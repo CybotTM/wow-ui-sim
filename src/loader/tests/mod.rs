@@ -1348,6 +1348,69 @@ fn test_runtime_named_child_inherited_layers_use_child_name_for_parent_substitut
 }
 
 #[test]
+fn test_runtime_nested_wrapper_onload_can_publish_texture_to_named_ancestor() {
+    let t = load_test_xml(
+        "runtime-nested-wrapper-texture-parent",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Button name="RuntimeBossButtonTemplate" virtual="true">
+                <Frames>
+                    <Frame>
+                        <Layers>
+                            <Layer>
+                                <Texture name="$parentCreature" parentKey="creature"/>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnLoad>
+                                self:GetParent().wrapperLoaded = true
+                                self:GetParent().creature = self.creature
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                </Frames>
+            </Button>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local button = CreateFrame("Button", "RuntimeBossButton", UIParent, "RuntimeBossButtonTemplate")
+            assert(button.wrapperLoaded == true, "nested wrapper OnLoad should run")
+            assert(button.creature ~= nil, "nested wrapper OnLoad should publish creature texture onto button")
+            assert(button.creature:GetParent():GetParent() == button, "published texture should stay under wrapper child")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_synthetic_ui_theme_container_intrinsic_applies_theme_mixin() {
+    let t = load_test_xml(
+        "synthetic-theme-container-intrinsic",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="PlainHost"/>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            UIThemeContainerMixin = { UpdateTheme = function(self) self.themeUpdated = true end }
+            local frame = CreateFrame("Frame", "RuntimeThemeContainer", UIParent, "UIThemeContainerFrame")
+            assert(type(frame.UpdateTheme) == "function", "UIThemeContainerFrame intrinsic should apply UIThemeContainerMixin")
+            frame:UpdateTheme()
+            assert(frame.themeUpdated == true, "UpdateTheme should dispatch on synthetic UIThemeContainerFrame")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_xml_inherited_parent_array_registers_children_once_in_order() {
     let t = load_test_xml(
         "xml-inherited-parent-array-once",

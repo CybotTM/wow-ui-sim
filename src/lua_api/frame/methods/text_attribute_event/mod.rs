@@ -78,6 +78,7 @@ fn register_text_measurement(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
     table_set_rust_fn_static(state, table, "GetStringWidth", text::get_string_width)?;
     table_set_rust_fn_static(state, table, "GetStringHeight", text::get_string_height)?;
     table_set_rust_fn_static(state, table, "GetTextWidth", text::get_text_width)?;
+    table_set_rust_fn_static(state, table, "GetTextHeight", text::get_text_height)?;
     table_set_rust_fn_static(state, table, "GetContentHeight", text::get_content_height)?;
     table_set_rust_fn_static(state, table, "GetTextData", text::get_text_data)?;
     table_set_rust_fn_static(state, table, "GetLineHeight", text::get_line_height)?;

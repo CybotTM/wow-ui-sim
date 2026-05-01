@@ -109,6 +109,7 @@ fn create_template_child_frame(
     finalize_runtime_template_child(
         state,
         state_rc,
+        parent_id,
         child_id,
         &child_name,
         subst_parent,
@@ -121,6 +122,7 @@ fn create_template_child_frame(
 fn finalize_runtime_template_child(
     state: &mut LuaState,
     state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
+    parent_id: u64,
     child_id: u64,
     child_name: &str,
     subst_parent: &str,
@@ -136,15 +138,148 @@ fn finalize_runtime_template_child(
     // child frame's own direct loader-backed content or it duplicates named
     // inherited regions (for example `$parentBackground`).
     apply_runtime_template_loader_effects(state, child_name, child_subst, frame, None)?;
+    repair_runtime_direct_layer_parent_keys(state, child_id, child_subst, frame)?;
     crate::lua_api::globals::template::repair_direct_child_parent_keys(state, child_id)?;
     super::resolve_runtime_template_named_anchors(state, child_id)?;
     fire_frame_on_load(state, child_id)?;
+    publish_anonymous_wrapper_layer_keys_to_parent(state, parent_id, frame, child_subst)?;
 
     // Child `OnLoad` handlers can re-anchor against runtime-created siblings.
     // Re-resolve once more so late sibling targets created or fixed in `OnLoad`
     // are updated.
     super::resolve_runtime_template_named_anchors(state, child_id)?;
     Ok(())
+}
+
+fn publish_anonymous_wrapper_layer_keys_to_parent(
+    state: &mut LuaState,
+    parent_id: u64,
+    frame: &crate::xml::FrameXml,
+    name_parent: &str,
+) -> LuaResult<()> {
+    if frame.name.is_some() || frame.parent_key.is_some() {
+        return Ok(());
+    }
+
+    let repairs =
+        collect_runtime_direct_layer_parent_key_repairs(state, parent_id, name_parent, frame)?;
+    for (parent_key, child_id) in repairs {
+        crate::lua_api::globals::template::assign_parent_key(
+            state,
+            parent_id,
+            &parent_key,
+            child_id,
+        )?;
+    }
+    Ok(())
+}
+
+fn repair_runtime_direct_layer_parent_keys(
+    state: &mut LuaState,
+    frame_id: u64,
+    name_parent: &str,
+    frame: &crate::xml::FrameXml,
+) -> LuaResult<()> {
+    let repairs =
+        collect_runtime_direct_layer_parent_key_repairs(state, frame_id, name_parent, frame)?;
+    for (parent_key, child_id) in repairs {
+        crate::lua_api::globals::template::assign_parent_key(
+            state,
+            frame_id,
+            &parent_key,
+            child_id,
+        )?;
+    }
+    Ok(())
+}
+
+fn collect_runtime_direct_layer_parent_key_repairs(
+    state: &LuaState,
+    frame_id: u64,
+    name_parent: &str,
+    frame: &crate::xml::FrameXml,
+) -> LuaResult<Vec<(String, u64)>> {
+    let desired = direct_layer_parent_key_children(frame, name_parent);
+    if desired.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let sim = borrow_state(state)?;
+    let Some(parent) = sim.widgets.get(frame_id) else {
+        return Ok(Vec::new());
+    };
+
+    let repairs = desired
+        .into_iter()
+        .filter(|(parent_key, _)| parent.children_keys.get(parent_key).is_none())
+        .filter_map(|(parent_key, child_name)| {
+            let child_id = sim
+                .widgets
+                .get_id_by_name(&child_name)
+                .or_else(|| sole_direct_texture_child(&sim, frame_id));
+            child_id.map(|child_id| (parent_key, child_id))
+        })
+        .collect();
+    Ok(repairs)
+}
+
+fn direct_layer_parent_key_children(
+    frame: &crate::xml::FrameXml,
+    name_parent: &str,
+) -> Vec<(String, String)> {
+    let mut children = Vec::new();
+    for layers in frame.layers() {
+        for layer in &layers.layers {
+            for element in &layer.elements {
+                if let Some((parent_key, child_name)) =
+                    direct_layer_parent_key_child(element, name_parent)
+                {
+                    children.push((parent_key, child_name));
+                }
+            }
+        }
+    }
+    children
+}
+
+fn direct_layer_parent_key_child(
+    element: &crate::xml::LayerElement,
+    name_parent: &str,
+) -> Option<(String, String)> {
+    match element {
+        crate::xml::LayerElement::Texture(texture)
+        | crate::xml::LayerElement::Line(texture)
+        | crate::xml::LayerElement::MaskTexture(texture) => {
+            let resolved = crate::xml::resolve_texture_inheritance(texture);
+            let parent_key = resolved.parent_key.clone()?;
+            let child_name = crate::loader::helpers::resolve_child_name(
+                resolved.name.as_deref(),
+                name_parent,
+                "__tex_",
+            );
+            Some((parent_key, child_name))
+        }
+        crate::xml::LayerElement::FontString(font_string) => {
+            let parent_key = font_string.parent_key.clone()?;
+            let child_name = crate::loader::helpers::resolve_child_name(
+                font_string.name.as_deref(),
+                name_parent,
+                "__fs_",
+            );
+            Some((parent_key, child_name))
+        }
+    }
+}
+
+fn sole_direct_texture_child(sim: &crate::lua_api::SimState, frame_id: u64) -> Option<u64> {
+    let parent = sim.widgets.get(frame_id)?;
+    let mut texture_children = parent.children.iter().copied().filter(|child_id| {
+        sim.widgets
+            .get(*child_id)
+            .is_some_and(|child| child.widget_type == WidgetType::Texture)
+    });
+    let first = texture_children.next()?;
+    texture_children.next().is_none().then_some(first)
 }
 
 fn child_runtime_subst<'a>(

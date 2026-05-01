@@ -613,6 +613,10 @@ pub(super) fn get_text_width(state: &mut LuaState) -> LuaResult<u32> {
     get_string_width(state)
 }
 
+pub(super) fn get_text_height(state: &mut LuaState) -> LuaResult<u32> {
+    get_string_height(state)
+}
+
 pub(super) fn get_content_height(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let has_text = {

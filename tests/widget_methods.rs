@@ -48,6 +48,25 @@ fn test_editbox_focus_switches_between_frames() {
     assert!(eb2_focus);
 }
 
+#[test]
+fn test_button_get_text_height_measures_button_text() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local button = CreateFrame("Button", "TextHeightButton", UIParent)
+        button:SetText("Quest")
+    "#,
+    )
+    .unwrap();
+
+    let height: f64 = env.eval("return TextHeightButton:GetTextHeight()").unwrap();
+    assert!(
+        height > 0.0,
+        "Button:GetTextHeight should measure button text"
+    );
+}
+
 // ============================================================================
 // EditBox: SetNumber / GetNumber
 // ============================================================================
