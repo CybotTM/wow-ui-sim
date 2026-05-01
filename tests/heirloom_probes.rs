@@ -92,3 +92,41 @@ fn get_heirloom_item_id_returns_zero_out_of_range() {
     assert_eq!(negative, 0);
     assert_eq!(big, 0);
 }
+
+#[test]
+fn create_heirloom_adds_collected_item_to_bag() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.ClearBags()
+            C_Heirloom.CreateHeirloom(122245)
+            local info = C_Container.GetContainerItemInfo(0, 1)
+            if not info then return "missing item" end
+            if info.itemID ~= 122245 then return "itemID=" .. tostring(info.itemID) end
+            if info.stackCount ~= 1 then return "stack=" .. tostring(info.stackCount) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn create_heirloom_ignores_uncollected_item() {
+    let env = env();
+    let is_empty: bool = env
+        .eval(
+            r#"
+            A_Admin.ClearBags()
+            A_Admin.UncollectHeirloom(122245)
+            C_Heirloom.CreateHeirloom(122245)
+            return C_Container.GetContainerItemInfo(0, 1) == nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        is_empty,
+        "uncollected heirlooms should not create a bag copy"
+    );
+}
