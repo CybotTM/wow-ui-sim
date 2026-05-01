@@ -823,7 +823,7 @@ fn build_loot_table(state: &mut LuaState, item_id: u32, encounter_id: u32) -> Va
     table_set(state, table, "displayAsVeryRare", Val::Bool(false));
     table_set(state, table, "handError", Val::Bool(false));
     table_set(state, table, "weaponTypeError", Val::Bool(false));
-    table_set(state, table, "displaySeasonID", Val::Num(0.0));
+    table_set(state, table, "displaySeasonID", Val::Nil);
     table_set(state, table, "filterType", Val::Num(0.0));
     table
 }
