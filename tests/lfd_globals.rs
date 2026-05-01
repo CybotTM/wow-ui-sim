@@ -211,6 +211,31 @@ fn get_random_dungeon_best_choice() {
 }
 
 #[test]
+fn dungeon_appears_in_random_lfd_reports_lfd_category_for_seeded_dungeons() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if type(DungeonAppearsInRandomLFD) ~= "function" then
+                return "type=" .. type(DungeonAppearsInRandomLFD)
+            end
+            if DungeonAppearsInRandomLFD(1201) ~= LE_LFG_CATEGORY_LFD then
+                return "known=" .. tostring(DungeonAppearsInRandomLFD(1201))
+            end
+            if DungeonAppearsInRandomLFD(-1) ~= nil then
+                return "header=" .. tostring(DungeonAppearsInRandomLFD(-1))
+            end
+            if DungeonAppearsInRandomLFD(1271) ~= nil then
+                return "journal_id=" .. tostring(DungeonAppearsInRandomLFD(1271))
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "DungeonAppearsInRandomLFD: {result}");
+}
+
+#[test]
 fn unit_has_lfg_random_cooldown_is_registered_and_defaults_false() {
     let env = env();
     let result: String = env

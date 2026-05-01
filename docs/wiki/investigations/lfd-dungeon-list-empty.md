@@ -38,6 +38,10 @@ All three globals were unregistered in the simulator, so the first call (`GetLFD
 
 `GetLFDChoiceEnabledState()` returned an empty table, so Blizzard's row initializer treated every specific dungeon as unchecked. `GetLFGRoles()` was also a false stub and `SetLFGRoles()` was a no-op, so role checkbox state could not be initialized or persisted. The LFD queue button is role-gated before queue state checks, so this left "Join as Party" greyed out even with visible dungeons.
 
+### 6. Adventure Journal dungeon action used the wrong id family
+
+Clicking a dungeon entry in the Adventure Journal fires `AJ_DUNGEON_ACTION`, and `LFDFrame_OnEvent` passes that id through `DungeonAppearsInRandomLFD()` before showing the Group Finder panel. The simulator had no `DungeonAppearsInRandomLFD` global, and `C_EncounterJournal.GetInstanceInfo`/`EJ_GetInstanceInfo` returned the Encounter Journal instance id as `linkDungeonID` for dungeon rows. That id family does not match the seeded LFD dungeon ids consumed by `GetLFGDungeonInfo`.
+
 ## Fix
 
 Implementation:
@@ -56,6 +60,12 @@ Follow-up implementation:
 - **`global_stubs.rs`**: removed `GetLFGRoles` / `SetLFGRoles` from static stubs so the state-backed implementations own those globals.
 - **`tests/lfd_globals.rs`**: covers default DPS role selection, role persistence, default specific-dungeon checkbox selection, and `SetLFGDungeonEnabled` persistence.
 
+Adventure Journal follow-up:
+
+- **`battlefield_lfg_probes.rs`**: added state-backed `DungeonAppearsInRandomLFD`, returning `LE_LFG_CATEGORY_LFD` only for positive seeded LFD dungeon ids.
+- **`encounter_journal.rs`**: maps current seeded dungeon instance names to their LFD ids for the `linkDungeonID` return.
+- **`tests/lfd_globals.rs` / `tests/c_encounter_journal_probes.rs`**: cover the new LFD membership global and the Encounter Journal → LFD id bridge.
+
 ## Why direct LFGLockList assignment over event firing
 
 Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestRFChoice` → `RaidFinderFrame_UpdateAvailability` → `GetNumRFDungeons` → `ScenarioFinderFrame_UpdateAvailability` → `GetNumRandomScenarios`. None of those exist in the sim. We could stub all of them, but the goal is just to populate `LFGLockList` for the LFD panel; the event broadcast is wider than needed.
@@ -63,8 +73,9 @@ Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestR
 ## Sources
 
 - `Interface/BlizzardUI/Blizzard_GroupFinder/Shared/LFGFrame.lua` — `LFGDungeonList_Setup` (line 1080), `LFG_LOCK_INFO_RECEIVED` handler (line 173)
-- `Interface/BlizzardUI/Blizzard_GroupFinder/Mainline/LFDFrame.lua` — `UpdateLFDDungeonList` (line 686), `LFG_UPDATE_RANDOM_INFO` handler (line 80)
+- `Interface/BlizzardUI/Blizzard_GroupFinder/Mainline/LFDFrame.lua` — `UpdateLFDDungeonList` (line 686), `LFG_UPDATE_RANDOM_INFO` handler (line 80), `AJ_DUNGEON_ACTION` handler (line 106)
 - `Interface/BlizzardUI/Blizzard_GroupFinder/Mainline/LFDFrame.xml` — Specific frame `OnShow="LFDQueueFrame_Update"` (line 273)
+- `Interface/BlizzardUI/Blizzard_EncounterJournal/Mainline/Blizzard_EncounterJournal.lua` — Adventure Journal suggestion click calls `C_AdventureJournal.ActivateEntry`
 - `src/lua_api/globals/battlefield_lfg_probes.rs` — simulator LFD globals and selection/role state registration
 - `tests/lfd_globals.rs` — regression coverage for LFD role and checkbox state
 
