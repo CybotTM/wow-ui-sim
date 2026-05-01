@@ -75,3 +75,6 @@ mod behavior_guild_member_tooltip;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_comparison_friend_completed.rs"]
 mod behavior_comparison_friend_completed;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_statistic_row.rs"]
+mod behavior_statistic_row;
