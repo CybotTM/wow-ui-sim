@@ -78,6 +78,7 @@ macro_rules! build_empty_sim_state {
             action_bar_state: ActionBarStateInfo::default(),
             action_bar_page: 1,
             action_bars: $collections.action_bars,
+            assisted_combat: AssistedCombatState::default(),
             action_highlights: ActionHighlightState::default(),
             extra_action_button: ExtraActionButtonState::default(),
             equipped_artifact: None,
@@ -504,6 +505,14 @@ impl Default for ActionBarStateInfo {
             possess_bar_visible: false,
         }
     }
+}
+
+/// Minimal assisted-combat recommendation state exposed through
+/// `C_AssistedCombat`. `next_cast_spell_id` is the spell Blizzard highlights
+/// when assisted combat asks the player to cast a specific action-bar spell.
+#[derive(Clone, Debug, Default)]
+pub struct AssistedCombatState {
+    pub next_cast_spell_id: Option<u32>,
 }
 
 /// Server-pushed payload for the single-button extra action bar
@@ -1318,6 +1327,8 @@ pub struct SimState {
     pub account_store_items: HashMap<i64, AccountStoreItemInfo>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
+    /// Assisted-combat recommendations exposed by `C_AssistedCombat`.
+    pub assisted_combat: AssistedCombatState,
     /// Currently visible main-bar page, 1..=`NUM_ACTIONBAR_PAGES` (6). Read by
     /// `C_ActionBar.GetActionBarPage`; written by `C_ActionBar.SetActionBarPage`
     /// (which also fires `ACTIONBAR_PAGE_CHANGED` so mixins re-resolve the

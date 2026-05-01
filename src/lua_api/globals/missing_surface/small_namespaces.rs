@@ -218,8 +218,11 @@ fn c_assisted_combat_get_action_spell(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_assisted_combat_get_next_cast_spell(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = state;
-    state.push(Val::Nil);
+    let spell_id = borrow_state(state)?.assisted_combat.next_cast_spell_id;
+    match spell_id {
+        Some(spell_id) => state.push(Val::Num(spell_id as f64)),
+        None => state.push(Val::Nil),
+    }
     Ok(1)
 }
 
