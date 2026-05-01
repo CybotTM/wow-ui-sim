@@ -63,3 +63,6 @@ mod behavior_category_default;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_search_progress.rs"]
 mod behavior_search_progress;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_search_filter.rs"]
+mod behavior_search_filter;
