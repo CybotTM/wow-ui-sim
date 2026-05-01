@@ -11,6 +11,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 const MAX_OUTFITS: i32 = 20;
+type StaticLuaFn = fn(&mut LuaState) -> LuaResult<u32>;
 
 pub(super) fn register_transmog_collection_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_TransmogCollection")?;
@@ -25,39 +26,29 @@ fn register_transmog_collection_appearance_queries(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn_static(
+    register_static_functions(
         state,
         table_ref,
-        "GetAppearanceSources",
-        get_appearance_sources,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "GetSourceInfo", get_source_info)?;
-    table_set_rust_fn_static(state, table_ref, "PlayerHasTransmog", player_has_transmog)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "PlayerHasTransmogByItemInfo",
-        player_has_transmog_by_item_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "PlayerHasTransmogItemModifiedAppearance",
-        player_has_transmog_item_modified_appearance,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetNumTransmogSources",
-        get_num_transmog_sources,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetAllAppearanceSources",
-        get_all_appearance_sources,
-    )?;
-    Ok(())
+        &[
+            ("GetAppearanceSources", get_appearance_sources),
+            (
+                "GetValidAppearanceSourcesForClass",
+                get_valid_appearance_sources_for_class,
+            ),
+            ("GetSourceInfo", get_source_info),
+            ("PlayerHasTransmog", player_has_transmog),
+            (
+                "PlayerHasTransmogByItemInfo",
+                player_has_transmog_by_item_info,
+            ),
+            (
+                "PlayerHasTransmogItemModifiedAppearance",
+                player_has_transmog_item_modified_appearance,
+            ),
+            ("GetNumTransmogSources", get_num_transmog_sources),
+            ("GetAllAppearanceSources", get_all_appearance_sources),
+        ],
+    )
 }
 
 fn register_transmog_collection_category_queries(
@@ -79,25 +70,79 @@ fn register_transmog_collection_flags(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn_static(
+    register_transmog_filter_defaults(state, table_ref)?;
+    register_transmog_source_filters(state, table_ref)?;
+    register_transmog_filter_counts(state, table_ref)?;
+    register_static_functions(
         state,
         table_ref,
-        "IsAppearanceHiddenVisual",
-        is_appearance_hidden_visual,
-    )?;
-    table_set_rust_fn_static(
+        &[
+            ("IsSearchInProgress", return_false),
+            ("IsAppearanceHiddenVisual", is_appearance_hidden_visual),
+            (
+                "GetShowMissingSourceInItemTooltips",
+                get_show_missing_source_in_item_tooltips,
+            ),
+        ],
+    )
+}
+
+fn register_transmog_filter_defaults(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    register_static_functions(
         state,
         table_ref,
-        "IsSourceTypeFilterChecked",
-        is_source_type_filter_checked,
-    )?;
-    table_set_rust_fn_static(
+        &[
+            ("GetClassFilter", get_class_filter),
+            ("SetClassFilter", noop),
+            ("SetSearchAndFilterCategory", noop),
+            ("GetCollectedShown", return_true),
+            ("GetUncollectedShown", return_true),
+            ("SetCollectedShown", noop),
+            ("SetUncollectedShown", noop),
+            ("GetAllFactionsShown", return_false),
+            ("GetAllRacesShown", return_false),
+            ("SetAllFactionsShown", noop),
+            ("SetAllRacesShown", noop),
+            ("SetAllSourceTypeFilters", noop),
+            ("SetSourceTypeFilter", noop),
+            ("IsUsingDefaultFilters", return_true),
+            ("SetDefaultFilters", noop),
+        ],
+    )
+}
+
+fn register_transmog_source_filters(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    register_static_functions(
         state,
         table_ref,
-        "GetShowMissingSourceInItemTooltips",
-        get_show_missing_source_in_item_tooltips,
-    )?;
-    Ok(())
+        &[
+            ("IsValidTransmogSource", is_valid_transmog_source),
+            ("IsSourceTypeFilterChecked", is_source_type_filter_checked),
+        ],
+    )
+}
+
+fn register_transmog_filter_counts(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    register_static_functions(
+        state,
+        table_ref,
+        &[
+            (
+                "GetFilteredCategoryCollectedCount",
+                get_filtered_category_collected_count,
+            ),
+            ("GetFilteredCategoryTotal", get_filtered_category_total),
+        ],
+    )
 }
 
 fn register_transmog_collection_outfits(
@@ -117,8 +162,29 @@ fn register_transmog_collection_outfits(
     Ok(())
 }
 
+fn register_static_functions(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    functions: &[(&'static str, StaticLuaFn)],
+) -> LuaResult<()> {
+    for (name, function) in functions {
+        table_set_rust_fn_static(state, table_ref, name, *function)?;
+    }
+    Ok(())
+}
+
 fn get_appearance_sources(state: &mut LuaState) -> LuaResult<u32> {
     let visual_id = i32::from_stack(state, 1)?;
+    push_appearance_sources(state, visual_id)
+}
+
+fn get_valid_appearance_sources_for_class(state: &mut LuaState) -> LuaResult<u32> {
+    let visual_id = i32::from_stack(state, 1)?;
+    let _class_id = i32::from_stack(state, 2)?;
+    push_appearance_sources(state, visual_id)
+}
+
+fn push_appearance_sources(state: &mut LuaState, visual_id: i32) -> LuaResult<u32> {
     let appearances = transmog_appearances(state, Some(visual_id), None);
     let array = create_table(state);
     let Val::Table(array_ref) = array else {
@@ -185,8 +251,7 @@ fn player_has_transmog_item_modified_appearance(state: &mut LuaState) -> LuaResu
 }
 
 fn get_num_transmog_sources(state: &mut LuaState) -> LuaResult<u32> {
-    let count = borrow_state(state)?.world.transmog_appearances.len() as i32;
-    state.push(Val::Num(count as f64));
+    state.push(Val::Num(7.0));
     Ok(1)
 }
 
@@ -244,6 +309,48 @@ fn is_source_type_filter_checked(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn is_valid_transmog_source(state: &mut LuaState) -> LuaResult<u32> {
+    let source_type = i32::from_stack(state, 1).unwrap_or_default();
+    state.push(Val::Bool((1..=7).contains(&source_type)));
+    Ok(1)
+}
+
+fn get_filtered_category_collected_count(state: &mut LuaState) -> LuaResult<u32> {
+    let category_id = i32::from_stack(state, 1)?;
+    let count = transmog_appearances(state, None, Some(category_id))
+        .iter()
+        .filter(|appearance| appearance.is_collected)
+        .count();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_filtered_category_total(state: &mut LuaState) -> LuaResult<u32> {
+    let category_id = i32::from_stack(state, 1)?;
+    let count = transmog_appearances(state, None, Some(category_id)).len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_class_filter(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(2.0));
+    Ok(1)
+}
+
+fn return_true(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn return_false(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn noop(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 fn get_show_missing_source_in_item_tooltips(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
     Ok(1)
@@ -284,47 +391,26 @@ fn appearance_row(
     ui_order: Option<i32>,
 ) -> Val {
     let row = create_table(state);
-    table_set(
-        state,
-        row,
-        "sourceID",
-        Val::Num(appearance.source_id as f64),
-    );
-    table_set(
-        state,
-        row,
-        "visualID",
-        Val::Num(appearance.visual_id as f64),
-    );
-    table_set(
-        state,
-        row,
-        "categoryID",
-        Val::Num(appearance.category_id as f64),
-    );
-    table_set(state, row, "itemID", Val::Num(appearance.item_id as f64));
-    table_set(
-        state,
-        row,
-        "isCollected",
-        Val::Bool(appearance.is_collected),
-    );
-    table_set(
-        state,
-        row,
-        "sourceType",
-        Val::Num(appearance.source_type as f64),
-    );
-    table_set(
-        state,
-        row,
-        "itemModID",
-        Val::Num(appearance.item_mod_id as f64),
-    );
+    set_number_field(state, row, "sourceID", appearance.source_id);
+    set_number_field(state, row, "visualID", appearance.visual_id);
+    set_number_field(state, row, "categoryID", appearance.category_id);
+    set_number_field(state, row, "itemID", appearance.item_id);
+    set_bool_field(state, row, "isCollected", appearance.is_collected);
+    set_bool_field(state, row, "playerCanCollect", true);
+    set_number_field(state, row, "sourceType", appearance.source_type);
+    set_number_field(state, row, "itemModID", appearance.item_mod_id);
     if let Some(ui_order) = ui_order {
-        table_set(state, row, "uiOrder", Val::Num(ui_order as f64));
+        set_number_field(state, row, "uiOrder", ui_order);
     }
     row
+}
+
+fn set_number_field(state: &mut LuaState, table: Val, key: &str, value: i32) {
+    table_set(state, table, key, Val::Num(value as f64));
+}
+
+fn set_bool_field(state: &mut LuaState, table: Val, key: &str, value: bool) {
+    table_set(state, table, key, Val::Bool(value));
 }
 
 fn empty_array(state: &mut LuaState) -> Val {
