@@ -81,3 +81,6 @@ mod behavior_statistic_row;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_expand_collapse.rs"]
 mod behavior_expand_collapse;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_saturate.rs"]
+mod behavior_saturate;
