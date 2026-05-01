@@ -24,6 +24,10 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     register_event_methods(state, table)
 }
 
+pub(crate) fn refresh_auto_text_height_after_width_change(state: &mut LuaState, id: u64) {
+    text::refresh_auto_text_height_after_width_change(state, id);
+}
+
 fn register_text_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     register_plain_text(state, table)?;
     register_font_methods(state, table)?;

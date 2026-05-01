@@ -1,12 +1,13 @@
 //! Frame size methods: GetWidth, GetHeight, GetSize, SetSize, SetWidth, SetHeight.
 
 use super::helpers::{
-    apply_explicit_height, apply_explicit_size, apply_explicit_width, clear_auto_width_flag,
-    current_explicit_size_state, frame_id, frame_size, opt_f32,
+    apply_explicit_height, apply_explicit_size, apply_explicit_width, clear_auto_height_flag,
+    clear_auto_width_flag, current_explicit_size_state, frame_id, frame_size, opt_f32,
 };
 use crate::lua_api::frame::methods::methods_helpers::{
     can_change_protected_state_for, emit_addon_action_blocked,
 };
+use crate::lua_api::frame::methods::text_attribute_event::refresh_auto_text_height_after_width_change;
 use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -55,6 +56,9 @@ pub fn set_size(state: &mut LuaState) -> LuaResult<u32> {
         if current.width_is_text_auto {
             clear_auto_width_flag(&mut sim, id);
         }
+        if current.height_is_text_auto {
+            clear_auto_height_flag(&mut sim, id);
+        }
         return Ok(0);
     }
 
@@ -89,6 +93,7 @@ pub fn set_width(state: &mut LuaState) -> LuaResult<u32> {
 
     apply_explicit_width(&mut sim, id, width);
     drop(sim);
+    refresh_auto_text_height_after_width_change(state, id);
     super::super::widgets::refresh_scroll_frames_for_resized_frame(state, id)?;
     Ok(0)
 }
@@ -101,11 +106,14 @@ pub fn set_height(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     }
     let mut sim = borrow_state_mut(state)?;
-    let Some(current_height) = sim.widgets.get(id).map(|frame| frame.height) else {
+    let Some(current) = current_explicit_size_state(&sim, id) else {
         return Ok(0);
     };
 
-    if current_height == height {
+    if current.height == height {
+        if current.height_is_text_auto {
+            clear_auto_height_flag(&mut sim, id);
+        }
         return Ok(0);
     }
 

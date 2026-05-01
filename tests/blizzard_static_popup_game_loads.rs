@@ -404,6 +404,33 @@ fn is_addon_loaded_reports_true_after_eager_sweep() {
 }
 
 #[test]
+fn equipment_set_confirmation_popup_resizes_to_compact_dialog() {
+    let env = load_full_ui_for(ScreenKind::Game);
+
+    let (width, height, text_width): (f64, f64, f64) = env
+        .eval(
+            r#"
+            local dialog = StaticPopup_Show("CONFIRM_SAVE_EQUIPMENT_SET", "kk", nil, "kk")
+            assert(dialog ~= nil, "CONFIRM_SAVE_EQUIPMENT_SET dialog should be shown")
+            return dialog:GetWidth(), dialog:GetHeight(), dialog.Text:GetWidth()
+            "#,
+        )
+        .expect("equipment set StaticPopup dimensions");
+
+    assert!(
+        (300.0..=380.0).contains(&width),
+        "Equipment-set confirmation dialog should keep Blizzard's compact popup width \
+         instead of stretching to a viewport-derived size. Got width={width}, \
+         text_width={text_width}"
+    );
+    assert!(
+        height <= 180.0,
+        "Equipment-set confirmation dialog should be a compact confirmation box, not a \
+         screen-tall overlay. Got height={height}, width={width}, text_width={text_width}"
+    );
+}
+
+#[test]
 fn publishes_four_mixin_tables_at_global_scope() {
     let env = load_full_ui_for(ScreenKind::Game);
 

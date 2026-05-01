@@ -1,6 +1,7 @@
 //! EditBox and text-spacing widget methods.
 
 use super::shared::{opt_string, val_to_bool, val_to_f64};
+use crate::lua_api::frame::methods::text_attribute_event::refresh_auto_text_height_after_width_change;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, frame_id_from_stack, get_or_create_frame_fields,
     table_get, table_set,
@@ -437,6 +438,7 @@ fn set_width_from_desired(state: &mut LuaState, id: u64, width: f32) {
         }
         sim.widgets.mark_rect_dirty(id);
     }
+    refresh_auto_text_height_after_width_change(state, id);
 }
 
 pub(super) fn set_desired_width(state: &mut LuaState) -> LuaResult<u32> {

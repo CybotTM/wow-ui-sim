@@ -29,6 +29,8 @@ pub struct Frame {
     pub width_is_text_auto: bool,
     /// Height in pixels.
     pub height: f32,
+    /// Whether height was set by text auto-sizing (vs explicit SetHeight/anchors).
+    pub height_is_text_auto: bool,
     /// Anchors defining position.
     pub anchors: Vec<Anchor>,
     pub visible: bool,
@@ -558,6 +560,7 @@ impl Frame {
     pub fn set_size(&mut self, width: f32, height: f32) {
         self.width = width;
         self.height = height;
+        self.height_is_text_auto = false;
     }
 
     pub fn set_point(
