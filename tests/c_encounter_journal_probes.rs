@@ -185,6 +185,32 @@ fn test_encounter_journal_tier_selection_round_trips() {
 }
 
 #[test]
+fn test_get_section_icon_flags_returns_array_or_nil() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local flags = C_EncounterJournal.GetSectionIconFlags(820)
+            if type(flags) ~= "table" then
+                return "nonzero_type=" .. type(flags)
+            end
+            if flags[1] ~= 1 then
+                return "first_flag=" .. tostring(flags[1])
+            end
+
+            local noFlags = C_EncounterJournal.GetSectionIconFlags(819)
+            if noFlags ~= nil then
+                return "zero_type=" .. type(noFlags)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "section icon flag array shape: {result}");
+}
+
+#[test]
 fn encounter_journal_search_surface_is_available_and_empty() {
     let env = env();
     env.exec(
