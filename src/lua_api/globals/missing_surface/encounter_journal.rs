@@ -199,8 +199,14 @@ fn get_section_info(state: &mut LuaState) -> LuaResult<u32> {
         "uiModelSceneID",
         Val::Num(row.model_scene_id as f64),
     );
-    table_set(state, table, "iconFlags", Val::Num(row.icon_flags as f64));
+    table_set(
+        state,
+        table,
+        "abilityIcon",
+        Val::Num(row.icon_file_id as f64),
+    );
     table_set(state, table, "filteredByDifficulty", Val::Bool(false));
+    table_set(state, table, "startsOpen", Val::Bool(false));
     table_set(state, table, "link", empty_link);
     state.push(table);
     Ok(1)
@@ -679,10 +685,6 @@ fn ej_is_search_finished(state: &mut LuaState) -> LuaResult<u32> {
 fn ej_handle_link_path(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 fn push_encounter_tuple(state: &mut LuaState, row: &data::Encounter) {
     let name = create_string(state, row.name);
