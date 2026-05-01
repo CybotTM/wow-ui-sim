@@ -66,3 +66,6 @@ mod behavior_search_progress;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_search_filter.rs"]
 mod behavior_search_filter;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_guild_view_toggle.rs"]
+mod behavior_guild_view_toggle;
