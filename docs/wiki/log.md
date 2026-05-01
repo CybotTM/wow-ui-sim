@@ -691,6 +691,10 @@ Created `investigations/chatframe-scrollbar-anchor-reapply.md` to document the `
 
 Updated `investigations/world-map-texture-loading-budget.md` with the second root cause behind the remaining world-map stalls: preload cleared `textures_pending` after CPU cache warmup even while the GPU atlas still lacked most tiles. Recorded the new `gpu_uploaded_textures`-based pending check, the focused `budgeted_preload` regression tests, and refreshed the `index.md` summary for that page.
 
+## [2026-05-01] investigation | crafting cast bar
+
+Created `investigations/crafting-cast-bar.md` to document the missing professions spellbar root cause. `C_TradeSkillUI.CraftRecipe` performed inventory changes but never started player casting or fired `UNIT_SPELLCAST_START`; successful crafts now populate `SimState.casting`, notify spellcast listeners, and emit `UPDATE_TRADESKILL_CAST_STOPPED` on completion. Updated `index.md` with the new investigation page.
+
 ## [2026-04-13] ingest | world map CreateTexture sublevel investigation
 
 Created `investigations/world-map-create-texture-sublevel.md` to document the follow-up world-map open ordering churn: `CreateTexture(..., subLevel)` ignored its fourth argument, pooled textures started at sublevel 0, and Blizzard immediately repaired them with `SetDrawLayer()`. Recorded the new regressions for `CreateTexture(..., subLevel)` and no-op `SetDrawLayer()`, plus the traced repro where post-open `SetDrawLayer()` invalidations dropped from 150 to 0. Updated `index.md` with the new investigation page.

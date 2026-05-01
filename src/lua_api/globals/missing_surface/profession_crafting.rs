@@ -5,13 +5,17 @@
 //! `C_TradeSkillUI.IsRecipeCraftable` and `C_TradeSkillUI.CraftRecipe`
 //! dispatchers in `professions.rs`.
 
+use crate::lua_api::game_data::CastingState;
 use crate::lua_api::globals::profession_data;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_api::state::BagItem;
 use rilua::Val;
 use rilua::vm::state::LuaState;
 use std::collections::{BTreeSet, HashMap};
+
+const CRAFTING_CAST_DURATION_SECONDS: f64 = 1.5;
+const DEFAULT_CRAFTING_ICON: &str = "Interface/Icons/INV_Misc_QuestionMark";
 
 /// Returns true iff the recipe exists in the catalogue AND all reagents are
 /// available in `player.bag_items` for the requested `count`.
@@ -56,6 +60,8 @@ pub(super) fn craft_recipe(state: &mut LuaState, recipe_id: i32, count: i32) -> 
         affected_bags.insert(output_bag);
     }
 
+    start_crafting_cast(state, &plan);
+
     for bag_id in &affected_bags {
         fire_named_event_state(state, "BAG_UPDATE", &[Val::Num(*bag_id as f64)]);
     }
@@ -65,6 +71,8 @@ pub(super) fn craft_recipe(state: &mut LuaState, recipe_id: i32, count: i32) -> 
 }
 
 struct CraftPlan {
+    recipe_id: i32,
+    recipe_name: &'static str,
     reagent_deltas: Vec<(u32, i32)>,
     output_item_id: u32,
     output_count: i32,
@@ -77,10 +85,34 @@ fn craft_plan(state: &mut LuaState, recipe_id: i32, count: i32) -> Option<CraftP
 
     let recipe = profession_data::get_recipe(recipe_id)?;
     Some(CraftPlan {
+        recipe_id: recipe.recipe_id,
+        recipe_name: recipe.name,
         reagent_deltas: reagent_deltas(recipe, count),
         output_item_id: recipe.output_item_id,
         output_count: count,
     })
+}
+
+fn start_crafting_cast(state: &mut LuaState, plan: &CraftPlan) {
+    let Ok(mut sim) = borrow_state_mut(state) else {
+        return;
+    };
+    let now = sim.start_time.elapsed().as_secs_f64();
+    let cast_id = sim.next_cast_id;
+    sim.next_cast_id = sim.next_cast_id.wrapping_add(1);
+    sim.casting = Some(CastingState {
+        spell_id: plan.recipe_id as u32,
+        spell_name: plan.recipe_name.to_string(),
+        icon_path: DEFAULT_CRAFTING_ICON.to_string(),
+        start_time: now,
+        end_time: now + CRAFTING_CAST_DURATION_SECONDS,
+        cast_id,
+    });
+    drop(sim);
+
+    let player = create_string(state, "player");
+    let spell_id = Val::Num(plan.recipe_id as f64);
+    fire_named_event_state(state, "UNIT_SPELLCAST_START", &[player, spell_id]);
 }
 
 fn reagent_deltas(recipe: &profession_data::RecipeEntry, count: i32) -> Vec<(u32, i32)> {
