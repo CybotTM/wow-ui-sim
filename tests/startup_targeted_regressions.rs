@@ -458,6 +458,83 @@ fn startup_wardrobe_head_appearances_are_displayable() {
 }
 
 #[test]
+fn startup_wardrobe_filter_dropdown_click_toggles_not_collected() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: String = env
+            .eval(
+                r#"
+                ToggleCollectionsJournal(5)
+                if CollectionsJournal and CollectionsJournal_SetTab then
+                    CollectionsJournal_SetTab(CollectionsJournal, 5)
+                end
+
+                local wardrobeFrame = WardrobeCollectionFrame
+                local itemsFrame = wardrobeFrame and wardrobeFrame.ItemsCollectionFrame
+                local filterButton = wardrobeFrame and wardrobeFrame.FilterButton
+                if not itemsFrame or not filterButton then
+                    return "missing_wardrobe_filter"
+                end
+
+                local headLocation = TransmogUtil.GetTransmogLocation("HEADSLOT", Enum.TransmogType.Appearance, false)
+                if not headLocation then
+                    return "missing_head_location"
+                end
+                itemsFrame:SetActiveSlot(headLocation)
+
+                if not filterButton:IsEnabled() then
+                    return "filter_disabled"
+                end
+                local onMouseDown = filterButton:GetScript("OnMouseDown")
+                if type(onMouseDown) ~= "function" then
+                    return "missing_on_mouse_down"
+                end
+                onMouseDown(filterButton, "LeftButton")
+                if not filterButton:IsMenuOpen() then
+                    return "menu_not_open"
+                end
+
+                local notCollectedButton
+                local function inspectButton(button)
+                    local text = button:GetText()
+                    if (text == nil or text == "") and button.fontString then
+                        text = button.fontString:GetText()
+                    end
+                    if text == NOT_COLLECTED then
+                        notCollectedButton = button
+                    end
+                end
+
+                for _, button in ipairs(filterButton.__wow_menu_buttons or {}) do
+                    inspectButton(button)
+                end
+                if not notCollectedButton and filterButton.menu then
+                    for _, child in ipairs({ filterButton.menu:GetChildren() }) do
+                        if child.GetText then
+                            inspectButton(child)
+                        end
+                    end
+                end
+                if not notCollectedButton then
+                    return "missing_not_collected_button"
+                end
+
+                C_TransmogCollection.SetUncollectedShown(true)
+                notCollectedButton:Click()
+                if C_TransmogCollection.GetUncollectedShown() then
+                    return "not_collected_still_enabled"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("wardrobe filter dropdown probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
+
+#[test]
 fn cursor_hovered_item_globals_are_callable() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");

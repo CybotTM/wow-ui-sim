@@ -775,6 +775,10 @@ Created `investigations/editbox-render-text-cache.md` to document the SimCommand
 
 Updated `investigations/lfd-dungeon-list-empty.md` with the follow-up Group Finder bug where Specific Dungeons populated but dungeon selections were empty and `GetLFGRoles` was still a false stub, leaving "Join as Party" disabled. Documented the state-backed role and LFD checkbox fix plus regression coverage.
 
+## [2026-05-01] update | Wardrobe filter click dispatch
+
+Updated `investigations/appearances-wardrobe-api.md` with the follow-up Wardrobe filter bug where menu descriptions and callbacks were valid, but clicks could be swallowed by decorative child regions during GUI hit testing. Documented the fix: final mouse targets must be mouse-enabled frames, while decorative children only guide hit-test descent.
+
 ## [2026-04-12] ingest | transparent wrapper render-order investigation
 
 Created `investigations/transparent-wrapper-render-order.md` for the world map / quest log render-order fix. Updated it after a follow-up regression to document the depth-aware transparent-wrapper hoist in `state_render.rs`, including both world-map visibility coverage (`world_map_tiles_render_after_tiled_background`) and world-quest pin ordering coverage.

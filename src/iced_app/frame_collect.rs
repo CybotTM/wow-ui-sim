@@ -153,6 +153,14 @@ pub fn collect_hittable_frames(
     }
 }
 
+pub fn frame_accepts_mouse_button(frame: &crate::widget::Frame, button_name: &str) -> bool {
+    let mouse_enabled = frame.mouse_enabled || matches!(frame.widget_type, WidgetType::EditBox);
+    mouse_enabled
+        && !frame
+            .pass_through_buttons
+            .contains(&button_name.to_ascii_lowercase())
+}
+
 #[cfg(test)]
 mod tests {
     use super::intra_strata_sort_key;
