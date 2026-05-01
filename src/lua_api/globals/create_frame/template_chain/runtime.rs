@@ -140,6 +140,9 @@ fn finalize_runtime_template_child(
     apply_runtime_template_loader_effects(state, child_name, child_subst, frame, None)?;
     repair_runtime_direct_layer_parent_keys(state, child_id, child_subst, frame)?;
     crate::lua_api::globals::template::repair_direct_child_parent_keys(state, child_id)?;
+    crate::lua_api::globals::template::repair_transparent_wrapper_parent_key_aliases(
+        state, child_id,
+    )?;
     super::resolve_runtime_template_named_anchors(state, child_id)?;
     fire_frame_on_load(state, child_id)?;
     publish_anonymous_wrapper_layer_keys_to_parent(state, parent_id, frame, child_subst)?;

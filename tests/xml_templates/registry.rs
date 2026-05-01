@@ -45,6 +45,115 @@ fn test_xml_template_with_children() {
 }
 
 #[test]
+fn anonymous_wrapper_layer_texture_parent_key_reaches_named_ancestor() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlAnonymousWrapperParentKeyButton" parent="UIParent">
+        <Frames>
+            <Frame>
+                <Layers><Layer level="OVERLAY">
+                    <Texture name="$parentCreature" parentKey="creature"/>
+                </Layer></Layers>
+            </Frame>
+        </Frames>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    let object_type: String = env
+        .eval("return XmlAnonymousWrapperParentKeyButton.creature:GetObjectType()")
+        .unwrap();
+    assert_eq!(
+        object_type, "Texture",
+        "layer parentKey inside an anonymous wrapper should attach to the named ancestor used for $parent substitution"
+    );
+
+    let state = env.state().borrow();
+    let parent_id = state
+        .widgets
+        .get_id_by_name("XmlAnonymousWrapperParentKeyButton")
+        .expect("parent button should exist");
+    let parent = state.widgets.get(parent_id).unwrap();
+    assert!(
+        !parent.children_keys.contains_key("creature"),
+        "anonymous-wrapper parentKey aliases should not rewrite the Rust child hierarchy"
+    );
+}
+
+#[test]
+fn runtime_template_anonymous_wrapper_layer_texture_parent_key_reaches_instance() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    register_first_template(
+        r#"<Ui><Button name="AnonymousWrapperParentKeyTemplate" virtual="true">
+        <Frames>
+            <Frame>
+                <Layers><Layer level="OVERLAY">
+                    <Texture name="$parentCreature" parentKey="creature"/>
+                </Layer></Layers>
+            </Frame>
+        </Frames>
+    </Button></Ui>"#,
+        "AnonymousWrapperParentKeyTemplate",
+        "Button",
+    );
+
+    env.exec(
+        r#"
+        RuntimeAnonymousWrapperButton = CreateFrame("Button", nil, UIParent, "AnonymousWrapperParentKeyTemplate")
+        "#,
+    )
+    .unwrap();
+
+    let object_type: String = env
+        .eval("return RuntimeAnonymousWrapperButton.creature:GetObjectType()")
+        .unwrap();
+    assert_eq!(
+        object_type, "Texture",
+        "runtime templates should expose anonymous-wrapper layer parentKeys on the created instance"
+    );
+}
+
+#[test]
+fn parent_keyed_wrapper_layer_texture_stays_under_wrapper() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlParentKeyedWrapperFrame" parent="UIParent">
+        <Frames>
+            <Frame parentKey="IconContainer">
+                <Layers><Layer level="OVERLAY">
+                    <Texture parentKey="Icon"/>
+                </Layer></Layers>
+            </Frame>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let wrapper_type: String = env
+        .eval("return XmlParentKeyedWrapperFrame.IconContainer:GetObjectType()")
+        .unwrap();
+    let texture_type: String = env
+        .eval("return XmlParentKeyedWrapperFrame.IconContainer.Icon:GetObjectType()")
+        .unwrap();
+    let outer_icon_is_nil: bool = env
+        .eval("return XmlParentKeyedWrapperFrame.Icon == nil")
+        .unwrap();
+    assert_eq!(wrapper_type, "Frame");
+    assert_eq!(texture_type, "Texture");
+    assert!(
+        outer_icon_is_nil,
+        "layer parentKey under a parentKeyed anonymous wrapper should not overwrite the outer frame"
+    );
+}
+
+#[test]
 fn test_xml_template_inheritance() {
     clear_templates();
     register_first_template(

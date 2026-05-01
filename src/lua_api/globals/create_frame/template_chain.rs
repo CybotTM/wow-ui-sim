@@ -179,6 +179,10 @@ fn finalize_template_frame(
 ) -> LuaResult<()> {
     runtime::apply_runtime_template_direct_properties(state_rc, frame_id, inherits, frame_name);
     crate::lua_api::globals::template::repair_direct_child_parent_keys(state, frame_id)?;
+    crate::lua_api::globals::template::repair_transparent_descendant_parent_key_aliases(
+        state, frame_id,
+    )?;
+    crate::lua_api::globals::template::repair_descendant_name_aliases(state, frame_id)?;
     resolve_runtime_template_named_anchors(state, frame_id)?;
     if fire_on_load {
         runtime::fire_frame_on_load(state, frame_id)?;
