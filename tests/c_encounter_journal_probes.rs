@@ -245,6 +245,39 @@ fn test_get_section_icon_flags_returns_array_or_nil() {
 }
 
 #[test]
+fn test_get_section_info_resolves_boss_spell_icon() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local section = C_EncounterJournal.GetSectionInfo(31622)
+            if not section then
+                return "missing_section"
+            end
+            if section.spellID ~= 1217649 then
+                return "spell_id=" .. tostring(section.spellID)
+            end
+
+            if type(section.abilityIcon) ~= "number" or section.abilityIcon <= 0 then
+                return "ability_icon=" .. tostring(section.abilityIcon)
+            end
+
+            local olderSection = C_EncounterJournal.GetSectionInfo(816)
+            if olderSection.abilityIcon ~= 132368 then
+                return "older_icon=" .. tostring(olderSection.abilityIcon)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "boss spell sections should expose abilityIcon from spell data: {result}"
+    );
+}
+
+#[test]
 fn encounter_journal_search_surface_is_available_and_empty() {
     let env = env();
     env.exec(

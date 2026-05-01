@@ -30,10 +30,12 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_set, table_set_num,
 };
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 const ENCOUNTER_JOURNAL_ICON_FLAG_COUNT: u32 = 14;
+const FALLBACK_ABILITY_ICON: u32 = 136243;
 
 // ---------------------------------------------------------------------------
 // Registration
@@ -161,14 +163,35 @@ fn get_section_info(state: &mut LuaState) -> LuaResult<u32> {
     let Some(row) = data::section_by_id(section_id) else {
         return Ok(0);
     };
+    let table = build_section_info_table(state, row);
+    state.push(table);
+    Ok(1)
+}
+
+fn build_section_info_table(state: &mut LuaState, row: &data::Section) -> Val {
     let table = create_table(state);
+    set_section_text_fields(state, table, row);
+    set_section_relationship_fields(state, table, row);
+    set_section_visual_fields(state, table, row);
+    table_set(state, table, "iconFlags", Val::Num(row.icon_flags as f64));
+    table_set(state, table, "filteredByDifficulty", Val::Bool(false));
+    table_set(state, table, "startsOpen", Val::Bool(false));
+    table
+}
+
+fn set_section_text_fields(state: &mut LuaState, table: Val, row: &data::Section) {
     let title = create_string(state, row.title);
     let body = create_string(state, row.body);
     let empty_link = create_string(state, "");
+
     table_set(state, table, "spellID", Val::Num(row.spell_id as f64));
     table_set(state, table, "headerType", Val::Num(row.kind as f64));
     table_set(state, table, "title", title);
     table_set(state, table, "description", body);
+    table_set(state, table, "link", empty_link);
+}
+
+fn set_section_relationship_fields(state: &mut LuaState, table: Val, row: &data::Section) {
     table_set(
         state,
         table,
@@ -187,6 +210,9 @@ fn get_section_info(state: &mut LuaState) -> LuaResult<u32> {
         "parentSectionID",
         Val::Num(row.parent_id as f64),
     );
+}
+
+fn set_section_visual_fields(state: &mut LuaState, table: Val, row: &data::Section) {
     table_set(
         state,
         table,
@@ -199,11 +225,25 @@ fn get_section_info(state: &mut LuaState) -> LuaResult<u32> {
         "uiModelSceneID",
         Val::Num(row.model_scene_id as f64),
     );
-    table_set(state, table, "iconFlags", Val::Num(row.icon_flags as f64));
-    table_set(state, table, "filteredByDifficulty", Val::Bool(false));
-    table_set(state, table, "link", empty_link);
-    state.push(table);
-    Ok(1)
+    if let Some(ability_icon) = ability_icon_for_section(row) {
+        table_set(state, table, "abilityIcon", Val::Num(ability_icon as f64));
+    }
+}
+
+fn ability_icon_for_section(row: &data::Section) -> Option<u32> {
+    if row.icon_file_id != 0 {
+        return Some(row.icon_file_id);
+    }
+
+    if row.spell_id == 0 {
+        return None;
+    }
+
+    Some(
+        spells::get_spell(row.spell_id)
+            .map(|spell| spell.icon_file_data_id)
+            .unwrap_or(FALLBACK_ABILITY_ICON),
+    )
 }
 
 fn get_loot_info(state: &mut LuaState) -> LuaResult<u32> {
