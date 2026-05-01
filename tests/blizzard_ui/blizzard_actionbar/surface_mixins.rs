@@ -231,16 +231,11 @@ const ACTION_BAR_MIXIN_PLAN_NAMED_METHODS: &[&str] = &[
     "UpdateShownButtons",
 ];
 
-/// Source-additional methods on `ActionBarMixin` that PLAN omits. Each
-/// is a direct `function ActionBarMixin:METHOD(...)` declaration in
-/// `Shared/ActionBar.lua`. PLAN-only would silently drop these from the
-/// surface contract: `CacheGridSettings` (lua:65) and `ShouldUpdateGrid`
-/// (lua:76) gate the grid-layout dirty path; `GetShowAllButtons`
-/// (lua:173), `ShouldRaise` (lua:183), `UpdateFrameStrata` (lua:194)
-/// drive bar strata raise/lower on hold-key drag; `UpdateSpellFlyoutDirection`
-/// (lua:221) and `GetSpellFlyoutDirection` (lua:246) are the actual
-/// spell-flyout direction methods (PLAN's `SetSpellFlyoutDirection` is
-/// not the contract — see absent slice below).
+/// Source-additional methods on `ActionBarMixin` that PLAN omits.
+/// Grid-cache (`CacheGridSettings`/`ShouldUpdateGrid` lua:65/76),
+/// strata raise/lower (`GetShowAllButtons`/`ShouldRaise`/
+/// `UpdateFrameStrata` lua:173/183/194), and spell-flyout direction
+/// (`UpdateSpellFlyoutDirection`/`GetSpellFlyoutDirection` lua:221/246).
 const ACTION_BAR_MIXIN_SOURCE_ADDITIONAL_METHODS: &[&str] = &[
     "CacheGridSettings",
     "ShouldUpdateGrid",
@@ -251,30 +246,16 @@ const ACTION_BAR_MIXIN_SOURCE_ADDITIONAL_METHODS: &[&str] = &[
     "GetSpellFlyoutDirection",
 ];
 
-/// PLAN-named methods that DO NOT exist on `ActionBarMixin` — negative
-/// tripwires for spec drift. `SetSpellFlyoutDirection`: source has only
-/// `Update`/`GetSpellFlyoutDirection` (lua:221/246) — there is no
-/// setter. `Layout`: `ActionBarMixin` does not declare `Layout`; the
-/// method exists on `ResizeLayoutMixin` (`Blizzard_SharedXML/LayoutFrame.lua:486`)
-/// and reaches bar frames only through the `ResizeLayoutFrame` template
-/// inheritance chain at `Shared/ActionBarTemplate.xml:7`. Pinning these
-/// as nil ensures (a) the PLAN line is recognised as drifted from
-/// source, and (b) a future "fix" that adds either method to
-/// `ActionBarMixin` directly forces a spec/test review rather than
-/// shadowing the inherited Layout silently.
+/// PLAN-named methods absent from `ActionBarMixin` — negative tripwires.
+/// Source has no `SetSpellFlyoutDirection` (only `Update`/`Get` at
+/// lua:221/246); `Layout` lives on `ResizeLayoutMixin`
+/// (`Blizzard_SharedXML/LayoutFrame.lua:486`), reaching bar frames via
+/// `ResizeLayoutFrame` template inheritance.
 const ACTION_BAR_MIXIN_PLAN_NAMED_ABSENT_METHODS: &[&str] = &["SetSpellFlyoutDirection", "Layout"];
 
-/// Pin `ActionBarMixin`'s method-surface contract. **Spec/source
-/// mismatch in both directions.** PLAN names 7 methods; source declares
-/// 12 on the mixin (5 PLAN-named match + 7 source-additional), and 2
-/// PLAN-named methods don't exist on the mixin at all. Single test
-/// drives 15 assertions: existence (1), PLAN-named functions (5),
-/// source-additional functions (7), PLAN-named-but-absent nil
-/// tripwires (2). Mixin global is plain Lua — no Mixin() call needed
-/// for these assertions; `_G.ActionBarMixin.method` is the source-level
-/// declaration directly. The `frame.method == mixin.method` reference
-/// pin in `plan_named_frames_have_their_mixins_applied` covers
-/// per-frame Mixin-codegen drift; this test covers source-load drift.
+/// Pin `ActionBarMixin`'s method-surface contract. **Bidirectional
+/// spec/source mismatch.** PLAN names 7; source declares 12 (5 match,
+/// 7 source-additional, 2 PLAN-named absent). 15 assertions total.
 #[test]
 fn action_bar_mixin_publishes_plan_named_and_source_additional_methods() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -739,6 +720,26 @@ fn assisted_combat_manager_publishes_plan_named_methods() {
                  `{ROOT}` loads, got `{method_type}`. Source declares it in \
                  `Mainline/AssistedCombatManager.lua`."
             );
+        }
+    });
+}
+
+/// Pin `ActionButtonSpellAlertManager` table + 3 PLAN-named methods
+/// at `Shared/ActionButtonSpellAlerts.lua` lua:1/114/125/132.
+#[test]
+fn action_button_spell_alert_manager_publishes_plan_named_methods() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let manager: String = env
+            .eval("return type(_G.ActionButtonSpellAlertManager)")
+            .expect("ActionButtonSpellAlertManager probe must run cleanly");
+        assert_eq!(manager, "table", "expected table, got `{manager}`");
+        for method in ["ShowAlert", "HideAlert", "HasAlert"] {
+            let m: String = env
+                .eval(&format!(
+                    "return type(_G.ActionButtonSpellAlertManager.{method})"
+                ))
+                .expect("method probe must run cleanly");
+            assert_eq!(m, "function", "expected `{method}` function, got `{m}`");
         }
     });
 }
