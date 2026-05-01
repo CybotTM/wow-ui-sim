@@ -155,7 +155,7 @@ fn test_suppressed_lua_error_summary_lines_report_repeat_counts() {
     assert_eq!(summary.len(), 1);
     assert_eq!(
         summary[0],
-        "Lua error suppressed 1 additional times: repeated boom"
+        "Lua error suppressed 1 additional times: repeated boom\nstack traceback:\n\t[C]: in function 'error'"
     );
 }
 
