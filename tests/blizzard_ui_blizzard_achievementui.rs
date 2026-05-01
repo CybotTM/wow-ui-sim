@@ -78,3 +78,6 @@ mod behavior_comparison_friend_completed;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_statistic_row.rs"]
 mod behavior_statistic_row;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_expand_collapse.rs"]
+mod behavior_expand_collapse;
