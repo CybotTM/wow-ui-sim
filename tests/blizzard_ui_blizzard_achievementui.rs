@@ -42,3 +42,6 @@ mod behavior_objective_rep;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_comparison_set.rs"]
 mod behavior_comparison_set;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_comparison_clear.rs"]
+mod behavior_comparison_clear;
