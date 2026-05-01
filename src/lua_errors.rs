@@ -129,15 +129,15 @@ pub fn grouped_errors_by_addon(state: &SimState) -> BTreeMap<String, Vec<String>
 }
 
 pub(crate) fn suppressed_error_summary_lines(state: &SimState) -> Vec<String> {
-    unique_error_order(state)
+    unique_error_messages(state)
         .into_iter()
-        .filter_map(|message| {
-            let count = state.lua_error_counts.get(&message).copied().unwrap_or(0);
+        .filter_map(|error| {
+            let count = state.lua_error_counts.get(&error.key).copied().unwrap_or(0);
             (count > 1).then(|| {
                 format!(
                     "Lua error suppressed {} additional times: {}",
                     count - 1,
-                    message
+                    error.message
                 )
             })
         })
@@ -148,13 +148,6 @@ pub(crate) fn print_suppressed_error_summary(state: &SimState) {
     for line in suppressed_error_summary_lines(state) {
         eprintln!("{line}");
     }
-}
-
-fn unique_error_order(state: &SimState) -> Vec<String> {
-    unique_error_messages(state)
-        .into_iter()
-        .map(|error| error.key)
-        .collect()
 }
 
 fn unique_error_messages(state: &SimState) -> Vec<UniqueLuaError> {
