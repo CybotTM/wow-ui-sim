@@ -33,3 +33,6 @@ mod behavior_summary_update;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_button_click_link.rs"]
 mod behavior_button_click_link;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_button_double_click.rs"]
+mod behavior_button_double_click;
