@@ -687,3 +687,64 @@ fn spell_flyout_publishes_dialog_strata_hidden_by_default() {
         );
     });
 }
+
+/// Pin `StatusTrackingBarManager` identity together with its two
+/// `parentKey` child containers. Declared at
+/// `Mainline/StatusTrackingBar.xml:35-62` as a `parent="UIParent"`
+/// `frameStrata="MEDIUM"` Frame with `mixin="StatusTrackingManagerMixin"`,
+/// containing two `<Frame>` entries with
+/// `parentKey="MainStatusTrackingBarContainer"` and
+/// `parentKey="SecondaryStatusTrackingBarContainer"` respectively
+/// (both inherit `StatusTrackingBarContainerTemplate` plus an
+/// `EditModeStatusTrackingBar<N>SystemTemplate`).
+///
+/// `parentKey` auto-attaches the child onto its parent under that
+/// key — separate from the optional `name=` global.
+/// `StatusTrackingManagerMixin` at `Mainline/StatusTrackingBarManager.lua`
+/// reads both keys directly, so a regression that severs `parentKey`
+/// wiring while keeping the global name would crash every UpdateAll
+/// pass. The dual-axis pin below (global + field lookup) catches it.
+#[test]
+fn status_tracking_bar_manager_publishes_main_and_secondary_parent_key_children() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let manager_type: String = env
+            .eval("return type(_G.StatusTrackingBarManager)")
+            .expect("StatusTrackingBarManager existence probe must run cleanly");
+
+        assert_eq!(
+            manager_type, "table",
+            "Expected `_G.StatusTrackingBarManager` to be a table after `{ROOT}` loads, got \
+             `{manager_type}`. The XML at `Mainline/StatusTrackingBar.xml:35` declares \
+             `<Frame name=\"StatusTrackingBarManager\" parent=\"UIParent\" \
+             frameStrata=\"MEDIUM\" mixin=\"StatusTrackingManagerMixin\">`. A nil reading \
+             means either the XML chunk failed to execute or the named-frame registration \
+             didn't run. Every consumer that calls `StatusTrackingBarManager:UpdateBarsShown()` \
+             from `Mainline/StatusTrackingBarManager.lua` would surface a nil-method error."
+        );
+
+        for parent_key in [
+            "MainStatusTrackingBarContainer",
+            "SecondaryStatusTrackingBarContainer",
+        ] {
+            let container_type: String = env
+                .eval(&format!(
+                    "return type(_G.StatusTrackingBarManager[{parent_key:?}])"
+                ))
+                .expect("parentKey child probe must run cleanly");
+
+            assert_eq!(
+                container_type, "table",
+                "Expected `StatusTrackingBarManager.{parent_key}` to be a table (the \
+                 `parentKey=\"{parent_key}\"` child auto-attached by XML at \
+                 `Mainline/StatusTrackingBar.xml:41/49`), got `{container_type}`. \
+                 `parentKey` on a child `<Frame>` is what wires the child onto its parent \
+                 under that key — separate from the optional `name=` global. A nil reading \
+                 here while `_G.{parent_key}` is non-nil would mean the global-name path \
+                 ran but the parentKey wiring did not, leaving `StatusTrackingManagerMixin` \
+                 method bodies in `Mainline/StatusTrackingBarManager.lua` (which read \
+                 `self.{parent_key}:Show()` / `self.{parent_key}:UpdateBarsShown()` \
+                 directly) to crash with nil-method errors on every UpdateAll pass."
+            );
+        }
+    });
+}
