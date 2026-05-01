@@ -1,7 +1,9 @@
 use crate::c_api::ensure_namespace;
 use crate::c_api::item_spell::{helpers::global_table, item_link_for_id};
 use crate::items;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::methods::{
+    borrow_state, create_string, create_table, table_set, table_set_num,
+};
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -48,12 +50,24 @@ fn c_item_upgrade_clear(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(crate) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Container")?;
+    register_container_query_methods(state, table_ref)?;
+    register_container_action_methods(state, table_ref)?;
+    Ok(())
+}
+
+type ContainerScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
+
+fn register_container_query_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     register_container_methods(
         state,
         table_ref,
         &[
             ("GetContainerNumSlots", c_container_get_num_slots),
             ("GetContainerNumFreeSlots", c_container_get_num_free_slots),
+            ("GetContainerFreeSlots", c_container_get_free_slots),
             ("HasContainerItem", c_container_has_item),
             ("GetBagSlotFlag", c_container_get_bag_slot_flag),
             ("GetContainerItemInfo", c_container_get_item_info),
@@ -72,7 +86,13 @@ pub(crate) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
             ("IsContainerFiltered", c_container_is_container_filtered),
             ("IsBattlePayItem", c_container_is_battle_pay_item),
         ],
-    )?;
+    )
+}
+
+fn register_container_action_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     register_container_methods(
         state,
         table_ref,
@@ -81,11 +101,15 @@ pub(crate) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
             ("PickupContainerItem", c_container_noop),
             ("SplitContainerItem", c_container_noop),
         ],
-    )?;
-    Ok(())
+    )
 }
 
-type ContainerScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
+fn container_slot_count(bag: i32) -> i32 {
+    match bag {
+        0..=4 => 16,
+        _ => 0,
+    }
+}
 
 fn register_container_methods(
     state: &mut LuaState,
@@ -100,24 +124,36 @@ fn register_container_methods(
 
 fn c_container_get_num_slots(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
-    let slots = match bag {
-        0..=4 => 16.0,
-        _ => 0.0,
-    };
-    state.push(Val::Num(slots));
+    state.push(Val::Num(container_slot_count(bag) as f64));
     Ok(1)
 }
 
 fn c_container_get_num_free_slots(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let occupied = borrow_state(state)?.bag_occupied_slots(bag) as f64;
-    let free = match bag {
-        0..=4 => (16.0 - occupied).max(0.0),
-        _ => 0.0,
-    };
+    let free = (container_slot_count(bag) as f64 - occupied).max(0.0);
     state.push(Val::Num(free));
     state.push(Val::Num(0.0));
     Ok(2)
+}
+
+fn c_container_get_free_slots(state: &mut LuaState) -> LuaResult<u32> {
+    let bag = i32::from_stack(state, 1)?;
+    let free_slots = {
+        let sim = borrow_state(state)?;
+        (1..=container_slot_count(bag))
+            .filter(|slot| sim.get_bag_item(bag, *slot).is_none())
+            .collect::<Vec<_>>()
+    };
+
+    let table = create_table(state);
+    if let Val::Table(table_ref) = table {
+        for (index, slot) in free_slots.iter().enumerate() {
+            table_set_num(state, table_ref, (index + 1) as f64, Val::Num(*slot as f64));
+        }
+    }
+    state.push(table);
+    Ok(1)
 }
 
 fn c_container_has_item(state: &mut LuaState) -> LuaResult<u32> {
@@ -136,6 +172,12 @@ fn c_container_get_item_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
 
+    let info = build_container_item_info(state, item_id, stack_count);
+    state.push(info);
+    Ok(1)
+}
+
+fn build_container_item_info(state: &mut LuaState, item_id: u32, stack_count: i32) -> Val {
     let item = items::get_item(item_id);
     let info = create_table(state);
     table_set(state, info, "itemID", Val::Num(item_id as f64));
@@ -169,8 +211,7 @@ fn c_container_get_item_info(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => table_set(state, info, "hyperlink", Val::Nil),
     }
-    state.push(info);
-    Ok(1)
+    info
 }
 
 fn c_container_get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {

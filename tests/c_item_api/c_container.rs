@@ -102,6 +102,29 @@ fn test_c_container_free_slots_tracks_items() {
 }
 
 #[test]
+fn test_c_container_free_slot_list_returns_table() {
+    let env = env();
+    let (kind, count, first_free): (String, i32, i32) = env
+        .eval(
+            r#"
+            local slots = C_Container.GetContainerFreeSlots(0)
+            local count = 0
+            local firstFree
+            for _, slot in ipairs(slots) do
+                count = count + 1
+                firstFree = firstFree or slot
+            end
+            return type(slots), count, firstFree
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(kind, "table");
+    assert_eq!(count, 12);
+    assert_eq!(first_free, 5);
+}
+
+#[test]
 fn test_c_container_has_item() {
     let env = env();
     let has: bool = env
