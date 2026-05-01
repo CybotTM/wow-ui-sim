@@ -202,6 +202,72 @@ fn test_select_instance_clears_stale_encounter_for_instance_loot() {
 }
 
 #[test]
+fn test_magisters_terrace_loot_rows_have_item_metadata() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            EJ_SelectInstance(1300)
+            local count = EJ_GetNumLoot()
+            if count < 20 then
+                return "count=" .. tostring(count)
+            end
+
+            for i = 1, count do
+                local item = EJ_GetLootInfoByIndex(i)
+                if not item then
+                    return "missing_item:" .. tostring(i)
+                end
+                if item.name == nil or item.name == "" then
+                    return "missing_name:" .. tostring(i) .. ":" .. tostring(item.itemID)
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Magisters' Terrace loot should render concrete item rows: {result}"
+    );
+}
+
+#[test]
+fn test_adventure_guide_raid_loot_rows_have_item_metadata() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            for _, instanceID in ipairs({1278, 1302, 1307, 1308, 1312, 1314}) do
+                EJ_SelectInstance(instanceID)
+                local count = EJ_GetNumLoot()
+                if count <= 0 then
+                    return "count=" .. tostring(instanceID) .. ":" .. tostring(count)
+                end
+
+                for i = 1, count do
+                    local item = EJ_GetLootInfoByIndex(i)
+                    if not item then
+                        return "missing_item:" .. tostring(instanceID) .. ":" .. tostring(i)
+                    end
+                    if item.name == nil or item.name == "" then
+                        return "missing_name:" .. tostring(instanceID) .. ":" .. tostring(i) .. ":" .. tostring(item.itemID)
+                    end
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Adventure Guide raid loot should render concrete item rows: {result}"
+    );
+}
+
+#[test]
 fn test_encounter_journal_tier_selection_round_trips() {
     let env = env();
     let (initial_tier, selected_tier): (i64, i64) = env

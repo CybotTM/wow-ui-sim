@@ -8,7 +8,7 @@
 //! Generates: data/items.rs
 
 use super::csv_util::{escape_str, parse_csv_line, read_csv_records, wow_data_dir};
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
@@ -32,7 +32,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     write_header(&mut out)?;
 
-    let (count, skipped) = build_item_map(&mut out, reader, &icon_map, &required_ids)?;
+    let (count, skipped) = build_item_map(&mut out, reader, &icon_map, &required_ids, &wow_data)?;
 
     write_lookup_fn(&mut out)?;
     write_tests(&mut out)?;
@@ -73,12 +73,10 @@ fn collect_required_item_ids() -> BTreeSet<u32> {
         collect_number_literals_after(&src, "itemID = ", &mut ids);
     }
 
-    // Adventure Guide loot rows.
-    let journal_loot = wow_data_dir().join("JournalEncounterItem.csv");
-    if let Ok(file) = std::fs::File::open(&journal_loot) {
-        if let Ok(records) = read_csv_records(BufReader::new(file)) {
-            collect_item_ids_from_journal_loot(&records, &mut ids);
-        }
+    ids.extend(EXISTING_ITEM_FIXTURE_IDS);
+
+    if let Ok(journal_items) = collect_required_encounter_journal_items(&wow_data_dir()) {
+        ids.extend(journal_items);
     }
 
     // Bag items from state.rs default backpack
@@ -110,27 +108,110 @@ fn collect_number_literals_after(src: &str, marker: &str, out: &mut BTreeSet<u32
     }
 }
 
-fn collect_item_ids_from_journal_loot(records: &[String], out: &mut BTreeSet<u32>) {
-    let mut iter = records.iter();
-    let Some(header) = iter.next() else {
-        return;
-    };
-    let header_fields = parse_csv_line(header);
-    let item_idx = header_fields
+const EXISTING_ITEM_FIXTURE_IDS: &[u32] = &[
+    // Existing compact item fixture rows. Keep these explicit so regenerating
+    // the file adds targeted journal coverage without pruning older fixtures.
+    159, 4540, 6948, 7005, 122245, 210934, 210935, 211988, 211989, 211990, 211991, 211992, 211993,
+    211994, 211995, 211996, 215135, 218715, 225748, 229181, 230637, 236914,
+];
+
+const REQUIRED_ENCOUNTER_JOURNAL_TIER_IDS: &[u32] = &[
+    516, // Midnight dungeons and raids
+    505, // Suggested/current Adventure Guide dungeons and raids
+];
+
+fn collect_required_encounter_journal_items(
+    wow_data: &Path,
+) -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
+    let instance_ids = collect_journal_instance_ids_for_required_tiers(wow_data)?;
+    let encounter_ids = collect_journal_encounter_ids_for_instances(wow_data, &instance_ids)?;
+    collect_journal_item_ids_for_encounters(wow_data, &encounter_ids)
+}
+
+fn collect_journal_instance_ids_for_required_tiers(
+    wow_data: &Path,
+) -> Result<HashSet<u32>, Box<dyn std::error::Error>> {
+    let required_tiers: HashSet<u32> = REQUIRED_ENCOUNTER_JOURNAL_TIER_IDS
         .iter()
-        .position(|field| field == "ItemID")
-        .unwrap_or(0);
+        .copied()
+        .collect();
+    let records = open_records(&wow_data.join("JournalTierXInstance.csv"))?;
+    let mut iter = records.iter();
+    let header = iter.next().ok_or("empty JournalTierXInstance.csv")?;
+    let idx = header_index(header);
+    let mut instance_ids = HashSet::new();
     for record in iter {
         let fields = parse_csv_line(record);
-        if let Some(item_id) = fields
-            .get(item_idx)
-            .and_then(|field| field.parse::<u32>().ok())
-        {
-            if item_id != 0 {
-                out.insert(item_id);
-            }
+        let tier_id = parse_u32(field(&fields, &idx, "JournalTierID"));
+        if required_tiers.contains(&tier_id) {
+            instance_ids.insert(parse_u32(field(&fields, &idx, "JournalInstanceID")));
         }
     }
+    Ok(instance_ids)
+}
+
+fn collect_journal_encounter_ids_for_instances(
+    wow_data: &Path,
+    instance_ids: &HashSet<u32>,
+) -> Result<HashSet<u32>, Box<dyn std::error::Error>> {
+    let records = open_records(&wow_data.join("JournalEncounter.csv"))?;
+    let mut iter = records.iter();
+    let header = iter.next().ok_or("empty JournalEncounter.csv")?;
+    let idx = header_index(header);
+    let mut encounter_ids = HashSet::new();
+    for record in iter {
+        let fields = parse_csv_line(record);
+        let instance_id = parse_u32(field(&fields, &idx, "JournalInstanceID"));
+        if instance_ids.contains(&instance_id) {
+            encounter_ids.insert(parse_u32(field(&fields, &idx, "ID")));
+        }
+    }
+    Ok(encounter_ids)
+}
+
+fn collect_journal_item_ids_for_encounters(
+    wow_data: &Path,
+    encounter_ids: &HashSet<u32>,
+) -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
+    let records = open_records(&wow_data.join("JournalEncounterItem.csv"))?;
+    let mut iter = records.iter();
+    let header = iter.next().ok_or("empty JournalEncounterItem.csv")?;
+    let idx = header_index(header);
+    let mut item_ids = BTreeSet::new();
+    for record in iter {
+        let fields = parse_csv_line(record);
+        let encounter_id = parse_u32(field(&fields, &idx, "JournalEncounterID"));
+        if encounter_ids.contains(&encounter_id) {
+            item_ids.insert(parse_u32(field(&fields, &idx, "ItemID")));
+        }
+    }
+    item_ids.remove(&0);
+    Ok(item_ids)
+}
+
+fn open_records(path: &Path) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+    Ok(read_csv_records(reader)?)
+}
+
+fn header_index(header: &str) -> HashMap<String, usize> {
+    parse_csv_line(header)
+        .into_iter()
+        .enumerate()
+        .map(|(i, name)| (name, i))
+        .collect()
+}
+
+fn field<'a>(fields: &'a [String], idx: &HashMap<String, usize>, key: &str) -> &'a str {
+    idx.get(key)
+        .and_then(|i| fields.get(*i))
+        .map(String::as_str)
+        .unwrap_or("")
+}
+
+fn parse_u32(s: &str) -> u32 {
+    s.parse().unwrap_or(0)
 }
 
 /// Build a HashMap<item_id, icon_file_data_id> from ItemModifiedAppearance + ItemAppearance CSVs.
@@ -226,8 +307,10 @@ fn build_item_map(
     reader: BufReader<File>,
     icon_map: &HashMap<u32, u32>,
     required_ids: &BTreeSet<u32>,
+    wow_data: &Path,
 ) -> Result<(u32, u32), Box<dyn std::error::Error>> {
     let mut builder = phf_codegen::Map::new();
+    let mut emitted_ids = BTreeSet::new();
     let mut count = 0u32;
     let mut skipped = 0u32;
 
@@ -239,12 +322,18 @@ fn build_item_map(
         match parse_item_row(&line, icon_map) {
             Some((id, value)) if required_ids.contains(&id) => {
                 builder.entry(id, &value);
+                emitted_ids.insert(id);
                 count += 1;
             }
             _ => {
                 skipped += 1;
             }
         }
+    }
+
+    for (id, value) in fallback_item_search_rows(wow_data, required_ids, &emitted_ids)? {
+        builder.entry(id, &value);
+        count += 1;
     }
 
     writeln!(
@@ -254,6 +343,27 @@ fn build_item_map(
     )?;
     writeln!(out)?;
     Ok((count, skipped))
+}
+
+fn fallback_item_search_rows(
+    wow_data: &Path,
+    required_ids: &BTreeSet<u32>,
+    emitted_ids: &BTreeSet<u32>,
+) -> Result<Vec<(u32, String)>, Box<dyn std::error::Error>> {
+    let records = open_records(&wow_data.join("ItemSearchName.csv"))?;
+    let mut iter = records.iter();
+    let header = iter.next().ok_or("empty ItemSearchName.csv")?;
+    let idx = header_index(header);
+    let mut missing_ids: BTreeSet<u32> = required_ids.difference(emitted_ids).copied().collect();
+    let mut rows = Vec::new();
+    for record in iter {
+        let fields = parse_csv_line(record);
+        let id = parse_u32(field(&fields, &idx, "ID"));
+        if missing_ids.remove(&id) {
+            rows.push((id, format_search_item_info(&fields, &idx)));
+        }
+    }
+    Ok(rows)
 }
 
 fn parse_item_row(line: &str, icon_map: &HashMap<u32, u32>) -> Option<(u32, String)> {
@@ -292,6 +402,21 @@ fn format_item_info(fields: &[String], name: &str, icon_file_data_id: u32) -> St
          expansion_id: {expansion_id}, icon_file_data_id: {icon_file_data_id}, \
          stat_percent_editor: {stat_percent_editor}, \
          stat_modifier_bonus_stat: {stat_modifier_bonus_stat} }}"
+    )
+}
+
+fn format_search_item_info(fields: &[String], idx: &HashMap<String, usize>) -> String {
+    let name = escape_str(field(fields, idx, "Display_lang"));
+    let quality: u8 = field(fields, idx, "OverallQualityID").parse().unwrap_or(0);
+    let item_level: u16 = field(fields, idx, "ItemLevel").parse().unwrap_or(0);
+    let required_level: u16 = field(fields, idx, "RequiredLevel").parse().unwrap_or(0);
+    let expansion_id: u8 = field(fields, idx, "ExpansionID").parse().unwrap_or(0);
+    format!(
+        "ItemInfo {{ name: \"{name}\", quality: {quality}, item_level: {item_level}, \
+         required_level: {required_level}, inventory_type: 0, sell_price: 0, \
+         stackable: 1, bonding: 1, expansion_id: {expansion_id}, icon_file_data_id: 0, \
+         stat_percent_editor: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], \
+         stat_modifier_bonus_stat: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1] }}"
     )
 }
 
