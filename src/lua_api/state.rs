@@ -79,6 +79,7 @@ macro_rules! build_empty_sim_state {
             action_bar_page: 1,
             action_bars: $collections.action_bars,
             action_highlights: ActionHighlightState::default(),
+            extra_action_button: ExtraActionButtonState::default(),
             equipped_artifact: None,
             artifact_point_costs: HashMap::new(),
             allied_races: HashMap::new(),
@@ -502,6 +503,23 @@ impl Default for ActionBarStateInfo {
             possess_bar_visible: false,
         }
     }
+}
+
+/// Server-pushed payload for the single-button extra action bar
+/// (`ExtraActionBarFrame` / `ExtraActionButton1`). `spell_id` is `Some`
+/// while a quest/encounter/scenario has granted the player a temporary
+/// extra-action ability and `None` once it is revoked.
+///
+/// The flag drives `C_ActionBar.HasExtraActionBar()`
+/// (`src/lua_api/globals/action_bar_api.rs:378-380`), which
+/// `ExtraActionBar_Update`
+/// (`Blizzard_ActionBar/Shared/ExtraActionBar.lua:10-30`) reads to decide
+/// whether to call `bar:Show()` (when true and currently hidden) or play
+/// the `outro` animation (when false and currently shown). Default `None`
+/// — no extra-action ability granted.
+#[derive(Clone, Debug, Default)]
+pub struct ExtraActionButtonState {
+    pub spell_id: Option<u32>,
 }
 
 /// `C_Housing` favor-bar payload read by `HouseFavorBarMixin:Update`
@@ -1291,6 +1309,13 @@ pub struct SimState {
     /// `On Bar` highlight verbs. Read by Blizzard_ActionBar buttons during
     /// hover/drag updates.
     pub action_highlights: ActionHighlightState,
+    /// Server-pushed extra-action-bar grant. `spell_id = Some(_)` while the
+    /// player has a quest/encounter/scenario extra ability bound to
+    /// `ExtraActionButton1`; `None` while no grant is active. Drives
+    /// `C_ActionBar.HasExtraActionBar()` and the
+    /// `ExtraActionBar_Update` show/hide branch
+    /// (`Blizzard_ActionBar/Shared/ExtraActionBar.lua:10-30`).
+    pub extra_action_button: ExtraActionButtonState,
     /// Currently equipped artifact (legacy-spec content). `None` when no
     /// artifact is wielded — drives `C_ArtifactUI.GetEquippedArtifactItemID`
     /// returning nil and keeps the `ArtifactBarMixin` hidden.

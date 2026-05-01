@@ -376,7 +376,8 @@ fn has_temp_shapeshift_action_bar(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn has_extra_action_bar(state: &mut LuaState) -> LuaResult<u32> {
-    push_bool(state, false)
+    let granted = borrow_state(state)?.extra_action_button.spell_id.is_some();
+    push_bool(state, granted)
 }
 
 fn is_possess_bar_visible(state: &mut LuaState) -> LuaResult<u32> {
