@@ -75,6 +75,18 @@ const PLAN_NAMED_ACHIEVEMENTS_GLOBALS: &[&str] = &[
     "AchievementFrameAchievements_OnCriteriaUpdate",
     "AchievementFrameAchievements_UpdateDataProvider",
 ];
+/// PLAN-named comparison globals that DO exist verbatim in source.
+const PLAN_NAMED_COMPARISON_PRESENT: &[&str] = &["AchievementFrameComparison_UpdateStatusBars"];
+/// PLAN-named comparison globals that do NOT exist in source — tripwires.
+/// `AchievementFrameComparison_Update` was never declared (closest matches
+/// are `_ForceUpdate` at 2846, `_UpdateDataProvider` at 2854,
+/// `_UpdateStatsDataProvider` at 2868). `AchievementFrameComparison_OnInspectReady`
+/// was never declared either — INSPECT_ACHIEVEMENT_READY is dispatched
+/// inline from `AchievementFrameComparison_OnEvent` at line 2814.
+const PLAN_NAMED_COMPARISON_ABSENT: &[&str] = &[
+    "AchievementFrameComparison_Update",
+    "AchievementFrameComparison_OnInspectReady",
+];
 
 #[test]
 fn achievement_frame_plan_named_globals_are_functions() {
@@ -243,6 +255,106 @@ fn achievement_frame_achievements_plan_named_globals_are_functions() {
                  provider for the current category — a regression on any one of them would \
                  silently break either the live progress display or the post-earn list refresh. \
                  Got `type({name}) == \"function\"` returned false."
+            );
+        }
+    });
+}
+
+/// Pin the `AchievementFrameComparison_*` globals — split presence/absence.
+///
+/// **Spec/source mismatch.** The PLAN line names three globals
+/// (`AchievementFrameComparison_Update`, `_OnInspectReady`,
+/// `_UpdateStatusBars`) but only `_UpdateStatusBars` actually exists in
+/// `Mainline/Blizzard_AchievementUI.lua`. The other two were never
+/// declared — most likely they are spec-side guesses about how the
+/// comparison sub-frame would be structured if Blizzard had factored
+/// each event-handler and update-driver into its own top-level function,
+/// but the source instead uses a single `_OnEvent` (line 2814) that
+/// dispatches inline by event name, plus a `_ForceUpdate` (2846) that
+/// branches on the active `achievementFunctions` table.
+///
+/// We therefore split the test along the spec/source boundary:
+///
+/// **Presence tripwire** (`PLAN_NAMED_COMPARISON_PRESENT`):
+/// - `AchievementFrameComparison_UpdateStatusBars` at line 820 — takes a
+///   `category id`, reads `numAchievements`/`numCompleted` via
+///   `GetCategoryNumAchievements(id)` and the category name via
+///   `GetCategoryInfo(id)` (with `ACHIEVEMENT_SUMMARY_CATEGORY` override
+///   when `id == ACHIEVEMENT_COMPARISON_SUMMARY_ID`), then writes the
+///   player and friend status-bar pairs:
+///   `AchievementFrameComparison.Summary.Player.StatusBar` gets the
+///   player's completed count (from `GetCategoryNumAchievements`) and
+///   `AchievementFrameComparison.Summary.Friend.StatusBar` gets the
+///   compared unit's count (from `GetComparisonCategoryNumAchievements`).
+///   Both bars get `SetMinMaxValues(0, numAchievements)` so they share
+///   the same denominator. The function is invoked from the inline
+///   `INSPECT_ACHIEVEMENT_READY` arm of `AchievementFrameComparison_OnEvent`
+///   (line 2818), proving its public-surface role.
+///
+/// **Absence tripwires** (`PLAN_NAMED_COMPARISON_ABSENT`):
+/// - `AchievementFrameComparison_Update` — never declared. The closest
+///   real symbols are `_ForceUpdate` (2846, dispatches between
+///   `_UpdateDataProvider` 2854 and `_UpdateStatsDataProvider` 2868
+///   based on `achievementFunctions == COMPARISON_ACHIEVEMENT_FUNCTIONS`
+///   vs `COMPARISON_STAT_FUNCTIONS`). If the spec really meant
+///   "the comparison-side update driver", the closest analogue is
+///   `_ForceUpdate`. A future Blizzard refactor that introduces a
+///   `_Update` symbol would flip this tripwire and force this test to
+///   be re-evaluated against the new shape.
+/// - `AchievementFrameComparison_OnInspectReady` — never declared.
+///   `INSPECT_ACHIEVEMENT_READY` is handled inline from line 2815-2819
+///   inside `AchievementFrameComparison_OnEvent`: clear selected
+///   categories, fetch current category, call `_UpdateStatusBars`, then
+///   set `AchievementFrameComparisonHeader.Points` to
+///   `GetComparisonAchievementPoints()`. A future Blizzard refactor
+///   that splits this arm into its own `_OnInspectReady` global would
+///   flip this tripwire.
+///
+/// Asserting both `type(present) == "function"` AND `type(absent) ==
+/// "nil"` makes the test a two-way contract pin: it fails loudly if
+/// `_UpdateStatusBars` is removed/renamed AND if either of the
+/// PLAN-anticipated symbols suddenly appears (which would be the
+/// signal to re-read the new structure and update the spec).
+#[test]
+fn achievement_frame_comparison_plan_named_globals_split_presence_absence() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for name in PLAN_NAMED_COMPARISON_PRESENT {
+            let probe = format!(r#"return type({name})"#);
+            let actual_type = env
+                .eval::<String>(&probe)
+                .expect("file-scope global type probe must run cleanly");
+
+            assert_eq!(
+                actual_type, "function",
+                "Global `{name}` MUST be a function after the smoke-shape harness loads \
+                 `Blizzard_AchievementUI`. This is the only PLAN-named comparison global that \
+                 actually exists in `Mainline/Blizzard_AchievementUI.lua` (line 820). A \
+                 non-function reading proves either (a) the file chunk failed before reaching \
+                 the declaration (load.rs's `achievement_ui_load_emits_no_lane_specific_lua_errors` \
+                 would also fail in that case — multi-test failure mode), OR (b) Blizzard \
+                 re-shaped `_UpdateStatusBars` into a method on the `AchievementFrameComparison` \
+                 sub-frame / removed it / renamed it. Got `type({name}) == \"{actual_type}\"`."
+            );
+        }
+
+        for name in PLAN_NAMED_COMPARISON_ABSENT {
+            let probe = format!(r#"return type({name})"#);
+            let actual_type = env
+                .eval::<String>(&probe)
+                .expect("file-scope global type probe must run cleanly");
+
+            assert_eq!(
+                actual_type, "nil",
+                "Global `{name}` MUST be nil after the smoke-shape harness loads \
+                 `Blizzard_AchievementUI`. The PLAN line names this symbol but it does NOT \
+                 exist in `Mainline/Blizzard_AchievementUI.lua` — see the module doc comment for \
+                 details on which actual symbols cover the same role (`_OnEvent` line 2814 \
+                 inline-dispatches INSPECT_ACHIEVEMENT_READY for the OnInspectReady role; \
+                 `_ForceUpdate` line 2846 plus `_UpdateDataProvider` / `_UpdateStatsDataProvider` \
+                 cover the Update role). A non-nil reading here is itself meaningful: it would \
+                 prove Blizzard has now factored the inline arm into a top-level function, at \
+                 which point the spec needs to be updated to point at the new symbol's actual \
+                 contract. Got `type({name}) == \"{actual_type}\"`, expected \"nil\"."
             );
         }
     });
