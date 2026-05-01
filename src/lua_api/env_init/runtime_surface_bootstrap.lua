@@ -7081,7 +7081,7 @@ if GetPartyLFGID == nil then
   function GetPartyLFGID() return 0 end
 end
 
--- Adventure journal: the sim has no adventure content.
+-- Adventure journal: fallback only; Rust registration seeds visible suggestions.
 C_AdventureJournal = C_AdventureJournal or __wow_namespace()
 if rawget(C_AdventureJournal, "CanBeShown") == nil then
   function C_AdventureJournal.CanBeShown()
