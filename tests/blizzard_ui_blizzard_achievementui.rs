@@ -90,3 +90,6 @@ mod behavior_track_toggle;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_filter_dropdown.rs"]
 mod behavior_filter_dropdown;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_restricted_mode.rs"]
+mod behavior_restricted_mode;
