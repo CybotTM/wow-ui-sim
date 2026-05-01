@@ -379,6 +379,46 @@ fn test_tooltip_anchor_cursor_uses_absolute_position() {
 }
 
 #[test]
+fn test_tooltip_side_cursor_anchors_use_absolute_position() {
+    for anchor_kind in ["ANCHOR_CURSOR_RIGHT", "ANCHOR_CURSOR_LEFT"] {
+        let env = WowLuaEnv::new().unwrap();
+
+        env.state()
+            .borrow_mut()
+            .set_mouse_position(Some((200.0, 300.0)));
+
+        env.exec(&format!(
+            r#"
+            local owner = CreateFrame("Frame", "AnchorCursorSideOwner", UIParent)
+            GameTooltip:SetOwner(owner, "{anchor_kind}")
+        "#
+        ))
+        .unwrap();
+
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        let frame = state.widgets.get(gt_id).unwrap();
+
+        assert_eq!(
+            frame.anchors.len(),
+            1,
+            "{anchor_kind} should set one anchor"
+        );
+        let anchor = &frame.anchors[0];
+        assert_eq!(anchor.point, AnchorPoint::TopLeft);
+        assert!(anchor.relative_to_id.is_none());
+        assert!(
+            (anchor.x_offset - 200.0).abs() < 0.1,
+            "{anchor_kind} x_offset should be mouse x"
+        );
+        assert!(
+            (anchor.y_offset - 320.0).abs() < 0.1,
+            "{anchor_kind} y_offset should be mouse y + 20"
+        );
+    }
+}
+
+#[test]
 fn test_tooltip_anchor_cursor_tracks_mouse_movement() {
     let env = WowLuaEnv::new().unwrap();
 
