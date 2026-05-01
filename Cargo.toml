@@ -75,12 +75,10 @@ intern-stats = ["rilua/intern-stats"]
 
 [profile.release]
 lto = false
-incremental = true
 debug = "line-tables-only"
 
 [profile.dev]
 lto = false
-incremental = true
 debug = "line-tables-only"
 
 [[test]]
