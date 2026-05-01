@@ -155,7 +155,10 @@ impl SimState {
                 _ => return a.cmp(&b),
             };
             let type_flag = |frame: &crate::widget::Frame| -> u8 {
-                u8::from(frame.widget_type == crate::widget::WidgetType::FontString)
+                u8::from(matches!(
+                    frame.widget_type,
+                    crate::widget::WidgetType::FontString | crate::widget::WidgetType::SimpleHTML
+                ))
             };
             (
                 frame_a.draw_layer as i32,
