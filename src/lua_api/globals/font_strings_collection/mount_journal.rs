@@ -1,11 +1,45 @@
 //! C_MountJournal namespace.
 
-use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 use super::set_global_val;
+
+fn mount_matches_search(mount: &crate::lua_api::state_types::MountData, search_text: &str) -> bool {
+    search_text.is_empty() || mount.name.to_lowercase().contains(search_text)
+}
+
+fn displayed_mount_count(st: &crate::lua_api::state::SimState) -> i32 {
+    st.world
+        .mounts
+        .iter()
+        .filter(|mount| mount_matches_search(mount, &st.world.mount_search_text))
+        .count() as i32
+}
+
+fn displayed_mount<'a>(
+    st: &'a crate::lua_api::state::SimState,
+    index: i32,
+) -> Option<&'a crate::lua_api::state_types::MountData> {
+    if index <= 0 {
+        return None;
+    }
+    let i = (index - 1) as usize;
+    st.world
+        .mounts
+        .iter()
+        .filter(|mount| mount_matches_search(mount, &st.world.mount_search_text))
+        .nth(i)
+}
+
+fn displayed_mount_snapshot(
+    st: &crate::lua_api::state::SimState,
+    index: i32,
+) -> Option<MountInfoSnapshot> {
+    displayed_mount(st, index).map(MountInfoSnapshot::from_mount)
+}
 
 fn push_mount_info(
     state: &mut LuaState,
@@ -38,7 +72,10 @@ fn register_mount_counts(tb: TableBuilder) -> LuaResult<TableBuilder> {
         count.into_stack(state)
     })?
     .set_function("GetNumDisplayedMounts", |state| {
-        let count = borrow_state(state)?.world.mounts.len() as i32;
+        let count = {
+            let st = borrow_state(state)?;
+            displayed_mount_count(&st)
+        };
         count.into_stack(state)
     })?
     .set_function("IsUsingDefaultFilters", |state| true.into_stack(state))?
@@ -47,8 +84,7 @@ fn register_mount_counts(tb: TableBuilder) -> LuaResult<TableBuilder> {
         let index = i32::from_stack(state, 1)?;
         let mount_id = {
             let st = borrow_state(state)?;
-            let i = (index - 1) as usize;
-            st.world.mounts.get(i).map(|mount| mount.mount_id as f64)
+            displayed_mount(&st, index).map(|mount| mount.mount_id as f64)
         };
         match mount_id {
             Some(id) => id.into_stack(state),
@@ -95,8 +131,7 @@ fn mount_get_displayed_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1)?;
     let snapshot = {
         let st = borrow_state(state)?;
-        let i = (index - 1) as usize;
-        st.world.mounts.get(i).map(MountInfoSnapshot::from_mount)
+        displayed_mount_snapshot(&st, index)
     };
     let Some(snapshot) = snapshot else {
         return Ok(0);
@@ -225,7 +260,14 @@ fn register_mount_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("Summon", |_state| Ok(0))?
         .set_function("SummonByID", |_state| Ok(0))?
         .set_function("Dismiss", |_state| Ok(0))?
-        .set_function("SetSearch", |_state| Ok(0))?
+        .set_function("SetSearch", |state| {
+            let search_text = Option::<String>::from_stack(state, 1)?
+                .unwrap_or_default()
+                .trim()
+                .to_lowercase();
+            borrow_state_mut(state)?.world.mount_search_text = search_text;
+            Ok(0)
+        })?
         .set_function("IsItemMountEquipment", |state| false.into_stack(state))?
         .set_function("IsMountEquipmentApplied", |state| false.into_stack(state))?
         .set_function("PickupDynamicFlightMode", |_state| Ok(0))?

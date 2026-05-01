@@ -41,6 +41,39 @@ fn mount_journal_get_displayed_mount_info() {
 }
 
 #[test]
+fn mount_journal_search_filters_displayed_mounts() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            C_MountJournal.SetSearch("ashes")
+
+            local count = C_MountJournal.GetNumDisplayedMounts()
+            if count ~= 1 then return "count=" .. tostring(count) end
+
+            local mountID = C_MountJournal.GetDisplayedMountID(1)
+            if mountID ~= 107 then return "displayed_id=" .. tostring(mountID) end
+
+            local name, _, _, _, _, _, _, _, _, _, _, infoMountID = C_MountJournal.GetDisplayedMountInfo(1)
+            if name ~= "Ashes of Al'ar" then return "name=" .. tostring(name) end
+            if infoMountID ~= 107 then return "info_id=" .. tostring(infoMountID) end
+
+            C_MountJournal.SetSearch("")
+            if C_MountJournal.GetNumDisplayedMounts() ~= C_MountJournal.GetNumMounts() then
+                return "clear_count=" .. tostring(C_MountJournal.GetNumDisplayedMounts())
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "SetSearch should filter displayed mounts: {result}"
+    );
+}
+
+#[test]
 fn mount_journal_displayed_info_uncollected() {
     let env = env();
     let result: String = env

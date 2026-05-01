@@ -388,6 +388,8 @@ pub struct WorldState {
     pub applied_transmog_slots: HashMap<i32, i32>,
     pub collected_mounts: HashSet<i32>,
     pub mounts: Vec<MountData>,
+    /// Current mount journal search text. Drives displayed mount APIs.
+    pub mount_search_text: String,
     pub collected_pets: HashSet<i32>,
     pub pets: Vec<PetData>,
     pub collected_toys: HashSet<i32>,
