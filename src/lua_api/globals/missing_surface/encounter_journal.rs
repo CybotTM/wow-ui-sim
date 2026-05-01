@@ -439,6 +439,7 @@ fn ej_select_instance(state: &mut LuaState) -> LuaResult<u32> {
     let instance_id = u32::from_stack(state, 1).unwrap_or(0);
     let mut sim = borrow_state_mut(state)?;
     sim.encounter_journal.current_instance = instance_id;
+    sim.encounter_journal.current_encounter = 0;
     if let Some(inst) = data::instance_by_id(instance_id) {
         sim.encounter_journal.is_raid = inst.is_raid;
     }
