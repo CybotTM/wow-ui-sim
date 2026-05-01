@@ -57,3 +57,6 @@ mod behavior_criteria_update_event;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_category_select.rs"]
 mod behavior_category_select;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_category_default.rs"]
+mod behavior_category_default;
