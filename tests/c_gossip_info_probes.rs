@@ -7,6 +7,21 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
+fn event_listener_script(event_name: &str, flag_name: &str) -> String {
+    format!(
+        r#"
+        {flag_name} = false
+        local f = CreateFrame("Frame")
+        f:RegisterEvent("{event_name}")
+        f:SetScript("OnEvent", function(_, event)
+            if event == "{event_name}" then
+                {flag_name} = true
+            end
+        end)
+        "#
+    )
+}
+
 #[test]
 fn get_options_returns_empty_array_by_default() {
     let env = env();
@@ -154,4 +169,60 @@ fn get_options_spell_id_nil_when_absent() {
         .eval("return C_GossipInfo.GetOptions()[1].spellID == nil")
         .unwrap();
     assert!(is_nil, "spellID should be nil when not set");
+}
+
+#[test]
+fn admin_open_quest_npc_seeds_available_quest_and_fires_gossip_show() {
+    let env = env();
+    env.exec(&event_listener_script("GOSSIP_SHOW", "__gossip_show_fired"))
+        .unwrap();
+
+    env.exec("A_Admin.OpenQuestNpc()").unwrap();
+
+    let (fired, active, count, quest_id, title): (bool, bool, i32, i32, String) = env
+        .eval(
+            r#"
+            local quests = C_GossipInfo.GetAvailableQuests()
+            return __gossip_show_fired, GetGossipNumAvailableQuests() == 1,
+                #quests, quests[1].questID, quests[1].title
+            "#,
+        )
+        .unwrap();
+    assert!(
+        fired,
+        "OpenQuestNpc should dispatch GOSSIP_SHOW immediately"
+    );
+    assert!(
+        active,
+        "legacy gossip count should reflect the available quest"
+    );
+    assert_eq!(count, 1);
+    assert_eq!(quest_id, 80000);
+    assert_eq!(title, "The Lost Expedition");
+}
+
+#[test]
+fn select_available_quest_sets_offer_and_fires_quest_detail() {
+    let env = env();
+    env.exec(&event_listener_script(
+        "QUEST_DETAIL",
+        "__quest_detail_fired",
+    ))
+    .unwrap();
+
+    env.exec(
+        r#"
+        A_Admin.OpenQuestNpc(80002, "Supply Run")
+        C_GossipInfo.SelectAvailableQuest(80002)
+        "#,
+    )
+    .unwrap();
+
+    let (fired, selected): (bool, i32) = env
+        .eval("return __quest_detail_fired, C_QuestLog.GetSelectedQuest()")
+        .unwrap();
+    let state = env.state().borrow();
+    assert!(fired, "SelectAvailableQuest should dispatch QUEST_DETAIL");
+    assert_eq!(selected, 80002);
+    assert_eq!(state.pending_quest_offer, Some(80002));
 }
