@@ -90,3 +90,6 @@ mod behavior_outfit_locked;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_quick_keybind_mode.rs"]
 mod behavior_quick_keybind_mode;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_main_bar_dividers.rs"]
+mod behavior_main_bar_dividers;
