@@ -60,8 +60,23 @@
 //! lane-specific filter below.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
+use crate::common::panel_fixtures::blizzard_ui_dir;
+use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_ActionBar";
+const ROOT_TOC_FILE: &str = "Blizzard_ActionBar_Mainline.toc";
+const PLAN_DECLARED_DEPS: &[&str] = &[
+    "Blizzard_StoreUI",
+    "Blizzard_QuickKeybind",
+    "Blizzard_UIParent",
+    "Blizzard_EditMode",
+    "Blizzard_UIPanels_Game",
+    "Blizzard_TextStatusBar",
+    "Blizzard_Flyout",
+    "Blizzard_Colors",
+    "Blizzard_HelpPlate",
+    "Blizzard_MicroMenu",
+];
 const LANE_FILE_SCOPE_MIXINS: &[&str] = &[
     "ActionBarMixin",
     "EditModeActionBarMixin",
@@ -164,6 +179,89 @@ fn action_bar_load_executes_file_scope_mixin_declarations() {
                  AssistedCombatManager.lua:3 — both as `Name = {{}}` at file scope. A nil \
                  reading here means the file chunk failed before reaching the declaration. Got \
                  `type({table_name}) == \"table\"` returned false."
+            );
+        }
+    });
+}
+
+/// Pin the TOC-declared dependency contract via TWO independent grounds:
+///
+/// 1. **Parser-grounded.** Parse `Blizzard_ActionBar_Mainline.toc` via
+///    `TocFile::from_file` (the same parser the closure walker uses at
+///    `src/loader/mod.rs:454` via `toc.dependencies().chain(toc.optional_deps())`)
+///    and assert the parser-extracted dep set matches the PLAN-stated list
+///    BIT-FOR-BIT. A regression where Blizzard adds, removes, or reorders a
+///    `## Dependencies:` entry would trip this — surfacing the contract drift
+///    before the runtime-load round-trip matters.
+/// 2. **Runtime-loaded round-trip.** After the startup-shape harness runs,
+///    assert `C_AddOns.IsAddOnLoaded(dep) == true` for every parser-extracted
+///    dep. The closure-walked `loaded` set does NOT contain these deps —
+///    they're pre-loaded by the panel-addons baseline at
+///    `tests/common/panel_fixtures.rs:104-115` BEFORE the closure walker
+///    runs, and the walker skips already-loaded entries when adding to the
+///    new closure's `loaded` list. So `IsAddOnLoaded` (which reads the
+///    addon registry's loaded-flag, set by `mark_addon_loaded` at
+///    `src/c_api/c_addons.rs:661`) is the correct ground for the
+///    "dep is satisfied at runtime" contract.
+///
+/// PLAN's wording "every TOC dependency present in loaded set after harness
+/// runs" is interpreted as **runtime-loaded** rather than **closure-walked**:
+/// the closure-walked `loaded` is a build-time concept (what the walker
+/// just pulled), while the registry's loaded-flag is the runtime-state
+/// concept (what is currently usable from Lua). For an addon whose deps
+/// are pre-loaded by the baseline, only the runtime-state reading carries
+/// information.
+#[test]
+fn action_bar_every_declared_toc_dependency_is_loaded_after_harness_runs() {
+    let toc_path = blizzard_ui_dir().join(ROOT).join(ROOT_TOC_FILE);
+    let toc = TocFile::from_file(&toc_path).unwrap_or_else(|e| {
+        panic!(
+            "TOC at `{}` MUST parse cleanly. The closure walker reads this same file via \
+             `TocFile::from_file` (src/c_api/c_addons.rs:639) when servicing LoadAddOn — a \
+             parser failure here would prove the simulator's runtime LoadAddOn dispatch \
+             cannot resolve this addon either. Got: {e}",
+            toc_path.display()
+        )
+    });
+    let mut declared_deps: Vec<String> = toc.dependencies();
+    declared_deps.extend(toc.optional_deps());
+
+    let plan_deps_owned: Vec<String> = PLAN_DECLARED_DEPS.iter().map(|s| s.to_string()).collect();
+    assert_eq!(
+        declared_deps, plan_deps_owned,
+        "Parser-extracted dep list from `{ROOT_TOC_FILE}` MUST match the PLAN-stated dep list \
+         BIT-FOR-BIT (same entries in the same order). The TOC currently declares \
+         `## Dependencies: Blizzard_StoreUI, Blizzard_QuickKeybind, Blizzard_UIParent, \
+         Blizzard_EditMode, Blizzard_UIPanels_Game, Blizzard_TextStatusBar, Blizzard_Flyout, \
+         Blizzard_Colors, Blizzard_HelpPlate, Blizzard_MicroMenu` (line 4) and NO \
+         `## OptionalDeps:` line. A regression that adds, removes, or reorders an entry would \
+         trip here BEFORE the runtime-loaded round-trip below; if the PLAN line at PLAN.md:1116 \
+         is updated to match Blizzard's new TOC, this `PLAN_DECLARED_DEPS` const must be \
+         updated alongside it."
+    );
+
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for dep in &declared_deps {
+            let is_loaded = env
+                .eval::<bool>(&format!(
+                    r#"return C_AddOns.IsAddOnLoaded("{dep}") == true"#
+                ))
+                .expect("C_AddOns.IsAddOnLoaded probe must run cleanly");
+
+            assert!(
+                is_loaded,
+                "Declared TOC dependency `{dep}` (parsed from `{ROOT_TOC_FILE}` via \
+                 `TocFile::from_file`) MUST be runtime-loaded after the startup-shape harness \
+                 finishes — `C_AddOns.IsAddOnLoaded(\"{dep}\")` returned false. Each declared \
+                 dep is pre-loaded by the panel-addons baseline (cross-references in this \
+                 file's module doc) BEFORE the closure walker runs; the walker then sees the \
+                 dep as already satisfied and skips re-loading. A false reading here means \
+                 either (a) the panel baseline regressed (entry missing or load failure \
+                 silently swallowed at `panel_fixtures.rs:111-113`), OR (b) `mark_addon_loaded` \
+                 (src/c_api/c_addons.rs:661) didn't run for this dep, OR (c) the TOC's \
+                 declared name doesn't match the addon folder name discovered by \
+                 `discover_blizzard_addons_for_screen`. Downstream addons inheriting templates \
+                 from `{dep}` would fail to resolve in production."
             );
         }
     });
