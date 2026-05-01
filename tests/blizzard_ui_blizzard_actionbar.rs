@@ -78,3 +78,6 @@ mod behavior_spell_flyout_glyph;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_assisted_combat_highlight.rs"]
 mod behavior_assisted_combat_highlight;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_action_highlight.rs"]
+mod behavior_action_highlight;
