@@ -72,3 +72,6 @@ mod behavior_status_bar_swap;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_spell_flyout.rs"]
 mod behavior_spell_flyout;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_spell_flyout_glyph.rs"]
+mod behavior_spell_flyout_glyph;
