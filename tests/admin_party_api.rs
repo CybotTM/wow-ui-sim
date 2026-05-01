@@ -188,6 +188,28 @@ fn test_group_queries_switch_between_solo_and_grouped_states() {
 }
 
 #[test]
+fn set_party_size_defaults_to_player_leader() {
+    let env = env();
+    let (player_leads, party1_leads): (bool, bool) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(4)
+            return UnitIsGroupLeader("player", LE_PARTY_CATEGORY_HOME),
+                   UnitIsGroupLeader("party1", LE_PARTY_CATEGORY_HOME)
+            "#,
+        )
+        .unwrap();
+    assert!(
+        player_leads,
+        "party-size fixtures should let the local player queue as party leader"
+    );
+    assert!(
+        !party1_leads,
+        "party1 should only lead after explicit A_Admin.SetPartyLeader(1)"
+    );
+}
+
+#[test]
 fn test_set_party_leader_to_party_member_updates_group_leader_queries() {
     let env = env();
     let (player_leads, party1_leads, party2_leads): (bool, bool, bool) = env

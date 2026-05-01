@@ -20,13 +20,12 @@ Concrete effect:
 - manager height becomes `347`
 - forward toggle ends up at `y≈296`
 
-Fresh headless `A_Admin.SetPartySize(4)` was already fine because the admin API normalized leader to `party1`. The mismatch existed because the GUI path did not.
+Fresh headless `A_Admin.SetPartySize(4)` now leaves the local player as leader so Group Finder queue buttons can enable by default. Reproducing the non-leader retail reference state requires an explicit `A_Admin.SetPartyLeader(1)`.
 
 Fix:
 
-- `resize_party_state()` now normalizes leader the same way as `A_Admin.SetPartySize()`:
-  - `Some(0)` when party size > 0 (`party1` leads)
-  - `None` when party size = 0
+- Non-leader reproduction fixtures should call `A_Admin.SetPartyLeader(1)` after `A_Admin.SetPartySize(4)`.
+- `resize_party_state()` now normalizes leader the same way as `A_Admin.SetPartySize()`: `None`, meaning the local player leads by default.
 
 ## Problem Statement
 
@@ -69,7 +68,7 @@ No scale multiplier is compounding anywhere in the chain, so the oversize is **n
 
 | Fixture | Quad rect | Size | Notes |
 |---|---|---|---|
-| `SetPartySize(4)` only (no leader) | `(-1, 260) → (15, 295)` | 16×35 | isLeader=false, `usedY≈255`, manager `222x275` |
+| `SetPartySize(4) + SetPartyLeader(1)` | `(-1, 260) → (15, 295)` | 16×35 | isLeader=false, `usedY≈255`, manager `222x275` |
 | `SetPartySize(4) + SetPartyLeader(0)` (screenshot) | `(-1, 296) → (15, 331)` | 16×35 | isLeader=true, `usedY=327`, manager `222x347` |
 
 Same `16x35` size in both (size never stretches). The top moves from `y=260` to `y=296` because the manager grew from `275` to `347` tall and the toggle is anchored `RIGHT x=-7 y=0` (vertical center of manager).
@@ -239,7 +238,7 @@ Ruled out by direct evidence:
 
 The "too tall" visual is an **upstream-state bug, not a render/layout bug**.
 
-`SimState.party_leader_index` defaults to `None` in `src/lua_api/state.rs:180`, and `src/lua_api/globals/group_queries.rs:172` documents that `party_leader_index = None` means the player is the leader. So any seeded party (including the brief's `A_Admin.SetPartySize(4)` fixture, even without explicit `SetPartyLeader`) makes `UnitIsGroupLeader("player") == true`.
+`SimState.party_leader_index` defaults to `None` in `src/lua_api/state.rs:180`, and `src/lua_api/globals/group_queries.rs:172` documents that `party_leader_index = None` means the player is the leader. So any player-led party fixture, including `A_Admin.SetPartySize(4)` without an explicit `SetPartyLeader`, makes `UnitIsGroupLeader("player") == true`.
 
 `CompactRaidFrameManager_UpdateOptionsFlowContainer()` is gated on that flag in two places. The leader branch is **72 px taller** than the non-leader branch:
 
@@ -266,16 +265,16 @@ startingPrimary      48
 
 Non-leader trace produces `usedY = 255`, `SetHeight = 275` — matching the no-seed baseline probe that gave `manager H=275` and `toggle top y=260`.
 
-So both states behave correctly per Blizzard's source. The reason the branch "looks too tall compared with retail" is that the simulator's default seeded party makes the player the leader, while the retail reference screenshot is almost certainly a non-leader state.
+So both states behave correctly per Blizzard's source. The reason the branch "looks too tall compared with retail" is that the fixture made the player the leader, while the retail reference screenshot is almost certainly a non-leader state.
 
 ## Fix Direction
 
 Because the bug is upstream state, the fix belongs upstream — not in the render path, not in a flow-container workaround, not in the vendored Blizzard source.
 
-Candidate state-side fixes, ordered by scope:
+State-side fixture choices, ordered by scope:
 
 1. **Fixture-only** (narrowest): change the brief's reproduction fixture to explicitly pass leadership to a member (e.g. `A_Admin.SetPartyLeader(1)`) so the probed state matches the retail reference. Keeps the sim default as-is.
-2. **Sim default** (broader): change `SimState::party_leader_index`'s default from `None` (player-is-leader) to `Some(1)` (a member-is-leader) for seeded parties that weren't created by the player. This makes the "just dropped into a 4-man party" default match the more common retail scenario. Existing admin commands (`A_Admin.SetPartyLeader`) still give full control.
+2. **Sim default** (rejected for now): changing `A_Admin.SetPartySize` or GUI party-size changes to a non-player leader makes ordinary party queue buttons show `JOIN_AS_PARTY` while disabled, because Blizzard only empowers the local party leader to queue a non-LFG party.
 3. **Semantics** (broadest): introduce a distinction between "player solo" and "player in a seeded party" at the `SimState` level, so the leader default depends on how the party was seeded instead of falling out of `None`.
 
 Whichever is chosen, the render/layout pipeline needs no change: it correctly paints the logical rect, and the logical rect correctly reflects the flow math for the seeded state.

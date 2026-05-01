@@ -617,7 +617,7 @@ fn set_party_size(state: &mut LuaState) -> LuaResult<u32> {
         }
         st.party_members.truncate(size);
         st.party_group_active = size > 0;
-        let next_leader = if size > 0 { Some(0) } else { None };
+        let next_leader = None;
         let leader_changed = st.party_leader_index != next_leader;
         st.party_leader_index = next_leader;
         size_changed || leader_changed

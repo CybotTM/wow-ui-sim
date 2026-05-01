@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-01] update | LFD Join as Party leadership gating
+
+Updated `investigations/lfd-dungeon-list-empty.md` after `JOIN_AS_PARTY` was still greyed out with valid role and dungeon selection state. Documented that party-size fixtures had made `party1` the leader, causing Blizzard's `LFD_IsEmpowered()` to reject the local player; `A_Admin.SetPartySize` and GUI party-size changes now default to local-player leadership.
+
 ## [2026-05-01] update | Adventure Journal LFD dungeon handoff
 
 Updated `investigations/lfd-dungeon-list-empty.md` after the Adventure Journal dungeon click path exposed another LFD id/state gap. Documented that `AJ_DUNGEON_ACTION` depends on `DungeonAppearsInRandomLFD` and on Encounter Journal `linkDungeonID` values using the LFD id family, not Encounter Journal instance ids.

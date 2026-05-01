@@ -8,6 +8,8 @@ The Dungeons & Raids panel showed an empty dungeon list when "Specific Dungeons"
 
 Follow-up symptom: the list later populated, but the dungeon checkboxes were not preselected and the queue button stayed disabled. Blizzard's `LFDQueueFrameFindGroupButton_Update()` disables the button when no tank/healer/DPS role is selected, and the simulator still had `GetLFGRoles` as a one-value `false` stub.
 
+Second follow-up symptom: the button text was correctly `JOIN_AS_PARTY`, but the button was still greyed out. Role and dungeon selection state were already valid; the simulator's party-size fixture had made `party1` the leader, so Blizzard's `LFD_IsEmpowered()` rejected the local player as not empowered to queue an ordinary party.
+
 ## Root Causes
 
 ### 1. Missing list-init globals
@@ -38,6 +40,10 @@ All three globals were unregistered in the simulator, so the first call (`GetLFD
 
 `GetLFDChoiceEnabledState()` returned an empty table, so Blizzard's row initializer treated every specific dungeon as unchecked. `GetLFGRoles()` was also a false stub and `SetLFGRoles()` was a no-op, so role checkbox state could not be initialized or persisted. The LFD queue button is role-gated before queue state checks, so this left "Join as Party" greyed out even with visible dungeons.
 
+### 6. Party-size fixture selected a non-player leader
+
+`A_Admin.SetPartySize(n)` and the GUI party-size control normalized `party_leader_index` to `Some(0)`, meaning `party1` was the leader. Blizzard's `LFD_IsEmpowered()` returns true for solo players, party leaders, or LFG-restricted dungeon-finder groups. A plain simulated party is not LFG-restricted, so the local player must be party leader for `JOIN_AS_PARTY` to be enabled.
+
 ### 6. Adventure Journal dungeon action used the wrong id family
 
 Clicking a dungeon entry in the Adventure Journal fires `AJ_DUNGEON_ACTION`, and `LFDFrame_OnEvent` passes that id through `DungeonAppearsInRandomLFD()` before showing the Group Finder panel. The simulator had no `DungeonAppearsInRandomLFD` global, and `C_EncounterJournal.GetInstanceInfo`/`EJ_GetInstanceInfo` returned the Encounter Journal instance id as `linkDungeonID` for dungeon rows. That id family does not match the seeded LFD dungeon ids consumed by `GetLFGDungeonInfo`.
@@ -65,6 +71,11 @@ Adventure Journal follow-up:
 - **`battlefield_lfg_probes.rs`**: added state-backed `DungeonAppearsInRandomLFD`, returning `LE_LFG_CATEGORY_LFD` only for positive seeded LFD dungeon ids.
 - **`encounter_journal.rs`**: maps current seeded dungeon instance names to their LFD ids for the `linkDungeonID` return.
 - **`tests/lfd_globals.rs` / `tests/c_encounter_journal_probes.rs`**: cover the new LFD membership global and the Encounter Journal → LFD id bridge.
+
+Party leadership follow-up:
+
+- **`admin.rs` / `iced_app/app.rs`**: party-size changes now leave `party_leader_index = None`, the simulator's existing representation for "player leads".
+- **`tests/admin_party_api.rs` / `iced_app::update` tests**: cover both `A_Admin.SetPartySize(4)` and GUI party-size changes defaulting to local-player leadership. Non-leader fixtures should call `A_Admin.SetPartyLeader(1)` explicitly.
 
 ## Why direct LFGLockList assignment over event firing
 
