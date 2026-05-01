@@ -267,6 +267,218 @@ fn main_action_bar_publishes_action_button_globals_and_button_containers() {
     });
 }
 
+/// PLAN-named multi-bars and their XML declaration sites in
+/// `Shared/MultiActionBars.xml`. All seven inherit
+/// `EditModeActionBarTemplate`, all have `parent="UIParent"`, all have
+/// `frameStrata="MEDIUM"`, all are `hidden="true"`, all declare
+/// `numButtons=12`. They differ in button template
+/// (`MultiBar<N>ButtonTemplate`), command-name prefix
+/// (`MULTIACTIONBAR<N>`), orientation (BottomLeft/BottomRight/5/6/7
+/// horizontal, Left/Right vertical), and EditMode system index.
+///
+/// Unlike `MainActionBar` (which special-cases its button names to
+/// `ActionButton<N>` per `Shared/ActionBar.lua:19-20`), the multi-bars
+/// fall through to the generic suffix branch at
+/// `Shared/ActionBar.lua:28` (`buttonName = actionBarName..\"Button\"..i`).
+/// So `MultiBarBottomLeft` publishes `MultiBarBottomLeftButton1`..`12`,
+/// `MultiBar5` publishes `MultiBar5Button1`..`12`, etc. — each bar's
+/// button globals share the bar's own name as a prefix.
+const PLAN_NAMED_MULTI_BARS: &[(&str, &str)] = &[
+    ("MultiBarBottomLeft", "Shared/MultiActionBars.xml:45"),
+    ("MultiBarBottomRight", "Shared/MultiActionBars.xml:75"),
+    ("MultiBarLeft", "Shared/MultiActionBars.xml:104"),
+    ("MultiBarRight", "Shared/MultiActionBars.xml:133"),
+    ("MultiBar5", "Shared/MultiActionBars.xml:162"),
+    ("MultiBar6", "Shared/MultiActionBars.xml:191"),
+    ("MultiBar7", "Shared/MultiActionBars.xml:220"),
+];
+
+/// Pin each of the seven multi-bars: exists as a table global, parent
+/// is `UIParent`, and `actionButtons` array holds exactly 12
+/// `CheckButton`s. The PLAN line covers all seven bars in one entry —
+/// a single test loops them so a regression on any one bar fails fast
+/// with the bar name in the assertion message.
+///
+/// Why parent-chain is pinned here too: every multi-bar's XML declares
+/// `parent="UIParent"` literally, but `EditMode` reparents bars when
+/// the player drags them onto attached frames (e.g.
+/// `MainActionBarMixin:AttachToFrame` at
+/// `Shared/MainActionBar.lua:38-46` does `self:SetParent(frame)` on
+/// MainActionBar; while no equivalent exists for the multi-bars in
+/// the current codebase, the EditMode test fixtures could exercise
+/// reparenting). At rest / immediately after addon load, every
+/// multi-bar must be parented to `UIParent` so `SetUIScale` and the
+/// `UIParent.Hide()` cascade reach them. A different parent name
+/// here flags a regression in either the XML declaration or the
+/// EditMode reparenting logic firing pre-load.
+#[test]
+fn multi_bars_publish_expected_panel_identity() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for (bar_name, xml_site) in PLAN_NAMED_MULTI_BARS {
+            let frame_type: String = env
+                .eval(&format!("return type(_G[{bar_name:?}])"))
+                .expect("multi-bar global probe must run cleanly");
+
+            assert_eq!(
+                frame_type, "table",
+                "Expected `_G[{bar_name:?}]` to be a table after `{ROOT}` loads, got \
+                 `{frame_type}`. The XML at `{xml_site}` declares this frame with \
+                 `name=\"{bar_name}\"` and `parent=\"UIParent\"`, so the named-frame \
+                 registration runs at XML-load time. A nil reading means either the XML \
+                 did not execute (a regression in the load pipeline) or the frame failed \
+                 to register its name. Every downstream consumer that names `{bar_name}` \
+                 directly would surface a nil-table-method error — including the \
+                 `MultiBar<N>_IsVisible()` trampolines (lua:140-164 in MultiActionBars.lua) \
+                 that call `_G[barName]:IsShown()` indirectly via the file-local \
+                 `IsMultibarVisible(index)` helper, EditMode's bar-list builder that \
+                 reaches into `MultiBarBottomLeft`/`Right`/`Left`/`Right` directly, and \
+                 the per-page driver in `MultiActionBar_GetBarForPage` (lua:131) that \
+                 returns `bars[page].bar` from the file-local `GetMultiActionBars()` \
+                 table at lua:58-71."
+            );
+
+            let parent_name: String = env
+                .eval(&format!("return _G[{bar_name:?}]:GetParent():GetName()"))
+                .expect("multi-bar GetParent():GetName() must run cleanly");
+
+            assert_eq!(
+                parent_name, "UIParent",
+                "Expected `_G[{bar_name:?}]:GetParent():GetName()` to return `UIParent`, \
+                 got `{parent_name}`. The XML at `{xml_site}` declares \
+                 `parent=\"UIParent\"` literally — `UIParent` is the standard scaled-UI \
+                 root that `SetUIScale` and the resolution-aware reparenting drive \
+                 against. A different parent name means either the XML changed or \
+                 EditMode's reparenting (analogous to `MainActionBarMixin:AttachToFrame` \
+                 at `Shared/MainActionBar.lua:38-46`) fired pre-load and stranded the bar \
+                 outside the UIParent scaling chain — `UIParent.Hide()` cascading and \
+                 user-set UI scaling would both miss the bar."
+            );
+
+            let action_buttons_count: i64 = env
+                .eval(&format!("return #_G[{bar_name:?}].actionButtons"))
+                .expect("multi-bar #actionButtons must run cleanly");
+
+            let expected_count = NUM_BUTTONS as i64;
+            assert_eq!(
+                action_buttons_count, expected_count,
+                "Expected `#_G[{bar_name:?}].actionButtons` to be `{expected_count}`, got \
+                 `{action_buttons_count}`. The XML at `{xml_site}` declares \
+                 `<KeyValue key=\"numButtons\" value=\"12\" type=\"number\"/>`, which \
+                 `ActionBarMixin:ActionBar_OnLoad` at `{ACTION_BAR_LUA_SITE}` reads and \
+                 uses to drive a `for i=1, self.numButtons do ... \
+                 table.insert(self.actionButtons, actionButton) end` loop (lua:13/41). \
+                 The `actionButtons` array is the internal contract every consumer of \
+                 the bar reads — `UpdateShownButtons()` walks it (lua:200-209), \
+                 `SetShowGrid()` walks it (lua:144-171), and `MultiActionButtonDown` / \
+                 `MultiActionButtonUp` (Shared/MultiActionBars.lua:35/44) reach into \
+                 `_G[barName].actionButtons[id]` for keybind dispatch. A short array \
+                 means either the OnLoad chunk failed mid-loop (fewer than 12 buttons \
+                 created) or Blizzard moved away from the file-local table pattern."
+            );
+        }
+    });
+}
+
+/// Pin the per-bar button publishing for all seven multi-bars: each
+/// slot N has `_G[<BarName>Button<N>]` as a CheckButton with the
+/// parent chain `<BarName>Button<N>` → `<BarName>ButtonContainer<N>`
+/// → `<BarName>`. 7 bars × 12 slots × 3 assertions = 252 checks per
+/// run, but the failure is bounded to the first slot/bar pair that
+/// regresses (the loop `assert_eq!` exits the test on first
+/// mismatch).
+///
+/// This is the inverse of the MainActionBar absence test: the
+/// multi-bars fall through to the generic suffix branch at
+/// `Shared/ActionBar.lua:28` (`buttonName = actionBarName..\"Button\"..i`)
+/// so the PLAN-meant naming pattern (`<BarName>Button<N>`) IS the
+/// actual published surface. A nil reading on any of the buttons would
+/// prove either (a) a regression added a special case for one of these
+/// bars that mirrors the MainActionBar branch (which would silently
+/// rename the buttons and break every Bindings.xml entry that names
+/// `MultiBarBottomLeftButton1` and friends), OR (b) the OnLoad loop
+/// at `Shared/ActionBar.lua:13-44` failed before reaching slot N for
+/// the bar in question.
+#[test]
+fn multi_bars_publish_their_button_globals_and_button_containers() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for (bar_name, xml_site) in PLAN_NAMED_MULTI_BARS {
+            for slot in 1..=NUM_BUTTONS {
+                let button_name = format!("{bar_name}Button{slot}");
+                let container_name = format!("{bar_name}ButtonContainer{slot}");
+
+                let button_object_type: String = env
+                    .eval(&format!(
+                        "return type(_G[{button_name:?}]) == \"table\" and \
+                                _G[{button_name:?}]:GetObjectType() or \
+                                type(_G[{button_name:?}])"
+                    ))
+                    .expect("multi-bar button object-type probe must run cleanly");
+
+                assert_eq!(
+                    button_object_type, "CheckButton",
+                    "Expected `_G[{button_name:?}]:GetObjectType()` to return `CheckButton` \
+                     after `{ROOT}` loads, got `{button_object_type}`. The XML at \
+                     `{xml_site}` declares `<KeyValue key=\"buttonTemplate\" \
+                     value=\"...\"/>` referencing one of the `MultiBar<N>ButtonTemplate` \
+                     CheckButton templates at `Shared/MultiActionBars.xml:3-43`, all of \
+                     which inherit `ActionBarButtonTemplate` (a CheckButton). \
+                     `ActionBarMixin:ActionBar_OnLoad` at `{ACTION_BAR_LUA_SITE}` line 28 \
+                     falls through to the generic-suffix branch for the multi-bars (the \
+                     special-case branch at lua:19-26 only matches MainActionBar, \
+                     StanceBar, PetActionBar, PossessActionBar — none of the multi-bars), \
+                     so `buttonName = actionBarName..\"Button\"..i` produces \
+                     `{button_name}`. A non-CheckButton or nil reading means either (a) \
+                     a regression added a `self == {bar_name}` special-case branch at \
+                     lua:19-26 that renamed this bar's buttons (silently breaking every \
+                     Bindings.xml entry that names `{button_name}` directly), OR (b) \
+                     the OnLoad loop failed before reaching slot {slot}, OR (c) the \
+                     `buttonTemplate` KeyValue was changed to a different widget kind."
+                );
+
+                let button_parent_name: String = env
+                    .eval(&format!("return _G[{button_name:?}]:GetParent():GetName()"))
+                    .expect("multi-bar button GetParent():GetName() must run cleanly");
+
+                assert_eq!(
+                    button_parent_name, container_name,
+                    "Expected `_G[{button_name:?}]:GetParent():GetName()` to return \
+                     `{container_name}`, got `{button_parent_name}`. \
+                     `ActionBarMixin:ActionBar_OnLoad` at `{ACTION_BAR_LUA_SITE}` line 14 \
+                     creates each button's container as `CreateFrame(\"Frame\", \
+                     actionBarName..\"ButtonContainer\"..i, self, \
+                     \"ActionBarButtonContainerTemplate\", i)`, then line 31 creates the \
+                     button as `CreateFrame(\"CheckButton\", buttonName, buttonContainer, \
+                     self.buttonTemplate, i)` — so the button's parent IS the container, \
+                     NOT the bar directly. A different parent name means either the \
+                     wrapping container was elided (button parented directly onto \
+                     `{bar_name}`, which would break the `buttonContainer:SetSize` \
+                     sizing layer at lua:43) or the container's name was changed."
+                );
+
+                let container_parent_name: String = env
+                    .eval(&format!(
+                        "return _G[{container_name:?}]:GetParent():GetName()"
+                    ))
+                    .expect("multi-bar container GetParent():GetName() must run cleanly");
+
+                assert_eq!(
+                    container_parent_name, *bar_name,
+                    "Expected `_G[{container_name:?}]:GetParent():GetName()` to return \
+                     `{bar_name}`, got `{container_parent_name}`. \
+                     `ActionBarMixin:ActionBar_OnLoad` at `{ACTION_BAR_LUA_SITE}` line 14 \
+                     creates each button container with `self` as the parent (where \
+                     `self` is `{bar_name}` for this bar's invocation of the OnLoad), so \
+                     the container's parent must be `{bar_name}`. A different parent name \
+                     means the OnLoad ran on a different frame (e.g. the `for i=1, \
+                     self.numButtons` loop self-reference broke) or the container was \
+                     reparented post-load — neither has a consumer in Blizzard's own \
+                     code so either would be a simulator-side regression."
+                );
+            }
+        }
+    });
+}
+
 #[test]
 fn main_action_bar_does_not_publish_plan_named_button_globals() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
