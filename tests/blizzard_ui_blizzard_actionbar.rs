@@ -57,3 +57,6 @@ mod behavior_reputation_bar_update;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_honor_bar_update.rs"]
 mod behavior_honor_bar_update;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_house_favor_bar.rs"]
+mod behavior_house_favor_bar;
