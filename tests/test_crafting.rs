@@ -2,7 +2,7 @@
 //!
 //! Uses recipe 100001 (Khaz Algar Helm) from BLACKSMITHING_RECIPES:
 //!   reagents: item_id=210934 qty=12, item_id=210937 qty=2
-//!   output_item_id: 211993
+//!   output_item_id: 211993 (Entombed Seraph's Casque)
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -163,7 +163,7 @@ fn craft_recipe_consumes_reagents_and_adds_output() {
 }
 
 #[test]
-fn craft_recipe_starts_player_cast_for_cast_bar() {
+fn craft_recipe_starts_player_cast_with_output_item_name_for_cast_bar() {
     let env = env();
     env.exec(
         r#"
@@ -199,7 +199,7 @@ fn craft_recipe_starts_player_cast_for_cast_bar() {
         )
         .unwrap();
 
-    assert_eq!(result, "Khaz Algar Helm:100001");
+    assert_eq!(result, "Entombed Seraph's Casque:100001");
 }
 
 #[test]

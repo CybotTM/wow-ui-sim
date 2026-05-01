@@ -5,6 +5,7 @@
 //! `C_TradeSkillUI.IsRecipeCraftable` and `C_TradeSkillUI.CraftRecipe`
 //! dispatchers in `professions.rs`.
 
+use crate::items;
 use crate::lua_api::game_data::CastingState;
 use crate::lua_api::globals::profession_data;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
@@ -72,7 +73,7 @@ pub(super) fn craft_recipe(state: &mut LuaState, recipe_id: i32, count: i32) -> 
 
 struct CraftPlan {
     recipe_id: i32,
-    recipe_name: &'static str,
+    cast_name: String,
     reagent_deltas: Vec<(u32, i32)>,
     output_item_id: u32,
     output_count: i32,
@@ -86,7 +87,7 @@ fn craft_plan(state: &mut LuaState, recipe_id: i32, count: i32) -> Option<CraftP
     let recipe = profession_data::get_recipe(recipe_id)?;
     Some(CraftPlan {
         recipe_id: recipe.recipe_id,
-        recipe_name: recipe.name,
+        cast_name: crafted_item_name(recipe).to_string(),
         reagent_deltas: reagent_deltas(recipe, count),
         output_item_id: recipe.output_item_id,
         output_count: count,
@@ -102,7 +103,7 @@ fn start_crafting_cast(state: &mut LuaState, plan: &CraftPlan) {
     sim.next_cast_id = sim.next_cast_id.wrapping_add(1);
     sim.casting = Some(CastingState {
         spell_id: plan.recipe_id as u32,
-        spell_name: plan.recipe_name.to_string(),
+        spell_name: plan.cast_name.clone(),
         icon_path: DEFAULT_CRAFTING_ICON.to_string(),
         start_time: now,
         end_time: now + CRAFTING_CAST_DURATION_SECONDS,
@@ -113,6 +114,12 @@ fn start_crafting_cast(state: &mut LuaState, plan: &CraftPlan) {
     let player = create_string(state, "player");
     let spell_id = Val::Num(plan.recipe_id as f64);
     fire_named_event_state(state, "UNIT_SPELLCAST_START", &[player, spell_id]);
+}
+
+fn crafted_item_name(recipe: &profession_data::RecipeEntry) -> &'static str {
+    items::get_item(recipe.output_item_id)
+        .map(|item| item.name)
+        .unwrap_or(recipe.name)
 }
 
 fn reagent_deltas(recipe: &profession_data::RecipeEntry, count: i32) -> Vec<(u32, i32)> {
