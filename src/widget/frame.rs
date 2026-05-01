@@ -35,6 +35,7 @@ pub struct Frame {
     pub anchors: Vec<Anchor>,
     pub visible: bool,
     pub show_hide_depth: u16, // reentry depth for Show/Hide mutual recursion limit
+    pub click_depth: u16,     // reentry depth for programmatic Button:Click recursion limit
     pub collapses_layout: bool,
     /// Events this frame is registered to receive.
     pub registered_events: HashSet<String>,

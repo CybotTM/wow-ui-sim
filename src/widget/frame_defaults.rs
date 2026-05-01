@@ -21,6 +21,7 @@ macro_rules! frame_defaults {
             anchors: Vec::new(),
             visible: true,
             show_hide_depth: 0,
+            click_depth: 0,
             collapses_layout: false,
             registered_events: HashSet::new(),
             frame_level: 0,

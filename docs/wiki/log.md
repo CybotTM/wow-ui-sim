@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-01] update | Adventure Journal dungeon click stack overflow
+
+Updated `investigations/lfd-dungeon-list-empty.md` after reproducing the stack overflow from `EncounterJournal_DisplayInstance(1271)`. Documented the split between modern `C_EncounterJournal.GetInstanceInfo` slot 9 (`linkDungeonID`) and legacy `EJ_GetInstanceInfo` slot 9 (`shouldDisplayDifficulty`) plus the same-button `Button:Click()` reentry guard that prevents the programmatic overview-tab click loop from aborting the process.
+
 ## [2026-05-01] update | Adventure Journal LFD dungeon handoff
 
 Updated `investigations/lfd-dungeon-list-empty.md` after the Adventure Journal dungeon click path exposed another LFD id/state gap. Documented that `AJ_DUNGEON_ACTION` depends on `DungeonAppearsInRandomLFD` and on Encounter Journal `linkDungeonID` values using the LFD id family, not Encounter Journal instance ids.

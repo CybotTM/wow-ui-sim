@@ -66,6 +66,12 @@ Adventure Journal follow-up:
 - **`encounter_journal.rs`**: maps current seeded dungeon instance names to their LFD ids for the `linkDungeonID` return.
 - **`tests/lfd_globals.rs` / `tests/c_encounter_journal_probes.rs`**: cover the new LFD membership global and the Encounter Journal → LFD id bridge.
 
+Stack-overflow follow-up:
+
+- **`encounter_journal.rs`**: split the modern `C_EncounterJournal.GetInstanceInfo` shape from legacy `EJ_GetInstanceInfo`. The modern C API keeps `linkDungeonID` in return slot 9, while Blizzard's legacy Encounter Journal Lua uses slot 9 as `shouldDisplayDifficulty` and slot 12 as `isRaid`.
+- **`buttons.rs` / `frame.rs`**: added a same-button `Button:Click()` reentry guard. The Adventure Journal dungeon display path can execute a programmatic tab click while another handler is still on the stack; the guard prevents that from becoming a native stack overflow.
+- **`tests/panel_harness_runtime.rs`**: covers both direct dungeon display (`EncounterJournal_DisplayInstance(1271)`) and the `AJ_DUNGEON_ACTION` LFD handoff.
+
 ## Why direct LFGLockList assignment over event firing
 
 Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestRFChoice` → `RaidFinderFrame_UpdateAvailability` → `GetNumRFDungeons` → `ScenarioFinderFrame_UpdateAvailability` → `GetNumRandomScenarios`. None of those exist in the sim. We could stub all of them, but the goal is just to populate `LFGLockList` for the LFD panel; the event broadcast is wider than needed.
@@ -75,8 +81,10 @@ Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestR
 - `Interface/BlizzardUI/Blizzard_GroupFinder/Shared/LFGFrame.lua` — `LFGDungeonList_Setup` (line 1080), `LFG_LOCK_INFO_RECEIVED` handler (line 173)
 - `Interface/BlizzardUI/Blizzard_GroupFinder/Mainline/LFDFrame.lua` — `UpdateLFDDungeonList` (line 686), `LFG_UPDATE_RANDOM_INFO` handler (line 80), `AJ_DUNGEON_ACTION` handler (line 106)
 - `Interface/BlizzardUI/Blizzard_GroupFinder/Mainline/LFDFrame.xml` — Specific frame `OnShow="LFDQueueFrame_Update"` (line 273)
-- `Interface/BlizzardUI/Blizzard_EncounterJournal/Mainline/Blizzard_EncounterJournal.lua` — Adventure Journal suggestion click calls `C_AdventureJournal.ActivateEntry`
+- `Interface/BlizzardUI/Blizzard_EncounterJournal/Mainline/Blizzard_EncounterJournal.lua` — Adventure Journal suggestion click calls `C_AdventureJournal.ActivateEntry`; dungeon display uses `EJ_GetInstanceInfo` legacy slots and programmatic tab `:Click()`
 - `src/lua_api/globals/battlefield_lfg_probes.rs` — simulator LFD globals and selection/role state registration
+- `src/lua_api/globals/missing_surface/encounter_journal.rs` — simulator Encounter Journal C API and legacy EJ tuple implementations
+- `src/lua_api/frame/methods/button_anchor_hierarchy/buttons.rs` — simulator `Button:Click()` dispatch
 - `tests/lfd_globals.rs` — regression coverage for LFD role and checkbox state
 
 ## See Also

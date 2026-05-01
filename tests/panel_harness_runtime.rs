@@ -545,6 +545,67 @@ fn encounter_toggle_loads_and_shows_frame() {
 }
 
 #[test]
+fn adventure_journal_dungeon_action_opens_lfd_without_recursing() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+    load_blizzard_addon(
+        &env,
+        "Blizzard_GroupFinder",
+        "Blizzard_GroupFinder_Mainline.toc",
+    );
+
+    env.fire_event_with_args("AJ_DUNGEON_ACTION", &[rilua::Val::Num(1201.0)])
+        .expect("AJ_DUNGEON_ACTION should not overflow or error");
+
+    let (shown, selected_lfd, dungeon_type): (bool, bool, i32) = env
+        .eval(
+            r#"
+            return PVEFrame and PVEFrame:IsShown() or false,
+                   GroupFinderFrame and GroupFinderFrame.selection == LFDParentFrame or false,
+                   type(LFDQueueFrame.type) == "number" and LFDQueueFrame.type or 0
+            "#,
+        )
+        .expect("LFD handoff probe should return");
+
+    assert!(shown, "AJ_DUNGEON_ACTION should show the PVE frame");
+    assert!(
+        selected_lfd,
+        "AJ_DUNGEON_ACTION should select the LFD parent frame"
+    );
+    assert_eq!(dungeon_type, 1201, "linked dungeon should become LFD type");
+}
+
+#[test]
+fn encounter_journal_display_dungeon_instance_does_not_recurse() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+
+    env.exec("ToggleEncounterJournal()")
+        .expect("ToggleEncounterJournal should execute");
+    env.exec("EncounterJournal_DisplayInstance(1271)")
+        .expect("displaying a linked dungeon instance should not overflow or error");
+
+    let (instance_id, encounter_shown): (i32, bool) = env
+        .eval(
+            r#"
+            return EncounterJournal.instanceID or 0,
+                   EncounterJournal.encounter and EncounterJournal.encounter:IsShown() or false
+            "#,
+        )
+        .expect("display instance probe should return");
+
+    assert_eq!(instance_id, 1271);
+    assert!(
+        encounter_shown,
+        "dungeon display should show the encounter panel"
+    );
+}
+
+#[test]
 fn encounter_journal_journeys_frame_seeds_tww_major_factions() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);

@@ -129,6 +129,41 @@ fn intrinsic_dropdown_scripts_chain_with_style_template_scripts() {
     );
 }
 
+#[test]
+fn sibling_virtual_button_templates_do_not_share_onclick_scripts() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("SiblingTemplateCalls = {}").unwrap();
+    let dir = create_test_addon(
+        r#"<Ui>
+            <Button name="FirstSiblingButtonTemplate" virtual="true">
+                <Scripts>
+                    <OnClick>table.insert(SiblingTemplateCalls, "first")</OnClick>
+                </Scripts>
+            </Button>
+            <Button name="SecondSiblingButtonTemplate" virtual="true">
+                <Scripts>
+                    <OnClick>table.insert(SiblingTemplateCalls, "second")</OnClick>
+                </Scripts>
+            </Button>
+            <Button name="ConcreteSiblingButton" parent="UIParent" inherits="SecondSiblingButtonTemplate"/>
+        </Ui>"#,
+        "TestSiblingButtonTemplateScripts",
+    );
+    let toc_path = dir.path().join("TestSiblingButtonTemplateScripts.toc");
+
+    load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
+    env.exec("ConcreteSiblingButton:Click()").unwrap();
+
+    let calls: String = env
+        .eval("return table.concat(SiblingTemplateCalls, ',')")
+        .unwrap();
+    assert_eq!(
+        calls, "second",
+        "a concrete frame should inherit only its named template script"
+    );
+}
+
 // ============================================================================
 // CreateFrame with XML Template Tests
 // ============================================================================
