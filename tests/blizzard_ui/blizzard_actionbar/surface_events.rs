@@ -226,3 +226,209 @@ fn action_bar_button_events_frame_registers_plan_and_source_additional_events_af
         );
     });
 }
+
+const ACTION_EVENTS_FRAME_NAME: &str = "ActionBarActionEventsFrame";
+const ACTION_EVENTS_FRAME_XML_SITE: &str = "Shared/ActionButtonComponentTemplate.xml:96";
+const ACTION_EVENTS_ONLOAD_LUA_SITE: &str = "Shared/ActionButton.lua:245";
+
+/// Every event the source registers on `ActionBarActionEventsFrame`'s
+/// OnLoad at `Shared/ActionButton.lua:245-288`. The list is structured
+/// to mirror the source's four ordered blocks so a regression deleting
+/// any sub-block produces a localised failure rather than a single
+/// noisy panic.
+///
+/// **Block 1 — pre-spellcast plain events (14, lua:248-261).** Note:
+/// `ACTIONBAR_UPDATE_USABLE` (lua:247) is COMMENTED OUT in source with
+/// the inline note "replaced with ACTION_USABLE_CHANGED" — it is NOT
+/// registered, so it does NOT appear here. (Pinning a commented-out
+/// event would prove a parser stripped comments and registered the
+/// line by mistake.) `UNIT_SPELLCAST_SENT` (lua:261) is registered as
+/// a PLAIN event here, NOT a unit event — the IsSpellcastEvent helper
+/// at lua:291-308 still classifies it as a spellcast for OnEvent
+/// dispatch routing, but the registration itself is plain.
+///
+/// **Block 2 — spellcast unit events (11, lua:262-272).** All
+/// registered via `RegisterUnitEvent(event, "player")`. The
+/// IsSpellcastEvent helper enumerates 12 events as "spellcast" for
+/// dispatch — 11 of these unit-registered ones plus the plain
+/// `UNIT_SPELLCAST_SENT` from Block 1.
+///
+/// **Block 3 — post-spellcast plain events (6, lua:274-279).** Plain
+/// `RegisterEvent` calls separated from Block 1 by the spellcast
+/// block; the source orders them this way to keep the spellcast set
+/// visually grouped.
+///
+/// **Block 4 — loss-of-control unit + spell-icon plain (3, lua:280-282).**
+/// Two `RegisterUnitEvent("player")` for `LOSS_OF_CONTROL_*`, then one
+/// trailing plain `RegisterEvent("SPELL_UPDATE_ICON")`.
+///
+/// Total: 14 + 11 + 6 + 3 = 34 events. PLAN says "25+" — a deliberate
+/// loose lower bound. The actual count of 34 is the contract; pinning
+/// it tightly catches both directions of drift.
+const ACTION_EVENTS_REGISTERED: &[&str] = &[
+    // Block 1 — pre-spellcast plain events (lua:248-261)
+    "SPELL_UPDATE_CHARGES",
+    "UPDATE_INVENTORY_ALERTS",
+    "TRADE_SKILL_SHOW",
+    "TRADE_SKILL_CLOSE",
+    "ARCHAEOLOGY_CLOSED",
+    "PLAYER_ENTER_COMBAT",
+    "PLAYER_LEAVE_COMBAT",
+    "START_AUTOREPEAT_SPELL",
+    "STOP_AUTOREPEAT_SPELL",
+    "UNIT_ENTERED_VEHICLE",
+    "UNIT_EXITED_VEHICLE",
+    "COMPANION_UPDATE",
+    "UNIT_INVENTORY_CHANGED",
+    "UNIT_SPELLCAST_SENT",
+    // Block 2 — spellcast unit events (lua:262-272)
+    "UNIT_SPELLCAST_INTERRUPTED",
+    "UNIT_SPELLCAST_SUCCEEDED",
+    "UNIT_SPELLCAST_FAILED",
+    "UNIT_SPELLCAST_START",
+    "UNIT_SPELLCAST_STOP",
+    "UNIT_SPELLCAST_CHANNEL_START",
+    "UNIT_SPELLCAST_CHANNEL_STOP",
+    "UNIT_SPELLCAST_RETICLE_TARGET",
+    "UNIT_SPELLCAST_RETICLE_CLEAR",
+    "UNIT_SPELLCAST_EMPOWER_START",
+    "UNIT_SPELLCAST_EMPOWER_STOP",
+    // Block 3 — post-spellcast plain events (lua:274-279)
+    "LEARNED_SPELL_IN_SKILL_LINE",
+    "PET_STABLE_UPDATE",
+    "PET_STABLE_SHOW",
+    "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW",
+    "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE",
+    "UPDATE_SUMMONPETS_ACTION",
+    // Block 4 — loss-of-control unit + spell-icon plain (lua:280-282)
+    "LOSS_OF_CONTROL_ADDED",
+    "LOSS_OF_CONTROL_UPDATE",
+    "SPELL_UPDATE_ICON",
+];
+
+/// Event explicitly NOT registered (commented out in source). Pinned
+/// as a tripwire so a future "uncomment to restore" change is forced
+/// to update the spec.
+const ACTION_EVENTS_COMMENTED_OUT: &str = "ACTIONBAR_UPDATE_USABLE";
+
+/// Pin `ActionBarActionEventsFrame`'s post-OnLoad event-registration
+/// surface, the OnEvent script wiring, and the commented-out
+/// `ACTIONBAR_UPDATE_USABLE` tripwire.
+///
+/// 37 assertions split into:
+///
+/// **Frame existence (1):** `_G.ActionBarActionEventsFrame` is a
+/// table.
+///
+/// **All 34 registered events (34):** loop `ACTION_EVENTS_REGISTERED`
+/// and pin `IsEventRegistered(event) == true`.
+///
+/// **Commented-out tripwire (1):** pin `IsEventRegistered(
+/// "ACTIONBAR_UPDATE_USABLE") == false` — the comment at lua:247 says
+/// it was "replaced with ACTION_USABLE_CHANGED", and a true reading
+/// would prove a parser regression that stripped Lua comments and
+/// registered the line.
+///
+/// **OnEvent script (1):** `type(:GetScript("OnEvent")) == "function"`
+/// — XML at xml:99 wires `<OnEvent method="OnEvent"/>` against the
+/// mixin's `OnEvent` body at lua:310.
+#[test]
+fn action_bar_action_events_frame_registers_thirty_four_spell_action_events_after_onload() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let frame_type: String = env
+            .eval(&format!("return type(_G[{ACTION_EVENTS_FRAME_NAME:?}])"))
+            .expect("ActionBarActionEventsFrame global probe must run cleanly");
+
+        assert_eq!(
+            frame_type, "table",
+            "Expected `_G[{ACTION_EVENTS_FRAME_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{frame_type}`. The XML at `{ACTION_EVENTS_FRAME_XML_SITE}` \
+             declares this frame as `<Frame name=\"ActionBarActionEventsFrame\" \
+             mixin=\"ActionBarActionEventsFrameMixin\">`. A nil reading means either \
+             the XML chunk failed to execute or the frame was removed. Every \
+             event-registration assertion below depends on this frame existing."
+        );
+
+        for event in ACTION_EVENTS_REGISTERED {
+            let registered: bool = env
+                .eval(&format!(
+                    "return _G[{ACTION_EVENTS_FRAME_NAME:?}]:IsEventRegistered({event:?})"
+                ))
+                .unwrap_or_else(|err| {
+                    panic!(
+                        "`{ACTION_EVENTS_FRAME_NAME}:IsEventRegistered({event:?})` raised: {err}"
+                    )
+                });
+
+            assert!(
+                registered,
+                "Expected `{ACTION_EVENTS_FRAME_NAME}:IsEventRegistered({event:?})` to be \
+                 true after `{ROOT}` loads. The mixin OnLoad at \
+                 `{ACTION_EVENTS_ONLOAD_LUA_SITE}` registers `{event}` as part of one of \
+                 four ordered blocks (pre-spellcast plain @ lua:248-261, spellcast \
+                 unit-events @ lua:262-272, post-spellcast plain @ lua:274-279, \
+                 loss-of-control unit + spell-icon plain @ lua:280-282 — see \
+                 `ACTION_EVENTS_REGISTERED` const docstring for the full block \
+                 attribution). The XML at `{ACTION_EVENTS_FRAME_XML_SITE}` wires \
+                 `<OnLoad method=\"OnLoad\"/>`, and the simulator's `register_event` and \
+                 `register_unit_event` impls in \
+                 `src/lua_api/frame/methods/text_attribute_event/events.rs` both insert \
+                 the event into the frame's `registered_events` set, so \
+                 `IsEventRegistered` returns true regardless of the registration mode. A \
+                 false reading means either OnLoad did not run, the registration call \
+                 was removed, or the loader's method-style OnLoad dispatch regressed. \
+                 Without `{event}` registered, the OnEvent dispatch at lua:310-336 — \
+                 which fans non-spellcast events out to every per-button frame in \
+                 `self.frames` and routes spellcast events through the \
+                 `MatchesActiveButtonSpellID` filter — would silently drop `{event}` \
+                 from the per-button update path."
+            );
+        }
+
+        let commented_registered: bool = env
+            .eval(&format!(
+                "return _G[{ACTION_EVENTS_FRAME_NAME:?}]:IsEventRegistered({ACTION_EVENTS_COMMENTED_OUT:?})"
+            ))
+            .unwrap_or_else(|err| {
+                panic!(
+                    "`{ACTION_EVENTS_FRAME_NAME}:IsEventRegistered({ACTION_EVENTS_COMMENTED_OUT:?})` raised: {err}"
+                )
+            });
+
+        assert!(
+            !commented_registered,
+            "Expected `{ACTION_EVENTS_FRAME_NAME}:IsEventRegistered(\
+             {ACTION_EVENTS_COMMENTED_OUT:?})` to be false after `{ROOT}` loads. The \
+             mixin OnLoad at `{ACTION_EVENTS_ONLOAD_LUA_SITE}` line 247 contains the \
+             RegisterEvent call for `{ACTION_EVENTS_COMMENTED_OUT}` as a Lua line \
+             comment (`--self:RegisterEvent(\"ACTIONBAR_UPDATE_USABLE\");`) with the \
+             trailing note `replaced with ACTION_USABLE_CHANGED`. A true reading would \
+             prove a Lua parser regression that strips comments before tokenisation, \
+             OR Blizzard restored the registration without removing the replacement \
+             note (in which case the spec needs updating to acknowledge the dual-event \
+             registration)."
+        );
+
+        let onevent_script: String = env
+            .eval(&format!(
+                "return type(_G[{ACTION_EVENTS_FRAME_NAME:?}]:GetScript(\"OnEvent\"))"
+            ))
+            .expect("`GetScript(\"OnEvent\")` must run cleanly on ActionBarActionEventsFrame");
+
+        assert_eq!(
+            onevent_script, "function",
+            "Expected `{ACTION_EVENTS_FRAME_NAME}:GetScript(\"OnEvent\")` to be a \
+             function after `{ROOT}` loads, got `{onevent_script}`. The XML at \
+             `{ACTION_EVENTS_FRAME_XML_SITE}` line 99 wires \
+             `<OnEvent method=\"OnEvent\"/>` against the mixin's `OnEvent` body at \
+             `Shared/ActionButton.lua:310`. The body branches on event name: a \
+             `UNIT_INVENTORY_CHANGED` arm refreshes the tooltip owner if it's the \
+             player, an `IsSpellcastEvent(event)` arm fans spellcast events through a \
+             `MatchesActiveButtonSpellID` filter (lua:316-330), and the default arm \
+             fans the event out to every per-button frame in `self.frames` \
+             (lua:331-335). Without an OnEvent script wired, all 34 registered events \
+             above would fire but the dispatch would have no handler — every \
+             ActionButton would lose its action-update path."
+        );
+    });
+}
