@@ -318,6 +318,12 @@ pub fn register_intrinsic_templates() {
             "WowTrimScrollBarTemplate",
             "",
         ),
+        (
+            "UIThemeContainerFrame",
+            "Frame",
+            "",
+            "UIThemeContainerMixin",
+        ),
     ];
 
     for &(name, wtype, inherits, mixin) in intrinsics {

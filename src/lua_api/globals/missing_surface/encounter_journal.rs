@@ -52,33 +52,33 @@ struct AdventureSuggestion {
 
 const ADVENTURE_SUGGESTIONS: &[AdventureSuggestion] = &[
     AdventureSuggestion {
-        title: "The War Within Dungeons",
-        description: "Explore current-season dungeons and queue for group content.",
-        button_text: "View Dungeons",
+        title: "Dungeons",
+        description: "Queue for current dungeons.",
+        button_text: "View",
         icon_path: "Interface\\Icons\\Achievement_Dungeon_UlduarRaid_Titan_01",
     },
     AdventureSuggestion {
         title: "Nerub-ar Palace",
-        description: "Review raid bosses, abilities, and loot before entering the palace.",
-        button_text: "Open Raid",
+        description: "Study bosses and loot.",
+        button_text: "Open",
         icon_path: "Interface\\Icons\\Achievement_Raid_Nerubian",
     },
     AdventureSuggestion {
         title: "Delves",
-        description: "Find short outdoor adventures with progression and weekly rewards.",
-        button_text: "Start Delving",
+        description: "Explore short adventures.",
+        button_text: "Start",
         icon_path: "Interface\\Icons\\Inv_Archaeology_70_Scroll",
     },
     AdventureSuggestion {
-        title: "Dragonflight Raids",
-        description: "Browse previous expansion raids for appearances, mounts, and lore.",
-        button_text: "Browse Raids",
+        title: "Legacy Raids",
+        description: "Browse raid appearances.",
+        button_text: "Browse",
         icon_path: "Interface\\Icons\\Achievement_Raid_DragonSoul",
     },
     AdventureSuggestion {
         title: "Collections",
-        description: "Track appearances, pets, mounts, and toys from across Azeroth.",
-        button_text: "Open Collections",
+        description: "Track mounts and outfits.",
+        button_text: "Open",
         icon_path: "Interface\\Icons\\Achievement_General_StayClassy",
     },
 ];
