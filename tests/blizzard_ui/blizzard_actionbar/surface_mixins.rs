@@ -19,20 +19,11 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
 const ROOT: &str = "Blizzard_ActionBar";
 
-/// PLAN-named frames that have a `mixin=` attribute in their XML
-/// declaration. Each entry pairs the frame's own (xml_site, frame_name)
-/// with the (mixin_name, mixin_lua_site, methods) that XML mixin
-/// codegen at `src/loader/xml_frame_codegen.rs:155-173` expands into a
-/// `Mixin(frame, MixinName)` call at frame-OnLoad time. The shared
-/// `Mixin(object, ...)` impl at
-/// `src/lua_api/env_init/shared_bootstrap.lua` walks `pairs(mixin)` and
-/// does `object[k] = v` — so after addon load, `frame.method` IS the
-/// same function reference as `MixinName.method` and `type(frame.method)
-/// == "function"`. A nil reading on either side proves the codegen path
-/// regressed (frame missed the Mixin call) or the mixin's source file
-/// failed to execute past the `function MixinName:method(...)` line
-/// (the mixin global ended up partial). Both are catastrophic — every
-/// XML script handler that reads `self:Update()` etc. would nil-call.
+/// PLAN-named frames with a `mixin=` attribute in their XML. Codegen
+/// at `src/loader/xml_frame_codegen.rs:155-173` expands the attribute
+/// into `Mixin(frame, MixinName)`; the shared impl at
+/// `src/lua_api/env_init/shared_bootstrap.lua` does `object[k] = v` for
+/// every mixin key. After load, `frame.method == MixinName.method`.
 struct MixinPin {
     frame_name: &'static str,
     frame_xml_site: &'static str,
@@ -119,27 +110,14 @@ const PLAN_NAMED_MIXIN_FRAMES: &[MixinPin] = &[
     },
 ];
 
-/// Pin that each PLAN-named frame's expected mixin was applied: the
-/// frame exists as a table global, the mixin global is a table, every
-/// expected mixin method is present on BOTH the mixin table AND the
-/// frame, and the frame's method IS the same function reference as the
-/// mixin's. The double-pin (frame.method is function AND frame.method
-/// == mixin.method) catches two distinct regressions: a missing
-/// `Mixin(frame, MixinName)` codegen call (frame.method nil while
-/// mixin.method present) and a mixin source-load failure (mixin.method
-/// nil while frame.method might be a stale leftover).
-///
-/// Note: `ExtraActionButton1` uses an INHERITED mixin — its XML at
-/// `Shared/ExtraActionBar.xml:116` says `inherits="ExtraActionButtonTemplate"`,
-/// and the mixin attribute is on the template at
-/// `Shared/ExtraActionBar.xml:3` (`mixin="ExtraActionButtonMixin"`).
-/// The codegen comment at `src/loader/xml_frame_codegen.rs:157-159`
-/// notes that template-inherited mixins are applied inside CreateFrame
-/// via `apply_templates_from_registry → apply_single_template →
-/// apply_mixin`, NOT by the per-frame `append_mixins_code` path that
-/// handles direct `mixin=` attributes — so this entry exercises the
-/// inherited-mixin code path while the four bar entries exercise the
-/// direct-mixin path.
+/// Pin per-frame mixin application. The double-pin (frame.method is
+/// function AND frame.method == mixin.method) catches two regressions:
+/// missing `Mixin(frame, MixinName)` codegen call vs. mixin source-load
+/// failure. `ExtraActionButton1` uses an INHERITED mixin via
+/// `inherits="ExtraActionButtonTemplate"` (`Shared/ExtraActionBar.xml:3`
+/// has `mixin="ExtraActionButtonMixin"`), exercising the
+/// template-mixin code path; the other four entries exercise the
+/// direct `mixin=` codegen path.
 #[test]
 fn plan_named_frames_have_their_mixins_applied() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -189,21 +167,12 @@ fn plan_named_frames_have_their_mixins_applied() {
     });
 }
 
-/// Pin that `ExtraActionBarFrame` exists with NO `mixin=` attribute —
-/// the PLAN line says "with expected mixins applied" for all six frames
-/// but `ExtraActionBarFrame` at `Shared/ExtraActionBar.xml:93` has no
-/// `mixin=` attribute and no `ExtraActionBarFrameMixin` global is
-/// defined anywhere in the addon. Its only behavioral wiring is an
-/// `OnLoad` script handler that points at the FREE function
-/// `ExtraActionBar_OnLoad` at `Shared/ExtraActionBar.lua:5` (NOT a
-/// mixin method — there's no colon syntax, no method-receiver
-/// argument). This is the inverse of the mixin-applied test for the
-/// other five frames: the "expected mixin set" for this frame is empty,
-/// and pinning that empty set guards against either (a) someone
-/// "fixing" the inconsistency by sprinkling a mixin onto the XML
-/// declaration (which would shadow the free-function OnLoad handler if
-/// the mixin defined `OnLoad` too), OR (b) the simulator's codegen
-/// silently injecting a mixin-style apply when none was declared.
+/// Pin that `ExtraActionBarFrame` has NO mixin — XML at
+/// `Shared/ExtraActionBar.xml:93` lacks `mixin=`, no
+/// `ExtraActionBarFrameMixin` global exists; behavioral wiring is the
+/// FREE function `ExtraActionBar_OnLoad` (`Shared/ExtraActionBar.lua:5`).
+/// Inverse of the mixin-applied test: pinning the empty mixin set
+/// guards against accidental mixin injection.
 #[test]
 fn extra_action_bar_frame_publishes_no_mixin_only_a_script_handler() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -228,13 +197,8 @@ fn extra_action_bar_frame_publishes_no_mixin_only_a_script_handler() {
         assert_eq!(
             convention_named_mixin_type, "nil",
             "Expected `_G.ExtraActionBarFrameMixin` to be nil — `ExtraActionBarFrame` at \
-             `Shared/ExtraActionBar.xml:93` has NO `mixin=` attribute, and no \
-             `ExtraActionBarFrameMixin` global is declared anywhere in the addon's \
-             Mainline or Shared Lua sources. A non-nil reading proves either someone \
-             added a convention-named mixin upstream (and the PLAN line for this task \
-             needs revisiting to verify the new mixin's expected method set), or a \
-             sibling addon re-published the name (a cross-addon collision worth \
-             investigating). Got `{convention_named_mixin_type}`."
+             `Shared/ExtraActionBar.xml:93` has no `mixin=` and the global is undeclared. \
+             Got `{convention_named_mixin_type}`."
         );
 
         let on_load_handler_type: String = env
@@ -244,16 +208,9 @@ fn extra_action_bar_frame_publishes_no_mixin_only_a_script_handler() {
         assert_eq!(
             on_load_handler_type, "function",
             "Expected `_G.ExtraActionBar_OnLoad` to be a function — declared at \
-             `Shared/ExtraActionBar.lua:5` as a FREE function (no colon syntax, no \
-             implicit `self`-receiver), wired to the frame via \
+             `Shared/ExtraActionBar.lua:5` as a free function, wired via \
              `<OnLoad function=\"ExtraActionBar_OnLoad\"/>` at \
-             `Shared/ExtraActionBar.xml:139`. This is the actual behavioral entry point \
-             for the frame, taking the place of the mixin-method `OnLoad` pattern used \
-             by the other five frames in this PLAN line. A nil or non-function reading \
-             means the source file failed to execute past line 5 (every other \
-             `ExtraActionBar_*` global at lua:10/32/38/51 would be missing too, since \
-             they're declared sequentially in the same chunk). Got \
-             `{on_load_handler_type}`."
+             `Shared/ExtraActionBar.xml:139`. Got `{on_load_handler_type}`."
         );
     });
 }
@@ -742,6 +699,45 @@ fn status_tracking_and_flyout_bar_mixins_publish_as_tables() {
                 "Expected `_G.{name}` to be a table after `{ROOT}` loads (declared at \
                  `{lua_site}`), got `{mixin_type}`. Nil reading: source file failed to \
                  load, or the `MixinName = {{}}` line was dropped."
+            );
+        }
+    });
+}
+
+/// Pin `AssistedCombatManager` as a table with all 8 PLAN-named
+/// methods. Declared at `Mainline/AssistedCombatManager.lua:3`. Source
+/// has 11 additional methods PLAN omits (`ProcessCVars` etc.) — the
+/// PLAN list is the surface contract for this task.
+#[test]
+fn assisted_combat_manager_publishes_plan_named_methods() {
+    let plan_methods = [
+        "Init",
+        "OnSpellsChanged",
+        "SetActionSpell",
+        "IsAssistedHighlightActive",
+        "IsRotationSpell",
+        "HasActionSpell",
+        "GetActionSpellID",
+        "ShouldHighlightSpellbookSpell",
+    ];
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let manager_type: String = env
+            .eval("return type(_G.AssistedCombatManager)")
+            .expect("AssistedCombatManager global probe must run cleanly");
+        assert_eq!(
+            manager_type, "table",
+            "Expected `_G.AssistedCombatManager` to be a table after `{ROOT}` loads \
+             (declared at `Mainline/AssistedCombatManager.lua:3`), got `{manager_type}`."
+        );
+        for method in plan_methods {
+            let method_type: String = env
+                .eval(&format!("return type(_G.AssistedCombatManager.{method})"))
+                .expect("AssistedCombatManager method probe must run cleanly");
+            assert_eq!(
+                method_type, "function",
+                "Expected `AssistedCombatManager.{method}` to be a function after \
+                 `{ROOT}` loads, got `{method_type}`. Source declares it in \
+                 `Mainline/AssistedCombatManager.lua`."
             );
         }
     });
