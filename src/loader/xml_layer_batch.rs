@@ -255,6 +255,7 @@ fn apply_texture_anims(env: &LoaderEnv<'_>, entries: &[AnimEntry<'_>]) {
 fn apply_parent_key_attachments(
     env: &LoaderEnv<'_>,
     parent_name: &str,
+    target_parent_name: &str,
     attachments: &[ParentKeyAttachment],
 ) -> Result<(), LoadError> {
     if attachments.is_empty() {
@@ -263,22 +264,13 @@ fn apply_parent_key_attachments(
 
     env.with_state(|state| {
         for attachment in attachments {
-            let ids = {
-                let sim = crate::lua_api::methods::borrow_state(state)
-                    .map_err(|error| LoadError::Lua(error.to_string()))?;
-                (
-                    sim.widgets.get_id_by_name(parent_name),
-                    sim.widgets.get_id_by_name(&attachment.child_name),
-                )
-            };
-            let (Some(parent_id), Some(child_id)) = ids else {
+            let (parent_id, child_id) =
+                find_attachment_ids(state, parent_name, target_parent_name, attachment)?;
+            let (Some(parent_id), Some(child_id)) = (parent_id, child_id) else {
                 continue;
             };
             if let Some(parent_key) = attachment.parent_key.as_deref() {
-                crate::lua_api::globals::template::assign_parent_key(
-                    state, parent_id, parent_key, child_id,
-                )
-                .map_err(|error| LoadError::Lua(error.to_string()))?;
+                attach_parent_key(state, parent_id, parent_key, child_id)?;
             }
             if let Some(parent_array) = attachment.parent_array.as_deref() {
                 append_parent_array_entry(state, parent_id, parent_array, child_id)?;
@@ -286,6 +278,76 @@ fn apply_parent_key_attachments(
         }
         Ok(())
     })
+}
+
+fn find_attachment_ids(
+    state: &mut rilua::vm::state::LuaState,
+    parent_name: &str,
+    target_parent_name: &str,
+    attachment: &ParentKeyAttachment,
+) -> Result<(Option<u64>, Option<u64>), LoadError> {
+    let sim = crate::lua_api::methods::borrow_state(state)
+        .map_err(|error| LoadError::Lua(error.to_string()))?;
+    let child_id = sim.widgets.get_id_by_name(&attachment.child_name);
+    let named_parent_id = sim
+        .widgets
+        .get_id_by_name(target_parent_name)
+        .or_else(|| sim.widgets.get_id_by_name(parent_name));
+    let fallback_parent_id =
+        child_id.and_then(|child_id| sim.widgets.get(child_id).and_then(|child| child.parent_id));
+
+    Ok((named_parent_id.or(fallback_parent_id), child_id))
+}
+
+fn attach_parent_key(
+    state: &mut rilua::vm::state::LuaState,
+    parent_id: u64,
+    parent_key: &str,
+    child_id: u64,
+) -> Result<(), LoadError> {
+    if child_is_direct(state, parent_id, child_id)? {
+        crate::lua_api::globals::template::assign_parent_key(
+            state, parent_id, parent_key, child_id,
+        )
+        .map_err(|error| LoadError::Lua(error.to_string()))?;
+    } else {
+        crate::lua_api::methods::sync_child_to_rilua(state, parent_id, parent_key, child_id)
+            .map_err(|error| LoadError::Lua(error.to_string()))?;
+    }
+
+    if let Some(target_parent_id) = transparent_wrapper_parent_id(state, parent_id)? {
+        crate::lua_api::methods::sync_child_to_rilua(state, target_parent_id, parent_key, child_id)
+            .map_err(|error| LoadError::Lua(error.to_string()))?;
+    }
+
+    Ok(())
+}
+
+fn child_is_direct(
+    state: &mut rilua::vm::state::LuaState,
+    parent_id: u64,
+    child_id: u64,
+) -> Result<bool, LoadError> {
+    let sim = crate::lua_api::methods::borrow_state(state)
+        .map_err(|error| LoadError::Lua(error.to_string()))?;
+    Ok(sim.widgets.get(child_id).and_then(|child| child.parent_id) == Some(parent_id))
+}
+
+fn transparent_wrapper_parent_id(
+    state: &mut rilua::vm::state::LuaState,
+    parent_id: u64,
+) -> Result<Option<u64>, LoadError> {
+    let sim = crate::lua_api::methods::borrow_state(state)
+        .map_err(|error| LoadError::Lua(error.to_string()))?;
+    Ok(sim.widgets.get(parent_id).and_then(|parent| {
+        let synthetic_name = parent
+            .name
+            .as_deref()
+            .is_some_and(|name| name.starts_with("__tpl_"));
+        (synthetic_name && parent.parent_key.is_none())
+            .then_some(parent.parent_id)
+            .flatten()
+    }))
 }
 
 fn append_parent_array_entry(
@@ -365,7 +427,13 @@ pub fn create_layer_children_batched_with_name_parent(
         timing,
     );
     exec_batch(env, &batch, parent_name)?;
-    apply_parent_key_attachments(env, parent_name, &attachments)?;
+    let attachment_parent_name =
+        if frame.name.is_none() && frame.parent_key.is_none() && frame.parent_array.is_none() {
+            name_parent
+        } else {
+            parent_name
+        };
+    apply_parent_key_attachments(env, parent_name, attachment_parent_name, &attachments)?;
     apply_texture_anims(env, &anim_entries);
     apply_fontstring_syncs(env, &text_syncs);
     Ok(())

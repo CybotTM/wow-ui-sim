@@ -69,6 +69,151 @@ pub fn repair_direct_child_parent_keys(state: &mut LuaState, parent_id: u64) -> 
     Ok(())
 }
 
+pub fn repair_transparent_wrapper_parent_key_aliases(
+    state: &mut LuaState,
+    wrapper_id: u64,
+) -> LuaResult<()> {
+    let aliases = collect_transparent_wrapper_aliases(state, wrapper_id)?;
+
+    for (target_parent_id, key, child_id) in aliases {
+        sync_child_to_rilua(state, target_parent_id, &key, child_id)?;
+    }
+
+    Ok(())
+}
+
+fn collect_transparent_wrapper_aliases(
+    state: &mut LuaState,
+    wrapper_id: u64,
+) -> LuaResult<Vec<(u64, String, u64)>> {
+    let sim = crate::lua_api::methods::borrow_state(state)?;
+    let Some(wrapper) = sim.widgets.get(wrapper_id) else {
+        return Ok(Vec::new());
+    };
+    if !is_transparent_wrapper(wrapper) {
+        return Ok(Vec::new());
+    }
+    let Some(target_parent_id) = wrapper.parent_id else {
+        return Ok(Vec::new());
+    };
+
+    let target_parent_name = sim
+        .widgets
+        .get(target_parent_id)
+        .and_then(|parent| parent.name.as_deref());
+    let aliases = wrapper
+        .children
+        .iter()
+        .flat_map(|child_id| {
+            let Some(child) = sim.widgets.get(*child_id) else {
+                return Vec::new();
+            };
+            let key = child.parent_key.clone().or_else(|| {
+                infer_parent_key_from_child_name(target_parent_name, child.name.as_deref())
+                    .map(lowercase_first)
+            });
+            key.into_iter()
+                .map(|key| (target_parent_id, key, *child_id))
+                .collect::<Vec<_>>()
+        })
+        .collect();
+
+    Ok(aliases)
+}
+
+fn is_transparent_wrapper(frame: &crate::widget::Frame) -> bool {
+    let has_xml_name = frame
+        .name
+        .as_deref()
+        .is_some_and(|name| !name.starts_with("__tpl_"));
+    !has_xml_name && frame.parent_key.is_none()
+}
+
+pub fn repair_descendant_name_aliases(state: &mut LuaState, parent_id: u64) -> LuaResult<()> {
+    let aliases = {
+        let sim = crate::lua_api::methods::borrow_state(state)?;
+        let Some(parent) = sim.widgets.get(parent_id) else {
+            return Ok(());
+        };
+        if parent.name.is_none() {
+            return Ok(());
+        }
+        let mut aliases = Vec::new();
+        let mut stack = parent.children.clone();
+        while let Some(child_id) = stack.pop() {
+            let Some(child) = sim.widgets.get(child_id) else {
+                continue;
+            };
+            stack.extend(child.children.iter().copied());
+            if child.parent_id == Some(parent_id) {
+                continue;
+            }
+            if let Some(key) =
+                infer_parent_key_from_child_name(parent.name.as_deref(), child.name.as_deref())
+            {
+                aliases.push((parent_id, lowercase_first(key), child_id));
+            }
+        }
+        aliases
+    };
+
+    for (parent_id, key, child_id) in aliases {
+        sync_child_to_rilua(state, parent_id, &key, child_id)?;
+    }
+
+    Ok(())
+}
+
+pub fn repair_transparent_descendant_parent_key_aliases(
+    state: &mut LuaState,
+    parent_id: u64,
+) -> LuaResult<()> {
+    let aliases = {
+        let sim = crate::lua_api::methods::borrow_state(state)?;
+        let Some(parent) = sim.widgets.get(parent_id) else {
+            return Ok(());
+        };
+        let mut aliases = Vec::new();
+        let mut stack = parent.children.clone();
+        while let Some(frame_id) = stack.pop() {
+            let Some(frame) = sim.widgets.get(frame_id) else {
+                continue;
+            };
+            stack.extend(frame.children.iter().copied());
+            let synthetic_name = frame
+                .name
+                .as_deref()
+                .is_some_and(|name| name.starts_with("__tpl_"));
+            if !synthetic_name || frame.parent_key.is_some() {
+                continue;
+            }
+            for child_id in &frame.children {
+                let Some(child) = sim.widgets.get(*child_id) else {
+                    continue;
+                };
+                if let Some(key) = child.parent_key.as_ref() {
+                    aliases.push((parent_id, key.clone(), *child_id));
+                }
+            }
+        }
+        aliases
+    };
+
+    for (parent_id, key, child_id) in aliases {
+        sync_child_to_rilua(state, parent_id, &key, child_id)?;
+    }
+
+    Ok(())
+}
+
+fn lowercase_first(value: String) -> String {
+    let mut chars = value.chars();
+    let Some(first) = chars.next() else {
+        return value;
+    };
+    first.to_lowercase().chain(chars).collect()
+}
+
 fn infer_parent_key_from_child_name(
     parent_name: Option<&str>,
     child_name: Option<&str>,
