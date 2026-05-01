@@ -87,3 +87,6 @@ mod behavior_locked_action;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_outfit_locked.rs"]
 mod behavior_outfit_locked;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_quick_keybind_mode.rs"]
+mod behavior_quick_keybind_mode;
