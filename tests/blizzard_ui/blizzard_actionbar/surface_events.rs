@@ -432,3 +432,129 @@ fn action_bar_action_events_frame_registers_thirty_four_spell_action_events_afte
         );
     });
 }
+
+const MAIN_ACTION_BAR_FRAME_NAME: &str = "MainActionBar";
+const MAIN_ACTION_BAR_XML_SITE: &str = "Mainline/MainActionBar.xml:29";
+const MAIN_ACTION_BAR_SCRIPTS_XML_SITE: &str = "Mainline/MainActionBar.xml:170";
+const MAIN_ACTION_BAR_ONLOAD_LUA_SITE: &str = "Shared/MainActionBar.lua:5";
+
+/// Events `MainActionBarMixin:OnLoad` registers at
+/// `Shared/MainActionBar.lua:5-11`. Both are plain `RegisterEvent`
+/// calls (lua:6 and lua:7), matching the PLAN line verbatim and with
+/// no commented-out siblings or unit-event variants. After the two
+/// registrations, OnLoad does two more things: sets `self.state =
+/// "player"` (lua:9) and calls `MainActionBar.ActionBarPageNumber.Text:SetText(
+/// C_ActionBar.GetActionBarPage())` (lua:10) — those non-registration
+/// side effects are not pinned here.
+const MAIN_ACTION_BAR_REGISTERED_EVENTS: &[&str] =
+    &["ACTIONBAR_PAGE_CHANGED", "NEUTRAL_FACTION_SELECT_RESULT"];
+
+/// Pin `MainActionBar`'s post-OnLoad event-registration surface.
+///
+/// **No spec/source mismatch on this one.** PLAN claim and source
+/// agree exactly: `MainActionBarMixin:OnLoad` at
+/// `Shared/MainActionBar.lua:5-11` registers exactly two events
+/// (lua:6, lua:7), and the XML at `Mainline/MainActionBar.xml:172`
+/// wires `<OnLoad method="OnLoad" inherit="prepend"/>` plus an OnEvent
+/// dispatch at xml:173. The `inherit="prepend"` attribute means the
+/// inherited (template) OnLoad runs FIRST and the instance (mixin)
+/// OnLoad runs second — per the CLAUDE.md note on the counterintuitive
+/// XML attribute. The template chain is `EditModeActionBarTemplate`
+/// (xml:29 `inherits=`) → `EditModeSystemTemplate` → so the EditMode
+/// system OnLoad runs before the mixin's two `RegisterEvent` calls,
+/// but neither inherited OnLoad registers `ACTIONBAR_PAGE_CHANGED` or
+/// `NEUTRAL_FACTION_SELECT_RESULT`, so the two PLAN-named events are
+/// solely the mixin's contribution.
+///
+/// Four assertions:
+///
+/// 1. `type(_G.MainActionBar) == "table"` — frame exists, resolved
+///    from `name="MainActionBar"` at `Mainline/MainActionBar.xml:29`.
+/// 2-3. `IsEventRegistered("ACTIONBAR_PAGE_CHANGED") == true` and
+///    `IsEventRegistered("NEUTRAL_FACTION_SELECT_RESULT") == true` —
+///    OnLoad ran and registered both events.
+/// 4. `type(:GetScript("OnEvent")) == "function"` — XML wires OnEvent
+///    at xml:173, dispatch body at lua:30-36 has explicit arms for
+///    each PLAN-named event (page-changed updates the
+///    `ActionBarPageNumber.Text` from `C_ActionBar.GetActionBarPage()`,
+///    neutral-faction-select calls `self:UpdateEndCaps()`).
+#[test]
+fn main_action_bar_registers_action_bar_page_changed_and_neutral_faction_select_result_after_onload()
+ {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let frame_type: String = env
+            .eval(&format!("return type(_G[{MAIN_ACTION_BAR_FRAME_NAME:?}])"))
+            .expect("MainActionBar global probe must run cleanly");
+
+        assert_eq!(
+            frame_type, "table",
+            "Expected `_G[{MAIN_ACTION_BAR_FRAME_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{frame_type}`. The XML at `{MAIN_ACTION_BAR_XML_SITE}` declares \
+             this frame as `<Frame name=\"MainActionBar\" \
+             inherits=\"EditModeActionBarTemplate\" enableMouse=\"true\" \
+             parent=\"UIParent\" frameLevel=\"50\" mixin=\"MainActionBarMixin\">`. A nil \
+             reading means either the XML chunk failed to execute, the name= attribute \
+             changed, or the frame was removed. Every event-registration assertion below \
+             depends on this frame existing."
+        );
+
+        for event in MAIN_ACTION_BAR_REGISTERED_EVENTS {
+            let registered: bool = env
+                .eval(&format!(
+                    "return _G[{MAIN_ACTION_BAR_FRAME_NAME:?}]:IsEventRegistered({event:?})"
+                ))
+                .unwrap_or_else(|err| {
+                    panic!(
+                        "`{MAIN_ACTION_BAR_FRAME_NAME}:IsEventRegistered({event:?})` raised: {err}"
+                    )
+                });
+
+            assert!(
+                registered,
+                "Expected `{MAIN_ACTION_BAR_FRAME_NAME}:IsEventRegistered({event:?})` to \
+                 be true after `{ROOT}` loads. The mixin OnLoad at \
+                 `{MAIN_ACTION_BAR_ONLOAD_LUA_SITE}` declares \
+                 `function MainActionBarMixin:OnLoad()` and registers `{event}` as one \
+                 of its first two statements (lua:6 for ACTIONBAR_PAGE_CHANGED, lua:7 \
+                 for NEUTRAL_FACTION_SELECT_RESULT). The XML at \
+                 `{MAIN_ACTION_BAR_SCRIPTS_XML_SITE}` line 172 wires \
+                 `<OnLoad method=\"OnLoad\" inherit=\"prepend\"/>` — `inherit=\"prepend\"` \
+                 means the template's inherited OnLoad runs FIRST and the mixin's \
+                 OnLoad runs second (the template chain via `EditModeActionBarTemplate` \
+                 at xml:29 `inherits=` does not register either event, so this is \
+                 solely the mixin's contribution). A false reading means either the \
+                 mixin OnLoad did not run (regression in the loader's method-style \
+                 OnLoad dispatch against `inherit=\"prepend\"`) or the RegisterEvent \
+                 call was removed. Without `{event}` registered, the OnEvent dispatch \
+                 arm at lua:31-35 — which updates `ActionBarPageNumber.Text` from \
+                 `C_ActionBar.GetActionBarPage()` for ACTIONBAR_PAGE_CHANGED, or calls \
+                 `self:UpdateEndCaps()` for NEUTRAL_FACTION_SELECT_RESULT — would never \
+                 fire."
+            );
+        }
+
+        let onevent_script: String = env
+            .eval(&format!(
+                "return type(_G[{MAIN_ACTION_BAR_FRAME_NAME:?}]:GetScript(\"OnEvent\"))"
+            ))
+            .expect("`GetScript(\"OnEvent\")` must run cleanly on MainActionBar");
+
+        assert_eq!(
+            onevent_script, "function",
+            "Expected `{MAIN_ACTION_BAR_FRAME_NAME}:GetScript(\"OnEvent\")` to be a \
+             function after `{ROOT}` loads, got `{onevent_script}`. The XML at \
+             `{MAIN_ACTION_BAR_SCRIPTS_XML_SITE}` line 173 wires \
+             `<OnEvent method=\"OnEvent\" inherit=\"prepend\"/>` against the mixin's \
+             `OnEvent` body at `Shared/MainActionBar.lua:30`. The body has explicit \
+             arms for each PLAN-named event: ACTIONBAR_PAGE_CHANGED refreshes \
+             `MainActionBar.ActionBarPageNumber.Text` from \
+             `C_ActionBar.GetActionBarPage()` (lua:31-32), and \
+             NEUTRAL_FACTION_SELECT_RESULT triggers `self:UpdateEndCaps()` (lua:33-34) \
+             — the latter re-evaluates the gryphon end-cap visibility for the new \
+             faction's bar art. Without an OnEvent script wired, both registered \
+             events would fire but the dispatch would have no handler, leaving the \
+             page number text stuck on the initial `OnLoad`-time value (lua:10) and \
+             the end-caps stuck on the old faction's art."
+        );
+    });
+}
