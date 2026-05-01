@@ -63,3 +63,6 @@ mod behavior_house_favor_bar;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_artifact_bar.rs"]
 mod behavior_artifact_bar;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_azerite_bar.rs"]
+mod behavior_azerite_bar;
