@@ -27,7 +27,8 @@
 //!   no persisted collapse state, so the table is wiped and returned (or a
 //!   fresh empty table if none was passed). Required by `LFGDungeonList_Setup`.
 //! - `GetLFDChoiceEnabledState(t?)`    → table of `{[dungeonID]=bool|0|1|2}`.
-//!   Same wipe-and-return pattern. Required by `LFGDungeonList_Setup`.
+//!   Defaults joinable specific dungeons to checked and preserves explicit
+//!   `SetLFGDungeonEnabled` choices. Required by `LFGDungeonList_Setup`.
 //! - `GetLFGLockList()`                → empty table. No locks without server
 //!   state. Required by `LFGDungeonList_Setup` and `LFGList_DefaultFilterFunction`
 //!   (filter returns `false` when the list is nil, hiding every dungeon).
@@ -39,7 +40,7 @@
 //! - `IsLFGDungeonJoinable(dungeonID)` → `(isAvailableForAll, isAvailableForPlayer,
 //!   hideIfNotJoinable, totalGroupSizeRequired)` from `lfd_dungeons` + `player.level`.
 
-use crate::lua_api::methods::{borrow_state, create_string, create_table};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_api::state::BattlefieldStatus;
 use crate::lua_api::state_types::LfdDungeonInfo;
 use crate::lua_bridge::stack_val;
@@ -51,6 +52,18 @@ fn stack_i32(state: &LuaState, index: i32) -> Option<i32> {
         Val::Num(n) => Some(n as i32),
         _ => None,
     }
+}
+
+fn stack_bool(state: &LuaState, index: i32) -> bool {
+    matches!(stack_val(state, index), Val::Bool(true))
+}
+
+fn is_default_lfd_enabled(d: &LfdDungeonInfo, player_level: i32) -> bool {
+    d.dungeon_id > 0
+        && !d.is_random
+        && !d.is_follower_dungeon
+        && player_level >= d.min_level
+        && player_level <= d.max_level
 }
 
 /// `GetBattlefieldStatus(index)` — retail returns 9 values. The sim
@@ -289,12 +302,70 @@ fn get_lfd_choice_collapse_state(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 /// `GetLFDChoiceEnabledState(t?)` → table mapping dungeonID → checkbox
-/// state. Empty means nothing checked. Same fresh-table convention as
-/// `GetLFDChoiceCollapseState`.
+/// state. Fresh characters start with joinable non-follower specific
+/// dungeons checked, matching the LFD panel's queueable default state.
 fn get_lfd_choice_enabled_state(state: &mut LuaState) -> LuaResult<u32> {
+    let entries = {
+        let sim = borrow_state(state)?;
+        let player_level = sim.player.level;
+        sim.lfd_dungeons
+            .iter()
+            .filter_map(|d| {
+                let enabled = sim
+                    .lfd_enabled_dungeons
+                    .get(&d.dungeon_id)
+                    .copied()
+                    .unwrap_or_else(|| is_default_lfd_enabled(d, player_level));
+                enabled.then_some(d.dungeon_id)
+            })
+            .collect::<Vec<_>>()
+    };
     let result = create_table(state);
+    if let Val::Table(table_ref) = result {
+        for id in entries {
+            if let Some(table) = state.gc.tables.get_mut(table_ref) {
+                let _ = table.raw_set(Val::Num(id as f64), Val::Bool(true), &state.gc.string_arena);
+            }
+        }
+        state.gc.barrier_back(table_ref);
+    }
     state.push(result);
     Ok(1)
+}
+
+/// `SetLFGDungeonEnabled(dungeonID, enabled)` persists the checkbox state
+/// that Blizzard's LFD list stores through `LFGDungeonList_SetDungeonEnabled`.
+fn set_lfg_dungeon_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let dungeon_id = stack_i32(state, 1).unwrap_or(0);
+    let enabled = stack_bool(state, 2);
+    borrow_state_mut(state)?
+        .lfd_enabled_dungeons
+        .insert(dungeon_id, enabled);
+    Ok(0)
+}
+
+/// `GetLFGRoles()` → `(leader, tank, healer, dps)`.
+fn get_lfg_roles(state: &mut LuaState) -> LuaResult<u32> {
+    let roles = borrow_state(state)?.lfg_roles.clone();
+    state.push(Val::Bool(roles.leader));
+    state.push(Val::Bool(roles.tank));
+    state.push(Val::Bool(roles.healer));
+    state.push(Val::Bool(roles.dps));
+    Ok(4)
+}
+
+/// `SetLFGRoles(leader, tank, healer, dps)`.
+fn set_lfg_roles(state: &mut LuaState) -> LuaResult<u32> {
+    let leader = stack_bool(state, 1);
+    let tank = stack_bool(state, 2);
+    let healer = stack_bool(state, 3);
+    let dps = stack_bool(state, 4);
+    let mut sim = borrow_state_mut(state)?;
+    sim.lfg_roles.leader = leader;
+    sim.lfg_roles.tank = tank;
+    sim.lfg_roles.healer = healer;
+    sim.lfg_roles.dps = dps;
+    Ok(0)
 }
 
 /// `GetLFGLockList()` → table mapping dungeonID → `{lfgID, reason}` for
@@ -391,6 +462,13 @@ fn is_lfg_dungeon_joinable(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_battlefield_queue_globals(lua)?;
+    register_lfd_info_globals(lua)?;
+    register_lfd_state_globals(lua)?;
+    Ok(())
+}
+
+fn register_battlefield_queue_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetBattlefieldStatus", get_battlefield_status)?;
     LuaApiMut::register_function(
         lua,
@@ -403,6 +481,10 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         get_num_battleground_entries,
     )?;
     LuaApiMut::register_function(lua, "GetWorldPVPQueueStatus", get_world_pvp_queue_status)?;
+    Ok(())
+}
+
+fn register_lfd_info_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLFGDungeonInfo", get_lfg_dungeon_info)?;
     LuaApiMut::register_function(lua, "GetLFGMode", get_lfg_mode)?;
     LuaApiMut::register_function(
@@ -418,6 +500,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetRandomDungeonBestChoice",
         get_random_dungeon_best_choice,
     )?;
+    LuaApiMut::register_function(lua, "GetLFGDungeonRewards", get_lfg_dungeon_rewards)?;
+    LuaApiMut::register_function(lua, "IsLFGDungeonJoinable", is_lfg_dungeon_joinable)?;
+    Ok(())
+}
+
+fn register_lfd_state_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLFDLockPlayerCount", get_lfd_lock_player_count)?;
     LuaApiMut::register_function(lua, "GetLFDLockInfo", get_lfd_lock_info)?;
     LuaApiMut::register_function(lua, "GetLFDRoleLockInfo", get_lfd_role_lock_info)?;
@@ -431,6 +519,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetLFDChoiceEnabledState",
         get_lfd_choice_enabled_state,
     )?;
+    LuaApiMut::register_function(lua, "SetLFGDungeonEnabled", set_lfg_dungeon_enabled)?;
+    LuaApiMut::register_function(lua, "GetLFGRoles", get_lfg_roles)?;
+    LuaApiMut::register_function(lua, "SetLFGRoles", set_lfg_roles)?;
     LuaApiMut::register_function(lua, "GetLFGLockList", get_lfg_lock_list)?;
     LuaApiMut::register_function(lua, "GetBestRFChoice", get_best_rf_choice)?;
     LuaApiMut::register_function(
@@ -438,7 +529,5 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetRandomScenarioBestChoice",
         get_random_scenario_best_choice,
     )?;
-    LuaApiMut::register_function(lua, "GetLFGDungeonRewards", get_lfg_dungeon_rewards)?;
-    LuaApiMut::register_function(lua, "IsLFGDungeonJoinable", is_lfg_dungeon_joinable)?;
     Ok(())
 }

@@ -67,7 +67,6 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "SetActionBarToggles",
     "SetChannelPassword",
     "SetInsertItemsLeftToRight",
-    "SetLFGRoles",
     "SetLootThreshold",
     "SetPartyLeader",
     "SetRaidSubgroup",
@@ -111,7 +110,6 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "DoesCurrentZoneHaveDungeon",
     "GetCVarBool",
     "GetLFGDungeonEncounterInfo",
-    "GetLFGRoles",
     "HasLFGRestrictions",
     "IsCharacterNewlyBoosted",
     // GetLootMethod / GetMasterLooterThreshold are SimState-backed in

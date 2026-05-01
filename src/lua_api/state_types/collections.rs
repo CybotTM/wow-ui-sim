@@ -195,6 +195,25 @@ pub struct LfdDungeonInfo {
     pub is_follower_dungeon: bool,
 }
 
+#[derive(Debug, Clone)]
+pub struct LfgRoleSelection {
+    pub leader: bool,
+    pub tank: bool,
+    pub healer: bool,
+    pub dps: bool,
+}
+
+impl Default for LfgRoleSelection {
+    fn default() -> Self {
+        Self {
+            leader: false,
+            tank: false,
+            healer: false,
+            dps: true,
+        }
+    }
+}
+
 /// Minimal area-POI metadata keyed by area poi id in
 /// `SimState.area_pois`. Drives `C_AreaPoiInfo.GetAreaPOIInfo` and
 /// `GetAreaPOISecondsLeft`. Only the subset of retail fields used by
