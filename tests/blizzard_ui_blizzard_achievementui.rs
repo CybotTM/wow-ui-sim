@@ -51,3 +51,6 @@ mod behavior_comparison_portrait;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_achievement_earned_event.rs"]
 mod behavior_achievement_earned_event;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_criteria_update_event.rs"]
+mod behavior_criteria_update_event;
