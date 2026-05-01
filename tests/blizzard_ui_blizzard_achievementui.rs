@@ -21,3 +21,6 @@ mod surface_events;
 
 #[path = "blizzard_ui/blizzard_achievementui/surface_mixins.rs"]
 mod surface_mixins;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_toggle.rs"]
+mod behavior_toggle;
