@@ -66,7 +66,8 @@ pub use state::{
     AzeriteEmpoweredSelectionKey, AzeriteItemState, BarberShopAlternateFormRace,
     BarberShopCategory, BarberShopCharacterData, BarberShopOption, BarberShopState,
     FactionParagonInfo, HousingState, ItemLocationData, LossOfControlInfo, MajorFactionData,
-    PendingTimer, ProfessionQualityInfo, RenownLevelInfo, SimState, tick_party_health,
+    PendingTimer, ProfessionQualityInfo, RenownLevelInfo, SimState, SpellFlyoutInfo,
+    SpellFlyoutSlot, tick_party_health,
 };
 pub use tooltip::TooltipData;
 

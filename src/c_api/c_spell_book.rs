@@ -9,6 +9,7 @@ use crate::lua_api::methods::{
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
 };
+use crate::lua_api::state::{SpellFlyoutInfo, SpellFlyoutSlot};
 use crate::lua_api::state_types::CursorInfo;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use crate::spells;
@@ -21,6 +22,7 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     register_spell_book_item_queries(state, table_ref)?;
     register_spell_book_item_actions(state, table_ref)?;
     register_spell_book_state_queries(state, table_ref)?;
+    register_spell_flyout_queries(state, table_ref)?;
     Ok(())
 }
 
@@ -204,6 +206,28 @@ fn register_spell_book_owned_state_queries(
         table_ref,
         "HasPetSpells",
         c_spell_book_has_pet_spells,
+    )?;
+    Ok(())
+}
+
+fn register_spell_flyout_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    table_set_rust_fn_static(state, table_ref, "GetFlyoutInfo", get_flyout_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetFlyoutSlotInfo", get_flyout_slot_info)?;
+    table_set_rust_fn_static(state, state.global, "GetFlyoutInfo", get_flyout_info)?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetFlyoutSlotInfo",
+        get_flyout_slot_info,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetCallPetSpellInfo",
+        get_call_pet_spell_info,
     )?;
     Ok(())
 }
@@ -564,6 +588,86 @@ fn c_spell_book_has_pet_spells(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Num(count as f64));
     }
     Ok(1)
+}
+
+fn get_flyout_info(state: &mut LuaState) -> LuaResult<u32> {
+    let flyout_id = u32::from_stack(state, 1)?;
+    let Some(flyout) = spell_flyout_info(state, flyout_id)? else {
+        push_empty_flyout_info(state);
+        return Ok(4);
+    };
+
+    push_flyout_info(state, flyout);
+    Ok(4)
+}
+
+fn spell_flyout_info(state: &mut LuaState, flyout_id: u32) -> LuaResult<Option<SpellFlyoutInfo>> {
+    Ok(borrow_state(state)?.spell_flyouts.get(&flyout_id).cloned())
+}
+
+fn push_flyout_info(state: &mut LuaState, flyout: SpellFlyoutInfo) {
+    let name = create_string(state, &flyout.name);
+    let description = create_string(state, &flyout.description);
+    state.push(name);
+    state.push(description);
+    state.push(Val::Num(flyout.slots.len() as f64));
+    state.push(Val::Bool(flyout.is_known));
+}
+
+fn push_empty_flyout_info(state: &mut LuaState) {
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(false));
+}
+
+fn get_flyout_slot_info(state: &mut LuaState) -> LuaResult<u32> {
+    let flyout_id = u32::from_stack(state, 1)?;
+    let slot_index = u32::from_stack(state, 2)? as usize;
+    let Some(slot) = spell_flyout_slot(state, flyout_id, slot_index)? else {
+        push_empty_flyout_slot(state);
+        return Ok(5);
+    };
+
+    push_flyout_slot_info(state, slot);
+    Ok(5)
+}
+
+fn spell_flyout_slot(
+    state: &mut LuaState,
+    flyout_id: u32,
+    slot_index: usize,
+) -> LuaResult<Option<SpellFlyoutSlot>> {
+    let index = slot_index.saturating_sub(1);
+    Ok(borrow_state(state)?
+        .spell_flyouts
+        .get(&flyout_id)
+        .and_then(|flyout| flyout.slots.get(index))
+        .cloned())
+}
+
+fn push_flyout_slot_info(state: &mut LuaState, slot: SpellFlyoutSlot) {
+    let spell_name = create_string(state, &slot.spell_name);
+    state.push(Val::Num(slot.spell_id as f64));
+    state.push(Val::Num(slot.override_spell_id as f64));
+    state.push(Val::Bool(slot.is_known));
+    state.push(spell_name);
+    state.push(Val::Num(slot.spec_id as f64));
+}
+
+fn get_call_pet_spell_info(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(2)
+}
+
+fn push_empty_flyout_slot(state: &mut LuaState) {
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Bool(false));
+    state.push(Val::Nil);
+    state.push(Val::Num(0.0));
 }
 
 fn spellbook_item_info(state: &mut LuaState, slot: i32) -> Option<Val> {

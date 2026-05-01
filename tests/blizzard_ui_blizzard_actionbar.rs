@@ -69,3 +69,6 @@ mod behavior_azerite_bar;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_status_bar_swap.rs"]
 mod behavior_status_bar_swap;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_spell_flyout.rs"]
+mod behavior_spell_flyout;

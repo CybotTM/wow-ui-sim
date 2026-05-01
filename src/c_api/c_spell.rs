@@ -7,6 +7,7 @@
 //!   `SimState.spell_cooldowns` (start/duration/isEnabled/isActive/modRate).
 //! - `GetSpellCastCount(spellID)` → permissive zero. The zone-ability UI
 //!   only uses this as a fallback display count when charges are absent.
+//! - `GetSpellDisplayCount(spellID, maxDisplayCount)` → permissive zero.
 //! - `GetSpellDescription(spellID)` → localized spell description, or empty.
 //! - `GetSpellTexture(spellID)` → `(fallbackTexturePath, fileDataID)`.
 //! - `GetSpellPowerCost(spellID)` → `SpellPowerCostInfo[]` table or nil.
@@ -86,6 +87,7 @@ const SPELL_QUERY_METHODS: &[(&'static str, SpellScriptFn)] = &[
     ("GetSpellName", get_spell_name),
     ("GetSpellCooldown", get_spell_cooldown),
     ("GetSpellCastCount", get_spell_cast_count),
+    ("GetSpellDisplayCount", get_spell_display_count),
     ("GetMountFromSpell", get_mount_from_spell),
     ("GetVisibilityInfo", get_visibility_info),
     ("GetSpellTradeSkillLink", get_spell_trade_skill_link),
@@ -388,6 +390,18 @@ fn get_spell_cooldown(state: &mut LuaState) -> LuaResult<u32> {
 /// permissive baseline is zero.
 fn get_spell_cast_count(state: &mut LuaState) -> LuaResult<u32> {
     let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+/// `C_Spell.GetSpellDisplayCount(spellID, maxDisplayCount)` → `0`.
+///
+/// SpellFlyout popup buttons use this to fill their count text. The simulator
+/// does not model spell reagent/charge display counts yet, so zero is the
+/// inert baseline.
+fn get_spell_display_count(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    let _max_display_count = Option::<u32>::from_stack(state, 2)?;
     state.push(Val::Num(0.0));
     Ok(1)
 }

@@ -100,6 +100,7 @@ macro_rules! build_empty_sim_state {
             spell_trade_skill_links: HashMap::new(),
             spell_id_aliases: HashMap::new(),
             spell_loss_of_control: HashMap::new(),
+            spell_flyouts: HashMap::new(),
             action_profession_quality: HashMap::new(),
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -566,6 +567,27 @@ pub struct LossOfControlInfo {
     pub mod_rate: f32,
     pub is_active: bool,
     pub should_replace_normal_cooldown: bool,
+}
+
+/// A single spell row in a legacy spell flyout. `SpellFlyout.lua` reads
+/// these through `GetFlyoutSlotInfo` before creating popup buttons.
+#[derive(Clone, Debug, Default)]
+pub struct SpellFlyoutSlot {
+    pub spell_id: u32,
+    pub override_spell_id: u32,
+    pub is_known: bool,
+    pub spell_name: String,
+    pub spec_id: i32,
+}
+
+/// Legacy spell flyout metadata returned by `GetFlyoutInfo`. Empty by
+/// default so unknown flyouts are treated as unavailable.
+#[derive(Clone, Debug, Default)]
+pub struct SpellFlyoutInfo {
+    pub name: String,
+    pub description: String,
+    pub is_known: bool,
+    pub slots: Vec<SpellFlyoutSlot>,
 }
 
 /// Paragon-rep payload returned by `C_Reputation.GetFactionParagonInfo`.
@@ -1423,6 +1445,11 @@ pub struct SimState {
     /// `ActionButton_UpdateCooldown` then falls back to the inert
     /// `defaultLossOfControlInfo` baseline.
     pub spell_loss_of_control: HashMap<u32, LossOfControlInfo>,
+    /// Legacy spell flyout payloads keyed by flyout id. Drives
+    /// `GetFlyoutInfo` / `GetFlyoutSlotInfo`, which
+    /// `Blizzard_ActionBar/Shared/SpellFlyout.lua` uses to create popup
+    /// spell buttons.
+    pub spell_flyouts: HashMap<u32, SpellFlyoutInfo>,
     /// Profession-quality overlays for action slots. Drives
     /// `C_ActionBar.GetProfessionQualityInfo`. Empty by default —
     /// `ActionBarActionButtonMixin:UpdateProfessionQuality` then clears the
