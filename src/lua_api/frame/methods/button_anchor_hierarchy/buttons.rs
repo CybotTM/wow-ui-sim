@@ -213,10 +213,15 @@ pub(super) fn is_down_over(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn click(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    if !begin_click(state, id)? {
+        return Ok(0);
+    }
     let Some(handler) = get_rilua_script(state, id, "OnClick") else {
+        end_click(state, id);
         return Ok(0);
     };
     if matches!(handler, Val::Nil) {
+        end_click(state, id);
         return Ok(0);
     }
     let self_ref = frame_ref(state, id)?;
@@ -225,7 +230,28 @@ pub(super) fn click(state: &mut LuaState) -> LuaResult<u32> {
     if let Err(error) = call_function_state(state, handler, &args) {
         call_error_handler_state(state, &error.to_string());
     }
+    end_click(state, id);
     Ok(0)
+}
+
+fn begin_click(state: &mut LuaState, id: u64) -> LuaResult<bool> {
+    let mut sim = borrow_state_mut(state)?;
+    let Some(frame) = sim.widgets.get_mut(id) else {
+        return Ok(false);
+    };
+    if frame.click_depth > 0 {
+        return Ok(false);
+    }
+    frame.click_depth = 1;
+    Ok(true)
+}
+
+fn end_click(state: &mut LuaState, id: u64) {
+    if let Ok(mut sim) = borrow_state_mut(state)
+        && let Some(frame) = sim.widgets.get_mut(id)
+    {
+        frame.click_depth = 0;
+    }
 }
 
 pub(super) fn set_item_button_scale(state: &mut LuaState) -> LuaResult<u32> {

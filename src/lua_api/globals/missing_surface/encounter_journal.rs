@@ -342,7 +342,7 @@ fn ej_get_instance_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     push_instance_legacy_tuple(state, row);
-    Ok(11)
+    Ok(12)
 }
 
 fn ej_get_instance_by_index(state: &mut LuaState) -> LuaResult<u32> {
@@ -356,7 +356,7 @@ fn ej_get_instance_by_index(state: &mut LuaState) -> LuaResult<u32> {
     let inst = instances[index - 1];
     state.push(Val::Num(inst.id as f64));
     push_instance_legacy_tuple(state, inst);
-    Ok(12)
+    Ok(13)
 }
 
 fn ej_get_encounter_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -675,9 +675,20 @@ fn push_instance_tuple(state: &mut LuaState, row: &data::Instance) {
 }
 
 fn push_instance_legacy_tuple(state: &mut LuaState, row: &data::Instance) {
-    push_instance_base_tuple(state, row);
-    state.push(Val::Bool(false));
+    let name = create_string(state, row.name);
+    let description = create_string(state, row.description);
+    state.push(name);
+    state.push(description);
+    state.push(Val::Num(row.bg_file_id as f64));
+    state.push(Val::Num(row.button_file_id as f64));
+    state.push(Val::Num(row.lore_file_id as f64));
+    state.push(Val::Num(row.button_small_file_id as f64));
+    state.push(Val::Num(row.area_id as f64));
+    state.push(Val::Num(if row.is_raid { row.id as f64 } else { 0.0 }));
+    state.push(Val::Bool(row.is_raid));
     state.push(Val::Num(row.map_id as f64));
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(row.is_raid));
 }
 
 fn push_instance_base_tuple(state: &mut LuaState, row: &data::Instance) {

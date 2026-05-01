@@ -132,9 +132,14 @@ fn test_get_instance_info_links_current_dungeons_to_lfd_ids() {
                 return "c_link=" .. tostring(linkDungeonID)
             end
 
-            local _, _, _, _, _, _, _, _, legacyLinkDungeonID = EJ_GetInstanceInfo(1271)
-            if legacyLinkDungeonID ~= 1201 then
-                return "legacy_link=" .. tostring(legacyLinkDungeonID)
+            local legacyShouldDisplayDifficulty = select(9, EJ_GetInstanceInfo(1271))
+            if legacyShouldDisplayDifficulty ~= false then
+                return "legacy_difficulty=" .. tostring(legacyShouldDisplayDifficulty)
+            end
+
+            local legacyIsRaid = select(12, EJ_GetInstanceInfo(1271))
+            if legacyIsRaid ~= false then
+                return "legacy_is_raid=" .. tostring(legacyIsRaid)
             end
 
             return "ok"
