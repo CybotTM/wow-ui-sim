@@ -69,6 +69,12 @@ const PLAN_NAMED_CATEGORIES_GLOBALS: &[&str] = &[
     "AchievementFrameCategories_SelectDefaultElementData",
     "AchievementFrameCategories_UpdateDataProvider",
 ];
+const PLAN_NAMED_ACHIEVEMENTS_GLOBALS: &[&str] = &[
+    "AchievementFrameAchievements_GetSelectedAchievementId",
+    "AchievementFrameAchievements_OnAchievementEarned",
+    "AchievementFrameAchievements_OnCriteriaUpdate",
+    "AchievementFrameAchievements_UpdateDataProvider",
+];
 
 #[test]
 fn achievement_frame_plan_named_globals_are_functions() {
@@ -159,6 +165,84 @@ fn achievement_frame_categories_plan_named_globals_are_functions() {
                  ExpandToCategory drives cross-tab navigation — a regression on any one of them \
                  would silently break either the panel's first-open population or the deep-link \
                  navigation flow. Got `type({name}) == \"function\"` returned false."
+            );
+        }
+    });
+}
+
+/// Pin the `AchievementFrameAchievements_*` selection-and-data-driver globals.
+///
+/// All four PLAN-named globals match the actual source verbatim — no
+/// spec/source mismatches in this batch. Each is declared via the
+/// `function <name>(...)` syntax in `Mainline/Blizzard_AchievementUI.lua`:
+///
+/// - `AchievementFrameAchievements_GetSelectedAchievementId` at line 890 —
+///   trampolines through `AchievementFrameAchievements_GetSelectedElementData`
+///   (line 886, which itself returns
+///   `g_achievementSelectionBehavior:GetFirstSelectedElementData()`) and
+///   returns `elementData and elementData.id or 0` — i.e. zero is the
+///   sentinel for "nothing currently selected", not a real achievement id.
+///   Zero-arg.
+///
+/// - `AchievementFrameAchievements_OnAchievementEarned` at line 895 — the
+///   ACHIEVEMENT_EARNED event handler. Calls `UpdateDataProvider` to rebuild
+///   the list, then conditionally invokes
+///   `AchievementFrame_SelectAndScrollToAchievementId(AchievementFrameAchievements.ScrollBox, achievementId)`
+///   only when the just-earned id matches the currently-selected one (so the
+///   list stays anchored on the player's focus), refreshes the category
+///   tooltip via `AchievementFrameCategories_UpdateTooltip()`, and
+///   re-renders the points header via
+///   `AchievementFrame.Header.Points:SetText(BreakUpLargeNumbers(GetTotalAchievementPoints(InGuildView())))`.
+///   Takes the freshly-earned achievement id.
+///
+/// - `AchievementFrameAchievements_OnCriteriaUpdate` at line 907 — the
+///   CRITERIA_UPDATE handler. Looks up the currently-selected element data,
+///   resolves the rendered button via `ScrollBox:FindFrame(selectedElementData)`,
+///   and re-runs `button:Init(selectedElementData)` to refresh the visible
+///   progress bars in place (no data provider rebuild — surgical update of
+///   the one frame whose criteria changed). Zero-arg.
+///
+/// - `AchievementFrameAchievements_UpdateDataProvider` at line 960 — the
+///   data-provider rebuild driver. Early-returns when the active category
+///   is "summary" (which uses a different rendering path), then resolves
+///   `numAchievements`/`numCompleted`/`completedOffset` via
+///   `ACHIEVEMENTUI_SELECTEDFILTER(category)`, toggles the
+///   `AchievementFrameAchievementsFeatOfStrengthText` visibility/text
+///   (choosing `GUILD_FEAT_OF_STRENGTH_DESCRIPTION` vs
+///   `FEAT_OF_STRENGTH_DESCRIPTION` based on `AchievementFrame.selectedTab == 2`),
+///   builds a fresh `CreateDataProvider()` by iterating
+///   `GetAchievementInfo(category, filteredIndex)` and inserting
+///   `{category, index, id}` records, and dispatches
+///   `ScrollBox:SetDataProvider(newDataProvider)` at the end. Zero-arg.
+#[test]
+fn achievement_frame_achievements_plan_named_globals_are_functions() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for name in PLAN_NAMED_ACHIEVEMENTS_GLOBALS {
+            let is_function = env
+                .eval::<bool>(&format!(r#"return type({name}) == "function""#))
+                .expect("file-scope global type probe must run cleanly");
+
+            assert!(
+                is_function,
+                "Global `{name}` MUST be a function after the smoke-shape harness loads \
+                 `Blizzard_AchievementUI`. Each entry in `PLAN_NAMED_ACHIEVEMENTS_GLOBALS` is \
+                 declared via `function <name>(...)` syntax in \
+                 `Mainline/Blizzard_AchievementUI.lua` (lines 890/895/907/960). A non-function \
+                 reading here proves either (a) the file chunk failed before reaching the \
+                 declaration (load.rs's `achievement_ui_load_emits_no_lane_specific_lua_errors` \
+                 would also fail in that case — the failure mode is multi-test), OR (b) the \
+                 selection/data-driver dispatch was re-shaped into a method on \
+                 `AchievementFrameAchievements` (a frame mixin) / removed / renamed (this \
+                 lane-specific test surfaces the API contract drift even when the load smoke \
+                 stays green). The four functions form one cohesive surface: \
+                 GetSelectedAchievementId reads the current selection's id (zero-default), \
+                 OnAchievementEarned is the ACHIEVEMENT_EARNED event entry-point that rebuilds \
+                 the data provider + conditionally scrolls + refreshes the points header, \
+                 OnCriteriaUpdate surgically refreshes the selected button's progress bars on \
+                 CRITERIA_UPDATE, and UpdateDataProvider rebuilds the ScrollBox's data \
+                 provider for the current category — a regression on any one of them would \
+                 silently break either the live progress display or the post-earn list refresh. \
+                 Got `type({name}) == \"function\"` returned false."
             );
         }
     });
