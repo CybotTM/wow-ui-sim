@@ -159,6 +159,15 @@ SimCommands:Register("Earn Achievement", "Earn an achievement by ID", function()
     end)
 end, "Collections")
 
+local RANDOM_ACHIEVEMENT_IDS = { 6, 7, 8, 9, 10, 11, 776 }
+
+SimCommands:Register("Earn Random Achievement", "Earn a random seeded achievement", function()
+    local id = RANDOM_ACHIEVEMENT_IDS[math.random(#RANDOM_ACHIEVEMENT_IDS)]
+    if id then
+        A_Admin.EarnAchievement(id)
+    end
+end, "Collections")
+
 SimCommands:Register("Toggle Debug Borders", "Red borders around elements", function()
     A_Admin.ToggleDebugBorders()
 end, "Debug")

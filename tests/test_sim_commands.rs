@@ -654,6 +654,57 @@ fn builtin_earn_achievement_registered() {
 }
 
 #[test]
+fn builtin_earn_random_achievement_earns_and_notifies_toast_listener() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local randomAchievement
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Earn Random Achievement" then
+                    randomAchievement = cmd
+                    break
+                end
+            end
+            if not randomAchievement then return "missing_command" end
+
+            local originalRandom = math.random
+            math.random = function(max)
+                if max == nil then return 0.5 end
+                return 3
+            end
+
+            local toast = CreateFrame("Frame", "RandomAchievementToastTest", UIParent)
+            toast:RegisterEvent("ACHIEVEMENT_EARNED")
+            toast:SetScript("OnEvent", function(self, event, achievementID)
+                local _, name = GetAchievementInfo(achievementID)
+                self.event = event
+                self.achievementID = achievementID
+                self.achievementName = name
+            end)
+
+            randomAchievement.action()
+            math.random = originalRandom
+
+            local _, name, _, completed = GetAchievementInfo(8)
+            return table.concat({
+                tostring(completed == true),
+                tostring(toast.event),
+                tostring(toast.achievementID),
+                tostring(toast.achievementName),
+                tostring(name),
+            }, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "true|ACHIEVEMENT_EARNED|8|Level 30|Level 30",
+        "random achievement command should earn a seeded achievement and notify the toast event listener"
+    );
+}
+
+#[test]
 fn builtin_toggle_debug_borders() {
     let env = env();
     let result: String = env
