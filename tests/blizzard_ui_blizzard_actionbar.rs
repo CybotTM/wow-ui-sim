@@ -39,3 +39,6 @@ mod behavior_stance_select;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_pet_bar_update.rs"]
 mod behavior_pet_bar_update;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_possess_bar_show.rs"]
+mod behavior_possess_bar_show;

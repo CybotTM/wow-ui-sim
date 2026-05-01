@@ -380,7 +380,8 @@ fn has_extra_action_bar(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_possess_bar_visible(state: &mut LuaState) -> LuaResult<u32> {
-    push_bool(state, false)
+    let visible = borrow_state(state)?.action_bar_state.possess_bar_visible;
+    push_bool(state, visible)
 }
 
 fn get_action_text(state: &mut LuaState) -> LuaResult<u32> {

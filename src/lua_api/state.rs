@@ -484,6 +484,14 @@ pub struct ActionHighlightState {
 pub struct ActionBarStateInfo {
     pub busy: bool,
     pub current_state: i32,
+    /// Drives `C_ActionBar.IsPossessBarVisible()`. True while a
+    /// pet/vehicle possession is granting the player the 2-slot
+    /// `PossessActionBar`. `PossessActionBarMixin:Update`
+    /// (`Blizzard_ActionBar/Shared/PossessActionBar.lua:10-22`) calls
+    /// `IsPossessBarVisible()` to decide whether to `:Show()` the bar
+    /// (when true and not currently shown) or `:Hide()` it (when false
+    /// and currently shown). Default false — no possession active.
+    pub possess_bar_visible: bool,
 }
 
 impl Default for ActionBarStateInfo {
@@ -491,6 +499,7 @@ impl Default for ActionBarStateInfo {
         Self {
             busy: false,
             current_state: 1,
+            possess_bar_visible: false,
         }
     }
 }
