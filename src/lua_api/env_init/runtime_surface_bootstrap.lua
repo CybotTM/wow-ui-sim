@@ -6759,7 +6759,6 @@ local function __wow_pet_battle_seed_sample()
   end
 
   __wow_pet_battle_state.sampleSeeded = true
-  __wow_pet_battle_state.battleState = __wow_pet_battle_waiting_state
   __wow_pet_battle_state.numPetsPlayer = 3
   __wow_pet_battle_state.numPetsEnemy = 2
   __wow_pet_battle_state.isWildBattle = true
