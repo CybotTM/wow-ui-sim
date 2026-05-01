@@ -173,23 +173,12 @@ fn plan_named_frames_have_their_mixins_applied() {
                 assert!(
                     ok,
                     "Expected `{frame_name}.{method}` to be the same function as \
-                     `{mixin_name}.{method}` after `{ROOT}` loads. The XML at \
-                     `{frame_xml_site}` declares this frame's mixin (directly via \
-                     `mixin=\"{mixin_name}\"` for the bars and \
-                     `MainMenuBarVehicleLeaveButton`, OR via the inherited \
-                     `ExtraActionButtonTemplate` for `ExtraActionButton1` — see \
-                     `Shared/ExtraActionBar.xml:3`). The XML codegen at \
-                     `src/loader/xml_frame_codegen.rs:155-173` expands the attribute into \
-                     `Mixin(frame, {mixin_name})`, and the shared `Mixin(object, ...)` \
-                     impl in `src/lua_api/env_init/shared_bootstrap.lua` does \
-                     `object[k] = v` for every key. The mixin source at `{mixin_lua_site}` \
-                     declares `function {mixin_name}:{method}(...) end`. A failure on the \
-                     `{mixin_name}.{method}` half means the source file failed to execute \
-                     past that line. A failure on the `{frame_name}.{method}` half means \
-                     either the codegen Mixin call did not run (registered handlers like \
-                     XML script bindings would call `self:{method}()` and nil-call) or the \
-                     frame's per-instance fenv table was rebuilt post-Mixin and dropped \
-                     the copied keys.",
+                     `{mixin_name}.{method}` after `{ROOT}` loads. XML at \
+                     `{frame_xml_site}` declares the mixin (direct or inherited via \
+                     template); codegen at `src/loader/xml_frame_codegen.rs:155-173` \
+                     expands to `Mixin(frame, {mixin_name})`. Mixin source at \
+                     `{mixin_lua_site}` declares the method. Failure means source \
+                     load stopped early OR the Mixin codegen call did not run.",
                     frame_name = pin.frame_name,
                     mixin_name = pin.mixin_name,
                     frame_xml_site = pin.frame_xml_site,
@@ -507,14 +496,10 @@ fn action_bar_button_and_base_action_button_mixins_pin_plan_named_and_source_add
 
         assert_eq!(
             present_method_type, "function",
-            "Expected `BaseActionButtonMixin.{BASE_ACTION_BUTTON_PRESENT_PLAN_METHOD}` to be \
-             a function — declared as a stub at `{ACTION_BUTTON_LUA_SITE}:1546` and \
-             overridden by `Mainline/ActionButtonOverrides.lua:2` (the real Mainline body \
-             switches `UI-HUD-ActionBar-IconFrame*` vs \
-             `UI-HUD-ActionBar-IconFrame-AddRow*` atlases on `SlotArt`/`SlotBackground`). \
-             False reading: stub failed to load (every action button's `:UpdateButtonArt()` \
-             call at `BaseActionButtonMixin_OnLoad` lua:1505 nil-calls), or the override \
-             failed and removed the stub."
+            "Expected `BaseActionButtonMixin.{BASE_ACTION_BUTTON_PRESENT_PLAN_METHOD}` to be a \
+             function — stub at `{ACTION_BUTTON_LUA_SITE}:1546`, overridden by \
+             `Mainline/ActionButtonOverrides.lua:2`. False reading: stub or override failed \
+             to load."
         );
 
         for method in PLAN_NAMED_BUTTON_METHODS {
@@ -529,18 +514,10 @@ fn action_bar_button_and_base_action_button_mixins_pin_plan_named_and_source_add
             assert_eq!(
                 method_type, "nil",
                 "Expected `BaseActionButtonMixin.{method}` to be nil after `{ROOT}` \
-                 loads, got `{method_type}`. PLAN names this method, but source declares \
+                 loads, got `{method_type}`. PLAN names this method, but source places \
                  it on the sibling `ActionBarActionButtonMixin` (lua:442) — NOT on \
-                 `BaseActionButtonMixin`: OnLoad lua:444, UpdateAction lua:529, \
-                 UpdateState lua:673, UpdateUsable lua:679, MatchesActiveButtonSpellID \
-                 lua:944, OnEvent lua:966, SetTooltip lua:1101, OnEnter lua:1419, OnLeave \
-                 lua:1432. Plain `OnLoad`/`OnEnter`/`OnLeave` on the named mixins use \
-                 prefixed variants (`BaseActionButtonMixin_OnLoad` lua:1502 etc.) so the \
-                 `ActionBarButtonTemplate -> ActionButtonTemplate` chain at \
-                 `Mainline/ActionButtonTemplate.xml:189`->xml:4 composes Mixins without \
-                 name collision. Non-nil reading: source moved the method onto \
-                 `BaseActionButtonMixin`, which would shadow the sibling's contract — \
-                 spec needs review."
+                 `BaseActionButtonMixin`. Non-nil reading: source moved the method onto \
+                 `BaseActionButtonMixin`, which would shadow the sibling's contract."
             );
         }
 
@@ -552,16 +529,10 @@ fn action_bar_button_and_base_action_button_mixins_pin_plan_named_and_source_add
             assert_eq!(
                 method_type, "nil",
                 "Expected `ActionBarButtonMixin.{method}` to be nil after `{ROOT}` loads, \
-                 got `{method_type}`. PLAN names this method, but `ActionBarButtonMixin` \
-                 (lua:1603) only declares 4 prefixed forwarders \
-                 (`ActionBarButtonMixin_OnLoad`/`OnEnter`/`OnLeave`/`OnDragStart` at \
-                 lua:1605/1610/1615/1620), each delegating to BOTH `BaseActionButtonMixin` \
-                 (the corresponding `BaseActionButtonMixin_*` entry) and \
-                 `ActionBarActionButtonDerivedMixin` (the derived sibling at lua:1444 \
-                 created from `ActionBarActionButtonMixin`). The 10 PLAN-named methods \
-                 reach frames through `ActionBarActionButtonDerivedMixin`, NOT \
-                 `ActionBarButtonMixin` directly. Non-nil reading: source added the \
-                 method on `ActionBarButtonMixin` directly — spec needs review."
+                 got `{method_type}`. `ActionBarButtonMixin` (lua:1603) only declares 4 \
+                 prefixed forwarders (`ActionBarButtonMixin_OnLoad`/`OnEnter`/`OnLeave`/\
+                 `OnDragStart`); the PLAN-named methods reach frames through \
+                 `ActionBarActionButtonDerivedMixin`. Non-nil reading: spec drift."
             );
         }
 
@@ -573,16 +544,10 @@ fn action_bar_button_and_base_action_button_mixins_pin_plan_named_and_source_add
             assert_eq!(
                 method_type, "function",
                 "Expected `BaseActionButtonMixin.{method}` to be a function after \
-                 `{ROOT}` loads, got `{method_type}`. PLAN omits this method, but source \
-                 declares it as a direct `function BaseActionButtonMixin:{method}(...)` \
-                 in `{ACTION_BUTTON_LUA_SITE}` between lua:1502 and 1551. Pinned as a \
-                 tripwire: the prefixed chain entries (`BaseActionButtonMixin_OnLoad` \
-                 etc.) are the actual XML-script targets via the prefixed forwarders on \
-                 the sibling `ActionBarButtonMixin`; dropping any breaks Mixin chain \
-                 composition. The grid-attribute helpers \
-                 (`GetShowGrid`/`SetShowGrid`/`UpdateFlyout`) are referenced by \
-                 `ActionBarMixin:ActionBar_OnLoad` (`Shared/ActionBar.lua:46-54`) and \
-                 the `BaseActionButtonMixin_OnLoad` body (lua:1505-1506)."
+                 `{ROOT}` loads, got `{method_type}`. Source declares it directly in \
+                 `{ACTION_BUTTON_LUA_SITE}` (lua:1502-1551). Tripwire: prefixed chain \
+                 entries are XML-script targets; grid helpers are called from \
+                 `ActionBarMixin:ActionBar_OnLoad` and `BaseActionButtonMixin_OnLoad`."
             );
         }
 
@@ -595,12 +560,9 @@ fn action_bar_button_and_base_action_button_mixins_pin_plan_named_and_source_add
                 method_type, "function",
                 "Expected `ActionBarButtonMixin.{method}` to be a function after \
                  `{ROOT}` loads, got `{method_type}`. Source declares the prefixed \
-                 forwarder in `{ACTION_BUTTON_LUA_SITE}` between lua:1605 and 1620; \
-                 each delegates to BOTH `BaseActionButtonMixin.BaseActionButtonMixin_*` \
-                 and `ActionBarActionButtonDerivedMixin.ActionBarActionButtonDerivedMixin_*` \
-                 (lua:1606-1607 etc.). Without these forwarders, the \
-                 `ActionBarButtonTemplate` script handlers fail to compose the two \
-                 parent Mixin chains."
+                 forwarder in `{ACTION_BUTTON_LUA_SITE}` (lua:1605-1620), each delegating \
+                 to both `BaseActionButtonMixin_*` and \
+                 `ActionBarActionButtonDerivedMixin_*` siblings."
             );
         }
     });
@@ -745,6 +707,42 @@ fn analyzer_inventory_mixins_publish_their_documented_methods() {
                     lua_site = inventory.lua_site,
                 );
             }
+        }
+    });
+}
+
+/// Status-tracking and spell-flyout mixins PLAN names as "tables".
+/// Existence-only contract — no method inventory.
+const STATUS_AND_FLYOUT_BAR_MIXINS: &[(&str, &str)] = &[
+    ("SpellFlyoutPopupButtonMixin", "Shared/SpellFlyout.lua:8"),
+    ("SpellFlyoutMixin", "Shared/SpellFlyout.lua:151"),
+    ("StatusTrackingBarMixin", "Shared/StatusTrackingBar.lua:1"),
+    ("ExpBarMixin", "Shared/ExpBar.lua:2"),
+    ("ExhaustionTickMixin", "Shared/ExpBar.lua:111"),
+    ("ReputationStatusBarMixin", "Shared/ReputationBar.lua:40"),
+    ("HonorBarMixin", "Mainline/HonorBar.lua:5"),
+    ("AzeriteBarMixin", "Mainline/AzeriteBar.lua:12"),
+    ("ArtifactBarMixin", "Mainline/ArtifactBar.lua:5"),
+    ("ArtifactTickMixin", "Mainline/ArtifactBar.lua:110"),
+    ("HouseFavorBarMixin", "Mainline/HouseFavorBar.lua:11"),
+];
+
+/// Pin the 11 PLAN-named status-tracking/spell-flyout mixins as tables.
+/// Single test loops `STATUS_AND_FLYOUT_BAR_MIXINS` and asserts each
+/// global's `type` is `"table"` after addon load. 11 assertions total.
+#[test]
+fn status_tracking_and_flyout_bar_mixins_publish_as_tables() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for (name, lua_site) in STATUS_AND_FLYOUT_BAR_MIXINS {
+            let mixin_type: String = env
+                .eval(&format!("return type(_G.{name})"))
+                .expect("mixin global probe must run cleanly");
+            assert_eq!(
+                mixin_type, "table",
+                "Expected `_G.{name}` to be a table after `{ROOT}` loads (declared at \
+                 `{lua_site}`), got `{mixin_type}`. Nil reading: source file failed to \
+                 load, or the `MixinName = {{}}` line was dropped."
+            );
         }
     });
 }
