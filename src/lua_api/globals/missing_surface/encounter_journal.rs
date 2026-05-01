@@ -470,9 +470,17 @@ fn ej_get_creature_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(name);
     state.push(description);
     state.push(Val::Num(c.display_id as f64));
-    state.push(Val::Num(c.icon_file_id as f64));
+    state.push(optional_file_data_id(c.icon_file_id));
     state.push(Val::Num(c.model_scene_id as f64));
     Ok(6)
+}
+
+fn optional_file_data_id(file_data_id: u32) -> Val {
+    if file_data_id == 0 {
+        Val::Nil
+    } else {
+        Val::Num(file_data_id as f64)
+    }
 }
 
 fn ej_select_instance(state: &mut LuaState) -> LuaResult<u32> {
