@@ -326,6 +326,45 @@ fn blizzard_frame_xml_publishes_canonical_overlay_and_toast_mixins() {
 }
 
 #[test]
+fn earning_achievement_displays_achievement_alert_toast() {
+    let env = load_full_game_ui();
+    wow_ui_sim::startup::run_extra_update_ticks(&env, 1);
+
+    let result: String = env
+        .eval(
+            r#"
+            if not AlertFrame or not AchievementAlertSystem then
+                return "missing_alert_system"
+            end
+
+            A_Admin.EarnAchievement(6)
+
+            local visibleCount = AchievementAlertSystem:GetNumVisibleAlerts()
+            local toastName = nil
+            local toastShown = false
+            for frame in AchievementAlertSystem.alertFramePool:EnumerateActive() do
+                toastShown = frame:IsShown()
+                toastName = frame.Name and frame.Name:GetText() or nil
+                break
+            end
+
+            return table.concat({
+                tostring(AlertFrame:AreAlertsEnabled()),
+                tostring(visibleCount),
+                tostring(toastShown),
+                tostring(toastName),
+            }, "|")
+            "#,
+        )
+        .expect("earning an achievement should let FrameXML show the achievement alert");
+
+    assert_eq!(
+        result, "true|1|true|Level 10",
+        "earning achievement 6 should display one visible achievement alert toast with the achievement name"
+    );
+}
+
+#[test]
 fn blizzard_frame_xml_publishes_equipment_manager_inventory_and_bag_slot_tables() {
     let env = load_full_game_ui();
 

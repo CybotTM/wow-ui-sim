@@ -93,6 +93,12 @@ const GLUE_LOGIN_HIDE_CHAT: &str = r#"
     if CharCustomizeFrame then CharCustomizeFrame:Hide() end
 "#;
 
+const UNBLOCK_HIDDEN_SPLASH_ALERTS: &str = r#"
+    if AlertFrame and SplashFrame and not SplashFrame:IsShown() then
+        AlertFrame:SetAlertsEnabled(true, "splashFrame")
+    end
+"#;
+
 fn log_with_timestamp(env: &WowLuaEnv, message: &str) {
     let start_time = env.state().borrow().start_time;
     eprintln!("{} {}", crate::logging::elapsed_prefix(start_time), message);
@@ -186,12 +192,18 @@ fn dismiss_headless_glue_overlays(env: &WowLuaEnv) {
     );
 }
 
+fn unblock_hidden_splash_alerts(env: &WowLuaEnv) {
+    let _ = env.exec(UNBLOCK_HIDDEN_SPLASH_ALERTS);
+}
+
 /// Fire startup events to simulate WoW login sequence.
 pub fn fire_startup_events(env: &WowLuaEnv) {
     env.set_screen_mode(ScreenKind::Game);
     fire_login_sequence(env, false);
     fire_world_enter_sequence(env);
     fire_post_login_events(env);
+    fire_simple_event(env, "FIRST_FRAME_RENDERED");
+    unblock_hidden_splash_alerts(env);
     env.apply_post_event_workarounds();
 }
 
