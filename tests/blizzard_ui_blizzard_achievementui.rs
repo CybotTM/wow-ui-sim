@@ -48,3 +48,6 @@ mod behavior_comparison_clear;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_comparison_portrait.rs"]
 mod behavior_comparison_portrait;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_achievement_earned_event.rs"]
+mod behavior_achievement_earned_event;
