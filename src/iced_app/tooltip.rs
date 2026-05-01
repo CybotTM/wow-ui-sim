@@ -305,6 +305,8 @@ pub fn build_tooltip_quads(
 
     if tooltip.draw_background {
         emit_tooltip_background(tooltip.batch, tooltip.bounds, tooltip.eff_alpha);
+    } else {
+        emit_tooltip_center_fill(tooltip.batch, tooltip.bounds, tooltip.eff_alpha);
     }
 
     let Some((font_sys, glyph_atlas)) = text_ctx else {
@@ -326,6 +328,25 @@ fn emit_tooltip_background(batch: &mut QuadBatch, bounds: Rectangle, alpha: f32)
     } else {
         batch.push_solid(bounds, [0.0, 0.0, 0.0, alpha]);
         batch.push_border(bounds, 1.0, [0.6, 0.5, 0.15, alpha]);
+    }
+}
+
+fn emit_tooltip_center_fill(batch: &mut QuadBatch, bounds: Rectangle, alpha: f32) {
+    let center_color = [0.0, 0.0, 0.0, alpha];
+    let Some(ns) = tooltip_nine_slice() else {
+        batch.push_solid(bounds, center_color);
+        return;
+    };
+
+    let x = bounds.x + ns.corner_tl.width as f32;
+    let y = bounds.y + ns.corner_tl.height as f32;
+    let width = bounds.width - ns.corner_tl.width as f32 - ns.corner_tr.width as f32;
+    let height = bounds.height - ns.corner_tl.height as f32 - ns.corner_bl.height as f32;
+    if width > 0.0 && height > 0.0 {
+        batch.push_solid(
+            Rectangle::new(Point::new(x, y), Size::new(width, height)),
+            center_color,
+        );
     }
 }
 
@@ -671,6 +692,13 @@ mod tests {
             .vertices
             .iter()
             .any(|vertex| vertex.tex_index == GLYPH_ATLAS_TEX_INDEX && vertex.color == color)
+    }
+
+    fn has_solid_color(batch: &QuadBatch, color: [f32; 4]) -> bool {
+        batch
+            .vertices
+            .iter()
+            .any(|vertex| vertex.tex_index == -1 && vertex.color == color)
     }
 
     fn glyph_bounds_for_color(batch: &QuadBatch, color: [f32; 4]) -> Option<(f32, f32, f32, f32)> {
@@ -1059,6 +1087,47 @@ mod tests {
         assert!(
             glyph_bounds(&batch).is_some(),
             "Skipping the fallback background must still render tooltip text"
+        );
+    }
+
+    #[test]
+    fn tooltip_renderer_keeps_opaque_center_when_lua_nineslice_exists() {
+        let data = TooltipRenderData {
+            lines: vec![TooltipLineRender {
+                left_text: "Header".to_string(),
+                left_color: [1.0, 1.0, 1.0, 1.0],
+                left_segments: Vec::new(),
+                right_text: None,
+                right_color: [1.0, 1.0, 1.0, 1.0],
+                right_segments: Vec::new(),
+                font_size: TOOLTIP_HEADER_FONT_SIZE,
+                wrap: false,
+                measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+            }],
+            line_spacing: TOOLTIP_LINE_SPACING,
+        };
+
+        let mut batch = QuadBatch::new();
+        let mut font_sys = WowFontSystem::new();
+        let mut glyph_atlas = GlyphAtlas::new();
+        let tooltip_data = HashMap::from([(42_u64, data)]);
+        let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
+
+        build_tooltip_quads(
+            TooltipRender {
+                batch: &mut batch,
+                bounds: Rectangle::new(Point::new(100.0, 200.0), Size::new(160.0, 80.0)),
+                tooltip_data: Some(&tooltip_data),
+                id: 42,
+                eff_alpha: 1.0,
+                draw_background: false,
+            },
+            &mut text_ctx,
+        );
+
+        assert!(
+            has_solid_color(&batch, [0.0, 0.0, 0.0, 1.0]),
+            "Lua-owned tooltip NineSlice should still get an opaque black center fill"
         );
     }
 }

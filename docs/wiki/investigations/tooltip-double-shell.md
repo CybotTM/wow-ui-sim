@@ -21,10 +21,13 @@ Added a post-load workaround that creates a tooltip `NineSlice` only after Blizz
 
 Changed the Rust tooltip renderer to draw its fallback background only when the tooltip frame does **not** already expose a `NineSlice` child.
 
+Follow-up: that ownership check must only suppress the fallback border/shell. The tooltip frame still emits a center-only black fill when Lua owns the `NineSlice`, because `GameTooltip.NineSlice` can exist before the simulator has a renderable opaque center texture. Without that fill, underlying UI text can show through the tooltip body.
+
 ## Verification
 
 - `cargo test --test tooltip_text` passes, including `test_tooltip_nineslice_child_accessible`
 - `iced_app::tooltip::tests::tooltip_renderer_skips_fallback_background_when_lua_nineslice_exists` passes
+- `iced_app::tooltip::tests::tooltip_renderer_keeps_opaque_center_when_lua_nineslice_exists` passes
 
 ## Sources
 
