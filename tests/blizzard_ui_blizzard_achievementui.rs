@@ -30,3 +30,6 @@ mod behavior_progress_bar;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_summary_update.rs"]
 mod behavior_summary_update;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_button_click_link.rs"]
+mod behavior_button_click_link;
