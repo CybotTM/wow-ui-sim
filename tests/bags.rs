@@ -6,6 +6,7 @@
 mod common;
 
 use std::path::PathBuf;
+use wow_ui_sim::iced_app::build_quad_batch_for_registry;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -188,6 +189,35 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
 
 fn clear_recorded_lua_errors(env: &WowLuaEnv) {
     common::panel_fixtures::clear_recorded_lua_errors(env);
+}
+
+fn build_texture_requests(env: &WowLuaEnv) -> Vec<String> {
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        let _ = state.get_strata_buckets();
+        state
+            .strata_buckets
+            .as_ref()
+            .expect("strata buckets should be initialized")
+            .clone()
+    };
+    let state = env.state().borrow();
+    let batch = build_quad_batch_for_registry(
+        &state.widgets,
+        (1024.0, 768.0),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        &buckets,
+    );
+    batch
+        .texture_requests
+        .iter()
+        .map(|request| request.path.clone())
+        .collect()
 }
 
 fn assert_no_bag_open_errors(env: &WowLuaEnv, context: &str) {
@@ -563,6 +593,16 @@ fn test_new_bag_item_button_icon_matches_its_slot_after_refresh() {
             if width < 30 or height < 30 then
                 return string.format("icon_too_small_%s_%s", tostring(width), tostring(height))
             end
+            local left, right, top, bottom = button.icon:GetTexCoord()
+            if left ~= 0 or right ~= 1 or top ~= 0 or bottom ~= 1 then
+                return string.format(
+                    "icon_has_stale_tex_coords_%s_%s_%s_%s",
+                    tostring(left),
+                    tostring(right),
+                    tostring(top),
+                    tostring(bottom)
+                )
+            end
             return "ok"
             "#,
         )
@@ -571,6 +611,15 @@ fn test_new_bag_item_button_icon_matches_its_slot_after_refresh() {
     assert_eq!(
         result, "ok",
         "Copper Chain Pants bag button should render the slot's item icon: {result}"
+    );
+
+    let textures = build_texture_requests(&env);
+    assert!(
+        textures
+            .iter()
+            .any(|path| path.to_ascii_lowercase().contains("inv_pants_03")),
+        "render batch should request the Copper Chain Pants icon, got {} texture requests",
+        textures.len()
     );
 }
 
