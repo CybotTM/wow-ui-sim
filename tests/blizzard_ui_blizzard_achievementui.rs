@@ -84,3 +84,6 @@ mod behavior_expand_collapse;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_saturate.rs"]
 mod behavior_saturate;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_track_toggle.rs"]
+mod behavior_track_toggle;
