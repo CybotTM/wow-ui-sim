@@ -132,6 +132,20 @@ const PLAN_NAMED_HIGHLIGHT_GLOBALS: &[&str] = &[
     "UpdateOnBarHighlightMarksByPetAction",
     "GetActionButtonForID",
 ];
+const PLAN_NAMED_MULTIBAR_GLOBALS: &[&str] = &[
+    "MultiActionBar_Update",
+    "MultiActionBar_ShowAllGrids",
+    "MultiActionBar_HideAllGrids",
+    "MultiActionBar_GetBarForPage",
+    "MultiBar1_IsVisible",
+    "MultiBar2_IsVisible",
+    "MultiBar3_IsVisible",
+    "MultiBar4_IsVisible",
+    "MultiBar5_IsVisible",
+    "MultiBar6_IsVisible",
+    "MultiBar7_IsVisible",
+    "IsNormalActionBarState",
+];
 
 #[test]
 fn action_bar_plan_named_input_globals_are_functions() {
@@ -288,6 +302,110 @@ fn action_bar_plan_named_highlight_tracking_globals_are_functions() {
                  declaration didn't run, the re-bind would create an out-of-band global that \
                  readers of the original file-scope name wouldn't see. Got `type({name}) == \
                  \"function\"` returned false."
+            );
+        }
+    });
+}
+
+/// Pin the multi-bar driver/visibility globals — the surface that
+/// `EditMode`, `MainMenuBar`, and addon authors consume to query and
+/// drive the state of the secondary action bars (BottomLeft / BottomRight
+/// / Right / Right2 plus the three additional bars added in newer
+/// patches).
+///
+/// PLAN.md task: `MultiActionBar_Update`, `MultiActionBar_ShowAllGrids`,
+/// `MultiActionBar_HideAllGrids`, `MultiActionBar_GetBarForPage`,
+/// `MultiBar1_IsVisible` … `MultiBar7_IsVisible`,
+/// `IsNormalActionBarState` are functions.
+///
+/// All 12 PLAN-named globals match the actual Blizzard source verbatim
+/// and live in a single file: `Shared/MultiActionBars.lua`. Each is
+/// declared via `function <name>(...)` syntax binding to `_G` at file-
+/// chunk execution time. Source map (line numbers in
+/// `Shared/MultiActionBars.lua`):
+///
+/// - `IsNormalActionBarState()` at `lua:53` — single-line predicate:
+///   `return MainActionBar:IsShown()`. The other multi-bar logic
+///   gates on this — when the override bar is up (vehicle / possess),
+///   `MainActionBar` hides and the multi-bars suppress their visibility
+///   tracking via `UpdateMultiActionBar` at lua:78-93.
+///
+/// - `MultiActionBar_Update()` at `lua:95` — driver that walks the
+///   table returned by `GetMultiActionBars()` (file-local at lua:58)
+///   and dispatches `UpdateMultiActionBar(bar, isVisible, page)` for
+///   each entry. The page argument feeds `VIEWABLE_ACTION_BAR_PAGES`
+///   so `ActionBar_PageUp`/`PageDown` can skip pages bound to hidden
+///   bars. Zero-arg.
+///
+/// - `MultiActionBar_ShowAllGrids(reason)` at `lua:104` — calls
+///   `barEntry.bar:SetShowGrid(true, reason)` on every multi-bar.
+///   The `reason` is one of the `ACTION_BUTTON_SHOW_GRID_REASON_*`
+///   constants (CVAR / EVENT / SPELLCOLLECTION at
+///   `Shared/ActionButton.lua:12-14`) so the bar can refcount overlapping
+///   show-grid sources and only hide when ALL reasons clear.
+///
+/// - `MultiActionBar_HideAllGrids(reason)` at `lua:113` — counterpart
+///   that calls `SetShowGrid(false, reason)` against the same reason
+///   tag. The bar's own refcounted state at the SetShowGrid level
+///   ensures pairing with the matching ShowAllGrids call.
+///
+/// - `MultiActionBar_GetBarForPage(page)` at `lua:131` — single
+///   expression: `return (bars and bars[page]) and bars[page].bar or
+///   nil`. The double-guard handles two failure modes — first the
+///   addon-not-yet-loaded case (`GetMultiActionBars()` returns nil
+///   before `MainActionBar` is available; see file-local at lua:60),
+///   second the page-not-mapped case (only pages 3/4/5/6/13/14/15 map
+///   to multi-bars; querying page 1 or 2 returns nil because they're
+///   bound to `MainActionBar` itself).
+///
+/// - `MultiBar1_IsVisible()` … `MultiBar7_IsVisible()` at
+///   `lua:140/144/148/152/156/160/164` — seven trampolines that each
+///   delegate to the file-local `IsMultibarVisible(index)` (lua:17)
+///   with their respective indices 1-7. The trampoline pattern exists
+///   because `EditMode` and `MainMenuBar` register frame-show
+///   callbacks that name a specific MultiBar by number, so each bar
+///   needs its own globally-named accessor. Internally they all read
+///   from `Settings.GetValue("PROXY_SHOW_ACTIONBAR_<N+1>")` (note the
+///   off-by-one: `MultiBar1` reads `PROXY_SHOW_ACTIONBAR_2` because
+///   `_1` is the main bar). Zero-arg surface.
+///
+/// **Note on the gap dependency.** This batch's PLAN line has NO
+/// `(depends-on:)` suffix — none of these globals are pre-published by
+/// the simulator's `runtime_surface_bootstrap.lua` / Rust env-init.
+/// The contract is therefore one-way: a nil reading on any of these
+/// globals proves the addon's `Shared/MultiActionBars.lua` file chunk
+/// failed before reaching the declaration line. There is no fallback
+/// publisher, unlike the input-globals and highlight-tracking batches
+/// above. This makes the test a STRICTER tripwire than the prior two —
+/// a partial-load regression that breaks the multi-bar Lua chunk would
+/// be caught here even when other action-bar surface tests still pass.
+#[test]
+fn action_bar_plan_named_multibar_globals_are_functions() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for name in PLAN_NAMED_MULTIBAR_GLOBALS {
+            let is_function = env
+                .eval::<bool>(&format!(r#"return type({name}) == "function""#))
+                .expect("file-scope global type probe must run cleanly");
+
+            assert!(
+                is_function,
+                "Global `{name}` MUST be a function after the startup-shape harness loads \
+                 `Blizzard_ActionBar`. Each entry in `PLAN_NAMED_MULTIBAR_GLOBALS` is declared \
+                 via `function <name>(...)` syntax in `Shared/MultiActionBars.lua` \
+                 (lines 53/95/104/113/131/140/144/148/152/156/160/164). Unlike the input-globals \
+                 and highlight-tracking batches above, this batch has NO simulator-side gap-fill \
+                 pre-publish (PLAN line carries no `depends-on:` suffix). The contract is \
+                 therefore one-way: a nil reading proves the addon's file chunk failed before \
+                 reaching the declaration — no fallback publisher exists. A non-function reading \
+                 also flags any of: (a) the file chunk failed before this declaration line \
+                 (load.rs's `action_bar_load_emits_no_lane_specific_lua_errors` would also fail \
+                 in that case — multi-test failure mode), OR (b) Blizzard re-shaped the multi-bar \
+                 surface — e.g. moved `MultiBar1_IsVisible` … `_IsVisible` onto a single \
+                 `MultiActionBar_IsVisible(index)` accessor (which would break every \
+                 EditMode/MainMenuBar consumer that names a specific MultiBar by number), OR \
+                 (c) the file-local `IsMultibarVisible` (lua:17) was renamed and the trampolines \
+                 still reference the old name — a parse-time success but a runtime failure on \
+                 first call. Got `type({name}) == \"function\"` returned false."
             );
         }
     });
