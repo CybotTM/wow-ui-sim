@@ -560,8 +560,16 @@ fn appearance_row(
     set_number_field(state, row, "itemID", appearance.item_id);
     set_bool_field(state, row, "isCollected", appearance.is_collected);
     set_bool_field(state, row, "playerCanCollect", true);
+    set_bool_field(state, row, "canDisplayOnPlayer", true);
+    set_bool_field(state, row, "isUsable", true);
+    set_bool_field(state, row, "isValidSourceForPlayer", true);
+    set_bool_field(state, row, "isHideVisual", false);
+    set_bool_field(state, row, "isFavorite", false);
     set_number_field(state, row, "sourceType", appearance.source_type);
     set_number_field(state, row, "itemModID", appearance.item_mod_id);
+    set_number_field(state, row, "quality", 4);
+    let name = create_string(state, &format!("Item {}", appearance.item_id));
+    table_set(state, row, "name", name);
     if let Some(ui_order) = ui_order {
         set_number_field(state, row, "uiOrder", ui_order);
     }

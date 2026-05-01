@@ -415,6 +415,49 @@ fn startup_wardrobe_can_switch_from_armor_to_weapon_slot() {
 }
 
 #[test]
+fn startup_wardrobe_head_appearances_are_displayable() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: String = env
+            .eval(
+                r#"
+                ToggleCollectionsJournal(5)
+                if CollectionsJournal and CollectionsJournal_SetTab then
+                    CollectionsJournal_SetTab(CollectionsJournal, 5)
+                end
+
+                local itemsFrame = WardrobeCollectionFrame and WardrobeCollectionFrame.ItemsCollectionFrame
+                if not itemsFrame then
+                    return "missing_items_frame"
+                end
+
+                local headLocation = TransmogUtil.GetTransmogLocation("HEADSLOT", Enum.TransmogType.Appearance, false)
+                if not headLocation then
+                    return "missing_head_location"
+                end
+
+                itemsFrame:SetActiveSlot(headLocation)
+                local model = itemsFrame.Models and itemsFrame.Models[1]
+                if not model or not model.visualInfo then
+                    return "missing_visual_info"
+                end
+                if not model.visualInfo.canDisplayOnPlayer then
+                    return "not_displayable"
+                end
+                if model.SlotInvalidTexture:IsShown() then
+                    return "invalid_overlay_shown"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("wardrobe displayability probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
+
+#[test]
 fn cursor_hovered_item_globals_are_callable() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
