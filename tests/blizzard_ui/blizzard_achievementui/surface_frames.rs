@@ -262,3 +262,139 @@ fn achievement_frame_plan_named_children_are_reachable_as_parent_properties() {
         }
     });
 }
+
+const COMPARISON_FRAME_NAME: &str = "AchievementFrameComparison";
+const COMPARISON_XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:2080";
+
+/// PLAN-named comparison-subtree paths. Each tuple is `(lua_path, xml_site,
+/// routing_kind)` where `lua_path` is the dotted access from
+/// `AchievementFrameComparison`, `xml_site` is the source declaration, and
+/// `routing_kind` is `"parentKey"` when the XML uses an explicit
+/// `parentKey="<Key>"` attribute and `"name-prefix"` when the XML uses
+/// `name="$parent<Key>"` and the simulator's
+/// `infer_parent_key_from_child_name` repair (`src/lua_api/globals/template/mod.rs:72`)
+/// derives the key by stripping the parent's resolved name.
+///
+/// `Header.Portrait` is a two-step path: `Header` is a name-prefix child
+/// of `AchievementFrameComparison` (XML `name="$parentHeader"`, resolved
+/// name `AchievementFrameComparisonHeader`, prefix-strip yields
+/// `Header`), and `Portrait` is a Texture inside the Header's
+/// `<Layer level="BACKGROUND">` block (XML `name="$parentPortrait"`,
+/// resolved name `AchievementFrameComparisonHeaderPortrait`, prefix-strip
+/// yields `Portrait`).
+const PLAN_NAMED_COMPARISON_PATHS: &[(&str, &str, &str)] = &[
+    (
+        "Header",
+        "Mainline/Blizzard_AchievementUI.xml:2087",
+        "name-prefix",
+    ),
+    (
+        "Header.Portrait",
+        "Mainline/Blizzard_AchievementUI.xml:2103",
+        "name-prefix",
+    ),
+    (
+        "Summary",
+        "Mainline/Blizzard_AchievementUI.xml:2149",
+        "parentKey",
+    ),
+    (
+        "AchievementContainer",
+        "Mainline/Blizzard_AchievementUI.xml:2212",
+        "parentKey",
+    ),
+];
+
+/// Pin `AchievementFrameComparison` and its PLAN-named subtree paths.
+///
+/// PLAN names three children of the comparison frame: `Header.Portrait`
+/// (a two-step path through `Header`), `Summary`, and
+/// `AchievementContainer`. The XML at
+/// `Mainline/Blizzard_AchievementUI.xml:2080` declares the comparison
+/// frame itself as `<Frame name="$parentComparison">`, reachable in the
+/// simulator as both `_G.AchievementFrameComparison` and
+/// `AchievementFrame.Comparison` — the latter via the same name-prefix
+/// inference that handles `AchievementFrame.Achievements` /
+/// `AchievementFrame.Stats` / `AchievementFrame.Summary` (pinned by the
+/// sibling `achievement_frame_plan_named_children_are_reachable_as_parent_properties`
+/// test).
+///
+/// Subtree routing kinds:
+///
+/// - `Header` (line 2087) and its `Portrait` texture (line 2103) are both
+///   declared via `name="$parent<Key>"` without explicit `parentKey=`
+///   attributes. They land on the parent's per-instance table only
+///   because the simulator's `infer_parent_key_from_child_name` repair
+///   strips the parent's resolved name from each child's resolved name
+///   and installs the resulting suffix as the parentKey. A regression
+///   that removed the prefix-inference would null both. The Lua source
+///   touches `Portrait` via the OnShow handler at line 2144 —
+///   `SetPortraitTexture(_G[self:GetName().."Portrait"], "player")` —
+///   which uses the global path, but the `Header.Portrait`
+///   parent-property path is what every test fixture and downstream
+///   consumer expects.
+///
+/// - `Summary` (line 2149) and `AchievementContainer` (line 2212) are
+///   declared with explicit `parentKey="<Key>"` attributes, routed
+///   through `append_parent_key_code` in
+///   `src/loader/xml_frame_codegen.rs:90`. They participate in the
+///   comparison-mode show/hide swap driven by
+///   `AchievementFrameComparison_OnEvent` and the panel Lua code at
+///   `Blizzard_AchievementUI.xml:2229-2238` (`parent.Summary:Show()` and
+///   `parent.Summary:Hide()` from the AchievementContainer OnShow/OnHide
+///   scripts) — a nil reading would surface a nil-table-method error in
+///   the show/hide cascade.
+///
+/// The test asserts a uniform contract for all four paths: each is
+/// reachable as a chained access from `_G.AchievementFrameComparison`
+/// and is itself a table (frame or texture). The first probe
+/// additionally confirms the comparison frame itself exists as a global
+/// before the chained accesses are attempted, so a missing comparison
+/// frame surfaces with a precise message rather than a confusing
+/// nil-index error inside the loop.
+#[test]
+fn achievement_frame_comparison_subtree_publishes_plan_named_paths() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let comparison_type: String = env
+            .eval(&format!("return type(_G[{COMPARISON_FRAME_NAME:?}])"))
+            .expect("AchievementFrameComparison global probe must run cleanly");
+
+        assert_eq!(
+            comparison_type, "table",
+            "Expected `_G[{COMPARISON_FRAME_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{comparison_type}`. The XML at `{COMPARISON_XML_SITE}` declares \
+             the comparison sub-frame as `<Frame name=\"$parentComparison\">` nested \
+             inside `AchievementFrame`'s `<Frames>` block, which resolves the name token \
+             to `AchievementFrameComparison` and registers it in `_G`. A nil reading \
+             means either the XML changed the name token, the frame was removed, or the \
+             file chunk failed before reaching the declaration. Every Lua call-site that \
+             drives the comparison panel — `AchievementFrameComparison_OnEvent` at line \
+             2814, `AchievementFrameComparison_ForceUpdate` at 2846, the comparison-mode \
+             tab swap in `AchievementFrame_SetComparisonTabs` at 332 — would surface a \
+             nil-table-method error."
+        );
+
+        for (lua_path, xml_site, routing_kind) in PLAN_NAMED_COMPARISON_PATHS {
+            let value_type: String = env
+                .eval(&format!(
+                    "return type(_G[{COMPARISON_FRAME_NAME:?}].{lua_path})"
+                ))
+                .expect("comparison subtree path probe must run cleanly");
+
+            assert_eq!(
+                value_type, "table",
+                "Expected `AchievementFrameComparison.{lua_path}` to be a table after \
+                 `{ROOT}` loads, got `{value_type}`. The XML at `{xml_site}` attaches \
+                 this path via the `{routing_kind}` route. A nil reading on a \
+                 `parentKey` path means the XML dropped the attribute or \
+                 `append_parent_key_code` stopped routing it; a nil reading on a \
+                 `name-prefix` path means the XML changed the `name=\"$parent<Key>\"` \
+                 token or `infer_parent_key_from_child_name` stopped running. The \
+                 comparison panel's show/hide cascade \
+                 (`Blizzard_AchievementUI.xml:2229-2238`, `parent.Summary:Show()` etc.) \
+                 and its inline INSPECT_ACHIEVEMENT_READY handler at \
+                 `Blizzard_AchievementUI.lua:2815-2819` both walk this subtree."
+            );
+        }
+    });
+}
