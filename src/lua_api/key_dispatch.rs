@@ -37,6 +37,19 @@ fn char_byte_range(s: &str, char_index: usize) -> Range<usize> {
     start..start + ch.len_utf8()
 }
 
+fn refresh_editbox_render_text(frame: &mut crate::widget::Frame) {
+    frame.text_stripped = frame.text.as_deref().map(crate::render::strip_wow_markup);
+    frame.text_segments.clear();
+}
+
+fn editbox_text_char_count(frame: &crate::widget::Frame) -> i32 {
+    frame
+        .text
+        .as_ref()
+        .map(|text| text.chars().count() as i32)
+        .unwrap_or(0)
+}
+
 // ── WowLuaEnv impl ───────────────────────────────────────────────────────────
 
 impl WowLuaEnv {
@@ -375,6 +388,7 @@ impl WowLuaEnv {
                 .unwrap_or(current.len());
             current.insert_str(byte_pos, text);
             frame.editbox_cursor_pos += text.chars().count() as i32;
+            refresh_editbox_render_text(frame);
         }
     }
 
@@ -402,6 +416,7 @@ impl WowLuaEnv {
                     let byte_range = char_byte_range(current, char_pos - 1);
                     current.drain(byte_range);
                     frame.editbox_cursor_pos -= 1;
+                    refresh_editbox_render_text(frame);
                     true
                 } else {
                     false
@@ -427,6 +442,7 @@ impl WowLuaEnv {
                 if char_pos < char_count {
                     let byte_range = char_byte_range(current, char_pos);
                     current.drain(byte_range);
+                    refresh_editbox_render_text(frame);
                     true
                 } else {
                     false
@@ -445,11 +461,7 @@ impl WowLuaEnv {
     fn editbox_move_cursor(&self, fid: u64, delta: i32) -> Result<()> {
         let mut state = self.state.borrow_mut();
         if let Some(frame) = state.widgets.get_mut(fid) {
-            let char_count = frame
-                .text
-                .as_ref()
-                .map(|t| t.chars().count() as i32)
-                .unwrap_or(0);
+            let char_count = editbox_text_char_count(frame);
             let new_pos = (frame.editbox_cursor_pos + delta).clamp(0, char_count);
             frame.editbox_cursor_pos = new_pos;
         }
@@ -469,12 +481,7 @@ impl WowLuaEnv {
     fn editbox_cursor_end(&self, fid: u64) -> Result<()> {
         let mut state = self.state.borrow_mut();
         if let Some(frame) = state.widgets.get_mut(fid) {
-            let char_count = frame
-                .text
-                .as_ref()
-                .map(|t| t.chars().count() as i32)
-                .unwrap_or(0);
-            frame.editbox_cursor_pos = char_count;
+            frame.editbox_cursor_pos = editbox_text_char_count(frame);
         }
         Ok(())
     }

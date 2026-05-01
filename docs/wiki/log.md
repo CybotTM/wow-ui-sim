@@ -735,6 +735,10 @@ Created `investigations/micro-menu-atlas-revert.md` to document the micro-menu h
 
 Created `investigations/dialog-background-dxt3-stripes.md` to document the escape-menu background stripe root cause: DXT3 BLPs were incorrectly mapped to BC3 on the raw compressed upload path. Updated `index.md` with the new investigation page.
 
+## [2026-05-01] ingest | editbox render text cache investigation
+
+Created `investigations/editbox-render-text-cache.md` to document the SimCommands search-box input bug: keyboard input updated `Frame.text` but left `text_stripped` stale after `SetText("")`, causing glyph rendering to shape an empty string. Updated `index.md` with the new investigation page.
+
 ## [2026-04-12] ingest | transparent wrapper render-order investigation
 
 Created `investigations/transparent-wrapper-render-order.md` for the world map / quest log render-order fix. Updated it after a follow-up regression to document the depth-aware transparent-wrapper hoist in `state_render.rs`, including both world-map visibility coverage (`world_map_tiles_render_after_tiled_background`) and world-quest pin ordering coverage.
