@@ -70,7 +70,7 @@ pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
-const SPELL_QUERY_METHODS: &[(&'static str, SpellScriptFn)] = &[
+const SPELL_QUERY_METHODS: &[(&str, SpellScriptFn)] = &[
     ("GetSpellDescription", get_spell_description),
     ("GetSpellInfo", get_spell_info),
     ("GetSpellTexture", get_spell_texture),
@@ -102,7 +102,7 @@ const SPELL_QUERY_METHODS: &[(&'static str, SpellScriptFn)] = &[
     ),
 ];
 
-const SPELL_BOOLEAN_METHODS: &[(&'static str, SpellScriptFn)] = &[
+const SPELL_BOOLEAN_METHODS: &[(&str, SpellScriptFn)] = &[
     ("DoesSpellExist", does_spell_exist),
     ("IsSpellDataCached", is_spell_data_cached),
     ("IsPriorityAura", is_priority_aura),
@@ -116,7 +116,7 @@ const SPELL_BOOLEAN_METHODS: &[(&'static str, SpellScriptFn)] = &[
     ("IsSpellUsable", is_spell_usable),
 ];
 
-const SPELL_TARGET_METHODS: &[(&'static str, SpellScriptFn)] = &[
+const SPELL_TARGET_METHODS: &[(&str, SpellScriptFn)] = &[
     ("TargetSpellIsEnchanting", target_spell_is_enchanting),
     (
         "TargetSpellJumpsUpgradeTrack",
