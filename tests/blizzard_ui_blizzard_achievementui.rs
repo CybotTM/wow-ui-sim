@@ -87,3 +87,6 @@ mod behavior_saturate;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_track_toggle.rs"]
 mod behavior_track_toggle;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_filter_dropdown.rs"]
+mod behavior_filter_dropdown;
