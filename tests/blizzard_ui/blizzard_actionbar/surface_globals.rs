@@ -146,6 +146,13 @@ const PLAN_NAMED_MULTIBAR_GLOBALS: &[&str] = &[
     "MultiBar7_IsVisible",
     "IsNormalActionBarState",
 ];
+const PLAN_NAMED_EXTRA_BAR_GLOBALS: &[&str] = &[
+    "ExtraActionBar_OnLoad",
+    "ExtraActionBar_Update",
+    "ExtraActionBar_ForceEmpty",
+    "ExtraActionBar_ForceShowIfNeeded",
+    "ExtraActionBar_CancelForceShow",
+];
 
 #[test]
 fn action_bar_plan_named_input_globals_are_functions() {
@@ -406,6 +413,107 @@ fn action_bar_plan_named_multibar_globals_are_functions() {
                  (c) the file-local `IsMultibarVisible` (lua:17) was renamed and the trampolines \
                  still reference the old name — a parse-time success but a runtime failure on \
                  first call. Got `type({name}) == \"function\"` returned false."
+            );
+        }
+    });
+}
+
+/// Pin the ExtraActionBar lifecycle/visibility globals — the surface
+/// that drives the contextual extra-action bar (vehicle abilities,
+/// encounter-specific extra buttons, world-event handout buttons like
+/// the "Use Item" prompt during scripted sequences).
+///
+/// PLAN.md task: `ExtraActionBar_OnLoad`, `ExtraActionBar_Update`,
+/// `ExtraActionBar_ForceEmpty`, `ExtraActionBar_ForceShowIfNeeded`,
+/// `ExtraActionBar_CancelForceShow` are functions.
+///
+/// All 5 PLAN-named globals match the actual Blizzard source verbatim
+/// and live in a single file: `Shared/ExtraActionBar.lua`. Each is
+/// declared via `function <name>(...)` syntax binding to `_G` at file-
+/// chunk execution time. Source map (line numbers in
+/// `Shared/ExtraActionBar.lua`):
+///
+/// - `ExtraActionBar_OnLoad(self)` at `lua:5` — the XML `<OnLoad>`
+///   handler bound at `Shared/ExtraActionBar.xml:126`. Two-line body:
+///   `self:SetFrameLevel(self:GetFrameLevel() + 2)` (so the bar
+///   renders above its parent's contemporaries) and `self:SetAlpha(0.0)`
+///   (default-hidden — the alpha drives the intro/outro animations
+///   later when `_Update` toggles visibility). Single-arg surface.
+///
+/// - `ExtraActionBar_Update()` at `lua:10` — the public visibility
+///   driver. Three-way branch on `C_ActionBar.HasExtraActionBar()`:
+///   when true, plays the `intro` animation and registers the bar with
+///   `ExtraAbilityContainer:AddFrame(bar, ExtraActionButtonPriority)`;
+///   when false-and-shown, either calls `_ForceEmpty` (if
+///   `KeybindFrames_InQuickKeybindMode`) or plays the `outro` animation;
+///   when false-and-hidden, removes from the ability container. Zero-arg.
+///
+/// - `ExtraActionBar_ForceEmpty()` at `lua:32` — strips the visible
+///   button to a transparent shell: `bar.button.style:Hide()` plus
+///   `bar.button.icon:SetAlpha(0)`. Used during quick-keybind mode
+///   (so the player can re-bind the slot without the live extra
+///   action's icon getting in the way) and from `_ForceShowIfNeeded`
+///   to ensure the bar shows blank when forced visible without a
+///   real action. Zero-arg.
+///
+/// - `ExtraActionBar_ForceShowIfNeeded()` at `lua:38` — the
+///   force-show entry point used by glue-side flows that need the
+///   bar visible regardless of `HasExtraActionBar()`. When the bar is
+///   currently hidden, fires `_ForceEmpty` + `bar.button:Show()` +
+///   `bar:Show()` + `UpdateUsable` + `ExtraAbilityContainer:AddFrame`
+///   + `intro` animation. The if-not-shown guard prevents double-show
+///   on repeat calls. Zero-arg.
+///
+/// - `ExtraActionBar_CancelForceShow()` at `lua:51` — the counterpart
+///   that hides the bar IF it was forced visible AND no real extra
+///   action exists. Gated by `not C_ActionBar.HasExtraActionBar() and
+///   bar:IsShown()` — so a real extra action surviving past the
+///   force-show period stays visible. Restores the visual state
+///   (`bar.button.style:Show()` + `bar.button.icon:SetAlpha(1)`)
+///   before hiding, so the next `_Update` that re-shows the bar with
+///   a real action doesn't paint over a stripped style. Zero-arg.
+///
+/// **Note on the gap dependency.** This batch's PLAN line has NO
+/// `(depends-on:)` suffix — none of these globals are pre-published
+/// by the simulator's `runtime_surface_bootstrap.lua` / Rust env-init.
+/// The contract is therefore one-way: a nil reading on any of them
+/// proves the addon's `Shared/ExtraActionBar.lua` file chunk failed
+/// before reaching the declaration line. There is no fallback
+/// publisher, matching the multi-bar batch above. Note the asymmetry
+/// with the input-globals batch: `ExtraActionButtonKey` (lua:63 in
+/// the same file) IS on the gap-fill line at PLAN.md:93, but the
+/// five lifecycle globals here are addon-only.
+#[test]
+fn action_bar_plan_named_extra_bar_globals_are_functions() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for name in PLAN_NAMED_EXTRA_BAR_GLOBALS {
+            let is_function = env
+                .eval::<bool>(&format!(r#"return type({name}) == "function""#))
+                .expect("file-scope global type probe must run cleanly");
+
+            assert!(
+                is_function,
+                "Global `{name}` MUST be a function after the startup-shape harness loads \
+                 `Blizzard_ActionBar`. Each entry in `PLAN_NAMED_EXTRA_BAR_GLOBALS` is declared \
+                 via `function <name>(...)` syntax in `Shared/ExtraActionBar.lua` \
+                 (lines 5/10/32/38/51). The PLAN line carries no `(depends-on:)` suffix, so the \
+                 simulator does NOT pre-publish these in `runtime_surface_bootstrap.lua` / Rust \
+                 env-init — a nil reading is unambiguous: the addon's file chunk failed before \
+                 the declaration. No fallback publisher exists. Note the asymmetry within this \
+                 same source file: `ExtraActionButtonKey` (lua:63) IS gap-filled by PLAN.md:93, \
+                 but the five lifecycle globals here are addon-only — a partial-load regression \
+                 that breaks the file chunk between lua:5 and lua:51 would leave \
+                 `ExtraActionButtonKey` working (via the gap-fill pre-publish) while ALL of these \
+                 five fail simultaneously, surfacing the partial-load mode that no other test in \
+                 this lane catches. A non-function reading also flags any of: (a) the file chunk \
+                 failed before this declaration line (load.rs's \
+                 `action_bar_load_emits_no_lane_specific_lua_errors` would also fail in that \
+                 case — multi-test failure mode), OR (b) Blizzard re-shaped the lifecycle \
+                 surface — e.g. moved `_Update` / `_ForceEmpty` onto an `ExtraActionBarMixin` \
+                 frame mixin instead of top-level globals, which would break the XML `<OnLoad>` \
+                 binding at `Shared/ExtraActionBar.xml:126` plus every world-event consumer that \
+                 calls `ExtraActionBar_ForceShowIfNeeded` / `_CancelForceShow` directly. Got \
+                 `type({name}) == \"function\"` returned false."
             );
         }
     });
