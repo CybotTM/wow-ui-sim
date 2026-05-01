@@ -87,6 +87,50 @@ const ACHIEVEMENT_TEMPLATE_MIXIN_NAME: &str = "AchievementTemplateMixin";
 const ACHIEVEMENT_TEMPLATE_LUA_SITE: &str = "Mainline/Blizzard_AchievementUI.lua:1039";
 const ACHIEVEMENT_TEMPLATE_XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:733";
 
+/// PLAN-named mixin tables on the `Blizzard_AchievementUI` lane that this
+/// task only pins as tables (no method probes). Each tuple is
+/// `(mixin_name, declared_at_line_number, xml_template_site)` so a
+/// missing-table failure message points at both the Lua declaration and
+/// the XML virtual-template that would fail to instantiate. The PLAN
+/// names six mixins; one of them (`AchivementComparisonStatMixin`) is
+/// spelt with a typo in the source itself — both `AchievementComparison*`
+/// and `AchivementComparison*` (sic) appear in the same file as separate
+/// mixins so the typo is preserved in the PLAN claim. `AchievementsObjectivesMixin`
+/// uses the plural form (`Achievement-S-Objectives`) — the only mixin in
+/// the file whose first word is plural.
+const PLAN_NAMED_TABLE_ONLY_MIXINS: &[(&str, u32, &str)] = &[
+    (
+        "AchievementsObjectivesMixin",
+        1674,
+        "Mainline/Blizzard_AchievementUI.xml:340 (AchievementFrameAchievementsObjectivesTemplate)",
+    ),
+    (
+        "AchievementMetaCriteriaMixin",
+        2580,
+        "Mainline/Blizzard_AchievementUI.xml:457 (MetaCriteriaTemplate)",
+    ),
+    (
+        "AchievementComparisonTemplateMixin",
+        2682,
+        "Mainline/Blizzard_AchievementUI.xml:1222 (AchievementComparisonTemplate)",
+    ),
+    (
+        "AchievementStatTemplateMixin",
+        2125,
+        "Mainline/Blizzard_AchievementUI.xml:1351 (AchievementStatTemplate)",
+    ),
+    (
+        "AchivementComparisonStatMixin",
+        2908,
+        "Mainline/Blizzard_AchievementUI.xml:1405 (AchievementComparisonStatTemplate)",
+    ),
+    (
+        "AchievementFullSearchResultsButtonMixin",
+        3392,
+        "Mainline/Blizzard_AchievementUI.xml:62 (AchievementFullSearchResultsButtonTemplate)",
+    ),
+];
+
 /// PLAN-named methods on `AchievementTemplateMixin`. Each tuple is
 /// `(method_name, declared_at_line_number)` so a missing-method failure
 /// message points directly at the source line that should declare it.
@@ -336,6 +380,87 @@ fn achievement_template_mixin_exposes_plan_named_methods() {
                  `:OnEnter`/`:OnLeave` for the script wiring. A missing method here \
                  means achievement rows fail to populate, react to clicks, render \
                  their objectives, or track the player's progress at runtime."
+            );
+        }
+    });
+}
+
+/// Pin the existence of every PLAN-named mixin table on the
+/// `Blizzard_AchievementUI` lane that the PLAN claim does NOT enumerate
+/// methods for.
+///
+/// **No spec/source mismatch on the table-existence claim, but caveat:
+/// the PLAN preserves a typo from the source.** Source declares all six
+/// mixins at file scope: `AchievementsObjectivesMixin = {};` at
+/// `Mainline/Blizzard_AchievementUI.lua:1674` (note the plural form
+/// `Achievement-S-` — the ONLY mixin in this file whose first word is
+/// plural; this drives the per-achievement-row objectives sub-panel and
+/// is stored on the row's `ObjectivesContainer` parentKey child via the
+/// virtual `AchievementFrameAchievementsObjectivesTemplate` Frame at
+/// xml:340), `AchievementMetaCriteriaMixin = {};` at lua:2580 (drives
+/// each criterion button under a meta-achievement's objective list — bound
+/// to the virtual `MetaCriteriaTemplate` Button at xml:457),
+/// `AchievementComparisonTemplateMixin = {};` at lua:2682 (drives every
+/// row inside the comparison panel's `AchievementContainer` scrollbox —
+/// bound to the virtual `AchievementComparisonTemplate` Frame at
+/// xml:1222), `AchievementStatTemplateMixin = {};` at lua:2125 (drives
+/// every row in the Stats tab's StatContainer scrollbox — bound to the
+/// virtual `AchievementStatTemplate` Button at xml:1351, hidden by
+/// default), `AchivementComparisonStatMixin = {};` (sic — note the
+/// **missing 'e'** in `Achivement` vs the rest of the file's
+/// `Achievement` spelling) at lua:2908 (drives every row in the
+/// comparison panel's StatContainer scrollbox — bound to the virtual
+/// `AchievementComparisonStatTemplate` Frame at xml:1405; **the typo is
+/// preserved in BOTH the Lua mixin name AND the PLAN claim** because
+/// changing it would break addons that already reference the misspelt
+/// global, so the test must probe the misspelt name verbatim), and
+/// `AchievementFullSearchResultsButtonMixin = {};` at lua:3392 (drives
+/// each row in the full-search-results scrollbox shown when the player
+/// clicks "Show all results" — bound to the virtual
+/// `AchievementFullSearchResultsButtonTemplate` Button at xml:62).
+///
+/// Each mixin is attached to the global namespace and bound to a
+/// distinct virtual template — when any of these tables fail to load,
+/// the corresponding XML template's `<EventButton mixin="...">` /
+/// `<Frame mixin="...">` / `<Button mixin="...">` attribute would
+/// reference a nil global, which the template-instantiation code path
+/// in `template/mod.rs` should report but the LATER `:Init`/`:OnLoad`
+/// dispatch would surface as a nil-call error — this shape probe
+/// surfaces the deletion at the table level instead.
+///
+/// **Why this single test pins six mixins together instead of splitting
+/// them into six separate tests:** the PLAN claim itself groups them as
+/// a single line item, and the assertion shape is uniform across all
+/// six (just `type(_G[name]) == "table"`). Splitting would force
+/// duplicate `with_blizzard_addon_smoke_shape` calls that re-load the
+/// addon six times for no behavioral gain. The const tuple
+/// `PLAN_NAMED_TABLE_ONLY_MIXINS` carries the per-mixin context (lua
+/// declaration line + XML template binding site) so a failure message
+/// names the specific mixin and its source location.
+///
+/// Six assertions: one per mixin in `PLAN_NAMED_TABLE_ONLY_MIXINS`,
+/// asserting `type(_G[mixin_name]) == "table"`. No precondition probe
+/// is needed because each mixin's own assertion IS the precondition for
+/// any future method-shape pin on the same mixin.
+#[test]
+fn plan_named_table_only_mixins_exist_as_tables() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for (mixin_name, line_number, xml_site) in PLAN_NAMED_TABLE_ONLY_MIXINS {
+            let mixin_type: String = env
+                .eval(&format!("return type(_G[{mixin_name:?}])"))
+                .unwrap_or_else(|err| panic!("`_G[{mixin_name:?}]` probe raised: {err}"));
+
+            assert_eq!(
+                mixin_type, "table",
+                "Expected `_G[{mixin_name:?}]` to be a table after `{ROOT}` loads, got \
+                 `{mixin_type}`. The Lua source declares `{mixin_name} = {{}};` at \
+                 `Mainline/Blizzard_AchievementUI.lua:{line_number}`, and the mixin is \
+                 bound at `{xml_site}` via the corresponding `mixin=\"{mixin_name}\"` \
+                 attribute. A nil reading means either the table assignment failed \
+                 (Lua chunk crashed before reaching line {line_number}) or Blizzard \
+                 renamed/removed the mixin (in which case the XML template at \
+                 `{xml_site}` would also need updating, since template instantiation \
+                 reads the named global)."
             );
         }
     });
