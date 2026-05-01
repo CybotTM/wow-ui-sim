@@ -15,6 +15,7 @@ Current API shape:
 - `C_TransmogCollection.GetCategoryAppearances` returns seeded rows by category and active collection/source/search filters.
 - Source/collection/search filter setters now mutate `WorldState`, and category rows/counts apply collected/uncollected, source-type, and search-text filters.
 - Search completion is synchronous and deterministic: no DB loading, no in-progress state, and progress equals result size.
+- `C_TransmogOutfitInfo.GetAllSlotLocationInfo` reports weapon appearance slots with `Enum.TransmogCollectionType.None`; Blizzard derives weapon browsing categories through `IsEitherHand()` and `GetCategoryInfo()`. Reporting weapon collection categories there makes `TransmogLocationMixin:GetArmorCategoryID()` non-nil for weapons, and Wardrobe's armor-only model setup path then indexes missing `MAINHANDSLOT` / `SECONDARYHANDSLOT` entries in `WARDROBE_MODEL_SETUP`.
 - Tooltip and visual-state helpers such as `GetAppearanceSourceInfo`, `GetAppearanceInfoBySource`, `GetIsAppearanceFavorite`, `SetIsAppearanceFavorite`, `IsNewAppearance`, and `ClearNewAppearance` are not backed by first-class visual/source state.
 - `C_TransmogSets` is currently a Lua bootstrap fallback returning empty/default values. That is enough to keep the UI from crashing, but not enough for real set-tab filtering.
 

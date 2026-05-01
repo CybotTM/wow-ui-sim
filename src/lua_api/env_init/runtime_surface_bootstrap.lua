@@ -12641,8 +12641,8 @@ if rawget(C_TransmogOutfitInfo, "GetAllSlotLocationInfo") == nil then
       __wow_make_outfit_slot_info("WAISTSLOT", appearanceType, collectionType.Waist or 9, false),
       __wow_make_outfit_slot_info("LEGSSLOT", appearanceType, collectionType.Legs or 10, false),
       __wow_make_outfit_slot_info("FEETSLOT", appearanceType, collectionType.Feet or 11, false),
-      __wow_make_outfit_slot_info("MAINHANDSLOT", appearanceType, collectionType.Sword1H or 14, false),
-      __wow_make_outfit_slot_info("SECONDARYHANDSLOT", appearanceType, collectionType.Shield or 18, false),
+      __wow_make_outfit_slot_info("MAINHANDSLOT", appearanceType, noneType, false),
+      __wow_make_outfit_slot_info("SECONDARYHANDSLOT", appearanceType, noneType, false),
       __wow_make_outfit_slot_info("SHOULDERSLOT", appearanceType, collectionType.Shoulder or 2, true),
     }
 
