@@ -176,7 +176,9 @@ macro_rules! build_empty_sim_state {
                 m.insert("enUS".to_string(), true);
                 m
             },
+            lfg_roles: LfgRoleSelection::default(),
             lfd_dungeons: default_lfd_dungeons(),
+            lfd_enabled_dungeons: ::std::collections::HashMap::new(),
             photo_sharing_authorized: false,
             photo_sharing_enabled: false,
             tutorial_flags: $collections.tutorial_flags,
@@ -317,12 +319,12 @@ pub use super::state_types::{
     CursorItemOrigin, DeathRecapEntry, EquipmentManagerState, EquipmentSet, EquippedItem,
     GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey, ItemSearchResultInfo,
     ItemSearchResults, KillingBlowInfo, LfdDungeonInfo, LfgActivityGroupInfo, LfgActivityInfo,
-    LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo,
-    MapChildRect, MapData, MapRect, MirrorTimer, MovementState, MythicPlusAffix,
-    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
-    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, PlayerXpState,
-    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState,
-    TokenAuctionInfo, WorldState, WowTokenState,
+    LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, LfgRoleSelection, LootRollInfo,
+    LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MovementState,
+    MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
+    MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer,
+    PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
+    SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -1596,8 +1598,14 @@ pub struct SimState {
     /// `C_LFGList.GetLanguageSearchFilter()` map. Default `{ enUS = true }`
     /// matches `GetAvailableLanguageSearchFilter`.
     pub lfg_language_filter: std::collections::HashMap<String, bool>,
+    /// Player role selections used by `GetLFGRoles` / `SetLFGRoles`.
+    /// Default DPS selected so the LFD panel starts in a queueable solo state.
+    pub lfg_roles: LfgRoleSelection,
     /// LFD dungeon list for the Looking for Dungeon panel.
     pub lfd_dungeons: Vec<LfdDungeonInfo>,
+    /// Explicit LFD checkbox state changed through `SetLFGDungeonEnabled`.
+    /// Missing entries fall back to the default joinable specific-dungeon set.
+    pub lfd_enabled_dungeons: std::collections::HashMap<i32, bool>,
     /// Whether `C_PhotoSharing.IsAuthorized()` reports true. Sim has no
     /// real photo-sharing service; default false. Admin:
     /// `A_Admin.SetPhotoSharingAuthorized(b?)`.

@@ -5,6 +5,101 @@ fn env() -> WowLuaEnv {
 }
 
 #[test]
+fn get_lfg_roles_defaults_to_damage() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local leader, tank, healer, dps = GetLFGRoles()
+            if type(leader) ~= "boolean" then return "leader_type=" .. type(leader) end
+            if type(tank) ~= "boolean" then return "tank_type=" .. type(tank) end
+            if type(healer) ~= "boolean" then return "healer_type=" .. type(healer) end
+            if type(dps) ~= "boolean" then return "dps_type=" .. type(dps) end
+            if leader ~= false then return "leader=" .. tostring(leader) end
+            if tank ~= false then return "tank=" .. tostring(tank) end
+            if healer ~= false then return "healer=" .. tostring(healer) end
+            if dps ~= true then return "dps=" .. tostring(dps) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetLFGRoles default tuple: {result}");
+}
+
+#[test]
+fn set_lfg_roles_persists_all_flags() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            SetLFGRoles(true, true, false, false)
+            local leader, tank, healer, dps = GetLFGRoles()
+            if leader ~= true then return "leader=" .. tostring(leader) end
+            if tank ~= true then return "tank=" .. tostring(tank) end
+            if healer ~= false then return "healer=" .. tostring(healer) end
+            if dps ~= false then return "dps=" .. tostring(dps) end
+
+            SetLFGRoles(false, false, true, true)
+            leader, tank, healer, dps = GetLFGRoles()
+            if leader ~= false then return "leader2=" .. tostring(leader) end
+            if tank ~= false then return "tank2=" .. tostring(tank) end
+            if healer ~= true then return "healer2=" .. tostring(healer) end
+            if dps ~= true then return "dps2=" .. tostring(dps) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "SetLFGRoles persistence: {result}");
+}
+
+#[test]
+fn get_lfd_choice_enabled_state_defaults_specific_joinable_dungeons() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local enabled = GetLFDChoiceEnabledState()
+            if type(enabled) ~= "table" then return "type=" .. type(enabled) end
+            for _, id in ipairs({1201, 1203, 1205, 1206, 1208}) do
+                if enabled[id] ~= true then
+                    return "unchecked=" .. id .. ":" .. tostring(enabled[id])
+                end
+            end
+            if enabled[1202] then return "follower=" .. tostring(enabled[1202]) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "GetLFDChoiceEnabledState default selections: {result}"
+    );
+}
+
+#[test]
+fn set_lfg_dungeon_enabled_persists_specific_choice_state() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local enabled = GetLFDChoiceEnabledState()
+            if enabled[1203] ~= true then return "initial=" .. tostring(enabled[1203]) end
+
+            SetLFGDungeonEnabled(1203, false)
+            enabled = GetLFDChoiceEnabledState()
+            if enabled[1203] then return "disabled=" .. tostring(enabled[1203]) end
+
+            SetLFGDungeonEnabled(1203, true)
+            enabled = GetLFDChoiceEnabledState()
+            if enabled[1203] ~= true then return "restored=" .. tostring(enabled[1203]) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "SetLFGDungeonEnabled persistence: {result}");
+}
+
+#[test]
 fn get_lfd_choice_order_returns_ids() {
     let env = env();
     let result: String = env

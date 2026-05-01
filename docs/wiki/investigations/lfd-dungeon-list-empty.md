@@ -6,6 +6,8 @@ The Dungeons & Raids panel showed an empty dungeon list when "Specific Dungeons"
 
 `PVEFrame → Dungeons & Raids → Specific Dungeons` showed `Type: Specific Dungeons` selected but the scroll list was empty. No tooltips, no headers, no entries — just blank background.
 
+Follow-up symptom: the list later populated, but the dungeon checkboxes were not preselected and the queue button stayed disabled. Blizzard's `LFDQueueFrameFindGroupButton_Update()` disables the button when no tank/healer/DPS role is selected, and the simulator still had `GetLFGRoles` as a one-value `false` stub.
+
 ## Root Causes
 
 ### 1. Missing list-init globals
@@ -32,6 +34,10 @@ All three globals were unregistered in the simulator, so the first call (`GetLFD
 
 `default_lfd_dungeons` had `is_random=true` on the negative-id header. This made `GetRandomDungeonBestChoice()` return `-1`, which `LFDQueueFrame_SetType(-1)` then routed through `GetLFGDungeonInfo(-1)` and `LFDQueueFrame_SetTypeRandomDungeon` — which calls `GetLFGDungeonRewards` on the header.
 
+### 5. Empty selection and role state
+
+`GetLFDChoiceEnabledState()` returned an empty table, so Blizzard's row initializer treated every specific dungeon as unchecked. `GetLFGRoles()` was also a false stub and `SetLFGRoles()` was a no-op, so role checkbox state could not be initialized or persisted. The LFD queue button is role-gated before queue state checks, so this left "Join as Party" greyed out even with visible dungeons.
+
 ## Fix
 
 Implementation:
@@ -43,6 +49,13 @@ Implementation:
 - **`workarounds.rs`** (`patch_lfg_lock_list`): assign `LFGLockList = GetLFGLockList()` directly instead of firing `LFG_LOCK_INFO_RECEIVED`. The event would also wake up RaidFinder and ScenarioFinder, which require many additional unmodeled APIs (`GetNumRFDungeons`, etc.). Direct assignment satisfies the LFD panel without that cascade.
 - **`state.rs`** (`default_lfd_dungeons`): split the random header (negative id, `is_random=false`) from a real positive-id "Random Heroic Dungeon" entry (`id=999, is_random=true`). Matches retail data shape.
 
+Follow-up implementation:
+
+- **`state.rs` / `collections.rs`**: added persistent `lfg_roles` and `lfd_enabled_dungeons` state.
+- **`battlefield_lfg_probes.rs`**: added state-backed `GetLFGRoles`, `SetLFGRoles`, and `SetLFGDungeonEnabled`; `GetLFDChoiceEnabledState` now defaults joinable positive non-follower specific dungeons to checked.
+- **`global_stubs.rs`**: removed `GetLFGRoles` / `SetLFGRoles` from static stubs so the state-backed implementations own those globals.
+- **`tests/lfd_globals.rs`**: covers default DPS role selection, role persistence, default specific-dungeon checkbox selection, and `SetLFGDungeonEnabled` persistence.
+
 ## Why direct LFGLockList assignment over event firing
 
 Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestRFChoice` → `RaidFinderFrame_UpdateAvailability` → `GetNumRFDungeons` → `ScenarioFinderFrame_UpdateAvailability` → `GetNumRandomScenarios`. None of those exist in the sim. We could stub all of them, but the goal is just to populate `LFGLockList` for the LFD panel; the event broadcast is wider than needed.
@@ -52,6 +65,8 @@ Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestR
 - `Interface/BlizzardUI/Blizzard_GroupFinder/Shared/LFGFrame.lua` — `LFGDungeonList_Setup` (line 1080), `LFG_LOCK_INFO_RECEIVED` handler (line 173)
 - `Interface/BlizzardUI/Blizzard_GroupFinder/Mainline/LFDFrame.lua` — `UpdateLFDDungeonList` (line 686), `LFG_UPDATE_RANDOM_INFO` handler (line 80)
 - `Interface/BlizzardUI/Blizzard_GroupFinder/Mainline/LFDFrame.xml` — Specific frame `OnShow="LFDQueueFrame_Update"` (line 273)
+- `src/lua_api/globals/battlefield_lfg_probes.rs` — simulator LFD globals and selection/role state registration
+- `tests/lfd_globals.rs` — regression coverage for LFD role and checkbox state
 
 ## See Also
 

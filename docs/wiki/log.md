@@ -739,6 +739,10 @@ Created `investigations/dialog-background-dxt3-stripes.md` to document the escap
 
 Created `investigations/editbox-render-text-cache.md` to document the SimCommands search-box input bug: keyboard input updated `Frame.text` but left `text_stripped` stale after `SetText("")`, causing glyph rendering to shape an empty string. Updated `index.md` with the new investigation page.
 
+## [2026-05-01] ingest | LFD checkbox and role-state follow-up
+
+Updated `investigations/lfd-dungeon-list-empty.md` with the follow-up Group Finder bug where Specific Dungeons populated but dungeon selections were empty and `GetLFGRoles` was still a false stub, leaving "Join as Party" disabled. Documented the state-backed role and LFD checkbox fix plus regression coverage.
+
 ## [2026-04-12] ingest | transparent wrapper render-order investigation
 
 Created `investigations/transparent-wrapper-render-order.md` for the world map / quest log render-order fix. Updated it after a follow-up regression to document the depth-aware transparent-wrapper hoist in `state_render.rs`, including both world-map visibility coverage (`world_map_tiles_render_after_tiled_background`) and world-quest pin ordering coverage.
