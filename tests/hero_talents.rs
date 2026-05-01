@@ -235,7 +235,7 @@ fn test_class_talents_switch_methods_update_seeded_spec_and_loadout_state() {
 }
 
 #[test]
-fn test_load_config_switches_loadout_and_returns_no_changes_necessary() {
+fn test_load_config_switches_loadout_and_returns_ready() {
     let env = env();
     let (load_result, before, after, after_loadout): (i32, i32, i32, i32) = env
         .eval(
@@ -248,7 +248,7 @@ fn test_load_config_switches_loadout_and_returns_no_changes_necessary() {
 
             local result, err, newlyLearned = C_ClassTalents.LoadConfig(configs[2], true)
             assert(err == nil, "no error string expected on success")
-            assert(newlyLearned == nil, "no newly-learned-nodes table expected on no-op load")
+            assert(newlyLearned == nil, "no newly-learned-nodes table expected on instant load")
 
             local after = C_ClassTalents.GetActiveConfigID()
             local lastSelected = C_ClassTalents.GetLastSelectedSavedConfigID(66)
@@ -257,10 +257,32 @@ fn test_load_config_switches_loadout_and_returns_no_changes_necessary() {
         )
         .unwrap();
 
-    // Enum.LoadConfigResult.NoChangesNecessary == 1
-    assert_eq!(load_result, 1);
+    // Enum.LoadConfigResult.Ready == 3
+    assert_eq!(load_result, 3);
     assert_ne!(after, before);
     assert_eq!(after, after_loadout);
+}
+
+#[test]
+fn test_load_config_returns_no_changes_necessary_for_active_loadout() {
+    let env = env();
+    let (load_result, before, after): (i32, i32, i32) = env
+        .eval(
+            r#"
+            local before = C_ClassTalents.GetActiveConfigID()
+            local result, err, newlyLearned = C_ClassTalents.LoadConfig(before, true)
+            assert(err == nil, "no error string expected when reloading active config")
+            assert(newlyLearned == nil, "no newly-learned-nodes table expected on no-op load")
+
+            local after = C_ClassTalents.GetActiveConfigID()
+            return result, before, after
+            "#,
+        )
+        .unwrap();
+
+    // Enum.LoadConfigResult.NoChangesNecessary == 1
+    assert_eq!(load_result, 1);
+    assert_eq!(after, before);
 }
 
 #[test]
