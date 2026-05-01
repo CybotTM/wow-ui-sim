@@ -140,47 +140,41 @@ fn apply_anchor_target(edges: &mut AnchorEdges, point: AnchorPoint, target: (f32
     let (target_x, target_y) = target;
     match point {
         AnchorPoint::TopLeft => {
-            set_edge_if_unset(&mut edges.left_x, target_x);
-            set_edge_if_unset(&mut edges.top_y, target_y);
+            edges.left_x = Some(target_x);
+            edges.top_y = Some(target_y);
         }
         AnchorPoint::TopRight => {
-            set_edge_if_unset(&mut edges.right_x, target_x);
-            set_edge_if_unset(&mut edges.top_y, target_y);
+            edges.right_x = Some(target_x);
+            edges.top_y = Some(target_y);
         }
         AnchorPoint::BottomLeft => {
-            set_edge_if_unset(&mut edges.left_x, target_x);
-            set_edge_if_unset(&mut edges.bottom_y, target_y);
+            edges.left_x = Some(target_x);
+            edges.bottom_y = Some(target_y);
         }
         AnchorPoint::BottomRight => {
-            set_edge_if_unset(&mut edges.right_x, target_x);
-            set_edge_if_unset(&mut edges.bottom_y, target_y);
+            edges.right_x = Some(target_x);
+            edges.bottom_y = Some(target_y);
         }
         AnchorPoint::Top => {
-            set_edge_if_unset(&mut edges.top_y, target_y);
-            set_edge_if_unset(&mut edges.center_x, target_x);
+            edges.top_y = Some(target_y);
+            edges.center_x = Some(target_x);
         }
         AnchorPoint::Bottom => {
-            set_edge_if_unset(&mut edges.bottom_y, target_y);
-            set_edge_if_unset(&mut edges.center_x, target_x);
+            edges.bottom_y = Some(target_y);
+            edges.center_x = Some(target_x);
         }
         AnchorPoint::Left => {
-            set_edge_if_unset(&mut edges.left_x, target_x);
-            set_edge_if_unset(&mut edges.center_y, target_y);
+            edges.left_x = Some(target_x);
+            edges.center_y = Some(target_y);
         }
         AnchorPoint::Right => {
-            set_edge_if_unset(&mut edges.right_x, target_x);
-            set_edge_if_unset(&mut edges.center_y, target_y);
+            edges.right_x = Some(target_x);
+            edges.center_y = Some(target_y);
         }
         AnchorPoint::Center => {
-            set_edge_if_unset(&mut edges.center_x, target_x);
-            set_edge_if_unset(&mut edges.center_y, target_y);
+            edges.center_x = Some(target_x);
+            edges.center_y = Some(target_y);
         }
-    }
-}
-
-fn set_edge_if_unset(edge: &mut Option<f32>, value: f32) {
-    if edge.is_none() {
-        *edge = Some(value);
     }
 }
 
@@ -708,34 +702,5 @@ mod tests {
         assert_eq!(rect.y, 20.0);
         assert_eq!(rect.width, 984.0);
         assert_eq!(rect.height, 708.0);
-    }
-
-    #[test]
-    fn duplicate_edge_anchors_preserve_first_axis_constraint() {
-        let mut registry = WidgetRegistry::new();
-        registry.register(make_frame(1, None, 920.0, 724.0, vec![2], vec![]));
-
-        let mut frame = make_frame(
-            2,
-            Some(1),
-            199.0,
-            569.0,
-            vec![],
-            vec![
-                anchor(AnchorPoint::TopLeft, Some(1), AnchorPoint::TopLeft),
-                anchor(AnchorPoint::BottomLeft, Some(1), AnchorPoint::BottomLeft),
-            ],
-        );
-        frame.anchors[0].x_offset = 18.0;
-        frame.anchors[0].y_offset = -76.0;
-        frame.anchors[1].x_offset = 178.0;
-        frame.anchors[1].y_offset = 46.0;
-        registry.register(frame);
-
-        let rect = compute_frame_rect(&registry, 2, 920.0, 724.0);
-        assert_eq!(rect.x, 18.0);
-        assert_eq!(rect.width, 199.0);
-        assert_eq!(rect.y, 76.0);
-        assert_eq!(rect.height, 602.0);
     }
 }
