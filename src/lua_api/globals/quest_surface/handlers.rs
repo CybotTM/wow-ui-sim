@@ -18,6 +18,16 @@ use super::data::{
 };
 
 const QUEST_WIDGET_SET_BASE_ID: i32 = 1_000_000;
+const SEEDED_REWARD_ITEM_ID: i32 = 6948;
+const QUEST_GREETING_TEXT: &str = "How can I help you, adventurer?";
+const QUEST_REWARD_TEXT: &str = "You will receive:";
+
+#[derive(Clone, Copy)]
+struct StaticQuest {
+    title: &'static str,
+    description: &'static str,
+    objectives: &'static [Objective],
+}
 
 // ---------------------------------------------------------------------------
 // Data lookup helpers
@@ -87,6 +97,12 @@ fn selected_quest_id(state: &LuaState) -> LuaResult<i32> {
         .unwrap_or(0))
 }
 
+fn selected_log_index(state: &LuaState) -> LuaResult<i32> {
+    Ok(find_quest_by_id(selected_quest_id(state)?)
+        .map(|(index, _)| index)
+        .unwrap_or(0))
+}
+
 fn set_selected_quest_id(state: &mut LuaState, quest_id: i32) -> LuaResult<()> {
     borrow_state_mut(state)?.selected_quest_log_id = (quest_id > 0).then_some(quest_id as u32);
     Ok(())
@@ -116,6 +132,78 @@ fn selected_criteria_spell(state: &LuaState) -> LuaResult<Option<(i32, String, S
         spell_texture,
         entry.criteria_spell_finished,
     )))
+}
+
+fn quest_list_index(state: &mut LuaState) -> LuaResult<usize> {
+    let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as isize;
+    Ok(index.saturating_sub(1) as usize)
+}
+
+fn static_quest_by_id(quest_id: i32) -> Option<StaticQuest> {
+    QUEST_LOG.iter().find_map(|entry| match entry {
+        QuestLogEntry::Quest {
+            quest_id: id,
+            title,
+            description,
+            objectives,
+        } if *id == quest_id => Some(StaticQuest {
+            title,
+            description,
+            objectives,
+        }),
+        _ => None,
+    })
+}
+
+fn selected_static_quest(state: &LuaState) -> LuaResult<Option<StaticQuest>> {
+    Ok(static_quest_by_id(selected_quest_id(state)?))
+}
+
+fn join_objective_text(quest: StaticQuest) -> String {
+    quest
+        .objectives
+        .iter()
+        .map(|objective| objective.text)
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn reward_items_for_quest(
+    state: &LuaState,
+    quest_id: i32,
+) -> LuaResult<Vec<crate::lua_api::state::QuestRewardItem>> {
+    let rewards = borrow_state(state)?
+        .quest_log_entries
+        .entries
+        .iter()
+        .find(|entry| entry.quest_id == quest_id)
+        .map(|entry| entry.reward_items.clone())
+        .unwrap_or_default();
+    Ok(rewards)
+}
+
+fn quest_has_rewards(state: &LuaState, quest_id: i32) -> LuaResult<bool> {
+    let has_rewards = borrow_state(state)?
+        .quest_log_entries
+        .entries
+        .iter()
+        .find(|entry| entry.quest_id == quest_id)
+        .is_some_and(|entry| !entry.reward_items.is_empty() || !entry.currency_rewards.is_empty());
+    Ok(has_rewards)
+}
+
+fn push_optional_i32(state: &mut LuaState, value: Option<i32>) {
+    match value {
+        Some(value) => state.push(Val::Num(value as f64)),
+        None => state.push(Val::Nil),
+    }
+}
+
+fn push_optional_bool(state: &mut LuaState, value: Option<bool>) {
+    match value {
+        Some(value) => state.push(Val::Bool(value)),
+        None => state.push(Val::Nil),
+    }
 }
 
 fn fire_event_with_args(state: &mut LuaState, event_name: &'static str, args: &[Val]) {
@@ -291,6 +379,12 @@ pub fn return_nil(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub fn should_show_quest_rewards(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    state.push(Val::Bool(quest_has_rewards(state, quest_id)?));
+    Ok(1)
+}
+
 pub fn is_world_quest_fn(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     state.push(Val::Bool(is_world_quest(quest_id)));
@@ -460,8 +554,215 @@ pub fn request_load_quest_by_id(state: &mut LuaState) -> LuaResult<u32> {
 // Global quest function handlers
 // ---------------------------------------------------------------------------
 
+pub fn get_greeting_text(state: &mut LuaState) -> LuaResult<u32> {
+    let text = create_string_static(state, QUEST_GREETING_TEXT);
+    state.push(text);
+    Ok(1)
+}
+
+pub fn get_num_active_quests(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.gossip.active_quests.len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+pub fn get_num_available_quests(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.gossip.available_quests.len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+pub fn get_active_title(state: &mut LuaState) -> LuaResult<u32> {
+    let index = quest_list_index(state)?;
+    let row = borrow_state(state)?
+        .gossip
+        .active_quests
+        .get(index)
+        .cloned();
+    let Some(row) = row else {
+        return Ok(0);
+    };
+    let title = create_string(state, &row.title);
+    state.push(title);
+    state.push(Val::Bool(row.is_complete.unwrap_or(false)));
+    Ok(2)
+}
+
+pub fn get_active_quest_id(state: &mut LuaState) -> LuaResult<u32> {
+    let index = quest_list_index(state)?;
+    let quest_id = borrow_state(state)?
+        .gossip
+        .active_quests
+        .get(index)
+        .map(|row| row.quest_id)
+        .unwrap_or(0);
+    state.push(Val::Num(quest_id as f64));
+    Ok(1)
+}
+
+pub fn is_active_quest_trivial(state: &mut LuaState) -> LuaResult<u32> {
+    let index = quest_list_index(state)?;
+    let is_trivial = borrow_state(state)?
+        .gossip
+        .active_quests
+        .get(index)
+        .is_some_and(|row| row.is_trivial);
+    state.push(Val::Bool(is_trivial));
+    Ok(1)
+}
+
+pub fn get_available_title(state: &mut LuaState) -> LuaResult<u32> {
+    let index = quest_list_index(state)?;
+    let title = borrow_state(state)?
+        .gossip
+        .available_quests
+        .get(index)
+        .map(|row| row.title.clone())
+        .unwrap_or_default();
+    let title = create_string(state, &title);
+    state.push(title);
+    Ok(1)
+}
+
+pub fn get_available_quest_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = quest_list_index(state)?;
+    let row = borrow_state(state)?
+        .gossip
+        .available_quests
+        .get(index)
+        .cloned();
+    let Some(row) = row else {
+        return Ok(0);
+    };
+    state.push(Val::Bool(row.is_trivial));
+    push_optional_i32(state, row.frequency);
+    push_optional_bool(state, row.repeatable);
+    state.push(Val::Bool(row.is_legendary));
+    state.push(Val::Num(row.quest_id as f64));
+    state.push(Val::Bool(row.is_important));
+    state.push(Val::Bool(row.is_meta));
+    state.push(Val::Num(row.quest_info_id as f64));
+    Ok(8)
+}
+
+pub fn select_active_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let index = quest_list_index(state)?;
+    let row = borrow_state(state)?
+        .gossip
+        .active_quests
+        .get(index)
+        .cloned();
+    let Some(row) = row else {
+        return Ok(0);
+    };
+    set_selected_quest_id(state, row.quest_id as i32)?;
+    let event = if row.is_complete.unwrap_or(false) {
+        "QUEST_COMPLETE"
+    } else {
+        "QUEST_PROGRESS"
+    };
+    fire_event_with_args(state, event, &[]);
+    Ok(0)
+}
+
+pub fn select_available_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let index = quest_list_index(state)?;
+    let row = borrow_state(state)?
+        .gossip
+        .available_quests
+        .get(index)
+        .cloned();
+    let Some(row) = row else {
+        return Ok(0);
+    };
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.pending_quest_offer = Some(row.quest_id);
+        sim.selected_quest_log_id = Some(row.quest_id);
+    }
+    fire_event_with_args(state, "QUEST_DETAIL", &[]);
+    Ok(0)
+}
+
+pub fn get_quest_id(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = selected_quest_id(state)?;
+    state.push(Val::Num(quest_id as f64));
+    Ok(1)
+}
+
+pub fn get_title_text(state: &mut LuaState) -> LuaResult<u32> {
+    let title = selected_static_quest(state)?
+        .map(|quest| quest.title)
+        .unwrap_or("Quest");
+    let title = create_string(state, title);
+    state.push(title);
+    Ok(1)
+}
+
+pub fn get_quest_text(state: &mut LuaState) -> LuaResult<u32> {
+    let description = selected_static_quest(state)?
+        .map(|quest| quest.description)
+        .unwrap_or("");
+    let description = create_string(state, description);
+    state.push(description);
+    Ok(1)
+}
+
+pub fn get_objective_text(state: &mut LuaState) -> LuaResult<u32> {
+    let objective_text = selected_static_quest(state)?
+        .map(join_objective_text)
+        .unwrap_or_default();
+    let objective_text = create_string(state, &objective_text);
+    state.push(objective_text);
+    Ok(1)
+}
+
+pub fn get_reward_text(state: &mut LuaState) -> LuaResult<u32> {
+    let reward_text = create_string_static(state, QUEST_REWARD_TEXT);
+    state.push(reward_text);
+    Ok(1)
+}
+
+pub fn get_num_quest_rewards(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = selected_quest_id(state)?;
+    let count = reward_items_for_quest(state, quest_id)?.len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+pub fn get_quest_item_info(state: &mut LuaState) -> LuaResult<u32> {
+    let reward_type = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let reward_index = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0) as usize;
+    if reward_type != "reward" || reward_index == 0 {
+        return Ok(0);
+    }
+    let quest_id = selected_quest_id(state)?;
+    let item = reward_items_for_quest(state, quest_id)?
+        .get(reward_index - 1)
+        .cloned();
+    let Some(item) = item else {
+        return Ok(0);
+    };
+    let name = create_string(state, &item.name);
+    let texture = create_string(state, &item.texture);
+    state.push(name);
+    state.push(texture);
+    state.push(Val::Num(item.count as f64));
+    state.push(Val::Num(item.quality as f64));
+    state.push(Val::Bool(item.is_usable));
+    state.push(Val::Num(SEEDED_REWARD_ITEM_ID as f64));
+    Ok(6)
+}
+
+pub fn get_quest_item_info_loot_type(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
 pub fn get_num_quest_leaderboards(state: &mut LuaState) -> LuaResult<u32> {
-    let log_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let log_index = Option::<f64>::from_stack(state, 1)?
+        .map(|index| index as i32)
+        .unwrap_or(selected_log_index(state)?);
     let count = match entry_at(log_index) {
         Some(QuestLogEntry::Quest { objectives, .. }) => objectives.len() as i32,
         _ => 0,
@@ -472,7 +773,9 @@ pub fn get_num_quest_leaderboards(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn get_quest_log_leaderboard(state: &mut LuaState) -> LuaResult<u32> {
     let objective_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
-    let log_index = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0) as i32;
+    let log_index = Option::<f64>::from_stack(state, 2)?
+        .map(|index| index as i32)
+        .unwrap_or(selected_log_index(state)?);
     let Some(objective) = objective_at(log_index, objective_index) else {
         return Ok(0);
     };

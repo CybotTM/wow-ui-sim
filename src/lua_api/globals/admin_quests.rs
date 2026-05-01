@@ -66,7 +66,7 @@ pub(super) fn open_multi_quest_npc(state: &mut LuaState) -> LuaResult<u32> {
         refresh_gossip_counts(&mut sim.gossip);
     }
 
-    dispatch_event_now(state, "GOSSIP_SHOW", &[])?;
+    dispatch_event_now(state, "QUEST_GREETING", &[])?;
     Ok(0)
 }
 

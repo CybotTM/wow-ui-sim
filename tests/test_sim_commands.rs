@@ -315,16 +315,16 @@ fn builtin_talk_to_quest_npc_is_marked_old() {
 }
 
 #[test]
-fn builtin_talk_to_multi_quest_npc_opens_mixed_quest_gossip() {
+fn builtin_talk_to_multi_quest_npc_opens_quest_greeting() {
     let env = env();
     let result: String = env
         .eval(
             r#"
             local fired = false
             local f = CreateFrame("Frame")
-            f:RegisterEvent("GOSSIP_SHOW")
+            f:RegisterEvent("QUEST_GREETING")
             f:SetScript("OnEvent", function(self, event)
-                if event == "GOSSIP_SHOW" then fired = true end
+                if event == "QUEST_GREETING" then fired = true end
             end)
             for _, cmd in ipairs(SimCommands:GetCommands()) do
                 if cmd.name == "Talk to Multi-Quest NPC" then
@@ -333,20 +333,25 @@ fn builtin_talk_to_multi_quest_npc_opens_mixed_quest_gossip() {
                 end
             end
 
-            local available = C_GossipInfo.GetAvailableQuests()
-            local active = C_GossipInfo.GetActiveQuests()
             if not fired then return "not_fired" end
-            if #available ~= 1 then return "available_count=" .. #available end
-            if #active ~= 2 then return "active_count=" .. #active end
-            if active[1].isComplete ~= true then return "first_not_complete" end
-            if active[2].isComplete ~= false then return "second_not_incomplete" end
+            if GetNumAvailableQuests() ~= 1 then return "available_count=" .. GetNumAvailableQuests() end
+            if GetNumActiveQuests() ~= 2 then return "active_count=" .. GetNumActiveQuests() end
+            if UnitName("questnpc") ~= "Quest Giver" then return "questnpc=" .. tostring(UnitName("questnpc")) end
 
-            local name, texture, count, quality, usable = GetQuestLogRewardInfo(1, active[1].questID)
+            local activeTitle, activeComplete = GetActiveTitle(1)
+            local secondTitle, secondComplete = GetActiveTitle(2)
+            local availableTitle = GetAvailableTitle(1)
+            local _, _, _, _, availableQuestID = GetAvailableQuestInfo(1)
+            if activeComplete ~= true then return "first_not_complete" end
+            if secondComplete ~= false then return "second_not_incomplete" end
+
+            SelectActiveQuest(1)
+            local name, texture, count, quality, usable = GetQuestItemInfo("reward", 1)
             if name ~= "Earthen Lockbox" then return "reward_name=" .. tostring(name) end
             if texture ~= "Interface\\Icons\\INV_Box_01" then return "reward_texture=" .. tostring(texture) end
-            return active[1].questID .. ":" .. active[1].title .. ":" ..
-                active[2].questID .. ":" .. active[2].title .. ":" ..
-                available[1].questID .. ":" .. available[1].title .. ":" ..
+            return GetQuestID() .. ":" .. activeTitle .. ":" ..
+                GetActiveQuestID(2) .. ":" .. secondTitle .. ":" ..
+                availableQuestID .. ":" .. availableTitle .. ":" ..
                 count .. ":" .. quality .. ":" .. tostring(usable)
             "#,
         )
@@ -354,6 +359,46 @@ fn builtin_talk_to_multi_quest_npc_opens_mixed_quest_gossip() {
     assert_eq!(
         result, "80001:Defending the Gates:80000:The Lost Expedition:80002:Supply Run:1:3:true",
         "Talk to Multi-Quest NPC should open mixed quest gossip with rewards: {result}"
+    );
+}
+
+#[test]
+fn builtin_talk_to_multi_quest_npc_selects_available_quest_detail() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local detailFired = false
+            local completeFired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("QUEST_DETAIL")
+            f:RegisterEvent("QUEST_COMPLETE")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "QUEST_DETAIL" then detailFired = true end
+                if event == "QUEST_COMPLETE" then completeFired = true end
+            end)
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Talk to Multi-Quest NPC" then
+                    cmd.action()
+                    break
+                end
+            end
+
+            SelectAvailableQuest(1)
+            if not detailFired then return "detail_not_fired" end
+            if completeFired then return "complete_fired" end
+            if GetQuestID() ~= 80002 then return "quest_id=" .. tostring(GetQuestID()) end
+            if GetTitleText() ~= "Supply Run" then return "title=" .. tostring(GetTitleText()) end
+            if GetQuestText() == "" then return "missing_description" end
+            if GetObjectiveText() == "" then return "missing_objective" end
+            if GetRewardText() == "" then return "missing_reward_text" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Selecting available quest should open QuestFrame detail data: {result}"
     );
 }
 
