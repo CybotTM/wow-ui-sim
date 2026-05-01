@@ -518,3 +518,98 @@ fn main_action_bar_does_not_publish_plan_named_button_globals() {
         }
     });
 }
+
+/// PLAN-named event-routing global frames. Each is a parentless,
+/// invisible singleton declared at `Shared/ActionButtonComponentTemplate.xml:89-121`
+/// whose only job is to route engine events / OnUpdate ticks to a
+/// fan-out list of action buttons. Action buttons opt into a router by
+/// calling `Router:RegisterFrame(self)` (or `(action, self)` for the
+/// per-action routers); the router demuxes the event and dispatches
+/// back to each registered button. The mixin-pinned method on each
+/// router is `RegisterFrame` because that is the public surface every
+/// caller in Blizzard's own code uses, and a regression that breaks
+/// `RegisterFrame` would silently disable every action button's
+/// reaction to the corresponding event class.
+///
+/// Note the deliberate inconsistency in the `ActionBarButtonEventsFrame`
+/// row: the XML at xml:89 declares `mixin="ActionBarButtonEventsDerivedFrameMixin"`,
+/// NOT `ActionBarButtonEventsFrameMixin`. The base `Mixin = {}` is
+/// declared at `Shared/ActionButton.lua:201` but the XML uses the
+/// derived subclass declared at `Shared/ActionButton.lua:1443`
+/// (`ActionBarButtonEventsDerivedFrameMixin = CreateFromMixins(ActionBarButtonEventsFrameMixin)`)
+/// so that flavor-specific overrides (the WoWLabs-only `OnWorldLootObjectTooltipShown`
+/// at `WoWLabs/ActionButtonOverrides.lua:26-30`) can drop into the
+/// subclass without disturbing the base contract that `RegisterFrame`
+/// callers depend on. `CreateFromMixins` is implemented as
+/// `Mixin({}, ...)` in `src/lua_api/env_init/shared_bootstrap.lua` —
+/// it shallow-copies the parent mixin's keys onto a fresh table — so
+/// `RegisterFrame` shows up on the derived mixin AND on the frame.
+const PLAN_NAMED_EVENT_ROUTING_FRAMES: &[(&str, &str)] = &[
+    (
+        "ActionBarButtonEventsFrame",
+        "Shared/ActionButtonComponentTemplate.xml:89",
+    ),
+    (
+        "ActionBarActionEventsFrame",
+        "Shared/ActionButtonComponentTemplate.xml:96",
+    ),
+    (
+        "ActionBarButtonUpdateFrame",
+        "Shared/ActionButtonComponentTemplate.xml:103",
+    ),
+    (
+        "ActionBarButtonRangeCheckFrame",
+        "Shared/ActionButtonComponentTemplate.xml:110",
+    ),
+    (
+        "ActionBarButtonUsableWatcherFrame",
+        "Shared/ActionButtonComponentTemplate.xml:117",
+    ),
+];
+
+#[test]
+fn plan_named_event_routing_frames_exist_with_register_frame_surface() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for (frame_name, xml_site) in PLAN_NAMED_EVENT_ROUTING_FRAMES {
+            let frame_type: String = env
+                .eval(&format!("return type(_G[{frame_name:?}])"))
+                .expect("event-routing frame existence probe must run cleanly");
+
+            assert_eq!(
+                frame_type, "table",
+                "Expected `_G[{frame_name:?}]` to be a table after `{ROOT}` loads, got \
+                 `{frame_type}`. The XML at `{xml_site}` declares this frame with \
+                 `<Frame name=\"{frame_name}\" mixin=\"...\">` — a parentless invisible \
+                 singleton. A nil reading means the addon's XML chunk failed to execute \
+                 past this declaration, which would also prevent the four sibling \
+                 routing frames in the same XML file from registering (so this test \
+                 fails first on whichever frame appears earliest in the file). Every \
+                 caller of `{frame_name}:RegisterFrame(...)` in `Shared/ActionButton.lua` \
+                 (the 5 RegisterFrame call sites at lua:459, 564, 957, etc.) would \
+                 nil-call on the `:` indexer."
+            );
+
+            let register_frame_type: String = env
+                .eval(&format!("return type(_G[{frame_name:?}].RegisterFrame)"))
+                .expect("RegisterFrame method probe must run cleanly");
+
+            assert_eq!(
+                register_frame_type, "function",
+                "Expected `_G[{frame_name:?}].RegisterFrame` to be a function after \
+                 `{ROOT}` loads, got `{register_frame_type}`. Every routing frame's \
+                 mixin (declared at `Shared/ActionButton.lua:201/243/346/366/404`) defines \
+                 `function Mixin:RegisterFrame(...)` as the public fan-in API. The XML \
+                 codegen at `src/loader/xml_frame_codegen.rs:155-173` expands the \
+                 `mixin=` attribute into `Mixin(frame, MixinName)`, and the shared \
+                 `Mixin(object, ...)` impl in `src/lua_api/env_init/shared_bootstrap.lua` \
+                 walks `pairs(mixin)` to copy `RegisterFrame` onto the frame. A \
+                 nil/non-function reading means either (a) the mixin source did not \
+                 execute past its `function Mixin:RegisterFrame(...)` line, OR (b) the \
+                 codegen Mixin call did not run for this frame. Either way every \
+                 ActionButton that calls `{frame_name}:RegisterFrame(self)` from its \
+                 OnLoad/OnEvent path would crash with a nil-method error during the \
+                 first event tick after addon load."
+            );
+        }
+    });
+}
