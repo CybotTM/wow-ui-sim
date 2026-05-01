@@ -60,3 +60,6 @@ mod behavior_honor_bar_update;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_house_favor_bar.rs"]
 mod behavior_house_favor_bar;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_artifact_bar.rs"]
+mod behavior_artifact_bar;
