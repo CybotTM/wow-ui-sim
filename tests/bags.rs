@@ -506,6 +506,75 @@ fn test_container_frame_1_item_1_icon_matches_first_bag_slot_item() {
 }
 
 #[test]
+fn test_new_bag_item_button_icon_matches_its_slot_after_refresh() {
+    let env = setup_env();
+    install_test_error_handler(&env);
+    clear_recorded_lua_errors(&env);
+
+    env.exec(
+        r#"
+        assert(ContainerFrameSettingsManager, "ContainerFrameSettingsManager should exist")
+        ContainerFrameSettingsManager:SetUsingCombinedBags(false)
+        A_Admin.AddBagItem(0, 5, 2852, 1)
+        "#,
+    )
+    .unwrap();
+
+    open_all_bags(&env);
+    assert_no_bag_open_errors(&env, "ToggleAllBags after adding Copper Chain Pants");
+
+    let result: String = env
+        .eval(
+            r#"
+            local expectedInfo = C_Container.GetContainerItemInfo(0, 5)
+            if not expectedInfo then
+                return "missing_slot_5_info"
+            end
+            if expectedInfo.iconFileID ~= 134583 then
+                return "wrong_api_icon_" .. tostring(expectedInfo.iconFileID)
+            end
+
+            local button
+            if ContainerFrame1 and ContainerFrame1.Items then
+                for _, itemButton in ipairs(ContainerFrame1.Items) do
+                    if itemButton:GetID() == 5 then
+                        button = itemButton
+                        break
+                    end
+                end
+            end
+            button = button or ContainerFrame1Item5
+            if not button then
+                return "missing_slot_5_button"
+            end
+            if not button.icon then
+                return "missing_slot_5_icon_texture"
+            end
+
+            local actual = button.icon:GetTexture()
+            if actual ~= expectedInfo.iconFileID then
+                return string.format(
+                    "icon_mismatch_expected_%s_actual_%s",
+                    tostring(expectedInfo.iconFileID),
+                    tostring(actual)
+                )
+            end
+            local width, height = button.icon:GetSize()
+            if width < 30 or height < 30 then
+                return string.format("icon_too_small_%s_%s", tostring(width), tostring(height))
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "Copper Chain Pants bag button should render the slot's item icon: {result}"
+    );
+}
+
+#[test]
 fn test_toggle_backpack_bootstrap_token_ui_does_not_nil_error() {
     let env = setup_env_with_bootstrap_loaded_token_ui();
     install_test_error_handler(&env);
