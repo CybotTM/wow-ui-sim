@@ -22,13 +22,21 @@
 //! compares it against `"INVTYPE_*"` constants.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::script_helpers::fire_named_event_state;
+use crate::lua_api::state::{BagItem, SimState};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_heirloom_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Heirloom")?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CreateHeirloom",
+        c_heirloom_create_heirloom,
+    )?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -116,6 +124,59 @@ pub(super) fn register_heirloom_surface(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
+fn c_heirloom_create_heirloom(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = u32::from_stack(state, 1)?;
+    let Some(slot) = insert_heirloom_copy(state, item_id)? else {
+        return Ok(0);
+    };
+
+    fire_named_event_state(state, "BAG_UPDATE", &[Val::Num(slot.0 as f64)]);
+    fire_named_event_state(state, "BAG_UPDATE_DELAYED", &[]);
+    Ok(0)
+}
+
+fn insert_heirloom_copy(state: &mut LuaState, item_id: u32) -> LuaResult<Option<(i32, i32)>> {
+    let mut sim = borrow_state_mut(state)?;
+    if !can_create_heirloom(&sim, item_id) {
+        return Ok(None);
+    }
+
+    let Some(slot) = first_free_backpack_slot(&sim) else {
+        return Ok(None);
+    };
+
+    sim.bag_items.insert(
+        slot,
+        BagItem {
+            item_id,
+            stack_count: 1,
+        },
+    );
+    Ok(Some(slot))
+}
+
+fn can_create_heirloom(sim: &SimState, item_id: u32) -> bool {
+    heirloom_is_collected(sim, item_id)
+        && sim
+            .world
+            .heirlooms
+            .iter()
+            .any(|heirloom| heirloom.item_id == item_id)
+}
+
+fn heirloom_is_collected(sim: &SimState, item_id: u32) -> bool {
+    sim.world
+        .collected_heirlooms
+        .iter()
+        .any(|collected_id| *collected_id == item_id)
+}
+
+fn first_free_backpack_slot(sim: &SimState) -> Option<(i32, i32)> {
+    (1..=16)
+        .map(|slot| (0, slot))
+        .find(|slot| !sim.bag_items.contains_key(slot))
+}
+
 fn c_heirloom_get_heirloom_info(state: &mut LuaState) -> LuaResult<u32> {
     let item_id = u32::from_stack(state, 1)?;
     let entry = {
@@ -191,7 +252,7 @@ fn c_heirloom_get_num_known_heirlooms(state: &mut LuaState) -> LuaResult<u32> {
         sim.world
             .heirlooms
             .iter()
-            .filter(|heirloom| sim.world.collected_heirlooms.contains(&heirloom.item_id))
+            .filter(|heirloom| heirloom_is_collected(&sim, heirloom.item_id))
             .count() as i32
     };
     state.push(Val::Num(count as f64));
@@ -204,10 +265,10 @@ fn c_heirloom_get_num_displayed_heirlooms(state: &mut LuaState) -> LuaResult<u32
 
 fn c_heirloom_player_has_heirloom(state: &mut LuaState) -> LuaResult<u32> {
     let item_id = u32::from_stack(state, 1)?;
-    let has = borrow_state(state)?
-        .world
-        .collected_heirlooms
-        .contains(&item_id);
+    let has = {
+        let sim = borrow_state(state)?;
+        heirloom_is_collected(&sim, item_id)
+    };
     state.push(Val::Bool(has));
     Ok(1)
 }
