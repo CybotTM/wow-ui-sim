@@ -6,6 +6,10 @@ Chronological record of wiki operations.
 
 Created `investigations/appearances-wardrobe-api.md` after opening Collections Journal > Appearances in the simulator and auditing Blizzard Wardrobe/Transmog call sites against the current `C_TransmogCollection`, `C_Transmog`, and `C_TransmogSets` surfaces. Documented that the panel opens with no Lua errors, but real browsing/filtering/search/favorite behavior needs stateful source, visual, filter, and search backing rather than no-op filter setters and empty Lua bootstrap fallbacks.
 
+## [2026-05-01] update | Wardrobe weapon slot switch crash
+
+Updated `investigations/appearances-wardrobe-api.md` with the root cause for the `Blizzard_Wardrobe.lua:687` nil-index crash. The simulator was reporting main/offhand appearance slot location metadata as weapon collection categories, which made Blizzard treat weapons as armor setup slots; weapon slot metadata now uses `Enum.TransmogCollectionType.None` so the weapon-category path handles them.
+
 ## [2026-05-01] ingest | Adventure Guide boss icon fallback
 
 Created `investigations/adventure-guide-boss-icons.md` after tracing blank Encounter Journal boss icons to `EJ_GetCreatureInfo` returning `0` for missing creature icon fileDataIDs. Documented that Blizzard's boss button Lua relies on nil to select `UI-EJ-BOSS-Default`; `0` is truthy and makes `SetTexture(0)` clear the texture.

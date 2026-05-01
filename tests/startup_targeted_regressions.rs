@@ -366,6 +366,55 @@ fn startup_wardrobe_tab_has_transmog_locations() {
 }
 
 #[test]
+fn startup_wardrobe_can_switch_from_armor_to_weapon_slot() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: String = env
+            .eval(
+                r#"
+                ToggleCollectionsJournal(5)
+                if CollectionsJournal and CollectionsJournal_SetTab then
+                    CollectionsJournal_SetTab(CollectionsJournal, 5)
+                end
+
+                local itemsFrame = WardrobeCollectionFrame and WardrobeCollectionFrame.ItemsCollectionFrame
+                if not itemsFrame then
+                    return "missing_items_frame"
+                end
+
+                local headLocation = TransmogUtil.GetTransmogLocation("HEADSLOT", Enum.TransmogType.Appearance, false)
+                local mainHandLocation = TransmogUtil.GetTransmogLocation("MAINHANDSLOT", Enum.TransmogType.Appearance, false)
+                if not headLocation or not mainHandLocation then
+                    return "missing_location"
+                end
+                if mainHandLocation:GetArmorCategoryID() ~= nil then
+                    return "weapon_has_armor_category"
+                end
+
+                local headOk, headErr = pcall(function()
+                    itemsFrame:SetActiveSlot(headLocation)
+                end)
+                if not headOk then
+                    return "head_error:" .. tostring(headErr)
+                end
+
+                local weaponOk, weaponErr = pcall(function()
+                    itemsFrame:SetActiveSlot(mainHandLocation)
+                end)
+                if not weaponOk then
+                    return "weapon_error:" .. tostring(weaponErr)
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("wardrobe armor-to-weapon slot switch probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
+
+#[test]
 fn cursor_hovered_item_globals_are_callable() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
