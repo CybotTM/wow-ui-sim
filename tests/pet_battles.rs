@@ -10,6 +10,14 @@ fn seed_sample_pet_battle(env: &WowLuaEnv) {
     seed_sample_pet_battle_state(&mut sim);
     sim.pet_battles.player_pets = seeded_player_pets();
     sim.pet_battles.enemy_pets = seeded_enemy_pets();
+    drop(sim);
+    env.exec(
+        r#"
+        A_Admin.SetPetBattleState(1)
+        C_PetBattles._state.isWildBattle = true
+        "#,
+    )
+    .unwrap();
 }
 
 fn seed_sample_pet_battle_state(sim: &mut wow_ui_sim::lua_api::state::SimState) {
