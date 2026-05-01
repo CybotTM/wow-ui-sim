@@ -425,6 +425,35 @@ fn test_get_section_info_resolves_boss_spell_icon() {
 }
 
 #[test]
+fn adventure_journal_suggestions_seed_visible_cards() {
+    let env = env();
+    env.exec(
+        r#"
+        assert(C_AdventureJournal.CanBeShown() == true)
+        C_AdventureJournal.UpdateSuggestions()
+
+        local suggestions = {}
+        C_AdventureJournal.GetSuggestions(suggestions)
+
+        assert(C_AdventureJournal.GetNumAvailableSuggestions() >= 3)
+        assert(#suggestions == 3)
+        for index, suggestion in ipairs(suggestions) do
+            assert(type(suggestion.title) == "string" and suggestion.title ~= "", index)
+            assert(type(suggestion.description) == "string" and suggestion.description ~= "", index)
+            assert(type(suggestion.buttonText) == "string" and suggestion.buttonText ~= "", index)
+            assert(type(suggestion.iconPath) == "string" and suggestion.iconPath ~= "", index)
+        end
+
+        C_AdventureJournal.SetPrimaryOffset(1)
+        assert(C_AdventureJournal.GetPrimaryOffset() == 1)
+        C_AdventureJournal.SetPrimaryOffset(999)
+        assert(C_AdventureJournal.GetPrimaryOffset() == C_AdventureJournal.GetNumAvailableSuggestions() - 1)
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn encounter_journal_search_surface_is_available_and_empty() {
     let env = env();
     env.exec(

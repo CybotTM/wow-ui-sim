@@ -960,6 +960,8 @@ pub struct EncounterJournalState {
     /// Currently active EJ tab (1=Suggested, 2=Dungeons, 3=Raids,
     /// 4=Loot, 5=Search).
     pub current_tab: u32,
+    /// Zero-based carousel offset for `C_AdventureJournal` suggestions.
+    pub adventure_primary_offset: u32,
 }
 
 impl Default for EncounterJournalState {
@@ -977,6 +979,7 @@ impl Default for EncounterJournalState {
             search_results: Vec::new(),
             search_finished: true,
             current_tab: 3,
+            adventure_primary_offset: 0,
         }
     }
 }
