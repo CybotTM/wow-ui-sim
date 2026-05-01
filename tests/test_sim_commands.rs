@@ -294,6 +294,70 @@ fn builtin_talk_to_quest_npc_opens_available_quest_gossip() {
 }
 
 #[test]
+fn builtin_talk_to_quest_npc_is_marked_old() {
+    let env = env();
+    let description: String = env
+        .eval(
+            r#"
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Talk to Quest NPC" then
+                    return cmd.description
+                end
+            end
+            return "missing"
+            "#,
+        )
+        .unwrap();
+    assert!(
+        description.to_ascii_lowercase().contains("old"),
+        "Talk to Quest NPC should be marked old, got: {description}"
+    );
+}
+
+#[test]
+fn builtin_talk_to_multi_quest_npc_opens_mixed_quest_gossip() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("GOSSIP_SHOW")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "GOSSIP_SHOW" then fired = true end
+            end)
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Talk to Multi-Quest NPC" then
+                    cmd.action()
+                    break
+                end
+            end
+
+            local available = C_GossipInfo.GetAvailableQuests()
+            local active = C_GossipInfo.GetActiveQuests()
+            if not fired then return "not_fired" end
+            if #available ~= 1 then return "available_count=" .. #available end
+            if #active ~= 2 then return "active_count=" .. #active end
+            if active[1].isComplete ~= true then return "first_not_complete" end
+            if active[2].isComplete ~= false then return "second_not_incomplete" end
+
+            local name, texture, count, quality, usable = GetQuestLogRewardInfo(1, active[1].questID)
+            if name ~= "Earthen Lockbox" then return "reward_name=" .. tostring(name) end
+            if texture ~= "Interface\\Icons\\INV_Box_01" then return "reward_texture=" .. tostring(texture) end
+            return active[1].questID .. ":" .. active[1].title .. ":" ..
+                active[2].questID .. ":" .. active[2].title .. ":" ..
+                available[1].questID .. ":" .. available[1].title .. ":" ..
+                count .. ":" .. quality .. ":" .. tostring(usable)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "80001:Defending the Gates:80000:The Lost Expedition:80002:Supply Run:1:3:true",
+        "Talk to Multi-Quest NPC should open mixed quest gossip with rewards: {result}"
+    );
+}
+
+#[test]
 fn builtin_open_bank_fires_event() {
     let env = env();
     let result: String = env

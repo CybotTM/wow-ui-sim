@@ -12,11 +12,19 @@ SimCommands:Register("Open Merchant", "Fire MERCHANT_SHOW event", function()
     FireEvent("MERCHANT_SHOW")
 end, "UI Panels")
 
-SimCommands:Register("Talk to Quest NPC", "Open a gossip dialog with an available quest", function()
+SimCommands:Register("Talk to Quest NPC", "Open old single-quest gossip dialog", function()
     if A_Admin and A_Admin.OpenQuestNpc then
         A_Admin.OpenQuestNpc()
     else
         print("[SimCommands] Quest NPC admin API unavailable.")
+    end
+end, "UI Panels")
+
+SimCommands:Register("Talk to Multi-Quest NPC", "Open quest gossip with completed, incomplete, and reward quests", function()
+    if A_Admin and A_Admin.OpenMultiQuestNpc then
+        A_Admin.OpenMultiQuestNpc()
+    else
+        print("[SimCommands] Multi-quest NPC admin API unavailable.")
     end
 end, "UI Panels")
 
