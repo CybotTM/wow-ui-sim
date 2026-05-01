@@ -92,7 +92,13 @@ fn show_or_hide(state: &mut LuaState, id: u64, shown: bool) -> LuaResult<()> {
         sim.global_show_hide_depth = depth;
     }
 
-    result
+    result?;
+    if shown {
+        super::size::mark_visible_layout_subtree_dirty(state, id);
+    } else {
+        super::size::mark_nearest_layout_parent_dirty(state, id);
+    }
+    Ok(())
 }
 
 fn read_show_hide_state(
@@ -182,18 +188,18 @@ fn fire_visibility_handler_recursive(
         fire_visibility_handler_recursive(state, child_id, handler_name)?;
     }
 
-    let Some(handler) = get_rilua_script(state, frame_id, handler_name) else {
-        return Ok(());
-    };
-    let Ok(frame) = frame_ref(state, frame_id) else {
-        return Ok(());
-    };
-    if let Err(error_msg) =
-        crate::lua_api::script_helpers::protected_lua_pcall_state(state, handler, &[frame])
-    {
-        call_error_handler_state(state, &error_msg);
+    if let Some(handler) = get_rilua_script(state, frame_id, handler_name) {
+        let Ok(frame) = frame_ref(state, frame_id) else {
+            return Ok(());
+        };
+        if let Err(error_msg) =
+            crate::lua_api::script_helpers::protected_lua_pcall_state(state, handler, &[frame])
+        {
+            call_error_handler_state(state, &error_msg);
+        }
     }
 
+    super::size::mark_nearest_layout_parent_dirty(state, frame_id);
     Ok(())
 }
 

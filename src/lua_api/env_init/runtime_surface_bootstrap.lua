@@ -11303,6 +11303,24 @@ local function __wow_register_core_frame_methods()
     end
   end
 
+  function __wow_mark_nearest_layout_parent_dirty(frame)
+    local parent = frame and frame.GetParent and frame:GetParent() or nil
+    while parent do
+      if __wow_mark_layout_frame_dirty(parent) then
+        return
+      end
+      parent = parent.GetParent and parent:GetParent() or nil
+    end
+  end
+
+  function __wow_mark_layout_frame_dirty(frame)
+    if frame and frame.IsLayoutFrame and frame:IsLayoutFrame() then
+      frame:MarkDirty()
+      return true
+    end
+    return false
+  end
+
   if methods.AddModule == nil then
     function methods:AddModule(module)
       local fields = __wow_frame_fields(self)

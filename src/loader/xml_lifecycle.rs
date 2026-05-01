@@ -39,6 +39,9 @@ pub fn fire_lifecycle_scripts(
         };
         if lifecycle.on_load {
             fire_handler(state, name, "OnLoad", precompiled::fire_onload, frame);
+            crate::lua_api::frame::methods::core_state::size::mark_nearest_layout_parent_dirty(
+                state, frame_id,
+            );
         }
         if lifecycle.on_show && frame_visible {
             fire_handler(state, name, "OnShow", precompiled::fire_onshow, frame);

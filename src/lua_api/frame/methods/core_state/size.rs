@@ -8,7 +8,9 @@ use crate::lua_api::frame::methods::methods_helpers::{
     can_change_protected_state_for, emit_addon_action_blocked,
 };
 use crate::lua_api::frame::methods::text_attribute_event::refresh_auto_text_height_after_width_change;
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, call_function_state, frame_ref, table_get_static,
+};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -64,6 +66,7 @@ pub fn set_size(state: &mut LuaState) -> LuaResult<u32> {
 
     apply_explicit_size(&mut sim, id, width, height);
     drop(sim);
+    mark_nearest_layout_parent_dirty(state, id);
     super::super::widgets::refresh_scroll_frames_for_resized_frame(state, id)?;
     Ok(0)
 }
@@ -93,6 +96,7 @@ pub fn set_width(state: &mut LuaState) -> LuaResult<u32> {
 
     apply_explicit_width(&mut sim, id, width);
     drop(sim);
+    mark_nearest_layout_parent_dirty(state, id);
     refresh_auto_text_height_after_width_change(state, id);
     super::super::widgets::refresh_scroll_frames_for_resized_frame(state, id)?;
     Ok(0)
@@ -119,6 +123,75 @@ pub fn set_height(state: &mut LuaState) -> LuaResult<u32> {
 
     apply_explicit_height(&mut sim, id, height);
     drop(sim);
+    mark_nearest_layout_parent_dirty(state, id);
     super::super::widgets::refresh_scroll_frames_for_resized_frame(state, id)?;
     Ok(0)
+}
+
+pub(crate) fn mark_nearest_layout_parent_dirty(state: &mut LuaState, id: u64) {
+    let Some(helper) = layout_dirty_helper(state) else {
+        return;
+    };
+
+    let ancestors = {
+        let Ok(sim) = borrow_state(state) else {
+            return;
+        };
+        let mut ancestors = Vec::new();
+        let mut current = sim.widgets.get(id).and_then(|frame| frame.parent_id);
+        while let Some(parent_id) = current {
+            ancestors.push(parent_id);
+            current = sim.widgets.get(parent_id).and_then(|frame| frame.parent_id);
+        }
+        ancestors
+    };
+
+    for ancestor_id in ancestors {
+        let Ok(frame) = frame_ref(state, ancestor_id) else {
+            continue;
+        };
+        if let Ok(Val::Bool(true)) = call_function_state(state, helper, &[frame]) {
+            break;
+        }
+    }
+}
+
+pub(crate) fn mark_visible_layout_subtree_dirty(state: &mut LuaState, id: u64) {
+    let Some(helper) = layout_dirty_helper(state) else {
+        return;
+    };
+
+    let descendants = {
+        let Ok(sim) = borrow_state(state) else {
+            return;
+        };
+        let mut descendants = vec![id];
+        let mut index = 0;
+        while let Some(current_id) = descendants.get(index).copied() {
+            index += 1;
+            if let Some(frame) = sim.widgets.get(current_id) {
+                descendants.extend(frame.children.iter().copied());
+            }
+        }
+        descendants
+            .into_iter()
+            .filter(|&descendant_id| sim.widgets.is_ancestor_visible(descendant_id))
+            .collect::<Vec<_>>()
+    };
+
+    for descendant_id in descendants {
+        let Ok(frame) = frame_ref(state, descendant_id) else {
+            continue;
+        };
+        let _ = call_function_state(state, helper, &[frame]);
+    }
+}
+
+fn layout_dirty_helper(state: &mut LuaState) -> Option<Val> {
+    let helper = table_get_static(
+        state,
+        Val::Table(state.global),
+        "__wow_mark_layout_frame_dirty",
+    );
+    matches!(helper, Val::Function(_)).then_some(helper)
 }

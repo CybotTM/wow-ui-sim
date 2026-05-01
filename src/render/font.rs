@@ -174,7 +174,7 @@ impl WowFontSystem {
         font_path: Option<&str>,
         font_size: f32,
     ) -> f32 {
-        if text.is_empty() {
+        if text.is_empty() || font_size <= 0.0 {
             return 0.0;
         }
         let line_height = (font_size * 1.2).ceil();
@@ -209,7 +209,7 @@ impl WowFontSystem {
         font_size: f32,
         wrap_width: Option<f32>,
     ) -> f32 {
-        if text.is_empty() {
+        if text.is_empty() || font_size <= 0.0 {
             return 0.0;
         }
         let line_height = (font_size * 1.2).ceil();

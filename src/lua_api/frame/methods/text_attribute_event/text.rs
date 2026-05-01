@@ -284,6 +284,8 @@ fn update_auto_text_width(state: &mut LuaState, id: u64) {
     frame.width = width;
     frame.width_is_text_auto = true;
     sim.widgets.mark_rect_dirty(id);
+    drop(sim);
+    crate::lua_api::frame::methods::core_state::size::mark_nearest_layout_parent_dirty(state, id);
 }
 
 /// If the frame's anchors pin both its left and right edges, set its width from

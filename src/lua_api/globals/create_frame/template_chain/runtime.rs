@@ -523,6 +523,9 @@ pub(super) fn fire_frame_on_load(state: &mut LuaState, frame_id: u64) -> LuaResu
     if let Some(on_load) = get_script(state, frame_id, "OnLoad") {
         call_handler_with_frame(state, on_load, frame)?;
     }
+    crate::lua_api::frame::methods::core_state::size::mark_nearest_layout_parent_dirty(
+        state, frame_id,
+    );
     Ok(())
 }
 
