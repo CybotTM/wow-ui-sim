@@ -12,6 +12,14 @@ SimCommands:Register("Open Merchant", "Fire MERCHANT_SHOW event", function()
     FireEvent("MERCHANT_SHOW")
 end, "UI Panels")
 
+SimCommands:Register("Talk to Quest NPC", "Open a gossip dialog with an available quest", function()
+    if A_Admin and A_Admin.OpenQuestNpc then
+        A_Admin.OpenQuestNpc()
+    else
+        print("[SimCommands] Quest NPC admin API unavailable.")
+    end
+end, "UI Panels")
+
 SimCommands:Register("Open Guild Bank", "Fire GUILDBANKFRAME_OPENED event", function()
     FireEvent("GUILDBANKFRAME_OPENED")
 end, "UI Panels")

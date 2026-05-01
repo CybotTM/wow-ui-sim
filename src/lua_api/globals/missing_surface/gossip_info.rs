@@ -6,10 +6,17 @@
 //! - `C_GossipInfo.GetActiveQuests()` — array of `GossipQuestUIInfo` tables
 //! - `C_GossipInfo.GetAvailableQuests()` — array of `GossipQuestUIInfo` tables
 //! - `C_GossipInfo.GetPoiForUiMapID(uiMapID)` — nil (permissive stub)
+//! - `C_GossipInfo.SelectAvailableQuest(questID)` — opens QUEST_DETAIL
+//! - `C_GossipInfo.SelectActiveQuest(questID)` — opens QUEST_PROGRESS
+//! - `C_GossipInfo.CloseGossip()` — closes the active gossip dialog
 
 use super::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_set,
+};
 use crate::lua_api::sim_substates::{GossipOption, GossipQuestRow};
+use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -47,6 +54,19 @@ pub(super) fn register_gossip_info_surface(state: &mut LuaState) -> LuaResult<()
         "GetFriendshipReputationRanks",
         c_gossip_info_get_friendship_reputation_ranks,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SelectAvailableQuest",
+        c_gossip_info_select_available_quest,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SelectActiveQuest",
+        c_gossip_info_select_active_quest,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "CloseGossip", c_gossip_info_close_gossip)?;
     Ok(())
 }
 
@@ -74,6 +94,79 @@ fn c_gossip_info_get_available_quests(state: &mut LuaState) -> LuaResult<u32> {
 fn c_gossip_info_get_poi_for_ui_map_id(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Nil);
     Ok(1)
+}
+
+fn c_gossip_info_select_available_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(quest_id) = quest_id_arg(state)? else {
+        return Ok(0);
+    };
+    {
+        let mut sim = borrow_state_mut(state)?;
+        let exists = sim
+            .gossip
+            .available_quests
+            .iter()
+            .any(|row| row.quest_id == quest_id);
+        if !exists {
+            return Ok(0);
+        }
+        sim.pending_quest_offer = Some(quest_id);
+        sim.selected_quest_log_id = Some(quest_id);
+    }
+
+    dispatch_event_now(state, "QUEST_DETAIL", &[])?;
+    Ok(0)
+}
+
+fn c_gossip_info_select_active_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(quest_id) = quest_id_arg(state)? else {
+        return Ok(0);
+    };
+    let Some(is_complete) = ({
+        let mut sim = borrow_state_mut(state)?;
+        let is_complete = sim
+            .gossip
+            .active_quests
+            .iter()
+            .find(|row| row.quest_id == quest_id)
+            .map(|row| row.is_complete.unwrap_or(false));
+        if is_complete.is_some() {
+            sim.selected_quest_log_id = Some(quest_id);
+        }
+        is_complete
+    }) else {
+        return Ok(0);
+    };
+
+    let event = if is_complete {
+        "QUEST_COMPLETE"
+    } else {
+        "QUEST_PROGRESS"
+    };
+    dispatch_event_now(state, event, &[])?;
+    Ok(0)
+}
+
+fn c_gossip_info_close_gossip(state: &mut LuaState) -> LuaResult<u32> {
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.gossip.active = false;
+        sim.gossip.options.clear();
+        sim.gossip.active_quests.clear();
+        sim.gossip.available_quests.clear();
+        sim.gossip.num_options = 0;
+        sim.gossip.num_active_quests = 0;
+        sim.gossip.num_available_quests = 0;
+    }
+
+    dispatch_event_now(state, "GOSSIP_CLOSED", &[])?;
+    Ok(0)
+}
+
+fn quest_id_arg(state: &mut LuaState) -> LuaResult<Option<u32>> {
+    Ok(Option::<f64>::from_stack(state, 1)?
+        .filter(|id| *id > 0.0)
+        .map(|id| id as u32))
 }
 
 fn c_gossip_info_get_friendship_reputation(state: &mut LuaState) -> LuaResult<u32> {

@@ -303,7 +303,8 @@ fn register_inventory_misc(b: TableBuilder) -> LuaResult<TableBuilder> {
     let b = b
         .set_function("FireEvent", fire_event_admin)?
         .set_function("ToggleDebugBorders", toggle_debug_borders)?
-        .set_function("ToggleDebugAnchors", toggle_debug_anchors)?
+        .set_function("ToggleDebugAnchors", toggle_debug_anchors)?;
+    let b = super::admin_quests::register_quests(b)?
         .set_function("SimulateBossKill", simulate_boss_kill)?
         .set_function("StartLootRoll", start_loot_roll)?
         .set_function("EndLootRoll", end_loot_roll)?;

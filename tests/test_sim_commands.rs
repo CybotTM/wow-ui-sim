@@ -263,6 +263,37 @@ fn builtin_open_mailbox_fires_event() {
 }
 
 #[test]
+fn builtin_talk_to_quest_npc_opens_available_quest_gossip() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("GOSSIP_SHOW")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "GOSSIP_SHOW" then fired = true end
+            end)
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Talk to Quest NPC" then
+                    cmd.action()
+                    break
+                end
+            end
+            local quests = C_GossipInfo.GetAvailableQuests()
+            if not fired then return "not_fired" end
+            if #quests ~= 1 then return "wrong_count" end
+            return quests[1].questID .. ":" .. quests[1].title
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "80000:The Lost Expedition",
+        "Talk to Quest NPC should open seeded quest gossip: {result}"
+    );
+}
+
+#[test]
 fn builtin_open_bank_fires_event() {
     let env = env();
     let result: String = env
