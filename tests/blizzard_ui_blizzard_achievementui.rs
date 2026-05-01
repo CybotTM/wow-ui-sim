@@ -36,3 +36,6 @@ mod behavior_button_click_link;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_button_double_click.rs"]
 mod behavior_button_double_click;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_objective_rep.rs"]
+mod behavior_objective_rep;
