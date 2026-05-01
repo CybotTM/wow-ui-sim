@@ -83,6 +83,33 @@ const CATEGORY_BUTTON_XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:625"
 /// virtual Frame at xml:625 — and only carries the tooltip wiring.
 const CATEGORY_BUTTON_PLAN_METHODS: &[(&str, u32)] = &[("OnEnter", 573), ("OnLeave", 579)];
 
+const ACHIEVEMENT_TEMPLATE_MIXIN_NAME: &str = "AchievementTemplateMixin";
+const ACHIEVEMENT_TEMPLATE_LUA_SITE: &str = "Mainline/Blizzard_AchievementUI.lua:1039";
+const ACHIEVEMENT_TEMPLATE_XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:733";
+
+/// PLAN-named methods on `AchievementTemplateMixin`. Each tuple is
+/// `(method_name, declared_at_line_number)` so a missing-method failure
+/// message points directly at the source line that should declare it.
+/// The mixin drives every individual achievement row in the right-hand
+/// achievements scrollbox: the row's collapse/expand toggle, hover/click
+/// behavior, tracking checkbox state, and the saturated-vs-desaturated
+/// styling that distinguishes earned from unearned achievements.
+const ACHIEVEMENT_TEMPLATE_PLAN_METHODS: &[(&str, u32)] = &[
+    ("OnLoad", 1041),
+    ("OnClick", 1089),
+    ("OnEnter", 1093),
+    ("OnLeave", 1103),
+    ("Init", 1158),
+    ("Collapse", 1308),
+    ("Expand", 1332),
+    ("Saturate", 1359),
+    ("Desaturate", 1392),
+    ("DisplayObjectives", 1541),
+    ("ToggleTracking", 1580),
+    ("SetAsTracked", 1609),
+    ("SetSelected", 1141),
+];
+
 /// Pin every PLAN-named method on `AchievementCategoryTemplateMixin` as a
 /// Lua function on the mixin table.
 ///
@@ -220,6 +247,95 @@ fn achievement_category_template_button_mixin_exposes_plan_named_methods() {
                  dismiss the tooltip when the cursor leaves — a missing method here \
                  means category-button tooltips fail to show on hover or fail to \
                  hide on leave at runtime."
+            );
+        }
+    });
+}
+
+/// Pin every PLAN-named method on `AchievementTemplateMixin` as a Lua
+/// function on the mixin table.
+///
+/// **No spec/source mismatch.** Source declares
+/// `AchievementTemplateMixin = {};` at file scope at
+/// `Mainline/Blizzard_AchievementUI.lua:1039`, then attaches a much larger
+/// surface than this test pins (the mixin also defines non-PLAN-named
+/// methods `:ProcessClick` at lua:1060, `:UpdatePlusMinusTexture` at
+/// lua:1110, `:IsSelected` at lua:1147, `:GetObjectiveFrame` at lua:1151,
+/// `:OnCheckClicked` at lua:1621, `:OnShieldClicked` at lua:1625, plus the
+/// static helper `.CalculateSelectedHeight` at lua:1422). This test pins
+/// only the 13 PLAN-named methods.
+///
+/// The mixin is bound to the virtual EventButton `AchievementTemplate` at
+/// `Mainline/Blizzard_AchievementUI.xml:733` via `mixin="AchievementTemplateMixin"`.
+/// Every individual achievement row in the right-hand achievements scrollbox
+/// uses this template — `view:SetElementInitializer("AchievementTemplate", ...)`
+/// in `AchievementFrameAchievements_OnLoad` (lua:843+) wires `:Init` per row.
+/// The mixin governs collapse/expand state (`:Collapse` lua:1308 / `:Expand`
+/// lua:1332), the selected-row height calculation (`.CalculateSelectedHeight`
+/// at lua:1422 — used by the scrollbox's element-extent function at lua:856),
+/// the saturated-vs-desaturated styling that distinguishes earned from
+/// unearned achievements (`:Saturate` lua:1359 / `:Desaturate` lua:1392),
+/// the objectives panel rendering (`:DisplayObjectives` lua:1541), and the
+/// tracking checkbox state (`:ToggleTracking` lua:1580 / `:SetAsTracked`
+/// lua:1609 / `:SetSelected` lua:1141).
+///
+/// Fourteen assertions: one precondition probe that the mixin global itself
+/// exists, then one per PLAN-named method (13) confirming
+/// `type(AchievementTemplateMixin.<method>) == "function"`. The precondition
+/// probe surfaces a missing mixin global with a precise message instead of
+/// a confusing nil-index error inside the loop.
+#[test]
+fn achievement_template_mixin_exposes_plan_named_methods() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let mixin_type: String = env
+            .eval(&format!(
+                "return type(_G[{ACHIEVEMENT_TEMPLATE_MIXIN_NAME:?}])"
+            ))
+            .expect("AchievementTemplateMixin global probe must run cleanly");
+
+        assert_eq!(
+            mixin_type, "table",
+            "Expected `_G[{ACHIEVEMENT_TEMPLATE_MIXIN_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{mixin_type}`. The Lua source at `{ACHIEVEMENT_TEMPLATE_LUA_SITE}` \
+             declares `AchievementTemplateMixin = {{}};` at file scope, then attaches \
+             13 PLAN-named methods plus several non-PLAN-named helpers (ProcessClick, \
+             UpdatePlusMinusTexture, IsSelected, GetObjectiveFrame, OnCheckClicked, \
+             OnShieldClicked, and the static `.CalculateSelectedHeight`). The mixin is \
+             bound to the virtual EventButton `AchievementTemplate` at \
+             `{ACHIEVEMENT_TEMPLATE_XML_SITE}` via `mixin=\"AchievementTemplateMixin\"`, \
+             and every individual achievement row in the right-hand achievements \
+             scrollbox uses this template via `view:SetElementInitializer(\"AchievementTemplate\", ...)` \
+             which calls `:Init` per row. A nil reading means either the table \
+             assignment failed (Lua chunk crashed before reaching line 1039) or \
+             Blizzard refactored the mixin onto a different namespace. Every method \
+             probe below depends on this table existing."
+        );
+
+        for (method, line_number) in ACHIEVEMENT_TEMPLATE_PLAN_METHODS {
+            let method_type: String = env
+                .eval(&format!(
+                    "return type(_G[{ACHIEVEMENT_TEMPLATE_MIXIN_NAME:?}].{method})"
+                ))
+                .unwrap_or_else(|err| {
+                    panic!("`{ACHIEVEMENT_TEMPLATE_MIXIN_NAME}.{method}` probe raised: {err}")
+                });
+
+            assert_eq!(
+                method_type, "function",
+                "Expected `{ACHIEVEMENT_TEMPLATE_MIXIN_NAME}.{method}` to be a function \
+                 after `{ROOT}` loads, got `{method_type}`. The Lua source declares \
+                 `function AchievementTemplateMixin:{method}(...)` at line \
+                 {line_number}. A nil reading means either the method declaration was \
+                 removed, the Lua chunk failed before reaching line {line_number}, or \
+                 Blizzard refactored the method onto a sibling/child mixin. The \
+                 method drives core achievement-row behavior — `:Init` per-row, \
+                 `:Collapse`/`:Expand` for accordion state, `:Saturate`/`:Desaturate` \
+                 for earned-vs-unearned styling, `:DisplayObjectives` for criterion \
+                 list rendering, `:ToggleTracking`/`:SetAsTracked`/`:SetSelected` for \
+                 the tracking checkbox + selected-row state, and `:OnLoad`/`:OnClick`/\
+                 `:OnEnter`/`:OnLeave` for the script wiring. A missing method here \
+                 means achievement rows fail to populate, react to clicks, render \
+                 their objectives, or track the player's progress at runtime."
             );
         }
     });
