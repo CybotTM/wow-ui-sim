@@ -131,6 +131,22 @@ const PLAN_NAMED_TABLE_ONLY_MIXINS: &[(&str, u32, &str)] = &[
     ),
 ];
 
+const ACHIVEMENT_BUTTON_CHECK_MIXIN_NAME: &str = "AchivementButtonCheckMixin";
+const ACHIVEMENT_BUTTON_CHECK_LUA_SITE: &str = "Mainline/Blizzard_AchievementUI.lua:1629";
+const ACHIVEMENT_BUTTON_CHECK_XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:220";
+
+/// PLAN-named methods on `AchivementButtonCheckMixin` (sic — note the
+/// **missing 'e' in `Achivement`** vs the rest of the file's `Achievement`
+/// spelling, the same typo preserved in `AchivementComparisonStatMixin`
+/// at lua:2908). PLAN names only `ApplyChecked` even though the mixin
+/// also exposes `:OnEnter` (lua:1642) and `:OnLeave` (lua:1651) — this
+/// test pins only what PLAN names; the unmentioned methods are
+/// intentionally not probed so a future Blizzard refactor that splits
+/// the tooltip wiring off (mirroring how `AchievementCategoryTemplateButtonMixin`
+/// is split from `AchievementCategoryTemplateMixin`) wouldn't break
+/// this test.
+const ACHIVEMENT_BUTTON_CHECK_PLAN_METHODS: &[(&str, u32)] = &[("ApplyChecked", 1631)];
+
 /// PLAN-named methods on `AchievementTemplateMixin`. Each tuple is
 /// `(method_name, declared_at_line_number)` so a missing-method failure
 /// message points directly at the source line that should declare it.
@@ -461,6 +477,97 @@ fn plan_named_table_only_mixins_exist_as_tables() {
                  renamed/removed the mixin (in which case the XML template at \
                  `{xml_site}` would also need updating, since template instantiation \
                  reads the named global)."
+            );
+        }
+    });
+}
+
+/// Pin every PLAN-named method on `AchivementButtonCheckMixin` as a Lua
+/// function on the mixin table.
+///
+/// **No spec/source mismatch on the method-existence claim, but the
+/// mixin name itself preserves a typo from the source.** Source declares
+/// `AchivementButtonCheckMixin = {};` (sic — **missing 'e' in
+/// `Achivement`**, same typo as `AchivementComparisonStatMixin` at
+/// lua:2908) at `Mainline/Blizzard_AchievementUI.lua:1629`, then attaches
+/// `:ApplyChecked(checked, noSound)` at line 1631 (plays the
+/// IG_MAINMENU_OPTION_CHECKBOX_ON/OFF audio cue unless `noSound` is
+/// truthy, then calls `self:SetChecked(checked)` to update the underlying
+/// CheckButton state). The mixin also exposes `:OnEnter` at line 1642
+/// (shows the TRACK_ACHIEVEMENT_TOOLTIP / UNTRACK_ACHIEVEMENT_TOOLTIP
+/// based on current checked state) and `:OnLeave` at line 1651
+/// (`GameTooltip:Hide()`), but PLAN names only `ApplyChecked` so this
+/// test pins only that one — leaving the tooltip wiring un-pinned by
+/// design so a future Blizzard refactor that splits the tooltip surface
+/// onto a sibling mixin (mirroring how `AchievementCategoryTemplateButtonMixin`
+/// is split from `AchievementCategoryTemplateMixin`) wouldn't break
+/// this test.
+///
+/// The mixin is bound to the virtual CheckButton `AchievementCheckButtonTemplate`
+/// at `Mainline/Blizzard_AchievementUI.xml:220` via
+/// `mixin="AchivementButtonCheckMixin"`. Every achievement row's tracking
+/// checkbox uses this template — the row's `:SetAsTracked(tracked, noSound)`
+/// at lua:1609 calls into this mixin's `:ApplyChecked` to flip the
+/// CheckButton state and play the audio cue. So a regression on
+/// `:ApplyChecked` would surface as a runtime nil-call error the moment
+/// the player clicks the tracking checkbox or the
+/// TRACKED_ACHIEVEMENT_LIST_CHANGED event fires.
+///
+/// Two assertions: one precondition probe that the mixin global itself
+/// exists, then one per PLAN-named method (1) confirming
+/// `type(AchivementButtonCheckMixin.ApplyChecked) == "function"`. The
+/// precondition probe surfaces a missing mixin global with a precise
+/// message (and doubles as a typo-preservation tripwire — if the
+/// precondition fails because Blizzard finally fixed the spelling to
+/// `Achievement`, the failure message points the reader at both the
+/// source line that declares the misspelt name and the XML template
+/// that references it).
+#[test]
+fn achivement_button_check_mixin_exposes_plan_named_methods() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let mixin_type: String = env
+            .eval(&format!(
+                "return type(_G[{ACHIVEMENT_BUTTON_CHECK_MIXIN_NAME:?}])"
+            ))
+            .expect("AchivementButtonCheckMixin global probe must run cleanly");
+
+        assert_eq!(
+            mixin_type, "table",
+            "Expected `_G[{ACHIVEMENT_BUTTON_CHECK_MIXIN_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{mixin_type}`. The Lua source at `{ACHIVEMENT_BUTTON_CHECK_LUA_SITE}` \
+             declares `AchivementButtonCheckMixin = {{}};` (sic — note the typo, missing \
+             'e' in `Achivement`) at file scope, then attaches `:ApplyChecked` (line 1631), \
+             `:OnEnter` (line 1642), and `:OnLeave` (line 1651). The mixin is bound to the \
+             virtual CheckButton `AchievementCheckButtonTemplate` at \
+             `{ACHIVEMENT_BUTTON_CHECK_XML_SITE}` via `mixin=\"AchivementButtonCheckMixin\"`. \
+             A nil reading means either the table assignment failed (Lua chunk crashed \
+             before reaching line 1629) OR Blizzard finally corrected the typo to \
+             `AchievementButtonCheckMixin` — in which case the XML template at \
+             `{ACHIVEMENT_BUTTON_CHECK_XML_SITE}` would ALSO need updating to match, \
+             and any addon that references the misspelt global would break. The method \
+             probe below depends on this table existing."
+        );
+
+        for (method, line_number) in ACHIVEMENT_BUTTON_CHECK_PLAN_METHODS {
+            let method_type: String = env
+                .eval(&format!(
+                    "return type(_G[{ACHIVEMENT_BUTTON_CHECK_MIXIN_NAME:?}].{method})"
+                ))
+                .unwrap_or_else(|err| {
+                    panic!("`{ACHIVEMENT_BUTTON_CHECK_MIXIN_NAME}.{method}` probe raised: {err}")
+                });
+
+            assert_eq!(
+                method_type, "function",
+                "Expected `{ACHIVEMENT_BUTTON_CHECK_MIXIN_NAME}.{method}` to be a function \
+                 after `{ROOT}` loads, got `{method_type}`. The Lua source declares \
+                 `function AchivementButtonCheckMixin:{method}(checked, noSound)` at line \
+                 {line_number}. A nil reading means either the method declaration was \
+                 removed or the Lua chunk failed before reaching line {line_number}. \
+                 `:ApplyChecked` is called by every achievement row's `:SetAsTracked` at \
+                 lua:1609 to flip the tracking-checkbox state and play the audio cue — \
+                 a missing method here means clicking the row's tracking checkbox or \
+                 receiving a TRACKED_ACHIEVEMENT_LIST_CHANGED event would crash."
             );
         }
     });
