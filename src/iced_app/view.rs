@@ -713,9 +713,22 @@ impl App {
         let env = self.env.borrow();
         let state = env.state().borrow();
         let initial_id = grid.topmost_matching_at(pos, |id| {
-            deepest_click_target_through_visible_children(&state.widgets, grid, id, pos, button_name).is_some()
+            deepest_click_target_through_visible_children(
+                &state.widgets,
+                grid,
+                id,
+                pos,
+                button_name,
+            )
+            .is_some()
         })?;
-        deepest_click_target_through_visible_children(&state.widgets, grid, initial_id, pos, button_name)
+        deepest_click_target_through_visible_children(
+            &state.widgets,
+            grid,
+            initial_id,
+            pos,
+            button_name,
+        )
     }
 }
 
@@ -727,7 +740,9 @@ fn deepest_hover_target_through_visible_children(
 ) -> Option<u64> {
     let frame = widgets.get(frame_id)?;
     for child_id in visible_descendants_at_point_by_z_order(widgets, frame, pos) {
-        if let Some(target) = deepest_hover_target_through_visible_children(widgets, grid, child_id, pos) {
+        if let Some(target) =
+            deepest_hover_target_through_visible_children(widgets, grid, child_id, pos)
+        {
             return Some(target);
         }
     }
@@ -744,7 +759,9 @@ fn deepest_click_target_through_visible_children(
 ) -> Option<u64> {
     let frame = widgets.get(frame_id)?;
     for child_id in visible_descendants_at_point_by_z_order(widgets, frame, pos) {
-        if let Some(target) = deepest_click_target_through_visible_children(widgets, grid, child_id, pos, button_name) {
+        if let Some(target) =
+            deepest_click_target_through_visible_children(widgets, grid, child_id, pos, button_name)
+        {
             return Some(target);
         }
     }
