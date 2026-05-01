@@ -16,7 +16,7 @@
 use crate::c_api::helpers::ensure_namespace;
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, create_table_with_fields,
-    table_set_num,
+    table_set, table_set_num,
 };
 use crate::lua_api::state::{MajorFactionData, RenownLevelInfo};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
@@ -124,36 +124,88 @@ fn get_renown_levels(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn build_major_faction_data_table(state: &mut LuaState, data: &MajorFactionData) -> Val {
+    let table = create_table(state);
     let name = create_string(state, &data.name);
     let texture_kit = create_string(state, &data.texture_kit);
     let unlock_description = optional_string_val(state, data.unlock_description.as_ref());
-    let faction_id = Val::Num(data.faction_id as f64);
-    let expansion_filter = Val::Num(data.expansion_filter as f64);
-    let renown_level = Val::Num(data.renown_level as f64);
-    let renown_reputation_earned = Val::Num(data.renown_reputation_earned as f64);
-    let renown_level_threshold = Val::Num(data.renown_level_threshold as f64);
-    let celebration_sound_kit = Val::Num(data.celebration_sound_kit as f64);
-    let renown_fanfare_sound_kit_id = Val::Num(data.renown_fanfare_sound_kit_id as f64);
+    let faction_font_color = create_faction_font_color(state, data);
+    set_major_faction_numbers(state, table, data);
+    table_set(state, table, "name", name);
+    table_set(state, table, "isUnlocked", Val::Bool(data.is_unlocked));
+    table_set(state, table, "unlockDescription", unlock_description);
+    table_set(state, table, "textureKit", texture_kit);
+    table_set(state, table, "factionFontColor", faction_font_color);
+    table
+}
+
+fn set_major_faction_numbers(state: &mut LuaState, table: Val, data: &MajorFactionData) {
+    set_major_faction_identity_numbers(state, table, data);
+    set_major_faction_progress_numbers(state, table, data);
+    set_major_faction_sound_numbers(state, table, data);
+}
+
+fn set_major_faction_identity_numbers(state: &mut LuaState, table: Val, data: &MajorFactionData) {
+    table_set(state, table, "factionID", number(data.faction_id));
+    table_set(
+        state,
+        table,
+        "expansionFilter",
+        number(data.expansion_filter as i64),
+    );
+    table_set(
+        state,
+        table,
+        "expansionID",
+        number(data.expansion_filter as i64),
+    );
+    table_set(state, table, "maxLevel", number(data.max_level as i64));
+    table_set(state, table, "uiPriority", number(data.ui_priority as i64));
+}
+
+fn set_major_faction_progress_numbers(state: &mut LuaState, table: Val, data: &MajorFactionData) {
+    table_set(
+        state,
+        table,
+        "renownLevel",
+        number(data.renown_level as i64),
+    );
+    table_set(
+        state,
+        table,
+        "renownReputationEarned",
+        number(data.renown_reputation_earned as i64),
+    );
+    table_set(
+        state,
+        table,
+        "renownLevelThreshold",
+        number(data.renown_level_threshold as i64),
+    );
+}
+
+fn set_major_faction_sound_numbers(state: &mut LuaState, table: Val, data: &MajorFactionData) {
+    table_set(
+        state,
+        table,
+        "celebrationSoundKit",
+        number(data.celebration_sound_kit as i64),
+    );
+    table_set(
+        state,
+        table,
+        "renownFanfareSoundKitID",
+        number(data.renown_fanfare_sound_kit_id as i64),
+    );
+}
+
+fn number(value: i64) -> Val {
+    Val::Num(value as f64)
+}
+
+fn create_faction_font_color(state: &mut LuaState, data: &MajorFactionData) -> Val {
     let (r, g, b) = data.faction_font_color;
     let color = create_color_mixin(state, r as f64, g as f64, b as f64);
-    let faction_font_color = create_table_with_fields(state, &[("color", color)]);
-    create_table_with_fields(
-        state,
-        &[
-            ("factionID", faction_id),
-            ("name", name),
-            ("expansionFilter", expansion_filter),
-            ("renownLevel", renown_level),
-            ("renownReputationEarned", renown_reputation_earned),
-            ("renownLevelThreshold", renown_level_threshold),
-            ("isUnlocked", Val::Bool(data.is_unlocked)),
-            ("unlockDescription", unlock_description),
-            ("celebrationSoundKit", celebration_sound_kit),
-            ("renownFanfareSoundKitID", renown_fanfare_sound_kit_id),
-            ("textureKit", texture_kit),
-            ("factionFontColor", faction_font_color),
-        ],
-    )
+    create_table_with_fields(state, &[("color", color)])
 }
 
 fn create_color_mixin(state: &mut LuaState, r: f64, g: f64, b: f64) -> Val {

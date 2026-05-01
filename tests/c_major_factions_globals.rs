@@ -10,9 +10,11 @@ fn sample_faction(faction_id: i64) -> MajorFactionData {
         faction_id,
         name: "Dream Wardens".to_string(),
         expansion_filter: 9,
+        max_level: 10,
         renown_level: 7,
         renown_reputation_earned: 1_500,
         renown_level_threshold: 2_500,
+        ui_priority: 42,
         is_unlocked: true,
         unlock_description: Some("Reach Honored to unlock.".to_string()),
         celebration_sound_kit: 12345,
@@ -75,7 +77,10 @@ fn get_major_faction_data_returns_state_row() {
         textureKit = data.textureKit
         factionID = data.factionID
         expansion = data.expansionFilter
+        expansionID = data.expansionID
+        maxLevel = data.maxLevel
         earned = data.renownReputationEarned
+        uiPriority = data.uiPriority
         celebration = data.celebrationSoundKit
         fanfare = data.renownFanfareSoundKitID
     "#,
@@ -89,7 +94,10 @@ fn get_major_faction_data_returns_state_row() {
     let texture_kit: String = env.eval("return textureKit").unwrap();
     let faction_id: f64 = env.eval("return factionID").unwrap();
     let expansion: f64 = env.eval("return expansion").unwrap();
+    let expansion_id: f64 = env.eval("return expansionID").unwrap();
+    let max_level: f64 = env.eval("return maxLevel").unwrap();
     let earned: f64 = env.eval("return earned").unwrap();
+    let ui_priority: f64 = env.eval("return uiPriority").unwrap();
     let celebration: f64 = env.eval("return celebration").unwrap();
     let fanfare: f64 = env.eval("return fanfare").unwrap();
     assert_eq!(name, "Dream Wardens");
@@ -100,9 +108,71 @@ fn get_major_faction_data_returns_state_row() {
     assert_eq!(texture_kit, "majorfactions_dreamwardens");
     assert!((faction_id - 2_507.0).abs() < 1e-6);
     assert!((expansion - 9.0).abs() < 1e-6);
+    assert!((expansion_id - 9.0).abs() < 1e-6);
+    assert!((max_level - 10.0).abs() < 1e-6);
     assert!((earned - 1_500.0).abs() < 1e-6);
+    assert!((ui_priority - 42.0).abs() < 1e-6);
     assert!((celebration - 12_345.0).abs() < 1e-6);
     assert!((fanfare - 67_890.0).abs() < 1e-6);
+}
+
+#[test]
+fn default_tww_major_faction_texture_kits_resolve_to_journey_icon_atlases() {
+    let env = WowLuaEnv::new().expect("env");
+    let (count, missing): (i32, String) = env
+        .eval(
+            r#"
+            local ids = C_MajorFactions.GetMajorFactionIDs(LE_EXPANSION_WAR_WITHIN)
+            local missing = {}
+            for _, factionID in ipairs(ids) do
+                local data = C_MajorFactions.GetMajorFactionData(factionID)
+                local atlas = ("majorfactions_icons_%s512"):format(data.textureKit)
+                if C_Texture.GetAtlasInfo(atlas) == nil then
+                    missing[#missing + 1] = atlas
+                end
+            end
+            return #ids, table.concat(missing, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(count, 4);
+    assert_eq!(
+        missing, "",
+        "every default War Within textureKit must resolve through the Journeys icon atlas format"
+    );
+}
+
+#[test]
+fn midnight_major_faction_filter_does_not_return_war_within_rows() {
+    let env = WowLuaEnv::new().expect("env");
+    let names: String = env
+        .eval(
+            r#"
+            local out = {}
+            for _, factionID in ipairs(C_MajorFactions.GetMajorFactionIDs(LE_EXPANSION_MIDNIGHT)) do
+                out[#out + 1] = C_MajorFactions.GetMajorFactionData(factionID).name
+            end
+            return table.concat(out, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        not_contains_war_within_faction(&names),
+        "Midnight Journeys should not be seeded with War Within factions: {names}"
+    );
+}
+
+fn not_contains_war_within_faction(names: &str) -> bool {
+    ![
+        "Hallowfall Arathi",
+        "Council of Dornogal",
+        "The Assembly of the Deeps",
+        "The Severed Threads",
+    ]
+    .iter()
+    .any(|name| names.contains(name))
 }
 
 #[test]
@@ -201,7 +271,7 @@ fn is_major_faction_reads_state_table() {
 fn is_account_wide_reputation_is_false_by_default() {
     let env = WowLuaEnv::new().expect("env");
     let result: bool = env
-        .eval("return C_Reputation.IsAccountWideReputation(2507)")
+        .eval("return C_Reputation.IsAccountWideReputation(72)")
         .unwrap();
     assert!(!result);
 }
