@@ -269,10 +269,21 @@ pub(super) fn register_c_bank(state: &mut LuaState) -> LuaResult<()> {
         "FetchDepositedMoney",
         c_bank_fetch_deposited_money,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "FetchNumPurchasedBankTabs",
+        c_bank_fetch_num_purchased_bank_tabs,
+    )?;
     Ok(())
 }
 
 fn c_bank_fetch_deposited_money(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_bank_fetch_num_purchased_bank_tabs(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
 }
