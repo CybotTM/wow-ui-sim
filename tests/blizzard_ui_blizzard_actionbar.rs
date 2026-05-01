@@ -66,3 +66,6 @@ mod behavior_artifact_bar;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_azerite_bar.rs"]
 mod behavior_azerite_bar;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_status_bar_swap.rs"]
+mod behavior_status_bar_swap;
