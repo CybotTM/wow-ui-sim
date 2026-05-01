@@ -5873,7 +5873,7 @@ pub static ITEM_DB: phf::Map<u32, ItemInfo> = ::phf::Map {
                 stackable: 1,
                 bonding: 1,
                 expansion_id: 11,
-                icon_file_data_id: 0,
+                icon_file_data_id: 4914670,
                 stat_percent_editor: [6666, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 stat_modifier_bonus_stat: [5, -1, -1, -1, -1, -1, -1, -1, -1, -1],
             },

@@ -295,6 +295,26 @@ fn test_magisters_terrace_loot_rows_have_renderable_text_and_icons() {
 }
 
 #[test]
+fn test_refueling_orb_uses_real_icon() {
+    let env = env();
+    let icon: i64 = env
+        .eval(
+            r#"
+            EJ_SelectInstance(1300)
+            for i = 1, EJ_GetNumLoot() do
+                local item = C_EncounterJournal.GetLootInfoByIndex(i)
+                if item.itemID == 250246 then
+                    return item.icon
+                end
+            end
+            return 0
+            "#,
+        )
+        .unwrap();
+    assert_eq!(icon, 4_914_670);
+}
+
+#[test]
 fn test_adventure_guide_raid_loot_rows_have_item_metadata() {
     let env = env();
     let result: String = env

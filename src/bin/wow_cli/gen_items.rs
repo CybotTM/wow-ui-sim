@@ -243,6 +243,8 @@ fn required_item_icon_overrides() -> &'static [(u32, u32)] {
         (159, 132788), // ICONS/INV_Drink_01
         // Tough Hunk of Bread
         (4540, 133964), // ICONS/INV_MISC_FOOD_11
+        // Refueling Orb
+        (250246, 4914670), // ICONS/INV_CosmicVoid_Orb
     ]
 }
 
