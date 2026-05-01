@@ -45,3 +45,6 @@ mod behavior_possess_bar_show;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_extra_action_bar.rs"]
 mod behavior_extra_action_bar;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_vehicle_leave_button.rs"]
+mod behavior_vehicle_leave_button;
