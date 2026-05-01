@@ -33,6 +33,48 @@ fn defaults_all_zero() {
 }
 
 #[test]
+fn default_pet_battle_state_is_not_active() {
+    let env = WowLuaEnv::new().unwrap();
+    let is_active: bool = env.eval("return C_PetBattles.IsInBattle()").unwrap();
+    assert!(
+        !is_active,
+        "fresh simulator state should not be in a pet battle"
+    );
+}
+
+#[test]
+fn action_key_does_not_route_to_pet_battle_when_not_active() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.pet_battle_button_up_calls = 0
+        function ActionButtonDown(id) end
+        function UseAction(id) end
+        function ActionButtonUp(id)
+            if C_PetBattles.IsInBattle() and PetBattleFrame then
+                _G.pet_battle_button_up_calls = _G.pet_battle_button_up_calls + 1
+                PetBattleFrame_ButtonUp(id)
+            end
+        end
+        PetBattleFrame = {
+            BottomFrame = {
+                abilityButtons = {}
+            }
+        }
+        function PetBattleFrame_ButtonUp(id)
+            error("should not route action key to inactive pet battle")
+        end
+        "#,
+    )
+    .unwrap();
+
+    env.send_key_press("1", Some("1")).unwrap();
+
+    let calls: i64 = env.eval("return _G.pet_battle_button_up_calls").unwrap();
+    assert_eq!(calls, 0);
+}
+
+#[test]
 fn admin_set_pet_battle_counts_drives_both_owners() {
     let env = WowLuaEnv::new().unwrap();
     env.exec("A_Admin.SetPetBattleCounts(3, 4)").unwrap();

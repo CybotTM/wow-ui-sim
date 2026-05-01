@@ -6715,9 +6715,10 @@ if rawget(GameRulesUtil, "ShouldShowPlayerCastBar") == nil then
   end
 end
 
--- Pet battles: not simulated. `GetNumPets` is compared numerically
--- during PetBattleFrame OnLoad refresh, so returning nil crashes
--- `petIndex > GetNumPets(owner)`. Zero is the accurate "no pets" answer.
+-- Pet battles: lightly modeled, but fresh simulator state is not in a battle.
+-- `GetNumPets` is compared numerically during PetBattleFrame OnLoad refresh,
+-- so returning nil crashes `petIndex > GetNumPets(owner)`. Zero is the
+-- accurate "no pets" answer.
 -- C_PetBattles.GetNumPets / GetBattleState are registered from Rust
 -- (src/lua_api/globals/pet_battles.rs), backed by SimState::pet_battles.
 -- The earlier __wow_merge_namespace at the top of this file already
@@ -6881,12 +6882,11 @@ end
 
 C_PetBattles._state = __wow_pet_battle_state
 C_PetBattles.IsInBattle = function()
-  __wow_pet_battle_ensure_active()
-  return (__wow_pet_battle_state.battleState or 0) ~= __wow_pet_battle_finished_state
+  local battleState = C_PetBattles.GetBattleState()
+  return battleState ~= 0 and battleState ~= __wow_pet_battle_finished_state
 end
 C_PetBattles.IsWildBattle = function()
-  __wow_pet_battle_ensure_active()
-  return __wow_pet_battle_state.isWildBattle == true
+  return C_PetBattles.IsInBattle() and __wow_pet_battle_state.isWildBattle == true
 end
 C_PetBattles.GetAbilityInfo = function(owner, petIndex, abilityIndex)
   local ability = __wow_pet_battle_get_ability(owner, petIndex, abilityIndex)

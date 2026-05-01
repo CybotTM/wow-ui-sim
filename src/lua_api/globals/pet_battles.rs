@@ -32,7 +32,13 @@ pub fn get_num_pets(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_battle_state(state: &mut LuaState) -> LuaResult<u32> {
-    let s = runtime_state_i32(state, BATTLE_STATE_KEY).unwrap_or(0);
+    let sim_state = borrow_state(state)?.pet_battles.battle_state;
+    let runtime_state = runtime_state_i32(state, BATTLE_STATE_KEY).unwrap_or(0);
+    let s = if runtime_state != 0 {
+        runtime_state
+    } else {
+        sim_state
+    };
     state.push(Val::Num(s as f64));
     Ok(1)
 }
