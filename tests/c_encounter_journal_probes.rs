@@ -16,15 +16,15 @@ fn test_get_encounter_info_known_returns_fields() {
     let (name, enc_id, journal_inst_id, inst_id): (String, i64, i64, i64) = env
         .eval(
             r#"
-            local name, _, eid, _, _, jiid, _, iid = C_EncounterJournal.GetEncounterInfo(2587)
+            local name, _, eid, _, _, jiid, _, iid = C_EncounterJournal.GetEncounterInfo(2684)
             return name, eid, jiid, iid
             "#,
         )
         .unwrap();
-    assert_eq!(name, "Eranog");
-    assert_eq!(enc_id, 2587_i64);
-    assert_eq!(journal_inst_id, 1193_i64);
-    assert_eq!(inst_id, 1200_i64);
+    assert_eq!(name, "Plexus Sentinel");
+    assert_eq!(enc_id, 2684_i64);
+    assert_eq!(journal_inst_id, 1302_i64);
+    assert_eq!(inst_id, 2460_i64);
 }
 
 #[test]
@@ -47,13 +47,13 @@ fn test_get_encounter_info_fyrakk() {
     let (name, inst_id): (String, i64) = env
         .eval(
             r#"
-            local name, _, _, _, _, _, _, iid = C_EncounterJournal.GetEncounterInfo(2737)
+            local name, _, _, _, _, _, _, iid = C_EncounterJournal.GetEncounterInfo(2519)
             return name, iid
             "#,
         )
         .unwrap();
     assert_eq!(name, "Fyrakk the Blazing");
-    assert_eq!(inst_id, 2549_i64);
+    assert_eq!(inst_id, 2238_i64);
 }
 
 #[test]
@@ -62,13 +62,13 @@ fn test_get_encounter_info_queen_ansurek() {
     let (name, inst_id): (String, i64) = env
         .eval(
             r#"
-            local name, _, _, _, _, _, _, iid = C_EncounterJournal.GetEncounterInfo(2922)
+            local name, _, _, _, _, _, _, iid = C_EncounterJournal.GetEncounterInfo(2602)
             return name, iid
             "#,
         )
         .unwrap();
     assert_eq!(name, "Queen Ansurek");
-    assert_eq!(inst_id, 2657_i64);
+    assert_eq!(inst_id, 2295_i64);
 }
 
 #[test]
@@ -77,7 +77,7 @@ fn test_get_encounter_info_full_tuple_count() {
     let count: i64 = env
         .eval(
             r#"
-            local a,b,c,d,e,f,g,h = C_EncounterJournal.GetEncounterInfo(2902)
+            local a,b,c,d,e,f,g,h = C_EncounterJournal.GetEncounterInfo(2684)
             local n = 0
             for _, v in ipairs({a,b,c,d,e,f,g,h}) do n = n + 1 end
             -- count non-nil manually since select('#',...) won't work here
@@ -99,12 +99,12 @@ fn test_get_instance_info_known_returns_name() {
     let name: String = env
         .eval(
             r#"
-            local name = C_EncounterJournal.GetInstanceInfo(2657)
+            local name = C_EncounterJournal.GetInstanceInfo(1302)
             return name
             "#,
         )
         .unwrap();
-    assert_eq!(name, "Nerub-ar Palace");
+    assert_eq!(name, "Manaforge Omega");
 }
 
 #[test]
@@ -152,18 +152,52 @@ fn test_get_instance_info_links_current_dungeons_to_lfd_ids() {
 #[test]
 fn test_get_instance_info_amirdrassil() {
     let env = env();
-    let (name, bg_image): (String, String) = env
+    let (name, bg_image): (String, i64) = env
         .eval(
             r#"
-            local name, _, bg = C_EncounterJournal.GetInstanceInfo(2549)
+            local name, _, bg = C_EncounterJournal.GetInstanceInfo(1207)
             return name, bg
             "#,
         )
         .unwrap();
     assert_eq!(name, "Amirdrassil, the Dream's Hope");
     assert!(
-        bg_image.contains("Amirdrassil"),
-        "expected Amirdrassil in bg_image, got: {bg_image}"
+        bg_image > 0,
+        "expected Amirdrassil to expose a numeric bg fileDataID, got: {bg_image}"
+    );
+}
+
+#[test]
+fn test_select_instance_clears_stale_encounter_for_instance_loot() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            EJ_SelectInstance(1302)
+            local instanceLoot = EJ_GetNumLoot()
+            if instanceLoot <= 0 then
+                return "instance_empty"
+            end
+
+            EJ_SelectEncounter(2684)
+            local encounterLoot = EJ_GetNumLoot()
+            if encounterLoot <= 0 then
+                return "encounter_empty"
+            end
+
+            EJ_SelectInstance(1302)
+            local restoredInstanceLoot = EJ_GetNumLoot()
+            if restoredInstanceLoot ~= instanceLoot then
+                return "stale_encounter:" .. tostring(restoredInstanceLoot) .. "/" .. tostring(instanceLoot)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "instance loot should not use stale boss selection: {result}"
     );
 }
 
