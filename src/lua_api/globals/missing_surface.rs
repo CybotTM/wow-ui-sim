@@ -125,16 +125,6 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
         "MapSceneCharacterHighlightEnd",
         map_scene_character_highlight_end,
     )?;
-    LuaApiMut::register_function(
-        lua,
-        "MultiActionBar_ShowAllGrids",
-        multi_action_bar_show_all_grids,
-    )?;
-    LuaApiMut::register_function(
-        lua,
-        "MultiActionBar_HideAllGrids",
-        multi_action_bar_hide_all_grids,
-    )?;
     LuaApiMut::register_function(lua, "CreateAtlasMarkup", create_atlas_markup)?;
     LuaApiMut::register_function(lua, "InGlue", in_glue)?;
     LuaApiMut::register_function(
@@ -408,16 +398,6 @@ fn map_scene_character_highlight_start(state: &mut LuaState) -> LuaResult<u32> {
 
 fn map_scene_character_highlight_end(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.highlighted_map_scene_character_guid = None;
-    Ok(0)
-}
-
-fn multi_action_bar_show_all_grids(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.multi_action_bar_grids_shown = true;
-    Ok(0)
-}
-
-fn multi_action_bar_hide_all_grids(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.multi_action_bar_grids_shown = false;
     Ok(0)
 }
 

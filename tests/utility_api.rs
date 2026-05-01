@@ -441,22 +441,6 @@ fn launch_url_overwrites_previous_request() {
 }
 
 #[test]
-fn test_multi_action_bar_grid_shims_toggle_sim_state() {
-    let env = env();
-    env.eval::<()>("MultiActionBar_ShowAllGrids()").unwrap();
-    assert!(
-        env.state().borrow().multi_action_bar_grids_shown,
-        "ShowAllGrids should flip the grid-visible shim state on"
-    );
-
-    env.eval::<()>("MultiActionBar_HideAllGrids()").unwrap();
-    assert!(
-        !env.state().borrow().multi_action_bar_grids_shown,
-        "HideAllGrids should flip the grid-visible shim state off"
-    );
-}
-
-#[test]
 fn test_map_scene_character_highlight_shims_track_guid() {
     let env = env();
     env.eval::<()>(r#"MapSceneCharacterHighlightStart("Player-1-0000BEEF")"#)

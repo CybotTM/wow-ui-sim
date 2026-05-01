@@ -30,3 +30,6 @@ mod behavior_page_change;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_keybind_dispatch.rs"]
 mod behavior_keybind_dispatch;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_show_grid.rs"]
+mod behavior_show_grid;

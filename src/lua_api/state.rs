@@ -121,7 +121,6 @@ macro_rules! build_empty_sim_state {
             last_stopped_sound_handle: $runtime.last_stopped_sound_handle,
             last_launched_url: $runtime.last_launched_url,
             highlighted_map_scene_character_guid: $runtime.highlighted_map_scene_character_guid,
-            multi_action_bar_grids_shown: $runtime.multi_action_bar_grids_shown,
             secure_attribute_drivers: $collections.secure_attribute_drivers,
             rot_damage_level: $runtime.rot_damage_level,
             fps: $runtime.fps,
@@ -1443,8 +1442,6 @@ pub struct SimState {
     pub last_launched_url: Option<String>,
     /// Character GUID currently highlighted by glue `MapSceneCharacterHighlightStart`.
     pub highlighted_map_scene_character_guid: Option<String>,
-    /// Whether the legacy `MultiActionBar_ShowAllGrids` shim has grids enabled.
-    pub multi_action_bar_grids_shown: bool,
     /// Registered secure state/attribute drivers keyed by frame id and
     /// attribute name. The sim applies them eagerly when registered and keeps
     /// the raw option text so future updates can reuse the same mapping.
@@ -3089,7 +3086,6 @@ struct EmptyRuntimeState {
     last_stopped_sound_handle: Option<u32>,
     last_launched_url: Option<String>,
     highlighted_map_scene_character_guid: Option<String>,
-    multi_action_bar_grids_shown: bool,
     casting: Option<CastingState>,
     channeling: Option<CastingState>,
     gcd: Option<(f64, f64)>,
@@ -3152,7 +3148,6 @@ macro_rules! build_empty_runtime_state {
             last_stopped_sound_handle: None,
             last_launched_url: None,
             highlighted_map_scene_character_guid: None,
-            multi_action_bar_grids_shown: false,
             casting: None,
             channeling: None,
             gcd: None,
