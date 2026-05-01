@@ -27,3 +27,6 @@ mod behavior_main_bar_buttons;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_page_change.rs"]
 mod behavior_page_change;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_keybind_dispatch.rs"]
+mod behavior_keybind_dispatch;
