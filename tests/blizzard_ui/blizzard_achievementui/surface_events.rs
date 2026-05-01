@@ -309,3 +309,193 @@ fn achievement_frame_categories_registers_addon_loaded_after_onload() {
         );
     });
 }
+
+const COMPARISON_FRAME_NAME: &str = "AchievementFrameComparison";
+const COMPARISON_FRAME_XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:2080";
+const COMPARISON_SCRIPTS_XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:2302";
+const COMPARISON_ONLOAD_LUA_SITE: &str = "Mainline/Blizzard_AchievementUI.lua:2764";
+const COMPARISON_ONEVENT_LUA_SITE: &str = "Mainline/Blizzard_AchievementUI.lua:2814";
+const COMPARISON_REGISTERED_EVENT: &str = "INSPECT_ACHIEVEMENT_READY";
+
+/// Events `AchievementFrameComparison` registers DYNAMICALLY in
+/// `_OnShow` (lua:2800) via
+/// `FrameUtil.RegisterFrameForEvents(self, AchievementFrameComparisonShownEvents)`,
+/// where `AchievementFrameComparisonShownEvents` is the table at
+/// lua:2784-2790. They are unregistered in `_OnHide` at lua:2811. At
+/// smoke-load time the frame is `hidden="true"` (xml:2080), so OnShow
+/// has not run and these MUST be unregistered. A `true` reading on any
+/// of them would prove either OnShow ran during smoke load (regression
+/// in the loader's hidden-frame handling) or Blizzard moved the
+/// dynamic registrations into OnLoad.
+const COMPARISON_ONSHOW_DYNAMIC_EVENTS: &[&str] = &[
+    "ACHIEVEMENT_EARNED",
+    "UNIT_PORTRAIT_UPDATE",
+    "PORTRAITS_UPDATED",
+    "DISPLAY_SIZE_CHANGED",
+];
+
+/// Pin `AchievementFrameComparison`'s event-registration surface after
+/// OnLoad runs.
+///
+/// **No spec/source mismatch on the PLAN claim itself.** Source at
+/// `Mainline/Blizzard_AchievementUI.lua:2764-2782` declares
+/// `function AchievementFrameComparison_OnLoad (self)` whose last
+/// statement (line 2781) is `self:RegisterEvent("INSPECT_ACHIEVEMENT_READY")`,
+/// after the two scrollbox view setups for `AchievementContainer` and
+/// `StatContainer`. The XML at
+/// `Mainline/Blizzard_AchievementUI.xml:2302-2307` wires four scripts:
+/// `<OnLoad>`, `<OnEvent>`, `<OnShow>`, `<OnHide>`.
+///
+/// **Lifecycle context captured as tripwires.** The frame registers
+/// FIVE distinct events across its lifecycle, but only ONE of them
+/// (INSPECT_ACHIEVEMENT_READY) is registered at OnLoad. The other four
+/// (ACHIEVEMENT_EARNED, UNIT_PORTRAIT_UPDATE, PORTRAITS_UPDATED,
+/// DISPLAY_SIZE_CHANGED) are registered DYNAMICALLY in `_OnShow` at
+/// lua:2800 via `FrameUtil.RegisterFrameForEvents(self, AchievementFrameComparisonShownEvents)`
+/// (the table is at lua:2784-2790) and unregistered in `_OnHide` at
+/// lua:2811. The frame is `hidden="true"` at xml:2080, so OnShow has
+/// NOT run during smoke load — those four events MUST be unregistered.
+/// A true reading on any would prove either OnShow ran during smoke
+/// load (loader-side regression on hidden-frame handling) or Blizzard
+/// moved the dynamic registrations into OnLoad (spec needs updating).
+///
+/// Eight assertions:
+///
+/// **Presence half (4):**
+/// 1. `type(_G.AchievementFrameComparison) == "table"` — frame exists.
+/// 2. `:IsEventRegistered("INSPECT_ACHIEVEMENT_READY") == true` —
+///    OnLoad's last statement.
+/// 3. `type(:GetScript("OnEvent")) == "function"` — XML wires OnEvent
+///    at xml:2304, dispatch arm for INSPECT_ACHIEVEMENT_READY at
+///    lua:2815-2819 calls `ClearSelectedCategories()` +
+///    `AchievementFrame_GetOrSelectCurrentCategory()` +
+///    `_UpdateStatusBars(category)` +
+///    `AchievementFrameComparisonHeader.Points:SetText(GetComparisonAchievementPoints())`.
+/// 4. `type(_G.AchievementFrameComparison_OnEvent) == "function"` —
+///    handler global at lua:2814.
+///
+/// **Absence half (4 dynamic-event tripwires):**
+/// 5-8. Each of the four `_OnShow`-registered events is NOT registered
+/// at smoke time (because the frame is hidden by default).
+#[test]
+fn achievement_frame_comparison_registers_inspect_achievement_ready_after_onload() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let frame_type: String = env
+            .eval(&format!("return type(_G[{COMPARISON_FRAME_NAME:?}])"))
+            .expect("AchievementFrameComparison global probe must run cleanly");
+
+        assert_eq!(
+            frame_type, "table",
+            "Expected `_G[{COMPARISON_FRAME_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{frame_type}`. The XML at `{COMPARISON_FRAME_XML_SITE}` \
+             declares this frame as `<Frame name=\"$parentComparison\" hidden=\"true\">` \
+             nested inside `AchievementFrame`'s `<Frames>` block, which resolves the \
+             name token to `AchievementFrameComparison` and registers it in `_G`. A \
+             nil reading means either the XML changed the name token, the frame was \
+             removed, or the file chunk failed before reaching the declaration."
+        );
+
+        let registered: bool = env
+            .eval(&format!(
+                "return _G[{COMPARISON_FRAME_NAME:?}]:IsEventRegistered({COMPARISON_REGISTERED_EVENT:?})"
+            ))
+            .unwrap_or_else(|err| {
+                panic!(
+                    "`{COMPARISON_FRAME_NAME}:IsEventRegistered({COMPARISON_REGISTERED_EVENT:?})` raised: {err}"
+                )
+            });
+
+        assert!(
+            registered,
+            "Expected `{COMPARISON_FRAME_NAME}:IsEventRegistered({COMPARISON_REGISTERED_EVENT:?})` \
+             to be true after `{ROOT}` loads. The Lua source at \
+             `{COMPARISON_ONLOAD_LUA_SITE}` declares \
+             `function AchievementFrameComparison_OnLoad (self)` and its last \
+             statement (line 2781) is \
+             `self:RegisterEvent(\"INSPECT_ACHIEVEMENT_READY\")` — after the two \
+             scrollbox view setups for `AchievementContainer` (lua:2766-2771) and \
+             `StatContainer` (lua:2773-2779). The OnLoad handler is wired by the \
+             XML `<OnLoad function=\"AchievementFrameComparison_OnLoad\"/>` element \
+             at `{COMPARISON_SCRIPTS_XML_SITE}` line 2303 and runs at frame-creation \
+             time during the smoke load. A false reading means either OnLoad did \
+             not run (regression in the loader's OnLoad dispatch during XML parse) \
+             or the RegisterEvent call was removed from OnLoad. Without \
+             INSPECT_ACHIEVEMENT_READY registered, the OnEvent dispatch arm at \
+             lua:2815-2819 — which clears categories, calls \
+             `_UpdateStatusBars(category)`, and refreshes the points text — would \
+             never fire when the player inspects another character's achievements."
+        );
+
+        let onevent_script: String = env
+            .eval(&format!(
+                "return type(_G[{COMPARISON_FRAME_NAME:?}]:GetScript(\"OnEvent\"))"
+            ))
+            .expect("`GetScript(\"OnEvent\")` must run cleanly on AchievementFrameComparison");
+
+        assert_eq!(
+            onevent_script, "function",
+            "Expected `{COMPARISON_FRAME_NAME}:GetScript(\"OnEvent\")` to be a \
+             function after `{ROOT}` loads, got `{onevent_script}`. The XML at \
+             `{COMPARISON_SCRIPTS_XML_SITE}` line 2304 wires \
+             `<OnEvent function=\"AchievementFrameComparison_OnEvent\"/>` — the \
+             OnEvent script attaches at XML parse time. Without an OnEvent script, \
+             the registered INSPECT_ACHIEVEMENT_READY event would fire but the \
+             dispatch would have no handler, and the inspect-mode status-bar \
+             refresh + Points text update would never run. A nil reading means \
+             either the XML dropped the `<OnEvent>` element, the loader stopped \
+             wiring `<OnEvent function=...>` children, or the global handler \
+             function did not exist at script-attach time."
+        );
+
+        let onevent_global_type: String = env
+            .eval(&format!(
+                "return type(_G[\"{COMPARISON_FRAME_NAME}_OnEvent\"])"
+            ))
+            .expect("`AchievementFrameComparison_OnEvent` global probe must run cleanly");
+
+        assert_eq!(
+            onevent_global_type, "function",
+            "Expected `_G[\"{COMPARISON_FRAME_NAME}_OnEvent\"]` to be a function \
+             after `{ROOT}` loads, got `{onevent_global_type}`. The Lua source at \
+             `{COMPARISON_ONEVENT_LUA_SITE}` declares \
+             `function AchievementFrameComparison_OnEvent (self, event, ...)` at \
+             file scope. This is the global the XML \
+             `<OnEvent function=\"...\"/>` element resolves against during \
+             script-attach. The body branches on event name: \
+             INSPECT_ACHIEVEMENT_READY (lines 2815-2819), DISPLAY_SIZE_CHANGED \
+             (2820-2821), PORTRAITS_UPDATED (2822-2823), UNIT_PORTRAIT_UPDATE \
+             (2824-2828), then unconditionally calls \
+             `AchievementFrameComparison_ForceUpdate()` at line 2831. A nil \
+             reading means the Lua chunk failed before reaching the declaration."
+        );
+
+        for event in COMPARISON_ONSHOW_DYNAMIC_EVENTS {
+            let dynamic_registered: bool = env
+                .eval(&format!(
+                    "return _G[{COMPARISON_FRAME_NAME:?}]:IsEventRegistered({event:?})"
+                ))
+                .unwrap_or_else(|err| {
+                    panic!("`{COMPARISON_FRAME_NAME}:IsEventRegistered({event:?})` raised: {err}")
+                });
+
+            assert!(
+                !dynamic_registered,
+                "Expected `{COMPARISON_FRAME_NAME}:IsEventRegistered({event:?})` to \
+                 be false after `{ROOT}` loads. This event is registered \
+                 DYNAMICALLY in `_OnShow` at lua:2800 via \
+                 `FrameUtil.RegisterFrameForEvents(self, AchievementFrameComparisonShownEvents)` \
+                 — the table at lua:2784-2790 lists ACHIEVEMENT_EARNED, \
+                 UNIT_PORTRAIT_UPDATE, PORTRAITS_UPDATED, DISPLAY_SIZE_CHANGED. The \
+                 frame is declared `hidden=\"true\"` at xml:2080, so OnShow has \
+                 NOT run during the smoke load — `{event}` MUST be unregistered \
+                 at this point. A true reading proves either OnShow ran during \
+                 smoke load (regression in the loader's hidden-frame handling \
+                 would surface here — a frame declared `hidden=\"true\"` should \
+                 not fire OnShow at creation time) OR Blizzard moved the dynamic \
+                 registrations into OnLoad (spec needs updating to reflect that \
+                 the OnEvent dispatch arm for `{event}` is now live whenever the \
+                 addon is loaded, not just while comparison mode is active)."
+            );
+        }
+    });
+}
