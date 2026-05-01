@@ -24,3 +24,6 @@ mod surface_events;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_main_bar_buttons.rs"]
 mod behavior_main_bar_buttons;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_page_change.rs"]
+mod behavior_page_change;

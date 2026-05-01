@@ -76,6 +76,7 @@ macro_rules! build_empty_sim_state {
             account_store_categories: $collections.account_store_categories,
             account_store_items: $collections.account_store_items,
             action_bar_state: ActionBarStateInfo::default(),
+            action_bar_page: 1,
             action_bars: $collections.action_bars,
             action_highlights: ActionHighlightState::default(),
             equipped_artifact: None,
@@ -1267,6 +1268,12 @@ pub struct SimState {
     pub account_store_items: HashMap<i64, AccountStoreItemInfo>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
+    /// Currently visible main-bar page, 1..=`NUM_ACTIONBAR_PAGES` (6). Read by
+    /// `C_ActionBar.GetActionBarPage`; written by `C_ActionBar.SetActionBarPage`
+    /// (which also fires `ACTIONBAR_PAGE_CHANGED` so mixins re-resolve the
+    /// per-button action ids). Default 1 — the page seeded after
+    /// `PLAYER_ENTERING_WORLD` before any keybind cycles `ActionBar_PageUp`.
+    pub action_bar_page: u32,
     /// Action-bar transition state. Drives `ActionBarBusy()` (set true while
     /// a status-tracking-bar fade or page change is mid-animation) and
     /// `ActionBarController_GetCurrentActionBarState()` (1 = main bar,

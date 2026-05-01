@@ -303,11 +303,26 @@ fn has_assisted_combat_action_buttons(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_action_bar_page(state: &mut LuaState) -> LuaResult<u32> {
-    push_i32(state, 1)
+    let page = borrow_state(state)?.action_bar_page as i32;
+    push_i32(state, page)
 }
 
 fn set_action_bar_page(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = stack_val(state, 1);
+    let Some(page) = stack_slot(state) else {
+        return push_no_results(state);
+    };
+    if page < 1 || page as i32 > NUM_ACTIONBAR_PAGES {
+        return push_no_results(state);
+    }
+    let changed = {
+        let mut sim = borrow_state_mut(state)?;
+        let was = sim.action_bar_page;
+        sim.action_bar_page = page;
+        was != page
+    };
+    if changed {
+        fire_named_event_state(state, "ACTIONBAR_PAGE_CHANGED", &[]);
+    }
     push_no_results(state)
 }
 
