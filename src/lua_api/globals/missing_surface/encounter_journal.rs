@@ -27,11 +27,13 @@ use super::ensure_namespace;
 use crate::encounter_journal_data as data;
 use crate::items;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, table_set,
+    borrow_state, borrow_state_mut, create_string, create_table, table_set, table_set_num,
 };
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+
+const ENCOUNTER_JOURNAL_ICON_FLAG_COUNT: u32 = 14;
 
 // ---------------------------------------------------------------------------
 // Registration
@@ -235,11 +237,36 @@ fn get_loot_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_section_icon_flags(state: &mut LuaState) -> LuaResult<u32> {
     let section_id = u32::from_stack(state, 1)?;
-    let flags = data::section_by_id(section_id)
-        .map(|s| s.icon_flags as f64)
-        .unwrap_or(0.0);
-    state.push(Val::Num(flags));
+    let Some(section) = data::section_by_id(section_id) else {
+        return Ok(0);
+    };
+    let Some(icon_indices) = section_icon_indices_table(state, section.icon_flags) else {
+        return Ok(0);
+    };
+    state.push(icon_indices);
     Ok(1)
+}
+
+fn section_icon_indices_table(state: &mut LuaState, icon_flags: u32) -> Option<Val> {
+    if icon_flags == 0 {
+        return None;
+    }
+
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        return None;
+    };
+
+    let mut lua_index = 1.0;
+    for icon_index in 0..ENCOUNTER_JOURNAL_ICON_FLAG_COUNT {
+        let flag = 1_u32 << icon_index;
+        if icon_flags & flag != 0 {
+            table_set_num(state, table_ref, lua_index, Val::Num(icon_index as f64));
+            lua_index += 1.0;
+        }
+    }
+
+    Some(table)
 }
 
 fn instance_has_loot(state: &mut LuaState) -> LuaResult<u32> {
