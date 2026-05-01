@@ -12,11 +12,8 @@
 //! `MainMenuBarVehicleLeaveButton` exist with expected mixins applied.
 //!
 //! Pulled out of `surface_frames.rs` because that file passed the
-//! 750-line readability budget after the mixin tests were appended.
-//! The split is along an aspect boundary (frames vs mixin shape on
-//! frames), not a topical one — the four bar/button-with-mixin tests
-//! and the one absence test all live here so the spec/source split is
-//! self-contained.
+//! 750-line readability budget. Split is along the frames-vs-mixin-
+//! shape aspect boundary.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
@@ -605,6 +602,149 @@ fn action_bar_button_and_base_action_button_mixins_pin_plan_named_and_source_add
                  `ActionBarButtonTemplate` script handlers fail to compose the two \
                  parent Mixin chains."
             );
+        }
+    });
+}
+
+/// One per-mixin row. PLAN says "are tables with the mixin methods
+/// documented in the analyzer inventory" — the contract is the FULL
+/// method set per mixin, not a subset.
+struct MixinInventory {
+    name: &'static str,
+    lua_site: &'static str,
+    methods: &'static [&'static str],
+}
+
+const MIXIN_INVENTORY: &[MixinInventory] = &[
+    MixinInventory {
+        name: "StanceBarMixin",
+        lua_site: "Shared/StanceBar.lua:4",
+        methods: &[
+            "OnLoad",
+            "OnEvent",
+            "OnShow",
+            "ShouldShow",
+            "Update",
+            "ShouldShowBackgroundArt",
+            "SetBackgroundArtShown",
+            "UpdateBackgroundArt",
+            "UpdateState",
+            "Select",
+        ],
+    },
+    MixinInventory {
+        name: "StanceButtonMixin",
+        lua_site: "Shared/StanceBar.lua:107",
+        methods: &[
+            "StanceButtonMixin_OnLoad",
+            "StanceButtonMixin_OnClick",
+            "StanceButtonMixin_OnEnter",
+            "StanceButtonMixin_OnLeave",
+            "HasAction",
+        ],
+    },
+    MixinInventory {
+        name: "PetActionBarMixin",
+        lua_site: "Shared/PetActionBar.lua:16",
+        methods: &[
+            "ClearPetActionHighlightMarks",
+            "UpdatePetActionHighlightMarks",
+            "OnHide",
+            "OnLoad",
+            "OnEvent",
+            "OnUpdate",
+            "Update",
+            "UpdateCooldowns",
+            "PetActionButtonDown",
+            "PetActionButtonUp",
+            "LockPetActionBar",
+            "UnlockPetActionBar",
+            "ShouldShowBackgroundArt",
+            "SetBackgroundArtShown",
+        ],
+    },
+    MixinInventory {
+        name: "PossessActionBarMixin",
+        lua_site: "Shared/PossessActionBar.lua:4",
+        methods: &[
+            "PossessActionBar_OnLoad",
+            "Update",
+            "UpdateState",
+            "ShouldShowBackgroundArt",
+            "SetBackgroundArtShown",
+        ],
+    },
+    MixinInventory {
+        name: "PossessButtonMixin",
+        lua_site: "Shared/PossessActionBar.lua:65",
+        methods: &["OnLoad", "OnClick", "OnEnter", "OnLeave", "HasAction"],
+    },
+    MixinInventory {
+        name: "ExtraActionButtonMixin",
+        lua_site: "Shared/ExtraActionBar.lua:82",
+        methods: &["ExtraActionButton_OnLoad"],
+    },
+    MixinInventory {
+        name: "MainActionBarMixin",
+        lua_site: "Shared/MainActionBar.lua:3",
+        methods: &[
+            "OnLoad",
+            "OnShow",
+            "OnHide",
+            "SetYOffset",
+            "GetYOffset",
+            "OnEvent",
+            "AttachToFrame",
+            "DetachFromFrame",
+            "IsInDefaultPosition",
+            "SetQuickKeybindModeEffectsShown",
+            "UpdateEndCaps",
+            "EditModeSetScale",
+            "UpdateDividers",
+            "GetEndCapsFrameLevel",
+        ],
+    },
+];
+
+/// Pin the analyzer-inventory method surface for the seven bar/button
+/// mixins PLAN names. 61 assertions = 7 mixin-table existence + 54
+/// methods. `MainActionBarMixin:UpdateEndCaps` is a Shared stub
+/// (`Shared/MainActionBar.lua:72`) overridden by
+/// `Mainline/MainActionBarOverrides.lua:2` — both are valid `function`
+/// readings. `StanceButtonMixin` uses prefixed forwarders
+/// (`StanceButtonMixin_OnLoad` etc.); `PossessButtonMixin` uses plain
+/// handler names — both pinned verbatim.
+#[test]
+fn analyzer_inventory_mixins_publish_their_documented_methods() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for inventory in MIXIN_INVENTORY {
+            let mixin_type: String = env
+                .eval(&format!("return type(_G.{})", inventory.name))
+                .expect("mixin global probe must run cleanly");
+
+            assert_eq!(
+                mixin_type, "table",
+                "Expected `_G.{}` to be a table after `{ROOT}` loads (declared at `{}`), \
+                 got `{mixin_type}`. Every method assertion below depends on it.",
+                inventory.name, inventory.lua_site
+            );
+
+            for method in inventory.methods {
+                let method_type: String = env
+                    .eval(&format!("return type(_G.{}.{method})", inventory.name))
+                    .expect("mixin method probe must run cleanly");
+
+                assert_eq!(
+                    method_type,
+                    "function",
+                    "Expected `{mixin}.{method}` to be a function after `{ROOT}` loads \
+                     (declared at `{lua_site}`), got `{method_type}`. PLAN names the \
+                     analyzer inventory as the contract — full per-mixin method set, \
+                     not a PLAN subset.",
+                    mixin = inventory.name,
+                    lua_site = inventory.lua_site,
+                );
+            }
         }
     });
 }
