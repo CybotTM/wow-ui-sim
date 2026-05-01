@@ -90,6 +90,10 @@ fn try_build_global_method_self_arg_variants(
             target_path,
             method_name,
         } => build_global_method_with_self_id_handler(state, target_path, method_name).map(Some),
+        FastHandlerRef::GlobalMethodWithSelfArg {
+            target_path,
+            method_name,
+        } => build_global_method_with_self_arg_handler(state, target_path, method_name).map(Some),
         FastHandlerRef::GlobalMethodWithSelfFieldArg {
             target_path,
             method_name,
@@ -314,6 +318,14 @@ fn build_global_method_with_self_id_handler(
     method_name: &str,
 ) -> LuaResult<Val> {
     build_global_method_with_mode(state, target_path, method_name, GlobalMethodMode::SelfId)
+}
+
+fn build_global_method_with_self_arg_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+) -> LuaResult<Val> {
+    build_global_method_with_mode(state, target_path, method_name, GlobalMethodMode::SelfArg)
 }
 
 fn build_global_method_with_self_field_handler(

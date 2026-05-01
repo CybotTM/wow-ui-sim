@@ -1,5 +1,37 @@
 use super::*;
 #[test]
+fn test_create_frame_from_xml_inline_global_method_with_self_arg_preserves_frame_methods() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineTabOwner = {}
+        function XmlInlineTabOwner:ClickTab(tab)
+            self.clickedTabId = tab:GetID()
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineGlobalSelfArgTab" parent="UIParent" id="2">
+        <Scripts><OnClick>XmlInlineTabOwner:ClickTab(self)</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineGlobalSelfArgTab:GetScript('OnClick')(XmlInlineGlobalSelfArgTab)")
+        .unwrap();
+
+    let clicked_tab_id: f64 = env.eval("return XmlInlineTabOwner.clickedTabId").unwrap();
+    assert_eq!(
+        clicked_tab_id, 2.0,
+        "global method passthrough handlers must pass the frame object as self"
+    );
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_global_method_with_late_bound_global_arg_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

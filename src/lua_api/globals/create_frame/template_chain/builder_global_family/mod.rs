@@ -47,6 +47,7 @@ fn build_global_method_variants(
 
 pub(super) enum GlobalMethodMode {
     Passthrough,
+    SelfArg,
     SelfId,
 }
 
@@ -102,11 +103,33 @@ const GLOBAL_METHOD_SELF_ID_TEMPLATE: &str = r#"
     end
 "#;
 
+const GLOBAL_METHOD_SELF_ARG_TEMPLATE: &str = r#"
+    local target_ref, method_name = ...
+    return function(self, ...)
+        local target = target_ref
+        if type(target) == "string" then
+            local env = getfenv(0) or _G
+            for segment in string.gmatch(target, "[^%.]+") do
+                env = env and env[segment]
+            end
+            target = env
+        end
+        if not target then
+            return
+        end
+        return target[method_name](target, self)
+    end
+"#;
+
 fn global_method_template(mode: GlobalMethodMode) -> (&'static str, &'static str) {
     match mode {
         GlobalMethodMode::Passthrough => (
             GLOBAL_METHOD_PASSTHROUGH_TEMPLATE,
             TEMPLATE_GLOBAL_METHOD_HANDLER,
+        ),
+        GlobalMethodMode::SelfArg => (
+            GLOBAL_METHOD_SELF_ARG_TEMPLATE,
+            "template-global-method-self-arg-handler",
         ),
         GlobalMethodMode::SelfId => (
             GLOBAL_METHOD_SELF_ID_TEMPLATE,

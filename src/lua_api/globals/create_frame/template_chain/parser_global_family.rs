@@ -214,9 +214,12 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             },
         );
     }
-    // This shape behaves correctly on the generic Lua path, but the current
-    // fast path is brittle when tests intentionally replace `_G.GameTooltip`
-    // with a plain table and assert exact call arguments.
+    if let Some((target_path, method_name)) = parse_inline_global_method_with_self_arg(stmt) {
+        return Some(FastHandlerRef::GlobalMethodWithSelfArg {
+            target_path,
+            method_name,
+        });
+    }
     if let Some((target_path, method_name)) = parse_inline_global_method_with_self_id_arg(stmt) {
         return Some(FastHandlerRef::GlobalMethodWithSelfIdArg {
             target_path,
@@ -451,6 +454,16 @@ fn parse_inline_global_method(stmt: &str) -> Option<(&str, &str)> {
         && is_fast_identifier(method_name)
         && super::is_fast_passthrough_args(args))
     .then_some((target_path, method_name))
+}
+
+fn parse_inline_global_method_with_self_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (target_path, remainder) = stmt.rsplit_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let target_path = target_path.trim();
+    let method_name = method_name.trim();
+    (is_fast_handler_path(target_path) && is_fast_identifier(method_name) && args == "self")
+        .then_some((target_path, method_name))
 }
 
 fn parse_inline_global_method_with_self_string_arg(stmt: &str) -> Option<(&str, &str, &str)> {

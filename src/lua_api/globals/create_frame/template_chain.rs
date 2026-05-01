@@ -476,6 +476,10 @@ enum FastHandlerRef<'a> {
         target_path: &'a str,
         method_name: &'a str,
     },
+    GlobalMethodWithSelfArg {
+        target_path: &'a str,
+        method_name: &'a str,
+    },
     GlobalMethodWithSelfStringArg {
         target_path: &'a str,
         method_name: &'a str,
