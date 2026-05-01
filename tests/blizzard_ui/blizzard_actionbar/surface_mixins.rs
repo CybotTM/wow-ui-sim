@@ -271,3 +271,138 @@ fn extra_action_bar_frame_publishes_no_mixin_only_a_script_handler() {
         );
     });
 }
+
+const ACTION_BAR_MIXIN_LUA_SITE: &str = "Shared/ActionBar.lua:1";
+
+/// PLAN-named methods that DO exist on `ActionBarMixin`. Source order
+/// (lua:3/57/144/93/198): `ActionBar_OnLoad` and `ActionBar_OnEvent` are
+/// the prefixed entry points the bar XML wires via
+/// `<OnLoad function="ActionBar_OnLoad"/>`-style chains; `SetShowGrid`,
+/// `UpdateGridLayout`, `UpdateShownButtons` are the three grid/visibility
+/// helpers each bar's mixin calls into.
+const ACTION_BAR_MIXIN_PLAN_NAMED_METHODS: &[&str] = &[
+    "ActionBar_OnLoad",
+    "ActionBar_OnEvent",
+    "SetShowGrid",
+    "UpdateGridLayout",
+    "UpdateShownButtons",
+];
+
+/// Source-additional methods on `ActionBarMixin` that PLAN omits. Each
+/// is a direct `function ActionBarMixin:METHOD(...)` declaration in
+/// `Shared/ActionBar.lua`. PLAN-only would silently drop these from the
+/// surface contract: `CacheGridSettings` (lua:65) and `ShouldUpdateGrid`
+/// (lua:76) gate the grid-layout dirty path; `GetShowAllButtons`
+/// (lua:173), `ShouldRaise` (lua:183), `UpdateFrameStrata` (lua:194)
+/// drive bar strata raise/lower on hold-key drag; `UpdateSpellFlyoutDirection`
+/// (lua:221) and `GetSpellFlyoutDirection` (lua:246) are the actual
+/// spell-flyout direction methods (PLAN's `SetSpellFlyoutDirection` is
+/// not the contract — see absent slice below).
+const ACTION_BAR_MIXIN_SOURCE_ADDITIONAL_METHODS: &[&str] = &[
+    "CacheGridSettings",
+    "ShouldUpdateGrid",
+    "GetShowAllButtons",
+    "ShouldRaise",
+    "UpdateFrameStrata",
+    "UpdateSpellFlyoutDirection",
+    "GetSpellFlyoutDirection",
+];
+
+/// PLAN-named methods that DO NOT exist on `ActionBarMixin` — negative
+/// tripwires for spec drift. `SetSpellFlyoutDirection`: source has only
+/// `Update`/`GetSpellFlyoutDirection` (lua:221/246) — there is no
+/// setter. `Layout`: `ActionBarMixin` does not declare `Layout`; the
+/// method exists on `ResizeLayoutMixin` (`Blizzard_SharedXML/LayoutFrame.lua:486`)
+/// and reaches bar frames only through the `ResizeLayoutFrame` template
+/// inheritance chain at `Shared/ActionBarTemplate.xml:7`. Pinning these
+/// as nil ensures (a) the PLAN line is recognised as drifted from
+/// source, and (b) a future "fix" that adds either method to
+/// `ActionBarMixin` directly forces a spec/test review rather than
+/// shadowing the inherited Layout silently.
+const ACTION_BAR_MIXIN_PLAN_NAMED_ABSENT_METHODS: &[&str] = &["SetSpellFlyoutDirection", "Layout"];
+
+/// Pin `ActionBarMixin`'s method-surface contract. **Spec/source
+/// mismatch in both directions.** PLAN names 7 methods; source declares
+/// 12 on the mixin (5 PLAN-named match + 7 source-additional), and 2
+/// PLAN-named methods don't exist on the mixin at all. Single test
+/// drives 15 assertions: existence (1), PLAN-named functions (5),
+/// source-additional functions (7), PLAN-named-but-absent nil
+/// tripwires (2). Mixin global is plain Lua — no Mixin() call needed
+/// for these assertions; `_G.ActionBarMixin.method` is the source-level
+/// declaration directly. The `frame.method == mixin.method` reference
+/// pin in `plan_named_frames_have_their_mixins_applied` covers
+/// per-frame Mixin-codegen drift; this test covers source-load drift.
+#[test]
+fn action_bar_mixin_publishes_plan_named_and_source_additional_methods() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let mixin_type: String = env
+            .eval("return type(_G.ActionBarMixin)")
+            .expect("ActionBarMixin global probe must run cleanly");
+
+        assert_eq!(
+            mixin_type, "table",
+            "Expected `_G.ActionBarMixin` to be a table after `{ROOT}` loads, got \
+             `{mixin_type}`. Source declares it at `{ACTION_BAR_MIXIN_LUA_SITE}` \
+             (`ActionBarMixin = {{}}`). Nil reading: source file failed to load before \
+             line 1, or the global was overwritten by a later addon."
+        );
+
+        for method in ACTION_BAR_MIXIN_PLAN_NAMED_METHODS {
+            let method_type: String = env
+                .eval(&format!("return type(_G.ActionBarMixin.{method})"))
+                .expect("ActionBarMixin method probe must run cleanly");
+
+            assert_eq!(
+                method_type, "function",
+                "Expected `ActionBarMixin.{method}` to be a function after `{ROOT}` \
+                 loads, got `{method_type}`. PLAN names this method; source declares \
+                 `function ActionBarMixin:{method}(...)` in `Shared/ActionBar.lua`. \
+                 False reading: source file failed to execute past the declaration, or \
+                 the method was renamed/removed. Each per-bar mixin's OnLoad calls into \
+                 these via `self:ActionBar_OnLoad()`-style invocations, so a nil \
+                 reading would nil-call at frame-OnLoad time."
+            );
+        }
+
+        for method in ACTION_BAR_MIXIN_SOURCE_ADDITIONAL_METHODS {
+            let method_type: String = env
+                .eval(&format!("return type(_G.ActionBarMixin.{method})"))
+                .expect("ActionBarMixin method probe must run cleanly");
+
+            assert_eq!(
+                method_type, "function",
+                "Expected `ActionBarMixin.{method}` to be a function after `{ROOT}` \
+                 loads, got `{method_type}`. PLAN omits this method, but source \
+                 declares it as a direct `function ActionBarMixin:{method}(...)` in \
+                 `Shared/ActionBar.lua`. Pinned as a tripwire so the spec recognises \
+                 source drift if the method is removed: the grid-cache path \
+                 (`CacheGridSettings`/`ShouldUpdateGrid`), strata raise/lower path \
+                 (`GetShowAllButtons`/`ShouldRaise`/`UpdateFrameStrata`), and \
+                 spell-flyout direction path (`UpdateSpellFlyoutDirection`/\
+                 `GetSpellFlyoutDirection`) all depend on these declarations."
+            );
+        }
+
+        for method in ACTION_BAR_MIXIN_PLAN_NAMED_ABSENT_METHODS {
+            let method_type: String = env
+                .eval(&format!("return type(_G.ActionBarMixin.{method})"))
+                .expect("ActionBarMixin absent-method probe must run cleanly");
+
+            assert_eq!(
+                method_type, "nil",
+                "Expected `ActionBarMixin.{method}` to be nil after `{ROOT}` loads, \
+                 got `{method_type}`. PLAN names this method but source does NOT \
+                 declare it on `ActionBarMixin` (`Shared/ActionBar.lua` has \
+                 `UpdateSpellFlyoutDirection` lua:221 and `GetSpellFlyoutDirection` \
+                 lua:246 — no `SetSpellFlyoutDirection`; and `Layout` lives on \
+                 `ResizeLayoutMixin` at `Blizzard_SharedXML/LayoutFrame.lua:486`, \
+                 reaching bar frames only via the `ResizeLayoutFrame` template \
+                 inheritance at `Shared/ActionBarTemplate.xml:7`). Non-nil reading: \
+                 source added the method on `ActionBarMixin` directly — the spec \
+                 needs review (a directly-declared `Layout` on `ActionBarMixin` \
+                 would shadow the inherited `ResizeLayoutMixin:Layout` and silently \
+                 change layout-pass behavior across every bar)."
+            );
+        }
+    });
+}
