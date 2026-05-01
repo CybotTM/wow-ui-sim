@@ -28,6 +28,9 @@ pub(super) fn fire_cast_complete_events(
     let args = &[player, Val::Num(cast_id as f64), Val::Num(spell_id as f64)];
     let _ = env.fire_event_with_args("UNIT_SPELLCAST_STOP", args);
     let _ = env.fire_event_with_args("UNIT_SPELLCAST_SUCCEEDED", args);
+    if crate::lua_api::globals::profession_data::get_recipe(spell_id as i32).is_some() {
+        let _ = env.fire_event_with_args("UPDATE_TRADESKILL_CAST_STOPPED", &[Val::Bool(false)]);
+    }
 }
 
 /// Apply spell effects (damage or healing) based on spell target type.

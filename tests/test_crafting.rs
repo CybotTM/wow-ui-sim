@@ -163,6 +163,46 @@ fn craft_recipe_consumes_reagents_and_adds_output() {
 }
 
 #[test]
+fn craft_recipe_starts_player_cast_for_cast_bar() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.SetSelectedProfession(164)
+        A_Admin.LearnRecipe(100001)
+        A_Admin.SeedReagentsForRecipe(100001, 1)
+        "#,
+    )
+    .unwrap();
+
+    let before: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
+    assert!(!before, "player should not already be casting");
+
+    let result: String = env
+        .eval(
+            r#"
+            local events = {}
+            local listener = CreateFrame("Frame")
+            listener:RegisterEvent("UNIT_SPELLCAST_START")
+            listener:SetScript("OnEvent", function(_, event, unit)
+                table.insert(events, event .. ":" .. tostring(unit))
+            end)
+
+            C_TradeSkillUI.CraftRecipe(100001, 1)
+            local name, _, _, startTime, endTime, _, _, _, spellID = UnitCastingInfo("player")
+            if not name then return "not_casting" end
+            if events[1] ~= "UNIT_SPELLCAST_START:player" then
+                return "event=" .. tostring(events[1])
+            end
+            if endTime <= startTime then return "bad_times" end
+            return name .. ":" .. tostring(spellID)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "Khaz Algar Helm:100001");
+}
+
+#[test]
 fn craft_recipe_fires_bag_update_events() {
     let env = env();
     let result: String = env
