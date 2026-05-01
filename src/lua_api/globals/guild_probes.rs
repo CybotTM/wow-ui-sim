@@ -236,7 +236,17 @@ fn guild_news_sort(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn can_view_guild_recipes(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+    let b = {
+        let sim = borrow_state(state)?;
+        sim.world.guild_name.is_some()
+            && sim
+                .world
+                .guild_members
+                .first()
+                .map(|member| member.rank_index == 1)
+                .unwrap_or(false)
+    };
+    state.push(Val::Bool(b));
     Ok(1)
 }
 
@@ -380,9 +390,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "CanEditPublicNote", can_edit_public_note)?;
     LuaApiMut::register_function(lua, "CanEditMOTD", can_edit_motd)?;
     LuaApiMut::register_function(lua, "CanEditGuildInfo", can_edit_guild_info)?;
-    LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;
     LuaApiMut::register_function(lua, "CanGuildPromote", can_guild_promote)?;
     LuaApiMut::register_function(lua, "CanGuildDemote", can_guild_demote)?;
+    LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;
     LuaApiMut::register_function(lua, "QueryGuildRecipes", query_guild_recipes)?;
     LuaApiMut::register_function(lua, "CanViewGuildRecipes", can_view_guild_recipes)?;
     LuaApiMut::register_function(lua, "QueryGuildNews", query_guild_news)?;
