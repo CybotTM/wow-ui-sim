@@ -48,3 +48,6 @@ mod behavior_extra_action_bar;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_vehicle_leave_button.rs"]
 mod behavior_vehicle_leave_button;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_xp_bar_update.rs"]
+mod behavior_xp_bar_update;
