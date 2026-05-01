@@ -700,9 +700,9 @@ impl App {
         let env = self.env.borrow();
         let state = env.state().borrow();
         let initial_id = grid.topmost_matching_at(pos, |id| {
-            deepest_hover_target(&state.widgets, grid, id, pos).is_some()
+            deepest_hover_target_through_visible_children(&state.widgets, grid, id, pos).is_some()
         })?;
-        deepest_hover_target(&state.widgets, grid, initial_id, pos)
+        deepest_hover_target_through_visible_children(&state.widgets, grid, initial_id, pos)
     }
 
     pub(crate) fn hit_test_mouse_button(&self, pos: iced::Point, button_name: &str) -> Option<u64> {
@@ -713,21 +713,21 @@ impl App {
         let env = self.env.borrow();
         let state = env.state().borrow();
         let initial_id = grid.topmost_matching_at(pos, |id| {
-            deepest_click_target(&state.widgets, grid, id, pos, button_name).is_some()
+            deepest_click_target_through_visible_children(&state.widgets, grid, id, pos, button_name).is_some()
         })?;
-        deepest_click_target(&state.widgets, grid, initial_id, pos, button_name)
+        deepest_click_target_through_visible_children(&state.widgets, grid, initial_id, pos, button_name)
     }
 }
 
-fn deepest_hover_target(
+fn deepest_hover_target_through_visible_children(
     widgets: &crate::widget::WidgetRegistry,
     grid: &crate::iced_app::hit_grid::HitGrid,
     frame_id: u64,
     pos: iced::Point,
 ) -> Option<u64> {
     let frame = widgets.get(frame_id)?;
-    for child_id in children_at_point_by_z_order(widgets, frame, pos) {
-        if let Some(target) = deepest_hover_target(widgets, grid, child_id, pos) {
+    for child_id in visible_descendants_at_point_by_z_order(widgets, frame, pos) {
+        if let Some(target) = deepest_hover_target_through_visible_children(widgets, grid, child_id, pos) {
             return Some(target);
         }
     }
@@ -735,7 +735,7 @@ fn deepest_hover_target(
     grid.contains(frame_id, pos).then_some(frame_id)
 }
 
-fn deepest_click_target(
+fn deepest_click_target_through_visible_children(
     widgets: &crate::widget::WidgetRegistry,
     grid: &crate::iced_app::hit_grid::HitGrid,
     frame_id: u64,
@@ -743,8 +743,8 @@ fn deepest_click_target(
     button_name: &str,
 ) -> Option<u64> {
     let frame = widgets.get(frame_id)?;
-    for child_id in children_at_point_by_z_order(widgets, frame, pos) {
-        if let Some(target) = deepest_click_target(widgets, grid, child_id, pos, button_name) {
+    for child_id in visible_descendants_at_point_by_z_order(widgets, frame, pos) {
+        if let Some(target) = deepest_click_target_through_visible_children(widgets, grid, child_id, pos, button_name) {
             return Some(target);
         }
     }
@@ -756,7 +756,7 @@ fn deepest_click_target(
     }
 }
 
-fn children_at_point_by_z_order(
+fn visible_descendants_at_point_by_z_order(
     widgets: &crate::widget::WidgetRegistry,
     frame: &crate::widget::Frame,
     pos: iced::Point,
