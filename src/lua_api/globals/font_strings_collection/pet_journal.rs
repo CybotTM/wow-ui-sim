@@ -7,6 +7,13 @@ use rilua::{LuaApiMut, LuaResult, Val};
 
 use super::set_global_val;
 
+const BASE_PET_HEALTH: i32 = 100;
+const PET_HEALTH_PER_LEVEL: i32 = 20;
+const PET_HEALTH_PER_RARITY: i32 = 10;
+const BASE_PET_ATTACK: i32 = 10;
+const PET_ATTACK_PER_LEVEL: i32 = 2;
+const BASE_PET_SPEED: i32 = 10;
+
 fn pet_get_num_pets(state: &mut LuaState) -> LuaResult<u32> {
     let st = borrow_state(state)?;
     let total = st.world.pets.len() as i32;
@@ -180,6 +187,39 @@ fn pet_get_info_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(push_pet_info_by_species_id(state, &pet))
 }
 
+fn find_pet_by_stack_arg(state: &LuaState, index: i32) -> Option<PetInfoSnapshot> {
+    match stack_val(state, index) {
+        Val::Str(value) => {
+            let pet_id = val_to_string(state, Val::Str(value))?;
+            let species_id = pet_id.parse::<u32>().ok();
+            find_pet_by_pet_id(state, &pet_id).or_else(|| {
+                species_id.and_then(|species_id| find_pet_by_species_id(state, species_id))
+            })
+        }
+        Val::Num(species_id) => find_pet_by_species_id(state, species_id as u32),
+        _ => None,
+    }
+}
+
+fn pet_get_stats(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(pet) = find_pet_by_stack_arg(state, 1) else {
+        return Ok(0);
+    };
+
+    let level = pet.level.max(1);
+    let rarity = pet.quality.max(1);
+    let max_health =
+        BASE_PET_HEALTH + (level * PET_HEALTH_PER_LEVEL) + (rarity * PET_HEALTH_PER_RARITY);
+    let attack = BASE_PET_ATTACK + (level * PET_ATTACK_PER_LEVEL) + rarity;
+    let speed = BASE_PET_SPEED + level + rarity;
+    state.push(Val::Num(max_health as f64));
+    state.push(Val::Num(max_health as f64));
+    state.push(Val::Num(attack as f64));
+    state.push(Val::Num(speed as f64));
+    state.push(Val::Num(rarity as f64));
+    Ok(5)
+}
+
 pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
     let t = TableBuilder::new(lua.state_mut())
         .set_function("ClearRecentFanfares", |_state| Ok(0))?
@@ -227,17 +267,7 @@ pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             state.push(Val::Num(0.0));
             Ok(1)
         })?
-        .set_function("GetPetStats", |state| {
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            Ok(8)
-        })?
+        .set_function("GetPetStats", pet_get_stats)?
         .set_function("GetPetSummonInfo", |state| {
             state.push(Val::Nil);
             Ok(1)
