@@ -398,7 +398,10 @@ fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
             _ => return a.id.cmp(&b.id),
         };
         let type_flag = |frame: &crate::widget::Frame| -> u8 {
-            u8::from(frame.widget_type == crate::widget::WidgetType::FontString)
+            u8::from(matches!(
+                frame.widget_type,
+                crate::widget::WidgetType::FontString | crate::widget::WidgetType::SimpleHTML
+            ))
         };
         (
             a.depth,

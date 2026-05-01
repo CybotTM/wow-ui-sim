@@ -119,7 +119,10 @@ fn renderable_frame_with_bounds(
     frame: &crate::widget::Frame,
     rect: crate::LayoutRect,
 ) -> Option<&crate::widget::Frame> {
-    let is_fontstring = matches!(frame.widget_type, WidgetType::FontString);
+    let is_fontstring = matches!(
+        frame.widget_type,
+        WidgetType::FontString | WidgetType::SimpleHTML
+    );
     let is_line = matches!(frame.widget_type, WidgetType::Line);
     let has_height = rect.height > 0.0 || is_line;
     let has_width = rect.width > 0.0 || is_fontstring || is_line;

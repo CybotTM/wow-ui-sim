@@ -183,7 +183,10 @@ fn emit_one_frame(
 }
 
 fn has_renderable_size(frame: &crate::widget::Frame, rect: crate::LayoutRect) -> bool {
-    let is_fontstring = matches!(frame.widget_type, WidgetType::FontString);
+    let is_fontstring = matches!(
+        frame.widget_type,
+        WidgetType::FontString | WidgetType::SimpleHTML
+    );
     let is_line = matches!(frame.widget_type, WidgetType::Line);
     !((rect.height <= 0.0 && !is_line) || (rect.width <= 0.0 && !is_fontstring && !is_line))
 }
