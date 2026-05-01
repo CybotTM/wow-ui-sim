@@ -24,3 +24,6 @@ mod surface_mixins;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_toggle.rs"]
 mod behavior_toggle;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_progress_bar.rs"]
+mod behavior_progress_bar;
