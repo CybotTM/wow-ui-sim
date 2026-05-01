@@ -36,3 +36,6 @@ mod behavior_show_grid;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_stance_select.rs"]
 mod behavior_stance_select;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_pet_bar_update.rs"]
+mod behavior_pet_bar_update;
