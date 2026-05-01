@@ -234,6 +234,35 @@ fn test_magisters_terrace_loot_rows_have_item_metadata() {
 }
 
 #[test]
+fn test_magisters_terrace_loot_rows_are_not_marked_seasonal() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            EJ_SelectInstance(1300)
+            local count = EJ_GetNumLoot()
+            if count <= 0 then
+                return "count=" .. tostring(count)
+            end
+
+            for i = 1, count do
+                local item = C_EncounterJournal.GetLootInfoByIndex(i)
+                if item.displaySeasonID ~= nil then
+                    return "seasonal:" .. tostring(i) .. ":" .. tostring(item.itemID) .. ":" .. tostring(item.displaySeasonID)
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "ordinary Adventure Guide loot must not be truthy seasonal loot: {result}"
+    );
+}
+
+#[test]
 fn test_adventure_guide_raid_loot_rows_have_item_metadata() {
     let env = env();
     let result: String = env
