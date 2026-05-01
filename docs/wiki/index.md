@@ -61,6 +61,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[hero-spec-dialog-anchors]] | LIGHTSMITH/TEMPLAR selection dialog: layer-children batched out of XML order + runtime templates skipped named-anchor re-resolution, dropping panel content to spec-frame edge |
 | [[hero-spec-icon-bug]] | Retired — 5 layers of evidence confirm icon renders correctly |
 | [[hit-testing]] | Two-phase algorithm: HitGrid spatial index + depth-first child drill-down |
+| [[journeys-midnight-empty]] | Journeys tab was empty because current expansion was Midnight but default major-faction data only seeded War Within rows |
 | [[keybinding-system]] | Two Lua tables, key press pipeline, default bindings, Lua API |
 | [[lfd-dungeon-list-empty]] | Dungeons & Raids panel showed empty Specific list: missing `GetLFGLockList` etc., never-fired `LFG_UPDATE_RANDOM_INFO`, header marked `is_random` |
 | [[mask-texture]] | UV computation, useAtlasSize default, SmallActionButtonMixin override |

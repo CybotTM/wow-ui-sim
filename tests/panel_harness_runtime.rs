@@ -634,6 +634,17 @@ fn encounter_journal_journeys_frame_seeds_current_major_factions_without_tww_lea
 
     assert_eq!(expansion, 11, "current Journeys tier should be Midnight");
     assert_eq!(
+        count, 4,
+        "current Midnight Journeys should show the four major-faction rows: {names}"
+    );
+    assert!(
+        names.contains("Silvermoon Court")
+            && names.contains("Amani Tribe")
+            && names.contains("Hara'ti")
+            && names.contains("The Singularity"),
+        "current Midnight Journeys should show current faction rows: {names}"
+    );
+    assert_eq!(
         names.contains("Hallowfall Arathi")
             || names.contains("Council of Dornogal")
             || names.contains("The Assembly of the Deeps")
