@@ -128,10 +128,7 @@ fn plan_named_frames_have_their_mixins_applied() {
 
             assert_eq!(
                 frame_type, "table",
-                "Expected `_G[{:?}]` to be a table after `{ROOT}` loads, got `{frame_type}`. \
-                 The XML at `{}` declares this frame and the named-frame registration runs \
-                 at XML-load time. A nil reading means the XML did not execute or the frame \
-                 failed to register.",
+                "Expected `_G[{:?}]` to be a table (XML at `{}`), got `{frame_type}`",
                 pin.frame_name, pin.frame_xml_site
             );
 
@@ -142,25 +139,13 @@ fn plan_named_frames_have_their_mixins_applied() {
                             (_G[{:?}].{method} == {}.{method})",
                     pin.mixin_name, pin.frame_name, pin.frame_name, pin.mixin_name
                 );
-                let ok: bool = env.eval(&probe).unwrap_or_else(|err| {
-                    panic!(
-                        "Mixin pin probe failed to evaluate for `{}.{method}`: {err}",
-                        pin.frame_name
-                    )
-                });
+                let ok: bool = env
+                    .eval(&probe)
+                    .expect("mixin pin probe must evaluate cleanly");
                 assert!(
                     ok,
-                    "Expected `{frame_name}.{method}` to be the same function as \
-                     `{mixin_name}.{method}` after `{ROOT}` loads. XML at \
-                     `{frame_xml_site}` declares the mixin (direct or inherited via \
-                     template); codegen at `src/loader/xml_frame_codegen.rs:155-173` \
-                     expands to `Mixin(frame, {mixin_name})`. Mixin source at \
-                     `{mixin_lua_site}` declares the method. Failure means source \
-                     load stopped early OR the Mixin codegen call did not run.",
-                    frame_name = pin.frame_name,
-                    mixin_name = pin.mixin_name,
-                    frame_xml_site = pin.frame_xml_site,
-                    mixin_lua_site = pin.mixin_lua_site,
+                    "Expected `{}.{method}` to equal `{}.{method}` (XML `{}` mixin `{}`)",
+                    pin.frame_name, pin.mixin_name, pin.frame_xml_site, pin.mixin_lua_site
                 );
             }
         }
@@ -182,35 +167,23 @@ fn extra_action_bar_frame_publishes_no_mixin_only_a_script_handler() {
 
         assert_eq!(
             frame_type, "table",
-            "Expected `_G.ExtraActionBarFrame` to be a table after `{ROOT}` loads, got \
-             `{frame_type}`. The XML at `Shared/ExtraActionBar.xml:93` declares \
-             `<Frame name=\"ExtraActionBarFrame\" frameStrata=\"LOW\" enableMouse=\"true\" \
-             hidden=\"true\">` (no `parent=\"...\"` — a parented-by-Lua frame, attached to \
-             `ExtraAbilityContainer` at runtime). A nil reading means the XML did not \
-             execute or the frame failed to register its name."
+            "Expected `_G.ExtraActionBarFrame` table (XML `Shared/ExtraActionBar.xml:93`), got `{frame_type}`"
         );
 
         let convention_named_mixin_type: String = env
             .eval("return type(_G.ExtraActionBarFrameMixin)")
             .expect("ExtraActionBarFrameMixin nil-probe must run cleanly");
-
         assert_eq!(
             convention_named_mixin_type, "nil",
-            "Expected `_G.ExtraActionBarFrameMixin` to be nil — `ExtraActionBarFrame` at \
-             `Shared/ExtraActionBar.xml:93` has no `mixin=` and the global is undeclared. \
-             Got `{convention_named_mixin_type}`."
+            "Expected `_G.ExtraActionBarFrameMixin` nil (no `mixin=` on the XML frame), got `{convention_named_mixin_type}`"
         );
 
         let on_load_handler_type: String = env
             .eval("return type(_G.ExtraActionBar_OnLoad)")
             .expect("ExtraActionBar_OnLoad probe must run cleanly");
-
         assert_eq!(
             on_load_handler_type, "function",
-            "Expected `_G.ExtraActionBar_OnLoad` to be a function — declared at \
-             `Shared/ExtraActionBar.lua:5` as a free function, wired via \
-             `<OnLoad function=\"ExtraActionBar_OnLoad\"/>` at \
-             `Shared/ExtraActionBar.xml:139`. Got `{on_load_handler_type}`."
+            "Expected `_G.ExtraActionBar_OnLoad` function (`Shared/ExtraActionBar.lua:5`), got `{on_load_handler_type}`"
         );
     });
 }
@@ -740,6 +713,37 @@ fn action_button_spell_alert_manager_publishes_plan_named_methods() {
                 ))
                 .expect("method probe must run cleanly");
             assert_eq!(m, "function", "expected `{method}` function, got `{m}`");
+        }
+    });
+}
+
+/// Event-routing/refresh-watcher mixins PLAN names as "tables". Five
+/// live in `Shared/ActionButton.lua` (lua:201/243/346/366/404 — per-
+/// button event router + three refresh-frame watchers); the sixth at
+/// `Shared/VehicleLeaveButton.lua:2`. Existence-only contract.
+const EVENT_AND_WATCHER_FRAME_MIXINS: &[&str] = &[
+    "ActionBarButtonEventsFrameMixin",
+    "ActionBarActionEventsFrameMixin",
+    "ActionBarButtonUpdateFrameMixin",
+    "ActionBarButtonRangeCheckFrameMixin",
+    "ActionBarButtonUsableWatcherFrameMixin",
+    "MainMenuBarVehicleLeaveButtonMixin",
+];
+
+/// Pin the 6 event-routing/refresh-watcher mixins as tables. 6
+/// assertions; nil reading on any row means the source file failed to
+/// load past the `MixinName = {}` line.
+#[test]
+fn event_and_watcher_frame_mixins_publish_as_tables() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for name in EVENT_AND_WATCHER_FRAME_MIXINS {
+            let mixin_type: String = env
+                .eval(&format!("return type(_G.{name})"))
+                .expect("mixin global probe must run cleanly");
+            assert_eq!(
+                mixin_type, "table",
+                "Expected `_G.{name}` to be a table, got `{mixin_type}`"
+            );
         }
     });
 }
