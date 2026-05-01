@@ -33,3 +33,6 @@ mod behavior_keybind_dispatch;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_show_grid.rs"]
 mod behavior_show_grid;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_stance_select.rs"]
+mod behavior_stance_select;
