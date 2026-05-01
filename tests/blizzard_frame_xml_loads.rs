@@ -350,6 +350,23 @@ fn blizzard_frame_xml_publishes_equipment_manager_inventory_and_bag_slot_tables(
 }
 
 #[test]
+fn equipment_manager_free_space_update_handles_bank_tab_count() {
+    let env = load_full_game_ui();
+
+    let last_bag_slot: i32 = env
+        .eval(
+            "return NUM_TOTAL_EQUIPPED_BAG_SLOTS \
+                 + C_Bank.FetchNumPurchasedBankTabs(Enum.BankType.Character)",
+        )
+        .expect("EquipmentManager bag-slot upper bound should not error");
+    assert!(
+        last_bag_slot >= 5,
+        "EquipmentManager.lua adds FetchNumPurchasedBankTabs() to NUM_TOTAL_EQUIPPED_BAG_SLOTS; \
+         the bank API must return a non-nil numeric tab count"
+    );
+}
+
+#[test]
 fn blizzard_frame_xml_publishes_alert_frame_subsystem_derivative_mixins() {
     let env = load_full_game_ui();
 
