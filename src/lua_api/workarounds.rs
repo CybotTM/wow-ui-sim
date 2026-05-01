@@ -2355,10 +2355,22 @@ function ToggleCollectionsJournal(tabIndex)
         return
     end
 
-    if CollectionsJournal:IsShown() then
-        CollectionsJournal:Hide();
+    if type(SetCollectionsJournalShown) == "function" then
+        local tabMatches = not tabIndex or tabIndex == PanelTemplates_GetSelectedTab(CollectionsJournal)
+        local isShown = CollectionsJournal:IsShown() and tabMatches
+        SetCollectionsJournalShown(not isShown, tabIndex)
+    elseif CollectionsJournal:IsShown() then
+        if type(HideUIPanel) == "function" then
+            HideUIPanel(CollectionsJournal)
+        else
+            CollectionsJournal:Hide()
+        end
     else
-        CollectionsJournal:Show();
+        if type(ShowUIPanel) == "function" then
+            ShowUIPanel(CollectionsJournal)
+        else
+            CollectionsJournal:Show()
+        end
     end
 end
 "#;
