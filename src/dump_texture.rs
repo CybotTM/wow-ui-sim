@@ -19,10 +19,9 @@ pub fn dump_batch_textures(
     std::fs::create_dir_all(output_dir).ok();
     let mut seen = std::collections::HashSet::new();
     let mut saved = 0;
-    let filter = filter.map(str::to_lowercase);
 
     for request in iter_texture_requests(batch) {
-        if !should_dump_texture(&request.path, &mut seen, filter.as_deref()) {
+        if !should_dump_texture(&request.path, &mut seen, filter) {
             continue;
         }
         saved += dump_texture_request(tex_mgr, output_dir, &request.path);
@@ -47,7 +46,12 @@ fn should_dump_texture(
     if !seen.insert(path.to_string()) {
         return false;
     }
-    filter.is_none_or(|needle| path.to_lowercase().contains(needle))
+
+    let normalized_path = path.to_lowercase();
+    filter.is_none_or(|needle| {
+        let normalized_needle = needle.to_lowercase();
+        normalized_path.contains(&normalized_needle)
+    })
 }
 
 fn dump_texture_request(tex_mgr: &mut TextureManager, output_dir: &Path, path: &str) -> usize {
@@ -98,4 +102,20 @@ fn sanitize_texture_filename(path: &str) -> String {
     // Strip leading underscores from Interface_ prefix
     let name = name.trim_start_matches('_');
     format!("{name}.png")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::should_dump_texture;
+
+    #[test]
+    fn should_dump_texture_matches_filter_case_insensitively() {
+        let mut seen = std::collections::HashSet::new();
+
+        assert!(should_dump_texture(
+            "interface/icons/inv_pants_01",
+            &mut seen,
+            Some("INV_Pants"),
+        ));
+    }
 }
