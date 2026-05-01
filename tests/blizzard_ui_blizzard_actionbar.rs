@@ -81,3 +81,6 @@ mod behavior_assisted_combat_highlight;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_action_highlight.rs"]
 mod behavior_action_highlight;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_locked_action.rs"]
+mod behavior_locked_action;
