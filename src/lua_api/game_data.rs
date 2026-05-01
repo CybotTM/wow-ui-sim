@@ -1029,10 +1029,17 @@ fn allied_races_scene_actor_tags() -> Vec<String> {
     .collect()
 }
 
-/// Major Factions for The War Within (`expansion_filter = 10`). Drives the
-/// EncounterJournal "Journeys" panel via `C_MajorFactions.GetMajorFactionIDs`
-/// and the per-id `GetMajorFactionData` lookup. Faction ids match
-/// `MajorFactions.db2`:
+/// Major Factions for the modern Journeys panel. Drives the EncounterJournal
+/// "Journeys" panel via `C_MajorFactions.GetMajorFactionIDs` and the per-id
+/// `GetMajorFactionData` lookup. Faction ids match `MajorFactions.db2`:
+///
+/// Midnight (`expansion_filter = 11`):
+/// - 2710 Silvermoon Court
+/// - 2696 Amani Tribe
+/// - 2704 Hara'ti
+/// - 2699 The Singularity
+///
+/// The War Within (`expansion_filter = 10`):
 /// - 2590 Council of Dornogal
 /// - 2570 Hallowfall Arathi
 /// - 2594 The Assembly of the Deeps
@@ -1079,6 +1086,10 @@ impl MajorFactionRow {
 
 fn default_major_faction_rows() -> Vec<MajorFactionRow> {
     vec![
+        (2710, "Silvermoon Court", 11, "light", (1.00, 0.82, 0.36)),
+        (2696, "Amani Tribe", 11, "sky", (0.50, 0.82, 0.36)),
+        (2704, "Hara'ti", 11, "root", (0.86, 0.52, 0.35)),
+        (2699, "The Singularity", 11, "origin", (0.56, 0.58, 1.00)),
         (2590, "Council of Dornogal", 10, "storm", (0.96, 0.78, 0.40)),
         (2570, "Hallowfall Arathi", 10, "flame", (0.99, 0.91, 0.62)),
         (
@@ -1108,7 +1119,7 @@ fn default_major_faction_rows() -> Vec<MajorFactionRow> {
 /// flags are not yet driven by any panel we render.
 pub fn default_major_faction_renown_levels() -> HashMap<i64, Vec<RenownLevelInfo>> {
     let mut map = HashMap::new();
-    for &faction_id in &[2590i64, 2570, 2594, 2600] {
+    for &faction_id in &[2710i64, 2696, 2704, 2699, 2590, 2570, 2594, 2600] {
         let levels = (1..=20)
             .map(|level| RenownLevelInfo {
                 faction_id,

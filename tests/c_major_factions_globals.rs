@@ -144,23 +144,61 @@ fn default_tww_major_faction_texture_kits_resolve_to_journey_icon_atlases() {
 }
 
 #[test]
-fn midnight_major_faction_filter_does_not_return_war_within_rows() {
+fn midnight_major_faction_filter_returns_midnight_rows_without_war_within_leak() {
     let env = WowLuaEnv::new().expect("env");
-    let names: String = env
+    let (count, names): (i32, String) = env
         .eval(
             r#"
             local out = {}
             for _, factionID in ipairs(C_MajorFactions.GetMajorFactionIDs(LE_EXPANSION_MIDNIGHT)) do
                 out[#out + 1] = C_MajorFactions.GetMajorFactionData(factionID).name
             end
-            return table.concat(out, "|")
+            return #out, table.concat(out, "|")
             "#,
         )
         .unwrap();
 
+    assert_eq!(
+        count, 4,
+        "Midnight Journeys should seed the four current major factions: {names}"
+    );
+    assert!(
+        names.contains("Silvermoon Court")
+            && names.contains("Amani Tribe")
+            && names.contains("Hara'ti")
+            && names.contains("The Singularity"),
+        "Midnight Journeys should expose current faction rows: {names}"
+    );
     assert!(
         not_contains_war_within_faction(&names),
         "Midnight Journeys should not be seeded with War Within factions: {names}"
+    );
+}
+
+#[test]
+fn default_midnight_major_faction_texture_kits_resolve_to_journey_icon_atlases() {
+    let env = WowLuaEnv::new().expect("env");
+    let (count, missing): (i32, String) = env
+        .eval(
+            r#"
+            local ids = C_MajorFactions.GetMajorFactionIDs(LE_EXPANSION_MIDNIGHT)
+            local missing = {}
+            for _, factionID in ipairs(ids) do
+                local data = C_MajorFactions.GetMajorFactionData(factionID)
+                local atlas = ("majorfactions_icons_%s512"):format(data.textureKit)
+                if C_Texture.GetAtlasInfo(atlas) == nil then
+                    missing[#missing + 1] = atlas
+                end
+            end
+            return #ids, table.concat(missing, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(count, 4);
+    assert_eq!(
+        missing, "",
+        "every default Midnight textureKit must resolve through the Journeys icon atlas format"
     );
 }
 

@@ -729,6 +729,10 @@ Created `investigations/world-map-create-texture-sublevel.md` to document the fo
 
 ## [2026-04-13] ingest | world map voice chat alert investigation
 
+## [2026-05-01] investigation | Journeys Midnight empty
+
+Created `investigations/journeys-midnight-empty.md` to document the empty Journeys tab on Midnight. Root cause: current expansion constants were 11, but default major-faction data only seeded War Within expansion 10 rows, so Blizzard's `JourneysFrameMixin:Refresh()` received an empty `C_MajorFactions.GetMajorFactionIDs(11)` result. Updated `index.md` with the new investigation page.
+
 Created `investigations/world-map-voice-chat-alerts.md` to document the reduced-stack world-map overlay where voice prompt frames appeared above the panel. Recorded the two harness prerequisites behind it: `Blizzard_Channels` needs `Blizzard_SocialToast` for `SocialToastTemplate hidden="true"`, and alert positioning needs the real chat-alert addons instead of the `ChatAlertFrame` stub. Updated `index.md` with the new investigation page.
 
 ## [2026-04-27] investigation | explicit XML parent anchors
