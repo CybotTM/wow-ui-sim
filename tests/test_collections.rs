@@ -190,6 +190,32 @@ fn pet_journal_get_pet_info_by_pet_id_has_strings_for_card_fields() {
 }
 
 #[test]
+fn pet_journal_get_pet_stats_reports_collected_pets_alive() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local petID = C_PetJournal.GetPetInfoByIndex(1)
+            local health, maxHealth, attack, speed, rarity = C_PetJournal.GetPetStats(petID)
+            if health == nil then return "health=nil" end
+            if maxHealth == nil then return "maxHealth=nil" end
+            if health <= 0 then return "health=" .. tostring(health) end
+            if maxHealth <= 0 then return "maxHealth=" .. tostring(maxHealth) end
+            if health > maxHealth then return "health_gt_max=" .. tostring(health) .. "," .. tostring(maxHealth) end
+            if attack <= 0 then return "attack=" .. tostring(attack) end
+            if speed <= 0 then return "speed=" .. tostring(speed) end
+            if rarity ~= 3 then return "rarity=" .. tostring(rarity) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Collected pets should not be reported as dead: {result}"
+    );
+}
+
+#[test]
 fn pet_journal_get_pet_info_invalid() {
     let env = env();
     let result: String = env
