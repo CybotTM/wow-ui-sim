@@ -172,7 +172,32 @@ fn test_transmog_collection_get_num_transmog_sources() {
     let count: i32 = env
         .eval("return C_TransmogCollection.GetNumTransmogSources()")
         .unwrap();
-    assert_eq!(count, 60, "default world has 60 transmog appearances");
+    assert_eq!(count, 7, "default source filter list has 7 source types");
+}
+
+#[test]
+fn test_transmog_collection_filter_surface_supports_wardrobe_dropdowns() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if C_TransmogCollection.GetClassFilter() ~= 2 then return "class_filter" end
+            if not C_TransmogCollection.GetCollectedShown() then return "collected" end
+            if not C_TransmogCollection.GetUncollectedShown() then return "uncollected" end
+            if C_TransmogCollection.GetAllFactionsShown() then return "factions" end
+            if C_TransmogCollection.GetAllRacesShown() then return "races" end
+            if not C_TransmogCollection.IsValidTransmogSource(1) then return "source_1" end
+            if C_TransmogCollection.IsValidTransmogSource(99) then return "source_99" end
+            if C_TransmogCollection.GetFilteredCategoryCollectedCount(1) ~= 4 then return "collected_count" end
+            if C_TransmogCollection.GetFilteredCategoryTotal(1) ~= 5 then return "total_count" end
+            local sources = C_TransmogCollection.GetValidAppearanceSourcesForClass(1, 2, 1, nil)
+            if #sources ~= 1 then return "valid_sources=" .. #sources end
+            if not sources[1].playerCanCollect then return "playerCanCollect" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
 }
 
 #[test]

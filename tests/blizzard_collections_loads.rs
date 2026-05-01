@@ -321,3 +321,52 @@ fn wardrobe_appearances_panel_populates_for_head_slot() {
         "First appearance tile (Models[1]) should be visible after the wardrobe populates"
     );
 }
+
+#[test]
+fn wardrobe_appearances_filter_dropdown_has_rows() {
+    let env = load_full_game_ui();
+    load_addon(&env.loader_env(), &collections_toc()).expect("Blizzard_Collections should load");
+
+    let result: String = env
+        .eval(
+            r#"
+            CollectionsJournal:Show()
+            CollectionsJournal_SetTab(CollectionsJournal, 5)
+
+            local dropdown = WardrobeCollectionFrame and WardrobeCollectionFrame.FilterButton
+            if dropdown == nil then
+                return "missing_dropdown"
+            end
+
+            dropdown:Show()
+            dropdown:OpenMenu()
+
+            local description = dropdown:GetMenuDescription()
+            if description == nil or not description:HasElements() then
+                return "empty_filter"
+            end
+
+            dropdown:CloseMenu()
+
+            local classDropdown = WardrobeCollectionFrame.ClassDropdown
+            if classDropdown == nil then
+                return "missing_class_dropdown"
+            end
+            classDropdown:Show()
+            classDropdown:OpenMenu()
+
+            local classDescription = classDropdown:GetMenuDescription()
+            if classDescription == nil or not classDescription:HasElements() then
+                return "empty_class"
+            end
+
+            return "ok"
+            "#,
+        )
+        .expect("opening the wardrobe filter dropdown should not error");
+
+    assert_eq!(
+        result, "ok",
+        "Appearances filter and class dropdowns should expose menu rows"
+    );
+}
