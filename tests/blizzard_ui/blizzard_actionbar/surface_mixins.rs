@@ -406,3 +406,205 @@ fn action_bar_mixin_publishes_plan_named_and_source_additional_methods() {
         }
     });
 }
+
+const ACTION_BUTTON_LUA_SITE: &str = "Shared/ActionButton.lua";
+
+/// PLAN names 10 methods as living on `ActionBarButtonMixin /
+/// BaseActionButtonMixin`. Source disagrees on 9: only `UpdateButtonArt`
+/// is on `BaseActionButtonMixin` (lua:1546 stub + `Mainline/ActionButtonOverrides.lua:2`
+/// real impl). The remaining 9 (`OnLoad`, `OnEvent`, `OnEnter`,
+/// `OnLeave`, `UpdateUsable`, `UpdateState`, `UpdateAction`,
+/// `SetTooltip`, `MatchesActiveButtonSpellID`) all live on the sibling
+/// `ActionBarActionButtonMixin` (declared lua:442) — a third mixin PLAN
+/// does not name. The plain script handlers (`OnLoad`, `OnEnter`,
+/// `OnLeave`) on the named mixins use prefixed variants
+/// (`BaseActionButtonMixin_OnLoad` lua:1502, `ActionBarButtonMixin_OnLoad`
+/// lua:1605, etc.) so the chain `ActionBarButtonTemplate ->
+/// ActionButtonTemplate` (`Mainline/ActionButtonTemplate.xml:189` ->
+/// `xml:4`) can compose Mixin OnLoads without name collision.
+const PLAN_NAMED_BUTTON_METHODS: &[&str] = &[
+    "OnLoad",
+    "OnEvent",
+    "OnEnter",
+    "OnLeave",
+    "UpdateUsable",
+    "UpdateState",
+    "UpdateAction",
+    "SetTooltip",
+    "MatchesActiveButtonSpellID",
+    "UpdateButtonArt",
+];
+
+/// The single PLAN-named method that IS on `BaseActionButtonMixin`.
+/// Stub at lua:1546, overridden at `Mainline/ActionButtonOverrides.lua:2`
+/// — the real Mainline body shows/hides `SlotArt`/`SlotBackground` and
+/// switches the normal+pushed atlases between `UI-HUD-ActionBar-IconFrame*`
+/// and `UI-HUD-ActionBar-IconFrame-AddRow*` based on `self.bar.hideBarArt`.
+const BASE_ACTION_BUTTON_PRESENT_PLAN_METHOD: &str = "UpdateButtonArt";
+
+/// Sample of source-additional methods on `BaseActionButtonMixin` that
+/// PLAN omits — pinned so a regression that drops the chain entry
+/// points (`BaseActionButtonMixin_OnLoad` etc.) or the grid-attribute
+/// helpers (`GetShowGrid`/`SetShowGrid`/`UpdateFlyout`) surfaces with a
+/// clear cause.
+const BASE_ACTION_BUTTON_SOURCE_ADDITIONAL_METHODS: &[&str] = &[
+    "BaseActionButtonMixin_OnLoad",
+    "BaseActionButtonMixin_OnEnter",
+    "BaseActionButtonMixin_OnLeave",
+    "BaseActionButtonMixin_OnDragStart",
+    "BaseActionButtonMixin_OnAttributeChanged",
+    "GetShowGrid",
+    "SetShowGrid",
+    "UpdateFlyout",
+];
+
+/// Source-additional methods on `ActionBarButtonMixin` (declared
+/// lua:1603). All four are prefixed-name forwarders that delegate to
+/// both `BaseActionButtonMixin` and `ActionBarActionButtonDerivedMixin`
+/// (lua:1606-1607 etc.) — they exist precisely so the
+/// `ActionBarButtonTemplate` XML can compose two parent mixins without
+/// name collision on `OnLoad`/`OnEnter`/`OnLeave`/`OnDragStart`.
+const ACTION_BAR_BUTTON_SOURCE_ADDITIONAL_METHODS: &[&str] = &[
+    "ActionBarButtonMixin_OnLoad",
+    "ActionBarButtonMixin_OnEnter",
+    "ActionBarButtonMixin_OnLeave",
+    "ActionBarButtonMixin_OnDragStart",
+];
+
+/// Pin `ActionBarButtonMixin` and `BaseActionButtonMixin` method
+/// surfaces. **Spec/source mismatch — PLAN names 10 methods, but only
+/// 1 (`UpdateButtonArt`) actually lives on the named mixins.** The
+/// other 9 live on the sibling `ActionBarActionButtonMixin` (declared
+/// `Shared/ActionButton.lua:442`) — a mixin PLAN does NOT name and
+/// reaches frames via `ActionBarActionButtonDerivedMixin = CreateFromMixins(...)`
+/// at lua:1444 + a function-call apply at lua:1607. Test pins 30
+/// assertions: 2 mixin-table existence + 1 PLAN-named PRESENT on
+/// `BaseActionButtonMixin` (`UpdateButtonArt`) + 9 PLAN-named ABSENT on
+/// `BaseActionButtonMixin` + 10 PLAN-named ABSENT on
+/// `ActionBarButtonMixin` + 8 source-additional functions on
+/// `BaseActionButtonMixin` (`BaseActionButtonMixin_*` chain entries +
+/// `GetShowGrid`/`SetShowGrid`/`UpdateFlyout`).
+#[test]
+fn action_bar_button_and_base_action_button_mixins_pin_plan_named_and_source_additional_methods() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for mixin in ["BaseActionButtonMixin", "ActionBarButtonMixin"] {
+            let mixin_type: String = env
+                .eval(&format!("return type(_G.{mixin})"))
+                .expect("mixin global probe must run cleanly");
+
+            assert_eq!(
+                mixin_type, "table",
+                "Expected `_G.{mixin}` to be a table after `{ROOT}` loads, got \
+                 `{mixin_type}`. Source declares both at `{ACTION_BUTTON_LUA_SITE}` \
+                 (`BaseActionButtonMixin = {{}}` lua:1500, `ActionBarButtonMixin = {{}};` \
+                 lua:1603). Nil reading: source file failed to load, or one global was \
+                 overwritten by a later addon."
+            );
+        }
+
+        let present_method_type: String = env
+            .eval(&format!(
+                "return type(_G.BaseActionButtonMixin.{BASE_ACTION_BUTTON_PRESENT_PLAN_METHOD})"
+            ))
+            .expect("BaseActionButtonMixin.UpdateButtonArt probe must run cleanly");
+
+        assert_eq!(
+            present_method_type, "function",
+            "Expected `BaseActionButtonMixin.{BASE_ACTION_BUTTON_PRESENT_PLAN_METHOD}` to be \
+             a function — declared as a stub at `{ACTION_BUTTON_LUA_SITE}:1546` and \
+             overridden by `Mainline/ActionButtonOverrides.lua:2` (the real Mainline body \
+             switches `UI-HUD-ActionBar-IconFrame*` vs \
+             `UI-HUD-ActionBar-IconFrame-AddRow*` atlases on `SlotArt`/`SlotBackground`). \
+             False reading: stub failed to load (every action button's `:UpdateButtonArt()` \
+             call at `BaseActionButtonMixin_OnLoad` lua:1505 nil-calls), or the override \
+             failed and removed the stub."
+        );
+
+        for method in PLAN_NAMED_BUTTON_METHODS {
+            if *method == BASE_ACTION_BUTTON_PRESENT_PLAN_METHOD {
+                continue;
+            }
+
+            let method_type: String = env
+                .eval(&format!("return type(_G.BaseActionButtonMixin.{method})"))
+                .expect("BaseActionButtonMixin absent-method probe must run cleanly");
+
+            assert_eq!(
+                method_type, "nil",
+                "Expected `BaseActionButtonMixin.{method}` to be nil after `{ROOT}` \
+                 loads, got `{method_type}`. PLAN names this method, but source declares \
+                 it on the sibling `ActionBarActionButtonMixin` (lua:442) — NOT on \
+                 `BaseActionButtonMixin`: OnLoad lua:444, UpdateAction lua:529, \
+                 UpdateState lua:673, UpdateUsable lua:679, MatchesActiveButtonSpellID \
+                 lua:944, OnEvent lua:966, SetTooltip lua:1101, OnEnter lua:1419, OnLeave \
+                 lua:1432. Plain `OnLoad`/`OnEnter`/`OnLeave` on the named mixins use \
+                 prefixed variants (`BaseActionButtonMixin_OnLoad` lua:1502 etc.) so the \
+                 `ActionBarButtonTemplate -> ActionButtonTemplate` chain at \
+                 `Mainline/ActionButtonTemplate.xml:189`->xml:4 composes Mixins without \
+                 name collision. Non-nil reading: source moved the method onto \
+                 `BaseActionButtonMixin`, which would shadow the sibling's contract — \
+                 spec needs review."
+            );
+        }
+
+        for method in PLAN_NAMED_BUTTON_METHODS {
+            let method_type: String = env
+                .eval(&format!("return type(_G.ActionBarButtonMixin.{method})"))
+                .expect("ActionBarButtonMixin absent-method probe must run cleanly");
+
+            assert_eq!(
+                method_type, "nil",
+                "Expected `ActionBarButtonMixin.{method}` to be nil after `{ROOT}` loads, \
+                 got `{method_type}`. PLAN names this method, but `ActionBarButtonMixin` \
+                 (lua:1603) only declares 4 prefixed forwarders \
+                 (`ActionBarButtonMixin_OnLoad`/`OnEnter`/`OnLeave`/`OnDragStart` at \
+                 lua:1605/1610/1615/1620), each delegating to BOTH `BaseActionButtonMixin` \
+                 (the corresponding `BaseActionButtonMixin_*` entry) and \
+                 `ActionBarActionButtonDerivedMixin` (the derived sibling at lua:1444 \
+                 created from `ActionBarActionButtonMixin`). The 10 PLAN-named methods \
+                 reach frames through `ActionBarActionButtonDerivedMixin`, NOT \
+                 `ActionBarButtonMixin` directly. Non-nil reading: source added the \
+                 method on `ActionBarButtonMixin` directly — spec needs review."
+            );
+        }
+
+        for method in BASE_ACTION_BUTTON_SOURCE_ADDITIONAL_METHODS {
+            let method_type: String = env
+                .eval(&format!("return type(_G.BaseActionButtonMixin.{method})"))
+                .expect("BaseActionButtonMixin source-additional probe must run cleanly");
+
+            assert_eq!(
+                method_type, "function",
+                "Expected `BaseActionButtonMixin.{method}` to be a function after \
+                 `{ROOT}` loads, got `{method_type}`. PLAN omits this method, but source \
+                 declares it as a direct `function BaseActionButtonMixin:{method}(...)` \
+                 in `{ACTION_BUTTON_LUA_SITE}` between lua:1502 and 1551. Pinned as a \
+                 tripwire: the prefixed chain entries (`BaseActionButtonMixin_OnLoad` \
+                 etc.) are the actual XML-script targets via the prefixed forwarders on \
+                 the sibling `ActionBarButtonMixin`; dropping any breaks Mixin chain \
+                 composition. The grid-attribute helpers \
+                 (`GetShowGrid`/`SetShowGrid`/`UpdateFlyout`) are referenced by \
+                 `ActionBarMixin:ActionBar_OnLoad` (`Shared/ActionBar.lua:46-54`) and \
+                 the `BaseActionButtonMixin_OnLoad` body (lua:1505-1506)."
+            );
+        }
+
+        for method in ACTION_BAR_BUTTON_SOURCE_ADDITIONAL_METHODS {
+            let method_type: String = env
+                .eval(&format!("return type(_G.ActionBarButtonMixin.{method})"))
+                .expect("ActionBarButtonMixin source-additional probe must run cleanly");
+
+            assert_eq!(
+                method_type, "function",
+                "Expected `ActionBarButtonMixin.{method}` to be a function after \
+                 `{ROOT}` loads, got `{method_type}`. Source declares the prefixed \
+                 forwarder in `{ACTION_BUTTON_LUA_SITE}` between lua:1605 and 1620; \
+                 each delegates to BOTH `BaseActionButtonMixin.BaseActionButtonMixin_*` \
+                 and `ActionBarActionButtonDerivedMixin.ActionBarActionButtonDerivedMixin_*` \
+                 (lua:1606-1607 etc.). Without these forwarders, the \
+                 `ActionBarButtonTemplate` script handlers fail to compose the two \
+                 parent Mixin chains."
+            );
+        }
+    });
+}
