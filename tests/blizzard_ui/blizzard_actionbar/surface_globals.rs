@@ -121,6 +121,17 @@ const PLAN_NAMED_INPUT_GLOBALS: &[&str] = &[
     "ActionBar_PageUp",
     "ActionBar_PageDown",
 ];
+const PLAN_NAMED_HIGHLIGHT_GLOBALS: &[&str] = &[
+    "MarkNewActionHighlight",
+    "ClearNewActionHighlight",
+    "GetNewActionHighlightMark",
+    "ClearOnBarHighlightMarks",
+    "GetOnBarHighlightMark",
+    "UpdateOnBarHighlightMarksBySpell",
+    "UpdateOnBarHighlightMarksByFlyout",
+    "UpdateOnBarHighlightMarksByPetAction",
+    "GetActionButtonForID",
+];
 
 #[test]
 fn action_bar_plan_named_input_globals_are_functions() {
@@ -149,6 +160,134 @@ fn action_bar_plan_named_input_globals_are_functions() {
                  `ActionBar_PageUp`/`_PageDown` (the only two NOT on the gap-fill line) a nil \
                  reading proves the addon's file chunk failed before the declaration line. \
                  Got `type({name}) == \"function\"` returned false."
+            );
+        }
+    });
+}
+
+/// Pin the action-highlight-tracking globals — the surface that
+/// `SpellBookFrame`, `Blizzard_PlayerSpells`, and `Blizzard_TalentUI`
+/// consume to mark "new action" indicators on action bar buttons and to
+/// flag the "this spell is already on a bar" hint while a player is
+/// dragging from spellbook/talent panels.
+///
+/// PLAN.md task: `MarkNewActionHighlight`, `ClearNewActionHighlight`,
+/// `GetNewActionHighlightMark`, `ClearOnBarHighlightMarks`,
+/// `GetOnBarHighlightMark`, `UpdateOnBarHighlightMarksBySpell`,
+/// `UpdateOnBarHighlightMarksByFlyout`,
+/// `UpdateOnBarHighlightMarksByPetAction`, `GetActionButtonForID` are
+/// functions (depends-on: action highlight tracking globals gap).
+///
+/// All 9 PLAN-named globals match the actual Blizzard source verbatim.
+/// Each is declared via the `function <name>(...)` syntax (not `<name> =
+/// function(...)`), which under Lua 5.1 semantics binds to the global
+/// table at file-chunk execution time. Source map (all in
+/// `Shared/ActionButton.lua`):
+///
+/// - `MarkNewActionHighlight(action)` at `lua:27` — single-line setter:
+///   `ACTION_HIGHLIGHT_MARKS[action] = true`. The file-scope
+///   `ACTION_HIGHLIGHT_MARKS = { }` declaration at lua:9 owns the
+///   storage; this function is the public mutator.
+///
+/// - `ClearNewActionHighlight(action, preventIdenticalActionsFromClearing)`
+///   at `lua:31` — clears the mark on `action` and (unless the second
+///   arg is truthy) walks `ACTION_HIGHLIGHT_MARKS` to also clear marks
+///   on every other action whose `(actionType, actionID)` from
+///   `GetActionInfo` matches the cleared one. The cascade exists so
+///   that putting the same spell on two bars only requires one click
+///   to dismiss both highlights.
+///
+/// - `GetNewActionHighlightMark(action)` at `lua:61` — read accessor.
+///   Trampolines through `securecallfunction(SecureGetNewActionHighlightMark, ...)`
+///   (the local at lua:57) so taint from the caller's stack doesn't
+///   leak into the table read. The comment at lua:55 flags
+///   `ACTION_HIGHLIGHT_MARKS`/`ON_BAR_HIGHLIGHT_MARKS` keys as
+///   "vulnerable to taint from talent and spellbook code" —
+///   `securecallfunction` is the runtime defence.
+///
+/// - `ClearOnBarHighlightMarks()` at `lua:65` — re-binds
+///   `ON_BAR_HIGHLIGHT_MARKS` to a fresh empty table (NOT
+///   `wipe(ON_BAR_HIGHLIGHT_MARKS)` — re-binding is intentional so
+///   stale references held by tainted callers don't survive the clear).
+///   Zero-arg.
+///
+/// - `GetOnBarHighlightMark(action)` at `lua:73` — read accessor.
+///   Mirror of `GetNewActionHighlightMark` but against
+///   `ON_BAR_HIGHLIGHT_MARKS`; same `securecallfunction` taint
+///   firewall, same single-arg shape.
+///
+/// - `UpdateOnBarHighlightMarksBySpell(spellID)` at `lua:85` — calls
+///   `C_ActionBar.FindSpellActionButtons(spellID)` to resolve the bar
+///   slots that currently hold the spell, then dispatches to the
+///   file-local `UpdateOnBarHighlightMarks` (lua:77) which `tInvert`s
+///   the result so `ON_BAR_HIGHLIGHT_MARKS[slot] = true` for each
+///   matching slot. Falls through to `ClearOnBarHighlightMarks()` when
+///   no buttons match.
+///
+/// - `UpdateOnBarHighlightMarksByFlyout(flyoutID)` at `lua:89` — same
+///   shape as the spell variant but probes `FindFlyoutActionButtons`
+///   for flyout-button slots (the master flyout button, e.g. for
+///   mage portals or hunter pet specials).
+///
+/// - `UpdateOnBarHighlightMarksByPetAction(petAction)` at `lua:93` —
+///   same shape, `FindPetActionButtons`. The three Update*By* variants
+///   are deliberately thin trampolines into one shared
+///   `UpdateOnBarHighlightMarks` helper — keeping the public surface
+///   matched to the three different action-source kinds while letting
+///   the storage re-write logic live in one place.
+///
+/// - `GetActionButtonForID(id)` at `lua:97` — the keybind dispatcher
+///   uses this to map an action-button id (1-12) to a frame. Branches
+///   on `OverrideActionBar:IsShown()`: when the override bar is up
+///   (vehicle / possess / temporary shapeshift), returns
+///   `_G["OverrideActionBarButton"..id]` (or nil when `id >
+///   NUM_OVERRIDE_BUTTONS`); otherwise returns
+///   `_G["ActionButton"..id]`. A regression on this function would
+///   silently break every keybind on the override bar.
+///
+/// **Note on the gap dependency.** PLAN.md line 94 ("Implement action
+/// highlight tracking globals ...") is checked off — the simulator's
+/// `runtime_surface_bootstrap.lua` / Rust env-init pre-publishes ALL
+/// 9 of these globals BEFORE any addon loads. The Blizzard source
+/// then re-declares them at file scope (lines 27/31/61/65/73/85/89/93/97
+/// in `Shared/ActionButton.lua`), overwriting the simulator's
+/// pre-published versions. The post-load contract is therefore a
+/// two-way pin: either the simulator's pre-publish OR the addon's
+/// source declaration must result in a function. Unlike the input-
+/// globals batch above, this batch has NO PLAN-only globals — every
+/// entry is on PLAN.md:94, so a nil reading on any of them proves the
+/// gap-fill regressed AND the addon's file-scope declaration didn't
+/// run.
+#[test]
+fn action_bar_plan_named_highlight_tracking_globals_are_functions() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for name in PLAN_NAMED_HIGHLIGHT_GLOBALS {
+            let is_function = env
+                .eval::<bool>(&format!(r#"return type({name}) == "function""#))
+                .expect("file-scope global type probe must run cleanly");
+
+            assert!(
+                is_function,
+                "Global `{name}` MUST be a function after the startup-shape harness loads \
+                 `Blizzard_ActionBar`. Each entry in `PLAN_NAMED_HIGHLIGHT_GLOBALS` is declared \
+                 via `function <name>(...)` syntax in `Shared/ActionButton.lua` \
+                 (lines 27/31/61/65/73/85/89/93/97). A non-function reading proves either (a) the \
+                 file chunk failed before reaching the declaration (load.rs's \
+                 `action_bar_load_emits_no_lane_specific_lua_errors` would also fail in that case \
+                 — multi-test failure mode), OR (b) Blizzard re-shaped the highlight-tracking \
+                 surface — e.g. moved the global setters/getters onto an `ActionBarHighlightMixin` \
+                 frame mixin instead of top-level globals, which would break every \
+                 SpellBookFrame / Blizzard_PlayerSpells / Blizzard_TalentUI consumer that names \
+                 these globals directly), OR (c) the simulator's gap-fill pre-publish at \
+                 PLAN.md:94 regressed AND the addon's source-side declaration didn't run. Every \
+                 one of these 9 globals is on the gap-fill line, so a nil reading is unambiguous \
+                 — both publishers failed. Storage globals `ACTION_HIGHLIGHT_MARKS` (lua:9) and \
+                 `ON_BAR_HIGHLIGHT_MARKS` (lua:10) are NOT pinned by this test (separate \
+                 surface_globals task) but a regression that wiped them would be observable here \
+                 indirectly: `ClearOnBarHighlightMarks()` re-binds the global; if the file-scope \
+                 declaration didn't run, the re-bind would create an out-of-band global that \
+                 readers of the original file-scope name wouldn't see. Got `type({name}) == \
+                 \"function\"` returned false."
             );
         }
     });
