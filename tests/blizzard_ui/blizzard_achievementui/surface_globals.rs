@@ -87,6 +87,23 @@ const PLAN_NAMED_COMPARISON_ABSENT: &[&str] = &[
     "AchievementFrameComparison_Update",
     "AchievementFrameComparison_OnInspectReady",
 ];
+/// PLAN-named achievement-row globals that DO exist verbatim in source.
+const PLAN_NAMED_ACHIEVEMENT_ROW_PRESENT: &[&str] = &["AchievementObjectives_DisplayCriteria"];
+/// PLAN-named achievement-row globals that do NOT exist in source — tripwires.
+/// `AchievementButton_OnClick` and `AchievementButton_OnEnter` were never
+/// declared as standalone globals — the XML `AchievementTemplate` virtual
+/// frame at line 733 uses `mixin="AchievementTemplateMixin"` and binds
+/// `<OnClick method="OnClick"/>` / `<OnEnter method="OnEnter"/>` (lines
+/// 880-881) which dispatches to `AchievementTemplateMixin:OnClick` (1089)
+/// and `:OnEnter` (1093) on the frame instance, not to a top-level
+/// function. `AchievementButton_OnDoubleClick` does not exist at all —
+/// no `OnDoubleClick` script binding appears anywhere in the addon's Lua
+/// or XML, so achievement rows have no double-click behaviour to pin.
+const PLAN_NAMED_ACHIEVEMENT_ROW_ABSENT: &[&str] = &[
+    "AchievementButton_OnClick",
+    "AchievementButton_OnEnter",
+    "AchievementButton_OnDoubleClick",
+];
 
 #[test]
 fn achievement_frame_plan_named_globals_are_functions() {
@@ -355,6 +372,113 @@ fn achievement_frame_comparison_plan_named_globals_split_presence_absence() {
                  prove Blizzard has now factored the inline arm into a top-level function, at \
                  which point the spec needs to be updated to point at the new symbol's actual \
                  contract. Got `type({name}) == \"{actual_type}\"`, expected \"nil\"."
+            );
+        }
+    });
+}
+
+/// Pin the achievement-row click/enter/criteria-render globals — split
+/// presence/absence.
+///
+/// **Spec/source mismatch.** The PLAN line names four globals
+/// (`AchievementButton_OnClick`, `_OnEnter`, `_OnDoubleClick`,
+/// `AchievementObjectives_DisplayCriteria`) but only
+/// `AchievementObjectives_DisplayCriteria` is declared at the file
+/// scope. The three `AchievementButton_*` symbols never existed as
+/// top-level globals — Blizzard refactored the per-row interaction
+/// surface onto `AchievementTemplateMixin` years ago, and the XML
+/// `AchievementTemplate` virtual frame at line 733 uses
+/// `mixin="AchievementTemplateMixin"` plus `<OnClick method="OnClick"/>`
+/// / `<OnEnter method="OnEnter"/>` (lines 880-881) to dispatch to the
+/// mixin instance rather than a global handler. No double-click handler
+/// is wired at all — neither the Lua nor the XML mention any
+/// `OnDoubleClick` script in the achievement UI lane.
+///
+/// We therefore split the test along the spec/source boundary:
+///
+/// **Presence tripwire** (`PLAN_NAMED_ACHIEVEMENT_ROW_PRESENT`):
+/// - `AchievementObjectives_DisplayCriteria` at line 1861 — takes
+///   `(objectivesFrame, id)` and is the criteria-row layout driver
+///   invoked when a row expands. Early-returns on `not id`. Reads
+///   `GetAchievementGuildRep(id)` for the rep-requirement banner
+///   (writes `objectivesFrame.RepCriteria` text/colour and calls
+///   `AddExtraCriteriaRow()` to push subsequent rows down). Continues
+///   on to walk the meta-criteria list and the regular criteria list,
+///   accumulating `numMetaRows` / `numCriteriaRows` /
+///   `numExtraCriteriaRows` for layout sizing. Three local counters
+///   plus the `yOffset` accumulator drive the per-row layout — the
+///   function is the bridge between the achievement-data API and the
+///   ScrollBox button's visible criteria block.
+///
+/// **Absence tripwires** (`PLAN_NAMED_ACHIEVEMENT_ROW_ABSENT`):
+/// - `AchievementButton_OnClick` — never declared. The actual handler
+///   is `AchievementTemplateMixin:OnClick(buttonName, down)` at line
+///   1089 which delegates to `self:ProcessClick(buttonName, down)`.
+///   The XML at 880 binds via `<OnClick method="OnClick"/>` so the
+///   dispatch goes through the mixin namespace, not the global table.
+/// - `AchievementButton_OnEnter` — never declared. Actual handler is
+///   `AchievementTemplateMixin:OnEnter` at line 1093 which shows the
+///   `Highlight` child and short-circuits when `self.id` is nil
+///   (the empty-row case during ScrollBox button construction). XML
+///   binds via `<OnEnter method="OnEnter"/>` at line 881.
+/// - `AchievementButton_OnDoubleClick` — never declared **and there
+///   is no double-click handler anywhere in the addon**. A grep
+///   across both Mainline/Blizzard_AchievementUI.lua AND .xml for
+///   `OnDoubleClick` returns zero hits. This is a stronger tripwire
+///   than the OnClick/OnEnter ones — those have a clear mixin-method
+///   replacement, but a true reading on this name would prove
+///   Blizzard added a brand new behaviour to the row, not just
+///   refactored an existing one.
+///
+/// Asserting both `type(present) == "function"` AND `type(absent) ==
+/// "nil"` makes the test a two-way contract pin: it fails loudly if
+/// `_DisplayCriteria` is removed/renamed AND if any of the three
+/// PLAN-anticipated symbols suddenly appears (which would be the
+/// signal to re-read the new structure and update the spec).
+#[test]
+fn achievement_row_plan_named_globals_split_presence_absence() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for name in PLAN_NAMED_ACHIEVEMENT_ROW_PRESENT {
+            let probe = format!(r#"return type({name})"#);
+            let actual_type = env
+                .eval::<String>(&probe)
+                .expect("file-scope global type probe must run cleanly");
+
+            assert_eq!(
+                actual_type, "function",
+                "Global `{name}` MUST be a function after the smoke-shape harness loads \
+                 `Blizzard_AchievementUI`. This is the only PLAN-named achievement-row global \
+                 that actually exists at the file scope in `Mainline/Blizzard_AchievementUI.lua` \
+                 (line 1861). A non-function reading proves either (a) the file chunk failed \
+                 before reaching the declaration (load.rs's \
+                 `achievement_ui_load_emits_no_lane_specific_lua_errors` would also fail in that \
+                 case — multi-test failure mode), OR (b) Blizzard re-shaped \
+                 `_DisplayCriteria` into a method on `AchievementTemplateMixin` (the same \
+                 refactor that already absorbed OnClick/OnEnter) / removed it / renamed it. \
+                 Got `type({name}) == \"{actual_type}\"`."
+            );
+        }
+
+        for name in PLAN_NAMED_ACHIEVEMENT_ROW_ABSENT {
+            let probe = format!(r#"return type({name})"#);
+            let actual_type = env
+                .eval::<String>(&probe)
+                .expect("file-scope global type probe must run cleanly");
+
+            assert_eq!(
+                actual_type, "nil",
+                "Global `{name}` MUST be nil after the smoke-shape harness loads \
+                 `Blizzard_AchievementUI`. The PLAN line names this symbol but it does NOT exist \
+                 in `Mainline/Blizzard_AchievementUI.lua` — see the module doc comment for \
+                 details on which actual symbols cover the same role \
+                 (`AchievementTemplateMixin:OnClick` line 1089 and `:OnEnter` line 1093 for the \
+                 click/enter roles, dispatched from XML via `<OnClick method=\"OnClick\"/>` / \
+                 `<OnEnter method=\"OnEnter\"/>` at lines 880-881; NO double-click handler \
+                 anywhere in the addon's Lua or XML). A non-nil reading here is itself \
+                 meaningful: for OnClick/OnEnter it would prove Blizzard regressed the mixin \
+                 refactor back to a top-level global; for OnDoubleClick it would prove Blizzard \
+                 added brand-new double-click behaviour to achievement rows that the spec \
+                 must now describe. Got `type({name}) == \"{actual_type}\"`, expected \"nil\"."
             );
         }
     });

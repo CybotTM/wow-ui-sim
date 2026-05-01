@@ -203,10 +203,20 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
         frame.texture = path;
         frame.texture_file_data_id = file_data_id;
         frame.color_texture = None;
+        clear_atlas_owned_tex_coords(frame);
         frame.atlas = None;
         frame.atlas_tex_coords = None;
     }
     Ok(0)
+}
+
+fn clear_atlas_owned_tex_coords(frame: &mut crate::widget::Frame) {
+    if frame.atlas.is_none() {
+        return;
+    }
+    if frame.tex_coords == frame.atlas_tex_coords {
+        frame.tex_coords = None;
+    }
 }
 
 fn resolve_texture_value(state: &LuaState, value: Val) -> Option<(Option<String>, Option<i64>)> {

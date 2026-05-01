@@ -96,6 +96,52 @@ fn test_set_texture_file_data_id_resolves_path_and_round_trips() {
     );
 }
 
+#[test]
+fn test_set_texture_after_atlas_resets_atlas_tex_coords() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "TexAfterAtlas");
+    env.exec(&format!(
+        r#"
+        {tex}:SetAtlas("checkbox-minimal")
+        {tex}:SetTexture(134583)
+        "#
+    ))
+    .unwrap();
+
+    let (left, right, top, bottom): (f64, f64, f64, f64) =
+        env.eval(&format!("return {tex}:GetTexCoord()")).unwrap();
+    assert_eq!(
+        (left, right, top, bottom),
+        (0.0, 1.0, 0.0, 1.0),
+        "SetTexture should render a full file texture after replacing an atlas"
+    );
+}
+
+#[test]
+fn test_set_texture_after_atlas_preserves_custom_tex_coords() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "TexAfterAtlasCustomCoords");
+    let coords_preserved: bool = env
+        .eval(&format!(
+            r#"
+        {tex}:SetAtlas("checkbox-minimal")
+        {tex}:SetTexCoord(0.25, 0.75, 0.125, 0.875)
+        local beforeLeft, beforeRight, beforeTop, beforeBottom = {tex}:GetTexCoord()
+        {tex}:SetTexture(134583)
+        local afterLeft, afterRight, afterTop, afterBottom = {tex}:GetTexCoord()
+        return beforeLeft == afterLeft
+            and beforeRight == afterRight
+            and beforeTop == afterTop
+            and beforeBottom == afterBottom
+        "#
+        ))
+        .unwrap();
+    assert!(
+        coords_preserved,
+        "SetTexture should preserve caller-provided tex coords"
+    );
+}
+
 // ============================================================================
 // SetVertexColor / GetVertexColor
 // ============================================================================
