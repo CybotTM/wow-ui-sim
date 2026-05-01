@@ -27,3 +27,6 @@ mod behavior_toggle;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_progress_bar.rs"]
 mod behavior_progress_bar;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_summary_update.rs"]
+mod behavior_summary_update;
