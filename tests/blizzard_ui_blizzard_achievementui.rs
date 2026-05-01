@@ -69,3 +69,6 @@ mod behavior_search_filter;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_guild_view_toggle.rs"]
 mod behavior_guild_view_toggle;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_guild_member_tooltip.rs"]
+mod behavior_guild_member_tooltip;
