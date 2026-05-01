@@ -304,3 +304,17 @@ fn encounter_journal_search_surface_is_available_and_empty() {
     )
     .unwrap();
 }
+
+#[test]
+fn get_section_info_matches_section_info_shape() {
+    let env = env();
+    env.exec(
+        r#"
+        local info = C_EncounterJournal.GetSectionInfo(820)
+        assert(type(info.abilityIcon) == "number", "section info should expose abilityIcon")
+        assert(type(info.startsOpen) == "boolean", "section info should expose startsOpen")
+        assert(info.iconFlags == nil, "section icon flags belong to GetSectionIconFlags")
+        "#,
+    )
+    .unwrap();
+}

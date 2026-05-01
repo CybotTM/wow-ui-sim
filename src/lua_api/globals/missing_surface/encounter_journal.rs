@@ -173,7 +173,6 @@ fn build_section_info_table(state: &mut LuaState, row: &data::Section) -> Val {
     set_section_text_fields(state, table, row);
     set_section_relationship_fields(state, table, row);
     set_section_visual_fields(state, table, row);
-    table_set(state, table, "iconFlags", Val::Num(row.icon_flags as f64));
     table_set(state, table, "filteredByDifficulty", Val::Bool(false));
     table_set(state, table, "startsOpen", Val::Bool(false));
     table
@@ -727,10 +726,6 @@ fn ej_is_search_finished(state: &mut LuaState) -> LuaResult<u32> {
 fn ej_handle_link_path(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 fn push_encounter_tuple(state: &mut LuaState, row: &data::Encounter) {
     let name = create_string(state, row.name);

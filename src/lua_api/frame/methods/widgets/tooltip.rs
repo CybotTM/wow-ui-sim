@@ -1151,20 +1151,7 @@ pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     let owner_id = frame_id_from_stack(state, 2).ok();
     let anchor_kind = {
         let anchor_kind = opt_string(state, 3).unwrap_or_else(|| "ANCHOR_NONE".to_string());
-        if matches!(
-            anchor_kind.as_str(),
-            "ANCHOR_NONE"
-                | "ANCHOR_PRESERVE"
-                | "ANCHOR_RIGHT"
-                | "ANCHOR_LEFT"
-                | "ANCHOR_TOP"
-                | "ANCHOR_BOTTOM"
-                | "ANCHOR_TOPRIGHT"
-                | "ANCHOR_TOPLEFT"
-                | "ANCHOR_BOTTOMRIGHT"
-                | "ANCHOR_BOTTOMLEFT"
-                | "ANCHOR_CURSOR"
-        ) {
+        if is_valid_tooltip_anchor(&anchor_kind) {
             anchor_kind
         } else {
             let _ = collect_lua_error(
@@ -1256,7 +1243,7 @@ fn apply_tooltip_anchor(
         return;
     }
     tooltip.anchors.clear();
-    if anchor_kind == "ANCHOR_CURSOR" {
+    if is_cursor_tooltip_anchor(anchor_kind) {
         if let Some((mx, my)) = mouse_position {
             tooltip
                 .anchors
@@ -1351,20 +1338,7 @@ pub(super) fn set_anchor_type(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
     let anchor_kind = {
         let anchor_kind = opt_string(state, 2).unwrap_or_else(|| "ANCHOR_NONE".to_string());
-        if matches!(
-            anchor_kind.as_str(),
-            "ANCHOR_NONE"
-                | "ANCHOR_PRESERVE"
-                | "ANCHOR_RIGHT"
-                | "ANCHOR_LEFT"
-                | "ANCHOR_TOP"
-                | "ANCHOR_BOTTOM"
-                | "ANCHOR_TOPRIGHT"
-                | "ANCHOR_TOPLEFT"
-                | "ANCHOR_BOTTOMRIGHT"
-                | "ANCHOR_BOTTOMLEFT"
-                | "ANCHOR_CURSOR"
-        ) {
+        if is_valid_tooltip_anchor(&anchor_kind) {
             anchor_kind
         } else {
             let _ = collect_lua_error(
@@ -1406,6 +1380,32 @@ pub(super) fn set_anchor_type(state: &mut LuaState) -> LuaResult<u32> {
     let anchor_value = create_string(state, &anchor_kind);
     table_set(state, fields, "anchor", anchor_value);
     Ok(0)
+}
+
+fn is_valid_tooltip_anchor(anchor_kind: &str) -> bool {
+    matches!(
+        anchor_kind,
+        "ANCHOR_NONE"
+            | "ANCHOR_PRESERVE"
+            | "ANCHOR_RIGHT"
+            | "ANCHOR_LEFT"
+            | "ANCHOR_TOP"
+            | "ANCHOR_BOTTOM"
+            | "ANCHOR_TOPRIGHT"
+            | "ANCHOR_TOPLEFT"
+            | "ANCHOR_BOTTOMRIGHT"
+            | "ANCHOR_BOTTOMLEFT"
+            | "ANCHOR_CURSOR"
+            | "ANCHOR_CURSOR_RIGHT"
+            | "ANCHOR_CURSOR_LEFT"
+    )
+}
+
+fn is_cursor_tooltip_anchor(anchor_kind: &str) -> bool {
+    matches!(
+        anchor_kind,
+        "ANCHOR_CURSOR" | "ANCHOR_CURSOR_RIGHT" | "ANCHOR_CURSOR_LEFT"
+    )
 }
 
 pub(super) fn copy_tooltip(state: &mut LuaState) -> LuaResult<u32> {

@@ -3345,7 +3345,12 @@ impl SimState {
     fn collect_cursor_tooltip_positions(&self, mx: f32, my: f32) -> Vec<(u64, Anchor)> {
         self.tooltips
             .iter()
-            .filter(|(_, td)| td.anchor_type == "ANCHOR_CURSOR")
+            .filter(|(_, td)| {
+                matches!(
+                    td.anchor_type.as_str(),
+                    "ANCHOR_CURSOR" | "ANCHOR_CURSOR_RIGHT" | "ANCHOR_CURSOR_LEFT"
+                )
+            })
             .map(|(&tooltip_id, td)| {
                 (
                     tooltip_id,
