@@ -21,3 +21,6 @@ mod surface_mixins;
 
 #[path = "blizzard_ui/blizzard_actionbar/surface_events.rs"]
 mod surface_events;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_main_bar_buttons.rs"]
+mod behavior_main_bar_buttons;
