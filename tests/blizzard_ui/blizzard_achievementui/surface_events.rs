@@ -202,3 +202,110 @@ fn achievement_frame_achievements_event_registration_split_presence_absence() {
         );
     });
 }
+
+const CATEGORIES_FRAME_NAME: &str = "AchievementFrameCategories";
+const CATEGORIES_FRAME_XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:1729";
+const CATEGORIES_ONLOAD_LUA_SITE: &str = "Mainline/Blizzard_AchievementUI.lua:584";
+const CATEGORIES_REGISTERED_EVENT: &str = "ADDON_LOADED";
+
+/// Pin `AchievementFrameCategories`'s event-registration surface after
+/// OnLoad runs.
+///
+/// **No spec/source mismatch on this one.** PLAN claim and source agree:
+/// `_OnLoad` at `Mainline/Blizzard_AchievementUI.lua:584-593` registers
+/// exactly `ADDON_LOADED` (line 585, single statement) and then sets up
+/// the scrollbox view. The XML at
+/// `Mainline/Blizzard_AchievementUI.xml:1729-1738` declares the frame
+/// with both `parentKey="Categories"` AND `name="$parentCategories"`,
+/// so it's reachable as `_G.AchievementFrameCategories` AND
+/// `AchievementFrame.Categories`.
+///
+/// Notable structural fact captured as a tripwire: the XML
+/// `<Scripts>` block at lines 1735-1738 wires only `<OnLoad>` and
+/// `<OnShow>` — there is **no `<OnEvent>` script**. So the
+/// `ADDON_LOADED` registration is dispatched against a nil OnEvent
+/// handler. This may be intentional (Blizzard registers but never
+/// processes the event on this frame, perhaps for a future hook) or a
+/// dead leftover. Either way, a future XML edit adding an OnEvent
+/// script would change the dispatch behavior, which is what the
+/// `GetScript("OnEvent") == nil` tripwire catches.
+///
+/// Three assertions:
+///
+/// 1. `type(_G.AchievementFrameCategories) == "table"` — frame exists,
+///    resolved from `name="$parentCategories"`.
+/// 2. `IsEventRegistered("ADDON_LOADED") == true` — OnLoad ran and
+///    registered the event.
+/// 3. `type(:GetScript("OnEvent")) == "nil"` — tripwire for a future
+///    XML change adding an OnEvent script (which would mean Blizzard
+///    started processing the registered event for the first time).
+#[test]
+fn achievement_frame_categories_registers_addon_loaded_after_onload() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let frame_type: String = env
+            .eval(&format!("return type(_G[{CATEGORIES_FRAME_NAME:?}])"))
+            .expect("AchievementFrameCategories global probe must run cleanly");
+
+        assert_eq!(
+            frame_type, "table",
+            "Expected `_G[{CATEGORIES_FRAME_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{frame_type}`. The XML at `{CATEGORIES_FRAME_XML_SITE}` \
+             declares this frame as `<Frame parentKey=\"Categories\" \
+             name=\"$parentCategories\" inherits=\"AchivementGoldBorderBackdrop\">` \
+             nested inside `AchievementFrame`'s `<Frames>` block, which resolves the \
+             name token to `AchievementFrameCategories` and registers it in `_G`. A \
+             nil reading means either the XML changed the name token, the frame was \
+             removed, or the file chunk failed before reaching the declaration. The \
+             registration assertion below depends on this frame existing."
+        );
+
+        let registered: bool = env
+            .eval(&format!(
+                "return _G[{CATEGORIES_FRAME_NAME:?}]:IsEventRegistered({CATEGORIES_REGISTERED_EVENT:?})"
+            ))
+            .unwrap_or_else(|err| {
+                panic!(
+                    "`{CATEGORIES_FRAME_NAME}:IsEventRegistered({CATEGORIES_REGISTERED_EVENT:?})` raised: {err}"
+                )
+            });
+
+        assert!(
+            registered,
+            "Expected `{CATEGORIES_FRAME_NAME}:IsEventRegistered({CATEGORIES_REGISTERED_EVENT:?})` \
+             to be true after `{ROOT}` loads. The Lua source at \
+             `{CATEGORIES_ONLOAD_LUA_SITE}` declares \
+             `function AchievementFrameCategories_OnLoad (self)` and its first \
+             statement (line 585) is `self:RegisterEvent(\"ADDON_LOADED\")`. The \
+             OnLoad handler is wired by the XML `<OnLoad inherit=\"prepend\" \
+             function=\"AchievementFrameCategories_OnLoad\"/>` element at \
+             `{CATEGORIES_FRAME_XML_SITE}` line 1736 and runs at frame-creation \
+             time during the smoke load (the `inherit=\"prepend\"` attribute \
+             prepends the inherited handler — `AchievementFrameAchievementsBackdrop_OnLoad` \
+             from `AchivementGoldBorderBackdrop` at xml:10 — but does not stop the \
+             instance handler from running). A false reading means either OnLoad \
+             did not run (regression in the loader's OnLoad dispatch during XML \
+             parse) or the RegisterEvent call was removed from OnLoad."
+        );
+
+        let onevent_script: String = env
+            .eval(&format!(
+                "return type(_G[{CATEGORIES_FRAME_NAME:?}]:GetScript(\"OnEvent\"))"
+            ))
+            .expect("`GetScript(\"OnEvent\")` must run cleanly on AchievementFrameCategories");
+
+        assert_eq!(
+            onevent_script, "nil",
+            "Expected `{CATEGORIES_FRAME_NAME}:GetScript(\"OnEvent\")` to be nil \
+             after `{ROOT}` loads, got `{onevent_script}`. The XML `<Scripts>` block \
+             at `{CATEGORIES_FRAME_XML_SITE}` lines 1735-1738 wires only `<OnLoad>` \
+             and `<OnShow>` — there is no `<OnEvent>` script. The registered \
+             ADDON_LOADED event is therefore dispatched against a nil OnEvent \
+             handler, which the dispatch loop silently ignores. A non-nil reading \
+             means a future XML edit added an OnEvent script (or an inherited \
+             template — `AchivementGoldBorderBackdrop` at xml:4 inheriting \
+             `TooltipBackdropTemplate` — started providing one), at which point \
+             Blizzard's started processing the registered event for the first time \
+             and the spec needs updating to describe what the OnEvent dispatch does."
+        );
+    });
+}
