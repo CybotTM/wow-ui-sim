@@ -166,6 +166,21 @@ fn sync_frame_visibility(state: &mut LuaState, frame_name: &str, visible: bool) 
     st.set_frame_visible(frame_id, visible);
 }
 
+fn values_match(left: Val, right: Val) -> bool {
+    match (left, right) {
+        (Val::Nil, Val::Nil) => true,
+        (Val::Bool(left), Val::Bool(right)) => left == right,
+        (Val::Num(left), Val::Num(right)) => left == right,
+        (Val::Str(left), Val::Str(right)) => left == right,
+        (Val::Table(left), Val::Table(right)) => left == right,
+        (Val::Function(left), Val::Function(right)) => left == right,
+        (Val::Userdata(left), Val::Userdata(right)) => left == right,
+        (Val::Thread(left), Val::Thread(right)) => left == right,
+        (Val::LightUserdata(left), Val::LightUserdata(right)) => left == right,
+        _ => false,
+    }
+}
+
 macro_rules! define_toggle {
     ($fn_name:ident, $panel:literal, $frame:literal) => {
         fn $fn_name(state: &mut LuaState) -> LuaResult<u32> {
@@ -210,13 +225,71 @@ fn toggle_loadable_panel(
     Ok(0)
 }
 
+fn collections_journal_is_shown(state: &mut LuaState) -> bool {
+    borrow_state(state)
+        .ok()
+        .and_then(|st| {
+            st.widgets
+                .get_id_by_name("CollectionsJournal")
+                .and_then(|frame_id| st.widgets.get(frame_id).map(|frame| frame.visible))
+        })
+        .unwrap_or(false)
+}
+
+fn collections_journal_tab_matches(
+    state: &mut LuaState,
+    frame: Val,
+    tab_index: Val,
+) -> LuaResult<bool> {
+    if matches!(tab_index, Val::Nil) {
+        return Ok(true);
+    }
+
+    let global = Val::Table(state.global);
+    let get_selected_tab = table_get(state, global, "PanelTemplates_GetSelectedTab");
+    let Val::Function(_) = get_selected_tab else {
+        return Ok(false);
+    };
+
+    let selected_tab = call_function_state(state, get_selected_tab, &[frame])?;
+    Ok(values_match(selected_tab, tab_index))
+}
+
+fn try_set_collections_journal_shown(state: &mut LuaState, tab_index: Val) -> LuaResult<bool> {
+    let global = Val::Table(state.global);
+    let frame = table_get(state, global, "CollectionsJournal");
+    if matches!(frame, Val::Nil) {
+        return Ok(false);
+    }
+
+    let set_shown = table_get(state, global, "SetCollectionsJournalShown");
+    let Val::Function(_) = set_shown else {
+        return Ok(false);
+    };
+
+    let tab_matches = collections_journal_tab_matches(state, frame, tab_index)?;
+    let shown = !(collections_journal_is_shown(state) && tab_matches);
+    let args = if matches!(tab_index, Val::Nil) {
+        vec![Val::Bool(shown)]
+    } else {
+        vec![Val::Bool(shown), tab_index]
+    };
+    call_function_state(state, set_shown, &args)?;
+    sync_open_panel_membership(state, "CollectionsJournal", "CollectionsJournal");
+    Ok(true)
+}
+
 fn toggle_collections_journal(state: &mut LuaState) -> LuaResult<u32> {
-    toggle_loadable_panel(
-        state,
-        "Blizzard_Collections",
-        "CollectionsJournal",
-        "CollectionsJournal",
-    )
+    let tab_index = state.stack_get(state.base);
+    let global = Val::Table(state.global);
+    if matches!(table_get(state, global, "CollectionsJournal"), Val::Nil) {
+        let _ = try_load_addon(state, "Blizzard_Collections")?;
+    }
+    if try_set_collections_journal_shown(state, tab_index)? {
+        return Ok(0);
+    }
+    toggle_panel(state, "CollectionsJournal", "CollectionsJournal")?;
+    Ok(0)
 }
 
 fn toggle_encounter_journal(state: &mut LuaState) -> LuaResult<u32> {
