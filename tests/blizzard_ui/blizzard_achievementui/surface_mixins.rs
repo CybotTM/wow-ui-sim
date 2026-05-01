@@ -1,8 +1,9 @@
 //! Mixin method surface for the `Blizzard_AchievementUI` lane.
 //!
-//! PLAN.md task: pin that `AchievementCategoryTemplateMixin` exposes
-//! `OnLoad`, `OnClick`, `Init`, `UpdateSelectionState` as Lua functions
-//! on the mixin table.
+//! PLAN.md tasks: pin the method shape of every PLAN-named mixin in the
+//! `Blizzard_AchievementUI` lane. Each mixin gets one test that probes the
+//! mixin global is a table, then iterates a const tuple of PLAN-named
+//! method names and asserts each is a Lua function on the table.
 //!
 //! **No spec/source mismatch.** Source declares all four methods at file
 //! scope on `AchievementCategoryTemplateMixin`
@@ -71,6 +72,17 @@ const CATEGORY_TEMPLATE_PLAN_METHODS: &[(&str, u32)] = &[
     ("UpdateSelectionState", 563),
 ];
 
+const CATEGORY_BUTTON_MIXIN_NAME: &str = "AchievementCategoryTemplateButtonMixin";
+const CATEGORY_BUTTON_LUA_SITE: &str = "Mainline/Blizzard_AchievementUI.lua:571";
+const CATEGORY_BUTTON_XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:625";
+
+/// PLAN-named methods on `AchievementCategoryTemplateButtonMixin`. Each
+/// tuple is `(method_name, declared_at_line_number)`. The button mixin is
+/// a sibling of `AchievementCategoryTemplateMixin` — bound to the inner
+/// `<Button parentKey="Button">` child of the `AchievementCategoryTemplate`
+/// virtual Frame at xml:625 — and only carries the tooltip wiring.
+const CATEGORY_BUTTON_PLAN_METHODS: &[(&str, u32)] = &[("OnEnter", 573), ("OnLeave", 579)];
+
 /// Pin every PLAN-named method on `AchievementCategoryTemplateMixin` as a
 /// Lua function on the mixin table.
 ///
@@ -132,6 +144,82 @@ fn achievement_category_template_mixin_exposes_plan_named_methods() {
                  `AchievementFrameCategories_OnCategoryClicked(self)` — a missing \
                  method here means category buttons fail to populate or fail to \
                  react to clicks at runtime."
+            );
+        }
+    });
+}
+
+/// Pin every PLAN-named method on `AchievementCategoryTemplateButtonMixin`
+/// as a Lua function on the mixin table.
+///
+/// **No spec/source mismatch.** Source declares
+/// `AchievementCategoryTemplateButtonMixin = {};` at file scope at
+/// `Mainline/Blizzard_AchievementUI.lua:571`, then attaches both PLAN-named
+/// methods immediately below: `:OnEnter()` at line 573 (calls
+/// `self.showTooltipFunc(self)` if the parent `Init` wired one — the
+/// feat-of-strength / status-bar tooltip variant), and `:OnLeave()` at
+/// line 579 (`GameTooltip:SetMinimumWidth(0, false); GameTooltip:Hide()`).
+///
+/// The mixin is bound to the inner
+/// `<Button parentKey="Button" mixin="AchievementCategoryTemplateButtonMixin">`
+/// at `Mainline/Blizzard_AchievementUI.xml:625`, nested inside the
+/// `<Frame name="AchievementCategoryTemplate">` virtual frame at xml:622.
+/// So the parent-mixin `:OnLoad` (lua:498) wires the Button's `OnClick`
+/// script and the Button mixin handles `:OnEnter`/`:OnLeave` — together
+/// they form the click+tooltip surface for every category row in the
+/// scrollbox. A regression on either method would surface as a runtime
+/// nil-call error the moment a player hovers a category button (showing
+/// stale tooltip from a previous hover, or never hiding it on leave).
+///
+/// Three assertions: one precondition probe that the mixin global itself
+/// exists, then one per PLAN-named method (2) confirming
+/// `type(AchievementCategoryTemplateButtonMixin.<method>) == "function"`.
+#[test]
+fn achievement_category_template_button_mixin_exposes_plan_named_methods() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let mixin_type: String = env
+            .eval(&format!("return type(_G[{CATEGORY_BUTTON_MIXIN_NAME:?}])"))
+            .expect("AchievementCategoryTemplateButtonMixin global probe must run cleanly");
+
+        assert_eq!(
+            mixin_type, "table",
+            "Expected `_G[{CATEGORY_BUTTON_MIXIN_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{mixin_type}`. The Lua source at `{CATEGORY_BUTTON_LUA_SITE}` \
+             declares `AchievementCategoryTemplateButtonMixin = {{}};` at file scope, \
+             then attaches `:OnEnter` (line 573) and `:OnLeave` (line 579) to it. The \
+             mixin is bound to the inner `<Button parentKey=\"Button\">` of the \
+             virtual `AchievementCategoryTemplate` Frame at `{CATEGORY_BUTTON_XML_SITE}` \
+             via `mixin=\"AchievementCategoryTemplateButtonMixin\"`. A nil reading \
+             means either the table assignment failed (Lua chunk crashed before \
+             reaching line 571) or Blizzard merged the button's tooltip wiring back \
+             into the parent `AchievementCategoryTemplateMixin` and removed this \
+             sibling. Every method probe below depends on this table existing."
+        );
+
+        for (method, line_number) in CATEGORY_BUTTON_PLAN_METHODS {
+            let method_type: String = env
+                .eval(&format!(
+                    "return type(_G[{CATEGORY_BUTTON_MIXIN_NAME:?}].{method})"
+                ))
+                .unwrap_or_else(|err| {
+                    panic!("`{CATEGORY_BUTTON_MIXIN_NAME}.{method}` probe raised: {err}")
+                });
+
+            assert_eq!(
+                method_type, "function",
+                "Expected `{CATEGORY_BUTTON_MIXIN_NAME}.{method}` to be a function \
+                 after `{ROOT}` loads, got `{method_type}`. The Lua source declares \
+                 `function AchievementCategoryTemplateButtonMixin:{method}(...)` at \
+                 line {line_number}. A nil reading means either the method \
+                 declaration was removed, the Lua chunk failed before reaching line \
+                 {line_number}, or Blizzard refactored the method onto the parent \
+                 `AchievementCategoryTemplateMixin` (lua:496). Every category row's \
+                 hover tooltip dispatches through these methods: `:OnEnter` calls \
+                 `self.showTooltipFunc(self)` which the parent mixin's `:Init` (lua:510) \
+                 wires per category, and `:OnLeave` calls `GameTooltip:Hide()` to \
+                 dismiss the tooltip when the cursor leaves — a missing method here \
+                 means category-button tooltips fail to show on hover or fail to \
+                 hide on leave at runtime."
             );
         }
     });
