@@ -558,3 +558,191 @@ fn main_action_bar_registers_action_bar_page_changed_and_neutral_faction_select_
         );
     });
 }
+
+const STANCE_BAR_FRAME_NAME: &str = "StanceBar";
+const STANCE_BAR_XML_SITE: &str = "Mainline/StanceBar.xml:12";
+const STANCE_BAR_SCRIPTS_XML_SITE: &str = "Mainline/StanceBar.xml:32";
+const STANCE_BAR_ONLOAD_LUA_SITE: &str = "Shared/StanceBar.lua:6";
+
+/// `StanceBarMixin:OnLoad` (`Shared/StanceBar.lua:6-9`) registers one
+/// event at lua:7 — PLAN matches exactly.
+const STANCE_BAR_REGISTERED_EVENTS: &[&str] = &["UPDATE_SHAPESHIFT_COOLDOWN"];
+
+/// Pin `StanceBar`'s post-OnLoad event-registration surface. No
+/// spec/source mismatch. XML at `Mainline/StanceBar.xml:33` wires
+/// `<OnLoad ... inherit="prepend"/>` + OnEvent at xml:34; the
+/// `EditModeActionBarTemplate` chain at xml:12 does not register
+/// `UPDATE_SHAPESHIFT_COOLDOWN`. Three assertions: frame exists, event
+/// registered, OnEvent script wired (single arm at lua:12-14).
+#[test]
+fn stance_bar_registers_update_shapeshift_cooldown_after_onload() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let frame_type: String = env
+            .eval(&format!("return type(_G[{STANCE_BAR_FRAME_NAME:?}])"))
+            .expect("StanceBar global probe must run cleanly");
+
+        assert_eq!(
+            frame_type, "table",
+            "Expected `_G[{STANCE_BAR_FRAME_NAME:?}]` to be a table after `{ROOT}` loads, \
+             got `{frame_type}`. XML at `{STANCE_BAR_XML_SITE}` declares \
+             `<Frame name=\"StanceBar\" mixin=\"StanceBarMixin\" ...>`. Nil reading: \
+             XML chunk failed, name= changed, or frame removed."
+        );
+
+        for event in STANCE_BAR_REGISTERED_EVENTS {
+            let registered: bool = env
+                .eval(&format!(
+                    "return _G[{STANCE_BAR_FRAME_NAME:?}]:IsEventRegistered({event:?})"
+                ))
+                .expect("StanceBar:IsEventRegistered must run cleanly");
+
+            assert!(
+                registered,
+                "Expected `{STANCE_BAR_FRAME_NAME}:IsEventRegistered({event:?})` to be \
+                 true after `{ROOT}` loads. Mixin OnLoad at \
+                 `{STANCE_BAR_ONLOAD_LUA_SITE}` registers `{event}` at lua:7; XML at \
+                 `{STANCE_BAR_SCRIPTS_XML_SITE}:33` wires \
+                 `<OnLoad ... inherit=\"prepend\"/>`. False reading: OnLoad did not \
+                 run, RegisterEvent was removed, or prepend dispatch regressed. \
+                 Without `{event}`, the single OnEvent arm at lua:12-14 \
+                 (`self:UpdateState()`) never fires."
+            );
+        }
+
+        let onevent_script: String = env
+            .eval(&format!(
+                "return type(_G[{STANCE_BAR_FRAME_NAME:?}]:GetScript(\"OnEvent\"))"
+            ))
+            .expect("`GetScript(\"OnEvent\")` must run cleanly on StanceBar");
+
+        assert_eq!(
+            onevent_script, "function",
+            "Expected `{STANCE_BAR_FRAME_NAME}:GetScript(\"OnEvent\")` to be a function \
+             after `{ROOT}` loads, got `{onevent_script}`. XML at \
+             `{STANCE_BAR_SCRIPTS_XML_SITE}:34` wires \
+             `<OnEvent method=\"OnEvent\" inherit=\"prepend\"/>` against the mixin's \
+             `OnEvent` body at `Shared/StanceBar.lua:11` — a single \
+             UPDATE_SHAPESHIFT_COOLDOWN arm calling `self:UpdateState()` (lua:12-14). \
+             Without the script, the event fires but the dispatch has no handler."
+        );
+    });
+}
+
+const PET_ACTION_BAR_FRAME_NAME: &str = "PetActionBar";
+const PET_ACTION_BAR_XML_SITE: &str = "Mainline/PetActionBar.xml:33";
+const PET_ACTION_BAR_SCRIPTS_XML_SITE: &str = "Mainline/PetActionBar.xml:55";
+const PET_ACTION_BAR_ONLOAD_LUA_SITE: &str = "Shared/PetActionBar.lua:49";
+
+/// PLAN-named events — 9 plain `RegisterEvent` calls in
+/// `PetActionBarMixin:OnLoad` (lua:50-60), in source order.
+const PET_ACTION_BAR_PLAN_NAMED_EVENTS: &[&str] = &[
+    "PLAYER_CONTROL_LOST",
+    "PLAYER_CONTROL_GAINED",
+    "UNIT_PET",
+    "PET_BAR_UPDATE",
+    "PET_BAR_UPDATE_COOLDOWN",
+    "PET_BAR_UPDATE_USABLE",
+    "PET_UI_UPDATE",
+    "PLAYER_TARGET_CHANGED",
+    "UPDATE_VEHICLE_ACTIONBAR",
+];
+
+/// Source-additional events PLAN omits. Each has an OnEvent dispatch
+/// arm (lua:72-90) — dropping any breaks the corresponding refresh.
+const PET_ACTION_BAR_SOURCE_ADDITIONAL_EVENTS: &[&str] = &[
+    "PLAYER_FARSIGHT_FOCUS_CHANGED",
+    "UNIT_FLAGS",
+    "PLAYER_MOUNT_DISPLAY_CHANGED",
+    "UNIT_AURA",
+];
+
+/// Pin `PetActionBar`'s post-OnLoad event-registration surface.
+/// **Spec/source mismatch — PLAN under-counts.** PLAN names 9 events;
+/// source `PetActionBarMixin:OnLoad` (`Shared/PetActionBar.lua:49-68`)
+/// registers 13. Four source-only extras: PLAYER_FARSIGHT_FOCUS_CHANGED
+/// (lua:52), UNIT_FLAGS (lua:54), PLAYER_MOUNT_DISPLAY_CHANGED (lua:61),
+/// UNIT_AURA via `RegisterUnitEvent("pet")` (lua:62). Unit filter is
+/// ignored for registration-set membership (both modes share
+/// `registered_events.insert(event)` in
+/// `src/lua_api/frame/methods/text_attribute_event/events.rs:51-70`).
+/// XML at xml:56 wires `<OnLoad ... inherit="prepend"/>`; the
+/// `EditModeActionBarTemplate` chain at xml:33 does not register any
+/// of these 13 events. 15 assertions: existence (1), PLAN-named (9),
+/// source-additional (4), OnEvent script (1).
+#[test]
+fn pet_action_bar_registers_plan_and_source_additional_events_after_onload() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let frame_type: String = env
+            .eval(&format!("return type(_G[{PET_ACTION_BAR_FRAME_NAME:?}])"))
+            .expect("PetActionBar global probe must run cleanly");
+
+        assert_eq!(
+            frame_type, "table",
+            "Expected `_G[{PET_ACTION_BAR_FRAME_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{frame_type}`. XML at `{PET_ACTION_BAR_XML_SITE}` declares \
+             `<Frame name=\"PetActionBar\" mixin=\"PetActionBarMixin\" ...>`. Nil \
+             reading: XML chunk failed, name= changed, or frame removed."
+        );
+
+        for event in PET_ACTION_BAR_PLAN_NAMED_EVENTS {
+            let registered: bool = env
+                .eval(&format!(
+                    "return _G[{PET_ACTION_BAR_FRAME_NAME:?}]:IsEventRegistered({event:?})"
+                ))
+                .expect("PetActionBar:IsEventRegistered must run cleanly");
+
+            assert!(
+                registered,
+                "Expected `{PET_ACTION_BAR_FRAME_NAME}:IsEventRegistered({event:?})` to \
+                 be true after `{ROOT}` loads. Mixin OnLoad at \
+                 `{PET_ACTION_BAR_ONLOAD_LUA_SITE}` registers `{event}` at lua:50-60; \
+                 XML at `{PET_ACTION_BAR_SCRIPTS_XML_SITE}:56` wires \
+                 `<OnLoad ... inherit=\"prepend\"/>`. False reading: OnLoad did not \
+                 run, RegisterEvent was removed, or prepend dispatch regressed. The \
+                 OnEvent dispatch at lua:70-91 silently drops `{event}` from the \
+                 pet-bar visibility / state-refresh / cooldown arms."
+            );
+        }
+
+        for event in PET_ACTION_BAR_SOURCE_ADDITIONAL_EVENTS {
+            let registered: bool = env
+                .eval(&format!(
+                    "return _G[{PET_ACTION_BAR_FRAME_NAME:?}]:IsEventRegistered({event:?})"
+                ))
+                .expect("PetActionBar:IsEventRegistered must run cleanly");
+
+            assert!(
+                registered,
+                "Expected `{PET_ACTION_BAR_FRAME_NAME}:IsEventRegistered({event:?})` to \
+                 be true after `{ROOT}` loads. PLAN omits this event but source \
+                 registers it in the same OnLoad at `{PET_ACTION_BAR_ONLOAD_LUA_SITE}` \
+                 (PLAYER_FARSIGHT_FOCUS_CHANGED lua:52, UNIT_FLAGS lua:54, \
+                 PLAYER_MOUNT_DISPLAY_CHANGED lua:61, UNIT_AURA via \
+                 RegisterUnitEvent(\"pet\") lua:62 — unit filter ignored for \
+                 registration-set membership). False reading: OnLoad regressed, the \
+                 call was removed, or unit-event registration stopped marking. \
+                 OnEvent dispatch at lua:72-90 has arms for all four — dropping any \
+                 breaks the corresponding refresh path."
+            );
+        }
+
+        let onevent_script: String = env
+            .eval(&format!(
+                "return type(_G[{PET_ACTION_BAR_FRAME_NAME:?}]:GetScript(\"OnEvent\"))"
+            ))
+            .expect("`GetScript(\"OnEvent\")` must run cleanly on PetActionBar");
+
+        assert_eq!(
+            onevent_script, "function",
+            "Expected `{PET_ACTION_BAR_FRAME_NAME}:GetScript(\"OnEvent\")` to be a \
+             function after `{ROOT}` loads, got `{onevent_script}`. XML at \
+             `{PET_ACTION_BAR_SCRIPTS_XML_SITE}:57` wires \
+             `<OnEvent method=\"OnEvent\" inherit=\"prepend\"/>` against the mixin's \
+             `OnEvent` body at `Shared/PetActionBar.lua:70` — explicit arms for every \
+             registered event (pet-bar visibility lua:72-81, generic refresh lua:82-83, \
+             pet-filter lua:84-87, cooldown lua:88-89). Without the script, all 13 \
+             events fire but no handler runs, leaving the pet bar stuck on its \
+             OnLoad-time `:Update()` snapshot at lua:63."
+        );
+    });
+}
