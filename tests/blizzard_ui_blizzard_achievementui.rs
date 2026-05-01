@@ -39,3 +39,6 @@ mod behavior_button_double_click;
 
 #[path = "blizzard_ui/blizzard_achievementui/behavior_objective_rep.rs"]
 mod behavior_objective_rep;
+
+#[path = "blizzard_ui/blizzard_achievementui/behavior_comparison_set.rs"]
+mod behavior_comparison_set;
