@@ -1,71 +1,16 @@
-//! Event registration surface for the `Blizzard_ActionBar` lane.
+//! Event-registration surface for the `Blizzard_ActionBar` lane.
+//! Each test pins one frame's post-OnLoad `IsEventRegistered` set plus
+//! its `OnEvent` script wiring. Where PLAN under-counts the source's
+//! registrations, the events are split into PLAN-named vs
+//! source-additional slices so a mismatch surfaces with a clear cause.
 //!
-//! PLAN.md task: pin that `ActionBarButtonEventsFrame` registers
-//! `PLAYER_ENTERING_WORLD`, `ACTIONBAR_SLOT_CHANGED`, `UPDATE_BINDINGS`,
-//! `GAME_PAD_ACTIVE_CHANGED`, `UPDATE_SHAPESHIFT_FORM`,
-//! `ACTIONBAR_UPDATE_COOLDOWN`, `PET_BAR_UPDATE` after OnLoad.
-//!
-//! **Spec/source mismatch — PLAN under-counts the registrations.** The
-//! mixin OnLoad at `Shared/ActionButton.lua:203-218` registers TEN
-//! events, not seven:
-//!
-//! ```lua
-//! function ActionBarButtonEventsFrameMixin:OnLoad()
-//!     self.frames = {};
-//!     self:RegisterEvent("PLAYER_ENTERING_WORLD");        -- PLAN
-//!     self:RegisterEvent("ACTIONBAR_SLOT_CHANGED");       -- PLAN
-//!     self:RegisterEvent("UPDATE_BINDINGS");              -- PLAN
-//!     self:RegisterEvent("GAME_PAD_ACTIVE_CHANGED");      -- PLAN
-//!     self:RegisterEvent("UPDATE_SHAPESHIFT_FORM");       -- PLAN
-//!     self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN");    -- PLAN
-//!     self:RegisterEvent("PET_BAR_UPDATE");               -- PLAN
-//!     self:RegisterUnitEvent("UNIT_FLAGS", "pet");        -- ★ source-only
-//!     self:RegisterUnitEvent("UNIT_AURA", "pet");         -- ★ source-only
-//!     self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED"); -- ★ source-only
-//!     ...
-//! end
-//! ```
-//!
-//! The XML at `Shared/ActionButtonComponentTemplate.xml:89-94` declares
-//! the frame as `<Frame name="ActionBarButtonEventsFrame"
-//! mixin="ActionBarButtonEventsDerivedFrameMixin">` with
-//! `<OnLoad method="OnLoad"/>` and `<OnEvent method="OnEvent"/>`. The
-//! derived mixin at `Shared/ActionButton.lua:1443`
-//! (`ActionBarButtonEventsDerivedFrameMixin = CreateFromMixins(
-//! ActionBarButtonEventsFrameMixin)`) shallow-copies `OnLoad` from the
-//! base, so the derived OnLoad is the same body — same 10
-//! registrations.
-//!
-//! Note: `RegisterUnitEvent(event, ...)` and `RegisterEvent(event)`
-//! both add the event to the frame's `registered_events` set in the
-//! simulator (`src/lua_api/frame/methods/text_attribute_event/events.rs`
-//! line 51-70 vs 41-49 — same `registered_events.insert(event)`). So
-//! `IsEventRegistered("UNIT_FLAGS")` returns true after the
-//! `RegisterUnitEvent` call, the same way it would for a plain
-//! `RegisterEvent`. The unit-filter ("pet") is intentionally ignored
-//! for the registration set and only matters at dispatch-filter time.
-//!
-//! Test pins all ten registrations + OnEvent script + handler global,
-//! split as:
-//!
-//! - **PLAN-named events (7)** in `PLAN_NAMED_EVENTS` — the contract the
-//!   PLAN line names verbatim.
-//!
-//! - **Source-additional events (3)** in `SOURCE_ADDITIONAL_EVENTS` —
-//!   `UNIT_FLAGS`, `UNIT_AURA` (registered via RegisterUnitEvent with
-//!   "pet" filter), and `PLAYER_MOUNT_DISPLAY_CHANGED` (the trailing
-//!   plain RegisterEvent the PLAN list omits). A `false` reading on any
-//!   would prove either OnLoad's RegisterUnitEvent path no longer
-//!   marks events as registered (regression in
-//!   `src/lua_api/frame/methods/text_attribute_event/events.rs:62`'s
-//!   `registered_events.insert(event)`) or Blizzard removed those three
-//!   registrations from the mixin OnLoad. Either way, the spec needs
-//!   updating because dispatch arms in `OnEvent` (lua:220-225 — the
-//!   event-fanout to per-button frames) would lose those events.
-//!
-//! - **OnEvent script + handler-global presence** so a regression that
-//!   drops the script wiring or removes the mixin's `OnEvent` method
-//!   surfaces with a clear cause.
+//! `RegisterUnitEvent(event, ...)` and `RegisterEvent(event)` both
+//! insert into the frame's `registered_events` set
+//! (`src/lua_api/frame/methods/text_attribute_event/events.rs:51-70`
+//! vs 41-49) — the unit filter is ignored for registration-set
+//! membership and only matters at dispatch-filter time. So
+//! `IsEventRegistered("UNIT_FLAGS")` returns true after a
+//! `RegisterUnitEvent("UNIT_FLAGS", "pet")` call.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 
@@ -100,25 +45,10 @@ const SOURCE_ADDITIONAL_EVENTS: &[&str] =
     &["UNIT_FLAGS", "UNIT_AURA", "PLAYER_MOUNT_DISPLAY_CHANGED"];
 
 /// Pin `ActionBarButtonEventsFrame`'s post-OnLoad event-registration
-/// surface together with the OnEvent script wiring and handler-global
-/// presence.
-///
-/// Twelve assertions split into:
-///
-/// **Frame existence (1):** `_G.ActionBarButtonEventsFrame` is a
-/// table — the XML at `Shared/ActionButtonComponentTemplate.xml:89`
-/// resolved its `name=` token and registered the frame in `_G`.
-///
-/// **PLAN-named registrations (7):** loop `PLAN_NAMED_EVENTS` and pin
-/// `IsEventRegistered(event) == true` for each.
-///
-/// **Source-additional registrations (3):** loop
-/// `SOURCE_ADDITIONAL_EVENTS` and pin the same — these would slip past
-/// a PLAN-only test even though they're part of the OnLoad contract.
-///
-/// **OnEvent script + handler global (1 each):** the XML wires
-/// `<OnEvent method="OnEvent"/>` against the mixin, and the derived
-/// mixin's `OnEvent` is the inherited base body at lua:220.
+/// surface and the OnEvent script wiring. **Spec/source mismatch** —
+/// PLAN names 7 events; OnLoad at lua:203-218 registers 10 (3 extras
+/// in `SOURCE_ADDITIONAL_EVENTS`). 12 assertions: existence (1) +
+/// PLAN-named (7) + source-additional (3) + OnEvent script (1).
 #[test]
 fn action_bar_button_events_frame_registers_plan_and_source_additional_events_after_onload() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
@@ -129,13 +59,8 @@ fn action_bar_button_events_frame_registers_plan_and_source_additional_events_af
         assert_eq!(
             frame_type, "table",
             "Expected `_G[{FRAME_NAME:?}]` to be a table after `{ROOT}` loads, got \
-             `{frame_type}`. The XML at `{FRAME_XML_SITE}` declares this frame as \
-             `<Frame name=\"ActionBarButtonEventsFrame\" \
-             mixin=\"ActionBarButtonEventsDerivedFrameMixin\">`, which resolves the name \
-             at XML-parse time and registers the frame in `_G`. A nil reading means \
-             either the XML chunk failed to execute, the name= attribute changed, or the \
-             frame was removed. Every event-registration assertion below depends on this \
-             frame existing."
+             `{frame_type}`. XML at `{FRAME_XML_SITE}` declares the frame; nil reading \
+             means XML chunk failed, name= changed, or frame removed."
         );
 
         for event in PLAN_NAMED_EVENTS {
@@ -143,29 +68,19 @@ fn action_bar_button_events_frame_registers_plan_and_source_additional_events_af
                 .eval(&format!(
                     "return _G[{FRAME_NAME:?}]:IsEventRegistered({event:?})"
                 ))
-                .unwrap_or_else(|err| {
-                    panic!("`{FRAME_NAME}:IsEventRegistered({event:?})` raised: {err}")
-                });
+                .expect("IsEventRegistered must run cleanly");
 
             assert!(
                 registered,
                 "Expected `{FRAME_NAME}:IsEventRegistered({event:?})` to be true after \
-                 `{ROOT}` loads. The base mixin OnLoad at `{ONLOAD_LUA_SITE}` declares \
-                 `function ActionBarButtonEventsFrameMixin:OnLoad()` and registers \
-                 `{event}` via `self:RegisterEvent({event:?})` (one of the first seven \
-                 statements after `self.frames = {{}}`). The XML at `{FRAME_XML_SITE}` \
-                 wires `<OnLoad method=\"OnLoad\"/>`, and the derived mixin at \
-                 `{DERIVED_MIXIN_LUA_SITE}` (`CreateFromMixins(ActionBarButtonEventsFrameMixin)`) \
-                 shallow-copies `OnLoad` so the derived body is the same. A false \
-                 reading means either OnLoad did not run (regression in the loader's \
-                 method-style OnLoad dispatch — `<OnLoad method=\"OnLoad\"/>` resolves \
-                 against the mixin's `OnLoad` field copied onto the frame at \
-                 `src/lua_api/env_init/shared_bootstrap.lua`'s Mixin impl) or the \
-                 RegisterEvent call was removed from the mixin OnLoad. Without `{event}` \
-                 registered, the OnEvent fan-out at lua:220-225 — \
-                 `for k, frame in pairs(self.frames) do frame:OnEvent(event, ...) end` \
-                 — would never fire `{event}` to the per-button frames, breaking every \
-                 ActionButton's reaction to that event."
+                 `{ROOT}` loads. Mixin OnLoad at `{ONLOAD_LUA_SITE}` registers `{event}` \
+                 (one of the first seven `RegisterEvent` calls). XML wires \
+                 `<OnLoad method=\"OnLoad\"/>`; derived mixin at \
+                 `{DERIVED_MIXIN_LUA_SITE}` shallow-copies the base OnLoad. False \
+                 reading: OnLoad did not run, RegisterEvent removed, or method-style \
+                 OnLoad dispatch regressed. Without `{event}`, the OnEvent fan-out at \
+                 lua:220-225 (`for k, frame in pairs(self.frames) do \
+                 frame:OnEvent(event, ...) end`) silently drops `{event}`."
             );
         }
 
@@ -174,28 +89,18 @@ fn action_bar_button_events_frame_registers_plan_and_source_additional_events_af
                 .eval(&format!(
                     "return _G[{FRAME_NAME:?}]:IsEventRegistered({event:?})"
                 ))
-                .unwrap_or_else(|err| {
-                    panic!("`{FRAME_NAME}:IsEventRegistered({event:?})` raised: {err}")
-                });
+                .expect("IsEventRegistered must run cleanly");
 
             assert!(
                 registered,
                 "Expected `{FRAME_NAME}:IsEventRegistered({event:?})` to be true after \
-                 `{ROOT}` loads. PLAN omits this event, but the source registers it as \
-                 part of the same OnLoad body at `{ONLOAD_LUA_SITE}`. Specifically: \
-                 `UNIT_FLAGS` and `UNIT_AURA` are registered at lua:212-213 via \
-                 `self:RegisterUnitEvent(event, \"pet\")`, and `PLAYER_MOUNT_DISPLAY_CHANGED` \
-                 at lua:214 via plain `self:RegisterEvent(...)`. The simulator's \
-                 `register_unit_event` and `register_event` impls in \
-                 `src/lua_api/frame/methods/text_attribute_event/events.rs` both insert \
-                 into the frame's `registered_events` set, so `IsEventRegistered` \
-                 returns true for both modes. A false reading means either OnLoad \
-                 regressed (loader did not invoke method-style OnLoad), the \
-                 `RegisterUnitEvent` registration path stopped marking events as \
-                 registered (regression in events.rs:62), or Blizzard removed those \
-                 three registrations from the mixin OnLoad. Spec needs updating in any \
-                 case — the OnEvent dispatch at lua:220-225 would no longer fan `{event}` \
-                 out to the per-button frames."
+                 `{ROOT}` loads. PLAN omits this; source registers it in the same \
+                 OnLoad at `{ONLOAD_LUA_SITE}` (UNIT_FLAGS+UNIT_AURA via \
+                 RegisterUnitEvent(\"pet\") lua:212-213, PLAYER_MOUNT_DISPLAY_CHANGED \
+                 plain lua:214). False reading: OnLoad regressed, the \
+                 `RegisterUnitEvent` registration path stopped marking events \
+                 (events.rs:62), or Blizzard removed the call — fan-out at lua:220-225 \
+                 drops `{event}`."
             );
         }
 
@@ -208,21 +113,13 @@ fn action_bar_button_events_frame_registers_plan_and_source_additional_events_af
         assert_eq!(
             onevent_script, "function",
             "Expected `{FRAME_NAME}:GetScript(\"OnEvent\")` to be a function after \
-             `{ROOT}` loads, got `{onevent_script}`. The XML at `{FRAME_XML_SITE}` line \
-             92 wires `<OnEvent method=\"OnEvent\"/>` against the mixin — the loader \
-             resolves this by reading the mixin's `OnEvent` field (copied onto the \
-             frame via the codegen path at `src/loader/xml_frame_codegen.rs:155-173` \
-             plus the shared `Mixin(object, ...)` impl). The base mixin at \
-             `Shared/ActionButton.lua:220` declares \
-             `function ActionBarButtonEventsFrameMixin:OnEvent(event, ...)` whose body \
-             fans the event out to every per-button frame in `self.frames`. Without an \
-             OnEvent script wired, every registered event above would fire but no \
-             dispatch would run, breaking the entire per-button event-fanout that \
-             ActionButton OnLoad relies on (the per-button OnLoad at lua:459 calls \
-             `ActionBarButtonEventsFrame:RegisterFrame(self)` to subscribe). A nil \
-             reading means either the XML dropped the `<OnEvent>` element, the loader \
-             stopped wiring `<OnEvent method=...>` against mixin methods, or the mixin \
-             did not provide an `OnEvent` field at script-attach time."
+             `{ROOT}` loads, got `{onevent_script}`. XML at `{FRAME_XML_SITE}` (line 92) \
+             wires `<OnEvent method=\"OnEvent\"/>` against the mixin's OnEvent at \
+             lua:220, whose body fans the event out to every per-button frame in \
+             `self.frames`. Without the script, every registered event fires but no \
+             dispatch runs — breaks ActionButton OnLoad's \
+             `ActionBarButtonEventsFrame:RegisterFrame(self)` subscription path \
+             (lua:459)."
         );
     });
 }
@@ -743,6 +640,86 @@ fn pet_action_bar_registers_plan_and_source_additional_events_after_onload() {
              pet-filter lua:84-87, cooldown lua:88-89). Without the script, all 13 \
              events fire but no handler runs, leaving the pet bar stuck on its \
              OnLoad-time `:Update()` snapshot at lua:63."
+        );
+    });
+}
+
+const VEHICLE_LEAVE_FRAME_NAME: &str = "MainMenuBarVehicleLeaveButton";
+const VEHICLE_LEAVE_XML_SITE: &str = "Shared/VehicleLeaveButton.xml:4";
+const VEHICLE_LEAVE_SCRIPTS_XML_SITE: &str = "Shared/VehicleLeaveButton.xml:13";
+const VEHICLE_LEAVE_ONLOAD_LUA_SITE: &str = "Shared/VehicleLeaveButton.lua:4";
+const VEHICLE_LEAVE_REGISTERED_EVENTS: &[&str] = &[
+    "UPDATE_BONUS_ACTIONBAR",
+    "UPDATE_MULTI_CAST_ACTIONBAR",
+    "UNIT_ENTERED_VEHICLE",
+    "UNIT_EXITED_VEHICLE",
+    "VEHICLE_UPDATE",
+];
+
+/// Pin `MainMenuBarVehicleLeaveButton`'s post-OnLoad event-registration
+/// surface. PLAN names 5 events and the source registers exactly those 5
+/// in `MainMenuBarVehicleLeaveButtonMixin:OnLoad` (lua:5-9) — no
+/// mismatch. XML at xml:14 wires `<OnLoad ... inherit="prepend"/>`; the
+/// `EditModeVehicleLeaveButtonSystemTemplate` chain at xml:4 contributes
+/// no event registrations of its own. OnEvent at lua:25-27 has a single
+/// catch-all body (`self:Update();`) — no per-event arms, so dropping
+/// any registration silently breaks the show/enable/highlight refresh
+/// driven by `:Update` at lua:37-52. 7 assertions: existence (1),
+/// 5 registrations, OnEvent script (1).
+#[test]
+fn main_menu_bar_vehicle_leave_button_registers_five_events_after_onload() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let frame_type: String = env
+            .eval(&format!("return type(_G[{VEHICLE_LEAVE_FRAME_NAME:?}])"))
+            .expect("MainMenuBarVehicleLeaveButton global probe must run cleanly");
+
+        assert_eq!(
+            frame_type, "table",
+            "Expected `_G[{VEHICLE_LEAVE_FRAME_NAME:?}]` to be a table after `{ROOT}` \
+             loads, got `{frame_type}`. XML at `{VEHICLE_LEAVE_XML_SITE}` declares \
+             `<Button name=\"MainMenuBarVehicleLeaveButton\" \
+             mixin=\"MainMenuBarVehicleLeaveButtonMixin\" parent=\"MainActionBar\" \
+             parentKey=\"VehicleLeaveButton\" ...>`. Nil reading: XML chunk failed, \
+             name= changed, parent MainActionBar absent, or frame removed."
+        );
+
+        for event in VEHICLE_LEAVE_REGISTERED_EVENTS {
+            let registered: bool = env
+                .eval(&format!(
+                    "return _G[{VEHICLE_LEAVE_FRAME_NAME:?}]:IsEventRegistered({event:?})"
+                ))
+                .expect("VehicleLeaveButton:IsEventRegistered must run cleanly");
+
+            assert!(
+                registered,
+                "Expected `{VEHICLE_LEAVE_FRAME_NAME}:IsEventRegistered({event:?})` to \
+                 be true after `{ROOT}` loads. Mixin OnLoad at \
+                 `{VEHICLE_LEAVE_ONLOAD_LUA_SITE}` registers `{event}` at lua:5-9; XML \
+                 at `{VEHICLE_LEAVE_SCRIPTS_XML_SITE}:14` wires \
+                 `<OnLoad ... inherit=\"prepend\"/>`. False reading: OnLoad did not \
+                 run, RegisterEvent was removed, or prepend dispatch regressed. The \
+                 OnEvent body at lua:25-27 is a single catch-all `self:Update();` — \
+                 dropping any registration silently breaks the show/enable/highlight \
+                 refresh driven by `:Update` at lua:37-52."
+            );
+        }
+
+        let onevent_script: String = env
+            .eval(&format!(
+                "return type(_G[{VEHICLE_LEAVE_FRAME_NAME:?}]:GetScript(\"OnEvent\"))"
+            ))
+            .expect("`GetScript(\"OnEvent\")` must run cleanly on VehicleLeaveButton");
+
+        assert_eq!(
+            onevent_script, "function",
+            "Expected `{VEHICLE_LEAVE_FRAME_NAME}:GetScript(\"OnEvent\")` to be a \
+             function after `{ROOT}` loads, got `{onevent_script}`. XML at \
+             `{VEHICLE_LEAVE_SCRIPTS_XML_SITE}:15` wires `<OnEvent method=\"OnEvent\"/>` \
+             (no inherit attribute — instance handler replaces any inherited one) \
+             against the mixin's `OnEvent` body at `Shared/VehicleLeaveButton.lua:25` — \
+             a catch-all `self:Update()` call at lua:26. Without the script, all 5 \
+             events fire but no handler runs, leaving the button stuck on its \
+             OnLoad-time `hidden=\"true\"` XML default at xml:4."
         );
     });
 }
