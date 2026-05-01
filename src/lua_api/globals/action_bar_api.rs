@@ -437,8 +437,12 @@ fn is_equipped_action(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_equipped_gear_outfit_action(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = stack_val(state, 1);
-    push_bool(state, false)
+    let slot = stack_slot(state);
+    let is_equipped_gear_outfit = {
+        let sim = borrow_state(state)?;
+        slot.is_some_and(|slot| sim.equipped_gear_outfit_action_slots.contains(&slot))
+    };
+    push_bool(state, is_equipped_gear_outfit)
 }
 
 fn is_helpful_action(state: &mut LuaState) -> LuaResult<u32> {
@@ -562,7 +566,9 @@ fn has_action(state: &mut LuaState) -> LuaResult<u32> {
     let slot = stack_slot(state);
     let has_action = {
         let sim = borrow_state(state)?;
-        slot.is_some_and(|slot| sim.action_bars.contains_key(&slot))
+        slot.is_some_and(|slot| {
+            sim.action_bars.contains_key(&slot) || sim.action_outfits.contains_key(&slot)
+        })
     };
     state.push(Val::Bool(has_action));
     Ok(1)
@@ -589,7 +595,9 @@ fn is_usable_action(state: &mut LuaState) -> LuaResult<u32> {
     let slot = stack_slot(state);
     let usable = {
         let sim = borrow_state(state)?;
-        slot.is_some_and(|slot| sim.action_bars.contains_key(&slot))
+        slot.is_some_and(|slot| {
+            sim.action_bars.contains_key(&slot) || sim.action_outfits.contains_key(&slot)
+        })
     };
     state.push(Val::Bool(usable));
     state.push(Val::Bool(false));
@@ -642,7 +650,7 @@ fn get_action_charges(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `C_ActionBar.PutActionInSlot(slot, targetSlot)` → `bool`.
 ///
-/// Moves the spell stored at `state.action_bars[slot]` into `targetSlot`,
+/// Moves the spell or outfit action stored at `slot` into `targetSlot`,
 /// firing `ACTIONBAR_SLOT_CHANGED` for both slots so the action button
 /// mixins refresh their textures. Returns `true` when there was an action
 /// to move; `false` for empty slots, missing target, or non-numeric input.
@@ -657,12 +665,29 @@ fn put_action_in_slot(state: &mut LuaState) -> LuaResult<u32> {
         let mut sim = borrow_state_mut(state)?;
         sim.action_bars.remove(&source)
     };
-    let Some(spell_id) = moved_spell else {
-        return push_bool(state, false);
+    let moved_outfit = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.action_outfits.remove(&source)
     };
-    borrow_state_mut(state)?
-        .action_bars
-        .insert(target, spell_id);
+    if let Some(spell_id) = moved_spell {
+        let mut sim = borrow_state_mut(state)?;
+        sim.action_bars.insert(target, spell_id);
+        sim.action_outfits.remove(&target);
+        sim.equipped_gear_outfit_action_slots.remove(&source);
+        sim.equipped_gear_outfit_action_slots.remove(&target);
+    } else if let Some(outfit_id) = moved_outfit {
+        let mut sim = borrow_state_mut(state)?;
+        let is_equipped_gear = sim.equipped_gear_outfit_action_slots.remove(&source);
+        sim.action_bars.remove(&target);
+        sim.action_outfits.insert(target, outfit_id);
+        if is_equipped_gear {
+            sim.equipped_gear_outfit_action_slots.insert(target);
+        } else {
+            sim.equipped_gear_outfit_action_slots.remove(&target);
+        }
+    } else {
+        return push_bool(state, false);
+    }
     fire_named_event_state(state, "ACTIONBAR_SLOT_CHANGED", &[Val::Num(source as f64)]);
     fire_named_event_state(state, "ACTIONBAR_SLOT_CHANGED", &[Val::Num(target as f64)]);
     push_bool(state, true)

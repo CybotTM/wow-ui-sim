@@ -78,6 +78,8 @@ macro_rules! build_empty_sim_state {
             action_bar_state: ActionBarStateInfo::default(),
             action_bar_page: 1,
             action_bars: $collections.action_bars,
+            action_outfits: $collections.action_outfits,
+            equipped_gear_outfit_action_slots: $collections.equipped_gear_outfit_action_slots,
             assisted_combat: AssistedCombatState::default(),
             action_highlights: ActionHighlightState::default(),
             extra_action_button: ExtraActionButtonState::default(),
@@ -1330,6 +1332,13 @@ pub struct SimState {
     pub account_store_items: HashMap<i64, AccountStoreItemInfo>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
+    /// Action bar slots that hold transmog outfit shortcuts: slot → outfit ID.
+    /// `GetActionInfo(slot)` reports these as `"outfit"` actions. Empty by
+    /// default; tests seed entries when exercising Blizzard outfit button code.
+    pub action_outfits: HashMap<u32, i64>,
+    /// Slots whose outfit action is the equipped-gear pseudo-outfit. Drives
+    /// `C_ActionBar.IsEquippedGearOutfitAction(slot)`.
+    pub equipped_gear_outfit_action_slots: HashSet<u32>,
     /// Assisted-combat recommendations exposed by `C_AssistedCombat`.
     pub assisted_combat: AssistedCombatState,
     /// Currently visible main-bar page, 1..=`NUM_ACTIONBAR_PAGES` (6). Read by
@@ -2155,6 +2164,8 @@ struct EmptyStateCollections {
     pending_hit_grid_changes: Vec<(u64, bool)>,
     pending_texture_preloads: BTreeSet<String>,
     action_bars: HashMap<u32, u32>,
+    action_outfits: HashMap<u32, i64>,
+    equipped_gear_outfit_action_slots: HashSet<u32>,
     addon_base_paths: Vec<PathBuf>,
     spell_cooldowns: HashMap<u32, SpellCooldownState>,
     action_ui_buttons: Vec<(u64, u32)>,

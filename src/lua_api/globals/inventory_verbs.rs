@@ -81,6 +81,10 @@ fn action_spell_id(state: &mut LuaState, slot: u32) -> Option<u32> {
     borrow_state(state).ok()?.action_bars.get(&slot).copied()
 }
 
+fn action_outfit_id(state: &mut LuaState, slot: u32) -> Option<i64> {
+    borrow_state(state).ok()?.action_outfits.get(&slot).copied()
+}
+
 fn place_cursor_item_in_backpack(state: &mut LuaState) -> LuaResult<u32> {
     let Some((item_id, stack_count)) = take_cursor_item(state) else {
         return Ok(0);
@@ -193,6 +197,8 @@ fn pickup_action(state: &mut LuaState) -> LuaResult<u32> {
     };
     if !ignore_removal {
         st.action_bars.remove(&slot);
+        st.action_outfits.remove(&slot);
+        st.equipped_gear_outfit_action_slots.remove(&slot);
     }
     st.cursor_item = Some(CursorInfo::Action { slot, spell_id });
     drop(st);
@@ -205,9 +211,9 @@ fn pickup_action(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn has_action(state: &mut LuaState) -> LuaResult<u32> {
-    let has = stack_u32(state, 1)
-        .and_then(|slot| action_spell_id(state, slot))
-        .is_some();
+    let has = stack_u32(state, 1).is_some_and(|slot| {
+        action_spell_id(state, slot).is_some() || action_outfit_id(state, slot).is_some()
+    });
     state.push(Val::Bool(has));
     Ok(1)
 }
@@ -231,22 +237,25 @@ fn get_action_texture(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_action_info(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = stack_u32(state, 1).and_then(|slot| action_spell_id(state, slot));
-    match spell_id {
-        Some(spell_id) => {
-            let kind = create_string(state, "spell");
-            state.push(kind);
-            state.push(Val::Num(spell_id as f64));
-            state.push(Val::Nil);
-            Ok(3)
-        }
-        None => {
-            state.push(Val::Nil);
-            state.push(Val::Nil);
-            state.push(Val::Nil);
-            Ok(3)
-        }
+    let slot = stack_u32(state, 1);
+    if let Some(outfit_id) = slot.and_then(|slot| action_outfit_id(state, slot)) {
+        let kind = create_string(state, "outfit");
+        state.push(kind);
+        state.push(Val::Num(outfit_id as f64));
+        state.push(Val::Nil);
+        return Ok(3);
     }
+    if let Some(spell_id) = slot.and_then(|slot| action_spell_id(state, slot)) {
+        let kind = create_string(state, "spell");
+        state.push(kind);
+        state.push(Val::Num(spell_id as f64));
+        state.push(Val::Nil);
+        return Ok(3);
+    }
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(3)
 }
 
 /// `PickupMerchantItem(index)` — synthesize a merchant item on the cursor
@@ -417,6 +426,8 @@ fn place_action(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     st.action_bars.insert(slot, spell_id);
+    st.action_outfits.remove(&slot);
+    st.equipped_gear_outfit_action_slots.remove(&slot);
     st.cursor_item = None;
     drop(st);
     fire_actionbar_slot_changed(state);

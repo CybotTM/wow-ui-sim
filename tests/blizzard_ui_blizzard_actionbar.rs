@@ -84,3 +84,6 @@ mod behavior_action_highlight;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_locked_action.rs"]
 mod behavior_locked_action;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_outfit_locked.rs"]
+mod behavior_outfit_locked;

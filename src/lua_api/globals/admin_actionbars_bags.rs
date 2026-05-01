@@ -15,18 +15,27 @@ use rilua::vm::state::LuaState;
 pub(super) fn set_action_slot(state: &mut LuaState) -> LuaResult<u32> {
     let slot = u32::from_stack(state, 1)?;
     let spell_id = u32::from_stack(state, 2)?;
-    borrow_state_mut(state)?.action_bars.insert(slot, spell_id);
+    let mut state = borrow_state_mut(state)?;
+    state.action_bars.insert(slot, spell_id);
+    state.action_outfits.remove(&slot);
+    state.equipped_gear_outfit_action_slots.remove(&slot);
     Ok(0)
 }
 
 pub(super) fn clear_action_slot(state: &mut LuaState) -> LuaResult<u32> {
     let slot = u32::from_stack(state, 1)?;
-    borrow_state_mut(state)?.action_bars.remove(&slot);
+    let mut state = borrow_state_mut(state)?;
+    state.action_bars.remove(&slot);
+    state.action_outfits.remove(&slot);
+    state.equipped_gear_outfit_action_slots.remove(&slot);
     Ok(0)
 }
 
 pub(super) fn clear_action_bars(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.action_bars.clear();
+    let mut state = borrow_state_mut(state)?;
+    state.action_bars.clear();
+    state.action_outfits.clear();
+    state.equipped_gear_outfit_action_slots.clear();
     Ok(0)
 }
 
