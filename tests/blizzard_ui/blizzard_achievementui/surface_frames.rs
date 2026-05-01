@@ -50,6 +50,70 @@ const ROOT: &str = "Blizzard_AchievementUI";
 const FRAME_NAME: &str = "AchievementFrame";
 const XML_SITE: &str = "Mainline/Blizzard_AchievementUI.xml:1505";
 
+/// PLAN-named children of `AchievementFrame`. Each tuple is
+/// (key, xml_site, routing_kind) where `routing_kind` is "parentKey" when the
+/// XML attaches the child via `parentKey="<Key>"` and "name-prefix" when the
+/// XML attaches via `name="$parent<Key>"` and the simulator's
+/// `infer_parent_key_from_child_name` repair derives the key by stripping the
+/// `AchievementFrame` prefix from the child's resolved name.
+///
+/// Both routes land in the same place — `AchievementFrame.<Key>` is the child
+/// frame — so callers don't see a difference, but a regression in either path
+/// would surface here:
+///
+/// - `parentKey="..."` route: handled by `append_parent_key_code` in
+///   `src/loader/xml_frame_codegen.rs:90`. A regression dropping the
+///   `parentKey=` attribute or a loader bug skipping the assignment would null
+///   one of the four explicit-key entries below.
+///
+/// - `name="$parent<Key>"` route: handled by
+///   `infer_parent_key_from_child_name` in
+///   `src/lua_api/globals/template/mod.rs:72`. A regression that removed the
+///   prefix-inference repair, or that changed the `name="$parentX"` token,
+///   would null one of the four name-inferred entries below.
+const PLAN_NAMED_CHILDREN: &[(&str, &str, &str)] = &[
+    (
+        "Header",
+        "Mainline/Blizzard_AchievementUI.xml:1660",
+        "parentKey",
+    ),
+    (
+        "Categories",
+        "Mainline/Blizzard_AchievementUI.xml:1729",
+        "parentKey",
+    ),
+    (
+        "FilterDropdown",
+        "Mainline/Blizzard_AchievementUI.xml:2348",
+        "parentKey",
+    ),
+    (
+        "SearchBox",
+        "Mainline/Blizzard_AchievementUI.xml:2356",
+        "parentKey",
+    ),
+    (
+        "Achievements",
+        "Mainline/Blizzard_AchievementUI.xml:1755",
+        "name-prefix",
+    ),
+    (
+        "Stats",
+        "Mainline/Blizzard_AchievementUI.xml:1816",
+        "name-prefix",
+    ),
+    (
+        "Summary",
+        "Mainline/Blizzard_AchievementUI.xml:1866",
+        "name-prefix",
+    ),
+    (
+        "Comparison",
+        "Mainline/Blizzard_AchievementUI.xml:2080",
+        "name-prefix",
+    ),
+];
+
 #[test]
 fn achievement_frame_publishes_expected_panel_identity() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -116,5 +180,85 @@ fn achievement_frame_publishes_expected_panel_identity() {
              the loader failed to honour the attribute, putting the panel on screen at game \
              start and blocking the player's view."
         );
+    });
+}
+
+/// Pin every PLAN-named child as a parent property on `AchievementFrame`.
+///
+/// PLAN names eight children: `Achievements`, `Stats`, `Summary`,
+/// `Categories`, `Comparison`, `SearchBox`, `FilterDropdown`, `Header`. The
+/// XML installs them via two distinct routes (see `PLAN_NAMED_CHILDREN`
+/// docs above): four use `parentKey="<Key>"` directly (`Header`,
+/// `Categories`, `FilterDropdown`, `SearchBox`), and four use
+/// `name="$parent<Key>"` with the prefix-inference repair filling in the
+/// parent property (`Achievements`, `Stats`, `Summary`, `Comparison`).
+/// Both routes converge on the same observable contract: every
+/// PLAN-named child is reachable as `AchievementFrame.<Key>`, is a Frame,
+/// and has `AchievementFrame` as its parent.
+///
+/// The single test asserts that contract for all eight children
+/// uniformly. Each assertion message names the routing kind and the XML
+/// site so a regression points to the right code path:
+///
+/// - A nil reading on a `parentKey`-routed child means either the XML
+///   dropped the `parentKey="<Key>"` attribute (the panel's Lua code
+///   that uses `AchievementFrame.Header.Points:SetText(...)` or
+///   `AchievementFrame.SearchBox:HasFocus()` would surface a
+///   nil-table-index error) or the loader's `append_parent_key_code`
+///   stopped routing `parentKey=` into the parent's per-instance table.
+///
+/// - A nil reading on a `name-prefix`-routed child means either the XML
+///   changed the `name="$parent<Key>"` token (so the resolved child
+///   name no longer has the parent's name as a prefix) or the
+///   simulator's `infer_parent_key_from_child_name` repair stopped
+///   running. Either way every consumer that walks
+///   `AchievementFrame.Achievements`, `.Stats`, `.Summary`, or
+///   `.Comparison` (notably the panel-stack push/pop code that toggles
+///   their visibility) would silently miss the child.
+///
+/// - A child whose `:GetParent():GetName()` is anything other than
+///   `AchievementFrame` means the child was reparented post-load — none
+///   of the panel's Lua code does that, so it would be a regression
+///   that breaks `AchievementFrame:Hide()` cascading to children and
+///   `SetUIScale` propagating from UIParent.
+#[test]
+fn achievement_frame_plan_named_children_are_reachable_as_parent_properties() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for (key, xml_site, routing_kind) in PLAN_NAMED_CHILDREN {
+            let value_type: String = env
+                .eval(&format!(
+                    "return type(_G[{FRAME_NAME:?}][{key:?}])",
+                    key = key
+                ))
+                .expect("`type(AchievementFrame[<Key>])` must run cleanly");
+
+            assert_eq!(
+                value_type, "table",
+                "Expected `AchievementFrame.{key}` to be a table after `{ROOT}` loads, got \
+                 `{value_type}`. The XML at `{xml_site}` attaches this child via the \
+                 `{routing_kind}` route. A nil reading on a `parentKey` child means the \
+                 XML dropped the attribute or `append_parent_key_code` stopped routing it; \
+                 a nil reading on a `name-prefix` child means the XML changed the \
+                 `name=\"$parent{key}\"` token or `infer_parent_key_from_child_name` \
+                 stopped running. Either way the panel's Lua code that reaches \
+                 `AchievementFrame.{key}` would surface a nil-table-index error."
+            );
+
+            let parent_name: String = env
+                .eval(&format!(
+                    "return _G[{FRAME_NAME:?}][{key:?}]:GetParent():GetName()"
+                ))
+                .expect("`GetParent():GetName()` must run cleanly on the child frame");
+
+            assert_eq!(
+                parent_name, FRAME_NAME,
+                "Expected `AchievementFrame.{key}:GetParent():GetName()` to return \
+                 `{FRAME_NAME}`, got `{parent_name}`. The XML at `{xml_site}` nests this \
+                 child inside `AchievementFrame`'s `<Frames>` block, so its parent must \
+                 be `AchievementFrame` — `AchievementFrame:Hide()` cascading to children \
+                 and `SetUIScale` propagating from `UIParent` both depend on the parent \
+                 chain landing here."
+            );
+        }
     });
 }
