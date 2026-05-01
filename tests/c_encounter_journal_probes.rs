@@ -122,6 +122,29 @@ fn test_get_instance_info_unknown_returns_nothing() {
 }
 
 #[test]
+fn test_get_instance_info_links_current_dungeons_to_lfd_ids() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local _, _, _, _, _, _, _, _, linkDungeonID = C_EncounterJournal.GetInstanceInfo(1271)
+            if linkDungeonID ~= 1201 then
+                return "c_link=" .. tostring(linkDungeonID)
+            end
+
+            local _, _, _, _, _, _, _, _, legacyLinkDungeonID = EJ_GetInstanceInfo(1271)
+            if legacyLinkDungeonID ~= 1201 then
+                return "legacy_link=" .. tostring(legacyLinkDungeonID)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Encounter Journal LFD link ids: {result}");
+}
+
+#[test]
 fn test_get_instance_info_amirdrassil() {
     let env = env();
     let (name, bg_image): (String, String) = env

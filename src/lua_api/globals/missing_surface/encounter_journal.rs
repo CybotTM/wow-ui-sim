@@ -671,22 +671,19 @@ fn push_encounter_tuple(state: &mut LuaState, row: &data::Encounter) {
 }
 
 fn push_instance_tuple(state: &mut LuaState, row: &data::Instance) {
-    let name = create_string(state, row.name);
-    let description = create_string(state, row.description);
-    state.push(name);
-    state.push(description);
-    state.push(Val::Num(row.bg_file_id as f64));
-    state.push(Val::Num(row.button_file_id as f64));
-    state.push(Val::Num(row.lore_file_id as f64));
-    state.push(Val::Num(row.button_small_file_id as f64));
-    state.push(Val::Num(row.area_id as f64));
-    state.push(Val::Num(if row.is_raid { row.id as f64 } else { 0.0 }));
-    state.push(Val::Num(if row.is_raid { 0.0 } else { row.id as f64 }));
+    push_instance_base_tuple(state, row);
 }
 
 fn push_instance_legacy_tuple(state: &mut LuaState, row: &data::Instance) {
+    push_instance_base_tuple(state, row);
+    state.push(Val::Bool(false));
+    state.push(Val::Num(row.map_id as f64));
+}
+
+fn push_instance_base_tuple(state: &mut LuaState, row: &data::Instance) {
     let name = create_string(state, row.name);
     let description = create_string(state, row.description);
+    let link_dungeon_id = linked_lfd_dungeon_id(row);
     state.push(name);
     state.push(description);
     state.push(Val::Num(row.bg_file_id as f64));
@@ -695,9 +692,24 @@ fn push_instance_legacy_tuple(state: &mut LuaState, row: &data::Instance) {
     state.push(Val::Num(row.button_small_file_id as f64));
     state.push(Val::Num(row.area_id as f64));
     state.push(Val::Num(if row.is_raid { row.id as f64 } else { 0.0 }));
-    state.push(Val::Num(if row.is_raid { 0.0 } else { row.id as f64 }));
-    state.push(Val::Bool(false));
-    state.push(Val::Num(row.map_id as f64));
+    state.push(Val::Num(link_dungeon_id as f64));
+}
+
+fn linked_lfd_dungeon_id(row: &data::Instance) -> u32 {
+    if row.is_raid {
+        return 0;
+    }
+    match row.name {
+        "Ara-Kara, City of Echoes" => 1201,
+        "City of Threads" => 1202,
+        "Mists of Tirna Scithe" => 1203,
+        "The Stonevault" => 1204,
+        "Grim Batol" => 1205,
+        "The Dawnbreaker" => 1206,
+        "Darkflame Cleft" => 1207,
+        "The Rookery" => 1208,
+        _ => row.id,
+    }
 }
 
 fn build_loot_table(state: &mut LuaState, item_id: u32, encounter_id: u32) -> Val {

@@ -37,6 +37,9 @@
 //! - `GetRandomScenarioBestChoice()`   → nil. No scenario state. Same path.
 //! - `GetLFGDungeonRewards(id)`        → 7 zeros + nil spellID. Called from
 //!   `LFDQueueFrameRandom_UpdateFrame` when a random dungeon is selected.
+//! - `DungeonAppearsInRandomLFD(id)`   → `LE_LFG_CATEGORY_LFD` for seeded
+//!   positive LFD dungeon ids, nil otherwise. Used by the Adventure Journal
+//!   dungeon-action handoff before the Group Finder panel is shown.
 //! - `IsLFGDungeonJoinable(dungeonID)` → `(isAvailableForAll, isAvailableForPlayer,
 //!   hideIfNotJoinable, totalGroupSizeRequired)` from `lfd_dungeons` + `player.level`.
 
@@ -406,6 +409,26 @@ fn get_lfg_dungeon_rewards(state: &mut LuaState) -> LuaResult<u32> {
     Ok(7)
 }
 
+/// `DungeonAppearsInRandomLFD(dungeonID)` returns the LFG category id when
+/// the dungeon is represented in the random/specific LFD pool. Blizzard's
+/// Adventure Journal path uses this as the gate for selecting a dungeon by id.
+fn dungeon_appears_in_random_lfd(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(dungeon_id) = stack_i32(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let appears = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .any(|d| d.dungeon_id == dungeon_id && d.dungeon_id > 0);
+    if appears {
+        state.push(Val::Num(1.0)); // LE_LFG_CATEGORY_LFD
+    } else {
+        state.push(Val::Nil);
+    }
+    Ok(1)
+}
+
 /// `GetLFDLockInfo(dungeonID, partyIndex)` — retail returns 6 values
 /// describing a player's lock on a dungeon. The sim has no locks, so
 /// every call reports all-nil.
@@ -501,6 +524,11 @@ fn register_lfd_info_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         get_random_dungeon_best_choice,
     )?;
     LuaApiMut::register_function(lua, "GetLFGDungeonRewards", get_lfg_dungeon_rewards)?;
+    LuaApiMut::register_function(
+        lua,
+        "DungeonAppearsInRandomLFD",
+        dungeon_appears_in_random_lfd,
+    )?;
     LuaApiMut::register_function(lua, "IsLFGDungeonJoinable", is_lfg_dungeon_joinable)?;
     Ok(())
 }
