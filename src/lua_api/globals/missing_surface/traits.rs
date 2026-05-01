@@ -1731,6 +1731,7 @@ fn c_class_talents_get_trait_tree_for_spec(state: &mut LuaState) -> LuaResult<u3
 fn c_class_talents_load_config(state: &mut LuaState) -> LuaResult<u32> {
     const RESULT_ERROR: f64 = 0.0;
     const RESULT_NO_CHANGES: f64 = 1.0;
+    const RESULT_READY: f64 = 3.0;
 
     let config_id = i32::from_stack(state, 1)?;
     let Some(spec_id) = config_spec_id(config_id) else {
@@ -1738,6 +1739,13 @@ fn c_class_talents_load_config(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         state.push(Val::Nil);
         return Ok(3);
+    };
+
+    let active_config_id = borrow_state(state)?.talents.active_config_id;
+    let load_result = if config_id == active_config_id {
+        RESULT_NO_CHANGES
+    } else {
+        RESULT_READY
     };
 
     borrow_state_mut(state)?
@@ -1750,7 +1758,7 @@ fn c_class_talents_load_config(state: &mut LuaState) -> LuaResult<u32> {
         Val::Num(config_id as f64),
     );
 
-    state.push(Val::Num(RESULT_NO_CHANGES));
+    state.push(Val::Num(load_result));
     state.push(Val::Nil);
     state.push(Val::Nil);
     Ok(3)
