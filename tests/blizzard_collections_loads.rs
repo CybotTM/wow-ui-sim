@@ -132,6 +132,112 @@ fn blizzard_collections_top_level_frames_are_defined() {
 }
 
 #[test]
+fn warband_scene_footer_controls_do_not_overlap() {
+    let env = load_full_game_ui();
+
+    load_addon(&env.loader_env(), &collections_toc()).expect("Blizzard_Collections should load");
+
+    env.exec(
+        r#"
+        CollectionsJournal:Show()
+        CollectionsJournal_SetTab(CollectionsJournal, 6)
+        "#,
+    )
+    .expect("warband scene tab should open");
+    env.fire_on_update(0.016)
+        .expect("layout dirty OnUpdate should run");
+
+    let layout: (
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        String,
+        f64,
+        String,
+        f64,
+        bool,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local controls = WarbandSceneJournal.IconsFrame.Icons.Controls
+            local showOwned = controls.ShowOwned
+            local paging = controls.PagingControls
+            local checkbox = showOwned.Checkbox
+            local label = showOwned.Text
+
+            local showPoint, _, _, showX = showOwned:GetPoint(1)
+            local pagingPoint, _, _, pagingX = paging:GetPoint(1)
+            return label:GetWidth(),
+                   showOwned:GetWidth(),
+                   checkbox:GetWidth(),
+                   label.anchorSpacing or 0,
+                   showOwned:GetLeft(),
+                   showOwned:GetRight(),
+                   paging:GetLeft(),
+                   paging.PageText:GetRight(),
+                   paging.PrevPageButton:GetLeft(),
+                   showPoint or "",
+                   showX or 0,
+                   pagingPoint or "",
+                   pagingX or 0,
+                   controls:IsDirty() == true,
+                   type(controls:GetScript("OnUpdate"))
+            "#,
+        )
+        .expect("warband scene footer geometry query should succeed");
+
+    let (
+        label_width,
+        show_owned_width,
+        checkbox_width,
+        anchor_spacing,
+        show_owned_left,
+        show_owned_right,
+        paging_left,
+        page_text_right,
+        prev_button_left,
+        show_owned_point,
+        show_owned_offset,
+        paging_point,
+        paging_offset,
+        controls_dirty,
+        controls_on_update_type,
+    ) = layout;
+
+    assert!(
+        label_width > 80.0,
+        "Show Collected Only label should report its intrinsic text width, got {label_width}"
+    );
+    assert!(
+        show_owned_width >= checkbox_width + label_width + anchor_spacing - 0.5,
+        "ShowOwned width should include checkbox + label + spacing, got \
+         showOwned={show_owned_width}, checkbox={checkbox_width}, label={label_width}, \
+         spacing={anchor_spacing}"
+    );
+    assert!(
+        paging_left >= show_owned_right + 20.0,
+        "Paging controls should sit after ShowOwned with layout spacing, got \
+         showOwnedLeft={show_owned_left}, showOwnedRight={show_owned_right}, \
+         pagingLeft={paging_left}, showOwnedPoint={show_owned_point}, \
+         showOwnedOffset={show_owned_offset}, pagingPoint={paging_point}, \
+         pagingOffset={paging_offset}, controlsDirty={controls_dirty}, \
+         controlsOnUpdateType={controls_on_update_type}"
+    );
+    assert!(
+        prev_button_left >= page_text_right + 4.0,
+        "Paging arrow should be laid out after page text, got \
+         pageTextRight={page_text_right}, prevButtonLeft={prev_button_left}"
+    );
+}
+
+#[test]
 fn blizzard_collections_mixins_are_defined() {
     let env = load_full_game_ui();
 
