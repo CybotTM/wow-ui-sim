@@ -22,3 +22,6 @@ mod surface_events;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_initial_show_populates_scroll.rs"]
 mod behavior_initial_show_populates_scroll;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_search_box_filters_rows.rs"]
+mod behavior_search_box_filters_rows;
