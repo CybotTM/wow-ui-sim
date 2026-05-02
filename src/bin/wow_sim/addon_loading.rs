@@ -19,18 +19,13 @@ pub const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData", "WowBehaviorTest", 
 
 /// Load Blizzard SharedXML and base UI addons (auto-discovered, dependency-sorted).
 pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
-    let blizzard_ui_path = PathBuf::from("./Interface/BlizzardUI");
-    if !blizzard_ui_path.exists() {
-        eprintln!(
-            "FATAL: ./Interface/BlizzardUI is missing: Blizzard UI source not set up.\n\
-             Run ./scripts/setup-blizzard-ui.sh from the repo root to sparse-checkout\n\
-             vendor/wow-ui-source and create the symlink.\n\
-             For a worktree, symlink it to the parent repo's checkout, e.g.:\n\
-             \tln -s ../../vendor/wow-ui-source/Interface/AddOns Interface/BlizzardUI\n\
-             (adjust the relative path for your worktree depth)."
-        );
-        std::process::exit(1);
-    }
+    let blizzard_ui_path = match wow_ui_sim::paths::default_blizzard_ui_addons_path() {
+        Ok(path) => path,
+        Err(e) => {
+            eprintln!("FATAL: {e}");
+            std::process::exit(1);
+        }
+    };
 
     let addons = discover_blizzard_addons_for_screen(&blizzard_ui_path, screen);
     let verbose = std::env::var("WOW_SIM_VERBOSE").is_ok();

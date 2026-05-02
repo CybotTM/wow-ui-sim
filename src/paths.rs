@@ -99,16 +99,60 @@ fn resolve_blizzard_ui_addons_path(root: &Path) -> crate::Result<PathBuf> {
         return Ok(symlink_path);
     }
 
-    let vendor_path = root.join("vendor/wow-ui-source/Interface/AddOns");
-    if vendor_path.exists() {
-        return Ok(vendor_path);
+    if symlink_exists(&symlink_path) {
+        std::fs::remove_file(&symlink_path).map_err(|e| {
+            crate::Error::Other(format!(
+                "broken Blizzard UI symlink exists at {} but could not be removed: {e}",
+                symlink_path.display()
+            ))
+        })?;
+    }
+
+    if let Some(vendor_path) = find_vendor_blizzard_addons(root) {
+        if let Some(parent) = symlink_path.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| {
+                crate::Error::Other(format!(
+                    "missing Blizzard UI symlink parent {} and could not create it: {e}",
+                    parent.display()
+                ))
+            })?;
+        }
+        if let Err(e) = create_blizzard_ui_symlink(&vendor_path, &symlink_path) {
+            return Err(crate::Error::Other(format!(
+                "missing Blizzard UI symlink at {} and could not link it to {}: {e}",
+                symlink_path.display(),
+                vendor_path.display()
+            )));
+        }
+        return Ok(symlink_path);
     }
 
     Err(crate::Error::Other(format!(
-        "missing Blizzard UI addon tree; expected {} or {}",
-        symlink_path.display(),
-        vendor_path.display()
+        "missing Blizzard UI addon tree; expected {} or an ancestor vendor/wow-ui-source/Interface/AddOns. Run ./scripts/setup-blizzard-ui.sh from the repo root.",
+        symlink_path.display()
     )))
+}
+
+fn symlink_exists(path: &Path) -> bool {
+    std::fs::symlink_metadata(path).is_ok_and(|metadata| metadata.file_type().is_symlink())
+}
+
+fn find_vendor_blizzard_addons(root: &Path) -> Option<PathBuf> {
+    root.canonicalize()
+        .ok()?
+        .ancestors()
+        .map(|ancestor| ancestor.join("vendor/wow-ui-source/Interface/AddOns"))
+        .find(|candidate| candidate.is_dir())
+}
+
+#[cfg(unix)]
+fn create_blizzard_ui_symlink(target: &Path, symlink_path: &Path) -> std::io::Result<()> {
+    std::os::unix::fs::symlink(target, symlink_path)
+}
+
+#[cfg(windows)]
+fn create_blizzard_ui_symlink(target: &Path, symlink_path: &Path) -> std::io::Result<()> {
+    std::os::windows::fs::symlink_dir(target, symlink_path)
 }
 
 fn interface_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
@@ -251,13 +295,33 @@ mod tests {
         assert_eq!(resolved, ui);
     }
 
+    #[cfg(unix)]
     #[test]
-    fn blizzard_ui_path_falls_back_to_vendor_tree() {
+    fn blizzard_ui_path_links_to_vendor_tree() {
         let root = tempfile::tempdir().expect("tempdir");
+        let ui = root.path().join("Interface/BlizzardUI");
         let vendor = root.path().join("vendor/wow-ui-source/Interface/AddOns");
+        fs::create_dir_all(root.path().join("Interface")).expect("create interface dir");
         fs::create_dir_all(&vendor).expect("create vendor dir");
 
         let resolved = resolve_blizzard_ui_addons_path(root.path()).expect("resolve path");
-        assert_eq!(resolved, vendor);
+        assert_eq!(resolved, ui);
+        assert_eq!(fs::read_link(&resolved).expect("read symlink"), vendor);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn blizzard_ui_path_links_to_ancestor_vendor_tree() {
+        let root = tempfile::tempdir().expect("tempdir");
+        let repo = root.path().join("repo");
+        let worktree = repo.join(".claude/worktrees/example");
+        let ui = worktree.join("Interface/BlizzardUI");
+        let vendor = repo.join("vendor/wow-ui-source/Interface/AddOns");
+        fs::create_dir_all(worktree.join("Interface")).expect("create interface dir");
+        fs::create_dir_all(&vendor).expect("create vendor dir");
+
+        let resolved = resolve_blizzard_ui_addons_path(&worktree).expect("resolve path");
+        assert_eq!(resolved, ui);
+        assert_eq!(fs::read_link(&resolved).expect("read symlink"), vendor);
     }
 }
