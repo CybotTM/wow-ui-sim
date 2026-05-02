@@ -247,6 +247,39 @@ fn generated_api_documentation_registers_well_known_global_functions() {
     );
 }
 
+#[test]
+fn generated_api_documentation_registers_namespaced_map_function() {
+    let env = load_generated_api_documentation();
+
+    let failure: String = env
+        .eval(
+            r#"
+            local functionInfo =
+                APIDocumentation:FindAPIByName("function", "GetMapInfo", "MapUI")
+            if functionInfo == nil then
+                return "missing MapUI.GetMapInfo function"
+            end
+
+            if functionInfo.System == nil then
+                return "MapUI.GetMapInfo missing System parent"
+            end
+
+            local namespace = functionInfo.System:GetNamespaceName()
+            if namespace ~= "C_Map" then
+                return string.format("expected C_Map namespace, got %q", tostring(namespace))
+            end
+
+            return ""
+            "#,
+        )
+        .expect("generated APIDocumentation namespaced function probe must run cleanly");
+
+    assert_eq!(
+        "", failure,
+        "generated C_Map.GetMapInfo documentation must be registered with its system parent"
+    );
+}
+
 struct DocumentationCorpusCounts {
     systems: i64,
     tables: i64,
