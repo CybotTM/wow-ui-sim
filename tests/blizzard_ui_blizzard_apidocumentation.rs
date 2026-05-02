@@ -11,6 +11,9 @@ mod behavior_add_documentation_table_routes_payload_kinds;
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_find_all_api_matches_returns_nil_when_empty.rs"]
 mod behavior_find_all_api_matches_returns_nil_when_empty;
 
+#[path = "blizzard_ui/blizzard_apidocumentation/behavior_find_api_by_name_returns_first_match_across_kinds.rs"]
+mod behavior_find_api_by_name_returns_first_match_across_kinds;
+
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_slash_command_help_writes_usage.rs"]
 mod behavior_handle_slash_command_help_writes_usage;
 
