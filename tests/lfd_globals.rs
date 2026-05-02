@@ -263,6 +263,36 @@ fn lfg_join_verbs_complete_specific_dungeon_queue_path() {
 }
 
 #[test]
+fn get_lfg_info_server_reports_queued_after_join_lfg() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if type(GetLFGInfoServer) ~= "function" then
+                return "missing=" .. type(GetLFGInfoServer)
+            end
+            ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+            local _, _, queued = GetLFGInfoServer(LE_LFG_CATEGORY_LFD)
+            if queued then return "queued_before" end
+
+            JoinLFG(LE_LFG_CATEGORY_LFD)
+            local inParty, joined, queued, noPartialClear, achievements, lfgComment, slotCount =
+                GetLFGInfoServer(LE_LFG_CATEGORY_LFD)
+            if inParty ~= false then return "inParty=" .. tostring(inParty) end
+            if joined ~= false then return "joined=" .. tostring(joined) end
+            if queued ~= true then return "queued=" .. tostring(queued) end
+            if noPartialClear ~= false then return "noPartialClear=" .. tostring(noPartialClear) end
+            if achievements ~= nil then return "achievements=" .. tostring(achievements) end
+            if lfgComment ~= "" then return "comment=" .. tostring(lfgComment) end
+            if slotCount ~= 0 then return "slotCount=" .. tostring(slotCount) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetLFGInfoServer queued state: {result}");
+}
+
+#[test]
 fn lfg_join_dungeon_specific_path_reaches_queued_mode() {
     let env = env();
     let result: String = env

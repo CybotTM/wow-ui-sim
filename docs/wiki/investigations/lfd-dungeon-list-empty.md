@@ -103,9 +103,9 @@ Group-size follow-up:
 
 Queue-verb follow-up:
 
-- **`battlefield_lfg_probes.rs`**: registered `ClearAllLFGDungeons`, `SetLFGDungeon`, and `JoinLFG`. `JoinLFG` now marks the category queued through existing LFG active-category state, and `GetLFGMode` reports `"queued"` for that category.
+- **`battlefield_lfg_probes.rs`**: registered `ClearAllLFGDungeons`, `SetLFGDungeon`, `JoinLFG`, and `GetLFGInfoServer`. `JoinLFG` now marks the category queued through existing LFG active-category state, and Blizzard's Lua `GetLFGMode` sees it through the server-info tuple.
 - **Root cause**: after the group-size gate passed, Blizzard's `LFG_JoinDungeon()` called the real queue verbs. They were still missing, so the path aborted at `ClearAllLFGDungeons` before it could enter queued mode.
-- **`tests/lfd_globals.rs`**: covers the individual queue verbs and a copied specific-dungeon `LFG_JoinDungeon` path reaching queued mode.
+- **`tests/lfd_globals.rs`**: covers the individual queue verbs, `GetLFGInfoServer`, and a copied specific-dungeon `LFG_JoinDungeon` path reaching queued mode.
 
 ## Why direct LFGLockList assignment over event firing
 

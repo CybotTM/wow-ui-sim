@@ -35,6 +35,8 @@
 //! - `SetLFGDungeon(category, id)`      → validates the selected id. Selection
 //!   details are not modelled yet; `JoinLFG` owns the visible queued mode.
 //! - `JoinLFG(category)`               → marks the category queued.
+//! - `GetLFGInfoServer(category, id?)` → queued server-info tuple consumed by
+//!   Blizzard's Lua `GetLFGMode`.
 //! - `GetLFGLockList()`                → empty table. No locks without server
 //!   state. Required by `LFGDungeonList_Setup` and `LFGList_DefaultFilterFunction`
 //!   (filter returns `false` when the list is nil, hiding every dungeon).
@@ -407,6 +409,26 @@ fn join_lfg(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `GetLFGInfoServer(category[, lfgID])` feeds Blizzard's Lua `GetLFGMode`.
+/// The simulator models only "queued for this category" and leaves server
+/// proposal/listing details inert.
+fn get_lfg_info_server(state: &mut LuaState) -> LuaResult<u32> {
+    let category = stack_i32(state, 1).unwrap_or(0);
+    let queued = borrow_state(state)?
+        .lfg_active_categories
+        .get(&category)
+        .is_some();
+    state.push(Val::Bool(false)); // inParty
+    state.push(Val::Bool(false)); // joined
+    state.push(Val::Bool(queued)); // queued
+    state.push(Val::Bool(false)); // noPartialClear
+    state.push(Val::Nil); // achievements
+    let comment = create_string(state, "");
+    state.push(comment); // lfgComment
+    state.push(Val::Num(0.0)); // slotCount
+    Ok(7)
+}
+
 /// `GetLFGRoles()` → `(leader, tank, healer, dps)`.
 fn get_lfg_roles(state: &mut LuaState) -> LuaResult<u32> {
     let roles = borrow_state(state)?.lfg_roles.clone();
@@ -626,6 +648,7 @@ fn register_lfd_state_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ClearAllLFGDungeons", clear_all_lfg_dungeons)?;
     LuaApiMut::register_function(lua, "SetLFGDungeon", set_lfg_dungeon)?;
     LuaApiMut::register_function(lua, "JoinLFG", join_lfg)?;
+    LuaApiMut::register_function(lua, "GetLFGInfoServer", get_lfg_info_server)?;
     LuaApiMut::register_function(lua, "GetLFGRoles", get_lfg_roles)?;
     LuaApiMut::register_function(lua, "SetLFGRoles", set_lfg_roles)?;
     LuaApiMut::register_function(lua, "GetLFGLockList", get_lfg_lock_list)?;
