@@ -17,6 +17,9 @@ mod behavior_handle_slash_command_help_writes_usage;
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_slash_command_stats_writes_counts.rs"]
 mod behavior_handle_slash_command_stats_writes_counts;
 
+#[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_slash_command_system_list_writes_all_systems.rs"]
+mod behavior_handle_slash_command_system_list_writes_all_systems;
+
 #[path = "blizzard_ui/blizzard_apidocumentation/load.rs"]
 mod load;
 
