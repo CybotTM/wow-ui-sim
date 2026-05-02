@@ -43,3 +43,6 @@ mod behavior_update_temp_shapeshift_uses_temp_index;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_bonus_uses_bonus_index_when_page_one.rs"]
 mod behavior_update_bonus_uses_bonus_index_when_page_one;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_pet_battle_uses_action_bar_page.rs"]
+mod behavior_update_pet_battle_uses_action_bar_page;
