@@ -52,3 +52,6 @@ mod behavior_reset_to_default;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_unit_displaypower_updates_vehicle_mana.rs"]
 mod behavior_unit_displaypower_updates_vehicle_mana;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_shapeshift_events_update_stance_bar.rs"]
+mod behavior_shapeshift_events_update_stance_bar;
