@@ -339,7 +339,8 @@ fn get_vehicle_bar_index(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_override_bar_index(state: &mut LuaState) -> LuaResult<u32> {
-    push_nil(state)
+    let override_bar_index = borrow_state(state)?.override_bar_index;
+    push_i32(state, override_bar_index)
 }
 
 fn get_temp_shapeshift_bar_index(state: &mut LuaState) -> LuaResult<u32> {
@@ -364,7 +365,8 @@ fn get_override_bar_skin(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn has_vehicle_action_bar(state: &mut LuaState) -> LuaResult<u32> {
-    push_bool(state, false)
+    let has_vehicle_action_bar = borrow_state(state)?.has_vehicle_action_bar;
+    push_bool(state, has_vehicle_action_bar)
 }
 
 fn has_override_action_bar(state: &mut LuaState) -> LuaResult<u32> {

@@ -28,3 +28,6 @@ mod behavior_page_changed_routes_to_update_all;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_override_skinned.rs"]
 mod behavior_update_override_skinned;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_override_unskinned_uses_main.rs"]
+mod behavior_update_override_unskinned_uses_main;
