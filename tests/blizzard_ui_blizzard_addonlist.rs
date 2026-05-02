@@ -49,3 +49,6 @@ mod behavior_addon_tooltip_update_builds_deps_line;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_addon_tooltip_banned_short_circuit.rs"]
 mod behavior_addon_tooltip_banned_short_circuit;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_init_addon_uses_question_mark_icon.rs"]
+mod behavior_init_addon_uses_question_mark_icon;
