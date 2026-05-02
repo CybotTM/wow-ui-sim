@@ -31,3 +31,6 @@ mod behavior_update_override_skinned;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_override_unskinned_uses_main.rs"]
 mod behavior_update_override_unskinned_uses_main;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_vehicle_skinned.rs"]
+mod behavior_update_vehicle_skinned;

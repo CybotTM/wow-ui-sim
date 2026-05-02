@@ -48,6 +48,24 @@ fn current_action_bar_state_reports_override() {
 }
 
 #[test]
+fn current_action_bar_state_reports_skinned_vehicle_override() {
+    let env = WowLuaEnv::new().expect("env");
+    {
+        let mut state = env.state().borrow_mut();
+        state.has_vehicle_action_bar = true;
+        state.player.vehicle_skin = Some("MechagonShredder".to_string());
+    }
+
+    let matches_override: bool = env
+        .eval(
+            "return ActionBarController_GetCurrentActionBarState() == LE_ACTIONBAR_STATE_OVERRIDE",
+        )
+        .unwrap();
+
+    assert!(matches_override);
+}
+
+#[test]
 fn le_actionbar_state_constants_are_seeded() {
     let env = WowLuaEnv::new().expect("env");
     let main: f64 = env.eval("return LE_ACTIONBAR_STATE_MAIN").unwrap();

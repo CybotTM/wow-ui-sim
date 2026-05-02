@@ -6,8 +6,9 @@
 //! - `ActionBarBusy()` → `state.action_bar_state.busy` — true while a
 //!   status-tracking-bar fade or page change is mid-animation.
 //! - `ActionBarController_GetCurrentActionBarState()` →
-//!   `state.action_bar_state.current_state` — `LE_ACTIONBAR_STATE_MAIN` (1)
-//!   or `LE_ACTIONBAR_STATE_OVERRIDE` (2).
+//!   `state.action_bar_state.current_state`, with skinned override/vehicle
+//!   state inferred from the backing action-bar flags — `LE_ACTIONBAR_STATE_MAIN`
+//!   (1) or `LE_ACTIONBAR_STATE_OVERRIDE` (2).
 //!
 //! The `LE_ACTIONBAR_STATE_*` constants are seeded as global numbers in
 //! `globals/strings/string_data/game_enums.rs`, so callers can compare
@@ -39,7 +40,14 @@ fn current_action_bar_state(state: &SimState) -> i32 {
             .override_bar_skin
             .map(|skin| skin != 0)
             .unwrap_or(false);
-    if skinned_override_active {
+    let skinned_vehicle_active = state.has_vehicle_action_bar
+        && state
+            .player
+            .vehicle_skin
+            .as_deref()
+            .map(|skin| !skin.is_empty())
+            .unwrap_or(false);
+    if skinned_override_active || skinned_vehicle_active {
         2
     } else {
         state.action_bar_state.current_state
