@@ -124,66 +124,9 @@ pub fn wow_font_to_iced(font_path: Option<&str>) -> Font {
     }
 }
 
-/// Strip WoW markup from text: textures (`|T...|t`), atlases (`|A...|a`),
-/// colors (`|cXXXXXXXX`/`|r`), and hyperlinks (`|H...|h`/`|h`).
-/// Preserves plain text content visible to the player.
-pub fn strip_wow_markup(text: &str) -> String {
-    let mut result = String::with_capacity(text.len());
-    let mut chars = text.chars().peekable();
-
-    while let Some(c) = chars.next() {
-        if c == '|' && consume_escape(&mut chars) {
-            continue;
-        }
-        result.push(c);
-    }
-
-    result
-}
-
-/// Try to consume a WoW escape sequence after `|`. Returns true if consumed.
-fn consume_escape(chars: &mut std::iter::Peekable<std::str::Chars>) -> bool {
-    let Some(&next) = chars.peek() else {
-        return false;
-    };
-    match next {
-        'T' | 'A' => skip_delimited_span(chars, if next == 'T' { 't' } else { 'a' }),
-        'H' => skip_delimited_span(chars, 'h'),
-        'h' | 'r' => {
-            chars.next();
-            true
-        }
-        'c' => {
-            chars.next();
-            skip_n(chars, 8);
-            true
-        }
-        _ => false,
-    }
-}
-
-/// Skip from current position to `|{end_marker}` (e.g. `|T...|t`).
-fn skip_delimited_span(chars: &mut std::iter::Peekable<std::str::Chars>, end_marker: char) -> bool {
-    chars.next(); // consume the opening letter (T, A, H)
-    while let Some(ch) = chars.next() {
-        if ch == '|' && chars.peek() == Some(&end_marker) {
-            chars.next();
-            return true;
-        }
-    }
-    true // consumed the opening, even if unclosed
-}
-
-/// Skip N characters.
-fn skip_n(chars: &mut std::iter::Peekable<std::str::Chars>, n: usize) {
-    for _ in 0..n {
-        chars.next();
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::render::strip_wow_markup;
 
     #[test]
     fn plain_text_unchanged() {
@@ -218,6 +161,19 @@ mod tests {
         assert_eq!(
             strip_wow_markup("|cFF0070DD|Hitem:123|h[Blade]|h|r"),
             "[Blade]"
+        );
+    }
+
+    #[test]
+    fn converts_wow_newline_escape() {
+        assert_eq!(strip_wow_markup("First|nSecond"), "First\nSecond");
+    }
+
+    #[test]
+    fn strips_spell_link_before_wow_newline_escape() {
+        assert_eq!(
+            strip_wow_markup("|cFF2959D3|Hspell:1225135|h[Suppression Zones]|h|r|nNext"),
+            "[Suppression Zones]\nNext"
         );
     }
 

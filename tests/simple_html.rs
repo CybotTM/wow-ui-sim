@@ -68,6 +68,22 @@ fn test_settext_strips_html_tags() {
 }
 
 #[test]
+fn test_settext_strips_wow_markup_after_html_tags() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("SimpleHTML", "TestHTMLWowMarkup", UIParent)
+        f:SetText("<p>|cFF2959D3|Hspell:1225135|h[Suppression Zones]|h|r|nNext</p>")
+    "#,
+    )
+    .unwrap();
+
+    let text: String = env.eval("return TestHTMLWowMarkup:GetText()").unwrap();
+    assert_eq!(text, "[Suppression Zones]\nNext");
+}
+
+#[test]
 fn test_hyperlink_format_default() {
     let env = WowLuaEnv::new().unwrap();
 

@@ -776,6 +776,14 @@ Created `investigations/adventure-guide-layout.md` for the Suggested Content ove
 
 Updated `investigations/adventure-guide-layout.md` with the follow-up Suggested Content text overlap root cause: tooltip `GetNumLines` overwrote the shared FrameRef method slot, so regular FontStrings returned zero lines. FontStrings now compute wrapped line count from measured text height while GameTooltip keeps tooltip-backed line counts; regression coverage is `fontstring_get_num_lines_reports_wrapped_line_count`.
 
+## [2026-05-02] investigation | Adventure Guide SimpleHTML markup
+
+Created `investigations/adventure-guide-simplehtml-markup.md` for the boss
+overview text rendering raw `|c...|Hspell...|h...|r` and `|n` escapes. Root
+cause: Encounter Journal uses `SimpleHTML`, whose stripped-text path only
+removed HTML tags and bypassed WoW markup cleanup. Updated `index.md` with the
+new investigation page.
+
 ## [2026-04-13] ingest | world map texture loading budget investigation
 
 Created `investigations/world-map-texture-loading-budget.md` to document the post-rebuild-fix world-map stalls: hidden BC tile uploads, preload/draw source-cache mismatch, the new BC cache in `TextureManager`, and the smaller draw/tick texture budgets. Updated `index.md` with the new investigation page.

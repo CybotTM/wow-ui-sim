@@ -27,7 +27,7 @@ pub fn strip_wow_markup(text: &str) -> String {
     let mut chars = text.chars().peekable();
 
     while let Some(c) = chars.next() {
-        if c == '|' && consume_escape(&mut chars) {
+        if c == '|' && consume_escape(&mut chars, &mut result) {
             continue;
         }
         result.push(c);
@@ -37,7 +37,7 @@ pub fn strip_wow_markup(text: &str) -> String {
 }
 
 /// Try to consume a WoW escape sequence after `|`. Returns true if consumed.
-fn consume_escape(chars: &mut std::iter::Peekable<std::str::Chars>) -> bool {
+fn consume_escape(chars: &mut std::iter::Peekable<std::str::Chars>, result: &mut String) -> bool {
     let Some(&next) = chars.peek() else {
         return false;
     };
@@ -46,6 +46,11 @@ fn consume_escape(chars: &mut std::iter::Peekable<std::str::Chars>) -> bool {
         'H' => skip_delimited_span(chars, 'h'),
         'h' | 'r' => {
             chars.next();
+            true
+        }
+        'n' => {
+            chars.next();
+            result.push('\n');
             true
         }
         'c' => {
@@ -69,6 +74,19 @@ fn skip_delimited_span(chars: &mut std::iter::Peekable<std::str::Chars>, end_mar
         }
     }
     true
+}
+
+#[cfg(test)]
+mod tests {
+    use super::strip_wow_markup;
+
+    #[test]
+    fn strips_spell_link_before_wow_newline_escape() {
+        assert_eq!(
+            strip_wow_markup("|cFF2959D3|Hspell:1225135|h[Suppression Zones]|h|r|nNext"),
+            "[Suppression Zones]\nNext"
+        );
+    }
 }
 
 #[cfg(feature = "gui")]
