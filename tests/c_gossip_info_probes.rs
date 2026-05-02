@@ -55,6 +55,16 @@ fn get_poi_for_ui_map_id_returns_nil() {
 }
 
 #[test]
+fn get_text_returns_seeded_gossip_text() {
+    let env = env();
+
+    env.exec("A_Admin.OpenQuestNpc()").unwrap();
+
+    let text: String = env.eval("return C_GossipInfo.GetText()").unwrap();
+    assert_eq!(text, "How can I help you, adventurer?");
+}
+
+#[test]
 fn get_options_returns_seeded_option() {
     let env = env();
     {
