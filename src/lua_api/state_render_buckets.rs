@@ -484,8 +484,6 @@ pub(super) fn same_strata_subtree_segment_end(
 }
 
 fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
-    use std::cmp::Reverse;
-
     regions.sort_by(|a, b| {
         let (frame_a, frame_b) = match (widgets.get(a.id), widgets.get(b.id)) {
             (Some(frame_a), Some(frame_b)) => (frame_a, frame_b),
@@ -502,14 +500,14 @@ fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
             frame_a.draw_layer as i32,
             frame_a.draw_sub_layer,
             type_flag(frame_a),
-            Reverse(a.id),
+            a.id,
         )
             .cmp(&(
                 b.depth,
                 frame_b.draw_layer as i32,
                 frame_b.draw_sub_layer,
                 type_flag(frame_b),
-                Reverse(b.id),
+                b.id,
             ))
     });
 }
