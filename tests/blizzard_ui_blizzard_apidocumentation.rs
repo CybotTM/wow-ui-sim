@@ -8,6 +8,9 @@ mod common;
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_add_documentation_table_routes_payload_kinds.rs"]
 mod behavior_add_documentation_table_routes_payload_kinds;
 
+#[path = "blizzard_ui/blizzard_apidocumentation/behavior_find_all_api_matches_returns_nil_when_empty.rs"]
+mod behavior_find_all_api_matches_returns_nil_when_empty;
+
 #[path = "blizzard_ui/blizzard_apidocumentation/load.rs"]
 mod load;
 
