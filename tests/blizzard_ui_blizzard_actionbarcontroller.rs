@@ -46,3 +46,6 @@ mod behavior_update_bonus_uses_bonus_index_when_page_one;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_pet_battle_uses_action_bar_page.rs"]
 mod behavior_update_pet_battle_uses_action_bar_page;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_reset_to_default.rs"]
+mod behavior_reset_to_default;
