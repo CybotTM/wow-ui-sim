@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-02] update | LFD reward cap info missing
+
+Updated `investigations/lfd-dungeon-list-empty.md` after the Join as Party path
+advanced into `LFGRewardsFrame_EstimateRemainingCompletions()` and hit missing
+`GetLFGDungeonRewardCapInfo`. Documented the inert 11-nil return shape Blizzard
+uses as the no-cap path.
+
 ## [2026-05-02] update | LFD Join as Party format error
 
 Updated `investigations/lfd-dungeon-list-empty.md` after clicking `Join as Party`

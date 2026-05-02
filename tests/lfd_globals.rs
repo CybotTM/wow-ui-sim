@@ -200,6 +200,57 @@ fn get_lfg_dungeon_info_unknown_returns_nil() {
 }
 
 #[test]
+fn get_lfg_dungeon_reward_cap_info_returns_inert_cap_shape() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if type(GetLFGDungeonRewardCapInfo) ~= "function" then
+                return "type=" .. type(GetLFGDungeonRewardCapInfo)
+            end
+            local values = {GetLFGDungeonRewardCapInfo(1203)}
+            if #values ~= 0 then return "count=" .. #values end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetLFGDungeonRewardCapInfo: {result}");
+}
+
+#[test]
+fn lfg_rewards_frame_estimate_remaining_completions_handles_no_cap() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            function LFGRewardsFrame_EstimateRemainingCompletions(dungeonID)
+                local currencyID, currencyQuantity, specificQuantity, specificLimit,
+                    overallQuantity, overallLimit, periodPurseQuantity, periodPurseLimit,
+                    purseQuantity, purseLimit, isWeekly = GetLFGDungeonRewardCapInfo(dungeonID)
+                if not currencyID then
+                    return 0, false
+                end
+                local remainingAllotment = math.min(specificLimit - specificQuantity, overallLimit - overallQuantity)
+                if periodPurseLimit ~= 0 then
+                    remainingAllotment = math.min(remainingAllotment, periodPurseLimit - periodPurseQuantity)
+                end
+                if currencyQuantity == 0 then
+                    return 0, isWeekly
+                end
+                return math.ceil(remainingAllotment / currencyQuantity), isWeekly
+            end
+
+            local count, weekly = LFGRewardsFrame_EstimateRemainingCompletions(1203)
+            if count ~= 0 then return "count=" .. tostring(count) end
+            if weekly ~= false then return "weekly=" .. tostring(weekly) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "LFG reward cap no-cap path: {result}");
+}
+
+#[test]
 fn get_num_random_dungeons() {
     let env = env();
     let result: String = env

@@ -89,6 +89,12 @@ Join-as-party formatting follow-up:
 - **Root cause**: the simulator returned `minPlayers` at slot 16 and `mapName` at slot 17. `LFG_HasRequiredGroupSize()` reads `select(LFG_RETURN_VALUES.minPlayers, GetLFGDungeonInfo(queueID))`, so it passed a dungeon map name such as `"Ara-Kara, City of Echoes"` into `format(ERR_LFG_MEMBERS_REQUIRED, requiredGroupSize)`, whose format expects `%d`.
 - **`tests/lfd_globals.rs`**: `get_lfg_dungeon_info_min_players_matches_blizzard_slot` locks the modern slot layout so the join button path receives a number for `minPlayers`.
 
+Reward-cap follow-up:
+
+- **`battlefield_lfg_probes.rs`**: registered `GetLFGDungeonRewardCapInfo` with the full 11-value nil return shape. The simulator has no repeated-reward currency cap state, and Blizzard's `LFGRewardsFrame_EstimateRemainingCompletions()` treats nil `currencyID` as "no cap".
+- **Root cause**: `LFDQueueFrameRandom_UpdateFrame()` updates the rewards frame when the random/specific queue type changes. That path calls `GetLFGDungeonRewardCapInfo(dungeonID)` unconditionally, so the missing global aborted the panel before the join path could continue.
+- **`tests/lfd_globals.rs`**: covers both the inert cap function shape and a local copy of Blizzard's no-cap early return.
+
 ## Why direct LFGLockList assignment over event firing
 
 Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestRFChoice` → `RaidFinderFrame_UpdateAvailability` → `GetNumRFDungeons` → `ScenarioFinderFrame_UpdateAvailability` → `GetNumRandomScenarios`. None of those exist in the sim. We could stub all of them, but the goal is just to populate `LFGLockList` for the LFD panel; the event broadcast is wider than needed.

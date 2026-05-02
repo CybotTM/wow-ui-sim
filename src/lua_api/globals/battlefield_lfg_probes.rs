@@ -37,6 +37,8 @@
 //! - `GetRandomScenarioBestChoice()`   → nil. No scenario state. Same path.
 //! - `GetLFGDungeonRewards(id)`        → 7 zeros + nil spellID. Called from
 //!   `LFDQueueFrameRandom_UpdateFrame` when a random dungeon is selected.
+//! - `GetLFGDungeonRewardCapInfo(id)`  → 11 nils. No currency cap data in
+//!   the sim; Blizzard treats nil currencyID as no cap.
 //! - `DungeonAppearsInRandomLFD(id)`   → `LE_LFG_CATEGORY_LFD` for seeded
 //!   positive LFD dungeon ids, nil otherwise. Used by the Adventure Journal
 //!   dungeon-action handoff before the Group Finder panel is shown.
@@ -409,6 +411,16 @@ fn get_lfg_dungeon_rewards(state: &mut LuaState) -> LuaResult<u32> {
     Ok(7)
 }
 
+/// `GetLFGDungeonRewardCapInfo(dungeonID)` → 11 values describing the
+/// currency cap that limits repeated rewards. The sim has no cap data, so
+/// return the full nil shape; Blizzard exits early when currencyID is nil.
+fn get_lfg_dungeon_reward_cap_info(state: &mut LuaState) -> LuaResult<u32> {
+    for _ in 0..11 {
+        state.push(Val::Nil);
+    }
+    Ok(11)
+}
+
 /// `DungeonAppearsInRandomLFD(dungeonID)` returns the LFG category id when
 /// the dungeon is represented in the random/specific LFD pool. Blizzard's
 /// Adventure Journal path uses this as the gate for selecting a dungeon by id.
@@ -524,6 +536,11 @@ fn register_lfd_info_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         get_random_dungeon_best_choice,
     )?;
     LuaApiMut::register_function(lua, "GetLFGDungeonRewards", get_lfg_dungeon_rewards)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetLFGDungeonRewardCapInfo",
+        get_lfg_dungeon_reward_cap_info,
+    )?;
     LuaApiMut::register_function(
         lua,
         "DungeonAppearsInRandomLFD",
