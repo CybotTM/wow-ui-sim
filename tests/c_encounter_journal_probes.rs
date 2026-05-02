@@ -447,6 +447,10 @@ fn adventure_journal_suggestions_seed_visible_cards() {
             assert(type(suggestion.iconPath) == "string" and suggestion.iconPath ~= "", index)
         end
 
+        assert(suggestions[1].iconPath == "Interface\\Icons\\Achievement_Dungeon_UlduarRaid_Titan_01")
+        assert(suggestions[2].iconPath == "Interface\\Icons\\INV_Nerubian_Ring_01_Color5")
+        assert(suggestions[3].iconPath == "Interface\\Icons\\INV_Misc_ScrollUnrolled03")
+
         C_AdventureJournal.SetPrimaryOffset(1)
         assert(C_AdventureJournal.GetPrimaryOffset() == 1)
         C_AdventureJournal.SetPrimaryOffset(999)

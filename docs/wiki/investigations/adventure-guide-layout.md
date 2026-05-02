@@ -16,13 +16,19 @@ The fix is for `SimState::resolve_rect_if_dirty` to use the anchor-dependent lay
 
 Follow-up: the cards could still overlap after the stale-rect fix because `GetNumLines` was registered by the tooltip widget methods after the general text methods on the shared FrameRef metatable. Non-tooltip FontStrings therefore called the tooltip line counter and returned `0`, so Blizzard sized title/description containers to zero lines. `GameTooltip` keeps tooltip-backed line counting, while regular FontStrings now compute line count from measured wrapped text height. Regression coverage lives in `tests/fontstring_anchor_pinned_width.rs` as `fontstring_get_num_lines_reports_wrapped_line_count`.
 
+Follow-up: the card portraits had two separate source issues. Blizzard calls `Texture:SetMask("Interface\\CharacterFrame\\TempPortraitAlphaMask")` for the circular card portraits, but the simulator's `SetMask` method was still a no-op, so icons rendered square instead of clipping to the gold circle. The seeded `C_AdventureJournal` suggestions also used two missing texture paths (`Achievement_Raid_Nerubian` and `Inv_Archaeology_70_Scroll`), which left the Nerub-ar Palace and Delves portraits blank. `SetMask` now creates a real mask texture wired through the existing mask renderer, and the seed icons use manifest-backed 64x64 paths.
+
 ## Sources
 
 - [state_render.rs](../../../src/lua_api/state_render.rs) - synchronous dirty rect resolution and anchor-dependent recomputation
 - [text.rs](../../../src/lua_api/frame/methods/text_attribute_event/text.rs) - FontString `GetNumLines` measurement
 - [tooltip.rs](../../../src/lua_api/frame/methods/widgets/tooltip.rs) - GameTooltip-specific `GetNumLines` dispatch
+- [rotation_mask.rs](../../../src/lua_api/frame/methods/widgets/texture/rotation_mask.rs) - `Texture:SetMask` mask texture creation
+- [encounter_journal.rs](../../../src/lua_api/globals/missing_surface/encounter_journal.rs) - Adventure Journal seed suggestion data
 - [layout_resolve.rs](../../../tests/layout_resolve.rs) - regression coverage for resized anchor targets updating sibling dependents
 - [fontstring_anchor_pinned_width.rs](../../../tests/fontstring_anchor_pinned_width.rs) - regression coverage for FontString wrapped line counts
+- [methods_texture.rs](../../../tests/methods_texture.rs) - regression coverage for `Texture:SetMask`
+- [c_encounter_journal_probes.rs](../../../tests/c_encounter_journal_probes.rs) - regression coverage for Adventure Journal suggestion icon paths
 - [Blizzard_EncounterJournal.xml](</syncthing/World of Warcraft/_retail_/BlizzardInterfaceCode/Interface/AddOns/Blizzard_EncounterJournal/Mainline/Blizzard_EncounterJournal.xml>) - Adventure Journal Suggested Content card anchors
 - [Blizzard_EncounterJournal.lua](</syncthing/World of Warcraft/_retail_/BlizzardInterfaceCode/Interface/AddOns/Blizzard_EncounterJournal/Mainline/Blizzard_EncounterJournal.lua>) - runtime text sizing and geometry queries
 

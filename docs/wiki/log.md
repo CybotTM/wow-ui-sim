@@ -788,6 +788,10 @@ Created `investigations/lfd-dungeon-list-empty.md` for the Dungeons & Raids pane
 
 Created `investigations/micro-menu-atlas-revert.md` to document the micro-menu hover/leave icon disappearance root cause: button atlas setters populated child `tex_coords` but not `atlas_tex_coords`, so restored normal textures could miss the atlas-crop render path. Updated `index.md` with the new investigation page.
 
+## [2026-05-02] update | Adventure Guide portrait masks and icons
+
+Updated `investigations/adventure-guide-layout.md` with the follow-up Adventure Guide portrait bug: `Texture:SetMask` was still a no-op, so card icons did not clip to the gold portrait rings, and two seeded Adventure Journal icon paths did not resolve. Documented the mask wiring and manifest-backed icon replacements.
+
 ## [2026-04-29] ingest | dialog background DXT3 stripes
 
 Created `investigations/dialog-background-dxt3-stripes.md` to document the escape-menu background stripe root cause: DXT3 BLPs were incorrectly mapped to BC3 on the raw compressed upload path. Updated `index.md` with the new investigation page.
