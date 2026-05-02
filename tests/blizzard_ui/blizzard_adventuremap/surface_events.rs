@@ -9,6 +9,7 @@ const DATA_PROVIDER_EVENTS: &[&str] = &[
     "ADVENTURE_MAP_QUEST_UPDATE",
     "QUEST_ACCEPTED",
 ];
+const QUEST_DIALOG_SHOW_EVENTS: &[&str] = &["ADVENTURE_MAP_QUEST_UPDATE", "QUEST_LOG_UPDATE"];
 
 #[test]
 fn adventure_map_frame_and_quest_data_providers_register_events() {
@@ -29,6 +30,31 @@ fn adventure_map_frame_and_quest_data_providers_register_events() {
         }
     });
 }
+
+#[test]
+fn quest_choice_dialog_registers_events_only_while_shown() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for event in QUEST_DIALOG_SHOW_EVENTS {
+            let lifecycle: QuestDialogEventLifecycle = env
+                .eval(&format!(
+                    r#"
+                    AdventureMapQuestChoiceDialog:Hide()
+                    local beforeShow = AdventureMapQuestChoiceDialog:IsEventRegistered({event:?})
+                    AdventureMapQuestChoiceDialog:Show()
+                    local afterShow = AdventureMapQuestChoiceDialog:IsEventRegistered({event:?})
+                    AdventureMapQuestChoiceDialog:Hide()
+                    local afterHide = AdventureMapQuestChoiceDialog:IsEventRegistered({event:?})
+                    return beforeShow, afterShow, afterHide
+                    "#
+                ))
+                .expect("AdventureMapQuestChoiceDialog show/hide event probe must run cleanly");
+
+            assert_quest_dialog_event_lifecycle(event, lifecycle);
+        }
+    });
+}
+
+type QuestDialogEventLifecycle = (bool, bool, bool);
 
 const QUEST_DATA_PROVIDER_MIXINS: &[&str] = &[
     "AdventureMap_QuestChoiceDataProviderMixin",
@@ -56,4 +82,21 @@ fn assert_data_provider_events(env: &wow_ui_sim::lua_api::WowLuaEnv, provider_na
             "`{provider_name}:OnAdded` must register `{event}` when added to AdventureMapFrame"
         );
     }
+}
+
+fn assert_quest_dialog_event_lifecycle(event: &str, lifecycle: QuestDialogEventLifecycle) {
+    let (before_show, after_show, after_hide) = lifecycle;
+
+    assert!(
+        !before_show,
+        "`AdventureMapQuestChoiceDialog` must not register `{event}` while hidden"
+    );
+    assert!(
+        after_show,
+        "`AdventureMapQuestChoiceDialog:OnShow` must register `{event}`"
+    );
+    assert!(
+        !after_hide,
+        "`AdventureMapQuestChoiceDialog:OnHide` must unregister `{event}`"
+    );
 }
