@@ -26,6 +26,41 @@ fn adventure_map_frame_loads_as_map_canvas_panel() {
 
 type AdventureMapFrameSurface = (String, String, String, String, String, String);
 
+#[test]
+fn adventure_map_quest_choice_dialog_loads_with_mixin_and_children() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let surface: QuestChoiceDialogSurface = env
+            .eval(
+                r#"
+                return type(AdventureMapQuestChoiceDialog),
+                       AdventureMapQuestChoiceDialog.OnLoad == AdventureMapQuestChoiceDialogMixin.OnLoad,
+                       AdventureMapQuestChoiceDialog.OnShow == AdventureMapQuestChoiceDialogMixin.OnShow,
+                       type(AdventureMapQuestChoiceDialog.Portrait),
+                       type(AdventureMapQuestChoiceDialog.Background),
+                       type(AdventureMapQuestChoiceDialog.Details),
+                       type(AdventureMapQuestChoiceDialog.Rewards),
+                       type(AdventureMapQuestChoiceDialog.RewardsHeader),
+                       type(AdventureMapQuestChoiceDialog.FadeIn)
+                "#,
+            )
+            .expect("AdventureMapQuestChoiceDialog surface probe must run cleanly");
+
+        assert_quest_choice_dialog_surface(surface);
+    });
+}
+
+type QuestChoiceDialogSurface = (
+    String,
+    bool,
+    bool,
+    String,
+    String,
+    String,
+    String,
+    String,
+    String,
+);
+
 fn assert_adventure_map_frame_surface(surface: AdventureMapFrameSurface) {
     let (
         frame_type,
@@ -57,4 +92,49 @@ fn assert_adventure_map_frame_surface(surface: AdventureMapFrameSurface) {
         pin_frame_level_definitions_type, "table",
         "`MapCanvasPinFrameLevelsManagerMixin:Initialize` must seed frame-level definitions"
     );
+}
+
+fn assert_quest_choice_dialog_surface(surface: QuestChoiceDialogSurface) {
+    let (
+        dialog_type,
+        on_load_matches_mixin,
+        on_show_matches_mixin,
+        portrait_type,
+        background_type,
+        details_type,
+        rewards_type,
+        rewards_header_type,
+        fade_in_type,
+    ) = surface;
+
+    assert_eq!(
+        dialog_type, "table",
+        "`AdventureMapQuestChoiceDialog` must exist"
+    );
+    assert!(
+        on_load_matches_mixin,
+        "`AdventureMapQuestChoiceDialog` must copy `OnLoad` from its mixin"
+    );
+    assert!(
+        on_show_matches_mixin,
+        "`AdventureMapQuestChoiceDialog` must copy `OnShow` from its mixin"
+    );
+
+    assert_quest_choice_dialog_children([
+        ("Portrait", portrait_type),
+        ("Background", background_type),
+        ("Details", details_type),
+        ("Rewards", rewards_type),
+        ("RewardsHeader", rewards_header_type),
+        ("FadeIn", fade_in_type),
+    ]);
+}
+
+fn assert_quest_choice_dialog_children(child_types: [(&str, String); 6]) {
+    for (child_name, child_type) in child_types {
+        assert_eq!(
+            child_type, "table",
+            "`AdventureMapQuestChoiceDialog.{child_name}` must be exposed"
+        );
+    }
 }
