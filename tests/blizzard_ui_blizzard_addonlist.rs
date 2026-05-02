@@ -70,3 +70,6 @@ mod behavior_node_right_click_opens_context_menu;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_dropdown_setup_radio_options.rs"]
 mod behavior_dropdown_setup_radio_options;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_update_performance_skips_in_glue.rs"]
+mod behavior_update_performance_skips_in_glue;
