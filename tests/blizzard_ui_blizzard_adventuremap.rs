@@ -67,3 +67,6 @@ mod behavior_quest_offer_pin_click_anchors_dialog_and_trigger;
 
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_dialog_accept_records_result_and_starts_quest.rs"]
 mod behavior_quest_dialog_accept_records_result_and_starts_quest;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_dialog_decline_path_distinguishes_abstain_vs_decline.rs"]
+mod behavior_quest_dialog_decline_path_distinguishes_abstain_vs_decline;
