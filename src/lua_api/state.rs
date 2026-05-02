@@ -82,6 +82,8 @@ macro_rules! build_empty_sim_state {
             has_override_action_bar: false,
             override_bar_skin: None,
             override_bar_index: 1,
+            has_temp_shapeshift_action_bar: false,
+            temp_shapeshift_bar_index: 1,
             action_bars: $collections.action_bars,
             action_outfits: $collections.action_outfits,
             equipped_gear_outfit_action_slots: $collections.equipped_gear_outfit_action_slots,
@@ -1367,6 +1369,13 @@ pub struct SimState {
     /// Drives `C_ActionBar.GetOverrideBarIndex()` when an unskinned override
     /// bar is active. Default 1 matches Blizzard's bootstrap fallback.
     pub override_bar_index: i32,
+    /// Drives `C_ActionBar.HasTempShapeshiftActionBar()`. Default false — no
+    /// temporary shapeshift bar is mounted.
+    pub has_temp_shapeshift_action_bar: bool,
+    /// Drives `C_ActionBar.GetTempShapeshiftBarIndex()` when a temporary
+    /// shapeshift bar is active. Default 1 matches Blizzard's bootstrap
+    /// fallback.
+    pub temp_shapeshift_bar_index: i32,
     /// Action-bar transition state. Drives `ActionBarBusy()` (set true while
     /// a status-tracking-bar fade or page change is mid-animation) and
     /// `ActionBarController_GetCurrentActionBarState()` (1 = main bar,

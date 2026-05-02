@@ -345,7 +345,8 @@ fn get_override_bar_index(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_temp_shapeshift_bar_index(state: &mut LuaState) -> LuaResult<u32> {
-    push_nil(state)
+    let temp_shapeshift_bar_index = borrow_state(state)?.temp_shapeshift_bar_index;
+    push_i32(state, temp_shapeshift_bar_index)
 }
 
 fn get_bonus_bar_index(state: &mut LuaState) -> LuaResult<u32> {
@@ -380,7 +381,8 @@ fn has_bonus_action_bar(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn has_temp_shapeshift_action_bar(state: &mut LuaState) -> LuaResult<u32> {
-    push_bool(state, false)
+    let has_temp_shapeshift_action_bar = borrow_state(state)?.has_temp_shapeshift_action_bar;
+    push_bool(state, has_temp_shapeshift_action_bar)
 }
 
 fn has_extra_action_bar(state: &mut LuaState) -> LuaResult<u32> {

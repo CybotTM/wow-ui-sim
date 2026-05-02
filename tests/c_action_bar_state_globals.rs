@@ -76,6 +76,28 @@ fn vehicle_bar_index_reads_state() {
 }
 
 #[test]
+fn temp_shapeshift_bar_index_reads_state() {
+    let env = WowLuaEnv::new().expect("env");
+    {
+        let mut state = env.state().borrow_mut();
+        state.has_temp_shapeshift_action_bar = true;
+        state.temp_shapeshift_bar_index = 9;
+    }
+
+    let (has_temp_bar, temp_bar_index): (bool, i32) = env
+        .eval(
+            r#"
+            return C_ActionBar.HasTempShapeshiftActionBar(),
+                C_ActionBar.GetTempShapeshiftBarIndex()
+            "#,
+        )
+        .unwrap();
+
+    assert!(has_temp_bar);
+    assert_eq!(temp_bar_index, 9);
+}
+
+#[test]
 fn le_actionbar_state_constants_are_seeded() {
     let env = WowLuaEnv::new().expect("env");
     let main: f64 = env.eval("return LE_ACTIONBAR_STATE_MAIN").unwrap();

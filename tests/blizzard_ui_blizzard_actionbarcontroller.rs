@@ -37,3 +37,6 @@ mod behavior_update_vehicle_skinned;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_vehicle_unskinned_uses_vehicle_index.rs"]
 mod behavior_update_vehicle_unskinned_uses_vehicle_index;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_temp_shapeshift_uses_temp_index.rs"]
+mod behavior_update_temp_shapeshift_uses_temp_index;
