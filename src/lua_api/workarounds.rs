@@ -2209,6 +2209,33 @@ local function __wow_seed_adventure_map_canvas_state(frame)
     frame.pinFrameLevelsManager.definitions = frame.pinFrameLevelsManager.definitions or {}
 end
 
+local function __wow_seed_adventure_map_border_frame(frame)
+    if type(frame) ~= "table" or type(CreateFrame) ~= "function" then
+        return
+    end
+
+    if type(frame.BorderFrame) ~= "table" then
+        frame.BorderFrame = CreateFrame("Frame", nil, frame)
+    end
+
+    local borderFrame = frame.BorderFrame
+    if type(borderFrame.SetPortraitToAsset) ~= "function" then
+        borderFrame.SetPortraitToAsset = function() end
+    end
+    if type(borderFrame.Underlay) ~= "table" then
+        borderFrame.Underlay = CreateFrame("Frame", nil, borderFrame)
+    end
+    if type(borderFrame.TitleText) ~= "table" and type(borderFrame.CreateFontString) == "function" then
+        borderFrame.TitleText = borderFrame:CreateFontString(nil, "ARTWORK")
+    end
+    if type(borderFrame.Bg) ~= "table" and type(borderFrame.CreateTexture) == "function" then
+        borderFrame.Bg = borderFrame:CreateTexture(nil, "BACKGROUND")
+    end
+    if type(borderFrame.TopTileStreaks) ~= "table" and type(borderFrame.CreateTexture) == "function" then
+        borderFrame.TopTileStreaks = borderFrame:CreateTexture(nil, "ARTWORK")
+    end
+end
+
 local function __wow_adventure_map_has_provider(frame, mixin)
     if type(frame.dataProviders) ~= "table" or type(mixin) ~= "table" then
         return true
@@ -2237,6 +2264,33 @@ local function __wow_add_adventure_map_provider(frame, mixin)
     end
 end
 
+local function __wow_seed_adventure_map_inset_pool(frame)
+    if type(frame) ~= "table"
+        or frame.mapInsetPool ~= nil
+        or type(CreateFramePool) ~= "function"
+        or type(frame.GetCanvas) ~= "function"
+        or type(frame.SetMapInsetPool) ~= "function"
+    then
+        return
+    end
+
+    local canvasOk, canvas = pcall(frame.GetCanvas, frame)
+    if not canvasOk or type(canvas) ~= "table" then
+        return
+    end
+
+    local function releaseMapInset(pool, mapInset)
+        if type(mapInset) == "table" and type(mapInset.OnReleased) == "function" then
+            mapInset:OnReleased()
+        end
+    end
+
+    local poolOk, mapInsetPool = pcall(CreateFramePool, "FRAME", canvas, "AdventureMapInsetTemplate", releaseMapInset)
+    if poolOk and type(mapInsetPool) == "table" then
+        pcall(frame.SetMapInsetPool, frame, mapInsetPool)
+    end
+end
+
 if type(AdventureMapFrame) ~= "table"
     and type(UIParent) == "table"
     and type(CreateFrame) == "function"
@@ -2246,6 +2300,7 @@ then
     AdventureMapFrame:SetFrameStrata("DIALOG")
     AdventureMapFrame:SetSize(1004, 689)
     __wow_seed_adventure_map_canvas_state(AdventureMapFrame)
+    __wow_seed_adventure_map_border_frame(AdventureMapFrame)
 
     if type(Mixin) == "function" then
         pcall(Mixin, AdventureMapFrame, MapCanvasMixin)
@@ -2259,6 +2314,8 @@ then
     AdventureMapFrame.ScrollContainer = scrollContainer
 
     __wow_seed_adventure_map_canvas_state(AdventureMapFrame)
+    __wow_seed_adventure_map_border_frame(AdventureMapFrame)
+    __wow_seed_adventure_map_inset_pool(AdventureMapFrame)
 
     if type(AdventureMapFrame.RegisterEvent) == "function" then
         pcall(AdventureMapFrame.RegisterEvent, AdventureMapFrame, "ADVENTURE_MAP_UPDATE_INSETS")
@@ -2267,6 +2324,11 @@ then
     __wow_add_adventure_map_provider(AdventureMapFrame, AdventureMap_QuestChoiceDataProviderMixin)
     __wow_add_adventure_map_provider(AdventureMapFrame, AdventureMap_QuestOfferDataProviderMixin)
     __wow_add_adventure_map_provider(AdventureMapFrame, QuestSessionDataProviderMixin)
+end
+
+if type(AdventureMapFrame) == "table" then
+    __wow_seed_adventure_map_border_frame(AdventureMapFrame)
+    __wow_seed_adventure_map_inset_pool(AdventureMapFrame)
 end
 "#;
 
