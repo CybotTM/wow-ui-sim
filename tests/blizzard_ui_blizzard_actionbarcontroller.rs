@@ -70,3 +70,6 @@ mod behavior_settings_loaded_registers_callbacks;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_pet_battle_close_validates_transition.rs"]
 mod behavior_pet_battle_close_validates_transition;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_pet_battle_open_hides_override.rs"]
+mod behavior_pet_battle_open_hides_override;
