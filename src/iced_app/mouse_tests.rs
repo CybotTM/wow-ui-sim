@@ -58,6 +58,7 @@ const PASS_THROUGH_SETUP_LUA: &str = r#"
     PassThroughParent:SetSize(100, 100)
     PassThroughParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
     PassThroughParent:EnableMouse(true)
+    PassThroughParent:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     PassThroughParent:SetScript("OnClick", function(_, button)
         if button == "LeftButton" then
             __pass_parent_left = (__pass_parent_left or 0) + 1
@@ -69,6 +70,7 @@ const PASS_THROUGH_SETUP_LUA: &str = r#"
     PassThroughChild = CreateFrame("Button", "PassThroughChild", PassThroughParent)
     PassThroughChild:SetAllPoints(PassThroughParent)
     PassThroughChild:EnableMouse(true)
+    PassThroughChild:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     PassThroughChild:SetScript("OnClick", function(_, button)
         if button == "LeftButton" then
             __pass_child_left = (__pass_child_left or 0) + 1
@@ -625,6 +627,59 @@ fn hover_and_click_use_child_render_order_when_parent_wins_phase_one() {
     assert_eq!(
         low_clicks, 0.0,
         "lower-rendered sibling should not steal the click by creation order"
+    );
+}
+
+#[test]
+fn register_for_clicks_left_button_down_fires_click_on_mouse_down_only() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            DownClickButton = CreateFrame("Button", "DownClickButton", UIParent)
+            DownClickButton:SetSize(100, 100)
+            DownClickButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            DownClickButton:RegisterForClicks("LeftButtonDown")
+            DownClickButton:SetScript("OnClick", function(_, button, down)
+                __down_click_count = (__down_click_count or 0) + 1
+                __down_click_button = button
+                __down_click_down = down
+            end)
+
+            __down_click_count = 0
+            __down_click_button = nil
+            __down_click_down = nil
+            "#,
+        )
+        .expect("down-click setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    let click_pos = Point::new(150.0, 150.0);
+
+    app.handle_mouse_down(click_pos);
+
+    let (count_after_down, button, down): (f64, String, bool) = app
+        .env
+        .borrow()
+        .eval("return __down_click_count, __down_click_button, __down_click_down")
+        .expect("down-click state should be readable after mouse down");
+    assert_eq!(count_after_down, 1.0);
+    assert_eq!(button, "LeftButton");
+    assert!(down, "LeftButtonDown click should pass down=true");
+
+    app.handle_mouse_up(click_pos);
+
+    let count_after_up: f64 = app
+        .env
+        .borrow()
+        .eval("return __down_click_count")
+        .expect("down-click count should be readable after mouse up");
+    assert_eq!(
+        count_after_up, 1.0,
+        "LeftButtonDown registration should not fire OnClick again on mouse up"
     );
 }
 
