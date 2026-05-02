@@ -26,6 +26,9 @@ mod behavior_onload_seeds_data_providers_and_pin_levels;
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_onload_styles_close_button.rs"]
 mod behavior_onload_styles_close_button;
 
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_can_reinforce_gates_on_progress.rs"]
+mod behavior_can_reinforce_gates_on_progress;
+
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_has_available_node_walks_node_list.rs"]
 mod behavior_has_available_node_walks_node_list;
 
