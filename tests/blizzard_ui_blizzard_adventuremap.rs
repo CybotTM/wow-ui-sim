@@ -31,3 +31,6 @@ mod behavior_onload_adds_three_data_providers;
 
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_onshow_clears_area_ids_and_sets_map_id.rs"]
 mod behavior_onshow_clears_area_ids_and_sets_map_id;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_onhide_calls_dialog_parent_hide_and_close.rs"]
+mod behavior_onhide_calls_dialog_parent_hide_and_close;
