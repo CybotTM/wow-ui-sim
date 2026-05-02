@@ -55,3 +55,6 @@ mod behavior_init_addon_uses_question_mark_icon;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_init_addon_grays_out_disabled.rs"]
 mod behavior_init_addon_grays_out_disabled;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_addon_actions_blocked_appends_alert_icon.rs"]
+mod behavior_addon_actions_blocked_appends_alert_icon;
