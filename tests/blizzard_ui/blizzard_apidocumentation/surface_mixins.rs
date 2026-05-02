@@ -63,6 +63,23 @@ const BASE_API_MIXIN_METHODS: &[&str] = &[
     "AddSystemTag",
 ];
 
+const SYSTEMS_API_MIXIN_OVERRIDES: &[&str] = &[
+    "GetType",
+    "GetLinkHexColor",
+    "GetNamespaceName",
+    "GetLoweredNamespaceName",
+    "MatchesSearchString",
+    "GetSingleOutputLine",
+    "GetDetailedOutputLines",
+    "MatchesName",
+    "MatchesNameCaseInsenstive",
+    "FindAllAPIMatches",
+    "ListAllAPI",
+    "GetNumTables",
+    "GetNumFunctions",
+    "GetNumEvents",
+];
+
 #[test]
 fn api_documentation_mixin_exposes_expected_methods() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -96,6 +113,42 @@ fn base_api_mixin_exposes_expected_methods() {
             assert_eq!(
                 "function", method_type,
                 "BaseAPIMixin.{method_name} must be a function"
+            );
+        }
+    });
+}
+
+#[test]
+fn systems_api_mixin_inherits_base_and_exposes_expected_overrides() {
+    with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
+        load_api_documentation(env);
+
+        let inherited_pretty_type: bool = env
+            .eval("return SystemsAPIMixin.GetPrettyType == BaseAPIMixin.GetPrettyType")
+            .expect("SystemsAPIMixin inheritance probe must run cleanly");
+
+        assert!(
+            inherited_pretty_type,
+            "SystemsAPIMixin must inherit methods from BaseAPIMixin"
+        );
+
+        let system_type: String = env
+            .eval("return SystemsAPIMixin:GetType()")
+            .expect("SystemsAPIMixin:GetType probe must run cleanly");
+
+        assert_eq!(
+            "system", system_type,
+            "SystemsAPIMixin:GetType() must return the API kind string"
+        );
+
+        for method_name in SYSTEMS_API_MIXIN_OVERRIDES {
+            let method_type: String = env
+                .eval(&format!(r#"return type(SystemsAPIMixin["{method_name}"])"#))
+                .expect("SystemsAPIMixin method type probe must run cleanly");
+
+            assert_eq!(
+                "function", method_type,
+                "SystemsAPIMixin.{method_name} must be a function"
             );
         }
     });
