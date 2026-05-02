@@ -31,6 +31,22 @@ const ADVENTURE_MAP_INSET_MIXIN_METHODS: &[&str] = &[
     "OnMouseEnter",
     "OnMouseLeave",
 ];
+const ADVENTURE_MAP_QUEST_CHOICE_DIALOG_MIXIN_METHODS: &[&str] = &[
+    "OnLoad",
+    "OnParentHide",
+    "ShowWithQuest",
+    "SetPortraitAtlas",
+    "OnEvent",
+    "OnShow",
+    "OnHide",
+    "Finalize",
+    "Refresh",
+    "RefreshRewards",
+    "RefreshDetails",
+    "AddReward",
+    "AcceptQuest",
+    "DeclineQuest",
+];
 
 #[test]
 fn adventure_map_mixin_exposes_plan_methods() {
@@ -46,6 +62,17 @@ fn adventure_map_inset_mixin_exposes_plan_methods() {
             env,
             "AdventureMapInsetMixin",
             ADVENTURE_MAP_INSET_MIXIN_METHODS,
+        );
+    });
+}
+
+#[test]
+fn adventure_map_quest_choice_dialog_mixin_exposes_plan_methods() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        assert_mixin_methods(
+            env,
+            "AdventureMapQuestChoiceDialogMixin",
+            ADVENTURE_MAP_QUEST_CHOICE_DIALOG_MIXIN_METHODS,
         );
     });
 }
