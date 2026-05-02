@@ -12,6 +12,7 @@
 use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 use crate::common::panel_fixtures::{blizzard_ui_dir, recorded_lua_errors};
 use std::path::PathBuf;
+use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_AdventureMap";
@@ -20,6 +21,20 @@ const REQUIRED_DEPS: &[&str] = &[
     "Blizzard_GarrisonTemplates",
     "Blizzard_MapCanvas",
     "Blizzard_SharedMapDataProviders",
+];
+const MIXIN_TABLES: &[&str] = &[
+    "AdventureMapMixin",
+    "AdventureMapInsetMixin",
+    "AdventureMapQuestChoiceDialogMixin",
+    "AdventureMap_QuestChoiceDataProviderMixin",
+    "AdventureMap_QuestOfferDataProviderMixin",
+    "AdventureMap_ZoneSummaryProviderMixin",
+    "AdventureMap_QuestChoicePinMixin",
+    "AdventureMap_QuestOfferPinMixin",
+    "AdventureMap_FogPinMixin",
+    "AdventureMap_ZoneSummaryPinMixin",
+    "AdventureMap_ZoneSummaryInsetPinMixin",
+    "AdventureMapQuestRewardMixin",
 ];
 
 #[test]
@@ -40,6 +55,48 @@ fn adventure_map_loads_with_dependency_closure_and_no_lua_errors() {
             errors.join("\n  ")
         );
     });
+}
+
+#[test]
+fn adventure_map_publishes_expected_mixin_tables() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, loaded| {
+        assert_loaded(loaded, ROOT);
+
+        let missing_or_wrong_type = probe_missing_mixin_tables(env);
+        assert!(
+            missing_or_wrong_type.is_empty(),
+            "`{ROOT}` must publish all expected mixins as tables. Missing or wrong type: \
+             {missing_or_wrong_type:?}"
+        );
+    });
+}
+
+fn probe_missing_mixin_tables(env: &WowLuaEnv) -> Vec<String> {
+    let mixin_list = MIXIN_TABLES
+        .iter()
+        .map(|name| format!("{name:?}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let probe = format!(
+        r#"
+        local missing = {{}}
+        for _, name in ipairs({{{mixin_list}}}) do
+            if type(_G[name]) ~= "table" then
+                table.insert(missing, name .. ":" .. type(_G[name]))
+            end
+        end
+        return table.concat(missing, "\n")
+        "#
+    );
+    let missing: String = env
+        .eval(&probe)
+        .expect("AdventureMap mixin table probe must run cleanly");
+
+    missing
+        .lines()
+        .filter(|line| !line.is_empty())
+        .map(str::to_string)
+        .collect()
 }
 
 fn assert_toc_declares_required_dependencies() {
