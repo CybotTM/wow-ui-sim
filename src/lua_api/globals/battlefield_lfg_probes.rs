@@ -1,18 +1,12 @@
 //! Battlefield / LFG probe globals.
 //!
-//! Migrates 6 entries off `GLOBAL_ZERO_STUBS`:
+//! Covers battlefield queue probes plus the LFD state used by Group Finder and
+//! QueueStatusFrame. Most functions return seeded, inert server-state shapes
+//! until the simulator models real queue matching.
 //!
-//! - `GetBattlefieldStatus(index)`     → `(status, mapName, instanceID,
-//!   lvlMin, lvlMax, teamSize, registered, eligible, waitingOther)` from
-//!   `SimState.battlefield_queue`.
-//! - `GetBattlefieldInstanceRunTime()` → 0. The sim doesn't track when
-//!   the player entered a battleground instance; callers expect the
-//!   retail `ms since entry` integer.
-//! - `GetNumBattlegroundEntries()`     → 1 when the queue is active
-//!   (`Queued` / `Confirm` / `Active`), else 0.
-//! - `GetWorldPVPQueueStatus(index)`   → 7 values with the same status token
-//!   family as battlefield queues. Default is the inert
-//!   `("none", "", 0, 0, 0, 0, false)` shape Blizzard startup expects.
+//! - `GetBattlefieldStatus`, `GetNumBattlegroundEntries`, and
+//!   `GetWorldPVPQueueStatus` reflect `SimState.battlefield_queue`.
+//! - `GetBattlefieldInstanceRunTime()` → 0; entry timing is not modeled.
 //! - `GetLFGDungeonInfo(dungeonID)`    → 21 values from `SimState.lfd_dungeons`.
 //! - `GetLFGMode(category)`            → `("queued", nil)` after `JoinLFG`,
 //!   otherwise `(nil, nil)`.
@@ -24,35 +18,27 @@
 //! - `GetLFDLockPlayerCount()`         → 0. The sim has no LFD locks.
 //! - `GetLFDLockInfo(dungeonID, idx)`  → all-nil. No lock data without queue.
 //! - `GetLFDRoleLockInfo(id, roleID)`  → empty table. No role restrictions.
-//! - `GetLFDChoiceCollapseState(t?)`   → table of `{[dungeonID]=bool}`. Sim has
-//!   no persisted collapse state, so the table is wiped and returned (or a
-//!   fresh empty table if none was passed). Required by `LFGDungeonList_Setup`.
-//! - `GetLFDChoiceEnabledState(t?)`    → table of `{[dungeonID]=bool|0|1|2}`.
-//!   Defaults joinable specific dungeons to checked and preserves explicit
-//!   `SetLFGDungeonEnabled` choices. Required by `LFGDungeonList_Setup`.
-//! - `ClearAllLFGDungeons(category)`   → clears active LFG mode for the
-//!   category before Blizzard selects entries to queue.
-//! - `SetLFGDungeon(category, id)`      → validates the selected id. Selection
-//!   details are not modelled yet; `JoinLFG` owns the visible queued mode.
+//! - `GetLFDChoiceCollapseState(t?)` and `GetLFDChoiceEnabledState(t?)` feed
+//!   `LFGDungeonList_Setup`.
+//! - `ClearAllLFGDungeons(category)`   → clears selected and active LFG mode.
+//! - `SetLFGDungeon(category, id)`      → validates and records selected ids.
 //! - `JoinLFG(category)`               → marks the category queued.
 //! - `GetLFGInfoServer(category, id?)` → queued server-info tuple consumed by
 //!   Blizzard's Lua `GetLFGMode`.
-//! - `GetLFGLockList()`                → empty table. No locks without server
-//!   state. Required by `LFGDungeonList_Setup` and `LFGList_DefaultFilterFunction`
-//!   (filter returns `false` when the list is nil, hiding every dungeon).
+//! - `GetLFGQueuedList(category, t?)`   → selected queue ids by category.
+//! - `GetLFGQueueStats(category, id?)`  → queue-status display tuple.
+//! - `GetLFGLockList()`                → empty table. No server locks.
 //! - `GetBestRFChoice()`               → nil. No raid-finder state. Called from
 //!   `RaidFinderFrame_OnEvent(LFG_LOCK_INFO_RECEIVED)`.
 //! - `GetRandomScenarioBestChoice()`   → nil. No scenario state. Same path.
 //! - `GetLFGDungeonRewards(id)`        → 7 zeros + nil spellID. Called from
 //!   `LFDQueueFrameRandom_UpdateFrame` when a random dungeon is selected.
-//! - `GetLFGDungeonRewardCapInfo(id)`  → 11 nils. No currency cap data in
-//!   the sim; Blizzard treats nil currencyID as no cap.
-//! - `DungeonAppearsInRandomLFD(id)`   → `LE_LFG_CATEGORY_LFD` for seeded
-//!   positive LFD dungeon ids, nil otherwise. Used by the Adventure Journal
-//!   dungeon-action handoff before the Group Finder panel is shown.
+//! - `GetLFGDungeonRewardCapInfo(id)`  → 11 nils. No currency cap data.
+//! - `DungeonAppearsInRandomLFD(id)`   → LFD category for seeded dungeon ids.
 //! - `IsLFGDungeonJoinable(dungeonID)` → `(isAvailableForAll, isAvailableForPlayer,
 //!   hideIfNotJoinable, totalGroupSizeRequired)` from `lfd_dungeons` + `player.level`.
 
+use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_api::state::BattlefieldStatus;
 use crate::lua_api::state_types::LfdDungeonInfo;
@@ -375,9 +361,9 @@ fn set_lfg_dungeon_enabled(state: &mut LuaState) -> LuaResult<u32> {
 /// category. Blizzard calls this immediately before selecting queue entries.
 fn clear_all_lfg_dungeons(state: &mut LuaState) -> LuaResult<u32> {
     let category = stack_i32(state, 1).unwrap_or(0);
-    borrow_state_mut(state)?
-        .lfg_active_categories
-        .remove(&category);
+    let mut sim = borrow_state_mut(state)?;
+    sim.lfg_active_categories.remove(&category);
+    sim.lfg_queued_dungeons.remove(&category);
     Ok(0)
 }
 
@@ -385,6 +371,7 @@ fn clear_all_lfg_dungeons(state: &mut LuaState) -> LuaResult<u32> {
 /// `JoinLFG`. The simulator does not yet expose selected ids, but it validates
 /// known ids so bad data fails closed instead of creating phantom queues.
 fn set_lfg_dungeon(state: &mut LuaState) -> LuaResult<u32> {
+    let category = stack_i32(state, 1).unwrap_or(0);
     let dungeon_id = stack_i32(state, 2).unwrap_or(0);
     let known = borrow_state(state)?
         .lfd_dungeons
@@ -393,6 +380,11 @@ fn set_lfg_dungeon(state: &mut LuaState) -> LuaResult<u32> {
     if !known {
         return Ok(0);
     }
+    borrow_state_mut(state)?
+        .lfg_queued_dungeons
+        .entry(category)
+        .or_default()
+        .insert(dungeon_id);
     Ok(0)
 }
 
@@ -405,8 +397,24 @@ fn join_lfg(state: &mut LuaState) -> LuaResult<u32> {
         borrow_state_mut(state)?
             .lfg_active_categories
             .insert(category);
+        dispatch_event_now(state, "LFG_UPDATE", &[])?;
+        dispatch_event_now(state, "LFG_QUEUE_STATUS_UPDATE", &[])?;
     }
     Ok(0)
+}
+
+fn is_category_queued(state: &LuaState, category: i32) -> LuaResult<bool> {
+    Ok(borrow_state(state)?
+        .lfg_active_categories
+        .get(&category)
+        .is_some())
+}
+
+fn first_queued_lfg_id(state: &LuaState, category: i32) -> LuaResult<Option<i32>> {
+    Ok(borrow_state(state)?
+        .lfg_queued_dungeons
+        .get(&category)
+        .and_then(|ids| ids.iter().next().copied()))
 }
 
 /// `GetLFGInfoServer(category[, lfgID])` feeds Blizzard's Lua `GetLFGMode`.
@@ -414,10 +422,8 @@ fn join_lfg(state: &mut LuaState) -> LuaResult<u32> {
 /// proposal/listing details inert.
 fn get_lfg_info_server(state: &mut LuaState) -> LuaResult<u32> {
     let category = stack_i32(state, 1).unwrap_or(0);
-    let queued = borrow_state(state)?
-        .lfg_active_categories
-        .get(&category)
-        .is_some();
+    let queued = is_category_queued(state, category)?;
+    let roles = borrow_state(state)?.lfg_roles.clone();
     state.push(Val::Bool(false)); // inParty
     state.push(Val::Bool(false)); // joined
     state.push(Val::Bool(queued)); // queued
@@ -426,7 +432,83 @@ fn get_lfg_info_server(state: &mut LuaState) -> LuaResult<u32> {
     let comment = create_string(state, "");
     state.push(comment); // lfgComment
     state.push(Val::Num(0.0)); // slotCount
-    Ok(7)
+    state.push(Val::Nil); // reserved
+    state.push(Val::Bool(roles.leader)); // leader
+    state.push(Val::Bool(roles.tank)); // tank
+    state.push(Val::Bool(roles.healer)); // healer
+    state.push(Val::Bool(roles.dps)); // dps
+    Ok(12)
+}
+
+/// `GetLFGQueuedList(category, queuedList?)` wipes and fills a Lua map of
+/// queued ids. QueueStatusFrame uses it to decide which LFG entry to display.
+fn get_lfg_queued_list(state: &mut LuaState) -> LuaResult<u32> {
+    let category = stack_i32(state, 1).unwrap_or(0);
+    let ids = borrow_state(state)?
+        .lfg_queued_dungeons
+        .get(&category)
+        .map(|set| set.iter().copied().collect::<Vec<_>>())
+        .unwrap_or_default();
+    let result = create_table(state);
+    if let Val::Table(table_ref) = result {
+        for id in ids {
+            if let Some(table) = state.gc.tables.get_mut(table_ref) {
+                let _ = table.raw_set(Val::Num(id as f64), Val::Bool(true), &state.gc.string_arena);
+            }
+        }
+        state.gc.barrier_back(table_ref);
+    }
+    state.push(result);
+    Ok(1)
+}
+
+/// `GetLFGQueueStats(category[, queueID])` returns the queue-status display
+/// tuple. The sim has no server wait estimates, so timing values are zero.
+fn get_lfg_queue_stats(state: &mut LuaState) -> LuaResult<u32> {
+    let category = stack_i32(state, 1).unwrap_or(0);
+    let queue_id = stack_i32(state, 2)
+        .filter(|id| *id > 0)
+        .or(first_queued_lfg_id(state, category)?);
+    let dungeon = {
+        let sim = borrow_state(state)?;
+        queue_id.and_then(|id| {
+            sim.lfd_dungeons
+                .iter()
+                .find(|d| d.dungeon_id == id)
+                .cloned()
+        })
+    };
+    let Some(dungeon) = dungeon else {
+        for _ in 0..18 {
+            state.push(Val::Nil);
+        }
+        return Ok(18);
+    };
+    push_lfg_queue_stats(state, &dungeon);
+    Ok(18)
+}
+
+fn push_lfg_queue_stats(state: &mut LuaState, dungeon: &LfdDungeonInfo) {
+    state.push(Val::Bool(true)); // hasData
+    for value in [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        3.0,
+        dungeon.type_id as f64,
+        dungeon.subtype_id as f64,
+    ] {
+        state.push(Val::Num(value));
+    }
+    let name = create_string(state, &dungeon.name);
+    state.push(name); // instanceName
+    for _ in 0..6 {
+        state.push(Val::Num(0.0));
+    }
+    state.push(Val::Num(dungeon.dungeon_id as f64)); // activeID
 }
 
 /// `GetLFGRoles()` → `(leader, tank, healer, dps)`.
@@ -649,6 +731,8 @@ fn register_lfd_state_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "SetLFGDungeon", set_lfg_dungeon)?;
     LuaApiMut::register_function(lua, "JoinLFG", join_lfg)?;
     LuaApiMut::register_function(lua, "GetLFGInfoServer", get_lfg_info_server)?;
+    LuaApiMut::register_function(lua, "GetLFGQueuedList", get_lfg_queued_list)?;
+    LuaApiMut::register_function(lua, "GetLFGQueueStats", get_lfg_queue_stats)?;
     LuaApiMut::register_function(lua, "GetLFGRoles", get_lfg_roles)?;
     LuaApiMut::register_function(lua, "SetLFGRoles", set_lfg_roles)?;
     LuaApiMut::register_function(lua, "GetLFGLockList", get_lfg_lock_list)?;

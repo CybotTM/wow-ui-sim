@@ -293,6 +293,46 @@ fn get_lfg_info_server_reports_queued_after_join_lfg() {
 }
 
 #[test]
+fn lfg_queue_stats_and_queued_list_track_selected_dungeons() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+            SetLFGDungeon(LE_LFG_CATEGORY_LFD, 1203)
+            JoinLFG(LE_LFG_CATEGORY_LFD)
+
+            local queued = GetLFGQueuedList(LE_LFG_CATEGORY_LFD)
+            if queued[1203] ~= true then return "missing_queued_id" end
+
+            local activeID = select(18, GetLFGQueueStats(LE_LFG_CATEGORY_LFD))
+            if activeID ~= 1203 then return "activeID=" .. tostring(activeID) end
+
+            local hasData, leaderNeeds, tankNeeds, healerNeeds, dpsNeeds, totalTanks, totalHealers,
+                totalDPS, instanceType, instanceSubType, instanceName, averageWait, tankWait,
+                healerWait, damageWait, myWait, queuedTime = GetLFGQueueStats(LE_LFG_CATEGORY_LFD, 1203)
+            if hasData ~= true then return "hasData=" .. tostring(hasData) end
+            if leaderNeeds ~= 0 then return "leaderNeeds=" .. tostring(leaderNeeds) end
+            if tankNeeds ~= 0 then return "tankNeeds=" .. tostring(tankNeeds) end
+            if healerNeeds ~= 0 then return "healerNeeds=" .. tostring(healerNeeds) end
+            if dpsNeeds ~= 0 then return "dpsNeeds=" .. tostring(dpsNeeds) end
+            if totalTanks ~= 1 then return "totalTanks=" .. tostring(totalTanks) end
+            if totalHealers ~= 1 then return "totalHealers=" .. tostring(totalHealers) end
+            if totalDPS ~= 3 then return "totalDPS=" .. tostring(totalDPS) end
+            if instanceType ~= 2 then return "instanceType=" .. tostring(instanceType) end
+            if instanceSubType ~= 2 then return "instanceSubType=" .. tostring(instanceSubType) end
+            if type(instanceName) ~= "string" or instanceName == "" then return "instanceName=" .. tostring(instanceName) end
+            if averageWait ~= 0 or tankWait ~= 0 or healerWait ~= 0 or damageWait ~= 0 or myWait ~= 0 or queuedTime ~= 0 then
+                return "waits"
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "LFG queued list/stats: {result}");
+}
+
+#[test]
 fn lfg_join_dungeon_specific_path_reaches_queued_mode() {
     let env = env();
     let result: String = env
