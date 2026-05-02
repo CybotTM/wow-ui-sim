@@ -12,6 +12,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 use crate::common::panel_fixtures::{blizzard_ui_dir, recorded_lua_errors};
 use std::path::PathBuf;
 use wow_ui_sim::loader::BlizzardAddonOverride;
+use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_AnimaDiversionUI";
@@ -21,6 +22,20 @@ const CLOSURE_OVERRIDES: &[BlizzardAddonOverride<'_>] = &[BlizzardAddonOverride 
     addon: ROOT,
     extra_roots: IMPLICIT_DEPS,
 }];
+const MIXIN_TABLES: &[&str] = &[
+    "AnimaDiversionFrameMixin",
+    "AnimaDiversionCurrencyFrameMixin",
+    "ReinforceProgressFrameMixin",
+    "ReinforceInfoFrameMixin",
+    "AnimaNodeReinforceButtonMixin",
+    "AnimaDiversionDataProviderMixin",
+    "AnimaDiversionModelScenePinMixin",
+    "AnimaDiversionPinMixin",
+    "AnimaDiversionConnectionMixin",
+    "AnimaDiversion_WorldQuestDataProviderMixin",
+    "AnimaDiversion_WorldQuestPinMixin",
+    "AnimaDiversionUtil",
+];
 
 #[test]
 fn anima_diversion_ui_loads_with_dependency_closure_and_no_lua_errors() {
@@ -31,6 +46,49 @@ fn anima_diversion_ui_loads_with_dependency_closure_and_no_lua_errors() {
         assert_implicit_dependencies_loaded(loaded);
         assert_no_lua_errors(env);
     });
+}
+
+#[test]
+fn anima_diversion_ui_publishes_expected_mixin_tables() {
+    with_blizzard_addon_startup_shape(&[ROOT], CLOSURE_OVERRIDES, |env, loaded| {
+        assert_loaded(loaded);
+        assert_implicit_dependencies_loaded(loaded);
+
+        let missing_or_wrong_type = probe_missing_mixin_tables(env);
+        assert!(
+            missing_or_wrong_type.is_empty(),
+            "`{ROOT}` must publish all expected mixins/util tables. Missing or wrong type: \
+             {missing_or_wrong_type:?}"
+        );
+    });
+}
+
+fn probe_missing_mixin_tables(env: &WowLuaEnv) -> Vec<String> {
+    let mixin_list = MIXIN_TABLES
+        .iter()
+        .map(|name| format!("{name:?}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let probe = format!(
+        r#"
+        local missing = {{}}
+        for _, name in ipairs({{{mixin_list}}}) do
+            if type(_G[name]) ~= "table" then
+                table.insert(missing, name .. ":" .. type(_G[name]))
+            end
+        end
+        return table.concat(missing, "\n")
+        "#
+    );
+    let missing: String = env
+        .eval(&probe)
+        .expect("AnimaDiversionUI mixin table probe must run cleanly");
+
+    missing
+        .lines()
+        .filter(|line| !line.is_empty())
+        .map(str::to_string)
+        .collect()
 }
 
 fn assert_toc_declares_no_required_dependencies() {
