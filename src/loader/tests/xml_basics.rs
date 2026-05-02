@@ -807,6 +807,46 @@ fn test_xml_multiple_anchors() {
 }
 
 #[test]
+fn test_xml_set_all_points_keeps_explicit_anchors_authoritative() {
+    let t = load_test_xml(
+        "test-set-all-points-explicit-anchors",
+        r#"<Ui>
+            <Frame name="ExplicitAnchorParent" parent="UIParent">
+                <Size x="400" y="300"/>
+                <Anchors>
+                    <Anchor point="CENTER"/>
+                </Anchors>
+                <Frames>
+                    <Frame name="$parentInset" parentKey="Inset">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="20" y="-30"/>
+                            <Anchor point="BOTTOMRIGHT" x="-40" y="50"/>
+                        </Anchors>
+                    </Frame>
+                    <Frame name="$parentChild" parentKey="Child" setAllPoints="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeTo="$parentInset" x="0" y="0"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$parentInset" x="0" y="0"/>
+                        </Anchors>
+                    </Frame>
+                </Frames>
+            </Frame>
+        </Ui>"#,
+    );
+
+    t.assert_lua_str(
+        r#"
+        local _, topLeftRelativeTo = ExplicitAnchorParent.Child:GetPoint(1)
+        local _, bottomRightRelativeTo = ExplicitAnchorParent.Child:GetPoint(2)
+        return tostring(topLeftRelativeTo == ExplicitAnchorParent.Inset)
+            .. "|"
+            .. tostring(bottomRightRelativeTo == ExplicitAnchorParent.Inset)
+    "#,
+        "true|true",
+    );
+}
+
+#[test]
 fn test_xml_all_script_handlers() {
     let t = load_test_xml(
         "test-allscripts",
