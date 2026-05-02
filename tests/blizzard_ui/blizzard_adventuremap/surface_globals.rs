@@ -27,6 +27,29 @@ fn adventure_map_registers_uipanel_window_entry() {
 
 type UIPanelWindowSurface = (String, String, i64, i64, String, bool);
 
+#[test]
+fn adventure_map_exports_quest_choice_result_constants() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let constants: QuestChoiceResultConstants = env
+            .eval(
+                r#"
+                return QUEST_CHOICE_DIALOG_RESULT_ACCEPTED,
+                       QUEST_CHOICE_DIALOG_RESULT_DECLINED,
+                       QUEST_CHOICE_DIALOG_RESULT_ABSTAIN
+                "#,
+            )
+            .expect("AdventureMap quest-choice result constant probe must run cleanly");
+
+        assert_eq!(
+            constants,
+            (1, 2, 3),
+            "AdventureMap quest-choice result constants must keep their published values"
+        );
+    });
+}
+
+type QuestChoiceResultConstants = (i64, i64, i64);
+
 fn assert_uipanel_window_surface(surface: UIPanelWindowSurface) {
     let (
         entry_type,
