@@ -16,3 +16,6 @@ mod surface_frames;
 
 #[path = "blizzard_ui/blizzard_addonlist/surface_mixins.rs"]
 mod surface_mixins;
+
+#[path = "blizzard_ui/blizzard_addonlist/surface_events.rs"]
+mod surface_events;
