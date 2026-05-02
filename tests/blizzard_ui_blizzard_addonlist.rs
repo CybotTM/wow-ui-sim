@@ -88,3 +88,6 @@ mod behavior_glue_dialog_confirm_disable_disables_outdated;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_pending_children_attach_when_parent_loaded.rs"]
 mod behavior_pending_children_attach_when_parent_loaded;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_search_with_invalid_group_falls_back_to_root.rs"]
+mod behavior_search_with_invalid_group_falls_back_to_root;
