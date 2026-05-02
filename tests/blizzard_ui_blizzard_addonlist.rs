@@ -76,3 +76,6 @@ mod behavior_update_performance_skips_in_glue;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_update_performance_writes_metric_text.rs"]
 mod behavior_update_performance_writes_metric_text;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_get_addon_metric_percent_warning_color.rs"]
+mod behavior_get_addon_metric_percent_warning_color;
