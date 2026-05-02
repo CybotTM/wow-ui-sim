@@ -53,5 +53,8 @@ mod behavior_setup_bolster_progress_releases_pool_and_inits_info_frame;
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_setup_currency_frame_formats_quantity_with_icon.rs"]
 mod behavior_setup_currency_frame_formats_quantity_with_icon;
 
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_set_exclusive_selection_node_dims_other_pins.rs"]
+mod behavior_set_exclusive_selection_node_dims_other_pins;
+
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_try_show_seeds_state_and_opens_panel.rs"]
 mod behavior_try_show_seeds_state_and_opens_panel;
