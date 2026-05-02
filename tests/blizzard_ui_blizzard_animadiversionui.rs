@@ -7,3 +7,6 @@ mod common;
 
 #[path = "blizzard_ui/blizzard_animadiversionui/load.rs"]
 mod load;
+
+#[path = "blizzard_ui/blizzard_animadiversionui/surface_globals.rs"]
+mod surface_globals;
