@@ -52,3 +52,6 @@ mod behavior_glue_branch_registers_glue_events;
 
 #[path = "blizzard_ui/blizzard_actionstatus/behavior_get_best_parent_no_parent_returns_nil.rs"]
 mod behavior_get_best_parent_no_parent_returns_nil;
+
+#[path = "blizzard_ui/blizzard_actionstatus/behavior_clear_all_points_before_anchor.rs"]
+mod behavior_clear_all_points_before_anchor;
