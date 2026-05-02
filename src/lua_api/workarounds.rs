@@ -89,6 +89,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_map_canvas_data_provider_attachment", || {
         patch_map_canvas_data_provider_attachment(env);
     });
+    log_step(env, "ensure_adventure_map_frame_surface", || {
+        ensure_adventure_map_frame_surface(env);
+    });
     log_step(env, "patch_action_bar_button_event_fanout", || {
         patch_action_bar_button_event_fanout(env);
     });
@@ -264,6 +267,9 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     }
     if addon_name == "Blizzard_EncounterJournal" {
         patch_toggle_encounter_journal_for_runtime_addon_load(env);
+    }
+    if addon_name == "Blizzard_AdventureMap" {
+        ensure_adventure_map_frame_surface_for_runtime_addon_load(env);
     }
     if addon_name == "Blizzard_AccountStore" {
         let _ = patch_account_store_set_storefront(env);
@@ -1224,6 +1230,14 @@ fn patch_map_canvas_data_provider_attachment_for_runtime_addon_load(
     let _ = env.exec(MAP_CANVAS_DATA_PROVIDER_WORKAROUND_LUA);
 }
 
+fn ensure_adventure_map_frame_surface(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(ADVENTURE_MAP_FRAME_SURFACE_LUA);
+}
+
+fn ensure_adventure_map_frame_surface_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(ADVENTURE_MAP_FRAME_SURFACE_LUA);
+}
+
 pub(crate) fn patch_account_store_set_storefront(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) -> Result<(), crate::Error> {
@@ -2163,6 +2177,60 @@ for _, mapName in ipairs({ "WorldMapFrame", "BattlefieldMapFrame" }) do
             end
         end
     end
+end
+"#;
+
+const ADVENTURE_MAP_FRAME_SURFACE_LUA: &str = r#"
+local function __wow_seed_adventure_map_canvas_state(frame)
+    frame.dataProviders = frame.dataProviders or {}
+    frame.dataProviderEventsCount = frame.dataProviderEventsCount or {}
+    frame.pinPools = frame.pinPools or {}
+    frame.pinTemplateTypes = frame.pinTemplateTypes or {}
+    frame.activeAreaTriggers = frame.activeAreaTriggers or {}
+    frame.lockReasons = frame.lockReasons or {}
+    frame.pinsToNudge = frame.pinsToNudge or {}
+    frame.pinSuppressors = frame.pinSuppressors or {}
+
+    if type(frame.pinFrameLevelsManager) ~= "table" then
+        if type(CreateFromMixins) == "function" and type(MapCanvasPinFrameLevelsManagerMixin) == "table" then
+            local ok, manager = pcall(CreateFromMixins, MapCanvasPinFrameLevelsManagerMixin)
+            if ok then
+                frame.pinFrameLevelsManager = manager
+            end
+        end
+
+        frame.pinFrameLevelsManager = frame.pinFrameLevelsManager or {}
+    end
+
+    if type(frame.pinFrameLevelsManager.Initialize) == "function" then
+        pcall(frame.pinFrameLevelsManager.Initialize, frame.pinFrameLevelsManager)
+    end
+
+    frame.pinFrameLevelsManager.definitions = frame.pinFrameLevelsManager.definitions or {}
+end
+
+if type(AdventureMapFrame) ~= "table"
+    and type(UIParent) == "table"
+    and type(CreateFrame) == "function"
+    and type(MapCanvasMixin) == "table"
+then
+    AdventureMapFrame = CreateFrame("Frame", "AdventureMapFrame", UIParent)
+    AdventureMapFrame:SetFrameStrata("DIALOG")
+    AdventureMapFrame:SetSize(1004, 689)
+    __wow_seed_adventure_map_canvas_state(AdventureMapFrame)
+
+    if type(Mixin) == "function" then
+        pcall(Mixin, AdventureMapFrame, MapCanvasMixin)
+        if type(AdventureMapMixin) == "table" then
+            pcall(Mixin, AdventureMapFrame, AdventureMapMixin)
+        end
+    end
+
+    local scrollContainer = CreateFrame("ScrollFrame", nil, AdventureMapFrame)
+    scrollContainer.Child = CreateFrame("Frame", nil, scrollContainer)
+    AdventureMapFrame.ScrollContainer = scrollContainer
+
+    __wow_seed_adventure_map_canvas_state(AdventureMapFrame)
 end
 "#;
 
