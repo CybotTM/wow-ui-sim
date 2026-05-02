@@ -28,3 +28,6 @@ mod behavior_search_box_filters_rows;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_force_load_toggles_version_check.rs"]
 mod behavior_force_load_toggles_version_check;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_enable_all_disables_disable_all.rs"]
+mod behavior_enable_all_disables_disable_all;
