@@ -40,7 +40,11 @@ const ADDON_LIST_PARENT_KEY_CHILDREN: &[ParentKeyChild] = &[
     ParentKeyChild::new("ScrollBox", "Frame", "Frame"),
     ParentKeyChild::new("ScrollBar", "EventFrame", "EventFrame"),
 ];
-
+const ADDON_DIALOG_CHILDREN: &[DialogChild] = &[
+    DialogChild::new("AddonDialogText", "FontString", 0),
+    DialogChild::new("AddonDialogButton1", "Button", 1),
+    DialogChild::new("AddonDialogButton2", "Button", 2),
+];
 type AddonListSurfaceProbe = (
     bool,
     String,
@@ -85,6 +89,21 @@ fn addon_list_exposes_plan_parent_key_children() {
     });
 }
 
+#[test]
+fn addon_dialog_frame_matches_xml_surface() {
+    with_blizzard_addon_glue_smoke_shape(&[GLUE_PARENT_ROOT, ROOT], &[], |env, _loaded| {
+        let surface = probe_addon_dialog_surface(env);
+
+        assert_addon_dialog_surface(surface);
+
+        for child in ADDON_DIALOG_CHILDREN {
+            let surface = probe_dialog_child(env, child.name);
+
+            assert_dialog_child_surface(child, surface);
+        }
+    });
+}
+
 struct ParentKeyChild {
     key: &'static str,
     xml_tag: &'static str,
@@ -104,6 +123,38 @@ impl ParentKeyChild {
 struct ParentKeyChildSurface {
     actual_type: String,
     parent_is_addon_list: bool,
+}
+
+struct DialogChild {
+    name: &'static str,
+    object_type: &'static str,
+    id: i32,
+}
+
+impl DialogChild {
+    const fn new(name: &'static str, object_type: &'static str, id: i32) -> Self {
+        Self {
+            name,
+            object_type,
+            id,
+        }
+    }
+}
+
+struct DialogChildSurface {
+    object_type: String,
+    parent_matches: bool,
+    id: i32,
+}
+
+struct AddonDialogSurface {
+    exists: bool,
+    object_type: String,
+    parent_is_glue_parent: bool,
+    is_shown: bool,
+    frame_strata: String,
+    background_is_child: bool,
+    background_has_dialog_bg: bool,
 }
 
 struct AddonListSurface {
@@ -138,6 +189,62 @@ fn probe_parent_key_child(
     ParentKeyChildSurface {
         actual_type,
         parent_is_addon_list,
+    }
+}
+
+fn probe_addon_dialog_surface(env: &wow_ui_sim::lua_api::WowLuaEnv) -> AddonDialogSurface {
+    let (
+        exists,
+        object_type,
+        parent_is_glue_parent,
+        is_shown,
+        frame_strata,
+        background_is_child,
+        background_has_dialog_bg,
+    ): (bool, String, bool, bool, String, bool, bool) = env
+        .eval(
+            r#"
+            return AddonDialog ~= nil,
+                   AddonDialog:GetObjectType(),
+                   AddonDialog:GetParent() == GlueParent,
+                   AddonDialog:IsShown(),
+                   AddonDialog:GetFrameStrata(),
+                   AddonDialogBackground:GetParent() == AddonDialog,
+                   AddonDialogBackground.Bg ~= nil
+            "#,
+        )
+        .expect("AddonDialog frame surface probe must run cleanly");
+
+    AddonDialogSurface {
+        exists,
+        object_type,
+        parent_is_glue_parent,
+        is_shown,
+        frame_strata,
+        background_is_child,
+        background_has_dialog_bg,
+    }
+}
+
+fn probe_dialog_child(
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+    child_name: &str,
+) -> DialogChildSurface {
+    let (object_type, parent_matches, id): (String, bool, i32) = env
+        .eval(&format!(
+            r#"
+            local child = _G[{child_name:?}]
+            return child and child:GetObjectType() or "nil",
+                   child and child:GetParent() == AddonDialogBackground or false,
+                   child and child:GetID() or 0
+            "#
+        ))
+        .unwrap_or_else(|err| panic!("failed to probe `{child_name}`: {err}"));
+
+    DialogChildSurface {
+        object_type,
+        parent_matches,
+        id,
     }
 }
 
@@ -264,5 +371,54 @@ fn assert_parent_key_child_surface(child: &ParentKeyChild, surface: ParentKeyChi
         surface.parent_is_addon_list,
         "`AddonList.{}` must be parented to `AddonList`",
         child.key
+    );
+}
+
+fn assert_addon_dialog_surface(surface: AddonDialogSurface) {
+    assert!(
+        surface.exists,
+        "`AddonDialog` must exist after `{ROOT}` loads"
+    );
+    assert_eq!(
+        surface.object_type, "Frame",
+        "`AddonDialog` XML declares a Frame"
+    );
+    assert!(
+        surface.parent_is_glue_parent,
+        "`AddonDialog` must be parented to `GlueParent` in the glue branch"
+    );
+    assert!(
+        !surface.is_shown,
+        "`AddonDialog` XML declares hidden=\"true\""
+    );
+    assert_eq!(
+        surface.frame_strata, "DIALOG",
+        "`AddonDialog` XML declares DIALOG frame strata"
+    );
+    assert!(
+        surface.background_is_child,
+        "`AddonDialogBackground` must be parented to `AddonDialog`"
+    );
+    assert!(
+        surface.background_has_dialog_bg,
+        "`AddonDialogBackground` must inherit `DialogBorderTemplate` background surface"
+    );
+}
+
+fn assert_dialog_child_surface(child: &DialogChild, surface: DialogChildSurface) {
+    assert_eq!(
+        surface.object_type, child.object_type,
+        "`{}` must be a runtime {}",
+        child.name, child.object_type
+    );
+    assert!(
+        surface.parent_matches,
+        "`{}` must be parented to `AddonDialogBackground`",
+        child.name
+    );
+    assert_eq!(
+        surface.id, child.id,
+        "`{}` must preserve the XML id",
+        child.name
     );
 }
