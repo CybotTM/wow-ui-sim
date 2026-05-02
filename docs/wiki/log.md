@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-01] update | EditBox child background render ordering
+
+Updated `investigations/editbox-render-text-cache.md` after tracing the SimCommands search box typed text to render ordering: the search box's opaque child `BACKGROUND` texture rendered after the EditBox frame, while the EditBox frame emitter owns the internal input text and caret. Documented the new EditBox-specific strata DFS rule that child regions render before the EditBox frame emitter.
+
 ## [2026-05-01] update | Tooltip Lua NineSlice center fill
 
 Updated `investigations/tooltip-double-shell.md` after the Journeys renown-card tooltip showed underlying card text through the tooltip body. Documented that the Lua-owned tooltip `NineSlice` should suppress the Rust fallback border/shell, but not the solid center fill needed while the simulator does not have a renderable opaque Lua center.

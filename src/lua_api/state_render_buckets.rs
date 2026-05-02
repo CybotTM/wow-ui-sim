@@ -52,6 +52,8 @@ pub(super) fn is_strata_root_boundary(frame: &crate::widget::Frame) -> bool {
 /// of child frame backgrounds. In WoW's flat render model, all regions at the
 /// same frame_level are interleaved by draw_layer, so we approximate this by
 /// splitting regions into textures before children and fontstrings after.
+/// EditBox is the exception: its internal text/caret are emitted by the frame
+/// itself, so child regions must come first or opaque backgrounds cover input.
 pub(super) fn dfs_emit(
     id: u64,
     strata_idx: usize,
@@ -74,6 +76,45 @@ fn dfs_emit_with_region_mode(
         return;
     };
     let tooltip_nineslice_id = tooltip_nineslice_child(frame, strata_idx, widgets, visible);
+    emit_tooltip_nineslice(
+        tooltip_nineslice_id,
+        strata_idx,
+        widgets,
+        visible,
+        out,
+        suppress_regions,
+    );
+
+    let (regions, mut child_frames) =
+        collect_regions_and_children(frame, strata_idx, widgets, visible, suppress_regions);
+    if let Some(nineslice_id) = tooltip_nineslice_id {
+        child_frames.retain(|&child_id| child_id != nineslice_id);
+    }
+
+    let region_placement = region_placement_for_frame(frame, suppress_regions);
+    emit_frame_with_regions(
+        id,
+        regions,
+        &mut child_frames,
+        RegionEmitContext {
+            strata_idx,
+            widgets,
+            visible,
+            out,
+            suppress_regions,
+        },
+        region_placement,
+    );
+}
+
+fn emit_tooltip_nineslice(
+    tooltip_nineslice_id: Option<u64>,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+    out: &mut Vec<u64>,
+    suppress_regions: bool,
+) {
     if let Some(nineslice_id) = tooltip_nineslice_id {
         dfs_emit_with_region_mode(
             nineslice_id,
@@ -84,25 +125,73 @@ fn dfs_emit_with_region_mode(
             suppress_regions,
         );
     }
-    out.push(id);
+}
 
-    let (regions, mut child_frames) =
-        collect_regions_and_children(frame, strata_idx, widgets, visible, suppress_regions);
-    if let Some(nineslice_id) = tooltip_nineslice_id {
-        child_frames.retain(|&child_id| child_id != nineslice_id);
+fn region_placement_for_frame(
+    frame: &crate::widget::Frame,
+    suppress_regions: bool,
+) -> RegionPlacement {
+    if !suppress_regions && frame.widget_type == crate::widget::WidgetType::EditBox {
+        return RegionPlacement::BeforeFrame;
     }
-    let mut deferred_font_regions = emit_immediate_regions(regions, widgets, out);
+    RegionPlacement::AfterFrame
+}
+
+#[derive(Clone, Copy)]
+enum RegionPlacement {
+    BeforeFrame,
+    AfterFrame,
+}
+
+struct RegionEmitContext<'a> {
+    strata_idx: usize,
+    widgets: &'a WidgetRegistry,
+    visible: &'a HashSet<u64>,
+    out: &'a mut Vec<u64>,
+    suppress_regions: bool,
+}
+
+fn emit_frame_with_regions(
+    id: u64,
+    regions: Vec<RegionEntry>,
+    child_frames: &mut [u64],
+    ctx: RegionEmitContext<'_>,
+    placement: RegionPlacement,
+) {
+    let mut deferred_font_regions =
+        emit_regions_around_frame(id, regions, ctx.widgets, ctx.out, placement);
     emit_child_frames_and_hoisted(
-        &mut child_frames,
-        strata_idx,
-        widgets,
-        visible,
-        out,
-        suppress_regions,
+        child_frames,
+        ctx.strata_idx,
+        ctx.widgets,
+        ctx.visible,
+        ctx.out,
+        ctx.suppress_regions,
         &mut deferred_font_regions,
     );
-    sort_regions(&mut deferred_font_regions, widgets);
-    out.extend(deferred_font_regions.into_iter().map(|entry| entry.id));
+    sort_regions(&mut deferred_font_regions, ctx.widgets);
+    ctx.out
+        .extend(deferred_font_regions.into_iter().map(|entry| entry.id));
+}
+
+fn emit_regions_around_frame(
+    id: u64,
+    regions: Vec<RegionEntry>,
+    widgets: &WidgetRegistry,
+    out: &mut Vec<u64>,
+    placement: RegionPlacement,
+) -> Vec<RegionEntry> {
+    match placement {
+        RegionPlacement::BeforeFrame => {
+            emit_all_regions(regions, widgets, out);
+            out.push(id);
+            Vec::new()
+        }
+        RegionPlacement::AfterFrame => {
+            out.push(id);
+            emit_immediate_regions(regions, widgets, out)
+        }
+    }
 }
 
 fn tooltip_nineslice_child(
@@ -156,6 +245,11 @@ fn emit_immediate_regions(
     let (immediate_regions, deferred_regions) = split_font_regions(regions, widgets);
     out.extend(immediate_regions.into_iter().map(|entry| entry.id));
     deferred_regions
+}
+
+fn emit_all_regions(mut regions: Vec<RegionEntry>, widgets: &WidgetRegistry, out: &mut Vec<u64>) {
+    sort_regions(&mut regions, widgets);
+    out.extend(regions.into_iter().map(|entry| entry.id));
 }
 
 fn emit_child_frames_and_hoisted(
@@ -452,7 +546,7 @@ fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
 #[cfg(test)]
 mod tests {
     use super::{collect_child_for_emit, dfs_emit, same_strata_subtree_segment_end};
-    use crate::widget::{Frame, FrameStrata, WidgetRegistry, WidgetType};
+    use crate::widget::{DrawLayer, Frame, FrameStrata, WidgetRegistry, WidgetType};
     use std::collections::HashSet;
 
     fn test_frame(id: u64, widget_type: WidgetType, parent_id: Option<u64>) -> Frame {
@@ -464,6 +558,33 @@ mod tests {
             visible: true,
             ..Default::default()
         }
+    }
+
+    #[test]
+    fn editbox_regions_render_before_internal_text_emitter() {
+        let mut widgets = WidgetRegistry::default();
+        widgets.register(test_frame(1, WidgetType::EditBox, None));
+        widgets.register(Frame {
+            draw_layer: DrawLayer::Background,
+            ..test_frame(2, WidgetType::Texture, Some(1))
+        });
+        widgets.add_child(1, 2);
+
+        let visible = HashSet::from([1, 2]);
+        let mut emitted = Vec::new();
+        dfs_emit(
+            1,
+            FrameStrata::Medium.as_index(),
+            &widgets,
+            &visible,
+            &mut emitted,
+        );
+
+        assert_eq!(
+            emitted,
+            vec![2, 1],
+            "EditBox child art must render below the EditBox internal text/caret emitter"
+        );
     }
 
     #[test]
