@@ -7,3 +7,6 @@ mod common;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_init_arms_ten_second_ticker.rs"]
 mod behavior_init_arms_ten_second_ticker;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_combat_lockdown_short_circuits_check.rs"]
+mod behavior_combat_lockdown_short_circuits_check;
