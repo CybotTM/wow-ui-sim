@@ -50,6 +50,29 @@ fn adventure_map_exports_quest_choice_result_constants() {
 
 type QuestChoiceResultConstants = (i64, i64, i64);
 
+#[test]
+fn adventure_map_exports_utility_helper_functions() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for helper_name in ADVENTURE_MAP_UTILITY_HELPERS {
+            let probe = format!("return type(_G[{helper_name:?}])");
+            let actual_type: String = env
+                .eval(&probe)
+                .expect("AdventureMap utility helper type probe must run cleanly");
+
+            assert_eq!(
+                actual_type, "function",
+                "`{helper_name}` must be exported as a function"
+            );
+        }
+    });
+}
+
+const ADVENTURE_MAP_UTILITY_HELPERS: &[&str] = &[
+    "AdventureMap_IsQuestValid",
+    "AdventureMap_IsZoneIDBlockedByZoneChoice",
+    "AdventureMap_IsPositionBlockedByZoneChoice",
+];
+
 fn assert_uipanel_window_surface(surface: UIPanelWindowSurface) {
     let (
         entry_type,
