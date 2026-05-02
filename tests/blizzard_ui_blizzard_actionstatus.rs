@@ -37,3 +37,6 @@ mod behavior_on_update_after_fadetime_hides;
 
 #[path = "blizzard_ui/blizzard_actionstatus/behavior_alternate_parent_frame.rs"]
 mod behavior_alternate_parent_frame;
+
+#[path = "blizzard_ui/blizzard_actionstatus/behavior_update_parent_uses_world_frame_when_top_level_hidden.rs"]
+mod behavior_update_parent_uses_world_frame_when_top_level_hidden;
