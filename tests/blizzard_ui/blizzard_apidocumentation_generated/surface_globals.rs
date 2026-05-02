@@ -280,6 +280,45 @@ fn generated_api_documentation_registers_namespaced_map_function() {
     );
 }
 
+#[test]
+fn generated_api_documentation_registers_well_known_events() {
+    let env = load_generated_api_documentation();
+
+    let failure: String = env
+        .eval(
+            r#"
+            local expectedEvents = {
+                "PlayerLogin",
+                "ChatMsgSystem",
+            }
+
+            for _, expectedName in ipairs(expectedEvents) do
+                local eventInfo = APIDocumentation:FindAPIByName("event", expectedName)
+                if eventInfo == nil then
+                    return string.format("missing event %q", expectedName)
+                end
+
+                local eventType = eventInfo:GetType()
+                if eventType ~= "event" then
+                    return string.format(
+                        "%s expected event type, got %q",
+                        expectedName,
+                        tostring(eventType)
+                    )
+                end
+            end
+
+            return ""
+            "#,
+        )
+        .expect("generated APIDocumentation event probe must run cleanly");
+
+    assert_eq!(
+        "", failure,
+        "well-known generated APIDocumentation events must be registered"
+    );
+}
+
 struct DocumentationCorpusCounts {
     systems: i64,
     tables: i64,
