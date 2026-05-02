@@ -22,3 +22,6 @@ mod behavior_initial_state;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_player_entering_world_runs_update_all.rs"]
 mod behavior_player_entering_world_runs_update_all;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_page_changed_routes_to_update_all.rs"]
+mod behavior_page_changed_routes_to_update_all;
