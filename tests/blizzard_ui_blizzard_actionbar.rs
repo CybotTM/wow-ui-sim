@@ -99,3 +99,6 @@ mod behavior_main_bar_endcaps;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_attach_detach.rs"]
 mod behavior_attach_detach;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_spell_alert_animation.rs"]
+mod behavior_spell_alert_animation;
