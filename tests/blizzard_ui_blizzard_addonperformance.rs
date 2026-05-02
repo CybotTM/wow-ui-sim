@@ -25,3 +25,6 @@ mod behavior_check_records_per_addon_warning;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_check_refreshes_visible_addon_list.rs"]
 mod behavior_check_refreshes_visible_addon_list;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_check_skips_addon_list_refresh_after_first_warning.rs"]
+mod behavior_check_skips_addon_list_refresh_after_first_warning;
