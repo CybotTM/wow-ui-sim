@@ -100,3 +100,6 @@ mod behavior_reset_to_default_uses_default_enabled;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_addon_list_clear_character_dropdown.rs"]
 mod behavior_addon_list_clear_character_dropdown;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_security_icon_uses_subregion_texcoords.rs"]
+mod behavior_security_icon_uses_subregion_texcoords;
