@@ -37,3 +37,6 @@ mod behavior_onhide_calls_dialog_parent_hide_and_close;
 
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_refresh_insets_skips_when_no_count.rs"]
 mod behavior_refresh_insets_skips_when_no_count;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_refresh_insets_filters_by_area_table_id.rs"]
+mod behavior_refresh_insets_filters_by_area_table_id;
