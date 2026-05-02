@@ -608,6 +608,33 @@ fn startup_wardrobe_class_dropdown_uses_localized_radio_rows() {
 }
 
 #[test]
+fn startup_collections_journal_closes_on_escape() {
+    test_timeout! {
+        let env = load_and_startup_env();
+
+        env.exec("ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_APPEARANCES)")
+            .expect("collections journal should open");
+        let opened: bool = env
+            .eval("return CollectionsJournal and CollectionsJournal:IsShown()")
+            .expect("collections journal open state should be readable");
+        assert!(opened, "CollectionsJournal should be shown before Escape");
+
+        env.send_key_press("ESCAPE", None)
+            .expect("Escape dispatch should succeed");
+        let closed_without_menu: bool = env
+            .eval(
+                "return (not CollectionsJournal:IsShown()) \
+                    and (GameMenuFrame == nil or not GameMenuFrame:IsShown())",
+            )
+            .expect("collections journal closed state should be readable");
+        assert!(
+            closed_without_menu,
+            "Escape should close CollectionsJournal through the UIPanel close path"
+        );
+    }
+}
+
+#[test]
 fn cursor_hovered_item_globals_are_callable() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");

@@ -34,6 +34,47 @@ fn console_text_from_log_messages(log_messages: &[String]) -> String {
     log_messages.join("\n")
 }
 
+fn should_dispatch_wow_key(status: iced::event::Status, wow_key: &str) -> bool {
+    matches!(status, iced::event::Status::Ignored) || wow_key == "ESCAPE"
+}
+
+fn message_from_keyboard_event(
+    event: &iced::Event,
+    status: iced::event::Status,
+) -> Option<Message> {
+    use iced::keyboard;
+    use std::time::Instant;
+
+    let iced::Event::Keyboard(keyboard::Event::KeyPressed {
+        key,
+        modifiers,
+        text,
+        ..
+    }) = event
+    else {
+        return None;
+    };
+
+    // Ctrl+R is a simulator-only shortcut.
+    if modifiers.control() && *key == keyboard::Key::Character("r".into()) {
+        return Some(Message::ReloadUI);
+    }
+
+    let wow_key = super::keybinds::iced_key_to_wow(key)?;
+    if !should_dispatch_wow_key(status, &wow_key) {
+        return None;
+    }
+
+    // Include raw text for character input into focused EditBox.
+    // Skip text when Ctrl/Alt modifiers are held (shortcuts, not typing).
+    let raw_text = if modifiers.control() || modifiers.alt() {
+        None
+    } else {
+        text.as_ref().map(|t| t.to_string())
+    };
+    Some(Message::KeyPress(wow_key, raw_text, Instant::now()))
+}
+
 impl App {
     /// Build the title bar with FPS counter, frame time, canvas size, and mouse coords.
     fn build_title_bar(&self) -> Element<'_, Message> {
@@ -364,35 +405,7 @@ impl App {
 
     pub fn subscription(&self) -> Subscription<Message> {
         let keyboard = iced::event::listen_with(|event, status, _window| {
-            use iced::keyboard;
-            use std::time::Instant;
-            if let iced::Event::Keyboard(keyboard::Event::KeyPressed {
-                key,
-                modifiers,
-                text,
-                ..
-            }) = &event
-            {
-                // Ctrl+R is a simulator-only shortcut
-                if modifiers.control() && *key == keyboard::Key::Character("r".into()) {
-                    return Some(Message::ReloadUI);
-                }
-                // Only dispatch to Lua when no iced widget captured the event
-                // (i.e., when the command input is not focused)
-                if matches!(status, iced::event::Status::Ignored)
-                    && let Some(wow_key) = super::keybinds::iced_key_to_wow(key)
-                {
-                    // Include raw text for character input into focused EditBox.
-                    // Skip text when Ctrl/Alt modifiers are held (shortcuts, not typing).
-                    let raw_text = if modifiers.control() || modifiers.alt() {
-                        None
-                    } else {
-                        text.as_ref().map(|t| t.to_string())
-                    };
-                    return Some(Message::KeyPress(wow_key, raw_text, Instant::now()));
-                }
-            }
-            None
+            message_from_keyboard_event(&event, status)
         });
 
         if let Some(interval) = self.compute_tick_interval() {
@@ -729,6 +742,25 @@ impl App {
             pos,
             button_name,
         )
+    }
+}
+
+#[cfg(test)]
+mod key_dispatch_tests {
+    use super::should_dispatch_wow_key;
+
+    #[test]
+    fn escape_dispatches_even_when_iced_captures_event() {
+        assert!(should_dispatch_wow_key(
+            iced::event::Status::Captured,
+            "ESCAPE"
+        ));
+    }
+
+    #[test]
+    fn non_escape_keys_only_dispatch_when_ignored_by_iced() {
+        assert!(should_dispatch_wow_key(iced::event::Status::Ignored, "M"));
+        assert!(!should_dispatch_wow_key(iced::event::Status::Captured, "M"));
     }
 }
 
