@@ -79,3 +79,6 @@ mod behavior_update_performance_writes_metric_text;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_get_addon_metric_percent_warning_color.rs"]
 mod behavior_get_addon_metric_percent_warning_color;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_glue_dialog_addons_out_of_date.rs"]
+mod behavior_glue_dialog_addons_out_of_date;
