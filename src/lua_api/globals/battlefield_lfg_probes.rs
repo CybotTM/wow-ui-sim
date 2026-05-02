@@ -14,7 +14,8 @@
 //!   family as battlefield queues. Default is the inert
 //!   `("none", "", 0, 0, 0, 0, false)` shape Blizzard startup expects.
 //! - `GetLFGDungeonInfo(dungeonID)`    → 21 values from `SimState.lfd_dungeons`.
-//! - `GetLFGMode(category)`            → `(nil, nil)`. No active LFG.
+//! - `GetLFGMode(category)`            → `("queued", nil)` after `JoinLFG`,
+//!   otherwise `(nil, nil)`.
 //! - `GetLFGDungeonNumEncounters(id)`  → `(numEncounters, numCompleted)`.
 //! - `GetLFDChoiceOrder()`             → array of dungeon IDs in seeded order.
 //! - `GetNumRandomDungeons()`          → count of random-flagged LFD entries.
@@ -29,6 +30,11 @@
 //! - `GetLFDChoiceEnabledState(t?)`    → table of `{[dungeonID]=bool|0|1|2}`.
 //!   Defaults joinable specific dungeons to checked and preserves explicit
 //!   `SetLFGDungeonEnabled` choices. Required by `LFGDungeonList_Setup`.
+//! - `ClearAllLFGDungeons(category)`   → clears active LFG mode for the
+//!   category before Blizzard selects entries to queue.
+//! - `SetLFGDungeon(category, id)`      → validates the selected id. Selection
+//!   details are not modelled yet; `JoinLFG` owns the visible queued mode.
+//! - `JoinLFG(category)`               → marks the category queued.
 //! - `GetLFGLockList()`                → empty table. No locks without server
 //!   state. Required by `LFGDungeonList_Setup` and `LFGList_DefaultFilterFunction`
 //!   (filter returns `false` when the list is nil, hiding every dungeon).
@@ -195,9 +201,19 @@ fn get_lfg_dungeon_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 /// `GetLFGMode(category[, queueID])` — retail returns `(mode, submode)`.
-/// No active LFG in the sim, so `(nil, nil)`.
+/// The sim tracks category-level queued state only.
 fn get_lfg_mode(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
+    let category = stack_i32(state, 1).unwrap_or(0);
+    let queued = borrow_state(state)?
+        .lfg_active_categories
+        .get(&category)
+        .is_some();
+    if queued {
+        let mode = create_string(state, "queued");
+        state.push(mode);
+    } else {
+        state.push(Val::Nil);
+    }
     state.push(Val::Nil);
     Ok(2)
 }
@@ -350,6 +366,44 @@ fn set_lfg_dungeon_enabled(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?
         .lfd_enabled_dungeons
         .insert(dungeon_id, enabled);
+    Ok(0)
+}
+
+/// `ClearAllLFGDungeons(category)` clears pending/active queued mode for that
+/// category. Blizzard calls this immediately before selecting queue entries.
+fn clear_all_lfg_dungeons(state: &mut LuaState) -> LuaResult<u32> {
+    let category = stack_i32(state, 1).unwrap_or(0);
+    borrow_state_mut(state)?
+        .lfg_active_categories
+        .remove(&category);
+    Ok(0)
+}
+
+/// `SetLFGDungeon(category, dungeonID)` selects a dungeon for the next
+/// `JoinLFG`. The simulator does not yet expose selected ids, but it validates
+/// known ids so bad data fails closed instead of creating phantom queues.
+fn set_lfg_dungeon(state: &mut LuaState) -> LuaResult<u32> {
+    let dungeon_id = stack_i32(state, 2).unwrap_or(0);
+    let known = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .any(|d| d.dungeon_id == dungeon_id && dungeon_id > 0);
+    if !known {
+        return Ok(0);
+    }
+    Ok(0)
+}
+
+/// `JoinLFG(category)` marks the category as queued. Proposal/server matching
+/// state is out of scope for now, but Blizzard panels can observe the queued
+/// mode through `GetLFGMode`.
+fn join_lfg(state: &mut LuaState) -> LuaResult<u32> {
+    let category = stack_i32(state, 1).unwrap_or(0);
+    if category > 0 {
+        borrow_state_mut(state)?
+            .lfg_active_categories
+            .insert(category);
+    }
     Ok(0)
 }
 
@@ -569,6 +623,9 @@ fn register_lfd_state_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         get_lfd_choice_enabled_state,
     )?;
     LuaApiMut::register_function(lua, "SetLFGDungeonEnabled", set_lfg_dungeon_enabled)?;
+    LuaApiMut::register_function(lua, "ClearAllLFGDungeons", clear_all_lfg_dungeons)?;
+    LuaApiMut::register_function(lua, "SetLFGDungeon", set_lfg_dungeon)?;
+    LuaApiMut::register_function(lua, "JoinLFG", join_lfg)?;
     LuaApiMut::register_function(lua, "GetLFGRoles", get_lfg_roles)?;
     LuaApiMut::register_function(lua, "SetLFGRoles", set_lfg_roles)?;
     LuaApiMut::register_function(lua, "GetLFGLockList", get_lfg_lock_list)?;
