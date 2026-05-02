@@ -53,6 +53,9 @@ mod behavior_inset_expand_acquires_trigger_and_pans;
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_choice_provider_event_registration.rs"]
 mod behavior_quest_choice_provider_event_registration;
 
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_choice_provider_quest_accepted_event_removes_pin.rs"]
+mod behavior_quest_choice_provider_quest_accepted_event_removes_pin;
+
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_choice_refresh_acquires_pin_per_valid_choice.rs"]
 mod behavior_quest_choice_refresh_acquires_pin_per_valid_choice;
 
