@@ -36,6 +36,9 @@ struct AnchorEdges {
     center_y: Option<f32>,
 }
 
+/// Resolved anchor targets keyed by the point on the frame being positioned.
+struct AnchorPointTargets([Option<(f32, f32)>; 9]);
+
 /// Resolve each anchor in a multi-anchor frame to edge constraints.
 fn resolve_multi_anchor_edges(
     registry: &WidgetRegistry,
@@ -46,11 +49,11 @@ fn resolve_multi_anchor_edges(
     screen_height: f32,
     cache: &mut LayoutCache,
 ) -> AnchorEdges {
-    let mut edges = empty_anchor_edges();
+    let mut targets = empty_anchor_point_targets();
 
     for anchor in &frame.anchors {
-        apply_multi_anchor_edge(
-            &mut edges,
+        resolve_multi_anchor_target(
+            &mut targets,
             registry,
             anchor,
             parent_rect,
@@ -61,18 +64,11 @@ fn resolve_multi_anchor_edges(
         );
     }
 
-    edges
+    anchor_point_targets_to_edges(targets)
 }
 
-fn empty_anchor_edges() -> AnchorEdges {
-    AnchorEdges {
-        left_x: None,
-        right_x: None,
-        top_y: None,
-        bottom_y: None,
-        center_x: None,
-        center_y: None,
-    }
+fn empty_anchor_point_targets() -> AnchorPointTargets {
+    AnchorPointTargets([None; 9])
 }
 
 fn resolve_multi_anchor_relative_rect(
@@ -96,8 +92,8 @@ fn resolve_multi_anchor_relative_rect(
     parent_rect
 }
 
-fn apply_multi_anchor_edge(
-    edges: &mut AnchorEdges,
+fn resolve_multi_anchor_target(
+    targets: &mut AnchorPointTargets,
     registry: &WidgetRegistry,
     anchor: &crate::widget::Anchor,
     parent_rect: LayoutRect,
@@ -115,7 +111,7 @@ fn apply_multi_anchor_edge(
         cache,
     );
     let target = resolve_anchor_target(anchor, relative_rect, eff_scale);
-    apply_anchor_target(edges, anchor.point, target);
+    set_anchor_target(targets, anchor.point, target);
 }
 
 fn resolve_anchor_target(
@@ -136,46 +132,55 @@ fn resolve_anchor_target(
     )
 }
 
-fn apply_anchor_target(edges: &mut AnchorEdges, point: AnchorPoint, target: (f32, f32)) {
-    let (target_x, target_y) = target;
-    match point {
-        AnchorPoint::TopLeft => {
-            edges.left_x = Some(target_x);
-            edges.top_y = Some(target_y);
-        }
-        AnchorPoint::TopRight => {
-            edges.right_x = Some(target_x);
-            edges.top_y = Some(target_y);
-        }
-        AnchorPoint::BottomLeft => {
-            edges.left_x = Some(target_x);
-            edges.bottom_y = Some(target_y);
-        }
-        AnchorPoint::BottomRight => {
-            edges.right_x = Some(target_x);
-            edges.bottom_y = Some(target_y);
-        }
-        AnchorPoint::Top => {
-            edges.top_y = Some(target_y);
-            edges.center_x = Some(target_x);
-        }
-        AnchorPoint::Bottom => {
-            edges.bottom_y = Some(target_y);
-            edges.center_x = Some(target_x);
-        }
-        AnchorPoint::Left => {
-            edges.left_x = Some(target_x);
-            edges.center_y = Some(target_y);
-        }
-        AnchorPoint::Right => {
-            edges.right_x = Some(target_x);
-            edges.center_y = Some(target_y);
-        }
-        AnchorPoint::Center => {
-            edges.center_x = Some(target_x);
-            edges.center_y = Some(target_y);
-        }
+fn set_anchor_target(targets: &mut AnchorPointTargets, point: AnchorPoint, target: (f32, f32)) {
+    targets.0[anchor_point_slot(point)] = Some(target);
+}
+
+fn anchor_point_targets_to_edges(targets: AnchorPointTargets) -> AnchorEdges {
+    let target = |point| targets.0[anchor_point_slot(point)];
+
+    AnchorEdges {
+        left_x: target_x(target(AnchorPoint::TopLeft))
+            .or_else(|| target_x(target(AnchorPoint::Left)))
+            .or_else(|| target_x(target(AnchorPoint::BottomLeft))),
+        right_x: target_x(target(AnchorPoint::TopRight))
+            .or_else(|| target_x(target(AnchorPoint::Right)))
+            .or_else(|| target_x(target(AnchorPoint::BottomRight))),
+        top_y: target_y(target(AnchorPoint::TopLeft))
+            .or_else(|| target_y(target(AnchorPoint::Top)))
+            .or_else(|| target_y(target(AnchorPoint::TopRight))),
+        bottom_y: target_y(target(AnchorPoint::BottomLeft))
+            .or_else(|| target_y(target(AnchorPoint::Bottom)))
+            .or_else(|| target_y(target(AnchorPoint::BottomRight))),
+        center_x: target_x(target(AnchorPoint::Top))
+            .or_else(|| target_x(target(AnchorPoint::Center)))
+            .or_else(|| target_x(target(AnchorPoint::Bottom))),
+        center_y: target_y(target(AnchorPoint::Left))
+            .or_else(|| target_y(target(AnchorPoint::Center)))
+            .or_else(|| target_y(target(AnchorPoint::Right))),
     }
+}
+
+fn anchor_point_slot(point: AnchorPoint) -> usize {
+    match point {
+        AnchorPoint::TopLeft => 0,
+        AnchorPoint::Top => 1,
+        AnchorPoint::TopRight => 2,
+        AnchorPoint::Left => 3,
+        AnchorPoint::Center => 4,
+        AnchorPoint::Right => 5,
+        AnchorPoint::BottomLeft => 6,
+        AnchorPoint::Bottom => 7,
+        AnchorPoint::BottomRight => 8,
+    }
+}
+
+fn target_x(target: Option<(f32, f32)>) -> Option<f32> {
+    target.map(|(x, _)| x)
+}
+
+fn target_y(target: Option<(f32, f32)>) -> Option<f32> {
+    target.map(|(_, y)| y)
 }
 
 fn compute_rect_from_edges(
@@ -702,5 +707,40 @@ mod tests {
         assert_eq!(rect.y, 20.0);
         assert_eq!(rect.width, 984.0);
         assert_eq!(rect.height, 708.0);
+    }
+
+    #[test]
+    fn duplicate_left_edge_uses_frame_point_priority_not_anchor_order() {
+        for points in [
+            [AnchorPoint::TopLeft, AnchorPoint::BottomLeft],
+            [AnchorPoint::BottomLeft, AnchorPoint::TopLeft],
+        ] {
+            let rect = compute_duplicate_left_edge_rect(points);
+
+            assert_eq!(rect.x, 18.0);
+            assert_eq!(rect.width, 199.0);
+            assert_eq!(rect.y, 76.0);
+            assert_eq!(rect.height, 602.0);
+        }
+    }
+
+    fn compute_duplicate_left_edge_rect(points: [AnchorPoint; 2]) -> LayoutRect {
+        let mut registry = WidgetRegistry::new();
+        registry.register(make_frame(1, None, 920.0, 724.0, vec![2], vec![]));
+        let anchors = points.map(duplicate_left_anchor).to_vec();
+        registry.register(make_frame(2, Some(1), 199.0, 569.0, vec![], anchors));
+        compute_frame_rect(&registry, 2, 920.0, 724.0)
+    }
+
+    fn duplicate_left_anchor(point: AnchorPoint) -> Anchor {
+        let (x_offset, y_offset) = match point {
+            AnchorPoint::TopLeft => (18.0, -76.0),
+            AnchorPoint::BottomLeft => (178.0, 46.0),
+            _ => unreachable!("test only uses left-edge anchors"),
+        };
+        let mut anchor = anchor(point, Some(1), point);
+        anchor.x_offset = x_offset;
+        anchor.y_offset = y_offset;
+        anchor
     }
 }
