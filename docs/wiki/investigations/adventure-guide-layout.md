@@ -14,10 +14,15 @@ The simulator's synchronous dirty-rect fast path resolved only the queried frame
 
 The fix is for `SimState::resolve_rect_if_dirty` to use the anchor-dependent layout path for directly dirty frames, and for dirty ancestor resolution to recompute anchor dependents before clearing dirty roots. The hit-grid incremental queue must include those same transitive anchor dependents, because moved sibling buttons are not descendants of the resized anchor target. Regression coverage lives in `tests/layout_resolve.rs` as `querying_resized_anchor_target_updates_dependent_siblings`.
 
+Follow-up: the cards could still overlap after the stale-rect fix because `GetNumLines` was registered by the tooltip widget methods after the general text methods on the shared FrameRef metatable. Non-tooltip FontStrings therefore called the tooltip line counter and returned `0`, so Blizzard sized title/description containers to zero lines. `GameTooltip` keeps tooltip-backed line counting, while regular FontStrings now compute line count from measured wrapped text height. Regression coverage lives in `tests/fontstring_anchor_pinned_width.rs` as `fontstring_get_num_lines_reports_wrapped_line_count`.
+
 ## Sources
 
 - [state_render.rs](../../../src/lua_api/state_render.rs) - synchronous dirty rect resolution and anchor-dependent recomputation
+- [text.rs](../../../src/lua_api/frame/methods/text_attribute_event/text.rs) - FontString `GetNumLines` measurement
+- [tooltip.rs](../../../src/lua_api/frame/methods/widgets/tooltip.rs) - GameTooltip-specific `GetNumLines` dispatch
 - [layout_resolve.rs](../../../tests/layout_resolve.rs) - regression coverage for resized anchor targets updating sibling dependents
+- [fontstring_anchor_pinned_width.rs](../../../tests/fontstring_anchor_pinned_width.rs) - regression coverage for FontString wrapped line counts
 - [Blizzard_EncounterJournal.xml](</syncthing/World of Warcraft/_retail_/BlizzardInterfaceCode/Interface/AddOns/Blizzard_EncounterJournal/Mainline/Blizzard_EncounterJournal.xml>) - Adventure Journal Suggested Content card anchors
 - [Blizzard_EncounterJournal.lua](</syncthing/World of Warcraft/_retail_/BlizzardInterfaceCode/Interface/AddOns/Blizzard_EncounterJournal/Mainline/Blizzard_EncounterJournal.lua>) - runtime text sizing and geometry queries
 
