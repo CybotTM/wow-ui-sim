@@ -15,11 +15,38 @@ const ADVENTURE_MAP_MIXIN_METHODS: &[&str] = &[
     "ClearAreaTableIDAvailableForInsets",
     "SetAreaTableIDAvailableForInsets",
 ];
+const ADVENTURE_MAP_INSET_MIXIN_METHODS: &[&str] = &[
+    "Initialize",
+    "OnReleased",
+    "BuildDetailTiles",
+    "OnCollapseExpandAnimFinished",
+    "SyncAnimation",
+    "Collapse",
+    "Expand",
+    "OnAreaEnclosedChanged",
+    "OnCanvasScaleChanged",
+    "GetMap",
+    "SetLocalPinPosition",
+    "GetGlobalPosition",
+    "OnMouseEnter",
+    "OnMouseLeave",
+];
 
 #[test]
 fn adventure_map_mixin_exposes_plan_methods() {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
         assert_mixin_methods(env, "AdventureMapMixin", ADVENTURE_MAP_MIXIN_METHODS);
+    });
+}
+
+#[test]
+fn adventure_map_inset_mixin_exposes_plan_methods() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        assert_mixin_methods(
+            env,
+            "AdventureMapInsetMixin",
+            ADVENTURE_MAP_INSET_MIXIN_METHODS,
+        );
     });
 }
 
