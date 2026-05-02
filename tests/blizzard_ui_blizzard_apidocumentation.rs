@@ -5,6 +5,9 @@
 
 mod common;
 
+#[path = "blizzard_ui/blizzard_apidocumentation/behavior_add_documentation_table_routes_payload_kinds.rs"]
+mod behavior_add_documentation_table_routes_payload_kinds;
+
 #[path = "blizzard_ui/blizzard_apidocumentation/load.rs"]
 mod load;
 
