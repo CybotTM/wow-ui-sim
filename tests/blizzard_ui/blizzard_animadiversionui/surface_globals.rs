@@ -99,6 +99,15 @@ return type(AnimaDiversionUtil.IsNodeActive),
        anyWithTemporaryNode,
        anyWithPermanentNode
 "#;
+const NODE_STATE_ENUM_PROBE: &str = r#"
+local state = Enum.AnimaDiversionNodeState
+return type(state),
+       state.Unavailable,
+       state.Available,
+       state.SelectedTemporary,
+       state.SelectedPermanent,
+       state.Cooldown
+"#;
 
 #[test]
 fn anima_diversion_ui_registers_static_popup_globals() {
@@ -119,6 +128,17 @@ fn anima_diversion_util_predicates_match_node_state_semantics() {
             .expect("AnimaDiversionUtil predicate probe must run cleanly");
 
         assert_util_surface(surface);
+    });
+}
+
+#[test]
+fn anima_diversion_node_state_enum_exposes_published_values() {
+    with_blizzard_addon_startup_shape(&[ROOT], CLOSURE_OVERRIDES, |env, _loaded| {
+        let surface: NodeStateEnumSurface = env
+            .eval(NODE_STATE_ENUM_PROBE)
+            .expect("AnimaDiversionNodeState enum surface probe must run cleanly");
+
+        assert_node_state_enum_surface(surface);
     });
 }
 
@@ -158,6 +178,7 @@ type UtilSurface = (
 );
 type NodeStatePredicates = (bool, bool, bool, bool, bool);
 type AnyNodePredicates = (bool, bool, bool, bool);
+type NodeStateEnumSurface = (String, i64, i64, i64, i64, i64);
 
 fn assert_popup_surface(surface: PopupSurface) {
     assert_common_popup_fields("ANIMA_DIVERSION_CONFIRM_CHANNEL", channel_fields(&surface));
@@ -307,4 +328,25 @@ fn assert_any_node_predicates(predicates: AnyNodePredicates) {
         any_with_permanent_node,
         "`IsAnyNodeActive` must accept a permanent selected node"
     );
+}
+
+fn assert_node_state_enum_surface(surface: NodeStateEnumSurface) {
+    let (enum_type, unavailable, available, selected_temporary, selected_permanent, cooldown) =
+        surface;
+
+    assert_eq!(
+        enum_type, "table",
+        "`Enum.AnimaDiversionNodeState` must be a table"
+    );
+    assert_eq!(unavailable, 0, "`Unavailable` enum value changed");
+    assert_eq!(available, 1, "`Available` enum value changed");
+    assert_eq!(
+        selected_temporary, 2,
+        "`SelectedTemporary` enum value changed"
+    );
+    assert_eq!(
+        selected_permanent, 3,
+        "`SelectedPermanent` enum value changed"
+    );
+    assert_eq!(cooldown, 4, "`Cooldown` enum value changed");
 }
