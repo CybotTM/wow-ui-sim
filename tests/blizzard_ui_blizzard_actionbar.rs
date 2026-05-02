@@ -96,3 +96,6 @@ mod behavior_main_bar_dividers;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_main_bar_endcaps.rs"]
 mod behavior_main_bar_endcaps;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_attach_detach.rs"]
+mod behavior_attach_detach;
