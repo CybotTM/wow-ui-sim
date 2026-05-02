@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-02] update | LFD Join as Party format error
+
+Updated `investigations/lfd-dungeon-list-empty.md` after clicking `Join as Party`
+raised `bad argument #2 to 'string.format' (number expected)`. Documented that
+`GetLFGDungeonInfo` returned `mapName` in Blizzard's `minPlayers` slot, so
+`ERR_LFG_MEMBERS_REQUIRED` received a dungeon name where `%d` expected a number.
+
 ## [2026-05-02] add | Adventure Guide disabled tabs
 
 Added `investigations/adventure-guide-disabled-tabs.md` after tracing the
