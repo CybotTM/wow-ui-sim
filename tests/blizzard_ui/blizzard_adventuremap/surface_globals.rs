@@ -1,0 +1,61 @@
+//! Global-surface probes for `Blizzard_AdventureMap`.
+
+use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
+
+const ROOT: &str = "Blizzard_AdventureMap";
+
+#[test]
+fn adventure_map_registers_uipanel_window_entry() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let surface: UIPanelWindowSurface = env
+            .eval(
+                r#"
+                local entry = UIPanelWindows and UIPanelWindows["AdventureMapFrame"]
+                return type(entry),
+                       entry and entry.area or nil,
+                       entry and entry.pushable or nil,
+                       entry and entry.allowOtherPanels or nil,
+                       type(entry and entry.showFailedFunc),
+                       entry and entry.showFailedFunc == C_AdventureMap.Close
+                "#,
+            )
+            .expect("AdventureMap UIPanelWindows surface probe must run cleanly");
+
+        assert_uipanel_window_surface(surface);
+    });
+}
+
+type UIPanelWindowSurface = (String, String, i64, i64, String, bool);
+
+fn assert_uipanel_window_surface(surface: UIPanelWindowSurface) {
+    let (
+        entry_type,
+        area,
+        pushable,
+        allow_other_panels,
+        show_failed_func_type,
+        show_failed_func_is_close,
+    ) = surface;
+
+    assert_eq!(
+        entry_type, "table",
+        "`UIPanelWindows[\"AdventureMapFrame\"]` must be registered as a table"
+    );
+    assert_eq!(
+        area, "center",
+        "`AdventureMapFrame` panel area must be center"
+    );
+    assert_eq!(pushable, 0, "`AdventureMapFrame` pushable value must be 0");
+    assert_eq!(
+        allow_other_panels, 1,
+        "`AdventureMapFrame` must allow other panels"
+    );
+    assert_eq!(
+        show_failed_func_type, "function",
+        "`AdventureMapFrame.showFailedFunc` must hold a function reference"
+    );
+    assert!(
+        show_failed_func_is_close,
+        "`AdventureMapFrame.showFailedFunc` must be the loaded `C_AdventureMap.Close` reference"
+    );
+}

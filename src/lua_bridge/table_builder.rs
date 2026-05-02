@@ -56,23 +56,56 @@ fn install_rust_fn(
     func: RustFn,
 ) -> LuaResult<()> {
     let key = Val::Str(key_ref);
+    if table_has_matching_rust_fn(state, table_ref, key, func) {
+        return Ok(());
+    }
+
     let closure = Closure::Rust(RustClosure::new(func, name));
     let closure_ref = state.gc.alloc_closure(closure);
     let stack_slot = state.top;
     state.ensure_stack(stack_slot + 1);
     state.stack_set(stack_slot, Val::Function(closure_ref));
     state.top = stack_slot + 1;
-    let table = state.gc.tables.get_mut(table_ref).ok_or_else(|| {
-        LuaError::Runtime(RuntimeError {
-            message: "table has been collected".into(),
-            level: 0,
-            traceback: vec![],
-        })
-    })?;
+    let table = state
+        .gc
+        .tables
+        .get_mut(table_ref)
+        .ok_or_else(table_collected_error)?;
     let result = table.raw_set(key, Val::Function(closure_ref), &state.gc.string_arena);
     state.gc.barrier_back(table_ref);
     state.top = stack_slot;
     result
+}
+
+fn table_has_matching_rust_fn(
+    state: &LuaState,
+    table_ref: GcRef<RiluaTable>,
+    key: Val,
+    func: RustFn,
+) -> bool {
+    let existing_value = state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| table.get(key, &state.gc.string_arena));
+
+    let Some(Val::Function(closure_ref)) = existing_value else {
+        return false;
+    };
+
+    let Some(Closure::Rust(existing_closure)) = state.gc.closures.get(closure_ref) else {
+        return false;
+    };
+
+    std::ptr::fn_addr_eq(existing_closure.func, func)
+}
+
+fn table_collected_error() -> LuaError {
+    LuaError::Runtime(RuntimeError {
+        message: "table has been collected".into(),
+        level: 0,
+        traceback: vec![],
+    })
 }
 
 /// Allocate a Lua table with wow-ui-sim's frame backing metadata attached.
@@ -125,13 +158,7 @@ impl<'a> TableBuilder<'a> {
             1 => self.state.stack[save_top],
             _ => {
                 self.state.top = save_top;
-                return Err(LuaError::Runtime(RuntimeError {
-                    message: format!(
-                        "table builder values must push exactly 0 or 1 Lua values, got {count}"
-                    ),
-                    level: 0,
-                    traceback: vec![],
-                }));
+                return Err(table_builder_value_error(count));
             }
         };
         self.state.top = save_top;
@@ -143,13 +170,7 @@ impl<'a> TableBuilder<'a> {
             .gc
             .tables
             .get_mut(self.table_ref)
-            .ok_or_else(|| {
-                LuaError::Runtime(RuntimeError {
-                    message: "table has been collected".into(),
-                    level: 0,
-                    traceback: vec![],
-                })
-            })?;
+            .ok_or_else(table_collected_error)?;
         table.raw_set(k, val, &self.state.gc.string_arena)?;
         Ok(self)
     }
@@ -169,4 +190,12 @@ impl<'a> TableBuilder<'a> {
     pub fn build(self) -> Val {
         Val::Table(self.table_ref)
     }
+}
+
+fn table_builder_value_error(count: u32) -> LuaError {
+    LuaError::Runtime(RuntimeError {
+        message: format!("table builder values must push exactly 0 or 1 Lua values, got {count}"),
+        level: 0,
+        traceback: vec![],
+    })
 }

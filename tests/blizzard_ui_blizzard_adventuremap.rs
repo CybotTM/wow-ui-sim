@@ -7,3 +7,6 @@ mod common;
 
 #[path = "blizzard_ui/blizzard_adventuremap/load.rs"]
 mod load;
+
+#[path = "blizzard_ui/blizzard_adventuremap/surface_globals.rs"]
+mod surface_globals;
