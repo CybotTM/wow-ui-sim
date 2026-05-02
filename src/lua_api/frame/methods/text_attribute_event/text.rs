@@ -119,7 +119,7 @@ fn strip_html_tags(text: &str) -> String {
 fn prepare_stripped_text(widget_type: WidgetType, text: Option<String>) -> Option<String> {
     text.map(|value| {
         if widget_type == WidgetType::SimpleHTML {
-            strip_html_tags(&value)
+            crate::render::strip_wow_markup(&strip_html_tags(&value))
         } else {
             crate::render::strip_wow_markup(&value)
         }
