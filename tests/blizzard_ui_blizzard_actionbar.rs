@@ -102,3 +102,6 @@ mod behavior_attach_detach;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_spell_alert_animation.rs"]
 mod behavior_spell_alert_animation;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_button_range_check.rs"]
+mod behavior_button_range_check;
