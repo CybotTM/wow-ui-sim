@@ -73,3 +73,6 @@ mod behavior_quest_dialog_decline_path_distinguishes_abstain_vs_decline;
 
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_dialog_refresh_details_branches_on_widgets_and_rewards.rs"]
 mod behavior_quest_dialog_refresh_details_branches_on_widgets_and_rewards;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_zone_summary_provider_groups_quests_by_zone_and_inset.rs"]
+mod behavior_zone_summary_provider_groups_quests_by_zone_and_inset;
