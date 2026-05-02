@@ -49,3 +49,6 @@ mod behavior_update_pet_battle_uses_action_bar_page;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_reset_to_default.rs"]
 mod behavior_reset_to_default;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_unit_displaypower_updates_vehicle_mana.rs"]
+mod behavior_unit_displaypower_updates_vehicle_mana;
