@@ -97,3 +97,6 @@ mod behavior_set_enabled_dependencies_walks_chain;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_reset_to_default_uses_default_enabled.rs"]
 mod behavior_reset_to_default_uses_default_enabled;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_addon_list_clear_character_dropdown.rs"]
+mod behavior_addon_list_clear_character_dropdown;
