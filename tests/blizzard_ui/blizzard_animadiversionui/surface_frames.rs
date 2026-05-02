@@ -38,6 +38,18 @@ return type(frame.NineSlice),
        type(quantity),
        quantity and quantity:GetObjectType()
 "#;
+const REINFORCE_INFO_FRAME_CHILDREN_PROBE: &str = r#"
+local frame = AnimaDiversionFrame.ReinforceInfoFrame
+local title = frame and frame.Title
+
+return type(frame.TitleShadow),
+       type(title),
+       title and title:GetObjectType(),
+       title and title:GetText(),
+       ANIMA_DIVERSION_REINFORCE_READY,
+       type(frame.AnimaNodeReinforceButton),
+       frame.AnimaNodeReinforceButton and frame.AnimaNodeReinforceButton:GetObjectType()
+"#;
 
 #[test]
 fn anima_diversion_frame_loads_as_hidden_map_canvas_panel() {
@@ -61,6 +73,17 @@ fn anima_diversion_frame_exposes_expected_children() {
     });
 }
 
+#[test]
+fn reinforce_info_frame_exposes_expected_children_and_ready_title() {
+    with_blizzard_addon_startup_shape(&[ROOT], CLOSURE_OVERRIDES, |env, _loaded| {
+        let surface: ReinforceInfoFrameChildren = env
+            .eval(REINFORCE_INFO_FRAME_CHILDREN_PROBE)
+            .expect("ReinforceInfoFrame child probe must run cleanly");
+
+        assert_reinforce_info_frame_children(surface);
+    });
+}
+
 type AnimaDiversionFrameSurface = (
     String,
     String,
@@ -81,6 +104,15 @@ type AnimaDiversionFrameChildren = (
     String,
     String,
     String,
+    String,
+    String,
+    Option<String>,
+);
+type ReinforceInfoFrameChildren = (
+    String,
+    String,
+    Option<String>,
+    Option<String>,
     String,
     String,
     Option<String>,
@@ -177,6 +209,31 @@ fn assert_anima_diversion_frame_children(children: AnimaDiversionFrameChildren) 
         quantity_object_type,
     ) = children;
 
+    assert_main_child_frames(
+        nine_slice_type,
+        border_frame_type,
+        scroll_container_type,
+        close_button_type,
+        currency_frame_type,
+        reinforce_progress_frame_type,
+        reinforce_info_frame_type,
+    );
+    assert_currency_quantity(
+        nested_currency_frame_type,
+        quantity_type,
+        quantity_object_type,
+    );
+}
+
+fn assert_main_child_frames(
+    nine_slice_type: String,
+    border_frame_type: String,
+    scroll_container_type: String,
+    close_button_type: String,
+    currency_frame_type: String,
+    reinforce_progress_frame_type: String,
+    reinforce_info_frame_type: String,
+) {
     assert_child_frame("NineSlice", nine_slice_type);
     assert_child_frame("BorderFrame", border_frame_type);
     assert_child_frame("ScrollContainer", scroll_container_type);
@@ -184,6 +241,13 @@ fn assert_anima_diversion_frame_children(children: AnimaDiversionFrameChildren) 
     assert_child_frame("AnimaDiversionCurrencyFrame", currency_frame_type);
     assert_child_frame("ReinforceProgressFrame", reinforce_progress_frame_type);
     assert_child_frame("ReinforceInfoFrame", reinforce_info_frame_type);
+}
+
+fn assert_currency_quantity(
+    nested_currency_frame_type: String,
+    quantity_type: String,
+    quantity_object_type: Option<String>,
+) {
     assert_child_frame(
         "AnimaDiversionCurrencyFrame.CurrencyFrame",
         nested_currency_frame_type,
@@ -203,5 +267,63 @@ fn assert_child_frame(parent_key: &str, child_type: String) {
     assert_eq!(
         child_type, "table",
         "`AnimaDiversionFrame.{parent_key}` must exist as a frame child"
+    );
+}
+
+fn assert_reinforce_info_frame_children(children: ReinforceInfoFrameChildren) {
+    let (
+        title_shadow_type,
+        title_type,
+        title_object_type,
+        title_text,
+        ready_text,
+        reinforce_button_type,
+        reinforce_button_object_type,
+    ) = children;
+
+    assert_reinforce_info_child_frames(
+        title_shadow_type,
+        title_type,
+        title_object_type,
+        reinforce_button_type,
+        reinforce_button_object_type,
+    );
+    assert_reinforce_title_text(title_text, ready_text);
+}
+
+fn assert_reinforce_info_child_frames(
+    title_shadow_type: String,
+    title_type: String,
+    title_object_type: Option<String>,
+    reinforce_button_type: String,
+    reinforce_button_object_type: Option<String>,
+) {
+    assert_child_frame("ReinforceInfoFrame.TitleShadow", title_shadow_type);
+    assert_child_frame("ReinforceInfoFrame.Title", title_type);
+    assert_child_frame(
+        "ReinforceInfoFrame.AnimaNodeReinforceButton",
+        reinforce_button_type,
+    );
+    assert_eq!(
+        title_object_type.as_deref(),
+        Some("FontString"),
+        "`AnimaDiversionFrame.ReinforceInfoFrame.Title` must be a FontString"
+    );
+    assert_eq!(
+        reinforce_button_object_type.as_deref(),
+        Some("Button"),
+        "`AnimaDiversionFrame.ReinforceInfoFrame.AnimaNodeReinforceButton` must be a Button"
+    );
+}
+
+fn assert_reinforce_title_text(title_text: Option<String>, ready_text: String) {
+    assert_eq!(
+        title_text.as_deref(),
+        Some(ready_text.as_str()),
+        "`ReinforceInfoFrame.Title` must resolve `ANIMA_DIVERSION_REINFORCE_READY`"
+    );
+    assert_eq!(
+        ready_text, "Select a location to Reinforce",
+        "`ANIMA_DIVERSION_REINFORCE_READY` must match the en-US global string"
     );
 }
