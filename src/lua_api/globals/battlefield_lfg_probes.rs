@@ -9,7 +9,7 @@
 //! - `GetBattlefieldInstanceRunTime()` → 0; entry timing is not modeled.
 //! - `GetLFGDungeonInfo(dungeonID)`    → 21 values from `SimState.lfd_dungeons`.
 //! - `GetLFGMode(category)`            → `("queued", nil)` after `JoinLFG`,
-//!   otherwise `(nil, nil)`.
+//!   `("proposal", nil)` after the queue-pop timer fires, otherwise `(nil, nil)`.
 //! - `GetLFGDungeonNumEncounters(id)`  → `(numEncounters, numCompleted)`.
 //! - `GetLFDChoiceOrder()`             → array of dungeon IDs in seeded order.
 //! - `GetNumRandomDungeons()`          → count of random-flagged LFD entries.
@@ -22,7 +22,12 @@
 //!   `LFGDungeonList_Setup`.
 //! - `ClearAllLFGDungeons(category)`   → clears selected and active LFG mode.
 //! - `SetLFGDungeon(category, id)`      → validates and records selected ids.
-//! - `JoinLFG(category)`               → marks the category queued.
+//! - `JoinLFG(category)`               → marks the category queued and schedules
+//!   a proposal pop.
+//! - `LeaveLFG(category)`              → clears queued/proposal state.
+//! - `GetLFGProposal()`                → active proposal tuple or inert shape.
+//! - `GetLFGProposalMember(index)`     → active proposal member tuple.
+//! - `GetLFGProposalEncounter(index)`  → active proposal boss tuple.
 //! - `GetLFGInfoServer(category, id?)` → queued server-info tuple consumed by
 //!   Blizzard's Lua `GetLFGMode`.
 //! - `GetLFGQueuedList(category, t?)`   → selected queue ids by category.
@@ -38,13 +43,20 @@
 //! - `IsLFGDungeonJoinable(dungeonID)` → `(isAvailableForAll, isAvailableForPlayer,
 //!   hideIfNotJoinable, totalGroupSizeRequired)` from `lfd_dungeons` + `player.level`.
 
+use crate::lua_api::env::WowLuaAppData;
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_api::state::BattlefieldStatus;
 use crate::lua_api::state_types::LfdDungeonInfo;
+use crate::lua_api::state_types::PendingTimer;
+use crate::lua_api::{next_timer_id, timer_layout};
 use crate::lua_bridge::stack_val;
+use rilua::vm::closure::{Closure, RustClosure};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
-use rilua::{LuaApiMut, LuaResult, Val};
+use rilua::vm::table::Table as RiluaTable;
+use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
+use std::time::{Duration, Instant};
 
 fn stack_i32(state: &LuaState, index: i32) -> Option<i32> {
     match stack_val(state, index) {
@@ -192,17 +204,33 @@ fn get_lfg_dungeon_info(state: &mut LuaState) -> LuaResult<u32> {
 /// The sim tracks category-level queued state only.
 fn get_lfg_mode(state: &mut LuaState) -> LuaResult<u32> {
     let category = stack_i32(state, 1).unwrap_or(0);
-    let queued = borrow_state(state)?
-        .lfg_active_categories
-        .get(&category)
-        .is_some();
-    if queued {
-        let mode = create_string(state, "queued");
-        state.push(mode);
+    let mode = {
+        let sim = borrow_state(state)?;
+        let has_proposal = sim
+            .lfg_active_proposal
+            .as_ref()
+            .is_some_and(|proposal| proposal.category == category);
+        if has_proposal {
+            Some("proposal")
+        } else if sim.lfg_active_categories.contains(&category) {
+            Some("queued")
+        } else {
+            None
+        }
+    };
+    match mode {
+        Some(mode) => {
+            let mode = create_string(state, mode);
+            state.push(mode);
+        }
+        None => state.push(Val::Nil),
+    }
+    if mode == Some("proposal") {
+        let submode = create_string(state, "unaccepted");
+        state.push(submode);
     } else {
         state.push(Val::Nil);
     }
-    state.push(Val::Nil);
     Ok(2)
 }
 
@@ -362,9 +390,21 @@ fn set_lfg_dungeon_enabled(state: &mut LuaState) -> LuaResult<u32> {
 fn clear_all_lfg_dungeons(state: &mut LuaState) -> LuaResult<u32> {
     let category = stack_i32(state, 1).unwrap_or(0);
     let mut sim = borrow_state_mut(state)?;
+    clear_lfg_category(&mut sim, category);
+    Ok(0)
+}
+
+fn clear_lfg_category(sim: &mut crate::lua_api::state::SimState, category: i32) {
     sim.lfg_active_categories.remove(&category);
     sim.lfg_queued_dungeons.remove(&category);
-    Ok(0)
+    sim.lfg_queue_pop_due_at = None;
+    if sim
+        .lfg_active_proposal
+        .as_ref()
+        .is_some_and(|proposal| proposal.category == category)
+    {
+        sim.lfg_active_proposal = None;
+    }
 }
 
 /// `SetLFGDungeon(category, dungeonID)` selects a dungeon for the next
@@ -394,13 +434,116 @@ fn set_lfg_dungeon(state: &mut LuaState) -> LuaResult<u32> {
 fn join_lfg(state: &mut LuaState) -> LuaResult<u32> {
     let category = stack_i32(state, 1).unwrap_or(0);
     if category > 0 {
-        borrow_state_mut(state)?
-            .lfg_active_categories
-            .insert(category);
+        let delay = {
+            let mut sim = borrow_state_mut(state)?;
+            sim.lfg_active_categories.insert(category);
+            sim.lfg_active_proposal = None;
+            sim.lfg_queue_pop_due_at =
+                Some(Instant::now() + Duration::from_secs_f64(sim.lfg_queue_pop_delay_seconds));
+            sim.lfg_queue_pop_delay_seconds
+        };
+        schedule_lfg_queue_pop(state, delay)?;
         dispatch_event_now(state, "LFG_UPDATE", &[])?;
         dispatch_event_now(state, "LFG_QUEUE_STATUS_UPDATE", &[])?;
     }
     Ok(0)
+}
+
+/// `LeaveLFG([category])` clears queued and proposal state. Blizzard has
+/// several no-argument callers, so a missing category leaves every active
+/// simulator queue.
+fn leave_lfg(state: &mut LuaState) -> LuaResult<u32> {
+    let had_proposal = {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(category) = stack_i32(state, 1).filter(|category| *category > 0) {
+            let had_proposal = sim
+                .lfg_active_proposal
+                .as_ref()
+                .is_some_and(|proposal| proposal.category == category);
+            clear_lfg_category(&mut sim, category);
+            had_proposal
+        } else {
+            let had_proposal = sim.lfg_active_proposal.is_some();
+            sim.lfg_active_categories.clear();
+            sim.lfg_queued_dungeons.clear();
+            sim.lfg_queue_pop_due_at = None;
+            sim.lfg_active_proposal = None;
+            had_proposal
+        }
+    };
+    if had_proposal {
+        dispatch_event_now(state, "LFG_PROPOSAL_DONE", &[])?;
+    }
+    dispatch_event_now(state, "LFG_UPDATE", &[])?;
+    dispatch_event_now(state, "LFG_QUEUE_STATUS_UPDATE", &[])?;
+    Ok(0)
+}
+
+fn schedule_lfg_queue_pop(state: &mut LuaState, delay: f64) -> LuaResult<()> {
+    let callback = Val::Function(state.gc.alloc_closure(Closure::Rust(RustClosure::new(
+        pop_lfg_queue,
+        "LFG.QueuePop",
+    ))));
+    let id = next_timer_id();
+    timer_layout::store_timer_callback(state, id, callback);
+
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let owner_addon = {
+        let sim = app.sim_state.borrow();
+        sim.loading_addon_index.or(sim.executing_addon_index)
+    };
+    app.sim_state
+        .borrow_mut()
+        .rilua_timers
+        .push_back(PendingTimer {
+            id,
+            fire_at: Instant::now() + Duration::from_secs_f64(delay),
+            interval: None,
+            remaining: None,
+            cancelled: false,
+            owner_addon,
+        });
+    Ok(())
+}
+
+fn pop_lfg_queue(state: &mut LuaState) -> LuaResult<u32> {
+    let should_dispatch = {
+        let mut sim = borrow_state_mut(state)?;
+        let Some(due_at) = sim.lfg_queue_pop_due_at else {
+            return Ok(0);
+        };
+        if Instant::now() < due_at {
+            return Ok(0);
+        }
+        let Some((category, dungeon_id)) = first_active_queue(&sim) else {
+            sim.lfg_queue_pop_due_at = None;
+            return Ok(0);
+        };
+        sim.lfg_active_categories.remove(&category);
+        sim.lfg_queued_dungeons.remove(&category);
+        sim.lfg_queue_pop_due_at = None;
+        sim.lfg_active_proposal = Some(crate::lua_api::state::LfgProposalState {
+            category,
+            dungeon_id,
+        });
+        true
+    };
+    if should_dispatch {
+        dispatch_event_now(state, "LFG_PROPOSAL_SHOW", &[])?;
+        dispatch_event_now(state, "LFG_PROPOSAL_UPDATE", &[])?;
+        dispatch_event_now(state, "LFG_QUEUE_STATUS_UPDATE", &[])?;
+    }
+    Ok(0)
+}
+
+fn first_active_queue(sim: &crate::lua_api::state::SimState) -> Option<(i32, i32)> {
+    sim.lfg_queued_dungeons
+        .iter()
+        .filter(|(category, ids)| sim.lfg_active_categories.contains(category) && !ids.is_empty())
+        .map(|(category, ids)| (*category, *ids.iter().next().expect("ids is not empty")))
+        .min_by_key(|(category, dungeon_id)| (*category, *dungeon_id))
 }
 
 fn is_category_queued(state: &LuaState, category: i32) -> LuaResult<bool> {
@@ -449,7 +592,13 @@ fn get_lfg_queued_list(state: &mut LuaState) -> LuaResult<u32> {
         .get(&category)
         .map(|set| set.iter().copied().collect::<Vec<_>>())
         .unwrap_or_default();
-    let result = create_table(state);
+    let result = match stack_val(state, 2) {
+        Val::Table(table_ref) => {
+            clear_table(state, table_ref)?;
+            Val::Table(table_ref)
+        }
+        _ => create_table(state),
+    };
     if let Val::Table(table_ref) = result {
         for id in ids {
             if let Some(table) = state.gc.tables.get_mut(table_ref) {
@@ -460,6 +609,25 @@ fn get_lfg_queued_list(state: &mut LuaState) -> LuaResult<u32> {
     }
     state.push(result);
     Ok(1)
+}
+
+fn clear_table(state: &mut LuaState, table_ref: GcRef<RiluaTable>) -> LuaResult<()> {
+    let mut keys = Vec::new();
+    if let Some(table) = state.gc.tables.get(table_ref) {
+        let mut key = Val::Nil;
+        while let Some((next_key, _)) = table.next(key, &state.gc.string_arena)? {
+            keys.push(next_key);
+            key = next_key;
+        }
+    }
+
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        for key in keys {
+            let _ = table.raw_set(key, Val::Nil, &state.gc.string_arena);
+        }
+    }
+    state.gc.barrier_back(table_ref);
+    Ok(())
 }
 
 /// `GetLFGQueueStats(category[, queueID])` returns the queue-status display
@@ -509,6 +677,202 @@ fn push_lfg_queue_stats(state: &mut LuaState, dungeon: &LfdDungeonInfo) {
         state.push(Val::Num(0.0));
     }
     state.push(Val::Num(dungeon.dungeon_id as f64)); // activeID
+}
+
+fn active_lfg_proposal(state: &LuaState) -> LuaResult<Option<(i32, i32, LfdDungeonInfo)>> {
+    let sim = borrow_state(state)?;
+    let Some(proposal) = sim.lfg_active_proposal.as_ref() else {
+        return Ok(None);
+    };
+    let dungeon = sim
+        .lfd_dungeons
+        .iter()
+        .find(|dungeon| dungeon.dungeon_id == proposal.dungeon_id)
+        .cloned();
+    Ok(dungeon.map(|dungeon| (proposal.category, proposal.dungeon_id, dungeon)))
+}
+
+/// `GetLFGProposal()` returns the active proposal tuple consumed by
+/// `LFGDungeonReadyPopup_Update`, or the full inert no-proposal shape.
+fn get_lfg_proposal(state: &mut LuaState) -> LuaResult<u32> {
+    let Some((category, dungeon_id, dungeon)) = active_lfg_proposal(state)? else {
+        push_inactive_lfg_proposal(state);
+        return Ok(15);
+    };
+    let role = {
+        let sim = borrow_state(state)?;
+        proposal_player_role(&sim)
+    };
+
+    state.push(Val::Bool(true)); // proposalExists
+    state.push(Val::Num(dungeon_id as f64)); // id
+    state.push(Val::Num(dungeon.type_id as f64)); // typeID
+    state.push(Val::Num(dungeon.subtype_id as f64)); // subtypeID
+    let name = create_string(state, &dungeon.name);
+    state.push(name);
+    let background = create_string(state, &dungeon.texture_filename);
+    state.push(background);
+    let role = create_string(state, role);
+    state.push(role);
+    state.push(Val::Bool(false)); // hasResponded
+    state.push(Val::Num(3.0)); // totalEncounters
+    state.push(Val::Num(0.0)); // completedEncounters
+    state.push(Val::Num(5.0)); // numMembers
+    state.push(Val::Bool(true)); // isLeader
+    state.push(Val::Bool(dungeon.is_holiday)); // isHoliday
+    state.push(Val::Num(category as f64)); // proposalCategory
+    state.push(Val::Bool(false)); // isSilent
+    Ok(15)
+}
+
+fn push_inactive_lfg_proposal(state: &mut LuaState) {
+    state.push(Val::Bool(false));
+    for _ in 0..3 {
+        state.push(Val::Num(0.0));
+    }
+    for value in ["", "", ""] {
+        let value = create_string(state, value);
+        state.push(value);
+    }
+    state.push(Val::Bool(false));
+    for _ in 0..3 {
+        state.push(Val::Num(0.0));
+    }
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(false));
+    state.push(Val::Nil);
+    state.push(Val::Bool(false));
+}
+
+/// `GetLFGProposalMember(index)` returns role/acceptance data for proposal
+/// slots. The first member is the simulated player; remaining slots are
+/// deterministic fillers so Blizzard status rows can render.
+fn get_lfg_proposal_member(state: &mut LuaState) -> LuaResult<u32> {
+    let index = stack_i32(state, 1).unwrap_or(0);
+    if active_lfg_proposal(state)?.is_none() || index < 1 || index > 5 {
+        for _ in 0..7 {
+            state.push(Val::Nil);
+        }
+        return Ok(7);
+    }
+
+    let (role, level, name, class) = {
+        let sim = borrow_state(state)?;
+        proposal_member_data(&sim, index)
+    };
+    state.push(Val::Bool(index == 1)); // isLeader
+    let role = create_string(state, &role);
+    state.push(role);
+    state.push(Val::Num(level as f64));
+    state.push(Val::Bool(false)); // responded
+    state.push(Val::Bool(false)); // accepted
+    let name = create_string(state, &name);
+    state.push(name);
+    let class = create_string(state, &class);
+    state.push(class);
+    Ok(7)
+}
+
+fn proposal_member_data(
+    sim: &crate::lua_api::state::SimState,
+    index: i32,
+) -> (String, i32, String, String) {
+    let role = if index == 1 {
+        proposal_player_role(sim).to_string()
+    } else {
+        match index {
+            2 => "TANK",
+            3 => "HEALER",
+            _ => "DAMAGER",
+        }
+        .to_string()
+    };
+    let name = if index == 1 && !sim.player.name.is_empty() {
+        sim.player.name.clone()
+    } else {
+        format!("ProposalMember{index}")
+    };
+    let class = class_token(sim.player.class_index).to_string();
+    (role, sim.player.level, name, class)
+}
+
+fn proposal_player_role(sim: &crate::lua_api::state::SimState) -> &'static str {
+    if sim.lfg_roles.tank {
+        "TANK"
+    } else if sim.lfg_roles.healer {
+        "HEALER"
+    } else if sim.lfg_roles.dps {
+        "DAMAGER"
+    } else {
+        "NONE"
+    }
+}
+
+fn class_token(class_index: i32) -> &'static str {
+    match class_index {
+        1 => "WARRIOR",
+        2 => "PALADIN",
+        3 => "HUNTER",
+        4 => "ROGUE",
+        5 => "PRIEST",
+        6 => "DEATHKNIGHT",
+        7 => "SHAMAN",
+        8 => "MAGE",
+        9 => "WARLOCK",
+        10 => "MONK",
+        11 => "DRUID",
+        12 => "DEMONHUNTER",
+        13 => "EVOKER",
+        _ => "PALADIN",
+    }
+}
+
+/// `GetLFGProposalEncounter(index)` returns boss rows for the proposal
+/// tooltip. The simulator tracks only encounter count, so names are stable
+/// placeholders and every boss is alive.
+fn get_lfg_proposal_encounter(state: &mut LuaState) -> LuaResult<u32> {
+    let index = stack_i32(state, 1).unwrap_or(0);
+    let has_encounter = active_lfg_proposal(state)?.is_some() && (1..=3).contains(&index);
+    let name = if has_encounter {
+        format!("Encounter {index}")
+    } else {
+        String::new()
+    };
+    let name = create_string(state, &name);
+    state.push(name);
+    let texture = create_string(state, "");
+    state.push(texture);
+    state.push(Val::Bool(false));
+    Ok(3)
+}
+
+/// `AcceptProposal()` consumes the active proposal and reports success.
+fn accept_proposal(state: &mut LuaState) -> LuaResult<u32> {
+    clear_active_lfg_proposal(state, "LFG_PROPOSAL_SUCCEEDED")
+}
+
+/// `RejectProposal()` consumes the active proposal and returns to idle state.
+fn reject_proposal(state: &mut LuaState) -> LuaResult<u32> {
+    clear_active_lfg_proposal(state, "LFG_PROPOSAL_DONE")
+}
+
+fn clear_active_lfg_proposal(state: &mut LuaState, event_name: &str) -> LuaResult<u32> {
+    let had_proposal = {
+        let mut sim = borrow_state_mut(state)?;
+        let had_proposal = sim.lfg_active_proposal.is_some();
+        sim.lfg_active_proposal = None;
+        sim.lfg_queue_pop_due_at = None;
+        had_proposal
+    };
+    if had_proposal {
+        dispatch_event_now(state, event_name, &[])?;
+        if event_name != "LFG_PROPOSAL_DONE" {
+            dispatch_event_now(state, "LFG_PROPOSAL_DONE", &[])?;
+        }
+        dispatch_event_now(state, "LFG_UPDATE", &[])?;
+        dispatch_event_now(state, "LFG_QUEUE_STATUS_UPDATE", &[])?;
+    }
+    Ok(0)
 }
 
 /// `GetLFGRoles()` → `(leader, tank, healer, dps)`.
@@ -726,13 +1090,7 @@ fn register_lfd_state_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetLFDChoiceEnabledState",
         get_lfd_choice_enabled_state,
     )?;
-    LuaApiMut::register_function(lua, "SetLFGDungeonEnabled", set_lfg_dungeon_enabled)?;
-    LuaApiMut::register_function(lua, "ClearAllLFGDungeons", clear_all_lfg_dungeons)?;
-    LuaApiMut::register_function(lua, "SetLFGDungeon", set_lfg_dungeon)?;
-    LuaApiMut::register_function(lua, "JoinLFG", join_lfg)?;
-    LuaApiMut::register_function(lua, "GetLFGInfoServer", get_lfg_info_server)?;
-    LuaApiMut::register_function(lua, "GetLFGQueuedList", get_lfg_queued_list)?;
-    LuaApiMut::register_function(lua, "GetLFGQueueStats", get_lfg_queue_stats)?;
+    register_lfg_queue_state_globals(lua)?;
     LuaApiMut::register_function(lua, "GetLFGRoles", get_lfg_roles)?;
     LuaApiMut::register_function(lua, "SetLFGRoles", set_lfg_roles)?;
     LuaApiMut::register_function(lua, "GetLFGLockList", get_lfg_lock_list)?;
@@ -742,5 +1100,27 @@ fn register_lfd_state_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetRandomScenarioBestChoice",
         get_random_scenario_best_choice,
     )?;
+    Ok(())
+}
+
+fn register_lfg_queue_state_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "SetLFGDungeonEnabled", set_lfg_dungeon_enabled)?;
+    LuaApiMut::register_function(lua, "ClearAllLFGDungeons", clear_all_lfg_dungeons)?;
+    LuaApiMut::register_function(lua, "SetLFGDungeon", set_lfg_dungeon)?;
+    LuaApiMut::register_function(lua, "JoinLFG", join_lfg)?;
+    LuaApiMut::register_function(lua, "LeaveLFG", leave_lfg)?;
+    LuaApiMut::register_function(lua, "GetLFGInfoServer", get_lfg_info_server)?;
+    LuaApiMut::register_function(lua, "GetLFGQueuedList", get_lfg_queued_list)?;
+    LuaApiMut::register_function(lua, "GetLFGQueueStats", get_lfg_queue_stats)?;
+    register_lfg_proposal_globals(lua)?;
+    Ok(())
+}
+
+fn register_lfg_proposal_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "GetLFGProposal", get_lfg_proposal)?;
+    LuaApiMut::register_function(lua, "GetLFGProposalMember", get_lfg_proposal_member)?;
+    LuaApiMut::register_function(lua, "GetLFGProposalEncounter", get_lfg_proposal_encounter)?;
+    LuaApiMut::register_function(lua, "AcceptProposal", accept_proposal)?;
+    LuaApiMut::register_function(lua, "RejectProposal", reject_proposal)?;
     Ok(())
 }
