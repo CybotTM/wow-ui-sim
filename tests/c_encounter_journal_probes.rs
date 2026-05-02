@@ -295,23 +295,26 @@ fn test_magisters_terrace_loot_rows_have_renderable_text_and_icons() {
 }
 
 #[test]
-fn test_refueling_orb_uses_real_icon() {
+fn test_refueling_orb_uses_spell_name_icon() {
     let env = env();
-    let icon: i64 = env
+    let result: String = env
         .eval(
             r#"
             EJ_SelectInstance(1300)
             for i = 1, EJ_GetNumLoot() do
                 local item = C_EncounterJournal.GetLootInfoByIndex(i)
                 if item.itemID == 250246 then
-                    return item.icon
+                    return tostring(item.icon)
                 end
             end
-            return 0
+            return "missing"
             "#,
         )
         .unwrap();
-    assert_eq!(icon, 4_914_670);
+    assert_eq!(
+        result, "4914670",
+        "Refueling Orb should use its matching non-generic spell icon"
+    );
 }
 
 #[test]

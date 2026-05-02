@@ -232,6 +232,8 @@ fn build_icon_map(
         }
     }
 
+    add_spell_name_icon_fallbacks(wow_data, required_ids, &mut icon_map)?;
+
     Ok(icon_map)
 }
 
@@ -243,9 +245,117 @@ fn required_item_icon_overrides() -> &'static [(u32, u32)] {
         (159, 132788), // ICONS/INV_Drink_01
         // Tough Hunk of Bread
         (4540, 133964), // ICONS/INV_MISC_FOOD_11
-        // Refueling Orb
-        (250246, 4914670), // ICONS/INV_CosmicVoid_Orb
     ]
+}
+
+const GENERIC_SPELL_ICON_FILE_DATA_ID: u32 = 136243;
+
+fn add_spell_name_icon_fallbacks(
+    wow_data: &Path,
+    required_ids: &BTreeSet<u32>,
+    icon_map: &mut HashMap<u32, u32>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let item_names = required_item_names(wow_data, required_ids)?;
+    let spell_icons = spell_icon_file_data_ids(wow_data)?;
+    let spell_name_icons = spell_name_icon_file_data_ids(wow_data, &spell_icons)?;
+
+    for (item_id, name) in item_names {
+        if icon_map.contains_key(&item_id) {
+            continue;
+        }
+        if let Some(icon_file_data_id) = spell_name_icons.get(&name) {
+            icon_map.insert(item_id, *icon_file_data_id);
+        }
+    }
+
+    Ok(())
+}
+
+fn required_item_names(
+    wow_data: &Path,
+    required_ids: &BTreeSet<u32>,
+) -> Result<HashMap<u32, String>, Box<dyn std::error::Error>> {
+    let mut item_names = required_item_names_from_csv(wow_data, "ItemSparse.csv", required_ids)?;
+    for (item_id, name) in
+        required_item_names_from_csv(wow_data, "ItemSearchName.csv", required_ids)?
+    {
+        item_names.entry(item_id).or_insert(name);
+    }
+    Ok(item_names)
+}
+
+fn required_item_names_from_csv(
+    wow_data: &Path,
+    file_name: &str,
+    required_ids: &BTreeSet<u32>,
+) -> Result<HashMap<u32, String>, Box<dyn std::error::Error>> {
+    let records = open_records(&wow_data.join(file_name))?;
+    let mut iter = records.iter();
+    let header = iter.next().ok_or_else(|| format!("empty {file_name}"))?;
+    let idx = header_index(header);
+    let mut item_names = HashMap::new();
+
+    for record in iter {
+        let fields = parse_csv_line(record);
+        let item_id = parse_u32(field(&fields, &idx, "ID"));
+        let name = field(&fields, &idx, "Display_lang");
+        if required_ids.contains(&item_id) && !name.is_empty() {
+            item_names.insert(item_id, name.to_string());
+        }
+    }
+
+    Ok(item_names)
+}
+
+fn spell_icon_file_data_ids(
+    wow_data: &Path,
+) -> Result<HashMap<u32, u32>, Box<dyn std::error::Error>> {
+    let records = open_records(&wow_data.join("SpellMisc.csv"))?;
+    let mut iter = records.iter();
+    let header = iter.next().ok_or("empty SpellMisc.csv")?;
+    let idx = header_index(header);
+    let mut spell_icons = HashMap::new();
+
+    for record in iter {
+        let fields = parse_csv_line(record);
+        let spell_id = parse_u32(field(&fields, &idx, "SpellID"));
+        let icon_file_data_id = parse_u32(field(&fields, &idx, "SpellIconFileDataID"));
+        if spell_id != 0
+            && icon_file_data_id != 0
+            && icon_file_data_id != GENERIC_SPELL_ICON_FILE_DATA_ID
+        {
+            spell_icons.insert(spell_id, icon_file_data_id);
+        }
+    }
+
+    Ok(spell_icons)
+}
+
+fn spell_name_icon_file_data_ids(
+    wow_data: &Path,
+    spell_icons: &HashMap<u32, u32>,
+) -> Result<HashMap<String, u32>, Box<dyn std::error::Error>> {
+    let records = open_records(&wow_data.join("SpellName.csv"))?;
+    let mut iter = records.iter();
+    let header = iter.next().ok_or("empty SpellName.csv")?;
+    let idx = header_index(header);
+    let mut spell_name_icons = HashMap::new();
+
+    for record in iter {
+        let fields = parse_csv_line(record);
+        let spell_id = parse_u32(field(&fields, &idx, "ID"));
+        let name = field(&fields, &idx, "Name_lang");
+        if name.is_empty() {
+            continue;
+        }
+        if let Some(icon_file_data_id) = spell_icons.get(&spell_id) {
+            spell_name_icons
+                .entry(name.to_string())
+                .or_insert(*icon_file_data_id);
+        }
+    }
+
+    Ok(spell_name_icons)
 }
 
 /// Parse ItemAppearance.csv: appearance_id → icon fileDataID.
