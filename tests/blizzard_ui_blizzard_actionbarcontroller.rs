@@ -85,3 +85,6 @@ mod behavior_update_all_spell_highlights;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_action_bar_busy_during_slide.rs"]
 mod behavior_action_bar_busy_during_slide;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_validate_transition_state_main.rs"]
+mod behavior_validate_transition_state_main;
