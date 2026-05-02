@@ -244,6 +244,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
 ];
 
 static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
+    ("GetActionBarToggles", stub_action_bar_toggles),
     ("GetReadyCheckStatus", stub_nil),
     ("GetReadyCheckTimeLeft", stub_zero),
     // GetRestrictedAccountData is SimState-backed in xp_honor_rest.rs.
@@ -284,6 +285,13 @@ fn stub_classic_expansion_at_least(state: &mut LuaState) -> rilua::LuaResult<u32
 fn stub_num_expansions(state: &mut LuaState) -> rilua::LuaResult<u32> {
     state.push(rilua::Val::Num(NUM_EXPANSIONS));
     Ok(1)
+}
+
+fn stub_action_bar_toggles(state: &mut LuaState) -> rilua::LuaResult<u32> {
+    for _ in 0..7 {
+        state.push(rilua::Val::Bool(false));
+    }
+    Ok(7)
 }
 
 pub(super) fn register_global_stubs(state: &mut LuaState) {
