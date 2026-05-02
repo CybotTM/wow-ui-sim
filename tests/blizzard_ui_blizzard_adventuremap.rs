@@ -28,3 +28,6 @@ mod behavior_onload_registers_inset_update_event;
 
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_onload_adds_three_data_providers.rs"]
 mod behavior_onload_adds_three_data_providers;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_onshow_clears_area_ids_and_sets_map_id.rs"]
+mod behavior_onshow_clears_area_ids_and_sets_map_id;
