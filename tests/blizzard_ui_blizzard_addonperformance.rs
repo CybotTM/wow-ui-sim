@@ -16,3 +16,6 @@ mod behavior_check_skips_when_no_message;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_check_marks_message_type_seen.rs"]
 mod behavior_check_marks_message_type_seen;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_check_dedupes_repeat_message_type.rs"]
+mod behavior_check_dedupes_repeat_message_type;
