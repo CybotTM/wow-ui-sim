@@ -8,3 +8,6 @@ mod common;
 
 #[path = "blizzard_ui/blizzard_apidocumentation_generated/load.rs"]
 mod load;
+
+#[path = "blizzard_ui/blizzard_apidocumentation_generated/surface_globals.rs"]
+mod surface_globals;
