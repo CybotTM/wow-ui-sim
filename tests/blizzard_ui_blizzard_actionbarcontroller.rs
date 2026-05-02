@@ -97,3 +97,6 @@ mod behavior_status_tracking_bar_animation_hook;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_main_menu_micro_button_init.rs"]
 mod behavior_main_menu_micro_button_init;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_validate_transition_resets_micro_menu.rs"]
+mod behavior_validate_transition_resets_micro_menu;
