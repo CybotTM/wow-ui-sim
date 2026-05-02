@@ -68,6 +68,9 @@ mod behavior_pin_click_routes_by_reinforce_state;
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_pin_have_enough_anima_compares_currency.rs"]
 mod behavior_pin_have_enough_anima_compares_currency;
 
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_pin_refresh_tooltip_branches_on_state_and_currency.rs"]
+mod behavior_pin_refresh_tooltip_branches_on_state_and_currency;
+
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_confirm_channel_popup_plays_covenant_sound.rs"]
 mod behavior_confirm_channel_popup_plays_covenant_sound;
 
