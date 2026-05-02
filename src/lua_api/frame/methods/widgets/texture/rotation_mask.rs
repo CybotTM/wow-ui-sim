@@ -2,11 +2,13 @@
 
 use super::super::shared::{opt_f32, opt_string};
 use super::color::color_from_table;
+use crate::lua_api::methods::val_to_string;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_table, frame_id_from_stack,
     get_or_create_frame_fields, table_get, table_set,
 };
 use crate::lua_bridge::stack_val;
+use crate::widget::{Frame, WidgetType};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -32,12 +34,65 @@ pub(super) fn get_rotation(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 // ---------------------------------------------------------------------------
-// SetMask — no-op stub (not implemented on master either)
+// SetMask
 // ---------------------------------------------------------------------------
 
 pub(super) fn set_mask(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = frame_id_from_stack(state, 1);
+    let texture_id = frame_id_from_stack(state, 1)?;
+    let mask_path = val_to_string(state, stack_val(state, 2));
+    let mask_id = create_set_mask_texture(state, texture_id, mask_path)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(texture) = sim.widgets.get_mut_visual(texture_id) {
+        texture.mask_textures.clear();
+        texture.mask_textures.extend(mask_id);
+    }
     Ok(0)
+}
+
+fn create_set_mask_texture(
+    state: &mut LuaState,
+    texture_id: u64,
+    mask_path: Option<String>,
+) -> LuaResult<Option<u64>> {
+    let Some(mask_path) = mask_path else {
+        return Ok(None);
+    };
+    let parent_id = borrow_state(state)?
+        .widgets
+        .get(texture_id)
+        .and_then(|texture| texture.parent_id);
+    let Some(parent_id) = parent_id else {
+        return Ok(None);
+    };
+
+    let mut mask = Frame::new(WidgetType::Texture, None, Some(parent_id));
+    mask.is_mask = true;
+    mask.object_type_name = Some("MaskTexture".to_string());
+    mask.texture = Some(mask_path);
+    copy_texture_layout_to_mask(state, texture_id, &mut mask)?;
+    let mask_id = mask.id;
+
+    let mut sim = borrow_state_mut(state)?;
+    sim.widgets.register(mask);
+    sim.widgets.add_child(parent_id, mask_id);
+    sim.invalidate_strata_buckets();
+    Ok(Some(mask_id))
+}
+
+fn copy_texture_layout_to_mask(
+    state: &LuaState,
+    texture_id: u64,
+    mask: &mut Frame,
+) -> LuaResult<()> {
+    let sim = borrow_state(state)?;
+    let Some(texture) = sim.widgets.get(texture_id) else {
+        return Ok(());
+    };
+    mask.width = texture.width;
+    mask.height = texture.height;
+    mask.anchors = texture.anchors.clone();
+    mask.layout_rect = texture.layout_rect;
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------

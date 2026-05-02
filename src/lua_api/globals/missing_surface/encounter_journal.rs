@@ -61,13 +61,13 @@ const ADVENTURE_SUGGESTIONS: &[AdventureSuggestion] = &[
         title: "Nerub-ar Palace",
         description: "Study bosses and loot.",
         button_text: "Open",
-        icon_path: "Interface\\Icons\\Achievement_Raid_Nerubian",
+        icon_path: "Interface\\Icons\\INV_Nerubian_Ring_01_Color5",
     },
     AdventureSuggestion {
         title: "Delves",
         description: "Explore short adventures.",
         button_text: "Start",
-        icon_path: "Interface\\Icons\\Inv_Archaeology_70_Scroll",
+        icon_path: "Interface\\Icons\\INV_Misc_ScrollUnrolled03",
     },
     AdventureSuggestion {
         title: "Legacy Raids",

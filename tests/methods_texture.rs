@@ -731,6 +731,27 @@ fn test_get_mask_texture_nil() {
     assert!(is_nil);
 }
 
+#[test]
+fn test_set_mask_creates_mask_texture() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "SetMask");
+    let (mask_count, mask_path): (i32, String) = env
+        .eval(&format!(
+            r#"
+        {tex}:SetMask("Interface\\CharacterFrame\\TempPortraitAlphaMask")
+        local mask = {tex}:GetMaskTexture(1)
+        return {tex}:GetNumMaskTextures(), mask and mask:GetTexture() or ""
+    "#
+        ))
+        .unwrap();
+
+    assert_eq!(mask_count, 1);
+    assert_eq!(
+        mask_path,
+        "Interface\\CharacterFrame\\TempPortraitAlphaMask"
+    );
+}
+
 // ============================================================================
 // SetPortraitToTexture
 // ============================================================================
