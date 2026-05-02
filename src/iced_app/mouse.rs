@@ -199,10 +199,20 @@ impl App {
         {
             let env = self.env.borrow();
             let button_val = env.lua_string("LeftButton");
-            let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val]);
+            if self.frame_mouse_on_edge(frame_id, "LeftButton", true) {
+                let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val.clone()]);
+            }
             if clicks_on_down {
                 self.fire_left_click_sequence(frame_id, &env, &env.lua_string("LeftButton"), true);
             }
+            self.fire_propagated_mouse_script(
+                frame_id,
+                &env,
+                "OnMouseDown",
+                "LeftButton",
+                &button_val,
+                true,
+            );
         }
         self.flush_post_script_updates();
     }
@@ -270,7 +280,17 @@ impl App {
             self.fire_left_click_sequence(frame_id, &env, &button_val, false);
         }
 
-        let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val]);
+        if self.frame_mouse_on_edge(frame_id, "LeftButton", false) {
+            let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val.clone()]);
+        }
+        self.fire_propagated_mouse_script(
+            frame_id,
+            &env,
+            "OnMouseUp",
+            "LeftButton",
+            &button_val,
+            false,
+        );
     }
 
     fn cursor_holds_item(&self) -> bool {
@@ -317,7 +337,9 @@ impl App {
         {
             let env = self.env.borrow();
             let button_val = env.lua_string("RightButton");
-            let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val]);
+            if self.frame_mouse_on_edge(frame_id, "RightButton", true) {
+                let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val.clone()]);
+            }
             if clicks_on_down {
                 let down_val = Val::Bool(true);
                 let _ = env.fire_script_handler(
@@ -331,6 +353,14 @@ impl App {
                     vec![env.lua_string("RightButton"), down_val],
                 );
             }
+            self.fire_propagated_mouse_script(
+                frame_id,
+                &env,
+                "OnMouseDown",
+                "RightButton",
+                &button_val,
+                true,
+            );
         }
         self.flush_post_script_updates();
     }
@@ -378,7 +408,18 @@ impl App {
                     );
                 }
 
-                let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val]);
+                if self.frame_mouse_on_edge(frame_id, "RightButton", false) {
+                    let _ =
+                        env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val.clone()]);
+                }
+                self.fire_propagated_mouse_script(
+                    frame_id,
+                    &env,
+                    "OnMouseUp",
+                    "RightButton",
+                    &button_val,
+                    false,
+                );
             }
             self.flush_post_script_updates();
         }
@@ -392,6 +433,65 @@ impl App {
             return false;
         };
         frame_click_registration_matches(frame, button_name, down)
+    }
+
+    fn frame_mouse_on_edge(&self, frame_id: u64, button_name: &str, down: bool) -> bool {
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        let Some(frame) = state.widgets.get(frame_id) else {
+            return false;
+        };
+        crate::iced_app::frame_collect::frame_mouse_registration_matches(frame, button_name, down)
+    }
+
+    fn fire_propagated_mouse_script(
+        &self,
+        frame_id: u64,
+        env: &crate::lua_api::WowLuaEnv,
+        script_name: &str,
+        button_name: &str,
+        button_val: &Val,
+        down: bool,
+    ) {
+        for parent_id in self.propagated_mouse_targets(frame_id, button_name, down) {
+            let _ = env.fire_script_handler(parent_id, script_name, vec![button_val.clone()]);
+        }
+    }
+
+    fn propagated_mouse_targets(&self, frame_id: u64, button_name: &str, down: bool) -> Vec<u64> {
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        let mut targets = Vec::new();
+        let mut current_id = frame_id;
+
+        loop {
+            let Some(current) = state.widgets.get(current_id) else {
+                break;
+            };
+            if !current.propagate_mouse_clicks {
+                break;
+            }
+            let Some(parent_id) = current.parent_id else {
+                break;
+            };
+            let Some(parent) = state.widgets.get(parent_id) else {
+                break;
+            };
+            let parent_accepts_button =
+                crate::iced_app::frame_collect::frame_accepts_mouse_button(parent, button_name);
+            let parent_accepts_edge =
+                crate::iced_app::frame_collect::frame_mouse_registration_matches(
+                    parent,
+                    button_name,
+                    down,
+                );
+            if parent_accepts_button && parent_accepts_edge {
+                targets.push(parent_id);
+            }
+            current_id = parent_id;
+        }
+
+        targets
     }
 
     pub(super) fn handle_middle_click(&mut self, pos: Point) {

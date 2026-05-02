@@ -159,6 +159,34 @@ pub fn frame_accepts_mouse_button(frame: &crate::widget::Frame, button_name: &st
         && !frame
             .pass_through_buttons
             .contains(&button_name.to_ascii_lowercase())
+        && frame_has_registered_mouse_button(frame, button_name)
+}
+
+fn frame_has_registered_mouse_button(frame: &crate::widget::Frame, button_name: &str) -> bool {
+    if frame.registered_mouse_buttons.is_empty() {
+        return true;
+    }
+
+    frame_mouse_registration_matches(frame, button_name, true)
+        || frame_mouse_registration_matches(frame, button_name, false)
+}
+
+pub fn frame_mouse_registration_matches(
+    frame: &crate::widget::Frame,
+    button_name: &str,
+    down: bool,
+) -> bool {
+    if frame.registered_mouse_buttons.is_empty() {
+        return true;
+    }
+
+    let edge = if down { "Down" } else { "Up" };
+    frame
+        .registered_mouse_buttons
+        .contains(&format!("{button_name}{edge}"))
+        || frame
+            .registered_mouse_buttons
+            .contains(&format!("Any{edge}"))
 }
 
 #[cfg(test)]

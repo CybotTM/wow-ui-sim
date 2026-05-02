@@ -1,6 +1,6 @@
 # Dropdown Intrinsic Script Chain
 
-Reputation filter dropdowns failed to open because intrinsic `DropdownButton` XML scripts were replaced by style-template scripts. The fix keeps Blizzard's intrinsic handler in the runtime script chain and removes the simulator's fake descriptor/materialized-row fallback path.
+Reputation filter dropdowns failed to open because intrinsic `DropdownButton` XML scripts were replaced by style-template scripts. Later shared input work also made `RegisterForMouse` and click propagation real simulator state, so dropdown-like parents do not need per-widget click shims when a child or physical mouse registration is involved.
 
 ## Content
 
@@ -29,6 +29,14 @@ The fake menu path was retired:
 
 - `intrinsic_dropdown_scripts_chain_with_style_template_scripts` asserts a minimal intrinsic `DropdownButton` plus style template runs both handlers in order.
 - `reputation_filter_dropdown_opens_with_blizzard_menu_renderer` loads Blizzard UI, runs `ReputationFrame`'s real `OnShow`, clicks the real dropdown script, and asserts `Menu.GetManager()` tracks the opened menu.
+- `register_for_mouse_restricts_physical_mouse_button_events` asserts `RegisterForMouse("LeftButtonDown", "LeftButtonUp")` suppresses right-button `OnMouseDown`/`OnMouseUp` dispatch.
+- `propagated_mouse_clicks_fire_parent_mouse_handlers` asserts a child with `SetPropagateMouseClicks(true)` forwards physical mouse scripts to its parent. This covers dropdown-style parents whose base handler is on the parent while the deepest hit target is a child.
+
+### Follow-up Root Cause
+
+The simulator already stored `propagate_mouse_clicks`, but GUI mouse dispatch did not consume it. `RegisterForMouse` was also a stub, even though Blizzard dropdown intrinsics call it from `DropdownButtonMixin:OnLoad_Intrinsic()` and deprecated `DropDownToggleButtonMixin:OnLoad_Intrinsic()`.
+
+The shared fix stores physical mouse registrations on `Frame`, filters physical `OnMouseDown`/`OnMouseUp` by the registered edge, and walks parent frames while the current frame has `propagate_mouse_clicks` enabled. `RegisterForClicks` remains separate and still controls `OnClick`/`PostClick` edge dispatch.
 
 ## Sources
 
@@ -37,7 +45,10 @@ The fake menu path was retired:
 - [ReputationFrame.lua](../../../Interface/BlizzardUI/Blizzard_UIPanels_Game/Mainline/ReputationFrame.lua) — menu generator
 - [template_chain.rs](../../../src/lua_api/globals/create_frame/template_chain.rs) — runtime template script application
 - [helpers.rs](../../../src/loader/helpers.rs) — slow-path XML script chaining
+- [mouse.rs](../../../src/iced_app/mouse.rs) — GUI mouse dispatch, physical edge checks, and click propagation
+- [input.rs](../../../src/lua_api/frame/methods/core_state/input.rs) — `RegisterForMouse` state storage
 - [startup_api_stubs.rs](../../../tests/startup_api_stubs.rs) — Reputation dropdown regression test
+- [mouse_tests.rs](../../../src/iced_app/mouse_tests.rs) — shared mouse registration and propagation regressions
 - [registry.rs](../../../tests/xml_templates/registry.rs) — intrinsic/style chaining regression test
 
 ## See Also

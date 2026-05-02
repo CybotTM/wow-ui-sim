@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-02] update | Dropdown base mouse handling
+
+Updated `investigations/dropdown-intrinsic-script-chain.md` after shared input
+dispatch gained `RegisterForMouse` state and `SetPropagateMouseClicks` parent
+dispatch. Documented why dropdown-like widgets should not need per-dropdown
+click shims when the issue is physical mouse registration or child hit targets.
+
 ## [2026-05-02] update | LFD queue verbs
 
 Updated `investigations/lfd-dungeon-list-empty.md` after the LFD join path got

@@ -1,7 +1,8 @@
 //! Mouse and keyboard input-enable methods.
 
 use super::helpers::{arg_bool, frame_id};
-use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, val_to_string};
+use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -75,9 +76,32 @@ pub fn is_keyboard_enabled(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_for_mouse(state: &mut LuaState) -> LuaResult<u32> {
-    let _id = frame_id(state, 1)?;
-    // Variadic args ignored — stub only.
+    let id = frame_id(state, 1)?;
+    let buttons = collect_mouse_registration_args(state, 2);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.registered_mouse_buttons = buttons;
+    }
     Ok(0)
+}
+
+fn collect_mouse_registration_args(
+    state: &mut LuaState,
+    start: i32,
+) -> std::collections::HashSet<String> {
+    let mut buttons = std::collections::HashSet::new();
+    let mut index = start;
+    loop {
+        let value = stack_val(state, index);
+        if value == Val::Nil {
+            break;
+        }
+        if let Some(button) = val_to_string(state, value) {
+            buttons.insert(button);
+        }
+        index += 1;
+    }
+    buttons
 }
 
 pub fn enable_mouse_motion(state: &mut LuaState) -> LuaResult<u32> {
