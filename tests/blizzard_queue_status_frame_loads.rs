@@ -484,3 +484,38 @@ fn blizzard_queue_status_frame_registers_twenty_four_events_in_onload() {
         );
     }
 }
+
+#[test]
+fn blizzard_queue_status_button_enters_searching_mode_after_lfd_join() {
+    let env = load_full_game_ui();
+
+    let result: String = env
+        .eval(
+            r#"
+            PVEFrame_ShowFrame("GroupFinderFrame", LFDParentFrame)
+            LFDQueueFrame_SetType("specific")
+            local ok, err = pcall(LFDQueueFrame_Join)
+            if not ok then
+                return "join_error=" .. tostring(err)
+            end
+
+            local mode = GetLFGMode(LE_LFG_CATEGORY_LFD)
+            if mode ~= "queued" then
+                return "mode=" .. tostring(mode)
+            end
+            if not QueueStatusButton:IsShown() then
+                return "hidden"
+            end
+            if QueueStatusButton.Eye:IsStaticMode() then
+                return "static"
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "joining an LFD queue must notify QueueStatusFrame so the eye leaves static mode"
+    );
+}
