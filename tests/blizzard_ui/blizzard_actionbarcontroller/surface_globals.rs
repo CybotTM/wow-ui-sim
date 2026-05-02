@@ -10,6 +10,9 @@ const ACTION_BAR_CONTROLLER_FUNCTIONS: &[&str] = &[
     "ActionBarController_UpdateAll",
     "ActionBarController_UpdateAllSpellHighlights",
     "ActionBarController_ResetToDefault",
+    "ActionBarBusy",
+    "BeginActionBarTransition",
+    "ValidateActionBarTransition",
 ];
 
 #[test]
