@@ -91,3 +91,6 @@ mod behavior_validate_transition_state_main;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_validate_transition_state_override.rs"]
 mod behavior_validate_transition_state_override;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_status_tracking_bar_animation_hook.rs"]
+mod behavior_status_tracking_bar_animation_hook;
