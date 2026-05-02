@@ -46,3 +46,6 @@ mod behavior_inset_initialize_sizes_and_positions;
 
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_inset_collapse_releases_area_trigger.rs"]
 mod behavior_inset_collapse_releases_area_trigger;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_inset_expand_acquires_trigger_and_pans.rs"]
+mod behavior_inset_expand_acquires_trigger_and_pans;
