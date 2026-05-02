@@ -23,6 +23,9 @@ mod behavior_handle_slash_command_search_writes_matches;
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_slash_command_system_list_writes_all_systems.rs"]
 mod behavior_handle_slash_command_system_list_writes_all_systems;
 
+#[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_slash_command_system_search_dispatches_to_system.rs"]
+mod behavior_handle_slash_command_system_search_dispatches_to_system;
+
 #[path = "blizzard_ui/blizzard_apidocumentation/load.rs"]
 mod load;
 
