@@ -176,8 +176,11 @@ pub(super) fn emit_widget_text_quads(
     layout.word_wrap = effective_word_wrap(f, layout.word_wrap);
     let color = color_with_alpha(&f.text_color, layout.alpha);
     let shadow = (f.shadow_color.a > 0.0).then(|| color_with_alpha(&f.shadow_color, layout.alpha));
+    let clip_bounds = layout.bounds;
+    let vert_before = text_renderer.batch.vertices.len();
     if !f.text_segments.is_empty() {
         emit_widget_text_segment_quads(text_renderer, f, layout, shadow);
+        clip_recent_quads(text_renderer.batch, vert_before, clip_bounds);
         return;
     }
     emit_text_quads(
@@ -199,6 +202,7 @@ pub(super) fn emit_widget_text_quads(
         layout.max_lines,
         f.text_stripped.as_deref(),
     );
+    clip_recent_quads(text_renderer.batch, vert_before, clip_bounds);
 }
 
 fn emit_widget_text_segment_quads(

@@ -9,6 +9,15 @@ fn has_glyph_color(batch: &QuadBatch, color: [f32; 4]) -> bool {
         .any(|vertex| vertex.tex_index == GLYPH_ATLAS_TEX_INDEX && vertex.color == color)
 }
 
+fn max_glyph_x(batch: &QuadBatch) -> f32 {
+    batch
+        .vertices
+        .iter()
+        .filter(|vertex| vertex.tex_index == GLYPH_ATLAS_TEX_INDEX && vertex.color[3] > 0.0)
+        .map(|vertex| vertex.position[0])
+        .fold(0.0, f32::max)
+}
+
 fn button_highlight_frame(
     registry: &WidgetRegistry,
     hovered_frame: Option<u64>,
@@ -87,6 +96,44 @@ fn explicit_text_width_keeps_render_wrapping() {
     frame.width_is_text_auto = false;
 
     assert!(effective_word_wrap(&frame, true));
+}
+
+#[test]
+fn fixed_width_fontstring_clips_no_wrap_text_to_bounds() {
+    let mut frame = Frame::new(crate::widget::WidgetType::FontString, None, None);
+    frame.width = 60.0;
+    frame.height = 20.0;
+    frame.width_is_text_auto = false;
+    frame.word_wrap = false;
+
+    let mut batch = QuadBatch::new();
+    let mut font_sys = WowFontSystem::new();
+    let mut glyph_atlas = GlyphAtlas::new();
+    let mut text_renderer = WidgetTextRenderer {
+        batch: &mut batch,
+        font_sys: &mut font_sys,
+        glyph_atlas: &mut glyph_atlas,
+    };
+    let bounds = Rectangle::new(iced::Point::ORIGIN, iced::Size::new(60.0, 20.0));
+
+    emit_widget_text_quads(
+        &mut text_renderer,
+        &frame,
+        WidgetTextLayout {
+            text: "Open quest gossip with completed incomplete reward quests",
+            bounds,
+            justify_h: TextJustify::Left,
+            justify_v: TextJustify::Center,
+            word_wrap: frame.word_wrap,
+            max_lines: 0,
+            alpha: 1.0,
+        },
+    );
+
+    assert!(
+        max_glyph_x(&batch) <= bounds.x + bounds.width + 0.5,
+        "glyph vertices should be clipped to the FontString right edge"
+    );
 }
 
 /// A frame that only has a nine-slice layout registered (no active backdrop)
