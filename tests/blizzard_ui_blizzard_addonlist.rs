@@ -94,3 +94,6 @@ mod behavior_search_with_invalid_group_falls_back_to_root;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_set_enabled_dependencies_walks_chain.rs"]
 mod behavior_set_enabled_dependencies_walks_chain;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_reset_to_default_uses_default_enabled.rs"]
+mod behavior_reset_to_default_uses_default_enabled;
