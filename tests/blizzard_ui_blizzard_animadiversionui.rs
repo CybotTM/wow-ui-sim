@@ -92,5 +92,8 @@ mod behavior_update_tutorial_tips_branches_on_reinforce_state;
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_world_quest_data_provider_returns_subclassed_pin_template.rs"]
 mod behavior_world_quest_data_provider_returns_subclassed_pin_template;
 
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_data_provider_clear_effect_on_all_pins_skips_exempt.rs"]
+mod behavior_data_provider_clear_effect_on_all_pins_skips_exempt;
+
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_try_show_seeds_state_and_opens_panel.rs"]
 mod behavior_try_show_seeds_state_and_opens_panel;
