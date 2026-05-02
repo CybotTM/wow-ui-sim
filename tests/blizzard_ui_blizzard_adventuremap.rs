@@ -43,3 +43,6 @@ mod behavior_refresh_insets_filters_by_area_table_id;
 
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_inset_initialize_sizes_and_positions.rs"]
 mod behavior_inset_initialize_sizes_and_positions;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_inset_collapse_releases_area_trigger.rs"]
+mod behavior_inset_collapse_releases_area_trigger;
