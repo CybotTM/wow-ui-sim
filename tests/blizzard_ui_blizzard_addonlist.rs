@@ -13,3 +13,6 @@ mod surface_globals;
 
 #[path = "blizzard_ui/blizzard_addonlist/surface_frames.rs"]
 mod surface_frames;
+
+#[path = "blizzard_ui/blizzard_addonlist/surface_mixins.rs"]
+mod surface_mixins;
