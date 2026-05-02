@@ -30,3 +30,20 @@ fn action_bar_controller_surface_globals_are_functions() {
         }
     });
 }
+
+#[test]
+fn action_bar_controller_onload_initializes_current_state_to_main() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let current_is_main: bool = env
+            .eval(
+                "return ActionBarController_GetCurrentActionBarState() == LE_ACTIONBAR_STATE_MAIN",
+            )
+            .expect("current action bar state probe must run cleanly");
+
+        assert!(
+            current_is_main,
+            "ActionBarController_OnLoad must initialize CURRENT_ACTION_BAR_STATE to \
+             LE_ACTIONBAR_STATE_MAIN"
+        );
+    });
+}
