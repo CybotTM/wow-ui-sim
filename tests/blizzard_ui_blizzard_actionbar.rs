@@ -105,3 +105,6 @@ mod behavior_spell_alert_animation;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_button_range_check.rs"]
 mod behavior_button_range_check;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_battlefield_hides_xp_bar.rs"]
+mod behavior_battlefield_hides_xp_bar;
