@@ -47,5 +47,8 @@ mod behavior_onshow_registers_events_and_plays_open_sound;
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_setup_bolster_progress_caps_at_max_and_records_new_gems.rs"]
 mod behavior_setup_bolster_progress_caps_at_max_and_records_new_gems;
 
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_setup_bolster_progress_releases_pool_and_inits_info_frame.rs"]
+mod behavior_setup_bolster_progress_releases_pool_and_inits_info_frame;
+
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_try_show_seeds_state_and_opens_panel.rs"]
 mod behavior_try_show_seeds_state_and_opens_panel;
