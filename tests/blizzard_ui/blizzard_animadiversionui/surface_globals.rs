@@ -60,6 +60,45 @@ return channelIsTable,
        reinforceHideOnEscape,
        type(reinforce and reinforce.GetExpirationText)
 "#;
+const UTIL_SURFACE_PROBE: &str = r#"
+local state = Enum.AnimaDiversionNodeState
+local originalGetNodes = C_AnimaDiversion.GetAnimaDiversionNodes
+
+local function isAnyActive(nodes)
+    C_AnimaDiversion.GetAnimaDiversionNodes = function()
+        return nodes
+    end
+    return AnimaDiversionUtil.IsAnyNodeActive()
+end
+
+local unavailableActive = AnimaDiversionUtil.IsNodeActive(state.Unavailable)
+local availableActive = AnimaDiversionUtil.IsNodeActive(state.Available)
+local temporaryActive = AnimaDiversionUtil.IsNodeActive(state.SelectedTemporary)
+local permanentActive = AnimaDiversionUtil.IsNodeActive(state.SelectedPermanent)
+local cooldownActive = AnimaDiversionUtil.IsNodeActive(state.Cooldown)
+local anyWithNoNodes = isAnyActive(nil)
+local anyWithInactiveNodes = isAnyActive({
+    { state = state.Unavailable },
+    { state = state.Available },
+    { state = state.Cooldown },
+})
+local anyWithTemporaryNode = isAnyActive({ { state = state.SelectedTemporary } })
+local anyWithPermanentNode = isAnyActive({ { state = state.SelectedPermanent } })
+
+C_AnimaDiversion.GetAnimaDiversionNodes = originalGetNodes
+
+return type(AnimaDiversionUtil.IsNodeActive),
+       type(AnimaDiversionUtil.IsAnyNodeActive),
+       unavailableActive,
+       availableActive,
+       temporaryActive,
+       permanentActive,
+       cooldownActive,
+       anyWithNoNodes,
+       anyWithInactiveNodes,
+       anyWithTemporaryNode,
+       anyWithPermanentNode
+"#;
 
 #[test]
 fn anima_diversion_ui_registers_static_popup_globals() {
@@ -69,6 +108,17 @@ fn anima_diversion_ui_registers_static_popup_globals() {
             .expect("AnimaDiversionUI static popup surface probe must run cleanly");
 
         assert_popup_surface(surface);
+    });
+}
+
+#[test]
+fn anima_diversion_util_predicates_match_node_state_semantics() {
+    with_blizzard_addon_startup_shape(&[ROOT], CLOSURE_OVERRIDES, |env, _loaded| {
+        let surface: UtilSurface = env
+            .eval(UTIL_SURFACE_PROBE)
+            .expect("AnimaDiversionUtil predicate probe must run cleanly");
+
+        assert_util_surface(surface);
     });
 }
 
@@ -93,6 +143,21 @@ type PopupSurface = (
     String,
 );
 type PopupFields = (bool, String, bool, bool, String, String, String, bool);
+type UtilSurface = (
+    String,
+    String,
+    bool,
+    bool,
+    bool,
+    bool,
+    bool,
+    bool,
+    bool,
+    bool,
+    bool,
+);
+type NodeStatePredicates = (bool, bool, bool, bool, bool);
+type AnyNodePredicates = (bool, bool, bool, bool);
 
 fn assert_popup_surface(surface: PopupSurface) {
     assert_common_popup_fields("ANIMA_DIVERSION_CONFIRM_CHANNEL", channel_fields(&surface));
@@ -168,5 +233,78 @@ fn assert_common_popup_fields(name: &str, fields: PopupFields) {
     assert!(
         hide_on_escape,
         "`{name}` must opt into hide-on-escape behavior"
+    );
+}
+
+fn assert_util_surface(surface: UtilSurface) {
+    assert_eq!(
+        surface.0, "function",
+        "`AnimaDiversionUtil.IsNodeActive` must be a function"
+    );
+    assert_eq!(
+        surface.1, "function",
+        "`AnimaDiversionUtil.IsAnyNodeActive` must be a function"
+    );
+    assert_node_state_predicates(node_state_predicates(&surface));
+    assert_any_node_predicates(any_node_predicates(&surface));
+}
+
+fn node_state_predicates(surface: &UtilSurface) -> NodeStatePredicates {
+    (surface.2, surface.3, surface.4, surface.5, surface.6)
+}
+
+fn any_node_predicates(surface: &UtilSurface) -> AnyNodePredicates {
+    (surface.7, surface.8, surface.9, surface.10)
+}
+
+fn assert_node_state_predicates(predicates: NodeStatePredicates) {
+    let (unavailable_active, available_active, temporary_active, permanent_active, cooldown_active) =
+        predicates;
+
+    assert!(
+        !unavailable_active,
+        "Unavailable nodes must not be considered active"
+    );
+    assert!(
+        !available_active,
+        "Available nodes must not be considered active"
+    );
+    assert!(
+        temporary_active,
+        "SelectedTemporary nodes must be considered active"
+    );
+    assert!(
+        permanent_active,
+        "SelectedPermanent nodes must be considered active"
+    );
+    assert!(
+        !cooldown_active,
+        "Cooldown nodes must not be considered active"
+    );
+}
+
+fn assert_any_node_predicates(predicates: AnyNodePredicates) {
+    let (
+        any_with_no_nodes,
+        any_with_inactive_nodes,
+        any_with_temporary_node,
+        any_with_permanent_node,
+    ) = predicates;
+
+    assert!(
+        !any_with_no_nodes,
+        "`IsAnyNodeActive` must handle nil nodes"
+    );
+    assert!(
+        !any_with_inactive_nodes,
+        "`IsAnyNodeActive` must reject all-inactive node lists"
+    );
+    assert!(
+        any_with_temporary_node,
+        "`IsAnyNodeActive` must accept a temporary selected node"
+    );
+    assert!(
+        any_with_permanent_node,
+        "`IsAnyNodeActive` must accept a permanent selected node"
     );
 }
