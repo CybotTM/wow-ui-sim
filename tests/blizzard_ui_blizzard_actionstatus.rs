@@ -16,3 +16,6 @@ mod surface_frames;
 
 #[path = "blizzard_ui/blizzard_actionstatus/surface_events.rs"]
 mod surface_events;
+
+#[path = "blizzard_ui/blizzard_actionstatus/behavior_screenshot_started_hides_frame.rs"]
+mod behavior_screenshot_started_hides_frame;
