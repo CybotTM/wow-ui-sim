@@ -157,6 +157,7 @@ pub struct Frame {
     pub resize_bounds_max: Option<(f32, f32)>,
     pub user_placed: bool,
     pub dont_save_position: bool,
+    pub registered_mouse_buttons: HashSet<String>,
     pub registered_click_buttons: HashSet<String>,
     pub registered_drag_buttons: HashSet<String>,
     pub highlight_locked: bool,

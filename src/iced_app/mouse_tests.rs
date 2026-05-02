@@ -684,6 +684,90 @@ fn register_for_clicks_left_button_down_fires_click_on_mouse_down_only() {
 }
 
 #[test]
+fn register_for_mouse_restricts_physical_mouse_button_events() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            MouseRegisteredButton = CreateFrame("Button", "MouseRegisteredButton", UIParent)
+            MouseRegisteredButton:SetSize(100, 100)
+            MouseRegisteredButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            MouseRegisteredButton:RegisterForMouse("LeftButtonDown", "LeftButtonUp")
+            MouseRegisteredButton:SetScript("OnMouseDown", function(_, button)
+                __mouse_registered_down = (__mouse_registered_down or "") .. button .. ";"
+            end)
+            MouseRegisteredButton:SetScript("OnMouseUp", function(_, button)
+                __mouse_registered_up = (__mouse_registered_up or "") .. button .. ";"
+            end)
+
+            __mouse_registered_down = ""
+            __mouse_registered_up = ""
+            "#,
+        )
+        .expect("mouse registration setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    let click_pos = Point::new(150.0, 150.0);
+
+    app.handle_right_mouse_down(click_pos);
+    app.handle_right_mouse_up(click_pos);
+    app.handle_mouse_down(click_pos);
+    app.handle_mouse_up(click_pos);
+
+    let (down_buttons, up_buttons): (String, String) = app
+        .env
+        .borrow()
+        .eval("return __mouse_registered_down, __mouse_registered_up")
+        .expect("mouse registration counters should be readable");
+    assert_eq!(down_buttons, "LeftButton;");
+    assert_eq!(up_buttons, "LeftButton;");
+}
+
+#[test]
+fn propagated_mouse_clicks_fire_parent_mouse_handlers() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            PropagatingDropdownParent = CreateFrame("Button", "PropagatingDropdownParent", UIParent)
+            PropagatingDropdownParent:SetSize(100, 100)
+            PropagatingDropdownParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            PropagatingDropdownParent:SetScript("OnMouseDown", function(_, button)
+                __propagated_parent_down = (__propagated_parent_down or "") .. button .. ";"
+            end)
+
+            PropagatingDropdownChild = CreateFrame("Button", "PropagatingDropdownChild", PropagatingDropdownParent)
+            PropagatingDropdownChild:SetAllPoints(PropagatingDropdownParent)
+            PropagatingDropdownChild:SetPropagateMouseClicks(true)
+            PropagatingDropdownChild:SetScript("OnMouseDown", function(_, button)
+                __propagated_child_down = (__propagated_child_down or "") .. button .. ";"
+            end)
+
+            __propagated_parent_down = ""
+            __propagated_child_down = ""
+            "#,
+        )
+        .expect("propagating click setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    app.handle_mouse_down(Point::new(150.0, 150.0));
+
+    let (parent_down, child_down): (String, String) = app
+        .env
+        .borrow()
+        .eval("return __propagated_parent_down, __propagated_child_down")
+        .expect("propagated click counters should be readable");
+    assert_eq!(child_down, "LeftButton;");
+    assert_eq!(parent_down, "LeftButton;");
+}
+
+#[test]
 fn hit_test_reflects_frames_shown_by_previous_clicks() {
     let mut app = build_test_app(ScreenKind::Game);
 
