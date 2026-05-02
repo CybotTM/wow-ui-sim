@@ -46,3 +46,6 @@ mod behavior_specific_error_popup_disable_path;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_overall_error_popup_opens_addon_list.rs"]
 mod behavior_overall_error_popup_opens_addon_list;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_addon_warning_predicate_returns_nil_when_unflagged.rs"]
+mod behavior_addon_warning_predicate_returns_nil_when_unflagged;
