@@ -16,3 +16,6 @@ mod surface_frames;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/surface_events.rs"]
 mod surface_events;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_initial_state.rs"]
+mod behavior_initial_state;
