@@ -310,12 +310,32 @@ fn set_callback_field(state: &mut LuaState, key: &str, value_index: i32) -> LuaR
     Ok(0)
 }
 
+fn set_callback_field_or_delegate(
+    state: &mut LuaState,
+    method_name: &str,
+    key: &str,
+    value_index: i32,
+) -> LuaResult<u32> {
+    let (_, fields) = frame_fields(state)?;
+    let override_fn = table_get(state, fields, method_name);
+    if matches!(override_fn, Val::Function(_)) {
+        let arg_count = state.top.saturating_sub(state.base) as i32;
+        let args: Vec<Val> = (1..=arg_count)
+            .map(|index| stack_val(state, index))
+            .collect();
+        let _ = call_function_state(state, override_fn, &args)?;
+        return Ok(0);
+    }
+    table_set(state, fields, key, stack_val(state, value_index));
+    Ok(0)
+}
+
 pub(super) fn set_default_text(state: &mut LuaState) -> LuaResult<u32> {
-    set_callback_field(state, "defaultText", 2)
+    set_callback_field_or_delegate(state, "SetDefaultText", "defaultText", 2)
 }
 
 pub(super) fn set_selection_translator(state: &mut LuaState) -> LuaResult<u32> {
-    set_callback_field(state, "selectionTranslator", 2)
+    set_callback_field_or_delegate(state, "SetSelectionTranslator", "selectionTranslator", 2)
 }
 
 pub(super) fn set_selection_text(state: &mut LuaState) -> LuaResult<u32> {

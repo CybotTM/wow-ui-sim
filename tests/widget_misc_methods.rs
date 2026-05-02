@@ -167,6 +167,52 @@ fn test_widget_misc_registration_methods_delegate_or_store_state() {
 }
 
 #[test]
+fn test_widget_misc_register_font_string_delegates_or_adds_to_set() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, bool, bool) = env
+        .eval(
+            r##"
+            local frame = CreateFrame("Frame", "TestWidgetMiscRegisterFontStringFrame", UIParent)
+            local fontA = frame:CreateFontString(nil, "OVERLAY")
+            local fontB = frame:CreateFontString(nil, "OVERLAY")
+            local fields = debug.getfenv(frame)[1]
+            fields.fontStrings = {}
+
+            frame:RegisterFontString(fontA)
+            frame:RegisterFontString(fontB)
+            local registered = fields.fontStrings[fontA] == true and fields.fontStrings[fontB] == true
+
+            local overrideFrame = CreateFrame("Frame", "TestWidgetMiscRegisterFontStringOverrideFrame", UIParent)
+            local overrideFont = overrideFrame:CreateFontString(nil, "OVERLAY")
+            local overrideFields = debug.getfenv(overrideFrame)[1]
+            overrideFields.RegisterFontString = function(self, fontString)
+                rawset(overrideFields, "storedSelf", self)
+                rawset(overrideFields, "storedFontString", fontString)
+            end
+            overrideFrame:RegisterFontString(overrideFont)
+            local delegated = overrideFields.storedSelf == overrideFrame and overrideFields.storedFontString == overrideFont
+
+            return registered, fields.__registeredFontStrings == fields.fontStrings, delegated
+        "##,
+        )
+        .unwrap();
+
+    assert!(
+        result.0,
+        "RegisterFontString should add each font string to the frame's fontStrings set"
+    );
+    assert!(
+        result.1,
+        "RegisterFontString should expose the same registry through __registeredFontStrings"
+    );
+    assert!(
+        result.2,
+        "RegisterFontString should delegate to an existing mixin override instead of shadowing it"
+    );
+}
+
+#[test]
 fn test_widget_misc_item_button_methods_delegate_or_store_state() {
     let env = WowLuaEnv::new().unwrap();
 

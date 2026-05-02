@@ -15,6 +15,7 @@ use rilua::{LuaResult, Val};
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, mt, "GetOrCreateGroup", get_or_create_group)?;
     table_set_rust_fn_static(state, mt, "ForceUpdateTimers", force_update_timers)?;
+    table_set_rust_fn_static(state, mt, "RegisterFontString", register_font_string)?;
     table_set_rust_fn_static(state, mt, "RegisterFontStrings", register_font_strings)?;
     table_set_rust_fn_static(
         state,
@@ -182,6 +183,18 @@ pub fn register_font_strings(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub fn register_font_string(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "RegisterFontString")? {
+        return Ok(0);
+    }
+    let fields = frame_fields_from_self(state)?;
+    let font_strings = ensure_registry_table(state, fields, "fontStrings");
+    let font_string = stack_val(state, 2);
+    set_table_entry(state, font_strings, font_string, Val::Bool(true));
+    table_set(state, fields, "__registeredFontStrings", font_strings);
+    Ok(0)
+}
+
 pub fn register_background_texture(state: &mut LuaState) -> LuaResult<u32> {
     if call_fields_override_if_present(state, "RegisterBackgroundTexture")? {
         return Ok(0);
@@ -336,10 +349,24 @@ fn collect_varargs_table(state: &mut LuaState, start: i32) -> Val {
     table
 }
 
+fn ensure_registry_table(state: &mut LuaState, fields: Val, key: &str) -> Val {
+    let existing = table_get(state, fields, key);
+    if matches!(existing, Val::Table(_)) {
+        return existing;
+    }
+    let table = create_table(state);
+    table_set(state, fields, key, table);
+    table
+}
+
 fn set_array_entry(state: &mut LuaState, table: Val, index: i64, value: Val) {
+    set_table_entry(state, table, Val::Num(index as f64), value);
+}
+
+fn set_table_entry(state: &mut LuaState, table: Val, key: Val, value: Val) {
     let Val::Table(table_ref) = table else { return };
     if let Some(t) = state.gc.tables.get_mut(table_ref) {
-        let _ = t.raw_set(Val::Num(index as f64), value, &state.gc.string_arena);
+        let _ = t.raw_set(key, value, &state.gc.string_arena);
     }
     state.gc.barrier_back(table_ref);
 }
