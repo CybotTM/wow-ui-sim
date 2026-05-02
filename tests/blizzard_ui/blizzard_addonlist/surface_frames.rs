@@ -45,6 +45,19 @@ const ADDON_DIALOG_CHILDREN: &[DialogChild] = &[
     DialogChild::new("AddonDialogButton1", "Button", 1),
     DialogChild::new("AddonDialogButton2", "Button", 2),
 ];
+const ENTRY_TEMPLATE_CHILDREN: &[ParentKeyChild] = &[
+    ParentKeyChild::new("Title", "FontString", "FontString"),
+    ParentKeyChild::new("Status", "FontString", "FontString"),
+    ParentKeyChild::new("Reload", "FontString", "FontString"),
+    ParentKeyChild::new("Enabled", "CheckButton", "CheckButton"),
+    ParentKeyChild::new("LoadAddonButton", "Button", "Button"),
+];
+const CATEGORY_TEMPLATE_CHILDREN: &[ParentKeyChild] = &[
+    ParentKeyChild::new("Title", "FontString", "FontString"),
+    ParentKeyChild::new("CollapseExpand", "Button", "Button"),
+];
+const ENTRY_TEMPLATE_PROBE: &str = "AddonListEntryTemplateProbe";
+const CATEGORY_TEMPLATE_PROBE: &str = "AddonListCategoryTemplateProbe";
 type AddonListSurfaceProbe = (
     bool,
     String,
@@ -104,6 +117,18 @@ fn addon_dialog_frame_matches_xml_surface() {
     });
 }
 
+#[test]
+fn addon_list_virtual_templates_expose_parent_keys() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        create_template_probe_frames(env);
+
+        assert_template_button(env, ENTRY_TEMPLATE_PROBE);
+        assert_template_children(env, ENTRY_TEMPLATE_PROBE, ENTRY_TEMPLATE_CHILDREN);
+        assert_template_button(env, CATEGORY_TEMPLATE_PROBE);
+        assert_template_children(env, CATEGORY_TEMPLATE_PROBE, CATEGORY_TEMPLATE_CHILDREN);
+    });
+}
+
 struct ParentKeyChild {
     key: &'static str,
     xml_tag: &'static str,
@@ -122,7 +147,7 @@ impl ParentKeyChild {
 
 struct ParentKeyChildSurface {
     actual_type: String,
-    parent_is_addon_list: bool,
+    parent_matches: bool,
 }
 
 struct DialogChild {
@@ -188,7 +213,66 @@ fn probe_parent_key_child(
 
     ParentKeyChildSurface {
         actual_type,
-        parent_is_addon_list,
+        parent_matches: parent_is_addon_list,
+    }
+}
+
+fn create_template_probe_frames(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    env.exec(
+        r#"
+        AddonListEntryTemplateProbe = CreateFrame("Button", "AddonListEntryTemplateProbe", UIParent, "AddonListEntryTemplate")
+        AddonListCategoryTemplateProbe = CreateFrame("Button", "AddonListCategoryTemplateProbe", UIParent, "AddonListCategoryTemplate")
+        "#,
+    )
+    .expect("AddonList virtual template probe frames must be created");
+}
+
+fn assert_template_button(env: &wow_ui_sim::lua_api::WowLuaEnv, frame_name: &str) {
+    let object_type: String = env
+        .eval(&format!(
+            r#"
+            return _G[{frame_name:?}]:GetObjectType()
+            "#
+        ))
+        .unwrap_or_else(|err| panic!("failed to probe `{frame_name}` object type: {err}"));
+
+    assert_eq!(
+        object_type, "Button",
+        "`{frame_name}` must instantiate a virtual Button template"
+    );
+}
+
+fn assert_template_children(
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+    frame_name: &str,
+    children: &[ParentKeyChild],
+) {
+    for child in children {
+        let surface = probe_template_child(env, frame_name, child.key);
+
+        assert_template_child_surface(frame_name, child, surface);
+    }
+}
+
+fn probe_template_child(
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+    frame_name: &str,
+    child_key: &str,
+) -> ParentKeyChildSurface {
+    let (actual_type, parent_matches): (String, bool) = env
+        .eval(&format!(
+            r#"
+            local frame = _G[{frame_name:?}]
+            local child = frame and frame[{child_key:?}]
+            return child and child:GetObjectType() or "nil",
+                   child and child:GetParent() == frame or false
+            "#
+        ))
+        .unwrap_or_else(|err| panic!("failed to probe `{frame_name}.{child_key}`: {err}"));
+
+    ParentKeyChildSurface {
+        actual_type,
+        parent_matches,
     }
 }
 
@@ -368,8 +452,25 @@ fn assert_parent_key_child_surface(child: &ParentKeyChild, surface: ParentKeyChi
         child.key, child.xml_tag, child.object_type
     );
     assert!(
-        surface.parent_is_addon_list,
+        surface.parent_matches,
         "`AddonList.{}` must be parented to `AddonList`",
+        child.key
+    );
+}
+
+fn assert_template_child_surface(
+    frame_name: &str,
+    child: &ParentKeyChild,
+    surface: ParentKeyChildSurface,
+) {
+    assert_eq!(
+        surface.actual_type, child.object_type,
+        "`{frame_name}.{}` must expose the XML `{}` parentKey child as a runtime {}",
+        child.key, child.xml_tag, child.object_type
+    );
+    assert!(
+        surface.parent_matches,
+        "`{frame_name}.{}` must be parented to `{frame_name}`",
         child.key
     );
 }
