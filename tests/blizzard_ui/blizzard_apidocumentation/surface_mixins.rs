@@ -41,6 +41,28 @@ const API_DOCUMENTATION_MIXIN_METHODS: &[&str] = &[
     "AddSystem",
 ];
 
+const BASE_API_MIXIN_METHODS: &[&str] = &[
+    "GetType",
+    "GetPrettyType",
+    "GetLinkHexColor",
+    "GetName",
+    "GetFullName",
+    "GetParentName",
+    "GetLoweredParentName",
+    "GetLoweredName",
+    "GetClipboardString",
+    "GenerateAPILink",
+    "GetSingleOutputLine",
+    "GetDetailedOutputLines",
+    "MatchesSearchString",
+    "MatchesName",
+    "MatchesNameCaseInsenstive",
+    "MatchesAnyAPI",
+    "MatchesAnyDocumentation",
+    "AddDocumentationTags",
+    "AddSystemTag",
+];
+
 #[test]
 fn api_documentation_mixin_exposes_expected_methods() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -56,6 +78,24 @@ fn api_documentation_mixin_exposes_expected_methods() {
             assert_eq!(
                 "function", method_type,
                 "APIDocumentationMixin.{method_name} must be a function"
+            );
+        }
+    });
+}
+
+#[test]
+fn base_api_mixin_exposes_expected_methods() {
+    with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
+        load_api_documentation(env);
+
+        for method_name in BASE_API_MIXIN_METHODS {
+            let method_type: String = env
+                .eval(&format!(r#"return type(BaseAPIMixin["{method_name}"])"#))
+                .expect("BaseAPIMixin method type probe must run cleanly");
+
+            assert_eq!(
+                "function", method_type,
+                "BaseAPIMixin.{method_name} must be a function"
             );
         }
     });
