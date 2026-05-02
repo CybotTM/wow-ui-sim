@@ -19,3 +19,6 @@ mod surface_mixins;
 
 #[path = "blizzard_ui/blizzard_addonlist/surface_events.rs"]
 mod surface_events;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_initial_show_populates_scroll.rs"]
+mod behavior_initial_show_populates_scroll;
