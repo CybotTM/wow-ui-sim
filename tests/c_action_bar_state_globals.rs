@@ -66,6 +66,16 @@ fn current_action_bar_state_reports_skinned_vehicle_override() {
 }
 
 #[test]
+fn vehicle_bar_index_reads_state() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().vehicle_bar_index = 7;
+
+    let vehicle_bar_index: i32 = env.eval("return C_ActionBar.GetVehicleBarIndex()").unwrap();
+
+    assert_eq!(vehicle_bar_index, 7);
+}
+
+#[test]
 fn le_actionbar_state_constants_are_seeded() {
     let env = WowLuaEnv::new().expect("env");
     let main: f64 = env.eval("return LE_ACTIONBAR_STATE_MAIN").unwrap();

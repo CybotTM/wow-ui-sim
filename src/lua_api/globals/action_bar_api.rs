@@ -335,7 +335,8 @@ fn get_multicast_bar_index(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_vehicle_bar_index(state: &mut LuaState) -> LuaResult<u32> {
-    push_nil(state)
+    let vehicle_bar_index = borrow_state(state)?.vehicle_bar_index;
+    push_i32(state, vehicle_bar_index)
 }
 
 fn get_override_bar_index(state: &mut LuaState) -> LuaResult<u32> {

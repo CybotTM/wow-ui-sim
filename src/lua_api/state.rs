@@ -78,6 +78,7 @@ macro_rules! build_empty_sim_state {
             action_bar_state: ActionBarStateInfo::default(),
             action_bar_page: 1,
             has_vehicle_action_bar: false,
+            vehicle_bar_index: 1,
             has_override_action_bar: false,
             override_bar_skin: None,
             override_bar_index: 1,
@@ -1357,6 +1358,9 @@ pub struct SimState {
     /// Drives `C_ActionBar.HasVehicleActionBar()`. Default false — no vehicle
     /// action bar is mounted.
     pub has_vehicle_action_bar: bool,
+    /// Drives `C_ActionBar.GetVehicleBarIndex()` when an unskinned vehicle bar
+    /// is active. Default 1 matches Blizzard's bootstrap fallback.
+    pub vehicle_bar_index: i32,
     /// Drives `C_ActionBar.GetOverrideBarSkin()`. `Some(nonzero)` selects the
     /// skinned override-bar path in `ActionBarController_UpdateAll`.
     pub override_bar_skin: Option<i32>,
