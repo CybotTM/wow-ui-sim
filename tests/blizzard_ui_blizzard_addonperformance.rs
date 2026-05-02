@@ -34,3 +34,6 @@ mod behavior_display_specific_chat_warning;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_display_specific_error_dialog.rs"]
 mod behavior_display_specific_error_dialog;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_display_overall_error_dialog.rs"]
+mod behavior_display_overall_error_dialog;
