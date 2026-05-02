@@ -7,9 +7,11 @@ use crate::common::panel_fixtures::{
 use wow_ui_sim::loader::{discover_blizzard_addon_closure_for_screen_with_overrides, load_addon};
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::settle_headless_startup;
+use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_APIDocumentationGenerated";
 const DEPENDENCY: &str = "Blizzard_APIDocumentation";
+const ROOT_TOC_FILE: &str = "Blizzard_APIDocumentationGenerated.toc";
 
 #[test]
 fn generated_api_documentation_loads_after_core_api_documentation() {
@@ -32,6 +34,43 @@ fn generated_api_documentation_loads_after_core_api_documentation() {
         "{ROOT} must settle without recorded Lua errors:\n  {}",
         errors.join("\n  ")
     );
+}
+
+#[test]
+fn generated_api_documentation_loaded_set_contains_every_toc_dependency() {
+    let ui_dir = blizzard_ui_dir();
+    let declared_dependencies = load_declared_dependencies(&ui_dir);
+    assert_eq!(
+        [DEPENDENCY.to_string()],
+        declared_dependencies.as_slice(),
+        "{ROOT_TOC_FILE} dependency contract changed"
+    );
+
+    let env = new_blizzard_addon_env(&ui_dir);
+    load_panel_addons(&env);
+    clear_recorded_lua_errors(&env);
+
+    let loaded = load_generated_documentation_closure(&env, &ui_dir);
+    for dependency in &declared_dependencies {
+        assert!(
+            loaded.iter().any(|addon| addon == dependency),
+            "TOC dependency `{dependency}` must be present in loaded set: {loaded:?}"
+        );
+    }
+}
+
+fn load_declared_dependencies(ui_dir: &std::path::Path) -> Vec<String> {
+    let toc_path = ui_dir.join(ROOT).join(ROOT_TOC_FILE);
+    let toc = TocFile::from_file(&toc_path).unwrap_or_else(|error| {
+        panic!(
+            "TOC at `{}` must parse cleanly before dependency assertions can run: {error}",
+            toc_path.display()
+        )
+    });
+
+    let mut dependencies = toc.dependencies();
+    dependencies.extend(toc.optional_deps());
+    dependencies
 }
 
 fn ensure_player_frame_stub(env: &wow_ui_sim::lua_api::WowLuaEnv) {
