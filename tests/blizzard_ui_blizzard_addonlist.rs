@@ -58,3 +58,6 @@ mod behavior_init_addon_grays_out_disabled;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_addon_actions_blocked_appends_alert_icon.rs"]
 mod behavior_addon_actions_blocked_appends_alert_icon;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_tristate_checkbox_visual_states.rs"]
+mod behavior_tristate_checkbox_visual_states;
