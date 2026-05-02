@@ -25,3 +25,6 @@ mod behavior_initial_show_populates_scroll;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_search_box_filters_rows.rs"]
 mod behavior_search_box_filters_rows;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_force_load_toggles_version_check.rs"]
+mod behavior_force_load_toggles_version_check;
