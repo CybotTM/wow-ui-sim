@@ -40,3 +40,6 @@ mod behavior_display_overall_error_dialog;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_display_unknown_type_assertsafe.rs"]
 mod behavior_display_unknown_type_assertsafe;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_specific_error_popup_disable_path.rs"]
+mod behavior_specific_error_popup_disable_path;
