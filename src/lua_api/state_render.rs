@@ -198,7 +198,7 @@ impl SimState {
         let mut cache = crate::layout::LayoutCache::default();
         Self::recompute_layout_subtree(&mut self.widgets, id, sw, sh, &mut cache);
         Self::recompute_anchor_dependents(&mut self.widgets, id, sw, sh, &mut cache, 0);
-        self.pending_hit_grid_changes.push((id, true));
+        self.queue_hit_grid_layout_changes(id);
     }
 
     pub(crate) fn recompute_layout_subtree(
@@ -246,11 +246,7 @@ impl SimState {
         if depth > 16 {
             return; // guard against cycles
         }
-        let deps: Vec<u64> = widgets
-            .get_anchor_dependents(target_id)
-            .map(|s| s.iter().copied().collect())
-            .unwrap_or_default();
-        for dep_id in deps {
+        for dep_id in anchor_dependent_ids(widgets, target_id, depth) {
             Self::recompute_layout_subtree(widgets, dep_id, sw, sh, cache);
             Self::recompute_anchor_dependents(widgets, dep_id, sw, sh, cache, depth + 1);
         }
@@ -305,7 +301,8 @@ impl SimState {
     ///
     /// Fast path: when `id` is directly in `rect_dirty_ids` (common during
     /// loading — SetPoint marks dirty, then GetRect resolves), skips the
-    /// ancestor walk and resolves just `id`.
+    /// ancestor walk but still resolves anchor dependents so immediate Lua
+    /// geometry queries observe sibling frames that track `id`.
     /// Slow path: when `id` inherits dirtiness from an ancestor, resolves
     /// dirty ancestor subtrees first.
     pub fn resolve_rect_if_dirty(&mut self, id: u64) {
@@ -315,7 +312,7 @@ impl SimState {
         let dirty_roots = self.widgets.collect_dirty_ancestor_roots(id);
         // Fast path: only `id` itself is dirty, so no ancestor layout can be stale.
         if dirty_roots.len() == 1 && dirty_roots[0] == id {
-            self.invalidate_layout(id);
+            self.invalidate_layout_with_dependents(id);
             self.widgets.clear_rect_dirty(id);
             return;
         }
@@ -340,7 +337,17 @@ impl SimState {
         // layout_rects before we clear the dirty flag.
         for &root_id in dirty_roots.iter().rev() {
             Self::recompute_layout_subtree(&mut self.widgets, root_id, sw, sh, &mut cache);
+            Self::recompute_anchor_dependents(&mut self.widgets, root_id, sw, sh, &mut cache, 0);
+            self.queue_hit_grid_layout_changes(root_id);
             self.widgets.clear_rect_dirty(root_id);
+        }
+    }
+
+    fn queue_hit_grid_layout_changes(&mut self, root_id: u64) {
+        let mut ids = vec![root_id];
+        collect_transitive_anchor_dependent_ids(&self.widgets, root_id, &mut ids, 0);
+        for id in ids {
+            self.pending_hit_grid_changes.push((id, true));
         }
     }
 
@@ -634,6 +641,32 @@ impl SimState {
         self.visible_on_update_cache = None;
         let after = self.on_update_frames.len();
         eprintln!("[self-test] stripped OnUpdate: {before} → {after} (keeping {addon_name})");
+    }
+}
+
+fn anchor_dependent_ids(
+    widgets: &crate::widget::WidgetRegistry,
+    target_id: u64,
+    depth: u32,
+) -> Vec<u64> {
+    if depth > 16 {
+        return Vec::new();
+    }
+    widgets
+        .get_anchor_dependents(target_id)
+        .map(|set| set.iter().copied().collect())
+        .unwrap_or_default()
+}
+
+fn collect_transitive_anchor_dependent_ids(
+    widgets: &crate::widget::WidgetRegistry,
+    target_id: u64,
+    ids: &mut Vec<u64>,
+    depth: u32,
+) {
+    for dep_id in anchor_dependent_ids(widgets, target_id, depth) {
+        ids.push(dep_id);
+        collect_transitive_anchor_dependent_ids(widgets, dep_id, ids, depth + 1);
     }
 }
 

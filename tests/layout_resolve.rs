@@ -93,3 +93,49 @@ fn multiple_dirty_ancestors_resolve_correctly() {
         "child height should be 40, got {h}"
     );
 }
+
+#[test]
+fn querying_resized_anchor_target_updates_dependent_siblings() {
+    let env = env();
+    let (title_bottom, description_top): (f64, f64) = env
+        .eval(
+            r#"
+        local parent = CreateFrame("Frame", "DependentLayoutParent", UIParent)
+        parent:SetSize(400, 300)
+        parent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
+
+        local title = CreateFrame("Frame", "DependentLayoutTitle", parent)
+        title:SetSize(100, 10)
+        title:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, 0)
+
+        local description = CreateFrame("Frame", "DependentLayoutDescription", parent)
+        description:SetSize(100, 10)
+        description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -5)
+
+        local _ = description:GetTop()
+        title:SetHeight(40)
+
+        return title:GetBottom(), description:GetTop()
+    "#,
+        )
+        .unwrap();
+
+    assert!(
+        (description_top - (title_bottom - 5.0)).abs() < 0.01,
+        "description should move with resized title: title bottom={title_bottom}, description top={description_top}"
+    );
+
+    let state = env.state();
+    let state = state.borrow();
+    let description_id = state
+        .widgets
+        .get_id_by_name("DependentLayoutDescription")
+        .expect("description should exist");
+    assert!(
+        state
+            .pending_hit_grid_changes
+            .iter()
+            .any(|&(id, became_visible)| id == description_id && became_visible),
+        "hit grid should be queued for anchored dependent sibling"
+    );
+}
