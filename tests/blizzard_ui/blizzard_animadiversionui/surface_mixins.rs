@@ -44,6 +44,21 @@ const DATA_PROVIDER_MIXIN_METHODS: &[&str] = &[
     "AddOrigin",
     "AddModelScene",
 ];
+const PIN_MIXIN_METHODS: &[&str] = &[
+    "OnLoad",
+    "SetupOrigin",
+    "IsConnected",
+    "SetupNode",
+    "SetVisualState",
+    "SetReinforceState",
+    "SetSelectedState",
+    "OnMouseEnter",
+    "HaveEnoughAnimaToActivate",
+    "RefreshTooltip",
+    "OnMouseLeave",
+    "OnClick",
+];
+const CONNECTION_MIXIN_METHODS: &[&str] = &["Setup"];
 const FRAME_MIXIN_METHODS_PROBE: &str = r#"
 local methods = {
     "OnLoad",
@@ -101,6 +116,39 @@ end
 
 return type(AnimaDiversionDataProviderMixin), missing
 "#;
+const PIN_MIXIN_METHODS_PROBE: &str = r#"
+local methods = {
+    "OnLoad",
+    "SetupOrigin",
+    "IsConnected",
+    "SetupNode",
+    "SetVisualState",
+    "SetReinforceState",
+    "SetSelectedState",
+    "OnMouseEnter",
+    "HaveEnoughAnimaToActivate",
+    "RefreshTooltip",
+    "OnMouseLeave",
+    "OnClick",
+}
+
+local missing = {}
+for _, method in ipairs(methods) do
+    if type(AnimaDiversionPinMixin[method]) ~= "function" then
+        table.insert(missing, method .. ":" .. type(AnimaDiversionPinMixin[method]))
+    end
+end
+
+return type(AnimaDiversionPinMixin), missing
+"#;
+const CONNECTION_MIXIN_METHODS_PROBE: &str = r#"
+local missing = {}
+if type(AnimaDiversionConnectionMixin.Setup) ~= "function" then
+    table.insert(missing, "Setup:" .. type(AnimaDiversionConnectionMixin.Setup))
+end
+
+return type(AnimaDiversionConnectionMixin), missing
+"#;
 
 #[test]
 fn anima_diversion_frame_mixin_exposes_expected_methods() {
@@ -124,6 +172,25 @@ fn anima_diversion_data_provider_mixin_exposes_expected_methods() {
             "AnimaDiversionDataProviderMixin",
             DATA_PROVIDER_MIXIN_METHODS,
             surface,
+        );
+    });
+}
+
+#[test]
+fn anima_diversion_pin_and_connection_mixins_expose_expected_methods() {
+    with_blizzard_addon_startup_shape(&[ROOT], CLOSURE_OVERRIDES, |env, _loaded| {
+        let pin_surface: MixinMethodSurface = env
+            .eval(PIN_MIXIN_METHODS_PROBE)
+            .expect("AnimaDiversionPinMixin method probe must run cleanly");
+        let connection_surface: MixinMethodSurface = env
+            .eval(CONNECTION_MIXIN_METHODS_PROBE)
+            .expect("AnimaDiversionConnectionMixin method probe must run cleanly");
+
+        assert_mixin_methods("AnimaDiversionPinMixin", PIN_MIXIN_METHODS, pin_surface);
+        assert_mixin_methods(
+            "AnimaDiversionConnectionMixin",
+            CONNECTION_MIXIN_METHODS,
+            connection_surface,
         );
     });
 }
