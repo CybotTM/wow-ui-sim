@@ -146,6 +146,107 @@ fn generated_api_documentation_registers_well_known_systems() {
     );
 }
 
+#[test]
+fn generated_api_documentation_registers_well_known_global_functions() {
+    let env = load_generated_api_documentation();
+
+    let failure: String = env
+        .eval(
+            r#"
+            local expectedFunctions = {
+                { name = "GetTime", hasArguments = false, hasReturns = true },
+                { name = "UnitName", hasArguments = true, hasReturns = true },
+                { name = "CreateFrame", hasArguments = false, hasReturns = false },
+            }
+
+            local function validateOptionalFieldArray(functionInfo, fieldName, shouldExist)
+                local fieldValue = functionInfo[fieldName]
+                if fieldValue == nil then
+                    if shouldExist then
+                        return string.format("%s missing %s", functionInfo:GetName(), fieldName)
+                    end
+                    return nil
+                end
+
+                if type(fieldValue) ~= "table" then
+                    return string.format(
+                        "%s expected %s table, got %s",
+                        functionInfo:GetName(),
+                        fieldName,
+                        type(fieldValue)
+                    )
+                end
+
+                for index, field in ipairs(fieldValue) do
+                    if type(field.Name) ~= "string" or field.Name == "" then
+                        return string.format(
+                            "%s.%s[%d] missing field Name",
+                            functionInfo:GetName(),
+                            fieldName,
+                            index
+                        )
+                    end
+
+                    if type(field.Type) ~= "string" or field.Type == "" then
+                        return string.format(
+                            "%s.%s[%d] missing field Type",
+                            functionInfo:GetName(),
+                            fieldName,
+                            index
+                        )
+                    end
+
+                    if type(field.Nilable) ~= "boolean" then
+                        return string.format(
+                            "%s.%s[%d] missing boolean Nilable",
+                            functionInfo:GetName(),
+                            fieldName,
+                            index
+                        )
+                    end
+                end
+
+                return nil
+            end
+
+            for _, expected in ipairs(expectedFunctions) do
+                local functionInfo = APIDocumentation:FindAPIByName("function", expected.name)
+                if functionInfo == nil then
+                    return string.format("missing function %q", expected.name)
+                end
+
+                if functionInfo:GetType() ~= "function" then
+                    return string.format(
+                        "%s expected function type, got %q",
+                        expected.name,
+                        tostring(functionInfo:GetType())
+                    )
+                end
+
+                local argumentFailure =
+                    validateOptionalFieldArray(functionInfo, "Arguments", expected.hasArguments)
+                if argumentFailure then
+                    return argumentFailure
+                end
+
+                local returnFailure =
+                    validateOptionalFieldArray(functionInfo, "Returns", expected.hasReturns)
+                if returnFailure then
+                    return returnFailure
+                end
+            end
+
+            return ""
+            "#,
+        )
+        .expect("generated APIDocumentation global function probe must run cleanly");
+
+    assert_eq!(
+        "", failure,
+        "well-known generated APIDocumentation functions must be registered"
+    );
+}
+
 struct DocumentationCorpusCounts {
     systems: i64,
     tables: i64,
