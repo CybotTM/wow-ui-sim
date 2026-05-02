@@ -73,3 +73,6 @@ mod behavior_dropdown_setup_radio_options;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_update_performance_skips_in_glue.rs"]
 mod behavior_update_performance_skips_in_glue;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_update_performance_writes_metric_text.rs"]
+mod behavior_update_performance_writes_metric_text;
