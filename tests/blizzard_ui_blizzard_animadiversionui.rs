@@ -59,5 +59,8 @@ mod behavior_set_exclusive_selection_node_dims_other_pins;
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_pin_setup_node_marks_reinforce_state.rs"]
 mod behavior_pin_setup_node_marks_reinforce_state;
 
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_pin_set_visual_state_dims_unavailable_only.rs"]
+mod behavior_pin_set_visual_state_dims_unavailable_only;
+
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_try_show_seeds_state_and_opens_panel.rs"]
 mod behavior_try_show_seeds_state_and_opens_panel;
