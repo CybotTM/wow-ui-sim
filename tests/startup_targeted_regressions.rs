@@ -535,6 +535,79 @@ fn startup_wardrobe_filter_dropdown_click_toggles_not_collected() {
 }
 
 #[test]
+fn startup_wardrobe_class_dropdown_uses_localized_radio_rows() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: String = env
+            .eval(
+                r#"
+                ToggleCollectionsJournal(5)
+                if CollectionsJournal and CollectionsJournal_SetTab then
+                    CollectionsJournal_SetTab(CollectionsJournal, 5)
+                end
+
+                local dropdown = WardrobeCollectionFrame and WardrobeCollectionFrame.ClassDropdown
+                if not dropdown then
+                    return "missing_class_dropdown"
+                end
+
+                dropdown:Show()
+                dropdown:Refresh()
+                dropdown:OpenMenu()
+
+                local selectedText = dropdown.Text and dropdown.Text:GetText() or dropdown:GetText()
+                if type(selectedText) ~= "string" or not selectedText:find("|c") then
+                    return "selected_not_colored:" .. tostring(selectedText)
+                end
+                if selectedText:find("PALADIN", 1, true) then
+                    return "selected_uppercase:" .. selectedText
+                end
+                local paladinColor = GetClassColorObj("PALADIN")
+                local r, g, b = dropdown.Text:GetTextColor()
+                if math.abs(r - paladinColor.r) > 0.01
+                    or math.abs(g - paladinColor.g) > 0.01
+                    or math.abs(b - paladinColor.b) > 0.01 then
+                    return "selected_color=" .. tostring(r) .. "," .. tostring(g) .. "," .. tostring(b)
+                end
+
+                local firstButton
+                local function inspectButton(button)
+                    local text = button:GetText()
+                    if (text == nil or text == "") and button.fontString then
+                        text = button.fontString:GetText()
+                    end
+                    if text == "Warrior" then
+                        firstButton = button
+                    end
+                end
+
+                for _, button in ipairs(dropdown.__wow_menu_buttons or {}) do
+                    inspectButton(button)
+                end
+                if not firstButton and dropdown.menu then
+                    for _, child in ipairs({ dropdown.menu:GetChildren() }) do
+                        if child.GetText then
+                            inspectButton(child)
+                        end
+                    end
+                end
+                if not firstButton then
+                    return "missing_warrior_button"
+                end
+                if not firstButton.leftTexture1 then
+                    return "missing_radio_texture"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("wardrobe class dropdown probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
+
+#[test]
 fn cursor_hovered_item_globals_are_callable() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");

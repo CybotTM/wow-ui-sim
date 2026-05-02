@@ -57,9 +57,9 @@ pub(super) fn register_creature_info_surface(state: &mut LuaState) -> LuaResult<
 
 fn c_creature_info_get_class_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1).unwrap_or(1);
-    let (_class_label, class_file, class_id) = class_info_by_index(index);
+    let (class_label, class_file, class_id) = class_info_by_index(index);
     let info = create_table(state);
-    let class_name = create_string(state, class_file);
+    let class_name = create_string(state, class_label);
     let class_file = create_string(state, class_file);
     table_set(state, info, "className", class_name);
     table_set(state, info, "classFile", class_file);

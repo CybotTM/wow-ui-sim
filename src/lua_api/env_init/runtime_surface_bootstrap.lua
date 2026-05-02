@@ -10455,6 +10455,11 @@ if rawget(C_TransmogSets, "GetSetPrimaryAppearances") == nil then
     return {}
   end
 end
+if rawget(C_TransmogSets, "GetBaseSets") == nil then
+  function C_TransmogSets.GetBaseSets()
+    return {}
+  end
+end
 if rawget(C_TransmogSets, "GetAllSets") == nil then
   function C_TransmogSets.GetAllSets()
     return {}

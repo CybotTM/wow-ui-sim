@@ -865,6 +865,22 @@ fn test_transmog_sets_get_all_sets_empty() {
 }
 
 #[test]
+fn test_transmog_sets_get_base_sets_empty() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local baseSets = C_TransmogSets.GetBaseSets()
+            if type(baseSets) ~= "table" then return "type=" .. type(baseSets) end
+            if #baseSets ~= 0 then return "count=" .. tostring(#baseSets) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_transmog_sets_get_usable_sets_empty() {
     let env = env();
     let count: i32 = env.eval("return #C_TransmogSets.GetUsableSets()").unwrap();
