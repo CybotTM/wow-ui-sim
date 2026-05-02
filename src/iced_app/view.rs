@@ -829,9 +829,7 @@ fn hit_sort_key(
 }
 
 fn frame_accepts_mouse_button(frame: &crate::widget::Frame, button_name: &str) -> bool {
-    !frame
-        .pass_through_buttons
-        .contains(&button_name.to_ascii_lowercase())
+    crate::iced_app::frame_collect::frame_accepts_mouse_button(frame, button_name)
 }
 
 fn frame_should_be_hidden_in_sidebar(frame: &crate::widget::Frame) -> bool {

@@ -10,6 +10,10 @@ Created `investigations/appearances-wardrobe-api.md` after opening Collections J
 
 Updated `investigations/appearances-wardrobe-api.md` with the root cause for the `Blizzard_Wardrobe.lua:687` nil-index crash. The simulator was reporting main/offhand appearance slot location metadata as weapon collection categories, which made Blizzard treat weapons as armor setup slots; weapon slot metadata now uses `Enum.TransmogCollectionType.None` so the weapon-category path handles them.
 
+## [2026-05-01] update | Wardrobe invalid appearance overlays
+
+Updated `investigations/appearances-wardrobe-api.md` after Wardrobe rendered every head appearance card with the red invalid overlay. Root cause was missing displayability/usability fields on simulator appearance rows; `canDisplayOnPlayer`, usability, source validity, hidden/favorite defaults, name, and quality now come from the `C_TransmogCollection` row backing instead of forcing Blizzard's invalid-card path.
+
 ## [2026-05-01] ingest | Adventure Guide boss icon fallback
 
 Created `investigations/adventure-guide-boss-icons.md` after tracing blank Encounter Journal boss icons to `EJ_GetCreatureInfo` returning `0` for missing creature icon fileDataIDs. Documented that Blizzard's boss button Lua relies on nil to select `UI-EJ-BOSS-Default`; `0` is truthy and makes `SetTexture(0)` clear the texture.
@@ -774,6 +778,14 @@ Created `investigations/editbox-render-text-cache.md` to document the SimCommand
 ## [2026-05-01] ingest | LFD checkbox and role-state follow-up
 
 Updated `investigations/lfd-dungeon-list-empty.md` with the follow-up Group Finder bug where Specific Dungeons populated but dungeon selections were empty and `GetLFGRoles` was still a false stub, leaving "Join as Party" disabled. Documented the state-backed role and LFD checkbox fix plus regression coverage.
+
+## [2026-05-01] update | Wardrobe filter click dispatch
+
+Updated `investigations/appearances-wardrobe-api.md` with the follow-up Wardrobe filter bug where menu descriptions and callbacks were valid, but clicks could be swallowed by decorative child regions during GUI hit testing. Documented the fix: final mouse targets must be mouse-enabled frames, while decorative children only guide hit-test descent.
+
+## [2026-05-01] update | Wardrobe class dropdown and set fallback
+
+Updated `investigations/appearances-wardrobe-api.md` with the Wardrobe class dropdown casing/color contract and the `C_TransmogSets.GetBaseSets()` nil fallback stack overflow. Documented that class display names come from localized `className`, colors from uppercase `classFile`, and empty set surfaces must return tables.
 
 ## [2026-04-12] ingest | transparent wrapper render-order investigation
 

@@ -243,6 +243,11 @@ pub(super) fn default_transmog_appearances() -> Vec<TransmogAppearance> {
         a(&mut sid, &mut vid, 4, 50078, true, 1), // Thassarian's Battleplate
         a(&mut sid, &mut vid, 4, 77171, true, 1), // Colossal Dragonplate Battleplate
         a(&mut sid, &mut vid, 4, 99996, false, 3), // Uncollected chest
+        // Shirt (cat 5)
+        a(&mut sid, &mut vid, 5, 16059, true, 3), // Common Brown Shirt
+        a(&mut sid, &mut vid, 5, 4330, true, 3),  // Stylish Red Shirt
+        // Tabard (cat 6)
+        a(&mut sid, &mut vid, 6, 5976, true, 3), // Guild Tabard
         // Wrist (cat 7)
         a(&mut sid, &mut vid, 7, 30067, true, 1), // Bracers of Maliciousness
         a(&mut sid, &mut vid, 7, 34431, true, 1), // Wristguards of Tranquil Thought

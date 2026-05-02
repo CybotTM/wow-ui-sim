@@ -13,8 +13,13 @@ Baseline:
 Current API shape:
 
 - `C_TransmogCollection.GetCategoryAppearances` returns seeded rows by category and active collection/source/search filters.
+- Default appearance seeds include two Shirt rows and one Tabard row in addition to the five-row armor/weapon categories, so the Wardrobe shirt/tabard slots are no longer empty by default.
 - Source/collection/search filter setters now mutate `WorldState`, and category rows/counts apply collected/uncollected, source-type, and search-text filters.
+- `C_CreatureInfo.GetClassInfo()` must return localized `className` values (`Paladin`) plus uppercase `classFile` tokens (`PALADIN`). The Wardrobe class dropdown uses `className` for row text and `classFile` for class-color lookup.
+- `C_TransmogSets.GetBaseSets()` must return an empty table, not nil. `WardrobeSetsDataProviderMixin:GetBaseSets()` assigns the result before calling `DetermineFavorites()`; nil leaves `self.baseSets` unset and recurses until stack overflow.
 - Search completion is synchronous and deterministic: no DB loading, no in-progress state, and progress equals result size.
+- Appearance rows include displayability/usability fields (`canDisplayOnPlayer`, `isUsable`, `isValidSourceForPlayer`, `isHideVisual`, `isFavorite`, name, and quality) so Blizzard's Wardrobe model buttons do not render every card as an invalid red slashed placeholder.
+- Wardrobe filter dropdowns rely on normal mouse dispatch to the dropdown button. Decorative child regions must remain visual-only hit-test descent candidates, not final click targets; otherwise the filter button's `OnMouseDown` never opens its Blizzard menu even though the menu description and filter callbacks are valid.
 - `C_TransmogOutfitInfo.GetAllSlotLocationInfo` reports weapon appearance slots with `Enum.TransmogCollectionType.None`; Blizzard derives weapon browsing categories through `IsEitherHand()` and `GetCategoryInfo()`. Reporting weapon collection categories there makes `TransmogLocationMixin:GetArmorCategoryID()` non-nil for weapons, and Wardrobe's armor-only model setup path then indexes missing `MAINHANDSLOT` / `SECONDARYHANDSLOT` entries in `WARDROBE_MODEL_SETUP`.
 - Tooltip and visual-state helpers such as `GetAppearanceSourceInfo`, `GetAppearanceInfoBySource`, `GetIsAppearanceFavorite`, `SetIsAppearanceFavorite`, `IsNewAppearance`, and `ClearNewAppearance` are not backed by first-class visual/source state.
 - `C_TransmogSets` is currently a Lua bootstrap fallback returning empty/default values. That is enough to keep the UI from crashing, but not enough for real set-tab filtering.
@@ -23,6 +28,7 @@ Implementation direction:
 
 - Treat the Wardrobe panel as a C API/state-model problem, not a Blizzard Lua patching problem.
 - Add stateful transmog source, visual, filter, search, and favorite state before trying to polish UI output.
+- The item cards are `DressUpModel`/model-scene based. The simulator can clear invalid overlays and drive selection/filter state, but real 3D item previews remain under the documented no-3D rendering gap.
 - Keep in-world `Blizzard_Transmog` compatible through the shared `C_TransmogCollection` surface, but defer transmogrifier transaction/apply-cost behavior until browsing/filtering works.
 - Keep 3D model preview gaps isolated to existing model stubs.
 

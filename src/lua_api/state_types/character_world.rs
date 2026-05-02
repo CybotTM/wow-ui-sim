@@ -942,8 +942,8 @@ mod tests {
     #[test]
     fn transmog_default_appearances_populated() {
         let world = seeded_world_state();
-        // 12 slots × 5 appearances each = 60
-        assert_eq!(world.transmog_appearances.len(), 60);
+        // 12 slots × 5 appearances each, plus 2 shirts and 1 tabard.
+        assert_eq!(world.transmog_appearances.len(), 63);
 
         // Each armor slot has 4 collected + 1 uncollected
         let head: Vec<_> = world
@@ -961,7 +961,7 @@ mod tests {
             .iter()
             .map(|a| a.source_id)
             .collect();
-        assert_eq!(source_ids.len(), 60, "All source IDs should be unique");
+        assert_eq!(source_ids.len(), 63, "All source IDs should be unique");
     }
 
     #[test]

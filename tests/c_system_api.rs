@@ -300,7 +300,7 @@ fn test_c_creature_info_get_class_info_warrior() {
             "#,
         )
         .unwrap();
-    assert_eq!(class_name, "WARRIOR");
+    assert_eq!(class_name, "Warrior");
     assert_eq!(class_file, "WARRIOR");
     assert_eq!(class_id, 1);
 }
@@ -311,7 +311,7 @@ fn test_c_creature_info_get_class_info_evoker() {
     let class_name: String = env
         .eval("return C_CreatureInfo.GetClassInfo(13).className")
         .unwrap();
-    assert_eq!(class_name, "EVOKER");
+    assert_eq!(class_name, "Evoker");
 }
 
 #[test]
@@ -320,7 +320,7 @@ fn test_c_creature_info_get_class_info_unknown() {
     let class_name: String = env
         .eval("return C_CreatureInfo.GetClassInfo(99).className")
         .unwrap();
-    assert_eq!(class_name, "UNKNOWN");
+    assert_eq!(class_name, "Unknown");
 }
 
 // ============================================================================

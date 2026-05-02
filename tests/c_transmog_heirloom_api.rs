@@ -201,6 +201,25 @@ fn test_transmog_collection_filter_surface_supports_wardrobe_dropdowns() {
 }
 
 #[test]
+fn test_transmog_collection_seeds_shirts_and_tabards() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local shirtRows = C_TransmogCollection.GetCategoryAppearances(Enum.TransmogCollectionType.Shirt, nil)
+            if #shirtRows ~= 2 then return "shirts=" .. tostring(#shirtRows) end
+
+            local tabardRows = C_TransmogCollection.GetCategoryAppearances(Enum.TransmogCollectionType.Tabard, nil)
+            if #tabardRows ~= 1 then return "tabards=" .. tostring(#tabardRows) end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_transmog_collection_source_type_filter_changes_category_results() {
     let env = env();
     let result: String = env
@@ -843,6 +862,22 @@ fn test_transmog_sets_get_all_sets_empty() {
     let env = env();
     let count: i32 = env.eval("return #C_TransmogSets.GetAllSets()").unwrap();
     assert_eq!(count, 0);
+}
+
+#[test]
+fn test_transmog_sets_get_base_sets_empty() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local baseSets = C_TransmogSets.GetBaseSets()
+            if type(baseSets) ~= "table" then return "type=" .. type(baseSets) end
+            if #baseSets ~= 0 then return "count=" .. tostring(#baseSets) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
 }
 
 #[test]

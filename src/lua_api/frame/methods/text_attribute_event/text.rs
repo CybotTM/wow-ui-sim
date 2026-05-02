@@ -26,7 +26,7 @@ use crate::lua_api::methods::{
 };
 use crate::lua_api::state::SimState;
 use crate::lua_bridge::stack_val;
-use crate::widget::WidgetType;
+use crate::widget::{Color, WidgetType};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use simple_html::{build_simple_html_text_data, is_simple_html_frame};
@@ -120,6 +120,17 @@ fn prepare_stripped_text(widget_type: WidgetType, text: Option<String>) -> Optio
     })
 }
 
+fn leading_wow_text_color(text: &Option<String>) -> Option<Color> {
+    let text = text.as_deref()?;
+    let color_code = text.strip_prefix("|c")?.get(..8)?;
+    let argb = u32::from_str_radix(color_code, 16).ok()?;
+    let a = ((argb >> 24) & 0xff) as f32 / 255.0;
+    let r = ((argb >> 16) & 0xff) as f32 / 255.0;
+    let g = ((argb >> 8) & 0xff) as f32 / 255.0;
+    let b = (argb & 0xff) as f32 / 255.0;
+    Some(Color::new(r, g, b, a))
+}
+
 fn stripped_text_for_frame(
     state: &LuaState,
     id: u64,
@@ -150,12 +161,16 @@ fn update_text_frame(
         frame.map(|frame| frame.widget_type),
         Some(WidgetType::Button | WidgetType::CheckButton)
     );
+    let inline_color = leading_wow_text_color(text);
     let has_button_text_child = frame.and_then(button_text_child_id).is_some();
     let changed = is_tooltip || current_text != *text || current_stripped_text != *stripped_text;
     if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.text = text.clone();
         frame.text_stripped = stripped_text.clone();
         frame.text_segments.clear();
+        if let Some(color) = inline_color {
+            frame.text_color = color;
+        }
     }
     let should_update_button_child =
         is_button && (changed || (!has_button_text_child && text.is_some()));
@@ -177,9 +192,13 @@ fn sync_button_text_child(
     };
     {
         let mut sim = borrow_state_mut(state)?;
+        let inline_color = leading_wow_text_color(text);
         if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
             text_child.text = text.clone();
             text_child.text_stripped = stripped_text.clone();
+            if let Some(color) = inline_color {
+                text_child.text_color = color;
+            }
         }
     }
     refresh_text_measurements(state, text_child_id);

@@ -415,6 +415,199 @@ fn startup_wardrobe_can_switch_from_armor_to_weapon_slot() {
 }
 
 #[test]
+fn startup_wardrobe_head_appearances_are_displayable() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: String = env
+            .eval(
+                r#"
+                ToggleCollectionsJournal(5)
+                if CollectionsJournal and CollectionsJournal_SetTab then
+                    CollectionsJournal_SetTab(CollectionsJournal, 5)
+                end
+
+                local itemsFrame = WardrobeCollectionFrame and WardrobeCollectionFrame.ItemsCollectionFrame
+                if not itemsFrame then
+                    return "missing_items_frame"
+                end
+
+                local headLocation = TransmogUtil.GetTransmogLocation("HEADSLOT", Enum.TransmogType.Appearance, false)
+                if not headLocation then
+                    return "missing_head_location"
+                end
+
+                itemsFrame:SetActiveSlot(headLocation)
+                local model = itemsFrame.Models and itemsFrame.Models[1]
+                if not model or not model.visualInfo then
+                    return "missing_visual_info"
+                end
+                if not model.visualInfo.canDisplayOnPlayer then
+                    return "not_displayable"
+                end
+                if model.SlotInvalidTexture:IsShown() then
+                    return "invalid_overlay_shown"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("wardrobe displayability probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
+
+#[test]
+fn startup_wardrobe_filter_dropdown_click_toggles_not_collected() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: String = env
+            .eval(
+                r#"
+                ToggleCollectionsJournal(5)
+                if CollectionsJournal and CollectionsJournal_SetTab then
+                    CollectionsJournal_SetTab(CollectionsJournal, 5)
+                end
+
+                local wardrobeFrame = WardrobeCollectionFrame
+                local itemsFrame = wardrobeFrame and wardrobeFrame.ItemsCollectionFrame
+                local filterButton = wardrobeFrame and wardrobeFrame.FilterButton
+                if not itemsFrame or not filterButton then
+                    return "missing_wardrobe_filter"
+                end
+
+                local headLocation = TransmogUtil.GetTransmogLocation("HEADSLOT", Enum.TransmogType.Appearance, false)
+                if not headLocation then
+                    return "missing_head_location"
+                end
+                itemsFrame:SetActiveSlot(headLocation)
+
+                if not filterButton:IsEnabled() then
+                    return "filter_disabled"
+                end
+                local onMouseDown = filterButton:GetScript("OnMouseDown")
+                if type(onMouseDown) ~= "function" then
+                    return "missing_on_mouse_down"
+                end
+                onMouseDown(filterButton, "LeftButton")
+                if not filterButton:IsMenuOpen() then
+                    return "menu_not_open"
+                end
+
+                local notCollectedButton
+                local function inspectButton(button)
+                    local text = button:GetText()
+                    if (text == nil or text == "") and button.fontString then
+                        text = button.fontString:GetText()
+                    end
+                    if text == NOT_COLLECTED then
+                        notCollectedButton = button
+                    end
+                end
+
+                for _, button in ipairs(filterButton.__wow_menu_buttons or {}) do
+                    inspectButton(button)
+                end
+                if not notCollectedButton and filterButton.menu then
+                    for _, child in ipairs({ filterButton.menu:GetChildren() }) do
+                        if child.GetText then
+                            inspectButton(child)
+                        end
+                    end
+                end
+                if not notCollectedButton then
+                    return "missing_not_collected_button"
+                end
+
+                C_TransmogCollection.SetUncollectedShown(true)
+                notCollectedButton:Click()
+                if C_TransmogCollection.GetUncollectedShown() then
+                    return "not_collected_still_enabled"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("wardrobe filter dropdown probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
+
+#[test]
+fn startup_wardrobe_class_dropdown_uses_localized_radio_rows() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: String = env
+            .eval(
+                r#"
+                ToggleCollectionsJournal(5)
+                if CollectionsJournal and CollectionsJournal_SetTab then
+                    CollectionsJournal_SetTab(CollectionsJournal, 5)
+                end
+
+                local dropdown = WardrobeCollectionFrame and WardrobeCollectionFrame.ClassDropdown
+                if not dropdown then
+                    return "missing_class_dropdown"
+                end
+
+                dropdown:Show()
+                dropdown:Refresh()
+                dropdown:OpenMenu()
+
+                local selectedText = dropdown.Text and dropdown.Text:GetText() or dropdown:GetText()
+                if type(selectedText) ~= "string" or not selectedText:find("|c") then
+                    return "selected_not_colored:" .. tostring(selectedText)
+                end
+                if selectedText:find("PALADIN", 1, true) then
+                    return "selected_uppercase:" .. selectedText
+                end
+                local paladinColor = GetClassColorObj("PALADIN")
+                local r, g, b = dropdown.Text:GetTextColor()
+                if math.abs(r - paladinColor.r) > 0.01
+                    or math.abs(g - paladinColor.g) > 0.01
+                    or math.abs(b - paladinColor.b) > 0.01 then
+                    return "selected_color=" .. tostring(r) .. "," .. tostring(g) .. "," .. tostring(b)
+                end
+
+                local firstButton
+                local function inspectButton(button)
+                    local text = button:GetText()
+                    if (text == nil or text == "") and button.fontString then
+                        text = button.fontString:GetText()
+                    end
+                    if text == "Warrior" then
+                        firstButton = button
+                    end
+                end
+
+                for _, button in ipairs(dropdown.__wow_menu_buttons or {}) do
+                    inspectButton(button)
+                end
+                if not firstButton and dropdown.menu then
+                    for _, child in ipairs({ dropdown.menu:GetChildren() }) do
+                        if child.GetText then
+                            inspectButton(child)
+                        end
+                    end
+                end
+                if not firstButton then
+                    return "missing_warrior_button"
+                end
+                if not firstButton.leftTexture1 then
+                    return "missing_radio_texture"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("wardrobe class dropdown probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
+
+#[test]
 fn cursor_hovered_item_globals_are_callable() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
