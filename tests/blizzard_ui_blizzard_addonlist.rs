@@ -64,3 +64,6 @@ mod behavior_tristate_checkbox_visual_states;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_category_collapse_persists_to_saved_var.rs"]
 mod behavior_category_collapse_persists_to_saved_var;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_node_right_click_opens_context_menu.rs"]
+mod behavior_node_right_click_opens_context_menu;
