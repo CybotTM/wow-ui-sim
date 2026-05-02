@@ -40,3 +40,6 @@ mod behavior_update_vehicle_unskinned_uses_vehicle_index;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_temp_shapeshift_uses_temp_index.rs"]
 mod behavior_update_temp_shapeshift_uses_temp_index;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_bonus_uses_bonus_index_when_page_one.rs"]
+mod behavior_update_bonus_uses_bonus_index_when_page_one;

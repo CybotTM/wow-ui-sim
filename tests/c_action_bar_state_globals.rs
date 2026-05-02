@@ -98,6 +98,28 @@ fn temp_shapeshift_bar_index_reads_state() {
 }
 
 #[test]
+fn bonus_bar_index_reads_state() {
+    let env = WowLuaEnv::new().expect("env");
+    {
+        let mut state = env.state().borrow_mut();
+        state.has_bonus_action_bar = true;
+        state.bonus_bar_index = 5;
+    }
+
+    let (has_bonus_bar, bonus_bar_index): (bool, i32) = env
+        .eval(
+            r#"
+            return C_ActionBar.HasBonusActionBar(),
+                C_ActionBar.GetBonusBarIndex()
+            "#,
+        )
+        .unwrap();
+
+    assert!(has_bonus_bar);
+    assert_eq!(bonus_bar_index, 5);
+}
+
+#[test]
 fn le_actionbar_state_constants_are_seeded() {
     let env = WowLuaEnv::new().expect("env");
     let main: f64 = env.eval("return LE_ACTIONBAR_STATE_MAIN").unwrap();

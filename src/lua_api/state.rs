@@ -84,6 +84,8 @@ macro_rules! build_empty_sim_state {
             override_bar_index: 1,
             has_temp_shapeshift_action_bar: false,
             temp_shapeshift_bar_index: 1,
+            has_bonus_action_bar: false,
+            bonus_bar_index: 0,
             action_bars: $collections.action_bars,
             action_outfits: $collections.action_outfits,
             equipped_gear_outfit_action_slots: $collections.equipped_gear_outfit_action_slots,
@@ -1376,6 +1378,12 @@ pub struct SimState {
     /// shapeshift bar is active. Default 1 matches Blizzard's bootstrap
     /// fallback.
     pub temp_shapeshift_bar_index: i32,
+    /// Drives `C_ActionBar.HasBonusActionBar()`. Default false — no bonus
+    /// action bar is mounted.
+    pub has_bonus_action_bar: bool,
+    /// Drives `C_ActionBar.GetBonusBarIndex()` when a bonus action bar is
+    /// active. Default 0 matches the inactive legacy fallback.
+    pub bonus_bar_index: i32,
     /// Action-bar transition state. Drives `ActionBarBusy()` (set true while
     /// a status-tracking-bar fade or page change is mid-animation) and
     /// `ActionBarController_GetCurrentActionBarState()` (1 = main bar,

@@ -350,7 +350,8 @@ fn get_temp_shapeshift_bar_index(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_bonus_bar_index(state: &mut LuaState) -> LuaResult<u32> {
-    push_i32(state, 0)
+    let bonus_bar_index = borrow_state(state)?.bonus_bar_index;
+    push_i32(state, bonus_bar_index)
 }
 
 fn get_bonus_bar_offset(state: &mut LuaState) -> LuaResult<u32> {
@@ -377,7 +378,8 @@ fn has_override_action_bar(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn has_bonus_action_bar(state: &mut LuaState) -> LuaResult<u32> {
-    push_bool(state, false)
+    let has_bonus_action_bar = borrow_state(state)?.has_bonus_action_bar;
+    push_bool(state, has_bonus_action_bar)
 }
 
 fn has_temp_shapeshift_action_bar(state: &mut LuaState) -> LuaResult<u32> {
