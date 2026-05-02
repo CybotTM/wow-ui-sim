@@ -34,3 +34,6 @@ mod behavior_on_update_fades_alpha;
 
 #[path = "blizzard_ui/blizzard_actionstatus/behavior_on_update_after_fadetime_hides.rs"]
 mod behavior_on_update_after_fadetime_hides;
+
+#[path = "blizzard_ui/blizzard_actionstatus/behavior_alternate_parent_frame.rs"]
+mod behavior_alternate_parent_frame;
