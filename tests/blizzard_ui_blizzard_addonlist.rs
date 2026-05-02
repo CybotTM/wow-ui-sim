@@ -31,3 +31,6 @@ mod behavior_force_load_toggles_version_check;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_enable_all_disables_disable_all.rs"]
 mod behavior_enable_all_disables_disable_all;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_okay_button_saves_when_pending_changes.rs"]
+mod behavior_okay_button_saves_when_pending_changes;
