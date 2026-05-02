@@ -107,6 +107,8 @@ pub struct AddonInfo {
     pub load_on_demand: bool,
     /// Whether the addon loads Lua/XML chunks in the secure environment.
     pub use_secure_env: bool,
+    /// Optional security status reported by `C_AddOns.GetAddOnSecurity`.
+    pub security: Option<String>,
     /// Total load time in seconds (for profiler metrics).
     pub load_time_secs: f64,
     /// Runtime profiler metrics (updated per frame).
@@ -131,6 +133,7 @@ impl Default for AddonInfo {
             loaded: false,
             load_on_demand: false,
             use_secure_env: false,
+            security: None,
             load_time_secs: 0.0,
             runtime: AddonRuntimeMetrics::default(),
             dependencies: Vec::new(),

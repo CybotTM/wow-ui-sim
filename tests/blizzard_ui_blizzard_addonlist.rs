@@ -46,3 +46,6 @@ mod behavior_is_addon_load_on_demand_walks_deps;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_addon_tooltip_update_builds_deps_line.rs"]
 mod behavior_addon_tooltip_update_builds_deps_line;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_addon_tooltip_banned_short_circuit.rs"]
+mod behavior_addon_tooltip_banned_short_circuit;

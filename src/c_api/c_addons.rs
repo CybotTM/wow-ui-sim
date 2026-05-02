@@ -14,6 +14,9 @@ use std::{collections::HashSet, io};
 
 use super::helpers::set_global_val;
 
+#[path = "c_addons_registration.rs"]
+mod c_addons_registration;
+
 const ADDON_VERSION_CHECK_KEY: &str = "__addon_version_check_enabled";
 const GAME_RUNTIME_FOUNDATIONS: &[&str] = &[
     "Blizzard_SharedXMLBase",
@@ -38,92 +41,8 @@ pub fn register_c_addons(state: &mut LuaState) -> LuaResult<()> {
     let Val::Table(c_addons_ref) = c_addons else {
         unreachable!("create_table must return a table");
     };
-    register_c_addons_methods(state, c_addons_ref)?;
+    c_addons_registration::register_c_addons_methods(state, c_addons_ref)?;
     set_global_val(state, "C_AddOns", c_addons);
-    Ok(())
-}
-
-fn register_c_addons_methods(
-    state: &mut LuaState,
-    t: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-) -> LuaResult<()> {
-    register_c_addons_queries(state, t)?;
-    register_c_addons_state(state, t)?;
-    Ok(())
-}
-
-/// Query/info methods: read-only addon introspection.
-fn register_c_addons_queries(
-    state: &mut LuaState,
-    t: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-) -> LuaResult<()> {
-    table_set_rust_fn_static(state, t, "GetNumAddOns", c_addons_get_num_addons)?;
-    table_set_rust_fn_static(state, t, "GetAddOnInfo", c_addons_get_addon_info)?;
-    table_set_rust_fn_static(state, t, "IsAddOnLoaded", c_addons_is_addon_loaded)?;
-    table_set_rust_fn_static(state, t, "IsAddOnLoadable", c_addons_is_addon_loadable)?;
-    table_set_rust_fn_static(
-        state,
-        t,
-        "IsAddOnLoadOnDemand",
-        c_addons_is_addon_load_on_demand,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t,
-        "GetAddOnEnableState",
-        c_addons_get_addon_enable_state,
-    )?;
-    table_set_rust_fn_static(state, t, "GetAddOnMetadata", c_addons_get_addon_metadata)?;
-    table_set_rust_fn_static(state, t, "DoesAddOnExist", c_addons_does_addon_exist)?;
-    table_set_rust_fn_static(state, t, "GetAddOnName", c_addons_get_addon_name)?;
-    table_set_rust_fn_static(state, t, "GetAddOnTitle", c_addons_get_addon_title)?;
-    table_set_rust_fn_static(state, t, "GetAddOnNotes", c_addons_get_addon_notes)?;
-    table_set_rust_fn_static(state, t, "GetAddOnSecurity", c_addons_get_addon_security)?;
-    table_set_rust_fn_static(
-        state,
-        t,
-        "GetAddOnDependencies",
-        c_addons_get_addon_dependencies,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t,
-        "IsAddOnDefaultEnabled",
-        c_addons_is_addon_default_enabled,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t,
-        "GetScriptsDisallowedForBeta",
-        c_addons_get_scripts_disallowed_for_beta,
-    )?;
-    Ok(())
-}
-
-/// State-mutation methods: enable/disable, version check, load.
-fn register_c_addons_state(
-    state: &mut LuaState,
-    t: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-) -> LuaResult<()> {
-    table_set_rust_fn_static(state, t, "EnableAddOn", c_addons_enable_addon)?;
-    table_set_rust_fn_static(state, t, "DisableAddOn", c_addons_disable_addon)?;
-    table_set_rust_fn_static(state, t, "EnableAllAddOns", c_addons_enable_all_addons)?;
-    table_set_rust_fn_static(state, t, "DisableAllAddOns", c_addons_disable_all_addons)?;
-    table_set_rust_fn_static(state, t, "SaveAddOns", c_addons_save_addons)?;
-    table_set_rust_fn_static(state, t, "ResetAddOns", c_addons_reset_addons)?;
-    table_set_rust_fn_static(
-        state,
-        t,
-        "IsAddonVersionCheckEnabled",
-        c_addons_is_addon_version_check_enabled,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t,
-        "SetAddonVersionCheck",
-        c_addons_set_addon_version_check,
-    )?;
-    table_set_rust_fn_static(state, t, "LoadAddOn", c_addons_load_addon)?;
     Ok(())
 }
 
@@ -506,16 +425,24 @@ fn c_addons_get_addon_notes(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_addons_get_addon_security(state: &mut LuaState) -> LuaResult<u32> {
     let security = with_addon(state, stack_val(state, 1), |a| {
-        if a.folder_name == "__BuiltIn" || a.folder_name.starts_with("Blizzard_") {
-            "SECURE"
+        if let Some(security) = &a.security {
+            return security.clone();
+        }
+
+        if addon_is_secure_by_default(a) {
+            "SECURE".to_string()
         } else {
-            "INSECURE"
+            "INSECURE".to_string()
         }
     })
-    .unwrap_or("INSECURE");
-    let v = create_string(state, security);
+    .unwrap_or_else(|| "INSECURE".to_string());
+    let v = create_string(state, &security);
     state.push(v);
     Ok(1)
+}
+
+fn addon_is_secure_by_default(addon: &crate::lua_api::AddonInfo) -> bool {
+    addon.folder_name == "__BuiltIn" || addon.folder_name.starts_with("Blizzard_")
 }
 
 fn c_addons_get_scripts_disallowed_for_beta(state: &mut LuaState) -> LuaResult<u32> {
