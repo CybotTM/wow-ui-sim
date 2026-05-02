@@ -55,3 +55,6 @@ mod behavior_quest_choice_provider_event_registration;
 
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_choice_refresh_acquires_pin_per_valid_choice.rs"]
 mod behavior_quest_choice_refresh_acquires_pin_per_valid_choice;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_choice_select_quest_id_shows_dialog.rs"]
+mod behavior_quest_choice_select_quest_id_shows_dialog;
