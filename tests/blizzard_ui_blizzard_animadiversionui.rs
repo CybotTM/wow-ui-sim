@@ -25,3 +25,6 @@ mod behavior_onload_seeds_data_providers_and_pin_levels;
 
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_onload_styles_close_button.rs"]
 mod behavior_onload_styles_close_button;
+
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_try_show_seeds_state_and_opens_panel.rs"]
+mod behavior_try_show_seeds_state_and_opens_panel;
