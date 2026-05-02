@@ -28,3 +28,6 @@ mod behavior_check_refreshes_visible_addon_list;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_check_skips_addon_list_refresh_after_first_warning.rs"]
 mod behavior_check_skips_addon_list_refresh_after_first_warning;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_display_specific_chat_warning.rs"]
+mod behavior_display_specific_chat_warning;
