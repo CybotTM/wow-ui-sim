@@ -527,12 +527,16 @@ fn is_spell_harmful(state: &mut LuaState) -> LuaResult<u32> {
 /// Returns `(true, false)` for known spells; `(false, false)` otherwise.
 fn is_spell_usable(state: &mut LuaState) -> LuaResult<u32> {
     let spell_id = u32::from_stack(state, 1)?;
-    let known = borrow_state(state)
-        .map(|sim| sim.known_spells.contains(&spell_id))
-        .unwrap_or(false);
+    let known = is_known_spell_for_usability(state, spell_id);
     state.push(Val::Bool(known));
     state.push(Val::Bool(false));
     Ok(2)
+}
+
+fn is_known_spell_for_usability(state: &mut LuaState, spell_id: u32) -> bool {
+    borrow_state(state)
+        .map(|sim| sim.known_spells.contains(&spell_id))
+        .unwrap_or(false)
 }
 
 /// `C_Spell.TargetSpellIsEnchanting()` → `false`.
