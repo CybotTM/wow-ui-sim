@@ -432,6 +432,7 @@ pub struct GossipQuestRow {
 #[derive(Debug, Default, Clone)]
 pub struct GossipState {
     pub active: bool,
+    pub text: String,
     pub num_options: i32,
     pub num_available_quests: i32,
     pub num_active_quests: i32,

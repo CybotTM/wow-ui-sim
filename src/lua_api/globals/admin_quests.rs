@@ -16,6 +16,7 @@ const INCOMPLETE_ACTIVE_QUEST_ID: u32 = 80000;
 const AVAILABLE_MULTI_QUEST_ID: u32 = 80002;
 const COMPLETED_REWARD_NAME: &str = "Earthen Lockbox";
 const COMPLETED_REWARD_TEXTURE: &str = "Interface\\Icons\\INV_Box_01";
+const QUEST_GREETING_TEXT: &str = "How can I help you, adventurer?";
 
 pub(super) fn register_quests(b: TableBuilder) -> LuaResult<TableBuilder> {
     b.set_function("OpenQuestNpc", open_quest_npc)?
@@ -35,6 +36,7 @@ pub(super) fn open_quest_npc(state: &mut LuaState) -> LuaResult<u32> {
     {
         let mut sim = borrow_state_mut(state)?;
         sim.gossip.active = true;
+        sim.gossip.text = QUEST_GREETING_TEXT.to_string();
         sim.gossip.options.clear();
         sim.gossip.active_quests.clear();
         sim.gossip.available_quests = vec![GossipQuestRow {
@@ -56,6 +58,7 @@ pub(super) fn open_multi_quest_npc(state: &mut LuaState) -> LuaResult<u32> {
     {
         let mut sim = borrow_state_mut(state)?;
         sim.gossip.active = true;
+        sim.gossip.text = QUEST_GREETING_TEXT.to_string();
         sim.gossip.options.clear();
         sim.gossip.active_quests = vec![
             quest_row(COMPLETED_REWARD_QUEST_ID, true),
@@ -74,6 +77,7 @@ pub(super) fn close_quest_npc(state: &mut LuaState) -> LuaResult<u32> {
     {
         let mut sim = borrow_state_mut(state)?;
         sim.gossip.active = false;
+        sim.gossip.text.clear();
         sim.gossip.options.clear();
         sim.gossip.active_quests.clear();
         sim.gossip.available_quests.clear();
