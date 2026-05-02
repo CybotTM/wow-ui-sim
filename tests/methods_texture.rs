@@ -403,6 +403,40 @@ fn test_set_desaturated_no_error() {
     .unwrap();
 }
 
+#[test]
+fn test_set_desaturated_updates_texture_state() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "DesatState");
+
+    env.exec(&format!("{tex}:SetDesaturated(true)")).unwrap();
+    let desat: bool = env.eval(&format!("return {tex}:IsDesaturated()")).unwrap();
+
+    assert!(desat, "SetDesaturated(true) should update IsDesaturated");
+}
+
+#[test]
+fn test_button_texture_child_desaturation_persists() {
+    let env = env();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "DesatButtonTextureChild", UIParent)
+        btn:SetDisabledTexture("Interface\\EncounterJournal\\UI-EncounterJournalTextures")
+        btn:GetDisabledTexture():SetDesaturated(true)
+        "#,
+    )
+    .unwrap();
+
+    let desat: bool = env
+        .eval("return DesatButtonTextureChild:GetDisabledTexture():IsDesaturated()")
+        .unwrap();
+
+    assert!(
+        desat,
+        "desaturation should persist on button texture children"
+    );
+}
+
 // ============================================================================
 // SetAtlas / GetAtlas
 // ============================================================================

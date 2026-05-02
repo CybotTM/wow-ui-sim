@@ -1345,7 +1345,6 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetCamDistanceScale", stub_variadic),
     ("SetCamera", stub_variadic),
     ("SetPortraitZoom", stub_variadic),
-    ("SetDesaturation", stub_variadic),
     ("SetLight", stub_variadic),
     ("ResetLights", stub_variadic),
     ("RefreshUnit", refresh_unit),
@@ -1378,7 +1377,6 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("Undress", stub_variadic),
     ("SetUnit", stub_variadic),
     ("UpdateCamera", stub_variadic),
-    ("SetDesaturated", stub_variadic),
     ("FreezeAnimation", stub_variadic),
     // Typed return stubs
     ("GetModelSceneID", stub_zero),

@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-02] add | Adventure Guide disabled tabs
+
+Added `investigations/adventure-guide-disabled-tabs.md` after tracing the
+apparently unclickable Adventure Guide abilities tab. Blizzard intentionally
+shows the tab disabled until a boss is selected, but simulator model stubs had
+overwritten the shared `SetDesaturated` / `SetDesaturation` implementation, so
+the disabled tab art stayed saturated and looked active.
+
 ## [2026-05-01] update | Journeys breadcrumb overlap
 
 Updated `investigations/journeys-midnight-empty.md` with the later Midnight
