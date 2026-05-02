@@ -10,3 +10,6 @@ mod load;
 
 #[path = "blizzard_ui/blizzard_apidocumentation/surface_globals.rs"]
 mod surface_globals;
+
+#[path = "blizzard_ui/blizzard_apidocumentation/surface_mixins.rs"]
+mod surface_mixins;
