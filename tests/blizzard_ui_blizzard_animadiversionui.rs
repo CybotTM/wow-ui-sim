@@ -89,5 +89,8 @@ mod behavior_reinforce_button_click_shows_static_popup;
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_update_tutorial_tips_branches_on_reinforce_state.rs"]
 mod behavior_update_tutorial_tips_branches_on_reinforce_state;
 
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_world_quest_data_provider_returns_subclassed_pin_template.rs"]
+mod behavior_world_quest_data_provider_returns_subclassed_pin_template;
+
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_try_show_seeds_state_and_opens_panel.rs"]
 mod behavior_try_show_seeds_state_and_opens_panel;
