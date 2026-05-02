@@ -43,3 +43,6 @@ mod behavior_load_lod_addon_calls_load;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_is_addon_load_on_demand_walks_deps.rs"]
 mod behavior_is_addon_load_on_demand_walks_deps;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_addon_tooltip_update_builds_deps_line.rs"]
+mod behavior_addon_tooltip_update_builds_deps_line;
