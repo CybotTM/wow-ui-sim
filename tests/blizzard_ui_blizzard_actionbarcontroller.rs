@@ -76,3 +76,6 @@ mod behavior_pet_battle_open_hides_override;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_bonus_resets_icon_intro_tracker.rs"]
 mod behavior_update_bonus_resets_icon_intro_tracker;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_all_iterates_button_events_frame.rs"]
+mod behavior_update_all_iterates_button_events_frame;
