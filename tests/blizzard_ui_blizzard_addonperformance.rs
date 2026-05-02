@@ -19,3 +19,6 @@ mod behavior_check_marks_message_type_seen;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_check_dedupes_repeat_message_type.rs"]
 mod behavior_check_dedupes_repeat_message_type;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_check_records_per_addon_warning.rs"]
+mod behavior_check_records_per_addon_warning;
