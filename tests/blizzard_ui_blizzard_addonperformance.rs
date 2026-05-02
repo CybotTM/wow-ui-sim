@@ -22,3 +22,6 @@ mod behavior_check_dedupes_repeat_message_type;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_check_records_per_addon_warning.rs"]
 mod behavior_check_records_per_addon_warning;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_check_refreshes_visible_addon_list.rs"]
+mod behavior_check_refreshes_visible_addon_list;
