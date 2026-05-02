@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-02] update | LFD normal dungeon group-size gate
+
+Updated `investigations/lfd-dungeon-list-empty.md` after a five-player party saw
+`You need a group of 1 players` when joining LFD. Documented that normal dungeon
+entries must return nil for `GetLFGDungeonInfo` slot 17 (`minPlayers`) because
+Blizzard treats a non-nil value as an exact group-size requirement.
+
 ## [2026-05-02] update | LFD reward cap info missing
 
 Updated `investigations/lfd-dungeon-list-empty.md` after the Join as Party path
