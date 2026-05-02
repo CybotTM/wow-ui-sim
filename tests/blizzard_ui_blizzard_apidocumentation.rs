@@ -14,6 +14,9 @@ mod behavior_find_all_api_matches_returns_nil_when_empty;
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_slash_command_help_writes_usage.rs"]
 mod behavior_handle_slash_command_help_writes_usage;
 
+#[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_slash_command_stats_writes_counts.rs"]
+mod behavior_handle_slash_command_stats_writes_counts;
+
 #[path = "blizzard_ui/blizzard_apidocumentation/load.rs"]
 mod load;
 
