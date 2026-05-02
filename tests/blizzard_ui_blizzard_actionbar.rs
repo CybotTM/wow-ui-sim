@@ -108,3 +108,6 @@ mod behavior_button_range_check;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_battlefield_hides_xp_bar.rs"]
 mod behavior_battlefield_hides_xp_bar;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_resting_indicator.rs"]
+mod behavior_resting_indicator;
