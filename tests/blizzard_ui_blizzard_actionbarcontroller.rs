@@ -58,3 +58,6 @@ mod behavior_shapeshift_events_update_stance_bar;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_possess_event_updates_possess_and_stance.rs"]
 mod behavior_possess_event_updates_possess_and_stance;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_extra_actionbar_event.rs"]
+mod behavior_extra_actionbar_event;
