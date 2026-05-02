@@ -100,3 +100,6 @@ mod behavior_main_menu_micro_button_init;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_validate_transition_resets_micro_menu.rs"]
 mod behavior_validate_transition_resets_micro_menu;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_validate_transition_relayouts_uiparent.rs"]
+mod behavior_validate_transition_relayouts_uiparent;
