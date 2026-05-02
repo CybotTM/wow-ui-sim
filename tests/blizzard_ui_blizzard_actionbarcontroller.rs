@@ -61,3 +61,6 @@ mod behavior_possess_event_updates_possess_and_stance;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_extra_actionbar_event.rs"]
 mod behavior_extra_actionbar_event;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_show_bottomleft_after_settings_loaded.rs"]
+mod behavior_show_bottomleft_after_settings_loaded;
