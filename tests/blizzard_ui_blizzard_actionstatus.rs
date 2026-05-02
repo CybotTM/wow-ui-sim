@@ -43,3 +43,6 @@ mod behavior_update_parent_uses_world_frame_when_top_level_hidden;
 
 #[path = "blizzard_ui/blizzard_actionstatus/behavior_update_parent_resets_strata_to_tooltip.rs"]
 mod behavior_update_parent_resets_strata_to_tooltip;
+
+#[path = "blizzard_ui/blizzard_actionstatus/behavior_alternate_top_level_parent_event.rs"]
+mod behavior_alternate_top_level_parent_event;
