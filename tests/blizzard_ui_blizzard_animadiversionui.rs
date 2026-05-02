@@ -29,6 +29,9 @@ mod behavior_onload_styles_close_button;
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_onhide_unregisters_events_and_plays_close_sound.rs"]
 mod behavior_onhide_unregisters_events_and_plays_close_sound;
 
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_onevent_anima_close_hides_panel.rs"]
+mod behavior_onevent_anima_close_hides_panel;
+
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_onshow_registers_events_and_plays_open_sound.rs"]
 mod behavior_onshow_registers_events_and_plays_open_sound;
 
