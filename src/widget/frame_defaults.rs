@@ -82,6 +82,7 @@ macro_rules! frame_defaults {
             resize_bounds_max: None,
             user_placed: false,
             dont_save_position: false,
+            registered_click_buttons: HashSet::new(),
             registered_drag_buttons: HashSet::new(),
             highlight_locked: false,
             ignoring_children_for_bounds: false,

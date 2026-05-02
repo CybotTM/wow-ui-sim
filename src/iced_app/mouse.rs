@@ -195,10 +195,14 @@ impl App {
             state.set_active_slider_thumb_drag_frame(slider_drag_target);
         }
 
+        let clicks_on_down = self.frame_clicks_on_edge(frame_id, "LeftButton", true);
         {
             let env = self.env.borrow();
             let button_val = env.lua_string("LeftButton");
             let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val]);
+            if clicks_on_down {
+                self.fire_left_click_sequence(frame_id, &env, &env.lua_string("LeftButton"), true);
+            }
         }
         self.flush_post_script_updates();
     }
@@ -258,11 +262,12 @@ impl App {
             return;
         }
 
+        let clicks_on_up = self.frame_clicks_on_edge(frame_id, "LeftButton", false);
         let env = self.env.borrow();
         let button_val = env.lua_string("LeftButton");
 
-        if self.mouse_down_frame == Some(frame_id) {
-            self.fire_left_click_sequence(frame_id, &env, &button_val);
+        if self.mouse_down_frame == Some(frame_id) && clicks_on_up {
+            self.fire_left_click_sequence(frame_id, &env, &button_val, false);
         }
 
         let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val]);
@@ -277,10 +282,11 @@ impl App {
         frame_id: u64,
         env: &crate::lua_api::WowLuaEnv,
         button_val: &Val,
+        down: bool,
     ) {
         self.toggle_checkbutton_if_needed(frame_id, env);
 
-        let down_val = Val::Bool(false);
+        let down_val = Val::Bool(down);
         let _ = env.fire_script_handler(
             frame_id,
             "OnClick",
@@ -307,10 +313,24 @@ impl App {
             return;
         }
         self.right_mouse_down_frame = Some(frame_id);
+        let clicks_on_down = self.frame_clicks_on_edge(frame_id, "RightButton", true);
         {
             let env = self.env.borrow();
             let button_val = env.lua_string("RightButton");
             let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val]);
+            if clicks_on_down {
+                let down_val = Val::Bool(true);
+                let _ = env.fire_script_handler(
+                    frame_id,
+                    "OnClick",
+                    vec![env.lua_string("RightButton"), down_val.clone()],
+                );
+                let _ = env.fire_script_handler(
+                    frame_id,
+                    "PostClick",
+                    vec![env.lua_string("RightButton"), down_val],
+                );
+            }
         }
         self.flush_post_script_updates();
     }
@@ -339,11 +359,12 @@ impl App {
 
         let released_on = self.hit_test_mouse_button(pos, "RightButton");
         if let Some(frame_id) = released_on {
+            let clicks_on_up = self.frame_clicks_on_edge(frame_id, "RightButton", false);
             {
                 let env = self.env.borrow();
                 let button_val = env.lua_string("RightButton");
 
-                if self.right_mouse_down_frame == Some(frame_id) {
+                if self.right_mouse_down_frame == Some(frame_id) && clicks_on_up {
                     let down_val = Val::Bool(false);
                     let _ = env.fire_script_handler(
                         frame_id,
@@ -362,6 +383,15 @@ impl App {
             self.flush_post_script_updates();
         }
         self.right_mouse_down_frame = None;
+    }
+
+    fn frame_clicks_on_edge(&self, frame_id: u64, button_name: &str, down: bool) -> bool {
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        let Some(frame) = state.widgets.get(frame_id) else {
+            return false;
+        };
+        frame_click_registration_matches(frame, button_name, down)
     }
 
     pub(super) fn handle_middle_click(&mut self, pos: Point) {
@@ -500,6 +530,24 @@ impl App {
             .map(frame_motion_scripts_allowed)
             .unwrap_or(false)
     }
+}
+
+fn frame_click_registration_matches(
+    frame: &crate::widget::Frame,
+    button_name: &str,
+    down: bool,
+) -> bool {
+    if frame.registered_click_buttons.is_empty() {
+        return !down && button_name == "LeftButton";
+    }
+
+    let edge = if down { "Down" } else { "Up" };
+    frame
+        .registered_click_buttons
+        .contains(&format!("{button_name}{edge}"))
+        || frame
+            .registered_click_buttons
+            .contains(&format!("Any{edge}"))
 }
 
 fn mark_button_state_visuals_dirty(state: &mut crate::lua_api::SimState, frame_id: Option<u64>) {

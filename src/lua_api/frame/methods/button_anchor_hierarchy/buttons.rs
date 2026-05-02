@@ -3,6 +3,7 @@
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id,
     frame_id_from_stack, frame_ref, get_or_create_frame_fields, table_get, table_set,
+    val_to_string,
 };
 use crate::lua_api::script_helpers::{call_error_handler_state, get_script as get_rilua_script};
 use crate::lua_bridge::{FromStack, stack_val};
@@ -138,8 +139,32 @@ pub(super) fn disable(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn register_for_clicks(state: &mut LuaState) -> LuaResult<u32> {
-    let _id = frame_id_from_stack(state, 1)?;
+    let id = frame_id_from_stack(state, 1)?;
+    let buttons = collect_click_registration_args(state, 2);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.registered_click_buttons = buttons;
+    }
     Ok(0)
+}
+
+fn collect_click_registration_args(
+    state: &mut LuaState,
+    start: i32,
+) -> std::collections::HashSet<String> {
+    let mut buttons = std::collections::HashSet::new();
+    let mut index = start;
+    loop {
+        let value = stack_val(state, index);
+        if value == Val::Nil {
+            break;
+        }
+        if let Some(button) = val_to_string(state, value) {
+            buttons.insert(button);
+        }
+        index += 1;
+    }
+    buttons
 }
 
 pub(super) fn set_button_state(state: &mut LuaState) -> LuaResult<u32> {

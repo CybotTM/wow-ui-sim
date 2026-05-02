@@ -14,6 +14,7 @@ impl Frame {
             + hash_set_string_bytes(&self.pass_through_buttons)
             + hash_map_string_attribute_value_bytes(&self.attributes)
             + hash_map_string_u64_bytes(&self.children_keys)
+            + hash_set_string_bytes(&self.registered_click_buttons)
             + hash_set_string_bytes(&self.registered_drag_buttons)
             + btree_set_bytes(&self.disabled_draw_layers)
             + vec_bytes(&self.mask_textures)
