@@ -1,7 +1,7 @@
 //! Behavior pin: successful action-bar transitions refresh bars then relayout UIParent.
 
 use crate::common;
-use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
+use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 use crate::test_timeout;
 
 const ROOT: &str = "Blizzard_ActionBarController";
@@ -9,17 +9,36 @@ const ROOT: &str = "Blizzard_ActionBarController";
 #[test]
 fn validate_transition_successful_paths_update_multibars_then_relayout_uiparent() {
     test_timeout! {
-    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         env.exec(
             r#"
             _G.transitionRelayoutLog = {}
             _G.transitionRelayoutCases = {}
 
-            table.insert(ActionBarButtonEventsFrame.frames, {
-                UpdateAction = function()
+            function Settings.GetValue()
+                return true
+            end
+
+            local function logMultiActionBarUpdate()
+                if not _G.transitionRelayoutMultiLogged then
+                    _G.transitionRelayoutMultiLogged = true
                     table.insert(_G.transitionRelayoutLog, "multi")
-                end,
-            })
+                end
+            end
+
+            for _, bar in ipairs({
+                MultiBarBottomLeft,
+                MultiBarBottomRight,
+                MultiBarRight,
+                MultiBarLeft,
+                MultiBar5,
+                MultiBar6,
+                MultiBar7,
+            }) do
+                function bar:SetShown()
+                    logMultiActionBarUpdate()
+                end
+            end
 
             function UIParent_ManageFramePositions()
                 table.insert(_G.transitionRelayoutLog, "uiparent")
@@ -36,6 +55,7 @@ fn validate_transition_successful_paths_update_multibars_then_relayout_uiparent(
             end
 
             function _G.runTransitionRelayoutCase(caseName)
+                _G.transitionRelayoutMultiLogged = false
                 local startIndex = #_G.transitionRelayoutLog + 1
                 ValidateActionBarTransition()
                 local callCount = #_G.transitionRelayoutLog - startIndex + 1
