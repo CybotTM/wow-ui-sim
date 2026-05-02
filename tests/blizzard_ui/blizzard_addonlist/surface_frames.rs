@@ -28,6 +28,18 @@ return AddonList ~= nil,
            and AddonList.Inset ~= nil
            and AddonList.Bg ~= nil
 "#;
+const ADDON_LIST_PARENT_KEY_CHILDREN: &[ParentKeyChild] = &[
+    ParentKeyChild::new("Dropdown", "DropdownButton", "Button"),
+    ParentKeyChild::new("ForceLoad", "CheckButton", "CheckButton"),
+    ParentKeyChild::new("SearchBox", "EditBox", "EditBox"),
+    ParentKeyChild::new("Performance", "Frame", "Frame"),
+    ParentKeyChild::new("CancelButton", "Button", "Button"),
+    ParentKeyChild::new("OkayButton", "Button", "Button"),
+    ParentKeyChild::new("EnableAllButton", "Button", "Button"),
+    ParentKeyChild::new("DisableAllButton", "Button", "Button"),
+    ParentKeyChild::new("ScrollBox", "Frame", "Frame"),
+    ParentKeyChild::new("ScrollBar", "EventFrame", "EventFrame"),
+];
 
 type AddonListSurfaceProbe = (
     bool,
@@ -62,6 +74,38 @@ fn addon_list_frame_uses_glue_parent_in_glue() {
     });
 }
 
+#[test]
+fn addon_list_exposes_plan_parent_key_children() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for child in ADDON_LIST_PARENT_KEY_CHILDREN {
+            let surface = probe_parent_key_child(env, child.key);
+
+            assert_parent_key_child_surface(child, surface);
+        }
+    });
+}
+
+struct ParentKeyChild {
+    key: &'static str,
+    xml_tag: &'static str,
+    object_type: &'static str,
+}
+
+impl ParentKeyChild {
+    const fn new(key: &'static str, xml_tag: &'static str, object_type: &'static str) -> Self {
+        Self {
+            key,
+            xml_tag,
+            object_type,
+        }
+    }
+}
+
+struct ParentKeyChildSurface {
+    actual_type: String,
+    parent_is_addon_list: bool,
+}
+
 struct AddonListSurface {
     exists: bool,
     object_type: String,
@@ -75,6 +119,26 @@ struct AddonListSurface {
     x_offset: f32,
     y_offset: f32,
     has_button_frame_template_children: bool,
+}
+
+fn probe_parent_key_child(
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+    child_key: &str,
+) -> ParentKeyChildSurface {
+    let (actual_type, parent_is_addon_list): (String, bool) = env
+        .eval(&format!(
+            r#"
+            local child = AddonList[{child_key:?}]
+            return child and child:GetObjectType() or "nil",
+                   child and child:GetParent() == AddonList or false
+            "#
+        ))
+        .unwrap_or_else(|err| panic!("failed to probe `AddonList.{child_key}`: {err}"));
+
+    ParentKeyChildSurface {
+        actual_type,
+        parent_is_addon_list,
+    }
 }
 
 fn probe_addon_list_surface(
@@ -187,5 +251,18 @@ fn assert_button_frame_template_children(surface: &AddonListSurface) {
     assert!(
         surface.has_button_frame_template_children,
         "`AddonList` must inherit concrete children from ButtonFrameTemplate"
+    );
+}
+
+fn assert_parent_key_child_surface(child: &ParentKeyChild, surface: ParentKeyChildSurface) {
+    assert_eq!(
+        surface.actual_type, child.object_type,
+        "`AddonList.{}` must expose the XML `{}` parentKey child as a runtime {}",
+        child.key, child.xml_tag, child.object_type
+    );
+    assert!(
+        surface.parent_is_addon_list,
+        "`AddonList.{}` must be parented to `AddonList`",
+        child.key
     );
 }
