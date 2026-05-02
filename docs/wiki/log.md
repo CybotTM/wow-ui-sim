@@ -762,6 +762,10 @@ Created `investigations/explicit-xml-parent-anchors.md` to document the PaperDol
 
 Created `investigations/world-map-onupdate-hover-polling.md` to document the post-texture-fix `UIParent_OnUpdate` cost: `FCF_OnUpdate` hover polling, the unnecessary mutable borrow in `IsMouseOver()`, the new immutable-borrow regression test, and the runtime repro where verbose OnUpdate logs stayed quiet after startup. Updated `index.md` with the new investigation page.
 
+## [2026-05-02] investigation | Adventure Guide layout
+
+Created `investigations/adventure-guide-layout.md` for the Suggested Content overlap bug. Root cause: `resolve_rect_if_dirty` fast-path geometry queries recomputed only the queried resized frame, leaving sibling frames anchored to it with stale cached rects. The fix now recomputes anchor dependents for direct dirty roots and dirty ancestor roots, and queues those moved dependents for hit-grid updates; regression coverage is `querying_resized_anchor_target_updates_dependent_siblings`.
+
 ## [2026-04-13] ingest | world map texture loading budget investigation
 
 Created `investigations/world-map-texture-loading-budget.md` to document the post-rebuild-fix world-map stalls: hidden BC tile uploads, preload/draw source-cache mismatch, the new BC cache in `TextureManager`, and the smaller draw/tick texture budgets. Updated `index.md` with the new investigation page.
