@@ -28,6 +28,22 @@ const FRAME_MIXIN_METHODS: &[&str] = &[
     "TryShow",
     "SetupCurrencyFrame",
 ];
+const DATA_PROVIDER_MIXIN_METHODS: &[&str] = &[
+    "OnShow",
+    "OnHide",
+    "OnEvent",
+    "SetupConnectionOnPin",
+    "ResetModelScene",
+    "AddEffectOnPin",
+    "ClearEffectOnPin",
+    "ClearEffectOnAllPins",
+    "RemoveAllData",
+    "CanReinforceNode",
+    "RefreshAllData",
+    "AddNode",
+    "AddOrigin",
+    "AddModelScene",
+];
 const FRAME_MIXIN_METHODS_PROBE: &str = r#"
 local methods = {
     "OnLoad",
@@ -58,6 +74,33 @@ end
 
 return type(AnimaDiversionFrameMixin), missing
 "#;
+const DATA_PROVIDER_MIXIN_METHODS_PROBE: &str = r#"
+local methods = {
+    "OnShow",
+    "OnHide",
+    "OnEvent",
+    "SetupConnectionOnPin",
+    "ResetModelScene",
+    "AddEffectOnPin",
+    "ClearEffectOnPin",
+    "ClearEffectOnAllPins",
+    "RemoveAllData",
+    "CanReinforceNode",
+    "RefreshAllData",
+    "AddNode",
+    "AddOrigin",
+    "AddModelScene",
+}
+
+local missing = {}
+for _, method in ipairs(methods) do
+    if type(AnimaDiversionDataProviderMixin[method]) ~= "function" then
+        table.insert(missing, method .. ":" .. type(AnimaDiversionDataProviderMixin[method]))
+    end
+end
+
+return type(AnimaDiversionDataProviderMixin), missing
+"#;
 
 #[test]
 fn anima_diversion_frame_mixin_exposes_expected_methods() {
@@ -66,22 +109,37 @@ fn anima_diversion_frame_mixin_exposes_expected_methods() {
             .eval(FRAME_MIXIN_METHODS_PROBE)
             .expect("AnimaDiversionFrameMixin method probe must run cleanly");
 
-        assert_frame_mixin_methods(surface);
+        assert_mixin_methods("AnimaDiversionFrameMixin", FRAME_MIXIN_METHODS, surface);
+    });
+}
+
+#[test]
+fn anima_diversion_data_provider_mixin_exposes_expected_methods() {
+    with_blizzard_addon_startup_shape(&[ROOT], CLOSURE_OVERRIDES, |env, _loaded| {
+        let surface: MixinMethodSurface = env
+            .eval(DATA_PROVIDER_MIXIN_METHODS_PROBE)
+            .expect("AnimaDiversionDataProviderMixin method probe must run cleanly");
+
+        assert_mixin_methods(
+            "AnimaDiversionDataProviderMixin",
+            DATA_PROVIDER_MIXIN_METHODS,
+            surface,
+        );
     });
 }
 
 type MixinMethodSurface = (String, Vec<String>);
 
-fn assert_frame_mixin_methods(surface: MixinMethodSurface) {
+fn assert_mixin_methods(mixin_name: &str, expected_methods: &[&str], surface: MixinMethodSurface) {
     let (mixin_type, missing_methods) = surface;
 
     assert_eq!(
         mixin_type, "table",
-        "`AnimaDiversionFrameMixin` must be exposed as a table"
+        "`{mixin_name}` must be exposed as a table"
     );
     assert!(
         missing_methods.is_empty(),
-        "`AnimaDiversionFrameMixin` must expose these methods as functions: {FRAME_MIXIN_METHODS:?}; \
+        "`{mixin_name}` must expose these methods as functions: {expected_methods:?}; \
          missing or wrong-type entries: {missing_methods:?}"
     );
 }
