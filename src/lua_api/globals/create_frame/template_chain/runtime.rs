@@ -592,6 +592,9 @@ fn apply_runtime_child_direct_properties_with_inherits(
     frame_name: &str,
 ) {
     crate::lua_api::globals::template::direct::apply_xml_size(state, frame_id, frame, inherits);
+    crate::lua_api::globals::template::direct::apply_xml_set_all_points(
+        state, frame_id, frame, inherits,
+    );
     crate::lua_api::globals::template::direct::apply_xml_anchors(
         state, frame_id, frame, inherits, frame_name,
     );
@@ -601,9 +604,6 @@ fn apply_runtime_child_direct_properties_with_inherits(
         state, frame_id, frame, inherits,
     );
     crate::lua_api::globals::template::direct::apply_xml_clips_children(
-        state, frame_id, frame, inherits,
-    );
-    crate::lua_api::globals::template::direct::apply_xml_set_all_points(
         state, frame_id, frame, inherits,
     );
     crate::lua_api::globals::template::direct::apply_xml_frame_level(

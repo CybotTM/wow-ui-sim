@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-01] update | Journeys breadcrumb overlap
+
+Updated `investigations/journeys-midnight-empty.md` with the later Midnight
+renown-card overlap root cause. The issue was XML property order:
+`setAllPoints=true` was applied after explicit `$parentInset` anchors, clearing
+them and stretching `EncounterJournalJourneysFrame` to the full parent.
+
 ## [2026-05-01] update | Tooltip Lua NineSlice center fill
 
 Updated `investigations/tooltip-double-shell.md` after the Journeys renown-card tooltip showed underlying card text through the tooltip body. Documented that the Lua-owned tooltip `NineSlice` should suppress the Rust fallback border/shell, but not the solid center fill needed while the simulator does not have a renderable opaque Lua center.

@@ -348,6 +348,7 @@ fn apply_xml_properties_direct(
     use crate::lua_api::globals::template::direct;
     let state = env.state();
     direct::apply_xml_size(state, frame_id, frame, inherits);
+    direct::apply_xml_set_all_points(state, frame_id, frame, inherits);
     direct::apply_xml_anchors(state, frame_id, frame, inherits, parent);
     direct::apply_xml_frame_strata(state, frame_id, frame, inherits);
     direct::apply_xml_frame_level(state, frame_id, frame, inherits);
@@ -359,7 +360,6 @@ fn apply_xml_properties_direct(
     direct::apply_xml_clips_children(state, frame_id, frame, inherits);
     direct::apply_xml_hit_rect_insets(state, frame_id, frame);
     direct::apply_xml_clamped_to_screen(state, frame_id, frame, inherits);
-    direct::apply_xml_set_all_points(state, frame_id, frame, inherits);
     direct::apply_xml_protected(state, frame_id, frame, inherits);
     direct::apply_xml_id(state, frame_id, frame);
     direct::apply_xml_letters(state, frame_id, frame, inherits);
