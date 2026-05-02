@@ -20,6 +20,9 @@ mod behavior_get_api_table_by_type_name_routes_kind;
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_write_line_uses_system_chat_color.rs"]
 mod behavior_write_line_uses_system_chat_color;
 
+#[path = "blizzard_ui/blizzard_apidocumentation/behavior_get_indent_string_returns_two_space_blocks.rs"]
+mod behavior_get_indent_string_returns_two_space_blocks;
+
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_slash_command_help_writes_usage.rs"]
 mod behavior_handle_slash_command_help_writes_usage;
 
