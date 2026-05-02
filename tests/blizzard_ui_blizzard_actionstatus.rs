@@ -28,3 +28,6 @@ mod behavior_screenshot_failed_shows_failure_text;
 
 #[path = "blizzard_ui/blizzard_actionstatus/behavior_display_message_direct_call.rs"]
 mod behavior_display_message_direct_call;
+
+#[path = "blizzard_ui/blizzard_actionstatus/behavior_on_update_fades_alpha.rs"]
+mod behavior_on_update_fades_alpha;
