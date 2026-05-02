@@ -13,6 +13,7 @@ Baseline:
 Current API shape:
 
 - `C_TransmogCollection.GetCategoryAppearances` returns seeded rows by category and active collection/source/search filters.
+- Default appearance seeds include two Shirt rows and one Tabard row in addition to the five-row armor/weapon categories, so the Wardrobe shirt/tabard slots are no longer empty by default.
 - Source/collection/search filter setters now mutate `WorldState`, and category rows/counts apply collected/uncollected, source-type, and search-text filters.
 - Search completion is synchronous and deterministic: no DB loading, no in-progress state, and progress equals result size.
 - Appearance rows include displayability/usability fields (`canDisplayOnPlayer`, `isUsable`, `isValidSourceForPlayer`, `isHideVisual`, `isFavorite`, name, and quality) so Blizzard's Wardrobe model buttons do not render every card as an invalid red slashed placeholder.

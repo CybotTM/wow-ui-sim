@@ -201,6 +201,25 @@ fn test_transmog_collection_filter_surface_supports_wardrobe_dropdowns() {
 }
 
 #[test]
+fn test_transmog_collection_seeds_shirts_and_tabards() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local shirtRows = C_TransmogCollection.GetCategoryAppearances(Enum.TransmogCollectionType.Shirt, nil)
+            if #shirtRows ~= 2 then return "shirts=" .. tostring(#shirtRows) end
+
+            local tabardRows = C_TransmogCollection.GetCategoryAppearances(Enum.TransmogCollectionType.Tabard, nil)
+            if #tabardRows ~= 1 then return "tabards=" .. tostring(#tabardRows) end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_transmog_collection_source_type_filter_changes_category_results() {
     let env = env();
     let result: String = env
