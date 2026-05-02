@@ -13,3 +13,6 @@ mod behavior_combat_lockdown_short_circuits_check;
 
 #[path = "blizzard_ui/blizzard_addonperformance/behavior_check_skips_when_no_message.rs"]
 mod behavior_check_skips_when_no_message;
+
+#[path = "blizzard_ui/blizzard_addonperformance/behavior_check_marks_message_type_seen.rs"]
+mod behavior_check_marks_message_type_seen;
