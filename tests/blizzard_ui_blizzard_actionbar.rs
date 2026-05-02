@@ -111,3 +111,6 @@ mod behavior_battlefield_hides_xp_bar;
 
 #[path = "blizzard_ui/blizzard_actionbar/behavior_resting_indicator.rs"]
 mod behavior_resting_indicator;
+
+#[path = "blizzard_ui/blizzard_actionbar/behavior_paragon_tooltip.rs"]
+mod behavior_paragon_tooltip;
