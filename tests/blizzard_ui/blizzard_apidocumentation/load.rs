@@ -12,21 +12,7 @@ const ROOT: &str = "Blizzard_APIDocumentation";
 #[test]
 fn api_documentation_loads_cleanly_and_expands_default_chat_history() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
-        clear_recorded_lua_errors(env);
-        let ui_dir = blizzard_ui_dir();
-        let loaded = load_blizzard_addon_closure_into_env(env, &ui_dir, &[ROOT], &[]);
-
-        assert!(
-            loaded.iter().any(|addon| addon == ROOT),
-            "{ROOT} must be included in the loaded addon closure; loaded={loaded:?}"
-        );
-
-        let errors = recorded_lua_errors(env);
-        assert!(
-            errors.is_empty(),
-            "{ROOT} must settle without recorded Lua errors:\n  {}",
-            errors.join("\n  ")
-        );
+        load_api_documentation(env);
 
         let (api_documentation_type, object_type, default_chat_max_lines): (String, String, i64) =
             env.eval(
@@ -48,4 +34,59 @@ fn api_documentation_loads_cleanly_and_expands_default_chat_history() {
             "APIDocumentation:OnLoad must raise DEFAULT_CHAT_FRAME ({object_type}) max lines to at least 2000; got {default_chat_max_lines}"
         );
     });
+}
+
+#[test]
+fn api_documentation_loads_expected_mixin_tables() {
+    with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
+        load_api_documentation(env);
+
+        let all_are_tables: bool = env
+            .eval(
+                r#"
+                local globals = {
+                    "BaseAPIMixin",
+                    "SystemsAPIMixin",
+                    "FunctionsAPIMixin",
+                    "EventsAPIMixin",
+                    "FieldsAPIMixin",
+                    "TablesAPIMixin",
+                    "APIDocumentationMixin",
+                    "APIDocumentation",
+                }
+
+                for _, globalName in ipairs(globals) do
+                    if type(_G[globalName]) ~= "table" then
+                        return false
+                    end
+                end
+
+                return true
+                "#,
+            )
+            .expect("APIDocumentation mixin table probe must run cleanly");
+
+        assert!(
+            all_are_tables,
+            "APIDocumentation load must publish every documented mixin global as a table"
+        );
+    });
+}
+
+fn load_api_documentation(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    clear_recorded_lua_errors(env);
+    let ui_dir = blizzard_ui_dir();
+    let loaded = load_blizzard_addon_closure_into_env(env, &ui_dir, &[ROOT], &[]);
+
+    assert!(
+        loaded.iter().any(|addon| addon == ROOT),
+        "{ROOT} must be included in the loaded addon closure; loaded={loaded:?}"
+    );
+
+    let errors = recorded_lua_errors(env);
+    assert!(
+        errors.is_empty(),
+        "{ROOT} must settle without recorded Lua errors:\n  {}",
+        errors.join("\n  ")
+    );
 }
