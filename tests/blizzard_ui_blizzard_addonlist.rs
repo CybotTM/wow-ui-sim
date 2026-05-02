@@ -82,3 +82,6 @@ mod behavior_get_addon_metric_percent_warning_color;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_glue_dialog_addons_out_of_date.rs"]
 mod behavior_glue_dialog_addons_out_of_date;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_glue_dialog_confirm_disable_disables_outdated.rs"]
+mod behavior_glue_dialog_confirm_disable_disables_outdated;
