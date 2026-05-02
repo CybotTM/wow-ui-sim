@@ -55,3 +55,6 @@ mod behavior_unit_displaypower_updates_vehicle_mana;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_shapeshift_events_update_stance_bar.rs"]
 mod behavior_shapeshift_events_update_stance_bar;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_possess_event_updates_possess_and_stance.rs"]
+mod behavior_possess_event_updates_possess_and_stance;
