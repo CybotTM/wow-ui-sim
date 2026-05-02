@@ -77,6 +77,8 @@ macro_rules! build_empty_sim_state {
             account_store_items: $collections.account_store_items,
             action_bar_state: ActionBarStateInfo::default(),
             action_bar_page: 1,
+            has_override_action_bar: false,
+            override_bar_skin: None,
             action_bars: $collections.action_bars,
             action_outfits: $collections.action_outfits,
             equipped_gear_outfit_action_slots: $collections.equipped_gear_outfit_action_slots,
@@ -1347,10 +1349,18 @@ pub struct SimState {
     /// per-button action ids). Default 1 — the page seeded after
     /// `PLAYER_ENTERING_WORLD` before any keybind cycles `ActionBar_PageUp`.
     pub action_bar_page: u32,
+    /// Drives `C_ActionBar.HasOverrideActionBar()`. Default false — no
+    /// skinned or unskinned override action bar is mounted.
+    pub has_override_action_bar: bool,
+    /// Drives `C_ActionBar.GetOverrideBarSkin()`. `Some(nonzero)` selects the
+    /// skinned override-bar path in `ActionBarController_UpdateAll`.
+    pub override_bar_skin: Option<i32>,
     /// Action-bar transition state. Drives `ActionBarBusy()` (set true while
     /// a status-tracking-bar fade or page change is mid-animation) and
     /// `ActionBarController_GetCurrentActionBarState()` (1 = main bar,
-    /// 2 = override bar mounted by a vehicle/possess override).
+    /// 2 = override bar mounted by a vehicle/possess override). A skinned
+    /// override bar seeded through `has_override_action_bar` /
+    /// `override_bar_skin` also reports override state.
     pub action_bar_state: ActionBarStateInfo,
     /// Action-highlight bookkeeping for `MarkNewActionHighlight` and the
     /// `On Bar` highlight verbs. Read by Blizzard_ActionBar buttons during

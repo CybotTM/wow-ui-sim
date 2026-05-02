@@ -356,7 +356,11 @@ fn get_bonus_bar_offset(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_override_bar_skin(state: &mut LuaState) -> LuaResult<u32> {
-    push_nil(state)
+    let override_bar_skin = borrow_state(state)?.override_bar_skin;
+    match override_bar_skin {
+        Some(skin) => push_i32(state, skin),
+        None => push_nil(state),
+    }
 }
 
 fn has_vehicle_action_bar(state: &mut LuaState) -> LuaResult<u32> {
@@ -364,7 +368,8 @@ fn has_vehicle_action_bar(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn has_override_action_bar(state: &mut LuaState) -> LuaResult<u32> {
-    push_bool(state, false)
+    let has_override_action_bar = borrow_state(state)?.has_override_action_bar;
+    push_bool(state, has_override_action_bar)
 }
 
 fn has_bonus_action_bar(state: &mut LuaState) -> LuaResult<u32> {

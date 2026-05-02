@@ -145,7 +145,7 @@ pub(super) fn get_region_parent(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
     let group_frame_id = frame_id_from_stack(state, 1)?;
-    let reverse = matches!(stack_val(state, 2), Val::Bool(true));
+    let reverse = !matches!(stack_val(state, 2), Val::Nil | Val::Bool(false));
     let mut sim = borrow_state_mut(state)?;
     if let Some(group_id) = resolve_animation_group_id(&sim, group_frame_id) {
         if let Some(group) = sim.animation_groups.get_mut(&group_id) {

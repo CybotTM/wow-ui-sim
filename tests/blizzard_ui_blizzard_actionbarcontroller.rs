@@ -25,3 +25,6 @@ mod behavior_player_entering_world_runs_update_all;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_page_changed_routes_to_update_all.rs"]
 mod behavior_page_changed_routes_to_update_all;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_override_skinned.rs"]
+mod behavior_update_override_skinned;

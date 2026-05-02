@@ -13,6 +13,7 @@
 //! `globals/strings/string_data/game_enums.rs`, so callers can compare
 //! results directly without further wiring here.
 
+use crate::lua_api::SimState;
 use crate::lua_api::methods::borrow_state;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -24,9 +25,25 @@ fn action_bar_busy(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn action_bar_controller_get_current_action_bar_state(state: &mut LuaState) -> LuaResult<u32> {
-    let current = borrow_state(state)?.action_bar_state.current_state;
+    let current = {
+        let sim = borrow_state(state)?;
+        current_action_bar_state(&sim)
+    };
     state.push(Val::Num(current as f64));
     Ok(1)
+}
+
+fn current_action_bar_state(state: &SimState) -> i32 {
+    let skinned_override_active = state.has_override_action_bar
+        && state
+            .override_bar_skin
+            .map(|skin| skin != 0)
+            .unwrap_or(false);
+    if skinned_override_active {
+        2
+    } else {
+        state.action_bar_state.current_state
+    }
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
