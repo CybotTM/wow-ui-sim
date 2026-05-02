@@ -27,6 +27,15 @@ const GLOBAL_FUNCTIONS: &[&str] = &[
     "AddonTooltip_Update",
     "AddonTooltip_ActionBlocked",
 ];
+const MIXIN_TABLES: &[&str] = &[
+    "AddonListMixin",
+    "AddonDialogMixin",
+    "AddonListNodeMixin",
+    "AddonCategoryCollapseExpandMixin",
+    "AddonListCategoryMixin",
+    "AddonListEntryMixin",
+];
+const INHERITED_NODE_METHODS: &[&str] = &["OnClick", "SetEnabledAll"];
 
 #[test]
 fn addon_list_publishes_module_constants() {
@@ -70,7 +79,42 @@ fn addon_list_publishes_global_functions() {
     });
 }
 
+#[test]
+fn addon_list_publishes_mixin_tables() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for global_name in MIXIN_TABLES {
+            let actual_type = global_type(env, global_name);
+
+            assert_eq!(
+                actual_type, "table",
+                "`{global_name}` must be published as a global mixin table"
+            );
+        }
+
+        for method_name in INHERITED_NODE_METHODS {
+            assert_node_method_inherited(env, "AddonListCategoryMixin", method_name);
+            assert_node_method_inherited(env, "AddonListEntryMixin", method_name);
+        }
+    });
+}
+
 fn global_type(env: &WowLuaEnv, global_name: &str) -> String {
     env.eval(&format!("return type(_G[{global_name:?}])"))
         .unwrap_or_else(|err| panic!("failed to probe global type for `{global_name}`: {err}"))
+}
+
+fn assert_node_method_inherited(env: &WowLuaEnv, mixin_name: &str, method_name: &str) {
+    let inherited: bool = env
+        .eval(&format!(
+            "return _G[{mixin_name:?}][{method_name:?}] == AddonListNodeMixin[{method_name:?}]"
+        ))
+        .unwrap_or_else(|err| {
+            panic!("failed to probe `{mixin_name}` inheritance for `{method_name}`: {err}")
+        });
+
+    assert!(
+        inherited,
+        "`{mixin_name}` must inherit `{method_name}` from `AddonListNodeMixin` via \
+         `CreateFromMixins`"
+    );
 }
