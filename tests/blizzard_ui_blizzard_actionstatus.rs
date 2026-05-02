@@ -49,3 +49,6 @@ mod behavior_alternate_top_level_parent_event;
 
 #[path = "blizzard_ui/blizzard_actionstatus/behavior_glue_branch_registers_glue_events.rs"]
 mod behavior_glue_branch_registers_glue_events;
+
+#[path = "blizzard_ui/blizzard_actionstatus/behavior_get_best_parent_no_parent_returns_nil.rs"]
+mod behavior_get_best_parent_no_parent_returns_nil;
