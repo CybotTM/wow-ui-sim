@@ -6,8 +6,8 @@ Chronological record of wiki operations.
 
 Updated `investigations/lfd-dungeon-list-empty.md` after the LFD join path got
 past the group-size gate and hit missing `ClearAllLFGDungeons`. Documented the
-new `ClearAllLFGDungeons` / `SetLFGDungeon` / `JoinLFG` surface and queued-mode
-state through `GetLFGMode`.
+new `ClearAllLFGDungeons` / `SetLFGDungeon` / `JoinLFG` / `GetLFGInfoServer`
+surface and queued-mode state through Blizzard's Lua `GetLFGMode`.
 
 ## [2026-05-02] update | LFD normal dungeon group-size gate
 
