@@ -80,6 +80,13 @@ const SYSTEMS_API_MIXIN_OVERRIDES: &[&str] = &[
     "GetNumEvents",
 ];
 
+const API_KIND_MIXIN_TYPES: &[(&str, &str)] = &[
+    ("FunctionsAPIMixin", "function"),
+    ("EventsAPIMixin", "event"),
+    ("FieldsAPIMixin", "field"),
+    ("TablesAPIMixin", "table"),
+];
+
 #[test]
 fn api_documentation_mixin_exposes_expected_methods() {
     with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
@@ -149,6 +156,24 @@ fn systems_api_mixin_inherits_base_and_exposes_expected_overrides() {
             assert_eq!(
                 "function", method_type,
                 "SystemsAPIMixin.{method_name} must be a function"
+            );
+        }
+    });
+}
+
+#[test]
+fn api_kind_mixins_return_dispatch_type_strings() {
+    with_blizzard_addon_startup_shape(&[], &[], |env, _loaded| {
+        load_api_documentation(env);
+
+        for (mixin_name, expected_type) in API_KIND_MIXIN_TYPES {
+            let actual_type: String = env
+                .eval(&format!(r#"return {mixin_name}:GetType()"#))
+                .expect("API kind mixin GetType probe must run cleanly");
+
+            assert_eq!(
+                *expected_type, actual_type,
+                "{mixin_name}:GetType() must return the slash-dispatcher API kind"
             );
         }
     });
