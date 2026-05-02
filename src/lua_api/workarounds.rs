@@ -2209,6 +2209,34 @@ local function __wow_seed_adventure_map_canvas_state(frame)
     frame.pinFrameLevelsManager.definitions = frame.pinFrameLevelsManager.definitions or {}
 end
 
+local function __wow_adventure_map_has_provider(frame, mixin)
+    if type(frame.dataProviders) ~= "table" or type(mixin) ~= "table" then
+        return true
+    end
+
+    for provider in pairs(frame.dataProviders) do
+        if provider.OnAdded == mixin.OnAdded then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function __wow_add_adventure_map_provider(frame, mixin)
+    if type(frame.AddDataProvider) ~= "function"
+        or type(CreateFromMixins) ~= "function"
+        or __wow_adventure_map_has_provider(frame, mixin)
+    then
+        return
+    end
+
+    local ok, provider = pcall(CreateFromMixins, mixin)
+    if ok and type(provider) == "table" then
+        pcall(frame.AddDataProvider, frame, provider)
+    end
+end
+
 if type(AdventureMapFrame) ~= "table"
     and type(UIParent) == "table"
     and type(CreateFrame) == "function"
@@ -2231,6 +2259,14 @@ then
     AdventureMapFrame.ScrollContainer = scrollContainer
 
     __wow_seed_adventure_map_canvas_state(AdventureMapFrame)
+
+    if type(AdventureMapFrame.RegisterEvent) == "function" then
+        pcall(AdventureMapFrame.RegisterEvent, AdventureMapFrame, "ADVENTURE_MAP_UPDATE_INSETS")
+    end
+
+    __wow_add_adventure_map_provider(AdventureMapFrame, AdventureMap_QuestChoiceDataProviderMixin)
+    __wow_add_adventure_map_provider(AdventureMapFrame, AdventureMap_QuestOfferDataProviderMixin)
+    __wow_add_adventure_map_provider(AdventureMapFrame, QuestSessionDataProviderMixin)
 end
 "#;
 
