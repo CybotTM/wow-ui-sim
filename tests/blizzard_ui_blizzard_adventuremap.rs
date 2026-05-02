@@ -61,3 +61,6 @@ mod behavior_quest_choice_select_quest_id_shows_dialog;
 
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_choice_deselect_zooms_out.rs"]
 mod behavior_quest_choice_deselect_zooms_out;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_offer_pin_click_anchors_dialog_and_trigger.rs"]
+mod behavior_quest_offer_pin_click_anchors_dialog_and_trigger;
