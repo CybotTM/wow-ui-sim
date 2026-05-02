@@ -22,3 +22,6 @@ mod behavior_screenshot_started_hides_frame;
 
 #[path = "blizzard_ui/blizzard_actionstatus/behavior_screenshot_succeeded_shows_success_text.rs"]
 mod behavior_screenshot_succeeded_shows_success_text;
+
+#[path = "blizzard_ui/blizzard_actionstatus/behavior_screenshot_failed_shows_failure_text.rs"]
+mod behavior_screenshot_failed_shows_failure_text;
