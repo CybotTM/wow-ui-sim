@@ -1,0 +1,191 @@
+//! Frame-surface probes for `Blizzard_AddOnList`.
+
+use crate::common::blizzard_addon_harness::{
+    with_blizzard_addon_glue_smoke_shape, with_blizzard_addon_startup_shape,
+};
+
+const ROOT: &str = "Blizzard_AddOnList";
+const GLUE_PARENT_ROOT: &str = "Blizzard_GlueParent";
+const ADDON_LIST_WIDTH: f32 = 600.0;
+const ADDON_LIST_HEIGHT: f32 = 550.0;
+const ADDON_LIST_CENTER_X: f32 = 0.0;
+const ADDON_LIST_CENTER_Y: f32 = 24.0;
+const ADDON_LIST_SURFACE_PROBE: &str = r#"
+local expectedParent = _G[%q]
+local point, _, relativePoint, xOfs, yOfs = AddonList:GetPoint(1)
+return AddonList ~= nil,
+       AddonList:GetObjectType(),
+       AddonList:GetParent() == expectedParent,
+       AddonList:IsShown(),
+       AddonList:GetWidth(),
+       AddonList:GetHeight(),
+       AddonList:GetNumPoints(),
+       point,
+       relativePoint,
+       xOfs,
+       yOfs,
+       AddonList.CloseButton ~= nil
+           and AddonList.Inset ~= nil
+           and AddonList.Bg ~= nil
+"#;
+
+type AddonListSurfaceProbe = (
+    bool,
+    String,
+    bool,
+    bool,
+    f32,
+    f32,
+    i32,
+    String,
+    String,
+    f32,
+    f32,
+    bool,
+);
+
+#[test]
+fn addon_list_frame_matches_game_xml_surface() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let surface = probe_addon_list_surface(env, "UIParent");
+
+        assert_addon_list_surface(surface, "UIParent");
+    });
+}
+
+#[test]
+fn addon_list_frame_uses_glue_parent_in_glue() {
+    with_blizzard_addon_glue_smoke_shape(&[GLUE_PARENT_ROOT, ROOT], &[], |env, _loaded| {
+        let surface = probe_addon_list_surface(env, "GlueParent");
+
+        assert_addon_list_surface(surface, "GlueParent");
+    });
+}
+
+struct AddonListSurface {
+    exists: bool,
+    object_type: String,
+    parent_matches: bool,
+    is_shown: bool,
+    width: f32,
+    height: f32,
+    point_count: i32,
+    point: String,
+    relative_point: String,
+    x_offset: f32,
+    y_offset: f32,
+    has_button_frame_template_children: bool,
+}
+
+fn probe_addon_list_surface(
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+    expected_parent_name: &str,
+) -> AddonListSurface {
+    let probe = ADDON_LIST_SURFACE_PROBE.replace("%q", &format!("{expected_parent_name:?}"));
+    let raw_surface = env
+        .eval::<AddonListSurfaceProbe>(&probe)
+        .expect("AddonList frame surface probe must run cleanly");
+
+    AddonListSurface::from(raw_surface)
+}
+
+impl From<AddonListSurfaceProbe> for AddonListSurface {
+    fn from(raw_surface: AddonListSurfaceProbe) -> Self {
+        let (
+            exists,
+            object_type,
+            parent_matches,
+            is_shown,
+            width,
+            height,
+            point_count,
+            point,
+            relative_point,
+            x_offset,
+            y_offset,
+            has_button_frame_template_children,
+        ) = raw_surface;
+
+        AddonListSurface {
+            exists,
+            object_type,
+            parent_matches,
+            is_shown,
+            width,
+            height,
+            point_count,
+            point,
+            relative_point,
+            x_offset,
+            y_offset,
+            has_button_frame_template_children,
+        }
+    }
+}
+
+fn assert_addon_list_surface(surface: AddonListSurface, expected_parent_name: &str) {
+    assert_frame_shape(&surface, expected_parent_name);
+    assert_frame_size(&surface);
+    assert_frame_anchor(&surface);
+    assert_button_frame_template_children(&surface);
+}
+
+fn assert_frame_shape(surface: &AddonListSurface, expected_parent_name: &str) {
+    assert!(
+        surface.exists,
+        "`AddonList` must exist after `{ROOT}` loads"
+    );
+    assert_eq!(
+        surface.object_type, "Frame",
+        "`AddonList` XML declares a Frame"
+    );
+    assert!(
+        surface.parent_matches,
+        "`AddonList` must be parented to `{expected_parent_name}` in this screen branch"
+    );
+    assert!(
+        !surface.is_shown,
+        "`AddonList` XML declares hidden=\"true\""
+    );
+}
+
+fn assert_frame_size(surface: &AddonListSurface) {
+    assert_eq!(
+        surface.width, ADDON_LIST_WIDTH,
+        "`AddonList` XML width must be 600"
+    );
+    assert_eq!(
+        surface.height, ADDON_LIST_HEIGHT,
+        "`AddonList` XML height must be 550"
+    );
+}
+
+fn assert_frame_anchor(surface: &AddonListSurface) {
+    assert_eq!(
+        surface.point_count, 1,
+        "`AddonList` XML declares exactly one anchor"
+    );
+    assert_eq!(
+        surface.point, "CENTER",
+        "`AddonList` anchor point must be CENTER"
+    );
+    assert_eq!(
+        surface.relative_point, "CENTER",
+        "`AddonList` relative anchor point must be CENTER"
+    );
+    assert_eq!(
+        surface.x_offset, ADDON_LIST_CENTER_X,
+        "`AddonList` x offset must be 0"
+    );
+    assert_eq!(
+        surface.y_offset, ADDON_LIST_CENTER_Y,
+        "`AddonList` y offset must be 24"
+    );
+}
+
+fn assert_button_frame_template_children(surface: &AddonListSurface) {
+    assert!(
+        surface.has_button_frame_template_children,
+        "`AddonList` must inherit concrete children from ButtonFrameTemplate"
+    );
+}
