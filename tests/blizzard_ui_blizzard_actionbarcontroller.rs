@@ -64,3 +64,6 @@ mod behavior_extra_actionbar_event;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_show_bottomleft_after_settings_loaded.rs"]
 mod behavior_show_bottomleft_after_settings_loaded;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_settings_loaded_registers_callbacks.rs"]
+mod behavior_settings_loaded_registers_callbacks;
