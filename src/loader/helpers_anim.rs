@@ -20,6 +20,13 @@ pub fn generate_animation_group_code(
             "\n        {frame_ref}.{parent_key} = __ag\n        "
         ));
     }
+    if let Some(parent_array) = &anim_group.parent_array {
+        let parent_array = escape_lua_string(parent_array);
+        code.push_str(&format!(
+            "\n        {frame_ref}[\"{parent_array}\"] = {frame_ref}[\"{parent_array}\"] or {{}}\n        \
+             table.insert({frame_ref}[\"{parent_array}\"], __ag)\n        ",
+        ));
+    }
     emit_str_call(
         &mut code,
         "__ag",

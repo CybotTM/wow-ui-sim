@@ -77,6 +77,9 @@ mod behavior_confirm_channel_popup_plays_covenant_sound;
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_confirm_reinforce_popup_calls_select_anima_node_permanent.rs"]
 mod behavior_confirm_reinforce_popup_calls_select_anima_node_permanent;
 
+#[path = "blizzard_ui/blizzard_animadiversionui/behavior_connection_setup_anchors_origin_and_rotates.rs"]
+mod behavior_connection_setup_anchors_origin_and_rotates;
+
 #[path = "blizzard_ui/blizzard_animadiversionui/behavior_data_provider_refresh_skips_when_origin_or_nodes_missing.rs"]
 mod behavior_data_provider_refresh_skips_when_origin_or_nodes_missing;
 

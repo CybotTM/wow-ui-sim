@@ -583,6 +583,8 @@ pub struct AnimationGroupXml {
     pub name: Option<String>,
     #[serde(rename = "@parentKey")]
     pub parent_key: Option<String>,
+    #[serde(rename = "@parentArray")]
+    pub parent_array: Option<String>,
     #[serde(rename = "@inherits")]
     pub inherits: Option<String>,
     #[serde(rename = "@mixin")]
