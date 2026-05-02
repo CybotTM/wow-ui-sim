@@ -50,6 +50,60 @@ fn generated_api_documentation_populates_corpus_above_lower_bounds() {
     );
 }
 
+#[test]
+fn generated_api_documentation_entries_have_expected_mixin_shape() {
+    let env = load_generated_api_documentation();
+
+    let failure: String = env
+        .eval(
+            r#"
+            local function validateCollection(collectionName, expectedType)
+                local collection = APIDocumentation[collectionName]
+                for index, entry in ipairs(collection) do
+                    local okType, actualType = pcall(function()
+                        return entry:GetType()
+                    end)
+                    if not okType or actualType ~= expectedType then
+                        return string.format(
+                            "%s[%d] expected GetType()=%q, got %q",
+                            collectionName,
+                            index,
+                            expectedType,
+                            tostring(actualType)
+                        )
+                    end
+
+                    local okName, name = pcall(function()
+                        return entry:GetName()
+                    end)
+                    if not okName or type(name) ~= "string" or name == "" then
+                        return string.format(
+                            "%s[%d] expected non-empty GetName(), got %q",
+                            collectionName,
+                            index,
+                            tostring(name)
+                        )
+                    end
+                end
+
+                return nil
+            end
+
+            return validateCollection("systems", "system")
+                or validateCollection("tables", "table")
+                or validateCollection("functions", "function")
+                or validateCollection("events", "event")
+                or ""
+            "#,
+        )
+        .expect("generated APIDocumentation mixin-shape probe must run cleanly");
+
+    assert_eq!(
+        "", failure,
+        "every generated APIDocumentation entry must expose the expected mixin shape"
+    );
+}
+
 struct DocumentationCorpusCounts {
     systems: i64,
     tables: i64,
