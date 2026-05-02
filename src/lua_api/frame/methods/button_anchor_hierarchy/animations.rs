@@ -156,6 +156,7 @@ pub(super) fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
             group.reverse = reverse;
         }
         apply_group_flipbook_state(&mut sim, group_id);
+        sync_action_bar_busy_for_group(&mut sim, group_id);
     }
     Ok(0)
 }
@@ -163,12 +164,14 @@ pub(super) fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn animation_group_pause(state: &mut LuaState) -> LuaResult<u32> {
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(group_id) = resolve_animation_group_id(&sim, group_frame_id)
-        && let Some(group) = sim.animation_groups.get_mut(&group_id)
-        && group.playing
-    {
-        group.playing = false;
-        group.paused = true;
+    if let Some(group_id) = resolve_animation_group_id(&sim, group_frame_id) {
+        if let Some(group) = sim.animation_groups.get_mut(&group_id)
+            && group.playing
+        {
+            group.playing = false;
+            group.paused = true;
+        }
+        sync_action_bar_busy_for_group(&mut sim, group_id);
     }
     Ok(0)
 }
@@ -188,6 +191,7 @@ pub(super) fn animation_group_stop(state: &mut LuaState) -> LuaResult<u32> {
             }
         }
         apply_group_flipbook_state(&mut sim, group_id);
+        sync_action_bar_busy_for_group(&mut sim, group_id);
     }
     Ok(0)
 }
@@ -872,6 +876,7 @@ pub(crate) fn advance_animation_groups(
             continue;
         };
         apply_animation_group_outcome(&mut sim, &result);
+        sync_action_bar_busy_for_group(&mut sim, group_id);
         for _ in 0..result.loop_count {
             loop_scripts.push(result.frame_id);
         }
@@ -1250,6 +1255,45 @@ fn collect_group_flipbook_updates(
             })
         })
         .collect()
+}
+
+fn sync_action_bar_busy_for_group(sim: &mut crate::lua_api::state::SimState, group_id: u64) {
+    let Some(group) = sim.animation_groups.get(&group_id) else {
+        return;
+    };
+    if is_override_action_bar_slideout(sim, group) {
+        sim.action_bar_state.busy = group.playing;
+    }
+}
+
+fn is_override_action_bar_slideout(
+    sim: &crate::lua_api::state::SimState,
+    group: &crate::lua_api::animation::AnimGroupState,
+) -> bool {
+    let owner_is_override_bar = sim
+        .widgets
+        .get(group.owner_frame_id)
+        .and_then(|owner| owner.name.as_deref())
+        == Some("OverrideActionBar");
+    if !owner_is_override_bar {
+        return false;
+    }
+
+    let Some(group_frame_id) = group.frame_id else {
+        return false;
+    };
+    let owner_child_key_matches = sim
+        .widgets
+        .get(group.owner_frame_id)
+        .and_then(|owner| owner.children_keys.get("slideOut"))
+        .copied()
+        == Some(group_frame_id);
+    let group_parent_key_matches = sim
+        .widgets
+        .get(group_frame_id)
+        .and_then(|frame| frame.parent_key.as_deref())
+        == Some("slideOut");
+    owner_child_key_matches || group_parent_key_matches
 }
 
 fn apply_group_flipbook_updates(

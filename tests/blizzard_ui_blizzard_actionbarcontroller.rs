@@ -82,3 +82,6 @@ mod behavior_update_all_iterates_button_events_frame;
 
 #[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_update_all_spell_highlights.rs"]
 mod behavior_update_all_spell_highlights;
+
+#[path = "blizzard_ui/blizzard_actionbarcontroller/behavior_action_bar_busy_during_slide.rs"]
+mod behavior_action_bar_busy_during_slide;
