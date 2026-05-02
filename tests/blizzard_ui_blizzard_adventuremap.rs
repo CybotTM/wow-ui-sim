@@ -19,3 +19,6 @@ mod surface_events;
 
 #[path = "blizzard_ui/blizzard_adventuremap/surface_mixins.rs"]
 mod surface_mixins;
+
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_uipanel_window_entry_registered_at_load.rs"]
+mod behavior_uipanel_window_entry_registered_at_load;
