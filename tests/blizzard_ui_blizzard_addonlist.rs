@@ -67,3 +67,6 @@ mod behavior_category_collapse_persists_to_saved_var;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_node_right_click_opens_context_menu.rs"]
 mod behavior_node_right_click_opens_context_menu;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_dropdown_setup_radio_options.rs"]
+mod behavior_dropdown_setup_radio_options;
