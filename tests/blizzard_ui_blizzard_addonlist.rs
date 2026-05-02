@@ -103,3 +103,6 @@ mod behavior_addon_list_clear_character_dropdown;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_security_icon_uses_subregion_texcoords.rs"]
 mod behavior_security_icon_uses_subregion_texcoords;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_memory_usage_throttled_to_15s.rs"]
+mod behavior_memory_usage_throttled_to_15s;
