@@ -91,3 +91,6 @@ mod behavior_pending_children_attach_when_parent_loaded;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_search_with_invalid_group_falls_back_to_root.rs"]
 mod behavior_search_with_invalid_group_falls_back_to_root;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_set_enabled_dependencies_walks_chain.rs"]
+mod behavior_set_enabled_dependencies_walks_chain;
