@@ -95,6 +95,12 @@ Reward-cap follow-up:
 - **Root cause**: `LFDQueueFrameRandom_UpdateFrame()` updates the rewards frame when the random/specific queue type changes. That path calls `GetLFGDungeonRewardCapInfo(dungeonID)` unconditionally, so the missing global aborted the panel before the join path could continue.
 - **`tests/lfd_globals.rs`**: covers both the inert cap function shape and a local copy of Blizzard's no-cap early return.
 
+Group-size follow-up:
+
+- **`battlefield_lfg_probes.rs`**: normal seeded LFD entries now return nil in `GetLFGDungeonInfo` slot 17 (`minPlayers`). Values greater than 1 still return a number for special queues that require an exact group size.
+- **Root cause**: Blizzard's `LFG_HasRequiredGroupSize()` treats any non-nil `minPlayers` as an exact required group size. The simulator returned `1` for normal dungeons, so a five-player party failed the check and saw `ERR_LFG_MEMBERS_REQUIRED` as "You need a group of 1 players."
+- **`tests/lfd_globals.rs`**: `lfg_required_group_size_allows_full_party_for_normal_specific_dungeon` copies Blizzard's exact-size gate and verifies a full party can pass for a normal specific dungeon.
+
 ## Why direct LFGLockList assignment over event firing
 
 Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestRFChoice` → `RaidFinderFrame_UpdateAvailability` → `GetNumRFDungeons` → `ScenarioFinderFrame_UpdateAvailability` → `GetNumRandomScenarios`. None of those exist in the sim. We could stub all of them, but the goal is just to populate `LFGLockList` for the LFD panel; the event broadcast is wider than needed.

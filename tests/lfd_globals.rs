@@ -150,7 +150,7 @@ fn get_lfg_dungeon_info_returns_21_values() {
 }
 
 #[test]
-fn get_lfg_dungeon_info_min_players_matches_blizzard_slot() {
+fn get_lfg_dungeon_info_min_players_slot_is_nil_for_normal_dungeons() {
     let env = env();
     let result: String = env
         .eval(
@@ -166,7 +166,7 @@ fn get_lfg_dungeon_info_min_players_matches_blizzard_slot() {
             if type(t[LFG_RETURN_VALUES.bonusRepAmount]) ~= "number" then
                 return "bonusRepAmount_type=" .. type(t[LFG_RETURN_VALUES.bonusRepAmount])
             end
-            if type(t[LFG_RETURN_VALUES.minPlayers]) ~= "number" then
+            if t[LFG_RETURN_VALUES.minPlayers] ~= nil then
                 return "minPlayers_type=" .. type(t[LFG_RETURN_VALUES.minPlayers])
             end
             if type(t[LFG_RETURN_VALUES.isTimewalker]) ~= "boolean" then
@@ -183,6 +183,53 @@ fn get_lfg_dungeon_info_min_players_matches_blizzard_slot() {
         )
         .unwrap();
     assert_eq!(result, "ok", "GetLFGDungeonInfo return slots: {result}");
+}
+
+#[test]
+fn lfg_required_group_size_allows_full_party_for_normal_specific_dungeon() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(4)
+            local LFG_RETURN_VALUES = { minPlayers = 17 }
+            LFGEnabledList = { [1203] = true }
+            LFGLockList = {}
+
+            function LFGIsIDHeader(id)
+                return id < 0
+            end
+
+            function LFG_HasRequiredGroupSize(category, joinType, dungeonList, hiddenByCollapseList)
+                local numGroupMembers, numRequiredPlayers
+                if IsInGroup() then
+                    numGroupMembers = GetNumGroupMembers()
+                else
+                    numGroupMembers = 1
+                end
+                if joinType == "specific" or joinType == "follower" then
+                    for _, queueID in pairs(dungeonList) do
+                        if not LFGIsIDHeader(queueID) and LFGEnabledList[queueID] and not LFGLockList[queueID] then
+                            numRequiredPlayers = select(LFG_RETURN_VALUES.minPlayers, GetLFGDungeonInfo(queueID))
+                            if numRequiredPlayers and numRequiredPlayers ~= numGroupMembers then
+                                return false, numRequiredPlayers
+                            end
+                        end
+                    end
+                end
+                return true
+            end
+
+            local ok, required = LFG_HasRequiredGroupSize(1, "specific", { 1203 }, {})
+            if not ok then return "required=" .. tostring(required) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "normal specific LFD should not require an exact party size: {result}"
+    );
 }
 
 #[test]

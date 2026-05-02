@@ -185,6 +185,8 @@ pub struct LfdDungeonInfo {
     pub max_players: i32,
     pub description: String,
     pub is_holiday: bool,
+    /// Exact group-size requirement for special queues. Values <= 1 represent
+    /// normal Dungeon Finder entries that can fill missing roles.
     pub min_players: i32,
     pub map_name: String,
     pub min_gear: i32,

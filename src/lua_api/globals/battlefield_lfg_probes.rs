@@ -161,7 +161,11 @@ fn push_dungeon_info(state: &mut LuaState, d: &LfdDungeonInfo) {
     state.push(description); // 14: description
     state.push(Val::Bool(d.is_holiday)); // 15: isHoliday
     state.push(Val::Num(0.0)); // 16: bonusRepAmount
-    state.push(Val::Num(d.min_players as f64)); // 17: minPlayers
+    if d.min_players > 1 {
+        state.push(Val::Num(d.min_players as f64)); // 17: minPlayers
+    } else {
+        state.push(Val::Nil); // 17: minPlayers
+    }
     state.push(Val::Bool(false)); // 18: isTimewalker
     state.push(map_name); // 19: mapName
     state.push(Val::Num(d.min_gear as f64)); // 20: minGear
