@@ -34,3 +34,6 @@ mod behavior_enable_all_disables_disable_all;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_okay_button_saves_when_pending_changes.rs"]
 mod behavior_okay_button_saves_when_pending_changes;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_cancel_button_resets_changes.rs"]
+mod behavior_cancel_button_resets_changes;
