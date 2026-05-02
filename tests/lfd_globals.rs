@@ -150,6 +150,42 @@ fn get_lfg_dungeon_info_returns_21_values() {
 }
 
 #[test]
+fn get_lfg_dungeon_info_min_players_matches_blizzard_slot() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local LFG_RETURN_VALUES = {
+                bonusRepAmount = 16,
+                minPlayers = 17,
+                isTimewalker = 18,
+                mapName = 19,
+                minGear = 20,
+            }
+            local t = {GetLFGDungeonInfo(1203)}
+            if type(t[LFG_RETURN_VALUES.bonusRepAmount]) ~= "number" then
+                return "bonusRepAmount_type=" .. type(t[LFG_RETURN_VALUES.bonusRepAmount])
+            end
+            if type(t[LFG_RETURN_VALUES.minPlayers]) ~= "number" then
+                return "minPlayers_type=" .. type(t[LFG_RETURN_VALUES.minPlayers])
+            end
+            if type(t[LFG_RETURN_VALUES.isTimewalker]) ~= "boolean" then
+                return "isTimewalker_type=" .. type(t[LFG_RETURN_VALUES.isTimewalker])
+            end
+            if type(t[LFG_RETURN_VALUES.mapName]) ~= "string" then
+                return "mapName_type=" .. type(t[LFG_RETURN_VALUES.mapName])
+            end
+            if type(t[LFG_RETURN_VALUES.minGear]) ~= "number" then
+                return "minGear_type=" .. type(t[LFG_RETURN_VALUES.minGear])
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetLFGDungeonInfo return slots: {result}");
+}
+
+#[test]
 fn get_lfg_dungeon_info_unknown_returns_nil() {
     let env = env();
     let result: String = env

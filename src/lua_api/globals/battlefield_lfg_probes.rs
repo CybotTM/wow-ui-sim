@@ -158,12 +158,12 @@ fn push_dungeon_info(state: &mut LuaState, d: &LfdDungeonInfo) {
     state.push(Val::Num(d.max_players as f64)); // 13: maxPlayers
     state.push(description); // 14: description
     state.push(Val::Bool(d.is_holiday)); // 15: isHoliday
-    state.push(Val::Num(d.min_players as f64)); // 16: minPlayers
-    state.push(map_name); // 17: mapName
-    state.push(Val::Num(d.min_gear as f64)); // 18: minGear
-    state.push(Val::Bool(d.is_scaling_dungeon)); // 19: isScalingDungeon
-    state.push(Val::Num(d.dungeon_id as f64)); // 20: dungeonID (echo)
-    state.push(Val::Bool(d.is_follower_dungeon)); // 21: isFollowerDungeon
+    state.push(Val::Num(0.0)); // 16: bonusRepAmount
+    state.push(Val::Num(d.min_players as f64)); // 17: minPlayers
+    state.push(Val::Bool(false)); // 18: isTimewalker
+    state.push(map_name); // 19: mapName
+    state.push(Val::Num(d.min_gear as f64)); // 20: minGear
+    state.push(Val::Bool(d.is_scaling_dungeon)); // 21: isScalingDungeon
 }
 
 /// `GetLFGDungeonInfo(dungeonID)` → 21 values from `lfd_dungeons`, or nil.

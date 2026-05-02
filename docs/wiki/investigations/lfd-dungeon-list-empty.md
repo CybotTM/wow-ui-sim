@@ -83,6 +83,12 @@ Party leadership follow-up:
 - **`admin.rs` / `iced_app/app.rs`**: party-size changes now leave `party_leader_index = None`, the simulator's existing representation for "player leads".
 - **`tests/admin_party_api.rs` / `iced_app::update` tests**: cover both `A_Admin.SetPartySize(4)` and GUI party-size changes defaulting to local-player leadership. Non-leader fixtures should call `A_Admin.SetPartyLeader(1)` explicitly.
 
+Join-as-party formatting follow-up:
+
+- **`battlefield_lfg_probes.rs`**: `GetLFGDungeonInfo` must match Blizzard's `LFG_RETURN_VALUES` slot order. Slot 16 is `bonusRepAmount`, slot 17 is `minPlayers`, slot 18 is `isRandomTimewalker`, slot 19 is `mapName`, slot 20 is `minGear`, and slot 21 is `isScalingDungeon`.
+- **Root cause**: the simulator returned `minPlayers` at slot 16 and `mapName` at slot 17. `LFG_HasRequiredGroupSize()` reads `select(LFG_RETURN_VALUES.minPlayers, GetLFGDungeonInfo(queueID))`, so it passed a dungeon map name such as `"Ara-Kara, City of Echoes"` into `format(ERR_LFG_MEMBERS_REQUIRED, requiredGroupSize)`, whose format expects `%d`.
+- **`tests/lfd_globals.rs`**: `get_lfg_dungeon_info_min_players_matches_blizzard_slot` locks the modern slot layout so the join button path receives a number for `minPlayers`.
+
 ## Why direct LFGLockList assignment over event firing
 
 Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestRFChoice` → `RaidFinderFrame_UpdateAvailability` → `GetNumRFDungeons` → `ScenarioFinderFrame_UpdateAvailability` → `GetNumRandomScenarios`. None of those exist in the sim. We could stub all of them, but the goal is just to populate `LFGLockList` for the LFD panel; the event broadcast is wider than needed.
