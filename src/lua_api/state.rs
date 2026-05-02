@@ -180,6 +180,9 @@ macro_rules! build_empty_sim_state {
             lfg_category_info: default_lfg_category_info(),
             lfg_active_categories: ::std::collections::HashSet::new(),
             lfg_queued_dungeons: ::std::collections::HashMap::new(),
+            lfg_queue_pop_delay_seconds: DEFAULT_LFG_QUEUE_POP_DELAY_SECONDS,
+            lfg_queue_pop_due_at: None,
+            lfg_active_proposal: None,
             lfg_random_cooldown_units: ::std::collections::HashSet::new(),
             lfg_activity_groups: default_lfg_activity_groups(),
             lfg_activities: default_lfg_activities(),
@@ -1186,6 +1189,14 @@ pub struct ChatEditOpenState {
     pub cursor_position: Option<i64>,
 }
 
+pub const DEFAULT_LFG_QUEUE_POP_DELAY_SECONDS: f64 = 5.0;
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct LfgProposalState {
+    pub category: i32,
+    pub dungeon_id: i32,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -1710,6 +1721,14 @@ pub struct SimState {
     /// Selected LFG queue ids by category. Filled by `SetLFGDungeon` and read
     /// by `GetLFGQueuedList` / `GetLFGQueueStats` for QueueStatusFrame.
     pub lfg_queued_dungeons: std::collections::HashMap<i32, std::collections::BTreeSet<i32>>,
+    /// Seconds between `JoinLFG` and automatic queue proposal pop. Admin:
+    /// `A_Admin.SetLfgQueuePopDelay(seconds?)`. Default 5 seconds.
+    pub lfg_queue_pop_delay_seconds: f64,
+    /// Wall-clock due time for the scheduled LFG queue pop. Cleared by
+    /// `LeaveLFG` / `ClearAllLFGDungeons` so stale timer callbacks no-op.
+    pub lfg_queue_pop_due_at: Option<Instant>,
+    /// Active queue proposal after the queue pop timer fires.
+    pub lfg_active_proposal: Option<LfgProposalState>,
     /// Unit tokens with an active random-dungeon queue cooldown. Default
     /// empty: seeded characters are ready for random LFD queues.
     pub lfg_random_cooldown_units: std::collections::HashSet<String>,

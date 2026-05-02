@@ -188,6 +188,15 @@ SimCommands:Register("Reload UI", "Reload the interface (ReloadUI)", function()
     ReloadUI()
 end, "Debug")
 
+SimCommands:Register("Set LFG Queue Pop Delay", "Seconds before an LFG queue proposal appears", function()
+    SimCommands:Prompt("Enter LFG queue pop delay in seconds:", function(text)
+        local delay = tonumber(text)
+        if delay and delay >= 0 and A_Admin and A_Admin.SetLfgQueuePopDelay then
+            A_Admin.SetLfgQueuePopDelay(delay)
+        end
+    end)
+end, "Group Finder")
+
 SimCommands:Register("Set Honor Level", "Change PvP honor level (1-500)", function()
     SimCommands:Prompt("Enter honor level (1-500):", function(text)
         local level = tonumber(text)

@@ -12,7 +12,8 @@
 //! rather than converted by hand. See the script for the template.
 
 use crate::lua_api::game_data::{AuraInfo, CastingState, SpellCooldownState};
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::state::DEFAULT_LFG_QUEUE_POP_DELAY_SECONDS;
 use crate::lua_api::state_types::SecondaryPowerState;
 use crate::lua_bridge::{FromStack, TableBuilder};
 use rilua::vm::state::LuaState;
@@ -226,7 +227,32 @@ fn register_lfg_services(b: TableBuilder) -> LuaResult<TableBuilder> {
     .set_function(
         "SetCanUsePremadeGroup",
         super::lfg_info::admin_set_can_use_premade_group,
-    )
+    )?
+    .set_function("GetLfgQueuePopDelay", get_lfg_queue_pop_delay)?
+    .set_function("SetLfgQueuePopDelay", set_lfg_queue_pop_delay)
+}
+
+/// `A_Admin.GetLfgQueuePopDelay()` returns seconds from JoinLFG to proposal.
+fn get_lfg_queue_pop_delay(state: &mut LuaState) -> LuaResult<u32> {
+    let delay = borrow_state(state)?.lfg_queue_pop_delay_seconds;
+    state.push(Val::Num(delay));
+    Ok(1)
+}
+
+/// `A_Admin.SetLfgQueuePopDelay(seconds?)` configures the JoinLFG proposal
+/// delay. Missing args reset to the default; invalid numeric values clamp to 0.
+fn set_lfg_queue_pop_delay(state: &mut LuaState) -> LuaResult<u32> {
+    let delay = Option::<f64>::from_stack(state, 1)?.unwrap_or(DEFAULT_LFG_QUEUE_POP_DELAY_SECONDS);
+    borrow_state_mut(state)?.lfg_queue_pop_delay_seconds = valid_lfg_queue_pop_delay(delay);
+    Ok(0)
+}
+
+fn valid_lfg_queue_pop_delay(delay: f64) -> f64 {
+    if delay.is_finite() {
+        delay.max(0.0)
+    } else {
+        0.0
+    }
 }
 
 fn register_photo_sharing(b: TableBuilder) -> LuaResult<TableBuilder> {

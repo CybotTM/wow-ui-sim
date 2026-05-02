@@ -293,6 +293,257 @@ fn get_lfg_info_server_reports_queued_after_join_lfg() {
 }
 
 #[test]
+fn leave_lfg_clears_queued_lfd_state() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if type(LeaveLFG) ~= "function" then
+                return "missing_leave=" .. type(LeaveLFG)
+            end
+
+            ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+            SetLFGDungeon(LE_LFG_CATEGORY_LFD, 1203)
+            JoinLFG(LE_LFG_CATEGORY_LFD)
+            LeaveLFG(LE_LFG_CATEGORY_LFD)
+
+            local mode = GetLFGMode(LE_LFG_CATEGORY_LFD)
+            if mode ~= nil then return "mode=" .. tostring(mode) end
+
+            local _, _, queued = GetLFGInfoServer(LE_LFG_CATEGORY_LFD)
+            if queued ~= false then return "queued=" .. tostring(queued) end
+
+            local queuedList = GetLFGQueuedList(LE_LFG_CATEGORY_LFD)
+            if next(queuedList) ~= nil then return "queued_list_not_empty" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "LeaveLFG lifecycle: {result}");
+}
+
+#[test]
+fn get_lfg_queued_list_reuses_and_clears_passed_table() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+            SetLFGDungeon(LE_LFG_CATEGORY_LFD, 1203)
+
+            local queuedList = { stale = true }
+            local returned = GetLFGQueuedList(LE_LFG_CATEGORY_LFD, queuedList)
+            if returned ~= queuedList then return "different_table" end
+            if queuedList.stale ~= nil then return "stale=" .. tostring(queuedList.stale) end
+            if queuedList[1203] ~= true then return "queued=" .. tostring(queuedList[1203]) end
+
+            ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+            GetLFGQueuedList(LE_LFG_CATEGORY_LFD, queuedList)
+            if next(queuedList) ~= nil then return "not_cleared" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetLFGQueuedList table reuse: {result}");
+}
+
+#[test]
+fn leave_lfg_without_category_clears_all_lfg_state() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+            SetLFGDungeon(LE_LFG_CATEGORY_LFD, 1203)
+            JoinLFG(LE_LFG_CATEGORY_LFD)
+            LeaveLFG()
+
+            local mode = GetLFGMode(LE_LFG_CATEGORY_LFD)
+            if mode ~= nil then return "mode=" .. tostring(mode) end
+
+            local _, _, queued = GetLFGInfoServer(LE_LFG_CATEGORY_LFD)
+            if queued ~= false then return "queued=" .. tostring(queued) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "LeaveLFG without category: {result}");
+}
+
+#[test]
+fn admin_lfg_queue_pop_delay_defaults_persists_and_clamps_invalid_values() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if type(A_Admin.GetLfgQueuePopDelay) ~= "function" then
+                return "missing_get=" .. type(A_Admin.GetLfgQueuePopDelay)
+            end
+            if type(A_Admin.SetLfgQueuePopDelay) ~= "function" then
+                return "missing_set=" .. type(A_Admin.SetLfgQueuePopDelay)
+            end
+
+            local defaultDelay = A_Admin.GetLfgQueuePopDelay()
+            if defaultDelay ~= 5 then return "default=" .. tostring(defaultDelay) end
+
+            A_Admin.SetLfgQueuePopDelay(1.25)
+            local positiveDelay = A_Admin.GetLfgQueuePopDelay()
+            if positiveDelay ~= 1.25 then return "positive=" .. tostring(positiveDelay) end
+
+            A_Admin.SetLfgQueuePopDelay(-8)
+            local clampedDelay = A_Admin.GetLfgQueuePopDelay()
+            if clampedDelay ~= 0 then return "clamped=" .. tostring(clampedDelay) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "A_Admin LFG delay config: {result}");
+}
+
+#[test]
+fn zero_delay_lfg_queue_pop_transitions_to_active_proposal() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.SetLfgQueuePopDelay(0)
+        ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+        SetLFGDungeon(LE_LFG_CATEGORY_LFD, 1203)
+        JoinLFG(LE_LFG_CATEGORY_LFD)
+        "#,
+    )
+    .unwrap();
+
+    let fired = env.process_timers().unwrap();
+    assert_eq!(fired, 1, "zero-delay LFG pop should fire exactly one timer");
+
+    let result: String = env
+        .eval(
+            r#"
+            local mode, submode = GetLFGMode(LE_LFG_CATEGORY_LFD)
+            if mode ~= "proposal" then return "mode=" .. tostring(mode) end
+            if submode ~= "unaccepted" then return "submode=" .. tostring(submode) end
+
+            local proposalExists, id, typeID, subtypeID, name, backgroundTexture, role,
+                hasResponded, totalEncounters, completedEncounters, numMembers, isLeader,
+                isHoliday, proposalCategory, isSilent = GetLFGProposal()
+            if proposalExists ~= true then return "proposalExists=" .. tostring(proposalExists) end
+            if id ~= 1203 then return "id=" .. tostring(id) end
+            if typeID ~= 2 then return "typeID=" .. tostring(typeID) end
+            if subtypeID ~= 2 then return "subtypeID=" .. tostring(subtypeID) end
+            if type(name) ~= "string" or name == "" then return "name=" .. tostring(name) end
+            if type(backgroundTexture) ~= "string" or backgroundTexture == "" then return "backgroundTexture=" .. tostring(backgroundTexture) end
+            if role ~= "DAMAGER" then return "role=" .. tostring(role) end
+            if hasResponded ~= false then return "hasResponded=" .. tostring(hasResponded) end
+            if totalEncounters ~= 3 then return "totalEncounters=" .. tostring(totalEncounters) end
+            if completedEncounters ~= 0 then return "completedEncounters=" .. tostring(completedEncounters) end
+            if numMembers ~= 5 then return "numMembers=" .. tostring(numMembers) end
+            if isLeader ~= true then return "isLeader=" .. tostring(isLeader) end
+            if isHoliday ~= false then return "isHoliday=" .. tostring(isHoliday) end
+            if proposalCategory ~= LE_LFG_CATEGORY_LFD then return "proposalCategory=" .. tostring(proposalCategory) end
+            if isSilent ~= false then return "isSilent=" .. tostring(isSilent) end
+
+            local memberLeader, memberRole, memberLevel, responded, accepted, memberName, memberClass =
+                GetLFGProposalMember(1)
+            if memberLeader ~= true then return "memberLeader=" .. tostring(memberLeader) end
+            if memberRole ~= "DAMAGER" then return "memberRole=" .. tostring(memberRole) end
+            if memberLevel ~= UnitLevel("player") then return "memberLevel=" .. tostring(memberLevel) end
+            if responded ~= false then return "responded=" .. tostring(responded) end
+            if accepted ~= false then return "accepted=" .. tostring(accepted) end
+            if type(memberName) ~= "string" or memberName == "" then return "memberName=" .. tostring(memberName) end
+            if type(memberClass) ~= "string" or memberClass == "" then return "memberClass=" .. tostring(memberClass) end
+
+            local bossName, texture, isKilled = GetLFGProposalEncounter(1)
+            if type(bossName) ~= "string" or bossName == "" then return "bossName=" .. tostring(bossName) end
+            if texture ~= "" then return "texture=" .. tostring(texture) end
+            if isKilled ~= false then return "isKilled=" .. tostring(isKilled) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "LFG proposal transition: {result}");
+}
+
+#[test]
+fn leave_lfg_other_category_does_not_hide_active_proposal() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.SetLfgQueuePopDelay(0)
+        ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+        SetLFGDungeon(LE_LFG_CATEGORY_LFD, 1203)
+        JoinLFG(LE_LFG_CATEGORY_LFD)
+        "#,
+    )
+    .unwrap();
+    assert_eq!(env.process_timers().unwrap(), 1);
+
+    let result: String = env
+        .eval(
+            r#"
+            LeaveLFG(LE_LFG_CATEGORY_RF)
+            local proposalExists, id = GetLFGProposal()
+            if proposalExists ~= true then return "proposalExists=" .. tostring(proposalExists) end
+            if id ~= 1203 then return "id=" .. tostring(id) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "cross-category LeaveLFG: {result}");
+}
+
+#[test]
+fn lfg_proposal_response_globals_clear_active_proposal() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.SetLfgQueuePopDelay(0)
+        ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+        SetLFGDungeon(LE_LFG_CATEGORY_LFD, 1203)
+        JoinLFG(LE_LFG_CATEGORY_LFD)
+        "#,
+    )
+    .unwrap();
+    assert_eq!(env.process_timers().unwrap(), 1);
+
+    let result: String = env
+        .eval(
+            r#"
+            if type(AcceptProposal) ~= "function" then
+                return "missing_accept=" .. type(AcceptProposal)
+            end
+            if type(RejectProposal) ~= "function" then
+                return "missing_reject=" .. type(RejectProposal)
+            end
+
+            AcceptProposal()
+            local proposalExists = GetLFGProposal()
+            if proposalExists ~= false then return "proposal_after_accept=" .. tostring(proposalExists) end
+
+            SetLFGDungeon(LE_LFG_CATEGORY_LFD, 1203)
+            JoinLFG(LE_LFG_CATEGORY_LFD)
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "AcceptProposal clears proposal: {result}");
+
+    assert_eq!(env.process_timers().unwrap(), 1);
+    let result: String = env
+        .eval(
+            r#"
+            RejectProposal()
+            local proposalExists = GetLFGProposal()
+            if proposalExists ~= false then return "proposal_after_reject=" .. tostring(proposalExists) end
+            local mode = GetLFGMode(LE_LFG_CATEGORY_LFD)
+            if mode ~= nil then return "mode_after_reject=" .. tostring(mode) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "RejectProposal clears proposal: {result}");
+}
+
+#[test]
 fn lfg_queue_stats_and_queued_list_track_selected_dungeons() {
     let env = env();
     let result: String = env
