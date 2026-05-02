@@ -230,9 +230,16 @@ end
 
 do
   local stringMeta = getmetatable("")
-  if type(stringMeta) == "table" and stringMeta.split == nil then
-    function stringMeta:split(delimiter, limit)
-      return { strsplit(delimiter, self, limit) }
+  if type(stringMeta) == "table" then
+    local stringIndex = stringMeta.__index
+    if type(stringIndex) == "table" then
+      function stringIndex:split(input, limit)
+        return strsplit(self, input, limit)
+      end
+    end
+
+    function stringMeta:split(input, limit)
+      return strsplit(self, input, limit)
     end
   end
 end
