@@ -32,6 +32,9 @@ mod behavior_handle_api_link_default_writes_detailed_output;
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_api_link_copyapi_records_clipboard.rs"]
 mod behavior_handle_api_link_copyapi_records_clipboard;
 
+#[path = "blizzard_ui/blizzard_apidocumentation/behavior_handle_api_link_opendump_seeds_chat_edit.rs"]
+mod behavior_handle_api_link_opendump_seeds_chat_edit;
+
 #[path = "blizzard_ui/blizzard_apidocumentation/load.rs"]
 mod load;
 
