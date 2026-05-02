@@ -83,3 +83,35 @@ fn single_anchor_fontstring_still_uses_auto_text_width() {
     );
     let _ = is_auto; // flag is internal; only the width matters for the public test contract
 }
+
+#[test]
+fn fontstring_get_num_lines_reports_wrapped_line_count() {
+    let env = env();
+    let (method_type, short_lines, wrapped_lines): (String, i32, i32) = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "NumLinesParent", UIParent)
+            parent:SetSize(120, 80)
+
+            local fs = parent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+            fs:SetWidth(120)
+            fs:SetWordWrap(true)
+
+            fs:SetText("Short")
+            local shortLines = fs:GetNumLines()
+
+            fs:SetText("This is a much longer Adventure Guide description that should wrap across multiple lines")
+            local wrappedLines = fs:GetNumLines()
+
+            return type(fs.GetNumLines), shortLines, wrappedLines
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(method_type, "function");
+    assert_eq!(short_lines, 1, "single-line text should report one line");
+    assert!(
+        wrapped_lines > 1,
+        "wrapped text should report multiple lines, got {wrapped_lines}"
+    );
+}

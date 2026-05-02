@@ -28,6 +28,10 @@ pub(crate) fn refresh_auto_text_height_after_width_change(state: &mut LuaState, 
     text::refresh_auto_text_height_after_width_change(state, id);
 }
 
+pub(crate) fn get_text_num_lines(state: &mut LuaState) -> LuaResult<u32> {
+    text::get_num_lines(state)
+}
+
 fn register_text_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     register_plain_text(state, table)?;
     register_font_methods(state, table)?;
@@ -82,6 +86,7 @@ fn register_text_measurement(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
     table_set_rust_fn_static(state, table, "GetContentHeight", text::get_content_height)?;
     table_set_rust_fn_static(state, table, "GetTextData", text::get_text_data)?;
     table_set_rust_fn_static(state, table, "GetLineHeight", text::get_line_height)?;
+    table_set_rust_fn_static(state, table, "GetNumLines", text::get_num_lines)?;
     table_set_rust_fn_static(state, table, "IsTruncated", text::is_truncated)?;
     table_set_rust_fn_static(
         state,

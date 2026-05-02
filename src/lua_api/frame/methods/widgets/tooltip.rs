@@ -117,10 +117,20 @@ pub(super) fn add_double_line(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn num_lines(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let v = sim.tooltips.get(&id).map(|td| td.lines.len()).unwrap_or(0);
-    drop(sim);
-    (v as f64).into_stack(state)
+    let is_tooltip = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .is_some_and(|frame| frame.widget_type == WidgetType::GameTooltip)
+    };
+    if !is_tooltip {
+        return crate::lua_api::frame::methods::text_attribute_event::get_text_num_lines(state);
+    }
+    let line_count = {
+        let sim = borrow_state(state)?;
+        sim.tooltips.get(&id).map(|td| td.lines.len()).unwrap_or(0)
+    };
+    (line_count as f64).into_stack(state)
 }
 
 fn next_tooltip_line_index(state: &mut LuaState, tooltip_id: u64) -> usize {

@@ -54,6 +54,12 @@ struct AutoTextHeightState {
     height: f32,
 }
 
+struct LineCountProps {
+    has_text: bool,
+    line_height: f32,
+    wrap_width: Option<f32>,
+}
+
 pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text = read_text_arg(state, 2);
@@ -683,6 +689,39 @@ pub(super) fn get_line_height(state: &mut LuaState) -> LuaResult<u32> {
     drop(sim);
     state.push(Val::Num(height as f64));
     Ok(1)
+}
+
+pub(super) fn get_num_lines(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(props) = read_line_count_props(state, id)? else {
+        state.push(Val::Num(0.0));
+        return Ok(1);
+    };
+
+    let line_count = if props.has_text && props.line_height > 0.0 {
+        let text_height = measure_text_height(state, id, props.wrap_width);
+        (text_height / f64::from(props.line_height)).ceil().max(1.0)
+    } else {
+        0.0
+    };
+    state.push(Val::Num(line_count));
+    Ok(1)
+}
+
+fn read_line_count_props(state: &LuaState, id: u64) -> LuaResult<Option<LineCountProps>> {
+    let sim = borrow_state(state)?;
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(None);
+    };
+    Ok(Some(LineCountProps {
+        has_text: frame_text_value(&sim, frame, true).is_some_and(|text| !text.is_empty()),
+        line_height: measured_line_height(frame),
+        wrap_width: (frame.word_wrap && frame.width > 0.0).then_some(frame.width),
+    }))
+}
+
+fn measured_line_height(frame: &crate::widget::Frame) -> f32 {
+    (frame.font_size * 1.2).ceil() * frame.text_scale.max(0.0) as f32
 }
 
 #[cfg(test)]
