@@ -37,3 +37,6 @@ mod behavior_okay_button_saves_when_pending_changes;
 
 #[path = "blizzard_ui/blizzard_addonlist/behavior_cancel_button_resets_changes.rs"]
 mod behavior_cancel_button_resets_changes;
+
+#[path = "blizzard_ui/blizzard_addonlist/behavior_load_lod_addon_calls_load.rs"]
+mod behavior_load_lod_addon_calls_load;
