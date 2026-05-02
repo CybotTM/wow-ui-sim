@@ -71,6 +71,9 @@ mod behavior_quest_dialog_accept_records_result_and_starts_quest;
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_dialog_decline_path_distinguishes_abstain_vs_decline.rs"]
 mod behavior_quest_dialog_decline_path_distinguishes_abstain_vs_decline;
 
+#[path = "blizzard_ui/blizzard_adventuremap/behavior_dialog_show_with_quest_swap_declines_previous.rs"]
+mod behavior_dialog_show_with_quest_swap_declines_previous;
+
 #[path = "blizzard_ui/blizzard_adventuremap/behavior_quest_dialog_refresh_details_branches_on_widgets_and_rewards.rs"]
 mod behavior_quest_dialog_refresh_details_branches_on_widgets_and_rewards;
 
