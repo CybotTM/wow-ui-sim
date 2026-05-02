@@ -104,6 +104,48 @@ fn generated_api_documentation_entries_have_expected_mixin_shape() {
     );
 }
 
+#[test]
+fn generated_api_documentation_registers_well_known_systems() {
+    let env = load_generated_api_documentation();
+
+    let failure: String = env
+        .eval(
+            r#"
+            local expectedSystems = {
+                "AbbreviateConfigAPI",
+                "AccountInfo",
+                "ChatInfo",
+                "MapUI",
+                "QuestLog",
+            }
+
+            for _, expectedName in ipairs(expectedSystems) do
+                local system = APIDocumentation:FindSystemByName(expectedName)
+                if system == nil then
+                    return string.format("missing system %q", expectedName)
+                end
+
+                local actualName = system:GetName()
+                if actualName ~= expectedName then
+                    return string.format(
+                        "system %q resolved to %q",
+                        expectedName,
+                        tostring(actualName)
+                    )
+                end
+            end
+
+            return ""
+            "#,
+        )
+        .expect("generated APIDocumentation well-known system probe must run cleanly");
+
+    assert_eq!(
+        "", failure,
+        "well-known generated APIDocumentation systems must be registered"
+    );
+}
+
 struct DocumentationCorpusCounts {
     systems: i64,
     tables: i64,
