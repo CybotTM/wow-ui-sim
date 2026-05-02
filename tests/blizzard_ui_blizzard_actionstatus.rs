@@ -31,3 +31,6 @@ mod behavior_display_message_direct_call;
 
 #[path = "blizzard_ui/blizzard_actionstatus/behavior_on_update_fades_alpha.rs"]
 mod behavior_on_update_fades_alpha;
+
+#[path = "blizzard_ui/blizzard_actionstatus/behavior_on_update_after_fadetime_hides.rs"]
+mod behavior_on_update_after_fadetime_hides;
