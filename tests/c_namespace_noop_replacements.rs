@@ -381,6 +381,33 @@ fn perks_activities_monthly_accessors_return_stable_shapes() {
 }
 
 #[test]
+fn perks_program_pending_chest_rewards_return_empty_table() {
+    let env = env();
+    let (request_ok, rewards_type, rewards_count): (bool, String, i64) = env
+        .eval(
+            r#"
+            local requestOK = pcall(C_PerksProgram.RequestPendingChestRewards)
+            local rewards = C_PerksProgram.GetPendingChestRewards()
+            return requestOK, type(rewards), #rewards
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        request_ok,
+        "RequestPendingChestRewards should be callable as a no-op"
+    );
+    assert_eq!(
+        rewards_type, "table",
+        "pending chest rewards should be a table for TableIsEmpty/pairs safety"
+    );
+    assert_eq!(
+        rewards_count, 0,
+        "pending chest rewards should default empty"
+    );
+}
+
+#[test]
 fn encounter_journal_global_filters_and_tier_are_numeric() {
     let env = env();
     let (

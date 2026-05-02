@@ -4,7 +4,9 @@
 //! and `GetAvailableCategoryIDs` return empty arrays so the OnLoad ipairs loop
 //! stays well-typed, and `GetCurrencyAmount` returns 0 so the currency-color
 //! comparison in `PerksProgramCurrencyFrameMixin:UpdateCurrencyAmount` does not
-//! compare nil against a number. Real catalog state would replace this surface.
+//! compare nil against a number. Monthly Activities chest rewards return an empty
+//! list for `TableIsEmpty`/`pairs` safety. Real catalog state would replace this
+//! surface.
 
 use crate::c_api::ensure_global_table;
 use crate::lua_bridge::table_set_rust_fn_static;
@@ -20,6 +22,8 @@ pub fn register_c_perks_program(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, t_ref, "GetAvailableCategoryIDs", empty_table)?;
     table_set_rust_fn_static(state, t_ref, "GetCategoryInfo", return_nil)?;
     table_set_rust_fn_static(state, t_ref, "GetCurrencyAmount", return_zero)?;
+    table_set_rust_fn_static(state, t_ref, "GetPendingChestRewards", empty_table)?;
+    table_set_rust_fn_static(state, t_ref, "RequestPendingChestRewards", return_nil)?;
     Ok(())
 }
 

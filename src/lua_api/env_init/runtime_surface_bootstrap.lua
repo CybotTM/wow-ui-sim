@@ -10615,9 +10615,17 @@ if rawget(_G, "ToggleEncounterJournal") == nil then
     end
     if EncounterJournal then
       if EncounterJournal:IsShown() then
-        EncounterJournal:Hide()
+        if type(HideUIPanel) == "function" then
+          HideUIPanel(EncounterJournal)
+        else
+          EncounterJournal:Hide()
+        end
       else
-        EncounterJournal:Show()
+        if type(ShowUIPanel) == "function" then
+          ShowUIPanel(EncounterJournal)
+        else
+          EncounterJournal:Show()
+        end
       end
     end
   end

@@ -635,6 +635,33 @@ fn startup_collections_journal_closes_on_escape() {
 }
 
 #[test]
+fn startup_adventure_guide_closes_on_escape() {
+    test_timeout! {
+        let env = load_and_startup_env();
+
+        env.exec("ToggleEncounterJournal()")
+            .expect("adventure guide should open");
+        let opened: bool = env
+            .eval("return EncounterJournal and EncounterJournal:IsShown()")
+            .expect("adventure guide open state should be readable");
+        assert!(opened, "EncounterJournal should be shown before Escape");
+
+        env.send_key_press("ESCAPE", None)
+            .expect("Escape dispatch should succeed");
+        let closed_without_menu: bool = env
+            .eval(
+                "return (not EncounterJournal:IsShown()) \
+                    and (GameMenuFrame == nil or not GameMenuFrame:IsShown())",
+            )
+            .expect("adventure guide closed state should be readable");
+        assert!(
+            closed_without_menu,
+            "Escape should close EncounterJournal through the UIPanel close path"
+        );
+    }
+}
+
+#[test]
 fn cursor_hovered_item_globals_are_callable() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
