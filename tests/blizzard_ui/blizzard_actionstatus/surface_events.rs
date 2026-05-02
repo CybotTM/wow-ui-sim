@@ -5,6 +5,7 @@ use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 const ROOT: &str = "Blizzard_ActionStatus";
 const FRAME_NAME: &str = "ActionStatus";
 const ONLOAD_LUA_SITE: &str = "ActionStatus.lua:7-15";
+const ALTERNATE_PARENT_EVENT: &str = "UI.AlternateTopLevelParentChanged";
 const GAME_SCREEN_EVENTS: &[&str] = &[
     "SCREENSHOT_STARTED",
     "SCREENSHOT_SUCCEEDED",
@@ -22,6 +23,33 @@ fn action_status_registers_game_screenshot_events_outside_glue() {
         assert_in_glue(env, false);
         assert_events_registered(env, GAME_SCREEN_EVENTS);
         assert_events_not_registered(env, GLUE_SCREEN_EVENTS);
+    });
+}
+
+#[test]
+fn action_status_alternate_top_level_parent_callback_updates_parent() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let adopted_new_parent: bool = env
+            .eval(
+                r#"
+                local parent = CreateFrame("Frame", "ActionStatusAlternateTopLevelProbe", UIParent)
+                parent:Show()
+
+                GetAppropriateTopLevelParent = function()
+                    return parent
+                end
+
+                EventRegistry:TriggerEvent("UI.AlternateTopLevelParentChanged")
+                return ActionStatus:GetParent() == parent
+                "#,
+            )
+            .expect("alternate top-level parent callback probe must run cleanly");
+
+        assert!(
+            adopted_new_parent,
+            "`{ROOT}` OnLoad must register `{ALTERNATE_PARENT_EVENT}` with \
+             `EventRegistry:RegisterCallback`, forwarding to `ActionStatus:UpdateParent()`"
+        );
     });
 }
 
