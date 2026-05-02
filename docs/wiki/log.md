@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-02] update | LFD queue verbs
+
+Updated `investigations/lfd-dungeon-list-empty.md` after the LFD join path got
+past the group-size gate and hit missing `ClearAllLFGDungeons`. Documented the
+new `ClearAllLFGDungeons` / `SetLFGDungeon` / `JoinLFG` surface and queued-mode
+state through `GetLFGMode`.
+
 ## [2026-05-02] update | LFD normal dungeon group-size gate
 
 Updated `investigations/lfd-dungeon-list-empty.md` after a five-player party saw

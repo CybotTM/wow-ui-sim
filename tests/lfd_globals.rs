@@ -233,6 +233,112 @@ fn lfg_required_group_size_allows_full_party_for_normal_specific_dungeon() {
 }
 
 #[test]
+fn lfg_join_verbs_complete_specific_dungeon_queue_path() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if type(ClearAllLFGDungeons) ~= "function" then
+                return "missing_clear=" .. type(ClearAllLFGDungeons)
+            end
+            if type(SetLFGDungeon) ~= "function" then
+                return "missing_set=" .. type(SetLFGDungeon)
+            end
+            if type(JoinLFG) ~= "function" then
+                return "missing_join=" .. type(JoinLFG)
+            end
+
+            ClearAllLFGDungeons(LE_LFG_CATEGORY_LFD)
+            SetLFGDungeon(LE_LFG_CATEGORY_LFD, 1203)
+            JoinLFG(LE_LFG_CATEGORY_LFD)
+
+            local mode, submode = GetLFGMode(LE_LFG_CATEGORY_LFD)
+            if mode ~= "queued" then return "mode=" .. tostring(mode) end
+            if submode ~= nil then return "submode=" .. tostring(submode) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "LFG join verbs: {result}");
+}
+
+#[test]
+fn lfg_join_dungeon_specific_path_reaches_queued_mode() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(4)
+            local LFG_RETURN_VALUES = { minPlayers = 17 }
+            LFGEnabledList = { [1203] = true }
+            LFGLockList = {}
+
+            function LFGIsIDHeader(id)
+                return id < 0
+            end
+
+            function LFG_QueueForInstanceIfEnabled(category, queueID)
+                if not LFGIsIDHeader(queueID) and LFGEnabledList[queueID] and not LFGLockList[queueID] then
+                    SetLFGDungeon(category, queueID)
+                    return true
+                end
+                return false
+            end
+
+            function LFG_HasRequiredGroupSize(category, joinType, dungeonList, hiddenByCollapseList)
+                local numGroupMembers, numRequiredPlayers
+                if IsInGroup() then
+                    numGroupMembers = GetNumGroupMembers()
+                else
+                    numGroupMembers = 1
+                end
+                for _, queueID in pairs(dungeonList) do
+                    if not LFGIsIDHeader(queueID) and LFGEnabledList[queueID] and not LFGLockList[queueID] then
+                        numRequiredPlayers = select(LFG_RETURN_VALUES.minPlayers, GetLFGDungeonInfo(queueID))
+                        if numRequiredPlayers and numRequiredPlayers ~= numGroupMembers then
+                            return false, numRequiredPlayers
+                        end
+                    end
+                end
+                for _, queueID in pairs(hiddenByCollapseList) do
+                    if not LFGIsIDHeader(queueID) and LFGEnabledList[queueID] and not LFGLockList[queueID] then
+                        numRequiredPlayers = select(LFG_RETURN_VALUES.minPlayers, GetLFGDungeonInfo(queueID))
+                        if numRequiredPlayers and numRequiredPlayers ~= numGroupMembers then
+                            return false, numRequiredPlayers
+                        end
+                    end
+                end
+                return true
+            end
+
+            function LFG_JoinDungeon(category, joinType, dungeonList, hiddenByCollapseList)
+                local hasReqGroupSize, requiredGroupSize = LFG_HasRequiredGroupSize(category, joinType, dungeonList, hiddenByCollapseList)
+                if not hasReqGroupSize then
+                    return "required=" .. tostring(requiredGroupSize)
+                end
+                ClearAllLFGDungeons(category)
+                for _, queueID in pairs(dungeonList) do
+                    LFG_QueueForInstanceIfEnabled(category, queueID)
+                end
+                for _, queueID in pairs(hiddenByCollapseList) do
+                    LFG_QueueForInstanceIfEnabled(category, queueID)
+                end
+                JoinLFG(category)
+                return "joined"
+            end
+
+            local joined = LFG_JoinDungeon(LE_LFG_CATEGORY_LFD, "specific", { 1203 }, {})
+            if joined ~= "joined" then return joined end
+            local mode = GetLFGMode(LE_LFG_CATEGORY_LFD)
+            if mode ~= "queued" then return "mode=" .. tostring(mode) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "specific LFG join path: {result}");
+}
+
+#[test]
 fn get_lfg_dungeon_info_unknown_returns_nil() {
     let env = env();
     let result: String = env

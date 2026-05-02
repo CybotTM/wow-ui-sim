@@ -101,6 +101,12 @@ Group-size follow-up:
 - **Root cause**: Blizzard's `LFG_HasRequiredGroupSize()` treats any non-nil `minPlayers` as an exact required group size. The simulator returned `1` for normal dungeons, so a five-player party failed the check and saw `ERR_LFG_MEMBERS_REQUIRED` as "You need a group of 1 players."
 - **`tests/lfd_globals.rs`**: `lfg_required_group_size_allows_full_party_for_normal_specific_dungeon` copies Blizzard's exact-size gate and verifies a full party can pass for a normal specific dungeon.
 
+Queue-verb follow-up:
+
+- **`battlefield_lfg_probes.rs`**: registered `ClearAllLFGDungeons`, `SetLFGDungeon`, and `JoinLFG`. `JoinLFG` now marks the category queued through existing LFG active-category state, and `GetLFGMode` reports `"queued"` for that category.
+- **Root cause**: after the group-size gate passed, Blizzard's `LFG_JoinDungeon()` called the real queue verbs. They were still missing, so the path aborted at `ClearAllLFGDungeons` before it could enter queued mode.
+- **`tests/lfd_globals.rs`**: covers the individual queue verbs and a copied specific-dungeon `LFG_JoinDungeon` path reaching queued mode.
+
 ## Why direct LFGLockList assignment over event firing
 
 Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestRFChoice` → `RaidFinderFrame_UpdateAvailability` → `GetNumRFDungeons` → `ScenarioFinderFrame_UpdateAvailability` → `GetNumRandomScenarios`. None of those exist in the sim. We could stub all of them, but the goal is just to populate `LFGLockList` for the LFD panel; the event broadcast is wider than needed.
