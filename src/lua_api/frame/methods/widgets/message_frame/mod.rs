@@ -31,6 +31,7 @@ const METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("ClearText", getters::clear_text),
     // Count / max lines
     ("GetNumMessages", getters::get_num_messages),
+    ("SetMaxLines", getters::set_max_lines),
     ("GetMaxLines", getters::get_max_lines),
     // Fading
     ("SetFading", getters::set_fading),
