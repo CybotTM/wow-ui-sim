@@ -843,15 +843,7 @@ fn kahns_sort<'a>(
     count: usize,
     load_first: &HashSet<&'a str>,
 ) -> Vec<&'a str> {
-    let mut in_degree: HashMap<&str, usize> = deps.keys().map(|&n| (n, 0)).collect();
-    let mut dependents: HashMap<&str, Vec<&str>> = HashMap::new();
-    for (&node, reqs) in deps {
-        *in_degree.entry(node).or_default() = reqs.len();
-        for &r in reqs {
-            dependents.entry(r).or_default().push(node);
-        }
-    }
-
+    let (mut in_degree, dependents) = build_kahn_state(deps);
     let mut queue = build_zero_degree_queue(&in_degree, load_first);
 
     let mut result = Vec::with_capacity(count);
@@ -865,17 +857,47 @@ fn kahns_sort<'a>(
             continue;
         }
         result.push(name);
-        for &dep in dependents.get(name).unwrap_or(&Vec::new()) {
-            if let Some(deg) = in_degree.get_mut(dep) {
-                *deg = deg.saturating_sub(1);
-                if *deg == 0 {
-                    insert_by_priority(&mut queue, dep, load_first);
-                }
-            }
-        }
+        release_dependents(name, &dependents, &mut in_degree, &mut queue, load_first);
     }
 
     result
+}
+
+fn build_kahn_state<'a>(
+    deps: &HashMap<&'a str, Vec<&'a str>>,
+) -> (HashMap<&'a str, usize>, HashMap<&'a str, Vec<&'a str>>) {
+    let mut in_degree: HashMap<&str, usize> = deps.keys().map(|&name| (name, 0)).collect();
+    let mut dependents: HashMap<&str, Vec<&str>> = HashMap::new();
+
+    for (&node, reqs) in deps {
+        *in_degree.entry(node).or_default() = reqs.len();
+        for &requirement in reqs {
+            dependents.entry(requirement).or_default().push(node);
+        }
+    }
+
+    (in_degree, dependents)
+}
+
+fn release_dependents<'a>(
+    name: &'a str,
+    dependents: &HashMap<&'a str, Vec<&'a str>>,
+    in_degree: &mut HashMap<&'a str, usize>,
+    queue: &mut Vec<&'a str>,
+    load_first: &HashSet<&'a str>,
+) {
+    let Some(nodes) = dependents.get(name) else {
+        return;
+    };
+
+    for &dependent in nodes {
+        if let Some(degree) = in_degree.get_mut(dependent) {
+            *degree = degree.saturating_sub(1);
+            if *degree == 0 {
+                insert_by_priority(queue, dependent, load_first);
+            }
+        }
+    }
 }
 
 fn build_zero_degree_queue<'a>(
