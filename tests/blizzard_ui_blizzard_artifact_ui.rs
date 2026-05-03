@@ -52,3 +52,6 @@ mod behavior_knowledge_tooltip_meta_powers;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_knowledge_tooltip_clears_on_leave.rs"]
 mod behavior_knowledge_tooltip_clears_on_leave;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_can_view_predicate.rs"]
+mod behavior_can_view_predicate;
