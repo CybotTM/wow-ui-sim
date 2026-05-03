@@ -30,7 +30,7 @@ use rilua::{LuaApiMut, LuaResult};
 const DEFAULT_INVITE_HEALTH: i32 = 100_000;
 const DEFAULT_INVITE_POWER: i32 = 10_000;
 
-fn push_event(state: &mut LuaState, name: &str) -> LuaResult<()> {
+pub(crate) fn push_event(state: &mut LuaState, name: &str) -> LuaResult<()> {
     borrow_state_mut(state)?.events.push(Event {
         name: name.to_string(),
         args: Vec::new(),
@@ -90,13 +90,20 @@ fn decline_group(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// Clear roster and group metadata when the player leaves the group.
+pub(crate) fn clear_party_roster(state: &mut LuaState) -> LuaResult<()> {
+    let mut st = borrow_state_mut(state)?;
+    st.party_members.clear();
+    st.party_group_active = false;
+    st.party_leader_index = None;
+    st.is_party_lfg = false;
+    st.everyone_assistant = false;
+    Ok(())
+}
+
 /// `LeaveParty()` — clear members + active flag.
 fn leave_party(state: &mut LuaState) -> LuaResult<u32> {
-    {
-        let mut st = borrow_state_mut(state)?;
-        st.party_members.clear();
-        st.party_group_active = false;
-    }
+    clear_party_roster(state)?;
     push_event(state, "GROUP_ROSTER_UPDATE")?;
     Ok(0)
 }

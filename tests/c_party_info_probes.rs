@@ -7,6 +7,15 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
+fn fired(env: &WowLuaEnv, name: &str) -> bool {
+    env.state()
+        .borrow()
+        .events
+        .pending()
+        .iter()
+        .any(|e| e.name == name)
+}
+
 // ── GetActiveGroupType ────────────────────────────────────────────────────────
 
 #[test]
@@ -130,4 +139,25 @@ fn get_invite_confirmation_info_returns_nil() {
         .eval(r#"return select('#', C_PartyInfo.GetInviteConfirmationInfo("Player-1234-ABCDEF"))"#)
         .unwrap();
     assert_eq!(count, 0, "no pending invite returns nothing");
+}
+
+// ── LeaveParty ────────────────────────────────────────────────────────────────
+
+#[test]
+fn leave_party_clears_roster_and_fires_event() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(3)
+            C_PartyInfo.LeaveParty()
+            return GetNumGroupMembers()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 0, "leaving party should clear group members");
+    assert!(
+        fired(&env, "GROUP_ROSTER_UPDATE"),
+        "leaving party should fire GROUP_ROSTER_UPDATE"
+    );
 }

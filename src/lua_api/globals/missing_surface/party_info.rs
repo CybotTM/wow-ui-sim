@@ -55,6 +55,7 @@ fn register_group_membership_probes(
         c_party_info_get_active_group_type,
     )?;
     table_set_rust_fn_static(state, table_ref, "IsPartyFull", c_party_info_is_party_full)?;
+    table_set_rust_fn_static(state, table_ref, "LeaveParty", c_party_info_leave_party)?;
     Ok(())
 }
 
@@ -188,6 +189,14 @@ fn c_party_info_is_party_full(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Bool(full));
     Ok(1)
+}
+
+/// `LeaveParty()` — namespace entry point for the same group state mutation
+/// used by the legacy global `LeaveParty()`.
+fn c_party_info_leave_party(state: &mut LuaState) -> LuaResult<u32> {
+    crate::lua_api::globals::group_verbs::clear_party_roster(state)?;
+    crate::lua_api::globals::group_verbs::push_event(state, "GROUP_ROSTER_UPDATE")?;
+    Ok(0)
 }
 
 /// `IsPartyInJailersTower()` — Torghast layer probe; always false in the
