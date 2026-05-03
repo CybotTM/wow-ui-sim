@@ -12,6 +12,13 @@ fn resolve(elem: &FrameElement) -> Option<(&'static str, Option<&'static str>)> 
 }
 
 fn frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)> {
+    primary_frame_element_parts(elem)
+        .or_else(|| secondary_frame_element_parts(elem))
+        .or_else(|| tertiary_frame_element_parts(elem))
+        .or_else(|| quaternary_frame_element_parts(elem))
+}
+
+fn primary_frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)> {
     match elem {
         FrameElement::Frame(f) => Some((f, "Frame")),
         FrameElement::Button(f) => Some((f, "Button")),
@@ -28,6 +35,12 @@ fn frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)>
         FrameElement::EventFrame(f) => Some((f, "EventFrame")),
         FrameElement::CinematicModel(f) => Some((f, "CinematicModel")),
         FrameElement::PlayerModel(f) => Some((f, "PlayerModel")),
+        _ => None,
+    }
+}
+
+fn secondary_frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)> {
+    match elem {
         FrameElement::DressUpModel(f) => Some((f, "DressUpModel")),
         FrameElement::Browser(f) => Some((f, "Browser")),
         FrameElement::Minimap(f) => Some((f, "Minimap")),
@@ -41,6 +54,12 @@ fn frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)>
         FrameElement::EventButton(f) => Some((f, "EventButton")),
         FrameElement::EventEditBox(f) => Some((f, "EventEditBox")),
         FrameElement::Cooldown(f) => Some((f, "Cooldown")),
+        _ => None,
+    }
+}
+
+fn tertiary_frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)> {
+    match elem {
         FrameElement::TaxiRouteFrame(f) => Some((f, "TaxiRouteFrame")),
         FrameElement::ModelFFX(f) => Some((f, "ModelFFX")),
         FrameElement::TabardModel(f) => Some((f, "TabardModel")),
@@ -51,6 +70,12 @@ fn frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)>
         FrameElement::FogOfWarFrame(f) => Some((f, "FogOfWarFrame")),
         FrameElement::QuestPOIFrame(f) => Some((f, "QuestPOIFrame")),
         FrameElement::ArchaeologyDigSiteFrame(f) => Some((f, "ArchaeologyDigSiteFrame")),
+        _ => None,
+    }
+}
+
+fn quaternary_frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)> {
+    match elem {
         FrameElement::ScenarioPOIFrame(f) => Some((f, "ScenarioPOIFrame")),
         FrameElement::UIThemeContainerFrame(f) => Some((f, "UIThemeContainerFrame")),
         FrameElement::EventScrollFrame(f) => Some((f, "EventScrollFrame")),
@@ -58,6 +83,7 @@ fn frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)>
         FrameElement::MapScene(f) => Some((f, "MapScene")),
         FrameElement::Line(f) => Some((f, "Line")),
         FrameElement::ScopedModifier(_) => None,
+        _ => None,
     }
 }
 
