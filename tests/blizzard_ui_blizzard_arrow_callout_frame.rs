@@ -16,3 +16,6 @@ mod surface_frames;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/surface_events.rs"]
 mod surface_events;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/surface_templates.rs"]
+mod surface_templates;
