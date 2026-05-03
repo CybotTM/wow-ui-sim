@@ -49,3 +49,6 @@ mod behavior_appearance_tutorial_helptip;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_knowledge_tooltip_meta_powers.rs"]
 mod behavior_knowledge_tooltip_meta_powers;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_knowledge_tooltip_clears_on_leave.rs"]
+mod behavior_knowledge_tooltip_clears_on_leave;
