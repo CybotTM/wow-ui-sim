@@ -29,3 +29,6 @@ mod behavior_handle_api_link_default_writes_real_detailed_output;
 
 #[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_handle_api_link_copyapi_records_real_clipboard.rs"]
 mod behavior_handle_api_link_copyapi_records_real_clipboard;
+
+#[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_handle_api_link_opendump_seeds_real_chat_edit.rs"]
+mod behavior_handle_api_link_opendump_seeds_real_chat_edit;
