@@ -31,3 +31,6 @@ mod behavior_onenter_dormant_branch;
 
 #[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_onleave_hides_tooltip.rs"]
 mod behavior_onleave_hides_tooltip;
+
+#[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_is_garden_accessible_gates_landing_page.rs"]
+mod behavior_is_garden_accessible_gates_landing_page;
