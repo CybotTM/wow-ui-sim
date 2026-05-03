@@ -13,3 +13,6 @@ mod surface_globals;
 
 #[path = "blizzard_ui/blizzard_ardenweald_gardening/surface_frames.rs"]
 mod surface_frames;
+
+#[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_create_attaches_panel.rs"]
+mod behavior_create_attaches_panel;
