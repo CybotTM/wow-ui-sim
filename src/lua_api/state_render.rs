@@ -147,8 +147,6 @@ impl SimState {
     }
 
     fn sort_root_regions(&self, ids: &mut [u64]) {
-        use std::cmp::Reverse;
-
         ids.sort_by(|&a, &b| {
             let (frame_a, frame_b) = match (self.widgets.get(a), self.widgets.get(b)) {
                 (Some(frame_a), Some(frame_b)) => (frame_a, frame_b),
@@ -164,13 +162,13 @@ impl SimState {
                 frame_a.draw_layer as i32,
                 frame_a.draw_sub_layer,
                 type_flag(frame_a),
-                Reverse(a),
+                a,
             )
                 .cmp(&(
                     frame_b.draw_layer as i32,
                     frame_b.draw_sub_layer,
                     type_flag(frame_b),
-                    Reverse(b),
+                    b,
                 ))
         });
     }
@@ -620,7 +618,6 @@ impl SimState {
             }
         }
     }
-
     /// Remove `id` and all its descendants from cache (hidden ancestor = all hidden).
     fn remove_on_update_descendants(&self, id: u64, cache: &mut Vec<u64>) {
         cache.retain(|&cached_id| cached_id != id);
@@ -743,7 +740,7 @@ mod tests {
         state.set_frame_visible(3, true);
 
         assert!(state.strata_buckets.is_some());
-        assert_eq!(medium_bucket(&mut state), vec![1, 3, 2, 4, 5, 6]);
+        assert_eq!(medium_bucket(&mut state), vec![1, 2, 3, 4, 5, 6]);
     }
 
     #[test]

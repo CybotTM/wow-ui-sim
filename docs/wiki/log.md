@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-02] add | Root-region render order
+
+Added `investigations/root-region-render-order.md` after tracing an inverted
+root-region tie breaker. Documented that root-level regions should use ascending
+creation order inside the same draw layer, matching child regions, and that
+`Reverse(id)` made newer root regions draw underneath older ones.
+
 ## [2026-05-02] update | Dropdown base mouse handling
 
 Updated `investigations/dropdown-intrinsic-script-chain.md` after shared input

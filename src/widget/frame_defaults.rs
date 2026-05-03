@@ -111,6 +111,7 @@ macro_rules! frame_defaults {
             right_texture: None,
             draw_layer: DrawLayer::Artwork,
             draw_sub_layer: 0,
+            region_order: next_region_order(),
             disabled_draw_layers: BTreeSet::new(),
             horiz_tile: false,
             vert_tile: false,

@@ -20,10 +20,16 @@ pub use registry::{AnchorCyclePath, RenderDirtyBatch, RenderDirtySource, WidgetR
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_WIDGET_ID: AtomicU64 = AtomicU64::new(1);
+static NEXT_REGION_ORDER: AtomicU64 = AtomicU64::new(1);
 
 /// Generate a unique widget ID.
 pub fn next_widget_id() -> u64 {
     NEXT_WIDGET_ID.fetch_add(1, Ordering::Relaxed)
+}
+
+/// Generate a monotonic ordering value for same-layer regions.
+pub fn next_region_order() -> u64 {
+    NEXT_REGION_ORDER.fetch_add(1, Ordering::Relaxed)
 }
 
 /// Widget types supported by the simulator.
