@@ -229,7 +229,7 @@ pub fn resolve_anchor_offset(anchor: &crate::xml::AnchorXml) -> (f32, f32) {
         if let Some(abs) = &offset.abs_dimension {
             (abs.x.unwrap_or(0.0), abs.y.unwrap_or(0.0))
         } else {
-            (0.0, 0.0)
+            (offset.x.unwrap_or(0.0), offset.y.unwrap_or(0.0))
         }
     } else {
         (anchor.x.unwrap_or(0.0), anchor.y.unwrap_or(0.0))

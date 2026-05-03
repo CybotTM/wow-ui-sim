@@ -2,6 +2,12 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-03] add | PVE tabs direct offset
+
+Added `investigations/pve-tabs-direct-offset.md` after tracing the Dungeons &
+Raids bottom tab placement to XML direct `<Offset x="..." y="..."/>`
+attributes being ignored unless they used nested `<AbsDimension>`.
+
 ## [2026-05-02] add | Root-region render order
 
 Added `investigations/root-region-render-order.md` after tracing an inverted

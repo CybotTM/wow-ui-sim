@@ -560,6 +560,50 @@ fn test_xml_anchors_with_offset() {
 }
 
 #[test]
+fn test_xml_anchors_with_direct_offset_attributes() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_dir = std::env::temp_dir().join("wow-sim-test-direct-offset");
+    std::fs::create_dir_all(&temp_dir).unwrap();
+    let xml_path = temp_dir.join("test_direct_offset.xml");
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
+        <Frame name="DirectOffsetFrame" parent="UIParent">
+            <Size x="100" y="100"/>
+            <Anchors>
+                <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT">
+                    <Offset x="19" y="-30"/>
+                </Anchor>
+            </Anchors>
+        </Frame>
+    </Ui>"#,
+    )
+    .unwrap();
+
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
+
+    let point_info: String = env
+        .eval(
+            r#"
+        local point, relativeTo, relativePoint, x, y = DirectOffsetFrame:GetPoint(1)
+        return string.format("%s,%s,%d,%d", point, relativePoint, x, y)
+    "#,
+        )
+        .unwrap();
+    assert_eq!(point_info, "BOTTOMLEFT,BOTTOMLEFT,19,-30");
+    std::fs::remove_file(&xml_path).ok();
+}
+
+#[test]
 fn test_xml_size_with_absdimension() {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join("wow-sim-test-abssize");
