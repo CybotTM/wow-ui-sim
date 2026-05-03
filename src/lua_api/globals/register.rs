@@ -140,38 +140,63 @@ fn register_action_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_actor_state_probes(lua)?;
+    register_action_state_probes(lua)?;
+    register_progression_state_probes(lua)?;
+    register_world_state_probes(lua)?;
+    register_social_state_probes(lua)?;
+    Ok(())
+}
+
+fn register_actor_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::combat_probes::register_all(lua)?;
     super::spell_state_probes::register_all(lua)?;
     super::pvp_probes::register_all(lua)?;
     super::player_probes::register_all(lua)?;
-    super::inventory_probes::register_all(lua)?;
-    super::inventory_counts::register_all(lua)?;
     super::unit_stats::register_all(lua)?;
     super::combat_stats::register_all(lua)?;
     super::pet_stats::register_all(lua)?;
     super::cooldown_probes::register_all(lua)?;
+    Ok(())
+}
+
+fn register_action_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
+    super::inventory_probes::register_all(lua)?;
+    super::inventory_counts::register_all(lua)?;
     super::action_highlights::register_all(lua)?;
     super::shapeshift::register_all(lua)?;
     super::pet_bar::register_all(lua)?;
     super::vehicle_possession::register_all(lua)?;
     super::glyph_state::register_all(lua)?;
-    super::xp_honor_rest::register_all(lua)?;
     super::action_bar_state::register_all(lua)?;
+    Ok(())
+}
+
+fn register_progression_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
+    super::xp_honor_rest::register_all(lua)?;
     super::talent_spec_probes::register_all(lua)?;
     super::battlefield_lfg_probes::register_all(lua)?;
     super::loot_method::register_all(lua)?;
+    Ok(())
+}
+
+fn register_world_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::mouse_probes::register_all(lua)?;
     super::movement_probes::register_all(lua)?;
     super::faction_probes::register_all(lua)?;
     super::gossip_probes::register_all(lua)?;
-    super::social_probes::register_all(lua)?;
     super::torghast::register_all(lua)?;
     super::instance_info::register_all(lua)?;
+    super::state_backed_queries::register_all(lua)?;
+    super::archaeology::register_all(lua)?;
+    Ok(())
+}
+
+fn register_social_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
+    super::social_probes::register_all(lua)?;
     super::guild_probes::register_all(lua)?;
     super::mail_probes::register_all(lua)?;
     super::voice_chat_probes::register_all(lua)?;
-    super::state_backed_queries::register_all(lua)?;
-    super::archaeology::register_all(lua)?;
     Ok(())
 }
 
