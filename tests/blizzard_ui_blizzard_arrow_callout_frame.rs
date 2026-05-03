@@ -37,3 +37,6 @@ mod behavior_hide_callout_releases_to_pool;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_hide_callout_nil_id_is_noop.rs"]
 mod behavior_hide_callout_nil_id_is_noop;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_close_button_acknowledges_and_hides.rs"]
+mod behavior_close_button_acknowledges_and_hides;
