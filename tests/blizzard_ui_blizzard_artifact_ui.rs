@@ -43,3 +43,6 @@ mod behavior_inventory_hover_highlights_relic_slot;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_underlay_rotation_drag.rs"]
 mod behavior_underlay_rotation_drag;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_appearance_tutorial_helptip.rs"]
+mod behavior_appearance_tutorial_helptip;
