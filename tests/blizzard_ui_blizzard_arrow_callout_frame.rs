@@ -58,3 +58,6 @@ mod behavior_text_width_clamps_to_226;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_arrow_anim_reschedules_on_finished.rs"]
 mod behavior_arrow_anim_reschedules_on_finished;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_player_soft_interact_changed_is_registered_unused.rs"]
+mod behavior_player_soft_interact_changed_is_registered_unused;
