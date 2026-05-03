@@ -16,3 +16,6 @@ mod surface_frames;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/surface_events.rs"]
 mod surface_events;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_show_panel_with_no_artifact_redirects.rs"]
+mod behavior_show_panel_with_no_artifact_redirects;

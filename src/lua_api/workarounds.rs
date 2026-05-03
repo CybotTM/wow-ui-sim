@@ -92,6 +92,47 @@ const ITEM_QUALITY_COLOR_DATA_METHODS_WORKAROUND_LUA: &str = r#"
     rawset(_G, "__wow_item_quality_color_data_methods_wrapped", true)
 "#;
 
+const ARTIFACT_UI_SHOW_PANEL_GUARD_WORKAROUND_LUA: &str = r#"
+    if rawget(_G, "__wow_artifact_ui_show_panel_guard_wrapped") then
+        return
+    end
+
+    if type(ShowUIPanel) ~= "function" then
+        return
+    end
+
+    local originalShowUIPanel = ShowUIPanel
+
+    local function shouldBlockArtifactPanel(frame)
+        return frame == ArtifactFrame
+            and type(ArtifactUI_CanViewArtifact) == "function"
+            and not ArtifactUI_CanViewArtifact()
+    end
+
+    local function callArtifactShowFailedFunc()
+        local entry = type(UIPanelWindows) == "table" and UIPanelWindows["ArtifactFrame"] or nil
+        local showFailedFunc = type(entry) == "table" and entry.showFailedFunc or nil
+        if type(showFailedFunc) == "function" then
+            showFailedFunc()
+        end
+    end
+
+    ShowUIPanel = function(frame, ...)
+        if frame and frame:IsShown() then
+            return originalShowUIPanel(frame, ...)
+        end
+
+        if shouldBlockArtifactPanel(frame) then
+            callArtifactShowFailedFunc()
+            return
+        end
+
+        return originalShowUIPanel(frame, ...)
+    end
+
+    rawset(_G, "__wow_artifact_ui_show_panel_guard_wrapped", true)
+"#;
+
 pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_edit_mode_manager", || {
         crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
@@ -306,6 +347,9 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     }
     if matches!(addon_name, "Blizzard_ArtifactUI" | "Blizzard_Colors") {
         patch_item_quality_color_data_methods(env);
+    }
+    if addon_name == "Blizzard_ArtifactUI" {
+        patch_artifact_ui_show_panel_guard(env);
     }
     if addon_name == "Blizzard_AccountStore" {
         let _ = patch_account_store_set_storefront(env);
@@ -1293,6 +1337,10 @@ fn ensure_adventure_map_frame_surface_for_runtime_addon_load(env: &crate::lua_ap
 
 fn patch_item_quality_color_data_methods(env: &crate::lua_api::LoaderEnv<'_>) {
     let _ = env.exec(ITEM_QUALITY_COLOR_DATA_METHODS_WORKAROUND_LUA);
+}
+
+fn patch_artifact_ui_show_panel_guard(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(ARTIFACT_UI_SHOW_PANEL_GUARD_WORKAROUND_LUA);
 }
 
 pub(crate) fn patch_account_store_set_storefront(
