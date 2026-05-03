@@ -22,3 +22,6 @@ mod behavior_onenter_active_branch;
 
 #[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_onenter_ready_branch.rs"]
 mod behavior_onenter_ready_branch;
+
+#[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_onenter_active_and_ready_branch.rs"]
+mod behavior_onenter_active_and_ready_branch;
