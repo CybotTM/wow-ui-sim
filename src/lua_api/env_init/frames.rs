@@ -77,48 +77,65 @@ fn frame_newindex(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u3
         return Ok(0);
     };
 
+    assign_frame_table_field(state, table_ref, key_val, value);
+
+    let Some(key) = string_key(state, key_val) else {
+        return Ok(0);
+    };
+    if let Some(child_id) = extract_frame_id(state, value) {
+        sync_child_key(state, parent_id, child_id, key)?;
+    } else {
+        remove_child_key(state, parent_id, &key)?;
+    }
+
+    Ok(0)
+}
+
+fn assign_frame_table_field(
+    state: &mut rilua::vm::state::LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    key_val: Val,
+    value: Val,
+) {
     if let Some(table) = state.gc.tables.get_mut(table_ref) {
         let _ = table.raw_set(key_val, value, &state.gc.string_arena);
     }
     state.gc.barrier_back(table_ref);
+}
 
-    if let Val::Str(_) = key_val {
-        let Some(key) = val_to_string(state, key_val) else {
-            return Ok(0);
-        };
-        if let Some(child_id) = extract_frame_id(state, value) {
-            let mut sim = borrow_state_mut(state)?;
-            let child_parent_matches =
-                sim.widgets.get(child_id).and_then(|child| child.parent_id) == Some(parent_id);
-            if !child_parent_matches {
-                return Ok(0);
-            }
+fn string_key(state: &mut rilua::vm::state::LuaState, key_val: Val) -> Option<String> {
+    matches!(key_val, Val::Str(_))
+        .then(|| val_to_string(state, key_val))
+        .flatten()
+}
 
-            let already_registered = sim.widgets.get(parent_id).is_some_and(|parent| {
-                parent
-                    .children_keys
-                    .values()
-                    .any(|&existing_id| existing_id == child_id)
-            });
-            if already_registered {
-                return Ok(0);
-            }
-
-            if let Some(parent) = sim.widgets.get_mut(parent_id) {
-                parent.children_keys.insert(key.clone(), child_id);
-            }
-            if let Some(child) = sim.widgets.get_mut(child_id) {
-                child.parent_key = Some(key);
-            }
-            return Ok(0);
-        }
-
-        let mut sim = borrow_state_mut(state)?;
-        if let Some(parent) = sim.widgets.get_mut(parent_id) {
-            parent.children_keys.remove(&key);
-        }
+fn sync_child_key(
+    state: &mut rilua::vm::state::LuaState,
+    parent_id: u64,
+    child_id: u64,
+    key: String,
+) -> rilua::LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(parent) = sim.widgets.get_mut(parent_id) {
+        parent.children_keys.insert(key.clone(), child_id);
     }
-    Ok(0)
+    if let Some(child) = sim.widgets.get_mut(child_id) {
+        child.parent_key = Some(key);
+    }
+
+    Ok(())
+}
+
+fn remove_child_key(
+    state: &mut rilua::vm::state::LuaState,
+    parent_id: u64,
+    key: &str,
+) -> rilua::LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(parent) = sim.widgets.get_mut(parent_id) {
+        parent.children_keys.remove(key);
+    }
+    Ok(())
 }
 
 /// Build a shallow, non-cyclic clone of the frame metatable's method entries.
