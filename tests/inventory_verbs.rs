@@ -19,6 +19,7 @@ fn pickup_container_item_moves_bag_item_to_cursor() {
             BagItem {
                 item_id: 6948, // Hearthstone
                 stack_count: 1,
+                hyperlink: None,
             },
         );
     }

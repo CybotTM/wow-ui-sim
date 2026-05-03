@@ -52,6 +52,7 @@ pub(super) fn add_bag_item(state: &mut LuaState) -> LuaResult<u32> {
         BagItem {
             item_id,
             stack_count: stack.unwrap_or(1),
+            hyperlink: None,
         },
     );
     Ok(0)

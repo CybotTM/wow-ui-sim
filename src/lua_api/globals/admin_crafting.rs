@@ -144,6 +144,7 @@ fn apply_reagent_count(state: &mut LuaState, item_id: u32, qty: i32) {
         BagItem {
             item_id,
             stack_count: qty,
+            hyperlink: None,
         },
     );
 }

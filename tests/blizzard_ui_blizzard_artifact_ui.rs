@@ -37,3 +37,6 @@ mod behavior_artifact_update_when_hidden_shows_panel;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_confirm_respec_popup_watchdog.rs"]
 mod behavior_confirm_respec_popup_watchdog;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_inventory_hover_highlights_relic_slot.rs"]
+mod behavior_inventory_hover_highlights_relic_slot;

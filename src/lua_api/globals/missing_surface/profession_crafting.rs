@@ -173,6 +173,7 @@ fn add_output_item(bag_items: &mut HashMap<(i32, i32), BagItem>, item_id: u32, c
         BagItem {
             item_id,
             stack_count: count,
+            hyperlink: None,
         },
     );
     key.0

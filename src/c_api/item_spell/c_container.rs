@@ -4,6 +4,7 @@ use crate::items;
 use crate::lua_api::methods::{
     borrow_state, create_string, create_table, table_set, table_set_num,
 };
+use crate::lua_api::state::BagItem;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -167,51 +168,67 @@ fn c_container_has_item(state: &mut LuaState) -> LuaResult<u32> {
 fn c_container_get_item_info(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let slot = i32::from_stack(state, 2)?;
-    let Some((item_id, stack_count)) = borrow_state(state)?.get_bag_item(bag, slot) else {
+    let Some(bag_item) = borrow_state(state)?.bag_items.get(&(bag, slot)).cloned() else {
         state.push(Val::Nil);
         return Ok(1);
     };
 
-    let info = build_container_item_info(state, item_id, stack_count);
+    let info = build_container_item_info(state, &bag_item);
     state.push(info);
     Ok(1)
 }
 
-fn build_container_item_info(state: &mut LuaState, item_id: u32, stack_count: i32) -> Val {
+fn build_container_item_info(state: &mut LuaState, bag_item: &BagItem) -> Val {
+    let item_id = bag_item.item_id;
     let item = items::get_item(item_id);
     let info = create_table(state);
     table_set(state, info, "itemID", Val::Num(item_id as f64));
-    table_set(state, info, "stackCount", Val::Num(stack_count as f64));
-    table_set(
-        state,
-        info,
-        "iconFileID",
-        Val::Num(
-            item.map(|item| item.icon_file_data_id)
-                .filter(|icon| *icon != 0)
-                .unwrap_or(134400) as f64,
-        ),
-    );
-    table_set(
-        state,
-        info,
-        "quality",
-        Val::Num(item.map(|item| item.quality).unwrap_or(0) as f64),
-    );
+    let icon_file_id = item
+        .map(|item| item.icon_file_data_id)
+        .filter(|icon| *icon != 0)
+        .unwrap_or(134400);
+    let quality = item.map(|item| item.quality).unwrap_or(0);
+    set_container_item_stack_and_quality(state, info, bag_item, icon_file_id, quality);
     table_set(state, info, "isFiltered", Val::Bool(false));
     table_set(state, info, "isLocked", Val::Bool(false));
     table_set(state, info, "isBound", Val::Bool(false));
     table_set(state, info, "hasNoValue", Val::Bool(false));
     table_set(state, info, "isReadable", Val::Bool(false));
     table_set(state, info, "IsReadable", Val::Bool(false));
-    match item_link_for_id(item_id) {
+    set_container_item_hyperlink(state, info, bag_item);
+    info
+}
+
+fn set_container_item_stack_and_quality(
+    state: &mut LuaState,
+    info: Val,
+    bag_item: &BagItem,
+    icon_file_id: u32,
+    quality: u8,
+) {
+    table_set(
+        state,
+        info,
+        "stackCount",
+        Val::Num(bag_item.stack_count as f64),
+    );
+    table_set(state, info, "iconFileID", Val::Num(icon_file_id as f64));
+    table_set(state, info, "quality", Val::Num(quality as f64));
+}
+
+fn set_container_item_hyperlink(state: &mut LuaState, info: Val, bag_item: &BagItem) {
+    let hyperlink = bag_item
+        .hyperlink
+        .clone()
+        .or_else(|| item_link_for_id(bag_item.item_id));
+
+    match hyperlink {
         Some(link) => {
             let hyperlink = create_string(state, &link);
             table_set(state, info, "hyperlink", hyperlink);
         }
         None => table_set(state, info, "hyperlink", Val::Nil),
     }
-    info
 }
 
 fn c_container_get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {

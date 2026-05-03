@@ -88,6 +88,7 @@ fn is_empowered_resolves_bag_and_slot() {
             BagItem {
                 item_id: 158041,
                 stack_count: 1,
+                hyperlink: None,
             },
         );
     }

@@ -1992,6 +1992,7 @@ fn deposit_purchased_into_bag(state: &mut LuaState, item_id: i32, quantity: i32)
         .or_insert_with(|| crate::lua_api::state::BagItem {
             item_id: item_id as u32,
             stack_count: 0,
+            hyperlink: None,
         });
     if slot.item_id != item_id as u32 {
         slot.item_id = item_id as u32;

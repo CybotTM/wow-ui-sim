@@ -617,6 +617,7 @@ pub struct MailMessage {
 pub struct BagItem {
     pub item_id: u32,
     pub stack_count: i32,
+    pub hyperlink: Option<String>,
 }
 
 /// An equipped item in an inventory slot.

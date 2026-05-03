@@ -3181,38 +3181,22 @@ fn default_social_friends() -> Vec<SocialFriend> {
 /// Default items in bag 0 (backpack) at startup. Slots are 1-based (WoW convention).
 fn default_backpack_items() -> HashMap<(i32, i32), BagItem> {
     [
-        (
-            1,
-            BagItem {
-                item_id: 6948,
-                stack_count: 1,
-            },
-        ), // Hearthstone
-        (
-            2,
-            BagItem {
-                item_id: 159,
-                stack_count: 5,
-            },
-        ), // Refreshing Spring Water
-        (
-            3,
-            BagItem {
-                item_id: 4540,
-                stack_count: 5,
-            },
-        ), // Tough Hunk of Bread
-        (
-            4,
-            BagItem {
-                item_id: 7005,
-                stack_count: 1,
-            },
-        ), // Skinning Knife
+        (1, default_bag_item(6948, 1)), // Hearthstone
+        (2, default_bag_item(159, 5)),  // Refreshing Spring Water
+        (3, default_bag_item(4540, 5)), // Tough Hunk of Bread
+        (4, default_bag_item(7005, 1)), // Skinning Knife
     ]
     .into_iter()
     .map(|(slot, item)| ((0, slot), item))
     .collect()
+}
+
+fn default_bag_item(item_id: u32, stack_count: i32) -> BagItem {
+    BagItem {
+        item_id,
+        stack_count,
+        hyperlink: None,
+    }
 }
 
 struct EmptyRuntimeState {
