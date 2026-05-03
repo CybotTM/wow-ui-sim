@@ -524,6 +524,60 @@ fn raid_finder_group_button_path_handles_empty_rf_dungeon_list() {
     }
 }
 
+#[test]
+fn premade_group_category_buttons_can_be_clicked() {
+    test_timeout! {
+        let env = setup_env();
+        env.exec(
+            r#"
+            assert(LoadAddOn("Blizzard_GroupFinder"))
+            LFGListPVEStub_OnShow(LFGListPVEStub)
+            LFGListFrame_SetActivePanel(LFGListFrame, LFGListFrame.CategorySelection)
+            assert(LFGListFrame.CategorySelection:IsShown(), "category selection should be shown")
+
+            local clicked = 0
+            for _, button in ipairs(LFGListFrame.CategorySelection.CategoryButtons) do
+                if button:IsShown() then
+                    button:GetScript("OnClick")(button)
+                    assert(
+                        LFGListFrame.CategorySelection.selectedCategory == button.categoryID,
+                        "click should select category " .. tostring(button.categoryID)
+                    )
+                    clicked = clicked + 1
+                end
+            end
+
+            assert(clicked > 0, "expected at least one visible premade category button")
+            "#
+        ).expect("Premade Group category buttons should click without Lua errors");
+    }
+}
+
+#[test]
+fn premade_group_categories_can_start_search() {
+    test_timeout! {
+        let env = setup_env();
+        env.exec(
+            r#"
+            assert(LoadAddOn("Blizzard_GroupFinder"))
+            LFGListPVEStub_OnShow(LFGListPVEStub)
+            LFGListFrame_SetActivePanel(LFGListFrame, LFGListFrame.CategorySelection)
+
+            for _, button in ipairs(LFGListFrame.CategorySelection.CategoryButtons) do
+                if button:IsShown() then
+                    LFGListFrame_SetActivePanel(LFGListFrame, LFGListFrame.CategorySelection)
+                    button:GetScript("OnClick")(button)
+                    LFGListFrame.CategorySelection.FindGroupButton:GetScript("OnClick")(
+                        LFGListFrame.CategorySelection.FindGroupButton
+                    )
+                    assert(LFGListFrame.SearchPanel:IsShown(), "search panel should be shown")
+                end
+            end
+            "#
+        ).expect("Premade Group categories should start search without Lua errors");
+    }
+}
+
 // ── O → ToggleFriendsFrame() ────────────────────────────────────────────
 
 #[test]
