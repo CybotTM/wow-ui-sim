@@ -120,7 +120,7 @@ const POSITION_TESTS: &[TestCase] = &[
     ("debuff_frame",               "DebuffFrame",                   1050.0,  155.0,  280.0,  90.0, 1.0),
     // Chat
     ("chat_frame",                 "ChatFrame1",                      35.0,  980.0,  430.0, 170.0, 1.0),
-    ("chat_edit_box",              "ChatFrame1EditBox",                30.0, 1152.0,  447.0,  32.0, 0.35),
+    ("chat_edit_box",              "ChatFrame1EditBox",                30.0, 1152.0,  466.0,  32.0, 0.35),
     ("general_dock_manager",       "GeneralDockManager",              35.0,  951.0,  430.0,  26.0, 1.0),
     // Action bars
     ("main_action_bar",            "MainActionBar",                  519.0, 1110.0,  562.0,  45.0, 1.0),

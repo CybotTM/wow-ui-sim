@@ -4,6 +4,8 @@ use super::{FastHandlerRef, FastLiteralValue};
 mod parser_function_family;
 #[path = "parser_global_family.rs"]
 mod parser_global_family;
+#[path = "parser_inline_sequence.rs"]
+mod parser_inline_sequence;
 #[path = "parser_method_family.rs"]
 mod parser_method_family;
 
@@ -11,6 +13,7 @@ use self::parser_function_family::parse_function_family;
 use self::parser_global_family::{
     parse_global_family, parse_global_tooltip_set_owner_then_set_text,
 };
+use self::parser_inline_sequence::split_inline_sequence_parts;
 use self::parser_method_family::parse_method_family;
 
 pub(super) fn parse_inline_fast_handler<'a>(
@@ -249,151 +252,16 @@ fn parse_inline_sequence(stmt: &str) -> Option<FastHandlerRef<'_>> {
     }
 }
 
-fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
-    let mut parts = Vec::new();
-    let mut start = 0usize;
-    let mut chars = stmt.char_indices().peekable();
-    let mut in_string = false;
-    let mut quote = '\0';
-    let mut escaped = false;
-    let mut in_comment = false;
-    let mut block_depth = 0usize;
-    let mut paren_depth = 0usize;
-
-    while let Some((idx, ch)) = chars.next() {
-        if in_comment {
-            if ch == '\n' {
-                in_comment = false;
-                start = idx + ch.len_utf8();
-            }
-            continue;
-        }
-
-        if in_string {
-            if escaped {
-                escaped = false;
-                continue;
-            }
-            if ch == '\\' {
-                escaped = true;
-                continue;
-            }
-            if ch == quote {
-                in_string = false;
-            }
-            continue;
-        }
-
-        if ch == '"' || ch == '\'' {
-            in_string = true;
-            quote = ch;
-            continue;
-        }
-
-        match ch {
-            '(' => {
-                paren_depth += 1;
-                continue;
-            }
-            ')' => {
-                paren_depth = paren_depth.saturating_sub(1);
-                continue;
-            }
-            '\n' if block_depth == 0 && paren_depth == 0 => {
-                let part = stmt[start..idx].trim();
-                let rest = stmt[idx + ch.len_utf8()..].trim_start();
-                if !part.is_empty() && should_keep_local_prelude_with_following_block(part, rest) {
-                    continue;
-                }
-                if !part.is_empty() {
-                    parts.push(part);
-                }
-                start = idx + ch.len_utf8();
-                continue;
-            }
-            _ => {}
-        }
-
-        if ch.is_ascii_alphabetic() || ch == '_' {
-            let mut end = idx + ch.len_utf8();
-            while let Some((next_idx, next_ch)) = chars.peek().copied() {
-                if next_ch.is_ascii_alphanumeric() || next_ch == '_' {
-                    end = next_idx + next_ch.len_utf8();
-                    let _ = chars.next();
-                } else {
-                    break;
-                }
-            }
-            match &stmt[idx..end] {
-                "if" => block_depth += 1,
-                "end" if block_depth > 0 => {
-                    block_depth -= 1;
-                    if block_depth == 0 {
-                        let rest = stmt[end..].trim_start();
-                        if !rest.is_empty() && !rest.starts_with(';') {
-                            let part = stmt[start..end].trim();
-                            if !part.is_empty() {
-                                parts.push(part);
-                            }
-                            start = end;
-                        }
-                    }
-                }
-                _ => {}
-            }
-            continue;
-        }
-
-        if ch == '-' && matches!(chars.peek(), Some((_, '-'))) {
-            let part = stmt[start..idx].trim();
-            if !part.is_empty() {
-                parts.push(part);
-            }
-            let _ = chars.next();
-            in_comment = true;
-            continue;
-        }
-
-        if ch == ';' && block_depth == 0 && paren_depth == 0 {
-            let part = stmt[start..idx].trim();
-            if !part.is_empty() {
-                parts.push(part);
-            }
-            start = idx + ch.len_utf8();
-        }
-    }
-
-    if !in_comment {
-        let part = stmt[start..].trim();
-        if !part.is_empty() {
-            parts.push(part);
-        }
-    }
-
-    parts
-}
-
-fn should_keep_local_prelude_with_following_block(part: &str, rest: &str) -> bool {
-    let part = part.trim_start();
-    let rest = rest.trim_start();
-    part.starts_with("local ")
-        && (rest.starts_with("local ")
-            || rest.starts_with("if ")
-            || rest.starts_with("if(")
-            || rest.starts_with("if\t")
-            || rest.starts_with("if\n"))
-}
-
 pub(super) fn split_top_level_args(args: &str) -> Option<Vec<&str>> {
     let mut parts = Vec::new();
     let mut start = 0usize;
-    let mut chars = args.char_indices().peekable();
+    let chars = args.char_indices().peekable();
     let mut in_string = false;
     let mut quote = '\0';
     let mut escaped = false;
     let mut paren_depth = 0usize;
 
-    while let Some((idx, ch)) = chars.next() {
+    for (idx, ch) in chars {
         if in_string {
             if escaped {
                 escaped = false;
