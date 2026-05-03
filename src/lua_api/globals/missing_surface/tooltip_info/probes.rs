@@ -2,11 +2,12 @@ use super::super::{
     LINE_TYPE_SPELL_NAME, TOOLTIP_TYPE_ITEM, TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT_AURA,
 };
 use super::builders::{
-    empty_tooltip, inbox_attachment_item_id, merchant_item_id, parse_spell_source,
-    pet_action_spell_id, push_plain_line, push_tooltip_line, recipe_output_item,
+    empty_tooltip, pet_action_spell_id, push_plain_line, push_tooltip_line, tooltip_for_item_id,
+};
+use super::sources::{
+    inbox_attachment_item_id, merchant_item_id, parse_spell_source, recipe_output_item,
     send_mail_attachment_item_id, tooltip_for_bag_item, tooltip_for_currency,
-    tooltip_for_inventory_slot, tooltip_for_item_id, tooltip_for_item_source, trade_skill_item_id,
-    trade_slot_item_id,
+    tooltip_for_inventory_slot, tooltip_for_item_source, trade_skill_item_id, trade_slot_item_id,
 };
 use super::spell::{
     append_action_binding_line, lookup_player_aura, lookup_player_aura_by_instance_id,
