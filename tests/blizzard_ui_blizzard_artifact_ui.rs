@@ -13,3 +13,6 @@ mod surface_globals;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/surface_frames.rs"]
 mod surface_frames;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/surface_events.rs"]
+mod surface_events;
