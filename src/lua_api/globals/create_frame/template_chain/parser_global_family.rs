@@ -637,49 +637,116 @@ fn parse_global_tooltip_set_owner_then_set_text_literal(
 }
 
 fn parse_conditional_tooltip(stmt: &str) -> Option<(&str, &str, &str, &str, &str, &str)> {
+    let body = parse_conditional_tooltip_body(stmt)?;
+    let owner = parse_tooltip_set_owner(body.owner_stmt)?;
+    let text = parse_conditional_tooltip_text(body.text_stmt, owner.target_path, body.field)?;
+    Some((
+        owner.target_path,
+        body.field,
+        owner.anchor,
+        text.red_path,
+        text.green_path,
+        text.blue_path,
+    ))
+}
+
+struct ConditionalTooltipBody<'a> {
+    field: &'a str,
+    owner_stmt: &'a str,
+    text_stmt: &'a str,
+}
+
+struct ConditionalTooltipText<'a> {
+    red_path: &'a str,
+    green_path: &'a str,
+    blue_path: &'a str,
+}
+
+fn parse_conditional_tooltip_body(stmt: &str) -> Option<ConditionalTooltipBody<'_>> {
     let remainder = stmt.trim().strip_prefix("if")?.trim_start();
     let remainder = remainder.strip_prefix('(')?.trim_start();
     let remainder = remainder.strip_prefix("self.")?;
     let (field, remainder) = remainder.split_once(')')?;
-    if !is_fast_identifier(field.trim()) {
+    let field = field.trim();
+    if !is_fast_identifier(field) {
         return None;
     }
+
     let remainder = remainder.trim_start().strip_prefix("then")?.trim_start();
-    let (first, second_with_end) = remainder.split_once(";")?;
-    let second = second_with_end.trim().strip_suffix("end")?.trim();
+    let (owner_stmt, text_with_end) = remainder.split_once(";")?;
+    let text_stmt = text_with_end.trim().strip_suffix("end")?.trim();
+    Some(ConditionalTooltipBody {
+        field,
+        owner_stmt: owner_stmt.trim(),
+        text_stmt,
+    })
+}
 
-    let (target_path, method_name, anchor) =
-        parse_inline_global_method_with_self_string_arg(first.trim())?;
-    if method_name != "SetOwner" {
+fn parse_conditional_tooltip_text<'a>(
+    stmt: &'a str,
+    expected_target_path: &str,
+    expected_field: &str,
+) -> Option<ConditionalTooltipText<'a>> {
+    let text_args = parse_matching_global_set_text_args(stmt, expected_target_path)?;
+    let [text_path, red_path, green_path, blue_path] =
+        super::split_top_level_args(text_args)?.try_into().ok()?;
+    let text_field = text_path.strip_prefix("self.")?;
+    if text_field != expected_field {
         return None;
     }
 
-    let (text_target_path, text_remainder) = second.rsplit_once(':')?;
-    let (text_method_name, text_args) = text_remainder.split_once('(')?;
-    let text_args = text_args.strip_suffix(')')?.trim();
-    if text_target_path.trim() != target_path || text_method_name.trim() != "SetText" {
-        return None;
+    let color_paths = [red_path, green_path, blue_path];
+    color_paths
+        .iter()
+        .all(|path| is_fast_handler_path(path))
+        .then_some(ConditionalTooltipText {
+            red_path,
+            green_path,
+            blue_path,
+        })
+}
+
+#[cfg(test)]
+mod conditional_tooltip_tests {
+    use super::parse_conditional_tooltip;
+
+    #[test]
+    fn parses_conditional_tooltip_color_paths() {
+        let stmt = concat!(
+            "if (self.tooltip) then ",
+            "GameTooltip:SetOwner(self, \"ANCHOR_RIGHT\"); ",
+            "GameTooltip:SetText(self.tooltip, TEST_FAST_TOOLTIP_COLOR.r, ",
+            "TEST_FAST_TOOLTIP_COLOR.g, TEST_FAST_TOOLTIP_COLOR.b) end"
+        );
+
+        let parsed = parse_conditional_tooltip(stmt);
+
+        assert_eq!(
+            parsed,
+            Some((
+                "GameTooltip",
+                "tooltip",
+                "ANCHOR_RIGHT",
+                "TEST_FAST_TOOLTIP_COLOR.r",
+                "TEST_FAST_TOOLTIP_COLOR.g",
+                "TEST_FAST_TOOLTIP_COLOR.b",
+            ))
+        );
     }
-    let mut parts = text_args.split(',').map(str::trim);
-    let text_field = parts.next()?.strip_prefix("self.")?;
-    let red_path = parts.next()?;
-    let green_path = parts.next()?;
-    let blue_path = parts.next()?;
-    if parts.next().is_some() {
-        return None;
+
+    #[test]
+    fn rejects_conditional_tooltip_text_from_different_field() {
+        let stmt = concat!(
+            "if (self.tooltip) then ",
+            "GameTooltip:SetOwner(self, \"ANCHOR_RIGHT\"); ",
+            "GameTooltip:SetText(self.otherTooltip, TEST_FAST_TOOLTIP_COLOR.r, ",
+            "TEST_FAST_TOOLTIP_COLOR.g, TEST_FAST_TOOLTIP_COLOR.b) end"
+        );
+
+        let parsed = parse_conditional_tooltip(stmt);
+
+        assert_eq!(parsed, None);
     }
-    (text_field == field.trim()
-        && is_fast_handler_path(red_path)
-        && is_fast_handler_path(green_path)
-        && is_fast_handler_path(blue_path))
-    .then_some((
-        target_path,
-        field.trim(),
-        anchor,
-        red_path,
-        green_path,
-        blue_path,
-    ))
 }
 
 fn parse_toggle_global_visibility(stmt: &str) -> Option<&str> {
