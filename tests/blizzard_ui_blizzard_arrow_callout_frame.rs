@@ -43,3 +43,6 @@ mod behavior_close_button_acknowledges_and_hides;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_anchor_callout_clears_previous_points.rs"]
 mod behavior_anchor_callout_clears_previous_points;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_anchor_directions_use_documented_offsets.rs"]
+mod behavior_anchor_directions_use_documented_offsets;
