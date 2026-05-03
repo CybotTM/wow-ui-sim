@@ -40,3 +40,6 @@ mod behavior_hide_callout_nil_id_is_noop;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_close_button_acknowledges_and_hides.rs"]
 mod behavior_close_button_acknowledges_and_hides;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_anchor_callout_clears_previous_points.rs"]
+mod behavior_anchor_callout_clears_previous_points;
