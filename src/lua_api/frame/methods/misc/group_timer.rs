@@ -7,62 +7,67 @@ use crate::lua_api::methods::{
 };
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use crate::quest_poi_blobs;
+use rilua::vm::closure::RustFn;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(state, mt, "GetOrCreateGroup", get_or_create_group)?;
-    table_set_rust_fn_static(state, mt, "ForceUpdateTimers", force_update_timers)?;
-    table_set_rust_fn_static(state, mt, "RegisterFontString", register_font_string)?;
-    table_set_rust_fn_static(state, mt, "RegisterFontStrings", register_font_strings)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "RegisterBackgroundTexture",
-        register_background_texture,
-    )?;
-    table_set_rust_fn_static(state, mt, "RegisterFrames", register_frames)?;
-    table_set_rust_fn_static(state, mt, "SetBorderAlpha", set_border_alpha)?;
-    table_set_rust_fn_static(state, mt, "SetBorderScalar", set_border_scalar)?;
-    table_set_rust_fn_static(state, mt, "SetBorderTexture", set_border_texture)?;
-    table_set_rust_fn_static(state, mt, "SetFillAlpha", set_fill_alpha)?;
-    table_set_rust_fn_static(state, mt, "SetOwningDialog", set_owning_dialog)?;
-    table_set_rust_fn_static(state, mt, "SetFillTexture", set_fill_texture)?;
-    table_set_rust_fn_static(state, mt, "DrawBlob", draw_blob)?;
-    table_set_rust_fn_static(state, mt, "SetToDefaults", set_to_defaults)?;
-    table_set_rust_fn_static(state, mt, "DrawNone", draw_none)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "UpdateMouseOverTooltip",
-        update_mouse_over_tooltip,
-    )?;
-    table_set_rust_fn_static(state, mt, "GetTooltipIndex", get_tooltip_index)?;
-    table_set_rust_fn_static(state, mt, "SetAlertContainer", set_alert_container)?;
-    table_set_rust_fn_static(state, mt, "SetDefaultText", set_default_text)?;
-    table_set_rust_fn_static(state, mt, "UpdateHeight", update_height)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetSelectionTranslator",
-        set_selection_translator,
-    )?;
-    table_set_rust_fn_static(state, mt, "SetItemButtonScale", set_item_button_scale)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "UpdateItemContextMatching",
-        update_item_context_matching,
-    )?;
-    table_set_rust_fn_static(state, mt, "RegisterForWidgetSet", register_for_widget_set)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "UnregisterForWidgetSet",
-        unregister_for_widget_set,
-    )?;
+    register_methods(state, mt, GROUP_TIMER_METHODS)?;
+    Ok(())
+}
+
+struct MethodBinding {
+    name: &'static str,
+    func: RustFn,
+}
+
+macro_rules! method {
+    ($name:literal, $func:path) => {
+        MethodBinding {
+            name: $name,
+            func: $func,
+        }
+    };
+}
+
+const GROUP_TIMER_METHODS: &[MethodBinding] = &[
+    method!("GetOrCreateGroup", get_or_create_group),
+    method!("ForceUpdateTimers", force_update_timers),
+    method!("RegisterFontString", register_font_string),
+    method!("RegisterFontStrings", register_font_strings),
+    method!("RegisterBackgroundTexture", register_background_texture),
+    method!("RegisterFrames", register_frames),
+    method!("SetBorderAlpha", set_border_alpha),
+    method!("SetBorderScalar", set_border_scalar),
+    method!("SetBorderTexture", set_border_texture),
+    method!("SetFillAlpha", set_fill_alpha),
+    method!("SetOwningDialog", set_owning_dialog),
+    method!("SetFillTexture", set_fill_texture),
+    method!("DrawBlob", draw_blob),
+    method!("SetToDefaults", set_to_defaults),
+    method!("DrawNone", draw_none),
+    method!("UpdateMouseOverTooltip", update_mouse_over_tooltip),
+    method!("GetTooltipIndex", get_tooltip_index),
+    method!("SetAlertContainer", set_alert_container),
+    method!("SetDefaultText", set_default_text),
+    method!("UpdateHeight", update_height),
+    method!("SetSelectionTranslator", set_selection_translator),
+    method!("SetItemButtonScale", set_item_button_scale),
+    method!("UpdateItemContextMatching", update_item_context_matching),
+    method!("RegisterForWidgetSet", register_for_widget_set),
+    method!("UnregisterForWidgetSet", unregister_for_widget_set),
+];
+
+fn register_methods(
+    state: &mut LuaState,
+    mt: GcRef<Table>,
+    methods: &[MethodBinding],
+) -> LuaResult<()> {
+    for method in methods {
+        table_set_rust_fn_static(state, mt, method.name, method.func)?;
+    }
     Ok(())
 }
 

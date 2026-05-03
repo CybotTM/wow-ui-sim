@@ -3,6 +3,58 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[test]
+fn test_widget_misc_group_timer_method_surface_is_registered() {
+    let env = WowLuaEnv::new().unwrap();
+    let missing_method: Option<String> = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "TestWidgetMiscGroupTimerSurfaceFrame", UIParent)
+            local methods = {
+                "GetOrCreateGroup",
+                "ForceUpdateTimers",
+                "RegisterFontString",
+                "RegisterFontStrings",
+                "RegisterBackgroundTexture",
+                "RegisterFrames",
+                "SetBorderAlpha",
+                "SetBorderScalar",
+                "SetBorderTexture",
+                "SetFillAlpha",
+                "SetOwningDialog",
+                "SetFillTexture",
+                "DrawBlob",
+                "SetToDefaults",
+                "DrawNone",
+                "UpdateMouseOverTooltip",
+                "GetTooltipIndex",
+                "SetAlertContainer",
+                "SetDefaultText",
+                "UpdateHeight",
+                "SetSelectionTranslator",
+                "SetItemButtonScale",
+                "UpdateItemContextMatching",
+                "RegisterForWidgetSet",
+                "UnregisterForWidgetSet",
+            }
+
+            for _, method in ipairs(methods) do
+                if type(frame[method]) ~= "function" then
+                    return method
+                end
+            end
+
+            return nil
+        "#,
+        )
+        .unwrap();
+
+    assert!(
+        missing_method.is_none(),
+        "missing widget misc method: {missing_method:?}"
+    );
+}
+
+#[test]
 fn test_widget_misc_setup_and_alert_methods_persist_runtime_fields() {
     let env = WowLuaEnv::new().unwrap();
 
