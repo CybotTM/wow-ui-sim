@@ -16,3 +16,6 @@ mod surface_frames;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/surface_events.rs"]
 mod surface_events;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_show_opens_the_panel.rs"]
+mod behavior_show_opens_the_panel;
