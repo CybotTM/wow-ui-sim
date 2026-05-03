@@ -889,6 +889,62 @@ pub(crate) fn advance_animation_groups(
     Ok(())
 }
 
+pub(crate) fn stop_animation_groups_for_hidden_subtree(
+    sim: &mut crate::lua_api::state::SimState,
+    root_id: u64,
+) {
+    let mut subtree_ids = std::collections::HashSet::new();
+    collect_subtree_ids(sim, root_id, &mut subtree_ids);
+
+    let group_ids: Vec<u64> = sim
+        .animation_groups
+        .iter()
+        .filter_map(|(&group_id, group)| {
+            subtree_ids
+                .contains(&group.owner_frame_id)
+                .then_some(group_id)
+        })
+        .collect();
+
+    for group_id in group_ids {
+        if let Some(group) = sim.animation_groups.get_mut(&group_id) {
+            stop_group(group);
+        }
+        apply_group_flipbook_state(sim, group_id);
+        sync_action_bar_busy_for_group(sim, group_id);
+    }
+}
+
+fn collect_subtree_ids(
+    sim: &crate::lua_api::state::SimState,
+    frame_id: u64,
+    subtree_ids: &mut std::collections::HashSet<u64>,
+) {
+    if !subtree_ids.insert(frame_id) {
+        return;
+    }
+
+    let children = sim
+        .widgets
+        .get(frame_id)
+        .map(|frame| frame.children.clone())
+        .unwrap_or_default();
+    for child_id in children {
+        collect_subtree_ids(sim, child_id, subtree_ids);
+    }
+}
+
+fn stop_group(group: &mut crate::lua_api::animation::AnimGroupState) {
+    group.playing = false;
+    group.paused = false;
+    group.done = true;
+    group.pending_finish = false;
+    group.elapsed = 0.0;
+    for animation in &mut group.animations {
+        animation.elapsed = 0.0;
+    }
+}
+
 struct AnimationGroupAdvance {
     owner_id: u64,
     alpha_updates: Vec<AlphaUpdate>,

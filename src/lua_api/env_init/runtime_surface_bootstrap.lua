@@ -4780,6 +4780,8 @@ if CreateFramePool == nil then
       self.active[frame] = nil
       if self.resetter then
         self.resetter(self, frame, false, self.template)
+      elseif frame.Hide then
+        frame:Hide()
       end
       table.insert(self.inactive, frame)
       return true

@@ -376,6 +376,9 @@ impl SimState {
             .map(|p| p.effective_alpha)
             .unwrap_or(1.0);
         if !visible {
+            crate::lua_api::frame::methods::button_anchor_hierarchy::stop_animation_groups_for_hidden_subtree(
+                self, id,
+            );
             // Hide: remove subtree from buckets BEFORE propagating alpha to 0.
             self.remove_subtree_from_buckets(id);
         }
