@@ -1,6 +1,6 @@
 //! C_PetJournal namespace.
 
-use crate::lua_api::methods::{borrow_state, create_string, val_to_string};
+use crate::lua_api::methods::{borrow_state, create_string, create_table, val_to_string};
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -96,7 +96,7 @@ fn push_pet_info_by_pet_id(state: &mut LuaState, pet: &PetInfoSnapshot) -> u32 {
     state.push(Val::Num(pet.icon as f64));
     state.push(Val::Num(pet.pet_type as f64));
     state.push(Val::Num(pet.species_id as f64));
-    state.push(empty.clone());
+    state.push(empty);
     state.push(empty);
     state.push(Val::Bool(false));
     state.push(Val::Bool(pet.quality > 0));
@@ -112,7 +112,7 @@ fn push_pet_info_by_species_id(state: &mut LuaState, pet: &PetInfoSnapshot) -> u
     state.push(Val::Num(pet.icon as f64));
     state.push(Val::Num(pet.pet_type as f64));
     state.push(Val::Num(pet.species_id as f64));
-    state.push(empty.clone());
+    state.push(empty);
     state.push(empty);
     state.push(Val::Bool(false));
     state.push(Val::Bool(pet.quality > 0));
@@ -221,95 +221,145 @@ fn pet_get_stats(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
-    let t = TableBuilder::new(lua.state_mut())
-        .set_function("ClearRecentFanfares", |_state| Ok(0))?
+    let tb = TableBuilder::new(lua.state_mut());
+    let tb = register_pet_fanfare_stubs(tb)?;
+    let tb = register_pet_filter_stubs(tb)?;
+    let tb = register_pet_count_stubs(tb)?;
+    let tb = register_pet_info_stubs(tb)?;
+    let tb = register_pet_ability_stubs(tb)?;
+    let tb = register_pet_loadout_stubs(tb)?;
+    let tb = register_pet_summon_stubs(tb)?;
+    let tb = register_pet_journal_state_stubs(tb)?;
+    let tb = register_pet_mutation_stubs(tb)?;
+    let tb = register_pet_predicate_stubs(tb)?;
+    let t = tb.build();
+
+    set_global_val(lua.state_mut(), "C_PetJournal", t);
+    Ok(())
+}
+
+fn register_pet_fanfare_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("ClearRecentFanfares", |_state| Ok(0))?
         .set_function("ClearFanfare", |_state| Ok(0))?
-        .set_function("ClearHoveredBattlePet", |_state| Ok(0))?
-        .set_function("IsUsingDefaultFilters", |state| true.into_stack(state))?
-        .set_function("SetDefaultFilters", |_state| Ok(0))?
-        .set_function("GetNumPets", pet_get_num_pets)?
-        .set_function("GetNumPetTypes", pet_get_num_pet_types)?
-        .set_function("GetNumPetSources", pet_get_num_pet_sources)?
-        .set_function("GetNumCollectedInfo", pet_get_num_collected_info)?
-        .set_function("GetNumPetsNeedingFanfare", |state| (0i32).into_stack(state))?
-        .set_function("GetBattlePetLink", |state| {
-            state.push(Val::Nil);
-            Ok(1)
-        })?
-        .set_function("GetPetInfoByIndex", pet_get_info_by_index)?
-        .set_function("GetPetInfoByPetID", pet_get_info_by_pet_id)?
-        .set_function("GetPetInfoBySpeciesID", pet_get_info_by_species_id)?
-        .set_function("GetPetAbilityInfo", |state| {
-            state.push(Val::Nil);
-            Ok(1)
-        })?
-        .set_function("GetPetAbilityList", |state| {
-            use crate::lua_api::methods::create_table;
-            create_table(state).into_stack(state)
-        })?
-        .set_function("GetPetCooldownByGUID", |state| {
-            (0.0f64, 0.0f64, false).into_stack(state)
-        })?
-        .set_function("GetPetLoadOutInfo", |state| {
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            state.push(Val::Num(0.0));
-            Ok(6)
-        })?
-        .set_function("GetPetModelSceneInfoBySpeciesID", |state| {
-            state.push(Val::Nil);
-            Ok(1)
-        })?
-        .set_function("GetPetSortParameter", |state| {
-            state.push(Val::Num(0.0));
-            Ok(1)
-        })?
-        .set_function("GetPetStats", pet_get_stats)?
-        .set_function("GetPetSummonInfo", |state| {
-            state.push(Val::Nil);
-            Ok(1)
-        })?
-        .set_function("GetSummonedPetGUID", |_state| Ok(0))?
-        .set_function("GetSummonBattlePetCooldown", |state| {
-            (0.0f64, 0.0f64, false).into_stack(state)
-        })?
         .set_function("PetNeedsFanfare", |state| false.into_stack(state))?
-        .set_function("HasFavoritePets", |state| false.into_stack(state))?
-        .set_function("IsFindBattleEnabled", |state| false.into_stack(state))?
-        .set_function("IsJournalUnlocked", |state| true.into_stack(state))?
-        .set_function("IsFilterChecked", |state| false.into_stack(state))?
-        .set_function("IsPetTypeChecked", |state| false.into_stack(state))?
+        .set_function("GetNumPetsNeedingFanfare", |state| (0i32).into_stack(state))
+}
+
+fn register_pet_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    let tb = register_pet_default_filter_stubs(tb)?;
+    let tb = register_pet_type_source_filter_stubs(tb)?;
+    register_pet_misc_filter_stubs(tb)
+}
+
+fn register_pet_default_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("IsUsingDefaultFilters", |state| true.into_stack(state))?
+        .set_function("SetDefaultFilters", |_state| Ok(0))
+}
+
+fn register_pet_type_source_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("IsPetTypeChecked", |state| false.into_stack(state))?
         .set_function("IsPetSourceChecked", |state| false.into_stack(state))?
         .set_function("SetPetTypeFilter", |_state| Ok(0))?
         .set_function("SetPetSourceChecked", |_state| Ok(0))?
         .set_function("SetAllPetTypesChecked", |_state| Ok(0))?
-        .set_function("SetAllPetSourcesChecked", |_state| Ok(0))?
+        .set_function("SetAllPetSourcesChecked", |_state| Ok(0))
+}
+
+fn register_pet_misc_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("IsFilterChecked", |state| false.into_stack(state))?
         .set_function("SetFilterChecked", |_state| Ok(0))?
-        .set_function("SetAbility", |_state| Ok(0))?
-        .set_function("SetCustomName", |_state| Ok(0))?
+        .set_function("SetSearchFilter", |_state| Ok(0))
+}
+
+fn register_pet_count_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("GetNumPets", pet_get_num_pets)?
+        .set_function("GetNumPetTypes", pet_get_num_pet_types)?
+        .set_function("GetNumPetSources", pet_get_num_pet_sources)?
+        .set_function("GetNumCollectedInfo", pet_get_num_collected_info)
+}
+
+fn register_pet_info_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("GetBattlePetLink", |state| {
+        state.push(Val::Nil);
+        Ok(1)
+    })?
+    .set_function("GetPetInfoByIndex", pet_get_info_by_index)?
+    .set_function("GetPetInfoByPetID", pet_get_info_by_pet_id)?
+    .set_function("GetPetInfoBySpeciesID", pet_get_info_by_species_id)?
+    .set_function("GetPetModelSceneInfoBySpeciesID", |state| {
+        state.push(Val::Nil);
+        Ok(1)
+    })
+}
+
+fn register_pet_ability_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("GetPetAbilityInfo", |state| {
+        state.push(Val::Nil);
+        Ok(1)
+    })?
+    .set_function("GetPetAbilityList", |state| {
+        create_table(state).into_stack(state)
+    })?
+    .set_function("SetAbility", |_state| Ok(0))
+}
+
+fn register_pet_loadout_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("GetPetCooldownByGUID", |state| {
+        (0.0f64, 0.0f64, false).into_stack(state)
+    })?
+    .set_function("GetPetLoadOutInfo", pet_get_loadout_info)?
+    .set_function("GetPetStats", pet_get_stats)?
+    .set_function("GetPetSortParameter", |state| {
+        state.push(Val::Num(0.0));
+        Ok(1)
+    })?
+    .set_function("SetPetSortParameter", |_state| Ok(0))
+}
+
+fn pet_get_loadout_info(state: &mut LuaState) -> LuaResult<u32> {
+    for _ in 0..6 {
+        state.push(Val::Num(0.0));
+    }
+    Ok(6)
+}
+
+fn register_pet_summon_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("GetPetSummonInfo", |state| {
+        state.push(Val::Nil);
+        Ok(1)
+    })?
+    .set_function("GetSummonedPetGUID", |_state| Ok(0))?
+    .set_function("GetSummonBattlePetCooldown", |state| {
+        (0.0f64, 0.0f64, false).into_stack(state)
+    })?
+    .set_function("SummonPetByGUID", |_state| Ok(0))?
+    .set_function("SummonRandomPet", |_state| Ok(0))?
+    .set_function("SpellTargetBattlePet", |_state| Ok(0))
+}
+
+fn register_pet_journal_state_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("ClearHoveredBattlePet", |_state| Ok(0))?
+        .set_function("HasFavoritePets", |state| false.into_stack(state))?
+        .set_function("IsFindBattleEnabled", |state| false.into_stack(state))?
+        .set_function("IsJournalUnlocked", |state| true.into_stack(state))
+}
+
+fn register_pet_mutation_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("SetCustomName", |_state| Ok(0))?
         .set_function("SetFavorite", |_state| Ok(0))?
         .set_function("SetHoveredBattlePet", |_state| Ok(0))?
-        .set_function("SetPetSortParameter", |_state| Ok(0))?
-        .set_function("SetSearchFilter", |_state| Ok(0))?
-        .set_function("SpellTargetBattlePet", |_state| Ok(0))?
-        .set_function("SummonPetByGUID", |_state| Ok(0))?
-        .set_function("SummonRandomPet", |_state| Ok(0))?
         .set_function("PickupPet", |_state| Ok(0))?
         .set_function("PickupSummonRandomPet", |_state| Ok(0))?
         .set_function("ReleasePetByID", |_state| Ok(0))?
-        .set_function("CagePetByID", |_state| Ok(0))?
-        .set_function("PetIsFavorite", |state| false.into_stack(state))?
+        .set_function("CagePetByID", |_state| Ok(0))
+}
+
+fn register_pet_predicate_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("PetIsFavorite", |state| false.into_stack(state))?
         .set_function("PetIsHurt", |state| false.into_stack(state))?
         .set_function("PetIsLockedForConvert", |state| false.into_stack(state))?
         .set_function("PetIsRevoked", |state| false.into_stack(state))?
         .set_function("PetIsSlotted", |state| false.into_stack(state))?
         .set_function("PetIsSummonable", |state| false.into_stack(state))?
-        .set_function("PetIsTradable", |state| false.into_stack(state))?
-        .build();
-
-    set_global_val(lua.state_mut(), "C_PetJournal", t);
-    Ok(())
+        .set_function("PetIsTradable", |state| false.into_stack(state))
 }
