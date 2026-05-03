@@ -22,3 +22,6 @@ mod surface_templates;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_show_callout_anchors_to_global_frame.rs"]
 mod behavior_show_callout_anchors_to_global_frame;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_show_callout_unknown_anchor_returns_silently.rs"]
+mod behavior_show_callout_unknown_anchor_returns_silently;
