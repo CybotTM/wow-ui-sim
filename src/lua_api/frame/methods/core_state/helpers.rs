@@ -38,6 +38,11 @@ fn resolved_frame_size(state: &crate::lua_api::state::SimState, id: u64) -> (f32
         .widgets
         .get(id)
         .map(|frame| {
+            // FontString:GetWidth reports its text extent after SetText/SetWidth,
+            // even when anchors also determine the eventual render rect.
+            if frame.widget_type == crate::widget::WidgetType::FontString && frame.width > 0.0 {
+                return (frame.width, frame.height);
+            }
             if let Some(rect) = frame.layout_rect {
                 let eff_scale = frame.effective_scale.max(1e-6);
                 (rect.width / eff_scale, rect.height / eff_scale)
