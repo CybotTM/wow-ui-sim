@@ -6,6 +6,59 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
+#[test]
+fn test_admin_collections_pvp_method_surface_is_registered() {
+    let env = env();
+    let missing_method: Option<String> = env
+        .eval(
+            r#"
+            local methods = {
+                "AddTransmog",
+                "RemoveTransmog",
+                "AddTransmogAppearance",
+                "SetTransmogForSlot",
+                "CollectHeirloom",
+                "UncollectHeirloom",
+                "SetMountCollected",
+                "SetPetCollected",
+                "SetToyCollected",
+                "SetCampsiteCollected",
+                "SetAchievementEarned",
+                "HasAchievement",
+                "CollectMount",
+                "UncollectMount",
+                "CollectPet",
+                "UncollectPet",
+                "CollectToy",
+                "UncollectToy",
+                "CollectCampsite",
+                "UncollectCampsite",
+                "EarnAchievement",
+                "SetPvPEnabled",
+                "SetHonorLevel",
+                "SetGuildInfo",
+                "JoinGuild",
+                "ClearGuild",
+                "LeaveGuild",
+            }
+
+            for _, method in ipairs(methods) do
+                if type(A_Admin[method]) ~= "function" then
+                    return method
+                end
+            end
+
+            return nil
+        "#,
+        )
+        .unwrap();
+
+    assert!(
+        missing_method.is_none(),
+        "missing A_Admin collections/PvP method: {missing_method:?}"
+    );
+}
+
 // ============================================================================
 // SetHonorLevel
 // ============================================================================
@@ -450,12 +503,12 @@ fn test_c_ping_get_default_ping_options_returns_empty_table() {
 }
 
 #[test]
-fn test_c_lfg_list_get_available_categories_returns_empty_table() {
+fn test_c_lfg_list_get_available_categories_returns_seeded_categories() {
     let env = env();
     let count: i32 = env
         .eval("local categories = C_LFGList.GetAvailableCategories(); return #categories")
         .unwrap();
-    assert_eq!(count, 0);
+    assert_eq!(count, 5);
 }
 
 #[test]

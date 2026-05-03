@@ -16,6 +16,7 @@ use crate::lua_api::methods::{borrow_state, borrow_state_mut};
 use crate::lua_api::state::DEFAULT_LFG_QUEUE_POP_DELAY_SECONDS;
 use crate::lua_api::state_types::SecondaryPowerState;
 use crate::lua_bridge::{FromStack, TableBuilder};
+use rilua::vm::closure::RustFn;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -295,34 +296,48 @@ fn register_vault_and_premade(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("UpdatePremadeListing", update_premade_listing)
 }
 
-fn register_collections_pvp(b: TableBuilder) -> LuaResult<TableBuilder> {
-    b.set_function("AddTransmog", add_transmog)?
-        .set_function("RemoveTransmog", remove_transmog)?
-        .set_function("AddTransmogAppearance", add_transmog_appearance)?
-        .set_function("SetTransmogForSlot", set_transmog_for_slot)?
-        .set_function("CollectHeirloom", collect_heirloom)?
-        .set_function("UncollectHeirloom", uncollect_heirloom)?
-        .set_function("SetMountCollected", set_mount_collected)?
-        .set_function("SetPetCollected", set_pet_collected)?
-        .set_function("SetToyCollected", set_toy_collected)?
-        .set_function("SetCampsiteCollected", set_campsite_collected)?
-        .set_function("SetAchievementEarned", set_achievement_earned)?
-        .set_function("HasAchievement", has_achievement)?
-        .set_function("CollectMount", collect_mount)?
-        .set_function("UncollectMount", uncollect_mount)?
-        .set_function("CollectPet", collect_pet)?
-        .set_function("UncollectPet", uncollect_pet)?
-        .set_function("CollectToy", collect_toy)?
-        .set_function("UncollectToy", uncollect_toy)?
-        .set_function("CollectCampsite", collect_campsite)?
-        .set_function("UncollectCampsite", uncollect_campsite)?
-        .set_function("EarnAchievement", earn_achievement)?
-        .set_function("SetPvPEnabled", set_pvp_enabled)?
-        .set_function("SetHonorLevel", set_honor_level)?
-        .set_function("SetGuildInfo", set_guild_info)?
-        .set_function("JoinGuild", join_guild)?
-        .set_function("ClearGuild", clear_guild)?
-        .set_function("LeaveGuild", leave_guild)
+fn register_collections_pvp<'lua>(b: TableBuilder<'lua>) -> LuaResult<TableBuilder<'lua>> {
+    register_functions(b, COLLECTIONS_PVP_FUNCTIONS)
+}
+
+const COLLECTIONS_PVP_FUNCTIONS: &[(&str, RustFn)] = &[
+    ("AddTransmog", add_transmog),
+    ("RemoveTransmog", remove_transmog),
+    ("AddTransmogAppearance", add_transmog_appearance),
+    ("SetTransmogForSlot", set_transmog_for_slot),
+    ("CollectHeirloom", collect_heirloom),
+    ("UncollectHeirloom", uncollect_heirloom),
+    ("SetMountCollected", set_mount_collected),
+    ("SetPetCollected", set_pet_collected),
+    ("SetToyCollected", set_toy_collected),
+    ("SetCampsiteCollected", set_campsite_collected),
+    ("SetAchievementEarned", set_achievement_earned),
+    ("HasAchievement", has_achievement),
+    ("CollectMount", collect_mount),
+    ("UncollectMount", uncollect_mount),
+    ("CollectPet", collect_pet),
+    ("UncollectPet", uncollect_pet),
+    ("CollectToy", collect_toy),
+    ("UncollectToy", uncollect_toy),
+    ("CollectCampsite", collect_campsite),
+    ("UncollectCampsite", uncollect_campsite),
+    ("EarnAchievement", earn_achievement),
+    ("SetPvPEnabled", set_pvp_enabled),
+    ("SetHonorLevel", set_honor_level),
+    ("SetGuildInfo", set_guild_info),
+    ("JoinGuild", join_guild),
+    ("ClearGuild", clear_guild),
+    ("LeaveGuild", leave_guild),
+];
+
+fn register_functions<'lua>(
+    mut builder: TableBuilder<'lua>,
+    functions: &[(&str, RustFn)],
+) -> LuaResult<TableBuilder<'lua>> {
+    for (name, func) in functions {
+        builder = builder.set_function(name, *func)?;
+    }
+    Ok(builder)
 }
 
 fn register_inventory_misc(b: TableBuilder) -> LuaResult<TableBuilder> {
@@ -399,10 +414,10 @@ fn set_frame_protected(state: &mut LuaState) -> LuaResult<u32> {
     let name = String::from_stack(state, 1)?;
     let v = bool::from_stack(state, 2)?;
     let mut st = borrow_state_mut(state)?;
-    if let Some(id) = st.widgets.get_id_by_name(&name) {
-        if let Some(frame) = st.widgets.get_mut(id) {
-            frame.is_protected = v;
-        }
+    if let Some(id) = st.widgets.get_id_by_name(&name)
+        && let Some(frame) = st.widgets.get_mut(id)
+    {
+        frame.is_protected = v;
     }
     Ok(0)
 }
