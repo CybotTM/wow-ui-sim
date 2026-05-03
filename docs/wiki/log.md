@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-02] update | Action-button same-parent region order
+
+Updated `investigations/action-bar-spell-icons.md` and
+`investigations/root-region-render-order.md` after action-button icons were
+still hidden behind `SlotArt`. Documented the split between root-region ordering
+(ascending id, newer root regions on top) and same-parent region ordering
+(reverse id tie breaker so earlier XML regions can render above later siblings).
+
 ## [2026-05-02] add | Root-region render order
 
 Added `investigations/root-region-render-order.md` after tracing an inverted

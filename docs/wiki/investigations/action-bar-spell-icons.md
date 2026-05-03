@@ -10,11 +10,11 @@ Four compounding bugs caused spell icon textures to be invisible on action bar b
 
 **Fix**: Removed the no-op from `widget_model.rs`.
 
-### 2. Draw order within same layer (FIXED)
+### 2. Same-parent region draw order within same layer (FIXED)
 
 Icon and SlotArt were both at BACKGROUND sub-level 0. SlotArt (opaque dark wing texture) had a higher widget ID and rendered on top of the icon. WoW's engine renders earlier-created textures on top within the same draw layer/sublevel.
 
-**Fix**: Reversed the ID tiebreaker in `intra_strata_sort_key` — lower IDs now sort last (render on top). Added `type_flag` so FontStrings always render above Textures in the same layer.
+**Fix**: Same-parent collected regions use reverse ID as the final tie breaker in `state_render_buckets::sort_regions`, so lower IDs emit later and render on top. Root-region buckets stay separate: `sort_root_regions()` uses ascending ID so newer root regions draw on top.
 
 ### 3. `SetDrawLayer` sublevel parameter ignored (FIXED)
 
@@ -30,13 +30,17 @@ Icon and SlotArt were both at BACKGROUND sub-level 0. SlotArt (opaque dark wing 
 
 ## Render Sort Key
 
+Same-parent collected regions:
+
 ```
-(frame_level, region_flag, draw_layer, draw_sub_layer, type_flag, Reverse(id))
+(depth, draw_layer, draw_sub_layer, type_flag, Reverse(id))
 ```
 
-- `region_flag`: 0 for frames, 1 for textures/fontstrings
 - `type_flag`: 0 for Texture, 1 for FontString
 - `Reverse(id)`: Earlier-created regions render on top within the same layer
+
+Root-level regions use ascending `id` instead; do not apply the same-parent tie
+breaker to root-region buckets.
 
 ## Action Button Layer Structure
 
@@ -50,6 +54,7 @@ OVERLAY:     NormalTexture (transparent center) → PushedTexture
 - `src/lua_api/frame/methods/widget_model.rs`
 - `src/lua_api/frame/methods/methods_texture.rs`
 - `src/iced_app/frame_collect.rs`
+- `src/lua_api/state_render_buckets.rs`
 - `src/xml/types_elements.rs`
 - `src/loader/xml_frame.rs`, `xml_texture.rs`, `xml_fontstring.rs`
 

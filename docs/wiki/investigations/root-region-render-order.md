@@ -6,9 +6,9 @@ Root-level regions in the same draw layer must render in creation order, so newe
 
 `sort_root_regions()` handled regions whose parent is missing, invisible, in a different strata, or a strata root boundary such as `UIParent`. It previously used `Reverse(id)` as the final tie breaker, which made later-created root regions render before earlier regions. That inverted the normal "newer draws on top" rule for root-region buckets only.
 
-The fix is to use ascending widget id as the tie breaker, matching the existing child-region ordering. `show_visible_region_repairs_parent_subtree_without_invalidating_buckets` now expects repaired visible regions to stay in creation order instead of jumping newly shown regions above older siblings. `tests/root_region_order.rs` covers the direct root-region case.
+The fix is to use ascending widget id as the tie breaker for root-region buckets. `show_visible_region_repairs_parent_subtree_without_invalidating_buckets` now expects repaired visible root regions to stay in creation order instead of jumping newly shown regions above older siblings. `tests/root_region_order.rs` covers the direct root-region case.
 
-This does not change button-internal ordering: `NormalTexture` on `OVERLAY` still draws above `ARTWORK` regions inside the same action button. It only removes the root-region reverse ordering path.
+Do not conflate this with same-parent region stacks. Same-parent texture regions still need the opposite final tie breaker so the earlier XML child can render on top of later siblings like action-button `SlotArt`.
 
 ## Sources
 
