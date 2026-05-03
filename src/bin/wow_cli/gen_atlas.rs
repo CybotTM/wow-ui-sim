@@ -126,34 +126,53 @@ fn write_header(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_atlas_structs(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "#[derive(Debug, Clone)]")?;
-    writeln!(out, "pub struct AtlasInfo {{")?;
-    writeln!(out, "    pub file: &'static str,")?;
-    writeln!(out, "    pub width: u32,")?;
-    writeln!(out, "    pub height: u32,")?;
-    writeln!(out, "    pub left_tex_coord: f32,")?;
-    writeln!(out, "    pub right_tex_coord: f32,")?;
-    writeln!(out, "    pub top_tex_coord: f32,")?;
-    writeln!(out, "    pub bottom_tex_coord: f32,")?;
-    writeln!(out, "    pub tiles_horizontally: bool,")?;
-    writeln!(out, "    pub tiles_vertically: bool,")?;
-    writeln!(out, "}}")?;
-    writeln!(out)?;
-    writeln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]")?;
-    writeln!(out, "pub enum AtlasSliceMode {{")?;
-    writeln!(out, "    Stretch,")?;
-    writeln!(out, "    Tile,")?;
-    writeln!(out, "}}")?;
-    writeln!(out)?;
-    writeln!(out, "#[derive(Debug, Clone, Copy)]")?;
-    writeln!(out, "pub struct AtlasSliceInfo {{")?;
-    writeln!(out, "    pub left: u32,")?;
-    writeln!(out, "    pub top: u32,")?;
-    writeln!(out, "    pub right: u32,")?;
-    writeln!(out, "    pub bottom: u32,")?;
-    writeln!(out, "    pub mode: AtlasSliceMode,")?;
-    writeln!(out, "}}")?;
-    writeln!(out)?;
+    write_literal_lines(out, ATLAS_INFO_STRUCT)?;
+    write_literal_lines(out, ATLAS_SLICE_MODE_ENUM)?;
+    write_literal_lines(out, ATLAS_SLICE_INFO_STRUCT)?;
+    Ok(())
+}
+
+const ATLAS_INFO_STRUCT: &[&str] = &[
+    "#[derive(Debug, Clone)]",
+    "pub struct AtlasInfo {",
+    "    pub file: &'static str,",
+    "    pub width: u32,",
+    "    pub height: u32,",
+    "    pub left_tex_coord: f32,",
+    "    pub right_tex_coord: f32,",
+    "    pub top_tex_coord: f32,",
+    "    pub bottom_tex_coord: f32,",
+    "    pub tiles_horizontally: bool,",
+    "    pub tiles_vertically: bool,",
+    "}",
+    "",
+];
+
+const ATLAS_SLICE_MODE_ENUM: &[&str] = &[
+    "#[derive(Debug, Clone, Copy, PartialEq, Eq)]",
+    "pub enum AtlasSliceMode {",
+    "    Stretch,",
+    "    Tile,",
+    "}",
+    "",
+];
+
+const ATLAS_SLICE_INFO_STRUCT: &[&str] = &[
+    "#[derive(Debug, Clone, Copy)]",
+    "pub struct AtlasSliceInfo {",
+    "    pub left: u32,",
+    "    pub top: u32,",
+    "    pub right: u32,",
+    "    pub bottom: u32,",
+    "    pub mode: AtlasSliceMode,",
+    "}",
+    "",
+];
+
+fn write_literal_lines(out: &mut File, lines: &[&str]) -> std::io::Result<()> {
+    for line in lines {
+        writeln!(out, "{line}")?;
+    }
     Ok(())
 }
 
