@@ -1,5 +1,9 @@
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 use super::{TextureData, TextureManager, normalize_wow_path};
 
@@ -136,10 +140,35 @@ impl TextureManager {
         width: u32,
         height: u32,
     ) -> Option<&TextureData> {
+        self.load_sub_region_with_cache_root(
+            wow_path,
+            x,
+            y,
+            width,
+            height,
+            persistent_crop_cache_root().as_deref(),
+        )
+    }
+
+    fn load_sub_region_with_cache_root(
+        &mut self,
+        wow_path: &str,
+        x: u32,
+        y: u32,
+        width: u32,
+        height: u32,
+        cache_root: Option<&Path>,
+    ) -> Option<&TextureData> {
         let normalized = normalize_wow_path(wow_path);
         let key = format!("{}#{}_{}_{}_{}", normalized, x, y, width, height);
 
         if self.sub_cache.contains_key(&key) {
+            return self.sub_cache.get(&key);
+        }
+        if let Some(cache_root) = cache_root
+            && let Some(cached) = load_persistent_sub_region_cache(cache_root, &key)
+        {
+            self.sub_cache.insert(key.clone(), cached);
             return self.sub_cache.get(&key);
         }
 
@@ -149,6 +178,9 @@ impl TextureManager {
         if let Some(full_data) = self.cache.get(&normalized)
             && let Some(sub_data) = extract_sub_region(full_data, x, y, width, height)
         {
+            if let Some(cache_root) = cache_root {
+                store_persistent_sub_region_cache(cache_root, &key, &sub_data);
+            }
             self.sub_cache.insert(key.clone(), sub_data);
             return self.sub_cache.get(&key);
         }
@@ -239,32 +271,13 @@ impl TextureManager {
     /// Resolve path with case-insensitive directory matching within a base directory.
     fn resolve_case_insensitive_in(&self, base: &Path, path: &str) -> Option<PathBuf> {
         let components: Vec<&str> = path.split('/').collect();
+        let file_name = components.last()?;
         let mut current = base.to_path_buf();
 
-        for (index, component) in components.iter().enumerate() {
-            let is_last = index == components.len() - 1;
-
-            if is_last {
-                for ext in texture_extension_priority() {
-                    let with_ext = format!("{}.{}", component, ext);
-                    if let Some(entry) = find_case_insensitive(&current, &with_ext) {
-                        return Some(entry);
-                    }
-                }
-                if let Some(entry) = find_case_insensitive(&current, component) {
-                    return Some(entry);
-                }
-            } else if let Some(entry) = find_case_insensitive(&current, component) {
-                if entry.is_dir() {
-                    current = entry;
-                } else {
-                    return None;
-                }
-            } else {
-                return None;
-            }
+        for component in components.iter().take(components.len().saturating_sub(1)) {
+            current = find_case_insensitive_dir(&current, component)?;
         }
-        None
+        find_case_insensitive_file(&current, file_name)
     }
 }
 
@@ -276,10 +289,79 @@ fn normalize_crop_request_key(path: &str) -> String {
     normalize_wow_path(path)
 }
 
+fn persistent_crop_cache_root() -> Option<PathBuf> {
+    let dir = dirs::cache_dir()?.join("wow-ui-sim").join("crop-cache");
+    std::fs::create_dir_all(&dir).ok()?;
+    Some(dir)
+}
+
+fn load_persistent_sub_region_cache(root: &Path, key: &str) -> Option<TextureData> {
+    let path = persistent_sub_region_cache_path(root, key);
+    let rgba = image::open(path).ok()?.to_rgba8();
+    Some(TextureData {
+        width: rgba.width(),
+        height: rgba.height(),
+        pixels: Arc::<[u8]>::from(rgba.into_raw()),
+    })
+}
+
+fn store_persistent_sub_region_cache(root: &Path, key: &str, data: &TextureData) {
+    let path = persistent_sub_region_cache_path(root, key);
+    let Some(parent) = path.parent() else {
+        return;
+    };
+    if std::fs::create_dir_all(parent).is_err() {
+        return;
+    }
+    let Some(image) = image::RgbaImage::from_raw(data.width, data.height, data.pixels.to_vec())
+    else {
+        return;
+    };
+    let _ = image.save(path);
+}
+
+fn persistent_sub_region_cache_path(root: &Path, key: &str) -> PathBuf {
+    let mut hasher = DefaultHasher::new();
+    key.hash(&mut hasher);
+    let hash = hasher.finish();
+    let prefix = safe_crop_cache_prefix(key);
+    root.join(format!("{prefix}-{hash:016x}.png"))
+}
+
+fn safe_crop_cache_prefix(key: &str) -> String {
+    let mut prefix = String::new();
+    for ch in key.chars() {
+        if prefix.len() >= 96 {
+            break;
+        }
+        if ch.is_ascii_alphanumeric() {
+            prefix.push(ch.to_ascii_lowercase());
+        } else if !prefix.ends_with('_') {
+            prefix.push('_');
+        }
+    }
+    prefix.trim_matches('_').to_string()
+}
+
 fn texture_extension_priority() -> &'static [&'static str] {
     &[
         "blp", "BLP", "webp", "WEBP", "PNG", "png", "tga", "TGA", "jpg", "JPG",
     ]
+}
+
+fn find_case_insensitive_file(dir: &Path, name: &str) -> Option<PathBuf> {
+    for ext in texture_extension_priority() {
+        let with_ext = format!("{name}.{ext}");
+        if let Some(entry) = find_case_insensitive(dir, &with_ext) {
+            return Some(entry);
+        }
+    }
+    find_case_insensitive(dir, name)
+}
+
+fn find_case_insensitive_dir(dir: &Path, name: &str) -> Option<PathBuf> {
+    let entry = find_case_insensitive(dir, name)?;
+    entry.is_dir().then_some(entry)
 }
 
 /// Find a directory entry case-insensitively.
@@ -395,8 +477,9 @@ fn is_edge_color_source(pixel: &[u8]) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::extract_sub_region;
+    use super::{extract_sub_region, persistent_sub_region_cache_path};
     use crate::texture::TextureData;
+    use std::path::Path;
     use std::sync::Arc;
 
     #[test]
@@ -415,5 +498,43 @@ mod tests {
 
         assert_eq!(&cropped.pixels[4..8], &[220, 180, 40, 96]);
         assert_eq!(&cropped.pixels[8..12], &[220, 180, 40, 0]);
+    }
+
+    #[test]
+    fn cropped_sub_region_uses_persistent_cache_without_base_texture() {
+        let root = tempfile::tempdir().unwrap();
+        let mut source_mgr = crate::texture::TextureManager::new();
+        source_mgr.insert_test_texture(
+            "Interface/Foo/Atlas",
+            TextureData {
+                width: 2,
+                height: 2,
+                pixels: Arc::from([1, 2, 3, 255, 4, 5, 6, 255, 7, 8, 9, 255, 10, 11, 12, 255]),
+            },
+        );
+
+        let stored = source_mgr
+            .load_sub_region_with_cache_root("Interface/Foo/Atlas", 1, 0, 1, 2, Some(root.path()))
+            .unwrap()
+            .clone();
+
+        let mut cached_mgr = crate::texture::TextureManager::new();
+        let cached = cached_mgr
+            .load_sub_region_with_cache_root("Interface/Foo/Atlas", 1, 0, 1, 2, Some(root.path()))
+            .unwrap();
+
+        assert_eq!(cached.width, 1);
+        assert_eq!(cached.height, 2);
+        assert_eq!(cached.pixels, stored.pixels);
+    }
+
+    #[test]
+    fn persistent_crop_cache_path_includes_stable_hash_suffix() {
+        let root = Path::new("/tmp/crops");
+        let path = persistent_sub_region_cache_path(root, "Interface/Foo#1_2_3_4");
+        let file_name = path.file_name().unwrap().to_string_lossy();
+
+        assert!(file_name.starts_with("interface_foo_1_2_3_4-"));
+        assert!(file_name.ends_with(".png"));
     }
 }

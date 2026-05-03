@@ -830,6 +830,10 @@ new investigation page.
 
 Created `investigations/world-map-texture-loading-budget.md` to document the post-rebuild-fix world-map stalls: hidden BC tile uploads, preload/draw source-cache mismatch, the new BC cache in `TextureManager`, and the smaller draw/tick texture budgets. Updated `index.md` with the new investigation page.
 
+## [2026-05-03] investigation | LFD role icon slowness
+
+Created `investigations/lfd-role-icon-slowness.md` for the LFD load pause around role selection icons. Root cause: role icons/backgrounds are button atlas crops from `Interface\lfgframe\uilfgprompts`, and crop extraction decoded the full 2048x2048 BLP before producing small sub-regions. Documented the persistent crop cache added in `TextureManager::load_sub_region` and updated `index.md`.
+
 ## [2026-04-13] ingest | world map frame-level rebuild investigation
 
 ## [2026-04-13] investigations | startup CreateFrame profiling follow-up
