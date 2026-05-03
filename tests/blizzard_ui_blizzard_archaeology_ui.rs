@@ -37,3 +37,6 @@ mod behavior_keystone_click_toggles_socket;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_completed_page_paginates.rs"]
 mod behavior_completed_page_paginates;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_race_filter_dropdown_filters_listing.rs"]
+mod behavior_race_filter_dropdown_filters_listing;
