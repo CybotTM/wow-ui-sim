@@ -89,210 +89,280 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
         return Cow::Borrowed(bytes);
     };
 
-    let patched = if chunk_name.ends_with("/ChatFrameUtil.lua") {
-        source
-            .replace(
-                "local info = ChatTypeInfo[\"SYSTEM\"];",
-                "local info = ChatTypeInfo[\"SYSTEM\"] or { r = 1, g = 1, b = 0, id = 1 };",
-            )
-            .replacen(
-                "previousValue:Hide();",
-                "if type(previousValue.Hide) == \"function\" then previousValue:Hide(); end",
-                1,
-            )
-            .replacen(
-                "FCFClickAnywhereButton_UpdateState(previousValue.chatFrame.clickAnywhereButton);",
-                "if previousValue.chatFrame and previousValue.chatFrame.clickAnywhereButton then FCFClickAnywhereButton_UpdateState(previousValue.chatFrame.clickAnywhereButton); end",
-                1,
-            )
-            .replacen(
-                "FCFClickAnywhereButton_UpdateState(editBox.chatFrame.clickAnywhereButton);",
-                "if editBox.chatFrame and editBox.chatFrame.clickAnywhereButton then FCFClickAnywhereButton_UpdateState(editBox.chatFrame.clickAnywhereButton); end",
-                1,
-            )
-    } else if chunk_name.ends_with("/Deprecated_ArenaUI.lua") {
-        source
-            .replacen(
-                "self.layoutIndex = self:GetParent().layoutIndex + 1;",
-                "self.layoutIndex = (self:GetParent().layoutIndex or ((id * 2) - 1)) + 1;",
-                1,
-            )
-            .replacen(
-                "_G[prefix..\"HealthBar\"]:SetBarTextZeroText(DEAD);",
-                "if _G[prefix..\"HealthBar\"] then _G[prefix..\"HealthBar\"]:SetBarTextZeroText(DEAD); end",
-                1,
-            )
-            .replacen(
-                "_G[prefix..\"Name\"]:Hide();",
-                "if _G[prefix..\"Name\"] then _G[prefix..\"Name\"]:Hide(); end",
-                1,
-            )
-    } else if chunk_name.ends_with("/Blizzard_CodeOfConduct.lua") {
-        source.replace(
-            "ChatFrameUtil.AddSystemMessage(ONLINE_SAFETY_NOTICE);",
-            "-- suppressed in the simulator to keep chat history tests stable",
-        )
-    } else if chunk_name.ends_with("/VoiceChatTranscriptionFrame.lua") {
-        source.replace(
-            "chatInfo = ChatTypeInfo[chatType];",
-            "chatInfo = ChatTypeInfo[chatType] or ChatTypeInfo.SYSTEM or { r = 1, g = 1, b = 0, id = 1 };",
-        )
-    } else if chunk_name.ends_with("/EventUtil.lua") {
-        format!(
-            "if EventUtil ~= nil then return end\n{}",
-            source.replace(
-                "callback();",
-                "if type(callback) == \"function\" then callback(); end",
-            )
-        )
-    } else if chunk_name.ends_with("/LocalizationMachinery.lua") {
-        format!("if SetupLocalization ~= nil then return end\n{source}")
-    } else if chunk_name.ends_with("/Blizzard_AddOnList/AddonList.lua") {
-        source.replacen(
-            "local group = C_AddOns.GetAddOnMetadata(i, \"Group\");",
-            "local group = C_AddOns.GetAddOnMetadata(i, \"Group\");\n\t\tif type(group) ~= \"string\" or group == \"\" then\n\t\t\tgroup = C_AddOns.GetAddOnName(i);\n\t\tend",
-            1,
-        )
-    } else if chunk_name.ends_with("/EditModeManager.lua") {
-        source
-            .replacen(
-                "function EditModeManagerFrameMixin:ReconcileLayoutsWithModern()\n\tlocal somethingChanged = false;",
-                "function EditModeManagerFrameMixin:ReconcileLayoutsWithModern()\n\tif type(self.layoutInfo) ~= \"table\" or type(self.layoutInfo.layouts) ~= \"table\" then\n\t\treturn false;\n\tend\n\tlocal somethingChanged = false;",
-                1,
-            )
-            .replacen(
-                "function EditModeManagerFrameMixin:UpdateLayoutInfo(layoutInfo, reconcileLayouts)\n\tself.layoutApplyInProgress = true;\n\tself.layoutInfo = layoutInfo;",
-                "function EditModeManagerFrameMixin:UpdateLayoutInfo(layoutInfo, reconcileLayouts)\n\tself.layoutApplyInProgress = true;\n\tself.layoutInfo = layoutInfo or self.layoutInfo or { layouts = {}, activeLayout = 1 };\n\tif type(self.layoutInfo.layouts) ~= \"table\" then\n\t\tself.layoutInfo.layouts = {};\n\tend",
-                1,
-            )
-    } else if chunk_name.ends_with("/MainMenuBarMicroButtons.lua") {
-        source
-            .replace(
-                "local wasShown = CatalogShopInboundInterface.IsShown();",
-                "local wasShown = false;\n\t\tif CatalogShopInboundInterface and type(CatalogShopInboundInterface.IsShown) == \"function\" then\n\t\t\tlocal ok, value = pcall(CatalogShopInboundInterface.IsShown);\n\t\t\twasShown = ok and value or false;\n\t\tend",
-            )
-            .replace(
-                "local wasShown = StoreFrame_IsShown();",
-                "local wasShown = false;\n\t\tif type(StoreFrame_IsShown) == \"function\" then\n\t\t\tlocal ok, value = pcall(StoreFrame_IsShown);\n\t\t\twasShown = ok and value or false;\n\t\tend",
-            )
-    } else if chunk_name.ends_with("/UIParent.lua") {
-        source
-            .replacen(
-                "if ( lastTalkedToGM ~= \"\" ) then",
-                "if false and ( lastTalkedToGM ~= \"\" ) then",
-                1,
-            )
-            .replacen(
-                "NPETutorial_AttemptToBegin(event);",
-                "if type(NPETutorial_AttemptToBegin) == \"function\" then NPETutorial_AttemptToBegin(event); end",
-                1,
-            )
-            .replacen(
-                "UpdateMicroButtons();",
-                "pcall(UpdateMicroButtons);",
-                1,
-            )
-            .replacen(
-                "CatalogShopInboundInterface.CheckForFree(event);",
-                "if CatalogShopInboundInterface and type(CatalogShopInboundInterface.CheckForFree) == \"function\" then CatalogShopInboundInterface.CheckForFree(event); end",
-                1,
-            )
-            .replacen(
-                "StoreFrame_CheckForFree(event);",
-                "if type(StoreFrame_CheckForFree) == \"function\" then StoreFrame_CheckForFree(event); end",
-                1,
-            )
-            .replacen(
-                "EventUtil.TriggerOnVariablesLoaded();",
-                "-- EventUtil.TriggerOnVariablesLoaded() skipped in rilua startup",
-                1,
-            )
-    } else if chunk_name.ends_with("/Blizzard_Shared_StoreUIInbound.lua") {
-        source.replace(
-            "function StoreFrame_IsShown()\n\treturn StoreFrame:GetAttribute(\"isshown\");\nend",
-            "function StoreFrame_IsShown()\n\tif type(StoreFrame) ~= \"table\" or type(StoreFrame.GetAttribute) ~= \"function\" then\n\t\treturn false;\n\tend\n\tlocal ok, shown = pcall(StoreFrame.GetAttribute, StoreFrame, \"isshown\");\n\treturn ok and shown or false;\nend",
-        )
-    } else if chunk_name.ends_with("/MinimalSlider.lua") {
-        source.replace(
-            "self.Slider.Thumb:SetAlpha(alpha);",
-            "if self.Slider and self.Slider.Thumb then self.Slider.Thumb:SetAlpha(alpha); end",
-        )
-    } else if chunk_name.ends_with("/FloatingChatFrame.lua") {
-        source
-            .replace(
-                "DEFAULT_TAB_SELECTED_COLOR_TABLE = { r = 1, g = 0.5, b = 0.25 };",
-                "DEFAULT_TAB_SELECTED_COLOR_TABLE = { r = 1, g = 0.5, b = 0.25 };\n\nlocal function __wow_ensure_chat_tab_font_string(button)\n\tif not button then\n\t\treturn nil;\n\tend\n\n\tlocal fontString = button:GetFontString();\n\tif fontString then\n\t\treturn fontString;\n\tend\n\tif type(button.CreateFontString) ~= \"function\" then\n\t\treturn nil;\n\tend\n\n\tlocal name = button.GetName and button:GetName();\n\tlocal childName = type(name) == \"string\" and name ~= \"\" and (name..\"Text\") or nil;\n\tfontString = button:CreateFontString(childName, \"ARTWORK\");\n\tif fontString and type(button.SetFontString) == \"function\" then\n\t\tbutton:SetFontString(fontString);\n\tend\n\treturn fontString;\nend",
-            )
-            .replace(
-                "UIFrameFadeIn(object, CHAT_FRAME_FADE_TIME, object:GetAlpha(), max(chatFrame.oldAlpha, DEFAULT_CHATFRAME_ALPHA));",
-                "UIFrameFadeIn(object, CHAT_FRAME_FADE_TIME, object:GetAlpha(), max(chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA, DEFAULT_CHATFRAME_ALPHA));",
-            )
-            .replace(
-                "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha(), chatFrame.oldAlpha), chatFrame.oldAlpha);",
-                "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha() or 0, chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA), chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA);",
-            )
-            .replace(
-                "self:GetFontString():SetTextColor(colorTable.r, colorTable.g, colorTable.b);",
-                "do local fontString = __wow_ensure_chat_tab_font_string(self); if fontString then fontString:SetTextColor(colorTable.r, colorTable.g, colorTable.b); end end",
-            )
-            .replace(
-                "self:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
-                "do local fontString = __wow_ensure_chat_tab_font_string(self); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
-            )
-            .replace(
-                "minFrame:GetFontString():SetTextColor(colorTable.r, colorTable.g, colorTable.b);",
-                "do local fontString = __wow_ensure_chat_tab_font_string(minFrame); if fontString then fontString:SetTextColor(colorTable.r, colorTable.g, colorTable.b); end end",
-            )
-            .replace(
-                "minFrame:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
-                "do local fontString = __wow_ensure_chat_tab_font_string(minFrame); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
-            )
-            .replace(
-                "button:GetFontString():SetTextColor(colorTable.r, colorTable.g, colorTable.b);",
-                "do local fontString = __wow_ensure_chat_tab_font_string(button); if fontString then fontString:SetTextColor(colorTable.r, colorTable.g, colorTable.b); end end",
-            )
-            .replace(
-                "button:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
-                "do local fontString = __wow_ensure_chat_tab_font_string(button); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
-            )
-    } else if chunk_name.ends_with("/MenuTemplates.lua") {
-        source
-            .replace(
-                "function DropdownTextMixin:UpdateText()\n\tself.Text:SetText(self:GetUpdateText());",
-                "local function __wow_ensure_dropdown_text_font_string(self)\n\tif self.Text then\n\t\treturn self.Text;\n\tend\n\tif not MenuVariants or type(MenuVariants.CreateFontString) ~= \"function\" then\n\t\treturn nil;\n\tend\n\tlocal ok, fontString = pcall(MenuVariants.CreateFontString, self);\n\tif not ok or fontString == nil then\n\t\treturn nil;\n\tend\n\tself.Text = fontString;\n\treturn fontString;\nend\n\nfunction DropdownTextMixin:UpdateText()\n\tlocal text = __wow_ensure_dropdown_text_font_string(self);\n\tif not text then\n\t\treturn;\n\tend\n\ttext:SetText(self:GetUpdateText());",
-            )
-            .replace(
-                "local newWidth = self.Text:GetUnboundedStringWidth();",
-                "local newWidth = text:GetUnboundedStringWidth();",
-            )
-    } else if chunk_name.ends_with("TextToSpeechFrame.lua") {
-        source.replace(
-            "function TextToSpeechFrame_CheckLoad(self)",
-            "local __wow_saved_text_to_speech_voice_dropdown = TextToSpeechFrame_SetupVoiceDropdown\nlocal __wow_saved_text_to_speech_alt_voice_dropdown = TextToSpeechFrame_SetupAlternateVoiceDropdown\nlocal function __wow_ensure_text_to_speech_dropdown_helpers(self)\n\tif type(TextToSpeechFrame_SetupVoiceDropdown) ~= \"function\" then\n\t\tif type(__wow_saved_text_to_speech_voice_dropdown) == \"function\" then\n\t\t\tTextToSpeechFrame_SetupVoiceDropdown = __wow_saved_text_to_speech_voice_dropdown\n\t\telse\n\t\t\tfunction TextToSpeechFrame_SetupVoiceDropdown(frame)\n\t\t\t\tSetupVoiceMenu(frame.PanelContainer.TtsVoiceDropdown, Enum.TtsVoiceType.Standard);\n\t\t\tend\n\t\tend\n\tend\n\tif type(TextToSpeechFrame_SetupAlternateVoiceDropdown) ~= \"function\" then\n\t\tif type(__wow_saved_text_to_speech_alt_voice_dropdown) == \"function\" then\n\t\t\tTextToSpeechFrame_SetupAlternateVoiceDropdown = __wow_saved_text_to_speech_alt_voice_dropdown\n\t\telse\n\t\t\tfunction TextToSpeechFrame_SetupAlternateVoiceDropdown(frame)\n\t\t\t\tSetupVoiceMenu(frame.PanelContainer.TtsVoiceAlternateDropdown, Enum.TtsVoiceType.Alternate);\n\t\t\tend\n\t\tend\n\tend\nend\n\nfunction TextToSpeechFrame_CheckLoad(self)\n\t__wow_ensure_text_to_speech_dropdown_helpers(self)",
-        )
-    } else if chunk_name.ends_with("/Blizzard_PetBattleUI.lua") {
-        source
-            .replace(
-                "cooldown = max(currentCooldown, currentLockdown);",
-                "cooldown = max(currentCooldown or 0, currentLockdown or 0);",
-            )
-            .replace(
-                "self.XPBar:SetWidth(max((xp / max(maxXp,1)) * self.xpBarWidth, 1));",
-                "self.XPBar:SetWidth(max(((xp or 0) / max(maxXp or 1,1)) * self.xpBarWidth, 1));",
-            )
-            .replace(
-                "self.ActualHealthBar:SetWidth((health / max(maxHealth,1)) * self.healthBarWidth);",
-                "self.ActualHealthBar:SetWidth(((health or 0) / max(maxHealth or 1,1)) * self.healthBarWidth);",
-            )
-    } else {
+    let Some(patch) = lua_source_patch_for_chunk(chunk_name) else {
         return Cow::Borrowed(bytes);
     };
+
+    let patched = apply_lua_source_patch(source, patch.operations);
     if patched == source {
         return Cow::Borrowed(bytes);
     }
     Cow::Owned(patched.into_bytes())
 }
 
+struct LuaSourcePatch {
+    suffix: &'static str,
+    operations: &'static [LuaSourcePatchOp],
+}
+
+enum LuaSourcePatchOp {
+    Prefix(&'static str),
+    Replace {
+        from: &'static str,
+        to: &'static str,
+    },
+    ReplaceOnce {
+        from: &'static str,
+        to: &'static str,
+    },
+}
+
+const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
+    LuaSourcePatch {
+        suffix: "/ChatFrameUtil.lua",
+        operations: &[
+            LuaSourcePatchOp::Replace {
+                from: "local info = ChatTypeInfo[\"SYSTEM\"];",
+                to: "local info = ChatTypeInfo[\"SYSTEM\"] or { r = 1, g = 1, b = 0, id = 1 };",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "previousValue:Hide();",
+                to: "if type(previousValue.Hide) == \"function\" then previousValue:Hide(); end",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "FCFClickAnywhereButton_UpdateState(previousValue.chatFrame.clickAnywhereButton);",
+                to: "if previousValue.chatFrame and previousValue.chatFrame.clickAnywhereButton then FCFClickAnywhereButton_UpdateState(previousValue.chatFrame.clickAnywhereButton); end",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "FCFClickAnywhereButton_UpdateState(editBox.chatFrame.clickAnywhereButton);",
+                to: "if editBox.chatFrame and editBox.chatFrame.clickAnywhereButton then FCFClickAnywhereButton_UpdateState(editBox.chatFrame.clickAnywhereButton); end",
+            },
+        ],
+    },
+    LuaSourcePatch {
+        suffix: "/Deprecated_ArenaUI.lua",
+        operations: &[
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "self.layoutIndex = self:GetParent().layoutIndex + 1;",
+                to: "self.layoutIndex = (self:GetParent().layoutIndex or ((id * 2) - 1)) + 1;",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "_G[prefix..\"HealthBar\"]:SetBarTextZeroText(DEAD);",
+                to: "if _G[prefix..\"HealthBar\"] then _G[prefix..\"HealthBar\"]:SetBarTextZeroText(DEAD); end",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "_G[prefix..\"Name\"]:Hide();",
+                to: "if _G[prefix..\"Name\"] then _G[prefix..\"Name\"]:Hide(); end",
+            },
+        ],
+    },
+    LuaSourcePatch {
+        suffix: "/Blizzard_CodeOfConduct.lua",
+        operations: &[LuaSourcePatchOp::Replace {
+            from: "ChatFrameUtil.AddSystemMessage(ONLINE_SAFETY_NOTICE);",
+            to: "-- suppressed in the simulator to keep chat history tests stable",
+        }],
+    },
+    LuaSourcePatch {
+        suffix: "/VoiceChatTranscriptionFrame.lua",
+        operations: &[LuaSourcePatchOp::Replace {
+            from: "chatInfo = ChatTypeInfo[chatType];",
+            to: "chatInfo = ChatTypeInfo[chatType] or ChatTypeInfo.SYSTEM or { r = 1, g = 1, b = 0, id = 1 };",
+        }],
+    },
+    LuaSourcePatch {
+        suffix: "/EventUtil.lua",
+        operations: &[
+            LuaSourcePatchOp::Replace {
+                from: "callback();",
+                to: "if type(callback) == \"function\" then callback(); end",
+            },
+            LuaSourcePatchOp::Prefix("if EventUtil ~= nil then return end\n"),
+        ],
+    },
+    LuaSourcePatch {
+        suffix: "/LocalizationMachinery.lua",
+        operations: &[LuaSourcePatchOp::Prefix(
+            "if SetupLocalization ~= nil then return end\n",
+        )],
+    },
+    LuaSourcePatch {
+        suffix: "/Blizzard_AddOnList/AddonList.lua",
+        operations: &[LuaSourcePatchOp::ReplaceOnce {
+            from: "local group = C_AddOns.GetAddOnMetadata(i, \"Group\");",
+            to: "local group = C_AddOns.GetAddOnMetadata(i, \"Group\");\n\t\tif type(group) ~= \"string\" or group == \"\" then\n\t\t\tgroup = C_AddOns.GetAddOnName(i);\n\t\tend",
+        }],
+    },
+    LuaSourcePatch {
+        suffix: "/EditModeManager.lua",
+        operations: &[
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "function EditModeManagerFrameMixin:ReconcileLayoutsWithModern()\n\tlocal somethingChanged = false;",
+                to: "function EditModeManagerFrameMixin:ReconcileLayoutsWithModern()\n\tif type(self.layoutInfo) ~= \"table\" or type(self.layoutInfo.layouts) ~= \"table\" then\n\t\treturn false;\n\tend\n\tlocal somethingChanged = false;",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "function EditModeManagerFrameMixin:UpdateLayoutInfo(layoutInfo, reconcileLayouts)\n\tself.layoutApplyInProgress = true;\n\tself.layoutInfo = layoutInfo;",
+                to: "function EditModeManagerFrameMixin:UpdateLayoutInfo(layoutInfo, reconcileLayouts)\n\tself.layoutApplyInProgress = true;\n\tself.layoutInfo = layoutInfo or self.layoutInfo or { layouts = {}, activeLayout = 1 };\n\tif type(self.layoutInfo.layouts) ~= \"table\" then\n\t\tself.layoutInfo.layouts = {};\n\tend",
+            },
+        ],
+    },
+    LuaSourcePatch {
+        suffix: "/MainMenuBarMicroButtons.lua",
+        operations: &[
+            LuaSourcePatchOp::Replace {
+                from: "local wasShown = CatalogShopInboundInterface.IsShown();",
+                to: "local wasShown = false;\n\t\tif CatalogShopInboundInterface and type(CatalogShopInboundInterface.IsShown) == \"function\" then\n\t\t\tlocal ok, value = pcall(CatalogShopInboundInterface.IsShown);\n\t\t\twasShown = ok and value or false;\n\t\tend",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "local wasShown = StoreFrame_IsShown();",
+                to: "local wasShown = false;\n\t\tif type(StoreFrame_IsShown) == \"function\" then\n\t\t\tlocal ok, value = pcall(StoreFrame_IsShown);\n\t\t\twasShown = ok and value or false;\n\t\tend",
+            },
+        ],
+    },
+    LuaSourcePatch {
+        suffix: "/UIParent.lua",
+        operations: &[
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "if ( lastTalkedToGM ~= \"\" ) then",
+                to: "if false and ( lastTalkedToGM ~= \"\" ) then",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "NPETutorial_AttemptToBegin(event);",
+                to: "if type(NPETutorial_AttemptToBegin) == \"function\" then NPETutorial_AttemptToBegin(event); end",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "UpdateMicroButtons();",
+                to: "pcall(UpdateMicroButtons);",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "CatalogShopInboundInterface.CheckForFree(event);",
+                to: "if CatalogShopInboundInterface and type(CatalogShopInboundInterface.CheckForFree) == \"function\" then CatalogShopInboundInterface.CheckForFree(event); end",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "StoreFrame_CheckForFree(event);",
+                to: "if type(StoreFrame_CheckForFree) == \"function\" then StoreFrame_CheckForFree(event); end",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "EventUtil.TriggerOnVariablesLoaded();",
+                to: "-- EventUtil.TriggerOnVariablesLoaded() skipped in rilua startup",
+            },
+        ],
+    },
+    LuaSourcePatch {
+        suffix: "/Blizzard_Shared_StoreUIInbound.lua",
+        operations: &[LuaSourcePatchOp::Replace {
+            from: "function StoreFrame_IsShown()\n\treturn StoreFrame:GetAttribute(\"isshown\");\nend",
+            to: "function StoreFrame_IsShown()\n\tif type(StoreFrame) ~= \"table\" or type(StoreFrame.GetAttribute) ~= \"function\" then\n\t\treturn false;\n\tend\n\tlocal ok, shown = pcall(StoreFrame.GetAttribute, StoreFrame, \"isshown\");\n\treturn ok and shown or false;\nend",
+        }],
+    },
+    LuaSourcePatch {
+        suffix: "/MinimalSlider.lua",
+        operations: &[LuaSourcePatchOp::Replace {
+            from: "self.Slider.Thumb:SetAlpha(alpha);",
+            to: "if self.Slider and self.Slider.Thumb then self.Slider.Thumb:SetAlpha(alpha); end",
+        }],
+    },
+    LuaSourcePatch {
+        suffix: "/FloatingChatFrame.lua",
+        operations: &[
+            LuaSourcePatchOp::Replace {
+                from: "DEFAULT_TAB_SELECTED_COLOR_TABLE = { r = 1, g = 0.5, b = 0.25 };",
+                to: "DEFAULT_TAB_SELECTED_COLOR_TABLE = { r = 1, g = 0.5, b = 0.25 };\n\nlocal function __wow_ensure_chat_tab_font_string(button)\n\tif not button then\n\t\treturn nil;\n\tend\n\n\tlocal fontString = button:GetFontString();\n\tif fontString then\n\t\treturn fontString;\n\tend\n\tif type(button.CreateFontString) ~= \"function\" then\n\t\treturn nil;\n\tend\n\n\tlocal name = button.GetName and button:GetName();\n\tlocal childName = type(name) == \"string\" and name ~= \"\" and (name..\"Text\") or nil;\n\tfontString = button:CreateFontString(childName, \"ARTWORK\");\n\tif fontString and type(button.SetFontString) == \"function\" then\n\t\tbutton:SetFontString(fontString);\n\tend\n\treturn fontString;\nend",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "UIFrameFadeIn(object, CHAT_FRAME_FADE_TIME, object:GetAlpha(), max(chatFrame.oldAlpha, DEFAULT_CHATFRAME_ALPHA));",
+                to: "UIFrameFadeIn(object, CHAT_FRAME_FADE_TIME, object:GetAlpha(), max(chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA, DEFAULT_CHATFRAME_ALPHA));",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha(), chatFrame.oldAlpha), chatFrame.oldAlpha);",
+                to: "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha() or 0, chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA), chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA);",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "self:GetFontString():SetTextColor(colorTable.r, colorTable.g, colorTable.b);",
+                to: "do local fontString = __wow_ensure_chat_tab_font_string(self); if fontString then fontString:SetTextColor(colorTable.r, colorTable.g, colorTable.b); end end",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "self:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
+                to: "do local fontString = __wow_ensure_chat_tab_font_string(self); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "minFrame:GetFontString():SetTextColor(colorTable.r, colorTable.g, colorTable.b);",
+                to: "do local fontString = __wow_ensure_chat_tab_font_string(minFrame); if fontString then fontString:SetTextColor(colorTable.r, colorTable.g, colorTable.b); end end",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "minFrame:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
+                to: "do local fontString = __wow_ensure_chat_tab_font_string(minFrame); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "button:GetFontString():SetTextColor(colorTable.r, colorTable.g, colorTable.b);",
+                to: "do local fontString = __wow_ensure_chat_tab_font_string(button); if fontString then fontString:SetTextColor(colorTable.r, colorTable.g, colorTable.b); end end",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "button:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
+                to: "do local fontString = __wow_ensure_chat_tab_font_string(button); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
+            },
+        ],
+    },
+    LuaSourcePatch {
+        suffix: "/MenuTemplates.lua",
+        operations: &[
+            LuaSourcePatchOp::Replace {
+                from: "function DropdownTextMixin:UpdateText()\n\tself.Text:SetText(self:GetUpdateText());",
+                to: "local function __wow_ensure_dropdown_text_font_string(self)\n\tif self.Text then\n\t\treturn self.Text;\n\tend\n\tif not MenuVariants or type(MenuVariants.CreateFontString) ~= \"function\" then\n\t\treturn nil;\n\tend\n\tlocal ok, fontString = pcall(MenuVariants.CreateFontString, self);\n\tif not ok or fontString == nil then\n\t\treturn nil;\n\tend\n\tself.Text = fontString;\n\treturn fontString;\nend\n\nfunction DropdownTextMixin:UpdateText()\n\tlocal text = __wow_ensure_dropdown_text_font_string(self);\n\tif not text then\n\t\treturn;\n\tend\n\ttext:SetText(self:GetUpdateText());",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "local newWidth = self.Text:GetUnboundedStringWidth();",
+                to: "local newWidth = text:GetUnboundedStringWidth();",
+            },
+        ],
+    },
+    LuaSourcePatch {
+        suffix: "TextToSpeechFrame.lua",
+        operations: &[LuaSourcePatchOp::Replace {
+            from: "function TextToSpeechFrame_CheckLoad(self)",
+            to: "local __wow_saved_text_to_speech_voice_dropdown = TextToSpeechFrame_SetupVoiceDropdown\nlocal __wow_saved_text_to_speech_alt_voice_dropdown = TextToSpeechFrame_SetupAlternateVoiceDropdown\nlocal function __wow_ensure_text_to_speech_dropdown_helpers(self)\n\tif type(TextToSpeechFrame_SetupVoiceDropdown) ~= \"function\" then\n\t\tif type(__wow_saved_text_to_speech_voice_dropdown) == \"function\" then\n\t\t\tTextToSpeechFrame_SetupVoiceDropdown = __wow_saved_text_to_speech_voice_dropdown\n\t\telse\n\t\t\tfunction TextToSpeechFrame_SetupVoiceDropdown(frame)\n\t\t\t\tSetupVoiceMenu(frame.PanelContainer.TtsVoiceDropdown, Enum.TtsVoiceType.Standard);\n\t\t\tend\n\t\tend\n\tend\n\tif type(TextToSpeechFrame_SetupAlternateVoiceDropdown) ~= \"function\" then\n\t\tif type(__wow_saved_text_to_speech_alt_voice_dropdown) == \"function\" then\n\t\t\tTextToSpeechFrame_SetupAlternateVoiceDropdown = __wow_saved_text_to_speech_alt_voice_dropdown\n\t\telse\n\t\t\tfunction TextToSpeechFrame_SetupAlternateVoiceDropdown(frame)\n\t\t\t\tSetupVoiceMenu(frame.PanelContainer.TtsVoiceAlternateDropdown, Enum.TtsVoiceType.Alternate);\n\t\t\tend\n\t\tend\n\tend\nend\n\nfunction TextToSpeechFrame_CheckLoad(self)\n\t__wow_ensure_text_to_speech_dropdown_helpers(self)",
+        }],
+    },
+    LuaSourcePatch {
+        suffix: "/Blizzard_PetBattleUI.lua",
+        operations: &[
+            LuaSourcePatchOp::Replace {
+                from: "cooldown = max(currentCooldown, currentLockdown);",
+                to: "cooldown = max(currentCooldown or 0, currentLockdown or 0);",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "self.XPBar:SetWidth(max((xp / max(maxXp,1)) * self.xpBarWidth, 1));",
+                to: "self.XPBar:SetWidth(max(((xp or 0) / max(maxXp or 1,1)) * self.xpBarWidth, 1));",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "self.ActualHealthBar:SetWidth((health / max(maxHealth,1)) * self.healthBarWidth);",
+                to: "self.ActualHealthBar:SetWidth(((health or 0) / max(maxHealth or 1,1)) * self.healthBarWidth);",
+            },
+        ],
+    },
+];
+
+fn lua_source_patch_for_chunk(chunk_name: &str) -> Option<&'static LuaSourcePatch> {
+    LUA_SOURCE_PATCHES
+        .iter()
+        .find(|patch| chunk_name.ends_with(patch.suffix))
+}
+
+fn apply_lua_source_patch(source: &str, operations: &[LuaSourcePatchOp]) -> String {
+    let mut patched = source.to_string();
+    for operation in operations {
+        patched = apply_lua_source_patch_operation(&patched, operation);
+    }
+    patched
+}
+
+fn apply_lua_source_patch_operation(source: &str, operation: &LuaSourcePatchOp) -> String {
+    match operation {
+        LuaSourcePatchOp::Prefix(prefix) => format!("{prefix}{source}"),
+        LuaSourcePatchOp::Replace { from, to } => source.replace(from, to),
+        LuaSourcePatchOp::ReplaceOnce { from, to } => source.replacen(from, to, 1),
+    }
+}
 /// Execute a compiled addon function.
 /// Taint is already stamped on the function's GC header by the caller.
 fn exec_addon_func(
