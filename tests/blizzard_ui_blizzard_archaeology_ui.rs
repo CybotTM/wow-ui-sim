@@ -52,3 +52,6 @@ mod behavior_research_artifact_complete_event_refreshes_pages;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_bag_update_delayed_refreshes_keystones.rs"]
 mod behavior_bag_update_delayed_refreshes_keystones;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_summary_page_mouse_wheel_paginates.rs"]
+mod behavior_summary_page_mouse_wheel_paginates;
