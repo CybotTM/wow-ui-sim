@@ -49,3 +49,6 @@ mod behavior_tab_switches_swap_currentframe;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_research_artifact_complete_event_refreshes_pages.rs"]
 mod behavior_research_artifact_complete_event_refreshes_pages;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_bag_update_delayed_refreshes_keystones.rs"]
+mod behavior_bag_update_delayed_refreshes_keystones;
