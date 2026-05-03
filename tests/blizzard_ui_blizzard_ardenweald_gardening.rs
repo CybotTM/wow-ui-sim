@@ -7,3 +7,6 @@ mod common;
 
 #[path = "blizzard_ui/blizzard_ardenweald_gardening/load.rs"]
 mod load;
+
+#[path = "blizzard_ui/blizzard_ardenweald_gardening/surface_globals.rs"]
+mod surface_globals;
