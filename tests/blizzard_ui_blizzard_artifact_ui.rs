@@ -25,3 +25,6 @@ mod behavior_show_panel_with_purchased_ranks;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_set_tab_resizes_panel.rs"]
 mod behavior_set_tab_resizes_panel;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_artifact_close_event_hides_panel.rs"]
+mod behavior_artifact_close_event_hides_panel;
