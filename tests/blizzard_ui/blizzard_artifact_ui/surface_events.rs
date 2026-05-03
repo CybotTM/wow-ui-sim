@@ -38,6 +38,23 @@ fn artifact_perks_and_title_event_lifecycles_match_mixin_handlers() {
     });
 }
 
+#[test]
+fn artifact_appearances_onload_registers_artifact_update() {
+    with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
+        load_artifact_ui(env);
+
+        let mismatches: Vec<String> = env
+            .eval(APPEARANCES_EVENT_SURFACE_PROBE)
+            .expect("Artifact appearances event surface probe should run cleanly");
+
+        assert!(
+            mismatches.is_empty(),
+            "`{ROOT}` must register ARTIFACT_UPDATE on ArtifactFrame.AppearancesTab during \
+             ArtifactAppearancesMixin:OnLoad; mismatches: {mismatches:?}"
+        );
+    });
+}
+
 fn load_artifact_ui(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     let (loaded, error): (bool, Option<String>) = env
         .eval(r#"return C_AddOns.LoadAddOn("Blizzard_ArtifactUI")"#)
@@ -119,6 +136,26 @@ C_ArtifactUI.Clear = originalClear
 StaticPopup_Hide = originalStaticPopupHide
 
 expect(ok, "OnShow/OnHide error:" .. tostring(errorMessage))
+
+return mismatches
+"#;
+
+const APPEARANCES_EVENT_SURFACE_PROBE: &str = r#"
+local mismatches = {}
+
+local function expect(condition, message)
+    if not condition then
+        table.insert(mismatches, message)
+    end
+end
+
+local appearances = ArtifactFrame and ArtifactFrame.AppearancesTab
+expect(type(appearances) == "table", "ArtifactFrame.AppearancesTab:" .. type(appearances))
+expect(
+    appearances and appearances:IsEventRegistered("ARTIFACT_UPDATE"),
+    "AppearancesTab ARTIFACT_UPDATE registered:" ..
+        tostring(appearances and appearances:IsEventRegistered("ARTIFACT_UPDATE"))
+)
 
 return mismatches
 "#;
