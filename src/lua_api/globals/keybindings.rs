@@ -592,15 +592,8 @@ pub fn set_binding_macro(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn set_override_binding(state: &mut LuaState) -> LuaResult<u32> {
     // Args: owner (frame), isPriority (bool), key (string), action (string?)
-    let key = Option::<String>::from_stack(state, 3)?.unwrap_or_default();
     let action = Option::<String>::from_stack(state, 4)?.unwrap_or_default();
-    if key.is_empty() {
-        return Ok(0);
-    }
-    borrow_state_mut(state)?
-        .keybindings
-        .set_override(&key, &action);
-    Ok(0)
+    set_override_action(state, action)
 }
 
 fn set_override_action(state: &mut LuaState, action: String) -> LuaResult<u32> {
@@ -666,6 +659,13 @@ pub fn load_bindings(_state: &mut LuaState) -> LuaResult<u32> {
 
 /// Register all binding-related global functions on the rilua VM.
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
+    register_binding_read_globals(lua)?;
+    register_binding_write_globals(lua)?;
+    register_override_binding_globals(lua)?;
+    register_binding_persistence_globals(lua)
+}
+
+fn register_binding_read_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "GetBindingKey", get_binding_key)?;
     LuaApiMut::register_function(lua, "GetBindingKeyForAction", get_binding_key_for_action)?;
     LuaApiMut::register_function(lua, "GetBindingAction", get_binding_action)?;
@@ -674,17 +674,29 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "GetCurrentBindingSet", get_current_binding_set)?;
     LuaApiMut::register_function(lua, "GetBindingText", get_binding_text)?;
     LuaApiMut::register_function(lua, "IsBindingForGamePad", is_binding_for_game_pad)?;
+    Ok(())
+}
+
+fn register_binding_write_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "SetBinding", set_binding)?;
     LuaApiMut::register_function(lua, "SetBindingClick", set_binding_click)?;
     LuaApiMut::register_function(lua, "SetBindingSpell", set_binding_spell)?;
     LuaApiMut::register_function(lua, "SetBindingItem", set_binding_item)?;
     LuaApiMut::register_function(lua, "SetBindingMacro", set_binding_macro)?;
+    Ok(())
+}
+
+fn register_override_binding_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "SetOverrideBinding", set_override_binding)?;
     LuaApiMut::register_function(lua, "SetOverrideBindingClick", set_override_binding_click)?;
     LuaApiMut::register_function(lua, "SetOverrideBindingSpell", set_override_binding_spell)?;
     LuaApiMut::register_function(lua, "SetOverrideBindingItem", set_override_binding_item)?;
     LuaApiMut::register_function(lua, "SetOverrideBindingMacro", set_override_binding_macro)?;
     LuaApiMut::register_function(lua, "ClearOverrideBindings", clear_override_bindings)?;
+    Ok(())
+}
+
+fn register_binding_persistence_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "SaveBindings", save_bindings)?;
     LuaApiMut::register_function(lua, "LoadBindings", load_bindings)?;
     Ok(())
