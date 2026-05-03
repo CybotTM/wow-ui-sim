@@ -28,3 +28,6 @@ mod behavior_show_callout_unknown_anchor_returns_silently;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_show_callout_duplicate_id_is_idempotent.rs"]
 mod behavior_show_callout_duplicate_id_is_idempotent;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_show_callout_picks_pool_by_type.rs"]
+mod behavior_show_callout_picks_pool_by_type;
