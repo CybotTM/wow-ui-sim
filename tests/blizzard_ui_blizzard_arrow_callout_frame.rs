@@ -31,3 +31,6 @@ mod behavior_show_callout_duplicate_id_is_idempotent;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_show_callout_picks_pool_by_type.rs"]
 mod behavior_show_callout_picks_pool_by_type;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_hide_callout_releases_to_pool.rs"]
+mod behavior_hide_callout_releases_to_pool;
