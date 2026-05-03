@@ -1,7 +1,7 @@
 //! Frame widget - the base container for UI elements.
 
 pub use super::frame_types::*;
-use super::{Anchor, AnchorPoint, WidgetType, next_widget_id};
+use super::{Anchor, AnchorPoint, WidgetType, next_region_order, next_widget_id};
 use crate::BlendMode;
 use crate::atlas::NineSliceAtlasInfo;
 use std::collections::{BTreeSet, HashMap, HashSet};
@@ -208,6 +208,9 @@ pub struct Frame {
     pub draw_layer: DrawLayer,
     /// Sub-layer within draw layer (for fine-grained ordering).
     pub draw_sub_layer: i32,
+    /// Monotonic same-layer region ordering. Texture source updates can bump
+    /// this without changing widget identity or creation-time parentage.
+    pub region_order: u64,
     /// Parent-controlled disabled region layers.
     pub disabled_draw_layers: BTreeSet<DrawLayer>,
     /// Tile texture horizontally.
@@ -535,7 +538,8 @@ include!("frame_defaults.rs");
 
 impl Default for Frame {
     fn default() -> Self {
-        frame_defaults!(next_widget_id())
+        let id = next_widget_id();
+        frame_defaults!(id)
     }
 }
 

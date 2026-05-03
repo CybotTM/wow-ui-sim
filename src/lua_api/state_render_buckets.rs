@@ -489,27 +489,27 @@ fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
             (Some(frame_a), Some(frame_b)) => (frame_a, frame_b),
             _ => return a.id.cmp(&b.id),
         };
-        let type_flag = |frame: &crate::widget::Frame| -> u8 {
-            u8::from(matches!(
-                frame.widget_type,
-                crate::widget::WidgetType::FontString | crate::widget::WidgetType::SimpleHTML
-            ))
-        };
-        (
-            a.depth,
-            frame_a.draw_layer as i32,
-            frame_a.draw_sub_layer,
-            type_flag(frame_a),
-            a.id,
-        )
-            .cmp(&(
-                b.depth,
-                frame_b.draw_layer as i32,
-                frame_b.draw_sub_layer,
-                type_flag(frame_b),
-                b.id,
-            ))
+        match region_sort_key(*a, frame_a).cmp(&region_sort_key(*b, frame_b)) {
+            std::cmp::Ordering::Equal if frame_a.parent_id == frame_b.parent_id => {
+                (frame_a.region_order, a.id).cmp(&(frame_b.region_order, b.id))
+            }
+            std::cmp::Ordering::Equal => a.id.cmp(&b.id),
+            structural_order => structural_order,
+        }
     });
+}
+
+fn region_sort_key(entry: RegionEntry, frame: &crate::widget::Frame) -> (u32, i32, i32, u8) {
+    let text_region = matches!(
+        frame.widget_type,
+        crate::widget::WidgetType::FontString | crate::widget::WidgetType::SimpleHTML
+    ) as u8;
+    (
+        entry.depth,
+        frame.draw_layer as i32,
+        frame.draw_sub_layer,
+        text_region,
+    )
 }
 
 fn split_font_regions(

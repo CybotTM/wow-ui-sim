@@ -283,6 +283,59 @@ fn same_draw_layer_preserves_cached_strata_buckets() {
 }
 
 #[test]
+fn set_texture_moves_region_after_existing_same_layer_siblings() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "SetTextureOrderParent", UIParent)
+        parent:SetSize(80, 80)
+        parent:SetPoint("CENTER")
+        parent:Show()
+
+        local icon = parent:CreateTexture("SetTextureOrderIcon", "BACKGROUND")
+        icon:SetAllPoints()
+
+        local slot = parent:CreateTexture("SetTextureOrderSlot", "BACKGROUND")
+        slot:SetAllPoints()
+        slot:SetColorTexture(0.1, 0.1, 0.1, 1)
+    "#,
+    )
+    .unwrap();
+
+    let _ = build_strata_buckets(&env);
+
+    env.exec(r#"SetTextureOrderIcon:SetTexture("Interface\\Buttons\\UI-Quickslot2")"#)
+        .unwrap();
+
+    let buckets = build_strata_buckets(&env);
+    let state = env.state().borrow();
+    let medium_bucket = &buckets[wow_ui_sim::widget::FrameStrata::Medium.as_index()];
+    let icon_id = state
+        .widgets
+        .get_id_by_name("SetTextureOrderIcon")
+        .expect("icon texture should exist");
+    let slot_id = state
+        .widgets
+        .get_id_by_name("SetTextureOrderSlot")
+        .expect("slot texture should exist");
+    let icon_pos = medium_bucket
+        .iter()
+        .position(|&id| id == icon_id)
+        .expect("icon should be in MEDIUM bucket after SetTexture");
+    let slot_pos = medium_bucket
+        .iter()
+        .position(|&id| id == slot_id)
+        .expect("slot should be in MEDIUM bucket");
+
+    assert!(
+        icon_pos > slot_pos,
+        "SetTexture should move the updated texture after existing same-layer siblings: \
+         got icon={icon_pos} slot={slot_pos}"
+    );
+}
+
+#[test]
 fn late_set_frame_level_invalidates_cached_strata_buckets() {
     let env = env_with_shared_xml();
 
