@@ -1,6 +1,6 @@
 //! C_MountJournal namespace.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -19,10 +19,10 @@ fn displayed_mount_count(st: &crate::lua_api::state::SimState) -> i32 {
         .count() as i32
 }
 
-fn displayed_mount<'a>(
-    st: &'a crate::lua_api::state::SimState,
+fn displayed_mount(
+    st: &crate::lua_api::state::SimState,
     index: i32,
-) -> Option<&'a crate::lua_api::state_types::MountData> {
+) -> Option<&crate::lua_api::state_types::MountData> {
     if index <= 0 {
         return None;
     }
@@ -189,66 +189,101 @@ fn register_mount_info(tb: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn register_mount_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
-    Ok(tb
-        .set_function("GetMountIDs", |state| {
-            use crate::lua_api::methods::create_table;
-            let ids = {
-                let st = borrow_state(state)?;
-                st.world
-                    .mounts
-                    .iter()
-                    .map(|mount| mount.mount_id as f64)
-                    .collect::<Vec<_>>()
-            };
-            let table = create_table(state);
-            for (index, mount_id) in ids.into_iter().enumerate() {
-                let Val::Table(table_ref) = table else {
-                    return Ok(0);
-                };
-                if let Some(array) = state.gc.tables.get_mut(table_ref) {
-                    let _ = array.raw_set(
-                        Val::Num(index as f64 + 1.0),
-                        Val::Num(mount_id),
-                        &state.gc.string_arena,
-                    );
-                }
-                state.gc.barrier_back(table_ref);
-            }
-            table.into_stack(state)
-        })?
+    let tb = register_mount_id_stubs(tb)?;
+    let tb = register_mount_equipment_stubs(tb)?;
+    let tb = register_mount_fanfare_stubs(tb)?;
+    let tb = register_mount_filter_stubs(tb)?;
+    let tb = register_mount_favorite_stubs(tb)?;
+    register_mount_action_stubs(tb)
+}
+
+fn register_mount_id_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("GetMountIDs", mount_get_ids)?
         .set_function("GetMountAllCreatureDisplayInfoByID", |state| {
-            use crate::lua_api::methods::create_table;
             create_table(state).into_stack(state)
-        })?
-        .set_function("AreMountEquipmentEffectsSuppressed", |state| {
-            false.into_stack(state)
-        })?
-        .set_function("GetAppliedMountEquipmentID", |_state| Ok(0))?
-        .set_function("ClearRecentFanfares", |_state| Ok(0))?
+        })
+}
+
+fn mount_get_ids(state: &mut LuaState) -> LuaResult<u32> {
+    let ids = {
+        let st = borrow_state(state)?;
+        st.world
+            .mounts
+            .iter()
+            .map(|mount| mount.mount_id as f64)
+            .collect::<Vec<_>>()
+    };
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        return Ok(0);
+    };
+    for (index, mount_id) in ids.into_iter().enumerate() {
+        if let Some(array) = state.gc.tables.get_mut(table_ref) {
+            let _ = array.raw_set(
+                Val::Num(index as f64 + 1.0),
+                Val::Num(mount_id),
+                &state.gc.string_arena,
+            );
+        }
+        state.gc.barrier_back(table_ref);
+    }
+    table.into_stack(state)
+}
+
+fn register_mount_equipment_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("AreMountEquipmentEffectsSuppressed", |state| {
+        false.into_stack(state)
+    })?
+    .set_function("GetAppliedMountEquipmentID", |_state| Ok(0))?
+    .set_function("GetMountEquipmentUnlockLevel", |state| {
+        (0i32).into_stack(state)
+    })?
+    .set_function("IsItemMountEquipment", |state| false.into_stack(state))?
+    .set_function("IsMountEquipmentApplied", |state| false.into_stack(state))
+}
+
+fn register_mount_fanfare_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("ClearRecentFanfares", |_state| Ok(0))?
         .set_function("ClearFanfare", |_state| Ok(0))?
         .set_function("NeedsFanfare", |state| false.into_stack(state))?
-        .set_function("GetDynamicFlightModeSpellID", |state| {
-            (0i32).into_stack(state)
-        })?
-        .set_function("GetMountEquipmentUnlockLevel", |state| {
-            (0i32).into_stack(state)
-        })?
         .set_function("GetNumMountsNeedingFanfare", |state| {
             (0i32).into_stack(state)
-        })?
-        .set_function("GetCollectedFilterSetting", |state| true.into_stack(state))?
-        .set_function("IsDragonridingUnlocked", |state| false.into_stack(state))?
+        })
+}
+
+fn register_mount_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    let tb = register_collected_filter_stubs(tb)?;
+    let tb = register_default_filter_stubs(tb)?;
+    let tb = register_source_filter_stubs(tb)?;
+    register_type_filter_stubs(tb)
+}
+
+fn register_collected_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("GetCollectedFilterSetting", |state| true.into_stack(state))?
+        .set_function("SetCollectedFilterSetting", |_state| Ok(0))
+}
+
+fn register_default_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("IsDragonridingUnlocked", |state| false.into_stack(state))?
         .set_function("IsUsingDefaultFilters", |state| true.into_stack(state))?
-        .set_function("SetDefaultFilters", |_state| Ok(0))?
-        .set_function("IsSourceChecked", |state| false.into_stack(state))?
+        .set_function("SetDefaultFilters", |_state| Ok(0))
+}
+
+fn register_source_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("IsSourceChecked", |state| false.into_stack(state))?
         .set_function("SetSourceFilter", |_state| Ok(0))?
         .set_function("IsValidSourceFilter", |state| true.into_stack(state))?
-        .set_function("SetAllSourceFilters", |_state| Ok(0))?
-        .set_function("IsTypeChecked", |state| false.into_stack(state))?
+        .set_function("SetAllSourceFilters", |_state| Ok(0))
+}
+
+fn register_type_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("IsTypeChecked", |state| false.into_stack(state))?
         .set_function("SetTypeFilter", |_state| Ok(0))?
-        .set_function("IsValidTypeFilter", |state| true.into_stack(state))?
-        .set_function("SetCollectedFilterSetting", |_state| Ok(0))?
-        .set_function("GetIsFavorite", |state| (false, false).into_stack(state))?
+        .set_function("IsValidTypeFilter", |state| true.into_stack(state))
+}
+
+fn register_mount_favorite_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("GetIsFavorite", |state| (false, false).into_stack(state))?
         .set_function("SetIsFavorite", |_state| Ok(0))?
         .set_function("GetMountLink", |state| {
             state.push(Val::Nil);
@@ -256,22 +291,28 @@ fn register_mount_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
         })?
         .set_function("GetMountUsabilityByID", |state| {
             (false, false, false).into_stack(state)
-        })?
-        .set_function("Summon", |_state| Ok(0))?
+        })
+}
+
+fn register_mount_action_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("Summon", |_state| Ok(0))?
         .set_function("SummonByID", |_state| Ok(0))?
         .set_function("Dismiss", |_state| Ok(0))?
-        .set_function("SetSearch", |state| {
-            let search_text = Option::<String>::from_stack(state, 1)?
-                .unwrap_or_default()
-                .trim()
-                .to_lowercase();
-            borrow_state_mut(state)?.world.mount_search_text = search_text;
-            Ok(0)
+        .set_function("SetSearch", mount_set_search)?
+        .set_function("GetDynamicFlightModeSpellID", |state| {
+            (0i32).into_stack(state)
         })?
-        .set_function("IsItemMountEquipment", |state| false.into_stack(state))?
-        .set_function("IsMountEquipmentApplied", |state| false.into_stack(state))?
         .set_function("PickupDynamicFlightMode", |_state| Ok(0))?
-        .set_function("SwapDynamicFlightMode", |_state| Ok(0))?)
+        .set_function("SwapDynamicFlightMode", |_state| Ok(0))
+}
+
+fn mount_set_search(state: &mut LuaState) -> LuaResult<u32> {
+    let search_text = Option::<String>::from_stack(state, 1)?
+        .unwrap_or_default()
+        .trim()
+        .to_lowercase();
+    borrow_state_mut(state)?.world.mount_search_text = search_text;
+    Ok(0)
 }
 
 pub fn register_rilua_mount_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
