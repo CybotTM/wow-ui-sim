@@ -19,3 +19,6 @@ mod surface_events;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_show_opens_the_panel.rs"]
 mod behavior_show_opens_the_panel;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_onload_seeds_title_and_pages.rs"]
+mod behavior_onload_seeds_title_and_pages;
