@@ -1107,38 +1107,93 @@ fn advance_group_elapsed(
 
     match group.looping {
         crate::lua_api::animation::LoopType::None => {
-            if group.reverse {
-                if group.elapsed <= 0.0 {
-                    finished_scripts.push(finish_group_now(group, 0.0));
-                }
-            } else if group.elapsed >= total_duration {
-                finished_scripts.push(finish_group_now(group, total_duration));
-            }
+            finish_unlooped_group_at_boundary(group, total_duration, finished_scripts)
         }
         crate::lua_api::animation::LoopType::Repeat => {
-            if group.reverse {
-                while group.elapsed < 0.0 {
-                    group.elapsed += total_duration;
-                    *loop_count += 1;
-                }
-            } else {
-                while group.elapsed >= total_duration {
-                    group.elapsed -= total_duration;
-                    *loop_count += 1;
-                }
-            }
+            wrap_repeating_group_elapsed(group, total_duration, loop_count);
         }
         crate::lua_api::animation::LoopType::Bounce => {
-            while group.elapsed >= total_duration || group.elapsed < 0.0 {
-                if group.elapsed >= total_duration {
-                    group.elapsed = (group.elapsed - total_duration).max(0.0);
-                } else {
-                    group.elapsed = (-group.elapsed).min(total_duration);
-                }
-                group.reverse = !group.reverse;
-                *loop_count += 1;
-            }
+            bounce_group_elapsed_at_boundaries(group, total_duration, loop_count);
         }
+    }
+}
+
+fn finish_unlooped_group_at_boundary(
+    group: &mut crate::lua_api::animation::AnimGroupState,
+    total_duration: f64,
+    finished_scripts: &mut Vec<u64>,
+) {
+    let finish_elapsed = if group.reverse && group.elapsed <= 0.0 {
+        Some(0.0)
+    } else if !group.reverse && group.elapsed >= total_duration {
+        Some(total_duration)
+    } else {
+        None
+    };
+
+    if let Some(elapsed) = finish_elapsed {
+        finished_scripts.push(finish_group_now(group, elapsed));
+    }
+}
+
+fn wrap_repeating_group_elapsed(
+    group: &mut crate::lua_api::animation::AnimGroupState,
+    total_duration: f64,
+    loop_count: &mut u32,
+) {
+    if group.reverse {
+        wrap_reverse_repeating_group(group, total_duration, loop_count);
+    } else {
+        wrap_forward_repeating_group(group, total_duration, loop_count);
+    }
+}
+
+fn wrap_reverse_repeating_group(
+    group: &mut crate::lua_api::animation::AnimGroupState,
+    total_duration: f64,
+    loop_count: &mut u32,
+) {
+    while group.elapsed < 0.0 {
+        group.elapsed += total_duration;
+        *loop_count += 1;
+    }
+}
+
+fn wrap_forward_repeating_group(
+    group: &mut crate::lua_api::animation::AnimGroupState,
+    total_duration: f64,
+    loop_count: &mut u32,
+) {
+    while group.elapsed >= total_duration {
+        group.elapsed -= total_duration;
+        *loop_count += 1;
+    }
+}
+
+fn bounce_group_elapsed_at_boundaries(
+    group: &mut crate::lua_api::animation::AnimGroupState,
+    total_duration: f64,
+    loop_count: &mut u32,
+) {
+    while is_group_elapsed_outside_bounds(group.elapsed, total_duration) {
+        reflect_bouncing_group_elapsed(group, total_duration);
+        group.reverse = !group.reverse;
+        *loop_count += 1;
+    }
+}
+
+fn is_group_elapsed_outside_bounds(elapsed: f64, total_duration: f64) -> bool {
+    elapsed >= total_duration || elapsed < 0.0
+}
+
+fn reflect_bouncing_group_elapsed(
+    group: &mut crate::lua_api::animation::AnimGroupState,
+    total_duration: f64,
+) {
+    if group.elapsed >= total_duration {
+        group.elapsed = (group.elapsed - total_duration).max(0.0);
+    } else {
+        group.elapsed = (-group.elapsed).min(total_duration);
     }
 }
 
