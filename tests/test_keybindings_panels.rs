@@ -510,6 +510,20 @@ fn keybind_l_opens_group_finder() {
     }
 }
 
+#[test]
+fn raid_finder_group_button_path_handles_empty_rf_dungeon_list() {
+    test_timeout! {
+        let env = setup_env();
+        env.exec(
+            r#"
+            assert(LoadAddOn("Blizzard_GroupFinder"))
+            GroupFinderFrame_ShowGroupFrame(RaidFinderFrame)
+            assert(RaidFinderFrame:IsShown(), "RaidFinderFrame should be shown")
+            "#
+        ).expect("Raid Finder group button path should not raise Lua errors");
+    }
+}
+
 // ── O → ToggleFriendsFrame() ────────────────────────────────────────────
 
 #[test]

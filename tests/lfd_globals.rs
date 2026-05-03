@@ -757,6 +757,31 @@ fn get_lfg_random_dungeon_info() {
 }
 
 #[test]
+fn raid_finder_dungeon_globals_are_inert_when_no_raids_are_seeded() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if type(GetNumRFDungeons) ~= "function" then
+                return "count_type=" .. type(GetNumRFDungeons)
+            end
+            if type(GetRFDungeonInfo) ~= "function" then
+                return "info_type=" .. type(GetRFDungeonInfo)
+            end
+            local count = GetNumRFDungeons()
+            if count ~= 0 then return "count=" .. tostring(count) end
+            if GetRFDungeonInfo(1) ~= nil then return "unexpected_info" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Raid Finder dungeon globals should be inert: {result}"
+    );
+}
+
+#[test]
 fn get_random_dungeon_best_choice() {
     let env = env();
     let result: String = env
