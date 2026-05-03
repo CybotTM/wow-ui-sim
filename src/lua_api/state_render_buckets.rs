@@ -484,8 +484,6 @@ pub(super) fn same_strata_subtree_segment_end(
 }
 
 fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
-    use std::cmp::Reverse;
-
     regions.sort_by(|a, b| {
         let (frame_a, frame_b) = match (widgets.get(a.id), widgets.get(b.id)) {
             (Some(frame_a), Some(frame_b)) => (frame_a, frame_b),
@@ -502,14 +500,14 @@ fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
             frame_a.draw_layer as i32,
             frame_a.draw_sub_layer,
             type_flag(frame_a),
-            Reverse(a.id),
+            a.id,
         )
             .cmp(&(
                 b.depth,
                 frame_b.draw_layer as i32,
                 frame_b.draw_sub_layer,
                 type_flag(frame_b),
-                Reverse(b.id),
+                b.id,
             ))
     });
 }
@@ -634,38 +632,6 @@ mod tests {
             vec![2]
         );
         assert_eq!(child_frames, vec![3]);
-    }
-
-    #[test]
-    fn same_parent_regions_in_same_layer_render_earlier_child_on_top() {
-        let mut widgets = WidgetRegistry::default();
-        widgets.register(test_frame(1, WidgetType::Frame, None));
-        widgets.register(Frame {
-            draw_layer: DrawLayer::Background,
-            ..test_frame(2, WidgetType::Texture, Some(1))
-        });
-        widgets.register(Frame {
-            draw_layer: DrawLayer::Background,
-            ..test_frame(3, WidgetType::Texture, Some(1))
-        });
-        widgets.add_child(1, 2);
-        widgets.add_child(1, 3);
-
-        let visible = HashSet::from([1, 2, 3]);
-        let mut emitted = Vec::new();
-        dfs_emit(
-            1,
-            FrameStrata::Medium.as_index(),
-            &widgets,
-            &visible,
-            &mut emitted,
-        );
-
-        assert_eq!(
-            emitted,
-            vec![1, 3, 2],
-            "same-parent regions in the same layer should put the earlier child on top"
-        );
     }
 
     #[test]
