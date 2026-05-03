@@ -41,6 +41,46 @@ fn arrow_callout_pointer_templates_define_atlases_and_looping_animation() {
     }
 }
 
+#[test]
+fn arrow_callout_container_templates_define_expected_child_surface() {
+    let ui = parse_xml_file(&arrow_callout_xml())
+        .expect("ArrowCalloutFrame.xml must parse as Blizzard UI XML");
+
+    let container = find_top_level_frame(&ui.elements, "ArrowCalloutContainerTemplate");
+    assert_frame_inherits(container, "ResizeLayoutFrame");
+    assert_key_value(container, "widthPadding", "20", "number");
+    assert_key_value(container, "heightPadding", "20", "number");
+
+    let content = child_frame(container, "Content", "Frame");
+    assert_frame_inherits(content, "GlowBoxTemplate");
+
+    let glow = child_frame(container, "Glow", "Frame");
+    assert_frame_inherits(glow, "BackdropTemplate");
+
+    let close_container = find_top_level_frame(
+        &ui.elements,
+        "ArrowCalloutContainerTemplateWithCloseButtonTemplate",
+    );
+    assert_frame_inherits(close_container, "ArrowCalloutContainerTemplate");
+    assert_key_value(close_container, "widthPadding", "40", "number");
+
+    let close_button = child_frame(close_container, "CloseButton", "Button");
+    assert_frame_inherits(close_button, "UIPanelCloseButton");
+    assert_eq!(
+        close_button.mixin.as_deref(),
+        Some("ArrowCalloutCloseButtonMixin"),
+        "`CloseButton` must mix in the ArrowCallout close-button behavior"
+    );
+
+    let widget_container = find_top_level_frame(&ui.elements, "WidgetContainerCalloutTemplate");
+    assert_frame_inherits(widget_container, "UIWidgetContainerTemplate");
+    assert_eq!(
+        widget_container.hidden,
+        Some(true),
+        "`WidgetContainerCalloutTemplate` must be hidden by default"
+    );
+}
+
 fn pointer_template_expectations() -> &'static [PointerTemplateExpectation] {
     &[
         PointerTemplateExpectation {
@@ -265,6 +305,57 @@ fn find_top_level_frame<'a>(elements: &'a [XmlElement], name: &str) -> &'a Frame
             _ => None,
         })
         .unwrap_or_else(|| panic!("`{name}` must exist as a top-level frame template"))
+}
+
+fn child_frame<'a>(parent: &'a FrameXml, parent_key: &str, tag: &str) -> &'a FrameXml {
+    parent
+        .all_frame_elements()
+        .into_iter()
+        .find_map(|(frame, frame_tag)| {
+            let matches_key = frame.parent_key.as_deref() == Some(parent_key);
+            let matches_tag = frame_tag == tag;
+            if matches_key && matches_tag {
+                Some(frame)
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| {
+            panic!(
+                "`{}` must expose `{parent_key}` as a `{tag}` child",
+                frame_name(parent)
+            )
+        })
+}
+
+fn assert_frame_inherits(frame: &FrameXml, expected_inherits: &str) {
+    assert_eq!(
+        frame.inherits.as_deref(),
+        Some(expected_inherits),
+        "`{}` must inherit `{expected_inherits}`",
+        frame_name(frame)
+    );
+}
+
+fn assert_key_value(frame: &FrameXml, key: &str, expected_value: &str, expected_type: &str) {
+    let key_value = frame
+        .all_key_values()
+        .flat_map(|key_values| key_values.values.iter())
+        .find(|key_value| key_value.key == key)
+        .unwrap_or_else(|| panic!("`{}` must define KeyValue `{key}`", frame_name(frame)));
+
+    assert_eq!(
+        key_value.value,
+        expected_value,
+        "`{}` must set KeyValue `{key}` to `{expected_value}`",
+        frame_name(frame)
+    );
+    assert_eq!(
+        key_value.value_type.as_deref(),
+        Some(expected_type),
+        "`{}` must type KeyValue `{key}` as `{expected_type}`",
+        frame_name(frame)
+    );
 }
 
 fn frame_name(frame: &FrameXml) -> &str {
