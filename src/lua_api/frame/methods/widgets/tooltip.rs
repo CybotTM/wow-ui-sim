@@ -735,19 +735,8 @@ fn apply_tooltip_table(
     spell_id: Option<u32>,
 ) -> LuaResult<bool> {
     let lines_table = table_get(state, tooltip, "lines");
-    let mut lines = Vec::new();
-    let mut index = 1;
-    loop {
-        let line = table_array_get(state, lines_table, index);
-        if !matches!(line, Val::Table(_)) {
-            break;
-        }
-        if let Some(parsed) = tooltip_line_from_table(state, line) {
-            lines.push(parsed);
-        }
-        index += 1;
-    }
-
+    let word_wrap_min_width = tooltip_word_wrap_min_width(state, tooltip);
+    let lines = tooltip_lines_from_table(state, lines_table);
     let allow_show_with_no_lines = {
         let sim = borrow_state(state)?;
         sim.tooltips
@@ -760,12 +749,37 @@ fn apply_tooltip_table(
     let mut sim = borrow_state_mut(state)?;
     let td = sim.tooltips.entry(tooltip_id).or_default();
     td.lines = lines;
+    if let Some(word_wrap_min_width) = word_wrap_min_width {
+        td.custom_word_wrap_min_width = Some(word_wrap_min_width);
+    }
     td.spell_id = spell_id;
     td.unit_token = None;
     td.unit_name = None;
     td.unit_guid = None;
     sim.set_frame_visible(tooltip_id, has_lines || allow_show_with_no_lines);
     Ok(has_lines)
+}
+
+fn tooltip_word_wrap_min_width(state: &mut LuaState, tooltip: Val) -> Option<f32> {
+    match table_get(state, tooltip, "wordWrapMinWidth") {
+        Val::Num(width) => Some(width as f32),
+        _ => None,
+    }
+}
+
+fn tooltip_lines_from_table(state: &mut LuaState, lines_table: Val) -> Vec<TooltipLine> {
+    let mut lines = Vec::new();
+    let mut index = 1;
+    loop {
+        let line = table_array_get(state, lines_table, index);
+        if !matches!(line, Val::Table(_)) {
+            return lines;
+        }
+        if let Some(parsed) = tooltip_line_from_table(state, line) {
+            lines.push(parsed);
+        }
+        index += 1;
+    }
 }
 
 fn populate_tooltip_from_method(

@@ -11,6 +11,8 @@ use crate::traits::{TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB};
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
+const SPELL_TOOLTIP_WORD_WRAP_MIN_WIDTH: f64 = 240.0;
+
 fn spell_cost_line(spell_id: u32) -> Option<&'static str> {
     match spell_id {
         19750 => Some("10% of Base MANA"),
@@ -201,6 +203,7 @@ pub(super) fn tooltip_for_spell_id(state: &mut LuaState, spell_id: u32) -> Val {
     let lines = table_get(state, tooltip, "lines");
     push_spell_tooltip_lines(state, lines, spell_id, spell.name);
     table_set(state, tooltip, "id", Val::Num(spell_id as f64));
+    set_spell_tooltip_width_hint(state, tooltip);
     tooltip
 }
 
@@ -291,7 +294,17 @@ fn build_mount_tooltip(state: &mut LuaState, spell_id: u32, mount_name: &str) ->
         true,
     );
     table_set(state, tooltip, "id", Val::Num(spell_id as f64));
+    set_spell_tooltip_width_hint(state, tooltip);
     tooltip
+}
+
+fn set_spell_tooltip_width_hint(state: &mut LuaState, tooltip: Val) {
+    table_set(
+        state,
+        tooltip,
+        "wordWrapMinWidth",
+        Val::Num(SPELL_TOOLTIP_WORD_WRAP_MIN_WIDTH),
+    );
 }
 
 fn preferred_trait_spell_id(definition_id: u32) -> Option<u32> {

@@ -28,7 +28,6 @@ const TOOLTIP_HEADER_FONT_SIZE: f32 = 14.0;
 const TOOLTIP_BODY_FONT_SIZE: f32 = 12.0;
 const DOUBLE_LINE_GAP: f32 = 20.0;
 const TOOLTIP_CENTER_OVERLAP: f32 = 4.0;
-const DEFAULT_WORD_WRAP_MIN_WIDTH: f32 = 240.0;
 
 /// Pre-collected tooltip render data for a single tooltip frame.
 pub struct TooltipRenderData {
@@ -176,8 +175,7 @@ fn measure_tooltip_content_width(
 }
 
 fn tooltip_wrapped_min_width(td: &crate::lua_api::tooltip::TooltipData) -> f32 {
-    td.custom_word_wrap_min_width
-        .unwrap_or(DEFAULT_WORD_WRAP_MIN_WIDTH)
+    td.custom_word_wrap_min_width.unwrap_or(0.0)
 }
 
 fn tooltip_has_wrapped_lines(td: &crate::lua_api::tooltip::TooltipData) -> bool {
