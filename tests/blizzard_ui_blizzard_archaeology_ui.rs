@@ -25,3 +25,6 @@ mod behavior_onload_seeds_title_and_pages;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_summary_page_lists_races.rs"]
 mod behavior_summary_page_lists_races;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_artifact_page_renders_selected.rs"]
+mod behavior_artifact_page_renders_selected;
