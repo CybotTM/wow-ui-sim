@@ -264,30 +264,36 @@ pub(super) fn item_quality_color(quality: u8) -> (f64, f64, f64) {
 }
 
 fn item_equip_slot_label(inv_type: u8) -> &'static str {
-    match inv_type {
-        1 => "Head",
-        2 => "Neck",
-        3 => "Shoulder",
-        4 => "Shirt",
-        5 | 20 => "Chest",
-        6 => "Waist",
-        7 => "Legs",
-        8 => "Feet",
-        9 => "Wrist",
-        10 => "Hands",
-        11 => "Finger",
-        12 => "Trinket",
-        13 => "One-Hand",
-        14 => "Shield",
-        15 => "Ranged",
-        16 => "Back",
-        17 => "Two-Hand",
-        21 => "Main Hand",
-        22 => "Off Hand",
-        23 => "Held In Off-hand",
-        _ => "",
-    }
+    ITEM_EQUIP_SLOT_LABELS
+        .iter()
+        .find(|(item_inv_type, _)| *item_inv_type == inv_type)
+        .map(|(_, label)| *label)
+        .unwrap_or("")
 }
+
+const ITEM_EQUIP_SLOT_LABELS: &[(u8, &str)] = &[
+    (1, "Head"),
+    (2, "Neck"),
+    (3, "Shoulder"),
+    (4, "Shirt"),
+    (5, "Chest"),
+    (6, "Waist"),
+    (7, "Legs"),
+    (8, "Feet"),
+    (9, "Wrist"),
+    (10, "Hands"),
+    (11, "Finger"),
+    (12, "Trinket"),
+    (13, "One-Hand"),
+    (14, "Shield"),
+    (15, "Ranged"),
+    (16, "Back"),
+    (17, "Two-Hand"),
+    (20, "Chest"),
+    (21, "Main Hand"),
+    (22, "Off Hand"),
+    (23, "Held In Off-hand"),
+];
 
 fn push_item_name_line(state: &mut LuaState, lines: Val, item: &items::ItemInfo) {
     push_tooltip_line(
