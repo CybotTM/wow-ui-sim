@@ -103,18 +103,33 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
 }
 
 fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
+    register_audio_and_utility_globals(lua)?;
+    register_item_spell_globals(lua)?;
+    register_scene_and_ui_globals(lua)?;
+    register_string_globals(lua)?;
+    register_spellbook_and_totem_globals(lua)?;
+    encounter_journal::register_ej_globals(lua)
+}
+
+fn register_audio_and_utility_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "PlaySound", play_sound)?;
     LuaApiMut::register_function(lua, "PlaySoundFile", play_sound_file)?;
     LuaApiMut::register_function(lua, "StopSound", stop_sound)?;
     LuaApiMut::register_function(lua, "LaunchURL", launch_url)?;
     LuaApiMut::register_function(lua, "CopyToClipboard", copy_to_clipboard)?;
     install_date_alias(lua)?;
+    Ok(())
+}
+
+fn register_item_spell_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "GetSpellLink", get_spell_link_global)?;
     LuaApiMut::register_function(lua, "GetSpellIcon", get_spell_icon_global)?;
     LuaApiMut::register_function(lua, "GetItemInfo", get_item_info_global)?;
     LuaApiMut::register_function(lua, "GetItemClassInfo", get_item_class_info_global)?;
-    LuaApiMut::register_function(lua, "GetRepairAllCost", get_repair_all_cost)?;
-    LuaApiMut::register_function(lua, "SetActionUIButton", set_action_ui_button)?;
+    Ok(())
+}
+
+fn register_scene_and_ui_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(
         lua,
         "MapSceneCharacterHighlightStart",
@@ -137,10 +152,20 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
         "GetMaxLevelForLatestExpansion",
         get_max_level_for_latest_expansion,
     )?;
+    LuaApiMut::register_function(lua, "GetRepairAllCost", get_repair_all_cost)?;
+    LuaApiMut::register_function(lua, "SetActionUIButton", set_action_ui_button)?;
+    Ok(())
+}
+
+fn register_string_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "strsub", strsub)?;
     LuaApiMut::register_function(lua, "strconcat", strconcat)?;
     LuaApiMut::register_function(lua, "strlenutf8", strlenutf8)?;
     LuaApiMut::register_function(lua, "strcmputf8i", strcmputf8i)?;
+    Ok(())
+}
+
+fn register_spellbook_and_totem_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(
         lua,
         "FindSpellBookSlotBySpellID",
@@ -148,7 +173,6 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     )?;
     LuaApiMut::register_function(lua, "GetMultiCastTotemSpells", get_multi_cast_totem_spells)?;
     LuaApiMut::register_function(lua, "GetMouseButtonClicked", get_mouse_button_clicked)?;
-    encounter_journal::register_ej_globals(lua)?;
     Ok(())
 }
 
@@ -174,16 +198,31 @@ fn seed_placeholder_global_tables(state: &mut LuaState) {
 }
 
 fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
+    register_item_profession_surfaces(state)?;
+    register_collection_surfaces(state)?;
+    register_artifact_surfaces(state)?;
+    register_interaction_surfaces(state)
+}
+
+fn register_item_profession_surfaces(state: &mut LuaState) -> LuaResult<()> {
     item_spell::register_item_and_spell_surfaces(state)?;
     encoding_util::register_encoding_util_surface(state)?;
     item_socket_info::register_item_socket_info_surface(state)?;
     professions::register_profession_surface(state)?;
     traits::register_trait_surfaces(state)?;
     tooltip_info::register_tooltip_surface(state)?;
+    Ok(())
+}
+
+fn register_collection_surfaces(state: &mut LuaState) -> LuaResult<()> {
     transmog_collection::register_transmog_collection_surface(state)?;
     transmog::register_transmog_surface(state)?;
     tutorial::register_tutorial_surface(state)?;
     heirloom::register_heirloom_surface(state)?;
+    Ok(())
+}
+
+fn register_artifact_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_spell::register_c_spell_surface(state)?;
     c_widget::register_c_widget_surface(state)?;
     c_paper_doll_info::register_c_paper_doll_info_surface(state)?;
@@ -196,6 +235,10 @@ fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_cursor::register_c_cursor_surface(state)?;
     c_major_factions::register_c_major_factions_surface(state)?;
     c_allied_races::register_c_allied_races_surface(state)?;
+    Ok(())
+}
+
+fn register_interaction_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_ardenweald_gardening::register_c_ardenweald_gardening_surface(state)?;
     c_arrow_callout_manager::register_c_arrow_callout_manager_surface(state)?;
     c_behavioral_messaging::register_c_behavioral_messaging_surface(state)?;
