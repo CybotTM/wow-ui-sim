@@ -389,51 +389,80 @@ fn parse_inline_function_with_self_and_parent_field_arg(stmt: &str) -> Option<(&
 }
 
 fn parse_checked_assignment_then_callbacks(stmt: &str) -> Option<(&str, &str, &str, &str)> {
-    let stmt = stmt.trim();
-    let prefix = "local checked = self:GetChecked()";
-    let remainder = stmt.strip_prefix(prefix)?.trim_start();
-    let remainder = remainder.strip_prefix("if")?.trim_start();
-    let remainder = remainder.strip_prefix('(')?.trim_start();
-    let (condition, remainder) = remainder.split_once("then")?;
-    if condition.trim_end().strip_suffix(')')?.trim() != "checked" {
-        return None;
-    }
-    let remainder = remainder.trim_start();
-    let (then_stmt, else_tail) = remainder.split_once("else")?;
-    let else_tail = else_tail.trim_start();
-    let (else_stmt, after_end) = else_tail.split_once("end")?;
-    let then_stmt = then_stmt.trim().strip_suffix(';')?.trim();
-    let else_stmt = else_stmt.trim().strip_suffix(';')?.trim();
+    let (then_parts, else_parts, after_end) = parse_checked_then_else(stmt)?;
+    let assignment = parse_single_checked_bool_assignment_pair(&then_parts, &else_parts)?;
+    let callbacks = parse_checked_after_end_callbacks(after_end)?;
+    checked_assignment_callbacks_result(assignment, callbacks)
+}
 
+struct CheckedBoolAssignment<'a> {
+    target_path: &'a str,
+    field: &'a str,
+}
+
+struct CheckedCallbacks<'a> {
+    on_change_function: &'a str,
+    on_sound_function: &'a str,
+}
+
+fn parse_single_checked_bool_assignment_pair<'a>(
+    then_parts: &[&'a str],
+    else_parts: &[&'a str],
+) -> Option<CheckedBoolAssignment<'a>> {
+    let [then_stmt] = then_parts else {
+        return None;
+    };
+    let [else_stmt] = else_parts else {
+        return None;
+    };
+    parse_checked_bool_assignment_pair(then_stmt, else_stmt)
+}
+
+fn parse_checked_bool_assignment_pair<'a>(
+    then_stmt: &'a str,
+    else_stmt: &'a str,
+) -> Option<CheckedBoolAssignment<'a>> {
     let (then_path, then_field, then_value) = parse_global_bool_assignment(then_stmt)?;
     let (else_path, else_field, else_value) = parse_global_bool_assignment(else_stmt)?;
-    if then_path != else_path
-        || then_field != else_field
-        || then_value != true
-        || else_value != false
-    {
-        return None;
-    }
+    let is_checked_pair =
+        then_value && !else_value && then_path == else_path && then_field == else_field;
+    is_checked_pair.then_some(CheckedBoolAssignment {
+        target_path: then_path,
+        field: then_field,
+    })
+}
 
-    let after_end = after_end.trim();
+fn parse_checked_after_end_callbacks(after_end: &str) -> Option<CheckedCallbacks<'_>> {
     let parts = super::split_inline_sequence_parts(after_end);
     let [on_change_stmt, on_sound_stmt] = parts.as_slice() else {
         return None;
     };
     let on_change_function = parse_global_function_suffix(on_change_stmt.trim(), "()")?;
-    let (on_sound_function, args) = on_sound_stmt.trim().split_once('(')?;
-    if args.strip_suffix(')')?.trim() != "checked" {
-        return None;
-    }
-    (is_fast_handler_path(then_path)
-        && is_fast_identifier(then_field)
-        && is_fast_handler_path(on_change_function)
-        && is_fast_handler_path(on_sound_function.trim()))
-    .then_some((
-        then_path,
-        then_field,
+    let on_sound_function = parse_checked_sound_function(on_sound_stmt.trim())?;
+    Some(CheckedCallbacks {
         on_change_function,
-        on_sound_function.trim(),
+        on_sound_function,
+    })
+}
+
+fn parse_checked_sound_function(stmt: &str) -> Option<&str> {
+    let (function_name, args) = stmt.split_once('(')?;
+    (args.strip_suffix(')')?.trim() == "checked").then_some(function_name.trim())
+}
+
+fn checked_assignment_callbacks_result<'a>(
+    assignment: CheckedBoolAssignment<'a>,
+    callbacks: CheckedCallbacks<'a>,
+) -> Option<(&'a str, &'a str, &'a str, &'a str)> {
+    let valid = is_fast_handler_path(assignment.target_path)
+        && is_fast_identifier(assignment.field)
+        && is_fast_handler_path(callbacks.on_change_function)
+        && is_fast_handler_path(callbacks.on_sound_function);
+    valid.then_some((
+        assignment.target_path,
+        assignment.field,
+        callbacks.on_change_function,
+        callbacks.on_sound_function,
     ))
 }
 
@@ -594,4 +623,30 @@ fn parse_global_number_assignment(stmt: &str) -> Option<(&str, &str, f64)> {
         .ok()?;
     let (target_path, field) = lhs.trim().rsplit_once('.')?;
     Some((target_path.trim(), field.trim(), value))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_checked_assignment_then_callbacks;
+
+    #[test]
+    fn parses_checked_assignment_then_callbacks() {
+        let parsed = parse_checked_assignment_then_callbacks(
+            "local checked = self:GetChecked() if (checked) then SettingsPanel.Enabled = true; else SettingsPanel.Enabled = false; end RefreshSettings(); PlaySound(checked)",
+        );
+
+        assert_eq!(
+            parsed,
+            Some(("SettingsPanel", "Enabled", "RefreshSettings", "PlaySound"))
+        );
+    }
+
+    #[test]
+    fn rejects_mismatched_checked_assignment_pair() {
+        let parsed = parse_checked_assignment_then_callbacks(
+            "local checked = self:GetChecked() if (checked) then SettingsPanel.Enabled = true; else OtherPanel.Enabled = false; end RefreshSettings(); PlaySound(checked)",
+        );
+
+        assert_eq!(parsed, None);
+    }
 }
