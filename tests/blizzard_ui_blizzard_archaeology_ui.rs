@@ -22,3 +22,6 @@ mod behavior_show_opens_the_panel;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_onload_seeds_title_and_pages.rs"]
 mod behavior_onload_seeds_title_and_pages;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_summary_page_lists_races.rs"]
+mod behavior_summary_page_lists_races;
