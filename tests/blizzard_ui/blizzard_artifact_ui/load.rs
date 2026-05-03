@@ -126,6 +126,20 @@ fn artifact_item_quality_color_surface_is_available_after_load() {
 }
 
 #[test]
+fn artifact_appearance_tutorial_bitfield_constant_is_numeric() {
+    with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
+        let constant_type: String = env
+            .eval(r#"return type(LE_FRAME_TUTORIAL_ARTIFACT_APPEARANCE_TAB)"#)
+            .expect("tutorial bitfield constant probe should run cleanly");
+        assert_eq!(
+            constant_type, "number",
+            "`LE_FRAME_TUTORIAL_ARTIFACT_APPEARANCE_TAB` must be numeric for ArtifactUI \
+             GetCVarBitfield/SetCVarBitfield gates"
+        );
+    });
+}
+
+#[test]
 fn artifact_ui_loads_cleanly_via_c_addons_load_addon() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
         clear_recorded_lua_errors(env);
