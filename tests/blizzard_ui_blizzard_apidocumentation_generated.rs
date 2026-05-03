@@ -26,3 +26,6 @@ mod behavior_handle_slash_command_system_search_dispatches_to_corpus_system;
 
 #[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_handle_api_link_default_writes_real_detailed_output.rs"]
 mod behavior_handle_api_link_default_writes_real_detailed_output;
+
+#[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_handle_api_link_copyapi_records_real_clipboard.rs"]
+mod behavior_handle_api_link_copyapi_records_real_clipboard;
