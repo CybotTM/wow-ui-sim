@@ -2,6 +2,30 @@ use crate::lua_api::methods::{create_table, table_get};
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
+const ITEM_CLASS_NAMES: &[(i32, &str)] = &[
+    (0, "Consumable"),
+    (1, "Container"),
+    (2, "Weapon"),
+    (3, "Gem"),
+    (4, "Armor"),
+    (5, "Reagent"),
+    (6, "Projectile"),
+    (7, "Trade Goods"),
+    (8, "Item Enhancement"),
+    (9, "Recipe"),
+    (10, "Money"),
+    (11, "Quiver"),
+    (12, "Quest"),
+    (13, "Key"),
+    (14, "Permanent"),
+    (15, "Miscellaneous"),
+    (16, "Glyph"),
+    (17, "Battle Pet"),
+    (18, "WoW Token"),
+    (19, "Profession"),
+    (20, "Housing"),
+];
+
 pub(crate) fn item_class_from_inv_type(inv_type: u8) -> &'static str {
     match inv_type {
         13 | 15 | 17 | 21 | 22 | 25 | 26 => "Weapon",
@@ -19,30 +43,10 @@ pub(crate) fn inv_type_to_class_id(inv_type: u8) -> i32 {
 }
 
 pub(crate) fn item_class_name(class_id: i32) -> &'static str {
-    match class_id {
-        0 => "Consumable",
-        1 => "Container",
-        2 => "Weapon",
-        3 => "Gem",
-        4 => "Armor",
-        5 => "Reagent",
-        6 => "Projectile",
-        7 => "Trade Goods",
-        8 => "Item Enhancement",
-        9 => "Recipe",
-        10 => "Money",
-        11 => "Quiver",
-        12 => "Quest",
-        13 => "Key",
-        14 => "Permanent",
-        15 => "Miscellaneous",
-        16 => "Glyph",
-        17 => "Battle Pet",
-        18 => "WoW Token",
-        19 => "Profession",
-        20 => "Housing",
-        _ => "Unknown",
-    }
+    ITEM_CLASS_NAMES
+        .iter()
+        .find_map(|(id, name)| (*id == class_id).then_some(*name))
+        .unwrap_or("Unknown")
 }
 
 pub(super) fn item_subclass_name(class_id: i32, subclass_id: i32) -> &'static str {
