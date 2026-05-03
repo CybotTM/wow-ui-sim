@@ -1,5 +1,7 @@
 use super::{FastHandlerRef, FastLiteralValue};
 
+#[path = "parser_args.rs"]
+mod parser_args;
 #[path = "parser_function_family.rs"]
 mod parser_function_family;
 #[path = "parser_global_family.rs"]
@@ -9,6 +11,7 @@ mod parser_inline_sequence;
 #[path = "parser_method_family.rs"]
 mod parser_method_family;
 
+use self::parser_args::split_top_level_args;
 use self::parser_function_family::parse_function_family;
 use self::parser_global_family::{
     parse_global_family, parse_global_tooltip_set_owner_then_set_text,
@@ -250,62 +253,6 @@ fn parse_inline_sequence(stmt: &str) -> Option<FastHandlerRef<'_>> {
         )))),
         _ => None,
     }
-}
-
-pub(super) fn split_top_level_args(args: &str) -> Option<Vec<&str>> {
-    let mut parts = Vec::new();
-    let mut start = 0usize;
-    let chars = args.char_indices().peekable();
-    let mut in_string = false;
-    let mut quote = '\0';
-    let mut escaped = false;
-    let mut paren_depth = 0usize;
-
-    for (idx, ch) in chars {
-        if in_string {
-            if escaped {
-                escaped = false;
-                continue;
-            }
-            if ch == '\\' {
-                escaped = true;
-                continue;
-            }
-            if ch == quote {
-                in_string = false;
-            }
-            continue;
-        }
-
-        match ch {
-            '"' | '\'' => {
-                in_string = true;
-                quote = ch;
-            }
-            '(' => paren_depth += 1,
-            ')' => paren_depth = paren_depth.saturating_sub(1),
-            ',' if paren_depth == 0 => {
-                let part = args[start..idx].trim();
-                if part.is_empty() {
-                    return None;
-                }
-                parts.push(part);
-                start = idx + ch.len_utf8();
-            }
-            _ => {}
-        }
-    }
-
-    if in_string || paren_depth != 0 {
-        return None;
-    }
-
-    let part = args[start..].trim();
-    if part.is_empty() {
-        return None;
-    }
-    parts.push(part);
-    Some(parts)
 }
 
 fn parse_inline_register_for_clicks(stmt: &str) -> Option<(&str, Option<&str>, Option<&str>)> {
