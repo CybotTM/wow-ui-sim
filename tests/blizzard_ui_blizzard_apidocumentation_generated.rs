@@ -20,3 +20,6 @@ mod behavior_handle_slash_command_stats_writes_real_counts;
 
 #[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_handle_slash_command_system_list_lists_corpus_systems.rs"]
 mod behavior_handle_slash_command_system_list_lists_corpus_systems;
+
+#[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_handle_slash_command_system_search_dispatches_to_corpus_system.rs"]
+mod behavior_handle_slash_command_system_search_dispatches_to_corpus_system;
