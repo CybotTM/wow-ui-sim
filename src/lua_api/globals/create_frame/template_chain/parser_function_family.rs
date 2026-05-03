@@ -491,62 +491,63 @@ fn parse_checked_number_assignment_then_callbacks(
     ))
 }
 
+type CheckedAssignments3Callbacks<'a> = (
+    &'a str,
+    &'a str,
+    &'a str,
+    &'a str,
+    &'a str,
+    &'a str,
+    &'a str,
+    &'a str,
+);
+
 fn parse_checked_assignments3_then_callbacks(
     stmt: &str,
-) -> Option<(&str, &str, &str, &str, &str, &str, &str, &str)> {
+) -> Option<CheckedAssignments3Callbacks<'_>> {
     let (then_parts, else_parts, after_end) = parse_checked_then_else(stmt)?;
-    let [then_first, then_second, then_third] = then_parts.as_slice() else {
+    let assignments = parse_checked_bool_assignment_triple(&then_parts, &else_parts)?;
+    let callbacks = parse_checked_after_end_callbacks(after_end)?;
+    Some(checked_assignments3_callbacks_tuple(assignments, callbacks))
+}
+
+struct CheckedBoolAssignments3<'a> {
+    first: CheckedBoolAssignment<'a>,
+    second: CheckedBoolAssignment<'a>,
+    third: CheckedBoolAssignment<'a>,
+}
+
+fn parse_checked_bool_assignment_triple<'a>(
+    then_parts: &[&'a str],
+    else_parts: &[&'a str],
+) -> Option<CheckedBoolAssignments3<'a>> {
+    let [then_first, then_second, then_third] = then_parts else {
         return None;
     };
-    let [else_first, else_second, else_third] = else_parts.as_slice() else {
+    let [else_first, else_second, else_third] = else_parts else {
         return None;
     };
-    let (first_target_path, first_field, first_then_value) =
-        parse_global_bool_assignment(then_first)?;
-    let (second_target_path, second_field, second_then_value) =
-        parse_global_bool_assignment(then_second)?;
-    let (third_target_path, third_field, third_then_value) =
-        parse_global_bool_assignment(then_third)?;
-    let (first_else_path, first_else_field, first_else_value) =
-        parse_global_bool_assignment(else_first)?;
-    let (second_else_path, second_else_field, second_else_value) =
-        parse_global_bool_assignment(else_second)?;
-    let (third_else_path, third_else_field, third_else_value) =
-        parse_global_bool_assignment(else_third)?;
-    if first_then_value != true
-        || second_then_value != true
-        || third_then_value != true
-        || first_else_value != false
-        || second_else_value != false
-        || third_else_value != false
-        || first_target_path != first_else_path
-        || first_field != first_else_field
-        || second_target_path != second_else_path
-        || second_field != second_else_field
-        || third_target_path != third_else_path
-        || third_field != third_else_field
-    {
-        return None;
-    }
-    let parts = super::split_inline_sequence_parts(after_end);
-    let [on_change_stmt, on_sound_stmt] = parts.as_slice() else {
-        return None;
-    };
-    let on_change_function = parse_global_function_suffix(on_change_stmt.trim(), "()")?;
-    let (on_sound_function, args) = on_sound_stmt.trim().split_once('(')?;
-    if args.strip_suffix(')')?.trim() != "checked" {
-        return None;
-    }
-    Some((
-        first_target_path,
-        first_field,
-        second_target_path,
-        second_field,
-        third_target_path,
-        third_field,
-        on_change_function,
-        on_sound_function.trim(),
-    ))
+    Some(CheckedBoolAssignments3 {
+        first: parse_checked_bool_assignment_pair(then_first, else_first)?,
+        second: parse_checked_bool_assignment_pair(then_second, else_second)?,
+        third: parse_checked_bool_assignment_pair(then_third, else_third)?,
+    })
+}
+
+fn checked_assignments3_callbacks_tuple<'a>(
+    assignments: CheckedBoolAssignments3<'a>,
+    callbacks: CheckedCallbacks<'a>,
+) -> CheckedAssignments3Callbacks<'a> {
+    (
+        assignments.first.target_path,
+        assignments.first.field,
+        assignments.second.target_path,
+        assignments.second.field,
+        assignments.third.target_path,
+        assignments.third.field,
+        callbacks.on_change_function,
+        callbacks.on_sound_function,
+    )
 }
 
 fn parse_checked_assignment_then_two_callbacks(
@@ -561,11 +562,7 @@ fn parse_checked_assignment_then_two_callbacks(
     };
     let (then_path, then_field, then_value) = parse_global_bool_assignment(then_stmt)?;
     let (else_path, else_field, else_value) = parse_global_bool_assignment(else_stmt)?;
-    if then_path != else_path
-        || then_field != else_field
-        || then_value != true
-        || else_value != false
-    {
+    if then_path != else_path || then_field != else_field || !then_value || else_value {
         return None;
     }
     let parts = super::split_inline_sequence_parts(after_end);
@@ -627,7 +624,9 @@ fn parse_global_number_assignment(stmt: &str) -> Option<(&str, &str, f64)> {
 
 #[cfg(test)]
 mod tests {
-    use super::parse_checked_assignment_then_callbacks;
+    use super::{
+        parse_checked_assignment_then_callbacks, parse_checked_assignments3_then_callbacks,
+    };
 
     #[test]
     fn parses_checked_assignment_then_callbacks() {
@@ -645,6 +644,36 @@ mod tests {
     fn rejects_mismatched_checked_assignment_pair() {
         let parsed = parse_checked_assignment_then_callbacks(
             "local checked = self:GetChecked() if (checked) then SettingsPanel.Enabled = true; else OtherPanel.Enabled = false; end RefreshSettings(); PlaySound(checked)",
+        );
+
+        assert_eq!(parsed, None);
+    }
+
+    #[test]
+    fn parses_checked_assignments3_then_callbacks() {
+        let parsed = parse_checked_assignments3_then_callbacks(
+            "local checked = self:GetChecked() if (checked) then A.Enabled = true; B.Enabled = true; C.Enabled = true; else A.Enabled = false; B.Enabled = false; C.Enabled = false; end RefreshSettings(); PlaySound(checked)",
+        );
+
+        assert_eq!(
+            parsed,
+            Some((
+                "A",
+                "Enabled",
+                "B",
+                "Enabled",
+                "C",
+                "Enabled",
+                "RefreshSettings",
+                "PlaySound",
+            ))
+        );
+    }
+
+    #[test]
+    fn rejects_mismatched_checked_assignments3_pair() {
+        let parsed = parse_checked_assignments3_then_callbacks(
+            "local checked = self:GetChecked() if (checked) then A.Enabled = true; B.Enabled = true; C.Enabled = true; else A.Enabled = false; Other.Enabled = false; C.Enabled = false; end RefreshSettings(); PlaySound(checked)",
         );
 
         assert_eq!(parsed, None);
