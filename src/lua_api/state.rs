@@ -176,7 +176,7 @@ macro_rules! build_empty_sim_state {
             pet_battles: PetBattleState::default(),
             pet: PetState::default(),
             lfg_list_counts: LfgListCounts::default(),
-            can_use_premade_group: false,
+            can_use_premade_group: true,
             lfg_category_info: default_lfg_category_info(),
             lfg_active_categories: ::std::collections::HashSet::new(),
             lfg_queued_dungeons: ::std::collections::HashMap::new(),
@@ -1708,8 +1708,8 @@ pub struct SimState {
     /// scroll behaviour without standing up a real LFG listing.
     pub lfg_list_counts: LfgListCounts,
     /// Whether `C_LFGInfo.CanPlayerUsePremadeGroup()` reports true. Sim
-    /// default is false — the Premade Group Finder UI is gated off in a
-    /// fresh env. Admin: `A_Admin.SetCanUsePremadeGroup(b?)`.
+    /// default is true so the Premade Group Finder UI is available in a
+    /// fresh game env. Admin: `A_Admin.SetCanUsePremadeGroup(b?)`.
     pub can_use_premade_group: bool,
     /// Category metadata for `C_LFGInfo.GetLFGCategoryInfo(id)` and
     /// `C_LFGList.GetLfgCategoryInfo(id)`. Seeded with standard retail

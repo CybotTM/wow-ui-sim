@@ -494,6 +494,19 @@ fn keybind_l_opens_group_finder() {
             triggered,
             "Pressing L should dispatch PVEFrame_ToggleFrame"
         );
+        let premade_enabled: bool = env
+            .eval(
+                r#"
+                return GroupFinderFrame ~= nil
+                    and GroupFinderFrame.groupButton3 ~= nil
+                    and GroupFinderFrame.groupButton3:IsEnabled() == true
+                "#,
+            )
+            .expect("Failed to read Premade Groups button enabled state");
+        assert!(
+            premade_enabled,
+            "Premade Groups should be enabled after opening Group Finder"
+        );
     }
 }
 

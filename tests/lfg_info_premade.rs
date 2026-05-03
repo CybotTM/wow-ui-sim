@@ -8,9 +8,9 @@ fn probe(env: &WowLuaEnv) -> bool {
 }
 
 #[test]
-fn defaults_to_false() {
+fn defaults_to_true() {
     let env = WowLuaEnv::new().unwrap();
-    assert!(!probe(&env));
+    assert!(probe(&env));
 }
 
 #[test]
