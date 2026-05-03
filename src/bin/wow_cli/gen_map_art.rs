@@ -338,32 +338,41 @@ fn write_file_header(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_structs(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "/// Map art layer info (dimensions and scale).")?;
-    writeln!(out, "#[derive(Debug, Clone, Copy)]")?;
-    writeln!(out, "pub struct MapArtLayer {{")?;
-    writeln!(out, "    pub layer_width: u32,")?;
-    writeln!(out, "    pub layer_height: u32,")?;
-    writeln!(out, "    pub tile_width: u32,")?;
-    writeln!(out, "    pub tile_height: u32,")?;
-    writeln!(out, "    pub min_scale: f32,")?;
-    writeln!(out, "    pub max_scale: f32,")?;
-    writeln!(out, "    pub additional_zoom_steps: u32,")?;
-    writeln!(out, "}}")?;
-    writeln!(out)?;
-    writeln!(
-        out,
-        "/// Map art info (art ID, style layers, and tile fileDataIDs per layer)."
-    )?;
-    writeln!(out, "#[derive(Debug, Clone)]")?;
-    writeln!(out, "pub struct MapArtInfo {{")?;
-    writeln!(out, "    pub art_id: u32,")?;
-    writeln!(out, "    pub layers: &'static [MapArtLayer],")?;
-    writeln!(
-        out,
-        "    pub tiles: &'static [&'static [u32]], // per layer, ordered row-major"
-    )?;
-    writeln!(out, "}}")?;
-    writeln!(out)?;
+    write_literal_lines(out, MAP_ART_LAYER_STRUCT)?;
+    write_literal_lines(out, MAP_ART_INFO_STRUCT)?;
+    Ok(())
+}
+
+const MAP_ART_LAYER_STRUCT: &[&str] = &[
+    "/// Map art layer info (dimensions and scale).",
+    "#[derive(Debug, Clone, Copy)]",
+    "pub struct MapArtLayer {",
+    "    pub layer_width: u32,",
+    "    pub layer_height: u32,",
+    "    pub tile_width: u32,",
+    "    pub tile_height: u32,",
+    "    pub min_scale: f32,",
+    "    pub max_scale: f32,",
+    "    pub additional_zoom_steps: u32,",
+    "}",
+    "",
+];
+
+const MAP_ART_INFO_STRUCT: &[&str] = &[
+    "/// Map art info (art ID, style layers, and tile fileDataIDs per layer).",
+    "#[derive(Debug, Clone)]",
+    "pub struct MapArtInfo {",
+    "    pub art_id: u32,",
+    "    pub layers: &'static [MapArtLayer],",
+    "    pub tiles: &'static [&'static [u32]], // per layer, ordered row-major",
+    "}",
+    "",
+];
+
+fn write_literal_lines(out: &mut File, lines: &[&str]) -> std::io::Result<()> {
+    for line in lines {
+        writeln!(out, "{line}")?;
+    }
     Ok(())
 }
 
