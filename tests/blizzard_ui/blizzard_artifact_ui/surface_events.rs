@@ -21,6 +21,23 @@ fn artifact_frame_event_lifecycle_matches_mixin_handlers() {
     });
 }
 
+#[test]
+fn artifact_perks_and_title_event_lifecycles_match_mixin_handlers() {
+    with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
+        load_artifact_ui(env);
+
+        let mismatches: Vec<String> = env
+            .eval(PERKS_AND_TITLE_EVENT_LIFECYCLE_PROBE)
+            .expect("Artifact perks/title event lifecycle probe should run cleanly");
+
+        assert!(
+            mismatches.is_empty(),
+            "`{ROOT}` must register and unregister ArtifactPerks and title events through \
+             their mixin handlers; mismatches: {mismatches:?}"
+        );
+    });
+}
+
 fn load_artifact_ui(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     let (loaded, error): (bool, Option<String>) = env
         .eval(r#"return C_AddOns.LoadAddOn("Blizzard_ArtifactUI")"#)
@@ -102,6 +119,79 @@ C_ArtifactUI.Clear = originalClear
 StaticPopup_Hide = originalStaticPopupHide
 
 expect(ok, "OnShow/OnHide error:" .. tostring(errorMessage))
+
+return mismatches
+"#;
+
+const PERKS_AND_TITLE_EVENT_LIFECYCLE_PROBE: &str = r#"
+local mismatches = {}
+
+local function expect(condition, message)
+    if not condition then
+        table.insert(mismatches, message)
+    end
+end
+
+local perks = ArtifactFrame and ArtifactFrame.PerksTab
+local title = perks and perks.TitleContainer
+local perksEvents = {
+    "CURSOR_CHANGED",
+    "UI_MODEL_SCENE_INFO_UPDATED",
+}
+local titleEvents = {
+    "ARTIFACT_UPDATE",
+    "CURSOR_CHANGED",
+}
+
+expect(type(perks) == "table", "ArtifactFrame.PerksTab:" .. type(perks))
+expect(type(title) == "table", "ArtifactFrame.PerksTab.TitleContainer:" .. type(title))
+
+local function expectRegistered(frame, events, expected, phase)
+    for _, event in ipairs(events) do
+        local registered = frame and frame:IsEventRegistered(event) or false
+        expect(
+            registered == expected,
+            phase .. " " .. event .. ":" .. tostring(registered)
+        )
+    end
+end
+
+expectRegistered(perks, perksEvents, false, "perks before OnShow")
+expectRegistered(title, titleEvents, false, "title before OnShow")
+
+local originalCancelAllTimedAnimations = perks.CancelAllTimedAnimations
+local originalSkipTier2Animation = perks.SkipTier2Animation
+local originalRefreshTitle = title.RefreshTitle
+local originalEvaluateRelics = title.EvaluateRelics
+local originalHideReplacePopup = StaticPopup_Hide
+
+perks.CancelAllTimedAnimations = function() end
+perks.SkipTier2Animation = function() end
+title.RefreshTitle = function() end
+title.EvaluateRelics = function() end
+StaticPopup_Hide = function() end
+
+local ok, errorMessage = pcall(function()
+    ArtifactPerksMixin.OnShow(perks)
+    expectRegistered(perks, perksEvents, true, "perks after OnShow")
+
+    ArtifactPerksMixin.OnHide(perks)
+    expectRegistered(perks, perksEvents, false, "perks after OnHide")
+
+    ArtifactTitleTemplateMixin.OnShow(title)
+    expectRegistered(title, titleEvents, true, "title after OnShow")
+
+    ArtifactTitleTemplateMixin.OnHide(title)
+    expectRegistered(title, titleEvents, false, "title after OnHide")
+end)
+
+perks.CancelAllTimedAnimations = originalCancelAllTimedAnimations
+perks.SkipTier2Animation = originalSkipTier2Animation
+title.RefreshTitle = originalRefreshTitle
+title.EvaluateRelics = originalEvaluateRelics
+StaticPopup_Hide = originalHideReplacePopup
+
+expect(ok, "perks/title OnShow/OnHide error:" .. tostring(errorMessage))
 
 return mismatches
 "#;
