@@ -233,13 +233,13 @@ do
   if type(stringMeta) == "table" then
     local stringIndex = stringMeta.__index
     if type(stringIndex) == "table" then
-      function stringIndex:split(input, limit)
-        return strsplit(self, input, limit)
+      function stringIndex:split(delimiter, limit)
+        return strsplittable(delimiter, self, limit)
       end
     end
 
-    function stringMeta:split(input, limit)
-      return strsplit(self, input, limit)
+    function stringMeta:split(delimiter, limit)
+      return strsplittable(delimiter, self, limit)
     end
   end
 end
