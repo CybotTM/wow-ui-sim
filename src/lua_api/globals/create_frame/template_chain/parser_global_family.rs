@@ -1,294 +1,9 @@
 use super::{FastHandlerRef, FastLiteralValue, is_fast_handler_path, is_fast_identifier};
 
-pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    if let Some((category_path, slot_path, leave_function, join_function)) =
-        parse_get_lfg_mode_branch(stmt)
-    {
-        return Some(FastHandlerRef::GetLfgModeBranch {
-            category_path,
-            slot_path,
-            leave_function,
-            join_function,
-        });
-    }
-    if let Some((target_path, method_name)) = parse_local_global_path_conditional_method(stmt) {
-        return Some(FastHandlerRef::LocalGlobalPathConditionalMethod {
-            target_path,
-            method_name,
-        });
-    }
-    if let Some((function_name, then_ref, else_ref)) =
-        parse_conditional_global_noarg_then_else(stmt)
-    {
-        return Some(FastHandlerRef::ConditionalGlobalNoArgs {
-            function_name,
-            then_ref: Box::new(then_ref),
-            else_ref: Box::new(else_ref),
-        });
-    }
-    if let Some((function_name, arg_function_name, then_ref)) =
-        parse_conditional_global_function_with_noarg_function_result_then(stmt)
-    {
-        return Some(
-            FastHandlerRef::ConditionalGlobalFunctionWithNoArgFunctionResultThen {
-                function_name,
-                arg_function_name,
-                then_ref: Box::new(then_ref),
-            },
-        );
-    }
-    if let Some((target_path, field, value, then_ref)) =
-        parse_conditional_global_field_equals_string_then(stmt)
-    {
-        return Some(FastHandlerRef::ConditionalGlobalFieldEqualsStringThen {
-            target_path,
-            field,
-            value,
-            then_ref: Box::new(then_ref),
-        });
-    }
-    if let Some((target_path, method_name, field, value)) =
-        parse_inline_global_method_then_assign(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodThenAssignLiteral {
-            target_path,
-            method_name,
-            field,
-            value,
-        });
-    }
-    if let Some((target_path, method_name, arg)) =
-        parse_inline_global_method_with_self_string_arg(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodWithSelfStringArg {
-            target_path,
-            method_name,
-            arg,
-        });
-    }
-    if let Some((target_path, method_name, first, second, third)) =
-        parse_inline_global_method_with_self_string_number_number_args(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodWithSelfStringNumberNumberArgs {
-            target_path,
-            method_name,
-            first,
-            second,
-            third,
-        });
-    }
-    if let Some((target_path, method_name, arg)) = parse_inline_global_method_with_string_arg(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodWithStringArg {
-            target_path,
-            method_name,
-            arg,
-        });
-    }
-    if let Some((target_path, method_name, arg_path)) =
-        parse_inline_global_method_with_global_arg(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodWithGlobalArg {
-            target_path,
-            method_name,
-            arg_path,
-        });
-    }
-    if let Some((target_path, method_name, first, second_arg_path, third)) =
-        parse_inline_global_method_with_string_global_bool_args(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodWithStringGlobalBoolArgs {
-            target_path,
-            method_name,
-            first,
-            second_arg_path,
-            third,
-        });
-    }
-    if let Some((
-        target_path,
-        method_name,
-        first_arg_path,
-        second_arg_path,
-        third_arg_path,
-        fourth_arg_path,
-        fifth,
-    )) = parse_inline_global_method_with_global_three_global_bool_args(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodWithGlobalThreeGlobalBoolArgs {
-            target_path,
-            method_name,
-            first_arg_path,
-            second_arg_path,
-            third_arg_path,
-            fourth_arg_path,
-            fifth,
-        });
-    }
-    if let Some((target_path, method_name, first_arg_path, sixth)) =
-        parse_inline_global_method_with_global_nil_nil_nil_nil_bool_args(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodWithGlobalNilNilNilNilBoolArgs {
-            target_path,
-            method_name,
-            first_arg_path,
-            sixth,
-        });
-    }
-    if let Some((
-        target_path,
-        method_name,
-        first_arg_path,
-        second_self_method,
-        third_self_method,
-        fourth,
-    )) = parse_inline_global_method_with_global_self_method_self_method_bool_args(stmt)
-    {
-        return Some(
-            FastHandlerRef::GlobalMethodWithGlobalSelfMethodSelfMethodBoolArgs {
-                target_path,
-                method_name,
-                first_arg_path,
-                second_self_method,
-                third_self_method,
-                fourth,
-            },
-        );
-    }
-    if let Some((
-        target_path,
-        method_name,
-        first_arg_path,
-        second_arg_path,
-        third_arg_path,
-        fourth_arg_path,
-    )) = parse_inline_global_method_with_four_global_args(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodWithFourGlobalArgs {
-            target_path,
-            method_name,
-            first_arg_path,
-            second_arg_path,
-            third_arg_path,
-            fourth_arg_path,
-        });
-    }
-    if let Some((target_path, method_name, function_name, first, second, third, fourth, fifth)) =
-        parse_inline_global_method_with_string_string_function_result_and_three_number_args(stmt)
-    {
-        return Some(
-            FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
-                target_path,
-                method_name,
-                function_name,
-                first,
-                second,
-                third,
-                fourth,
-                fifth,
-            },
-        );
-    }
-    if let Some((
-        target_path,
-        method_name,
-        function_name,
-        first_arg_path,
-        second,
-        third,
-        fourth,
-        fifth,
-    )) =
-        parse_inline_global_method_with_global_string_function_result_and_three_number_args(stmt)
-    {
-        return Some(
-            FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs {
-                target_path,
-                method_name,
-                function_name,
-                first_arg_path,
-                second,
-                third,
-                fourth,
-                fifth,
-            },
-        );
-    }
-    if let Some((target_path, method_name)) = parse_inline_global_method_with_self_arg(stmt) {
-        return Some(FastHandlerRef::GlobalMethodWithSelfArg {
-            target_path,
-            method_name,
-        });
-    }
-    if let Some((target_path, method_name)) = parse_inline_global_method_with_self_id_arg(stmt) {
-        return Some(FastHandlerRef::GlobalMethodWithSelfIdArg {
-            target_path,
-            method_name,
-        });
-    }
-    if let Some((target_path, method_name)) = parse_inline_global_method(stmt) {
-        return Some(FastHandlerRef::GlobalMethod {
-            target_path,
-            method_name,
-        });
-    }
-    if let Some((target_path, anchor, text, red, green, blue)) =
-        parse_global_tooltip_set_owner_then_set_text_literal(stmt)
-    {
-        return Some(FastHandlerRef::GlobalTooltipSetOwnerThenSetTextLiteral {
-            target_path,
-            anchor,
-            text,
-            red,
-            green,
-            blue,
-        });
-    }
-    if let Some((target_path, anchor, text_path, red_path, green_path, blue_path, wrap)) =
-        parse_global_tooltip_set_owner_then_set_text(stmt)
-    {
-        return Some(FastHandlerRef::GlobalTooltipSetOwnerThenSetText {
-            target_path,
-            anchor,
-            text_path,
-            red_path,
-            green_path,
-            blue_path,
-            wrap,
-        });
-    }
-    if let Some((target_path, field, anchor, red_path, green_path, blue_path)) =
-        parse_conditional_tooltip(stmt)
-    {
-        return Some(FastHandlerRef::ConditionalTooltip {
-            target_path,
-            field,
-            anchor,
-            red_path,
-            green_path,
-            blue_path,
-        });
-    }
-    if let Some(target_path) = parse_toggle_global_visibility(stmt) {
-        return Some(FastHandlerRef::ToggleGlobalVisibility { target_path });
-    }
-    if let Some((suffix, method_name, arg_path)) =
-        parse_inline_named_global_method_with_global_arg(stmt)
-    {
-        return Some(FastHandlerRef::NamedGlobalMethodWithGlobalArg {
-            suffix,
-            method_name,
-            arg_path,
-        });
-    }
-    parse_inline_global_method_with_self_field_arg(stmt).map(|(target_path, method_name, field)| {
-        FastHandlerRef::GlobalMethodWithSelfFieldArg {
-            target_path,
-            method_name,
-            field,
-        }
-    })
-}
+#[path = "parser_global_dispatch.rs"]
+mod parser_global_dispatch;
+
+pub(super) use self::parser_global_dispatch::parse_global_family;
 
 fn parse_local_global_path_conditional_method(stmt: &str) -> Option<(&str, &str)> {
     let stmt = stmt.trim();
@@ -695,9 +410,12 @@ fn parse_inline_global_method_with_global_self_method_self_method_bool_args(
     ))
 }
 
+type GlobalMethodStringStringFunctionResultNumbers<'a> =
+    (&'a str, &'a str, &'a str, &'a str, &'a str, f64, f64, f64);
+
 fn parse_inline_global_method_with_string_string_function_result_and_three_number_args(
     stmt: &str,
-) -> Option<(&str, &str, &str, &str, &str, f64, f64, f64)> {
+) -> Option<GlobalMethodStringStringFunctionResultNumbers<'_>> {
     let (target_path, remainder) = stmt.rsplit_once(':')?;
     let (method_name, args) = remainder.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
@@ -737,9 +455,12 @@ fn parse_inline_global_method_with_string_string_function_result_and_three_numbe
     ))
 }
 
+type GlobalMethodGlobalStringFunctionResultNumbers<'a> =
+    (&'a str, &'a str, &'a str, &'a str, &'a str, f64, f64, f64);
+
 fn parse_inline_global_method_with_global_string_function_result_and_three_number_args(
     stmt: &str,
-) -> Option<(&str, &str, &str, &str, &str, f64, f64, f64)> {
+) -> Option<GlobalMethodGlobalStringFunctionResultNumbers<'_>> {
     let (target_path, remainder) = stmt.rsplit_once(':')?;
     let (method_name, args) = remainder.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
