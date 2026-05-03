@@ -62,6 +62,31 @@ const SPELL_LOOKUP_TESTS: &[&str] = &[
     "}",
 ];
 
+const SPELL_POWER_TESTS: &[&str] = &[
+    "",
+    "#[cfg(test)]",
+    "mod tests {",
+    "    use super::*;",
+    "",
+    "    #[test]",
+    "    fn test_flash_of_light_power_cost() {",
+    "        let costs = get_spell_power(19750).expect(\"Flash of Light should have power cost\");",
+    "        assert!(!costs.is_empty());",
+    "        assert_eq!(costs[0].power_type, 0); // MANA",
+    "    }",
+    "",
+    "    #[test]",
+    "    fn test_spell_power_count() {",
+    "        assert!(SPELL_POWER_DB.len() > 100);",
+    "    }",
+    "",
+    "    #[test]",
+    "    fn test_no_power_for_unknown() {",
+    "        assert!(get_spell_power(999_999_999).is_none());",
+    "    }",
+    "}",
+];
+
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let wow_data = wow_data_dir();
     let spell_data = load_spell_data(&wow_data)?;
@@ -637,34 +662,7 @@ fn write_power_type_name_fn(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_spell_power_tests(out: &mut File) -> std::io::Result<()> {
-    writeln!(out)?;
-    writeln!(out, "#[cfg(test)]")?;
-    writeln!(out, "mod tests {{")?;
-    writeln!(out, "    use super::*;")?;
-    writeln!(out)?;
-    writeln!(out, "    #[test]")?;
-    writeln!(out, "    fn test_flash_of_light_power_cost() {{")?;
-    writeln!(
-        out,
-        "        let costs = get_spell_power(19750).expect(\"Flash of Light should have power cost\");"
-    )?;
-    writeln!(out, "        assert!(!costs.is_empty());")?;
-    writeln!(out, "        assert_eq!(costs[0].power_type, 0); // MANA")?;
-    writeln!(out, "    }}")?;
-    writeln!(out)?;
-    writeln!(out, "    #[test]")?;
-    writeln!(out, "    fn test_spell_power_count() {{")?;
-    writeln!(out, "        assert!(SPELL_POWER_DB.len() > 100);")?;
-    writeln!(out, "    }}")?;
-    writeln!(out)?;
-    writeln!(out, "    #[test]")?;
-    writeln!(out, "    fn test_no_power_for_unknown() {{")?;
-    writeln!(
-        out,
-        "        assert!(get_spell_power(999_999_999).is_none());"
-    )?;
-    writeln!(out, "    }}")?;
-    writeln!(out, "}}")
+    write_literal_lines(out, SPELL_POWER_TESTS)
 }
 
 /// Load ImplicitTarget_0 for each spell's first effect (EffectIndex=0, DifficultyID=0).
