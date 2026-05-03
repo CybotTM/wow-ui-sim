@@ -528,45 +528,83 @@ pub(super) fn parse_global_tooltip_set_owner_then_set_text(
     stmt: &str,
 ) -> Option<(&str, &str, &str, &str, &str, &str, bool)> {
     let (first, second) = stmt.split_once(';')?;
-    let (target_path, method_name, anchor) =
-        parse_inline_global_method_with_self_string_arg(first.trim())?;
-    if method_name != "SetOwner" {
-        return None;
-    }
+    let owner = parse_tooltip_set_owner(first.trim())?;
+    let text = parse_tooltip_set_text_paths(second.trim(), owner.target_path)?;
+    Some((
+        owner.target_path,
+        owner.anchor,
+        text.text_path,
+        text.red_path,
+        text.green_path,
+        text.blue_path,
+        text.wrap,
+    ))
+}
 
-    let (text_target_path, text_remainder) = second.trim().rsplit_once(':')?;
-    let (text_method_name, text_args) = text_remainder.split_once('(')?;
-    let text_args = text_args.strip_suffix(')')?.trim();
-    if text_target_path.trim() != target_path || text_method_name.trim() != "SetText" {
-        return None;
-    }
+struct TooltipOwner<'a> {
+    target_path: &'a str,
+    anchor: &'a str,
+}
 
-    let mut parts = text_args.split(',').map(str::trim);
-    let text_path = parts.next()?;
-    let red_path = parts.next()?;
-    let green_path = parts.next()?;
-    let blue_path = parts.next()?;
-    let maybe_nil = parts.next()?;
-    let wrap = parts.next()?;
-    if parts.next().is_some() {
-        return None;
-    }
+struct TooltipTextPaths<'a> {
+    text_path: &'a str,
+    red_path: &'a str,
+    green_path: &'a str,
+    blue_path: &'a str,
+    wrap: bool,
+}
 
+fn parse_tooltip_set_owner(stmt: &str) -> Option<TooltipOwner<'_>> {
+    let (target_path, method_name, anchor) = parse_inline_global_method_with_self_string_arg(stmt)?;
+    (method_name == "SetOwner").then_some(TooltipOwner {
+        target_path,
+        anchor,
+    })
+}
+
+fn parse_tooltip_set_text_paths<'a>(
+    stmt: &'a str,
+    expected_target_path: &str,
+) -> Option<TooltipTextPaths<'a>> {
+    let text_args = parse_matching_global_set_text_args(stmt, expected_target_path)?;
+    let [text_path, red_path, green_path, blue_path, maybe_nil, wrap] =
+        super::split_top_level_args(text_args)?.try_into().ok()?;
+    let wrap = parse_tooltip_wrap_arg(wrap, maybe_nil)?;
     (is_fast_handler_path(text_path)
         && is_fast_handler_path(red_path)
         && is_fast_handler_path(green_path)
-        && is_fast_handler_path(blue_path)
-        && maybe_nil == "nil"
-        && matches!(wrap, "true" | "false"))
-    .then_some((
-        target_path,
-        anchor,
+        && is_fast_handler_path(blue_path))
+    .then_some(TooltipTextPaths {
         text_path,
         red_path,
         green_path,
         blue_path,
-        wrap == "true",
-    ))
+        wrap,
+    })
+}
+
+fn parse_matching_global_set_text_args<'a>(
+    stmt: &'a str,
+    expected_target_path: &str,
+) -> Option<&'a str> {
+    let (target_path, text_remainder) = stmt.rsplit_once(':')?;
+    let (method_name, text_args) = text_remainder.split_once('(')?;
+    let same_target = target_path.trim() == expected_target_path;
+    let is_set_text = method_name.trim() == "SetText";
+    if !(same_target && is_set_text) {
+        return None;
+    }
+    Some(text_args.strip_suffix(')')?.trim())
+}
+
+fn parse_tooltip_wrap_arg(wrap: &str, maybe_nil: &str) -> Option<bool> {
+    (maybe_nil == "nil")
+        .then_some(wrap)
+        .and_then(|wrap| match wrap {
+            "true" => Some(true),
+            "false" => Some(false),
+            _ => None,
+        })
 }
 
 fn parse_global_tooltip_set_owner_then_set_text_literal(
@@ -697,4 +735,44 @@ fn parse_inline_global_method_then_assign(
         return None;
     };
     Some((target_path, method_name, field, value))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_global_tooltip_set_owner_then_set_text;
+
+    #[test]
+    fn parses_global_tooltip_set_owner_then_set_text_paths() {
+        let stmt = concat!(
+            "GameTooltip:SetOwner(self, \"ANCHOR_RIGHT\"); ",
+            "GameTooltip:SetText(self.Title, self.Red, self.Green, self.Blue, nil, true)"
+        );
+
+        let parsed = parse_global_tooltip_set_owner_then_set_text(stmt);
+
+        assert_eq!(
+            parsed,
+            Some((
+                "GameTooltip",
+                "ANCHOR_RIGHT",
+                "self.Title",
+                "self.Red",
+                "self.Green",
+                "self.Blue",
+                true,
+            ))
+        );
+    }
+
+    #[test]
+    fn rejects_global_tooltip_set_text_on_different_target() {
+        let stmt = concat!(
+            "GameTooltip:SetOwner(self, \"ANCHOR_RIGHT\"); ",
+            "OtherTooltip:SetText(self.Title, self.Red, self.Green, self.Blue, nil, true)"
+        );
+
+        let parsed = parse_global_tooltip_set_owner_then_set_text(stmt);
+
+        assert_eq!(parsed, None);
+    }
 }
