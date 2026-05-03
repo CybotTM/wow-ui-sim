@@ -28,3 +28,6 @@ mod behavior_set_tab_resizes_panel;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_artifact_close_event_hides_panel.rs"]
 mod behavior_artifact_close_event_hides_panel;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_artifact_update_with_new_item_swaps_data.rs"]
+mod behavior_artifact_update_with_new_item_swaps_data;
