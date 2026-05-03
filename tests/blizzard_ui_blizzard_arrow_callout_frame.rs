@@ -10,3 +10,6 @@ mod load;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/surface_globals.rs"]
 mod surface_globals;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/surface_frames.rs"]
+mod surface_frames;
