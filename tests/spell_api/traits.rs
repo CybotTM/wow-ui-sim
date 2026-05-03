@@ -87,6 +87,52 @@ fn test_traits_get_entry_info_nil() {
 }
 
 #[test]
+fn test_traits_get_condition_info_exposes_condition_shape() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local configID = 201
+            local treeID = C_Traits.GetConfigInfo(configID).treeIDs[1]
+            for _, nodeID in ipairs(C_Traits.GetTreeNodes(configID, treeID)) do
+                local node = C_Traits.GetNodeInfo(configID, nodeID)
+                for _, conditionID in ipairs(node.conditionIDs or {}) do
+                    local info = C_Traits.GetConditionInfo(configID, conditionID)
+                    if type(info) ~= "table" then
+                        return "expected_table"
+                    end
+                    if info.condID ~= conditionID then
+                        return "bad_id"
+                    end
+                    if type(info.ranksGranted) ~= "number" then
+                        return "missing_ranks"
+                    end
+                    if type(info.isMet) ~= "boolean" or type(info.isSufficient) ~= "boolean" then
+                        return "missing_state"
+                    end
+                    if type(info.type) ~= "number" then
+                        return "missing_type"
+                    end
+                    return "ok"
+                end
+            end
+            return "no_conditions"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn test_traits_get_condition_info_unknown_returns_nil() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_Traits.GetConditionInfo(201, 999999999) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
 fn test_traits_initialize_view_loadout() {
     let env = env();
     let ok: bool = env

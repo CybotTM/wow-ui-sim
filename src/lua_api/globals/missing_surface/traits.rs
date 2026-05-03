@@ -280,11 +280,7 @@ fn check_edge_requirements(
                     any_sufficient_met = true;
                 }
             }
-            3 => {
-                if !purchased {
-                    return false;
-                }
-            }
+            3 if !purchased => return false,
             _ => {}
         }
     }
@@ -961,9 +957,7 @@ fn c_traits_get_config_info(state: &mut LuaState) -> LuaResult<u32> {
     } else {
         push_u32_array(
             state,
-            config_spec_id(config_id)
-                .and_then(c_class_talents_trait_tree_for_spec)
-                .into_iter(),
+            config_spec_id(config_id).and_then(c_class_talents_trait_tree_for_spec),
         )
     };
     table_set(state, info, "treeIDs", tree_ids);
@@ -1087,6 +1081,20 @@ fn c_traits_get_condition_info(state: &mut LuaState) -> LuaResult<u32> {
     };
 
     let info = create_table(state);
+    push_condition_base_fields(state, info, cond_id, cond);
+    let is_met = trait_condition_is_met(state, cond);
+    push_condition_state_fields(state, info, cond, is_met);
+    push_condition_optional_fields(state, info, cond);
+    state.push(info);
+    Ok(1)
+}
+
+fn push_condition_base_fields(
+    state: &mut LuaState,
+    info: Val,
+    cond_id: u32,
+    cond: &crate::traits::TraitCondInfo,
+) {
     table_set(state, info, "condID", Val::Num(cond_id as f64));
     table_set(
         state,
@@ -1100,8 +1108,10 @@ fn c_traits_get_condition_info(state: &mut LuaState) -> LuaResult<u32> {
         "isAlwaysMet",
         Val::Bool(cond.currency_id == 0 && cond.spec_set_id == 0),
     );
+}
 
-    let is_met = match borrow_state(state).ok() {
+fn trait_condition_is_met(state: &LuaState, cond: &crate::traits::TraitCondInfo) -> bool {
+    match borrow_state(state).ok() {
         Some(sim) => match cond.cond_type {
             0 => {
                 cond.currency_id == 0
@@ -1112,75 +1122,67 @@ fn c_traits_get_condition_info(state: &mut LuaState) -> LuaResult<u32> {
             _ => true,
         },
         None => false,
-    };
+    }
+}
+
+fn push_condition_state_fields(
+    state: &mut LuaState,
+    info: Val,
+    cond: &crate::traits::TraitCondInfo,
+    is_met: bool,
+) {
     table_set(state, info, "isMet", Val::Bool(is_met));
     table_set(state, info, "isGate", Val::Bool(cond.currency_id != 0));
     table_set(state, info, "isSufficient", Val::Bool(is_met));
     table_set(state, info, "type", Val::Num(cond.cond_type as f64));
-    table_set(
-        state,
-        info,
-        "questID",
-        if cond.quest_id == 0 {
-            Val::Nil
-        } else {
-            Val::Num(cond.quest_id as f64)
-        },
-    );
+}
+
+fn push_condition_optional_fields(
+    state: &mut LuaState,
+    info: Val,
+    cond: &crate::traits::TraitCondInfo,
+) {
+    table_set(state, info, "questID", optional_trait_u32(cond.quest_id));
     table_set(
         state,
         info,
         "achievementID",
-        if cond.achievement_id == 0 {
-            Val::Nil
-        } else {
-            Val::Num(cond.achievement_id as f64)
-        },
+        optional_trait_u32(cond.achievement_id),
     );
     table_set(
         state,
         info,
         "specSetID",
-        if cond.spec_set_id == 0 {
-            Val::Nil
-        } else {
-            Val::Num(cond.spec_set_id as f64)
-        },
+        optional_trait_u32(cond.spec_set_id),
     );
     table_set(
         state,
         info,
         "playerLevel",
-        if cond.required_level == 0 {
-            Val::Nil
-        } else {
-            Val::Num(cond.required_level as f64)
-        },
+        optional_trait_u32(cond.required_level),
     );
     table_set(
         state,
         info,
         "traitCurrencyID",
-        if cond.currency_id == 0 {
-            Val::Nil
-        } else {
-            Val::Num(cond.currency_id as f64)
-        },
+        optional_trait_u32(cond.currency_id),
     );
     table_set(
         state,
         info,
         "spentAmountRequired",
-        if cond.spent_amount == 0 {
-            Val::Nil
-        } else {
-            Val::Num(cond.spent_amount as f64)
-        },
+        optional_trait_u32(cond.spent_amount),
     );
     table_set(state, info, "tooltipFormat", Val::Nil);
     table_set(state, info, "traitCondAccountElementID", Val::Nil);
-    state.push(info);
-    Ok(1)
+}
+
+fn optional_trait_u32(value: u32) -> Val {
+    if value == 0 {
+        Val::Nil
+    } else {
+        Val::Num(value as f64)
+    }
 }
 
 fn c_traits_initialize_view_loadout(state: &mut LuaState) -> LuaResult<u32> {
@@ -1482,9 +1484,7 @@ fn push_subtree_base_fields(
 fn push_subtree_hero_fields(state: &mut LuaState, info: Val, subtree_id: u32) {
     let selection_node_ids = push_u32_array(
         state,
-        hero_talents::selection_node_ids_for_subtree(subtree_id)
-            .into_iter()
-            .map(|node_id| node_id as u32),
+        hero_talents::selection_node_ids_for_subtree(subtree_id),
     );
     table_set(state, info, "subTreeSelectionNodeIDs", selection_node_ids);
     let (pos_x, pos_y) = hero_talents::subtree_position(subtree_id);
