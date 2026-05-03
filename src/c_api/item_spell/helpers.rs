@@ -26,6 +26,35 @@ const ITEM_CLASS_NAMES: &[(i32, &str)] = &[
     (20, "Housing"),
 ];
 
+const ITEM_SUBCLASS_NAMES: &[(i32, i32, &str)] = &[
+    (2, 0, "Axe"),
+    (2, 1, "Axe"),
+    (2, 2, "Bow"),
+    (2, 3, "Gun"),
+    (2, 4, "Mace"),
+    (2, 5, "Mace"),
+    (2, 6, "Polearm"),
+    (2, 7, "One-Handed Swords"),
+    (2, 8, "Two-Handed Swords"),
+    (2, 9, "Warglaives"),
+    (2, 10, "Staves"),
+    (2, 11, "Bear Claws"),
+    (2, 12, "Cat Claws"),
+    (2, 13, "Unarmed"),
+    (2, 14, "Generic"),
+    (2, 15, "Daggers"),
+    (2, 16, "Thrown"),
+    (2, 18, "Crossbows"),
+    (2, 19, "Wands"),
+    (2, 20, "Fishing Poles"),
+    (4, 1, "Cloth"),
+    (4, 2, "Leather"),
+    (4, 3, "Mail"),
+    (4, 4, "Plate"),
+    (4, 6, "Shield"),
+    (7, 4, "Cooking"),
+];
+
 pub(crate) fn item_class_from_inv_type(inv_type: u8) -> &'static str {
     match inv_type {
         13 | 15 | 17 | 21 | 22 | 25 | 26 => "Weapon",
@@ -50,35 +79,12 @@ pub(crate) fn item_class_name(class_id: i32) -> &'static str {
 }
 
 pub(super) fn item_subclass_name(class_id: i32, subclass_id: i32) -> &'static str {
-    match (class_id, subclass_id) {
-        (2, 0) => "Axe",
-        (2, 1) => "Axe",
-        (2, 2) => "Bow",
-        (2, 3) => "Gun",
-        (2, 4) => "Mace",
-        (2, 5) => "Mace",
-        (2, 6) => "Polearm",
-        (2, 7) => "One-Handed Swords",
-        (2, 8) => "Two-Handed Swords",
-        (2, 9) => "Warglaives",
-        (2, 10) => "Staves",
-        (2, 11) => "Bear Claws",
-        (2, 12) => "Cat Claws",
-        (2, 13) => "Unarmed",
-        (2, 14) => "Generic",
-        (2, 15) => "Daggers",
-        (2, 16) => "Thrown",
-        (2, 18) => "Crossbows",
-        (2, 19) => "Wands",
-        (2, 20) => "Fishing Poles",
-        (4, 1) => "Cloth",
-        (4, 2) => "Leather",
-        (4, 3) => "Mail",
-        (4, 4) => "Plate",
-        (4, 6) => "Shield",
-        (7, 4) => "Cooking",
-        _ => "Unknown",
-    }
+    ITEM_SUBCLASS_NAMES
+        .iter()
+        .find_map(|(class, subclass, name)| {
+            (*class == class_id && *subclass == subclass_id).then_some(*name)
+        })
+        .unwrap_or("Unknown")
 }
 
 pub(crate) fn inv_type_to_subclass(inv_type: u8) -> &'static str {
