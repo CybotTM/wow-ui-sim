@@ -46,3 +46,6 @@ mod behavior_underlay_rotation_drag;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_appearance_tutorial_helptip.rs"]
 mod behavior_appearance_tutorial_helptip;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_knowledge_tooltip_meta_powers.rs"]
+mod behavior_knowledge_tooltip_meta_powers;
