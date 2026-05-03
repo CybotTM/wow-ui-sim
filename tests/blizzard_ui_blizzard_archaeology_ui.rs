@@ -40,3 +40,6 @@ mod behavior_completed_page_paginates;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_race_filter_dropdown_filters_listing.rs"]
 mod behavior_race_filter_dropdown_filters_listing;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_show_failed_calls_close_research.rs"]
+mod behavior_show_failed_calls_close_research;
