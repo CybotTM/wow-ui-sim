@@ -34,3 +34,6 @@ mod behavior_artifact_update_with_new_item_swaps_data;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_artifact_update_when_hidden_shows_panel.rs"]
 mod behavior_artifact_update_when_hidden_shows_panel;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_confirm_respec_popup_watchdog.rs"]
+mod behavior_confirm_respec_popup_watchdog;
