@@ -55,6 +55,30 @@ const ITEM_SUBCLASS_NAMES: &[(i32, i32, &str)] = &[
     (7, 4, "Cooking"),
 ];
 
+const INV_TYPE_EQUIP_LOCS: &[(u8, &str)] = &[
+    (1, "INVTYPE_HEAD"),
+    (2, "INVTYPE_NECK"),
+    (3, "INVTYPE_SHOULDER"),
+    (4, "INVTYPE_BODY"),
+    (5, "INVTYPE_CHEST"),
+    (6, "INVTYPE_WAIST"),
+    (7, "INVTYPE_LEGS"),
+    (8, "INVTYPE_FEET"),
+    (9, "INVTYPE_WRIST"),
+    (10, "INVTYPE_HAND"),
+    (11, "INVTYPE_FINGER"),
+    (12, "INVTYPE_TRINKET"),
+    (13, "INVTYPE_WEAPON"),
+    (14, "INVTYPE_SHIELD"),
+    (15, "INVTYPE_RANGED"),
+    (16, "INVTYPE_CLOAK"),
+    (17, "INVTYPE_2HWEAPON"),
+    (20, "INVTYPE_ROBE"),
+    (21, "INVTYPE_WEAPONMAINHAND"),
+    (22, "INVTYPE_WEAPONOFFHAND"),
+    (23, "INVTYPE_HOLDABLE"),
+];
+
 pub(crate) fn item_class_from_inv_type(inv_type: u8) -> &'static str {
     match inv_type {
         13 | 15 | 17 | 21 | 22 | 25 | 26 => "Weapon",
@@ -108,30 +132,10 @@ pub(crate) fn inv_type_to_subclass(inv_type: u8) -> &'static str {
 }
 
 pub(crate) fn inv_type_to_equip_loc(inv_type: u8) -> &'static str {
-    match inv_type {
-        1 => "INVTYPE_HEAD",
-        2 => "INVTYPE_NECK",
-        3 => "INVTYPE_SHOULDER",
-        4 => "INVTYPE_BODY",
-        5 => "INVTYPE_CHEST",
-        6 => "INVTYPE_WAIST",
-        7 => "INVTYPE_LEGS",
-        8 => "INVTYPE_FEET",
-        9 => "INVTYPE_WRIST",
-        10 => "INVTYPE_HAND",
-        11 => "INVTYPE_FINGER",
-        12 => "INVTYPE_TRINKET",
-        13 => "INVTYPE_WEAPON",
-        14 => "INVTYPE_SHIELD",
-        15 => "INVTYPE_RANGED",
-        16 => "INVTYPE_CLOAK",
-        17 => "INVTYPE_2HWEAPON",
-        20 => "INVTYPE_ROBE",
-        21 => "INVTYPE_WEAPONMAINHAND",
-        22 => "INVTYPE_WEAPONOFFHAND",
-        23 => "INVTYPE_HOLDABLE",
-        _ => "",
-    }
+    INV_TYPE_EQUIP_LOCS
+        .iter()
+        .find_map(|(id, equip_loc)| (*id == inv_type).then_some(*equip_loc))
+        .unwrap_or("")
 }
 
 pub(crate) fn global_table(state: &mut LuaState, name: &str) -> Val {
