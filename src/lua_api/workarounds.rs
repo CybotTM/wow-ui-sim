@@ -46,6 +46,52 @@ const CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA: &str = r#"
     rawset(_G, "__wow_catalog_shop_product_card_defaults_wrapped", true)
 "#;
 
+const ITEM_QUALITY_COLOR_DATA_METHODS_WORKAROUND_LUA: &str = r#"
+    if rawget(_G, "__wow_item_quality_color_data_methods_wrapped") then
+        return
+    end
+
+    local function ensureColorDataMethods(colorData)
+        if type(colorData) ~= "table" then
+            return
+        end
+
+        if type(colorData.GetRGB) ~= "function" then
+            function colorData:GetRGB()
+                return self.r, self.g, self.b
+            end
+        end
+
+        if type(colorData.GetRGBA) ~= "function" then
+            function colorData:GetRGBA()
+                return self.r, self.g, self.b, self.a or 1
+            end
+        end
+    end
+
+    local function ensureAllItemQualityColorMethods()
+        if type(ITEM_QUALITY_COLORS) ~= "table" then
+            return
+        end
+
+        for _, colorData in pairs(ITEM_QUALITY_COLORS) do
+            ensureColorDataMethods(colorData)
+        end
+    end
+
+    ensureAllItemQualityColorMethods()
+
+    if type(ColorManager) == "table" and type(ColorManager.UpdateColorsForItemQuality) == "function" then
+        local originalUpdateColorsForItemQuality = ColorManager.UpdateColorsForItemQuality
+        function ColorManager.UpdateColorsForItemQuality(...)
+            originalUpdateColorsForItemQuality(...)
+            ensureAllItemQualityColorMethods()
+        end
+    end
+
+    rawset(_G, "__wow_item_quality_color_data_methods_wrapped", true)
+"#;
+
 pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_edit_mode_manager", || {
         crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
@@ -247,6 +293,32 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     ) {
         let _ = env.exec(TALENT_EDGE_FRAME_LEVEL_SYNC_WORKAROUND_LUA);
     }
+    patch_runtime_map_addon_surfaces(env, addon_name);
+    if addon_name == "Blizzard_Collections" {
+        patch_toggle_collections_journal_for_runtime_addon_load(env);
+        patch_collections_journal_namespace(env);
+    }
+    if addon_name == "Blizzard_EncounterJournal" {
+        patch_toggle_encounter_journal_for_runtime_addon_load(env);
+    }
+    if addon_name == "Blizzard_AdventureMap" {
+        ensure_adventure_map_frame_surface_for_runtime_addon_load(env);
+    }
+    if matches!(addon_name, "Blizzard_ArtifactUI" | "Blizzard_Colors") {
+        patch_item_quality_color_data_methods(env);
+    }
+    if addon_name == "Blizzard_AccountStore" {
+        let _ = patch_account_store_set_storefront(env);
+    }
+    if addon_name == "Blizzard_CatalogShop" {
+        let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
+    }
+    if addon_name == "Blizzard_DamageMeter" {
+        patch_damage_meter_initial_scrollbox_extent(env);
+    }
+}
+
+fn patch_runtime_map_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if addon_name == "Blizzard_MapCanvas" {
         patch_map_canvas_scroll_container(env);
     }
@@ -260,25 +332,6 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
         patch_fog_of_war_pin_mixin_for_runtime_addon_load(env);
         patch_map_exploration_pin_mixin_for_runtime_addon_load(env);
         patch_map_canvas_data_provider_attachment_for_runtime_addon_load(env);
-    }
-    if addon_name == "Blizzard_Collections" {
-        patch_toggle_collections_journal_for_runtime_addon_load(env);
-        patch_collections_journal_namespace(env);
-    }
-    if addon_name == "Blizzard_EncounterJournal" {
-        patch_toggle_encounter_journal_for_runtime_addon_load(env);
-    }
-    if addon_name == "Blizzard_AdventureMap" {
-        ensure_adventure_map_frame_surface_for_runtime_addon_load(env);
-    }
-    if addon_name == "Blizzard_AccountStore" {
-        let _ = patch_account_store_set_storefront(env);
-    }
-    if addon_name == "Blizzard_CatalogShop" {
-        let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
-    }
-    if addon_name == "Blizzard_DamageMeter" {
-        patch_damage_meter_initial_scrollbox_extent(env);
     }
 }
 
@@ -1236,6 +1289,10 @@ fn ensure_adventure_map_frame_surface(env: &crate::lua_api::WowLuaEnv) {
 
 fn ensure_adventure_map_frame_surface_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
     let _ = env.exec(ADVENTURE_MAP_FRAME_SURFACE_LUA);
+}
+
+fn patch_item_quality_color_data_methods(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(ITEM_QUALITY_COLOR_DATA_METHODS_WORKAROUND_LUA);
 }
 
 pub(crate) fn patch_account_store_set_storefront(

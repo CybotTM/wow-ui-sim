@@ -73,6 +73,59 @@ fn artifact_ui_is_load_on_demand_until_explicitly_loaded() {
 }
 
 #[test]
+fn artifact_item_quality_color_surface_is_available_after_load() {
+    with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
+        let (loaded, error): (bool, Option<String>) = env
+            .eval(r#"return C_AddOns.LoadAddOn("Blizzard_ArtifactUI")"#)
+            .expect("C_AddOns.LoadAddOn probe should run cleanly");
+        assert!(
+            loaded,
+            "`{ROOT}` must load before probing artifact quality colors; error={error:?}"
+        );
+
+        let failures: String = env
+            .eval(
+                r#"
+                local failures = {}
+
+                local function expect(condition, message)
+                    if not condition then
+                        table.insert(failures, message)
+                    end
+                end
+
+                local artifactQuality = Enum.ItemQuality.Artifact
+                expect(type(artifactQuality) == "number", "Enum.ItemQuality.Artifact must be numeric")
+
+                local colorData = ColorManager.GetColorDataForItemQuality(artifactQuality)
+                expect(type(colorData) == "table", "artifact item quality color data must be a table")
+
+                if type(colorData) == "table" then
+                    expect(type(colorData.r) == "number", "artifact colorData.r must be numeric")
+                    expect(type(colorData.g) == "number", "artifact colorData.g must be numeric")
+                    expect(type(colorData.b) == "number", "artifact colorData.b must be numeric")
+                    expect(type(colorData.GetRGB) == "function", "artifact colorData must expose GetRGB")
+
+                    if type(colorData.GetRGB) == "function" then
+                        local r, g, b = colorData:GetRGB()
+                        expect(r == colorData.r, "GetRGB red channel should match colorData.r")
+                        expect(g == colorData.g, "GetRGB green channel should match colorData.g")
+                        expect(b == colorData.b, "GetRGB blue channel should match colorData.b")
+                    end
+                end
+
+                return table.concat(failures, "\n")
+                "#,
+            )
+            .expect("artifact quality color probe should run cleanly");
+        assert!(
+            failures.is_empty(),
+            "Artifact item-quality color surface mismatches:\n{failures}"
+        );
+    });
+}
+
+#[test]
 fn artifact_ui_loads_cleanly_via_c_addons_load_addon() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
         clear_recorded_lua_errors(env);
