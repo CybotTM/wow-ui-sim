@@ -7,3 +7,6 @@ mod common;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/load.rs"]
 mod load;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/surface_globals.rs"]
+mod surface_globals;
