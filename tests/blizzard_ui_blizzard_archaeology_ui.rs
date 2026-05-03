@@ -34,3 +34,6 @@ mod behavior_solve_button_clicks_solve;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_keystone_click_toggles_socket.rs"]
 mod behavior_keystone_click_toggles_socket;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_completed_page_paginates.rs"]
+mod behavior_completed_page_paginates;
