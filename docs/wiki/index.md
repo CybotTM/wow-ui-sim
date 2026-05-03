@@ -79,6 +79,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[partyframe-portrait-composition]] | Party member class icon is a `37x37` `Portrait`; the visible ring is not a separate widget but part of the larger `UI-HUD-UnitFrame-Party-PortraitOn` frame-art texture (`120x49` live on master) |
 | [[partyframe-tree]] | `rilua-migration` regresses `PartyFrame` from master's `(120x244)` 4-member layout down to `(4x2)` with zero member frames; regression test pinned against the master dump |
 | [[partyframe-statusbar-textures]] | XML loader passes `StatusBar` bar textures as userdata into `SetStatusBarTexture()`, so the party health/mana bar source gets cleared while masks still render via `SetAtlas()` |
+| [[pve-tabs-direct-offset]] | Dungeons & Raids bottom tabs lost their base offset because direct `<Offset x="..." y="..."/>` attributes were ignored unless nested in `<AbsDimension>` |
 | [[quest-scrollbar-partial-size]] | Quest scrollbar track/thumb drifted right because partial XML sizes like `<Size x="8"/>` were ignored unless both dimensions were present |
 | [[rilua-mlua-gap-audit]] | Audit of mlua-era Lua API handling still missing on rilua: sandbox cleanup parity, dropped MessageFrame methods, secure/event follow-ups, and an unwired namespace patch hook |
 | [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only, empty `UIParent` worklists short-circuit, but the fresh 90s world-map profile still sits at 31 steady-state handlers |

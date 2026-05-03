@@ -150,6 +150,10 @@ pub struct AnchorXml {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct OffsetXml {
+    #[serde(rename = "@x")]
+    pub x: Option<f32>,
+    #[serde(rename = "@y")]
+    pub y: Option<f32>,
     #[serde(rename = "AbsDimension")]
     pub abs_dimension: Option<AbsDimensionXml>,
 }

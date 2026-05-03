@@ -1040,6 +1040,42 @@ fn test_runtime_minimal_scrollbar_avoids_lua_createframe_for_nested_thumb() {
 }
 
 #[test]
+fn test_runtime_template_anchor_keeps_direct_offset_attributes() {
+    let t = load_test_xml(
+        "runtime-template-direct-offset",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="DirectOffsetTemplate" virtual="true">
+                <Frames>
+                    <Frame parentKey="Child">
+                        <Size x="10" y="10"/>
+                        <Anchors>
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT">
+                                <Offset x="19" y="-30"/>
+                            </Anchor>
+                        </Anchors>
+                    </Frame>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local parent = CreateFrame("Frame", "DirectOffsetTemplateParent", UIParent, "DirectOffsetTemplate")
+            local point, relativeTo, relativePoint, x, y = parent.Child:GetPoint(1)
+            assert(point == "BOTTOMLEFT", "point=" .. tostring(point))
+            assert(relativePoint == "BOTTOMLEFT", "relativePoint=" .. tostring(relativePoint))
+            assert(x == 19, "x=" .. tostring(x))
+            assert(y == -30, "y=" .. tostring(y))
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_anonymous_runtime_template_uses_registry_frame_refs_without_global_alias() {
     let t = load_test_xml(
         "runtime-anon-template-registry-ref",

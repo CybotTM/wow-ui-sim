@@ -315,10 +315,11 @@ pub fn set_id(state: &Rc<RefCell<SimState>>, frame_id: u64, id: i32) {
 fn anchor_offset(anchor: &AnchorXml) -> (f32, f32) {
     if let Some(offset) = &anchor.offset {
         let abs = offset.abs_dimension.as_ref();
-        (
-            abs.and_then(|d| d.x).unwrap_or(0.0),
-            abs.and_then(|d| d.y).unwrap_or(0.0),
-        )
+        if let Some(abs) = abs {
+            (abs.x.unwrap_or(0.0), abs.y.unwrap_or(0.0))
+        } else {
+            (offset.x.unwrap_or(0.0), offset.y.unwrap_or(0.0))
+        }
     } else {
         (anchor.x.unwrap_or(0.0), anchor.y.unwrap_or(0.0))
     }
