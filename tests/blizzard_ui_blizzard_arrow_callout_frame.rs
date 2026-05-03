@@ -46,3 +46,6 @@ mod behavior_anchor_callout_clears_previous_points;
 
 #[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_anchor_directions_use_documented_offsets.rs"]
 mod behavior_anchor_directions_use_documented_offsets;
+
+#[path = "blizzard_ui/blizzard_arrow_callout_frame/behavior_widget_container_registers_widget_set.rs"]
+mod behavior_widget_container_registers_widget_set;
