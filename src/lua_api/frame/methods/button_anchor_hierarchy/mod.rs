@@ -25,6 +25,7 @@ pub(crate) use font_strings::{
 
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaResult;
+use rilua::vm::closure::RustFn;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -358,121 +359,125 @@ fn register_animation_creation(state: &mut LuaState, table: GcRef<Table>) -> Lua
 }
 
 fn register_animation_group_control(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(state, table, "Play", animations::animation_group_play)?;
-    table_set_rust_fn_static(state, table, "PlaySynced", animations::animation_group_play)?;
-    table_set_rust_fn_static(state, table, "Pause", animations::animation_group_pause)?;
-    table_set_rust_fn_static(state, table, "Restart", animations::animation_group_restart)?;
-    table_set_rust_fn_static(state, table, "Stop", animations::animation_group_stop)?;
-    table_set_rust_fn_static(state, table, "Finish", animations::animation_group_finish)?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetPlaying",
-        animations::animation_group_set_playing,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "IsPlaying",
-        animations::animation_group_is_playing,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "IsPaused",
-        animations::animation_group_is_paused,
-    )?;
-    table_set_rust_fn_static(state, table, "IsDone", animations::animation_group_is_done)?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "IsPendingFinish",
-        animations::animation_group_is_pending_finish,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "IsReverse",
-        animations::animation_group_is_reverse,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetDuration",
-        animations::animation_group_get_duration,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetElapsed",
-        animations::animation_group_get_elapsed,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetProgress",
-        animations::animation_group_get_progress,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetSmoothProgress",
-        animations::animation_group_get_smooth_progress,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetLooping",
-        animations::animation_group_set_looping,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetLooping",
-        animations::animation_group_get_looping,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetLoopState",
-        animations::animation_group_get_loop_state,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetAnimationSpeedMultiplier",
-        animations::animation_group_set_animation_speed_multiplier,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetAnimationSpeedMultiplier",
-        animations::animation_group_get_animation_speed_multiplier,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetToFinalAlpha",
-        animations::animation_group_set_to_final_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "IsSetToFinalAlpha",
-        animations::animation_group_is_set_to_final_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetToFinalAlpha",
-        animations::animation_group_get_to_final_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "RemoveAnimations",
-        animations::animation_group_remove_animations,
-    )?;
+    register_methods(state, table, ANIMATION_GROUP_CONTROL_METHODS)
+}
+
+struct MethodBinding {
+    name: &'static str,
+    func: RustFn,
+}
+
+const ANIMATION_GROUP_CONTROL_METHODS: &[MethodBinding] = &[
+    MethodBinding {
+        name: "Play",
+        func: animations::animation_group_play,
+    },
+    MethodBinding {
+        name: "PlaySynced",
+        func: animations::animation_group_play,
+    },
+    MethodBinding {
+        name: "Pause",
+        func: animations::animation_group_pause,
+    },
+    MethodBinding {
+        name: "Restart",
+        func: animations::animation_group_restart,
+    },
+    MethodBinding {
+        name: "Stop",
+        func: animations::animation_group_stop,
+    },
+    MethodBinding {
+        name: "Finish",
+        func: animations::animation_group_finish,
+    },
+    MethodBinding {
+        name: "SetPlaying",
+        func: animations::animation_group_set_playing,
+    },
+    MethodBinding {
+        name: "IsPlaying",
+        func: animations::animation_group_is_playing,
+    },
+    MethodBinding {
+        name: "IsPaused",
+        func: animations::animation_group_is_paused,
+    },
+    MethodBinding {
+        name: "IsDone",
+        func: animations::animation_group_is_done,
+    },
+    MethodBinding {
+        name: "IsPendingFinish",
+        func: animations::animation_group_is_pending_finish,
+    },
+    MethodBinding {
+        name: "IsReverse",
+        func: animations::animation_group_is_reverse,
+    },
+    MethodBinding {
+        name: "GetDuration",
+        func: animations::animation_group_get_duration,
+    },
+    MethodBinding {
+        name: "GetElapsed",
+        func: animations::animation_group_get_elapsed,
+    },
+    MethodBinding {
+        name: "GetProgress",
+        func: animations::animation_group_get_progress,
+    },
+    MethodBinding {
+        name: "GetSmoothProgress",
+        func: animations::animation_group_get_smooth_progress,
+    },
+    MethodBinding {
+        name: "SetLooping",
+        func: animations::animation_group_set_looping,
+    },
+    MethodBinding {
+        name: "GetLooping",
+        func: animations::animation_group_get_looping,
+    },
+    MethodBinding {
+        name: "GetLoopState",
+        func: animations::animation_group_get_loop_state,
+    },
+    MethodBinding {
+        name: "SetAnimationSpeedMultiplier",
+        func: animations::animation_group_set_animation_speed_multiplier,
+    },
+    MethodBinding {
+        name: "GetAnimationSpeedMultiplier",
+        func: animations::animation_group_get_animation_speed_multiplier,
+    },
+    MethodBinding {
+        name: "SetToFinalAlpha",
+        func: animations::animation_group_set_to_final_alpha,
+    },
+    MethodBinding {
+        name: "IsSetToFinalAlpha",
+        func: animations::animation_group_is_set_to_final_alpha,
+    },
+    MethodBinding {
+        name: "GetToFinalAlpha",
+        func: animations::animation_group_get_to_final_alpha,
+    },
+    MethodBinding {
+        name: "RemoveAnimations",
+        func: animations::animation_group_remove_animations,
+    },
+];
+
+fn register_methods(
+    state: &mut LuaState,
+    table: GcRef<Table>,
+    methods: &[MethodBinding],
+) -> LuaResult<()> {
+    for method in methods {
+        table_set_rust_fn_static(state, table, method.name, method.func)?;
+    }
     Ok(())
 }
 
