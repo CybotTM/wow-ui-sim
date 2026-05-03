@@ -40,3 +40,6 @@ mod behavior_confirm_respec_popup_watchdog;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_inventory_hover_highlights_relic_slot.rs"]
 mod behavior_inventory_hover_highlights_relic_slot;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_underlay_rotation_drag.rs"]
+mod behavior_underlay_rotation_drag;
