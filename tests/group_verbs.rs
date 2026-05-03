@@ -71,10 +71,19 @@ fn leave_party_clears_roster_and_fires_event() {
     let env = env();
     // Default party has members — confirm they disappear.
     let had_members = !env.state().borrow().party_members.is_empty();
+    {
+        let mut st = env.state().borrow_mut();
+        st.party_leader_index = Some(0);
+        st.is_party_lfg = true;
+        st.everyone_assistant = true;
+    }
     env.exec("LeaveParty()").unwrap();
     let st = env.state().borrow();
     assert!(st.party_members.is_empty());
     assert!(!st.party_group_active);
+    assert_eq!(st.party_leader_index, None);
+    assert!(!st.is_party_lfg);
+    assert!(!st.everyone_assistant);
     drop(st);
     if had_members {
         assert!(fired(&env, "GROUP_ROSTER_UPDATE"));
