@@ -11,8 +11,7 @@ const ROOT: &str = "Blizzard_ArrowCalloutFrame";
 #[test]
 fn arrow_callout_frame_loads_cleanly_with_no_recorded_lua_errors() {
     with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
-        load_addon(&env.loader_env(), &arrow_callout_toc())
-            .expect("Blizzard_ArrowCalloutFrame should load directly from its TOC");
+        load_arrow_callout_frame(env);
 
         ensure_player_frame_stub(env);
         env.apply_post_load_workarounds();
@@ -58,10 +57,47 @@ fn arrow_callout_frame_toc_declares_ui_parent_and_help_plate_deps() {
     );
 }
 
+#[test]
+fn arrow_callout_frame_enum_values_match_generated_documentation() {
+    with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
+        load_arrow_callout_frame(env);
+
+        let direction_values: (i64, i64, i64, i64) = env
+            .eval(
+                r#"
+                return Enum.ArrowCalloutDirection.Up,
+                       Enum.ArrowCalloutDirection.Down,
+                       Enum.ArrowCalloutDirection.Left,
+                       Enum.ArrowCalloutDirection.Right
+                "#,
+            )
+            .expect("ArrowCalloutDirection enum values should be readable");
+        assert_eq!(direction_values, (0, 1, 2, 3));
+
+        let callout_type_values: (i64, i64, i64, i64, i64) = env
+            .eval(
+                r#"
+                return Enum.ArrowCalloutType.None,
+                       Enum.ArrowCalloutType.Generic,
+                       Enum.ArrowCalloutType.WorldLootObject,
+                       Enum.ArrowCalloutType.Tutorial,
+                       Enum.ArrowCalloutType.WidgetContainerNoBorder
+                "#,
+            )
+            .expect("ArrowCalloutType enum values should be readable");
+        assert_eq!(callout_type_values, (0, 1, 2, 3, 4));
+    });
+}
+
 fn arrow_callout_toc() -> std::path::PathBuf {
     blizzard_ui_dir()
         .join(ROOT)
         .join("Blizzard_ArrowCalloutFrame.toc")
+}
+
+fn load_arrow_callout_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    load_addon(&env.loader_env(), &arrow_callout_toc())
+        .expect("Blizzard_ArrowCalloutFrame should load directly from its TOC");
 }
 
 fn ensure_player_frame_stub(env: &wow_ui_sim::lua_api::WowLuaEnv) {
