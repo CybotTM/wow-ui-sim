@@ -55,3 +55,6 @@ mod behavior_bag_update_delayed_refreshes_keystones;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_summary_page_mouse_wheel_paginates.rs"]
 mod behavior_summary_page_mouse_wheel_paginates;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_faction_icon_uses_alliance_or_horde_texcoords.rs"]
+mod behavior_faction_icon_uses_alliance_or_horde_texcoords;
