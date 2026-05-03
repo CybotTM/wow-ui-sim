@@ -172,6 +172,9 @@ use std::sync::OnceLock;
 const TEXTURE_PRELOAD_LOG_ENV: &str = "WOW_SIM_LOG_TEXTURE_PRELOAD";
 const TEXTURE_PRELOAD_SAMPLE_LIMIT: usize = 4;
 
+type PendingTextureRequestsByPath = FxHashMap<String, Vec<crate::render::TextureRequest>>;
+type PendingTextureRequestsByStrata = [PendingTextureRequestsByPath; FrameStrata::COUNT];
+
 #[derive(Debug, Default)]
 struct TexturePreloadPassTelemetry {
     elapsed: std::time::Duration,
@@ -507,28 +510,11 @@ impl App {
     }
 
     fn prune_completed_pending_texture_paths(&self) {
-        let mut changed = false;
-        let mut resolved_paths = Vec::new();
-        let mut unresolved_paths = Vec::new();
-        {
+        let (changed, resolved_paths, unresolved_paths) = {
             let mut strata_pending = self.strata_pending_texture_requests.borrow_mut();
-            for strata_map in strata_pending.iter_mut() {
-                strata_map.retain(|path, requests| {
-                    let had_ready = requests.iter().any(|request| request.handle.is_ready());
-                    requests.retain(|request| request.handle.is_pending());
-                    let keep = !requests.is_empty();
-                    if !keep {
-                        if had_ready {
-                            resolved_paths.push(path.clone());
-                        } else {
-                            unresolved_paths.push(path.clone());
-                        }
-                        changed = true;
-                    }
-                    keep
-                });
-            }
-        }
+            prune_completed_texture_requests_by_strata(&mut strata_pending)
+        };
+
         if !resolved_paths.is_empty() || !unresolved_paths.is_empty() {
             let mut ready_paths = self.ready_texture_path_cache.borrow_mut();
             for path in resolved_paths {
@@ -774,6 +760,57 @@ pub(crate) fn preload_texture_request_source(
         return;
     }
     let _ = tex_mgr.load(path);
+}
+
+enum PendingTexturePathPruneResult {
+    Keep,
+    Resolved(String),
+    Unresolved(String),
+}
+
+fn prune_completed_texture_requests_by_strata(
+    strata_pending: &mut PendingTextureRequestsByStrata,
+) -> (bool, Vec<String>, Vec<String>) {
+    let mut changed = false;
+    let mut resolved_paths = Vec::new();
+    let mut unresolved_paths = Vec::new();
+
+    for strata_map in strata_pending.iter_mut() {
+        strata_map.retain(|path, requests| {
+            match prune_completed_texture_requests_for_path(path, requests) {
+                PendingTexturePathPruneResult::Keep => true,
+                PendingTexturePathPruneResult::Resolved(path) => {
+                    resolved_paths.push(path);
+                    changed = true;
+                    false
+                }
+                PendingTexturePathPruneResult::Unresolved(path) => {
+                    unresolved_paths.push(path);
+                    changed = true;
+                    false
+                }
+            }
+        });
+    }
+
+    (changed, resolved_paths, unresolved_paths)
+}
+
+fn prune_completed_texture_requests_for_path(
+    path: &str,
+    requests: &mut Vec<crate::render::TextureRequest>,
+) -> PendingTexturePathPruneResult {
+    let had_ready = requests.iter().any(|request| request.handle.is_ready());
+    requests.retain(|request| request.handle.is_pending());
+    if !requests.is_empty() {
+        return PendingTexturePathPruneResult::Keep;
+    }
+
+    if had_ready {
+        PendingTexturePathPruneResult::Resolved(path.to_string())
+    } else {
+        PendingTexturePathPruneResult::Unresolved(path.to_string())
+    }
 }
 
 fn texture_preload_logging_enabled() -> bool {
