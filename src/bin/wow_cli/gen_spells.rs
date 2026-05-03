@@ -38,6 +38,30 @@ const POWER_TYPE_NAMES: &[(&'static str, &str)] = &[
     ("19", "ESSENCE"),
 ];
 
+const SPELL_LOOKUP_TESTS: &[&str] = &[
+    "",
+    "#[cfg(test)]",
+    "mod tests {",
+    "    use super::*;",
+    "",
+    "    #[test]",
+    "    fn test_spell_count() {",
+    "        assert!(SPELL_DB.len() > 100);",
+    "    }",
+    "",
+    "    #[test]",
+    "    fn test_frostbolt() {",
+    "        let spell = get_spell(116).expect(\"spell 116 should exist\");",
+    "        assert_eq!(spell.name, \"Frostbolt\");",
+    "    }",
+    "",
+    "    #[test]",
+    "    fn test_nonexistent_spell() {",
+    "        assert!(get_spell(999_999_999).is_none());",
+    "    }",
+    "}",
+];
+
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let wow_data = wow_data_dir();
     let spell_data = load_spell_data(&wow_data)?;
@@ -283,30 +307,14 @@ fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_tests(out: &mut File) -> std::io::Result<()> {
-    writeln!(out)?;
-    writeln!(out, "#[cfg(test)]")?;
-    writeln!(out, "mod tests {{")?;
-    writeln!(out, "    use super::*;")?;
-    writeln!(out)?;
-    writeln!(out, "    #[test]")?;
-    writeln!(out, "    fn test_spell_count() {{")?;
-    writeln!(out, "        assert!(SPELL_DB.len() > 100);")?;
-    writeln!(out, "    }}")?;
-    writeln!(out)?;
-    writeln!(out, "    #[test]")?;
-    writeln!(out, "    fn test_frostbolt() {{")?;
-    writeln!(
-        out,
-        "        let spell = get_spell(116).expect(\"spell 116 should exist\");"
-    )?;
-    writeln!(out, "        assert_eq!(spell.name, \"Frostbolt\");")?;
-    writeln!(out, "    }}")?;
-    writeln!(out)?;
-    writeln!(out, "    #[test]")?;
-    writeln!(out, "    fn test_nonexistent_spell() {{")?;
-    writeln!(out, "        assert!(get_spell(999_999_999).is_none());")?;
-    writeln!(out, "    }}")?;
-    writeln!(out, "}}")?;
+    write_literal_lines(out, SPELL_LOOKUP_TESTS)?;
+    Ok(())
+}
+
+fn write_literal_lines(out: &mut File, lines: &[&str]) -> std::io::Result<()> {
+    for line in lines {
+        writeln!(out, "{line}")?;
+    }
     Ok(())
 }
 
