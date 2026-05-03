@@ -1,98 +1,183 @@
 use super::{FastHandlerRef, is_fast_handler_path, is_fast_identifier, is_fast_passthrough_args};
 
+type MethodFamilyParser = for<'a> fn(&'a str) -> Option<FastHandlerRef<'a>>;
+
+const METHOD_FAMILY_PARSERS: &[MethodFamilyParser] = &[
+    parse_conditional_self_text_empty_show_text_child_ref,
+    parse_method_then_unchecked_parent_field_clear_and_show_text_ref,
+    parse_conditional_self_get_text_non_empty_then_parent_method_ref,
+    parse_parent_field_local_toggle_shown_ref,
+    parse_conditional_self_noarg_method_then_else_ref,
+    parse_conditional_not_self_noarg_method_then_ref,
+    parse_conditional_self_field_then_else_ref,
+    parse_inline_self_method_with_bool_arg_ref,
+    parse_inline_self_method_with_number_arg_ref,
+    parse_inline_self_method_with_two_number_args_ref,
+    parse_inline_self_method_with_string_arg_ref,
+    parse_inline_self_method_ref,
+    parse_inline_self_field_method_with_string_arg_ref,
+    parse_inline_self_field_method_with_number_arg_ref,
+    parse_inline_self_field_method_with_string_number_number_args_ref,
+    parse_inline_self_field_method_with_string_self_string_number_number_args_ref,
+    parse_inline_self_field_method_with_self_field_arg_ref,
+    parse_inline_self_field_method_with_global_arg_ref,
+    parse_inline_self_field_method_ref,
+    parse_inline_parent_method_with_string_arg_ref,
+    parse_inline_parent_field_method_with_self_noarg_method_result_ref,
+    parse_inline_grandparent_field_method_ref,
+    parse_inline_grandparent_method_with_not_self_checked_arg_ref,
+    parse_inline_parent_method_ref,
+    parse_inline_grandparent_method_ref,
+];
+
 pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    if parse_conditional_self_text_empty_show_text_child(stmt).is_some() {
-        return Some(FastHandlerRef::ConditionalSelfTextEmptyShowTextChild);
-    }
-    if let Some((method_name, field)) =
-        parse_method_then_unchecked_parent_field_clear_and_show_text(stmt)
-    {
-        return Some(
-            FastHandlerRef::MethodThenUncheckedParentFieldClearAndShowText { method_name, field },
-        );
-    }
-    if let Some(method_name) = parse_conditional_self_get_text_non_empty_then_parent_method(stmt) {
-        return Some(
-            FastHandlerRef::ConditionalSelfGetTextNonEmptyThenParentMethodWithSelfGetTextAndClear {
-                method_name,
-            },
-        );
-    }
-    if let Some(field) = parse_parent_field_local_toggle_shown(stmt) {
-        return Some(FastHandlerRef::ParentFieldLocalToggleShown { field });
-    }
-    if let Some((method_name, then_ref, else_ref)) =
-        parse_conditional_self_noarg_method_then_else(stmt)
-    {
-        return Some(FastHandlerRef::ConditionalSelfNoArgsMethod {
+    METHOD_FAMILY_PARSERS
+        .iter()
+        .find_map(|parse_method_candidate| parse_method_candidate(stmt))
+}
+
+fn parse_conditional_self_text_empty_show_text_child_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_conditional_self_text_empty_show_text_child(stmt)
+        .map(|()| FastHandlerRef::ConditionalSelfTextEmptyShowTextChild)
+}
+
+fn parse_method_then_unchecked_parent_field_clear_and_show_text_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_method_then_unchecked_parent_field_clear_and_show_text(stmt).map(
+        |(method_name, field)| FastHandlerRef::MethodThenUncheckedParentFieldClearAndShowText {
+            method_name,
+            field,
+        },
+    )
+}
+
+fn parse_conditional_self_get_text_non_empty_then_parent_method_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_conditional_self_get_text_non_empty_then_parent_method(stmt).map(|method_name| {
+        FastHandlerRef::ConditionalSelfGetTextNonEmptyThenParentMethodWithSelfGetTextAndClear {
+            method_name,
+        }
+    })
+}
+
+fn parse_parent_field_local_toggle_shown_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_parent_field_local_toggle_shown(stmt)
+        .map(|field| FastHandlerRef::ParentFieldLocalToggleShown { field })
+}
+
+fn parse_conditional_self_noarg_method_then_else_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_conditional_self_noarg_method_then_else(stmt).map(|(method_name, then_ref, else_ref)| {
+        FastHandlerRef::ConditionalSelfNoArgsMethod {
             method_name,
             then_ref: Box::new(then_ref),
             else_ref: Box::new(else_ref),
-        });
-    }
-    if let Some((method_name, then_ref)) = parse_conditional_not_self_noarg_method_then(stmt) {
-        return Some(FastHandlerRef::ConditionalNotSelfNoArgsMethodThen {
+        }
+    })
+}
+
+fn parse_conditional_not_self_noarg_method_then_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_conditional_not_self_noarg_method_then(stmt).map(|(method_name, then_ref)| {
+        FastHandlerRef::ConditionalNotSelfNoArgsMethodThen {
             method_name,
             then_ref: Box::new(then_ref),
-        });
-    }
-    if let Some((field, then_ref, else_ref)) = parse_conditional_self_field_then_else(stmt) {
-        return Some(FastHandlerRef::ConditionalSelfFieldTruthy {
+        }
+    })
+}
+
+fn parse_conditional_self_field_then_else_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_conditional_self_field_then_else(stmt).map(|(field, then_ref, else_ref)| {
+        FastHandlerRef::ConditionalSelfFieldTruthy {
             field,
             then_ref: Box::new(then_ref),
             else_ref: Box::new(else_ref),
-        });
-    }
-    if let Some((method_name, value)) = parse_inline_self_method_with_bool_arg(stmt) {
-        return Some(FastHandlerRef::MethodWithBoolArg { method_name, value });
-    }
-    if let Some((method_name, value)) = parse_inline_self_method_with_number_arg(stmt) {
-        return Some(FastHandlerRef::MethodWithNumberArg { method_name, value });
-    }
-    if let Some((method_name, first, second)) = parse_inline_self_method_with_two_number_args(stmt)
-    {
-        return Some(FastHandlerRef::MethodWithTwoNumberArgs {
+        }
+    })
+}
+
+fn parse_inline_self_method_with_bool_arg_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_method_with_bool_arg(stmt)
+        .map(|(method_name, value)| FastHandlerRef::MethodWithBoolArg { method_name, value })
+}
+
+fn parse_inline_self_method_with_number_arg_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_method_with_number_arg(stmt)
+        .map(|(method_name, value)| FastHandlerRef::MethodWithNumberArg { method_name, value })
+}
+
+fn parse_inline_self_method_with_two_number_args_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_method_with_two_number_args(stmt).map(|(method_name, first, second)| {
+        FastHandlerRef::MethodWithTwoNumberArgs {
             method_name,
             first,
             second,
-        });
-    }
-    if let Some((method_name, arg)) = parse_inline_self_method_with_string_arg(stmt) {
-        return Some(FastHandlerRef::MethodWithStringArg { method_name, arg });
-    }
-    if let Some(method_name) = parse_inline_self_method(stmt) {
-        return Some(FastHandlerRef::Method(method_name));
-    }
-    if let Some((field, method_name, arg)) = parse_inline_self_field_method_with_string_arg(stmt) {
-        return Some(FastHandlerRef::SelfFieldMethodWithStringArg {
+        }
+    })
+}
+
+fn parse_inline_self_method_with_string_arg_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_method_with_string_arg(stmt)
+        .map(|(method_name, arg)| FastHandlerRef::MethodWithStringArg { method_name, arg })
+}
+
+fn parse_inline_self_method_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_method(stmt).map(FastHandlerRef::Method)
+}
+
+fn parse_inline_self_field_method_with_string_arg_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_field_method_with_string_arg(stmt).map(|(field, method_name, arg)| {
+        FastHandlerRef::SelfFieldMethodWithStringArg {
             field,
             method_name,
             arg,
-        });
-    }
-    if let Some((field, method_name, value)) = parse_inline_self_field_method_with_number_arg(stmt)
-    {
-        return Some(FastHandlerRef::SelfFieldMethodWithNumberArg {
+        }
+    })
+}
+
+fn parse_inline_self_field_method_with_number_arg_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_field_method_with_number_arg(stmt).map(|(field, method_name, value)| {
+        FastHandlerRef::SelfFieldMethodWithNumberArg {
             field,
             method_name,
             value,
-        });
-    }
-    if let Some((field, method_name, first, second, third)) =
-        parse_inline_self_field_method_with_string_number_number_args(stmt)
-    {
-        return Some(FastHandlerRef::SelfFieldMethodWithStringNumberNumberArgs {
-            field,
-            method_name,
-            first,
-            second,
-            third,
-        });
-    }
-    if let Some((field, method_name, first, third, fourth, fifth)) =
-        parse_inline_self_field_method_with_string_self_string_number_number_args(stmt)
-    {
-        return Some(
+        }
+    })
+}
+
+fn parse_inline_self_field_method_with_string_number_number_args_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_field_method_with_string_number_number_args(stmt).map(
+        |(field, method_name, first, second, third)| {
+            FastHandlerRef::SelfFieldMethodWithStringNumberNumberArgs {
+                field,
+                method_name,
+                first,
+                second,
+                third,
+            }
+        },
+    )
+}
+
+fn parse_inline_self_field_method_with_string_self_string_number_number_args_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_field_method_with_string_self_string_number_number_args(stmt).map(
+        |(field, method_name, first, third, fourth, fifth)| {
             FastHandlerRef::SelfFieldMethodWithStringSelfStringNumberNumberArgs {
                 field,
                 method_name,
@@ -100,51 +185,76 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
                 third,
                 fourth,
                 fifth,
-            },
-        );
-    }
-    if let Some((field, method_name, arg_field)) =
-        parse_inline_self_field_method_with_self_field_arg(stmt)
-    {
-        return Some(FastHandlerRef::SelfFieldMethodWithSelfFieldArg {
+            }
+        },
+    )
+}
+
+fn parse_inline_self_field_method_with_self_field_arg_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_field_method_with_self_field_arg(stmt).map(
+        |(field, method_name, arg_field)| FastHandlerRef::SelfFieldMethodWithSelfFieldArg {
             field,
             method_name,
             arg_field,
-        });
-    }
-    if let Some((field, method_name, arg_path)) =
-        parse_inline_self_field_method_with_global_arg(stmt)
-    {
-        return Some(FastHandlerRef::SelfFieldMethodWithGlobalArg {
+        },
+    )
+}
+
+fn parse_inline_self_field_method_with_global_arg_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_field_method_with_global_arg(stmt).map(|(field, method_name, arg_path)| {
+        FastHandlerRef::SelfFieldMethodWithGlobalArg {
             field,
             method_name,
             arg_path,
-        });
-    }
-    if let Some((field, method_name)) = parse_inline_self_field_method(stmt) {
-        return Some(FastHandlerRef::SelfFieldMethod { field, method_name });
-    }
-    if let Some((method_name, arg)) = parse_inline_parent_method_with_string_arg(stmt) {
-        return Some(FastHandlerRef::ParentMethodWithStringArg { method_name, arg });
-    }
-    if let Some((field, method_name, self_method_name)) =
-        parse_inline_parent_field_method_with_self_noarg_method_result(stmt)
-    {
-        return Some(FastHandlerRef::ParentFieldMethodWithSelfNoArgMethodResult {
-            field,
-            method_name,
-            self_method_name,
-        });
-    }
-    if let Some((field, method_name)) = parse_inline_grandparent_field_method(stmt) {
-        return Some(FastHandlerRef::GrandparentFieldMethod { field, method_name });
-    }
-    if let Some(method_name) = parse_inline_grandparent_method_with_not_self_checked_arg(stmt) {
-        return Some(FastHandlerRef::GrandparentMethodWithNotSelfCheckedArg { method_name });
-    }
-    if let Some(method_name) = parse_inline_parent_method(stmt) {
-        return Some(FastHandlerRef::ParentMethod(method_name));
-    }
+        }
+    })
+}
+
+fn parse_inline_self_field_method_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_inline_self_field_method(stmt)
+        .map(|(field, method_name)| FastHandlerRef::SelfFieldMethod { field, method_name })
+}
+
+fn parse_inline_parent_method_with_string_arg_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_inline_parent_method_with_string_arg(stmt)
+        .map(|(method_name, arg)| FastHandlerRef::ParentMethodWithStringArg { method_name, arg })
+}
+
+fn parse_inline_parent_field_method_with_self_noarg_method_result_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_inline_parent_field_method_with_self_noarg_method_result(stmt).map(
+        |(field, method_name, self_method_name)| {
+            FastHandlerRef::ParentFieldMethodWithSelfNoArgMethodResult {
+                field,
+                method_name,
+                self_method_name,
+            }
+        },
+    )
+}
+
+fn parse_inline_grandparent_field_method_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_inline_grandparent_field_method(stmt)
+        .map(|(field, method_name)| FastHandlerRef::GrandparentFieldMethod { field, method_name })
+}
+
+fn parse_inline_grandparent_method_with_not_self_checked_arg_ref<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    parse_inline_grandparent_method_with_not_self_checked_arg(stmt)
+        .map(|method_name| FastHandlerRef::GrandparentMethodWithNotSelfCheckedArg { method_name })
+}
+
+fn parse_inline_parent_method_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_inline_parent_method(stmt).map(FastHandlerRef::ParentMethod)
+}
+
+fn parse_inline_grandparent_method_ref<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     parse_inline_grandparent_method(stmt).map(FastHandlerRef::GrandparentMethod)
 }
 
@@ -507,4 +617,34 @@ fn parse_inline_method_call<'a>(stmt: &'a str, prefix: &str) -> Option<&'a str> 
     let args = args.strip_suffix(')')?.trim();
     let method_name = method_name.trim();
     (is_fast_identifier(method_name) && is_fast_passthrough_args(args)).then_some(method_name)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_method_family;
+    use crate::lua_api::globals::create_frame::template_chain::FastHandlerRef;
+
+    #[test]
+    fn dispatches_plain_self_method() {
+        let parsed = parse_method_family("self:Hide()");
+
+        match parsed {
+            Some(FastHandlerRef::Method("Hide")) => {}
+            _ => panic!("expected self method parser to dispatch Hide"),
+        }
+    }
+
+    #[test]
+    fn dispatches_self_field_method_with_string_arg() {
+        let parsed = parse_method_family(r#"self.Text:SetText("hello")"#);
+
+        match parsed {
+            Some(FastHandlerRef::SelfFieldMethodWithStringArg {
+                field: "Text",
+                method_name: "SetText",
+                arg: "hello",
+            }) => {}
+            _ => panic!("expected self field string-arg method parser"),
+        }
+    }
 }
