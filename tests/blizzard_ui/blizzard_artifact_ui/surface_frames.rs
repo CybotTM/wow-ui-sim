@@ -46,6 +46,23 @@ fn artifact_ui_registers_uipanel_window_entry_after_load_addon() {
     });
 }
 
+#[test]
+fn artifact_ui_registers_respec_static_popup_dialogs_after_load_addon() {
+    with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
+        load_artifact_ui(env);
+
+        let mismatches: Vec<String> = env
+            .eval(RESPEC_POPUP_SURFACE_PROBE)
+            .expect("ArtifactUI respec popup surface probe should run cleanly");
+
+        assert!(
+            mismatches.is_empty(),
+            "`{ROOT}` must register the artifact-respec static popup dialogs; \
+             mismatches: {mismatches:?}"
+        );
+    });
+}
+
 fn load_artifact_ui(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     let (loaded, error): (bool, Option<String>) = env
         .eval(r#"return C_AddOns.LoadAddOn("Blizzard_ArtifactUI")"#)
@@ -86,6 +103,90 @@ if type(entry) == "table" then
         "showFailedFunc direct reference"
     )
 end
+
+return mismatches
+"#;
+
+const RESPEC_POPUP_SURFACE_PROBE: &str = r#"
+local mismatches = {}
+
+local function expect(condition, message)
+    if not condition then
+        table.insert(mismatches, message)
+    end
+end
+
+local confirm = StaticPopupDialogs and StaticPopupDialogs["CONFIRM_ARTIFACT_RESPEC"]
+local notEnough = StaticPopupDialogs and StaticPopupDialogs["NOT_ENOUGH_POWER_ARTIFACT_RESPEC"]
+expect(type(confirm) == "table", "CONFIRM_ARTIFACT_RESPEC:" .. type(confirm))
+expect(type(notEnough) == "table", "NOT_ENOUGH_POWER_ARTIFACT_RESPEC:" .. type(notEnough))
+
+if type(confirm) == "table" then
+    expect(confirm.text == ARTIFACT_RESPEC, "confirm text")
+    expect(confirm.button1 == YES, "confirm button1")
+    expect(confirm.button2 == NO, "confirm button2")
+    expect(type(confirm.OnAccept) == "function", "confirm OnAccept")
+    expect(type(confirm.OnUpdate) == "function", "confirm OnUpdate")
+end
+
+if type(notEnough) == "table" then
+    expect(notEnough.text == ARTIFACT_RESPEC_NOT_ENOUGH_POWER, "not-enough text")
+    expect(notEnough.button1 == OKAY, "not-enough button1")
+    expect(type(notEnough.OnUpdate) == "function", "not-enough OnUpdate")
+end
+
+local originalConfirmRespec = C_ArtifactUI.ConfirmRespec
+local originalCheckRespecNPC = C_ArtifactUI.CheckRespecNPC
+local originalHideUIPanel = HideUIPanel
+local originalStaticPopupHide = StaticPopup_Hide
+local calls = {}
+
+C_ArtifactUI.ConfirmRespec = function()
+    table.insert(calls, "confirm")
+end
+C_ArtifactUI.CheckRespecNPC = function()
+    table.insert(calls, "check")
+    return false
+end
+HideUIPanel = function(frame)
+    table.insert(calls, frame == ArtifactFrame and "hide-panel" or "hide-other")
+end
+StaticPopup_Hide = function(which)
+    table.insert(calls, "hide-popup:" .. tostring(which))
+end
+
+local ok, errorMessage = pcall(function()
+    if type(confirm) == "table" and type(confirm.OnAccept) == "function" then
+        confirm.OnAccept({}, nil)
+    end
+    if type(confirm) == "table" and type(confirm.OnUpdate) == "function" then
+        confirm.OnUpdate({}, 0)
+    end
+    if type(notEnough) == "table" and type(notEnough.OnUpdate) == "function" then
+        notEnough.OnUpdate({}, 0)
+    end
+end)
+
+C_ArtifactUI.ConfirmRespec = originalConfirmRespec
+C_ArtifactUI.CheckRespecNPC = originalCheckRespecNPC
+HideUIPanel = originalHideUIPanel
+StaticPopup_Hide = originalStaticPopupHide
+
+expect(ok, "popup callbacks error:" .. tostring(errorMessage))
+expect(calls[1] == "confirm", "confirm OnAccept first call:" .. tostring(calls[1]))
+expect(calls[2] == "hide-panel", "confirm OnAccept second call:" .. tostring(calls[2]))
+expect(calls[3] == "check", "confirm OnUpdate CheckRespecNPC:" .. tostring(calls[3]))
+expect(
+    calls[4] == "hide-popup:CONFIRM_ARTIFACT_RESPEC",
+    "confirm OnUpdate StaticPopup_Hide:" .. tostring(calls[4])
+)
+expect(calls[5] == "hide-panel", "confirm OnUpdate HideUIPanel:" .. tostring(calls[5]))
+expect(calls[6] == "check", "not-enough OnUpdate CheckRespecNPC:" .. tostring(calls[6]))
+expect(
+    calls[7] == "hide-popup:NOT_ENOUGH_POWER_ARTIFACT_RESPEC",
+    "not-enough OnUpdate StaticPopup_Hide:" .. tostring(calls[7])
+)
+expect(calls[8] == "hide-panel", "not-enough OnUpdate HideUIPanel:" .. tostring(calls[8]))
 
 return mismatches
 "#;
