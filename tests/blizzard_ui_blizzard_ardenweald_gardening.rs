@@ -37,3 +37,6 @@ mod behavior_is_garden_accessible_gates_landing_page;
 
 #[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_seconds_formatter_format.rs"]
 mod behavior_seconds_formatter_format;
+
+#[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_remaining_seconds_zero_when_no_active.rs"]
+mod behavior_remaining_seconds_zero_when_no_active;
