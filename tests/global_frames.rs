@@ -47,6 +47,83 @@ fn test_minimap_exists() {
 }
 
 #[test]
+fn test_map_frame_method_surface_is_registered() {
+    let env = env();
+    let missing_method: Option<String> = env
+        .eval(
+            r#"
+        local methods = {
+            "GetUiMapID",
+            "SetUiMapID",
+            "GetFogOfWarBackgroundAtlas",
+            "GetFogOfWarMaskAtlas",
+            "GetMaskScalar",
+            "SetFogOfWarBackgroundAtlas",
+            "SetFogOfWarMaskAtlas",
+            "SetMaskScalar",
+            "ClearUnits",
+            "AddUnit",
+            "FinalizeUnits",
+            "SetUnitColor",
+            "GetMouseOverUnits",
+            "GetPlayerPingScale",
+            "SetPlayerPingTexture",
+            "SetPlayerPingScale",
+            "StartPlayerPing",
+            "StopPlayerPing",
+            "SetBlipTexture",
+            "SetMaskTexture",
+            "SetIconTexture",
+            "SetPOIArrowTexture",
+            "SetCorpsePOIArrowTexture",
+            "SetStaticPOIArrowTexture",
+            "SetPlayerTexture",
+            "SetQuestBlobInsideTexture",
+            "SetQuestBlobInsideAlpha",
+            "SetQuestBlobOutsideTexture",
+            "SetQuestBlobOutsideAlpha",
+            "SetQuestBlobRingTexture",
+            "SetQuestBlobRingAlpha",
+            "SetQuestBlobRingScalar",
+            "SetTaskBlobInsideTexture",
+            "SetTaskBlobInsideAlpha",
+            "SetTaskBlobOutsideTexture",
+            "SetTaskBlobOutsideAlpha",
+            "SetTaskBlobRingTexture",
+            "SetTaskBlobRingAlpha",
+            "SetTaskBlobRingScalar",
+            "SetArchBlobInsideTexture",
+            "SetArchBlobInsideAlpha",
+            "SetArchBlobOutsideTexture",
+            "SetArchBlobOutsideAlpha",
+            "SetArchBlobRingTexture",
+            "SetArchBlobRingAlpha",
+            "SetArchBlobRingScalar",
+            "SetZoom",
+            "GetZoom",
+            "GetZoomLevels",
+            "PingLocation",
+            "GetPingPosition",
+            "UpdateBlips",
+            "SetToDefaults",
+        }
+        for _, method in ipairs(methods) do
+            if type(Minimap[method]) ~= "function" then
+                return method
+            end
+        end
+        return nil
+    "#,
+        )
+        .unwrap();
+
+    assert!(
+        missing_method.is_none(),
+        "missing map frame method: {missing_method:?}"
+    );
+}
+
+#[test]
 fn test_minimap_zoom_persists_and_clamps() {
     let env = env();
     let (default_zoom, clamped_zoom, zoom_levels): (i32, i32, i32) = env

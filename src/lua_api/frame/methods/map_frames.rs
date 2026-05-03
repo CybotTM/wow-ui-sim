@@ -6,6 +6,7 @@ use crate::lua_api::methods::{
     table_set, val_to_string,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
+use rilua::vm::closure::RustFn;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -15,174 +16,94 @@ const MINIMAP_ZOOM_KEY: &str = "__minimapZoom";
 const MINIMAP_ZOOM_LEVELS: i32 = 6;
 
 pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(state, mt, "GetUiMapID", get_ui_map_id)?;
-    table_set_rust_fn_static(state, mt, "SetUiMapID", set_ui_map_id)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
+    register_methods(state, mt, MAP_FRAME_METHODS)?;
+    Ok(())
+}
+
+struct MethodBinding {
+    name: &'static str,
+    func: RustFn,
+}
+
+macro_rules! method {
+    ($name:literal, $func:path) => {
+        MethodBinding {
+            name: $name,
+            func: $func,
+        }
+    };
+}
+
+const MAP_FRAME_METHODS: &[MethodBinding] = &[
+    method!("GetUiMapID", get_ui_map_id),
+    method!("SetUiMapID", set_ui_map_id),
+    method!(
         "GetFogOfWarBackgroundAtlas",
-        get_fog_of_war_background_atlas,
-    )?;
-    table_set_rust_fn_static(state, mt, "GetFogOfWarMaskAtlas", get_fog_of_war_mask_atlas)?;
-    table_set_rust_fn_static(state, mt, "GetMaskScalar", get_fog_of_war_mask_scalar)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
+        get_fog_of_war_background_atlas
+    ),
+    method!("GetFogOfWarMaskAtlas", get_fog_of_war_mask_atlas),
+    method!("GetMaskScalar", get_fog_of_war_mask_scalar),
+    method!(
         "SetFogOfWarBackgroundAtlas",
-        set_fog_of_war_background_atlas,
-    )?;
-    table_set_rust_fn_static(state, mt, "SetFogOfWarMaskAtlas", set_fog_of_war_mask_atlas)?;
-    table_set_rust_fn_static(state, mt, "SetMaskScalar", set_fog_of_war_mask_scalar)?;
-    table_set_rust_fn_static(state, mt, "ClearUnits", clear_units)?;
-    table_set_rust_fn_static(state, mt, "AddUnit", add_unit)?;
-    table_set_rust_fn_static(state, mt, "FinalizeUnits", finalize_units)?;
-    table_set_rust_fn_static(state, mt, "SetUnitColor", set_unit_color)?;
-    table_set_rust_fn_static(state, mt, "GetMouseOverUnits", get_mouse_over_units)?;
-    table_set_rust_fn_static(state, mt, "GetPlayerPingScale", get_player_ping_scale)?;
-    table_set_rust_fn_static(state, mt, "SetPlayerPingTexture", set_player_ping_texture)?;
-    table_set_rust_fn_static(state, mt, "SetPlayerPingScale", set_player_ping_scale)?;
-    table_set_rust_fn_static(state, mt, "StartPlayerPing", start_player_ping)?;
-    table_set_rust_fn_static(state, mt, "StopPlayerPing", stop_player_ping)?;
-    table_set_rust_fn_static(state, mt, "SetBlipTexture", set_blip_texture)?;
-    table_set_rust_fn_static(state, mt, "SetMaskTexture", set_minimap_mask_texture)?;
-    table_set_rust_fn_static(state, mt, "SetIconTexture", set_minimap_icon_texture)?;
-    table_set_rust_fn_static(state, mt, "SetPOIArrowTexture", set_poi_arrow_texture)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetCorpsePOIArrowTexture",
-        set_corpse_poi_arrow_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetStaticPOIArrowTexture",
-        set_static_poi_arrow_texture,
-    )?;
-    table_set_rust_fn_static(state, mt, "SetPlayerTexture", set_minimap_player_texture)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetQuestBlobInsideTexture",
-        set_quest_blob_inside_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetQuestBlobInsideAlpha",
-        set_quest_blob_inside_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetQuestBlobOutsideTexture",
-        set_quest_blob_outside_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetQuestBlobOutsideAlpha",
-        set_quest_blob_outside_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetQuestBlobRingTexture",
-        set_quest_blob_ring_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetQuestBlobRingAlpha",
-        set_quest_blob_ring_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetQuestBlobRingScalar",
-        set_quest_blob_ring_scalar,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetTaskBlobInsideTexture",
-        set_task_blob_inside_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetTaskBlobInsideAlpha",
-        set_task_blob_inside_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetTaskBlobOutsideTexture",
-        set_task_blob_outside_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetTaskBlobOutsideAlpha",
-        set_task_blob_outside_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetTaskBlobRingTexture",
-        set_task_blob_ring_texture,
-    )?;
-    table_set_rust_fn_static(state, mt, "SetTaskBlobRingAlpha", set_task_blob_ring_alpha)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetTaskBlobRingScalar",
-        set_task_blob_ring_scalar,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetArchBlobInsideTexture",
-        set_arch_blob_inside_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetArchBlobInsideAlpha",
-        set_arch_blob_inside_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetArchBlobOutsideTexture",
-        set_arch_blob_outside_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetArchBlobOutsideAlpha",
-        set_arch_blob_outside_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetArchBlobRingTexture",
-        set_arch_blob_ring_texture,
-    )?;
-    table_set_rust_fn_static(state, mt, "SetArchBlobRingAlpha", set_arch_blob_ring_alpha)?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetArchBlobRingScalar",
-        set_arch_blob_ring_scalar,
-    )?;
-    table_set_rust_fn_static(state, mt, "SetZoom", set_zoom)?;
-    table_set_rust_fn_static(state, mt, "GetZoom", get_zoom)?;
-    table_set_rust_fn_static(state, mt, "GetZoomLevels", get_zoom_levels)?;
-    table_set_rust_fn_static(state, mt, "PingLocation", ping_location)?;
-    table_set_rust_fn_static(state, mt, "GetPingPosition", get_ping_position)?;
-    table_set_rust_fn_static(state, mt, "UpdateBlips", update_blips)?;
-    table_set_rust_fn_static(state, mt, "SetToDefaults", set_to_defaults)?;
+        set_fog_of_war_background_atlas
+    ),
+    method!("SetFogOfWarMaskAtlas", set_fog_of_war_mask_atlas),
+    method!("SetMaskScalar", set_fog_of_war_mask_scalar),
+    method!("ClearUnits", clear_units),
+    method!("AddUnit", add_unit),
+    method!("FinalizeUnits", finalize_units),
+    method!("SetUnitColor", set_unit_color),
+    method!("GetMouseOverUnits", get_mouse_over_units),
+    method!("GetPlayerPingScale", get_player_ping_scale),
+    method!("SetPlayerPingTexture", set_player_ping_texture),
+    method!("SetPlayerPingScale", set_player_ping_scale),
+    method!("StartPlayerPing", start_player_ping),
+    method!("StopPlayerPing", stop_player_ping),
+    method!("SetBlipTexture", set_blip_texture),
+    method!("SetMaskTexture", set_minimap_mask_texture),
+    method!("SetIconTexture", set_minimap_icon_texture),
+    method!("SetPOIArrowTexture", set_poi_arrow_texture),
+    method!("SetCorpsePOIArrowTexture", set_corpse_poi_arrow_texture),
+    method!("SetStaticPOIArrowTexture", set_static_poi_arrow_texture),
+    method!("SetPlayerTexture", set_minimap_player_texture),
+    method!("SetQuestBlobInsideTexture", set_quest_blob_inside_texture),
+    method!("SetQuestBlobInsideAlpha", set_quest_blob_inside_alpha),
+    method!("SetQuestBlobOutsideTexture", set_quest_blob_outside_texture),
+    method!("SetQuestBlobOutsideAlpha", set_quest_blob_outside_alpha),
+    method!("SetQuestBlobRingTexture", set_quest_blob_ring_texture),
+    method!("SetQuestBlobRingAlpha", set_quest_blob_ring_alpha),
+    method!("SetQuestBlobRingScalar", set_quest_blob_ring_scalar),
+    method!("SetTaskBlobInsideTexture", set_task_blob_inside_texture),
+    method!("SetTaskBlobInsideAlpha", set_task_blob_inside_alpha),
+    method!("SetTaskBlobOutsideTexture", set_task_blob_outside_texture),
+    method!("SetTaskBlobOutsideAlpha", set_task_blob_outside_alpha),
+    method!("SetTaskBlobRingTexture", set_task_blob_ring_texture),
+    method!("SetTaskBlobRingAlpha", set_task_blob_ring_alpha),
+    method!("SetTaskBlobRingScalar", set_task_blob_ring_scalar),
+    method!("SetArchBlobInsideTexture", set_arch_blob_inside_texture),
+    method!("SetArchBlobInsideAlpha", set_arch_blob_inside_alpha),
+    method!("SetArchBlobOutsideTexture", set_arch_blob_outside_texture),
+    method!("SetArchBlobOutsideAlpha", set_arch_blob_outside_alpha),
+    method!("SetArchBlobRingTexture", set_arch_blob_ring_texture),
+    method!("SetArchBlobRingAlpha", set_arch_blob_ring_alpha),
+    method!("SetArchBlobRingScalar", set_arch_blob_ring_scalar),
+    method!("SetZoom", set_zoom),
+    method!("GetZoom", get_zoom),
+    method!("GetZoomLevels", get_zoom_levels),
+    method!("PingLocation", ping_location),
+    method!("GetPingPosition", get_ping_position),
+    method!("UpdateBlips", update_blips),
+    method!("SetToDefaults", set_to_defaults),
+];
+
+fn register_methods(
+    state: &mut LuaState,
+    mt: GcRef<Table>,
+    methods: &[MethodBinding],
+) -> LuaResult<()> {
+    for method in methods {
+        table_set_rust_fn_static(state, mt, method.name, method.func)?;
+    }
     Ok(())
 }
 
