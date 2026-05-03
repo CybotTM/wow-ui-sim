@@ -46,3 +46,6 @@ mod behavior_show_failed_calls_close_research;
 
 #[path = "blizzard_ui/blizzard_archaeology_ui/behavior_tab_switches_swap_currentframe.rs"]
 mod behavior_tab_switches_swap_currentframe;
+
+#[path = "blizzard_ui/blizzard_archaeology_ui/behavior_research_artifact_complete_event_refreshes_pages.rs"]
+mod behavior_research_artifact_complete_event_refreshes_pages;
