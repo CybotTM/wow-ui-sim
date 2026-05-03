@@ -75,6 +75,14 @@ fn message_from_keyboard_event(
     Some(Message::KeyPress(wow_key, raw_text, Instant::now()))
 }
 
+fn keyboard_subscription() -> Subscription<Message> {
+    iced::event::listen_with(|event, status, _window| message_from_keyboard_event(&event, status))
+}
+
+fn timer_subscription(interval: std::time::Duration) -> Subscription<Message> {
+    iced::time::every(interval).map(Message::ProcessTimers)
+}
+
 impl App {
     /// Build the title bar with FPS counter, frame time, canvas size, and mouse coords.
     fn build_title_bar(&self) -> Element<'_, Message> {
@@ -404,12 +412,10 @@ impl App {
     }
 
     pub fn subscription(&self) -> Subscription<Message> {
-        let keyboard = iced::event::listen_with(|event, status, _window| {
-            message_from_keyboard_event(&event, status)
-        });
+        let keyboard = keyboard_subscription();
 
         if let Some(interval) = self.compute_tick_interval() {
-            let timer = iced::time::every(interval).map(Message::ProcessTimers);
+            let timer = timer_subscription(interval);
             Subscription::batch([timer, keyboard])
         } else {
             keyboard
