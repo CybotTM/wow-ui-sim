@@ -35,3 +35,6 @@ mod behavior_handle_api_link_opendump_seeds_real_chat_edit;
 
 #[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_data_files_self_register_idempotently.rs"]
 mod behavior_data_files_self_register_idempotently;
+
+#[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_dependency_loads_first.rs"]
+mod behavior_dependency_loads_first;
