@@ -36,6 +36,10 @@ pub struct ArrowCalloutState {
 }
 
 impl ArrowCalloutState {
+    pub fn sync_acknowledged_cvar_value(&mut self, value: &str) {
+        self.acknowledged = parse_acknowledged_callout_ids(value);
+    }
+
     /// Comma-separated list of acknowledged ids in ascending order, used
     /// to round-trip the `acknowledgedArrowCallouts` cvar. An empty set
     /// renders as `"0"` to match the cvar default seeded in
@@ -50,4 +54,17 @@ impl ArrowCalloutState {
             .collect::<Vec<_>>()
             .join(",")
     }
+}
+
+fn parse_acknowledged_callout_ids(value: &str) -> BTreeSet<i64> {
+    value
+        .split(',')
+        .filter_map(|raw_id| {
+            let id = raw_id.trim();
+            if id.is_empty() || id == "0" {
+                return None;
+            }
+            id.parse::<i64>().ok()
+        })
+        .collect()
 }

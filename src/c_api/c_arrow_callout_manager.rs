@@ -72,6 +72,7 @@ fn acknowledge_callout(state: &mut LuaState) -> LuaResult<u32> {
     let Some(callout_id) = read_callout_id(state, 1) else {
         return Ok(0);
     };
+    sync_acknowledged_from_cvar(state)?;
     let cvar_value = {
         let mut sim = borrow_state_mut(state)?;
         sim.arrow_callouts.acknowledged.insert(callout_id);
@@ -103,14 +104,25 @@ fn is_callout_active(state: &mut LuaState) -> LuaResult<u32> {
 
 fn is_callout_acknowledged(state: &mut LuaState) -> LuaResult<u32> {
     let acknowledged = match read_callout_id(state, 1) {
-        Some(id) => borrow_state_mut(state)?
-            .arrow_callouts
-            .acknowledged
-            .contains(&id),
+        Some(id) => {
+            sync_acknowledged_from_cvar(state)?;
+            borrow_state_mut(state)?
+                .arrow_callouts
+                .acknowledged
+                .contains(&id)
+        }
         None => false,
     };
     state.push(Val::Bool(acknowledged));
     Ok(1)
+}
+
+fn sync_acknowledged_from_cvar(state: &mut LuaState) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(value) = sim.cvars.get("acknowledgedArrowCallouts") {
+        sim.arrow_callouts.sync_acknowledged_cvar_value(&value);
+    }
+    Ok(())
 }
 
 fn persist_acknowledged_cvar(state: &mut LuaState, value: &str) -> LuaResult<()> {

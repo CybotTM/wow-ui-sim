@@ -85,16 +85,17 @@ fn arrow_callout_manager_dispatches_show_hide_events() {
             local showCount = 0
             local hideCount = 0
             local lastHideID = 0
-            ArrowCalloutFrameManager = {
-                OnEvent = function(self, eventName, payload)
-                    if eventName == "SHOW_ARROW_CALLOUT" then
-                        showCount = showCount + 1
-                    elseif eventName == "HIDE_ARROW_CALLOUT" then
-                        hideCount = hideCount + 1
-                        lastHideID = payload
-                    end
+            ArrowCalloutFrameManager = CreateFrame("Frame", "ArrowCalloutFrameManager", UIParent)
+            ArrowCalloutFrameManager:RegisterEvent("SHOW_ARROW_CALLOUT")
+            ArrowCalloutFrameManager:RegisterEvent("HIDE_ARROW_CALLOUT")
+            ArrowCalloutFrameManager:SetScript("OnEvent", function(self, eventName, payload)
+                if eventName == "SHOW_ARROW_CALLOUT" then
+                    showCount = showCount + 1
+                elseif eventName == "HIDE_ARROW_CALLOUT" then
+                    hideCount = hideCount + 1
+                    lastHideID = payload
                 end
-            }
+            end)
 
             C_ArrowCalloutManager.ShowCallout({
                 calloutID = 303,
