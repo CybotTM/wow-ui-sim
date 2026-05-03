@@ -209,52 +209,34 @@ fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_get_atlas_info_fn(out: &mut File) -> std::io::Result<()> {
-    writeln!(
-        out,
-        "pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {{"
-    )?;
-    writeln!(out, "    let lower = name.to_lowercase();")?;
-    writeln!(out)?;
-    writeln!(
-        out,
-        "    if let Some(info) = ATLAS_DB.get(&lower as &str) {{"
-    )?;
-    writeln!(
-        out,
-        "        return Some(AtlasLookup {{ info, is_2x_fallback: false }});"
-    )?;
-    writeln!(out, "    }}")?;
-    writeln!(out)?;
-    writeln!(out, "    if !lower.ends_with(\"-2x\") {{")?;
-    writeln!(out, "        let with_2x = format!(\"{{lower}}-2x\");")?;
-    writeln!(
-        out,
-        "        if let Some(info) = ATLAS_DB.get(&with_2x as &str) {{"
-    )?;
-    writeln!(
-        out,
-        "            return Some(AtlasLookup {{ info, is_2x_fallback: true }});"
-    )?;
-    writeln!(out, "        }}")?;
-    writeln!(out, "    }}")?;
-    writeln!(out)?;
-    writeln!(
-        out,
-        "    if let Some(base) = lower.strip_suffix(\"-2x\") {{"
-    )?;
-    writeln!(out, "        if let Some(info) = ATLAS_DB.get(base) {{")?;
-    writeln!(
-        out,
-        "            return Some(AtlasLookup {{ info, is_2x_fallback: false }});"
-    )?;
-    writeln!(out, "        }}")?;
-    writeln!(out, "    }}")?;
-    writeln!(out)?;
-    writeln!(out, "    None")?;
-    writeln!(out, "}}")?;
-    writeln!(out)?;
-    Ok(())
+    write_literal_lines(out, GET_ATLAS_INFO_FN)
 }
+
+const GET_ATLAS_INFO_FN: &[&str] = &[
+    "pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {",
+    "    let lower = name.to_lowercase();",
+    "",
+    "    if let Some(info) = ATLAS_DB.get(&lower as &str) {",
+    "        return Some(AtlasLookup { info, is_2x_fallback: false });",
+    "    }",
+    "",
+    "    if !lower.ends_with(\"-2x\") {",
+    "        let with_2x = format!(\"{lower}-2x\");",
+    "        if let Some(info) = ATLAS_DB.get(&with_2x as &str) {",
+    "            return Some(AtlasLookup { info, is_2x_fallback: true });",
+    "        }",
+    "    }",
+    "",
+    "    if let Some(base) = lower.strip_suffix(\"-2x\") {",
+    "        if let Some(info) = ATLAS_DB.get(base) {",
+    "            return Some(AtlasLookup { info, is_2x_fallback: false });",
+    "        }",
+    "    }",
+    "",
+    "    None",
+    "}",
+    "",
+];
 
 fn write_get_atlas_slice_info_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(
