@@ -1,10 +1,47 @@
 //! Load smoke for `Blizzard_ArtifactUI`.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
-use crate::common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
+use crate::common::panel_fixtures::{
+    blizzard_ui_dir, clear_recorded_lua_errors, recorded_lua_errors,
+};
+use wow_ui_sim::loader::discover_blizzard_addon_closure_for_screen;
+use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::settle_headless_startup;
+use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_ArtifactUI";
+const COLORS: &str = "Blizzard_Colors";
+
+#[test]
+fn artifact_ui_toc_dependency_loads_blizzard_colors_first() {
+    let toc = TocFile::from_file(&artifact_ui_toc()).expect("Blizzard_ArtifactUI TOC should parse");
+    assert_eq!(
+        toc.dependencies(),
+        [COLORS],
+        "`{ROOT}` must declare its hard dependency on `{COLORS}`"
+    );
+
+    let closure =
+        discover_blizzard_addon_closure_for_screen(&blizzard_ui_dir(), ScreenKind::Game, &[ROOT]);
+    let loaded_names = closure
+        .iter()
+        .map(|(name, _toc)| name.as_str())
+        .collect::<Vec<_>>();
+    let colors_index = loaded_names
+        .iter()
+        .position(|name| *name == COLORS)
+        .unwrap_or_else(|| panic!("dependency closure for `{ROOT}` must include `{COLORS}`"));
+    let artifact_index = loaded_names
+        .iter()
+        .position(|name| *name == ROOT)
+        .unwrap_or_else(|| panic!("dependency closure must include root addon `{ROOT}`"));
+
+    assert!(
+        colors_index < artifact_index,
+        "`{COLORS}` must be loaded before `{ROOT}` in the dependency-aware loader closure: \
+         {loaded_names:?}"
+    );
+}
 
 #[test]
 fn artifact_ui_is_load_on_demand_until_explicitly_loaded() {
@@ -71,4 +108,8 @@ fn ensure_player_frame_stub(env: &wow_ui_sim::lua_api::WowLuaEnv) {
         "#,
     )
     .expect("failed to create PlayerFrame stub before settling startup events");
+}
+
+fn artifact_ui_toc() -> std::path::PathBuf {
+    blizzard_ui_dir().join(ROOT).join("Blizzard_ArtifactUI.toc")
 }
