@@ -22,3 +22,6 @@ mod behavior_show_panel_with_no_artifact_redirects;
 
 #[path = "blizzard_ui/blizzard_artifact_ui/behavior_show_panel_with_purchased_ranks.rs"]
 mod behavior_show_panel_with_purchased_ranks;
+
+#[path = "blizzard_ui/blizzard_artifact_ui/behavior_set_tab_resizes_panel.rs"]
+mod behavior_set_tab_resizes_panel;
