@@ -34,3 +34,6 @@ mod behavior_onleave_hides_tooltip;
 
 #[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_is_garden_accessible_gates_landing_page.rs"]
 mod behavior_is_garden_accessible_gates_landing_page;
+
+#[path = "blizzard_ui/blizzard_ardenweald_gardening/behavior_seconds_formatter_format.rs"]
+mod behavior_seconds_formatter_format;
