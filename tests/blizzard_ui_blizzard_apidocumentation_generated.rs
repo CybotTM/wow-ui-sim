@@ -14,3 +14,6 @@ mod surface_globals;
 
 #[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_find_all_api_matches_returns_corpus_results.rs"]
 mod behavior_find_all_api_matches_returns_corpus_results;
+
+#[path = "blizzard_ui/blizzard_apidocumentation_generated/behavior_handle_slash_command_stats_writes_real_counts.rs"]
+mod behavior_handle_slash_command_stats_writes_real_counts;
