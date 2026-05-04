@@ -20,6 +20,9 @@ use rilua::{LuaResult, Val, runtime_error};
 use std::cell::{Ref, RefMut};
 use std::rc::Rc;
 
+mod frame_metatable;
+use frame_metatable::frame_metatable_for_widget_type;
+
 /// Extract the frame ID (u64) from a Lua argument (a backed table).
 ///
 /// The table's backing `(index, generation)` encodes the widget ID as
@@ -229,10 +232,10 @@ fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
     // docs/wiki/investigations/intern-string-ranking.md.
     let key_ref = state.gc.intern_string(FRAME_REFS_KEY.as_bytes());
     let registry = state.gc.tables.get(state.registry);
-    if let Some(reg) = registry {
-        if let Val::Table(cache) = reg.get_str(key_ref, &state.gc.string_arena) {
-            return cache;
-        }
+    if let Some(reg) = registry
+        && let Val::Table(cache) = reg.get_str(key_ref, &state.gc.string_arena)
+    {
+        return cache;
     }
     // Pre-allocate for typical frame count to avoid rehashing
     let cache = state.gc.alloc_table(Table::with_sizes(4096, 0));
@@ -280,110 +283,6 @@ fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>, id: u64
         }
         // Methods accessed via __index, no need to copy
     }
-}
-
-fn frame_metatable_for_widget_type(
-    state: &mut LuaState,
-    base_mt_ref: GcRef<Table>,
-    widget_type: WidgetType,
-) -> Val {
-    if matches!(widget_type, WidgetType::Frame | WidgetType::WorldFrame) {
-        return Val::Table(base_mt_ref);
-    }
-
-    let cache = registry_table_or_create(state, FRAME_MT_CACHE_KEY);
-    let key = widget_type.as_str();
-    let cached = table_get_static(state, cache, key);
-    if let Val::Table(_) = cached {
-        return cached;
-    }
-
-    let source_index_key = state.gc.intern_string_static(b"__index");
-    let source_index = match state
-        .gc
-        .tables
-        .get(base_mt_ref)
-        .map(|table| table.get_str(source_index_key, &state.gc.string_arena))
-        .unwrap_or(Val::Nil)
-    {
-        Val::Table(index_ref) => index_ref,
-        _ => return Val::Table(base_mt_ref),
-    };
-
-    let remove: &[&str] = match widget_type {
-        WidgetType::ScrollFrame => &["SetMaxLines"],
-        WidgetType::StatusBar => &["SetStatusBarAtlas"],
-        _ => &[
-            "GetVerticalScroll",
-            "SetVerticalScroll",
-            "GetVerticalScrollRange",
-            "GetScrollChild",
-            "SetScrollChild",
-            "UpdateScrollChildRect",
-        ],
-    };
-
-    let index_clone = match create_table(state) {
-        Val::Table(index_ref) => index_ref,
-        _ => return Val::Table(base_mt_ref),
-    };
-    let index_entries = state
-        .gc
-        .tables
-        .get(source_index)
-        .map(|table| table.hash_entries())
-        .unwrap_or_default();
-    for (entry_key, entry_value) in index_entries {
-        let keep = match entry_key {
-            Val::Str(str_ref) => state
-                .gc
-                .string_arena
-                .get(str_ref)
-                .and_then(|name| std::str::from_utf8(name.data()).ok())
-                .is_none_or(|name| !remove.contains(&name)),
-            _ => true,
-        };
-        if keep && let Some(index_tbl) = state.gc.tables.get_mut(index_clone) {
-            let _ = index_tbl.raw_set(entry_key, entry_value, &state.gc.string_arena);
-        }
-    }
-    state.gc.barrier_back(index_clone);
-
-    let mt_clone = match create_table(state) {
-        Val::Table(mt_ref) => mt_ref,
-        _ => return Val::Table(base_mt_ref),
-    };
-    let base_entries = state
-        .gc
-        .tables
-        .get(base_mt_ref)
-        .map(|table| table.hash_entries())
-        .unwrap_or_default();
-    for (entry_key, entry_value) in base_entries {
-        let is_index = matches!(entry_key, Val::Str(str_ref)
-            if state
-                .gc
-                .string_arena
-                .get(str_ref)
-                .and_then(|name| std::str::from_utf8(name.data()).ok())
-                == Some("__index"));
-        if let Some(mt_tbl) = state.gc.tables.get_mut(mt_clone) {
-            let _ = mt_tbl.raw_set(
-                entry_key,
-                if is_index {
-                    Val::Table(index_clone)
-                } else {
-                    entry_value
-                },
-                &state.gc.string_arena,
-            );
-        }
-    }
-    state.gc.barrier_back(mt_clone);
-
-    let mt = Val::Table(mt_clone);
-    table_set_static(state, cache, key, mt);
-    mt
 }
 
 /// Get a numeric-keyed value from a table.
@@ -620,30 +519,6 @@ pub fn registry_table_or_create(state: &mut LuaState, key: &'static str) -> Val 
     table
 }
 
-#[cfg(test)]
-mod tests {
-    use super::{borrow_state, frame_ref};
-    use crate::lua_api::WowLuaEnv;
-    use rilua::LuaApiMut;
-
-    #[test]
-    fn frame_ref_returns_same_table_for_same_widget_id() {
-        let env = WowLuaEnv::new().expect("env");
-        let mut lua = env.rilua_mut();
-        let state = lua.state_mut();
-        let ui_parent_id = borrow_state(state)
-            .expect("borrow state")
-            .widgets
-            .get_id_by_name("UIParent")
-            .expect("UIParent");
-
-        let first = frame_ref(state, ui_parent_id).expect("first frame ref");
-        let second = frame_ref(state, ui_parent_id).expect("second frame ref");
-
-        assert_eq!(first, second, "frame_ref should reuse cached table refs");
-    }
-}
-
 // ── Table creation ──────────────────────────────────────────────────
 
 /// Create a new empty table in rilua's GC heap.
@@ -672,18 +547,9 @@ pub fn create_table_with_fields(state: &mut LuaState, fields: &[(&'static str, V
 
 /// Set a string key on an existing table Val.
 pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
-    let Val::Table(table_ref) = table else { return };
-    let stack_slot = state.top;
-    state.ensure_stack(stack_slot + 1);
-    state.stack_set(stack_slot, value);
-    state.top = stack_slot + 1;
-
-    let key_ref = state.gc.intern_string(key.as_bytes());
-    if let Some(t) = state.gc.tables.get_mut(table_ref) {
-        let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
-    }
-    state.gc.barrier_back(table_ref);
-    state.top = stack_slot;
+    table_set_with_key(state, table, value, |state| {
+        state.gc.intern_string(key.as_bytes())
+    });
 }
 
 /// Like [`table_set`] but interns `key` through the pointer-keyed static
@@ -691,13 +557,22 @@ pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
 /// matching `table_get_static` uses for lookup — content-dedupe works
 /// too, but the fast path only triggers when the pointer matches.
 pub fn table_set_static(state: &mut LuaState, table: Val, key: &'static str, value: Val) {
+    table_set_with_key(state, table, value, |state| {
+        state.gc.intern_string_static(key.as_bytes())
+    });
+}
+
+fn table_set_with_key<F>(state: &mut LuaState, table: Val, value: Val, intern_key: F)
+where
+    F: FnOnce(&mut LuaState) -> GcRef<rilua::vm::string::LuaString>,
+{
     let Val::Table(table_ref) = table else { return };
     let stack_slot = state.top;
     state.ensure_stack(stack_slot + 1);
     state.stack_set(stack_slot, value);
     state.top = stack_slot + 1;
 
-    let key_ref = state.gc.intern_string_static(key.as_bytes());
+    let key_ref = intern_key(state);
     if let Some(t) = state.gc.tables.get_mut(table_ref) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
@@ -707,10 +582,26 @@ pub fn table_set_static(state: &mut LuaState, table: Val, key: &'static str, val
 
 /// Get a string key from a table Val.
 pub fn table_get(state: &mut LuaState, table: Val, key: &str) -> Val {
+    table_get_with_key(state, table, |state| state.gc.intern_string(key.as_bytes()))
+}
+
+/// Like [`table_get`] but interns `key` through the pointer-keyed static
+/// cache. Use when the key is a compile-time literal hit on a hot path
+/// (script handler dispatch, XML attribute lookup, etc.).
+pub fn table_get_static(state: &mut LuaState, table: Val, key: &'static str) -> Val {
+    table_get_with_key(state, table, |state| {
+        state.gc.intern_string_static(key.as_bytes())
+    })
+}
+
+fn table_get_with_key<F>(state: &mut LuaState, table: Val, intern_key: F) -> Val
+where
+    F: FnOnce(&mut LuaState) -> GcRef<rilua::vm::string::LuaString>,
+{
     let Val::Table(table_ref) = table else {
         return Val::Nil;
     };
-    let key_ref = state.gc.intern_string(key.as_bytes());
+    let key_ref = intern_key(state);
     state
         .gc
         .tables
@@ -719,18 +610,26 @@ pub fn table_get(state: &mut LuaState, table: Val, key: &str) -> Val {
         .unwrap_or(Val::Nil)
 }
 
-/// Like [`table_get`] but interns `key` through the pointer-keyed static
-/// cache. Use when the key is a compile-time literal hit on a hot path
-/// (script handler dispatch, XML attribute lookup, etc.).
-pub fn table_get_static(state: &mut LuaState, table: Val, key: &'static str) -> Val {
-    let Val::Table(table_ref) = table else {
-        return Val::Nil;
-    };
-    let key_ref = state.gc.intern_string_static(key.as_bytes());
-    state
-        .gc
-        .tables
-        .get(table_ref)
-        .map(|t| t.get_str(key_ref, &state.gc.string_arena))
-        .unwrap_or(Val::Nil)
+#[cfg(test)]
+mod tests {
+    use super::{borrow_state, frame_ref};
+    use crate::lua_api::WowLuaEnv;
+    use rilua::LuaApiMut;
+
+    #[test]
+    fn frame_ref_returns_same_table_for_same_widget_id() {
+        let env = WowLuaEnv::new().expect("env");
+        let mut lua = env.rilua_mut();
+        let state = lua.state_mut();
+        let ui_parent_id = borrow_state(state)
+            .expect("borrow state")
+            .widgets
+            .get_id_by_name("UIParent")
+            .expect("UIParent");
+
+        let first = frame_ref(state, ui_parent_id).expect("first frame ref");
+        let second = frame_ref(state, ui_parent_id).expect("second frame ref");
+
+        assert_eq!(first, second, "frame_ref should reuse cached table refs");
+    }
 }
