@@ -11,6 +11,11 @@ use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+use super::state_backed_queries::dispatch_event_now;
+
+const AUCTION_HOUSE_BROWSE_RESULTS_UPDATED: &str = "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED";
+const AUCTION_HOUSE_THROTTLED_SYSTEM_READY: &str = "AUCTION_HOUSE_THROTTLED_SYSTEM_READY";
+
 pub(super) fn add_auction_browse_result(state: &mut LuaState) -> LuaResult<u32> {
     let item_id = i32::from_stack(state, 1)?;
     let item_level = i32::from_stack(state, 2)?;
@@ -33,6 +38,37 @@ pub(super) fn add_auction_browse_result(state: &mut LuaState) -> LuaResult<u32> 
 pub(super) fn clear_auction_browse_results(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.auction_browse_results.clear();
     Ok(0)
+}
+
+pub(super) fn set_auction_throttle_ready(state: &mut LuaState) -> LuaResult<u32> {
+    let ready = bool::from_stack(state, 1)?;
+    let should_dispatch_ready = {
+        let mut sim = borrow_state_mut(state)?;
+        let was_ready = sim.auction_throttle_ready;
+        sim.auction_throttle_ready = ready;
+        ready && !was_ready
+    };
+
+    if should_dispatch_ready {
+        dispatch_event_now(state, AUCTION_HOUSE_THROTTLED_SYSTEM_READY, &[])?;
+        dispatch_queued_browse_results(state)?;
+    }
+
+    Ok(0)
+}
+
+fn dispatch_queued_browse_results(state: &mut LuaState) -> LuaResult<()> {
+    let queued_query = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.auction_queued_browse_query.take()
+    };
+
+    if let Some(query) = queued_query {
+        borrow_state_mut(state)?.auction_last_browse_query = Some(query);
+        dispatch_event_now(state, AUCTION_HOUSE_BROWSE_RESULTS_UPDATED, &[])?;
+    }
+
+    Ok(())
 }
 
 pub(super) fn add_auction_replicate_item(state: &mut LuaState) -> LuaResult<u32> {

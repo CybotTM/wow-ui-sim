@@ -1347,10 +1347,10 @@ enum SearchSide {
 
 fn c_auction_house_send_browse_query(state: &mut LuaState) -> LuaResult<u32> {
     let query_arg = Val::from_stack(state, 1)?;
-    if dispatch_throttle_if_pending(state)? {
+    let query = parse_browse_query(state, query_arg);
+    if dispatch_throttled_browse_query(state, query.clone())? {
         return Ok(0);
     }
-    let query = parse_browse_query(state, query_arg);
     borrow_state_mut(state)?.auction_last_browse_query = Some(query);
     dispatch_event_now(state, AUCTION_HOUSE_BROWSE_RESULTS_UPDATED, &[])?;
     Ok(0)
@@ -1415,6 +1415,15 @@ fn dispatch_throttle_if_pending(state: &mut LuaState) -> LuaResult<bool> {
     if borrow_state(state)?.auction_throttle_ready {
         return Ok(false);
     }
+    dispatch_event_now(state, AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED, &[])?;
+    Ok(true)
+}
+
+fn dispatch_throttled_browse_query(state: &mut LuaState, query: BrowseQuery) -> LuaResult<bool> {
+    if borrow_state(state)?.auction_throttle_ready {
+        return Ok(false);
+    }
+    borrow_state_mut(state)?.auction_queued_browse_query = Some(query);
     dispatch_event_now(state, AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED, &[])?;
     Ok(true)
 }

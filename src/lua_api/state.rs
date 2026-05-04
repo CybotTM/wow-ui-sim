@@ -258,6 +258,7 @@ macro_rules! build_empty_sim_state {
             auction_commodity_searches: ::std::collections::HashMap::new(),
             auction_sell_search_results: ::std::collections::HashMap::new(),
             auction_last_browse_query: None,
+            auction_queued_browse_query: None,
             auction_favorites: Vec::new(),
             auction_sell_quote: None,
             auction_index: ::std::collections::HashMap::new(),
@@ -2006,6 +2007,10 @@ pub struct SimState {
     /// `None` until the first browse-query call. Tests can introspect
     /// this to verify the addon submitted the expected filter shape.
     pub auction_last_browse_query: Option<BrowseQuery>,
+    /// Browse query held while `auction_throttle_ready` is false.
+    /// Replayed by `A_Admin.SetAuctionThrottleReady(true)`, which
+    /// mirrors the server-side throttle system becoming ready later.
+    pub auction_queued_browse_query: Option<BrowseQuery>,
     /// Item keys the player has favorited. Drives the favorites-aware
     /// helpers (currently `SearchForFavorites` only re-emits the
     /// browse-results event, but future favorites work — `IsFavoriteItem`,
