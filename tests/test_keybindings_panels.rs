@@ -578,6 +578,24 @@ fn premade_group_categories_can_start_search() {
     }
 }
 
+#[test]
+fn premade_group_search_result_tooltips_do_not_error() {
+    test_timeout! {
+        let env = setup_env();
+        env.exec(
+            r#"
+            assert(LoadAddOn("Blizzard_GroupFinder"))
+            local _, results = C_LFGList.GetSearchResults()
+            assert(#results > 0, "expected seeded premade search results")
+
+            for _, resultID in ipairs(results) do
+                LFGListUtil_SetSearchEntryTooltip(GameTooltip, resultID)
+            end
+            "#
+        ).expect("Premade Group search result tooltips should not raise Lua errors");
+    }
+}
+
 // ── O → ToggleFriendsFrame() ────────────────────────────────────────────
 
 #[test]

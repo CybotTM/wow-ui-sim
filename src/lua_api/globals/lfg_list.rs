@@ -796,6 +796,31 @@ fn get_activity_full_name(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `GetPlaystyleString(playstyle, generalPlaystyle, activityInfo)` → string.
+///
+/// Retail always returns a string. The current sim seeds modern
+/// `generalPlaystyle` values, so map those first and fall back to the legacy
+/// `playstyle` enum only when no general playstyle is provided.
+fn get_playstyle_string(state: &mut LuaState) -> LuaResult<u32> {
+    let playstyle = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let general_playstyle = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0) as i32;
+    let label = match general_playstyle {
+        1 => "Learning",
+        2 => "Relaxed",
+        3 => "Focused",
+        4 => "Expert",
+        _ => match playstyle {
+            1 => "Standard",
+            2 => "Casual",
+            3 => "Hardcore",
+            _ => "",
+        },
+    };
+    let val = create_string(state, label);
+    state.push(val);
+    Ok(1)
+}
+
 /// `HasActivityList()` → bool. True when the activity catalog is seeded.
 fn has_activity_list(state: &mut LuaState) -> LuaResult<u32> {
     let has = !borrow_state(state)?.lfg_activities.is_empty();
@@ -1088,6 +1113,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         "GetActivityFullName",
         get_activity_full_name,
     )?;
+    table_set_rust_fn_static(state, table_ref, "GetPlaystyleString", get_playstyle_string)?;
     table_set_rust_fn_static(state, table_ref, "HasActivityList", has_activity_list)?;
     table_set_rust_fn_static(
         state,

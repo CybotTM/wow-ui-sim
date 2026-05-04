@@ -526,7 +526,7 @@ pub struct PremadeListing {
     /// 3=FunSerious, 4=Expert.
     pub general_playstyle: i32,
     pub cross_faction_listing: bool,
-    /// Faction id of the leader: 0=neutral, 1=Horde, 2=Alliance.
+    /// `PLAYER_FACTION_GROUP` index of the leader: 0=Horde, 1=Alliance.
     pub leader_faction_group: i32,
     pub num_bnet_friends: i32,
     pub num_char_friends: i32,
