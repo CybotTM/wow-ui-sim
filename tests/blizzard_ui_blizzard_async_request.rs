@@ -7,3 +7,6 @@ mod common;
 
 #[path = "blizzard_ui/blizzard_async_request/load.rs"]
 mod load;
+
+#[path = "blizzard_ui/blizzard_async_request/surface_globals.rs"]
+mod surface_globals;
