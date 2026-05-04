@@ -146,31 +146,9 @@ impl TextureManager {
 
     /// Pre-load spellbook / PlayerSpells icon textures from the static spell DB.
     pub fn preload_spellbook_icons(&mut self) {
-        use crate::lua_api::globals::spellbook_data;
+        let file_data_ids = spellbook_icon_file_data_ids();
 
-        let mut file_data_ids = HashSet::new();
-        for skill_line_index in 1..=spellbook_data::num_skill_lines() {
-            if let Some(skill_line) = spellbook_data::get_skill_line(skill_line_index) {
-                file_data_ids.insert(skill_line.icon_id);
-                for entry in skill_line.spells {
-                    if let Some(spell) = crate::spells::get_spell(entry.spell_id)
-                        && spell.icon_file_data_id != 0
-                    {
-                        file_data_ids.insert(spell.icon_file_data_id);
-                    }
-                }
-            }
-        }
-
-        let mut loaded = 0u32;
-        for id in &file_data_ids {
-            if let Some(path) = crate::manifest_interface_data::get_texture_path(*id) {
-                let wow_path = format!("Interface\\{}", path.replace('/', "\\"));
-                if self.load(&wow_path).is_some() {
-                    loaded += 1;
-                }
-            }
-        }
+        let loaded = self.preload_file_data_textures(&file_data_ids);
         crate::logging::eprintln_elapsed(&format!(
             "[TexMgr] Preloaded {} / {} spellbook icons",
             loaded,
@@ -227,6 +205,36 @@ fn talent_entry_icon_file_data_id(entry_id: u32) -> Option<u32> {
         crate::spells::get_spell(def.spell_id)?.icon_file_data_id
     };
     (icon_id != 0).then_some(icon_id)
+}
+
+fn spellbook_icon_file_data_ids() -> HashSet<u32> {
+    use crate::lua_api::globals::spellbook_data;
+
+    let mut file_data_ids = HashSet::new();
+    for skill_line_index in 1..=spellbook_data::num_skill_lines() {
+        collect_spellbook_skill_line_icons(&mut file_data_ids, skill_line_index);
+    }
+    file_data_ids
+}
+
+fn collect_spellbook_skill_line_icons(file_data_ids: &mut HashSet<u32>, skill_line_index: i32) {
+    use crate::lua_api::globals::spellbook_data;
+
+    let Some(skill_line) = spellbook_data::get_skill_line(skill_line_index) else {
+        return;
+    };
+
+    file_data_ids.insert(skill_line.icon_id);
+    for entry in skill_line.spells {
+        if let Some(icon_id) = spellbook_entry_icon_file_data_id(entry.spell_id) {
+            file_data_ids.insert(icon_id);
+        }
+    }
+}
+
+fn spellbook_entry_icon_file_data_id(spell_id: u32) -> Option<u32> {
+    let spell = crate::spells::get_spell(spell_id)?;
+    (spell.icon_file_data_id != 0).then_some(spell.icon_file_data_id)
 }
 
 pub(super) fn normalize_talent_class_key(class_name: &str) -> Option<String> {
