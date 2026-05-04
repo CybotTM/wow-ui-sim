@@ -6,7 +6,7 @@
 //! Glyphs are stored as RGBA (white + alpha) so the shader's `tex * color`
 //! multiplication produces correctly tinted text from vertex color.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, hash_map::Entry};
 
 use cosmic_text::{Buffer, CacheKey, Metrics, Shaping, SwashContent};
 use iced::Rectangle;
@@ -152,7 +152,7 @@ impl GlyphAtlas {
     /// every 60 generations (~1s at 60fps).
     pub fn advance_generation(&mut self) {
         self.shape_cache_generation += 1;
-        if self.shape_cache_generation % 60 == 0 {
+        if self.shape_cache_generation.is_multiple_of(60) {
             let generation = self.shape_cache_generation;
             self.shape_cache
                 .retain(|_, entry| generation - entry.last_used < 120);
@@ -270,47 +270,97 @@ fn write_glyph_pixels(
 ) {
     match content {
         SwashContent::Mask => {
-            for y in 0..height {
-                for x in 0..width {
-                    let src_idx = (y * width + x) as usize;
-                    let alpha = data.get(src_idx).copied().unwrap_or(0);
-                    let dst_idx = (((cursor_y + y) * GLYPH_ATLAS_SIZE + cursor_x + x) * 4) as usize;
-                    pixels[dst_idx] = 255;
-                    pixels[dst_idx + 1] = 255;
-                    pixels[dst_idx + 2] = 255;
-                    pixels[dst_idx + 3] = alpha;
-                }
-            }
+            write_mask_glyph_pixels(pixels, cursor_x, cursor_y, width, height, data)
         }
         SwashContent::Color => {
-            for y in 0..height {
-                for x in 0..width {
-                    let src_idx = ((y * width + x) * 4) as usize;
-                    let dst_idx = (((cursor_y + y) * GLYPH_ATLAS_SIZE + cursor_x + x) * 4) as usize;
-                    pixels[dst_idx] = data.get(src_idx).copied().unwrap_or(0);
-                    pixels[dst_idx + 1] = data.get(src_idx + 1).copied().unwrap_or(0);
-                    pixels[dst_idx + 2] = data.get(src_idx + 2).copied().unwrap_or(0);
-                    pixels[dst_idx + 3] = data.get(src_idx + 3).copied().unwrap_or(0);
-                }
-            }
+            write_color_glyph_pixels(pixels, cursor_x, cursor_y, width, height, data);
         }
         SwashContent::SubpixelMask => {
-            for y in 0..height {
-                for x in 0..width {
-                    let src_idx = ((y * width + x) * 3) as usize;
-                    let r = data.get(src_idx).copied().unwrap_or(0);
-                    let g = data.get(src_idx + 1).copied().unwrap_or(0);
-                    let b = data.get(src_idx + 2).copied().unwrap_or(0);
-                    let alpha = subpixel_mask_alpha(r, g, b);
-                    let dst_idx = (((cursor_y + y) * GLYPH_ATLAS_SIZE + cursor_x + x) * 4) as usize;
-                    pixels[dst_idx] = 255;
-                    pixels[dst_idx + 1] = 255;
-                    pixels[dst_idx + 2] = 255;
-                    pixels[dst_idx + 3] = alpha;
-                }
-            }
+            write_subpixel_glyph_pixels(pixels, cursor_x, cursor_y, width, height, data);
         }
     }
+}
+
+fn write_mask_glyph_pixels(
+    pixels: &mut [u8],
+    cursor_x: u32,
+    cursor_y: u32,
+    width: u32,
+    height: u32,
+    data: &[u8],
+) {
+    for pixel in glyph_pixel_positions(cursor_x, cursor_y, width, height) {
+        let alpha = data.get(pixel.src_idx).copied().unwrap_or(0);
+        write_rgba_pixel(pixels, pixel.dst_idx, [255, 255, 255, alpha]);
+    }
+}
+
+fn write_color_glyph_pixels(
+    pixels: &mut [u8],
+    cursor_x: u32,
+    cursor_y: u32,
+    width: u32,
+    height: u32,
+    data: &[u8],
+) {
+    for pixel in glyph_pixel_positions(cursor_x, cursor_y, width, height) {
+        let src_idx = pixel.src_idx * 4;
+        let rgba = [
+            data.get(src_idx).copied().unwrap_or(0),
+            data.get(src_idx + 1).copied().unwrap_or(0),
+            data.get(src_idx + 2).copied().unwrap_or(0),
+            data.get(src_idx + 3).copied().unwrap_or(0),
+        ];
+        write_rgba_pixel(pixels, pixel.dst_idx, rgba);
+    }
+}
+
+fn write_subpixel_glyph_pixels(
+    pixels: &mut [u8],
+    cursor_x: u32,
+    cursor_y: u32,
+    width: u32,
+    height: u32,
+    data: &[u8],
+) {
+    for pixel in glyph_pixel_positions(cursor_x, cursor_y, width, height) {
+        let src_idx = pixel.src_idx * 3;
+        let r = data.get(src_idx).copied().unwrap_or(0);
+        let g = data.get(src_idx + 1).copied().unwrap_or(0);
+        let b = data.get(src_idx + 2).copied().unwrap_or(0);
+        write_rgba_pixel(
+            pixels,
+            pixel.dst_idx,
+            [255, 255, 255, subpixel_mask_alpha(r, g, b)],
+        );
+    }
+}
+
+struct GlyphPixelPosition {
+    src_idx: usize,
+    dst_idx: usize,
+}
+
+fn glyph_pixel_positions(
+    cursor_x: u32,
+    cursor_y: u32,
+    width: u32,
+    height: u32,
+) -> impl Iterator<Item = GlyphPixelPosition> {
+    (0..height).flat_map(move |y| {
+        (0..width).map(move |x| GlyphPixelPosition {
+            src_idx: (y * width + x) as usize,
+            dst_idx: glyph_atlas_pixel_offset(cursor_x + x, cursor_y + y),
+        })
+    })
+}
+
+fn glyph_atlas_pixel_offset(x: u32, y: u32) -> usize {
+    ((y * GLYPH_ATLAS_SIZE + x) * 4) as usize
+}
+
+fn write_rgba_pixel(pixels: &mut [u8], dst_idx: usize, rgba: [u8; 4]) {
+    pixels[dst_idx..dst_idx + 4].copy_from_slice(&rgba);
 }
 
 fn subpixel_mask_alpha(r: u8, g: u8, b: u8) -> u8 {
@@ -572,7 +622,7 @@ pub fn emit_text_quads(
         max_lines,
     );
     let generation = glyph_atlas.shape_cache_generation;
-    if !glyph_atlas.shape_cache.contains_key(&key) {
+    if let Entry::Vacant(entry) = glyph_atlas.shape_cache.entry(key) {
         let (buffer, total_height) = shape_text_to_runs(
             font_system,
             TextShapeRequest {
@@ -586,14 +636,11 @@ pub fn emit_text_quads(
             },
         );
         let runs = extract_layout_runs(&buffer, max_lines);
-        glyph_atlas.shape_cache.insert(
-            key,
-            ShapeCacheEntry {
-                runs,
-                total_height,
-                last_used: generation,
-            },
-        );
+        entry.insert(ShapeCacheEntry {
+            runs,
+            total_height,
+            last_used: generation,
+        });
     }
     let entry = glyph_atlas.shape_cache.get_mut(&key).unwrap();
     entry.last_used = generation;
@@ -669,54 +716,4 @@ pub fn emit_text_quads(
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{GlyphAtlas, build_glyph_entry, emit_text_quads, subpixel_mask_alpha};
-    use crate::font::WowFontSystem;
-    use crate::render::shader::QuadBatch;
-    use crate::widget::{TextJustify, TextOutline};
-    use iced::{Point, Rectangle, Size};
-
-    #[test]
-    fn subpixel_mask_alpha_averages_rgb_channels() {
-        assert_eq!(subpixel_mask_alpha(0, 0, 0), 0);
-        assert_eq!(subpixel_mask_alpha(255, 255, 255), 255);
-        assert_eq!(subpixel_mask_alpha(255, 0, 0), 85);
-        assert_eq!(subpixel_mask_alpha(0, 255, 128), 127);
-    }
-
-    #[test]
-    fn glyph_entry_keeps_left_and_top_placement_offsets() {
-        let entry = build_glyph_entry(8, 16, 20, 30, 4, 7);
-        assert_eq!(entry.left, 4);
-        assert_eq!(entry.top, 7);
-    }
-
-    #[test]
-    fn zero_font_size_emits_no_text_quads() {
-        let mut batch = QuadBatch::new();
-        let mut fonts = WowFontSystem::new();
-        let mut glyphs = GlyphAtlas::new();
-
-        emit_text_quads(
-            &mut batch,
-            &mut fonts,
-            &mut glyphs,
-            "Collections",
-            Rectangle::new(Point::ORIGIN, Size::new(120.0, 20.0)),
-            None,
-            0.0,
-            [1.0, 1.0, 1.0, 1.0],
-            TextJustify::Left,
-            TextJustify::Center,
-            0,
-            None,
-            (0.0, 0.0),
-            TextOutline::None,
-            false,
-            0,
-            None,
-        );
-
-        assert_eq!(batch.quad_count(), 0);
-    }
-}
+mod tests;
