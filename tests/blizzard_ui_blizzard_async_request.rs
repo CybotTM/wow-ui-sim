@@ -16,3 +16,6 @@ mod surface_frames;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_create_requires_callbacks.rs"]
 mod behavior_create_requires_callbacks;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_create_timeout_pair_required.rs"]
+mod behavior_create_timeout_pair_required;
