@@ -32,6 +32,7 @@ pub(super) const NAMED_COLOR_GLOBALS: &[(&'static str, (f64, f64, f64, f64))] = 
     ("ORANGE_FONT_COLOR", (1.0, 0.5, 0.25, 1.0)),
     ("WHITE_FONT_COLOR", (1.0, 1.0, 1.0, 1.0)),
     ("DISABLED_FONT_COLOR", (0.5, 0.5, 0.5, 1.0)),
+    ("HEIRLOOM_BLUE_COLOR", (0.0, 0.8, 1.0, 1.0)),
     ("DIM_RED_FONT_COLOR", (0.8, 0.1, 0.1, 1.0)),
     ("LIGHTBLUE_FONT_COLOR", (0.51176, 0.77255, 1.0, 1.0)),
     ("HIGHLIGHT_LIGHT_BLUE", (0.51176, 0.77255, 1.0, 1.0)),
@@ -117,6 +118,7 @@ fn register_color_methods(
         let a = color_channel(state, this, "a", 1.0);
         (r, g, b, a).into_stack(state)
     })?;
+    register_color_equality_methods(state, t_ref)?;
     table_set_rust_fn_static(state, t_ref, "GenerateHexColor", |state| {
         let this = stack_val(state, 1);
         let (r, g, b) = color_rgb(state, this);
@@ -129,6 +131,29 @@ fn register_color_methods(
         let (r, g, b) = color_rgb(state, this);
         let wrapped = format!("|c{}{}|r", hex_from_rgb(r, g, b), text);
         create_string(state, &wrapped).into_stack(state)
+    })?;
+    Ok(())
+}
+
+fn register_color_equality_methods(
+    state: &mut LuaState,
+    t_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    table_set_rust_fn_static(state, t_ref, "IsRGBEqualTo", |state| {
+        let this = stack_val(state, 1);
+        let other = stack_val(state, 2);
+        let (r, g, b) = color_rgb(state, this);
+        let (other_r, other_g, other_b) = color_rgb(state, other);
+        (r == other_r && g == other_g && b == other_b).into_stack(state)
+    })?;
+    table_set_rust_fn_static(state, t_ref, "IsEqualTo", |state| {
+        let this = stack_val(state, 1);
+        let other = stack_val(state, 2);
+        let (r, g, b) = color_rgb(state, this);
+        let (other_r, other_g, other_b) = color_rgb(state, other);
+        let a = color_channel(state, this, "a", 1.0);
+        let other_a = color_channel(state, other, "a", 1.0);
+        (r == other_r && g == other_g && b == other_b && a == other_a).into_stack(state)
     })?;
     Ok(())
 }
