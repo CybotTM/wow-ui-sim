@@ -37,3 +37,9 @@ mod behavior_response_event_other_name_ignored;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_timeout_fires_callback.rs"]
 mod behavior_timeout_fires_callback;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_response_before_timeout_cancels_timer.rs"]
+mod behavior_response_before_timeout_cancels_timer;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_stop_without_start_is_safe.rs"]
+mod behavior_stop_without_start_is_safe;
