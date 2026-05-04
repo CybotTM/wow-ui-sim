@@ -6,7 +6,7 @@
 //! Glyphs are stored as RGBA (white + alpha) so the shader's `tex * color`
 //! multiplication produces correctly tinted text from vertex color.
 
-use std::collections::{HashMap, hash_map::Entry};
+use std::collections::HashMap;
 
 use cosmic_text::{Buffer, CacheKey, Metrics, Shaping, SwashContent};
 use iced::Rectangle;
@@ -14,6 +14,9 @@ use iced::Rectangle;
 use super::font::{WowFontSystem, line_height_for_font_size};
 use super::shader::{BlendMode, QuadBatch};
 use crate::widget::TextJustify;
+
+mod text_emit;
+pub use text_emit::emit_text_quads;
 
 /// Size of the glyph atlas texture in pixels.
 const GLYPH_ATLAS_SIZE: u32 = 2048;
@@ -562,157 +565,6 @@ pub fn measure_text_height(
         },
     );
     total_height
-}
-
-/// Emit text quads into a QuadBatch.
-///
-/// Shapes the text, rasterizes glyphs into the atlas, and pushes textured quads.
-/// The glyph atlas texture must be uploaded separately via `GlyphAtlas::texture_data()`.
-#[allow(clippy::too_many_arguments)]
-pub fn emit_text_quads(
-    batch: &mut QuadBatch,
-    font_system: &mut WowFontSystem,
-    glyph_atlas: &mut GlyphAtlas,
-    text: &str,
-    bounds: Rectangle,
-    font_path: Option<&str>,
-    font_size: f32,
-    color: [f32; 4],
-    justify_h: TextJustify,
-    justify_v: TextJustify,
-    glyph_tex_index: i32,
-    shadow_color: Option<[f32; 4]>,
-    shadow_offset: (f32, f32),
-    outline: crate::widget::TextOutline,
-    word_wrap: bool,
-    max_lines: u32,
-    pre_stripped: Option<&str>,
-) {
-    let has_text = !text.is_empty();
-    let has_drawable_height = bounds.height > 0.0;
-    let has_valid_font_size = line_height_for_font_size(font_size).is_some();
-    if !has_text || !has_drawable_height || !has_valid_font_size {
-        return;
-    }
-
-    // Use pre-stripped text if available, otherwise strip on the fly.
-    let stripped_owned;
-    let stripped: &str = if let Some(s) = pre_stripped {
-        s
-    } else {
-        stripped_owned = crate::render::strip_wow_markup(text);
-        &stripped_owned
-    };
-    if stripped.is_empty() {
-        return;
-    }
-
-    // Phase 1: Populate cache if miss, extract runs + total_height.
-    let shape_width = if word_wrap && bounds.width > 0.0 {
-        bounds.width
-    } else {
-        10000.0
-    };
-    let key = shape_cache_hash(
-        stripped,
-        font_path,
-        font_size,
-        shape_width,
-        bounds.height,
-        max_lines,
-    );
-    let generation = glyph_atlas.shape_cache_generation;
-    if let Entry::Vacant(entry) = glyph_atlas.shape_cache.entry(key) {
-        let (buffer, total_height) = shape_text_to_runs(
-            font_system,
-            TextShapeRequest {
-                text: stripped,
-                font_path,
-                font_size,
-                bounds_width: bounds.width,
-                bounds_height: bounds.height,
-                word_wrap,
-                max_lines,
-            },
-        );
-        let runs = extract_layout_runs(&buffer, max_lines);
-        entry.insert(ShapeCacheEntry {
-            runs,
-            total_height,
-            last_used: generation,
-        });
-    }
-    let entry = glyph_atlas.shape_cache.get_mut(&key).unwrap();
-    entry.last_used = generation;
-    let total_height = entry.total_height;
-    let runs = entry.runs.clone();
-
-    // Phase 2: Emit quads from cached runs.
-    let y_offset = match justify_v {
-        TextJustify::Left => 0.0, // TOP
-        TextJustify::Center => (bounds.height - total_height) / 2.0,
-        TextJustify::Right => bounds.height - total_height, // BOTTOM
-    };
-
-    let emit = |batch: &mut QuadBatch,
-                ga: &mut GlyphAtlas,
-                fs: &mut WowFontSystem,
-                c: [f32; 4],
-                ox: f32,
-                oy: f32| {
-        emit_glyphs_from_cache(
-            batch,
-            ga,
-            fs,
-            &runs,
-            bounds,
-            y_offset,
-            justify_h,
-            c,
-            ox,
-            oy,
-            glyph_tex_index,
-        );
-    };
-
-    // Render outline first (behind everything)
-    if outline != crate::widget::TextOutline::None {
-        let outline_color = [0.0_f32, 0.0, 0.0, color[3]];
-        let d = match outline {
-            crate::widget::TextOutline::Outline => 1.0_f32,
-            crate::widget::TextOutline::ThickOutline => 2.0,
-            crate::widget::TextOutline::None => unreachable!(),
-        };
-        for &(dx, dy) in &[
-            (-d, 0.0),
-            (d, 0.0),
-            (0.0, -d),
-            (0.0, d),
-            (-d, -d),
-            (d, -d),
-            (-d, d),
-            (d, d),
-        ] {
-            emit(batch, glyph_atlas, font_system, outline_color, dx, dy);
-        }
-    }
-
-    // Render shadow (behind main text, in front of outline)
-    if let Some(sc) = shadow_color
-        && sc[3] > 0.0
-    {
-        emit(
-            batch,
-            glyph_atlas,
-            font_system,
-            sc,
-            shadow_offset.0,
-            shadow_offset.1,
-        );
-    }
-
-    // Render main text
-    emit(batch, glyph_atlas, font_system, color, 0.0, 0.0);
 }
 
 #[cfg(test)]
