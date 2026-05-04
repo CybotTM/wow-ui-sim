@@ -13,3 +13,6 @@ mod surface_globals;
 
 #[path = "blizzard_ui/blizzard_async_request/surface_frames.rs"]
 mod surface_frames;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_create_requires_callbacks.rs"]
+mod behavior_create_requires_callbacks;
