@@ -913,13 +913,31 @@ fn optional_int_arg(state: &mut LuaState, slot: i32) -> LuaResult<i32> {
     }
 }
 
-/// Resolve an `ItemLocation`-shaped Lua table to an `itemID`. The sim
-/// has no bag/equipment inventory yet, so tests pass `{ itemID = X }`
-/// directly. When a `resolve_item_location` helper lands this can grow
-/// a bag/slot fallback; today the shape matches an `ItemKey`, so
-/// delegate to the shared field reader.
+/// Resolve an `ItemLocation`-shaped Lua table to an `itemID`. Retail
+/// sell flows pass `{ bagID, slotIndex }`; direct `{ itemID = X }`
+/// remains as a test-friendly shortcut for API-level probes.
 fn extract_item_id_from_location(state: &mut LuaState, value: Val) -> Option<u32> {
-    extract_item_key_id(state, value)
+    if let Some(item_id) = extract_item_key_id(state, value) {
+        return Some(item_id);
+    }
+    let (bag, slot) = extract_bag_slot_location(state, value)?;
+    borrow_state(state)
+        .ok()?
+        .get_bag_item(bag, slot)
+        .map(|item| item.0)
+}
+
+fn extract_bag_slot_location(state: &mut LuaState, value: Val) -> Option<(i32, i32)> {
+    let table_ref = match value {
+        Val::Table(table_ref) => table_ref,
+        _ => return None,
+    };
+    let bag_key = state.gc.intern_string_static(b"bagID");
+    let slot_key = state.gc.intern_string_static(b"slotIndex");
+    let table = state.gc.tables.get(table_ref)?;
+    let bag = read_optional_int_field(table, bag_key, &state.gc.string_arena)?;
+    let slot = read_optional_int_field(table, slot_key, &state.gc.string_arena)?;
+    Some((bag, slot))
 }
 
 /// `(min, max)` seconds for each `Enum.AuctionHouseTimeLeftBand`
