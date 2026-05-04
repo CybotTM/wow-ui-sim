@@ -2001,7 +2001,9 @@ fn plan_commodity_purchase(
 ) -> (Vec<(i64, i32)>, i32) {
     let mut plan: Vec<(i64, i32)> = Vec::new();
     let mut remaining = requested.max(0);
-    for row in listings {
+    let mut sorted_listings: Vec<&CommoditySearchResultInfo> = listings.iter().collect();
+    sorted_listings.sort_by_key(|row| row.unit_price);
+    for row in sorted_listings {
         if remaining == 0 {
             break;
         }
@@ -2024,6 +2026,7 @@ fn total_price_for_plan(plan: &[(i64, i32)]) -> i64 {
 /// lowest-priced listing first.
 fn drain_commodity_listings(listings: &mut Vec<CommoditySearchResultInfo>, requested: i32) {
     let mut remaining = requested.max(0);
+    listings.sort_by_key(|row| row.unit_price);
     listings.retain_mut(|row| {
         if remaining == 0 {
             return true;
