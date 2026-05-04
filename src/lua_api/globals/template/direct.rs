@@ -5,7 +5,11 @@
 //! call. Used during template application and XML frame loading.
 
 use crate::lua_api::SimState;
-use crate::widget::{AnchorPoint, FrameStrata};
+mod frame_level;
+
+pub use frame_level::{apply_xml_frame_level, apply_xml_frame_strata};
+
+use crate::widget::AnchorPoint;
 use crate::xml::{AnchorXml, FrameXml};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -211,59 +215,6 @@ pub fn set_alpha(state: &Rc<RefCell<SimState>>, frame_id: u64, alpha: f32) {
     s.widgets.propagate_effective_alpha(frame_id, parent_eff);
 }
 
-/// Set frame strata directly.
-pub fn set_frame_strata(state: &Rc<RefCell<SimState>>, frame_id: u64, strata_str: &str) {
-    let Some(strata) = FrameStrata::from_str(strata_str) else {
-        return;
-    };
-    let mut s = state.borrow_mut();
-    if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
-        frame.frame_strata = strata;
-        frame.has_fixed_frame_strata = true;
-    }
-    // Propagate to descendants that don't have fixed strata
-    let mut queue: Vec<u64> = s
-        .widgets
-        .get(frame_id)
-        .map(|f| f.children.clone())
-        .unwrap_or_default();
-    while let Some(child_id) = queue.pop() {
-        let Some(child) = s.widgets.get_mut_visual(child_id) else {
-            continue;
-        };
-        if child.has_fixed_frame_strata {
-            continue;
-        }
-        child.frame_strata = strata;
-        queue.extend(child.children.iter().copied());
-    }
-    // Invalidate strata buckets since strata changed.
-    s.invalidate_strata_buckets();
-}
-
-fn set_xml_frame_level(
-    state: &Rc<RefCell<SimState>>,
-    frame_id: u64,
-    level_offset: i32,
-    fixed: bool,
-) {
-    let mut s = state.borrow_mut();
-    let parent_level = s
-        .widgets
-        .get(frame_id)
-        .and_then(|frame| frame.parent_id)
-        .and_then(|parent_id| s.widgets.get(parent_id))
-        .map(|parent| parent.frame_level);
-    if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
-        frame.frame_level_offset = Some(level_offset);
-        frame.has_fixed_frame_level = fixed;
-        frame.frame_level = parent_level
-            .map(|parent_level| parent_level.saturating_add(level_offset))
-            .unwrap_or(level_offset);
-    }
-    crate::lua_api::frame::propagate_strata_level_pub(&mut s.widgets, frame_id);
-}
-
 /// Set toplevel directly.
 pub fn set_toplevel(state: &Rc<RefCell<SimState>>, frame_id: u64, toplevel: bool) {
     let mut s = state.borrow_mut();
@@ -385,86 +336,6 @@ pub fn apply_xml_anchors(
             }
         }
     }
-}
-
-/// Resolve and apply frame strata from template chain + instance XML.
-pub fn apply_xml_frame_strata(
-    state: &Rc<RefCell<SimState>>,
-    frame_id: u64,
-    frame: &FrameXml,
-    inherits: &str,
-) {
-    let strata: Option<String> = frame.frame_strata.clone().or_else(|| {
-        if inherits.is_empty() {
-            return None;
-        }
-        crate::xml::get_template_chain(inherits)
-            .iter()
-            .find_map(|e| e.frame.frame_strata.clone())
-    });
-    if let Some(ref s) = strata {
-        set_frame_strata(state, frame_id, s);
-    }
-}
-
-/// Resolve and apply frame level from template chain + instance XML.
-pub fn apply_xml_frame_level(
-    state: &Rc<RefCell<SimState>>,
-    frame_id: u64,
-    frame: &FrameXml,
-    inherits: &str,
-) {
-    let mut level = None;
-    let mut fixed_frame_level = None;
-    let mut use_parent_level = None;
-    if !inherits.is_empty() {
-        for entry in &*crate::xml::get_template_chain(inherits) {
-            if let Some(entry_level) = entry.frame.frame_level {
-                level = Some(entry_level);
-            }
-            if let Some(entry_fixed) = entry.frame.fixed_frame_level {
-                fixed_frame_level = Some(entry_fixed);
-            }
-            if let Some(entry_upl) = entry.frame.use_parent_level {
-                use_parent_level = Some(entry_upl);
-            }
-        }
-    }
-    if let Some(frame_level) = frame.frame_level {
-        level = Some(frame_level);
-    }
-    if let Some(frame_fixed) = frame.fixed_frame_level {
-        fixed_frame_level = Some(frame_fixed);
-    }
-    if let Some(frame_upl) = frame.use_parent_level {
-        use_parent_level = Some(frame_upl);
-    }
-    if use_parent_level == Some(true) {
-        set_xml_frame_level_to_parent(state, frame_id);
-        return;
-    }
-    if let Some(l) = level {
-        set_xml_frame_level(state, frame_id, l, fixed_frame_level.unwrap_or(false));
-    }
-}
-
-/// Force a frame to share its parent's level (XML `useParentLevel="true"`).
-fn set_xml_frame_level_to_parent(state: &Rc<RefCell<SimState>>, frame_id: u64) {
-    let mut s = state.borrow_mut();
-    let parent_level = s
-        .widgets
-        .get(frame_id)
-        .and_then(|frame| frame.parent_id)
-        .and_then(|parent_id| s.widgets.get(parent_id))
-        .map(|parent| parent.frame_level);
-    if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
-        frame.frame_level_offset = Some(0);
-        frame.has_fixed_frame_level = false;
-        if let Some(pl) = parent_level {
-            frame.frame_level = pl;
-        }
-    }
-    crate::lua_api::frame::propagate_strata_level_pub(&mut s.widgets, frame_id);
 }
 
 /// Resolve and apply hidden from template chain + instance XML.
