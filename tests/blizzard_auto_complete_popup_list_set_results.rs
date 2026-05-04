@@ -38,6 +38,29 @@ if popup ~= nil then
          tostring(popup.ScrollBox:GetDataProviderSize()))
 end
 
+local emptyPopup = CreateFrame("Frame", "TestPopupListEmptyResultsFrame",
+                              UIParent, "AutoCompletePopupListTemplate")
+expect(emptyPopup ~= nil, "AutoCompletePopupListTemplate must instantiate again")
+
+if emptyPopup ~= nil then
+  emptyPopup:OnLoad()
+  emptyPopup.resultsListCallback = function()
+    return 0, {}, nil
+  end
+
+  emptyPopup:UpdateResults()
+
+  expect(not emptyPopup:HasResults(),
+         "emptyPopup must not have results after empty UpdateResults")
+  expect(not emptyPopup:IsShown(),
+         "emptyPopup must be hidden after empty UpdateResults")
+  expect(not emptyPopup.OverflowCount:IsShown(),
+         "emptyPopup OverflowCount must be hidden after empty UpdateResults")
+  expect(emptyPopup.highlightedIndex == 0,
+         "emptyPopup highlightedIndex must be 0, got " ..
+         tostring(emptyPopup.highlightedIndex))
+end
+
 return table.concat(failures, "\n")
 "#;
 
