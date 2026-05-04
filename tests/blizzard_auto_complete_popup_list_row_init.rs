@@ -51,6 +51,38 @@ if popup ~= nil then
     expect(not row.HighlightTexture:IsShown(),
            "row HighlightTexture must be hidden after Init")
   end
+
+  local texturedRow = CreateFrame("Button", "TestPopupListRowInitTexturedButton",
+                                 popup, "AutoCompletePopupListResultTemplate")
+  expect(texturedRow ~= nil,
+         "AutoCompletePopupListResultTemplate must instantiate textured row")
+
+  if texturedRow ~= nil then
+    local texturePath = "Interface\\Icons\\foo"
+    texturedRow:Init({
+      resultInfo = { text = "Textured" },
+      index = 3,
+      owner = popup,
+      displayText = "Textured",
+      subtext = "hint",
+      displayTexture = texturePath,
+    })
+
+    expect(texturedRow.Icon:IsShown(), "textured row Icon must be shown")
+    expect(texturedRow.IconFrame:IsShown(),
+           "textured row IconFrame must be shown")
+    expect(texturedRow.Icon:GetTexture() == texturePath,
+           "textured row Icon texture must be " .. texturePath .. ", got " ..
+           tostring(texturedRow.Icon:GetTexture()))
+    expect(texturedRow.Subtext:IsShown(),
+           "textured row Subtext must be shown")
+    expect(texturedRow.Subtext:GetText() == "hint",
+           "textured row Subtext text must be hint, got " ..
+           tostring(texturedRow.Subtext:GetText()))
+    expect(texturedRow.Name:GetMaxLines() == 1,
+           "textured row Name max lines must be 1, got " ..
+           tostring(texturedRow.Name:GetMaxLines()))
+  end
 end
 
 return table.concat(failures, "\n")
