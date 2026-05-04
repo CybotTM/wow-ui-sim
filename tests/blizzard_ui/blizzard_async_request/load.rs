@@ -6,6 +6,7 @@ use crate::common::panel_fixtures::{
 };
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::startup::settle_headless_startup;
+use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_AsyncRequest";
 
@@ -26,6 +27,29 @@ fn async_request_loads_cleanly_with_no_recorded_lua_errors() {
             errors.is_empty(),
             "`{ROOT}` must load and settle with zero recorded Lua errors:\n{}",
             errors.join("\n")
+        );
+    });
+}
+
+#[test]
+fn async_request_toc_declares_no_dependencies_and_loads_as_leaf() {
+    let toc =
+        TocFile::from_file(&async_request_toc()).expect("Blizzard_AsyncRequest TOC should parse");
+    assert!(
+        toc.dependencies().is_empty(),
+        "`{ROOT}` must not declare required dependencies"
+    );
+    assert!(
+        toc.optional_deps().is_empty(),
+        "`{ROOT}` must not declare optional dependencies"
+    );
+
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |_env, loaded| {
+        assert_eq!(
+            loaded,
+            [ROOT],
+            "`{ROOT}` must load as a leaf addon in the smoke harness; shared XML panel setup is \
+             provided before the dependency-closure load. Loaded closure: {loaded:?}"
         );
     });
 }
