@@ -1,50 +1,14 @@
 use super::TextureManager;
+use std::collections::HashSet;
 
 impl TextureManager {
     /// Pre-load talent icon textures for the given tree to avoid on-demand lag.
     pub fn preload_talent_textures(&mut self, tree_id: u32) {
-        use crate::traits::{TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_TREE_DB};
-        use std::collections::HashSet;
-
-        let Some(tree) = TRAIT_TREE_DB.get(&tree_id) else {
+        let Some(file_data_ids) = talent_icon_file_data_ids(tree_id) else {
             return;
         };
-        let mut file_data_ids = HashSet::new();
 
-        for &node_id in tree.node_ids {
-            let Some(node) = TRAIT_NODE_DB.get(&node_id) else {
-                continue;
-            };
-            for &entry_id in node.entry_ids {
-                let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else {
-                    continue;
-                };
-                let Some(def) = TRAIT_DEFINITION_DB.get(&entry.definition_id) else {
-                    continue;
-                };
-                let icon_id = if def.override_icon != 0 {
-                    def.override_icon
-                } else {
-                    let Some(spell) = crate::spells::get_spell(def.spell_id) else {
-                        continue;
-                    };
-                    spell.icon_file_data_id
-                };
-                if icon_id != 0 {
-                    file_data_ids.insert(icon_id);
-                }
-            }
-        }
-
-        let mut loaded = 0u32;
-        for id in &file_data_ids {
-            if let Some(path) = crate::manifest_interface_data::get_texture_path(*id) {
-                let wow_path = format!("Interface\\{}", path.replace('/', "\\"));
-                if self.load(&wow_path).is_some() {
-                    loaded += 1;
-                }
-            }
-        }
+        let loaded = self.preload_file_data_textures(&file_data_ids);
         crate::logging::eprintln_elapsed(&format!(
             "[TexMgr] Preloaded {} / {} talent icon textures (tree {})",
             loaded,
@@ -183,17 +147,16 @@ impl TextureManager {
     /// Pre-load spellbook / PlayerSpells icon textures from the static spell DB.
     pub fn preload_spellbook_icons(&mut self) {
         use crate::lua_api::globals::spellbook_data;
-        use std::collections::HashSet;
 
         let mut file_data_ids = HashSet::new();
         for skill_line_index in 1..=spellbook_data::num_skill_lines() {
             if let Some(skill_line) = spellbook_data::get_skill_line(skill_line_index) {
                 file_data_ids.insert(skill_line.icon_id);
                 for entry in skill_line.spells {
-                    if let Some(spell) = crate::spells::get_spell(entry.spell_id) {
-                        if spell.icon_file_data_id != 0 {
-                            file_data_ids.insert(spell.icon_file_data_id);
-                        }
+                    if let Some(spell) = crate::spells::get_spell(entry.spell_id)
+                        && spell.icon_file_data_id != 0
+                    {
+                        file_data_ids.insert(spell.icon_file_data_id);
                     }
                 }
             }
@@ -214,6 +177,56 @@ impl TextureManager {
             file_data_ids.len()
         ));
     }
+
+    fn preload_file_data_textures(&mut self, file_data_ids: &HashSet<u32>) -> u32 {
+        let mut loaded = 0u32;
+        for id in file_data_ids {
+            if let Some(path) = crate::manifest_interface_data::get_texture_path(*id) {
+                let wow_path = format!("Interface\\{}", path.replace('/', "\\"));
+                if self.load(&wow_path).is_some() {
+                    loaded += 1;
+                }
+            }
+        }
+        loaded
+    }
+}
+
+fn talent_icon_file_data_ids(tree_id: u32) -> Option<HashSet<u32>> {
+    use crate::traits::TRAIT_TREE_DB;
+
+    let tree = TRAIT_TREE_DB.get(&tree_id)?;
+    let mut file_data_ids = HashSet::new();
+    for &node_id in tree.node_ids {
+        collect_talent_node_icons(&mut file_data_ids, node_id);
+    }
+    Some(file_data_ids)
+}
+
+fn collect_talent_node_icons(file_data_ids: &mut HashSet<u32>, node_id: u32) {
+    use crate::traits::TRAIT_NODE_DB;
+
+    let Some(node) = TRAIT_NODE_DB.get(&node_id) else {
+        return;
+    };
+    for &entry_id in node.entry_ids {
+        if let Some(icon_id) = talent_entry_icon_file_data_id(entry_id) {
+            file_data_ids.insert(icon_id);
+        }
+    }
+}
+
+fn talent_entry_icon_file_data_id(entry_id: u32) -> Option<u32> {
+    use crate::traits::{TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB};
+
+    let entry = TRAIT_ENTRY_DB.get(&entry_id)?;
+    let def = TRAIT_DEFINITION_DB.get(&entry.definition_id)?;
+    let icon_id = if def.override_icon != 0 {
+        def.override_icon
+    } else {
+        crate::spells::get_spell(def.spell_id)?.icon_file_data_id
+    };
+    (icon_id != 0).then_some(icon_id)
 }
 
 pub(super) fn normalize_talent_class_key(class_name: &str) -> Option<String> {
