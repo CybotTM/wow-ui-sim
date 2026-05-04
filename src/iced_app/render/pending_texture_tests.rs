@@ -53,7 +53,7 @@ fn build_test_app_with_addons(addons_path: Option<&Path>) -> App {
 fn budgeted_preload_loads_explicitly_queued_texture_requests() {
     let temp_dir = tempdir().unwrap();
     let addons_dir = temp_dir.path();
-    let texture_path = addons_dir.join("Interface/AddOns/world-map-tile.png");
+    let texture_path = addons_dir.join("world-map-tile.png");
     std::fs::create_dir_all(texture_path.parent().unwrap()).unwrap();
     let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
     image.save(&texture_path).unwrap();
@@ -151,7 +151,7 @@ fn empty_queue_preload_keeps_draw_owned_pending_state() {
 fn preload_current_render_requests_keeps_pending_until_draw_uploads_cached_requests() {
     let temp_dir = tempdir().unwrap();
     let addons_dir = temp_dir.path();
-    let texture_path = addons_dir.join("Interface/AddOns/render-owned-pending.png");
+    let texture_path = addons_dir.join("render-owned-pending.png");
     std::fs::create_dir_all(texture_path.parent().unwrap()).unwrap();
     let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
     image.save(&texture_path).unwrap();
