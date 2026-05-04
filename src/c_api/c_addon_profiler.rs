@@ -7,6 +7,9 @@ use rilua::{LuaResult, Val};
 
 use super::helpers::set_global_val;
 
+type LuaTableRef = rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>;
+type RustLuaFn = rilua::vm::closure::RustFn;
+
 const ADDON_PROFILER_METRIC_RECENT_AVERAGE_TIME: i32 = 1;
 const ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_CHAT_WARNING: i32 = 0;
 const ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_ERROR_DIALOG: i32 = 1;
@@ -15,54 +18,42 @@ const ADDON_PERFORMANCE_WARNING_CVAR: &str = "addonPerformanceMsgWarning";
 const ADDON_PERFORMANCE_ERROR_CVAR: &str = "addonPerformanceMsgError";
 const ADDON_PERFORMANCE_OVERALL_CVAR: &str = "addonPerformanceMsgOverall";
 
+const C_ADDON_PROFILER_METHODS: &[(&str, RustLuaFn)] = &[
+    (
+        "GetApplicationMetric",
+        c_addon_profiler_get_application_metric,
+    ),
+    ("GetOverallMetric", c_addon_profiler_get_overall_metric),
+    ("GetAddOnMetric", c_addon_profiler_get_addon_metric),
+    (
+        "GetTopKAddOnsForMetric",
+        c_addon_profiler_get_top_k_addons_for_metric,
+    ),
+    (
+        "AddPerformanceMessageShown",
+        c_addon_profiler_add_performance_message_shown,
+    ),
+    (
+        "CheckForPerformanceMessage",
+        c_addon_profiler_check_for_performance_message,
+    ),
+    ("IsEnabled", c_addon_profiler_is_enabled),
+];
+
 pub fn register_c_addon_profiler(state: &mut LuaState) -> LuaResult<()> {
     let profiler = create_table(state);
     let Val::Table(profiler_ref) = profiler else {
         unreachable!("create_table must return a table");
     };
-    table_set_rust_fn_static(
-        state,
-        profiler_ref,
-        "GetApplicationMetric",
-        c_addon_profiler_get_application_metric,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        profiler_ref,
-        "GetOverallMetric",
-        c_addon_profiler_get_overall_metric,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        profiler_ref,
-        "GetAddOnMetric",
-        c_addon_profiler_get_addon_metric,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        profiler_ref,
-        "GetTopKAddOnsForMetric",
-        c_addon_profiler_get_top_k_addons_for_metric,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        profiler_ref,
-        "AddPerformanceMessageShown",
-        c_addon_profiler_add_performance_message_shown,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        profiler_ref,
-        "CheckForPerformanceMessage",
-        c_addon_profiler_check_for_performance_message,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        profiler_ref,
-        "IsEnabled",
-        c_addon_profiler_is_enabled,
-    )?;
+    register_c_addon_profiler_methods(state, profiler_ref)?;
     set_global_val(state, "C_AddOnProfiler", profiler);
+    Ok(())
+}
+
+fn register_c_addon_profiler_methods(state: &mut LuaState, t: LuaTableRef) -> LuaResult<()> {
+    for (name, rust_fn) in C_ADDON_PROFILER_METHODS {
+        table_set_rust_fn_static(state, t, name, *rust_fn)?;
+    }
     Ok(())
 }
 
@@ -207,32 +198,32 @@ fn find_specific_performance_message(
     let (add_on_name, metric_value, _, percentage) =
         find_highest_specific_addon_metric(sim, metric)?;
 
-    if let Some(error_threshold) = error_threshold {
-        if percentage > error_threshold {
-            let threshold_value =
-                threshold_value_for_specific_message(sim, metric, &add_on_name, error_threshold);
-            return Some(PerformanceMessage {
-                add_on_name: Some(add_on_name),
-                metric,
-                metric_value,
-                threshold_value,
-                message_type: ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_ERROR_DIALOG,
-            });
-        }
+    if let Some(error_threshold) = error_threshold
+        && percentage > error_threshold
+    {
+        let threshold_value =
+            threshold_value_for_specific_message(sim, metric, &add_on_name, error_threshold);
+        return Some(PerformanceMessage {
+            add_on_name: Some(add_on_name),
+            metric,
+            metric_value,
+            threshold_value,
+            message_type: ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_ERROR_DIALOG,
+        });
     }
 
-    if let Some(warning_threshold) = warning_threshold {
-        if percentage > warning_threshold {
-            let threshold_value =
-                threshold_value_for_specific_message(sim, metric, &add_on_name, warning_threshold);
-            return Some(PerformanceMessage {
-                add_on_name: Some(add_on_name),
-                metric,
-                metric_value,
-                threshold_value,
-                message_type: ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_CHAT_WARNING,
-            });
-        }
+    if let Some(warning_threshold) = warning_threshold
+        && percentage > warning_threshold
+    {
+        let threshold_value =
+            threshold_value_for_specific_message(sim, metric, &add_on_name, warning_threshold);
+        return Some(PerformanceMessage {
+            add_on_name: Some(add_on_name),
+            metric,
+            metric_value,
+            threshold_value,
+            message_type: ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_CHAT_WARNING,
+        });
     }
 
     None
@@ -292,24 +283,25 @@ fn push_performance_message(state: &mut LuaState, message: PerformanceMessage) -
 
 // ── API implementations ───────────────────────────────────────────────────────
 
-fn c_addon_profiler_get_application_metric(state: &mut LuaState) -> LuaResult<u32> {
+fn push_profiler_metric(
+    state: &mut LuaState,
+    metric_value: fn(&crate::lua_api::SimState, i32) -> f64,
+) -> LuaResult<u32> {
     let metric = profiler_metric_kind(state, stack_val(state, 1)).unwrap_or(1);
     let value = {
         let sim = borrow_state(state)?;
-        application_metric_value(&sim, metric)
+        metric_value(&sim, metric)
     };
     state.push(Val::Num(value));
     Ok(1)
 }
 
+fn c_addon_profiler_get_application_metric(state: &mut LuaState) -> LuaResult<u32> {
+    push_profiler_metric(state, application_metric_value)
+}
+
 fn c_addon_profiler_get_overall_metric(state: &mut LuaState) -> LuaResult<u32> {
-    let metric = profiler_metric_kind(state, stack_val(state, 1)).unwrap_or(1);
-    let value = {
-        let sim = borrow_state(state)?;
-        overall_metric_value(&sim, metric)
-    };
-    state.push(Val::Num(value));
-    Ok(1)
+    push_profiler_metric(state, overall_metric_value)
 }
 
 fn c_addon_profiler_get_addon_metric(state: &mut LuaState) -> LuaResult<u32> {
