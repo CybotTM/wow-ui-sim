@@ -361,6 +361,7 @@ fn register_event_registration(state: &mut LuaState, table: GcRef<Table>) -> Lua
         events::register_unit_event,
     )?;
     table_set_rust_fn_static(state, table, "UnregisterEvent", events::unregister_event)?;
+    table_set_rust_fn_static(state, table, "UnRegisterEvent", events::unregister_event)?;
     table_set_rust_fn_static(
         state,
         table,
