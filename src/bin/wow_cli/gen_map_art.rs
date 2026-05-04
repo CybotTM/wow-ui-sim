@@ -14,6 +14,8 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 
+type TileMaps = HashMap<(u32, u32), BTreeMap<(u32, u32), u32>>;
+
 /// One layer's dimension info from UiMapArtStyleLayer.
 #[derive(Debug, Clone)]
 struct StyleLayer {
@@ -121,13 +123,11 @@ fn load_art_style(path: &Path) -> Result<HashMap<u32, u32>, Box<dyn std::error::
     Ok(map)
 }
 
-fn load_tiles(
-    path: &Path,
-) -> Result<HashMap<(u32, u32), BTreeMap<(u32, u32), u32>>, Box<dyn std::error::Error>> {
+fn load_tiles(path: &Path) -> Result<TileMaps, Box<dyn std::error::Error>> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     // key: (artID, layerIndex), value: BTreeMap<(row, col), fileDataID>
-    let mut map: HashMap<(u32, u32), BTreeMap<(u32, u32), u32>> = HashMap::new();
+    let mut map: TileMaps = HashMap::new();
 
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
@@ -186,7 +186,7 @@ fn write_map_art(
     map_art: &BTreeMap<u32, u32>,
     art_style: &HashMap<u32, u32>,
     style_layers: &HashMap<u32, Vec<StyleLayer>>,
-    tiles: &HashMap<(u32, u32), BTreeMap<(u32, u32), u32>>,
+    tiles: &TileMaps,
 ) -> Result<u32, Box<dyn std::error::Error>> {
     write_file_header(out)?;
     write_structs(out)?;
@@ -229,7 +229,19 @@ fn emit_art_statics(
     out: &mut File,
     art_id: u32,
     layers: &[StyleLayer],
-    tiles: &HashMap<(u32, u32), BTreeMap<(u32, u32), u32>>,
+    tiles: &TileMaps,
+) -> std::io::Result<()> {
+    emit_layer_tile_statics(out, art_id, layers, tiles)?;
+    emit_layers_static(out, art_id, layers)?;
+    emit_tile_slices_static(out, art_id, layers)?;
+    Ok(())
+}
+
+fn emit_layer_tile_statics(
+    out: &mut File,
+    art_id: u32,
+    layers: &[StyleLayer],
+    tiles: &TileMaps,
 ) -> std::io::Result<()> {
     for layer in layers {
         let ids = tiles
@@ -251,7 +263,10 @@ fn emit_art_statics(
         }
         writeln!(out, "];")?;
     }
+    Ok(())
+}
 
+fn emit_layers_static(out: &mut File, art_id: u32, layers: &[StyleLayer]) -> std::io::Result<()> {
     writeln!(
         out,
         "static ART_{}_LAYERS: [MapArtLayer; {}] = [",
@@ -272,7 +287,14 @@ fn emit_art_statics(
         )?;
     }
     writeln!(out, "];")?;
+    Ok(())
+}
 
+fn emit_tile_slices_static(
+    out: &mut File,
+    art_id: u32,
+    layers: &[StyleLayer],
+) -> std::io::Result<()> {
     writeln!(
         out,
         "static ART_{}_TILE_SLICES: [&[u32]; {}] = [",
