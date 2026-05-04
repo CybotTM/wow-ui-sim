@@ -90,13 +90,7 @@ fn build_and_setup_frame(
     intrinsic_base: Option<&str>,
 ) -> Result<(), LoadError> {
     let build_start = Instant::now();
-    let parent_ref_expr = env
-        .state()
-        .borrow()
-        .widgets
-        .get_id_by_name(&prepared.parent)
-        .map(lua_frame_ref_by_id)
-        .unwrap_or_else(|| lua_global_ref(&prepared.parent));
+    let parent_ref_expr = parent_ref_expr(env, &prepared.parent);
     let lua_code = build_frame_lua_code(
         widget_type,
         &prepared.name,
@@ -122,4 +116,17 @@ fn build_and_setup_frame(
             intrinsic_base,
         },
     )
+}
+
+fn parent_ref_expr(env: &LoaderEnv<'_>, parent_name: &str) -> String {
+    if parent_name == "UIParent" {
+        return lua_global_ref(parent_name);
+    }
+
+    env.state()
+        .borrow()
+        .widgets
+        .get_id_by_name(parent_name)
+        .map(lua_frame_ref_by_id)
+        .unwrap_or_else(|| lua_global_ref(parent_name))
 }

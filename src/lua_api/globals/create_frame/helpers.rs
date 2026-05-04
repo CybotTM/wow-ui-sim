@@ -143,6 +143,8 @@ pub(super) fn parse_frame_strata(strata: &str) -> crate::widget::FrameStrata {
         crate::widget::FrameStrata::Medium
     } else if strata.eq_ignore_ascii_case("HIGH") {
         crate::widget::FrameStrata::High
+    } else if strata.eq_ignore_ascii_case("BLIZZARD") {
+        crate::widget::FrameStrata::Blizzard
     } else if strata.eq_ignore_ascii_case("DIALOG") {
         crate::widget::FrameStrata::Dialog
     } else if strata.eq_ignore_ascii_case("FULLSCREEN") {

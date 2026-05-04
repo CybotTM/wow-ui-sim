@@ -21,6 +21,7 @@ pub(super) fn build_frame_lua_code(
         name,
         explicit_parent,
         inherits,
+        frame.set_all_points == Some(true),
         parent_ref_expr,
     );
     append_parent_key_code(&mut lua_code, frame, inherits, parent, parent_ref_expr);
@@ -43,6 +44,7 @@ fn build_create_frame_code(
     name: &str,
     parent: Option<&str>,
     inherits: &str,
+    set_all_points: bool,
     parent_ref_expr: &str,
 ) -> String {
     let inherits_arg = if inherits.is_empty() {
@@ -53,14 +55,14 @@ fn build_create_frame_code(
     // Engine-root frames (e.g. UIParent) are pre-created without a parent.
     // When XML defines them, name == default parent, which would self-parent.
     // Reuse the existing engine frame instead.
-    if let Some(p) = parent {
-        if name == p {
-            return format!(
-                r#"
+    if let Some(p) = parent
+        && name == p
+    {
+        return format!(
+            r#"
         local frame = {parent_ref_expr}
         "#,
-            );
-        }
+        );
     }
     let parent_arg = match parent {
         Some(_) => format!("{parent_ref_expr} or UIParent"),
@@ -68,7 +70,7 @@ fn build_create_frame_code(
         // here and orphan the frame with SetParent(nil) afterwards.
         None => "UIParent".to_string(),
     };
-    let orphan_code = if parent.is_none() {
+    let orphan_code = if parent.is_none() && !set_all_points {
         // In WoW, top-level XML frames without a parent attribute are created
         // as orphans (no parent). Our Lua CreateFrame always defaults to
         // UIParent, so we create with UIParent then immediately orphan.

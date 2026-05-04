@@ -197,6 +197,8 @@ pub struct FrameXml {
     pub clip_children: Option<bool>,
     #[serde(rename = "@enableMouse")]
     pub enable_mouse: Option<bool>,
+    #[serde(rename = "@enableKeyboard")]
+    pub enable_keyboard: Option<bool>,
     #[serde(rename = "@clampedToScreen")]
     pub clamped_to_screen: Option<bool>,
     /// Button text attribute (localization key or literal text).

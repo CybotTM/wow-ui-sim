@@ -1,0 +1,56 @@
+mod common;
+
+use common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
+use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
+
+const ROOT: &str = "Blizzard_AuthChallengeUI";
+const FRAME_SURFACE_PROBE_LUA: &str = r#"
+local failures = {}
+
+local function expect(condition, message)
+  if not condition then
+    table.insert(failures, message)
+  end
+end
+
+expect(AuthChallengeFrame ~= nil, "AuthChallengeFrame must exist")
+local parent = AuthChallengeFrame and AuthChallengeFrame:GetParent()
+local parentName = parent and parent:GetName() or "nil"
+expect(parent == UIParent,
+       "AuthChallengeFrame must be parented to UIParent, got "
+       .. parentName .. " (" .. tostring(parent) .. " vs " .. tostring(UIParent) .. ")")
+expect(AuthChallengeFrame:GetFrameStrata() == "BLIZZARD", "AuthChallengeFrame must use BLIZZARD strata")
+expect(not AuthChallengeFrame:IsShown(), "AuthChallengeFrame must start hidden")
+expect(AuthChallengeFrame:IsKeyboardEnabled(), "AuthChallengeFrame must enable keyboard")
+expect(AuthChallengeFrame:IsMouseEnabled(), "AuthChallengeFrame must enable mouse")
+
+return table.concat(failures, "\n")
+"#;
+
+#[test]
+fn auth_challenge_ui_frame_surface_exists_after_load() {
+    common::with_perf_lock(|| {
+        common::with_timeout(240, || {
+            with_blizzard_addon_smoke_shape(&[], &[], |env, _loaded| {
+                clear_recorded_lua_errors(env);
+
+                let (loaded, reason): (bool, Option<String>) = env
+                    .eval(r#"return C_AddOns.LoadAddOn("Blizzard_AuthChallengeUI")"#)
+                    .expect("C_AddOns.LoadAddOn should return");
+                assert!(loaded, "`{ROOT}` should load: {reason:?}");
+
+                let failures: String = env
+                    .eval(FRAME_SURFACE_PROBE_LUA)
+                    .expect("AuthChallengeUI frame surface probe should run");
+                assert!(failures.is_empty(), "`{ROOT}` missing frames:\n{failures}");
+
+                let errors = recorded_lua_errors(env);
+                assert!(
+                    errors.is_empty(),
+                    "`{ROOT}` frame-surface load emitted Lua errors:\n{}",
+                    errors.join("\n")
+                );
+            });
+        });
+    });
+}

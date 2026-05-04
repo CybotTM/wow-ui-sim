@@ -239,6 +239,16 @@ const AUCTION_HOUSE_SEARCH_CONTEXT_ALIASES_WORKAROUND_LUA: &str = r#"
     rawset(_G, "__wow_auction_house_search_context_aliases_patched", true)
 "#;
 
+const AUTH_CHALLENGE_FRAME_PARENT_WORKAROUND_LUA: &str = r#"
+    if type(AuthChallengeFrame) ~= "table" or type(UIParent) ~= "table" then
+        return
+    end
+
+    if AuthChallengeFrame:GetParent() ~= UIParent then
+        AuthChallengeFrame:SetParent(UIParent)
+    end
+"#;
+
 struct WorkaroundStep {
     label: &'static str,
     apply: fn(&crate::lua_api::WowLuaEnv),
@@ -352,6 +362,10 @@ const POST_LOAD_WORKAROUNDS: &[WorkaroundStep] = &[
     WorkaroundStep {
         label: "patch_auction_house_search_context_aliases",
         apply: patch_auction_house_search_context_aliases_from_env,
+    },
+    WorkaroundStep {
+        label: "patch_auth_challenge_frame_parent",
+        apply: patch_auth_challenge_frame_parent_from_env,
     },
 ];
 
@@ -518,9 +532,10 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
         patch_artifact_ui_show_panel_guard(env);
     }
     if addon_name == "Blizzard_AuctionHouseUI" {
-        patch_auction_house_categories_refresh_count(env);
-        patch_auction_house_browse_results_event(env);
-        patch_auction_house_search_context_aliases(env);
+        patch_auction_house_runtime_surface(env);
+    }
+    if addon_name == "Blizzard_AuthChallengeUI" {
+        patch_auth_challenge_frame_parent(env);
     }
     if addon_name == "Blizzard_AccountStore" {
         let _ = patch_account_store_set_storefront(env);
@@ -531,6 +546,12 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     if addon_name == "Blizzard_DamageMeter" {
         patch_damage_meter_initial_scrollbox_extent(env);
     }
+}
+
+fn patch_auction_house_runtime_surface(env: &crate::lua_api::LoaderEnv<'_>) {
+    patch_auction_house_categories_refresh_count(env);
+    patch_auction_house_browse_results_event(env);
+    patch_auction_house_search_context_aliases(env);
 }
 
 fn patch_runtime_map_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
@@ -1532,6 +1553,14 @@ fn patch_auction_house_search_context_aliases(env: &crate::lua_api::LoaderEnv<'_
 
 fn patch_auction_house_search_context_aliases_from_env(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(AUCTION_HOUSE_SEARCH_CONTEXT_ALIASES_WORKAROUND_LUA);
+}
+
+fn patch_auth_challenge_frame_parent(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(AUTH_CHALLENGE_FRAME_PARENT_WORKAROUND_LUA);
+}
+
+fn patch_auth_challenge_frame_parent_from_env(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(AUTH_CHALLENGE_FRAME_PARENT_WORKAROUND_LUA);
 }
 
 pub(crate) fn patch_account_store_set_storefront(

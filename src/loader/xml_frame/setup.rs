@@ -179,7 +179,7 @@ fn build_parent_link_repair_script(
         repair.push_str(&format!(
             "  parent[{parent_array:?}] = parent[{parent_array:?}] or {{}}\n"
         ));
-        repair.push_str(&format!("  local already_present = false\n"));
+        repair.push_str("  local already_present = false\n");
         repair.push_str(&format!(
             "  for _, existing in ipairs(parent[{parent_array:?}]) do\n"
         ));
@@ -356,6 +356,7 @@ fn apply_xml_properties_direct(
     direct::apply_xml_toplevel(state, frame_id, frame, inherits);
     direct::apply_xml_alpha(state, frame_id, frame, inherits);
     direct::apply_xml_enable_mouse(state, frame_id, frame, inherits);
+    direct::apply_xml_enable_keyboard(state, frame_id, frame, inherits);
     direct::apply_xml_propagate_mouse_input(state, frame_id, frame, inherits);
     direct::apply_xml_clips_children(state, frame_id, frame, inherits);
     direct::apply_xml_hit_rect_insets(state, frame_id, frame);

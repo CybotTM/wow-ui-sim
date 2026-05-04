@@ -549,6 +549,28 @@ pub fn apply_xml_enable_mouse(
     }
 }
 
+/// Resolve and apply enableKeyboard from template chain + instance XML.
+pub fn apply_xml_enable_keyboard(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    frame: &FrameXml,
+    inherits: &str,
+) {
+    let mut enabled = frame.enable_keyboard;
+    if enabled.is_none() && !inherits.is_empty() {
+        for entry in &*crate::xml::get_template_chain(inherits) {
+            if let Some(template_enabled) = entry.frame.enable_keyboard {
+                enabled = Some(template_enabled);
+            }
+        }
+    }
+    if let Some(enabled) = enabled
+        && let Some(frame) = state.borrow_mut().widgets.get_mut(frame_id)
+    {
+        frame.keyboard_enabled = enabled;
+    }
+}
+
 /// Resolve and apply propagateMouseInput / propagateMouseInputMask from XML.
 pub fn apply_xml_propagate_mouse_input(
     state: &Rc<RefCell<SimState>>,

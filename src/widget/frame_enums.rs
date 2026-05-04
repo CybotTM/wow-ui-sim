@@ -9,6 +9,7 @@ pub enum FrameStrata {
     #[default]
     Medium,
     High,
+    Blizzard,
     Dialog,
     Fullscreen,
     FullscreenDialog,
@@ -17,7 +18,7 @@ pub enum FrameStrata {
 
 impl FrameStrata {
     /// Number of strata variants (for fixed-size arrays/vecs).
-    pub const COUNT: usize = 9;
+    pub const COUNT: usize = 10;
 
     /// Convert to index (0..COUNT) for array indexing.
     pub fn as_index(self) -> usize {
@@ -36,6 +37,8 @@ impl FrameStrata {
             Self::Medium
         } else if s.eq_ignore_ascii_case("HIGH") {
             Self::High
+        } else if s.eq_ignore_ascii_case("BLIZZARD") {
+            Self::Blizzard
         } else if s.eq_ignore_ascii_case("DIALOG") {
             Self::Dialog
         } else if s.eq_ignore_ascii_case("FULLSCREEN") {
@@ -56,6 +59,7 @@ impl FrameStrata {
             Self::Low => "LOW",
             Self::Medium => "MEDIUM",
             Self::High => "HIGH",
+            Self::Blizzard => "BLIZZARD",
             Self::Dialog => "DIALOG",
             Self::Fullscreen => "FULLSCREEN",
             Self::FullscreenDialog => "FULLSCREEN_DIALOG",
