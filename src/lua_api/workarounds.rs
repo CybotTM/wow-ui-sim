@@ -133,82 +133,134 @@ const ARTIFACT_UI_SHOW_PANEL_GUARD_WORKAROUND_LUA: &str = r#"
     rawset(_G, "__wow_artifact_ui_show_panel_guard_wrapped", true)
 "#;
 
+struct WorkaroundStep {
+    label: &'static str,
+    apply: fn(&crate::lua_api::WowLuaEnv),
+}
+
+const POST_LOAD_WORKAROUNDS: &[WorkaroundStep] = &[
+    WorkaroundStep {
+        label: "patch_edit_mode_manager",
+        apply: patch_edit_mode_manager,
+    },
+    WorkaroundStep {
+        label: "init_edit_mode_layout",
+        apply: init_edit_mode_layout,
+    },
+    WorkaroundStep {
+        label: "patch_ui_parent_panel_toggles",
+        apply: patch_ui_parent_panel_toggles,
+    },
+    WorkaroundStep {
+        label: "patch_uiparent_onupdate_worklists",
+        apply: patch_uiparent_onupdate_worklists,
+    },
+    WorkaroundStep {
+        label: "init_chat_type_colors",
+        apply: init_chat_type_colors,
+    },
+    WorkaroundStep {
+        label: "patch_chat_voice_button_surface",
+        apply: patch_chat_voice_button_surface,
+    },
+    WorkaroundStep {
+        label: "patch_item_socketing_tooltips",
+        apply: patch_item_socketing_tooltips,
+    },
+    WorkaroundStep {
+        label: "patch_character_select_selected_name",
+        apply: patch_character_select_selected_name,
+    },
+    WorkaroundStep {
+        label: "patch_character_create_defaults",
+        apply: patch_character_create_defaults,
+    },
+    WorkaroundStep {
+        label: "patch_character_frame_title_refresh",
+        apply: patch_character_frame_title_refresh,
+    },
+    WorkaroundStep {
+        label: "patch_vignette_pin_template",
+        apply: patch_vignette_pin_template,
+    },
+    WorkaroundStep {
+        label: "patch_fog_of_war_pin_mixin",
+        apply: patch_fog_of_war_pin_mixin,
+    },
+    WorkaroundStep {
+        label: "patch_map_exploration_pin_mixin",
+        apply: patch_map_exploration_pin_mixin,
+    },
+    WorkaroundStep {
+        label: "patch_map_canvas_data_provider_attachment",
+        apply: patch_map_canvas_data_provider_attachment,
+    },
+    WorkaroundStep {
+        label: "ensure_adventure_map_frame_surface",
+        apply: ensure_adventure_map_frame_surface,
+    },
+    WorkaroundStep {
+        label: "patch_action_bar_button_event_fanout",
+        apply: patch_action_bar_button_event_fanout,
+    },
+    WorkaroundStep {
+        label: "patch_paging_controls_page_text",
+        apply: patch_paging_controls_page_text,
+    },
+    WorkaroundStep {
+        label: "patch_talent_edge_frame_level_sync",
+        apply: patch_talent_edge_frame_level_sync,
+    },
+    WorkaroundStep {
+        label: "patch_catalog_shop_product_card_defaults",
+        apply: patch_catalog_shop_product_card_defaults,
+    },
+    WorkaroundStep {
+        label: "patch_game_time_defaults",
+        apply: patch_game_time_defaults,
+    },
+    WorkaroundStep {
+        label: "patch_tooltip_nineslice_surface",
+        apply: patch_tooltip_nineslice_surface,
+    },
+    WorkaroundStep {
+        label: "patch_container_frame_token_tracker",
+        apply: patch_container_frame_token_tracker,
+    },
+    WorkaroundStep {
+        label: "patch_achievement_display_set_achievements",
+        apply: patch_achievement_display_set_achievements,
+    },
+    WorkaroundStep {
+        label: "patch_housing_dashboard_preload",
+        apply: patch_housing_dashboard_preload_from_env,
+    },
+    WorkaroundStep {
+        label: "patch_lfg_lock_list",
+        apply: patch_lfg_lock_list,
+    },
+];
+
 pub fn apply(env: &crate::lua_api::WowLuaEnv) {
-    log_step(env, "patch_edit_mode_manager", || {
-        crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
-    });
-    log_step(env, "init_edit_mode_layout", || {
-        crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
-    });
-    log_step(env, "patch_ui_parent_panel_toggles", || {
-        patch_ui_parent_panel_toggles(env);
-    });
-    log_step(env, "patch_uiparent_onupdate_worklists", || {
-        patch_uiparent_onupdate_worklists(env);
-    });
-    log_step(env, "init_chat_type_colors", || {
-        crate::lua_api::chat_init::init_chat_type_colors(env);
-    });
-    log_step(env, "patch_chat_voice_button_surface", || {
-        patch_chat_voice_button_surface(env);
-    });
-    log_step(env, "patch_item_socketing_tooltips", || {
-        patch_item_socketing_tooltips(env);
-    });
-    log_step(env, "patch_character_select_selected_name", || {
-        patch_character_select_selected_name(env);
-    });
-    log_step(env, "patch_character_create_defaults", || {
-        patch_character_create_defaults(env);
-    });
-    log_step(env, "patch_character_frame_title_refresh", || {
-        patch_character_frame_title_refresh(env);
-    });
-    log_step(env, "patch_vignette_pin_template", || {
-        patch_vignette_pin_template(env);
-    });
-    log_step(env, "patch_fog_of_war_pin_mixin", || {
-        patch_fog_of_war_pin_mixin(env);
-    });
-    log_step(env, "patch_map_exploration_pin_mixin", || {
-        patch_map_exploration_pin_mixin(env);
-    });
-    log_step(env, "patch_map_canvas_data_provider_attachment", || {
-        patch_map_canvas_data_provider_attachment(env);
-    });
-    log_step(env, "ensure_adventure_map_frame_surface", || {
-        ensure_adventure_map_frame_surface(env);
-    });
-    log_step(env, "patch_action_bar_button_event_fanout", || {
-        patch_action_bar_button_event_fanout(env);
-    });
-    log_step(env, "patch_paging_controls_page_text", || {
-        patch_paging_controls_page_text(env);
-    });
-    log_step(env, "patch_talent_edge_frame_level_sync", || {
-        patch_talent_edge_frame_level_sync(env);
-    });
-    log_step(env, "patch_catalog_shop_product_card_defaults", || {
-        patch_catalog_shop_product_card_defaults(env);
-    });
-    log_step(env, "patch_game_time_defaults", || {
-        patch_game_time_defaults(env);
-    });
-    log_step(env, "patch_tooltip_nineslice_surface", || {
-        patch_tooltip_nineslice_surface(env);
-    });
-    log_step(env, "patch_container_frame_token_tracker", || {
-        patch_container_frame_token_tracker(env);
-    });
-    log_step(env, "patch_achievement_display_set_achievements", || {
-        patch_achievement_display_set_achievements(env);
-    });
-    log_step(env, "patch_housing_dashboard_preload", || {
-        patch_housing_dashboard_preload(&env.loader_env());
-    });
-    log_step(env, "patch_lfg_lock_list", || {
-        patch_lfg_lock_list(env);
-    });
+    for step in POST_LOAD_WORKAROUNDS {
+        log_step(env, step.label, || (step.apply)(env));
+    }
+}
+
+fn patch_edit_mode_manager(env: &crate::lua_api::WowLuaEnv) {
+    crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
+}
+
+fn init_edit_mode_layout(env: &crate::lua_api::WowLuaEnv) {
+    crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
+}
+
+fn init_chat_type_colors(env: &crate::lua_api::WowLuaEnv) {
+    crate::lua_api::chat_init::init_chat_type_colors(env);
+}
+
+fn patch_housing_dashboard_preload_from_env(env: &crate::lua_api::WowLuaEnv) {
+    patch_housing_dashboard_preload(&env.loader_env());
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
