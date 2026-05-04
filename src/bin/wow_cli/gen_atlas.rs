@@ -169,6 +169,24 @@ const ATLAS_SLICE_INFO_STRUCT: &[&str] = &[
     "",
 ];
 
+const ATLAS_LOOKUP_STRUCT: &[&str] = &[
+    "pub struct AtlasLookup {",
+    "    pub info: &'static AtlasInfo,",
+    "    pub is_2x_fallback: bool,",
+    "}",
+    "",
+    "impl AtlasLookup {",
+    "    pub fn width(&self) -> u32 {",
+    "        if self.is_2x_fallback { self.info.width / 2 } else { self.info.width }",
+    "    }",
+    "",
+    "    pub fn height(&self) -> u32 {",
+    "        if self.is_2x_fallback { self.info.height / 2 } else { self.info.height }",
+    "    }",
+    "}",
+    "",
+];
+
 fn write_literal_lines(out: &mut File, lines: &[&str]) -> std::io::Result<()> {
     for line in lines {
         writeln!(out, "{line}")?;
@@ -177,28 +195,7 @@ fn write_literal_lines(out: &mut File, lines: &[&str]) -> std::io::Result<()> {
 }
 
 fn write_atlas_lookup_struct(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "pub struct AtlasLookup {{")?;
-    writeln!(out, "    pub info: &'static AtlasInfo,")?;
-    writeln!(out, "    pub is_2x_fallback: bool,")?;
-    writeln!(out, "}}")?;
-    writeln!(out)?;
-    writeln!(out, "impl AtlasLookup {{")?;
-    writeln!(out, "    pub fn width(&self) -> u32 {{")?;
-    writeln!(
-        out,
-        "        if self.is_2x_fallback {{ self.info.width / 2 }} else {{ self.info.width }}"
-    )?;
-    writeln!(out, "    }}")?;
-    writeln!(out)?;
-    writeln!(out, "    pub fn height(&self) -> u32 {{")?;
-    writeln!(
-        out,
-        "        if self.is_2x_fallback {{ self.info.height / 2 }} else {{ self.info.height }}"
-    )?;
-    writeln!(out, "    }}")?;
-    writeln!(out, "}}")?;
-    writeln!(out)?;
-    Ok(())
+    write_literal_lines(out, ATLAS_LOOKUP_STRUCT)
 }
 
 fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
