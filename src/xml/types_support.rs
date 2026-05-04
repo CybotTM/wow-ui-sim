@@ -199,6 +199,8 @@ pub struct ScriptsXml {
     pub on_tab_pressed: Vec<ScriptBodyXml>,
     #[serde(rename = "OnSpacePressed", default)]
     pub on_space_pressed: Vec<ScriptBodyXml>,
+    #[serde(rename = "OnArrowPressed", default)]
+    pub on_arrow_pressed: Vec<ScriptBodyXml>,
     #[serde(rename = "OnTextChanged", default)]
     pub on_text_changed: Vec<ScriptBodyXml>,
     #[serde(rename = "OnTextSet", default)]

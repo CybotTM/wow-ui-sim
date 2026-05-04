@@ -963,12 +963,13 @@ fn pointer_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnly
     ]
 }
 
-fn text_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlyScript<'_>; 10] {
+fn text_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlyScript<'_>; 11] {
     [
         ("OnEnterPressed", scripts.on_enter_pressed.last()),
         ("OnEscapePressed", scripts.on_escape_pressed.last()),
         ("OnTabPressed", scripts.on_tab_pressed.last()),
         ("OnSpacePressed", scripts.on_space_pressed.last()),
+        ("OnArrowPressed", scripts.on_arrow_pressed.last()),
         ("OnTextChanged", scripts.on_text_changed.last()),
         ("OnTextSet", scripts.on_text_set.last()),
         ("OnChar", scripts.on_char.last()),
