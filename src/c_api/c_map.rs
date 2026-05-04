@@ -40,81 +40,45 @@ use crate::lua_api::methods::{
 };
 use crate::lua_api::state::MapData;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 use std::collections::HashSet;
 
-pub(crate) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
-    let table_ref = ensure_namespace(state, "C_Map")?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
+type LuaTableRef = GcRef<Table>;
+type RustLuaFn = rilua::vm::closure::RustFn;
+
+const C_MAP_METHODS: &[(&str, RustLuaFn)] = &[
+    (
         "GetMapArtBackgroundAtlas",
         c_map_get_map_art_background_atlas,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "GetMapArtID", c_map_get_map_art_id)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetMapArtLayerTextures",
-        c_map_get_map_art_layer_textures,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetMapArtLayers",
-        c_map_get_map_art_layers,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "GetMapInfo", c_map_get_map_info)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetMapInfoAtPosition",
-        c_map_get_map_info_at_position,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetMapRectOnMap",
-        c_map_get_map_rect_on_map,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetMapChildrenInfo",
-        c_map_get_map_children_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetPlayerMapPosition",
-        c_map_get_player_map_position,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetBestMapForUnit",
-        c_map_get_best_map_for_unit,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetCurrentMapID",
-        c_map_get_current_map_id,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetFallbackWorldMapID",
-        c_map_get_fallback_world_map_id,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "MapHasArt", c_map_map_has_art)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "RequestPreloadMap",
-        c_map_request_preload_map,
-    )?;
+    ),
+    ("GetMapArtID", c_map_get_map_art_id),
+    ("GetMapArtLayerTextures", c_map_get_map_art_layer_textures),
+    ("GetMapArtLayers", c_map_get_map_art_layers),
+    ("GetMapInfo", c_map_get_map_info),
+    ("GetMapInfoAtPosition", c_map_get_map_info_at_position),
+    ("GetMapRectOnMap", c_map_get_map_rect_on_map),
+    ("GetMapChildrenInfo", c_map_get_map_children_info),
+    ("GetPlayerMapPosition", c_map_get_player_map_position),
+    ("GetBestMapForUnit", c_map_get_best_map_for_unit),
+    ("GetCurrentMapID", c_map_get_current_map_id),
+    ("GetFallbackWorldMapID", c_map_get_fallback_world_map_id),
+    ("MapHasArt", c_map_map_has_art),
+    ("RequestPreloadMap", c_map_request_preload_map),
+];
+
+pub(crate) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
+    let table_ref = ensure_namespace(state, "C_Map")?;
+    register_c_map_methods(state, table_ref)?;
+    Ok(())
+}
+
+fn register_c_map_methods(state: &mut LuaState, table_ref: LuaTableRef) -> LuaResult<()> {
+    for (name, rust_fn) in C_MAP_METHODS {
+        table_set_rust_fn_static(state, table_ref, name, *rust_fn)?;
+    }
     Ok(())
 }
 
@@ -149,54 +113,33 @@ fn c_map_get_map_art_layers(state: &mut LuaState) -> LuaResult<u32> {
 
     let layers = create_table(state);
     for (index, layer) in map_art.layers.iter().enumerate() {
-        let layer_info = create_table(state);
-        table_set(
-            state,
-            layer_info,
-            "layerWidth",
-            Val::Num(layer.layer_width as f64),
-        );
-        table_set(
-            state,
-            layer_info,
-            "layerHeight",
-            Val::Num(layer.layer_height as f64),
-        );
-        table_set(
-            state,
-            layer_info,
-            "tileWidth",
-            Val::Num(layer.tile_width as f64),
-        );
-        table_set(
-            state,
-            layer_info,
-            "tileHeight",
-            Val::Num(layer.tile_height as f64),
-        );
-        table_set(
-            state,
-            layer_info,
-            "minScale",
-            Val::Num(layer.min_scale as f64),
-        );
-        table_set(
-            state,
-            layer_info,
-            "maxScale",
-            Val::Num(layer.max_scale as f64),
-        );
-        table_set(
-            state,
-            layer_info,
-            "additionalZoomSteps",
-            Val::Num(layer.additional_zoom_steps as f64),
-        );
+        let layer_info = create_map_art_layer_table(state, layer);
         set_table_array(state, layers, index as i64 + 1, layer_info);
     }
 
     state.push(layers);
     Ok(1)
+}
+
+fn create_map_art_layer_table(state: &mut LuaState, layer: &crate::map_art::MapArtLayer) -> Val {
+    let layer_info = create_table(state);
+    table_set_num_field(state, layer_info, "layerWidth", layer.layer_width as f64);
+    table_set_num_field(state, layer_info, "layerHeight", layer.layer_height as f64);
+    table_set_num_field(state, layer_info, "tileWidth", layer.tile_width as f64);
+    table_set_num_field(state, layer_info, "tileHeight", layer.tile_height as f64);
+    table_set_num_field(state, layer_info, "minScale", layer.min_scale as f64);
+    table_set_num_field(state, layer_info, "maxScale", layer.max_scale as f64);
+    table_set_num_field(
+        state,
+        layer_info,
+        "additionalZoomSteps",
+        layer.additional_zoom_steps as f64,
+    );
+    layer_info
+}
+
+fn table_set_num_field(state: &mut LuaState, table: Val, key: &str, value: f64) {
+    table_set(state, table, key, Val::Num(value));
 }
 
 fn c_map_get_map_art_layer_textures(state: &mut LuaState) -> LuaResult<u32> {
