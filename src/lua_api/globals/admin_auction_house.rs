@@ -7,8 +7,9 @@
 
 use crate::lua_api::methods::{borrow_state_mut, val_to_string};
 use crate::lua_api::state::{
-    AuctionBrowseResult, AuctionReplicateItem, BidAuction, CommoditySearchResultInfo,
-    CommoditySearchResults, ItemSearchResultInfo, ItemSearchResults, OwnedAuction,
+    AuctionBrowseResult, AuctionReplicateItem, AuctionRowInfo, BidAuction,
+    CommoditySearchResultInfo, CommoditySearchResults, ItemSearchResultInfo, ItemSearchResults,
+    OwnedAuction,
 };
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -25,17 +26,36 @@ pub(super) fn add_auction_browse_result(state: &mut LuaState) -> LuaResult<u32> 
     let min_price = i64::from_stack(state, 3)?;
     let total_quantity = i32::from_stack(state, 4)?;
     let contains_owner_item = bool::from_stack(state, 5)?;
+    let auction_id = optional_i64_arg(state, 6)?;
 
-    borrow_state_mut(state)?
-        .auction_browse_results
-        .push(AuctionBrowseResult {
-            item_id,
-            item_level,
-            min_price,
-            total_quantity,
-            contains_owner_item,
-        });
+    let mut sim = borrow_state_mut(state)?;
+    sim.auction_browse_results.push(AuctionBrowseResult {
+        item_id,
+        item_level,
+        min_price,
+        total_quantity,
+        contains_owner_item,
+    });
+    if let Some(auction_id) = auction_id {
+        sim.auction_index.insert(
+            auction_id,
+            AuctionRowInfo {
+                owner: "Browse Seller".to_string(),
+                bid_amount: 0,
+                buyout_amount: min_price,
+                deposit: 0,
+                consortium_cut: 0,
+            },
+        );
+    }
     Ok(0)
+}
+
+fn optional_i64_arg(state: &mut LuaState, slot: i32) -> LuaResult<Option<i64>> {
+    Ok(match Val::from_stack(state, slot)? {
+        Val::Num(value) => Some(value as i64),
+        _ => None,
+    })
 }
 
 pub(super) fn clear_auction_browse_results(state: &mut LuaState) -> LuaResult<u32> {
