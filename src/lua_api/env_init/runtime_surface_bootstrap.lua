@@ -1012,6 +1012,12 @@ ChatTypeInfo.SYSTEM = ChatTypeInfo.SYSTEM or {
   b = 0,
   id = 1,
 }
+ChatTypeInfo.BN_WHISPER = ChatTypeInfo.BN_WHISPER or {
+  r = 0,
+  g = 1,
+  b = 0.96470594406128,
+  id = 19,
+}
 
 local __wow_chat_window_state = __wow_chat_window_state or {}
 
