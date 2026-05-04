@@ -219,6 +219,26 @@ const AUCTION_HOUSE_BROWSE_RESULTS_EVENT_WORKAROUND_LUA: &str = r#"
     rawset(_G, "__wow_auction_house_browse_results_event_wrapped", true)
 "#;
 
+const AUCTION_HOUSE_SEARCH_CONTEXT_ALIASES_WORKAROUND_LUA: &str = r#"
+    if rawget(_G, "__wow_auction_house_search_context_aliases_patched") then
+        return
+    end
+
+    if type(AuctionHouseSearchContext) ~= "table" then
+        return
+    end
+
+    if AuctionHouseSearchContext.Auctions == nil then
+        AuctionHouseSearchContext.Auctions = AuctionHouseSearchContext.AllAuctions
+    end
+
+    if AuctionHouseSearchContext.BrowseFavorites == nil then
+        AuctionHouseSearchContext.BrowseFavorites = AuctionHouseSearchContext.AllFavorites
+    end
+
+    rawset(_G, "__wow_auction_house_search_context_aliases_patched", true)
+"#;
+
 struct WorkaroundStep {
     label: &'static str,
     apply: fn(&crate::lua_api::WowLuaEnv),
@@ -328,6 +348,10 @@ const POST_LOAD_WORKAROUNDS: &[WorkaroundStep] = &[
     WorkaroundStep {
         label: "patch_auction_house_browse_results_event",
         apply: patch_auction_house_browse_results_event_from_env,
+    },
+    WorkaroundStep {
+        label: "patch_auction_house_search_context_aliases",
+        apply: patch_auction_house_search_context_aliases_from_env,
     },
 ];
 
@@ -496,6 +520,7 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     if addon_name == "Blizzard_AuctionHouseUI" {
         patch_auction_house_categories_refresh_count(env);
         patch_auction_house_browse_results_event(env);
+        patch_auction_house_search_context_aliases(env);
     }
     if addon_name == "Blizzard_AccountStore" {
         let _ = patch_account_store_set_storefront(env);
@@ -1499,6 +1524,14 @@ fn patch_auction_house_browse_results_event(env: &crate::lua_api::LoaderEnv<'_>)
 
 fn patch_auction_house_browse_results_event_from_env(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(AUCTION_HOUSE_BROWSE_RESULTS_EVENT_WORKAROUND_LUA);
+}
+
+fn patch_auction_house_search_context_aliases(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(AUCTION_HOUSE_SEARCH_CONTEXT_ALIASES_WORKAROUND_LUA);
+}
+
+fn patch_auction_house_search_context_aliases_from_env(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(AUCTION_HOUSE_SEARCH_CONTEXT_ALIASES_WORKAROUND_LUA);
 }
 
 pub(crate) fn patch_account_store_set_storefront(
