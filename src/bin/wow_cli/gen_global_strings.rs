@@ -33,28 +33,26 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn write_header(out: &mut File) -> std::io::Result<()> {
-    writeln!(
-        out,
-        "//! Auto-generated global strings from WoW CSV exports."
-    )?;
-    writeln!(
-        out,
-        "//! Do not edit manually - regenerate with: wow-cli generate global-strings"
-    )?;
-    writeln!(out)?;
-    writeln!(out, "use phf::phf_map;")?;
-    writeln!(out)?;
-    writeln!(
-        out,
-        "pub fn get_global_string(name: &str) -> Option<&'static str> {{"
-    )?;
-    writeln!(out, "    GLOBAL_STRINGS.get(name).copied()")?;
-    writeln!(out, "}}")?;
-    writeln!(out)?;
-    writeln!(
-        out,
-        "pub static GLOBAL_STRINGS: phf::Map<&'static str, &'static str> = phf_map! {{"
-    )?;
+    write_literal_lines(out, GLOBAL_STRINGS_HEADER)
+}
+
+const GLOBAL_STRINGS_HEADER: &[&str] = &[
+    "//! Auto-generated global strings from WoW CSV exports.",
+    "//! Do not edit manually - regenerate with: wow-cli generate global-strings",
+    "",
+    "use phf::phf_map;",
+    "",
+    "pub fn get_global_string(name: &str) -> Option<&'static str> {",
+    "    GLOBAL_STRINGS.get(name).copied()",
+    "}",
+    "",
+    "pub static GLOBAL_STRINGS: phf::Map<&'static str, &'static str> = phf_map! {",
+];
+
+fn write_literal_lines(out: &mut File, lines: &[&str]) -> std::io::Result<()> {
+    for line in lines {
+        writeln!(out, "{line}")?;
+    }
     Ok(())
 }
 
@@ -121,37 +119,23 @@ fn write_test_addon_list_string(out: &mut File) -> std::io::Result<()> {
 fn write_test_common_strings_exist(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_common_strings_exist() {{")?;
-    writeln!(
-        out,
-        "        assert!(get_global_string(\"OKAY\").is_some());"
-    )?;
-    writeln!(
-        out,
-        "        assert!(get_global_string(\"CANCEL\").is_some());"
-    )?;
-    writeln!(
-        out,
-        "        assert!(get_global_string(\"ACCEPT\").is_some());"
-    )?;
-    writeln!(
-        out,
-        "        assert!(get_global_string(\"DECLINE\").is_some());"
-    )?;
-    writeln!(
-        out,
-        "        assert!(get_global_string(\"YES\").is_some());"
-    )?;
-    writeln!(out, "        assert!(get_global_string(\"NO\").is_some());")?;
-    writeln!(
-        out,
-        "        assert!(get_global_string(\"ENABLE\").is_some());"
-    )?;
-    writeln!(
-        out,
-        "        assert!(get_global_string(\"DISABLE\").is_some());"
-    )?;
+    write_test_common_string_asserts(out)?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+const COMMON_STRING_TEST_KEYS: &[&str] = &[
+    "OKAY", "CANCEL", "ACCEPT", "DECLINE", "YES", "NO", "ENABLE", "DISABLE",
+];
+
+fn write_test_common_string_asserts(out: &mut File) -> std::io::Result<()> {
+    for key in COMMON_STRING_TEST_KEYS {
+        writeln!(
+            out,
+            "        assert!(get_global_string(\"{key}\").is_some());"
+        )?;
+    }
     Ok(())
 }
 
