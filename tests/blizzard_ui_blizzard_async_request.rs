@@ -22,3 +22,6 @@ mod behavior_create_timeout_pair_required;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_start_calls_request_function.rs"]
 mod behavior_start_calls_request_function;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_start_registers_response_event.rs"]
+mod behavior_start_registers_response_event;
