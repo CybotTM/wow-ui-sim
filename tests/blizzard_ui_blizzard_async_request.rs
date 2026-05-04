@@ -31,3 +31,6 @@ mod behavior_start_is_idempotent_when_running;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_response_event_fires_callback.rs"]
 mod behavior_response_event_fires_callback;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_response_event_other_name_ignored.rs"]
+mod behavior_response_event_other_name_ignored;
