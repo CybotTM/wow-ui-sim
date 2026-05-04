@@ -8,7 +8,9 @@ use crate::lua_api::methods::{
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use crate::specializations;
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 use super::helpers::set_global_val;
@@ -29,96 +31,81 @@ const CLASS_FILES: &[&str] = &[
     "EVOKER",
 ];
 
+type LuaTableRef = GcRef<Table>;
+type RustLuaFn = rilua::vm::closure::RustFn;
+
+const C_SPECIALIZATION_INFO_METHODS: &[(&str, RustLuaFn)] = &[
+    ("GetSpecialization", c_spec_get_specialization),
+    ("GetSpecializationInfo", c_spec_get_specialization_info),
+    ("GetClassIDFromSpecID", c_spec_get_class_id_from_spec_id),
+    (
+        "GetNumSpecializationsForClassID",
+        c_spec_get_num_specializations_for_class_id,
+    ),
+    ("IsInitialized", c_spec_is_initialized),
+    (
+        "CanPlayerUseTalentSpecUI",
+        c_spec_can_player_use_talent_spec_ui,
+    ),
+    ("CanPlayerUseTalentUI", c_spec_can_player_use_talent_ui),
+    ("GetActiveSpecGroup", c_spec_get_active_spec_group),
+    ("GetSpellsDisplay", c_spec_get_spells_display),
+    ("SetSpecialization", c_spec_set_specialization),
+    ("GetPvpTalentSlotInfo", c_spec_get_pvp_talent_slot_info),
+    (
+        "GetPvpTalentSlotUnlockLevel",
+        c_spec_get_pvp_talent_slot_unlock_level,
+    ),
+    ("GetPvpTalentInfo", c_spec_get_pvp_talent_info),
+    (
+        "GetPvpTalentUnlockLevel",
+        c_spec_get_pvp_talent_unlock_level,
+    ),
+    (
+        "GetInspectSelectedPvpTalent",
+        c_spec_get_inspect_selected_pvp_talent,
+    ),
+    (
+        "GetAllSelectedPvpTalentIDs",
+        c_spec_get_all_selected_pvp_talent_ids,
+    ),
+    ("IsPvpTalentLocked", c_spec_is_pvp_talent_locked),
+    ("SetPvpTalentLocked", c_spec_set_pvp_talent_locked),
+];
+
+const LEGACY_SPECIALIZATION_GLOBALS: &[(&str, RustLuaFn)] = &[
+    ("GetNumSpecializations", get_num_specializations),
+    ("GetSpecializationInfoByID", get_specialization_info_by_id),
+    ("GetSpecializationRole", get_specialization_role),
+    ("GetSpecializationRoleEnum", get_specialization_role_enum),
+    (
+        "GetSpecializationRoleEnumByID",
+        get_specialization_role_enum_by_id,
+    ),
+    ("GetLFGStringFromEnum", get_lfg_string_from_enum),
+];
+
+const SPEC_ACTIVATION_SPELL_ID: u32 = 200749;
+const SPEC_ACTIVATION_CAST_SECONDS: f64 = 1.5;
+
 pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
     let t = create_table(state);
     let Val::Table(t_ref) = t else {
         unreachable!("create_table must return a table");
     };
-    table_set_rust_fn_static(state, t_ref, "GetSpecialization", c_spec_get_specialization)?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetSpecializationInfo",
-        c_spec_get_specialization_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetClassIDFromSpecID",
-        c_spec_get_class_id_from_spec_id,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetNumSpecializationsForClassID",
-        c_spec_get_num_specializations_for_class_id,
-    )?;
-    table_set_rust_fn_static(state, t_ref, "IsInitialized", c_spec_is_initialized)?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "CanPlayerUseTalentSpecUI",
-        c_spec_can_player_use_talent_spec_ui,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "CanPlayerUseTalentUI",
-        c_spec_can_player_use_talent_ui,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetActiveSpecGroup",
-        c_spec_get_active_spec_group,
-    )?;
-    table_set_rust_fn_static(state, t_ref, "GetSpellsDisplay", c_spec_get_spells_display)?;
-    table_set_rust_fn_static(state, t_ref, "SetSpecialization", c_spec_set_specialization)?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetPvpTalentSlotInfo",
-        c_spec_get_pvp_talent_slot_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetPvpTalentSlotUnlockLevel",
-        c_spec_get_pvp_talent_slot_unlock_level,
-    )?;
-    table_set_rust_fn_static(state, t_ref, "GetPvpTalentInfo", c_spec_get_pvp_talent_info)?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetPvpTalentUnlockLevel",
-        c_spec_get_pvp_talent_unlock_level,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetInspectSelectedPvpTalent",
-        c_spec_get_inspect_selected_pvp_talent,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetAllSelectedPvpTalentIDs",
-        c_spec_get_all_selected_pvp_talent_ids,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "IsPvpTalentLocked",
-        c_spec_is_pvp_talent_locked,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "SetPvpTalentLocked",
-        c_spec_set_pvp_talent_locked,
-    )?;
+    register_c_specialization_info_methods(state, t_ref)?;
     set_global_val(state, "C_SpecializationInfo", t);
     register_legacy_specialization_globals(state)?;
+    Ok(())
+}
+
+fn register_c_specialization_info_methods(
+    state: &mut LuaState,
+    table_ref: LuaTableRef,
+) -> LuaResult<()> {
+    for (name, rust_fn) in C_SPECIALIZATION_INFO_METHODS {
+        table_set_rust_fn_static(state, table_ref, name, *rust_fn)?;
+    }
     Ok(())
 }
 
@@ -235,46 +222,39 @@ fn c_spec_get_spells_display(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_spec_set_specialization(state: &mut LuaState) -> LuaResult<u32> {
-    const SPEC_ACTIVATION_SPELL_ID: u32 = 200749;
-    const SPEC_ACTIVATION_CAST_SECONDS: f64 = 1.5;
-
     let requested_index = match stack_val(state, 1) {
         Val::Num(n) => n as i32,
         _ => 0,
     };
     let can_set = requested_or_active_spec(state, requested_index).is_some();
-    if can_set {
-        let target_index = requested_index.max(1);
-        let started = {
-            let mut sim = borrow_state_mut(state)?;
-            if sim.player.active_spec_index == target_index
-                && sim.player.pending_spec_change.is_none()
-            {
-                false
-            } else {
-                sim.player.pending_spec_change = Some(target_index);
-                let now = sim.start_time.elapsed().as_secs_f64();
-                let cast_id = sim.next_cast_id;
-                sim.next_cast_id = sim.next_cast_id.wrapping_add(1);
-                sim.casting = Some(CastingState {
-                    spell_id: SPEC_ACTIVATION_SPELL_ID,
-                    spell_name: "Activate Specialization".to_string(),
-                    icon_path: String::new(),
-                    start_time: now,
-                    end_time: now + SPEC_ACTIVATION_CAST_SECONDS,
-                    cast_id,
-                });
-                true
-            }
-        };
-        if started {
-            let player = create_string(state, "player");
-            let spell_id_val = Val::Num(SPEC_ACTIVATION_SPELL_ID as f64);
-            fire_named_event_state(state, "UNIT_SPELLCAST_START", &[player, spell_id_val]);
-        }
+    if can_set && start_specialization_change(state, requested_index.max(1))? {
+        let player = create_string(state, "player");
+        let spell_id_val = Val::Num(SPEC_ACTIVATION_SPELL_ID as f64);
+        fire_named_event_state(state, "UNIT_SPELLCAST_START", &[player, spell_id_val]);
     }
     state.push(Val::Bool(can_set));
     Ok(1)
+}
+
+fn start_specialization_change(state: &mut LuaState, target_index: i32) -> LuaResult<bool> {
+    let mut sim = borrow_state_mut(state)?;
+    if sim.player.active_spec_index == target_index && sim.player.pending_spec_change.is_none() {
+        return Ok(false);
+    }
+
+    sim.player.pending_spec_change = Some(target_index);
+    let now = sim.start_time.elapsed().as_secs_f64();
+    let cast_id = sim.next_cast_id;
+    sim.next_cast_id = sim.next_cast_id.wrapping_add(1);
+    sim.casting = Some(CastingState {
+        spell_id: SPEC_ACTIVATION_SPELL_ID,
+        spell_name: "Activate Specialization".to_string(),
+        icon_path: String::new(),
+        start_time: now,
+        end_time: now + SPEC_ACTIVATION_CAST_SECONDS,
+        cast_id,
+    });
+    Ok(true)
 }
 
 fn c_spec_get_pvp_talent_slot_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -282,7 +262,7 @@ fn c_spec_get_pvp_talent_slot_info(state: &mut LuaState) -> LuaResult<u32> {
         Val::Num(n) => n as i32,
         _ => 0,
     };
-    if !(1..=3).contains(&slot_index) {
+    if !is_pvp_talent_slot_index_valid(slot_index) {
         state.push(Val::Nil);
         return Ok(1);
     }
@@ -302,6 +282,13 @@ fn c_spec_get_pvp_talent_slot_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "availableTalentIDs", available_talent_ids);
     state.push(info);
     Ok(1)
+}
+
+fn is_pvp_talent_slot_index_valid(slot_index: i32) -> bool {
+    const FIRST_PVP_TALENT_SLOT: i32 = 1;
+    const LAST_PVP_TALENT_SLOT: i32 = 3;
+
+    matches!(slot_index, FIRST_PVP_TALENT_SLOT..=LAST_PVP_TALENT_SLOT)
 }
 
 fn c_spec_get_pvp_talent_slot_unlock_level(state: &mut LuaState) -> LuaResult<u32> {
@@ -368,42 +355,9 @@ fn c_spec_set_pvp_talent_locked(_state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn register_legacy_specialization_globals(state: &mut LuaState) -> LuaResult<()> {
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetNumSpecializations",
-        get_num_specializations,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetSpecializationInfoByID",
-        get_specialization_info_by_id,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetSpecializationRole",
-        get_specialization_role,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetSpecializationRoleEnum",
-        get_specialization_role_enum,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetSpecializationRoleEnumByID",
-        get_specialization_role_enum_by_id,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetLFGStringFromEnum",
-        get_lfg_string_from_enum,
-    )?;
+    for (name, rust_fn) in LEGACY_SPECIALIZATION_GLOBALS {
+        table_set_rust_fn_static(state, state.global, name, *rust_fn)?;
+    }
     Ok(())
 }
 
@@ -439,29 +393,21 @@ fn get_specialization_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_specialization_role(state: &mut LuaState) -> LuaResult<u32> {
-    let requested_index = match stack_val(state, 1) {
-        Val::Num(n) => n as i32,
-        _ => 1,
-    };
-    let Some(spec) = requested_or_active_spec(state, requested_index) else {
+    let Some(role) = requested_spec_role(state) else {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let role = create_string(state, spec.role);
+    let role = create_string(state, role);
     state.push(role);
     Ok(1)
 }
 
 fn get_specialization_role_enum(state: &mut LuaState) -> LuaResult<u32> {
-    let requested_index = match stack_val(state, 1) {
-        Val::Num(n) => n as i32,
-        _ => 1,
-    };
-    let Some(spec) = requested_or_active_spec(state, requested_index) else {
+    let Some(role) = requested_spec_role(state) else {
         state.push(Val::Nil);
         return Ok(1);
     };
-    state.push(Val::Num(role_enum_value(spec.role)));
+    state.push(Val::Num(role_enum_value(role)));
     Ok(1)
 }
 
@@ -490,6 +436,14 @@ fn get_lfg_string_from_enum(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn requested_spec_role(state: &LuaState) -> Option<&'static str> {
+    let requested_index = match stack_val(state, 1) {
+        Val::Num(n) => n as i32,
+        _ => 1,
+    };
+    requested_or_active_spec(state, requested_index).map(|spec| spec.role)
+}
+
 fn requested_or_active_spec(
     state: &LuaState,
     requested_index: i32,
@@ -498,12 +452,12 @@ fn requested_or_active_spec(
         let sim = borrow_state(state).ok()?;
         (sim.player.class_index as u32, sim.player.active_spec_index)
     };
-    let fallback = requested_index.max(1);
+    let requested_spec_index = requested_index.max(1);
     specializations::specs_for_class(class_id)
-        .nth((fallback - 1) as usize)
+        .nth((requested_spec_index - 1) as usize)
         .or_else(|| {
-            let active = active_spec_index.max(1);
-            specializations::specs_for_class(class_id).nth((active - 1) as usize)
+            let active_spec_index = active_spec_index.max(1);
+            specializations::specs_for_class(class_id).nth((active_spec_index - 1) as usize)
         })
 }
 
