@@ -169,7 +169,7 @@ fn c_container_has_item(state: &mut LuaState) -> LuaResult<u32> {
 fn c_container_get_item_info(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let slot = i32::from_stack(state, 2)?;
-    let Some(bag_item) = borrow_state(state)?.bag_items.get(&(bag, slot)).cloned() else {
+    let Some(bag_item) = container_bag_item(state, bag, slot)? else {
         state.push(Val::Nil);
         return Ok(1);
     };
@@ -177,6 +177,11 @@ fn c_container_get_item_info(state: &mut LuaState) -> LuaResult<u32> {
     let info = build_container_item_info(state, &bag_item);
     state.push(info);
     Ok(1)
+}
+
+fn container_bag_item(state: &LuaState, bag: i32, slot: i32) -> LuaResult<Option<BagItem>> {
+    let bag_item = borrow_state(state)?.bag_items.get(&(bag, slot)).cloned();
+    Ok(bag_item)
 }
 
 fn build_container_item_info(state: &mut LuaState, bag_item: &BagItem) -> Val {
