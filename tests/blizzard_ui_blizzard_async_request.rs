@@ -43,3 +43,6 @@ mod behavior_response_before_timeout_cancels_timer;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_stop_without_start_is_safe.rs"]
 mod behavior_stop_without_start_is_safe;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_no_timeout_path_skips_timer.rs"]
+mod behavior_no_timeout_path_skips_timer;
