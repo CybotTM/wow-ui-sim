@@ -21,6 +21,31 @@ local function expectObjectType(object, expectedType, message)
   end
 end
 
+local function expectAnchor(region, index, expectedPoint, expectedRelativeTo,
+                            expectedRelativePoint, expectedX, expectedY, message)
+  expect(region:GetNumPoints() >= index,
+         message .. " must have anchor #" .. tostring(index))
+  if region:GetNumPoints() < index then
+    return
+  end
+
+  local point, relativeTo, relativePoint, x, y = region:GetPoint(index)
+  expect(point == expectedPoint,
+         message .. " point must be " .. expectedPoint .. ", got " ..
+         tostring(point))
+  expect(relativeTo == expectedRelativeTo,
+         message .. " relativeTo mismatch")
+  expect(relativePoint == expectedRelativePoint,
+         message .. " relativePoint must be " .. expectedRelativePoint ..
+         ", got " .. tostring(relativePoint))
+  expect(x == expectedX,
+         message .. " x offset must be " .. tostring(expectedX) ..
+         ", got " .. tostring(x))
+  expect(y == expectedY,
+         message .. " y offset must be " .. tostring(expectedY) ..
+         ", got " .. tostring(y))
+end
+
 local popup = CreateFrame("Frame", "TestPopupListTemplateFrame", UIParent,
                          "AutoCompletePopupListTemplate")
 expect(popup ~= nil, "AutoCompletePopupListTemplate must instantiate")
@@ -48,13 +73,70 @@ if popup ~= nil then
   end
 end
 
-local row = CreateFrame("Button", "TestPopupListResultTemplateButton", UIParent,
-                        "AutoCompletePopupListResultTemplate")
-expect(row ~= nil, "AutoCompletePopupListResultTemplate must instantiate")
+local row = nil
+if popup ~= nil then
+  row = CreateFrame("Button", "TestPopupListResultTemplateButton", popup,
+                    "AutoCompletePopupListResultTemplate")
+  expect(row ~= nil, "AutoCompletePopupListResultTemplate must instantiate")
+end
 
 if row ~= nil then
   expect(row:GetObjectType() == "Button",
          "AutoCompletePopupListResultTemplate must instantiate a Button")
+  expect(row:GetParent() == popup,
+         "AutoCompletePopupListResultTemplate instance must be parented to popup")
+  expectObjectType(row.HighlightTexture, "Texture", "row.HighlightTexture")
+  expectObjectType(row.IconFrame, "Texture", "row.IconFrame")
+  expectObjectType(row.Icon, "Texture", "row.Icon")
+  expectObjectType(row.Name, "FontString", "row.Name")
+  expectObjectType(row.Subtext, "FontString", "row.Subtext")
+
+  if row.HighlightTexture ~= nil then
+    expect(not row.HighlightTexture:IsShown(),
+           "row.HighlightTexture must be hidden by default")
+    expect(row.HighlightTexture:GetNumPoints() == 2,
+           "row.HighlightTexture must have exactly 2 anchors")
+    expectAnchor(row.HighlightTexture, 1, "TOPLEFT", row, "TOPLEFT", 0, 0,
+                 "row.HighlightTexture anchor 1")
+    expectAnchor(row.HighlightTexture, 2, "BOTTOMRIGHT", row, "BOTTOMRIGHT",
+                 0, 0, "row.HighlightTexture anchor 2")
+  end
+
+  if row.IconFrame ~= nil then
+    expect(row.IconFrame:GetNumPoints() == 1,
+           "row.IconFrame must have exactly 1 anchor")
+    expectAnchor(row.IconFrame, 1, "LEFT", row, "LEFT", 5, 1,
+                 "row.IconFrame anchor")
+  end
+
+  if row.Icon ~= nil and row.IconFrame ~= nil then
+    expect(row.Icon:GetNumPoints() == 2,
+           "row.Icon must have exactly 2 anchors")
+    expectAnchor(row.Icon, 1, "TOPLEFT", row.IconFrame, "TOPLEFT", 1, -1,
+                 "row.Icon anchor 1")
+    expectAnchor(row.Icon, 2, "BOTTOMRIGHT", row.IconFrame, "BOTTOMRIGHT",
+                 -1, 1, "row.Icon anchor 2")
+  end
+
+  if row.Name ~= nil and row.Icon ~= nil then
+    expect(row.Name:GetNumPoints() == 2,
+           "row.Name must have exactly 2 anchors")
+    expectAnchor(row.Name, 1, "LEFT", row.Icon, "RIGHT", 5, 1,
+                 "row.Name anchor 1")
+    expectAnchor(row.Name, 2, "RIGHT", row, "RIGHT", -5, 0,
+                 "row.Name anchor 2")
+  end
+
+  if row.Subtext ~= nil and row.Name ~= nil then
+    expect(row.Subtext:GetNumPoints() == 3,
+           "row.Subtext must have exactly 3 anchors")
+    expectAnchor(row.Subtext, 1, "TOP", row.Name, "BOTTOM", 0, -2,
+                 "row.Subtext anchor 1")
+    expectAnchor(row.Subtext, 2, "LEFT", row.Name, "LEFT", 0, 0,
+                 "row.Subtext anchor 2")
+    expectAnchor(row.Subtext, 3, "RIGHT", row.Name, "RIGHT", 0, 0,
+                 "row.Subtext anchor 3")
+  end
 end
 
 return table.concat(failures, "\n")
