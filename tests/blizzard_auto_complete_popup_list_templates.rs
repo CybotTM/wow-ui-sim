@@ -12,6 +12,15 @@ local function expect(condition, message)
   end
 end
 
+local function expectObjectType(object, expectedType, message)
+  expect(object ~= nil, message .. " must exist")
+  if object ~= nil then
+    expect(object:GetObjectType() == expectedType,
+           message .. " must be a " .. expectedType ..
+           ", got " .. tostring(object:GetObjectType()))
+  end
+end
+
 local popup = CreateFrame("Frame", "TestPopupListTemplateFrame", UIParent,
                          "AutoCompletePopupListTemplate")
 expect(popup ~= nil, "AutoCompletePopupListTemplate must instantiate")
@@ -22,6 +31,21 @@ if popup ~= nil then
   expect(popup.maximumEntries == 5,
          "AutoCompletePopupListTemplate maximumEntries must be 5, got " ..
          tostring(popup.maximumEntries))
+  expectObjectType(popup.ScrollBox, "Frame", "popup.ScrollBox")
+  expectObjectType(popup.OverflowCount, "Frame", "popup.OverflowCount")
+  expectObjectType(popup.Background, "Texture", "popup.Background")
+  expectObjectType(popup.BorderAnchor, "Texture", "popup.BorderAnchor")
+  expectObjectType(popup.BotRightCorner, "Texture", "popup.BotRightCorner")
+  expectObjectType(popup.BottomBorder, "Texture", "popup.BottomBorder")
+  expectObjectType(popup.LeftBorder, "Texture", "popup.LeftBorder")
+  expectObjectType(popup.RightBorder, "Texture", "popup.RightBorder")
+
+  if popup.OverflowCount ~= nil then
+    expect(not popup.OverflowCount:IsShown(),
+           "popup.OverflowCount must be hidden by default")
+    expectObjectType(popup.OverflowCount.Text, "FontString",
+                     "popup.OverflowCount.Text")
+  end
 end
 
 local row = CreateFrame("Button", "TestPopupListResultTemplateButton", UIParent,
