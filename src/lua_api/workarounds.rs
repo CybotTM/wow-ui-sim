@@ -240,6 +240,22 @@ const AUCTION_HOUSE_SEARCH_CONTEXT_ALIASES_WORKAROUND_LUA: &str = r#"
 "#;
 
 const AUTH_CHALLENGE_FRAME_PARENT_WORKAROUND_LUA: &str = r#"
+    local authChallengeFunctions = {
+        "AuthChallengeUI_OnLoad",
+        "AuthChallengeUI_Submit",
+        "AuthChallengeUI_Cancel",
+        "AuthChallengeUI_OnTabPressed",
+        "AuthChallengeUI_OnKeyDown",
+    }
+
+    for _, functionName in ipairs(authChallengeFunctions) do
+        if rawget(_G, functionName) == nil
+            and type(__secureenv) == "table"
+            and type(rawget(__secureenv, functionName)) == "function" then
+            rawset(_G, functionName, rawget(__secureenv, functionName))
+        end
+    end
+
     if type(AuthChallengeFrame) ~= "table" or type(UIParent) ~= "table" then
         return
     end
