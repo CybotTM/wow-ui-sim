@@ -155,6 +155,70 @@ const AUCTION_HOUSE_CATEGORIES_REFRESH_COUNT_WORKAROUND_LUA: &str = r#"
     AuctionHouseCategoriesListMixin.GetNumElementsForRefresh = getNumElementsForRefresh
 "#;
 
+const AUCTION_HOUSE_BROWSE_RESULTS_EVENT_WORKAROUND_LUA: &str = r#"
+    if rawget(_G, "__wow_auction_house_browse_results_event_wrapped") then
+        return
+    end
+
+    if type(AuctionHouseFrameMixin) ~= "table" then
+        return
+    end
+
+    local browseResultsEvent = "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED"
+
+    local function registerBrowseResultsEvent(frame)
+        if type(frame) == "table" and type(frame.RegisterEvent) == "function" then
+            frame:RegisterEvent(browseResultsEvent)
+        end
+    end
+
+    local function unregisterBrowseResultsEvent(frame)
+        if type(frame) == "table" and type(frame.UnregisterEvent) == "function" then
+            frame:UnregisterEvent(browseResultsEvent)
+        end
+    end
+
+    local originalOnShow = AuctionHouseFrameMixin.OnShow
+    local originalOnHide = AuctionHouseFrameMixin.OnHide
+
+    AuctionHouseFrameMixin.OnShow = function(self, ...)
+        if type(originalOnShow) == "function" then
+            originalOnShow(self, ...)
+        end
+        registerBrowseResultsEvent(self)
+    end
+
+    AuctionHouseFrameMixin.OnHide = function(self, ...)
+        unregisterBrowseResultsEvent(self)
+        if type(originalOnHide) == "function" then
+            originalOnHide(self, ...)
+        end
+    end
+
+    local frame = AuctionHouseFrame
+    if type(frame) == "table" then
+        local frameOnShow = frame:GetScript("OnShow")
+        frame:SetScript("OnShow", function(self, ...)
+            if type(frameOnShow) == "function" then
+                frameOnShow(self, ...)
+            end
+            registerBrowseResultsEvent(self)
+        end)
+
+        local frameOnHide = frame:GetScript("OnHide")
+        frame:SetScript("OnHide", function(self, ...)
+            unregisterBrowseResultsEvent(self)
+            if type(frameOnHide) == "function" then
+                frameOnHide(self, ...)
+            end
+        end)
+
+        registerBrowseResultsEvent(frame)
+    end
+
+    rawset(_G, "__wow_auction_house_browse_results_event_wrapped", true)
+"#;
+
 struct WorkaroundStep {
     label: &'static str,
     apply: fn(&crate::lua_api::WowLuaEnv),
@@ -260,6 +324,10 @@ const POST_LOAD_WORKAROUNDS: &[WorkaroundStep] = &[
     WorkaroundStep {
         label: "patch_lfg_lock_list",
         apply: patch_lfg_lock_list,
+    },
+    WorkaroundStep {
+        label: "patch_auction_house_browse_results_event",
+        apply: patch_auction_house_browse_results_event_from_env,
     },
 ];
 
@@ -427,6 +495,7 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     }
     if addon_name == "Blizzard_AuctionHouseUI" {
         patch_auction_house_categories_refresh_count(env);
+        patch_auction_house_browse_results_event(env);
     }
     if addon_name == "Blizzard_AccountStore" {
         let _ = patch_account_store_set_storefront(env);
@@ -1422,6 +1491,14 @@ fn patch_artifact_ui_show_panel_guard(env: &crate::lua_api::LoaderEnv<'_>) {
 
 fn patch_auction_house_categories_refresh_count(env: &crate::lua_api::LoaderEnv<'_>) {
     let _ = env.exec(AUCTION_HOUSE_CATEGORIES_REFRESH_COUNT_WORKAROUND_LUA);
+}
+
+fn patch_auction_house_browse_results_event(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(AUCTION_HOUSE_BROWSE_RESULTS_EVENT_WORKAROUND_LUA);
+}
+
+fn patch_auction_house_browse_results_event_from_env(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(AUCTION_HOUSE_BROWSE_RESULTS_EVENT_WORKAROUND_LUA);
 }
 
 pub(crate) fn patch_account_store_set_storefront(
