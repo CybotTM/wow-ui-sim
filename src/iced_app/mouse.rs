@@ -671,5 +671,13 @@ fn mark_button_state_visuals_dirty(state: &mut crate::lua_api::SimState, frame_i
 }
 
 #[cfg(test)]
+#[path = "mouse_test_support.rs"]
+mod test_support;
+
+#[cfg(test)]
 #[path = "mouse_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "mouse_hover_tests.rs"]
+mod hover_tests;
