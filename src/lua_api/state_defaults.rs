@@ -434,9 +434,9 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
     const PLAYSTYLE_FUN_SERIOUS: i32 = 3;
 
     /// Faction id encoding for `leaderFactionGroup` (`PLAYER_FACTION_GROUP`):
-    /// 0 = neutral/cross-faction, 1 = Horde, 2 = Alliance.
-    const FACTION_HORDE: i32 = 1;
-    const FACTION_ALLIANCE: i32 = 2;
+    /// 0 = Horde, 1 = Alliance.
+    const FACTION_HORDE: i32 = 0;
+    const FACTION_ALLIANCE: i32 = 1;
 
     let mut id = 0u32;
     let l = |id: &mut u32,

@@ -45,6 +45,7 @@ fn register_group_status(state: &mut LuaState) {
     set_global(state, "IsGroupLeader", is_group_leader);
     set_global(state, "IsEveryoneAssistant", is_everyone_assistant);
     set_global(state, "IsPartyWorldPVP", always_false);
+    set_global(state, "GroupHasOfflineMember", always_false);
     set_global(state, "GetPartyAssignment", get_party_assignment);
 }
 

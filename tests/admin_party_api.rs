@@ -45,6 +45,23 @@ fn test_set_party_size_zero_means_not_in_group() {
 }
 
 #[test]
+fn test_group_has_offline_member_defaults_false() {
+    let env = env();
+    let has_offline: bool = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(3)
+            return GroupHasOfflineMember(LE_PARTY_CATEGORY_HOME)
+            "#,
+        )
+        .unwrap();
+    assert!(
+        !has_offline,
+        "GroupHasOfflineMember should be false until offline party state is modeled"
+    );
+}
+
+#[test]
 fn test_get_num_group_members_includes_player() {
     let env = env();
     // GetNumGroupMembers returns party count + 1 (for the player) when in a group.

@@ -210,6 +210,53 @@ fn search_result_info_has_full_blizzard_schema() {
 }
 
 #[test]
+fn search_result_leader_factions_use_player_faction_group_indexes() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local _, results = C_LFGList.GetSearchResults()
+            local valid = { [0] = true, [1] = true }
+            for _, resultID in ipairs(results) do
+                local info = C_LFGList.GetSearchResultInfo(resultID)
+                if not valid[info.leaderFactionGroup] then
+                    return "bad faction " .. tostring(resultID) .. "=" .. tostring(info.leaderFactionGroup)
+                end
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "leader factions: {result}");
+}
+
+#[test]
+fn get_playstyle_string_returns_text_for_seeded_general_playstyles() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local _, results = C_LFGList.GetSearchResults()
+            for _, resultID in ipairs(results) do
+                local info = C_LFGList.GetSearchResultInfo(resultID)
+                local activityInfo = C_LFGList.GetActivityInfoTable(info.activityIDs[1])
+                local text = C_LFGList.GetPlaystyleString(
+                    Enum.LFGEntryPlaystyle.None,
+                    info.generalPlaystyle,
+                    activityInfo
+                )
+                if type(text) ~= "string" then
+                    return "type " .. tostring(resultID) .. "=" .. type(text)
+                end
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "playstyle string: {result}");
+}
+
+#[test]
 fn get_search_result_member_counts_returns_role_breakdown() {
     let env = env();
     let result: String = env
