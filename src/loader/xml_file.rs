@@ -543,7 +543,7 @@ mod tests {
         );
         assert_eq!(
             resolve(&XmlElement::EventEditBox(f.clone())),
-            Some(("EditBox", None))
+            Some(("EditBox", Some("EventEditBox")))
         );
         assert_eq!(
             resolve(&XmlElement::ScrollFrame(f.clone())),
@@ -551,7 +551,7 @@ mod tests {
         );
         assert_eq!(
             resolve(&XmlElement::EventScrollFrame(f.clone())),
-            Some(("ScrollFrame", None))
+            Some(("ScrollFrame", Some("EventScrollFrame")))
         );
         assert_eq!(
             resolve(&XmlElement::Slider(f.clone())),

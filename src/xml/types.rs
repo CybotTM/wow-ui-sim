@@ -277,36 +277,7 @@ impl FrameXml {
     pub fn all_frame_elements(&self) -> Vec<(&FrameXml, &'static str)> {
         let mut out = Vec::new();
         for child in &self.children {
-            match child {
-                FrameChildElement::Frames(frames) => {
-                    for element in &frames.elements {
-                        if let Some((frame, tag)) = element.as_frame_data() {
-                            out.push((frame, tag));
-                        }
-                    }
-                }
-                FrameChildElement::Frame(frame) => out.push((frame, "Frame")),
-                FrameChildElement::Button(frame) => out.push((frame, "Button")),
-                FrameChildElement::StatusBar(frame) => out.push((frame, "StatusBar")),
-                FrameChildElement::CheckButton(frame) => out.push((frame, "CheckButton")),
-                FrameChildElement::EditBox(frame) => out.push((frame, "EditBox")),
-                FrameChildElement::ScrollFrame(frame) => out.push((frame, "ScrollFrame")),
-                FrameChildElement::Slider(frame) => out.push((frame, "Slider")),
-                FrameChildElement::Cooldown(frame) => out.push((frame, "Cooldown")),
-                FrameChildElement::GameTooltip(frame) => out.push((frame, "GameTooltip")),
-                FrameChildElement::Model(frame) => out.push((frame, "Model")),
-                FrameChildElement::ModelScene(frame) => out.push((frame, "ModelScene")),
-                FrameChildElement::PlayerModel(frame) => out.push((frame, "PlayerModel")),
-                FrameChildElement::MessageFrame(frame) => out.push((frame, "MessageFrame")),
-                FrameChildElement::ScrollingMessageFrame(frame) => {
-                    out.push((frame, "ScrollingMessageFrame"))
-                }
-                FrameChildElement::SimpleHTML(frame) => out.push((frame, "SimpleHTML")),
-                FrameChildElement::ColorSelect(frame) => out.push((frame, "ColorSelect")),
-                FrameChildElement::ItemButton(frame) => out.push((frame, "ItemButton")),
-                FrameChildElement::EventFrame(frame) => out.push((frame, "EventFrame")),
-                _ => {}
-            }
+            collect_frame_child_elements(child, &mut out);
         }
         out
     }
@@ -487,6 +458,28 @@ fn visit_frames_section<E>(
         }
     }
     Ok(())
+}
+
+fn collect_frame_child_elements<'a>(
+    child: &'a FrameChildElement,
+    out: &mut Vec<(&'a FrameXml, &'static str)>,
+) {
+    if let FrameChildElement::Frames(frames) = child {
+        collect_frames_section(frames, out);
+        return;
+    }
+
+    if let Some((frame, tag)) = standalone_frame_child_tag(child) {
+        out.push((frame, tag));
+    }
+}
+
+fn collect_frames_section<'a>(frames: &'a FramesXml, out: &mut Vec<(&'a FrameXml, &'static str)>) {
+    for element in &frames.elements {
+        if let Some((frame, tag)) = element.as_frame_data() {
+            out.push((frame, tag));
+        }
+    }
 }
 
 fn standalone_frame_child_tag(child: &FrameChildElement) -> Option<(&FrameXml, &'static str)> {
