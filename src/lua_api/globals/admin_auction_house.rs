@@ -7,8 +7,8 @@
 
 use crate::lua_api::methods::{borrow_state_mut, val_to_string};
 use crate::lua_api::state::{
-    AuctionBrowseResult, AuctionReplicateItem, BidAuction, ItemSearchResultInfo, ItemSearchResults,
-    OwnedAuction,
+    AuctionBrowseResult, AuctionReplicateItem, BidAuction, CommoditySearchResultInfo,
+    CommoditySearchResults, ItemSearchResultInfo, ItemSearchResults, OwnedAuction,
 };
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -83,6 +83,40 @@ pub(super) fn add_auction_item_search_result(state: &mut LuaState) -> LuaResult<
 
 pub(super) fn clear_auction_item_search_results(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.auction_item_searches.clear();
+    Ok(0)
+}
+
+pub(super) fn add_auction_commodity_search_result(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    let quantity = i32::from_stack(state, 2)?;
+    let unit_price = i64::from_stack(state, 3)?;
+    let auction_id = i64::from_stack(state, 4)?;
+    let owner = val_to_string(state, Val::from_stack(state, 5)?).unwrap_or_default();
+
+    borrow_state_mut(state)?
+        .auction_commodity_searches
+        .entry(item_id)
+        .or_insert_with(|| CommoditySearchResults {
+            entries: Vec::new(),
+            has_full_results: true,
+        })
+        .entries
+        .push(CommoditySearchResultInfo {
+            item_id,
+            quantity,
+            unit_price,
+            auction_id,
+            owners: vec![owner],
+            time_left_seconds: 4 * 60 * 60,
+            num_owner_items: 0,
+            contains_owner_item: false,
+            contains_account_item: false,
+        });
+    Ok(0)
+}
+
+pub(super) fn clear_auction_commodity_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.auction_commodity_searches.clear();
     Ok(0)
 }
 

@@ -1376,8 +1376,10 @@ fn c_auction_house_search_for_favorites(state: &mut LuaState) -> LuaResult<u32> 
 
 /// Common dispatch for `SendSearchQuery` / `SendSellSearchQuery`. Fires
 /// `AUCTION_HOUSE_THROTTLED_MESSAGE_QUEUED` while the throttle gate is
-/// closed, `ITEM_SEARCH_RESULTS_UPDATED` when the corresponding bucket
-/// is already seeded, and `AUCTION_HOUSE_BROWSE_FAILURE` otherwise.
+/// closed, `COMMODITY_SEARCH_RESULTS_UPDATED` for seeded buyer-side
+/// commodity buckets, `ITEM_SEARCH_RESULTS_UPDATED` when the
+/// corresponding item bucket is already seeded, and
+/// `AUCTION_HOUSE_BROWSE_FAILURE` otherwise.
 fn dispatch_search_query_event(
     state: &mut LuaState,
     item_key_arg: Val,
@@ -1390,6 +1392,14 @@ fn dispatch_search_query_event(
         dispatch_event_now(state, AUCTION_HOUSE_BROWSE_FAILURE, &[])?;
         return Ok(0);
     };
+    if has_buyer_commodity_bucket(state, side, key.0)? {
+        dispatch_event_now(
+            state,
+            COMMODITY_SEARCH_RESULTS_UPDATED,
+            &[Val::Num(key.0 as f64)],
+        )?;
+        return Ok(0);
+    }
     let has_bucket = bucket_exists(state, side, &key)?;
     if has_bucket {
         let item_key = push_item_key_table_from_search_key(state, key);
@@ -1398,6 +1408,19 @@ fn dispatch_search_query_event(
         dispatch_event_now(state, AUCTION_HOUSE_BROWSE_FAILURE, &[])?;
     }
     Ok(0)
+}
+
+fn has_buyer_commodity_bucket(
+    state: &mut LuaState,
+    side: SearchSide,
+    item_id: i32,
+) -> LuaResult<bool> {
+    if !matches!(side, SearchSide::Buyer) {
+        return Ok(false);
+    }
+    Ok(borrow_state(state)?
+        .auction_commodity_searches
+        .contains_key(&item_id))
 }
 
 fn bucket_exists(state: &mut LuaState, side: SearchSide, key: &ItemSearchKey) -> LuaResult<bool> {
