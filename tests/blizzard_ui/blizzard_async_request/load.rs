@@ -1,6 +1,8 @@
 //! Load smoke for `Blizzard_AsyncRequest`.
 
-use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
+use crate::common::blizzard_addon_harness::{
+    with_blizzard_addon_glue_smoke_shape, with_blizzard_addon_smoke_shape,
+};
 use crate::common::panel_fixtures::{
     blizzard_ui_dir, clear_recorded_lua_errors, recorded_lua_errors,
 };
@@ -50,6 +52,33 @@ fn async_request_toc_declares_no_dependencies_and_loads_as_leaf() {
             [ROOT],
             "`{ROOT}` must load as a leaf addon in the smoke harness; shared XML panel setup is \
              provided before the dependency-closure load. Loaded closure: {loaded:?}"
+        );
+    });
+}
+
+#[test]
+fn async_request_allow_load_both_works_in_game_and_glue_contexts() {
+    let toc =
+        TocFile::from_file(&async_request_toc()).expect("Blizzard_AsyncRequest TOC should parse");
+    assert_eq!(
+        toc.metadata.get("AllowLoad").map(String::as_str),
+        Some("Both"),
+        "`{ROOT}` must remain loadable in both game and glue contexts"
+    );
+
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |_env, loaded| {
+        assert_eq!(
+            loaded,
+            [ROOT],
+            "`{ROOT}` must be accepted by the game-screen closure walker"
+        );
+    });
+
+    with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |_env, loaded| {
+        assert_eq!(
+            loaded,
+            [ROOT],
+            "`{ROOT}` must be accepted by the glue-screen closure walker"
         );
     });
 }
