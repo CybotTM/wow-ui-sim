@@ -268,6 +268,7 @@ fn scoped_modifier_returns_none() {
     use crate::xml::ScopedModifierXml;
     let sm = ScopedModifierXml {
         forbidden: None,
+        full_lockdown: None,
         elements: vec![],
     };
     assert_eq!(resolve(&FrameElement::ScopedModifier(sm)), None);

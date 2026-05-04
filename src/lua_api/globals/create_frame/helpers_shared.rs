@@ -116,11 +116,14 @@ fn apply_addon_ownership(
     frame: &mut Frame,
 ) -> LuaResult<()> {
     let sim = borrow_state_mut(state)?;
+    let parent_forbidden = parent_id
+        .and_then(|pid| sim.widgets.get(pid))
+        .is_some_and(|parent| parent.forbidden);
     frame.owner_addon = sim
         .loading_addon_index
         .or(sim.executing_addon_index)
         .or_else(|| parent_id.and_then(|pid| sim.widgets.get(pid).and_then(|f| f.owner_addon)));
-    frame.forbidden = sim.loading_forbidden;
+    frame.forbidden = sim.loading_forbidden || parent_forbidden;
     Ok(())
 }
 

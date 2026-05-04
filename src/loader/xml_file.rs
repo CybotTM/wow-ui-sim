@@ -113,7 +113,7 @@ fn process_scoped_modifier(
     timing: &mut LoadTiming,
 ) -> Result<usize, LoadError> {
     let prev_forbidden = env.state().borrow().loading_forbidden;
-    if scoped.forbidden.unwrap_or(false) {
+    if scoped.forbidden.unwrap_or(false) || scoped.full_lockdown.unwrap_or(false) {
         env.state().borrow_mut().loading_forbidden = true;
     }
     let mut count = 0;
