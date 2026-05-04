@@ -356,7 +356,8 @@ fn c_auction_house_request_more_browse_results(state: &mut LuaState) -> LuaResul
 }
 
 fn c_auction_house_get_item_key_info(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(item) = item_from_item_key(state) else {
+    let item_key = Val::from_stack(state, 1)?;
+    let Some(item) = item_from_item_key(state, item_key) else {
         state.push(Val::Nil);
         return Ok(1);
     };
@@ -367,7 +368,7 @@ fn c_auction_house_get_item_key_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_auction_house_get_item_key_required_level(state: &mut LuaState) -> LuaResult<u32> {
-    let item_key = state.stack_get(1);
+    let item_key = Val::from_stack(state, 1)?;
     let level = extract_item_key_id(state, item_key)
         .and_then(items::get_item)
         .map(|item| item.required_level as f64)
@@ -377,7 +378,7 @@ fn c_auction_house_get_item_key_required_level(state: &mut LuaState) -> LuaResul
 }
 
 fn c_auction_house_get_extra_browse_info(state: &mut LuaState) -> LuaResult<u32> {
-    let item_key = state.stack_get(1);
+    let item_key = Val::from_stack(state, 1)?;
     let quality = extract_item_key_id(state, item_key)
         .and_then(items::get_item)
         .map(|item| item.quality as f64)
@@ -584,8 +585,8 @@ fn push_item_key_info_table(state: &mut LuaState, item: &items::ItemInfo) -> Val
     info
 }
 
-fn item_from_item_key(state: &mut LuaState) -> Option<&'static items::ItemInfo> {
-    extract_item_key_id(state, state.stack_get(1)).and_then(items::get_item)
+fn item_from_item_key(state: &mut LuaState, item_key: Val) -> Option<&'static items::ItemInfo> {
+    extract_item_key_id(state, item_key).and_then(items::get_item)
 }
 
 fn item_icon_file_id(item: &items::ItemInfo) -> f64 {

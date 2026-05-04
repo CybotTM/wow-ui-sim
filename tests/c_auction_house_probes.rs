@@ -240,6 +240,23 @@ fn make_item_key_zeroes_optional_args_when_omitted() {
 }
 
 #[test]
+fn get_item_key_info_resolves_make_item_key_result() {
+    let env = env();
+    let (name, icon, quality): (String, i32, i32) = env
+        .eval(
+            r#"
+            local key = C_AuctionHouse.MakeItemKey(210935, 70)
+            local info = C_AuctionHouse.GetItemKeyInfo(key)
+            return info.itemName, info.iconFileID, info.quality
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Aqirite");
+    assert!(icon > 0, "iconFileID should be populated");
+    assert!(quality >= 0, "quality should be populated");
+}
+
+#[test]
 fn get_item_key_from_item_resolves_item_id_to_full_key() {
     let env = env();
     let (item_id, item_level): (i32, i32) = env
