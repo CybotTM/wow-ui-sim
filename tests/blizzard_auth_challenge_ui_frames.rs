@@ -24,6 +24,14 @@ expect(not AuthChallengeFrame:IsShown(), "AuthChallengeFrame must start hidden")
 expect(AuthChallengeFrame:IsKeyboardEnabled(), "AuthChallengeFrame must enable keyboard")
 expect(AuthChallengeFrame:IsMouseEnabled(), "AuthChallengeFrame must enable mouse")
 
+for _, childName in ipairs({ "WaitFrame", "InputFrame", "DeniedFrame", "ErrorFrame" }) do
+  local child = AuthChallengeFrame[childName]
+  expect(child ~= nil, "AuthChallengeFrame." .. childName .. " must exist")
+  if child ~= nil then
+    expect(not child:IsShown(), "AuthChallengeFrame." .. childName .. " must start hidden")
+  end
+end
+
 return table.concat(failures, "\n")
 "#;
 
