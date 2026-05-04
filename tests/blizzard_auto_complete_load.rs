@@ -3,7 +3,8 @@ mod common;
 use std::path::PathBuf;
 
 use common::blizzard_addon_harness::{
-    with_blizzard_addon_glue_smoke_shape, with_blizzard_addon_smoke_shape,
+    with_blizzard_addon_closure, with_blizzard_addon_glue_smoke_shape,
+    with_blizzard_addon_smoke_shape,
 };
 use common::panel_fixtures::{blizzard_ui_dir, clear_recorded_lua_errors, recorded_lua_errors};
 use wow_ui_sim::screen::ScreenKind;
@@ -11,6 +12,8 @@ use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_AutoComplete";
 const ROOT_TOC_FILE: &str = "Blizzard_AutoComplete.toc";
+const GAME_OPTIONAL_DEP: &str = "Blizzard_UIParent";
+const RAW_OPTIONAL_DEPS_LINE: &str = "## OptionalDeps: Blizzard_UIParent, Blizzard_GlueParent";
 
 #[test]
 fn blizzard_auto_complete_loads_without_ingestion_errors() {
@@ -50,6 +53,70 @@ fn blizzard_auto_complete_allowload_both_loads_in_game_and_glue_scopes() {
             });
         });
     });
+}
+
+#[test]
+fn blizzard_auto_complete_optional_dep_loads_uiparent_before_autocomplete() {
+    assert_toc_declares_uiparent_optional_dep();
+
+    common::with_perf_lock(|| {
+        common::with_timeout(240, || {
+            with_blizzard_addon_closure(&[ROOT], &[], |env, loaded| {
+                assert_loaded_before(loaded, GAME_OPTIONAL_DEP, ROOT);
+
+                let (uiparent_loaded, autocomplete_loaded, color_code_available): (
+                    bool,
+                    bool,
+                    bool,
+                ) = env
+                    .eval(
+                        r#"
+                        return C_AddOns.IsAddOnLoaded("Blizzard_UIParent"),
+                            C_AddOns.IsAddOnLoaded("Blizzard_AutoComplete"),
+                            type(RGBTableToColorCode) == "function"
+                        "#,
+                    )
+                    .expect("optional dependency availability probe should return");
+                assert!(
+                    uiparent_loaded,
+                    "`{GAME_OPTIONAL_DEP}` must be loaded before `{ROOT}` evaluates"
+                );
+                assert!(
+                    autocomplete_loaded,
+                    "`{ROOT}` must be loaded by the closure"
+                );
+                assert!(
+                    color_code_available,
+                    "`RGBTableToColorCode` must be available from `{GAME_OPTIONAL_DEP}` \
+                     before `{ROOT}` can evaluate `AutoComplete_UpdateResults` safely"
+                );
+            });
+        });
+    });
+}
+
+fn assert_toc_declares_uiparent_optional_dep() {
+    let toc = load_root_toc();
+    let optional_deps = toc.optional_deps();
+    assert!(
+        optional_deps.iter().any(|dep| dep == GAME_OPTIONAL_DEP),
+        "`{ROOT}` must declare `{GAME_OPTIONAL_DEP}` in `## OptionalDeps` so the \
+         closure walker keeps `RGBTableToColorCode` available before AutoComplete.lua \
+         evaluates. Optional deps: {optional_deps:?}"
+    );
+
+    let toc_path = root_toc_path();
+    let raw_toc = std::fs::read_to_string(&toc_path).unwrap_or_else(|err| {
+        panic!(
+            "TOC at `{}` MUST be readable for raw OptionalDeps verification: {err}",
+            toc_path.display()
+        )
+    });
+    assert!(
+        raw_toc.contains(RAW_OPTIONAL_DEPS_LINE),
+        "`{ROOT}` must keep the exact plural OptionalDeps line `{RAW_OPTIONAL_DEPS_LINE}`. \
+         Raw TOC:\n{raw_toc}"
+    );
 }
 
 fn assert_toc_allows_game_and_glue_scopes() {
@@ -110,5 +177,20 @@ fn assert_loaded_in_scope(
         errors.is_empty(),
         "`{ROOT}` emitted Lua errors in the {scope} scope:\n{}",
         errors.join("\n")
+    );
+}
+
+fn assert_loaded_before(loaded: &[String], before: &str, after: &str) {
+    let before_index = loaded
+        .iter()
+        .position(|name| name == before)
+        .unwrap_or_else(|| panic!("`{before}` must appear in the loaded closure: {loaded:?}"));
+    let after_index = loaded
+        .iter()
+        .position(|name| name == after)
+        .unwrap_or_else(|| panic!("`{after}` must appear in the loaded closure: {loaded:?}"));
+    assert!(
+        before_index < after_index,
+        "`{before}` must load before `{after}`. Loaded closure: {loaded:?}"
     );
 }
