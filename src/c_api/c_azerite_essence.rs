@@ -26,8 +26,9 @@
 //! - `HasNeverActivatedAnyEssences() → bool`
 //! - `GetEssenceHyperlink(essenceID, rank) → string|nil`
 
-use crate::c_api::ensure_namespace;
+use crate::c_api::{ensure_namespace, global_val};
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
+use crate::lua_api::methods::call_function_state;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, create_table_with_fields,
     table_set_num,
@@ -340,7 +341,17 @@ fn close_forge(state: &mut LuaState) -> LuaResult<u32> {
         sim.azerite_essence.is_at_forge = false;
     }
     dispatch_event_now(state, "AZERITE_ESSENCE_FORGE_CLOSE", &[])?;
+    hide_azerite_essence_panel(state)?;
     Ok(0)
+}
+
+fn hide_azerite_essence_panel(state: &mut LuaState) -> LuaResult<()> {
+    let hide_panel = global_val(state, "HideUIPanel");
+    let panel = global_val(state, "AzeriteEssenceUI");
+    if matches!(hide_panel, Val::Function(_)) && !matches!(panel, Val::Nil) {
+        call_function_state(state, hide_panel, &[panel])?;
+    }
+    Ok(())
 }
 
 fn unlock_milestone(state: &mut LuaState) -> LuaResult<u32> {
