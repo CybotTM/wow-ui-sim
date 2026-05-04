@@ -45,6 +45,30 @@ if popup ~= nil then
   end)
   expect(rowCount == 3, "highlight popup must initialize 3 rows, got " ..
                        tostring(rowCount))
+
+  popup:HighlightResult(0)
+  expect(popup.highlightedIndex == 3,
+         "HighlightResult(0) must wrap highlightedIndex to 3, got " ..
+         tostring(popup.highlightedIndex))
+
+  popup.ScrollBox:ForEachFrame(function(row)
+    local shouldHighlight = row:GetIndex() == 3
+    expect(row.HighlightTexture:IsShown() == shouldHighlight,
+           "row " .. tostring(row:GetIndex()) ..
+           " HighlightTexture shown state mismatch after HighlightResult(0)")
+  end)
+
+  popup:HighlightResult(5)
+  expect(popup.highlightedIndex == 2,
+         "HighlightResult(5) must wrap highlightedIndex to 2, got " ..
+         tostring(popup.highlightedIndex))
+
+  popup.ScrollBox:ForEachFrame(function(row)
+    local shouldHighlight = row:GetIndex() == 2
+    expect(row.HighlightTexture:IsShown() == shouldHighlight,
+           "row " .. tostring(row:GetIndex()) ..
+           " HighlightTexture shown state mismatch after HighlightResult(5)")
+  end)
 end
 
 local emptyPopup = CreateFrame("Frame", "TestPopupListHighlightEmptyFrame",
