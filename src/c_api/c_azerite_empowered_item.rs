@@ -16,8 +16,10 @@
 //!   `{equipmentSlotIndex}`).
 //! - `ConfirmAzeriteEmpoweredItemRespec(itemLocation)` — records the
 //!   location on `last_confirmed_respec` and clears the resolved
-//!   item's `selections` entry. No-op when the location is nil or not
-//!   a table (mirrors the addon's nil-cursor case).
+//!   item's `selections` entry, then fires
+//!   `AZERITE_EMPOWERED_ITEM_SELECTION_UPDATED` with the same location.
+//!   No-op when the location is nil or not a table (mirrors the addon's
+//!   nil-cursor case).
 //!
 //! Panel-flow methods:
 //! - `GetPowerText(itemLocation, powerID, level) → {name, description}|nil`
@@ -95,10 +97,11 @@ fn get_azerite_empowered_item_respec_cost(state: &mut LuaState) -> LuaResult<u32
 fn is_azerite_empowered_item(state: &mut LuaState) -> LuaResult<u32> {
     let item_id = resolve_location_item_id(state, 1);
     let empowered = match item_id {
-        Some(id) => borrow_state(state)?
-            .azerite_empowered
-            .empowered_items
-            .contains(&id),
+        Some(id) => {
+            let sim = borrow_state(state)?;
+            let empowered_items = &sim.azerite_empowered.empowered_items;
+            std::collections::HashSet::contains(empowered_items, &id)
+        }
         None => false,
     };
     state.push(Val::Bool(empowered));
@@ -109,12 +112,19 @@ fn confirm_azerite_empowered_item_respec(state: &mut LuaState) -> LuaResult<u32>
     let Some(location) = read_optional_location(state, 1) else {
         return Ok(0);
     };
+    let location_arg = crate::lua_bridge::stack_val(state, 1);
     let selection_key = build_selection_key(state, 1);
     let mut sim = borrow_state_mut(state)?;
     sim.azerite_empowered.last_confirmed_respec = Some(location);
     if let Some(key) = selection_key {
         sim.azerite_empowered.selections.remove(&key);
     }
+    drop(sim);
+    dispatch_event_now(
+        state,
+        "AZERITE_EMPOWERED_ITEM_SELECTION_UPDATED",
+        &[location_arg],
+    )?;
     Ok(0)
 }
 
@@ -255,10 +265,10 @@ fn resolve_location_item_id(state: &mut LuaState, slot: i32) -> Option<i32> {
         return Some(id);
     }
     let sim = borrow_state(state).ok()?;
-    if let (Some(bag), Some(idx)) = (fields.bag_id, fields.slot_index) {
-        if let Some((item_id, _)) = sim.get_bag_item(bag, idx) {
-            return Some(item_id as i32);
-        }
+    if let (Some(bag), Some(idx)) = (fields.bag_id, fields.slot_index)
+        && let Some((item_id, _)) = sim.get_bag_item(bag, idx)
+    {
+        return Some(item_id as i32);
     }
     let slot_idx = fields.equipment_slot?;
     sim.player
