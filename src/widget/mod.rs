@@ -33,6 +33,7 @@ pub fn next_region_order() -> u64 {
 }
 
 /// Widget types supported by the simulator.
+#[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WidgetType {
     Frame,
@@ -56,6 +57,29 @@ pub enum WidgetType {
     Minimap,
     WorldFrame,
 }
+
+const WIDGET_TYPE_NAMES: [&str; 20] = [
+    "Frame",
+    "Button",
+    "FontString",
+    "Texture",
+    "Line",
+    "EditBox",
+    "ScrollFrame",
+    "Slider",
+    "CheckButton",
+    "StatusBar",
+    "Cooldown",
+    "Model",
+    "ModelScene",
+    "PlayerModel",
+    "ColorSelect",
+    "MessageFrame",
+    "SimpleHTML",
+    "GameTooltip",
+    "Minimap",
+    "Frame",
+];
 
 impl WidgetType {
     #[allow(clippy::should_implement_trait)]
@@ -144,27 +168,35 @@ impl WidgetType {
     }
 
     pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Frame => "Frame",
-            Self::Button => "Button",
-            Self::FontString => "FontString",
-            Self::Texture => "Texture",
-            Self::Line => "Line",
-            Self::EditBox => "EditBox",
-            Self::ScrollFrame => "ScrollFrame",
-            Self::Slider => "Slider",
-            Self::CheckButton => "CheckButton",
-            Self::StatusBar => "StatusBar",
-            Self::Cooldown => "Cooldown",
-            Self::Model => "Model",
-            Self::ModelScene => "ModelScene",
-            Self::PlayerModel => "PlayerModel",
-            Self::ColorSelect => "ColorSelect",
-            Self::MessageFrame => "MessageFrame",
-            Self::SimpleHTML => "SimpleHTML",
-            Self::GameTooltip => "GameTooltip",
-            Self::Minimap => "Minimap",
-            Self::WorldFrame => "Frame",
-        }
+        WIDGET_TYPE_NAMES[*self as usize]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::WidgetType;
+
+    #[test]
+    fn widget_type_as_str_returns_wow_object_type_names() {
+        assert_eq!(WidgetType::Frame.as_str(), "Frame");
+        assert_eq!(WidgetType::Button.as_str(), "Button");
+        assert_eq!(WidgetType::FontString.as_str(), "FontString");
+        assert_eq!(WidgetType::Texture.as_str(), "Texture");
+        assert_eq!(WidgetType::Line.as_str(), "Line");
+        assert_eq!(WidgetType::EditBox.as_str(), "EditBox");
+        assert_eq!(WidgetType::ScrollFrame.as_str(), "ScrollFrame");
+        assert_eq!(WidgetType::Slider.as_str(), "Slider");
+        assert_eq!(WidgetType::CheckButton.as_str(), "CheckButton");
+        assert_eq!(WidgetType::StatusBar.as_str(), "StatusBar");
+        assert_eq!(WidgetType::Cooldown.as_str(), "Cooldown");
+        assert_eq!(WidgetType::Model.as_str(), "Model");
+        assert_eq!(WidgetType::ModelScene.as_str(), "ModelScene");
+        assert_eq!(WidgetType::PlayerModel.as_str(), "PlayerModel");
+        assert_eq!(WidgetType::ColorSelect.as_str(), "ColorSelect");
+        assert_eq!(WidgetType::MessageFrame.as_str(), "MessageFrame");
+        assert_eq!(WidgetType::SimpleHTML.as_str(), "SimpleHTML");
+        assert_eq!(WidgetType::GameTooltip.as_str(), "GameTooltip");
+        assert_eq!(WidgetType::Minimap.as_str(), "Minimap");
+        assert_eq!(WidgetType::WorldFrame.as_str(), "Frame");
     }
 }
