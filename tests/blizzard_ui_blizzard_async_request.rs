@@ -34,3 +34,6 @@ mod behavior_response_event_fires_callback;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_response_event_other_name_ignored.rs"]
 mod behavior_response_event_other_name_ignored;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_timeout_fires_callback.rs"]
+mod behavior_timeout_fires_callback;
