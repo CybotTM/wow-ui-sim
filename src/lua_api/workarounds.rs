@@ -247,6 +247,19 @@ const AUTH_CHALLENGE_FRAME_PARENT_WORKAROUND_LUA: &str = r#"
     if AuthChallengeFrame:GetParent() ~= UIParent then
         AuthChallengeFrame:SetParent(UIParent)
     end
+
+    local inputFrame = AuthChallengeFrame.InputFrame
+    if inputFrame and inputFrame.Submit == nil and type(inputFrame.GetChildren) == "function" then
+        for _, child in ipairs({ inputFrame:GetChildren() }) do
+            if type(child.GetObjectType) == "function"
+                and child:GetObjectType() == "Button"
+                and type(child.GetText) == "function"
+                and child:GetText() == BLIZZARD_CHALLENGE_SUBMIT then
+                inputFrame.Submit = child
+                break
+            end
+        end
+    end
 "#;
 
 struct WorkaroundStep {

@@ -13,6 +13,14 @@ local function expect(condition, message)
   end
 end
 
+local function expectObjectType(frame, expectedType, message)
+  expect(frame ~= nil, message .. " must exist")
+  if frame ~= nil then
+    expect(frame:GetObjectType() == expectedType,
+           message .. " must be a " .. expectedType)
+  end
+end
+
 expect(AuthChallengeFrame ~= nil, "AuthChallengeFrame must exist")
 local parent = AuthChallengeFrame and AuthChallengeFrame:GetParent()
 local parentName = parent and parent:GetName() or "nil"
@@ -30,6 +38,18 @@ for _, childName in ipairs({ "WaitFrame", "InputFrame", "DeniedFrame", "ErrorFra
   if child ~= nil then
     expect(not child:IsShown(), "AuthChallengeFrame." .. childName .. " must start hidden")
   end
+end
+
+local inputFrame = AuthChallengeFrame.InputFrame
+if inputFrame ~= nil then
+  for _, inputName in ipairs({ "Input1", "Input2", "Input3", "Input4" }) do
+    expectObjectType(inputFrame[inputName], "EditBox", "AuthChallengeFrame.InputFrame." .. inputName)
+  end
+
+  expectObjectType(inputFrame.Submit, "Button", "AuthChallengeFrame.InputFrame.Submit")
+  expectObjectType(inputFrame.Prompt, "FontString", "AuthChallengeFrame.InputFrame.Prompt")
+  expectObjectType(inputFrame.Info, "FontString", "AuthChallengeFrame.InputFrame.Info")
+  expectObjectType(inputFrame.Error, "FontString", "AuthChallengeFrame.InputFrame.Error")
 end
 
 return table.concat(failures, "\n")
