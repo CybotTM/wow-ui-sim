@@ -19,3 +19,6 @@ mod behavior_create_requires_callbacks;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_create_timeout_pair_required.rs"]
 mod behavior_create_timeout_pair_required;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_start_calls_request_function.rs"]
+mod behavior_start_calls_request_function;
