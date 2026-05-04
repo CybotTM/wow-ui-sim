@@ -32,22 +32,7 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
     let (parent_id, parent_explicit) =
         resolve_parent_id(state, args.parent_val, args.default_parent_allowed)?;
     let runtime_inherits = build_runtime_inherits(&args.frame_type, args.inherits.as_deref());
-    let parent_for_name_sub = if parent_explicit && parent_id != 0 {
-        Some(parent_id)
-    } else {
-        None
-    };
-    if let Some(name) = args.name.take() {
-        let resolved_name = {
-            let sim = borrow_state(state)?;
-            crate::lua_api::globals::create_frame::apply_parent_sub(
-                &name,
-                parent_for_name_sub,
-                &sim,
-            )
-        };
-        args.name = Some(resolved_name);
-    }
+    args.name = resolve_frame_name(state, args.name.take(), parent_id, parent_explicit)?;
     let frame_id = crate::lua_api::globals::create_frame::create_frame_instance(
         state,
         args.widget_type,
@@ -87,6 +72,7 @@ struct CreateFrameArgs {
 
 fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
     let frame_type: String = FromStack::from_stack(state, 1)?;
+    let arg_count = state.top.saturating_sub(state.base);
     let arg2 = stack_val(state, 2);
     let arg3 = stack_val(state, 3);
     let arg4 = stack_val(state, 4);
@@ -101,7 +87,7 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
     } else {
         Val::Nil
     };
-    let default_parent_allowed = matches!(arg2, Val::Str(_) | Val::Nil);
+    let default_parent_allowed = arg_count >= 2 && matches!(arg2, Val::Str(_) | Val::Nil);
     let inherits = val_to_string(state, arg4);
     let id = match arg5 {
         Val::Num(n) => Some(n as i32),
@@ -118,6 +104,22 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
         inherits,
         id,
     })
+}
+
+fn resolve_frame_name(
+    state: &mut LuaState,
+    name: Option<String>,
+    parent_id: u64,
+    parent_explicit: bool,
+) -> LuaResult<Option<String>> {
+    let Some(name) = name else {
+        return Ok(None);
+    };
+    let parent_for_name_sub = (parent_explicit && parent_id != 0).then_some(parent_id);
+    let sim = borrow_state(state)?;
+    Ok(Some(
+        crate::lua_api::globals::create_frame::apply_parent_sub(&name, parent_for_name_sub, &sim),
+    ))
 }
 
 fn resolve_parent_id(
@@ -207,5 +209,33 @@ mod tests {
             .eval("local p = RiluaCreateFrameChild:GetParent(); return p and p:GetName()")
             .expect("eval parent name");
         assert_eq!(parent_name.as_deref(), Some("UIParent"));
+    }
+
+    #[test]
+    fn create_frame_omitted_parent_is_nil() {
+        let env = WowLuaEnv::new().expect("env");
+
+        let parents: (bool, Option<String>) = env
+            .eval(
+                r#"
+                local omitted = CreateFrame("Frame")
+                local explicitNilName = CreateFrame("Frame", nil)
+                local explicitNilParent = explicitNilName:GetParent()
+
+                return omitted:GetParent() == nil,
+                       explicitNilParent and explicitNilParent:GetName()
+            "#,
+            )
+            .expect("CreateFrame parent defaults should be observable");
+
+        assert!(
+            parents.0,
+            "omitting the parent argument must leave parent nil"
+        );
+        assert_eq!(
+            parents.1.as_deref(),
+            Some("UIParent"),
+            "passing nil as the name still uses the legacy UIParent default"
+        );
     }
 }
