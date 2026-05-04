@@ -133,6 +133,28 @@ const ARTIFACT_UI_SHOW_PANEL_GUARD_WORKAROUND_LUA: &str = r#"
     rawset(_G, "__wow_artifact_ui_show_panel_guard_wrapped", true)
 "#;
 
+const AUCTION_HOUSE_CATEGORIES_REFRESH_COUNT_WORKAROUND_LUA: &str = r#"
+    local function getNumElementsForRefresh()
+        return type(AuctionCategories) == "table" and #AuctionCategories or 0
+    end
+
+    local categoriesList = AuctionHouseFrame and AuctionHouseFrame.CategoriesList or nil
+    if type(categoriesList) == "table"
+        and type(categoriesList.GetNumElementsForRefresh) ~= "function" then
+        categoriesList.GetNumElementsForRefresh = getNumElementsForRefresh
+    end
+
+    if type(AuctionHouseCategoriesListMixin) ~= "table" then
+        return
+    end
+
+    if type(AuctionHouseCategoriesListMixin.GetNumElementsForRefresh) == "function" then
+        return
+    end
+
+    AuctionHouseCategoriesListMixin.GetNumElementsForRefresh = getNumElementsForRefresh
+"#;
+
 struct WorkaroundStep {
     label: &'static str,
     apply: fn(&crate::lua_api::WowLuaEnv),
@@ -402,6 +424,9 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     }
     if addon_name == "Blizzard_ArtifactUI" {
         patch_artifact_ui_show_panel_guard(env);
+    }
+    if addon_name == "Blizzard_AuctionHouseUI" {
+        patch_auction_house_categories_refresh_count(env);
     }
     if addon_name == "Blizzard_AccountStore" {
         let _ = patch_account_store_set_storefront(env);
@@ -1393,6 +1418,10 @@ fn patch_item_quality_color_data_methods(env: &crate::lua_api::LoaderEnv<'_>) {
 
 fn patch_artifact_ui_show_panel_guard(env: &crate::lua_api::LoaderEnv<'_>) {
     let _ = env.exec(ARTIFACT_UI_SHOW_PANEL_GUARD_WORKAROUND_LUA);
+}
+
+fn patch_auction_house_categories_refresh_count(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(AUCTION_HOUSE_CATEGORIES_REFRESH_COUNT_WORKAROUND_LUA);
 }
 
 pub(crate) fn patch_account_store_set_storefront(
