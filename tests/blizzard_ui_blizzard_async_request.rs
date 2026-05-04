@@ -25,3 +25,6 @@ mod behavior_start_calls_request_function;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_start_registers_response_event.rs"]
 mod behavior_start_registers_response_event;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_start_is_idempotent_when_running.rs"]
+mod behavior_start_is_idempotent_when_running;
