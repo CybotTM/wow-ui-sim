@@ -49,3 +49,6 @@ mod behavior_no_timeout_path_skips_timer;
 
 #[path = "blizzard_ui/blizzard_async_request/behavior_two_concurrent_requests_isolated.rs"]
 mod behavior_two_concurrent_requests_isolated;
+
+#[path = "blizzard_ui/blizzard_async_request/behavior_response_callback_can_restart.rs"]
+mod behavior_response_callback_can_restart;
