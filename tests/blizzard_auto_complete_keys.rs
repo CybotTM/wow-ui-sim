@@ -35,6 +35,29 @@ expect(editBox.disallowAutoComplete == false, "non-backspace keyup must preserve
 
 return table.concat(failures, "\n")
 "#;
+const TEXT_CHANGED_DISALLOWED_PROBE_LUA: &str = r#"
+local failures = {}
+
+local function expect(condition, message)
+  if not condition then
+    table.insert(failures, message)
+  end
+end
+
+local editBox = CreateFrame("EditBox", nil, UIParent)
+editBox:SetText("abc")
+editBox.disallowAutoComplete = true
+
+AutoCompleteBox.parent = editBox
+AutoCompleteBox:Show()
+
+AutoCompleteEditBox_OnTextChanged(editBox, true)
+
+expect(not AutoCompleteBox:IsShown(), "disallowed text change must hide AutoCompleteBox")
+expect(AutoCompleteBox.parent == nil, "disallowed text change must detach AutoCompleteBox")
+
+return table.concat(failures, "\n")
+"#;
 
 #[test]
 fn blizzard_auto_complete_backspace_toggles_disallow_flag() {
@@ -53,6 +76,29 @@ fn blizzard_auto_complete_backspace_toggles_disallow_flag() {
                 assert!(
                     failures.is_empty(),
                     "`{ROOT}` key handler mismatches:\n{failures}"
+                );
+            });
+        });
+    });
+}
+
+#[test]
+fn blizzard_auto_complete_text_changed_hides_when_disallowed() {
+    common::with_perf_lock(|| {
+        common::with_timeout(240, || {
+            with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
+                assert!(
+                    loaded.iter().any(|name| name == ROOT),
+                    "`{ROOT}` must load before AutoComplete text-change handling can be checked. \
+                     Loaded set: {loaded:?}"
+                );
+
+                let failures: String = env
+                    .eval(TEXT_CHANGED_DISALLOWED_PROBE_LUA)
+                    .expect("AutoComplete text-change disallowed probe should run");
+                assert!(
+                    failures.is_empty(),
+                    "`{ROOT}` text-change disallowed mismatches:\n{failures}"
                 );
             });
         });
