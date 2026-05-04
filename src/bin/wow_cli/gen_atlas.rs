@@ -235,6 +235,9 @@ const GET_ATLAS_INFO_FN: &[&str] = &[
     "",
 ];
 
+const ATLAS_DB_HEADER: &[&str] =
+    &["pub static ATLAS_DB: phf::Map<&'static str, AtlasInfo> = phf_map! {"];
+
 fn write_get_atlas_slice_info_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(
         out,
@@ -248,11 +251,7 @@ fn write_get_atlas_slice_info_fn(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_atlas_db_header(out: &mut File) -> std::io::Result<()> {
-    writeln!(
-        out,
-        "pub static ATLAS_DB: phf::Map<&'static str, AtlasInfo> = phf_map! {{"
-    )?;
-    Ok(())
+    write_literal_lines(out, ATLAS_DB_HEADER)
 }
 
 fn write_atlas_entries(
