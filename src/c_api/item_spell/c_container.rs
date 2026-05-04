@@ -57,6 +57,7 @@ pub(crate) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
 }
 
 type ContainerScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
+type ContainerMethod = (&'static str, ContainerScriptFn);
 
 fn register_container_query_methods(
     state: &mut LuaState,
@@ -115,7 +116,7 @@ fn container_slot_count(bag: i32) -> i32 {
 fn register_container_methods(
     state: &mut LuaState,
     table_ref: GcRef<Table>,
-    entries: &[(&'static str, ContainerScriptFn)],
+    entries: &[ContainerMethod],
 ) -> LuaResult<()> {
     for &(name, func) in entries {
         table_set_rust_fn_static(state, table_ref, name, func)?;
