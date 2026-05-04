@@ -28,8 +28,9 @@ use super::admin_actionbars_bags::{
 };
 use super::admin_addons::register_test_addon;
 use super::admin_auction_house::{
-    add_auction_bid, add_auction_browse_result, add_auction_replicate_item, add_owned_auction,
-    clear_auction_bids, clear_auction_browse_results, clear_auction_replicate_items,
+    add_auction_bid, add_auction_browse_result, add_auction_item_search_result,
+    add_auction_replicate_item, add_owned_auction, clear_auction_bids,
+    clear_auction_browse_results, clear_auction_item_search_results, clear_auction_replicate_items,
     clear_owned_auctions, set_auction_throttle_ready,
 };
 use super::admin_buffs::{add_buff, clear_buffs, remove_buff};
@@ -276,6 +277,11 @@ fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("ClearBags", clear_bags)?
         .set_function("AddAuctionBrowseResult", add_auction_browse_result)?
         .set_function("ClearAuctionBrowseResults", clear_auction_browse_results)?
+        .set_function("AddAuctionItemSearchResult", add_auction_item_search_result)?
+        .set_function(
+            "ClearAuctionItemSearchResults",
+            clear_auction_item_search_results,
+        )?
         .set_function("SetAuctionThrottleReady", set_auction_throttle_ready)?
         .set_function("AddAuctionReplicateItem", add_auction_replicate_item)?
         .set_function("ClearAuctionReplicateItems", clear_auction_replicate_items)?

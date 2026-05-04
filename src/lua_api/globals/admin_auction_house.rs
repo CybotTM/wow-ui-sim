@@ -6,7 +6,10 @@
 //! / bids lists.
 
 use crate::lua_api::methods::{borrow_state_mut, val_to_string};
-use crate::lua_api::state::{AuctionBrowseResult, AuctionReplicateItem, BidAuction, OwnedAuction};
+use crate::lua_api::state::{
+    AuctionBrowseResult, AuctionReplicateItem, BidAuction, ItemSearchResultInfo, ItemSearchResults,
+    OwnedAuction,
+};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -37,6 +40,49 @@ pub(super) fn add_auction_browse_result(state: &mut LuaState) -> LuaResult<u32> 
 
 pub(super) fn clear_auction_browse_results(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.auction_browse_results.clear();
+    Ok(0)
+}
+
+pub(super) fn add_auction_item_search_result(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    let item_level = i32::from_stack(state, 2)?;
+    let auction_id = i32::from_stack(state, 3)?;
+    let quantity = i32::from_stack(state, 4)?;
+    let min_bid = i64::from_stack(state, 5)?;
+    let bid_amount = i64::from_stack(state, 6)?;
+    let buyout_amount = i64::from_stack(state, 7)?;
+    let time_left = i32::from_stack(state, 8)?;
+    let time_left_seconds = i64::from_stack(state, 9)?;
+    let owner = val_to_string(state, Val::from_stack(state, 10)?).unwrap_or_default();
+
+    borrow_state_mut(state)?
+        .auction_item_searches
+        .entry((item_id, item_level, 0, 0))
+        .or_insert_with(|| ItemSearchResults {
+            entries: Vec::new(),
+            has_full_results: true,
+        })
+        .entries
+        .push(ItemSearchResultInfo {
+            owners: vec![owner],
+            time_left,
+            auction_id: i64::from(auction_id),
+            quantity,
+            item_link: format!("|cffffffff|Hitem:{item_id}|h[Item {item_id}]|h|r"),
+            contains_owner_item: false,
+            contains_account_item: false,
+            contains_socketed_item: false,
+            bidder: None,
+            min_bid,
+            bid_amount,
+            buyout_amount,
+            time_left_seconds,
+        });
+    Ok(0)
+}
+
+pub(super) fn clear_auction_item_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.auction_item_searches.clear();
     Ok(0)
 }
 
