@@ -54,6 +54,31 @@ fn decode_number(value: Val) -> Result<f64> {
     }
 }
 
+fn integer_decode_error(number: f64) -> crate::Error {
+    crate::Error::Other(format!(
+        "expected integer result, got non-integer number {number}"
+    ))
+}
+
+fn decode_integer<T>(value: Val, convert: impl FnOnce(f64) -> Option<T>) -> Result<T> {
+    let number = decode_number(value)?;
+    convert(number).ok_or_else(|| integer_decode_error(number))
+}
+
+fn decode_i32(value: Val) -> Result<i32> {
+    decode_integer(value, |number| {
+        let int = number as i32;
+        (int as f64 == number).then_some(int)
+    })
+}
+
+fn decode_i64(value: Val) -> Result<i64> {
+    decode_integer(value, |number| {
+        let int = number as i64;
+        (int as f64 == number).then_some(int)
+    })
+}
+
 // ── Scalar impls ─────────────────────────────────────────────────────────────
 
 impl FromRiluaResults for () {
@@ -103,57 +128,25 @@ impl FromRiluaValue for f32 {
 
 impl FromRiluaResults for i32 {
     fn from_results(_state: &LuaState, results: Vec<Val>) -> Result<Self> {
-        let number = decode_number(first_result(&results))?;
-        let int = number as i32;
-        if int as f64 == number {
-            Ok(int)
-        } else {
-            Err(crate::Error::Other(format!(
-                "expected integer result, got non-integer number {number}"
-            )))
-        }
+        decode_i32(first_result(&results))
     }
 }
 
 impl FromRiluaValue for i32 {
     fn from_value(_state: &LuaState, value: Val) -> Result<Self> {
-        let number = decode_number(value)?;
-        let int = number as i32;
-        if int as f64 == number {
-            Ok(int)
-        } else {
-            Err(crate::Error::Other(format!(
-                "expected integer result, got non-integer number {number}"
-            )))
-        }
+        decode_i32(value)
     }
 }
 
 impl FromRiluaResults for i64 {
     fn from_results(_state: &LuaState, results: Vec<Val>) -> Result<Self> {
-        let number = decode_number(first_result(&results))?;
-        let int = number as i64;
-        if int as f64 == number {
-            Ok(int)
-        } else {
-            Err(crate::Error::Other(format!(
-                "expected integer result, got non-integer number {number}"
-            )))
-        }
+        decode_i64(first_result(&results))
     }
 }
 
 impl FromRiluaValue for i64 {
     fn from_value(_state: &LuaState, value: Val) -> Result<Self> {
-        let number = decode_number(value)?;
-        let int = number as i64;
-        if int as f64 == number {
-            Ok(int)
-        } else {
-            Err(crate::Error::Other(format!(
-                "expected integer result, got non-integer number {number}"
-            )))
-        }
+        decode_i64(value)
     }
 }
 
