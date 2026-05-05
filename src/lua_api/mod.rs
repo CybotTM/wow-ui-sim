@@ -3,7 +3,6 @@
 mod addon_scan;
 pub mod animation;
 mod builtin_frames;
-#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub mod chat_init;
 mod diagnostics;
 mod env;

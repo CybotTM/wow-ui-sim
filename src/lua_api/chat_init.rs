@@ -3,12 +3,6 @@
 //! Sets up ChatFrame1 position/size, chat type colors, and fake chat
 //! messages for a realistic UI appearance.
 //!
-// TODO: wire from register_globals after colleague's register.rs edits land.
-// Intended call sites in register.rs (or equivalent entry point):
-//   chat_init::init_chat_type_colors(&env);   — after PLAYER_LOGIN fires
-//   chat_init::show_chat_frame(&env);          — after addon loading completes
-#![allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-
 use super::WowLuaEnv;
 
 /// Show ChatFrame1 and set DEFAULT_CHAT_FRAME after addon loading.
