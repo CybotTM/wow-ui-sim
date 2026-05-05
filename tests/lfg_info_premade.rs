@@ -49,3 +49,20 @@ fn sibling_c_lfg_info_members_still_resolve() {
         .unwrap();
     assert_eq!(result, "ok");
 }
+
+#[test]
+fn lfg_mode_active_reads_state_set() {
+    let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().lfg_active_categories.insert(3);
+    let (active, inactive): (bool, bool) = env
+        .eval(
+            r#"
+            return C_LFGInfo.IsLFGModeActiveForCategory(3),
+                   C_LFGInfo.IsLFGModeActiveForCategory(2)
+            "#,
+        )
+        .unwrap();
+
+    assert!(active);
+    assert!(!inactive);
+}

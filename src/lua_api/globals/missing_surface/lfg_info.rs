@@ -17,9 +17,11 @@
 
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::state_types::LfgCategoryInfo;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+use std::collections::HashSet;
 
 pub(super) fn register_lfg_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_LFGInfo")?;
@@ -74,41 +76,45 @@ fn get_lfg_category_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
     let t = create_table(state);
+    populate_lfg_category_table(state, t, &info);
+    state.push(t);
+    Ok(1)
+}
+
+fn populate_lfg_category_table(state: &mut LuaState, table: Val, info: &LfgCategoryInfo) {
     let name_val = create_string(state, &info.name);
-    table_set(state, t, "name", name_val);
-    table_set(state, t, "order", Val::Num(info.order as f64));
+    table_set(state, table.clone(), "name", name_val);
+    table_set(state, table.clone(), "order", Val::Num(info.order as f64));
     table_set(
         state,
-        t,
+        table.clone(),
         "separateRecommended",
         Val::Bool(info.separate_recommended),
     );
     table_set(
         state,
-        t,
+        table.clone(),
         "preferCurrentArea",
         Val::Bool(info.prefer_current_area),
     );
     table_set(
         state,
-        t,
+        table.clone(),
         "allowCrossFaction",
         Val::Bool(info.allow_cross_faction),
     );
     table_set(
         state,
-        t,
+        table.clone(),
         "autoChooseActivity",
         Val::Bool(info.auto_choose_activity),
     );
     table_set(
         state,
-        t,
+        table,
         "showPlaystyleDropdown",
         Val::Bool(info.show_playstyle_dropdown),
     );
-    state.push(t);
-    Ok(1)
 }
 
 fn get_system_panel_data(state: &mut LuaState) -> LuaResult<u32> {
@@ -121,9 +127,14 @@ fn get_system_panel_data(state: &mut LuaState) -> LuaResult<u32> {
 
 fn is_lfg_mode_active_for_category(state: &mut LuaState) -> LuaResult<u32> {
     let category_id = i32::from_stack(state, 1)?;
-    let active = borrow_state(state)?
-        .lfg_active_categories
-        .contains(&category_id);
+    let active = {
+        let sim = borrow_state(state)?;
+        is_lfg_category_active(&sim.lfg_active_categories, category_id)
+    };
     state.push(Val::Bool(active));
     Ok(1)
+}
+
+fn is_lfg_category_active(active_categories: &HashSet<i32>, category_id: i32) -> bool {
+    active_categories.contains(&category_id)
 }
