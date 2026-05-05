@@ -4,6 +4,8 @@
 //! instantiate a frame: CreateFrame call, parentKey, mixins, KeyValues,
 //! attributes, and script handlers.
 
+use rustc_hash::FxHashSet;
+
 use super::helpers::{escape_lua_string, generate_scripts_code, lua_table_field_ref};
 
 /// Build the complete Lua code string for creating a frame from XML.
@@ -160,10 +162,8 @@ fn resolve_inherited_string(
 /// `apply_templates_from_registry` → `apply_single_template` → `apply_mixin`,
 /// so we only need the frame's own mixin attribute here.
 fn append_mixins_code(lua_code: &mut String, frame: &crate::xml::FrameXml, _inherits: &str) {
-    let mut all_mixins: Vec<String> = Vec::new();
-
     // Only direct mixins — template mixins are applied during CreateFrame
-    collect_mixins_from_attr(&mut all_mixins, frame.combined_mixin().as_deref());
+    let all_mixins = collect_mixins_from_attr(frame.combined_mixin().as_deref());
 
     for m in &all_mixins {
         lua_code.push_str(&format!(
@@ -174,14 +174,24 @@ fn append_mixins_code(lua_code: &mut String, frame: &crate::xml::FrameXml, _inhe
 }
 
 /// Parse a comma-separated mixin attribute and append unique entries.
-fn collect_mixins_from_attr(all_mixins: &mut Vec<String>, mixin_attr: Option<&str>) {
-    if let Some(mixin) = mixin_attr {
-        for m in mixin.split(',').map(|s| s.trim()) {
-            if !m.is_empty() && !all_mixins.contains(&m.to_string()) {
-                all_mixins.push(m.to_string());
-            }
+fn collect_mixins_from_attr(mixin_attr: Option<&str>) -> Vec<String> {
+    let Some(mixin) = mixin_attr else {
+        return Vec::new();
+    };
+
+    let mut mixins = Vec::new();
+    let mut seen = FxHashSet::default();
+    for mixin_name in mixin
+        .split(',')
+        .map(str::trim)
+        .filter(|name| !name.is_empty())
+    {
+        let mixin_name = mixin_name.to_string();
+        if seen.insert(mixin_name.clone()) {
+            mixins.push(mixin_name);
         }
     }
+    mixins
 }
 
 /// Append KeyValue assignments from the frame's own XML only.
@@ -269,5 +279,25 @@ fn append_xml_attributes_code(lua_code: &mut String, frame: &crate::xml::FrameXm
 fn append_scripts_code(lua_code: &mut String, frame: &crate::xml::FrameXml) {
     if let Some(scripts) = frame.scripts() {
         lua_code.push_str(&generate_scripts_code(scripts));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::collect_mixins_from_attr;
+
+    #[test]
+    fn collect_mixins_from_attr_keeps_first_unique_mixin_order() {
+        let mixins =
+            collect_mixins_from_attr(Some(" AlphaMixin, BetaMixin, AlphaMixin, , GammaMixin "));
+
+        assert_eq!(
+            mixins,
+            vec![
+                "AlphaMixin".to_string(),
+                "BetaMixin".to_string(),
+                "GammaMixin".to_string(),
+            ]
+        );
     }
 }
