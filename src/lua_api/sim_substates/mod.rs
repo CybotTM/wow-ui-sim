@@ -26,7 +26,7 @@ pub use wow_labs::{
     WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 /// Simulated network statistics returned by `GetNetStats()`.
 ///
@@ -539,6 +539,8 @@ pub struct ChatWindow {
     pub uninteractable: bool,
     /// Channels subscribed to this window, in insertion order.
     pub channels: Vec<String>,
+    /// Channel membership mirror for idempotent insertion without scanning.
+    pub channel_names: HashSet<String>,
     /// Message-type names this window receives (e.g. `"SAY"`, `"YELL"`).
     pub messages: Vec<String>,
 }
@@ -553,6 +555,7 @@ impl Default for ChatWindow {
             locked: false,
             uninteractable: false,
             channels: Vec::new(),
+            channel_names: HashSet::new(),
             messages: Vec::new(),
         }
     }

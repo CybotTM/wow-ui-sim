@@ -124,10 +124,11 @@ fn add_chat_window_channel(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     let mut st = window_entry(state, index)?;
-    if let Some(w) = st.chat_windows.get_mut(&index)
-        && !w.channels.contains(&channel)
-    {
-        w.channels.push(channel);
+    if let Some(w) = st.chat_windows.get_mut(&index) {
+        let is_new_channel = w.channel_names.insert(channel.clone());
+        if is_new_channel {
+            w.channels.push(channel);
+        }
     }
     Ok(0)
 }

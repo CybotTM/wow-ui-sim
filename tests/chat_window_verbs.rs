@@ -82,6 +82,9 @@ fn add_chat_window_channel_appends_unique_channels() {
     let st = env.state().borrow();
     let w = &st.chat_windows[&1];
     assert_eq!(w.channels, vec!["Trade".to_string(), "General".to_string()]);
+    assert!(w.channel_names.contains("Trade"));
+    assert!(w.channel_names.contains("General"));
+    assert_eq!(w.channel_names.len(), 2);
 }
 
 // ── ChangeChatColor ───────────────────────────────────────────────────────────
