@@ -9,7 +9,6 @@ use wow_ui_sim::startup::settle_headless_startup;
 
 use super::panel_fixtures::{blizzard_ui_dir, clear_recorded_lua_errors, load_panel_addons};
 
-#[allow(dead_code)]
 pub fn load_blizzard_addon_closure_into_env(
     env: &WowLuaEnv,
     ui_dir: &Path,
@@ -19,7 +18,6 @@ pub fn load_blizzard_addon_closure_into_env(
     load_blizzard_addon_closure_for_screen_into_env(env, ui_dir, ScreenKind::Game, roots, overrides)
 }
 
-#[allow(dead_code)]
 pub fn load_blizzard_addon_closure_for_screen_into_env(
     env: &WowLuaEnv,
     ui_dir: &Path,
@@ -39,7 +37,6 @@ pub fn load_blizzard_addon_closure_for_screen_into_env(
     loaded
 }
 
-#[allow(dead_code)]
 pub fn build_blizzard_addon_closure_env(
     ui_dir: &Path,
     roots: &[&str],
@@ -50,7 +47,6 @@ pub fn build_blizzard_addon_closure_env(
     (env, loaded)
 }
 
-#[allow(dead_code)]
 pub fn new_blizzard_addon_env(ui_dir: &Path) -> WowLuaEnv {
     new_blizzard_addon_env_for_screen(ui_dir, ScreenKind::Game)
 }
@@ -69,7 +65,6 @@ fn new_blizzard_addon_env_for_screen(ui_dir: &Path, screen: ScreenKind) -> WowLu
     env
 }
 
-#[allow(dead_code)]
 pub fn with_blizzard_addon_closure_in_dir<R, F>(
     ui_dir: &Path,
     roots: &[&str],
@@ -83,7 +78,6 @@ where
     assertions(&env, &loaded)
 }
 
-#[allow(dead_code)]
 pub fn with_blizzard_addon_closure<R, F>(
     roots: &[&str],
     overrides: &[BlizzardAddonOverride<'_>],
@@ -95,7 +89,6 @@ where
     with_blizzard_addon_closure_in_dir(&blizzard_ui_dir(), roots, overrides, assertions)
 }
 
-#[allow(dead_code)]
 pub fn with_blizzard_addon_startup_shape_in_dir<R, F>(
     ui_dir: &Path,
     roots: &[&str],
@@ -120,7 +113,6 @@ where
     assertions(&env, &loaded)
 }
 
-#[allow(dead_code)]
 pub fn with_blizzard_addon_startup_shape<R, F>(
     roots: &[&str],
     overrides: &[BlizzardAddonOverride<'_>],
@@ -144,7 +136,6 @@ fn ensure_player_frame_stub(env: &WowLuaEnv) {
     .expect("failed to create PlayerFrame stub for startup smoke tests");
 }
 
-#[allow(dead_code)]
 pub fn with_blizzard_addon_smoke_shape_in_dir<R, F>(
     ui_dir: &Path,
     roots: &[&str],
@@ -161,7 +152,6 @@ where
     assertions(&env, &loaded)
 }
 
-#[allow(dead_code)]
 pub fn with_blizzard_addon_smoke_shape<R, F>(
     roots: &[&str],
     overrides: &[BlizzardAddonOverride<'_>],
@@ -173,7 +163,6 @@ where
     with_blizzard_addon_smoke_shape_in_dir(&blizzard_ui_dir(), roots, overrides, assertions)
 }
 
-#[allow(dead_code)]
 pub fn new_blizzard_addon_glue_env(ui_dir: &Path) -> WowLuaEnv {
     new_blizzard_addon_env_for_screen(ui_dir, ScreenKind::CharacterSelect)
 }
@@ -189,7 +178,6 @@ pub fn new_blizzard_addon_glue_env(ui_dir: &Path) -> WowLuaEnv {
 // pulls in `Blizzard_GlueXML` and its transitive deps from `roots` when the
 // root TOC lists `## Dependencies: Blizzard_GlueXML`, so loading anything
 // extra would either duplicate work or fight the dependency order.
-#[allow(dead_code)]
 pub fn with_blizzard_addon_glue_smoke_shape_in_dir<R, F>(
     ui_dir: &Path,
     roots: &[&str],
@@ -211,7 +199,6 @@ where
     assertions(&env, &loaded)
 }
 
-#[allow(dead_code)]
 pub fn with_blizzard_addon_glue_smoke_shape<R, F>(
     roots: &[&str],
     overrides: &[BlizzardAddonOverride<'_>],
@@ -222,3 +209,41 @@ where
 {
     with_blizzard_addon_glue_smoke_shape_in_dir(&blizzard_ui_dir(), roots, overrides, assertions)
 }
+
+type HarnessAssertions = fn(&WowLuaEnv, &[String]);
+
+// Each integration test compiles this shared helper module as its own crate
+// module, so some helpers are unused in any single target even though they are
+// part of the cross-test harness API.
+const _: () = {
+    let _ = load_blizzard_addon_closure_into_env
+        as for<'a> fn(&WowLuaEnv, &Path, &[&str], &[BlizzardAddonOverride<'a>]) -> Vec<String>;
+    let _ = load_blizzard_addon_closure_for_screen_into_env
+        as for<'a> fn(
+            &WowLuaEnv,
+            &Path,
+            ScreenKind,
+            &[&str],
+            &[BlizzardAddonOverride<'a>],
+        ) -> Vec<String>;
+    let _ = build_blizzard_addon_closure_env
+        as for<'a> fn(&Path, &[&str], &[BlizzardAddonOverride<'a>]) -> (WowLuaEnv, Vec<String>);
+    let _ = new_blizzard_addon_env as fn(&Path) -> WowLuaEnv;
+    let _ = with_blizzard_addon_closure_in_dir::<(), HarnessAssertions>
+        as for<'a> fn(&Path, &[&str], &[BlizzardAddonOverride<'a>], HarnessAssertions);
+    let _ = with_blizzard_addon_closure::<(), HarnessAssertions>
+        as for<'a> fn(&[&str], &[BlizzardAddonOverride<'a>], HarnessAssertions);
+    let _ = with_blizzard_addon_startup_shape_in_dir::<(), HarnessAssertions>
+        as for<'a> fn(&Path, &[&str], &[BlizzardAddonOverride<'a>], HarnessAssertions);
+    let _ = with_blizzard_addon_startup_shape::<(), HarnessAssertions>
+        as for<'a> fn(&[&str], &[BlizzardAddonOverride<'a>], HarnessAssertions);
+    let _ = with_blizzard_addon_smoke_shape_in_dir::<(), HarnessAssertions>
+        as for<'a> fn(&Path, &[&str], &[BlizzardAddonOverride<'a>], HarnessAssertions);
+    let _ = with_blizzard_addon_smoke_shape::<(), HarnessAssertions>
+        as for<'a> fn(&[&str], &[BlizzardAddonOverride<'a>], HarnessAssertions);
+    let _ = new_blizzard_addon_glue_env as fn(&Path) -> WowLuaEnv;
+    let _ = with_blizzard_addon_glue_smoke_shape_in_dir::<(), HarnessAssertions>
+        as for<'a> fn(&Path, &[&str], &[BlizzardAddonOverride<'a>], HarnessAssertions);
+    let _ = with_blizzard_addon_glue_smoke_shape::<(), HarnessAssertions>
+        as for<'a> fn(&[&str], &[BlizzardAddonOverride<'a>], HarnessAssertions);
+};
