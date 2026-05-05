@@ -11,13 +11,11 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-#[allow(dead_code)]
 pub fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
 
 /// Blizzard addons needed for the panel system (dependency order).
-#[allow(dead_code)]
 pub const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
@@ -80,7 +78,6 @@ pub const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
 ];
 
-#[allow(dead_code)]
 pub fn setup_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
@@ -94,13 +91,11 @@ pub fn setup_env() -> WowLuaEnv {
     env
 }
 
-#[allow(dead_code)]
 pub fn seed_addon_search_paths(env: &WowLuaEnv) {
     let mut state = env.state().borrow_mut();
     state.addon_base_paths = vec![blizzard_ui_dir()];
 }
 
-#[allow(dead_code)]
 pub fn load_panel_addons(env: &WowLuaEnv) {
     let ui = blizzard_ui_dir();
     for (name, toc) in PANEL_ADDONS {
@@ -114,7 +109,6 @@ pub fn load_panel_addons(env: &WowLuaEnv) {
     }
 }
 
-#[allow(dead_code)]
 pub fn install_lua_harness_stubs(env: &WowLuaEnv) {
     install_uiparent_load_addon_seam(env);
     install_action_button_util_stub(env);
@@ -143,7 +137,6 @@ pub fn install_lua_harness_stubs(env: &WowLuaEnv) {
 /// * exposes a `__test_skip_cooldown_broadcaster_load` opt-out flag so a
 ///   dedicated coverage test can flip it to `false` and run
 ///   `CooldownBroadcaster_LoadUI()` against the real addon load path.
-#[allow(dead_code)]
 pub fn install_uiparent_load_addon_seam(env: &WowLuaEnv) {
     env.exec(
         r#"
@@ -198,7 +191,6 @@ pub fn install_uiparent_load_addon_seam(env: &WowLuaEnv) {
 ///   `OnInactiveBonusBar` / `OnDisabledActionBar` branches in
 ///   `SpellSearchUtil` can do so by writing a single Lua line before
 ///   invoking the panel.
-#[allow(dead_code)]
 pub fn install_action_button_util_stub(env: &WowLuaEnv) {
     env.exec(
         r#"
@@ -236,7 +228,6 @@ pub fn install_action_button_util_stub(env: &WowLuaEnv) {
     .expect("failed to install ActionButtonUtil harness stub");
 }
 
-#[allow(dead_code)]
 pub fn fire_startup_events(env: &WowLuaEnv) {
     super::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
@@ -252,7 +243,6 @@ pub fn fire_startup_events(env: &WowLuaEnv) {
     }
 }
 
-#[allow(dead_code)]
 pub fn clear_recorded_lua_errors(env: &WowLuaEnv) {
     let mut state = env.state().borrow_mut();
     state.lua_errors.clear();
@@ -260,12 +250,10 @@ pub fn clear_recorded_lua_errors(env: &WowLuaEnv) {
     state.lua_error_counts.clear();
 }
 
-#[allow(dead_code)]
 pub fn recorded_lua_errors(env: &WowLuaEnv) -> Vec<String> {
     env.state().borrow().lua_errors.clone()
 }
 
-#[allow(dead_code)]
 pub fn player_spells_panel_debug_snapshot(env: &WowLuaEnv) -> String {
     if let Some(missing) = player_spells_frame_missing_marker(env) {
         return missing;
@@ -423,3 +411,23 @@ const CALLBACK_INVOCATION_SECTION_LUA: &str = r#"
         "call.setMinimizedFunc=" .. tostring(setCallOk) .. ":" .. tostring(setCallResult),
     }, "\n")
 "#;
+
+type EnvFn = fn(&WowLuaEnv);
+
+// This fixture module is compiled independently by many integration tests.
+// Keep the shared helper API referenced even when one target uses only a slice
+// of the fixture surface.
+const _: () = {
+    let _ = blizzard_ui_dir as fn() -> PathBuf;
+    let _ = PANEL_ADDONS;
+    let _ = setup_env as fn() -> WowLuaEnv;
+    let _ = seed_addon_search_paths as EnvFn;
+    let _ = load_panel_addons as EnvFn;
+    let _ = install_lua_harness_stubs as EnvFn;
+    let _ = install_uiparent_load_addon_seam as EnvFn;
+    let _ = install_action_button_util_stub as EnvFn;
+    let _ = fire_startup_events as EnvFn;
+    let _ = clear_recorded_lua_errors as EnvFn;
+    let _ = recorded_lua_errors as fn(&WowLuaEnv) -> Vec<String>;
+    let _ = player_spells_panel_debug_snapshot as fn(&WowLuaEnv) -> String;
+};
