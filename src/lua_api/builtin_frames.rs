@@ -20,32 +20,7 @@ fn register_frame(
     size: Option<(f32, f32)>,
     owner: u16,
 ) -> u64 {
-    let mut frame = Frame::new(widget_type, Some(name.to_string()), parent);
-    frame.owner_addon = Some(owner);
-    if let Some((w, h)) = size {
-        frame.width = w;
-        frame.height = h;
-    }
-    widgets.register(frame)
-}
-
-/// Create a named frame that starts hidden, register it, and return its ID.
-fn register_hidden_frame(
-    widgets: &mut WidgetRegistry,
-    widget_type: WidgetType,
-    name: &str,
-    parent: Option<u64>,
-    size: Option<(f32, f32)>,
-    owner: u16,
-) -> u64 {
-    let mut frame = Frame::new(widget_type, Some(name.to_string()), parent);
-    frame.owner_addon = Some(owner);
-    if let Some((w, h)) = size {
-        frame.width = w;
-        frame.height = h;
-    }
-    frame.visible = false;
-    widgets.register(frame)
+    register_builtin_frame(widgets, widget_type, name, parent, size, owner, true, None)
 }
 
 fn register_hidden_frame_with_strata(
@@ -57,15 +32,39 @@ fn register_hidden_frame_with_strata(
     owner: u16,
     strata: FrameStrata,
 ) -> u64 {
+    register_builtin_frame(
+        widgets,
+        widget_type,
+        name,
+        parent,
+        size,
+        owner,
+        false,
+        Some(strata),
+    )
+}
+
+fn register_builtin_frame(
+    widgets: &mut WidgetRegistry,
+    widget_type: WidgetType,
+    name: &str,
+    parent: Option<u64>,
+    size: Option<(f32, f32)>,
+    owner: u16,
+    visible: bool,
+    fixed_strata: Option<FrameStrata>,
+) -> u64 {
     let mut frame = Frame::new(widget_type, Some(name.to_string()), parent);
     frame.owner_addon = Some(owner);
-    frame.frame_strata = strata;
-    frame.has_fixed_frame_strata = true;
+    frame.visible = visible;
+    if let Some(strata) = fixed_strata {
+        frame.frame_strata = strata;
+        frame.has_fixed_frame_strata = true;
+    }
     if let Some((w, h)) = size {
         frame.width = w;
         frame.height = h;
     }
-    frame.visible = false;
     widgets.register(frame)
 }
 
@@ -110,120 +109,112 @@ fn create_engine_frames(
     screen_height: f32,
     o: u16,
 ) -> u64 {
-    let ui_parent_id = register_frame(
+    let ui_parent_id = create_ui_parent(widgets, screen_width, screen_height, o);
+
+    set_ui_parent_panel_attributes(widgets, ui_parent_id);
+    create_world_frame(widgets, screen_width, screen_height, o);
+    create_minimap_cluster(widgets, ui_parent_id, o);
+    create_tooltip_frames(widgets, ui_parent_id, o);
+    create_default_chat_frame(widgets, ui_parent_id, o);
+
+    ui_parent_id
+}
+
+fn create_ui_parent(
+    widgets: &mut WidgetRegistry,
+    screen_width: f32,
+    screen_height: f32,
+    owner: u16,
+) -> u64 {
+    register_frame(
         widgets,
         WidgetType::Frame,
         "UIParent",
         None,
         Some((screen_width, screen_height)),
-        o,
-    );
+        owner,
+    )
+}
 
-    set_ui_parent_panel_attributes(widgets, ui_parent_id);
-
-    // WorldFrame (3D world rendering area, same level as UIParent)
+fn create_world_frame(
+    widgets: &mut WidgetRegistry,
+    screen_width: f32,
+    screen_height: f32,
+    owner: u16,
+) {
     register_frame(
         widgets,
         WidgetType::WorldFrame,
         "WorldFrame",
         None,
         Some((screen_width, screen_height)),
-        o,
+        owner,
     );
+}
 
-    create_minimap_cluster(widgets, ui_parent_id, o);
+fn create_tooltip_frames(widgets: &mut WidgetRegistry, ui_parent_id: u64, owner: u16) {
+    register_standard_tooltips(widgets, ui_parent_id, owner);
+    register_tooltip_container(widgets, ui_parent_id, owner);
+    register_friends_tooltip(widgets, ui_parent_id, owner);
+}
 
-    register_hidden_frame_with_strata(
-        widgets,
-        WidgetType::GameTooltip,
-        "GameTooltip",
-        Some(ui_parent_id),
-        Some((128.0, 64.0)),
-        o,
-        FrameStrata::Tooltip,
-    );
+fn register_standard_tooltips(widgets: &mut WidgetRegistry, ui_parent_id: u64, owner: u16) {
+    for name in STANDARD_TOOLTIP_FRAMES {
+        register_hidden_frame_with_strata(
+            widgets,
+            WidgetType::GameTooltip,
+            name,
+            Some(ui_parent_id),
+            Some((128.0, 64.0)),
+            owner,
+            FrameStrata::Tooltip,
+        );
+    }
+}
 
+const STANDARD_TOOLTIP_FRAMES: &[&str] = &[
+    "GameTooltip",
+    "ShoppingTooltip1",
+    "ShoppingTooltip2",
+    "ItemRefShoppingTooltip1",
+    "ItemRefShoppingTooltip2",
+    "ItemRefTooltip",
+];
+
+fn register_tooltip_container(widgets: &mut WidgetRegistry, ui_parent_id: u64, owner: u16) {
     register_hidden_frame_with_strata(
         widgets,
         WidgetType::Frame,
         "GameTooltipDefaultContainer",
         Some(ui_parent_id),
         None,
-        o,
+        owner,
         FrameStrata::Low,
     );
+}
 
-    register_hidden_frame_with_strata(
-        widgets,
-        WidgetType::GameTooltip,
-        "ShoppingTooltip1",
-        Some(ui_parent_id),
-        Some((128.0, 64.0)),
-        o,
-        FrameStrata::Tooltip,
-    );
-
-    register_hidden_frame_with_strata(
-        widgets,
-        WidgetType::GameTooltip,
-        "ShoppingTooltip2",
-        Some(ui_parent_id),
-        Some((128.0, 64.0)),
-        o,
-        FrameStrata::Tooltip,
-    );
-
-    register_hidden_frame_with_strata(
-        widgets,
-        WidgetType::GameTooltip,
-        "ItemRefShoppingTooltip1",
-        Some(ui_parent_id),
-        Some((128.0, 64.0)),
-        o,
-        FrameStrata::Tooltip,
-    );
-
-    register_hidden_frame_with_strata(
-        widgets,
-        WidgetType::GameTooltip,
-        "ItemRefShoppingTooltip2",
-        Some(ui_parent_id),
-        Some((128.0, 64.0)),
-        o,
-        FrameStrata::Tooltip,
-    );
-
-    register_hidden_frame_with_strata(
-        widgets,
-        WidgetType::GameTooltip,
-        "ItemRefTooltip",
-        Some(ui_parent_id),
-        Some((128.0, 64.0)),
-        o,
-        FrameStrata::Tooltip,
-    );
-
+fn register_friends_tooltip(widgets: &mut WidgetRegistry, ui_parent_id: u64, owner: u16) {
     register_hidden_frame_with_strata(
         widgets,
         WidgetType::Frame,
         "FriendsTooltip",
         Some(ui_parent_id),
         None,
-        o,
+        owner,
         FrameStrata::Tooltip,
     );
+}
 
-    // DEFAULT_CHAT_FRAME fallback (overwritten by show_chat_frame workaround when chat addons load)
+fn create_default_chat_frame(widgets: &mut WidgetRegistry, ui_parent_id: u64, owner: u16) {
+    // Overwritten by show_chat_frame workaround when chat addons load.
     register_frame(
         widgets,
         WidgetType::MessageFrame,
         "DEFAULT_CHAT_FRAME",
         Some(ui_parent_id),
         Some((430.0, 120.0)),
-        o,
+        owner,
     );
-
-    ui_parent_id
 }
 
 fn create_minimap_cluster(widgets: &mut WidgetRegistry, ui_parent_id: u64, owner: u16) {
@@ -309,11 +300,11 @@ fn create_debuff_frame(widgets: &mut WidgetRegistry, ui_parent_id: u64, o: u16) 
 // ---------------------------------------------------------------------------
 
 fn create_stub_frames(widgets: &mut WidgetRegistry, ui_parent_id: u64, o: u16) {
-    register_stub_frame_specs(widgets, ui_parent_id, o, VISIBLE_STUB_FRAMES);
-    register_hidden_stub_frame_specs(widgets, ui_parent_id, o, HIDDEN_STUB_FRAMES);
+    register_stub_frame_specs(widgets, ui_parent_id, o, VISIBLE_STUB_FRAMES, true);
+    register_stub_frame_specs(widgets, ui_parent_id, o, HIDDEN_STUB_FRAMES, false);
 }
 
-const VISIBLE_STUB_FRAMES: &[(&'static str, Option<(f32, f32)>)] = &[
+const VISIBLE_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[
     ("ObjectiveTrackerFrame", Some((248.0, 600.0))),
     ("ScenarioObjectiveTracker", None),
     ("LFGEventFrame", None),
@@ -322,41 +313,25 @@ const VISIBLE_STUB_FRAMES: &[(&'static str, Option<(f32, f32)>)] = &[
     ("InterfaceOptionsFrame", None),
 ];
 
-const HIDDEN_STUB_FRAMES: &[(&'static str, Option<(f32, f32)>)] =
-    &[("LFGListFrame", Some((400.0, 500.0)))];
+const HIDDEN_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[("LFGListFrame", Some((400.0, 500.0)))];
 
 fn register_stub_frame_specs(
     widgets: &mut WidgetRegistry,
     ui_parent_id: u64,
     owner: u16,
-    specs: &[(&'static str, Option<(f32, f32)>)],
+    specs: &[(&str, Option<(f32, f32)>)],
+    visible: bool,
 ) {
     for (name, size) in specs {
-        register_frame(
+        register_builtin_frame(
             widgets,
             WidgetType::Frame,
             name,
             Some(ui_parent_id),
             *size,
             owner,
-        );
-    }
-}
-
-fn register_hidden_stub_frame_specs(
-    widgets: &mut WidgetRegistry,
-    ui_parent_id: u64,
-    owner: u16,
-    specs: &[(&'static str, Option<(f32, f32)>)],
-) {
-    for (name, size) in specs {
-        register_hidden_frame(
-            widgets,
-            WidgetType::Frame,
-            name,
-            Some(ui_parent_id),
-            *size,
-            owner,
+            visible,
+            None,
         );
     }
 }
