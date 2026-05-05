@@ -525,13 +525,7 @@ fn set_blob_texture<F>(state: &mut LuaState, write: F) -> LuaResult<u32>
 where
     F: Fn(&mut crate::widget::Frame, Option<String>),
 {
-    let id = frame_id_from_stack(state, 1)?;
-    let texture = val_to_string(state, stack_val(state, 2));
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        write(frame, texture);
-    }
-    Ok(0)
+    set_frame_texture_field(state, write)
 }
 
 fn set_blob_alpha<F>(state: &mut LuaState, write: F) -> LuaResult<u32>
@@ -561,6 +555,13 @@ where
 }
 
 fn set_minimap_texture_field<F>(state: &mut LuaState, write: F) -> LuaResult<u32>
+where
+    F: Fn(&mut crate::widget::Frame, Option<String>),
+{
+    set_frame_texture_field(state, write)
+}
+
+fn set_frame_texture_field<F>(state: &mut LuaState, write: F) -> LuaResult<u32>
 where
     F: Fn(&mut crate::widget::Frame, Option<String>),
 {
