@@ -406,19 +406,23 @@ fn shape_text_to_runs(
     if shape.max_lines > 0 {
         runs.truncate(shape.max_lines as usize);
     }
-    let total_height = if runs.len() <= 1 {
-        line_height
-    } else {
-        let first_y = runs.first().map(|r| r.line_y).unwrap_or(0.0);
-        runs.last()
-            .map(|run| run.line_y - first_y + line_height)
-            .unwrap_or(line_height)
-    };
+    let total_height = text_total_height(&runs, line_height);
 
     // We only need total_height; the buffer is returned for glyph iteration.
     // The runs are re-collected from buffer later via layout_runs().
     drop(runs);
     (buffer, total_height)
+}
+
+fn text_total_height(runs: &[cosmic_text::LayoutRun<'_>], line_height: f32) -> f32 {
+    if runs.len() <= 1 {
+        return line_height;
+    }
+
+    let first_y = runs.first().map(|run| run.line_y).unwrap_or(0.0);
+    runs.last()
+        .map(|run| run.line_y - first_y + line_height)
+        .unwrap_or(line_height)
 }
 
 struct TextShapeRequest<'a> {
@@ -463,27 +467,29 @@ fn extract_layout_runs(buffer: &Buffer, max_lines: u32) -> Vec<CachedLayoutRun> 
         .collect()
 }
 
-/// Emit glyph quads from cached layout runs with a given color and offset.
-#[allow(clippy::too_many_arguments)]
-fn emit_glyphs_from_cache(
-    batch: &mut QuadBatch,
-    glyph_atlas: &mut GlyphAtlas,
-    font_system: &mut WowFontSystem,
-    runs: &[CachedLayoutRun],
+pub(super) struct GlyphCacheEmitRequest<'a> {
+    runs: &'a [CachedLayoutRun],
     bounds: Rectangle,
     y_offset: f32,
     justify_h: TextJustify,
     glyph_color: [f32; 4],
-    offset_x: f32,
-    offset_y: f32,
+    offset: (f32, f32),
     glyph_tex_index: i32,
+}
+
+/// Emit glyph quads from cached layout runs with a given color and offset.
+fn emit_glyphs_from_cache(
+    batch: &mut QuadBatch,
+    glyph_atlas: &mut GlyphAtlas,
+    font_system: &mut WowFontSystem,
+    request: GlyphCacheEmitRequest<'_>,
 ) {
-    for run in runs {
-        let x_offset = if bounds.width > 0.0 {
-            match justify_h {
+    for run in request.runs {
+        let x_offset = if request.bounds.width > 0.0 {
+            match request.justify_h {
                 TextJustify::Left => 0.0,
-                TextJustify::Center => (bounds.width - run.line_w) / 2.0,
-                TextJustify::Right => bounds.width - run.line_w,
+                TextJustify::Center => (request.bounds.width - run.line_w) / 2.0,
+                TextJustify::Right => request.bounds.width - run.line_w,
             }
         } else {
             0.0
@@ -491,9 +497,14 @@ fn emit_glyphs_from_cache(
 
         for glyph in &run.glyphs {
             if let Some(entry) = glyph_atlas.ensure_glyph(font_system, glyph.cache_key) {
-                let glyph_x = bounds.x + x_offset + glyph.x as f32 + entry.left as f32 + offset_x;
-                let glyph_y =
-                    bounds.y + y_offset + run.line_y + glyph.y as f32 - entry.top as f32 + offset_y;
+                let glyph_x = request.bounds.x
+                    + x_offset
+                    + glyph.x as f32
+                    + entry.left as f32
+                    + request.offset.0;
+                let glyph_y = request.bounds.y + request.y_offset + run.line_y + glyph.y as f32
+                    - entry.top as f32
+                    + request.offset.1;
                 let glyph_bounds = Rectangle::new(
                     iced::Point::new(glyph_x, glyph_y),
                     iced::Size::new(entry.width as f32, entry.height as f32),
@@ -505,8 +516,8 @@ fn emit_glyphs_from_cache(
                 batch.push_quad(
                     glyph_bounds,
                     uv,
-                    glyph_color,
-                    glyph_tex_index,
+                    request.glyph_color,
+                    request.glyph_tex_index,
                     BlendMode::Alpha,
                 );
             }

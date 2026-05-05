@@ -4,8 +4,8 @@ use std::collections::hash_map::Entry;
 use iced::Rectangle;
 
 use super::{
-    CachedLayoutRun, GlyphAtlas, ShapeCacheEntry, TextShapeRequest, emit_glyphs_from_cache,
-    extract_layout_runs, shape_cache_hash, shape_text_to_runs,
+    CachedLayoutRun, GlyphAtlas, GlyphCacheEmitRequest, ShapeCacheEntry, TextShapeRequest,
+    emit_glyphs_from_cache, extract_layout_runs, shape_cache_hash, shape_text_to_runs,
 };
 use crate::render::font::{WowFontSystem, line_height_for_font_size};
 use crate::render::shader::QuadBatch;
@@ -261,13 +261,14 @@ fn emit_text_pass(
         batch,
         glyph_atlas,
         font_system,
-        pass.runs,
-        pass.bounds,
-        pass.y_offset,
-        pass.justify_h,
-        color,
-        offset.0,
-        offset.1,
-        pass.glyph_tex_index,
+        GlyphCacheEmitRequest {
+            runs: pass.runs,
+            bounds: pass.bounds,
+            y_offset: pass.y_offset,
+            justify_h: pass.justify_h,
+            glyph_color: color,
+            offset,
+            glyph_tex_index: pass.glyph_tex_index,
+        },
     );
 }
