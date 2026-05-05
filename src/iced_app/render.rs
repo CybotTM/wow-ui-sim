@@ -34,7 +34,7 @@ pub(crate) use preload::preload_texture_request_source;
 use preload::texture_preload_reason;
 use preload::{
     format_texture_preload_log, prune_completed_texture_requests_by_strata, sample_texture_paths,
-    sort_pending_texture_paths, texture_preload_logging_enabled,
+    sort_pending_texture_paths, texture_preload_logging_enabled, update_ready_texture_path_cache,
 };
 use rebuild::prune_irrelevant_dirty_strata;
 pub use rebuild::rebuild_dirty_strata_batches_for_registry;
@@ -505,15 +505,12 @@ impl App {
             prune_completed_texture_requests_by_strata(&mut strata_pending)
         };
 
-        if !resolved_paths.is_empty() || !unresolved_paths.is_empty() {
-            let mut ready_paths = self.ready_texture_path_cache.borrow_mut();
-            for path in resolved_paths {
-                ready_paths.insert(path);
-            }
-            for path in unresolved_paths {
-                ready_paths.remove(&path);
-            }
-        }
+        update_ready_texture_path_cache(
+            &mut self.ready_texture_path_cache.borrow_mut(),
+            resolved_paths,
+            unresolved_paths,
+        );
+
         if changed {
             self.rebuild_pending_texture_queue_from_strata_maps();
         }

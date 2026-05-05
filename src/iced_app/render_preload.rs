@@ -1,5 +1,7 @@
 use std::sync::OnceLock;
 
+use rustc_hash::FxHashSet;
+
 use super::{PendingTextureRequestsByStrata, TEXTURE_PRELOAD_LOG_ENV, TexturePreloadPassTelemetry};
 use crate::render::load_texture_or_crop;
 
@@ -49,6 +51,19 @@ pub(super) fn prune_completed_texture_requests_by_strata(
     }
 
     (changed, resolved_paths, unresolved_paths)
+}
+
+pub(super) fn update_ready_texture_path_cache(
+    ready_paths: &mut FxHashSet<String>,
+    resolved_paths: Vec<String>,
+    unresolved_paths: Vec<String>,
+) {
+    for path in resolved_paths {
+        ready_paths.insert(path);
+    }
+    for path in unresolved_paths {
+        ready_paths.remove(&path);
+    }
 }
 
 fn prune_completed_texture_requests_for_path(
