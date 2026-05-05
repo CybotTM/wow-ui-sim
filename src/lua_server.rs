@@ -5,7 +5,7 @@
 use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{OnceLock, mpsc};
 use std::thread;
 
@@ -126,26 +126,44 @@ pub fn init() -> mpsc::Receiver<LuaCommand> {
 /// Clean up stale sockets from dead processes.
 fn cleanup_stale_sockets() {
     let pattern = "/tmp/wow-lua-*.sock";
-    if let Ok(entries) = glob::glob(pattern) {
-        for entry in entries.flatten() {
-            // Extract PID from filename: /tmp/wow-lua-{pid}.sock
-            if let Some(filename) = entry.file_name().and_then(|f| f.to_str())
-                && let Some(pid_str) = filename
-                    .strip_prefix("wow-lua-")
-                    .and_then(|s| s.strip_suffix(".sock"))
-                && let Ok(pid) = pid_str.parse::<i32>()
-            {
-                // Check if process is still alive using kill(pid, 0)
-                let exists = unsafe { libc::kill(pid, 0) } == 0;
-                if !exists && std::fs::remove_file(&entry).is_ok() {
-                    crate::logging::eprintln_elapsed(&format!(
-                        "[wow-sim] Cleaned up stale socket: {}",
-                        entry.display()
-                    ));
-                }
-            }
-        }
+    let Ok(entries) = glob::glob(pattern) else {
+        return;
+    };
+
+    for entry in entries.flatten() {
+        cleanup_stale_socket(&entry);
     }
+}
+
+fn cleanup_stale_socket(path: &Path) {
+    let Some(pid) = socket_pid(path) else {
+        return;
+    };
+    if process_exists(pid) {
+        return;
+    }
+    if std::fs::remove_file(path).is_ok() {
+        crate::logging::eprintln_elapsed(&format!(
+            "[wow-sim] Cleaned up stale socket: {}",
+            path.display()
+        ));
+    }
+}
+
+fn socket_pid(path: &Path) -> Option<i32> {
+    let filename = path.file_name()?.to_str()?;
+    let pid = filename
+        .strip_prefix("wow-lua-")?
+        .strip_suffix(".sock")?
+        .parse()
+        .ok()?;
+    Some(pid)
+}
+
+fn process_exists(pid: i32) -> bool {
+    // Check if process is still alive using kill(pid, 0).
+    let status = unsafe { libc::kill(pid, 0) };
+    status == 0
 }
 
 extern "C" fn signal_handler(sig: libc::c_int) {
@@ -193,16 +211,19 @@ fn run_server(cmd_tx: mpsc::Sender<LuaCommand>, path: PathBuf) {
     let _guard = SocketGuard(path);
 
     for stream in listener.incoming() {
-        match stream {
-            Ok(stream) => {
-                if let Err(e) = handle_connection(stream, &cmd_tx) {
-                    crate::logging::eprintln_elapsed(&format!("[wow-sim] Connection error: {}", e));
-                }
-            }
-            Err(e) => {
-                crate::logging::eprintln_elapsed(&format!("[wow-sim] Accept error: {}", e));
-            }
-        }
+        handle_incoming_stream(stream, &cmd_tx);
+    }
+}
+
+fn handle_incoming_stream(stream: std::io::Result<UnixStream>, cmd_tx: &mpsc::Sender<LuaCommand>) {
+    let Ok(stream) = stream else {
+        let error = stream.err().expect("failed stream must contain an error");
+        crate::logging::eprintln_elapsed(&format!("[wow-sim] Accept error: {}", error));
+        return;
+    };
+
+    if let Err(error) = handle_connection(stream, cmd_tx) {
+        crate::logging::eprintln_elapsed(&format!("[wow-sim] Connection error: {}", error));
     }
 }
 
@@ -264,13 +285,7 @@ fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Respon
             filter_key,
             visible_only,
             verbose,
-        } => send_command(cmd_tx, |respond| LuaCommand::DumpTree {
-            filter,
-            filter_key,
-            visible_only,
-            verbose,
-            respond,
-        }),
+        } => send_dump_tree_command(cmd_tx, filter, filter_key, visible_only, verbose),
         Request::DumpQuads { filter, verbose } => {
             send_command(cmd_tx, |respond| LuaCommand::DumpQuads {
                 filter,
@@ -284,15 +299,42 @@ fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Respon
             height,
             filter,
             crop,
-        } => send_command(cmd_tx, |respond| LuaCommand::Screenshot {
-            output,
-            width,
-            height,
-            filter,
-            crop,
-            respond,
-        }),
+        } => send_screenshot_command(cmd_tx, output, width, height, filter, crop),
     }
+}
+
+fn send_dump_tree_command(
+    cmd_tx: &mpsc::Sender<LuaCommand>,
+    filter: Option<String>,
+    filter_key: Option<String>,
+    visible_only: bool,
+    verbose: bool,
+) -> Response {
+    send_command(cmd_tx, |respond| LuaCommand::DumpTree {
+        filter,
+        filter_key,
+        visible_only,
+        verbose,
+        respond,
+    })
+}
+
+fn send_screenshot_command(
+    cmd_tx: &mpsc::Sender<LuaCommand>,
+    output: String,
+    width: u32,
+    height: u32,
+    filter: Option<String>,
+    crop: Option<String>,
+) -> Response {
+    send_command(cmd_tx, |respond| LuaCommand::Screenshot {
+        output,
+        width,
+        height,
+        filter,
+        crop,
+        respond,
+    })
 }
 
 fn write_response(stream: &mut UnixStream, response: &Response) -> std::io::Result<()> {
@@ -306,14 +348,9 @@ pub mod client {
     use std::os::unix::net::UnixStream;
     use std::path::Path;
 
-    /// Connect to a Lua server and execute code.
-    pub fn exec<P: AsRef<Path>>(socket: P, code: &str) -> Result<String, String> {
+    fn send_request<P: AsRef<Path>>(socket: P, request: Request) -> Result<Response, String> {
         let mut stream =
             UnixStream::connect(socket).map_err(|e| format!("Connect failed: {}", e))?;
-
-        let request = Request::Exec {
-            code: code.to_string(),
-        };
         writeln!(stream, "{}", serde_json::to_string(&request).unwrap())
             .map_err(|e| format!("Write failed: {}", e))?;
 
@@ -323,9 +360,17 @@ pub mod client {
             .read_line(&mut line)
             .map_err(|e| format!("Read failed: {}", e))?;
 
-        let response: Response =
-            serde_json::from_str(&line).map_err(|e| format!("Invalid response: {}", e))?;
+        serde_json::from_str(&line).map_err(|e| format!("Invalid response: {}", e))
+    }
 
+    /// Connect to a Lua server and execute code.
+    pub fn exec<P: AsRef<Path>>(socket: P, code: &str) -> Result<String, String> {
+        let response = send_request(
+            socket,
+            Request::Exec {
+                code: code.to_string(),
+            },
+        )?;
         match response {
             Response::Output(s) => Ok(s),
             Response::Error(e) => Err(e),
@@ -337,22 +382,7 @@ pub mod client {
 
     /// Ping the server.
     pub fn ping<P: AsRef<Path>>(socket: P) -> Result<(), String> {
-        let mut stream =
-            UnixStream::connect(socket).map_err(|e| format!("Connect failed: {}", e))?;
-
-        let request = Request::Ping;
-        writeln!(stream, "{}", serde_json::to_string(&request).unwrap())
-            .map_err(|e| format!("Write failed: {}", e))?;
-
-        let mut reader = BufReader::new(stream);
-        let mut line = String::new();
-        reader
-            .read_line(&mut line)
-            .map_err(|e| format!("Read failed: {}", e))?;
-
-        let response: Response =
-            serde_json::from_str(&line).map_err(|e| format!("Invalid response: {}", e))?;
-
+        let response = send_request(socket, Request::Ping)?;
         match response {
             Response::Pong => Ok(()),
             Response::Error(e) => Err(e),
@@ -376,28 +406,16 @@ pub mod client {
         filter: Option<String>,
         crop: Option<String>,
     ) -> Result<String, String> {
-        let mut stream =
-            UnixStream::connect(socket).map_err(|e| format!("Connect failed: {}", e))?;
-
-        let request = Request::Screenshot {
-            output: output.to_string(),
-            width,
-            height,
-            filter,
-            crop,
-        };
-        writeln!(stream, "{}", serde_json::to_string(&request).unwrap())
-            .map_err(|e| format!("Write failed: {}", e))?;
-
-        let mut reader = BufReader::new(stream);
-        let mut line = String::new();
-        reader
-            .read_line(&mut line)
-            .map_err(|e| format!("Read failed: {}", e))?;
-
-        let response: Response =
-            serde_json::from_str(&line).map_err(|e| format!("Invalid response: {}", e))?;
-
+        let response = send_request(
+            socket,
+            Request::Screenshot {
+                output: output.to_string(),
+                width,
+                height,
+                filter,
+                crop,
+            },
+        )?;
         match response {
             Response::Output(s) => Ok(s),
             Response::Error(e) => Err(e),
@@ -413,27 +431,15 @@ pub mod client {
         visible_only: bool,
         verbose: bool,
     ) -> Result<String, String> {
-        let mut stream =
-            UnixStream::connect(socket).map_err(|e| format!("Connect failed: {}", e))?;
-
-        let request = Request::DumpTree {
-            filter,
-            filter_key,
-            visible_only,
-            verbose,
-        };
-        writeln!(stream, "{}", serde_json::to_string(&request).unwrap())
-            .map_err(|e| format!("Write failed: {}", e))?;
-
-        let mut reader = BufReader::new(stream);
-        let mut line = String::new();
-        reader
-            .read_line(&mut line)
-            .map_err(|e| format!("Read failed: {}", e))?;
-
-        let response: Response =
-            serde_json::from_str(&line).map_err(|e| format!("Invalid response: {}", e))?;
-
+        let response = send_request(
+            socket,
+            Request::DumpTree {
+                filter,
+                filter_key,
+                visible_only,
+                verbose,
+            },
+        )?;
         match response {
             Response::Tree(s) => Ok(s),
             Response::Error(e) => Err(e),
@@ -447,22 +453,7 @@ pub mod client {
         filter: Option<String>,
         verbose: bool,
     ) -> Result<String, String> {
-        let mut stream =
-            UnixStream::connect(socket).map_err(|e| format!("Connect failed: {}", e))?;
-
-        let request = Request::DumpQuads { filter, verbose };
-        writeln!(stream, "{}", serde_json::to_string(&request).unwrap())
-            .map_err(|e| format!("Write failed: {}", e))?;
-
-        let mut reader = BufReader::new(stream);
-        let mut line = String::new();
-        reader
-            .read_line(&mut line)
-            .map_err(|e| format!("Read failed: {}", e))?;
-
-        let response: Response =
-            serde_json::from_str(&line).map_err(|e| format!("Invalid response: {}", e))?;
-
+        let response = send_request(socket, Request::DumpQuads { filter, verbose })?;
         match response {
             Response::Quads(s) => Ok(s),
             Response::Error(e) => Err(e),
@@ -473,9 +464,57 @@ pub mod client {
 
 #[cfg(test)]
 mod tests {
-    use super::{LuaCommand, Request, Response, handle_request, parse_request};
+    use super::{
+        LuaCommand, Request, Response, cleanup_stale_socket, handle_request, parse_request,
+        socket_pid,
+    };
+    use std::fs::File;
+    use std::path::Path;
     use std::sync::mpsc;
     use std::thread;
+
+    #[test]
+    fn socket_pid_extracts_pid_from_wow_lua_socket_name() {
+        let pid = socket_pid(Path::new("/tmp/wow-lua-12345.sock"));
+
+        assert_eq!(pid, Some(12345));
+    }
+
+    #[test]
+    fn socket_pid_rejects_non_matching_socket_names() {
+        assert_eq!(socket_pid(Path::new("/tmp/auth-challenge.sock")), None);
+        assert_eq!(socket_pid(Path::new("/tmp/wow-lua-not-a-pid.sock")), None);
+        assert_eq!(socket_pid(Path::new("/tmp/wow-lua-12345")), None);
+    }
+
+    #[test]
+    fn cleanup_stale_socket_ignores_files_without_socket_pid() {
+        let temp_dir = tempfile::tempdir().expect("temp dir should be created");
+        let socket_path = temp_dir.path().join("auth-challenge.sock");
+        File::create(&socket_path).expect("test socket file should be created");
+
+        cleanup_stale_socket(&socket_path);
+
+        assert!(
+            socket_path.exists(),
+            "non wow-lua socket files must not be removed"
+        );
+    }
+
+    #[test]
+    fn cleanup_stale_socket_keeps_socket_for_live_process() {
+        let temp_dir = tempfile::tempdir().expect("temp dir should be created");
+        let pid = std::process::id();
+        let socket_path = temp_dir.path().join(format!("wow-lua-{pid}.sock"));
+        File::create(&socket_path).expect("test socket file should be created");
+
+        cleanup_stale_socket(&socket_path);
+
+        assert!(
+            socket_path.exists(),
+            "socket for current live process must not be removed"
+        );
+    }
 
     #[test]
     fn parse_request_accepts_dump_quads_payload() {
