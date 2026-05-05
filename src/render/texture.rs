@@ -100,7 +100,14 @@ pub fn draw_horizontal_slice_texture(frame: &mut Frame, texture: HorizontalSlice
 
     let _ = texture.alpha;
 
-    // If we have sliced handles, use them
+    if draw_horizontal_slice_parts(frame, &texture) {
+        return;
+    }
+
+    frame.draw_image(texture.bounds, canvas::Image::new(texture.handle.clone()));
+}
+
+fn draw_horizontal_slice_parts(frame: &mut Frame, texture: &HorizontalSliceTexture<'_>) -> bool {
     if let (Some(left), Some(middle), Some(right)) = (
         texture.left_handle,
         texture.middle_handle,
@@ -138,12 +145,11 @@ pub fn draw_horizontal_slice_texture(frame: &mut Frame, texture: HorizontalSlice
             };
             frame.draw_image(right_bounds, canvas::Image::new(right.clone()));
 
-            return;
+            return true;
         }
     }
 
-    // Fallback: draw the full texture scaled
-    frame.draw_image(texture.bounds, canvas::Image::new(texture.handle.clone()));
+    false
 }
 
 pub struct HorizontalSliceTexture<'a> {
@@ -180,20 +186,16 @@ pub fn draw_nine_slice_texture(
         return;
     }
 
-    let inner_width = bounds.width - corner_size * 2.0;
-    let inner_height = bounds.height - corner_size * 2.0;
+    let geometry = NineSliceGeometry {
+        corner_size,
+        edge_size,
+        inner_width: bounds.width - corner_size * 2.0,
+        inner_height: bounds.height - corner_size * 2.0,
+    };
 
     draw_nine_slice_center(frame, bounds, handles, edge_size);
     draw_nine_slice_corners(frame, bounds, handles, corner_size);
-    draw_nine_slice_edges(
-        frame,
-        bounds,
-        handles,
-        corner_size,
-        edge_size,
-        inner_width,
-        inner_height,
-    );
+    draw_nine_slice_edges(frame, bounds, handles, geometry);
 }
 
 /// Draw the center region of a 9-slice texture.
@@ -263,32 +265,28 @@ fn draw_nine_slice_corners(
 }
 
 /// Draw the four edges of a 9-slice texture.
-#[allow(clippy::too_many_arguments)]
 fn draw_nine_slice_edges(
     frame: &mut Frame,
     bounds: Rectangle,
     handles: &NineSliceHandles,
-    corner_size: f32,
-    edge_size: f32,
-    inner_width: f32,
-    inner_height: f32,
+    geometry: NineSliceGeometry,
 ) {
     if let Some(top) = &handles.top {
         let top_bounds = Rectangle {
-            x: bounds.x + corner_size,
+            x: bounds.x + geometry.corner_size,
             y: bounds.y,
-            width: inner_width,
-            height: edge_size,
+            width: geometry.inner_width,
+            height: geometry.edge_size,
         };
         frame.draw_image(top_bounds, canvas::Image::new(top.clone()));
     }
 
     if let Some(bottom) = &handles.bottom {
         let bottom_bounds = Rectangle {
-            x: bounds.x + corner_size,
-            y: bounds.y + bounds.height - edge_size,
-            width: inner_width,
-            height: edge_size,
+            x: bounds.x + geometry.corner_size,
+            y: bounds.y + bounds.height - geometry.edge_size,
+            width: geometry.inner_width,
+            height: geometry.edge_size,
         };
         frame.draw_image(bottom_bounds, canvas::Image::new(bottom.clone()));
     }
@@ -296,22 +294,30 @@ fn draw_nine_slice_edges(
     if let Some(left) = &handles.left {
         let left_bounds = Rectangle {
             x: bounds.x,
-            y: bounds.y + corner_size,
-            width: edge_size,
-            height: inner_height,
+            y: bounds.y + geometry.corner_size,
+            width: geometry.edge_size,
+            height: geometry.inner_height,
         };
         frame.draw_image(left_bounds, canvas::Image::new(left.clone()));
     }
 
     if let Some(right) = &handles.right {
         let right_bounds = Rectangle {
-            x: bounds.x + bounds.width - edge_size,
-            y: bounds.y + corner_size,
-            width: edge_size,
-            height: inner_height,
+            x: bounds.x + bounds.width - geometry.edge_size,
+            y: bounds.y + geometry.corner_size,
+            width: geometry.edge_size,
+            height: geometry.inner_height,
         };
         frame.draw_image(right_bounds, canvas::Image::new(right.clone()));
     }
+}
+
+#[derive(Clone, Copy)]
+struct NineSliceGeometry {
+    corner_size: f32,
+    edge_size: f32,
+    inner_width: f32,
+    inner_height: f32,
 }
 
 /// Handles for 9-slice texture rendering.
