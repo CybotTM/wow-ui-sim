@@ -162,13 +162,17 @@ fn push_i32_array(state: &mut LuaState, values: impl IntoIterator<Item = i32>) -
     table
 }
 
+const TREE_HASH_VALUE_MIXER: u32 = 0x9E37_79B9;
+const TREE_HASH_LANE_MIXER: u32 = 0x85EB_CA6B;
+const TREE_HASH_INITIAL_LANES: [u32; 4] = [0xC2B2_AE35, 0x27D4_EB2F, 0x1656_67B1, 0x85EB_CA77];
+
 fn mix_tree_hash_lane(lane: &mut u32, value: u32) {
-    *lane ^= value.wrapping_mul(0x9E37_79B9);
-    *lane = lane.rotate_left(7).wrapping_mul(0x85EB_CA6B);
+    *lane ^= value.wrapping_mul(TREE_HASH_VALUE_MIXER);
+    *lane = lane.rotate_left(7).wrapping_mul(TREE_HASH_LANE_MIXER);
 }
 
 fn trait_tree_hash_bytes(tree: &crate::traits::TraitTreeInfo) -> [u8; 16] {
-    let mut lanes = [0xC2B2_AE35, 0x27D4_EB2F, 0x1656_67B1, 0x85EB_CA77];
+    let mut lanes = TREE_HASH_INITIAL_LANES;
     mix_tree_hash_lane(&mut lanes[0], tree.id);
     mix_tree_hash_lane(&mut lanes[1], tree.first_node_id);
     mix_tree_hash_lane(&mut lanes[2], tree.flags);
