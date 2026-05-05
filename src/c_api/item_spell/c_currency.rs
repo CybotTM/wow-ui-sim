@@ -197,8 +197,7 @@ fn write_currency_transfer_fields(state: &mut LuaState, t: Val, info: &CurrencyI
     }
 }
 
-fn c_currency_get_currency_info(state: &mut LuaState) -> LuaResult<u32> {
-    let currency_id = i32::from_stack(state, 1)?;
+fn push_currency_info_by_id(state: &mut LuaState, currency_id: i32) -> LuaResult<u32> {
     let info = borrow_state(state)?
         .currency_info
         .get(&currency_id)
@@ -211,6 +210,11 @@ fn c_currency_get_currency_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn c_currency_get_currency_info(state: &mut LuaState) -> LuaResult<u32> {
+    let currency_id = i32::from_stack(state, 1)?;
+    push_currency_info_by_id(state, currency_id)
+}
+
 fn c_currency_get_currency_info_from_link(state: &mut LuaState) -> LuaResult<u32> {
     let Some(link) = val_to_string(state, stack_val(state, 1)) else {
         return Ok(0);
@@ -218,16 +222,7 @@ fn c_currency_get_currency_info_from_link(state: &mut LuaState) -> LuaResult<u32
     let Some(currency_id) = parse_currency_id_from_link(&link) else {
         return Ok(0);
     };
-    let info = borrow_state(state)?
-        .currency_info
-        .get(&currency_id)
-        .cloned();
-    let Some(info) = info else {
-        return Ok(0);
-    };
-    let table = push_currency_info_table(state, &info);
-    state.push(table);
-    Ok(1)
+    push_currency_info_by_id(state, currency_id)
 }
 
 fn c_currency_get_currency_container_info(state: &mut LuaState) -> LuaResult<u32> {
