@@ -29,23 +29,7 @@ pub(super) fn register_event(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn insert_registered_event_checked(state: &mut LuaState, id: u64, event: &str) -> LuaResult<bool> {
-    let mut sim = borrow_state_mut(state)?;
-    if !crate::event::is_registerable_event(event) {
-        let frame_name = sim
-            .widgets
-            .get(id)
-            .and_then(|f| f.name.clone())
-            .unwrap_or_else(|| "Frame".to_string());
-        return Err(runtime_error(format!(
-            "{}:RegisterEvent(): {}:RegisterEvent(): Attempt to register unknown event \"{}\"",
-            frame_name, frame_name, event
-        )));
-    }
-    Ok(sim
-        .widgets
-        .get_mut(id)
-        .map(|f| f.registered_events.insert(event.to_string()))
-        .unwrap_or(false))
+    mutate_registered_event_checked(state, id, event, RegisteredEventOp::Insert)
 }
 
 pub(super) fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
@@ -84,23 +68,47 @@ pub(super) fn unregister_event(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn remove_registered_event_checked(state: &mut LuaState, id: u64, event: &str) -> LuaResult<bool> {
+    mutate_registered_event_checked(state, id, event, RegisteredEventOp::Remove)
+}
+
+enum RegisteredEventOp {
+    Insert,
+    Remove,
+}
+
+fn mutate_registered_event_checked(
+    state: &mut LuaState,
+    id: u64,
+    event: &str,
+    op: RegisteredEventOp,
+) -> LuaResult<bool> {
+    ensure_registerable_event(state, id, event)?;
     let mut sim = borrow_state_mut(state)?;
-    if !crate::event::is_registerable_event(event) {
-        let frame_name = sim
-            .widgets
-            .get(id)
-            .and_then(|f| f.name.clone())
-            .unwrap_or_else(|| "Frame".to_string());
-        return Err(runtime_error(format!(
-            "{}:RegisterEvent(): {}:RegisterEvent(): Attempt to register unknown event \"{}\"",
-            frame_name, frame_name, event
-        )));
-    }
     Ok(sim
         .widgets
         .get_mut(id)
-        .map(|f| f.registered_events.remove(event))
+        .map(|frame| match op {
+            RegisteredEventOp::Insert => frame.registered_events.insert(event.to_string()),
+            RegisteredEventOp::Remove => frame.registered_events.remove(event),
+        })
         .unwrap_or(false))
+}
+
+fn ensure_registerable_event(state: &mut LuaState, id: u64, event: &str) -> LuaResult<()> {
+    if crate::event::is_registerable_event(event) {
+        return Ok(());
+    }
+
+    let sim = borrow_state(state)?;
+    let frame_name = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.name.clone())
+        .unwrap_or_else(|| "Frame".to_string());
+    Err(runtime_error(format!(
+        "{}:RegisterEvent(): {}:RegisterEvent(): Attempt to register unknown event \"{}\"",
+        frame_name, frame_name, event
+    )))
 }
 
 pub(super) fn unregister_all_events(state: &mut LuaState) -> LuaResult<u32> {
@@ -135,12 +143,16 @@ pub(super) fn is_event_registered(state: &mut LuaState) -> LuaResult<u32> {
     let registered = sim
         .widgets
         .get(id)
-        .map(|f| f.registered_events.contains(&event))
+        .map(|frame| frame_has_registered_event(frame, &event))
         .unwrap_or(false);
     drop(sim);
     state.push(Val::Bool(registered));
     state.push(Val::Nil);
     Ok(2)
+}
+
+fn frame_has_registered_event(frame: &crate::widget::Frame, event: &str) -> bool {
+    frame.registered_events.contains(event)
 }
 
 pub(super) fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
@@ -319,46 +331,94 @@ fn script_supported(state: &LuaState, frame_id: u64, handler_name: &str) -> bool
 }
 
 fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> bool {
+    if is_common_script_handler(handler_name)
+        || is_keyboard_script_handler(handler_name)
+        || is_hyperlink_script_handler(handler_name)
+    {
+        return true;
+    }
+
     match handler_name {
-        "OnLoad" | "OnEvent" | "OnUpdate" | "OnShow" | "OnHide" | "OnEnter" | "OnLeave"
-        | "OnMouseDown" | "OnMouseUp" | "OnMouseWheel" | "OnDragStart" | "OnDragStop"
-        | "OnReceiveDrag" | "OnSizeChanged" | "OnAttributeChanged" | "OnPlay" | "OnFinished"
-        | "OnStop" | "OnLoop" | "OnPause" => true,
         "OnClick" | "PreClick" | "PostClick" => {
             matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
         }
         "OnDoubleClick" => true,
-        "OnEnable" | "OnDisable" => matches!(
-            widget_type,
-            WidgetType::Button
-                | WidgetType::CheckButton
-                | WidgetType::EditBox
-                | WidgetType::Slider
-                | WidgetType::ScrollFrame
-        ),
-        "OnEnterPressed" | "OnEscapePressed" | "OnTabPressed" | "OnSpacePressed" | "OnChar"
-        | "OnKeyDown" | "OnKeyUp" => true,
+        "OnEnable" | "OnDisable" => supports_enable_disable_script(widget_type),
         "OnTextChanged"
         | "OnTextSet"
         | "OnEditFocusGained"
         | "OnEditFocusLost"
-        | "OnInputLanguageChanged" => matches!(widget_type, WidgetType::EditBox),
+        | "OnInputLanguageChanged" => widget_type == WidgetType::EditBox,
         "OnCooldownDone" => matches!(widget_type, WidgetType::Cooldown),
         "OnValueChanged" => matches!(widget_type, WidgetType::Slider | WidgetType::StatusBar),
         "OnVerticalScroll" | "OnScrollRangeChanged" => {
             matches!(widget_type, WidgetType::ScrollFrame | WidgetType::EditBox)
         }
         "OnColorSelect" => matches!(widget_type, WidgetType::ColorSelect),
-        "OnHyperlinkClick" | "OnHyperlinkEnter" | "OnHyperlinkLeave" => true,
         "OnTooltipCleared"
         | "OnTooltipSetSpell"
         | "OnTooltipSetItem"
         | "OnTooltipSetUnit"
-        | "OnTooltipSetFramestack" => {
-            matches!(widget_type, WidgetType::GameTooltip)
-        }
+        | "OnTooltipSetFramestack" => widget_type == WidgetType::GameTooltip,
         _ => false,
     }
+}
+
+fn supports_enable_disable_script(widget_type: WidgetType) -> bool {
+    matches!(
+        widget_type,
+        WidgetType::Button
+            | WidgetType::CheckButton
+            | WidgetType::EditBox
+            | WidgetType::Slider
+            | WidgetType::ScrollFrame
+    )
+}
+
+fn is_common_script_handler(handler_name: &str) -> bool {
+    matches!(
+        handler_name,
+        "OnLoad"
+            | "OnEvent"
+            | "OnUpdate"
+            | "OnShow"
+            | "OnHide"
+            | "OnEnter"
+            | "OnLeave"
+            | "OnMouseDown"
+            | "OnMouseUp"
+            | "OnMouseWheel"
+            | "OnDragStart"
+            | "OnDragStop"
+            | "OnReceiveDrag"
+            | "OnSizeChanged"
+            | "OnAttributeChanged"
+            | "OnPlay"
+            | "OnFinished"
+            | "OnStop"
+            | "OnLoop"
+            | "OnPause"
+    )
+}
+
+fn is_keyboard_script_handler(handler_name: &str) -> bool {
+    matches!(
+        handler_name,
+        "OnEnterPressed"
+            | "OnEscapePressed"
+            | "OnTabPressed"
+            | "OnSpacePressed"
+            | "OnChar"
+            | "OnKeyDown"
+            | "OnKeyUp"
+    )
+}
+
+fn is_hyperlink_script_handler(handler_name: &str) -> bool {
+    matches!(
+        handler_name,
+        "OnHyperlinkClick" | "OnHyperlinkEnter" | "OnHyperlinkLeave"
+    )
 }
 
 fn is_animation_script_container(state: &LuaState, frame_id: u64) -> bool {
@@ -625,4 +685,19 @@ pub(super) fn rilua_hlist_set(state: &mut LuaState, tbl: GcRef<Table>) -> GcRef<
     }
     state.gc.barrier_back(tbl);
     new_set
+}
+
+#[cfg(test)]
+mod tests {
+    use super::frame_has_registered_event;
+    use crate::widget::{Frame, WidgetType};
+
+    #[test]
+    fn frame_has_registered_event_uses_set_membership() {
+        let mut frame = Frame::new(WidgetType::Frame, Some("EventFrame".to_string()), None);
+        frame.registered_events.insert("PLAYER_LOGIN".to_string());
+
+        assert!(frame_has_registered_event(&frame, "PLAYER_LOGIN"));
+        assert!(!frame_has_registered_event(&frame, "PLAYER_LOGOUT"));
+    }
 }
