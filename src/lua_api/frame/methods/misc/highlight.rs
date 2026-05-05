@@ -2,6 +2,7 @@
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::widget::Frame;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -62,11 +63,15 @@ fn collect_descendants(
 }
 
 pub fn is_highlight_locked(state: &mut LuaState) -> LuaResult<u32> {
+    push_frame_bool(state, |frame| frame.highlight_locked)
+}
+
+fn push_frame_bool(state: &mut LuaState, read: impl FnOnce(&Frame) -> bool) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let val = borrow_state(state)?
         .widgets
         .get(id)
-        .map(|f| f.highlight_locked)
+        .map(read)
         .unwrap_or(false);
     state.push(Val::Bool(val));
     Ok(1)
@@ -98,14 +103,7 @@ fn set_highlight_with_texture(state: &mut LuaState, id: u64, locked: bool) -> Lu
 }
 
 pub fn is_ignoring_children_for_bounds(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let val = borrow_state(state)?
-        .widgets
-        .get(id)
-        .map(|f| f.ignoring_children_for_bounds)
-        .unwrap_or(false);
-    state.push(Val::Bool(val));
-    Ok(1)
+    push_frame_bool(state, |frame| frame.ignoring_children_for_bounds)
 }
 
 pub fn set_highlight_locked(state: &mut LuaState) -> LuaResult<u32> {
