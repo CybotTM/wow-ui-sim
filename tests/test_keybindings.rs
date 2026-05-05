@@ -90,34 +90,37 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
 
 /// Create a fully loaded environment with Blizzard addons and startup events.
 fn setup_env() -> common::LockedEnv {
-    common::lock_env(|| {
-        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-        env.set_screen_size(1024.0, 768.0);
+    common::lock_env(setup_unsettled_env)
+}
 
-        // Set addon_base_paths for runtime on-demand loading
-        {
-            let mut state = env.state().borrow_mut();
-            state.addon_base_paths = vec![blizzard_ui_dir()];
+fn setup_unsettled_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    seed_addon_search_paths(&env);
+    load_base_blizzard_addons(&env);
+    env.apply_post_load_workarounds();
+    fire_startup_events(&env);
+    env
+}
+
+fn seed_addon_search_paths(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    state.addon_base_paths = vec![blizzard_ui_dir()];
+}
+
+fn load_base_blizzard_addons(env: &WowLuaEnv) {
+    let ui = blizzard_ui_dir();
+    for (name, toc) in BLIZZARD_ADDONS {
+        let toc_path = ui.join(name).join(toc);
+        if !toc_path.exists() {
+            continue;
         }
-
-        // Load base Blizzard addons
-        let ui = blizzard_ui_dir();
-        for (name, toc) in BLIZZARD_ADDONS {
-            let toc_path = ui.join(name).join(toc);
-            if !toc_path.exists() {
-                continue;
-            }
-            if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
-                eprintln!("[load {name}] FAILED: {e}");
-            } else {
-                env.apply_runtime_addon_load_workarounds(name);
-            }
+        if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+            eprintln!("[load {name}] FAILED: {e}");
+        } else {
+            env.apply_runtime_addon_load_workarounds(name);
         }
-
-        env.apply_post_load_workarounds();
-        fire_startup_events(&env);
-        env
-    })
+    }
 }
 
 fn settle_env(env: &WowLuaEnv) {
@@ -136,33 +139,8 @@ fn prepare_bag_env(env: &WowLuaEnv) {
 /// Create a fully loaded environment with Blizzard addons and startup events.
 fn setup_settled_env() -> common::LockedEnv {
     common::lock_env(|| {
-        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-        env.set_screen_size(1024.0, 768.0);
-
-        {
-            let mut state = env.state().borrow_mut();
-            state.addon_base_paths = vec![blizzard_ui_dir()];
-        }
-
-        let ui = blizzard_ui_dir();
-        for (name, toc) in BLIZZARD_ADDONS {
-            let toc_path = ui.join(name).join(toc);
-            if !toc_path.exists() {
-                continue;
-            }
-            if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
-                eprintln!("[load {name}] FAILED: {e}");
-            } else {
-                env.apply_runtime_addon_load_workarounds(name);
-            }
-        }
-
-        env.apply_post_load_workarounds();
-        fire_startup_events(&env);
-        env.apply_post_event_workarounds();
-        process_pending_timers(&env);
-        fire_one_on_update_tick(&env);
-        let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
+        let env = setup_unsettled_env();
+        settle_env(&env);
         env
     })
 }
@@ -258,13 +236,6 @@ fn bag_id_is_shown(env: &WowLuaEnv, bag_id: i32) -> bool {
     "#
     ))
     .unwrap_or(false)
-}
-
-/// Check whether a global frame exists.
-#[allow(dead_code)]
-fn frame_exists(env: &WowLuaEnv, frame_name: &str) -> bool {
-    let code = format!("return {frame_name} ~= nil");
-    env.eval::<bool>(&code).unwrap_or(false)
 }
 
 /// Install a Lua error handler that collects errors into `__test_errors`.
