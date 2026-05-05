@@ -39,6 +39,8 @@ fn is_equippable_item_reads_state_set() {
     env.state().borrow_mut().equippable_items.insert(19019);
     let b: bool = env.eval("return IsEquippableItem(19019)").unwrap();
     assert!(b);
+    let b: bool = env.eval("return IsEquippableItem(6948)").unwrap();
+    assert!(!b);
 }
 
 #[test]
@@ -47,6 +49,8 @@ fn is_consumable_item_reads_state_set() {
     env.state().borrow_mut().consumable_items.insert(6948);
     let b: bool = env.eval("return IsConsumableItem(6948)").unwrap();
     assert!(b);
+    let b: bool = env.eval("return IsConsumableItem(19019)").unwrap();
+    assert!(!b);
 }
 
 // ── CanLootUnit ───────────────────────────────────────────────────────────────

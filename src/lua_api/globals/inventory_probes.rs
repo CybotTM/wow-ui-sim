@@ -13,11 +13,13 @@
 
 use super::missing_surface::item_link_for_id;
 use crate::items;
+use crate::lua_api::SimState;
 use crate::lua_api::methods::borrow_state;
 use crate::lua_api::state_types::CursorInfo;
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+use std::collections::HashSet;
 
 const FIRST_EQUIPMENT_SLOT_ID: i32 = 1;
 const LAST_PROFESSION_SLOT_ID: i32 = 28;
@@ -58,23 +60,39 @@ fn is_inventory_item_locked(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_equippable_item(state: &mut LuaState) -> LuaResult<u32> {
+    push_item_classification(state, equippable_item_ids)
+}
+
+fn is_consumable_item(state: &mut LuaState) -> LuaResult<u32> {
+    push_item_classification(state, consumable_item_ids)
+}
+
+fn push_item_classification(
+    state: &mut LuaState,
+    item_ids: fn(&SimState) -> &HashSet<u32>,
+) -> LuaResult<u32> {
     let Some(id) = stack_u32(state, 1) else {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    let b = borrow_state(state)?.equippable_items.contains(&id);
+    let b = {
+        let sim = borrow_state(state)?;
+        is_item_classified(item_ids(&sim), id)
+    };
     state.push(Val::Bool(b));
     Ok(1)
 }
 
-fn is_consumable_item(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(id) = stack_u32(state, 1) else {
-        state.push(Val::Bool(false));
-        return Ok(1);
-    };
-    let b = borrow_state(state)?.consumable_items.contains(&id);
-    state.push(Val::Bool(b));
-    Ok(1)
+fn equippable_item_ids(state: &SimState) -> &HashSet<u32> {
+    &state.equippable_items
+}
+
+fn consumable_item_ids(state: &SimState) -> &HashSet<u32> {
+    &state.consumable_items
+}
+
+fn is_item_classified(item_ids: &HashSet<u32>, item_id: u32) -> bool {
+    item_ids.contains(&item_id)
 }
 
 /// `CanLootUnit(unit)` — true when the unit is dead and is an enemy.
