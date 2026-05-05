@@ -220,11 +220,15 @@ impl WidgetRegistry {
                 child.parent_id = Some(parent_id);
             }
         }
-        if old_parent_id != Some(parent_id)
-            && let Some(parent) = self.widgets.get_mut(&parent_id)
-        {
-            parent.children.retain(|&id| id != child_id);
-            parent.children.push(child_id);
+        if let Some(parent) = self.widgets.get_mut(&parent_id) {
+            let child_already_registered = old_parent_id == Some(parent_id)
+                && parent.children.iter().any(|&id| id == child_id);
+            if !child_already_registered {
+                if old_parent_id != Some(parent_id) {
+                    parent.children.retain(|&id| id != child_id);
+                }
+                parent.children.push(child_id);
+            }
         }
         self.propagate_effective_alpha(child_id, parent_eff_alpha);
         self.propagate_effective_scale(child_id, parent_eff_scale);
@@ -757,6 +761,25 @@ mod tests {
             .filter(|&&id| id == 3)
             .count();
         assert_eq!(duplicates, 1, "add_child should not duplicate child IDs");
+    }
+
+    #[test]
+    fn add_child_repairs_missing_parent_child_entry() {
+        let mut registry = WidgetRegistry::default();
+
+        registry.register(frame(1, WidgetType::Frame, None, FrameStrata::High));
+        registry.register(frame(2, WidgetType::Texture, Some(1), FrameStrata::High));
+
+        registry.add_child(1, 2);
+
+        assert_eq!(
+            registry
+                .get(1)
+                .expect("parent should remain registered")
+                .children,
+            vec![2],
+            "add_child should repair parent child lists when parent_id is already set"
+        );
     }
 
     #[test]

@@ -95,6 +95,26 @@ fn bounds_match_rect(bounds: (f32, f32, f32, f32), rect: wow_ui_sim::LayoutRect)
         && (bounds.3 - (rect.y + rect.height)).abs() <= tolerance
 }
 
+fn is_compact_raid_manager_texture(path: &str) -> bool {
+    let texture_path = path.to_ascii_lowercase();
+    if texture_path.starts_with("interface\\hud\\uigroupmanager") {
+        return true;
+    }
+
+    matches!(
+        texture_path.as_str(),
+        "gm-bgopen-leads"
+            | "gm-bgopen-assists"
+            | "gm-bgopen-regulars"
+            | "gm-bgopen-party-leads"
+            | "gm-bgopen-party-regulars"
+            | "gm-btnforward-normal"
+            | "gm-btnforward-hover"
+            | "gm-btnforward-pressed"
+            | "gm-btnforward-disabled"
+    )
+}
+
 #[test]
 fn compact_raid_manager_emits_background_and_forward_toggle_quad_bounds() {
     test_timeout! {
@@ -102,8 +122,10 @@ fn compact_raid_manager_emits_background_and_forward_toggle_quad_bounds() {
         env.exec(
             r#"
             A_Admin.SetPartySize(4)
-            CompactRaidFrameManager_Collapse()
             CompactRaidFrameManager_UpdateShown()
+            CompactRaidFrameManager_UpdateOptionsFlowContainer()
+            CompactRaidFrameManager_UpdateContainerVisibility()
+            CompactRaidFrameManager_Collapse()
             "#,
         )
         .expect("Failed to configure collapsed compact raid manager fixture");
@@ -130,6 +152,8 @@ fn compact_raid_manager_emits_background_and_forward_toggle_quad_bounds() {
 
         let buckets = {
             let mut state = env.state().borrow_mut();
+            state.initialize_render_state();
+            state.strata_buckets = None;
             let _ = state.get_strata_buckets();
             state
                 .strata_buckets
@@ -154,9 +178,8 @@ fn compact_raid_manager_emits_background_and_forward_toggle_quad_bounds() {
         let mut background_requests = Vec::new();
         let mut toggle_requests = Vec::new();
         for request in &batch.texture_requests {
-            let path = request.path.to_ascii_lowercase();
             let bounds = quad_bounds(&batch, request);
-            if path.contains("uigroupmanager") {
+            if is_compact_raid_manager_texture(&request.path) {
                 let record = (request.path.clone(), bounds);
                 uigroupmanager_requests.push(record.clone());
                 if bounds_match_rect(bounds, background_rect) {
