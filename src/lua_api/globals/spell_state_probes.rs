@@ -16,6 +16,7 @@
 //! - `IsHelpfulSpell(id)`                 — helpful_spells.contains(id)
 //! - `HasPetSpells()`                     — pet_spells non-empty
 
+use crate::lua_api::SimState;
 use crate::lua_api::methods::borrow_state;
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
@@ -61,15 +62,22 @@ fn is_current_action(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-/// `IsSpellKnown(spellId)` — `known_spells.contains(id)`.
+/// `IsSpellKnown(spellId)` — `known_spells` set membership.
 fn is_spell_known(state: &mut LuaState) -> LuaResult<u32> {
     let Some(id) = stack_u32(state, 1) else {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    let known = borrow_state(state)?.known_spells.contains(&id);
+    let known = {
+        let st = borrow_state(state)?;
+        is_known_spell(&st, id)
+    };
     state.push(Val::Bool(known));
     Ok(1)
+}
+
+fn is_known_spell(st: &SimState, spell_id: u32) -> bool {
+    st.known_spells.contains(&spell_id)
 }
 
 /// `IsSpellKnownOrOverridesKnown(spellId)` — alias of `IsSpellKnown`.
@@ -87,7 +95,7 @@ fn is_spell_in_range(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
     let in_range = {
         let st = borrow_state(state)?;
-        st.known_spells.contains(&id) && unit_is_reachable(&st, &unit)
+        is_known_spell(&st, id) && unit_is_reachable(&st, &unit)
     };
     state.push(Val::Bool(in_range));
     Ok(1)
@@ -114,7 +122,7 @@ fn is_usable_spell(state: &mut LuaState) -> LuaResult<u32> {
     };
     let (usable, no_mana) = {
         let st = borrow_state(state)?;
-        let known = st.known_spells.contains(&id);
+        let known = is_known_spell(&st, id);
         let on_cooldown = st
             .spell_cooldowns
             .get(&id)
@@ -126,26 +134,40 @@ fn is_usable_spell(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
-/// `IsHarmfulSpell(spellId)` — `harmful_spells.contains(id)`.
+/// `IsHarmfulSpell(spellId)` — `harmful_spells` set membership.
 fn is_harmful_spell(state: &mut LuaState) -> LuaResult<u32> {
     let Some(id) = stack_u32(state, 1) else {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    let harmful = borrow_state(state)?.harmful_spells.contains(&id);
+    let harmful = {
+        let st = borrow_state(state)?;
+        is_harmful_spell_id(&st, id)
+    };
     state.push(Val::Bool(harmful));
     Ok(1)
 }
 
-/// `IsHelpfulSpell(spellId)` — `helpful_spells.contains(id)`.
+fn is_harmful_spell_id(st: &SimState, spell_id: u32) -> bool {
+    st.harmful_spells.contains(&spell_id)
+}
+
+/// `IsHelpfulSpell(spellId)` — `helpful_spells` set membership.
 fn is_helpful_spell(state: &mut LuaState) -> LuaResult<u32> {
     let Some(id) = stack_u32(state, 1) else {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    let helpful = borrow_state(state)?.helpful_spells.contains(&id);
+    let helpful = {
+        let st = borrow_state(state)?;
+        is_helpful_spell_id(&st, id)
+    };
     state.push(Val::Bool(helpful));
     Ok(1)
+}
+
+fn is_helpful_spell_id(st: &SimState, spell_id: u32) -> bool {
+    st.helpful_spells.contains(&spell_id)
 }
 
 /// `HasPetSpells()` — retail returns `(count, petType)` when a pet is
