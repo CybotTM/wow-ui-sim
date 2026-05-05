@@ -379,52 +379,55 @@ fn set_table_entry(state: &mut LuaState, table: Val, key: Val, value: Val) {
 // ── Quest blob fields ─────────────────────────────────────────────────────────
 
 pub fn set_fill_texture(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let texture = val_to_string(state, stack_val(state, 2));
-    borrow_state_mut(state)?
-        .quest_blobs
-        .entry(id)
-        .or_default()
-        .fill_texture = texture;
-    Ok(0)
+    set_blob_texture(state, BlobTextureField::Fill)
 }
 
 pub fn set_fill_alpha(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let alpha = match stack_val(state, 2) {
-        Val::Num(value) => Some(value),
-        _ => None,
-    };
-    borrow_state_mut(state)?
-        .quest_blobs
-        .entry(id)
-        .or_default()
-        .fill_alpha = alpha;
-    Ok(0)
+    set_blob_alpha(state, BlobAlphaField::Fill)
 }
 
 pub fn set_border_texture(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let texture = val_to_string(state, stack_val(state, 2));
-    borrow_state_mut(state)?
-        .quest_blobs
-        .entry(id)
-        .or_default()
-        .border_texture = texture;
-    Ok(0)
+    set_blob_texture(state, BlobTextureField::Border)
 }
 
 pub fn set_border_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, BlobAlphaField::Border)
+}
+
+enum BlobTextureField {
+    Fill,
+    Border,
+}
+
+enum BlobAlphaField {
+    Fill,
+    Border,
+}
+
+fn set_blob_texture(state: &mut LuaState, field: BlobTextureField) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let texture = val_to_string(state, stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    let blob = sim.quest_blobs.entry(id).or_default();
+    match field {
+        BlobTextureField::Fill => blob.fill_texture = texture,
+        BlobTextureField::Border => blob.border_texture = texture,
+    }
+    Ok(0)
+}
+
+fn set_blob_alpha(state: &mut LuaState, field: BlobAlphaField) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let alpha = match stack_val(state, 2) {
         Val::Num(value) => Some(value),
         _ => None,
     };
-    borrow_state_mut(state)?
-        .quest_blobs
-        .entry(id)
-        .or_default()
-        .border_alpha = alpha;
+    let mut sim = borrow_state_mut(state)?;
+    let blob = sim.quest_blobs.entry(id).or_default();
+    match field {
+        BlobAlphaField::Fill => blob.fill_alpha = alpha,
+        BlobAlphaField::Border => blob.border_alpha = alpha,
+    }
     Ok(0)
 }
 
@@ -462,8 +465,7 @@ pub fn draw_none(state: &mut LuaState) -> LuaResult<u32> {
         .quest_blobs
         .entry(id)
         .or_default()
-        .active_quests
-        .clear();
+        .clear_active_quests();
     Ok(0)
 }
 
@@ -476,9 +478,7 @@ pub fn draw_blob(state: &mut LuaState) -> LuaResult<u32> {
     }
     let mut sim = borrow_state_mut(state)?;
     let blob = sim.quest_blobs.entry(id).or_default();
-    if !blob.active_quests.contains(&quest_id) {
-        blob.active_quests.push(quest_id);
-    }
+    blob.insert_active_quest(quest_id);
     Ok(0)
 }
 

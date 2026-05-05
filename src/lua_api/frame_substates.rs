@@ -3,7 +3,7 @@
 //! file. Each map on `SimState` stores one of these structs per frame
 //! of the relevant widget kind.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 /// Active quest blob state for a QuestPOIFrame.
 pub struct QuestBlobState {
@@ -11,6 +11,7 @@ pub struct QuestBlobState {
     pub map_id: u32,
     /// Quest IDs currently drawn (via `DrawBlob`).
     pub active_quests: Vec<u32>,
+    active_quest_ids: HashSet<u32>,
     /// Fill texture configured via `SetFillTexture`.
     pub fill_texture: Option<String>,
     /// Border texture configured via `SetBorderTexture`.
@@ -28,12 +29,26 @@ impl Default for QuestBlobState {
         Self {
             map_id: 0,
             active_quests: Vec::new(),
+            active_quest_ids: HashSet::new(),
             fill_texture: None,
             border_texture: None,
             fill_alpha: None,
             border_alpha: None,
             border_scalar: None,
         }
+    }
+}
+
+impl QuestBlobState {
+    pub fn insert_active_quest(&mut self, quest_id: u32) {
+        if self.active_quest_ids.insert(quest_id) {
+            self.active_quests.push(quest_id);
+        }
+    }
+
+    pub fn clear_active_quests(&mut self) {
+        self.active_quests.clear();
+        self.active_quest_ids.clear();
     }
 }
 
