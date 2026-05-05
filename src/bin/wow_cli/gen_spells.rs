@@ -87,6 +87,10 @@ const SPELL_POWER_TESTS: &[&str] = &[
     "}",
 ];
 
+const POWER_TYPE_NAME_FN_HEADER: &str =
+    "pub fn power_type_name(power_type: i8) -> &'static str {\n    match power_type {\n";
+const POWER_TYPE_NAME_FN_FOOTER: &str = "        _ => \"MANA\",\n    }\n}";
+
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let wow_data = wow_data_dir();
     let spell_data = load_spell_data(&wow_data)?;
@@ -665,17 +669,16 @@ fn write_get_spell_power_fn(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_power_type_name_fn(out: &mut File) -> std::io::Result<()> {
-    writeln!(
-        out,
-        "pub fn power_type_name(power_type: i8) -> &'static str {{"
-    )?;
-    writeln!(out, "    match power_type {{")?;
+    write!(out, "{POWER_TYPE_NAME_FN_HEADER}")?;
+    write_power_type_name_arms(out)?;
+    write!(out, "{POWER_TYPE_NAME_FN_FOOTER}")
+}
+
+fn write_power_type_name_arms(out: &mut File) -> std::io::Result<()> {
     for (val, name) in POWER_TYPE_NAMES {
         writeln!(out, "        {val} => \"{name}\",")?;
     }
-    writeln!(out, "        _ => \"MANA\",")?;
-    writeln!(out, "    }}")?;
-    writeln!(out, "}}")
+    Ok(())
 }
 
 fn write_spell_power_tests(out: &mut File) -> std::io::Result<()> {
