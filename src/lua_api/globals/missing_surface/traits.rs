@@ -15,6 +15,7 @@ use crate::traits::{
 };
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+use std::collections::HashSet;
 
 const DELVES_COMPANION_CONFIG_ID: i32 = 9201;
 const DELVES_COMPANION_TRAIT_TREE_ID: u32 = 9201;
@@ -42,21 +43,28 @@ fn fire_named_event_with_arg(state: &mut LuaState, event_name: &str, arg: Val) {
 /// Fire `TRAIT_NODE_CHANGED` for `changed_node_id` and nodes that directly
 /// depend on it through incoming edge sources.
 fn fire_trait_node_changed_with_dependents(state: &mut LuaState, changed_node_id: u32) {
-    let mut affected = Vec::with_capacity(8);
-    affected.push(changed_node_id);
-    for node in TRAIT_NODE_DB.values() {
-        if node
-            .edges
-            .iter()
-            .any(|edge| edge.source_node_id == changed_node_id)
-            && !affected.contains(&node.id)
-        {
-            affected.push(node.id);
-        }
-    }
+    let affected = affected_trait_node_ids(changed_node_id);
     for node_id in affected {
         fire_named_event_with_arg(state, "TRAIT_NODE_CHANGED", Val::Num(node_id as f64));
     }
+}
+
+fn affected_trait_node_ids(changed_node_id: u32) -> Vec<u32> {
+    let mut affected = Vec::with_capacity(8);
+    let mut seen = HashSet::with_capacity(8);
+    affected.push(changed_node_id);
+    seen.insert(changed_node_id);
+
+    for node in TRAIT_NODE_DB.values() {
+        let depends_on_changed_node = node
+            .edges
+            .iter()
+            .any(|edge| edge.source_node_id == changed_node_id);
+        if depends_on_changed_node && seen.insert(node.id) {
+            affected.push(node.id);
+        }
+    }
+    affected
 }
 
 /// Fire `TRAIT_TREE_CURRENCY_INFO_UPDATED` for the node's owning tree.
