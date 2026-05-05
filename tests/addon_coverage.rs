@@ -493,7 +493,7 @@ fn load_panel_harness_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     let roots = panel_coverage_roots();
     let closure = discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, &roots);
     for (addon_name, toc_path) in &closure {
-        if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
+        if let Err(error) = load_addon(&env.loader_env(), toc_path) {
             panic!("{addon_name} should load for the panel harness: {error}");
         }
     }
@@ -1007,53 +1007,71 @@ fn closure_runtime_failure_message(
     })
 }
 
+fn record_load_on_demand_closure_failures(
+    env: &WowLuaEnv,
+    closure: &LoadOnDemandAddonClosure,
+    startup_addons: &HashSet<String>,
+    known_runtime_counts: &BTreeMap<String, usize>,
+    closure_failures: &mut Vec<String>,
+    load_failures: &mut Vec<String>,
+) {
+    clear_lua_error_tracking(env);
+    let Some(representative) = load_addon_root_for_closure(env, closure, load_failures) else {
+        return;
+    };
+
+    if let Some(failure) = closure_runtime_failure_message(
+        env,
+        closure,
+        &representative,
+        startup_addons,
+        known_runtime_counts,
+    ) {
+        closure_failures.push(failure);
+    }
+}
+
+fn run_load_on_demand_blizzard_addon_shard_body(shard_index: usize, shard_count: usize) {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+
+    let startup_addons = load_startup_blizzard_ui(&env);
+    let lod_closures = discover_blizzard_lod_addon_closures();
+    let known_runtime_counts = known_load_on_demand_runtime_error_counts();
+    let shard_closures =
+        shard_load_on_demand_addon_closures(&lod_closures, shard_count, &known_runtime_counts);
+    let mut closure_failures = Vec::new();
+    let mut load_failures = Vec::new();
+
+    for closure in &shard_closures[shard_index] {
+        record_load_on_demand_closure_failures(
+            &env,
+            closure,
+            &startup_addons,
+            &known_runtime_counts,
+            &mut closure_failures,
+            &mut load_failures,
+        );
+    }
+
+    assert!(
+        load_failures.is_empty(),
+        "runtime LoadAddOn should load every Blizzard LoD addon in shard {shard_index}/{shard_count} after startup:\n{}",
+        load_failures.join("\n"),
+    );
+    assert!(
+        closure_failures.is_empty(),
+        "runtime LoadAddOn exceeded the known runtime per-addon Lua error baseline for at least one explicit addon closure in shard {shard_index}/{shard_count}:\n{}",
+        closure_failures.join("\n\n"),
+    );
+}
+
 fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usize) {
     with_isolated_addon_coverage_state(|| {
         common::with_perf_lock(|| {
             common::with_timeout(600, move || {
-                let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-                env.set_screen_size(1024.0, 768.0);
-                env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
-
-                let startup_addons = load_startup_blizzard_ui(&env);
-                let lod_closures = discover_blizzard_lod_addon_closures();
-                let known_runtime_counts = known_load_on_demand_runtime_error_counts();
-                let shard_closures = shard_load_on_demand_addon_closures(
-                    &lod_closures,
-                    shard_count,
-                    &known_runtime_counts,
-                );
-                let mut closure_failures = Vec::new();
-                let mut load_failures = Vec::new();
-
-                for closure in &shard_closures[shard_index] {
-                    clear_lua_error_tracking(&env);
-                    let representative =
-                        load_addon_root_for_closure(&env, closure, &mut load_failures);
-                    let Some(representative) = representative else {
-                        continue;
-                    };
-                    if let Some(failure) = closure_runtime_failure_message(
-                        &env,
-                        closure,
-                        &representative,
-                        &startup_addons,
-                        &known_runtime_counts,
-                    ) {
-                        closure_failures.push(failure);
-                    }
-                }
-
-                assert!(
-                    load_failures.is_empty(),
-                    "runtime LoadAddOn should load every Blizzard LoD addon in shard {shard_index}/{shard_count} after startup:\n{}",
-                    load_failures.join("\n"),
-                );
-                assert!(
-                    closure_failures.is_empty(),
-                    "runtime LoadAddOn exceeded the known runtime per-addon Lua error baseline for at least one explicit addon closure in shard {shard_index}/{shard_count}:\n{}",
-                    closure_failures.join("\n\n"),
-                );
+                run_load_on_demand_blizzard_addon_shard_body(shard_index, shard_count);
             })
         })
     })
