@@ -4,7 +4,7 @@
 mod common;
 
 use common::env_with_shared_xml;
-use wow_ui_sim::iced_app::build_quad_batch_for_registry;
+use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
 
 // ============================================================================
 // MinimalCheckboxTemplate
@@ -260,15 +260,8 @@ fn minimal_checkbox_quad_batch() {
     };
     let state = env.state().borrow();
     let batch = build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        Some("TestMinCbQuad"),
-        None,
-        None,
-        None,
-        None,
-        None,
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+            .root_name(Some("TestMinCbQuad")),
     );
 
     // Should have texture requests referencing the checkbox atlas path

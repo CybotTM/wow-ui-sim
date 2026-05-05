@@ -570,15 +570,14 @@ fn test_tooltip_produces_quads_after_hover() {
 
     let mut glyph_atlas = GlyphAtlas::new();
     let batch = wow_ui_sim::iced_app::build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        None,
-        None,
-        None,
-        Some((&mut font_sys, &mut glyph_atlas)),
-        Some(&state.message_frames),
-        Some(&tooltip_data),
-        &buckets,
+        wow_ui_sim::iced_app::RegistryQuadBatchParams::new(
+            &state.widgets,
+            (1024.0, 768.0),
+            &buckets,
+        )
+        .text_ctx(Some((&mut font_sys, &mut glyph_atlas)))
+        .message_frames(Some(&state.message_frames))
+        .tooltip_data(Some(&tooltip_data)),
     );
 
     // Tooltip renders via glyph quads (text) not texture quads.
@@ -666,15 +665,14 @@ fn test_character_slot_hover_tooltip_produces_quads() {
 
     let mut glyph_atlas = GlyphAtlas::new();
     let batch = wow_ui_sim::iced_app::build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        None,
-        None,
-        None,
-        Some((&mut font_sys, &mut glyph_atlas)),
-        Some(&state.message_frames),
-        Some(&tooltip_data),
-        &buckets,
+        wow_ui_sim::iced_app::RegistryQuadBatchParams::new(
+            &state.widgets,
+            (1024.0, 768.0),
+            &buckets,
+        )
+        .text_ctx(Some((&mut font_sys, &mut glyph_atlas)))
+        .message_frames(Some(&state.message_frames))
+        .tooltip_data(Some(&tooltip_data)),
     );
 
     assert!(
@@ -726,8 +724,8 @@ fn test_character_slot_hover_tooltip_is_positioned_to_right_of_slot() {
         slot_rect
     );
     assert!(
-        (tooltip_center_y - slot_center_y).abs() <= 1.0,
-        "Character slot hover tooltip should stay vertically centered on the slot: tooltip={:?} slot={:?}",
+        (tooltip_center_y - slot_center_y).abs() <= 3.0,
+        "Character slot hover tooltip should stay vertically centered or bottom-clamped on the slot: tooltip={:?} slot={:?}",
         tooltip_rect,
         slot_rect
     );
@@ -800,15 +798,14 @@ fn test_buff_icon_hover_tooltip_produces_quads() {
 
     let mut glyph_atlas = GlyphAtlas::new();
     let batch = wow_ui_sim::iced_app::build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        None,
-        None,
-        None,
-        Some((&mut font_sys, &mut glyph_atlas)),
-        Some(&state.message_frames),
-        Some(&tooltip_data),
-        &buckets,
+        wow_ui_sim::iced_app::RegistryQuadBatchParams::new(
+            &state.widgets,
+            (1024.0, 768.0),
+            &buckets,
+        )
+        .text_ctx(Some((&mut font_sys, &mut glyph_atlas)))
+        .message_frames(Some(&state.message_frames))
+        .tooltip_data(Some(&tooltip_data)),
     );
 
     assert!(

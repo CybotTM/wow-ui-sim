@@ -106,7 +106,7 @@ pub use render::{DirtyStrataRebuildParams, rebuild_dirty_strata_batches_for_regi
 pub use state::{CanvasMessage, InspectorState};
 #[cfg(feature = "gui")]
 pub use strata_emit::{
-    build_hittable_rects, build_quad_batch_for_registry,
+    RegistryQuadBatchParams, build_hittable_rects, build_quad_batch_for_registry,
     build_quad_batch_for_registry_with_quest_blobs,
 };
 #[cfg(feature = "gui")]

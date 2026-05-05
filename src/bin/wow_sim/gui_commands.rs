@@ -117,7 +117,9 @@ fn build_screenshot_batch(
     wow_ui_sim::render::QuadBatch,
     wow_ui_sim::render::GlyphAtlas,
 ) {
-    use wow_ui_sim::iced_app::build_quad_batch_for_registry_with_quest_blobs;
+    use wow_ui_sim::iced_app::{
+        RegistryQuadBatchParams, build_quad_batch_for_registry_with_quest_blobs,
+    };
     use wow_ui_sim::render::GlyphAtlas;
 
     let mut glyph_atlas = GlyphAtlas::new();
@@ -133,16 +135,12 @@ fn build_screenshot_batch(
         let state = env.state().borrow();
         let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
         build_quad_batch_for_registry_with_quest_blobs(
-            &state.widgets,
-            (width as f32, height as f32),
-            filter,
-            None,
-            None,
-            Some((&mut fs, &mut glyph_atlas)),
-            Some(&state.message_frames),
-            Some(&tooltip_data),
-            Some(&state.quest_blobs),
-            &buckets,
+            RegistryQuadBatchParams::new(&state.widgets, (width as f32, height as f32), &buckets)
+                .root_name(filter)
+                .text_ctx(Some((&mut fs, &mut glyph_atlas)))
+                .message_frames(Some(&state.message_frames))
+                .tooltip_data(Some(&tooltip_data))
+                .quest_blobs(Some(&state.quest_blobs)),
         )
     };
     (batch, glyph_atlas)

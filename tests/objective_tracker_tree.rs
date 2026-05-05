@@ -23,7 +23,9 @@ mod common;
 
 use std::path::PathBuf;
 
-use wow_ui_sim::iced_app::build_quad_batch_for_registry_with_quest_blobs;
+use wow_ui_sim::iced_app::{
+    RegistryQuadBatchParams, build_quad_batch_for_registry_with_quest_blobs,
+};
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::{GlyphAtlas, WowFontSystem};
@@ -62,16 +64,10 @@ fn build_text_quad_batch(env: &WowLuaEnv) -> wow_ui_sim::render::QuadBatch {
     };
     let state = env.state().borrow();
     build_quad_batch_for_registry_with_quest_blobs(
-        &state.widgets,
-        (1024.0, 768.0),
-        None,
-        None,
-        None,
-        Some((&mut font_sys, &mut glyph_atlas)),
-        Some(&state.message_frames),
-        None,
-        Some(&state.quest_blobs),
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+            .text_ctx(Some((&mut font_sys, &mut glyph_atlas)))
+            .message_frames(Some(&state.message_frames))
+            .quest_blobs(Some(&state.quest_blobs)),
     )
 }
 

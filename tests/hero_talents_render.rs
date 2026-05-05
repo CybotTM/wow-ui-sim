@@ -5,7 +5,7 @@ mod common;
 use std::path::PathBuf;
 
 use wow_ui_sim::atlas::get_atlas_info;
-use wow_ui_sim::iced_app::build_quad_batch_for_registry;
+use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -171,17 +171,11 @@ fn hero_spec_icon_and_mask_quads_match_layout_rect() {
         state.strata_buckets.as_ref().unwrap().clone()
     };
     let state = env.state().borrow();
-    let batch = build_quad_batch_for_registry(
+    let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
         &state.widgets,
         (1024.0, 768.0),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
         &buckets,
-    );
+    ));
 
     let icon_crop_prefix = format!("{icon_path}@crop:");
     let icon_requests: Vec<_> = batch
@@ -267,17 +261,11 @@ fn hero_spec_icon_crop_request_matches_atlas_entry() {
         state.strata_buckets.as_ref().unwrap().clone()
     };
     let state = env.state().borrow();
-    let batch = build_quad_batch_for_registry(
+    let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
         &state.widgets,
         (1024.0, 768.0),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
         &buckets,
-    );
+    ));
 
     let icon_crop_prefix = format!("{icon_path}@crop:");
     let request = batch

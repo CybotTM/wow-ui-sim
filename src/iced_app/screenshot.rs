@@ -62,16 +62,18 @@ impl App {
             let state = env.state().borrow();
             let tooltip_data = super::tooltip::collect_tooltip_data(&state);
             super::build_quad_batch_for_registry_with_quest_blobs(
-                &state.widgets,
-                (width as f32, height as f32),
-                filter,
-                self.pressed_frame,
-                self.hovered_frame,
-                Some((&mut fs, &mut glyph_atlas)),
-                Some(&state.message_frames),
-                Some(&tooltip_data),
-                Some(&state.quest_blobs),
-                &buckets,
+                super::RegistryQuadBatchParams::new(
+                    &state.widgets,
+                    (width as f32, height as f32),
+                    &buckets,
+                )
+                .root_name(filter)
+                .pressed_frame(self.pressed_frame)
+                .hovered_frame(self.hovered_frame)
+                .text_ctx(Some((&mut fs, &mut glyph_atlas)))
+                .message_frames(Some(&state.message_frames))
+                .tooltip_data(Some(&tooltip_data))
+                .quest_blobs(Some(&state.quest_blobs)),
             )
         };
         (batch, glyph_atlas)

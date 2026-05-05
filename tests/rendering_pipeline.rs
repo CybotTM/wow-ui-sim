@@ -12,7 +12,9 @@ mod common;
 
 use common::env_with_shared_xml;
 use wow_ui_sim::atlas::{ATLAS_DB, get_atlas_info};
-use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
+use wow_ui_sim::iced_app::{
+    RegistryQuadBatchParams, build_quad_batch_for_registry, compute_frame_rect,
+};
 use wow_ui_sim::render::{GpuTextureAtlas, QuadBatch};
 use wow_ui_sim::texture::TextureManager;
 
@@ -293,15 +295,8 @@ fn layer4_quad_batch_has_quads_for_scroll_widgets() {
     let buckets = build_strata_buckets(&env);
     let state = env.state().borrow();
     let batch = build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        Some("TestSFQuads"),
-        None,
-        None,
-        None,
-        None,
-        None,
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+            .root_name(Some("TestSFQuads")),
     );
 
     // Should have at least the background quad + some widget quads
@@ -407,15 +402,8 @@ fn layer4_texture_widget_with_file_data_id_emits_texture_request() {
     let buckets = build_strata_buckets(&env);
     let state = env.state().borrow();
     let batch = build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        Some("RenderFileDataTexture"),
-        None,
-        None,
-        None,
-        None,
-        None,
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+            .root_name(Some("RenderFileDataTexture")),
     );
 
     assert!(
@@ -458,15 +446,8 @@ fn layer4_quad_batch_vertex_positions_match_layout() {
     let sf_rect = compute_frame_rect(registry, sf_id, screen_w, screen_h);
 
     let batch = build_quad_batch_for_registry(
-        registry,
-        (screen_w, screen_h),
-        Some("TestSFLayout"),
-        None,
-        None,
-        None,
-        None,
-        None,
-        &buckets,
+        RegistryQuadBatchParams::new(registry, (screen_w, screen_h), &buckets)
+            .root_name(Some("TestSFLayout")),
     );
 
     // The first quad is the background (full screen). Skip it.

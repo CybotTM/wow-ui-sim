@@ -6,7 +6,7 @@
 mod common;
 
 use std::path::PathBuf;
-use wow_ui_sim::iced_app::build_quad_batch_for_registry;
+use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -202,17 +202,11 @@ fn build_texture_requests(env: &WowLuaEnv) -> Vec<String> {
             .clone()
     };
     let state = env.state().borrow();
-    let batch = build_quad_batch_for_registry(
+    let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
         &state.widgets,
         (1024.0, 768.0),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
         &buckets,
-    );
+    ));
     batch
         .texture_requests
         .iter()

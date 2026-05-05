@@ -1,6 +1,8 @@
 //! Tests for quest log, POI blobs, map ID, tooltip, and cursor position.
 
-use wow_ui_sim::iced_app::build_quad_batch_for_registry_with_quest_blobs;
+use wow_ui_sim::iced_app::{
+    RegistryQuadBatchParams, build_quad_batch_for_registry_with_quest_blobs,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
@@ -18,16 +20,8 @@ fn build_quads(env: &WowLuaEnv) -> wow_ui_sim::render::QuadBatch {
     let buckets = build_strata_buckets(env);
     let state = env.state().borrow();
     build_quad_batch_for_registry_with_quest_blobs(
-        &state.widgets,
-        (1024.0, 768.0),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(&state.quest_blobs),
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+            .quest_blobs(Some(&state.quest_blobs)),
     )
 }
 

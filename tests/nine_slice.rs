@@ -4,7 +4,9 @@
 mod common;
 
 use common::env_with_shared_xml;
-use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
+use wow_ui_sim::iced_app::{
+    RegistryQuadBatchParams, build_quad_batch_for_registry, compute_frame_rect,
+};
 
 /// The NineSlice child of a ButtonFrameTemplate should have corner/edge
 /// Texture children with atlas textures set by NineSliceUtil.ApplyLayout.
@@ -101,15 +103,8 @@ fn nine_slice_textures_produce_quads() {
     };
     let state = env.state().borrow();
     let batch = build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        Some("TestNS9Quads"),
-        None,
-        None,
-        None,
-        None,
-        None,
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+            .root_name(Some("TestNS9Quads")),
     );
 
     // Collect all texture request paths

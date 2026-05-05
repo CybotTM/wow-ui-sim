@@ -8,7 +8,7 @@
 mod common;
 
 use common::env_with_shared_xml;
-use wow_ui_sim::iced_app::build_quad_batch_for_registry;
+use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
 
 /// Helper: build a quad batch for a named subtree with given button state.
 fn build_batch_for_button(
@@ -29,15 +29,10 @@ fn build_batch_for_button(
     };
     let state = env.state().borrow();
     build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        Some(root),
-        pressed,
-        hovered,
-        None,
-        None,
-        None,
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+            .root_name(Some(root))
+            .pressed_frame(pressed)
+            .hovered_frame(hovered),
     )
 }
 
@@ -62,15 +57,9 @@ fn build_text_batch_for_button(
     let mut glyph_atlas = GlyphAtlas::new();
     let state = env.state().borrow();
     build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        Some(root),
-        None,
-        None,
-        Some((&mut font_sys, &mut glyph_atlas)),
-        None,
-        None,
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+            .root_name(Some(root))
+            .text_ctx(Some((&mut font_sys, &mut glyph_atlas))),
     )
 }
 

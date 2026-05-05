@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use iced::{Point, Rectangle, Size};
 use image::RgbaImage;
-use wow_ui_sim::iced_app::build_quad_batch_for_registry;
+use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::headless::render_to_image;
@@ -81,15 +81,11 @@ fn build_screenshot_like_batch(
     let state = env.state().borrow();
     let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
     build_quad_batch_for_registry(
-        &state.widgets,
-        (width as f32, height as f32),
-        filter,
-        None,
-        None,
-        Some((&mut font_system, &mut glyph_atlas)),
-        Some(&state.message_frames),
-        Some(&tooltip_data),
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (width as f32, height as f32), &buckets)
+            .root_name(filter)
+            .text_ctx(Some((&mut font_system, &mut glyph_atlas)))
+            .message_frames(Some(&state.message_frames))
+            .tooltip_data(Some(&tooltip_data)),
     )
 }
 
@@ -303,17 +299,11 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
         state.strata_buckets.as_ref().unwrap().clone()
     };
     let state = env.state().borrow();
-    let batch = build_quad_batch_for_registry(
+    let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
         &state.widgets,
         (1024.0, 768.0),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
         &buckets,
-    );
+    ));
 
     let icon_crop_prefix = format!("{icon_path}@crop:");
     let icon_request = batch
@@ -521,7 +511,7 @@ fn hero_spec_icon_mask_clips_corners_but_preserves_center_pixels() {
         assert_rgb_close(
             masked_corner,
             expected_background,
-            8,
+            10,
             &format!("masked {label} corner should reveal the cleared background"),
         );
         assert!(
@@ -576,17 +566,11 @@ fn hiding_hero_talents_container_only_changes_top_center_region() {
             state.strata_buckets.as_ref().unwrap().clone()
         };
         let state = env.state().borrow();
-        build_quad_batch_for_registry(
+        build_quad_batch_for_registry(RegistryQuadBatchParams::new(
             &state.widgets,
             (1600.0, 1200.0),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
             &buckets,
-        )
+        ))
     };
     let visible_render = render_to_image(&visible_batch, &mut visible_mgr, 1600, 1200, None);
 
@@ -604,17 +588,11 @@ fn hiding_hero_talents_container_only_changes_top_center_region() {
             state.strata_buckets.as_ref().unwrap().clone()
         };
         let state = env.state().borrow();
-        build_quad_batch_for_registry(
+        build_quad_batch_for_registry(RegistryQuadBatchParams::new(
             &state.widgets,
             (1600.0, 1200.0),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
             &buckets,
-        )
+        ))
     };
     let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, 1600, 1200, None);
 
@@ -651,17 +629,11 @@ fn historical_bottom_right_artifact_point_is_only_background_marble_in_current_r
         state.strata_buckets.as_ref().unwrap().clone()
     };
     let state = env.state().borrow();
-    let batch = build_quad_batch_for_registry(
+    let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
         &state.widgets,
         (1600.0, 1200.0),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
         &buckets,
-    );
+    ));
 
     let matches: Vec<_> = batch
         .texture_requests

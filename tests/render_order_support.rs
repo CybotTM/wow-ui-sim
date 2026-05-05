@@ -13,7 +13,9 @@ use image::RgbaImage;
 use rilua::Val;
 use std::path::{Path, PathBuf};
 use std::{cell::RefCell, rc::Rc};
-use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
+use wow_ui_sim::iced_app::{
+    RegistryQuadBatchParams, build_quad_batch_for_registry, compute_frame_rect,
+};
 use wow_ui_sim::loader::discover_blizzard_addon_closure_for_screen as load_blizzard_addon_closure_for_screen;
 use wow_ui_sim::lua_api::{SimState, WowLuaEnv};
 use wow_ui_sim::render::{GlyphAtlas, QuadBatch, QuadVertex, TextureRequest, WowFontSystem};
@@ -58,15 +60,11 @@ pub(crate) fn build_screenshot_like_batch(
     let state = env.state().borrow();
     let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
     build_quad_batch_for_registry(
-        &state.widgets,
-        (width as f32, height as f32),
-        filter,
-        None,
-        None,
-        Some((&mut font_system, &mut glyph_atlas)),
-        Some(&state.message_frames),
-        Some(&tooltip_data),
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (width as f32, height as f32), &buckets)
+            .root_name(filter)
+            .text_ctx(Some((&mut font_system, &mut glyph_atlas)))
+            .message_frames(Some(&state.message_frames))
+            .tooltip_data(Some(&tooltip_data)),
     )
 }
 

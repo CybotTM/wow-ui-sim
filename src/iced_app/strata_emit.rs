@@ -7,12 +7,20 @@ use crate::render::QuadBatch;
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::GlyphAtlas;
 use crate::render::texture::UI_SCALE;
+use crate::widget::WidgetRegistry;
 use crate::widget::WidgetType;
 
 use super::frame_collect::{CollectedFrames, collect_hittable_frames, collect_subtree_ids};
-use super::quad_builders::{FrameQuadEmit, emit_frame_quads};
+use super::quad_builders::{
+    FrameQuadEmit, build_texture_quads, emit_button_highlight, emit_frame_quads,
+};
 use super::statusbar::collect_statusbar_fills;
 use super::tooltip::TooltipRenderData;
+
+pub type MessageFrameMap =
+    std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>;
+pub type TooltipDataMap = std::collections::HashMap<u64, TooltipRenderData>;
+pub type QuestBlobMap = std::collections::HashMap<u64, crate::lua_api::state::QuestBlobState>;
 
 fn uses_parent_alpha_fallback(frame: &crate::widget::Frame) -> bool {
     matches!(
@@ -137,10 +145,9 @@ pub(super) struct SingleStrataEmit<'a> {
     screen_size: (f32, f32),
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
-    message_frames:
-        Option<&'a std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
-    tooltip_data: Option<&'a std::collections::HashMap<u64, TooltipRenderData>>,
-    quest_blobs: Option<&'a std::collections::HashMap<u64, crate::lua_api::state::QuestBlobState>>,
+    message_frames: Option<&'a MessageFrameMap>,
+    tooltip_data: Option<&'a TooltipDataMap>,
+    quest_blobs: Option<&'a QuestBlobMap>,
     elapsed_secs: f64,
 }
 
@@ -223,63 +230,100 @@ fn layout_rect_to_screen_rect(rect: crate::LayoutRect) -> Rectangle {
     )
 }
 
-/// Build a QuadBatch from a WidgetRegistry without needing an App instance.
-#[allow(clippy::too_many_arguments)]
-pub fn build_quad_batch_for_registry(
-    registry: &crate::widget::WidgetRegistry,
-    screen_size: (f32, f32),
-    root_name: Option<&str>,
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
-    text_ctx: Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<
-        &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
-    >,
-    tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
-    strata_buckets: &Vec<Vec<u64>>,
-) -> QuadBatch {
-    build_quad_batch_for_registry_with_quest_blobs(
-        registry,
-        screen_size,
-        root_name,
-        pressed_frame,
-        hovered_frame,
-        text_ctx,
-        message_frames,
-        tooltip_data,
-        None,
-        strata_buckets,
-    )
+pub struct RegistryQuadBatchParams<'a, 'font> {
+    pub registry: &'a WidgetRegistry,
+    pub screen_size: (f32, f32),
+    pub root_name: Option<&'a str>,
+    pub pressed_frame: Option<u64>,
+    pub hovered_frame: Option<u64>,
+    pub text_ctx: Option<(&'font mut WowFontSystem, &'font mut GlyphAtlas)>,
+    pub message_frames: Option<&'a MessageFrameMap>,
+    pub tooltip_data: Option<&'a TooltipDataMap>,
+    pub quest_blobs: Option<&'a QuestBlobMap>,
+    pub strata_buckets: &'a [Vec<u64>],
 }
 
-#[allow(clippy::too_many_arguments)]
+impl<'a, 'font> RegistryQuadBatchParams<'a, 'font> {
+    pub fn new(
+        registry: &'a WidgetRegistry,
+        screen_size: (f32, f32),
+        strata_buckets: &'a [Vec<u64>],
+    ) -> Self {
+        Self {
+            registry,
+            screen_size,
+            root_name: None,
+            pressed_frame: None,
+            hovered_frame: None,
+            text_ctx: None,
+            message_frames: None,
+            tooltip_data: None,
+            quest_blobs: None,
+            strata_buckets,
+        }
+    }
+
+    pub fn root_name(mut self, root_name: Option<&'a str>) -> Self {
+        self.root_name = root_name;
+        self
+    }
+
+    pub fn pressed_frame(mut self, pressed_frame: Option<u64>) -> Self {
+        self.pressed_frame = pressed_frame;
+        self
+    }
+
+    pub fn hovered_frame(mut self, hovered_frame: Option<u64>) -> Self {
+        self.hovered_frame = hovered_frame;
+        self
+    }
+
+    pub fn text_ctx(
+        mut self,
+        text_ctx: Option<(&'font mut WowFontSystem, &'font mut GlyphAtlas)>,
+    ) -> Self {
+        self.text_ctx = text_ctx;
+        self
+    }
+
+    pub fn message_frames(mut self, message_frames: Option<&'a MessageFrameMap>) -> Self {
+        self.message_frames = message_frames;
+        self
+    }
+
+    pub fn tooltip_data(mut self, tooltip_data: Option<&'a TooltipDataMap>) -> Self {
+        self.tooltip_data = tooltip_data;
+        self
+    }
+
+    pub fn quest_blobs(mut self, quest_blobs: Option<&'a QuestBlobMap>) -> Self {
+        self.quest_blobs = quest_blobs;
+        self
+    }
+}
+
+/// Build a QuadBatch from a WidgetRegistry without needing an App instance.
+pub fn build_quad_batch_for_registry(params: RegistryQuadBatchParams<'_, '_>) -> QuadBatch {
+    build_quad_batch_for_registry_with_quest_blobs(params)
+}
+
 pub fn build_quad_batch_for_registry_with_quest_blobs(
-    registry: &crate::widget::WidgetRegistry,
-    screen_size: (f32, f32),
-    root_name: Option<&str>,
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
-    mut text_ctx: Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<
-        &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
-    >,
-    tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
-    quest_blobs: Option<&std::collections::HashMap<u64, crate::lua_api::state::QuestBlobState>>,
-    strata_buckets: &Vec<Vec<u64>>,
+    params: RegistryQuadBatchParams<'_, '_>,
 ) -> QuadBatch {
-    let (batch, _) = build_quad_batch_with_cache(
-        registry,
-        screen_size,
-        root_name,
-        pressed_frame,
-        hovered_frame,
-        &mut text_ctx,
-        message_frames,
-        tooltip_data,
-        quest_blobs,
-        strata_buckets,
-        0.0,
-    );
+    let mut text_ctx = params.text_ctx;
+    let (batch, _) = build_quad_batch_with_cache(CachedQuadBatchParams {
+        registry: params.registry,
+        screen_size: params.screen_size,
+        root_name: params.root_name,
+        pressed_frame: params.pressed_frame,
+        hovered_frame: params.hovered_frame,
+        text_ctx: &mut text_ctx,
+        message_frames: params.message_frames,
+        tooltip_data: params.tooltip_data,
+        quest_blobs: params.quest_blobs,
+        strata_buckets: params.strata_buckets,
+        elapsed_secs: 0.0,
+    });
     batch
 }
 
@@ -313,24 +357,25 @@ pub fn build_hittable_rects(
 /// Build a QuadBatch by iterating visible-only strata buckets directly.
 ///
 /// Also builds a hittable frame list as a side output for hit testing.
-#[allow(clippy::too_many_arguments)]
+pub struct CachedQuadBatchParams<'a, 'text, 'font> {
+    pub registry: &'a WidgetRegistry,
+    pub screen_size: (f32, f32),
+    pub root_name: Option<&'a str>,
+    pub pressed_frame: Option<u64>,
+    pub hovered_frame: Option<u64>,
+    pub text_ctx: &'text mut Option<(&'font mut WowFontSystem, &'font mut GlyphAtlas)>,
+    pub message_frames: Option<&'a MessageFrameMap>,
+    pub tooltip_data: Option<&'a TooltipDataMap>,
+    pub quest_blobs: Option<&'a QuestBlobMap>,
+    pub strata_buckets: &'a [Vec<u64>],
+    pub elapsed_secs: f64,
+}
+
 pub fn build_quad_batch_with_cache(
-    registry: &crate::widget::WidgetRegistry,
-    screen_size: (f32, f32),
-    root_name: Option<&str>,
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
-    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<
-        &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
-    >,
-    tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
-    quest_blobs: Option<&std::collections::HashMap<u64, crate::lua_api::state::QuestBlobState>>,
-    strata_buckets: &[Vec<u64>],
-    elapsed_secs: f64,
+    params: CachedQuadBatchParams<'_, '_, '_>,
 ) -> (QuadBatch, CollectedFrames) {
     let mut batch = QuadBatch::with_capacity(1000);
-    let size = Size::new(screen_size.0, screen_size.1);
+    let size = Size::new(params.screen_size.0, params.screen_size.1);
 
     batch.push_tiled_path(
         Rectangle::new(Point::ORIGIN, size),
@@ -340,28 +385,84 @@ pub fn build_quad_batch_with_cache(
         [0.55, 0.55, 0.55, 1.0],
     );
 
-    let visible_ids = root_name.map(|name| collect_subtree_ids(registry, name));
-    let collected = collect_hittable_frames(registry, strata_buckets);
+    let visible_ids = params
+        .root_name
+        .map(|name| collect_subtree_ids(params.registry, name));
+    let collected = collect_hittable_frames(params.registry, params.strata_buckets);
 
-    for bucket in strata_buckets {
+    for bucket in params.strata_buckets {
         emit_single_strata(
             &mut batch,
-            text_ctx,
+            params.text_ctx,
             SingleStrataEmit {
                 bucket,
-                registry,
+                registry: params.registry,
                 visible_ids: &visible_ids,
-                screen_size,
-                pressed_frame,
-                hovered_frame,
-                message_frames,
-                tooltip_data,
-                quest_blobs,
-                elapsed_secs,
+                screen_size: params.screen_size,
+                pressed_frame: params.pressed_frame,
+                hovered_frame: params.hovered_frame,
+                message_frames: params.message_frames,
+                tooltip_data: params.tooltip_data,
+                quest_blobs: params.quest_blobs,
+                elapsed_secs: params.elapsed_secs,
             },
         );
     }
+    append_hover_highlight(&mut batch, &params, &visible_ids);
     (batch, collected)
+}
+
+fn append_hover_highlight(
+    batch: &mut QuadBatch,
+    params: &CachedQuadBatchParams<'_, '_, '_>,
+    visible_ids: &Option<FxHashSet<u64>>,
+) {
+    let Some(hovered_id) = params.hovered_frame else {
+        return;
+    };
+    if visible_ids
+        .as_ref()
+        .is_some_and(|ids| !ids.contains(&hovered_id))
+    {
+        return;
+    }
+
+    let Some(frame) = params.registry.get(hovered_id) else {
+        return;
+    };
+    if !matches!(
+        frame.widget_type,
+        WidgetType::Button | WidgetType::CheckButton
+    ) {
+        return;
+    }
+    if params.pressed_frame == Some(hovered_id) || frame.button_state == 1 {
+        return;
+    }
+
+    append_hover_highlight_from_frame(batch, params.registry, frame);
+}
+
+fn append_hover_highlight_from_frame(
+    batch: &mut QuadBatch,
+    registry: &WidgetRegistry,
+    frame: &crate::widget::Frame,
+) {
+    if let Some(bounds) = frame.layout_rect.map(layout_rect_to_screen_rect)
+        && !frame.children_keys.contains_key("HighlightTexture")
+    {
+        emit_button_highlight(batch, bounds, frame, frame.alpha);
+    }
+
+    let Some(&highlight_id) = frame.children_keys.get("HighlightTexture") else {
+        return;
+    };
+    let Some(highlight) = registry.get(highlight_id) else {
+        return;
+    };
+    if let Some(bounds) = highlight.layout_rect.map(layout_rect_to_screen_rect) {
+        build_texture_quads(batch, bounds, highlight, None, highlight.alpha);
+    }
 }
 
 #[cfg(test)]

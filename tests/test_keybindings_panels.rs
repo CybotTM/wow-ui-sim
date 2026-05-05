@@ -5,7 +5,9 @@
 mod common;
 
 use std::path::PathBuf;
-use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
+use wow_ui_sim::iced_app::{
+    RegistryQuadBatchParams, build_quad_batch_for_registry, compute_frame_rect,
+};
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::{QuadBatch, QuadVertex, TextureRequest};
@@ -182,15 +184,8 @@ fn build_batch_for_root(env: &WowLuaEnv, root_name: &str) -> wow_ui_sim::render:
     };
     let state = env.state().borrow();
     build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        Some(root_name),
-        None,
-        None,
-        None,
-        None,
-        None,
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+            .root_name(Some(root_name)),
     )
 }
 

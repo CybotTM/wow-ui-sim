@@ -4,7 +4,9 @@ mod common;
 
 use std::path::PathBuf;
 
-use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
+use wow_ui_sim::iced_app::{
+    RegistryQuadBatchParams, build_quad_batch_for_registry, compute_frame_rect,
+};
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
@@ -162,17 +164,11 @@ fn compact_raid_manager_emits_background_and_forward_toggle_quad_bounds() {
                 .clone()
         };
         let state = env.state().borrow();
-        let batch = build_quad_batch_for_registry(
+        let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
             &state.widgets,
             (1024.0, 768.0),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
             &buckets,
-        );
+        ));
 
         let mut uigroupmanager_requests = Vec::new();
         let mut background_requests = Vec::new();

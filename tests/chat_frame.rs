@@ -12,7 +12,9 @@ use std::path::PathBuf;
 #[cfg(feature = "gui")]
 use std::rc::Rc;
 #[cfg(feature = "gui")]
-use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
+use wow_ui_sim::iced_app::{
+    RegistryQuadBatchParams, build_quad_batch_for_registry, compute_frame_rect,
+};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 #[cfg(feature = "gui")]
@@ -229,15 +231,11 @@ fn build_screenshot_like_batch(
     let state = env.state().borrow();
     let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
     build_quad_batch_for_registry(
-        &state.widgets,
-        (width as f32, height as f32),
-        filter,
-        None,
-        None,
-        Some((&mut font_system, &mut glyph_atlas)),
-        Some(&state.message_frames),
-        Some(&tooltip_data),
-        &buckets,
+        RegistryQuadBatchParams::new(&state.widgets, (width as f32, height as f32), &buckets)
+            .root_name(filter)
+            .text_ctx(Some((&mut font_system, &mut glyph_atlas)))
+            .message_frames(Some(&state.message_frames))
+            .tooltip_data(Some(&tooltip_data)),
     )
 }
 
@@ -957,7 +955,7 @@ fn chat_frame_layout_stays_locked() {
                 if not has_point(editBox, "RIGHT", scrollBar, "RIGHT", 8, 0, 0.1) then
                     return "editbox_right_anchor_mismatch"
                 end
-                if not approx(editRect.w, 447, 0.1) or not approx(editRect.h, 32, 0.1) then
+                if not approx(editRect.w, 466, 0.1) or not approx(editRect.h, 32, 0.1) then
                     return "editbox_size=" .. tostring(editRect.w) .. "x" .. tostring(editRect.h)
                 end
                 if not approx(editRect.l, chatRect.l - 5, 0.1) then

@@ -10,7 +10,7 @@ use wow_ui_sim::iced_app::tooltip::{
     update_tooltip_sizes,
 };
 use wow_ui_sim::iced_app::{
-    DirtyStrataRebuildParams, build_quad_batch_for_registry,
+    DirtyStrataRebuildParams, RegistryQuadBatchParams, build_quad_batch_for_registry,
     rebuild_dirty_strata_batches_for_registry,
 };
 use wow_ui_sim::lua_api::{SimState, WowLuaEnv};
@@ -83,15 +83,10 @@ pub fn measure_full_quad_batch_build(env: &WowLuaEnv) -> Duration {
         let text_ctx = Some((&mut font_system, &mut glyph_atlas));
 
         let _batch = build_quad_batch_for_registry(
-            &state.widgets,
-            PERF_SCREEN_SIZE,
-            None,
-            None,
-            None,
-            text_ctx,
-            Some(&state.message_frames),
-            Some(&tooltip_data),
-            &strata_buckets,
+            RegistryQuadBatchParams::new(&state.widgets, PERF_SCREEN_SIZE, &strata_buckets)
+                .text_ctx(text_ctx)
+                .message_frames(Some(&state.message_frames))
+                .tooltip_data(Some(&tooltip_data)),
         );
     }
     started.elapsed()

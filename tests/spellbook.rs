@@ -8,7 +8,9 @@
 mod common;
 
 use std::path::PathBuf;
-use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
+use wow_ui_sim::iced_app::{
+    RegistryQuadBatchParams, build_quad_batch_for_registry, compute_frame_rect,
+};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::{QuadBatch, QuadVertex, TextureRequest};
@@ -279,34 +281,22 @@ fn build_strata_buckets(env: &WowLuaEnv) -> Vec<Vec<u64>> {
 fn build_quads(env: &WowLuaEnv) -> usize {
     let buckets = build_strata_buckets(env);
     let state = env.state().borrow();
-    let batch = build_quad_batch_for_registry(
+    let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
         &state.widgets,
         (1024.0, 768.0),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
         &buckets,
-    );
+    ));
     batch.quad_count()
 }
 
 fn build_quads_with_textures(env: &WowLuaEnv) -> (usize, Vec<String>) {
     let buckets = build_strata_buckets(env);
     let state = env.state().borrow();
-    let batch = build_quad_batch_for_registry(
+    let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
         &state.widgets,
         (1024.0, 768.0),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
         &buckets,
-    );
+    ));
     let textures: Vec<String> = batch
         .texture_requests
         .iter()
@@ -648,17 +638,11 @@ fn spellbook_first_visible_item_emits_icon_mask_quad_on_first_open() {
         let icon_rect = compute_frame_rect(registry, icon_id, 1024.0, 768.0);
         let mask_rect = compute_frame_rect(registry, mask_id, 1024.0, 768.0);
 
-        let batch = build_quad_batch_for_registry(
+        let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
             registry,
             (1024.0, 768.0),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
             &buckets,
-        );
+        ));
 
         let icon_request = batch
             .texture_requests
@@ -791,17 +775,11 @@ fn spellbook_passive_item_border_and_icon_match_master_geometry() {
         assert!((mask_rect.width - scaled_mask_w).abs() <= 0.1, "Rendered passive mask width should match GetScaledRect: render={} lua={}", mask_rect.width, scaled_mask_w);
         assert!((mask_rect.height - scaled_mask_h).abs() <= 0.1, "Rendered passive mask height should match GetScaledRect: render={} lua={}", mask_rect.height, scaled_mask_h);
 
-        let batch = build_quad_batch_for_registry(
+        let batch = build_quad_batch_for_registry(RegistryQuadBatchParams::new(
             registry,
             (1024.0, 768.0),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
             &buckets,
-        );
+        ));
 
         let border_request = batch
             .texture_requests
@@ -1317,15 +1295,10 @@ fn spellbook_hover_tooltip_is_sized_and_on_screen() {
 
         let mut glyph_atlas = wow_ui_sim::render::glyph::GlyphAtlas::new();
         let batch = build_quad_batch_for_registry(
-            &state.widgets,
-            (1024.0, 768.0),
-            None,
-            None,
-            None,
-            Some((&mut font_sys, &mut glyph_atlas)),
-            Some(&state.message_frames),
-            Some(&tooltip_data),
-            &buckets,
+            RegistryQuadBatchParams::new(&state.widgets, (1024.0, 768.0), &buckets)
+                .text_ctx(Some((&mut font_sys, &mut glyph_atlas)))
+                .message_frames(Some(&state.message_frames))
+                .tooltip_data(Some(&tooltip_data)),
         );
 
         assert!(
