@@ -3,7 +3,7 @@
 mod common;
 
 use std::collections::{HashMap, HashSet};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
@@ -49,6 +49,17 @@ fn fire(env: &WowLuaEnv, event: &str, args: &[rilua::Val]) -> Vec<String> {
     drain_test_errors(env)
 }
 
+fn collect_addon_load_warnings(env: &WowLuaEnv, name: &str, toc_path: &Path) -> Vec<String> {
+    match load_addon(&env.loader_env(), toc_path) {
+        Ok(result) => result
+            .warnings
+            .into_iter()
+            .map(|warning| format!("[load {name}] {warning}"))
+            .collect(),
+        Err(error) => vec![format!("[load {name}] FAILED: {error}")],
+    }
+}
+
 /// Load all Blizzard addons and fire startup events, collecting all warnings.
 fn load_and_startup() -> Vec<String> {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -61,16 +72,7 @@ fn load_and_startup() -> Vec<String> {
 
     // Load addons
     for (name, toc_path) in &addons {
-        match load_addon(&env.loader_env(), toc_path) {
-            Ok(r) => {
-                for w in r.warnings {
-                    warnings.push(format!("[load {name}] {w}"));
-                }
-            }
-            Err(e) => {
-                warnings.push(format!("[load {name}] FAILED: {e}"));
-            }
-        }
+        warnings.extend(collect_addon_load_warnings(&env, name, toc_path));
     }
 
     // Apply workarounds (same as main.rs run_post_load_scripts)
