@@ -22,6 +22,7 @@ use crate::lua_api::methods::{borrow_state_mut, create_string, create_table, tab
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+use std::collections::HashSet;
 
 fn stack_i32(state: &LuaState, index: i32) -> Option<i32> {
     match stack_val(state, index) {
@@ -135,10 +136,19 @@ pub(super) fn get_locklist_map_name(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn set_locklist_map(state: &mut LuaState) -> LuaResult<u32> {
     let map_id = stack_i32(state, 1).unwrap_or(0);
     let mut sim = borrow_state_mut(state)?;
-    if map_id > 0 && !sim.world.locklist_maps.contains(&(map_id as u32)) {
-        sim.world.locklist_maps.push(map_id as u32);
-    }
+    append_locklist_map(&mut sim.world.locklist_maps, map_id);
     Ok(0)
+}
+
+fn append_locklist_map(locklist_maps: &mut Vec<u32>, map_id: i32) {
+    if map_id <= 0 {
+        return;
+    }
+    let map_id = map_id as u32;
+    let mut known_maps = locklist_maps.iter().copied().collect::<HashSet<_>>();
+    if known_maps.insert(map_id) {
+        locklist_maps.push(map_id);
+    }
 }
 
 pub(super) fn clear_locklist_map(state: &mut LuaState) -> LuaResult<u32> {
