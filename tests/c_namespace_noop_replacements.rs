@@ -600,17 +600,21 @@ fn combat_log_namespaces_iterate_seeded_entries_and_messages() {
     ) = env
         .eval(
             r#"
+            local SOURCE_PLAYER_FLAGS = 1297
+            local TARGET_PLAYER_FLAGS = 1298
+            local TARGET_CREATURE_FLAGS = 68168
+
             local olderEntry = {
                 1234567891,
                 "SPELL_HEAL",
                 false,
                 "Player-1",
                 "Player",
-                0x511,
+                SOURCE_PLAYER_FLAGS,
                 0,
                 "Player-2",
                 "Target",
-                0x512,
+                TARGET_PLAYER_FLAGS,
                 0,
                 82326,
                 "Holy Light",
@@ -626,11 +630,11 @@ fn combat_log_namespaces_iterate_seeded_entries_and_messages() {
                 false,
                 "Player-1",
                 "Player",
-                0x511,
+                SOURCE_PLAYER_FLAGS,
                 0,
                 "Creature-1",
                 "Training Dummy",
-                0x10a48,
+                TARGET_CREATURE_FLAGS,
                 0,
                 19750,
                 "Flash of Light",
