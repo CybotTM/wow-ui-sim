@@ -258,13 +258,17 @@ impl GpuTextureAtlas {
 
         upload_cell_to_gpu(
             queue,
-            &self.tiers[tier_idx],
-            grid_x,
-            grid_y,
-            width,
-            height,
-            rgba_data,
-            cell_size,
+            AtlasCell {
+                tier: &self.tiers[tier_idx],
+                grid_x,
+                grid_y,
+                cell_size,
+            },
+            TextureUploadSource {
+                width,
+                height,
+                rgba_data,
+            },
         );
 
         let entry = compute_texture_entry(
@@ -522,23 +526,31 @@ fn pad_texture_replicate(width: u32, height: u32, rgba_data: &[u8], cell_size: u
 }
 
 /// Upload texture data to a specific cell in a tier atlas.
-#[allow(clippy::too_many_arguments)]
-fn upload_cell_to_gpu(
-    queue: &wgpu::Queue,
-    tier: &TierAtlas,
+struct AtlasCell<'a> {
+    tier: &'a TierAtlas,
     grid_x: u32,
     grid_y: u32,
+    cell_size: u32,
+}
+
+struct TextureUploadSource<'a> {
     width: u32,
     height: u32,
-    rgba_data: &[u8],
-    cell_size: u32,
-) {
-    let data = GpuTextureAtlas::prepare_texture_data_static(width, height, rgba_data, cell_size);
-    let (pixel_x, pixel_y) = tier.pixel_offset(grid_x, grid_y);
+    rgba_data: &'a [u8],
+}
+
+fn upload_cell_to_gpu(queue: &wgpu::Queue, cell: AtlasCell<'_>, source: TextureUploadSource<'_>) {
+    let data = GpuTextureAtlas::prepare_texture_data_static(
+        source.width,
+        source.height,
+        source.rgba_data,
+        cell.cell_size,
+    );
+    let (pixel_x, pixel_y) = cell.tier.pixel_offset(cell.grid_x, cell.grid_y);
 
     queue.write_texture(
         wgpu::TexelCopyTextureInfo {
-            texture: &tier.texture,
+            texture: &cell.tier.texture,
             mip_level: 0,
             origin: wgpu::Origin3d {
                 x: pixel_x,
@@ -550,12 +562,12 @@ fn upload_cell_to_gpu(
         &data,
         wgpu::TexelCopyBufferLayout {
             offset: 0,
-            bytes_per_row: Some(cell_size * 4),
-            rows_per_image: Some(cell_size),
+            bytes_per_row: Some(cell.cell_size * 4),
+            rows_per_image: Some(cell.cell_size),
         },
         wgpu::Extent3d {
-            width: cell_size,
-            height: cell_size,
+            width: cell.cell_size,
+            height: cell.cell_size,
             depth_or_array_layers: 1,
         },
     );
