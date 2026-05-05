@@ -19,6 +19,7 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
+use std::collections::HashSet;
 
 const DEFAULT_PORTRAIT_PATH: &str = "Interface\\Icons\\Achievement_Character_Default";
 
@@ -571,10 +572,10 @@ fn get_next_achievement(state: &mut LuaState) -> LuaResult<u32> {
     let achievement_id = i32::from_stack(state, 1)?;
     match next_achievement_id(achievement_id) {
         Some(next_id) => {
-            let completed = borrow_state(state)?
-                .world
-                .earned_achievements
-                .contains(&next_id);
+            let completed = {
+                let sim = borrow_state(state)?;
+                is_achievement_completed(&sim.world.earned_achievements, next_id)
+            };
             state.push(Val::Num(next_id as f64));
             state.push(Val::Bool(completed));
         }
@@ -660,7 +661,9 @@ fn get_num_completed_achievements(state: &mut LuaState) -> LuaResult<u32> {
         categories
             .iter()
             .flat_map(|category| category.achievement_ids.iter())
-            .filter(|achievement_id| sim.world.earned_achievements.contains(achievement_id))
+            .filter(|achievement_id| {
+                is_achievement_completed(&sim.world.earned_achievements, **achievement_id)
+            })
             .count() as i32
     };
     state.push(Val::Num(total as f64));
@@ -1031,8 +1034,14 @@ fn count_completed_achievements(state: &mut LuaState, achievement_ids: &[i32]) -
     let sim = borrow_state(state)?;
     Ok(achievement_ids
         .iter()
-        .filter(|achievement_id| sim.world.earned_achievements.contains(achievement_id))
+        .filter(|achievement_id| {
+            is_achievement_completed(&sim.world.earned_achievements, **achievement_id)
+        })
         .count() as i32)
+}
+
+fn is_achievement_completed(earned_achievements: &HashSet<i32>, achievement_id: i32) -> bool {
+    earned_achievements.contains(&achievement_id)
 }
 
 fn collect_category_achievement_ids(category_id: i32) -> Vec<i32> {
