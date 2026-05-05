@@ -238,6 +238,11 @@ const GET_ATLAS_INFO_FN: &[&str] = &[
 const ATLAS_DB_HEADER: &[&str] =
     &["pub static ATLAS_DB: phf::Map<&'static str, AtlasInfo> = phf_map! {"];
 
+const ATLAS_SLICE_DB_HEADER: &[&str] = &[
+    "",
+    "pub static ATLAS_SLICE_DB: phf::Map<&'static str, AtlasSliceInfo> = phf_map! {",
+];
+
 fn write_get_atlas_slice_info_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(
         out,
@@ -284,30 +289,40 @@ fn write_slice_lookup(
     out: &mut File,
     slices: &HashMap<u32, SliceEntry>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    writeln!(out)?;
-    writeln!(
-        out,
-        "pub static ATLAS_SLICE_DB: phf::Map<&'static str, AtlasSliceInfo> = phf_map! {{"
-    )?;
+    write_literal_lines(out, ATLAS_SLICE_DB_HEADER)?;
 
-    let mut sorted: Vec<_> = slices.iter().collect();
-    sorted.sort_by_key(|(id, _)| *id);
-
-    for (_id, slice) in sorted {
-        let mode = match slice.mode {
-            0 => "AtlasSliceMode::Stretch",
-            1 => "AtlasSliceMode::Tile",
-            _ => continue,
-        };
-        writeln!(
-            out,
-            "    \"{}\" => AtlasSliceInfo {{ left: {}u32, top: {}u32, right: {}u32, bottom: {}u32, mode: {} }},",
-            slice.name, slice.left, slice.top, slice.right, slice.bottom, mode
-        )?;
+    for slice in sorted_slices(slices) {
+        write_slice_entry(out, slice)?;
     }
 
     writeln!(out, "}};")?;
     Ok(())
+}
+
+fn sorted_slices(slices: &HashMap<u32, SliceEntry>) -> Vec<&SliceEntry> {
+    let mut sorted: Vec<_> = slices.iter().collect();
+    sorted.sort_by_key(|(id, _)| *id);
+    sorted.into_iter().map(|(_id, slice)| slice).collect()
+}
+
+fn write_slice_entry(out: &mut File, slice: &SliceEntry) -> std::io::Result<()> {
+    let Some(mode) = atlas_slice_mode_name(slice.mode) else {
+        return Ok(());
+    };
+
+    writeln!(
+        out,
+        "    \"{}\" => AtlasSliceInfo {{ left: {}u32, top: {}u32, right: {}u32, bottom: {}u32, mode: {} }},",
+        slice.name, slice.left, slice.top, slice.right, slice.bottom, mode
+    )
+}
+
+fn atlas_slice_mode_name(mode: u8) -> Option<&'static str> {
+    match mode {
+        0 => Some("AtlasSliceMode::Stretch"),
+        1 => Some("AtlasSliceMode::Tile"),
+        _ => None,
+    }
 }
 
 fn format_atlas_entry(
