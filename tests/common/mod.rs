@@ -13,7 +13,6 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 /// Per-test timeout. Exits the process if the closure doesn't complete within `secs`.
 /// Default 120s — enough for full Blizzard UI load + test logic.
-#[allow(dead_code)]
 pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
     let (tx, rx) = std::sync::mpsc::channel();
     let handle = std::thread::spawn(move || {
@@ -38,7 +37,6 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
 
 /// Serialize perf-sensitive integration tests so their thresholds measure one
 /// startup/load scenario at a time instead of competing with sibling tests.
-#[allow(dead_code)]
 pub fn with_perf_lock<T>(f: impl FnOnce() -> T) -> T {
     let _guard = lock_perf_tests();
     f()
@@ -56,13 +54,11 @@ fn lock_perf_tests() -> MutexGuard<'static, ()> {
 }
 
 /// Keep a `WowLuaEnv` alive under the global perf lock for the lifetime of a test.
-#[allow(dead_code)]
 pub struct LockedEnv {
     _guard: MutexGuard<'static, ()>,
     env: WowLuaEnv,
 }
 
-#[allow(dead_code)]
 pub fn lock_env(build: impl FnOnce() -> WowLuaEnv) -> LockedEnv {
     let guard = lock_perf_tests();
     let env = build();
@@ -98,7 +94,6 @@ macro_rules! test_timeout {
 /// Try to create a wgpu device for GPU tests.
 /// Returns None if no adapter is available (e.g., headless CI).
 #[cfg(feature = "gui")]
-#[allow(dead_code)]
 pub fn try_create_gpu_device() -> Option<(wgpu::Device, wgpu::Queue)> {
     let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
@@ -127,34 +122,31 @@ fn blizzard_ui_dir() -> PathBuf {
 
 /// Helper to load Blizzard_SharedXML templates for tests that need them.
 /// Returns the environment with templates loaded.
-#[allow(dead_code)]
 pub fn env_with_shared_xml() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     let ui = blizzard_ui_dir();
 
     let base_toc = ui.join("Blizzard_SharedXMLBase/Blizzard_SharedXMLBase.toc");
-    if base_toc.exists() {
-        if let Err(e) = load_addon(&env.loader_env(), &base_toc) {
-            eprintln!("Warning: Failed to load SharedXMLBase: {}", e);
-        }
+    if base_toc.exists()
+        && let Err(e) = load_addon(&env.loader_env(), &base_toc)
+    {
+        eprintln!("Warning: Failed to load SharedXMLBase: {}", e);
     }
 
     let shared_toc = ui.join("Blizzard_SharedXML/Blizzard_SharedXML_Mainline.toc");
-    if shared_toc.exists() {
-        if let Err(e) = load_addon(&env.loader_env(), &shared_toc) {
-            eprintln!("Warning: Failed to load SharedXML: {}", e);
-        }
+    if shared_toc.exists()
+        && let Err(e) = load_addon(&env.loader_env(), &shared_toc)
+    {
+        eprintln!("Warning: Failed to load SharedXML: {}", e);
     }
 
     env
 }
 
-#[allow(dead_code)]
 pub fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
     let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(addon_name)]);
 }
 
-#[allow(dead_code)]
 pub fn fire_player_entering_world(env: &WowLuaEnv, initial_login: bool, is_reload: bool) {
     let _ = env.fire_event_with_args(
         "PLAYER_ENTERING_WORLD",
@@ -162,7 +154,6 @@ pub fn fire_player_entering_world(env: &WowLuaEnv, initial_login: bool, is_reloa
     );
 }
 
-#[allow(dead_code)]
 pub fn call_global_if_present(env: &WowLuaEnv, function_name: &str) {
     let is_present = env
         .eval::<bool>(&format!("return type(_G[{function_name:?}]) == 'function'"))
@@ -172,7 +163,6 @@ pub fn call_global_if_present(env: &WowLuaEnv, function_name: &str) {
     }
 }
 
-#[allow(dead_code)]
 pub fn install_error_collector(env: &WowLuaEnv, global_name: &str) {
     env.exec(&format!(
         r#"
@@ -190,7 +180,6 @@ pub fn install_error_collector(env: &WowLuaEnv, global_name: &str) {
     .expect("Failed to install test error handler");
 }
 
-#[allow(dead_code)]
 pub fn drain_string_table(env: &WowLuaEnv, global_name: &str) -> Vec<String> {
     const SEP: char = '\u{1f}';
     let joined = env
@@ -215,3 +204,27 @@ pub fn drain_string_table(env: &WowLuaEnv, global_name: &str) -> Vec<String> {
     }
     joined.split(SEP).map(|entry| entry.to_string()).collect()
 }
+
+type TimeoutBody = fn();
+type PerfBody = fn();
+type EnvBuilder = fn() -> WowLuaEnv;
+
+// Each integration test compiles this module separately, so a helper can be
+// part of the shared test API while remaining unused in one specific target.
+const _: () = {
+    let _ = with_timeout::<TimeoutBody> as fn(u64, TimeoutBody);
+    let _ = with_perf_lock::<()> as fn(PerfBody);
+    let _ = std::mem::size_of::<LockedEnv>();
+    let _ = lock_env as fn(EnvBuilder) -> LockedEnv;
+    let _ = env_with_shared_xml as fn() -> WowLuaEnv;
+    let _ = fire_addon_loaded as fn(&WowLuaEnv, &str);
+    let _ = fire_player_entering_world as fn(&WowLuaEnv, bool, bool);
+    let _ = call_global_if_present as fn(&WowLuaEnv, &str);
+    let _ = install_error_collector as fn(&WowLuaEnv, &str);
+    let _ = drain_string_table as fn(&WowLuaEnv, &str) -> Vec<String>;
+
+    #[cfg(feature = "gui")]
+    {
+        let _ = try_create_gpu_device as fn() -> Option<(wgpu::Device, wgpu::Queue)>;
+    }
+};
