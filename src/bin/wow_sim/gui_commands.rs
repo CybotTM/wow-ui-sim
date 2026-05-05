@@ -17,36 +17,44 @@ pub(super) fn run_gui(dispatch: CommandDispatch) -> Result<(), Box<dyn std::erro
     )
 }
 
-#[allow(clippy::too_many_arguments)]
+pub(super) struct ScreenshotCommand<'a> {
+    pub(super) output: PathBuf,
+    pub(super) width: u32,
+    pub(super) height: u32,
+    pub(super) filter: Option<String>,
+    pub(super) crop: Option<String>,
+    pub(super) delay: Option<u64>,
+    pub(super) exec_lua: Option<&'a str>,
+    pub(super) exec_lua_secure: bool,
+    pub(super) dump_tree: Option<Option<String>>,
+}
+
 pub(super) fn run_screenshot(
     env: &WowLuaEnv,
     font_system: &Rc<RefCell<WowFontSystem>>,
-    output: PathBuf,
-    width: u32,
-    height: u32,
-    filter: Option<String>,
-    crop: Option<String>,
-    delay: Option<u64>,
-    exec_lua: Option<&str>,
-    exec_lua_secure: bool,
-    dump_tree: Option<Option<String>>,
+    command: ScreenshotCommand<'_>,
 ) {
     use wow_ui_sim::render::headless::render_to_image;
 
     settle_headless_startup(env);
-    env.set_screen_size(width as f32, height as f32);
+    env.set_screen_size(command.width as f32, command.height as f32);
     wow_ui_sim::debug_helpers::debug_show_game_menu(env);
-    if let Some(code) = exec_lua
-        && let Err(e) = env.exec_maybe_secure(code, exec_lua_secure)
+    if let Some(code) = command.exec_lua
+        && let Err(e) = env.exec_maybe_secure(code, command.exec_lua_secure)
     {
         eprintln!("[exec-lua] error: {e}");
     }
     run_extra_update_ticks(env, 3);
-    apply_delay(delay);
-    let (batch, glyph_atlas) =
-        build_screenshot_batch(env, font_system, width, height, filter.as_deref());
-    if let Some(dump_filter) = &dump_tree {
-        dump_screenshot_tree(env, dump_filter.as_deref(), width, height);
+    apply_delay(command.delay);
+    let (batch, glyph_atlas) = build_screenshot_batch(
+        env,
+        font_system,
+        command.width,
+        command.height,
+        command.filter.as_deref(),
+    );
+    if let Some(dump_filter) = &command.dump_tree {
+        dump_screenshot_tree(env, dump_filter.as_deref(), command.width, command.height);
     }
     eprintln!(
         "QuadBatch: {} quads, {} texture requests",
@@ -59,12 +67,18 @@ pub(super) fn run_screenshot(
         let (data, size, _) = glyph_atlas.texture_data();
         (data, size)
     });
-    let img = render_to_image(&batch, &mut tex_mgr, width, height, glyph_data);
-    let img = match crop.as_deref() {
+    let img = render_to_image(
+        &batch,
+        &mut tex_mgr,
+        command.width,
+        command.height,
+        glyph_data,
+    );
+    let img = match command.crop.as_deref() {
         Some(crop_str) => apply_crop(img, crop_str),
         None => img,
     };
-    let output = output.with_extension("webp");
+    let output = command.output.with_extension("webp");
     save_screenshot(&img, &output);
     eprintln!(
         "Saved {}x{} screenshot to {}",

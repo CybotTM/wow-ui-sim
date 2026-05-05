@@ -416,15 +416,17 @@ fn dispatch_dump_tree(dispatch: CommandDispatch) {
     };
     run_dump_tree(
         &dispatch.env,
-        filter,
-        filter_key,
-        visible_only,
-        verbose,
-        width,
-        height,
-        dispatch.delay,
-        dispatch.exec_lua.as_deref(),
-        dispatch.exec_lua_secure,
+        DumpTreeCommand {
+            filter,
+            filter_key,
+            visible_only,
+            verbose,
+            width,
+            height,
+            delay: dispatch.delay,
+            exec_lua: dispatch.exec_lua.as_deref(),
+            exec_lua_secure: dispatch.exec_lua_secure,
+        },
     );
 }
 
@@ -444,15 +446,17 @@ fn dispatch_screenshot(dispatch: CommandDispatch) {
     gui_commands::run_screenshot(
         &dispatch.env,
         &dispatch.font_system,
-        output,
-        width,
-        height,
-        filter,
-        crop,
-        dispatch.delay,
-        dispatch.exec_lua.as_deref(),
-        dispatch.exec_lua_secure,
-        dump_tree,
+        gui_commands::ScreenshotCommand {
+            output,
+            width,
+            height,
+            filter,
+            crop,
+            delay: dispatch.delay,
+            exec_lua: dispatch.exec_lua.as_deref(),
+            exec_lua_secure: dispatch.exec_lua_secure,
+            dump_tree,
+        },
     );
 }
 
@@ -508,9 +512,7 @@ fn run_addon_tests(dispatch: &CommandDispatch, addon_name: &str) {
     );
 }
 
-#[allow(clippy::too_many_arguments)]
-fn run_dump_tree(
-    env: &WowLuaEnv,
+struct DumpTreeCommand<'a> {
     filter: Option<String>,
     filter_key: Option<String>,
     visible_only: bool,
@@ -518,28 +520,30 @@ fn run_dump_tree(
     width: u32,
     height: u32,
     delay: Option<u64>,
-    exec_lua: Option<&str>,
+    exec_lua: Option<&'a str>,
     exec_lua_secure: bool,
-) {
+}
+
+fn run_dump_tree(env: &WowLuaEnv, command: DumpTreeCommand<'_>) {
     settle_headless_startup(env);
-    if let Some(code) = exec_lua
-        && let Err(e) = env.exec_maybe_secure(code, exec_lua_secure)
+    if let Some(code) = command.exec_lua
+        && let Err(e) = env.exec_maybe_secure(code, command.exec_lua_secure)
     {
         eprintln!("[exec-lua] error: {e}");
     }
     run_extra_update_ticks(env, 3);
-    apply_delay(delay);
+    apply_delay(command.delay);
     let state = env.state().borrow();
     let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
     wow_ui_sim::dump::print_frame_tree(
         &state.widgets,
         &addon_names,
-        filter.as_deref(),
-        filter_key.as_deref(),
-        visible_only,
-        verbose,
-        width as f32,
-        height as f32,
+        command.filter.as_deref(),
+        command.filter_key.as_deref(),
+        command.visible_only,
+        command.verbose,
+        command.width as f32,
+        command.height as f32,
     );
 }
 
