@@ -432,17 +432,15 @@ impl TooltipTextRenderer<'_> {
         color: [f32; 4],
         wrap: bool,
     ) {
-        emit_tooltip_text_run(
-            self.batch,
-            self.font_sys,
-            self.glyph_atlas,
+        let run = TooltipTextRun {
             text,
             bounds,
             justify,
             font_size,
             color,
             wrap,
-        );
+        };
+        emit_tooltip_text_run(self.batch, self.font_sys, self.glyph_atlas, run);
     }
 }
 
@@ -461,75 +459,148 @@ fn emit_tooltip_line(
         Some(rw) if rw > 0.0 => (placement.width - rw - DOUBLE_LINE_GAP).max(0.0),
         _ => placement.width,
     };
-    let left_bounds = tooltip_line_bounds(placement.x, placement.y, left_width, placement.height);
-    emit_tooltip_text_segments(
-        tr,
-        &line.left_text,
-        &line.left_segments,
-        left_bounds,
-        TextJustify::Left,
-        line.font_size,
-        line.left_color,
-        line.wrap,
-    );
+    emit_left_tooltip_text(tr, line, placement, left_width);
 
     if let Some(ref right_text) = line.right_text {
-        let right_x = placement.x + left_width + DOUBLE_LINE_GAP;
-        let right_w = (placement.width - left_width - DOUBLE_LINE_GAP).max(0.0);
-        let right_bounds = tooltip_line_bounds(right_x, placement.y, right_w, placement.height);
-        emit_tooltip_text_segments(
-            tr,
-            right_text,
-            &line.right_segments,
-            right_bounds,
-            TextJustify::Right,
-            line.font_size,
-            line.right_color,
-            false,
-        );
+        emit_right_tooltip_text(tr, line, placement, left_width, right_text);
     }
 }
 
-fn emit_tooltip_text_segments(
+fn emit_left_tooltip_text(
     tr: &mut TooltipTextRenderer<'_>,
-    text: &str,
-    segments: &[TooltipTextSegmentRender],
+    line: &TooltipLineRender,
+    placement: TooltipLinePlacement,
+    left_width: f32,
+) {
+    let left_bounds = tooltip_line_bounds(placement.x, placement.y, left_width, placement.height);
+    emit_tooltip_text_segments(
+        tr,
+        TooltipTextSegments {
+            text: &line.left_text,
+            segments: &line.left_segments,
+            bounds: left_bounds,
+            justify: TextJustify::Left,
+            font_size: line.font_size,
+            color: line.left_color,
+            wrap: line.wrap,
+        },
+    );
+}
+
+fn emit_right_tooltip_text(
+    tr: &mut TooltipTextRenderer<'_>,
+    line: &TooltipLineRender,
+    placement: TooltipLinePlacement,
+    left_width: f32,
+    right_text: &str,
+) {
+    let right_x = placement.x + left_width + DOUBLE_LINE_GAP;
+    let right_w = (placement.width - left_width - DOUBLE_LINE_GAP).max(0.0);
+    let right_bounds = tooltip_line_bounds(right_x, placement.y, right_w, placement.height);
+    emit_tooltip_text_segments(
+        tr,
+        TooltipTextSegments {
+            text: right_text,
+            segments: &line.right_segments,
+            bounds: right_bounds,
+            justify: TextJustify::Right,
+            font_size: line.font_size,
+            color: line.right_color,
+            wrap: false,
+        },
+    );
+}
+
+#[derive(Clone, Copy)]
+struct TooltipTextSegments<'a> {
+    text: &'a str,
+    segments: &'a [TooltipTextSegmentRender],
     bounds: Rectangle,
     justify: TextJustify,
     font_size: f32,
     color: [f32; 4],
     wrap: bool,
+}
+
+struct TooltipSegmentFlow {
+    x: f32,
+    y: f32,
+    line_height: f32,
+    right: f32,
+}
+
+fn emit_tooltip_text_segments(
+    tr: &mut TooltipTextRenderer<'_>,
+    segment_run: TooltipTextSegments<'_>,
 ) {
-    if segments.is_empty() {
-        tr.emit(text, bounds, justify, font_size, color, wrap);
+    if segment_run.segments.is_empty() {
+        tr.emit(
+            segment_run.text,
+            segment_run.bounds,
+            segment_run.justify,
+            segment_run.font_size,
+            segment_run.color,
+            segment_run.wrap,
+        );
         return;
     }
 
-    let line_height = (font_size * 1.2).ceil();
-    let total_width = measure_tooltip_segments_width(tr, segments, font_size);
-    let mut x = tooltip_segment_start_x(bounds, justify, total_width, wrap);
-    let mut y = bounds.y;
-    let right = bounds.x + bounds.width;
+    let line_height = (segment_run.font_size * 1.2).ceil();
+    let total_width =
+        measure_tooltip_segments_width(tr, segment_run.segments, segment_run.font_size);
+    let mut flow = TooltipSegmentFlow {
+        x: tooltip_segment_start_x(
+            segment_run.bounds,
+            segment_run.justify,
+            total_width,
+            segment_run.wrap,
+        ),
+        y: segment_run.bounds.y,
+        line_height,
+        right: segment_run.bounds.x + segment_run.bounds.width,
+    };
 
-    for segment in segments {
-        for chunk in tooltip_segment_chunks(&segment.text, wrap) {
-            let chunk_width = tr.font_sys.measure_text_width(chunk, None, font_size);
-            if starts_wrapped_tooltip_segment_line(wrap, chunk, x, chunk_width, bounds.x, right) {
-                x = bounds.x;
-                y += line_height;
-            }
-            let chunk_bounds =
-                tooltip_line_bounds(x, y, chunk_width.max(1.0), line_height.min(bounds.height));
-            tr.emit(
-                chunk,
-                chunk_bounds,
-                TextJustify::Left,
-                font_size,
-                segment.color,
-                false,
-            );
-            x += chunk_width;
+    for segment in segment_run.segments {
+        emit_tooltip_segment_chunks(tr, segment_run, segment, &mut flow);
+    }
+}
+
+fn emit_tooltip_segment_chunks(
+    tr: &mut TooltipTextRenderer<'_>,
+    segment_run: TooltipTextSegments<'_>,
+    segment: &TooltipTextSegmentRender,
+    flow: &mut TooltipSegmentFlow,
+) {
+    for chunk in tooltip_segment_chunks(&segment.text, segment_run.wrap) {
+        let chunk_width = tr
+            .font_sys
+            .measure_text_width(chunk, None, segment_run.font_size);
+        if starts_wrapped_tooltip_segment_line(
+            segment_run.wrap,
+            chunk,
+            flow.x,
+            chunk_width,
+            segment_run.bounds.x,
+            flow.right,
+        ) {
+            flow.x = segment_run.bounds.x;
+            flow.y += flow.line_height;
         }
+        let chunk_bounds = tooltip_line_bounds(
+            flow.x,
+            flow.y,
+            chunk_width.max(1.0),
+            flow.line_height.min(segment_run.bounds.height),
+        );
+        tr.emit(
+            chunk,
+            chunk_bounds,
+            TextJustify::Left,
+            segment_run.font_size,
+            segment.color,
+            false,
+        );
+        flow.x += chunk_width;
     }
 }
 
@@ -582,6 +653,7 @@ fn starts_wrapped_tooltip_segment_line(
     wrap && x > left && x + chunk_width > right && !chunk.trim().is_empty()
 }
 
+#[derive(Clone, Copy)]
 struct TooltipLinePlacement {
     x: f32,
     y: f32,
@@ -589,38 +661,41 @@ struct TooltipLinePlacement {
     height: f32,
 }
 
+struct TooltipTextRun<'a> {
+    text: &'a str,
+    bounds: Rectangle,
+    justify: TextJustify,
+    font_size: f32,
+    color: [f32; 4],
+    wrap: bool,
+}
+
 fn tooltip_line_bounds(x: f32, y: f32, width: f32, height: f32) -> Rectangle {
     Rectangle::new(Point::new(x, y), Size::new(width, height))
 }
 
-#[allow(clippy::too_many_arguments)]
 fn emit_tooltip_text_run(
     batch: &mut QuadBatch,
     font_sys: &mut WowFontSystem,
     glyph_atlas: &mut GlyphAtlas,
-    text: &str,
-    bounds: Rectangle,
-    horiz_justify: TextJustify,
-    font_size: f32,
-    color: [f32; 4],
-    wrap: bool,
+    run: TooltipTextRun<'_>,
 ) {
     emit_text_quads(
         batch,
         font_sys,
         glyph_atlas,
-        text,
-        bounds,
+        run.text,
+        run.bounds,
         None,
-        font_size,
-        color,
-        horiz_justify,
+        run.font_size,
+        run.color,
+        run.justify,
         TextJustify::Center,
         GLYPH_ATLAS_TEX_INDEX,
         None,
         (0.0, 0.0),
         TextOutline::None,
-        wrap,
+        run.wrap,
         0,
         None,
     );
