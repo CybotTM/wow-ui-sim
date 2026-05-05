@@ -184,7 +184,7 @@ impl WidgetRegistry {
         let mut individual = Vec::new();
         let mut all_events = Vec::new();
         for frame in self.widgets.values() {
-            if frame.registered_events.contains(event) {
+            if frame_is_registered_for_event(frame, event) {
                 individual.push(frame.id);
             } else if frame.register_all_events {
                 all_events.push(frame.id);
@@ -220,10 +220,11 @@ impl WidgetRegistry {
                 child.parent_id = Some(parent_id);
             }
         }
-        if let Some(parent) = self.widgets.get_mut(&parent_id) {
-            if !parent.children.contains(&child_id) {
-                parent.children.push(child_id);
-            }
+        if old_parent_id != Some(parent_id)
+            && let Some(parent) = self.widgets.get_mut(&parent_id)
+        {
+            parent.children.retain(|&id| id != child_id);
+            parent.children.push(child_id);
         }
         self.propagate_effective_alpha(child_id, parent_eff_alpha);
         self.propagate_effective_scale(child_id, parent_eff_scale);
@@ -553,7 +554,7 @@ impl WidgetRegistry {
         let mut roots = Vec::new();
         let mut current = Some(id);
         while let Some(cid) = current {
-            if self.rect_dirty_ids.contains(&cid) {
+            if self.is_rect_dirty_self(cid) {
                 roots.push(cid);
             }
             current = self.widgets.get(&cid).and_then(|f| f.parent_id);
@@ -605,6 +606,10 @@ impl WidgetRegistry {
             .or_default()
             .insert(source);
     }
+}
+
+fn frame_is_registered_for_event(frame: &Frame, event: &str) -> bool {
+    frame.registered_events.contains(event)
 }
 
 fn hash_set_u64_bytes(values: &FxHashSet<u64>) -> usize {
