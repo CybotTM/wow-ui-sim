@@ -23,6 +23,12 @@ use iced_layout_inspector::server as debug_server;
 use super::Message;
 use super::state::InspectorState;
 
+type RenderResources = (
+    Rc<RefCell<TextureManager>>,
+    Rc<RefCell<WowFontSystem>>,
+    Rc<RefCell<GlyphAtlas>>,
+);
+
 const DEFAULT_FAST_TICK_MS: u64 = 16;
 
 /// Debug visualization options.
@@ -168,6 +174,20 @@ pub struct App {
     pub(crate) movement: crate::config::MovementConfig,
 }
 
+pub(crate) struct AppInit {
+    pub(crate) env: Rc<RefCell<WowLuaEnv>>,
+    pub(crate) log_messages: Vec<String>,
+    pub(crate) texture_manager: Rc<RefCell<TextureManager>>,
+    pub(crate) font_system: Rc<RefCell<WowFontSystem>>,
+    pub(crate) glyph_atlas: Rc<RefCell<GlyphAtlas>>,
+    pub(crate) cmd_rx: mpsc::Receiver<debug_server::Command>,
+    pub(crate) lua_rx: std::sync::mpsc::Receiver<lua_server::LuaCommand>,
+    pub(crate) debug_borders: bool,
+    pub(crate) debug_anchors: bool,
+    pub(crate) saved_vars: Option<SavedVariablesManager>,
+    pub(crate) config: crate::config::SimConfig,
+}
+
 impl App {
     pub fn title(_state: &Self) -> String {
         "WoW UI Simulator".to_string()
@@ -192,8 +212,8 @@ impl App {
         let (cmd_rx, lua_rx) = Self::init_servers();
         let (debug_borders, debug_anchors) = Self::resolve_debug_flags();
 
-        let app = Self::build_app(
-            env_rc,
+        let app = Self::build_app(AppInit {
+            env: env_rc,
             log_messages,
             texture_manager,
             font_system,
@@ -204,7 +224,7 @@ impl App {
             debug_anchors,
             saved_vars,
             config,
-        );
+        });
 
         app.preload_initial_texture_requests();
 
@@ -212,28 +232,15 @@ impl App {
     }
 
     /// Construct the App struct from initialized components.
-    #[allow(clippy::too_many_arguments)]
-    pub(crate) fn build_app(
-        env: Rc<RefCell<WowLuaEnv>>,
-        log_messages: Vec<String>,
-        texture_manager: Rc<RefCell<TextureManager>>,
-        font_system: Rc<RefCell<WowFontSystem>>,
-        glyph_atlas: Rc<RefCell<GlyphAtlas>>,
-        cmd_rx: mpsc::Receiver<debug_server::Command>,
-        lua_rx: std::sync::mpsc::Receiver<lua_server::LuaCommand>,
-        debug_borders: bool,
-        debug_anchors: bool,
-        saved_vars: Option<SavedVariablesManager>,
-        config: crate::config::SimConfig,
-    ) -> Self {
+    pub(crate) fn build_app(init: AppInit) -> Self {
         let now = std::time::Instant::now();
         App {
-            env,
-            log_messages,
+            env: init.env,
+            log_messages: init.log_messages,
             command_input: String::new(),
-            texture_manager,
-            font_system,
-            glyph_atlas,
+            texture_manager: init.texture_manager,
+            font_system: init.font_system,
+            glyph_atlas: init.glyph_atlas,
             hovered_frame: None,
             pressed_frame: None,
             mouse_down_frame: None,
@@ -242,11 +249,11 @@ impl App {
             dragging: false,
             scroll_offset: 0.0,
             screen_size: std::cell::Cell::new(Size::new(800.0, 600.0)),
-            debug_rx: Some(cmd_rx),
+            debug_rx: Some(init.cmd_rx),
             pending_screenshot: None,
-            lua_rx: Some(lua_rx),
-            debug_borders,
-            debug_anchors,
+            lua_rx: Some(init.lua_rx),
+            debug_borders: init.debug_borders,
+            debug_anchors: init.debug_anchors,
             cached_quads: RefCell::new(None),
             cached_strata_quads: RefCell::new(std::array::from_fn(|_| None)),
             cached_frame_snapshots: RefCell::new(std::array::from_fn(|_| None)),
@@ -280,16 +287,16 @@ impl App {
             inspector_state: InspectorState::default(),
             frames_panel_collapsed: true,
             last_on_update_time: now,
-            saved_vars,
+            saved_vars: init.saved_vars,
             pending_exec_lua: INIT_EXEC_LUA.with(|cell| cell.borrow_mut().take()),
-            selected_xp_level: config.xp_level.clone(),
-            selected_party_size: config.party_size.to_string(),
+            selected_xp_level: init.config.xp_level.clone(),
+            selected_party_size: init.config.party_size.to_string(),
             last_party_health_tick: now,
-            selected_class: config.player_class,
-            selected_race: config.player_race,
-            selected_rot_level: config.rot_damage_level,
+            selected_class: init.config.player_class,
+            selected_race: init.config.player_race,
+            selected_rot_level: init.config.rot_damage_level,
             options_modal_visible: false,
-            movement: config.movement,
+            movement: init.config.movement,
         }
     }
 
@@ -349,14 +356,7 @@ impl App {
     }
 
     /// Create texture manager, font system, and glyph atlas.
-    #[allow(clippy::type_complexity)]
-    fn init_rendering(
-        env_rc: &Rc<RefCell<WowLuaEnv>>,
-    ) -> (
-        Rc<RefCell<TextureManager>>,
-        Rc<RefCell<WowFontSystem>>,
-        Rc<RefCell<GlyphAtlas>>,
-    ) {
+    fn init_rendering(env_rc: &Rc<RefCell<WowLuaEnv>>) -> RenderResources {
         let mut tex_mgr =
             TextureManager::new().with_addons_path(crate::paths::default_addons_path());
         if Self::eager_startup_texture_preloads_enabled() {
@@ -592,19 +592,19 @@ mod tests {
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);
         let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
 
-        App::build_app(
+        App::build_app(AppInit {
             env,
-            Vec::new(),
+            log_messages: Vec::new(),
             texture_manager,
             font_system,
             glyph_atlas,
             cmd_rx,
             lua_rx,
-            false,
-            false,
-            None,
-            crate::config::SimConfig::default(),
-        )
+            debug_borders: false,
+            debug_anchors: false,
+            saved_vars: None,
+            config: crate::config::SimConfig::default(),
+        })
     }
 
     #[test]

@@ -1,4 +1,5 @@
 use super::*;
+use crate::iced_app::app::AppInit;
 use crate::iced_app::{build_hittable_rects, frame_collect::collect_hittable_frames};
 use crate::lua_api::WowLuaEnv;
 use crate::render::{GlyphAtlas, WowFontSystem};
@@ -22,19 +23,19 @@ pub(super) fn build_test_app(screen_kind: ScreenKind) -> App {
     let (_cmd_tx, cmd_rx) = mpsc::channel(1);
     let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
 
-    let app = App::build_app(
-        Rc::clone(&env),
-        Vec::new(),
+    let app = App::build_app(AppInit {
+        env: Rc::clone(&env),
+        log_messages: Vec::new(),
         texture_manager,
         font_system,
         glyph_atlas,
         cmd_rx,
         lua_rx,
-        false,
-        false,
-        None,
-        crate::config::SimConfig::default(),
-    );
+        debug_borders: false,
+        debug_anchors: false,
+        saved_vars: None,
+        config: crate::config::SimConfig::default(),
+    });
     app.screen_size.set(Size::new(800.0, 600.0));
     app
 }

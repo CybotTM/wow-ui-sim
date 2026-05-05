@@ -1023,6 +1023,7 @@ fn sample_display_metrics(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::iced_app::app::AppInit;
     use crate::iced_app::render;
     use crate::render::{FrameQuadSnapshot, QuadBatch, TextureRequest};
     use crate::screen::ScreenKind;
@@ -1049,19 +1050,19 @@ mod tests {
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);
         let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
 
-        App::build_app(
+        App::build_app(AppInit {
             env,
-            Vec::new(),
+            log_messages: Vec::new(),
             texture_manager,
             font_system,
             glyph_atlas,
             cmd_rx,
             lua_rx,
-            false,
-            false,
-            None,
-            crate::config::SimConfig::default(),
-        )
+            debug_borders: false,
+            debug_anchors: false,
+            saved_vars: None,
+            config: crate::config::SimConfig::default(),
+        })
     }
 
     #[test]

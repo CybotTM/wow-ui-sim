@@ -628,6 +628,7 @@ mod tests {
         unresolved_texture_request_paths,
     };
     use crate::iced_app::App;
+    use crate::iced_app::app::AppInit;
     use crate::render::shader::primitive::TextureRequestTracker;
     use crate::render::{GlyphAtlas, GpuTextureData, QuadBatch, TextureRequest, WowFontSystem};
     use crate::screen::ScreenKind;
@@ -753,9 +754,9 @@ mod tests {
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);
         let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
 
-        App::build_app(
+        App::build_app(AppInit {
             env,
-            Vec::new(),
+            log_messages: Vec::new(),
             texture_manager,
             font_system,
             glyph_atlas,
@@ -763,9 +764,9 @@ mod tests {
             lua_rx,
             debug_borders,
             debug_anchors,
-            None,
-            crate::config::SimConfig::default(),
-        )
+            saved_vars: None,
+            config: crate::config::SimConfig::default(),
+        })
     }
 
     fn build_texture_load_test_app() -> App {
@@ -780,19 +781,19 @@ mod tests {
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);
         let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
 
-        App::build_app(
+        App::build_app(AppInit {
             env,
-            Vec::new(),
+            log_messages: Vec::new(),
             texture_manager,
             font_system,
             glyph_atlas,
             cmd_rx,
             lua_rx,
-            false,
-            false,
-            None,
-            crate::config::SimConfig::default(),
-        )
+            debug_borders: false,
+            debug_anchors: false,
+            saved_vars: None,
+            config: crate::config::SimConfig::default(),
+        })
     }
 
     fn register_debug_frame(app: &App) {

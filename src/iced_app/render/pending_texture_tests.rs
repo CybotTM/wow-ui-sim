@@ -1,4 +1,5 @@
 use super::*;
+use crate::iced_app::app::AppInit;
 use crate::lua_api::WowLuaEnv;
 use crate::render::BlendMode;
 use crate::render::shader::primitive::TextureRequestTracker;
@@ -34,19 +35,19 @@ fn build_test_app_with_addons(addons_path: Option<&Path>) -> App {
     let (_cmd_tx, cmd_rx) = mpsc::channel(1);
     let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
 
-    App::build_app(
+    App::build_app(AppInit {
         env,
-        Vec::new(),
+        log_messages: Vec::new(),
         texture_manager,
         font_system,
         glyph_atlas,
         cmd_rx,
         lua_rx,
-        false,
-        false,
-        None,
-        crate::config::SimConfig::default(),
-    )
+        debug_borders: false,
+        debug_anchors: false,
+        saved_vars: None,
+        config: crate::config::SimConfig::default(),
+    })
 }
 
 #[test]
