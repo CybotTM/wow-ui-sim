@@ -445,23 +445,25 @@ impl App {
     }
 
     fn refresh_pending_texture_requests_for_rebuilt_strata(&self, rebuilt: u16) {
-        if rebuilt == 0 {
-            return;
-        }
-        self.refresh_pending_texture_requests_for_strata(|strata_idx| {
-            rebuilt & (1 << strata_idx) != 0
-        });
+        self.refresh_pending_texture_requests_for_strata(Some(rebuilt));
     }
 
     pub(crate) fn seed_pending_texture_paths_from_cached_strata(&self) {
-        self.refresh_pending_texture_requests_for_strata(|_| true);
+        self.refresh_pending_texture_requests_for_strata(None);
     }
 
-    fn refresh_pending_texture_requests_for_strata(&self, should_refresh: impl Fn(usize) -> bool) {
+    fn refresh_pending_texture_requests_for_strata(&self, rebuilt_strata_mask: Option<u16>) {
+        if rebuilt_strata_mask == Some(0) {
+            return;
+        }
         let strata_cache = self.cached_strata_quads.borrow();
         let mut strata_pending = self.strata_pending_texture_requests.borrow_mut();
         for strata_idx in 0..FrameStrata::COUNT {
-            if !should_refresh(strata_idx) {
+            let refresh_strata = match rebuilt_strata_mask {
+                Some(mask) => mask & (1 << strata_idx) != 0,
+                None => true,
+            };
+            if !refresh_strata {
                 continue;
             }
             strata_pending[strata_idx] = strata_cache[strata_idx]
