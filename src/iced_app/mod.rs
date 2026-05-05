@@ -101,7 +101,7 @@ pub use benchmark::{
     benchmark_lfg_panel_open_in_gui, benchmark_spellbook_open_in_gui,
 };
 #[cfg(feature = "gui")]
-pub use render::rebuild_dirty_strata_batches_for_registry;
+pub use render::{DirtyStrataRebuildParams, rebuild_dirty_strata_batches_for_registry};
 #[cfg(feature = "gui")]
 pub use state::{CanvasMessage, InspectorState};
 #[cfg(feature = "gui")]

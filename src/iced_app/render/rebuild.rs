@@ -18,6 +18,21 @@ use super::super::tooltip::TooltipRenderData;
 pub(crate) type StrataBatchCache = [Option<Arc<QuadBatch>>; FrameStrata::COUNT];
 pub(crate) type StrataSnapshotCache = [Option<HashMap<u64, FrameQuadSnapshot>>; FrameStrata::COUNT];
 
+/// Inputs for rebuilding cached strata batches against a widget registry.
+pub struct DirtyStrataRebuildParams<'a> {
+    pub dirty: u16,
+    pub dirty_ids: Option<&'a FxHashSet<u64>>,
+    pub size: Size,
+    pub strata_buckets: &'a [Vec<u64>],
+    pub widgets: &'a crate::widget::WidgetRegistry,
+    pub pressed_frame: Option<u64>,
+    pub hovered_frame: Option<u64>,
+    pub message_frames: &'a HashMap<u64, crate::lua_api::MessageFrameData>,
+    pub tooltip_data: &'a HashMap<u64, TooltipRenderData>,
+    pub quest_blobs: &'a HashMap<u64, crate::lua_api::state::QuestBlobState>,
+    pub elapsed_secs: f64,
+}
+
 /// Rebuild strata batches for all dirty strata indices.
 ///
 /// When `dirty_ids` is `Some`, uses per-frame snapshot cache for incremental
@@ -45,21 +60,7 @@ fn rebuild_strata_batches(
         }
 
         let snapshots = snapshot_cache[strata_idx].get_or_insert_with(HashMap::new);
-        let stats = emit_strata_cached(
-            &mut batch,
-            snapshots,
-            bucket,
-            params.dirty_ids,
-            params.widgets,
-            (params.size.width / UI_SCALE, params.size.height / UI_SCALE),
-            params.pressed_frame,
-            params.hovered_frame,
-            text_ctx,
-            params.message_frames,
-            params.tooltip_data,
-            params.quest_blobs,
-            params.elapsed_secs,
-        );
+        let stats = emit_strata_cached(&mut batch, snapshots, text_ctx, params.strata_emit(bucket));
         log_strata_timing(strata_idx, bucket.len(), &stats, strata_start.elapsed());
         strata_cache[strata_idx] = Some(Arc::new(batch));
     }
@@ -70,13 +71,63 @@ struct RebuildStrataBatches<'a> {
     dirty_ids: Option<&'a FxHashSet<u64>>,
     size: Size,
     strata_buckets: &'a [Vec<u64>],
-    widgets: &'a crate::widget::WidgetRegistry,
+    ctx: StrataRenderContext<'a>,
+}
+
+impl<'a> RebuildStrataBatches<'a> {
+    fn strata_emit(&self, bucket: &'a [u64]) -> EmitStrataCached<'a> {
+        EmitStrataCached {
+            bucket,
+            dirty_ids: self.dirty_ids,
+            screen_size: (self.size.width / UI_SCALE, self.size.height / UI_SCALE),
+            ctx: self.ctx,
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+struct StrataRenderContext<'a> {
+    registry: &'a crate::widget::WidgetRegistry,
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
     message_frames: &'a HashMap<u64, crate::lua_api::MessageFrameData>,
     tooltip_data: &'a HashMap<u64, TooltipRenderData>,
     quest_blobs: &'a HashMap<u64, crate::lua_api::state::QuestBlobState>,
     elapsed_secs: f64,
+}
+
+struct EmitStrataCached<'a> {
+    bucket: &'a [u64],
+    dirty_ids: Option<&'a FxHashSet<u64>>,
+    screen_size: (f32, f32),
+    ctx: StrataRenderContext<'a>,
+}
+
+#[derive(Clone, Copy)]
+struct RenderListEntry {
+    id: u64,
+    rect: crate::LayoutRect,
+    clip_rect: Option<crate::LayoutRect>,
+    eff_alpha: f32,
+}
+
+impl From<(u64, crate::LayoutRect, Option<crate::LayoutRect>, f32)> for RenderListEntry {
+    fn from(
+        (id, rect, clip_rect, eff_alpha): (u64, crate::LayoutRect, Option<crate::LayoutRect>, f32),
+    ) -> Self {
+        Self {
+            id,
+            rect,
+            clip_rect,
+            eff_alpha,
+        }
+    }
+}
+
+struct EmitOneFrame<'a> {
+    entry: RenderListEntry,
+    ctx: StrataRenderContext<'a>,
+    statusbar_fills: &'a HashMap<u64, super::super::statusbar::StatusBarFill>,
 }
 
 fn emit_marble_background(batch: &mut QuadBatch, size: Size) {
@@ -113,53 +164,21 @@ fn log_strata_timing(
 }
 
 /// Emit one frame's quads into the batch. Returns true if quads were emitted.
-#[allow(clippy::too_many_arguments)]
 fn emit_one_frame(
     batch: &mut QuadBatch,
-    id: u64,
-    rect: crate::LayoutRect,
-    clip_rect: Option<crate::LayoutRect>,
-    eff_alpha: f32,
-    registry: &crate::widget::WidgetRegistry,
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: &HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
-    tooltip_data: &HashMap<u64, TooltipRenderData>,
-    quest_blobs: &HashMap<u64, crate::lua_api::state::QuestBlobState>,
-    statusbar_fills: &HashMap<u64, super::super::statusbar::StatusBarFill>,
-    elapsed_secs: f64,
+    params: EmitOneFrame<'_>,
 ) -> bool {
-    let Some(frame) = registry.get(id) else {
+    let id = params.entry.id;
+    let ctx = params.ctx;
+    let Some(frame) = ctx.registry.get(id) else {
         return false;
     };
-
-    let no_visible_ids: Option<FxHashSet<u64>> = None;
-    if super::super::button_vis::should_skip_frame(
-        frame,
-        id,
-        eff_alpha,
-        &no_visible_ids,
-        registry,
-        pressed_frame,
-        hovered_frame,
-    ) {
-        return false;
-    }
-    if !has_renderable_size(frame, rect) {
+    if !should_emit_frame(frame, params.entry, ctx) {
         return false;
     }
 
-    let bounds = Rectangle::new(
-        Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
-        Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
-    );
-    let clip_bounds = clip_rect.map(|rect| {
-        Rectangle::new(
-            Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
-            Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
-        )
-    });
+    let (bounds, clip_bounds) = scaled_bounds(params.entry);
     emit_frame_quads(
         batch,
         text_ctx,
@@ -168,18 +187,49 @@ fn emit_one_frame(
             widget: frame,
             bounds,
             clip_bounds,
-            bar_fill: statusbar_fills.get(&id),
-            pressed_frame,
-            hovered_frame,
-            message_frames: Some(message_frames),
-            tooltip_data: Some(tooltip_data),
-            quest_blobs: Some(quest_blobs),
-            registry,
-            elapsed_secs,
-            eff_alpha,
+            bar_fill: params.statusbar_fills.get(&id),
+            pressed_frame: ctx.pressed_frame,
+            hovered_frame: ctx.hovered_frame,
+            message_frames: Some(ctx.message_frames),
+            tooltip_data: Some(ctx.tooltip_data),
+            quest_blobs: Some(ctx.quest_blobs),
+            registry: ctx.registry,
+            elapsed_secs: ctx.elapsed_secs,
+            eff_alpha: params.entry.eff_alpha,
         },
     );
     true
+}
+
+fn should_emit_frame(
+    frame: &crate::widget::Frame,
+    entry: RenderListEntry,
+    ctx: StrataRenderContext<'_>,
+) -> bool {
+    let no_visible_ids: Option<FxHashSet<u64>> = None;
+    let skip_frame = super::super::button_vis::should_skip_frame(
+        frame,
+        entry.id,
+        entry.eff_alpha,
+        &no_visible_ids,
+        ctx.registry,
+        ctx.pressed_frame,
+        ctx.hovered_frame,
+    );
+    !skip_frame && has_renderable_size(frame, entry.rect)
+}
+
+fn scaled_bounds(entry: RenderListEntry) -> (Rectangle, Option<Rectangle>) {
+    let bounds = scale_layout_rect(entry.rect);
+    let clip_bounds = entry.clip_rect.map(scale_layout_rect);
+    (bounds, clip_bounds)
+}
+
+fn scale_layout_rect(rect: crate::LayoutRect) -> Rectangle {
+    Rectangle::new(
+        Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
+        Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
+    )
 }
 
 fn has_renderable_size(frame: &crate::widget::Frame, rect: crate::LayoutRect) -> bool {
@@ -196,31 +246,28 @@ fn has_renderable_size(frame: &crate::widget::Frame, rect: crate::LayoutRect) ->
 /// For frames not in `dirty_ids` that have a cached snapshot, appends the
 /// cached data (fast memcpy). Dirty or uncached frames are emitted fresh
 /// and their snapshots recorded for future incremental rebuilds.
-#[allow(clippy::too_many_arguments)]
 fn emit_strata_cached(
     batch: &mut QuadBatch,
     snapshots: &mut HashMap<u64, FrameQuadSnapshot>,
-    bucket: &[u64],
-    dirty_ids: Option<&FxHashSet<u64>>,
-    registry: &crate::widget::WidgetRegistry,
-    screen_size: (f32, f32),
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: &HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
-    tooltip_data: &HashMap<u64, TooltipRenderData>,
-    quest_blobs: &HashMap<u64, crate::lua_api::state::QuestBlobState>,
-    elapsed_secs: f64,
+    params: EmitStrataCached<'_>,
 ) -> EmitStats {
-    let render_list = build_render_list(bucket, registry, screen_size);
-    let statusbar_fills = collect_statusbar_fills(&render_list, registry);
+    let render_list = build_render_list(params.bucket, params.ctx.registry, params.screen_size);
+    let statusbar_fills = collect_statusbar_fills(&render_list, params.ctx.registry);
     let mut stats = EmitStats {
         cached: 0,
         emitted: 0,
     };
 
-    for &(id, rect, clip_rect, eff_alpha) in &render_list {
-        if try_use_cached(batch, snapshots, dirty_ids, registry, id) {
+    for &entry in &render_list {
+        let entry = RenderListEntry::from(entry);
+        if try_use_cached(
+            batch,
+            snapshots,
+            params.dirty_ids,
+            params.ctx.registry,
+            entry.id,
+        ) {
             stats.cached += 1;
             continue;
         }
@@ -228,22 +275,15 @@ fn emit_strata_cached(
         let before = snapshot_offsets(batch);
         let emitted = emit_one_frame(
             batch,
-            id,
-            rect,
-            clip_rect,
-            eff_alpha,
-            registry,
-            pressed_frame,
-            hovered_frame,
             text_ctx,
-            message_frames,
-            tooltip_data,
-            quest_blobs,
-            &statusbar_fills,
-            elapsed_secs,
+            EmitOneFrame {
+                entry,
+                ctx: params.ctx,
+                statusbar_fills: &statusbar_fills,
+            },
         );
         snapshots.insert(
-            id,
+            entry.id,
             batch.take_snapshot_since(before.0, before.1, before.2, before.3),
         );
         if emitted {
@@ -364,39 +404,30 @@ fn strata_needs_rebuild(
 ///
 /// This drives the same incremental snapshot path the live renderer uses:
 /// clean frames append cached snapshots, while dirty frames re-emit fresh quads.
-#[allow(clippy::too_many_arguments)]
 pub fn rebuild_dirty_strata_batches_for_registry(
     strata_cache: &mut StrataBatchCache,
     snapshot_cache: &mut StrataSnapshotCache,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    dirty: u16,
-    dirty_ids: Option<&FxHashSet<u64>>,
-    size: Size,
-    strata_buckets: &[Vec<u64>],
-    widgets: &crate::widget::WidgetRegistry,
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
-    message_frames: &HashMap<u64, crate::lua_api::MessageFrameData>,
-    tooltip_data: &HashMap<u64, TooltipRenderData>,
-    quest_blobs: &HashMap<u64, crate::lua_api::state::QuestBlobState>,
-    elapsed_secs: f64,
+    params: DirtyStrataRebuildParams<'_>,
 ) {
     rebuild_strata_batches(
         strata_cache,
         snapshot_cache,
         text_ctx,
         RebuildStrataBatches {
-            dirty,
-            dirty_ids,
-            size,
-            strata_buckets,
-            widgets,
-            pressed_frame,
-            hovered_frame,
-            message_frames,
-            tooltip_data,
-            quest_blobs,
-            elapsed_secs,
+            dirty: params.dirty,
+            dirty_ids: params.dirty_ids,
+            size: params.size,
+            strata_buckets: params.strata_buckets,
+            ctx: StrataRenderContext {
+                registry: params.widgets,
+                pressed_frame: params.pressed_frame,
+                hovered_frame: params.hovered_frame,
+                message_frames: params.message_frames,
+                tooltip_data: params.tooltip_data,
+                quest_blobs: params.quest_blobs,
+                elapsed_secs: params.elapsed_secs,
+            },
         },
     );
 }

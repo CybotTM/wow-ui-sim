@@ -37,7 +37,7 @@ use preload::{
     sort_pending_texture_paths, texture_preload_logging_enabled, update_ready_texture_path_cache,
 };
 use rebuild::prune_irrelevant_dirty_strata;
-pub use rebuild::rebuild_dirty_strata_batches_for_registry;
+pub use rebuild::{DirtyStrataRebuildParams, rebuild_dirty_strata_batches_for_registry};
 
 /// Shader program implementation for GPU rendering of WoW frames.
 impl shader::Program<Message> for &App {
@@ -655,17 +655,19 @@ impl App {
             &mut strata_cache,
             &mut snap_cache,
             &mut text_ctx,
-            dirty,
-            dirty_ids,
-            size,
-            strata_buckets,
-            &state.widgets,
-            self.pressed_frame,
-            self.hovered_frame,
-            &state.message_frames,
-            &tooltip_data,
-            &state.quest_blobs,
-            elapsed_secs,
+            DirtyStrataRebuildParams {
+                dirty,
+                dirty_ids,
+                size,
+                strata_buckets,
+                widgets: &state.widgets,
+                pressed_frame: self.pressed_frame,
+                hovered_frame: self.hovered_frame,
+                message_frames: &state.message_frames,
+                tooltip_data: &tooltip_data,
+                quest_blobs: &state.quest_blobs,
+                elapsed_secs,
+            },
         );
     }
 

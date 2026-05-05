@@ -1,15 +1,19 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use iced::{Point, Rectangle, Size};
+use rustc_hash::FxHashSet;
 use wow_ui_sim::iced_app::compute_frame_rect;
 use wow_ui_sim::iced_app::tooltip::{
-    TooltipRender, build_tooltip_quads, collect_tooltip_data, update_tooltip_sizes,
+    TooltipRender, TooltipRenderData, build_tooltip_quads, collect_tooltip_data,
+    update_tooltip_sizes,
 };
 use wow_ui_sim::iced_app::{
-    build_quad_batch_for_registry, rebuild_dirty_strata_batches_for_registry,
+    DirtyStrataRebuildParams, build_quad_batch_for_registry,
+    rebuild_dirty_strata_batches_for_registry,
 };
-use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::{SimState, WowLuaEnv};
 use wow_ui_sim::render::{FrameQuadSnapshot, GlyphAtlas, QuadBatch, WowFontSystem};
 use wow_ui_sim::widget::{Anchor, FrameStrata};
 
@@ -17,6 +21,9 @@ const PERF_SCREEN_SIZE: (f32, f32) = (1024.0, 768.0);
 const PERF_DIRTY_TEXTURE_NAME: &str = "PerfDirtyTexture";
 const PERF_TOOLTIP_OWNER_NAME: &str = "PerfTooltipOwner";
 const PERF_TOOLTIP_HEADER: &str = "Performance Tooltip";
+
+type PerfStrataCache = [Option<Arc<QuadBatch>>; FrameStrata::COUNT];
+type PerfSnapshotCache = [Option<HashMap<u64, FrameQuadSnapshot>>; FrameStrata::COUNT];
 
 pub fn measure_full_root_layout_pass(env: &WowLuaEnv) -> Duration {
     let ui_parent_id = {
@@ -99,89 +106,33 @@ pub fn measure_dirty_tree_quad_rebuild(env: &WowLuaEnv) -> Duration {
     let mut snapshot_cache = empty_snapshot_cache();
 
     let mut state = env.state().borrow_mut();
-    state.ensure_layout_rects();
-
-    let strata_buckets = state
-        .get_strata_buckets()
-        .expect("strata buckets should exist for dirty-tree quad measurement")
-        .clone();
-    let mut tooltip_data = collect_tooltip_data(&state);
-    let elapsed_secs = state.start_time.elapsed().as_secs_f64();
+    let strata_buckets = prepare_dirty_tree_strata(&mut state);
     let mut text_ctx = Some((&mut font_system, &mut glyph_atlas));
 
-    rebuild_dirty_strata_batches_for_registry(
+    prime_perf_strata_cache(
         &mut strata_cache,
         &mut snapshot_cache,
         &mut text_ctx,
-        full_dirty_mask(),
-        None,
-        perf_screen_size(),
+        &state,
         &strata_buckets,
-        &state.widgets,
-        None,
-        None,
-        &state.message_frames,
-        &tooltip_data,
-        &state.quest_blobs,
-        elapsed_secs,
     );
 
     let _ = state.widgets.take_render_dirty_with_ids();
+    let dirty_change = perturb_perf_dirty_texture(&mut state);
+    let dirty_frames = take_incremental_dirty_frames(&mut state, dirty_change.texture_id);
 
-    let dirty_texture_id = state
-        .widgets
-        .get_id_by_name(PERF_DIRTY_TEXTURE_NAME)
-        .expect("perf dirty texture should resolve by name");
-    let original_alpha = state
-        .widgets
-        .get(dirty_texture_id)
-        .expect("perf dirty texture should exist")
-        .alpha;
-    let updated_alpha = (original_alpha * 0.5).max(0.1);
-    state
-        .widgets
-        .get_mut_visual(dirty_texture_id)
-        .expect("perf dirty texture should be mutable")
-        .alpha = updated_alpha;
-
-    let (dirty_mask, dirty_ids) = state.widgets.take_render_dirty_with_ids();
-    assert_ne!(
-        dirty_mask, 0,
-        "single-frame visual change should dirty a strata"
-    );
-    let dirty_ids = dirty_ids.expect("single-frame visual change should stay incremental");
-    assert!(
-        dirty_ids.contains(&dirty_texture_id),
-        "dirty IDs should contain the changed texture frame"
-    );
-
-    tooltip_data = collect_tooltip_data(&state);
-    let elapsed_secs = state.start_time.elapsed().as_secs_f64();
-    let started = Instant::now();
-    rebuild_dirty_strata_batches_for_registry(
+    let tooltip_data = collect_tooltip_data(&state);
+    let elapsed = measure_perf_strata_rebuild(
         &mut strata_cache,
         &mut snapshot_cache,
         &mut text_ctx,
-        dirty_mask,
-        Some(&dirty_ids),
-        perf_screen_size(),
+        &state,
         &strata_buckets,
-        &state.widgets,
-        None,
-        None,
-        &state.message_frames,
         &tooltip_data,
-        &state.quest_blobs,
-        elapsed_secs,
+        dirty_frames.as_refs(),
     );
-    let elapsed = started.elapsed();
 
-    state
-        .widgets
-        .get_mut_visual(dirty_texture_id)
-        .expect("perf dirty texture should still be mutable")
-        .alpha = original_alpha;
-    let _ = state.widgets.take_render_dirty_with_ids();
+    restore_perf_dirty_texture(&mut state, dirty_change);
 
     elapsed
 }
@@ -199,46 +150,231 @@ pub fn measure_tooltip_collect_and_quad_emission(env: &WowLuaEnv) -> Duration {
     let started = Instant::now();
     {
         let state = env.state().borrow();
-        let tooltip_data = collect_tooltip_data(&state);
-        let tooltip_id = state
-            .widgets
-            .get_id_by_name("GameTooltip")
-            .expect("GameTooltip should exist in the settled game UI");
-        let tooltip_frame = state
-            .widgets
-            .get(tooltip_id)
-            .expect("GameTooltip frame should resolve");
-        let bounds = compute_frame_rect(
-            &state.widgets,
-            tooltip_id,
-            PERF_SCREEN_SIZE.0,
-            PERF_SCREEN_SIZE.1,
-        );
-        let bounds = Rectangle::new(
-            Point::new(bounds.x, bounds.y),
-            Size::new(bounds.width, bounds.height),
-        );
-        let mut batch = QuadBatch::new();
-        let mut text_ctx = Some((&mut font_system, &mut glyph_atlas));
-
-        build_tooltip_quads(
-            TooltipRender {
-                batch: &mut batch,
-                bounds,
-                tooltip_data: Some(&tooltip_data),
-                id: tooltip_id,
-                eff_alpha: tooltip_frame.alpha,
-                draw_background: true,
-            },
-            &mut text_ctx,
-        );
-
-        assert!(
-            !batch.vertices.is_empty(),
-            "perf tooltip measurement should emit tooltip quads"
-        );
+        emit_perf_tooltip_quads(&state, &mut font_system, &mut glyph_atlas);
     }
     started.elapsed()
+}
+
+fn prepare_dirty_tree_strata(state: &mut SimState) -> Vec<Vec<u64>> {
+    state.ensure_layout_rects();
+    state
+        .get_strata_buckets()
+        .expect("strata buckets should exist for dirty-tree quad measurement")
+        .clone()
+}
+
+fn prime_perf_strata_cache(
+    strata_cache: &mut PerfStrataCache,
+    snapshot_cache: &mut PerfSnapshotCache,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    state: &SimState,
+    strata_buckets: &[Vec<u64>],
+) {
+    let tooltip_data = collect_tooltip_data(state);
+    rebuild_perf_strata(
+        strata_cache,
+        snapshot_cache,
+        text_ctx,
+        state,
+        strata_buckets,
+        &tooltip_data,
+        DirtyFrames::all(),
+    );
+}
+
+fn rebuild_perf_strata(
+    strata_cache: &mut PerfStrataCache,
+    snapshot_cache: &mut PerfSnapshotCache,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    state: &SimState,
+    strata_buckets: &[Vec<u64>],
+    tooltip_data: &HashMap<u64, TooltipRenderData>,
+    dirty_frames: DirtyFrameRefs<'_>,
+) {
+    let elapsed_secs = state.start_time.elapsed().as_secs_f64();
+    rebuild_dirty_strata_batches_for_registry(
+        strata_cache,
+        snapshot_cache,
+        text_ctx,
+        dirty_strata_params(
+            state,
+            strata_buckets,
+            tooltip_data,
+            dirty_frames.mask,
+            dirty_frames.ids,
+            elapsed_secs,
+        ),
+    );
+}
+
+fn measure_perf_strata_rebuild(
+    strata_cache: &mut PerfStrataCache,
+    snapshot_cache: &mut PerfSnapshotCache,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    state: &SimState,
+    strata_buckets: &[Vec<u64>],
+    tooltip_data: &HashMap<u64, TooltipRenderData>,
+    dirty_frames: DirtyFrameRefs<'_>,
+) -> Duration {
+    let started = Instant::now();
+    rebuild_perf_strata(
+        strata_cache,
+        snapshot_cache,
+        text_ctx,
+        state,
+        strata_buckets,
+        tooltip_data,
+        dirty_frames,
+    );
+    started.elapsed()
+}
+
+fn dirty_strata_params<'a>(
+    state: &'a SimState,
+    strata_buckets: &'a [Vec<u64>],
+    tooltip_data: &'a HashMap<u64, TooltipRenderData>,
+    dirty: u16,
+    dirty_ids: Option<&'a FxHashSet<u64>>,
+    elapsed_secs: f64,
+) -> DirtyStrataRebuildParams<'a> {
+    DirtyStrataRebuildParams {
+        dirty,
+        dirty_ids,
+        size: perf_screen_size(),
+        strata_buckets,
+        widgets: &state.widgets,
+        pressed_frame: None,
+        hovered_frame: None,
+        message_frames: &state.message_frames,
+        tooltip_data,
+        quest_blobs: &state.quest_blobs,
+        elapsed_secs,
+    }
+}
+
+struct DirtyTextureChange {
+    texture_id: u64,
+    original_alpha: f32,
+}
+
+struct DirtyFrames {
+    mask: u16,
+    ids: Option<FxHashSet<u64>>,
+}
+
+impl DirtyFrames {
+    fn all() -> DirtyFrameRefs<'static> {
+        DirtyFrameRefs {
+            mask: full_dirty_mask(),
+            ids: None,
+        }
+    }
+
+    fn as_refs(&self) -> DirtyFrameRefs<'_> {
+        DirtyFrameRefs {
+            mask: self.mask,
+            ids: self.ids.as_ref(),
+        }
+    }
+}
+
+struct DirtyFrameRefs<'a> {
+    mask: u16,
+    ids: Option<&'a FxHashSet<u64>>,
+}
+
+fn take_incremental_dirty_frames(state: &mut SimState, expected_dirty_id: u64) -> DirtyFrames {
+    let (mask, ids) = state.widgets.take_render_dirty_with_ids();
+    assert_ne!(mask, 0, "single-frame visual change should dirty a strata");
+    let ids = ids.expect("single-frame visual change should stay incremental");
+    assert!(
+        ids.contains(&expected_dirty_id),
+        "dirty IDs should contain the changed texture frame"
+    );
+    DirtyFrames {
+        mask,
+        ids: Some(ids),
+    }
+}
+
+fn perturb_perf_dirty_texture(state: &mut SimState) -> DirtyTextureChange {
+    let texture_id = state
+        .widgets
+        .get_id_by_name(PERF_DIRTY_TEXTURE_NAME)
+        .expect("perf dirty texture should resolve by name");
+    let original_alpha = state
+        .widgets
+        .get(texture_id)
+        .expect("perf dirty texture should exist")
+        .alpha;
+    state
+        .widgets
+        .get_mut_visual(texture_id)
+        .expect("perf dirty texture should be mutable")
+        .alpha = (original_alpha * 0.5).max(0.1);
+
+    DirtyTextureChange {
+        texture_id,
+        original_alpha,
+    }
+}
+
+fn restore_perf_dirty_texture(state: &mut SimState, change: DirtyTextureChange) {
+    state
+        .widgets
+        .get_mut_visual(change.texture_id)
+        .expect("perf dirty texture should still be mutable")
+        .alpha = change.original_alpha;
+    let _ = state.widgets.take_render_dirty_with_ids();
+}
+
+fn emit_perf_tooltip_quads(
+    state: &SimState,
+    font_system: &mut WowFontSystem,
+    glyph_atlas: &mut GlyphAtlas,
+) {
+    let tooltip_data = collect_tooltip_data(state);
+    let tooltip_id = state
+        .widgets
+        .get_id_by_name("GameTooltip")
+        .expect("GameTooltip should exist in the settled game UI");
+    let tooltip_frame = state
+        .widgets
+        .get(tooltip_id)
+        .expect("GameTooltip frame should resolve");
+    let bounds = perf_tooltip_bounds(state, tooltip_id);
+    let mut batch = QuadBatch::new();
+    let mut text_ctx = Some((font_system, glyph_atlas));
+
+    build_tooltip_quads(
+        TooltipRender {
+            batch: &mut batch,
+            bounds,
+            tooltip_data: Some(&tooltip_data),
+            id: tooltip_id,
+            eff_alpha: tooltip_frame.alpha,
+            draw_background: true,
+        },
+        &mut text_ctx,
+    );
+
+    assert!(
+        !batch.vertices.is_empty(),
+        "perf tooltip measurement should emit tooltip quads"
+    );
+}
+
+fn perf_tooltip_bounds(state: &SimState, tooltip_id: u64) -> Rectangle {
+    let bounds = compute_frame_rect(
+        &state.widgets,
+        tooltip_id,
+        PERF_SCREEN_SIZE.0,
+        PERF_SCREEN_SIZE.1,
+    );
+    Rectangle::new(
+        Point::new(bounds.x, bounds.y),
+        Size::new(bounds.width, bounds.height),
+    )
 }
 
 fn find_player_frame_id(env: &WowLuaEnv) -> u64 {
