@@ -84,7 +84,6 @@ fn update_child_parent_link(
 fn attach_to_new_parent(widgets: &mut WidgetRegistry, child_id: u64, new_parent_id: Option<u64>) {
     if let Some(new_pid) = new_parent_id
         && let Some(new_parent) = widgets.get_mut_visual(new_pid)
-        && !new_parent.children.contains(&child_id)
     {
         new_parent.children.push(child_id);
     }
@@ -123,5 +122,67 @@ fn propagate_strata_level(widgets: &mut WidgetRegistry, root_id: u64) {
         for &grandchild_id in &children {
             queue.push((grandchild_id, child_strata, child_level));
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::reparent_widget;
+    use crate::widget::{Frame, WidgetRegistry, WidgetType};
+
+    #[test]
+    fn reparent_widget_does_not_duplicate_same_parent_child() {
+        let mut widgets = WidgetRegistry::new();
+        let parent_id = register_frame(&mut widgets, "Parent", None);
+        let child_id = register_frame(&mut widgets, "Child", Some(parent_id));
+
+        widgets
+            .get_mut_visual(parent_id)
+            .expect("parent should exist")
+            .children
+            .push(child_id);
+
+        reparent_widget(&mut widgets, child_id, Some(parent_id));
+
+        let parent = widgets.get(parent_id).expect("parent should exist");
+        assert_eq!(parent.children, vec![child_id]);
+    }
+
+    #[test]
+    fn reparent_widget_moves_child_between_parent_lists() {
+        let mut widgets = WidgetRegistry::new();
+        let old_parent_id = register_frame(&mut widgets, "OldParent", None);
+        let new_parent_id = register_frame(&mut widgets, "NewParent", None);
+        let child_id = register_frame(&mut widgets, "Child", Some(old_parent_id));
+
+        widgets
+            .get_mut_visual(old_parent_id)
+            .expect("old parent should exist")
+            .children
+            .push(child_id);
+
+        reparent_widget(&mut widgets, child_id, Some(new_parent_id));
+
+        assert!(
+            widgets
+                .get(old_parent_id)
+                .expect("old parent should exist")
+                .children
+                .is_empty()
+        );
+        assert_eq!(
+            widgets
+                .get(new_parent_id)
+                .expect("new parent should exist")
+                .children,
+            vec![child_id]
+        );
+    }
+
+    fn register_frame(widgets: &mut WidgetRegistry, name: &str, parent_id: Option<u64>) -> u64 {
+        let frame = Frame::new(WidgetType::Frame, Some(name.to_string()), parent_id);
+        let id = frame.id;
+        widgets.register(frame);
+        id
     }
 }
