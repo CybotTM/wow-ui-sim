@@ -163,37 +163,43 @@ fn resolve_top_level_value(lua: &Lua, name: &str) -> mlua::Result<Value> {
 fn build_mixin_post_init(mixin: &str) -> String {
     let mut post_init = String::new();
     for name in mixin.split(',').map(str::trim) {
-        match name {
-            "ActionBarMixin" => {
-                post_init.push_str("f.actionButtons = f.actionButtons or {} ");
-                post_init.push_str("f.shownButtonContainers = f.shownButtonContainers or {} ");
-            }
-            "EditModeSystemMixin" => {
-                for alias in [
-                    "SetScale",
-                    "SetPoint",
-                    "ClearAllPoints",
-                    "SetShown",
-                    "Show",
-                    "Hide",
-                    "IsShown",
-                ] {
-                    post_init.push_str(&format!("f.{alias}Base = f.{alias} "));
-                }
-            }
-            "EventFrameMixin" | "CallbackRegistryMixin" => {
-                post_init.push_str("if f.OnLoad_Intrinsic then pcall(f.OnLoad_Intrinsic, f) end ");
-                post_init.push_str("f.callbackTables = f.callbackTables or {} ");
-                post_init.push_str("f.executingEvents = f.executingEvents or {} ");
-            }
-            "UIParentManagedFrameContainerMixin" => {
-                post_init.push_str("f.showingFrames = f.showingFrames or {} ");
-            }
-            "TabSystemMixin" => {
-                post_init.push_str("f.tabs = f.tabs or {} ");
-            }
-            _ => {}
-        }
+        append_mixin_post_init(&mut post_init, name);
     }
     post_init
+}
+
+fn append_mixin_post_init(post_init: &mut String, name: &str) {
+    match name {
+        "ActionBarMixin" => {
+            post_init.push_str("f.actionButtons = f.actionButtons or {} ");
+            post_init.push_str("f.shownButtonContainers = f.shownButtonContainers or {} ");
+        }
+        "EditModeSystemMixin" => append_edit_mode_system_post_init(post_init),
+        "EventFrameMixin" | "CallbackRegistryMixin" => {
+            post_init.push_str("if f.OnLoad_Intrinsic then pcall(f.OnLoad_Intrinsic, f) end ");
+            post_init.push_str("f.callbackTables = f.callbackTables or {} ");
+            post_init.push_str("f.executingEvents = f.executingEvents or {} ");
+        }
+        "UIParentManagedFrameContainerMixin" => {
+            post_init.push_str("f.showingFrames = f.showingFrames or {} ");
+        }
+        "TabSystemMixin" => {
+            post_init.push_str("f.tabs = f.tabs or {} ");
+        }
+        _ => {}
+    }
+}
+
+fn append_edit_mode_system_post_init(post_init: &mut String) {
+    for alias in [
+        "SetScale",
+        "SetPoint",
+        "ClearAllPoints",
+        "SetShown",
+        "Show",
+        "Hide",
+        "IsShown",
+    ] {
+        post_init.push_str(&format!("f.{alias}Base = f.{alias} "));
+    }
 }
