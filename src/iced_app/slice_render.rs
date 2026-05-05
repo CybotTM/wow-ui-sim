@@ -65,6 +65,7 @@ pub(super) struct TileSliceRender<'a> {
 #[derive(Clone, Copy)]
 enum TileSlicePattern {
     Horizontal { tile_w: f32 },
+    Vertical { tile_h: f32 },
     Grid { tile_w: f32, tile_h: f32 },
 }
 
@@ -72,6 +73,7 @@ impl TileSlicePattern {
     fn is_valid(self) -> bool {
         match self {
             Self::Horizontal { tile_w } => tile_w > 0.0,
+            Self::Vertical { tile_h } => tile_h > 0.0,
             Self::Grid { tile_w, tile_h } => tile_w > 0.0 && tile_h > 0.0,
         }
     }
@@ -85,6 +87,10 @@ impl TileSlicePattern {
     ) -> bool {
         match self {
             Self::Horizontal { tile_w } if tile_w <= 1.0 => {
+                push_cropped_slice_quad(batch, texture, bounds, source_uvs);
+                true
+            }
+            Self::Vertical { tile_h } if tile_h <= 1.0 => {
                 push_cropped_slice_quad(batch, texture, bounds, source_uvs);
                 true
             }
@@ -113,31 +119,82 @@ impl TileSlicePattern {
         path: &str,
     ) {
         match self {
-            Self::Horizontal { tile_w } => emit_horiz_tiles(
-                batch,
-                HorizTileStrip {
-                    bounds,
-                    uvs: full_uvs,
-                    tex_path: path,
-                    tile_w,
-                    tint: texture.tint,
-                    blend: texture.blend,
-                },
-            ),
-            Self::Grid { tile_w, tile_h } => emit_grid_tiles(
-                batch,
-                GridTileStrip {
-                    bounds,
-                    uvs: full_uvs,
-                    tex_path: path,
-                    tile_w,
-                    tile_h,
-                    tint: texture.tint,
-                    blend: texture.blend,
-                },
-            ),
+            Self::Horizontal { tile_w } => {
+                emit_pattern_horiz_tiles(batch, texture, bounds, full_uvs, path, tile_w)
+            }
+            Self::Vertical { tile_h } => {
+                emit_pattern_vert_tiles(batch, texture, bounds, full_uvs, path, tile_h)
+            }
+            Self::Grid { tile_w, tile_h } => {
+                emit_pattern_grid_tiles(batch, texture, bounds, full_uvs, path, tile_w, tile_h)
+            }
         }
     }
+}
+
+fn emit_pattern_horiz_tiles(
+    batch: &mut QuadBatch,
+    texture: TexturedSlice<'_>,
+    bounds: Rectangle,
+    full_uvs: &Rectangle,
+    path: &str,
+    tile_w: f32,
+) {
+    emit_horiz_tiles(
+        batch,
+        HorizTileStrip {
+            bounds,
+            uvs: full_uvs,
+            tex_path: path,
+            tile_w,
+            tint: texture.tint,
+            blend: texture.blend,
+        },
+    );
+}
+
+fn emit_pattern_vert_tiles(
+    batch: &mut QuadBatch,
+    texture: TexturedSlice<'_>,
+    bounds: Rectangle,
+    full_uvs: &Rectangle,
+    path: &str,
+    tile_h: f32,
+) {
+    emit_vert_tiles(
+        batch,
+        VertTileStrip {
+            bounds,
+            uvs: full_uvs,
+            tex_path: path,
+            tile_h,
+            tint: texture.tint,
+            blend: texture.blend,
+        },
+    );
+}
+
+fn emit_pattern_grid_tiles(
+    batch: &mut QuadBatch,
+    texture: TexturedSlice<'_>,
+    bounds: Rectangle,
+    full_uvs: &Rectangle,
+    path: &str,
+    tile_w: f32,
+    tile_h: f32,
+) {
+    emit_grid_tiles(
+        batch,
+        GridTileStrip {
+            bounds,
+            uvs: full_uvs,
+            tex_path: path,
+            tile_w,
+            tile_h,
+            tint: texture.tint,
+            blend: texture.blend,
+        },
+    );
 }
 
 /// Render an atlas texture as 3 horizontal slices (left cap, stretched middle, right cap).
@@ -550,41 +607,7 @@ macro_rules! tiled_slice_emitter {
 }
 
 tiled_slice_emitter!(emit_horiz_tiled_slice, tile_w => TileSlicePattern::Horizontal { tile_w });
-
-fn emit_vert_tiled_slice(
-    batch: &mut QuadBatch,
-    texture: TexturedSlice<'_>,
-    bounds: Rectangle,
-    source_uvs: Rectangle,
-    tile_h: f32,
-) {
-    if bounds.width <= 0.0
-        || bounds.height <= 0.0
-        || tile_h <= 0.0
-        || source_uvs.width <= 0.0
-        || source_uvs.height <= 0.0
-    {
-        return;
-    }
-
-    if emit_unit_repeat_quad(batch, texture, bounds, source_uvs, tile_h) {
-        return;
-    }
-
-    let (path, full_uvs) = crop_flattened_subregion(texture.path, source_uvs);
-    emit_vert_tiles(
-        batch,
-        VertTileStrip {
-            bounds,
-            uvs: &full_uvs,
-            tex_path: &path,
-            tile_h,
-            tint: texture.tint,
-            blend: texture.blend,
-        },
-    );
-}
-
+tiled_slice_emitter!(emit_vert_tiled_slice, tile_h => TileSlicePattern::Vertical { tile_h });
 tiled_slice_emitter!(emit_grid_tiled_slice, tile_w, tile_h => TileSlicePattern::Grid { tile_w, tile_h });
 
 fn emit_tiled_slice(
@@ -609,20 +632,6 @@ fn emit_tiled_slice(
 
     let (path, full_uvs) = crop_flattened_subregion(texture.path, source_uvs);
     pattern.emit_tiles(batch, texture, bounds, &full_uvs, &path);
-}
-
-fn emit_unit_repeat_quad(
-    batch: &mut QuadBatch,
-    texture: TexturedSlice<'_>,
-    bounds: Rectangle,
-    source_uvs: Rectangle,
-    tile_extent: f32,
-) -> bool {
-    if tile_extent > 1.0 {
-        return false;
-    }
-    push_cropped_slice_quad(batch, texture, bounds, source_uvs);
-    true
 }
 
 pub(super) fn atlas_subregion_uvs(
