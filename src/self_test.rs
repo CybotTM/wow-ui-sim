@@ -191,36 +191,66 @@ fn debug_print(env: &WowLuaEnv) {
 /// Must be called before `run_headless_startup` so the filter is active
 /// when the test iterator first runs during OnUpdate ticks.
 pub fn inject_category_filter(env: &WowLuaEnv, categories: &str) {
-    use std::collections::HashMap;
-    let mut top: HashMap<&str, Vec<&str>> = HashMap::new();
-    for entry in categories.split(',') {
-        let entry = entry.trim();
-        if entry.is_empty() {
-            continue;
-        }
-        if let Some((cat, sub)) = entry.split_once('.') {
-            top.entry(cat).or_default().push(sub);
-        } else {
-            top.entry(entry).or_default(); // empty vec = run all
-        }
-    }
-    let mut lua_code = String::from("__wowsim_test_filter = {\n");
-    for (cat, subs) in &top {
-        if subs.is_empty() {
-            lua_code += &format!("  [\"{cat}\"] = true,\n");
-        } else {
-            lua_code += &format!("  [\"{cat}\"] = {{ ");
-            for sub in subs {
-                lua_code += &format!("[\"{sub}\"] = true, ");
-            }
-            lua_code += "},\n";
-        }
-    }
-    lua_code += "}\n";
+    let lua_code = build_category_filter_lua(categories);
     eprintln!("[self-test] category filter: {categories}");
     if let Err(e) = env.exec(&lua_code) {
         eprintln!("[self-test] failed to set category filter: {e}");
     }
+}
+
+fn build_category_filter_lua(categories: &str) -> String {
+    let filter = parse_category_filter(categories);
+    let mut lua_code = String::from("__wowsim_test_filter = {\n");
+    for (category, subcategories) in &filter {
+        append_category_filter_lua(&mut lua_code, category, subcategories);
+    }
+    lua_code += "}\n";
+    lua_code
+}
+
+fn parse_category_filter(categories: &str) -> std::collections::BTreeMap<&str, Vec<&str>> {
+    let mut filter = std::collections::BTreeMap::new();
+    for entry in categories
+        .split(',')
+        .map(str::trim)
+        .filter(|entry| !entry.is_empty())
+    {
+        add_category_filter_entry(&mut filter, entry);
+    }
+    filter
+}
+
+fn add_category_filter_entry<'a>(
+    filter: &mut std::collections::BTreeMap<&'a str, Vec<&'a str>>,
+    entry: &'a str,
+) {
+    if let Some((category, subcategory)) = entry.split_once('.') {
+        filter.entry(category).or_default().push(subcategory);
+    } else {
+        filter.entry(entry).or_default(); // empty vec = run all
+    }
+}
+
+fn append_category_filter_lua(lua_code: &mut String, category: &str, subcategories: &[&str]) {
+    lua_code.push_str("  ");
+    append_lua_table_key(lua_code, category);
+    if subcategories.is_empty() {
+        lua_code.push_str(" = true,\n");
+        return;
+    }
+
+    lua_code.push_str(" = { ");
+    for subcategory in subcategories {
+        append_lua_table_key(lua_code, subcategory);
+        lua_code.push_str(" = true, ");
+    }
+    lua_code.push_str("},\n");
+}
+
+fn append_lua_table_key(lua_code: &mut String, key: &str) {
+    lua_code.push_str("[\"");
+    lua_code.push_str(key);
+    lua_code.push_str("\"]");
 }
 
 /// Augment WowlessData with extra stubs not defined in wowless YAML.
@@ -585,5 +615,46 @@ fn report_results(env: &WowLuaEnv, completed: bool) {
     }
     if !completed {
         std::process::exit(2);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::build_category_filter_lua;
+
+    #[test]
+    fn category_filter_lua_marks_top_level_category_true() {
+        let lua_code = build_category_filter_lua("generated");
+
+        assert_eq!(
+            lua_code,
+            "__wowsim_test_filter = {\n  [\"generated\"] = true,\n}\n"
+        );
+    }
+
+    #[test]
+    fn category_filter_lua_groups_subcategories() {
+        let lua_code =
+            build_category_filter_lua("generated.globalApis, luaobjects, generated.enums");
+
+        assert_eq!(
+            lua_code,
+            concat!(
+                "__wowsim_test_filter = {\n",
+                "  [\"generated\"] = { [\"globalApis\"] = true, [\"enums\"] = true, },\n",
+                "  [\"luaobjects\"] = true,\n",
+                "}\n",
+            )
+        );
+    }
+
+    #[test]
+    fn category_filter_lua_ignores_empty_entries() {
+        let lua_code = build_category_filter_lua(" , generated.globalApis, ");
+
+        assert_eq!(
+            lua_code,
+            "__wowsim_test_filter = {\n  [\"generated\"] = { [\"globalApis\"] = true, },\n}\n"
+        );
     }
 }
