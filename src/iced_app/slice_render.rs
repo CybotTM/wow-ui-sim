@@ -14,6 +14,14 @@ use super::tiling::{
 pub(super) type TextureUvs = (f32, f32, f32, f32);
 
 #[derive(Clone, Copy)]
+struct RectGrid {
+    x: [f32; 3],
+    y: [f32; 3],
+    w: [f32; 3],
+    h: [f32; 3],
+}
+
+#[derive(Clone, Copy)]
 pub(super) struct TexturedSlice<'a> {
     pub path: &'a str,
     pub uvs: TextureUvs,
@@ -54,6 +62,84 @@ pub(super) struct TileSliceRender<'a> {
     pub atlas_height_px: f32,
 }
 
+#[derive(Clone, Copy)]
+enum TileSlicePattern {
+    Horizontal { tile_w: f32 },
+    Grid { tile_w: f32, tile_h: f32 },
+}
+
+impl TileSlicePattern {
+    fn is_valid(self) -> bool {
+        match self {
+            Self::Horizontal { tile_w } => tile_w > 0.0,
+            Self::Grid { tile_w, tile_h } => tile_w > 0.0 && tile_h > 0.0,
+        }
+    }
+
+    fn emit_collapsed_repeat(
+        self,
+        batch: &mut QuadBatch,
+        texture: TexturedSlice<'_>,
+        bounds: Rectangle,
+        source_uvs: Rectangle,
+    ) -> bool {
+        match self {
+            Self::Horizontal { tile_w } if tile_w <= 1.0 => {
+                push_cropped_slice_quad(batch, texture, bounds, source_uvs);
+                true
+            }
+            Self::Grid { tile_w, tile_h } if tile_w <= 1.0 && tile_h <= 1.0 => {
+                push_cropped_slice_quad(batch, texture, bounds, source_uvs);
+                true
+            }
+            Self::Grid { tile_w, tile_h } if tile_w <= 1.0 => {
+                emit_vert_tiled_slice(batch, texture, bounds, source_uvs, tile_h);
+                true
+            }
+            Self::Grid { tile_w, tile_h } if tile_h <= 1.0 => {
+                emit_horiz_tiled_slice(batch, texture, bounds, source_uvs, tile_w);
+                true
+            }
+            _ => false,
+        }
+    }
+
+    fn emit_tiles(
+        self,
+        batch: &mut QuadBatch,
+        texture: TexturedSlice<'_>,
+        bounds: Rectangle,
+        full_uvs: &Rectangle,
+        path: &str,
+    ) {
+        match self {
+            Self::Horizontal { tile_w } => emit_horiz_tiles(
+                batch,
+                HorizTileStrip {
+                    bounds,
+                    uvs: full_uvs,
+                    tex_path: path,
+                    tile_w,
+                    tint: texture.tint,
+                    blend: texture.blend,
+                },
+            ),
+            Self::Grid { tile_w, tile_h } => emit_grid_tiles(
+                batch,
+                GridTileStrip {
+                    bounds,
+                    uvs: full_uvs,
+                    tex_path: path,
+                    tile_w,
+                    tile_h,
+                    tint: texture.tint,
+                    blend: texture.blend,
+                },
+            ),
+        }
+    }
+}
+
 /// Render an atlas texture as 3 horizontal slices (left cap, stretched middle, right cap).
 pub(super) fn emit_three_slice_h_atlas(batch: &mut QuadBatch, render: ThreeSliceRender<'_>) {
     push_textured_rects(batch, render.texture, three_slice_rects(render));
@@ -62,47 +148,54 @@ pub(super) fn emit_three_slice_h_atlas(batch: &mut QuadBatch, render: ThreeSlice
 fn three_slice_rects(render: ThreeSliceRender<'_>) -> [(Rectangle, Rectangle); 3] {
     let bounds = render.bounds;
     let (left_uv, right_uv, top_uv, bottom_uv) = render.texture.uvs;
-    let uv_w = right_uv - left_uv;
-    let uv_h = bottom_uv - top_uv;
-    let left_frac = render.left_cap_px / render.atlas_width_px;
-    let right_frac = render.right_cap_px / render.atlas_width_px;
-
-    let left_cap_uv_end = left_uv + left_frac * uv_w;
-    let right_cap_uv_start = right_uv - right_frac * uv_w;
-
-    let mid_x = bounds.x + render.left_cap_px;
-    let mid_w = bounds.width - render.left_cap_px - render.right_cap_px;
-    let right_x = bounds.x + bounds.width - render.right_cap_px;
+    let (uv_w, uv_h) = (right_uv - left_uv, bottom_uv - top_uv);
+    let (left_cap_uv_end, right_cap_uv_start) =
+        three_slice_cap_uvs(render, left_uv, right_uv, uv_w);
+    let (mid_x, mid_w, right_x) = three_slice_dst_spans(render);
 
     [
         (
-            Rectangle::new(
-                Point::new(bounds.x, bounds.y),
-                Size::new(render.left_cap_px, bounds.height),
-            ),
-            Rectangle::new(
-                Point::new(left_uv, top_uv),
-                Size::new(left_cap_uv_end - left_uv, uv_h),
+            rect(bounds.x, bounds.y, render.left_cap_px, bounds.height),
+            rect(left_uv, top_uv, left_cap_uv_end - left_uv, uv_h),
+        ),
+        (
+            rect(mid_x, bounds.y, mid_w, bounds.height),
+            rect(
+                left_cap_uv_end,
+                top_uv,
+                right_cap_uv_start - left_cap_uv_end,
+                uv_h,
             ),
         ),
         (
-            Rectangle::new(Point::new(mid_x, bounds.y), Size::new(mid_w, bounds.height)),
-            Rectangle::new(
-                Point::new(left_cap_uv_end, top_uv),
-                Size::new(right_cap_uv_start - left_cap_uv_end, uv_h),
-            ),
-        ),
-        (
-            Rectangle::new(
-                Point::new(right_x, bounds.y),
-                Size::new(render.right_cap_px, bounds.height),
-            ),
-            Rectangle::new(
-                Point::new(right_cap_uv_start, top_uv),
-                Size::new(right_uv - right_cap_uv_start, uv_h),
+            rect(right_x, bounds.y, render.right_cap_px, bounds.height),
+            rect(
+                right_cap_uv_start,
+                top_uv,
+                right_uv - right_cap_uv_start,
+                uv_h,
             ),
         ),
     ]
+}
+
+fn three_slice_cap_uvs(
+    render: ThreeSliceRender<'_>,
+    left_uv: f32,
+    right_uv: f32,
+    uv_w: f32,
+) -> (f32, f32) {
+    let left_frac = render.left_cap_px / render.atlas_width_px;
+    let right_frac = render.right_cap_px / render.atlas_width_px;
+    (left_uv + left_frac * uv_w, right_uv - right_frac * uv_w)
+}
+
+fn three_slice_dst_spans(render: ThreeSliceRender<'_>) -> (f32, f32, f32) {
+    let bounds = render.bounds;
+    let mid_x = bounds.x + render.left_cap_px;
+    let mid_w = bounds.width - render.left_cap_px - render.right_cap_px;
+    let right_x = bounds.x + bounds.width - render.right_cap_px;
+    (mid_x, mid_w, right_x)
 }
 
 pub(super) fn emit_stretch_slice_atlas(batch: &mut QuadBatch, render: StretchSliceRender<'_>) {
@@ -160,76 +253,62 @@ fn emit_tile_slice_center(batch: &mut QuadBatch, render: TileSliceRender<'_>) {
 
 fn tile_slice_corner_rects(render: TileSliceRender<'_>) -> [(Rectangle, Rectangle); 4] {
     [
-        (
-            Rectangle::new(
-                Point::new(render.bounds.x, render.bounds.y),
-                Size::new(render.left_px, render.top_px),
-            ),
-            atlas_subregion_uvs(
-                render.texture,
-                render.atlas_width_px,
-                render.atlas_height_px,
-                0.0,
-                0.0,
-                render.left_px,
-                render.top_px,
-            ),
+        tile_slice_corner_rect(render, 0.0, 0.0, render.left_px, render.top_px),
+        tile_slice_corner_rect(
+            render,
+            render.atlas_width_px - render.right_px,
+            0.0,
+            render.right_px,
+            render.top_px,
         ),
-        (
-            Rectangle::new(
-                Point::new(
-                    render.bounds.x + render.bounds.width - render.right_px,
-                    render.bounds.y,
-                ),
-                Size::new(render.right_px, render.top_px),
-            ),
-            atlas_subregion_uvs(
-                render.texture,
-                render.atlas_width_px,
-                render.atlas_height_px,
-                render.atlas_width_px - render.right_px,
-                0.0,
-                render.right_px,
-                render.top_px,
-            ),
+        tile_slice_corner_rect(
+            render,
+            0.0,
+            render.atlas_height_px - render.bottom_px,
+            render.left_px,
+            render.bottom_px,
         ),
-        (
-            Rectangle::new(
-                Point::new(
-                    render.bounds.x,
-                    render.bounds.y + render.bounds.height - render.bottom_px,
-                ),
-                Size::new(render.left_px, render.bottom_px),
-            ),
-            atlas_subregion_uvs(
-                render.texture,
-                render.atlas_width_px,
-                render.atlas_height_px,
-                0.0,
-                render.atlas_height_px - render.bottom_px,
-                render.left_px,
-                render.bottom_px,
-            ),
-        ),
-        (
-            Rectangle::new(
-                Point::new(
-                    render.bounds.x + render.bounds.width - render.right_px,
-                    render.bounds.y + render.bounds.height - render.bottom_px,
-                ),
-                Size::new(render.right_px, render.bottom_px),
-            ),
-            atlas_subregion_uvs(
-                render.texture,
-                render.atlas_width_px,
-                render.atlas_height_px,
-                render.atlas_width_px - render.right_px,
-                render.atlas_height_px - render.bottom_px,
-                render.right_px,
-                render.bottom_px,
-            ),
+        tile_slice_corner_rect(
+            render,
+            render.atlas_width_px - render.right_px,
+            render.atlas_height_px - render.bottom_px,
+            render.right_px,
+            render.bottom_px,
         ),
     ]
+}
+
+fn tile_slice_corner_rect(
+    render: TileSliceRender<'_>,
+    source_x: f32,
+    source_y: f32,
+    width: f32,
+    height: f32,
+) -> (Rectangle, Rectangle) {
+    let dst_x = render.bounds.x + source_x.min(render.left_px);
+    let dst_y = render.bounds.y + source_y.min(render.top_px);
+    let dst_x = if source_x > render.left_px {
+        render.bounds.x + render.bounds.width - width
+    } else {
+        dst_x
+    };
+    let dst_y = if source_y > render.top_px {
+        render.bounds.y + render.bounds.height - height
+    } else {
+        dst_y
+    };
+    (
+        rect(dst_x, dst_y, width, height),
+        atlas_subregion_uvs(
+            render.texture,
+            render.atlas_width_px,
+            render.atlas_height_px,
+            source_x,
+            source_y,
+            width,
+            height,
+        ),
+    )
 }
 
 fn emit_tile_slice_horiz_edges(batch: &mut QuadBatch, render: TileSliceRender<'_>) {
@@ -237,44 +316,51 @@ fn emit_tile_slice_horiz_edges(batch: &mut QuadBatch, render: TileSliceRender<'_
         return;
     };
 
-    let top_uvs = atlas_subregion_uvs(
-        render.texture,
-        render.atlas_width_px,
-        render.atlas_height_px,
-        render.left_px,
-        0.0,
-        center_src_w,
-        render.top_px,
-    );
-    let top_bounds = Rectangle::new(
-        Point::new(render.bounds.x + render.left_px, render.bounds.y),
-        Size::new(center_dst_w, render.top_px),
-    );
-    emit_horiz_tiled_slice(batch, render.texture, top_bounds, top_uvs, center_src_w);
-
-    let bottom_uvs = atlas_subregion_uvs(
-        render.texture,
-        render.atlas_width_px,
-        render.atlas_height_px,
-        render.left_px,
-        render.atlas_height_px - render.bottom_px,
-        center_src_w,
-        render.bottom_px,
-    );
-    let bottom_bounds = Rectangle::new(
-        Point::new(
-            render.bounds.x + render.left_px,
-            render.bounds.y + render.bounds.height - render.bottom_px,
-        ),
-        Size::new(center_dst_w, render.bottom_px),
-    );
-    emit_horiz_tiled_slice(
+    emit_tile_slice_horiz_edge(
         batch,
-        render.texture,
-        bottom_bounds,
-        bottom_uvs,
+        render,
+        0.0,
+        render.bounds.y,
+        render.top_px,
+        center_dst_w,
         center_src_w,
     );
+    emit_tile_slice_horiz_edge(
+        batch,
+        render,
+        render.atlas_height_px - render.bottom_px,
+        render.bounds.y + render.bounds.height - render.bottom_px,
+        render.bottom_px,
+        center_dst_w,
+        center_src_w,
+    );
+}
+
+fn emit_tile_slice_horiz_edge(
+    batch: &mut QuadBatch,
+    render: TileSliceRender<'_>,
+    source_y: f32,
+    dst_y: f32,
+    height: f32,
+    center_dst_w: f32,
+    center_src_w: f32,
+) {
+    let edge_uvs = atlas_subregion_uvs(
+        render.texture,
+        render.atlas_width_px,
+        render.atlas_height_px,
+        render.left_px,
+        source_y,
+        center_src_w,
+        height,
+    );
+    let edge_bounds = rect(
+        render.bounds.x + render.left_px,
+        dst_y,
+        center_dst_w,
+        height,
+    );
+    emit_horiz_tiled_slice(batch, render.texture, edge_bounds, edge_uvs, center_src_w);
 }
 
 fn emit_tile_slice_vert_edges(batch: &mut QuadBatch, render: TileSliceRender<'_>) {
@@ -329,7 +415,34 @@ pub(super) fn tile_slice_center_height(render: TileSliceRender<'_>) -> Option<(f
 }
 
 fn stretch_slice_rects(render: StretchSliceRender<'_>) -> [(Rectangle, Rectangle); 9] {
+    let dst = stretch_slice_dst_grid(render);
+    let src = stretch_slice_src_grid(render);
+    grid_rect_pairs(dst, src)
+}
+
+fn stretch_slice_dst_grid(render: StretchSliceRender<'_>) -> RectGrid {
     let bounds = render.bounds;
+    let left_w = render.left_px;
+    let right_w = render.right_px;
+    let top_h = render.top_px;
+    let bottom_h = render.bottom_px;
+    RectGrid {
+        x: [
+            bounds.x,
+            bounds.x + left_w,
+            bounds.x + bounds.width - right_w,
+        ],
+        y: [
+            bounds.y,
+            bounds.y + top_h,
+            bounds.y + bounds.height - bottom_h,
+        ],
+        w: [left_w, bounds.width - left_w - right_w, right_w],
+        h: [top_h, bounds.height - top_h - bottom_h, bottom_h],
+    }
+}
+
+fn stretch_slice_src_grid(render: StretchSliceRender<'_>) -> RectGrid {
     let (left_uv, right_uv, top_uv, bottom_uv) = render.texture.uvs;
     let uv_w = right_uv - left_uv;
     let uv_h = bottom_uv - top_uv;
@@ -342,68 +455,34 @@ fn stretch_slice_rects(render: StretchSliceRender<'_>) -> [(Rectangle, Rectangle
     let u2 = right_uv - right_u;
     let v1 = top_uv + top_v;
     let v2 = bottom_uv - bottom_v;
+    RectGrid {
+        x: [left_uv, u1, u2],
+        y: [top_uv, v1, v2],
+        w: [u1 - left_uv, u2 - u1, right_uv - u2],
+        h: [v1 - top_uv, v2 - v1, bottom_uv - v2],
+    }
+}
 
-    let left_w = render.left_px;
-    let right_w = render.right_px;
-    let top_h = render.top_px;
-    let bottom_h = render.bottom_px;
-    let center_w = bounds.width - left_w - right_w;
-    let center_h = bounds.height - top_h - bottom_h;
-
-    let x0 = bounds.x;
-    let x1 = bounds.x + left_w;
-    let x2 = bounds.x + bounds.width - right_w;
-    let y0 = bounds.y;
-    let y1 = bounds.y + top_h;
-    let y2 = bounds.y + bounds.height - bottom_h;
-
+fn grid_rect_pairs(dst: RectGrid, src: RectGrid) -> [(Rectangle, Rectangle); 9] {
     [
-        (
-            Rectangle::new(Point::new(x0, y0), Size::new(left_w, top_h)),
-            Rectangle::new(
-                Point::new(left_uv, top_uv),
-                Size::new(u1 - left_uv, v1 - top_uv),
-            ),
-        ),
-        (
-            Rectangle::new(Point::new(x1, y0), Size::new(center_w, top_h)),
-            Rectangle::new(Point::new(u1, top_uv), Size::new(u2 - u1, v1 - top_uv)),
-        ),
-        (
-            Rectangle::new(Point::new(x2, y0), Size::new(right_w, top_h)),
-            Rectangle::new(
-                Point::new(u2, top_uv),
-                Size::new(right_uv - u2, v1 - top_uv),
-            ),
-        ),
-        (
-            Rectangle::new(Point::new(x0, y1), Size::new(left_w, center_h)),
-            Rectangle::new(Point::new(left_uv, v1), Size::new(u1 - left_uv, v2 - v1)),
-        ),
-        (
-            Rectangle::new(Point::new(x1, y1), Size::new(center_w, center_h)),
-            Rectangle::new(Point::new(u1, v1), Size::new(u2 - u1, v2 - v1)),
-        ),
-        (
-            Rectangle::new(Point::new(x2, y1), Size::new(right_w, center_h)),
-            Rectangle::new(Point::new(u2, v1), Size::new(right_uv - u2, v2 - v1)),
-        ),
-        (
-            Rectangle::new(Point::new(x0, y2), Size::new(left_w, bottom_h)),
-            Rectangle::new(
-                Point::new(left_uv, v2),
-                Size::new(u1 - left_uv, bottom_uv - v2),
-            ),
-        ),
-        (
-            Rectangle::new(Point::new(x1, y2), Size::new(center_w, bottom_h)),
-            Rectangle::new(Point::new(u1, v2), Size::new(u2 - u1, bottom_uv - v2)),
-        ),
-        (
-            Rectangle::new(Point::new(x2, y2), Size::new(right_w, bottom_h)),
-            Rectangle::new(Point::new(u2, v2), Size::new(right_uv - u2, bottom_uv - v2)),
-        ),
+        (grid_rect(dst, 0, 0), grid_rect(src, 0, 0)),
+        (grid_rect(dst, 1, 0), grid_rect(src, 1, 0)),
+        (grid_rect(dst, 2, 0), grid_rect(src, 2, 0)),
+        (grid_rect(dst, 0, 1), grid_rect(src, 0, 1)),
+        (grid_rect(dst, 1, 1), grid_rect(src, 1, 1)),
+        (grid_rect(dst, 2, 1), grid_rect(src, 2, 1)),
+        (grid_rect(dst, 0, 2), grid_rect(src, 0, 2)),
+        (grid_rect(dst, 1, 2), grid_rect(src, 1, 2)),
+        (grid_rect(dst, 2, 2), grid_rect(src, 2, 2)),
     ]
+}
+
+fn grid_rect(grid: RectGrid, col: usize, row: usize) -> Rectangle {
+    rect(grid.x[col], grid.y[row], grid.w[col], grid.h[row])
+}
+
+fn rect(x: f32, y: f32, width: f32, height: f32) -> Rectangle {
+    Rectangle::new(Point::new(x, y), Size::new(width, height))
 }
 
 fn push_textured_rects<const N: usize>(
@@ -444,39 +523,33 @@ fn push_cropped_slice_rects<const N: usize>(
     }
 }
 
-fn emit_horiz_tiled_slice(
-    batch: &mut QuadBatch,
-    texture: TexturedSlice<'_>,
-    bounds: Rectangle,
-    source_uvs: Rectangle,
-    tile_w: f32,
-) {
-    if bounds.width <= 0.0
-        || bounds.height <= 0.0
-        || tile_w <= 0.0
-        || source_uvs.width <= 0.0
-        || source_uvs.height <= 0.0
-    {
-        return;
-    }
-
-    if emit_unit_repeat_quad(batch, texture, bounds, source_uvs, tile_w) {
-        return;
-    }
-
-    let (path, full_uvs) = crop_flattened_subregion(texture.path, source_uvs);
-    emit_horiz_tiles(
-        batch,
-        HorizTileStrip {
-            bounds,
-            uvs: &full_uvs,
-            tex_path: &path,
-            tile_w,
-            tint: texture.tint,
-            blend: texture.blend,
-        },
-    );
+macro_rules! tiled_slice_emitter {
+    ($name:ident, $tile_w:ident => $pattern:expr) => {
+        fn $name(
+            batch: &mut QuadBatch,
+            texture: TexturedSlice<'_>,
+            bounds: Rectangle,
+            source_uvs: Rectangle,
+            $tile_w: f32,
+        ) {
+            emit_tiled_slice(batch, texture, bounds, source_uvs, $pattern);
+        }
+    };
+    ($name:ident, $tile_w:ident, $tile_h:ident => $pattern:expr) => {
+        fn $name(
+            batch: &mut QuadBatch,
+            texture: TexturedSlice<'_>,
+            bounds: Rectangle,
+            source_uvs: Rectangle,
+            $tile_w: f32,
+            $tile_h: f32,
+        ) {
+            emit_tiled_slice(batch, texture, bounds, source_uvs, $pattern);
+        }
+    };
 }
+
+tiled_slice_emitter!(emit_horiz_tiled_slice, tile_w => TileSlicePattern::Horizontal { tile_w });
 
 fn emit_vert_tiled_slice(
     batch: &mut QuadBatch,
@@ -512,41 +585,30 @@ fn emit_vert_tiled_slice(
     );
 }
 
-fn emit_grid_tiled_slice(
+tiled_slice_emitter!(emit_grid_tiled_slice, tile_w, tile_h => TileSlicePattern::Grid { tile_w, tile_h });
+
+fn emit_tiled_slice(
     batch: &mut QuadBatch,
     texture: TexturedSlice<'_>,
     bounds: Rectangle,
     source_uvs: Rectangle,
-    tile_w: f32,
-    tile_h: f32,
+    pattern: TileSlicePattern,
 ) {
     if bounds.width <= 0.0
         || bounds.height <= 0.0
-        || tile_w <= 0.0
-        || tile_h <= 0.0
+        || !pattern.is_valid()
         || source_uvs.width <= 0.0
         || source_uvs.height <= 0.0
     {
         return;
     }
 
-    if try_emit_collapsed_grid_repeat(batch, texture, bounds, source_uvs, tile_w, tile_h) {
+    if pattern.emit_collapsed_repeat(batch, texture, bounds, source_uvs) {
         return;
     }
 
     let (path, full_uvs) = crop_flattened_subregion(texture.path, source_uvs);
-    emit_grid_tiles(
-        batch,
-        GridTileStrip {
-            bounds,
-            uvs: &full_uvs,
-            tex_path: &path,
-            tile_w,
-            tile_h,
-            tint: texture.tint,
-            blend: texture.blend,
-        },
-    );
+    pattern.emit_tiles(batch, texture, bounds, &full_uvs, &path);
 }
 
 fn emit_unit_repeat_quad(
@@ -561,29 +623,6 @@ fn emit_unit_repeat_quad(
     }
     push_cropped_slice_quad(batch, texture, bounds, source_uvs);
     true
-}
-
-fn try_emit_collapsed_grid_repeat(
-    batch: &mut QuadBatch,
-    texture: TexturedSlice<'_>,
-    bounds: Rectangle,
-    source_uvs: Rectangle,
-    tile_w: f32,
-    tile_h: f32,
-) -> bool {
-    if tile_w <= 1.0 && tile_h <= 1.0 {
-        push_cropped_slice_quad(batch, texture, bounds, source_uvs);
-        return true;
-    }
-    if tile_w <= 1.0 {
-        emit_vert_tiled_slice(batch, texture, bounds, source_uvs, tile_h);
-        return true;
-    }
-    if tile_h <= 1.0 {
-        emit_horiz_tiled_slice(batch, texture, bounds, source_uvs, tile_w);
-        return true;
-    }
-    false
 }
 
 pub(super) fn atlas_subregion_uvs(
