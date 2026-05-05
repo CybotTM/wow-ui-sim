@@ -1,5 +1,6 @@
 //! Minimal `C_Tutorial` surface with per-id flag storage.
 
+use crate::lua_api::SimState;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
@@ -67,9 +68,16 @@ fn get_tutorial_status(state: &mut LuaState) -> LuaResult<u32> {
 
 fn push_seen_status(state: &mut LuaState) -> LuaResult<u32> {
     let tutorial_id = u32::from_stack(state, 1)?;
-    let seen = borrow_state(state)?.tutorial_flags.contains(&tutorial_id);
+    let seen = {
+        let sim = borrow_state(state)?;
+        has_tutorial_flag(&sim, tutorial_id)
+    };
     state.push(Val::Bool(seen));
     Ok(1)
+}
+
+fn has_tutorial_flag(sim: &SimState, tutorial_id: u32) -> bool {
+    sim.tutorial_flags.contains(&tutorial_id)
 }
 
 fn set_tutorial_flag(state: &mut LuaState) -> LuaResult<u32> {
