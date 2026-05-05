@@ -7,6 +7,13 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("WowLuaEnv init")
 }
 
+fn assert_close(actual: f64, expected: f64) {
+    assert!(
+        (actual - expected).abs() < 1e-9,
+        "expected {actual} to be close to {expected}"
+    );
+}
+
 // ── GetSpellCooldown ──────────────────────────────────────────────────────────
 
 #[test]
@@ -37,7 +44,7 @@ fn get_spell_cooldown_reads_spell_cooldowns_entry() {
         (start - now).abs() < 0.5,
         "start should match the seeded cooldown"
     );
-    assert_eq!(duration, 30.0);
+    assert_close(duration, 30.0);
 }
 
 // ── GetActionCooldown ─────────────────────────────────────────────────────────
@@ -59,7 +66,7 @@ fn get_action_cooldown_resolves_bar_slot_through_spell() {
     }
     let (_start, duration, enable, mod_rate): (f64, f64, i32, f64) =
         env.eval("return GetActionCooldown(1)").unwrap();
-    assert_eq!(duration, 15.0);
+    assert_close(duration, 15.0);
     assert_eq!(enable, 1);
     assert_eq!(mod_rate, 1.0);
 }

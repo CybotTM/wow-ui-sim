@@ -24,6 +24,7 @@ use crate::lua_api::methods::borrow_state;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+use std::collections::HashSet;
 
 fn stack_u32(state: &LuaState, index: i32) -> Option<u32> {
     match stack_val(state, index) {
@@ -132,11 +133,15 @@ fn get_spell_autocast(state: &mut LuaState) -> LuaResult<u32> {
 fn get_spell_level_learned(state: &mut LuaState) -> LuaResult<u32> {
     let spell_id = stack_u32(state, 1).unwrap_or(0);
     let level = match borrow_state(state) {
-        Ok(sim) if sim.known_spells.contains(&spell_id) => 1.0,
+        Ok(sim) if is_known_spell(&sim.known_spells, spell_id) => 1.0,
         _ => 0.0,
     };
     state.push(Val::Num(level));
     Ok(1)
+}
+
+fn is_known_spell(known_spells: &HashSet<u32>, spell_id: u32) -> bool {
+    known_spells.contains(&spell_id)
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
