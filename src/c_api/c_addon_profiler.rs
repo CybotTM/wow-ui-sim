@@ -296,13 +296,19 @@ fn push_profiler_metric(
     Ok(1)
 }
 
-fn c_addon_profiler_get_application_metric(state: &mut LuaState) -> LuaResult<u32> {
-    push_profiler_metric(state, application_metric_value)
+macro_rules! profiler_metric_method {
+    ($name:ident, $metric_value:ident) => {
+        fn $name(state: &mut LuaState) -> LuaResult<u32> {
+            push_profiler_metric(state, $metric_value)
+        }
+    };
 }
 
-fn c_addon_profiler_get_overall_metric(state: &mut LuaState) -> LuaResult<u32> {
-    push_profiler_metric(state, overall_metric_value)
-}
+profiler_metric_method!(
+    c_addon_profiler_get_application_metric,
+    application_metric_value
+);
+profiler_metric_method!(c_addon_profiler_get_overall_metric, overall_metric_value);
 
 fn c_addon_profiler_get_addon_metric(state: &mut LuaState) -> LuaResult<u32> {
     let addon_name = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
