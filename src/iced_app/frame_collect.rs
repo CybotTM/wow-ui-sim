@@ -1,5 +1,7 @@
 //! Frame collection and sorting helpers for rendering.
 
+use std::sync::LazyLock;
+
 use rustc_hash::FxHashSet;
 
 use crate::widget::{FrameStrata, WidgetType};
@@ -14,6 +16,9 @@ pub const HIT_TEST_EXCLUDED: &[&str] = &[
     "EventToastManagerFrame",
     "EditModeManagerFrame",
 ];
+
+static HIT_TEST_EXCLUDED_NAMES: LazyLock<FxHashSet<&'static str>> =
+    LazyLock::new(|| HIT_TEST_EXCLUDED.iter().copied().collect());
 
 /// Result of collecting frames for hit testing.
 ///
@@ -113,30 +118,11 @@ pub fn collect_hittable_frames(
     registry: &crate::widget::WidgetRegistry,
     strata_buckets: &[Vec<u64>],
 ) -> CollectedFrames {
-    let mut hittable: Vec<(u64, FrameStrata, i32, i32, crate::LayoutRect)> = Vec::new();
-
-    for bucket in strata_buckets {
-        for &id in bucket {
-            let Some(f) = registry.get(id) else { continue };
-            let Some(rect) = f.layout_rect else { continue };
-            if f.visible
-                && f.effective_alpha > 0.0
-                && (f.mouse_enabled || matches!(f.widget_type, WidgetType::EditBox))
-                && !f
-                    .name
-                    .as_deref()
-                    .is_some_and(|n| HIT_TEST_EXCLUDED.contains(&n))
-            {
-                hittable.push((
-                    id,
-                    f.frame_strata,
-                    effective_frame_level(f),
-                    f.frame_level,
-                    rect,
-                ));
-            }
-        }
-    }
+    let mut hittable: Vec<HittableFrameEntry> = strata_buckets
+        .iter()
+        .flat_map(|bucket| bucket.iter().copied())
+        .filter_map(|id| hittable_frame_entry(registry, id))
+        .collect();
 
     hittable.sort_by(|a, b| {
         a.1.cmp(&b.1)
@@ -151,6 +137,40 @@ pub fn collect_hittable_frames(
             .map(|(id, _, _, _, r)| (id, r))
             .collect(),
     }
+}
+
+type HittableFrameEntry = (u64, FrameStrata, i32, i32, crate::LayoutRect);
+
+fn hittable_frame_entry(
+    registry: &crate::widget::WidgetRegistry,
+    id: u64,
+) -> Option<HittableFrameEntry> {
+    let frame = registry.get(id)?;
+    let rect = frame.layout_rect?;
+
+    is_frame_hittable(frame).then(|| {
+        (
+            id,
+            frame.frame_strata,
+            effective_frame_level(frame),
+            frame.frame_level,
+            rect,
+        )
+    })
+}
+
+fn is_frame_hittable(frame: &crate::widget::Frame) -> bool {
+    frame.visible
+        && frame.effective_alpha > 0.0
+        && (frame.mouse_enabled || matches!(frame.widget_type, WidgetType::EditBox))
+        && !is_hit_test_excluded(frame)
+}
+
+fn is_hit_test_excluded(frame: &crate::widget::Frame) -> bool {
+    frame
+        .name
+        .as_deref()
+        .is_some_and(|name| HIT_TEST_EXCLUDED_NAMES.contains(name))
 }
 
 pub fn frame_accepts_mouse_button(frame: &crate::widget::Frame, button_name: &str) -> bool {
@@ -195,6 +215,23 @@ mod tests {
     use crate::widget::{Frame, WidgetRegistry, WidgetType};
 
     #[test]
+    fn excluded_overlay_names_are_not_hittable() {
+        let mut registry = WidgetRegistry::new();
+        let excluded_id = register_hittable_frame(&mut registry, "UIParent", 10);
+        let included_id = register_hittable_frame(&mut registry, "ClickableFrame", 20);
+
+        let strata_buckets = vec![vec![excluded_id, included_id]];
+        let collected = super::collect_hittable_frames(&registry, &strata_buckets);
+        let collected_ids: Vec<u64> = collected
+            .hittable
+            .into_iter()
+            .map(|(id, _rect)| id)
+            .collect();
+
+        assert_eq!(collected_ids, vec![included_id]);
+    }
+
+    #[test]
     fn later_created_regions_sort_after_earlier_regions_in_same_layer() {
         let mut registry = WidgetRegistry::new();
 
@@ -228,5 +265,19 @@ mod tests {
             first_key < second_key,
             "later-created texture should sort later/on top within the same parent layer"
         );
+    }
+
+    fn register_hittable_frame(registry: &mut WidgetRegistry, name: &str, x: i32) -> u64 {
+        let mut frame = Frame::new(WidgetType::Frame, Some(name.to_string()), None);
+        frame.mouse_enabled = true;
+        frame.layout_rect = Some(crate::LayoutRect {
+            x: x as f32,
+            y: 0.0,
+            width: 20.0,
+            height: 20.0,
+        });
+        let id = frame.id;
+        registry.register(frame);
+        id
     }
 }
