@@ -166,10 +166,7 @@ fn can_create_heirloom(sim: &SimState, item_id: u32) -> bool {
 }
 
 fn heirloom_is_collected(sim: &SimState, item_id: u32) -> bool {
-    sim.world
-        .collected_heirlooms
-        .iter()
-        .any(|collected_id| *collected_id == item_id)
+    sim.world.collected_heirlooms.contains(&item_id)
 }
 
 fn first_free_backpack_slot(sim: &SimState) -> Option<(i32, i32)> {
