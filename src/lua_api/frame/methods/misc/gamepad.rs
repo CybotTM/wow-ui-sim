@@ -32,56 +32,87 @@ pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
 }
 
 pub fn enable_game_pad_button(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let enabled = bool::from_stack(state, 2)?;
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.gamepad_button_enabled = enabled;
-    }
-    Ok(0)
+    set_game_pad_enabled(state, GamePadControl::Button)
 }
 
 pub fn enable_game_pad_stick(state: &mut LuaState) -> LuaResult<u32> {
+    set_game_pad_enabled(state, GamePadControl::Stick)
+}
+
+pub fn is_game_pad_button_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    push_game_pad_enabled(state, GamePadControl::Button)
+}
+
+pub fn is_game_pad_stick_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    push_game_pad_enabled(state, GamePadControl::Stick)
+}
+
+enum GamePadControl {
+    Button,
+    Stick,
+}
+
+fn set_game_pad_enabled(state: &mut LuaState, control: GamePadControl) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let enabled = bool::from_stack(state, 2)?;
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.gamepad_stick_enabled = enabled;
+        match control {
+            GamePadControl::Button => frame.gamepad_button_enabled = enabled,
+            GamePadControl::Stick => frame.gamepad_stick_enabled = enabled,
+        }
     }
     Ok(0)
 }
 
-pub fn is_game_pad_button_enabled(state: &mut LuaState) -> LuaResult<u32> {
+fn push_game_pad_enabled(state: &mut LuaState, control: GamePadControl) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let val = borrow_state(state)?
+    let enabled = borrow_state(state)?
         .widgets
         .get(id)
-        .map(|f| f.gamepad_button_enabled)
+        .map(|frame| match control {
+            GamePadControl::Button => frame.gamepad_button_enabled,
+            GamePadControl::Stick => frame.gamepad_stick_enabled,
+        })
         .unwrap_or(false);
-    state.push(Val::Bool(val));
-    Ok(1)
-}
-
-pub fn is_game_pad_stick_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let val = borrow_state(state)?
-        .widgets
-        .get(id)
-        .map(|f| f.gamepad_stick_enabled)
-        .unwrap_or(false);
-    state.push(Val::Bool(val));
+    state.push(Val::Bool(enabled));
     Ok(1)
 }
 
 pub fn should_button_pass_through(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let button = String::from_stack(state, 2)?;
-    let normalized = button.to_ascii_lowercase();
     let val = borrow_state(state)?
         .widgets
         .get(id)
-        .map(|f| f.pass_through_buttons.contains(&normalized))
+        .map(|frame| frame_has_pass_through_button(frame, &button))
         .unwrap_or(false);
     state.push(Val::Bool(val));
     Ok(1)
+}
+
+fn frame_has_pass_through_button(frame: &crate::widget::Frame, button: &str) -> bool {
+    if button.bytes().all(|byte| !byte.is_ascii_uppercase()) {
+        return frame.pass_through_buttons.contains(button);
+    }
+
+    frame
+        .pass_through_buttons
+        .contains(&button.to_ascii_lowercase())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::frame_has_pass_through_button;
+    use crate::widget::{Frame, WidgetType};
+
+    #[test]
+    fn frame_has_pass_through_button_matches_lowercase_and_mixed_case_names() {
+        let mut frame = Frame::new(WidgetType::Button, Some("GamePadButton".to_string()), None);
+        frame.pass_through_buttons.insert("leftbutton".to_string());
+
+        assert!(frame_has_pass_through_button(&frame, "leftbutton"));
+        assert!(frame_has_pass_through_button(&frame, "LeftButton"));
+        assert!(!frame_has_pass_through_button(&frame, "RightButton"));
+    }
 }
