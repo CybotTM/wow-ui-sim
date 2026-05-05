@@ -291,6 +291,20 @@ fn test_unit_guid_other() {
     assert_eq!(guid, "Creature-0000-00000000");
 }
 
+#[test]
+fn test_unit_guid_party_member() {
+    let env = env();
+    let guid: String = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(1)
+            return UnitGUID('party1')
+            "#,
+        )
+        .unwrap();
+    assert_eq!(guid, "Player-0000-00000002");
+}
+
 // ============================================================================
 // UnitLevel / UnitEffectiveLevel
 // ============================================================================

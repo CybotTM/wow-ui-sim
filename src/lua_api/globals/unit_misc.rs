@@ -7,6 +7,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 const SIM_REALM: &str = "SimRealm";
+const UNKNOWN_CREATURE_GUID: &str = "Creature-0000-00000000";
 
 fn unit_name_for(state: &mut LuaState, unit: &str) -> String {
     let Ok(sim) = borrow_state(state) else {
@@ -114,30 +115,39 @@ fn unit_guid(state: &mut LuaState) -> LuaResult<u32> {
         let Ok(sim) = borrow_state(state) else {
             return Ok(0);
         };
-        match unit.as_str() {
-            "player" => "Player-0000-00000001".to_string(),
-            "target" => sim
-                .current_target
-                .as_ref()
-                .map(|target| target.guid.clone())
-                .unwrap_or_else(|| "Creature-0000-00000000".to_string()),
-            "focus" => sim
-                .current_focus
-                .as_ref()
-                .map(|target| target.guid.clone())
-                .unwrap_or_else(|| "Creature-0000-00000000".to_string()),
-            other => {
-                if let Some(idx) = crate::lua_api::globals::unit_api::parse_party_index(other) {
-                    format!("Player-0000-000000{:02}", idx + 2)
-                } else {
-                    "Creature-0000-00000000".to_string()
-                }
-            }
-        }
+        guid_for_unit(&sim, &unit)
     };
     let guid = create_string(state, &guid);
     state.push(guid);
     Ok(1)
+}
+
+fn guid_for_unit(sim: &crate::lua_api::state::SimState, unit: &str) -> String {
+    match unit {
+        "player" => "Player-0000-00000001".to_string(),
+        "target" => target_guid(sim),
+        "focus" => focus_guid(sim),
+        other => party_guid_for_unit(other).unwrap_or_else(|| UNKNOWN_CREATURE_GUID.to_string()),
+    }
+}
+
+fn target_guid(sim: &crate::lua_api::state::SimState) -> String {
+    sim.current_target
+        .as_ref()
+        .map(|target| target.guid.clone())
+        .unwrap_or_else(|| UNKNOWN_CREATURE_GUID.to_string())
+}
+
+fn focus_guid(sim: &crate::lua_api::state::SimState) -> String {
+    sim.current_focus
+        .as_ref()
+        .map(|target| target.guid.clone())
+        .unwrap_or_else(|| UNKNOWN_CREATURE_GUID.to_string())
+}
+
+fn party_guid_for_unit(unit: &str) -> Option<String> {
+    crate::lua_api::globals::unit_api::parse_party_index(unit)
+        .map(|idx| format!("Player-0000-000000{:02}", idx + 2))
 }
 
 fn target_or_focus_token_from_guid(
