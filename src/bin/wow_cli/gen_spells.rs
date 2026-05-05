@@ -18,6 +18,16 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 
+const SPELL_NAME_COLUMN: usize = 1;
+const SPELL_SUBTEXT_COLUMN: usize = 1;
+const SPELL_DESCRIPTION_COLUMN: usize = 2;
+
+#[derive(Clone, Copy)]
+enum EmptySpellText {
+    Keep,
+    Skip,
+}
+
 const POWER_TYPE_NAMES: &[(&'static str, &str)] = &[
     ("-2", "HEALTH"),
     ("0", "MANA"),
@@ -348,67 +358,37 @@ fn write_literal_lines(out: &mut File, lines: &[&str]) -> std::io::Result<()> {
 }
 
 fn load_spell_names(path: &Path) -> Result<HashMap<u32, String>, Box<dyn std::error::Error>> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    let mut map = HashMap::new();
-
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
-        if i == 0 {
-            continue;
-        }
-        let fields = parse_csv_line(&line);
-        if fields.len() >= 2
-            && let Ok(id) = fields[0].parse::<u32>()
-        {
-            map.insert(id, fields[1].clone());
-        }
-    }
-    Ok(map)
+    load_spell_text_column(path, SPELL_NAME_COLUMN, EmptySpellText::Keep)
 }
 
 fn load_spell_subtexts(path: &Path) -> Result<HashMap<u32, String>, Box<dyn std::error::Error>> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    let mut map = HashMap::new();
-
-    for (i, line) in reader.lines().enumerate() {
-        let line = line?;
-        if i == 0 {
-            continue;
-        }
-        let fields = parse_csv_line(&line);
-        if fields.len() >= 2
-            && let Ok(id) = fields[0].parse::<u32>()
-        {
-            let subtext = &fields[1];
-            if !subtext.is_empty() {
-                map.insert(id, subtext.clone());
-            }
-        }
-    }
-    Ok(map)
+    load_spell_text_column(path, SPELL_SUBTEXT_COLUMN, EmptySpellText::Skip)
 }
 
 fn load_spell_descriptions(
     path: &Path,
 ) -> Result<HashMap<u32, String>, Box<dyn std::error::Error>> {
+    load_spell_text_column(path, SPELL_DESCRIPTION_COLUMN, EmptySpellText::Skip)
+}
+
+fn load_spell_text_column(
+    path: &Path,
+    value_column: usize,
+    empty_spell_text: EmptySpellText,
+) -> Result<HashMap<u32, String>, Box<dyn std::error::Error>> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     let mut map = HashMap::new();
 
-    for (i, line) in reader.lines().enumerate() {
+    for line in reader.lines().skip(1) {
         let line = line?;
-        if i == 0 {
-            continue;
-        }
         let fields = parse_csv_line(&line);
-        if fields.len() >= 3
+        if fields.len() > value_column
             && let Ok(id) = fields[0].parse::<u32>()
         {
-            let description = &fields[2];
-            if !description.is_empty() {
-                map.insert(id, description.clone());
+            let value = &fields[value_column];
+            if matches!(empty_spell_text, EmptySpellText::Keep) || !value.is_empty() {
+                map.insert(id, value.clone());
             }
         }
     }
