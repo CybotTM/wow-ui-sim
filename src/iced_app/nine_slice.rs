@@ -5,7 +5,9 @@ use iced::{Point, Rectangle, Size};
 use crate::atlas::{NineSliceAtlasInfo, NineSlicePiece};
 use crate::render::{BlendMode, QuadBatch};
 
-use super::tiling::{crop_path_for_subregion, emit_horiz_tiles, emit_vert_tiles};
+use super::tiling::{
+    HorizTileStrip, VertTileStrip, crop_path_for_subregion, emit_horiz_tiles, emit_vert_tiles,
+};
 
 /// Build a `@crop:` path for a nine-slice piece so it gets its own GPU atlas slot,
 /// preventing bilinear bleed into adjacent content in the source texture.
@@ -90,12 +92,14 @@ fn emit_horiz_edge(batch: &mut QuadBatch, bounds: Rectangle, piece: &NineSlicePi
     let (path, uvs) = crop_piece(piece);
     emit_horiz_tiles(
         batch,
-        bounds,
-        &uvs,
-        &path,
-        piece.width as f32,
-        [1.0, 1.0, 1.0, alpha],
-        BlendMode::Alpha,
+        HorizTileStrip {
+            bounds,
+            uvs: &uvs,
+            tex_path: &path,
+            tile_w: piece.width as f32,
+            tint: [1.0, 1.0, 1.0, alpha],
+            blend: BlendMode::Alpha,
+        },
     );
 }
 
@@ -135,12 +139,14 @@ fn emit_vert_edge_strip(
     let (path, uvs) = crop_piece(piece);
     emit_vert_tiles(
         batch,
-        strip,
-        &uvs,
-        &path,
-        piece.height as f32,
-        [1.0, 1.0, 1.0, alpha],
-        BlendMode::Alpha,
+        VertTileStrip {
+            bounds: strip,
+            uvs: &uvs,
+            tex_path: &path,
+            tile_h: piece.height as f32,
+            tint: [1.0, 1.0, 1.0, alpha],
+            blend: BlendMode::Alpha,
+        },
     );
 }
 

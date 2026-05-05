@@ -6,7 +6,10 @@ use iced::{Point, Rectangle, Size};
 
 use crate::render::{BlendMode, QuadBatch};
 
-use super::tiling::{emit_grid_tiles, emit_horiz_tiles, emit_vert_tiles};
+use super::tiling::{
+    GridTileStrip, HorizTileStrip, VertTileStrip, emit_grid_tiles, emit_horiz_tiles,
+    emit_vert_tiles,
+};
 
 pub(super) type TextureUvs = (f32, f32, f32, f32);
 
@@ -464,12 +467,14 @@ fn emit_horiz_tiled_slice(
     let (path, full_uvs) = crop_flattened_subregion(texture.path, source_uvs);
     emit_horiz_tiles(
         batch,
-        bounds,
-        &full_uvs,
-        &path,
-        tile_w,
-        texture.tint,
-        texture.blend,
+        HorizTileStrip {
+            bounds,
+            uvs: &full_uvs,
+            tex_path: &path,
+            tile_w,
+            tint: texture.tint,
+            blend: texture.blend,
+        },
     );
 }
 
@@ -496,12 +501,14 @@ fn emit_vert_tiled_slice(
     let (path, full_uvs) = crop_flattened_subregion(texture.path, source_uvs);
     emit_vert_tiles(
         batch,
-        bounds,
-        &full_uvs,
-        &path,
-        tile_h,
-        texture.tint,
-        texture.blend,
+        VertTileStrip {
+            bounds,
+            uvs: &full_uvs,
+            tex_path: &path,
+            tile_h,
+            tint: texture.tint,
+            blend: texture.blend,
+        },
     );
 }
 
@@ -530,13 +537,15 @@ fn emit_grid_tiled_slice(
     let (path, full_uvs) = crop_flattened_subregion(texture.path, source_uvs);
     emit_grid_tiles(
         batch,
-        bounds,
-        &full_uvs,
-        &path,
-        tile_w,
-        tile_h,
-        texture.tint,
-        texture.blend,
+        GridTileStrip {
+            bounds,
+            uvs: &full_uvs,
+            tex_path: &path,
+            tile_w,
+            tile_h,
+            tint: texture.tint,
+            blend: texture.blend,
+        },
     );
 }
 
