@@ -27,7 +27,7 @@ use crate::lua_api::globals::quest_surface::data::{
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_set,
 };
-use crate::lua_api::sim_substates::QuestLogEntry;
+use crate::lua_api::sim_substates::{QuestLogEntry, QuestLogState};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -457,12 +457,13 @@ fn is_on_quest(state: &mut LuaState) -> LuaResult<u32> {
 
 fn is_quest_flagged_completed(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = i32::from_stack(state, 1)?;
-    let flagged = borrow_state(state)?
-        .quest_log_entries
-        .completed_quest_ids
-        .contains(&quest_id);
+    let flagged = is_completed_quest_id(&borrow_state(state)?.quest_log_entries, quest_id);
     state.push(Val::Bool(flagged));
     Ok(1)
+}
+
+fn is_completed_quest_id(quest_log: &QuestLogState, quest_id: i32) -> bool {
+    quest_log.completed_quest_ids.contains(&quest_id)
 }
 
 fn is_quest_replayable(state: &mut LuaState) -> LuaResult<u32> {
