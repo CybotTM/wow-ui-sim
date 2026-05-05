@@ -3,76 +3,57 @@
 use super::helpers::{arg_bool, frame_id};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, val_to_string};
 use crate::lua_bridge::stack_val;
+use crate::widget::Frame;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub fn enable_mouse(state: &mut LuaState) -> LuaResult<u32> {
+    set_frame_input_flag(state, |frame, enable| frame.mouse_enabled = enable)
+}
+
+fn set_frame_input_flag(
+    state: &mut LuaState,
+    apply: impl FnOnce(&mut Frame, bool),
+) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let enable = arg_bool(state, 2);
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.mouse_enabled = enable;
+        apply(frame, enable);
     }
     Ok(0)
 }
 
 pub fn is_mouse_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    push_frame_input_flag(state, |frame| frame.mouse_enabled)
+}
+
+fn push_frame_input_flag(
+    state: &mut LuaState,
+    read: impl FnOnce(&Frame) -> bool,
+) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let sim = borrow_state(state)?;
-    let result = sim
-        .widgets
-        .get(id)
-        .map(|f| f.mouse_enabled)
-        .unwrap_or(false);
+    let result = sim.widgets.get(id).map(read).unwrap_or(false);
     drop(sim);
     state.push(Val::Bool(result));
     Ok(1)
 }
 
 pub fn enable_mouse_wheel(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id(state, 1)?;
-    let enable = arg_bool(state, 2);
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.mouse_wheel_enabled = enable;
-    }
-    Ok(0)
+    set_frame_input_flag(state, |frame, enable| frame.mouse_wheel_enabled = enable)
 }
 
 pub fn is_mouse_wheel_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id(state, 1)?;
-    let sim = borrow_state(state)?;
-    let result = sim
-        .widgets
-        .get(id)
-        .map(|f| f.mouse_wheel_enabled)
-        .unwrap_or(false);
-    drop(sim);
-    state.push(Val::Bool(result));
-    Ok(1)
+    push_frame_input_flag(state, |frame| frame.mouse_wheel_enabled)
 }
 
 pub fn enable_keyboard(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id(state, 1)?;
-    let enable = arg_bool(state, 2);
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut(id) {
-        f.keyboard_enabled = enable;
-    }
-    Ok(0)
+    set_frame_input_flag(state, |frame, enable| frame.keyboard_enabled = enable)
 }
 
 pub fn is_keyboard_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id(state, 1)?;
-    let sim = borrow_state(state)?;
-    let result = sim
-        .widgets
-        .get(id)
-        .map(|f| f.keyboard_enabled)
-        .unwrap_or(false);
-    drop(sim);
-    state.push(Val::Bool(result));
-    Ok(1)
+    push_frame_input_flag(state, |frame| frame.keyboard_enabled)
 }
 
 pub fn register_for_mouse(state: &mut LuaState) -> LuaResult<u32> {
@@ -105,26 +86,11 @@ fn collect_mouse_registration_args(
 }
 
 pub fn enable_mouse_motion(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id(state, 1)?;
-    let enable = arg_bool(state, 2);
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.mouse_motion_enabled = enable;
-    }
-    Ok(0)
+    set_frame_input_flag(state, |frame, enable| frame.mouse_motion_enabled = enable)
 }
 
 pub fn is_mouse_motion_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id(state, 1)?;
-    let sim = borrow_state(state)?;
-    let result = sim
-        .widgets
-        .get(id)
-        .map(|f| f.mouse_motion_enabled)
-        .unwrap_or(false);
-    drop(sim);
-    state.push(Val::Bool(result));
-    Ok(1)
+    push_frame_input_flag(state, |frame| frame.mouse_motion_enabled)
 }
 
 pub fn set_mouse_motion_enabled(state: &mut LuaState) -> LuaResult<u32> {
@@ -132,13 +98,7 @@ pub fn set_mouse_motion_enabled(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn set_mouse_click_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id(state, 1)?;
-    let enable = arg_bool(state, 2);
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.mouse_enabled = enable;
-    }
-    Ok(0)
+    enable_mouse(state)
 }
 
 pub fn is_mouse_click_enabled(state: &mut LuaState) -> LuaResult<u32> {
