@@ -555,21 +555,26 @@ fn collect_inherited_mixins(
     lookup_parent_mixin: impl Fn(&str) -> Option<String>,
 ) -> Vec<String> {
     let mut mixins = Vec::new();
+    let mut seen_mixins = HashSet::new();
     if let Some(inherits) = inherits {
         for parent_name in inherits.split(',').map(|s| s.trim()) {
             if let Some(parent_mixin) = lookup_parent_mixin(parent_name) {
-                append_unique_mixins(&mut mixins, Some(&parent_mixin));
+                append_unique_mixins(&mut mixins, &mut seen_mixins, Some(&parent_mixin));
             }
         }
     }
-    append_unique_mixins(&mut mixins, own_mixin);
+    append_unique_mixins(&mut mixins, &mut seen_mixins, own_mixin);
     mixins
 }
 
-fn append_unique_mixins(mixins: &mut Vec<String>, attr: Option<&str>) {
+fn append_unique_mixins(
+    mixins: &mut Vec<String>,
+    seen_mixins: &mut HashSet<String>,
+    attr: Option<&str>,
+) {
     let Some(attr) = attr else { return };
     for name in attr.split(',').map(|s| s.trim()) {
-        if !name.is_empty() && !mixins.contains(&name.to_string()) {
+        if !name.is_empty() && seen_mixins.insert(name.to_string()) {
             mixins.push(name.to_string());
         }
     }
