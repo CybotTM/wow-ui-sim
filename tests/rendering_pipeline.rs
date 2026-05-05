@@ -41,6 +41,11 @@ const SCROLL_KNOB: &str = "Interface/Buttons/UI-ScrollBar-Knob";
 /// Atlas-based scroll bar texture (MinimalScrollBar).
 const MINIMAL_SCROLLBAR_ATLAS: &str = "Interface/Buttons/ScrollBarProportional";
 
+const GPU_ATLAS_MEDIUM_TEXTURE_SIZE: u32 = 100;
+const GPU_ATLAS_LARGE_TEXTURE_SIZE: u32 = 200;
+const GPU_ATLAS_XL_TEXTURE_SIZE: u32 = 400;
+const GPU_ATLAS_TIER_2_CELL_SIZE: u32 = 256;
+
 // ============================================================================
 // Layer 1: TextureManager loads scroll bar textures
 // ============================================================================
@@ -595,44 +600,73 @@ fn layer5_gpu_atlas_tier_selection() {
 
     let mut atlas = GpuTextureAtlas::new(&device);
 
-    // Upload a small texture (should go to tier 0: 64x64)
+    // Upload a small texture (should go to tier 0: 64 by 64)
     let small_pixels = vec![255u8; 16 * 16 * 4];
     let small = atlas.upload(&queue, "test/small_16x16", 16, 16, &small_pixels);
     assert!(small.is_some());
     assert_eq!(
         small.unwrap().tier,
         0,
-        "16x16 texture should go to tier 0 (64x64 cells)"
+        "16 by 16 texture should go to tier 0 (64 by 64 cells)"
     );
 
-    // Upload a medium texture (should go to tier 1: 128x128)
-    let medium_pixels = vec![255u8; 100 * 100 * 4];
-    let medium = atlas.upload(&queue, "test/medium_100x100", 100, 100, &medium_pixels);
+    // Upload a medium texture (should go to tier 1: 128 by 128)
+    let medium_pixels =
+        vec![255u8; (GPU_ATLAS_MEDIUM_TEXTURE_SIZE * GPU_ATLAS_MEDIUM_TEXTURE_SIZE * 4) as usize];
+    let medium = atlas.upload(
+        &queue,
+        "test/medium_square",
+        GPU_ATLAS_MEDIUM_TEXTURE_SIZE,
+        GPU_ATLAS_MEDIUM_TEXTURE_SIZE,
+        &medium_pixels,
+    );
     assert!(medium.is_some());
     assert_eq!(
         medium.unwrap().tier,
         1,
-        "100x100 texture should go to tier 1 (128x128 cells)"
+        "{} by {} texture should go to tier 1 (128 by 128 cells)",
+        GPU_ATLAS_MEDIUM_TEXTURE_SIZE,
+        GPU_ATLAS_MEDIUM_TEXTURE_SIZE,
     );
 
-    // Upload a larger texture (should go to tier 2: 256x256)
-    let large_pixels = vec![255u8; 200 * 200 * 4];
-    let large = atlas.upload(&queue, "test/large_200x200", 200, 200, &large_pixels);
+    // Upload a larger texture (should go to tier 2)
+    let large_pixels =
+        vec![255u8; (GPU_ATLAS_LARGE_TEXTURE_SIZE * GPU_ATLAS_LARGE_TEXTURE_SIZE * 4) as usize];
+    let large = atlas.upload(
+        &queue,
+        "test/large_square",
+        GPU_ATLAS_LARGE_TEXTURE_SIZE,
+        GPU_ATLAS_LARGE_TEXTURE_SIZE,
+        &large_pixels,
+    );
     assert!(large.is_some());
     assert_eq!(
         large.unwrap().tier,
         2,
-        "200x200 texture should go to tier 2 (256x256 cells)"
+        "{} by {} texture should go to tier 2 ({} by {} cells)",
+        GPU_ATLAS_LARGE_TEXTURE_SIZE,
+        GPU_ATLAS_LARGE_TEXTURE_SIZE,
+        GPU_ATLAS_TIER_2_CELL_SIZE,
+        GPU_ATLAS_TIER_2_CELL_SIZE,
     );
 
-    // Upload an extra-large texture (should go to tier 3: 512x512)
-    let xl_pixels = vec![255u8; 400 * 400 * 4];
-    let xl = atlas.upload(&queue, "test/xl_400x400", 400, 400, &xl_pixels);
+    // Upload an extra-large texture (should go to tier 3: 512 by 512)
+    let xl_pixels =
+        vec![255u8; (GPU_ATLAS_XL_TEXTURE_SIZE * GPU_ATLAS_XL_TEXTURE_SIZE * 4) as usize];
+    let xl = atlas.upload(
+        &queue,
+        "test/xl_square",
+        GPU_ATLAS_XL_TEXTURE_SIZE,
+        GPU_ATLAS_XL_TEXTURE_SIZE,
+        &xl_pixels,
+    );
     assert!(xl.is_some());
     assert_eq!(
         xl.unwrap().tier,
         3,
-        "400x400 texture should go to tier 3 (512x512 cells)"
+        "{} by {} texture should go to tier 3 (512 by 512 cells)",
+        GPU_ATLAS_XL_TEXTURE_SIZE,
+        GPU_ATLAS_XL_TEXTURE_SIZE,
     );
 
     assert_eq!(atlas.len(), 4, "Atlas should have 4 textures");
