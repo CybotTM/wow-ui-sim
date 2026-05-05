@@ -249,7 +249,6 @@ dependencies = [
 [[package]]
 name = "asset-resolver"
 version = "0.1.0"
-source = "git+https://github.com/world-of-osso/asset-resolver?rev=327e361bd996ceaae2e45e7a4c5220e1fe7d6cd8#327e361bd996ceaae2e45e7a4c5220e1fe7d6cd8"
 dependencies = [
  "binrw",
  "cascette-client-storage",
