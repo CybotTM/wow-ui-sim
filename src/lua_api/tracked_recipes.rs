@@ -1,5 +1,7 @@
 //! Tracked recipe state for the Profession Recipe Tracker.
 
+use std::collections::HashSet;
+
 /// Recipe IDs the Profession Recipe Tracker is currently tracking,
 /// split by recraft state. WoW's `C_TradeSkillUI` keeps two distinct
 /// lists: regular crafts and recrafts, queried with `isRecrafting`.
@@ -9,6 +11,8 @@ pub struct TrackedRecipes {
     pub normal: Vec<u32>,
     /// Recipes tracked for recrafting (`isRecrafting == true`).
     pub recrafting: Vec<u32>,
+    normal_lookup: HashSet<u32>,
+    recrafting_lookup: HashSet<u32>,
 }
 
 impl TrackedRecipes {
@@ -22,7 +26,7 @@ impl TrackedRecipes {
     }
 
     /// Returns the mutable bucket for the given `isRecrafting` flag.
-    pub fn list_mut(&mut self, is_recrafting: bool) -> &mut Vec<u32> {
+    fn list_mut(&mut self, is_recrafting: bool) -> &mut Vec<u32> {
         if is_recrafting {
             &mut self.recrafting
         } else {
@@ -30,27 +34,53 @@ impl TrackedRecipes {
         }
     }
 
+    fn lookup(&self, is_recrafting: bool) -> &HashSet<u32> {
+        if is_recrafting {
+            &self.recrafting_lookup
+        } else {
+            &self.normal_lookup
+        }
+    }
+
+    fn lookup_mut(&mut self, is_recrafting: bool) -> &mut HashSet<u32> {
+        if is_recrafting {
+            &mut self.recrafting_lookup
+        } else {
+            &mut self.normal_lookup
+        }
+    }
+
     /// Whether `recipe_id` is tracked under the given `isRecrafting` flag.
     pub fn contains(&self, recipe_id: u32, is_recrafting: bool) -> bool {
-        self.list(is_recrafting).contains(&recipe_id)
+        self.lookup(is_recrafting).contains(&recipe_id)
     }
 
     /// Adds or removes a recipe from the bucket. Returns true if the
     /// list changed (i.e. SetRecipeTracked should fire `TRACKED_RECIPE_UPDATE`).
     pub fn set(&mut self, recipe_id: u32, tracked: bool, is_recrafting: bool) -> bool {
-        let bucket = self.list_mut(is_recrafting);
-        let pos = bucket.iter().position(|&r| r == recipe_id);
-        match (tracked, pos) {
-            (true, None) => {
-                bucket.push(recipe_id);
-                true
-            }
-            (false, Some(idx)) => {
-                bucket.remove(idx);
-                true
-            }
-            _ => false,
+        if tracked {
+            return self.add(recipe_id, is_recrafting);
         }
+        self.remove(recipe_id, is_recrafting)
+    }
+
+    fn add(&mut self, recipe_id: u32, is_recrafting: bool) -> bool {
+        if !self.lookup_mut(is_recrafting).insert(recipe_id) {
+            return false;
+        }
+        self.list_mut(is_recrafting).push(recipe_id);
+        true
+    }
+
+    fn remove(&mut self, recipe_id: u32, is_recrafting: bool) -> bool {
+        if !self.lookup_mut(is_recrafting).remove(&recipe_id) {
+            return false;
+        }
+        let bucket = self.list_mut(is_recrafting);
+        if let Some(idx) = bucket.iter().position(|&r| r == recipe_id) {
+            bucket.remove(idx);
+        }
+        true
     }
 }
 

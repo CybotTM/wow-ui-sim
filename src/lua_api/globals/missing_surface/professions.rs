@@ -6,10 +6,13 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
 };
 use crate::lua_api::script_helpers::{fire_named_event_state, protected_lua_pcall_state};
+use crate::lua_api::state_types::CraftingState;
+use crate::lua_api::tracked_recipes::TrackedRecipes;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::{gc::arena::GcRef, table::Table};
 use rilua::{LuaApiMut, LuaResult, Val};
+use std::collections::HashSet;
 
 const TRADE_SKILL_NAMESPACE: &str = "C_TradeSkillUI";
 const CRAFTING_ORDERS_NAMESPACE: &str = "C_CraftingOrders";
@@ -491,15 +494,23 @@ fn get_professions_global(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_profession_info_global(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1)?;
-    let Some(profession) = global_profession(index) else {
+    let Some(profession) = visible_global_profession(state, index) else {
         state.push(Val::Nil);
         return Ok(1);
     };
-    if is_profession_unlearned(state, profession.skill_line_id) {
-        state.push(Val::Nil);
-        return Ok(1);
-    }
+    push_global_profession_info(state, profession);
+    Ok(11)
+}
 
+fn visible_global_profession(
+    state: &mut LuaState,
+    index: i32,
+) -> Option<&'static profession_data::ProfessionInfo> {
+    let profession = global_profession(index)?;
+    (!is_profession_unlearned(state, profession.skill_line_id)).then_some(profession)
+}
+
+fn push_global_profession_info(state: &mut LuaState, profession: &profession_data::ProfessionInfo) {
     let name = create_string(state, profession.name);
     let icon = create_string(state, profession_icon_path(profession.profession_id));
     let skill_line_name = if profession.parent_profession_name.is_empty() {
@@ -526,7 +537,6 @@ fn get_profession_info_global(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     state.push(Val::Num(0.0));
     state.push(skill_line_name);
-    Ok(11)
 }
 
 fn c_trade_skill_ui_get_num_recipes(state: &mut LuaState) -> LuaResult<u32> {
@@ -678,9 +688,10 @@ fn c_trade_skill_ui_is_recipe_tracked(state: &mut LuaState) -> LuaResult<u32> {
     let recipe_id = u32::from_stack(state, 1)?;
     let is_recrafting = bool::from_stack(state, 2)?;
 
-    let tracked = borrow_state(state)?
-        .tracked_recipes
-        .contains(recipe_id, is_recrafting);
+    let tracked = {
+        let sim = borrow_state(state)?;
+        is_recipe_tracked(&sim.tracked_recipes, recipe_id, is_recrafting)
+    };
 
     state.push(Val::Bool(tracked));
     Ok(1)
@@ -713,12 +724,28 @@ fn c_trade_skill_ui_get_recipes_tracked(state: &mut LuaState) -> LuaResult<u32> 
 
 fn c_trade_skill_ui_is_recipe_learned(state: &mut LuaState) -> LuaResult<u32> {
     let recipe_id = i32::from_stack(state, 1)?;
-    let learned = borrow_state(state)?
-        .crafting
-        .known_recipe_ids
-        .contains(&recipe_id);
+    let learned = {
+        let sim = borrow_state(state)?;
+        is_recipe_learned(&sim.crafting, recipe_id)
+    };
     state.push(Val::Bool(learned));
     Ok(1)
+}
+
+fn is_recipe_tracked(
+    tracked_recipes: &TrackedRecipes,
+    recipe_id: u32,
+    is_recrafting: bool,
+) -> bool {
+    tracked_recipes.contains(recipe_id, is_recrafting)
+}
+
+fn is_recipe_learned(crafting: &CraftingState, recipe_id: i32) -> bool {
+    contains_recipe_id(&crafting.known_recipe_ids, recipe_id)
+}
+
+fn contains_recipe_id(recipe_ids: &HashSet<i32>, recipe_id: i32) -> bool {
+    recipe_ids.contains(&recipe_id)
 }
 
 fn c_trade_skill_ui_is_recipe_craftable(state: &mut LuaState) -> LuaResult<u32> {
