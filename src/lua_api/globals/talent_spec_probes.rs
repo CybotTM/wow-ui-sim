@@ -83,7 +83,7 @@ fn get_spell_tab_info(state: &mut LuaState) -> LuaResult<u32> {
 /// enabled / unlocked / unselected.
 fn get_pvp_talent_slot_info(state: &mut LuaState) -> LuaResult<u32> {
     let slot_index = stack_i32(state, 1).unwrap_or(0);
-    if !(1..=3).contains(&slot_index) {
+    if !is_pvp_talent_slot_index(slot_index) {
         state.push(Val::Nil);
         return Ok(1);
     }
@@ -94,6 +94,10 @@ fn get_pvp_talent_slot_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "slotIndex", Val::Num(slot_index as f64));
     state.push(info);
     Ok(1)
+}
+
+fn is_pvp_talent_slot_index(slot_index: i32) -> bool {
+    matches!(slot_index, 1..=3)
 }
 
 /// `GetArenaOpponentSpec(opponentIndex)` — the sim has no arena
