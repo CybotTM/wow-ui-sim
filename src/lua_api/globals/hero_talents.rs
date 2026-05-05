@@ -2,7 +2,7 @@
 
 use crate::lua_api::SimState;
 use crate::traits::{TRAIT_COND_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_TREE_DB};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 fn spec_id_to_spec_set(spec_id: u32) -> u32 {
     match spec_id {
@@ -62,6 +62,7 @@ pub fn auto_select_hero_spec_for_spec(
 
 pub fn selection_node_ids_for_subtree(sub_tree_id: u32) -> Vec<u32> {
     let mut node_ids = Vec::new();
+    let mut seen_node_ids = HashSet::new();
     for node in TRAIT_NODE_DB.values() {
         if node.node_type != 3 {
             continue;
@@ -70,7 +71,7 @@ pub fn selection_node_ids_for_subtree(sub_tree_id: u32) -> Vec<u32> {
             let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else {
                 continue;
             };
-            if entry.sub_tree_id == sub_tree_id && !node_ids.contains(&node.id) {
+            if entry.sub_tree_id == sub_tree_id && seen_node_ids.insert(node.id) {
                 node_ids.push(node.id);
             }
         }
