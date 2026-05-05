@@ -568,3 +568,31 @@ fn test_earn_achievement_sets_earned_and_fires_event() {
     assert!(completed);
     assert!(event_fired);
 }
+
+#[test]
+fn test_earn_achievement_does_not_fire_duplicate_event() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.EarnAchievement(6)
+        A_Admin.EarnAchievement(6)
+        "#,
+    )
+    .unwrap();
+
+    let matching_events = {
+        let state = env.state();
+        let state = state.borrow();
+        state
+            .events
+            .pending()
+            .iter()
+            .filter(|event| {
+                event.name == "ACHIEVEMENT_EARNED"
+                    && matches!(event.args.as_slice(), [EventArg::Number(id)] if *id == 6.0)
+            })
+            .count()
+    };
+
+    assert_eq!(matching_events, 1);
+}

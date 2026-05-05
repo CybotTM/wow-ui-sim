@@ -13,6 +13,7 @@ use crate::lua_api::script_helpers::get_script;
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+use std::collections::HashSet;
 
 // ── Transmog & collections ────────────────────────────────────────────────────
 
@@ -205,18 +206,24 @@ pub(super) fn set_achievement_earned(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn has_achievement(state: &mut LuaState) -> LuaResult<u32> {
     let id = i32::from_stack(state, 1)?;
-    let result = borrow_state(state)?.world.earned_achievements.contains(&id);
+    let result = is_achievement_earned(&borrow_state(state)?.world.earned_achievements, id);
     state.push(Val::Bool(result));
     Ok(1)
 }
 
+fn is_achievement_earned(earned_achievements: &HashSet<i32>, id: i32) -> bool {
+    earned_achievements.contains(&id)
+}
+
 pub(super) fn earn_achievement(state: &mut LuaState) -> LuaResult<u32> {
     let id = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?
+    let newly_earned = borrow_state_mut(state)?
         .world
         .earned_achievements
         .insert(id);
-    fire_achievement_earned(state, id);
+    if newly_earned {
+        fire_achievement_earned(state, id);
+    }
     Ok(0)
 }
 
