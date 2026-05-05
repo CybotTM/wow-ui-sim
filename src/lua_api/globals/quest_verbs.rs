@@ -31,6 +31,7 @@ use crate::lua_api::state::QuestPortraitState;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+use std::collections::HashSet;
 
 fn push_event(state: &mut LuaState, name: &str) -> LuaResult<()> {
     borrow_state_mut(state)?.events.push(Event {
@@ -71,15 +72,20 @@ fn confirm_accept_quest(state: &mut LuaState) -> LuaResult<u32> {
         let Some(id) = st.pending_quest_offer.take() else {
             return Ok(0);
         };
-        if !st.quest_log.contains(&id) {
-            st.quest_log.push(id);
-        }
+        append_quest_log_entry(&mut st.quest_log, id);
         true
     };
     if accepted {
         push_event(state, "QUEST_ACCEPTED")?;
     }
     Ok(0)
+}
+
+fn append_quest_log_entry(quest_log: &mut Vec<u32>, quest_id: u32) {
+    let mut known_quests = quest_log.iter().copied().collect::<HashSet<_>>();
+    if known_quests.insert(quest_id) {
+        quest_log.push(quest_id);
+    }
 }
 
 /// `CloseQuestFrame()` — fires `QUEST_FINISHED`. WoW also nils the pending
@@ -232,6 +238,12 @@ fn quest_frame_hide_quest_portrait(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_quest_state_verbs(lua)?;
+    register_quest_portrait_verbs(lua)?;
+    Ok(())
+}
+
+fn register_quest_state_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ConfirmAcceptQuest", confirm_accept_quest)?;
     LuaApiMut::register_function(lua, "CloseQuestFrame", close_quest_frame)?;
     LuaApiMut::register_function(
@@ -252,6 +264,10 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "SetAbandonQuest", set_abandon_quest)?;
     LuaApiMut::register_function(lua, "SetTrackedAchievement", set_tracked_achievement)?;
     LuaApiMut::register_function(lua, "UntrackAchievement", untrack_achievement)?;
+    Ok(())
+}
+
+fn register_quest_portrait_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(
         lua,
         "QuestFrame_ShowQuestPortrait",
