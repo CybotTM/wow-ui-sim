@@ -42,22 +42,28 @@ fn format_stack_values(state: &LuaState, values: &[Val]) -> String {
         if index > 0 {
             output.push('\t');
         }
-        match value {
-            Val::Nil => output.push_str("nil"),
-            Val::Bool(true) => output.push_str("true"),
-            Val::Bool(false) => output.push_str("false"),
-            Val::Num(n) => {
-                if n.fract() == 0.0 && n.abs() < 1e15 {
-                    output.push_str(&format!("{}", *n as i64));
-                } else {
-                    output.push_str(&format!("{n}"));
-                }
-            }
-            Val::Str(_) => output.push_str(&val_to_string(state, *value).unwrap_or_default()),
-            _ => output.push_str(&format!("{value:?}")),
-        }
+        output.push_str(&format_stack_value(state, *value));
     }
     output
+}
+
+fn format_stack_value(state: &LuaState, value: Val) -> String {
+    match value {
+        Val::Nil => "nil".to_string(),
+        Val::Bool(true) => "true".to_string(),
+        Val::Bool(false) => "false".to_string(),
+        Val::Num(number) => format_stack_number(number),
+        Val::Str(_) => val_to_string(state, value).unwrap_or_default(),
+        _ => format!("{value:?}"),
+    }
+}
+
+fn format_stack_number(number: f64) -> String {
+    if number.fract() == 0.0 && number.abs() < 1e15 {
+        format!("{}", number as i64)
+    } else {
+        format!("{number}")
+    }
 }
 
 fn collect_stack_values(state: &LuaState) -> Vec<Val> {
