@@ -173,32 +173,43 @@ fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_tests(out: &mut File, quest_map: &HashMap<u32, u32>) -> std::io::Result<()> {
-    writeln!(out)?;
-    writeln!(out, "#[cfg(test)]")?;
-    writeln!(out, "mod tests {{")?;
-    writeln!(out, "    use super::*;")?;
+    write_literal_lines(out, TEST_MODULE_HEADER)?;
+    write_literal_lines(out, UNKNOWN_QUEST_TEST)?;
+    write_known_quest_test(out, quest_map)?;
+    writeln!(out, "}}")?;
+    Ok(())
+}
+
+const TEST_MODULE_HEADER: &[&str] = &["", "#[cfg(test)]", "mod tests {", "    use super::*;"];
+
+const UNKNOWN_QUEST_TEST: &[&str] = &[
+    "",
+    "    #[test]",
+    "    fn test_unknown_quest_returns_zero() {",
+    "        assert_eq!(get_quest_ui_map_id(999_999_999), 0);",
+    "    }",
+];
+
+fn write_literal_lines(out: &mut File, lines: &[&str]) -> std::io::Result<()> {
+    for line in lines {
+        writeln!(out, "{line}")?;
+    }
+    Ok(())
+}
+
+fn write_known_quest_test(out: &mut File, quest_map: &HashMap<u32, u32>) -> std::io::Result<()> {
+    let Some((&quest_id, &ui_map_id)) = quest_map.iter().next() else {
+        return Ok(());
+    };
+
     writeln!(out)?;
     writeln!(out, "    #[test]")?;
-    writeln!(out, "    fn test_unknown_quest_returns_zero() {{")?;
+    writeln!(out, "    fn test_known_quest() {{")?;
     writeln!(
         out,
-        "        assert_eq!(get_quest_ui_map_id(999_999_999), 0);"
+        "        assert_eq!(get_quest_ui_map_id({}), {});",
+        quest_id, ui_map_id
     )?;
     writeln!(out, "    }}")?;
-
-    // Generate a test for the first known quest if any exist
-    if let Some((&quest_id, &ui_map_id)) = quest_map.iter().next() {
-        writeln!(out)?;
-        writeln!(out, "    #[test]")?;
-        writeln!(out, "    fn test_known_quest() {{")?;
-        writeln!(
-            out,
-            "        assert_eq!(get_quest_ui_map_id({}), {});",
-            quest_id, ui_map_id
-        )?;
-        writeln!(out, "    }}")?;
-    }
-
-    writeln!(out, "}}")?;
     Ok(())
 }
