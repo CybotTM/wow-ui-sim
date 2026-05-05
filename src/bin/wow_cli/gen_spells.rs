@@ -587,30 +587,47 @@ fn write_spell_power_arrays(
     spell_power: &HashMap<u32, Vec<SpellPowerRow>>,
 ) -> std::io::Result<()> {
     for &spell_id in spell_ids {
-        let entries = &spell_power[&spell_id];
-        writeln!(
-            out,
-            "static SPELL_POWER_{spell_id}: [SpellPowerCost; {}] = [",
-            entries.len()
-        )?;
-        for e in entries {
-            writeln!(
-                out,
-                "    SpellPowerCost {{ power_type: {}, mana_cost: {}, cost_pct: {:?}_f32, \
-                 cost_max_pct: {:?}_f32, cost_per_sec: {:?}_f32, required_aura_id: {}, \
-                 optional_cost: {} }},",
-                e.power_type,
-                e.mana_cost,
-                e.cost_pct,
-                e.cost_max_pct,
-                e.cost_per_sec,
-                e.required_aura_id,
-                e.optional_cost,
-            )?;
-        }
-        writeln!(out, "];")?;
+        write_spell_power_array(out, spell_id, &spell_power[&spell_id])?;
     }
     writeln!(out)
+}
+
+fn write_spell_power_array(
+    out: &mut File,
+    spell_id: u32,
+    entries: &[SpellPowerRow],
+) -> std::io::Result<()> {
+    writeln!(
+        out,
+        "static SPELL_POWER_{spell_id}: [SpellPowerCost; {}] = [",
+        entries.len()
+    )?;
+    write_spell_power_entries(out, entries)?;
+    writeln!(out, "];")?;
+    Ok(())
+}
+
+fn write_spell_power_entries(out: &mut File, entries: &[SpellPowerRow]) -> std::io::Result<()> {
+    for entry in entries {
+        write_spell_power_entry(out, entry)?;
+    }
+    Ok(())
+}
+
+fn write_spell_power_entry(out: &mut File, entry: &SpellPowerRow) -> std::io::Result<()> {
+    writeln!(
+        out,
+        "    SpellPowerCost {{ power_type: {}, mana_cost: {}, cost_pct: {:?}_f32, \
+         cost_max_pct: {:?}_f32, cost_per_sec: {:?}_f32, required_aura_id: {}, \
+         optional_cost: {} }},",
+        entry.power_type,
+        entry.mana_cost,
+        entry.cost_pct,
+        entry.cost_max_pct,
+        entry.cost_per_sec,
+        entry.required_aura_id,
+        entry.optional_cost,
+    )
 }
 
 fn write_spell_power_phf_map(
