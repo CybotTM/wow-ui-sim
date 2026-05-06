@@ -274,7 +274,7 @@ fn unit_max_health_modifier_value(stats: UnitStats) -> f64 {
     (stats.health_max as f64 / base_health).max(0.0)
 }
 
-fn secondary_power_max(power_type: i32) -> i32 {
+pub(crate) fn secondary_power_max(power_type: i32) -> i32 {
     match power_type {
         4 => 7,
         5 => 6,
