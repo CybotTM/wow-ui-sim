@@ -25,6 +25,12 @@ use super::env::WowLuaEnv;
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
+enum EditboxCursorTarget {
+    Delta(i32),
+    Home,
+    End,
+}
+
 /// Return `true` for any Lua value that is truthy (not nil and not false).
 fn is_truthy(val: Val) -> bool {
     !matches!(val, Val::Nil | Val::Bool(false))
@@ -470,30 +476,31 @@ impl WowLuaEnv {
 
     /// Move the cursor by `delta` characters (negative = left, positive = right).
     fn editbox_move_cursor(&self, fid: u64, delta: i32) -> Result<()> {
+        self.set_editbox_cursor(fid, EditboxCursorTarget::Delta(delta))
+    }
+
+    fn set_editbox_cursor(&self, fid: u64, target: EditboxCursorTarget) -> Result<()> {
         let mut state = self.state.borrow_mut();
         if let Some(frame) = state.widgets.get_mut(fid) {
             let char_count = editbox_text_char_count(frame);
-            let new_pos = (frame.editbox_cursor_pos + delta).clamp(0, char_count);
-            frame.editbox_cursor_pos = new_pos;
+            frame.editbox_cursor_pos = match target {
+                EditboxCursorTarget::Delta(delta) => {
+                    (frame.editbox_cursor_pos + delta).clamp(0, char_count)
+                }
+                EditboxCursorTarget::Home => 0,
+                EditboxCursorTarget::End => char_count,
+            };
         }
         Ok(())
     }
 
     /// Move the cursor to the start of text (Home key).
     fn editbox_cursor_home(&self, fid: u64) -> Result<()> {
-        let mut state = self.state.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(fid) {
-            frame.editbox_cursor_pos = 0;
-        }
-        Ok(())
+        self.set_editbox_cursor(fid, EditboxCursorTarget::Home)
     }
 
     /// Move the cursor to the end of text (End key).
     fn editbox_cursor_end(&self, fid: u64) -> Result<()> {
-        let mut state = self.state.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(fid) {
-            frame.editbox_cursor_pos = editbox_text_char_count(frame);
-        }
-        Ok(())
+        self.set_editbox_cursor(fid, EditboxCursorTarget::End)
     }
 }

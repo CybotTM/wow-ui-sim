@@ -244,6 +244,42 @@ fn editbox_backspace_removes_last_character() {
     assert_eq!(text, "hell", "Backspace should remove the last character");
 }
 
+#[test]
+fn editbox_cursor_keys_move_within_text_bounds() {
+    let env = env();
+    env.exec(
+        r#"
+        local eb = CreateFrame("EditBox", "TestCursorKeysEB", UIParent)
+        eb:SetText("hello")
+        eb:SetCursorPosition(2)
+        eb:SetFocus()
+        "#,
+    )
+    .unwrap();
+
+    env.send_key_press("LEFT", None).unwrap();
+    let left_pos: i64 = env
+        .eval(r#"return TestCursorKeysEB:GetCursorPosition()"#)
+        .unwrap();
+    env.send_key_press("RIGHT", None).unwrap();
+    let right_pos: i64 = env
+        .eval(r#"return TestCursorKeysEB:GetCursorPosition()"#)
+        .unwrap();
+    env.send_key_press("END", None).unwrap();
+    let end_pos: i64 = env
+        .eval(r#"return TestCursorKeysEB:GetCursorPosition()"#)
+        .unwrap();
+    env.send_key_press("HOME", None).unwrap();
+    let home_pos: i64 = env
+        .eval(r#"return TestCursorKeysEB:GetCursorPosition()"#)
+        .unwrap();
+
+    assert_eq!(left_pos, 1);
+    assert_eq!(right_pos, 2);
+    assert_eq!(end_pos, 5);
+    assert_eq!(home_pos, 0);
+}
+
 // ── OnKeyDown propagation ─────────────────────────────────────────────────────
 
 #[test]
