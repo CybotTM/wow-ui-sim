@@ -12,3 +12,9 @@ rustflags = ["-C", "link-arg=-Wl,--stack,33554432"]
 
 [build]
 jobs = 4
+
+[alias]
+xtask = "run --package xtask --"
+release-current = "xtask release current"
+release-windows = "xtask release windows"
+release-linux = "xtask release linux"
