@@ -622,11 +622,22 @@ fn get_activity_info_table(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     let info = create_table(state);
-    let full_name = create_string(state, &act.full_name.clone());
-    let short_name = create_string(state, &act.short_name.clone());
-    table_set(state, info, "activityID", Val::Num(activity_id as f64));
+    set_activity_identity_fields(state, info, &act);
+    set_activity_group_fields(state, info, &act);
+    set_activity_filter_fields(state, info, &act);
+    state.push(info);
+    Ok(1)
+}
+
+fn set_activity_identity_fields(state: &mut LuaState, info: Val, act: &LfgActivityInfo) {
+    let full_name = create_string(state, &act.full_name);
+    let short_name = create_string(state, &act.short_name);
+    table_set(state, info, "activityID", Val::Num(act.activity_id as f64));
     table_set(state, info, "fullName", full_name);
     table_set(state, info, "shortName", short_name);
+}
+
+fn set_activity_group_fields(state: &mut LuaState, info: Val, act: &LfgActivityInfo) {
     table_set(state, info, "categoryID", Val::Num(act.category_id as f64));
     table_set(
         state,
@@ -635,6 +646,9 @@ fn get_activity_info_table(state: &mut LuaState) -> LuaResult<u32> {
         Val::Num(act.group_id as f64),
     );
     table_set(state, info, "maxPlayers", Val::Num(act.max_players as f64));
+}
+
+fn set_activity_filter_fields(state: &mut LuaState, info: Val, act: &LfgActivityInfo) {
     table_set(
         state,
         info,
@@ -658,8 +672,6 @@ fn get_activity_info_table(state: &mut LuaState) -> LuaResult<u32> {
         Val::Num(act.item_level as f64),
     );
     table_set(state, info, "useHonorLevel", Val::Bool(act.use_honor_level));
-    state.push(info);
-    Ok(1)
 }
 
 /// `GetAvailableCategories(filters?)` → array of category IDs ordered by
