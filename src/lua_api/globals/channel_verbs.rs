@@ -256,20 +256,29 @@ fn channel_leave(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// `ChannelBan(name, player)` — ban a player from a channel, also
-/// evicting them if currently a member.
-fn channel_ban(state: &mut LuaState) -> LuaResult<u32> {
+fn mutate_channel_player(
+    state: &mut LuaState,
+    mutate: impl FnOnce(&mut ChatChannel, &str),
+) -> LuaResult<u32> {
     let (Some(channel), Some(player)) = (required_string(state, 1), required_string(state, 2))
     else {
         return Ok(0);
     };
     let mut st = borrow_state_mut(state)?;
     if let Some(ch) = ensure_channel(&mut st.chat_channels, &channel) {
-        ch.banned.insert(player.clone());
-        ch.members.remove(&player);
-        ch.moderators.remove(&player);
+        mutate(ch, &player);
     }
     Ok(0)
+}
+
+/// `ChannelBan(name, player)` — ban a player from a channel, also
+/// evicting them if currently a member.
+fn channel_ban(state: &mut LuaState) -> LuaResult<u32> {
+    mutate_channel_player(state, |ch, player| {
+        ch.banned.insert(player.to_string());
+        ch.members.remove(player);
+        ch.moderators.remove(player);
+    })
 }
 
 /// `ChannelInvite(name, player)` — add member; idempotent via BTreeSet.
@@ -289,16 +298,10 @@ fn channel_invite(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `ChannelKick(name, player)` — remove from members (no ban record).
 fn channel_kick(state: &mut LuaState) -> LuaResult<u32> {
-    let (Some(channel), Some(player)) = (required_string(state, 1), required_string(state, 2))
-    else {
-        return Ok(0);
-    };
-    let mut st = borrow_state_mut(state)?;
-    if let Some(ch) = ensure_channel(&mut st.chat_channels, &channel) {
-        ch.members.remove(&player);
-        ch.moderators.remove(&player);
-    }
-    Ok(0)
+    mutate_channel_player(state, |ch, player| {
+        ch.members.remove(player);
+        ch.moderators.remove(player);
+    })
 }
 
 /// `ChannelModerator(name, player)` — grant moderator; player must be a
@@ -319,15 +322,9 @@ fn channel_moderator(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `ChannelUnmoderator(name, player)` — revoke moderator.
 fn channel_unmoderator(state: &mut LuaState) -> LuaResult<u32> {
-    let (Some(channel), Some(player)) = (required_string(state, 1), required_string(state, 2))
-    else {
-        return Ok(0);
-    };
-    let mut st = borrow_state_mut(state)?;
-    if let Some(ch) = ensure_channel(&mut st.chat_channels, &channel) {
-        ch.moderators.remove(&player);
-    }
-    Ok(0)
+    mutate_channel_player(state, |ch, player| {
+        ch.moderators.remove(player);
+    })
 }
 
 /// `SwapChatChannelLinks(a, b)` — swap channels at positions a and b
@@ -367,6 +364,14 @@ fn register_channel_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
 
 fn register_chat_info_namespace(state: &mut LuaState) -> LuaResult<()> {
     let chat_info = ensure_namespace(state, "C_ChatInfo");
+    register_chat_info_lookup_functions(state, chat_info)?;
+    register_chat_info_regional_functions(state, chat_info)
+}
+
+fn register_chat_info_lookup_functions(
+    state: &mut LuaState,
+    chat_info: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         chat_info,
@@ -391,7 +396,13 @@ fn register_chat_info_namespace(state: &mut LuaState) -> LuaResult<()> {
         chat_info,
         "GetGeneralChannelID",
         get_general_channel_local_id,
-    )?;
+    )
+}
+
+fn register_chat_info_regional_functions(
+    state: &mut LuaState,
+    chat_info: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(state, chat_info, "IsChannelRegional", is_channel_regional)?;
     table_set_rust_fn_static(
         state,
