@@ -68,6 +68,19 @@ fn try_build_global_method_global_arg_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = try_build_global_method_global_bool_variant(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = try_build_global_method_global_nil_bool_variant(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    try_build_global_method_four_global_variant(state, handler_ref)
+}
+
+fn try_build_global_method_global_bool_variant(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::GlobalMethodWithGlobalThreeGlobalBoolArgs {
             target_path,
@@ -88,6 +101,15 @@ fn try_build_global_method_global_arg_variants(
             *fifth,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_global_method_global_nil_bool_variant(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalMethodWithGlobalNilNilNilNilBoolArgs {
             target_path,
             method_name,
@@ -101,6 +123,15 @@ fn try_build_global_method_global_arg_variants(
             *sixth,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_global_method_four_global_variant(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalMethodWithFourGlobalArgs {
             target_path,
             method_name,
@@ -126,50 +157,131 @@ fn try_build_global_method_function_result_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
-    match handler_ref {
-        FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
+    let Some(variant) = function_result_variant(handler_ref) else {
+        return Ok(None);
+    };
+    build_function_result_variant(state, variant)
+}
+
+fn function_result_variant<'a>(
+    handler_ref: &'a FastHandlerRef<'a>,
+) -> Option<FunctionResultVariant<'a>> {
+    string_function_result_variant(handler_ref)
+        .or_else(|| global_function_result_variant(handler_ref))
+}
+
+fn string_function_result_variant<'a>(
+    handler_ref: &'a FastHandlerRef<'a>,
+) -> Option<FunctionResultVariant<'a>> {
+    let FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
+        target_path,
+        method_name,
+        function_name,
+        first,
+        second,
+        third,
+        fourth,
+        fifth,
+    } = handler_ref
+    else {
+        return None;
+    };
+    Some(FunctionResultVariant::new(
+        target_path,
+        method_name,
+        function_name,
+        FunctionResultFirstArg::Literal(first),
+        second,
+        (*third, *fourth, *fifth),
+    ))
+}
+
+fn global_function_result_variant<'a>(
+    handler_ref: &'a FastHandlerRef<'a>,
+) -> Option<FunctionResultVariant<'a>> {
+    let FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs {
+        target_path,
+        method_name,
+        function_name,
+        first_arg_path,
+        second,
+        third,
+        fourth,
+        fifth,
+    } = handler_ref
+    else {
+        return None;
+    };
+    Some(FunctionResultVariant::new(
+        target_path,
+        method_name,
+        function_name,
+        FunctionResultFirstArg::Global(first_arg_path),
+        second,
+        (*third, *fourth, *fifth),
+    ))
+}
+
+struct FunctionResultVariant<'a> {
+    target_path: &'a str,
+    method_name: &'a str,
+    function_name: &'a str,
+    first_arg: FunctionResultFirstArg<'a>,
+    second: &'a str,
+    numbers: (f64, f64, f64),
+}
+
+impl<'a> FunctionResultVariant<'a> {
+    fn new(
+        target_path: &'a str,
+        method_name: &'a str,
+        function_name: &'a str,
+        first_arg: FunctionResultFirstArg<'a>,
+        second: &'a str,
+        numbers: (f64, f64, f64),
+    ) -> Self {
+        Self {
             target_path,
             method_name,
             function_name,
-            first,
+            first_arg,
             second,
-            third,
-            fourth,
-            fifth,
-        } => build_global_method_with_string_string_function_result_and_three_number_args_handler(
-            state,
-            target_path,
-            method_name,
-            function_name,
-            first,
-            second,
-            *third,
-            *fourth,
-            *fifth,
-        )
-        .map(Some),
-        FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs {
-            target_path,
-            method_name,
-            function_name,
-            first_arg_path,
-            second,
-            third,
-            fourth,
-            fifth,
-        } => build_global_method_with_global_string_function_result_and_three_number_args_handler(
-            state,
-            target_path,
-            method_name,
-            function_name,
-            first_arg_path,
-            second,
-            *third,
-            *fourth,
-            *fifth,
-        )
-        .map(Some),
-        _ => Ok(None),
+            numbers,
+        }
+    }
+}
+
+enum FunctionResultFirstArg<'a> {
+    Literal(&'a str),
+    Global(&'a str),
+}
+
+fn build_function_result_variant(
+    state: &mut LuaState,
+    variant: FunctionResultVariant<'_>,
+) -> LuaResult<Option<Val>> {
+    let first = resolve_function_result_first_arg(state, variant.first_arg);
+    build_global_method_with_function_result_and_three_number_args_handler(
+        state,
+        variant.target_path,
+        variant.method_name,
+        variant.function_name,
+        first,
+        variant.second,
+        variant.numbers.0,
+        variant.numbers.1,
+        variant.numbers.2,
+    )
+    .map(Some)
+}
+
+fn resolve_function_result_first_arg(
+    state: &mut LuaState,
+    first_arg: FunctionResultFirstArg<'_>,
+) -> Val {
+    match first_arg {
+        FunctionResultFirstArg::Literal(value) => create_string(state, value),
+        FunctionResultFirstArg::Global(path) => resolve_global_path(state, path),
     }
 }
 
@@ -383,29 +495,7 @@ fn build_global_method_with_global_self_method_self_method_bool_args_handler(
     );
     let builder = load_template(
         state,
-        r#"
-            local target_path, method_name, first_path, second_method, third_method, fourth = ...
-            local function resolve_global(path)
-                local value = _G
-                for segment in string.gmatch(path, "[^%.]+") do
-                    value = value and value[segment]
-                end
-                return value
-            end
-            return function(self, ...)
-                local target = resolve_global(target_path)
-                if not target then
-                    return
-                end
-                return target[method_name](
-                    target,
-                    resolve_global(first_path),
-                    self[second_method](self),
-                    self[third_method](self),
-                    fourth
-                )
-            end
-        "#,
+        global_self_method_bool_template(),
         "template-global-method-global-self-method-self-method-bool-args",
     )?;
     crate::lua_api::methods::call_function_state(
@@ -434,54 +524,38 @@ fn build_global_self_method_bool_args(
     ]
 }
 
-fn build_global_method_with_string_string_function_result_and_three_number_args_handler(
-    state: &mut LuaState,
-    target_path: &str,
-    method_name: &str,
-    function_name: &str,
-    first: &str,
-    second: &str,
-    third: f64,
-    fourth: f64,
-    fifth: f64,
-) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local target, method_name, fn, first, second, third, fourth, fifth = ...
-            return function(self, ...)
-                return target[method_name](target, fn(first, second), third, fourth, fifth)
+fn global_self_method_bool_template() -> &'static str {
+    r#"
+        local target_path, method_name, first_path, second_method, third_method, fourth = ...
+        local function resolve_global(path)
+            local value = _G
+            for segment in string.gmatch(path, "[^%.]+") do
+                value = value and value[segment]
             end
-        "#,
-        "template-global-method-string-string-function-result-three-number-args",
-    )?;
-    let target = resolve_global_path(state, target_path);
-    let method_name = create_string(state, method_name);
-    let function_name = resolve_global_path(state, function_name);
-    let first = create_string(state, first);
-    let second = create_string(state, second);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[
-            target,
-            method_name,
-            function_name,
-            first,
-            second,
-            Val::Num(third),
-            Val::Num(fourth),
-            Val::Num(fifth),
-        ],
-    )
+            return value
+        end
+        return function(self, ...)
+            local target = resolve_global(target_path)
+            if not target then
+                return
+            end
+            return target[method_name](
+                target,
+                resolve_global(first_path),
+                self[second_method](self),
+                self[third_method](self),
+                fourth
+            )
+        end
+    "#
 }
 
-fn build_global_method_with_global_string_function_result_and_three_number_args_handler(
+fn build_global_method_with_function_result_and_three_number_args_handler(
     state: &mut LuaState,
     target_path: &str,
     method_name: &str,
     function_name: &str,
-    first_arg_path: &str,
+    first: Val,
     second: &str,
     third: f64,
     fourth: f64,
@@ -495,12 +569,11 @@ fn build_global_method_with_global_string_function_result_and_three_number_args_
                 return target[method_name](target, fn(first, second), third, fourth, fifth)
             end
         "#,
-        "template-global-method-global-string-function-result-three-number-args",
+        "template-global-method-function-result-three-number-args",
     )?;
     let target = resolve_global_path(state, target_path);
     let method_name = create_string(state, method_name);
     let function_name = resolve_global_path(state, function_name);
-    let first = resolve_global_path(state, first_arg_path);
     let second = create_string(state, second);
     crate::lua_api::methods::call_function_state(
         state,
