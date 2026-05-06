@@ -241,6 +241,21 @@ fn delete_cursor_item_clears_cursor() {
     assert!(env.state().borrow().cursor_item.is_none());
 }
 
+#[test]
+fn clear_cursor_clears_cursor() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.cursor_item = Some(CursorInfo::Item {
+            item_id: 42,
+            stack_count: 1,
+            origin: CursorItemOrigin::Unknown,
+        });
+    }
+    env.exec("ClearCursor()").unwrap();
+    assert!(env.state().borrow().cursor_item.is_none());
+}
+
 // ── PlaceAction ───────────────────────────────────────────────────────────────
 
 #[test]

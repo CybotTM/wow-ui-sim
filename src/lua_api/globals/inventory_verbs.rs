@@ -329,17 +329,15 @@ fn equip_cursor_item(state: &mut LuaState) -> LuaResult<u32> {
 /// `DeleteCursorItem()` — clear the cursor. If the cursor was carrying a
 /// bag item, it is NOT returned to the bag (deletion semantics).
 fn delete_cursor_item(state: &mut LuaState) -> LuaResult<u32> {
-    let Ok(mut st) = borrow_state_mut(state) else {
-        return Ok(0);
-    };
-    st.cursor_item = None;
-    drop(st);
-    fire_named_event(state, "CURSOR_CHANGED");
-    Ok(0)
+    clear_cursor_payload(state)
 }
 
 /// `ClearCursor()` — clear any cursor payload and fire `CURSOR_CHANGED`.
 fn clear_cursor(state: &mut LuaState) -> LuaResult<u32> {
+    clear_cursor_payload(state)
+}
+
+fn clear_cursor_payload(state: &mut LuaState) -> LuaResult<u32> {
     let Ok(mut st) = borrow_state_mut(state) else {
         return Ok(0);
     };
