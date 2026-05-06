@@ -13,6 +13,7 @@
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_bridge::{FromStack, stack_val};
+use rilua::vm::closure::RustFn;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -21,6 +22,16 @@ const CVAR_BITS_PER_BYTE: usize = 6;
 const CVAR_DATA_MASK: u8 = 0x3F;
 const CVAR_DATA_TAG: u8 = 0x40;
 const DEFAULT_CVAR_BITFIELD_VERSION: u8 = b'0';
+const C_CVAR_FUNCTIONS: &[(&str, RustFn)] = &[
+    ("GetCVar", get_cvar),
+    ("SetCVar", set_cvar),
+    ("GetCVarBool", get_cvar_bool),
+    ("GetCVarDefault", get_cvar_default),
+    ("RegisterCVar", register_cvar),
+    ("GetCVarBitfield", get_cvar_bitfield),
+    ("SetCVarBitfield", set_cvar_bitfield),
+    ("ResetTestCVars", reset_test_cvars),
+];
 
 fn required_string(state: &mut LuaState, index: i32) -> Option<String> {
     Option::<String>::from_stack(state, index)
@@ -80,23 +91,29 @@ fn register_cvar(state: &mut LuaState) -> LuaResult<u32> {
 /// Returns nil for unknown names, matching retail's behaviour for
 /// CVars that haven't been registered.
 fn get_cvar(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(name) = required_string(state, 1) else {
-        state.push(Val::Nil);
-        return Ok(1);
-    };
-    let value = borrow_state(state)?.cvars.get(&name);
-    push_optional_string(state, value);
-    Ok(1)
+    push_cvar_string(state, CvarStringSource::Current)
 }
 
 /// `GetCVarDefault(name)` — read the YAML/factory default for `name`,
 /// ignoring any session override.
 fn get_cvar_default(state: &mut LuaState) -> LuaResult<u32> {
+    push_cvar_string(state, CvarStringSource::Default)
+}
+
+enum CvarStringSource {
+    Current,
+    Default,
+}
+
+fn push_cvar_string(state: &mut LuaState, source: CvarStringSource) -> LuaResult<u32> {
     let Some(name) = required_string(state, 1) else {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let value = borrow_state(state)?.cvars.get_default(&name);
+    let value = match source {
+        CvarStringSource::Current => borrow_state(state)?.cvars.get(&name),
+        CvarStringSource::Default => borrow_state(state)?.cvars.get_default(&name),
+    };
     push_optional_string(state, value);
     Ok(1)
 }
@@ -233,34 +250,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn install_c_cvar_namespace(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let table_ref = ensure_c_cvar_table(state);
-    crate::lua_bridge::table_set_rust_fn_static(state, table_ref, "GetCVar", get_cvar)?;
-    crate::lua_bridge::table_set_rust_fn_static(state, table_ref, "SetCVar", set_cvar)?;
-    crate::lua_bridge::table_set_rust_fn_static(state, table_ref, "GetCVarBool", get_cvar_bool)?;
-    crate::lua_bridge::table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetCVarDefault",
-        get_cvar_default,
-    )?;
-    crate::lua_bridge::table_set_rust_fn_static(state, table_ref, "RegisterCVar", register_cvar)?;
-    crate::lua_bridge::table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetCVarBitfield",
-        get_cvar_bitfield,
-    )?;
-    crate::lua_bridge::table_set_rust_fn_static(
-        state,
-        table_ref,
-        "SetCVarBitfield",
-        set_cvar_bitfield,
-    )?;
-    crate::lua_bridge::table_set_rust_fn_static(
-        state,
-        table_ref,
-        "ResetTestCVars",
-        reset_test_cvars,
-    )?;
+    for &(name, func) in C_CVAR_FUNCTIONS {
+        crate::lua_bridge::table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
     Ok(())
 }
 
