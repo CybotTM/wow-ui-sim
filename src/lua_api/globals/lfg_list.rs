@@ -10,7 +10,9 @@ use crate::lua_api::methods::{
     table_set,
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
-use crate::lua_api::state_types::{LfgActivityInfo, LfgApplication, PendingTimer, PremadeListing};
+use crate::lua_api::state_types::{
+    LfgActivityInfo, LfgApplication, LfgCategoryInfo, PendingTimer, PremadeListing,
+};
 use crate::lua_api::{next_timer_id, timer_layout};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::closure::{Closure, RustClosure};
@@ -715,41 +717,49 @@ fn get_lfg_category_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
     let t = create_table(state);
+    set_lfg_category_info_fields(state, t, &info);
+    state.push(t);
+    Ok(1)
+}
+
+fn set_lfg_category_info_fields(state: &mut LuaState, table: Val, info: &LfgCategoryInfo) {
     let name = create_string(state, &info.name);
-    table_set(state, t, "name", name);
+    table_set(state, table, "name", name);
+    set_lfg_category_info_flags(state, table, info);
+    table_set(state, table, "searchPromptOverride", Val::Nil);
+}
+
+fn set_lfg_category_info_flags(state: &mut LuaState, table: Val, info: &LfgCategoryInfo) {
     table_set(
         state,
-        t,
+        table,
         "separateRecommended",
         Val::Bool(info.separate_recommended),
     );
     table_set(
         state,
-        t,
+        table,
         "preferCurrentArea",
         Val::Bool(info.prefer_current_area),
     );
     table_set(
         state,
-        t,
+        table,
         "allowCrossFaction",
         Val::Bool(info.allow_cross_faction),
     );
     table_set(
         state,
-        t,
+        table,
         "autoChooseActivity",
         Val::Bool(info.auto_choose_activity),
     );
     table_set(
         state,
-        t,
+        table,
         "showPlaystyleDropdown",
         Val::Bool(info.show_playstyle_dropdown),
     );
-    table_set(state, t, "searchPromptOverride", Val::Nil);
-    state.push(t);
-    Ok(1)
 }
 
 /// `GetAvailableActivityGroups(categoryID, filters?)` → array of groupIDs.
