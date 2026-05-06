@@ -2,6 +2,7 @@
 
 pub mod blizzard_addon_harness;
 pub mod blizzard_addon_manifest;
+pub mod keybinding_panel_fixtures;
 pub mod panel_fixtures;
 
 use rilua::Val;
