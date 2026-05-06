@@ -682,69 +682,7 @@ fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_>) {
 }
 
 fn patch_uiparent_onupdate_worklists(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if type(FCF_OnUpdate) == "function" and rawget(_G, "__wow_fcf_onupdate_wrapper") ~= FCF_OnUpdate then
-            local original_fcf_onupdate = FCF_OnUpdate
-            local wrapper = function(elapsed)
-                if type(CHAT_FRAMES) == "table" and next(CHAT_FRAMES) == nil then
-                    return
-                end
-                return original_fcf_onupdate(elapsed)
-            end
-            FCF_OnUpdate = wrapper
-            rawset(_G, "__wow_fcf_onupdate_wrapper", wrapper)
-        end
-
-        if type(ButtonPulse_OnUpdate) == "function" and rawget(_G, "__wow_button_pulse_onupdate_wrapper") ~= ButtonPulse_OnUpdate then
-            local original_button_pulse_onupdate = ButtonPulse_OnUpdate
-            local wrapper = function(elapsed)
-                if type(PULSEBUTTONS) == "table" and next(PULSEBUTTONS) == nil then
-                    return
-                end
-                return original_button_pulse_onupdate(elapsed)
-            end
-            ButtonPulse_OnUpdate = wrapper
-            rawset(_G, "__wow_button_pulse_onupdate_wrapper", wrapper)
-        end
-
-        if type(AnimatedShine_OnUpdate) == "function" and rawget(_G, "__wow_animated_shine_onupdate_wrapper") ~= AnimatedShine_OnUpdate then
-            local original_animated_shine_onupdate = AnimatedShine_OnUpdate
-            local wrapper = function(elapsed)
-                if type(SHINES_TO_ANIMATE) == "table" and next(SHINES_TO_ANIMATE) == nil then
-                    return
-                end
-                return original_animated_shine_onupdate(elapsed)
-            end
-            AnimatedShine_OnUpdate = wrapper
-            rawset(_G, "__wow_animated_shine_onupdate_wrapper", wrapper)
-        end
-
-        if type(UIParent) == "table"
-            and type(UIParent.GetScript) == "function"
-            and type(UIParent.SetScript) == "function" then
-            local wrapper = rawget(_G, "__wow_ui_parent_onupdate_worklist_wrapper")
-            if UIParent:GetScript("OnUpdate") ~= wrapper then
-                wrapper = function(self, elapsed)
-                    if type(CHAT_FRAMES) ~= "table" or next(CHAT_FRAMES) ~= nil then
-                        FCF_OnUpdate(elapsed)
-                    end
-                    if type(PULSEBUTTONS) ~= "table" or next(PULSEBUTTONS) ~= nil then
-                        ButtonPulse_OnUpdate(elapsed)
-                    end
-                    if type(SHINES_TO_ANIMATE) ~= "table" or next(SHINES_TO_ANIMATE) ~= nil then
-                        AnimatedShine_OnUpdate(elapsed)
-                    end
-                    if type(HelpOpenWebTicketButton_OnUpdate) == "function" then
-                        HelpOpenWebTicketButton_OnUpdate(HelpOpenWebTicketButton, elapsed)
-                    end
-                end
-                UIParent:SetScript("OnUpdate", wrapper)
-                rawset(_G, "__wow_ui_parent_onupdate_worklist_wrapper", wrapper)
-            end
-        end
-        "#,
-    );
+    let _ = env.exec(UIPARENT_ONUPDATE_WORKLISTS_WORKAROUND_LUA);
 }
 
 fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {
@@ -2932,6 +2870,68 @@ for _, mapName in ipairs({"WorldMapFrame", "BattlefieldMapFrame", "FlightMapFram
     end
 end
 "###;
+
+const UIPARENT_ONUPDATE_WORKLISTS_WORKAROUND_LUA: &str = r#"
+if type(FCF_OnUpdate) == "function" and rawget(_G, "__wow_fcf_onupdate_wrapper") ~= FCF_OnUpdate then
+    local original_fcf_onupdate = FCF_OnUpdate
+    local wrapper = function(elapsed)
+        if type(CHAT_FRAMES) == "table" and next(CHAT_FRAMES) == nil then
+            return
+        end
+        return original_fcf_onupdate(elapsed)
+    end
+    FCF_OnUpdate = wrapper
+    rawset(_G, "__wow_fcf_onupdate_wrapper", wrapper)
+end
+
+if type(ButtonPulse_OnUpdate) == "function" and rawget(_G, "__wow_button_pulse_onupdate_wrapper") ~= ButtonPulse_OnUpdate then
+    local original_button_pulse_onupdate = ButtonPulse_OnUpdate
+    local wrapper = function(elapsed)
+        if type(PULSEBUTTONS) == "table" and next(PULSEBUTTONS) == nil then
+            return
+        end
+        return original_button_pulse_onupdate(elapsed)
+    end
+    ButtonPulse_OnUpdate = wrapper
+    rawset(_G, "__wow_button_pulse_onupdate_wrapper", wrapper)
+end
+
+if type(AnimatedShine_OnUpdate) == "function" and rawget(_G, "__wow_animated_shine_onupdate_wrapper") ~= AnimatedShine_OnUpdate then
+    local original_animated_shine_onupdate = AnimatedShine_OnUpdate
+    local wrapper = function(elapsed)
+        if type(SHINES_TO_ANIMATE) == "table" and next(SHINES_TO_ANIMATE) == nil then
+            return
+        end
+        return original_animated_shine_onupdate(elapsed)
+    end
+    AnimatedShine_OnUpdate = wrapper
+    rawset(_G, "__wow_animated_shine_onupdate_wrapper", wrapper)
+end
+
+if type(UIParent) == "table"
+    and type(UIParent.GetScript) == "function"
+    and type(UIParent.SetScript) == "function" then
+    local wrapper = rawget(_G, "__wow_ui_parent_onupdate_worklist_wrapper")
+    if UIParent:GetScript("OnUpdate") ~= wrapper then
+        wrapper = function(self, elapsed)
+            if type(CHAT_FRAMES) ~= "table" or next(CHAT_FRAMES) ~= nil then
+                FCF_OnUpdate(elapsed)
+            end
+            if type(PULSEBUTTONS) ~= "table" or next(PULSEBUTTONS) ~= nil then
+                ButtonPulse_OnUpdate(elapsed)
+            end
+            if type(SHINES_TO_ANIMATE) ~= "table" or next(SHINES_TO_ANIMATE) ~= nil then
+                AnimatedShine_OnUpdate(elapsed)
+            end
+            if type(HelpOpenWebTicketButton_OnUpdate) == "function" then
+                HelpOpenWebTicketButton_OnUpdate(HelpOpenWebTicketButton, elapsed)
+            end
+        end
+        UIParent:SetScript("OnUpdate", wrapper)
+        rawset(_G, "__wow_ui_parent_onupdate_worklist_wrapper", wrapper)
+    end
+end
+"#;
 
 const POST_EVENT_FRAME_LAYOUT_WORKAROUND_LUA: &str = r#"
 local function reanchor_objective_tracker(frame)
