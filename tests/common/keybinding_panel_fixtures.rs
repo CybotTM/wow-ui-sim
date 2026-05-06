@@ -3,6 +3,11 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+#[path = "token_ui_fixtures.rs"]
+mod token_ui_fixtures;
+
+use token_ui_fixtures::load_token_ui;
+
 pub(crate) const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
@@ -126,22 +131,4 @@ pub(crate) fn fire_startup_events(env: &WowLuaEnv) {
     ] {
         let _ = env.fire_event(event);
     }
-}
-
-fn load_token_ui(env: &WowLuaEnv) {
-    env.exec(
-        r#"
-        local loaded, reason = LoadAddOn("Blizzard_TokenUI")
-        assert(loaded, "LoadAddOn(Blizzard_TokenUI) failed: " .. tostring(reason))
-        if ContainerFrameSettingsManager and not ContainerFrameSettingsManager.TokenTracker then
-            ContainerFrameSettingsManager:OnAddonLoaded("Blizzard_TokenUI")
-        end
-        assert(BackpackTokenFrame, "BackpackTokenFrame should exist after loading Blizzard_TokenUI")
-        assert(
-            ContainerFrameSettingsManager and ContainerFrameSettingsManager.TokenTracker == BackpackTokenFrame,
-            "ContainerFrameSettingsManager should own BackpackTokenFrame after loading Blizzard_TokenUI"
-        )
-        "#,
-    )
-    .expect("Failed to runtime-load Blizzard_TokenUI for keybinding bag tests");
 }
