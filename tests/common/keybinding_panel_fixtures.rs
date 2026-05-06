@@ -112,12 +112,12 @@ pub(crate) fn setup_env() -> WowLuaEnv {
 }
 
 pub(crate) fn fire_startup_events(env: &WowLuaEnv) {
-    super::fire_addon_loaded(env, "WoWUISim");
+    crate::common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(event);
     }
-    super::call_global_if_present(env, "RequestTimePlayed");
-    super::fire_player_entering_world(env, true, false);
+    crate::common::call_global_if_present(env, "RequestTimePlayed");
+    crate::common::fire_player_entering_world(env, true, false);
     for event in [
         "UPDATE_BINDINGS",
         "DISPLAY_SIZE_CHANGED",

@@ -2,10 +2,9 @@
 
 pub mod blizzard_addon_harness;
 pub mod blizzard_addon_manifest;
-pub mod keybinding_panel_fixtures;
+mod event_helpers;
 pub mod panel_fixtures;
 
-use rilua::Val;
 use std::ops::Deref;
 use std::path::PathBuf;
 use std::sync::{Mutex, MutexGuard, OnceLock};
@@ -148,12 +147,7 @@ pub fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
     let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(addon_name)]);
 }
 
-pub fn fire_player_entering_world(env: &WowLuaEnv, initial_login: bool, is_reload: bool) {
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[Val::Bool(initial_login), Val::Bool(is_reload)],
-    );
-}
+pub use event_helpers::fire_player_entering_world;
 
 pub fn call_global_if_present(env: &WowLuaEnv, function_name: &str) {
     let is_present = env

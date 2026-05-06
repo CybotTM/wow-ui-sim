@@ -2,8 +2,11 @@ use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::globals::global_frames;
 
-pub(crate) use crate::common::keybinding_panel_fixtures::setup_env;
-use crate::common::keybinding_panel_fixtures::{blizzard_ui_dir, fire_startup_events};
+#[path = "../common/keybinding_panel_fixtures.rs"]
+mod keybinding_panel_fixtures;
+
+pub(crate) use keybinding_panel_fixtures::setup_env;
+use keybinding_panel_fixtures::{blizzard_ui_dir, fire_startup_events};
 
 pub(crate) fn frame_is_shown(env: &WowLuaEnv, frame_name: &str) -> bool {
     let code = format!("return {frame_name} ~= nil and {frame_name}:IsShown() == true");

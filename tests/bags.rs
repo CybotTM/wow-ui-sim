@@ -4,8 +4,10 @@
 //! that item slots are populated with real item data from the mock inventory.
 
 mod common;
+#[path = "common/keybinding_panel_fixtures.rs"]
+mod keybinding_panel_fixtures;
 
-use common::keybinding_panel_fixtures::{
+use keybinding_panel_fixtures::{
     BLIZZARD_ADDONS, BLIZZARD_TOKEN_UI_ADDON, blizzard_ui_dir, setup_env,
 };
 use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};
