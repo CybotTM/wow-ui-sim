@@ -62,15 +62,26 @@ fn try_build_global_method_literal_arg_variants(
             target_path,
             method_name,
             arg,
-        } => build_global_method_with_self_string_handler(state, target_path, method_name, arg)
-            .map(Some),
+        } => build_global_method_with_string_value_handler(
+            state,
+            target_path,
+            method_name,
+            arg,
+            true,
+        )
+        .map(Some),
         FastHandlerRef::GlobalMethodWithStringArg {
             target_path,
             method_name,
             arg,
-        } => {
-            build_global_method_with_string_handler(state, target_path, method_name, arg).map(Some)
-        }
+        } => build_global_method_with_string_value_handler(
+            state,
+            target_path,
+            method_name,
+            arg,
+            false,
+        )
+        .map(Some),
         FastHandlerRef::GlobalMethodWithGlobalArg {
             target_path,
             method_name,
@@ -204,71 +215,67 @@ fn build_global_method_handler(
     )
 }
 
-fn build_global_method_with_self_string_handler(
+fn build_global_method_with_string_value_handler(
     state: &mut LuaState,
     target_path: &str,
     method_name: &str,
     arg: &str,
+    pass_self: bool,
 ) -> LuaResult<Val> {
     let literal_arg = create_string(state, arg);
     call_global_method_builder(
         state,
         target_path,
         method_name,
-        r#"
-            local target_ref, method_name, literal_arg = ...
-            return function(self, ...)
-                local target = target_ref
-                if type(target) == "string" then
-                    local env = getfenv(0) or _G
-                    for segment in string.gmatch(target, "[^%.]+") do
-                        env = env and env[segment]
-                    end
-                    target = env
-                end
-                if not target then
-                    return
-                end
-                return target[method_name](target, self, literal_arg)
-            end
-        "#,
-        "template-global-method-self-string-handler",
+        global_method_string_value_template(pass_self),
+        "template-global-method-string-value-handler",
         &[literal_arg],
     )
 }
 
-fn build_global_method_with_string_handler(
-    state: &mut LuaState,
-    target_path: &str,
-    method_name: &str,
-    arg: &str,
-) -> LuaResult<Val> {
-    let literal_arg = create_string(state, arg);
-    call_global_method_builder(
-        state,
-        target_path,
-        method_name,
-        r#"
-            local target_ref, method_name, literal_arg = ...
-            return function(self, ...)
-                local target = target_ref
-                if type(target) == "string" then
-                    local env = getfenv(0) or _G
-                    for segment in string.gmatch(target, "[^%.]+") do
-                        env = env and env[segment]
-                    end
-                    target = env
-                end
-                if not target then
-                    return
-                end
-                return target[method_name](target, literal_arg)
-            end
-        "#,
-        "template-global-method-string-handler",
-        &[literal_arg],
-    )
+fn global_method_string_value_template(pass_self: bool) -> &'static str {
+    if pass_self {
+        TEMPLATE_GLOBAL_METHOD_WITH_SELF_STRING_ARG
+    } else {
+        TEMPLATE_GLOBAL_METHOD_WITH_STRING_ARG
+    }
 }
+
+const TEMPLATE_GLOBAL_METHOD_WITH_SELF_STRING_ARG: &str = r#"
+    local target_ref, method_name, literal_arg = ...
+    return function(self, ...)
+        local target = target_ref
+        if type(target) == "string" then
+            local env = getfenv(0) or _G
+            for segment in string.gmatch(target, "[^%.]+") do
+                env = env and env[segment]
+            end
+            target = env
+        end
+        if not target then
+            return
+        end
+        return target[method_name](target, self, literal_arg)
+    end
+"#;
+
+const TEMPLATE_GLOBAL_METHOD_WITH_STRING_ARG: &str = r#"
+    local target_ref, method_name, literal_arg = ...
+    return function(self, ...)
+        local target = target_ref
+        if type(target) == "string" then
+            local env = getfenv(0) or _G
+            for segment in string.gmatch(target, "[^%.]+") do
+                env = env and env[segment]
+            end
+            target = env
+        end
+        if not target then
+            return
+        end
+        return target[method_name](target, literal_arg)
+    end
+"#;
 
 const TEMPLATE_GLOBAL_METHOD_WITH_GLOBAL_ARG: &str = r#"
     local target_ref, method_name, arg_path = ...
