@@ -930,44 +930,107 @@ pub(super) fn scene_get_paused(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn scene_project_3d_point_to_2d(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let point = (
-        val_to_f64(stack_val(state, 2)) as f32,
-        val_to_f64(stack_val(state, 3)) as f32,
-        val_to_f64(stack_val(state, 4)) as f32,
-    );
-    let Some((width, height, view_insets, view_translation, camera)) = ({
-        let sim = borrow_state(state)?;
-        sim.widgets.get(id).map(|frame| {
-            (
-                frame.width,
-                frame.height,
-                frame.model_scene_state.view_insets,
-                frame.model_scene_state.view_translation,
-                frame.model_scene_state.camera,
-            )
-        })
-    }) else {
+    let point = point3_from_stack(state);
+    let Some(scene) = read_scene_projection_state(state, id)? else {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let depth = point.2 - camera.position.2;
-    if depth <= 0.0 {
-        state.push(Val::Nil);
-        return Ok(1);
+
+    match project_scene_point(point, scene) {
+        Some(projected) => projected.into_stack(state),
+        None => {
+            state.push(Val::Nil);
+            Ok(1)
+        }
     }
-    let viewport_width = (width - view_insets.0 - view_insets.1).max(0.0);
-    let viewport_height = (height - view_insets.2 - view_insets.3).max(0.0);
-    let focal = (viewport_height * 0.5) / (camera.field_of_view * 0.5).tan();
-    let x = view_insets.0
+}
+
+#[derive(Clone, Copy)]
+struct SceneProjectionState {
+    width: f32,
+    height: f32,
+    view_insets: (f32, f32, f32, f32),
+    view_translation: (f32, f32),
+    camera_position: (f32, f32, f32),
+    camera_field_of_view: f32,
+    camera_near_clip: f32,
+}
+
+fn point3_from_stack(state: &LuaState) -> (f32, f32, f32) {
+    (
+        val_to_f64(stack_val(state, 2)) as f32,
+        val_to_f64(stack_val(state, 3)) as f32,
+        val_to_f64(stack_val(state, 4)) as f32,
+    )
+}
+
+fn read_scene_projection_state(
+    state: &mut LuaState,
+    id: u64,
+) -> LuaResult<Option<SceneProjectionState>> {
+    let sim = borrow_state(state)?;
+    Ok(sim.widgets.get(id).map(|frame| {
+        let camera = frame.model_scene_state.camera;
+        SceneProjectionState {
+            width: frame.width,
+            height: frame.height,
+            view_insets: frame.model_scene_state.view_insets,
+            view_translation: frame.model_scene_state.view_translation,
+            camera_position: camera.position,
+            camera_field_of_view: camera.field_of_view,
+            camera_near_clip: camera.near_clip,
+        }
+    }))
+}
+
+fn project_scene_point(
+    point: (f32, f32, f32),
+    scene: SceneProjectionState,
+) -> Option<(f64, f64, f64)> {
+    let depth = point.2 - scene.camera_position.2;
+    if depth <= 0.0 {
+        return None;
+    }
+
+    let (viewport_width, viewport_height) = projection_viewport_size(scene);
+    let focal = (viewport_height * 0.5) / (scene.camera_field_of_view * 0.5).tan();
+    let x = projected_x(point, scene, viewport_width, focal, depth);
+    let y = projected_y(point, scene, viewport_height, focal, depth);
+    let depth_value = 1.0 - (scene.camera_near_clip / depth.max(scene.camera_near_clip));
+
+    Some((x as f64, y as f64, depth_value as f64))
+}
+
+fn projection_viewport_size(scene: SceneProjectionState) -> (f32, f32) {
+    let viewport_width = (scene.width - scene.view_insets.0 - scene.view_insets.1).max(0.0);
+    let viewport_height = (scene.height - scene.view_insets.2 - scene.view_insets.3).max(0.0);
+    (viewport_width, viewport_height)
+}
+
+fn projected_x(
+    point: (f32, f32, f32),
+    scene: SceneProjectionState,
+    viewport_width: f32,
+    focal: f32,
+    depth: f32,
+) -> f32 {
+    scene.view_insets.0
         + viewport_width * 0.5
-        + view_translation.0 / 6.0
-        + (point.0 - camera.position.0) * focal / depth;
-    let y = view_insets.2
+        + scene.view_translation.0 / 6.0
+        + (point.0 - scene.camera_position.0) * focal / depth
+}
+
+fn projected_y(
+    point: (f32, f32, f32),
+    scene: SceneProjectionState,
+    viewport_height: f32,
+    focal: f32,
+    depth: f32,
+) -> f32 {
+    scene.view_insets.2
         + viewport_height * 0.5
-        + view_translation.1 * 6.0
-        + (point.1 - camera.position.1) * focal / depth;
-    let depth_value = 1.0 - (camera.near_clip / depth.max(camera.near_clip));
-    (x as f64, y as f64, depth_value as f64).into_stack(state)
+        + scene.view_translation.1 * 6.0
+        + (point.1 - scene.camera_position.1) * focal / depth
 }
 
 pub(super) fn scene_create_actor(state: &mut LuaState) -> LuaResult<u32> {
