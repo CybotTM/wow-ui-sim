@@ -69,42 +69,64 @@ impl TextureManager {
         wow_path: &str,
     ) -> (Option<&TextureData>, RgbaLoadTelemetry) {
         let start = Instant::now();
-        // Normalize the path
         let normalized = normalize_wow_path(wow_path);
         let mut telemetry = RgbaLoadTelemetry::default();
 
-        // Check cache first
         if self.cache.contains_key(&normalized) {
-            telemetry.mem_cache_hit = true;
-            telemetry.total_elapsed = start.elapsed();
-            return (self.cache.get(&normalized), telemetry);
+            return self.cached_texture_load_result(&normalized, start);
         }
         if self.not_found.contains(&normalized) {
-            telemetry.total_elapsed = start.elapsed();
-            return (None, telemetry);
+            return unavailable_texture_load_result(start);
         }
 
-        // Try to load from disk (disk cache → decode → write cache)
+        let loaded = self.load_resolved_texture(wow_path, &normalized, &mut telemetry);
+        telemetry.total_elapsed = start.elapsed();
+        let texture = loaded.then(|| self.cache.get(&normalized)).flatten();
+        (texture, telemetry)
+    }
+
+    fn cached_texture_load_result<'a>(
+        &'a self,
+        normalized: &str,
+        start: Instant,
+    ) -> (Option<&'a TextureData>, RgbaLoadTelemetry) {
+        let mut telemetry = RgbaLoadTelemetry {
+            mem_cache_hit: true,
+            ..RgbaLoadTelemetry::default()
+        };
+        telemetry.total_elapsed = start.elapsed();
+        (self.cache.get(normalized), telemetry)
+    }
+
+    fn load_resolved_texture(
+        &mut self,
+        wow_path: &str,
+        normalized: &str,
+        telemetry: &mut RgbaLoadTelemetry,
+    ) -> bool {
         let resolve_start = Instant::now();
-        if let Some(file_path) = self.resolve_path(&normalized) {
-            telemetry.resolve_elapsed = resolve_start.elapsed();
-            let (loaded, load_telemetry) = self.load_texture_with_telemetry(&file_path);
-            telemetry.decode_elapsed = load_telemetry.decode_elapsed;
-            if let Some(data) = loaded {
-                self.size_cache
-                    .insert(normalized.clone(), (data.width, data.height));
-                self.cache.insert(normalized.clone(), data);
-                telemetry.total_elapsed = start.elapsed();
-                return (self.cache.get(&normalized), telemetry);
-            }
-        } else {
+        let Some(file_path) = self.resolve_path(normalized) else {
             telemetry.resolve_elapsed = resolve_start.elapsed();
             crate::logging::eprintln_elapsed(&format!("[TexMgr] Not found: {}", wow_path));
-            self.not_found.insert(normalized);
-        }
+            self.not_found.insert(normalized.to_string());
+            return false;
+        };
 
-        telemetry.total_elapsed = start.elapsed();
-        (None, telemetry)
+        telemetry.resolve_elapsed = resolve_start.elapsed();
+        let (loaded, load_telemetry) = self.load_texture_with_telemetry(&file_path);
+        telemetry.decode_elapsed = load_telemetry.decode_elapsed;
+        let Some(data) = loaded else {
+            return false;
+        };
+
+        self.cache_texture_data(normalized, data);
+        true
+    }
+
+    fn cache_texture_data(&mut self, normalized: &str, data: TextureData) {
+        self.size_cache
+            .insert(normalized.to_string(), (data.width, data.height));
+        self.cache.insert(normalized.to_string(), data);
     }
 
     /// Get a cached texture without loading.
@@ -141,6 +163,14 @@ impl TextureManager {
             }
         }
     }
+}
+
+fn unavailable_texture_load_result(
+    start: Instant,
+) -> (Option<&'static TextureData>, RgbaLoadTelemetry) {
+    let mut telemetry = RgbaLoadTelemetry::default();
+    telemetry.total_elapsed = start.elapsed();
+    (None, telemetry)
 }
 
 /// Result of a BC-compressed texture load.
