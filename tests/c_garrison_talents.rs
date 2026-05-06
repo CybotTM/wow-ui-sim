@@ -18,65 +18,66 @@ fn env() -> WowLuaEnv {
 
 fn seed_two_talents(env: &WowLuaEnv) {
     let mut sim = env.state().borrow_mut();
-    sim.garrison_talents.talents.insert(
-        201,
-        GarrisonTalentInfo {
-            id: 201,
-            name: "Bolster Bastion".to_string(),
-            description: "Reinforce Bastion's anima reservoir.".to_string(),
-            icon: 3528287,
-            tier: 1,
-            ui_order: 0,
-            talent_rank: 0,
-            talent_max_rank: 1,
-            is_being_researched: false,
-            researched: false,
-            selected: false,
-            perk_spell_id: 350001,
-            talent_availability: 1,
-            research_duration: 0,
-            start_time: 0,
-            time_remaining: 0,
-            research_gold_cost: 0,
-            research_currency_costs: vec![GarrisonTalentCurrencyCostInfo {
-                currency_type: 1820,
-                currency_quantity: 500,
-            }],
-        },
-    );
-    sim.garrison_talents.talents.insert(
-        202,
-        GarrisonTalentInfo {
-            id: 202,
-            name: "Ascendant Echo".to_string(),
-            description: "Permanent power for the Ascended.".to_string(),
-            icon: 3528288,
-            tier: 2,
-            ui_order: 1,
-            talent_rank: 0,
-            talent_max_rank: 1,
-            is_being_researched: true,
-            researched: false,
-            selected: false,
-            perk_spell_id: 350002,
-            talent_availability: 2,
-            research_duration: 600,
-            start_time: 1_700_000_000,
-            time_remaining: 300,
-            research_gold_cost: 50,
-            research_currency_costs: vec![
-                GarrisonTalentCurrencyCostInfo {
-                    currency_type: 1820,
-                    currency_quantity: 1500,
-                },
-                GarrisonTalentCurrencyCostInfo {
-                    currency_type: 1822,
-                    currency_quantity: 25,
-                },
-            ],
-        },
-    );
+    sim.garrison_talents
+        .talents
+        .insert(201, bolster_bastion_talent());
+    sim.garrison_talents
+        .talents
+        .insert(202, ascendant_echo_talent());
     sim.garrison_talents.unlock_world_quests.insert(202, 67890);
+}
+
+fn bolster_bastion_talent() -> GarrisonTalentInfo {
+    GarrisonTalentInfo {
+        id: 201,
+        name: "Bolster Bastion".to_string(),
+        description: "Reinforce Bastion's anima reservoir.".to_string(),
+        icon: 3528287,
+        tier: 1,
+        ui_order: 0,
+        talent_rank: 0,
+        talent_max_rank: 1,
+        is_being_researched: false,
+        researched: false,
+        selected: false,
+        perk_spell_id: 350001,
+        talent_availability: 1,
+        research_duration: 0,
+        start_time: 0,
+        time_remaining: 0,
+        research_gold_cost: 0,
+        research_currency_costs: vec![currency_cost(1820, 500)],
+    }
+}
+
+fn ascendant_echo_talent() -> GarrisonTalentInfo {
+    GarrisonTalentInfo {
+        id: 202,
+        name: "Ascendant Echo".to_string(),
+        description: "Permanent power for the Ascended.".to_string(),
+        icon: 3528288,
+        tier: 2,
+        ui_order: 1,
+        talent_rank: 0,
+        talent_max_rank: 1,
+        is_being_researched: true,
+        researched: false,
+        selected: false,
+        perk_spell_id: 350002,
+        talent_availability: 2,
+        research_duration: 600,
+        start_time: 1_700_000_000,
+        time_remaining: 300,
+        research_gold_cost: 50,
+        research_currency_costs: vec![currency_cost(1820, 1500), currency_cost(1822, 25)],
+    }
+}
+
+fn currency_cost(currency_type: i64, currency_quantity: i64) -> GarrisonTalentCurrencyCostInfo {
+    GarrisonTalentCurrencyCostInfo {
+        currency_type,
+        currency_quantity,
+    }
 }
 
 #[test]
