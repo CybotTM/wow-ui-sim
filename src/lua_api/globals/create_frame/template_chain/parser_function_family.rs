@@ -302,18 +302,17 @@ fn parse_inline_function_with_global_arg(stmt: &str) -> Option<(&str, &str)> {
 }
 
 fn parse_inline_function_with_global_and_self_arg(stmt: &str) -> Option<(&str, &str)> {
-    let (function_name, args) = stmt.split_once('(')?;
-    let args = args.strip_suffix(')')?.trim();
-    let (global_arg_path, self_arg) = args.split_once(',')?;
-    let function_name = function_name.trim();
-    let global_arg_path = global_arg_path.trim();
-    (is_fast_handler_path(function_name)
-        && is_fast_handler_path(global_arg_path)
-        && self_arg.trim() == "self")
-        .then_some((function_name, global_arg_path))
+    parse_inline_function_with_global_and_self_expression_arg(stmt, "self")
 }
 
 fn parse_inline_function_with_global_and_self_id_arg(stmt: &str) -> Option<(&str, &str)> {
+    parse_inline_function_with_global_and_self_expression_arg(stmt, "self:GetID()")
+}
+
+fn parse_inline_function_with_global_and_self_expression_arg<'a>(
+    stmt: &'a str,
+    expected_self_arg: &str,
+) -> Option<(&'a str, &'a str)> {
     let (function_name, args) = stmt.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
     let (global_arg_path, self_arg) = args.split_once(',')?;
@@ -321,7 +320,7 @@ fn parse_inline_function_with_global_and_self_id_arg(stmt: &str) -> Option<(&str
     let global_arg_path = global_arg_path.trim();
     (is_fast_handler_path(function_name)
         && is_fast_handler_path(global_arg_path)
-        && self_arg.trim() == "self:GetID()")
+        && self_arg.trim() == expected_self_arg)
         .then_some((function_name, global_arg_path))
 }
 
