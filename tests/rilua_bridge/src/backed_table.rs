@@ -100,10 +100,7 @@ fn test_backed_table_with_rust_methods() {
         .unwrap();
 }
 
-fn register_frame_methods(
-    state: &mut LuaState,
-    mt_ref: rilua::vm::gc::arena::GcRef<Table>,
-) {
+fn register_frame_methods(state: &mut LuaState, mt_ref: rilua::vm::gc::arena::GcRef<Table>) {
     register_name_methods(state, mt_ref);
     register_frame_state_methods(state, mt_ref);
 }
@@ -147,10 +144,7 @@ fn register_name_methods(state: &mut LuaState, mt_ref: rilua::vm::gc::arena::GcR
     table_set_fn(state, mt_ref, "GetName", get_name);
 }
 
-fn register_frame_state_methods(
-    state: &mut LuaState,
-    mt_ref: rilua::vm::gc::arena::GcRef<Table>,
-) {
+fn register_frame_state_methods(state: &mut LuaState, mt_ref: rilua::vm::gc::arena::GcRef<Table>) {
     fn is_frame(state: &mut LuaState) -> LuaResult<u32> {
         let self_val = stack_val(state, 1);
         let result = if let Val::Table(tref) = self_val {

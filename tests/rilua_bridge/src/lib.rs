@@ -17,10 +17,10 @@ use rilua::vm::table::Table;
 use rilua::{Lua, LuaApiMut, LuaResult, Val};
 
 use crate::lua_bridge::{
-    create_frame_table, FrameArena, FrameObject, FrameRef as BridgeFrameRef, FromStack, IntoStack,
-    MultiValue as BridgeMultiValue, TableBuilder,
+    FrameArena, FrameObject, FrameRef as BridgeFrameRef, FromStack, IntoStack,
+    MultiValue as BridgeMultiValue, TableBuilder, create_frame_table,
 };
-pub use benchmark::{benchmark_table_field_access, FieldAccessBenchResult};
+pub use benchmark::{FieldAccessBenchResult, benchmark_table_field_access};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -67,18 +67,14 @@ pub(crate) fn table_set_fn(state: &mut LuaState, table: GcRef<Table>, name: &str
 }
 
 pub(crate) fn set_global_table(state: &mut LuaState, name: &str, table_ref: GcRef<Table>) {
-    let key = state.gc.intern_string(name.as_bytes());
-    let global = state.global;
-    state
-        .gc
-        .tables
-        .get_mut(global)
-        .unwrap()
-        .raw_set(Val::Str(key), Val::Table(table_ref), &state.gc.string_arena)
-        .unwrap();
+    set_global(state, name, Val::Table(table_ref));
 }
 
 pub(crate) fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
+    set_global(state, name, value);
+}
+
+fn set_global(state: &mut LuaState, name: &str, value: Val) {
     let key = state.gc.intern_string(name.as_bytes());
     let global = state.global;
     state
@@ -103,6 +99,33 @@ pub(crate) fn make_index_self(state: &mut LuaState, mt_ref: GcRef<Table>) {
             &state.gc.string_arena,
         )
         .unwrap();
+}
+
+#[test]
+fn test_global_helpers_set_table_and_value_globals() {
+    let mut lua = Lua::new().unwrap();
+    {
+        let state = lua.state_mut();
+
+        let table_ref = state.gc.alloc_table(Table::new());
+        let table_key = state.gc.intern_string(b"name");
+        let table_value = state.gc.intern_string(b"BridgeTable");
+        let table = state.gc.tables.get_mut(table_ref).unwrap();
+        table
+            .raw_set(
+                Val::Str(table_key),
+                Val::Str(table_value),
+                &state.gc.string_arena,
+            )
+            .unwrap();
+
+        set_global_table(state, "BridgeTableGlobal", table_ref);
+        set_global_val(state, "BridgeValueGlobal", Val::Num(42.0));
+    }
+
+    lua.exec("assert(BridgeTableGlobal.name == 'BridgeTable')")
+        .unwrap();
+    lua.exec("assert(BridgeValueGlobal == 42)").unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -646,7 +669,8 @@ fn test_frame_table_roundtrips_five_registered_methods() {
         .unwrap();
     lua.exec("assert(roundtrip_frame:AppendLabel('-healer') == 'mage-healer')")
         .unwrap();
-    lua.exec("assert(roundtrip_frame:AddVisits(4) == 5)").unwrap();
+    lua.exec("assert(roundtrip_frame:AddVisits(4) == 5)")
+        .unwrap();
     lua.exec("assert(roundtrip_frame:GetLabel() == 'mage-healer')")
         .unwrap();
     lua.exec("local label, visits = roundtrip_frame:Snapshot(); assert(label == 'mage-healer' and visits == 5)")
