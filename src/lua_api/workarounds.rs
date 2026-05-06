@@ -421,113 +421,24 @@ fn patch_housing_dashboard_preload_from_env(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
+    apply_post_event_bootstrap(env);
+    patch_post_event_frame_layout(env);
+    refresh_post_event_surfaces(env);
+}
+
+fn apply_post_event_bootstrap(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(REFRESH_ACTION_BUTTONS_LUA);
     crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
     crate::lua_api::workarounds_editmode::reapply_player_frame_anchor(env);
     crate::lua_api::chat_init::init_chat_type_colors(env);
     crate::lua_api::chat_init::show_chat_frame(env);
-    let _ = env.exec(
-        r#"
-        local function reanchor_objective_tracker(frame)
-            frame:ClearAllPoints()
-            frame:SetPoint(
-                "TOPRIGHT",
-                UIParentRightManagedFrameContainer,
-                "TOPRIGHT",
-                0,
-                11
-            )
-            frame:SetHeight(836.5)
-        end
+}
 
-        if EditModeManagerFrame then
-            local partySystem = EditModeManagerFrame:GetRegisteredSystemFrame(
-                Enum.EditModeSystem.UnitFrame,
-                Enum.EditModeUnitFrameSystemIndices.Party
-            )
-            if partySystem and partySystem.systemInfo and partySystem.systemInfo.settings then
-                for _, settingInfo in ipairs(partySystem.systemInfo.settings) do
-                    if settingInfo.setting == Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames then
-                        settingInfo.value = 0
-                    end
-                end
-                if partySystem.UpdateSettingMap then
-                    partySystem:UpdateSettingMap(true)
-                end
-                if partySystem.UpdateSystemSetting then
-                    pcall(
-                        partySystem.UpdateSystemSetting,
-                        partySystem,
-                        Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames,
-                        true
-                    )
-                end
-            end
-        end
+fn patch_post_event_frame_layout(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(POST_EVENT_FRAME_LAYOUT_WORKAROUND_LUA);
+}
 
-        if UpdateRaidAndPartyFrames then
-            pcall(UpdateRaidAndPartyFrames)
-        end
-        if PartyFrame and PartyFrame.UpdatePaddingAndLayout then
-            pcall(PartyFrame.UpdatePaddingAndLayout, PartyFrame)
-        end
-        if CompactPartyFrame and CompactPartyFrame.UpdateVisibility then
-            pcall(CompactPartyFrame.UpdateVisibility, CompactPartyFrame)
-        end
-        if ObjectiveTrackerFrame then
-            if ObjectiveTrackerFrame.Update then
-                pcall(ObjectiveTrackerFrame.Update, ObjectiveTrackerFrame)
-            end
-            if ObjectiveTrackerFrame.UpdateHeight then
-                pcall(ObjectiveTrackerFrame.UpdateHeight, ObjectiveTrackerFrame)
-            end
-            reanchor_objective_tracker(ObjectiveTrackerFrame)
-        end
-        if CompactPartyFrame then
-            CompactPartyFrame:SetHeight(234)
-        end
-        if PlayerCastingBarFrame then
-            PlayerCastingBarFrame:SetAlpha(1)
-        end
-        if not rawget(_G, "__wow_objective_tracker_update_height_wrapper")
-            and ObjectiveTrackerContainerMixin
-            and type(ObjectiveTrackerContainerMixin.UpdateHeight) == "function" then
-            local originalUpdateHeight = ObjectiveTrackerContainerMixin.UpdateHeight
-            function ObjectiveTrackerContainerMixin:UpdateHeight()
-                originalUpdateHeight(self)
-                if self == ObjectiveTrackerFrame then
-                    reanchor_objective_tracker(self)
-                end
-            end
-            rawset(_G, "__wow_objective_tracker_update_height_wrapper", true)
-        end
-        if not rawget(_G, "__wow_compact_party_update_layout_wrapper")
-            and CompactPartyFrameMixin
-            and type(CompactPartyFrameMixin.UpdateLayout) == "function" then
-            local originalUpdateLayout = CompactPartyFrameMixin.UpdateLayout
-            function CompactPartyFrameMixin:UpdateLayout()
-                originalUpdateLayout(self)
-                self:SetHeight(234)
-            end
-            rawset(_G, "__wow_compact_party_update_layout_wrapper", true)
-        end
-        if not rawget(_G, "__wow_casting_bar_apply_alpha_wrapper")
-            and CastingBarMixin
-            and type(CastingBarMixin.ApplyAlpha) == "function" then
-            local originalApplyAlpha = CastingBarMixin.ApplyAlpha
-            function CastingBarMixin:ApplyAlpha(alpha)
-                if self == PlayerCastingBarFrame then
-                    alpha = 1
-                end
-                originalApplyAlpha(self, alpha)
-            end
-            rawset(_G, "__wow_casting_bar_apply_alpha_wrapper", true)
-        end
-        if ChatFrame1EditBox and ChatFrame1 then
-            ChatFrame1EditBox:SetWidth(447)
-        end
-    "#,
-    );
+fn refresh_post_event_surfaces(env: &crate::lua_api::WowLuaEnv) {
     refresh_character_frame_surface(env);
     patch_chat_voice_button_surface(env);
     patch_objective_tracker_quest_header(env);
@@ -3021,6 +2932,107 @@ for _, mapName in ipairs({"WorldMapFrame", "BattlefieldMapFrame", "FlightMapFram
     end
 end
 "###;
+
+const POST_EVENT_FRAME_LAYOUT_WORKAROUND_LUA: &str = r#"
+local function reanchor_objective_tracker(frame)
+    frame:ClearAllPoints()
+    frame:SetPoint(
+        "TOPRIGHT",
+        UIParentRightManagedFrameContainer,
+        "TOPRIGHT",
+        0,
+        11
+    )
+    frame:SetHeight(836.5)
+end
+
+if EditModeManagerFrame then
+    local partySystem = EditModeManagerFrame:GetRegisteredSystemFrame(
+        Enum.EditModeSystem.UnitFrame,
+        Enum.EditModeUnitFrameSystemIndices.Party
+    )
+    if partySystem and partySystem.systemInfo and partySystem.systemInfo.settings then
+        for _, settingInfo in ipairs(partySystem.systemInfo.settings) do
+            if settingInfo.setting == Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames then
+                settingInfo.value = 0
+            end
+        end
+        if partySystem.UpdateSettingMap then
+            partySystem:UpdateSettingMap(true)
+        end
+        if partySystem.UpdateSystemSetting then
+            pcall(
+                partySystem.UpdateSystemSetting,
+                partySystem,
+                Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames,
+                true
+            )
+        end
+    end
+end
+
+if UpdateRaidAndPartyFrames then
+    pcall(UpdateRaidAndPartyFrames)
+end
+if PartyFrame and PartyFrame.UpdatePaddingAndLayout then
+    pcall(PartyFrame.UpdatePaddingAndLayout, PartyFrame)
+end
+if CompactPartyFrame and CompactPartyFrame.UpdateVisibility then
+    pcall(CompactPartyFrame.UpdateVisibility, CompactPartyFrame)
+end
+if ObjectiveTrackerFrame then
+    if ObjectiveTrackerFrame.Update then
+        pcall(ObjectiveTrackerFrame.Update, ObjectiveTrackerFrame)
+    end
+    if ObjectiveTrackerFrame.UpdateHeight then
+        pcall(ObjectiveTrackerFrame.UpdateHeight, ObjectiveTrackerFrame)
+    end
+    reanchor_objective_tracker(ObjectiveTrackerFrame)
+end
+if CompactPartyFrame then
+    CompactPartyFrame:SetHeight(234)
+end
+if PlayerCastingBarFrame then
+    PlayerCastingBarFrame:SetAlpha(1)
+end
+if not rawget(_G, "__wow_objective_tracker_update_height_wrapper")
+    and ObjectiveTrackerContainerMixin
+    and type(ObjectiveTrackerContainerMixin.UpdateHeight) == "function" then
+    local originalUpdateHeight = ObjectiveTrackerContainerMixin.UpdateHeight
+    function ObjectiveTrackerContainerMixin:UpdateHeight()
+        originalUpdateHeight(self)
+        if self == ObjectiveTrackerFrame then
+            reanchor_objective_tracker(self)
+        end
+    end
+    rawset(_G, "__wow_objective_tracker_update_height_wrapper", true)
+end
+if not rawget(_G, "__wow_compact_party_update_layout_wrapper")
+    and CompactPartyFrameMixin
+    and type(CompactPartyFrameMixin.UpdateLayout) == "function" then
+    local originalUpdateLayout = CompactPartyFrameMixin.UpdateLayout
+    function CompactPartyFrameMixin:UpdateLayout()
+        originalUpdateLayout(self)
+        self:SetHeight(234)
+    end
+    rawset(_G, "__wow_compact_party_update_layout_wrapper", true)
+end
+if not rawget(_G, "__wow_casting_bar_apply_alpha_wrapper")
+    and CastingBarMixin
+    and type(CastingBarMixin.ApplyAlpha) == "function" then
+    local originalApplyAlpha = CastingBarMixin.ApplyAlpha
+    function CastingBarMixin:ApplyAlpha(alpha)
+        if self == PlayerCastingBarFrame then
+            alpha = 1
+        end
+        originalApplyAlpha(self, alpha)
+    end
+    rawset(_G, "__wow_casting_bar_apply_alpha_wrapper", true)
+end
+if ChatFrame1EditBox and ChatFrame1 then
+    ChatFrame1EditBox:SetWidth(447)
+end
+"#;
 
 const REFRESH_ACTION_BUTTONS_LUA: &str = r###"
 local function __wow_refresh_action_button(button)
