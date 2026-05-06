@@ -131,21 +131,17 @@ pub(super) fn is_scroll_allowed(state: &mut LuaState) -> LuaResult<u32> {
 // ── Scroll helpers ────────────────────────────────────────────────────────────
 
 fn adjust_scroll(state: &mut LuaState, id: u64, delta: i32) {
-    let mut sim = match borrow_state_mut(state) {
-        Ok(s) => s,
-        Err(_) => return,
-    };
-    let Some(data) = sim.message_frames.get_mut(&id) else {
-        return;
-    };
-    if !data.scroll_allowed {
-        return;
-    }
-    let max = message_frame_scroll_limit(data);
-    data.scroll_offset = (data.scroll_offset + delta).clamp(0, max);
+    scroll_by(state, id, |_| delta);
 }
 
 fn page_scroll(state: &mut LuaState, id: u64, towards_top: bool) {
+    scroll_by(state, id, |data| {
+        let page = data.max_lines.max(1) as i32;
+        if towards_top { page } else { -page }
+    });
+}
+
+fn scroll_by(state: &mut LuaState, id: u64, delta_for_data: impl FnOnce(&MessageFrameData) -> i32) {
     let mut sim = match borrow_state_mut(state) {
         Ok(s) => s,
         Err(_) => return,
@@ -156,8 +152,7 @@ fn page_scroll(state: &mut LuaState, id: u64, towards_top: bool) {
     if !data.scroll_allowed {
         return;
     }
-    let page = data.max_lines.max(1) as i32;
-    let delta = if towards_top { page } else { -page };
+    let delta = delta_for_data(data);
     let max = message_frame_scroll_limit(data);
     data.scroll_offset = (data.scroll_offset + delta).clamp(0, max);
 }
