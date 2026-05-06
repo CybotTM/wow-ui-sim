@@ -35,6 +35,47 @@ pub(in crate::lua_api::state) fn default_lfg_activity_groups() -> Vec<LfgActivit
 
 const LFG_FILTER_PVE: u32 = 1;
 const LFG_FILTER_PVP: u32 = 2;
+const LFG_MIN_LEVEL_TWW: i32 = 80;
+const LFG_MIN_LEVEL_PVP: i32 = 70;
+
+#[derive(Clone, Copy)]
+struct LfgActivitySeed {
+    activity_id: u32,
+    group_id: u32,
+    category_id: i32,
+    full_name: &'static str,
+    short_name: &'static str,
+    min_level: i32,
+    max_players: i32,
+    filters: u32,
+    order_index: i32,
+    use_honor_level: bool,
+    difficulty_id: i32,
+    allow_cross_faction: bool,
+    is_current_raid_activity: bool,
+}
+
+impl From<LfgActivitySeed> for LfgActivityInfo {
+    fn from(seed: LfgActivitySeed) -> Self {
+        Self {
+            activity_id: seed.activity_id,
+            group_id: seed.group_id,
+            category_id: seed.category_id,
+            full_name: seed.full_name.into(),
+            short_name: seed.short_name.into(),
+            min_level: seed.min_level,
+            max_players: seed.max_players,
+            item_level: 0,
+            filters: seed.filters,
+            display_type: 0,
+            order_index: seed.order_index,
+            use_honor_level: seed.use_honor_level,
+            difficulty_id: seed.difficulty_id,
+            allow_cross_faction: seed.allow_cross_faction,
+            is_current_raid_activity: seed.is_current_raid_activity,
+        }
+    }
+}
 
 fn lfg_activity_group(
     group_id: u32,
@@ -53,84 +94,20 @@ fn lfg_activity_group(
 }
 
 pub(in crate::lua_api::state) fn default_lfg_activities() -> Vec<LfgActivityInfo> {
-    let pve = |activity_id: u32,
-               group_id: u32,
-               category_id: i32,
-               full_name: &str,
-               short_name: &str,
-               max_players: i32,
-               order_index: i32,
-               difficulty_id: i32,
-               is_current_raid: bool|
-     -> LfgActivityInfo {
-        LfgActivityInfo {
-            activity_id,
-            group_id,
-            category_id,
-            full_name: full_name.into(),
-            short_name: short_name.into(),
-            min_level: 80,
-            max_players,
-            item_level: 0,
-            filters: 1, // PvE
-            display_type: 0,
-            order_index,
-            use_honor_level: false,
-            difficulty_id,
-            allow_cross_faction: true,
-            is_current_raid_activity: is_current_raid,
-        }
-    };
-    let pvp = |activity_id: u32,
-               group_id: u32,
-               category_id: i32,
-               full_name: &str,
-               short_name: &str,
-               max_players: i32,
-               order_index: i32|
-     -> LfgActivityInfo {
-        LfgActivityInfo {
-            activity_id,
-            group_id,
-            category_id,
-            full_name: full_name.into(),
-            short_name: short_name.into(),
-            min_level: 70,
-            max_players,
-            item_level: 0,
-            filters: 2, // PvP
-            display_type: 0,
-            order_index,
-            use_honor_level: true,
-            difficulty_id: 0,
-            allow_cross_faction: false,
-            is_current_raid_activity: false,
-        }
-    };
-    vec![
-        pve(
-            1195,
-            295,
-            2,
-            "Mists of Tirna Scithe (M+)",
-            "MoTS M+",
-            5,
-            1,
-            0,
-            false,
-        ),
-        pve(
-            1188,
-            295,
-            2,
-            "The Stonevault (M+)",
-            "Stonevault M+",
-            5,
-            2,
-            0,
-            false,
-        ),
-        pve(
+    mythic_plus_activity_seeds()
+        .into_iter()
+        .chain(raid_activity_seeds())
+        .chain(world_content_activity_seeds())
+        .chain(pvp_activity_seeds())
+        .map(LfgActivityInfo::from)
+        .collect()
+}
+
+fn mythic_plus_activity_seeds() -> [LfgActivitySeed; 3] {
+    [
+        pve_activity(1195, 295, 2, "Mists of Tirna Scithe (M+)", "MoTS M+", 5, 1),
+        pve_activity(1188, 295, 2, "The Stonevault (M+)", "Stonevault M+", 5, 2),
+        pve_activity(
             1190,
             295,
             2,
@@ -138,32 +115,20 @@ pub(in crate::lua_api::state) fn default_lfg_activities() -> Vec<LfgActivityInfo
             "Ara-Kara M+",
             5,
             3,
-            0,
-            false,
         ),
-        pve(
-            1296,
-            320,
-            3,
-            "Nerub-ar Palace (Heroic)",
-            "Nerub-ar HC",
-            20,
-            1,
-            15,
-            true,
-        ),
-        pve(
-            1295,
-            320,
-            3,
-            "Nerub-ar Palace (Normal)",
-            "Nerub-ar N",
-            20,
-            2,
-            14,
-            true,
-        ),
-        pve(
+    ]
+}
+
+fn raid_activity_seeds() -> [LfgActivitySeed; 2] {
+    [
+        raid_activity(1296, "Nerub-ar Palace (Heroic)", "Nerub-ar HC", 1, 15, true),
+        raid_activity(1295, "Nerub-ar Palace (Normal)", "Nerub-ar N", 2, 14, true),
+    ]
+}
+
+fn world_content_activity_seeds() -> [LfgActivitySeed; 2] {
+    [
+        pve_activity(
             1350,
             400,
             6,
@@ -171,10 +136,8 @@ pub(in crate::lua_api::state) fn default_lfg_activities() -> Vec<LfgActivityInfo
             "World Boss",
             40,
             1,
-            0,
-            false,
         ),
-        pve(
+        pve_activity(
             1700,
             400,
             6,
@@ -182,13 +145,83 @@ pub(in crate::lua_api::state) fn default_lfg_activities() -> Vec<LfgActivityInfo
             "World Quests",
             5,
             2,
-            0,
-            false,
         ),
-        pvp(491, 350, 4, "2v2 Arena Skirmish", "2v2 Arena", 2, 1),
-        pvp(492, 350, 4, "3v3 Arena Skirmish", "3v3 Arena", 3, 2),
-        pvp(493, 360, 9, "Rated Battlegrounds", "RBG", 10, 1),
     ]
+}
+
+fn pvp_activity_seeds() -> [LfgActivitySeed; 3] {
+    [
+        pvp_activity(491, 350, 4, "2v2 Arena Skirmish", "2v2 Arena", 2, 1),
+        pvp_activity(492, 350, 4, "3v3 Arena Skirmish", "3v3 Arena", 3, 2),
+        pvp_activity(493, 360, 9, "Rated Battlegrounds", "RBG", 10, 1),
+    ]
+}
+
+fn pve_activity(
+    activity_id: u32,
+    group_id: u32,
+    category_id: i32,
+    full_name: &'static str,
+    short_name: &'static str,
+    max_players: i32,
+    order_index: i32,
+) -> LfgActivitySeed {
+    LfgActivitySeed {
+        activity_id,
+        group_id,
+        category_id,
+        full_name,
+        short_name,
+        min_level: LFG_MIN_LEVEL_TWW,
+        max_players,
+        filters: LFG_FILTER_PVE,
+        order_index,
+        use_honor_level: false,
+        difficulty_id: 0,
+        allow_cross_faction: true,
+        is_current_raid_activity: false,
+    }
+}
+
+fn pvp_activity(
+    activity_id: u32,
+    group_id: u32,
+    category_id: i32,
+    full_name: &'static str,
+    short_name: &'static str,
+    max_players: i32,
+    order_index: i32,
+) -> LfgActivitySeed {
+    LfgActivitySeed {
+        activity_id,
+        group_id,
+        category_id,
+        full_name,
+        short_name,
+        min_level: LFG_MIN_LEVEL_PVP,
+        max_players,
+        filters: LFG_FILTER_PVP,
+        order_index,
+        use_honor_level: true,
+        difficulty_id: 0,
+        allow_cross_faction: false,
+        is_current_raid_activity: false,
+    }
+}
+
+fn raid_activity(
+    activity_id: u32,
+    full_name: &'static str,
+    short_name: &'static str,
+    order_index: i32,
+    difficulty_id: i32,
+    is_current_raid_activity: bool,
+) -> LfgActivitySeed {
+    LfgActivitySeed {
+        difficulty_id,
+        is_current_raid_activity,
+        ..pve_activity(activity_id, 320, 3, full_name, short_name, 20, order_index)
+    }
 }
 
 pub(in crate::lua_api::state) fn default_lfd_dungeons() -> Vec<LfdDungeonInfo> {
