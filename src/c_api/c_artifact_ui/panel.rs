@@ -10,6 +10,7 @@ use super::helpers::{
 };
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::state::SimState;
 use crate::lua_api::state_types::runtime::CursorInfo;
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
@@ -227,12 +228,16 @@ pub(super) fn get_powers_affected_by_relic_item_link(state: &mut LuaState) -> Lu
 
 pub(super) fn is_power_known(state: &mut LuaState) -> LuaResult<u32> {
     let power_id = i32::from_stack(state, 1)?;
-    let known = borrow_state(state)?
-        .viewed_artifact
-        .power_known
-        .contains(&power_id);
+    let known = {
+        let sim = borrow_state(state)?;
+        viewed_power_known(&sim, power_id)
+    };
     state.push(Val::Bool(known));
     Ok(1)
+}
+
+fn viewed_power_known(sim: &SimState, power_id: i32) -> bool {
+    sim.viewed_artifact.power_known.contains(&power_id)
 }
 
 // ── Panel-side appearance getters ────────────────────────────────────
@@ -392,16 +397,8 @@ pub(super) fn get_relic_slot_type(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn can_apply_cursor_relic_to_slot(state: &mut LuaState) -> LuaResult<u32> {
     let slot_index = i32::from_stack(state, 1)?;
     let can_apply = {
-        let st = borrow_state(state)?;
-        let slot_pos = (slot_index - 1).max(0) as usize;
-        let slot_unlocked = st
-            .viewed_artifact
-            .relic_slots
-            .get(slot_pos)
-            .is_some_and(|slot| slot.locked_reason.is_none());
-        let cursor_id = cursor_item_id(&st.cursor_item);
-        let is_known_relic = cursor_id.is_some_and(|id| st.artifact_relic_items.contains(&id));
-        slot_unlocked && is_known_relic
+        let sim = borrow_state(state)?;
+        can_apply_cursor_relic(&sim, slot_index)
     };
     state.push(Val::Bool(can_apply));
     Ok(1)
@@ -411,17 +408,32 @@ pub(super) fn can_apply_relic_item_id_to_slot(state: &mut LuaState) -> LuaResult
     let relic_item_id = i32::from_stack(state, 1)?;
     let slot_index = i32::from_stack(state, 2)?;
     let can_apply = {
-        let st = borrow_state(state)?;
-        let slot_pos = (slot_index - 1).max(0) as usize;
-        let slot_unlocked = st
-            .viewed_artifact
-            .relic_slots
-            .get(slot_pos)
-            .is_some_and(|slot| slot.locked_reason.is_none());
-        slot_unlocked && st.artifact_relic_items.contains(&relic_item_id)
+        let sim = borrow_state(state)?;
+        can_apply_relic_item(&sim, relic_item_id, slot_index)
     };
     state.push(Val::Bool(can_apply));
     Ok(1)
+}
+
+fn can_apply_cursor_relic(sim: &SimState, slot_index: i32) -> bool {
+    cursor_item_id(&sim.cursor_item)
+        .is_some_and(|item_id| can_apply_relic_item(sim, item_id, slot_index))
+}
+
+fn can_apply_relic_item(sim: &SimState, relic_item_id: i32, slot_index: i32) -> bool {
+    relic_slot_unlocked(sim, slot_index) && known_artifact_relic(sim, relic_item_id)
+}
+
+fn relic_slot_unlocked(sim: &SimState, slot_index: i32) -> bool {
+    let slot_pos = (slot_index - 1).max(0) as usize;
+    sim.viewed_artifact
+        .relic_slots
+        .get(slot_pos)
+        .is_some_and(|slot| slot.locked_reason.is_none())
+}
+
+fn known_artifact_relic(sim: &SimState, relic_item_id: i32) -> bool {
+    sim.artifact_relic_items.contains(&relic_item_id)
 }
 
 /// Extract the cursor's carried item id when the cursor holds a
@@ -538,16 +550,12 @@ pub(super) fn apply_cursor_relic_to_slot(state: &mut LuaState) -> LuaResult<u32>
     let slot_pos = (slot_index - 1).max(0) as usize;
     let mut sim = borrow_state_mut(state)?;
     let cursor_id = cursor_item_id(&sim.cursor_item);
-    let is_known_relic = cursor_id.is_some_and(|id| sim.artifact_relic_items.contains(&id));
-    let slot_unlocked = sim
-        .viewed_artifact
-        .relic_slots
-        .get(slot_pos)
-        .is_some_and(|slot| slot.locked_reason.is_none());
-    if !is_known_relic || !slot_unlocked {
+    let Some(item_id) = cursor_id else {
+        return Ok(0);
+    };
+    if !can_apply_relic_item(&sim, item_id, slot_index) {
         return Ok(0);
     }
-    let item_id = cursor_id.unwrap();
     if let Some(slot) = sim.viewed_artifact.relic_slots.get_mut(slot_pos) {
         slot.link = format!("item:{item_id}");
         slot.icon = format!("Interface/Icons/inv_relic_{item_id}");
