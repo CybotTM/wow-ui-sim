@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 pub mod valid_events;
 mod valid_events_a;
+mod valid_events_a_tail;
 mod valid_events_b;
 mod valid_events_c;
 pub use valid_events::{
