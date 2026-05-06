@@ -4,7 +4,7 @@ use crate::lua_api::SimState;
 use crate::traits::{TRAIT_COND_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_TREE_DB};
 use std::collections::{HashMap, HashSet};
 
-fn spec_id_to_spec_set(spec_id: u32) -> u32 {
+pub(crate) fn spec_id_to_spec_set(spec_id: u32) -> u32 {
     match spec_id {
         65 => 27,
         66 => 28,

@@ -90,9 +90,7 @@ fn current_spec_id(state: &LuaState) -> Option<u32> {
 
 fn current_spec_set_id(state: &LuaState) -> u32 {
     match current_spec_id(state) {
-        Some(65) => 27,
-        Some(66) => 28,
-        Some(70) => 29,
+        Some(spec_id) => hero_talents::spec_id_to_spec_set(spec_id),
         _ => 0,
     }
 }
@@ -116,15 +114,6 @@ fn config_spec_id(config_id: i32) -> Option<u32> {
         201 | 202 => Some(66),
         301 | 302 => Some(70),
         _ => None,
-    }
-}
-
-fn spec_id_to_spec_set(spec_id: u32) -> u32 {
-    match spec_id {
-        65 => 27,
-        66 => 28,
-        70 => 29,
-        _ => 0,
     }
 }
 
@@ -323,7 +312,7 @@ fn has_unspent_talent_points(state: &crate::lua_api::SimState) -> bool {
 }
 
 fn class_talent_tree_for_spec(spec_id: u32) -> Option<u32> {
-    let required_spec_set = spec_id_to_spec_set(spec_id);
+    let required_spec_set = hero_talents::spec_id_to_spec_set(spec_id);
     if required_spec_set == 0 {
         return None;
     }
