@@ -226,65 +226,96 @@ impl TextureManager {
         let start = Instant::now();
         let normalized = normalize_wow_path(wow_path);
         if self.bc_cache.contains_key(&normalized) {
-            return (
-                self.bc_cache.get(&normalized),
-                BcLoadTelemetry {
-                    cache_hit: true,
-                    total_elapsed: start.elapsed(),
-                    ..Default::default()
-                },
-            );
+            return self.cached_bc_load_result(&normalized, start);
         }
         if self.bc_unavailable.contains(&normalized) {
-            return (
-                None,
-                BcLoadTelemetry {
-                    total_elapsed: start.elapsed(),
-                    ..Default::default()
-                },
-            );
+            return unavailable_bc_load_result(start);
         }
+
         let mut telemetry = BcLoadTelemetry::default();
+        let loaded = self.load_resolved_bc_texture(&normalized, &mut telemetry);
+        telemetry.total_elapsed = start.elapsed();
+        let texture = loaded.then(|| self.bc_cache.get(&normalized)).flatten();
+        (texture, telemetry)
+    }
+
+    fn cached_bc_load_result<'a>(
+        &'a self,
+        normalized: &str,
+        start: Instant,
+    ) -> (Option<&'a BcTextureResult>, BcLoadTelemetry) {
+        let mut telemetry = BcLoadTelemetry {
+            cache_hit: true,
+            ..BcLoadTelemetry::default()
+        };
+        telemetry.total_elapsed = start.elapsed();
+        (self.bc_cache.get(normalized), telemetry)
+    }
+
+    fn load_resolved_bc_texture(
+        &mut self,
+        normalized: &str,
+        telemetry: &mut BcLoadTelemetry,
+    ) -> bool {
         let resolve_start = Instant::now();
-        let Some(file_path) = self.resolve_path(&normalized) else {
-            self.bc_unavailable.insert(normalized);
+        let Some(file_path) = self.resolve_path(normalized) else {
             telemetry.resolve_elapsed = resolve_start.elapsed();
-            telemetry.total_elapsed = start.elapsed();
-            return (None, telemetry);
+            self.mark_bc_unavailable(normalized);
+            return false;
         };
         telemetry.resolve_elapsed = resolve_start.elapsed();
 
-        let ext = file_path.extension().and_then(|e| e.to_str()).unwrap_or("");
-        if !ext.eq_ignore_ascii_case("blp") {
-            self.bc_unavailable.insert(normalized);
-            telemetry.total_elapsed = start.elapsed();
-            return (None, telemetry);
+        if !is_blp_file(&file_path) {
+            self.mark_bc_unavailable(normalized);
+            return false;
         }
         telemetry.resolved_blp = true;
 
-        let parse_start = Instant::now();
-        let Some(blp) = load_blp(&file_path).ok() else {
-            self.bc_unavailable.insert(normalized);
-            telemetry.parse_elapsed = parse_start.elapsed();
-            telemetry.total_elapsed = start.elapsed();
-            return (None, telemetry);
+        let Some(bc_texture) = load_bc_texture_from_blp(&file_path, telemetry) else {
+            self.mark_bc_unavailable(normalized);
+            return false;
         };
-        telemetry.parse_elapsed = parse_start.elapsed();
-        let extract_start = Instant::now();
-        let Some(bc_texture) = bc_texture_result(blp.header.width, blp.header.height, blp.content)
-        else {
-            self.bc_unavailable.insert(normalized);
-            telemetry.extract_elapsed = extract_start.elapsed();
-            telemetry.total_elapsed = start.elapsed();
-            return (None, telemetry);
-        };
-        telemetry.extract_elapsed = extract_start.elapsed();
 
-        self.bc_unavailable.remove(&normalized);
-        self.bc_cache.insert(normalized.clone(), bc_texture);
-        telemetry.total_elapsed = start.elapsed();
-        (self.bc_cache.get(&normalized), telemetry)
+        self.cache_bc_texture_data(normalized, bc_texture);
+        true
     }
+
+    fn mark_bc_unavailable(&mut self, normalized: &str) {
+        self.bc_unavailable.insert(normalized.to_string());
+    }
+
+    fn cache_bc_texture_data(&mut self, normalized: &str, bc_texture: BcTextureResult) {
+        self.bc_unavailable.remove(normalized);
+        self.bc_cache.insert(normalized.to_string(), bc_texture);
+    }
+}
+
+fn unavailable_bc_load_result(
+    start: Instant,
+) -> (Option<&'static BcTextureResult>, BcLoadTelemetry) {
+    let mut telemetry = BcLoadTelemetry::default();
+    telemetry.total_elapsed = start.elapsed();
+    (None, telemetry)
+}
+
+fn is_blp_file(file_path: &Path) -> bool {
+    let ext = file_path.extension().and_then(|e| e.to_str()).unwrap_or("");
+    ext.eq_ignore_ascii_case("blp")
+}
+
+fn load_bc_texture_from_blp(
+    file_path: &Path,
+    telemetry: &mut BcLoadTelemetry,
+) -> Option<BcTextureResult> {
+    let parse_start = Instant::now();
+    let blp = load_blp(file_path).ok();
+    telemetry.parse_elapsed = parse_start.elapsed();
+
+    let blp = blp?;
+    let extract_start = Instant::now();
+    let bc_texture = bc_texture_result(blp.header.width, blp.header.height, blp.content);
+    telemetry.extract_elapsed = extract_start.elapsed();
+    bc_texture
 }
 
 fn bc_texture_result(width: u32, height: u32, content: BlpContent) -> Option<BcTextureResult> {
