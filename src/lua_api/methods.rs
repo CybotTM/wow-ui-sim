@@ -650,4 +650,20 @@ mod tests {
         assert_eq!(table_get(state, table, "dynamicKey"), Val::Num(10.0));
         assert_eq!(table_get_static(state, table, "staticKey"), Val::Num(20.0));
     }
+
+    #[test]
+    fn table_get_variants_return_values_or_nil() {
+        let env = WowLuaEnv::new().expect("env");
+        let mut lua = env.rilua_mut();
+        let state = lua.state_mut();
+        let table = create_table(state);
+
+        table_set(state, table, "dynamicKey", Val::Num(30.0));
+        table_set_static(state, table, "staticKey", Val::Num(40.0));
+
+        assert_eq!(table_get(state, table, "dynamicKey"), Val::Num(30.0));
+        assert_eq!(table_get_static(state, table, "staticKey"), Val::Num(40.0));
+        assert_eq!(table_get(state, table, "missingKey"), Val::Nil);
+        assert_eq!(table_get_static(state, Val::Nil, "staticKey"), Val::Nil);
+    }
 }
