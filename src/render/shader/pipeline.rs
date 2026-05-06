@@ -105,16 +105,12 @@ impl WowUiPipeline {
         uniform_bind_group_layout: &wgpu::BindGroupLayout,
         texture_bind_group_layout: &wgpu::BindGroupLayout,
     ) -> wgpu::RenderPipeline {
-        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("WoW UI Shader"),
-            source: wgpu::ShaderSource::Wgsl(include_str!("quad.wgsl").into()),
-        });
-
-        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("WoW UI Pipeline Layout"),
-            bind_group_layouts: &[uniform_bind_group_layout, texture_bind_group_layout],
-            push_constant_ranges: &[],
-        });
+        let shader = Self::create_shader_module(device);
+        let pipeline_layout = Self::create_pipeline_layout(
+            device,
+            uniform_bind_group_layout,
+            texture_bind_group_layout,
+        );
 
         device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("WoW UI Render Pipeline"),
@@ -135,20 +131,43 @@ impl WowUiPipeline {
                 })],
                 compilation_options: wgpu::PipelineCompilationOptions::default(),
             }),
-            primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList,
-                strip_index_format: None,
-                front_face: wgpu::FrontFace::Ccw,
-                cull_mode: None, // No culling for 2D UI
-                polygon_mode: wgpu::PolygonMode::Fill,
-                unclipped_depth: false,
-                conservative: false,
-            },
+            primitive: Self::triangle_list_primitive_state(),
             depth_stencil: None,
             multisample: wgpu::MultisampleState::default(),
             multiview: None,
             cache: None,
         })
+    }
+
+    fn create_shader_module(device: &wgpu::Device) -> wgpu::ShaderModule {
+        device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("WoW UI Shader"),
+            source: wgpu::ShaderSource::Wgsl(include_str!("quad.wgsl").into()),
+        })
+    }
+
+    fn create_pipeline_layout(
+        device: &wgpu::Device,
+        uniform_bind_group_layout: &wgpu::BindGroupLayout,
+        texture_bind_group_layout: &wgpu::BindGroupLayout,
+    ) -> wgpu::PipelineLayout {
+        device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("WoW UI Pipeline Layout"),
+            bind_group_layouts: &[uniform_bind_group_layout, texture_bind_group_layout],
+            push_constant_ranges: &[],
+        })
+    }
+
+    fn triangle_list_primitive_state() -> wgpu::PrimitiveState {
+        wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleList,
+            strip_index_format: None,
+            front_face: wgpu::FrontFace::Ccw,
+            cull_mode: None,
+            polygon_mode: wgpu::PolygonMode::Fill,
+            unclipped_depth: false,
+            conservative: false,
+        }
     }
 
     /// Update the projection matrix if the viewport size changed.
@@ -260,48 +279,13 @@ impl WowUiPipeline {
         target: &wgpu::TextureView,
         clip_bounds: &Rectangle<u32>,
     ) {
-        let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("WoW UI Render Pass"),
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: target,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Load,
-                    store: wgpu::StoreOp::Store,
-                },
-                depth_slice: None,
-            })],
-            depth_stencil_attachment: None,
-            timestamp_writes: None,
-            occlusion_query_set: None,
-        });
-
-        render_pass.set_viewport(
-            clip_bounds.x as f32,
-            clip_bounds.y as f32,
-            clip_bounds.width as f32,
-            clip_bounds.height as f32,
-            0.0,
-            1.0,
+        self.render_with_load_op(
+            encoder,
+            target,
+            clip_bounds,
+            "WoW UI Render Pass",
+            wgpu::LoadOp::Load,
         );
-        render_pass.set_scissor_rect(
-            clip_bounds.x,
-            clip_bounds.y,
-            clip_bounds.width,
-            clip_bounds.height,
-        );
-        render_pass.set_pipeline(&self.pipeline);
-        render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
-        render_pass.set_bind_group(1, self.texture_atlas.bind_group(), &[]);
-
-        // Draw each strata + overlay in order.
-        for buf in &self.strata_buffers {
-            if buf.index_count > 0 {
-                render_pass.set_vertex_buffer(0, buf.vertex_buffer.slice(..));
-                render_pass.set_index_buffer(buf.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
-                render_pass.draw_indexed(0..buf.index_count as u32, 0, 0..1);
-            }
-        }
     }
 
     /// Render with a clear operation (for standalone/headless rendering).
@@ -312,18 +296,36 @@ impl WowUiPipeline {
         clip_bounds: &Rectangle<u32>,
         clear_color: [f32; 4],
     ) {
+        let clear_color = wgpu::Color {
+            r: clear_color[0] as f64,
+            g: clear_color[1] as f64,
+            b: clear_color[2] as f64,
+            a: clear_color[3] as f64,
+        };
+        self.render_with_load_op(
+            encoder,
+            target,
+            clip_bounds,
+            "WoW UI Render Pass (Clear)",
+            wgpu::LoadOp::Clear(clear_color),
+        );
+    }
+
+    fn render_with_load_op(
+        &self,
+        encoder: &mut wgpu::CommandEncoder,
+        target: &wgpu::TextureView,
+        clip_bounds: &Rectangle<u32>,
+        label: &'static str,
+        load: wgpu::LoadOp<wgpu::Color>,
+    ) {
         let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("WoW UI Render Pass (Clear)"),
+            label: Some(label),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: target,
                 resolve_target: None,
                 ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color {
-                        r: clear_color[0] as f64,
-                        g: clear_color[1] as f64,
-                        b: clear_color[2] as f64,
-                        a: clear_color[3] as f64,
-                    }),
+                    load,
                     store: wgpu::StoreOp::Store,
                 },
                 depth_slice: None,
@@ -333,6 +335,15 @@ impl WowUiPipeline {
             occlusion_query_set: None,
         });
 
+        self.configure_render_pass(&mut render_pass, clip_bounds);
+        self.draw_strata_buffers(&mut render_pass);
+    }
+
+    fn configure_render_pass(
+        &self,
+        render_pass: &mut wgpu::RenderPass<'_>,
+        clip_bounds: &Rectangle<u32>,
+    ) {
         render_pass.set_viewport(
             clip_bounds.x as f32,
             clip_bounds.y as f32,
@@ -350,7 +361,9 @@ impl WowUiPipeline {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
         render_pass.set_bind_group(1, self.texture_atlas.bind_group(), &[]);
+    }
 
+    fn draw_strata_buffers(&self, render_pass: &mut wgpu::RenderPass<'_>) {
         for buf in &self.strata_buffers {
             if buf.index_count > 0 {
                 render_pass.set_vertex_buffer(0, buf.vertex_buffer.slice(..));
