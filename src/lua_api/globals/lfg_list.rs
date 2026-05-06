@@ -16,7 +16,7 @@ use crate::lua_api::state_types::{
 };
 use crate::lua_api::{next_timer_id, timer_layout};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
-use rilua::vm::closure::{Closure, RustClosure};
+use rilua::vm::closure::{Closure, RustClosure, RustFn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -475,7 +475,7 @@ fn get_application_info(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => state.push(Val::Nil),
     }
-    state.push(Val::Num(app.duration as f64));
+    state.push(Val::Num(app.duration));
     let role_val = create_string(state, &app.role);
     state.push(role_val);
     Ok(5)
@@ -988,10 +988,10 @@ fn get_language_search_filter(state: &mut LuaState) -> LuaResult<u32> {
     if let Val::Table(table_ref) = result {
         for (lang, enabled) in &entries {
             let key = create_string(state, lang);
-            if let Val::Str(s) = key {
-                if let Some(t) = state.gc.tables.get_mut(table_ref) {
-                    let _ = t.raw_set(Val::Str(s), Val::Bool(*enabled), &state.gc.string_arena);
-                }
+            if let Val::Str(s) = key
+                && let Some(t) = state.gc.tables.get_mut(table_ref)
+            {
+                let _ = t.raw_set(Val::Str(s), Val::Bool(*enabled), &state.gc.string_arena);
             }
         }
         state.gc.barrier_back(table_ref);
@@ -1150,149 +1150,120 @@ fn ensure_c_lfg_list_table(state: &mut LuaState) -> GcRef<Table> {
     new_ref
 }
 
+fn register_lfg_list_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+    methods: &[(&'static str, RustFn)],
+) -> LuaResult<()> {
+    for (name, method) in methods {
+        table_set_rust_fn_static(state, table_ref, name, *method)?;
+    }
+    Ok(())
+}
+
+fn register_search_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    register_lfg_list_methods(
+        state,
+        table_ref,
+        &[
+            ("GetSearchResultInfo", get_search_result_info),
+            ("HasSearchResultInfo", has_search_result_info),
+            ("GetSearchResults", get_search_results),
+            ("GetFilteredSearchResults", get_filtered_search_results),
+            (
+                "GetSearchResultMemberCounts",
+                get_search_result_member_counts,
+            ),
+            (
+                "GetGroupLeaverCountsByRole",
+                get_group_leaver_counts_by_role,
+            ),
+            ("Search", search),
+        ],
+    )
+}
+
+fn register_listing_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    register_lfg_list_methods(
+        state,
+        table_ref,
+        &[
+            ("GetNumApplications", get_num_applications),
+            ("GetNumApplicants", get_num_applicants),
+            ("RemoveListing", remove_listing),
+            ("GetApplications", get_applications),
+            ("GetApplicationInfo", get_application_info),
+            ("ApplyToGroup", apply_to_group),
+            ("CancelApplication", cancel_application),
+        ],
+    )
+}
+
+fn register_capability_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    register_lfg_list_methods(
+        state,
+        table_ref,
+        &[
+            ("GetPremadeGroupFinderStyle", get_premade_group_finder_style),
+            ("CanCreateQuestGroup", can_create_quest_group),
+            ("CanCreateScenarioGroup", can_create_scenario_group),
+            (
+                "IsPremadeGroupFinderEnabled",
+                is_premade_group_finder_enabled,
+            ),
+            ("HasActivityList", has_activity_list),
+            ("HasActiveEntryInfo", has_active_entry_info),
+            ("GetActiveEntryInfo", get_active_entry_info),
+            ("GetAvailableRoles", get_available_roles),
+        ],
+    )
+}
+
+fn register_activity_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    register_lfg_list_methods(
+        state,
+        table_ref,
+        &[
+            ("GetActivityInfoTable", get_activity_info_table),
+            ("GetAvailableCategories", get_available_categories),
+            ("GetLfgCategoryInfo", get_lfg_category_info),
+            ("GetAvailableActivityGroups", get_available_activity_groups),
+            ("GetAvailableActivities", get_available_activities),
+            ("GetActivityGroupInfo", get_activity_group_info),
+            ("GetActivityFullName", get_activity_full_name),
+            ("GetPlaystyleString", get_playstyle_string),
+        ],
+    )
+}
+
+fn register_filter_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    register_lfg_list_methods(
+        state,
+        table_ref,
+        &[
+            (
+                "GetAvailableLanguageSearchFilter",
+                get_available_language_search_filter,
+            ),
+            ("GetLanguageSearchFilter", get_language_search_filter),
+            (
+                "GetDefaultLanguageSearchFilter",
+                get_default_language_search_filter,
+            ),
+            ("GetAdvancedFilter", get_advanced_filter),
+        ],
+    )
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
     let table_ref = ensure_c_lfg_list_table(state);
-    table_set_rust_fn_static(state, table_ref, "GetNumApplications", get_num_applications)?;
-    table_set_rust_fn_static(state, table_ref, "GetNumApplicants", get_num_applicants)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetSearchResultInfo",
-        get_search_result_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "HasSearchResultInfo",
-        has_search_result_info,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "GetSearchResults", get_search_results)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetFilteredSearchResults",
-        get_filtered_search_results,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetPremadeGroupFinderStyle",
-        get_premade_group_finder_style,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "CanCreateQuestGroup",
-        can_create_quest_group,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "CanCreateScenarioGroup",
-        can_create_scenario_group,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "IsPremadeGroupFinderEnabled",
-        is_premade_group_finder_enabled,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "RemoveListing", remove_listing)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetSearchResultMemberCounts",
-        get_search_result_member_counts,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetGroupLeaverCountsByRole",
-        get_group_leaver_counts_by_role,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "GetApplications", get_applications)?;
-    table_set_rust_fn_static(state, table_ref, "GetApplicationInfo", get_application_info)?;
-    table_set_rust_fn_static(state, table_ref, "ApplyToGroup", apply_to_group)?;
-    table_set_rust_fn_static(state, table_ref, "CancelApplication", cancel_application)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetActivityInfoTable",
-        get_activity_info_table,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "Search", search)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetAvailableCategories",
-        get_available_categories,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetLfgCategoryInfo",
-        get_lfg_category_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetAvailableActivityGroups",
-        get_available_activity_groups,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetAvailableActivities",
-        get_available_activities,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetActivityGroupInfo",
-        get_activity_group_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetActivityFullName",
-        get_activity_full_name,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "GetPlaystyleString", get_playstyle_string)?;
-    table_set_rust_fn_static(state, table_ref, "HasActivityList", has_activity_list)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "HasActiveEntryInfo",
-        has_active_entry_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetActiveEntryInfo",
-        get_active_entry_info,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "GetAvailableRoles", get_available_roles)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetAvailableLanguageSearchFilter",
-        get_available_language_search_filter,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetLanguageSearchFilter",
-        get_language_search_filter,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetDefaultLanguageSearchFilter",
-        get_default_language_search_filter,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "GetAdvancedFilter", get_advanced_filter)?;
+    register_search_methods(state, table_ref)?;
+    register_listing_methods(state, table_ref)?;
+    register_capability_methods(state, table_ref)?;
+    register_activity_methods(state, table_ref)?;
+    register_filter_methods(state, table_ref)?;
     Ok(())
 }
 
