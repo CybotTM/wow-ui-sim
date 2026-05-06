@@ -1564,25 +1564,29 @@ fn c_traits_set_selection(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_traits_purchase_rank(state: &mut LuaState) -> LuaResult<u32> {
-    let _config_id = i32::from_stack(state, 1)?;
-    let node_id = u32::from_stack(state, 2)?;
-    {
-        let mut sim = borrow_state_mut(state)?;
-        let next_rank = sim.talents.node_ranks.get(&node_id).copied().unwrap_or(0) + 1;
-        sim.talents.set_node_rank(node_id, next_rank);
-    }
-    fire_trait_node_changed_with_dependents(state, node_id);
-    fire_trait_tree_currency_info_updated_for_node(state, node_id);
-    state.push(Val::Bool(true));
-    Ok(1)
+    change_trait_rank(state, TraitRankChange::Purchase)
 }
 
 fn c_traits_refund_rank(state: &mut LuaState) -> LuaResult<u32> {
+    change_trait_rank(state, TraitRankChange::Refund)
+}
+
+enum TraitRankChange {
+    Purchase,
+    Refund,
+}
+
+fn change_trait_rank(state: &mut LuaState, change: TraitRankChange) -> LuaResult<u32> {
     let _config_id = i32::from_stack(state, 1)?;
     let node_id = u32::from_stack(state, 2)?;
     {
         let mut sim = borrow_state_mut(state)?;
-        sim.talents.set_node_rank(node_id, 0);
+        let current_rank = sim.talents.node_ranks.get(&node_id).copied().unwrap_or(0);
+        let next_rank = match change {
+            TraitRankChange::Purchase => current_rank + 1,
+            TraitRankChange::Refund => 0,
+        };
+        sim.talents.set_node_rank(node_id, next_rank);
     }
     fire_trait_node_changed_with_dependents(state, node_id);
     fire_trait_tree_currency_info_updated_for_node(state, node_id);
