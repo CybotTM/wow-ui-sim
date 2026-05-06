@@ -12,12 +12,12 @@ use crate::lua_api::methods::{
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_api::state_types::{LfgActivityInfo, LfgApplication, PendingTimer, PremadeListing};
 use crate::lua_api::{next_timer_id, timer_layout};
-use crate::lua_bridge::{table_set_rust_fn_static, FromStack};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::closure::{Closure, RustClosure};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{runtime_error, LuaResult, Val};
+use rilua::{LuaResult, Val, runtime_error};
 use std::time::Instant;
 
 pub fn get_num_applications(state: &mut LuaState) -> LuaResult<u32> {
