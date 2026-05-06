@@ -37,7 +37,7 @@ use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaResult, Val};
+use rilua::{LuaApiMut, LuaResult, Val};
 
 pub fn get_club_id(state: &mut LuaState) -> LuaResult<u32> {
     let club_id = borrow_state(state)?.world.guild_club_id.clone();
@@ -190,13 +190,32 @@ fn ensure_c_guild_info_table(state: &mut LuaState) -> GcRef<Table> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
-    use rilua::LuaApiMut;
     let state = lua.state_mut();
     let table_ref = ensure_c_guild_info_table(state);
+    register_c_guild_info_methods(state, table_ref)?;
+    register_guild_challenge_globals(lua)?;
+    Ok(())
+}
+
+fn register_c_guild_info_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    register_guild_identity_methods(state, table_ref)?;
+    register_guild_permission_methods(state, table_ref)?;
+    register_guild_text_methods(state, table_ref)?;
+    Ok(())
+}
+
+fn register_guild_identity_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetClubId", get_club_id)?;
     table_set_rust_fn_static(state, table_ref, "GuildRoster", guild_roster)?;
     table_set_rust_fn_static(state, table_ref, "GetGuildNewsInfo", get_guild_news_info)?;
     table_set_rust_fn_static(state, table_ref, "IsGuildOfficer", is_guild_officer)?;
+    Ok(())
+}
+
+fn register_guild_permission_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -222,10 +241,18 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         is_guild_rank_assignment_allowed,
     )?;
     table_set_rust_fn_static(state, table_ref, "SetGuildRankOrder", set_guild_rank_order)?;
+    Ok(())
+}
+
+fn register_guild_text_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetMOTD", get_motd)?;
     table_set_rust_fn_static(state, table_ref, "SetMOTD", set_motd)?;
     table_set_rust_fn_static(state, table_ref, "GetInfoText", get_info_text)?;
     table_set_rust_fn_static(state, table_ref, "SetInfoText", set_info_text)?;
+    Ok(())
+}
+
+fn register_guild_challenge_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "GetNumGuildChallenges", get_num_guild_challenges)?;
     LuaApiMut::register_function(lua, "GetGuildChallengeInfo", get_guild_challenge_info)?;
     Ok(())
