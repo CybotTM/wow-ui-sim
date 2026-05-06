@@ -55,13 +55,17 @@ fn normalize_whitespace_padded_numbers(xml: &str) -> String {
     use regex::Regex;
     use std::sync::OnceLock;
     static RE: OnceLock<Regex> = OnceLock::new();
-    let re = RE.get_or_init(|| {
-        Regex::new(r#"="(\s+-?\d[\d.]*\s*|-?\d[\d.]*\s+)""#).expect("padded-number regex compiles")
-    });
-    re.replace_all(xml, |caps: &regex::Captures<'_>| {
-        format!(r#"="{}""#, caps[1].trim())
-    })
-    .into_owned()
+    let re = RE.get_or_init(padded_number_attr_regex);
+    re.replace_all(xml, trim_padded_number_attr).into_owned()
+}
+
+fn padded_number_attr_regex() -> regex::Regex {
+    regex::Regex::new(r#"="(\s+-?\d[\d.]*\s*|-?\d[\d.]*\s+)""#)
+        .expect("padded-number regex compiles")
+}
+
+fn trim_padded_number_attr(caps: &regex::Captures<'_>) -> String {
+    format!(r#"="{}""#, caps[1].trim())
 }
 
 /// Strip CurseForge/BigWigs packager XML comment markers so source-form addons parse correctly.
