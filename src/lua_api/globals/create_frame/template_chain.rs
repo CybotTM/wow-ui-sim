@@ -76,36 +76,9 @@ fn apply_runtime_template_chain_impl(
     let frame_name = frame_lookup_name(state, frame_id);
     apply_template_parent_links(state, frame_id, &chain)?;
     apply_chain_entries(state, frame_id, &chain)?;
-
-    if let Some(frame) = direct_frame {
-        // XML direct key-values must exist before template child OnLoad
-        // handlers run, matching the loader chunk order.
-        apply_template_key_values(state, frame_id, frame.all_key_values());
-    }
-
-    // The chain is base-to-derived. Install all parent-facing state first so
-    // template child OnLoad/OnShow handlers can see derived key values and
-    // mixin methods (for example ThreeSliceButtonTemplate children expect the
-    // derived template's `atlasName` to already exist on the parent button).
-    for entry in &*chain {
-        runtime::create_template_child_frames(
-            state,
-            &state_rc,
-            frame_id,
-            &frame_name,
-            &frame_name,
-            &entry.frame,
-        )?;
-    }
-
-    let runtime_frame = crate::xml::FrameXml::default();
-    runtime::apply_runtime_template_loader_effects(
-        state,
-        &frame_name,
-        &frame_name,
-        &runtime_frame,
-        Some(inherits),
-    )?;
+    apply_direct_frame_key_values(state, frame_id, direct_frame);
+    create_runtime_template_child_frames(state, &state_rc, frame_id, &frame_name, &chain)?;
+    apply_runtime_template_loader_effects(state, inherits, &frame_name)?;
 
     finalize_template_frame(
         state,
@@ -114,6 +87,51 @@ fn apply_runtime_template_chain_impl(
         inherits,
         &frame_name,
         fire_on_load,
+    )
+}
+
+fn apply_direct_frame_key_values(
+    state: &mut LuaState,
+    frame_id: u64,
+    direct_frame: Option<&crate::xml::FrameXml>,
+) {
+    if let Some(frame) = direct_frame {
+        apply_template_key_values(state, frame_id, frame.all_key_values());
+    }
+}
+
+fn create_runtime_template_child_frames(
+    state: &mut LuaState,
+    state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    frame_name: &str,
+    chain: &[Arc<crate::xml::TemplateEntry>],
+) -> LuaResult<()> {
+    for entry in chain {
+        runtime::create_template_child_frames(
+            state,
+            state_rc,
+            frame_id,
+            frame_name,
+            frame_name,
+            &entry.frame,
+        )?;
+    }
+    Ok(())
+}
+
+fn apply_runtime_template_loader_effects(
+    state: &mut LuaState,
+    inherits: &str,
+    frame_name: &str,
+) -> LuaResult<()> {
+    let runtime_frame = crate::xml::FrameXml::default();
+    runtime::apply_runtime_template_loader_effects(
+        state,
+        frame_name,
+        frame_name,
+        &runtime_frame,
+        Some(inherits),
     )
 }
 
@@ -916,7 +934,7 @@ fn fast_handler_ref<'a>(
         return Some(FastHandlerRef::Function(function_name));
     }
     if let Some(body) = script.body.as_deref() {
-        return Some(parser::parse_inline_fast_handler(handler_name, body)?);
+        return parser::parse_inline_fast_handler(handler_name, body);
     }
     Some(FastHandlerRef::NoOp)
 }
