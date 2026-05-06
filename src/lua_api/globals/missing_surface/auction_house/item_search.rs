@@ -378,36 +378,76 @@ fn push_item_key_table_from_search_key(state: &mut LuaState, key: ItemSearchKey)
 }
 
 fn push_item_search_result_info_table(state: &mut LuaState, entry: &ItemSearchResultInfo) -> Val {
+    let table = create_table(state);
+    set_item_search_result_identity_fields(state, table, entry);
+    set_item_search_result_flag_fields(state, table, entry);
+    set_item_search_result_price_fields(state, table, entry);
+    table
+}
+
+fn set_item_search_result_identity_fields(
+    state: &mut LuaState,
+    table: Val,
+    entry: &ItemSearchResultInfo,
+) {
     let owners = build_owners_array(state, &entry.owners);
     let item_link = create_string(state, &entry.item_link);
     let bidder = match &entry.bidder {
         Some(name) => create_string(state, name),
         None => Val::Nil,
     };
-    create_table_with_fields(
+    table_set(state, table, "owners", owners);
+    table_set(state, table, "timeLeft", Val::Num(entry.time_left as f64));
+    table_set(state, table, "auctionID", Val::Num(entry.auction_id as f64));
+    table_set(state, table, "quantity", Val::Num(entry.quantity as f64));
+    table_set(state, table, "itemLink", item_link);
+    table_set(state, table, "bidder", bidder);
+}
+
+fn set_item_search_result_flag_fields(
+    state: &mut LuaState,
+    table: Val,
+    entry: &ItemSearchResultInfo,
+) {
+    table_set(
         state,
-        &[
-            ("owners", owners),
-            ("timeLeft", Val::Num(entry.time_left as f64)),
-            ("auctionID", Val::Num(entry.auction_id as f64)),
-            ("quantity", Val::Num(entry.quantity as f64)),
-            ("itemLink", item_link),
-            ("containsOwnerItem", Val::Bool(entry.contains_owner_item)),
-            (
-                "containsAccountItem",
-                Val::Bool(entry.contains_account_item),
-            ),
-            (
-                "containsSocketedItem",
-                Val::Bool(entry.contains_socketed_item),
-            ),
-            ("bidder", bidder),
-            ("minBid", Val::Num(entry.min_bid as f64)),
-            ("bidAmount", Val::Num(entry.bid_amount as f64)),
-            ("buyoutAmount", Val::Num(entry.buyout_amount as f64)),
-            ("timeLeftSeconds", Val::Num(entry.time_left_seconds as f64)),
-        ],
-    )
+        table,
+        "containsOwnerItem",
+        Val::Bool(entry.contains_owner_item),
+    );
+    table_set(
+        state,
+        table,
+        "containsAccountItem",
+        Val::Bool(entry.contains_account_item),
+    );
+    table_set(
+        state,
+        table,
+        "containsSocketedItem",
+        Val::Bool(entry.contains_socketed_item),
+    );
+}
+
+fn set_item_search_result_price_fields(
+    state: &mut LuaState,
+    table: Val,
+    entry: &ItemSearchResultInfo,
+) {
+    table_set(state, table, "minBid", Val::Num(entry.min_bid as f64));
+    table_set(state, table, "bidAmount", Val::Num(entry.bid_amount as f64));
+    table_set(
+        state,
+        table,
+        "buyoutAmount",
+        Val::Num(entry.buyout_amount as f64),
+    );
+    table_set(
+        state,
+        table,
+        "timeLeftSeconds",
+        Val::Num(entry.time_left_seconds as f64),
+    );
 }
 
 fn build_owners_array(state: &mut LuaState, owners: &[String]) -> Val {
