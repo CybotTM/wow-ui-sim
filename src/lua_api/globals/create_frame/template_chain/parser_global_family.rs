@@ -244,30 +244,15 @@ fn parse_inline_global_method_with_global_arg(stmt: &str) -> Option<(&str, &str,
 fn parse_inline_global_method_with_four_global_args(
     stmt: &str,
 ) -> Option<(&str, &str, &str, &str, &str, &str)> {
-    let (target_path, remainder) = stmt.rsplit_once(':')?;
-    let (method_name, args) = remainder.split_once('(')?;
-    let args = args.strip_suffix(')')?.trim();
-    let mut parts = args.split(',').map(str::trim);
-    let first_arg_path = parts.next()?;
-    let second_arg_path = parts.next()?;
-    let third_arg_path = parts.next()?;
-    let fourth_arg_path = parts.next()?;
-    if parts.next().is_some() {
-        return None;
-    }
-    let target_path = target_path.trim();
-    let method_name = method_name.trim();
-    (is_fast_handler_path(target_path)
-        && is_fast_identifier(method_name)
-        && is_fast_handler_path(first_arg_path)
-        && is_fast_handler_path(second_arg_path)
-        && is_fast_handler_path(third_arg_path)
-        && is_fast_handler_path(fourth_arg_path)
-        && first_arg_path.split('.').next() != Some("self")
-        && second_arg_path.split('.').next() != Some("self")
-        && third_arg_path.split('.').next() != Some("self")
-        && fourth_arg_path.split('.').next() != Some("self"))
-    .then_some((
+    let (target_path, method_name, arg_paths) =
+        parse_global_method_with_four_global_arg_paths(stmt)?;
+    let [
+        first_arg_path,
+        second_arg_path,
+        third_arg_path,
+        fourth_arg_path,
+    ] = arg_paths;
+    Some((
         target_path,
         method_name,
         first_arg_path,
@@ -309,31 +294,15 @@ fn parse_inline_global_method_with_string_global_bool_args(
 fn parse_inline_global_method_with_global_three_global_bool_args(
     stmt: &str,
 ) -> Option<(&str, &str, &str, &str, &str, &str, bool)> {
-    let (target_path, remainder) = stmt.rsplit_once(':')?;
-    let (method_name, args) = remainder.split_once('(')?;
-    let args = args.strip_suffix(')')?.trim();
-    let mut parts = args.split(',').map(str::trim);
-    let first_arg_path = parts.next()?;
-    let second_arg_path = parts.next()?;
-    let third_arg_path = parts.next()?;
-    let fourth_arg_path = parts.next()?;
-    let fifth = super::parse_single_bool_literal(parts.next()?)?;
-    if parts.next().is_some() {
-        return None;
-    }
-    let target_path = target_path.trim();
-    let method_name = method_name.trim();
-    (is_fast_handler_path(target_path)
-        && is_fast_identifier(method_name)
-        && is_fast_handler_path(first_arg_path)
-        && is_fast_handler_path(second_arg_path)
-        && is_fast_handler_path(third_arg_path)
-        && is_fast_handler_path(fourth_arg_path)
-        && first_arg_path.split('.').next() != Some("self")
-        && second_arg_path.split('.').next() != Some("self")
-        && third_arg_path.split('.').next() != Some("self")
-        && fourth_arg_path.split('.').next() != Some("self"))
-    .then_some((
+    let (target_path, method_name, arg_paths, fifth) =
+        parse_global_method_with_four_global_arg_paths_and_bool(stmt)?;
+    let [
+        first_arg_path,
+        second_arg_path,
+        third_arg_path,
+        fourth_arg_path,
+    ] = arg_paths;
+    Some((
         target_path,
         method_name,
         first_arg_path,
@@ -342,6 +311,65 @@ fn parse_inline_global_method_with_global_three_global_bool_args(
         fourth_arg_path,
         fifth,
     ))
+}
+
+fn parse_global_method_with_four_global_arg_paths_and_bool<'a>(
+    stmt: &'a str,
+) -> Option<(&'a str, &'a str, [&'a str; 4], bool)> {
+    let (target_path, method_name, arg_paths, fifth_arg) =
+        parse_global_method_with_four_global_arg_paths_and_tail(stmt)?;
+    let fifth = super::parse_single_bool_literal(fifth_arg?)?;
+    validate_global_method_with_global_arg_paths(target_path, method_name, arg_paths)
+        .map(|(target_path, method_name, arg_paths)| (target_path, method_name, arg_paths, fifth))
+}
+
+fn parse_global_method_with_four_global_arg_paths<'a>(
+    stmt: &'a str,
+) -> Option<(&'a str, &'a str, [&'a str; 4])> {
+    let (target_path, method_name, arg_paths, tail_arg) =
+        parse_global_method_with_four_global_arg_paths_and_tail(stmt)?;
+    if tail_arg.is_some() {
+        return None;
+    }
+    validate_global_method_with_global_arg_paths(target_path, method_name, arg_paths)
+}
+
+fn parse_global_method_with_four_global_arg_paths_and_tail<'a>(
+    stmt: &'a str,
+) -> Option<(&'a str, &'a str, [&'a str; 4], Option<&'a str>)> {
+    let (target_path, remainder) = stmt.rsplit_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let mut parts = args.split(',').map(str::trim);
+    let first_arg_path = parts.next()?;
+    let second_arg_path = parts.next()?;
+    let third_arg_path = parts.next()?;
+    let fourth_arg_path = parts.next()?;
+    let tail_arg = parts.next();
+    if parts.next().is_some() {
+        return None;
+    }
+    let arg_paths = [
+        first_arg_path,
+        second_arg_path,
+        third_arg_path,
+        fourth_arg_path,
+    ];
+    Some((target_path, method_name, arg_paths, tail_arg))
+}
+
+fn validate_global_method_with_global_arg_paths<'a>(
+    target_path: &'a str,
+    method_name: &'a str,
+    arg_paths: [&'a str; 4],
+) -> Option<(&'a str, &'a str, [&'a str; 4])> {
+    let target_path = target_path.trim();
+    let method_name = method_name.trim();
+    let all_args_are_global = arg_paths.iter().all(|arg_path| {
+        is_fast_handler_path(arg_path) && arg_path.split('.').next() != Some("self")
+    });
+    (is_fast_handler_path(target_path) && is_fast_identifier(method_name) && all_args_are_global)
+        .then_some((target_path, method_name, arg_paths))
 }
 
 fn parse_inline_global_method_with_global_nil_nil_nil_nil_bool_args(
@@ -806,7 +834,51 @@ fn parse_inline_global_method_then_assign(
 
 #[cfg(test)]
 mod tests {
-    use super::parse_global_tooltip_set_owner_then_set_text;
+    use super::{
+        parse_global_tooltip_set_owner_then_set_text,
+        parse_inline_global_method_with_four_global_args,
+        parse_inline_global_method_with_global_three_global_bool_args,
+    };
+
+    #[test]
+    fn parses_global_method_with_four_global_args() {
+        let stmt = "GameTooltip:SetText(Tooltip.Title, Tooltip.Red, Tooltip.Green, Tooltip.Blue)";
+
+        let parsed = parse_inline_global_method_with_four_global_args(stmt);
+
+        assert_eq!(
+            parsed,
+            Some((
+                "GameTooltip",
+                "SetText",
+                "Tooltip.Title",
+                "Tooltip.Red",
+                "Tooltip.Green",
+                "Tooltip.Blue",
+            ))
+        );
+    }
+
+    #[test]
+    fn parses_global_method_with_global_three_global_bool_args() {
+        let stmt =
+            "GameTooltip:AddLine(Tooltip.Text, Tooltip.Red, Tooltip.Green, Tooltip.Blue, true)";
+
+        let parsed = parse_inline_global_method_with_global_three_global_bool_args(stmt);
+
+        assert_eq!(
+            parsed,
+            Some((
+                "GameTooltip",
+                "AddLine",
+                "Tooltip.Text",
+                "Tooltip.Red",
+                "Tooltip.Green",
+                "Tooltip.Blue",
+                true,
+            ))
+        );
+    }
 
     #[test]
     fn parses_global_tooltip_set_owner_then_set_text_paths() {
