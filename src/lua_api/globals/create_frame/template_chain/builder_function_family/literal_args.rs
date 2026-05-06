@@ -87,16 +87,25 @@ fn build_function_handler_with_string_arg(
     function_name: &str,
     arg: &str,
 ) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local fn, literal_arg = ...
-            return function(self, ...)
-                return fn(self, literal_arg)
-            end
-        "#,
-        TEMPLATE_INLINE_FUNCTION_SELF_STRING,
-    )?;
+    build_function_handler_with_string_value_arg(state, function_name, arg, true)
+}
+
+fn build_function_handler_with_string_only_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    arg: &str,
+) -> LuaResult<Val> {
+    build_function_handler_with_string_value_arg(state, function_name, arg, false)
+}
+
+fn build_function_handler_with_string_value_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    arg: &str,
+    pass_self: bool,
+) -> LuaResult<Val> {
+    let (template, template_name) = string_value_arg_template(pass_self);
+    let builder = load_template(state, template, template_name)?;
     let target = resolve_global_path(state, function_name);
     let arg = create_string(state, arg);
     crate::lua_api::methods::call_function_state(
@@ -106,28 +115,28 @@ fn build_function_handler_with_string_arg(
     )
 }
 
-fn build_function_handler_with_string_only_arg(
-    state: &mut LuaState,
-    function_name: &str,
-    arg: &str,
-) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local fn, literal_arg = ...
-            return function(self, ...)
-                return fn(literal_arg)
-            end
-        "#,
-        TEMPLATE_INLINE_FUNCTION_STRING_ARG,
-    )?;
-    let target = resolve_global_path(state, function_name);
-    let arg = create_string(state, arg);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[target, arg],
-    )
+fn string_value_arg_template(pass_self: bool) -> (&'static str, &'static str) {
+    if pass_self {
+        (
+            r#"
+                local fn, literal_arg = ...
+                return function(self, ...)
+                    return fn(self, literal_arg)
+                end
+            "#,
+            TEMPLATE_INLINE_FUNCTION_SELF_STRING,
+        )
+    } else {
+        (
+            r#"
+                local fn, literal_arg = ...
+                return function(self, ...)
+                    return fn(literal_arg)
+                end
+            "#,
+            TEMPLATE_INLINE_FUNCTION_STRING_ARG,
+        )
+    }
 }
 
 fn build_function_handler_with_string_number_args(
@@ -188,16 +197,25 @@ fn build_function_handler_with_number_arg(
     function_name: &str,
     value: f64,
 ) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local fn, number_arg = ...
-            return function(self, ...)
-                return fn(number_arg)
-            end
-        "#,
-        "template-inline-function-number-arg",
-    )?;
+    build_function_handler_with_number_value_arg(state, function_name, value, false)
+}
+
+fn build_function_handler_with_self_number_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    value: f64,
+) -> LuaResult<Val> {
+    build_function_handler_with_number_value_arg(state, function_name, value, true)
+}
+
+fn build_function_handler_with_number_value_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    value: f64,
+    pass_self: bool,
+) -> LuaResult<Val> {
+    let (template, template_name) = number_value_arg_template(pass_self);
+    let builder = load_template(state, template, template_name)?;
     let target = resolve_global_path(state, function_name);
     crate::lua_api::methods::call_function_state(
         state,
@@ -206,25 +224,26 @@ fn build_function_handler_with_number_arg(
     )
 }
 
-fn build_function_handler_with_self_number_arg(
-    state: &mut LuaState,
-    function_name: &str,
-    value: f64,
-) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local fn, number_arg = ...
-            return function(self, ...)
-                return fn(self, number_arg)
-            end
-        "#,
-        "template-inline-function-self-number-arg",
-    )?;
-    let target = resolve_global_path(state, function_name);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[target, Val::Num(value)],
-    )
+fn number_value_arg_template(pass_self: bool) -> (&'static str, &'static str) {
+    if pass_self {
+        (
+            r#"
+                local fn, number_arg = ...
+                return function(self, ...)
+                    return fn(self, number_arg)
+                end
+            "#,
+            "template-inline-function-self-number-arg",
+        )
+    } else {
+        (
+            r#"
+                local fn, number_arg = ...
+                return function(self, ...)
+                    return fn(number_arg)
+                end
+            "#,
+            "template-inline-function-number-arg",
+        )
+    }
 }
