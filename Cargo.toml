@@ -6,6 +6,9 @@ description = "World of Warcraft UI simulator for addon development"
 license = "GPL-3.0-only"
 default-run = "wow-sim"
 
+[workspace]
+members = [".", "xtask"]
+
 [dependencies]
 # mlua removed — rilua is the sole Lua VM
 rilua = { git = "https://github.com/Osso/rilua.git" }
@@ -44,7 +47,7 @@ bytemuck = { version = "1.21", features = ["derive"], optional = true }
 pollster = { version = "0.4", optional = true }
 webp = { version = "0.3.1", optional = true }
 rustc-hash = "2.1.2"
-asset-resolver = { git = "https://github.com/world-of-osso/asset-resolver", rev = "327e361bd996ceaae2e45e7a4c5220e1fe7d6cd8", optional = true }
+asset-resolver = { git = "https://github.com/world-of-osso/asset-resolver", rev = "3dd4a4d913ccb620d1e22a71ddb5896d37b509c7", optional = true }
 
 [[bin]]
 name = "wow-sim"
@@ -63,11 +66,11 @@ sha2 = "0.10"
 [features]
 # fast-build is on by default so local dev/debug builds get the iced dylib for
 # faster incremental rebuilds. Release builds should use:
-#   cargo build --release --no-default-features --features sound,gui,casc
+#   cargo build --release --no-default-features --features sound,gui
 # to produce a fully static binary not tied to a specific rustc version.
 default = ["sound", "gui", "casc", "fast-build"]
 sound = ["rodio"]
-gui = ["dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp"]
+gui = ["casc", "dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp"]
 casc = ["dep:asset-resolver"]
 fast-build = ["gui", "dep:iced-dynamic"]
 rehash-stats = ["rilua/rehash-stats"]

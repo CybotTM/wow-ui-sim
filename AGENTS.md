@@ -223,6 +223,18 @@ WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 timeout 90 cargo run --bin wow-sim
 ```
 **Always use `timeout 90` or less** on the run step to prevent hung processes. Never put a timeout on the build step.
 
+### Release Builds
+
+Use the xtask-backed Cargo aliases for release binaries:
+
+```bash
+cargo release-windows
+cargo release-linux
+cargo release-current
+```
+
+These aliases build both `wow-sim` and `wow-cli` with `--release --no-default-features --features sound,gui`. This intentionally excludes the `fast-build` feature so release builds use non-dynamic iced. The `gui` feature requires `casc`, so release GUI builds always include CASC asset loading.
+
 ### CLI Arguments
 
 - `--exec-lua "code"` - Execute Lua code after startup events. Works in all modes: GUI (after first frame render), screenshot, and dump-tree. Prefix with `@` to load from file (e.g., `--exec-lua @/tmp/debug.lua`)
