@@ -11,7 +11,8 @@ use crate::lua_api::methods::{
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_api::state_types::{
-    LfgActivityInfo, LfgApplication, LfgCategoryInfo, PendingTimer, PremadeListing,
+    LfgActivityInfo, LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, PendingTimer,
+    PremadeListing,
 };
 use crate::lua_api::{next_timer_id, timer_layout};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
@@ -1012,84 +1013,119 @@ fn get_default_language_search_filter(state: &mut LuaState) -> LuaResult<u32> {
 /// dropdown helpers. All-false / zero / empty defaults pass every
 /// search result through.
 fn get_advanced_filter(state: &mut LuaState) -> LuaResult<u32> {
-    let f = borrow_state(state)?.lfg_advanced_filter.clone();
+    let filter = borrow_state(state)?.lfg_advanced_filter.clone();
     let info = create_table(state);
-    table_set(state, info, "needsTank", Val::Bool(f.needs_tank));
-    table_set(state, info, "needsHealer", Val::Bool(f.needs_healer));
-    table_set(state, info, "needsDamage", Val::Bool(f.needs_damage));
-    table_set(state, info, "needsMyClass", Val::Bool(f.needs_my_class));
-    table_set(state, info, "hasTank", Val::Bool(f.has_tank));
-    table_set(state, info, "hasHealer", Val::Bool(f.has_healer));
+    set_advanced_filter_role_fields(state, info, &filter);
     table_set(
         state,
         info,
         "minimumRating",
-        Val::Num(f.minimum_rating as f64),
+        Val::Num(filter.minimum_rating as f64),
     );
-    let activities = create_table(state);
-    if let Val::Table(act_ref) = activities {
-        for (i, aid) in f.activities.iter().enumerate() {
-            if let Some(t) = state.gc.tables.get_mut(act_ref) {
-                let _ = t.raw_set(
-                    Val::Num(i as f64 + 1.0),
-                    Val::Num(*aid as f64),
-                    &state.gc.string_arena,
-                );
-            }
+    set_advanced_filter_activities(state, info, &filter.activities);
+    set_advanced_filter_difficulty_fields(state, info, &filter);
+    set_advanced_filter_playstyle_fields(state, info, &filter);
+    state.push(info);
+    Ok(1)
+}
+
+fn set_advanced_filter_role_fields(state: &mut LuaState, info: Val, filter: &LfgAdvancedFilter) {
+    table_set(state, info, "needsTank", Val::Bool(filter.needs_tank));
+    table_set(state, info, "needsHealer", Val::Bool(filter.needs_healer));
+    table_set(state, info, "needsDamage", Val::Bool(filter.needs_damage));
+    table_set(
+        state,
+        info,
+        "needsMyClass",
+        Val::Bool(filter.needs_my_class),
+    );
+    table_set(state, info, "hasTank", Val::Bool(filter.has_tank));
+    table_set(state, info, "hasHealer", Val::Bool(filter.has_healer));
+}
+
+fn set_advanced_filter_activities(state: &mut LuaState, info: Val, activities: &[u32]) {
+    let activities_table = u32_array_table(state, activities);
+    table_set(state, info, "activities", activities_table);
+}
+
+fn u32_array_table(state: &mut LuaState, values: &[u32]) -> Val {
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        return table;
+    };
+    for (index, value) in values.iter().enumerate() {
+        if let Some(table) = state.gc.tables.get_mut(table_ref) {
+            let _ = table.raw_set(
+                Val::Num(index as f64 + 1.0),
+                Val::Num(*value as f64),
+                &state.gc.string_arena,
+            );
         }
-        state.gc.barrier_back(act_ref);
     }
-    table_set(state, info, "activities", activities);
+    state.gc.barrier_back(table_ref);
+    table
+}
+
+fn set_advanced_filter_difficulty_fields(
+    state: &mut LuaState,
+    info: Val,
+    filter: &LfgAdvancedFilter,
+) {
     table_set(
         state,
         info,
         "difficultyNormal",
-        Val::Bool(f.difficulty_normal),
+        Val::Bool(filter.difficulty_normal),
     );
     table_set(
         state,
         info,
         "difficultyHeroic",
-        Val::Bool(f.difficulty_heroic),
+        Val::Bool(filter.difficulty_heroic),
     );
     table_set(
         state,
         info,
         "difficultyMythic",
-        Val::Bool(f.difficulty_mythic),
+        Val::Bool(filter.difficulty_mythic),
     );
     table_set(
         state,
         info,
         "difficultyMythicPlus",
-        Val::Bool(f.difficulty_mythic_plus),
+        Val::Bool(filter.difficulty_mythic_plus),
     );
+}
+
+fn set_advanced_filter_playstyle_fields(
+    state: &mut LuaState,
+    info: Val,
+    filter: &LfgAdvancedFilter,
+) {
     table_set(
         state,
         info,
         "generalPlaystyle1",
-        Val::Bool(f.general_playstyle1),
+        Val::Bool(filter.general_playstyle1),
     );
     table_set(
         state,
         info,
         "generalPlaystyle2",
-        Val::Bool(f.general_playstyle2),
+        Val::Bool(filter.general_playstyle2),
     );
     table_set(
         state,
         info,
         "generalPlaystyle3",
-        Val::Bool(f.general_playstyle3),
+        Val::Bool(filter.general_playstyle3),
     );
     table_set(
         state,
         info,
         "generalPlaystyle4",
-        Val::Bool(f.general_playstyle4),
+        Val::Bool(filter.general_playstyle4),
     );
-    state.push(info);
-    Ok(1)
 }
 
 fn ensure_c_lfg_list_table(state: &mut LuaState) -> GcRef<Table> {
