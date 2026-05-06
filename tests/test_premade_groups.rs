@@ -61,14 +61,14 @@ fn search_fires_results_event_on_next_tick() {
     let result: String = env
         .eval(
             r#"
-            local fired = false
+            __lfg_search_results_fired = false
             local f = CreateFrame("Frame")
             f:RegisterEvent("LFG_LIST_SEARCH_RESULTS_RECEIVED")
             f:SetScript("OnEvent", function(self, event)
-                if event == "LFG_LIST_SEARCH_RESULTS_RECEIVED" then fired = true end
+                if event == "LFG_LIST_SEARCH_RESULTS_RECEIVED" then __lfg_search_results_fired = true end
             end)
             C_LFGList.Search(2)
-            return fired and "fired_sync" or "pending"
+            return __lfg_search_results_fired and "fired_sync" or "pending"
             "#,
         )
         .unwrap();
@@ -78,7 +78,9 @@ fn search_fires_results_event_on_next_tick() {
     );
 
     env.process_timers().unwrap();
-    let result: String = env.eval("return fired and 'ok' or 'not_fired'").unwrap();
+    let result: String = env
+        .eval("return __lfg_search_results_fired and 'ok' or 'not_fired'")
+        .unwrap();
     assert_eq!(
         result, "ok",
         "Search should fire event on timer tick: {result}"

@@ -123,6 +123,15 @@ fn find_activity(state: &LuaState, activity_id: u32) -> Option<LfgActivityInfo> 
 
 fn build_search_result_info(state: &mut LuaState, listing: &PremadeListing) -> Val {
     let info = create_table(state);
+    set_search_result_identity_fields(state, info, listing);
+    set_search_result_activity_fields(state, info, listing);
+    set_search_result_size_fields(state, info, listing);
+    set_search_result_social_fields(state, info, listing);
+    set_search_result_requirement_fields(state, info);
+    info
+}
+
+fn set_search_result_identity_fields(state: &mut LuaState, info: Val, listing: &PremadeListing) {
     let name = create_string(state, &listing.name);
     let comment = create_string(state, &listing.comment);
     let leader_name = create_string(state, &listing.leader_name);
@@ -137,6 +146,13 @@ fn build_search_result_info(state: &mut LuaState, listing: &PremadeListing) -> V
     table_set(state, info, "name", name);
     table_set(state, info, "comment", comment);
     table_set(state, info, "leaderName", leader_name);
+    table_set(state, info, "voiceChat", voice_chat);
+    table_set(state, info, "autoAccept", Val::Bool(listing.auto_accept));
+    table_set(state, info, "isDelisted", Val::Bool(listing.is_delisted));
+    table_set(state, info, "partyGUID", party_guid);
+}
+
+fn set_search_result_activity_fields(state: &mut LuaState, info: Val, listing: &PremadeListing) {
     // `activityID` is the legacy single-value form; `activityIDs` is the
     // current shape addons read (`searchResultInfo.activityIDs[1]`).
     table_set(
@@ -145,52 +161,8 @@ fn build_search_result_info(state: &mut LuaState, listing: &PremadeListing) -> V
         "activityID",
         Val::Num(listing.activity_id as f64),
     );
-    let activity_ids = create_table(state);
-    if let Val::Table(activity_ids_ref) = activity_ids {
-        if let Some(t) = state.gc.tables.get_mut(activity_ids_ref) {
-            let _ = t.raw_set(
-                Val::Num(1.0),
-                Val::Num(listing.activity_id as f64),
-                &state.gc.string_arena,
-            );
-        }
-        state.gc.barrier_back(activity_ids_ref);
-    }
+    let activity_ids = activity_ids_table(state, listing);
     table_set(state, info, "activityIDs", activity_ids);
-    table_set(
-        state,
-        info,
-        "numMembers",
-        Val::Num(listing.num_members as f64),
-    );
-    table_set(
-        state,
-        info,
-        "maxMembers",
-        Val::Num(listing.max_members as f64),
-    );
-    table_set(state, info, "voiceChat", voice_chat);
-    table_set(state, info, "autoAccept", Val::Bool(listing.auto_accept));
-    table_set(state, info, "isDelisted", Val::Bool(listing.is_delisted));
-    table_set(state, info, "partyGUID", party_guid);
-    table_set(
-        state,
-        info,
-        "numBNetFriends",
-        Val::Num(listing.num_bnet_friends as f64),
-    );
-    table_set(
-        state,
-        info,
-        "numCharFriends",
-        Val::Num(listing.num_char_friends as f64),
-    );
-    table_set(
-        state,
-        info,
-        "numGuildMates",
-        Val::Num(listing.num_guild_mates as f64),
-    );
     table_set(
         state,
         info,
@@ -209,6 +181,61 @@ fn build_search_result_info(state: &mut LuaState, listing: &PremadeListing) -> V
         "leaderFactionGroup",
         Val::Num(listing.leader_faction_group as f64),
     );
+}
+
+fn activity_ids_table(state: &mut LuaState, listing: &PremadeListing) -> Val {
+    let activity_ids = create_table(state);
+    let Val::Table(activity_ids_ref) = activity_ids else {
+        return activity_ids;
+    };
+    if let Some(t) = state.gc.tables.get_mut(activity_ids_ref) {
+        let _ = t.raw_set(
+            Val::Num(1.0),
+            Val::Num(listing.activity_id as f64),
+            &state.gc.string_arena,
+        );
+    }
+    state.gc.barrier_back(activity_ids_ref);
+    activity_ids
+}
+
+fn set_search_result_size_fields(state: &mut LuaState, info: Val, listing: &PremadeListing) {
+    table_set(
+        state,
+        info,
+        "numMembers",
+        Val::Num(listing.num_members as f64),
+    );
+    table_set(
+        state,
+        info,
+        "maxMembers",
+        Val::Num(listing.max_members as f64),
+    );
+}
+
+fn set_search_result_social_fields(state: &mut LuaState, info: Val, listing: &PremadeListing) {
+    table_set(
+        state,
+        info,
+        "numBNetFriends",
+        Val::Num(listing.num_bnet_friends as f64),
+    );
+    table_set(
+        state,
+        info,
+        "numCharFriends",
+        Val::Num(listing.num_char_friends as f64),
+    );
+    table_set(
+        state,
+        info,
+        "numGuildMates",
+        Val::Num(listing.num_guild_mates as f64),
+    );
+}
+
+fn set_search_result_requirement_fields(state: &mut LuaState, info: Val) {
     table_set(state, info, "requiredItemLevel", Val::Num(0.0));
     table_set(state, info, "requiredHonorLevel", Val::Num(0.0));
     table_set(state, info, "requiredDungeonScore", Val::Num(0.0));
@@ -216,7 +243,6 @@ fn build_search_result_info(state: &mut LuaState, listing: &PremadeListing) -> V
     table_set(state, info, "questID", Val::Num(0.0));
     table_set(state, info, "age", Val::Num(0.0));
     table_set(state, info, "isWarMode", Val::Bool(false));
-    info
 }
 
 fn get_search_result_info(state: &mut LuaState) -> LuaResult<u32> {
