@@ -5,6 +5,7 @@ use crate::lua_api::methods::{
     table_set,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
+use crate::widget::Frame;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -50,25 +51,22 @@ fn any_ancestor_flattens(widgets: &crate::widget::WidgetRegistry, start: u64) ->
 }
 
 pub fn get_flattens_render_layers(state: &mut LuaState) -> LuaResult<u32> {
+    push_frame_bool(state, |frame| frame.flattens_render_layers)
+}
+
+fn push_frame_bool(state: &mut LuaState, read: impl FnOnce(&Frame) -> bool) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let val = borrow_state(state)?
         .widgets
         .get(id)
-        .map(|f| f.flattens_render_layers)
+        .map(read)
         .unwrap_or(false);
     state.push(Val::Bool(val));
     Ok(1)
 }
 
 pub fn get_dont_save_position(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let val = borrow_state(state)?
-        .widgets
-        .get(id)
-        .map(|f| f.dont_save_position)
-        .unwrap_or(false);
-    state.push(Val::Bool(val));
-    Ok(1)
+    push_frame_bool(state, |frame| frame.dont_save_position)
 }
 
 pub fn set_dont_save_position(state: &mut LuaState) -> LuaResult<u32> {
