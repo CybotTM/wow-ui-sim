@@ -21,7 +21,8 @@ use crate::c_api::permanent_shims::c_model_info;
 use crate::c_api::temporary_shims::{c_black_market, c_calendar, c_lfg_info, c_perks_program};
 use crate::lua_api::methods::call_function_state_multi;
 use crate::lua_api::script_helpers::{
-    call_error_handler_state, protected_call_state, protected_lua_pcall_state,
+    call_error_handler_state, protected_call_state, protected_lua_pcall_state, registry_value,
+    set_registry_value,
 };
 use crate::lua_bridge::stack_val;
 use rilua::LuaApiMut;
@@ -601,25 +602,6 @@ fn build_default_error_handler(state: &mut LuaState) -> LuaResult<Val> {
     let result = state.stack_get(call_base);
     state.top = call_base;
     Ok(result)
-}
-
-fn registry_value(state: &mut LuaState, key: &str) -> Val {
-    let key_ref = state.gc.intern_string(key.as_bytes());
-    state
-        .gc
-        .tables
-        .get(state.registry)
-        .map(|table| table.get_str(key_ref, &state.gc.string_arena))
-        .unwrap_or(Val::Nil)
-}
-
-fn set_registry_value(state: &mut LuaState, key: &str, value: Val) {
-    let key_ref = state.gc.intern_string(key.as_bytes());
-    let registry = state.registry;
-    if let Some(table) = state.gc.tables.get_mut(registry) {
-        let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
-    }
-    state.gc.barrier_back(registry);
 }
 
 // ── Registration ─────────────────────────────────────────────────────────────
