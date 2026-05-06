@@ -46,6 +46,10 @@ fn load_full_game_ui_with_housing_cornerstone_lod() -> WowLuaEnv {
     env
 }
 
+fn eval_bool(env: &WowLuaEnv, script: &str, context: &str) -> bool {
+    env.eval(script).expect(context)
+}
+
 #[test]
 fn blizzard_housing_cornerstone_find_toc_resolves_bare_variant() {
     let resolved = find_toc_file(&housing_cornerstone_dir())
@@ -469,54 +473,54 @@ fn blizzard_import_house_confirmation_dialog_mixin_publishes_three_methods() {
 fn blizzard_housing_cornerstone_purchase_frame_publishes_money_widgets_via_parent_keys() {
     let env = load_full_game_ui_with_housing_cornerstone_lod();
 
-    let cost_text_frame: bool = env
-        .eval(
-            "local f = HousingCornerstonePurchaseFrame.CostTextFrame; return type(f) == 'table' and type(f.GetName) == 'function'",
-        )
-        .expect("CostTextFrame parentKey lookup should succeed");
+    let cost_text_frame = eval_bool(
+        &env,
+        "local f = HousingCornerstonePurchaseFrame.CostTextFrame; return type(f) == 'table' and type(f.GetName) == 'function'",
+        "CostTextFrame parentKey lookup should succeed",
+    );
     assert!(
         cost_text_frame,
         "PurchaseFrame.CostTextFrame must publish via parentKey"
     );
 
-    let price_money_frame: bool = env
-        .eval(
-            "local f = HousingCornerstonePurchaseFrame.CostTextFrame.PriceMoneyFrame; return type(f) == 'table'",
-        )
-        .expect("PriceMoneyFrame parentKey lookup should succeed");
+    let price_money_frame = eval_bool(
+        &env,
+        "local f = HousingCornerstonePurchaseFrame.CostTextFrame.PriceMoneyFrame; return type(f) == 'table'",
+        "PriceMoneyFrame parentKey lookup should succeed",
+    );
     assert!(
         price_money_frame,
         "PurchaseFrame.CostTextFrame.PriceMoneyFrame must publish via parentKey — \
          SmallMoneyFrameTemplate child also published as global HousingCornerstonePriceMoneyFrame"
     );
 
-    let price_global: bool = env
-        .eval(
-            "local f = _G['HousingCornerstonePriceMoneyFrame']; return type(f) == 'table' and type(f.GetName) == 'function'",
-        )
-        .expect("HousingCornerstonePriceMoneyFrame global lookup should succeed");
+    let price_global = eval_bool(
+        &env,
+        "local f = _G['HousingCornerstonePriceMoneyFrame']; return type(f) == 'table' and type(f.GetName) == 'function'",
+        "HousingCornerstonePriceMoneyFrame global lookup should succeed",
+    );
     assert!(
         price_global,
         "_G.HousingCornerstonePriceMoneyFrame must publish — only child with both name= and \
          parentKey= because MoneyFrame_Update / SetMoneyFrameColor look up by string name"
     );
 
-    let purchase_money_frame: bool = env
-        .eval(
-            "local f = HousingCornerstonePurchaseFrame.MoneyFrame; return type(f) == 'table' and type(f.GoldButton) ~= nil",
-        )
-        .expect("MoneyFrame parentKey lookup should succeed");
+    let purchase_money_frame = eval_bool(
+        &env,
+        "local f = HousingCornerstonePurchaseFrame.MoneyFrame; return type(f) == 'table' and type(f.GoldButton) ~= nil",
+        "MoneyFrame parentKey lookup should succeed",
+    );
     assert!(
         purchase_money_frame,
         "PurchaseFrame.MoneyFrame must publish via parentKey — MoneyFrameTemplate (not Small) \
          showing player's current Gold/Silver/Copper denominations"
     );
 
-    let input_mask: bool = env
-        .eval(
-            "local f = HousingCornerstonePurchaseFrame.InputMask; return type(f) == 'table' and type(f.GetName) == 'function'",
-        )
-        .expect("InputMask parentKey lookup should succeed");
+    let input_mask = eval_bool(
+        &env,
+        "local f = HousingCornerstonePurchaseFrame.InputMask; return type(f) == 'table' and type(f.GetName) == 'function'",
+        "InputMask parentKey lookup should succeed",
+    );
     assert!(
         input_mask,
         "PurchaseFrame.InputMask must publish via parentKey — toggled via SetInputMaskShown \
