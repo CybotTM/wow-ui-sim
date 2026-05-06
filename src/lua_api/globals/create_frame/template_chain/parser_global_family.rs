@@ -444,6 +444,38 @@ type GlobalMethodStringStringFunctionResultNumbers<'a> =
 fn parse_inline_global_method_with_string_string_function_result_and_three_number_args(
     stmt: &str,
 ) -> Option<GlobalMethodStringStringFunctionResultNumbers<'_>> {
+    let parsed = parse_global_method_with_function_result_and_three_numbers(stmt)?;
+    let (function_name, first, second) =
+        parse_string_string_function_result_call(parsed.first_arg)?;
+    validate_global_method_with_function_result(
+        parsed.target_path,
+        parsed.method_name,
+        function_name,
+    )?;
+    Some((
+        parsed.target_path.trim(),
+        parsed.method_name.trim(),
+        function_name.trim(),
+        first,
+        second,
+        parsed.third,
+        parsed.fourth,
+        parsed.fifth,
+    ))
+}
+
+struct GlobalMethodFunctionResultNumbers<'a> {
+    target_path: &'a str,
+    method_name: &'a str,
+    first_arg: &'a str,
+    third: f64,
+    fourth: f64,
+    fifth: f64,
+}
+
+fn parse_global_method_with_function_result_and_three_numbers(
+    stmt: &str,
+) -> Option<GlobalMethodFunctionResultNumbers<'_>> {
     let (target_path, remainder) = stmt.rsplit_once(':')?;
     let (method_name, args) = remainder.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
@@ -451,36 +483,53 @@ fn parse_inline_global_method_with_string_string_function_result_and_three_numbe
     if parts.len() != 4 {
         return None;
     }
-    let first_arg = parts[0];
     let third = parts[1].parse::<f64>().ok()?;
     let fourth = parts[2].parse::<f64>().ok()?;
     let fifth = parts[3].parse::<f64>().ok()?;
-    let (function_name, call_args) = first_arg.split_once('(')?;
+    Some(GlobalMethodFunctionResultNumbers {
+        target_path,
+        method_name,
+        first_arg: parts[0],
+        third,
+        fourth,
+        fifth,
+    })
+}
+
+fn parse_string_string_function_result_call(stmt: &str) -> Option<(&str, &str, &str)> {
+    let (function_name, raw_first, raw_second) = parse_two_arg_function_call(stmt)?;
+    let first = super::parse_single_string_literal(raw_first.trim())?;
+    let second = super::parse_single_string_literal(raw_second.trim())?;
+    Some((function_name, first, second))
+}
+
+fn parse_global_string_function_result_call(stmt: &str) -> Option<(&str, &str, &str)> {
+    let (function_name, raw_first, raw_second) = parse_two_arg_function_call(stmt)?;
+    let first_arg_path = raw_first.trim();
+    let second = super::parse_single_string_literal(raw_second.trim())?;
+    (is_fast_handler_path(first_arg_path) && first_arg_path.split('.').next() != Some("self"))
+        .then_some((function_name, first_arg_path, second))
+}
+
+fn parse_two_arg_function_call(stmt: &str) -> Option<(&str, &str, &str)> {
+    let (function_name, call_args) = stmt.split_once('(')?;
     let call_args = call_args.strip_suffix(')')?.trim();
     let call_args = super::split_top_level_args(call_args)?;
     if call_args.len() != 2 {
         return None;
     }
-    let raw_first = call_args[0];
-    let raw_second = call_args[1];
-    let first = super::parse_single_string_literal(raw_first.trim())?;
-    let second = super::parse_single_string_literal(raw_second.trim())?;
-    let target_path = target_path.trim();
-    let method_name = method_name.trim();
-    let function_name = function_name.trim();
-    (is_fast_handler_path(target_path)
-        && is_fast_identifier(method_name)
-        && is_fast_handler_path(function_name))
-    .then_some((
-        target_path,
-        method_name,
-        function_name,
-        first,
-        second,
-        third,
-        fourth,
-        fifth,
-    ))
+    Some((function_name, call_args[0], call_args[1]))
+}
+
+fn validate_global_method_with_function_result(
+    target_path: &str,
+    method_name: &str,
+    function_name: &str,
+) -> Option<()> {
+    (is_fast_handler_path(target_path.trim())
+        && is_fast_identifier(method_name.trim())
+        && is_fast_handler_path(function_name.trim()))
+    .then_some(())
 }
 
 type GlobalMethodGlobalStringFunctionResultNumbers<'a> =
@@ -489,44 +538,23 @@ type GlobalMethodGlobalStringFunctionResultNumbers<'a> =
 fn parse_inline_global_method_with_global_string_function_result_and_three_number_args(
     stmt: &str,
 ) -> Option<GlobalMethodGlobalStringFunctionResultNumbers<'_>> {
-    let (target_path, remainder) = stmt.rsplit_once(':')?;
-    let (method_name, args) = remainder.split_once('(')?;
-    let args = args.strip_suffix(')')?.trim();
-    let parts = super::split_top_level_args(args)?;
-    if parts.len() != 4 {
-        return None;
-    }
-    let first_arg = parts[0];
-    let third = parts[1].parse::<f64>().ok()?;
-    let fourth = parts[2].parse::<f64>().ok()?;
-    let fifth = parts[3].parse::<f64>().ok()?;
-    let (function_name, call_args) = first_arg.split_once('(')?;
-    let call_args = call_args.strip_suffix(')')?.trim();
-    let call_args = super::split_top_level_args(call_args)?;
-    if call_args.len() != 2 {
-        return None;
-    }
-    let raw_first = call_args[0];
-    let raw_second = call_args[1];
-    let first_arg_path = raw_first.trim();
-    let second = super::parse_single_string_literal(raw_second.trim())?;
-    let target_path = target_path.trim();
-    let method_name = method_name.trim();
-    let function_name = function_name.trim();
-    (is_fast_handler_path(target_path)
-        && is_fast_identifier(method_name)
-        && is_fast_handler_path(function_name)
-        && is_fast_handler_path(first_arg_path)
-        && first_arg_path.split('.').next() != Some("self"))
-    .then_some((
-        target_path,
-        method_name,
+    let parsed = parse_global_method_with_function_result_and_three_numbers(stmt)?;
+    let (function_name, first_arg_path, second) =
+        parse_global_string_function_result_call(parsed.first_arg)?;
+    validate_global_method_with_function_result(
+        parsed.target_path,
+        parsed.method_name,
         function_name,
+    )?;
+    Some((
+        parsed.target_path.trim(),
+        parsed.method_name.trim(),
+        function_name.trim(),
         first_arg_path,
         second,
-        third,
-        fourth,
-        fifth,
+        parsed.third,
+        parsed.fourth,
+        parsed.fifth,
     ))
 }
 
@@ -837,7 +865,9 @@ mod tests {
     use super::{
         parse_global_tooltip_set_owner_then_set_text,
         parse_inline_global_method_with_four_global_args,
+        parse_inline_global_method_with_global_string_function_result_and_three_number_args,
         parse_inline_global_method_with_global_three_global_bool_args,
+        parse_inline_global_method_with_string_string_function_result_and_three_number_args,
     };
 
     #[test]
@@ -876,6 +906,54 @@ mod tests {
                 "Tooltip.Green",
                 "Tooltip.Blue",
                 true,
+            ))
+        );
+    }
+
+    #[test]
+    fn parses_global_method_with_string_string_function_result_and_three_number_args() {
+        let stmt = "GameTooltip:SetText(GetColoredText(\"name\", \"rank\"), 1, 0.5, 0)";
+
+        let parsed =
+            parse_inline_global_method_with_string_string_function_result_and_three_number_args(
+                stmt,
+            );
+
+        assert_eq!(
+            parsed,
+            Some((
+                "GameTooltip",
+                "SetText",
+                "GetColoredText",
+                "name",
+                "rank",
+                1.0,
+                0.5,
+                0.0,
+            ))
+        );
+    }
+
+    #[test]
+    fn parses_global_method_with_global_string_function_result_and_three_number_args() {
+        let stmt = "GameTooltip:SetText(GetColoredText(Item.Name, \"rank\"), 1, 0.5, 0)";
+
+        let parsed =
+            parse_inline_global_method_with_global_string_function_result_and_three_number_args(
+                stmt,
+            );
+
+        assert_eq!(
+            parsed,
+            Some((
+                "GameTooltip",
+                "SetText",
+                "GetColoredText",
+                "Item.Name",
+                "rank",
+                1.0,
+                0.5,
+                0.0,
             ))
         );
     }
