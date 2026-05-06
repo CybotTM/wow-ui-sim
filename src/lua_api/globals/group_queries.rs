@@ -259,7 +259,7 @@ fn is_everyone_assistant(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn active_party_count(state: &mut LuaState) -> LuaResult<usize> {
+pub(crate) fn active_party_count(state: &mut LuaState) -> LuaResult<usize> {
     let st = borrow_state(state)?;
     Ok(if st.party_group_active {
         st.party_members.len()

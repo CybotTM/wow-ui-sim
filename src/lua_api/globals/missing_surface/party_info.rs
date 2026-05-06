@@ -19,7 +19,7 @@
 //! - `C_PartyInfo.StartInstanceAbandonVote()` — no-op.
 
 use super::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::borrow_state;
+use crate::lua_api::globals::group_queries::active_party_count;
 use crate::lua_api::methods::create_table;
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
@@ -274,13 +274,4 @@ fn c_party_info_get_loot_method(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Nil);
     state.push(Val::Nil);
     Ok(3)
-}
-
-fn active_party_count(state: &mut LuaState) -> LuaResult<usize> {
-    let st = borrow_state(state)?;
-    Ok(if st.party_group_active {
-        st.party_members.len()
-    } else {
-        0
-    })
 }
