@@ -272,30 +272,52 @@ fn parse_browse_query(state: &mut LuaState, arg: Val) -> BrowseQuery {
         return BrowseQuery::default();
     };
     let keys = intern_browse_query_keys(state);
-    let arena = &state.gc.string_arena;
-    let Some(table) = state.gc.tables.get(table_ref) else {
+    let Some(fields) = read_browse_query_fields(state, table_ref, &keys) else {
         return BrowseQuery::default();
     };
-    let search_string = read_string_field(table, keys.search_string, arena);
-    let min_level = read_optional_int_field(table, keys.min_level, arena);
-    let max_level = read_optional_int_field(table, keys.max_level, arena);
-    let sorts_ref = nested_table_ref(table, keys.sorts, arena);
-    let filters_ref = nested_table_ref(table, keys.filters, arena);
-    let class_filters_ref = nested_table_ref(table, keys.item_class_filters, arena);
     BrowseQuery {
-        search_string,
-        sorts: sorts_ref
+        search_string: fields.search_string,
+        sorts: fields
+            .sorts_ref
             .map(|r| read_sort_array(state, r, &keys))
             .unwrap_or_default(),
-        min_level,
-        max_level,
-        filters: filters_ref
+        min_level: fields.min_level,
+        max_level: fields.max_level,
+        filters: fields
+            .filters_ref
             .map(|r| read_int_array(state, r))
             .unwrap_or_default(),
-        item_class_filters: class_filters_ref
+        item_class_filters: fields
+            .class_filters_ref
             .map(|r| read_item_class_filter_array(state, r, &keys))
             .unwrap_or_default(),
     }
+}
+
+struct BrowseQueryFieldRefs {
+    search_string: String,
+    min_level: Option<i32>,
+    max_level: Option<i32>,
+    sorts_ref: Option<GcRef<Table>>,
+    filters_ref: Option<GcRef<Table>>,
+    class_filters_ref: Option<GcRef<Table>>,
+}
+
+fn read_browse_query_fields(
+    state: &LuaState,
+    table_ref: GcRef<Table>,
+    keys: &BrowseQueryKeys,
+) -> Option<BrowseQueryFieldRefs> {
+    let arena = &state.gc.string_arena;
+    let table = state.gc.tables.get(table_ref)?;
+    Some(BrowseQueryFieldRefs {
+        search_string: read_string_field(table, keys.search_string, arena),
+        min_level: read_optional_int_field(table, keys.min_level, arena),
+        max_level: read_optional_int_field(table, keys.max_level, arena),
+        sorts_ref: nested_table_ref(table, keys.sorts, arena),
+        filters_ref: nested_table_ref(table, keys.filters, arena),
+        class_filters_ref: nested_table_ref(table, keys.item_class_filters, arena),
+    })
 }
 
 fn read_string_field(
