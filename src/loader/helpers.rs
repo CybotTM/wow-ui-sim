@@ -2,22 +2,11 @@
 
 use std::path::{Path, PathBuf};
 
+pub use crate::paths::find_case_insensitive;
+
 /// Normalize Windows-style paths (backslashes) to Unix-style (forward slashes).
 pub fn normalize_path(path: &str) -> String {
     path.replace('\\', "/")
-}
-
-/// Find a directory entry case-insensitively.
-pub fn find_case_insensitive(dir: &Path, name: &str) -> Option<PathBuf> {
-    let name_lower = name.to_lowercase();
-    if let Ok(entries) = std::fs::read_dir(dir) {
-        for entry in entries.flatten() {
-            if entry.file_name().to_string_lossy().to_lowercase() == name_lower {
-                return Some(entry.path());
-            }
-        }
-    }
-    None
 }
 
 /// Resolve a path with case-insensitive matching (WoW is case-insensitive on Windows/macOS).

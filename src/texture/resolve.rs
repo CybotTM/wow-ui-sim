@@ -1,9 +1,11 @@
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
+    path::{Path, PathBuf},
+    sync::Arc,
 };
+
+use crate::paths::find_case_insensitive;
 
 use super::{TextureData, TextureManager, normalize_wow_path};
 
@@ -362,19 +364,6 @@ fn find_case_insensitive_file(dir: &Path, name: &str) -> Option<PathBuf> {
 fn find_case_insensitive_dir(dir: &Path, name: &str) -> Option<PathBuf> {
     let entry = find_case_insensitive(dir, name)?;
     entry.is_dir().then_some(entry)
-}
-
-/// Find a directory entry case-insensitively.
-fn find_case_insensitive(dir: &Path, name: &str) -> Option<PathBuf> {
-    let name_lower = name.to_lowercase();
-    if let Ok(entries) = std::fs::read_dir(dir) {
-        for entry in entries.flatten() {
-            if entry.file_name().to_string_lossy().to_lowercase() == name_lower {
-                return Some(entry.path());
-            }
-        }
-    }
-    None
 }
 
 /// Extract a sub-region from texture data.

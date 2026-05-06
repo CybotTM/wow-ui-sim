@@ -35,6 +35,19 @@ pub fn default_textures_path() -> PathBuf {
     PathBuf::from("./textures")
 }
 
+/// Find a directory entry case-insensitively.
+pub fn find_case_insensitive(dir: &Path, name: &str) -> Option<PathBuf> {
+    let name_lower = name.to_lowercase();
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            if entry.file_name().to_string_lossy().to_lowercase() == name_lower {
+                return Some(entry.path());
+            }
+        }
+    }
+    None
+}
+
 pub fn default_casc_data_path() -> Option<PathBuf> {
     discover_wow_resources().casc_data_path
 }
