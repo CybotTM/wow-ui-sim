@@ -2,110 +2,78 @@
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::widget::Frame;
+use rilua::vm::closure::RustFn;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "CanPropagateMouseClicks",
-        can_propagate_mouse_clicks,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "CanPropagateMouseMotion",
-        can_propagate_mouse_motion,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "DoesHyperlinkPropagateToParent",
-        does_hyperlink_propagate_to_parent,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetHyperlinkPropagateToParent",
-        set_hyperlink_propagate_to_parent,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetPropagateMouseClicks",
-        set_propagate_mouse_clicks,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        mt,
-        "SetPropagateMouseMotion",
-        set_propagate_mouse_motion,
-    )?;
+    for (name, function) in PROPAGATION_METHODS {
+        table_set_rust_fn_static(state, mt, name, *function)?;
+    }
     Ok(())
 }
 
+const PROPAGATION_METHODS: &[(&str, RustFn)] = &[
+    ("CanPropagateMouseClicks", can_propagate_mouse_clicks),
+    ("CanPropagateMouseMotion", can_propagate_mouse_motion),
+    (
+        "DoesHyperlinkPropagateToParent",
+        does_hyperlink_propagate_to_parent,
+    ),
+    (
+        "SetHyperlinkPropagateToParent",
+        set_hyperlink_propagate_to_parent,
+    ),
+    ("SetPropagateMouseClicks", set_propagate_mouse_clicks),
+    ("SetPropagateMouseMotion", set_propagate_mouse_motion),
+];
+
 pub fn can_propagate_mouse_clicks(state: &mut LuaState) -> LuaResult<u32> {
+    push_frame_bool(state, |frame| frame.propagate_mouse_clicks)
+}
+
+fn push_frame_bool(state: &mut LuaState, read: impl FnOnce(&Frame) -> bool) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let val = borrow_state(state)?
         .widgets
         .get(id)
-        .map(|f| f.propagate_mouse_clicks)
+        .map(read)
         .unwrap_or(false);
     state.push(Val::Bool(val));
     Ok(1)
 }
 
 pub fn can_propagate_mouse_motion(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let val = borrow_state(state)?
-        .widgets
-        .get(id)
-        .map(|f| f.propagate_mouse_motion)
-        .unwrap_or(false);
-    state.push(Val::Bool(val));
-    Ok(1)
+    push_frame_bool(state, |frame| frame.propagate_mouse_motion)
 }
 
 pub fn does_hyperlink_propagate_to_parent(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let val = borrow_state(state)?
-        .widgets
-        .get(id)
-        .map(|f| f.propagate_hyperlinks_to_parent)
-        .unwrap_or(false);
-    state.push(Val::Bool(val));
-    Ok(1)
+    push_frame_bool(state, |frame| frame.propagate_hyperlinks_to_parent)
 }
 
 pub fn set_hyperlink_propagate_to_parent(state: &mut LuaState) -> LuaResult<u32> {
+    set_frame_bool(state, |frame, value| {
+        frame.propagate_hyperlinks_to_parent = value
+    })
+}
+
+fn set_frame_bool(state: &mut LuaState, apply: impl FnOnce(&mut Frame, bool)) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let value = bool::from_stack(state, 2)?;
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.propagate_hyperlinks_to_parent = value;
+        apply(frame, value);
     }
     Ok(0)
 }
 
 pub fn set_propagate_mouse_clicks(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let value = bool::from_stack(state, 2)?;
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.propagate_mouse_clicks = value;
-    }
-    Ok(0)
+    set_frame_bool(state, |frame, value| frame.propagate_mouse_clicks = value)
 }
 
 pub fn set_propagate_mouse_motion(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let value = bool::from_stack(state, 2)?;
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.propagate_mouse_motion = value;
-    }
-    Ok(0)
+    set_frame_bool(state, |frame, value| frame.propagate_mouse_motion = value)
 }
