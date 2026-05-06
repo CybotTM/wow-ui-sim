@@ -517,28 +517,19 @@ fn ensure_named_font_string_child(
     parent_id: u64,
     key: &str,
 ) -> LuaResult<()> {
-    let mut sim = borrow_state_mut(state)?;
-    if sim
-        .widgets
-        .get(parent_id)
-        .is_some_and(|parent| parent.children_keys.contains_key(key))
-    {
-        return Ok(());
-    }
-
-    let mut child = Frame::new(WidgetType::FontString, None, Some(parent_id));
-    child.parent_key = Some(key.to_string());
-    set_all_points_anchors_pub(&mut child, parent_id);
-    let child_id = child.id;
-    sim.widgets.register(child);
-    sim.widgets.add_child(parent_id, child_id);
-    if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
-        parent.children_keys.insert(key.to_string(), child_id);
-    }
-    Ok(())
+    ensure_named_child(state, parent_id, key, WidgetType::FontString)
 }
 
 fn ensure_named_texture_child(state: &mut LuaState, parent_id: u64, key: &str) -> LuaResult<()> {
+    ensure_named_child(state, parent_id, key, WidgetType::Texture)
+}
+
+fn ensure_named_child(
+    state: &mut LuaState,
+    parent_id: u64,
+    key: &str,
+    widget_type: WidgetType,
+) -> LuaResult<()> {
     let mut sim = borrow_state_mut(state)?;
     if sim
         .widgets
@@ -548,7 +539,7 @@ fn ensure_named_texture_child(state: &mut LuaState, parent_id: u64, key: &str) -
         return Ok(());
     }
 
-    let mut child = Frame::new(WidgetType::Texture, None, Some(parent_id));
+    let mut child = Frame::new(widget_type, None, Some(parent_id));
     child.parent_key = Some(key.to_string());
     set_all_points_anchors_pub(&mut child, parent_id);
     let child_id = child.id;
