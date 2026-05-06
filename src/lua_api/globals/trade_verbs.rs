@@ -150,20 +150,26 @@ fn set_cursor_item_slot(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_player_trade_money(state: &mut LuaState) -> LuaResult<u32> {
-    let money = borrow_state(state)?
-        .active_trade
-        .as_ref()
-        .map(|trade| trade.player_money)
-        .unwrap_or(0);
-    state.push(Val::Num(money as f64));
-    Ok(1)
+    get_trade_money(state, TradeMoneyOwner::Player)
 }
 
 fn get_target_trade_money(state: &mut LuaState) -> LuaResult<u32> {
+    get_trade_money(state, TradeMoneyOwner::Target)
+}
+
+enum TradeMoneyOwner {
+    Player,
+    Target,
+}
+
+fn get_trade_money(state: &mut LuaState, owner: TradeMoneyOwner) -> LuaResult<u32> {
     let money = borrow_state(state)?
         .active_trade
         .as_ref()
-        .map(|trade| trade.target_money)
+        .map(|trade| match owner {
+            TradeMoneyOwner::Player => trade.player_money,
+            TradeMoneyOwner::Target => trade.target_money,
+        })
         .unwrap_or(0);
     state.push(Val::Num(money as f64));
     Ok(1)

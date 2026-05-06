@@ -126,6 +126,29 @@ fn set_trade_currency_without_trade_is_noop() {
     assert!(env.state().borrow().active_trade.is_none());
 }
 
+#[test]
+fn trade_money_getters_read_player_and_target_money() {
+    let env = env();
+    env.exec(
+        r#"InitiateTrade("Jaina")
+               SetTradeCurrency(10000)"#,
+    )
+    .unwrap();
+    env.state()
+        .borrow_mut()
+        .active_trade
+        .as_mut()
+        .unwrap()
+        .target_money = 2500;
+
+    let (player_money, target_money): (i64, i64) = env
+        .eval("return GetPlayerTradeMoney(), GetTargetTradeMoney()")
+        .unwrap();
+
+    assert_eq!(player_money, 10000);
+    assert_eq!(target_money, 2500);
+}
+
 // ── SetCursorItemSlot ─────────────────────────────────────────────────────────
 
 #[test]
