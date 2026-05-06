@@ -36,8 +36,7 @@ use rilua::vm::table::Table;
 
 type ArtifactUiFn = fn(&mut LuaState) -> LuaResult<u32>;
 
-const ARTIFACT_UI_METHODS: &[(&str, ArtifactUiFn)] = &[
-    // Action-bar getters (read state.equipped_artifact).
+const ACTION_BAR_METHODS: &[(&str, ArtifactUiFn)] = &[
     (
         "GetEquippedArtifactItemID",
         action_bar::get_equipped_artifact_item_id,
@@ -62,6 +61,9 @@ const ARTIFACT_UI_METHODS: &[(&str, ArtifactUiFn)] = &[
         "GetArtifactXPRewardTargetInfo",
         action_bar::get_artifact_xp_reward_target_info,
     ),
+];
+
+const PANEL_METHODS: &[(&str, ArtifactUiFn)] = &[
     // Panel core getters (read state.viewed_artifact).
     ("GetArtifactInfo", panel::get_artifact_info),
     ("GetArtifactItemID", panel::get_artifact_item_id),
@@ -130,14 +132,18 @@ const ARTIFACT_UI_METHODS: &[(&str, ArtifactUiFn)] = &[
     ("ApplyCursorRelicToSlot", panel::apply_cursor_relic_to_slot),
 ];
 
+const ARTIFACT_UI_METHOD_GROUPS: &[&[(&str, ArtifactUiFn)]] = &[ACTION_BAR_METHODS, PANEL_METHODS];
+
 pub(crate) fn register_c_artifact_ui_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_ArtifactUI")?;
     install_methods(state, ns)
 }
 
 fn install_methods(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
-    for &(name, func) in ARTIFACT_UI_METHODS {
-        table_set_rust_fn_static(state, ns, name, func)?;
+    for group in ARTIFACT_UI_METHOD_GROUPS {
+        for &(name, func) in *group {
+            table_set_rust_fn_static(state, ns, name, func)?;
+        }
     }
     Ok(())
 }
