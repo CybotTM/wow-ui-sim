@@ -10,6 +10,13 @@ use super::{FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, emit_widget_tex
 
 const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
 
+struct EditBoxTextMetrics {
+    bounds: Rectangle,
+    left_pad: f32,
+    top_inset: f32,
+    bottom_inset: f32,
+}
+
 /// UI-Panel-Button-Up is 128×32; button-up strip occupies rows 0-21 (V = 0 .. 22/32 = 0.6875).
 const PANEL_BUTTON_UP_CROP_V: f32 = 22.0 / 32.0;
 
@@ -418,27 +425,53 @@ pub(super) fn emit_editbox_with_text(
     alpha: f32,
 ) {
     build_editbox_quads(batch, bounds, f, alpha);
-    let (left_inset, right_inset, top_inset, bottom_inset) = f.editbox_text_insets;
+    let text_metrics = editbox_text_metrics(bounds, f.editbox_text_insets);
+    let text_width = emit_editbox_text(batch, f, text_ctx, text_metrics.bounds, alpha);
+    if f.editbox_focused {
+        emit_editbox_caret(batch, bounds, text_metrics, text_width, alpha);
+    }
+}
+
+fn editbox_text_metrics(
+    bounds: Rectangle,
+    text_insets: (f32, f32, f32, f32),
+) -> EditBoxTextMetrics {
+    let (left_inset, right_inset, top_inset, bottom_inset) = text_insets;
     let left_pad = if left_inset > 0.0 { left_inset } else { 4.0 };
     let right_pad = if right_inset > 0.0 { right_inset } else { 4.0 };
-    let text_bounds = Rectangle::new(
+    let bounds = Rectangle::new(
         Point::new(bounds.x + left_pad, bounds.y + top_inset),
         Size::new(
             (bounds.width - left_pad - right_pad).max(0.0),
             (bounds.height - top_inset - bottom_inset).max(0.0),
         ),
     );
-    let text_width = emit_editbox_text(batch, f, text_ctx, text_bounds, alpha);
-    if f.editbox_focused {
-        let caret_x = (bounds.x + left_pad + text_width).min(bounds.x + bounds.width - 1.0);
-        let caret_top = bounds.y + top_inset + 1.0;
-        let caret_height = (bounds.height - top_inset - bottom_inset - 2.0).max(2.0);
-        batch.push_solid(
-            Rectangle::new(Point::new(caret_x, caret_top), Size::new(1.5, caret_height)),
-            [1.0, 0.95, 0.55, 0.95 * alpha],
-        );
-        batch.push_border(bounds, 1.0, [1.0, 0.85, 0.30, 0.85 * alpha]);
+
+    EditBoxTextMetrics {
+        bounds,
+        left_pad,
+        top_inset,
+        bottom_inset,
     }
+}
+
+fn emit_editbox_caret(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    text_metrics: EditBoxTextMetrics,
+    text_width: f32,
+    alpha: f32,
+) {
+    let caret_x =
+        (bounds.x + text_metrics.left_pad + text_width).min(bounds.x + bounds.width - 1.0);
+    let caret_top = bounds.y + text_metrics.top_inset + 1.0;
+    let caret_height =
+        (bounds.height - text_metrics.top_inset - text_metrics.bottom_inset - 2.0).max(2.0);
+    batch.push_solid(
+        Rectangle::new(Point::new(caret_x, caret_top), Size::new(1.5, caret_height)),
+        [1.0, 0.95, 0.55, 0.95 * alpha],
+    );
+    batch.push_border(bounds, 1.0, [1.0, 0.85, 0.30, 0.85 * alpha]);
 }
 
 fn emit_editbox_text(
