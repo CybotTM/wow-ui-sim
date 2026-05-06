@@ -70,27 +70,7 @@ pub(super) fn build_button_quads(
     is_hovered: bool,
     alpha: f32,
 ) {
-    let has_normal_child = f.children_keys.contains_key("NormalTexture");
-    let has_pushed_child = f.children_keys.contains_key("PushedTexture");
-
-    let (texture_path, tex_coords, skip) = if is_pressed {
-        (
-            f.pushed_texture.as_ref().or(f.normal_texture.as_ref()),
-            f.pushed_tex_coords.or(f.normal_tex_coords),
-            if f.pushed_texture.is_some() {
-                has_pushed_child
-            } else {
-                has_normal_child
-            },
-        )
-    } else {
-        (
-            f.normal_texture.as_ref(),
-            f.normal_tex_coords,
-            has_normal_child,
-        )
-    };
-
+    let (texture_path, tex_coords, skip) = button_texture_state(f, is_pressed);
     if !skip {
         emit_button_texture(batch, bounds, texture_path, tex_coords, alpha);
     }
@@ -99,6 +79,31 @@ pub(super) fn build_button_quads(
     if is_hovered && !is_pressed && !has_highlight_child {
         emit_button_highlight(batch, bounds, f, alpha);
     }
+}
+
+fn button_texture_state(
+    f: &crate::widget::Frame,
+    is_pressed: bool,
+) -> (Option<&String>, Option<(f32, f32, f32, f32)>, bool) {
+    let has_normal_child = f.children_keys.contains_key("NormalTexture");
+    let has_pushed_child = f.children_keys.contains_key("PushedTexture");
+
+    if is_pressed {
+        let texture_path = f.pushed_texture.as_ref().or(f.normal_texture.as_ref());
+        let tex_coords = f.pushed_tex_coords.or(f.normal_tex_coords);
+        let skip = if f.pushed_texture.is_some() {
+            has_pushed_child
+        } else {
+            has_normal_child
+        };
+        return (texture_path, tex_coords, skip);
+    }
+
+    (
+        f.normal_texture.as_ref(),
+        f.normal_tex_coords,
+        has_normal_child,
+    )
 }
 
 /// Render the button's normal/pushed texture (atlas UV or 3-slice).
@@ -423,36 +428,7 @@ pub(super) fn emit_editbox_with_text(
             (bounds.height - top_inset - bottom_inset).max(0.0),
         ),
     );
-    let mut text_width = 0.0_f32;
-    if let Some((fs, ga)) = text_ctx {
-        if let Some(ref txt) = f.text {
-            let mut text_renderer = WidgetTextRenderer {
-                batch,
-                font_sys: fs,
-                glyph_atlas: ga,
-            };
-            emit_widget_text_quads(
-                &mut text_renderer,
-                f,
-                WidgetTextLayout {
-                    text: txt,
-                    bounds: text_bounds,
-                    justify_h: TextJustify::Left,
-                    justify_v: TextJustify::Center,
-                    word_wrap: false,
-                    max_lines: 0,
-                    alpha,
-                },
-            );
-            if f.editbox_focused {
-                let cursor_chars = f.editbox_cursor_pos.max(0) as usize;
-                let measured: String = txt.chars().take(cursor_chars).collect();
-                let font_path = f.font.as_deref();
-                let font_size = if f.font_size > 0.0 { f.font_size } else { 12.0 };
-                text_width = fs.measure_text_width(&measured, font_path, font_size);
-            }
-        }
-    }
+    let text_width = emit_editbox_text(batch, f, text_ctx, text_bounds, alpha);
     if f.editbox_focused {
         let caret_x = (bounds.x + left_pad + text_width).min(bounds.x + bounds.width - 1.0);
         let caret_top = bounds.y + top_inset + 1.0;
@@ -463,4 +439,59 @@ pub(super) fn emit_editbox_with_text(
         );
         batch.push_border(bounds, 1.0, [1.0, 0.85, 0.30, 0.85 * alpha]);
     }
+}
+
+fn emit_editbox_text(
+    batch: &mut QuadBatch,
+    f: &crate::widget::Frame,
+    text_ctx: &mut Option<(
+        &mut crate::render::font::WowFontSystem,
+        &mut crate::render::glyph::GlyphAtlas,
+    )>,
+    text_bounds: Rectangle,
+    alpha: f32,
+) -> f32 {
+    let Some((fs, ga)) = text_ctx else {
+        return 0.0;
+    };
+    let Some(txt) = f.text.as_ref() else {
+        return 0.0;
+    };
+
+    let mut text_renderer = WidgetTextRenderer {
+        batch,
+        font_sys: fs,
+        glyph_atlas: ga,
+    };
+    emit_widget_text_quads(
+        &mut text_renderer,
+        f,
+        WidgetTextLayout {
+            text: txt,
+            bounds: text_bounds,
+            justify_h: TextJustify::Left,
+            justify_v: TextJustify::Center,
+            word_wrap: false,
+            max_lines: 0,
+            alpha,
+        },
+    );
+
+    if f.editbox_focused {
+        measure_editbox_text_before_cursor(f, fs, txt)
+    } else {
+        0.0
+    }
+}
+
+fn measure_editbox_text_before_cursor(
+    f: &crate::widget::Frame,
+    font_sys: &mut crate::render::font::WowFontSystem,
+    text: &str,
+) -> f32 {
+    let cursor_chars = f.editbox_cursor_pos.max(0) as usize;
+    let measured: String = text.chars().take(cursor_chars).collect();
+    let font_path = f.font.as_deref();
+    let font_size = if f.font_size > 0.0 { f.font_size } else { 12.0 };
+    font_sys.measure_text_width(&measured, font_path, font_size)
 }
