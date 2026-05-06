@@ -6,6 +6,8 @@
 mod blizzard_addon_harness;
 #[path = "common/blizzard_addon_manifest.rs"]
 mod blizzard_addon_manifest;
+#[path = "common/event_helpers.rs"]
+mod event_helpers;
 #[path = "common/panel_fixtures.rs"]
 mod panel_fixtures;
 
@@ -301,7 +303,7 @@ pub(crate) fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
     let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(addon_name)]);
 }
 
-pub(crate) use crate::common::fire_player_entering_world;
+pub(crate) use event_helpers::fire_player_entering_world;
 
 pub(crate) fn env_with_isolated_world_map() -> WowLuaEnv {
     let env = env_with_isolated_world_map_ui();
