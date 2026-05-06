@@ -24,49 +24,32 @@ pub(in crate::lua_api::state) fn default_lfg_category_info()
 
 pub(in crate::lua_api::state) fn default_lfg_activity_groups() -> Vec<LfgActivityGroupInfo> {
     vec![
-        LfgActivityGroupInfo {
-            group_id: 295,
-            category_id: 2,
-            name: "The War Within Mythic+".into(),
-            order_index: 1,
-            filters: 1, // PvE
-        },
-        LfgActivityGroupInfo {
-            group_id: 296,
-            category_id: 2,
-            name: "The War Within Heroic Dungeons".into(),
-            order_index: 2,
-            filters: 1,
-        },
-        LfgActivityGroupInfo {
-            group_id: 320,
-            category_id: 3,
-            name: "The War Within Raids".into(),
-            order_index: 1,
-            filters: 1,
-        },
-        LfgActivityGroupInfo {
-            group_id: 350,
-            category_id: 4,
-            name: "Arenas".into(),
-            order_index: 1,
-            filters: 2, // PvP
-        },
-        LfgActivityGroupInfo {
-            group_id: 360,
-            category_id: 9,
-            name: "Rated Battlegrounds".into(),
-            order_index: 1,
-            filters: 2,
-        },
-        LfgActivityGroupInfo {
-            group_id: 400,
-            category_id: 6,
-            name: "Custom — World Content".into(),
-            order_index: 1,
-            filters: 1,
-        },
+        lfg_activity_group(295, 2, "The War Within Mythic+", 1, LFG_FILTER_PVE),
+        lfg_activity_group(296, 2, "The War Within Heroic Dungeons", 2, LFG_FILTER_PVE),
+        lfg_activity_group(320, 3, "The War Within Raids", 1, LFG_FILTER_PVE),
+        lfg_activity_group(350, 4, "Arenas", 1, LFG_FILTER_PVP),
+        lfg_activity_group(360, 9, "Rated Battlegrounds", 1, LFG_FILTER_PVP),
+        lfg_activity_group(400, 6, "Custom — World Content", 1, LFG_FILTER_PVE),
     ]
+}
+
+const LFG_FILTER_PVE: u32 = 1;
+const LFG_FILTER_PVP: u32 = 2;
+
+fn lfg_activity_group(
+    group_id: u32,
+    category_id: i32,
+    name: &str,
+    order_index: i32,
+    filters: u32,
+) -> LfgActivityGroupInfo {
+    LfgActivityGroupInfo {
+        group_id,
+        category_id,
+        name: name.into(),
+        order_index,
+        filters,
+    }
 }
 
 pub(in crate::lua_api::state) fn default_lfg_activities() -> Vec<LfgActivityInfo> {
