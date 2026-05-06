@@ -18,6 +18,7 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val, runtime_error};
+use std::collections::HashMap;
 use std::time::Instant;
 
 pub fn get_num_applications(state: &mut LuaState) -> LuaResult<u32> {
@@ -319,45 +320,57 @@ fn get_search_result_member_counts(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
     let display = create_table(state);
-    table_set(state, display, "TANK", Val::Num(listing.tanks as f64));
-    table_set(state, display, "HEALER", Val::Num(listing.healers as f64));
-    table_set(state, display, "DAMAGER", Val::Num(listing.damagers as f64));
-    table_set(state, display, "NOROLE", Val::Num(listing.no_role as f64));
-
-    let classes_by_role = create_table(state);
-    if let Val::Table(outer_ref) = classes_by_role {
-        for (role, class_counts) in &listing.classes_by_role {
-            let inner = create_table(state);
-            if let Val::Table(inner_ref) = inner {
-                for (class_name, count) in class_counts {
-                    let key = create_string(state, class_name);
-                    if let Val::Str(class_str) = key {
-                        if let Some(t) = state.gc.tables.get_mut(inner_ref) {
-                            let _ = t.raw_set(
-                                Val::Str(class_str),
-                                Val::Num(*count as f64),
-                                &state.gc.string_arena,
-                            );
-                        }
-                    }
-                }
-                state.gc.barrier_back(inner_ref);
-            }
-            let role_key = create_string(state, role);
-            if let Val::Str(role_str) = role_key {
-                if let Some(t) = state.gc.tables.get_mut(outer_ref) {
-                    let _ = t.raw_set(Val::Str(role_str), inner, &state.gc.string_arena);
-                }
-            }
-        }
-        state.gc.barrier_back(outer_ref);
-    }
+    set_search_result_role_counts(state, display, &listing);
+    let classes_by_role = classes_by_role_table(state, &listing.classes_by_role);
     table_set(state, display, "classesByRole", classes_by_role);
-
     let leavers = create_table(state);
     table_set(state, display, "leaversByClass", leavers);
     state.push(display);
     Ok(1)
+}
+
+fn set_search_result_role_counts(state: &mut LuaState, display: Val, listing: &PremadeListing) {
+    table_set(state, display, "TANK", Val::Num(listing.tanks as f64));
+    table_set(state, display, "HEALER", Val::Num(listing.healers as f64));
+    table_set(state, display, "DAMAGER", Val::Num(listing.damagers as f64));
+    table_set(state, display, "NOROLE", Val::Num(listing.no_role as f64));
+}
+
+fn classes_by_role_table(
+    state: &mut LuaState,
+    classes_by_role: &HashMap<String, HashMap<String, i32>>,
+) -> Val {
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        return table;
+    };
+    for (role, class_counts) in classes_by_role {
+        let inner = class_counts_table(state, class_counts);
+        raw_set_string_key(state, table_ref, role, inner);
+    }
+    state.gc.barrier_back(table_ref);
+    table
+}
+
+fn class_counts_table(state: &mut LuaState, class_counts: &HashMap<String, i32>) -> Val {
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        return table;
+    };
+    for (class_name, count) in class_counts {
+        raw_set_string_key(state, table_ref, class_name, Val::Num(*count as f64));
+    }
+    state.gc.barrier_back(table_ref);
+    table
+}
+
+fn raw_set_string_key(state: &mut LuaState, table_ref: GcRef<Table>, key: &str, value: Val) {
+    let Val::Str(key_ref) = create_string(state, key) else {
+        return;
+    };
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
+    }
 }
 
 /// `GetGroupLeaverCountsByRole()` → `(tank, healer, damager)`. Sim has
