@@ -487,7 +487,18 @@ fn apply_to_group(state: &mut LuaState) -> LuaResult<u32> {
     let tank = Option::<bool>::from_stack(state, 2)?.unwrap_or(false);
     let healer = Option::<bool>::from_stack(state, 3)?.unwrap_or(false);
     let damager = Option::<bool>::from_stack(state, 4)?.unwrap_or(false);
-    let role = if tank {
+    let role = selected_application_role(tank, healer, damager);
+    let listing_name = apply_to_group_listing_name(state, search_result_id)?;
+    let Some(listing_name) = listing_name else {
+        return Ok(0);
+    };
+    create_lfg_application(state, search_result_id, role)?;
+    fire_lfg_application_events(state, search_result_id, &listing_name)?;
+    Ok(0)
+}
+
+fn selected_application_role(tank: bool, healer: bool, damager: bool) -> String {
+    if tank {
         "TANK"
     } else if healer {
         "HEALER"
@@ -496,46 +507,58 @@ fn apply_to_group(state: &mut LuaState) -> LuaResult<u32> {
     } else {
         ""
     }
-    .to_string();
-    let listing_name = {
-        let sim = borrow_state(state)?;
-        if sim
-            .lfg_applications
-            .iter()
-            .any(|a| a.search_result_id == search_result_id)
-        {
-            return Ok(0);
-        }
-        sim.world
-            .premade_listings
-            .iter()
-            .find(|l| l.search_result_id == search_result_id)
-            .map(|l| l.name.clone())
-    };
-    let Some(listing_name) = listing_name else {
-        return Ok(0);
-    };
-    let now = {
-        let sim = borrow_state(state)?;
-        sim.start_time.elapsed().as_secs_f64()
-    };
+    .to_string()
+}
+
+fn apply_to_group_listing_name(
+    state: &mut LuaState,
+    search_result_id: u32,
+) -> LuaResult<Option<String>> {
+    let sim = borrow_state(state)?;
+    if sim
+        .lfg_applications
+        .iter()
+        .any(|a| a.search_result_id == search_result_id)
     {
-        let mut sim = borrow_state_mut(state)?;
-        let app_id = sim.lfg_next_application_id;
-        sim.lfg_next_application_id += 1;
-        sim.lfg_applications.push(LfgApplication {
-            application_id: app_id,
-            search_result_id,
-            status: "applied".to_string(),
-            pending_status: None,
-            start_time: now,
-            duration: 120.0,
-            role,
-        });
+        return Ok(None);
     }
+    Ok(sim
+        .world
+        .premade_listings
+        .iter()
+        .find(|l| l.search_result_id == search_result_id)
+        .map(|l| l.name.clone()))
+}
+
+fn create_lfg_application(
+    state: &mut LuaState,
+    search_result_id: u32,
+    role: String,
+) -> LuaResult<()> {
+    let now = borrow_state(state)?.start_time.elapsed().as_secs_f64();
+    let mut sim = borrow_state_mut(state)?;
+    let app_id = sim.lfg_next_application_id;
+    sim.lfg_next_application_id += 1;
+    sim.lfg_applications.push(LfgApplication {
+        application_id: app_id,
+        search_result_id,
+        status: "applied".to_string(),
+        pending_status: None,
+        start_time: now,
+        duration: 120.0,
+        role,
+    });
+    Ok(())
+}
+
+fn fire_lfg_application_events(
+    state: &mut LuaState,
+    search_result_id: u32,
+    listing_name: &str,
+) -> LuaResult<()> {
     let new_status = create_string(state, "applied");
     let old_status = create_string(state, "none");
-    let group_name = create_string(state, &listing_name);
+    let group_name = create_string(state, listing_name);
     fire_event_with_args(
         state,
         "LFG_LIST_APPLICATION_STATUS_UPDATED",
@@ -551,7 +574,7 @@ fn apply_to_group(state: &mut LuaState) -> LuaResult<u32> {
         "LFG_LIST_SEARCH_RESULT_UPDATED",
         vec![Val::Num(search_result_id as f64)],
     )?;
-    Ok(0)
+    Ok(())
 }
 
 /// `CancelApplication(searchResultID)` — cancel a pending application.
