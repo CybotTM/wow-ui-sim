@@ -110,12 +110,7 @@ impl<'a> LoaderEnv<'a> {
         lua: Rc<std::cell::RefCell<rilua::Lua>>,
         state: Rc<std::cell::RefCell<SimState>>,
     ) -> LoaderEnv<'static> {
-        LoaderEnv {
-            lua,
-            state,
-            current_state: None,
-            _marker: PhantomData,
-        }
+        Self::from_parts_with_state(lua, state, None)
     }
 
     pub fn from_parts_active(
@@ -123,10 +118,18 @@ impl<'a> LoaderEnv<'a> {
         state: Rc<std::cell::RefCell<SimState>>,
         current_state: &mut LuaState,
     ) -> LoaderEnv<'static> {
+        Self::from_parts_with_state(lua, state, Some(NonNull::from(current_state)))
+    }
+
+    fn from_parts_with_state(
+        lua: Rc<std::cell::RefCell<rilua::Lua>>,
+        state: Rc<std::cell::RefCell<SimState>>,
+        current_state: Option<NonNull<LuaState>>,
+    ) -> LoaderEnv<'static> {
         LoaderEnv {
             lua,
             state,
-            current_state: Some(NonNull::from(current_state)),
+            current_state,
             _marker: PhantomData,
         }
     }
