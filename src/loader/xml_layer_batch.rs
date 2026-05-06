@@ -264,20 +264,39 @@ fn apply_parent_key_attachments(
 
     env.with_state(|state| {
         for attachment in attachments {
-            let (parent_id, child_id) =
-                find_attachment_ids(state, parent_name, target_parent_name, attachment)?;
-            let (Some(parent_id), Some(child_id)) = (parent_id, child_id) else {
-                continue;
-            };
-            if let Some(parent_key) = attachment.parent_key.as_deref() {
-                attach_parent_key(state, parent_id, parent_key, child_id)?;
-            }
-            if let Some(parent_array) = attachment.parent_array.as_deref() {
-                append_parent_array_entry(state, parent_id, parent_array, child_id)?;
-            }
+            apply_parent_key_attachment(state, parent_name, target_parent_name, attachment)?;
         }
         Ok(())
     })
+}
+
+fn apply_parent_key_attachment(
+    state: &mut rilua::vm::state::LuaState,
+    parent_name: &str,
+    target_parent_name: &str,
+    attachment: &ParentKeyAttachment,
+) -> Result<(), LoadError> {
+    let (parent_id, child_id) =
+        find_attachment_ids(state, parent_name, target_parent_name, attachment)?;
+    let (Some(parent_id), Some(child_id)) = (parent_id, child_id) else {
+        return Ok(());
+    };
+    apply_attachment_links(state, parent_id, child_id, attachment)
+}
+
+fn apply_attachment_links(
+    state: &mut rilua::vm::state::LuaState,
+    parent_id: u64,
+    child_id: u64,
+    attachment: &ParentKeyAttachment,
+) -> Result<(), LoadError> {
+    if let Some(parent_key) = attachment.parent_key.as_deref() {
+        attach_parent_key(state, parent_id, parent_key, child_id)?;
+    }
+    if let Some(parent_array) = attachment.parent_array.as_deref() {
+        append_parent_array_entry(state, parent_id, parent_array, child_id)?;
+    }
+    Ok(())
 }
 
 fn find_attachment_ids(
