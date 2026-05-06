@@ -13,10 +13,23 @@ fn socket_info_queries_reflect_configured_state() {
         has_existing_info,
         existing_icon_ok,
         existing_match_ok,
+        existing_link_ok,
         has_new_info,
         new_icon_ok,
         new_match_ok,
-    ): (i32, String, bool, bool, bool, bool, bool, bool) = env
+        new_link_ok,
+    ): (
+        i32,
+        String,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
         .eval(
             r#"
             C_ItemSocketInfo._state.numSockets = 3
@@ -39,9 +52,11 @@ fn socket_info_queries_reflect_configured_state() {
                    existingName == "Ruby",
                    existingIcon == 111,
                    existingMatch == true,
+                   C_ItemSocketInfo.GetExistingSocketLink(1) == "item:111",
                    newName == "Sapphire",
                    newIcon == 222,
-                   newMatch == false
+                   newMatch == false,
+                   C_ItemSocketInfo.GetNewSocketLink(2) == "item:222"
             "#,
         )
         .unwrap();
@@ -60,12 +75,14 @@ fn socket_info_queries_reflect_configured_state() {
         existing_match_ok,
         "existing gemMatchesSocket should be returned"
     );
+    assert!(existing_link_ok, "existing socket link should be returned");
     assert!(has_new_info, "new socket name should be returned");
     assert!(
         new_icon_ok,
         "new socket icon should come from configured state"
     );
     assert!(new_match_ok, "new gemMatchesSocket should be returned");
+    assert!(new_link_ok, "new socket link should be returned");
 }
 
 #[test]

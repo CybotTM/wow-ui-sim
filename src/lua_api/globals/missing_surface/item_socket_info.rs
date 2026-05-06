@@ -277,13 +277,7 @@ fn c_item_socket_info_get_existing_socket_info(state: &mut LuaState) -> LuaResul
 }
 
 fn c_item_socket_info_get_existing_socket_link(state: &mut LuaState) -> LuaResult<u32> {
-    let index = i32::from_stack(state, 1)?;
-    let socket_state = ensure_socket_state_table(state);
-    let sockets = table_get(state, socket_state, "existingSockets");
-    let socket = table_array_get(state, sockets, index);
-    let link = table_get(state, socket, "link");
-    state.push(link);
-    Ok(1)
+    push_socket_link(state, "existingSockets")
 }
 
 fn c_item_socket_info_get_new_socket_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -295,9 +289,13 @@ fn c_item_socket_info_get_new_socket_info(state: &mut LuaState) -> LuaResult<u32
 }
 
 fn c_item_socket_info_get_new_socket_link(state: &mut LuaState) -> LuaResult<u32> {
+    push_socket_link(state, "newSockets")
+}
+
+fn push_socket_link(state: &mut LuaState, bucket: &str) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1)?;
     let socket_state = ensure_socket_state_table(state);
-    let sockets = table_get(state, socket_state, "newSockets");
+    let sockets = table_get(state, socket_state, bucket);
     let socket = table_array_get(state, sockets, index);
     let link = table_get(state, socket, "link");
     state.push(link);
