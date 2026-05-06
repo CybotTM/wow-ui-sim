@@ -44,27 +44,7 @@ fn build_function_handler_with_parent_field_arg(
     function_name: &str,
     field: &str,
 ) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local fn, field_name = ...
-            return function(self, ...)
-                local parent = self:GetParent()
-                if not parent then
-                    return
-                end
-                return fn(parent[field_name])
-            end
-        "#,
-        "template-inline-function-parent-field-arg",
-    )?;
-    let target = resolve_global_path(state, function_name);
-    let field_name = create_string(state, field);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[target, field_name],
-    )
+    build_function_handler_with_ancestor_field_arg(state, function_name, field, false)
 }
 
 fn build_function_handler_with_parent_field_and_nested_parent_field_method_result(
@@ -111,8 +91,31 @@ fn build_function_handler_with_self_and_parent_field_arg(
     function_name: &str,
     field: &str,
 ) -> LuaResult<Val> {
+    build_function_handler_with_ancestor_field_arg(state, function_name, field, true)
+}
+
+fn build_function_handler_with_ancestor_field_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    field: &str,
+    pass_self: bool,
+) -> LuaResult<Val> {
     let builder = load_template(
         state,
+        ancestor_field_arg_template(pass_self),
+        "template-inline-function-ancestor-field-arg",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let field_name = create_string(state, field);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, field_name],
+    )
+}
+
+fn ancestor_field_arg_template(pass_self: bool) -> &'static str {
+    if pass_self {
         r#"
             local fn, field_name = ...
             return function(self, ...)
@@ -122,14 +125,17 @@ fn build_function_handler_with_self_and_parent_field_arg(
                 end
                 return fn(self, parent[field_name])
             end
-        "#,
-        "template-inline-function-self-parent-field-arg",
-    )?;
-    let target = resolve_global_path(state, function_name);
-    let field_name = create_string(state, field);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[target, field_name],
-    )
+        "#
+    } else {
+        r#"
+            local fn, field_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                return fn(parent[field_name])
+            end
+        "#
+    }
 }
