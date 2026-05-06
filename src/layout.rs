@@ -582,17 +582,6 @@ mod tests {
     use super::*;
     use crate::widget::{Anchor, Frame};
 
-    fn anchor(point: AnchorPoint, rel_id: Option<usize>, rel_point: AnchorPoint) -> Anchor {
-        Anchor {
-            point,
-            relative_to_id: rel_id,
-            relative_to: None,
-            relative_point: rel_point,
-            x_offset: 0.0,
-            y_offset: 0.0,
-        }
-    }
-
     fn make_frame(
         id: u64,
         parent: Option<u64>,
@@ -634,7 +623,11 @@ mod tests {
             200.0,
             36.0,
             vec![20, 21, 22],
-            vec![anchor(AnchorPoint::Center, Some(1), AnchorPoint::Center)],
+            vec![Anchor::from_relative_id(
+                AnchorPoint::Center,
+                Some(1),
+                AnchorPoint::Center,
+            )],
         ));
     }
 
@@ -645,7 +638,7 @@ mod tests {
             32.0,
             39.0,
             vec![],
-            vec![anchor(point, Some(10), point)],
+            vec![Anchor::from_relative_id(point, Some(10), point)],
         ));
     }
 
@@ -657,8 +650,12 @@ mod tests {
             0.0,
             vec![],
             vec![
-                anchor(AnchorPoint::TopLeft, Some(20), AnchorPoint::TopRight),
-                anchor(AnchorPoint::BottomRight, Some(21), AnchorPoint::BottomLeft),
+                Anchor::from_relative_id(AnchorPoint::TopLeft, Some(20), AnchorPoint::TopRight),
+                Anchor::from_relative_id(
+                    AnchorPoint::BottomRight,
+                    Some(21),
+                    AnchorPoint::BottomLeft,
+                ),
             ],
         ));
     }
@@ -692,8 +689,8 @@ mod tests {
             40.0,
             vec![],
             vec![
-                anchor(AnchorPoint::TopLeft, None, AnchorPoint::TopLeft),
-                anchor(AnchorPoint::BottomRight, None, AnchorPoint::BottomRight),
+                Anchor::from_relative_id(AnchorPoint::TopLeft, None, AnchorPoint::TopLeft),
+                Anchor::from_relative_id(AnchorPoint::BottomRight, None, AnchorPoint::BottomRight),
             ],
         );
         frame.anchors[0].x_offset = 10.0;
@@ -738,7 +735,7 @@ mod tests {
             AnchorPoint::BottomLeft => (178.0, 46.0),
             _ => unreachable!("test only uses left-edge anchors"),
         };
-        let mut anchor = anchor(point, Some(1), point);
+        let mut anchor = Anchor::from_relative_id(point, Some(1), point);
         anchor.x_offset = x_offset;
         anchor.y_offset = y_offset;
         anchor
