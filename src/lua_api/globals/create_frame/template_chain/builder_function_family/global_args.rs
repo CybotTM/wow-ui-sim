@@ -155,17 +155,23 @@ fn try_build_global_self_variants(
         FastHandlerRef::FunctionWithGlobalAndSelfIdArg {
             function_name,
             global_arg_path,
-        } => build_function_handler_with_global_and_self_id_arg(
+        } => build_function_handler_with_global_and_self_value_arg(
             state,
             function_name,
             global_arg_path,
+            true,
         )
         .map(Some),
         FastHandlerRef::FunctionWithGlobalAndSelfArg {
             function_name,
             global_arg_path,
-        } => build_function_handler_with_global_and_self_arg(state, function_name, global_arg_path)
-            .map(Some),
+        } => build_function_handler_with_global_and_self_value_arg(
+            state,
+            function_name,
+            global_arg_path,
+            false,
+        )
+        .map(Some),
         _ => Ok(None),
     }
 }
@@ -177,6 +183,24 @@ fn build_function_handler_with_two_global_number_args(
     second_arg_path: &str,
     third: f64,
 ) -> LuaResult<Val> {
+    let first = resolve_global_path(state, first_arg_path);
+    let second = resolve_global_path(state, second_arg_path);
+    build_function_handler_with_three_bound_args(
+        state,
+        function_name,
+        first,
+        second,
+        Val::Num(third),
+    )
+}
+
+fn build_function_handler_with_three_bound_args(
+    state: &mut LuaState,
+    function_name: &str,
+    first: Val,
+    second: Val,
+    third: Val,
+) -> LuaResult<Val> {
     let builder = load_template(
         state,
         r#"
@@ -185,15 +209,13 @@ fn build_function_handler_with_two_global_number_args(
                 return fn(first, second, third)
             end
         "#,
-        "template-inline-function-two-global-number-args",
+        "template-inline-function-three-bound-args",
     )?;
     let target = resolve_global_path(state, function_name);
-    let first = resolve_global_path(state, first_arg_path);
-    let second = resolve_global_path(state, second_arg_path);
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[target, first, second, Val::Num(third)],
+        &[target, first, second, third],
     )
 }
 
@@ -204,25 +226,10 @@ fn build_function_handler_with_three_global_args(
     second_arg_path: &str,
     third_arg_path: &str,
 ) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local fn, first, second, third = ...
-            return function(self, ...)
-                return fn(first, second, third)
-            end
-        "#,
-        "template-inline-function-three-global-args",
-    )?;
-    let target = resolve_global_path(state, function_name);
     let first = resolve_global_path(state, first_arg_path);
     let second = resolve_global_path(state, second_arg_path);
     let third = resolve_global_path(state, third_arg_path);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[target, first, second, third],
-    )
+    build_function_handler_with_three_bound_args(state, function_name, first, second, third)
 }
 
 fn build_function_handler_with_string_global_bool_arg(
@@ -363,20 +370,16 @@ fn build_function_handler_with_two_global_args(
     )
 }
 
-fn build_function_handler_with_global_and_self_arg(
+fn build_function_handler_with_global_and_self_value_arg(
     state: &mut LuaState,
     function_name: &str,
     global_arg_path: &str,
+    pass_self_id: bool,
 ) -> LuaResult<Val> {
     let builder = load_template(
         state,
-        r#"
-            local fn, global_arg = ...
-            return function(self, ...)
-                return fn(global_arg, self)
-            end
-        "#,
-        "template-inline-function-global-self-arg",
+        global_and_self_value_arg_template(pass_self_id),
+        "template-inline-function-global-self-value-arg",
     )?;
     let target = resolve_global_path(state, function_name);
     let global_arg = resolve_global_path(state, global_arg_path);
@@ -387,26 +390,20 @@ fn build_function_handler_with_global_and_self_arg(
     )
 }
 
-fn build_function_handler_with_global_and_self_id_arg(
-    state: &mut LuaState,
-    function_name: &str,
-    global_arg_path: &str,
-) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
+fn global_and_self_value_arg_template(pass_self_id: bool) -> &'static str {
+    if pass_self_id {
         r#"
             local fn, global_arg = ...
             return function(self, ...)
                 return fn(global_arg, self:GetID())
             end
-        "#,
-        "template-inline-function-global-self-id-arg",
-    )?;
-    let target = resolve_global_path(state, function_name);
-    let global_arg = resolve_global_path(state, global_arg_path);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[target, global_arg],
-    )
+        "#
+    } else {
+        r#"
+            local fn, global_arg = ...
+            return function(self, ...)
+                return fn(global_arg, self)
+            end
+        "#
+    }
 }
