@@ -312,13 +312,7 @@ fn c_item_socket_info_get_num_sockets(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_item_socket_info_get_socket_item_bound_tradeable(state: &mut LuaState) -> LuaResult<u32> {
-    let socket_state = ensure_socket_state_table(state);
-    let item_info = table_get(state, socket_state, "itemInfo");
-    match table_get(state, item_info, "isBoundTradeable") {
-        value @ Val::Bool(_) => state.push(value),
-        _ => state.push(Val::Bool(false)),
-    }
-    Ok(1)
+    push_socket_item_bool(state, "isBoundTradeable")
 }
 
 fn c_item_socket_info_get_socket_item_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -334,9 +328,13 @@ fn c_item_socket_info_get_socket_item_info(state: &mut LuaState) -> LuaResult<u3
 }
 
 fn c_item_socket_info_get_socket_item_refundable(state: &mut LuaState) -> LuaResult<u32> {
+    push_socket_item_bool(state, "isRefundable")
+}
+
+fn push_socket_item_bool(state: &mut LuaState, key: &str) -> LuaResult<u32> {
     let socket_state = ensure_socket_state_table(state);
     let item_info = table_get(state, socket_state, "itemInfo");
-    match table_get(state, item_info, "isRefundable") {
+    match table_get(state, item_info, key) {
         value @ Val::Bool(_) => state.push(value),
         _ => state.push(Val::Bool(false)),
     }
