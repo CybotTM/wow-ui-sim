@@ -247,36 +247,49 @@ impl QuadBatch {
         let middle_width = params.bounds.width - params.left_cap_width - params.right_cap_width;
         let left_uv = params.left_cap_width / params.tex_width;
         let right_uv_start = 1.0 - (params.right_cap_width / params.tex_width);
-        let v_bottom = match params.path {
-            Some("Interface/Buttons/UI-Panel-Button-Up")
-            | Some("Interface\\Buttons\\UI-Panel-Button-Up")
-            | Some("Interface/Buttons/UI-Panel-Button-Highlight")
-            | Some("Interface\\Buttons\\UI-Panel-Button-Highlight") => 22.0 / 32.0,
-            _ => params.v_bottom,
-        };
-        let v_height = v_bottom - params.v_top;
-        let mut emit = |dest_x: f32, dest_w: f32, uv_x: f32, uv_w: f32| {
-            self.push_quad(
-                Rectangle::new(
-                    Point::new(dest_x, params.bounds.y),
-                    Size::new(dest_w, params.bounds.height),
-                ),
-                Rectangle::new(Point::new(uv_x, params.v_top), Size::new(uv_w, v_height)),
-                params.color,
-                params.tex_index,
-                params.blend_mode,
-            );
-        };
         let left_x = params.bounds.x;
         let middle_x = params.bounds.x + params.left_cap_width;
         let right_x = params.bounds.x + params.bounds.width - params.right_cap_width;
-        emit(left_x, params.left_cap_width, 0.0, left_uv);
-        emit(middle_x, middle_width, left_uv, right_uv_start - left_uv);
-        emit(
+
+        self.push_three_slice_segment(&params, left_x, params.left_cap_width, 0.0, left_uv);
+        self.push_three_slice_segment(
+            &params,
+            middle_x,
+            middle_width,
+            left_uv,
+            right_uv_start - left_uv,
+        );
+        self.push_three_slice_segment(
+            &params,
             right_x,
             params.right_cap_width,
             right_uv_start,
             1.0 - right_uv_start,
+        );
+    }
+
+    fn push_three_slice_segment(
+        &mut self,
+        params: &ThreeSliceParams,
+        dest_x: f32,
+        dest_width: f32,
+        uv_x: f32,
+        uv_width: f32,
+    ) {
+        let v_bottom = three_slice_v_bottom(params.path, params.v_bottom);
+        let v_height = v_bottom - params.v_top;
+        self.push_quad(
+            Rectangle::new(
+                Point::new(dest_x, params.bounds.y),
+                Size::new(dest_width, params.bounds.height),
+            ),
+            Rectangle::new(
+                Point::new(uv_x, params.v_top),
+                Size::new(uv_width, v_height),
+            ),
+            params.color,
+            params.tex_index,
+            params.blend_mode,
         );
     }
 
@@ -351,6 +364,16 @@ fn quad_positions(bounds: Rectangle) -> [[f32; 2]; 4] {
         [bounds.x + bounds.width, bounds.y + bounds.height],
         [bounds.x, bounds.y + bounds.height],
     ]
+}
+
+fn three_slice_v_bottom(path: Option<&str>, fallback: f32) -> f32 {
+    match path {
+        Some("Interface/Buttons/UI-Panel-Button-Up")
+        | Some("Interface\\Buttons\\UI-Panel-Button-Up")
+        | Some("Interface/Buttons/UI-Panel-Button-Highlight")
+        | Some("Interface\\Buttons\\UI-Panel-Button-Highlight") => 22.0 / 32.0,
+        _ => fallback,
+    }
 }
 
 fn border_rects(bounds: Rectangle, thickness: f32) -> [Rectangle; 4] {
