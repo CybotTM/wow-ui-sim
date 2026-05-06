@@ -231,6 +231,12 @@ fn init_and_load(
         screen,
     );
     env.sync_addon_names_to_lua();
+    apply_post_load_workarounds(&env);
+    restart_gc_after_bootstrap(&env);
+    (env, font_system, saved_vars)
+}
+
+fn apply_post_load_workarounds(env: &WowLuaEnv) {
     wow_ui_sim::logging::println_elapsed("[Startup] applying post-load workarounds");
     let post_load_started = Instant::now();
     env.apply_post_load_workarounds();
@@ -238,6 +244,9 @@ fn init_and_load(
         "[Startup] post-load workarounds complete in {:.2?}",
         post_load_started.elapsed()
     ));
+}
+
+fn restart_gc_after_bootstrap(env: &WowLuaEnv) {
     wow_ui_sim::logging::println_elapsed("[Startup] restarting GC after bootstrap");
     let gc_restart_started = Instant::now();
     env.gc_restart_after_bootstrap()
@@ -246,7 +255,6 @@ fn init_and_load(
         "[Startup] GC restart complete in {:.2?}",
         gc_restart_started.elapsed()
     ));
-    (env, font_system, saved_vars)
 }
 
 fn resolve_exec_lua(arg: &Option<String>) -> Option<String> {
