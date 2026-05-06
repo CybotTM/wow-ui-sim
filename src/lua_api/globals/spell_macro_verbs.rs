@@ -88,25 +88,19 @@ fn pickup_spell(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `PickupTalent(talentId)` — cursor = Talent (pvp=false).
 fn pickup_talent(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(talent_id) = stack_u32(state, 1) else {
-        return Ok(0);
-    };
-    borrow_state_mut(state)?.cursor_item = Some(CursorInfo::Talent {
-        talent_id,
-        pvp: false,
-    });
-    Ok(0)
+    pickup_talent_with_pvp_flag(state, false)
 }
 
 /// `PickupPvpTalent(talentId)` — cursor = Talent (pvp=true).
 fn pickup_pvp_talent(state: &mut LuaState) -> LuaResult<u32> {
+    pickup_talent_with_pvp_flag(state, true)
+}
+
+fn pickup_talent_with_pvp_flag(state: &mut LuaState, pvp: bool) -> LuaResult<u32> {
     let Some(talent_id) = stack_u32(state, 1) else {
         return Ok(0);
     };
-    borrow_state_mut(state)?.cursor_item = Some(CursorInfo::Talent {
-        talent_id,
-        pvp: true,
-    });
+    borrow_state_mut(state)?.cursor_item = Some(CursorInfo::Talent { talent_id, pvp });
     Ok(0)
 }
 
