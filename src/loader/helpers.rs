@@ -407,12 +407,30 @@ fn emit_chained_handler(
     new_handler: &str,
     prepend: bool,
 ) {
-    let (first, second) = if prepend {
+    let order = chained_handler_order(prepend);
+    code.push_str(&chained_handler_lua(
+        target,
+        handler_name,
+        new_handler,
+        order,
+    ));
+}
+
+fn chained_handler_order(prepend: bool) -> (&'static str, &'static str) {
+    if prepend {
         ("__new", "__old")
     } else {
         ("__old", "__new")
-    };
-    code.push_str(&format!(
+    }
+}
+
+fn chained_handler_lua(
+    target: &str,
+    handler_name: &str,
+    new_handler: &str,
+    (first, second): (&str, &str),
+) -> String {
+    format!(
         r#"
         do
             local __old = {target}:GetScript("{handler_name}")
@@ -441,7 +459,7 @@ fn emit_chained_handler(
             end
         end
         "#
-    ));
+    )
 }
 
 /// WoW implicit parameter names for inline XML script bodies.
