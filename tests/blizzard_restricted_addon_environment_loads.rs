@@ -204,7 +204,7 @@ fn toc_declares_eager_game_only_with_classic_standard_allowlist() {
          standard tokens are required because the secure-handler subsystem is shared infrastructure"
     );
     assert!(
-        toc.metadata.get("DefaultState").is_none(),
+        !toc.metadata.contains_key("DefaultState"),
         "Blizzard_RestrictedAddOnEnvironment intentionally omits `## DefaultState` — \
          default_enabled at src/toc.rs:251-256 returns TRUE when the metadata is absent. The \
          addon is foundational and cannot be disabled without breaking every protected-frame \
