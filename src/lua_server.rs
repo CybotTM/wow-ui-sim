@@ -363,6 +363,16 @@ pub mod client {
         serde_json::from_str(&line).map_err(|e| format!("Invalid response: {}", e))
     }
 
+    pub(super) fn response_result<T>(
+        response: Response,
+        take_expected: impl FnOnce(Response) -> Option<T>,
+    ) -> Result<T, String> {
+        match response {
+            Response::Error(e) => Err(e),
+            response => take_expected(response).ok_or_else(|| "Unexpected response".into()),
+        }
+    }
+
     /// Connect to a Lua server and execute code.
     pub fn exec<P: AsRef<Path>>(socket: P, code: &str) -> Result<String, String> {
         let response = send_request(
@@ -383,11 +393,9 @@ pub mod client {
     /// Ping the server.
     pub fn ping<P: AsRef<Path>>(socket: P) -> Result<(), String> {
         let response = send_request(socket, Request::Ping)?;
-        match response {
-            Response::Pong => Ok(()),
-            Response::Error(e) => Err(e),
-            _ => Err("Unexpected response".into()),
-        }
+        response_result(response, |response| {
+            matches!(response, Response::Pong).then_some(())
+        })
     }
 
     /// Find running wow-lua servers.
@@ -454,18 +462,17 @@ pub mod client {
         verbose: bool,
     ) -> Result<String, String> {
         let response = send_request(socket, Request::DumpQuads { filter, verbose })?;
-        match response {
-            Response::Quads(s) => Ok(s),
-            Response::Error(e) => Err(e),
-            _ => Err("Unexpected response".into()),
-        }
+        response_result(response, |response| match response {
+            Response::Quads(s) => Some(s),
+            _ => None,
+        })
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
-        LuaCommand, Request, Response, cleanup_stale_socket, handle_request, parse_request,
+        LuaCommand, Request, Response, cleanup_stale_socket, client, handle_request, parse_request,
         socket_pid,
     };
     use std::fs::File;
@@ -566,5 +573,21 @@ mod tests {
 
         response_thread.join().unwrap();
         assert!(matches!(response, Response::Quads(body) if body == "quad dump"));
+    }
+
+    #[test]
+    fn client_response_result_maps_expected_error_and_unexpected() {
+        let pong = client::response_result(Response::Pong, |response| {
+            matches!(response, Response::Pong).then_some(())
+        });
+        assert!(pong.is_ok());
+
+        let error = client::response_result(Response::Error("boom".to_string()), |_| Some(()));
+        assert_eq!(error, Err("boom".to_string()));
+
+        let unexpected = client::response_result(Response::Tree("tree".to_string()), |response| {
+            matches!(response, Response::Pong).then_some(())
+        });
+        assert_eq!(unexpected, Err("Unexpected response".to_string()));
     }
 }
