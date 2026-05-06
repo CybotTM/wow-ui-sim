@@ -1,9 +1,7 @@
 //! C_WowTokenSecure — token buy/sell/redeem simulation with event firing.
 
-use crate::lua_api::methods::{
-    call_function_state, create_string, create_table, frame_ref, val_to_string,
-};
-use crate::lua_api::script_helpers::{get_event_listeners, get_script};
+use crate::lua_api::methods::{create_table, val_to_string};
+use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -146,19 +144,6 @@ fn wowtoken_set_pending_redeem_type(state: &mut LuaState, value: Option<i32>) {
     wowtoken_set(state, "pendingRedeemType", v);
 }
 
-fn fire_named_event(state: &mut LuaState, event_name: &str) {
-    for widget_id in get_event_listeners(state, event_name) {
-        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
-            continue;
-        };
-        let Ok(frame) = frame_ref(state, widget_id) else {
-            continue;
-        };
-        let event_name_val = create_string(state, event_name);
-        let _ = call_function_state(state, handler, &[frame, event_name_val]);
-    }
-}
-
 fn first_bool_arg(state: &LuaState) -> bool {
     (1..=2)
         .find_map(|index| match stack_val(state, index) {
@@ -193,7 +178,7 @@ fn parse_balance_amount(text: &str) -> Option<i64> {
 }
 
 fn c_wowtoken_can_redeem_for_balance(state: &mut LuaState) -> LuaResult<u32> {
-    fire_named_event(state, "TOKEN_REDEEM_BALANCE_UPDATED");
+    fire_named_event_state(state, "TOKEN_REDEEM_BALANCE_UPDATED", &[]);
     let result = if wowtoken_num(state, "tokenCount", 0.0) > 0.0 {
         0.0
     } else {
@@ -217,7 +202,7 @@ fn c_wowtoken_confirm_buy_token(state: &mut LuaState) -> LuaResult<u32> {
     }
     let token_count = wowtoken_num(state, "tokenCount", 0.0) + 1.0;
     wowtoken_set_num(state, "tokenCount", token_count);
-    fire_named_event(state, "TOKEN_STATUS_CHANGED");
+    fire_named_event_state(state, "TOKEN_STATUS_CHANGED", &[]);
     state.push(Val::Bool(true));
     Ok(1)
 }
@@ -232,7 +217,7 @@ fn c_wowtoken_confirm_sell_token(state: &mut LuaState) -> LuaResult<u32> {
     if token_count > 0.0 {
         wowtoken_set_num(state, "tokenCount", token_count - 1.0);
     }
-    fire_named_event(state, "TOKEN_STATUS_CHANGED");
+    fire_named_event_state(state, "TOKEN_STATUS_CHANGED", &[]);
     state.push(Val::Bool(true));
     Ok(1)
 }
@@ -270,7 +255,7 @@ fn c_wowtoken_get_price_lock_duration(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_wowtoken_get_remaining_game_time(state: &mut LuaState) -> LuaResult<u32> {
-    fire_named_event(state, "TOKEN_REDEEM_GAME_TIME_UPDATED");
+    fire_named_event_state(state, "TOKEN_REDEEM_GAME_TIME_UPDATED", &[]);
     let v = wowtoken_num(state, "remainingGameTime", 1440.0);
     state.push(Val::Num(v));
     Ok(1)
@@ -325,8 +310,8 @@ fn confirm_game_time_redemption(state: &mut LuaState) {
     wowtoken_set_bool(state, "isSubscribed", true);
     let remaining = wowtoken_num(state, "remainingGameTime", 1440.0);
     wowtoken_set_num(state, "remainingGameTime", remaining + 30.0 * 24.0 * 60.0);
-    fire_named_event(state, "TOKEN_STATUS_CHANGED");
-    fire_named_event(state, "TOKEN_REDEEM_GAME_TIME_UPDATED");
+    fire_named_event_state(state, "TOKEN_STATUS_CHANGED", &[]);
+    fire_named_event_state(state, "TOKEN_REDEEM_GAME_TIME_UPDATED", &[]);
     state.push(Val::Bool(true));
 }
 
@@ -338,8 +323,8 @@ fn confirm_balance_redemption(state: &mut LuaState) {
         "currentBalance",
         current_balance + balance_redeem_amount,
     );
-    fire_named_event(state, "TOKEN_STATUS_CHANGED");
-    fire_named_event(state, "TOKEN_REDEEM_BALANCE_UPDATED");
+    fire_named_event_state(state, "TOKEN_STATUS_CHANGED", &[]);
+    fire_named_event_state(state, "TOKEN_REDEEM_BALANCE_UPDATED", &[]);
     state.push(Val::Bool(true));
 }
 

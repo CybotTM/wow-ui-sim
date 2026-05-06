@@ -21,7 +21,7 @@
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref, table_get,
 };
-use crate::lua_api::script_helpers::{fire_named_event_state, get_event_listeners, get_script};
+use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_api::state_types::{CursorInfo, CursorItemOrigin, EquippedItem};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -36,19 +36,6 @@ fn stack_i32(state: &mut LuaState, index: i32) -> Option<i32> {
 
 fn stack_u32(state: &mut LuaState, index: i32) -> Option<u32> {
     stack_i32(state, index).and_then(|n| u32::try_from(n).ok())
-}
-
-fn fire_named_event(state: &mut LuaState, event_name: &str) {
-    for widget_id in get_event_listeners(state, event_name) {
-        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
-            continue;
-        };
-        let Ok(frame) = frame_ref(state, widget_id) else {
-            continue;
-        };
-        let event_name_val = create_string(state, event_name);
-        let _ = call_function_state(state, handler, &[frame, event_name_val]);
-    }
 }
 
 fn fire_actionbar_slot_changed(state: &mut LuaState) {
@@ -94,7 +81,7 @@ fn place_cursor_item_in_backpack(state: &mut LuaState) -> LuaResult<u32> {
     };
 
     store_cursor_item_in_backpack(state, slot, item_id, stack_count);
-    fire_named_event(state, "CURSOR_CHANGED");
+    fire_named_event_state(state, "CURSOR_CHANGED", &[]);
     state.push(Val::Bool(true));
     Ok(1)
 }
@@ -207,7 +194,7 @@ fn pickup_action(state: &mut LuaState) -> LuaResult<u32> {
         fire_actionbar_slot_changed(state);
         refresh_action_ui_buttons(state, slot);
     }
-    fire_named_event(state, "CURSOR_CHANGED");
+    fire_named_event_state(state, "CURSOR_CHANGED", &[]);
     Ok(0)
 }
 
@@ -343,7 +330,7 @@ fn clear_cursor_payload(state: &mut LuaState) -> LuaResult<u32> {
     };
     st.cursor_item = None;
     drop(st);
-    fire_named_event(state, "CURSOR_CHANGED");
+    fire_named_event_state(state, "CURSOR_CHANGED", &[]);
     Ok(0)
 }
 
@@ -366,6 +353,10 @@ fn get_cursor_info(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
+    push_cursor_info(state, cursor)
+}
+
+fn push_cursor_info(state: &mut LuaState, cursor: CursorInfo) -> LuaResult<u32> {
     match cursor {
         CursorInfo::Action { spell_id, .. }
         | CursorInfo::Spell { spell_id }
@@ -431,7 +422,7 @@ fn place_action(state: &mut LuaState) -> LuaResult<u32> {
     drop(st);
     fire_actionbar_slot_changed(state);
     refresh_action_ui_buttons(state, slot);
-    fire_named_event(state, "CURSOR_CHANGED");
+    fire_named_event_state(state, "CURSOR_CHANGED", &[]);
     Ok(0)
 }
 
@@ -457,8 +448,8 @@ fn pickup_player_money(state: &mut LuaState) -> LuaResult<u32> {
     st.player.money -= amount as i64;
     st.cursor_item = Some(CursorInfo::Money { copper: amount });
     drop(st);
-    fire_named_event(state, "CURSOR_CHANGED");
-    fire_named_event(state, "PLAYER_MONEY");
+    fire_named_event_state(state, "CURSOR_CHANGED", &[]);
+    fire_named_event_state(state, "PLAYER_MONEY", &[]);
     Ok(0)
 }
 
@@ -476,8 +467,8 @@ fn drop_cursor_money(state: &mut LuaState) -> LuaResult<u32> {
     st.player.money += copper as i64;
     st.cursor_item = None;
     drop(st);
-    fire_named_event(state, "CURSOR_CHANGED");
-    fire_named_event(state, "PLAYER_MONEY");
+    fire_named_event_state(state, "CURSOR_CHANGED", &[]);
+    fire_named_event_state(state, "PLAYER_MONEY", &[]);
     Ok(0)
 }
 
