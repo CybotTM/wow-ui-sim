@@ -125,9 +125,20 @@ fn register_text_scaling(state: &mut LuaState, table: GcRef<Table>) -> LuaResult
 }
 
 fn register_styled_text(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_text_colors(state, table)?;
+    register_text_hyperlinks(state, table)?;
+    register_text_wrap_style(state, table)?;
+    Ok(())
+}
+
+fn register_text_colors(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "SetTextColor", text::set_text_color)?;
     table_set_rust_fn_static(state, table, "GetTextColor", text::get_text_color)?;
     table_set_rust_fn_static(state, table, "SetFixedColor", text::set_fixed_color)?;
+    Ok(())
+}
+
+fn register_text_hyperlinks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table,
@@ -152,6 +163,10 @@ fn register_styled_text(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<
         "GetHyperlinkFormat",
         text::get_hyperlink_format,
     )?;
+    Ok(())
+}
+
+fn register_text_wrap_style(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table,
