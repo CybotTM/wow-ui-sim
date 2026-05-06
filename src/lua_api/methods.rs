@@ -612,9 +612,13 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{borrow_state, frame_ref};
+    use super::{
+        borrow_state, create_table, frame_ref, table_get, table_get_static, table_set,
+        table_set_static,
+    };
     use crate::lua_api::WowLuaEnv;
     use rilua::LuaApiMut;
+    use rilua::Val;
 
     #[test]
     fn frame_ref_returns_same_table_for_same_widget_id() {
@@ -631,5 +635,19 @@ mod tests {
         let second = frame_ref(state, ui_parent_id).expect("second frame ref");
 
         assert_eq!(first, second, "frame_ref should reuse cached table refs");
+    }
+
+    #[test]
+    fn table_set_variants_store_string_keys() {
+        let env = WowLuaEnv::new().expect("env");
+        let mut lua = env.rilua_mut();
+        let state = lua.state_mut();
+        let table = create_table(state);
+
+        table_set(state, table, "dynamicKey", Val::Num(10.0));
+        table_set_static(state, table, "staticKey", Val::Num(20.0));
+
+        assert_eq!(table_get(state, table, "dynamicKey"), Val::Num(10.0));
+        assert_eq!(table_get_static(state, table, "staticKey"), Val::Num(20.0));
     }
 }
