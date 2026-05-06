@@ -79,7 +79,7 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
         .flat_map(|b| {
             std::iter::once(b.clone()).chain(candidates.iter().map(move |ext| format!("{b}.{ext}")))
         })
-        .find_map(|p| resolver.lookup_path(&p).map(|fdid| (fdid, p)))?;
+        .find_map(|p| lookup_casc_path(&resolver, &p))?;
 
     let extract_dir = casc_extract_dir()?;
     let safe_relative = listfile_path.replace('\\', "/");
@@ -93,6 +93,20 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
     }
 
     resolver.ensure_cached(fdid, &out_path)
+}
+
+#[cfg(feature = "casc")]
+fn lookup_casc_path(
+    resolver: &asset_resolver::CascListfileResolver,
+    path: &str,
+) -> Option<(u32, String)> {
+    crate::limited_listfile::lookup_entry(path)
+        .map(|entry| (entry.fdid, entry.path.to_string()))
+        .or_else(|| {
+            resolver
+                .lookup_path(path)
+                .map(|fdid| (fdid, path.to_string()))
+        })
 }
 
 #[cfg(not(feature = "casc"))]

@@ -15,7 +15,7 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 ### Texture resolution
 
 - [ ] WoW paths with backslashes (`Interface\Buttons\UI-Panel-Button-Up`) are normalised to forward slashes and extension-stripped before lookup.
-- [ ] Lookup probes the listfile under each of `<path>`, `<path>.blp`, `<path>.BLP`, `<path>.tga`, `<path>.TGA`, `<path>.ttf`, `<path>.TTF`, `<path>.otf`, `<path>.OTF` and stops at the first hit.
+- [ ] Lookup probes the bundled simulator listfile first, then the external/community listfile, under each of `<path>`, `<path>.blp`, `<path>.BLP`, `<path>.tga`, `<path>.TGA`, `<path>.ttf`, `<path>.TTF`, `<path>.otf`, `<path>.OTF` and stops at the first hit.
 - [ ] On hit, `asset_resolver::ensure_cached(fdid, out_path)` materialises the BLP under `~/.cache/wow-ui-sim/casc-extract/<listfile/path>` (forward-slash form).
 - [ ] A second resolution of the same path returns the cached file without re-extracting from CASC.
 - [ ] Addon-shipped textures under `Interface/AddOns/<Addon>/...` resolve before CASC is consulted.
@@ -65,7 +65,7 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 
 ## Out of scope
 
-- Listfile maintenance — upstream concern of `asset-resolver`; the simulator never writes the listfile.
+- Full community listfile maintenance — upstream concern of `asset-resolver`; the simulator ships a generated limited subset in `data/wow-ui-sim-listfile.csv` for first-run cache population.
 - 3D model assets (M2/WMO/ADT) — see `docs/wiki/index.md` "Intentional Gaps"; the simulator is 2D only.
 - Audio assets — gated by the separate `sound` feature; CASC loading for sounds is not implemented.
 - Live filesystem watching of the WoW install — re-launching the simulator picks up new patches.

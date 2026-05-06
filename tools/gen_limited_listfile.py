@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+"""Generate the bundled CASC listfile subset used by wow-ui-sim."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_SOURCE = Path.home() / "Projects/world-of-osso/game-engine/data/community-listfile.csv"
+DEFAULT_OUTPUT = ROOT / "data/wow-ui-sim-listfile.csv"
+MANIFEST_PATH = ROOT / "data/manifest_interface_data.rs"
+ATLAS_PATH = ROOT / "data/atlas.rs"
+SCAN_PATHS = [
+    ROOT / "src",
+    ROOT / "Interface/AddOns",
+    ROOT / "Interface/BlizzardUI",
+]
+FONT_PATHS = [
+    "fonts/frizqt__.ttf",
+    "fonts/arialn.ttf",
+    "fonts/frizqt___cyr.ttf",
+]
+PROBE_PATHS = [
+    "interface/buttons/ui-panel-button-up.blp",
+    "interface/buttons/ui-panel-button-down.blp",
+    "interface/buttons/ui-panel-button-highlight.blp",
+    "interface/buttons/ui-panel-button-disabled.blp",
+]
+EXTENSIONS = ["blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF"]
+
+
+def main() -> None:
+    args = parse_args()
+    by_path, by_fdid = load_source(args.source)
+    requested_paths, requested_fdids = collect_requests()
+    rows = resolve_rows(by_path, by_fdid, requested_paths, requested_fdids)
+    write_rows(args.output, rows)
+    print(
+        f"Generated {len(rows)} rows from "
+        f"{len(requested_paths)} path candidates and {len(requested_fdids)} fileDataIDs"
+    )
+    print(f"Output: {args.output}")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    return parser.parse_args()
+
+
+def load_source(path: Path) -> tuple[dict[str, tuple[int, str]], dict[int, str]]:
+    by_path: dict[str, tuple[int, str]] = {}
+    by_fdid: dict[int, str] = {}
+    with path.open("r", encoding="utf-8", errors="replace", newline="") as handle:
+        for raw in handle:
+            raw = raw.rstrip("\r\n")
+            fdid_text, sep, asset_path = raw.partition(";")
+            if not sep:
+                continue
+            try:
+                fdid = int(fdid_text)
+            except ValueError:
+                continue
+            normalized = normalize_path(asset_path)
+            by_path[normalized] = (fdid, normalized)
+            by_fdid.setdefault(fdid, normalized)
+    return by_path, by_fdid
+
+
+def collect_requests() -> tuple[set[str], set[int]]:
+    paths = {normalize_path(path) for path in FONT_PATHS + PROBE_PATHS}
+    fdids = collect_manifest_fdids()
+    paths.update(collect_atlas_paths())
+    paths.update(scan_literal_paths())
+    return paths, fdids
+
+
+def collect_manifest_fdids() -> set[int]:
+    text = MANIFEST_PATH.read_text(encoding="utf-8")
+    return {int(match) for match in re.findall(r"\(\s*(\d+)\s*,\s*\"", text)}
+
+
+def collect_atlas_paths() -> set[str]:
+    text = ATLAS_PATH.read_text(encoding="utf-8")
+    return {
+        normalize_path(match)
+        for match in re.findall(r'file:\s*r"([^"]+)"', text)
+        if match
+    }
+
+
+def scan_literal_paths() -> set[str]:
+    paths: set[str] = set()
+    for root in SCAN_PATHS:
+        if not root.exists():
+            continue
+        for path in root.rglob("*"):
+            if path.suffix.lower() not in {".rs", ".lua", ".xml"}:
+                continue
+            paths.update(extract_interface_literals(path))
+    return paths
+
+
+def extract_interface_literals(path: Path) -> set[str]:
+    try:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return set()
+    matches = re.findall(
+        r"(?i)(?:Interface|Fonts)[\\/][A-Za-z0-9_ .@+()/\\-]+", text
+    )
+    return {trim_literal_path(match) for match in matches}
+
+
+def trim_literal_path(path: str) -> str:
+    return normalize_path(path).strip(" \t\r\n'\"),;:{}[]<>")
+
+
+def resolve_rows(
+    by_path: dict[str, tuple[int, str]],
+    by_fdid: dict[int, str],
+    requested_paths: set[str],
+    requested_fdids: set[int],
+) -> list[tuple[int, str]]:
+    rows: dict[int, str] = {}
+    for fdid in requested_fdids:
+        if path := by_fdid.get(fdid):
+            rows[fdid] = path
+    for path in requested_paths:
+        if row := resolve_path(by_path, path):
+            rows[row[0]] = row[1]
+    return sorted(rows.items(), key=lambda row: row[1])
+
+
+def resolve_path(by_path: dict[str, tuple[int, str]], path: str) -> tuple[int, str] | None:
+    for candidate in path_candidates(path):
+        if row := by_path.get(candidate):
+            return row
+    return None
+
+
+def path_candidates(path: str) -> list[str]:
+    normalized = normalize_path(path)
+    bases = [normalized]
+    if not normalized.startswith("interface/") and not normalized.startswith("fonts/"):
+        bases.append(f"interface/{normalized}")
+    candidates: list[str] = []
+    for base in bases:
+        candidates.append(base)
+        if "." not in Path(base).name:
+            candidates.extend(f"{base}.{ext}" for ext in EXTENSIONS)
+    return [normalize_path(candidate) for candidate in candidates]
+
+
+def normalize_path(path: str) -> str:
+    return path.replace("\\", "/").lower()
+
+
+def write_rows(path: Path, rows: list[tuple[int, str]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        for fdid, asset_path in rows:
+            handle.write(f"{fdid};{asset_path}\n")
+
+
+if __name__ == "__main__":
+    main()
