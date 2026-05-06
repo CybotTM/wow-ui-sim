@@ -90,7 +90,17 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
 
 /// Create a fully loaded environment with Blizzard addons and startup events.
 fn setup_env() -> common::LockedEnv {
-    common::lock_env(setup_unsettled_env)
+    setup_locked_env(false)
+}
+
+fn setup_locked_env(settle_after_startup: bool) -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = setup_unsettled_env();
+        if settle_after_startup {
+            settle_env(&env);
+        }
+        env
+    })
 }
 
 fn setup_unsettled_env() -> WowLuaEnv {
@@ -138,11 +148,7 @@ fn prepare_bag_env(env: &WowLuaEnv) {
 
 /// Create a fully loaded environment with Blizzard addons and startup events.
 fn setup_settled_env() -> common::LockedEnv {
-    common::lock_env(|| {
-        let env = setup_unsettled_env();
-        settle_env(&env);
-        env
-    })
+    setup_locked_env(true)
 }
 
 /// Fire startup events (same sequence as main.rs).
