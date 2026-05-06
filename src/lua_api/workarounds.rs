@@ -712,44 +712,7 @@ fn patch_chat_voice_button_surface(env: &crate::lua_api::WowLuaEnv) {
 }
 
 fn patch_item_socketing_tooltips(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local frame = ItemSocketingFrame
-        local container = frame and frame.SocketingContainer
-        if type(container) ~= "table" then
-            return
-        end
-
-        local function install_socket_on_enter(socket, socketIndex)
-            if type(socket) ~= "table" or type(socket.SetScript) ~= "function" then
-                return
-            end
-            socket:SetScript("OnEnter", function(self)
-                if type(GameTooltip) ~= "table" then
-                    return
-                end
-                if type(GameTooltip.SetOwner) == "function" then
-                    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                end
-                if type(GameTooltip.SetSocketGem) == "function" then
-                    GameTooltip:SetSocketGem(socketIndex)
-                end
-                if type(GameTooltip.NumLines) == "function"
-                    and GameTooltip:NumLines() == 0
-                    and type(GameTooltip.AddLine) == "function" then
-                    GameTooltip:AddLine("Socket Gem " .. tostring(socketIndex))
-                end
-                if type(GameTooltip.Show) == "function" then
-                    GameTooltip:Show()
-                end
-            end)
-        end
-
-        install_socket_on_enter(container.Socket1, 1)
-        install_socket_on_enter(container.Socket2, 2)
-        install_socket_on_enter(container.Socket3, 3)
-        "#,
-    );
+    let _ = env.exec(ITEM_SOCKETING_TOOLTIPS_WORKAROUND_LUA);
 }
 
 fn patch_action_bar_button_event_fanout(env: &crate::lua_api::WowLuaEnv) {
@@ -2931,6 +2894,43 @@ end
 if QuickJoinToastButton == nil and type(CreateFrame) == "function" and UIParent ~= nil then
     QuickJoinToastButton = CreateFrame("Button", "QuickJoinToastButton", UIParent)
 end
+"#;
+
+const ITEM_SOCKETING_TOOLTIPS_WORKAROUND_LUA: &str = r#"
+local frame = ItemSocketingFrame
+local container = frame and frame.SocketingContainer
+if type(container) ~= "table" then
+    return
+end
+
+local function install_socket_on_enter(socket, socketIndex)
+    if type(socket) ~= "table" or type(socket.SetScript) ~= "function" then
+        return
+    end
+    socket:SetScript("OnEnter", function(self)
+        if type(GameTooltip) ~= "table" then
+            return
+        end
+        if type(GameTooltip.SetOwner) == "function" then
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        end
+        if type(GameTooltip.SetSocketGem) == "function" then
+            GameTooltip:SetSocketGem(socketIndex)
+        end
+        if type(GameTooltip.NumLines) == "function"
+            and GameTooltip:NumLines() == 0
+            and type(GameTooltip.AddLine) == "function" then
+            GameTooltip:AddLine("Socket Gem " .. tostring(socketIndex))
+        end
+        if type(GameTooltip.Show) == "function" then
+            GameTooltip:Show()
+        end
+    end)
+end
+
+install_socket_on_enter(container.Socket1, 1)
+install_socket_on_enter(container.Socket2, 2)
+install_socket_on_enter(container.Socket3, 3)
 "#;
 
 const POST_EVENT_FRAME_LAYOUT_WORKAROUND_LUA: &str = r#"
