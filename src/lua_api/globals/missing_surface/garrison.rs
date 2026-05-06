@@ -138,6 +138,10 @@ fn set_research_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentIn
         "talentAvailability",
         Val::Num(info.talent_availability as f64),
     );
+    set_research_timing_fields(state, entry, info);
+}
+
+fn set_research_timing_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentInfo) {
     table_set(
         state,
         entry,
