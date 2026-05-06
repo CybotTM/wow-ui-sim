@@ -794,43 +794,74 @@ fn get_available_activity_groups(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `GetAvailableActivities(categoryID?, groupID?, filters?, searchTerm?)` → array of activityIDs.
 fn get_available_activities(state: &mut LuaState) -> LuaResult<u32> {
-    let category_id = Option::<f64>::from_stack(state, 1)?.map(|v| v as i32);
-    let group_id = Option::<f64>::from_stack(state, 2)?.map(|v| v as u32);
-    let filters = Option::<f64>::from_stack(state, 3)?.unwrap_or(0.0) as u32;
-    let search_term = Option::<String>::from_stack(state, 4)?;
-    let st = search_term.as_deref().map(|s| s.to_lowercase());
-    let mut acts = {
+    let criteria = AvailableActivityCriteria::from_stack(state)?;
+    let mut activities = {
         let sim = borrow_state(state)?;
         sim.lfg_activities
             .iter()
-            .filter(|a| {
-                if let Some(cat) = category_id {
-                    if a.category_id != cat {
-                        return false;
-                    }
-                }
-                if let Some(grp) = group_id {
-                    if a.group_id != grp {
-                        return false;
-                    }
-                }
-                if filters != 0 && a.filters & filters == 0 {
-                    return false;
-                }
-                if let Some(ref term) = st {
-                    if !a.full_name.to_lowercase().contains(term.as_str()) {
-                        return false;
-                    }
-                }
-                true
-            })
+            .filter(|activity| criteria.matches(activity))
             .map(|a| (a.activity_id, a.order_index))
             .collect::<Vec<_>>()
     };
-    acts.sort_by_key(|(_, order)| *order);
+    activities.sort_by_key(|(_, order)| *order);
+    let result = ordered_activity_id_table(state, &activities);
+    state.push(result);
+    Ok(1)
+}
+
+struct AvailableActivityCriteria {
+    category_id: Option<i32>,
+    group_id: Option<u32>,
+    filters: u32,
+    search_term: Option<String>,
+}
+
+impl AvailableActivityCriteria {
+    fn from_stack(state: &mut LuaState) -> LuaResult<Self> {
+        let category_id = Option::<f64>::from_stack(state, 1)?.map(|v| v as i32);
+        let group_id = Option::<f64>::from_stack(state, 2)?.map(|v| v as u32);
+        let filters = Option::<f64>::from_stack(state, 3)?.unwrap_or(0.0) as u32;
+        let search_term = Option::<String>::from_stack(state, 4)?.map(|s| s.to_lowercase());
+        Ok(Self {
+            category_id,
+            group_id,
+            filters,
+            search_term,
+        })
+    }
+
+    fn matches(&self, activity: &LfgActivityInfo) -> bool {
+        self.matches_category(activity)
+            && self.matches_group(activity)
+            && self.matches_filters(activity)
+            && self.matches_search_term(activity)
+    }
+
+    fn matches_category(&self, activity: &LfgActivityInfo) -> bool {
+        self.category_id
+            .is_none_or(|category_id| activity.category_id == category_id)
+    }
+
+    fn matches_group(&self, activity: &LfgActivityInfo) -> bool {
+        self.group_id
+            .is_none_or(|group_id| activity.group_id == group_id)
+    }
+
+    fn matches_filters(&self, activity: &LfgActivityInfo) -> bool {
+        self.filters == 0 || activity.filters & self.filters != 0
+    }
+
+    fn matches_search_term(&self, activity: &LfgActivityInfo) -> bool {
+        self.search_term
+            .as_ref()
+            .is_none_or(|term| activity.full_name.to_lowercase().contains(term.as_str()))
+    }
+}
+
+fn ordered_activity_id_table(state: &mut LuaState, activities: &[(u32, i32)]) -> Val {
     let result = create_table(state);
     if let Val::Table(table_ref) = result {
-        for (index, (activity_id, _)) in acts.iter().enumerate() {
+        for (index, (activity_id, _)) in activities.iter().enumerate() {
             if let Some(table) = state.gc.tables.get_mut(table_ref) {
                 let _ = table.raw_set(
                     Val::Num(index as f64 + 1.0),
@@ -841,8 +872,7 @@ fn get_available_activities(state: &mut LuaState) -> LuaResult<u32> {
         }
         state.gc.barrier_back(table_ref);
     }
-    state.push(result);
-    Ok(1)
+    result
 }
 
 /// `GetActivityGroupInfo(groupID)` → (name, orderIndex) or nothing.
