@@ -1,51 +1,22 @@
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::iced_app::app::AppInit;
     use crate::iced_app::{build_hittable_rects, frame_collect::collect_hittable_frames};
-    use crate::lua_api::WowLuaEnv;
-    use crate::render::{FrameQuadSnapshot, GlyphAtlas, WowFontSystem};
-    use crate::screen::ScreenKind;
+    use crate::render::FrameQuadSnapshot;
     use crate::texture::{TextureManager, normalize_wow_path};
     use iced::Point;
     use rustc_hash::FxHashSet;
-    use std::cell::RefCell;
     use std::collections::HashMap;
     use std::fs;
     use std::path::Path;
-    use std::rc::Rc;
     use tempfile::tempdir;
-    use tokio::sync::mpsc;
 
     fn dirty_mask(strata: usize) -> u16 {
         1u16 << strata
     }
 
     fn build_test_app() -> App {
-        let env = Rc::new(RefCell::new(
-            WowLuaEnv::new().expect("Failed to create Lua environment"),
-        ));
-        env.borrow().set_screen_mode(ScreenKind::Game);
-
-        let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
-        let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
-        let (_cmd_tx, cmd_rx) = mpsc::channel(1);
-        let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
-
-        App::build_app(AppInit {
-            env,
-            log_messages: Vec::new(),
-            texture_manager,
-            font_system,
-            glyph_atlas,
-            cmd_rx,
-            lua_rx,
-            debug_borders: false,
-            debug_anchors: false,
-            saved_vars: None,
-            config: crate::config::SimConfig::default(),
-        })
+        super::test_support::build_test_app()
     }
 
     #[test]

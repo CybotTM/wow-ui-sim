@@ -27,6 +27,9 @@ mod rebuild;
 #[path = "render_textures.rs"]
 mod textures;
 
+#[cfg(test)]
+mod test_support;
+
 use draw_log::{DrawLogMetrics, log_draw_metrics};
 use mouse_events::handle_mouse_event;
 pub(crate) use preload::preload_texture_request_source;
