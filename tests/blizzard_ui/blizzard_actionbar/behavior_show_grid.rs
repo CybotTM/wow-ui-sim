@@ -161,233 +161,267 @@
 use crate::common;
 use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
 use crate::test_timeout;
+use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_ActionBar";
 const SHOW_GRID_REASON_EVENT: i32 = 2;
+
+struct SampleGridState {
+    bottomleft_first: bool,
+    bottomleft_last: bool,
+    right_first: bool,
+}
+
+fn assert_multi_bars_exist(env: &WowLuaEnv) {
+    let all_bars_exist: bool = env
+        .eval(
+            r#"
+            return MultiBarBottomLeft ~= nil
+                and MultiBarBottomRight ~= nil
+                and MultiBarRight ~= nil
+                and MultiBarLeft ~= nil
+                and MultiBar5 ~= nil
+                and MultiBar6 ~= nil
+                and MultiBar7 ~= nil
+            "#,
+        )
+        .expect("multi-bar global existence probe must run cleanly");
+    assert!(
+        all_bars_exist,
+        "After the startup-shape harness loads `{ROOT}`, all seven \
+         multi-bar globals must exist (MultiBarBottomLeft, MultiBarBottomRight, \
+         MultiBarRight, MultiBarLeft, MultiBar5, MultiBar6, MultiBar7). \
+         They are declared as `<Frame>` elements in \
+         Shared/MultiActionBars.xml:45-220, parented to UIParent. \
+         `GetMultiActionBars` (Shared/MultiActionBars.lua:61-63) returns \
+         nil if any one is missing, which silently disables \
+         `MultiActionBar_ShowAllGrids`. A false reading here means the \
+         XML didn't load or a `<Frame name=...>` regressed."
+    );
+}
+
+fn assert_sample_buttons_exist(env: &WowLuaEnv) {
+    let sample_buttons_exist: bool = env
+        .eval(
+            r#"
+            return MultiBarBottomLeftButton1 ~= nil
+                and MultiBarBottomLeftButton12 ~= nil
+                and MultiBarRightButton1 ~= nil
+            "#,
+        )
+        .expect("sample button global existence probe must run cleanly");
+    assert!(
+        sample_buttons_exist,
+        "After OnLoad, `MultiBarBottomLeftButton1`, \
+         `MultiBarBottomLeftButton12`, and `MultiBarRightButton1` must \
+         exist as globals. `ActionBar_OnLoad` (Shared/ActionBar.lua:13-44) \
+         creates each button via `CreateFrame(\"CheckButton\", buttonName, \
+         ..., self.buttonTemplate, i)` with `buttonName = \
+         actionBarName..\"Button\"..i` for non-Main/Stance/Pet/Possess \
+         bars (lua:27-28). A nil reading means OnLoad did not run for \
+         one of the bars, or the global naming branch regressed. The \
+         samples span both intra-bar fanout (BottomLeft #1 vs. #12) and \
+         cross-bar fanout (BottomLeft vs. Right)."
+    );
+}
+
+fn clear_multibar_showgrid_attributes(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        -- Test fixture: clear the `showgrid` attribute on every multi-bar
+        -- button. EditMode's UpdateSystemSettingAlwaysShowButtons sets
+        -- bit 1 (REASON_CVAR) during system load, which makes the
+        -- per-button SetShowGrid gate at ActionButton.lua:1536 short-
+        -- circuit. Pre-clearing gives a clean cold state of 0 so the
+        -- Show/Hide round trip is observable.
+        local bars = {MultiBarBottomLeft, MultiBarBottomRight, MultiBarRight,
+                      MultiBarLeft, MultiBar5, MultiBar6, MultiBar7}
+        for _, bar in ipairs(bars) do
+            if bar.actionButtons then
+                for _, button in pairs(bar.actionButtons) do
+                    button:SetAttribute("showgrid", 0)
+                end
+            end
+        end
+        "#,
+    )
+    .expect("test fixture pre-clear of showgrid attributes must run cleanly");
+}
+
+fn sample_button_grid_state(env: &WowLuaEnv, stage: &str) -> SampleGridState {
+    SampleGridState {
+        bottomleft_first: env
+            .eval("return MultiBarBottomLeftButton1:GetShowGrid()")
+            .unwrap_or_else(|_| panic!("BottomLeft #1 {stage} GetShowGrid probe must run cleanly")),
+        bottomleft_last: env
+            .eval("return MultiBarBottomLeftButton12:GetShowGrid()")
+            .unwrap_or_else(|_| {
+                panic!("BottomLeft #12 {stage} GetShowGrid probe must run cleanly")
+            }),
+        right_first: env
+            .eval("return MultiBarRightButton1:GetShowGrid()")
+            .unwrap_or_else(|_| panic!("Right #1 {stage} GetShowGrid probe must run cleanly")),
+    }
+}
+
+fn bottomleft_first_showgrid_attr(env: &WowLuaEnv, stage: &str) -> i32 {
+    env.eval("return MultiBarBottomLeftButton1:GetAttribute('showgrid') or -1")
+        .unwrap_or_else(|_| {
+            panic!("BottomLeft #1 {stage} showgrid attribute probe must run cleanly")
+        })
+}
+
+fn bottomleft_show_all_buttons(env: &WowLuaEnv, stage: &str) -> i32 {
+    env.eval("return MultiBarBottomLeft.showAllButtons or -1")
+        .unwrap_or_else(|_| {
+            panic!("MultiBarBottomLeft.showAllButtons {stage} probe must run cleanly")
+        })
+}
+
+fn show_all_grids(env: &WowLuaEnv) {
+    env.exec(&format!(
+        "MultiActionBar_ShowAllGrids({SHOW_GRID_REASON_EVENT})"
+    ))
+    .expect("MultiActionBar_ShowAllGrids must be callable as a global function");
+}
+
+fn hide_all_grids(env: &WowLuaEnv) {
+    env.exec(&format!(
+        "MultiActionBar_HideAllGrids({SHOW_GRID_REASON_EVENT})"
+    ))
+    .expect("MultiActionBar_HideAllGrids must be callable as a global function");
+}
+
+fn assert_post_fixture_grid_clear(state: &SampleGridState) {
+    assert!(
+        !state.bottomleft_first && !state.bottomleft_last && !state.right_first,
+        "After the test fixture writes `showgrid=0` to every multi-bar \
+         button, `:GetShowGrid()` must return false on every sample. \
+         `GetShowGrid` (Shared/ActionButton.lua:1528-1531) returns \
+         `(showGridAttribute > 0)`. A true reading here means the \
+         SetAttribute write didn't stick (broken attribute storage) or \
+         the GetShowGrid reader regressed and is reading a different \
+         field."
+    );
+}
+
+fn assert_post_show_grid_state(state: &SampleGridState) {
+    assert!(
+        state.bottomleft_first && state.bottomleft_last && state.right_first,
+        "After `MultiActionBar_ShowAllGrids({SHOW_GRID_REASON_EVENT})`, \
+         `:GetShowGrid()` must return true on every sampled button. \
+         The chain: lua:107 iterates GetMultiActionBars's table (proves \
+         multi-bar table iteration via Right-vs-BottomLeft samples), \
+         and lua:161 iterates `self.actionButtons` (proves intra-bar \
+         fanout via #1-vs-#12 samples). Per-button \
+         `SetShowGrid(true, 2)` writes `bit.bor(0, 2) = 2` into the \
+         `showgrid` attribute (Shared/ActionButton.lua:1539). \
+         `GetShowGrid` then returns `(2 > 0) = true`. A false reading \
+         on BottomLeft #12 means the bar's `actionButtons` loop \
+         short-circuited mid-fan; a false reading on Right #1 means \
+         `GetMultiActionBars` returned a partial subset; a false \
+         reading on all three means the per-button `issecure()` gate \
+         at lua:1536 was inverted, or `MultiActionBar_ShowAllGrids` \
+         didn't iterate at all. Got: BottomLeft #1={}, \
+         BottomLeft #12={}, Right #1={}.",
+        state.bottomleft_first,
+        state.bottomleft_last,
+        state.right_first
+    );
+}
+
+fn assert_post_hide_grid_state(state: &SampleGridState) {
+    assert!(
+        !state.bottomleft_first && !state.bottomleft_last && !state.right_first,
+        "After `MultiActionBar_HideAllGrids({SHOW_GRID_REASON_EVENT})`, \
+         `:GetShowGrid()` must return false on every sampled button. \
+         The per-button impl writes `bit.band(2, bit.bnot(2)) = 0` \
+         into the `showgrid` attribute (Shared/ActionButton.lua:1541). \
+         `GetShowGrid` then returns `(0 > 0) = false`. A true reading \
+         means either the Hide path didn't fan to actionButtons \
+         (Shared/ActionBar.lua:161-163), or the AND-NOT bit math \
+         regressed and the bit set by Show is still present. Got: \
+         BottomLeft #1={}, BottomLeft #12={}, Right #1={}.",
+        state.bottomleft_first,
+        state.bottomleft_last,
+        state.right_first
+    );
+}
+
+fn assert_post_show_flags(env: &WowLuaEnv) {
+    let show_attr_bottomleft_first = bottomleft_first_showgrid_attr(env, "post-Show");
+    assert_eq!(
+        show_attr_bottomleft_first, SHOW_GRID_REASON_EVENT,
+        "After `MultiActionBar_ShowAllGrids({SHOW_GRID_REASON_EVENT})` \
+         on a freshly-cleared (showgrid=0) cold state, the `showgrid` \
+         attribute must equal exactly REASON_EVENT (=2) on \
+         MultiBarBottomLeftButton1. The per-button impl computes \
+         `bit.bor(0, 2) = 2` (Shared/ActionButton.lua:1539). A value \
+         different from 2 means the bit math regressed (e.g. \
+         `bit.bor(0, 4)` — wrong reason constant) or the SetAttribute \
+         call wrote something else. Got: {show_attr_bottomleft_first}."
+    );
+
+    let bar_show_all_buttons_after_show = bottomleft_show_all_buttons(env, "post-Show");
+    assert_eq!(
+        bar_show_all_buttons_after_show, SHOW_GRID_REASON_EVENT,
+        "After `MultiActionBar_ShowAllGrids({SHOW_GRID_REASON_EVENT})`, \
+         `MultiBarBottomLeft.showAllButtons` must equal exactly \
+         REASON_EVENT (=2). The `reason == \
+         ACTION_BUTTON_SHOW_GRID_REASON_EVENT` branch at \
+         Shared/ActionBar.lua:151-155 writes \
+         `bit.bor(self.showAllButtons or 0, reason)` so subsequent \
+         `UpdateVisibility` calls keep the bar shown while a drag is \
+         active. Cold-state `showAllButtons` is nil/0 (only set by \
+         EVENT/SPELLCOLLECTION reasons, not by EditMode's CVAR), so the \
+         OR yields exactly 2. A different value means the branch \
+         evaluated the wrong reason or the bit math regressed. \
+         Got: {bar_show_all_buttons_after_show}."
+    );
+}
+
+fn assert_post_hide_flags(env: &WowLuaEnv) {
+    let hide_attr_bottomleft_first = bottomleft_first_showgrid_attr(env, "post-Hide");
+    assert_eq!(
+        hide_attr_bottomleft_first, 0,
+        "After `MultiActionBar_HideAllGrids({SHOW_GRID_REASON_EVENT})` \
+         on a state where Show set the attribute to exactly 2, the \
+         `showgrid` attribute must equal exactly 0 on \
+         MultiBarBottomLeftButton1. The per-button impl computes \
+         `bit.band(2, bit.bnot(2)) = 0` (Shared/ActionButton.lua:1541). \
+         A value different from 0 means the bit math regressed (e.g. \
+         missing `bit.bnot`). Got: {hide_attr_bottomleft_first}."
+    );
+
+    let bar_show_all_buttons_after_hide = bottomleft_show_all_buttons(env, "post-Hide");
+    assert_eq!(
+        bar_show_all_buttons_after_hide, 0,
+        "After `MultiActionBar_HideAllGrids({SHOW_GRID_REASON_EVENT})`, \
+         `MultiBarBottomLeft.showAllButtons` must equal exactly 0. The \
+         same `reason == EVENT` branch at Shared/ActionBar.lua:151-158 \
+         takes the AND-NOT path on the hide direction (lua:157), \
+         writing `bit.band(2, bit.bnot(2)) = 0`. A non-zero value \
+         means the symmetric clear regressed. \
+         Got: {bar_show_all_buttons_after_hide}."
+    );
+}
 
 #[test]
 fn multi_action_bar_show_all_grids_fans_showgrid_attribute_to_every_multibar_button() {
     test_timeout! {
     with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
-        let all_bars_exist: bool = env
-            .eval(
-                r#"
-                return MultiBarBottomLeft ~= nil
-                    and MultiBarBottomRight ~= nil
-                    and MultiBarRight ~= nil
-                    and MultiBarLeft ~= nil
-                    and MultiBar5 ~= nil
-                    and MultiBar6 ~= nil
-                    and MultiBar7 ~= nil
-                "#,
-            )
-            .expect("multi-bar global existence probe must run cleanly");
-        assert!(
-            all_bars_exist,
-            "After the startup-shape harness loads `{ROOT}`, all seven \
-             multi-bar globals must exist (MultiBarBottomLeft, MultiBarBottomRight, \
-             MultiBarRight, MultiBarLeft, MultiBar5, MultiBar6, MultiBar7). \
-             They are declared as `<Frame>` elements in \
-             Shared/MultiActionBars.xml:45-220, parented to UIParent. \
-             `GetMultiActionBars` (Shared/MultiActionBars.lua:61-63) returns \
-             nil if any one is missing, which silently disables \
-             `MultiActionBar_ShowAllGrids`. A false reading here means the \
-             XML didn't load or a `<Frame name=...>` regressed."
-        );
+        assert_multi_bars_exist(env);
+        assert_sample_buttons_exist(env);
+        clear_multibar_showgrid_attributes(env);
+        assert_post_fixture_grid_clear(&sample_button_grid_state(env, "post-fixture"));
 
-        let sample_buttons_exist: bool = env
-            .eval(
-                r#"
-                return MultiBarBottomLeftButton1 ~= nil
-                    and MultiBarBottomLeftButton12 ~= nil
-                    and MultiBarRightButton1 ~= nil
-                "#,
-            )
-            .expect("sample button global existence probe must run cleanly");
-        assert!(
-            sample_buttons_exist,
-            "After OnLoad, `MultiBarBottomLeftButton1`, \
-             `MultiBarBottomLeftButton12`, and `MultiBarRightButton1` must \
-             exist as globals. `ActionBar_OnLoad` (Shared/ActionBar.lua:13-44) \
-             creates each button via `CreateFrame(\"CheckButton\", buttonName, \
-             ..., self.buttonTemplate, i)` with `buttonName = \
-             actionBarName..\"Button\"..i` for non-Main/Stance/Pet/Possess \
-             bars (lua:27-28). A nil reading means OnLoad did not run for \
-             one of the bars, or the global naming branch regressed. The \
-             samples span both intra-bar fanout (BottomLeft #1 vs. #12) and \
-             cross-bar fanout (BottomLeft vs. Right)."
-        );
+        show_all_grids(env);
+        assert_post_show_grid_state(&sample_button_grid_state(env, "post-Show"));
+        assert_post_show_flags(env);
 
-        env.exec(
-            r#"
-            -- Test fixture: clear the `showgrid` attribute on every multi-bar
-            -- button. EditMode's UpdateSystemSettingAlwaysShowButtons sets
-            -- bit 1 (REASON_CVAR) during system load, which makes the
-            -- per-button SetShowGrid gate at ActionButton.lua:1536 short-
-            -- circuit. Pre-clearing gives a clean cold state of 0 so the
-            -- Show/Hide round trip is observable.
-            local bars = {MultiBarBottomLeft, MultiBarBottomRight, MultiBarRight,
-                          MultiBarLeft, MultiBar5, MultiBar6, MultiBar7}
-            for _, bar in ipairs(bars) do
-                if bar.actionButtons then
-                    for _, button in pairs(bar.actionButtons) do
-                        button:SetAttribute("showgrid", 0)
-                    end
-                end
-            end
-            "#,
-        )
-        .expect("test fixture pre-clear of showgrid attributes must run cleanly");
-
-        let post_fixture_grid_clear: bool = env
-            .eval(
-                r#"
-                return (not MultiBarBottomLeftButton1:GetShowGrid())
-                    and (not MultiBarBottomLeftButton12:GetShowGrid())
-                    and (not MultiBarRightButton1:GetShowGrid())
-                "#,
-            )
-            .expect("post-fixture GetShowGrid probe must run cleanly");
-        assert!(
-            post_fixture_grid_clear,
-            "After the test fixture writes `showgrid=0` to every multi-bar \
-             button, `:GetShowGrid()` must return false on every sample. \
-             `GetShowGrid` (Shared/ActionButton.lua:1528-1531) returns \
-             `(showGridAttribute > 0)`. A true reading here means the \
-             SetAttribute write didn't stick (broken attribute storage) or \
-             the GetShowGrid reader regressed and is reading a different \
-             field."
-        );
-
-        env.exec(&format!(
-            "MultiActionBar_ShowAllGrids({SHOW_GRID_REASON_EVENT})"
-        ))
-        .expect("MultiActionBar_ShowAllGrids must be callable as a global function");
-
-        let show_grid_bottomleft_first: bool = env
-            .eval("return MultiBarBottomLeftButton1:GetShowGrid()")
-            .expect("BottomLeft #1 post-Show GetShowGrid probe must run cleanly");
-        let show_grid_bottomleft_last: bool = env
-            .eval("return MultiBarBottomLeftButton12:GetShowGrid()")
-            .expect("BottomLeft #12 post-Show GetShowGrid probe must run cleanly");
-        let show_grid_right_first: bool = env
-            .eval("return MultiBarRightButton1:GetShowGrid()")
-            .expect("Right #1 post-Show GetShowGrid probe must run cleanly");
-        assert!(
-            show_grid_bottomleft_first
-                && show_grid_bottomleft_last
-                && show_grid_right_first,
-            "After `MultiActionBar_ShowAllGrids({SHOW_GRID_REASON_EVENT})`, \
-             `:GetShowGrid()` must return true on every sampled button. \
-             The chain: lua:107 iterates GetMultiActionBars's table (proves \
-             multi-bar table iteration via Right-vs-BottomLeft samples), \
-             and lua:161 iterates `self.actionButtons` (proves intra-bar \
-             fanout via #1-vs-#12 samples). Per-button \
-             `SetShowGrid(true, 2)` writes `bit.bor(0, 2) = 2` into the \
-             `showgrid` attribute (Shared/ActionButton.lua:1539). \
-             `GetShowGrid` then returns `(2 > 0) = true`. A false reading \
-             on BottomLeft #12 means the bar's `actionButtons` loop \
-             short-circuited mid-fan; a false reading on Right #1 means \
-             `GetMultiActionBars` returned a partial subset; a false \
-             reading on all three means the per-button `issecure()` gate \
-             at lua:1536 was inverted, or `MultiActionBar_ShowAllGrids` \
-             didn't iterate at all. Got: BottomLeft #1={show_grid_bottomleft_first}, \
-             BottomLeft #12={show_grid_bottomleft_last}, \
-             Right #1={show_grid_right_first}."
-        );
-
-        let show_attr_bottomleft_first: i32 = env
-            .eval("return MultiBarBottomLeftButton1:GetAttribute('showgrid') or -1")
-            .expect("BottomLeft #1 post-Show showgrid attribute probe must run cleanly");
-        assert_eq!(
-            show_attr_bottomleft_first, SHOW_GRID_REASON_EVENT,
-            "After `MultiActionBar_ShowAllGrids({SHOW_GRID_REASON_EVENT})` \
-             on a freshly-cleared (showgrid=0) cold state, the `showgrid` \
-             attribute must equal exactly REASON_EVENT (=2) on \
-             MultiBarBottomLeftButton1. The per-button impl computes \
-             `bit.bor(0, 2) = 2` (Shared/ActionButton.lua:1539). A value \
-             different from 2 means the bit math regressed (e.g. \
-             `bit.bor(0, 4)` — wrong reason constant) or the SetAttribute \
-             call wrote something else. Got: {show_attr_bottomleft_first}."
-        );
-
-        let bar_show_all_buttons_after_show: i32 = env
-            .eval("return MultiBarBottomLeft.showAllButtons or -1")
-            .expect("MultiBarBottomLeft.showAllButtons post-Show probe must run cleanly");
-        assert_eq!(
-            bar_show_all_buttons_after_show, SHOW_GRID_REASON_EVENT,
-            "After `MultiActionBar_ShowAllGrids({SHOW_GRID_REASON_EVENT})`, \
-             `MultiBarBottomLeft.showAllButtons` must equal exactly \
-             REASON_EVENT (=2). The `reason == \
-             ACTION_BUTTON_SHOW_GRID_REASON_EVENT` branch at \
-             Shared/ActionBar.lua:151-155 writes \
-             `bit.bor(self.showAllButtons or 0, reason)` so subsequent \
-             `UpdateVisibility` calls keep the bar shown while a drag is \
-             active. Cold-state `showAllButtons` is nil/0 (only set by \
-             EVENT/SPELLCOLLECTION reasons, not by EditMode's CVAR), so the \
-             OR yields exactly 2. A different value means the branch \
-             evaluated the wrong reason or the bit math regressed. \
-             Got: {bar_show_all_buttons_after_show}."
-        );
-
-        env.exec(&format!(
-            "MultiActionBar_HideAllGrids({SHOW_GRID_REASON_EVENT})"
-        ))
-        .expect("MultiActionBar_HideAllGrids must be callable as a global function");
-
-        let hide_grid_bottomleft_first: bool = env
-            .eval("return MultiBarBottomLeftButton1:GetShowGrid()")
-            .expect("BottomLeft #1 post-Hide GetShowGrid probe must run cleanly");
-        let hide_grid_bottomleft_last: bool = env
-            .eval("return MultiBarBottomLeftButton12:GetShowGrid()")
-            .expect("BottomLeft #12 post-Hide GetShowGrid probe must run cleanly");
-        let hide_grid_right_first: bool = env
-            .eval("return MultiBarRightButton1:GetShowGrid()")
-            .expect("Right #1 post-Hide GetShowGrid probe must run cleanly");
-        assert!(
-            !hide_grid_bottomleft_first
-                && !hide_grid_bottomleft_last
-                && !hide_grid_right_first,
-            "After `MultiActionBar_HideAllGrids({SHOW_GRID_REASON_EVENT})`, \
-             `:GetShowGrid()` must return false on every sampled button. \
-             The per-button impl writes `bit.band(2, bit.bnot(2)) = 0` \
-             into the `showgrid` attribute (Shared/ActionButton.lua:1541). \
-             `GetShowGrid` then returns `(0 > 0) = false`. A true reading \
-             means either the Hide path didn't fan to actionButtons \
-             (Shared/ActionBar.lua:161-163), or the AND-NOT bit math \
-             regressed and the bit set by Show is still present. Got: \
-             BottomLeft #1={hide_grid_bottomleft_first}, \
-             BottomLeft #12={hide_grid_bottomleft_last}, \
-             Right #1={hide_grid_right_first}."
-        );
-
-        let hide_attr_bottomleft_first: i32 = env
-            .eval("return MultiBarBottomLeftButton1:GetAttribute('showgrid') or -1")
-            .expect("BottomLeft #1 post-Hide showgrid attribute probe must run cleanly");
-        assert_eq!(
-            hide_attr_bottomleft_first, 0,
-            "After `MultiActionBar_HideAllGrids({SHOW_GRID_REASON_EVENT})` \
-             on a state where Show set the attribute to exactly 2, the \
-             `showgrid` attribute must equal exactly 0 on \
-             MultiBarBottomLeftButton1. The per-button impl computes \
-             `bit.band(2, bit.bnot(2)) = 0` (Shared/ActionButton.lua:1541). \
-             A value different from 0 means the bit math regressed (e.g. \
-             missing `bit.bnot`). Got: {hide_attr_bottomleft_first}."
-        );
-
-        let bar_show_all_buttons_after_hide: i32 = env
-            .eval("return MultiBarBottomLeft.showAllButtons or -1")
-            .expect("MultiBarBottomLeft.showAllButtons post-Hide probe must run cleanly");
-        assert_eq!(
-            bar_show_all_buttons_after_hide, 0,
-            "After `MultiActionBar_HideAllGrids({SHOW_GRID_REASON_EVENT})`, \
-             `MultiBarBottomLeft.showAllButtons` must equal exactly 0. The \
-             same `reason == EVENT` branch at Shared/ActionBar.lua:151-158 \
-             takes the AND-NOT path on the hide direction (lua:157), \
-             writing `bit.band(2, bit.bnot(2)) = 0`. A non-zero value \
-             means the symmetric clear regressed. \
-             Got: {bar_show_all_buttons_after_hide}."
-        );
+        hide_all_grids(env);
+        assert_post_hide_grid_state(&sample_button_grid_state(env, "post-Hide"));
+        assert_post_hide_flags(env);
     });
     }
 }
