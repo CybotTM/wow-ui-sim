@@ -357,52 +357,66 @@ fn c_get_num_equipment_sets(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+struct EquipmentSetInfo {
+    name: String,
+    icon: String,
+    id: i32,
+    is_equipped: bool,
+    num_items: i32,
+    num_ignored: i32,
+}
+
 fn c_get_equipment_set_info(state: &mut LuaState) -> LuaResult<u32> {
     let set_id = i32::from_stack(state, 1)?;
-    let info = {
-        let sim = borrow_state(state)?;
-        let Some(set) = sim.equipment_manager.sets.iter().find(|s| s.id == set_id) else {
-            return Ok(0);
-        };
-        let is_equipped = sim.equipment_manager.last_used_set_id == Some(set_id);
-        let num_items = set.item_ids.len() as i32;
-        let num_ignored = set.ignored_slots.len() as i32;
-        (
-            set.name.clone(),
-            set.icon.clone(),
-            set.id,
-            is_equipped,
-            num_items,
-            num_ignored,
-        )
+    let Some(info) = find_equipment_set_info(state, set_id)? else {
+        return Ok(0);
     };
-    let (name, icon, id, is_equipped, num_items, num_ignored) = info;
-    let name_val = create_string(state, &name);
+    push_equipment_set_info(state, &info);
+    Ok(9)
+}
+
+fn find_equipment_set_info(state: &LuaState, set_id: i32) -> LuaResult<Option<EquipmentSetInfo>> {
+    let sim = borrow_state(state)?;
+    let Some(set) = sim.equipment_manager.sets.iter().find(|s| s.id == set_id) else {
+        return Ok(None);
+    };
+
+    Ok(Some(EquipmentSetInfo {
+        name: set.name.clone(),
+        icon: set.icon.clone(),
+        id: set.id,
+        is_equipped: sim.equipment_manager.last_used_set_id == Some(set_id),
+        num_items: set.item_ids.len() as i32,
+        num_ignored: set.ignored_slots.len() as i32,
+    }))
+}
+
+fn push_equipment_set_info(state: &mut LuaState, info: &EquipmentSetInfo) {
+    let name_val = create_string(state, &info.name);
     state.push(name_val);
-    if let Ok(parsed) = icon.parse::<i64>() {
+    if let Ok(parsed) = info.icon.parse::<i64>() {
         state.push(Val::Num(parsed as f64));
-    } else if icon.is_empty() {
+    } else if info.icon.is_empty() {
         state.push(Val::Num(0.0));
     } else {
-        let icon_val = create_string(state, &icon);
+        let icon_val = create_string(state, &info.icon);
         state.push(icon_val);
     }
-    state.push(Val::Num(id as f64));
-    state.push(Val::Bool(is_equipped));
-    state.push(Val::Num(num_items as f64));
+    state.push(Val::Num(info.id as f64));
+    state.push(Val::Bool(info.is_equipped));
+    state.push(Val::Num(info.num_items as f64));
     // numEquipped — we don't model per-item equip diffs, so report
     // every captured item as equipped if `isEquipped`, else 0.
-    let num_equipped = if is_equipped { num_items } else { 0 };
+    let num_equipped = if info.is_equipped { info.num_items } else { 0 };
     state.push(Val::Num(num_equipped as f64));
     // numInInventory — unlocked items currently in bags. Match
     // numItems for the simulated case (no bag inventory model for
     // saved sets).
-    state.push(Val::Num(num_items as f64));
+    state.push(Val::Num(info.num_items as f64));
     // numLost — items the player no longer has. Always 0 since we
     // capture the live state at save time.
     state.push(Val::Num(0.0));
-    state.push(Val::Num(num_ignored as f64));
-    Ok(9)
+    state.push(Val::Num(info.num_ignored as f64));
 }
 
 fn c_get_equipment_set_assigned_spec(state: &mut LuaState) -> LuaResult<u32> {
@@ -457,11 +471,10 @@ fn c_assign_spec_to_equipment_set(state: &mut LuaState) -> LuaResult<u32> {
             .sets
             .iter_mut()
             .find(|s| s.id == set_id)
+            && set.spec_index != Some(spec_index)
         {
-            if set.spec_index != Some(spec_index) {
-                set.spec_index = Some(spec_index);
-                changed = true;
-            }
+            set.spec_index = Some(spec_index);
+            changed = true;
         }
     }
     if changed {
@@ -480,10 +493,9 @@ fn c_unassign_equipment_set_spec(state: &mut LuaState) -> LuaResult<u32> {
             .sets
             .iter_mut()
             .find(|s| s.id == set_id)
+            && set.spec_index.take().is_some()
         {
-            if set.spec_index.take().is_some() {
-                changed = true;
-            }
+            changed = true;
         }
     }
     if changed {
@@ -581,12 +593,16 @@ fn c_unignore_slot_for_save(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_is_slot_ignored_for_save(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 1)?;
-    let ignored = borrow_state(state)?
-        .equipment_manager
-        .ignored_slots_pending_save
-        .contains(&slot);
+    let ignored = is_slot_pending_save_ignored(state, slot)?;
     state.push(Val::Bool(ignored));
     Ok(1)
+}
+
+fn is_slot_pending_save_ignored(state: &LuaState, slot: i32) -> LuaResult<bool> {
+    Ok(borrow_state(state)?
+        .equipment_manager
+        .ignored_slots_pending_save
+        .contains(&slot))
 }
 
 fn c_clear_ignored_slots_for_save(state: &mut LuaState) -> LuaResult<u32> {
@@ -595,12 +611,4 @@ fn c_clear_ignored_slots_for_save(state: &mut LuaState) -> LuaResult<u32> {
         .ignored_slots_pending_save
         .clear();
     Ok(0)
-}
-
-// Catch-all for arg validation `let _ = stack_val(state, idx)` —
-// keep `unused_imports` quiet when this module is wired up before
-// tests exist for every method.
-#[allow(dead_code)]
-fn _arg_present(state: &LuaState, idx: i32) -> bool {
-    !matches!(stack_val(state, idx), Val::Nil)
 }
