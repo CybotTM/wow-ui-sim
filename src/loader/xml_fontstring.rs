@@ -106,11 +106,11 @@ fn generate_fontstring_parent_code(fs: &crate::xml::FontStringXml) -> String {
 pub(super) fn sync_fontstring_text_to_rust(env: &LoaderEnv<'_>, fs_name: &str, text: &str) {
     let state = env.state();
     let mut state_ref = state.borrow_mut();
-    if let Some(frame_id) = state_ref.widgets.get_id_by_name(fs_name) {
-        if let Some(frame) = state_ref.widgets.get_mut_visual(frame_id) {
-            frame.text_stripped = Some(crate::render::strip_wow_markup(text));
-            frame.text = Some(text.to_string());
-        }
+    if let Some(frame_id) = state_ref.widgets.get_id_by_name(fs_name)
+        && let Some(frame) = state_ref.widgets.get_mut_visual(frame_id)
+    {
+        frame.text_stripped = Some(crate::render::strip_wow_markup(text));
+        frame.text = Some(text.to_string());
     }
 }
 
@@ -153,14 +153,30 @@ fn build_fontstring_extra_code(
     resolved_text: &Option<String>,
 ) -> String {
     let mut code = String::new();
+    append_fontstring_text_code(&mut code, resolved_text);
+    code.push_str(&generate_fontstring_visual_code(fontstring));
+    code.push_str(&generate_fontstring_parent_code(fontstring));
+    append_fontstring_anchor_code(&mut code, fontstring, parent_name);
+    append_fontstring_key_values_code(&mut code, fontstring);
+    append_fontstring_scripts_code(&mut code, fontstring);
+    append_fontstring_alpha_visibility_code(&mut code, fontstring);
+    code
+}
+
+fn append_fontstring_text_code(code: &mut String, resolved_text: &Option<String>) {
     if let Some(text) = resolved_text {
         code.push_str(&format!(
             "\n        fs:SetText(\"{}\")\n        ",
             escape_lua_string(text)
         ));
     }
-    code.push_str(&generate_fontstring_visual_code(fontstring));
-    code.push_str(&generate_fontstring_parent_code(fontstring));
+}
+
+fn append_fontstring_anchor_code(
+    code: &mut String,
+    fontstring: &crate::xml::FontStringXml,
+    parent_name: &str,
+) {
     if let Some(anchors) = &fontstring.anchors {
         code.push_str(&generate_set_point_code(
             anchors,
@@ -170,15 +186,25 @@ fn build_fontstring_extra_code(
             "parent",
         ));
     }
+}
+
+fn append_fontstring_key_values_code(code: &mut String, fontstring: &crate::xml::FontStringXml) {
     code.push_str(&super::xml_frame_codegen::generate_key_values_code(
         fontstring.key_values.as_ref(),
         "fs",
     ));
+}
+
+fn append_fontstring_scripts_code(code: &mut String, fontstring: &crate::xml::FontStringXml) {
     if let Some(scripts) = &fontstring.scripts {
         code.push_str(&generate_scripts_code_for_target("fs", scripts));
         if fontstring_onload_should_fire_immediately(scripts) {
-            code.push_str(
-                r#"
+            code.push_str(IMMEDIATE_FONTSTRING_ONLOAD_LUA);
+        }
+    }
+}
+
+const IMMEDIATE_FONTSTRING_ONLOAD_LUA: &str = r#"
         do
             local __onload = fs:GetScript("OnLoad")
             if __onload then
@@ -194,17 +220,18 @@ fn build_fontstring_extra_code(
                 end
             end
         end
-        "#,
-            );
-        }
-    }
+        "#;
+
+fn append_fontstring_alpha_visibility_code(
+    code: &mut String,
+    fontstring: &crate::xml::FontStringXml,
+) {
     if let Some(a) = fontstring.alpha {
         code.push_str(&format!("\n        fs:SetAlpha({})\n        ", a));
     }
     if fontstring.hidden == Some(true) {
         code.push_str("\n        fs:Hide()\n        ");
     }
-    code
 }
 
 fn fontstring_onload_should_fire_immediately(scripts: &crate::xml::ScriptsXml) -> bool {
