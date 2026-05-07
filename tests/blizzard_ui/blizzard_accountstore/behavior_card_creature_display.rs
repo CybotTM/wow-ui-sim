@@ -169,9 +169,7 @@ fn account_store_mount_card_mixin_is_account_store_creature_card_mixin() {
 fn update_card_display_does_not_call_c_account_store_get_item_info() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         seed_get_item_info_tracker(env);
-        seed_stub_creature_card(
-            env, /*custom_scene_id_lua=*/ "nil", /*has_actor=*/ true,
-        );
+        seed_stub_creature_card(env, StubCreatureCardSeed::with_actor("nil"));
 
         env.eval::<()>(
             r#"
@@ -207,9 +205,7 @@ fn update_card_display_does_not_call_c_account_store_get_item_info() {
 #[test]
 fn update_card_display_returns_early_when_item_info_is_nil() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
-        seed_stub_creature_card(
-            env, /*custom_scene_id_lua=*/ "nil", /*has_actor=*/ true,
-        );
+        seed_stub_creature_card(env, StubCreatureCardSeed::with_actor("nil"));
         env.eval::<()>("_G.__behavior_card_creature_display_stub_card.itemInfo = nil; return")
             .expect("nil-itemInfo seed must run cleanly");
 
@@ -251,8 +247,7 @@ fn update_card_display_uses_custom_ui_model_scene_id_when_present_and_dispatches
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         seed_stub_creature_card(
             env,
-            /*custom_scene_id_lua=*/ &CUSTOM_MODEL_SCENE_ID_SENTINEL.to_string(),
-            /*has_actor=*/ true,
+            StubCreatureCardSeed::with_actor(CUSTOM_MODEL_SCENE_ID_SENTINEL.to_string()),
         );
 
         env.eval::<()>(
@@ -362,9 +357,7 @@ fn update_card_display_uses_custom_ui_model_scene_id_when_present_and_dispatches
 #[test]
 fn update_card_display_falls_back_to_creature_model_scene_id_when_custom_is_nil() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
-        seed_stub_creature_card(
-            env, /*custom_scene_id_lua=*/ "nil", /*has_actor=*/ true,
-        );
+        seed_stub_creature_card(env, StubCreatureCardSeed::with_actor("nil"));
 
         env.eval::<()>(
             r#"
@@ -410,8 +403,7 @@ fn update_card_display_skips_creature_display_when_get_actor_by_tag_returns_nil(
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         seed_stub_creature_card(
             env,
-            /*custom_scene_id_lua=*/ &CUSTOM_MODEL_SCENE_ID_SENTINEL.to_string(),
-            /*has_actor=*/ false,
+            StubCreatureCardSeed::without_actor(CUSTOM_MODEL_SCENE_ID_SENTINEL.to_string()),
         );
 
         env.eval::<()>(
@@ -487,9 +479,30 @@ fn teardown_get_item_info_tracker(env: &WowLuaEnv) {
     .expect("GetItemInfo tracker tear-down must run cleanly");
 }
 
-fn seed_stub_creature_card(env: &WowLuaEnv, custom_scene_id_lua: &str, has_actor: bool) {
+struct StubCreatureCardSeed {
+    custom_scene_id_lua: String,
+    has_actor: bool,
+}
+
+impl StubCreatureCardSeed {
+    fn with_actor(custom_scene_id_lua: impl Into<String>) -> Self {
+        Self {
+            custom_scene_id_lua: custom_scene_id_lua.into(),
+            has_actor: true,
+        }
+    }
+
+    fn without_actor(custom_scene_id_lua: impl Into<String>) -> Self {
+        Self {
+            custom_scene_id_lua: custom_scene_id_lua.into(),
+            has_actor: false,
+        }
+    }
+}
+
+fn seed_stub_creature_card(env: &WowLuaEnv, seed: StubCreatureCardSeed) {
     install_creature_actor_builder_global(env);
-    assemble_stub_creature_card(env, custom_scene_id_lua, has_actor);
+    assemble_stub_creature_card(env, &seed.custom_scene_id_lua, seed.has_actor);
 }
 
 fn install_creature_actor_builder_global(env: &WowLuaEnv) {
