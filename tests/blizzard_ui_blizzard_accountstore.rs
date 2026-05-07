@@ -19,7 +19,7 @@ mod surface_frames;
 #[path = "blizzard_ui/blizzard_accountstore/surface_events.rs"]
 mod surface_events;
 
-#[path = "blizzard_ui/blizzard_accountstore/surface_mixins.rs"]
+#[path = "blizzard_ui/blizzard_accountstore/surface_mixins/mod.rs"]
 mod surface_mixins;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_toggle.rs"]
