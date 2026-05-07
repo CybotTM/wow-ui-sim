@@ -362,6 +362,15 @@ fn starter_build_candidate(
 }
 
 fn starter_build_purchase_for_state(state: &crate::lua_api::SimState) -> Option<(u32, u32)> {
+    sorted_starter_build_candidates(state)
+        .into_iter()
+        .next()
+        .map(|(_, _, _, node_id, entry_id)| (node_id, entry_id))
+}
+
+fn sorted_starter_build_candidates(
+    state: &crate::lua_api::SimState,
+) -> Vec<(u8, i32, i32, u32, u32)> {
     let active_hero_subtree = state.talents.active_hero_subtree();
     let mut candidate_nodes = TRAIT_NODE_DB
         .values()
@@ -375,9 +384,6 @@ fn starter_build_purchase_for_state(state: &crate::lua_api::SimState) -> Option<
 
     candidate_nodes.sort_unstable();
     candidate_nodes
-        .into_iter()
-        .next()
-        .map(|(_, _, _, node_id, entry_id)| (node_id, entry_id))
 }
 
 fn check_has_currency(node_id: u32, state: &crate::lua_api::SimState) -> bool {
