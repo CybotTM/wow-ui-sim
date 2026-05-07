@@ -16,6 +16,8 @@ use super::frame_collect::collect_hittable_frames;
 use super::state::CanvasMessage;
 use super::strata_emit::build_hittable_rects;
 
+#[path = "render_draw_frame.rs"]
+mod draw_frame;
 #[path = "render_draw_log.rs"]
 mod draw_log;
 #[path = "render_mouse_events.rs"]
@@ -69,43 +71,7 @@ impl shader::Program<Message> for &App {
         _cursor: mouse::Cursor,
         bounds: Rectangle,
     ) -> Self::Primitive {
-        self.set_main_thread_phase("draw");
-        let start = std::time::Instant::now();
-        self.frame_count.set(self.frame_count.get() + 1);
-
-        let size = bounds.size();
-        self.screen_size.set(size);
-        self.sync_screen_size_to_state(size);
-        let mut quads = self.rebuild_draw_quads(size);
-
-        let overlay = self.build_overlay();
-        let (textures, bc_textures, tex_dur, texture_requests) =
-            self.load_all_textures(&quads.dirty_strata, &overlay);
-
-        if quads.had_textures_pending {
-            self.recover_pending_textures(&mut quads.dirty_strata, &texture_requests);
-        }
-
-        log_draw_metrics(DrawLogMetrics {
-            quad_dur: quads.quad_dur,
-            tex_dur,
-            dirty_before: quads.dirty_before,
-            had_textures_pending: quads.had_textures_pending,
-            dirty_strata: &quads.dirty_strata,
-            rgba_count: textures.len(),
-            bc_count: bc_textures.len(),
-            texture_requests: &texture_requests,
-        });
-
-        self.record_draw_time(start.elapsed());
-
-        self.build_draw_primitive(
-            quads.dirty_strata,
-            overlay,
-            textures,
-            bc_textures,
-            texture_requests,
-        )
+        self.draw_wow_ui_primitive(bounds)
     }
 
     fn mouse_interaction(
