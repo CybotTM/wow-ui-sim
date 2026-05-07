@@ -2,7 +2,7 @@
 
 use iced::{Point, Rectangle, Size};
 
-use crate::render::{BlendMode, QuadBatch};
+use crate::render::{BlendMode, QuadBatch, ThreeSlicePathParams};
 use crate::widget::{TextJustify, WidgetType};
 
 use super::textures::remap_atlas_crop;
@@ -210,17 +210,17 @@ fn emit_button_three_slice(
 ) {
     const BUTTON_TEX_WIDTH: f32 = 128.0;
     const BUTTON_CAP_WIDTH: f32 = 4.0;
-    batch.push_three_slice_h_path_blend(
+    batch.push_three_slice_h_path_blend(ThreeSlicePathParams {
         bounds,
-        BUTTON_CAP_WIDTH,
-        BUTTON_CAP_WIDTH,
-        tex_path,
-        BUTTON_TEX_WIDTH,
-        [1.0, 1.0, 1.0, alpha],
+        left_cap_width: BUTTON_CAP_WIDTH,
+        right_cap_width: BUTTON_CAP_WIDTH,
+        path: tex_path,
+        tex_width: BUTTON_TEX_WIDTH,
+        color: [1.0, 1.0, 1.0, alpha],
         blend_mode,
-        0.0,
-        BUTTON_TEX_V_BOTTOM,
-    );
+        v_top: 0.0,
+        v_bottom: BUTTON_TEX_V_BOTTOM,
+    });
 }
 
 fn emit_ui_panel_button_strip(
@@ -283,17 +283,17 @@ fn emit_ui_panel_button_strip_fallback(
     texture_width: f32,
     cap_width: f32,
 ) {
-    batch.push_three_slice_h_path_blend(
+    batch.push_three_slice_h_path_blend(ThreeSlicePathParams {
         bounds,
-        cap_width,
-        cap_width,
-        tex_path,
-        texture_width,
-        [1.0, 1.0, 1.0, alpha],
+        left_cap_width: cap_width,
+        right_cap_width: cap_width,
+        path: tex_path,
+        tex_width: texture_width,
+        color: [1.0, 1.0, 1.0, alpha],
         blend_mode,
-        0.0,
-        PANEL_BUTTON_UP_CROP_V,
-    );
+        v_top: 0.0,
+        v_bottom: PANEL_BUTTON_UP_CROP_V,
+    });
 }
 
 fn is_ui_panel_button_atlas(path: &str) -> bool {

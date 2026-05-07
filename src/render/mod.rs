@@ -76,21 +76,10 @@ fn skip_delimited_span(chars: &mut std::iter::Peekable<std::str::Chars>, end_mar
     true
 }
 
-#[cfg(test)]
-mod tests {
-    use super::strip_wow_markup;
-
-    #[test]
-    fn strips_spell_link_before_wow_newline_escape() {
-        assert_eq!(
-            strip_wow_markup("|cFF2959D3|Hspell:1225135|h[Suppression Zones]|h|r|nNext"),
-            "[Suppression Zones]\nNext"
-        );
-    }
-}
-
 #[cfg(feature = "gui")]
 pub use glyph::{GlyphAtlas, emit_text_quads};
+#[cfg(feature = "gui")]
+pub(crate) use shader::ThreeSlicePathParams;
 #[cfg(feature = "gui")]
 pub use shader::{
     FrameQuadSnapshot, GpuBcTextureData, GpuTextureAtlas, GpuTextureData, NineSliceTextures,
@@ -104,3 +93,16 @@ pub use texture::{
     draw_horizontal_slice_texture, draw_nine_slice_texture, draw_scaled_texture,
     draw_texture_with_texcoords, draw_tiled_texture,
 };
+
+#[cfg(test)]
+mod tests {
+    use super::strip_wow_markup;
+
+    #[test]
+    fn strips_spell_link_before_wow_newline_escape() {
+        assert_eq!(
+            strip_wow_markup("|cFF2959D3|Hspell:1225135|h[Suppression Zones]|h|r|nNext"),
+            "[Suppression Zones]\nNext"
+        );
+    }
+}
