@@ -572,40 +572,39 @@ fn register_animation_config(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
 }
 
 fn register_animation_target(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(state, table, "GetTarget", animations::get_animation_target)?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetRegionParent",
-        animations::get_region_parent,
-    )?;
-    table_set_rust_fn_static(state, table, "SetTarget", animations::animation_config_noop)?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetChildKey",
-        animations::set_animation_child_key,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetTargetName",
-        animations::animation_config_noop,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetTargetKey",
-        animations::animation_config_noop,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetTargetParent",
-        animations::animation_config_noop,
-    )?;
-    Ok(())
+    register_methods(state, table, ANIMATION_TARGET_METHODS)
 }
+
+const ANIMATION_TARGET_METHODS: &[MethodBinding] = &[
+    MethodBinding {
+        name: "GetTarget",
+        func: animations::get_animation_target,
+    },
+    MethodBinding {
+        name: "GetRegionParent",
+        func: animations::get_region_parent,
+    },
+    MethodBinding {
+        name: "SetTarget",
+        func: animations::animation_config_noop,
+    },
+    MethodBinding {
+        name: "SetChildKey",
+        func: animations::set_animation_child_key,
+    },
+    MethodBinding {
+        name: "SetTargetName",
+        func: animations::animation_config_noop,
+    },
+    MethodBinding {
+        name: "SetTargetKey",
+        func: animations::animation_config_noop,
+    },
+    MethodBinding {
+        name: "SetTargetParent",
+        func: animations::animation_config_noop,
+    },
+];
 
 fn register_animation_flipbook(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     register_flipbook_grid(state, table)?;
