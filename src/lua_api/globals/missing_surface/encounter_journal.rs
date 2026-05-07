@@ -115,6 +115,55 @@ const ENCOUNTER_JOURNAL_FUNCTIONS: &[(&str, RustFn)] = &[
     ("StartArathiRPE", noop),
 ];
 
+const EJ_GLOBAL_FUNCTIONS: &[(&str, RustFn)] = &[
+    ("EJ_GetNumTiers", ej_get_num_tiers),
+    ("EJ_GetTierInfo", ej_get_tier_info),
+    ("EJ_GetCurrentTier", ej_get_current_tier),
+    ("EJ_SelectTier", ej_select_tier),
+    ("EJ_GetInstanceInfo", ej_get_instance_info),
+    ("EJ_GetInstanceByIndex", ej_get_instance_by_index),
+    ("EJ_GetEncounterInfo", ej_get_encounter_info),
+    ("EJ_GetEncounterInfoByIndex", ej_get_encounter_info_by_index),
+    ("EJ_GetCreatureInfo", ej_get_creature_info),
+    ("EJ_SelectInstance", ej_select_instance),
+    ("EJ_SelectEncounter", ej_select_encounter),
+    ("EJ_GetSelectedInstance", ej_get_selected_instance),
+    ("EJ_GetSelectedEncounter", ej_get_selected_encounter),
+    ("EJ_GetDifficulty", ej_get_difficulty),
+    ("EJ_SetDifficulty", ej_set_difficulty),
+    ("EJ_InstanceIsRaid", ej_instance_is_raid),
+    (
+        "EJ_IsValidInstanceDifficulty",
+        ej_is_valid_instance_difficulty,
+    ),
+    ("EJ_GetNumLoot", ej_get_num_loot),
+    ("EJ_GetLootInfoByIndex", ej_get_loot_info_by_index_global),
+    ("EJ_GetLootFilter", ej_get_loot_filter),
+    ("EJ_SetLootFilter", ej_set_loot_filter),
+    ("EJ_ResetLootFilter", ej_reset_loot_filter),
+    ("EJ_GetInvTypeSortOrder", ej_get_inv_type_sort_order),
+    (
+        "EJ_GetNumEncountersForLootByIndex",
+        ej_get_num_encounters_for_loot_by_index,
+    ),
+    ("EJ_IsLootListOutOfDate", ej_is_loot_list_out_of_date),
+    ("EJ_GetSectionPath", ej_get_section_path),
+    ("EJ_GetContentTuningID", ej_get_content_tuning_id),
+    ("EJ_SetSearch", ej_set_search),
+    ("EJ_ClearSearch", ej_clear_search),
+    ("EJ_EndSearch", ej_end_search),
+    ("EJ_GetSearchSize", ej_get_search_size),
+    ("EJ_GetSearchProgress", ej_get_search_progress),
+    ("EJ_GetNumSearchResults", ej_get_num_search_results),
+    ("EJ_GetSearchResult", ej_get_search_result),
+    ("EJ_IsSearchFinished", ej_is_search_finished),
+    ("EJ_HandleLinkPath", ej_handle_link_path),
+    ("EJ_HideLootJournalPanel", noop_global),
+    ("EJ_HideNonInstancePanels", noop_global),
+    ("EJ_HideSuggestPanel", noop_global),
+    ("EJ_HideTutorialsPanel", noop_global),
+];
+
 // ---------------------------------------------------------------------------
 // Registration
 // ---------------------------------------------------------------------------
@@ -142,62 +191,9 @@ fn register_adventure_journal_surface(state: &mut LuaState) -> LuaResult<()> {
 }
 
 pub(crate) fn register_ej_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
-    LuaApiMut::register_function(lua, "EJ_GetNumTiers", ej_get_num_tiers)?;
-    LuaApiMut::register_function(lua, "EJ_GetTierInfo", ej_get_tier_info)?;
-    LuaApiMut::register_function(lua, "EJ_GetCurrentTier", ej_get_current_tier)?;
-    LuaApiMut::register_function(lua, "EJ_SelectTier", ej_select_tier)?;
-    LuaApiMut::register_function(lua, "EJ_GetInstanceInfo", ej_get_instance_info)?;
-    LuaApiMut::register_function(lua, "EJ_GetInstanceByIndex", ej_get_instance_by_index)?;
-    LuaApiMut::register_function(lua, "EJ_GetEncounterInfo", ej_get_encounter_info)?;
-    LuaApiMut::register_function(
-        lua,
-        "EJ_GetEncounterInfoByIndex",
-        ej_get_encounter_info_by_index,
-    )?;
-    LuaApiMut::register_function(lua, "EJ_GetCreatureInfo", ej_get_creature_info)?;
-    LuaApiMut::register_function(lua, "EJ_SelectInstance", ej_select_instance)?;
-    LuaApiMut::register_function(lua, "EJ_SelectEncounter", ej_select_encounter)?;
-    LuaApiMut::register_function(lua, "EJ_GetSelectedInstance", ej_get_selected_instance)?;
-    LuaApiMut::register_function(lua, "EJ_GetSelectedEncounter", ej_get_selected_encounter)?;
-    LuaApiMut::register_function(lua, "EJ_GetDifficulty", ej_get_difficulty)?;
-    LuaApiMut::register_function(lua, "EJ_SetDifficulty", ej_set_difficulty)?;
-    LuaApiMut::register_function(lua, "EJ_InstanceIsRaid", ej_instance_is_raid)?;
-    LuaApiMut::register_function(
-        lua,
-        "EJ_IsValidInstanceDifficulty",
-        ej_is_valid_instance_difficulty,
-    )?;
-    LuaApiMut::register_function(lua, "EJ_GetNumLoot", ej_get_num_loot)?;
-    LuaApiMut::register_function(
-        lua,
-        "EJ_GetLootInfoByIndex",
-        ej_get_loot_info_by_index_global,
-    )?;
-    LuaApiMut::register_function(lua, "EJ_GetLootFilter", ej_get_loot_filter)?;
-    LuaApiMut::register_function(lua, "EJ_SetLootFilter", ej_set_loot_filter)?;
-    LuaApiMut::register_function(lua, "EJ_ResetLootFilter", ej_reset_loot_filter)?;
-    LuaApiMut::register_function(lua, "EJ_GetInvTypeSortOrder", ej_get_inv_type_sort_order)?;
-    LuaApiMut::register_function(
-        lua,
-        "EJ_GetNumEncountersForLootByIndex",
-        ej_get_num_encounters_for_loot_by_index,
-    )?;
-    LuaApiMut::register_function(lua, "EJ_IsLootListOutOfDate", ej_is_loot_list_out_of_date)?;
-    LuaApiMut::register_function(lua, "EJ_GetSectionPath", ej_get_section_path)?;
-    LuaApiMut::register_function(lua, "EJ_GetContentTuningID", ej_get_content_tuning_id)?;
-    LuaApiMut::register_function(lua, "EJ_SetSearch", ej_set_search)?;
-    LuaApiMut::register_function(lua, "EJ_ClearSearch", ej_clear_search)?;
-    LuaApiMut::register_function(lua, "EJ_EndSearch", ej_end_search)?;
-    LuaApiMut::register_function(lua, "EJ_GetSearchSize", ej_get_search_size)?;
-    LuaApiMut::register_function(lua, "EJ_GetSearchProgress", ej_get_search_progress)?;
-    LuaApiMut::register_function(lua, "EJ_GetNumSearchResults", ej_get_num_search_results)?;
-    LuaApiMut::register_function(lua, "EJ_GetSearchResult", ej_get_search_result)?;
-    LuaApiMut::register_function(lua, "EJ_IsSearchFinished", ej_is_search_finished)?;
-    LuaApiMut::register_function(lua, "EJ_HandleLinkPath", ej_handle_link_path)?;
-    LuaApiMut::register_function(lua, "EJ_HideLootJournalPanel", noop_global)?;
-    LuaApiMut::register_function(lua, "EJ_HideNonInstancePanels", noop_global)?;
-    LuaApiMut::register_function(lua, "EJ_HideSuggestPanel", noop_global)?;
-    LuaApiMut::register_function(lua, "EJ_HideTutorialsPanel", noop_global)?;
+    for &(name, handler) in EJ_GLOBAL_FUNCTIONS {
+        LuaApiMut::register_function(lua, name, handler)?;
+    }
     Ok(())
 }
 
