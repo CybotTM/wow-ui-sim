@@ -1,5 +1,6 @@
 //! Tests for hero talent spec resolution.
 
+#[path = "hero_talents/rendering.rs"]
 mod hero_talents_rendering;
 
 use std::path::PathBuf;
