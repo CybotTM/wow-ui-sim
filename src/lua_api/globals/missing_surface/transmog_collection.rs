@@ -14,6 +14,27 @@ use rilua::{LuaResult, Val};
 const MAX_OUTFITS: i32 = 20;
 const DEFAULT_CLASS_FILTER: i32 = 2;
 type StaticLuaFn = fn(&mut LuaState) -> LuaResult<u32>;
+type StaticFunction = (&'static str, StaticLuaFn);
+
+const APPEARANCE_QUERY_FUNCTIONS: &[StaticFunction] = &[
+    ("GetAppearanceSources", get_appearance_sources),
+    (
+        "GetValidAppearanceSourcesForClass",
+        get_valid_appearance_sources_for_class,
+    ),
+    ("GetSourceInfo", get_source_info),
+    ("PlayerHasTransmog", player_has_transmog),
+    (
+        "PlayerHasTransmogByItemInfo",
+        player_has_transmog_by_item_info,
+    ),
+    (
+        "PlayerHasTransmogItemModifiedAppearance",
+        player_has_transmog_item_modified_appearance,
+    ),
+    ("GetNumTransmogSources", get_num_transmog_sources),
+    ("GetAllAppearanceSources", get_all_appearance_sources),
+];
 
 pub(super) fn register_transmog_collection_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_TransmogCollection")?;
@@ -28,29 +49,7 @@ fn register_transmog_collection_appearance_queries(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    register_static_functions(
-        state,
-        table_ref,
-        &[
-            ("GetAppearanceSources", get_appearance_sources),
-            (
-                "GetValidAppearanceSourcesForClass",
-                get_valid_appearance_sources_for_class,
-            ),
-            ("GetSourceInfo", get_source_info),
-            ("PlayerHasTransmog", player_has_transmog),
-            (
-                "PlayerHasTransmogByItemInfo",
-                player_has_transmog_by_item_info,
-            ),
-            (
-                "PlayerHasTransmogItemModifiedAppearance",
-                player_has_transmog_item_modified_appearance,
-            ),
-            ("GetNumTransmogSources", get_num_transmog_sources),
-            ("GetAllAppearanceSources", get_all_appearance_sources),
-        ],
-    )
+    register_static_functions(state, table_ref, APPEARANCE_QUERY_FUNCTIONS)
 }
 
 fn register_transmog_collection_category_queries(
@@ -173,7 +172,7 @@ fn register_transmog_collection_outfits(
 fn register_static_functions(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-    functions: &[(&'static str, StaticLuaFn)],
+    functions: &[StaticFunction],
 ) -> LuaResult<()> {
     for (name, function) in functions {
         table_set_rust_fn_static(state, table_ref, name, *function)?;
@@ -314,15 +313,14 @@ fn is_appearance_hidden_visual(state: &mut LuaState) -> LuaResult<u32> {
 fn is_source_type_filter_checked(state: &mut LuaState) -> LuaResult<u32> {
     let source_type = i32::from_stack(state, 1).unwrap_or_default();
     let checked = borrow_state(state)
-        .map(|sim| {
-            sim.world
-                .transmog_source_type_filters
-                .get(&source_type)
-                .is_some()
-        })
+        .map(|sim| source_type_filter_enabled(&sim.world, source_type))
         .unwrap_or(false);
     state.push(Val::Bool(checked));
     Ok(1)
+}
+
+fn source_type_filter_enabled(world: &WorldState, source_type: i32) -> bool {
+    world.transmog_source_type_filters.contains(&source_type)
 }
 
 fn is_valid_transmog_source(state: &mut LuaState) -> LuaResult<u32> {
