@@ -298,62 +298,92 @@ fn collect_template_chain(
 /// inherit from a base template and apply a mixin. Register them so the
 /// template chain resolution and CreateFrame can find them.
 pub fn register_intrinsic_templates() {
-    let intrinsics: &[(&'static str, &str, &str, &str)] = &[
-        // (name, widget_type, inherits, mixin)
-        (
-            "WoWScrollBoxList",
-            "Frame",
-            "ScrollBoxBaseTemplate",
-            "ScrollBoxListMixin",
-        ),
-        (
-            "WoWScrollBox",
-            "Frame",
-            "ScrollBoxBaseTemplate",
-            "ScrollBoxBaseMixin",
-        ),
-        (
-            "WoWTrimScrollBar",
-            "EventFrame",
-            "WowTrimScrollBarTemplate",
-            "",
-        ),
-        (
-            "UIThemeContainerFrame",
-            "Frame",
-            "",
-            "UIThemeContainerMixin",
-        ),
-    ];
+    register_intrinsic_frame_templates();
+    register_button_frame_template();
+}
 
-    for &(name, wtype, inherits, mixin) in intrinsics {
-        let frame = FrameXml {
-            inherits: Some(inherits.to_string()),
-            mixin: if mixin.is_empty() {
-                None
-            } else {
-                Some(mixin.to_string())
-            },
-            is_virtual: Some(true),
-            ..Default::default()
-        };
-        register_template(name, wtype, frame);
+struct IntrinsicFrameTemplate {
+    name: &'static str,
+    widget_type: &'static str,
+    inherits: &'static str,
+    mixin: &'static str,
+}
+
+fn register_intrinsic_frame_templates() {
+    for spec in intrinsic_frame_templates() {
+        register_intrinsic_frame_template(spec);
     }
+}
 
-    register_template(
-        "ButtonFrameTemplate",
-        "Frame",
-        FrameXml {
-            is_virtual: Some(true),
-            children: vec![FrameChildElement::Frame(FrameXml {
-                name: Some("$parentInset".to_string()),
-                parent_key: Some("Inset".to_string()),
-                inherits: Some("InsetFrameTemplate".to_string()),
-                ..Default::default()
-            })],
-            ..Default::default()
+fn intrinsic_frame_templates() -> &'static [IntrinsicFrameTemplate] {
+    &[
+        IntrinsicFrameTemplate {
+            name: "WoWScrollBoxList",
+            widget_type: "Frame",
+            inherits: "ScrollBoxBaseTemplate",
+            mixin: "ScrollBoxListMixin",
         },
-    );
+        IntrinsicFrameTemplate {
+            name: "WoWScrollBox",
+            widget_type: "Frame",
+            inherits: "ScrollBoxBaseTemplate",
+            mixin: "ScrollBoxBaseMixin",
+        },
+        IntrinsicFrameTemplate {
+            name: "WoWTrimScrollBar",
+            widget_type: "EventFrame",
+            inherits: "WowTrimScrollBarTemplate",
+            mixin: "",
+        },
+        IntrinsicFrameTemplate {
+            name: "UIThemeContainerFrame",
+            widget_type: "Frame",
+            inherits: "",
+            mixin: "UIThemeContainerMixin",
+        },
+    ]
+}
+
+fn register_intrinsic_frame_template(spec: &IntrinsicFrameTemplate) {
+    register_template(spec.name, spec.widget_type, intrinsic_frame_xml(spec));
+}
+
+fn intrinsic_frame_xml(spec: &IntrinsicFrameTemplate) -> FrameXml {
+    FrameXml {
+        inherits: Some(spec.inherits.to_string()),
+        mixin: intrinsic_mixin(spec.mixin),
+        is_virtual: Some(true),
+        ..Default::default()
+    }
+}
+
+fn intrinsic_mixin(mixin: &str) -> Option<String> {
+    if mixin.is_empty() {
+        None
+    } else {
+        Some(mixin.to_string())
+    }
+}
+
+fn register_button_frame_template() {
+    register_template("ButtonFrameTemplate", "Frame", button_frame_template_xml());
+}
+
+fn button_frame_template_xml() -> FrameXml {
+    FrameXml {
+        is_virtual: Some(true),
+        children: vec![button_frame_inset_child()],
+        ..Default::default()
+    }
+}
+
+fn button_frame_inset_child() -> FrameChildElement {
+    FrameChildElement::Frame(FrameXml {
+        name: Some("$parentInset".to_string()),
+        parent_key: Some("Inset".to_string()),
+        inherits: Some("InsetFrameTemplate".to_string()),
+        ..Default::default()
+    })
 }
 
 /// Clear the template registry (useful for testing).
