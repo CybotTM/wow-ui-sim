@@ -67,6 +67,8 @@ mod update;
 #[cfg(feature = "gui")]
 mod update_helpers;
 #[cfg(feature = "gui")]
+mod update_runtime;
+#[cfg(feature = "gui")]
 mod update_servers;
 #[cfg(feature = "gui")]
 mod view;
