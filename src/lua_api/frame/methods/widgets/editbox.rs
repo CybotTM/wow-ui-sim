@@ -1,12 +1,15 @@
 //! EditBox and text-spacing widget methods.
 
+mod registration;
+mod selection;
+
 use super::shared::{opt_string, val_to_bool, val_to_f64};
 use crate::lua_api::frame::methods::text_attribute_event::refresh_auto_text_height_after_width_change;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, frame_id_from_stack, get_or_create_frame_fields,
     table_get, table_set,
 };
-use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{IntoStack, stack_val};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -18,13 +21,13 @@ pub(super) fn set_focus(state: &mut LuaState) -> LuaResult<u32> {
         let mut sim = borrow_state_mut(state)?;
         let old = sim.focused_frame_id;
         sim.focused_frame_id = Some(id);
-        if let Some(old_id) = old {
-            if old_id != id {
-                if let Some(f) = sim.widgets.get_mut_visual(old_id) {
-                    f.editbox_focused = false;
-                }
-                sim.widgets.mark_visual_dirty(old_id);
+        if let Some(old_id) = old
+            && old_id != id
+        {
+            if let Some(f) = sim.widgets.get_mut_visual(old_id) {
+                f.editbox_focused = false;
             }
+            sim.widgets.mark_visual_dirty(old_id);
         }
         if let Some(f) = sim.widgets.get_mut_visual(id) {
             f.editbox_focused = true;
@@ -721,118 +724,6 @@ pub(super) fn get_alt_arrow_key_mode(state: &mut LuaState) -> LuaResult<u32> {
     v.into_stack(state)
 }
 
-pub(super) fn highlight_text(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let start = val_to_f64(stack_val(state, 2)) as i32;
-    let end_raw = stack_val(state, 3);
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut_visual(id) {
-        let len = f.text.as_deref().unwrap_or("").chars().count() as i32;
-        let end = match end_raw {
-            Val::Num(n) => n as i32,
-            _ => len,
-        };
-        let (s, e) = normalize_highlight_range(start, end, len);
-        f.editbox_highlight_range = Some((s, e));
-    }
-    Ok(0)
-}
-
-pub(super) fn clear_highlight_text(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut_visual(id) {
-        f.editbox_highlight_range = None;
-    }
-    Ok(0)
-}
-
-fn normalize_highlight_range(start: i32, end: i32, len: i32) -> (i32, i32) {
-    let s = start.clamp(0, len);
-    let e = end.clamp(0, len);
-    if s <= e { (s, e) } else { (e, s) }
-}
-
-// ---------------------------------------------------------------------------
-// register_editbox
-// ---------------------------------------------------------------------------
-
-const EDITBOX_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
-    // Focus state
-    ("SetFocus", set_focus),
-    ("ClearFocus", clear_focus),
-    ("HasFocus", has_focus),
-    ("HasText", has_text),
-    // Cursor + length
-    ("SetCursorPosition", set_cursor_position),
-    ("GetCursorPosition", get_cursor_position),
-    ("GetNumLetters", get_num_letters),
-    ("SetMaxLetters", set_max_letters),
-    ("GetMaxLetters", get_max_letters),
-    // Mode flags
-    ("SetMultiLine", set_multi_line),
-    ("IsMultiLine", is_multi_line),
-    ("SetAutoFocus", set_auto_focus),
-    ("IsAutoFocus", is_auto_focus),
-    ("SetNumeric", set_numeric),
-    ("IsNumeric", is_numeric),
-    ("SetAlphabeticOnly", set_alphabetic_only),
-    ("IsAlphabeticOnly", is_alphabetic_only),
-    ("SetNumericFullRange", set_numeric_full_range),
-    ("IsNumericFullRange", is_numeric_full_range),
-    ("SetPassword", set_password),
-    ("IsPassword", is_password),
-    ("SetSecureText", set_secure_text),
-    ("IsSecureText", is_secure_text),
-    ("SetCountInvisibleLetters", set_count_invisible_letters),
-    ("IsCountInvisibleLetters", is_count_invisible_letters),
-    ("SetSecurityDisableSetText", set_security_disable_set_text),
-    // Numeric helpers
-    ("SetNumber", set_number),
-    ("GetNumber", get_number),
-    // Input history
-    ("AddHistoryLine", add_history_line),
-    ("GetHistoryLines", get_history_lines),
-    ("SetHistoryLines", set_history_lines),
-    ("ClearHistory", clear_history),
-    // IME / language
-    ("GetInputLanguage", get_input_language),
-    ("ToggleInputLanguage", toggle_input_language),
-    ("ResetInputMode", reset_input_mode),
-    // Layout / display
-    ("SetTextInsets", set_text_insets),
-    ("SetSpacing", set_spacing),
-    ("GetSpacing", get_spacing),
-    ("GetTextInsets", get_text_insets),
-    ("GetDisplayText", get_display_text),
-    ("SetVisibleTextByteLimit", set_visible_text_byte_limit),
-    ("GetVisibleTextByteLimit", get_visible_text_byte_limit),
-    ("SetSecurityDisablePaste", set_security_disable_paste),
-    ("SetHighlightColor", set_highlight_color),
-    ("GetHighlightColor", get_highlight_color),
-    ("IsInIMECompositionMode", is_in_ime_composition_mode),
-    ("GetUTF8CursorPosition", get_utf8_cursor_position),
-    ("SetDesiredWidth", set_desired_width),
-    ("GetDesiredWidth", get_desired_width),
-    ("GetScaledDesiredWidth", get_scaled_desired_width),
-    ("GetDesiredHeight", get_desired_height),
-    ("GetScaledDesiredHeight", get_scaled_desired_height),
-    ("UpdateWidth", update_width),
-    ("OnTextScaleUpdated", on_text_scale_updated),
-    ("Insert", insert),
-    // Cursor blink + nav
-    ("SetBlinkSpeed", set_blink_speed),
-    ("GetBlinkSpeed", get_blink_speed),
-    ("SetAltArrowKeyMode", set_alt_arrow_key_mode),
-    ("GetAltArrowKeyMode", get_alt_arrow_key_mode),
-    // Selection
-    ("HighlightText", highlight_text),
-    ("ClearHighlightText", clear_highlight_text),
-];
-
 pub(super) fn register_editbox(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    for (name, func) in EDITBOX_METHODS {
-        table_set_rust_fn(state, metatable, name, *func)?;
-    }
-    Ok(())
+    registration::register_editbox(state, metatable)
 }
