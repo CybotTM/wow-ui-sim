@@ -82,6 +82,17 @@ fn assert_timeout_pair_guards(probe: TimeoutPairGuardProbe) {
         only_callback_calls,
     ) = probe;
 
+    assert_valid_timeout_pair_guards(both_nil_ok, both_nil_calls, both_set_ok, both_set_calls);
+    assert_missing_timeout_callback_guard(only_seconds_failed, only_seconds_calls);
+    assert_missing_timeout_seconds_guard(only_callback_failed, only_callback_calls);
+}
+
+fn assert_valid_timeout_pair_guards(
+    both_nil_ok: bool,
+    both_nil_calls: i32,
+    both_set_ok: bool,
+    both_set_calls: i32,
+) {
     assert!(both_nil_ok, "timeout fields may both be nil");
     assert_eq!(
         both_nil_calls, 5,
@@ -93,7 +104,9 @@ fn assert_timeout_pair_guards(probe: TimeoutPairGuardProbe) {
         both_set_calls, 5,
         "valid timeout pair must pass all constructor guards"
     );
+}
 
+fn assert_missing_timeout_callback_guard(only_seconds_failed: bool, only_seconds_calls: i32) {
     assert!(
         only_seconds_failed,
         "timeoutSeconds without timeoutCallback must fail"
@@ -102,7 +115,9 @@ fn assert_timeout_pair_guards(probe: TimeoutPairGuardProbe) {
         only_seconds_calls, 5,
         "timeoutSeconds without timeoutCallback must stop at lua:94-95"
     );
+}
 
+fn assert_missing_timeout_seconds_guard(only_callback_failed: bool, only_callback_calls: i32) {
     assert!(
         only_callback_failed,
         "timeoutCallback without timeoutSeconds must fail"
