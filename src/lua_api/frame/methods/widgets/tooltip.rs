@@ -1265,52 +1265,86 @@ pub(super) fn set_trade_skill_item(state: &mut LuaState) -> LuaResult<u32> {
 /// `Tooltip:SetOwner(frame, anchor, xOffset, yOffset)`
 pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
-    let owner_id = frame_id_from_stack(state, 2).ok();
-    let anchor_kind = {
-        let anchor_kind = opt_string(state, 3).unwrap_or_else(|| "ANCHOR_NONE".to_string());
-        if is_valid_tooltip_anchor(&anchor_kind) {
-            anchor_kind
-        } else {
-            let _ = collect_lua_error(
-                state,
-                &format!("invalid anchor type: {anchor_kind}; defaulting to ANCHOR_LEFT"),
-            );
-            "ANCHOR_LEFT".to_string()
-        }
-    };
-    let x_offset = opt_f32(state, 4).unwrap_or(0.0);
-    let y_offset = opt_f32(state, 5).unwrap_or(0.0);
+    let args = tooltip_owner_args(state);
     let mut sim = borrow_state_mut(state)?;
+    if !apply_tooltip_owner(&mut sim, tooltip_id, &args) {
+        return Ok(0);
+    }
+    drop(sim);
+    let fields = get_or_create_frame_fields(state, tooltip_id);
+    let anchor_value = create_string(state, &args.anchor_kind);
+    table_set(state, fields, "anchor", anchor_value);
+    fire_tooltip_script(state, tooltip_id, "OnTooltipCleared");
+    Ok(0)
+}
+
+struct TooltipOwnerArgs {
+    owner_id: Option<u64>,
+    anchor_kind: String,
+    x_offset: f32,
+    y_offset: f32,
+}
+
+fn tooltip_owner_args(state: &mut LuaState) -> TooltipOwnerArgs {
+    TooltipOwnerArgs {
+        owner_id: frame_id_from_stack(state, 2).ok(),
+        anchor_kind: tooltip_anchor_kind_arg(state),
+        x_offset: opt_f32(state, 4).unwrap_or(0.0),
+        y_offset: opt_f32(state, 5).unwrap_or(0.0),
+    }
+}
+
+fn tooltip_anchor_kind_arg(state: &mut LuaState) -> String {
+    let anchor_kind = opt_string(state, 3).unwrap_or_else(|| "ANCHOR_NONE".to_string());
+    if is_valid_tooltip_anchor(&anchor_kind) {
+        return anchor_kind;
+    }
+
+    let _ = collect_lua_error(
+        state,
+        &format!("invalid anchor type: {anchor_kind}; defaulting to ANCHOR_LEFT"),
+    );
+    "ANCHOR_LEFT".to_string()
+}
+
+fn apply_tooltip_owner(
+    sim: &mut crate::lua_api::state::SimState,
+    tooltip_id: u64,
+    args: &TooltipOwnerArgs,
+) -> bool {
     let mouse_position = sim.mouse_position;
     let Some(tooltip) = sim.widgets.get_mut_visual(tooltip_id) else {
-        return Ok(0);
+        return false;
     };
-    tooltip.tooltip_owner_id = owner_id;
+    tooltip.tooltip_owner_id = args.owner_id;
     apply_tooltip_anchor(
         tooltip,
-        &anchor_kind,
-        owner_id,
+        &args.anchor_kind,
+        args.owner_id,
         mouse_position,
-        x_offset,
-        y_offset,
+        args.x_offset,
+        args.y_offset,
     );
+    record_tooltip_owner(sim, tooltip_id, args);
+    true
+}
+
+fn record_tooltip_owner(
+    sim: &mut crate::lua_api::state::SimState,
+    tooltip_id: u64,
+    args: &TooltipOwnerArgs,
+) {
     let td = sim.tooltips.entry(tooltip_id).or_default();
-    td.owner_id = owner_id;
-    td.anchor_type = anchor_kind.clone();
-    td.anchor_x_offset = x_offset;
-    td.anchor_y_offset = y_offset;
+    td.owner_id = args.owner_id;
+    td.anchor_type = args.anchor_kind.clone();
+    td.anchor_x_offset = args.x_offset;
+    td.anchor_y_offset = args.y_offset;
     td.lines.clear();
     td.spell_id = None;
     sim.widgets.mark_rect_dirty(tooltip_id);
     // Tooltip owners commonly reapply SetOwner during periodic refreshes.
     // Keep the tooltip shown so identical refreshes don't churn show/hide state.
     sim.set_frame_visible(tooltip_id, true);
-    drop(sim);
-    let fields = get_or_create_frame_fields(state, tooltip_id);
-    let anchor_value = create_string(state, &anchor_kind);
-    table_set(state, fields, "anchor", anchor_value);
-    fire_tooltip_script(state, tooltip_id, "OnTooltipCleared");
-    Ok(0)
 }
 
 pub(super) fn set_object_tooltip_position(state: &mut LuaState) -> LuaResult<u32> {
