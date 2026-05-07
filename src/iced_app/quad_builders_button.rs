@@ -157,37 +157,46 @@ pub(crate) fn emit_button_highlight(
     f: &crate::widget::Frame,
     alpha: f32,
 ) {
+    const HIGHLIGHT_ALPHA: f32 = 0.5;
+
     let Some(highlight_path) = &f.highlight_texture else {
         return;
     };
+    let alpha = HIGHLIGHT_ALPHA * alpha;
+
     if is_ui_panel_button_atlas(highlight_path) {
         emit_ui_panel_button_strip(
             batch,
             bounds,
             highlight_path,
             f.highlight_tex_coords,
-            0.5 * alpha,
+            alpha,
             BlendMode::Additive,
         );
         return;
     }
-    if let Some(tex_coords) = f.highlight_tex_coords {
+
+    emit_skinned_button_highlight(batch, bounds, highlight_path, f.highlight_tex_coords, alpha);
+}
+
+fn emit_skinned_button_highlight(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    highlight_path: &str,
+    tex_coords: Option<(f32, f32, f32, f32)>,
+    alpha: f32,
+) {
+    if let Some(tex_coords) = tex_coords {
         push_skinned_button_quad(
             batch,
             bounds,
             highlight_path,
             tex_coords,
-            [1.0, 1.0, 1.0, 0.5 * alpha],
+            [1.0, 1.0, 1.0, alpha],
             BlendMode::Additive,
         );
     } else {
-        emit_button_three_slice(
-            batch,
-            bounds,
-            highlight_path,
-            0.5 * alpha,
-            BlendMode::Additive,
-        );
+        emit_button_three_slice(batch, bounds, highlight_path, alpha, BlendMode::Additive);
     }
 }
 
