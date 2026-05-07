@@ -111,26 +111,14 @@ impl WowUiPipeline {
             uniform_bind_group_layout,
             texture_bind_group_layout,
         );
+        let vertex_buffers = [QuadVertex::desc()];
+        let color_targets = [Some(Self::color_target_state(format))];
 
         device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("WoW UI Render Pipeline"),
             layout: Some(&pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: Some("vs_main"),
-                buffers: &[QuadVertex::desc()],
-                compilation_options: wgpu::PipelineCompilationOptions::default(),
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: Some("fs_main"),
-                targets: &[Some(wgpu::ColorTargetState {
-                    format,
-                    blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-                compilation_options: wgpu::PipelineCompilationOptions::default(),
-            }),
+            vertex: Self::vertex_state(&shader, &vertex_buffers),
+            fragment: Some(Self::fragment_state(&shader, &color_targets)),
             primitive: Self::triangle_list_primitive_state(),
             depth_stencil: None,
             multisample: wgpu::MultisampleState::default(),
@@ -156,6 +144,38 @@ impl WowUiPipeline {
             bind_group_layouts: &[uniform_bind_group_layout, texture_bind_group_layout],
             push_constant_ranges: &[],
         })
+    }
+
+    fn vertex_state<'a>(
+        shader: &'a wgpu::ShaderModule,
+        vertex_buffers: &'a [wgpu::VertexBufferLayout<'static>],
+    ) -> wgpu::VertexState<'a> {
+        wgpu::VertexState {
+            module: shader,
+            entry_point: Some("vs_main"),
+            buffers: vertex_buffers,
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+        }
+    }
+
+    fn fragment_state<'a>(
+        shader: &'a wgpu::ShaderModule,
+        targets: &'a [Option<wgpu::ColorTargetState>],
+    ) -> wgpu::FragmentState<'a> {
+        wgpu::FragmentState {
+            module: shader,
+            entry_point: Some("fs_main"),
+            targets,
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+        }
+    }
+
+    fn color_target_state(format: wgpu::TextureFormat) -> wgpu::ColorTargetState {
+        wgpu::ColorTargetState {
+            format,
+            blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
+            write_mask: wgpu::ColorWrites::ALL,
+        }
     }
 
     fn triangle_list_primitive_state() -> wgpu::PrimitiveState {
