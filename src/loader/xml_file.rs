@@ -5,7 +5,7 @@ use crate::lua_api::globals::security::mark_secure_state;
 use crate::lua_api::methods::create_string;
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::xml::{FrameXml, XmlElement, parse_xml_file};
-use rilua::LuaApiMut;
+use rilua::{Function, LuaApiMut};
 use std::path::Path;
 use std::time::Instant;
 
@@ -152,32 +152,54 @@ fn run_inline_script(
     inline: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    let table = ctx.table;
+    let func = compile_inline_script(env, inline, timing)?;
+    let call_start = Instant::now();
+    mark_inline_script_secure(env, ctx, &func)?;
+    call_inline_script(env, ctx, &func)?;
+    record_inline_script_call_timing(timing, call_start);
+    Ok(())
+}
+
+fn compile_inline_script(
+    env: &LoaderEnv<'_>,
+    inline: &str,
+    timing: &mut LoadTiming,
+) -> Result<Function, LoadError> {
     let compile_start = Instant::now();
     let func_result =
         env.with_state(|state| LuaApiMut::load_bytes(state, inline.as_bytes(), "@inline"));
     let compile_elapsed = compile_start.elapsed();
     timing.lua_compile_time += compile_elapsed;
     timing.lua_exec_time += compile_elapsed;
-    let func = func_result.map_err(|e| {
-        let _ = env.with_state(|state| {
-            call_error_handler_state(state, &e.to_string());
-            Ok::<(), crate::Error>(())
-        });
+
+    func_result.map_err(|e| {
+        report_inline_script_error(env, &e.to_string());
         LoadError::Lua(e.to_string())
-    })?;
+    })
+}
 
-    let call_start = Instant::now();
+fn mark_inline_script_secure(
+    env: &LoaderEnv<'_>,
+    ctx: &AddonContext,
+    func: &Function,
+) -> Result<(), LoadError> {
+    if !ctx.use_secure_env {
+        return Ok(());
+    }
+
     env.with_state(|state| {
-        if ctx.use_secure_env {
-            mark_secure_state(state, &func).map_err(|e| {
-                call_error_handler_state(state, &e.to_string());
-                LoadError::Lua(e.to_string())
-            })?;
-        }
-        Ok::<(), LoadError>(())
-    })?;
+        mark_secure_state(state, func).map_err(|e| {
+            call_error_handler_state(state, &e.to_string());
+            LoadError::Lua(e.to_string())
+        })
+    })
+}
 
+fn call_inline_script(
+    env: &LoaderEnv<'_>,
+    ctx: &AddonContext,
+    func: &Function,
+) -> Result<(), LoadError> {
     // In WoW, runtime errors in inline <Script> elements are caught by the
     // error handler and don't abort XML file processing.
     env.with_state(|state| {
@@ -185,18 +207,26 @@ fn run_inline_script(
         if let Err(e) = crate::lua_api::methods::call_function_state(
             state,
             rilua::Val::Function(func.gc_ref()),
-            &[addon_name, table],
+            &[addon_name, ctx.table],
         ) {
             call_error_handler_state(state, &e.to_string());
             tracing::warn!("Inline script error: {}", e);
         }
         Ok::<(), LoadError>(())
-    })?;
+    })
+}
 
+fn record_inline_script_call_timing(timing: &mut LoadTiming, call_start: Instant) {
     let call_elapsed = call_start.elapsed();
     timing.lua_call_time += call_elapsed;
     timing.lua_exec_time += call_elapsed;
-    Ok(())
+}
+
+fn report_inline_script_error(env: &LoaderEnv<'_>, error: &str) {
+    let _ = env.with_state(|state| {
+        call_error_handler_state(state, error);
+        Ok::<(), crate::Error>(())
+    });
 }
 
 /// Process an Include element (XML or Lua file).
