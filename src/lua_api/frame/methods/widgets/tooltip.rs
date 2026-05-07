@@ -499,30 +499,58 @@ fn ensure_tooltip_line_id(
     )?;
     {
         let mut sim = borrow_state_mut(state)?;
-        if let Some(child) = sim.widgets.get_mut_visual(child_id) {
-            child.parent_key = Some(if right_side {
-                format!("TextRight{line_index}")
-            } else {
-                format!("TextLeft{line_index}")
-            });
-            child.justify_h = if right_side {
-                TextJustify::Right
-            } else {
-                TextJustify::Left
-            };
-        }
-        let td = sim.tooltips.entry(tooltip_id).or_default();
-        let ids = if right_side {
-            &mut td.right_line_ids
-        } else {
-            &mut td.left_line_ids
-        };
-        if ids.len() < line_index {
-            ids.resize(line_index, 0);
-        }
-        ids[line_index - 1] = child_id;
+        configure_tooltip_line_child(&mut sim, child_id, right_side, line_index);
+        record_tooltip_line_child_id(&mut sim, tooltip_id, child_id, right_side, line_index);
     }
     Ok(Some(child_id))
+}
+
+fn configure_tooltip_line_child(
+    sim: &mut crate::lua_api::state::SimState,
+    child_id: u64,
+    right_side: bool,
+    line_index: usize,
+) {
+    let Some(child) = sim.widgets.get_mut_visual(child_id) else {
+        return;
+    };
+    child.parent_key = Some(tooltip_line_parent_key(right_side, line_index));
+    child.justify_h = tooltip_line_justify(right_side);
+}
+
+fn tooltip_line_parent_key(right_side: bool, line_index: usize) -> String {
+    if right_side {
+        format!("TextRight{line_index}")
+    } else {
+        format!("TextLeft{line_index}")
+    }
+}
+
+fn tooltip_line_justify(right_side: bool) -> TextJustify {
+    if right_side {
+        TextJustify::Right
+    } else {
+        TextJustify::Left
+    }
+}
+
+fn record_tooltip_line_child_id(
+    sim: &mut crate::lua_api::state::SimState,
+    tooltip_id: u64,
+    child_id: u64,
+    right_side: bool,
+    line_index: usize,
+) {
+    let td = sim.tooltips.entry(tooltip_id).or_default();
+    let ids = if right_side {
+        &mut td.right_line_ids
+    } else {
+        &mut td.left_line_ids
+    };
+    if ids.len() < line_index {
+        ids.resize(line_index, 0);
+    }
+    ids[line_index - 1] = child_id;
 }
 
 fn sync_tooltip_line_frame(
