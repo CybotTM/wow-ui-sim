@@ -9,12 +9,35 @@ pub fn generate_animation_group_code(
 ) -> String {
     let mut code = String::new();
 
+    emit_anim_group_header(&mut code, anim_group, frame_ref);
+    emit_anim_group_references(&mut code, anim_group, frame_ref);
+    emit_anim_group_props(&mut code, anim_group);
+    emit_inherited_anim_group_children(&mut code, anim_group, frame_ref);
+    emit_anim_group_children(&mut code, anim_group, frame_ref);
+    emit_anim_group_mixin(&mut code, anim_group);
+    emit_anim_group_on_load(&mut code);
+    code.push_str("\n        end\n        ");
+
+    code
+}
+
+fn emit_anim_group_header(
+    code: &mut String,
+    anim_group: &crate::xml::AnimationGroupXml,
+    frame_ref: &str,
+) {
     code.push_str(&format!(
         "\n        do\n        local __ag = {frame_ref}:CreateAnimationGroup({}, {})\n        ",
         lua_opt_str(anim_group.name.as_deref()),
         lua_opt_str(anim_group.inherits.as_deref()),
     ));
+}
 
+fn emit_anim_group_references(
+    code: &mut String,
+    anim_group: &crate::xml::AnimationGroupXml,
+    frame_ref: &str,
+) {
     if let Some(parent_key) = &anim_group.parent_key {
         code.push_str(&format!(
             "\n        {frame_ref}.{parent_key} = __ag\n        "
@@ -27,26 +50,19 @@ pub fn generate_animation_group_code(
              table.insert({frame_ref}[\"{parent_array}\"], __ag)\n        ",
         ));
     }
-    emit_str_call(
-        &mut code,
-        "__ag",
-        "SetLooping",
-        anim_group.looping.as_deref(),
-    );
+}
+
+fn emit_anim_group_props(code: &mut String, anim_group: &crate::xml::AnimationGroupXml) {
+    emit_str_call(code, "__ag", "SetLooping", anim_group.looping.as_deref());
     if anim_group.set_to_final_alpha == Some(true) {
         code.push_str("\n        __ag:SetToFinalAlpha(true)\n        ");
     }
+}
 
-    // Emit children from inherited templates first, then our own
-    emit_inherited_anim_group_children(&mut code, anim_group, frame_ref);
-    emit_anim_group_children(&mut code, anim_group, frame_ref);
-    emit_anim_group_mixin(&mut code, anim_group);
+fn emit_anim_group_on_load(code: &mut String) {
     code.push_str(
         "\n        do local __onLoad = __ag.GetScript and __ag:GetScript(\"OnLoad\")\n        if type(__onLoad) == \"function\" then __onLoad(__ag) end end\n        ",
     );
-
-    code.push_str("\n        end\n        ");
-    code
 }
 
 /// Emit child elements from inherited AnimationGroup templates.
@@ -208,6 +224,13 @@ fn emit_animation_header(code: &mut String, anim: &crate::xml::AnimationXml, ani
 }
 
 fn emit_animation_common_props(code: &mut String, anim: &crate::xml::AnimationXml) {
+    emit_animation_timing_props(code, anim);
+    emit_animation_alpha_props(code, anim);
+    emit_animation_transform_props(code, anim);
+    emit_animation_target_props(code, anim);
+}
+
+fn emit_animation_timing_props(code: &mut String, anim: &crate::xml::AnimationXml) {
     emit_num_call(code, "__anim", "SetDuration", anim.duration);
     if let Some(order) = anim.order {
         code.push_str(&format!("\n        __anim:SetOrder({order})\n        "));
@@ -215,8 +238,14 @@ fn emit_animation_common_props(code: &mut String, anim: &crate::xml::AnimationXm
     emit_num_call(code, "__anim", "SetStartDelay", anim.start_delay);
     emit_num_call(code, "__anim", "SetEndDelay", anim.end_delay);
     emit_str_call(code, "__anim", "SetSmoothing", anim.smoothing.as_deref());
+}
+
+fn emit_animation_alpha_props(code: &mut String, anim: &crate::xml::AnimationXml) {
     emit_num_call(code, "__anim", "SetFromAlpha", anim.from_alpha);
     emit_num_call(code, "__anim", "SetToAlpha", anim.to_alpha);
+}
+
+fn emit_animation_transform_props(code: &mut String, anim: &crate::xml::AnimationXml) {
     emit_pair_call(
         code,
         "__anim",
@@ -243,6 +272,9 @@ fn emit_animation_common_props(code: &mut String, anim: &crate::xml::AnimationXm
         1.0,
     );
     emit_num_call(code, "__anim", "SetDegrees", anim.degrees);
+}
+
+fn emit_animation_target_props(code: &mut String, anim: &crate::xml::AnimationXml) {
     emit_str_call(code, "__anim", "SetChildKey", anim.child_key.as_deref());
     emit_str_call(code, "__anim", "SetTargetName", anim.target.as_deref());
     emit_str_call(code, "__anim", "SetTargetKey", anim.target_key.as_deref());
