@@ -461,133 +461,209 @@ fn push_node_visible_edges(
     table_set(state, info, "visibleEdges", visible_edges);
 }
 
+struct NodeDbRuntimeFields {
+    ranks_purchased: u32,
+    active_entry_id: Option<u32>,
+    active_hero_subtree: Option<u32>,
+    is_spec_visible: bool,
+    is_available: bool,
+    meets_edge_requirements: bool,
+    has_currency: bool,
+    active_source_nodes: Vec<u32>,
+}
+
+fn node_db_runtime_fields(
+    state: &LuaState,
+    lookup_node_id: Option<u32>,
+    node: &crate::traits::TraitNodeInfo,
+) -> NodeDbRuntimeFields {
+    match borrow_state(state).ok() {
+        Some(sim) => NodeDbRuntimeFields {
+            ranks_purchased: lookup_node_id
+                .and_then(|id| sim.talents.node_ranks.get(&id).copied())
+                .unwrap_or(0),
+            active_entry_id: lookup_node_id
+                .and_then(|id| sim.talents.node_selections.get(&id).copied()),
+            active_hero_subtree: sim.talents.active_hero_subtree(),
+            is_spec_visible: check_spec_conditions_met(node, &sim),
+            is_available: check_node_available(node, &sim),
+            meets_edge_requirements: check_edge_requirements(node, &sim),
+            has_currency: lookup_node_id.is_none_or(|node_id| check_has_currency(node_id, &sim)),
+            active_source_nodes: ranked_node_ids(&sim),
+        },
+        None => NodeDbRuntimeFields {
+            ranks_purchased: 0,
+            active_entry_id: None,
+            active_hero_subtree: None,
+            is_spec_visible: true,
+            is_available: false,
+            meets_edge_requirements: false,
+            has_currency: true,
+            active_source_nodes: Vec::new(),
+        },
+    }
+}
+
+fn ranked_node_ids(sim: &crate::lua_api::SimState) -> Vec<u32> {
+    sim.talents
+        .node_ranks
+        .iter()
+        .filter_map(|(&node_id, &rank)| (rank > 0).then_some(node_id))
+        .collect()
+}
+
 fn push_node_db_fields(state: &mut LuaState, info: Val, lookup_node_id: Option<u32>) {
-    if let Some(node) = lookup_node_id.and_then(|id| TRAIT_NODE_DB.get(&id)) {
-        let (
-            ranks_purchased,
-            active_entry_id,
-            active_hero_subtree,
-            is_spec_visible,
-            is_available,
-            meets_edge_requirements,
-            has_currency,
-            active_source_nodes,
-        ) = match borrow_state(state).ok() {
-            Some(sim) => (
-                lookup_node_id
-                    .and_then(|id| sim.talents.node_ranks.get(&id).copied())
-                    .unwrap_or(0),
-                lookup_node_id.and_then(|id| sim.talents.node_selections.get(&id).copied()),
-                sim.talents.active_hero_subtree(),
-                check_spec_conditions_met(node, &sim),
-                check_node_available(node, &sim),
-                check_edge_requirements(node, &sim),
-                lookup_node_id.is_none_or(|node_id| check_has_currency(node_id, &sim)),
-                sim.talents
-                    .node_ranks
-                    .iter()
-                    .filter_map(|(&node_id, &rank)| (rank > 0).then_some(node_id))
-                    .collect::<Vec<_>>(),
-            ),
-            None => (0, None, None, true, false, false, true, Vec::new()),
-        };
-        let total_max_ranks = total_node_max_ranks(node);
-        let is_visible =
-            lookup_node_id.is_some_and(|id| trait_node_is_visible(state, id)) && is_spec_visible;
-        let can_purchase_rank = ranks_purchased < total_max_ranks
-            && is_available
-            && meets_edge_requirements
-            && has_currency;
+    let Some(node) = lookup_node_id.and_then(|id| TRAIT_NODE_DB.get(&id)) else {
+        push_missing_node_db_fields(state, info);
+        return;
+    };
 
-        table_set(state, info, "posX", Val::Num(node.pos_x as f64));
-        table_set(state, info, "posY", Val::Num(node.pos_y as f64));
-        table_set(state, info, "type", Val::Num(node.node_type as f64));
-        table_set(state, info, "flags", Val::Num(node.flags as f64));
-        push_node_array_fields(state, info, node);
+    let runtime = node_db_runtime_fields(state, lookup_node_id, node);
+    push_existing_node_db_fields(state, info, lookup_node_id, node, runtime);
+}
 
-        let entry_ids_with_committed_ranks = create_table(state);
-        if let Some(active_entry_id) = active_entry_id.filter(|_| ranks_purchased > 0) {
-            set_table_array(
-                state,
-                entry_ids_with_committed_ranks,
-                1,
-                Val::Num(active_entry_id as f64),
-            );
-        }
-        table_set(
-            state,
-            info,
-            "entryIDsWithCommittedRanks",
-            entry_ids_with_committed_ranks,
-        );
+fn push_existing_node_db_fields(
+    state: &mut LuaState,
+    info: Val,
+    lookup_node_id: Option<u32>,
+    node: &crate::traits::TraitNodeInfo,
+    runtime: NodeDbRuntimeFields,
+) {
+    let total_max_ranks = total_node_max_ranks(node);
+    let is_visible = lookup_node_id.is_some_and(|id| trait_node_is_visible(state, id))
+        && runtime.is_spec_visible;
+    let can_purchase_rank = runtime.ranks_purchased < total_max_ranks
+        && runtime.is_available
+        && runtime.meets_edge_requirements
+        && runtime.has_currency;
 
-        table_set(
-            state,
-            info,
-            "maxRanks",
-            Val::Num(node_max_ranks(node) as f64),
-        );
-        table_set(
-            state,
-            info,
-            "totalMaxRanks",
-            Val::Num(total_max_ranks as f64),
-        );
-        table_set(state, info, "isVisible", Val::Bool(is_visible));
-        table_set(state, info, "isAvailable", Val::Bool(is_available));
-        table_set(state, info, "isDisplayError", Val::Bool(false));
-        table_set(state, info, "canPurchaseRank", Val::Bool(can_purchase_rank));
-        table_set(state, info, "canRefundRank", Val::Bool(ranks_purchased > 0));
-        table_set(
-            state,
-            info,
-            "meetsEdgeRequirements",
-            Val::Bool(meets_edge_requirements),
-        );
-        table_set(state, info, "isCascadeRepurchasable", Val::Bool(false));
-        table_set(state, info, "cascadeRepurchaseEntryID", Val::Nil);
-        if node.sub_tree_id != 0 {
-            table_set(state, info, "subTreeID", Val::Num(node.sub_tree_id as f64));
-            let sub_tree_active = active_hero_subtree == Some(node.sub_tree_id);
-            table_set(state, info, "subTreeActive", Val::Bool(sub_tree_active));
-        } else {
-            table_set(state, info, "subTreeID", Val::Nil);
-            table_set(state, info, "subTreeActive", Val::Nil);
-        }
-        push_node_visible_edges(state, info, node, &active_source_nodes);
-    } else {
-        table_set(state, info, "posX", Val::Num(0.0));
-        table_set(state, info, "posY", Val::Num(0.0));
-        table_set(state, info, "type", Val::Num(0.0));
-        table_set(state, info, "flags", Val::Num(0.0));
-        let entry_ids = create_table(state);
-        table_set(state, info, "entryIDs", entry_ids);
-        let entry_ids_with_committed_ranks = create_table(state);
-        table_set(
-            state,
-            info,
-            "entryIDsWithCommittedRanks",
-            entry_ids_with_committed_ranks,
-        );
-        let condition_ids = create_table(state);
-        table_set(state, info, "conditionIDs", condition_ids);
-        let group_ids = create_table(state);
-        table_set(state, info, "groupIDs", group_ids);
-        let visible_edges = create_table(state);
-        table_set(state, info, "visibleEdges", visible_edges);
-        table_set(state, info, "maxRanks", Val::Num(0.0));
-        table_set(state, info, "totalMaxRanks", Val::Num(0.0));
-        table_set(state, info, "isVisible", Val::Bool(false));
-        table_set(state, info, "isAvailable", Val::Bool(false));
-        table_set(state, info, "isDisplayError", Val::Bool(false));
-        table_set(state, info, "canPurchaseRank", Val::Bool(false));
-        table_set(state, info, "canRefundRank", Val::Bool(false));
-        table_set(state, info, "meetsEdgeRequirements", Val::Bool(false));
-        table_set(state, info, "isCascadeRepurchasable", Val::Bool(false));
-        table_set(state, info, "cascadeRepurchaseEntryID", Val::Nil);
+    table_set(state, info, "posX", Val::Num(node.pos_x as f64));
+    table_set(state, info, "posY", Val::Num(node.pos_y as f64));
+    table_set(state, info, "type", Val::Num(node.node_type as f64));
+    table_set(state, info, "flags", Val::Num(node.flags as f64));
+    push_node_array_fields(state, info, node);
+    push_committed_rank_entry_ids(state, info, &runtime);
+    push_node_rank_limits(state, info, node, total_max_ranks);
+    push_node_availability_fields(state, info, is_visible, can_purchase_rank, &runtime);
+    push_node_subtree_fields(state, info, node.sub_tree_id, runtime.active_hero_subtree);
+    push_node_visible_edges(state, info, node, &runtime.active_source_nodes);
+}
+
+fn push_committed_rank_entry_ids(state: &mut LuaState, info: Val, runtime: &NodeDbRuntimeFields) {
+    let entry_ids = create_table(state);
+    if let Some(active_entry_id) = runtime
+        .active_entry_id
+        .filter(|_| runtime.ranks_purchased > 0)
+    {
+        set_table_array(state, entry_ids, 1, Val::Num(active_entry_id as f64));
+    }
+    table_set(state, info, "entryIDsWithCommittedRanks", entry_ids);
+}
+
+fn push_node_rank_limits(
+    state: &mut LuaState,
+    info: Val,
+    node: &crate::traits::TraitNodeInfo,
+    total_max_ranks: u32,
+) {
+    table_set(
+        state,
+        info,
+        "maxRanks",
+        Val::Num(node_max_ranks(node) as f64),
+    );
+    table_set(
+        state,
+        info,
+        "totalMaxRanks",
+        Val::Num(total_max_ranks as f64),
+    );
+}
+
+fn push_node_availability_fields(
+    state: &mut LuaState,
+    info: Val,
+    is_visible: bool,
+    can_purchase_rank: bool,
+    runtime: &NodeDbRuntimeFields,
+) {
+    table_set(state, info, "isVisible", Val::Bool(is_visible));
+    table_set(state, info, "isAvailable", Val::Bool(runtime.is_available));
+    table_set(state, info, "isDisplayError", Val::Bool(false));
+    table_set(state, info, "canPurchaseRank", Val::Bool(can_purchase_rank));
+    table_set(
+        state,
+        info,
+        "canRefundRank",
+        Val::Bool(runtime.ranks_purchased > 0),
+    );
+    table_set(
+        state,
+        info,
+        "meetsEdgeRequirements",
+        Val::Bool(runtime.meets_edge_requirements),
+    );
+    table_set(state, info, "isCascadeRepurchasable", Val::Bool(false));
+    table_set(state, info, "cascadeRepurchaseEntryID", Val::Nil);
+}
+
+fn push_node_subtree_fields(
+    state: &mut LuaState,
+    info: Val,
+    sub_tree_id: u32,
+    active_hero_subtree: Option<u32>,
+) {
+    if sub_tree_id == 0 {
         table_set(state, info, "subTreeID", Val::Nil);
         table_set(state, info, "subTreeActive", Val::Nil);
+        return;
     }
+
+    table_set(state, info, "subTreeID", Val::Num(sub_tree_id as f64));
+    let sub_tree_active = active_hero_subtree == Some(sub_tree_id);
+    table_set(state, info, "subTreeActive", Val::Bool(sub_tree_active));
+}
+
+fn push_missing_node_db_fields(state: &mut LuaState, info: Val) {
+    table_set(state, info, "posX", Val::Num(0.0));
+    table_set(state, info, "posY", Val::Num(0.0));
+    table_set(state, info, "type", Val::Num(0.0));
+    table_set(state, info, "flags", Val::Num(0.0));
+    push_empty_node_id_arrays(state, info);
+    table_set(state, info, "maxRanks", Val::Num(0.0));
+    table_set(state, info, "totalMaxRanks", Val::Num(0.0));
+    push_missing_node_status_fields(state, info);
+    table_set(state, info, "subTreeID", Val::Nil);
+    table_set(state, info, "subTreeActive", Val::Nil);
+}
+
+fn push_empty_node_id_arrays(state: &mut LuaState, info: Val) {
+    let entry_ids = create_table(state);
+    table_set(state, info, "entryIDs", entry_ids);
+    let entry_ids_with_committed_ranks = create_table(state);
+    table_set(
+        state,
+        info,
+        "entryIDsWithCommittedRanks",
+        entry_ids_with_committed_ranks,
+    );
+    let condition_ids = create_table(state);
+    table_set(state, info, "conditionIDs", condition_ids);
+    let group_ids = create_table(state);
+    table_set(state, info, "groupIDs", group_ids);
+    let visible_edges = create_table(state);
+    table_set(state, info, "visibleEdges", visible_edges);
+}
+
+fn push_missing_node_status_fields(state: &mut LuaState, info: Val) {
+    table_set(state, info, "isVisible", Val::Bool(false));
+    table_set(state, info, "isAvailable", Val::Bool(false));
+    table_set(state, info, "isDisplayError", Val::Bool(false));
+    table_set(state, info, "canPurchaseRank", Val::Bool(false));
+    table_set(state, info, "canRefundRank", Val::Bool(false));
+    table_set(state, info, "meetsEdgeRequirements", Val::Bool(false));
+    table_set(state, info, "isCascadeRepurchasable", Val::Bool(false));
+    table_set(state, info, "cascadeRepurchaseEntryID", Val::Nil);
 }
 
 fn push_node_info(state: &mut LuaState, node_id: i32) -> Val {
