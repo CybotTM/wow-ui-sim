@@ -97,43 +97,39 @@ const ADVENTURE_JOURNAL_FUNCTIONS: &[(&str, RustFn)] = &[
     ("ActivateEntry", adventure_activate_entry),
 ];
 
+const ENCOUNTER_JOURNAL_FUNCTIONS: &[(&str, RustFn)] = &[
+    ("GetEncounterInfo", get_encounter_info),
+    ("GetInstanceInfo", get_instance_info),
+    ("GetSectionInfo", get_section_info),
+    ("GetLootInfo", get_loot_info),
+    ("GetLootInfoByIndex", get_loot_info_by_index),
+    ("GetSectionIconFlags", get_section_icon_flags),
+    ("InstanceHasLoot", instance_has_loot),
+    ("GetSlotFilter", get_slot_filter),
+    ("SetSlotFilter", set_slot_filter),
+    ("ResetSlotFilter", reset_slot_filter),
+    ("SetTab", set_tab),
+    ("OnOpen", noop),
+    ("OnClose", noop),
+    ("InitalizeSelectedTier", initialize_selected_tier),
+    ("StartArathiRPE", noop),
+];
+
 // ---------------------------------------------------------------------------
 // Registration
 // ---------------------------------------------------------------------------
 
 pub(super) fn register_encounter_journal_surface(state: &mut LuaState) -> LuaResult<()> {
-    let table_ref = ensure_namespace(state, "C_EncounterJournal")?;
-    table_set_rust_fn_static(state, table_ref, "GetEncounterInfo", get_encounter_info)?;
-    table_set_rust_fn_static(state, table_ref, "GetInstanceInfo", get_instance_info)?;
-    table_set_rust_fn_static(state, table_ref, "GetSectionInfo", get_section_info)?;
-    table_set_rust_fn_static(state, table_ref, "GetLootInfo", get_loot_info)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetLootInfoByIndex",
-        get_loot_info_by_index,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetSectionIconFlags",
-        get_section_icon_flags,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "InstanceHasLoot", instance_has_loot)?;
-    table_set_rust_fn_static(state, table_ref, "GetSlotFilter", get_slot_filter)?;
-    table_set_rust_fn_static(state, table_ref, "SetSlotFilter", set_slot_filter)?;
-    table_set_rust_fn_static(state, table_ref, "ResetSlotFilter", reset_slot_filter)?;
-    table_set_rust_fn_static(state, table_ref, "SetTab", set_tab)?;
-    table_set_rust_fn_static(state, table_ref, "OnOpen", noop)?;
-    table_set_rust_fn_static(state, table_ref, "OnClose", noop)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "InitalizeSelectedTier",
-        initialize_selected_tier,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "StartArathiRPE", noop)?;
+    register_encounter_journal_functions(state)?;
     register_adventure_journal_surface(state)?;
+    Ok(())
+}
+
+fn register_encounter_journal_functions(state: &mut LuaState) -> LuaResult<()> {
+    let table_ref = ensure_namespace(state, "C_EncounterJournal")?;
+    for &(name, handler) in ENCOUNTER_JOURNAL_FUNCTIONS {
+        table_set_rust_fn_static(state, table_ref, name, handler)?;
+    }
     Ok(())
 }
 
