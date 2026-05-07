@@ -217,7 +217,7 @@ fn run_server(cmd_tx: mpsc::Sender<LuaCommand>, path: PathBuf) {
 
 fn handle_incoming_stream(stream: std::io::Result<UnixStream>, cmd_tx: &mpsc::Sender<LuaCommand>) {
     let Ok(stream) = stream else {
-        let error = stream.err().expect("failed stream must contain an error");
+        let error = stream.expect_err("failed stream must contain an error");
         crate::logging::eprintln_elapsed(&format!("[wow-sim] Accept error: {}", error));
         return;
     };
@@ -286,13 +286,7 @@ fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Respon
             visible_only,
             verbose,
         } => send_dump_tree_command(cmd_tx, filter, filter_key, visible_only, verbose),
-        Request::DumpQuads { filter, verbose } => {
-            send_command(cmd_tx, |respond| LuaCommand::DumpQuads {
-                filter,
-                verbose,
-                respond,
-            })
-        }
+        Request::DumpQuads { filter, verbose } => send_dump_quads_command(cmd_tx, filter, verbose),
         Request::Screenshot {
             output,
             width,
@@ -314,6 +308,18 @@ fn send_dump_tree_command(
         filter,
         filter_key,
         visible_only,
+        verbose,
+        respond,
+    })
+}
+
+fn send_dump_quads_command(
+    cmd_tx: &mpsc::Sender<LuaCommand>,
+    filter: Option<String>,
+    verbose: bool,
+) -> Response {
+    send_command(cmd_tx, |respond| LuaCommand::DumpQuads {
+        filter,
         verbose,
         respond,
     })
