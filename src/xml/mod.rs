@@ -4,6 +4,8 @@ mod parse;
 mod template;
 mod types;
 mod types_elements;
+mod types_fonts;
+mod types_frame_data;
 mod types_support;
 
 // Re-export all public types and functions
@@ -17,10 +19,11 @@ pub use template::{
 };
 pub use types::{FrameChildElement, FrameXml, ScopedModifierXml, UiXml, XmlElement};
 pub use types_elements::{
-    ActorXml, ActorsXml, AnimationElement, AnimationGroupXml, AnimationXml, FontFamilyMemberXml,
-    FontFamilyXml, FontStringXml, FontXml, FrameElement, FramesXml, IncludeXml, LayerElement,
-    LayerXml, LayersXml, ScriptXml, TextureXml, widget_type_for_tag,
+    ActorXml, ActorsXml, AnimationElement, AnimationGroupXml, AnimationXml, FontStringXml,
+    FrameElement, FramesXml, IncludeXml, LayerElement, LayerXml, LayersXml, ScriptXml, TextureXml,
+    widget_type_for_tag,
 };
+pub use types_fonts::{FontFamilyMemberXml, FontFamilyXml, FontXml};
 pub use types_support::{
     AbsDimensionXml, AnchorXml, AnchorsXml, AnimationsXml, AttributeXml, AttributesXml,
     BackdropXml, BindingXml, ColorXml, FontRefXml, GradientXml, InsetsXml, KeyValueXml,

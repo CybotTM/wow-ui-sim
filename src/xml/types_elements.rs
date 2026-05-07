@@ -496,70 +496,6 @@ mod tests {
     }
 }
 
-macro_rules! frame_variant_data {
-    ($self:expr, $($variant:ident),+ $(,)?) => {
-        match $self {
-            $(Self::$variant(f) => Some((f, stringify!($variant))),)+
-            _ => None,
-        }
-    };
-}
-pub(crate) use frame_variant_data;
-
-impl FrameElement {
-    /// Extract the inner `FrameXml` and variant tag name (e.g. `"Button"`, `"EditBox"`).
-    /// Returns `None` for `ScopedModifier` which has no `FrameXml`.
-    pub fn as_frame_data(&self) -> Option<(&FrameXml, &'static str)> {
-        frame_variant_data!(
-            self,
-            Frame,
-            Button,
-            ItemButton,
-            CheckButton,
-            EditBox,
-            ScrollFrame,
-            Slider,
-            StatusBar,
-            GameTooltip,
-            ColorSelect,
-            Model,
-            ModelScene,
-            EventFrame,
-            CinematicModel,
-            PlayerModel,
-            DressUpModel,
-            Browser,
-            Minimap,
-            MessageFrame,
-            MovieFrame,
-            ScrollingMessageFrame,
-            SimpleHTML,
-            WorldFrame,
-            DropDownToggleButton,
-            DropdownButton,
-            EventButton,
-            EventEditBox,
-            Cooldown,
-            TaxiRouteFrame,
-            ModelFFX,
-            TabardModel,
-            UiCamera,
-            UnitPositionFrame,
-            OffScreenFrame,
-            Checkout,
-            FogOfWarFrame,
-            QuestPOIFrame,
-            ArchaeologyDigSiteFrame,
-            ScenarioPOIFrame,
-            UIThemeContainerFrame,
-            EventScrollFrame,
-            ContainedAlertFrame,
-            MapScene,
-            Line
-        )
-    }
-}
-
 /// Script include (file attribute is optional for inline scripts).
 #[derive(Debug, Deserialize, Clone)]
 pub struct ScriptXml {
@@ -736,44 +672,4 @@ pub struct ActorXml {
     pub mixin: Option<String>,
     #[serde(rename = "@virtual")]
     pub is_virtual: Option<bool>,
-}
-
-/// Font definition.
-#[derive(Debug, Deserialize, Default, Clone)]
-pub struct FontXml {
-    #[serde(rename = "@name")]
-    pub name: Option<String>,
-    #[serde(rename = "@inherits")]
-    pub inherits: Option<String>,
-    #[serde(rename = "@virtual")]
-    pub is_virtual: Option<bool>,
-    #[serde(rename = "@font")]
-    pub font: Option<String>,
-    #[serde(rename = "@height")]
-    pub height: Option<f32>,
-    #[serde(rename = "@outline")]
-    pub outline: Option<String>,
-    #[serde(rename = "@justifyH")]
-    pub justify_h: Option<String>,
-    #[serde(rename = "@justifyV")]
-    pub justify_v: Option<String>,
-}
-
-/// FontFamily definition - collection of fonts for different alphabets.
-#[derive(Debug, Deserialize, Default, Clone)]
-pub struct FontFamilyXml {
-    #[serde(rename = "@name")]
-    pub name: Option<String>,
-    #[serde(rename = "@virtual")]
-    pub is_virtual: Option<bool>,
-    #[serde(rename = "Member", default)]
-    pub members: Vec<FontFamilyMemberXml>,
-}
-
-#[derive(Debug, Deserialize, Default, Clone)]
-pub struct FontFamilyMemberXml {
-    #[serde(rename = "@alphabet")]
-    pub alphabet: Option<String>,
-    #[serde(rename = "Font")]
-    pub font: Option<FontXml>,
 }
