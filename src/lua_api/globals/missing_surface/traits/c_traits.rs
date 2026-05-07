@@ -245,37 +245,20 @@ fn push_condition_optional_fields(
     info: Val,
     cond: &crate::traits::TraitCondInfo,
 ) {
-    table_set(state, info, "questID", optional_trait_u32(cond.quest_id));
-    table_set(
-        state,
-        info,
-        "achievementID",
-        optional_trait_u32(cond.achievement_id),
-    );
-    table_set(
-        state,
-        info,
-        "specSetID",
-        optional_trait_u32(cond.spec_set_id),
-    );
-    table_set(
-        state,
-        info,
-        "playerLevel",
-        optional_trait_u32(cond.required_level),
-    );
-    table_set(
-        state,
-        info,
-        "traitCurrencyID",
-        optional_trait_u32(cond.currency_id),
-    );
-    table_set(
-        state,
-        info,
-        "spentAmountRequired",
-        optional_trait_u32(cond.spent_amount),
-    );
+    set_optional_trait_u32(state, info, "questID", cond.quest_id);
+    set_optional_trait_u32(state, info, "achievementID", cond.achievement_id);
+    set_optional_trait_u32(state, info, "specSetID", cond.spec_set_id);
+    set_optional_trait_u32(state, info, "playerLevel", cond.required_level);
+    set_optional_trait_u32(state, info, "traitCurrencyID", cond.currency_id);
+    set_optional_trait_u32(state, info, "spentAmountRequired", cond.spent_amount);
+    push_condition_empty_metadata_fields(state, info);
+}
+
+fn set_optional_trait_u32(state: &mut LuaState, info: Val, field_name: &str, value: u32) {
+    table_set(state, info, field_name, optional_trait_u32(value));
+}
+
+fn push_condition_empty_metadata_fields(state: &mut LuaState, info: Val) {
     table_set(state, info, "tooltipFormat", Val::Nil);
     table_set(state, info, "traitCondAccountElementID", Val::Nil);
 }
