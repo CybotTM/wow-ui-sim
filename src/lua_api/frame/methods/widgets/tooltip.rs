@@ -1629,67 +1629,19 @@ pub(super) fn set_frame_stack(state: &mut LuaState) -> LuaResult<u32> {
     let _show_hidden = opt_bool(state, 2).unwrap_or(false);
     let _show_regions = opt_bool(state, 3).unwrap_or(false);
     let frame_stack_index = opt_f32(state, 4).unwrap_or(0.0).max(0.0) as usize;
-    let highlight_id = {
-        let sim = borrow_state(state)?;
-        sim.hovered_frame
-    };
+    let highlight_id = hovered_frame_id(state)?;
     let Some(highlight_id) = highlight_id else {
         clear_tooltip_lines(state, tooltip_id)?;
         state.push(Val::Nil);
         return Ok(1);
     };
-
-    let frame_info = {
-        let sim = borrow_state(state)?;
-        sim.widgets.get(highlight_id).map(|frame| {
-            let primary = frame.name.clone().unwrap_or_else(|| {
-                frame
-                    .object_type_name
-                    .clone()
-                    .unwrap_or_else(|| "Frame".into())
-            });
-            let parent_label = frame
-                .parent_id
-                .and_then(|pid| sim.widgets.get(pid))
-                .and_then(|parent| parent.name.clone())
-                .unwrap_or_else(|| frame.widget_type.as_str().to_string());
-            (primary, parent_label)
-        })
-    };
-    let Some((primary, parent_label)) = frame_info else {
+    let Some(frame_info) = frame_stack_info(state, highlight_id)? else {
         clear_tooltip_lines(state, tooltip_id)?;
         state.push(Val::Nil);
         return Ok(1);
     };
     let highlight = frame_global_or_ref_local(state, highlight_id)?;
-
-    {
-        let mut sim = borrow_state_mut(state)?;
-        let td = sim.tooltips.entry(tooltip_id).or_default();
-        td.frame_stack_index = frame_stack_index;
-        td.lines.clear();
-        td.lines.push(TooltipLine {
-            left_text: primary,
-            left_color: (1.0, 1.0, 1.0),
-            left_segments: Vec::new(),
-            right_text: None,
-            right_color: (1.0, 1.0, 1.0),
-            right_segments: Vec::new(),
-            wrap: false,
-            texture: None,
-        });
-        td.lines.push(TooltipLine {
-            left_text: format!("Parent: {parent_label}"),
-            left_color: (0.8, 0.8, 0.8),
-            left_segments: Vec::new(),
-            right_text: None,
-            right_color: (1.0, 1.0, 1.0),
-            right_segments: Vec::new(),
-            wrap: false,
-            texture: None,
-        });
-        sim.set_frame_visible(tooltip_id, true);
-    }
+    write_frame_stack_tooltip(state, tooltip_id, frame_stack_index, frame_info)?;
     fire_tooltip_script_with_args(
         state,
         tooltip_id,
@@ -1698,6 +1650,80 @@ pub(super) fn set_frame_stack(state: &mut LuaState) -> LuaResult<u32> {
     );
     state.push(highlight);
     Ok(1)
+}
+
+struct FrameStackInfo {
+    primary: String,
+    parent_label: String,
+}
+
+fn hovered_frame_id(state: &mut LuaState) -> LuaResult<Option<u64>> {
+    let sim = borrow_state(state)?;
+    Ok(sim.hovered_frame)
+}
+
+fn frame_stack_info(state: &mut LuaState, frame_id: u64) -> LuaResult<Option<FrameStackInfo>> {
+    let sim = borrow_state(state)?;
+    let Some(frame) = sim.widgets.get(frame_id) else {
+        return Ok(None);
+    };
+    let primary = frame
+        .name
+        .clone()
+        .or_else(|| frame.object_type_name.clone())
+        .unwrap_or_else(|| "Frame".into());
+    let parent_label = frame
+        .parent_id
+        .and_then(|pid| sim.widgets.get(pid))
+        .and_then(|parent| parent.name.clone())
+        .unwrap_or_else(|| frame.widget_type.as_str().to_string());
+    Ok(Some(FrameStackInfo {
+        primary,
+        parent_label,
+    }))
+}
+
+fn write_frame_stack_tooltip(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    frame_stack_index: usize,
+    frame_info: FrameStackInfo,
+) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    let td = sim.tooltips.entry(tooltip_id).or_default();
+    td.frame_stack_index = frame_stack_index;
+    td.lines.clear();
+    td.lines.push(frame_stack_primary_line(frame_info.primary));
+    td.lines
+        .push(frame_stack_parent_line(frame_info.parent_label));
+    sim.set_frame_visible(tooltip_id, true);
+    Ok(())
+}
+
+fn frame_stack_primary_line(primary: String) -> TooltipLine {
+    TooltipLine {
+        left_text: primary,
+        left_color: (1.0, 1.0, 1.0),
+        left_segments: Vec::new(),
+        right_text: None,
+        right_color: (1.0, 1.0, 1.0),
+        right_segments: Vec::new(),
+        wrap: false,
+        texture: None,
+    }
+}
+
+fn frame_stack_parent_line(parent_label: String) -> TooltipLine {
+    TooltipLine {
+        left_text: format!("Parent: {parent_label}"),
+        left_color: (0.8, 0.8, 0.8),
+        left_segments: Vec::new(),
+        right_text: None,
+        right_color: (1.0, 1.0, 1.0),
+        right_segments: Vec::new(),
+        wrap: false,
+        texture: None,
+    }
 }
 
 fn clear_tooltip_lines(state: &mut LuaState, tooltip_id: u64) -> LuaResult<()> {
