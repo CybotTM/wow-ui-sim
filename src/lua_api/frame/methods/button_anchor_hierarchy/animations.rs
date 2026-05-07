@@ -569,28 +569,7 @@ pub(super) fn animation_get_progress(state: &mut LuaState) -> LuaResult<u32> {
     let animation_frame_id = frame_id_from_stack(state, 1)?;
     let value = {
         let sim = borrow_state(state)?;
-        if let Some(group_id) = sim.anim_frame_to_group.get(&animation_frame_id).copied() {
-            sim.animation_groups
-                .get(&group_id)
-                .map(group_elapsed_progress)
-                .unwrap_or(0.0)
-        } else {
-            sim.anim_frame_to_anim
-                .get(&animation_frame_id)
-                .and_then(|(group_id, animation_index)| {
-                    sim.animation_groups.get(group_id).and_then(|group| {
-                        group.animations.get(*animation_index).map(|animation| {
-                            let total = animation.duration.max(0.0);
-                            if total <= 0.0 {
-                                0.0
-                            } else {
-                                (animation.elapsed / total).clamp(0.0, 1.0)
-                            }
-                        })
-                    })
-                })
-                .unwrap_or(0.0)
-        }
+        animation_progress_for_frame(&sim, animation_frame_id)
     };
     push_group_num(state, value)
 }
@@ -784,7 +763,7 @@ where
                 sim.animation_groups
                     .get(group_id)
                     .and_then(|group| group.animations.get(*animation_index))
-                    .map(|animation| f(animation))
+                    .map(&f)
             })
             .unwrap_or(0.0)
     };
@@ -828,6 +807,35 @@ fn group_elapsed_progress(group: &crate::lua_api::animation::AnimGroupState) -> 
         0.0
     } else {
         (group.elapsed / duration).clamp(0.0, 1.0)
+    }
+}
+
+fn animation_progress_for_frame(sim: &crate::lua_api::SimState, animation_frame_id: u64) -> f64 {
+    sim.anim_frame_to_group
+        .get(&animation_frame_id)
+        .copied()
+        .and_then(|group_id| sim.animation_groups.get(&group_id))
+        .map(group_elapsed_progress)
+        .or_else(|| animation_child_progress_for_frame(sim, animation_frame_id))
+        .unwrap_or(0.0)
+}
+
+fn animation_child_progress_for_frame(
+    sim: &crate::lua_api::SimState,
+    animation_frame_id: u64,
+) -> Option<f64> {
+    let (group_id, animation_index) = sim.anim_frame_to_anim.get(&animation_frame_id)?;
+    let group = sim.animation_groups.get(group_id)?;
+    let animation = group.animations.get(*animation_index)?;
+    Some(animation_elapsed_progress(animation))
+}
+
+fn animation_elapsed_progress(animation: &crate::lua_api::animation::AnimState) -> f64 {
+    let duration = animation.duration.max(0.0);
+    if duration <= 0.0 {
+        0.0
+    } else {
+        (animation.elapsed / duration).clamp(0.0, 1.0)
     }
 }
 
@@ -1464,9 +1472,7 @@ fn flipbook_tex_coords(
     frames: u32,
     frame_index: u32,
 ) -> Option<(f32, f32, f32, f32)> {
-    let Some((al, ar, at, ab)) = atlas_tex_coords else {
-        return None;
-    };
+    let (al, ar, at, ab) = atlas_tex_coords?;
     if rows == 0 || columns == 0 || frames == 0 {
         return None;
     }
