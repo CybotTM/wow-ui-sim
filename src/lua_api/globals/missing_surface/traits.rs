@@ -17,6 +17,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use std::collections::HashSet;
 
+type LuaTableRef = rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>;
+
 const DELVES_COMPANION_CONFIG_ID: i32 = 9201;
 const DELVES_COMPANION_TRAIT_TREE_ID: u32 = 9201;
 const DELVES_COMPANION_NODE_IDS: [u32; 3] = [9301, 9302, 9303];
@@ -743,9 +745,16 @@ fn trait_system_flags_for_config(state: &LuaState, config_id: i32) -> u32 {
         .unwrap_or(0)
 }
 
-fn register_c_traits_query_fns(
+fn register_c_traits_query_fns(state: &mut LuaState, table_ref: LuaTableRef) -> LuaResult<()> {
+    register_c_traits_config_query_fns(state, table_ref)?;
+    register_c_traits_node_query_fns(state, table_ref)?;
+    register_c_traits_tree_query_fns(state, table_ref)?;
+    Ok(())
+}
+
+fn register_c_traits_config_query_fns(
     state: &mut LuaState,
-    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    table_ref: LuaTableRef,
 ) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
@@ -766,6 +775,16 @@ fn register_c_traits_query_fns(
         c_traits_get_config_id_by_tree_id,
     )?;
     table_set_rust_fn_static(state, table_ref, "GetConfigInfo", c_traits_get_config_info)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "InitializeViewLoadout",
+        c_traits_initialize_view_loadout,
+    )?;
+    Ok(())
+}
+
+fn register_c_traits_node_query_fns(state: &mut LuaState, table_ref: LuaTableRef) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetNodeInfo", c_traits_get_node_info)?;
     table_set_rust_fn_static(state, table_ref, "GetEntryInfo", c_traits_get_entry_info)?;
     table_set_rust_fn_static(
@@ -786,12 +805,10 @@ fn register_c_traits_query_fns(
         "GetConditionInfo",
         c_traits_get_condition_info,
     )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "InitializeViewLoadout",
-        c_traits_initialize_view_loadout,
-    )?;
+    Ok(())
+}
+
+fn register_c_traits_tree_query_fns(state: &mut LuaState, table_ref: LuaTableRef) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -810,10 +827,7 @@ fn register_c_traits_query_fns(
     Ok(())
 }
 
-fn register_c_traits_action_fns(
-    state: &mut LuaState,
-    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-) -> LuaResult<()> {
+fn register_c_traits_action_fns(state: &mut LuaState, table_ref: LuaTableRef) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetAllTreeIDs", c_traits_get_all_tree_ids)?;
     table_set_rust_fn_static(
         state,
