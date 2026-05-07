@@ -23,12 +23,48 @@ use crate::lua_api::globals::group_queries::active_party_count;
 use crate::lua_api::methods::create_table;
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
+use rilua::vm::closure::RustFn;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 const AVAILABLE_LOOT_METHODS: [i32; 5] = [0, 1, 2, 3, 4];
+const INSTANCE_ABANDON_METHODS: &[PartyInfoMethod] = &[
+    PartyInfoMethod {
+        name: "GetInstanceAbandonVoteTime",
+        handler: c_party_info_get_instance_abandon_vote_time,
+    },
+    PartyInfoMethod {
+        name: "GetInstanceAbandonShutdownTime",
+        handler: c_party_info_get_instance_abandon_shutdown_time,
+    },
+    PartyInfoMethod {
+        name: "GetInstanceAbandonVoteResponse",
+        handler: c_party_info_get_instance_abandon_vote_response,
+    },
+    PartyInfoMethod {
+        name: "SetInstanceAbandonVoteResponse",
+        handler: c_party_info_set_instance_abandon_vote_response,
+    },
+    PartyInfoMethod {
+        name: "GetNumInstanceAbandonGroupVoteResponses",
+        handler: c_party_info_get_num_instance_abandon_group_vote_responses,
+    },
+    PartyInfoMethod {
+        name: "CanStartInstanceAbandonVote",
+        handler: c_party_info_can_start_instance_abandon_vote,
+    },
+    PartyInfoMethod {
+        name: "StartInstanceAbandonVote",
+        handler: c_party_info_start_instance_abandon_vote,
+    },
+];
+
+struct PartyInfoMethod {
+    name: &'static str,
+    handler: RustFn,
+}
 
 pub(super) fn register_party_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_PartyInfo")?;
@@ -77,48 +113,18 @@ fn register_invite_and_tower_stubs(state: &mut LuaState, table_ref: GcRef<Table>
 }
 
 fn register_instance_abandon_stubs(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetInstanceAbandonVoteTime",
-        c_party_info_get_instance_abandon_vote_time,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetInstanceAbandonShutdownTime",
-        c_party_info_get_instance_abandon_shutdown_time,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetInstanceAbandonVoteResponse",
-        c_party_info_get_instance_abandon_vote_response,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "SetInstanceAbandonVoteResponse",
-        c_party_info_set_instance_abandon_vote_response,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetNumInstanceAbandonGroupVoteResponses",
-        c_party_info_get_num_instance_abandon_group_vote_responses,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "CanStartInstanceAbandonVote",
-        c_party_info_can_start_instance_abandon_vote,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "StartInstanceAbandonVote",
-        c_party_info_start_instance_abandon_vote,
-    )?;
+    register_party_info_methods(state, table_ref, INSTANCE_ABANDON_METHODS)?;
+    Ok(())
+}
+
+fn register_party_info_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+    methods: &[PartyInfoMethod],
+) -> LuaResult<()> {
+    for method in methods {
+        table_set_rust_fn_static(state, table_ref, method.name, method.handler)?;
+    }
     Ok(())
 }
 
@@ -264,7 +270,7 @@ fn c_party_info_get_available_loot_methods(state: &mut LuaState) -> LuaResult<u3
 
 fn c_party_info_is_loot_method_available(state: &mut LuaState) -> LuaResult<u32> {
     let method = i32::from_stack(state, 1)?;
-    let available = matches!(method, 0 | 1 | 2 | 3 | 4);
+    let available = matches!(method, 0..=4);
     state.push(Val::Bool(available));
     Ok(1)
 }
