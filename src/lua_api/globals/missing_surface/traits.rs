@@ -828,6 +828,16 @@ fn register_c_traits_tree_query_fns(state: &mut LuaState, table_ref: LuaTableRef
 }
 
 fn register_c_traits_action_fns(state: &mut LuaState, table_ref: LuaTableRef) -> LuaResult<()> {
+    register_c_traits_system_action_fns(state, table_ref)?;
+    register_c_traits_staged_action_fns(state, table_ref)?;
+    register_c_traits_rank_action_fns(state, table_ref)?;
+    Ok(())
+}
+
+fn register_c_traits_system_action_fns(
+    state: &mut LuaState,
+    table_ref: LuaTableRef,
+) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetAllTreeIDs", c_traits_get_all_tree_ids)?;
     table_set_rust_fn_static(
         state,
@@ -847,6 +857,13 @@ fn register_c_traits_action_fns(state: &mut LuaState, table_ref: LuaTableRef) ->
         "GetLoadoutSerializationVersion",
         c_traits_get_loadout_serialization_version,
     )?;
+    Ok(())
+}
+
+fn register_c_traits_staged_action_fns(
+    state: &mut LuaState,
+    table_ref: LuaTableRef,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -865,6 +882,13 @@ fn register_c_traits_action_fns(state: &mut LuaState, table_ref: LuaTableRef) ->
         "GetStagedChangesCost",
         c_traits_get_staged_changes_cost,
     )?;
+    Ok(())
+}
+
+fn register_c_traits_rank_action_fns(
+    state: &mut LuaState,
+    table_ref: LuaTableRef,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
