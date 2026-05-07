@@ -107,6 +107,22 @@ fn assert_quest_choice_dialog_surface(surface: QuestChoiceDialogSurface) {
         fade_in_type,
     ) = surface;
 
+    assert_quest_choice_dialog_frame(dialog_type, on_load_matches_mixin, on_show_matches_mixin);
+    assert_quest_choice_dialog_children([
+        ("Portrait", portrait_type),
+        ("Background", background_type),
+        ("Details", details_type),
+        ("Rewards", rewards_type),
+        ("RewardsHeader", rewards_header_type),
+        ("FadeIn", fade_in_type),
+    ]);
+}
+
+fn assert_quest_choice_dialog_frame(
+    dialog_type: String,
+    on_load_matches_mixin: bool,
+    on_show_matches_mixin: bool,
+) {
     assert_eq!(
         dialog_type, "table",
         "`AdventureMapQuestChoiceDialog` must exist"
@@ -119,15 +135,6 @@ fn assert_quest_choice_dialog_surface(surface: QuestChoiceDialogSurface) {
         on_show_matches_mixin,
         "`AdventureMapQuestChoiceDialog` must copy `OnShow` from its mixin"
     );
-
-    assert_quest_choice_dialog_children([
-        ("Portrait", portrait_type),
-        ("Background", background_type),
-        ("Details", details_type),
-        ("Rewards", rewards_type),
-        ("RewardsHeader", rewards_header_type),
-        ("FadeIn", fade_in_type),
-    ]);
 }
 
 fn assert_quest_choice_dialog_children(child_types: [(&str, String); 6]) {
