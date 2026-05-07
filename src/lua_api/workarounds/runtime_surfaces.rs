@@ -13,8 +13,10 @@ pub(super) fn patch_damage_meter_initial_scrollbox_extent(env: &crate::lua_api::
 }
 
 pub(super) fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(
-        r#"
+    let _ = env.exec(HOUSING_DASHBOARD_PRELOAD_WORKAROUND_LUA);
+}
+
+pub(super) const HOUSING_DASHBOARD_PRELOAD_WORKAROUND_LUA: &str = r#"
         HousingTutorialUtil = HousingTutorialUtil or {}
         if type(HousingTutorialUtil.BoughtHouseQuestComplete) ~= "function" then
             function HousingTutorialUtil.BoughtHouseQuestComplete()
@@ -136,9 +138,7 @@ pub(super) fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_
                 return true
             end
         end
-    "#,
-    );
-}
+    "#;
 
 pub(super) fn patch_uiparent_onupdate_worklists(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(UIPARENT_ONUPDATE_WORKLISTS_WORKAROUND_LUA);
