@@ -70,34 +70,19 @@ impl App {
 
     fn handle_lua_command(&mut self, cmd: LuaCommand) {
         match cmd {
-            LuaCommand::Exec { code, respond } => {
-                let response = self.exec_lua_command(&code);
-                let _ = respond.send(response);
-                self.invalidate_after_lua_mutation();
-            }
+            LuaCommand::Exec { code, respond } => self.handle_lua_exec(code, respond),
             LuaCommand::DumpTree {
                 filter,
                 filter_key,
                 visible_only,
                 verbose,
                 respond,
-            } => {
-                let tree = self.build_frame_tree_dump(
-                    filter.as_deref(),
-                    filter_key.as_deref(),
-                    visible_only,
-                    verbose,
-                );
-                let _ = respond.send(LuaResponse::Tree(tree));
-            }
+            } => self.handle_lua_dump_tree(filter, filter_key, visible_only, verbose, respond),
             LuaCommand::DumpQuads {
                 filter,
                 verbose,
                 respond,
-            } => {
-                let dump = self.build_cached_quad_dump(filter.as_deref(), verbose);
-                let _ = respond.send(LuaResponse::Quads(dump));
-            }
+            } => self.handle_lua_dump_quads(filter, verbose, respond),
             LuaCommand::Screenshot {
                 output,
                 width,
@@ -105,17 +90,55 @@ impl App {
                 filter,
                 crop,
                 respond,
-            } => {
-                let result = self.render_screenshot(
-                    &output,
-                    width,
-                    height,
-                    filter.as_deref(),
-                    crop.as_deref(),
-                );
-                let _ = respond.send(result);
-            }
+            } => self.handle_lua_screenshot(output, width, height, filter, crop, respond),
         }
+    }
+
+    fn handle_lua_exec(&mut self, code: String, respond: mpsc::Sender<LuaResponse>) {
+        let response = self.exec_lua_command(&code);
+        let _ = respond.send(response);
+        self.invalidate_after_lua_mutation();
+    }
+
+    fn handle_lua_dump_tree(
+        &self,
+        filter: Option<String>,
+        filter_key: Option<String>,
+        visible_only: bool,
+        verbose: bool,
+        respond: mpsc::Sender<LuaResponse>,
+    ) {
+        let tree = self.build_frame_tree_dump(
+            filter.as_deref(),
+            filter_key.as_deref(),
+            visible_only,
+            verbose,
+        );
+        let _ = respond.send(LuaResponse::Tree(tree));
+    }
+
+    fn handle_lua_dump_quads(
+        &mut self,
+        filter: Option<String>,
+        verbose: bool,
+        respond: mpsc::Sender<LuaResponse>,
+    ) {
+        let dump = self.build_cached_quad_dump(filter.as_deref(), verbose);
+        let _ = respond.send(LuaResponse::Quads(dump));
+    }
+
+    fn handle_lua_screenshot(
+        &mut self,
+        output: String,
+        width: u32,
+        height: u32,
+        filter: Option<String>,
+        crop: Option<String>,
+        respond: mpsc::Sender<LuaResponse>,
+    ) {
+        let result =
+            self.render_screenshot(&output, width, height, filter.as_deref(), crop.as_deref());
+        let _ = respond.send(result);
     }
 
     fn handle_debug_command(&mut self, cmd: DebugCommand) -> Option<Task<Message>> {
