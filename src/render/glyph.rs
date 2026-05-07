@@ -407,16 +407,7 @@ fn shape_text_to_runs(
     let mut buffer = build_text_shape_buffer(font_system, &shape, line_height, shape_width);
     buffer.shape_until_scroll(&mut font_system.font_system, true);
 
-    // Calculate total text height (for vertical justification).
-    let mut runs: Vec<_> = buffer.layout_runs().collect();
-    if shape.max_lines > 0 {
-        runs.truncate(shape.max_lines as usize);
-    }
-    let total_height = text_total_height(&runs, line_height);
-
-    // We only need total_height; the buffer is returned for glyph iteration.
-    // The runs are re-collected from buffer later via layout_runs().
-    drop(runs);
+    let total_height = shaped_text_total_height(&buffer, shape.max_lines, line_height);
     (buffer, total_height)
 }
 
@@ -450,6 +441,14 @@ fn build_text_shape_buffer(
         None,
     );
     buffer
+}
+
+fn shaped_text_total_height(buffer: &Buffer, max_lines: u32, line_height: f32) -> f32 {
+    let mut runs: Vec<_> = buffer.layout_runs().collect();
+    if max_lines > 0 {
+        runs.truncate(max_lines as usize);
+    }
+    text_total_height(&runs, line_height)
 }
 
 fn text_total_height(runs: &[cosmic_text::LayoutRun<'_>], line_height: f32) -> f32 {
