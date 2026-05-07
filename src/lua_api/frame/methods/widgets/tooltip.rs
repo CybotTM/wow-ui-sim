@@ -1295,7 +1295,11 @@ fn tooltip_owner_args(state: &mut LuaState) -> TooltipOwnerArgs {
 }
 
 fn tooltip_anchor_kind_arg(state: &mut LuaState) -> String {
-    let anchor_kind = opt_string(state, 3).unwrap_or_else(|| "ANCHOR_NONE".to_string());
+    normalized_tooltip_anchor_kind(state, 3)
+}
+
+fn normalized_tooltip_anchor_kind(state: &mut LuaState, stack_index: i32) -> String {
+    let anchor_kind = opt_string(state, stack_index).unwrap_or_else(|| "ANCHOR_NONE".to_string());
     if is_valid_tooltip_anchor(&anchor_kind) {
         return anchor_kind;
     }
@@ -1504,50 +1508,68 @@ pub(super) fn get_anchor_type(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_anchor_type(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
-    let anchor_kind = {
-        let anchor_kind = opt_string(state, 2).unwrap_or_else(|| "ANCHOR_NONE".to_string());
-        if is_valid_tooltip_anchor(&anchor_kind) {
-            anchor_kind
-        } else {
-            let _ = collect_lua_error(
-                state,
-                &format!("invalid anchor type: {anchor_kind}; defaulting to ANCHOR_LEFT"),
-            );
-            "ANCHOR_LEFT".to_string()
-        }
-    };
+    let anchor_kind = tooltip_anchor_kind_from_stack(state);
     let x_offset = opt_f32(state, 3).unwrap_or(0.0);
     let y_offset = opt_f32(state, 4).unwrap_or(0.0);
-    let owner_id = {
-        let sim = borrow_state(state)?;
-        sim.widgets
-            .get(tooltip_id)
-            .and_then(|tooltip| tooltip.tooltip_owner_id)
-            .or_else(|| sim.tooltips.get(&tooltip_id).and_then(|td| td.owner_id))
-    };
+    let owner_id = current_tooltip_owner_id(state, tooltip_id)?;
+    apply_anchor_type_to_tooltip(
+        state,
+        tooltip_id,
+        &anchor_kind,
+        owner_id,
+        x_offset,
+        y_offset,
+    )?;
+    record_tooltip_anchor_field(state, tooltip_id, &anchor_kind);
+    Ok(0)
+}
+
+fn tooltip_anchor_kind_from_stack(state: &mut LuaState) -> String {
+    normalized_tooltip_anchor_kind(state, 2)
+}
+
+fn current_tooltip_owner_id(state: &mut LuaState, tooltip_id: u64) -> LuaResult<Option<u64>> {
+    let sim = borrow_state(state)?;
+    let widget_owner_id = sim
+        .widgets
+        .get(tooltip_id)
+        .and_then(|tooltip| tooltip.tooltip_owner_id);
+    Ok(widget_owner_id.or_else(|| sim.tooltips.get(&tooltip_id).and_then(|td| td.owner_id)))
+}
+
+fn apply_anchor_type_to_tooltip(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    anchor_kind: &str,
+    owner_id: Option<u64>,
+    x_offset: f32,
+    y_offset: f32,
+) -> LuaResult<()> {
     let mut sim = borrow_state_mut(state)?;
     let mouse_position = sim.mouse_position;
     let Some(tooltip) = sim.widgets.get_mut_visual(tooltip_id) else {
-        return Ok(0);
+        return Ok(());
     };
     apply_tooltip_anchor(
         tooltip,
-        &anchor_kind,
+        anchor_kind,
         owner_id,
         mouse_position,
         x_offset,
         y_offset,
     );
     let td = sim.tooltips.entry(tooltip_id).or_default();
-    td.anchor_type = anchor_kind.clone();
+    td.anchor_type = anchor_kind.to_string();
     td.anchor_x_offset = x_offset;
     td.anchor_y_offset = y_offset;
     sim.widgets.mark_rect_dirty(tooltip_id);
-    drop(sim);
+    Ok(())
+}
+
+fn record_tooltip_anchor_field(state: &mut LuaState, tooltip_id: u64, anchor_kind: &str) {
     let fields = get_or_create_frame_fields(state, tooltip_id);
-    let anchor_value = create_string(state, &anchor_kind);
+    let anchor_value = create_string(state, anchor_kind);
     table_set(state, fields, "anchor", anchor_value);
-    Ok(0)
 }
 
 fn is_valid_tooltip_anchor(anchor_kind: &str) -> bool {
