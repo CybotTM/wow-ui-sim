@@ -68,51 +68,95 @@ pub(super) fn add_line(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn add_double_line(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let left_text = opt_string(state, 2).unwrap_or_default();
-    let right_text = opt_string(state, 3);
-    let (default_r, default_g, default_b) = normal_font_color(state);
-    let left_r = opt_f32(state, 4).unwrap_or(default_r);
-    let left_g = opt_f32(state, 5).unwrap_or(default_g);
-    let left_b = opt_f32(state, 6).unwrap_or(default_b);
-    let right_r = opt_f32(state, 7).unwrap_or(left_r);
-    let right_g = opt_f32(state, 8).unwrap_or(left_g);
-    let right_b = opt_f32(state, 9).unwrap_or(left_b);
-    let wrap = val_to_bool(stack_val(state, 10));
+    let args = double_line_args(state);
     let line_index = next_tooltip_line_index(state, id);
     let left_segments = processing_line_color_segments(
         state,
         id,
         line_index,
         "leftText",
-        &left_text,
+        &args.left_text,
         "leftColorSegments",
     );
-    let right_segments = right_text
+    let right_segments = processing_right_line_color_segments(state, id, line_index, &args);
+    push_double_tooltip_line(state, id, args, left_segments, right_segments)?;
+
+    Ok(0)
+}
+
+struct DoubleLineArgs {
+    left_text: String,
+    right_text: Option<String>,
+    left_color: (f32, f32, f32),
+    right_color: (f32, f32, f32),
+    wrap: bool,
+}
+
+fn double_line_args(state: &mut LuaState) -> DoubleLineArgs {
+    let left_text = opt_string(state, 2).unwrap_or_default();
+    let right_text = opt_string(state, 3);
+    let (default_r, default_g, default_b) = normal_font_color(state);
+    let left_color = (
+        opt_f32(state, 4).unwrap_or(default_r),
+        opt_f32(state, 5).unwrap_or(default_g),
+        opt_f32(state, 6).unwrap_or(default_b),
+    );
+    let right_color = (
+        opt_f32(state, 7).unwrap_or(left_color.0),
+        opt_f32(state, 8).unwrap_or(left_color.1),
+        opt_f32(state, 9).unwrap_or(left_color.2),
+    );
+    let wrap = val_to_bool(stack_val(state, 10));
+    DoubleLineArgs {
+        left_text,
+        right_text,
+        left_color,
+        right_color,
+        wrap,
+    }
+}
+
+fn processing_right_line_color_segments(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    line_index: usize,
+    args: &DoubleLineArgs,
+) -> Vec<TooltipTextSegment> {
+    args.right_text
         .as_deref()
         .map(|text| {
             processing_line_color_segments(
                 state,
-                id,
+                tooltip_id,
                 line_index,
                 "rightText",
                 text,
                 "rightColorSegments",
             )
         })
-        .unwrap_or_default();
+        .unwrap_or_default()
+}
+
+fn push_double_tooltip_line(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    args: DoubleLineArgs,
+    left_segments: Vec<TooltipTextSegment>,
+    right_segments: Vec<TooltipTextSegment>,
+) -> LuaResult<()> {
     let mut sim = borrow_state_mut(state)?;
-    let td = sim.tooltips.entry(id).or_default();
+    let td = sim.tooltips.entry(tooltip_id).or_default();
     td.lines.push(TooltipLine {
-        left_text,
-        left_color: (left_r, left_g, left_b),
+        left_text: args.left_text,
+        left_color: args.left_color,
         left_segments,
-        right_text,
-        right_color: (right_r, right_g, right_b),
+        right_text: args.right_text,
+        right_color: args.right_color,
         right_segments,
-        wrap,
+        wrap: args.wrap,
         texture: None,
     });
-    Ok(0)
+    Ok(())
 }
 
 pub(super) fn num_lines(state: &mut LuaState) -> LuaResult<u32> {
