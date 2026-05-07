@@ -49,7 +49,25 @@ pub(super) fn create_glyph_atlas(
 }
 
 fn create_atlas_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
-    let texture_entry = |binding: u32| wgpu::BindGroupLayoutEntry {
+    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("WoW UI Texture Bind Group Layout"),
+        entries: &[
+            texture_bind_group_layout_entry(0),
+            texture_bind_group_layout_entry(1),
+            texture_bind_group_layout_entry(2),
+            texture_bind_group_layout_entry(3),
+            texture_bind_group_layout_entry(4),
+            sampler_bind_group_layout_entry(5),
+            texture_bind_group_layout_entry(6),
+            texture_bind_group_layout_entry(7),
+            texture_bind_group_layout_entry(8),
+            sampler_bind_group_layout_entry(9),
+        ],
+    })
+}
+
+fn texture_bind_group_layout_entry(binding: u32) -> wgpu::BindGroupLayoutEntry {
+    wgpu::BindGroupLayoutEntry {
         binding,
         visibility: wgpu::ShaderStages::FRAGMENT,
         ty: wgpu::BindingType::Texture {
@@ -58,32 +76,16 @@ fn create_atlas_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayou
             multisampled: false,
         },
         count: None,
-    };
-    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        label: Some("WoW UI Texture Bind Group Layout"),
-        entries: &[
-            texture_entry(0),
-            texture_entry(1),
-            texture_entry(2),
-            texture_entry(3),
-            texture_entry(4),
-            wgpu::BindGroupLayoutEntry {
-                binding: 5,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                count: None,
-            },
-            texture_entry(6),
-            texture_entry(7),
-            texture_entry(8),
-            wgpu::BindGroupLayoutEntry {
-                binding: 9,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                count: None,
-            },
-        ],
-    })
+    }
+}
+
+fn sampler_bind_group_layout_entry(binding: u32) -> wgpu::BindGroupLayoutEntry {
+    wgpu::BindGroupLayoutEntry {
+        binding,
+        visibility: wgpu::ShaderStages::FRAGMENT,
+        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+        count: None,
+    }
 }
 
 fn atlas_bind_group_views<'a>(
