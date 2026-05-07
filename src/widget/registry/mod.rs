@@ -221,8 +221,8 @@ impl WidgetRegistry {
             }
         }
         if let Some(parent) = self.widgets.get_mut(&parent_id) {
-            let child_already_registered = old_parent_id == Some(parent_id)
-                && parent.children.iter().any(|&id| id == child_id);
+            let child_already_registered =
+                old_parent_id == Some(parent_id) && parent.children.contains(&child_id);
             if !child_already_registered {
                 if old_parent_id != Some(parent_id) {
                     parent.children.retain(|&id| id != child_id);
@@ -271,10 +271,11 @@ impl WidgetRegistry {
                 &frame.pushed_texture,
                 &frame.highlight_texture,
                 &frame.disabled_texture,
-            ] {
-                if let Some(t) = path {
-                    paths.insert(t.clone());
-                }
+            ]
+            .into_iter()
+            .flatten()
+            {
+                paths.insert(path.clone());
             }
         }
         paths.into_iter().collect()
@@ -407,11 +408,11 @@ impl WidgetRegistry {
     ///
     /// Prefer `SimState::set_frame_visible` which also updates the OnUpdate cache.
     pub fn set_visible(&mut self, id: u64, visible: bool) {
-        if let Some(f) = self.widgets.get_mut(&id) {
-            if f.visible != visible {
-                f.visible = visible;
-                self.mark_visual_dirty(id);
-            }
+        if let Some(f) = self.widgets.get_mut(&id)
+            && f.visible != visible
+        {
+            f.visible = visible;
+            self.mark_visual_dirty(id);
         }
     }
 
