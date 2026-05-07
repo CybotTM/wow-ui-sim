@@ -386,28 +386,8 @@ fn shape_text_to_runs(
 ) -> (Buffer, f32) {
     let line_height = line_height_for_font_size(shape.font_size)
         .expect("shape_text_to_runs requires a positive font size");
-    let metrics = Metrics::new(shape.font_size, line_height);
-    let attrs = font_system.attrs_owned(shape.font_path);
-
-    let shape_width = if shape.word_wrap && shape.bounds_width > 0.0 {
-        shape.bounds_width
-    } else {
-        10000.0
-    };
-
-    let mut buffer = Buffer::new(&mut font_system.font_system, metrics);
-    buffer.set_size(
-        &mut font_system.font_system,
-        Some(shape_width),
-        Some(shape.bounds_height),
-    );
-    buffer.set_text(
-        &mut font_system.font_system,
-        shape.text,
-        &attrs.as_attrs(),
-        Shaping::Advanced,
-        None,
-    );
+    let shape_width = text_shape_width(&shape);
+    let mut buffer = build_text_shape_buffer(font_system, &shape, line_height, shape_width);
     buffer.shape_until_scroll(&mut font_system.font_system, true);
 
     // Calculate total text height (for vertical justification).
@@ -421,6 +401,38 @@ fn shape_text_to_runs(
     // The runs are re-collected from buffer later via layout_runs().
     drop(runs);
     (buffer, total_height)
+}
+
+fn text_shape_width(shape: &TextShapeRequest<'_>) -> f32 {
+    if shape.word_wrap && shape.bounds_width > 0.0 {
+        shape.bounds_width
+    } else {
+        10000.0
+    }
+}
+
+fn build_text_shape_buffer(
+    font_system: &mut WowFontSystem,
+    shape: &TextShapeRequest<'_>,
+    line_height: f32,
+    shape_width: f32,
+) -> Buffer {
+    let metrics = Metrics::new(shape.font_size, line_height);
+    let attrs = font_system.attrs_owned(shape.font_path);
+    let mut buffer = Buffer::new(&mut font_system.font_system, metrics);
+    buffer.set_size(
+        &mut font_system.font_system,
+        Some(shape_width),
+        Some(shape.bounds_height),
+    );
+    buffer.set_text(
+        &mut font_system.font_system,
+        shape.text,
+        &attrs.as_attrs(),
+        Shaping::Advanced,
+        None,
+    );
+    buffer
 }
 
 fn text_total_height(runs: &[cosmic_text::LayoutRun<'_>], line_height: f32) -> f32 {
