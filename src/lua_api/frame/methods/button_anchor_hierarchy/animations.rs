@@ -961,6 +961,12 @@ struct AnimationGroupAdvance {
     frame_id: u64,
 }
 
+struct AnimationGroupTargets {
+    owner_id: u64,
+    alpha_target_ids_by_animation: Vec<Option<u64>>,
+    unique_alpha_target_ids: Vec<u64>,
+}
+
 struct AlphaUpdate {
     target_id: u64,
     pending_alpha: Option<f64>,
@@ -982,20 +988,60 @@ fn advance_animation_group(
     finished_scripts: &mut Vec<u64>,
     finished_animation_scripts: &mut Vec<u64>,
 ) -> Option<AnimationGroupAdvance> {
-    let (owner_id, alpha_target_ids_by_animation) = {
-        let group = sim.animation_groups.get(&group_id)?;
-        // Most registered animation groups are idle; avoid any expensive
-        // target-resolution work unless the group is actively ticking.
-        if !group.playing || group.paused {
-            return None;
-        }
-        (
-            group.owner_frame_id,
-            resolve_group_alpha_targets(sim, group),
+    let targets = active_group_targets(sim, group_id)?;
+    let saved_alphas = saved_alphas_for_targets(sim, &targets.unique_alpha_target_ids);
+    let mut loop_count = 0u32;
+    let (group_finished, alpha_updates, flipbook_updates, frame_id) = {
+        let group = sim.animation_groups.get_mut(&group_id)?;
+        advance_group_state(
+            group,
+            elapsed,
+            &mut loop_count,
+            &targets.unique_alpha_target_ids,
+            &targets.alpha_target_ids_by_animation,
+            &saved_alphas,
+            finished_scripts,
         )
     };
+
+    if group_finished {
+        finished_animation_scripts.extend(animation_frame_ids_for_group(sim, group_id));
+    }
+
+    Some(AnimationGroupAdvance {
+        owner_id: targets.owner_id,
+        alpha_updates,
+        flipbook_updates,
+        loop_count,
+        frame_id,
+    })
+}
+
+fn active_group_targets(
+    sim: &crate::lua_api::state::SimState,
+    group_id: u64,
+) -> Option<AnimationGroupTargets> {
+    let group = sim.animation_groups.get(&group_id)?;
+    // Most registered animation groups are idle; avoid any expensive
+    // target-resolution work unless the group is actively ticking.
+    if !group.playing || group.paused {
+        return None;
+    }
+
+    let alpha_target_ids_by_animation = resolve_group_alpha_targets(sim, group);
     let unique_alpha_target_ids = unique_alpha_targets(&alpha_target_ids_by_animation);
-    let saved_alphas: std::collections::HashMap<u64, f32> = unique_alpha_target_ids
+    Some(AnimationGroupTargets {
+        owner_id: group.owner_frame_id,
+        alpha_target_ids_by_animation,
+        unique_alpha_target_ids,
+    })
+}
+
+fn saved_alphas_for_targets(
+    sim: &crate::lua_api::state::SimState,
+    target_ids: &[u64],
+) -> std::collections::HashMap<u64, f32> {
+    target_ids
         .iter()
         .copied()
         .map(|target_id| {
@@ -1006,60 +1052,76 @@ fn advance_animation_group(
                 .unwrap_or(1.0);
             (target_id, alpha)
         })
-        .collect();
-    let mut loop_count = 0u32;
-    let (group_finished, alpha_updates, flipbook_updates, frame_id) = {
-        let group = sim.animation_groups.get_mut(&group_id)?;
+        .collect()
+}
 
-        for (&target_id, &saved_alpha) in &saved_alphas {
-            group.saved_alphas.entry(target_id).or_insert(saved_alpha);
-        }
-        let total_duration = current_group_total_duration(group);
+fn advance_group_state(
+    group: &mut crate::lua_api::animation::AnimGroupState,
+    elapsed: f64,
+    loop_count: &mut u32,
+    unique_alpha_target_ids: &[u64],
+    alpha_target_ids_by_animation: &[Option<u64>],
+    saved_alphas: &std::collections::HashMap<u64, f32>,
+    finished_scripts: &mut Vec<u64>,
+) -> (bool, Vec<AlphaUpdate>, Vec<FlipbookUpdate>, u64) {
+    remember_saved_alphas(group, saved_alphas);
+    let total_duration = current_group_total_duration(group);
+    let group_finished =
+        advance_group_playback(group, elapsed, total_duration, loop_count, finished_scripts);
 
-        let group_finished = advance_group_playback(
-            group,
-            elapsed,
-            total_duration,
-            &mut loop_count,
-            finished_scripts,
-        );
+    sync_animation_elapsed(group);
+    let alpha_updates = collect_group_alpha_updates(
+        group,
+        unique_alpha_target_ids,
+        alpha_target_ids_by_animation,
+    );
+    let flipbook_updates = collect_group_flipbook_updates(group);
+    let frame_id = animation_group_frame_id(group);
+    (group_finished, alpha_updates, flipbook_updates, frame_id)
+}
 
-        sync_animation_elapsed(group);
-        let mut alpha_updates = Vec::new();
-        for target_id in unique_alpha_target_ids.iter().copied() {
-            let pending_alpha = group_current_alpha_for_target(
-                group,
-                group.elapsed,
-                target_id,
-                &alpha_target_ids_by_animation,
-            );
-            let restore_saved_alpha = if !group.playing && group.done && !group.set_to_final_alpha {
-                group.saved_alphas.get(&target_id).copied()
-            } else {
-                None
-            };
-            alpha_updates.push(AlphaUpdate {
-                target_id,
-                pending_alpha,
-                restore_saved_alpha,
-            });
-        }
-        let flipbook_updates = collect_group_flipbook_updates(group);
-        let frame_id = animation_group_frame_id(group);
-        (group_finished, alpha_updates, flipbook_updates, frame_id)
-    };
-
-    if group_finished {
-        finished_animation_scripts.extend(animation_frame_ids_for_group(sim, group_id));
+fn remember_saved_alphas(
+    group: &mut crate::lua_api::animation::AnimGroupState,
+    saved_alphas: &std::collections::HashMap<u64, f32>,
+) {
+    for (&target_id, &saved_alpha) in saved_alphas {
+        group.saved_alphas.entry(target_id).or_insert(saved_alpha);
     }
+}
 
-    Some(AnimationGroupAdvance {
-        owner_id,
-        alpha_updates,
-        flipbook_updates,
-        loop_count,
-        frame_id,
-    })
+fn collect_group_alpha_updates(
+    group: &crate::lua_api::animation::AnimGroupState,
+    unique_alpha_target_ids: &[u64],
+    alpha_target_ids_by_animation: &[Option<u64>],
+) -> Vec<AlphaUpdate> {
+    unique_alpha_target_ids
+        .iter()
+        .copied()
+        .map(|target_id| group_alpha_update(group, target_id, alpha_target_ids_by_animation))
+        .collect()
+}
+
+fn group_alpha_update(
+    group: &crate::lua_api::animation::AnimGroupState,
+    target_id: u64,
+    alpha_target_ids_by_animation: &[Option<u64>],
+) -> AlphaUpdate {
+    let pending_alpha = group_current_alpha_for_target(
+        group,
+        group.elapsed,
+        target_id,
+        alpha_target_ids_by_animation,
+    );
+    let restore_saved_alpha = if !group.playing && group.done && !group.set_to_final_alpha {
+        group.saved_alphas.get(&target_id).copied()
+    } else {
+        None
+    };
+    AlphaUpdate {
+        target_id,
+        pending_alpha,
+        restore_saved_alpha,
+    }
 }
 
 fn advance_group_playback(
