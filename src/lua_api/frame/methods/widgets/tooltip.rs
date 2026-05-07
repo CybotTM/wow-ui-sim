@@ -1387,9 +1387,6 @@ fn apply_tooltip_anchor(
     x_offset: f32,
     y_offset: f32,
 ) {
-    use crate::widget::AnchorPoint::{
-        Bottom, BottomLeft, BottomRight, Left, Right, Top, TopLeft, TopRight,
-    };
     if anchor_kind == "ANCHOR_PRESERVE" {
         return;
     }
@@ -1402,10 +1399,40 @@ fn apply_tooltip_anchor(
         }
         return;
     }
-    let Some(owner_id) = owner_id else {
+
+    if let Some(owner_id) = owner_id {
+        push_owner_tooltip_anchor(tooltip, anchor_kind, owner_id, x_offset, y_offset);
+    }
+}
+
+fn push_owner_tooltip_anchor(
+    tooltip: &mut crate::widget::Frame,
+    anchor_kind: &str,
+    owner_id: u64,
+    x_offset: f32,
+    y_offset: f32,
+) {
+    let Some((point, relative_point)) = owner_tooltip_anchor_points(anchor_kind) else {
         return;
     };
-    let points = match anchor_kind {
+    tooltip.anchors.push(crate::widget::Anchor {
+        point,
+        relative_to: None,
+        relative_to_id: Some(owner_id as usize),
+        relative_point,
+        x_offset,
+        y_offset,
+    });
+}
+
+fn owner_tooltip_anchor_points(
+    anchor_kind: &str,
+) -> Option<(crate::widget::AnchorPoint, crate::widget::AnchorPoint)> {
+    use crate::widget::AnchorPoint::{
+        Bottom, BottomLeft, BottomRight, Left, Right, Top, TopLeft, TopRight,
+    };
+
+    match anchor_kind {
         "ANCHOR_RIGHT" => Some((Left, Right)),
         "ANCHOR_LEFT" => Some((Right, Left)),
         "ANCHOR_TOP" => Some((Bottom, Top)),
@@ -1415,16 +1442,6 @@ fn apply_tooltip_anchor(
         "ANCHOR_BOTTOMRIGHT" => Some((TopRight, BottomRight)),
         "ANCHOR_BOTTOMLEFT" => Some((TopLeft, BottomLeft)),
         _ => None,
-    };
-    if let Some((point, relative_point)) = points {
-        tooltip.anchors.push(crate::widget::Anchor {
-            point,
-            relative_to: None,
-            relative_to_id: Some(owner_id as usize),
-            relative_point,
-            x_offset,
-            y_offset,
-        });
     }
 }
 
