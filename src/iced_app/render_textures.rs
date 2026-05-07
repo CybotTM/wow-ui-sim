@@ -30,6 +30,37 @@ pub(crate) struct TextureLoadBatchTelemetry {
     crop_extract_elapsed: std::time::Duration,
 }
 
+type BudgetedTextureLoadResult = (
+    Vec<GpuTextureData>,
+    Vec<GpuBcTextureData>,
+    std::time::Duration,
+    std::time::Duration,
+    TextureLoadBatchTelemetry,
+    bool,
+);
+
+#[derive(Default)]
+struct TextureLoadAccumulator {
+    textures: Vec<GpuTextureData>,
+    bc_textures: Vec<GpuBcTextureData>,
+    scan_elapsed: std::time::Duration,
+    load_elapsed: std::time::Duration,
+    telemetry: TextureLoadBatchTelemetry,
+    exhausted: bool,
+}
+
+impl TextureLoadAccumulator {
+    fn record_budgeted(&mut self, batch: BudgetedTextureLoadResult) {
+        let (textures, bc_textures, scan_elapsed, load_elapsed, telemetry, exhausted) = batch;
+        self.textures.extend(textures);
+        self.bc_textures.extend(bc_textures);
+        self.scan_elapsed += scan_elapsed;
+        self.load_elapsed += load_elapsed;
+        self.telemetry.record_batch(telemetry);
+        self.exhausted |= exhausted;
+    }
+}
+
 impl TextureLoadBatchTelemetry {
     fn record(&mut self, telemetry: TextureLoadTelemetry) {
         self.rgba_total_elapsed += telemetry.rgba.total_elapsed;
@@ -134,59 +165,37 @@ impl App {
     ) {
         let t = std::time::Instant::now();
         let deadline = t + std::time::Duration::from_millis(10);
-        let mut textures = Vec::new();
-        let mut bc_textures = Vec::new();
-        let mut scan_elapsed = std::time::Duration::ZERO;
-        let mut load_elapsed = std::time::Duration::ZERO;
-        let mut telemetry = TextureLoadBatchTelemetry::default();
-        let mut exhausted = false;
-        let mut texture_requests = TextureRequestTracker::default();
-        for batch in dirty_strata.iter().flatten() {
-            texture_requests.register_batch(batch);
-        }
+        let mut texture_requests = texture_requests_for_dirty_strata(dirty_strata);
+        let mut loaded = TextureLoadAccumulator::default();
 
-        let (
-            queued_textures,
-            queued_bc_textures,
-            queued_scan_elapsed,
-            queued_load_elapsed,
-            queued_telemetry,
-            queued_exhausted,
-        ) = self.load_pending_texture_queue_budgeted(deadline, &mut texture_requests);
-        textures.extend(queued_textures);
-        bc_textures.extend(queued_bc_textures);
-        scan_elapsed += queued_scan_elapsed;
-        load_elapsed += queued_load_elapsed;
-        telemetry.record_batch(queued_telemetry);
-        exhausted |= queued_exhausted;
+        loaded.record_budgeted(
+            self.load_pending_texture_queue_budgeted(deadline, &mut texture_requests),
+        );
 
-        if !exhausted {
-            let (loaded, loaded_bc, batch_scan, batch_load, batch_telemetry, hit) =
-                self.load_new_textures_budgeted(overlay, deadline, &mut texture_requests);
-            textures.extend(loaded);
-            bc_textures.extend(loaded_bc);
-            scan_elapsed += batch_scan;
-            load_elapsed += batch_load;
-            telemetry.record_batch(batch_telemetry);
-            exhausted |= hit;
+        if !loaded.exhausted {
+            loaded.record_budgeted(self.load_new_textures_budgeted(
+                overlay,
+                deadline,
+                &mut texture_requests,
+            ));
         }
 
         self.textures_pending
-            .set(exhausted || self.cached_render_requests_still_pending());
+            .set(loaded.exhausted || self.cached_render_requests_still_pending());
         let elapsed = t.elapsed();
-        if elapsed.as_millis() > 10 && (!textures.is_empty() || !bc_textures.is_empty()) {
+        if should_log_slow_texture_load(&loaded, elapsed) {
             log_slow_texture_load(
-                &textures,
-                &bc_textures,
+                &loaded.textures,
+                &loaded.bc_textures,
                 elapsed,
-                scan_elapsed,
-                load_elapsed,
-                telemetry,
+                loaded.scan_elapsed,
+                loaded.load_elapsed,
+                loaded.telemetry,
             );
         }
         (
-            textures,
-            bc_textures,
+            loaded.textures,
+            loaded.bc_textures,
             elapsed,
             Arc::new(Mutex::new(texture_requests)),
         )
@@ -199,14 +208,7 @@ impl App {
         quads: &QuadBatch,
         deadline: std::time::Instant,
         texture_requests: &mut TextureRequestTracker,
-    ) -> (
-        Vec<GpuTextureData>,
-        Vec<GpuBcTextureData>,
-        std::time::Duration,
-        std::time::Duration,
-        TextureLoadBatchTelemetry,
-        bool,
-    ) {
+    ) -> BudgetedTextureLoadResult {
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
         let mut telemetry = TextureLoadBatchTelemetry::default();
@@ -251,14 +253,7 @@ impl App {
         &self,
         deadline: std::time::Instant,
         texture_requests: &mut TextureRequestTracker,
-    ) -> (
-        Vec<GpuTextureData>,
-        Vec<GpuBcTextureData>,
-        std::time::Duration,
-        std::time::Duration,
-        TextureLoadBatchTelemetry,
-        bool,
-    ) {
+    ) -> BudgetedTextureLoadResult {
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
         let mut telemetry = TextureLoadBatchTelemetry::default();
@@ -465,6 +460,23 @@ fn append_anchor_markers(overlay: &mut QuadBatch, frame: &Frame, rect: crate::La
     }
 }
 
+fn texture_requests_for_dirty_strata(
+    dirty_strata: &[Option<Arc<QuadBatch>>; FrameStrata::COUNT],
+) -> TextureRequestTracker {
+    let mut texture_requests = TextureRequestTracker::default();
+    for batch in dirty_strata.iter().flatten() {
+        texture_requests.register_batch(batch);
+    }
+    texture_requests
+}
+
+fn should_log_slow_texture_load(
+    loaded: &TextureLoadAccumulator,
+    elapsed: std::time::Duration,
+) -> bool {
+    elapsed.as_millis() > 10 && (!loaded.textures.is_empty() || !loaded.bc_textures.is_empty())
+}
+
 fn log_slow_texture_load(
     textures: &[GpuTextureData],
     bc_textures: &[GpuBcTextureData],
@@ -580,7 +592,7 @@ fn load_pending_texture(
     texture_requests.mark_failed(path);
 }
 
-fn unresolved_texture_request_paths<'a>(quads: &'a QuadBatch) -> Vec<&'a str> {
+fn unresolved_texture_request_paths(quads: &QuadBatch) -> Vec<&str> {
     let mut paths = Vec::new();
     let mut seen = HashSet::new();
 
