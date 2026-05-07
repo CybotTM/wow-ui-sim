@@ -10,7 +10,7 @@ use crate::render::shader::primitive::{
 };
 use crate::render::texture::UI_SCALE;
 use crate::render::{GpuBcTextureData, GpuTextureData, QuadBatch};
-use crate::widget::{Frame, FrameStrata, WidgetType};
+use crate::widget::{Frame, FrameStrata, WidgetRegistry, WidgetType};
 
 use super::super::app::App;
 use super::super::quad_builders::{build_texture_quads, emit_button_highlight};
@@ -330,18 +330,9 @@ impl App {
             return;
         };
 
-        if !matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
+        let Some(bounds) = hovered_button_bounds(f) else {
             return;
-        }
-
-        let Some(rect) = f.layout_rect else { return };
-        if rect.width <= 0.0 || rect.height <= 0.0 {
-            return;
-        }
-        let bounds = Rectangle::new(
-            Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
-            Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
-        );
+        };
 
         let has_highlight_child = f.children_keys.contains_key("HighlightTexture");
         let is_pressed = self.pressed_frame == Some(hovered_id) || f.button_state == 1;
@@ -349,21 +340,7 @@ impl App {
             emit_button_highlight(quads, bounds, f, f.alpha);
         }
 
-        if !is_pressed
-            && let Some(&ht_id) = f.children_keys.get("HighlightTexture")
-            && let Some(ht) = registry.get(ht_id)
-        {
-            let Some(ht_rect) = ht.layout_rect else {
-                return;
-            };
-            if ht_rect.width > 0.0 && ht_rect.height > 0.0 {
-                let ht_bounds = Rectangle::new(
-                    Point::new(ht_rect.x * UI_SCALE, ht_rect.y * UI_SCALE),
-                    Size::new(ht_rect.width * UI_SCALE, ht_rect.height * UI_SCALE),
-                );
-                build_texture_quads(quads, ht_bounds, ht, None, ht.alpha);
-            }
-        }
+        append_hover_child_highlight(quads, registry, f, is_pressed);
     }
 
     /// Render the spell icon attached to the cursor when dragging.
@@ -435,6 +412,51 @@ fn debug_overlay_frame(
         Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
     );
     Some((frame, rect, bounds))
+}
+
+fn hovered_button_bounds(frame: &Frame) -> Option<Rectangle> {
+    if !matches!(
+        frame.widget_type,
+        WidgetType::Button | WidgetType::CheckButton
+    ) {
+        return None;
+    }
+
+    frame.layout_rect.and_then(layout_rect_bounds)
+}
+
+fn layout_rect_bounds(rect: crate::LayoutRect) -> Option<Rectangle> {
+    if rect.width <= 0.0 || rect.height <= 0.0 {
+        return None;
+    }
+
+    Some(Rectangle::new(
+        Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
+        Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
+    ))
+}
+
+fn append_hover_child_highlight(
+    quads: &mut QuadBatch,
+    registry: &WidgetRegistry,
+    frame: &Frame,
+    is_pressed: bool,
+) {
+    if is_pressed {
+        return;
+    }
+
+    let Some(&highlight_id) = frame.children_keys.get("HighlightTexture") else {
+        return;
+    };
+    let Some(highlight) = registry.get(highlight_id) else {
+        return;
+    };
+    let Some(bounds) = highlight.layout_rect.and_then(layout_rect_bounds) else {
+        return;
+    };
+
+    build_texture_quads(quads, bounds, highlight, None, highlight.alpha);
 }
 
 fn append_anchor_markers(overlay: &mut QuadBatch, frame: &Frame, rect: crate::LayoutRect) {
