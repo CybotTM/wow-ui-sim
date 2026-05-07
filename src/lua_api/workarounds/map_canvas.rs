@@ -347,8 +347,10 @@ end
     "#;
 
 pub(super) fn patch_collections_journal_namespace(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(
-        r#"
+    let _ = env.exec(COLLECTIONS_JOURNAL_NAMESPACE_WORKAROUND_LUA);
+}
+
+const COLLECTIONS_JOURNAL_NAMESPACE_WORKAROUND_LUA: &str = r#"
         if type(C_MountJournal) == "table" then
             if rawget(C_MountJournal, "IsUsingDefaultFilters") == nil then
                 function C_MountJournal.IsUsingDefaultFilters()
@@ -380,6 +382,4 @@ pub(super) fn patch_collections_journal_namespace(env: &crate::lua_api::LoaderEn
             end
             MountJournalToggleDynamicFlightFlyoutButtonMixin.__wow_popup_guard = true
         end
-        "#,
-    );
-}
+        "#;
