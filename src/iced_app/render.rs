@@ -115,6 +115,12 @@ struct TexturePreloadPassTelemetry {
     pending: bool,
 }
 
+struct TexturePreloadPass {
+    started: std::time::Instant,
+    log_enabled: bool,
+    telemetry: TexturePreloadPassTelemetry,
+}
+
 #[derive(Debug, Default)]
 struct QueuedTexturePreloadProgress {
     total: usize,
@@ -215,26 +221,48 @@ impl App {
         &self,
         budget: Option<std::time::Duration>,
     ) -> bool {
-        let started = std::time::Instant::now();
-        let log_preload = texture_preload_logging_enabled();
-        let pending_before = self.textures_pending.get();
-        let mut telemetry = TexturePreloadPassTelemetry {
-            budget,
-            pending: pending_before,
-            ..Default::default()
-        };
-
+        let mut pass = self.begin_texture_preload_pass(budget);
         let deadline = self.texture_preload_deadline(budget);
+        let queued_progress = self.preload_queued_textures_until(deadline, pass.log_enabled);
 
+        self.finish_texture_preload_pass(&mut pass, queued_progress)
+    }
+
+    fn begin_texture_preload_pass(
+        &self,
+        budget: Option<std::time::Duration>,
+    ) -> TexturePreloadPass {
+        TexturePreloadPass {
+            started: std::time::Instant::now(),
+            log_enabled: texture_preload_logging_enabled(),
+            telemetry: TexturePreloadPassTelemetry {
+                budget,
+                pending: self.textures_pending.get(),
+                ..Default::default()
+            },
+        }
+    }
+
+    fn preload_queued_textures_until(
+        &self,
+        deadline: Option<std::time::Instant>,
+        collect_samples: bool,
+    ) -> QueuedTexturePreloadProgress {
         let mut tex_mgr = self.texture_manager.borrow_mut();
-        let queued_progress =
-            self.preload_queued_texture_requests(&mut tex_mgr, deadline, log_preload);
+        self.preload_queued_texture_requests(&mut tex_mgr, deadline, collect_samples)
+    }
+
+    fn finish_texture_preload_pass(
+        &self,
+        pass: &mut TexturePreloadPass,
+        queued_progress: QueuedTexturePreloadProgress,
+    ) -> bool {
         let draw_pending = self.cached_render_requests_still_pending();
         let redraw_needed =
-            self.apply_texture_preload_progress(&mut telemetry, queued_progress, draw_pending);
-        telemetry.elapsed = started.elapsed();
-        if log_preload {
-            eprintln!("{}", format_texture_preload_log(&telemetry));
+            self.apply_texture_preload_progress(&mut pass.telemetry, queued_progress, draw_pending);
+        pass.telemetry.elapsed = pass.started.elapsed();
+        if pass.log_enabled {
+            eprintln!("{}", format_texture_preload_log(&pass.telemetry));
         }
         redraw_needed
     }
