@@ -809,16 +809,38 @@ fn apply_tooltip_table(
     let lines_table = table_get(state, tooltip, "lines");
     let word_wrap_min_width = tooltip_word_wrap_min_width(state, tooltip);
     let lines = tooltip_lines_from_table(state, lines_table);
-    let allow_show_with_no_lines = {
-        let sim = borrow_state(state)?;
-        sim.tooltips
-            .get(&tooltip_id)
-            .map(|td| td.allow_show_with_no_lines)
-            .unwrap_or(false)
-    };
+    let allow_show_with_no_lines = tooltip_allows_showing_without_lines(state, tooltip_id)?;
     let has_lines = !lines.is_empty();
 
     let mut sim = borrow_state_mut(state)?;
+    apply_tooltip_lines(
+        &mut sim,
+        tooltip_id,
+        lines,
+        word_wrap_min_width,
+        spell_id,
+        has_lines || allow_show_with_no_lines,
+    );
+    Ok(has_lines)
+}
+
+fn tooltip_allows_showing_without_lines(state: &LuaState, tooltip_id: u64) -> LuaResult<bool> {
+    let sim = borrow_state(state)?;
+    Ok(sim
+        .tooltips
+        .get(&tooltip_id)
+        .map(|td| td.allow_show_with_no_lines)
+        .unwrap_or(false))
+}
+
+fn apply_tooltip_lines(
+    sim: &mut crate::lua_api::state::SimState,
+    tooltip_id: u64,
+    lines: Vec<TooltipLine>,
+    word_wrap_min_width: Option<f32>,
+    spell_id: Option<u32>,
+    visible: bool,
+) {
     let td = sim.tooltips.entry(tooltip_id).or_default();
     td.lines = lines;
     if let Some(word_wrap_min_width) = word_wrap_min_width {
@@ -828,8 +850,7 @@ fn apply_tooltip_table(
     td.unit_token = None;
     td.unit_name = None;
     td.unit_guid = None;
-    sim.set_frame_visible(tooltip_id, has_lines || allow_show_with_no_lines);
-    Ok(has_lines)
+    sim.set_frame_visible(tooltip_id, visible);
 }
 
 fn tooltip_word_wrap_min_width(state: &mut LuaState, tooltip: Val) -> Option<f32> {
