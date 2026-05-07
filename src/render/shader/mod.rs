@@ -8,6 +8,7 @@ pub mod atlas_bc;
 mod atlas_bind_groups;
 mod pipeline;
 pub mod primitive;
+mod primitive_textures;
 mod program;
 mod quad;
 mod quad_batch_extras;
