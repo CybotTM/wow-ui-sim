@@ -1,6 +1,8 @@
 pub(super) fn patch_map_canvas_scroll_container(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(
-        r#"
+    let _ = env.exec(MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA);
+}
+
+const MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA: &str = r#"
 if type(ClearCachedActivitiesForPlayer) ~= "function" then
   function ClearCachedActivitiesForPlayer() end
 end
@@ -342,9 +344,7 @@ if type(ToggleWorldMap) == "function" and not rawget(_G, "__wow_toggle_world_map
 
   rawset(_G, "__wow_toggle_world_map_refresh_patched", true)
 end
-    "#,
-    );
-}
+    "#;
 
 pub(super) fn patch_collections_journal_namespace(env: &crate::lua_api::LoaderEnv<'_>) {
     let _ = env.exec(
