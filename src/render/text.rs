@@ -56,43 +56,65 @@ impl TextRenderer {
             return;
         }
 
-        // Convert WoW justification to iced alignment
-        let (align_x, x_pos) = match text.justify_h {
-            TextJustify::Left => (alignment::Horizontal::Left, text.bounds.x),
-            TextJustify::Center => (
-                alignment::Horizontal::Center,
-                text.bounds.x + text.bounds.width / 2.0,
-            ),
-            TextJustify::Right => (
-                alignment::Horizontal::Right,
-                text.bounds.x + text.bounds.width,
-            ),
-        };
-
-        let (align_y, y_pos) = match text.justify_v {
-            TextJustify::Left => (alignment::Vertical::Top, text.bounds.y), // TOP
-            TextJustify::Center => (
-                alignment::Vertical::Center,
-                text.bounds.y + text.bounds.height / 2.0,
-            ), // MIDDLE
-            TextJustify::Right => (
-                alignment::Vertical::Bottom,
-                text.bounds.y + text.bounds.height,
-            ), // BOTTOM
-        };
+        let horizontal = horizontal_text_anchor(text.bounds, text.justify_h);
+        let vertical = vertical_text_anchor(text.bounds, text.justify_v);
 
         frame.fill_text(canvas::Text {
             content: text.content.to_string(),
-            position: Point::new(x_pos, y_pos),
+            position: Point::new(horizontal.position, vertical.position),
             color: text.color,
             size: Pixels(text.font_size),
             line_height: iced::widget::text::LineHeight::default(),
             font: text.font,
-            align_x: align_x.into(),
-            align_y,
+            align_x: horizontal.alignment.into(),
+            align_y: vertical.alignment,
             shaping: iced::widget::text::Shaping::Advanced,
             max_width: text.bounds.width,
         });
+    }
+}
+
+struct HorizontalTextAnchor {
+    alignment: alignment::Horizontal,
+    position: f32,
+}
+
+struct VerticalTextAnchor {
+    alignment: alignment::Vertical,
+    position: f32,
+}
+
+fn horizontal_text_anchor(bounds: Rectangle, justify: TextJustify) -> HorizontalTextAnchor {
+    match justify {
+        TextJustify::Left => HorizontalTextAnchor {
+            alignment: alignment::Horizontal::Left,
+            position: bounds.x,
+        },
+        TextJustify::Center => HorizontalTextAnchor {
+            alignment: alignment::Horizontal::Center,
+            position: bounds.x + bounds.width / 2.0,
+        },
+        TextJustify::Right => HorizontalTextAnchor {
+            alignment: alignment::Horizontal::Right,
+            position: bounds.x + bounds.width,
+        },
+    }
+}
+
+fn vertical_text_anchor(bounds: Rectangle, justify: TextJustify) -> VerticalTextAnchor {
+    match justify {
+        TextJustify::Left => VerticalTextAnchor {
+            alignment: alignment::Vertical::Top,
+            position: bounds.y,
+        },
+        TextJustify::Center => VerticalTextAnchor {
+            alignment: alignment::Vertical::Center,
+            position: bounds.y + bounds.height / 2.0,
+        },
+        TextJustify::Right => VerticalTextAnchor {
+            alignment: alignment::Vertical::Bottom,
+            position: bounds.y + bounds.height,
+        },
     }
 }
 
