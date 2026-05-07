@@ -18,11 +18,8 @@ pub struct TocFile {
     pub metadata: HashMap<String, String>,
     /// Files to load in order (relative paths)
     pub files: Vec<PathBuf>,
-    /// Optional per-file environment override from inline annotations.
-    ///
-    /// `Some(true)` means `[LoadIntoEnvironment secure]`, `Some(false)` means
-    /// `[LoadIntoEnvironment global]`, and `None` means inherit the addon's
-    /// default environment.
+    /// Per-file environment override from `[LoadIntoEnvironment ...]` annotations.
+    /// `None` means inherit the addon's default environment.
     pub file_env_overrides: Vec<Option<bool>>,
 }
 
