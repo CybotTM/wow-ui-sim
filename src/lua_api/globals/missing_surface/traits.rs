@@ -1430,7 +1430,7 @@ fn c_traits_get_tree_hash(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn c_traits_get_tree_info(state: &mut LuaState) -> LuaResult<u32> {
+fn tree_info_args(state: &mut LuaState) -> LuaResult<(i32, u32)> {
     let config_id = match stack_val(state, 1) {
         Val::Num(value) => value as i32,
         _ => 0,
@@ -1439,10 +1439,10 @@ fn c_traits_get_tree_info(state: &mut LuaState) -> LuaResult<u32> {
         Val::Num(value) => value as u32,
         _ => u32::from_stack(state, 1)?,
     };
-    let Some(tree) = TRAIT_TREE_DB.get(&tree_id) else {
-        state.push(Val::Nil);
-        return Ok(1);
-    };
+    Ok((config_id, tree_id))
+}
+
+fn push_tree_info_table(state: &mut LuaState, config_id: i32, tree: &crate::traits::TraitTreeInfo) {
     let info = create_table(state);
     table_set(state, info, "ID", Val::Num(tree.id as f64));
     table_set(state, info, "configID", Val::Num(config_id as f64));
@@ -1457,15 +1457,21 @@ fn c_traits_get_tree_info(state: &mut LuaState) -> LuaResult<u32> {
         state,
         info,
         "rootNodeID",
-        if tree.first_node_id == 0 {
-            Val::Nil
-        } else {
-            Val::Num(tree.first_node_id as f64)
-        },
+        optional_u32_number(tree.first_node_id),
     );
     let currency_ids = push_u32_array(state, tree.currency_ids.iter().copied());
     table_set(state, info, "currencyIDs", currency_ids);
     state.push(info);
+}
+
+fn c_traits_get_tree_info(state: &mut LuaState) -> LuaResult<u32> {
+    let (config_id, tree_id) = tree_info_args(state)?;
+    let Some(tree) = TRAIT_TREE_DB.get(&tree_id) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    push_tree_info_table(state, config_id, tree);
     Ok(1)
 }
 
