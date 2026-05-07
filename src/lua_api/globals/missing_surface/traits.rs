@@ -1118,6 +1118,59 @@ fn c_traits_get_entry_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn optional_u32_number(value: u32) -> Val {
+    if value == 0 {
+        Val::Nil
+    } else {
+        Val::Num(value as f64)
+    }
+}
+
+fn push_definition_numeric_fields(
+    state: &mut LuaState,
+    info: Val,
+    definition: &crate::traits::TraitDefInfo,
+) {
+    table_set(
+        state,
+        info,
+        "spellID",
+        optional_u32_number(definition.spell_id),
+    );
+    table_set(
+        state,
+        info,
+        "overriddenSpellID",
+        optional_u32_number(definition.overrides_spell_id),
+    );
+    table_set(
+        state,
+        info,
+        "overrideIcon",
+        optional_u32_number(definition.override_icon),
+    );
+}
+
+fn push_definition_text_fields(
+    state: &mut LuaState,
+    info: Val,
+    definition: &crate::traits::TraitDefInfo,
+) {
+    let override_name = create_string(state, definition.override_name);
+    table_set(state, info, "overrideName", override_name);
+    let override_subtext = create_string(state, definition.override_subtext);
+    table_set(state, info, "overrideSubtext", override_subtext);
+    let override_description = create_string(state, definition.override_description);
+    table_set(state, info, "overrideDescription", override_description);
+}
+
+fn push_definition_info_table(state: &mut LuaState, definition: &crate::traits::TraitDefInfo) {
+    let info = create_table(state);
+    push_definition_numeric_fields(state, info, definition);
+    push_definition_text_fields(state, info, definition);
+    state.push(info);
+}
+
 fn c_traits_get_definition_info(state: &mut LuaState) -> LuaResult<u32> {
     let definition_id = u32::from_stack(state, 1)?;
     let Some(definition) = TRAIT_DEFINITION_DB.get(&definition_id) else {
@@ -1125,44 +1178,7 @@ fn c_traits_get_definition_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
 
-    let info = create_table(state);
-    table_set(
-        state,
-        info,
-        "spellID",
-        if definition.spell_id == 0 {
-            Val::Nil
-        } else {
-            Val::Num(definition.spell_id as f64)
-        },
-    );
-    table_set(
-        state,
-        info,
-        "overriddenSpellID",
-        if definition.overrides_spell_id == 0 {
-            Val::Nil
-        } else {
-            Val::Num(definition.overrides_spell_id as f64)
-        },
-    );
-    table_set(
-        state,
-        info,
-        "overrideIcon",
-        if definition.override_icon == 0 {
-            Val::Nil
-        } else {
-            Val::Num(definition.override_icon as f64)
-        },
-    );
-    let override_name = create_string(state, definition.override_name);
-    table_set(state, info, "overrideName", override_name);
-    let override_subtext = create_string(state, definition.override_subtext);
-    table_set(state, info, "overrideSubtext", override_subtext);
-    let override_description = create_string(state, definition.override_description);
-    table_set(state, info, "overrideDescription", override_description);
-    state.push(info);
+    push_definition_info_table(state, definition);
     Ok(1)
 }
 
