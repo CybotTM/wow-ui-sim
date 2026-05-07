@@ -10,6 +10,8 @@ use super::{FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, emit_widget_tex
 
 const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
 
+type ButtonTextureState<'a> = (Option<&'a String>, Option<(f32, f32, f32, f32)>, bool);
+
 struct EditBoxTextMetrics {
     bounds: Rectangle,
     left_pad: f32,
@@ -88,10 +90,7 @@ pub(super) fn build_button_quads(
     }
 }
 
-fn button_texture_state(
-    f: &crate::widget::Frame,
-    is_pressed: bool,
-) -> (Option<&String>, Option<(f32, f32, f32, f32)>, bool) {
+fn button_texture_state(f: &crate::widget::Frame, is_pressed: bool) -> ButtonTextureState<'_> {
     let has_normal_child = f.children_keys.contains_key("NormalTexture");
     let has_pushed_child = f.children_keys.contains_key("PushedTexture");
 
@@ -126,6 +125,17 @@ fn emit_button_texture(
         emit_ui_panel_button_strip(batch, bounds, tex_path, tex_coords, alpha, BlendMode::Alpha);
         return;
     }
+
+    emit_skinned_button_texture(batch, bounds, tex_path, tex_coords, alpha);
+}
+
+fn emit_skinned_button_texture(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    tex_coords: Option<(f32, f32, f32, f32)>,
+    alpha: f32,
+) {
     if let Some(tex_coords) = tex_coords {
         push_skinned_button_quad(
             batch,
@@ -136,18 +146,7 @@ fn emit_button_texture(
             BlendMode::Alpha,
         );
     } else {
-        const BUTTON_TEX_WIDTH: f32 = 128.0;
-        const BUTTON_CAP_WIDTH: f32 = 4.0;
-        batch.push_three_slice_h_path(
-            bounds,
-            BUTTON_CAP_WIDTH,
-            BUTTON_CAP_WIDTH,
-            tex_path,
-            BUTTON_TEX_WIDTH,
-            [1.0, 1.0, 1.0, alpha],
-            0.0,
-            BUTTON_TEX_V_BOTTOM,
-        );
+        emit_button_three_slice(batch, bounds, tex_path, alpha, BlendMode::Alpha);
     }
 }
 
@@ -182,16 +181,23 @@ pub(crate) fn emit_button_highlight(
             BlendMode::Additive,
         );
     } else {
-        emit_button_three_slice_blend(batch, bounds, highlight_path, 0.5 * alpha);
+        emit_button_three_slice(
+            batch,
+            bounds,
+            highlight_path,
+            0.5 * alpha,
+            BlendMode::Additive,
+        );
     }
 }
 
 /// 3-slice horizontal fallback for button textures with the up-strip V crop.
-fn emit_button_three_slice_blend(
+fn emit_button_three_slice(
     batch: &mut QuadBatch,
     bounds: Rectangle,
     tex_path: &str,
     alpha: f32,
+    blend_mode: BlendMode,
 ) {
     const BUTTON_TEX_WIDTH: f32 = 128.0;
     const BUTTON_CAP_WIDTH: f32 = 4.0;
@@ -202,7 +208,7 @@ fn emit_button_three_slice_blend(
         tex_path,
         BUTTON_TEX_WIDTH,
         [1.0, 1.0, 1.0, alpha],
-        BlendMode::Additive,
+        blend_mode,
         0.0,
         BUTTON_TEX_V_BOTTOM,
     );
