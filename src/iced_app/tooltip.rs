@@ -799,21 +799,18 @@ mod tests {
     fn render_single_line_tooltip_batch(
         bounds: Rectangle,
     ) -> (QuadBatch, (f32, f32, f32, f32), (f32, f32, f32, f32)) {
+        let batch = build_single_line_tooltip_batch(bounds);
+        let border_bounds = tooltip_border_bounds(&batch);
+        let glyph_bounds = glyph_bounds(&batch).expect("tooltip text should emit glyph vertices");
+
+        (batch, border_bounds, glyph_bounds)
+    }
+
+    fn build_single_line_tooltip_batch(bounds: Rectangle) -> QuadBatch {
         let data = TooltipRenderData {
-            lines: vec![TooltipLineRender {
-                left_text: "Header".to_string(),
-                left_color: [1.0, 1.0, 1.0, 1.0],
-                left_segments: Vec::new(),
-                right_text: None,
-                right_color: [1.0, 1.0, 1.0, 1.0],
-                right_segments: Vec::new(),
-                font_size: TOOLTIP_HEADER_FONT_SIZE,
-                wrap: false,
-                measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
-            }],
+            lines: vec![single_header_tooltip_line()],
             line_spacing: TOOLTIP_LINE_SPACING,
         };
-
         let mut batch = QuadBatch::new();
         let mut font_sys = WowFontSystem::new();
         let mut glyph_atlas = GlyphAtlas::new();
@@ -832,16 +829,31 @@ mod tests {
             &mut text_ctx,
         );
 
-        let border_bounds = union_bounds(
+        batch
+    }
+
+    fn single_header_tooltip_line() -> TooltipLineRender {
+        TooltipLineRender {
+            left_text: "Header".to_string(),
+            left_color: [1.0, 1.0, 1.0, 1.0],
+            left_segments: Vec::new(),
+            right_text: None,
+            right_color: [1.0, 1.0, 1.0, 1.0],
+            right_segments: Vec::new(),
+            font_size: TOOLTIP_HEADER_FONT_SIZE,
+            wrap: false,
+            measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+        }
+    }
+
+    fn tooltip_border_bounds(batch: &QuadBatch) -> (f32, f32, f32, f32) {
+        union_bounds(
             batch
                 .texture_requests
                 .iter()
-                .map(|request| request_bounds(&batch, request)),
+                .map(|request| request_bounds(batch, request)),
         )
-        .expect("tooltip border should emit texture requests");
-        let glyph_bounds = glyph_bounds(&batch).expect("tooltip text should emit glyph vertices");
-
-        (batch, border_bounds, glyph_bounds)
+        .expect("tooltip border should emit texture requests")
     }
 
     fn assert_text_origin_matches_nine_slice_corner(bounds: Rectangle, batch: &QuadBatch) {
