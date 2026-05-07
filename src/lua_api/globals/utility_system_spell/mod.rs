@@ -428,7 +428,20 @@ pub fn xpcall(state: &mut LuaState) -> LuaResult<u32> {
 
 /// securecall(name_or_func, ...) — call a function by name in a secure context.
 pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
-    let func = match stack_val(state, 1) {
+    let func = resolve_securecall_function(state);
+
+    if !matches!(func, Val::Function(_)) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+
+    let args = collect_securecall_args(state);
+    let results = call_function_with_secure_taint(state, func, &args);
+    push_securecall_results(state, results)
+}
+
+fn resolve_securecall_function(state: &mut LuaState) -> Val {
+    match stack_val(state, 1) {
         Val::Str(name_ref) => state
             .gc
             .tables
@@ -436,20 +449,14 @@ pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
             .map(|table| table.get_str(name_ref, &state.gc.string_arena))
             .unwrap_or(Val::Nil),
         value => value,
-    };
-
-    if !matches!(func, Val::Function(_)) {
-        state.push(Val::Nil);
-        return Ok(1);
     }
+}
 
+fn collect_securecall_args(state: &LuaState) -> Vec<Val> {
     let arg_count = (state.top - state.base).saturating_sub(1);
-    let args = (0..arg_count)
+    (0..arg_count)
         .map(|index| state.stack_get(state.base + 1 + index))
-        .collect::<Vec<_>>();
-
-    let results = call_function_with_secure_taint(state, func, &args);
-    push_securecall_results(state, results)
+        .collect()
 }
 
 fn call_function_with_secure_taint(
@@ -459,10 +466,10 @@ fn call_function_with_secure_taint(
 ) -> Result<Vec<Val>, rilua::LuaError> {
     let saved_taints = clear_securecall_taint(state);
     const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
-    let results = match call_function_state_multi(state, func, &args) {
+    let results = match call_function_state_multi(state, func, args) {
         Ok(results) => Ok(results),
         Err(error) if error.to_string().contains(DIRECT_CALL_FALLBACK_ERROR) => {
-            protected_lua_pcall_state(state, func, &args).map_err(runtime_error)
+            protected_lua_pcall_state(state, func, args).map_err(runtime_error)
         }
         Err(error) => Err(error),
     };
