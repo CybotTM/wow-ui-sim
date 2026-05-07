@@ -3,6 +3,8 @@ use super::methods_helpers::get_or_create_button_texture;
 use crate::lua_api::frame::handle::{frame_ref, get_sim_state, sync_child_to_lua};
 use mlua::{Result, Value};
 
+type TextureCoords = (f32, f32, f32, f32);
+
 pub(crate) fn add_button_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_texture_getter_methods(methods);
     add_texture_setter_methods(methods);
@@ -55,6 +57,12 @@ fn extract_texture_path(texture: &Value) -> Result<Option<String>> {
 struct ResolvedTexture {
     path: String,
     tex_coords: Option<(f32, f32, f32, f32)>,
+}
+
+struct ResolvedButtonTexturePath {
+    path: Option<String>,
+    tex_coords: Option<TextureCoords>,
+    file_data_id: Option<i64>,
 }
 
 type ButtonTextureFieldSetter =
@@ -154,6 +162,20 @@ fn apply_set_button_texture_path(
     texture: &Value,
     set_button_field: ButtonTextureFieldSetter,
 ) -> Result<()> {
+    let texture = resolve_button_texture_path(texture)?;
+    let should_show = button_texture_should_show(state, button_id, parent_key);
+
+    if button_texture_path_already_applied(state, button_id, parent_key, &texture, should_show) {
+        return Ok(());
+    }
+
+    let tex_id = get_or_create_button_texture(lua, state, button_id, parent_key);
+    apply_resolved_button_texture_path(state, button_id, tex_id, texture, set_button_field);
+    state.widgets.set_visible(tex_id, should_show);
+    Ok(())
+}
+
+fn resolve_button_texture_path(texture: &Value) -> Result<ResolvedButtonTexturePath> {
     let file_data_id = match texture {
         Value::Integer(n) => Some(*n as i64),
         Value::Number(n) => Some(*n as i64),
@@ -161,39 +183,57 @@ fn apply_set_button_texture_path(
     };
     let path = extract_texture_path(texture)?;
     let resolved = path.as_ref().map(|path| resolve_texture_string(path));
-    let resolved_path = resolved.as_ref().map(|texture| texture.path.clone());
-    let tex_coords = resolved.as_ref().and_then(|texture| texture.tex_coords);
-    let should_show = button_texture_should_show(state, button_id, parent_key);
-    if let Some(existing_tex_id) = state
+
+    Ok(ResolvedButtonTexturePath {
+        path: resolved.as_ref().map(|texture| texture.path.clone()),
+        tex_coords: resolved.as_ref().and_then(|texture| texture.tex_coords),
+        file_data_id,
+    })
+}
+
+fn button_texture_path_already_applied(
+    state: &crate::lua_api::SimState,
+    button_id: u64,
+    parent_key: &str,
+    texture: &ResolvedButtonTexturePath,
+    should_show: bool,
+) -> bool {
+    let Some(existing_tex_id) = state
         .widgets
         .get(button_id)
         .and_then(|frame| frame.children_keys.get(parent_key).copied())
-    {
-        if button_texture_path_is_noop(
-            state,
-            button_id,
-            existing_tex_id,
-            parent_key,
-            resolved_path.as_deref(),
-            tex_coords,
-            file_data_id,
-            should_show,
-        ) {
-            return Ok(());
-        }
-    }
-    let tex_id = get_or_create_button_texture(lua, state, button_id, parent_key);
+    else {
+        return false;
+    };
+
+    button_texture_path_is_noop(
+        state,
+        button_id,
+        existing_tex_id,
+        parent_key,
+        texture.path.as_deref(),
+        texture.tex_coords,
+        texture.file_data_id,
+        should_show,
+    )
+}
+
+fn apply_resolved_button_texture_path(
+    state: &mut crate::lua_api::SimState,
+    button_id: u64,
+    tex_id: u64,
+    texture: ResolvedButtonTexturePath,
+    set_button_field: ButtonTextureFieldSetter,
+) {
     if let Some(frame) = state.widgets.get_mut_visual(button_id) {
-        set_button_field(frame, resolved_path.clone(), tex_coords);
+        set_button_field(frame, texture.path.clone(), texture.tex_coords);
     }
     if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
-        tex.texture = resolved_path;
-        tex.tex_coords = tex_coords;
-        tex.atlas_tex_coords = tex_coords;
-        tex.texture_file_data_id = file_data_id;
+        tex.texture = texture.path;
+        tex.tex_coords = texture.tex_coords;
+        tex.atlas_tex_coords = texture.tex_coords;
+        tex.texture_file_data_id = texture.file_data_id;
     }
-    state.widgets.set_visible(tex_id, should_show);
-    Ok(())
 }
 
 fn button_texture_path_is_noop(
