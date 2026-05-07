@@ -233,35 +233,66 @@ fn emit_ui_panel_button_strip(
 ) {
     const BUTTON_TEX_WIDTH: f32 = 128.0;
     const BUTTON_CAP_WIDTH: f32 = 4.0;
-    const BUTTON_TEX_V_BOTTOM: f32 = 0.6875;
 
-    if let Some((left, right, top, bottom)) = tex_coords {
-        let v_bottom = if bottom > 0.9 {
-            BUTTON_TEX_V_BOTTOM
-        } else {
-            bottom
-        };
-        push_skinned_button_quad(
-            batch,
-            bounds,
-            tex_path,
-            (left, right, top, v_bottom),
-            [1.0, 1.0, 1.0, alpha],
-            blend_mode,
-        );
+    if let Some(tex_coords) = tex_coords {
+        emit_ui_panel_button_strip_crop(batch, bounds, tex_path, tex_coords, alpha, blend_mode);
         return;
     }
 
+    emit_ui_panel_button_strip_fallback(
+        batch,
+        bounds,
+        tex_path,
+        alpha,
+        blend_mode,
+        BUTTON_TEX_WIDTH,
+        BUTTON_CAP_WIDTH,
+    );
+}
+
+fn emit_ui_panel_button_strip_crop(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    tex_coords: (f32, f32, f32, f32),
+    alpha: f32,
+    blend_mode: BlendMode,
+) {
+    let (left, right, top, bottom) = tex_coords;
+    let bottom = if bottom > 0.9 {
+        PANEL_BUTTON_UP_CROP_V
+    } else {
+        bottom
+    };
+    push_skinned_button_quad(
+        batch,
+        bounds,
+        tex_path,
+        (left, right, top, bottom),
+        [1.0, 1.0, 1.0, alpha],
+        blend_mode,
+    );
+}
+
+fn emit_ui_panel_button_strip_fallback(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    alpha: f32,
+    blend_mode: BlendMode,
+    texture_width: f32,
+    cap_width: f32,
+) {
     batch.push_three_slice_h_path_blend(
         bounds,
-        BUTTON_CAP_WIDTH,
-        BUTTON_CAP_WIDTH,
+        cap_width,
+        cap_width,
         tex_path,
-        BUTTON_TEX_WIDTH,
+        texture_width,
         [1.0, 1.0, 1.0, alpha],
         blend_mode,
         0.0,
-        BUTTON_TEX_V_BOTTOM,
+        PANEL_BUTTON_UP_CROP_V,
     );
 }
 
