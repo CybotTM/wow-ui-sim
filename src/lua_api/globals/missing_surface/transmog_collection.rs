@@ -566,12 +566,16 @@ fn appearance_row(
     set_number_field(state, row, "sourceType", appearance.source_type);
     set_number_field(state, row, "itemModID", appearance.item_mod_id);
     set_number_field(state, row, "quality", 4);
-    let name = create_string(state, &format!("Item {}", appearance.item_id));
-    table_set(state, row, "name", name);
+    set_appearance_name_field(state, row, appearance.item_id);
     if let Some(ui_order) = ui_order {
         set_number_field(state, row, "uiOrder", ui_order);
     }
     row
+}
+
+fn set_appearance_name_field(state: &mut LuaState, row: Val, item_id: i32) {
+    let name = create_string(state, &format!("Item {}", item_id));
+    table_set(state, row, "name", name);
 }
 
 fn set_number_field(state: &mut LuaState, table: Val, key: &str, value: i32) {
