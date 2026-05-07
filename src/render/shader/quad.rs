@@ -3,6 +3,8 @@
 use iced::Rectangle;
 use std::sync::{Arc, Mutex};
 
+const FLOAT2: wgpu::VertexFormat = wgpu::VertexFormat::Float32x2;
+
 /// Flag bit: clip to a circle using UV coordinates (for minimap).
 pub const FLAG_CIRCLE_CLIP: u32 = 0x100;
 
@@ -47,53 +49,34 @@ impl QuadVertex {
         // Field offsets in bytes (all f32=4 bytes, i32=4, u32=4):
         // position(8) tex_coords(8) color(16) tex_index(4) flags(4)
         // local_uv(8) mask_tex_index(4) mask_tex_coords(8)
-        const F: wgpu::VertexFormat = wgpu::VertexFormat::Float32x2;
+        const ATTRIBUTES: &[wgpu::VertexAttribute] = &[
+            vertex_attribute(0, 0, FLOAT2),                         // position
+            vertex_attribute(8, 1, FLOAT2),                         // tex_coords
+            vertex_attribute(16, 2, wgpu::VertexFormat::Float32x4), // color
+            vertex_attribute(32, 3, wgpu::VertexFormat::Sint32),    // tex_index
+            vertex_attribute(36, 4, wgpu::VertexFormat::Uint32),    // flags
+            vertex_attribute(40, 5, FLOAT2),                        // local_uv
+            vertex_attribute(48, 6, wgpu::VertexFormat::Sint32),    // mask_tex_index
+            vertex_attribute(52, 7, FLOAT2),                        // mask_tex_coords
+        ];
+
         wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<QuadVertex>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: F,
-                }, // position
-                wgpu::VertexAttribute {
-                    offset: 8,
-                    shader_location: 1,
-                    format: F,
-                }, // tex_coords
-                wgpu::VertexAttribute {
-                    offset: 16,
-                    shader_location: 2,
-                    format: wgpu::VertexFormat::Float32x4,
-                }, // color
-                wgpu::VertexAttribute {
-                    offset: 32,
-                    shader_location: 3,
-                    format: wgpu::VertexFormat::Sint32,
-                }, // tex_index
-                wgpu::VertexAttribute {
-                    offset: 36,
-                    shader_location: 4,
-                    format: wgpu::VertexFormat::Uint32,
-                }, // flags
-                wgpu::VertexAttribute {
-                    offset: 40,
-                    shader_location: 5,
-                    format: F,
-                }, // local_uv
-                wgpu::VertexAttribute {
-                    offset: 48,
-                    shader_location: 6,
-                    format: wgpu::VertexFormat::Sint32,
-                }, // mask_tex_index
-                wgpu::VertexAttribute {
-                    offset: 52,
-                    shader_location: 7,
-                    format: F,
-                }, // mask_tex_coords
-            ],
+            attributes: ATTRIBUTES,
         }
+    }
+}
+
+const fn vertex_attribute(
+    offset: wgpu::BufferAddress,
+    shader_location: u32,
+    format: wgpu::VertexFormat,
+) -> wgpu::VertexAttribute {
+    wgpu::VertexAttribute {
+        offset,
+        shader_location,
+        format,
     }
 }
 
@@ -262,6 +245,14 @@ pub struct FrameQuadSnapshot {
     pub mask_texture_requests: Vec<TextureRequest>,
 }
 
+#[derive(Clone, Copy)]
+struct QuadVertexSet {
+    positions: [[f32; 2]; 4],
+    tex_coords: [[f32; 2]; 4],
+    local_uvs: [[f32; 2]; 4],
+    mask_tex_coords: [[f32; 2]; 4],
+}
+
 /// Batched quad collection for efficient GPU rendering.
 ///
 /// Collects quads during frame traversal, then uploads to GPU in one batch.
@@ -323,46 +314,15 @@ impl QuadBatch {
         blend_mode: BlendMode,
     ) {
         let base_index = self.vertices.len() as u32;
-
-        // Four corners: top-left, top-right, bottom-right, bottom-left
-        let positions = [
-            [bounds.x, bounds.y],                                // TL
-            [bounds.x + bounds.width, bounds.y],                 // TR
-            [bounds.x + bounds.width, bounds.y + bounds.height], // BR
-            [bounds.x, bounds.y + bounds.height],                // BL
-        ];
-
-        let tex_coords = [
-            [uvs.x, uvs.y],                          // TL
-            [uvs.x + uvs.width, uvs.y],              // TR
-            [uvs.x + uvs.width, uvs.y + uvs.height], // BR
-            [uvs.x, uvs.y + uvs.height],             // BL
-        ];
-
-        let flags = blend_mode as u32;
-
-        for i in 0..4 {
-            self.vertices.push(QuadVertex {
-                position: positions[i],
-                tex_coords: tex_coords[i],
-                color,
-                tex_index,
-                flags,
-                local_uv: tex_coords[i],
-                mask_tex_index: -1,
-                mask_tex_coords: [0.0, 0.0],
-            });
-        }
-
-        // Two triangles: TL-TR-BR and TL-BR-BL
-        self.indices.extend_from_slice(&[
-            base_index,
-            base_index + 1,
-            base_index + 2,
-            base_index,
-            base_index + 2,
-            base_index + 3,
-        ]);
+        let tex_coords = rect_corners(uvs);
+        let vertices = QuadVertexSet {
+            positions: rect_corners(bounds),
+            tex_coords,
+            local_uvs: tex_coords,
+            mask_tex_coords: zero_quad_uvs(),
+        };
+        self.push_quad_vertices(vertices, color, tex_index, blend_mode as u32);
+        push_quad_indices(&mut self.indices, base_index);
     }
 
     /// Push a single triangle with explicit vertex positions and UVs.
@@ -406,41 +366,42 @@ impl QuadBatch {
         sample_uv_range: Option<(f32, f32, f32, f32)>,
     ) {
         let base_index = self.vertices.len() as u32;
-        let positions = [
-            [bounds.x, bounds.y],
-            [bounds.x + bounds.width, bounds.y],
-            [bounds.x + bounds.width, bounds.y + bounds.height],
-            [bounds.x, bounds.y + bounds.height],
-        ];
-        let local_uvs = [[0.0_f32, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]];
         let (low_x, low_y, high_x, high_y) = sample_uv_range.unwrap_or((0.0, 0.0, 1.0, 1.0));
-        let sample_uvs = [
-            [low_x, low_y],
-            [high_x, low_y],
-            [high_x, high_y],
-            [low_x, high_y],
-        ];
+        let vertices = QuadVertexSet {
+            positions: rect_corners(bounds),
+            tex_coords: [[progress, 0.0]; 4],
+            local_uvs: unit_quad_uvs(),
+            mask_tex_coords: [
+                [low_x, low_y],
+                [high_x, low_y],
+                [high_x, high_y],
+                [low_x, high_y],
+            ],
+        };
         let flags = BlendMode::Alpha as u32 | FLAG_COOLDOWN_SWIPE;
+        self.push_quad_vertices(vertices, color, tex_index, flags);
+        push_quad_indices(&mut self.indices, base_index);
+    }
+
+    fn push_quad_vertices(
+        &mut self,
+        vertices: QuadVertexSet,
+        color: [f32; 4],
+        tex_index: i32,
+        flags: u32,
+    ) {
         for i in 0..4 {
             self.vertices.push(QuadVertex {
-                position: positions[i],
-                tex_coords: [progress, 0.0], // progress encoded in tex_coords.x
+                position: vertices.positions[i],
+                tex_coords: vertices.tex_coords[i],
                 color,
                 tex_index,
                 flags,
-                local_uv: local_uvs[i],
+                local_uv: vertices.local_uvs[i],
                 mask_tex_index: -1,
-                mask_tex_coords: sample_uvs[i],
+                mask_tex_coords: vertices.mask_tex_coords[i],
             });
         }
-        self.indices.extend_from_slice(&[
-            base_index,
-            base_index + 1,
-            base_index + 2,
-            base_index,
-            base_index + 2,
-            base_index + 3,
-        ]);
     }
 
     /// Push a solid-color cooldown swipe quad.
@@ -600,4 +561,32 @@ impl QuadBatch {
         self.texture_requests
             .push(TextureRequest::new(path, vertex_start, 3));
     }
+}
+
+fn rect_corners(rect: Rectangle) -> [[f32; 2]; 4] {
+    [
+        [rect.x, rect.y],
+        [rect.x + rect.width, rect.y],
+        [rect.x + rect.width, rect.y + rect.height],
+        [rect.x, rect.y + rect.height],
+    ]
+}
+
+fn zero_quad_uvs() -> [[f32; 2]; 4] {
+    [[0.0, 0.0]; 4]
+}
+
+fn unit_quad_uvs() -> [[f32; 2]; 4] {
+    [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
+}
+
+fn push_quad_indices(indices: &mut Vec<u32>, base_index: u32) {
+    indices.extend_from_slice(&[
+        base_index,
+        base_index + 1,
+        base_index + 2,
+        base_index,
+        base_index + 2,
+        base_index + 3,
+    ]);
 }
