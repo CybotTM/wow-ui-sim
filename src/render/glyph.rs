@@ -189,8 +189,19 @@ impl GlyphAtlas {
         }
 
         let (atlas_x, atlas_y) = self.reserve_glyph_slot(width, height)?;
+        let entry = self.insert_rasterized_glyph(cache_key, image, atlas_x, atlas_y);
+        Some(entry)
+    }
 
-        // Write glyph pixels into atlas
+    fn insert_rasterized_glyph(
+        &mut self,
+        cache_key: CacheKey,
+        image: &cosmic_text::SwashImage,
+        atlas_x: u32,
+        atlas_y: u32,
+    ) -> GlyphEntry {
+        let width = image.placement.width;
+        let height = image.placement.height;
         write_glyph_pixels(
             &mut self.pixels,
             atlas_x,
@@ -209,11 +220,9 @@ impl GlyphAtlas {
             image.placement.left,
             image.placement.top,
         );
-
         self.entries.insert(cache_key, entry);
         self.dirty = true;
-
-        Some(entry)
+        entry
     }
 
     fn reserve_glyph_slot(&mut self, width: u32, height: u32) -> Option<(u32, u32)> {
