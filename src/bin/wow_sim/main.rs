@@ -16,10 +16,8 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 
-#[cfg(windows)]
-const EMBEDDED_SETUP_BLIZZARD_UI_PS1: &str = include_str!("../../../scripts/setup-blizzard-ui.ps1");
-#[cfg(not(windows))]
-const EMBEDDED_SETUP_BLIZZARD_UI_SH: &str = include_str!("../../../scripts/setup-blizzard-ui.sh");
+const BLIZZARD_UI_TAG: &str = "12.0.5";
+const BLIZZARD_UI_REPO: &str = "https://github.com/Gethe/wow-ui-source.git";
 
 #[derive(Parser)]
 #[command(name = "wow-sim", about = "WoW UI Simulator")]
@@ -393,63 +391,87 @@ fn default_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
 fn recover_missing_blizzard_ui_addons_path(
     error: wow_ui_sim::Error,
 ) -> wow_ui_sim::Result<PathBuf> {
-    logging::println_elapsed("Blizzard UI source missing; running embedded setup script");
-    if let Err(setup_error) = run_embedded_blizzard_ui_setup_script() {
+    logging::println_elapsed("Blizzard UI source missing; setting up wow-ui-source");
+    if let Err(setup_error) = setup_blizzard_ui_source() {
         return Err(wow_ui_sim::Error::Other(format!(
-            "{error}\n\nEmbedded Blizzard UI setup failed: {setup_error}"
+            "{error}\n\nBlizzard UI setup failed: {setup_error}"
         )));
     }
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
 }
 
-#[cfg(windows)]
-fn run_embedded_blizzard_ui_setup_script() -> Result<(), Box<dyn std::error::Error>> {
-    let script_path = PathBuf::from("scripts").join("setup-blizzard-ui.ps1");
-    if let Some(parent) = script_path.parent() {
-        std::fs::create_dir_all(parent)?;
-    }
-    std::fs::write(&script_path, EMBEDDED_SETUP_BLIZZARD_UI_PS1)?;
+fn setup_blizzard_ui_source() -> Result<(), Box<dyn std::error::Error>> {
+    let repo_root = std::env::current_dir()?;
+    let vendor_dir = repo_root.join("vendor/wow-ui-source");
 
-    let status = std::process::Command::new("powershell")
-        .args([
-            "-ExecutionPolicy",
-            "Bypass",
-            "-File",
-            script_path
-                .to_str()
-                .ok_or("setup script path is not valid UTF-8")?,
-        ])
-        .status()?;
-
-    if status.success() {
-        Ok(())
+    if vendor_dir.is_dir() {
+        logging::println_elapsed(&format!(
+            "Updating wow-ui-source checkout to tag {BLIZZARD_UI_TAG}"
+        ));
+        run_git(
+            &vendor_dir,
+            &[
+                "fetch",
+                "--depth=1",
+                "origin",
+                &format!("refs/tags/{BLIZZARD_UI_TAG}:refs/tags/{BLIZZARD_UI_TAG}"),
+            ],
+        )
+        .or_else(|_| {
+            run_git(
+                &vendor_dir,
+                &["fetch", "--depth=1", "origin", "tag", BLIZZARD_UI_TAG],
+            )
+        })?;
+        run_git(&vendor_dir, &["checkout", BLIZZARD_UI_TAG])?;
     } else {
-        Err(format!("powershell setup exited with {status}").into())
+        logging::println_elapsed(&format!(
+            "Cloning wow-ui-source sparse checkout at tag {BLIZZARD_UI_TAG}"
+        ));
+        std::fs::create_dir_all(
+            vendor_dir
+                .parent()
+                .ok_or("vendor checkout path has no parent directory")?,
+        )?;
+        run_git(
+            &repo_root,
+            &[
+                "clone",
+                "--filter=blob:none",
+                "--no-checkout",
+                "--depth=1",
+                "--branch",
+                BLIZZARD_UI_TAG,
+                BLIZZARD_UI_REPO,
+                vendor_dir
+                    .to_str()
+                    .ok_or("vendor checkout path is not valid UTF-8")?,
+            ],
+        )?;
+        run_git(&vendor_dir, &["sparse-checkout", "init", "--cone"])?;
+        run_git(&vendor_dir, &["sparse-checkout", "set", "Interface/AddOns"])?;
+        run_git(&vendor_dir, &["checkout", BLIZZARD_UI_TAG])?;
     }
+
+    Ok(())
 }
 
-#[cfg(not(windows))]
-fn run_embedded_blizzard_ui_setup_script() -> Result<(), Box<dyn std::error::Error>> {
-    let script_path = PathBuf::from("scripts").join("setup-blizzard-ui.sh");
-    if let Some(parent) = script_path.parent() {
-        std::fs::create_dir_all(parent)?;
-    }
-    std::fs::write(&script_path, EMBEDDED_SETUP_BLIZZARD_UI_SH)?;
-
-    let status = std::process::Command::new("sh")
-        .arg(&script_path)
+fn run_git(cwd: &std::path::Path, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
+    let status = std::process::Command::new("git")
+        .args(args)
+        .current_dir(cwd)
         .status()?;
 
     if status.success() {
         Ok(())
     } else {
-        Err(format!("shell setup exited with {status}").into())
+        Err(format!("git {} failed with {status}", args.join(" ")).into())
     }
 }
 
 fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Error> {
     Box::<dyn std::error::Error>::from(format!(
-        "{error}\n\nThe release does not include Blizzard UI source. The simulator includes the setup script and tries to run it automatically. Make sure Git is installed and available on PATH, then start wow-sim again."
+        "{error}\n\nThe release does not include Blizzard UI source. The simulator tries to clone the sparse Blizzard UI source checkout automatically. Make sure Git is installed and available on PATH, then start wow-sim again."
     ))
 }
 

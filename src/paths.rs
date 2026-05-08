@@ -190,7 +190,25 @@ fn create_blizzard_ui_symlink(target: &Path, symlink_path: &Path) -> std::io::Re
 
 #[cfg(windows)]
 fn create_blizzard_ui_symlink(target: &Path, symlink_path: &Path) -> std::io::Result<()> {
-    std::os::windows::fs::symlink_dir(target, symlink_path)
+    fn cmd_path(path: &Path) -> String {
+        path.to_string_lossy()
+            .trim_start_matches(r"\\?\")
+            .replace('/', "\\")
+    }
+
+    let symlink_path = cmd_path(symlink_path);
+    let target = cmd_path(target);
+    let status = std::process::Command::new("cmd")
+        .args(["/C", "mklink", "/J", &symlink_path, &target])
+        .status()?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(std::io::Error::other(format!(
+            "mklink /J exited with {status}"
+        )))
+    }
 }
 
 fn interface_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
