@@ -1,5 +1,6 @@
 //! CASC-backed Blizzard UI source synchronization.
 
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
@@ -66,7 +67,7 @@ fn sync_blizzard_ui_entries<'a>(
             summary.present += 1;
             continue;
         }
-        match extract_fdid(fdid, &out_path)? {
+        match extract_fdid(entry, fdid, &out_path)? {
             true => summary.extracted += 1,
             false => summary.missing += 1,
         }
@@ -91,7 +92,7 @@ fn manifest_entry_fdid(entry: &str) -> Option<u32> {
 }
 
 #[cfg(feature = "casc")]
-fn extract_fdid(fdid: u32, out_path: &Path) -> crate::Result<bool> {
+fn extract_fdid(entry: &str, fdid: u32, out_path: &Path) -> crate::Result<bool> {
     if !casc_available() {
         return Err(crate::Error::Other(
             "local WoW CASC data is not available; set WOW_INSTALL_PATH or WOW_DATA_PATH, and make sure WOW_SIM_CASC is not 0".to_string(),
@@ -99,11 +100,14 @@ fn extract_fdid(fdid: u32, out_path: &Path) -> crate::Result<bool> {
     }
     remove_missing_marker(out_path);
     let resolver = asset_resolver::CascListfileResolver;
-    Ok(resolver.ensure_cached(fdid, out_path).is_some())
+    if resolver.ensure_cached(fdid, out_path).is_some() {
+        return Ok(true);
+    }
+    copy_from_installed_interface_code(entry, out_path)
 }
 
 #[cfg(not(feature = "casc"))]
-fn extract_fdid(_fdid: u32, _out_path: &Path) -> crate::Result<bool> {
+fn extract_fdid(_entry: &str, _fdid: u32, _out_path: &Path) -> crate::Result<bool> {
     Err(crate::Error::Other(
         "Blizzard UI CASC sync requires the `casc` feature".to_string(),
     ))
@@ -158,6 +162,92 @@ fn remove_missing_marker(path: &Path) {
     if missing_marker.is_file() {
         let _ = std::fs::remove_file(missing_marker);
     }
+}
+
+fn copy_from_installed_interface_code(entry: &str, out_path: &Path) -> crate::Result<bool> {
+    let Some(source_path) = installed_interface_code_path(entry) else {
+        return Ok(false);
+    };
+    let Some(parent) = out_path.parent() else {
+        return Ok(false);
+    };
+    std::fs::create_dir_all(parent).map_err(|e| {
+        crate::Error::Other(format!(
+            "could not create Blizzard UI cache directory {}: {e}",
+            parent.display()
+        ))
+    })?;
+    std::fs::copy(&source_path, out_path).map_err(|e| {
+        crate::Error::Other(format!(
+            "could not copy Blizzard UI fallback {} to {}: {e}",
+            source_path.display(),
+            out_path.display()
+        ))
+    })?;
+    remove_missing_marker(out_path);
+    Ok(true)
+}
+
+fn installed_interface_code_path(entry: &str) -> Option<PathBuf> {
+    installed_interface_code_roots()
+        .into_iter()
+        .map(|root| {
+            root.join("_retail_/BlizzardInterfaceCode/Interface/AddOns")
+                .join(entry)
+        })
+        .find(|path| path.is_file())
+}
+
+fn installed_interface_code_roots() -> Vec<PathBuf> {
+    let mut roots = Vec::new();
+    if let Some(root) = crate::paths::discover_wow_resources().install_root {
+        roots.push(root);
+    }
+    push_env_path(&mut roots, "WOW_INSTALL_PATH");
+    push_data_parent_env_path(&mut roots, "WOW_DATA_PATH");
+    push_data_parent_env_path(&mut roots, "WOW_SIM_CASC_PATH");
+    push_asset_resolver_install_root(&mut roots);
+    roots
+}
+
+fn push_env_path(roots: &mut Vec<PathBuf>, name: &str) {
+    if let Some(path) = std::env::var_os(name).map(PathBuf::from) {
+        roots.push(path);
+    }
+}
+
+fn push_data_parent_env_path(roots: &mut Vec<PathBuf>, name: &str) {
+    let Some(data_path) = std::env::var_os(name).map(PathBuf::from) else {
+        return;
+    };
+    if is_data_dir(&data_path) {
+        if let Some(parent) = data_path.parent() {
+            roots.push(parent.to_path_buf());
+            return;
+        }
+    }
+    roots.push(data_path);
+}
+
+#[cfg(feature = "casc")]
+fn push_asset_resolver_install_root(roots: &mut Vec<PathBuf>) {
+    if let Some(data_path) = asset_resolver::wow_install_path() {
+        if is_data_dir(&data_path) {
+            if let Some(parent) = data_path.parent() {
+                roots.push(parent.to_path_buf());
+                return;
+            }
+        }
+        roots.push(data_path.to_path_buf());
+    }
+}
+
+#[cfg(not(feature = "casc"))]
+fn push_asset_resolver_install_root(_roots: &mut Vec<PathBuf>) {}
+
+fn is_data_dir(path: &Path) -> bool {
+    path.file_name()
+        .is_some_and(|name| name == OsStr::new("Data"))
 }
 
 #[cfg(test)]
