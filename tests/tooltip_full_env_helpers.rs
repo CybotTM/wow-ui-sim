@@ -2,10 +2,11 @@
 // a subset of the helpers, so per-binary dead_code warnings are expected.
 #![allow(dead_code)]
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 
 #[path = "common/event_helpers.rs"]
 mod event_helpers;
@@ -81,7 +82,7 @@ pub fn setup_full_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
     env.set_screen_size(1024.0, 768.0);
 
-    let ui = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
+    let ui = default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced");
     env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
 
     load_blizzard_addons(&env, &ui);
