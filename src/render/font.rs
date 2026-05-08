@@ -23,9 +23,6 @@ pub(crate) fn line_height_for_font_size(font_size: f32) -> Option<f32> {
     Some((font_size * LINE_HEIGHT_MULTIPLIER).ceil().max(1.0))
 }
 
-/// Embedded fallback for FRIZQT__.TTF — used when CASC is unavailable or the lookup misses.
-const FRIZQT_FALLBACK: &[u8] = include_bytes!("../../assets/fonts/FRIZQT__.TTF");
-
 /// Font entry mapping a WoW path to a fontdb family name.
 #[derive(Debug, Clone)]
 struct FontEntry {
@@ -266,25 +263,9 @@ fn load_wow_font(
     db: &mut fontdb::Database,
     font_map: &mut HashMap<String, FontEntry>,
 ) {
-    let is_frizqt = font_file.filename.eq_ignore_ascii_case("FRIZQT__.TTF");
-
-    let data = match try_casc_font_bytes(font_file.filename) {
-        Some(bytes) => {
-            tracing::debug!("Loaded font {} from CASC", font_file.filename);
-            bytes
-        }
-        None => {
-            if is_frizqt {
-                tracing::debug!(
-                    "Font {} not found in CASC, using embedded fallback",
-                    font_file.filename
-                );
-                FRIZQT_FALLBACK.to_vec()
-            } else {
-                tracing::warn!("Font {} not found in CASC, skipping", font_file.filename);
-                return;
-            }
-        }
+    let Some(data) = try_casc_font_bytes(font_file.filename) else {
+        tracing::warn!("Font {} not found in CASC, skipping", font_file.filename);
+        return;
     };
 
     let family_name = fontdb_family_name(&data).unwrap_or_else(|| font_file.filename.to_string());
@@ -292,7 +273,7 @@ fn load_wow_font(
     register_font_aliases(font_file.wow_paths, &family_name, font_map);
 
     tracing::debug!(
-        "Registered font {} -> family '{}'",
+        "Registered font {} from CASC -> family '{}'",
         font_file.filename,
         family_name
     );
@@ -333,15 +314,27 @@ mod tests {
     #[test]
     fn loads_wow_fonts() {
         let fs = WowFontSystem::new();
-        // 3 font files: FRIZQT__ (2 aliases), ARIALN (2 aliases), frizqt___cyr (1 alias)
-        // TrajanPro3SemiBold removed (not in CASC)
-        // When CASC is unavailable only FRIZQT__ (embedded fallback) is guaranteed.
-        // Just verify at least the fallback loaded.
-        assert!(
-            !fs.font_map.is_empty(),
-            "font_map should have at least the FRIZQT fallback: {:?}",
-            fs.font_map.keys().collect::<Vec<_>>()
-        );
+        // 3 font files: FRIZQT__ (2 aliases), ARIALN (2 aliases), frizqt___cyr (1 alias).
+        // All come from CASC; without CASC the font_map is empty and downstream
+        // shaping uses cosmic-text's default fonts.
+        if asset_resolver_available() {
+            assert!(
+                !fs.font_map.is_empty(),
+                "font_map should have CASC fonts: {:?}",
+                fs.font_map.keys().collect::<Vec<_>>()
+            );
+        }
+    }
+
+    fn asset_resolver_available() -> bool {
+        #[cfg(feature = "casc")]
+        {
+            asset_resolver::wow_install_path().is_some()
+        }
+        #[cfg(not(feature = "casc"))]
+        {
+            false
+        }
     }
 
     #[test]
