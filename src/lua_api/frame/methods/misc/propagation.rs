@@ -11,9 +11,18 @@ use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     for (name, function) in PROPAGATION_METHODS {
-        table_set_rust_fn_static(state, mt, name, *function)?;
+        register_propagation_method(state, mt, name, *function)?;
     }
     Ok(())
+}
+
+fn register_propagation_method(
+    state: &mut LuaState,
+    mt: GcRef<Table>,
+    name: &'static str,
+    function: RustFn,
+) -> LuaResult<()> {
+    table_set_rust_fn_static(state, mt, name, function)
 }
 
 const PROPAGATION_METHODS: &[(&str, RustFn)] = &[
