@@ -354,24 +354,41 @@ impl WowUiPipeline {
         label: &'static str,
         load: wgpu::LoadOp<wgpu::Color>,
     ) {
-        let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some(label),
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: target,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load,
-                    store: wgpu::StoreOp::Store,
-                },
-                depth_slice: None,
-            })],
-            depth_stencil_attachment: None,
-            timestamp_writes: None,
-            occlusion_query_set: None,
-        });
+        let color_attachment = Self::render_pass_color_attachment(target, load);
+        let color_attachments = [Some(color_attachment)];
+        let descriptor = Self::render_pass_descriptor(label, &color_attachments);
+        let mut render_pass = encoder.begin_render_pass(&descriptor);
 
         self.configure_render_pass(&mut render_pass, clip_bounds);
         self.draw_strata_buffers(&mut render_pass);
+    }
+
+    fn render_pass_color_attachment<'a>(
+        target: &'a wgpu::TextureView,
+        load: wgpu::LoadOp<wgpu::Color>,
+    ) -> wgpu::RenderPassColorAttachment<'a> {
+        wgpu::RenderPassColorAttachment {
+            view: target,
+            resolve_target: None,
+            ops: wgpu::Operations {
+                load,
+                store: wgpu::StoreOp::Store,
+            },
+            depth_slice: None,
+        }
+    }
+
+    fn render_pass_descriptor<'a>(
+        label: &'static str,
+        color_attachments: &'a [Option<wgpu::RenderPassColorAttachment<'a>>],
+    ) -> wgpu::RenderPassDescriptor<'a> {
+        wgpu::RenderPassDescriptor {
+            label: Some(label),
+            color_attachments,
+            depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+        }
     }
 
     fn configure_render_pass(
