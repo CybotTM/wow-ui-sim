@@ -531,12 +531,20 @@ fn assert_player_casting_spell(env: &WowLuaEnv, expected_spell_name: &str) {
 fn assert_blizzard_action_button_click_casts_via_use_action(env: &WowLuaEnv) {
     env.exec("TargetUnit('party1')").expect("target party1");
 
-    // ActionButton1 should exist and have the "action" type
     let exists: bool = env.eval("return ActionButton1 ~= nil").unwrap();
     assert!(exists, "ActionButton1 should exist");
 
-    // Click ActionButton1 — goes through SecureActionButton_OnClick
-    // → SECURE_ACTIONS["action"] → UseAction(slot)
+    click_action_button1(env);
+    assert_no_action_button_click_errors(env);
+
+    let casting: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
+    assert!(
+        casting,
+        "clicking ActionButton1 should start casting Flash of Light"
+    );
+}
+
+fn click_action_button1(env: &WowLuaEnv) {
     env.exec(
         r#"
             local handler = ActionButton1:GetScript("OnClick")
@@ -546,7 +554,9 @@ fn assert_blizzard_action_button_click_casts_via_use_action(env: &WowLuaEnv) {
         "#,
     )
     .expect("click ActionButton1");
+}
 
+fn assert_no_action_button_click_errors(env: &WowLuaEnv) {
     let errors = drain_test_errors(env);
     let fatal: Vec<&String> = errors
         .iter()
@@ -560,12 +570,6 @@ fn assert_blizzard_action_button_click_casts_via_use_action(env: &WowLuaEnv) {
             .map(|s| s.as_str())
             .collect::<Vec<_>>()
             .join("\n")
-    );
-
-    let casting: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
-    assert!(
-        casting,
-        "clicking ActionButton1 should start casting Flash of Light"
     );
 }
 
