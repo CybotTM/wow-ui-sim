@@ -71,6 +71,8 @@ fn spellbook_corner_flipbook_plays_and_rewinds() {
         clear_recorded_lua_errors(&env);
 
         open_spellbook(&env);
+        clear_recorded_lua_errors(&env);
+        common::drain_string_table(&env, "__spellbook_flipbook_errors");
 
         assert_eq!(
             spellbook_corner_flipbook_frame_index(&env),

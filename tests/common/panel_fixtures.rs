@@ -12,7 +12,19 @@ use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 pub fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    blizzard_ui_candidates()
+        .into_iter()
+        .find(|path| path.exists())
+        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
+}
+
+fn blizzard_ui_candidates() -> [PathBuf; 3] {
+    let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    [
+        project_root.join("Interface/BlizzardUI"),
+        project_root.join("../reference-addons.new/wow-ui-source/Interface/AddOns"),
+        project_root.join("../Interface/AddOns"),
+    ]
 }
 
 /// Blizzard addons needed for the panel system (dependency order).
@@ -112,6 +124,7 @@ pub fn load_panel_addons(env: &WowLuaEnv) {
 pub fn install_lua_harness_stubs(env: &WowLuaEnv) {
     install_uiparent_load_addon_seam(env);
     install_action_button_util_stub(env);
+    install_multi_action_bar_grid_stubs(env);
 }
 
 /// Wrap `UIParentLoadAddOn` so the LoD panel tests don't drag in
@@ -226,6 +239,22 @@ pub fn install_action_button_util_stub(env: &WowLuaEnv) {
         "#,
     )
     .expect("failed to install ActionButtonUtil harness stub");
+}
+
+fn install_multi_action_bar_grid_stubs(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        if type(MultiActionBar_ShowAllGrids) ~= "function" then
+            function MultiActionBar_ShowAllGrids()
+            end
+        end
+        if type(MultiActionBar_HideAllGrids) ~= "function" then
+            function MultiActionBar_HideAllGrids()
+            end
+        end
+        "#,
+    )
+    .expect("failed to install multi action bar grid harness stubs");
 }
 
 pub fn fire_startup_events(env: &WowLuaEnv) {
