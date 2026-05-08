@@ -306,11 +306,15 @@ fn use_action_instant_spell_succeeds() {
 // ── Full Blizzard UI: SecureTemplates click chain ────────────────────
 
 fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
-    // Clear any existing target
     env.exec("ClearTarget()").expect("ClearTarget");
+    create_secure_unit_button(env);
+    assert_secure_unit_button_attributes(env);
+    click_secure_unit_button(env);
+    assert_no_secure_unit_button_click_errors(env);
+    assert_target_name(env, "Thrynn", "target should be Thrynn (party1)");
+}
 
-    // Create a button using SecureUnitButtonTemplate (like party frames do)
-    // and simulate clicking it
+fn create_secure_unit_button(env: &WowLuaEnv) {
     {
         let mut state = env.state().borrow_mut();
         state.party_group_active = true;
@@ -330,8 +334,9 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
         setup_errors.is_empty(),
         "SecureUnitButton setup errors: {setup_errors:?}"
     );
+}
 
-    // Verify the button has correct attributes
+fn assert_secure_unit_button_attributes(env: &WowLuaEnv) {
     let unit_attr: String = env
         .eval(r#"return TestSecureUnitBtn:GetAttribute("unit") or "none""#)
         .unwrap();
@@ -341,10 +346,9 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
         .eval(r#"return TestSecureUnitBtn:GetAttribute("*type1") or "none""#)
         .unwrap();
     assert_eq!(type_attr, "target", "*type1 attribute should be target");
+}
 
-    // Click the button via Lua — this calls SecureUnitButton_OnClick
-    // which goes through OnActionButtonClick → SECURE_ACTIONS["target"]
-    // → TargetUnit("party1")
+fn click_secure_unit_button(env: &WowLuaEnv) {
     env.exec(
         r#"
             local handler = TestSecureUnitBtn:GetScript("OnClick")
@@ -354,7 +358,9 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
         "#,
     )
     .expect("click SecureUnitButton");
+}
 
+fn assert_no_secure_unit_button_click_errors(env: &WowLuaEnv) {
     let click_errors = drain_test_errors(env);
     let fatal_errors: Vec<&String> = click_errors
         .iter()
@@ -369,13 +375,14 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
             .collect::<Vec<_>>()
             .join("\n")
     );
+}
 
-    // Verify the target was set
+fn assert_target_name(env: &WowLuaEnv, expected: &str, message: &str) {
     let has_target: bool = env.eval("return UnitExists('target')").unwrap();
     assert!(has_target, "clicking SecureUnitButton should set a target");
 
     let target_name: String = env.eval("return UnitName('target')").unwrap();
-    assert_eq!(target_name, "Thrynn", "target should be Thrynn (party1)");
+    assert_eq!(target_name, expected, "{message}");
 }
 
 fn assert_blizzard_player_frame_click_targets_player(env: &WowLuaEnv) {
