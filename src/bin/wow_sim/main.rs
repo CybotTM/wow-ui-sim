@@ -18,6 +18,8 @@ use wow_ui_sim::screen::ScreenKind;
 
 #[cfg(windows)]
 const EMBEDDED_SETUP_BLIZZARD_UI_PS1: &str = include_str!("../../../scripts/setup-blizzard-ui.ps1");
+#[cfg(not(windows))]
+const EMBEDDED_SETUP_BLIZZARD_UI_SH: &str = include_str!("../../../scripts/setup-blizzard-ui.sh");
 
 #[derive(Parser)]
 #[command(name = "wow-sim", about = "WoW UI Simulator")]
@@ -388,12 +390,11 @@ fn default_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
     }
 }
 
-#[cfg(windows)]
 fn recover_missing_blizzard_ui_addons_path(
     error: wow_ui_sim::Error,
 ) -> wow_ui_sim::Result<PathBuf> {
-    logging::println_elapsed("Blizzard UI source missing; running embedded setup-blizzard-ui.ps1");
-    if let Err(setup_error) = run_embedded_blizzard_ui_setup() {
+    logging::println_elapsed("Blizzard UI source missing; running embedded setup script");
+    if let Err(setup_error) = run_embedded_blizzard_ui_setup_script() {
         return Err(wow_ui_sim::Error::Other(format!(
             "{error}\n\nEmbedded Blizzard UI setup failed: {setup_error}"
         )));
@@ -401,15 +402,8 @@ fn recover_missing_blizzard_ui_addons_path(
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
 }
 
-#[cfg(not(windows))]
-fn recover_missing_blizzard_ui_addons_path(
-    error: wow_ui_sim::Error,
-) -> wow_ui_sim::Result<PathBuf> {
-    Err(error)
-}
-
 #[cfg(windows)]
-fn run_embedded_blizzard_ui_setup() -> Result<(), Box<dyn std::error::Error>> {
+fn run_embedded_blizzard_ui_setup_script() -> Result<(), Box<dyn std::error::Error>> {
     let script_path = PathBuf::from("scripts").join("setup-blizzard-ui.ps1");
     if let Some(parent) = script_path.parent() {
         std::fs::create_dir_all(parent)?;
@@ -434,9 +428,28 @@ fn run_embedded_blizzard_ui_setup() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
+#[cfg(not(windows))]
+fn run_embedded_blizzard_ui_setup_script() -> Result<(), Box<dyn std::error::Error>> {
+    let script_path = PathBuf::from("scripts").join("setup-blizzard-ui.sh");
+    if let Some(parent) = script_path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(&script_path, EMBEDDED_SETUP_BLIZZARD_UI_SH)?;
+
+    let status = std::process::Command::new("sh")
+        .arg(&script_path)
+        .status()?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("shell setup exited with {status}").into())
+    }
+}
+
 fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Error> {
     Box::<dyn std::error::Error>::from(format!(
-        "{error}\n\nThe release zip does not include Blizzard UI source. On Windows, wow-sim.exe includes the setup script and tries to run it automatically. Make sure Git is installed and available on PATH, then start wow-sim.exe again."
+        "{error}\n\nThe release does not include Blizzard UI source. The simulator includes the setup script and tries to run it automatically. Make sure Git is installed and available on PATH, then start wow-sim again."
     ))
 }
 
