@@ -4,6 +4,7 @@ use crate::lua_api::methods::{
     table_get, table_set,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
+use rilua::vm::closure::RustFn;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -208,103 +209,68 @@ fn colorselect_clear_color_wheel_texture(state: &mut LuaState) -> LuaResult<u32>
     set_colorselect_texture(state, id, "ColorWheelTexture", Val::Nil)
 }
 
+const COLORSELECT_COLOR_METHODS: &[(&str, RustFn)] = &[
+    ("SetColorRGB", colorselect_set_color_rgb),
+    ("GetColorRGB", colorselect_get_color_rgb),
+    ("SetColorHSV", colorselect_set_color_hsv),
+    ("GetColorHSV", colorselect_get_color_hsv),
+    ("SetColorAlpha", colorselect_set_color_alpha),
+    ("GetColorAlpha", colorselect_get_color_alpha),
+];
+
+const COLORSELECT_TEXTURE_METHODS: &[(&str, RustFn)] = &[
+    ("SetColorAlphaTexture", colorselect_set_color_alpha_texture),
+    ("GetColorAlphaTexture", colorselect_get_color_alpha_texture),
+    (
+        "SetColorAlphaThumbTexture",
+        colorselect_set_color_alpha_thumb_texture,
+    ),
+    (
+        "GetColorAlphaThumbTexture",
+        colorselect_get_color_alpha_thumb_texture,
+    ),
+    ("SetColorValueTexture", colorselect_set_color_value_texture),
+    ("GetColorValueTexture", colorselect_get_color_value_texture),
+    (
+        "SetColorValueThumbTexture",
+        colorselect_set_color_value_thumb_texture,
+    ),
+    (
+        "GetColorValueThumbTexture",
+        colorselect_get_color_value_thumb_texture,
+    ),
+    ("SetColorWheelTexture", colorselect_set_color_wheel_texture),
+    ("GetColorWheelTexture", colorselect_get_color_wheel_texture),
+    (
+        "SetColorWheelThumbTexture",
+        colorselect_set_color_wheel_thumb_texture,
+    ),
+    (
+        "GetColorWheelThumbTexture",
+        colorselect_get_color_wheel_thumb_texture,
+    ),
+    (
+        "ClearColorWheelTexture",
+        colorselect_clear_color_wheel_texture,
+    ),
+];
+
 pub(in crate::lua_api::frame::methods::widgets) fn register_colorselect(
     state: &mut LuaState,
     metatable: GcRef<Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn_static(state, metatable, "SetColorRGB", colorselect_set_color_rgb)?;
-    table_set_rust_fn_static(state, metatable, "GetColorRGB", colorselect_get_color_rgb)?;
-    table_set_rust_fn_static(state, metatable, "SetColorHSV", colorselect_set_color_hsv)?;
-    table_set_rust_fn_static(state, metatable, "GetColorHSV", colorselect_get_color_hsv)?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "SetColorAlpha",
-        colorselect_set_color_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "GetColorAlpha",
-        colorselect_get_color_alpha,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "SetColorAlphaTexture",
-        colorselect_set_color_alpha_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "GetColorAlphaTexture",
-        colorselect_get_color_alpha_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "SetColorAlphaThumbTexture",
-        colorselect_set_color_alpha_thumb_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "GetColorAlphaThumbTexture",
-        colorselect_get_color_alpha_thumb_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "SetColorValueTexture",
-        colorselect_set_color_value_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "GetColorValueTexture",
-        colorselect_get_color_value_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "SetColorValueThumbTexture",
-        colorselect_set_color_value_thumb_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "GetColorValueThumbTexture",
-        colorselect_get_color_value_thumb_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "SetColorWheelTexture",
-        colorselect_set_color_wheel_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "GetColorWheelTexture",
-        colorselect_get_color_wheel_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "SetColorWheelThumbTexture",
-        colorselect_set_color_wheel_thumb_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "GetColorWheelThumbTexture",
-        colorselect_get_color_wheel_thumb_texture,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        metatable,
-        "ClearColorWheelTexture",
-        colorselect_clear_color_wheel_texture,
-    )?;
+    register_colorselect_methods(state, metatable, COLORSELECT_COLOR_METHODS)?;
+    register_colorselect_methods(state, metatable, COLORSELECT_TEXTURE_METHODS)?;
+    Ok(())
+}
+
+fn register_colorselect_methods(
+    state: &mut LuaState,
+    metatable: GcRef<Table>,
+    methods: &[(&'static str, RustFn)],
+) -> LuaResult<()> {
+    for &(name, function) in methods {
+        table_set_rust_fn_static(state, metatable, name, function)?;
+    }
     Ok(())
 }
