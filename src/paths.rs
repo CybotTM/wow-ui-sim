@@ -65,7 +65,32 @@ pub fn default_addons_path() -> PathBuf {
 /// Prefer the repo symlink at `Interface/BlizzardUI`, but fall back to the
 /// vendored addon tree when the symlink is missing.
 pub fn default_blizzard_ui_addons_path() -> crate::Result<PathBuf> {
-    resolve_blizzard_ui_addons_path(Path::new(env!("CARGO_MANIFEST_DIR")))
+    if let Some(path) = env_path("WOW_SIM_BLIZZARD_UI_PATH") {
+        if path.is_dir() {
+            return Ok(path);
+        }
+        return Err(crate::Error::Other(format!(
+            "WOW_SIM_BLIZZARD_UI_PATH does not exist or is not a directory: {}",
+            path.display()
+        )));
+    }
+
+    let mut first_error = None;
+    for root in runtime_roots() {
+        match resolve_blizzard_ui_addons_path(&root) {
+            Ok(path) => return Ok(path),
+            Err(err) => {
+                if first_error.is_none() {
+                    first_error = Some(err);
+                }
+            }
+        }
+    }
+    Err(first_error.unwrap_or_else(|| {
+        crate::Error::Other(
+            "missing Blizzard UI addon tree; run ./scripts/setup-blizzard-ui.sh from the release or repo root.".to_string(),
+        )
+    }))
 }
 
 pub fn default_wtf_config() -> Option<WtfConfig> {
@@ -239,6 +264,37 @@ fn wow_install_roots() -> Vec<PathBuf> {
     }
 
     roots
+}
+
+fn runtime_roots() -> Vec<PathBuf> {
+    let mut roots = Vec::new();
+    if let Ok(cwd) = std::env::current_dir() {
+        roots.push(cwd);
+    }
+    if let Ok(exe) = std::env::current_exe()
+        && let Some(parent) = exe.parent()
+    {
+        roots.push(parent.to_path_buf());
+    }
+    if should_use_manifest_runtime_root() {
+        roots.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")));
+    }
+    roots
+}
+
+fn should_use_manifest_runtime_root() -> bool {
+    if cfg!(debug_assertions) {
+        return true;
+    }
+
+    let manifest_target = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("target");
+    let Ok(exe) = std::env::current_exe().and_then(|path| path.canonicalize()) else {
+        return false;
+    };
+    let Ok(manifest_target) = manifest_target.canonicalize() else {
+        return false;
+    };
+    exe.starts_with(manifest_target)
 }
 
 fn discover_wtf_identity(wtf_path: &std::path::Path) -> Option<(String, String, String)> {

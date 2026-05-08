@@ -1,7 +1,9 @@
 mod addon_loading;
+mod cache_texture;
 #[cfg(feature = "gui")]
 mod gui_commands;
 
+use cache_texture::run_cache_texture;
 use clap::{Parser, Subcommand};
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -13,6 +15,9 @@ use wow_ui_sim::logging;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
+
+#[cfg(windows)]
+const EMBEDDED_SETUP_BLIZZARD_UI_PS1: &str = include_str!("../../../scripts/setup-blizzard-ui.ps1");
 
 #[derive(Parser)]
 #[command(name = "wow-sim", about = "WoW UI Simulator")]
@@ -161,9 +166,23 @@ impl Args {
     }
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
     wow_ui_sim::stack::ensure_large_stack();
-    run_main()
+    set_cwd_to_exe_dir_for_gui_launch();
+    if let Err(error) = run_main() {
+        report_fatal_error(error.as_ref());
+        std::process::exit(1);
+    }
+}
+
+fn set_cwd_to_exe_dir_for_gui_launch() {
+    let Ok(exe) = std::env::current_exe() else {
+        return;
+    };
+    let Some(parent) = exe.parent() else {
+        return;
+    };
+    let _ = std::env::set_current_dir(parent);
 }
 
 fn run_main() -> Result<(), Box<dyn std::error::Error>> {
@@ -173,7 +192,7 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let screen = args.effective_screen();
     let saved_stdout = redirect_if_quiet(&args);
-    let (env, font_system, saved_vars) = init_and_load(&args, screen);
+    let (env, font_system, saved_vars) = init_and_load(&args, screen)?;
 
     let dispatch = CommandDispatch {
         command: args.command,
@@ -206,14 +225,17 @@ fn redirect_if_quiet(args: &Args) -> Option<i32> {
 fn init_and_load(
     args: &Args,
     screen: ScreenKind,
-) -> (
-    WowLuaEnv,
-    Rc<RefCell<WowFontSystem>>,
-    Option<SavedVariablesManager>,
-) {
+) -> Result<
+    (
+        WowLuaEnv,
+        Rc<RefCell<WowFontSystem>>,
+        Option<SavedVariablesManager>,
+    ),
+    Box<dyn std::error::Error>,
+> {
     let env = WowLuaEnv::new().expect("failed to create Lua env");
     let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
-    init_environment(args, &env, &font_system);
+    init_environment(args, &env, &font_system)?;
     env.set_screen_mode(screen);
 
     // Pause GC across addon loading — addons allocate monotonically
@@ -233,7 +255,7 @@ fn init_and_load(
     env.sync_addon_names_to_lua();
     apply_post_load_workarounds(&env);
     restart_gc_after_bootstrap(&env);
-    (env, font_system, saved_vars)
+    Ok((env, font_system, saved_vars))
 }
 
 fn apply_post_load_workarounds(env: &WowLuaEnv) {
@@ -332,7 +354,11 @@ fn apply_resource_limits() {
     // unconstrained on other platforms.
 }
 
-fn init_environment(args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>) {
+fn init_environment(
+    args: &Args,
+    env: &WowLuaEnv,
+    font_system: &Rc<RefCell<WowFontSystem>>,
+) -> Result<(), Box<dyn std::error::Error>> {
     logging::init_process_start_time(env.state().borrow().start_time);
     apply_resource_limits();
     tracing_subscriber::fmt()
@@ -343,8 +369,7 @@ fn init_environment(args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFo
     {
         let mut state = env.state().borrow_mut();
         let mut addon_base_paths = vec![
-            wow_ui_sim::paths::default_blizzard_ui_addons_path()
-                .expect("missing Blizzard UI addon tree"),
+            default_blizzard_ui_addons_path_with_setup().map_err(startup_blizzard_ui_help)?,
             PathBuf::from("./Interface/AddOns"),
         ];
         if args.is_test_command() {
@@ -353,6 +378,92 @@ fn init_environment(args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFo
         state.addon_base_paths = addon_base_paths;
     }
     wow_ui_sim::xml::register_intrinsic_templates();
+    Ok(())
+}
+
+fn default_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
+    match wow_ui_sim::paths::default_blizzard_ui_addons_path() {
+        Ok(path) => Ok(path),
+        Err(error) => recover_missing_blizzard_ui_addons_path(error),
+    }
+}
+
+#[cfg(windows)]
+fn recover_missing_blizzard_ui_addons_path(
+    error: wow_ui_sim::Error,
+) -> wow_ui_sim::Result<PathBuf> {
+    logging::println_elapsed("Blizzard UI source missing; running embedded setup-blizzard-ui.ps1");
+    if let Err(setup_error) = run_embedded_blizzard_ui_setup() {
+        return Err(wow_ui_sim::Error::Other(format!(
+            "{error}\n\nEmbedded Blizzard UI setup failed: {setup_error}"
+        )));
+    }
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+}
+
+#[cfg(not(windows))]
+fn recover_missing_blizzard_ui_addons_path(
+    error: wow_ui_sim::Error,
+) -> wow_ui_sim::Result<PathBuf> {
+    Err(error)
+}
+
+#[cfg(windows)]
+fn run_embedded_blizzard_ui_setup() -> Result<(), Box<dyn std::error::Error>> {
+    let script_path = PathBuf::from("scripts").join("setup-blizzard-ui.ps1");
+    if let Some(parent) = script_path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(&script_path, EMBEDDED_SETUP_BLIZZARD_UI_PS1)?;
+
+    let status = std::process::Command::new("powershell")
+        .args([
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            script_path
+                .to_str()
+                .ok_or("setup script path is not valid UTF-8")?,
+        ])
+        .status()?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("powershell setup exited with {status}").into())
+    }
+}
+
+fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Error> {
+    Box::<dyn std::error::Error>::from(format!(
+        "{error}\n\nThe release zip does not include Blizzard UI source. On Windows, wow-sim.exe includes the setup script and tries to run it automatically. Make sure Git is installed and available on PATH, then start wow-sim.exe again."
+    ))
+}
+
+fn report_fatal_error(error: &dyn std::error::Error) {
+    eprintln!("{error}");
+    #[cfg(windows)]
+    show_windows_error_message(&error.to_string());
+}
+
+#[cfg(windows)]
+fn show_windows_error_message(message: &str) {
+    use winapi::um::winuser::{MB_ICONERROR, MB_OK, MessageBoxW};
+
+    fn wide(value: &str) -> Vec<u16> {
+        value.encode_utf16().chain(std::iter::once(0)).collect()
+    }
+
+    let title = wide("wow-ui-sim startup error");
+    let body = wide(message);
+    unsafe {
+        MessageBoxW(
+            std::ptr::null_mut(),
+            body.as_ptr(),
+            title.as_ptr(),
+            MB_OK | MB_ICONERROR,
+        );
+    }
 }
 
 use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_startup};
@@ -553,92 +664,6 @@ fn run_dump_tree(env: &WowLuaEnv, command: DumpTreeCommand<'_>) {
         command.width as f32,
         command.height as f32,
     );
-}
-
-fn run_cache_texture(path: &str, force: bool) -> Result<(), Box<dyn std::error::Error>> {
-    use wow_ui_sim::texture::TextureManager;
-
-    let normalized = wow_ui_sim::texture::normalize_wow_path(path);
-    println!("path:       {path}");
-    println!("normalized: {normalized}");
-
-    if force {
-        let removed = remove_missing_sentinels(&normalized);
-        if !removed.is_empty() {
-            for marker in &removed {
-                println!("removed:    {}", marker.display());
-            }
-        }
-    }
-
-    let mut mgr = TextureManager::new();
-    let load_start = Instant::now();
-    let result = mgr.load(path);
-    let elapsed = load_start.elapsed();
-
-    match result {
-        Some(td) => {
-            let (w, h) = (td.width, td.height);
-            println!("status:     OK");
-            println!("dimensions: {w}x{h}");
-            println!("elapsed:    {elapsed:.2?}");
-            Ok(())
-        }
-        None => {
-            println!("status:     MISS");
-            println!("elapsed:    {elapsed:.2?}");
-            let markers = list_missing_sentinels(&normalized);
-            for marker in &markers {
-                println!("sentinel:   {}", marker.display());
-            }
-            std::process::exit(1);
-        }
-    }
-}
-
-fn casc_extract_root() -> Option<PathBuf> {
-    dirs::cache_dir().map(|d| d.join("wow-ui-sim/casc-extract"))
-}
-
-fn candidate_extract_paths(normalized: &str) -> Vec<PathBuf> {
-    let Some(root) = casc_extract_root() else {
-        return Vec::new();
-    };
-    let extensions = ["blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF"];
-    let mut paths = Vec::with_capacity(extensions.len() + 1);
-    paths.push(root.join(normalized));
-    for ext in extensions {
-        paths.push(root.join(format!("{normalized}.{ext}")));
-    }
-    paths
-}
-
-fn remove_missing_sentinels(normalized: &str) -> Vec<PathBuf> {
-    let mut removed = Vec::new();
-    for path in candidate_extract_paths(normalized) {
-        let Some(file_name) = path.file_name().and_then(|n| n.to_str()) else {
-            continue;
-        };
-        let marker = path.with_file_name(format!("{file_name}.missing"));
-        if marker.exists() && std::fs::remove_file(&marker).is_ok() {
-            removed.push(marker);
-        }
-    }
-    removed
-}
-
-fn list_missing_sentinels(normalized: &str) -> Vec<PathBuf> {
-    let mut markers = Vec::new();
-    for path in candidate_extract_paths(normalized) {
-        let Some(file_name) = path.file_name().and_then(|n| n.to_str()) else {
-            continue;
-        };
-        let marker = path.with_file_name(format!("{file_name}.missing"));
-        if marker.exists() {
-            markers.push(marker);
-        }
-    }
-    markers
 }
 
 #[cfg(test)]
