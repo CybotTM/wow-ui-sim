@@ -360,37 +360,23 @@ fn push_cursor_info(state: &mut LuaState, cursor: CursorInfo) -> LuaResult<u32> 
     match cursor {
         CursorInfo::Action { spell_id, .. }
         | CursorInfo::Spell { spell_id }
-        | CursorInfo::PetAction { spell_id, .. } => {
-            let kind = create_string(state, "spell");
-            state.push(kind);
-            state.push(Val::Num(spell_id as f64));
-            Ok(2)
-        }
-        CursorInfo::Talent { talent_id, .. } => {
-            let kind = create_string(state, "talent");
-            state.push(kind);
-            state.push(Val::Num(talent_id as f64));
-            Ok(2)
-        }
-        CursorInfo::Macro { macro_index } => {
-            let kind = create_string(state, "macro");
-            state.push(kind);
-            state.push(Val::Num(macro_index as f64));
-            Ok(2)
-        }
-        CursorInfo::Item { item_id, .. } => {
-            let kind = create_string(state, "item");
-            state.push(kind);
-            state.push(Val::Num(item_id as f64));
-            Ok(2)
-        }
-        CursorInfo::Money { copper } => {
-            let kind = create_string(state, "money");
-            state.push(kind);
-            state.push(Val::Num(copper as f64));
-            Ok(2)
-        }
+        | CursorInfo::PetAction { spell_id, .. } => push_cursor_kind_id(state, "spell", spell_id),
+        CursorInfo::Talent { talent_id, .. } => push_cursor_kind_id(state, "talent", talent_id),
+        CursorInfo::Macro { macro_index } => push_cursor_kind_id(state, "macro", macro_index),
+        CursorInfo::Item { item_id, .. } => push_cursor_kind_id(state, "item", item_id),
+        CursorInfo::Money { copper } => push_cursor_kind_number(state, "money", copper as f64),
     }
+}
+
+fn push_cursor_kind_id(state: &mut LuaState, kind: &str, id: u32) -> LuaResult<u32> {
+    push_cursor_kind_number(state, kind, id as f64)
+}
+
+fn push_cursor_kind_number(state: &mut LuaState, kind: &str, number: f64) -> LuaResult<u32> {
+    let kind = create_string(state, kind);
+    state.push(kind);
+    state.push(Val::Num(number));
+    Ok(2)
 }
 
 /// `PlaceAction(slot)` — if the cursor is carrying a spell/action, write
