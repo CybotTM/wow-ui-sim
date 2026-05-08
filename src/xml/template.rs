@@ -404,7 +404,8 @@ pub fn clear_templates() {
 // Texture template registry (virtual textures with mixin/inherits)
 // ---------------------------------------------------------------------------
 
-use super::types_elements::{AnimationGroupXml, FontStringXml, TextureXml};
+use super::types_animation::AnimationGroupXml;
+use super::types_elements::{FontStringXml, TextureXml};
 
 fn with_font_string_template_registry<R>(
     f: impl FnOnce(&HashMap<String, FontStringXml>) -> R,

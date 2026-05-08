@@ -3,6 +3,7 @@
 mod parse;
 mod template;
 mod types;
+mod types_animation;
 mod types_elements;
 mod types_fonts;
 mod types_frame_data;
@@ -18,10 +19,10 @@ pub use template::{
     register_template, register_texture_template, resolve_texture_inheritance,
 };
 pub use types::{FrameChildElement, FrameXml, ScopedModifierXml, UiXml, XmlElement};
+pub use types_animation::{AnimationElement, AnimationGroupXml, AnimationXml};
 pub use types_elements::{
-    ActorXml, ActorsXml, AnimationElement, AnimationGroupXml, AnimationXml, FontStringXml,
-    FrameElement, FramesXml, IncludeXml, LayerElement, LayerXml, LayersXml, ScriptXml, TextureXml,
-    widget_type_for_tag,
+    ActorXml, ActorsXml, FontStringXml, FrameElement, FramesXml, IncludeXml, LayerElement,
+    LayerXml, LayersXml, ScriptXml, TextureXml, widget_type_for_tag,
 };
 pub use types_fonts::{FontFamilyMemberXml, FontFamilyXml, FontXml};
 pub use types_support::{

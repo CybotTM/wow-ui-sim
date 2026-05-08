@@ -2,9 +2,9 @@
 
 use serde::Deserialize;
 
+use super::types_animation::{AnimationGroupXml, AnimationXml};
 use super::types_elements::{
-    ActorXml, ActorsXml, AnimationGroupXml, AnimationXml, FontStringXml, FramesXml, IncludeXml,
-    LayersXml, ScriptXml, TextureXml,
+    ActorXml, ActorsXml, FontStringXml, FramesXml, IncludeXml, LayersXml, ScriptXml, TextureXml,
 };
 use super::types_fonts::{FontFamilyXml, FontXml};
 use super::types_support::{
