@@ -8,7 +8,7 @@ The simulator reads textures and fonts from a live WoW install via three stacked
 |---|---|---|---|---|
 | FDID resolution | `fdid → (content_key, encoding_key)` | `<shared>/data/casc/resolution.sqlite` (~85 MB, ~1.87 M rows) | `casc_refresh` in the game-engine repo, validated against `root.bin`/`encoding.bin` mtimes | Persistent across processes; rebuilt when WoW patches |
 | BLP byte cache | Extracted BLP files keyed by listfile path | `~/.cache/wow-ui-sim/casc-extract/<Interface/...>.blp` | `asset_resolver::ensure_cached` on first miss | Persistent across processes; never invalidated automatically |
-| Blizzard UI source cache | Extracted Blizzard Lua/XML/TOC source files | `~/.cache/wow-ui-sim/blizzard-ui/<Blizzard_...>` | `wow-cli casc sync-blizzard-ui` or GUI startup when the checkout is missing | Persistent across processes; guarded by `.wow-ui-sim-blizzard-ui-complete` |
+| Blizzard UI source cache | Extracted Blizzard Lua/XML/TOC source files | `~/.cache/wow-ui-sim/blizzard-ui/<Blizzard_...>` | `wow-cli casc sync-blizzard-ui` or GUI startup when the cache is missing | Persistent across processes; guarded by `.wow-ui-sim-blizzard-ui-complete` |
 | In-memory texture cache | `TextureData` (decoded RGBA) keyed by normalised wow path | `TextureManager::cache` | `TextureManager::load` on first hit | Per-process |
 
 `<shared>` resolves to `$GAME_ENGINE_SHARED_ROOT`, which `src/texture/resolve.rs::casc_enabled` auto-sets to `~/Projects/world-of-osso/game-engine` if that directory exists. The two projects share **only** the resolution sqlite (cheap to share, expensive to build); they do not share extracted BLP bytes.
@@ -71,7 +71,7 @@ The BLP byte cache is roughly **10× faster** than re-extracting steady-state, a
 
 `data/blizzard-ui-files.txt` is a manifest of Blizzard UI source files that are present in the simulator's limited listfile. `wow-cli casc sync-blizzard-ui` resolves each manifest entry as `Interface/AddOns/<entry>`, extracts it from local CASC into `~/.cache/wow-ui-sim/blizzard-ui`, and preserves Blizzard's original addon/file casing on disk.
 
-The GUI startup path still prefers an explicit `WOW_SIM_BLIZZARD_UI_PATH`, then `Interface/BlizzardUI`, then `vendor/wow-ui-source/Interface/AddOns`. If those are missing, it syncs the manifest from CASC and uses the cache only after the completion marker exists. This makes the GitHub checkout optional for local GUI use while keeping partial syncs from being treated as a valid Blizzard UI tree.
+The GUI startup path uses the cache only. If the completion marker is missing, startup syncs the manifest from CASC and rechecks the cache. The old `Interface/BlizzardUI` symlink and `vendor/wow-ui-source` checkout are not part of runtime discovery.
 
 ## Failure modes
 

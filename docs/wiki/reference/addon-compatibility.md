@@ -1,6 +1,6 @@
 # Addon Compatibility
 
-The simulator loads the full Blizzard UI tree (`Interface/BlizzardUI/`, a sparse checkout of `Gethe/wow-ui-source` pinned to a tag) plus a small bundled set of third-party addons under `Interface/AddOns/`. CI and Wowless lanes can also mount external addons at test time.
+The simulator loads the full Blizzard UI tree from `~/.cache/wow-ui-sim/blizzard-ui`, populated by `wow-cli casc sync-blizzard-ui` from the committed manifest, plus a small bundled set of third-party addons under `Interface/AddOns/`. CI and Wowless lanes can also mount external addons at test time.
 
 ## Tested Addons
 
@@ -43,7 +43,7 @@ The Docker image is headless-only (~220MB): no audio, no textures, no GPU driver
 
 ## Load Order
 
-The simulator follows WoW's addon load order. The Blizzard tree under `Interface/BlizzardUI/` provides the full chain — `Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_SharedXMLGame`, `Blizzard_FrameXMLBase`, `Blizzard_FrameXMLUtil`, `Blizzard_FrameXML`, then per-feature `Blizzard_*` addons. User and third-party addons under `Interface/AddOns/` load on top via TOC files. Per-addon SavedVariables are applied after each addon's Lua executes.
+The simulator follows WoW's addon load order. The cached Blizzard tree provides the full chain — `Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_SharedXMLGame`, `Blizzard_FrameXMLBase`, `Blizzard_FrameXMLUtil`, `Blizzard_FrameXML`, then per-feature `Blizzard_*` addons. User and third-party addons under `Interface/AddOns/` load on top via TOC files. Per-addon SavedVariables are applied after each addon's Lua executes.
 
 ## Test Lanes
 

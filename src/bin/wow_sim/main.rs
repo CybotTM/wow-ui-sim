@@ -399,7 +399,7 @@ fn recover_missing_blizzard_ui_addons_path(
 
 fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Error> {
     Box::<dyn std::error::Error>::from(format!(
-        "{error}\n\nThe release does not include Blizzard UI source. The simulator tries to sync Blizzard UI from the local WoW CASC install automatically. Make sure WoW is installed or set WOW_INSTALL_PATH/WOW_DATA_PATH, or run `wow-cli casc sync-blizzard-ui` after configuring CASC."
+        "{error}\n\nThe simulator stores Blizzard UI source in ~/.cache/wow-ui-sim/blizzard-ui and tries to sync it from local WoW CASC automatically. Make sure WoW is installed or set WOW_INSTALL_PATH/WOW_DATA_PATH, or run `wow-cli casc sync-blizzard-ui` after configuring CASC."
     ))
 }
 

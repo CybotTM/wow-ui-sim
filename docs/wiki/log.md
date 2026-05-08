@@ -860,6 +860,10 @@ Created `investigations/micro-menu-atlas-revert.md` to document the micro-menu h
 
 Updated `investigations/adventure-guide-layout.md` with the follow-up Adventure Guide portrait bug: `Texture:SetMask` was still a no-op, so card icons did not clip to the gold portrait rings, and two seeded Adventure Journal icon paths did not resolve. Documented the mask wiring and manifest-backed icon replacements.
 
+## [2026-05-08] update | Blizzard UI cache-only runtime
+
+Simplified the Blizzard UI runtime model: `data/blizzard-ui-files.txt` is the committed file list, CASC is the extraction source, and `~/.cache/wow-ui-sim/blizzard-ui` is the only runtime Blizzard UI addon root. Removed the old runtime discovery language for `Interface/BlizzardUI`, `vendor/wow-ui-source`, and local `BlizzardInterfaceCode` fallback.
+
 ## [2026-05-08] update | Blizzard UI CASC source cache
 
 Updated `systems/casc-asset-cache.md` and `reference/cli-commands.md` for `wow-cli casc sync-blizzard-ui`, the `~/.cache/wow-ui-sim/blizzard-ui` source cache, and GUI startup fallback behavior when the GitHub checkout is missing.

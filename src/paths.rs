@@ -61,39 +61,14 @@ pub fn default_addons_path() -> PathBuf {
 }
 
 /// Blizzard UI addon root used by local benchmarks and dev binaries.
-///
-/// Prefer the repo symlink at `Interface/BlizzardUI`, then the vendored addon
-/// tree, then the CASC-synced cache when the checkout is missing.
 pub fn default_blizzard_ui_addons_path() -> crate::Result<PathBuf> {
-    if let Some(path) = env_path("WOW_SIM_BLIZZARD_UI_PATH") {
-        if path.is_dir() {
-            return Ok(path);
-        }
-        return Err(crate::Error::Other(format!(
-            "WOW_SIM_BLIZZARD_UI_PATH does not exist or is not a directory: {}",
-            path.display()
-        )));
-    }
-
-    let mut first_error = None;
-    for root in runtime_roots() {
-        match resolve_blizzard_ui_addons_path(&root) {
-            Ok(path) => return Ok(path),
-            Err(err) => {
-                if first_error.is_none() {
-                    first_error = Some(err);
-                }
-            }
-        }
-    }
     if let Some(cache_path) = crate::blizzard_ui_sync::cached_blizzard_ui_addons_path() {
         return Ok(cache_path);
     }
-    Err(first_error.unwrap_or_else(|| {
-        crate::Error::Other(
-            "missing Blizzard UI addon tree; run `wow-cli casc sync-blizzard-ui` or ./scripts/setup-blizzard-ui.sh from the release or repo root.".to_string(),
-        )
-    }))
+    Err(crate::Error::Other(format!(
+        "missing Blizzard UI cache at {}; run `wow-cli casc sync-blizzard-ui`",
+        blizzard_ui_cache_path_label()
+    )))
 }
 
 pub fn default_wtf_config() -> Option<WtfConfig> {
@@ -134,95 +109,10 @@ fn default_wtf_path_for_root(install_root: Option<&PathBuf>) -> Option<PathBuf> 
     first_existing_path(wtf_path_candidates(install_root))
 }
 
-fn resolve_blizzard_ui_addons_path(root: &Path) -> crate::Result<PathBuf> {
-    let symlink_path = root.join("Interface/BlizzardUI");
-    if symlink_path.exists() {
-        return Ok(symlink_path);
-    }
-
-    if symlink_exists(&symlink_path) {
-        std::fs::remove_file(&symlink_path).map_err(|e| {
-            crate::Error::Other(format!(
-                "broken Blizzard UI symlink exists at {} but could not be removed: {e}",
-                symlink_path.display()
-            ))
-        })?;
-    }
-
-    if let Some(vendor_path) = find_vendor_blizzard_addons(root) {
-        if let Some(parent) = symlink_path.parent() {
-            std::fs::create_dir_all(parent).map_err(|e| {
-                crate::Error::Other(format!(
-                    "missing Blizzard UI symlink parent {} and could not create it: {e}",
-                    parent.display()
-                ))
-            })?;
-        }
-        if let Err(e) = create_blizzard_ui_symlink(&vendor_path, &symlink_path) {
-            return Err(crate::Error::Other(format!(
-                "missing Blizzard UI symlink at {} and could not link it to {}: {e}",
-                symlink_path.display(),
-                vendor_path.display()
-            )));
-        }
-        return Ok(symlink_path);
-    }
-
-    Err(missing_blizzard_ui_addons_error(&symlink_path))
-}
-
-fn missing_blizzard_ui_addons_error(symlink_path: &Path) -> crate::Error {
-    crate::Error::Other(format!(
-        "missing Blizzard UI addon tree; expected {}, {}, or an ancestor vendor/wow-ui-source/Interface/AddOns. Run `wow-cli casc sync-blizzard-ui` or ./scripts/setup-blizzard-ui.sh from the repo root.",
-        blizzard_ui_cache_path_label(),
-        symlink_path.display()
-    ))
-}
-
 fn blizzard_ui_cache_path_label() -> String {
     crate::blizzard_ui_sync::default_cache_addons_path()
         .map(|path| path.display().to_string())
         .unwrap_or_else(|_| "~/.cache/wow-ui-sim/blizzard-ui".to_string())
-}
-
-fn symlink_exists(path: &Path) -> bool {
-    std::fs::symlink_metadata(path).is_ok_and(|metadata| metadata.file_type().is_symlink())
-}
-
-fn find_vendor_blizzard_addons(root: &Path) -> Option<PathBuf> {
-    root.canonicalize()
-        .ok()?
-        .ancestors()
-        .map(|ancestor| ancestor.join("vendor/wow-ui-source/Interface/AddOns"))
-        .find(|candidate| candidate.is_dir())
-}
-
-#[cfg(unix)]
-fn create_blizzard_ui_symlink(target: &Path, symlink_path: &Path) -> std::io::Result<()> {
-    std::os::unix::fs::symlink(target, symlink_path)
-}
-
-#[cfg(windows)]
-fn create_blizzard_ui_symlink(target: &Path, symlink_path: &Path) -> std::io::Result<()> {
-    fn cmd_path(path: &Path) -> String {
-        path.to_string_lossy()
-            .trim_start_matches(r"\\?\")
-            .replace('/', "\\")
-    }
-
-    let symlink_path = cmd_path(symlink_path);
-    let target = cmd_path(target);
-    let status = std::process::Command::new("cmd")
-        .args(["/C", "mklink", "/J", &symlink_path, &target])
-        .status()?;
-
-    if status.success() {
-        Ok(())
-    } else {
-        Err(std::io::Error::other(format!(
-            "mklink /J exited with {status}"
-        )))
-    }
 }
 
 fn interface_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
@@ -298,37 +188,6 @@ fn wow_install_roots() -> Vec<PathBuf> {
     roots
 }
 
-fn runtime_roots() -> Vec<PathBuf> {
-    let mut roots = Vec::new();
-    if let Ok(cwd) = std::env::current_dir() {
-        roots.push(cwd);
-    }
-    if let Ok(exe) = std::env::current_exe()
-        && let Some(parent) = exe.parent()
-    {
-        roots.push(parent.to_path_buf());
-    }
-    if should_use_manifest_runtime_root() {
-        roots.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")));
-    }
-    roots
-}
-
-fn should_use_manifest_runtime_root() -> bool {
-    if cfg!(debug_assertions) {
-        return true;
-    }
-
-    let manifest_target = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("target");
-    let Ok(exe) = std::env::current_exe().and_then(|path| path.canonicalize()) else {
-        return false;
-    };
-    let Ok(manifest_target) = manifest_target.canonicalize() else {
-        return false;
-    };
-    exe.starts_with(manifest_target)
-}
-
 fn discover_wtf_identity(wtf_path: &std::path::Path) -> Option<(String, String, String)> {
     let account_root = wtf_path.join("Account");
     let account = preferred_child_dir(&account_root, DEFAULT_ACCOUNT)?;
@@ -377,52 +236,4 @@ fn env_path(var: &str) -> Option<PathBuf> {
     std::env::var_os(var)
         .filter(|value| !value.is_empty())
         .map(PathBuf::from)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::resolve_blizzard_ui_addons_path;
-    use std::fs;
-
-    #[test]
-    fn blizzard_ui_path_prefers_repo_symlink() {
-        let root = tempfile::tempdir().expect("tempdir");
-        let ui = root.path().join("Interface/BlizzardUI");
-        let vendor = root.path().join("vendor/wow-ui-source/Interface/AddOns");
-        fs::create_dir_all(&ui).expect("create ui dir");
-        fs::create_dir_all(&vendor).expect("create vendor dir");
-
-        let resolved = resolve_blizzard_ui_addons_path(root.path()).expect("resolve path");
-        assert_eq!(resolved, ui);
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn blizzard_ui_path_links_to_vendor_tree() {
-        let root = tempfile::tempdir().expect("tempdir");
-        let ui = root.path().join("Interface/BlizzardUI");
-        let vendor = root.path().join("vendor/wow-ui-source/Interface/AddOns");
-        fs::create_dir_all(root.path().join("Interface")).expect("create interface dir");
-        fs::create_dir_all(&vendor).expect("create vendor dir");
-
-        let resolved = resolve_blizzard_ui_addons_path(root.path()).expect("resolve path");
-        assert_eq!(resolved, ui);
-        assert_eq!(fs::read_link(&resolved).expect("read symlink"), vendor);
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn blizzard_ui_path_links_to_ancestor_vendor_tree() {
-        let root = tempfile::tempdir().expect("tempdir");
-        let repo = root.path().join("repo");
-        let worktree = repo.join(".claude/worktrees/example");
-        let ui = worktree.join("Interface/BlizzardUI");
-        let vendor = repo.join("vendor/wow-ui-source/Interface/AddOns");
-        fs::create_dir_all(worktree.join("Interface")).expect("create interface dir");
-        fs::create_dir_all(&vendor).expect("create vendor dir");
-
-        let resolved = resolve_blizzard_ui_addons_path(&worktree).expect("resolve path");
-        assert_eq!(resolved, ui);
-        assert_eq!(fs::read_link(&resolved).expect("read symlink"), vendor);
-    }
 }

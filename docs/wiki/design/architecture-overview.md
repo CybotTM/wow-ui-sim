@@ -46,7 +46,7 @@ The C API surface is treated as a first-class subsystem at the same architectura
 - **Lua 5.1 via rilua**. Pure-Rust Lua 5.1 VM matching WoW's Lua version, with Elune-style taint tracking native to the interpreter (no C runtime).
 - **Taint tracking**. rilua exposes `debug.setobjecttaint` / `debug.getstacktaint` and propagates stack taint through `CallInfo`. The simulator stamps each addon's compiled chunks with its addon name, so insecure variables are correctly attributed. `issecure()` / `issecurevariable()` work; `SetAttribute` and friends do not block tainted callers (known gap).
 - **Auto-generated C_* stubs**. Missing `C_*` methods are filled in by a generated stub layer (returns nil/false/0) so addons don't crash on unrecognized namespaces. Hand-written Rust implementations win when present.
-- **XML templates** are loaded before user addons. The Blizzard UI tree (`Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_SharedXMLGame`, `Blizzard_FrameXMLBase`, `Blizzard_FrameXMLUtil`, `Blizzard_FrameXML`, plus per-feature `Blizzard_*` addons) lives under `Interface/BlizzardUI/`, a sparse checkout of `Gethe/wow-ui-source`.
+- **XML templates** are loaded before user addons. The Blizzard UI tree (`Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_SharedXMLGame`, `Blizzard_FrameXMLBase`, `Blizzard_FrameXMLUtil`, `Blizzard_FrameXML`, plus per-feature `Blizzard_*` addons) is loaded from the CASC-synced cache at `~/.cache/wow-ui-sim/blizzard-ui`.
 - **rilua hot paths**. Frame methods and globals dispatch directly through rilua's stack-level API; do not assume "Lua bridge cost" when handlers are slow — measure the handler body and downstream Rust work.
 
 ## See Also

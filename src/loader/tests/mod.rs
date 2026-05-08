@@ -87,7 +87,7 @@ fn val_to_rust_string(env: &WowLuaEnv, value: Val) -> String {
 }
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    crate::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
 }
 
 /// Create a test environment, write XML content, load it, return context.
@@ -174,8 +174,9 @@ fn preload_shared_templates(env: &WowLuaEnv) {
         return;
     }
 
-    let addon_root =
-        std::path::PathBuf::from("./vendor/wow-ui-source/Interface/AddOns/Blizzard_SharedXML");
+    let addon_root = crate::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be synced")
+        .join("Blizzard_SharedXML");
     let xml_path = addon_root.join("Mainline/SharedUIPanelTemplates.xml");
     let addon_table = env.create_addon_table().unwrap();
     let ctx = AddonContext::new(
