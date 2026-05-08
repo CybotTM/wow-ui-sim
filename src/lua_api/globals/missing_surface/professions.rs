@@ -191,17 +191,33 @@ fn c_trade_skill_ui_get_crafting_order_count(state: &mut LuaState) -> LuaResult<
 /// `ProfessionsRecipeTransactionMixin:AreDependentReagentsAllocated`.
 fn c_trade_skill_ui_get_dependent_reagents(state: &mut LuaState) -> LuaResult<u32> {
     let reagent = Val::from_stack(state, 1).unwrap_or(Val::Nil);
-    let item_id = match reagent {
+    let item_id = reagent_item_id(state, reagent);
+    let dependents = dependent_reagents_for_item(item_id);
+    let table = dependent_reagent_table(state, dependents);
+    state.push(table);
+    Ok(1)
+}
+
+fn reagent_item_id(state: &mut LuaState, reagent: Val) -> Option<u32> {
+    match reagent {
         Val::Table(_) => match table_get(state, reagent, "itemID") {
             Val::Num(n) if n > 0.0 => Some(n as u32),
             _ => None,
         },
         _ => None,
-    };
-    let dependents: &'static [profession_data::ReagentSlot] = match item_id {
-        Some(id) => profession_data::find_reagent_dependents(id),
-        None => &[],
-    };
+    }
+}
+
+fn dependent_reagents_for_item(item_id: Option<u32>) -> &'static [profession_data::ReagentSlot] {
+    item_id
+        .map(profession_data::find_reagent_dependents)
+        .unwrap_or(&[])
+}
+
+fn dependent_reagent_table(
+    state: &mut LuaState,
+    dependents: &[profession_data::ReagentSlot],
+) -> Val {
     let table = create_table(state);
     for (index, dep) in dependents.iter().enumerate() {
         let entry = create_table(state);
@@ -214,8 +230,7 @@ fn c_trade_skill_ui_get_dependent_reagents(state: &mut LuaState) -> LuaResult<u3
         );
         set_table_array(state, table, (index + 1) as i64, entry);
     }
-    state.push(table);
-    Ok(1)
+    table
 }
 
 fn c_trade_skill_ui_get_categories(state: &mut LuaState) -> LuaResult<u32> {
