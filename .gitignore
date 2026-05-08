@@ -31,3 +31,8 @@ target-perf/
 perf.data*.flamegraph.svg
 tests/rilua_bridge/target/
 .claude/worktrees/
+
+# Local maintenance-only full wowdev listfiles. Runtime should use the curated
+# restricted listfile; keep the huge full files local and untracked.
+/data/full-community-listfile*.csv
+/data/community-listfile-full*.csv
