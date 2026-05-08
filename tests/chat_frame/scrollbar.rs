@@ -59,6 +59,17 @@ fn read_chat_scrollbar_points(env: &WowLuaEnv) -> String {
 
 fn assert_chat_scrollbar_surface(surface: ChatScrollbarSurface, layout: &str) {
     let chat_right = surface.chat_x + surface.chat_w;
+    assert_scrollbar_near_chat_right_edge(&surface, chat_right, layout);
+    assert_scrollbar_width_sane(&surface, layout);
+    assert_editbox_width_sane(&surface, layout);
+    assert_scrollbar_dropped_track_anchors(&surface, layout);
+}
+
+fn assert_scrollbar_near_chat_right_edge(
+    surface: &ChatScrollbarSurface,
+    chat_right: f64,
+    layout: &str,
+) {
     assert!(
         (surface.scroll_x - chat_right).abs() <= 30.0,
         "ChatFrame1.ScrollBar should stay near ChatFrame1 right edge. chat=({:.0}, w={:.0}) scroll=({:.0}, w={:.0}) anchors={}\n{}",
@@ -69,6 +80,9 @@ fn assert_chat_scrollbar_surface(surface: ChatScrollbarSurface, layout: &str) {
         surface.points,
         layout
     );
+}
+
+fn assert_scrollbar_width_sane(surface: &ChatScrollbarSurface, layout: &str) {
     assert!(
         (4.0..=32.0).contains(&surface.scroll_w),
         "ChatFrame1.ScrollBar width should stay sane, got {}. anchors={}\n{}",
@@ -76,6 +90,9 @@ fn assert_chat_scrollbar_surface(surface: ChatScrollbarSurface, layout: &str) {
         surface.points,
         layout
     );
+}
+
+fn assert_editbox_width_sane(surface: &ChatScrollbarSurface, layout: &str) {
     assert!(
         (350.0..=600.0).contains(&surface.edit_w),
         "ChatFrame1EditBox width should stay sane, got {}. scrollbar anchors={}\n{}",
@@ -83,6 +100,9 @@ fn assert_chat_scrollbar_surface(surface: ChatScrollbarSurface, layout: &str) {
         surface.points,
         layout
     );
+}
+
+fn assert_scrollbar_dropped_track_anchors(surface: &ChatScrollbarSurface, layout: &str) {
     assert!(
         !surface.points.contains("TOP->$parent:TOP")
             && !surface.points.contains("BOTTOM->$parent:BOTTOM"),
