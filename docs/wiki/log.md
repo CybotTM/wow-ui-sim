@@ -2,6 +2,12 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-08] update | CASC Friz Quadrata root probe
+
+Updated `investigations/casc-fdid-1579624-root-debug.md` with known-good
+FDID `615960` / `fonts/frizqt__.ttf` resolution data, hashes, and extraction
+proof for Windows root parser debugging.
+
 ## [2026-05-08] ingest | CASC FDID 1579624 root debug
 
 Created `investigations/casc-fdid-1579624-root-debug.md` with the verified

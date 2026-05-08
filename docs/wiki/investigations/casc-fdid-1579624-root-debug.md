@@ -1,10 +1,10 @@
-# CASC FDID 1579624 Root Debug
+# CASC Known-Good Root Debug Probes
 
-FDID `1579624` is present in the local CASC resolution cache and maps to Blizzard API documentation source `Blizzard_APIDocumentation/BaseAPIMixin.lua`. If another root parser cannot find this FDID, the likely failure is in MFST/root parsing, locale/content filtering, or build/cache selection rather than in the listfile path.
+FDID `1579624` and font FDID `615960` are present in the local CASC resolution cache and extract successfully. If another root parser cannot find these FDIDs, the likely failure is in MFST/root parsing, locale/content filtering, or build/cache selection rather than in the listfile path.
 
 ## Content
 
-### Verified Mapping
+### FDID 1579624: BaseAPIMixin.lua
 
 Local resolution cache:
 
@@ -54,6 +54,42 @@ function BaseAPIMixin:GetType()
 end
 ```
 
+### FDID 615960: Friz Quadrata Font
+
+The standard WoW font `FRIZQT__.TTF` also resolves and extracts locally. This is a useful non-Lua probe because it lives under `fonts/` rather than `interface/addons/`.
+
+```text
+fdid: 615960
+path: fonts/frizqt__.ttf
+content key: 87CD491CD119E8C7AA48B562D7482ED8
+encoding key: DB472FF5CA74465BAA066021CD837645
+size: 38 KiB
+md5/content key: 87cd491cd119e8c7aa48b562d7482ed8
+sha256: 73de74d5d63690f29c7f97a9225edc8bd6f89e5103806af3714e4d7bfb9474e9
+file type: TrueType Font data
+```
+
+The local listfiles agree:
+
+```text
+data/wow-ui-sim-listfile.csv:
+615960;fonts/frizqt__.ttf
+
+data/full-community-listfile.csv:
+615960;fonts/frizqt__.ttf
+```
+
+Extraction proof:
+
+```text
+/home/osso/Projects/world-of-osso/asset-resolver/target/debug/casc-local 615960 -o /tmp/fdid-font-check
+
+CASC: extracted FDID 615960 -> /tmp/fdid-font-check/615960.ttf
+1 extracted, 0 failed
+```
+
+Spelling note: the extension is `.ttf`, not `.tff`.
+
 ### Gethe 12.0.5 Check
 
 The Gethe `wow-ui-source` `12.0.5` file at:
@@ -86,12 +122,12 @@ The FDID/key result above is from that local CASC cache. It still byte-matches G
 
 ### Debug Implications
 
-If a Windows-side parser cannot find FDID `1579624` in root:
+If a Windows-side parser cannot find FDID `1579624` or `615960` in root:
 
 - Confirm it is reading the `wow` product root for the intended build, not `wow_classic`, `_beta_`, or a stale build key.
 - Confirm the root parser handles modern MFST root files and block headers correctly.
 - Do not rely on path lookup alone; root maps `FileDataID -> content key`, then encoding maps `content key -> encoding key`.
-- Check locale/content filtering. The local resolution cache selected content key `51812203898E1E22B9927DDB95AF0897` for this FDID.
+- Check locale/content filtering. The local resolution cache selected content key `51812203898E1E22B9927DDB95AF0897` for FDID `1579624` and `87CD491CD119E8C7AA48B562D7482ED8` for FDID `615960`.
 - Verify byte hashes with CRLF line endings when comparing against Gethe/GitHub source.
 
 ## Sources
