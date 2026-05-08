@@ -142,53 +142,53 @@ fn first_panel_tab_divergence(env: &WowLuaEnv) -> Option<String> {
     (!summary.is_empty()).then_some(summary)
 }
 
-fn install_panel_tab_anchor_trace(env: &WowLuaEnv) {
-    env.exec(
-        r#"
-        __panel_tab_trace = {}
-        __panel_tab_trace_current_addon = nil
+const PANEL_TAB_ANCHOR_TRACE_LUA: &str = r#"
+    __panel_tab_trace = {}
+    __panel_tab_trace_current_addon = nil
 
-        local original_panel_templates_anchor_tabs = PanelTemplates_AnchorTabs
+    local original_panel_templates_anchor_tabs = PanelTemplates_AnchorTabs
 
-        local function tracked_panel(frame_name)
-            return frame_name == "CharacterFrame"
-                or frame_name == "MerchantFrame"
-                or frame_name == "FriendsFrame"
-                or frame_name == "RaidParentFrame"
-                or frame_name == "PVEFrame"
-                or frame_name == "MailFrame"
-        end
+    local function tracked_panel(frame_name)
+        return frame_name == "CharacterFrame"
+            or frame_name == "MerchantFrame"
+            or frame_name == "FriendsFrame"
+            or frame_name == "RaidParentFrame"
+            or frame_name == "PVEFrame"
+            or frame_name == "MailFrame"
+    end
 
-        local function tab_name(value)
-            return value and value.GetName and value:GetName() or "nil"
-        end
+    local function tab_name(value)
+        return value and value.GetName and value:GetName() or "nil"
+    end
 
-        function PanelTemplates_AnchorTabs(frame, numTabs)
-            local frame_name = frame and frame.GetName and frame:GetName()
-            if frame_name and tracked_panel(frame_name) then
-                for i = 2, frame.numTabs or 0 do
-                    local last_tab = frame.Tabs and frame.Tabs[i - 1] or _G[frame_name .. "Tab" .. (i - 1)]
-                    local this_tab = frame.Tabs and frame.Tabs[i] or _G[frame_name .. "Tab" .. i]
-                    local expected_tab = _G[frame_name .. "Tab" .. i]
-                    if this_tab ~= expected_tab then
-                        __panel_tab_trace[#__panel_tab_trace + 1] = table.concat({
-                            tostring(__panel_tab_trace_current_addon),
-                            frame_name,
-                            tostring(i),
-                            tab_name(last_tab),
-                            tab_name(this_tab),
-                            tab_name(expected_tab),
-                            tostring(type(frame.Tabs) == "table" and #frame.Tabs or -1),
-                        }, "|")
-                    end
+    function PanelTemplates_AnchorTabs(frame, numTabs)
+        local frame_name = frame and frame.GetName and frame:GetName()
+        if frame_name and tracked_panel(frame_name) then
+            for i = 2, frame.numTabs or 0 do
+                local last_tab = frame.Tabs and frame.Tabs[i - 1] or _G[frame_name .. "Tab" .. (i - 1)]
+                local this_tab = frame.Tabs and frame.Tabs[i] or _G[frame_name .. "Tab" .. i]
+                local expected_tab = _G[frame_name .. "Tab" .. i]
+                if this_tab ~= expected_tab then
+                    __panel_tab_trace[#__panel_tab_trace + 1] = table.concat({
+                        tostring(__panel_tab_trace_current_addon),
+                        frame_name,
+                        tostring(i),
+                        tab_name(last_tab),
+                        tab_name(this_tab),
+                        tab_name(expected_tab),
+                        tostring(type(frame.Tabs) == "table" and #frame.Tabs or -1),
+                    }, "|")
                 end
             end
-
-            return original_panel_templates_anchor_tabs(frame, numTabs)
         end
-        "#,
-    )
-    .expect("install panel tab anchor trace");
+
+        return original_panel_templates_anchor_tabs(frame, numTabs)
+    end
+"#;
+
+fn install_panel_tab_anchor_trace(env: &WowLuaEnv) {
+    env.exec(PANEL_TAB_ANCHOR_TRACE_LUA)
+        .expect("install panel tab anchor trace");
 }
 
 #[test]
