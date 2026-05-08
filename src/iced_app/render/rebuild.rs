@@ -178,27 +178,32 @@ fn emit_one_frame(
         return false;
     }
 
-    let (bounds, clip_bounds) = scaled_bounds(params.entry);
-    emit_frame_quads(
-        batch,
-        text_ctx,
-        FrameQuadEmit {
-            id,
-            widget: frame,
-            bounds,
-            clip_bounds,
-            bar_fill: params.statusbar_fills.get(&id),
-            pressed_frame: ctx.pressed_frame,
-            hovered_frame: ctx.hovered_frame,
-            message_frames: Some(ctx.message_frames),
-            tooltip_data: Some(ctx.tooltip_data),
-            quest_blobs: Some(ctx.quest_blobs),
-            registry: ctx.registry,
-            elapsed_secs: ctx.elapsed_secs,
-            eff_alpha: params.entry.eff_alpha,
-        },
-    );
+    emit_frame_quads(batch, text_ctx, frame_quad_emit(params, frame));
     true
+}
+
+fn frame_quad_emit<'a>(
+    params: EmitOneFrame<'a>,
+    frame: &'a crate::widget::Frame,
+) -> FrameQuadEmit<'a> {
+    let id = params.entry.id;
+    let ctx = params.ctx;
+    let (bounds, clip_bounds) = scaled_bounds(params.entry);
+    FrameQuadEmit {
+        id,
+        widget: frame,
+        bounds,
+        clip_bounds,
+        bar_fill: params.statusbar_fills.get(&id),
+        pressed_frame: ctx.pressed_frame,
+        hovered_frame: ctx.hovered_frame,
+        message_frames: Some(ctx.message_frames),
+        tooltip_data: Some(ctx.tooltip_data),
+        quest_blobs: Some(ctx.quest_blobs),
+        registry: ctx.registry,
+        elapsed_secs: ctx.elapsed_secs,
+        eff_alpha: params.entry.eff_alpha,
+    }
 }
 
 fn should_emit_frame(
