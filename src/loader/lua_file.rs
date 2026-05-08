@@ -353,7 +353,7 @@ const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
                 from: "function DropdownTextMixin:UpdateText()\n\tself.Text:SetText(self:GetUpdateText());",
                 to: "local function __wow_ensure_dropdown_text_font_string(self)\n\tif self.Text then\n\t\treturn self.Text;\n\tend\n\tif not MenuVariants or type(MenuVariants.CreateFontString) ~= \"function\" then\n\t\treturn nil;\n\tend\n\tlocal ok, fontString = pcall(MenuVariants.CreateFontString, self);\n\tif not ok or fontString == nil then\n\t\treturn nil;\n\tend\n\tself.Text = fontString;\n\treturn fontString;\nend\n\nfunction DropdownTextMixin:UpdateText()\n\tlocal text = __wow_ensure_dropdown_text_font_string(self);\n\tif not text then\n\t\treturn;\n\tend\n\ttext:SetText(self:GetUpdateText());",
             },
-            LuaSourcePatchOp::Replace {
+            LuaSourcePatchOp::ReplaceOnce {
                 from: "local newWidth = self.Text:GetUnboundedStringWidth();",
                 to: "local newWidth = text:GetUnboundedStringWidth();",
             },
@@ -386,9 +386,10 @@ const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
 ];
 
 fn lua_source_patch_for_chunk(chunk_name: &str) -> Option<&'static LuaSourcePatch> {
+    let normalized_chunk_name = chunk_name.replace('\\', "/");
     LUA_SOURCE_PATCHES
         .iter()
-        .find(|patch| chunk_name.ends_with(patch.suffix))
+        .find(|patch| normalized_chunk_name.ends_with(patch.suffix))
 }
 
 fn apply_lua_source_patch(source: &str, operations: &[LuaSourcePatchOp]) -> String {
@@ -402,9 +403,27 @@ fn apply_lua_source_patch(source: &str, operations: &[LuaSourcePatchOp]) -> Stri
 fn apply_lua_source_patch_operation(source: &str, operation: &LuaSourcePatchOp) -> String {
     match operation {
         LuaSourcePatchOp::Prefix(prefix) => format!("{prefix}{source}"),
-        LuaSourcePatchOp::Replace { from, to } => source.replace(from, to),
-        LuaSourcePatchOp::ReplaceOnce { from, to } => source.replacen(from, to, 1),
+        LuaSourcePatchOp::Replace { from, to } => replace_with_line_ending_fallback(source, from, to),
+        LuaSourcePatchOp::ReplaceOnce { from, to } => {
+            replace_once_with_line_ending_fallback(source, from, to)
+        }
     }
+}
+
+fn replace_with_line_ending_fallback(source: &str, from: &str, to: &str) -> String {
+    let patched = source.replace(from, to);
+    if patched != source {
+        return patched;
+    }
+    source.replace(&from.replace('\n', "\r\n"), &to.replace('\n', "\r\n"))
+}
+
+fn replace_once_with_line_ending_fallback(source: &str, from: &str, to: &str) -> String {
+    let patched = source.replacen(from, to, 1);
+    if patched != source {
+        return patched;
+    }
+    source.replacen(&from.replace('\n', "\r\n"), &to.replace('\n', "\r\n"), 1)
 }
 /// Execute a compiled addon function.
 /// Taint is already stamped on the function's GC header by the caller.

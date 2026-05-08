@@ -51,3 +51,11 @@ if not Enum.TransmogOutfitSlotOptionSheatheCategory then
     Hide = 3,
   }
 end
+
+if not Enum.ExpansionLandingPageType then
+  Enum.ExpansionLandingPageType = {
+    None = 0,
+    Dragonflight = 1,
+    WarWithin = 2,
+  }
+end

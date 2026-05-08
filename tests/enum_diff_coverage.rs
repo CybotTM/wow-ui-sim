@@ -362,7 +362,6 @@ fn diff_enums_extra_is_empty_and_removed_runtime_enums_stay_absent() {
         .eval(
             r#"
             local removed = {
-                "ExpansionLandingPageType",
                 "TransmogOutfitFlags",
             }
 
