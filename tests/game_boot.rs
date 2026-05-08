@@ -103,40 +103,40 @@ fn new_game_env() -> WowLuaEnv {
     env
 }
 
+const FIRST_PANEL_TAB_DIVERGENCE_LUA: &str = r#"
+    local function first_divergence(frame_name, count)
+        local frame = _G[frame_name]
+        if not frame or type(frame.Tabs) ~= "table" then
+            return nil
+        end
+        for i = 1, count do
+            local tab = frame.Tabs[i]
+            local expected = _G[frame_name .. "Tab" .. i]
+            if expected and tab ~= expected then
+                return table.concat({
+                    frame_name,
+                    tostring(i),
+                    tab and tab:GetName() or "nil",
+                    expected:GetName(),
+                    tab and tab:GetParent() and tab:GetParent():GetName() or "nil",
+                }, "|")
+            end
+        end
+        return nil
+    end
+
+    return first_divergence("CharacterFrame", 3)
+        or first_divergence("MerchantFrame", 2)
+        or first_divergence("FriendsFrame", 4)
+        or first_divergence("RaidParentFrame", 3)
+        or first_divergence("PVEFrame", 5)
+        or first_divergence("MailFrame", 2)
+        or ""
+"#;
+
 fn first_panel_tab_divergence(env: &WowLuaEnv) -> Option<String> {
     let summary: String = env
-        .eval(
-            r#"
-            local function first_divergence(frame_name, count)
-                local frame = _G[frame_name]
-                if not frame or type(frame.Tabs) ~= "table" then
-                    return nil
-                end
-                for i = 1, count do
-                    local tab = frame.Tabs[i]
-                    local expected = _G[frame_name .. "Tab" .. i]
-                    if expected and tab ~= expected then
-                        return table.concat({
-                            frame_name,
-                            tostring(i),
-                            tab and tab:GetName() or "nil",
-                            expected:GetName(),
-                            tab and tab:GetParent() and tab:GetParent():GetName() or "nil",
-                        }, "|")
-                    end
-                end
-                return nil
-            end
-
-            return first_divergence("CharacterFrame", 3)
-                or first_divergence("MerchantFrame", 2)
-                or first_divergence("FriendsFrame", 4)
-                or first_divergence("RaidParentFrame", 3)
-                or first_divergence("PVEFrame", 5)
-                or first_divergence("MailFrame", 2)
-                or ""
-            "#,
-        )
+        .eval(FIRST_PANEL_TAB_DIVERGENCE_LUA)
         .expect("eval first panel tab divergence");
 
     (!summary.is_empty()).then_some(summary)
