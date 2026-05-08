@@ -22,19 +22,6 @@ fn casc_enabled() -> bool {
         if std::env::var("WOW_SIM_CASC").ok().as_deref() == Some("0") {
             return false;
         }
-        // asset-resolver looks for its data dir via GAME_ENGINE_SHARED_ROOT.
-        // Default to the sibling game-engine repo if the user hasn't pointed it elsewhere.
-        if std::env::var_os("GAME_ENGINE_SHARED_ROOT").is_none()
-            && let Some(home) = dirs::home_dir()
-        {
-            let default_root = home.join("Projects/world-of-osso/game-engine");
-            if default_root.exists() {
-                // SAFETY: set_var before any other thread reads it (OnceLock guarantees first call).
-                unsafe {
-                    std::env::set_var("GAME_ENGINE_SHARED_ROOT", &default_root);
-                }
-            }
-        }
         // Require a discoverable WoW install, otherwise no point trying.
         asset_resolver::wow_install_path().is_some()
     })

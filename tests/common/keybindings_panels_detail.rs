@@ -2,13 +2,9 @@
 
 use crate::common;
 use crate::token_ui_fixtures::load_token_ui;
-use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
-
-fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
-}
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 
 /// Blizzard addons in dependency order (same as micro_menu.rs).
 const BLIZZARD_ADDONS: &[(&str, &str)] = &[
@@ -59,7 +55,10 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
+    (
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_FrameXMLUtil_Mainline.toc",
+    ),
     ("Blizzard_Menu", "Blizzard_Menu.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
@@ -95,13 +94,13 @@ pub(crate) fn setup_env() -> common::LockedEnv {
     common::lock_env(|| {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
         env.set_screen_size(1024.0, 768.0);
+        let ui = default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced");
 
         {
             let mut state = env.state().borrow_mut();
-            state.addon_base_paths = vec![blizzard_ui_dir()];
+            state.addon_base_paths = vec![ui.clone()];
         }
 
-        let ui = blizzard_ui_dir();
         for (name, toc) in BLIZZARD_ADDONS {
             let toc_path = ui.join(name).join(toc);
             if !toc_path.exists() {
