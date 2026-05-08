@@ -522,44 +522,79 @@ fn emit_glyphs_from_cache(
     request: GlyphCacheEmitRequest<'_>,
 ) {
     for run in request.runs {
-        let x_offset = if request.bounds.width > 0.0 {
-            match request.justify_h {
-                TextJustify::Left => 0.0,
-                TextJustify::Center => (request.bounds.width - run.line_w) / 2.0,
-                TextJustify::Right => request.bounds.width - run.line_w,
-            }
-        } else {
-            0.0
-        };
-
+        let x_offset = cached_run_x_offset(&request, run);
         for glyph in &run.glyphs {
-            if let Some(entry) = glyph_atlas.ensure_glyph(font_system, glyph.cache_key) {
-                let glyph_x = request.bounds.x
-                    + x_offset
-                    + glyph.x as f32
-                    + entry.left as f32
-                    + request.offset.0;
-                let glyph_y = request.bounds.y + request.y_offset + run.line_y + glyph.y as f32
-                    - entry.top as f32
-                    + request.offset.1;
-                let glyph_bounds = Rectangle::new(
-                    iced::Point::new(glyph_x, glyph_y),
-                    iced::Size::new(entry.width as f32, entry.height as f32),
-                );
-                let uv = Rectangle::new(
-                    iced::Point::new(entry.uv_x, entry.uv_y),
-                    iced::Size::new(entry.uv_w, entry.uv_h),
-                );
-                batch.push_quad(
-                    glyph_bounds,
-                    uv,
-                    request.glyph_color,
-                    request.glyph_tex_index,
-                    BlendMode::Alpha,
-                );
-            }
+            emit_cached_glyph(
+                batch,
+                glyph_atlas,
+                font_system,
+                &request,
+                run,
+                x_offset,
+                glyph,
+            );
         }
     }
+}
+
+fn cached_run_x_offset(request: &GlyphCacheEmitRequest<'_>, run: &CachedLayoutRun) -> f32 {
+    if request.bounds.width <= 0.0 {
+        return 0.0;
+    }
+
+    match request.justify_h {
+        TextJustify::Left => 0.0,
+        TextJustify::Center => (request.bounds.width - run.line_w) / 2.0,
+        TextJustify::Right => request.bounds.width - run.line_w,
+    }
+}
+
+fn emit_cached_glyph(
+    batch: &mut QuadBatch,
+    glyph_atlas: &mut GlyphAtlas,
+    font_system: &mut WowFontSystem,
+    request: &GlyphCacheEmitRequest<'_>,
+    run: &CachedLayoutRun,
+    x_offset: f32,
+    glyph: &CachedGlyph,
+) {
+    let Some(entry) = glyph_atlas.ensure_glyph(font_system, glyph.cache_key) else {
+        return;
+    };
+
+    batch.push_quad(
+        cached_glyph_bounds(request, run, x_offset, glyph, entry),
+        cached_glyph_uv(entry),
+        request.glyph_color,
+        request.glyph_tex_index,
+        BlendMode::Alpha,
+    );
+}
+
+fn cached_glyph_bounds(
+    request: &GlyphCacheEmitRequest<'_>,
+    run: &CachedLayoutRun,
+    x_offset: f32,
+    glyph: &CachedGlyph,
+    entry: GlyphEntry,
+) -> Rectangle {
+    let glyph_x =
+        request.bounds.x + x_offset + glyph.x as f32 + entry.left as f32 + request.offset.0;
+    let glyph_y = request.bounds.y + request.y_offset + run.line_y + glyph.y as f32
+        - entry.top as f32
+        + request.offset.1;
+
+    Rectangle::new(
+        iced::Point::new(glyph_x, glyph_y),
+        iced::Size::new(entry.width as f32, entry.height as f32),
+    )
+}
+
+fn cached_glyph_uv(entry: GlyphEntry) -> Rectangle {
+    Rectangle::new(
+        iced::Point::new(entry.uv_x, entry.uv_y),
+        iced::Size::new(entry.uv_w, entry.uv_h),
+    )
 }
 
 /// Measure the height of text after word-wrapping within the given width.
