@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-08] update | CASC resolution cache location
+
+Updated `systems/casc-asset-cache.md` after moving generated CASC resolution
+metadata out of repo `data/casc` and into the asset-resolver user cache. The
+page now documents product/build-key scoped cache paths and automatic rebuild
+behavior for missing or stale `resolution.sqlite`.
+
 ## [2026-05-03] add | PVE tabs direct offset
 
 Added `investigations/pve-tabs-direct-offset.md` after tracing the Dungeons &

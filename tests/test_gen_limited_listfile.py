@@ -41,7 +41,6 @@ class LimitedListfileGenerationTests(unittest.TestCase):
             requested_paths=set(),
             requested_fdids=set(),
             blizzard_files=blizzard_files,
-            resolution_db=None,
         )
 
         self.assertEqual(

@@ -11,9 +11,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SOURCE = Path.home() / "Projects/world-of-osso/game-engine/data/community-listfile.csv"
 DEFAULT_OUTPUT = ROOT / "data/wow-ui-sim-listfile.csv"
-DEFAULT_RESOLUTION_DB = (
-    Path.home() / "Projects/world-of-osso/game-engine/data/casc/resolution.sqlite"
-)
 MANIFEST_PATH = ROOT / "data/manifest_interface_data.rs"
 ATLAS_PATH = ROOT / "data/atlas.rs"
 BLIZZARD_UI_FILE_MANIFEST = ROOT / "data/blizzard-ui-files.txt"
@@ -63,7 +60,6 @@ def main() -> None:
         requested_paths,
         requested_fdids,
         blizzard_files,
-        args.resolution_db,
     )
     write_rows(args.output, rows)
     print(
@@ -77,7 +73,6 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--resolution-db", type=Path, default=DEFAULT_RESOLUTION_DB)
     return parser.parse_args()
 
 
@@ -166,7 +161,6 @@ def resolve_rows(
     requested_paths: set[str],
     requested_fdids: set[int],
     blizzard_files: set[str] | None = None,
-    resolution_db: Path | None = None,
 ) -> list[tuple[int, str]]:
     rows: dict[int, str] = {}
     for fdid in requested_fdids:

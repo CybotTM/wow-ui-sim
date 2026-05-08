@@ -6,14 +6,14 @@ The simulator reads textures and fonts from a live WoW install via three stacked
 
 | Layer | Stores | Location | Built / refreshed by | Lifetime |
 |---|---|---|---|---|
-| FDID resolution | `fdid → (content_key, encoding_key)` | `<shared>/data/casc/resolution.sqlite` (~85 MB, ~1.87 M rows) | `casc_refresh` in the game-engine repo, validated against `root.bin`/`encoding.bin` mtimes | Persistent across processes; rebuilt when WoW patches |
+| FDID resolution | `fdid → (content_key, encoding_key)` | `~/.cache/asset-resolver/casc/<product>/<build-key>/resolution.sqlite` (~85 MB, ~1.87 M rows) | `asset-resolver` on first miss or stale cache; `casc_refresh` can prewarm it | Persistent across processes; rebuilt when WoW patches |
 | BLP byte cache | Extracted BLP files keyed by listfile path | `~/.cache/wow-ui-sim/casc-extract/<Interface/...>.blp` | `asset_resolver::ensure_cached` on first miss | Persistent across processes; never invalidated automatically |
 | Blizzard UI source cache | Extracted Blizzard Lua/XML/TOC source files | `~/.cache/wow-ui-sim/blizzard-ui/<Blizzard_...>` | `wow-cli casc sync-blizzard-ui` or GUI startup when the cache is missing | Persistent across processes; guarded by `.wow-ui-sim-blizzard-ui-complete` |
 | In-memory texture cache | `TextureData` (decoded RGBA) keyed by normalised wow path | `TextureManager::cache` | `TextureManager::load` on first hit | Per-process |
 
-`<shared>` resolves to `$GAME_ENGINE_SHARED_ROOT`, which `src/texture/resolve.rs::casc_enabled` auto-sets to `~/Projects/world-of-osso/game-engine` if that directory exists. The two projects share **only** the resolution sqlite (cheap to share, expensive to build); they do not share extracted BLP bytes.
+The resolution sqlite is generated cache data, not repo data. `asset-resolver` keeps it under `$ASSET_RESOLVER_CACHE_DIR` when set, otherwise `$XDG_CACHE_HOME/asset-resolver` or `~/.cache/asset-resolver`. The path is product/build-key scoped so retail, classic, and future patch builds do not overwrite each other.
 
-Without the resolution sqlite, every cold start would parse `root.bin` (63 MB) + `encoding.bin` (185 MB) to build the FDID → encoding-key chain. With it, that step becomes a single `Connection::open` plus per-FDID sqlite SELECTs.
+Without the resolution sqlite, first CASC use reads the local build config, extracts fresh `root.bin` and `encoding.bin` from the WoW install into the cache directory, and builds the sqlite. Warm starts become a single `Connection::open` plus per-FDID sqlite SELECTs.
 
 ## Lookup flow
 
@@ -28,7 +28,7 @@ TextureManager::load(wow_path)
   │    │    └─ asset_resolver::ensure_cached(fdid)
   │    │         ├─ first call per process: init CASC
   │    │         │    ├─ Installation::open + initialize  (load 45 .idx + open .data archives)
-  │    │         │    └─ CascResolutionCache::open        (sqlite, freshness-checked)
+  │    │         │    └─ open/rebuild resolution sqlite   (cache hit, or root/encoding refresh)
   │    │         ├─ resolve_fdid(fdid)               (sqlite SELECT → encoding key)
   │    │         ├─ read_file_by_encoding_key        (archive read + BLTE decompress)
   │    │         └─ write to out_path                (BLP cache populated)
@@ -36,7 +36,7 @@ TextureManager::load(wow_path)
   └─ load_texture_file(path) + insert in-memory cache
 ```
 
-`Installation::initialize` does **not** parse `root.bin` or `encoding.bin` — that work is permanently delegated to the resolution sqlite. The expensive runtime steps that remain are the per-process CASC init (indices + archives) and the per-file BLTE decompress.
+`Installation::initialize` does **not** parse `root.bin` or `encoding.bin` on warm starts — that work is delegated to the resolution sqlite. If the sqlite is missing or stale, `asset-resolver` rebuilds it once from the current local CASC build.
 
 ## Measured costs
 
@@ -75,8 +75,8 @@ The GUI startup path uses the cache only. If the completion marker is missing, s
 
 ## Failure modes
 
-- **Resolution sqlite missing or stale**: `CascResolutionCache::open` returns `Err`, `init_casc` fails, every CASC lookup misses. Detected at startup via `CASC resolution cache: N entries` log line — its absence means the sqlite did not load. Fix: rebuild via `casc_refresh` in the game-engine repo.
-- **`GAME_ENGINE_SHARED_ROOT` set before `casc_enabled` runs**: `asset-resolver`'s `OnceLock` initialises with whatever value was visible at first call. The auto-set only fires if the env var is unset, so an explicit override always wins; an empty/wrong override pins the resolver to a directory without the sqlite.
+- **Resolution sqlite missing or stale**: `asset-resolver` logs the open failure, extracts current `root.bin` / `encoding.bin`, rebuilds `resolution.sqlite`, then reopens it. If rebuild fails, CASC lookup fails with the underlying read/build error.
+- **Wrong cache override**: an invalid `$ASSET_RESOLVER_CACHE_DIR` can put generated CASC metadata in an unexpected place or one without write permission. Unset it to use `~/.cache/asset-resolver`.
 - **Case-variant duplicates**: `out_path` uses the case returned by the listfile lookup. If a caller passes a non-canonical case to `lookup_path`, the BLP can land under `interface/...` or `INTERFACE/...` instead of `Interface/...`. The cache currently has 4 such stragglers out of 1747 files; harmless but wasteful.
 - **Listfile/CASC drift**: when the live archives have GC'd a file the encoding manifest still references, CASC extract fails with "missing resolution entry" or "missing archive location". The loader writes a `.missing` sentinel and falls back to `<wow>/_retail_/BlizzardInterfaceArt/` for the next request.
 - **Partial Blizzard UI source sync**: the source cache is ignored unless `.wow-ui-sim-blizzard-ui-complete` exists. Re-run `wow-cli casc sync-blizzard-ui` after fixing CASC/listfile issues.
@@ -88,9 +88,9 @@ The GUI startup path uses the cache only. If the completion marker is missing, s
 - `src/blizzard_ui_sync.rs` — Blizzard UI source manifest sync into the user cache
 - `data/blizzard-ui-files.txt` — manifest of Blizzard UI source files extractable from CASC
 - `src/texture.rs` — `TextureManager::load` and the in-memory cache
-- `asset-resolver/src/casc_resolver.rs` — `init_casc`, `extract_fdid_to_path`, `Installation::initialize`
-- `asset-resolver/src/casc_cache.rs` — `CascResolutionCache::open`, freshness check, `resolve_fdid`
-- `asset-resolver/src/paths.rs` — shared-root resolution and `remap_to_shared_data_path`
+- `asset-resolver/src/casc_resolver.rs` — `init_casc`, resolution metadata refresh, `extract_fdid_to_path`, `Installation::initialize`
+- `asset-resolver/src/casc_cache.rs` — `CascResolutionCache::open`, freshness check, `build_resolution_cache`, `resolve_fdid`
+- `asset-resolver/src/paths.rs` — source-data resolution, cache-root resolution, and `remap_to_shared_data_path`
 - `examples/casc_bench.rs` — reproduction harness for the timing table
 
 ## See Also
