@@ -29,6 +29,15 @@ type RenderResources = (
     Rc<RefCell<GlyphAtlas>>,
 );
 
+struct AppInitialSelections {
+    xp_level: String,
+    party_size: String,
+    class: String,
+    race: String,
+    rot_level: String,
+    movement: crate::config::MovementConfig,
+}
+
 const DEFAULT_FAST_TICK_MS: u64 = 16;
 
 /// Debug visualization options.
@@ -188,6 +197,88 @@ pub(crate) struct AppInit {
     pub(crate) config: crate::config::SimConfig,
 }
 
+impl AppInitialSelections {
+    fn from_config(config: &crate::config::SimConfig) -> Self {
+        Self {
+            xp_level: config.xp_level.clone(),
+            party_size: config.party_size.to_string(),
+            class: config.player_class.clone(),
+            race: config.player_race.clone(),
+            rot_level: config.rot_damage_level.clone(),
+            movement: config.movement.clone(),
+        }
+    }
+}
+
+macro_rules! app_from_initial_state {
+    ($init:ident, $selections:ident, $now:ident) => {
+        App {
+            env: $init.env,
+            log_messages: $init.log_messages,
+            command_input: String::new(),
+            texture_manager: $init.texture_manager,
+            font_system: $init.font_system,
+            glyph_atlas: $init.glyph_atlas,
+            hovered_frame: None,
+            pressed_frame: None,
+            mouse_down_frame: None,
+            right_mouse_down_frame: None,
+            mouse_down_pos: None,
+            dragging: false,
+            scroll_offset: 0.0,
+            screen_size: std::cell::Cell::new(Size::new(800.0, 600.0)),
+            debug_rx: Some($init.cmd_rx),
+            pending_screenshot: None,
+            lua_rx: Some($init.lua_rx),
+            debug_borders: $init.debug_borders,
+            debug_anchors: $init.debug_anchors,
+            cached_quads: RefCell::new(None),
+            cached_strata_quads: RefCell::new(std::array::from_fn(|_| None)),
+            cached_frame_snapshots: RefCell::new(std::array::from_fn(|_| None)),
+            pending_dirty_ids: RefCell::new(None),
+            cached_hittable: RefCell::new(None),
+            strata_dirty: std::cell::Cell::new((1u16 << crate::widget::FrameStrata::COUNT) - 1),
+            textures_pending: std::cell::Cell::new(false),
+            pending_texture_path_queue: RefCell::new(VecDeque::new()),
+            pending_texture_path_set: RefCell::new(FxHashSet::default()),
+            strata_pending_texture_requests: RefCell::new(std::array::from_fn(|_| {
+                FxHashMap::default()
+            })),
+            pending_texture_requests_by_path: RefCell::new(FxHashMap::default()),
+            ready_texture_path_cache: RefCell::new(FxHashSet::default()),
+            main_thread_phase: RefCell::new(("boot", $now)),
+            dropped_stale_timer_ticks: std::cell::Cell::new(0),
+            oldest_dropped_timer_tick_age: std::cell::Cell::new(std::time::Duration::ZERO),
+            frame_count: std::cell::Cell::new(0),
+            draw_time_accum_ms: std::cell::Cell::new(0.0),
+            tick_time_accum_ms: std::cell::Cell::new(0.0),
+            tick_count: std::cell::Cell::new(0),
+            fps_last_time: $now,
+            fps: 0.0,
+            tick_time_display: 0.0,
+            draw_time_display: 0.0,
+            other_time_display: 0.0,
+            mouse_position: None,
+            inspected_frame: None,
+            inspector_visible: false,
+            inspector_position: Point::new(100.0, 100.0),
+            inspector_state: InspectorState::default(),
+            frames_panel_collapsed: true,
+            last_on_update_time: $now,
+            saved_vars: $init.saved_vars,
+            pending_exec_lua: INIT_EXEC_LUA.with(|cell| cell.borrow_mut().take()),
+            selected_xp_level: $selections.xp_level,
+            selected_party_size: $selections.party_size,
+            last_party_health_tick: $now,
+            selected_class: $selections.class,
+            selected_race: $selections.race,
+            selected_rot_level: $selections.rot_level,
+            options_modal_visible: false,
+            movement: $selections.movement,
+        }
+    };
+}
+
 impl App {
     pub fn title(_state: &Self) -> String {
         "WoW UI Simulator".to_string()
@@ -234,70 +325,8 @@ impl App {
     /// Construct the App struct from initialized components.
     pub(crate) fn build_app(init: AppInit) -> Self {
         let now = std::time::Instant::now();
-        App {
-            env: init.env,
-            log_messages: init.log_messages,
-            command_input: String::new(),
-            texture_manager: init.texture_manager,
-            font_system: init.font_system,
-            glyph_atlas: init.glyph_atlas,
-            hovered_frame: None,
-            pressed_frame: None,
-            mouse_down_frame: None,
-            right_mouse_down_frame: None,
-            mouse_down_pos: None,
-            dragging: false,
-            scroll_offset: 0.0,
-            screen_size: std::cell::Cell::new(Size::new(800.0, 600.0)),
-            debug_rx: Some(init.cmd_rx),
-            pending_screenshot: None,
-            lua_rx: Some(init.lua_rx),
-            debug_borders: init.debug_borders,
-            debug_anchors: init.debug_anchors,
-            cached_quads: RefCell::new(None),
-            cached_strata_quads: RefCell::new(std::array::from_fn(|_| None)),
-            cached_frame_snapshots: RefCell::new(std::array::from_fn(|_| None)),
-            pending_dirty_ids: RefCell::new(None),
-            cached_hittable: RefCell::new(None),
-            strata_dirty: std::cell::Cell::new((1u16 << crate::widget::FrameStrata::COUNT) - 1),
-            textures_pending: std::cell::Cell::new(false),
-            pending_texture_path_queue: RefCell::new(VecDeque::new()),
-            pending_texture_path_set: RefCell::new(FxHashSet::default()),
-            strata_pending_texture_requests: RefCell::new(std::array::from_fn(|_| {
-                FxHashMap::default()
-            })),
-            pending_texture_requests_by_path: RefCell::new(FxHashMap::default()),
-            ready_texture_path_cache: RefCell::new(FxHashSet::default()),
-            main_thread_phase: RefCell::new(("boot", now)),
-            dropped_stale_timer_ticks: std::cell::Cell::new(0),
-            oldest_dropped_timer_tick_age: std::cell::Cell::new(std::time::Duration::ZERO),
-            frame_count: std::cell::Cell::new(0),
-            draw_time_accum_ms: std::cell::Cell::new(0.0),
-            tick_time_accum_ms: std::cell::Cell::new(0.0),
-            tick_count: std::cell::Cell::new(0),
-            fps_last_time: now,
-            fps: 0.0,
-            tick_time_display: 0.0,
-            draw_time_display: 0.0,
-            other_time_display: 0.0,
-            mouse_position: None,
-            inspected_frame: None,
-            inspector_visible: false,
-            inspector_position: Point::new(100.0, 100.0),
-            inspector_state: InspectorState::default(),
-            frames_panel_collapsed: true,
-            last_on_update_time: now,
-            saved_vars: init.saved_vars,
-            pending_exec_lua: INIT_EXEC_LUA.with(|cell| cell.borrow_mut().take()),
-            selected_xp_level: init.config.xp_level.clone(),
-            selected_party_size: init.config.party_size.to_string(),
-            last_party_health_tick: now,
-            selected_class: init.config.player_class,
-            selected_race: init.config.player_race,
-            selected_rot_level: init.config.rot_damage_level,
-            options_modal_visible: false,
-            movement: init.config.movement,
-        }
+        let selections = AppInitialSelections::from_config(&init.config);
+        app_from_initial_state!(init, selections, now)
     }
 
     /// Apply saved config to SimState before startup events fire.
