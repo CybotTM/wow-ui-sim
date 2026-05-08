@@ -534,34 +534,50 @@ fn emit_tooltip_text_segments(
     segment_run: TooltipTextSegments<'_>,
 ) {
     if segment_run.segments.is_empty() {
-        tr.emit(
-            segment_run.text,
-            segment_run.bounds,
-            segment_run.justify,
-            segment_run.font_size,
-            segment_run.color,
-            segment_run.wrap,
-        );
+        emit_unsegmented_tooltip_text(tr, segment_run);
         return;
     }
 
+    let mut flow = tooltip_segment_flow(tr, segment_run);
+    for segment in segment_run.segments {
+        emit_tooltip_segment_chunks(tr, segment_run, segment, &mut flow);
+    }
+}
+
+fn emit_unsegmented_tooltip_text(
+    tr: &mut TooltipTextRenderer<'_>,
+    segment_run: TooltipTextSegments<'_>,
+) {
+    tr.emit(
+        segment_run.text,
+        segment_run.bounds,
+        segment_run.justify,
+        segment_run.font_size,
+        segment_run.color,
+        segment_run.wrap,
+    );
+}
+
+fn tooltip_segment_flow(
+    tr: &mut TooltipTextRenderer<'_>,
+    segment_run: TooltipTextSegments<'_>,
+) -> TooltipSegmentFlow {
     let line_height = (segment_run.font_size * 1.2).ceil();
     let total_width =
         measure_tooltip_segments_width(tr, segment_run.segments, segment_run.font_size);
-    let mut flow = TooltipSegmentFlow {
-        x: tooltip_segment_start_x(
-            segment_run.bounds,
-            segment_run.justify,
-            total_width,
-            segment_run.wrap,
-        ),
+    let x = tooltip_segment_start_x(
+        segment_run.bounds,
+        segment_run.justify,
+        total_width,
+        segment_run.wrap,
+    );
+    let right = segment_run.bounds.x + segment_run.bounds.width;
+
+    TooltipSegmentFlow {
+        x,
         y: segment_run.bounds.y,
         line_height,
-        right: segment_run.bounds.x + segment_run.bounds.width,
-    };
-
-    for segment in segment_run.segments {
-        emit_tooltip_segment_chunks(tr, segment_run, segment, &mut flow);
+        right,
     }
 }
 
