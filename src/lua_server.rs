@@ -277,9 +277,14 @@ fn parse_request(line: &str) -> Result<Request, Response> {
 fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Response {
     match request {
         Request::Ping => Response::Pong,
-        Request::Exec { code } => {
-            send_command(cmd_tx, |respond| LuaCommand::Exec { code, respond })
-        }
+        request => send_app_command_request(request, cmd_tx),
+    }
+}
+
+fn send_app_command_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Response {
+    match request {
+        Request::Ping => unreachable!("ping requests are handled before command dispatch"),
+        Request::Exec { code } => send_exec_command(cmd_tx, code),
         Request::DumpTree {
             filter,
             filter_key,
@@ -295,6 +300,10 @@ fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Respon
             crop,
         } => send_screenshot_command(cmd_tx, output, width, height, filter, crop),
     }
+}
+
+fn send_exec_command(cmd_tx: &mpsc::Sender<LuaCommand>, code: String) -> Response {
+    send_command(cmd_tx, |respond| LuaCommand::Exec { code, respond })
 }
 
 fn send_dump_tree_command(
