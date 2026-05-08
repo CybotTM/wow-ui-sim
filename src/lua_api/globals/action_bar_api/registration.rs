@@ -4,7 +4,9 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, RustFn, Val};
 
-const GENERAL_METHODS: &[(&'static str, RustFn)] = &[
+type ActionBarMethod = (&'static str, RustFn);
+
+const GENERAL_METHODS: &[ActionBarMethod] = &[
     ("GetBonusBarIndexForSlot", get_bonus_bar_index_for_slot),
     ("IsOnBarOrSpecialBar", is_on_bar_or_special_bar),
     ("FindSpellActionButtons", find_spell_action_buttons),
@@ -19,6 +21,26 @@ const GENERAL_METHODS: &[(&'static str, RustFn)] = &[
         "HasAssistedCombatActionButtons",
         has_assisted_combat_action_buttons,
     ),
+];
+
+const BASIC_SLOT_VALUE_METHODS: &[ActionBarMethod] = &[
+    ("GetActionText", get_action_text),
+    ("GetActionCount", get_action_count),
+    ("GetActionDisplayCount", get_action_display_count),
+    ("GetActionUseCount", get_action_use_count),
+];
+
+const BASIC_SLOT_PREDICATE_METHODS: &[ActionBarMethod] = &[
+    ("IsConsumableAction", is_consumable_action),
+    ("IsStackableAction", is_stackable_action),
+    ("IsItemAction", is_item_action),
+    ("IsAttackAction", is_attack_action),
+    ("IsAutoRepeatAction", is_auto_repeat_action),
+    ("IsEquippedAction", is_equipped_action),
+    ("IsEquippedGearOutfitAction", is_equipped_gear_outfit_action),
+    ("IsHelpfulAction", is_helpful_action),
+    ("IsHarmfulAction", is_harmful_action),
+    ("IsPressHoldReleaseSpell", is_press_hold_release_spell),
 ];
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -42,7 +64,7 @@ fn register_general_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> Lu
 fn install_action_bar_methods(
     state: &mut LuaState,
     table_ref: GcRef<Table>,
-    methods: &[(&'static str, RustFn)],
+    methods: &[ActionBarMethod],
 ) -> LuaResult<()> {
     for &(name, func) in methods {
         table_set_rust_fn_static(state, table_ref, name, func)?;
@@ -79,23 +101,8 @@ fn register_state_queries(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaR
 }
 
 fn register_basic_slot_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
-    let methods: [(&'static str, RustFn); 14] = [
-        ("GetActionText", get_action_text),
-        ("GetActionCount", get_action_count),
-        ("GetActionDisplayCount", get_action_display_count),
-        ("GetActionUseCount", get_action_use_count),
-        ("IsConsumableAction", is_consumable_action),
-        ("IsStackableAction", is_stackable_action),
-        ("IsItemAction", is_item_action),
-        ("IsAttackAction", is_attack_action),
-        ("IsAutoRepeatAction", is_auto_repeat_action),
-        ("IsEquippedAction", is_equipped_action),
-        ("IsEquippedGearOutfitAction", is_equipped_gear_outfit_action),
-        ("IsHelpfulAction", is_helpful_action),
-        ("IsHarmfulAction", is_harmful_action),
-        ("IsPressHoldReleaseSpell", is_press_hold_release_spell),
-    ];
-    install_action_bar_methods(state, table_ref, &methods)
+    install_action_bar_methods(state, table_ref, BASIC_SLOT_VALUE_METHODS)?;
+    install_action_bar_methods(state, table_ref, BASIC_SLOT_PREDICATE_METHODS)
 }
 
 fn register_cooldown_slot_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
