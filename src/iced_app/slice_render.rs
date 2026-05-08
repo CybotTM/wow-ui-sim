@@ -69,6 +69,14 @@ enum TileSlicePattern {
     Grid { tile_w: f32, tile_h: f32 },
 }
 
+#[derive(Clone, Copy)]
+struct TilePatternEmit<'a> {
+    texture: TexturedSlice<'a>,
+    bounds: Rectangle,
+    full_uvs: &'a Rectangle,
+    path: &'a str,
+}
+
 impl TileSlicePattern {
     fn is_valid(self) -> bool {
         match self {
@@ -118,81 +126,65 @@ impl TileSlicePattern {
         full_uvs: &Rectangle,
         path: &str,
     ) {
+        let emit = TilePatternEmit {
+            texture,
+            bounds,
+            full_uvs,
+            path,
+        };
+
         match self {
-            Self::Horizontal { tile_w } => {
-                emit_pattern_horiz_tiles(batch, texture, bounds, full_uvs, path, tile_w)
-            }
-            Self::Vertical { tile_h } => {
-                emit_pattern_vert_tiles(batch, texture, bounds, full_uvs, path, tile_h)
-            }
-            Self::Grid { tile_w, tile_h } => {
-                emit_pattern_grid_tiles(batch, texture, bounds, full_uvs, path, tile_w, tile_h)
-            }
+            Self::Horizontal { tile_w } => emit_pattern_horiz_tiles(batch, emit, tile_w),
+            Self::Vertical { tile_h } => emit_pattern_vert_tiles(batch, emit, tile_h),
+            Self::Grid { tile_w, tile_h } => emit_pattern_grid_tiles(batch, emit, tile_w, tile_h),
         }
     }
 }
 
-fn emit_pattern_horiz_tiles(
-    batch: &mut QuadBatch,
-    texture: TexturedSlice<'_>,
-    bounds: Rectangle,
-    full_uvs: &Rectangle,
-    path: &str,
-    tile_w: f32,
-) {
+fn emit_pattern_horiz_tiles(batch: &mut QuadBatch, emit: TilePatternEmit<'_>, tile_w: f32) {
     emit_horiz_tiles(
         batch,
         HorizTileStrip {
-            bounds,
-            uvs: full_uvs,
-            tex_path: path,
+            bounds: emit.bounds,
+            uvs: emit.full_uvs,
+            tex_path: emit.path,
             tile_w,
-            tint: texture.tint,
-            blend: texture.blend,
+            tint: emit.texture.tint,
+            blend: emit.texture.blend,
         },
     );
 }
 
-fn emit_pattern_vert_tiles(
-    batch: &mut QuadBatch,
-    texture: TexturedSlice<'_>,
-    bounds: Rectangle,
-    full_uvs: &Rectangle,
-    path: &str,
-    tile_h: f32,
-) {
+fn emit_pattern_vert_tiles(batch: &mut QuadBatch, emit: TilePatternEmit<'_>, tile_h: f32) {
     emit_vert_tiles(
         batch,
         VertTileStrip {
-            bounds,
-            uvs: full_uvs,
-            tex_path: path,
+            bounds: emit.bounds,
+            uvs: emit.full_uvs,
+            tex_path: emit.path,
             tile_h,
-            tint: texture.tint,
-            blend: texture.blend,
+            tint: emit.texture.tint,
+            blend: emit.texture.blend,
         },
     );
 }
 
 fn emit_pattern_grid_tiles(
     batch: &mut QuadBatch,
-    texture: TexturedSlice<'_>,
-    bounds: Rectangle,
-    full_uvs: &Rectangle,
-    path: &str,
+    emit: TilePatternEmit<'_>,
     tile_w: f32,
     tile_h: f32,
 ) {
     emit_grid_tiles(
         batch,
         GridTileStrip {
-            bounds,
-            uvs: full_uvs,
-            tex_path: path,
+            bounds: emit.bounds,
+            uvs: emit.full_uvs,
+            tex_path: emit.path,
             tile_w,
             tile_h,
-            tint: texture.tint,
-            blend: texture.blend,
+            tint: emit.texture.tint,
+            blend: emit.texture.blend,
         },
     );
 }
