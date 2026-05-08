@@ -446,7 +446,13 @@ fn ensure_perf_dirty_texture_exists(env: &WowLuaEnv) {
 }
 
 fn seed_perf_tooltip(env: &WowLuaEnv) {
-    env.exec(&format!(
+    let script = perf_tooltip_seed_lua();
+    env.exec(&script)
+        .expect("perf tooltip setup should succeed");
+}
+
+fn perf_tooltip_seed_lua() -> String {
+    format!(
         r#"
         if not _G.{owner_name} then
             local owner = CreateFrame("Frame", "{owner_name}", UIParent)
@@ -466,8 +472,7 @@ fn seed_perf_tooltip(env: &WowLuaEnv) {
     "#,
         owner_name = PERF_TOOLTIP_OWNER_NAME,
         header = PERF_TOOLTIP_HEADER,
-    ))
-    .expect("perf tooltip setup should succeed");
+    )
 }
 
 fn full_dirty_mask() -> u16 {
