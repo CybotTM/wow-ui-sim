@@ -23,7 +23,13 @@ fn load_store_ui_tree() -> WowLuaEnv {
         state.addon_base_paths = vec![blizzard_ui_dir()];
     }
     wow_ui_sim::xml::register_intrinsic_templates();
+    load_store_addons(&env);
 
+    env.apply_post_load_workarounds();
+    env
+}
+
+fn load_store_addons(env: &WowLuaEnv) {
     for (name, toc_path) in [
         (
             "Blizzard_SharedXMLBase",
@@ -49,9 +55,6 @@ fn load_store_ui_tree() -> WowLuaEnv {
             panic!("[load {name}] FAILED: {err}");
         });
     }
-
-    env.apply_post_load_workarounds();
-    env
 }
 
 fn load_full_game_ui() -> WowLuaEnv {
