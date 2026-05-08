@@ -240,7 +240,11 @@ fn test_toy_box_filter_stubs() {
             if not C_ToyBox.GetCollectedShown() then return "collected" end
             if not C_ToyBox.GetUncollectedShown() then return "uncollected" end
             if not C_ToyBox.GetUnusableShown() then return "unusable" end
+            if not C_ToyBox.IsExpansionTypeFilterChecked(1) then return "expansion" end
+            if not C_ToyBox.IsSourceTypeFilterChecked(1) then return "source" end
             C_ToyBox.SetCollectedShown(false)
+            C_ToyBox.SetExpansionTypeFilter(1, false)
+            C_ToyBox.SetSourceTypeFilter(1, false)
             C_ToyBox.SetUncollectedShown(false)
             C_ToyBox.SetUnusableShown(false)
             return "ok"

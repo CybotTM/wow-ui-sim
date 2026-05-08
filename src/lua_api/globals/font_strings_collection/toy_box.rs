@@ -151,6 +151,11 @@ fn register_toy_favorites(b: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn register_toy_filter_stubs(b: TableBuilder) -> LuaResult<TableBuilder> {
+    let b = register_toy_visibility_filter_stubs(b)?;
+    register_toy_type_filter_stubs(b)
+}
+
+fn register_toy_visibility_filter_stubs(b: TableBuilder) -> LuaResult<TableBuilder> {
     b.set_function("GetCollectedShown", |state| true.into_stack(state))?
         .set_function("GetUncollectedShown", |state| true.into_stack(state))?
         .set_function("GetUnusableShown", |state| true.into_stack(state))?
@@ -158,6 +163,19 @@ fn register_toy_filter_stubs(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetUncollectedShown", |_state| Ok(0))?
         .set_function("SetUnusableShown", |_state| Ok(0))?
         .set_function("ForceToyRefilter", |_state| Ok(0))
+}
+
+fn register_toy_type_filter_stubs(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("IsExpansionTypeFilterChecked", |state| {
+        let _filter_index = i32::from_stack(state, 1)?;
+        true.into_stack(state)
+    })?
+    .set_function("IsSourceTypeFilterChecked", |state| {
+        let _filter_index = i32::from_stack(state, 1)?;
+        true.into_stack(state)
+    })?
+    .set_function("SetExpansionTypeFilter", |_state| Ok(0))?
+    .set_function("SetSourceTypeFilter", |_state| Ok(0))
 }
 
 pub fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {

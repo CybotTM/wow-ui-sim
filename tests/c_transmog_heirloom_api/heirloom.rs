@@ -168,3 +168,21 @@ fn test_heirloom_get_class_and_spec_filters() {
     assert_eq!(class_filter, 0);
     assert_eq!(spec_filter, 0);
 }
+
+#[test]
+fn test_heirloom_source_filter_surface() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if C_HeirloomInfo.IsHeirloomSourceValid(1) then return "source valid" end
+            if not C_Heirloom.GetHeirloomSourceFilter(1) then return "source unchecked" end
+            C_Heirloom.SetHeirloomSourceFilter(1, false)
+            C_HeirloomInfo.SetAllSourceFilters(true)
+            C_HeirloomInfo.SetDefaultFilters()
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}

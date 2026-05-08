@@ -26,17 +26,48 @@ use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_api::state::{BagItem, SimState};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_heirloom_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Heirloom")?;
+    register_heirloom_item_fns(state, table_ref)?;
+    register_heirloom_filter_fns(state, table_ref)?;
+    register_heirloom_info_fns(state)
+}
+
+fn register_heirloom_item_fns(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    register_heirloom_item_mutation_fns(state, table_ref)?;
+    register_heirloom_item_query_fns(state, table_ref)
+}
+
+fn register_heirloom_item_mutation_fns(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
         "CreateHeirloom",
         c_heirloom_create_heirloom,
-    )?;
+    )
+}
+
+fn register_heirloom_item_query_fns(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
+    register_heirloom_info_query_fns(state, table_ref)?;
+    register_heirloom_count_query_fns(state, table_ref)?;
+    register_heirloom_status_query_fns(state, table_ref)
+}
+
+fn register_heirloom_info_query_fns(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -54,7 +85,13 @@ pub(super) fn register_heirloom_surface(state: &mut LuaState) -> LuaResult<()> {
         table_ref,
         "GetHeirloomMaxUpgradeLevel",
         c_heirloom_get_max_upgrade_level,
-    )?;
+    )
+}
+
+fn register_heirloom_count_query_fns(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -72,7 +109,13 @@ pub(super) fn register_heirloom_surface(state: &mut LuaState) -> LuaResult<()> {
         table_ref,
         "GetNumDisplayedHeirlooms",
         c_heirloom_get_num_displayed_heirlooms,
-    )?;
+    )
+}
+
+fn register_heirloom_status_query_fns(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -84,7 +127,19 @@ pub(super) fn register_heirloom_surface(state: &mut LuaState) -> LuaResult<()> {
         table_ref,
         "GetHeirloomLink",
         c_heirloom_get_heirloom_link,
-    )?;
+    )
+}
+
+fn register_heirloom_filter_fns(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    register_heirloom_collection_filter_fns(state, table_ref)?;
+    register_heirloom_source_filter_fns(state, table_ref)?;
+    register_heirloom_class_filter_fns(state, table_ref)
+}
+
+fn register_heirloom_collection_filter_fns(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -108,7 +163,31 @@ pub(super) fn register_heirloom_surface(state: &mut LuaState) -> LuaResult<()> {
         table_ref,
         "SetUncollectedHeirloomFilter",
         c_heirloom_set_uncollected_filter,
+    )
+}
+
+fn register_heirloom_source_filter_fns(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetHeirloomSourceFilter",
+        c_heirloom_get_source_filter,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SetHeirloomSourceFilter",
+        c_heirloom_set_source_filter,
+    )
+}
+
+fn register_heirloom_class_filter_fns(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -120,6 +199,29 @@ pub(super) fn register_heirloom_surface(state: &mut LuaState) -> LuaResult<()> {
         table_ref,
         "CanHeirloomUpgradeFromPending",
         c_heirloom_can_upgrade_from_pending,
+    )?;
+    Ok(())
+}
+
+fn register_heirloom_info_fns(state: &mut LuaState) -> LuaResult<()> {
+    let info_ref = ensure_namespace(state, "C_HeirloomInfo")?;
+    table_set_rust_fn_static(
+        state,
+        info_ref,
+        "IsHeirloomSourceValid",
+        c_heirloom_info_is_source_valid,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        info_ref,
+        "SetAllSourceFilters",
+        c_heirloom_info_set_all_source_filters,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        info_ref,
+        "SetDefaultFilters",
+        c_heirloom_info_set_default_filters,
     )?;
     Ok(())
 }
@@ -315,6 +417,18 @@ fn c_heirloom_set_uncollected_filter(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn c_heirloom_get_source_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let _source = i32::from_stack(state, 1)?;
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_heirloom_set_source_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let _source = i32::from_stack(state, 1)?;
+    let _enabled = bool::from_stack(state, 2)?;
+    Ok(0)
+}
+
 fn c_heirloom_get_class_and_spec_filters(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     state.push(Val::Num(0.0));
@@ -325,4 +439,19 @@ fn c_heirloom_can_upgrade_from_pending(state: &mut LuaState) -> LuaResult<u32> {
     let _item_id = i32::from_stack(state, 1)?;
     state.push(Val::Bool(false));
     Ok(1)
+}
+
+fn c_heirloom_info_is_source_valid(state: &mut LuaState) -> LuaResult<u32> {
+    let _source = i32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_heirloom_info_set_all_source_filters(state: &mut LuaState) -> LuaResult<u32> {
+    let _enabled = bool::from_stack(state, 1)?;
+    Ok(0)
+}
+
+fn c_heirloom_info_set_default_filters(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }

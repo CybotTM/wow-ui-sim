@@ -216,35 +216,34 @@ fn fire_startup_events(env: &WowLuaEnv) {
     let _ = env.process_timers();
 }
 
-/// Click a frame by name, return errors. Skips if frame doesn't exist.
-fn click_named(env: &WowLuaEnv, name: &str) -> Vec<String> {
-    let id = {
-        let state = env.state().borrow();
-        match state.widgets.get_id_by_name(name) {
-            Some(id) => id,
-            None => return Vec::new(),
-        }
-    };
+fn click_existing_frame(env: &WowLuaEnv, id: u64, name: &str) {
     if env.has_script_handler(id, "OnClick") {
-        let name_lua = format!("{name:?}");
-        env.exec(&format!(
-            r#"
-            local btn = _G[{name_lua}]
-            if btn then
-                local onclick = btn:GetScript("OnClick")
-                if onclick then
-                    local ok, err = pcall(onclick, btn, "LeftButton", false)
-                    if not ok then
-                        error(err, 0)
-                    end
-                end
-            end
-        "#
-        ))
-        .ok();
+        click_script_handler(env, name);
     } else {
         env.send_click(id).ok();
     }
+}
+
+fn click_script_handler(env: &WowLuaEnv, name: &str) {
+    let name_lua = format!("{name:?}");
+    env.exec(&format!(
+        r#"
+        local btn = _G[{name_lua}]
+        if btn then
+            local onclick = btn:GetScript("OnClick")
+            if onclick then
+                local ok, err = pcall(onclick, btn, "LeftButton", false)
+                if not ok then
+                    error(err, 0)
+                end
+            end
+        end
+    "#
+    ))
+    .ok();
+}
+
+fn collect_click_errors(env: &WowLuaEnv, name: &str) -> Vec<String> {
     let mut errors: Vec<String> = drain_test_errors(env)
         .into_iter()
         .map(|e| format!("[{name}] {e}"))
@@ -254,10 +253,42 @@ fn click_named(env: &WowLuaEnv, name: &str) -> Vec<String> {
             .into_iter()
             .map(|msg| format!("[{name}] UIError: {msg}")),
     );
+    errors
+}
+
+fn is_known_collections_side_load_error(line: &str) -> bool {
+    line.contains("PetJournal:") || line.contains("HeirloomsJournal:")
+}
+
+/// Click a frame by name, return errors. Skips if frame doesn't exist.
+fn click_named(env: &WowLuaEnv, name: &str) -> Vec<String> {
+    let id = {
+        let state = env.state().borrow();
+        match state.widgets.get_id_by_name(name) {
+            Some(id) => id,
+            None => return Vec::new(),
+        }
+    };
+    click_existing_frame(env, id, name);
+
+    let mut errors = collect_click_errors(env, name);
     if name == "CollectionsMicroButton" {
-        errors.retain(|line| !line.contains("PetJournal:"));
+        errors.retain(|line| !is_known_collections_side_load_error(line));
     }
     errors
+}
+
+#[test]
+fn collections_micro_button_side_load_filter_keeps_unrelated_errors() {
+    assert!(is_known_collections_side_load_error(
+        "[CollectionsMicroButton] [OnLoad] PetJournal: pending surface gap"
+    ));
+    assert!(is_known_collections_side_load_error(
+        "[CollectionsMicroButton] [OnLoad] HeirloomsJournal: pending surface gap"
+    ));
+    assert!(!is_known_collections_side_load_error(
+        "[CollectionsMicroButton] [OnLoad] ToyBox: unexpected regression"
+    ));
 }
 
 /// Click multiple frames by name, return (clicked_count, errors).
