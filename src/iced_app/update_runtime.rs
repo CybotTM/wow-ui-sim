@@ -12,6 +12,11 @@ use super::update_helpers::{
     apply_subtree_hit_grid_change, get_checked_attribute, is_toggleable_checkbutton,
 };
 
+struct TimerTickOutcome {
+    combined: u16,
+    redraw_needed: bool,
+}
+
 impl App {
     pub(super) fn save_config(&self) {
         let mut config = crate::config::SimConfig::load();
@@ -316,17 +321,34 @@ impl App {
         let tick_started = std::time::Instant::now();
         let mut stage_timings = TickStageTimings::default();
         let queued_preloads_pending = self.has_queued_texture_preloads();
+        let outcome = self.run_timer_tick_stages(queued_preloads_pending, &mut stage_timings);
 
+        self.finish_timer_tick(
+            tick_started,
+            outcome.combined,
+            outcome.redraw_needed,
+            &mut stage_timings,
+        )
+    }
+
+    fn run_timer_tick_stages(
+        &mut self,
+        queued_preloads_pending: bool,
+        stage_timings: &mut TickStageTimings,
+    ) -> TimerTickOutcome {
         let mut redraw_needed =
-            self.preload_visible_textures_for_tick(queued_preloads_pending, &mut stage_timings);
-        redraw_needed |= self.run_pending_lua_for_tick(&mut stage_timings);
+            self.preload_visible_textures_for_tick(queued_preloads_pending, stage_timings);
+        redraw_needed |= self.run_pending_lua_for_tick(stage_timings);
 
-        let combined = self.collect_tick_work(&mut stage_timings);
-        redraw_needed |= self.mark_tick_dirty(combined, &mut stage_timings);
-        redraw_needed |= self
-            .preload_pending_render_requests_for_tick(queued_preloads_pending, &mut stage_timings);
+        let combined = self.collect_tick_work(stage_timings);
+        redraw_needed |= self.mark_tick_dirty(combined, stage_timings);
+        redraw_needed |=
+            self.preload_pending_render_requests_for_tick(queued_preloads_pending, stage_timings);
 
-        self.finish_timer_tick(tick_started, combined, redraw_needed, &mut stage_timings)
+        TimerTickOutcome {
+            combined,
+            redraw_needed,
+        }
     }
 
     fn drop_stale_timer_tick(&self, captured_at: Instant) -> bool {
