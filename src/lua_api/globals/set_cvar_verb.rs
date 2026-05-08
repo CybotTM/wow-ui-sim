@@ -14,7 +14,9 @@
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::closure::RustFn;
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::string::LuaString;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -253,18 +255,22 @@ fn install_c_cvar_namespace(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_c_cvar_functions(state, table_ref)
 }
 
-fn register_c_cvar_functions(
-    state: &mut LuaState,
-    table_ref: rilua::vm::gc::arena::GcRef<Table>,
-) -> crate::Result<()> {
+fn register_c_cvar_functions(state: &mut LuaState, table_ref: GcRef<Table>) -> crate::Result<()> {
     for &(name, func) in C_CVAR_FUNCTIONS {
         crate::lua_bridge::table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }
 
-fn ensure_c_cvar_table(state: &mut LuaState) -> rilua::vm::gc::arena::GcRef<Table> {
+fn ensure_c_cvar_table(state: &mut LuaState) -> GcRef<Table> {
     let key = state.gc.intern_string_static(b"C_CVar");
+    if let Some(table_ref) = existing_c_cvar_table(state, key) {
+        return table_ref;
+    }
+    insert_c_cvar_table(state, key)
+}
+
+fn existing_c_cvar_table(state: &mut LuaState, key: GcRef<LuaString>) -> Option<GcRef<Table>> {
     let global = state.global;
     let existing = state
         .gc
@@ -272,8 +278,13 @@ fn ensure_c_cvar_table(state: &mut LuaState) -> rilua::vm::gc::arena::GcRef<Tabl
         .get(global)
         .map(|t| t.get_str(key, &state.gc.string_arena));
     if let Some(Val::Table(r)) = existing {
-        return r;
+        return Some(r);
     }
+    None
+}
+
+fn insert_c_cvar_table(state: &mut LuaState, key: GcRef<LuaString>) -> GcRef<Table> {
+    let global = state.global;
     let new_val = crate::lua_api::methods::create_table(state);
     let Val::Table(new_ref) = new_val else {
         unreachable!("create_table must return a table");
