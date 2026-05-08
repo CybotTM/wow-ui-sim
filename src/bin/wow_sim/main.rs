@@ -163,10 +163,21 @@ impl Args {
 
 fn main() {
     wow_ui_sim::stack::ensure_large_stack();
+    set_cwd_to_exe_dir_for_gui_launch();
     if let Err(error) = run_main() {
         report_fatal_error(error.as_ref());
         std::process::exit(1);
     }
+}
+
+fn set_cwd_to_exe_dir_for_gui_launch() {
+    let Ok(exe) = std::env::current_exe() else {
+        return;
+    };
+    let Some(parent) = exe.parent() else {
+        return;
+    };
+    let _ = std::env::set_current_dir(parent);
 }
 
 fn run_main() -> Result<(), Box<dyn std::error::Error>> {
