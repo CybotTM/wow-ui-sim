@@ -475,15 +475,20 @@ fn perf_tooltip_lines_lua() -> String {
         GameTooltip:SetOwner(_G.{owner_name}, "ANCHOR_NONE")
         GameTooltip:ClearLines()
         GameTooltip:AddLine("{header}")
-        GameTooltip:AddLine("This is a deliberately long tooltip body line used to exercise wrapped tooltip text measurement and quad emission in the render path.", 1, 1, 1, true)
-        GameTooltip:AddDoubleLine("Spell", "Avenger's Shield")
-        GameTooltip:AddLine("Second wrapped line to keep the body realistic and ensure multiple glyph rows are emitted into the tooltip batch.", 0.9, 0.82, 0.5, true)
-        GameTooltip:AddDoubleLine("Cooldown", "15 sec")
+        {body_lines}
         GameTooltip:Show()
     "#,
         owner_name = PERF_TOOLTIP_OWNER_NAME,
         header = PERF_TOOLTIP_HEADER,
+        body_lines = perf_tooltip_body_lines_lua(),
     )
+}
+
+fn perf_tooltip_body_lines_lua() -> &'static str {
+    r#"GameTooltip:AddLine("This is a deliberately long tooltip body line used to exercise wrapped tooltip text measurement and quad emission in the render path.", 1, 1, 1, true)
+        GameTooltip:AddDoubleLine("Spell", "Avenger's Shield")
+        GameTooltip:AddLine("Second wrapped line to keep the body realistic and ensure multiple glyph rows are emitted into the tooltip batch.", 0.9, 0.82, 0.5, true)
+        GameTooltip:AddDoubleLine("Cooldown", "15 sec")"#
 }
 
 fn full_dirty_mask() -> u16 {
