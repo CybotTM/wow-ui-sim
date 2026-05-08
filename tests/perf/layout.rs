@@ -146,16 +146,26 @@ pub fn measure_tooltip_collect_and_quad_emission(env: &WowLuaEnv) -> Duration {
     seed_perf_tooltip(env);
 
     let mut font_system = WowFontSystem::new();
-    {
-        let mut state = env.state().borrow_mut();
-        update_tooltip_sizes(&mut state, &mut font_system);
-    }
+    update_seeded_perf_tooltip_sizes(env, &mut font_system);
 
     let mut glyph_atlas = GlyphAtlas::new();
+    measure_seeded_perf_tooltip_quad_emission(env, &mut font_system, &mut glyph_atlas)
+}
+
+fn update_seeded_perf_tooltip_sizes(env: &WowLuaEnv, font_system: &mut WowFontSystem) {
+    let mut state = env.state().borrow_mut();
+    update_tooltip_sizes(&mut state, font_system);
+}
+
+fn measure_seeded_perf_tooltip_quad_emission(
+    env: &WowLuaEnv,
+    font_system: &mut WowFontSystem,
+    glyph_atlas: &mut GlyphAtlas,
+) -> Duration {
     let started = Instant::now();
     {
         let state = env.state().borrow();
-        emit_perf_tooltip_quads(&state, &mut font_system, &mut glyph_atlas);
+        emit_perf_tooltip_quads(&state, font_system, glyph_atlas);
     }
     started.elapsed()
 }
