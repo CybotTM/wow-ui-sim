@@ -422,7 +422,12 @@ fn assert_blizzard_player_frame_click_targets_player(env: &WowLuaEnv) {
 
 fn assert_blizzard_party_member_frame_click_targets_party1(env: &WowLuaEnv) {
     env.exec("ClearTarget()").expect("ClearTarget");
+    click_party_member_frame(env);
+    assert_no_party_member_click_errors(env);
+    assert_target_name(env, "Healer", "party member click should target party1");
+}
 
+fn click_party_member_frame(env: &WowLuaEnv) {
     env.exec(
         r#"
             A_Admin.SetPartySize(1)
@@ -448,7 +453,9 @@ fn assert_blizzard_party_member_frame_click_targets_party1(env: &WowLuaEnv) {
         "#,
     )
     .expect("click party1 member frame");
+}
 
+fn assert_no_party_member_click_errors(env: &WowLuaEnv) {
     let fatal_errors: Vec<String> = drain_test_errors(env)
         .into_iter()
         .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
@@ -457,12 +464,6 @@ fn assert_blizzard_party_member_frame_click_targets_party1(env: &WowLuaEnv) {
         fatal_errors.is_empty(),
         "party member click errors:\n{}",
         fatal_errors.join("\n")
-    );
-
-    let target_name: String = env.eval("return UnitName('target')").unwrap();
-    assert_eq!(
-        target_name, "Healer",
-        "party member click should target party1"
     );
 }
 
