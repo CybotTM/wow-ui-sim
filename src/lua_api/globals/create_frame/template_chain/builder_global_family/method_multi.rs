@@ -192,7 +192,7 @@ fn string_function_result_variant<'a>(
         function_name,
         FunctionResultFirstArg::Literal(first),
         second,
-        (*third, *fourth, *fifth),
+        function_result_numbers(third, fourth, fifth),
     ))
 }
 
@@ -218,8 +218,12 @@ fn global_function_result_variant<'a>(
         function_name,
         FunctionResultFirstArg::Global(first_arg_path),
         second,
-        (*third, *fourth, *fifth),
+        function_result_numbers(third, fourth, fifth),
     ))
+}
+
+fn function_result_numbers(third: &f64, fourth: &f64, fifth: &f64) -> (f64, f64, f64) {
+    (*third, *fourth, *fifth)
 }
 
 struct FunctionResultVariant<'a> {
