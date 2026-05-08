@@ -213,12 +213,9 @@ impl App {
 
     pub(super) fn update_editbox_focus(&self, clicked_frame: Option<u64>) {
         let env = self.env.borrow();
-        let new_focus = env.resolve_editbox_focus_target(clicked_frame);
-        let old_focus = env.state().borrow().focused_frame_id;
-
-        if new_focus == old_focus {
+        let Some((old_focus, new_focus)) = resolve_editbox_focus_change(&env, clicked_frame) else {
             return;
-        }
+        };
 
         apply_editbox_focus_state(&env, old_focus, new_focus);
         fire_editbox_focus_scripts(&env, old_focus, new_focus);
@@ -457,6 +454,16 @@ impl App {
             Task::none()
         }
     }
+}
+
+fn resolve_editbox_focus_change(
+    env: &WowLuaEnv,
+    clicked_frame: Option<u64>,
+) -> Option<(Option<u64>, Option<u64>)> {
+    let new_focus = env.resolve_editbox_focus_target(clicked_frame);
+    let old_focus = env.state().borrow().focused_frame_id;
+
+    (new_focus != old_focus).then_some((old_focus, new_focus))
 }
 
 fn apply_editbox_focus_state(env: &WowLuaEnv, old_focus: Option<u64>, new_focus: Option<u64>) {
