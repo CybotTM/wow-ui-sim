@@ -110,14 +110,23 @@ fn create_engine_frames(
     o: u16,
 ) -> u64 {
     let ui_parent_id = create_ui_parent(widgets, screen_width, screen_height, o);
-
-    set_ui_parent_panel_attributes(widgets, ui_parent_id);
-    create_world_frame(widgets, screen_width, screen_height, o);
-    create_minimap_cluster(widgets, ui_parent_id, o);
-    create_tooltip_frames(widgets, ui_parent_id, o);
-    create_default_chat_frame(widgets, ui_parent_id, o);
+    create_engine_frame_children(widgets, ui_parent_id, screen_width, screen_height, o);
 
     ui_parent_id
+}
+
+fn create_engine_frame_children(
+    widgets: &mut WidgetRegistry,
+    ui_parent_id: u64,
+    screen_width: f32,
+    screen_height: f32,
+    owner: u16,
+) {
+    set_ui_parent_panel_attributes(widgets, ui_parent_id);
+    create_world_frame(widgets, screen_width, screen_height, owner);
+    create_minimap_cluster(widgets, ui_parent_id, owner);
+    create_tooltip_frames(widgets, ui_parent_id, owner);
+    create_default_chat_frame(widgets, ui_parent_id, owner);
 }
 
 fn create_ui_parent(
