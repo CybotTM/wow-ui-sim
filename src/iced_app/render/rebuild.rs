@@ -130,6 +130,12 @@ struct EmitOneFrame<'a> {
     statusbar_fills: &'a HashMap<u64, super::super::statusbar::StatusBarFill>,
 }
 
+struct EmitUncachedFrame<'a> {
+    entry: RenderListEntry,
+    ctx: StrataRenderContext<'a>,
+    statusbar_fills: &'a HashMap<u64, super::super::statusbar::StatusBarFill>,
+}
+
 fn emit_marble_background(batch: &mut QuadBatch, size: Size) {
     batch.push_tiled_path(
         Rectangle::new(Point::ORIGIN, size),
@@ -277,19 +283,15 @@ fn emit_strata_cached(
             continue;
         }
 
-        let before = snapshot_offsets(batch);
-        let emitted = emit_one_frame(
+        let emitted = emit_uncached_frame(
             batch,
+            snapshots,
             text_ctx,
-            EmitOneFrame {
+            EmitUncachedFrame {
                 entry,
                 ctx: params.ctx,
                 statusbar_fills: &statusbar_fills,
             },
-        );
-        snapshots.insert(
-            entry.id,
-            batch.take_snapshot_since(before.0, before.1, before.2, before.3),
         );
         if emitted {
             stats.emitted += 1;
@@ -297,6 +299,29 @@ fn emit_strata_cached(
     }
 
     stats
+}
+
+fn emit_uncached_frame(
+    batch: &mut QuadBatch,
+    snapshots: &mut HashMap<u64, FrameQuadSnapshot>,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    params: EmitUncachedFrame<'_>,
+) -> bool {
+    let before = snapshot_offsets(batch);
+    let emitted = emit_one_frame(
+        batch,
+        text_ctx,
+        EmitOneFrame {
+            entry: params.entry,
+            ctx: params.ctx,
+            statusbar_fills: params.statusbar_fills,
+        },
+    );
+    snapshots.insert(
+        params.entry.id,
+        batch.take_snapshot_since(before.0, before.1, before.2, before.3),
+    );
+    emitted
 }
 
 /// Try to append a cached snapshot for a clean frame. Returns true on hit.
