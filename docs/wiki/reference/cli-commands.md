@@ -86,6 +86,14 @@ Static analysis of `vendor/wow-ui-source/` to find gaps between what BlizzardUI 
 wow-cli audit-api --gaps --format plan      # Markdown checkboxes for PLAN.md
 ```
 
+### `casc sync-blizzard-ui`
+
+Extract Blizzard UI source files from the local WoW CASC install into `~/.cache/wow-ui-sim/blizzard-ui`. GUI startup runs this automatically when the repo symlink/vendor checkout is missing.
+
+```bash
+wow-cli casc sync-blizzard-ui
+```
+
 ## Common Flags (wow-sim)
 
 | Flag | Effect |
@@ -101,9 +109,11 @@ wow-cli audit-api --gaps --format plan      # Markdown checkboxes for PLAN.md
 ## Sources
 
 - [AGENTS.md](../../../AGENTS.md) — full CLI reference, Docker usage, environment variables
+- [[casc-asset-cache]] — CASC-backed texture and Blizzard UI source caches
 
 ## See Also
 
 - [[debug-tools]] — dump-tree and overlay details
 - [[addon-compatibility]] — Docker CI usage for addon testing
 - [[api-coverage]] — audit-api output and gap report
+- [[casc-asset-cache]] — CASC cache locations and failure modes

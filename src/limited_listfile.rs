@@ -26,6 +26,14 @@ pub fn lookup_entry(path: &str) -> Option<ListfileEntry> {
     BY_PATH.get(normalized.as_str()).copied()
 }
 
+pub fn entries() -> impl Iterator<Item = ListfileEntry> {
+    BY_PATH.values().copied()
+}
+
+pub fn blizzard_ui_entries() -> impl Iterator<Item = ListfileEntry> {
+    entries().filter(|entry| entry.path.starts_with("interface/addons/blizzard_"))
+}
+
 fn parse_bundled_listfile() -> HashMap<&'static str, ListfileEntry> {
     BUNDLED_LISTFILE
         .lines()
@@ -46,13 +54,25 @@ fn normalize_path(path: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::lookup_path;
+    use super::{blizzard_ui_entries, lookup_path};
 
     #[test]
     fn lookup_path_normalizes_slashes_and_case() {
         assert_eq!(
             lookup_path("Interface\\Icons\\Trade_Engineering.blp"),
             Some(136243)
+        );
+    }
+
+    #[test]
+    fn blizzard_ui_entries_include_only_addon_tree_rows() {
+        let entries: Vec<_> = blizzard_ui_entries().take(3).collect();
+
+        assert!(!entries.is_empty());
+        assert!(
+            entries
+                .iter()
+                .all(|entry| entry.path.starts_with("interface/addons/blizzard_"))
         );
     }
 }

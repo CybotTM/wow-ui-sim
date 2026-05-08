@@ -16,9 +16,6 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 
-const BLIZZARD_UI_TAG: &str = "12.0.5";
-const BLIZZARD_UI_REPO: &str = "https://github.com/Gethe/wow-ui-source.git";
-
 #[derive(Parser)]
 #[command(name = "wow-sim", about = "WoW UI Simulator")]
 struct Args {
@@ -391,87 +388,18 @@ fn default_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
 fn recover_missing_blizzard_ui_addons_path(
     error: wow_ui_sim::Error,
 ) -> wow_ui_sim::Result<PathBuf> {
-    logging::println_elapsed("Blizzard UI source missing; setting up wow-ui-source");
-    if let Err(setup_error) = setup_blizzard_ui_source() {
+    logging::println_elapsed("Blizzard UI source missing; syncing Blizzard UI from CASC");
+    if let Err(setup_error) = wow_ui_sim::blizzard_ui_sync::sync_blizzard_ui() {
         return Err(wow_ui_sim::Error::Other(format!(
-            "{error}\n\nBlizzard UI setup failed: {setup_error}"
+            "{error}\n\nBlizzard UI CASC sync failed: {setup_error}"
         )));
     }
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
 }
 
-fn setup_blizzard_ui_source() -> Result<(), Box<dyn std::error::Error>> {
-    let repo_root = std::env::current_dir()?;
-    let vendor_dir = repo_root.join("vendor/wow-ui-source");
-
-    if vendor_dir.is_dir() {
-        logging::println_elapsed(&format!(
-            "Updating wow-ui-source checkout to tag {BLIZZARD_UI_TAG}"
-        ));
-        run_git(
-            &vendor_dir,
-            &[
-                "fetch",
-                "--depth=1",
-                "origin",
-                &format!("refs/tags/{BLIZZARD_UI_TAG}:refs/tags/{BLIZZARD_UI_TAG}"),
-            ],
-        )
-        .or_else(|_| {
-            run_git(
-                &vendor_dir,
-                &["fetch", "--depth=1", "origin", "tag", BLIZZARD_UI_TAG],
-            )
-        })?;
-        run_git(&vendor_dir, &["checkout", BLIZZARD_UI_TAG])?;
-    } else {
-        logging::println_elapsed(&format!(
-            "Cloning wow-ui-source sparse checkout at tag {BLIZZARD_UI_TAG}"
-        ));
-        std::fs::create_dir_all(
-            vendor_dir
-                .parent()
-                .ok_or("vendor checkout path has no parent directory")?,
-        )?;
-        run_git(
-            &repo_root,
-            &[
-                "clone",
-                "--filter=blob:none",
-                "--no-checkout",
-                "--depth=1",
-                "--branch",
-                BLIZZARD_UI_TAG,
-                BLIZZARD_UI_REPO,
-                vendor_dir
-                    .to_str()
-                    .ok_or("vendor checkout path is not valid UTF-8")?,
-            ],
-        )?;
-        run_git(&vendor_dir, &["sparse-checkout", "init", "--cone"])?;
-        run_git(&vendor_dir, &["sparse-checkout", "set", "Interface/AddOns"])?;
-        run_git(&vendor_dir, &["checkout", BLIZZARD_UI_TAG])?;
-    }
-
-    Ok(())
-}
-
-fn run_git(cwd: &std::path::Path, args: &[&str]) -> Result<(), Box<dyn std::error::Error>> {
-    let status = std::process::Command::new("git")
-        .args(args)
-        .current_dir(cwd)
-        .status()?;
-
-    if status.success() {
-        Ok(())
-    } else {
-        Err(format!("git {} failed with {status}", args.join(" ")).into())
-    }
-}
-
 fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Error> {
     Box::<dyn std::error::Error>::from(format!(
-        "{error}\n\nThe release does not include Blizzard UI source. The simulator tries to clone the sparse Blizzard UI source checkout automatically. Make sure Git is installed and available on PATH, then start wow-sim again."
+        "{error}\n\nThe release does not include Blizzard UI source. The simulator tries to sync Blizzard UI from the local WoW CASC install automatically. Make sure WoW is installed or set WOW_INSTALL_PATH/WOW_DATA_PATH, or run `wow-cli casc sync-blizzard-ui` after configuring CASC."
     ))
 }
 

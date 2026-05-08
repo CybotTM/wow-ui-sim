@@ -35,7 +35,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[texture-atlas]] | TextureManager (BLP/PNG/WebP), ~50K-entry compiled atlas database, nine-slice kit detection, UV remapping |
 | [[frame-data-flow]] | Parallel Lua/Rust systems, global tables (__frame_fields/__scripts), method lookup order, Mixin() application, event dispatch flow |
 | [[taint-system]] | Protected-frame gating, dual Lua environment (genv/secureenv), Elune-backed issecure/securecall, Blizzard `issecure()` call-site matrix, SecureHandler fallback, state/attribute drivers |
-| [[casc-asset-cache]] | Three stacked caches (FDID resolution sqlite, BLP byte cache, in-memory texture cache), measured timings (~300 ms init, ~10 ms extract, ~1 ms disk hit, ~2 µs mem hit), failure modes |
+| [[casc-asset-cache]] | CASC cache layers (FDID resolution sqlite, BLP byte cache, Blizzard UI source cache, in-memory texture cache), measured timings, failure modes |
 
 ## investigations/
 

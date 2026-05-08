@@ -147,6 +147,12 @@ enum Commands {
         what: GenerateTarget,
     },
 
+    /// CASC cache and extraction commands (standalone)
+    Casc {
+        #[command(subcommand)]
+        what: CascTarget,
+    },
+
     /// Statically audit Blizzard UI API usage (standalone)
     AuditApi(AuditApiArgs),
 
@@ -206,6 +212,12 @@ enum GenerateTarget {
     EncounterJournal,
 }
 
+#[derive(Subcommand)]
+enum CascTarget {
+    /// Extract Blizzard UI source files from local CASC into ~/.cache/wow-ui-sim
+    SyncBlizzardUi,
+}
+
 fn default_addons_path() -> PathBuf {
     PathBuf::from("./Interface/AddOns")
 }
@@ -247,6 +259,7 @@ fn handle_command(command: Commands) {
         } => handle_extract_textures_command(addons, interface, output),
         Commands::ConvertTexture { input, output } => convert_texture(&input, output.as_ref()),
         Commands::Generate { what } => run_generator(what),
+        Commands::Casc { what } => run_casc_command(what),
         Commands::AuditApi(args) => handle_audit_api(args),
         Commands::StartupInternStats => startup_intern_stats::run(),
         Commands::GlobalSlotCoverage => global_slot_coverage::run(),
@@ -283,6 +296,24 @@ fn run_generator(target: GenerateTarget) {
         GenerateTarget::MapArt => gen_map_art::run(),
         GenerateTarget::QuestPoi => gen_quest_poi::run(),
         GenerateTarget::EncounterJournal => gen_encounter_journal::run(),
+    };
+    if let Err(e) = result {
+        eprintln!("Error: {}", e);
+        std::process::exit(1);
+    }
+}
+
+fn run_casc_command(target: CascTarget) {
+    let result = match target {
+        CascTarget::SyncBlizzardUi => wow_ui_sim::blizzard_ui_sync::sync_blizzard_ui().map(|s| {
+            println!(
+                "Synced {} Blizzard UI files to {} ({} extracted, {} already present)",
+                s.total,
+                s.root.display(),
+                s.extracted,
+                s.present
+            );
+        }),
     };
     if let Err(e) = result {
         eprintln!("Error: {}", e);
@@ -596,6 +627,18 @@ mod tests {
                 assert!(verbose);
             }
             _ => panic!("expected dump-quads command"),
+        }
+    }
+
+    #[test]
+    fn casc_sync_blizzard_ui_parses() {
+        let cli = Cli::try_parse_from(["wow-cli", "casc", "sync-blizzard-ui"])
+            .expect("casc sync-blizzard-ui should parse");
+        match cli.command {
+            Commands::Casc {
+                what: CascTarget::SyncBlizzardUi,
+            } => {}
+            _ => panic!("expected casc sync-blizzard-ui command"),
         }
     }
 }

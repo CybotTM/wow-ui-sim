@@ -62,8 +62,8 @@ pub fn default_addons_path() -> PathBuf {
 
 /// Blizzard UI addon root used by local benchmarks and dev binaries.
 ///
-/// Prefer the repo symlink at `Interface/BlizzardUI`, but fall back to the
-/// vendored addon tree when the symlink is missing.
+/// Prefer the repo symlink at `Interface/BlizzardUI`, then the vendored addon
+/// tree, then the CASC-synced cache when the checkout is missing.
 pub fn default_blizzard_ui_addons_path() -> crate::Result<PathBuf> {
     if let Some(path) = env_path("WOW_SIM_BLIZZARD_UI_PATH") {
         if path.is_dir() {
@@ -86,9 +86,12 @@ pub fn default_blizzard_ui_addons_path() -> crate::Result<PathBuf> {
             }
         }
     }
+    if let Some(cache_path) = crate::blizzard_ui_sync::cached_blizzard_ui_addons_path() {
+        return Ok(cache_path);
+    }
     Err(first_error.unwrap_or_else(|| {
         crate::Error::Other(
-            "missing Blizzard UI addon tree; run ./scripts/setup-blizzard-ui.sh from the release or repo root.".to_string(),
+            "missing Blizzard UI addon tree; run `wow-cli casc sync-blizzard-ui` or ./scripts/setup-blizzard-ui.sh from the release or repo root.".to_string(),
         )
     }))
 }
@@ -165,10 +168,21 @@ fn resolve_blizzard_ui_addons_path(root: &Path) -> crate::Result<PathBuf> {
         return Ok(symlink_path);
     }
 
-    Err(crate::Error::Other(format!(
-        "missing Blizzard UI addon tree; expected {} or an ancestor vendor/wow-ui-source/Interface/AddOns. Run ./scripts/setup-blizzard-ui.sh from the repo root.",
+    Err(missing_blizzard_ui_addons_error(&symlink_path))
+}
+
+fn missing_blizzard_ui_addons_error(symlink_path: &Path) -> crate::Error {
+    crate::Error::Other(format!(
+        "missing Blizzard UI addon tree; expected {}, {}, or an ancestor vendor/wow-ui-source/Interface/AddOns. Run `wow-cli casc sync-blizzard-ui` or ./scripts/setup-blizzard-ui.sh from the repo root.",
+        blizzard_ui_cache_path_label(),
         symlink_path.display()
-    )))
+    ))
+}
+
+fn blizzard_ui_cache_path_label() -> String {
+    crate::blizzard_ui_sync::default_cache_addons_path()
+        .map(|path| path.display().to_string())
+        .unwrap_or_else(|_| "~/.cache/wow-ui-sim/blizzard-ui".to_string())
 }
 
 fn symlink_exists(path: &Path) -> bool {
