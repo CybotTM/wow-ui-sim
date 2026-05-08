@@ -46,16 +46,20 @@ pub fn set_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn get_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    let strata: &'static str = {
-        let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .map(|f| f.frame_strata.as_str())
-            .unwrap_or("MEDIUM")
-    };
+    let strata = frame_strata_name(state, id)?;
     let val = create_string(state, strata);
     state.push(val);
     Ok(1)
+}
+
+fn frame_strata_name(state: &mut LuaState, id: u64) -> LuaResult<&'static str> {
+    let sim = borrow_state(state)?;
+    let strata = sim
+        .widgets
+        .get(id)
+        .map(|frame| frame.frame_strata.as_str())
+        .unwrap_or("MEDIUM");
+    Ok(strata)
 }
 
 pub fn set_fixed_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
