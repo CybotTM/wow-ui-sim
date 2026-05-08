@@ -465,6 +465,17 @@ fn register_menu_selection_callbacks(state: &mut LuaState, table: GcRef<Table>) 
 fn register_menu_setup_callbacks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "SetupMenu", callbacks::setup_menu)?;
     table_set_rust_fn_static(state, table, "SetDefaultText", callbacks::set_default_text)?;
+    register_menu_selection_setters(state, table)?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "EnableRegenerateOnResponse",
+        callbacks::enable_regenerate_on_response,
+    )?;
+    Ok(())
+}
+
+fn register_menu_selection_setters(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table,
@@ -476,12 +487,6 @@ fn register_menu_setup_callbacks(state: &mut LuaState, table: GcRef<Table>) -> L
         table,
         "SetSelectionText",
         callbacks::set_selection_text,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "EnableRegenerateOnResponse",
-        callbacks::enable_regenerate_on_response,
     )?;
     Ok(())
 }
