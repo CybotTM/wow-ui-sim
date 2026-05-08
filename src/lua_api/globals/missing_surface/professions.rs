@@ -1,5 +1,6 @@
 mod professions_registration;
 mod professions_tables;
+mod professions_tracking;
 
 use super::profession_crafting::{craft_recipe, recipe_is_craftable};
 use super::{ensure_namespace, set_table_array};
@@ -8,8 +9,6 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
 };
 use crate::lua_api::script_helpers::{fire_named_event_state, protected_lua_pcall_state};
-use crate::lua_api::state_types::CraftingState;
-use crate::lua_api::tracked_recipes::TrackedRecipes;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use professions_registration::{register_crafting_order_namespace, register_trade_skill_namespace};
 use professions_tables::{
@@ -18,9 +17,12 @@ use professions_tables::{
     reagent_index_from_stack, reagent_info_table, recipe_id_table, recipe_info_table,
     recipe_schematic_table, selected_profession, set_number_field, skill_line_id_table,
 };
+use professions_tracking::{
+    c_trade_skill_ui_get_recipes_tracked, c_trade_skill_ui_is_recipe_learned,
+    c_trade_skill_ui_is_recipe_tracked, c_trade_skill_ui_set_recipe_tracked,
+};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
-use std::collections::HashSet;
 
 pub(super) const TRADE_SKILL_NAMESPACE: &str = "C_TradeSkillUI";
 pub(super) const CRAFTING_ORDERS_NAMESPACE: &str = "C_CraftingOrders";
@@ -506,88 +508,6 @@ fn c_trade_skill_ui_get_recipe_schematic(state: &mut LuaState) -> LuaResult<u32>
     let table = recipe_schematic_table(state, recipe);
     state.push(table);
     Ok(1)
-}
-
-fn c_trade_skill_ui_set_recipe_tracked(state: &mut LuaState) -> LuaResult<u32> {
-    let recipe_id = u32::from_stack(state, 1)?;
-    let tracked = bool::from_stack(state, 2)?;
-    let is_recrafting = Option::<bool>::from_stack(state, 3)?.unwrap_or(false);
-
-    let changed = {
-        let mut sim = borrow_state_mut(state)?;
-        sim.tracked_recipes.set(recipe_id, tracked, is_recrafting)
-    };
-    if !changed {
-        return Ok(0);
-    }
-
-    let args = [Val::Num(recipe_id as f64), Val::Bool(tracked)];
-    fire_named_event_state(state, "TRACKED_RECIPE_UPDATE", &args);
-    Ok(0)
-}
-
-fn c_trade_skill_ui_is_recipe_tracked(state: &mut LuaState) -> LuaResult<u32> {
-    let recipe_id = u32::from_stack(state, 1)?;
-    let is_recrafting = bool::from_stack(state, 2)?;
-
-    let tracked = {
-        let sim = borrow_state(state)?;
-        is_recipe_tracked(&sim.tracked_recipes, recipe_id, is_recrafting)
-    };
-
-    state.push(Val::Bool(tracked));
-    Ok(1)
-}
-
-fn c_trade_skill_ui_get_recipes_tracked(state: &mut LuaState) -> LuaResult<u32> {
-    let is_recrafting = bool::from_stack(state, 1)?;
-    let recipe_ids = borrow_state(state)?
-        .tracked_recipes
-        .list(is_recrafting)
-        .to_vec();
-
-    let table = create_table(state);
-    let Val::Table(table_ref) = table else {
-        unreachable!("create_table must return a table");
-    };
-
-    if let Some(entries) = state.gc.tables.get_mut(table_ref) {
-        for (index, recipe_id) in recipe_ids.into_iter().enumerate() {
-            let key = Val::Num((index + 1) as f64);
-            let value = Val::Num(recipe_id as f64);
-            let _ = entries.raw_set(key, value, &state.gc.string_arena);
-        }
-    }
-    state.gc.barrier_back(table_ref);
-
-    state.push(table);
-    Ok(1)
-}
-
-fn c_trade_skill_ui_is_recipe_learned(state: &mut LuaState) -> LuaResult<u32> {
-    let recipe_id = i32::from_stack(state, 1)?;
-    let learned = {
-        let sim = borrow_state(state)?;
-        is_recipe_learned(&sim.crafting, recipe_id)
-    };
-    state.push(Val::Bool(learned));
-    Ok(1)
-}
-
-fn is_recipe_tracked(
-    tracked_recipes: &TrackedRecipes,
-    recipe_id: u32,
-    is_recrafting: bool,
-) -> bool {
-    tracked_recipes.contains(recipe_id, is_recrafting)
-}
-
-fn is_recipe_learned(crafting: &CraftingState, recipe_id: i32) -> bool {
-    contains_recipe_id(&crafting.known_recipe_ids, recipe_id)
-}
-
-fn contains_recipe_id(recipe_ids: &HashSet<i32>, recipe_id: i32) -> bool {
-    recipe_ids.contains(&recipe_id)
 }
 
 fn c_trade_skill_ui_is_recipe_craftable(state: &mut LuaState) -> LuaResult<u32> {
