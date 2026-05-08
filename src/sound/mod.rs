@@ -1,7 +1,9 @@
 //! Audio playback for WoW UI sounds via rodio.
 //!
-//! When the `sound` feature is disabled (e.g. during tests), all methods are
-//! no-ops and `SoundManager::new()` always returns `None`.
+//! SoundKit IDs resolve to CASC fileDataIDs and are cached under
+//! `~/.cache/wow-ui-sim/sounds`. When the `sound` feature is disabled (e.g.
+//! during tests), all methods are no-ops and `SoundManager::new()` always
+//! returns `None`.
 
 #[cfg(feature = "sound")]
 mod real;

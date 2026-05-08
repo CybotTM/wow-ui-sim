@@ -12,40 +12,40 @@ static NEXT_HANDLE: AtomicU32 = AtomicU32::new(1);
 pub struct SoundManager {
     stream: OutputStream,
     active_sounds: HashMap<u32, Sink>,
-    sound_dir: PathBuf,
-    /// SoundKit ID -> relative file path (e.g. 850 -> "igmainmenuopen.ogg").
-    soundkit_map: HashMap<u32, &'static str>,
+    cache_dir: PathBuf,
+    /// SoundKit ID -> fileDataID from SoundKitEntry.db2.
+    soundkit_map: HashMap<u32, u32>,
 }
 
 impl SoundManager {
     /// Initialize audio output. Returns `None` if no audio device is available.
-    pub fn new(sound_dir: PathBuf) -> Option<Self> {
+    pub fn new() -> Option<Self> {
         let stream = OutputStreamBuilder::from_default_device()
             .ok()?
             .open_stream_or_fallback()
             .ok()?;
+        let cache_dir = default_sound_cache_dir()?;
         Some(Self {
             stream,
             active_sounds: HashMap::new(),
-            sound_dir,
+            cache_dir,
             soundkit_map: build_soundkit_map(),
         })
     }
 
     /// Play a sound by SoundKit ID. Returns a handle on success.
     pub fn play_sound(&mut self, soundkit_id: u32) -> Option<u32> {
-        let rel_path = self.soundkit_map.get(&soundkit_id)?;
-        let full_path = self.sound_dir.join(rel_path);
-        self.play_file(&full_path)
+        let fdid = *self.soundkit_map.get(&soundkit_id)?;
+        let path = self.ensure_fdid_cached(fdid)?;
+        self.play_file(&path)
     }
 
     /// Play a sound file by path. Returns a handle on success.
     pub fn play_sound_file(&mut self, path: &str) -> Option<u32> {
-        // Try as absolute path first, then relative to sound_dir
         let full_path = if Path::new(path).is_absolute() {
             PathBuf::from(path)
         } else {
-            self.sound_dir.join(path)
+            self.ensure_path_cached(path)?
         };
         self.play_file(&full_path)
     }
@@ -78,23 +78,65 @@ impl SoundManager {
         self.active_sounds.insert(handle, sink);
         Some(handle)
     }
+
+    fn ensure_fdid_cached(&self, fdid: u32) -> Option<PathBuf> {
+        let out_path = self.cache_dir.join(format!("{fdid}.ogg"));
+        ensure_sound_cached(fdid, &out_path)
+    }
+
+    fn ensure_path_cached(&self, path: &str) -> Option<PathBuf> {
+        let resolver = asset_resolver::CascListfileResolver;
+        let fdid = resolver.lookup_path(path)?;
+        self.ensure_fdid_cached(fdid)
+    }
 }
 
-/// Build the SoundKit ID -> filename mapping for common UI sounds.
-fn build_soundkit_map() -> HashMap<u32, &'static str> {
+fn default_sound_cache_dir() -> Option<PathBuf> {
+    let dir = dirs::cache_dir()?.join("wow-ui-sim/sounds");
+    std::fs::create_dir_all(&dir).ok()?;
+    Some(dir)
+}
+
+fn ensure_sound_cached(fdid: u32, out_path: &Path) -> Option<PathBuf> {
+    if out_path.is_file() {
+        return Some(out_path.to_path_buf());
+    }
+    let resolver = asset_resolver::CascListfileResolver;
+    resolver.ensure_cached(fdid, out_path)
+}
+
+/// Build the SoundKit ID -> fileDataID mapping for common UI sounds.
+fn build_soundkit_map() -> HashMap<u32, u32> {
     HashMap::from([
-        (829, "igspellbookopen.ogg"),
-        (830, "igspellbookclose.ogg"),
-        (836, "igabilitypageturn.ogg"),
-        (839, "igcharacterinfotab.ogg"),
-        (841, "igcharacterinfoopen.ogg"),
-        (850, "igmainmenuopen.ogg"),
-        (851, "igmainmenuclose.ogg"),
-        (856, "igmainmenuoption.ogg"),
-        (857, "igmainmenuoptioncheckboxon.ogg"),
-        (858, "igmainmenuoptioncheckboxoff.ogg"),
-        // UI_CLASS_TALENT_OPEN/CLOSE_WINDOW — fallback to classic spellbook sounds
-        (207757, "igspellbookopen.ogg"),
-        (207758, "igspellbookclose.ogg"),
+        (829, 567440),    // IG_SPELLBOOK_OPEN
+        (830, 567496),    // IG_SPELLBOOK_CLOSE
+        (836, 567472),    // IG_ABILITY_PAGE_TURN
+        (839, 567507),    // IG_CHARACTER_INFO_TAB
+        (841, 567422),    // IG_CHARACTER_INFO_OPEN
+        (850, 567490),    // IG_MAINMENU_OPEN
+        (851, 567464),    // IG_MAINMENU_CLOSE
+        (856, 567407),    // IG_MAINMENU_OPTION
+        (857, 567407),    // IG_MAINMENU_OPTION_CHECKBOX_ON
+        (858, 567407),    // IG_MAINMENU_OPTION_CHECKBOX_OFF
+        (207757, 567507), // UI_CLASS_TALENT_OPEN_WINDOW
+        (207758, 567433), // UI_CLASS_TALENT_CLOSE_WINDOW
     ])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::build_soundkit_map;
+
+    #[test]
+    fn soundkit_file_data_ids_are_in_limited_listfile() {
+        let missing: Vec<_> = build_soundkit_map()
+            .into_values()
+            .filter(|fdid| !crate::limited_listfile::entries().any(|entry| entry.fdid == *fdid))
+            .collect();
+
+        assert!(
+            missing.is_empty(),
+            "SoundKit fileDataIDs missing from limited listfile: {missing:?}"
+        );
+    }
 }

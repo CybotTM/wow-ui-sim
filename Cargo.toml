@@ -70,7 +70,7 @@ sha2 = "0.10"
 #   cargo build --release --no-default-features --features sound,gui
 # to produce a fully static binary not tied to a specific rustc version.
 default = ["sound", "gui", "casc", "fast-build"]
-sound = ["rodio"]
+sound = ["rodio", "casc"]
 gui = ["casc", "dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp", "dep:winapi"]
 casc = ["dep:asset-resolver"]
 fast-build = ["gui", "dep:iced-dynamic"]

@@ -1,79 +1,53 @@
-import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from tools import gen_limited_listfile
 
 
 class LimitedListfileGenerationTests(unittest.TestCase):
-    def test_resolves_blizzard_ui_file_by_content_key_when_path_is_missing(self):
+    def test_collects_blizzard_ui_files_from_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            blizzard_root = root / "Interface" / "BlizzardUI"
-            source_file = blizzard_root / "Blizzard_Test" / "Blizzard_Test.lua"
-            source_file.parent.mkdir(parents=True)
-            source_file.write_bytes(b"print('from local blizzard source')\n")
-
-            resolution_db = root / "resolution.sqlite"
-            content_key = gen_limited_listfile.hash_file_md5(source_file)
-            with sqlite3.connect(resolution_db) as connection:
-                connection.execute(
-                    "create table resolution ("
-                    "fdid integer primary key, "
-                    "content_key blob not null, "
-                    "encoding_key blob not null)"
-                )
-                connection.execute(
-                    "insert into resolution values (?, ?, ?)",
-                    (12345, content_key, b"encoding-key"),
-                )
-
-            blizzard_files = gen_limited_listfile.collect_blizzard_ui_files(
-                blizzard_root
+            manifest = root / "blizzard-ui-files.txt"
+            manifest.write_text(
+                "Blizzard_Test/Blizzard_Test.lua\n"
+                "Blizzard_Test/Textures/Icon.blp\n",
+                encoding="utf-8",
             )
-            rows = gen_limited_listfile.resolve_rows(
-                by_path={},
-                by_fdid={},
-                requested_paths=set(),
-                requested_fdids=set(),
-                blizzard_files=blizzard_files,
-                resolution_db=resolution_db,
-            )
+
+            with patch.object(gen_limited_listfile, "BLIZZARD_UI_FILE_MANIFEST", manifest):
+                blizzard_files = gen_limited_listfile.collect_blizzard_ui_files()
 
             self.assertEqual(
-                [(12345, "interface/addons/blizzard_test/blizzard_test.lua")],
-                rows,
+                {
+                    "interface/addons/blizzard_test/blizzard_test.lua",
+                    "interface/addons/blizzard_test/textures/icon.blp",
+                },
+                blizzard_files,
             )
 
     def test_prefers_community_listfile_path_match_for_blizzard_ui_file(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            blizzard_root = Path(tmp) / "Interface" / "BlizzardUI"
-            source_file = blizzard_root / "Blizzard_Test" / "Blizzard_Test.lua"
-            source_file.parent.mkdir(parents=True)
-            source_file.write_bytes(b"local source differs from casc\n")
+        blizzard_files = {"interface/addons/blizzard_test/blizzard_test.lua"}
+        rows = gen_limited_listfile.resolve_rows(
+            by_path={
+                "interface/addons/blizzard_test/blizzard_test.lua": (
+                    67890,
+                    "interface/addons/blizzard_test/blizzard_test.lua",
+                )
+            },
+            by_fdid={},
+            requested_paths=set(),
+            requested_fdids=set(),
+            blizzard_files=blizzard_files,
+            resolution_db=None,
+        )
 
-            blizzard_files = gen_limited_listfile.collect_blizzard_ui_files(
-                blizzard_root
-            )
-            rows = gen_limited_listfile.resolve_rows(
-                by_path={
-                    "interface/addons/blizzard_test/blizzard_test.lua": (
-                        67890,
-                        "interface/addons/blizzard_test/blizzard_test.lua",
-                    )
-                },
-                by_fdid={},
-                requested_paths=set(),
-                requested_fdids=set(),
-                blizzard_files=blizzard_files,
-                resolution_db=None,
-            )
-
-            self.assertEqual(
-                [(67890, "interface/addons/blizzard_test/blizzard_test.lua")],
-                rows,
-            )
+        self.assertEqual(
+            [(67890, "interface/addons/blizzard_test/blizzard_test.lua")],
+            rows,
+        )
 
 
 if __name__ == "__main__":

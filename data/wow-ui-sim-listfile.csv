@@ -144755,3 +144755,14 @@
 137233;interface/worldstateframe/worldstatescoreframe-bottomright.blp
 137234;interface/worldstateframe/worldstatescoreframe-topleft.blp
 137235;interface/worldstateframe/worldstatescoreframe-topright.blp
+567496;sound/interface/iabilitiesclosea.ogg
+567440;sound/interface/iabilitiesopena.ogg
+567472;sound/interface/iabilitiesturnpagea.ogg
+567502;sound/interface/iabilitiesturnpageb.ogg
+567457;sound/interface/iabilitiesturnpagec.ogg
+567433;sound/interface/ucharactersheetclose.ogg
+567507;sound/interface/ucharactersheetopen.ogg
+567422;sound/interface/ucharactersheettab.ogg
+567407;sound/interface/uchatscrollbutton.ogg
+567464;sound/interface/uescapescreenclose.ogg
+567490;sound/interface/uescapescreenopen.ogg

@@ -1,10 +1,8 @@
-use std::path::PathBuf;
-
 /// No-op sound manager used when the `sound` feature is disabled.
 pub struct SoundManager;
 
 impl SoundManager {
-    pub fn new(_sound_dir: PathBuf) -> Option<Self> {
+    pub fn new() -> Option<Self> {
         None
     }
 

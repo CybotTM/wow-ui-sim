@@ -4,9 +4,7 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import re
-import sqlite3
 from pathlib import Path
 
 
@@ -18,11 +16,10 @@ DEFAULT_RESOLUTION_DB = (
 )
 MANIFEST_PATH = ROOT / "data/manifest_interface_data.rs"
 ATLAS_PATH = ROOT / "data/atlas.rs"
-DEFAULT_BLIZZARD_UI_ROOT = ROOT / "Interface/BlizzardUI"
+BLIZZARD_UI_FILE_MANIFEST = ROOT / "data/blizzard-ui-files.txt"
 SCAN_PATHS = [
     ROOT / "src",
     ROOT / "Interface/AddOns",
-    DEFAULT_BLIZZARD_UI_ROOT,
 ]
 FONT_PATHS = [
     "fonts/frizqt__.ttf",
@@ -35,6 +32,19 @@ PROBE_PATHS = [
     "interface/buttons/ui-panel-button-highlight.blp",
     "interface/buttons/ui-panel-button-disabled.blp",
 ]
+SOUNDKIT_FDIDS = [
+    567407,
+    567422,
+    567433,
+    567440,
+    567457,
+    567464,
+    567472,
+    567490,
+    567496,
+    567502,
+    567507,
+]
 EXTENSIONS = ["blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF"]
 
 
@@ -42,7 +52,7 @@ def main() -> None:
     args = parse_args()
     by_path, by_fdid = load_source(args.source)
     requested_paths, requested_fdids = collect_requests()
-    blizzard_files = collect_blizzard_ui_files(args.blizzard_ui_root)
+    blizzard_files = collect_blizzard_ui_files()
     rows = resolve_rows(
         by_path,
         by_fdid,
@@ -64,7 +74,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--resolution-db", type=Path, default=DEFAULT_RESOLUTION_DB)
-    parser.add_argument("--blizzard-ui-root", type=Path, default=DEFAULT_BLIZZARD_UI_ROOT)
     return parser.parse_args()
 
 
@@ -90,6 +99,7 @@ def load_source(path: Path) -> tuple[dict[str, tuple[int, str]], dict[int, str]]
 def collect_requests() -> tuple[set[str], set[int]]:
     paths = {normalize_path(path) for path in FONT_PATHS + PROBE_PATHS}
     fdids = collect_manifest_fdids()
+    fdids.update(SOUNDKIT_FDIDS)
     paths.update(collect_atlas_paths())
     paths.update(scan_literal_paths())
     return paths, fdids
@@ -121,16 +131,14 @@ def scan_literal_paths() -> set[str]:
     return paths
 
 
-def collect_blizzard_ui_files(root: Path) -> dict[str, Path]:
-    files: dict[str, Path] = {}
-    if not root.exists():
-        return files
-    for path in root.rglob("*"):
-        if not path.is_file():
-            continue
-        asset_path = normalize_path(f"interface/addons/{path.relative_to(root)}")
-        files[asset_path] = path
-    return files
+def collect_blizzard_ui_files() -> set[str]:
+    if not BLIZZARD_UI_FILE_MANIFEST.exists():
+        return set()
+    return {
+        normalize_path(f"interface/addons/{line.strip()}")
+        for line in BLIZZARD_UI_FILE_MANIFEST.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
 
 
 def extract_interface_literals(path: Path) -> set[str]:
@@ -153,7 +161,7 @@ def resolve_rows(
     by_fdid: dict[int, str],
     requested_paths: set[str],
     requested_fdids: set[int],
-    blizzard_files: dict[str, Path] | None = None,
+    blizzard_files: set[str] | None = None,
     resolution_db: Path | None = None,
 ) -> list[tuple[int, str]]:
     rows: dict[int, str] = {}
@@ -163,55 +171,10 @@ def resolve_rows(
     for path in requested_paths:
         if row := resolve_path(by_path, path):
             rows[row[0]] = row[1]
-    for fdid, path in resolve_blizzard_ui_files(
-        by_path, blizzard_files or {}, resolution_db
-    ):
-        rows[fdid] = path
+    for path in blizzard_files or set():
+        if row := resolve_path(by_path, path):
+            rows[row[0]] = row[1]
     return sorted(rows.items(), key=lambda row: row[1])
-
-
-def resolve_blizzard_ui_files(
-    by_path: dict[str, tuple[int, str]],
-    blizzard_files: dict[str, Path],
-    resolution_db: Path | None,
-) -> list[tuple[int, str]]:
-    rows: list[tuple[int, str]] = []
-    missing: dict[str, Path] = {}
-    for asset_path, source_path in blizzard_files.items():
-        if row := resolve_path(by_path, asset_path):
-            rows.append(row)
-        else:
-            missing[asset_path] = source_path
-    if not missing or resolution_db is None or not resolution_db.exists():
-        return rows
-    content_keys = load_content_key_fdids(resolution_db)
-    for asset_path, source_path in missing.items():
-        fdid = content_keys.get(hash_file_md5(source_path))
-        if fdid is not None:
-            rows.append((fdid, asset_path))
-    return rows
-
-
-def load_content_key_fdids(path: Path) -> dict[bytes, int | None]:
-    content_keys: dict[bytes, int | None] = {}
-    with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as connection:
-        for fdid, content_key in connection.execute(
-            "select fdid, content_key from resolution order by fdid"
-        ):
-            key = bytes(content_key)
-            if key in content_keys:
-                content_keys[key] = None
-            else:
-                content_keys[key] = fdid
-    return content_keys
-
-
-def hash_file_md5(path: Path) -> bytes:
-    digest = hashlib.md5(usedforsecurity=False)
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.digest()
 
 
 def resolve_path(by_path: dict[str, tuple[int, str]], path: str) -> tuple[int, str] | None:

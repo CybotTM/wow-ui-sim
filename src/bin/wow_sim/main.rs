@@ -319,8 +319,7 @@ fn init_sound(env: &WowLuaEnv) {
         logging::println_elapsed("Sound disabled");
         return;
     }
-    let sound_dir = PathBuf::from("./sounds");
-    match wow_ui_sim::sound::SoundManager::new(sound_dir) {
+    match wow_ui_sim::sound::SoundManager::new() {
         Some(mgr) => {
             logging::println_elapsed("Sound initialized");
             env.state().borrow_mut().sound_manager = Some(mgr);
