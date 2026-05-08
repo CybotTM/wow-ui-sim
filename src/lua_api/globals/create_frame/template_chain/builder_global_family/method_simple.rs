@@ -62,26 +62,14 @@ fn try_build_global_method_literal_arg_variants(
             target_path,
             method_name,
             arg,
-        } => build_global_method_with_string_value_handler(
-            state,
-            target_path,
-            method_name,
-            arg,
-            true,
-        )
-        .map(Some),
+        } => build_global_method_with_self_string_arg_handler(state, target_path, method_name, arg)
+            .map(Some),
         FastHandlerRef::GlobalMethodWithStringArg {
             target_path,
             method_name,
             arg,
-        } => build_global_method_with_string_value_handler(
-            state,
-            target_path,
-            method_name,
-            arg,
-            false,
-        )
-        .map(Some),
+        } => build_global_method_with_string_arg_handler(state, target_path, method_name, arg)
+            .map(Some),
         FastHandlerRef::GlobalMethodWithGlobalArg {
             target_path,
             method_name,
@@ -231,6 +219,24 @@ fn build_global_method_with_string_value_handler(
         "template-global-method-string-value-handler",
         &[literal_arg],
     )
+}
+
+fn build_global_method_with_self_string_arg_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+    arg: &str,
+) -> LuaResult<Val> {
+    build_global_method_with_string_value_handler(state, target_path, method_name, arg, true)
+}
+
+fn build_global_method_with_string_arg_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+    arg: &str,
+) -> LuaResult<Val> {
+    build_global_method_with_string_value_handler(state, target_path, method_name, arg, false)
 }
 
 fn global_method_string_value_template(pass_self: bool) -> &'static str {
