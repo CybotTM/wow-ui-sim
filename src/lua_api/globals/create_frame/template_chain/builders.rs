@@ -535,20 +535,7 @@ fn build_conditional_self_noargs_handler(
     let method_name = create_string(state, method_name);
     let builder = load_template(
         state,
-        r#"
-            local method_name, then_handler, else_handler = ...
-            return function(self, ...)
-                if self[method_name](self) then
-                    if then_handler then
-                        return then_handler(self, ...)
-                    end
-                    return
-                end
-                if else_handler then
-                    return else_handler(self, ...)
-                end
-            end
-        "#,
+        TEMPLATE_CONDITIONAL_SELF_NOARGS,
         "template-inline-conditional-self-noargs",
     )?;
     crate::lua_api::methods::call_function_state(
@@ -562,6 +549,21 @@ fn build_conditional_self_noargs_handler(
     )
     .map(Some)
 }
+
+const TEMPLATE_CONDITIONAL_SELF_NOARGS: &str = r#"
+    local method_name, then_handler, else_handler = ...
+    return function(self, ...)
+        if self[method_name](self) then
+            if then_handler then
+                return then_handler(self, ...)
+            end
+            return
+        end
+        if else_handler then
+            return else_handler(self, ...)
+        end
+    end
+"#;
 
 fn build_conditional_self_field_handler(
     state: &mut LuaState,
