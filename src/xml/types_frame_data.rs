@@ -131,6 +131,22 @@ mod tests {
     }
 
     #[test]
+    fn frame_element_frame_data_returns_primary_widget_tag() {
+        let frame = FrameXml {
+            name: Some("ActionButton".to_string()),
+            ..FrameXml::default()
+        };
+
+        let element = FrameElement::Button(frame);
+        let (frame_data, tag) = element
+            .as_frame_data()
+            .expect("Button should be frame-like");
+
+        assert_eq!(tag, "Button");
+        assert_eq!(frame_data.name.as_deref(), Some("ActionButton"));
+    }
+
+    #[test]
     fn frame_element_frame_data_ignores_scoped_modifier() {
         let scoped = ScopedModifierXml {
             forbidden: Some(true),
