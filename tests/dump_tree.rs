@@ -13,11 +13,22 @@ fn make_frame(id: u64, parent: Option<u64>, w: f32, h: f32) -> Frame {
 
 fn build_basic_registry() -> WidgetRegistry {
     let mut reg = WidgetRegistry::new();
-    reg.register(ui_parent_frame());
-    reg.register(button_frame());
-    reg.register(texture_frame());
-    reg.register(hidden_frame());
+    register_frames(
+        &mut reg,
+        [
+            ui_parent_frame(),
+            button_frame(),
+            texture_frame(),
+            hidden_frame(),
+        ],
+    );
     reg
+}
+
+fn register_frames(registry: &mut WidgetRegistry, frames: impl IntoIterator<Item = Frame>) {
+    for frame in frames {
+        registry.register(frame);
+    }
 }
 
 fn ui_parent_frame() -> Frame {
