@@ -34,18 +34,7 @@ pub(super) fn run_screenshot(
     font_system: &Rc<RefCell<WowFontSystem>>,
     command: ScreenshotCommand<'_>,
 ) {
-    use wow_ui_sim::render::headless::render_to_image;
-
-    settle_headless_startup(env);
-    env.set_screen_size(command.width as f32, command.height as f32);
-    wow_ui_sim::debug_helpers::debug_show_game_menu(env);
-    if let Some(code) = command.exec_lua
-        && let Err(e) = env.exec_maybe_secure(code, command.exec_lua_secure)
-    {
-        eprintln!("[exec-lua] error: {e}");
-    }
-    run_extra_update_ticks(env, 3);
-    apply_delay(command.delay);
+    prepare_screenshot_env(env, &command);
     let (batch, glyph_atlas) = build_screenshot_batch(
         env,
         font_system,
@@ -56,28 +45,10 @@ pub(super) fn run_screenshot(
     if let Some(dump_filter) = &command.dump_tree {
         dump_screenshot_tree(env, dump_filter.as_deref(), command.width, command.height);
     }
-    eprintln!(
-        "QuadBatch: {} quads, {} texture requests",
-        batch.quad_count(),
-        batch.texture_requests.len()
-    );
+    log_screenshot_batch(&batch);
 
-    let mut tex_mgr = create_texture_manager();
-    let glyph_data = glyph_atlas.is_dirty().then(|| {
-        let (data, size, _) = glyph_atlas.texture_data();
-        (data, size)
-    });
-    let img = render_to_image(
-        &batch,
-        &mut tex_mgr,
-        command.width,
-        command.height,
-        glyph_data,
-    );
-    let img = match command.crop.as_deref() {
-        Some(crop_str) => apply_crop(img, crop_str),
-        None => img,
-    };
+    let img = render_screenshot_image(&batch, &glyph_atlas, command.width, command.height);
+    let img = apply_optional_crop(img, command.crop.as_deref());
     let output = command.output.with_extension("webp");
     save_screenshot(&img, &output);
     eprintln!(
@@ -86,6 +57,53 @@ pub(super) fn run_screenshot(
         img.height(),
         output.display()
     );
+}
+
+fn prepare_screenshot_env(env: &WowLuaEnv, command: &ScreenshotCommand<'_>) {
+    settle_headless_startup(env);
+    env.set_screen_size(command.width as f32, command.height as f32);
+    wow_ui_sim::debug_helpers::debug_show_game_menu(env);
+    run_screenshot_exec_lua(env, command);
+    run_extra_update_ticks(env, 3);
+    apply_delay(command.delay);
+}
+
+fn run_screenshot_exec_lua(env: &WowLuaEnv, command: &ScreenshotCommand<'_>) {
+    let Some(code) = command.exec_lua else {
+        return;
+    };
+    if let Err(e) = env.exec_maybe_secure(code, command.exec_lua_secure) {
+        eprintln!("[exec-lua] error: {e}");
+    }
+}
+
+fn log_screenshot_batch(batch: &wow_ui_sim::render::QuadBatch) {
+    eprintln!(
+        "QuadBatch: {} quads, {} texture requests",
+        batch.quad_count(),
+        batch.texture_requests.len()
+    );
+}
+
+fn render_screenshot_image(
+    batch: &wow_ui_sim::render::QuadBatch,
+    glyph_atlas: &wow_ui_sim::render::GlyphAtlas,
+    width: u32,
+    height: u32,
+) -> image::RgbaImage {
+    let mut tex_mgr = create_texture_manager();
+    let glyph_data = glyph_atlas.is_dirty().then(|| {
+        let (data, size, _) = glyph_atlas.texture_data();
+        (data, size)
+    });
+    wow_ui_sim::render::headless::render_to_image(batch, &mut tex_mgr, width, height, glyph_data)
+}
+
+fn apply_optional_crop(img: image::RgbaImage, crop: Option<&str>) -> image::RgbaImage {
+    match crop {
+        Some(crop_str) => apply_crop(img, crop_str),
+        None => img,
+    }
 }
 
 pub(super) fn run_dump_texture(
