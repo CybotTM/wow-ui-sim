@@ -281,14 +281,8 @@ fn protected_call_state_with_policy(
     let saved_ci = state.ci;
     let saved_n_ccalls = state.n_ccalls;
     let saved_call_depth = state.call_depth;
-    state.error_object = None;
 
-    state.ensure_stack(call_base + 1 + args.len());
-    state.stack_set(call_base, func);
-    for (index, arg) in args.iter().copied().enumerate() {
-        state.stack_set(call_base + 1 + index, arg);
-    }
-    state.top = call_base + 1 + args.len();
+    prepare_protected_call_stack(state, call_base, func, args);
 
     let call_result = state.call_function(call_base, LUA_MULTRET);
     match call_result {
@@ -313,6 +307,16 @@ fn protected_call_state_with_policy(
             Err(error_val)
         }
     }
+}
+
+fn prepare_protected_call_stack(state: &mut LuaState, call_base: usize, func: Val, args: &[Val]) {
+    state.error_object = None;
+    state.ensure_stack(call_base + 1 + args.len());
+    state.stack_set(call_base, func);
+    for (index, arg) in args.iter().copied().enumerate() {
+        state.stack_set(call_base + 1 + index, arg);
+    }
+    state.top = call_base + 1 + args.len();
 }
 
 fn record_protected_call_error(state: &LuaState, error_val: Val, emit_policy: LuaErrorEmitPolicy) {
