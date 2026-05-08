@@ -76,7 +76,7 @@ pub fn load_lua_file(
 
 /// Transform path to WoW-style chunk name for debugstack.
 fn wow_chunk_name(path: &Path) -> String {
-    let path_str = path.display().to_string();
+    let path_str = path.display().to_string().replace('\\', "/");
     if let Some(pos) = path_str.find("AddOns/") {
         format!("@Interface/{}", &path_str[pos..])
     } else {
@@ -468,6 +468,24 @@ mod tests {
             .expect("system time before unix epoch")
             .as_nanos();
         format!("@{prefix}_{}_{}", std::process::id(), nanos)
+    }
+
+    #[test]
+    fn wow_chunk_name_normalizes_windows_addon_paths() {
+        let path = Path::new(
+            r"C:\repo\vendor\wow-ui-source\Interface\AddOns\Blizzard_UIParent\Mainline\UIParent.lua",
+        );
+        assert_eq!(
+            wow_chunk_name(path),
+            "@Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua"
+        );
+    }
+
+    #[test]
+    fn wow_chunk_name_normalizes_windows_blizzard_ui_paths_for_patches() {
+        let path =
+            Path::new(r"C:\repo\Interface\BlizzardUI\Blizzard_UIParent\Mainline\UIParent.lua");
+        assert!(wow_chunk_name(path).ends_with("/UIParent.lua"));
     }
 
     #[test]
