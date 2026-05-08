@@ -231,6 +231,17 @@ fn apply_statusbar_value(sim: &mut crate::lua_api::SimState, id: u64, value: f64
     }
 }
 
+fn apply_statusbar_interpolated_value(sim: &mut crate::lua_api::SimState, id: u64, value: f64) {
+    let Some(f) = sim.widgets.get(id) else {
+        return;
+    };
+    let clamped = value.clamp(f.statusbar_min, f.statusbar_max);
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.statusbar_value = clamped;
+        f.statusbar_interpolation_target = Some(clamped);
+    }
+}
+
 pub(super) fn shared_set_value(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let value = val_to_f64(stack_val(state, 2));
@@ -248,13 +259,7 @@ pub(super) fn shared_set_value(state: &mut LuaState) -> LuaResult<u32> {
         Some(WidgetType::StatusBar) => {
             let mut sim = borrow_state_mut(state)?;
             if interpolation_mode.is_some() {
-                if let Some(f) = sim.widgets.get(id) {
-                    let clamped = value.clamp(f.statusbar_min, f.statusbar_max);
-                    if let Some(f) = sim.widgets.get_mut_visual(id) {
-                        f.statusbar_value = clamped;
-                        f.statusbar_interpolation_target = Some(clamped);
-                    }
-                }
+                apply_statusbar_interpolated_value(&mut sim, id, value);
             } else {
                 apply_statusbar_value(&mut sim, id, value);
             }
