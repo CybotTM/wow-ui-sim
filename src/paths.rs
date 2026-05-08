@@ -263,8 +263,25 @@ fn runtime_roots() -> Vec<PathBuf> {
     {
         roots.push(parent.to_path_buf());
     }
-    roots.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")));
+    if should_use_manifest_runtime_root() {
+        roots.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")));
+    }
     roots
+}
+
+fn should_use_manifest_runtime_root() -> bool {
+    if cfg!(debug_assertions) {
+        return true;
+    }
+
+    let manifest_target = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("target");
+    let Ok(exe) = std::env::current_exe().and_then(|path| path.canonicalize()) else {
+        return false;
+    };
+    let Ok(manifest_target) = manifest_target.canonicalize() else {
+        return false;
+    };
+    exe.starts_with(manifest_target)
 }
 
 fn discover_wtf_identity(wtf_path: &std::path::Path) -> Option<(String, String, String)> {

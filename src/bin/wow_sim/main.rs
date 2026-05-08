@@ -14,6 +14,9 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 
+#[cfg(windows)]
+const EMBEDDED_SETUP_BLIZZARD_UI_PS1: &str = include_str!("../../../scripts/setup-blizzard-ui.ps1");
+
 #[derive(Parser)]
 #[command(name = "wow-sim", about = "WoW UI Simulator")]
 struct Args {
@@ -356,8 +359,7 @@ fn init_environment(
     {
         let mut state = env.state().borrow_mut();
         let mut addon_base_paths = vec![
-            wow_ui_sim::paths::default_blizzard_ui_addons_path()
-                .map_err(startup_blizzard_ui_help)?,
+            default_blizzard_ui_addons_path_with_setup().map_err(startup_blizzard_ui_help)?,
             PathBuf::from("./Interface/AddOns"),
         ];
         if args.is_test_command() {
@@ -369,9 +371,59 @@ fn init_environment(
     Ok(())
 }
 
+fn default_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
+    match wow_ui_sim::paths::default_blizzard_ui_addons_path() {
+        Ok(path) => Ok(path),
+        Err(error) => {
+            #[cfg(windows)]
+            {
+                logging::println_elapsed(
+                    "Blizzard UI source missing; running embedded setup-blizzard-ui.ps1",
+                );
+                if let Err(setup_error) = run_embedded_blizzard_ui_setup() {
+                    return Err(wow_ui_sim::Error::Other(format!(
+                        "{error}\n\nEmbedded Blizzard UI setup failed: {setup_error}"
+                    )));
+                }
+                wow_ui_sim::paths::default_blizzard_ui_addons_path()
+            }
+            #[cfg(not(windows))]
+            {
+                Err(error)
+            }
+        }
+    }
+}
+
+#[cfg(windows)]
+fn run_embedded_blizzard_ui_setup() -> Result<(), Box<dyn std::error::Error>> {
+    let script_path = PathBuf::from("scripts").join("setup-blizzard-ui.ps1");
+    if let Some(parent) = script_path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(&script_path, EMBEDDED_SETUP_BLIZZARD_UI_PS1)?;
+
+    let status = std::process::Command::new("powershell")
+        .args([
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            script_path
+                .to_str()
+                .ok_or("setup script path is not valid UTF-8")?,
+        ])
+        .status()?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("powershell setup exited with {status}").into())
+    }
+}
+
 fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Error> {
     Box::<dyn std::error::Error>::from(format!(
-        "{error}\n\nThe release zip does not include Blizzard UI source. From the extracted release folder, run:\n\n  powershell -ExecutionPolicy Bypass -File .\\scripts\\setup-blizzard-ui.ps1\n\nThen start wow-sim.exe again."
+        "{error}\n\nThe release zip does not include Blizzard UI source. On Windows, wow-sim.exe includes the setup script and tries to run it automatically. Make sure Git is installed and available on PATH, then start wow-sim.exe again."
     ))
 }
 
