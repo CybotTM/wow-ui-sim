@@ -469,29 +469,36 @@ fn assert_no_party_member_click_errors(env: &WowLuaEnv) {
 
 fn assert_blizzard_secure_action_button_click_casts_spell(env: &WowLuaEnv) {
     env.exec("TargetUnit('party1')").expect("target party1");
+    create_secure_spell_button(env);
+    click_secure_spell_button(env, false, "click spell button");
+    log_fatal_spell_click_errors(env);
+    retry_secure_spell_button_if_needed(env);
+    assert_player_casting_spell(env, "Flash of Light");
+}
 
-    // Create a SecureActionButton with type="spell" and spell=19750
+fn create_secure_spell_button(env: &WowLuaEnv) {
     env.exec(r#"
             local btn = CreateFrame("Button", "TestSpellBtn", UIParent, "SecureActionButtonTemplate")
             btn:SetAttribute("type", "spell")
             btn:SetAttribute("spell", 19750)
             btn:SetSize(40, 40)
         "#).expect("create SecureActionButton");
+}
 
-    // Click it — SecureActionButton_OnClick handles down/up logic.
-    // With down=true and useOnKeyDown, it fires on key down.
-    // With down=false and no useOnKeyDown (default), it fires on key up.
-    // The default for mouse clicks is useOnKeyDown=false, so down=false triggers.
-    env.exec(
+fn click_secure_spell_button(env: &WowLuaEnv, is_down: bool, label: &str) {
+    let is_down_lua = if is_down { "true" } else { "false" };
+    env.exec(&format!(
         r#"
             local handler = TestSpellBtn:GetScript("OnClick")
             if handler then
-                handler(TestSpellBtn, "LeftButton", false)
+                handler(TestSpellBtn, "LeftButton", {is_down_lua})
             end
-        "#,
-    )
-    .expect("click spell button");
+        "#
+    ))
+    .expect(label);
+}
 
+fn log_fatal_spell_click_errors(env: &WowLuaEnv) {
     let errors = drain_test_errors(env);
     let fatal: Vec<&String> = errors
         .iter()
@@ -500,34 +507,25 @@ fn assert_blizzard_secure_action_button_click_casts_spell(env: &WowLuaEnv) {
     for e in &fatal {
         eprintln!("[spell click error] {e}");
     }
+}
 
+fn retry_secure_spell_button_if_needed(env: &WowLuaEnv) {
     let casting: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
-    // SecureActionButton_OnClick checks: clickAction = (down and useOnKeyDown) or (not down and not useOnKeyDown)
-    // With down=false and useOnKeyDown=false (default), clickAction = true.
-    // But GetCVarBool("ActionButtonUseKeyDown") may return true, making useOnKeyDown=true,
-    // which means clickAction = (false and true) or (true and false) = false.
-    // In that case the button fires on down=true, not down=false.
-    if !casting {
-        // Try with down=true (key-down mode)
-        env.exec(
-            r#"
-                local handler = TestSpellBtn:GetScript("OnClick")
-                if handler then
-                    handler(TestSpellBtn, "LeftButton", true)
-                end
-            "#,
-        )
-        .expect("click spell button (down=true)");
-        let _ = drain_test_errors(env);
+    if casting {
+        return;
     }
+    click_secure_spell_button(env, true, "click spell button (down=true)");
+    let _ = drain_test_errors(env);
+}
 
+fn assert_player_casting_spell(env: &WowLuaEnv, expected_spell_name: &str) {
     let casting: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
     assert!(casting, "clicking spell button should start a cast");
 
     let spell_name: String = env
         .eval("return select(1, UnitCastingInfo('player'))")
         .unwrap();
-    assert_eq!(spell_name, "Flash of Light");
+    assert_eq!(spell_name, expected_spell_name);
 }
 
 fn assert_blizzard_action_button_click_casts_via_use_action(env: &WowLuaEnv) {
