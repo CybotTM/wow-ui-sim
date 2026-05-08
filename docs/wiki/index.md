@@ -43,6 +43,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 |------|---------|
 | [[action-bar-spell-icons]] | 4 bugs: SetDrawLayer no-op, draw order, sublevel ignored, textureSubLevel not parsed |
 | [[addon-load-order]] | Bag buttons partially initialized at load; workaround mirrors real WoW event recovery |
+| [[casc-fdid-1579624-root-debug]] | FDID 1579624 root/CASC resolution data, CRLF hash proof, and parser debugging checklist |
 | [[achievement-panel-hide]] | Achievement panel hide now uses Blizzard's managed panel path; animation completion also fires child animation `OnFinished` scripts for alert hide XML |
 | [[adventure-guide-layout]] | Suggested Content card overlap came from synchronous geometry queries resolving resized anchor targets without updating dependent sibling frames |
 | [[adventure-guide-disabled-tabs]] | Disabled Adventure Guide boss/model tabs looked active because model no-op stubs overwrote generic desaturation setters on the shared frame metatable |

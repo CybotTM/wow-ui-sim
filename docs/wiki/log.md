@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-08] ingest | CASC FDID 1579624 root debug
+
+Created `investigations/casc-fdid-1579624-root-debug.md` with the verified
+FDID-to-path mapping, content key, encoding key, CRLF hash proof against Gethe
+`12.0.5`, extraction proof, local build caveat, and root parser debugging
+checklist.
+
 ## [2026-05-08] update | CASC resolution cache location
 
 Updated `systems/casc-asset-cache.md` after moving generated CASC resolution
