@@ -10,6 +10,17 @@ use wow_ui_sim::loader::find_toc_file;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 const USER_ADDONS_PATH: &str = "/home/osso/Projects/wow/Interface/AddOns";
+const ADDON_LIST_DEPENDENCY_DIRS: &[&str] = &[
+    "Blizzard_SharedXMLBase",
+    "Blizzard_Colors",
+    "Blizzard_SharedXML",
+    "Blizzard_SharedXMLGame",
+    "Blizzard_UIPanelTemplates",
+    "Blizzard_GameMenu",
+    "Blizzard_UIWidgets",
+    "Blizzard_FrameXMLBase",
+    "Blizzard_AddOnList",
+];
 
 fn has_local_addons() -> bool {
     std::path::Path::new(USER_ADDONS_PATH).exists()
@@ -22,21 +33,15 @@ fn blizzard_addons_base() -> std::path::PathBuf {
 /// Load all Blizzard addons needed for AddonList + scan user addons.
 fn env_with_addon_list() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    load_addon_list_dependencies(&env);
+    env.scan_and_register_addons(std::path::Path::new(USER_ADDONS_PATH));
+    ensure_addon_list_scrollbox_view(&env);
+    env
+}
+
+fn load_addon_list_dependencies(env: &WowLuaEnv) {
     let base = blizzard_addons_base();
-
-    let addon_dirs = [
-        "Blizzard_SharedXMLBase",
-        "Blizzard_Colors",
-        "Blizzard_SharedXML",
-        "Blizzard_SharedXMLGame",
-        "Blizzard_UIPanelTemplates",
-        "Blizzard_GameMenu",
-        "Blizzard_UIWidgets",
-        "Blizzard_FrameXMLBase",
-        "Blizzard_AddOnList",
-    ];
-
-    for dir_name in &addon_dirs {
+    for dir_name in ADDON_LIST_DEPENDENCY_DIRS {
         let addon_dir = base.join(dir_name);
         let toc_path = find_toc_file(&addon_dir)
             .unwrap_or_else(|| panic!("No TOC found in {}", addon_dir.display()));
@@ -44,12 +49,13 @@ fn env_with_addon_list() -> WowLuaEnv {
             eprintln!("Warning: Failed to load {}: {}", dir_name, e);
         }
     }
+}
 
-    env.scan_and_register_addons(std::path::Path::new(USER_ADDONS_PATH));
-
+fn ensure_addon_list_scrollbox_view(env: &WowLuaEnv) {
     // Re-init the AddonList ScrollBox view. During XML loading, the OnLoad handler's
     // SetView call doesn't persist due to a __newindex ordering issue in method chains.
-    env.exec(r#"
+    env.exec(
+        r#"
         if AddonList and AddonList.ScrollBox and not AddonList.ScrollBox:HasView() then
             local view = CreateScrollBoxListTreeListView(20, 5, 5, 5, 5, 8)
             view:SetElementFactory(function(factory, treeNode)
@@ -62,9 +68,9 @@ fn env_with_addon_list() -> WowLuaEnv {
             end)
             ScrollUtil.InitScrollBoxListWithScrollBar(AddonList.ScrollBox, AddonList.ScrollBar, view)
         end
-    "#).unwrap();
-
-    env
+    "#,
+    )
+    .unwrap();
 }
 
 /// Return stable identifiers for visible AddonList rows.
