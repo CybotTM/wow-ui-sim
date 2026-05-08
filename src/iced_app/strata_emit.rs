@@ -372,10 +372,22 @@ pub struct CachedQuadBatchParams<'a, 'text, 'font> {
 }
 
 pub fn build_quad_batch_with_cache(
-    params: CachedQuadBatchParams<'_, '_, '_>,
+    mut params: CachedQuadBatchParams<'_, '_, '_>,
 ) -> (QuadBatch, CollectedFrames) {
+    let mut batch = build_background_batch(params.screen_size);
+    let visible_ids = params
+        .root_name
+        .map(|name| collect_subtree_ids(params.registry, name));
+    let collected = collect_hittable_frames(params.registry, params.strata_buckets);
+
+    emit_cached_strata(&mut batch, &mut params, &visible_ids);
+    append_hover_highlight(&mut batch, &params, &visible_ids);
+    (batch, collected)
+}
+
+fn build_background_batch(screen_size: (f32, f32)) -> QuadBatch {
     let mut batch = QuadBatch::with_capacity(1000);
-    let size = Size::new(params.screen_size.0, params.screen_size.1);
+    let size = Size::new(screen_size.0, screen_size.1);
 
     batch.push_tiled_path(
         Rectangle::new(Point::ORIGIN, size),
@@ -385,19 +397,22 @@ pub fn build_quad_batch_with_cache(
         [0.55, 0.55, 0.55, 1.0],
     );
 
-    let visible_ids = params
-        .root_name
-        .map(|name| collect_subtree_ids(params.registry, name));
-    let collected = collect_hittable_frames(params.registry, params.strata_buckets);
+    batch
+}
 
+fn emit_cached_strata(
+    batch: &mut QuadBatch,
+    params: &mut CachedQuadBatchParams<'_, '_, '_>,
+    visible_ids: &Option<FxHashSet<u64>>,
+) {
     for bucket in params.strata_buckets {
         emit_single_strata(
-            &mut batch,
+            batch,
             params.text_ctx,
             SingleStrataEmit {
                 bucket,
                 registry: params.registry,
-                visible_ids: &visible_ids,
+                visible_ids,
                 screen_size: params.screen_size,
                 pressed_frame: params.pressed_frame,
                 hovered_frame: params.hovered_frame,
@@ -408,8 +423,6 @@ pub fn build_quad_batch_with_cache(
             },
         );
     }
-    append_hover_highlight(&mut batch, &params, &visible_ids);
-    (batch, collected)
 }
 
 fn append_hover_highlight(
