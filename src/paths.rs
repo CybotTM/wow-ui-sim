@@ -139,12 +139,18 @@ fn addons_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
     paths.push(PathBuf::from("./Interface/AddOns"));
 
     for root in install_roots_for_candidates(install_root) {
-        paths.push(root.join("_retail_/Interface/AddOns"));
-        paths.push(root.join("_beta_/Interface/AddOns"));
-        paths.push(root.join("_classic_/Interface/AddOns"));
+        paths.extend(addon_paths_for_install_root(&root));
     }
 
     paths
+}
+
+fn addon_paths_for_install_root(root: &Path) -> [PathBuf; 3] {
+    [
+        root.join("_retail_/Interface/AddOns"),
+        root.join("_beta_/Interface/AddOns"),
+        root.join("_classic_/Interface/AddOns"),
+    ]
 }
 
 fn wtf_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
