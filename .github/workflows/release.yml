@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
 
 permissions:
   contents: write
@@ -18,8 +18,12 @@ jobs:
         include:
           - name: linux-x86_64
             os: ubuntu-latest
+            platform: linux
+            bin-dir: target/x86_64-unknown-linux-gnu/release
           - name: windows-x86_64
             os: windows-latest
+            platform: windows
+            bin-dir: target/x86_64-pc-windows-msvc/release
 
     steps:
       - name: Checkout
@@ -46,7 +50,7 @@ jobs:
           sudo apt-get install -y pkg-config libasound2-dev libudev-dev
 
       - name: Build release binaries
-        run: cargo build --release --locked --bin wow-sim --bin wow-cli
+        run: cargo release-${{ matrix.platform }} --locked
 
       - name: Package Linux release
         if: runner.os == 'Linux'
@@ -58,10 +62,9 @@ jobs:
           root="dist/${name}"
 
           mkdir -p "${root}/scripts"
-          cp target/release/wow-sim target/release/wow-cli "${root}/"
+          cp "${{ matrix.bin-dir }}/wow-sim" "${{ matrix.bin-dir }}/wow-cli" "${root}/"
           cp README.md LICENSE "${root}/"
           cp scripts/setup-blizzard-ui.sh scripts/setup-blizzard-ui.ps1 "${root}/scripts/"
-          cp -R fonts "${root}/fonts"
 
           tar -C dist -czf "dist/${name}.tar.gz" "${name}"
           echo "asset=dist/${name}.tar.gz" >> "${GITHUB_OUTPUT}"
@@ -83,10 +86,9 @@ jobs:
           $root = "dist\$name"
 
           New-Item -ItemType Directory -Force "$root\scripts" | Out-Null
-          Copy-Item target\release\wow-sim.exe, target\release\wow-cli.exe $root
+          Copy-Item "${{ matrix.bin-dir }}\wow-sim.exe", "${{ matrix.bin-dir }}\wow-cli.exe" $root
           Copy-Item README.md, LICENSE $root
           Copy-Item scripts\setup-blizzard-ui.sh, scripts\setup-blizzard-ui.ps1 "$root\scripts"
-          Copy-Item -Recurse fonts "$root\fonts"
 
           Compress-Archive -Path $root -DestinationPath "dist\$name.zip" -Force
           "asset=dist/$name.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append

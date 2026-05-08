@@ -16,13 +16,13 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let mut args = env::args().skip(1);
     match args.next().as_deref() {
-        Some("release") => release(args.next().as_deref()),
+        Some("release") => release(args.next().as_deref(), args.collect()),
         Some(command) => Err(format!("unknown xtask command: {command}\n{USAGE}")),
         None => Err(USAGE.to_string()),
     }
 }
 
-fn release(platform: Option<&str>) -> Result<(), String> {
+fn release(platform: Option<&str>, extra_cargo_args: Vec<String>) -> Result<(), String> {
     let target = match platform {
         Some("windows") | Some("win") => "x86_64-pc-windows-msvc",
         Some("linux") => "x86_64-unknown-linux-gnu",
@@ -44,6 +44,7 @@ fn release(platform: Option<&str>) -> Result<(), String> {
         "--bin",
         "wow-cli",
     ]);
+    command.args(extra_cargo_args);
 
     println!("running: {command:?}");
     let status = command
@@ -70,7 +71,7 @@ fn current_target() -> Result<&'static str, String> {
 
 const USAGE: &str = "\
 usage:
-  cargo xtask release [current|windows|linux]
-  cargo release-current
-  cargo release-windows
-  cargo release-linux";
+  cargo xtask release [current|windows|linux] [cargo build args...]
+  cargo release-current [cargo build args...]
+  cargo release-windows [cargo build args...]
+  cargo release-linux [cargo build args...]";
