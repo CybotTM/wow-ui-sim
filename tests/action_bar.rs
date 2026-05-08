@@ -1,7 +1,4 @@
 //! Integration tests for main action bar visibility after startup.
-//!
-//! Verifies that loading Blizzard addons and firing startup events results
-//! in the MainActionBar and its 12 ActionButton children being visible.
 
 mod common;
 
