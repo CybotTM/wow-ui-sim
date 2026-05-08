@@ -3,6 +3,7 @@ use iced::{Point, Rectangle, Size};
 use crate::iced_app::layout::anchor_position;
 use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use crate::render::shader::primitive::{
     TextureLoadTelemetry, TextureRequestTracker, load_texture_or_crop,
@@ -46,6 +47,13 @@ struct TextureLoadAccumulator {
     scan_elapsed: std::time::Duration,
     load_elapsed: std::time::Duration,
     telemetry: TextureLoadBatchTelemetry,
+    exhausted: bool,
+}
+
+struct PendingTextureQueueStep {
+    scan_elapsed: std::time::Duration,
+    load_elapsed: std::time::Duration,
+    budget_hit: bool,
     exhausted: bool,
 }
 
@@ -209,43 +217,21 @@ impl App {
         deadline: std::time::Instant,
         texture_requests: &mut TextureRequestTracker,
     ) -> BudgetedTextureLoadResult {
-        let mut textures = Vec::new();
-        let mut bc_textures = Vec::new();
-        let mut telemetry = TextureLoadBatchTelemetry::default();
         let mut tex_mgr = self.texture_manager.borrow_mut();
         let scan_start = std::time::Instant::now();
         texture_requests.register_batch(quads);
         let pending_paths = unresolved_texture_request_paths(quads);
         let scan_elapsed = scan_start.elapsed();
         let load_start = std::time::Instant::now();
-
-        for path in pending_paths {
-            if process_budgeted_texture_request(
-                deadline,
-                path,
-                &mut tex_mgr,
-                &mut textures,
-                &mut bc_textures,
-                &mut telemetry,
-                texture_requests,
-            ) {
-                return (
-                    textures,
-                    bc_textures,
-                    scan_elapsed,
-                    load_start.elapsed(),
-                    telemetry,
-                    true,
-                );
-            }
-        }
+        let (textures, bc_textures, telemetry, budget_hit) =
+            load_texture_paths_budgeted(pending_paths, deadline, &mut tex_mgr, texture_requests);
         (
             textures,
             bc_textures,
             scan_elapsed,
             load_start.elapsed(),
             telemetry,
-            false,
+            budget_hit,
         )
     }
 
@@ -265,46 +251,19 @@ impl App {
 
         while iterations_remaining != 0 {
             iterations_remaining -= 1;
-            let scan_started = std::time::Instant::now();
-            let Some(path) = self.pop_next_pending_texture_path() else {
-                scan_elapsed += scan_started.elapsed();
-                break;
-            };
-
-            let (is_pending, should_load) = self.pending_path_state(&path);
-            scan_elapsed += scan_started.elapsed();
-            if !is_pending {
-                self.remove_pending_texture_path(&path);
-                continue;
-            }
-            if !should_load {
-                self.requeue_pending_texture_path(path);
-                continue;
-            }
-
-            self.register_pending_texture_requests_for_path(&path, texture_requests);
-            let load_started = std::time::Instant::now();
-            if process_budgeted_texture_request(
+            let step = self.load_pending_texture_queue_step(
                 deadline,
-                &path,
                 &mut tex_mgr,
+                texture_requests,
                 &mut textures,
                 &mut bc_textures,
                 &mut telemetry,
-                texture_requests,
-            ) {
-                load_elapsed += load_started.elapsed();
-                self.requeue_pending_texture_path(path);
-                budget_hit = true;
+            );
+            scan_elapsed += step.scan_elapsed;
+            load_elapsed += step.load_elapsed;
+            if step.exhausted || step.budget_hit {
+                budget_hit = step.budget_hit;
                 break;
-            }
-            load_elapsed += load_started.elapsed();
-
-            let (still_pending, _) = self.pending_path_state(&path);
-            if still_pending {
-                self.requeue_pending_texture_path(path);
-            } else {
-                self.remove_pending_texture_path(&path);
             }
         }
 
@@ -316,6 +275,80 @@ impl App {
             telemetry,
             budget_hit,
         )
+    }
+
+    fn load_pending_texture_queue_step(
+        &self,
+        deadline: std::time::Instant,
+        tex_mgr: &mut crate::texture::TextureManager,
+        texture_requests: &mut TextureRequestTracker,
+        textures: &mut Vec<GpuTextureData>,
+        bc_textures: &mut Vec<GpuBcTextureData>,
+        telemetry: &mut TextureLoadBatchTelemetry,
+    ) -> PendingTextureQueueStep {
+        let scan_started = std::time::Instant::now();
+        let Some(path) = self.pop_next_pending_texture_path() else {
+            return pending_texture_queue_step(scan_started.elapsed(), Duration::ZERO, false, true);
+        };
+
+        let (is_pending, should_load) = self.pending_path_state(&path);
+        let scan_elapsed = scan_started.elapsed();
+        if !is_pending {
+            self.remove_pending_texture_path(&path);
+            return pending_texture_queue_step(scan_elapsed, Duration::ZERO, false, false);
+        }
+        if !should_load {
+            self.requeue_pending_texture_path(path);
+            return pending_texture_queue_step(scan_elapsed, Duration::ZERO, false, false);
+        }
+
+        self.register_pending_texture_requests_for_path(&path, texture_requests);
+        self.load_ready_pending_texture_path(
+            deadline,
+            path,
+            tex_mgr,
+            texture_requests,
+            textures,
+            bc_textures,
+            telemetry,
+            scan_elapsed,
+        )
+    }
+
+    fn load_ready_pending_texture_path(
+        &self,
+        deadline: std::time::Instant,
+        path: String,
+        tex_mgr: &mut crate::texture::TextureManager,
+        texture_requests: &mut TextureRequestTracker,
+        textures: &mut Vec<GpuTextureData>,
+        bc_textures: &mut Vec<GpuBcTextureData>,
+        telemetry: &mut TextureLoadBatchTelemetry,
+        scan_elapsed: std::time::Duration,
+    ) -> PendingTextureQueueStep {
+        let load_started = std::time::Instant::now();
+        let budget_hit = process_budgeted_texture_request(
+            deadline,
+            &path,
+            tex_mgr,
+            textures,
+            bc_textures,
+            telemetry,
+            texture_requests,
+        );
+        let load_elapsed = load_started.elapsed();
+        if budget_hit {
+            self.requeue_pending_texture_path(path);
+            return pending_texture_queue_step(scan_elapsed, load_elapsed, true, false);
+        }
+
+        let (still_pending, _) = self.pending_path_state(&path);
+        if still_pending {
+            self.requeue_pending_texture_path(path);
+        } else {
+            self.remove_pending_texture_path(&path);
+        }
+        pending_texture_queue_step(scan_elapsed, load_elapsed, false, false)
     }
 
     /// Append hover highlight quads for the currently hovered button.
@@ -557,6 +590,53 @@ fn should_pause_texture_loading_state(
 
 fn texture_request_base_path(path: &str) -> &str {
     path.find("@crop:").map_or(path, |index| &path[..index])
+}
+
+fn pending_texture_queue_step(
+    scan_elapsed: std::time::Duration,
+    load_elapsed: std::time::Duration,
+    budget_hit: bool,
+    exhausted: bool,
+) -> PendingTextureQueueStep {
+    PendingTextureQueueStep {
+        scan_elapsed,
+        load_elapsed,
+        budget_hit,
+        exhausted,
+    }
+}
+
+fn load_texture_paths_budgeted(
+    pending_paths: Vec<&str>,
+    deadline: std::time::Instant,
+    tex_mgr: &mut crate::texture::TextureManager,
+    texture_requests: &mut TextureRequestTracker,
+) -> (
+    Vec<GpuTextureData>,
+    Vec<GpuBcTextureData>,
+    TextureLoadBatchTelemetry,
+    bool,
+) {
+    let mut textures = Vec::new();
+    let mut bc_textures = Vec::new();
+    let mut telemetry = TextureLoadBatchTelemetry::default();
+
+    for path in pending_paths {
+        let budget_hit = process_budgeted_texture_request(
+            deadline,
+            path,
+            tex_mgr,
+            &mut textures,
+            &mut bc_textures,
+            &mut telemetry,
+            texture_requests,
+        );
+        if budget_hit {
+            return (textures, bc_textures, telemetry, true);
+        }
+    }
+
+    (textures, bc_textures, telemetry, false)
 }
 
 fn process_budgeted_texture_request(
