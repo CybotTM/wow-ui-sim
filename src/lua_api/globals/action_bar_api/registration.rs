@@ -43,6 +43,12 @@ const BASIC_SLOT_PREDICATE_METHODS: &[ActionBarMethod] = &[
     ("IsPressHoldReleaseSpell", is_press_hold_release_spell),
 ];
 
+const SLOT_MUTATION_METHODS: &[ActionBarMethod] = &[
+    ("PutActionInSlot", put_action_in_slot),
+    ("ForceUpdateAction", force_update_action),
+    ("GetProfessionQualityInfo", get_profession_quality_info),
+];
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let table_ref = ensure_namespace_table(state, C_ACTION_BAR);
@@ -160,12 +166,7 @@ fn register_stateful_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> L
 }
 
 fn register_slot_mutation_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
-    let methods: [(&'static str, RustFn); 3] = [
-        ("PutActionInSlot", put_action_in_slot),
-        ("ForceUpdateAction", force_update_action),
-        ("GetProfessionQualityInfo", get_profession_quality_info),
-    ];
-    install_action_bar_methods(state, table_ref, &methods)
+    install_action_bar_methods(state, table_ref, SLOT_MUTATION_METHODS)
 }
 
 fn ensure_namespace_table(state: &mut LuaState, namespace: &'static str) -> GcRef<Table> {
