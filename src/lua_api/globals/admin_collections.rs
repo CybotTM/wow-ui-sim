@@ -17,6 +17,8 @@ use std::collections::HashSet;
 
 // ── Transmog & collections ────────────────────────────────────────────────────
 
+const DEFAULT_TRANSMOG_SOURCE_TYPE: i32 = 1;
+
 pub(super) fn add_transmog(state: &mut LuaState) -> LuaResult<u32> {
     let id = i32::from_stack(state, 1)?;
     borrow_state_mut(state)?
@@ -55,7 +57,7 @@ pub(super) fn add_transmog_appearance(state: &mut LuaState) -> LuaResult<u32> {
         category_id,
         item_id,
         is_collected: true,
-        source_type: 0,
+        source_type: DEFAULT_TRANSMOG_SOURCE_TYPE,
         item_mod_id: 0,
     });
     Ok(0)

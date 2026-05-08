@@ -2,40 +2,46 @@ use wow_ui_sim::dump::{build_tree, build_warning_dump, strip_wow_escapes};
 use wow_ui_sim::widget::{Anchor, AnchorPoint, Frame, WidgetRegistry, WidgetType};
 
 fn make_frame(id: u64, parent: Option<u64>, w: f32, h: f32) -> Frame {
-    let mut f = Frame::default();
-    f.id = id;
-    f.parent_id = parent;
-    f.width = w;
-    f.height = h;
-    f
-}
-
-fn anchor(point: AnchorPoint, rel_id: Option<usize>, rel_point: AnchorPoint) -> Anchor {
-    Anchor {
-        point,
-        relative_to_id: rel_id,
-        relative_to: None,
-        relative_point: rel_point,
-        x_offset: 0.0,
-        y_offset: 0.0,
+    Frame {
+        id,
+        parent_id: parent,
+        width: w,
+        height: h,
+        ..Frame::default()
     }
 }
 
 fn build_basic_registry() -> WidgetRegistry {
     let mut reg = WidgetRegistry::new();
+    reg.register(ui_parent_frame());
+    reg.register(button_frame());
+    reg.register(texture_frame());
+    reg.register(hidden_frame());
+    reg
+}
+
+fn ui_parent_frame() -> Frame {
     let mut uip = make_frame(1, None, 1024.0, 768.0);
     uip.name = Some("UIParent".to_string());
     uip.children = vec![10, 11];
-    reg.register(uip);
+    uip
+}
 
+fn button_frame() -> Frame {
     let mut btn = make_frame(10, Some(1), 200.0, 36.0);
     btn.name = Some("MyButton".to_string());
     btn.visible = true;
-    btn.anchors = vec![anchor(AnchorPoint::Center, None, AnchorPoint::Center)];
+    btn.anchors = vec![Anchor::from_relative_id(
+        AnchorPoint::Center,
+        None,
+        AnchorPoint::Center,
+    )];
     btn.children = vec![20];
     btn.children_keys.insert("Icon".to_string(), 20);
-    reg.register(btn);
+    btn
+}
 
+fn texture_frame() -> Frame {
     let mut tex = make_frame(20, Some(10), 32.0, 32.0);
     tex.widget_type = WidgetType::Texture;
     tex.name = Some("__tex_123".to_string());
@@ -43,15 +49,19 @@ fn build_basic_registry() -> WidgetRegistry {
     tex.texture = Some("Interface/Icons/foo".to_string());
     tex.tex_coords = Some((0.1, 0.9, 0.2, 0.8));
     tex.atlas_tex_coords = Some((0.0, 1.0, 0.0, 1.0));
-    tex.anchors = vec![anchor(AnchorPoint::Center, None, AnchorPoint::Center)];
-    reg.register(tex);
+    tex.anchors = vec![Anchor::from_relative_id(
+        AnchorPoint::Center,
+        None,
+        AnchorPoint::Center,
+    )];
+    tex
+}
 
+fn hidden_frame() -> Frame {
     let mut hidden = make_frame(11, Some(1), 100.0, 50.0);
     hidden.name = Some("HiddenFrame".to_string());
     hidden.visible = false;
-    reg.register(hidden);
-
-    reg
+    hidden
 }
 
 // ── strip_wow_escapes ───────────────────────────────────────

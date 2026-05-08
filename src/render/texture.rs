@@ -104,7 +104,7 @@ pub fn draw_horizontal_slice_texture(frame: &mut Frame, texture: HorizontalSlice
         return;
     }
 
-    frame.draw_image(texture.bounds, canvas::Image::new(texture.handle.clone()));
+    draw_horizontal_slice_fallback(frame, &texture);
 }
 
 fn draw_horizontal_slice_parts(frame: &mut Frame, texture: &HorizontalSliceTexture<'_>) -> bool {
@@ -150,6 +150,10 @@ fn draw_horizontal_slice_parts(frame: &mut Frame, texture: &HorizontalSliceTextu
     }
 
     false
+}
+
+fn draw_horizontal_slice_fallback(frame: &mut Frame, texture: &HorizontalSliceTexture<'_>) {
+    frame.draw_image(texture.bounds, canvas::Image::new(texture.handle.clone()));
 }
 
 pub struct HorizontalSliceTexture<'a> {

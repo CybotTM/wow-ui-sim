@@ -70,34 +70,74 @@ fn open_active_and_ready_garden_tooltip(env: &WowLuaEnv) -> ActiveAndReadyToolti
 }
 
 fn assert_active_and_ready_tooltip(tooltip: ActiveAndReadyTooltipProbe) {
-    let (
-        is_shown,
-        line_count,
-        header_text,
-        active_text,
-        spacer_text,
-        ready_text,
-        expected_active_text,
-        expected_ready_text,
-        dormant_text,
-        expected_header_text,
-    ) = tooltip;
+    let tooltip = ActiveAndReadyTooltip::from(tooltip);
 
-    let lines = ActiveAndReadyLines {
-        is_shown,
-        line_count,
-        header_text: &header_text,
-        active_text: &active_text,
-        spacer_text: &spacer_text,
-        ready_text: &ready_text,
-        expected_active_text: &expected_active_text,
-        expected_ready_text: &expected_ready_text,
-        expected_header_text: &expected_header_text,
-    };
+    assert_active_and_ready_lines(tooltip.lines());
+    assert_no_dormant_line(&tooltip);
+}
 
-    assert_active_and_ready_lines(lines);
+struct ActiveAndReadyTooltip {
+    is_shown: bool,
+    line_count: f64,
+    header_text: String,
+    active_text: String,
+    spacer_text: String,
+    ready_text: String,
+    expected_active_text: String,
+    expected_ready_text: String,
+    dormant_text: String,
+    expected_header_text: String,
+}
+
+impl From<ActiveAndReadyTooltipProbe> for ActiveAndReadyTooltip {
+    fn from(tooltip: ActiveAndReadyTooltipProbe) -> Self {
+        let (
+            is_shown,
+            line_count,
+            header_text,
+            active_text,
+            spacer_text,
+            ready_text,
+            expected_active_text,
+            expected_ready_text,
+            dormant_text,
+            expected_header_text,
+        ) = tooltip;
+
+        Self {
+            is_shown,
+            line_count,
+            header_text,
+            active_text,
+            spacer_text,
+            ready_text,
+            expected_active_text,
+            expected_ready_text,
+            dormant_text,
+            expected_header_text,
+        }
+    }
+}
+
+impl ActiveAndReadyTooltip {
+    fn lines(&self) -> ActiveAndReadyLines<'_> {
+        ActiveAndReadyLines {
+            is_shown: self.is_shown,
+            line_count: self.line_count,
+            header_text: &self.header_text,
+            active_text: &self.active_text,
+            spacer_text: &self.spacer_text,
+            ready_text: &self.ready_text,
+            expected_active_text: &self.expected_active_text,
+            expected_ready_text: &self.expected_ready_text,
+            expected_header_text: &self.expected_header_text,
+        }
+    }
+}
+
+fn assert_no_dormant_line(tooltip: &ActiveAndReadyTooltip) {
     assert!(
-        ready_text != dormant_text,
+        tooltip.ready_text != tooltip.dormant_text,
         "active-plus-ready branch must not emit the dormant line"
     );
 }

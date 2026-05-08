@@ -1,10 +1,10 @@
 //! Global widget registry for tracking all widgets.
 
 mod anchor;
+mod storage;
 
 use super::Frame;
 pub use anchor::AnchorCyclePath;
-use anchor::hash_map_u64_hash_set_u64_bytes;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::cell::RefCell;
 
@@ -221,8 +221,8 @@ impl WidgetRegistry {
             }
         }
         if let Some(parent) = self.widgets.get_mut(&parent_id) {
-            let child_already_registered = old_parent_id == Some(parent_id)
-                && parent.children.iter().any(|&id| id == child_id);
+            let child_already_registered =
+                old_parent_id == Some(parent_id) && parent.children.contains(&child_id);
             if !child_already_registered {
                 if old_parent_id != Some(parent_id) {
                     parent.children.retain(|&id| id != child_id);
@@ -240,22 +240,7 @@ impl WidgetRegistry {
     }
 
     pub fn storage_estimate_bytes(&self) -> usize {
-        std::mem::size_of::<Self>()
-            + self.widgets.capacity() * std::mem::size_of::<(u64, Frame)>()
-            + self
-                .widgets
-                .values()
-                .map(Frame::storage_estimate_bytes)
-                .sum::<usize>()
-            + self.names.capacity() * std::mem::size_of::<(String, u64)>()
-            + self.names.keys().map(String::capacity).sum::<usize>()
-            + self.ordered_ids.capacity() * std::mem::size_of::<u64>()
-            + hash_set_u64_bytes(&self.render_dirty_ids.borrow())
-            + render_dirty_sources_bytes(&self.render_dirty_sources.borrow())
-            + dirty_source_bytes(&self.current_dirty_source.borrow())
-            + hash_map_u64_hash_set_u64_bytes(&self.anchor_dependents)
-            + hash_set_u64_bytes(&self.rect_dirty_ids)
-            + hash_set_u64_bytes(&self.pending_layout_ids)
+        storage::registry_storage_estimate_bytes(self)
     }
 
     /// Collect unique texture paths from all visible frames.
@@ -271,10 +256,11 @@ impl WidgetRegistry {
                 &frame.pushed_texture,
                 &frame.highlight_texture,
                 &frame.disabled_texture,
-            ] {
-                if let Some(t) = path {
-                    paths.insert(t.clone());
-                }
+            ]
+            .into_iter()
+            .flatten()
+            {
+                paths.insert(path.clone());
             }
         }
         paths.into_iter().collect()
@@ -407,11 +393,11 @@ impl WidgetRegistry {
     ///
     /// Prefer `SimState::set_frame_visible` which also updates the OnUpdate cache.
     pub fn set_visible(&mut self, id: u64, visible: bool) {
-        if let Some(f) = self.widgets.get_mut(&id) {
-            if f.visible != visible {
-                f.visible = visible;
-                self.mark_visual_dirty(id);
-            }
+        if let Some(f) = self.widgets.get_mut(&id)
+            && f.visible != visible
+        {
+            f.visible = visible;
+            self.mark_visual_dirty(id);
         }
     }
 
@@ -606,26 +592,6 @@ impl WidgetRegistry {
 
 fn frame_is_registered_for_event(frame: &Frame, event: &str) -> bool {
     frame.registered_events.contains(event)
-}
-
-fn hash_set_u64_bytes(values: &FxHashSet<u64>) -> usize {
-    values.capacity() * std::mem::size_of::<u64>()
-}
-
-fn dirty_source_bytes(value: &Option<RenderDirtySource>) -> usize {
-    usize::from(value.is_some()) * std::mem::size_of::<RenderDirtySource>()
-}
-
-fn render_dirty_sources_bytes(values: &FxHashMap<u64, FxHashSet<RenderDirtySource>>) -> usize {
-    values.capacity() * std::mem::size_of::<(u64, FxHashSet<RenderDirtySource>)>()
-        + values
-            .values()
-            .map(render_dirty_source_set_bytes)
-            .sum::<usize>()
-}
-
-fn render_dirty_source_set_bytes(values: &FxHashSet<RenderDirtySource>) -> usize {
-    values.capacity() * std::mem::size_of::<RenderDirtySource>()
 }
 
 #[cfg(test)]

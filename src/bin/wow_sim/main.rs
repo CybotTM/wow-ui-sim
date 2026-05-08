@@ -1,7 +1,9 @@
 mod addon_loading;
+mod cache_texture;
 #[cfg(feature = "gui")]
 mod gui_commands;
 
+use cache_texture::run_cache_texture;
 use clap::{Parser, Subcommand};
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -251,6 +253,12 @@ fn init_and_load(
         screen,
     );
     env.sync_addon_names_to_lua();
+    apply_post_load_workarounds(&env);
+    restart_gc_after_bootstrap(&env);
+    Ok((env, font_system, saved_vars))
+}
+
+fn apply_post_load_workarounds(env: &WowLuaEnv) {
     wow_ui_sim::logging::println_elapsed("[Startup] applying post-load workarounds");
     let post_load_started = Instant::now();
     env.apply_post_load_workarounds();
@@ -258,6 +266,9 @@ fn init_and_load(
         "[Startup] post-load workarounds complete in {:.2?}",
         post_load_started.elapsed()
     ));
+}
+
+fn restart_gc_after_bootstrap(env: &WowLuaEnv) {
     wow_ui_sim::logging::println_elapsed("[Startup] restarting GC after bootstrap");
     let gc_restart_started = Instant::now();
     env.gc_restart_after_bootstrap()
@@ -266,7 +277,6 @@ fn init_and_load(
         "[Startup] GC restart complete in {:.2?}",
         gc_restart_started.elapsed()
     ));
-    Ok((env, font_system, saved_vars))
 }
 
 fn resolve_exec_lua(arg: &Option<String>) -> Option<String> {
@@ -374,16 +384,20 @@ fn init_environment(
 fn default_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
     match wow_ui_sim::paths::default_blizzard_ui_addons_path() {
         Ok(path) => Ok(path),
-        Err(error) => {
-            logging::println_elapsed("Blizzard UI source missing; setting up wow-ui-source");
-            if let Err(setup_error) = setup_blizzard_ui_source() {
-                return Err(wow_ui_sim::Error::Other(format!(
-                    "{error}\n\nBlizzard UI setup failed: {setup_error}"
-                )));
-            }
-            wow_ui_sim::paths::default_blizzard_ui_addons_path()
-        }
+        Err(error) => recover_missing_blizzard_ui_addons_path(error),
     }
+}
+
+fn recover_missing_blizzard_ui_addons_path(
+    error: wow_ui_sim::Error,
+) -> wow_ui_sim::Result<PathBuf> {
+    logging::println_elapsed("Blizzard UI source missing; setting up wow-ui-source");
+    if let Err(setup_error) = setup_blizzard_ui_source() {
+        return Err(wow_ui_sim::Error::Other(format!(
+            "{error}\n\nBlizzard UI setup failed: {setup_error}"
+        )));
+    }
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
 }
 
 fn setup_blizzard_ui_source() -> Result<(), Box<dyn std::error::Error>> {
@@ -685,92 +699,6 @@ fn run_dump_tree(env: &WowLuaEnv, command: DumpTreeCommand<'_>) {
         command.width as f32,
         command.height as f32,
     );
-}
-
-fn run_cache_texture(path: &str, force: bool) -> Result<(), Box<dyn std::error::Error>> {
-    use wow_ui_sim::texture::TextureManager;
-
-    let normalized = wow_ui_sim::texture::normalize_wow_path(path);
-    println!("path:       {path}");
-    println!("normalized: {normalized}");
-
-    if force {
-        let removed = remove_missing_sentinels(&normalized);
-        if !removed.is_empty() {
-            for marker in &removed {
-                println!("removed:    {}", marker.display());
-            }
-        }
-    }
-
-    let mut mgr = TextureManager::new();
-    let load_start = Instant::now();
-    let result = mgr.load(path);
-    let elapsed = load_start.elapsed();
-
-    match result {
-        Some(td) => {
-            let (w, h) = (td.width, td.height);
-            println!("status:     OK");
-            println!("dimensions: {w}x{h}");
-            println!("elapsed:    {elapsed:.2?}");
-            Ok(())
-        }
-        None => {
-            println!("status:     MISS");
-            println!("elapsed:    {elapsed:.2?}");
-            let markers = list_missing_sentinels(&normalized);
-            for marker in &markers {
-                println!("sentinel:   {}", marker.display());
-            }
-            std::process::exit(1);
-        }
-    }
-}
-
-fn casc_extract_root() -> Option<PathBuf> {
-    dirs::cache_dir().map(|d| d.join("wow-ui-sim/casc-extract"))
-}
-
-fn candidate_extract_paths(normalized: &str) -> Vec<PathBuf> {
-    let Some(root) = casc_extract_root() else {
-        return Vec::new();
-    };
-    let extensions = ["blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF"];
-    let mut paths = Vec::with_capacity(extensions.len() + 1);
-    paths.push(root.join(normalized));
-    for ext in extensions {
-        paths.push(root.join(format!("{normalized}.{ext}")));
-    }
-    paths
-}
-
-fn remove_missing_sentinels(normalized: &str) -> Vec<PathBuf> {
-    let mut removed = Vec::new();
-    for path in candidate_extract_paths(normalized) {
-        let Some(file_name) = path.file_name().and_then(|n| n.to_str()) else {
-            continue;
-        };
-        let marker = path.with_file_name(format!("{file_name}.missing"));
-        if marker.exists() && std::fs::remove_file(&marker).is_ok() {
-            removed.push(marker);
-        }
-    }
-    removed
-}
-
-fn list_missing_sentinels(normalized: &str) -> Vec<PathBuf> {
-    let mut markers = Vec::new();
-    for path in candidate_extract_paths(normalized) {
-        let Some(file_name) = path.file_name().and_then(|n| n.to_str()) else {
-            continue;
-        };
-        let marker = path.with_file_name(format!("{file_name}.missing"));
-        if marker.exists() {
-            markers.push(marker);
-        }
-    }
-    markers
 }
 
 #[cfg(test)]

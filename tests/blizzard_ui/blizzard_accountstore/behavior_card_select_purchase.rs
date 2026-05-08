@@ -467,11 +467,9 @@ fn select_card_purchase_path_plays_item_select_at_entry_and_item_purchase_inside
 
 fn seed_select_card_trackers(env: &WowLuaEnv, item_id: i64) {
     seed_stub_self_with_item_info(env, item_id);
-    seed_show_generic_confirmation_tracker(env);
-    seed_static_popup_hide_stub(env);
-    seed_c_account_store_trackers(env);
-    seed_play_sound_silent_stub(env);
-    seed_format_currency_display_stub(env);
+    seed_purchase_popup_trackers(env);
+    seed_purchase_api_trackers(env);
+    seed_purchase_side_effect_stubs(env);
 }
 
 fn seed_stub_self_with_item_info(env: &WowLuaEnv, item_id: i64) {
@@ -490,6 +488,11 @@ fn seed_stub_self_with_item_info(env: &WowLuaEnv, item_id: i64) {
         "#
     ))
     .expect("seeding stub_self with sentinel itemInfo must run cleanly");
+}
+
+fn seed_purchase_popup_trackers(env: &WowLuaEnv) {
+    seed_show_generic_confirmation_tracker(env);
+    seed_static_popup_hide_stub(env);
 }
 
 fn seed_show_generic_confirmation_tracker(env: &WowLuaEnv) {
@@ -522,6 +525,10 @@ fn seed_static_popup_hide_stub(env: &WowLuaEnv) {
     .expect("seeding StaticPopup_Hide silent stub must run cleanly");
 }
 
+fn seed_purchase_api_trackers(env: &WowLuaEnv) {
+    seed_c_account_store_trackers(env);
+}
+
 fn seed_c_account_store_trackers(env: &WowLuaEnv) {
     env.eval::<()>(
         r#"
@@ -543,6 +550,11 @@ fn seed_c_account_store_trackers(env: &WowLuaEnv) {
         "#,
     )
     .expect("seeding C_AccountStore.BeginPurchase + RefundItem trackers must run cleanly");
+}
+
+fn seed_purchase_side_effect_stubs(env: &WowLuaEnv) {
+    seed_play_sound_silent_stub(env);
+    seed_format_currency_display_stub(env);
 }
 
 fn seed_play_sound_silent_stub(env: &WowLuaEnv) {

@@ -2,7 +2,7 @@
 
 use std::collections::{HashMap, VecDeque};
 
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashSet;
 
 use super::WidgetRegistry;
 
@@ -259,14 +259,6 @@ impl WidgetRegistry {
             self.resolve_named_anchor_targets_for_frame(frame_id);
         }
     }
-}
-
-pub(super) fn hash_map_u64_hash_set_u64_bytes(values: &FxHashMap<u64, FxHashSet<u64>>) -> usize {
-    values.capacity() * std::mem::size_of::<(u64, FxHashSet<u64>)>()
-        + values
-            .values()
-            .map(|s| s.capacity() * std::mem::size_of::<u64>())
-            .sum::<usize>()
 }
 
 fn rebuild_anchor_cycle_path(

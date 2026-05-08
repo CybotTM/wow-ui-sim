@@ -1,9 +1,12 @@
 //! App::view() and subscription methods plus UI building helpers.
 
+mod hit_testing;
+mod options_modal;
+
 use iced::widget::shader::Shader;
 use iced::widget::{
-    Column, Container, button, checkbox, column, container, mouse_area, opaque, pick_list, row,
-    scrollable, space, stack, text, text_input,
+    Column, Container, button, checkbox, column, container, row, scrollable, space, stack, text,
+    text_input,
 };
 use iced::{Border, Color, Element, Font, Length, Padding, Subscription};
 
@@ -12,7 +15,7 @@ use crate::LayoutRect;
 use super::Message;
 use super::app::App;
 use super::layout::compute_frame_rect;
-use super::styles::{event_button_style, input_style, palette, pick_list_style, run_button_style};
+use super::styles::{event_button_style, input_style, palette, run_button_style};
 
 /// Resolve a frame's display name, using the owner addon as fallback for anonymous frames.
 fn anon_display_name(
@@ -278,137 +281,6 @@ impl App {
         } else {
             base
         }
-    }
-
-    /// Wrap the base view with a modal overlay containing options.
-    fn wrap_with_modal<'a>(&'a self, base: Element<'a, Message>) -> Element<'a, Message> {
-        let modal_content = container(
-            column![
-                self.build_modal_title(),
-                self.build_player_config_column(),
-                self.build_event_buttons(),
-            ]
-            .spacing(12)
-            .padding(16),
-        )
-        .width(Length::Shrink)
-        .style(|_| container::Style {
-            background: Some(iced::Background::Color(palette::BG_PANEL)),
-            border: Border {
-                color: palette::BORDER_HIGHLIGHT,
-                width: 1.0,
-                radius: 6.0.into(),
-            },
-            ..Default::default()
-        });
-
-        let backdrop = mouse_area(
-            container(opaque(modal_content))
-                .width(Length::Fill)
-                .height(Length::Fill)
-                .center(Length::Fill),
-        )
-        .on_press(Message::CloseOptionsModal);
-
-        stack![base, opaque(backdrop)].into()
-    }
-
-    /// Title row for the options modal with close button.
-    fn build_modal_title(&self) -> Element<'_, Message> {
-        row![
-            text("Options").size(16).color(palette::GOLD),
-            space::horizontal(),
-            button(text("x").size(14))
-                .on_press(Message::CloseOptionsModal)
-                .padding(2)
-                .style(|_, _| button::Style {
-                    background: Some(iced::Background::Color(Color::TRANSPARENT)),
-                    text_color: palette::TEXT_SECONDARY,
-                    ..Default::default()
-                }),
-        ]
-        .align_y(iced::Alignment::Center)
-        .into()
-    }
-
-    /// Vertical layout of player config options for the modal.
-    fn build_player_config_column(&self) -> Element<'_, Message> {
-        column![
-            self.build_player_pick_lists(),
-            self.build_movement_controls(),
-        ]
-        .spacing(8)
-        .into()
-    }
-
-    fn build_player_pick_lists(&self) -> Column<'_, Message> {
-        use crate::lua_api::state::{CLASS_LABELS, RACE_DATA, ROT_DAMAGE_LEVELS, XP_LEVELS};
-
-        let class_opts: Vec<String> = CLASS_LABELS.iter().map(|s| s.to_string()).collect();
-        let race_opts: Vec<String> = RACE_DATA.iter().map(|(n, _, _)| n.to_string()).collect();
-        let xp_opts: Vec<String> = XP_LEVELS.iter().map(|(l, _)| l.to_string()).collect();
-        let party_size_opts: Vec<String> = (0..=4).map(|n| n.to_string()).collect();
-        let rot_opts: Vec<String> = ROT_DAMAGE_LEVELS
-            .iter()
-            .map(|(l, _)| l.to_string())
-            .collect();
-
-        column![
-            labeled_pick_list(
-                "Class:",
-                class_opts,
-                &self.selected_class,
-                Message::PlayerClassChanged
-            ),
-            labeled_pick_list(
-                "Race:",
-                race_opts,
-                &self.selected_race,
-                Message::PlayerRaceChanged
-            ),
-            labeled_pick_list(
-                "XP Bar:",
-                xp_opts,
-                &self.selected_xp_level,
-                Message::XpLevelChanged
-            ),
-            labeled_pick_list(
-                "Party:",
-                party_size_opts,
-                &self.selected_party_size,
-                Message::PartySizeChanged
-            ),
-            labeled_pick_list(
-                "Rot Damage:",
-                rot_opts,
-                &self.selected_rot_level,
-                Message::RotDamageLevelChanged
-            ),
-        ]
-        .spacing(8)
-    }
-
-    fn build_movement_controls(&self) -> Column<'_, Message> {
-        let m = &self.movement;
-        column![
-            text("Movement").size(12).color(palette::TEXT_SECONDARY),
-            labeled_checkbox("Moving", m.moving, |v| Message::MovementToggled(
-                "moving", v
-            )),
-            labeled_checkbox("Mounted", m.mounted, |v| Message::MovementToggled(
-                "mounted", v
-            )),
-            labeled_checkbox("Flying", m.flying, |v| Message::MovementToggled(
-                "flying", v
-            )),
-            labeled_checkbox("Falling", m.falling, |v| Message::MovementToggled(
-                "falling", v
-            )),
-            labeled_checkbox("Swimming", m.swimming, |v| Message::MovementToggled(
-                "swimming", v
-            )),
-        ]
-        .spacing(8)
     }
 
     pub fn subscription(&self) -> Subscription<Message> {
@@ -702,53 +574,6 @@ impl App {
             .height(Length::Fill)
             .into()
     }
-
-    /// Hit test to find frame under cursor (uses cached rects from render pass).
-    ///
-    /// After finding the topmost frame at the cursor position (highest strata/level),
-    /// drills down through child frames to find the deepest mouse-enabled descendant.
-    /// This matches WoW behavior where child frames always receive clicks over parents,
-    /// regardless of the parent's frame level. Descent walks through any visible child
-    /// whose visual rect contains the point — even non-mouse-enabled containers — so
-    /// hittable descendants of a transparent panning/scroll container are still reachable.
-    pub(crate) fn hit_test(&self, pos: iced::Point) -> Option<u64> {
-        self.apply_hit_grid_changes();
-        let cache = self.cached_hittable.borrow();
-        let grid = cache.as_ref()?;
-
-        let env = self.env.borrow();
-        let state = env.state().borrow();
-        let initial_id = grid.topmost_matching_at(pos, |id| {
-            deepest_hover_target_through_visible_children(&state.widgets, grid, id, pos).is_some()
-        })?;
-        deepest_hover_target_through_visible_children(&state.widgets, grid, initial_id, pos)
-    }
-
-    pub(crate) fn hit_test_mouse_button(&self, pos: iced::Point, button_name: &str) -> Option<u64> {
-        self.apply_hit_grid_changes();
-        let cache = self.cached_hittable.borrow();
-        let grid = cache.as_ref()?;
-
-        let env = self.env.borrow();
-        let state = env.state().borrow();
-        let initial_id = grid.topmost_matching_at(pos, |id| {
-            deepest_click_target_through_visible_children(
-                &state.widgets,
-                grid,
-                id,
-                pos,
-                button_name,
-            )
-            .is_some()
-        })?;
-        deepest_click_target_through_visible_children(
-            &state.widgets,
-            grid,
-            initial_id,
-            pos,
-            button_name,
-        )
-    }
 }
 
 #[cfg(test)]
@@ -768,106 +593,6 @@ mod key_dispatch_tests {
         assert!(should_dispatch_wow_key(iced::event::Status::Ignored, "M"));
         assert!(!should_dispatch_wow_key(iced::event::Status::Captured, "M"));
     }
-}
-
-fn deepest_hover_target_through_visible_children(
-    widgets: &crate::widget::WidgetRegistry,
-    grid: &crate::iced_app::hit_grid::HitGrid,
-    frame_id: u64,
-    pos: iced::Point,
-) -> Option<u64> {
-    let frame = widgets.get(frame_id)?;
-    for child_id in visible_descendants_at_point_by_z_order(widgets, frame, pos) {
-        if let Some(target) =
-            deepest_hover_target_through_visible_children(widgets, grid, child_id, pos)
-        {
-            return Some(target);
-        }
-    }
-
-    grid.contains(frame_id, pos).then_some(frame_id)
-}
-
-fn deepest_click_target_through_visible_children(
-    widgets: &crate::widget::WidgetRegistry,
-    grid: &crate::iced_app::hit_grid::HitGrid,
-    frame_id: u64,
-    pos: iced::Point,
-    button_name: &str,
-) -> Option<u64> {
-    let frame = widgets.get(frame_id)?;
-    for child_id in visible_descendants_at_point_by_z_order(widgets, frame, pos) {
-        if let Some(target) =
-            deepest_click_target_through_visible_children(widgets, grid, child_id, pos, button_name)
-        {
-            return Some(target);
-        }
-    }
-
-    if grid.contains(frame_id, pos) && frame_accepts_mouse_button(frame, button_name) {
-        Some(frame_id)
-    } else {
-        None
-    }
-}
-
-fn visible_descendants_at_point_by_z_order(
-    widgets: &crate::widget::WidgetRegistry,
-    frame: &crate::widget::Frame,
-    pos: iced::Point,
-) -> Vec<u64> {
-    let mut child_ids: Vec<_> = frame
-        .children
-        .iter()
-        .copied()
-        .filter(|&child_id| {
-            widgets
-                .get(child_id)
-                .is_some_and(|child| child_visually_contains(child, pos))
-        })
-        .collect();
-    child_ids.sort_by_key(|&child_id| {
-        widgets
-            .get(child_id)
-            .map(|child| hit_sort_key(child, child_id))
-            .unwrap_or_default()
-    });
-    child_ids.reverse();
-    child_ids
-}
-
-/// Whether the child's visual bounds (visible+layout_rect, scaled by UI_SCALE)
-/// contain the screen-space point. Used for hit-test descent through any
-/// visible frame, regardless of mouse-enabled status.
-fn child_visually_contains(child: &crate::widget::Frame, pos: iced::Point) -> bool {
-    if !child.visible || child.effective_alpha <= 0.0 {
-        return false;
-    }
-    let Some(rect) = child.layout_rect else {
-        return false;
-    };
-    let scale = crate::render::texture::UI_SCALE;
-    let x = rect.x * scale;
-    let y = rect.y * scale;
-    let w = rect.width * scale;
-    let h = rect.height * scale;
-    pos.x >= x && pos.x < x + w && pos.y >= y && pos.y < y + h
-}
-
-fn hit_sort_key(
-    frame: &crate::widget::Frame,
-    id: u64,
-) -> (crate::widget::FrameStrata, i32, i32, u64) {
-    (
-        frame.frame_strata,
-        frame.frame_level.saturating_add(frame.raise_order),
-        frame.frame_level,
-        id,
-    )
-}
-
-fn frame_accepts_mouse_button(frame: &crate::widget::Frame, button_name: &str) -> bool {
-    crate::iced_app::frame_collect::frame_accepts_mouse_button(frame, button_name)
 }
 
 fn frame_should_be_hidden_in_sidebar(frame: &crate::widget::Frame) -> bool {
@@ -912,43 +637,6 @@ fn truncate_sidebar_label(display: String) -> String {
     } else {
         display
     }
-}
-
-/// A label + pick_list row used in the options modal.
-fn labeled_pick_list<'a>(
-    label: &'a str,
-    options: Vec<String>,
-    selected: &str,
-    on_select: fn(String) -> Message,
-) -> Element<'a, Message> {
-    row![
-        text(label)
-            .size(12)
-            .color(palette::TEXT_SECONDARY)
-            .width(80),
-        pick_list(options, Some(selected.to_string()), on_select)
-            .text_size(12)
-            .width(Length::Fill)
-            .style(pick_list_style),
-    ]
-    .spacing(6)
-    .align_y(iced::Alignment::Center)
-    .into()
-}
-
-/// A label + checkbox row used in the options modal.
-fn labeled_checkbox<'a, F: Fn(bool) -> Message + 'a>(
-    label: &'a str,
-    checked: bool,
-    on_toggle: F,
-) -> Element<'a, Message> {
-    row![
-        checkbox(checked).on_toggle(on_toggle).text_size(12),
-        text(label).size(12).color(palette::TEXT_PRIMARY),
-    ]
-    .spacing(6)
-    .align_y(iced::Alignment::Center)
-    .into()
 }
 
 #[cfg(test)]

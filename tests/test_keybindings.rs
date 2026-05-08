@@ -13,8 +13,11 @@
 //! Targeting tests (TargetFrame, F2–F6) are in `test_keybindings_targeting.rs`.
 
 mod common;
+#[path = "common/token_ui_fixtures.rs"]
+mod token_ui_fixtures;
 
 use std::path::PathBuf;
+use token_ui_fixtures::load_token_ui;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::globals::global_frames;
@@ -90,7 +93,17 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
 
 /// Create a fully loaded environment with Blizzard addons and startup events.
 fn setup_env() -> common::LockedEnv {
-    common::lock_env(setup_unsettled_env)
+    setup_locked_env(false)
+}
+
+fn setup_locked_env(settle_after_startup: bool) -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = setup_unsettled_env();
+        if settle_after_startup {
+            settle_env(&env);
+        }
+        env
+    })
 }
 
 fn setup_unsettled_env() -> WowLuaEnv {
@@ -138,11 +151,7 @@ fn prepare_bag_env(env: &WowLuaEnv) {
 
 /// Create a fully loaded environment with Blizzard addons and startup events.
 fn setup_settled_env() -> common::LockedEnv {
-    common::lock_env(|| {
-        let env = setup_unsettled_env();
-        settle_env(&env);
-        env
-    })
+    setup_locked_env(true)
 }
 
 /// Fire startup events (same sequence as main.rs).
@@ -161,24 +170,6 @@ fn fire_startup_events(env: &WowLuaEnv) {
     ] {
         let _ = env.fire_event(event);
     }
-}
-
-fn load_token_ui(env: &WowLuaEnv) {
-    env.exec(
-        r#"
-        local loaded, reason = LoadAddOn("Blizzard_TokenUI")
-        assert(loaded, "LoadAddOn(Blizzard_TokenUI) failed: " .. tostring(reason))
-        if ContainerFrameSettingsManager and not ContainerFrameSettingsManager.TokenTracker then
-            ContainerFrameSettingsManager:OnAddonLoaded("Blizzard_TokenUI")
-        end
-        assert(BackpackTokenFrame, "BackpackTokenFrame should exist after loading Blizzard_TokenUI")
-        assert(
-            ContainerFrameSettingsManager and ContainerFrameSettingsManager.TokenTracker == BackpackTokenFrame,
-            "ContainerFrameSettingsManager should own BackpackTokenFrame after loading Blizzard_TokenUI"
-        )
-        "#,
-    )
-    .expect("Failed to runtime-load Blizzard_TokenUI for keybinding bag tests");
 }
 
 /// Check whether a global frame exists and is shown.

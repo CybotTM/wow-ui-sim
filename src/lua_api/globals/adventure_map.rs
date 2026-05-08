@@ -10,6 +10,7 @@
 //! hooks).
 
 use crate::event::{Event, EventArg};
+use crate::lua_api::AdventureMapQuestPortrait;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::LuaApiMut;
@@ -19,38 +20,36 @@ use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 const NAMESPACE: &str = "C_AdventureMap";
+type LuaTableRef = GcRef<Table>;
+type RustLuaFn = rilua::vm::closure::RustFn;
+
+const ADVENTURE_MAP_METHODS: &[(&str, RustLuaFn)] = &[
+    ("GetMapID", get_map_id),
+    ("Close", close),
+    ("GetNumMapInsets", get_num_map_insets),
+    ("GetMapInsetInfo", get_map_inset_info),
+    ("GetMapInsetDetailTileInfo", get_map_inset_detail_tile_info),
+    ("GetNumZoneChoices", get_num_zone_choices),
+    ("GetZoneChoiceInfo", get_zone_choice_info),
+    ("GetNumQuestOffers", get_num_quest_offers),
+    ("GetQuestOfferInfo", get_quest_offer_info),
+    ("GetQuestInfo", get_quest_info),
+    ("GetQuestPortraitInfo", get_quest_portrait_info),
+    ("StartQuest", start_quest),
+    ("GetAdventureMapTextureKit", get_adventure_map_texture_kit),
+];
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let table_ref = ensure_namespace_table(state);
-    table_set_rust_fn_static(state, table_ref, "GetMapID", get_map_id)?;
-    table_set_rust_fn_static(state, table_ref, "Close", close)?;
-    table_set_rust_fn_static(state, table_ref, "GetNumMapInsets", get_num_map_insets)?;
-    table_set_rust_fn_static(state, table_ref, "GetMapInsetInfo", get_map_inset_info)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetMapInsetDetailTileInfo",
-        get_map_inset_detail_tile_info,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "GetNumZoneChoices", get_num_zone_choices)?;
-    table_set_rust_fn_static(state, table_ref, "GetZoneChoiceInfo", get_zone_choice_info)?;
-    table_set_rust_fn_static(state, table_ref, "GetNumQuestOffers", get_num_quest_offers)?;
-    table_set_rust_fn_static(state, table_ref, "GetQuestOfferInfo", get_quest_offer_info)?;
-    table_set_rust_fn_static(state, table_ref, "GetQuestInfo", get_quest_info)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetQuestPortraitInfo",
-        get_quest_portrait_info,
-    )?;
-    table_set_rust_fn_static(state, table_ref, "StartQuest", start_quest)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetAdventureMapTextureKit",
-        get_adventure_map_texture_kit,
-    )?;
+    register_adventure_map_methods(state, table_ref)?;
+    Ok(())
+}
+
+fn register_adventure_map_methods(state: &mut LuaState, table_ref: LuaTableRef) -> LuaResult<()> {
+    for (name, rust_fn) in ADVENTURE_MAP_METHODS {
+        table_set_rust_fn_static(state, table_ref, name, *rust_fn)?;
+    }
     Ok(())
 }
 
@@ -256,6 +255,12 @@ fn get_quest_portrait_info(state: &mut LuaState) -> LuaResult<u32> {
     let Some(portrait) = portrait else {
         return Ok(0);
     };
+    let table_val = build_quest_portrait_table(state, &portrait);
+    state.push(table_val);
+    Ok(1)
+}
+
+fn build_quest_portrait_table(state: &mut LuaState, portrait: &AdventureMapQuestPortrait) -> Val {
     let model_scene = match portrait.model_scene_id {
         Some(value) => Val::Num(value as f64),
         None => Val::Nil,
@@ -278,8 +283,7 @@ fn get_quest_portrait_info(state: &mut LuaState) -> LuaResult<u32> {
     set_table_field(state, table_val, "modelSceneID", model_scene);
     set_table_field(state, table_val, "text", text);
     set_table_field(state, table_val, "name", name);
-    state.push(table_val);
-    Ok(1)
+    table_val
 }
 
 fn start_quest(state: &mut LuaState) -> LuaResult<u32> {
@@ -293,7 +297,8 @@ fn start_quest(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id_i64 = quest_id_f as i64;
     {
         let mut sim = borrow_state_mut(state)?;
-        if !sim.quest_log.contains(&quest_id_u32) {
+        let already_logged = sim.quest_log.iter().any(|id| *id == quest_id_u32);
+        if !already_logged {
             sim.quest_log.push(quest_id_u32);
         }
         sim.adventure_map

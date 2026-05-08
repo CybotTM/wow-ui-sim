@@ -6,12 +6,12 @@
 //! - CastSpellByID / CastSpellByName work (used by SECURE_ACTIONS["spell"])
 //! - Action bar UseAction click chain casts spells
 
+#[path = "click_targeting/full_ui.rs"]
+mod click_targeting_full_ui;
 mod common;
 
-use std::path::PathBuf;
-use wow_ui_sim::loader::load_addon;
+use click_targeting_full_ui::{drain_test_errors, env_with_full_ui, install_test_error_handler};
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::globals::global_frames;
 
 /// Lightweight env — no Blizzard addons, just the Lua API.
 fn env() -> WowLuaEnv {
@@ -34,137 +34,6 @@ fn battle_pet_unit_queries_default_to_false() {
         .unwrap();
 
     assert_eq!(result, (false, false, false, false));
-}
-
-fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
-}
-
-fn blizzard_toc(addon: &str, toc_name: &str) -> PathBuf {
-    blizzard_ui_dir().join(addon).join(toc_name)
-}
-
-fn click_targeting_addons() -> &'static [(&'static str, &'static str)] {
-    &[
-        ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
-        ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
-        ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-        ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
-        (
-            "Blizzard_UIPanelTemplates",
-            "Blizzard_UIPanelTemplates_Mainline.toc",
-        ),
-        (
-            "Blizzard_FrameXMLBase",
-            "Blizzard_FrameXMLBase_Mainline.toc",
-        ),
-        ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
-        ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
-        ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
-        ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
-        (
-            "Blizzard_AccessibilityTemplates",
-            "Blizzard_AccessibilityTemplates.toc",
-        ),
-        ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
-        ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
-        ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
-        ("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Mainline.toc"),
-        ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
-        ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
-        ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
-        ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
-        ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
-        ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
-        ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
-        (
-            "Blizzard_UIParentPanelManager",
-            "Blizzard_UIParentPanelManager_Mainline.toc",
-        ),
-        (
-            "Blizzard_Settings_Shared",
-            "Blizzard_Settings_Shared_Mainline.toc",
-        ),
-        (
-            "Blizzard_SettingsDefinitions_Shared",
-            "Blizzard_SettingsDefinitions_Shared.toc",
-        ),
-        (
-            "Blizzard_SettingsDefinitions_Frame",
-            "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
-        ),
-        ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
-        ("Blizzard_Menu", "Blizzard_Menu.toc"),
-        ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
-        ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
-        ("Blizzard_TimeManager", "Blizzard_TimeManager_Mainline.toc"),
-        ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
-        ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
-        ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
-        (
-            "Blizzard_UIPanels_Game",
-            "Blizzard_UIPanels_Game_Mainline.toc",
-        ),
-        ("Blizzard_BuffFrame", "Blizzard_BuffFrame.toc"),
-        ("Blizzard_SpellDiminishUI", "Blizzard_SpellDiminishUI.toc"),
-        ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
-        ("Blizzard_UnitFrame", "Blizzard_UnitFrame_Mainline.toc"),
-    ]
-}
-
-/// Full Blizzard UI with SecureTemplates, UnitFrame, ActionBar, etc.
-fn env_with_full_ui() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("create env");
-    env.set_screen_size(1024.0, 768.0);
-
-    let ui = blizzard_ui_dir();
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![ui.clone()];
-    }
-
-    for (name, toc_name) in click_targeting_addons() {
-        let toc_path = blizzard_toc(name, toc_name);
-        let _ = load_addon(&env.loader_env(), &toc_path);
-        env.apply_runtime_addon_load_workarounds(name);
-    }
-    env.apply_post_load_workarounds();
-    fire_startup_events(&env);
-    env.apply_post_event_workarounds();
-    let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
-    env
-}
-
-fn fire_startup_events(env: &WowLuaEnv) {
-    common::fire_addon_loaded(env, "WoWUISim");
-    for ev in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
-        let _ = env.fire_event(ev);
-    }
-    common::fire_player_entering_world(env, true, false);
-    let _ = env.fire_edit_mode_layouts_updated();
-    for ev in [
-        "UPDATE_BINDINGS",
-        "DISPLAY_SIZE_CHANGED",
-        "UI_SCALE_CHANGED",
-    ] {
-        let _ = env.fire_event(ev);
-    }
-}
-
-fn install_test_error_handler(env: &WowLuaEnv) {
-    env.exec(
-        r#"
-        __test_errors = {}
-        seterrorhandler(function(msg)
-            table.insert(__test_errors, tostring(msg))
-        end)
-    "#,
-    )
-    .expect("install error handler");
-}
-
-fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
-    common::drain_string_table(env, "__test_errors")
 }
 
 // ── CastSpellBookItem ────────────────────────────────────────────────
@@ -437,11 +306,15 @@ fn use_action_instant_spell_succeeds() {
 // ── Full Blizzard UI: SecureTemplates click chain ────────────────────
 
 fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
-    // Clear any existing target
     env.exec("ClearTarget()").expect("ClearTarget");
+    create_secure_unit_button(env);
+    assert_secure_unit_button_attributes(env);
+    click_secure_unit_button(env);
+    assert_no_secure_unit_button_click_errors(env);
+    assert_target_name(env, "Thrynn", "target should be Thrynn (party1)");
+}
 
-    // Create a button using SecureUnitButtonTemplate (like party frames do)
-    // and simulate clicking it
+fn create_secure_unit_button(env: &WowLuaEnv) {
     {
         let mut state = env.state().borrow_mut();
         state.party_group_active = true;
@@ -452,7 +325,7 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
             btn:SetSize(100, 30)
         "#).expect("create SecureUnitButton");
 
-    let errors = drain_test_errors(&env);
+    let errors = drain_test_errors(env);
     let setup_errors: Vec<&String> = errors
         .iter()
         .filter(|e| e.contains("SecureUnitButton"))
@@ -461,8 +334,9 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
         setup_errors.is_empty(),
         "SecureUnitButton setup errors: {setup_errors:?}"
     );
+}
 
-    // Verify the button has correct attributes
+fn assert_secure_unit_button_attributes(env: &WowLuaEnv) {
     let unit_attr: String = env
         .eval(r#"return TestSecureUnitBtn:GetAttribute("unit") or "none""#)
         .unwrap();
@@ -472,10 +346,9 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
         .eval(r#"return TestSecureUnitBtn:GetAttribute("*type1") or "none""#)
         .unwrap();
     assert_eq!(type_attr, "target", "*type1 attribute should be target");
+}
 
-    // Click the button via Lua — this calls SecureUnitButton_OnClick
-    // which goes through OnActionButtonClick → SECURE_ACTIONS["target"]
-    // → TargetUnit("party1")
+fn click_secure_unit_button(env: &WowLuaEnv) {
     env.exec(
         r#"
             local handler = TestSecureUnitBtn:GetScript("OnClick")
@@ -485,8 +358,10 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
         "#,
     )
     .expect("click SecureUnitButton");
+}
 
-    let click_errors = drain_test_errors(&env);
+fn assert_no_secure_unit_button_click_errors(env: &WowLuaEnv) {
+    let click_errors = drain_test_errors(env);
     let fatal_errors: Vec<&String> = click_errors
         .iter()
         .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
@@ -500,13 +375,14 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
             .collect::<Vec<_>>()
             .join("\n")
     );
+}
 
-    // Verify the target was set
+fn assert_target_name(env: &WowLuaEnv, expected: &str, message: &str) {
     let has_target: bool = env.eval("return UnitExists('target')").unwrap();
     assert!(has_target, "clicking SecureUnitButton should set a target");
 
     let target_name: String = env.eval("return UnitName('target')").unwrap();
-    assert_eq!(target_name, "Thrynn", "target should be Thrynn (party1)");
+    assert_eq!(target_name, expected, "{message}");
 }
 
 fn assert_blizzard_player_frame_click_targets_player(env: &WowLuaEnv) {
@@ -520,7 +396,7 @@ fn assert_blizzard_player_frame_click_targets_player(env: &WowLuaEnv) {
     )
     .expect("click PlayerFrame");
 
-    let fatal_errors: Vec<String> = drain_test_errors(&env)
+    let fatal_errors: Vec<String> = drain_test_errors(env)
         .into_iter()
         .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
         .collect();
@@ -546,7 +422,12 @@ fn assert_blizzard_player_frame_click_targets_player(env: &WowLuaEnv) {
 
 fn assert_blizzard_party_member_frame_click_targets_party1(env: &WowLuaEnv) {
     env.exec("ClearTarget()").expect("ClearTarget");
+    click_party_member_frame(env);
+    assert_no_party_member_click_errors(env);
+    assert_target_name(env, "Healer", "party member click should target party1");
+}
 
+fn click_party_member_frame(env: &WowLuaEnv) {
     env.exec(
         r#"
             A_Admin.SetPartySize(1)
@@ -572,8 +453,10 @@ fn assert_blizzard_party_member_frame_click_targets_party1(env: &WowLuaEnv) {
         "#,
     )
     .expect("click party1 member frame");
+}
 
-    let fatal_errors: Vec<String> = drain_test_errors(&env)
+fn assert_no_party_member_click_errors(env: &WowLuaEnv) {
+    let fatal_errors: Vec<String> = drain_test_errors(env)
         .into_iter()
         .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
         .collect();
@@ -582,40 +465,41 @@ fn assert_blizzard_party_member_frame_click_targets_party1(env: &WowLuaEnv) {
         "party member click errors:\n{}",
         fatal_errors.join("\n")
     );
-
-    let target_name: String = env.eval("return UnitName('target')").unwrap();
-    assert_eq!(
-        target_name, "Healer",
-        "party member click should target party1"
-    );
 }
 
 fn assert_blizzard_secure_action_button_click_casts_spell(env: &WowLuaEnv) {
     env.exec("TargetUnit('party1')").expect("target party1");
+    create_secure_spell_button(env);
+    click_secure_spell_button(env, false, "click spell button");
+    log_fatal_spell_click_errors(env);
+    retry_secure_spell_button_if_needed(env);
+    assert_player_casting_spell(env, "Flash of Light");
+}
 
-    // Create a SecureActionButton with type="spell" and spell=19750
+fn create_secure_spell_button(env: &WowLuaEnv) {
     env.exec(r#"
             local btn = CreateFrame("Button", "TestSpellBtn", UIParent, "SecureActionButtonTemplate")
             btn:SetAttribute("type", "spell")
             btn:SetAttribute("spell", 19750)
             btn:SetSize(40, 40)
         "#).expect("create SecureActionButton");
+}
 
-    // Click it — SecureActionButton_OnClick handles down/up logic.
-    // With down=true and useOnKeyDown, it fires on key down.
-    // With down=false and no useOnKeyDown (default), it fires on key up.
-    // The default for mouse clicks is useOnKeyDown=false, so down=false triggers.
-    env.exec(
+fn click_secure_spell_button(env: &WowLuaEnv, is_down: bool, label: &str) {
+    let is_down_lua = if is_down { "true" } else { "false" };
+    env.exec(&format!(
         r#"
             local handler = TestSpellBtn:GetScript("OnClick")
             if handler then
-                handler(TestSpellBtn, "LeftButton", false)
+                handler(TestSpellBtn, "LeftButton", {is_down_lua})
             end
-        "#,
-    )
-    .expect("click spell button");
+        "#
+    ))
+    .expect(label);
+}
 
-    let errors = drain_test_errors(&env);
+fn log_fatal_spell_click_errors(env: &WowLuaEnv) {
+    let errors = drain_test_errors(env);
     let fatal: Vec<&String> = errors
         .iter()
         .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
@@ -623,34 +507,25 @@ fn assert_blizzard_secure_action_button_click_casts_spell(env: &WowLuaEnv) {
     for e in &fatal {
         eprintln!("[spell click error] {e}");
     }
+}
 
+fn retry_secure_spell_button_if_needed(env: &WowLuaEnv) {
     let casting: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
-    // SecureActionButton_OnClick checks: clickAction = (down and useOnKeyDown) or (not down and not useOnKeyDown)
-    // With down=false and useOnKeyDown=false (default), clickAction = true.
-    // But GetCVarBool("ActionButtonUseKeyDown") may return true, making useOnKeyDown=true,
-    // which means clickAction = (false and true) or (true and false) = false.
-    // In that case the button fires on down=true, not down=false.
-    if !casting {
-        // Try with down=true (key-down mode)
-        env.exec(
-            r#"
-                local handler = TestSpellBtn:GetScript("OnClick")
-                if handler then
-                    handler(TestSpellBtn, "LeftButton", true)
-                end
-            "#,
-        )
-        .expect("click spell button (down=true)");
-        let _ = drain_test_errors(&env);
+    if casting {
+        return;
     }
+    click_secure_spell_button(env, true, "click spell button (down=true)");
+    let _ = drain_test_errors(env);
+}
 
+fn assert_player_casting_spell(env: &WowLuaEnv, expected_spell_name: &str) {
     let casting: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
     assert!(casting, "clicking spell button should start a cast");
 
     let spell_name: String = env
         .eval("return select(1, UnitCastingInfo('player'))")
         .unwrap();
-    assert_eq!(spell_name, "Flash of Light");
+    assert_eq!(spell_name, expected_spell_name);
 }
 
 fn assert_blizzard_action_button_click_casts_via_use_action(env: &WowLuaEnv) {
@@ -672,7 +547,7 @@ fn assert_blizzard_action_button_click_casts_via_use_action(env: &WowLuaEnv) {
     )
     .expect("click ActionButton1");
 
-    let errors = drain_test_errors(&env);
+    let errors = drain_test_errors(env);
     let fatal: Vec<&String> = errors
         .iter()
         .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))

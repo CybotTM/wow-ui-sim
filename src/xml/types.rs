@@ -2,10 +2,11 @@
 
 use serde::Deserialize;
 
+use super::types_animation::{AnimationGroupXml, AnimationXml};
 use super::types_elements::{
-    ActorXml, ActorsXml, AnimationGroupXml, AnimationXml, FontFamilyXml, FontStringXml, FontXml,
-    FramesXml, IncludeXml, LayersXml, ScriptXml, TextureXml,
+    ActorXml, ActorsXml, FontStringXml, FramesXml, IncludeXml, LayersXml, ScriptXml, TextureXml,
 };
+use super::types_fonts::{FontFamilyXml, FontXml};
 use super::types_support::{
     AnchorsXml, AnimationsXml, AttributesXml, BackdropXml, BindingXml, ColorXml, FontRefXml,
     InsetsXml, KeyValuesXml, ModifiedClickXml, ResizeBoundsXml, ScriptsXml, ScrollChildXml,
@@ -110,61 +111,6 @@ pub enum XmlElement {
     // Unknown elements (intrinsic types, custom elements)
     #[serde(other)]
     Unknown,
-}
-
-impl XmlElement {
-    /// Extract the inner `FrameXml` and variant tag name for frame-like elements.
-    /// Returns `None` for non-frame elements (Script, Include, Font, etc.).
-    pub fn as_frame_data(&self) -> Option<(&FrameXml, &'static str)> {
-        use super::types_elements::frame_variant_data;
-        frame_variant_data!(
-            self,
-            Frame,
-            Button,
-            ItemButton,
-            CheckButton,
-            EditBox,
-            ScrollFrame,
-            Slider,
-            StatusBar,
-            GameTooltip,
-            ColorSelect,
-            Model,
-            ModelScene,
-            EventFrame,
-            CinematicModel,
-            PlayerModel,
-            DressUpModel,
-            Browser,
-            Minimap,
-            MessageFrame,
-            MovieFrame,
-            ScrollingMessageFrame,
-            SimpleHTML,
-            WorldFrame,
-            DropDownToggleButton,
-            DropdownButton,
-            EventButton,
-            EventEditBox,
-            Cooldown,
-            TaxiRouteFrame,
-            ModelFFX,
-            TabardModel,
-            UiCamera,
-            UnitPositionFrame,
-            OffScreenFrame,
-            Checkout,
-            FogOfWarFrame,
-            QuestPOIFrame,
-            ArchaeologyDigSiteFrame,
-            ScenarioPOIFrame,
-            UIThemeContainerFrame,
-            EventScrollFrame,
-            ContainedAlertFrame,
-            MapScene,
-            Line
-        )
-    }
 }
 
 /// Frame definition in XML.

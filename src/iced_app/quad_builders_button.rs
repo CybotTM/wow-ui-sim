@@ -2,13 +2,22 @@
 
 use iced::{Point, Rectangle, Size};
 
-use crate::render::{BlendMode, QuadBatch};
+use crate::render::{BlendMode, QuadBatch, ThreeSlicePathParams};
 use crate::widget::{TextJustify, WidgetType};
 
 use super::textures::remap_atlas_crop;
 use super::{FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, emit_widget_text_quads};
 
 const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
+
+type ButtonTextureState<'a> = (Option<&'a String>, Option<(f32, f32, f32, f32)>, bool);
+
+struct EditBoxTextMetrics {
+    bounds: Rectangle,
+    left_pad: f32,
+    top_inset: f32,
+    bottom_inset: f32,
+}
 
 /// UI-Panel-Button-Up is 128×32; button-up strip occupies rows 0-21 (V = 0 .. 22/32 = 0.6875).
 const PANEL_BUTTON_UP_CROP_V: f32 = 22.0 / 32.0;
@@ -70,27 +79,7 @@ pub(super) fn build_button_quads(
     is_hovered: bool,
     alpha: f32,
 ) {
-    let has_normal_child = f.children_keys.contains_key("NormalTexture");
-    let has_pushed_child = f.children_keys.contains_key("PushedTexture");
-
-    let (texture_path, tex_coords, skip) = if is_pressed {
-        (
-            f.pushed_texture.as_ref().or(f.normal_texture.as_ref()),
-            f.pushed_tex_coords.or(f.normal_tex_coords),
-            if f.pushed_texture.is_some() {
-                has_pushed_child
-            } else {
-                has_normal_child
-            },
-        )
-    } else {
-        (
-            f.normal_texture.as_ref(),
-            f.normal_tex_coords,
-            has_normal_child,
-        )
-    };
-
+    let (texture_path, tex_coords, skip) = button_texture_state(f, is_pressed);
     if !skip {
         emit_button_texture(batch, bounds, texture_path, tex_coords, alpha);
     }
@@ -99,6 +88,28 @@ pub(super) fn build_button_quads(
     if is_hovered && !is_pressed && !has_highlight_child {
         emit_button_highlight(batch, bounds, f, alpha);
     }
+}
+
+fn button_texture_state(f: &crate::widget::Frame, is_pressed: bool) -> ButtonTextureState<'_> {
+    let has_normal_child = f.children_keys.contains_key("NormalTexture");
+    let has_pushed_child = f.children_keys.contains_key("PushedTexture");
+
+    if is_pressed {
+        let texture_path = f.pushed_texture.as_ref().or(f.normal_texture.as_ref());
+        let tex_coords = f.pushed_tex_coords.or(f.normal_tex_coords);
+        let skip = if f.pushed_texture.is_some() {
+            has_pushed_child
+        } else {
+            has_normal_child
+        };
+        return (texture_path, tex_coords, skip);
+    }
+
+    (
+        f.normal_texture.as_ref(),
+        f.normal_tex_coords,
+        has_normal_child,
+    )
 }
 
 /// Render the button's normal/pushed texture (atlas UV or 3-slice).
@@ -114,6 +125,17 @@ fn emit_button_texture(
         emit_ui_panel_button_strip(batch, bounds, tex_path, tex_coords, alpha, BlendMode::Alpha);
         return;
     }
+
+    emit_skinned_button_texture(batch, bounds, tex_path, tex_coords, alpha);
+}
+
+fn emit_skinned_button_texture(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    tex_coords: Option<(f32, f32, f32, f32)>,
+    alpha: f32,
+) {
     if let Some(tex_coords) = tex_coords {
         push_skinned_button_quad(
             batch,
@@ -124,18 +146,7 @@ fn emit_button_texture(
             BlendMode::Alpha,
         );
     } else {
-        const BUTTON_TEX_WIDTH: f32 = 128.0;
-        const BUTTON_CAP_WIDTH: f32 = 4.0;
-        batch.push_three_slice_h_path(
-            bounds,
-            BUTTON_CAP_WIDTH,
-            BUTTON_CAP_WIDTH,
-            tex_path,
-            BUTTON_TEX_WIDTH,
-            [1.0, 1.0, 1.0, alpha],
-            0.0,
-            BUTTON_TEX_V_BOTTOM,
-        );
+        emit_button_three_slice(batch, bounds, tex_path, alpha, BlendMode::Alpha);
     }
 }
 
@@ -146,54 +157,70 @@ pub(crate) fn emit_button_highlight(
     f: &crate::widget::Frame,
     alpha: f32,
 ) {
+    const HIGHLIGHT_ALPHA: f32 = 0.5;
+
     let Some(highlight_path) = &f.highlight_texture else {
         return;
     };
+    let alpha = HIGHLIGHT_ALPHA * alpha;
+
     if is_ui_panel_button_atlas(highlight_path) {
         emit_ui_panel_button_strip(
             batch,
             bounds,
             highlight_path,
             f.highlight_tex_coords,
-            0.5 * alpha,
+            alpha,
             BlendMode::Additive,
         );
         return;
     }
-    if let Some(tex_coords) = f.highlight_tex_coords {
+
+    emit_skinned_button_highlight(batch, bounds, highlight_path, f.highlight_tex_coords, alpha);
+}
+
+fn emit_skinned_button_highlight(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    highlight_path: &str,
+    tex_coords: Option<(f32, f32, f32, f32)>,
+    alpha: f32,
+) {
+    if let Some(tex_coords) = tex_coords {
         push_skinned_button_quad(
             batch,
             bounds,
             highlight_path,
             tex_coords,
-            [1.0, 1.0, 1.0, 0.5 * alpha],
+            [1.0, 1.0, 1.0, alpha],
             BlendMode::Additive,
         );
     } else {
-        emit_button_three_slice_blend(batch, bounds, highlight_path, 0.5 * alpha);
+        emit_button_three_slice(batch, bounds, highlight_path, alpha, BlendMode::Additive);
     }
 }
 
 /// 3-slice horizontal fallback for button textures with the up-strip V crop.
-fn emit_button_three_slice_blend(
+fn emit_button_three_slice(
     batch: &mut QuadBatch,
     bounds: Rectangle,
     tex_path: &str,
     alpha: f32,
+    blend_mode: BlendMode,
 ) {
     const BUTTON_TEX_WIDTH: f32 = 128.0;
     const BUTTON_CAP_WIDTH: f32 = 4.0;
-    batch.push_three_slice_h_path_blend(
+    batch.push_three_slice_h_path_blend(ThreeSlicePathParams {
         bounds,
-        BUTTON_CAP_WIDTH,
-        BUTTON_CAP_WIDTH,
-        tex_path,
-        BUTTON_TEX_WIDTH,
-        [1.0, 1.0, 1.0, alpha],
-        BlendMode::Additive,
-        0.0,
-        BUTTON_TEX_V_BOTTOM,
-    );
+        left_cap_width: BUTTON_CAP_WIDTH,
+        right_cap_width: BUTTON_CAP_WIDTH,
+        path: tex_path,
+        tex_width: BUTTON_TEX_WIDTH,
+        color: [1.0, 1.0, 1.0, alpha],
+        blend_mode,
+        v_top: 0.0,
+        v_bottom: BUTTON_TEX_V_BOTTOM,
+    });
 }
 
 fn emit_ui_panel_button_strip(
@@ -206,36 +233,67 @@ fn emit_ui_panel_button_strip(
 ) {
     const BUTTON_TEX_WIDTH: f32 = 128.0;
     const BUTTON_CAP_WIDTH: f32 = 4.0;
-    const BUTTON_TEX_V_BOTTOM: f32 = 0.6875;
 
-    if let Some((left, right, top, bottom)) = tex_coords {
-        let v_bottom = if bottom > 0.9 {
-            BUTTON_TEX_V_BOTTOM
-        } else {
-            bottom
-        };
-        push_skinned_button_quad(
-            batch,
-            bounds,
-            tex_path,
-            (left, right, top, v_bottom),
-            [1.0, 1.0, 1.0, alpha],
-            blend_mode,
-        );
+    if let Some(tex_coords) = tex_coords {
+        emit_ui_panel_button_strip_crop(batch, bounds, tex_path, tex_coords, alpha, blend_mode);
         return;
     }
 
-    batch.push_three_slice_h_path_blend(
+    emit_ui_panel_button_strip_fallback(
+        batch,
         bounds,
-        BUTTON_CAP_WIDTH,
-        BUTTON_CAP_WIDTH,
         tex_path,
+        alpha,
+        blend_mode,
         BUTTON_TEX_WIDTH,
+        BUTTON_CAP_WIDTH,
+    );
+}
+
+fn emit_ui_panel_button_strip_crop(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    tex_coords: (f32, f32, f32, f32),
+    alpha: f32,
+    blend_mode: BlendMode,
+) {
+    let (left, right, top, bottom) = tex_coords;
+    let bottom = if bottom > 0.9 {
+        PANEL_BUTTON_UP_CROP_V
+    } else {
+        bottom
+    };
+    push_skinned_button_quad(
+        batch,
+        bounds,
+        tex_path,
+        (left, right, top, bottom),
         [1.0, 1.0, 1.0, alpha],
         blend_mode,
-        0.0,
-        BUTTON_TEX_V_BOTTOM,
     );
+}
+
+fn emit_ui_panel_button_strip_fallback(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    alpha: f32,
+    blend_mode: BlendMode,
+    texture_width: f32,
+    cap_width: f32,
+) {
+    batch.push_three_slice_h_path_blend(ThreeSlicePathParams {
+        bounds,
+        left_cap_width: cap_width,
+        right_cap_width: cap_width,
+        path: tex_path,
+        tex_width: texture_width,
+        color: [1.0, 1.0, 1.0, alpha],
+        blend_mode,
+        v_top: 0.0,
+        v_bottom: PANEL_BUTTON_UP_CROP_V,
+    });
 }
 
 fn is_ui_panel_button_atlas(path: &str) -> bool {
@@ -413,54 +471,106 @@ pub(super) fn emit_editbox_with_text(
     alpha: f32,
 ) {
     build_editbox_quads(batch, bounds, f, alpha);
-    let (left_inset, right_inset, top_inset, bottom_inset) = f.editbox_text_insets;
+    let text_metrics = editbox_text_metrics(bounds, f.editbox_text_insets);
+    let text_width = emit_editbox_text(batch, f, text_ctx, text_metrics.bounds, alpha);
+    if f.editbox_focused {
+        emit_editbox_caret(batch, bounds, text_metrics, text_width, alpha);
+    }
+}
+
+fn editbox_text_metrics(
+    bounds: Rectangle,
+    text_insets: (f32, f32, f32, f32),
+) -> EditBoxTextMetrics {
+    let (left_inset, right_inset, top_inset, bottom_inset) = text_insets;
     let left_pad = if left_inset > 0.0 { left_inset } else { 4.0 };
     let right_pad = if right_inset > 0.0 { right_inset } else { 4.0 };
-    let text_bounds = Rectangle::new(
+    let bounds = Rectangle::new(
         Point::new(bounds.x + left_pad, bounds.y + top_inset),
         Size::new(
             (bounds.width - left_pad - right_pad).max(0.0),
             (bounds.height - top_inset - bottom_inset).max(0.0),
         ),
     );
-    let mut text_width = 0.0_f32;
-    if let Some((fs, ga)) = text_ctx {
-        if let Some(ref txt) = f.text {
-            let mut text_renderer = WidgetTextRenderer {
-                batch,
-                font_sys: fs,
-                glyph_atlas: ga,
-            };
-            emit_widget_text_quads(
-                &mut text_renderer,
-                f,
-                WidgetTextLayout {
-                    text: txt,
-                    bounds: text_bounds,
-                    justify_h: TextJustify::Left,
-                    justify_v: TextJustify::Center,
-                    word_wrap: false,
-                    max_lines: 0,
-                    alpha,
-                },
-            );
-            if f.editbox_focused {
-                let cursor_chars = f.editbox_cursor_pos.max(0) as usize;
-                let measured: String = txt.chars().take(cursor_chars).collect();
-                let font_path = f.font.as_deref();
-                let font_size = if f.font_size > 0.0 { f.font_size } else { 12.0 };
-                text_width = fs.measure_text_width(&measured, font_path, font_size);
-            }
-        }
+
+    EditBoxTextMetrics {
+        bounds,
+        left_pad,
+        top_inset,
+        bottom_inset,
     }
+}
+
+fn emit_editbox_caret(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    text_metrics: EditBoxTextMetrics,
+    text_width: f32,
+    alpha: f32,
+) {
+    let caret_x =
+        (bounds.x + text_metrics.left_pad + text_width).min(bounds.x + bounds.width - 1.0);
+    let caret_top = bounds.y + text_metrics.top_inset + 1.0;
+    let caret_height =
+        (bounds.height - text_metrics.top_inset - text_metrics.bottom_inset - 2.0).max(2.0);
+    batch.push_solid(
+        Rectangle::new(Point::new(caret_x, caret_top), Size::new(1.5, caret_height)),
+        [1.0, 0.95, 0.55, 0.95 * alpha],
+    );
+    batch.push_border(bounds, 1.0, [1.0, 0.85, 0.30, 0.85 * alpha]);
+}
+
+fn emit_editbox_text(
+    batch: &mut QuadBatch,
+    f: &crate::widget::Frame,
+    text_ctx: &mut Option<(
+        &mut crate::render::font::WowFontSystem,
+        &mut crate::render::glyph::GlyphAtlas,
+    )>,
+    text_bounds: Rectangle,
+    alpha: f32,
+) -> f32 {
+    let Some((fs, ga)) = text_ctx else {
+        return 0.0;
+    };
+    let Some(txt) = f.text.as_ref() else {
+        return 0.0;
+    };
+
+    let mut text_renderer = WidgetTextRenderer {
+        batch,
+        font_sys: fs,
+        glyph_atlas: ga,
+    };
+    emit_widget_text_quads(
+        &mut text_renderer,
+        f,
+        WidgetTextLayout {
+            text: txt,
+            bounds: text_bounds,
+            justify_h: TextJustify::Left,
+            justify_v: TextJustify::Center,
+            word_wrap: false,
+            max_lines: 0,
+            alpha,
+        },
+    );
+
     if f.editbox_focused {
-        let caret_x = (bounds.x + left_pad + text_width).min(bounds.x + bounds.width - 1.0);
-        let caret_top = bounds.y + top_inset + 1.0;
-        let caret_height = (bounds.height - top_inset - bottom_inset - 2.0).max(2.0);
-        batch.push_solid(
-            Rectangle::new(Point::new(caret_x, caret_top), Size::new(1.5, caret_height)),
-            [1.0, 0.95, 0.55, 0.95 * alpha],
-        );
-        batch.push_border(bounds, 1.0, [1.0, 0.85, 0.30, 0.85 * alpha]);
+        measure_editbox_text_before_cursor(f, fs, txt)
+    } else {
+        0.0
     }
+}
+
+fn measure_editbox_text_before_cursor(
+    f: &crate::widget::Frame,
+    font_sys: &mut crate::render::font::WowFontSystem,
+    text: &str,
+) -> f32 {
+    let cursor_chars = f.editbox_cursor_pos.max(0) as usize;
+    let measured: String = text.chars().take(cursor_chars).collect();
+    let font_path = f.font.as_deref();
+    let font_size = if f.font_size > 0.0 { f.font_size } else { 12.0 };
+    font_sys.measure_text_width(&measured, font_path, font_size)
 }

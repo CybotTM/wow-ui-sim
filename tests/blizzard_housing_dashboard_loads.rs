@@ -18,6 +18,10 @@ fn dashboard_toc() -> PathBuf {
     dashboard_dir().join("Blizzard_HousingDashboard.toc")
 }
 
+fn parse_dashboard_toc() -> TocFile {
+    TocFile::from_file(&dashboard_toc()).expect("HousingDashboard TOC should parse")
+}
+
 fn load_full_game_ui_with_dashboard_lod() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
@@ -69,7 +73,7 @@ fn blizzard_housing_dashboard_find_toc_resolves_bare_variant() {
 
 #[test]
 fn blizzard_housing_dashboard_toc_declares_lod_with_two_dependencies() {
-    let toc = TocFile::from_file(&dashboard_toc()).expect("HousingDashboard TOC should parse");
+    let toc = parse_dashboard_toc();
     assert!(
         toc.is_load_on_demand(),
         "Blizzard_HousingDashboard declares `## LoadOnDemand: 1` — pulled via explicit LoadAddOn \
@@ -92,7 +96,7 @@ fn blizzard_housing_dashboard_toc_declares_lod_with_two_dependencies() {
 
 #[test]
 fn blizzard_housing_dashboard_toc_is_retail_only_and_omits_allow_load() {
-    let toc = TocFile::from_file(&dashboard_toc()).expect("HousingDashboard TOC should parse");
+    let toc = parse_dashboard_toc();
     let toc_text = std::fs::read_to_string(dashboard_toc()).expect("TOC should read");
     assert!(
         toc_text.contains("## AllowLoadGameType: standard"),
@@ -113,7 +117,7 @@ fn blizzard_housing_dashboard_toc_is_retail_only_and_omits_allow_load() {
 
 #[test]
 fn blizzard_housing_dashboard_toc_lists_nine_files_in_order() {
-    let toc = TocFile::from_file(&dashboard_toc()).expect("HousingDashboard TOC should parse");
+    let toc = parse_dashboard_toc();
     let files: Vec<String> = toc
         .files
         .iter()

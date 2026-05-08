@@ -125,6 +125,11 @@ impl From<SummaryWheelTuple> for SummaryWheelProbe {
 }
 
 fn assert_summary_page_mouse_wheel_pagination(probe: SummaryWheelProbe) {
+    assert_summary_page_wheel_moves_between_pages(&probe);
+    assert_summary_page_rows_refresh_after_wheel(&probe);
+}
+
+fn assert_summary_page_wheel_moves_between_pages(probe: &SummaryWheelProbe) {
     assert_eq!(
         probe.initial_page, 1,
         "summaryPage must start on page 1 after selecting the summary tab"
@@ -145,6 +150,9 @@ fn assert_summary_page_mouse_wheel_pagination(probe: SummaryWheelProbe) {
         probe.after_second_up, 1,
         "wheel-up on the first summary page must be a no-op"
     );
+}
+
+fn assert_summary_page_rows_refresh_after_wheel(probe: &SummaryWheelProbe) {
     assert_eq!(
         probe.first_page_first_row, "Race 01|n1/35",
         "first summary page must render race 1 in row 1"

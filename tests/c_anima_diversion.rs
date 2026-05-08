@@ -24,42 +24,42 @@ fn seed_two_node_diversion(env: &WowLuaEnv) {
     sim.anima_diversion.map_id = 1543;
     sim.anima_diversion.origin_position = Some((0.42, 0.61));
     sim.anima_diversion.reinforce_progress = 0.75;
-    sim.anima_diversion.nodes = vec![
-        AnimaDiversionNodeInfo {
-            talent_id: 101,
-            name: "Bastion Ward".to_string(),
-            description: "Increase Bastion's resilience.".to_string(),
-            costs: vec![AnimaDiversionCostInfo {
-                currency_id: 1813,
-                quantity: 250,
-            }],
-            currency_id: 1813,
-            icon: 3528287,
-            normalized_position_x: 0.25,
-            normalized_position_y: 0.5,
-            state: 1, // Available
-        },
-        AnimaDiversionNodeInfo {
-            talent_id: 102,
-            name: "Ascendant Echo".to_string(),
-            description: "Permanent power for the Ascended.".to_string(),
-            costs: vec![
-                AnimaDiversionCostInfo {
-                    currency_id: 1813,
-                    quantity: 500,
-                },
-                AnimaDiversionCostInfo {
-                    currency_id: 1822,
-                    quantity: 50,
-                },
-            ],
-            currency_id: 1813,
-            icon: 3528288,
-            normalized_position_x: 0.75,
-            normalized_position_y: 0.5,
-            state: 3, // SelectedPermanent
-        },
-    ];
+    sim.anima_diversion.nodes = vec![bastion_ward_node(), ascendant_echo_node()];
+}
+
+fn bastion_ward_node() -> AnimaDiversionNodeInfo {
+    AnimaDiversionNodeInfo {
+        talent_id: 101,
+        name: "Bastion Ward".to_string(),
+        description: "Increase Bastion's resilience.".to_string(),
+        costs: vec![cost(1813, 250)],
+        currency_id: 1813,
+        icon: 3528287,
+        normalized_position_x: 0.25,
+        normalized_position_y: 0.5,
+        state: 1, // Available
+    }
+}
+
+fn ascendant_echo_node() -> AnimaDiversionNodeInfo {
+    AnimaDiversionNodeInfo {
+        talent_id: 102,
+        name: "Ascendant Echo".to_string(),
+        description: "Permanent power for the Ascended.".to_string(),
+        costs: vec![cost(1813, 500), cost(1822, 50)],
+        currency_id: 1813,
+        icon: 3528288,
+        normalized_position_x: 0.75,
+        normalized_position_y: 0.5,
+        state: 3, // SelectedPermanent
+    }
+}
+
+fn cost(currency_id: i64, quantity: i64) -> AnimaDiversionCostInfo {
+    AnimaDiversionCostInfo {
+        currency_id,
+        quantity,
+    }
 }
 
 #[test]

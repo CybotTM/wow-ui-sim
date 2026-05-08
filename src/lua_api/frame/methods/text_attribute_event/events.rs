@@ -331,13 +331,17 @@ fn script_supported(state: &LuaState, frame_id: u64, handler_name: &str) -> bool
 }
 
 fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> bool {
-    if is_common_script_handler(handler_name)
+    is_widget_agnostic_script_handler(handler_name)
+        || is_widget_specific_script_handler(widget_type, handler_name)
+}
+
+fn is_widget_agnostic_script_handler(handler_name: &str) -> bool {
+    is_common_script_handler(handler_name)
         || is_keyboard_script_handler(handler_name)
         || is_hyperlink_script_handler(handler_name)
-    {
-        return true;
-    }
+}
 
+fn is_widget_specific_script_handler(widget_type: WidgetType, handler_name: &str) -> bool {
     match handler_name {
         "OnClick" | "PreClick" | "PostClick" => {
             matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
@@ -689,7 +693,7 @@ pub(super) fn rilua_hlist_set(state: &mut LuaState, tbl: GcRef<Table>) -> GcRef<
 
 #[cfg(test)]
 mod tests {
-    use super::frame_has_registered_event;
+    use super::{frame_has_registered_event, script_supported_for_widget};
     use crate::widget::{Frame, WidgetType};
 
     #[test]
@@ -699,5 +703,18 @@ mod tests {
 
         assert!(frame_has_registered_event(&frame, "PLAYER_LOGIN"));
         assert!(!frame_has_registered_event(&frame, "PLAYER_LOGOUT"));
+    }
+
+    #[test]
+    fn script_supported_for_widget_combines_shared_and_widget_specific_handlers() {
+        assert!(script_supported_for_widget(WidgetType::Frame, "OnShow"));
+        assert!(script_supported_for_widget(
+            WidgetType::EditBox,
+            "OnTextChanged"
+        ));
+        assert!(!script_supported_for_widget(
+            WidgetType::Frame,
+            "OnTextChanged"
+        ));
     }
 }

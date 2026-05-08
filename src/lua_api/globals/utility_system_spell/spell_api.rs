@@ -1,6 +1,7 @@
 //! Spell-related globals: UnitHealth, UnitPower, UnitCastingInfo, CastSpellBy*.
 
 use crate::lua_api::globals::unit_api::parse_party_index;
+use crate::lua_api::globals::unit_stats::secondary_power_max;
 use crate::lua_api::methods::{borrow_state, create_string, val_to_string};
 use crate::lua_api::state_types::SecondaryPowerState;
 use crate::lua_bridge::stack_val;
@@ -68,16 +69,6 @@ fn is_secondary_power_type(power_type: Option<i64>) -> bool {
         power_type,
         Some(4 | 5 | 6 | 7 | 8 | 9 | 11 | 12 | 13 | 16 | 17 | 18)
     )
-}
-
-fn secondary_power_max(power_type: i64) -> i32 {
-    match power_type {
-        4 => 7,
-        5 => 6,
-        9 => 5,
-        16 => 4,
-        _ => 5,
-    }
 }
 
 pub(super) fn power_type_name(power_type: i32) -> &'static str {
@@ -158,7 +149,7 @@ fn requested_power_values(
     if is_secondary_power_type(Some(requested.into())) {
         return SecondaryPowerState {
             current: 0,
-            max: secondary_power_max(requested.into()),
+            max: secondary_power_max(requested),
         };
     }
     SecondaryPowerState {

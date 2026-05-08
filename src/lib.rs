@@ -36,6 +36,7 @@ pub mod inspector_server_stub;
 #[path = "../data/items.rs"]
 pub mod items;
 pub mod layout;
+pub mod limited_listfile;
 pub mod loader;
 pub mod logging;
 pub mod lua_api;

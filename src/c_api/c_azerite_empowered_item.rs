@@ -130,9 +130,18 @@ fn confirm_azerite_empowered_item_respec(state: &mut LuaState) -> LuaResult<u32>
 
 fn get_power_text(state: &mut LuaState) -> LuaResult<u32> {
     let Some(text) = lookup_power_text(state)? else {
-        state.push(Val::Nil);
+        push_nil_power_text(state);
         return Ok(1);
     };
+    push_power_text_table(state, &text);
+    Ok(1)
+}
+
+fn push_nil_power_text(state: &mut LuaState) {
+    state.push(Val::Nil);
+}
+
+fn push_power_text_table(state: &mut LuaState, text: &AzeriteEmpoweredPowerText) {
     let name_str = state.gc.intern_string(text.name.as_bytes());
     let desc_str = state.gc.intern_string(text.description.as_bytes());
     let table = create_table_with_fields(
@@ -143,7 +152,6 @@ fn get_power_text(state: &mut LuaState) -> LuaResult<u32> {
         ],
     );
     state.push(table);
-    Ok(1)
 }
 
 fn lookup_power_text(state: &mut LuaState) -> LuaResult<Option<AzeriteEmpoweredPowerText>> {

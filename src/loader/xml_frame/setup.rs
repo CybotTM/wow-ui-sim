@@ -284,57 +284,109 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
 
 fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), LoadError> {
     env.with_state(|state| {
-        let widget_type =
-            crate::widget::WidgetType::from_str(setup.widget_type).ok_or_else(|| {
-                crate::Error::Other(format!("unknown widget type '{}'", setup.widget_type))
-            })?;
-        let parent_id = crate::lua_api::methods::borrow_state(state)?
-            .widgets
-            .get_id_by_name(setup.parent)
-            .ok_or_else(|| crate::Error::Other(format!("missing parent '{}'", setup.parent)))?;
-        let frame_id = crate::lua_api::globals::create_frame::create_frame_instance(
-            state,
-            widget_type,
-            setup.widget_type,
-            Some(setup.name.to_string()),
-            Some(parent_id),
-            true,
-            setup.frame.xml_id,
-        )?;
-        crate::lua_api::globals::create_frame::apply_runtime_template_chain_with_frame_overrides(
-            state,
-            frame_id,
-            (!setup.inherits.is_empty()).then_some(setup.inherits),
-            false,
-            setup.frame,
-        )
-        .map_err(|error| crate::Error::Other(error.to_string()))?;
-        if let Some(parent_key) = setup.frame.parent_key.as_deref() {
-            crate::lua_api::globals::template::assign_parent_key(
-                state, parent_id, parent_key, frame_id,
-            )
-            .map_err(|error| crate::Error::Other(error.to_string()))?;
-        }
-        if let Some(parent_array) = setup.frame.parent_array.as_deref() {
-            crate::lua_api::globals::create_frame::append_parent_array_entry(
-                state,
-                parent_id,
-                parent_array,
-                frame_id,
-            );
-        }
-        crate::lua_api::globals::create_frame::apply_frame_mixins(
-            state,
-            frame_id,
-            setup.frame.combined_mixin().as_deref(),
-        );
-        if let Some(scripts) = setup.frame.scripts() {
-            crate::lua_api::globals::create_frame::apply_template_scripts(state, frame_id, scripts)
-                .map_err(|error| crate::Error::Other(error.to_string()))?;
-        }
+        let widget_type = fast_create_widget_type(setup.widget_type)?;
+        let parent_id = fast_create_parent_id(state, setup.parent)?;
+        let frame_id = create_fast_frame_instance(state, setup, widget_type, parent_id)?;
+
+        apply_fast_frame_templates(state, setup, frame_id)?;
+        attach_fast_frame_to_parent(state, setup, parent_id, frame_id)?;
+        apply_fast_frame_mixins_and_scripts(state, setup, frame_id)?;
+
         Ok::<(), crate::Error>(())
     })
     .map_err(|error| LoadError::Lua(format!("Failed to create frame {}: {}", setup.name, error)))
+}
+
+fn fast_create_widget_type(widget_type: &str) -> Result<crate::widget::WidgetType, crate::Error> {
+    crate::widget::WidgetType::from_str(widget_type)
+        .ok_or_else(|| crate::Error::Other(format!("unknown widget type '{}'", widget_type)))
+}
+
+fn fast_create_parent_id(
+    state: &mut rilua::vm::state::LuaState,
+    parent: &str,
+) -> Result<u64, crate::Error> {
+    crate::lua_api::methods::borrow_state(state)?
+        .widgets
+        .get_id_by_name(parent)
+        .ok_or_else(|| crate::Error::Other(format!("missing parent '{}'", parent)))
+}
+
+fn create_fast_frame_instance(
+    state: &mut rilua::vm::state::LuaState,
+    setup: &SetupFrame<'_>,
+    widget_type: crate::widget::WidgetType,
+    parent_id: u64,
+) -> Result<u64, crate::Error> {
+    let frame_id = crate::lua_api::globals::create_frame::create_frame_instance(
+        state,
+        widget_type,
+        setup.widget_type,
+        Some(setup.name.to_string()),
+        Some(parent_id),
+        true,
+        setup.frame.xml_id,
+    )?;
+    Ok(frame_id)
+}
+
+fn apply_fast_frame_templates(
+    state: &mut rilua::vm::state::LuaState,
+    setup: &SetupFrame<'_>,
+    frame_id: u64,
+) -> Result<(), crate::Error> {
+    crate::lua_api::globals::create_frame::apply_runtime_template_chain_with_frame_overrides(
+        state,
+        frame_id,
+        (!setup.inherits.is_empty()).then_some(setup.inherits),
+        false,
+        setup.frame,
+    )
+    .map_err(|error| crate::Error::Other(error.to_string()))
+}
+
+fn attach_fast_frame_to_parent(
+    state: &mut rilua::vm::state::LuaState,
+    setup: &SetupFrame<'_>,
+    parent_id: u64,
+    frame_id: u64,
+) -> Result<(), crate::Error> {
+    if let Some(parent_key) = setup.frame.parent_key.as_deref() {
+        crate::lua_api::globals::template::assign_parent_key(
+            state, parent_id, parent_key, frame_id,
+        )
+        .map_err(|error| crate::Error::Other(error.to_string()))?;
+    }
+
+    if let Some(parent_array) = setup.frame.parent_array.as_deref() {
+        crate::lua_api::globals::create_frame::append_parent_array_entry(
+            state,
+            parent_id,
+            parent_array,
+            frame_id,
+        );
+    }
+
+    Ok(())
+}
+
+fn apply_fast_frame_mixins_and_scripts(
+    state: &mut rilua::vm::state::LuaState,
+    setup: &SetupFrame<'_>,
+    frame_id: u64,
+) -> Result<(), crate::Error> {
+    crate::lua_api::globals::create_frame::apply_frame_mixins(
+        state,
+        frame_id,
+        setup.frame.combined_mixin().as_deref(),
+    );
+
+    if let Some(scripts) = setup.frame.scripts() {
+        crate::lua_api::globals::create_frame::apply_template_scripts(state, frame_id, scripts)
+            .map_err(|error| crate::Error::Other(error.to_string()))?;
+    }
+
+    Ok(())
 }
 
 /// Set declarative frame properties directly in Rust after the Lua CreateFrame chunk.

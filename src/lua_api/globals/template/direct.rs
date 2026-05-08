@@ -27,25 +27,56 @@ pub(super) fn set_single_anchor(
 
     let (offset_x, offset_y) = anchor_offset(anchor);
     let relative_to_id = resolve_anchor_target(state, frame_id, anchor, frame_name);
-    let unresolved_relative = if relative_to_id.is_none() {
-        anchor
-            .relative_key
-            .as_ref()
-            .cloned()
-            .or_else(|| anchor.relative_to.as_ref().cloned())
-    } else {
-        None
-    };
+    let unresolved_relative = unresolved_anchor_relative(anchor, relative_to_id);
 
-    if let Some(rel_id) = relative_to_id {
-        if state.widgets.would_create_anchor_cycle(frame_id, rel_id) {
-            return;
-        }
+    if anchor_would_create_cycle(state, frame_id, relative_to_id) {
+        return;
     }
 
     update_anchor_dependents(state, frame_id, point, relative_to_id);
+    set_frame_anchor(
+        state,
+        frame_id,
+        point,
+        relative_point,
+        relative_to_id,
+        unresolved_relative,
+        (offset_x, offset_y),
+    );
+    state.widgets.mark_rect_dirty(frame_id);
+}
 
+fn unresolved_anchor_relative(anchor: &AnchorXml, relative_to_id: Option<u64>) -> Option<String> {
+    if relative_to_id.is_some() {
+        return None;
+    }
+
+    anchor
+        .relative_key
+        .as_ref()
+        .cloned()
+        .or_else(|| anchor.relative_to.as_ref().cloned())
+}
+
+fn anchor_would_create_cycle(state: &SimState, frame_id: u64, relative_to_id: Option<u64>) -> bool {
+    let Some(rel_id) = relative_to_id else {
+        return false;
+    };
+
+    state.widgets.would_create_anchor_cycle(frame_id, rel_id)
+}
+
+fn set_frame_anchor(
+    state: &mut SimState,
+    frame_id: u64,
+    point: AnchorPoint,
+    relative_point: AnchorPoint,
+    relative_to_id: Option<u64>,
+    unresolved_relative: Option<String>,
+    offset: (f32, f32),
+) {
     if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        let (offset_x, offset_y) = offset;
         if let Some(relative_expr) = unresolved_relative {
             frame.set_point_with_name(
                 point,
@@ -64,7 +95,6 @@ pub(super) fn set_single_anchor(
             );
         }
     }
-    state.widgets.mark_rect_dirty(frame_id);
 }
 
 fn anchor_points(anchor: &AnchorXml) -> Option<(AnchorPoint, AnchorPoint)> {
@@ -100,14 +130,13 @@ fn update_anchor_dependents(
     point: AnchorPoint,
     new_target: Option<u64>,
 ) {
-    if let Some(frame) = state.widgets.get(frame_id) {
-        if let Some(old_anchor) = frame.anchors.iter().find(|a| a.point == point) {
-            if let Some(old_target) = old_anchor.relative_to_id {
-                state
-                    .widgets
-                    .remove_anchor_dependent(old_target as u64, frame_id);
-            }
-        }
+    if let Some(frame) = state.widgets.get(frame_id)
+        && let Some(old_anchor) = frame.anchors.iter().find(|a| a.point == point)
+        && let Some(old_target) = old_anchor.relative_to_id
+    {
+        state
+            .widgets
+            .remove_anchor_dependent(old_target as u64, frame_id);
     }
     if let Some(rel_id) = new_target {
         state.widgets.add_anchor_dependent(rel_id, frame_id);
@@ -122,7 +151,7 @@ fn resolve_relative_to(
     frame_name: &str,
 ) -> Option<u64> {
     match relative_to {
-        Some(rel) if rel == "$parent" => state.widgets.get(frame_id).and_then(|f| f.parent_id),
+        Some("$parent") => state.widgets.get(frame_id).and_then(|f| f.parent_id),
         Some(rel) if rel.contains("$parent") || rel.contains("$Parent") => {
             // $parent in relativeTo refers to the anchoring frame's parent.
             // Derive from frame_id so we don't depend on callers threading the
@@ -592,10 +621,10 @@ pub fn apply_xml_protected(
             .iter()
             .find_map(|e| e.frame.protected)
     });
-    if protected == Some(true) {
-        if let Some(f) = state.borrow_mut().widgets.get_mut_visual(frame_id) {
-            f.is_protected = true;
-        }
+    if protected == Some(true)
+        && let Some(f) = state.borrow_mut().widgets.get_mut_visual(frame_id)
+    {
+        f.is_protected = true;
     }
 }
 
@@ -626,10 +655,10 @@ pub fn apply_xml_letters(
             }
         }
     }
-    if let Some(value) = letters {
-        if let Some(f) = state.borrow_mut().widgets.get_mut_visual(frame_id) {
-            f.editbox_max_letters = value;
-        }
+    if let Some(value) = letters
+        && let Some(f) = state.borrow_mut().widgets.get_mut_visual(frame_id)
+    {
+        f.editbox_max_letters = value;
     }
 }
 
@@ -651,41 +680,5 @@ fn merge_size(
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn anchor_points_default_relative_point_and_reject_invalid_values() {
-        let default_relative = AnchorXml {
-            point: Some("BOTTOM".to_string()),
-            relative_point: None,
-            relative_to: None,
-            relative_key: None,
-            x: None,
-            y: None,
-            offset: None,
-        };
-        assert_eq!(
-            anchor_points(&default_relative),
-            Some((AnchorPoint::Bottom, AnchorPoint::Bottom))
-        );
-
-        let invalid_point = AnchorXml {
-            point: Some("NOPE".to_string()),
-            ..default_relative.clone()
-        };
-        assert!(
-            anchor_points(&invalid_point).is_none(),
-            "invalid primary point should reject the anchor"
-        );
-
-        let invalid_relative = AnchorXml {
-            relative_point: Some("NOPE".to_string()),
-            ..default_relative
-        };
-        assert!(
-            anchor_points(&invalid_relative).is_none(),
-            "invalid relative point should reject the anchor"
-        );
-    }
-}
+#[path = "direct_tests.rs"]
+mod tests;

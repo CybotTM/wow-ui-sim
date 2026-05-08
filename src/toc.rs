@@ -2,6 +2,7 @@
 //!
 //! Parses `.toc` files to extract addon metadata and file load order.
 
+use crate::paths::find_case_insensitive;
 use crate::screen::ScreenKind;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -17,11 +18,8 @@ pub struct TocFile {
     pub metadata: HashMap<String, String>,
     /// Files to load in order (relative paths)
     pub files: Vec<PathBuf>,
-    /// Optional per-file environment override from inline annotations.
-    ///
-    /// `Some(true)` means `[LoadIntoEnvironment secure]`, `Some(false)` means
-    /// `[LoadIntoEnvironment global]`, and `None` means inherit the addon's
-    /// default environment.
+    /// Per-file environment override from `[LoadIntoEnvironment ...]` annotations.
+    /// `None` means inherit the addon's default environment.
     pub file_env_overrides: Vec<Option<bool>>,
 }
 
@@ -372,19 +370,6 @@ fn resolve_path_case_insensitive(base: &Path, path: &Path) -> PathBuf {
         }
     }
     current
-}
-
-/// Find a directory entry case-insensitively.
-fn find_case_insensitive(dir: &Path, name: &str) -> Option<PathBuf> {
-    let name_lower = name.to_lowercase();
-    if let Ok(entries) = std::fs::read_dir(dir) {
-        for entry in entries.flatten() {
-            if entry.file_name().to_string_lossy().to_lowercase() == name_lower {
-                return Some(entry.path());
-            }
-        }
-    }
-    None
 }
 
 impl TocFile {

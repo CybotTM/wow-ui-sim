@@ -9,6 +9,8 @@ use rilua::{LuaApiMut, LuaResult, Val};
 
 use super::set_global_val;
 
+type ColorTableRef = rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>;
+
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 pub(super) const NAMED_COLOR_GLOBALS: &[(&'static str, (f64, f64, f64, f64))] = &[
@@ -103,10 +105,7 @@ fn hex_from_rgb(r: f64, g: f64, b: f64) -> String {
 
 // ── Color table constructor ───────────────────────────────────────────────────
 
-fn register_color_methods(
-    state: &mut LuaState,
-    t_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-) -> LuaResult<()> {
+fn register_color_access_methods(state: &mut LuaState, t_ref: ColorTableRef) -> LuaResult<()> {
     table_set_rust_fn_static(state, t_ref, "GetRGB", |state| {
         let this = stack_val(state, 1);
         let (r, g, b) = color_rgb(state, this);
@@ -118,7 +117,10 @@ fn register_color_methods(
         let a = color_channel(state, this, "a", 1.0);
         (r, g, b, a).into_stack(state)
     })?;
-    register_color_equality_methods(state, t_ref)?;
+    Ok(())
+}
+
+fn register_color_format_methods(state: &mut LuaState, t_ref: ColorTableRef) -> LuaResult<()> {
     table_set_rust_fn_static(state, t_ref, "GenerateHexColor", |state| {
         let this = stack_val(state, 1);
         let (r, g, b) = color_rgb(state, this);
@@ -135,10 +137,14 @@ fn register_color_methods(
     Ok(())
 }
 
-fn register_color_equality_methods(
-    state: &mut LuaState,
-    t_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-) -> LuaResult<()> {
+fn register_color_methods(state: &mut LuaState, t_ref: ColorTableRef) -> LuaResult<()> {
+    register_color_access_methods(state, t_ref)?;
+    register_color_equality_methods(state, t_ref)?;
+    register_color_format_methods(state, t_ref)?;
+    Ok(())
+}
+
+fn register_color_equality_methods(state: &mut LuaState, t_ref: ColorTableRef) -> LuaResult<()> {
     table_set_rust_fn_static(state, t_ref, "IsRGBEqualTo", |state| {
         let this = stack_val(state, 1);
         let other = stack_val(state, 2);

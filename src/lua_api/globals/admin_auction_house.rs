@@ -64,6 +64,25 @@ pub(super) fn clear_auction_browse_results(state: &mut LuaState) -> LuaResult<u3
 }
 
 pub(super) fn add_auction_item_search_result(state: &mut LuaState) -> LuaResult<u32> {
+    let result = item_search_result_from_args(state)?;
+    let key = (result.item_id, result.item_level, 0, 0);
+
+    borrow_state_mut(state)?
+        .auction_item_searches
+        .entry(key)
+        .or_insert_with(empty_item_search_results)
+        .entries
+        .push(result.info);
+    Ok(0)
+}
+
+struct AdminItemSearchResult {
+    item_id: i32,
+    item_level: i32,
+    info: ItemSearchResultInfo,
+}
+
+fn item_search_result_from_args(state: &mut LuaState) -> LuaResult<AdminItemSearchResult> {
     let item_id = i32::from_stack(state, 1)?;
     let item_level = i32::from_stack(state, 2)?;
     let auction_id = i32::from_stack(state, 3)?;
@@ -75,15 +94,10 @@ pub(super) fn add_auction_item_search_result(state: &mut LuaState) -> LuaResult<
     let time_left_seconds = i64::from_stack(state, 9)?;
     let owner = val_to_string(state, Val::from_stack(state, 10)?).unwrap_or_default();
 
-    borrow_state_mut(state)?
-        .auction_item_searches
-        .entry((item_id, item_level, 0, 0))
-        .or_insert_with(|| ItemSearchResults {
-            entries: Vec::new(),
-            has_full_results: true,
-        })
-        .entries
-        .push(ItemSearchResultInfo {
+    Ok(AdminItemSearchResult {
+        item_id,
+        item_level,
+        info: ItemSearchResultInfo {
             owners: vec![owner],
             time_left,
             auction_id: i64::from(auction_id),
@@ -97,8 +111,15 @@ pub(super) fn add_auction_item_search_result(state: &mut LuaState) -> LuaResult<
             bid_amount,
             buyout_amount,
             time_left_seconds,
-        });
-    Ok(0)
+        },
+    })
+}
+
+fn empty_item_search_results() -> ItemSearchResults {
+    ItemSearchResults {
+        entries: Vec::new(),
+        has_full_results: true,
+    }
 }
 
 pub(super) fn clear_auction_item_search_results(state: &mut LuaState) -> LuaResult<u32> {

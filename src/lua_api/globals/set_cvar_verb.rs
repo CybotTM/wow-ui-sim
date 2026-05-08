@@ -250,6 +250,13 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn install_c_cvar_namespace(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let table_ref = ensure_c_cvar_table(state);
+    register_c_cvar_functions(state, table_ref)
+}
+
+fn register_c_cvar_functions(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<Table>,
+) -> crate::Result<()> {
     for &(name, func) in C_CVAR_FUNCTIONS {
         crate::lua_bridge::table_set_rust_fn_static(state, table_ref, name, func)?;
     }

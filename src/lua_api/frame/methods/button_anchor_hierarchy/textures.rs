@@ -10,6 +10,14 @@ use rilua::{LuaResult, Val};
 
 use super::shared::opt_string;
 
+type TextureCoords = (f32, f32, f32, f32);
+
+struct ResolvedTexturePath {
+    path: Option<String>,
+    tex_coords: Option<TextureCoords>,
+    file_data_id: Option<i64>,
+}
+
 // ── Visibility logic ──────────────────────────────────────────────────────────
 
 pub(super) fn button_texture_should_show(
@@ -235,49 +243,82 @@ fn apply_texture_path(
     texture_val: Val,
     set_button_field: fn(&mut crate::widget::Frame, Option<String>, Option<(f32, f32, f32, f32)>),
 ) -> LuaResult<()> {
-    let path: Option<String> = match texture_val {
-        Val::Str(_) => val_to_string(state, texture_val),
-        _ => None,
-    };
-    let file_data_id: Option<i64> = match texture_val {
-        Val::Num(n) => Some(n as i64),
-        _ => None,
-    };
-
-    let (resolved_path, tex_coords) = match &path {
-        Some(p) => resolve_atlas_path(p),
-        None => (None, None),
-    };
-
+    let texture = resolve_texture_path_value(state, texture_val);
     let mut sim = borrow_state_mut(state)?;
-    if texture_child_matches(
-        &sim,
-        button_id,
-        parent_key,
-        resolved_path.as_deref(),
-        tex_coords,
-        file_data_id,
-    ) {
+
+    if texture_path_already_applied(&sim, button_id, parent_key, &texture) {
         return Ok(());
     }
-    if let Some(frame) = sim.widgets.get_mut_visual(button_id) {
-        set_button_field(frame, resolved_path.clone(), tex_coords);
-    }
 
-    let tex_id = super::super::methods_helpers::get_or_create_button_texture(
-        &mut sim, button_id, parent_key,
-    );
-    if let Some(tex) = sim.widgets.get_mut_visual(tex_id) {
-        tex.texture = resolved_path;
-        tex.tex_coords = tex_coords;
-        tex.atlas_tex_coords = tex_coords;
-        tex.texture_file_data_id = file_data_id;
-    }
-    let should_show = button_texture_should_show(&sim, button_id, parent_key);
-    sim.widgets.set_visible(tex_id, should_show);
+    let tex_id =
+        apply_texture_path_to_widgets(&mut sim, button_id, parent_key, texture, set_button_field);
     drop(sim);
     let _ = sync_child_to_rilua(state, button_id, parent_key, tex_id);
     Ok(())
+}
+
+fn resolve_texture_path_value(state: &mut LuaState, texture_val: Val) -> ResolvedTexturePath {
+    let path = match texture_val {
+        Val::Str(_) => val_to_string(state, texture_val),
+        _ => None,
+    };
+    let file_data_id = match texture_val {
+        Val::Num(n) => Some(n as i64),
+        _ => None,
+    };
+    let (path, tex_coords) = match path {
+        Some(path) => {
+            let (resolved_path, tex_coords) = resolve_atlas_path(&path);
+            (resolved_path, tex_coords)
+        }
+        None => (None, None),
+    };
+
+    ResolvedTexturePath {
+        path,
+        tex_coords,
+        file_data_id,
+    }
+}
+
+fn texture_path_already_applied(
+    sim: &crate::lua_api::SimState,
+    button_id: u64,
+    parent_key: &str,
+    texture: &ResolvedTexturePath,
+) -> bool {
+    texture_child_matches(
+        sim,
+        button_id,
+        parent_key,
+        texture.path.as_deref(),
+        texture.tex_coords,
+        texture.file_data_id,
+    )
+}
+
+fn apply_texture_path_to_widgets(
+    sim: &mut crate::lua_api::SimState,
+    button_id: u64,
+    parent_key: &str,
+    texture: ResolvedTexturePath,
+    set_button_field: fn(&mut crate::widget::Frame, Option<String>, Option<(f32, f32, f32, f32)>),
+) -> u64 {
+    if let Some(frame) = sim.widgets.get_mut_visual(button_id) {
+        set_button_field(frame, texture.path.clone(), texture.tex_coords);
+    }
+
+    let tex_id =
+        super::super::methods_helpers::get_or_create_button_texture(sim, button_id, parent_key);
+    if let Some(tex) = sim.widgets.get_mut_visual(tex_id) {
+        tex.texture = texture.path;
+        tex.tex_coords = texture.tex_coords;
+        tex.atlas_tex_coords = texture.tex_coords;
+        tex.texture_file_data_id = texture.file_data_id;
+    }
+    let should_show = button_texture_should_show(&sim, button_id, parent_key);
+    sim.widgets.set_visible(tex_id, should_show);
+    tex_id
 }
 
 // ── Texture setters ───────────────────────────────────────────────────────────

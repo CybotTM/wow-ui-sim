@@ -1,101 +1,13 @@
-use std::path::PathBuf;
-
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
-fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
-}
+#[path = "blizzard_major_factions_loads/support.rs"]
+mod support;
 
-fn major_factions_dir() -> PathBuf {
-    blizzard_ui_dir().join("Blizzard_MajorFactions")
-}
-
-fn major_factions_toc() -> PathBuf {
-    major_factions_dir().join("Blizzard_MajorFactions.toc")
-}
-
-const MAJOR_FACTIONS_TOC_FILES: &[&str] = &[
-    "Blizzard_MajorFactionsLandingTemplates.xml",
-    "Blizzard_MajorFactionToasts.xml",
-    "Blizzard_MajorFactionUnlockToast.lua",
-    "Blizzard_MajorFactionUnlockToast.xml",
-    "Blizzard_MajorFactionRenownToast.lua",
-    "Blizzard_MajorFactionRenownToast.xml",
-    "Localization.lua",
-];
-
-const MAJOR_FACTION_LIST_MIXIN_METHODS: &[&str] = &[
-    "OnLoad",
-    "OnShow",
-    "OnHide",
-    "OnEvent",
-    "Refresh",
-    "SetExpansionFilter",
-    "OnRenownTrackFactionChanged",
-    "SetSelectedFaction",
-    "ScrollToSelectedFaction",
-];
-
-const MAJOR_FACTION_BUTTON_MIXIN_METHODS: &[&str] = &["Init", "UpdateState"];
-
-const MAJOR_FACTION_BUTTON_LOCKED_STATE_MIXIN_METHODS: &[&str] = &["OnEnter", "OnLeave", "Refresh"];
-
-const MAJOR_FACTION_BUTTON_UNLOCKED_STATE_MIXIN_METHODS: &[&str] = &[
-    "Refresh",
-    "OnShow",
-    "OnHide",
-    "OnEvent",
-    "OnEnter",
-    "OnLeave",
-    "OnClick",
-    "OnUpdate",
-    "SetSelected",
-    "RefreshTooltip",
-    "ShowRenownRewardsTooltip",
-    "ShowParagonRewardsTooltip",
-    "PlayUnlockCelebration",
-    "StopUnlockCelebration",
-];
-
-const MAJOR_FACTION_WATCH_FACTION_BUTTON_MIXIN_METHODS: &[&str] = &[
-    "OnLoad",
-    "OnShow",
-    "OnHide",
-    "OnEvent",
-    "UpdateState",
-    "OnClick",
-];
-
-const MAJOR_FACTION_UNLOCK_TOAST_MIXIN_METHODS: &[&str] = &[
-    "OnLoad",
-    "OnEvent",
-    "OnHide",
-    "PlayMajorFactionUnlockToast",
-    "PlayBanner",
-    "StopBanner",
-    "OnAnimFinished",
-];
-
-const MAJOR_FACTIONS_RENOWN_TOAST_MIXIN_METHODS: &[&str] = &[
-    "OnLoad",
-    "OnEvent",
-    "OnHide",
-    "ShowRenownLevelUpToast",
-    "SetupRewardVisuals",
-    "PlayBanner",
-    "OnMouseEnter",
-    "OnMouseLeave",
-    "RefreshTooltip",
-    "StopBanner",
-    "OnAnimFinished",
-];
-
-const NAMED_MAJOR_FACTION_FRAMES: &[&str] =
-    &["MajorFactionUnlockToast", "MajorFactionsRenownToast"];
+use support::*;
 
 fn load_full_game_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");

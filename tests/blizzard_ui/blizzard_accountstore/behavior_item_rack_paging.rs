@@ -133,7 +133,13 @@ fn set_page_method_exists_on_item_display_mixin() {
 fn set_page_calls_set_items_on_rack_not_refresh_directly() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         seed_rack_call_trackers(env);
-        seed_stub_display(env, /*max_cards_per_page=*/ 4, /*item_count=*/ 8);
+        seed_stub_display(
+            env,
+            StubDisplaySeed {
+                max_cards_per_page: 4,
+                item_count: 8,
+            },
+        );
 
         env.eval::<()>(
             r#"
@@ -180,7 +186,13 @@ fn set_page_calls_set_items_on_rack_not_refresh_directly() {
 fn set_page_clamps_below_one_to_one() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
         seed_rack_call_trackers(env);
-        seed_stub_display(env, /*max_cards_per_page=*/ 4, /*item_count=*/ 12);
+        seed_stub_display(
+            env,
+            StubDisplaySeed {
+                max_cards_per_page: 4,
+                item_count: 12,
+            },
+        );
 
         for sub_one_page in [0_i64, -5, -100] {
             env.eval::<()>(&format!(
@@ -225,7 +237,13 @@ fn set_page_clamps_above_max_to_max_page() {
         const EXPECTED_MAX_PAGE: i64 = 3;
 
         seed_rack_call_trackers(env);
-        seed_stub_display(env, MAX_CARDS_PER_PAGE, ITEM_COUNT);
+        seed_stub_display(
+            env,
+            StubDisplaySeed {
+                max_cards_per_page: MAX_CARDS_PER_PAGE,
+                item_count: ITEM_COUNT,
+            },
+        );
 
         env.eval::<()>(
             r#"
@@ -273,7 +291,13 @@ fn set_page_passes_cumulative_buggy_slice_for_page_above_one() {
         const EXPECTED_LAST_SLICE_VALUE: i64 = 112;
 
         seed_rack_call_trackers(env);
-        seed_stub_display(env, MAX_CARDS_PER_PAGE, ITEM_COUNT);
+        seed_stub_display(
+            env,
+            StubDisplaySeed {
+                max_cards_per_page: MAX_CARDS_PER_PAGE,
+                item_count: ITEM_COUNT,
+            },
+        );
 
         env.eval::<()>(
             r#"
@@ -354,9 +378,14 @@ fn teardown_rack_call_trackers(env: &WowLuaEnv) {
     .expect("rack call tracker tear-down must run cleanly");
 }
 
-fn seed_stub_display(env: &WowLuaEnv, max_cards_per_page: i64, item_count: i64) {
-    seed_stub_display_skeleton(env, item_count);
-    seed_stub_rack_on_display(env, max_cards_per_page);
+struct StubDisplaySeed {
+    max_cards_per_page: i64,
+    item_count: i64,
+}
+
+fn seed_stub_display(env: &WowLuaEnv, seed: StubDisplaySeed) {
+    seed_stub_display_skeleton(env, seed.item_count);
+    seed_stub_rack_on_display(env, seed.max_cards_per_page);
     seed_stub_footer_on_display(env);
     finalize_stub_display_metatable(env);
 }

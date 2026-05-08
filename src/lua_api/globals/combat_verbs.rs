@@ -9,9 +9,9 @@
 //! - `CastSpellByID(id [, unit])`     — starts/executes the spell
 //! - `CastSpellByName(name [, unit])` — resolves and starts/executes the spell
 //! - `ClickSpecialAbility(index)`     — index 1 => Auto Attack toggle,
-//!                                       2 => Extra Attack marker
+//!   2 => Extra Attack marker
 //! - `SpellTargetUnit(unit)`  — no-op when no cast pending; consumes the
-//!                               pending cast target when one exists
+//!   pending cast target when one exists
 //! - `SpellIsTargeting()`     — false until the sim models spell targeting
 //! - `SpellCanTargetItem()`   — false until item-targeting cursor exists
 //! - `SpellCanTargetItemID()` — false until item-targeting cursor exists
@@ -19,10 +19,10 @@
 //! - `UseAction(slot)`        — cast/execute the spell in an action bar slot
 //! - `ActionButtonDown(id)` / `ActionButtonUp(id)` — main bar key dispatch
 //! - `MultiActionButtonDown(barName, id)` / `MultiActionButtonUp(...)` —
-//!     multi-bar key dispatch into the bar's `actionButtons` table
+//!   multi-bar key dispatch into the bar's `actionButtons` table
 //! - `ExtraActionButtonKey(id, isDown)` — extra action bar key dispatch
 //! - `TryUseActionButton(button, checkingFromDown)` — fires the action bound
-//!     to a button during a key down, mirroring SecureActionButton_OnClick
+//!   to a button during a key down, mirroring SecureActionButton_OnClick
 //!
 //! Registered from `register_tail_globals` in `register.rs` — runs after
 //! `missing_surface` so the real Rust bodies overwrite any pre-existing
@@ -193,32 +193,42 @@ pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaRes
         return Ok(());
     }
 
-    let spell_name = spell_name(spell_id);
-    let icon_path = spell_icon(spell_id);
-    let known_spell = crate::spells::get_spell(spell_id).is_some();
-    let cast_time_ms = if known_spell {
-        spell_cast_time(spell_id as i32)
-    } else {
-        (DEFAULT_CAST_DURATION * 1000.0) as i32
-    };
-    if cast_time_ms > 0 {
-        start_gcd(state, DEFAULT_GCD_SECONDS);
-        start_cast(
-            state,
-            spell_id,
-            &spell_name,
-            &icon_path,
-            cast_time_ms as f64 / 1000.0,
-        );
-        let player = create_string(state, "player");
-        let spell_id_val = Val::Num(spell_id as f64);
-        fire_named_event_state(state, "UNIT_SPELLCAST_START", &[player, spell_id_val]);
+    if start_timed_spell_cast(state, spell_id) {
         return Ok(());
     }
 
     start_instant_spell_cooldowns(state, spell_id);
     apply_spell_to_target(state, spell_id);
     Ok(())
+}
+
+fn start_timed_spell_cast(state: &mut LuaState, spell_id: u32) -> bool {
+    let cast_time_ms = cast_time_ms_for_spell(spell_id);
+    if cast_time_ms <= 0 {
+        return false;
+    }
+
+    let spell_name = spell_name(spell_id);
+    let icon_path = spell_icon(spell_id);
+    start_gcd(state, DEFAULT_GCD_SECONDS);
+    start_cast(
+        state,
+        spell_id,
+        &spell_name,
+        &icon_path,
+        cast_time_ms as f64 / 1000.0,
+    );
+    let player = create_string(state, "player");
+    let spell_id_val = Val::Num(spell_id as f64);
+    fire_named_event_state(state, "UNIT_SPELLCAST_START", &[player, spell_id_val]);
+    true
+}
+
+fn cast_time_ms_for_spell(spell_id: u32) -> i32 {
+    if crate::spells::get_spell(spell_id).is_some() {
+        return spell_cast_time(spell_id as i32);
+    }
+    (DEFAULT_CAST_DURATION * 1000.0) as i32
 }
 
 fn apply_spell_to_target(state: &mut LuaState, spell_id: u32) {

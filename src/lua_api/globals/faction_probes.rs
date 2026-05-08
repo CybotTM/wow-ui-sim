@@ -153,10 +153,28 @@ fn reputation_entry_table(
     _faction_id: i32,
 ) -> Val {
     let table = create_table(state);
+    set_reputation_entry_text_fields(state, table, entry);
+    set_reputation_entry_numeric_fields(state, table, entry);
+    set_reputation_entry_flags(state, table, entry);
+    table
+}
+
+fn set_reputation_entry_text_fields(
+    state: &mut LuaState,
+    table: Val,
+    entry: &reputation_data::FactionEntry,
+) {
     let name = create_string(state, entry.name);
     let description = create_string(state, entry.description);
     table_set(state, table, "name", name);
     table_set(state, table, "description", description);
+}
+
+fn set_reputation_entry_numeric_fields(
+    state: &mut LuaState,
+    table: Val,
+    entry: &reputation_data::FactionEntry,
+) {
     table_set(state, table, "factionID", Val::Num(entry.faction_id as f64));
     table_set(state, table, "reaction", Val::Num(entry.reaction as f64));
     table_set(state, table, "standing", Val::Num(entry.standing as f64));
@@ -174,6 +192,13 @@ fn reputation_entry_table(
         Val::Num(entry.standing as f64),
     );
     table_set(state, table, "topValue", Val::Num(entry.top_value as f64));
+}
+
+fn set_reputation_entry_flags(
+    state: &mut LuaState,
+    table: Val,
+    entry: &reputation_data::FactionEntry,
+) {
     table_set(state, table, "isHeader", Val::Bool(entry.is_header));
     table_set(state, table, "isCollapsed", Val::Bool(entry.is_collapsed));
     table_set(state, table, "isChild", Val::Bool(entry.is_child));
@@ -183,20 +208,6 @@ fn reputation_entry_table(
         "isAccountWide",
         Val::Bool(entry.is_account_wide),
     );
-    table_set(state, table, "currentReactionThreshold", Val::Num(0.0));
-    table_set(
-        state,
-        table,
-        "nextReactionThreshold",
-        Val::Num(entry.top_value as f64),
-    );
-    table_set(
-        state,
-        table,
-        "currentStanding",
-        Val::Num(entry.standing as f64),
-    );
-    table
 }
 
 const REPUTATION_METHODS: &[(&str, RustFn)] = &[
@@ -337,13 +348,16 @@ fn reputation_is_major_faction(state: &mut LuaState) -> LuaResult<u32> {
 
 fn reputation_is_account_wide_reputation(state: &mut LuaState) -> LuaResult<u32> {
     let is_account_wide = match stack_i32(state, 1) {
-        Some(id) => borrow_state(state)?
-            .account_wide_reputation_factions
-            .contains(&(id as i64)),
+        Some(id) => is_account_wide_reputation_id(state, id)?,
         None => false,
     };
     state.push(Val::Bool(is_account_wide));
     Ok(1)
+}
+
+fn is_account_wide_reputation_id(state: &mut LuaState, id: i32) -> LuaResult<bool> {
+    let sim = borrow_state(state)?;
+    Ok(sim.account_wide_reputation_factions.contains(&(id as i64)))
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {

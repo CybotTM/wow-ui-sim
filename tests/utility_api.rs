@@ -2,6 +2,9 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+#[path = "utility_api/error_handler.rs"]
+mod error_handler;
+
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
@@ -720,34 +723,4 @@ fn test_create_and_init_from_mixin() {
         )
         .unwrap();
     assert_eq!(val, 42);
-}
-
-// ============================================================================
-// Error handler functions
-// ============================================================================
-
-#[test]
-fn test_geterrorhandler_returns_function() {
-    let env = env();
-    let is_func: bool = env
-        .eval("return type(geterrorhandler()) == 'function'")
-        .unwrap();
-    assert!(is_func);
-}
-
-#[test]
-fn test_seterrorhandler_accepts_function() {
-    let env = env();
-    env.eval::<()>("seterrorhandler(function() end)").unwrap();
-}
-
-// ============================================================================
-// GetCurrentEnvironment
-// ============================================================================
-
-#[test]
-fn test_get_current_environment() {
-    let env = env();
-    let is_global: bool = env.eval("return GetCurrentEnvironment() == _G").unwrap();
-    assert!(is_global);
 }

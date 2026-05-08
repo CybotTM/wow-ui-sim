@@ -376,61 +376,97 @@ fn push_anchor_values(
     Ok(5)
 }
 
+#[derive(Clone, Copy)]
+struct SetPointRequest {
+    point: crate::widget::AnchorPoint,
+    relative_to: Option<usize>,
+    relative_point: crate::widget::AnchorPoint,
+    x_offset: f32,
+    y_offset: f32,
+}
+
 /// SetPoint(point [, relativeTo [, relativePoint]] [, xOfs, yOfs])
 pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    let point = set_point_anchor_from_stack(state)?;
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetPoint");
+        return Ok(0);
+    }
+
+    let request = set_point_request(state, id, point)?;
+    if is_set_point_unchanged(state, id, request)? {
+        return Ok(0);
+    }
+
+    ensure_no_anchor_cycle(state, id, request.relative_to, "SetPoint")?;
+
+    let mut sim = borrow_state_mut(state)?;
+    apply_set_point(&mut sim, id, request)
+}
+
+fn set_point_anchor_from_stack(state: &mut LuaState) -> LuaResult<crate::widget::AnchorPoint> {
     let point_name = String::from_stack(state, 2)?;
     let Some(point) = crate::widget::AnchorPoint::from_str(&point_name) else {
         return Err(runtime_error(format!(
             "Frame:SetPoint(): Invalid region point {point_name}"
         )));
     };
-    if !can_change_protected_state_for(state, id) {
-        emit_addon_action_blocked(state, id, "SetPoint");
-        return Ok(0);
-    }
+    Ok(point)
+}
 
-    let (mut relative_to, relative_point, x_offset, y_offset) =
-        parse_set_point_args(state, id, point)?;
-    if relative_to.is_none() {
-        relative_to = {
-            let sim = borrow_state(state)?;
-            sim.widgets
-                .get(id)
-                .and_then(|f| f.parent_id)
-                .map(|pid| pid as usize)
-        };
-    }
-
-    let unchanged = {
-        let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .and_then(|frame| frame.anchors.iter().find(|anchor| anchor.point == point))
-            .map(|anchor| {
-                anchor.relative_to_id == relative_to
-                    && anchor.relative_point == relative_point
-                    && anchor.x_offset == x_offset
-                    && anchor.y_offset == y_offset
-            })
-            .unwrap_or(false)
+fn set_point_request(
+    state: &mut LuaState,
+    id: u64,
+    point: crate::widget::AnchorPoint,
+) -> LuaResult<SetPointRequest> {
+    let (relative_to, relative_point, x_offset, y_offset) = parse_set_point_args(state, id, point)?;
+    let resolved_relative_to = match relative_to {
+        Some(relative_to) => Some(relative_to),
+        None => set_point_parent_id(state, id)?,
     };
-    if unchanged {
-        return Ok(0);
-    }
-
-    ensure_no_anchor_cycle(state, id, relative_to, "SetPoint")?;
-
-    let mut sim = borrow_state_mut(state)?;
-    apply_set_point(
-        &mut sim,
-        id,
-        relative_to,
+    Ok(SetPointRequest {
         point,
+        relative_to: resolved_relative_to,
         relative_point,
         x_offset,
         y_offset,
-    )
+    })
+}
+
+fn set_point_parent_id(state: &mut LuaState, id: u64) -> LuaResult<Option<usize>> {
+    let sim = borrow_state(state)?;
+    let parent_id = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.parent_id)
+        .map(|parent_id| parent_id as usize);
+    Ok(parent_id)
+}
+
+fn is_set_point_unchanged(
+    state: &mut LuaState,
+    id: u64,
+    request: SetPointRequest,
+) -> LuaResult<bool> {
+    let sim = borrow_state(state)?;
+    let unchanged = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| {
+            frame
+                .anchors
+                .iter()
+                .find(|anchor| anchor.point == request.point)
+        })
+        .map(|anchor| {
+            anchor.relative_to_id == request.relative_to
+                && anchor.relative_point == request.relative_point
+                && anchor.x_offset == request.x_offset
+                && anchor.y_offset == request.y_offset
+        })
+        .unwrap_or(false);
+    Ok(unchanged)
 }
 
 fn ensure_no_anchor_cycle(
@@ -456,25 +492,27 @@ fn ensure_no_anchor_cycle(
 fn apply_set_point(
     sim: &mut crate::lua_api::SimState,
     id: u64,
-    relative_to: Option<usize>,
-    point: crate::widget::AnchorPoint,
-    relative_point: crate::widget::AnchorPoint,
-    x_offset: f32,
-    y_offset: f32,
+    request: SetPointRequest,
 ) -> LuaResult<u32> {
     if let Some(old_target) = sim.widgets.get(id).and_then(|f| {
         f.anchors
             .iter()
-            .find(|a| a.point == point)
+            .find(|a| a.point == request.point)
             .and_then(|a| a.relative_to_id)
     }) {
         sim.widgets.remove_anchor_dependent(old_target as u64, id);
     }
-    if let Some(rel_id) = relative_to {
+    if let Some(rel_id) = request.relative_to {
         sim.widgets.add_anchor_dependent(rel_id as u64, id);
     }
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.set_point(point, relative_to, relative_point, x_offset, y_offset);
+        frame.set_point(
+            request.point,
+            request.relative_to,
+            request.relative_point,
+            request.x_offset,
+            request.y_offset,
+        );
     }
     sim.widgets.mark_rect_dirty(id);
     Ok(0)

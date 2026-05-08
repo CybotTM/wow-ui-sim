@@ -13,6 +13,7 @@ use crate::event::{Event, EventArg};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_set,
 };
+use crate::lua_api::state::{AnimaDiversionCostInfo, AnimaDiversionNodeInfo};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -38,49 +39,66 @@ fn get_nodes(state: &mut LuaState) -> LuaResult<u32> {
     let nodes = borrow_state(state)?.anima_diversion.nodes.clone();
     let array = create_table(state);
     for (index, node) in nodes.into_iter().enumerate() {
-        let entry = create_table(state);
-        let name = create_string(state, &node.name);
-        let description = create_string(state, &node.description);
-        table_set(state, entry, "talentID", Val::Num(node.talent_id as f64));
-        table_set(state, entry, "name", name);
-        table_set(state, entry, "description", description);
-        table_set(
-            state,
-            entry,
-            "currencyID",
-            Val::Num(node.currency_id as f64),
-        );
-        table_set(state, entry, "icon", Val::Num(node.icon as f64));
-        table_set(state, entry, "state", Val::Num(node.state as f64));
-
-        let position = create_table(state);
-        table_set(state, position, "x", Val::Num(node.normalized_position_x));
-        table_set(state, position, "y", Val::Num(node.normalized_position_y));
-        table_set(state, entry, "normalizedPosition", position);
-
-        let costs = create_table(state);
-        for (cost_index, cost) in node.costs.into_iter().enumerate() {
-            let cost_entry = create_table(state);
-            table_set(
-                state,
-                cost_entry,
-                "currencyID",
-                Val::Num(cost.currency_id as f64),
-            );
-            table_set(
-                state,
-                cost_entry,
-                "quantity",
-                Val::Num(cost.quantity as f64),
-            );
-            set_table_array(state, costs, cost_index as i64 + 1, cost_entry);
-        }
-        table_set(state, entry, "costs", costs);
-
+        let entry = anima_node_table(state, node);
         set_table_array(state, array, index as i64 + 1, entry);
     }
     state.push(array);
     Ok(1)
+}
+
+fn anima_node_table(state: &mut LuaState, node: AnimaDiversionNodeInfo) -> Val {
+    let entry = create_table(state);
+    let name = create_string(state, &node.name);
+    let description = create_string(state, &node.description);
+    table_set(state, entry, "talentID", Val::Num(node.talent_id as f64));
+    table_set(state, entry, "name", name);
+    table_set(state, entry, "description", description);
+    table_set(
+        state,
+        entry,
+        "currencyID",
+        Val::Num(node.currency_id as f64),
+    );
+    table_set(state, entry, "icon", Val::Num(node.icon as f64));
+    table_set(state, entry, "state", Val::Num(node.state as f64));
+    let position = node_position_table(state, &node);
+    let costs = node_costs_table(state, node.costs);
+    table_set(state, entry, "normalizedPosition", position);
+    table_set(state, entry, "costs", costs);
+    entry
+}
+
+fn node_position_table(state: &mut LuaState, node: &AnimaDiversionNodeInfo) -> Val {
+    let position = create_table(state);
+    table_set(state, position, "x", Val::Num(node.normalized_position_x));
+    table_set(state, position, "y", Val::Num(node.normalized_position_y));
+    position
+}
+
+fn node_costs_table(state: &mut LuaState, costs: Vec<AnimaDiversionCostInfo>) -> Val {
+    let costs_table = create_table(state);
+    for (index, cost) in costs.into_iter().enumerate() {
+        let cost_entry = node_cost_table(state, cost);
+        set_table_array(state, costs_table, index as i64 + 1, cost_entry);
+    }
+    costs_table
+}
+
+fn node_cost_table(state: &mut LuaState, cost: AnimaDiversionCostInfo) -> Val {
+    let cost_entry = create_table(state);
+    table_set(
+        state,
+        cost_entry,
+        "currencyID",
+        Val::Num(cost.currency_id as f64),
+    );
+    table_set(
+        state,
+        cost_entry,
+        "quantity",
+        Val::Num(cost.quantity as f64),
+    );
+    cost_entry
 }
 
 fn get_origin_position(state: &mut LuaState) -> LuaResult<u32> {

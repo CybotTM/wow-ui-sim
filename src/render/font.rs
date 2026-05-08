@@ -109,7 +109,8 @@ fn try_casc_font_bytes(filename: &str) -> Option<Vec<u8>> {
         return None;
     }
     let path = format!("fonts/{}", filename.to_lowercase());
-    let fdid = asset_resolver::lookup_path(&path)?;
+    let fdid = crate::limited_listfile::lookup_path(&path)
+        .or_else(|| asset_resolver::lookup_path(&path))?;
     asset_resolver::resolve_bytes(fdid)
 }
 

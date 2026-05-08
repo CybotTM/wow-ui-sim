@@ -30,48 +30,91 @@ pub fn load_lua_file(
     let chunk_name = wow_chunk_name(path);
     let patched_source = patch_lua_source(&bytes, &chunk_name);
 
+    let func = compile_lua_file(env, &patched_source, &chunk_name, timing)?;
+    execute_lua_file(env, func, ctx, &chunk_name, timing)?;
+
+    Ok(())
+}
+
+fn compile_lua_file(
+    env: &LoaderEnv<'_>,
+    patched_source: &[u8],
+    chunk_name: &str,
+    timing: &mut LoadTiming,
+) -> Result<rilua::Function, LoadError> {
     let compile_start = Instant::now();
     let func_result = env.with_state(|state| {
-        if chunk_name.starts_with("@Interface/") {
-            load_cached_or_compile(state, &patched_source, &chunk_name, timing)
-        } else {
-            let saved_slots = state.global_slots.take();
-            let result = load_cached_or_compile(state, &patched_source, &chunk_name, timing);
-            state.global_slots = saved_slots;
-            result
-        }
+        load_cached_or_compile_for_chunk(state, patched_source, chunk_name, timing)
     });
     let compile_elapsed = compile_start.elapsed();
     timing.lua_compile_time += compile_elapsed;
     timing.lua_exec_time += compile_elapsed;
-    let func = func_result?;
 
+    func_result
+}
+
+fn load_cached_or_compile_for_chunk(
+    state: &mut LuaState,
+    patched_source: &[u8],
+    chunk_name: &str,
+    timing: &mut LoadTiming,
+) -> Result<rilua::Function, LoadError> {
+    if chunk_name.starts_with("@Interface/") {
+        return load_cached_or_compile(state, patched_source, chunk_name, timing);
+    }
+
+    let saved_slots = state.global_slots.take();
+    let result = load_cached_or_compile(state, patched_source, chunk_name, timing);
+    state.global_slots = saved_slots;
+    result
+}
+
+fn execute_lua_file(
+    env: &LoaderEnv<'_>,
+    func: rilua::Function,
+    ctx: &AddonContext,
+    chunk_name: &str,
+    timing: &mut LoadTiming,
+) -> Result<(), LoadError> {
     let call_start = Instant::now();
-    // Stamp addon taint on the compiled function's GC header.
-    // When the VM executes it, fixedtaint = cl->taint blocks read-propagation
-    // and inner closures inherit via writetaint.
-    let exec_result = env.with_state(|state| {
-        if ctx.taint {
-            set_object_taint(state, &func, ctx.name);
-        }
-        if ctx.use_secure_env {
-            mark_secure_state(state, &func).map_err(|e| report_lua_load_error(state, e))?;
-        }
-        exec_addon_func(state, func, ctx).map_err(|e| {
-            if let LoadError::Lua(msg) = &e {
-                let contextual = format!("{chunk_name}: {msg}");
-                call_error_handler_state(state, &contextual);
-                return LoadError::Lua(contextual);
-            }
-            e
-        })
-    });
+    let exec_result =
+        env.with_state(|state| execute_compiled_lua_file(state, func, ctx, chunk_name));
     let call_elapsed = call_start.elapsed();
     timing.lua_call_time += call_elapsed;
     timing.lua_exec_time += call_elapsed;
-    exec_result?;
 
-    Ok(())
+    exec_result
+}
+
+fn execute_compiled_lua_file(
+    state: &mut LuaState,
+    func: rilua::Function,
+    ctx: &AddonContext,
+    chunk_name: &str,
+) -> Result<(), LoadError> {
+    // Stamp addon taint on the compiled function's GC header. When the VM executes
+    // it, fixedtaint blocks read-propagation and inner closures inherit writetaint.
+    if ctx.taint {
+        set_object_taint(state, &func, ctx.name);
+    }
+    if ctx.use_secure_env {
+        mark_secure_state(state, &func).map_err(|e| report_lua_load_error(state, e))?;
+    }
+    exec_addon_func(state, func, ctx).map_err(|e| contextual_lua_load_error(state, e, chunk_name))
+}
+
+fn contextual_lua_load_error(
+    state: &mut LuaState,
+    error: LoadError,
+    chunk_name: &str,
+) -> LoadError {
+    let LoadError::Lua(msg) = error else {
+        return error;
+    };
+
+    let contextual = format!("{chunk_name}: {msg}");
+    call_error_handler_state(state, &contextual);
+    LoadError::Lua(contextual)
 }
 
 /// Transform path to WoW-style chunk name for debugstack.

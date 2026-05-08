@@ -10,7 +10,7 @@ use crate::render::shader::primitive::{
 };
 use crate::render::texture::UI_SCALE;
 use crate::render::{GpuBcTextureData, GpuTextureData, QuadBatch};
-use crate::widget::{Frame, FrameStrata, WidgetType};
+use crate::widget::{Frame, FrameStrata, WidgetRegistry, WidgetType};
 
 use super::super::app::App;
 use super::super::quad_builders::{build_texture_quads, emit_button_highlight};
@@ -28,6 +28,37 @@ pub(crate) struct TextureLoadBatchTelemetry {
     bc_cache_hits: usize,
     crop_decode_elapsed: std::time::Duration,
     crop_extract_elapsed: std::time::Duration,
+}
+
+type BudgetedTextureLoadResult = (
+    Vec<GpuTextureData>,
+    Vec<GpuBcTextureData>,
+    std::time::Duration,
+    std::time::Duration,
+    TextureLoadBatchTelemetry,
+    bool,
+);
+
+#[derive(Default)]
+struct TextureLoadAccumulator {
+    textures: Vec<GpuTextureData>,
+    bc_textures: Vec<GpuBcTextureData>,
+    scan_elapsed: std::time::Duration,
+    load_elapsed: std::time::Duration,
+    telemetry: TextureLoadBatchTelemetry,
+    exhausted: bool,
+}
+
+impl TextureLoadAccumulator {
+    fn record_budgeted(&mut self, batch: BudgetedTextureLoadResult) {
+        let (textures, bc_textures, scan_elapsed, load_elapsed, telemetry, exhausted) = batch;
+        self.textures.extend(textures);
+        self.bc_textures.extend(bc_textures);
+        self.scan_elapsed += scan_elapsed;
+        self.load_elapsed += load_elapsed;
+        self.telemetry.record_batch(telemetry);
+        self.exhausted |= exhausted;
+    }
 }
 
 impl TextureLoadBatchTelemetry {
@@ -134,59 +165,37 @@ impl App {
     ) {
         let t = std::time::Instant::now();
         let deadline = t + std::time::Duration::from_millis(10);
-        let mut textures = Vec::new();
-        let mut bc_textures = Vec::new();
-        let mut scan_elapsed = std::time::Duration::ZERO;
-        let mut load_elapsed = std::time::Duration::ZERO;
-        let mut telemetry = TextureLoadBatchTelemetry::default();
-        let mut exhausted = false;
-        let mut texture_requests = TextureRequestTracker::default();
-        for batch in dirty_strata.iter().flatten() {
-            texture_requests.register_batch(batch);
-        }
+        let mut texture_requests = texture_requests_for_dirty_strata(dirty_strata);
+        let mut loaded = TextureLoadAccumulator::default();
 
-        let (
-            queued_textures,
-            queued_bc_textures,
-            queued_scan_elapsed,
-            queued_load_elapsed,
-            queued_telemetry,
-            queued_exhausted,
-        ) = self.load_pending_texture_queue_budgeted(deadline, &mut texture_requests);
-        textures.extend(queued_textures);
-        bc_textures.extend(queued_bc_textures);
-        scan_elapsed += queued_scan_elapsed;
-        load_elapsed += queued_load_elapsed;
-        telemetry.record_batch(queued_telemetry);
-        exhausted |= queued_exhausted;
+        loaded.record_budgeted(
+            self.load_pending_texture_queue_budgeted(deadline, &mut texture_requests),
+        );
 
-        if !exhausted {
-            let (loaded, loaded_bc, batch_scan, batch_load, batch_telemetry, hit) =
-                self.load_new_textures_budgeted(overlay, deadline, &mut texture_requests);
-            textures.extend(loaded);
-            bc_textures.extend(loaded_bc);
-            scan_elapsed += batch_scan;
-            load_elapsed += batch_load;
-            telemetry.record_batch(batch_telemetry);
-            exhausted |= hit;
+        if !loaded.exhausted {
+            loaded.record_budgeted(self.load_new_textures_budgeted(
+                overlay,
+                deadline,
+                &mut texture_requests,
+            ));
         }
 
         self.textures_pending
-            .set(exhausted || self.cached_render_requests_still_pending());
+            .set(loaded.exhausted || self.cached_render_requests_still_pending());
         let elapsed = t.elapsed();
-        if elapsed.as_millis() > 10 && (!textures.is_empty() || !bc_textures.is_empty()) {
+        if should_log_slow_texture_load(&loaded, elapsed) {
             log_slow_texture_load(
-                &textures,
-                &bc_textures,
+                &loaded.textures,
+                &loaded.bc_textures,
                 elapsed,
-                scan_elapsed,
-                load_elapsed,
-                telemetry,
+                loaded.scan_elapsed,
+                loaded.load_elapsed,
+                loaded.telemetry,
             );
         }
         (
-            textures,
-            bc_textures,
+            loaded.textures,
+            loaded.bc_textures,
             elapsed,
             Arc::new(Mutex::new(texture_requests)),
         )
@@ -199,14 +208,7 @@ impl App {
         quads: &QuadBatch,
         deadline: std::time::Instant,
         texture_requests: &mut TextureRequestTracker,
-    ) -> (
-        Vec<GpuTextureData>,
-        Vec<GpuBcTextureData>,
-        std::time::Duration,
-        std::time::Duration,
-        TextureLoadBatchTelemetry,
-        bool,
-    ) {
+    ) -> BudgetedTextureLoadResult {
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
         let mut telemetry = TextureLoadBatchTelemetry::default();
@@ -251,14 +253,7 @@ impl App {
         &self,
         deadline: std::time::Instant,
         texture_requests: &mut TextureRequestTracker,
-    ) -> (
-        Vec<GpuTextureData>,
-        Vec<GpuBcTextureData>,
-        std::time::Duration,
-        std::time::Duration,
-        TextureLoadBatchTelemetry,
-        bool,
-    ) {
+    ) -> BudgetedTextureLoadResult {
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
         let mut telemetry = TextureLoadBatchTelemetry::default();
@@ -335,18 +330,9 @@ impl App {
             return;
         };
 
-        if !matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
+        let Some(bounds) = hovered_button_bounds(f) else {
             return;
-        }
-
-        let Some(rect) = f.layout_rect else { return };
-        if rect.width <= 0.0 || rect.height <= 0.0 {
-            return;
-        }
-        let bounds = Rectangle::new(
-            Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
-            Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
-        );
+        };
 
         let has_highlight_child = f.children_keys.contains_key("HighlightTexture");
         let is_pressed = self.pressed_frame == Some(hovered_id) || f.button_state == 1;
@@ -354,21 +340,7 @@ impl App {
             emit_button_highlight(quads, bounds, f, f.alpha);
         }
 
-        if !is_pressed
-            && let Some(&ht_id) = f.children_keys.get("HighlightTexture")
-            && let Some(ht) = registry.get(ht_id)
-        {
-            let Some(ht_rect) = ht.layout_rect else {
-                return;
-            };
-            if ht_rect.width > 0.0 && ht_rect.height > 0.0 {
-                let ht_bounds = Rectangle::new(
-                    Point::new(ht_rect.x * UI_SCALE, ht_rect.y * UI_SCALE),
-                    Size::new(ht_rect.width * UI_SCALE, ht_rect.height * UI_SCALE),
-                );
-                build_texture_quads(quads, ht_bounds, ht, None, ht.alpha);
-            }
-        }
+        append_hover_child_highlight(quads, registry, f, is_pressed);
     }
 
     /// Render the spell icon attached to the cursor when dragging.
@@ -442,6 +414,51 @@ fn debug_overlay_frame(
     Some((frame, rect, bounds))
 }
 
+fn hovered_button_bounds(frame: &Frame) -> Option<Rectangle> {
+    if !matches!(
+        frame.widget_type,
+        WidgetType::Button | WidgetType::CheckButton
+    ) {
+        return None;
+    }
+
+    frame.layout_rect.and_then(layout_rect_bounds)
+}
+
+fn layout_rect_bounds(rect: crate::LayoutRect) -> Option<Rectangle> {
+    if rect.width <= 0.0 || rect.height <= 0.0 {
+        return None;
+    }
+
+    Some(Rectangle::new(
+        Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
+        Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
+    ))
+}
+
+fn append_hover_child_highlight(
+    quads: &mut QuadBatch,
+    registry: &WidgetRegistry,
+    frame: &Frame,
+    is_pressed: bool,
+) {
+    if is_pressed {
+        return;
+    }
+
+    let Some(&highlight_id) = frame.children_keys.get("HighlightTexture") else {
+        return;
+    };
+    let Some(highlight) = registry.get(highlight_id) else {
+        return;
+    };
+    let Some(bounds) = highlight.layout_rect.and_then(layout_rect_bounds) else {
+        return;
+    };
+
+    build_texture_quads(quads, bounds, highlight, None, highlight.alpha);
+}
+
 fn append_anchor_markers(overlay: &mut QuadBatch, frame: &Frame, rect: crate::LayoutRect) {
     const ANCHOR_MARKER_SIZE: f32 = 5.0;
     const ANCHOR_MARKER_OFFSET: f32 = ANCHOR_MARKER_SIZE * 0.5;
@@ -463,6 +480,23 @@ fn append_anchor_markers(overlay: &mut QuadBatch, frame: &Frame, rect: crate::La
             ANCHOR_MARKER_COLOR,
         );
     }
+}
+
+fn texture_requests_for_dirty_strata(
+    dirty_strata: &[Option<Arc<QuadBatch>>; FrameStrata::COUNT],
+) -> TextureRequestTracker {
+    let mut texture_requests = TextureRequestTracker::default();
+    for batch in dirty_strata.iter().flatten() {
+        texture_requests.register_batch(batch);
+    }
+    texture_requests
+}
+
+fn should_log_slow_texture_load(
+    loaded: &TextureLoadAccumulator,
+    elapsed: std::time::Duration,
+) -> bool {
+    elapsed.as_millis() > 10 && (!loaded.textures.is_empty() || !loaded.bc_textures.is_empty())
 }
 
 fn log_slow_texture_load(
@@ -580,7 +614,7 @@ fn load_pending_texture(
     texture_requests.mark_failed(path);
 }
 
-fn unresolved_texture_request_paths<'a>(quads: &'a QuadBatch) -> Vec<&'a str> {
+fn unresolved_texture_request_paths(quads: &QuadBatch) -> Vec<&str> {
     let mut paths = Vec::new();
     let mut seen = HashSet::new();
 
@@ -621,245 +655,5 @@ fn texture_request_priority(path: &str) -> (u8, u8) {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{
-        TextureLoadBatchTelemetry, process_budgeted_texture_request,
-        should_pause_texture_loading_state, texture_request_base_path,
-        unresolved_texture_request_paths,
-    };
-    use crate::iced_app::App;
-    use crate::iced_app::app::AppInit;
-    use crate::render::shader::primitive::TextureRequestTracker;
-    use crate::render::{GlyphAtlas, GpuTextureData, QuadBatch, TextureRequest, WowFontSystem};
-    use crate::screen::ScreenKind;
-    use crate::texture::TextureManager;
-    use crate::widget::{AnchorPoint, Frame, WidgetType};
-    use crate::{LayoutRect, lua_api::WowLuaEnv};
-    use std::cell::RefCell;
-    use std::rc::Rc;
-    use std::sync::Arc;
-    use tokio::sync::mpsc;
-
-    fn request(path: &str) -> TextureRequest {
-        TextureRequest::new(path, 0, 4)
-    }
-
-    #[test]
-    fn unresolved_texture_request_paths_filters_non_loadable_requests() {
-        let mut batch = QuadBatch::new();
-        batch
-            .texture_requests
-            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"));
-        batch
-            .texture_requests
-            .push(request(r"Interface\Minimap\UI-Minimap-Background"));
-        batch.mask_texture_requests.push(request("uploaded-mask"));
-        batch.texture_requests.push(request("failed-path"));
-
-        batch.mask_texture_requests[0].handle.mark_staged();
-        batch.texture_requests[2].handle.mark_failed();
-
-        let paths = unresolved_texture_request_paths(&batch);
-        assert_eq!(
-            paths,
-            vec![
-                r"Interface\WorldMap\IsleofDorn\IsleOfDorn1",
-                r"Interface\Minimap\UI-Minimap-Background",
-            ]
-        );
-    }
-
-    #[test]
-    fn unresolved_texture_request_paths_deduplicates_before_sorting() {
-        let mut batch = QuadBatch::new();
-        batch
-            .texture_requests
-            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"));
-        batch
-            .texture_requests
-            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"));
-        batch.texture_requests.push(request(
-            r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4",
-        ));
-
-        let paths = unresolved_texture_request_paths(&batch);
-        assert_eq!(
-            paths,
-            vec![
-                r"Interface\WorldMap\IsleofDorn\IsleOfDorn1",
-                r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4",
-            ]
-        );
-    }
-
-    #[test]
-    fn texture_request_base_path_strips_crop_suffix() {
-        assert_eq!(
-            texture_request_base_path(r"Interface\Foo\Bar@crop:0.1,0.2,0.3,0.4"),
-            r"Interface\Foo\Bar"
-        );
-        assert_eq!(
-            texture_request_base_path(r"Interface\Foo\Bar"),
-            r"Interface\Foo\Bar"
-        );
-    }
-
-    #[test]
-    fn texture_loading_only_pauses_after_budget_hit_for_uncached_base_path() {
-        assert!(!should_pause_texture_loading_state(false, true, false));
-        assert!(!should_pause_texture_loading_state(true, false, false));
-        assert!(!should_pause_texture_loading_state(true, true, true));
-        assert!(should_pause_texture_loading_state(true, true, false));
-    }
-
-    #[test]
-    fn process_budgeted_texture_request_returns_true_before_loading_uncached_work() {
-        let mut tex_mgr = TextureManager::new();
-        let mut textures = vec![GpuTextureData {
-            path: "already-loaded".to_string(),
-            width: 1,
-            height: 1,
-            rgba: Arc::<[u8]>::from(vec![0xff; 4]),
-        }];
-        let mut bc_textures = Vec::new();
-        let mut telemetry = TextureLoadBatchTelemetry::default();
-        let mut texture_requests = TextureRequestTracker::default();
-
-        let paused = process_budgeted_texture_request(
-            std::time::Instant::now(),
-            r"Interface\Foo\Bar",
-            &mut tex_mgr,
-            &mut textures,
-            &mut bc_textures,
-            &mut telemetry,
-            &mut texture_requests,
-        );
-
-        assert!(paused);
-        assert_eq!(texture_requests.ready_count(), 0);
-        assert_eq!(texture_requests.staged_count(), 0);
-        assert_eq!(textures.len(), 1);
-        assert!(bc_textures.is_empty());
-    }
-
-    fn build_test_app(debug_borders: bool, debug_anchors: bool) -> App {
-        let env = Rc::new(RefCell::new(
-            WowLuaEnv::new().expect("Failed to create Lua environment"),
-        ));
-        env.borrow().set_screen_mode(ScreenKind::Game);
-
-        let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
-        let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
-        let (_cmd_tx, cmd_rx) = mpsc::channel(1);
-        let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
-
-        App::build_app(AppInit {
-            env,
-            log_messages: Vec::new(),
-            texture_manager,
-            font_system,
-            glyph_atlas,
-            cmd_rx,
-            lua_rx,
-            debug_borders,
-            debug_anchors,
-            saved_vars: None,
-            config: crate::config::SimConfig::default(),
-        })
-    }
-
-    fn build_texture_load_test_app() -> App {
-        let env = Rc::new(RefCell::new(
-            WowLuaEnv::new().expect("Failed to create Lua environment"),
-        ));
-        env.borrow().set_screen_mode(ScreenKind::Game);
-
-        let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
-        let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
-        let (_cmd_tx, cmd_rx) = mpsc::channel(1);
-        let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
-
-        App::build_app(AppInit {
-            env,
-            log_messages: Vec::new(),
-            texture_manager,
-            font_system,
-            glyph_atlas,
-            cmd_rx,
-            lua_rx,
-            debug_borders: false,
-            debug_anchors: false,
-            saved_vars: None,
-            config: crate::config::SimConfig::default(),
-        })
-    }
-
-    fn register_debug_frame(app: &App) {
-        let env = app.env.borrow();
-        let mut state = env.state().borrow_mut();
-        let widgets = &mut state.widgets;
-        let mut frame = Frame::new(WidgetType::Frame, Some("DebugFrame".to_string()), None);
-        frame.layout_rect = Some(LayoutRect {
-            x: 10.0,
-            y: 20.0,
-            width: 40.0,
-            height: 30.0,
-        });
-        frame.set_point(AnchorPoint::TopLeft, None, AnchorPoint::TopLeft, 0.0, 0.0);
-        widgets.register(frame);
-    }
-
-    #[test]
-    fn build_overlay_emits_debug_quads_from_startup_flags() {
-        let app = build_test_app(true, true);
-        register_debug_frame(&app);
-
-        let overlay = app.build_overlay();
-        assert_eq!(overlay.quad_count(), 5);
-        assert!(overlay.texture_requests.is_empty());
-        assert!(overlay.mask_texture_requests.is_empty());
-    }
-
-    #[test]
-    fn build_overlay_emits_debug_quads_from_runtime_toggles() {
-        let app = build_test_app(false, false);
-        register_debug_frame(&app);
-        {
-            let env = app.env.borrow();
-            let mut state = env.state().borrow_mut();
-            state.debug_borders = true;
-            state.debug_anchors = true;
-        }
-
-        let overlay = app.build_overlay();
-        assert_eq!(overlay.quad_count(), 5);
-        assert!(overlay.texture_requests.is_empty());
-        assert!(overlay.mask_texture_requests.is_empty());
-    }
-
-    #[test]
-    fn load_new_textures_budgeted_loads_spellbook_mask_via_bc_path() {
-        let app = build_texture_load_test_app();
-        let mut batch = QuadBatch::new();
-        batch
-            .mask_texture_requests
-            .push(request(r"Interface\spellbook\spellbookelementsiconmask"));
-
-        let prev_bc_supported = crate::render::shader::atlas::set_bc_supported_for_tests(true);
-        let mut texture_requests = TextureRequestTracker::default();
-        let (rgba, bc, _scan_elapsed, _load_elapsed, _telemetry, hit_deadline) = app
-            .load_new_textures_budgeted(
-                &batch,
-                std::time::Instant::now() + std::time::Duration::from_secs(1),
-                &mut texture_requests,
-            );
-        crate::render::shader::atlas::set_bc_supported_for_tests(prev_bc_supported);
-
-        assert!(!hit_deadline, "single mask request should not hit deadline");
-        assert!(rgba.is_empty(), "mask should not fall back to RGBA path");
-        assert_eq!(bc.len(), 1, "expected one BC texture upload");
-        assert_eq!(bc[0].path, r"Interface\spellbook\spellbookelementsiconmask");
-    }
-}
+#[path = "render_textures_tests.rs"]
+mod tests;

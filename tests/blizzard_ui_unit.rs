@@ -9,6 +9,12 @@ mod tooltip_full_env_helpers;
 use tooltip_full_env_helpers::{refresh_aura_frames, setup_full_env};
 
 fn open_character_panel(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    click_character_micro_button(env);
+    sync_character_panel_title_text(env);
+    sync_character_panel_slot_icon_textures(env);
+}
+
+fn click_character_micro_button(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     env.exec(
         r#"
         local btn = CharacterMicroButton
@@ -18,30 +24,27 @@ fn open_character_panel(env: &wow_ui_sim::lua_api::WowLuaEnv) {
         onclick(btn, "LeftButton", false)
         assert(CharacterFrame and CharacterFrame:IsShown(), "CharacterFrame should be shown")
         assert(CharacterHeadSlot ~= nil, "CharacterHeadSlot should exist")
+        "#,
+    )
+    .expect("Failed to open character panel");
+}
+
+fn sync_character_panel_title_text(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    env.exec(
+        r#"
         if CharacterFrame.TitleContainer and CharacterFrame.TitleContainer.TitleText then
             CharacterFrame.TitleContainer.TitleText:SetText(UnitPVPName("player"))
         end
-        local slotNames = {
-            "CharacterHeadSlot",
-            "CharacterNeckSlot",
-            "CharacterShoulderSlot",
-            "CharacterBackSlot",
-            "CharacterChestSlot",
-            "CharacterShirtSlot",
-            "CharacterTabardSlot",
-            "CharacterWristSlot",
-            "CharacterHandsSlot",
-            "CharacterWaistSlot",
-            "CharacterLegsSlot",
-            "CharacterFeetSlot",
-            "CharacterFinger0Slot",
-            "CharacterFinger1Slot",
-            "CharacterTrinket0Slot",
-            "CharacterTrinket1Slot",
-            "CharacterMainHandSlot",
-            "CharacterSecondaryHandSlot",
-        }
-        for _, frameName in ipairs(slotNames) do
+        "#,
+    )
+    .expect("Failed to sync character panel title text");
+}
+
+fn sync_character_panel_slot_icon_textures(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    env.exec(
+        r#"
+        local slotNames = "CharacterHeadSlot,CharacterNeckSlot,CharacterShoulderSlot,CharacterBackSlot,CharacterChestSlot,CharacterShirtSlot,CharacterTabardSlot,CharacterWristSlot,CharacterHandsSlot,CharacterWaistSlot,CharacterLegsSlot,CharacterFeetSlot,CharacterFinger0Slot,CharacterFinger1Slot,CharacterTrinket0Slot,CharacterTrinket1Slot,CharacterMainHandSlot,CharacterSecondaryHandSlot"
+        for frameName in string.gmatch(slotNames, "[^,]+") do
             local slot = _G[frameName]
             if slot and slot.icon then
                 local texture = GetInventoryItemTexture("player", slot:GetID())
@@ -54,7 +57,7 @@ fn open_character_panel(env: &wow_ui_sim::lua_api::WowLuaEnv) {
         end
         "#,
     )
-    .expect("Failed to open character panel");
+    .expect("Failed to sync character slot icon textures");
 }
 
 fn open_spellbook(env: &wow_ui_sim::lua_api::WowLuaEnv) {

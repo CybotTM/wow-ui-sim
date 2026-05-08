@@ -15,10 +15,9 @@ use std::collections::hash_map::DefaultHasher;
 use std::ffi::OsStr;
 use std::hash::{Hash, Hasher};
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
-const CACHE_DIR: &str = ".cache/lua-bytecode";
 const PACK_FILE: &str = "pack.bin";
 // Bumped from `WOWBC001` when the version-header field was introduced.
 // Old packs without a version header are rejected on load.
@@ -72,12 +71,12 @@ pub fn legacy_content_hash(bytes: &[u8], chunk_name: &str) -> u64 {
     hasher.finish()
 }
 
-fn cache_dir() -> PathBuf {
-    PathBuf::from(CACHE_DIR)
+fn cache_dir() -> Option<PathBuf> {
+    Some(dirs::cache_dir()?.join("wow-ui-sim").join("lua-bytecode"))
 }
 
-fn pack_path() -> PathBuf {
-    cache_dir().join(PACK_FILE)
+fn pack_path() -> Option<PathBuf> {
+    Some(cache_dir()?.join(PACK_FILE))
 }
 
 /// Load cached bytecode for the current hash, falling back to a
@@ -115,8 +114,9 @@ fn ensure_loaded(state: &mut CacheState) {
         return;
     }
 
-    let pack = pack_path();
-    if let Ok(mut file) = std::fs::File::open(&pack) {
+    if let Some(pack) = pack_path()
+        && let Ok(mut file) = std::fs::File::open(&pack)
+    {
         let file_size = file.metadata().map(|meta| meta.len()).unwrap_or(0);
         if file_size > MAX_PACK_SIZE {
             drop(file);
@@ -199,27 +199,24 @@ fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> bool {
 }
 
 fn migrate_legacy_cache(state: &mut CacheState) -> std::io::Result<()> {
-    let dir = cache_dir();
+    let Some(dir) = cache_dir() else {
+        return Ok(());
+    };
     let Ok(entries) = std::fs::read_dir(&dir) else {
         return Ok(());
     };
 
+    let migrated = collect_legacy_cache_entries(state, entries);
+    write_migrated_pack(state, &dir, migrated)
+}
+
+fn collect_legacy_cache_entries(
+    state: &mut CacheState,
+    entries: std::fs::ReadDir,
+) -> Vec<(u64, Vec<u8>)> {
     let mut migrated = Vec::new();
     for entry in entries.flatten() {
-        let path = entry.path();
-        if path.file_name() == Some(OsStr::new(PACK_FILE)) {
-            continue;
-        }
-        if path.extension() != Some(OsStr::new("luac")) {
-            continue;
-        }
-        let Some(stem) = path.file_stem().and_then(|s| s.to_str()) else {
-            continue;
-        };
-        let Ok(hash) = u64::from_str_radix(stem, 16) else {
-            continue;
-        };
-        let Ok(bytecode) = std::fs::read(&path) else {
+        let Some((hash, bytecode)) = legacy_cache_entry(&entry.path()) else {
             continue;
         };
         let offset = state.values.len();
@@ -227,13 +224,37 @@ fn migrate_legacy_cache(state: &mut CacheState) -> std::io::Result<()> {
         state.index.insert(hash, (offset, bytecode.len()));
         migrated.push((hash, bytecode));
     }
+    migrated
+}
 
+fn legacy_cache_entry(path: &Path) -> Option<(u64, Vec<u8>)> {
+    if path.file_name() == Some(OsStr::new(PACK_FILE)) {
+        return None;
+    }
+    if path.extension() != Some(OsStr::new("luac")) {
+        return None;
+    }
+
+    let stem = path.file_stem()?.to_str()?;
+    let hash = u64::from_str_radix(stem, 16).ok()?;
+    let bytecode = std::fs::read(path).ok()?;
+    Some((hash, bytecode))
+}
+
+fn write_migrated_pack(
+    state: &mut CacheState,
+    dir: &Path,
+    migrated: Vec<(u64, Vec<u8>)>,
+) -> std::io::Result<()> {
     if migrated.is_empty() {
         return Ok(());
     }
 
+    let Some(pack) = pack_path() else {
+        return Ok(());
+    };
     std::fs::create_dir_all(&dir)?;
-    let mut file = std::fs::File::create(pack_path())?;
+    let mut file = std::fs::File::create(&pack)?;
     write_pack_header(&mut file)?;
     for (hash, bytecode) in migrated {
         write_pack_entry(&mut file, hash, &bytecode)?;
@@ -243,8 +264,13 @@ fn migrate_legacy_cache(state: &mut CacheState) -> std::io::Result<()> {
 }
 
 fn append_pack_entry(state: &mut CacheState, hash: u64, bytecode: &[u8]) -> std::io::Result<()> {
-    std::fs::create_dir_all(cache_dir())?;
-    let path = pack_path();
+    let Some(dir) = cache_dir() else {
+        return Ok(());
+    };
+    let Some(path) = pack_path() else {
+        return Ok(());
+    };
+    std::fs::create_dir_all(&dir)?;
 
     let mut file = if state.pack_exists {
         std::fs::OpenOptions::new().append(true).open(&path)?

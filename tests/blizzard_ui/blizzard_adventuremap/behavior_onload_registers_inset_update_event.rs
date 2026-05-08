@@ -57,7 +57,20 @@ type InsetPoolSurface = (
     bool,
 );
 
+type InsetPoolShape = (String, String, String, i64, i64);
+type AcquiredInsetSurface = (String, String, bool, bool, bool);
+
 fn assert_inset_pool_surface(surface: InsetPoolSurface) {
+    let (event_registered, pool_shape, acquired_inset) = split_inset_pool_surface(surface);
+
+    assert_inset_update_event_registered(event_registered);
+    assert_inset_pool_shape(pool_shape);
+    assert_acquired_inset_surface(acquired_inset);
+}
+
+fn split_inset_pool_surface(
+    surface: InsetPoolSurface,
+) -> (bool, InsetPoolShape, AcquiredInsetSurface) {
     let (
         event_registered,
         pool_type,
@@ -72,21 +85,22 @@ fn assert_inset_pool_surface(surface: InsetPoolSurface) {
         release_called,
     ) = surface;
 
-    assert_inset_update_event_registered(event_registered);
-    assert_inset_pool_shape(
+    let pool_shape = (
         pool_type,
         acquire_type,
         release_type,
         before_acquire,
         after_acquire,
     );
-    assert_acquired_inset_surface(
+    let acquired_inset = (
         inset_type,
         object_type,
         parent_is_canvas,
         inset_uses_template_mixin,
         release_called,
     );
+
+    (event_registered, pool_shape, acquired_inset)
 }
 
 fn assert_inset_update_event_registered(event_registered: bool) {
@@ -96,13 +110,9 @@ fn assert_inset_update_event_registered(event_registered: bool) {
     );
 }
 
-fn assert_inset_pool_shape(
-    pool_type: String,
-    acquire_type: String,
-    release_type: String,
-    before_acquire: i64,
-    after_acquire: i64,
-) {
+fn assert_inset_pool_shape(surface: InsetPoolShape) {
+    let (pool_type, acquire_type, release_type, before_acquire, after_acquire) = surface;
+
     assert_eq!(
         pool_type, "table",
         "`AdventureMapMixin:OnLoad` must store a map inset frame pool"
@@ -125,13 +135,10 @@ fn assert_inset_pool_shape(
     );
 }
 
-fn assert_acquired_inset_surface(
-    inset_type: String,
-    object_type: String,
-    parent_is_canvas: bool,
-    inset_uses_template_mixin: bool,
-    release_called: bool,
-) {
+fn assert_acquired_inset_surface(surface: AcquiredInsetSurface) {
+    let (inset_type, object_type, parent_is_canvas, inset_uses_template_mixin, release_called) =
+        surface;
+
     assert_eq!(inset_type, "table", "map inset pool must create a frame");
     assert_eq!(
         object_type, "Frame",

@@ -13,21 +13,8 @@ pub(super) fn handle_mouse_event(
     match mouse_event {
         mouse::Event::CursorMoved { position } => handle_cursor_moved(*position, bounds),
         mouse::Event::CursorLeft => publish_canvas_event(CanvasMessage::MouseLeave),
-        mouse::Event::ButtonPressed(mouse::Button::Left) => {
-            publish_cursor_event(cursor, bounds, CanvasMessage::MouseDown)
-        }
-        mouse::Event::ButtonReleased(mouse::Button::Left) => {
-            publish_cursor_event(cursor, bounds, CanvasMessage::MouseUp)
-        }
-        mouse::Event::ButtonPressed(mouse::Button::Right) => {
-            publish_cursor_event(cursor, bounds, CanvasMessage::RightMouseDown)
-        }
-        mouse::Event::ButtonReleased(mouse::Button::Right) => {
-            publish_cursor_event(cursor, bounds, CanvasMessage::RightMouseUp)
-        }
-        mouse::Event::ButtonPressed(mouse::Button::Middle) => {
-            publish_cursor_event(cursor, bounds, CanvasMessage::MiddleClick)
-        }
+        mouse::Event::ButtonPressed(button) => handle_button_pressed(*button, cursor, bounds),
+        mouse::Event::ButtonReleased(button) => handle_button_released(*button, cursor, bounds),
         mouse::Event::WheelScrolled { delta } => publish_scroll_event(delta),
         _ => None,
     }
@@ -40,6 +27,35 @@ fn handle_cursor_moved(position: Point, bounds: Rectangle) -> Option<shader::Act
     } else {
         publish_canvas_event(CanvasMessage::MouseLeave)
     }
+}
+
+fn handle_button_pressed(
+    button: mouse::Button,
+    cursor: mouse::Cursor,
+    bounds: Rectangle,
+) -> Option<shader::Action<Message>> {
+    let to_message = match button {
+        mouse::Button::Left => CanvasMessage::MouseDown,
+        mouse::Button::Right => CanvasMessage::RightMouseDown,
+        mouse::Button::Middle => CanvasMessage::MiddleClick,
+        _ => return None,
+    };
+
+    publish_cursor_event(cursor, bounds, to_message)
+}
+
+fn handle_button_released(
+    button: mouse::Button,
+    cursor: mouse::Cursor,
+    bounds: Rectangle,
+) -> Option<shader::Action<Message>> {
+    let to_message = match button {
+        mouse::Button::Left => CanvasMessage::MouseUp,
+        mouse::Button::Right => CanvasMessage::RightMouseUp,
+        _ => return None,
+    };
+
+    publish_cursor_event(cursor, bounds, to_message)
 }
 
 fn publish_cursor_event(

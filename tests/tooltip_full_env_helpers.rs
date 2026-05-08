@@ -2,11 +2,13 @@
 // a subset of the helpers, so per-binary dead_code warnings are expected.
 #![allow(dead_code)]
 
-use rilua::Val;
 use std::path::{Path, PathBuf};
 
 use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+
+#[path = "common/event_helpers.rs"]
+mod event_helpers;
 
 const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
@@ -130,12 +132,7 @@ fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
     let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(addon_name)]);
 }
 
-fn fire_player_entering_world(env: &WowLuaEnv, initial_login: bool, is_reload: bool) {
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[Val::Bool(initial_login), Val::Bool(is_reload)],
-    );
-}
+use event_helpers::fire_player_entering_world;
 
 fn ensure_player_frame_for_aura_tests(env: &WowLuaEnv) {
     env.exec(

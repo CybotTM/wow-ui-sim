@@ -274,49 +274,51 @@ struct TierInfoRow {
     locked_reason: Option<&'static str>,
 }
 
+const TIER_ROWS: [TierInfoRow; 5] = [
+    TierInfoRow {
+        tier: 1,
+        unlocked: true,
+        suggested_ilvl: 571,
+        modifier_widget_set_id: 4401,
+        tier_description: "Tier 1",
+        locked_reason: None,
+    },
+    TierInfoRow {
+        tier: 2,
+        unlocked: true,
+        suggested_ilvl: 584,
+        modifier_widget_set_id: 4402,
+        tier_description: "Tier 2",
+        locked_reason: None,
+    },
+    TierInfoRow {
+        tier: 3,
+        unlocked: true,
+        suggested_ilvl: 597,
+        modifier_widget_set_id: 4403,
+        tier_description: "Tier 3",
+        locked_reason: None,
+    },
+    TierInfoRow {
+        tier: 4,
+        unlocked: true,
+        suggested_ilvl: 610,
+        modifier_widget_set_id: 4404,
+        tier_description: "Tier 4",
+        locked_reason: None,
+    },
+    TierInfoRow {
+        tier: 5,
+        unlocked: false,
+        suggested_ilvl: 623,
+        modifier_widget_set_id: 4405,
+        tier_description: "Tier 5",
+        locked_reason: Some(LOCKED_TIER_REASON),
+    },
+];
+
 fn tier_rows() -> [TierInfoRow; 5] {
-    [
-        TierInfoRow {
-            tier: 1,
-            unlocked: true,
-            suggested_ilvl: 571,
-            modifier_widget_set_id: 4401,
-            tier_description: "Tier 1",
-            locked_reason: None,
-        },
-        TierInfoRow {
-            tier: 2,
-            unlocked: true,
-            suggested_ilvl: 584,
-            modifier_widget_set_id: 4402,
-            tier_description: "Tier 2",
-            locked_reason: None,
-        },
-        TierInfoRow {
-            tier: 3,
-            unlocked: true,
-            suggested_ilvl: 597,
-            modifier_widget_set_id: 4403,
-            tier_description: "Tier 3",
-            locked_reason: None,
-        },
-        TierInfoRow {
-            tier: 4,
-            unlocked: true,
-            suggested_ilvl: 610,
-            modifier_widget_set_id: 4404,
-            tier_description: "Tier 4",
-            locked_reason: None,
-        },
-        TierInfoRow {
-            tier: 5,
-            unlocked: false,
-            suggested_ilvl: 623,
-            modifier_widget_set_id: 4405,
-            tier_description: "Tier 5",
-            locked_reason: Some(LOCKED_TIER_REASON),
-        },
-    ]
+    TIER_ROWS
 }
 
 fn push_tier_info(state: &mut LuaState, tier: i32) {

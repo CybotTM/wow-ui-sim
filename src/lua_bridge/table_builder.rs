@@ -151,18 +151,7 @@ impl<'a> TableBuilder<'a> {
     /// slot is consumed — the value is pushed and immediately popped to
     /// set the table entry.
     pub fn set(self, key: &str, value: impl IntoStack) -> LuaResult<Self> {
-        let save_top = self.state.top;
-        let count = value.into_stack(self.state)?;
-        let val = match count {
-            0 => Val::Nil,
-            1 => self.state.stack[save_top],
-            _ => {
-                self.state.top = save_top;
-                return Err(table_builder_value_error(count));
-            }
-        };
-        self.state.top = save_top;
-
+        let val = value_to_table_entry(self.state, value)?;
         let key_ref = self.state.gc.intern_string(key.as_bytes());
         let k = Val::Str(key_ref);
         let table = self
@@ -190,6 +179,21 @@ impl<'a> TableBuilder<'a> {
     pub fn build(self) -> Val {
         Val::Table(self.table_ref)
     }
+}
+
+fn value_to_table_entry(state: &mut LuaState, value: impl IntoStack) -> LuaResult<Val> {
+    let save_top = state.top;
+    let count = value.into_stack(state)?;
+    let val = match count {
+        0 => Val::Nil,
+        1 => state.stack[save_top],
+        _ => {
+            state.top = save_top;
+            return Err(table_builder_value_error(count));
+        }
+    };
+    state.top = save_top;
+    Ok(val)
 }
 
 fn table_builder_value_error(count: u32) -> LuaError {

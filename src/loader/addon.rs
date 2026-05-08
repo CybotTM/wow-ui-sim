@@ -1,12 +1,15 @@
 //! Addon loading internals.
 
+mod map_canvas_patch;
+mod nil_symbol_reports;
+
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::state::SimState;
 use crate::saved_variables::SavedVariablesManager;
 use crate::toc::TocFile;
 use rilua::Val;
 use std::cell::RefCell;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::rc::Rc;
 use std::time::Instant;
 
@@ -14,6 +17,8 @@ use super::error::LoadError;
 use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
 use super::{LoadResult, LoadTiming};
+use map_canvas_patch::patch_map_canvas_scroll_container;
+use nil_symbol_reports::append_nil_symbol_access_warnings;
 
 /// Context for loading addon files (name, private table, and addon root for path resolution).
 pub struct AddonContext<'a> {
@@ -290,125 +295,6 @@ fn patch_quest_log_mixin(env: &LoaderEnv<'_>, result: &mut LoadResult) {
     }
 }
 
-fn patch_map_canvas_scroll_container(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = env.exec(
-        r#"
-        local function __wow_find_first_scroll_frame_child(parent)
-            if type(parent) ~= "table" or type(parent.GetNumChildren) ~= "function" or type(parent.GetChildren) ~= "function" then
-                return nil
-            end
-
-            local count = parent:GetNumChildren()
-            for index = 1, count do
-                local child = select(index, parent:GetChildren())
-                if type(child) == "table" then
-                    local isScrollFrame =
-                        (type(child.IsObjectType) == "function" and child:IsObjectType("ScrollFrame")) or
-                        (type(child.GetObjectType) == "function" and child:GetObjectType() == "ScrollFrame")
-                    if isScrollFrame then
-                        return child
-                    end
-                end
-            end
-
-            return nil
-        end
-
-        local function __wow_ensure_map_canvas_scroll_container(frame)
-            if type(frame) ~= "table" then
-                return nil
-            end
-
-            local existing = rawget(frame, "ScrollContainer")
-            if existing ~= nil then
-                return existing
-            end
-
-            local scroll = __wow_find_first_scroll_frame_child(frame)
-            if scroll ~= nil then
-                rawset(frame, "ScrollContainer", scroll)
-            end
-            return scroll
-        end
-
-        local function __wow_try_init_map_canvas(frame)
-            if type(frame) ~= "table" then
-                return
-            end
-
-            __wow_ensure_map_canvas_scroll_container(frame)
-            if rawget(frame, "__wow_map_canvas_onload_ran") then
-                return
-            end
-
-            local scroll = rawget(frame, "ScrollContainer")
-            if scroll == nil then
-                return
-            end
-
-            rawset(frame, "__wow_map_canvas_onload_ran", true)
-            local originalOnLoad = rawget(_G, "__wow_map_canvas_original_onload")
-            if type(originalOnLoad) == "function" then
-                originalOnLoad(frame)
-            end
-        end
-
-        if type(MapCanvasMixin) == "table" and not rawget(_G, "__wow_map_canvas_scroll_container_patched") then
-            if rawget(_G, "__wow_map_canvas_original_onload") == nil and type(MapCanvasMixin.OnLoad) == "function" then
-                _G.__wow_map_canvas_original_onload = MapCanvasMixin.OnLoad
-                MapCanvasMixin.OnLoad = function(self, ...)
-                    if rawget(self, "__wow_map_canvas_onload_ran") then
-                        return
-                    end
-                    __wow_try_init_map_canvas(self)
-                end
-            end
-
-            if type(MapCanvasMixin.SetMapID) == "function" then
-                local originalSetMapID = MapCanvasMixin.SetMapID
-                MapCanvasMixin.SetMapID = function(self, ...)
-                    __wow_try_init_map_canvas(self)
-                    return originalSetMapID(self, ...)
-                end
-            end
-
-            if type(MapCanvasMixin.GetCanvas) == "function" then
-                local originalGetCanvas = MapCanvasMixin.GetCanvas
-                MapCanvasMixin.GetCanvas = function(self, ...)
-                    __wow_try_init_map_canvas(self)
-                    return originalGetCanvas(self, ...)
-                end
-            end
-
-            if type(MapCanvasMixin.GetCanvasContainer) == "function" then
-                local originalGetCanvasContainer = MapCanvasMixin.GetCanvasContainer
-                MapCanvasMixin.GetCanvasContainer = function(self, ...)
-                    __wow_try_init_map_canvas(self)
-                    return originalGetCanvasContainer(self, ...)
-                end
-            end
-
-            if type(MapCanvasMixin.OnFrameSizeChanged) == "function" then
-                local originalOnFrameSizeChanged = MapCanvasMixin.OnFrameSizeChanged
-                MapCanvasMixin.OnFrameSizeChanged = function(self, ...)
-                    __wow_try_init_map_canvas(self)
-                    return originalOnFrameSizeChanged(self, ...)
-                end
-            end
-
-            __wow_map_canvas_scroll_container_patched = true
-        end
-        "#,
-    ) {
-        push_patch_warning(
-            result,
-            "Blizzard_MapCanvas",
-            "patch map canvas scroll container",
-            &e,
-        );
-    }
-}
-
 const PLAYERSPELLS_ONLOAD_BACKFILL_PATCH: &str = r#"
     local function backfill_onload(frame, needs_init)
         if not frame or not needs_init then
@@ -655,106 +541,6 @@ fn load_addon_file(
             .warnings
             .push(format!("{}: unknown file type", file.display())),
     }
-}
-
-fn append_nil_symbol_access_warnings(
-    env: &LoaderEnv<'_>,
-    addon_name: &str,
-    start_index: usize,
-    result: &mut LoadResult,
-) {
-    let grouped_accesses = {
-        let state = env.state().borrow();
-        summarize_nil_symbol_accesses(&state.nil_symbol_accesses[start_index..])
-    };
-    result.warnings.extend(
-        grouped_accesses
-            .into_iter()
-            .map(|report| format_missing_symbol_report(addon_name, &report)),
-    );
-}
-
-fn summarize_nil_symbol_accesses(
-    accesses: &[crate::lua_api::state::NilSymbolAccess],
-) -> Vec<MissingSymbolReport> {
-    let mut reports = std::collections::BTreeMap::new();
-    for access in accesses {
-        let need = classify_nil_symbol_access(access);
-        let location = format_nil_symbol_location(access);
-        reports.entry(need).or_insert(location);
-    }
-
-    reports
-        .into_iter()
-        .map(|(need, location)| MissingSymbolReport { need, location })
-        .collect()
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-enum MissingSymbolNeed {
-    Global(String),
-    CNamespace(String),
-    CMethod { namespace: String, method: String },
-}
-
-fn classify_nil_symbol_access(
-    access: &crate::lua_api::state::NilSymbolAccess,
-) -> MissingSymbolNeed {
-    if access.container == "_G" {
-        return classify_global_nil_access(&access.key);
-    }
-
-    if access.container.starts_with("C_") {
-        return MissingSymbolNeed::CMethod {
-            namespace: access.container.clone(),
-            method: access.key.clone(),
-        };
-    }
-
-    MissingSymbolNeed::Global(format!("{}.{}", access.container, access.key))
-}
-
-fn classify_global_nil_access(key: &str) -> MissingSymbolNeed {
-    if key.starts_with("C_") {
-        return MissingSymbolNeed::CNamespace(key.to_string());
-    }
-
-    MissingSymbolNeed::Global(key.to_string())
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-struct MissingSymbolReport {
-    need: MissingSymbolNeed,
-    location: Option<String>,
-}
-
-fn format_missing_symbol_report(addon_name: &str, report: &MissingSymbolReport) -> String {
-    let need = match &report.need {
-        MissingSymbolNeed::Global(name) => format!("global {name}"),
-        MissingSymbolNeed::CNamespace(namespace) => namespace.clone(),
-        MissingSymbolNeed::CMethod { namespace, method } => format!("{namespace}.{method}"),
-    };
-
-    match &report.location {
-        Some(location) => format!("{addon_name} needs {need} (accessed at {location})"),
-        None => format!("{addon_name} needs {need}"),
-    }
-}
-
-fn format_nil_symbol_location(access: &crate::lua_api::state::NilSymbolAccess) -> Option<String> {
-    let source = access.source.as_deref()?;
-    let line = access.line?;
-    Some(format!("{}:{line}", summarize_chunk_source(source)))
-}
-
-fn summarize_chunk_source(source: &str) -> String {
-    let stripped = source.trim_start_matches(['@', '=']);
-    let path = PathBuf::from(stripped);
-    path.file_name()
-        .and_then(|name| name.to_str())
-        .map(ToOwned::to_owned)
-        .filter(|name| !name.is_empty())
-        .unwrap_or_else(|| stripped.to_string())
 }
 
 fn load_addon_lua_file(

@@ -83,8 +83,8 @@ fn test_startup_bootstrap_namespaces_exist() {
     assert_eq!(nav_distance, 0);
     assert_eq!(nav_frame_ty, "nil");
     assert_eq!(token_ty, "function");
-    assert!(!commerce_enabled);
-    assert_eq!(commerce_poll_seconds, 0);
+    assert!(commerce_enabled);
+    assert_eq!(commerce_poll_seconds, 60);
     assert!(!commerce_balance_enabled);
 
     let (market_price_ty, market_price, guaranteed_price_ty, guaranteed_price): (

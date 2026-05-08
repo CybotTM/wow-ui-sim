@@ -217,7 +217,7 @@ fn run_server(cmd_tx: mpsc::Sender<LuaCommand>, path: PathBuf) {
 
 fn handle_incoming_stream(stream: std::io::Result<UnixStream>, cmd_tx: &mpsc::Sender<LuaCommand>) {
     let Ok(stream) = stream else {
-        let error = stream.err().expect("failed stream must contain an error");
+        let error = stream.expect_err("failed stream must contain an error");
         crate::logging::eprintln_elapsed(&format!("[wow-sim] Accept error: {}", error));
         return;
     };
@@ -277,22 +277,21 @@ fn parse_request(line: &str) -> Result<Request, Response> {
 fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Response {
     match request {
         Request::Ping => Response::Pong,
-        Request::Exec { code } => {
-            send_command(cmd_tx, |respond| LuaCommand::Exec { code, respond })
-        }
+        request => send_app_command_request(request, cmd_tx),
+    }
+}
+
+fn send_app_command_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Response {
+    match request {
+        Request::Ping => unreachable!("ping requests are handled before command dispatch"),
+        Request::Exec { code } => send_exec_command(cmd_tx, code),
         Request::DumpTree {
             filter,
             filter_key,
             visible_only,
             verbose,
         } => send_dump_tree_command(cmd_tx, filter, filter_key, visible_only, verbose),
-        Request::DumpQuads { filter, verbose } => {
-            send_command(cmd_tx, |respond| LuaCommand::DumpQuads {
-                filter,
-                verbose,
-                respond,
-            })
-        }
+        Request::DumpQuads { filter, verbose } => send_dump_quads_command(cmd_tx, filter, verbose),
         Request::Screenshot {
             output,
             width,
@@ -301,6 +300,10 @@ fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Respon
             crop,
         } => send_screenshot_command(cmd_tx, output, width, height, filter, crop),
     }
+}
+
+fn send_exec_command(cmd_tx: &mpsc::Sender<LuaCommand>, code: String) -> Response {
+    send_command(cmd_tx, |respond| LuaCommand::Exec { code, respond })
 }
 
 fn send_dump_tree_command(
@@ -314,6 +317,18 @@ fn send_dump_tree_command(
         filter,
         filter_key,
         visible_only,
+        verbose,
+        respond,
+    })
+}
+
+fn send_dump_quads_command(
+    cmd_tx: &mpsc::Sender<LuaCommand>,
+    filter: Option<String>,
+    verbose: bool,
+) -> Response {
+    send_command(cmd_tx, |respond| LuaCommand::DumpQuads {
+        filter,
         verbose,
         respond,
     })

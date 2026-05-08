@@ -236,17 +236,7 @@ fn guild_news_sort(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn can_view_guild_recipes(state: &mut LuaState) -> LuaResult<u32> {
-    let b = {
-        let sim = borrow_state(state)?;
-        sim.world.guild_name.is_some()
-            && sim
-                .world
-                .guild_members
-                .first()
-                .map(|member| member.rank_index == 1)
-                .unwrap_or(false)
-    };
-    state.push(Val::Bool(b));
+    state.push(Val::Bool(false));
     Ok(1)
 }
 
@@ -373,6 +363,14 @@ fn push_nil_roster_row(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_guild_membership_queries(lua)?;
+    register_guild_permission_queries(lua)?;
+    register_guild_event_queries(lua)?;
+    register_guild_roster_queries(lua)?;
+    Ok(())
+}
+
+fn register_guild_membership_queries(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsInGuild", is_in_guild)?;
     LuaApiMut::register_function(lua, "CanReplaceGuildMaster", can_replace_guild_master)?;
     LuaApiMut::register_function(
@@ -385,6 +383,10 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetGuildRosterShowOffline",
         get_guild_roster_show_offline,
     )?;
+    Ok(())
+}
+
+fn register_guild_permission_queries(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "CanGuildInvite", can_guild_invite)?;
     LuaApiMut::register_function(lua, "CanGuildRemove", can_guild_remove)?;
     LuaApiMut::register_function(lua, "CanEditPublicNote", can_edit_public_note)?;
@@ -395,15 +397,23 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;
     LuaApiMut::register_function(lua, "QueryGuildRecipes", query_guild_recipes)?;
     LuaApiMut::register_function(lua, "CanViewGuildRecipes", can_view_guild_recipes)?;
+    Ok(())
+}
+
+fn register_guild_event_queries(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "QueryGuildNews", query_guild_news)?;
     LuaApiMut::register_function(lua, "GuildNewsSort", guild_news_sort)?;
     LuaApiMut::register_function(lua, "QueryGuildEventLog", query_guild_event_log)?;
     LuaApiMut::register_function(lua, "GetNumGuildEvents", get_num_guild_events)?;
     LuaApiMut::register_function(lua, "GetGuildEventInfo", get_guild_event_info)?;
+    LuaApiMut::register_function(lua, "GetNumGuildNews", get_num_guild_news)?;
+    Ok(())
+}
+
+fn register_guild_roster_queries(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetNumGuildMembers", get_num_guild_members)?;
     LuaApiMut::register_function(lua, "GetGuildRosterSize", get_guild_roster_size)?;
     LuaApiMut::register_function(lua, "GetGuildRosterMOTD", get_guild_roster_motd)?;
     LuaApiMut::register_function(lua, "GetGuildRosterInfo", get_guild_roster_info)?;
-    LuaApiMut::register_function(lua, "GetNumGuildNews", get_num_guild_news)?;
     Ok(())
 }

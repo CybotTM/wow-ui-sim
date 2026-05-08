@@ -33,24 +33,8 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
         resolve_parent_id(state, args.parent_val, args.default_parent_allowed)?;
     let runtime_inherits = build_runtime_inherits(&args.frame_type, args.inherits.as_deref());
     args.name = resolve_frame_name(state, args.name.take(), parent_id, parent_explicit)?;
-    let frame_id = crate::lua_api::globals::create_frame::create_frame_instance(
-        state,
-        args.widget_type,
-        &args.frame_type,
-        args.name,
-        (parent_id != 0).then_some(parent_id),
-        parent_explicit,
-        args.id,
-    )?;
-    template_chain::ensure_runtime_slider_children(state, frame_id)?;
-    let fire_on_load = borrow_state(state)?.suppress_runtime_on_load_depth == 0;
-    template_chain::apply_runtime_template_chain(
-        state,
-        frame_id,
-        runtime_inherits.as_deref(),
-        fire_on_load,
-    )?;
-    replay_runtime_template_parent_links(state, frame_id, runtime_inherits.as_deref())?;
+    let frame_id = register_runtime_frame(state, args, parent_id, parent_explicit)?;
+    apply_runtime_frame_templates(state, frame_id, runtime_inherits.as_deref())?;
     let frame_val = frame_ref(state, frame_id)?;
     state.push(frame_val);
     Ok(1)
@@ -68,6 +52,34 @@ struct CreateFrameArgs {
     default_parent_allowed: bool,
     inherits: Option<String>,
     id: Option<i32>,
+}
+
+fn register_runtime_frame(
+    state: &mut LuaState,
+    args: CreateFrameArgs,
+    parent_id: u64,
+    parent_explicit: bool,
+) -> LuaResult<u64> {
+    crate::lua_api::globals::create_frame::create_frame_instance(
+        state,
+        args.widget_type,
+        &args.frame_type,
+        args.name,
+        (parent_id != 0).then_some(parent_id),
+        parent_explicit,
+        args.id,
+    )
+}
+
+fn apply_runtime_frame_templates(
+    state: &mut LuaState,
+    frame_id: u64,
+    runtime_inherits: Option<&str>,
+) -> LuaResult<()> {
+    template_chain::ensure_runtime_slider_children(state, frame_id)?;
+    let fire_on_load = borrow_state(state)?.suppress_runtime_on_load_depth == 0;
+    template_chain::apply_runtime_template_chain(state, frame_id, runtime_inherits, fire_on_load)?;
+    replay_runtime_template_parent_links(state, frame_id, runtime_inherits)
 }
 
 fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {

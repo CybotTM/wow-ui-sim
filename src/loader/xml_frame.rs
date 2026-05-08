@@ -90,17 +90,9 @@ fn build_and_setup_frame(
     intrinsic_base: Option<&str>,
 ) -> Result<(), LoadError> {
     let build_start = Instant::now();
-    let parent_ref_expr = parent_ref_expr(env, &prepared.parent);
-    let lua_code = build_frame_lua_code(
-        widget_type,
-        &prepared.name,
-        prepared.explicit_parent.as_deref(),
-        &prepared.inherits,
-        frame,
-        &prepared.parent,
-        &parent_ref_expr,
-    );
+    let lua_code = build_prepared_frame_lua(env, frame, widget_type, prepared);
     timing.frame_code_build_time += build_start.elapsed();
+
     setup_frame(
         env,
         timing,
@@ -115,6 +107,24 @@ fn build_and_setup_frame(
             parent: &prepared.parent,
             intrinsic_base,
         },
+    )
+}
+
+fn build_prepared_frame_lua(
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    widget_type: &str,
+    prepared: &PreparedFrameCreation,
+) -> String {
+    let parent_ref_expr = parent_ref_expr(env, &prepared.parent);
+    build_frame_lua_code(
+        widget_type,
+        &prepared.name,
+        prepared.explicit_parent.as_deref(),
+        &prepared.inherits,
+        frame,
+        &prepared.parent,
+        &parent_ref_expr,
     )
 }
 

@@ -203,35 +203,41 @@ pub(super) fn emit_three_slice_h_atlas(batch: &mut QuadBatch, render: ThreeSlice
 }
 
 fn three_slice_rects(render: ThreeSliceRender<'_>) -> [(Rectangle, Rectangle); 3] {
+    let dst = three_slice_dst_rects(render);
+    let src = three_slice_src_rects(render);
+    [(dst[0], src[0]), (dst[1], src[1]), (dst[2], src[2])]
+}
+
+fn three_slice_dst_rects(render: ThreeSliceRender<'_>) -> [Rectangle; 3] {
     let bounds = render.bounds;
+    let (mid_x, mid_w, right_x) = three_slice_dst_spans(render);
+
+    [
+        rect(bounds.x, bounds.y, render.left_cap_px, bounds.height),
+        rect(mid_x, bounds.y, mid_w, bounds.height),
+        rect(right_x, bounds.y, render.right_cap_px, bounds.height),
+    ]
+}
+
+fn three_slice_src_rects(render: ThreeSliceRender<'_>) -> [Rectangle; 3] {
     let (left_uv, right_uv, top_uv, bottom_uv) = render.texture.uvs;
     let (uv_w, uv_h) = (right_uv - left_uv, bottom_uv - top_uv);
     let (left_cap_uv_end, right_cap_uv_start) =
         three_slice_cap_uvs(render, left_uv, right_uv, uv_w);
-    let (mid_x, mid_w, right_x) = three_slice_dst_spans(render);
 
     [
-        (
-            rect(bounds.x, bounds.y, render.left_cap_px, bounds.height),
-            rect(left_uv, top_uv, left_cap_uv_end - left_uv, uv_h),
+        rect(left_uv, top_uv, left_cap_uv_end - left_uv, uv_h),
+        rect(
+            left_cap_uv_end,
+            top_uv,
+            right_cap_uv_start - left_cap_uv_end,
+            uv_h,
         ),
-        (
-            rect(mid_x, bounds.y, mid_w, bounds.height),
-            rect(
-                left_cap_uv_end,
-                top_uv,
-                right_cap_uv_start - left_cap_uv_end,
-                uv_h,
-            ),
-        ),
-        (
-            rect(right_x, bounds.y, render.right_cap_px, bounds.height),
-            rect(
-                right_cap_uv_start,
-                top_uv,
-                right_uv - right_cap_uv_start,
-                uv_h,
-            ),
+        rect(
+            right_cap_uv_start,
+            top_uv,
+            right_uv - right_cap_uv_start,
+            uv_h,
         ),
     ]
 }

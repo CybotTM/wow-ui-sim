@@ -8,6 +8,16 @@ pub(super) fn build_direct_method_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = build_direct_conditional_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    build_direct_method_call_variants(state, handler_ref)
+}
+
+fn build_direct_conditional_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::ConditionalSelfTextEmptyShowTextChild => {
             build_conditional_self_text_empty_show_text_child_handler(state).map(Some)
@@ -32,6 +42,15 @@ pub(super) fn build_direct_method_variants(
             build_conditional_not_self_noargs_method_then_handler(state, method_name, then_handler)
                 .map(Some)
         }
+        _ => Ok(None),
+    }
+}
+
+fn build_direct_method_call_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
         FastHandlerRef::MethodWithBoolArg { method_name, value } => {
             build_method_with_value_arg_handler(state, method_name, Val::Bool(*value)).map(Some)

@@ -14,12 +14,16 @@ pub(super) fn set_color_texture(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.color_texture = Some(color);
-        frame.texture = None;
-        frame.texture_file_data_id = None;
-        frame.atlas = None;
-        frame.atlas_tex_coords = None;
+        clear_texture_sources(frame);
     }
     Ok(0)
+}
+
+fn clear_texture_sources(frame: &mut crate::widget::Frame) {
+    frame.texture = None;
+    frame.texture_file_data_id = None;
+    frame.atlas = None;
+    frame.atlas_tex_coords = None;
 }
 
 pub(super) fn set_vertex_color(state: &mut LuaState) -> LuaResult<u32> {

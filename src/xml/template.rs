@@ -298,62 +298,92 @@ fn collect_template_chain(
 /// inherit from a base template and apply a mixin. Register them so the
 /// template chain resolution and CreateFrame can find them.
 pub fn register_intrinsic_templates() {
-    let intrinsics: &[(&'static str, &str, &str, &str)] = &[
-        // (name, widget_type, inherits, mixin)
-        (
-            "WoWScrollBoxList",
-            "Frame",
-            "ScrollBoxBaseTemplate",
-            "ScrollBoxListMixin",
-        ),
-        (
-            "WoWScrollBox",
-            "Frame",
-            "ScrollBoxBaseTemplate",
-            "ScrollBoxBaseMixin",
-        ),
-        (
-            "WoWTrimScrollBar",
-            "EventFrame",
-            "WowTrimScrollBarTemplate",
-            "",
-        ),
-        (
-            "UIThemeContainerFrame",
-            "Frame",
-            "",
-            "UIThemeContainerMixin",
-        ),
-    ];
+    register_intrinsic_frame_templates();
+    register_button_frame_template();
+}
 
-    for &(name, wtype, inherits, mixin) in intrinsics {
-        let frame = FrameXml {
-            inherits: Some(inherits.to_string()),
-            mixin: if mixin.is_empty() {
-                None
-            } else {
-                Some(mixin.to_string())
-            },
-            is_virtual: Some(true),
-            ..Default::default()
-        };
-        register_template(name, wtype, frame);
+struct IntrinsicFrameTemplate {
+    name: &'static str,
+    widget_type: &'static str,
+    inherits: &'static str,
+    mixin: &'static str,
+}
+
+fn register_intrinsic_frame_templates() {
+    for spec in intrinsic_frame_templates() {
+        register_intrinsic_frame_template(spec);
     }
+}
 
-    register_template(
-        "ButtonFrameTemplate",
-        "Frame",
-        FrameXml {
-            is_virtual: Some(true),
-            children: vec![FrameChildElement::Frame(FrameXml {
-                name: Some("$parentInset".to_string()),
-                parent_key: Some("Inset".to_string()),
-                inherits: Some("InsetFrameTemplate".to_string()),
-                ..Default::default()
-            })],
-            ..Default::default()
+fn intrinsic_frame_templates() -> &'static [IntrinsicFrameTemplate] {
+    &[
+        IntrinsicFrameTemplate {
+            name: "WoWScrollBoxList",
+            widget_type: "Frame",
+            inherits: "ScrollBoxBaseTemplate",
+            mixin: "ScrollBoxListMixin",
         },
-    );
+        IntrinsicFrameTemplate {
+            name: "WoWScrollBox",
+            widget_type: "Frame",
+            inherits: "ScrollBoxBaseTemplate",
+            mixin: "ScrollBoxBaseMixin",
+        },
+        IntrinsicFrameTemplate {
+            name: "WoWTrimScrollBar",
+            widget_type: "EventFrame",
+            inherits: "WowTrimScrollBarTemplate",
+            mixin: "",
+        },
+        IntrinsicFrameTemplate {
+            name: "UIThemeContainerFrame",
+            widget_type: "Frame",
+            inherits: "",
+            mixin: "UIThemeContainerMixin",
+        },
+    ]
+}
+
+fn register_intrinsic_frame_template(spec: &IntrinsicFrameTemplate) {
+    register_template(spec.name, spec.widget_type, intrinsic_frame_xml(spec));
+}
+
+fn intrinsic_frame_xml(spec: &IntrinsicFrameTemplate) -> FrameXml {
+    FrameXml {
+        inherits: Some(spec.inherits.to_string()),
+        mixin: intrinsic_mixin(spec.mixin),
+        is_virtual: Some(true),
+        ..Default::default()
+    }
+}
+
+fn intrinsic_mixin(mixin: &str) -> Option<String> {
+    if mixin.is_empty() {
+        None
+    } else {
+        Some(mixin.to_string())
+    }
+}
+
+fn register_button_frame_template() {
+    register_template("ButtonFrameTemplate", "Frame", button_frame_template_xml());
+}
+
+fn button_frame_template_xml() -> FrameXml {
+    FrameXml {
+        is_virtual: Some(true),
+        children: vec![button_frame_inset_child()],
+        ..Default::default()
+    }
+}
+
+fn button_frame_inset_child() -> FrameChildElement {
+    FrameChildElement::Frame(FrameXml {
+        name: Some("$parentInset".to_string()),
+        parent_key: Some("Inset".to_string()),
+        inherits: Some("InsetFrameTemplate".to_string()),
+        ..Default::default()
+    })
 }
 
 /// Clear the template registry (useful for testing).
@@ -374,7 +404,8 @@ pub fn clear_templates() {
 // Texture template registry (virtual textures with mixin/inherits)
 // ---------------------------------------------------------------------------
 
-use super::types_elements::{AnimationGroupXml, FontStringXml, TextureXml};
+use super::types_animation::AnimationGroupXml;
+use super::types_elements::{FontStringXml, TextureXml};
 
 fn with_font_string_template_registry<R>(
     f: impl FnOnce(&HashMap<String, FontStringXml>) -> R,
@@ -577,5 +608,35 @@ fn append_unique_mixins(
         if !name.is_empty() && seen_mixins.insert(name.to_string()) {
             mixins.push(name.to_string());
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn intrinsic_templates_register_engine_frames_and_button_frame_parts() {
+        register_intrinsic_templates();
+
+        let scroll_box = get_template("WoWScrollBoxList").expect("scroll box list intrinsic");
+        assert_eq!(scroll_box.widget_type, "Frame");
+        assert_eq!(
+            scroll_box.frame.inherits.as_deref(),
+            Some("ScrollBoxBaseTemplate")
+        );
+        assert_eq!(
+            scroll_box.frame.mixin.as_deref(),
+            Some("ScrollBoxListMixin")
+        );
+
+        let button_frame = get_template("ButtonFrameTemplate").expect("button frame intrinsic");
+        assert_eq!(button_frame.widget_type, "Frame");
+        assert_eq!(button_frame.frame.children.len(), 1);
+        let FrameChildElement::Frame(inset) = &button_frame.frame.children[0] else {
+            panic!("ButtonFrameTemplate child should be an inset frame");
+        };
+        assert_eq!(inset.parent_key.as_deref(), Some("Inset"));
+        assert_eq!(inset.inherits.as_deref(), Some("InsetFrameTemplate"));
     }
 }

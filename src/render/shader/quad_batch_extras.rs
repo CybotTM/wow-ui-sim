@@ -17,6 +17,27 @@ struct ThreeSliceParams<'a> {
     path: Option<&'a str>,
 }
 
+pub(crate) struct ThreeSlicePathParams<'a> {
+    pub(crate) bounds: Rectangle,
+    pub(crate) left_cap_width: f32,
+    pub(crate) right_cap_width: f32,
+    pub(crate) path: &'a str,
+    pub(crate) tex_width: f32,
+    pub(crate) color: [f32; 4],
+    pub(crate) blend_mode: BlendMode,
+    pub(crate) v_top: f32,
+    pub(crate) v_bottom: f32,
+}
+
+struct ThreeSliceLayout {
+    left_x: f32,
+    middle_x: f32,
+    right_x: f32,
+    middle_width: f32,
+    left_uv: f32,
+    right_uv_start: f32,
+}
+
 impl QuadBatch {
     /// Push a textured quad by path with explicit per-vertex UV coordinates.
     /// Used for rotated UV mappings (e.g., BackdropTemplateMixin edge textures).
@@ -51,94 +72,27 @@ impl QuadBatch {
         self.push_texture_request(path, vertex_start, 4);
     }
 
-    /// Push a horizontal 3-slice texture by path (left cap, stretched middle, right cap).
-    pub fn push_three_slice_h_path(
-        &mut self,
-        bounds: Rectangle,
-        left_cap_width: f32,
-        right_cap_width: f32,
-        path: &str,
-        tex_width: f32,
-        color: [f32; 4],
-        v_top: f32,
-        v_bottom: f32,
-    ) {
-        self.push_three_slice_h_path_blend(
-            bounds,
-            left_cap_width,
-            right_cap_width,
-            path,
-            tex_width,
-            color,
-            BlendMode::Alpha,
-            v_top,
-            v_bottom,
-        );
-    }
-
     /// Push a horizontal 3-slice texture with custom blend mode.
-    pub fn push_three_slice_h_path_blend(
-        &mut self,
-        bounds: Rectangle,
-        left_cap_width: f32,
-        right_cap_width: f32,
-        path: &str,
-        tex_width: f32,
-        color: [f32; 4],
-        blend_mode: BlendMode,
-        v_top: f32,
-        v_bottom: f32,
-    ) {
-        if bounds.width <= left_cap_width + right_cap_width {
-            self.push_textured_path(bounds, path, color, blend_mode);
+    pub(crate) fn push_three_slice_h_path_blend(&mut self, params: ThreeSlicePathParams<'_>) {
+        if params.bounds.width <= params.left_cap_width + params.right_cap_width {
+            self.push_textured_path(params.bounds, params.path, params.color, params.blend_mode);
             return;
         }
 
         let vertex_start = self.vertices.len() as u32;
         self.push_three_slice_quads(ThreeSliceParams {
-            bounds,
-            left_cap_width,
-            right_cap_width,
-            tex_width,
-            color,
+            bounds: params.bounds,
+            left_cap_width: params.left_cap_width,
+            right_cap_width: params.right_cap_width,
+            tex_width: params.tex_width,
+            color: params.color,
             tex_index: -2,
-            blend_mode,
-            v_top,
-            v_bottom,
-            path: Some(path),
+            blend_mode: params.blend_mode,
+            v_top: params.v_top,
+            v_bottom: params.v_bottom,
+            path: Some(params.path),
         });
-        self.push_texture_request(path, vertex_start, 12);
-    }
-
-    /// Push a horizontal 3-slice texture (left cap, stretched middle, right cap).
-    pub fn push_three_slice_h(
-        &mut self,
-        bounds: Rectangle,
-        left_cap_width: f32,
-        right_cap_width: f32,
-        tex_index: i32,
-        tex_width: f32,
-        color: [f32; 4],
-        v_top: f32,
-        v_bottom: f32,
-    ) {
-        if bounds.width <= left_cap_width + right_cap_width {
-            self.push_textured(bounds, tex_index, color, BlendMode::Alpha);
-            return;
-        }
-
-        self.push_three_slice_quads(ThreeSliceParams {
-            bounds,
-            left_cap_width,
-            right_cap_width,
-            tex_width,
-            color,
-            tex_index,
-            blend_mode: BlendMode::Alpha,
-            v_top,
-            v_bottom,
-            path: None,
-        });
+        self.push_texture_request(params.path, vertex_start, 12);
     }
 
     /// Push a tiled texture filling the bounds.
@@ -244,39 +198,53 @@ impl QuadBatch {
     }
 
     fn push_three_slice_quads(&mut self, params: ThreeSliceParams) {
-        let middle_width = params.bounds.width - params.left_cap_width - params.right_cap_width;
-        let left_uv = params.left_cap_width / params.tex_width;
-        let right_uv_start = 1.0 - (params.right_cap_width / params.tex_width);
-        let v_bottom = match params.path {
-            Some("Interface/Buttons/UI-Panel-Button-Up")
-            | Some("Interface\\Buttons\\UI-Panel-Button-Up")
-            | Some("Interface/Buttons/UI-Panel-Button-Highlight")
-            | Some("Interface\\Buttons\\UI-Panel-Button-Highlight") => 22.0 / 32.0,
-            _ => params.v_bottom,
-        };
-        let v_height = v_bottom - params.v_top;
-        let mut emit = |dest_x: f32, dest_w: f32, uv_x: f32, uv_w: f32| {
-            self.push_quad(
-                Rectangle::new(
-                    Point::new(dest_x, params.bounds.y),
-                    Size::new(dest_w, params.bounds.height),
-                ),
-                Rectangle::new(Point::new(uv_x, params.v_top), Size::new(uv_w, v_height)),
-                params.color,
-                params.tex_index,
-                params.blend_mode,
-            );
-        };
-        let left_x = params.bounds.x;
-        let middle_x = params.bounds.x + params.left_cap_width;
-        let right_x = params.bounds.x + params.bounds.width - params.right_cap_width;
-        emit(left_x, params.left_cap_width, 0.0, left_uv);
-        emit(middle_x, middle_width, left_uv, right_uv_start - left_uv);
-        emit(
-            right_x,
+        let layout = three_slice_layout(&params);
+
+        self.push_three_slice_segment(
+            &params,
+            layout.left_x,
+            params.left_cap_width,
+            0.0,
+            layout.left_uv,
+        );
+        self.push_three_slice_segment(
+            &params,
+            layout.middle_x,
+            layout.middle_width,
+            layout.left_uv,
+            layout.right_uv_start - layout.left_uv,
+        );
+        self.push_three_slice_segment(
+            &params,
+            layout.right_x,
             params.right_cap_width,
-            right_uv_start,
-            1.0 - right_uv_start,
+            layout.right_uv_start,
+            1.0 - layout.right_uv_start,
+        );
+    }
+
+    fn push_three_slice_segment(
+        &mut self,
+        params: &ThreeSliceParams,
+        dest_x: f32,
+        dest_width: f32,
+        uv_x: f32,
+        uv_width: f32,
+    ) {
+        let v_bottom = three_slice_v_bottom(params.path, params.v_bottom);
+        let v_height = v_bottom - params.v_top;
+        self.push_quad(
+            Rectangle::new(
+                Point::new(dest_x, params.bounds.y),
+                Size::new(dest_width, params.bounds.height),
+            ),
+            Rectangle::new(
+                Point::new(uv_x, params.v_top),
+                Size::new(uv_width, v_height),
+            ),
+            params.color,
+            params.tex_index,
+            params.blend_mode,
         );
     }
 
@@ -351,6 +319,27 @@ fn quad_positions(bounds: Rectangle) -> [[f32; 2]; 4] {
         [bounds.x + bounds.width, bounds.y + bounds.height],
         [bounds.x, bounds.y + bounds.height],
     ]
+}
+
+fn three_slice_layout(params: &ThreeSliceParams) -> ThreeSliceLayout {
+    ThreeSliceLayout {
+        left_x: params.bounds.x,
+        middle_x: params.bounds.x + params.left_cap_width,
+        right_x: params.bounds.x + params.bounds.width - params.right_cap_width,
+        middle_width: params.bounds.width - params.left_cap_width - params.right_cap_width,
+        left_uv: params.left_cap_width / params.tex_width,
+        right_uv_start: 1.0 - (params.right_cap_width / params.tex_width),
+    }
+}
+
+fn three_slice_v_bottom(path: Option<&str>, fallback: f32) -> f32 {
+    match path {
+        Some("Interface/Buttons/UI-Panel-Button-Up")
+        | Some("Interface\\Buttons\\UI-Panel-Button-Up")
+        | Some("Interface/Buttons/UI-Panel-Button-Highlight")
+        | Some("Interface\\Buttons\\UI-Panel-Button-Highlight") => 22.0 / 32.0,
+        _ => fallback,
+    }
 }
 
 fn border_rects(bounds: Rectangle, thickness: f32) -> [Rectangle; 4] {

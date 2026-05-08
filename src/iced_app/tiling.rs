@@ -222,18 +222,7 @@ fn emit_standard_tiled_texture(
         return;
     }
 
-    emit_grid_tiles(
-        batch,
-        GridTileStrip {
-            bounds,
-            uvs: &config.cropped_uvs,
-            tex_path: &config.cropped_path,
-            tile_w: config.tile_w,
-            tile_h: config.tile_h,
-            tint: config.tint,
-            blend: f.blend_mode,
-        },
-    );
+    emit_standard_grid_tiles(batch, bounds, config, f.blend_mode);
 }
 
 fn emit_standard_horiz_tiles(
@@ -267,6 +256,26 @@ fn emit_standard_vert_tiles(
             bounds,
             uvs: &config.cropped_uvs,
             tex_path: &config.cropped_path,
+            tile_h: config.tile_h,
+            tint: config.tint,
+            blend,
+        },
+    );
+}
+
+fn emit_standard_grid_tiles(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    config: &StandardTileConfig,
+    blend: BlendMode,
+) {
+    emit_grid_tiles(
+        batch,
+        GridTileStrip {
+            bounds,
+            uvs: &config.cropped_uvs,
+            tex_path: &config.cropped_path,
+            tile_w: config.tile_w,
             tile_h: config.tile_h,
             tint: config.tint,
             blend,

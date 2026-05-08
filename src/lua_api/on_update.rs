@@ -38,47 +38,25 @@ pub(crate) fn fire(
     // instead of interleaving mid-dispatch.
     env.gc_stop();
 
-    {
-        let mut lua = env.rilua_mut();
-        super::script_helpers::reconcile_on_update_runtime_cache_if_dirty(&mut lua);
-    }
-
-    let frame_ids = {
-        let mut sim = env.state().borrow_mut();
-        if sim.visible_on_update_cache.is_none() {
-            let mut visible = sim
-                .on_update_frames
-                .iter()
-                .copied()
-                .filter(|&id| sim.widgets.is_ancestor_visible(id))
-                .collect::<Vec<_>>();
-            visible.sort_unstable();
-            sim.visible_on_update_cache = Some(visible);
-        }
-        sim.visible_on_update_cache.clone().unwrap_or_default()
-    };
+    reconcile_runtime_cache(env);
+    let frame_ids = visible_on_update_frame_ids(env);
 
     {
         let started = Instant::now();
-        let mut lua = env.rilua_mut();
-        super::script_helpers::dispatch_on_update(&mut lua, &frame_ids, elapsed)?;
+        dispatch_on_update_handlers(env, &frame_ids, elapsed)?;
         timings.dispatch_handlers = started.elapsed();
     }
 
     let started = Instant::now();
-    crate::lua_api::frame::methods::button_anchor_hierarchy::advance_animation_groups(
-        env, elapsed,
-    )?;
+    advance_animation_groups(env, elapsed)?;
     timings.animation_groups = started.elapsed();
 
     let started = Instant::now();
-    for frame_id in &frame_ids {
-        env.fire_script_handler(*frame_id, "OnPostUpdate", vec![rilua::Val::Num(elapsed)])?;
-    }
+    fire_on_post_update_handlers(env, &frame_ids, elapsed)?;
     timings.on_post_update = started.elapsed();
 
     let started = Instant::now();
-    env.finalize_frame_metrics(elapsed * 1000.0);
+    finalize_frame_metrics(env, elapsed);
     timings.finalize_metrics = started.elapsed();
 
     // Advance the collector with a bounded budget. gc_step updates the
@@ -90,4 +68,53 @@ pub(crate) fn fire(
 
     timings.total = total_started.elapsed();
     Ok(timings)
+}
+
+fn reconcile_runtime_cache(env: &super::env::WowLuaEnv) {
+    let mut lua = env.rilua_mut();
+    super::script_helpers::reconcile_on_update_runtime_cache_if_dirty(&mut lua);
+}
+
+fn visible_on_update_frame_ids(env: &super::env::WowLuaEnv) -> Vec<u64> {
+    let mut sim = env.state().borrow_mut();
+    if sim.visible_on_update_cache.is_none() {
+        let mut visible = sim
+            .on_update_frames
+            .iter()
+            .copied()
+            .filter(|&id| sim.widgets.is_ancestor_visible(id))
+            .collect::<Vec<_>>();
+        visible.sort_unstable();
+        sim.visible_on_update_cache = Some(visible);
+    }
+    sim.visible_on_update_cache.clone().unwrap_or_default()
+}
+
+fn dispatch_on_update_handlers(
+    env: &super::env::WowLuaEnv,
+    frame_ids: &[u64],
+    elapsed: f64,
+) -> crate::Result<()> {
+    let mut lua = env.rilua_mut();
+    super::script_helpers::dispatch_on_update(&mut lua, frame_ids, elapsed)?;
+    Ok(())
+}
+
+fn advance_animation_groups(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<()> {
+    crate::lua_api::frame::methods::button_anchor_hierarchy::advance_animation_groups(env, elapsed)
+}
+
+fn fire_on_post_update_handlers(
+    env: &super::env::WowLuaEnv,
+    frame_ids: &[u64],
+    elapsed: f64,
+) -> crate::Result<()> {
+    for frame_id in frame_ids {
+        env.fire_script_handler(*frame_id, "OnPostUpdate", vec![rilua::Val::Num(elapsed)])?;
+    }
+    Ok(())
+}
+
+fn finalize_frame_metrics(env: &super::env::WowLuaEnv, elapsed: f64) {
+    env.finalize_frame_metrics(elapsed * 1000.0);
 }

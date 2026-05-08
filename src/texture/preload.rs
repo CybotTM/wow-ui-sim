@@ -1,6 +1,54 @@
 use super::TextureManager;
 use std::collections::HashSet;
 
+const GAME_HUD_TEXTURE_FILES: &[&str] = &[
+    r"Interface\hud\uiminimap",
+    r"Interface\hud\uiminimapbackground",
+    r"Interface\hud\uiminimapvertical",
+    r"Interface\hud\uiactionbar",
+    r"Interface\hud\uiactionbarvertical",
+    r"Interface\hud\uimicromenu2x",
+    r"Interface\hud\uiunitframe",
+    r"Interface\hud\uipartyframe",
+    r"Interface\hud\uigroupmanager",
+    r"Interface\hud\uicalendar",
+    r"Interface\hud\uipartyframeportraitonmanamask",
+    r"Interface\hud\uipartyframeportraitonhealthmask",
+    r"Interface\hud\uiunitframeplayerportraitmask",
+    r"Interface\hud\uiunitframeplayermanamask",
+    r"Interface\hud\uiunitframeplayerhealthmask",
+    r"Interface\questframe\questtracker",
+    r"Interface\questframe\questimportantmapicons",
+    r"Interface\questframe\questinprogressicons",
+    r"Interface\chatframe\chatframe",
+    r"Interface\ChatFrame\ChatFrameBackground",
+    r"Interface\ChatFrame\UI-ChatFrame-BorderTop",
+    r"Interface\ChatFrame\UI-ChatFrame-BorderLeft",
+    r"Interface\ChatFrame\UI-ChatFrame-BorderCorner",
+    r"Interface\ChatFrame\ChatFrameTab-BGMid",
+    r"Interface\ChatFrame\ChatFrameTab-BGRight",
+    r"Interface\ChatFrame\ChatFrameTab-BGLeft",
+    r"Interface\containerframe\bagslots2x",
+    r"Interface\buttons\minimalscrollbarproportional",
+    r"Interface\masks\circlemask",
+    r"Interface\AddOns\SimCommands\textures\minimap-placeholder",
+];
+
+const PLAYER_SPELLS_RUNTIME_TEXTURE_FILES: &[&str] = &[
+    r"Interface\Buttons\UI-Panel-Button-Up",
+    r"Interface\FrameGeneral\UI-Background-Rock",
+    r"Interface\TutorialFrame\UI-TutorialFrame-CalloutGlow",
+];
+
+const PLAYER_SPELLS_RUNTIME_TEXTURE_PREFIXES: &[&str] = &[
+    r"Interface\talentframe\",
+    r"Interface\framegeneral\uiframe",
+    r"Interface\common\commondropdown",
+    r"Interface\common\commonmask",
+    r"Interface\helpframe\newplayerexperienceparts",
+    r"Interface\tutorialframe\",
+];
+
 impl TextureManager {
     /// Pre-load talent icon textures for the given tree to avoid on-demand lag.
     pub fn preload_talent_textures(&mut self, tree_id: u32) {
@@ -51,92 +99,19 @@ impl TextureManager {
     /// Pre-load common game HUD atlases that otherwise cause large first-use
     /// stalls when PlayerSpells and other game UI panels open.
     pub fn preload_game_hud_textures(&mut self) {
-        const FILES: &[&str] = &[
-            r"Interface\hud\uiminimap",
-            r"Interface\hud\uiminimapbackground",
-            r"Interface\hud\uiminimapvertical",
-            r"Interface\hud\uiactionbar",
-            r"Interface\hud\uiactionbarvertical",
-            r"Interface\hud\uimicromenu2x",
-            r"Interface\hud\uiunitframe",
-            r"Interface\hud\uipartyframe",
-            r"Interface\hud\uigroupmanager",
-            r"Interface\hud\uicalendar",
-            r"Interface\hud\uipartyframeportraitonmanamask",
-            r"Interface\hud\uipartyframeportraitonhealthmask",
-            r"Interface\hud\uiunitframeplayerportraitmask",
-            r"Interface\hud\uiunitframeplayermanamask",
-            r"Interface\hud\uiunitframeplayerhealthmask",
-            r"Interface\questframe\questtracker",
-            r"Interface\questframe\questimportantmapicons",
-            r"Interface\questframe\questinprogressicons",
-            r"Interface\chatframe\chatframe",
-            r"Interface\ChatFrame\ChatFrameBackground",
-            r"Interface\ChatFrame\UI-ChatFrame-BorderTop",
-            r"Interface\ChatFrame\UI-ChatFrame-BorderLeft",
-            r"Interface\ChatFrame\UI-ChatFrame-BorderCorner",
-            r"Interface\ChatFrame\ChatFrameTab-BGMid",
-            r"Interface\ChatFrame\ChatFrameTab-BGRight",
-            r"Interface\ChatFrame\ChatFrameTab-BGLeft",
-            r"Interface\containerframe\bagslots2x",
-            r"Interface\buttons\minimalscrollbarproportional",
-            r"Interface\masks\circlemask",
-            r"Interface\AddOns\SimCommands\textures\minimap-placeholder",
-        ];
-
-        let mut loaded = 0usize;
-        for file in FILES {
-            if self.load(file).is_some() {
-                loaded += 1;
-            }
-        }
+        let loaded = self.preload_texture_paths(GAME_HUD_TEXTURE_FILES.iter().copied());
         crate::logging::eprintln_elapsed(&format!(
             "[TexMgr] Preloaded {} / {} game HUD textures",
             loaded,
-            FILES.len()
+            GAME_HUD_TEXTURE_FILES.len()
         ));
     }
 
     /// Pre-load non-glue UI atlases that are heavily used when opening the
     /// PlayerSpells / talents panels in the live renderer.
     pub fn preload_playerspells_runtime_textures(&mut self) {
-        use crate::atlas::ATLAS_DB;
-        use std::collections::HashSet;
-
-        const FILES: &[&str] = &[
-            r"Interface\Buttons\UI-Panel-Button-Up",
-            r"Interface\FrameGeneral\UI-Background-Rock",
-            r"Interface\TutorialFrame\UI-TutorialFrame-CalloutGlow",
-        ];
-        const PREFIXES: &[&str] = &[
-            r"Interface\talentframe\",
-            r"Interface\framegeneral\uiframe",
-            r"Interface\common\commondropdown",
-            r"Interface\common\commonmask",
-            r"Interface\helpframe\newplayerexperienceparts",
-            r"Interface\tutorialframe\",
-        ];
-
-        let mut files = HashSet::new();
-        for path in FILES {
-            files.insert(*path);
-        }
-        for (_, info) in ATLAS_DB.entries() {
-            if PREFIXES.iter().any(|prefix| {
-                info.file
-                    .to_ascii_lowercase()
-                    .starts_with(&prefix.to_ascii_lowercase())
-            }) {
-                files.insert(info.file);
-            }
-        }
-
-        let mut loaded = 0usize;
-        for file in &files {
-            if self.load(file).is_some() {
-                loaded += 1;
-            }
-        }
+        let files = playerspells_runtime_texture_files();
+        let loaded = self.preload_texture_paths(files.iter().copied());
         crate::logging::eprintln_elapsed(&format!(
             "[TexMgr] Preloaded {} / {} PlayerSpells runtime textures",
             loaded,
@@ -168,6 +143,38 @@ impl TextureManager {
         }
         loaded
     }
+
+    fn preload_texture_paths<'a>(&mut self, files: impl IntoIterator<Item = &'a str>) -> usize {
+        let mut loaded = 0usize;
+        for file in files {
+            if self.load(file).is_some() {
+                loaded += 1;
+            }
+        }
+        loaded
+    }
+}
+
+fn playerspells_runtime_texture_files() -> HashSet<&'static str> {
+    use crate::atlas::ATLAS_DB;
+
+    let mut files = PLAYER_SPELLS_RUNTIME_TEXTURE_FILES
+        .iter()
+        .copied()
+        .collect::<HashSet<_>>();
+    for (_, info) in ATLAS_DB.entries() {
+        if should_preload_playerspells_runtime_file(info.file) {
+            files.insert(info.file);
+        }
+    }
+    files
+}
+
+fn should_preload_playerspells_runtime_file(file: &str) -> bool {
+    let lowercase_file = file.to_ascii_lowercase();
+    PLAYER_SPELLS_RUNTIME_TEXTURE_PREFIXES
+        .iter()
+        .any(|prefix| lowercase_file.starts_with(&prefix.to_ascii_lowercase()))
 }
 
 fn talent_icon_file_data_ids(tree_id: u32) -> Option<HashSet<u32>> {

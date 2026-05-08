@@ -250,7 +250,7 @@ fn test_set_party_leader_to_party_member_updates_group_leader_queries() {
 }
 
 #[test]
-fn test_set_party_size_defaults_leadership_to_party1() {
+fn test_set_party_size_defaults_leadership_to_player() {
     let env = env();
     let (player_leads, party1_leads): (bool, bool) = env
         .eval(
@@ -261,10 +261,13 @@ fn test_set_party_size_defaults_leadership_to_party1() {
         )
         .unwrap();
     assert!(
-        !player_leads,
-        "SetPartySize should default the leader to party1, not the player"
+        player_leads,
+        "SetPartySize should default the local player as leader"
     );
-    assert!(party1_leads, "party1 should lead after SetPartySize");
+    assert!(
+        !party1_leads,
+        "party1 should only lead after explicit A_Admin.SetPartyLeader(1)"
+    );
 }
 
 #[test]

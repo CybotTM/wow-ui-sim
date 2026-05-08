@@ -19,6 +19,23 @@ fn c_equipment_set_count_defaults_to_zero() {
 }
 
 #[test]
+fn get_equipment_set_info_returns_saved_set_summary() {
+    let env = support::env();
+    let info: (String, i64, i64, bool, i64, i64, i64, i64, i64) = env
+        .eval(
+            "C_EquipmentSet.CreateEquipmentSet('Default Gear', '12345'); \
+             local setID = C_EquipmentSet.GetEquipmentSetID('Default Gear'); \
+             return C_EquipmentSet.GetEquipmentSetInfo(setID)",
+        )
+        .unwrap();
+
+    assert_eq!(
+        info,
+        ("Default Gear".to_string(), 12345, 1, false, 15, 0, 15, 0, 0,)
+    );
+}
+
+#[test]
 fn use_equipment_set_updates_equipped_inventory_items() {
     let env = support::env();
     let equipped_id: i64 = env

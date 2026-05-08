@@ -11,19 +11,17 @@
 //! `is_registerable_event` = only registerable (for RegisterEvent).
 
 use super::valid_events_a::EVENTS_A;
+use super::valid_events_a_tail::EVENTS_A_TAIL;
 use super::valid_events_b::EVENTS_B;
 use super::valid_events_c::EVENTS_C;
 
 /// Check if an event can be passed to `RegisterEvent()`.
 pub fn is_registerable_event(name: &str) -> bool {
     let first = name.as_bytes().first().copied().unwrap_or(0);
-    let chunk = if first <= b'G' {
-        EVENTS_A
-    } else if first <= b'P' {
-        EVENTS_B
-    } else {
-        EVENTS_C
-    };
+    if first <= b'G' {
+        return EVENTS_A.contains(&name) || EVENTS_A_TAIL.contains(&name);
+    }
+    let chunk = if first <= b'P' { EVENTS_B } else { EVENTS_C };
     chunk.contains(&name)
 }
 

@@ -482,71 +482,63 @@ fn register_methods(
 }
 
 fn register_animation_timing(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetDuration",
-        animations::animation_set_duration,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetDuration",
-        animations::animation_get_duration,
-    )?;
-    table_set_rust_fn_static(state, table, "SetOrder", animations::animation_set_order)?;
-    table_set_rust_fn_static(state, table, "GetOrder", animations::animation_get_order)?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetStartDelay",
-        animations::animation_set_start_delay,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetStartDelay",
-        animations::animation_get_start_delay,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetEndDelay",
-        animations::animation_set_end_delay,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetEndDelay",
-        animations::animation_get_end_delay,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetElapsed",
-        animations::animation_get_elapsed,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetProgress",
-        animations::animation_get_progress,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetSmoothProgress",
-        animations::animation_get_smooth_progress,
-    )?;
-    table_set_rust_fn_static(state, table, "IsStopped", animations::animation_is_stopped)?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "IsDelaying",
-        animations::animation_is_delaying,
-    )?;
-    Ok(())
+    register_methods(state, table, ANIMATION_TIMING_METHODS)
 }
+
+const ANIMATION_TIMING_METHODS: &[MethodBinding] = &[
+    MethodBinding {
+        name: "SetDuration",
+        func: animations::animation_set_duration,
+    },
+    MethodBinding {
+        name: "GetDuration",
+        func: animations::animation_get_duration,
+    },
+    MethodBinding {
+        name: "SetOrder",
+        func: animations::animation_set_order,
+    },
+    MethodBinding {
+        name: "GetOrder",
+        func: animations::animation_get_order,
+    },
+    MethodBinding {
+        name: "SetStartDelay",
+        func: animations::animation_set_start_delay,
+    },
+    MethodBinding {
+        name: "GetStartDelay",
+        func: animations::animation_get_start_delay,
+    },
+    MethodBinding {
+        name: "SetEndDelay",
+        func: animations::animation_set_end_delay,
+    },
+    MethodBinding {
+        name: "GetEndDelay",
+        func: animations::animation_get_end_delay,
+    },
+    MethodBinding {
+        name: "GetElapsed",
+        func: animations::animation_get_elapsed,
+    },
+    MethodBinding {
+        name: "GetProgress",
+        func: animations::animation_get_progress,
+    },
+    MethodBinding {
+        name: "GetSmoothProgress",
+        func: animations::animation_get_smooth_progress,
+    },
+    MethodBinding {
+        name: "IsStopped",
+        func: animations::animation_is_stopped,
+    },
+    MethodBinding {
+        name: "IsDelaying",
+        func: animations::animation_is_delaying,
+    },
+];
 
 fn register_animation_config(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     for name in [
@@ -580,40 +572,39 @@ fn register_animation_config(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
 }
 
 fn register_animation_target(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(state, table, "GetTarget", animations::get_animation_target)?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "GetRegionParent",
-        animations::get_region_parent,
-    )?;
-    table_set_rust_fn_static(state, table, "SetTarget", animations::animation_config_noop)?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetChildKey",
-        animations::set_animation_child_key,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetTargetName",
-        animations::animation_config_noop,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetTargetKey",
-        animations::animation_config_noop,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table,
-        "SetTargetParent",
-        animations::animation_config_noop,
-    )?;
-    Ok(())
+    register_methods(state, table, ANIMATION_TARGET_METHODS)
 }
+
+const ANIMATION_TARGET_METHODS: &[MethodBinding] = &[
+    MethodBinding {
+        name: "GetTarget",
+        func: animations::get_animation_target,
+    },
+    MethodBinding {
+        name: "GetRegionParent",
+        func: animations::get_region_parent,
+    },
+    MethodBinding {
+        name: "SetTarget",
+        func: animations::animation_config_noop,
+    },
+    MethodBinding {
+        name: "SetChildKey",
+        func: animations::set_animation_child_key,
+    },
+    MethodBinding {
+        name: "SetTargetName",
+        func: animations::animation_config_noop,
+    },
+    MethodBinding {
+        name: "SetTargetKey",
+        func: animations::animation_config_noop,
+    },
+    MethodBinding {
+        name: "SetTargetParent",
+        func: animations::animation_config_noop,
+    },
+];
 
 fn register_animation_flipbook(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     register_flipbook_grid(state, table)?;

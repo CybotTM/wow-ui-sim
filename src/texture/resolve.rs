@@ -1,9 +1,11 @@
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
+    path::{Path, PathBuf},
+    sync::Arc,
 };
+
+use crate::paths::find_case_insensitive;
 
 use super::{TextureData, TextureManager, normalize_wow_path};
 
@@ -77,7 +79,7 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
         .flat_map(|b| {
             std::iter::once(b.clone()).chain(candidates.iter().map(move |ext| format!("{b}.{ext}")))
         })
-        .find_map(|p| resolver.lookup_path(&p).map(|fdid| (fdid, p)))?;
+        .find_map(|p| lookup_casc_path(&resolver, &p))?;
 
     let extract_dir = casc_extract_dir()?;
     let safe_relative = listfile_path.replace('\\', "/");
@@ -91,6 +93,20 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
     }
 
     resolver.ensure_cached(fdid, &out_path)
+}
+
+#[cfg(feature = "casc")]
+fn lookup_casc_path(
+    resolver: &asset_resolver::CascListfileResolver,
+    path: &str,
+) -> Option<(u32, String)> {
+    crate::limited_listfile::lookup_entry(path)
+        .map(|entry| (entry.fdid, entry.path.to_string()))
+        .or_else(|| {
+            resolver
+                .lookup_path(path)
+                .map(|fdid| (fdid, path.to_string()))
+        })
 }
 
 #[cfg(not(feature = "casc"))]
@@ -362,19 +378,6 @@ fn find_case_insensitive_file(dir: &Path, name: &str) -> Option<PathBuf> {
 fn find_case_insensitive_dir(dir: &Path, name: &str) -> Option<PathBuf> {
     let entry = find_case_insensitive(dir, name)?;
     entry.is_dir().then_some(entry)
-}
-
-/// Find a directory entry case-insensitively.
-fn find_case_insensitive(dir: &Path, name: &str) -> Option<PathBuf> {
-    let name_lower = name.to_lowercase();
-    if let Ok(entries) = std::fs::read_dir(dir) {
-        for entry in entries.flatten() {
-            if entry.file_name().to_string_lossy().to_lowercase() == name_lower {
-                return Some(entry.path());
-            }
-        }
-    }
-    None
 }
 
 /// Extract a sub-region from texture data.

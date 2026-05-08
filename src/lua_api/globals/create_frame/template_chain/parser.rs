@@ -131,20 +131,64 @@ fn parse_global_tooltip_set_owner_then_function_text<'a>(
     stmt: &'a str,
 ) -> Option<FastHandlerRef<'a>> {
     let (first_stmt, second_stmt) = stmt.split_once(';')?;
+    let (target_path, method_name, arg) = parse_set_owner_self_string_arg(first_stmt.trim())?;
+    let second_ref = parse_matching_function_result_set_text(second_stmt, target_path)?;
+    Some(FastHandlerRef::Sequence2(Box::new((
+        FastHandlerRef::GlobalMethodWithSelfStringArg {
+            target_path,
+            method_name,
+            arg,
+        },
+        second_ref,
+    ))))
+}
+
+fn parse_set_owner_self_string_arg<'a>(stmt: &'a str) -> Option<(&'a str, &'a str, &'a str)> {
     let FastHandlerRef::GlobalMethodWithSelfStringArg {
         target_path,
         method_name,
         arg,
-    } = parse_inline_single_fast_handler(first_stmt.trim())?
+    } = parse_inline_single_fast_handler(stmt)?
     else {
         return None;
     };
-    if method_name != "SetOwner" {
-        return None;
+    (method_name == "SetOwner").then_some((target_path, method_name, arg))
+}
+
+fn parse_matching_function_result_set_text<'a>(
+    stmt: &'a str,
+    target_path: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    let stmt = stmt.trim().trim_end_matches(';').trim();
+    match parse_inline_single_fast_handler(stmt)? {
+        FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs { .. } => {
+            accept_string_string_function_result_set_text(stmt, target_path)
+        }
+        FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs { .. } => {
+            accept_global_string_function_result_set_text(stmt, target_path)
+        }
+        _ => None,
     }
-    let second_stmt = second_stmt.trim().trim_end_matches(';').trim();
-    let second_ref = parse_inline_single_fast_handler(second_stmt)?;
-    let second_ref = match second_ref {
+}
+
+fn accept_string_string_function_result_set_text<'a>(
+    stmt: &'a str,
+    target_path: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    let FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
+        target_path: text_target_path,
+        method_name: text_method_name,
+        function_name,
+        first,
+        second,
+        third,
+        fourth,
+        fifth,
+    } = parse_inline_single_fast_handler(stmt)?
+    else {
+        return None;
+    };
+    is_matching_set_text(text_target_path, text_method_name, target_path).then_some(
         FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
             target_path: text_target_path,
             method_name: text_method_name,
@@ -154,18 +198,28 @@ fn parse_global_tooltip_set_owner_then_function_text<'a>(
             third,
             fourth,
             fifth,
-        } if text_target_path == target_path && text_method_name == "SetText" => {
-            FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
-                target_path: text_target_path,
-                method_name: text_method_name,
-                function_name,
-                first,
-                second,
-                third,
-                fourth,
-                fifth,
-            }
-        }
+        },
+    )
+}
+
+fn accept_global_string_function_result_set_text<'a>(
+    stmt: &'a str,
+    target_path: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    let FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs {
+        target_path: text_target_path,
+        method_name: text_method_name,
+        function_name,
+        first_arg_path,
+        second,
+        third,
+        fourth,
+        fifth,
+    } = parse_inline_single_fast_handler(stmt)?
+    else {
+        return None;
+    };
+    is_matching_set_text(text_target_path, text_method_name, target_path).then_some(
         FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs {
             target_path: text_target_path,
             method_name: text_method_name,
@@ -175,28 +229,12 @@ fn parse_global_tooltip_set_owner_then_function_text<'a>(
             third,
             fourth,
             fifth,
-        } if text_target_path == target_path && text_method_name == "SetText" => {
-            FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs {
-                target_path: text_target_path,
-                method_name: text_method_name,
-                function_name,
-                first_arg_path,
-                second,
-                third,
-                fourth,
-                fifth,
-            }
-        }
-        _ => return None,
-    };
-    Some(FastHandlerRef::Sequence2(Box::new((
-        FastHandlerRef::GlobalMethodWithSelfStringArg {
-            target_path,
-            method_name,
-            arg,
         },
-        second_ref,
-    ))))
+    )
+}
+
+fn is_matching_set_text(text_target_path: &str, text_method_name: &str, target_path: &str) -> bool {
+    text_target_path == target_path && text_method_name == "SetText"
 }
 
 fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {

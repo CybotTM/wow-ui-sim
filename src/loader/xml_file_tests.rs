@@ -22,7 +22,7 @@ fn specialized_widget_types() {
     );
     assert_eq!(
         resolve(&XmlElement::ItemButton(f.clone())),
-        Some(("Button", None))
+        Some(("Button", Some("ItemButton")))
     );
     assert_eq!(
         resolve(&XmlElement::CheckButton(f.clone())),
@@ -34,7 +34,7 @@ fn specialized_widget_types() {
     );
     assert_eq!(
         resolve(&XmlElement::EventEditBox(f.clone())),
-        Some(("EditBox", None))
+        Some(("EditBox", Some("EventEditBox")))
     );
     assert_eq!(
         resolve(&XmlElement::ScrollFrame(f.clone())),
@@ -42,7 +42,7 @@ fn specialized_widget_types() {
     );
     assert_eq!(
         resolve(&XmlElement::EventScrollFrame(f.clone())),
-        Some(("ScrollFrame", None))
+        Some(("ScrollFrame", Some("EventScrollFrame")))
     );
     assert_eq!(
         resolve(&XmlElement::Slider(f.clone())),
@@ -110,6 +110,7 @@ fn player_model_variants_all_map_to_player_model() {
 #[test]
 fn button_intrinsic_variants() {
     let f = default_frame();
+    // DropDownToggleButton and EventButton map to plain Button (no intrinsic) in XmlElement
     assert_eq!(
         resolve(&XmlElement::DropDownToggleButton(f.clone())),
         Some(("Button", None))
@@ -118,10 +119,12 @@ fn button_intrinsic_variants() {
         resolve(&XmlElement::EventButton(f.clone())),
         Some(("Button", None))
     );
+    // DropdownButton has intrinsic
     assert_eq!(
         resolve(&XmlElement::DropdownButton(f.clone())),
         Some(("Button", Some("DropdownButton")))
     );
+    // ContainedAlertFrame has intrinsic
     assert_eq!(
         resolve(&XmlElement::ContainedAlertFrame(f.clone())),
         Some(("Button", Some("ContainedAlertFrame")))
@@ -199,17 +202,24 @@ fn non_frame_elements_return_none() {
     assert_eq!(resolve(&XmlElement::Unknown), None);
 }
 
+/// Document the differences between XmlElement and FrameElement mappings.
+/// ItemButton resolves as a Button with the ItemButton intrinsic base here,
+/// while FrameElement preserves the raw alias and inherits are resolved later.
+/// DropDownToggleButton/EventButton have no intrinsic here but do in FrameElement.
 #[test]
 fn xml_vs_frame_element_divergences() {
     let f = default_frame();
+    // XmlElement::ItemButton -> ("Button", Some("ItemButton"))
     assert_eq!(
         resolve(&XmlElement::ItemButton(f.clone())),
-        Some(("Button", None))
+        Some(("Button", Some("ItemButton")))
     );
+    // XmlElement::DropDownToggleButton -> ("Button", None) — no intrinsic
     assert_eq!(
         resolve(&XmlElement::DropDownToggleButton(f.clone())),
         Some(("Button", None))
     );
+    // XmlElement::EventButton -> ("Button", None) — no intrinsic
     assert_eq!(
         resolve(&XmlElement::EventButton(f.clone())),
         Some(("Button", None))

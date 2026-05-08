@@ -105,6 +105,23 @@ pub struct Anchor {
     pub y_offset: f32,
 }
 
+impl Anchor {
+    pub fn from_relative_id(
+        point: AnchorPoint,
+        relative_to_id: Option<usize>,
+        relative_point: AnchorPoint,
+    ) -> Self {
+        Self {
+            point,
+            relative_to: None,
+            relative_to_id,
+            relative_point,
+            x_offset: 0.0,
+            y_offset: 0.0,
+        }
+    }
+}
+
 impl Default for Anchor {
     fn default() -> Self {
         Self {

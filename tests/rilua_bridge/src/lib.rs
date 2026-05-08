@@ -21,27 +21,11 @@ use crate::lua_bridge::{
     MultiValue as BridgeMultiValue, TableBuilder, create_frame_table,
 };
 pub use benchmark::{FieldAccessBenchResult, benchmark_table_field_access};
+pub(crate) use lua_bridge::stack_val;
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-pub(crate) fn abs_index(state: &LuaState, index: i32) -> usize {
-    if index > 0 {
-        state.base + (index as usize) - 1
-    } else {
-        (state.top as isize + index as isize) as usize
-    }
-}
-
-pub(crate) fn stack_val(state: &LuaState, index: i32) -> Val {
-    let abs = abs_index(state, index);
-    if abs < state.stack.len() && abs < state.top {
-        state.stack[abs]
-    } else {
-        Val::Nil
-    }
-}
 
 pub(crate) fn get_string(state: &LuaState, index: i32) -> LuaResult<String> {
     match stack_val(state, index) {

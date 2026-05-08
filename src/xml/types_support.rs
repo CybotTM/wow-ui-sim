@@ -1,6 +1,7 @@
 use serde::Deserialize;
 
-use super::types_elements::{AnimationGroupXml, FrameElement};
+use super::types_animation::AnimationGroupXml;
+use super::types_elements::FrameElement;
 
 /// Animations container.
 #[derive(Debug, Deserialize, Default, Clone)]

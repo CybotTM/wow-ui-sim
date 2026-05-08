@@ -67,24 +67,41 @@ fn can_player_use_lfd(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_lfg_category_info(state: &mut LuaState) -> LuaResult<u32> {
     let category_id = i32::from_stack(state, 1)?;
-    let entry = {
-        let sim = borrow_state(state)?;
-        sim.lfg_category_info.get(&category_id).cloned()
-    };
-    let Some(info) = entry else {
+    let info = lookup_lfg_category_info(state, category_id)?;
+    push_lfg_category_info(state, info);
+    Ok(1)
+}
+
+fn lookup_lfg_category_info(
+    state: &LuaState,
+    category_id: i32,
+) -> LuaResult<Option<LfgCategoryInfo>> {
+    let sim = borrow_state(state)?;
+    Ok(sim.lfg_category_info.get(&category_id).cloned())
+}
+
+fn push_lfg_category_info(state: &mut LuaState, info: Option<LfgCategoryInfo>) {
+    let Some(info) = info else {
         state.push(Val::Nil);
-        return Ok(1);
+        return;
     };
     let t = create_table(state);
     populate_lfg_category_table(state, t, &info);
     state.push(t);
-    Ok(1)
 }
 
 fn populate_lfg_category_table(state: &mut LuaState, table: Val, info: &LfgCategoryInfo) {
+    populate_lfg_category_identity_fields(state, table.clone(), info);
+    populate_lfg_category_flag_fields(state, table, info);
+}
+
+fn populate_lfg_category_identity_fields(state: &mut LuaState, table: Val, info: &LfgCategoryInfo) {
     let name_val = create_string(state, &info.name);
     table_set(state, table.clone(), "name", name_val);
     table_set(state, table.clone(), "order", Val::Num(info.order as f64));
+}
+
+fn populate_lfg_category_flag_fields(state: &mut LuaState, table: Val, info: &LfgCategoryInfo) {
     table_set(
         state,
         table.clone(),

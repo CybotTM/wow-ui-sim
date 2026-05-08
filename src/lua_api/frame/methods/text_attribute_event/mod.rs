@@ -125,9 +125,20 @@ fn register_text_scaling(state: &mut LuaState, table: GcRef<Table>) -> LuaResult
 }
 
 fn register_styled_text(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_text_colors(state, table)?;
+    register_text_hyperlinks(state, table)?;
+    register_text_wrap_style(state, table)?;
+    Ok(())
+}
+
+fn register_text_colors(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "SetTextColor", text::set_text_color)?;
     table_set_rust_fn_static(state, table, "GetTextColor", text::get_text_color)?;
     table_set_rust_fn_static(state, table, "SetFixedColor", text::set_fixed_color)?;
+    Ok(())
+}
+
+fn register_text_hyperlinks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table,
@@ -152,6 +163,10 @@ fn register_styled_text(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<
         "GetHyperlinkFormat",
         text::get_hyperlink_format,
     )?;
+    Ok(())
+}
+
+fn register_text_wrap_style(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table,
@@ -406,6 +421,14 @@ fn register_event_callback_listeners(state: &mut LuaState, table: GcRef<Table>) 
 }
 
 fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_callback_registry_methods(state, table)?;
+    register_menu_selection_callbacks(state, table)?;
+    register_menu_default_callbacks(state, table)?;
+    register_menu_interaction_callbacks(state, table)?;
+    Ok(())
+}
+
+fn register_callback_registry_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table,
@@ -430,6 +453,16 @@ fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> L
         "TriggerEvent",
         callbacks::trigger_callback_event,
     )?;
+    Ok(())
+}
+
+fn register_menu_selection_callbacks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_menu_setup_callbacks(state, table)?;
+    register_menu_selection_text_callbacks(state, table)?;
+    Ok(())
+}
+
+fn register_menu_setup_callbacks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "SetupMenu", callbacks::setup_menu)?;
     table_set_rust_fn_static(state, table, "SetDefaultText", callbacks::set_default_text)?;
     table_set_rust_fn_static(
@@ -450,6 +483,13 @@ fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> L
         "EnableRegenerateOnResponse",
         callbacks::enable_regenerate_on_response,
     )?;
+    Ok(())
+}
+
+fn register_menu_selection_text_callbacks(
+    state: &mut LuaState,
+    table: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table,
@@ -462,6 +502,10 @@ fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> L
         "UpdateToMenuSelections",
         callbacks::update_to_menu_selections,
     )?;
+    Ok(())
+}
+
+fn register_menu_default_callbacks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table,
@@ -481,6 +525,10 @@ fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> L
         callbacks::set_update_callback,
     )?;
     table_set_rust_fn_static(state, table, "NotifyUpdate", callbacks::notify_update)?;
+    Ok(())
+}
+
+fn register_menu_interaction_callbacks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table,
