@@ -1,9 +1,7 @@
 Button:ClearScripts
-Button:GetTextHeight
 Button:SetATTTooltip
 Button:StartATTCoroutine
 CheckButton:ClearScripts
-CheckButton:GetTextHeight
 CheckButton:SetATTTooltip
 ColorSelect:ClearScripts
 Cooldown:ClearScripts
@@ -19,7 +17,6 @@ FontString:GetFieldSize
 FontString:GetScaleAnimationMode
 FontString:GetWrappedWidth
 FontString:OnColorsUpdated
-FontString:SetFixedColor
 FontString:SetScaleAnimationMode
 FontString:SetVertexColorFromBoolean
 Frame:ClearScripts
@@ -33,7 +30,6 @@ Model:GetModelDrawLayer
 Model:GetViewTranslation
 PlayerModel:ClearFog
 PlayerModel:ClearScripts
-PlayerModel:FreezeAnimation
 PlayerModel:GetModelDrawLayer
 PlayerModel:GetViewTranslation
 PlayerModel:SetBarberShopAlternateForm

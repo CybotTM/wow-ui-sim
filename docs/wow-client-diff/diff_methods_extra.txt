@@ -21,6 +21,7 @@ Button:AttachFontString
 Button:AttachTexture
 Button:BackFillMessage
 Button:CalculateAction
+Button:CallMethod
 Button:CanNonSpaceWrap
 Button:CanSetUnit
 Button:CanWordWrap
@@ -32,6 +33,7 @@ Button:ClearHistory
 Button:ClearLines
 Button:ClearModel
 Button:ClearPadding
+Button:ClearScene
 Button:ClearText
 Button:ClearTextureSlice
 Button:ClearTransform
@@ -49,7 +51,9 @@ Button:FadeOut
 Button:FinalizeUnits
 Button:Finish
 Button:ForceUpdateTimers
+Button:FreezeAnimation
 Button:GetActorAtIndex
+Button:GetActorByTag
 Button:GetAdditionalRegions
 Button:GetAltArrowKeyMode
 Button:GetAnchorType
@@ -256,6 +260,7 @@ Button:HasCustomCamera
 Button:HasFocus
 Button:HasMessageByID
 Button:HasText
+Button:HasTrackableSource
 Button:HighlightText
 Button:Insert
 Button:IsAllowOverlappedModels
@@ -269,6 +274,7 @@ Button:IsDone
 Button:IsDown
 Button:IsDownOver
 Button:IsDraggingThumb
+Button:IsGeoReady
 Button:IsInIMECompositionMode
 Button:IsInterpolating
 Button:IsLightVisible
@@ -286,6 +292,7 @@ Button:IsReverse
 Button:IsScrollAllowed
 Button:IsSecureText
 Button:IsSetToFinalAlpha
+Button:IsSlotAllowed
 Button:IsSnappingToPixelGrid
 Button:IsStatusBarDesaturated
 Button:IsStopped
@@ -310,6 +317,7 @@ Button:RefreshCamera
 Button:RefreshUnit
 Button:RegisterBackgroundTexture
 Button:RegisterCallback
+Button:RegisterFontString
 Button:RegisterFontStrings
 Button:RegisterForWidgetSet
 Button:RegisterFrames
@@ -423,6 +431,7 @@ Button:SetFading
 Button:SetFillAlpha
 Button:SetFillStyle
 Button:SetFillTexture
+Button:SetFixedColor
 Button:SetFixedSize
 Button:SetFlipBookColumns
 Button:SetFlipBookFrameHeight
@@ -489,6 +498,7 @@ Button:SetMinimumCountdownDuration
 Button:SetMinimumWidth
 Button:SetModel
 Button:SetModelAlpha
+Button:SetModelByCreatureDisplayID
 Button:SetModelDrawLayer
 Button:SetModelScale
 Button:SetMountBySpellID
@@ -497,6 +507,7 @@ Button:SetNonSpaceWrap
 Button:SetNumber
 Button:SetNumeric
 Button:SetNumericFullRange
+Button:SetObeyHideInTransmogFlag
 Button:SetObeyStepOnDrag
 Button:SetObjectTooltipPosition
 Button:SetOffset
@@ -529,6 +540,7 @@ Button:SetQuestBlobOutsideTexture
 Button:SetQuestBlobRingAlpha
 Button:SetQuestBlobRingScalar
 Button:SetQuestBlobRingTexture
+Button:SetResetCallback
 Button:SetReverse
 Button:SetReverseFill
 Button:SetRightTexture
@@ -618,6 +630,8 @@ Button:SetUpdateCallback
 Button:SetUseAuraDisplayTime
 Button:SetUseCircularEdge
 Button:SetUseGBuffer
+Button:SetUseTransmogChoices
+Button:SetUseTransmogSkin
 Button:SetValue
 Button:SetValueStep
 Button:SetVertTile
@@ -641,9 +655,14 @@ Button:TransformMessages
 Button:TransitionToModelSceneID
 Button:TriggerEvent
 Button:TryApplyDefaultText
+Button:TryOn
+Button:UnRegisterEvent
+Button:Undress
+Button:UndressSlot
 Button:UnregisterCallback
 Button:UnregisterForWidgetSet
 Button:UpdateBlips
+Button:UpdateCamera
 Button:UpdateHeight
 Button:UpdateItemContextMatching
 Button:UpdateMouseOverTooltip
@@ -674,6 +693,7 @@ CheckButton:AttachFontString
 CheckButton:AttachTexture
 CheckButton:BackFillMessage
 CheckButton:CalculateAction
+CheckButton:CallMethod
 CheckButton:CanNonSpaceWrap
 CheckButton:CanSetUnit
 CheckButton:CanWordWrap
@@ -685,6 +705,7 @@ CheckButton:ClearHistory
 CheckButton:ClearLines
 CheckButton:ClearModel
 CheckButton:ClearPadding
+CheckButton:ClearScene
 CheckButton:ClearText
 CheckButton:ClearTextureSlice
 CheckButton:ClearTransform
@@ -702,7 +723,9 @@ CheckButton:FadeOut
 CheckButton:FinalizeUnits
 CheckButton:Finish
 CheckButton:ForceUpdateTimers
+CheckButton:FreezeAnimation
 CheckButton:GetActorAtIndex
+CheckButton:GetActorByTag
 CheckButton:GetAdditionalRegions
 CheckButton:GetAltArrowKeyMode
 CheckButton:GetAnchorType
@@ -906,6 +929,7 @@ CheckButton:HasCustomCamera
 CheckButton:HasFocus
 CheckButton:HasMessageByID
 CheckButton:HasText
+CheckButton:HasTrackableSource
 CheckButton:HighlightText
 CheckButton:Insert
 CheckButton:IsAllowOverlappedModels
@@ -919,6 +943,7 @@ CheckButton:IsDone
 CheckButton:IsDown
 CheckButton:IsDownOver
 CheckButton:IsDraggingThumb
+CheckButton:IsGeoReady
 CheckButton:IsInIMECompositionMode
 CheckButton:IsInterpolating
 CheckButton:IsLightVisible
@@ -936,6 +961,7 @@ CheckButton:IsReverse
 CheckButton:IsScrollAllowed
 CheckButton:IsSecureText
 CheckButton:IsSetToFinalAlpha
+CheckButton:IsSlotAllowed
 CheckButton:IsSnappingToPixelGrid
 CheckButton:IsStatusBarDesaturated
 CheckButton:IsStopped
@@ -960,6 +986,7 @@ CheckButton:RefreshCamera
 CheckButton:RefreshUnit
 CheckButton:RegisterBackgroundTexture
 CheckButton:RegisterCallback
+CheckButton:RegisterFontString
 CheckButton:RegisterFontStrings
 CheckButton:RegisterForWidgetSet
 CheckButton:RegisterFrames
@@ -1070,6 +1097,7 @@ CheckButton:SetFading
 CheckButton:SetFillAlpha
 CheckButton:SetFillStyle
 CheckButton:SetFillTexture
+CheckButton:SetFixedColor
 CheckButton:SetFixedSize
 CheckButton:SetFlipBookColumns
 CheckButton:SetFlipBookFrameHeight
@@ -1136,6 +1164,7 @@ CheckButton:SetMinimumCountdownDuration
 CheckButton:SetMinimumWidth
 CheckButton:SetModel
 CheckButton:SetModelAlpha
+CheckButton:SetModelByCreatureDisplayID
 CheckButton:SetModelDrawLayer
 CheckButton:SetModelScale
 CheckButton:SetMountBySpellID
@@ -1144,6 +1173,7 @@ CheckButton:SetNonSpaceWrap
 CheckButton:SetNumber
 CheckButton:SetNumeric
 CheckButton:SetNumericFullRange
+CheckButton:SetObeyHideInTransmogFlag
 CheckButton:SetObeyStepOnDrag
 CheckButton:SetObjectTooltipPosition
 CheckButton:SetOffset
@@ -1176,6 +1206,7 @@ CheckButton:SetQuestBlobOutsideTexture
 CheckButton:SetQuestBlobRingAlpha
 CheckButton:SetQuestBlobRingScalar
 CheckButton:SetQuestBlobRingTexture
+CheckButton:SetResetCallback
 CheckButton:SetReverse
 CheckButton:SetReverseFill
 CheckButton:SetRightTexture
@@ -1265,6 +1296,8 @@ CheckButton:SetUpdateCallback
 CheckButton:SetUseAuraDisplayTime
 CheckButton:SetUseCircularEdge
 CheckButton:SetUseGBuffer
+CheckButton:SetUseTransmogChoices
+CheckButton:SetUseTransmogSkin
 CheckButton:SetValue
 CheckButton:SetValueStep
 CheckButton:SetVertTile
@@ -1288,9 +1321,14 @@ CheckButton:TransformMessages
 CheckButton:TransitionToModelSceneID
 CheckButton:TriggerEvent
 CheckButton:TryApplyDefaultText
+CheckButton:TryOn
+CheckButton:UnRegisterEvent
+CheckButton:Undress
+CheckButton:UndressSlot
 CheckButton:UnregisterCallback
 CheckButton:UnregisterForWidgetSet
 CheckButton:UpdateBlips
+CheckButton:UpdateCamera
 CheckButton:UpdateHeight
 CheckButton:UpdateItemContextMatching
 CheckButton:UpdateMouseOverTooltip
@@ -1321,6 +1359,7 @@ ColorSelect:AttachFontString
 ColorSelect:AttachTexture
 ColorSelect:BackFillMessage
 ColorSelect:CalculateAction
+ColorSelect:CallMethod
 ColorSelect:CanNonSpaceWrap
 ColorSelect:CanSetUnit
 ColorSelect:CanWordWrap
@@ -1335,6 +1374,7 @@ ColorSelect:ClearModel
 ColorSelect:ClearNormalTexture
 ColorSelect:ClearPadding
 ColorSelect:ClearPushedTexture
+ColorSelect:ClearScene
 ColorSelect:ClearText
 ColorSelect:ClearTextureSlice
 ColorSelect:ClearTransform
@@ -1355,7 +1395,9 @@ ColorSelect:FadeOut
 ColorSelect:FinalizeUnits
 ColorSelect:Finish
 ColorSelect:ForceUpdateTimers
+ColorSelect:FreezeAnimation
 ColorSelect:GetActorAtIndex
+ColorSelect:GetActorByTag
 ColorSelect:GetAdditionalRegions
 ColorSelect:GetAltArrowKeyMode
 ColorSelect:GetAnchorType
@@ -1528,6 +1570,7 @@ ColorSelect:GetTexelSnappingBias
 ColorSelect:GetText
 ColorSelect:GetTextColor
 ColorSelect:GetTextData
+ColorSelect:GetTextHeight
 ColorSelect:GetTextInsets
 ColorSelect:GetTextScale
 ColorSelect:GetTextWidth
@@ -1566,6 +1609,7 @@ ColorSelect:HasCustomCamera
 ColorSelect:HasFocus
 ColorSelect:HasMessageByID
 ColorSelect:HasText
+ColorSelect:HasTrackableSource
 ColorSelect:HighlightText
 ColorSelect:Insert
 ColorSelect:IsAllowOverlappedModels
@@ -1580,6 +1624,7 @@ ColorSelect:IsDown
 ColorSelect:IsDownOver
 ColorSelect:IsDraggingThumb
 ColorSelect:IsEnabled
+ColorSelect:IsGeoReady
 ColorSelect:IsInIMECompositionMode
 ColorSelect:IsInterpolating
 ColorSelect:IsLightVisible
@@ -1597,6 +1642,7 @@ ColorSelect:IsReverse
 ColorSelect:IsScrollAllowed
 ColorSelect:IsSecureText
 ColorSelect:IsSetToFinalAlpha
+ColorSelect:IsSlotAllowed
 ColorSelect:IsSnappingToPixelGrid
 ColorSelect:IsStatusBarDesaturated
 ColorSelect:IsStopped
@@ -1621,6 +1667,7 @@ ColorSelect:RefreshCamera
 ColorSelect:RefreshUnit
 ColorSelect:RegisterBackgroundTexture
 ColorSelect:RegisterCallback
+ColorSelect:RegisterFontString
 ColorSelect:RegisterFontStrings
 ColorSelect:RegisterForClicks
 ColorSelect:RegisterForMouse
@@ -1732,6 +1779,7 @@ ColorSelect:SetFading
 ColorSelect:SetFillAlpha
 ColorSelect:SetFillStyle
 ColorSelect:SetFillTexture
+ColorSelect:SetFixedColor
 ColorSelect:SetFixedSize
 ColorSelect:SetFlipBookColumns
 ColorSelect:SetFlipBookFrameHeight
@@ -1803,6 +1851,7 @@ ColorSelect:SetMinimumCountdownDuration
 ColorSelect:SetMinimumWidth
 ColorSelect:SetModel
 ColorSelect:SetModelAlpha
+ColorSelect:SetModelByCreatureDisplayID
 ColorSelect:SetModelDrawLayer
 ColorSelect:SetModelScale
 ColorSelect:SetMotionScriptsWhileDisabled
@@ -1815,6 +1864,7 @@ ColorSelect:SetNormalTexture
 ColorSelect:SetNumber
 ColorSelect:SetNumeric
 ColorSelect:SetNumericFullRange
+ColorSelect:SetObeyHideInTransmogFlag
 ColorSelect:SetObeyStepOnDrag
 ColorSelect:SetObjectTooltipPosition
 ColorSelect:SetOffset
@@ -1850,6 +1900,7 @@ ColorSelect:SetQuestBlobOutsideTexture
 ColorSelect:SetQuestBlobRingAlpha
 ColorSelect:SetQuestBlobRingScalar
 ColorSelect:SetQuestBlobRingTexture
+ColorSelect:SetResetCallback
 ColorSelect:SetReverse
 ColorSelect:SetReverseFill
 ColorSelect:SetRightTexture
@@ -1940,6 +1991,8 @@ ColorSelect:SetUpdateCallback
 ColorSelect:SetUseAuraDisplayTime
 ColorSelect:SetUseCircularEdge
 ColorSelect:SetUseGBuffer
+ColorSelect:SetUseTransmogChoices
+ColorSelect:SetUseTransmogSkin
 ColorSelect:SetValue
 ColorSelect:SetValueStep
 ColorSelect:SetVertTile
@@ -1963,9 +2016,14 @@ ColorSelect:TransformMessages
 ColorSelect:TransitionToModelSceneID
 ColorSelect:TriggerEvent
 ColorSelect:TryApplyDefaultText
+ColorSelect:TryOn
+ColorSelect:UnRegisterEvent
+ColorSelect:Undress
+ColorSelect:UndressSlot
 ColorSelect:UnregisterCallback
 ColorSelect:UnregisterForWidgetSet
 ColorSelect:UpdateBlips
+ColorSelect:UpdateCamera
 ColorSelect:UpdateHeight
 ColorSelect:UpdateItemContextMatching
 ColorSelect:UpdateMouseOverTooltip
@@ -1996,6 +2054,7 @@ Cooldown:AttachFontString
 Cooldown:AttachTexture
 Cooldown:BackFillMessage
 Cooldown:CalculateAction
+Cooldown:CallMethod
 Cooldown:CanNonSpaceWrap
 Cooldown:CanSetUnit
 Cooldown:CanWordWrap
@@ -2010,6 +2069,7 @@ Cooldown:ClearModel
 Cooldown:ClearNormalTexture
 Cooldown:ClearPadding
 Cooldown:ClearPushedTexture
+Cooldown:ClearScene
 Cooldown:ClearText
 Cooldown:ClearTextureSlice
 Cooldown:ClearTransform
@@ -2030,7 +2090,9 @@ Cooldown:FadeOut
 Cooldown:FinalizeUnits
 Cooldown:Finish
 Cooldown:ForceUpdateTimers
+Cooldown:FreezeAnimation
 Cooldown:GetActorAtIndex
+Cooldown:GetActorByTag
 Cooldown:GetAdditionalRegions
 Cooldown:GetAltArrowKeyMode
 Cooldown:GetAnchorType
@@ -2200,6 +2262,7 @@ Cooldown:GetTexelSnappingBias
 Cooldown:GetText
 Cooldown:GetTextColor
 Cooldown:GetTextData
+Cooldown:GetTextHeight
 Cooldown:GetTextInsets
 Cooldown:GetTextScale
 Cooldown:GetTextWidth
@@ -2237,6 +2300,7 @@ Cooldown:HasCustomCamera
 Cooldown:HasFocus
 Cooldown:HasMessageByID
 Cooldown:HasText
+Cooldown:HasTrackableSource
 Cooldown:HighlightText
 Cooldown:Insert
 Cooldown:IsAllowOverlappedModels
@@ -2251,6 +2315,7 @@ Cooldown:IsDown
 Cooldown:IsDownOver
 Cooldown:IsDraggingThumb
 Cooldown:IsEnabled
+Cooldown:IsGeoReady
 Cooldown:IsInIMECompositionMode
 Cooldown:IsInterpolating
 Cooldown:IsLightVisible
@@ -2267,6 +2332,7 @@ Cooldown:IsReverse
 Cooldown:IsScrollAllowed
 Cooldown:IsSecureText
 Cooldown:IsSetToFinalAlpha
+Cooldown:IsSlotAllowed
 Cooldown:IsSnappingToPixelGrid
 Cooldown:IsStatusBarDesaturated
 Cooldown:IsStopped
@@ -2290,6 +2356,7 @@ Cooldown:RefreshCamera
 Cooldown:RefreshUnit
 Cooldown:RegisterBackgroundTexture
 Cooldown:RegisterCallback
+Cooldown:RegisterFontString
 Cooldown:RegisterFontStrings
 Cooldown:RegisterForClicks
 Cooldown:RegisterForMouse
@@ -2395,6 +2462,7 @@ Cooldown:SetFading
 Cooldown:SetFillAlpha
 Cooldown:SetFillStyle
 Cooldown:SetFillTexture
+Cooldown:SetFixedColor
 Cooldown:SetFixedSize
 Cooldown:SetFlipBookColumns
 Cooldown:SetFlipBookFrameHeight
@@ -2464,6 +2532,7 @@ Cooldown:SetMinResize
 Cooldown:SetMinimumWidth
 Cooldown:SetModel
 Cooldown:SetModelAlpha
+Cooldown:SetModelByCreatureDisplayID
 Cooldown:SetModelDrawLayer
 Cooldown:SetModelScale
 Cooldown:SetMotionScriptsWhileDisabled
@@ -2476,6 +2545,7 @@ Cooldown:SetNormalTexture
 Cooldown:SetNumber
 Cooldown:SetNumeric
 Cooldown:SetNumericFullRange
+Cooldown:SetObeyHideInTransmogFlag
 Cooldown:SetObeyStepOnDrag
 Cooldown:SetObjectTooltipPosition
 Cooldown:SetOffset
@@ -2510,6 +2580,7 @@ Cooldown:SetQuestBlobOutsideTexture
 Cooldown:SetQuestBlobRingAlpha
 Cooldown:SetQuestBlobRingScalar
 Cooldown:SetQuestBlobRingTexture
+Cooldown:SetResetCallback
 Cooldown:SetReverseFill
 Cooldown:SetRightTexture
 Cooldown:SetRoll
@@ -2593,6 +2664,8 @@ Cooldown:SetUnitDebuff
 Cooldown:SetUnitDebuffByAuraInstanceID
 Cooldown:SetUpdateCallback
 Cooldown:SetUseGBuffer
+Cooldown:SetUseTransmogChoices
+Cooldown:SetUseTransmogSkin
 Cooldown:SetValue
 Cooldown:SetValueStep
 Cooldown:SetVertTile
@@ -2616,9 +2689,14 @@ Cooldown:TransformMessages
 Cooldown:TransitionToModelSceneID
 Cooldown:TriggerEvent
 Cooldown:TryApplyDefaultText
+Cooldown:TryOn
+Cooldown:UnRegisterEvent
+Cooldown:Undress
+Cooldown:UndressSlot
 Cooldown:UnregisterCallback
 Cooldown:UnregisterForWidgetSet
 Cooldown:UpdateBlips
+Cooldown:UpdateCamera
 Cooldown:UpdateHeight
 Cooldown:UpdateItemContextMatching
 Cooldown:UpdateMouseOverTooltip
@@ -2649,6 +2727,7 @@ EditBox:AttachFontString
 EditBox:AttachTexture
 EditBox:BackFillMessage
 EditBox:CalculateAction
+EditBox:CallMethod
 EditBox:CanNonSpaceWrap
 EditBox:CanSetUnit
 EditBox:CanWordWrap
@@ -2661,6 +2740,7 @@ EditBox:ClearModel
 EditBox:ClearNormalTexture
 EditBox:ClearPadding
 EditBox:ClearPushedTexture
+EditBox:ClearScene
 EditBox:ClearText
 EditBox:ClearTextureSlice
 EditBox:ClearTransform
@@ -2679,7 +2759,9 @@ EditBox:FadeOut
 EditBox:FinalizeUnits
 EditBox:Finish
 EditBox:ForceUpdateTimers
+EditBox:FreezeAnimation
 EditBox:GetActorAtIndex
+EditBox:GetActorByTag
 EditBox:GetAdditionalRegions
 EditBox:GetAnchorType
 EditBox:GetAnimationSpeedMultiplier
@@ -2840,6 +2922,7 @@ EditBox:GetTarget
 EditBox:GetTexCoord
 EditBox:GetTexelSnappingBias
 EditBox:GetTextData
+EditBox:GetTextHeight
 EditBox:GetTextScale
 EditBox:GetTextWidth
 EditBox:GetTexture
@@ -2873,6 +2956,7 @@ EditBox:HasAnimation
 EditBox:HasAttachmentPoints
 EditBox:HasCustomCamera
 EditBox:HasMessageByID
+EditBox:HasTrackableSource
 EditBox:IsAllowOverlappedModels
 EditBox:IsBlockingLoadRequested
 EditBox:IsDelaying
@@ -2881,6 +2965,7 @@ EditBox:IsDone
 EditBox:IsDown
 EditBox:IsDownOver
 EditBox:IsDraggingThumb
+EditBox:IsGeoReady
 EditBox:IsInDefaultPosition
 EditBox:IsInitialized
 EditBox:IsInterpolating
@@ -2894,6 +2979,7 @@ EditBox:IsPlaying
 EditBox:IsReverse
 EditBox:IsScrollAllowed
 EditBox:IsSetToFinalAlpha
+EditBox:IsSlotAllowed
 EditBox:IsSnappingToPixelGrid
 EditBox:IsStatusBarDesaturated
 EditBox:IsStopped
@@ -2918,6 +3004,7 @@ EditBox:RefreshCamera
 EditBox:RefreshUnit
 EditBox:RegisterBackgroundTexture
 EditBox:RegisterCallback
+EditBox:RegisterFontString
 EditBox:RegisterFontStrings
 EditBox:RegisterForClicks
 EditBox:RegisterForMouse
@@ -3031,6 +3118,7 @@ EditBox:SetFading
 EditBox:SetFillAlpha
 EditBox:SetFillStyle
 EditBox:SetFillTexture
+EditBox:SetFixedColor
 EditBox:SetFixedSize
 EditBox:SetFlipBookColumns
 EditBox:SetFlipBookFrameHeight
@@ -3093,6 +3181,7 @@ EditBox:SetMinimumCountdownDuration
 EditBox:SetMinimumWidth
 EditBox:SetModel
 EditBox:SetModelAlpha
+EditBox:SetModelByCreatureDisplayID
 EditBox:SetModelDrawLayer
 EditBox:SetModelScale
 EditBox:SetMotionScriptsWhileDisabled
@@ -3101,6 +3190,7 @@ EditBox:SetNonSpaceWrap
 EditBox:SetNormalAtlas
 EditBox:SetNormalFontObject
 EditBox:SetNormalTexture
+EditBox:SetObeyHideInTransmogFlag
 EditBox:SetObeyStepOnDrag
 EditBox:SetObjectTooltipPosition
 EditBox:SetOffset
@@ -3135,6 +3225,7 @@ EditBox:SetQuestBlobOutsideTexture
 EditBox:SetQuestBlobRingAlpha
 EditBox:SetQuestBlobRingScalar
 EditBox:SetQuestBlobRingTexture
+EditBox:SetResetCallback
 EditBox:SetReverse
 EditBox:SetReverseFill
 EditBox:SetRightTexture
@@ -3216,6 +3307,8 @@ EditBox:SetUpdateCallback
 EditBox:SetUseAuraDisplayTime
 EditBox:SetUseCircularEdge
 EditBox:SetUseGBuffer
+EditBox:SetUseTransmogChoices
+EditBox:SetUseTransmogSkin
 EditBox:SetValue
 EditBox:SetValueStep
 EditBox:SetVertTile
@@ -3237,9 +3330,14 @@ EditBox:TransformMessages
 EditBox:TransitionToModelSceneID
 EditBox:TriggerEvent
 EditBox:TryApplyDefaultText
+EditBox:TryOn
+EditBox:UnRegisterEvent
+EditBox:Undress
+EditBox:UndressSlot
 EditBox:UnregisterCallback
 EditBox:UnregisterForWidgetSet
 EditBox:UpdateBlips
+EditBox:UpdateCamera
 EditBox:UpdateHeight
 EditBox:UpdateItemContextMatching
 EditBox:UpdateMouseOverTooltip
@@ -3272,6 +3370,7 @@ FontString:AttachFontString
 FontString:AttachTexture
 FontString:BackFillMessage
 FontString:CalculateAction
+FontString:CallMethod
 FontString:CanChangeAttribute
 FontString:CanSetUnit
 FontString:Clear
@@ -3288,6 +3387,7 @@ FontString:ClearModel
 FontString:ClearNormalTexture
 FontString:ClearPadding
 FontString:ClearPushedTexture
+FontString:ClearScene
 FontString:ClearTextureSlice
 FontString:ClearTransform
 FontString:ClearUnits
@@ -3320,7 +3420,9 @@ FontString:FadeOut
 FontString:FinalizeUnits
 FontString:Finish
 FontString:ForceUpdateTimers
+FontString:FreezeAnimation
 FontString:GetActorAtIndex
+FontString:GetActorByTag
 FontString:GetAdditionalRegions
 FontString:GetAltArrowKeyMode
 FontString:GetAnchorType
@@ -3504,6 +3606,7 @@ FontString:GetTarget
 FontString:GetTexCoord
 FontString:GetTexelSnappingBias
 FontString:GetTextData
+FontString:GetTextHeight
 FontString:GetTextInsets
 FontString:GetTextWidth
 FontString:GetTexture
@@ -3543,6 +3646,7 @@ FontString:HasFixedFrameStrata
 FontString:HasFocus
 FontString:HasMessageByID
 FontString:HasText
+FontString:HasTrackableSource
 FontString:HighlightText
 FontString:Insert
 FontString:InterceptStartDrag
@@ -3564,6 +3668,7 @@ FontString:IsEventRegistered
 FontString:IsFrameBuffer
 FontString:IsGamePadButtonEnabled
 FontString:IsGamePadStickEnabled
+FontString:IsGeoReady
 FontString:IsHighlightLocked
 FontString:IsIgnoringChildrenForBounds
 FontString:IsInDefaultPosition
@@ -3588,6 +3693,7 @@ FontString:IsReverse
 FontString:IsScrollAllowed
 FontString:IsSecureText
 FontString:IsSetToFinalAlpha
+FontString:IsSlotAllowed
 FontString:IsSnappingToPixelGrid
 FontString:IsStatusBarDesaturated
 FontString:IsStopped
@@ -3620,6 +3726,7 @@ FontString:RegisterBackgroundTexture
 FontString:RegisterCallback
 FontString:RegisterEvent
 FontString:RegisterEventCallback
+FontString:RegisterFontString
 FontString:RegisterFontStrings
 FontString:RegisterForClicks
 FontString:RegisterForDrag
@@ -3826,6 +3933,7 @@ FontString:SetMinimumCountdownDuration
 FontString:SetMinimumWidth
 FontString:SetModel
 FontString:SetModelAlpha
+FontString:SetModelByCreatureDisplayID
 FontString:SetModelDrawLayer
 FontString:SetModelScale
 FontString:SetMotionScriptsWhileDisabled
@@ -3838,6 +3946,7 @@ FontString:SetNormalTexture
 FontString:SetNumber
 FontString:SetNumeric
 FontString:SetNumericFullRange
+FontString:SetObeyHideInTransmogFlag
 FontString:SetObeyStepOnDrag
 FontString:SetObjectTooltipPosition
 FontString:SetOffset
@@ -3874,6 +3983,7 @@ FontString:SetQuestBlobOutsideTexture
 FontString:SetQuestBlobRingAlpha
 FontString:SetQuestBlobRingScalar
 FontString:SetQuestBlobRingTexture
+FontString:SetResetCallback
 FontString:SetResizable
 FontString:SetResizeBounds
 FontString:SetReverse
@@ -3958,6 +4068,8 @@ FontString:SetUpdateCallback
 FontString:SetUseAuraDisplayTime
 FontString:SetUseCircularEdge
 FontString:SetUseGBuffer
+FontString:SetUseTransmogChoices
+FontString:SetUseTransmogSkin
 FontString:SetUserPlaced
 FontString:SetUsingParentLevel
 FontString:SetValue
@@ -3985,12 +4097,17 @@ FontString:TransformMessages
 FontString:TransitionToModelSceneID
 FontString:TriggerEvent
 FontString:TryApplyDefaultText
+FontString:TryOn
+FontString:UnRegisterEvent
+FontString:Undress
+FontString:UndressSlot
 FontString:UnlockHighlight
 FontString:UnregisterAllEvents
 FontString:UnregisterCallback
 FontString:UnregisterEvent
 FontString:UnregisterForWidgetSet
 FontString:UpdateBlips
+FontString:UpdateCamera
 FontString:UpdateHeight
 FontString:UpdateItemContextMatching
 FontString:UpdateMouseOverTooltip
@@ -4021,6 +4138,7 @@ Frame:AttachFontString
 Frame:AttachTexture
 Frame:BackFillMessage
 Frame:CalculateAction
+Frame:CallMethod
 Frame:CanNonSpaceWrap
 Frame:CanSetUnit
 Frame:CanWordWrap
@@ -4036,6 +4154,7 @@ Frame:ClearModel
 Frame:ClearNormalTexture
 Frame:ClearPadding
 Frame:ClearPushedTexture
+Frame:ClearScene
 Frame:ClearText
 Frame:ClearTextureSlice
 Frame:ClearTransform
@@ -4056,7 +4175,9 @@ Frame:FadeOut
 Frame:FinalizeUnits
 Frame:Finish
 Frame:ForceUpdateTimers
+Frame:FreezeAnimation
 Frame:GetActorAtIndex
+Frame:GetActorByTag
 Frame:GetAdditionalRegions
 Frame:GetAltArrowKeyMode
 Frame:GetAnchorType
@@ -4239,6 +4360,7 @@ Frame:GetTexelSnappingBias
 Frame:GetText
 Frame:GetTextColor
 Frame:GetTextData
+Frame:GetTextHeight
 Frame:GetTextInsets
 Frame:GetTextScale
 Frame:GetTextWidth
@@ -4279,6 +4401,7 @@ Frame:HasCustomCamera
 Frame:HasFocus
 Frame:HasMessageByID
 Frame:HasText
+Frame:HasTrackableSource
 Frame:HighlightText
 Frame:Insert
 Frame:IsAllowOverlappedModels
@@ -4293,6 +4416,7 @@ Frame:IsDown
 Frame:IsDownOver
 Frame:IsDraggingThumb
 Frame:IsEnabled
+Frame:IsGeoReady
 Frame:IsInIMECompositionMode
 Frame:IsInterpolating
 Frame:IsLightVisible
@@ -4310,6 +4434,7 @@ Frame:IsReverse
 Frame:IsScrollAllowed
 Frame:IsSecureText
 Frame:IsSetToFinalAlpha
+Frame:IsSlotAllowed
 Frame:IsSnappingToPixelGrid
 Frame:IsStatusBarDesaturated
 Frame:IsStopped
@@ -4334,6 +4459,7 @@ Frame:RefreshCamera
 Frame:RefreshUnit
 Frame:RegisterBackgroundTexture
 Frame:RegisterCallback
+Frame:RegisterFontString
 Frame:RegisterFontStrings
 Frame:RegisterForClicks
 Frame:RegisterForMouse
@@ -4454,6 +4580,7 @@ Frame:SetFading
 Frame:SetFillAlpha
 Frame:SetFillStyle
 Frame:SetFillTexture
+Frame:SetFixedColor
 Frame:SetFixedSize
 Frame:SetFlipBookColumns
 Frame:SetFlipBookFrameHeight
@@ -4525,6 +4652,7 @@ Frame:SetMinimumCountdownDuration
 Frame:SetMinimumWidth
 Frame:SetModel
 Frame:SetModelAlpha
+Frame:SetModelByCreatureDisplayID
 Frame:SetModelDrawLayer
 Frame:SetModelScale
 Frame:SetMotionScriptsWhileDisabled
@@ -4537,6 +4665,7 @@ Frame:SetNormalTexture
 Frame:SetNumber
 Frame:SetNumeric
 Frame:SetNumericFullRange
+Frame:SetObeyHideInTransmogFlag
 Frame:SetObeyStepOnDrag
 Frame:SetObjectTooltipPosition
 Frame:SetOffset
@@ -4572,6 +4701,7 @@ Frame:SetQuestBlobOutsideTexture
 Frame:SetQuestBlobRingAlpha
 Frame:SetQuestBlobRingScalar
 Frame:SetQuestBlobRingTexture
+Frame:SetResetCallback
 Frame:SetReverse
 Frame:SetReverseFill
 Frame:SetRightTexture
@@ -4663,6 +4793,8 @@ Frame:SetUpdateCallback
 Frame:SetUseAuraDisplayTime
 Frame:SetUseCircularEdge
 Frame:SetUseGBuffer
+Frame:SetUseTransmogChoices
+Frame:SetUseTransmogSkin
 Frame:SetValue
 Frame:SetValueStep
 Frame:SetVertTile
@@ -4687,9 +4819,14 @@ Frame:TransformMessages
 Frame:TransitionToModelSceneID
 Frame:TriggerEvent
 Frame:TryApplyDefaultText
+Frame:TryOn
+Frame:UnRegisterEvent
+Frame:Undress
+Frame:UndressSlot
 Frame:UnregisterCallback
 Frame:UnregisterForWidgetSet
 Frame:UpdateBlips
+Frame:UpdateCamera
 Frame:UpdateHeight
 Frame:UpdateItemContextMatching
 Frame:UpdateMouseOverTooltip
@@ -4715,6 +4852,7 @@ GameTooltip:AttachFontString
 GameTooltip:AttachTexture
 GameTooltip:BackFillMessage
 GameTooltip:CalculateAction
+GameTooltip:CallMethod
 GameTooltip:CanNonSpaceWrap
 GameTooltip:CanSetUnit
 GameTooltip:CanWordWrap
@@ -4728,6 +4866,7 @@ GameTooltip:ClearHistory
 GameTooltip:ClearModel
 GameTooltip:ClearNormalTexture
 GameTooltip:ClearPushedTexture
+GameTooltip:ClearScene
 GameTooltip:ClearText
 GameTooltip:ClearTextureSlice
 GameTooltip:ClearTransform
@@ -4746,7 +4885,9 @@ GameTooltip:EnableRegenerateOnResponse
 GameTooltip:FinalizeUnits
 GameTooltip:Finish
 GameTooltip:ForceUpdateTimers
+GameTooltip:FreezeAnimation
 GameTooltip:GetActorAtIndex
+GameTooltip:GetActorByTag
 GameTooltip:GetAdditionalRegions
 GameTooltip:GetAltArrowKeyMode
 GameTooltip:GetAnimationSpeedMultiplier
@@ -4921,6 +5062,7 @@ GameTooltip:GetTexelSnappingBias
 GameTooltip:GetText
 GameTooltip:GetTextColor
 GameTooltip:GetTextData
+GameTooltip:GetTextHeight
 GameTooltip:GetTextInsets
 GameTooltip:GetTextScale
 GameTooltip:GetTextWidth
@@ -4959,6 +5101,7 @@ GameTooltip:HasCustomCamera
 GameTooltip:HasFocus
 GameTooltip:HasMessageByID
 GameTooltip:HasText
+GameTooltip:HasTrackableSource
 GameTooltip:HighlightText
 GameTooltip:Insert
 GameTooltip:IsAllowOverlappedModels
@@ -4973,6 +5116,7 @@ GameTooltip:IsDown
 GameTooltip:IsDownOver
 GameTooltip:IsDraggingThumb
 GameTooltip:IsEnabled
+GameTooltip:IsGeoReady
 GameTooltip:IsInIMECompositionMode
 GameTooltip:IsInterpolating
 GameTooltip:IsLightVisible
@@ -4989,6 +5133,7 @@ GameTooltip:IsReverse
 GameTooltip:IsScrollAllowed
 GameTooltip:IsSecureText
 GameTooltip:IsSetToFinalAlpha
+GameTooltip:IsSlotAllowed
 GameTooltip:IsSnappingToPixelGrid
 GameTooltip:IsStatusBarDesaturated
 GameTooltip:IsStopped
@@ -5012,6 +5157,7 @@ GameTooltip:RefreshCamera
 GameTooltip:RefreshUnit
 GameTooltip:RegisterBackgroundTexture
 GameTooltip:RegisterCallback
+GameTooltip:RegisterFontString
 GameTooltip:RegisterFontStrings
 GameTooltip:RegisterForClicks
 GameTooltip:RegisterForMouse
@@ -5128,6 +5274,7 @@ GameTooltip:SetFading
 GameTooltip:SetFillAlpha
 GameTooltip:SetFillStyle
 GameTooltip:SetFillTexture
+GameTooltip:SetFixedColor
 GameTooltip:SetFixedSize
 GameTooltip:SetFlipBookColumns
 GameTooltip:SetFlipBookFrameHeight
@@ -5197,6 +5344,7 @@ GameTooltip:SetMinResize
 GameTooltip:SetMinimumCountdownDuration
 GameTooltip:SetModel
 GameTooltip:SetModelAlpha
+GameTooltip:SetModelByCreatureDisplayID
 GameTooltip:SetModelDrawLayer
 GameTooltip:SetModelScale
 GameTooltip:SetMotionScriptsWhileDisabled
@@ -5209,6 +5357,7 @@ GameTooltip:SetNormalTexture
 GameTooltip:SetNumber
 GameTooltip:SetNumeric
 GameTooltip:SetNumericFullRange
+GameTooltip:SetObeyHideInTransmogFlag
 GameTooltip:SetObeyStepOnDrag
 GameTooltip:SetOffset
 GameTooltip:SetOnClickHandler
@@ -5241,6 +5390,7 @@ GameTooltip:SetQuestBlobOutsideTexture
 GameTooltip:SetQuestBlobRingAlpha
 GameTooltip:SetQuestBlobRingScalar
 GameTooltip:SetQuestBlobRingTexture
+GameTooltip:SetResetCallback
 GameTooltip:SetReverse
 GameTooltip:SetReverseFill
 GameTooltip:SetRightTexture
@@ -5329,6 +5479,8 @@ GameTooltip:SetUpdateCallback
 GameTooltip:SetUseAuraDisplayTime
 GameTooltip:SetUseCircularEdge
 GameTooltip:SetUseGBuffer
+GameTooltip:SetUseTransmogChoices
+GameTooltip:SetUseTransmogSkin
 GameTooltip:SetValue
 GameTooltip:SetValueStep
 GameTooltip:SetVertTile
@@ -5352,9 +5504,14 @@ GameTooltip:TransformMessages
 GameTooltip:TransitionToModelSceneID
 GameTooltip:TriggerEvent
 GameTooltip:TryApplyDefaultText
+GameTooltip:TryOn
+GameTooltip:UnRegisterEvent
+GameTooltip:Undress
+GameTooltip:UndressSlot
 GameTooltip:UnregisterCallback
 GameTooltip:UnregisterForWidgetSet
 GameTooltip:UpdateBlips
+GameTooltip:UpdateCamera
 GameTooltip:UpdateHeight
 GameTooltip:UpdateItemContextMatching
 GameTooltip:UpdateMouseOverTooltip
@@ -5384,6 +5541,7 @@ MessageFrame:AttachFontString
 MessageFrame:AttachTexture
 MessageFrame:BackFillMessage
 MessageFrame:CalculateAction
+MessageFrame:CallMethod
 MessageFrame:CanNonSpaceWrap
 MessageFrame:CanSetUnit
 MessageFrame:CanWordWrap
@@ -5398,6 +5556,7 @@ MessageFrame:ClearModel
 MessageFrame:ClearNormalTexture
 MessageFrame:ClearPadding
 MessageFrame:ClearPushedTexture
+MessageFrame:ClearScene
 MessageFrame:ClearText
 MessageFrame:ClearTextureSlice
 MessageFrame:ClearTransform
@@ -5418,7 +5577,9 @@ MessageFrame:FadeOut
 MessageFrame:FinalizeUnits
 MessageFrame:Finish
 MessageFrame:ForceUpdateTimers
+MessageFrame:FreezeAnimation
 MessageFrame:GetActorAtIndex
+MessageFrame:GetActorByTag
 MessageFrame:GetAdditionalRegions
 MessageFrame:GetAltArrowKeyMode
 MessageFrame:GetAnchorType
@@ -5586,6 +5747,7 @@ MessageFrame:GetTexCoord
 MessageFrame:GetTexelSnappingBias
 MessageFrame:GetText
 MessageFrame:GetTextData
+MessageFrame:GetTextHeight
 MessageFrame:GetTextInsets
 MessageFrame:GetTextScale
 MessageFrame:GetTextWidth
@@ -5622,6 +5784,7 @@ MessageFrame:HasAttachmentPoints
 MessageFrame:HasCustomCamera
 MessageFrame:HasFocus
 MessageFrame:HasText
+MessageFrame:HasTrackableSource
 MessageFrame:HighlightText
 MessageFrame:Insert
 MessageFrame:IsAllowOverlappedModels
@@ -5636,6 +5799,7 @@ MessageFrame:IsDown
 MessageFrame:IsDownOver
 MessageFrame:IsDraggingThumb
 MessageFrame:IsEnabled
+MessageFrame:IsGeoReady
 MessageFrame:IsInIMECompositionMode
 MessageFrame:IsInterpolating
 MessageFrame:IsLightVisible
@@ -5653,6 +5817,7 @@ MessageFrame:IsReverse
 MessageFrame:IsScrollAllowed
 MessageFrame:IsSecureText
 MessageFrame:IsSetToFinalAlpha
+MessageFrame:IsSlotAllowed
 MessageFrame:IsSnappingToPixelGrid
 MessageFrame:IsStatusBarDesaturated
 MessageFrame:IsStopped
@@ -5677,6 +5842,7 @@ MessageFrame:RefreshCamera
 MessageFrame:RefreshUnit
 MessageFrame:RegisterBackgroundTexture
 MessageFrame:RegisterCallback
+MessageFrame:RegisterFontString
 MessageFrame:RegisterFontStrings
 MessageFrame:RegisterForClicks
 MessageFrame:RegisterForMouse
@@ -5793,6 +5959,7 @@ MessageFrame:SetFacing
 MessageFrame:SetFillAlpha
 MessageFrame:SetFillStyle
 MessageFrame:SetFillTexture
+MessageFrame:SetFixedColor
 MessageFrame:SetFixedSize
 MessageFrame:SetFlipBookColumns
 MessageFrame:SetFlipBookFrameHeight
@@ -5858,6 +6025,7 @@ MessageFrame:SetMinimumCountdownDuration
 MessageFrame:SetMinimumWidth
 MessageFrame:SetModel
 MessageFrame:SetModelAlpha
+MessageFrame:SetModelByCreatureDisplayID
 MessageFrame:SetModelDrawLayer
 MessageFrame:SetModelScale
 MessageFrame:SetMotionScriptsWhileDisabled
@@ -5870,6 +6038,7 @@ MessageFrame:SetNormalTexture
 MessageFrame:SetNumber
 MessageFrame:SetNumeric
 MessageFrame:SetNumericFullRange
+MessageFrame:SetObeyHideInTransmogFlag
 MessageFrame:SetObeyStepOnDrag
 MessageFrame:SetObjectTooltipPosition
 MessageFrame:SetOffset
@@ -5905,6 +6074,7 @@ MessageFrame:SetQuestBlobOutsideTexture
 MessageFrame:SetQuestBlobRingAlpha
 MessageFrame:SetQuestBlobRingScalar
 MessageFrame:SetQuestBlobRingTexture
+MessageFrame:SetResetCallback
 MessageFrame:SetReverse
 MessageFrame:SetReverseFill
 MessageFrame:SetRightTexture
@@ -5990,6 +6160,8 @@ MessageFrame:SetUpdateCallback
 MessageFrame:SetUseAuraDisplayTime
 MessageFrame:SetUseCircularEdge
 MessageFrame:SetUseGBuffer
+MessageFrame:SetUseTransmogChoices
+MessageFrame:SetUseTransmogSkin
 MessageFrame:SetValue
 MessageFrame:SetValueStep
 MessageFrame:SetVertTile
@@ -6013,9 +6185,14 @@ MessageFrame:TransformMessages
 MessageFrame:TransitionToModelSceneID
 MessageFrame:TriggerEvent
 MessageFrame:TryApplyDefaultText
+MessageFrame:TryOn
+MessageFrame:UnRegisterEvent
+MessageFrame:Undress
+MessageFrame:UndressSlot
 MessageFrame:UnregisterCallback
 MessageFrame:UnregisterForWidgetSet
 MessageFrame:UpdateBlips
+MessageFrame:UpdateCamera
 MessageFrame:UpdateHeight
 MessageFrame:UpdateItemContextMatching
 MessageFrame:UpdateMouseOverTooltip
@@ -6045,6 +6222,7 @@ Model:AttachFontString
 Model:AttachTexture
 Model:BackFillMessage
 Model:CalculateAction
+Model:CallMethod
 Model:CanNonSpaceWrap
 Model:CanSetUnit
 Model:CanWordWrap
@@ -6059,6 +6237,7 @@ Model:ClearLines
 Model:ClearNormalTexture
 Model:ClearPadding
 Model:ClearPushedTexture
+Model:ClearScene
 Model:ClearText
 Model:ClearTextureSlice
 Model:ClearUnits
@@ -6078,7 +6257,9 @@ Model:FadeOut
 Model:FinalizeUnits
 Model:Finish
 Model:ForceUpdateTimers
+Model:FreezeAnimation
 Model:GetActorAtIndex
+Model:GetActorByTag
 Model:GetAdditionalRegions
 Model:GetAltArrowKeyMode
 Model:GetAnchorType
@@ -6241,6 +6422,7 @@ Model:GetTexelSnappingBias
 Model:GetText
 Model:GetTextColor
 Model:GetTextData
+Model:GetTextHeight
 Model:GetTextInsets
 Model:GetTextScale
 Model:GetTextWidth
@@ -6275,6 +6457,7 @@ Model:HasAnimation
 Model:HasFocus
 Model:HasMessageByID
 Model:HasText
+Model:HasTrackableSource
 Model:HighlightText
 Model:Insert
 Model:IsAllowOverlappedModels
@@ -6289,6 +6472,7 @@ Model:IsDown
 Model:IsDownOver
 Model:IsDraggingThumb
 Model:IsEnabled
+Model:IsGeoReady
 Model:IsInIMECompositionMode
 Model:IsInterpolating
 Model:IsLightVisible
@@ -6306,6 +6490,7 @@ Model:IsReverse
 Model:IsScrollAllowed
 Model:IsSecureText
 Model:IsSetToFinalAlpha
+Model:IsSlotAllowed
 Model:IsSnappingToPixelGrid
 Model:IsStatusBarDesaturated
 Model:IsStopped
@@ -6328,6 +6513,7 @@ Model:RefreshCamera
 Model:RefreshUnit
 Model:RegisterBackgroundTexture
 Model:RegisterCallback
+Model:RegisterFontString
 Model:RegisterFontStrings
 Model:RegisterForClicks
 Model:RegisterForMouse
@@ -6438,6 +6624,7 @@ Model:SetFading
 Model:SetFillAlpha
 Model:SetFillStyle
 Model:SetFillTexture
+Model:SetFixedColor
 Model:SetFixedSize
 Model:SetFlipBookColumns
 Model:SetFlipBookFrameHeight
@@ -6501,6 +6688,7 @@ Model:SetMinMaxValues
 Model:SetMinResize
 Model:SetMinimumCountdownDuration
 Model:SetMinimumWidth
+Model:SetModelByCreatureDisplayID
 Model:SetMotionScriptsWhileDisabled
 Model:SetMountBySpellID
 Model:SetMultiLine
@@ -6511,6 +6699,7 @@ Model:SetNormalTexture
 Model:SetNumber
 Model:SetNumeric
 Model:SetNumericFullRange
+Model:SetObeyHideInTransmogFlag
 Model:SetObeyStepOnDrag
 Model:SetObjectTooltipPosition
 Model:SetOffset
@@ -6542,6 +6731,7 @@ Model:SetQuestBlobOutsideTexture
 Model:SetQuestBlobRingAlpha
 Model:SetQuestBlobRingScalar
 Model:SetQuestBlobRingTexture
+Model:SetResetCallback
 Model:SetReverse
 Model:SetReverseFill
 Model:SetRightTexture
@@ -6626,6 +6816,8 @@ Model:SetUnitDebuffByAuraInstanceID
 Model:SetUpdateCallback
 Model:SetUseAuraDisplayTime
 Model:SetUseCircularEdge
+Model:SetUseTransmogChoices
+Model:SetUseTransmogSkin
 Model:SetValue
 Model:SetValueStep
 Model:SetVertTile
@@ -6646,9 +6838,14 @@ Model:TransformMessages
 Model:TransitionToModelSceneID
 Model:TriggerEvent
 Model:TryApplyDefaultText
+Model:TryOn
+Model:UnRegisterEvent
+Model:Undress
+Model:UndressSlot
 Model:UnregisterCallback
 Model:UnregisterForWidgetSet
 Model:UpdateBlips
+Model:UpdateCamera
 Model:UpdateHeight
 Model:UpdateItemContextMatching
 Model:UpdateMouseOverTooltip
@@ -6676,6 +6873,7 @@ PlayerModel:AttachFontString
 PlayerModel:AttachTexture
 PlayerModel:BackFillMessage
 PlayerModel:CalculateAction
+PlayerModel:CallMethod
 PlayerModel:CanNonSpaceWrap
 PlayerModel:CanWordWrap
 PlayerModel:Clear
@@ -6689,6 +6887,7 @@ PlayerModel:ClearLines
 PlayerModel:ClearNormalTexture
 PlayerModel:ClearPadding
 PlayerModel:ClearPushedTexture
+PlayerModel:ClearScene
 PlayerModel:ClearText
 PlayerModel:ClearTextureSlice
 PlayerModel:ClearUnits
@@ -6709,6 +6908,7 @@ PlayerModel:FinalizeUnits
 PlayerModel:Finish
 PlayerModel:ForceUpdateTimers
 PlayerModel:GetActorAtIndex
+PlayerModel:GetActorByTag
 PlayerModel:GetAdditionalRegions
 PlayerModel:GetAltArrowKeyMode
 PlayerModel:GetAnchorType
@@ -6868,6 +7068,7 @@ PlayerModel:GetTexelSnappingBias
 PlayerModel:GetText
 PlayerModel:GetTextColor
 PlayerModel:GetTextData
+PlayerModel:GetTextHeight
 PlayerModel:GetTextInsets
 PlayerModel:GetTextScale
 PlayerModel:GetTextWidth
@@ -6901,6 +7102,7 @@ PlayerModel:GetZoomLevels
 PlayerModel:HasFocus
 PlayerModel:HasMessageByID
 PlayerModel:HasText
+PlayerModel:HasTrackableSource
 PlayerModel:HighlightText
 PlayerModel:Insert
 PlayerModel:IsAllowOverlappedModels
@@ -6915,6 +7117,7 @@ PlayerModel:IsDown
 PlayerModel:IsDownOver
 PlayerModel:IsDraggingThumb
 PlayerModel:IsEnabled
+PlayerModel:IsGeoReady
 PlayerModel:IsInIMECompositionMode
 PlayerModel:IsInterpolating
 PlayerModel:IsLightVisible
@@ -6932,6 +7135,7 @@ PlayerModel:IsReverse
 PlayerModel:IsScrollAllowed
 PlayerModel:IsSecureText
 PlayerModel:IsSetToFinalAlpha
+PlayerModel:IsSlotAllowed
 PlayerModel:IsSnappingToPixelGrid
 PlayerModel:IsStatusBarDesaturated
 PlayerModel:IsStopped
@@ -6951,6 +7155,7 @@ PlayerModel:Project3DPointTo2D
 PlayerModel:Protect
 PlayerModel:RegisterBackgroundTexture
 PlayerModel:RegisterCallback
+PlayerModel:RegisterFontString
 PlayerModel:RegisterFontStrings
 PlayerModel:RegisterForClicks
 PlayerModel:RegisterForMouse
@@ -7056,6 +7261,7 @@ PlayerModel:SetFading
 PlayerModel:SetFillAlpha
 PlayerModel:SetFillStyle
 PlayerModel:SetFillTexture
+PlayerModel:SetFixedColor
 PlayerModel:SetFixedSize
 PlayerModel:SetFlipBookColumns
 PlayerModel:SetFlipBookFrameHeight
@@ -7116,6 +7322,7 @@ PlayerModel:SetMinMaxValues
 PlayerModel:SetMinResize
 PlayerModel:SetMinimumCountdownDuration
 PlayerModel:SetMinimumWidth
+PlayerModel:SetModelByCreatureDisplayID
 PlayerModel:SetMotionScriptsWhileDisabled
 PlayerModel:SetMountBySpellID
 PlayerModel:SetMultiLine
@@ -7126,6 +7333,7 @@ PlayerModel:SetNormalTexture
 PlayerModel:SetNumber
 PlayerModel:SetNumeric
 PlayerModel:SetNumericFullRange
+PlayerModel:SetObeyHideInTransmogFlag
 PlayerModel:SetObeyStepOnDrag
 PlayerModel:SetObjectTooltipPosition
 PlayerModel:SetOffset
@@ -7156,6 +7364,7 @@ PlayerModel:SetQuestBlobOutsideTexture
 PlayerModel:SetQuestBlobRingAlpha
 PlayerModel:SetQuestBlobRingScalar
 PlayerModel:SetQuestBlobRingTexture
+PlayerModel:SetResetCallback
 PlayerModel:SetReverse
 PlayerModel:SetReverseFill
 PlayerModel:SetRightTexture
@@ -7238,6 +7447,8 @@ PlayerModel:SetUnitDebuffByAuraInstanceID
 PlayerModel:SetUpdateCallback
 PlayerModel:SetUseAuraDisplayTime
 PlayerModel:SetUseCircularEdge
+PlayerModel:SetUseTransmogChoices
+PlayerModel:SetUseTransmogSkin
 PlayerModel:SetValue
 PlayerModel:SetValueStep
 PlayerModel:SetVertTile
@@ -7257,9 +7468,14 @@ PlayerModel:TransformMessages
 PlayerModel:TransitionToModelSceneID
 PlayerModel:TriggerEvent
 PlayerModel:TryApplyDefaultText
+PlayerModel:TryOn
+PlayerModel:UnRegisterEvent
+PlayerModel:Undress
+PlayerModel:UndressSlot
 PlayerModel:UnregisterCallback
 PlayerModel:UnregisterForWidgetSet
 PlayerModel:UpdateBlips
+PlayerModel:UpdateCamera
 PlayerModel:UpdateHeight
 PlayerModel:UpdateItemContextMatching
 PlayerModel:UpdateMouseOverTooltip
@@ -7289,6 +7505,7 @@ ScrollFrame:AttachFontString
 ScrollFrame:AttachTexture
 ScrollFrame:BackFillMessage
 ScrollFrame:CalculateAction
+ScrollFrame:CallMethod
 ScrollFrame:CanNonSpaceWrap
 ScrollFrame:CanSetUnit
 ScrollFrame:CanWordWrap
@@ -7304,6 +7521,7 @@ ScrollFrame:ClearModel
 ScrollFrame:ClearNormalTexture
 ScrollFrame:ClearPadding
 ScrollFrame:ClearPushedTexture
+ScrollFrame:ClearScene
 ScrollFrame:ClearText
 ScrollFrame:ClearTextureSlice
 ScrollFrame:ClearTransform
@@ -7324,7 +7542,9 @@ ScrollFrame:FadeOut
 ScrollFrame:FinalizeUnits
 ScrollFrame:Finish
 ScrollFrame:ForceUpdateTimers
+ScrollFrame:FreezeAnimation
 ScrollFrame:GetActorAtIndex
+ScrollFrame:GetActorByTag
 ScrollFrame:GetAdditionalRegions
 ScrollFrame:GetAltArrowKeyMode
 ScrollFrame:GetAnchorType
@@ -7504,6 +7724,7 @@ ScrollFrame:GetTexelSnappingBias
 ScrollFrame:GetText
 ScrollFrame:GetTextColor
 ScrollFrame:GetTextData
+ScrollFrame:GetTextHeight
 ScrollFrame:GetTextInsets
 ScrollFrame:GetTextScale
 ScrollFrame:GetTextWidth
@@ -7542,6 +7763,7 @@ ScrollFrame:HasCustomCamera
 ScrollFrame:HasFocus
 ScrollFrame:HasMessageByID
 ScrollFrame:HasText
+ScrollFrame:HasTrackableSource
 ScrollFrame:HighlightText
 ScrollFrame:Insert
 ScrollFrame:IsAllowOverlappedModels
@@ -7556,6 +7778,7 @@ ScrollFrame:IsDown
 ScrollFrame:IsDownOver
 ScrollFrame:IsDraggingThumb
 ScrollFrame:IsEnabled
+ScrollFrame:IsGeoReady
 ScrollFrame:IsInIMECompositionMode
 ScrollFrame:IsInterpolating
 ScrollFrame:IsLightVisible
@@ -7573,6 +7796,7 @@ ScrollFrame:IsReverse
 ScrollFrame:IsScrollAllowed
 ScrollFrame:IsSecureText
 ScrollFrame:IsSetToFinalAlpha
+ScrollFrame:IsSlotAllowed
 ScrollFrame:IsSnappingToPixelGrid
 ScrollFrame:IsStatusBarDesaturated
 ScrollFrame:IsStopped
@@ -7597,6 +7821,7 @@ ScrollFrame:RefreshCamera
 ScrollFrame:RefreshUnit
 ScrollFrame:RegisterBackgroundTexture
 ScrollFrame:RegisterCallback
+ScrollFrame:RegisterFontString
 ScrollFrame:RegisterFontStrings
 ScrollFrame:RegisterForClicks
 ScrollFrame:RegisterForMouse
@@ -7717,6 +7942,7 @@ ScrollFrame:SetFading
 ScrollFrame:SetFillAlpha
 ScrollFrame:SetFillStyle
 ScrollFrame:SetFillTexture
+ScrollFrame:SetFixedColor
 ScrollFrame:SetFixedSize
 ScrollFrame:SetFlipBookColumns
 ScrollFrame:SetFlipBookFrameHeight
@@ -7786,6 +8012,7 @@ ScrollFrame:SetMinimumCountdownDuration
 ScrollFrame:SetMinimumWidth
 ScrollFrame:SetModel
 ScrollFrame:SetModelAlpha
+ScrollFrame:SetModelByCreatureDisplayID
 ScrollFrame:SetModelDrawLayer
 ScrollFrame:SetModelScale
 ScrollFrame:SetMotionScriptsWhileDisabled
@@ -7798,6 +8025,7 @@ ScrollFrame:SetNormalTexture
 ScrollFrame:SetNumber
 ScrollFrame:SetNumeric
 ScrollFrame:SetNumericFullRange
+ScrollFrame:SetObeyHideInTransmogFlag
 ScrollFrame:SetObeyStepOnDrag
 ScrollFrame:SetObjectTooltipPosition
 ScrollFrame:SetOffset
@@ -7833,6 +8061,7 @@ ScrollFrame:SetQuestBlobOutsideTexture
 ScrollFrame:SetQuestBlobRingAlpha
 ScrollFrame:SetQuestBlobRingScalar
 ScrollFrame:SetQuestBlobRingTexture
+ScrollFrame:SetResetCallback
 ScrollFrame:SetReverse
 ScrollFrame:SetReverseFill
 ScrollFrame:SetRightTexture
@@ -7923,6 +8152,8 @@ ScrollFrame:SetUpdateCallback
 ScrollFrame:SetUseAuraDisplayTime
 ScrollFrame:SetUseCircularEdge
 ScrollFrame:SetUseGBuffer
+ScrollFrame:SetUseTransmogChoices
+ScrollFrame:SetUseTransmogSkin
 ScrollFrame:SetValue
 ScrollFrame:SetValueStep
 ScrollFrame:SetVertTile
@@ -7946,9 +8177,14 @@ ScrollFrame:TransformMessages
 ScrollFrame:TransitionToModelSceneID
 ScrollFrame:TriggerEvent
 ScrollFrame:TryApplyDefaultText
+ScrollFrame:TryOn
+ScrollFrame:UnRegisterEvent
+ScrollFrame:Undress
+ScrollFrame:UndressSlot
 ScrollFrame:UnregisterCallback
 ScrollFrame:UnregisterForWidgetSet
 ScrollFrame:UpdateBlips
+ScrollFrame:UpdateCamera
 ScrollFrame:UpdateHeight
 ScrollFrame:UpdateItemContextMatching
 ScrollFrame:UpdateMouseOverTooltip
@@ -7979,6 +8215,7 @@ SimpleHTML:AttachFontString
 SimpleHTML:AttachTexture
 SimpleHTML:BackFillMessage
 SimpleHTML:CalculateAction
+SimpleHTML:CallMethod
 SimpleHTML:CanNonSpaceWrap
 SimpleHTML:CanSetUnit
 SimpleHTML:CanWordWrap
@@ -7994,6 +8231,7 @@ SimpleHTML:ClearModel
 SimpleHTML:ClearNormalTexture
 SimpleHTML:ClearPadding
 SimpleHTML:ClearPushedTexture
+SimpleHTML:ClearScene
 SimpleHTML:ClearText
 SimpleHTML:ClearTextureSlice
 SimpleHTML:ClearTransform
@@ -8014,7 +8252,9 @@ SimpleHTML:FadeOut
 SimpleHTML:FinalizeUnits
 SimpleHTML:Finish
 SimpleHTML:ForceUpdateTimers
+SimpleHTML:FreezeAnimation
 SimpleHTML:GetActorAtIndex
+SimpleHTML:GetActorByTag
 SimpleHTML:GetAdditionalRegions
 SimpleHTML:GetAltArrowKeyMode
 SimpleHTML:GetAnchorType
@@ -8184,6 +8424,7 @@ SimpleHTML:GetTarget
 SimpleHTML:GetTexCoord
 SimpleHTML:GetTexelSnappingBias
 SimpleHTML:GetText
+SimpleHTML:GetTextHeight
 SimpleHTML:GetTextInsets
 SimpleHTML:GetTextScale
 SimpleHTML:GetTextWidth
@@ -8222,6 +8463,7 @@ SimpleHTML:HasCustomCamera
 SimpleHTML:HasFocus
 SimpleHTML:HasMessageByID
 SimpleHTML:HasText
+SimpleHTML:HasTrackableSource
 SimpleHTML:HighlightText
 SimpleHTML:Insert
 SimpleHTML:IsAllowOverlappedModels
@@ -8236,6 +8478,7 @@ SimpleHTML:IsDown
 SimpleHTML:IsDownOver
 SimpleHTML:IsDraggingThumb
 SimpleHTML:IsEnabled
+SimpleHTML:IsGeoReady
 SimpleHTML:IsInIMECompositionMode
 SimpleHTML:IsInterpolating
 SimpleHTML:IsLightVisible
@@ -8253,6 +8496,7 @@ SimpleHTML:IsReverse
 SimpleHTML:IsScrollAllowed
 SimpleHTML:IsSecureText
 SimpleHTML:IsSetToFinalAlpha
+SimpleHTML:IsSlotAllowed
 SimpleHTML:IsSnappingToPixelGrid
 SimpleHTML:IsStatusBarDesaturated
 SimpleHTML:IsStopped
@@ -8277,6 +8521,7 @@ SimpleHTML:RefreshCamera
 SimpleHTML:RefreshUnit
 SimpleHTML:RegisterBackgroundTexture
 SimpleHTML:RegisterCallback
+SimpleHTML:RegisterFontString
 SimpleHTML:RegisterFontStrings
 SimpleHTML:RegisterForClicks
 SimpleHTML:RegisterForMouse
@@ -8397,6 +8642,7 @@ SimpleHTML:SetFading
 SimpleHTML:SetFillAlpha
 SimpleHTML:SetFillStyle
 SimpleHTML:SetFillTexture
+SimpleHTML:SetFixedColor
 SimpleHTML:SetFixedSize
 SimpleHTML:SetFlipBookColumns
 SimpleHTML:SetFlipBookFrameHeight
@@ -8462,6 +8708,7 @@ SimpleHTML:SetMinimumCountdownDuration
 SimpleHTML:SetMinimumWidth
 SimpleHTML:SetModel
 SimpleHTML:SetModelAlpha
+SimpleHTML:SetModelByCreatureDisplayID
 SimpleHTML:SetModelDrawLayer
 SimpleHTML:SetModelScale
 SimpleHTML:SetMotionScriptsWhileDisabled
@@ -8474,6 +8721,7 @@ SimpleHTML:SetNormalTexture
 SimpleHTML:SetNumber
 SimpleHTML:SetNumeric
 SimpleHTML:SetNumericFullRange
+SimpleHTML:SetObeyHideInTransmogFlag
 SimpleHTML:SetObeyStepOnDrag
 SimpleHTML:SetObjectTooltipPosition
 SimpleHTML:SetOffset
@@ -8509,6 +8757,7 @@ SimpleHTML:SetQuestBlobOutsideTexture
 SimpleHTML:SetQuestBlobRingAlpha
 SimpleHTML:SetQuestBlobRingScalar
 SimpleHTML:SetQuestBlobRingTexture
+SimpleHTML:SetResetCallback
 SimpleHTML:SetReverse
 SimpleHTML:SetReverseFill
 SimpleHTML:SetRightTexture
@@ -8594,6 +8843,8 @@ SimpleHTML:SetUpdateCallback
 SimpleHTML:SetUseAuraDisplayTime
 SimpleHTML:SetUseCircularEdge
 SimpleHTML:SetUseGBuffer
+SimpleHTML:SetUseTransmogChoices
+SimpleHTML:SetUseTransmogSkin
 SimpleHTML:SetValue
 SimpleHTML:SetValueStep
 SimpleHTML:SetVertTile
@@ -8617,9 +8868,14 @@ SimpleHTML:TransformMessages
 SimpleHTML:TransitionToModelSceneID
 SimpleHTML:TriggerEvent
 SimpleHTML:TryApplyDefaultText
+SimpleHTML:TryOn
+SimpleHTML:UnRegisterEvent
+SimpleHTML:Undress
+SimpleHTML:UndressSlot
 SimpleHTML:UnregisterCallback
 SimpleHTML:UnregisterForWidgetSet
 SimpleHTML:UpdateBlips
+SimpleHTML:UpdateCamera
 SimpleHTML:UpdateHeight
 SimpleHTML:UpdateItemContextMatching
 SimpleHTML:UpdateMouseOverTooltip
@@ -8650,6 +8906,7 @@ Slider:AttachFontString
 Slider:AttachTexture
 Slider:BackFillMessage
 Slider:CalculateAction
+Slider:CallMethod
 Slider:CanNonSpaceWrap
 Slider:CanSetUnit
 Slider:CanWordWrap
@@ -8665,6 +8922,7 @@ Slider:ClearModel
 Slider:ClearNormalTexture
 Slider:ClearPadding
 Slider:ClearPushedTexture
+Slider:ClearScene
 Slider:ClearText
 Slider:ClearTextureSlice
 Slider:ClearTransform
@@ -8683,7 +8941,9 @@ Slider:FadeOut
 Slider:FinalizeUnits
 Slider:Finish
 Slider:ForceUpdateTimers
+Slider:FreezeAnimation
 Slider:GetActorAtIndex
+Slider:GetActorByTag
 Slider:GetAdditionalRegions
 Slider:GetAltArrowKeyMode
 Slider:GetAnchorType
@@ -8861,6 +9121,7 @@ Slider:GetTexelSnappingBias
 Slider:GetText
 Slider:GetTextColor
 Slider:GetTextData
+Slider:GetTextHeight
 Slider:GetTextInsets
 Slider:GetTextScale
 Slider:GetTextWidth
@@ -8896,6 +9157,7 @@ Slider:HasCustomCamera
 Slider:HasFocus
 Slider:HasMessageByID
 Slider:HasText
+Slider:HasTrackableSource
 Slider:HighlightText
 Slider:Insert
 Slider:IsAllowOverlappedModels
@@ -8908,6 +9170,7 @@ Slider:IsDesaturated
 Slider:IsDone
 Slider:IsDown
 Slider:IsDownOver
+Slider:IsGeoReady
 Slider:IsInIMECompositionMode
 Slider:IsInterpolating
 Slider:IsLightVisible
@@ -8925,6 +9188,7 @@ Slider:IsReverse
 Slider:IsScrollAllowed
 Slider:IsSecureText
 Slider:IsSetToFinalAlpha
+Slider:IsSlotAllowed
 Slider:IsSnappingToPixelGrid
 Slider:IsStatusBarDesaturated
 Slider:IsStopped
@@ -8949,6 +9213,7 @@ Slider:RefreshCamera
 Slider:RefreshUnit
 Slider:RegisterBackgroundTexture
 Slider:RegisterCallback
+Slider:RegisterFontString
 Slider:RegisterFontStrings
 Slider:RegisterForClicks
 Slider:RegisterForMouse
@@ -9068,6 +9333,7 @@ Slider:SetFading
 Slider:SetFillAlpha
 Slider:SetFillStyle
 Slider:SetFillTexture
+Slider:SetFixedColor
 Slider:SetFixedSize
 Slider:SetFlipBookColumns
 Slider:SetFlipBookFrameHeight
@@ -9138,6 +9404,7 @@ Slider:SetMinimumCountdownDuration
 Slider:SetMinimumWidth
 Slider:SetModel
 Slider:SetModelAlpha
+Slider:SetModelByCreatureDisplayID
 Slider:SetModelDrawLayer
 Slider:SetModelScale
 Slider:SetMotionScriptsWhileDisabled
@@ -9150,6 +9417,7 @@ Slider:SetNormalTexture
 Slider:SetNumber
 Slider:SetNumeric
 Slider:SetNumericFullRange
+Slider:SetObeyHideInTransmogFlag
 Slider:SetObjectTooltipPosition
 Slider:SetOffset
 Slider:SetOnClickHandler
@@ -9183,6 +9451,7 @@ Slider:SetQuestBlobOutsideTexture
 Slider:SetQuestBlobRingAlpha
 Slider:SetQuestBlobRingScalar
 Slider:SetQuestBlobRingTexture
+Slider:SetResetCallback
 Slider:SetReverse
 Slider:SetReverseFill
 Slider:SetRightTexture
@@ -9271,6 +9540,8 @@ Slider:SetUpdateCallback
 Slider:SetUseAuraDisplayTime
 Slider:SetUseCircularEdge
 Slider:SetUseGBuffer
+Slider:SetUseTransmogChoices
+Slider:SetUseTransmogSkin
 Slider:SetVertTile
 Slider:SetVertexColor
 Slider:SetVertexOffset
@@ -9292,9 +9563,14 @@ Slider:TransformMessages
 Slider:TransitionToModelSceneID
 Slider:TriggerEvent
 Slider:TryApplyDefaultText
+Slider:TryOn
+Slider:UnRegisterEvent
+Slider:Undress
+Slider:UndressSlot
 Slider:UnregisterCallback
 Slider:UnregisterForWidgetSet
 Slider:UpdateBlips
+Slider:UpdateCamera
 Slider:UpdateHeight
 Slider:UpdateItemContextMatching
 Slider:UpdateMouseOverTooltip
@@ -9325,6 +9601,7 @@ StatusBar:AttachFontString
 StatusBar:AttachTexture
 StatusBar:BackFillMessage
 StatusBar:CalculateAction
+StatusBar:CallMethod
 StatusBar:CanNonSpaceWrap
 StatusBar:CanSetUnit
 StatusBar:CanWordWrap
@@ -9340,6 +9617,7 @@ StatusBar:ClearModel
 StatusBar:ClearNormalTexture
 StatusBar:ClearPadding
 StatusBar:ClearPushedTexture
+StatusBar:ClearScene
 StatusBar:ClearText
 StatusBar:ClearTextureSlice
 StatusBar:ClearTransform
@@ -9360,7 +9638,9 @@ StatusBar:FadeOut
 StatusBar:FinalizeUnits
 StatusBar:Finish
 StatusBar:ForceUpdateTimers
+StatusBar:FreezeAnimation
 StatusBar:GetActorAtIndex
+StatusBar:GetActorByTag
 StatusBar:GetAdditionalRegions
 StatusBar:GetAltArrowKeyMode
 StatusBar:GetAnchorType
@@ -9534,6 +9814,7 @@ StatusBar:GetTexelSnappingBias
 StatusBar:GetText
 StatusBar:GetTextColor
 StatusBar:GetTextData
+StatusBar:GetTextHeight
 StatusBar:GetTextInsets
 StatusBar:GetTextScale
 StatusBar:GetTextWidth
@@ -9572,6 +9853,7 @@ StatusBar:HasCustomCamera
 StatusBar:HasFocus
 StatusBar:HasMessageByID
 StatusBar:HasText
+StatusBar:HasTrackableSource
 StatusBar:HighlightText
 StatusBar:Insert
 StatusBar:IsAllowOverlappedModels
@@ -9586,6 +9868,7 @@ StatusBar:IsDown
 StatusBar:IsDownOver
 StatusBar:IsDraggingThumb
 StatusBar:IsEnabled
+StatusBar:IsGeoReady
 StatusBar:IsInIMECompositionMode
 StatusBar:IsLightVisible
 StatusBar:IsMenuOpen
@@ -9602,6 +9885,7 @@ StatusBar:IsReverse
 StatusBar:IsScrollAllowed
 StatusBar:IsSecureText
 StatusBar:IsSetToFinalAlpha
+StatusBar:IsSlotAllowed
 StatusBar:IsSnappingToPixelGrid
 StatusBar:IsStopped
 StatusBar:IsTextCopyable
@@ -9625,6 +9909,7 @@ StatusBar:RefreshCamera
 StatusBar:RefreshUnit
 StatusBar:RegisterBackgroundTexture
 StatusBar:RegisterCallback
+StatusBar:RegisterFontString
 StatusBar:RegisterFontStrings
 StatusBar:RegisterForClicks
 StatusBar:RegisterForMouse
@@ -9743,6 +10028,7 @@ StatusBar:SetFadePower
 StatusBar:SetFading
 StatusBar:SetFillAlpha
 StatusBar:SetFillTexture
+StatusBar:SetFixedColor
 StatusBar:SetFixedSize
 StatusBar:SetFlipBookColumns
 StatusBar:SetFlipBookFrameHeight
@@ -9813,6 +10099,7 @@ StatusBar:SetMinimumCountdownDuration
 StatusBar:SetMinimumWidth
 StatusBar:SetModel
 StatusBar:SetModelAlpha
+StatusBar:SetModelByCreatureDisplayID
 StatusBar:SetModelDrawLayer
 StatusBar:SetModelScale
 StatusBar:SetMotionScriptsWhileDisabled
@@ -9825,6 +10112,7 @@ StatusBar:SetNormalTexture
 StatusBar:SetNumber
 StatusBar:SetNumeric
 StatusBar:SetNumericFullRange
+StatusBar:SetObeyHideInTransmogFlag
 StatusBar:SetObeyStepOnDrag
 StatusBar:SetObjectTooltipPosition
 StatusBar:SetOffset
@@ -9859,6 +10147,7 @@ StatusBar:SetQuestBlobOutsideTexture
 StatusBar:SetQuestBlobRingAlpha
 StatusBar:SetQuestBlobRingScalar
 StatusBar:SetQuestBlobRingTexture
+StatusBar:SetResetCallback
 StatusBar:SetReverse
 StatusBar:SetRightTexture
 StatusBar:SetRoll
@@ -9942,6 +10231,8 @@ StatusBar:SetUpdateCallback
 StatusBar:SetUseAuraDisplayTime
 StatusBar:SetUseCircularEdge
 StatusBar:SetUseGBuffer
+StatusBar:SetUseTransmogChoices
+StatusBar:SetUseTransmogSkin
 StatusBar:SetValueStep
 StatusBar:SetVertTile
 StatusBar:SetVertexColor
@@ -9965,9 +10256,14 @@ StatusBar:TransformMessages
 StatusBar:TransitionToModelSceneID
 StatusBar:TriggerEvent
 StatusBar:TryApplyDefaultText
+StatusBar:TryOn
+StatusBar:UnRegisterEvent
+StatusBar:Undress
+StatusBar:UndressSlot
 StatusBar:UnregisterCallback
 StatusBar:UnregisterForWidgetSet
 StatusBar:UpdateBlips
+StatusBar:UpdateCamera
 StatusBar:UpdateHeight
 StatusBar:UpdateItemContextMatching
 StatusBar:UpdateMouseOverTooltip
@@ -9999,6 +10295,7 @@ Texture:AttachFontString
 Texture:AttachTexture
 Texture:BackFillMessage
 Texture:CalculateAction
+Texture:CallMethod
 Texture:CanChangeAttribute
 Texture:CanNonSpaceWrap
 Texture:CanSetUnit
@@ -10018,6 +10315,7 @@ Texture:ClearModel
 Texture:ClearNormalTexture
 Texture:ClearPadding
 Texture:ClearPushedTexture
+Texture:ClearScene
 Texture:ClearText
 Texture:ClearTransform
 Texture:ClearUnits
@@ -10049,7 +10347,9 @@ Texture:FadeOut
 Texture:FinalizeUnits
 Texture:Finish
 Texture:ForceUpdateTimers
+Texture:FreezeAnimation
 Texture:GetActorAtIndex
+Texture:GetActorByTag
 Texture:GetAdditionalRegions
 Texture:GetAltArrowKeyMode
 Texture:GetAnchorType
@@ -10241,6 +10541,7 @@ Texture:GetTarget
 Texture:GetText
 Texture:GetTextColor
 Texture:GetTextData
+Texture:GetTextHeight
 Texture:GetTextInsets
 Texture:GetTextScale
 Texture:GetTextWidth
@@ -10275,6 +10576,7 @@ Texture:HasFixedFrameStrata
 Texture:HasFocus
 Texture:HasMessageByID
 Texture:HasText
+Texture:HasTrackableSource
 Texture:HighlightText
 Texture:Insert
 Texture:InterceptStartDrag
@@ -10294,6 +10596,7 @@ Texture:IsEventRegistered
 Texture:IsFrameBuffer
 Texture:IsGamePadButtonEnabled
 Texture:IsGamePadStickEnabled
+Texture:IsGeoReady
 Texture:IsHighlightLocked
 Texture:IsIgnoringChildrenForBounds
 Texture:IsInIMECompositionMode
@@ -10316,6 +10619,7 @@ Texture:IsReverse
 Texture:IsScrollAllowed
 Texture:IsSecureText
 Texture:IsSetToFinalAlpha
+Texture:IsSlotAllowed
 Texture:IsStatusBarDesaturated
 Texture:IsStopped
 Texture:IsTextCopyable
@@ -10348,6 +10652,7 @@ Texture:RegisterBackgroundTexture
 Texture:RegisterCallback
 Texture:RegisterEvent
 Texture:RegisterEventCallback
+Texture:RegisterFontString
 Texture:RegisterFontStrings
 Texture:RegisterForClicks
 Texture:RegisterForDrag
@@ -10471,6 +10776,7 @@ Texture:SetFading
 Texture:SetFillAlpha
 Texture:SetFillStyle
 Texture:SetFillTexture
+Texture:SetFixedColor
 Texture:SetFixedFrameLevel
 Texture:SetFixedFrameStrata
 Texture:SetFixedSize
@@ -10551,6 +10857,7 @@ Texture:SetMinimumCountdownDuration
 Texture:SetMinimumWidth
 Texture:SetModel
 Texture:SetModelAlpha
+Texture:SetModelByCreatureDisplayID
 Texture:SetModelDrawLayer
 Texture:SetModelScale
 Texture:SetMotionScriptsWhileDisabled
@@ -10564,6 +10871,7 @@ Texture:SetNormalTexture
 Texture:SetNumber
 Texture:SetNumeric
 Texture:SetNumericFullRange
+Texture:SetObeyHideInTransmogFlag
 Texture:SetObeyStepOnDrag
 Texture:SetObjectTooltipPosition
 Texture:SetOffset
@@ -10600,6 +10908,7 @@ Texture:SetQuestBlobOutsideTexture
 Texture:SetQuestBlobRingAlpha
 Texture:SetQuestBlobRingScalar
 Texture:SetQuestBlobRingTexture
+Texture:SetResetCallback
 Texture:SetResizable
 Texture:SetResizeBounds
 Texture:SetReverse
@@ -10685,6 +10994,8 @@ Texture:SetUpdateCallback
 Texture:SetUseAuraDisplayTime
 Texture:SetUseCircularEdge
 Texture:SetUseGBuffer
+Texture:SetUseTransmogChoices
+Texture:SetUseTransmogSkin
 Texture:SetUserPlaced
 Texture:SetUsingParentLevel
 Texture:SetValue
@@ -10711,12 +11022,17 @@ Texture:TransformMessages
 Texture:TransitionToModelSceneID
 Texture:TriggerEvent
 Texture:TryApplyDefaultText
+Texture:TryOn
+Texture:UnRegisterEvent
+Texture:Undress
+Texture:UndressSlot
 Texture:UnlockHighlight
 Texture:UnregisterAllEvents
 Texture:UnregisterCallback
 Texture:UnregisterEvent
 Texture:UnregisterForWidgetSet
 Texture:UpdateBlips
+Texture:UpdateCamera
 Texture:UpdateHeight
 Texture:UpdateItemContextMatching
 Texture:UpdateMouseOverTooltip

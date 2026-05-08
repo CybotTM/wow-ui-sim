@@ -46,6 +46,8 @@ end
 return snapshot
 "#;
 
+const FRAME_METHODS_SECTION_START: &str = "[\"frame_methods\"] = {";
+
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
@@ -97,10 +99,6 @@ fn parse_diff_file(path: &str) -> BTreeMap<String, BTreeSet<String>> {
     }
 
     entries
-}
-
-fn is_frame_methods_section_start(line: &str) -> bool {
-    line == "[\"frame_methods\"] = {"
 }
 
 fn parse_discovery_method_name(line: &str) -> Option<&str> {
@@ -164,7 +162,7 @@ fn parse_discovery_frame_methods(path: &str) -> BTreeMap<String, BTreeSet<String
 
     for line in contents.lines().map(str::trim) {
         if !in_frame_methods {
-            in_frame_methods = is_frame_methods_section_start(line);
+            in_frame_methods = line == FRAME_METHODS_SECTION_START;
             continue;
         }
         if current_type.is_none() && line == "}," {
