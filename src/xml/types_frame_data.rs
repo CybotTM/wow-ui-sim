@@ -87,3 +87,61 @@ impl_frame_data_for!(
     FrameElement,
     "Returns `None` for `ScopedModifier` which has no `FrameXml`."
 );
+
+#[cfg(test)]
+mod tests {
+    use super::super::types::ScopedModifierXml;
+    use super::*;
+
+    #[test]
+    fn xml_element_frame_data_returns_frame_and_tag() {
+        let frame = FrameXml {
+            name: Some("MapSceneFrame".to_string()),
+            ..FrameXml::default()
+        };
+
+        let element = XmlElement::MapScene(frame);
+        let (frame_data, tag) = element
+            .as_frame_data()
+            .expect("MapScene should be frame-like");
+
+        assert_eq!(tag, "MapScene");
+        assert_eq!(frame_data.name.as_deref(), Some("MapSceneFrame"));
+    }
+
+    #[test]
+    fn xml_element_frame_data_ignores_non_frame_variants() {
+        assert!(XmlElement::Unknown.as_frame_data().is_none());
+    }
+
+    #[test]
+    fn frame_element_frame_data_returns_frame_and_tag() {
+        let frame = FrameXml {
+            parent_key: Some("ScrollChild".to_string()),
+            ..FrameXml::default()
+        };
+
+        let element = FrameElement::EventScrollFrame(frame);
+        let (frame_data, tag) = element
+            .as_frame_data()
+            .expect("EventScrollFrame should be frame-like");
+
+        assert_eq!(tag, "EventScrollFrame");
+        assert_eq!(frame_data.parent_key.as_deref(), Some("ScrollChild"));
+    }
+
+    #[test]
+    fn frame_element_frame_data_ignores_scoped_modifier() {
+        let scoped = ScopedModifierXml {
+            forbidden: Some(true),
+            full_lockdown: None,
+            elements: Vec::new(),
+        };
+
+        assert!(
+            FrameElement::ScopedModifier(scoped)
+                .as_frame_data()
+                .is_none()
+        );
+    }
+}
