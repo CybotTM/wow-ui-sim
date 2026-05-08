@@ -79,10 +79,6 @@ fn blizzard_toc(addon: &str, toc_name: &str) -> PathBuf {
     blizzard_ui_dir().join(addon).join(toc_name)
 }
 
-fn click_targeting_addons() -> &'static [(&'static str, &'static str)] {
-    CLICK_TARGETING_ADDONS
-}
-
 pub(crate) fn env_with_full_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("create env");
     env.set_screen_size(1024.0, 768.0);
@@ -93,7 +89,7 @@ pub(crate) fn env_with_full_ui() -> WowLuaEnv {
         state.addon_base_paths = vec![ui.clone()];
     }
 
-    for (name, toc_name) in click_targeting_addons() {
+    for (name, toc_name) in CLICK_TARGETING_ADDONS {
         let toc_path = blizzard_toc(name, toc_name);
         let _ = load_addon(&env.loader_env(), &toc_path);
         env.apply_runtime_addon_load_workarounds(name);
