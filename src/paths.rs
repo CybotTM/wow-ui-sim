@@ -52,7 +52,28 @@ pub fn default_addons_path() -> PathBuf {
 /// Prefer the repo symlink at `Interface/BlizzardUI`, but fall back to the
 /// vendored addon tree when the symlink is missing.
 pub fn default_blizzard_ui_addons_path() -> crate::Result<PathBuf> {
-    resolve_blizzard_ui_addons_path(Path::new(env!("CARGO_MANIFEST_DIR")))
+    if let Some(path) = env_path("WOW_SIM_BLIZZARD_UI_PATH") {
+        if path.is_dir() {
+            return Ok(path);
+        }
+        return Err(crate::Error::Other(format!(
+            "WOW_SIM_BLIZZARD_UI_PATH does not exist or is not a directory: {}",
+            path.display()
+        )));
+    }
+
+    let mut last_error = None;
+    for root in runtime_roots() {
+        match resolve_blizzard_ui_addons_path(&root) {
+            Ok(path) => return Ok(path),
+            Err(err) => last_error = Some(err),
+        }
+    }
+    Err(last_error.unwrap_or_else(|| {
+        crate::Error::Other(
+            "missing Blizzard UI addon tree; run ./scripts/setup-blizzard-ui.sh from the release or repo root.".to_string(),
+        )
+    }))
 }
 
 pub fn default_wtf_config() -> Option<WtfConfig> {
@@ -225,6 +246,20 @@ fn wow_install_roots() -> Vec<PathBuf> {
         roots.push(PathBuf::from(r"C:\Program Files\World of Warcraft"));
     }
 
+    roots
+}
+
+fn runtime_roots() -> Vec<PathBuf> {
+    let mut roots = Vec::new();
+    if let Ok(cwd) = std::env::current_dir() {
+        roots.push(cwd);
+    }
+    if let Ok(exe) = std::env::current_exe()
+        && let Some(parent) = exe.parent()
+    {
+        roots.push(parent.to_path_buf());
+    }
+    roots.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")));
     roots
 }
 
