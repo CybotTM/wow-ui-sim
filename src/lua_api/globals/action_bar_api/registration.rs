@@ -43,6 +43,29 @@ const BASIC_SLOT_PREDICATE_METHODS: &[ActionBarMethod] = &[
     ("IsPressHoldReleaseSpell", is_press_hold_release_spell),
 ];
 
+const COOLDOWN_SLOT_METHODS: &[ActionBarMethod] = &[
+    (
+        "GetActionLossOfControlCooldown",
+        get_action_loss_of_control_cooldown,
+    ),
+    (
+        "GetActionLossOfControlCooldownInfo",
+        get_action_loss_of_control_cooldown_info,
+    ),
+    ("UsesActionText", uses_action_text),
+    ("GetActionChargeDuration", get_action_charge_duration),
+    ("GetActionCooldownDuration", get_action_cooldown_duration),
+    (
+        "GetActionLossOfControlCooldownDuration",
+        get_action_loss_of_control_cooldown_duration,
+    ),
+    ("GetSpell", get_spell),
+    (
+        "GetItemActionOnEquipSpellID",
+        get_item_action_on_equip_spell_id,
+    ),
+];
+
 const SLOT_MUTATION_METHODS: &[ActionBarMethod] = &[
     ("PutActionInSlot", put_action_in_slot),
     ("ForceUpdateAction", force_update_action),
@@ -112,29 +135,7 @@ fn register_basic_slot_methods(state: &mut LuaState, table_ref: GcRef<Table>) ->
 }
 
 fn register_cooldown_slot_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
-    let methods: [(&'static str, RustFn); 8] = [
-        (
-            "GetActionLossOfControlCooldown",
-            get_action_loss_of_control_cooldown,
-        ),
-        (
-            "GetActionLossOfControlCooldownInfo",
-            get_action_loss_of_control_cooldown_info,
-        ),
-        ("UsesActionText", uses_action_text),
-        ("GetActionChargeDuration", get_action_charge_duration),
-        ("GetActionCooldownDuration", get_action_cooldown_duration),
-        (
-            "GetActionLossOfControlCooldownDuration",
-            get_action_loss_of_control_cooldown_duration,
-        ),
-        ("GetSpell", get_spell),
-        (
-            "GetItemActionOnEquipSpellID",
-            get_item_action_on_equip_spell_id,
-        ),
-    ];
-    install_action_bar_methods(state, table_ref, &methods)
+    install_action_bar_methods(state, table_ref, COOLDOWN_SLOT_METHODS)
 }
 
 fn register_pet_slot_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
