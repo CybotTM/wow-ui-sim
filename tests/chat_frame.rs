@@ -7,6 +7,8 @@
 mod common;
 #[path = "chat_frame/layout_lock.rs"]
 mod layout_lock;
+#[path = "chat_frame/scrollbar.rs"]
+mod scrollbar;
 
 #[cfg(feature = "gui")]
 use std::cell::RefCell;
@@ -669,62 +671,6 @@ fn test_chat_voice_button_uses_template_sized_centered_icon() {
             "voice button icon should stay centered with zero offset, got ({}, {})",
             surface.offset_x,
             surface.offset_y
-        );
-    }
-}
-
-#[test]
-fn test_chat_scrollbar_stays_attached_to_chat_frame_right_edge() {
-    test_timeout! {
-        let env = setup_env();
-        let layout = chat_layout_debug(&env);
-
-        let (chat_x, _chat_y, chat_w, _chat_h): (f64, f64, f64, f64) = env
-            .eval("local x, y, w, h = ChatFrame1:GetRect(); return x, y, w, h")
-            .expect("ChatFrame1:GetRect failed");
-        let (scroll_x, _scroll_y, scroll_w, _scroll_h): (f64, f64, f64, f64) = env
-            .eval("local x, y, w, h = ChatFrame1.ScrollBar:GetRect(); return x, y, w, h")
-            .expect("ChatFrame1.ScrollBar:GetRect failed");
-        let (_edit_x, _edit_y, edit_w, _edit_h): (f64, f64, f64, f64) = env
-            .eval("local x, y, w, h = ChatFrame1EditBox:GetRect(); return x, y, w, h")
-            .expect("ChatFrame1EditBox:GetRect failed");
-        let points: String = env
-            .eval(
-                r#"
-            local out = {}
-            for i = 1, ChatFrame1.ScrollBar:GetNumPoints() do
-                local point, rel, relPoint, x, y = ChatFrame1.ScrollBar:GetPoint(i)
-                local relName = rel and rel:GetName() or "$parent"
-                table.insert(out, string.format("%s->%s:%s(%.0f,%.0f)", point, relName, relPoint, x, y))
-            end
-            table.sort(out)
-            return table.concat(out, " | ")
-        "#,
-            )
-            .expect("ChatFrame1.ScrollBar:GetPoint failed");
-
-        let chat_right = chat_x + chat_w;
-        assert!(
-            (scroll_x - chat_right).abs() <= 30.0,
-            "ChatFrame1.ScrollBar should stay near ChatFrame1 right edge. chat=({:.0}, w={:.0}) scroll=({:.0}, w={:.0}) anchors={}\n{}",
-            chat_x,
-            chat_w,
-            scroll_x,
-            scroll_w,
-            points,
-            layout
-        );
-        assert!(
-            (4.0..=32.0).contains(&scroll_w),
-            "ChatFrame1.ScrollBar width should stay sane, got {scroll_w}. anchors={points}\n{layout}"
-        );
-        assert!(
-            (350.0..=600.0).contains(&edit_w),
-            "ChatFrame1EditBox width should stay sane, got {edit_w}. scrollbar anchors={points}\n{layout}"
-        );
-        assert!(
-            !points.contains("TOP->$parent:TOP") && !points.contains("BOTTOM->$parent:BOTTOM"),
-            "ChatFrame1.ScrollBar should not keep inner Track anchors after startup: {points}\n{layout}"
         );
     }
 }
