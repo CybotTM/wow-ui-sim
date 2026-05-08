@@ -62,3 +62,19 @@ pub fn clear_frame_taint(state: &mut LuaState) {
         ci.taint = None;
     }
 }
+
+pub fn clear_active_stack_taint(state: &mut LuaState) -> Vec<Option<String>> {
+    let active_depth = state.ci.saturating_add(1);
+    let mut saved_taints = Vec::with_capacity(active_depth);
+    for call_info in state.call_stack.iter_mut().take(active_depth) {
+        saved_taints.push(call_info.taint.clone());
+        call_info.taint = None;
+    }
+    saved_taints
+}
+
+pub fn restore_active_stack_taint(state: &mut LuaState, saved_taints: Vec<Option<String>>) {
+    for (call_info, taint) in state.call_stack.iter_mut().zip(saved_taints) {
+        call_info.taint = taint;
+    }
+}

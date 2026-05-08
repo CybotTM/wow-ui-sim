@@ -8,6 +8,14 @@ Updated `investigations/casc-fdid-1579624-root-debug.md` with known-good
 FDID `615960` / `fonts/frizqt__.ttf` resolution data, hashes, and extraction
 proof for Windows root parser debugging.
 
+## [2026-05-08] add | Windows CASC Blizzard taint
+
+Created `investigations/windows-casc-blizzard-taint.md` after fixing Windows
+startup against the CASC-synced Blizzard UI cache. Documented the TOC and
+`Blizzard_` folder-name taint semantics, plus the runtime `C_AddOns.LoadAddOn`
+stack-taint clearing needed for Blizzard/secure TOCs loaded under a tainted
+caller.
+
 ## [2026-05-08] ingest | CASC FDID 1579624 root debug
 
 Created `investigations/casc-fdid-1579624-root-debug.md` with the verified

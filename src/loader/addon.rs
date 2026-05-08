@@ -468,9 +468,11 @@ fn register_loading_addon(
 }
 
 fn is_blizzard_addon(toc: &TocFile) -> bool {
-    // Blizzard base UI code runs securely (no taint). Third-party addons
-    // get tainted with their folder name so issecurevariable tracks the source.
-    toc.addon_dir.to_string_lossy().contains("BlizzardUI")
+    // Blizzard UI source can come from a repo symlink or the CASC cache, so
+    // path shape is not a security signal. Retail marks Blizzard UI TOCs with
+    // AllowLoad, while a few secure-only Blizzard helpers only advertise
+    // UseSecureEnvironment.
+    toc.loads_as_blizzard_code()
 }
 
 /// Find or auto-register addon in the addon list, returning its index.
@@ -619,7 +621,10 @@ mod tests {
     fn blizzard_talent_ui_context_is_not_tainted() {
         let env = WowLuaEnv::new().unwrap();
         let addon_dir = Path::new("/repo/Interface/BlizzardUI/Blizzard_TalentUI");
-        let toc = TocFile::parse(addon_dir, "## Title: Blizzard Talent UI\nMain.lua");
+        let toc = TocFile::parse(
+            addon_dir,
+            "## Title: Blizzard Talent UI\n## AllowLoad: Game\nMain.lua",
+        );
 
         let ctx = build_addon_context(&env.loader_env(), &toc, "Blizzard_TalentUI").unwrap();
 
@@ -627,6 +632,77 @@ mod tests {
             !ctx.taint,
             "Blizzard_TalentUI loader context must not stamp addon taint"
         );
+    }
+
+    #[test]
+    fn cached_blizzard_ui_context_is_not_tainted() {
+        let env = WowLuaEnv::new().unwrap();
+        let addon_dir =
+            Path::new(r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\Blizzard_Menu");
+        let toc = TocFile::parse(
+            addon_dir,
+            "## Title: Blizzard Menu\n## AllowLoad: Both\nMenu.lua",
+        );
+
+        let ctx = build_addon_context(&env.loader_env(), &toc, "Blizzard_Menu").unwrap();
+
+        assert!(
+            !ctx.taint,
+            "CASC-cached Blizzard UI source must not stamp addon taint"
+        );
+    }
+
+    #[test]
+    fn secure_environment_context_is_not_tainted() {
+        let env = WowLuaEnv::new().unwrap();
+        let addon_dir = Path::new(
+            r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\Blizzard_ClassTrialSecure",
+        );
+        let toc = TocFile::parse(
+            addon_dir,
+            "## Title: Blizzard Class Trial Secure\n## UseSecureEnvironment: 1\nSecure.lua",
+        );
+
+        let ctx =
+            build_addon_context(&env.loader_env(), &toc, "Blizzard_ClassTrialSecure").unwrap();
+
+        assert!(
+            !ctx.taint,
+            "secure-environment Blizzard helpers must not stamp addon taint"
+        );
+    }
+
+    #[test]
+    fn blizzard_folder_context_is_not_tainted_without_allow_load() {
+        let env = WowLuaEnv::new().unwrap();
+        let addon_dir = Path::new(
+            r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\Blizzard_PersonalResourceDisplay",
+        );
+        let toc = TocFile::parse(
+            addon_dir,
+            "## Title: Blizzard_PersonalResourceDisplay\n## AllowLoadGameType: mainline\nMain.lua",
+        );
+
+        let ctx =
+            build_addon_context(&env.loader_env(), &toc, "Blizzard_PersonalResourceDisplay")
+                .unwrap();
+
+        assert!(
+            !ctx.taint,
+            "internal Blizzard_* addon folders must not stamp addon taint"
+        );
+    }
+
+    #[test]
+    fn path_alone_does_not_make_addon_untainted() {
+        let env = WowLuaEnv::new().unwrap();
+        let addon_dir =
+            Path::new(r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\TestAddon");
+        let toc = TocFile::parse(addon_dir, "## Title: TestAddon\nMain.lua");
+
+        let ctx = build_addon_context(&env.loader_env(), &toc, "TestAddon").unwrap();
+
+        assert!(ctx.taint, "paths are not trusted as Blizzard taint semantics");
     }
 
     #[test]

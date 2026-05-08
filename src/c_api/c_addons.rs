@@ -579,7 +579,7 @@ fn load_runtime_addon_with_dependencies(
     }
 
     crate::loader::trace_load_addon(origin, format!("files {addon_name}"));
-    let result = crate::loader::load_addon_from_toc(loader_env, &toc)?;
+    let result = load_runtime_addon_files(state, loader_env, &toc)?;
     for warning in &result.warnings {
         crate::loader::trace_load_addon(origin, format!("warning {addon_name}: {warning}"));
     }
@@ -589,6 +589,21 @@ fn load_runtime_addon_with_dependencies(
     fire_addon_loaded(state, loader_env, addon_name);
     crate::loader::trace_load_addon(origin, format!("event {addon_name}"));
     Ok(())
+}
+
+fn load_runtime_addon_files(
+    state: &mut LuaState,
+    loader_env: &LoaderEnv<'_>,
+    toc: &crate::toc::TocFile,
+) -> Result<crate::loader::LoadResult, LoadError> {
+    if !toc.loads_as_blizzard_code() {
+        return crate::loader::load_addon_from_toc(loader_env, toc);
+    }
+
+    let saved_taints = crate::lua_api::taint::clear_active_stack_taint(state);
+    let result = crate::loader::load_addon_from_toc(loader_env, toc);
+    crate::lua_api::taint::restore_active_stack_taint(state, saved_taints);
+    result
 }
 
 fn runtime_addon_dependencies(state: &LuaState, toc: &crate::toc::TocFile) -> Vec<String> {

@@ -377,6 +377,23 @@ impl TocFile {
     pub fn is_blizzard_addon(&self) -> bool {
         self.metadata.contains_key("AllowLoad")
     }
+
+    /// Check if this TOC should execute without addon taint.
+    ///
+    /// Most Blizzard UI TOCs advertise `AllowLoad`; a few secure helper TOCs
+    /// only advertise `UseSecureEnvironment`; other internal Blizzard addons
+    /// rely on the signed `Blizzard_` folder-name convention that also drives
+    /// `C_AddOns.GetAddOnSecurity`.
+    pub fn loads_as_blizzard_code(&self) -> bool {
+        self.is_blizzard_addon() || self.is_secure_env() || self.folder_name_starts_with_blizzard()
+    }
+
+    fn folder_name_starts_with_blizzard(&self) -> bool {
+        self.addon_dir
+            .file_name()
+            .and_then(|name| name.to_str())
+            .is_some_and(|name| name.starts_with("Blizzard_"))
+    }
 }
 
 #[cfg(test)]
