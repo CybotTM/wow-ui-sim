@@ -25,12 +25,16 @@ FONT_PATHS = [
     "fonts/frizqt__.ttf",
     "fonts/arialn.ttf",
     "fonts/frizqt___cyr.ttf",
+    "fonts/arheiuhk_bd.ttf",
+    "fonts/morpheus.ttf",
+    "fonts/skurri.ttf",
 ]
 PROBE_PATHS = [
     "interface/buttons/ui-panel-button-up.blp",
     "interface/buttons/ui-panel-button-down.blp",
     "interface/buttons/ui-panel-button-highlight.blp",
     "interface/buttons/ui-panel-button-disabled.blp",
+    "interface/glues/models/ui_nightelf/ui_nightelf.mdx",
 ]
 SOUNDKIT_FDIDS = [
     567407,
