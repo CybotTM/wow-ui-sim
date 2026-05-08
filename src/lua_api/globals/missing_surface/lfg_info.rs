@@ -91,9 +91,17 @@ fn push_lfg_category_info(state: &mut LuaState, info: Option<LfgCategoryInfo>) {
 }
 
 fn populate_lfg_category_table(state: &mut LuaState, table: Val, info: &LfgCategoryInfo) {
+    populate_lfg_category_identity_fields(state, table.clone(), info);
+    populate_lfg_category_flag_fields(state, table, info);
+}
+
+fn populate_lfg_category_identity_fields(state: &mut LuaState, table: Val, info: &LfgCategoryInfo) {
     let name_val = create_string(state, &info.name);
     table_set(state, table.clone(), "name", name_val);
     table_set(state, table.clone(), "order", Val::Num(info.order as f64));
+}
+
+fn populate_lfg_category_flag_fields(state: &mut LuaState, table: Val, info: &LfgCategoryInfo) {
     table_set(
         state,
         table.clone(),

@@ -132,3 +132,36 @@ fn get_lfg_category_info_reflects_state_mutation() {
     assert_eq!(name, "Scenarios");
     assert_eq!(order, 3);
 }
+
+#[test]
+fn get_lfg_category_info_returns_state_flags() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.lfg_category_info.insert(
+            9,
+            LfgCategoryInfo {
+                name: "Flagged".into(),
+                order: 9,
+                separate_recommended: true,
+                prefer_current_area: true,
+                allow_cross_faction: true,
+                auto_choose_activity: true,
+                show_playstyle_dropdown: true,
+            },
+        );
+    }
+    let flags: (bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local info = C_LFGInfo.GetLFGCategoryInfo(9)
+            return info.separateRecommended,
+                   info.preferCurrentArea,
+                   info.allowCrossFaction,
+                   info.autoChooseActivity,
+                   info.showPlaystyleDropdown
+            "#,
+        )
+        .unwrap();
+    assert_eq!(flags, (true, true, true, true, true));
+}
