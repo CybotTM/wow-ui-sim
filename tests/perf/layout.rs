@@ -452,6 +452,10 @@ fn seed_perf_tooltip(env: &WowLuaEnv) {
 }
 
 fn perf_tooltip_seed_lua() -> String {
+    format!("{}\n{}", perf_tooltip_owner_lua(), perf_tooltip_lines_lua())
+}
+
+fn perf_tooltip_owner_lua() -> String {
     format!(
         r#"
         if not _G.{owner_name} then
@@ -460,7 +464,14 @@ fn perf_tooltip_seed_lua() -> String {
             owner:SetPoint("CENTER")
             owner:Show()
         end
+"#,
+        owner_name = PERF_TOOLTIP_OWNER_NAME,
+    )
+}
 
+fn perf_tooltip_lines_lua() -> String {
+    format!(
+        r#"
         GameTooltip:SetOwner(_G.{owner_name}, "ANCHOR_NONE")
         GameTooltip:ClearLines()
         GameTooltip:AddLine("{header}")
