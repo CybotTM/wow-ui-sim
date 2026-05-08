@@ -73,7 +73,7 @@ fn load_atlas_data(wow_data: &Path) -> Result<AtlasData, Box<dyn std::error::Err
 }
 
 fn slice_data_path(wow_data: &Path) -> std::path::PathBuf {
-    let local = Path::new("data/UiTextureAtlasElementSliceData.csv");
+    let local = Path::new("data/db2/UiTextureAtlasElementSliceData.csv");
     if local.exists() {
         local.to_path_buf()
     } else {
