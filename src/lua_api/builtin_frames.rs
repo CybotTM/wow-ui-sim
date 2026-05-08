@@ -169,16 +169,25 @@ fn create_tooltip_frames(widgets: &mut WidgetRegistry, ui_parent_id: u64, owner:
 
 fn register_standard_tooltips(widgets: &mut WidgetRegistry, ui_parent_id: u64, owner: u16) {
     for name in STANDARD_TOOLTIP_FRAMES {
-        register_hidden_frame_with_strata(
-            widgets,
-            WidgetType::GameTooltip,
-            name,
-            Some(ui_parent_id),
-            Some((128.0, 64.0)),
-            owner,
-            FrameStrata::Tooltip,
-        );
+        register_standard_tooltip(widgets, ui_parent_id, owner, name);
     }
+}
+
+fn register_standard_tooltip(
+    widgets: &mut WidgetRegistry,
+    ui_parent_id: u64,
+    owner: u16,
+    name: &str,
+) {
+    register_hidden_frame_with_strata(
+        widgets,
+        WidgetType::GameTooltip,
+        name,
+        Some(ui_parent_id),
+        Some((128.0, 64.0)),
+        owner,
+        FrameStrata::Tooltip,
+    );
 }
 
 const STANDARD_TOOLTIP_FRAMES: &[&str] = &[
