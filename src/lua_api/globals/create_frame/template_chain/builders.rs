@@ -576,20 +576,7 @@ fn build_conditional_self_field_handler(
     let field = create_string(state, field);
     let builder = load_template(
         state,
-        r#"
-            local field, then_handler, else_handler = ...
-            return function(self, ...)
-                if self[field] then
-                    if then_handler then
-                        return then_handler(self, ...)
-                    end
-                    return
-                end
-                if else_handler then
-                    return else_handler(self, ...)
-                end
-            end
-        "#,
+        TEMPLATE_CONDITIONAL_SELF_FIELD,
         "template-inline-conditional-self-field",
     )?;
     crate::lua_api::methods::call_function_state(
@@ -603,6 +590,21 @@ fn build_conditional_self_field_handler(
     )
     .map(Some)
 }
+
+const TEMPLATE_CONDITIONAL_SELF_FIELD: &str = r#"
+    local field, then_handler, else_handler = ...
+    return function(self, ...)
+        if self[field] then
+            if then_handler then
+                return then_handler(self, ...)
+            end
+            return
+        end
+        if else_handler then
+            return else_handler(self, ...)
+        end
+    end
+"#;
 
 fn chain_optional_handlers(
     state: &mut LuaState,
