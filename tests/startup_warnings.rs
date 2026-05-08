@@ -255,16 +255,16 @@ fn load_blizzard_addon_recursive(
     loaded: &mut HashSet<String>,
     warnings: &mut Vec<String>,
 ) {
-    if loaded.contains(addon_name) || loading.contains(addon_name) {
+    if already_loading_or_loaded(addon_name, loading, loaded) {
         return;
     }
-    loading.insert(addon_name.to_string());
+    mark_addon_loading(addon_name, loading);
 
     let Some(toc_path) = addons.get(addon_name) else {
         if required {
             panic!("addon {addon_name} should exist");
         }
-        loading.remove(addon_name);
+        abandon_addon_load(addon_name, loading);
         return;
     };
     let toc = parse_blizzard_addon_toc(addon_name, toc_path);
@@ -272,7 +272,31 @@ fn load_blizzard_addon_recursive(
     load_toc_dependencies(env, addons, addon_name, &toc, loading, loaded, warnings);
     warnings.extend(load_blizzard_addon_warnings(env, addon_name, toc_path));
 
+    finish_addon_load(addon_name, loading, loaded);
+}
+
+fn already_loading_or_loaded(
+    addon_name: &str,
+    loading: &HashSet<String>,
+    loaded: &HashSet<String>,
+) -> bool {
+    loaded.contains(addon_name) || loading.contains(addon_name)
+}
+
+fn mark_addon_loading(addon_name: &str, loading: &mut HashSet<String>) {
+    loading.insert(addon_name.to_string());
+}
+
+fn abandon_addon_load(addon_name: &str, loading: &mut HashSet<String>) {
     loading.remove(addon_name);
+}
+
+fn finish_addon_load(
+    addon_name: &str,
+    loading: &mut HashSet<String>,
+    loaded: &mut HashSet<String>,
+) {
+    abandon_addon_load(addon_name, loading);
     loaded.insert(addon_name.to_string());
 }
 
