@@ -270,17 +270,21 @@ fn load_blizzard_addon_recursive(
     let toc = parse_blizzard_addon_toc(addon_name, toc_path);
     load_startup_warning_foundations(env, addons, addon_name, loading, loaded, warnings);
     load_toc_dependencies(env, addons, addon_name, &toc, loading, loaded, warnings);
+    warnings.extend(load_blizzard_addon_warnings(env, addon_name, toc_path));
 
-    let result = load_addon(&env.loader_env(), toc_path)
-        .unwrap_or_else(|error| panic!("{addon_name} should load: {error}"));
-    warnings.extend(
-        result
-            .warnings
-            .into_iter()
-            .map(|warning| format!("[load {addon_name}] {warning}")),
-    );
     loading.remove(addon_name);
     loaded.insert(addon_name.to_string());
+}
+
+fn load_blizzard_addon_warnings(env: &WowLuaEnv, addon_name: &str, toc_path: &Path) -> Vec<String> {
+    let result = load_addon(&env.loader_env(), toc_path)
+        .unwrap_or_else(|error| panic!("{addon_name} should load: {error}"));
+
+    result
+        .warnings
+        .into_iter()
+        .map(|warning| format!("[load {addon_name}] {warning}"))
+        .collect()
 }
 
 fn parse_blizzard_addon_toc(addon_name: &str, toc_path: &Path) -> TocFile {
