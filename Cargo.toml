@@ -30,6 +30,7 @@ walkdir = "2"
 phf = { version = "0.11", features = ["macros"] }
 phf_codegen = "0.11"
 rodio = { version = "0.21", optional = true }
+winapi = { version = "0.3", features = ["winuser"], optional = true }
 
 # Iced GUI (optional, gated behind "gui" feature)
 iced = { version = "0.14.0", optional = true, features = ["advanced", "canvas", "image", "tokio", "wgpu"] }
@@ -70,7 +71,7 @@ sha2 = "0.10"
 # to produce a fully static binary not tied to a specific rustc version.
 default = ["sound", "gui", "casc", "fast-build"]
 sound = ["rodio"]
-gui = ["casc", "dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp"]
+gui = ["casc", "dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp", "dep:winapi"]
 casc = ["dep:asset-resolver"]
 fast-build = ["gui", "dep:iced-dynamic"]
 rehash-stats = ["rilua/rehash-stats"]

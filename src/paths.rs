@@ -62,14 +62,18 @@ pub fn default_blizzard_ui_addons_path() -> crate::Result<PathBuf> {
         )));
     }
 
-    let mut last_error = None;
+    let mut first_error = None;
     for root in runtime_roots() {
         match resolve_blizzard_ui_addons_path(&root) {
             Ok(path) => return Ok(path),
-            Err(err) => last_error = Some(err),
+            Err(err) => {
+                if first_error.is_none() {
+                    first_error = Some(err);
+                }
+            }
         }
     }
-    Err(last_error.unwrap_or_else(|| {
+    Err(first_error.unwrap_or_else(|| {
         crate::Error::Other(
             "missing Blizzard UI addon tree; run ./scripts/setup-blizzard-ui.sh from the release or repo root.".to_string(),
         )

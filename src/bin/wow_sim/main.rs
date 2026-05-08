@@ -161,9 +161,12 @@ impl Args {
     }
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
     wow_ui_sim::stack::ensure_large_stack();
-    run_main()
+    if let Err(error) = run_main() {
+        report_fatal_error(error.as_ref());
+        std::process::exit(1);
+    }
 }
 
 fn run_main() -> Result<(), Box<dyn std::error::Error>> {
@@ -173,7 +176,7 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let screen = args.effective_screen();
     let saved_stdout = redirect_if_quiet(&args);
-    let (env, font_system, saved_vars) = init_and_load(&args, screen);
+    let (env, font_system, saved_vars) = init_and_load(&args, screen)?;
 
     let dispatch = CommandDispatch {
         command: args.command,
@@ -206,14 +209,17 @@ fn redirect_if_quiet(args: &Args) -> Option<i32> {
 fn init_and_load(
     args: &Args,
     screen: ScreenKind,
-) -> (
-    WowLuaEnv,
-    Rc<RefCell<WowFontSystem>>,
-    Option<SavedVariablesManager>,
-) {
+) -> Result<
+    (
+        WowLuaEnv,
+        Rc<RefCell<WowFontSystem>>,
+        Option<SavedVariablesManager>,
+    ),
+    Box<dyn std::error::Error>,
+> {
     let env = WowLuaEnv::new().expect("failed to create Lua env");
     let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
-    init_environment(args, &env, &font_system);
+    init_environment(args, &env, &font_system)?;
     env.set_screen_mode(screen);
 
     // Pause GC across addon loading — addons allocate monotonically
@@ -246,7 +252,7 @@ fn init_and_load(
         "[Startup] GC restart complete in {:.2?}",
         gc_restart_started.elapsed()
     ));
-    (env, font_system, saved_vars)
+    Ok((env, font_system, saved_vars))
 }
 
 fn resolve_exec_lua(arg: &Option<String>) -> Option<String> {
@@ -324,7 +330,11 @@ fn apply_resource_limits() {
     // unconstrained on other platforms.
 }
 
-fn init_environment(args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>) {
+fn init_environment(
+    args: &Args,
+    env: &WowLuaEnv,
+    font_system: &Rc<RefCell<WowFontSystem>>,
+) -> Result<(), Box<dyn std::error::Error>> {
     logging::init_process_start_time(env.state().borrow().start_time);
     apply_resource_limits();
     tracing_subscriber::fmt()
@@ -336,7 +346,7 @@ fn init_environment(args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFo
         let mut state = env.state().borrow_mut();
         let mut addon_base_paths = vec![
             wow_ui_sim::paths::default_blizzard_ui_addons_path()
-                .expect("missing Blizzard UI addon tree"),
+                .map_err(startup_blizzard_ui_help)?,
             PathBuf::from("./Interface/AddOns"),
         ];
         if args.is_test_command() {
@@ -345,6 +355,39 @@ fn init_environment(args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFo
         state.addon_base_paths = addon_base_paths;
     }
     wow_ui_sim::xml::register_intrinsic_templates();
+    Ok(())
+}
+
+fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Error> {
+    Box::<dyn std::error::Error>::from(format!(
+        "{error}\n\nThe release zip does not include Blizzard UI source. From the extracted release folder, run:\n\n  powershell -ExecutionPolicy Bypass -File .\\scripts\\setup-blizzard-ui.ps1\n\nThen start wow-sim.exe again."
+    ))
+}
+
+fn report_fatal_error(error: &dyn std::error::Error) {
+    eprintln!("{error}");
+    #[cfg(windows)]
+    show_windows_error_message(&error.to_string());
+}
+
+#[cfg(windows)]
+fn show_windows_error_message(message: &str) {
+    use winapi::um::winuser::{MB_ICONERROR, MB_OK, MessageBoxW};
+
+    fn wide(value: &str) -> Vec<u16> {
+        value.encode_utf16().chain(std::iter::once(0)).collect()
+    }
+
+    let title = wide("wow-ui-sim startup error");
+    let body = wide(message);
+    unsafe {
+        MessageBoxW(
+            std::ptr::null_mut(),
+            body.as_ptr(),
+            title.as_ptr(),
+            MB_OK | MB_ICONERROR,
+        );
+    }
 }
 
 use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_startup};
