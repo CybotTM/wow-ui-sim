@@ -94,16 +94,13 @@ pub fn measure_full_quad_batch_build(env: &WowLuaEnv) -> Duration {
 
 pub fn measure_dirty_tree_quad_rebuild(env: &WowLuaEnv) -> Duration {
     ensure_perf_dirty_texture_exists(env);
-
     let mut font_system = WowFontSystem::new();
     let mut glyph_atlas = GlyphAtlas::new();
     let mut strata_cache = empty_strata_cache();
     let mut snapshot_cache = empty_snapshot_cache();
-
     let mut state = env.state().borrow_mut();
     let strata_buckets = prepare_dirty_tree_strata(&mut state);
     let mut text_ctx = Some((&mut font_system, &mut glyph_atlas));
-
     prime_perf_strata_cache(
         &mut strata_cache,
         &mut snapshot_cache,
@@ -112,23 +109,36 @@ pub fn measure_dirty_tree_quad_rebuild(env: &WowLuaEnv) -> Duration {
         &strata_buckets,
     );
 
-    let _ = state.widgets.take_render_dirty_with_ids();
-    let dirty_change = perturb_perf_dirty_texture(&mut state);
-    let dirty_frames = take_incremental_dirty_frames(&mut state, dirty_change.texture_id);
-
-    let tooltip_data = collect_tooltip_data(&state);
-    let elapsed = measure_perf_strata_rebuild(
+    measure_primed_dirty_texture_rebuild(
         &mut strata_cache,
         &mut snapshot_cache,
         &mut text_ctx,
-        &state,
+        &mut state,
         &strata_buckets,
+    )
+}
+
+fn measure_primed_dirty_texture_rebuild(
+    strata_cache: &mut PerfStrataCache,
+    snapshot_cache: &mut PerfSnapshotCache,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    state: &mut SimState,
+    strata_buckets: &[Vec<u64>],
+) -> Duration {
+    let _ = state.widgets.take_render_dirty_with_ids();
+    let dirty_change = perturb_perf_dirty_texture(state);
+    let dirty_frames = take_incremental_dirty_frames(state, dirty_change.texture_id);
+    let tooltip_data = collect_tooltip_data(state);
+    let elapsed = measure_perf_strata_rebuild(
+        strata_cache,
+        snapshot_cache,
+        text_ctx,
+        state,
+        strata_buckets,
         &tooltip_data,
         dirty_frames.as_refs(),
     );
-
-    restore_perf_dirty_texture(&mut state, dirty_change);
-
+    restore_perf_dirty_texture(state, dirty_change);
     elapsed
 }
 
