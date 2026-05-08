@@ -114,17 +114,13 @@ impl WowUiPipeline {
         let vertex_buffers = [QuadVertex::desc()];
         let color_targets = [Some(Self::color_target_state(format))];
 
-        device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("WoW UI Render Pipeline"),
-            layout: Some(&pipeline_layout),
-            vertex: Self::vertex_state(&shader, &vertex_buffers),
-            fragment: Some(Self::fragment_state(&shader, &color_targets)),
-            primitive: Self::triangle_list_primitive_state(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview: None,
-            cache: None,
-        })
+        let descriptor = Self::render_pipeline_descriptor(
+            &pipeline_layout,
+            &shader,
+            &vertex_buffers,
+            &color_targets,
+        );
+        device.create_render_pipeline(&descriptor)
     }
 
     fn create_shader_module(device: &wgpu::Device) -> wgpu::ShaderModule {
@@ -144,6 +140,25 @@ impl WowUiPipeline {
             bind_group_layouts: &[uniform_bind_group_layout, texture_bind_group_layout],
             push_constant_ranges: &[],
         })
+    }
+
+    fn render_pipeline_descriptor<'a>(
+        pipeline_layout: &'a wgpu::PipelineLayout,
+        shader: &'a wgpu::ShaderModule,
+        vertex_buffers: &'a [wgpu::VertexBufferLayout<'static>],
+        color_targets: &'a [Option<wgpu::ColorTargetState>],
+    ) -> wgpu::RenderPipelineDescriptor<'a> {
+        wgpu::RenderPipelineDescriptor {
+            label: Some("WoW UI Render Pipeline"),
+            layout: Some(pipeline_layout),
+            vertex: Self::vertex_state(shader, vertex_buffers),
+            fragment: Some(Self::fragment_state(shader, color_targets)),
+            primitive: Self::triangle_list_primitive_state(),
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState::default(),
+            multiview: None,
+            cache: None,
+        }
     }
 
     fn vertex_state<'a>(
