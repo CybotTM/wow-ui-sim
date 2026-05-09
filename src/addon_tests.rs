@@ -293,7 +293,7 @@ fn read_test_results(env: &WowLuaEnv, file_name: &str) -> Result<(u32, u32), Str
             if entry.ok then
                 __wowsim_sync_passed = __wowsim_sync_passed + 1
             else
-                print("  \x1b[31m\u{{2717}}\x1b[0m {file_name} > " .. tostring(entry.name or ""))
+                print("  \27[31mX\27[0m {file_name} > " .. tostring(entry.name or ""))
                 print("    " .. tostring(entry.err or ""))
                 __wowsim_sync_failed = __wowsim_sync_failed + 1
             end

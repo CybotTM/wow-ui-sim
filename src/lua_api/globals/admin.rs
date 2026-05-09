@@ -24,7 +24,7 @@ use rilua::{LuaResult, Val};
 // entry-point file small. The parent TableBuilder chain wires these up.
 use super::admin_actionbars_bags::{
     add_bag_item, clear_action_bars, clear_action_slot, clear_bags, remove_bag_item,
-    set_action_slot,
+    set_action_slot, set_merchant_items,
 };
 use super::admin_addons::register_test_addon;
 use super::admin_auction_house::{
@@ -339,6 +339,7 @@ const COLLECTIONS_PVP_FUNCTIONS: &[(&str, RustFn)] = &[
     ("SetCampsiteCollected", set_campsite_collected),
     ("SetAchievementEarned", set_achievement_earned),
     ("HasAchievement", has_achievement),
+    ("SetMerchantItems", set_merchant_items),
     ("CollectMount", collect_mount),
     ("UncollectMount", uncollect_mount),
     ("CollectPet", collect_pet),

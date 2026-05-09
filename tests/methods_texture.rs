@@ -182,6 +182,40 @@ fn test_vertex_color_default_alpha() {
 }
 
 #[test]
+fn test_set_vertex_color_accepts_create_color_object() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "VCColorObject");
+    let (r, g, b, a): (f64, f64, f64, f64) = env
+        .eval(&format!(
+            "{tex}:SetVertexColor(CreateColor(0.9, 0.8, 0.7, 0.6)); return {tex}:GetVertexColor()"
+        ))
+        .unwrap();
+    assert!((r - 0.9).abs() < 0.001);
+    assert!((g - 0.8).abs() < 0.001);
+    assert!((b - 0.7).abs() < 0.001);
+    assert!((a - 0.6).abs() < 0.001);
+}
+
+#[test]
+fn test_set_vertex_color_object_alpha_argument_overrides_table_alpha() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "VCColorObjectAlpha");
+    let (r, g, b, a): (f64, f64, f64, f64) = env
+        .eval(&format!(
+            r#"
+            local color = CreateColor(0.25, 0.5, 0.75, 0.9)
+            {tex}:SetVertexColor(color, 0.4)
+            return {tex}:GetVertexColor()
+            "#
+        ))
+        .unwrap();
+    assert!((r - 0.25).abs() < 0.001);
+    assert!((g - 0.5).abs() < 0.001);
+    assert!((b - 0.75).abs() < 0.001);
+    assert!((a - 0.4).abs() < 0.001);
+}
+
+#[test]
 fn test_vertex_color_default_white() {
     let env = env();
     let (_, tex) = setup_texture(&env, "VCWhite");

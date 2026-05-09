@@ -129,6 +129,10 @@ impl WowFontSystem {
             load_system_font_fallback(&mut db, &mut font_map);
         }
 
+        if font_map.is_empty() {
+            db.load_system_fonts();
+        }
+
         let font_system = cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db);
         let swash_cache = cosmic_text::SwashCache::new();
 

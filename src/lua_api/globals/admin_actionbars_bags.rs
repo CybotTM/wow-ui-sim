@@ -6,8 +6,8 @@
 //! them into the A_Admin TableBuilder chain.
 
 use crate::lua_api::methods::borrow_state_mut;
-use crate::lua_bridge::FromStack;
-use rilua::LuaResult;
+use crate::lua_bridge::{FromStack, stack_val};
+use rilua::{LuaResult, Val};
 use rilua::vm::state::LuaState;
 
 // ── Action bars ───────────────────────────────────────────────────────────────
@@ -67,5 +67,30 @@ pub(super) fn remove_bag_item(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn clear_bags(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.bag_items.clear();
+    Ok(0)
+}
+
+pub(super) fn set_merchant_items(state: &mut LuaState) -> LuaResult<u32> {
+    let items = match stack_val(state, 1) {
+        Val::Table(items_ref) => state
+            .gc
+            .tables
+            .get(items_ref)
+            .map(|table| {
+                table
+                    .array_slice()
+                    .iter()
+                    .filter_map(|item| match item {
+                        Val::Num(value) if *value > 0.0 => Some(*value as u32),
+                        _ => None,
+                    })
+                    .collect()
+            })
+            .unwrap_or_default(),
+        Val::Num(value) if value > 0.0 => vec![value as u32],
+        _ => Vec::new(),
+    };
+
+    borrow_state_mut(state)?.merchant_items = items;
     Ok(0)
 }
