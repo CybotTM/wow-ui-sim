@@ -107,6 +107,11 @@ debug = "line-tables-only"
 name = "frame_positions"
 harness = false
 
+[[test]]
+name = "pandaria_installed_addons"
+path = "tests/pandaria_installed_addons.rs"
+required-features = ["client-mists"]
+
 # The `server` feature of iced-layout-inspector pulls in peercred-ipc, which is
 # Linux-only (uses SO_PEERCRED). Enable it only on unix targets.
 [target.'cfg(unix)'.dependencies]
