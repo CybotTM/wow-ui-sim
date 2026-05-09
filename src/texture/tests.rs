@@ -120,6 +120,18 @@ fn test_case_insensitive_loading() {
 }
 
 #[test]
+fn test_simcommands_minimap_placeholder_resolves_from_default_addons_path() {
+    let mut mgr = TextureManager::new().with_addons_path(crate::paths::default_addons_path());
+
+    let result = mgr.load(r"Interface\AddOns\SimCommands\textures\minimap-placeholder");
+
+    assert!(
+        result.is_some(),
+        "Should load bundled SimCommands minimap placeholder"
+    );
+}
+
+#[test]
 fn test_nonexistent_texture_returns_none() {
     let mut mgr = TextureManager::new();
 

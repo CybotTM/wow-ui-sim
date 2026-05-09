@@ -403,7 +403,9 @@ fn apply_lua_source_patch(source: &str, operations: &[LuaSourcePatchOp]) -> Stri
 fn apply_lua_source_patch_operation(source: &str, operation: &LuaSourcePatchOp) -> String {
     match operation {
         LuaSourcePatchOp::Prefix(prefix) => format!("{prefix}{source}"),
-        LuaSourcePatchOp::Replace { from, to } => replace_with_line_ending_fallback(source, from, to),
+        LuaSourcePatchOp::Replace { from, to } => {
+            replace_with_line_ending_fallback(source, from, to)
+        }
         LuaSourcePatchOp::ReplaceOnce { from, to } => {
             replace_once_with_line_ending_fallback(source, from, to)
         }

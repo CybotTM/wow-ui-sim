@@ -683,9 +683,8 @@ mod tests {
             "## Title: Blizzard_PersonalResourceDisplay\n## AllowLoadGameType: mainline\nMain.lua",
         );
 
-        let ctx =
-            build_addon_context(&env.loader_env(), &toc, "Blizzard_PersonalResourceDisplay")
-                .unwrap();
+        let ctx = build_addon_context(&env.loader_env(), &toc, "Blizzard_PersonalResourceDisplay")
+            .unwrap();
 
         assert!(
             !ctx.taint,
@@ -696,13 +695,15 @@ mod tests {
     #[test]
     fn path_alone_does_not_make_addon_untainted() {
         let env = WowLuaEnv::new().unwrap();
-        let addon_dir =
-            Path::new(r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\TestAddon");
+        let addon_dir = Path::new(r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\TestAddon");
         let toc = TocFile::parse(addon_dir, "## Title: TestAddon\nMain.lua");
 
         let ctx = build_addon_context(&env.loader_env(), &toc, "TestAddon").unwrap();
 
-        assert!(ctx.taint, "paths are not trusted as Blizzard taint semantics");
+        assert!(
+            ctx.taint,
+            "paths are not trusted as Blizzard taint semantics"
+        );
     }
 
     #[test]

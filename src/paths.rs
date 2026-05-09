@@ -137,11 +137,23 @@ fn addons_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
     let mut paths = Vec::new();
     push_env_path(&mut paths, "WOW_SIM_ADDONS_PATH");
     paths.push(PathBuf::from("./Interface/AddOns"));
+    paths.extend(bundled_addons_path_candidates());
 
     for root in install_roots_for_candidates(install_root) {
         paths.extend(addon_paths_for_install_root(&root));
     }
 
+    paths
+}
+
+fn bundled_addons_path_candidates() -> Vec<PathBuf> {
+    let mut paths = Vec::new();
+    if let Ok(exe_path) = std::env::current_exe()
+        && let Some(exe_dir) = exe_path.parent()
+    {
+        paths.push(exe_dir.join("Interface/AddOns"));
+    }
+    paths.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/AddOns"));
     paths
 }
 
@@ -229,7 +241,9 @@ fn preferred_child_dir(parent: &std::path::Path, preferred: &str) -> Option<Stri
 }
 
 fn first_existing_path(paths: Vec<PathBuf>) -> Option<PathBuf> {
-    paths.into_iter().find(|path| path.exists())
+    paths
+        .into_iter()
+        .find_map(|path| path.exists().then(|| path.canonicalize().unwrap_or(path)))
 }
 
 fn push_env_path(paths: &mut Vec<PathBuf>, var: &str) {
