@@ -64,8 +64,8 @@ jobs:
           mkdir -p "${root}"
           cp "${{ matrix.bin-dir }}/wow-sim" "${{ matrix.bin-dir }}/wow-cli" "${root}/"
           cp README.md LICENSE "${root}/"
-          mkdir -p "${root}/Interface/AddOns/SimCommands/textures"
-          cp "Interface/AddOns/SimCommands/textures/minimap-placeholder.webp" "${root}/Interface/AddOns/SimCommands/textures/"
+          mkdir -p "${root}/Interface/AddOns"
+          cp -R Interface/AddOns/Admin Interface/AddOns/SimCommands Interface/AddOns/TestFramework "${root}/Interface/AddOns/"
 
           tar -C dist -czf "dist/${name}.tar.gz" "${name}"
           echo "asset=dist/${name}.tar.gz" >> "${GITHUB_OUTPUT}"
@@ -89,8 +89,8 @@ jobs:
           New-Item -ItemType Directory -Force $root | Out-Null
           Copy-Item "${{ matrix.bin-dir }}\wow-sim.exe", "${{ matrix.bin-dir }}\wow-cli.exe" $root
           Copy-Item README.md, LICENSE $root
-          New-Item -ItemType Directory -Force "$root\Interface\AddOns\SimCommands\textures" | Out-Null
-          Copy-Item "Interface\AddOns\SimCommands\textures\minimap-placeholder.webp" "$root\Interface\AddOns\SimCommands\textures\"
+          New-Item -ItemType Directory -Force "$root\Interface\AddOns" | Out-Null
+          Copy-Item Interface\AddOns\Admin, Interface\AddOns\SimCommands, Interface\AddOns\TestFramework "$root\Interface\AddOns\" -Recurse
 
           Compress-Archive -Path $root -DestinationPath "dist\$name.zip" -Force
           "asset=dist/$name.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
