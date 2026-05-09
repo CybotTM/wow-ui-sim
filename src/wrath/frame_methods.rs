@@ -10,7 +10,7 @@ use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaApiMut, LuaResult, Val};
+use rilua::{LuaResult, Val};
 
 pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, mt, "IgnoreDepth", ignore_depth)?;

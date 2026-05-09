@@ -8,7 +8,7 @@ The Blizzard UI source isn't checked into this repo — `Interface/BlizzardUI/` 
 
 ```
 Interface/BlizzardUI/Retail      -> vendor/wow-ui-source-retail/Interface
-Interface/BlizzardUI/Wrath       -> vendor/wow-ui-source-wrath/Interface
+Interface/BlizzardUI/Wrath       -> vendor/wow-ui-source-wrath
 Interface/BlizzardUI/Mists       -> vendor/wow-ui-source-mists/Interface
 Interface/BlizzardUI/Era         -> vendor/wow-ui-source-era/Interface
 Interface/BlizzardUI/Anniversary -> vendor/wow-ui-source-anniversary/Interface
@@ -34,7 +34,7 @@ The vendor-source list is canonical:
 | Profile     | Vendor repo                                                | Pinned ref                                               |
 |-------------|------------------------------------------------------------|----------------------------------------------------------|
 | Retail      | `Gethe/wow-ui-source`                                      | `b062d332` (12.0.5)                                      |
-| Wrath       | `andrew6180/WoTLK-3.3.5-UI-Source` (verified byte-identical to `wowgaming/3.3.5-interface-files`) | `27334191` master HEAD     |
+| Wrath       | `Gethe/wow-ui-source` tag `3.3.5`                    | `c4e0255f`                                               |
 | Mists       | `Gethe/wow-ui-source` branch `classic`                     | `33d87412`                                               |
 | Era         | `Gethe/wow-ui-source` branch `classic_era`                 | `e0099491` (1.15.8 build 67156)                          |
 | Anniversary | `Gethe/wow-ui-source` branch `classic_anniversary`         | `b29b0d0a` (2.5.5 build 67157)                           |

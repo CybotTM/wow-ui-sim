@@ -11,7 +11,7 @@ Feature ↔ profile ↔ vendor source ↔ TOC suffix:
 | Feature              | Profile     | Vendor (`scripts/setup-blizzard-ui.sh`) | Primary TOC suffix |
 |----------------------|-------------|-----------------------------------------|--------------------|
 | `client-retail`      | Retail      | `Gethe/wow-ui-source@b062d332` (12.0.5) | `_Mainline`        |
-| `client-wrath`       | Wrath       | `andrew6180/WoTLK-3.3.5-UI-Source@27334191` | `_Wrath`     |
+| `client-wrath`       | Wrath       | `Gethe/wow-ui-source@c4e0255f` (3.3.5) | `_Wrath`     |
 | `client-mists`       | Mists       | `Gethe/wow-ui-source@33d87412` (classic) | `_Mists`          |
 | `client-era`         | Era         | `Gethe/wow-ui-source@e0099491` (1.15.8 build 67156) | `_Vanilla` |
 | `client-anniversary` | Anniversary | `Gethe/wow-ui-source@b29b0d0a` (2.5.5 build 67157)  | `_Vanilla` |
@@ -29,7 +29,7 @@ Each profile points `Interface/BlizzardUI/<Profile>` at a sparse-checkout symlin
 
 ```
 Interface/BlizzardUI/Retail      -> vendor/wow-ui-source-retail/Interface
-Interface/BlizzardUI/Wrath       -> vendor/wow-ui-source-wrath/Interface
+Interface/BlizzardUI/Wrath       -> vendor/wow-ui-source-wrath
 Interface/BlizzardUI/Mists       -> vendor/wow-ui-source-mists/Interface
 Interface/BlizzardUI/Era         -> vendor/wow-ui-source-era/Interface
 Interface/BlizzardUI/Anniversary -> vendor/wow-ui-source-anniversary/Interface
