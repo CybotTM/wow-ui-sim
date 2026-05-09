@@ -2,6 +2,16 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-09] update | Wrath vendor source switched to Gethe
+
+Updated `systems/addon-loading.md` and `systems/client-profiles.md` after
+standardizing the Wrath 3.3.5 source on `Gethe/wow-ui-source` tag `3.3.5`
+(`c4e0255f`). Documented that Wrath's symlink points at the checkout root
+because Gethe's 3.3.5 tag stores `AddOns/` and `FrameXML/` at repo root,
+unlike newer profiles that keep sources under `Interface/`.
+Recaptured `docs/baselines/wrath-lua-errors.json` against the Gethe source
+(128 distinct startup messages).
+
 ## [2026-05-08] update | Windows default GUI build and headless CI compile
 
 Updated `investigations/windows-port-build.md` after reproducing MSVC `LNK1189`

@@ -146,8 +146,8 @@ Core.lua
     assert_eq!(toc.interface_versions(), vec![110107, 50500, 11507]);
 }
 
-/// Wrath profile vendors (andrew6180/WoTLK-3.3.5-UI-Source) write
-/// `## Interface: 30300`. Parser must accept the single legacy value.
+/// Wrath 3.3.5 vendors write `## Interface: 30300`. Parser must accept the
+/// single legacy value.
 #[test]
 fn test_wrath_interface_version() {
     let contents = r#"

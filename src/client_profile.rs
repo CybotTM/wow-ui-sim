@@ -99,9 +99,11 @@ compile_error!(
     "Exactly one of client-retail, client-wrath, client-mists, client-era, client-anniversary must be enabled"
 );
 
-/// Path to `Interface/BlizzardUI/<Profile>` relative to the repo root.
+/// Absolute path to `Interface/BlizzardUI/<Profile>` under the repo root.
 pub fn blizzard_ui_root() -> PathBuf {
-    PathBuf::from("./Interface/BlizzardUI").join(ACTIVE.subdir())
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("Interface/BlizzardUI")
+        .join(ACTIVE.subdir())
 }
 
 /// Path to the AddOns directory for the active profile.
