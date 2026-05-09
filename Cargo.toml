@@ -5,6 +5,7 @@ edition = "2024"
 description = "World of Warcraft UI simulator for addon development"
 license = "GPL-3.0-only"
 default-run = "wow-sim"
+build = "build.rs"
 
 [workspace]
 members = [".", "xtask"]
@@ -104,6 +105,9 @@ harness = false
 # Linux-only (uses SO_PEERCRED). Enable it only on unix targets.
 [target.'cfg(unix)'.dependencies]
 iced-layout-inspector = { git = "https://github.com/Osso/iced-layout-inspector.git", tag = "v0.2.0", features = ["server"], optional = true }
+
+[build-dependencies]
+winresource = "0.1"
 
 [patch.crates-io]
 iced_wgpu = { path = "iced-wgpu-patched" }

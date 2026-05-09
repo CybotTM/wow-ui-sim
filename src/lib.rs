@@ -8,6 +8,7 @@
 use iced_dynamic;
 
 pub mod addon_tests;
+pub mod app_icon_render;
 pub mod atlas;
 #[path = "../data/atlas.rs"]
 mod atlas_data;

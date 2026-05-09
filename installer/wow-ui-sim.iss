@@ -32,10 +32,12 @@ PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\wow-sim.exe
+SetupIconFile=wow-sim.ico
 WizardStyle=modern
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "wow-sim.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\WoW UI Simulator"; Filename: "{app}\wow-sim.exe"; WorkingDir: "{app}"
+Name: "{autoprograms}\WoW UI Simulator"; Filename: "{app}\wow-sim.exe"; WorkingDir: "{app}"; IconFilename: "{app}\wow-sim.ico"
