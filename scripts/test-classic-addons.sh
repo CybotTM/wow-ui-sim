@@ -2,14 +2,16 @@
 # Third-party-addon test harness for the classic client profiles (Phase 8.2).
 #
 # Reads tools/classic-addon-manifest.tsv. For each entry:
-#   1. Clone into vendor/addons/<name>/ if not present (idempotent)
-#   2. Checkout the pinned ref
-#   3. Symlink Interface/AddOns/<name> -> vendor/addons/<name>/<subpath>
-#   4. Build wow-sim with the addon's profile feature
-#   5. Run lua-errors, save to target/addon-harness/<name>-lua-errors.json
-#   6. Diff message-set against docs/baselines/<profile>-lua-errors.json and
+#   1. Resolve the addon source:
+#      - Git rows clone into vendor/addons/<name>/ if not present (idempotent)
+#        and check out the pinned ref
+#      - local:<absolute-path> rows use the existing on-disk addon directory
+#   2. Symlink Interface/AddOns/<name> -> source/<subpath>
+#   3. Build wow-sim with the addon's profile feature
+#   4. Run lua-errors, save to target/addon-harness/<name>-lua-errors.json
+#   5. Diff message-set against docs/baselines/<profile>-lua-errors.json and
 #      report the count of *addon-induced* errors (= new vs baseline)
-#   7. Tear down the symlink so the test directory is clean for the next run
+#   6. Tear down the symlink so the test directory is clean for the next run
 #
 # Pass criterion: wow-sim must boot without crashing (exit 0). Addon-induced
 # Lua errors are counted and reported but do NOT fail the harness — those
@@ -64,8 +66,32 @@ fi
 
 mkdir -p "$VENDOR_DIR" "$OUT_DIR"
 
-ensure_vendor() {
+is_local_source() {
+    local url="$1"
+    [[ "$url" == local:* || "$url" == /* ]]
+}
+
+source_root() {
+    local name="$1" url="$2"
+    if [[ "$url" == local:* ]]; then
+        echo "${url#local:}"
+    elif [[ "$url" == /* ]]; then
+        echo "$url"
+    else
+        echo "$VENDOR_DIR/$name"
+    fi
+}
+
+ensure_source() {
     local name="$1" url="$2" ref="$3"
+    if is_local_source "$url"; then
+        local src
+        src=$(source_root "$name" "$url")
+        [ -d "$src" ] || { echo "ERROR: local source $src not found" >&2; return 1; }
+        echo "  → using local source $src"
+        return 0
+    fi
+
     local dest="$VENDOR_DIR/$name"
     if [ "$SKIP_CLONE" -eq 1 ] && [ -d "$dest/.git" ]; then
         return 0
@@ -84,11 +110,11 @@ ensure_vendor() {
 }
 
 install_symlink() {
-    local name="$1" subpath="$2"
-    local src="$VENDOR_DIR/$name/$subpath"
+    local name="$1" src_root="$2" subpath="$3"
+    local src="$src_root/$subpath"
     local dst="$ADDONS_DIR/$name"
     if [ ! -d "$src" ]; then
-        echo "ERROR: $src not found in vendor checkout" >&2
+        echo "ERROR: $src not found" >&2
         return 1
     fi
     [ -L "$dst" ] && rm "$dst"
@@ -161,8 +187,10 @@ run_addon() {
     echo ""
     echo "=== $name ($profile) ==="
 
-    ensure_vendor "$name" "$url" "$ref"
-    install_symlink "$name" "$subpath"
+    ensure_source "$name" "$url" "$ref"
+    local src_root
+    src_root=$(source_root "$name" "$url")
+    install_symlink "$name" "$src_root" "$subpath"
     install_compat_shims "$name"
 
     teardown() {

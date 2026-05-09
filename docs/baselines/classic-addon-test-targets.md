@@ -1,9 +1,10 @@
 # Classic-profile addon validation targets (Phase 8.1)
 
-Eight popular community addons picked to validate the wow-ui-sim's
-classic-profile coverage. The picks are biased toward Wrath (`Interface:
-30300`) and Mists (`Interface: 50500`) per the Phase 8 plan, with one
-vanilla pick to keep era/anniversary in scope.
+Popular community addons picked to validate the wow-ui-sim's classic-profile
+coverage. Wrath (`Interface: 30300`) keeps the historical 3.3.5 lane alive,
+while the Mists lane now focuses on installed Pandaria Classic addons from the
+local WoW install (`/syncthing/World of Warcraft/_classic_/Interface/AddOns`).
+One vanilla pick keeps era/anniversary in scope.
 
 Each entry is intended to surface a different chunk of the simulator's
 classic API surface; together they should produce a representative gap
@@ -17,10 +18,16 @@ report in Phase 8.3's per-addon stub list.
 | 2 | **Deadly Boss Mods (DBM-WotLK)** | wrath | 30300 | Combat-event-driven boss timers. Stresses `COMBAT_LOG_EVENT_UNFILTERED` parsing, `RegisterEvent`, `RaidNotice_AddMessage`, sound playback, and `SendChatMessage`. Heaviest event subscriber on a typical raid. |
 | 3 | **AtlasLoot Classic-WotLK** | wrath | 30300 | Instance-map and loot DB. Stresses `Item:CreateFromItemID` substitutes, tooltip rendering, dropdown menus, and large static-data tables (~2-5 MB compiled). |
 | 4 | **Skada (WotLK fork)** | wrath | 30300 | Modular combat-log meter. Stresses combat-log parsing under load + `LibSharedMedia-3.0`. Lighter than Recount's per-event hooks; better coverage of `LibStub` consumers. |
-| 5 | **WeakAuras 2 (MoP Classic)** | mists | 50500 | Generic visual aura engine. Stresses dynamic frame creation, animation API, OnUpdate ticker density, custom-trigger sandboxing, and `LibCompress`/`LibSerialize`. Often the heaviest single addon by frame count. |
-| 6 | **ElvUI-Classic-Mists** | mists | 50500 | Full UI replacement (action bars, unit frames, chat, nameplates, datatext). Stresses essentially the entire frame API surface end-to-end; if any other addon works, this one usually surfaces something they don't. |
-| 7 | **Details! Damage Meter (MoP Classic)** | mists | 50500 | Combat parser with internal frame pool. Stresses `CombatLogGetCurrentEventInfo`, segment switching, plugin discovery, and ScrollFrame heavy use. |
-| 8 | **pfQuest-Vanilla** | era | 11500 | Vanilla quest helper, smaller than Questie. Stresses minimap pin overlays, world-map pin overlays, `GetQuestLog*` family, and `C_Map.GetMapInfo` shims. |
+| 5 | **AllTheThings** (installed Pandaria Classic) | mists | 50503/50504 | Large achievement/collection database. Stresses big static data loads, tooltip hooks, item APIs, and saved option tables. |
+| 6 | **Auctionator** (installed Pandaria Classic) | mists | 50503 | Auction UI workflow. Stresses `C_AuctionHouse`, tab setup, money formatting, and list/search controls. |
+| 7 | **BlizzMove** (installed Pandaria Classic) | mists | 50503/50504 | Frame movement hooks. Stresses frame discovery, script hooks, saved placement state, and addon interaction with Blizzard panels. |
+| 8 | **DeModal** (installed Pandaria Classic) | mists | 50503 | Panel behavior override. Stresses dialog frame state, frame strata/level changes, and visibility hooks. |
+| 9 | **DialogueUI** (installed Pandaria Classic) | mists | 50503/50504 | Quest/dialog replacement. Stresses gossip/quest APIs, font strings, textures, animations, and event ordering. |
+| 10 | **Leatrix Maps** (installed Pandaria Classic) | mists | 50503/50504 | Map replacement. Stresses `C_Map`, scroll/zoom controls, POI overlays, and map event handling. |
+| 11 | **Leatrix Plus** (installed Pandaria Classic) | mists | 50503/50504 | Broad quality-of-life addon. Stresses many small global APIs, hooks, options UI, and saved-variable paths. |
+| 12 | **Plater** (installed Pandaria Classic) | mists | 50503/50504 | Nameplate replacement. Stresses nameplate APIs, aura/event churn, frame pools, and OnUpdate-heavy rendering logic. |
+| 13 | **Simple Item Level** (installed Pandaria Classic) | mists | 50503 | Character/inspection overlays. Stresses item location, tooltip, paper doll, and equipment APIs. |
+| 14 | **pfQuest-Vanilla** | era | 11500 | Vanilla quest helper, smaller than Questie. Stresses minimap pin overlays, world-map pin overlays, `GetQuestLog*` family, and `C_Map.GetMapInfo` shims. |
 
 ## Pass criterion
 
@@ -41,17 +48,16 @@ output is acceptable noise — track it as Phase 8.3 stub work.
 
 ## Source URLs (to fetch in Phase 8.2)
 
-These are the upstream repositories the harness will pin and clone. Pin a
-specific tag/SHA before running, mirroring the pattern in
-`scripts/setup-blizzard-ui.sh`.
+Wrath/Era rows use upstream repositories the harness pins and clones. Mists
+rows intentionally use installed Pandaria Classic addons from
+`/syncthing/World of Warcraft/_classic_/Interface/AddOns` because that install
+is currently active (`wow_classic` build 5.5.3).
 
 - Bartender4 (Wrath): https://www.curseforge.com/wow/addons/bartender4 — Wrath/3.3.5 release
 - DBM-WotLK: https://github.com/DeadlyBossMods/DBM-Wrath — `master` branch
 - AtlasLoot Classic-WotLK: https://github.com/Hoizame/AtlasLootClassic — `wotlk` branch
 - Skada (WotLK): https://github.com/bkader/Skada-WoTLK — `master` branch
-- WeakAuras 2 (MoP Classic): https://github.com/WeakAuras/WeakAuras2 — `mists` branch
-- ElvUI-Classic-Mists: https://github.com/tukui-org/ElvUI-Classic — `mists` branch
-- Details! (MoP Classic): https://github.com/Tercioo/Details-Damage-Meter — `mists` branch
+- Mists installed addons: `AllTheThings`, `Auctionator`, `BlizzMove`, `DeModal`, `DialogueUI`, `Leatrix_Maps`, `Leatrix_Plus`, `Plater`, `SimpleItemLevel`
 - pfQuest-Vanilla: https://github.com/shagu/pfQuest — `master` branch (vanilla support kept inline)
 
 ## Harness (Phase 8.2 — landed)
@@ -59,9 +65,10 @@ specific tag/SHA before running, mirroring the pattern in
 Implemented as `scripts/test-classic-addons.sh` driven by the declarative
 manifest `tools/classic-addon-manifest.tsv`. Per addon, it:
 
-1. Clones (filter:blob:none) into `vendor/addons/<name>/`, pins the
-   manifest ref
-2. Symlinks `Interface/AddOns/<name>` → `vendor/addons/<name>/<subpath>`
+1. Resolves each manifest source: Git rows clone (filter:blob:none) into
+   `vendor/addons/<name>/` and pin the manifest ref; `local:<absolute-path>`
+   rows use the existing installed addon directory
+2. Symlinks `Interface/AddOns/<name>` → `source/<subpath>`
 3. Builds `wow-sim` with `--features client-<profile>`
 4. Runs `wow-sim lua-errors`, saves output to
    `target/addon-harness/<name>-lua-errors.json`

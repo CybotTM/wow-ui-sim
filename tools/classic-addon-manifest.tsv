@@ -4,9 +4,10 @@
 # Columns:
 #   name     Slug used as Interface/AddOns/<name> and vendor/addons/<name>
 #   profile  Cargo client-* feature without the prefix (wrath|mists|era|anniversary)
-#   url      Git repo URL
-#   ref      Branch / tag / SHA to pin (avoid HEAD — pin everything)
-#   subpath  Path inside the cloned repo where the addon's TOC lives.
+#   url      Git repo URL, or local:<absolute-path> for installed addons
+#   ref      Branch / tag / SHA to pin (avoid HEAD — pin everything).
+#            Use "-" for local sources.
+#   subpath  Path inside the source where the addon's TOC lives.
 #            "." means root. Use multiple lines per repo if the addon ships
 #            sibling sub-addons (e.g. DBM-Core + DBM-PvP).
 #
@@ -17,7 +18,13 @@ Bartender4	wrath	https://github.com/Nevcairiel/Bartender4.git	master	.
 DBM-Wrath	wrath	https://github.com/DeadlyBossMods/DBM-Wrath.git	master	DBM-Core
 AtlasLootClassic	wrath	https://github.com/Hoizame/AtlasLootClassic.git	wotlk	AtlasLootClassic
 Skada-WoTLK	wrath	https://github.com/bkader/Skada-WoTLK.git	master	Skada
-WeakAuras-Mists	mists	https://github.com/WeakAuras/WeakAuras2.git	mists	WeakAuras
-ElvUI-Classic-Mists	mists	https://github.com/tukui-org/ElvUI-Classic.git	mists	ElvUI
-Details-Mists	mists	https://github.com/Tercioo/Details-Damage-Meter.git	mists	Details
+AllTheThings	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/AllTheThings	-	.
+Auctionator	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Auctionator	-	.
+BlizzMove	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/BlizzMove	-	.
+DeModal	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/DeModal	-	.
+DialogueUI	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/DialogueUI	-	.
+Leatrix_Maps	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Leatrix_Maps	-	.
+Leatrix_Plus	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Leatrix_Plus	-	.
+Plater	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Plater	-	.
+SimpleItemLevel	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/SimpleItemLevel	-	.
 pfQuest-Vanilla	era	https://github.com/shagu/pfQuest.git	master	.
