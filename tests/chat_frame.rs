@@ -69,7 +69,9 @@ const CHAT_LAYOUT_DEBUG_LUA: &str = r#"
 "#;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!("CARGO_MANIFEST_DIR")))
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
 }
 
 /// Create a fully loaded environment with all Blizzard addons and startup events.

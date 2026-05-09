@@ -315,8 +315,7 @@ fn test_is_game_type_restricted() {
     );
     assert!(mixed.is_game_type_restricted());
 
-    let no_restriction =
-        TocFile::parse(Path::new("/addons/Test"), "## Title: TestAddon\nCore.lua");
+    let no_restriction = TocFile::parse(Path::new("/addons/Test"), "## Title: TestAddon\nCore.lua");
     assert!(!no_restriction.is_game_type_restricted());
 }
 

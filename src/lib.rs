@@ -24,6 +24,8 @@ pub mod dump;
 pub mod dump_texture;
 #[path = "../data/encounter_journal.rs"]
 pub mod encounter_journal_data;
+#[cfg(any(feature = "client-era", feature = "client-anniversary"))]
+pub mod era;
 pub mod error;
 pub mod event;
 pub mod extract_textures;
@@ -54,6 +56,8 @@ pub mod manifest_interface_data;
 #[path = "../data/map_art.rs"]
 pub mod map_art;
 pub mod map_exploration;
+#[cfg(feature = "client-mists")]
+pub mod mists;
 pub mod paths;
 pub mod profession_item_overrides;
 #[path = "../data/quest_poi_blobs.rs"]
@@ -83,10 +87,6 @@ pub mod toc;
 #[path = "../data/traits.rs"]
 pub mod traits;
 pub mod widget;
-#[cfg(feature = "client-mists")]
-pub mod mists;
-#[cfg(any(feature = "client-era", feature = "client-anniversary"))]
-pub mod era;
 #[cfg(any(
     feature = "client-wrath",
     feature = "client-mists",

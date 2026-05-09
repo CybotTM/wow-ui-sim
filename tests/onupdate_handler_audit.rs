@@ -75,7 +75,9 @@ const BUFF_AUDIT_ADDONS: &[(&str, &str)] = &[
 ];
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!("CARGO_MANIFEST_DIR")))
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
 }
 
 fn load_settled_game_ui() -> WowLuaEnv {

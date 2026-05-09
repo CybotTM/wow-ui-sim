@@ -602,12 +602,11 @@ mod tests {
     #[cfg(feature = "client-retail")]
     #[test]
     fn test_parse_objective_tracker_widget_container_xml_keeps_self_closing_frame() {
-        let path = crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(
-            env!("CARGO_MANIFEST_DIR"),
-        ))
+        let path = crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
         .join("Blizzard_ObjectiveTracker/Blizzard_ObjectiveTrackerUIWidgetContainer.xml");
-        let ui = parse_xml_file(&path)
-            .expect("ObjectiveTracker widget container XML should parse");
+        let ui = parse_xml_file(&path).expect("ObjectiveTracker widget container XML should parse");
 
         let frame_names = ui
             .elements
@@ -632,9 +631,9 @@ mod tests {
     #[cfg(feature = "client-retail")]
     #[test]
     fn test_parse_low_health_frame_xml_keeps_animations() {
-        let path = crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(
-            env!("CARGO_MANIFEST_DIR"),
-        ))
+        let path = crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
         .join("Blizzard_FrameXML/Mainline/LowHealthFrame.xml");
         let ui = parse_xml_file(&path).expect("LowHealthFrame XML should parse");
 

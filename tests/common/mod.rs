@@ -118,7 +118,9 @@ pub fn try_create_gpu_device() -> Option<(wgpu::Device, wgpu::Queue)> {
 }
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!("CARGO_MANIFEST_DIR")))
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
 }
 
 /// Helper to load Blizzard_SharedXML templates for tests that need them.

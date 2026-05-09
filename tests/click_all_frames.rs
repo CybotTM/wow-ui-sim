@@ -11,7 +11,9 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::widget::WidgetType;
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!("CARGO_MANIFEST_DIR")))
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
 }
 
 /// Install a Lua error handler that collects errors into `__test_errors`.

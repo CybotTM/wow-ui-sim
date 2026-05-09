@@ -2,22 +2,22 @@
 
 mod character_lua;
 mod early_lua;
+mod logging;
 mod map_canvas;
 mod map_lua;
 mod panel_lua;
 mod post_event_lua;
 mod runtime_surfaces;
-mod logging;
 
 use character_lua::*;
 use early_lua::*;
+use logging::log_step;
 use map_canvas::*;
 use map_lua::*;
 use panel_lua::*;
 use post_event_lua::*;
 pub(crate) use runtime_surfaces::patch_account_store_set_storefront;
 use runtime_surfaces::*;
-use logging::log_step;
 
 struct WorkaroundStep {
     label: &'static str,

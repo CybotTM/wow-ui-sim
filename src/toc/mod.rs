@@ -321,10 +321,7 @@ impl TocFile {
         };
         self.metadata
             .get("AllowLoadGameType")
-            .map(|v| {
-                !v.split(',')
-                    .any(|t| allowed.contains(&t.trim()))
-            })
+            .map(|v| !v.split(',').any(|t| allowed.contains(&t.trim())))
             .unwrap_or(false)
     }
 

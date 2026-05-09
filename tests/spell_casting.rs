@@ -141,7 +141,9 @@ fn env_with_full_blizzard_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("create env");
     env.set_screen_size(1024.0, 768.0);
 
-    let ui = wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!("CARGO_MANIFEST_DIR")));
+    let ui = wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )));
     {
         let mut state = env.state().borrow_mut();
         state.addon_base_paths = vec![ui.clone()];
