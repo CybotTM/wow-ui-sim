@@ -124,6 +124,7 @@ fn blizzard_ui_cache_path_label() -> String {
         .unwrap_or_else(|_| "~/.cache/wow-ui-sim/blizzard-ui".to_string())
 }
 
+#[cfg(test)]
 fn resolve_blizzard_ui_addons_path(root: &Path) -> crate::Result<PathBuf> {
     let profile = crate::client_profile::ACTIVE;
     let profile_addons = root

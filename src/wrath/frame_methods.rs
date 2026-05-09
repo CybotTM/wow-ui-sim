@@ -7,16 +7,26 @@
 //! Compiled under `client-wrath`, `client-mists`, `client-era`, and `client-anniversary`.
 
 use crate::lua_bridge::table_set_rust_fn_static;
-use rilua::{LuaApiMut, LuaResult, Val};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
+use rilua::{LuaApiMut, LuaResult, Val};
 
 pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, mt, "IgnoreDepth", ignore_depth)?;
     table_set_rust_fn_static(state, mt, "SetBackdropColor", set_backdrop_color)?;
-    table_set_rust_fn_static(state, mt, "SetBackdropBorderColor", set_backdrop_border_color)?;
-    table_set_rust_fn_static(state, mt, "SetPlayerTextureHeight", set_player_texture_height)?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetBackdropBorderColor",
+        set_backdrop_border_color,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetPlayerTextureHeight",
+        set_player_texture_height,
+    )?;
     table_set_rust_fn_static(state, mt, "SetPlayerTextureWidth", set_player_texture_width)?;
     table_set_rust_fn_static(state, mt, "SetMaxBytes", set_max_bytes)?;
     table_set_rust_fn_static(state, mt, "GetTextHeight", get_text_height)?;

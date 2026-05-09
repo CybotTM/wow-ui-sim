@@ -12,11 +12,7 @@ pub(super) fn log_with_timestamp(env: &crate::lua_api::WowLuaEnv, message: &str)
     eprintln!("{} {}", crate::logging::elapsed_prefix(start_time), message);
 }
 
-pub(super) fn log_step(
-    env: &crate::lua_api::WowLuaEnv,
-    label: &str,
-    apply_step: impl FnOnce(),
-) {
+pub(super) fn log_step(env: &crate::lua_api::WowLuaEnv, label: &str, apply_step: impl FnOnce()) {
     log_with_timestamp(env, &format!("[Workarounds] starting {label}"));
     let started = Instant::now();
     apply_step();
