@@ -49,6 +49,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pkg-config libasound2-dev libudev-dev
 
+      - name: Install Inno Setup
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+
       - name: Build release binaries
         run: cargo release-${{ matrix.platform }} --locked
 
@@ -93,7 +98,14 @@ jobs:
           Copy-Item Interface\AddOns\Admin, Interface\AddOns\SimCommands, Interface\AddOns\TestFramework "$root\Interface\AddOns\" -Recurse
 
           Compress-Archive -Path $root -DestinationPath "dist\$name.zip" -Force
-          "asset=dist/$name.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          & $iscc ".\installer\wow-ui-sim.iss" `
+            "/DAppVersion=$env:GITHUB_REF_NAME" `
+            "/DSourceDir=$((Resolve-Path $root).Path)" `
+            "/DOutputDir=$((Resolve-Path dist).Path)" `
+            "/DOutputBaseFilename=$name-setup"
+
+          "asset=dist/$name*" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Upload Windows package
         if: runner.os == 'Windows'
