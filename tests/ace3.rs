@@ -4,8 +4,21 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+fn home_dir() -> Option<PathBuf> {
+    std::env::var_os("HOME")
+        .or_else(|| std::env::var_os("USERPROFILE"))
+        .map(PathBuf::from)
+}
+
+fn reference_addon_path(relative: &str) -> PathBuf {
+    home_dir()
+        .unwrap_or_else(|| PathBuf::from("__missing_home__"))
+        .join("Projects/wow/reference-addons")
+        .join(relative)
+}
+
 fn ace3_path() -> PathBuf {
-    PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/Ace3/Ace3.toc")
+    reference_addon_path("Ace3/Ace3.toc")
 }
 
 #[test]
@@ -147,8 +160,7 @@ fn test_ace_addon_loads() {
 
 #[test]
 fn test_load_details() {
-    let details_path =
-        PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/Details/Details.toc");
+    let details_path = reference_addon_path("Details/Details.toc");
 
     if !details_path.exists() {
         eprintln!("Skipping: Details not found at {:?}", details_path);
@@ -258,8 +270,7 @@ fn test_load_game_menu() {
 
 #[test]
 fn test_load_dbm_core() {
-    let dbm_path = PathBuf::from(env!("HOME"))
-        .join("Projects/wow/reference-addons/DeadlyBossMods/DBM-Core/DBM-Core_Mainline.toc");
+    let dbm_path = reference_addon_path("DeadlyBossMods/DBM-Core/DBM-Core_Mainline.toc");
 
     if !dbm_path.exists() {
         eprintln!("Skipping: DBM-Core not found at {:?}", dbm_path);
@@ -342,10 +353,8 @@ fn load_addon_lua_chunk(env: &WowLuaEnv, path: &std::path::Path, addon_name: &st
 
 #[test]
 fn test_load_weakauras_init() {
-    let details_path =
-        PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/Details/Details.toc");
-    let weakauras_dir =
-        PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/WeakAuras2/WeakAuras");
+    let details_path = reference_addon_path("Details/Details.toc");
+    let weakauras_dir = reference_addon_path("WeakAuras2/WeakAuras");
 
     if !details_path.exists() || !weakauras_dir.exists() {
         eprintln!("Skipping: Details or WeakAuras not found");
@@ -371,8 +380,7 @@ fn test_load_weakauras_init() {
 
 #[test]
 fn test_load_weakauras_full() {
-    let weakauras_toc = PathBuf::from(env!("HOME"))
-        .join("Projects/wow/reference-addons/WeakAuras2/WeakAuras/WeakAuras.toc");
+    let weakauras_toc = reference_addon_path("WeakAuras2/WeakAuras/WeakAuras.toc");
 
     if !weakauras_toc.exists() {
         eprintln!("Skipping: WeakAuras not found at {:?}", weakauras_toc);
@@ -422,8 +430,7 @@ fn test_load_weakauras_full() {
 
 #[test]
 fn test_load_plater() {
-    let plater_path =
-        PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/Plater/Plater.toc");
+    let plater_path = reference_addon_path("Plater/Plater.toc");
 
     if !plater_path.exists() {
         eprintln!("Skipping: Plater not found at {:?}", plater_path);

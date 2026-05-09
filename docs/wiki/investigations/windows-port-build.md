@@ -1,6 +1,6 @@
 # Windows Port Build
 
-Windows can build and start the simulator once the GUI dependency avoids building the local `iced-dynamic` DLL.
+Windows can build and start the simulator once default builds avoid the local `iced-dynamic` DLL.
 
 ## Content
 
@@ -10,7 +10,9 @@ The first Windows `cargo build --bin wow-sim` attempt reached MSVC linking and f
 LINK : fatal error LNK1189: library limit of 65535 objects exceeded
 ```
 
-`iced-dynamic` is only a re-export crate (`pub use iced::*;`) with `crate-type = ["dylib"]`. On Windows, that forces a very large Iced/WGPU DLL link and hits MSVC's object limit. The porting fix is to depend on upstream `iced` directly from the root crate instead of routing the `iced` dependency through the dynamic wrapper. That keeps the code's `iced::...` imports unchanged and avoids the DLL link step.
+`iced-dynamic` is only a re-export crate (`pub use iced::*;`) with `crate-type = ["dylib"]`. On Windows, that forces a very large Iced/WGPU DLL link and hits MSVC's object limit. The porting fix is to keep `fast-build` opt-in instead of enabling it in the default feature set. The root crate still depends on upstream `iced` through the normal `gui` feature, while Linux developers can explicitly add `--features fast-build` when they want the dynamic wrapper for faster local incremental builds.
+
+Headless CI uses `cargo test --no-default-features`. That build must not reference GUI-only modules, optional CASC crates, or Windows GUI-only dependencies. GUI/rendering tests are gated with `#![cfg(feature = "gui")]`, the `bench_spellbook` binary requires `gui`, and the `casc_smoke` example requires `casc`.
 
 Verification on Windows:
 
@@ -43,7 +45,7 @@ Known remaining observations from the smoke runs:
 
 ## Sources
 
-- [Cargo manifest](../../Cargo.toml) - root dependency selection for `iced`
+- [Cargo manifest](../../Cargo.toml) - root feature selection for `iced`, `fast-build`, and CASC examples
 - [iced-dynamic manifest](../../iced-dynamic/Cargo.toml) - dynamic re-export crate that triggered the Windows DLL link
 - [path resolver](../../../src/paths.rs) - shared WoW resource discovery for CASC, Interface, AddOns, and WTF
 - [saved variables](../../../src/saved_variables.rs) - live WTF import and simulator-local write behavior

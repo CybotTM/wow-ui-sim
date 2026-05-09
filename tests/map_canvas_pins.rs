@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Tests for MapCanvas pin infrastructure and world quest pin display.
 
 mod common;

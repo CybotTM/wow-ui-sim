@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 mod common;
 #[path = "perf/base_game.rs"]
 mod perf_base_game;

@@ -418,6 +418,7 @@ fn test_is_cached_reports_bc_preloaded_textures() {
     );
 }
 
+#[cfg(feature = "gui")]
 #[test]
 fn test_load_texture_prefer_bc_reuses_cached_bc_buffer() {
     let mut mgr = TextureManager::new();

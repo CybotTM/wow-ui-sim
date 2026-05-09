@@ -427,7 +427,7 @@ fn fire_post_login_events(env: &WowLuaEnv) {
 
     fire("BAG_UPDATE_DELAYED");
     fire("QUEST_LOG_UPDATE");
-    crate::iced_app::resize_party_state(&mut env.state().borrow_mut(), 4);
+    resize_party_state(&mut env.state().borrow_mut(), 4);
     refresh_party_frames(env);
     fire("UPDATE_BINDINGS");
     fire("DISPLAY_SIZE_CHANGED");
@@ -445,6 +445,21 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     // etc.). Direct assignment is enough to satisfy LFDQueueFrame.
     fire("LFG_UPDATE_RANDOM_INFO");
     seed_buff_durations(env);
+}
+
+fn resize_party_state(state: &mut crate::lua_api::SimState, size: usize) {
+    let clamped_size = size.min(4);
+    let defaults = crate::lua_api::game_data::default_party();
+    while state.party_members.len() < clamped_size {
+        let next_idx = state.party_members.len();
+        let Some(member) = defaults.get(next_idx).cloned() else {
+            break;
+        };
+        state.party_members.push(member);
+    }
+    state.party_members.truncate(clamped_size);
+    state.party_group_active = clamped_size > 0;
+    state.party_leader_index = None;
 }
 
 fn normalize_headless_frame_positions(env: &WowLuaEnv) {

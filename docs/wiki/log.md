@@ -2,6 +2,16 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-08] update | Windows default GUI build and headless CI compile
+
+Updated `investigations/windows-port-build.md` after reproducing MSVC `LNK1189`
+in the default `cargo build --bin wow-sim` path. The root cause remains the
+local `iced-dynamic` DLL, but the current fix is to make `fast-build` opt-in
+rather than part of default features. Also documented the no-default test
+compile contract: GUI/render tests need `cfg(feature = "gui")`, GUI benchmark
+binaries need `required-features = ["gui"]`, and CASC examples need
+`required-features = ["casc"]`.
+
 ## [2026-05-08] update | CASC Friz Quadrata root probe
 
 Updated `investigations/casc-fdid-1579624-root-debug.md` with known-good

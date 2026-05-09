@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::widget::AnchorPoint;
 

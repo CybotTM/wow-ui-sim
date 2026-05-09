@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Integration tests for keybinding dispatch — targeting tests.
 //!
 //! Covers TargetFrame visibility, F1–F6 party/enemy targeting keybinds.

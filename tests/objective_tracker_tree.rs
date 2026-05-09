@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! ObjectiveTracker tree regression test.
 //!
 //! On master at commit `322eba4a` the tracker paints "All Objectives",

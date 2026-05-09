@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[test]

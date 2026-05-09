@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 mod common;
 
 use iced::{Point, Rectangle};

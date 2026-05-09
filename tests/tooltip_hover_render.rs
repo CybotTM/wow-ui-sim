@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Full-environment tooltip render-pipeline tests requiring GUI support.
 
 mod tooltip_full_env_helpers;

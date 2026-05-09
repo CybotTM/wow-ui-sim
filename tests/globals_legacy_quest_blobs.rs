@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Tests for quest log, POI blobs, map ID, tooltip, and cursor position.
 
 use wow_ui_sim::iced_app::{

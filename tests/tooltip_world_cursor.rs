@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 mod tooltip_full_env_helpers;
 
 use tooltip_full_env_helpers::setup_full_env;

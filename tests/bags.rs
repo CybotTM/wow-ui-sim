@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Tests for bag frames opening and displaying items.
 //!
 //! Loads the full Blizzard addon set, opens bags via keybind, and verifies

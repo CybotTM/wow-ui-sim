@@ -404,11 +404,11 @@ fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Err
 
 fn report_fatal_error(error: &dyn std::error::Error) {
     eprintln!("{error}");
-    #[cfg(windows)]
+    #[cfg(all(windows, feature = "gui"))]
     show_windows_error_message(&error.to_string());
 }
 
-#[cfg(windows)]
+#[cfg(all(windows, feature = "gui"))]
 fn show_windows_error_message(message: &str) {
     use winapi::um::winuser::{MB_ICONERROR, MB_OK, MessageBoxW};
 

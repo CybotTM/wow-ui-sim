@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Integration tests for keybinding dispatch — panel interaction tests.
 //!
 //! Covers spellbook, talents, collections, world map, escape menu, and social panels.

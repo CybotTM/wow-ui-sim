@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 #[path = "tooltip_full_env_helpers.rs"]
 mod tooltip_full_env_helpers;
 

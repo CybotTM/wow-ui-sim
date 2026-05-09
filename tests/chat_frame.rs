@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Integration test for the Blizzard chat frame.
 //!
 //! Loads the Blizzard UI, clicks on ChatFrame1EditBox, types a message,

@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 mod common;
 #[path = "perf/text.rs"]
 mod perf_text;

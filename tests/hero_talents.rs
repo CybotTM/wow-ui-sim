@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Tests for hero talent spec resolution.
 
 #[path = "hero_talents/rendering.rs"]

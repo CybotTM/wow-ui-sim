@@ -58,6 +58,16 @@ path = "src/bin/wow_sim/main.rs"
 name = "wow-cli"
 path = "src/bin/wow_cli/main.rs"
 
+[[bin]]
+name = "bench_spellbook"
+path = "src/bin/bench_spellbook.rs"
+required-features = ["gui"]
+
+[[example]]
+name = "casc_smoke"
+path = "examples/casc_smoke.rs"
+required-features = ["casc"]
+
 [dev-dependencies]
 insta = "1.42"
 pollster = "0.4"
@@ -65,11 +75,12 @@ tempfile = "3"
 sha2 = "0.10"
 
 [features]
-# fast-build is on by default so local dev/debug builds get the iced dylib for
+# fast-build is opt-in because the iced dylib hits MSVC's LNK1189 object limit
+# on Windows. Local Linux dev/debug builds can use `--features fast-build` for
 # faster incremental rebuilds. Release builds should use:
 #   cargo build --release --no-default-features --features sound,gui
 # to produce a fully static binary not tied to a specific rustc version.
-default = ["sound", "gui", "casc", "fast-build"]
+default = ["sound", "gui", "casc"]
 sound = ["rodio", "casc"]
 gui = ["casc", "dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp", "dep:winapi"]
 casc = ["dep:asset-resolver"]

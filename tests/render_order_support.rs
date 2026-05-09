@@ -1,5 +1,6 @@
 // Shared test helpers. Individual test binaries that `mod` this file use
 // a subset of the helpers, so per-binary dead_code warnings are expected.
+#![cfg(feature = "gui")]
 #![allow(dead_code)]
 
 #[path = "common/blizzard_addon_harness.rs"]

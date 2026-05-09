@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 #[path = "common/blizzard_addon_manifest.rs"]
 mod blizzard_addon_manifest;
 mod common;

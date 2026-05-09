@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Render order tests: strata bucket ordering and z-order correctness.
 
 mod common;

@@ -96,8 +96,6 @@ use crate::saved_variables::SavedVariablesManager;
 #[cfg(feature = "gui")]
 pub use app::App;
 #[cfg(feature = "gui")]
-pub(crate) use app::resize_party_state;
-#[cfg(feature = "gui")]
 pub use benchmark::{
     BenchmarkPhase, LfgPanelBenchmarkReport, SpellbookBenchmarkReport,
     benchmark_lfg_panel_open_in_gui, benchmark_spellbook_open_in_gui,
