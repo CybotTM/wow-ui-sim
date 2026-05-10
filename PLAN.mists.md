@@ -75,7 +75,7 @@ attempt to perform arithmetic on local 'skillRank' (a nil value)
 ### 2. Honor Frame API Surface
 
 - [x] Reproduce `HonorSystemEnabled` nil during `HonorFrame_Shared.lua` load.
-- [ ] Determine expected MoP Classic behavior for `HonorSystemEnabled()`.
+- [x] Determine expected MoP Classic behavior for `HonorSystemEnabled()`.
 - [ ] Add a Mists-gated API contract test.
 - [ ] Implement or correct the backing honor/PvP API state.
 - [ ] Verify `HonorSystemEnabled` and `GetPVPThisWeekStats` errors disappear.
