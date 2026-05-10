@@ -282,7 +282,7 @@ stderr, so the old currency startup error is gone.
 - [x] Reproduce `SetBasicMessageDialogText` nil.
 - [x] Locate expected helper definition in Blizzard UI or legacy API surface.
 - [x] Add a focused test for dialog text mutation.
-- [ ] Implement the helper against the real dialog frame state.
+- [x] Implement the helper against the real dialog frame state.
 - [ ] Verify dialog helper errors disappear.
 
 Observed errors:
@@ -307,6 +307,12 @@ Mutation test: `mists_dialog_helpers::basic_message_dialog_helper_updates_text`
 installs a concrete `BasicMessageDialog.Text:SetText` fixture and asserts
 `SetBasicMessageDialogText("Invalid money type: TEST")` writes that exact text
 to the dialog text frame.
+
+Implementation: the Mists compatibility helper now mirrors Blizzard's
+`SharedBasicControls.lua` behavior against real `BasicMessageDialog` state. It
+writes `BasicMessageDialog.Text`, calls `BasicMessageDialog:Show()`, skips
+updates while the dialog is already shown, and honors the `force` argument to
+replace shown dialog text.
 
 ### 10. Class Color and Miscellaneous Nil Data
 
