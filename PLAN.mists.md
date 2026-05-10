@@ -322,7 +322,7 @@ exited successfully with `0` distinct errors. No `SetBasicMessageDialogText`,
 
 ### 10. Class Color and Miscellaneous Nil Data
 
-- [ ] Reproduce `classColor` nil in `Blizzard_Communities/ClubFinder.lua`.
+- [x] Reproduce `classColor` nil in `Blizzard_Communities/ClubFinder.lua`.
 - [ ] Identify which class token lacks a color.
 - [ ] Add a focused class-color/default data test.
 - [ ] Fix the backing class-color data.
@@ -334,6 +334,12 @@ Observed errors:
 Blizzard_Communities/ClubFinder.lua:564:
 attempt to index local 'classColor' (a nil value)
 ```
+
+Reproduction: `mists_class_colors::club_finder_setup_menu_reproduces_missing_class_color`
+loads Mists `Blizzard_Communities/ClubFinder.lua`, supplies a class token whose
+`GetClassColorObj()` result is nil, and exercises
+`ClubLookingForDropdownMixin:SetupMenu()`, confirming the nil `classColor`
+failure before the backing color data fix is considered.
 
 ## Addon Harness Follow-Up
 
