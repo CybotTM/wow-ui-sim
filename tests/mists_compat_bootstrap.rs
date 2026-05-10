@@ -170,6 +170,25 @@ fn mists_honor_frame_shared_reproduces_missing_honor_system_enabled() {
 }
 
 #[test]
+fn mists_honor_system_enabled_matches_disabled_legacy_honor_surface() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let (kind, enabled): (String, bool) = env
+        .eval(
+            r#"
+            return type(HonorSystemEnabled()), HonorSystemEnabled()
+            "#,
+        )
+        .expect("HonorSystemEnabled should be callable in Mists");
+
+    assert_eq!(
+        (kind, enabled),
+        ("boolean".to_string(), false),
+        "MoP Classic keeps HonorSystemEnabled as a global boolean gate; false hides the legacy HonorFrame honor currency surface"
+    );
+}
+
+#[test]
 fn mists_bootstrap_registers_startup_cvar_defaults() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 
