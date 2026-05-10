@@ -117,6 +117,11 @@ name = "mists_compat_bootstrap"
 path = "tests/mists_compat_bootstrap.rs"
 required-features = ["client-mists"]
 
+[[test]]
+name = "mists_world_map_opacity"
+path = "tests/mists_world_map_opacity.rs"
+required-features = ["client-mists"]
+
 # The `server` feature of iced-layout-inspector pulls in peercred-ipc, which is
 # Linux-only (uses SO_PEERCRED). Enable it only on unix targets.
 [target.'cfg(unix)'.dependencies]
