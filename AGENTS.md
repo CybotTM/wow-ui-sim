@@ -257,10 +257,6 @@ Each addon shows timing: `(total: io=X xml=X lua=X sv=X)`
 - `lua` - Lua execution (~78%)
 - `sv` - SavedVariables loading (~18%)
 
-### Known Issues
-
-- `BetterWardrobe/ColorFilter.lua` has very large constant tables (works in WoW's patched LuaJIT)
-
 ### Bilinear Atlas Bleed
 
 GPU texture atlas uses `ClampToEdge` + `Linear` (bilinear) filtering. UVs are remapped to atlas slot space in `resolve_and_scale_quads` (`primitive.rs:210-214`) with **no half-pixel inset**, so the sampler bleeds into adjacent content at slot boundaries. Symptoms: thin bright lines at tile seams, colored fringe around icons/buttons.
