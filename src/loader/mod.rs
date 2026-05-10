@@ -53,6 +53,7 @@ const FOUNDATIONAL_LOAD_FIRST_ADDONS: &[&str] = &[
     "Blizzard_SharedXMLBase",
     "Blizzard_SharedXML",
     "Blizzard_SharedXMLGame",
+    "Blizzard_MoneyFrame",
 ];
 
 fn promote_foundational_addons_to_load_first(addons: &mut HashMap<String, (PathBuf, TocFile)>) {
@@ -62,6 +63,13 @@ fn promote_foundational_addons_to_load_first(addons: &mut HashMap<String, (PathB
                 .insert("LoadFirst".to_string(), "1".to_string());
         }
     }
+}
+
+fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
+    HashMap::from([(
+        "Blizzard_UIPanels_Game".to_string(),
+        vec!["Blizzard_MoneyFrame".to_string()],
+    )])
 }
 
 /// TOC suffix matching the active client profile (e.g. `_Mainline` for retail,
@@ -376,7 +384,9 @@ pub fn discover_blizzard_addons_for_screen(
     // Pull LOD addons that are required by non-LOD addons
     pull_required_lod_addons(&mut addons, &mut lod_pool);
 
-    topological_sort_addons(addons)
+    promote_foundational_addons_to_load_first(&mut addons);
+    let extra_dependencies = implicit_blizzard_startup_dependencies();
+    topological_sort_addons_with_extra_dependencies(addons, &extra_dependencies)
 }
 
 /// Discover the explicit dependency closure for one or more Blizzard addons.
