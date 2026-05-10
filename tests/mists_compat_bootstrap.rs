@@ -1,5 +1,6 @@
 #![cfg(feature = "client-mists")]
 
+use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
@@ -17,6 +18,10 @@ fn blizzard_ui_dir() -> std::path::PathBuf {
 
 fn mists_money_input_frame_xml_path() -> std::path::PathBuf {
     blizzard_ui_dir().join("Blizzard_MoneyFrame/Classic/MoneyInputFrame.xml")
+}
+
+fn mists_blizzard_toc(addon: &str, toc_name: &str) -> std::path::PathBuf {
+    blizzard_ui_dir().join(addon).join(toc_name)
 }
 
 fn find_top_level_frame<'a>(elements: &'a [XmlElement], name: &str) -> &'a FrameXml {
@@ -113,6 +118,44 @@ fn mists_money_input_template_xml_wires_gold_silver_copper_parent_keys() {
     assert!(
         child_keys.contains(&"copper"),
         "MoneyInputFrameTemplate should wire the copper edit box via parentKey"
+    );
+}
+
+#[test]
+fn mists_money_input_template_runtime_syncs_coin_parent_keys() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+    let toc_path = mists_blizzard_toc("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Classic.toc");
+    load_addon(&env.loader_env(), &toc_path).expect("Blizzard_MoneyFrame should load");
+
+    let result: (String, String, String, String, String, String) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "MoneyInputFrameParentKeyProbe", UIParent, "MoneyInputFrameTemplate")
+            return type(frame.gold),
+                type(frame.silver),
+                type(frame.copper),
+                frame.gold:GetName(),
+                frame.silver:GetName(),
+                frame.copper:GetName()
+            "#,
+        )
+        .expect("MoneyInputFrameTemplate should instantiate under CreateFrame");
+
+    assert_eq!(
+        result,
+        (
+            "table".to_string(),
+            "table".to_string(),
+            "table".to_string(),
+            "MoneyInputFrameParentKeyProbeGold".to_string(),
+            "MoneyInputFrameParentKeyProbeSilver".to_string(),
+            "MoneyInputFrameParentKeyProbeCopper".to_string()
+        ),
+        "MoneyInputFrameTemplate inheritance and parentKey sync should publish gold/silver/copper children; missing copper is not a MoneyFrame API-state issue"
     );
 }
 
