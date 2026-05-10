@@ -325,7 +325,7 @@ exited successfully with `0` distinct errors. No `SetBasicMessageDialogText`,
 - [x] Reproduce `classColor` nil in `Blizzard_Communities/ClubFinder.lua`.
 - [x] Identify which class token lacks a color.
 - [x] Add a focused class-color/default data test.
-- [ ] Fix the backing class-color data.
+- [x] Fix the backing class-color data.
 - [ ] Verify class-color errors disappear.
 
 Observed errors:
@@ -352,6 +352,12 @@ Default data test: `mists_class_colors::mists_visible_classes_have_color_data`
 asserts Mists exposes exactly 11 visible classes, includes `MONK`, excludes
 `DEMONHUNTER` and `EVOKER`, and every visible `GetClassInfo()` class token has
 a `GetClassColorObj()` result.
+
+Backing data fix: `src/mists/compat_bootstrap.lua` caps `GetNumClasses()` at
+`11` for Mists, matching the MoP class roster through `MONK`. This keeps
+Mists-only Blizzard code from iterating shared retail-backed `DEMONHUNTER` and
+`EVOKER` class tokens that are outside MoP's visible class set, so every visible
+class token has matching `RAID_CLASS_COLORS` data.
 
 ## Addon Harness Follow-Up
 
