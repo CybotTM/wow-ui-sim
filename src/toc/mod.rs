@@ -147,6 +147,17 @@ fn family_subdir() -> &'static str {
     }
 }
 
+/// Resolve the `[Game]` TOC substitution per active client profile.
+fn game_subdir() -> &'static str {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => "Standard",
+        crate::client_profile::ClientProfile::Wrath => "Wrath",
+        crate::client_profile::ClientProfile::Mists => "Mists",
+        crate::client_profile::ClientProfile::Era
+        | crate::client_profile::ClientProfile::Anniversary => "Vanilla",
+    }
+}
+
 /// Process a non-metadata, non-comment TOC line as a file path entry.
 fn push_file_entry(
     files: &mut Vec<PathBuf>,
@@ -161,7 +172,7 @@ fn push_file_entry(
     }
     let line = line.replace("[TextLocale]", "enUS");
     let line = line.replace("[Family]", family_subdir());
-    let line = line.replace("[Game]", "Standard");
+    let line = line.replace("[Game]", game_subdir());
     let file_path = strip_annotations(&line).replace('\\', "/");
     if !file_path.is_empty() {
         files.push(PathBuf::from(file_path));
