@@ -236,7 +236,7 @@ roster startup error is gone and startup did not hang.
 ### 8. Currency List Compatibility
 
 - [x] Reproduce `GetCurrencyListSize` nil.
-- [ ] Confirm whether Mists Blizzard Lua calls legacy `GetCurrencyListSize` while simulator only exposes `C_CurrencyInfo.GetCurrencyListSize`.
+- [x] Confirm whether Mists Blizzard Lua calls legacy `GetCurrencyListSize` while simulator only exposes `C_CurrencyInfo.GetCurrencyListSize`.
 - [ ] Add a focused compatibility test.
 - [ ] Implement the legacy global as a wrapper over the C API if semantics match.
 - [ ] Verify currency errors disappear.
@@ -251,6 +251,14 @@ Reproduction: `mists_currency_list::token_frame_update_reproduces_missing_curren
 removes the bootstrap-provided legacy global and calls the Mists Cata
 `TokenFrame_Update()` path, confirming Blizzard Token UI fails with a
 `GetCurrencyListSize` nil global before the compatibility wrapper is considered.
+
+Confirmed: Mists Blizzard Lua calls the legacy global in
+`Blizzard_CharacterFrame/Wrath/CharacterFrame.lua`,
+`Blizzard_ActionBar/Classic/MainMenuBar.lua`, and both Cata and shared
+`Blizzard_TokenUI` sources. The simulator's backing C API registers
+`GetCurrencyListSize` under `C_CurrencyInfo` in
+`src/c_api/item_spell/c_currency.rs`; the legacy global exists only through the
+Mists compatibility wrapper in `src/mists/compat_bootstrap.lua`.
 
 ### 9. Dialog and Popup Text Helpers
 
