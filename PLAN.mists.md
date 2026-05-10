@@ -136,7 +136,7 @@ must also return a table for the item list.
 - [x] Reproduce `WorldMapFrame_SetOpacity` nil `opacity`.
 - [x] Find the CVar or saved setting that should seed map opacity.
 - [x] Add a focused test for the default value path.
-- [ ] Fix the backing setting/CVar state.
+- [x] Fix the backing setting/CVar state.
 - [ ] Verify world-map opacity errors disappear.
 
 Observed errors:
@@ -151,6 +151,11 @@ Root cause identified: the minimized WorldMap path calls
 saves back to the same `worldMapOpacity` CVar. The Mists startup CVar default
 should seed `worldMapOpacity` as a concrete string value (`"1"` in the current
 test contract), so `tonumber`-compatible arithmetic never receives nil.
+
+Backing state fix: `worldMapOpacity: '1'` is present in the shared
+`src/cvars.yaml` CVar defaults, and the registered `GetCVar` global reads from
+`SimState.cvars`. The fix is therefore the real backing CVar state, not a
+Mists-only Lua workaround.
 
 ### 6. Nameplate Vertical Scale State
 
