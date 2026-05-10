@@ -1,6 +1,8 @@
 /target
 /target-codex
 /target_codex_*
+/.cache/
+/cache/
 /iced-dynamic/target
 /iced-dynamic/Cargo.lock
 /elune-src/target
@@ -24,7 +26,9 @@ PLAN*.md
 perf.data
 perf.data.old
 flamegraph.svg
+*.log
 .codex/
+.claude/settings.local.json
 target-perf/
 perf.data*.flamegraph.svg
 tests/rilua_bridge/target/
