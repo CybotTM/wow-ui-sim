@@ -258,8 +258,17 @@ if RegisterForSave == nil then
   end
 end
 
+local selectedGuildRosterIndex = 0
+
 if SetGuildRosterSelection == nil then
-  function SetGuildRosterSelection()
+  function SetGuildRosterSelection(index)
+    selectedGuildRosterIndex = tonumber(index) or 0
+  end
+end
+
+if GetGuildRosterSelection == nil then
+  function GetGuildRosterSelection()
+    return selectedGuildRosterIndex
   end
 end
 
