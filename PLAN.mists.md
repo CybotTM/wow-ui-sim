@@ -279,7 +279,7 @@ stderr, so the old currency startup error is gone.
 
 ### 9. Dialog and Popup Text Helpers
 
-- [ ] Reproduce `SetBasicMessageDialogText` nil.
+- [x] Reproduce `SetBasicMessageDialogText` nil.
 - [ ] Locate expected helper definition in Blizzard UI or legacy API surface.
 - [ ] Add a focused test for dialog text mutation.
 - [ ] Implement the helper against the real dialog frame state.
@@ -290,6 +290,12 @@ Observed errors:
 ```text
 attempt to call global 'SetBasicMessageDialogText' (a nil value)
 ```
+
+Reproduction: `mists_dialog_helpers::money_frame_set_type_reproduces_missing_basic_message_dialog_helper`
+removes the bootstrap-provided helper and calls the Mists Classic
+`MoneyFrame_SetType()` invalid-money-type path, confirming Blizzard MoneyFrame
+fails with `SetBasicMessageDialogText` nil before the helper implementation is
+considered.
 
 ### 10. Class Color and Miscellaneous Nil Data
 
