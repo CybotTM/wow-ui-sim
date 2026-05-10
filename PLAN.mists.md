@@ -94,7 +94,7 @@ attempt to call global 'GetPVPThisWeekStats' (a nil value)
 - [x] Determine whether the issue is XML template inheritance, parentKey sync, or MoneyFrame API state.
 - [x] Add a focused XML/widget test for the missing `copper` child.
 - [x] Fix the upstream template/widget construction path.
-- [ ] Verify money-frame errors disappear.
+- [x] Verify money-frame errors disappear.
 
 Observed errors:
 
