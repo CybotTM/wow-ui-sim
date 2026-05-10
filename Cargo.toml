@@ -128,6 +128,11 @@ path = "tests/mists_nameplate_scale.rs"
 required-features = ["client-mists"]
 
 [[test]]
+name = "mists_currency_list"
+path = "tests/mists_currency_list.rs"
+required-features = ["client-mists"]
+
+[[test]]
 name = "classic_guild_roster_selection"
 path = "tests/classic_guild_roster_selection.rs"
 
