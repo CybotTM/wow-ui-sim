@@ -10,3 +10,4 @@
 //! registered (mists handles backdrop via templates, not direct methods).
 
 pub mod compat_bootstrap;
+pub mod post_load;

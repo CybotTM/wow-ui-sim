@@ -118,6 +118,98 @@ fn runtime_template_anonymous_wrapper_layer_texture_parent_key_reaches_instance(
 }
 
 #[test]
+fn runtime_template_frame_children_publish_parent_keys_before_onload() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    register_first_template(
+        r#"<Ui><Frame name="MoneyInputLikeTemplate" virtual="true">
+        <Frames>
+            <EditBox parentKey="gold" name="$parentGold"/>
+            <EditBox parentKey="silver" name="$parentSilver"/>
+            <EditBox parentKey="copper" name="$parentCopper"/>
+        </Frames>
+    </Frame></Ui>"#,
+        "MoneyInputLikeTemplate",
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        MoneyInputLikeFrame = CreateFrame("Frame", "MoneyInputLikeFrame", UIParent, "MoneyInputLikeTemplate")
+        MONEY_INPUT_LIKE_ONLOAD_KEYS = {
+            gold = MoneyInputLikeFrame.gold ~= nil,
+            silver = MoneyInputLikeFrame.silver ~= nil,
+            copper = MoneyInputLikeFrame.copper ~= nil,
+        }
+        "#,
+    )
+    .unwrap();
+
+    let children_ready: (bool, bool, bool) = env
+        .eval(
+            r#"
+            return MONEY_INPUT_LIKE_ONLOAD_KEYS.gold,
+                MONEY_INPUT_LIKE_ONLOAD_KEYS.silver,
+                MONEY_INPUT_LIKE_ONLOAD_KEYS.copper
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        children_ready,
+        (true, true, true),
+        "runtime template frame children must publish parentKey fields before instance OnLoad reads them"
+    );
+}
+
+#[test]
+fn xml_template_frame_children_publish_parent_keys_before_instance_onload() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    register_first_template(
+        r#"<Ui><Frame name="MoneyInputLikeXmlTemplate" virtual="true">
+        <Frames>
+            <EditBox parentKey="gold" name="$parentGold"/>
+            <EditBox parentKey="silver" name="$parentSilver"/>
+            <EditBox parentKey="copper" name="$parentCopper"/>
+        </Frames>
+    </Frame></Ui>"#,
+        "MoneyInputLikeXmlTemplate",
+        "Frame",
+    );
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="MoneyInputLikeXmlFrame" parent="UIParent" inherits="MoneyInputLikeXmlTemplate">
+        <Scripts>
+            <OnLoad>
+                MONEY_INPUT_XML_ONLOAD_KEYS = {
+                    gold = self.gold ~= nil,
+                    silver = self.silver ~= nil,
+                    copper = self.copper ~= nil,
+                }
+            </OnLoad>
+        </Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let children_ready: (bool, bool, bool) = env
+        .eval(
+            r#"
+            return MONEY_INPUT_XML_ONLOAD_KEYS.gold,
+                MONEY_INPUT_XML_ONLOAD_KEYS.silver,
+                MONEY_INPUT_XML_ONLOAD_KEYS.copper
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        children_ready,
+        (true, true, true),
+        "XML template frame children must publish parentKey fields before instance OnLoad reads them"
+    );
+}
+
+#[test]
 fn parent_keyed_wrapper_layer_texture_stays_under_wrapper() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

@@ -1046,6 +1046,8 @@ Blizzard_CombatLog/Blizzard_CombatLog_Mainline.toc
 Blizzard_CombatLog/Blizzard_CombatLog_Mists.toc
 Blizzard_CombatLog/Mainline/Blizzard_CombatLog.lua
 Blizzard_CombatLog/Mainline/Blizzard_CombatLog.xml
+Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua
+Blizzard_CombatLog/Wrath/Blizzard_CombatLog.xml
 Blizzard_CombatLogBase/Blizzard_CombatLogBase.toc
 Blizzard_CombatLogBase/Classic/CombatLogConstants.lua
 Blizzard_CombatLogBase/CombatLogUtil.lua

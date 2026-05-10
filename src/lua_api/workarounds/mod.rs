@@ -142,6 +142,11 @@ const POST_LOAD_WORKAROUNDS: &[WorkaroundStep] = &[
         label: "wrath::post_load",
         apply: apply_wrath_post_load,
     },
+    #[cfg(feature = "client-mists")]
+    WorkaroundStep {
+        label: "mists::post_load",
+        apply: apply_mists_post_load,
+    },
 ];
 
 pub fn apply(env: &crate::lua_api::WowLuaEnv) {
@@ -169,6 +174,11 @@ fn patch_housing_dashboard_preload_from_env(env: &crate::lua_api::WowLuaEnv) {
 #[cfg(feature = "client-wrath")]
 fn apply_wrath_post_load(env: &crate::lua_api::WowLuaEnv) {
     crate::wrath::post_load::apply(env);
+}
+
+#[cfg(feature = "client-mists")]
+fn apply_mists_post_load(env: &crate::lua_api::WowLuaEnv) {
+    crate::mists::post_load::apply(env);
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {

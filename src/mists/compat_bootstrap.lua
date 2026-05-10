@@ -80,7 +80,7 @@ if rawget(_G, "GetQuestTagInfo") == nil then
 end
 
 if rawget(_G, "GetQuestTimers") == nil then
-  function GetQuestTimers() return nil end
+  function GetQuestTimers() end
 end
 
 if rawget(_G, "GetRuneType") == nil then
@@ -245,6 +245,32 @@ if rawget(_G, "UIParent_OnLoad") == nil then
   function UIParent_OnLoad(self) end
 end
 
+local function ensureMoneyInputField(frame, key, suffix)
+  if not frame or frame[key] then
+    return
+  end
+  local name = frame.GetName and frame:GetName()
+  frame[key] = CreateFrame("EditBox", name and (name .. suffix) or nil, frame)
+end
+
+local function ensureMoneyInputFields(frame)
+  ensureMoneyInputField(frame, "gold", "Gold")
+  ensureMoneyInputField(frame, "silver", "Silver")
+  ensureMoneyInputField(frame, "copper", "Copper")
+end
+
+function MoneyInputFrame_SetCompact(frame)
+  ensureMoneyInputFields(frame)
+end
+
+if rawget(_G, "SetBasicMessageDialogText") == nil then
+  function SetBasicMessageDialogText(text)
+    if BasicMessageDialog and BasicMessageDialog.Text then
+      BasicMessageDialog.Text:SetText(text or "")
+    end
+  end
+end
+
 -- ─── Constants ───────────────────────────────────────────────────────────────
 
 if rawget(_G, "NUM_LE_ITEM_QUALITYS") == nil then
@@ -275,6 +301,17 @@ if rawget(_G, "INVSLOT_RANGED") == nil then INVSLOT_RANGED = 18 end
 if rawget(_G, "CHALLENGE_MEDAL_BRONZE") == nil then CHALLENGE_MEDAL_BRONZE = 1 end
 if rawget(_G, "CHALLENGE_MEDAL_SILVER") == nil then CHALLENGE_MEDAL_SILVER = 2 end
 if rawget(_G, "CHALLENGE_MEDAL_GOLD") == nil then CHALLENGE_MEDAL_GOLD = 3 end
+if rawget(_G, "NUM_BANKGENERIC_SLOTS") == nil then NUM_BANKGENERIC_SLOTS = 28 end
+if rawget(_G, "NUM_BANKBAGSLOTS") == nil then NUM_BANKBAGSLOTS = 7 end
+if rawget(_G, "BANK_CONTAINER") == nil then BANK_CONTAINER = -1 end
+if rawget(_G, "MAX_ARENA_TEAMS") == nil then MAX_ARENA_TEAMS = 2 end
+if rawget(_G, "OPTION_HD_TEXTURES") == nil then OPTION_HD_TEXTURES = "High Resolution Textures" end
+
+Constants = Constants or {}
+Constants.InventoryConstants = Constants.InventoryConstants or {}
+if rawget(Constants.InventoryConstants, "NumGenericBankSlots") == nil then
+  Constants.InventoryConstants.NumGenericBankSlots = NUM_BANKGENERIC_SLOTS
+end
 
 -- ─── DebugBarManager (mists debug overlay) ───────────────────────────────────
 
@@ -424,10 +461,44 @@ if rawget(_G, "GetPVPSessionStats") == nil then
   function GetPVPSessionStats() return 0, 0 end
 end
 
+if rawget(_G, "GetPVPLifetimeStats") == nil then
+  function GetPVPLifetimeStats() return 0, 0, 0 end
+end
+
 if rawget(_G, "GetPVPRankInfo") == nil then
   function GetPVPRankInfo(rank, faction)
     return "None", 0
   end
+end
+
+if rawget(_G, "UnitPVPRank") == nil then
+  function UnitPVPRank(unit) return 0 end
+end
+
+if rawget(_G, "GetPVPRankProgress") == nil then
+  function GetPVPRankProgress() return 0 end
+end
+
+if rawget(_G, "GetPersonalRatedInfo") == nil then
+  function GetPersonalRatedInfo(index)
+    return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, index or 0
+  end
+end
+
+if rawget(_G, "GetNumBattlegroundTypes") == nil then
+  function GetNumBattlegroundTypes() return 0 end
+end
+
+if rawget(_G, "GetTrackedAchievements") == nil then
+  function GetTrackedAchievements() end
+end
+
+if rawget(_G, "GetNumQuestWatches") == nil then
+  function GetNumQuestWatches() return 0 end
+end
+
+if rawget(_G, "GetPVPRoles") == nil then
+  function GetPVPRoles() return false, false, false end
 end
 
 if rawget(_G, "GetCurrencyListSize") == nil then
@@ -484,6 +555,63 @@ end
 
 if rawget(C_ProductChoice, "MakeSelection") == nil then
   function C_ProductChoice.MakeSelection() return false end
+end
+
+if rawget(_G, "UNIT_NAMEPLATES_MAX_DISTANCE") == nil then
+  UNIT_NAMEPLATES_MAX_DISTANCE = "Nameplate maximum distance"
+end
+
+if rawget(_G, "LOG_PERIODIC_EFFECTS_TEXT") == nil then
+  LOG_PERIODIC_EFFECTS_TEXT = "Periodic effects"
+end
+
+if rawget(_G, "SHOW_MINIMAP_CLOCK") == nil then
+  SHOW_MINIMAP_CLOCK = "Show minimap clock"
+end
+
+if rawget(_G, "SHOW_PET_MELEE_DAMAGE_TEXT") == nil then
+  SHOW_PET_MELEE_DAMAGE_TEXT = "Pet melee damage"
+end
+
+Enum = Enum or {}
+Enum.BagIndex = Enum.BagIndex or {}
+if rawget(Enum.BagIndex, "Bank") == nil then
+  Enum.BagIndex.Bank = -1
+end
+Enum.LFGListDisplayType = Enum.LFGListDisplayType or {}
+if rawget(Enum.LFGListDisplayType, "RoleCount") == nil then
+  Enum.LFGListDisplayType.RoleCount = 0
+end
+
+local function mistsLegacyAuraTuple(original, unitToken, index, filter)
+  if type(original) ~= "function" then
+    return nil
+  end
+  local name, icon, applications, dispelName, duration, expirationTime, sourceUnit, isStealable, _unused, spellID =
+      original(unitToken, index, filter)
+  if not name then
+    return nil
+  end
+  return name, icon, applications or 0, dispelName, duration or 0, expirationTime or 0,
+      nil, isStealable or false, nil, spellID, nil, nil, sourceUnit == "player", false, 1, false
+end
+
+do
+  local originalUnitBuff = rawget(_G, "UnitBuff")
+  local originalUnitDebuff = rawget(_G, "UnitDebuff")
+  local originalUnitAura = rawget(_G, "UnitAura")
+
+  function UnitBuff(unitToken, index)
+    return mistsLegacyAuraTuple(originalUnitBuff, unitToken, index)
+  end
+
+  function UnitDebuff(unitToken, index)
+    return mistsLegacyAuraTuple(originalUnitDebuff, unitToken, index)
+  end
+
+  function UnitAura(unitToken, index, filter)
+    return mistsLegacyAuraTuple(originalUnitAura, unitToken, index, filter)
+  end
 end
 
 if rawget(_G, "MoneyFrame_SetType") == nil then

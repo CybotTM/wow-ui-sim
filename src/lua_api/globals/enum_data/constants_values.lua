@@ -163,6 +163,7 @@ Constants.ITEM_WEAPON_SUBCLASSConstants.ITEM_WEAPON_SUBCLASS_NONE = -1
 Constants.InventoryConstants.MAX_TRANSACTION_BANK_TABS = 6
 Constants.InventoryConstants.NumAccountBankSlots = 5
 Constants.InventoryConstants.NumBagSlots = 4
+Constants.InventoryConstants.NumGenericBankSlots = 28
 Constants.InventoryConstants.NumCharacterBankSlots = 6
 Constants.InventoryConstants.NumReagentBagSlots = 1
 
@@ -288,4 +289,3 @@ Constants.UnitPowerSpellIDs.VOID_METAMORPHOSIS_SPELL_ID = 1217607
 
 Constants.WeeklyRewardsConsts.ABORT_ITEM_RETENTION_DAYS = 15
 Constants.WeeklyRewardsConsts.WEEKLY_REWARD_ITEM_RETENTION_DAYS = 15
-
