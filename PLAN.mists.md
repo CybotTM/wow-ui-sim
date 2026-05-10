@@ -134,7 +134,7 @@ must also return a table for the item list.
 ### 5. World Map Opacity State
 
 - [x] Reproduce `WorldMapFrame_SetOpacity` nil `opacity`.
-- [ ] Find the CVar or saved setting that should seed map opacity.
+- [x] Find the CVar or saved setting that should seed map opacity.
 - [ ] Add a focused test for the default value path.
 - [ ] Fix the backing setting/CVar state.
 - [ ] Verify world-map opacity errors disappear.
@@ -145,6 +145,12 @@ Observed errors:
 Blizzard_WorldMap/Cata/Blizzard_WorldMap.lua:790:
 attempt to perform arithmetic on local 'opacity' (a nil value)
 ```
+
+Root cause identified: the minimized WorldMap path calls
+`WorldMapFrame_SetOpacity(GetCVar("worldMapOpacity"))`, and the opacity slider
+saves back to the same `worldMapOpacity` CVar. The Mists startup CVar default
+should seed `worldMapOpacity` as a concrete string value (`"1"` in the current
+test contract), so `tonumber`-compatible arithmetic never receives nil.
 
 ### 6. Nameplate Vertical Scale State
 
