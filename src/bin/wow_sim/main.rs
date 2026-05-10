@@ -374,7 +374,7 @@ fn init_environment(
     {
         let mut state = env.state().borrow_mut();
         let mut addon_base_paths = vec![
-            default_blizzard_ui_addons_path_with_setup().map_err(startup_blizzard_ui_help)?,
+            runtime_blizzard_ui_addons_path_with_setup().map_err(startup_blizzard_ui_help)?,
             PathBuf::from("./Interface/AddOns"),
         ];
         if args.is_test_command() {
@@ -386,11 +386,24 @@ fn init_environment(
     Ok(())
 }
 
-fn default_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
-    match wow_ui_sim::paths::default_blizzard_ui_addons_path() {
-        Ok(path) => Ok(path),
-        Err(error) => recover_missing_blizzard_ui_addons_path(error),
+fn runtime_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
+    let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir();
+    if path.exists() {
+        return Ok(path);
     }
+
+    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Retail {
+        return recover_missing_blizzard_ui_addons_path(wow_ui_sim::Error::Other(format!(
+            "missing Blizzard UI cache at {}",
+            path.display()
+        )));
+    }
+
+    Err(wow_ui_sim::Error::Other(format!(
+        "missing Blizzard UI sources for {:?} profile at {}",
+        wow_ui_sim::client_profile::ACTIVE,
+        path.display()
+    )))
 }
 
 fn recover_missing_blizzard_ui_addons_path(

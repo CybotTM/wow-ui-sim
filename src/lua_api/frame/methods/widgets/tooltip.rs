@@ -50,6 +50,8 @@ const TOOLTIP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetTalent", set_talent),
     ("SetToyByItemID", set_toy_by_item_id),
     ("SetHyperlink", set_hyperlink),
+    ("SetAction", set_action),
+    ("SetCurrencyToken", set_currency_token),
     ("SetInventoryItem", set_inventory_item),
     ("SetSocketedItem", set_socketed_item),
     ("SetSocketGem", set_socket_gem),

@@ -533,6 +533,11 @@ pub(super) fn stub_nil(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub(super) fn transform_camera_space_to_model_space(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(stack_val(state, 2));
+    Ok(1)
+}
+
 pub(super) fn stub_zero(state: &mut LuaState) -> LuaResult<u32> {
     0.0_f64.into_stack(state)
 }
@@ -650,7 +655,10 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetPitch", stub_zero),
     ("GetRoll", stub_zero),
     ("GetWorldScale", stub_one),
-    ("TransformCameraSpaceToModelSpace", stub_nil),
+    (
+        "TransformCameraSpaceToModelSpace",
+        transform_camera_space_to_model_space,
+    ),
     ("IsUsingModelCenterToTransform", stub_false),
     ("GetUpperEmblemTexture", stub_nil),
     ("GetLowerEmblemTexture", stub_nil),
