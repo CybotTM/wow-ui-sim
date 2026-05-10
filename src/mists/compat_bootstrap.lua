@@ -268,9 +268,12 @@ function MoneyInputFrame_SetCompact(frame)
 end
 
 if rawget(_G, "SetBasicMessageDialogText") == nil then
-  function SetBasicMessageDialogText(text)
+  function SetBasicMessageDialogText(text, force)
     if BasicMessageDialog and BasicMessageDialog.Text then
-      BasicMessageDialog.Text:SetText(text or "")
+      if force or not BasicMessageDialog:IsShown() then
+        BasicMessageDialog.Text:SetText(text)
+        BasicMessageDialog:Show()
+      end
     end
   end
 end

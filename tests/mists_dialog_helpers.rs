@@ -47,11 +47,20 @@ fn money_frame_set_type_reproduces_missing_basic_message_dialog_helper() {
 fn basic_message_dialog_helper_updates_text() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 
-    let message_text: String = env
+    let result: (String, i32, String, i32, String, i32) = env
         .eval(
             r#"
             local textValue = nil
+            local shown = false
+            local showCount = 0
             BasicMessageDialog = {
+                IsShown = function()
+                    return shown
+                end,
+                Show = function()
+                    shown = true
+                    showCount = showCount + 1
+                end,
                 Text = {
                     SetText = function(_self, text)
                         textValue = text
@@ -60,13 +69,32 @@ fn basic_message_dialog_helper_updates_text() {
             }
 
             SetBasicMessageDialogText("Invalid money type: TEST")
-            return textValue
+            local firstText = textValue
+            local firstShowCount = showCount
+
+            SetBasicMessageDialogText("Ignored while shown")
+            local secondText = textValue
+            local secondShowCount = showCount
+
+            SetBasicMessageDialogText("Forced replacement", true)
+            local thirdText = textValue
+            local thirdShowCount = showCount
+
+            return firstText, firstShowCount, secondText, secondShowCount, thirdText, thirdShowCount
             "#,
         )
         .expect("SetBasicMessageDialogText should mutate BasicMessageDialog.Text");
 
     assert_eq!(
-        message_text, "Invalid money type: TEST",
-        "SetBasicMessageDialogText should write the supplied text to BasicMessageDialog.Text"
+        result,
+        (
+            "Invalid money type: TEST".to_string(),
+            1,
+            "Invalid money type: TEST".to_string(),
+            1,
+            "Forced replacement".to_string(),
+            2
+        ),
+        "SetBasicMessageDialogText should update and show only when hidden or forced"
     );
 }
