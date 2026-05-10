@@ -239,7 +239,7 @@ roster startup error is gone and startup did not hang.
 - [x] Confirm whether Mists Blizzard Lua calls legacy `GetCurrencyListSize` while simulator only exposes `C_CurrencyInfo.GetCurrencyListSize`.
 - [x] Add a focused compatibility test.
 - [x] Implement the legacy global as a wrapper over the C API if semantics match.
-- [ ] Verify currency errors disappear.
+- [x] Verify currency errors disappear.
 
 Observed errors:
 
@@ -269,6 +269,13 @@ Implementation: `src/mists/compat_bootstrap.lua` installs
 `GetCurrencyListSize()` only when the legacy global is absent. It delegates to
 `C_CurrencyInfo.GetCurrencyListSize()` when that namespaced C API is registered,
 and returns `0` only as a defensive fallback if the namespace is unavailable.
+
+Verification: after rebuilding `wow-sim` with the Mists feature gate,
+`WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 timeout 90 target/debug/wow-sim lua-errors`
+exited successfully with `0` distinct errors. No `GetCurrencyListSize`,
+`C_CurrencyInfo`, `TokenFrame`, `CurrencyList`, `currency list`,
+`Blizzard_TokenUI`, or `CharacterFrameTab4` strings appeared in stdout or
+stderr, so the old currency startup error is gone.
 
 ### 9. Dialog and Popup Text Helpers
 
