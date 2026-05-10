@@ -74,8 +74,6 @@ COPY --from=builder /build/target/release/wow-sim /app/wow-sim
 COPY --from=blizzard-ui /wow-ui-source/Interface/AddOns/ /app/Interface/BlizzardUI/
 # TestFramework: assertion library loaded automatically by `run-tests`
 COPY Interface/AddOns/TestFramework/ /app/Interface/AddOns/TestFramework/
-# fonts: TTF fonts used for text rendering
-COPY fonts/ /app/fonts/
 
 # Skip SavedVariables loading — no WTF directory is available in the image.
 ENV WOW_SIM_NO_SAVED_VARS=1
