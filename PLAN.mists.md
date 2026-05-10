@@ -163,7 +163,7 @@ Mists-only Lua workaround.
 - [x] Find the CVar or nameplate option that should provide the value.
 - [x] Add a focused Mists-gated test.
 - [x] Fix the backing setting/CVar state.
-- [ ] Verify nameplate scale errors disappear.
+- [x] Verify nameplate scale errors disappear.
 
 Observed errors:
 
@@ -182,6 +182,12 @@ Backing state fix: `NamePlateVerticalScale: '1'` and
 `NamePlateHorizontalScale: '1'` are present in the shared `src/cvars.yaml`
 defaults, and the registered `GetCVar` global reads from `SimState.cvars`.
 The fix is the shared CVar backing state, not a Mists-only Lua workaround.
+
+Verification: after rebuilding `wow-sim` with the Mists feature gate,
+`WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 timeout 90 target/debug/wow-sim lua-errors`
+reported `0` distinct errors, and no `NamePlateVerticalScale`,
+`namePlateVerticalScale`, `Blizzard_NamePlates`, or
+`UpdateNamePlateOptions` strings appeared in stdout or stderr.
 
 ### 7. Guild Roster Selection State
 
