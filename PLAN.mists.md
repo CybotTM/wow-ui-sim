@@ -107,7 +107,7 @@ attempt to index field 'copper' (a nil value)
 
 - [x] Reproduce `ProductChoice.lua:61: attempt to get length of a nil value`.
 - [x] Identify which product-choice table is nil.
-- [ ] Determine whether MoP Classic expects empty data or an unavailable feature path.
+- [x] Determine whether MoP Classic expects empty data or an unavailable feature path.
 - [ ] Add a focused Mists-gated test.
 - [ ] Fix the backing data/API state or load gating.
 - [ ] Verify ProductChoice errors disappear.
@@ -122,6 +122,14 @@ attempt to get length of a nil value
 Root cause identified: `C_ProductChoice` exists and `C_ProductChoice.GetChoices`
 is callable, but `C_ProductChoice.GetChoices()` returns nil where
 `ProductChoiceFrame_ShowAlerts` expects a choices table.
+
+Expected behavior: ProductChoice is an available Classic API/UI path in MoP
+Classic. The Mists `Blizzard_UIPanels_Game_Mists.toc` loads
+`Classic\ProductChoice.lua` and `.xml`, and the Classic API schema declares
+`C_ProductChoice.GetChoices()` as returning a table. Therefore an account with
+no product choices should expose empty data (`GetChoices()` returns `{}`), not a
+nil/unavailable feature path. If a choice ID is present, `GetProducts(choiceID)`
+must also return a table for the item list.
 
 ### 5. World Map Opacity State
 
