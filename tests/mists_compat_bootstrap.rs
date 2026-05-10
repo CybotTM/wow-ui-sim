@@ -9,6 +9,9 @@ use wow_ui_sim::xml::{FrameXml, XmlElement};
 const HONOR_FRAME_SHARED_LUA: &str = include_str!(
     "../Interface/BlizzardUI/Mists/AddOns/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua"
 );
+const PRODUCT_CHOICE_LUA: &str = include_str!(
+    "../Interface/BlizzardUI/Mists/AddOns/Blizzard_UIPanels_Game/Classic/ProductChoice.lua"
+);
 
 fn blizzard_ui_dir() -> std::path::PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
@@ -187,6 +190,39 @@ fn mists_trade_player_input_money_frame_widget_has_copper_child() {
             true
         ),
         "TradePlayerInputMoneyFrame must expose its copper edit box through both parentKey and named global wiring"
+    );
+}
+
+#[test]
+fn mists_product_choice_alerts_reproduce_nil_choices_length() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    env.exec(
+        r#"
+        C_ProductChoice = {
+            GetChoices = function() return nil end,
+        }
+        "#,
+    )
+    .expect("install nil ProductChoice choices fixture");
+    env.exec(PRODUCT_CHOICE_LUA)
+        .expect("ProductChoice.lua should define functions before events fire");
+
+    let (ok, err): (bool, String) = env
+        .eval(
+            r#"
+            local ok, err = pcall(ProductChoiceFrame_ShowAlerts, {})
+            return ok, tostring(err)
+            "#,
+        )
+        .expect("ProductChoiceFrame_ShowAlerts pcall should return a status");
+
+    assert!(
+        !ok,
+        "nil ProductChoice choices should fail under length operator"
+    );
+    assert!(
+        err.contains("length") || err.contains("nil"),
+        "expected nil choices length failure, got: {err}"
     );
 }
 
