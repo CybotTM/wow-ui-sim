@@ -93,7 +93,11 @@ pub(super) fn resolve_relative_point_from_val(
         Val::Nil => Ok(default),
         Val::Str(_) => {
             let point_name = val_to_string(state, value).unwrap_or_default();
-            crate::widget::AnchorPoint::from_str(&point_name).ok_or_else(|| {
+            let normalized = point_name
+                .split(['"', ',', ' '])
+                .next()
+                .unwrap_or(point_name.as_str());
+            crate::widget::AnchorPoint::from_str(normalized).ok_or_else(|| {
                 runtime_error(format!(
                     "Frame:SetPoint(): Unknown region point {point_name}"
                 ))

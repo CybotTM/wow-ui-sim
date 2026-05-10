@@ -162,6 +162,33 @@ enum LuaSourcePatchOp {
 
 const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
     LuaSourcePatch {
+        suffix: "/Blizzard_StoreUISecure.lua",
+        operations: &[
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "function StoreProductCard_OnLoad(self)\n\tif (not StoreProductCard_IsSplashPage(self)) then",
+                to: "function StoreProductCard_OnLoad(self)\n\tif self.ProductName == nil and type(self.CreateFontString) == \"function\" then\n\t\tself.ProductName = self:CreateFontString(nil, \"ARTWORK\", \"GameFontNormalLarge\");\n\tend\n\tif self.ProductName == nil then\n\t\treturn;\n\tend\n\tif (not StoreProductCard_IsSplashPage(self)) then",
+            },
+            LuaSourcePatchOp::ReplaceOnce {
+                from: "\t\t\tcard = CreateForbiddenFrame(\"Button\", nil, self, \"StoreProductCardTemplate\");",
+                to: "\t\t\tcard = CreateForbiddenFrame(\"Button\", nil, self, \"StoreProductCardTemplate\");\n\t\t\tif type(card.SetPoint) ~= \"function\" then card = CreateFrame(\"Button\", nil, self); end",
+            },
+        ],
+    },
+    LuaSourcePatch {
+        suffix: "/HybridScrollFrame.lua",
+        operations: &[LuaSourcePatchOp::ReplaceOnce {
+            from: "\t\t\tself.scrollBar.thumbTexture:Hide();",
+            to: "\t\t\tif self.scrollBar.thumbTexture then self.scrollBar.thumbTexture:Hide(); end",
+        }],
+    },
+    LuaSourcePatch {
+        suffix: "/Blizzard_SimpleCheckout.lua",
+        operations: &[LuaSourcePatchOp::ReplaceOnce {
+            from: "self:SetPoint(\"TOPLEFT\", UIParent, \"TOPLEFT\");",
+            to: "pcall(self.SetPoint, self, \"TOPLEFT\", UIParent, \"TOPLEFT\");",
+        }],
+    },
+    LuaSourcePatch {
         suffix: "/ChatFrameUtil.lua",
         operations: &[
             LuaSourcePatchOp::Replace {
