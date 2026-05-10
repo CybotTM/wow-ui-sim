@@ -1,13 +1,14 @@
 //! Post-load workarounds that are still required on the live rilua path.
 
+mod logging;
 mod permanent;
 mod runtime_surfaces;
 mod temporary;
-mod logging;
 
 pub(crate) use temporary::environment_cleanup_restore::restore_post_cleanup_globals;
 pub(crate) use temporary::source_patches::patch_lua_source;
 
+use logging::log_step;
 pub use runtime_surfaces::patch_uiparent_managed_frame_mixin;
 use runtime_surfaces::*;
 pub(crate) use runtime_surfaces::{
@@ -15,7 +16,6 @@ pub(crate) use runtime_surfaces::{
     patch_map_canvas_scroll_container, patch_playerspells_onload_backfill, patch_quest_log_mixin,
     patch_shared_xml_anim_mixins, patch_unit_position_frame_mixin,
 };
-use logging::log_step;
 
 struct WorkaroundStep {
     label: &'static str,
@@ -708,4 +708,3 @@ mod tests {
         );
     }
 }
-

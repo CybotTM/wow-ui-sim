@@ -191,38 +191,68 @@ fn mists_honor_system_enabled_matches_disabled_legacy_honor_surface() {
 #[test]
 fn mists_honor_pvp_api_contract_matches_classic_shapes() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    {
+        let mut state = env.state().borrow_mut();
+        state.player.honor_level = 5;
+        state.pvp_honor.classic_honor_system_enabled = true;
+        state.pvp_honor.yesterday_honorable_kills = 11;
+        state.pvp_honor.yesterday_dishonorable_kills = 1;
+        state.pvp_honor.this_week_honorable_kills = 22;
+        state.pvp_honor.this_week_contribution = 330;
+        state.pvp_honor.last_week_honorable_kills = 44;
+        state.pvp_honor.last_week_dishonorable_kills = 2;
+        state.pvp_honor.last_week_contribution = 550;
+        state.pvp_honor.last_week_rank = 6;
+        state.pvp_honor.lifetime_honorable_kills = 88;
+        state.pvp_honor.lifetime_highest_rank = 9;
+        state.pvp_honor.rank_progress = 0.25;
+    }
 
-    let result: (String, bool, i32, i32, i32, i32, String, i32, i32) = env
+    let shape: (String, bool, i32, i32, i32, i32) = env
         .eval(
             r##"
-            local rankName, rankNumber = GetPVPRankInfo(UnitPVPRank("player"))
             return type(HonorSystemEnabled()),
                 HonorSystemEnabled(),
                 select("#", GetPVPYesterdayStats()),
                 select("#", GetPVPThisWeekStats()),
                 select("#", GetPVPLastWeekStats()),
-                select("#", GetPVPLifetimeStats()),
+                select("#", GetPVPLifetimeStats())
+            "##,
+        )
+        .expect("Mists honor/PvP APIs should expose Classic call shapes");
+    let values: (i32, i32, i32, i32, i32, i32, i32, i32, String, i32, f64) = env
+        .eval(
+            r##"
+            local yesterdayHK, yesterdayDK = GetPVPYesterdayStats()
+            local weekHK, weekContribution = GetPVPThisWeekStats()
+            local lastWeekHK, lastWeekDK = GetPVPLastWeekStats()
+            local lifetimeHK, _, highestRank = GetPVPLifetimeStats()
+            local rankName, rankNumber = GetPVPRankInfo(UnitPVPRank("player"))
+            return
+                yesterdayHK,
+                yesterdayDK,
+                weekHK,
+                weekContribution,
+                lastWeekHK,
+                lastWeekDK,
+                lifetimeHK,
+                highestRank,
                 rankName,
                 rankNumber,
                 GetPVPRankProgress()
             "##,
         )
-        .expect("Mists honor/PvP APIs should be callable");
+        .expect("Mists honor/PvP APIs should read simulator state");
 
     assert_eq!(
-        result,
-        (
-            "boolean".to_string(),
-            false,
-            2,
-            2,
-            4,
-            3,
-            "None".to_string(),
-            0,
-            0
-        ),
+        shape,
+        ("boolean".to_string(), true, 2, 2, 4, 3),
         "Mists honor/PvP startup APIs should keep the Classic return shapes HonorFrame_Shared.lua consumes"
+    );
+    assert_eq!(
+        values,
+        (11, 1, 22, 330, 44, 2, 88, 9, "Rank".to_string(), 5, 0.25),
+        "Mists honor/PvP startup APIs should read Classic return shapes from simulator state"
     );
 }
 

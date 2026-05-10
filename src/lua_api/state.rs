@@ -165,6 +165,7 @@ macro_rules! build_empty_sim_state {
             player: PlayerState::seeded(),
             player_xp: PlayerXpState::default(),
             bind_location: "Stormwind City".into(),
+            pvp_honor: PvpHonorState::default(),
             world: super::state_types::seeded_world_state(),
             bag_items: $collections.bag_items,
             tracked_recipes: $collections.tracked_recipes,
@@ -345,7 +346,7 @@ pub use super::state_types::{
     LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer,
     MovementState, MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary,
     MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction,
-    PendingTimer, PlayerState, PlayerXpState, SEEDED_LOCAL_CHARACTER_GUID,
+    PendingTimer, PlayerState, PlayerXpState, PvpHonorState, SEEDED_LOCAL_CHARACTER_GUID,
     SEEDED_LOCAL_CHARACTER_NAME, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
     SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
 };
