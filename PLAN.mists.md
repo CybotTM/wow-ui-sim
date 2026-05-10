@@ -326,7 +326,7 @@ exited successfully with `0` distinct errors. No `SetBasicMessageDialogText`,
 - [x] Identify which class token lacks a color.
 - [x] Add a focused class-color/default data test.
 - [x] Fix the backing class-color data.
-- [ ] Verify class-color errors disappear.
+- [x] Verify class-color errors disappear.
 
 Observed errors:
 
@@ -358,6 +358,12 @@ Backing data fix: `src/mists/compat_bootstrap.lua` caps `GetNumClasses()` at
 Mists-only Blizzard code from iterating shared retail-backed `DEMONHUNTER` and
 `EVOKER` class tokens that are outside MoP's visible class set, so every visible
 class token has matching `RAID_CLASS_COLORS` data.
+
+Verification: after rebuilding `wow-sim` with the Mists feature gate,
+`WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 timeout 90 target/debug/wow-sim lua-errors`
+reported `0` distinct errors. No `classColor`, `ClubFinder`,
+`RAID_CLASS_COLORS`, `DEMONHUNTER`, or `EVOKER` strings appeared in stdout or
+stderr.
 
 ## Addon Harness Follow-Up
 
