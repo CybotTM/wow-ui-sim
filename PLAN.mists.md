@@ -193,7 +193,7 @@ reported `0` distinct errors, and no `NamePlateVerticalScale`,
 
 - [x] Reproduce `SetGuildRosterSelection` nil.
 - [x] Do not add a no-op stub: prior note says that can hang guild roster retry logic.
-- [ ] Implement real selected-guild-roster-index state with matching getter/setter behavior.
+- [x] Implement real selected-guild-roster-index state with matching getter/setter behavior.
 - [ ] Add a focused Mists/Wrath-compatible test.
 - [ ] Verify guild roster errors disappear and startup does not hang.
 
@@ -213,6 +213,12 @@ asserts that `SetGuildRosterSelection(7)` is observable through
 `GetGuildRosterSelection()` and that clearing back to `0` is also preserved.
 The Mists bootstrap comment now explicitly warns that a no-op setter can leave
 the guild roster UI retrying against unchanged selection state.
+
+State implementation: `src/mists/compat_bootstrap.lua` owns a local
+`selectedGuildRosterIndex`, initializes it to `0`, updates it through
+`SetGuildRosterSelection(index)` using `tonumber(index) or 0`, and exposes the
+current value through `GetGuildRosterSelection()`. This is real backing state
+for the legacy FriendsFrame/GuildFrame selection contract.
 
 ### 8. Currency List Compatibility
 
