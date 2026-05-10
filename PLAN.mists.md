@@ -191,7 +191,7 @@ reported `0` distinct errors, and no `NamePlateVerticalScale`,
 
 ### 7. Guild Roster Selection State
 
-- [ ] Reproduce `SetGuildRosterSelection` nil.
+- [x] Reproduce `SetGuildRosterSelection` nil.
 - [ ] Do not add a no-op stub: prior note says that can hang guild roster retry logic.
 - [ ] Implement real selected-guild-roster-index state with matching getter/setter behavior.
 - [ ] Add a focused Mists/Wrath-compatible test.
@@ -202,6 +202,11 @@ Observed errors:
 ```text
 FriendsFrame.lua: attempt to call global 'SetGuildRosterSelection' (a nil value)
 ```
+
+Reproduction: `mists_guild_roster_selection::friends_frame_onload_reproduces_missing_guild_roster_selection`
+removes the bootstrap-provided global and exercises the FriendsFrame OnLoad
+guild selection call shape, confirming the missing API fails with
+`SetGuildRosterSelection` nil before the real selection-state fix is considered.
 
 ### 8. Currency List Compatibility
 
