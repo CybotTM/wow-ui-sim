@@ -29,6 +29,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY .cargo/config.toml .cargo/config.toml
 COPY iced-wgpu-patched/ iced-wgpu-patched/
 COPY iced-dynamic/ iced-dynamic/
+COPY xtask/ xtask/
 
 # Copy test targets referenced by Cargo.toml's [[test]] sections.
 COPY tests/ tests/
