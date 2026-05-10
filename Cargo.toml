@@ -123,6 +123,11 @@ name = "pandaria_installed_addons"
 path = "tests/pandaria_installed_addons.rs"
 required-features = ["client-mists"]
 
+[[test]]
+name = "mists_compat_bootstrap"
+path = "tests/mists_compat_bootstrap.rs"
+required-features = ["client-mists"]
+
 # The `server` feature of iced-layout-inspector pulls in peercred-ipc, which is
 # Linux-only (uses SO_PEERCRED — macOS is unix but lacks this socket option).
 [target.'cfg(target_os = "linux")'.dependencies]

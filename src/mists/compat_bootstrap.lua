@@ -8,6 +8,26 @@
 -- aliases or the SetBackdrop frame proxies. The function stubs here address
 -- specifically the 46 unique missing globals in mists's lua-errors baseline.
 
+-- ─── Expansion helpers ──────────────────────────────────────────────────────
+
+if rawget(_G, "GetExpansionLevel") == nil or GetExpansionLevel() ~= LE_EXPANSION_MISTS_OF_PANDARIA then
+  function GetExpansionLevel()
+    return LE_EXPANSION_MISTS_OF_PANDARIA
+  end
+end
+
+if rawget(_G, "ClassicExpansionAtLeast") == nil or ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA + 1) then
+  function ClassicExpansionAtLeast(expansion)
+    return GetExpansionLevel() >= expansion
+  end
+end
+
+if rawget(_G, "ClassicExpansionAtMost") == nil then
+  function ClassicExpansionAtMost(expansion)
+    return GetExpansionLevel() <= expansion
+  end
+end
+
 -- ─── Pre-Cata leftover globals that mists kept but retail removed ────────────
 
 if rawget(_G, "FillLocalizedClassList") == nil then
