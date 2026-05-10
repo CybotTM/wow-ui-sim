@@ -4,6 +4,10 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
+const HONOR_FRAME_SHARED_LUA: &str = include_str!(
+    "../Interface/BlizzardUI/Mists/AddOns/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua"
+);
+
 fn blizzard_ui_dir() -> std::path::PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
         "CARGO_MANIFEST_DIR"
@@ -127,6 +131,41 @@ fn mists_bootstrap_supplies_legacy_startup_api_shapes() {
             "table".to_string()
         ),
         "Mists startup helpers should return non-nil legacy API shapes"
+    );
+}
+
+#[test]
+fn mists_honor_frame_shared_reproduces_missing_honor_system_enabled() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    env.exec(
+        r#"
+        rawset(_G, "HonorSystemEnabled", nil)
+        HonorFrame_GetCurrencyFrame = function()
+            return {
+                Hide = function() end,
+                Show = function() end,
+            }
+        end
+        "#,
+    )
+    .expect("install HonorFrame reproduction fixtures");
+    env.exec(HONOR_FRAME_SHARED_LUA)
+        .expect("HonorFrame_Shared.lua should define functions before OnLoad runs");
+
+    let (ok, err): (bool, String) = env
+        .eval(
+            r#"
+            local frame = { RegisterEvent = function() end }
+            local ok, err = pcall(HonorFrame_OnLoad, frame)
+            return ok, tostring(err)
+            "#,
+        )
+        .expect("HonorFrame_OnLoad pcall should return a status");
+
+    assert!(!ok, "HonorFrame_OnLoad should reproduce the nil global");
+    assert!(
+        err.contains("HonorSystemEnabled"),
+        "expected HonorSystemEnabled nil failure, got: {err}"
     );
 }
 
