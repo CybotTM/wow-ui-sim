@@ -160,7 +160,7 @@ Mists-only Lua workaround.
 ### 6. Nameplate Vertical Scale State
 
 - [x] Reproduce `namePlateVerticalScale` nil in `Blizzard_NamePlates.lua:293`.
-- [ ] Find the CVar or nameplate option that should provide the value.
+- [x] Find the CVar or nameplate option that should provide the value.
 - [ ] Add a focused Mists-gated test.
 - [ ] Fix the backing setting/CVar state.
 - [ ] Verify nameplate scale errors disappear.
@@ -171,6 +171,12 @@ Observed errors:
 Blizzard_NamePlates/TBC/Blizzard_NamePlates.lua:293:
 attempt to perform arithmetic on local 'namePlateVerticalScale' (a nil value)
 ```
+
+Root cause identified: `NamePlateDriverMixin:UpdateNamePlateOptions()` reads
+`tonumber(GetCVar("NamePlateVerticalScale"))` and immediately subtracts `1.0`.
+The backing setting is the `NamePlateVerticalScale` CVar, paired with
+`NamePlateHorizontalScale` for nameplate width. The shared `src/cvars.yaml`
+default should seed `NamePlateVerticalScale` as `"1"`.
 
 ### 7. Guild Roster Selection State
 
