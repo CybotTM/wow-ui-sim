@@ -280,7 +280,7 @@ stderr, so the old currency startup error is gone.
 ### 9. Dialog and Popup Text Helpers
 
 - [x] Reproduce `SetBasicMessageDialogText` nil.
-- [ ] Locate expected helper definition in Blizzard UI or legacy API surface.
+- [x] Locate expected helper definition in Blizzard UI or legacy API surface.
 - [ ] Add a focused test for dialog text mutation.
 - [ ] Implement the helper against the real dialog frame state.
 - [ ] Verify dialog helper errors disappear.
@@ -296,6 +296,12 @@ removes the bootstrap-provided helper and calls the Mists Classic
 `MoneyFrame_SetType()` invalid-money-type path, confirming Blizzard MoneyFrame
 fails with `SetBasicMessageDialogText` nil before the helper implementation is
 considered.
+
+Expected helper: Mists Blizzard UI defines `SetBasicMessageDialogText(text, force)`
+in `Blizzard_SharedXML/SharedBasicControls.lua`. It updates
+`BasicMessageDialog.Text` and shows `BasicMessageDialog` when forced or when the
+dialog is not already shown. The backing frame and `Text` parentKey are declared
+in `Blizzard_SharedXML/SharedBasicControls.xml`.
 
 ### 10. Class Color and Miscellaneous Nil Data
 
