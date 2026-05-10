@@ -523,6 +523,14 @@ if rawget(C_ProductChoice, "GetChoices") == nil then
   function C_ProductChoice.GetChoices() return {} end
 end
 
+if rawget(C_ProductChoice, "GetProducts") == nil then
+  function C_ProductChoice.GetProducts(choiceID) return {} end
+end
+
+if rawget(C_ProductChoice, "GetNumSuppressed") == nil then
+  function C_ProductChoice.GetNumSuppressed() return 0 end
+end
+
 if rawget(C_ProductChoice, "MakeSelection") == nil then
   function C_ProductChoice.MakeSelection() return false end
 end

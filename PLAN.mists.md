@@ -109,7 +109,7 @@ attempt to index field 'copper' (a nil value)
 - [x] Identify which product-choice table is nil.
 - [x] Determine whether MoP Classic expects empty data or an unavailable feature path.
 - [x] Add a focused Mists-gated test.
-- [ ] Fix the backing data/API state or load gating.
+- [x] Fix the backing data/API state or load gating.
 - [ ] Verify ProductChoice errors disappear.
 
 Observed errors:
