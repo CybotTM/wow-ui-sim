@@ -159,7 +159,7 @@ Mists-only Lua workaround.
 
 ### 6. Nameplate Vertical Scale State
 
-- [ ] Reproduce `namePlateVerticalScale` nil in `Blizzard_NamePlates.lua:293`.
+- [x] Reproduce `namePlateVerticalScale` nil in `Blizzard_NamePlates.lua:293`.
 - [ ] Find the CVar or nameplate option that should provide the value.
 - [ ] Add a focused Mists-gated test.
 - [ ] Fix the backing setting/CVar state.
