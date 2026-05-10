@@ -521,13 +521,33 @@ pub(super) fn ensure_runtime_button_texture_slots(
         ("CheckedTexture", frame.checked_texture()),
         ("DisabledCheckedTexture", frame.disabled_checked_texture()),
     ];
+    let mut aliases = Vec::new();
     let mut sim = borrow_state_mut(state)?;
     for (key, texture) in slots {
-        if texture.is_some() {
-            crate::lua_api::frame::methods::methods_helpers::get_or_create_button_texture(
-                &mut sim, frame_id, key,
-            );
+        if let Some(texture) = texture {
+            let texture_id =
+                crate::lua_api::frame::methods::methods_helpers::get_or_create_button_texture(
+                    &mut sim, frame_id, key,
+                );
+            if let Some(parent_key) = texture.parent_key.as_deref()
+                && parent_key != key
+                && let Some(button) = sim.widgets.get_mut_visual(frame_id)
+            {
+                button
+                    .children_keys
+                    .insert(parent_key.to_string(), texture_id);
+                aliases.push((parent_key.to_string(), texture_id));
+            }
         }
+    }
+    drop(sim);
+    for (parent_key, texture_id) in aliases {
+        crate::lua_api::globals::template::assign_parent_key(
+            state,
+            frame_id,
+            &parent_key,
+            texture_id,
+        )?;
     }
     Ok(())
 }

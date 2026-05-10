@@ -249,3 +249,27 @@ fn mists_bootstrap_supplies_settings_label_globals() {
         "Mists settings variables should not register nil display names"
     );
 }
+
+#[test]
+fn mists_create_forbidden_frame_forwards_to_create_frame() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let result: (String, String, bool) = env
+        .eval(
+            r#"
+            local frame = CreateForbiddenFrame("Button", "MistsForbiddenProbe", UIParent, "UIPanelButtonTemplate")
+            return frame:GetObjectType(), frame:GetName(), frame:IsForbidden()
+            "#,
+        )
+        .expect("CreateForbiddenFrame should create a real forbidden frame");
+
+    assert_eq!(
+        result,
+        (
+            "Button".to_string(),
+            "MistsForbiddenProbe".to_string(),
+            true
+        ),
+        "CreateForbiddenFrame should preserve CreateFrame semantics and mark the frame forbidden"
+    );
+}

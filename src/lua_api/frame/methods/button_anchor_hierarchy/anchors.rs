@@ -408,12 +408,20 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
 
 fn set_point_anchor_from_stack(state: &mut LuaState) -> LuaResult<crate::widget::AnchorPoint> {
     let point_name = String::from_stack(state, 2)?;
-    let Some(point) = parse_anchor_point_with_compat_warning(state, &point_name) else {
+    let normalized = normalize_anchor_point_name(&point_name);
+    let Some(point) = parse_anchor_point_with_compat_warning(state, normalized) else {
         return Err(runtime_error(format!(
             "Frame:SetPoint(): Invalid region point {point_name}"
         )));
     };
     Ok(point)
+}
+
+fn normalize_anchor_point_name(point_name: &str) -> &str {
+    point_name
+        .split(['"', ',', ' '])
+        .next()
+        .unwrap_or(point_name)
 }
 
 fn set_point_request(

@@ -174,10 +174,15 @@ if rawget(_G, "AreHighResTexturesAvailable") == nil then
 end
 
 if rawget(_G, "CreateForbiddenFrame") == nil then
-  -- Real mists creates a frame with the forbidden flag set. Returning a plain
-  -- table is enough for callers that store it without exercising frame methods.
-  function CreateForbiddenFrame()
-    return {}
+  function CreateForbiddenFrame(frameType, name, parent, template, id)
+    if type(CreateFrame) ~= "function" then
+      return {}
+    end
+    local frame = CreateFrame(frameType, name, parent, template, id)
+    if frame and type(frame.SetForbidden) == "function" then
+      frame:SetForbidden(true)
+    end
+    return frame
   end
 end
 
@@ -560,6 +565,14 @@ if rawget(C_ProductChoice, "MakeSelection") == nil then
   function C_ProductChoice.MakeSelection() return false end
 end
 
+C_UIWidgetManager = C_UIWidgetManager or {}
+function C_UIWidgetManager.GetTopCenterWidgetSetID() return 0 end
+function C_UIWidgetManager.GetBelowMinimapWidgetSetID() return 0 end
+
+UIWidgetManager = UIWidgetManager or {}
+function UIWidgetManager:RegisterWidgetSetContainer(setID, container, layoutFunc) end
+function UIWidgetManager:UnregisterWidgetSetContainer(setID, container) end
+
 if rawget(_G, "UNIT_NAMEPLATES_MAX_DISTANCE") == nil then
   UNIT_NAMEPLATES_MAX_DISTANCE = "Nameplate maximum distance"
 end
@@ -582,6 +595,49 @@ end
 
 if rawget(_G, "SHOW_COMBAT_HEALING_TEXT") == nil then
   SHOW_COMBAT_HEALING_TEXT = "Healing"
+end
+
+if rawget(_G, "USE_RAID_STYLE_PARTY_FRAMES") == nil then
+  USE_RAID_STYLE_PARTY_FRAMES = "Use raid-style party frames"
+end
+
+if rawget(_G, "COMPACT_UNIT_FRAME_PROFILE_LABEL") == nil then
+  COMPACT_UNIT_FRAME_PROFILE_LABEL = "Raid profile"
+end
+
+local compactFrameLabels = {
+  "COMPACT_UNIT_FRAME_PROFILE_KEEPGROUPSTOGETHER",
+  "COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS",
+  "COMPACT_UNIT_FRAME_PROFILE_SORTBY",
+  "COMPACT_UNIT_FRAME_PROFILE_DISPLAYPOWERBAR",
+  "COMPACT_UNIT_FRAME_PROFILE_USECLASSCOLORS",
+  "COMPACT_UNIT_FRAME_PROFILE_DISPLAYPETS",
+  "COMPACT_UNIT_FRAME_PROFILE_DISPLAYMAINTANKANDASSIST",
+  "COMPACT_UNIT_FRAME_PROFILE_DISPLAYBORDER",
+  "COMPACT_UNIT_FRAME_PROFILE_DISPLAYNONBOSSDEBUFFS",
+  "COMPACT_UNIT_FRAME_PROFILE_DISPLAYONLYDISPELLABLEDEBUFFS",
+  "COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT",
+  "COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_NONE",
+  "COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_HEALTH",
+  "COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_LOSTHEALTH",
+  "COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_PERC",
+  "COMPACT_UNIT_FRAME_PROFILE_FRAMEHEIGHT",
+  "COMPACT_UNIT_FRAME_PROFILE_FRAMEWIDTH",
+  "COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATEPVE",
+  "COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATEPVP",
+  "COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATE2PLAYERS",
+  "COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATE3PLAYERS",
+  "COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATE5PLAYERS",
+  "COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATE10PLAYERS",
+  "COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATE15PLAYERS",
+  "COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATE20PLAYERS",
+  "COMPACT_UNIT_FRAME_PROFILE_AUTOACTIVATE40PLAYERS",
+}
+
+for _, key in ipairs(compactFrameLabels) do
+  if rawget(_G, key) == nil then
+    _G[key] = key
+  end
 end
 
 Enum = Enum or {}
