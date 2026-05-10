@@ -449,44 +449,6 @@ if rawget(currencyConsts, "CONQUEST_ARENA_META_CURRENCY_ID") == nil then
   currencyConsts.CONQUEST_ARENA_META_CURRENCY_ID = 483
 end
 
-if rawget(_G, "GetPVPYesterdayStats") == nil then
-  function GetPVPYesterdayStats() return 0, 0 end
-end
-
-if rawget(_G, "HonorSystemEnabled") == nil then
-  function HonorSystemEnabled() return false end
-end
-
-if rawget(_G, "GetPVPThisWeekStats") == nil then
-  function GetPVPThisWeekStats() return 0, 0 end
-end
-
-if rawget(_G, "GetPVPLastWeekStats") == nil then
-  function GetPVPLastWeekStats() return 0, 0, 0, 0 end
-end
-
-if rawget(_G, "GetPVPSessionStats") == nil then
-  function GetPVPSessionStats() return 0, 0 end
-end
-
-if rawget(_G, "GetPVPLifetimeStats") == nil then
-  function GetPVPLifetimeStats() return 0, 0, 0 end
-end
-
-if rawget(_G, "GetPVPRankInfo") == nil then
-  function GetPVPRankInfo(rank, faction)
-    return "None", 0
-  end
-end
-
-if rawget(_G, "UnitPVPRank") == nil then
-  function UnitPVPRank(unit) return 0 end
-end
-
-if rawget(_G, "GetPVPRankProgress") == nil then
-  function GetPVPRankProgress() return 0 end
-end
-
 if rawget(_G, "GetPersonalRatedInfo") == nil then
   function GetPersonalRatedInfo(index)
     return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, index or 0

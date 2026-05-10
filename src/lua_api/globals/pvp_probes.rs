@@ -16,9 +16,11 @@
 //! - `GetLocklistMapName(idx)`  — locklist slot name lookup.
 //! - `SetLocklistMap(mapID)`    — append if absent.
 //! - `ClearLocklistMap(mapID)`  — remove matching entries.
+//! - Classic honor stat globals — read from `PvpHonorState`.
 
-use crate::lua_api::methods::borrow_state;
+use crate::lua_api::methods::{borrow_state, val_to_string};
 use crate::lua_api::methods::{borrow_state_mut, create_string, create_table, table_set};
+use crate::lua_api::state_types::PvpHonorState;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -50,6 +52,106 @@ pub(super) fn get_pvp_last_honor_gain(state: &mut LuaState) -> LuaResult<u32> {
     let honor = borrow_state(state)?.pvp_last_honor_gain;
     state.push(Val::Num(honor as f64));
     Ok(1)
+}
+
+fn honor_system_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled = borrow_state(state)?.pvp_honor.classic_honor_system_enabled;
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+fn get_pvp_yesterday_stats(state: &mut LuaState) -> LuaResult<u32> {
+    push_pvp_pair(state, |xp| {
+        (
+            xp.yesterday_honorable_kills,
+            xp.yesterday_dishonorable_kills,
+        )
+    })
+}
+
+fn get_pvp_this_week_stats(state: &mut LuaState) -> LuaResult<u32> {
+    push_pvp_pair(state, |xp| {
+        (xp.this_week_honorable_kills, xp.this_week_contribution)
+    })
+}
+
+fn get_pvp_last_week_stats(state: &mut LuaState) -> LuaResult<u32> {
+    let (honorable_kills, dishonorable_kills, contribution, rank) = {
+        let state_ref = borrow_state(state)?;
+        let xp = &state_ref.pvp_honor;
+        (
+            xp.last_week_honorable_kills,
+            xp.last_week_dishonorable_kills,
+            xp.last_week_contribution,
+            xp.last_week_rank,
+        )
+    };
+    state.push(Val::Num(honorable_kills as f64));
+    state.push(Val::Num(dishonorable_kills as f64));
+    state.push(Val::Num(contribution as f64));
+    state.push(Val::Num(rank as f64));
+    Ok(4)
+}
+
+fn get_pvp_session_stats(state: &mut LuaState) -> LuaResult<u32> {
+    push_pvp_pair(state, |xp| {
+        (xp.session_honorable_kills, xp.session_dishonorable_kills)
+    })
+}
+
+fn get_pvp_lifetime_stats(state: &mut LuaState) -> LuaResult<u32> {
+    let (honorable_kills, dishonorable_kills, highest_rank) = {
+        let state_ref = borrow_state(state)?;
+        let xp = &state_ref.pvp_honor;
+        (
+            xp.lifetime_honorable_kills,
+            xp.lifetime_dishonorable_kills,
+            xp.lifetime_highest_rank,
+        )
+    };
+    state.push(Val::Num(honorable_kills as f64));
+    state.push(Val::Num(dishonorable_kills as f64));
+    state.push(Val::Num(highest_rank as f64));
+    Ok(3)
+}
+
+fn get_pvp_rank_info(state: &mut LuaState) -> LuaResult<u32> {
+    let rank = stack_i32(state, 1).unwrap_or(0);
+    let rank_name = if rank > 0 { "Rank" } else { "None" };
+    let rank_name = create_string(state, rank_name);
+    state.push(rank_name);
+    state.push(Val::Num(rank.max(0) as f64));
+    Ok(2)
+}
+
+fn unit_pvp_rank(state: &mut LuaState) -> LuaResult<u32> {
+    let rank = if stack_arg_is_player(state, 1) {
+        borrow_state(state)?.player.honor_level
+    } else {
+        0
+    };
+    state.push(Val::Num(rank as f64));
+    Ok(1)
+}
+
+fn get_pvp_rank_progress(state: &mut LuaState) -> LuaResult<u32> {
+    let progress = borrow_state(state)?.pvp_honor.rank_progress;
+    state.push(Val::Num(progress));
+    Ok(1)
+}
+
+fn push_pvp_pair(
+    state: &mut LuaState,
+    read: impl FnOnce(&PvpHonorState) -> (i32, i32),
+) -> LuaResult<u32> {
+    let (first, second) = read(&borrow_state(state)?.pvp_honor);
+    state.push(Val::Num(first as f64));
+    state.push(Val::Num(second as f64));
+    Ok(2)
+}
+
+fn stack_arg_is_player(state: &LuaState, index: i32) -> bool {
+    val_to_string(state, stack_val(state, index)).as_deref() == Some("player")
 }
 
 pub(super) fn is_sub_zone_pvp(state: &mut LuaState) -> LuaResult<u32> {
@@ -171,6 +273,15 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetPVPDesired", get_pvp_desired)?;
     LuaApiMut::register_function(lua, "GetPVPLastHonorGain", get_pvp_last_honor_gain)?;
     LuaApiMut::register_function(lua, "IsSubZonePVP", is_sub_zone_pvp)?;
+    LuaApiMut::register_function(lua, "HonorSystemEnabled", honor_system_enabled)?;
+    LuaApiMut::register_function(lua, "GetPVPYesterdayStats", get_pvp_yesterday_stats)?;
+    LuaApiMut::register_function(lua, "GetPVPThisWeekStats", get_pvp_this_week_stats)?;
+    LuaApiMut::register_function(lua, "GetPVPLastWeekStats", get_pvp_last_week_stats)?;
+    LuaApiMut::register_function(lua, "GetPVPSessionStats", get_pvp_session_stats)?;
+    LuaApiMut::register_function(lua, "GetPVPLifetimeStats", get_pvp_lifetime_stats)?;
+    LuaApiMut::register_function(lua, "GetPVPRankInfo", get_pvp_rank_info)?;
+    LuaApiMut::register_function(lua, "UnitPVPRank", unit_pvp_rank)?;
+    LuaApiMut::register_function(lua, "GetPVPRankProgress", get_pvp_rank_progress)?;
     LuaApiMut::register_function(lua, "GetWorldPVPAreaInfo", get_world_pvp_area_info)?;
     LuaApiMut::register_function(lua, "GetHolidayBGInfo", get_holiday_bg_info)?;
     LuaApiMut::register_function(lua, "GetLocklistMap", get_locklist_map)?;

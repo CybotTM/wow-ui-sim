@@ -162,6 +162,7 @@ macro_rules! build_empty_sim_state {
             anim_sync_times: $collections.anim_sync_times,
             player: PlayerState::seeded(),
             player_xp: PlayerXpState::default(),
+            pvp_honor: PvpHonorState::default(),
             world: super::state_types::seeded_world_state(),
             bag_items: $collections.bag_items,
             tracked_recipes: $collections.tracked_recipes,
@@ -342,8 +343,8 @@ pub use super::state_types::{
     LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MovementState,
     MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
     MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer,
-    PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
-    SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
+    PlayerState, PlayerXpState, PvpHonorState, ScenarioState, ScenarioStep, SecondaryPowerState,
+    SocialFriend, SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
