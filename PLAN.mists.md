@@ -323,7 +323,7 @@ exited successfully with `0` distinct errors. No `SetBasicMessageDialogText`,
 ### 10. Class Color and Miscellaneous Nil Data
 
 - [x] Reproduce `classColor` nil in `Blizzard_Communities/ClubFinder.lua`.
-- [ ] Identify which class token lacks a color.
+- [x] Identify which class token lacks a color.
 - [ ] Add a focused class-color/default data test.
 - [ ] Fix the backing class-color data.
 - [ ] Verify class-color errors disappear.
@@ -340,6 +340,13 @@ loads Mists `Blizzard_Communities/ClubFinder.lua`, supplies a class token whose
 `GetClassColorObj()` result is nil, and exercises
 `ClubLookingForDropdownMixin:SetupMenu()`, confirming the nil `classColor`
 failure before the backing color data fix is considered.
+
+Missing token identified: `EVOKER`. The shared simulator class data includes
+`EVOKER` as class 13 (`src/lua_api/game_data.rs`), but Mists
+`Blizzard_SharedXML/Blizzard_SharedXML_Mists.toc` loads the TBC
+`ClassColors.lua`, whose `RAID_CLASS_COLORS` table includes `MONK` and
+`DEMONHUNTER` but no `EVOKER`. Any Mists path that iterates the uncapped shared
+class list can therefore get nil from `GetClassColorObj("EVOKER")`.
 
 ## Addon Harness Follow-Up
 
