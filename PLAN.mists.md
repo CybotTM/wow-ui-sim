@@ -92,7 +92,7 @@ attempt to call global 'GetPVPThisWeekStats' (a nil value)
 - [x] Reproduce `TradePlayerInputMoneyFrame` missing `copper`.
 - [x] Inspect generated XML for the money input frame and its child-key wiring.
 - [x] Determine whether the issue is XML template inheritance, parentKey sync, or MoneyFrame API state.
-- [ ] Add a focused XML/widget test for the missing `copper` child.
+- [x] Add a focused XML/widget test for the missing `copper` child.
 - [ ] Fix the upstream template/widget construction path.
 - [ ] Verify money-frame errors disappear.
 

@@ -24,6 +24,17 @@ fn mists_blizzard_toc(addon: &str, toc_name: &str) -> std::path::PathBuf {
     blizzard_ui_dir().join(addon).join(toc_name)
 }
 
+fn load_mists_money_frame_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+    let toc_path = mists_blizzard_toc("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Classic.toc");
+    load_addon(&env.loader_env(), &toc_path).expect("Blizzard_MoneyFrame should load");
+    env
+}
+
 fn find_top_level_frame<'a>(elements: &'a [XmlElement], name: &str) -> &'a FrameXml {
     elements
         .iter()
@@ -123,13 +134,7 @@ fn mists_money_input_template_xml_wires_gold_silver_copper_parent_keys() {
 
 #[test]
 fn mists_money_input_template_runtime_syncs_coin_parent_keys() {
-    let env = WowLuaEnv::new().expect("Lua environment should initialize");
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-    let toc_path = mists_blizzard_toc("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Classic.toc");
-    load_addon(&env.loader_env(), &toc_path).expect("Blizzard_MoneyFrame should load");
+    let env = load_mists_money_frame_env();
 
     let result: (String, String, String, String, String, String) = env
         .eval(
@@ -156,6 +161,32 @@ fn mists_money_input_template_runtime_syncs_coin_parent_keys() {
             "MoneyInputFrameParentKeyProbeCopper".to_string()
         ),
         "MoneyInputFrameTemplate inheritance and parentKey sync should publish gold/silver/copper children; missing copper is not a MoneyFrame API-state issue"
+    );
+}
+
+#[test]
+fn mists_trade_player_input_money_frame_widget_has_copper_child() {
+    let env = load_mists_money_frame_env();
+
+    let result: (String, String, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "TradePlayerInputMoneyFrame", UIParent, "MoneyInputFrameTemplate")
+            return type(frame.copper),
+                TradePlayerInputMoneyFrameCopper:GetName(),
+                frame.copper == TradePlayerInputMoneyFrameCopper
+            "#,
+        )
+        .expect("TradePlayerInputMoneyFrame should instantiate from MoneyInputFrameTemplate");
+
+    assert_eq!(
+        result,
+        (
+            "table".to_string(),
+            "TradePlayerInputMoneyFrameCopper".to_string(),
+            true
+        ),
+        "TradePlayerInputMoneyFrame must expose its copper edit box through both parentKey and named global wiring"
     );
 }
 
