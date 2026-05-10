@@ -257,6 +257,42 @@ fn mists_honor_pvp_api_contract_matches_classic_shapes() {
 }
 
 #[test]
+fn mists_trade_money_frame_onload_reproduces_missing_copper_child() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let (ok, err): (bool, String) = env
+        .eval(
+            r#"
+            MoneyInputFrame_SetCompact = function() end
+            MoneyInputFrame_SetOnValueChangedFunc = function() end
+            TradeFrame_UpdateMoney = function() end
+
+            local frame = {
+                silver = { SetPoint = function() end },
+                RegisterEvent = function() end,
+            }
+
+            local ok, err = pcall(function()
+                MoneyInputFrame_SetCompact(frame, 56, 7)
+                MoneyInputFrame_SetOnValueChangedFunc(frame, TradeFrame_UpdateMoney)
+                frame:RegisterEvent("PLAYER_TRADE_MONEY")
+                frame.copper:SetPoint("LEFT", "TradePlayerInputMoneyFrameSilver", "RIGHT", 11, 0)
+                frame.silver:SetPoint("LEFT", "TradePlayerInputMoneyFrameGold", "RIGHT", 22, 0)
+            end)
+
+            return ok, tostring(err)
+            "#,
+        )
+        .expect("TradePlayerInputMoneyFrame OnLoad reproduction should run under pcall");
+
+    assert!(!ok, "missing TradePlayerInputMoneyFrame.copper should fail");
+    assert!(
+        err.contains("copper"),
+        "expected missing copper child failure, got: {err}"
+    );
+}
+
+#[test]
 fn mists_bootstrap_registers_startup_cvar_defaults() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 
