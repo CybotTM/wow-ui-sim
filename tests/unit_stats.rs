@@ -14,11 +14,12 @@ fn env() -> WowLuaEnv {
 // ── Armor / AP / Ranged AP ────────────────────────────────────────────────────
 
 #[test]
-fn unit_armor_returns_four_values_for_player() {
+fn unit_armor_returns_five_values_for_player() {
     let env = env();
-    let (base, armor, pos, neg): (i32, i32, i32, i32) =
+    let (base, effective, armor, pos, neg): (i32, i32, i32, i32, i32) =
         env.eval(r#"return UnitArmor("player")"#).unwrap();
     assert!(armor > 0, "seeded player has gear-derived armor");
+    assert_eq!(base, effective);
     assert_eq!(base, armor);
     assert_eq!(pos, 0);
     assert_eq!(neg, 0);
@@ -92,12 +93,34 @@ fn unit_damage_returns_seven_values() {
 }
 
 #[test]
-fn unit_ranged_damage_matches_melee_in_sim() {
+fn unit_ranged_damage_returns_legacy_ranged_shape() {
     let env = env();
-    let (min_m, min_r): (f64, f64) = env
-        .eval(r#"local a=UnitDamage("player"); local b=UnitRangedDamage("player"); return a, b"#)
+    let (speed, min_dmg, max_dmg, pos, neg, pct): (f64, f64, f64, f64, f64, f64) =
+        env.eval(r#"return UnitRangedDamage("player")"#).unwrap();
+    assert!(speed > 0.0);
+    assert!(min_dmg > 0.0);
+    assert!(max_dmg >= min_dmg);
+    assert_eq!(pos, 0.0);
+    assert_eq!(neg, 0.0);
+    assert_eq!(pct, 1.0);
+}
+
+#[test]
+fn legacy_weapon_speed_and_ranged_attack_are_numeric() {
+    let env = env();
+    let (main_speed, off_speed, ranged_base, ranged_mod): (f64, f64, f64, f64) = env
+        .eval(
+            r#"
+            local mainSpeed, offSpeed = UnitAttackSpeed("player")
+            local rangedBase, rangedMod = UnitRangedAttack("player")
+            return mainSpeed, offSpeed, rangedBase, rangedMod
+            "#,
+        )
         .unwrap();
-    assert_eq!(min_m, min_r);
+    assert!(main_speed > 0.0);
+    assert!(off_speed > 0.0);
+    assert!(ranged_base > 0.0);
+    assert_eq!(ranged_mod, 0.0);
 }
 
 // ── Defense / Dodge / Parry ───────────────────────────────────────────────────

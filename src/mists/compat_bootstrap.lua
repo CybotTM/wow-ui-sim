@@ -28,6 +28,10 @@ if rawget(_G, "ClassicExpansionAtMost") == nil then
   end
 end
 
+if LE_UNIT_STAT_SPIRIT == nil then
+  LE_UNIT_STAT_SPIRIT = 5
+end
+
 -- Mists Classic only has classes through Monk. The shared retail-backed
 -- implementation includes Demon Hunter and Evoker, which lets Mists-only
 -- Blizzard code request specs/colors for classes that do not exist in MoP.
@@ -773,8 +777,20 @@ if rawget(_G, "GetCVarValueBool") == nil then
   function GetCVarValueBool(name) return false end
 end
 
+if rawget(_G, "IsRangedWeapon") == nil then
+  function IsRangedWeapon() return false end
+end
+
+if rawget(_G, "GetOverrideSpellPowerByAP") == nil then
+  function GetOverrideSpellPowerByAP() return 0 end
+end
+
+if rawget(_G, "GetOverrideAPBySpellPower") == nil then
+  function GetOverrideAPBySpellPower() return 0 end
+end
+
 if rawget(_G, "GetUnitSpeed") == nil then
-  function GetUnitSpeed(unit) return 0 end
+  function GetUnitSpeed(unit) return 0, 7, 7, 4.722222 end
 end
 
 if rawget(_G, "HasPetUI") == nil then
@@ -787,6 +803,44 @@ if rawget(_G, "GetNumFactions") == nil then
       return C_Reputation.GetNumFactions()
     end
     return 0
+  end
+end
+
+if rawget(_G, "GetFactionInfo") == nil then
+  function GetFactionInfo(index)
+    if not C_Reputation or type(C_Reputation.GetFactionInfo) ~= "function" then
+      return nil
+    end
+    local info = C_Reputation.GetFactionInfo(index)
+    if type(info) ~= "table" then
+      return nil
+    end
+
+    local isHeader = info.isHeader or false
+    local isCollapsed = info.isCollapsed or false
+    local isChild = info.isChild or false
+    local barMin = info.currentReactionThreshold or 0
+    local barMax = info.nextReactionThreshold or info.topValue or 0
+    local barValue = info.currentStanding or info.standing or 0
+    local standingID = info.reaction or info.standing or 4
+    if standingID < 1 or standingID > 8 then
+      standingID = 4
+    end
+
+    return info.name,
+      info.description or "",
+      standingID,
+      barMin,
+      barMax,
+      barValue,
+      info.atWarWith or false,
+      info.canToggleAtWar or false,
+      isHeader,
+      isCollapsed,
+      not isHeader,
+      info.isWatched or false,
+      isChild,
+      info.factionID
   end
 end
 

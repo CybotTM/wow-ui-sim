@@ -27,6 +27,7 @@ use crate::lua_api::globals::unit_api::parse_party_index;
 use crate::lua_api::methods::{borrow_state, val_to_string};
 use crate::lua_api::state::{PlayerState, SimState};
 use crate::lua_bridge::stack_val;
+use rilua::vm::closure::RustFn;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -303,16 +304,17 @@ fn player_secondary_power_max(state: &LuaState, power_type: i32) -> i32 {
 
 // ── Stat probes ──────────────────────────────────────────────────────────────
 
-/// `UnitArmor(unit)` — retail: `(base, armor, posBuff, negBuff)`.
-/// We model armor as a single value and report it as both `base` and
-/// `armor`, with zero buffs.
+/// `UnitArmor(unit)` — retail: `(base, effectiveArmor, armor, posBuff, negBuff)`.
+/// We model armor as a single value and report it as base/effective/total,
+/// with zero buffs.
 fn unit_armor(state: &mut LuaState) -> LuaResult<u32> {
     let stats = stats_for(state);
     state.push(Val::Num(stats.armor as f64));
     state.push(Val::Num(stats.armor as f64));
+    state.push(Val::Num(stats.armor as f64));
     state.push(Val::Num(0.0));
     state.push(Val::Num(0.0));
-    Ok(4)
+    Ok(5)
 }
 
 /// `UnitAttackPower(unit)` — retail: `(base, posBuff, negBuff)`.
@@ -367,7 +369,29 @@ fn unit_damage(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `UnitRangedDamage(unit)` — same shape as `UnitDamage`.
 fn unit_ranged_damage(state: &mut LuaState) -> LuaResult<u32> {
-    unit_damage(state)
+    let stats = stats_for(state);
+    state.push(Val::Num(2.0)); // ranged attack speed
+    state.push(Val::Num(stats.damage_min));
+    state.push(Val::Num(stats.damage_max));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(1.0));
+    Ok(6)
+}
+
+/// `UnitAttackSpeed(unit)` — `(mainHandSpeed, offHandSpeed)`.
+fn unit_attack_speed(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(2.0));
+    state.push(Val::Num(2.0));
+    Ok(2)
+}
+
+/// `UnitRangedAttack(unit)` — `(baseSkill, modifier)`.
+fn unit_ranged_attack(state: &mut LuaState) -> LuaResult<u32> {
+    let stats = stats_for(state);
+    state.push(Val::Num((stats.level * 5).max(0) as f64));
+    state.push(Val::Num(0.0));
+    Ok(2)
 }
 
 /// `UnitDefense(unit)` — retail's old API, returns skill rating. We
@@ -596,25 +620,33 @@ fn register_paperdoll_helpers(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
+const UNIT_STAT_GLOBALS: &[(&str, RustFn)] = &[
+    ("UnitArmor", unit_armor),
+    ("UnitAttackPower", unit_attack_power),
+    ("UnitRangedAttackPower", unit_ranged_attack_power),
+    ("UnitCriticalStrike", unit_critical_strike),
+    ("UnitRangedCriticalStrike", unit_ranged_critical_strike),
+    ("UnitSpellHaste", unit_spell_haste),
+    ("UnitDamage", unit_damage),
+    ("UnitRangedDamage", unit_ranged_damage),
+    ("UnitAttackSpeed", unit_attack_speed),
+    ("UnitRangedAttack", unit_ranged_attack),
+    ("UnitDefense", unit_defense),
+    ("UnitDodge", unit_dodge),
+    ("UnitParry", unit_parry),
+    ("UnitReaction", unit_reaction),
+    ("UnitHealthMax", unit_health_max),
+    ("UnitPowerMax", unit_power_max),
+    ("UnitXP", unit_xp),
+    ("UnitXPMax", unit_xp_max),
+    ("UnitStat", unit_stat),
+    ("UnitResistance", unit_resistance),
+];
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
-    LuaApiMut::register_function(lua, "UnitArmor", unit_armor)?;
-    LuaApiMut::register_function(lua, "UnitAttackPower", unit_attack_power)?;
-    LuaApiMut::register_function(lua, "UnitRangedAttackPower", unit_ranged_attack_power)?;
-    LuaApiMut::register_function(lua, "UnitCriticalStrike", unit_critical_strike)?;
-    LuaApiMut::register_function(lua, "UnitRangedCriticalStrike", unit_ranged_critical_strike)?;
-    LuaApiMut::register_function(lua, "UnitSpellHaste", unit_spell_haste)?;
-    LuaApiMut::register_function(lua, "UnitDamage", unit_damage)?;
-    LuaApiMut::register_function(lua, "UnitRangedDamage", unit_ranged_damage)?;
-    LuaApiMut::register_function(lua, "UnitDefense", unit_defense)?;
-    LuaApiMut::register_function(lua, "UnitDodge", unit_dodge)?;
-    LuaApiMut::register_function(lua, "UnitParry", unit_parry)?;
-    LuaApiMut::register_function(lua, "UnitReaction", unit_reaction)?;
-    LuaApiMut::register_function(lua, "UnitHealthMax", unit_health_max)?;
-    LuaApiMut::register_function(lua, "UnitPowerMax", unit_power_max)?;
-    LuaApiMut::register_function(lua, "UnitXP", unit_xp)?;
-    LuaApiMut::register_function(lua, "UnitXPMax", unit_xp_max)?;
-    LuaApiMut::register_function(lua, "UnitStat", unit_stat)?;
-    LuaApiMut::register_function(lua, "UnitResistance", unit_resistance)?;
+    for &(name, function) in UNIT_STAT_GLOBALS {
+        LuaApiMut::register_function(lua, name, function)?;
+    }
     register_paperdoll_helpers(lua)?;
     Ok(())
 }

@@ -48,3 +48,21 @@ fn stagger_percentage_returns_number_and_nil_target_value_without_target() {
     assert_eq!(stagger, 0.0);
     assert!(against_target_is_nil);
 }
+
+#[test]
+fn inventory_slot_enabled_matches_known_inventory_slots() {
+    let env = env();
+    let (head_enabled, main_hand_enabled, bogus_disabled): (bool, bool, bool) = env
+        .eval(
+            r#"
+            return C_PaperDollInfo.IsInventorySlotEnabled("HeadSlot"),
+                   C_PaperDollInfo.IsInventorySlotEnabled("MainHandSlot"),
+                   not C_PaperDollInfo.IsInventorySlotEnabled("NotASlot")
+            "#,
+        )
+        .unwrap();
+
+    assert!(head_enabled);
+    assert!(main_hand_enabled);
+    assert!(bogus_disabled);
+}
