@@ -324,7 +324,7 @@ exited successfully with `0` distinct errors. No `SetBasicMessageDialogText`,
 
 - [x] Reproduce `classColor` nil in `Blizzard_Communities/ClubFinder.lua`.
 - [x] Identify which class token lacks a color.
-- [ ] Add a focused class-color/default data test.
+- [x] Add a focused class-color/default data test.
 - [ ] Fix the backing class-color data.
 - [ ] Verify class-color errors disappear.
 
@@ -347,6 +347,11 @@ Missing token identified: `EVOKER`. The shared simulator class data includes
 `ClassColors.lua`, whose `RAID_CLASS_COLORS` table includes `MONK` and
 `DEMONHUNTER` but no `EVOKER`. Any Mists path that iterates the uncapped shared
 class list can therefore get nil from `GetClassColorObj("EVOKER")`.
+
+Default data test: `mists_class_colors::mists_visible_classes_have_color_data`
+asserts Mists exposes exactly 11 visible classes, includes `MONK`, excludes
+`DEMONHUNTER` and `EVOKER`, and every visible `GetClassInfo()` class token has
+a `GetClassColorObj()` result.
 
 ## Addon Harness Follow-Up
 
