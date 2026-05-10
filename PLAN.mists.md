@@ -367,7 +367,7 @@ stderr.
 
 ## Addon Harness Follow-Up
 
-- [ ] After base Mists startup is clean, run each installed Pandaria addon through `scripts/test-classic-addons.sh --profile mists`.
+- [x] After base Mists startup is clean, run each installed Pandaria addon through `scripts/test-classic-addons.sh --profile mists`.
 - [ ] For each addon, record addon-induced errors separately from base startup.
 - [ ] Promote shared missing APIs to `src/mists/compat_bootstrap.lua` or Rust backing systems.
 - [ ] Keep per-addon quirks under `tools/classic-addon-compat/<addon>/`.
@@ -375,15 +375,20 @@ stderr.
 
 Installed Mists targets:
 
-- [ ] `AllTheThings`
-- [ ] `Auctionator`
-- [ ] `BlizzMove`
-- [ ] `DeModal`
-- [ ] `DialogueUI`
-- [ ] `Leatrix_Maps`
-- [ ] `Leatrix_Plus`
-- [ ] `Plater`
-- [ ] `SimpleItemLevel`
+- [x] `AllTheThings`
+- [x] `Auctionator`
+- [x] `BlizzMove`
+- [x] `DeModal`
+- [x] `DialogueUI`
+- [x] `Leatrix_Maps`
+- [x] `Leatrix_Plus`
+- [x] `Plater`
+- [x] `SimpleItemLevel`
+
+Harness run: `scripts/test-classic-addons.sh --profile mists` completed with
+`passed: 9` and `failed: 0`. All nine addon runs booted successfully and wrote
+empty `target/addon-harness/*-lua-errors.json` arrays, reporting `0` distinct
+errors total and `0` addon-induced errors versus the Mists baseline.
 
 ## Notes
 
