@@ -3,6 +3,7 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
+use wow_ui_sim::xml::{FrameXml, XmlElement};
 
 const HONOR_FRAME_SHARED_LUA: &str = include_str!(
     "../Interface/BlizzardUI/Mists/AddOns/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua"
@@ -12,6 +13,20 @@ fn blizzard_ui_dir() -> std::path::PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
         "CARGO_MANIFEST_DIR"
     )))
+}
+
+fn mists_money_input_frame_xml_path() -> std::path::PathBuf {
+    blizzard_ui_dir().join("Blizzard_MoneyFrame/Classic/MoneyInputFrame.xml")
+}
+
+fn find_top_level_frame<'a>(elements: &'a [XmlElement], name: &str) -> &'a FrameXml {
+    elements
+        .iter()
+        .find_map(|element| match element {
+            XmlElement::Frame(frame) if frame.name.as_deref() == Some(name) => Some(frame),
+            _ => None,
+        })
+        .unwrap_or_else(|| panic!("expected top-level frame template {name}"))
 }
 
 #[test]
@@ -72,6 +87,32 @@ fn mists_loads_money_frame_before_uipanels_game() {
     assert!(
         money_frame_index < ui_panels_index,
         "Blizzard_MoneyFrame must load before Blizzard_UIPanels_Game so MoneyInputFrameTemplate exists before TradeFrame.xml instantiates TradePlayerInputMoneyFrame; indexes were MoneyFrame={money_frame_index}, UIPanels={ui_panels_index}"
+    );
+}
+
+#[test]
+fn mists_money_input_template_xml_wires_gold_silver_copper_parent_keys() {
+    let ui = wow_ui_sim::xml::parse_xml_file(&mists_money_input_frame_xml_path())
+        .expect("Mists MoneyInputFrame.xml should parse");
+    let template = find_top_level_frame(&ui.elements, "MoneyInputFrameTemplate");
+
+    let child_keys: Vec<&str> = template
+        .all_frame_elements()
+        .into_iter()
+        .filter_map(|(frame, _tag)| frame.parent_key.as_deref())
+        .collect();
+
+    assert!(
+        child_keys.contains(&"gold"),
+        "MoneyInputFrameTemplate should wire the gold edit box via parentKey"
+    );
+    assert!(
+        child_keys.contains(&"silver"),
+        "MoneyInputFrameTemplate should wire the silver edit box via parentKey"
+    );
+    assert!(
+        child_keys.contains(&"copper"),
+        "MoneyInputFrameTemplate should wire the copper edit box via parentKey"
     );
 }
 
