@@ -773,6 +773,67 @@ if rawget(_G, "GetCVarValueBool") == nil then
   function GetCVarValueBool(name) return false end
 end
 
+if rawget(_G, "GetUnitSpeed") == nil then
+  function GetUnitSpeed(unit) return 0 end
+end
+
+if rawget(_G, "HasPetUI") == nil then
+  function HasPetUI() return false, false end
+end
+
+if rawget(_G, "GetNumFactions") == nil then
+  function GetNumFactions()
+    if C_Reputation and type(C_Reputation.GetNumFactions) == "function" then
+      return C_Reputation.GetNumFactions()
+    end
+    return 0
+  end
+end
+
+if rawget(_G, "GetCurrencyListInfo") == nil then
+  function GetCurrencyListInfo(index)
+    if not C_CurrencyInfo or type(C_CurrencyInfo.GetCurrencyListInfo) ~= "function" then
+      return nil
+    end
+    local info = C_CurrencyInfo.GetCurrencyListInfo(index)
+    if type(info) ~= "table" then
+      return nil
+    end
+    return info.name,
+      info.isHeader,
+      info.isHeaderExpanded,
+      false,
+      false,
+      info.quantity or 0,
+      info.iconFileID,
+      nil,
+      nil,
+      nil,
+      false,
+      info.currencyTypesID
+  end
+end
+
+if rawget(_G, "SelectQuestLogEntry") == nil then
+  local selectedQuestLogEntry = 0
+  function SelectQuestLogEntry(index)
+    selectedQuestLogEntry = tonumber(index) or 0
+  end
+  function GetQuestLogSelection()
+    return selectedQuestLogEntry
+  end
+end
+
+if rawget(_G, "GetGuildInfoText") == nil then
+  function GetGuildInfoText() return "" end
+end
+
+if rawget(_G, "GetExpansionForLevel") == nil then
+  function GetExpansionForLevel(level)
+    return LE_EXPANSION_MISTS_OF_PANDARIA
+  end
+end
+
 if rawget(_G, "MoneyFrame_SetMaxDisplayWidth") == nil then
   function MoneyFrame_SetMaxDisplayWidth(self, w) end
 end
