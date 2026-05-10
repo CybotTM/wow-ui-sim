@@ -42,3 +42,31 @@ fn money_frame_set_type_reproduces_missing_basic_message_dialog_helper() {
         "expected SetBasicMessageDialogText nil failure, got: {err}"
     );
 }
+
+#[test]
+fn basic_message_dialog_helper_updates_text() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let message_text: String = env
+        .eval(
+            r#"
+            local textValue = nil
+            BasicMessageDialog = {
+                Text = {
+                    SetText = function(_self, text)
+                        textValue = text
+                    end,
+                },
+            }
+
+            SetBasicMessageDialogText("Invalid money type: TEST")
+            return textValue
+            "#,
+        )
+        .expect("SetBasicMessageDialogText should mutate BasicMessageDialog.Text");
+
+    assert_eq!(
+        message_text, "Invalid money type: TEST",
+        "SetBasicMessageDialogText should write the supplied text to BasicMessageDialog.Text"
+    );
+}
