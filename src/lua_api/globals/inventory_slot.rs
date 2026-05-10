@@ -61,7 +61,7 @@ const INVENTORY_SLOTS: &[(&'static str, i32, i32)] = &[
     ("reagentbagslot", 25, 136511),
 ];
 
-fn lookup_slot(name: &str) -> Option<(i32, i32)> {
+pub(crate) fn lookup_slot(name: &str) -> Option<(i32, i32)> {
     let needle = name.to_ascii_lowercase();
     INVENTORY_SLOTS
         .iter()

@@ -2,6 +2,7 @@
 
 use crate::lua_api::methods::borrow_state;
 use crate::lua_bridge::FromStack;
+use rilua::vm::closure::RustFn;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -96,6 +97,20 @@ fn get_ranged_crit_chance(state: &mut LuaState) -> LuaResult<u32> {
     get_crit_chance(state)
 }
 
+fn get_crit_chance_from_agility(state: &mut LuaState) -> LuaResult<u32> {
+    let _unit = String::from_stack(state, 1).unwrap_or_default();
+    let crit = borrow_state(state)?.player.stats.crit_pct();
+    state.push(Val::Num(crit));
+    Ok(1)
+}
+
+fn get_spell_crit_chance_from_intellect(state: &mut LuaState) -> LuaResult<u32> {
+    let _unit = String::from_stack(state, 1).unwrap_or_default();
+    let crit = borrow_state(state)?.player.stats.crit_pct();
+    state.push(Val::Num(crit));
+    Ok(1)
+}
+
 fn get_crit_chance_provides_parry_effect(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
@@ -105,6 +120,35 @@ fn get_haste(state: &mut LuaState) -> LuaResult<u32> {
     let haste = borrow_state(state)?.player.stats.haste_pct();
     state.push(Val::Num(haste));
     Ok(1)
+}
+
+fn get_melee_haste(state: &mut LuaState) -> LuaResult<u32> {
+    get_haste(state)
+}
+
+fn get_ranged_haste(state: &mut LuaState) -> LuaResult<u32> {
+    get_haste(state)
+}
+
+fn get_hit_modifier(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_spell_hit_modifier(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_expertise(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(3)
+}
+
+fn get_expertise_percent(state: &mut LuaState) -> LuaResult<u32> {
+    get_expertise(state)
 }
 
 fn get_mastery_effect(state: &mut LuaState) -> LuaResult<u32> {
@@ -117,6 +161,11 @@ fn get_mastery_effect(state: &mut LuaState) -> LuaResult<u32> {
 fn get_versatility_bonus(state: &mut LuaState) -> LuaResult<u32> {
     let vers = borrow_state(state)?.player.stats.versatility_pct();
     state.push(Val::Num(vers));
+    Ok(1)
+}
+
+fn get_zero_percent(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
     Ok(1)
 }
 
@@ -152,28 +201,61 @@ fn get_mana_regen(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
-pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
-    LuaApiMut::register_function(lua, "GetCombatRating", get_combat_rating)?;
-    LuaApiMut::register_function(lua, "GetCombatRatingBonus", get_combat_rating_bonus)?;
-    LuaApiMut::register_function(
-        lua,
+fn get_unit_mana_regen_rate_from_spirit(state: &mut LuaState) -> LuaResult<u32> {
+    let _unit = String::from_stack(state, 1).unwrap_or_default();
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+const COMBAT_STAT_GLOBALS: &[(&str, RustFn)] = &[
+    ("GetCombatRating", get_combat_rating),
+    ("GetCombatRatingBonus", get_combat_rating_bonus),
+    (
         "GetCombatRatingBonusForCombatRatingValue",
         get_combat_rating_bonus_for_value,
-    )?;
-    LuaApiMut::register_function(lua, "GetCritChance", get_crit_chance)?;
-    LuaApiMut::register_function(lua, "GetSpellCritChance", get_spell_crit_chance)?;
-    LuaApiMut::register_function(lua, "GetRangedCritChance", get_ranged_crit_chance)?;
-    LuaApiMut::register_function(
-        lua,
+    ),
+    ("GetCritChance", get_crit_chance),
+    ("GetSpellCritChance", get_spell_crit_chance),
+    ("GetRangedCritChance", get_ranged_crit_chance),
+    ("GetCritChanceFromAgility", get_crit_chance_from_agility),
+    (
+        "GetSpellCritChanceFromIntellect",
+        get_spell_crit_chance_from_intellect,
+    ),
+    (
         "GetCritChanceProvidesParryEffect",
         get_crit_chance_provides_parry_effect,
-    )?;
-    LuaApiMut::register_function(lua, "GetHaste", get_haste)?;
-    LuaApiMut::register_function(lua, "GetMasteryEffect", get_mastery_effect)?;
-    LuaApiMut::register_function(lua, "GetVersatilityBonus", get_versatility_bonus)?;
-    LuaApiMut::register_function(lua, "GetSpeed", get_speed)?;
-    LuaApiMut::register_function(lua, "GetLifesteal", get_lifesteal)?;
-    LuaApiMut::register_function(lua, "GetAvoidance", get_avoidance)?;
-    LuaApiMut::register_function(lua, "GetManaRegen", get_mana_regen)?;
+    ),
+    ("GetHaste", get_haste),
+    ("GetMeleeHaste", get_melee_haste),
+    ("GetRangedHaste", get_ranged_haste),
+    ("GetHitModifier", get_hit_modifier),
+    ("GetSpellHitModifier", get_spell_hit_modifier),
+    ("GetExpertise", get_expertise),
+    ("GetExpertisePercent", get_expertise_percent),
+    ("GetMasteryEffect", get_mastery_effect),
+    ("GetVersatilityBonus", get_versatility_bonus),
+    ("GetModResilienceDamageReduction", get_zero_percent),
+    ("GetPvpPowerDamage", get_zero_percent),
+    ("GetPvpPowerHealing", get_zero_percent),
+    ("GetMeleeMissChance", get_zero_percent),
+    ("GetRangedMissChance", get_zero_percent),
+    ("GetSpellMissChance", get_zero_percent),
+    ("GetEnemyDodgeChance", get_zero_percent),
+    ("GetEnemyParryChance", get_zero_percent),
+    ("GetSpeed", get_speed),
+    ("GetLifesteal", get_lifesteal),
+    ("GetAvoidance", get_avoidance),
+    ("GetManaRegen", get_mana_regen),
+    (
+        "GetUnitManaRegenRateFromSpirit",
+        get_unit_mana_regen_rate_from_spirit,
+    ),
+];
+
+pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    for &(name, function) in COMBAT_STAT_GLOBALS {
+        LuaApiMut::register_function(lua, name, function)?;
+    }
     Ok(())
 }

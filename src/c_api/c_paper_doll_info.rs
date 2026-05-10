@@ -1,6 +1,7 @@
 use crate::c_api::helpers::ensure_namespace;
+use crate::lua_api::globals::inventory_slot;
 use crate::lua_api::methods::borrow_state;
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -19,6 +20,13 @@ pub(crate) fn register_c_paper_doll_info_surface(state: &mut LuaState) -> LuaRes
         ns,
         "GetArmorEffectivenessAgainstTarget",
         get_armor_effectiveness_against_target,
+    )?;
+    table_set_rust_fn_static(state, ns, "GetStaggerPercentage", get_stagger_percentage)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "IsInventorySlotEnabled",
+        is_inventory_slot_enabled,
     )?;
     Ok(())
 }
@@ -41,6 +49,30 @@ fn get_armor_effectiveness_against_target(state: &mut LuaState) -> LuaResult<u32
     };
 
     state.push(Val::Num(armor_effectiveness(armor, target_level)));
+    Ok(1)
+}
+
+fn get_stagger_percentage(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn is_inventory_slot_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let name = match stack_val(state, 1) {
+        Val::Str(s) => state
+            .gc
+            .string_arena
+            .get(s)
+            .and_then(|lua_str| std::str::from_utf8(lua_str.data()).ok())
+            .map(str::to_owned),
+        _ => None,
+    };
+
+    let enabled = name
+        .as_deref()
+        .and_then(inventory_slot::lookup_slot)
+        .is_some();
+    state.push(Val::Bool(enabled));
     Ok(1)
 }
 
