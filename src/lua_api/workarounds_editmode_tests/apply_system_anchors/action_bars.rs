@@ -356,6 +356,35 @@ fn fix_action_bar_size_ignores_hidden_right_anchored_buttons() {
 }
 
 #[test]
+fn fix_action_bar_size_skips_missing_update_action_bar_positions() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        MainActionBar = CreateFrame("Frame", "TestMainActionBar", UIParent)
+        function MainActionBar:GetSize() return 0, 0 end
+        function MainActionBar:SetSize(width, height)
+            self.fixedHeight = height
+        end
+        for i = 1, 12 do
+            local button = CreateFrame("Frame", "MainActionBarButtonContainer" .. i, MainActionBar)
+            function button:GetSize() return 45, 45 end
+            function button:GetNumPoints() return 1 end
+            function button:GetPoint() return "LEFT", nil, "LEFT", (i - 1) * 45, 0 end
+        end
+        EditModeManagerFrame = {}
+        "#,
+    )
+    .expect("install action bar stubs");
+
+    let before = env.state().borrow().lua_errors.len();
+    env.exec(FIX_ACTION_BAR_NAN_SIZE_LUA)
+        .expect("fix action bar size should not call a missing updater");
+    let after = env.state().borrow().lua_errors.len();
+
+    assert_eq!(after, before);
+}
+
+#[test]
 fn apply_system_anchors_replays_each_widescreen_action_bar_profile_row() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(

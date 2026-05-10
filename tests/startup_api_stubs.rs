@@ -141,6 +141,7 @@ fn quest_sort_helpers_are_callable_noops() {
         .eval(
             r#"
             return pcall(function()
+                SortQuestWatches()
                 SortQuestSortTypes()
                 SortQuests()
             end)

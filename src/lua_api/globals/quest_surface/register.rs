@@ -140,6 +140,7 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&'static str, SurfaceFn)] = &[
         "GetQuestLogSpecialItemInfo",
         get_quest_log_special_item_info,
     ),
+    ("SortQuestWatches", noop),
     ("SortQuestSortTypes", noop),
     ("SortQuests", noop),
 ];
