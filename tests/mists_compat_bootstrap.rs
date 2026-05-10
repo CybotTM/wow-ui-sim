@@ -181,6 +181,50 @@ fn mists_skill_line_zero_selection_still_returns_numeric_rank() {
 }
 
 #[test]
+fn mists_selected_skill_api_matches_skill_frame_tuple_shape() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let result: (i32, String, bool, bool, i32, i32, i32, i32, bool, bool) = env
+        .eval(
+            r#"
+            SetSelectedSkill(1)
+            local selected = GetSelectedSkill()
+            local skillName, header, isExpanded, skillRank, tempPoints,
+                skillModifier, skillMaxRank, isAbandonable = GetSkillLineInfo(selected)
+            local missingSkill = GetSkillLineInfo(2) == nil
+            return selected,
+                skillName,
+                header,
+                isExpanded,
+                skillRank,
+                tempPoints,
+                skillModifier,
+                skillMaxRank,
+                isAbandonable,
+                missingSkill
+            "#,
+        )
+        .expect("Mists selected skill API should return the tuple SkillFrame destructures");
+
+    assert_eq!(
+        result,
+        (
+            1,
+            "Weapon Skills".to_string(),
+            false,
+            false,
+            1,
+            0,
+            0,
+            1,
+            false,
+            true
+        ),
+        "SkillFrame expects concrete rank numbers for selected rows and nil for out-of-range rows"
+    );
+}
+
+#[test]
 fn mists_bootstrap_supplies_pvp_currency_and_debugbar_shapes() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 
