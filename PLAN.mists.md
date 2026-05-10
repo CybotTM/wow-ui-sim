@@ -371,7 +371,7 @@ stderr.
 - [x] For each addon, record addon-induced errors separately from base startup.
 - [x] Promote shared missing APIs to `src/mists/compat_bootstrap.lua` or Rust backing systems.
 - [x] Keep per-addon quirks under `tools/classic-addon-compat/<addon>/`.
-- [ ] Do not update `docs/baselines/mists-lua-errors.json` to bless known startup errors; use it only after the base startup is clean or intentionally documented.
+- [x] Do not update `docs/baselines/mists-lua-errors.json` to bless known startup errors; use it only after the base startup is clean or intentionally documented.
 
 Installed Mists targets:
 
@@ -415,6 +415,12 @@ compat entries because each addon produced `0` addon-induced errors. Future
 addon-specific fixes should follow the existing `tools/classic-addon-compat`
 layout documented in `tools/classic-addon-compat/README.md`; shared gaps still
 belong in the Mists bootstrap or Rust backing systems.
+
+Baseline guardrail: `docs/baselines/mists-lua-errors.json` was not updated
+during the cleanup. It remains the historical Phase 7.4 capture, and
+`git diff -- docs/baselines/mists-lua-errors.json` is empty. Do not rewrite it
+to bless startup errors; only refresh it after clean base startup is the
+intended documented baseline.
 
 ## Notes
 
