@@ -240,6 +240,31 @@ fn mists_product_choice_alerts_reproduce_nil_choices_length() {
 }
 
 #[test]
+fn mists_product_choice_empty_choices_are_available_data() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    env.exec(PRODUCT_CHOICE_LUA)
+        .expect("ProductChoice.lua should define functions before events fire");
+
+    let (choices_type, choices_count, ok, err): (String, i32, bool, String) = env
+        .eval(
+            r#"
+            local choices = C_ProductChoice.GetChoices()
+            local frame = {}
+            local ok, err = pcall(ProductChoiceFrame_ShowAlerts, frame)
+            return type(choices), #choices, ok, tostring(err)
+            "#,
+        )
+        .expect("empty ProductChoice data should be safe for alert checks");
+
+    assert_eq!(
+        (choices_type, choices_count, ok),
+        ("table".to_string(), 0, true),
+        "Mists ProductChoice should expose no available choices as an empty table"
+    );
+    assert_eq!(err, "nil");
+}
+
+#[test]
 fn mists_bootstrap_supplies_legacy_startup_api_shapes() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 
