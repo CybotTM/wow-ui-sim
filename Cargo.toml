@@ -128,9 +128,8 @@ path = "tests/mists_nameplate_scale.rs"
 required-features = ["client-mists"]
 
 [[test]]
-name = "mists_guild_roster_selection"
-path = "tests/mists_guild_roster_selection.rs"
-required-features = ["client-mists"]
+name = "classic_guild_roster_selection"
+path = "tests/classic_guild_roster_selection.rs"
 
 # The `server` feature of iced-layout-inspector pulls in peercred-ipc, which is
 # Linux-only (uses SO_PEERCRED). Enable it only on unix targets.

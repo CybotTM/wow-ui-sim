@@ -1,4 +1,4 @@
-#![cfg(feature = "client-mists")]
+#![cfg(any(feature = "client-mists", feature = "client-wrath"))]
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
