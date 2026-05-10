@@ -78,7 +78,7 @@ attempt to perform arithmetic on local 'skillRank' (a nil value)
 - [x] Determine expected MoP Classic behavior for `HonorSystemEnabled()`.
 - [x] Add a Mists-gated API contract test.
 - [x] Implement or correct the backing honor/PvP API state.
-- [ ] Verify `HonorSystemEnabled` and `GetPVPThisWeekStats` errors disappear.
+- [x] Verify `HonorSystemEnabled` and `GetPVPThisWeekStats` errors disappear.
 
 Observed errors:
 
