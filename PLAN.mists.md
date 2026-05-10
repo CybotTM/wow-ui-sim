@@ -110,7 +110,7 @@ attempt to index field 'copper' (a nil value)
 - [x] Determine whether MoP Classic expects empty data or an unavailable feature path.
 - [x] Add a focused Mists-gated test.
 - [x] Fix the backing data/API state or load gating.
-- [ ] Verify ProductChoice errors disappear.
+- [x] Verify ProductChoice errors disappear.
 
 Observed errors:
 
