@@ -59,7 +59,8 @@ RUN git clone --filter=blob:none --no-checkout --depth=1 --branch ${BLIZZARD_UI_
     && git sparse-checkout init --cone \
     && git sparse-checkout set Interface/AddOns \
     && git checkout ${BLIZZARD_UI_TAG} \
-    && rm -rf /wow-ui-source/.git
+    && rm -rf /wow-ui-source/.git \
+    && touch /wow-ui-source/Interface/AddOns/.wow-ui-sim-blizzard-ui-complete
 
 # =============================================================================
 # Runtime Stage
@@ -74,8 +75,12 @@ COPY --from=builder /build/target/release/wow-sim /app/wow-sim
 # Copy data directories from the build context.
 # These are read at runtime and are NOT compiled into the binary.
 #
-# BlizzardUI: Blizzard's base UI Lua/XML (loaded before addons)
-COPY --from=blizzard-ui /wow-ui-source/Interface/AddOns/ /app/Interface/BlizzardUI/
+# BlizzardUI: Blizzard's base UI Lua/XML, placed in the cache path the
+# simulator checks. The .wow-ui-sim-blizzard-ui-complete marker is
+# created in the blizzard-ui stage and tells the runtime the cache
+# is ready, skipping the CASC sync attempt.
+COPY --from=blizzard-ui /wow-ui-source/Interface/AddOns/ /root/.cache/wow-ui-sim/blizzard-ui/
+
 # TestFramework: assertion library loaded automatically by `run-tests`
 COPY Interface/AddOns/TestFramework/ /app/Interface/AddOns/TestFramework/
 
