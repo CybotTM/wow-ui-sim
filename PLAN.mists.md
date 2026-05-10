@@ -133,7 +133,7 @@ must also return a table for the item list.
 
 ### 5. World Map Opacity State
 
-- [ ] Reproduce `WorldMapFrame_SetOpacity` nil `opacity`.
+- [x] Reproduce `WorldMapFrame_SetOpacity` nil `opacity`.
 - [ ] Find the CVar or saved setting that should seed map opacity.
 - [ ] Add a focused test for the default value path.
 - [ ] Fix the backing setting/CVar state.
