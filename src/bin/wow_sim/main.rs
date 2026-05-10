@@ -189,19 +189,28 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let screen = args.effective_screen();
     let saved_stdout = redirect_if_quiet(&args);
-    let (env, font_system, saved_vars) = init_and_load(&args, screen)?;
+    let init = init_and_load(&args, screen)?;
+    #[cfg(feature = "gui")]
+    let (env, font_system, saved_vars) = init;
+    #[cfg(not(feature = "gui"))]
+    let (env, _font_system, _saved_vars) = init;
 
     let dispatch = CommandDispatch {
         command: args.command,
         env,
+        #[cfg(feature = "gui")]
         font_system,
         delay: args.delay,
         exec_lua: resolve_exec_lua(&args.exec_lua),
         exec_lua_secure: args.exec_lua_secure,
         saved_stdout,
+        #[cfg(feature = "gui")]
         saved_vars,
+        #[cfg(feature = "gui")]
         debug_borders: args.debug_borders,
+        #[cfg(feature = "gui")]
         debug_anchors: args.debug_anchors,
+        #[cfg(feature = "gui")]
         debug_elements: args.debug_elements,
     };
     dispatch_command(dispatch)
@@ -433,14 +442,19 @@ use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_s
 struct CommandDispatch {
     command: Option<Commands>,
     env: WowLuaEnv,
+    #[cfg(feature = "gui")]
     font_system: Rc<RefCell<WowFontSystem>>,
     delay: Option<u64>,
     exec_lua: Option<String>,
     exec_lua_secure: bool,
     saved_stdout: Option<i32>,
+    #[cfg(feature = "gui")]
     saved_vars: Option<SavedVariablesManager>,
+    #[cfg(feature = "gui")]
     debug_borders: bool,
+    #[cfg(feature = "gui")]
     debug_anchors: bool,
+    #[cfg(feature = "gui")]
     debug_elements: bool,
 }
 

@@ -23,6 +23,7 @@ fn explicit_screen_parses_character_create() {
 }
 
 #[test]
+#[cfg(feature = "gui")]
 fn debug_elements_enable_borders_and_anchors() {
     let env = WowLuaEnv::new().expect("failed to create Lua env");
     let dispatch = CommandDispatch {

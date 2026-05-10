@@ -1,10 +1,12 @@
 //! CASC-backed Blizzard UI source synchronization.
 
 use std::path::{Path, PathBuf};
+#[cfg(feature = "casc")]
 use std::sync::OnceLock;
 
 const BLIZZARD_UI_MANIFEST: &str = include_str!("../data/blizzard-ui-files.txt");
 const COMPLETE_MARKER: &str = ".wow-ui-sim-blizzard-ui-complete";
+#[cfg(feature = "casc")]
 static CASC_CONFIGURED: OnceLock<bool> = OnceLock::new();
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -152,6 +154,7 @@ fn configure_default_asset_resolver_root() {
     }
 }
 
+#[cfg(feature = "casc")]
 fn remove_missing_marker(path: &Path) {
     let extension = path.extension().and_then(|e| e.to_str()).unwrap_or("");
     let missing_marker = path.with_extension(format!("{extension}.missing"));
