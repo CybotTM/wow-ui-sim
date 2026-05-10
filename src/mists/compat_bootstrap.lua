@@ -28,6 +28,13 @@ if rawget(_G, "ClassicExpansionAtMost") == nil then
   end
 end
 
+-- Mists Classic only has classes through Monk. The shared retail-backed
+-- implementation includes Demon Hunter and Evoker, which lets Mists-only
+-- Blizzard code request specs/colors for classes that do not exist in MoP.
+if rawget(_G, "GetNumClasses") ~= nil and GetNumClasses() > 11 then
+  function GetNumClasses() return 11 end
+end
+
 -- ─── Pre-Cata leftover globals that mists kept but retail removed ────────────
 
 if rawget(_G, "FillLocalizedClassList") == nil then
@@ -134,8 +141,26 @@ end
 -- The nil reference produces a clean Lua error instead, which is better than
 -- a hang. Implement with real state if a wrath/mists guild test ever needs it.
 
-if rawget(_G, "SetSelectedSkill") == nil then
-  function SetSelectedSkill() end
+local selectedSkillIndex = 1
+
+function SetSelectedSkill(index)
+  selectedSkillIndex = tonumber(index) or 1
+end
+
+function GetSelectedSkill()
+  return selectedSkillIndex
+end
+
+function GetNumSkillLines()
+  return 1
+end
+
+function GetSkillLineInfo(index)
+  local normalizedIndex = tonumber(index) or selectedSkillIndex
+  if normalizedIndex ~= 0 and normalizedIndex ~= 1 then
+    return nil
+  end
+  return "Weapon Skills", false, false, 1, 0, 0, 1, false, nil, nil, nil, nil, ""
 end
 
 -- ─── Helpers and utilities ───────────────────────────────────────────────────
@@ -259,6 +284,12 @@ if rawget(_G, "DebugBarManager") == nil then
   })
 end
 
+function DebugBarManager:GetInternalBarsHeight() return 0 end
+
+function DebugBarManager:GetScaledInternalBarsHeight() return 0 end
+
+function DebugBarManager:GetTotalHeight() return 0 end
+
 -- ─── C_LootHistory namespace ─────────────────────────────────────────────────
 
 -- C_Item.GetItemQualityColor: mists's UIParent.lua iterates qualities 0..8
@@ -343,8 +374,116 @@ if rawget(_G, "GetNumRaidProfiles") == nil then
   function GetNumRaidProfiles() return 0 end
 end
 
+if rawget(_G, "Constants") == nil then
+  Constants = {}
+end
+
+if rawget(Constants, "CurrencyConsts") == nil then
+  Constants.CurrencyConsts = {}
+end
+
+local currencyConsts = Constants.CurrencyConsts
+
+if rawget(currencyConsts, "CLASSIC_HONOR_CURRENCY_ID") == nil then
+  currencyConsts.CLASSIC_HONOR_CURRENCY_ID = 1901
+end
+
+if rawget(currencyConsts, "CLASSIC_ARENA_POINTS_CURRENCY_ID") == nil then
+  currencyConsts.CLASSIC_ARENA_POINTS_CURRENCY_ID = 1900
+end
+
+if rawget(currencyConsts, "CONQUEST_POINTS_CURRENCY_ID") == nil then
+  currencyConsts.CONQUEST_POINTS_CURRENCY_ID = 390
+end
+
+if rawget(currencyConsts, "CONQUEST_BG_META_CURRENCY_ID") == nil then
+  currencyConsts.CONQUEST_BG_META_CURRENCY_ID = 484
+end
+
+if rawget(currencyConsts, "CONQUEST_ARENA_META_CURRENCY_ID") == nil then
+  currencyConsts.CONQUEST_ARENA_META_CURRENCY_ID = 483
+end
+
 if rawget(_G, "GetPVPYesterdayStats") == nil then
   function GetPVPYesterdayStats() return 0, 0 end
+end
+
+if rawget(_G, "HonorSystemEnabled") == nil then
+  function HonorSystemEnabled() return false end
+end
+
+if rawget(_G, "GetPVPThisWeekStats") == nil then
+  function GetPVPThisWeekStats() return 0, 0 end
+end
+
+if rawget(_G, "GetPVPLastWeekStats") == nil then
+  function GetPVPLastWeekStats() return 0, 0, 0, 0 end
+end
+
+if rawget(_G, "GetPVPSessionStats") == nil then
+  function GetPVPSessionStats() return 0, 0 end
+end
+
+if rawget(_G, "GetPVPRankInfo") == nil then
+  function GetPVPRankInfo(rank, faction)
+    return "None", 0
+  end
+end
+
+if rawget(_G, "GetCurrencyListSize") == nil then
+  function GetCurrencyListSize()
+    if C_CurrencyInfo and type(C_CurrencyInfo.GetCurrencyListSize) == "function" then
+      return C_CurrencyInfo.GetCurrencyListSize()
+    end
+    return 0
+  end
+end
+
+local selectedGuildRosterIndex = 0
+
+if rawget(_G, "SetGuildRosterSelection") == nil then
+  function SetGuildRosterSelection(index)
+    selectedGuildRosterIndex = tonumber(index) or 0
+  end
+end
+
+if rawget(_G, "GetGuildRosterSelection") == nil then
+  function GetGuildRosterSelection()
+    return selectedGuildRosterIndex
+  end
+end
+
+if C_CurrencyInfo and type(C_CurrencyInfo.GetCurrencyInfo) == "function" then
+  local getCurrencyInfo = C_CurrencyInfo.GetCurrencyInfo
+  function C_CurrencyInfo.GetCurrencyInfo(currencyID)
+    local info = getCurrencyInfo(currencyID)
+    if info ~= nil then
+      return info
+    end
+    return {
+      name = "",
+      quantity = 0,
+      iconFileID = 0,
+      maxQuantity = 0,
+      discovered = true,
+      quality = 0,
+      isHeader = false,
+      isHeaderExpanded = false,
+      currencyID = currencyID or 0,
+    }
+  end
+end
+
+if rawget(_G, "C_ProductChoice") == nil then
+  C_ProductChoice = {}
+end
+
+if rawget(C_ProductChoice, "GetChoices") == nil then
+  function C_ProductChoice.GetChoices() return {} end
+end
+
+if rawget(C_ProductChoice, "MakeSelection") == nil then
+  function C_ProductChoice.MakeSelection() return false end
 end
 
 if rawget(_G, "MoneyFrame_SetType") == nil then
