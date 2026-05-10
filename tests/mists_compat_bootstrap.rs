@@ -265,6 +265,39 @@ fn mists_product_choice_empty_choices_are_available_data() {
 }
 
 #[test]
+fn mists_product_choice_api_defaults_expose_empty_tables() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let (choices_type, choices_count, products_type, products_count, suppressed): (
+        String,
+        i32,
+        String,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+            local choices = C_ProductChoice.GetChoices()
+            local products = C_ProductChoice.GetProducts(123)
+            return type(choices), #choices, type(products), #products, C_ProductChoice.GetNumSuppressed()
+            "#,
+        )
+        .expect("Mists ProductChoice API defaults should be callable");
+
+    assert_eq!(
+        (
+            choices_type,
+            choices_count,
+            products_type,
+            products_count,
+            suppressed
+        ),
+        ("table".to_string(), 0, "table".to_string(), 0, 0),
+        "Mists ProductChoice should expose empty data through the full API surface"
+    );
+}
+
+#[test]
 fn mists_bootstrap_supplies_legacy_startup_api_shapes() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 
