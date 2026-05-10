@@ -10,7 +10,7 @@ FROM rust:1.92-bookworm AS builder
 
 # Install system build dependencies:
 # - clang + mold: fast linker configured in .cargo/config.toml
-# - git: needed by some build scripts (e.g. elune-src submodule references)
+# - git: needed by some build scripts
 # - pkg-config + cmake: required by C-backed Rust crates (mlua vendored Lua, wgpu)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     clang \
@@ -23,11 +23,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /build
 
 # Copy dependency manifests first so Docker can cache the dep-fetch layer.
-# The elune-src/ submodule is a [patch.crates-io] override for lua-src and
-# must be present before `cargo fetch` or any build step.
+# iced-wgpu-patched/ is a [patch.crates-io] override and must be present
+# before `cargo fetch` or any build step.
 COPY Cargo.toml Cargo.lock ./
 COPY .cargo/config.toml .cargo/config.toml
-COPY elune-src/ elune-src/
+COPY iced-wgpu-patched/ iced-wgpu-patched/
+COPY iced-dynamic/ iced-dynamic/
 
 # Copy test targets referenced by Cargo.toml's [[test]] sections.
 COPY tests/ tests/
