@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     pkg-config \
     cmake \
+    fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
@@ -77,6 +78,10 @@ COPY --from=builder /build/target/release/wow-sim /app/wow-sim
 COPY --from=blizzard-ui /wow-ui-source/Interface/AddOns/ /app/Interface/BlizzardUI/
 # TestFramework: assertion library loaded automatically by `run-tests`
 COPY Interface/AddOns/TestFramework/ /app/Interface/AddOns/TestFramework/
+
+# DejaVu fonts for text shaping fallback when CASC is unavailable.
+# fontdb::load_system_fonts() picks these up from the standard path.
+COPY --from=builder /usr/share/fonts/truetype/dejavu/ /usr/share/fonts/truetype/dejavu/
 
 # Skip SavedVariables loading — no WTF directory is available in the image.
 ENV WOW_SIM_NO_SAVED_VARS=1
