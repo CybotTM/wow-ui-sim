@@ -134,12 +134,11 @@ if rawget(_G, "LFD_IsEmpowered") == nil then
   function LFD_IsEmpowered() return true end
 end
 
--- SetGuildRosterSelection: deliberately not stubbed. A no-op stub causes
--- mists's GuildRoster UI to enter an infinite loop — it calls Set then expects
--- a subsequent Get to return the new index; with a no-op stub the index stays
--- unchanged and the calling code retries forever, hanging the bootstrap.
--- The nil reference produces a clean Lua error instead, which is better than
--- a hang. Implement with real state if a wrath/mists guild test ever needs it.
+-- SetGuildRosterSelection must never be a no-op. Mists FriendsFrame/GuildFrame
+-- code calls Set, then expects a later Get to return the new index; a no-op
+-- leaves the index unchanged and can send the guild roster UI into retry loops.
+-- The concrete stateful implementation lives with the guild/PvP compatibility
+-- helpers below.
 
 local selectedSkillIndex = 1
 
