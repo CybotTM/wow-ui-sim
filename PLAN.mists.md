@@ -369,7 +369,7 @@ stderr.
 
 - [x] After base Mists startup is clean, run each installed Pandaria addon through `scripts/test-classic-addons.sh --profile mists`.
 - [x] For each addon, record addon-induced errors separately from base startup.
-- [ ] Promote shared missing APIs to `src/mists/compat_bootstrap.lua` or Rust backing systems.
+- [x] Promote shared missing APIs to `src/mists/compat_bootstrap.lua` or Rust backing systems.
 - [ ] Keep per-addon quirks under `tools/classic-addon-compat/<addon>/`.
 - [ ] Do not update `docs/baselines/mists-lua-errors.json` to bless known startup errors; use it only after the base startup is clean or intentionally documented.
 
@@ -403,6 +403,12 @@ Per-addon error split:
 | `Leatrix_Plus` | 0 | 0 |
 | `Plater` | 0 | 0 |
 | `SimpleItemLevel` | 0 | 0 |
+
+Promotion audit: no additional Mists shared API gaps were promotable after the
+addon harness run. Every `target/addon-harness/*-lua-errors.json` file reported
+`0` errors, and the only existing per-addon shim under `tools/classic-addon-compat`
+is the empty Wrath `Bartender4` seed. No new Mists bootstrap or Rust backing
+state was added for this pass.
 
 ## Notes
 
