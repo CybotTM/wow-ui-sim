@@ -12,6 +12,9 @@ const HONOR_FRAME_SHARED_LUA: &str = include_str!(
 const PRODUCT_CHOICE_LUA: &str = include_str!(
     "../Interface/BlizzardUI/Mists/AddOns/Blizzard_UIPanels_Game/Classic/ProductChoice.lua"
 );
+const WORLD_MAP_CATA_LUA: &str = include_str!(
+    "../Interface/BlizzardUI/Mists/AddOns/Blizzard_WorldMap/Cata/Blizzard_WorldMap.lua"
+);
 
 fn blizzard_ui_dir() -> std::path::PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
@@ -294,6 +297,34 @@ fn mists_product_choice_api_defaults_expose_empty_tables() {
         ),
         ("table".to_string(), 0, "table".to_string(), 0, 0),
         "Mists ProductChoice should expose empty data through the full API surface"
+    );
+}
+
+#[test]
+fn mists_world_map_set_opacity_reproduces_nil_opacity_arithmetic() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    env.exec(WORLD_MAP_CATA_LUA)
+        .expect("Cata/Mists WorldMap Lua should define opacity helpers");
+
+    let (ok, err): (bool, String) = env
+        .eval(
+            r#"
+            WorldMapFrame = {
+                SetAlpha = function() end,
+                ScrollContainer = { SetAlpha = function() end },
+            }
+            QuestMapFrame = { SetAlpha = function() end }
+
+            local ok, err = pcall(WorldMapFrame_SetOpacity, nil)
+            return ok, tostring(err)
+            "#,
+        )
+        .expect("WorldMapFrame_SetOpacity pcall should return a status");
+
+    assert!(!ok, "nil world map opacity should fail during arithmetic");
+    assert!(
+        err.contains("opacity") || err.contains("arithmetic") || err.contains("nil"),
+        "expected nil opacity arithmetic failure, got: {err}"
     );
 }
 
