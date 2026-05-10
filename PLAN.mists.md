@@ -106,7 +106,7 @@ attempt to index field 'copper' (a nil value)
 ### 4. Product Choice Data Model
 
 - [x] Reproduce `ProductChoice.lua:61: attempt to get length of a nil value`.
-- [ ] Identify which product-choice table is nil.
+- [x] Identify which product-choice table is nil.
 - [ ] Determine whether MoP Classic expects empty data or an unavailable feature path.
 - [ ] Add a focused Mists-gated test.
 - [ ] Fix the backing data/API state or load gating.
@@ -118,6 +118,10 @@ Observed errors:
 Blizzard_UIPanels_Game/Classic/ProductChoice.lua:61:
 attempt to get length of a nil value
 ```
+
+Root cause identified: `C_ProductChoice` exists and `C_ProductChoice.GetChoices`
+is callable, but `C_ProductChoice.GetChoices()` returns nil where
+`ProductChoiceFrame_ShowAlerts` expects a choices table.
 
 ### 5. World Map Opacity State
 

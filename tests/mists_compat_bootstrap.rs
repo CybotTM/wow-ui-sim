@@ -207,15 +207,28 @@ fn mists_product_choice_alerts_reproduce_nil_choices_length() {
     env.exec(PRODUCT_CHOICE_LUA)
         .expect("ProductChoice.lua should define functions before events fire");
 
-    let (ok, err): (bool, String) = env
+    let (product_choice_type, get_choices_type, choices_type, ok, err): (
+        String,
+        String,
+        String,
+        bool,
+        String,
+    ) = env
         .eval(
             r#"
+            local choices = C_ProductChoice.GetChoices()
             local ok, err = pcall(ProductChoiceFrame_ShowAlerts, {})
-            return ok, tostring(err)
+            return type(C_ProductChoice), type(C_ProductChoice.GetChoices), type(choices), ok, tostring(err)
             "#,
         )
         .expect("ProductChoiceFrame_ShowAlerts pcall should return a status");
 
+    assert_eq!(product_choice_type, "table");
+    assert_eq!(get_choices_type, "function");
+    assert_eq!(
+        choices_type, "nil",
+        "the missing product-choice table is the C_ProductChoice.GetChoices() return value"
+    );
     assert!(
         !ok,
         "nil ProductChoice choices should fail under length operator"
