@@ -52,10 +52,15 @@ CI image for running `run-tests` in addon CI pipelines. Published to `ghcr.io/os
 ### GitHub Action
 
 ```yaml
-- uses: osso/wow-ui-sim@v1
+- uses: osso/wow-ui-sim@master
   with:
     addon: MyAddon
 ```
+
+End-to-end example: [Osso/test-wow-addon](https://github.com/Osso/test-wow-addon)
+— a minimal addon (TOC + one Lua file + `tests/`) and a workflow that
+calls this action. Use it as a template or as a smoke test when
+changing the action / Docker image.
 
 ### Docker
 

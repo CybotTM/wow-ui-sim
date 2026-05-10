@@ -41,7 +41,7 @@ Join the wowless Discord: <https://discord.gg/rTwWcfJXuz> — we have a `#wow-ui
 Run your addon's test suite in CI:
 
 ```yaml
-- uses: osso/wow-ui-sim@v1
+- uses: osso/wow-ui-sim@master
   with:
     addon: MyAddon
 ```
@@ -54,6 +54,10 @@ test("frame name matches", function()
     assertEquals("MyFrame", f:GetName())
 end)
 ```
+
+A minimal end-to-end example is at
+[Osso/test-wow-addon](https://github.com/Osso/test-wow-addon) — a TOC,
+one Lua file, a `tests/` folder, and a workflow that calls this action.
 
 ## Docker
 
