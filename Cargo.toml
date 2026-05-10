@@ -149,6 +149,11 @@ path = "tests/mists_dialog_helpers.rs"
 required-features = ["client-mists"]
 
 [[test]]
+name = "mists_class_colors"
+path = "tests/mists_class_colors.rs"
+required-features = ["client-mists"]
+
+[[test]]
 name = "classic_guild_roster_selection"
 path = "tests/classic_guild_roster_selection.rs"
 
