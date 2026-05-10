@@ -138,6 +138,11 @@ name = "mists_nameplate_scale"
 path = "tests/mists_nameplate_scale.rs"
 required-features = ["client-mists"]
 
+[[test]]
+name = "mists_guild_roster_selection"
+path = "tests/mists_guild_roster_selection.rs"
+required-features = ["client-mists"]
+
 # The `server` feature of iced-layout-inspector pulls in peercred-ipc, which is
 # Linux-only (uses SO_PEERCRED — macOS is unix but lacks this socket option).
 [target.'cfg(target_os = "linux")'.dependencies]
