@@ -14,3 +14,7 @@ if RaidFrame and RaidFrame.RoleCount == nil then
   RaidFrame.RoleCount = CreateFrame("Frame", nil, RaidFrame)
   RaidFrame.RoleCount:Hide()
 end
+
+function CombatLog_LoadUI()
+  return true
+end

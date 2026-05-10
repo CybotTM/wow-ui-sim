@@ -207,7 +207,7 @@ fn mists_bootstrap_supplies_pvp_currency_and_debugbar_shapes() {
 fn mists_bootstrap_supplies_legacy_bank_and_aura_shapes() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 
-    let result: (i32, i32, i32, i32, i32) = env
+    let result: (i32, i32, i32, i32, i32, i32) = env
         .eval(
             r#"
             local _name, _icon, _count, _debuffType, duration, expirationTime,
@@ -216,6 +216,7 @@ fn mists_bootstrap_supplies_legacy_bank_and_aura_shapes() {
             return NUM_BANKGENERIC_SLOTS,
                 NUM_BANKBAGSLOTS,
                 Constants.InventoryConstants.NumGenericBankSlots,
+                Constants.InventoryConstants.NumBankBagSlots,
                 duration,
                 timeMod
             "#,
@@ -224,7 +225,27 @@ fn mists_bootstrap_supplies_legacy_bank_and_aura_shapes() {
 
     assert_eq!(
         result,
-        (28, 7, 28, 3600, 1),
+        (28, 7, 28, 7, 3600, 1),
         "Mists startup should see bank constants and the legacy UnitBuff tuple shape"
+    );
+}
+
+#[test]
+fn mists_bootstrap_supplies_settings_label_globals() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let result: (String, String) = env
+        .eval(
+            r#"
+            return SHOW_AGGRO_PERCENTAGES,
+                SHOW_COMBAT_HEALING_TEXT
+            "#,
+        )
+        .expect("Mists settings labels should be strings");
+
+    assert_eq!(
+        result,
+        ("Show aggro percentages".to_string(), "Healing".to_string()),
+        "Mists settings variables should not register nil display names"
     );
 }

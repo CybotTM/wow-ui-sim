@@ -312,6 +312,9 @@ Constants.InventoryConstants = Constants.InventoryConstants or {}
 if rawget(Constants.InventoryConstants, "NumGenericBankSlots") == nil then
   Constants.InventoryConstants.NumGenericBankSlots = NUM_BANKGENERIC_SLOTS
 end
+if rawget(Constants.InventoryConstants, "NumBankBagSlots") == nil then
+  Constants.InventoryConstants.NumBankBagSlots = NUM_BANKBAGSLOTS
+end
 
 -- ─── DebugBarManager (mists debug overlay) ───────────────────────────────────
 
@@ -571,6 +574,14 @@ end
 
 if rawget(_G, "SHOW_PET_MELEE_DAMAGE_TEXT") == nil then
   SHOW_PET_MELEE_DAMAGE_TEXT = "Pet melee damage"
+end
+
+if rawget(_G, "SHOW_AGGRO_PERCENTAGES") == nil then
+  SHOW_AGGRO_PERCENTAGES = "Show aggro percentages"
+end
+
+if rawget(_G, "SHOW_COMBAT_HEALING_TEXT") == nil then
+  SHOW_COMBAT_HEALING_TEXT = "Healing"
 end
 
 Enum = Enum or {}
