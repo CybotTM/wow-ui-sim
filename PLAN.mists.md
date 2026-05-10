@@ -137,7 +137,7 @@ must also return a table for the item list.
 - [x] Find the CVar or saved setting that should seed map opacity.
 - [x] Add a focused test for the default value path.
 - [x] Fix the backing setting/CVar state.
-- [ ] Verify world-map opacity errors disappear.
+- [x] Verify world-map opacity errors disappear.
 
 Observed errors:
 
