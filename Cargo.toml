@@ -144,6 +144,11 @@ path = "tests/mists_currency_list.rs"
 required-features = ["client-mists"]
 
 [[test]]
+name = "mists_dialog_helpers"
+path = "tests/mists_dialog_helpers.rs"
+required-features = ["client-mists"]
+
+[[test]]
 name = "classic_guild_roster_selection"
 path = "tests/classic_guild_roster_selection.rs"
 
