@@ -189,6 +189,44 @@ fn mists_honor_system_enabled_matches_disabled_legacy_honor_surface() {
 }
 
 #[test]
+fn mists_honor_pvp_api_contract_matches_classic_shapes() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let result: (String, bool, i32, i32, i32, i32, String, i32, i32) = env
+        .eval(
+            r##"
+            local rankName, rankNumber = GetPVPRankInfo(UnitPVPRank("player"))
+            return type(HonorSystemEnabled()),
+                HonorSystemEnabled(),
+                select("#", GetPVPYesterdayStats()),
+                select("#", GetPVPThisWeekStats()),
+                select("#", GetPVPLastWeekStats()),
+                select("#", GetPVPLifetimeStats()),
+                rankName,
+                rankNumber,
+                GetPVPRankProgress()
+            "##,
+        )
+        .expect("Mists honor/PvP APIs should be callable");
+
+    assert_eq!(
+        result,
+        (
+            "boolean".to_string(),
+            false,
+            2,
+            2,
+            4,
+            3,
+            "None".to_string(),
+            0,
+            0
+        ),
+        "Mists honor/PvP startup APIs should keep the Classic return shapes HonorFrame_Shared.lua consumes"
+    );
+}
+
+#[test]
 fn mists_bootstrap_registers_startup_cvar_defaults() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 
