@@ -283,7 +283,7 @@ stderr, so the old currency startup error is gone.
 - [x] Locate expected helper definition in Blizzard UI or legacy API surface.
 - [x] Add a focused test for dialog text mutation.
 - [x] Implement the helper against the real dialog frame state.
-- [ ] Verify dialog helper errors disappear.
+- [x] Verify dialog helper errors disappear.
 
 Observed errors:
 
@@ -313,6 +313,12 @@ Implementation: the Mists compatibility helper now mirrors Blizzard's
 writes `BasicMessageDialog.Text`, calls `BasicMessageDialog:Show()`, skips
 updates while the dialog is already shown, and honors the `force` argument to
 replace shown dialog text.
+
+Verification: after rebuilding `wow-sim` with the Mists feature gate,
+`WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 timeout 90 target/debug/wow-sim lua-errors`
+exited successfully with `0` distinct errors. No `SetBasicMessageDialogText`,
+`BasicMessageDialog`, `SharedBasicControls`, `MoneyFrame_SetType`,
+`Invalid money type`, or `dialog helper` strings appeared in stdout or stderr.
 
 ### 10. Class Color and Miscellaneous Nil Data
 
