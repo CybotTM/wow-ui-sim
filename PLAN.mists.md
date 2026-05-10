@@ -108,7 +108,7 @@ attempt to index field 'copper' (a nil value)
 - [x] Reproduce `ProductChoice.lua:61: attempt to get length of a nil value`.
 - [x] Identify which product-choice table is nil.
 - [x] Determine whether MoP Classic expects empty data or an unavailable feature path.
-- [ ] Add a focused Mists-gated test.
+- [x] Add a focused Mists-gated test.
 - [ ] Fix the backing data/API state or load gating.
 - [ ] Verify ProductChoice errors disappear.
 
