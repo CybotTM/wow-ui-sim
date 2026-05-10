@@ -4,6 +4,8 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 const CLUB_FINDER_LUA: &str =
     include_str!("../Interface/BlizzardUI/Mists/AddOns/Blizzard_Communities/ClubFinder.lua");
+const COLOR_UTIL_LUA: &str =
+    include_str!("../Interface/BlizzardUI/Mists/AddOns/Blizzard_SharedXML/ColorUtil.lua");
 
 fn load_club_finder_lua(env: &WowLuaEnv) {
     let loader = format!(
@@ -29,6 +31,11 @@ fn load_club_finder_lua(env: &WowLuaEnv) {
 
     env.exec(&loader)
         .expect("Mists ClubFinder Lua should define dropdown mixins");
+}
+
+fn load_color_util_lua(env: &WowLuaEnv) {
+    env.exec(COLOR_UTIL_LUA)
+        .expect("Mists ColorUtil Lua should define class color helpers");
 }
 
 #[test]
@@ -90,5 +97,46 @@ fn club_finder_setup_menu_reproduces_missing_class_color() {
     assert!(
         err.contains("classColor") || err.contains("WrapTextInColorCode"),
         "expected nil classColor failure, got: {err}"
+    );
+}
+
+#[test]
+fn mists_visible_classes_have_color_data() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    load_color_util_lua(&env);
+
+    let result: (i32, String, String, String, String) = env
+        .eval(
+            r#"
+            local missing = {}
+            local seen = {}
+
+            for classIndex = 1, GetNumClasses() do
+                local _className, classFile = GetClassInfo(classIndex)
+                seen[classFile] = true
+                if not GetClassColorObj(classFile) then
+                    table.insert(missing, classFile)
+                end
+            end
+
+            return GetNumClasses(),
+                table.concat(missing, ","),
+                tostring(seen.MONK),
+                tostring(seen.DEMONHUNTER),
+                tostring(seen.EVOKER)
+            "#,
+        )
+        .expect("Mists visible classes should be color-backed");
+
+    assert_eq!(
+        result,
+        (
+            11,
+            String::new(),
+            "true".to_string(),
+            "nil".to_string(),
+            "nil".to_string()
+        ),
+        "Mists should expose only classes with RAID_CLASS_COLORS entries"
     );
 }
