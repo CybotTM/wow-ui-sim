@@ -252,8 +252,10 @@ const FIX_ACTION_BAR_NAN_SIZE_LUA: &str = r#"
             end
         end
         MainActionBar:SetSize(lastOx + buttonWidth, buttonHeight)
-        pcall(EditModeManagerFrame.UpdateActionBarPositions,
-              EditModeManagerFrame)
+        if EditModeManagerFrame and type(EditModeManagerFrame.UpdateActionBarPositions) == "function" then
+            pcall(EditModeManagerFrame.UpdateActionBarPositions,
+                  EditModeManagerFrame)
+        end
     "#;
 
 /// Initialize EditMode layout info and apply system anchors.
@@ -387,7 +389,7 @@ pub fn patch_edit_mode_manager(env: &WowLuaEnv) {
 
 #[cfg(test)]
 mod tests {
-    use super::{SETUP_LAYOUT_INFO_LUA, WowLuaEnv};
+    use super::{FIX_ACTION_BAR_NAN_SIZE_LUA, SETUP_LAYOUT_INFO_LUA, WowLuaEnv};
 
     #[test]
     fn setup_layout_info_clones_preset_layouts_without_copytable() {
@@ -546,6 +548,35 @@ mod tests {
             copied_point, "TOP",
             "cloned anchor info must not alias preset source"
         );
+    }
+
+    #[test]
+    fn fix_action_bar_size_skips_missing_update_action_bar_positions() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            MainActionBar = CreateFrame("Frame", "TestMainActionBar", UIParent)
+            function MainActionBar:GetSize() return 0, 0 end
+            function MainActionBar:SetSize(width, height)
+                self.fixedHeight = height
+            end
+            for i = 1, 12 do
+                local button = CreateFrame("Frame", "MainActionBarButtonContainer" .. i, MainActionBar)
+                function button:GetSize() return 45, 45 end
+                function button:GetNumPoints() return 1 end
+                function button:GetPoint() return "LEFT", nil, "LEFT", (i - 1) * 45, 0 end
+            end
+            EditModeManagerFrame = {}
+            "#,
+        )
+        .expect("install action bar stubs");
+
+        let before = env.state().borrow().lua_errors.len();
+        env.exec(FIX_ACTION_BAR_NAN_SIZE_LUA)
+            .expect("fix action bar size should not call a missing updater");
+        let after = env.state().borrow().lua_errors.len();
+
+        assert_eq!(after, before);
     }
 }
 

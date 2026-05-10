@@ -191,7 +191,6 @@ fn append_layer_element_code<'a>(
         if let Some(ref name) = ct.texture.name {
             xml::register_texture_template(name, ct.texture.clone());
         }
-        return;
     }
     append_single_texture(
         &ct,
@@ -215,8 +214,8 @@ fn append_single_fontstring(
     text_syncs: &mut Vec<TextSync>,
     timing: &mut LoadTiming,
 ) {
-    if fontstring.is_virtual == Some(true) {
-        return;
+    if let (Some(name), Some(true)) = (fontstring.name.as_ref(), fontstring.is_virtual) {
+        xml::register_font_string_template(name, fontstring.clone());
     }
     let fs_name = resolve_child_name(fontstring.name.as_deref(), name_parent, "__fs_");
     let resolved_text = resolve_fontstring_text(fontstring.text.as_deref());
