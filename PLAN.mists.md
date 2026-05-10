@@ -281,7 +281,7 @@ stderr, so the old currency startup error is gone.
 
 - [x] Reproduce `SetBasicMessageDialogText` nil.
 - [x] Locate expected helper definition in Blizzard UI or legacy API surface.
-- [ ] Add a focused test for dialog text mutation.
+- [x] Add a focused test for dialog text mutation.
 - [ ] Implement the helper against the real dialog frame state.
 - [ ] Verify dialog helper errors disappear.
 
@@ -302,6 +302,11 @@ in `Blizzard_SharedXML/SharedBasicControls.lua`. It updates
 `BasicMessageDialog.Text` and shows `BasicMessageDialog` when forced or when the
 dialog is not already shown. The backing frame and `Text` parentKey are declared
 in `Blizzard_SharedXML/SharedBasicControls.xml`.
+
+Mutation test: `mists_dialog_helpers::basic_message_dialog_helper_updates_text`
+installs a concrete `BasicMessageDialog.Text:SetText` fixture and asserts
+`SetBasicMessageDialogText("Invalid money type: TEST")` writes that exact text
+to the dialog text frame.
 
 ### 10. Class Color and Miscellaneous Nil Data
 
