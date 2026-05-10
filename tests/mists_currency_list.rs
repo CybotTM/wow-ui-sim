@@ -40,3 +40,44 @@ fn token_frame_update_reproduces_missing_currency_list_size() {
         "expected GetCurrencyListSize nil failure, got: {err}"
     );
 }
+
+#[test]
+fn legacy_currency_list_size_wraps_c_currency_info() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    env.exec(
+        r#"
+        UIPanelWindows = {}
+        local tab_visible = nil
+        CharacterFrameTab4 = {
+            Hide = function() tab_visible = false end,
+            Show = function() tab_visible = true end,
+        }
+        TokenFrameContainer = {}
+        "#,
+    )
+    .expect("install TokenFrame compatibility fixtures");
+
+    env.exec(TOKEN_UI_CATA_LUA)
+        .expect("Mists Cata TokenUI Lua should define TokenFrame helpers");
+
+    let (legacy_size, namespaced_size, update_ok, err): (i32, i32, bool, String) = env
+        .eval(
+            r#"
+            local legacySize = GetCurrencyListSize()
+            local namespacedSize = C_CurrencyInfo.GetCurrencyListSize()
+            local ok, err = pcall(TokenFrame_Update)
+            return legacySize, namespacedSize, ok, tostring(err)
+            "#,
+        )
+        .expect("legacy currency wrapper should support TokenFrame_Update");
+
+    assert_eq!(
+        legacy_size, namespaced_size,
+        "legacy GetCurrencyListSize should delegate to C_CurrencyInfo.GetCurrencyListSize"
+    );
+    assert!(
+        update_ok,
+        "TokenFrame_Update should use the legacy compatibility wrapper: {err}"
+    );
+}
