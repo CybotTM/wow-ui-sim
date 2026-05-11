@@ -1,0 +1,100 @@
+#![cfg(feature = "client-mists")]
+
+use std::path::PathBuf;
+use std::process::Command;
+
+fn wow_sim_binary() -> PathBuf {
+    std::env::var_os("CARGO_BIN_EXE_wow-sim")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("target")
+                .join("debug")
+                .join("wow-sim")
+        })
+}
+
+#[test]
+fn mists_collections_tabs_render_without_wardrobe() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(wow_sim_binary())
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            ToggleCollectionsJournal()
+
+            local requiredFrames = {
+                { "CollectionsJournal", CollectionsJournal },
+                { "MountJournal", MountJournal },
+                { "PetJournal", PetJournal },
+                { "ToyBox", ToyBox },
+                { "HeirloomsJournal", HeirloomsJournal },
+            }
+            for _, entry in ipairs(requiredFrames) do
+                if entry[2] == nil then
+                    error(entry[1] .. " missing")
+                end
+            end
+
+            if WardrobeCollectionFrame ~= nil or CollectionsJournalTab5 ~= nil then
+                error("Mists Collections should not expose Wardrobe")
+            end
+            if CollectionsJournal.numTabs ~= 4 then
+                error("Mists Collections tab count mismatch")
+            end
+
+            local panelChecks = {
+                { 1, MountJournal },
+                { 2, PetJournal },
+                { 3, ToyBox },
+                { 4, HeirloomsJournal },
+            }
+            for _, check in ipairs(panelChecks) do
+                CollectionsJournal_SetTab(CollectionsJournal, check[1])
+                CollectionsJournal_UpdateSelectedTab(CollectionsJournal)
+                if check[2]:IsShown() ~= true then
+                    error("Collections tab " .. check[1] .. " did not show its panel")
+                end
+            end
+
+            if C_MountJournal.GetNumDisplayedMounts() < 1 then
+                error("mount collection data missing")
+            end
+            local totalPets, ownedPets = C_PetJournal.GetNumPets()
+            if totalPets < 1 or ownedPets < 1 then
+                error("pet collection data missing")
+            end
+            if C_ToyBox.GetNumTotalDisplayedToys() < 1 then
+                error("toy collection data missing")
+            end
+            if C_Heirloom.GetNumHeirlooms() < 1 then
+                error("heirloom collection data missing")
+            end
+            "#,
+            "lua-errors",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+}
+
+fn assert_no_lua_errors(stdout: &str, stderr: &str) {
+    assert!(
+        stdout.trim().ends_with("[]")
+            && !stdout.contains("Lua error")
+            && !stderr.contains("Lua error")
+            && !stderr.contains("[exec-lua] error"),
+        "Collections panel flow emitted Lua errors\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+}

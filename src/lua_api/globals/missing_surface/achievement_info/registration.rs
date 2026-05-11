@@ -166,6 +166,12 @@ fn register_summary_globals(state: &mut LuaState, globals: GcRef<Table>) -> LuaR
         "GetTotalAchievementPoints",
         get_total_achievement_points,
     )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetCategoryAchievementPoints",
+        get_category_achievement_points,
+    )?;
     table_set_rust_fn_static(state, globals, "GetAchievementLink", get_achievement_link)?;
     table_set_rust_fn_static(state, globals, "GetStatistic", get_statistic)?;
     Ok(())

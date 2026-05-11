@@ -340,7 +340,10 @@ fn pickup_spell(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_spell_link(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = u32::from_stack(state, 1)?;
+    let Some(spell_id) = numeric_spell_id(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
     match spell_link_for_id(spell_id) {
         Some(link) => {
             let link_string = create_string(state, &link);
@@ -476,8 +479,10 @@ fn is_known_spell_for_usability(state: &mut LuaState, spell_id: u32) -> bool {
 }
 
 fn numeric_spell_id(state: &LuaState, index: i32) -> Option<u32> {
-    match stack_val(state, index) {
+    let value = stack_val(state, index);
+    match value {
         Val::Num(n) if n.is_finite() && n >= 0.0 => Some(n as u32),
+        Val::Str(_) => val_to_string(state, value)?.parse::<u32>().ok(),
         _ => None,
     }
 }

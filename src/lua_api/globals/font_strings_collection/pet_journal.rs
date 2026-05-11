@@ -150,12 +150,23 @@ fn find_pet_by_species_id(state: &LuaState, species_id: u32) -> Option<PetInfoSn
 }
 
 fn pet_get_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
-    let index = i32::from_stack(state, 1)?;
+    let Some(index) = pet_index_from_stack(state, 1) else {
+        return Ok(0);
+    };
     let pet = find_pet_by_index(state, index);
     let Some(pet) = pet else {
         return Ok(0);
     };
     Ok(push_pet_info_by_index(state, &pet))
+}
+
+fn pet_index_from_stack(state: &mut LuaState, stack_index: i32) -> Option<i32> {
+    let value = stack_val(state, stack_index);
+    match value {
+        Val::Num(index) => Some(index as i32),
+        Val::Str(_) => val_to_string(state, value)?.parse::<i32>().ok(),
+        _ => None,
+    }
 }
 
 fn pet_get_info_by_pet_id(state: &mut LuaState) -> LuaResult<u32> {

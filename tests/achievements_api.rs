@@ -2,6 +2,7 @@
 
 use wow_ui_sim::event::EventArg;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::AchievementInfo;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -172,6 +173,60 @@ fn test_category_num_achievements_counts_nested_children() {
     assert_eq!(total, 2);
     assert_eq!(completed, 0);
     assert_eq!(incomplete, 2);
+}
+
+#[test]
+fn test_category_achievement_points_sum_completed_nested_children() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.achievements.insert(
+            948,
+            AchievementInfo {
+                achievement_id: 948,
+                name: "Ambassador of the Alliance".into(),
+                points: 10,
+                description: "Earn exalted reputation with alliance cities.".into(),
+                flags: 0,
+                icon: 0,
+                reward_text: String::new(),
+                is_guild: false,
+                is_statistic: false,
+                reward_item_id: None,
+            },
+        );
+        state.achievements.insert(
+            1017,
+            AchievementInfo {
+                achievement_id: 1017,
+                name: "Can I Keep Him?".into(),
+                points: 10,
+                description: "Collect a companion pet.".into(),
+                flags: 0,
+                icon: 0,
+                reward_text: String::new(),
+                is_guild: false,
+                is_statistic: false,
+                reward_item_id: None,
+            },
+        );
+    }
+    env.exec("A_Admin.SetAchievementEarned(948, true)").unwrap();
+    env.exec("A_Admin.SetAchievementEarned(1017, true)")
+        .unwrap();
+    let (parent_total, child_excluded, missing): (i32, i32, i32) = env
+        .eval(
+            r#"
+            return GetCategoryAchievementPoints(201, true),
+                   GetCategoryAchievementPoints(201, false),
+                   GetCategoryAchievementPoints(999999, true)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(parent_total, 20);
+    assert_eq!(child_excluded, 10);
+    assert_eq!(missing, 0);
 }
 
 #[test]

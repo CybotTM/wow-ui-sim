@@ -26,7 +26,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Friends, Who, Guild, Communities/Club finder
 - [x] PvP UI (HonorFrame, BG queue, Conquest — backing API fixed in triage)
 - [x] LFG / LFR / Raid Browser (Mists-era pre-group-finder rewrite)
-- [ ] Collections: mounts, pets, toys, heirlooms, transmog (no Wardrobe in MoP)
+- [x] Collections: mounts, pets, toys, heirlooms, transmog (no Wardrobe in MoP)
 - [ ] Pet Journal & Battle Pet UI (MoP-introduced system)
 - [ ] Achievements & Calendar
 - [ ] Encounter Journal (Mists adventure guide)

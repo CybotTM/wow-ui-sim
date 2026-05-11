@@ -321,6 +321,9 @@ fn load_addon_files(
     let overlay_dir = Path::new("Interface/AddOns").join(folder_name);
 
     for (index, (file_rel, file)) in toc.files.iter().zip(toc.file_paths()).enumerate() {
+        if should_skip_addon_file(toc, file_rel) {
+            continue;
+        }
         let resolved_file = resolve_addon_file_path(&overlay_dir, file_rel, file);
         let file_ctx = AddonContext {
             name: ctx.name,
@@ -331,6 +334,24 @@ fn load_addon_files(
         };
         load_addon_file(env, &file_ctx, result, &resolved_file);
     }
+}
+
+fn should_skip_addon_file(toc: &TocFile, file_rel: &Path) -> bool {
+    is_mists_collections_wardrobe_file(toc, file_rel)
+}
+
+fn is_mists_collections_wardrobe_file(toc: &TocFile, file_rel: &Path) -> bool {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Mists {
+        return false;
+    }
+    if toc.name != "Blizzard_Collections" {
+        return false;
+    }
+
+    file_rel
+        .to_string_lossy()
+        .replace('\\', "/")
+        .contains("Wardrobe")
 }
 
 fn resolve_addon_file_path(

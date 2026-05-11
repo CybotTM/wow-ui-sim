@@ -85,3 +85,59 @@ end
 function CombatLog_LoadUI()
   return true
 end
+
+local function PatchMistsCollectionsJournal()
+  if type(CollectionsJournal) ~= "table"
+     or rawget(_G, "__wow_sim_mists_collections_journal_patched") == true then
+    return
+  end
+
+  local wardrobeTab = rawget(_G, "CollectionsJournalTab5")
+  if wardrobeTab and wardrobeTab.Hide then
+    wardrobeTab:Hide()
+    if wardrobeTab.Disable then
+      wardrobeTab:Disable()
+    end
+  end
+  rawset(_G, "CollectionsJournalTab5", nil)
+  rawset(_G, "WardrobeCollectionFrame", nil)
+  rawset(_G, "WardrobeFrame", nil)
+
+  PanelTemplates_SetNumTabs(CollectionsJournal, 4)
+  if CollectionsJournal.selectedTab and CollectionsJournal.selectedTab > 4 then
+    PanelTemplates_SetTab(CollectionsJournal, 1)
+  end
+
+  local titles = {
+    [1] = MOUNTS,
+    [2] = PET_JOURNAL,
+    [3] = TOY_BOX,
+    [4] = HEIRLOOMS,
+  }
+
+  function CollectionsJournal_ValidateTab(tabNum)
+    return type(tabNum) == "number" and tabNum >= 1 and tabNum <= 4
+  end
+
+  function CollectionsJournal_UpdateSelectedTab(self)
+    local selected = CollectionsJournal_GetTab(self)
+    if not CollectionsJournal_ValidateTab(selected) then
+      PanelTemplates_SetTab(self, 1)
+      selected = 1
+    end
+
+    MountJournal:SetShown(selected == 1)
+    PetJournal:SetShown(selected == 2)
+    ToyBox:SetShown(selected == 3)
+    HeirloomsJournal:SetShown(selected == 4)
+    self:SetTitle(titles[selected] or COLLECTIONS)
+
+    if EventRegistry and EventRegistry.TriggerEvent then
+      EventRegistry:TriggerEvent("CollectionsJournal.TabSet", CollectionsJournal, selected)
+    end
+  end
+
+  rawset(_G, "__wow_sim_mists_collections_journal_patched", true)
+end
+
+PatchMistsCollectionsJournal()

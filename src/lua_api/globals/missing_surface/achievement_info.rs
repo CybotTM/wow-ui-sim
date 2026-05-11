@@ -11,19 +11,23 @@
 //! `GetAchievementCriteriaInfo`) on top of the same seeded data.
 
 mod categories;
+mod category_points;
 mod registration;
 
 use super::{ensure_namespace, set_table_array};
 use crate::event::Event;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, val_to_string,
+};
 use crate::lua_api::state::AchievementInfo;
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use categories::{
     AchievementCriterion, CategoryListKind, achievement_categories, categories_for,
     categories_for_view, category_id_for_achievement, collect_category_achievement_ids,
     criteria_for_achievement, criterion_at, find_category, next_achievement_id,
     previous_achievement_id,
 };
+use category_points::get_category_achievement_points;
 use registration::register_legacy_achievement_globals;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -341,7 +345,10 @@ fn get_num_completed_achievements(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_achievement_link(state: &mut LuaState) -> LuaResult<u32> {
-    let achievement_id = i32::from_stack(state, 1)?;
+    let Some(achievement_id) = achievement_id_from_stack(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
     let name = borrow_state(state)?
         .achievements
         .get(&achievement_id)
@@ -356,6 +363,15 @@ fn get_achievement_link(state: &mut LuaState) -> LuaResult<u32> {
     let link_val = create_string(state, &link);
     state.push(link_val);
     Ok(1)
+}
+
+fn achievement_id_from_stack(state: &LuaState, index: i32) -> Option<i32> {
+    let value = stack_val(state, index);
+    match value {
+        Val::Num(id) => Some(id as i32),
+        Val::Str(_) => val_to_string(state, value)?.parse::<i32>().ok(),
+        _ => None,
+    }
 }
 
 fn set_achievement_comparison_unit(state: &mut LuaState) -> LuaResult<u32> {
