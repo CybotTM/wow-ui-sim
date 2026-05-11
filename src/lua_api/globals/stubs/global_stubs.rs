@@ -108,6 +108,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "GetCVarBool",
     "GetLFGDungeonEncounterInfo",
     "HasLFGRestrictions",
+    "InRepairMode",
     "IsCharacterNewlyBoosted",
     // GetLootMethod / GetMasterLooterThreshold are SimState-backed in
     // globals::real::loot_method, not stubs.

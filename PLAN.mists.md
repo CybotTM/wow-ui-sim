@@ -15,9 +15,9 @@ In-flight (git status shows uncommitted work):
 Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
 
 - [x] Character panel (paperdoll, stats, titles, equipment manager)
-- [x] Spellbook & professions: missing icons, layout problems
-- [x] Talents & glyphs (Mists uses talent rows + glyph slots, not retail trees)
-- [ ] Quest log / objective tracker
+- [ ] Spellbook & professions: missing icons, layout problems
+- [ ] Talents & glyphs (Mists uses talent rows + glyph slots, not retail trees)
+- [x] Quest log / objective tracker
 - [ ] World map (zone overlays, quest pins, opacity slider already verified)
 - [ ] Mail (inbox, send, attachments, COD)
 - [ ] Auction House (browse, bid, post, cancel)
@@ -36,6 +36,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [ ] Action bars, micro menu, bag bar, status bars
 - [ ] Nameplates (CVar defaults fixed in triage; verify rendering)
 - [ ] Loot / group loot / personal loot UI
+- [ ] Game menu options breaks
 
 Cross-cutting follow-ups:
 

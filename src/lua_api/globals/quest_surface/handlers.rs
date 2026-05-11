@@ -81,6 +81,17 @@ fn watched_quest_id_at_index(index: i32) -> Option<i32> {
         .nth((index - 1) as usize)
 }
 
+fn watch_index_for_quest_id(quest_id: i32) -> Option<i32> {
+    QUEST_LOG
+        .iter()
+        .filter_map(|entry| match entry {
+            QuestLogEntry::Quest { quest_id, .. } => Some(*quest_id),
+            _ => None,
+        })
+        .position(|watched_quest_id| watched_quest_id == quest_id)
+        .map(|index| index as i32 + 1)
+}
+
 fn objective_at(log_index: i32, objective_index: i32) -> Option<&'static Objective> {
     match entry_at(log_index) {
         Some(QuestLogEntry::Quest { objectives, .. }) if objective_index > 0 => {
@@ -279,6 +290,108 @@ pub fn get_num_quest_log_entries(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
+pub fn get_quest_log_title(state: &mut LuaState) -> LuaResult<u32> {
+    let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let Some(entry) = entry_at(index) else {
+        return Ok(0);
+    };
+
+    match entry {
+        QuestLogEntry::Header { title } => push_legacy_quest_log_title(
+            state,
+            LegacyQuestLogTitle {
+                title,
+                level: 0,
+                quest_id: None,
+                is_header: true,
+                ..LegacyQuestLogTitle::default()
+            },
+        ),
+        QuestLogEntry::Quest {
+            quest_id, title, ..
+        } => {
+            let is_complete = is_completed_quest(state, *quest_id)?;
+            push_legacy_quest_log_title(
+                state,
+                LegacyQuestLogTitle {
+                    title,
+                    level: 80,
+                    quest_id: Some(*quest_id),
+                    is_complete,
+                    is_on_map: true,
+                    ..LegacyQuestLogTitle::default()
+                },
+            )
+        }
+    }
+}
+
+#[derive(Default)]
+struct LegacyQuestLogTitle<'a> {
+    title: &'a str,
+    level: i32,
+    quest_id: Option<i32>,
+    is_header: bool,
+    is_collapsed: bool,
+    is_complete: bool,
+    is_on_map: bool,
+    has_local_poi: bool,
+    is_task: bool,
+    is_bounty: bool,
+    is_story: bool,
+}
+
+fn push_legacy_quest_log_title(
+    state: &mut LuaState,
+    row: LegacyQuestLogTitle<'_>,
+) -> LuaResult<u32> {
+    let title = create_string(state, row.title);
+    state.push(title);
+    state.push(Val::Num(row.level as f64));
+    state.push(Val::Nil);
+    state.push(Val::Bool(row.is_header));
+    state.push(Val::Bool(row.is_collapsed));
+    push_legacy_completion_flag(state, row.is_complete);
+    state.push(Val::Num(0.0));
+    push_optional_number(state, row.quest_id);
+    state.push(Val::Bool(false));
+    push_optional_number(state, row.quest_id);
+    state.push(Val::Bool(row.is_on_map));
+    state.push(Val::Bool(row.has_local_poi));
+    state.push(Val::Bool(row.is_task));
+    state.push(Val::Bool(row.is_bounty));
+    state.push(Val::Bool(row.is_story));
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(false));
+    Ok(17)
+}
+
+fn push_optional_number(state: &mut LuaState, value: Option<i32>) {
+    match value {
+        Some(value) => state.push(Val::Num(value as f64)),
+        None => state.push(Val::Nil),
+    }
+}
+
+fn push_legacy_completion_flag(state: &mut LuaState, is_complete: bool) {
+    if is_complete {
+        state.push(Val::Num(1.0));
+    } else {
+        state.push(Val::Nil);
+    }
+}
+
+fn is_completed_quest(state: &LuaState, quest_id: i32) -> LuaResult<bool> {
+    let completed = borrow_state(state)?
+        .quest_log_entries
+        .entries
+        .iter()
+        .find(|entry| entry.quest_id == quest_id)
+        .map(|entry| entry.is_complete || entry.is_flagged_completed)
+        .unwrap_or(false);
+    Ok(completed)
+}
+
 pub fn get_quest_log_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     let Some(entry) = entry_at(index) else {
@@ -315,6 +428,68 @@ pub fn get_log_index_for_quest_id(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => Ok(0),
     }
+}
+
+pub fn get_quest_log_index_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    get_log_index_for_quest_id(state)
+}
+
+pub fn select_quest_log_entry(state: &mut LuaState) -> LuaResult<u32> {
+    let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let selected_quest_id = match entry_at(index) {
+        Some(QuestLogEntry::Quest { quest_id, .. }) => Some(*quest_id as u32),
+        _ => None,
+    };
+    borrow_state_mut(state)?.selected_quest_log_id = selected_quest_id;
+    Ok(0)
+}
+
+pub fn get_quest_log_selection(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(selected_log_index(state)? as f64));
+    Ok(1)
+}
+
+pub fn get_quest_log_selected_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(selected_quest_id(state)? as f64));
+    Ok(1)
+}
+
+pub fn get_abandon_quest_name(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(quest) = selected_static_quest(state)? else {
+        return Ok(0);
+    };
+    let title = create_string(state, quest.title);
+    state.push(title);
+    Ok(1)
+}
+
+pub fn can_abandon_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    state.push(Val::Bool(quest_exists(quest_id)));
+    Ok(1)
+}
+
+pub fn get_abandon_quest_items(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+pub fn get_quest_log_pushable(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+pub fn get_quest_ui_map_id(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let map_id = borrow_state(state)?
+        .quest_log_entries
+        .entries
+        .iter()
+        .find(|entry| entry.quest_id == quest_id)
+        .and_then(|entry| entry.map_id)
+        .unwrap_or(2248);
+    state.push(Val::Num(map_id as f64));
+    Ok(1)
 }
 
 pub fn get_title_for_quest_id(state: &mut LuaState) -> LuaResult<u32> {
@@ -355,6 +530,45 @@ pub fn get_quest_id_for_quest_watch_index(state: &mut LuaState) -> LuaResult<u32
         }
         None => Ok(0),
     }
+}
+
+pub fn get_quest_index_for_watch(state: &mut LuaState) -> LuaResult<u32> {
+    let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let log_index = watched_quest_id_at_index(index)
+        .and_then(|quest_id| find_quest_by_id(quest_id).map(|(log_index, _)| log_index))
+        .unwrap_or(0);
+    state.push(Val::Num(log_index as f64));
+    Ok(1)
+}
+
+pub fn get_quest_watch_index(state: &mut LuaState) -> LuaResult<u32> {
+    let log_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let watch_index = entry_at(log_index)
+        .and_then(|entry| match entry {
+            QuestLogEntry::Quest { quest_id, .. } => watch_index_for_quest_id(*quest_id),
+            QuestLogEntry::Header { .. } => None,
+        })
+        .unwrap_or(0);
+    state.push(Val::Num(watch_index as f64));
+    Ok(1)
+}
+
+pub fn get_quest_sort_index(state: &mut LuaState) -> LuaResult<u32> {
+    get_quest_watch_index(state)
+}
+
+pub fn is_quest_watched(state: &mut LuaState) -> LuaResult<u32> {
+    let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let watched = matches!(entry_at(index), Some(QuestLogEntry::Quest { .. }));
+    state.push(Val::Bool(watched));
+    Ok(1)
+}
+
+pub fn is_unit_on_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let on_quest = matches!(entry_at(index), Some(QuestLogEntry::Quest { .. }));
+    state.push(Val::Bool(on_quest));
+    Ok(1)
 }
 
 pub fn get_num_world_quest_watches(state: &mut LuaState) -> LuaResult<u32> {
