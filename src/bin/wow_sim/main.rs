@@ -394,27 +394,92 @@ fn default_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
 }
 
 fn recover_missing_blizzard_ui_addons_path(
-    error: wow_ui_sim::Error,
+    _missing_cache_error: wow_ui_sim::Error,
 ) -> wow_ui_sim::Result<PathBuf> {
     logging::println_elapsed("Blizzard UI source missing; syncing Blizzard UI from CASC");
-    if let Err(setup_error) = wow_ui_sim::blizzard_ui_sync::sync_blizzard_ui() {
-        return Err(wow_ui_sim::Error::Other(format!(
-            "{error}\n\nBlizzard UI CASC sync failed: {setup_error}"
-        )));
-    }
+    // Preserve the typed sync error so startup_blizzard_ui_help can pick a
+    // tailored message for WowInstallNotFound / BlizzardUiPartial.
+    wow_ui_sim::blizzard_ui_sync::sync_blizzard_ui()?;
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
 }
 
 fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Error> {
-    Box::<dyn std::error::Error>::from(format!(
-        "{error}\n\nThe simulator stores Blizzard UI source in ~/.cache/wow-ui-sim/blizzard-ui and tries to sync it from local WoW CASC automatically. Make sure WoW is installed or set WOW_INSTALL_PATH/WOW_DATA_PATH, or run `wow-cli casc sync-blizzard-ui` after configuring CASC."
-    ))
+    let message = match &error {
+        wow_ui_sim::Error::WowInstallNotFound => format!(
+            "Could not find a World of Warcraft installation.\n\n\
+             wow-ui-sim needs a local WoW install to load Blizzard UI files via CASC.\n\n\
+             Fix:\n  \
+             - Install WoW via the Battle.net launcher, OR\n  \
+             - Set WOW_INSTALL_PATH to your WoW directory before launching wow-ui-sim.\n\n\
+             Default search paths include /Applications/World of Warcraft (macOS), \
+             C:\\Program Files (x86)\\World of Warcraft (Windows), and common Wine/Lutris locations on Linux."
+        ),
+        wow_ui_sim::Error::BlizzardUiPartial {
+            missing,
+            total,
+            last_error,
+        } => format!(
+            "Your WoW install appears incomplete: {missing} of {total} required files could not be extracted from CASC.\n\
+             First missing entry: {last_error}\n\n\
+             This usually means your WoW install is partially downloaded or stuck on an older build.\n\n\
+             Fix:\n  \
+             1. Open Battle.net\n  \
+             2. Click the gear icon next to 'Play' on World of Warcraft\n  \
+             3. Choose 'Scan and Repair'\n  \
+             4. Re-launch wow-ui-sim after the repair completes."
+        ),
+        _ => format!(
+            "{error}\n\nThe simulator stores Blizzard UI source in ~/.cache/wow-ui-sim/blizzard-ui and tries to sync it from local WoW CASC automatically. Make sure WoW is installed or set WOW_INSTALL_PATH/WOW_DATA_PATH, or run `wow-cli casc sync-blizzard-ui` after configuring CASC."
+        ),
+    };
+    Box::<dyn std::error::Error>::from(message)
 }
 
 fn report_fatal_error(error: &dyn std::error::Error) {
     eprintln!("{error}");
     #[cfg(all(windows, feature = "gui"))]
     show_windows_error_message(&error.to_string());
+    #[cfg(all(target_os = "macos", feature = "gui"))]
+    show_macos_error_message(&error.to_string());
+    #[cfg(all(target_os = "linux", feature = "gui"))]
+    show_linux_error_message(&error.to_string());
+}
+
+#[cfg(all(target_os = "macos", feature = "gui"))]
+fn show_macos_error_message(message: &str) {
+    // osascript is preinstalled on every macOS. Escape backslashes and
+    // double quotes so the AppleScript string literal stays well-formed.
+    let escaped = message.replace('\\', "\\\\").replace('"', "\\\"");
+    let script = format!(
+        "display alert \"wow-ui-sim startup error\" message \"{escaped}\" as critical buttons {{\"OK\"}}"
+    );
+    let _ = std::process::Command::new("osascript")
+        .arg("-e")
+        .arg(&script)
+        .status();
+}
+
+#[cfg(all(target_os = "linux", feature = "gui"))]
+fn show_linux_error_message(message: &str) {
+    // Try zenity (GNOME), then kdialog (KDE), then xmessage. Any of these
+    // may be missing on a minimal install; failing silently is fine because
+    // stderr already carries the message.
+    let title = "wow-ui-sim startup error";
+    let attempts: &[(&str, &[&str])] = &[
+        ("zenity", &["--error", "--title", title, "--text", message]),
+        ("kdialog", &["--error", message, "--title", title]),
+        ("xmessage", &["-center", message]),
+    ];
+    for (cmd, args) in attempts {
+        if std::process::Command::new(cmd)
+            .args(*args)
+            .status()
+            .map(|s| s.success())
+            .unwrap_or(false)
+        {
+            return;
+        }
+    }
 }
 
 #[cfg(all(windows, feature = "gui"))]

@@ -49,6 +49,11 @@ fn sync_blizzard_ui_entries<'a>(
     root: &Path,
     entries: impl Iterator<Item = &'a str>,
 ) -> crate::Result<SyncSummary> {
+    #[cfg(feature = "casc")]
+    if !casc_available() {
+        return Err(crate::Error::WowInstallNotFound);
+    }
+
     let mut summary = SyncSummary {
         root: root.to_path_buf(),
         total: 0,
@@ -56,11 +61,13 @@ fn sync_blizzard_ui_entries<'a>(
         present: 0,
         missing: 0,
     };
+    let mut last_missing_entry: Option<String> = None;
 
     for entry in entries {
         summary.total += 1;
         let Some(fdid) = manifest_entry_fdid(entry) else {
             summary.missing += 1;
+            last_missing_entry = Some(format!("{entry} (no FDID in listfile)"));
             continue;
         };
         let out_path = root.join(entry);
@@ -70,17 +77,20 @@ fn sync_blizzard_ui_entries<'a>(
         }
         match extract_fdid(fdid, &out_path)? {
             true => summary.extracted += 1,
-            false => summary.missing += 1,
+            false => {
+                summary.missing += 1;
+                last_missing_entry = Some(format!("{entry} (fdid {fdid})"));
+            }
         }
     }
 
     if summary.missing > 0 {
-        return Err(crate::Error::Other(format!(
-            "failed to sync {} of {} Blizzard UI files from CASC into {}",
-            summary.missing,
-            summary.total,
-            root.display()
-        )));
+        return Err(crate::Error::BlizzardUiPartial {
+            missing: summary.missing,
+            total: summary.total,
+            last_error: last_missing_entry
+                .unwrap_or_else(|| "unknown extraction failure".to_string()),
+        });
     }
 
     write_complete_marker(root)?;
