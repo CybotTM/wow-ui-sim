@@ -24,6 +24,10 @@ jobs:
             os: windows-latest
             platform: windows
             bin-dir: target/x86_64-pc-windows-msvc/release
+          - name: macos-aarch64
+            os: macos-latest
+            platform: macos
+            bin-dir: target/aarch64-apple-darwin/release
 
     steps:
       - name: Checkout
@@ -81,6 +85,91 @@ jobs:
         with:
           name: wow-ui-sim-${{ github.ref_name }}-${{ matrix.name }}
           path: ${{ steps.package-linux.outputs.asset }}
+
+      - name: Package macOS release
+        if: runner.os == 'macOS'
+        id: package-macos
+        shell: bash
+        run: |
+          set -euo pipefail
+          name="wow-ui-sim-${GITHUB_REF_NAME}-${{ matrix.name }}"
+          version="${GITHUB_REF_NAME#v}"
+          app="dist/WoW Sim.app"
+          contents="${app}/Contents"
+
+          # Generate the source PNG for the iconset (also writes the ICO,
+          # which is unused on macOS).
+          cargo run --example gen_app_icon
+
+          # Build a multi-size iconset from the rendered PNG and convert
+          # to .icns. Source is 128x128, so larger sizes are upscaled.
+          iconset="dist/wow-sim.iconset"
+          rm -rf "${iconset}"
+          mkdir -p "${iconset}"
+          for size in 16 32 64 128 256 512 1024; do
+            sips -z "$size" "$size" installer/wow-sim.png \
+              --out "${iconset}/icon_${size}x${size}.png" >/dev/null
+          done
+          # Retina variants for sizes <= 512 (point size + @2x suffix).
+          for size in 16 32 128 256 512; do
+            doubled=$((size * 2))
+            sips -z "$doubled" "$doubled" installer/wow-sim.png \
+              --out "${iconset}/icon_${size}x${size}@2x.png" >/dev/null
+          done
+          iconutil -c icns "${iconset}" -o "dist/wow-sim.icns"
+
+          # Assemble the .app bundle.
+          rm -rf "${app}"
+          mkdir -p "${contents}/MacOS" "${contents}/Resources/Interface/AddOns"
+          cp "${{ matrix.bin-dir }}/wow-sim" "${contents}/MacOS/wow-sim"
+          chmod +x "${contents}/MacOS/wow-sim"
+          cp dist/wow-sim.icns "${contents}/Resources/wow-sim.icns"
+          cp -R Interface/AddOns/Admin Interface/AddOns/SimCommands Interface/AddOns/TestFramework \
+            "${contents}/Resources/Interface/AddOns/"
+
+          cat > "${contents}/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>            <string>WoW Sim</string>
+            <key>CFBundleDisplayName</key>     <string>WoW Sim</string>
+            <key>CFBundleIdentifier</key>      <string>net.osso.wow-ui-sim</string>
+            <key>CFBundleVersion</key>         <string>${version}</string>
+            <key>CFBundleShortVersionString</key><string>${version}</string>
+            <key>CFBundleExecutable</key>      <string>wow-sim</string>
+            <key>CFBundleIconFile</key>        <string>wow-sim</string>
+            <key>CFBundlePackageType</key>     <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>  <string>11.0</string>
+            <key>NSHighResolutionCapable</key> <true/>
+          </dict>
+          </plist>
+          PLIST
+
+          # Stage a DMG layout: the .app + a symlink to /Applications so
+          # users drag-to-install.
+          stage="dist/dmg-stage"
+          rm -rf "${stage}"
+          mkdir -p "${stage}"
+          cp -R "${app}" "${stage}/"
+          ln -s /Applications "${stage}/Applications"
+          cp README.md LICENSE "${stage}/"
+
+          dmg="dist/${name}.dmg"
+          rm -f "${dmg}"
+          hdiutil create -volname "WoW Sim ${version}" \
+            -srcfolder "${stage}" \
+            -ov -format UDZO \
+            "${dmg}"
+
+          echo "asset=${dmg}" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload macOS package
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-ui-sim-${{ github.ref_name }}-${{ matrix.name }}
+          path: ${{ steps.package-macos.outputs.asset }}
 
       - name: Package Windows release
         if: runner.os == 'Windows'

@@ -26,6 +26,7 @@ fn release(platform: Option<&str>, extra_cargo_args: Vec<String>) -> Result<(), 
     let target = match platform {
         Some("windows") | Some("win") => "x86_64-pc-windows-msvc",
         Some("linux") => "x86_64-unknown-linux-gnu",
+        Some("macos") | Some("mac") => "aarch64-apple-darwin",
         Some("current") | None => current_target()?,
         Some(platform) => return Err(format!("unknown release platform: {platform}\n{USAGE}")),
     };
@@ -64,6 +65,8 @@ fn current_target() -> Result<&'static str, String> {
         Ok("x86_64-pc-windows-msvc")
     } else if cfg!(target_os = "linux") {
         Ok("x86_64-unknown-linux-gnu")
+    } else if cfg!(target_os = "macos") {
+        Ok("aarch64-apple-darwin")
     } else {
         Err("current platform is not supported for release builds".to_string())
     }
@@ -71,7 +74,8 @@ fn current_target() -> Result<&'static str, String> {
 
 const USAGE: &str = "\
 usage:
-  cargo xtask release [current|windows|linux] [cargo build args...]
+  cargo xtask release [current|windows|linux|macos] [cargo build args...]
   cargo release-current [cargo build args...]
   cargo release-windows [cargo build args...]
-  cargo release-linux [cargo build args...]";
+  cargo release-linux [cargo build args...]
+  cargo release-macos [cargo build args...]";

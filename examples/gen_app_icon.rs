@@ -1,14 +1,16 @@
-//! Render the app icon and write `installer/wow-sim.ico`.
+//! Render the app icon and write `installer/wow-sim.ico` and
+//! `installer/wow-sim.png`.
 //!
 //! Run after editing `app_icon_render.rs` to regenerate the Windows icon
-//! resource embedded into `wow-sim.exe` by `build.rs`:
+//! resource embedded into `wow-sim.exe` by `build.rs` and the source PNG
+//! used to build the macOS `.icns`:
 //!
 //! ```text
 //! cargo run --example gen_app_icon
 //! ```
 //!
-//! The output is a single-image PNG-encoded ICO at `app_icon_render::SIZE`.
-//! Windows scales it down for shortcuts and Start Menu entries.
+//! The ICO is a single PNG-encoded entry at `app_icon_render::SIZE`.
+//! The PNG is the same raw bitmap, suitable as input to `sips`/`iconutil`.
 
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -27,15 +29,22 @@ fn main() -> std::io::Result<()> {
         .write_with_encoder(PngEncoder::new(&mut png_bytes))
         .expect("PNG encoding failed");
 
-    let ico_bytes = wrap_png_in_ico(&png_bytes, SIZE);
-
-    let out_path: PathBuf = [env!("CARGO_MANIFEST_DIR"), "installer", "wow-sim.ico"]
+    let png_path: PathBuf = [env!("CARGO_MANIFEST_DIR"), "installer", "wow-sim.png"]
         .iter()
         .collect();
-    let mut writer = BufWriter::new(File::create(&out_path)?);
-    writer.write_all(&ico_bytes)?;
-    writer.flush()?;
-    println!("wrote {} ({} bytes)", out_path.display(), ico_bytes.len());
+    let mut png_writer = BufWriter::new(File::create(&png_path)?);
+    png_writer.write_all(&png_bytes)?;
+    png_writer.flush()?;
+    println!("wrote {} ({} bytes)", png_path.display(), png_bytes.len());
+
+    let ico_bytes = wrap_png_in_ico(&png_bytes, SIZE);
+    let ico_path: PathBuf = [env!("CARGO_MANIFEST_DIR"), "installer", "wow-sim.ico"]
+        .iter()
+        .collect();
+    let mut ico_writer = BufWriter::new(File::create(&ico_path)?);
+    ico_writer.write_all(&ico_bytes)?;
+    ico_writer.flush()?;
+    println!("wrote {} ({} bytes)", ico_path.display(), ico_bytes.len());
     Ok(())
 }
 
