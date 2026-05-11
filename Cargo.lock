@@ -249,7 +249,7 @@ dependencies = [
 [[package]]
 name = "asset-resolver"
 version = "0.1.0"
-source = "git+https://github.com/world-of-osso/asset-resolver?rev=3b5b57a983509f90cba0277d6babe57c7b4a7d9e#3b5b57a983509f90cba0277d6babe57c7b4a7d9e"
+source = "git+https://github.com/world-of-osso/asset-resolver?rev=10bcc0f76c3e75097ec819f6ccdd9770614f5f30#10bcc0f76c3e75097ec819f6ccdd9770614f5f30"
 dependencies = [
  "binrw",
  "cascette-client-storage",
@@ -667,7 +667,7 @@ dependencies = [
 [[package]]
 name = "cascette-client-storage"
 version = "0.2.0"
-source = "git+https://github.com/Osso/cascette-rs?rev=4990dc9e9d1058da7de1dcc0ed201668062d4b74#4990dc9e9d1058da7de1dcc0ed201668062d4b74"
+source = "git+https://github.com/Osso/cascette-rs?rev=0d0e79abfc32b9d8fe712971a78f6a9b9a0cae4d#0d0e79abfc32b9d8fe712971a78f6a9b9a0cae4d"
 dependencies = [
  "binrw",
  "cascette-crypto",
@@ -691,7 +691,7 @@ dependencies = [
 [[package]]
 name = "cascette-crypto"
 version = "0.2.0"
-source = "git+https://github.com/Osso/cascette-rs?rev=4990dc9e9d1058da7de1dcc0ed201668062d4b74#4990dc9e9d1058da7de1dcc0ed201668062d4b74"
+source = "git+https://github.com/Osso/cascette-rs?rev=0d0e79abfc32b9d8fe712971a78f6a9b9a0cae4d#0d0e79abfc32b9d8fe712971a78f6a9b9a0cae4d"
 dependencies = [
  "binrw",
  "cipher",
@@ -704,7 +704,7 @@ dependencies = [
 [[package]]
 name = "cascette-formats"
 version = "0.2.0"
-source = "git+https://github.com/Osso/cascette-rs?rev=4990dc9e9d1058da7de1dcc0ed201668062d4b74#4990dc9e9d1058da7de1dcc0ed201668062d4b74"
+source = "git+https://github.com/Osso/cascette-rs?rev=0d0e79abfc32b9d8fe712971a78f6a9b9a0cae4d#0d0e79abfc32b9d8fe712971a78f6a9b9a0cae4d"
 dependencies = [
  "binrw",
  "cascette-crypto",
@@ -1301,7 +1301,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2774,7 +2774,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -3991,7 +3991,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4595,7 +4595,7 @@ dependencies = [
  "getrandom 0.3.4",
  "once_cell",
  "rustix 1.1.3",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5502,7 +5502,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
