@@ -18,6 +18,7 @@ use rilua::{LuaApiMut, LuaResult, Val};
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetMoney", get_money)?;
+    LuaApiMut::register_function(lua, "GetGuildInfo", get_guild_info)?;
     LuaApiMut::register_function(lua, "GetAverageItemLevel", get_average_item_level)?;
     LuaApiMut::register_function(lua, "FireEvent", fire_event)?;
     LuaApiMut::register_function(lua, "ReloadUI", reload_ui)?;
@@ -64,6 +65,10 @@ fn get_money(state: &mut LuaState) -> LuaResult<u32> {
     let money = borrow_state(state)?.player.money;
     state.push(Val::Num(money as f64));
     Ok(1)
+}
+
+fn get_guild_info(state: &mut LuaState) -> LuaResult<u32> {
+    push_guild_info_values(state, GuildInfoShape::Legacy)
 }
 
 fn get_average_item_level(state: &mut LuaState) -> LuaResult<u32> {
@@ -229,6 +234,15 @@ fn register_c_guild(state: &mut LuaState) -> LuaResult<()> {
 
 fn c_guild_get_guild_info(state: &mut LuaState) -> LuaResult<u32> {
     let _ = Option::<String>::from_stack(state, 1)?;
+    push_guild_info_values(state, GuildInfoShape::Namespace)
+}
+
+enum GuildInfoShape {
+    Legacy,
+    Namespace,
+}
+
+fn push_guild_info_values(state: &mut LuaState, shape: GuildInfoShape) -> LuaResult<u32> {
     let (name, rank, num_members) = {
         let world = &borrow_state(state)?.world;
         (
@@ -249,7 +263,11 @@ fn c_guild_get_guild_info(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => state.push(Val::Nil),
     }
-    state.push(Val::Num(num_members as f64));
+    let third_value = match shape {
+        GuildInfoShape::Legacy => 1.0,
+        GuildInfoShape::Namespace => num_members as f64,
+    };
+    state.push(Val::Num(third_value));
     Ok(3)
 }
 

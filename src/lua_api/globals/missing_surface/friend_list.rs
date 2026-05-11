@@ -70,6 +70,7 @@ pub(super) fn register_friend_list_surface(state: &mut LuaState) -> LuaResult<()
     )?;
     table_set_rust_fn_static(state, table_ref, "IsFriend", is_friend)?;
     table_set_rust_fn_static(state, table_ref, "GetWhoInfo", get_who_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetNumWhoResults", get_num_who_results)?;
     table_set_rust_fn_static(state, table_ref, "SetWhoToUi", set_who_to_ui)?;
     table_set_rust_fn_static(state, table_ref, "ShowFriends", show_friends)?;
     Ok(())
@@ -150,6 +151,13 @@ fn get_who_info(state: &mut LuaState) -> LuaResult<u32> {
     let who_info = build_who_info_table(state, row);
     state.push(who_info);
     Ok(1)
+}
+
+fn get_num_who_results(state: &mut LuaState) -> LuaResult<u32> {
+    let who_count = FRIEND_LIST_ROWS.len() as f64;
+    state.push(Val::Num(who_count));
+    state.push(Val::Num(who_count));
+    Ok(2)
 }
 
 fn set_who_to_ui(state: &mut LuaState) -> LuaResult<u32> {

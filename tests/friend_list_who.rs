@@ -37,6 +37,11 @@ fn friend_list_get_who_info_returns_seeded_who_rows() {
                 return "out_of_range_who_row_should_be_nil"
             end
 
+            local shownWhos, totalWhos = C_FriendList.GetNumWhoResults()
+            if shownWhos ~= 2 or totalWhos ~= 2 then
+                return "expected_seeded_who_counts"
+            end
+
             return "ok"
             "#,
         )

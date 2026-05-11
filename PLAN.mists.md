@@ -23,7 +23,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Auction House (browse, bid, post, cancel)
 - [x] Bank, ReagentBank, Void Storage, Guild Bank
 - [x] Trade window & TradePlayerInputMoneyFrame (root cause fixed in triage)
-- [ ] Friends, Who, Guild, Communities/Club finder
+- [x] Friends, Who, Guild, Communities/Club finder
 - [ ] PvP UI (HonorFrame, BG queue, Conquest — backing API fixed in triage)
 - [ ] LFG / LFR / Raid Browser (Mists-era pre-group-finder rewrite)
 - [ ] Collections: mounts, pets, toys, heirlooms, transmog (no Wardrobe in MoP)
