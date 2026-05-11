@@ -1,4 +1,47 @@
+# Goal
+
+- [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
+
 # Mists / Pandaria Classic Startup Plan
+
+## Active TODO — Panel Parity
+
+In-flight (git status shows uncommitted work):
+
+- [x] Finish the spellbook panel under `client-mists` — currently editing `src/c_api/c_spell.rs`, `src/c_api/c_spell_book.rs`, and `tests/mists_spellbook_panel.rs`; land the test green and commit.
+- [x] Land professions spellbook coverage under `client-mists` — `tests/professions_spellbook.rs` is modified; verify, run, commit.
+- [x] Resolve `src/lua_api/globals/talent_spec_probes.rs` changes — confirm Mists talent specs match retail probes, then commit.
+
+Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
+
+- [x] Character panel (paperdoll, stats, titles, equipment manager)
+- [x] Spellbook & professions (in progress above)
+- [ ] Talents & glyphs (Mists uses talent rows + glyph slots, not retail trees)
+- [ ] Quest log / objective tracker
+- [ ] World map (zone overlays, quest pins, opacity slider already verified)
+- [ ] Mail (inbox, send, attachments, COD)
+- [ ] Auction House (browse, bid, post, cancel)
+- [ ] Bank, ReagentBank, Void Storage, Guild Bank
+- [ ] Trade window & TradePlayerInputMoneyFrame (root cause fixed in triage)
+- [ ] Friends, Who, Guild, Communities/Club finder
+- [ ] PvP UI (HonorFrame, BG queue, Conquest — backing API fixed in triage)
+- [ ] LFG / LFR / Raid Browser (Mists-era pre-group-finder rewrite)
+- [ ] Collections: mounts, pets, toys, heirlooms, transmog (no Wardrobe in MoP)
+- [ ] Pet Journal & Battle Pet UI (MoP-introduced system)
+- [ ] Achievements & Calendar
+- [ ] Encounter Journal (Mists adventure guide)
+- [ ] Currency / Token UI (legacy `GetCurrencyListSize` wrapper verified)
+- [ ] Macro & key bindings
+- [ ] EditMode / interface options (Mists pre-EditMode — uses InterfaceOptionsFrame)
+- [ ] Action bars, micro menu, bag bar, status bars
+- [ ] Nameplates (CVar defaults fixed in triage; verify rendering)
+- [ ] Loot / group loot / personal loot UI
+
+Cross-cutting follow-ups:
+
+- [ ] Re-run `scripts/test-classic-addons.sh --profile mists` after each panel batch lands; keep addon-induced errors at zero.
+- [ ] Capture a panel parity baseline under `docs/baselines/mists-panels.md` (one row per panel: status, screenshot, gap notes) once the audit starts producing real signal.
+- [ ] Decide whether to refresh `docs/baselines/mists-lua-errors.json` after panel parity is reached, or keep it as the historical Phase 7.4 capture.
 
 ## Current State
 
