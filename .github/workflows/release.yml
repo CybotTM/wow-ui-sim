@@ -58,8 +58,45 @@ jobs:
         shell: pwsh
         run: choco install innosetup --yes --no-progress
 
+      - name: Sync Cargo.toml version to release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          python3 - "$version" <<'PY'
+          import pathlib, re, sys
+          v = sys.argv[1]
+          p = pathlib.Path("Cargo.toml")
+          text = p.read_text()
+          text, n = re.subn(r'^version = "[^"]+"',
+                            f'version = "{v}"',
+                            text, count=1, flags=re.MULTILINE)
+          if n != 1:
+              sys.exit("failed to patch version in Cargo.toml")
+          p.write_text(text)
+          PY
+          grep '^version' Cargo.toml | head -1
+
       - name: Build release binaries
-        run: cargo release-${{ matrix.platform }} --locked
+        run: cargo release-${{ matrix.platform }}
+
+      - name: Smoke-test release binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            bin="${{ matrix.bin-dir }}/wow-sim.exe"
+          else
+            bin="${{ matrix.bin-dir }}/wow-sim"
+          fi
+          echo "--- ${bin} --version ---"
+          "${bin}" --version
+          expected="wow-sim ${GITHUB_REF_NAME#v}"
+          actual="$("${bin}" --version)"
+          if [[ "${actual}" != "${expected}" ]]; then
+            echo "version mismatch: expected '${expected}', got '${actual}'" >&2
+            exit 1
+          fi
 
       - name: Package Linux release
         if: runner.os == 'Linux'
@@ -127,6 +164,12 @@ jobs:
           cp -R Interface/AddOns/Admin Interface/AddOns/SimCommands Interface/AddOns/TestFramework \
             "${contents}/Resources/Interface/AddOns/"
 
+          # Ad-hoc codesign so macOS reports "unidentified developer"
+          # rather than the misleading "damaged and can't be opened"
+          # Gatekeeper error on first launch of a quarantined download.
+          # The "-" identity is the ad-hoc signature: no Apple Developer
+          # cert needed, no notarization, no $99/yr account. Users still
+          # need to right-click -> Open to bypass Gatekeeper once.
           cat > "${contents}/Info.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -145,6 +188,11 @@ jobs:
           </dict>
           </plist>
           PLIST
+
+          # Ad-hoc sign the assembled bundle. --deep covers any nested
+          # frameworks (none today, but cheap insurance).
+          codesign --force --deep --sign - "${app}"
+          codesign --verify --deep --strict --verbose=2 "${app}"
 
           # Stage a DMG layout: the .app + a symlink to /Applications so
           # users drag-to-install.

@@ -17,7 +17,7 @@ use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 
 #[derive(Parser)]
-#[command(name = "wow-sim", about = "WoW UI Simulator")]
+#[command(name = "wow-sim", about = "WoW UI Simulator", version)]
 struct Args {
     /// Skip loading WTF SavedVariables (faster startup)
     #[arg(long)]

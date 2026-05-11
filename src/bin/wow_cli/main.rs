@@ -41,6 +41,7 @@ use wow_ui_sim::lua_server::client;
 #[derive(Parser)]
 #[command(name = "wow-cli")]
 #[command(about = "WoW UI Simulator CLI tools (requires running wow-sim)")]
+#[command(version)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
