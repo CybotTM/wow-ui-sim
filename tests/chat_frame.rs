@@ -634,6 +634,46 @@ fn test_chat_frame2_can_be_enabled_explicitly() {
 }
 
 #[test]
+fn test_chat_window_name_round_trips_through_info() {
+    test_timeout! {
+        let env = setup_env();
+
+        let name: String = env
+            .eval(
+                r#"
+                SetChatWindowName(4, "Pet Battle")
+                return GetChatWindowInfo(4)
+            "#,
+            )
+            .expect("chat window name eval failed");
+
+        assert_eq!(name, "Pet Battle");
+    }
+}
+
+#[test]
+fn test_chat_window_docked_state_round_trips_through_info() {
+    test_timeout! {
+        let env = setup_env();
+
+        let (docked, undocked): (bool, bool) = env
+            .eval(
+                r#"
+                SetChatWindowDocked(5, 1)
+                local docked = select(9, GetChatWindowInfo(5))
+                SetChatWindowDocked(5, nil)
+                local undocked = select(9, GetChatWindowInfo(5))
+                return docked, undocked
+            "#,
+            )
+            .expect("chat window docked state eval failed");
+
+        assert!(docked, "GetChatWindowInfo(5) should report docked after docking");
+        assert!(!undocked, "GetChatWindowInfo(5) should report undocked after clearing dock");
+    }
+}
+
+#[test]
 fn test_chat_voice_button_uses_template_sized_centered_icon() {
     test_timeout! {
         let env = setup_env();

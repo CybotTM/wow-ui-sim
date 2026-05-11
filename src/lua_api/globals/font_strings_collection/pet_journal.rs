@@ -1,7 +1,8 @@
 //! C_PetJournal namespace.
 
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_string_static, create_table, val_to_string,
+    borrow_state, create_string, create_string_static, create_table, table_set, table_set_num,
+    val_to_string,
 };
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder, stack_val};
 use rilua::vm::state::LuaState;
@@ -15,6 +16,8 @@ const PET_HEALTH_PER_RARITY: i32 = 10;
 const BASE_PET_ATTACK: i32 = 10;
 const PET_ATTACK_PER_LEVEL: i32 = 2;
 const BASE_PET_SPEED: i32 = 10;
+const UNKNOWN_PET_ABILITY_ICON: u32 = 134400;
+const PET_ABILITY_LEVELS: [i32; 3] = [1, 2, 4];
 
 fn pet_get_num_pets(state: &mut LuaState) -> LuaResult<u32> {
     let st = borrow_state(state)?;
@@ -233,6 +236,62 @@ fn pet_get_stats(state: &mut LuaState) -> LuaResult<u32> {
     Ok(5)
 }
 
+fn pet_ability_id(species_id: u32, ability_slot: usize) -> i32 {
+    (species_id as i32 * 10) + ability_slot as i32
+}
+
+fn species_id_from_ability_id(ability_id: i32) -> Option<u32> {
+    let species_id = ability_id / 10;
+    (species_id > 0).then_some(species_id as u32)
+}
+
+fn pet_get_ability_info(state: &mut LuaState) -> LuaResult<u32> {
+    let ability_id = i32::from_stack(state, 1)?;
+    let pet =
+        species_id_from_ability_id(ability_id).and_then(|id| find_pet_by_species_id(state, id));
+    let ability_name = pet
+        .as_ref()
+        .map(|pet| format!("{} Ability", pet.name))
+        .unwrap_or_else(|| "Battle Pet Ability".to_string());
+    let ability_icon = pet
+        .as_ref()
+        .map(|pet| pet.icon)
+        .unwrap_or(UNKNOWN_PET_ABILITY_ICON);
+    let pet_type = pet.as_ref().map(|pet| pet.pet_type).unwrap_or(1);
+
+    let name = create_string(state, &ability_name);
+    state.push(name);
+    state.push(Val::Num(ability_icon as f64));
+    state.push(Val::Num(pet_type as f64));
+    Ok(3)
+}
+
+fn push_pet_ability_entry(state: &mut LuaState, species_id: u32, slot: usize, level: i32) -> Val {
+    let entry = create_table(state);
+    table_set(
+        state,
+        entry.clone(),
+        "abilityID",
+        Val::Num(pet_ability_id(species_id, slot) as f64),
+    );
+    table_set(state, entry.clone(), "level", Val::Num(level as f64));
+    entry
+}
+
+fn pet_get_ability_list_table(state: &mut LuaState) -> LuaResult<u32> {
+    let species_id = u32::from_stack(state, 1)?;
+    let ability_table = create_table(state);
+
+    for (slot, level) in PET_ABILITY_LEVELS.iter().enumerate() {
+        let entry = push_pet_ability_entry(state, species_id, slot + 1, *level);
+        if let Val::Table(table_ref) = ability_table {
+            table_set_num(state, table_ref, (slot + 1) as f64, entry);
+        }
+    }
+
+    ability_table.into_stack(state)
+}
+
 pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
     let tb = TableBuilder::new(lua.state_mut());
     let tb = register_pet_fanfare_stubs(tb)?;
@@ -306,14 +365,12 @@ fn register_pet_info_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn register_pet_ability_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
-    tb.set_function("GetPetAbilityInfo", |state| {
-        state.push(Val::Nil);
-        Ok(1)
-    })?
-    .set_function("GetPetAbilityList", |state| {
-        create_table(state).into_stack(state)
-    })?
-    .set_function("SetAbility", |_state| Ok(0))
+    tb.set_function("GetPetAbilityInfo", pet_get_ability_info)?
+        .set_function("GetPetAbilityList", |state| {
+            create_table(state).into_stack(state)
+        })?
+        .set_function("GetPetAbilityListTable", pet_get_ability_list_table)?
+        .set_function("SetAbility", |_state| Ok(0))
 }
 
 fn register_pet_loadout_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {

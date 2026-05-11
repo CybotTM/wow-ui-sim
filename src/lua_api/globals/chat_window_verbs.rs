@@ -1,12 +1,15 @@
 //! Chat window presentation + subscription verbs.
 //!
-//! Migrates 8 entries off `GLOBAL_NIL_STUBS`:
+//! Migrates chat-window entries off `GLOBAL_NIL_STUBS`:
 //!
 //! - `SetChatWindowAlpha(index, a)`           — alpha ∈ [0,1]
+//! - `SetChatWindowSize(index, fontSize)`     — store chat font size
 //! - `SetChatWindowColor(index, r, g, b)`     — RGB ∈ [0,1]
 //! - `SetChatWindowLocked(index, locked?)`    — default true when arg omitted
 //! - `SetChatWindowUninteractable(i, u?)`     — default true when arg omitted
 //! - `AddChatWindowChannel(index, channel)`   — subscribe window to channel
+//! - `AddChatWindowMessages(index, group)`    — subscribe window to group
+//! - `RemoveChatWindowMessages(index, group)` — unsubscribe window from group
 //! - `ChangeChatColor(channel, r, g, b)`      — per-chat-type color override
 //! - `GetChatWindowChannels(index)`           — returns a flat list
 //! - `GetChatWindowMessages(index)`           — returns a flat list
@@ -73,6 +76,19 @@ fn set_chat_window_alpha(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `SetChatWindowSize(index, fontSize)` — store the chat frame font size.
+fn set_chat_window_size(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(index) = stack_i32(state, 1) else {
+        return Ok(0);
+    };
+    let font_size = stack_f32(state, 2).unwrap_or(12.0).max(1.0);
+    let mut st = window_entry(state, index)?;
+    if let Some(w) = st.chat_windows.get_mut(&index) {
+        w.font_size = font_size;
+    }
+    Ok(0)
+}
+
 /// `SetChatWindowColor(index, r, g, b)` — channel values clamped to [0, 1].
 fn set_chat_window_color(state: &mut LuaState) -> LuaResult<u32> {
     let Some(index) = stack_i32(state, 1) else {
@@ -129,6 +145,33 @@ fn add_chat_window_channel(state: &mut LuaState) -> LuaResult<u32> {
         if is_new_channel {
             w.channels.push(channel);
         }
+    }
+    Ok(0)
+}
+
+/// `AddChatWindowMessages(index, group)` — subscribe window to message group.
+/// Idempotent: re-adding a group is a silent no-op.
+fn add_chat_window_messages(state: &mut LuaState) -> LuaResult<u32> {
+    let (Some(index), Some(group)) = (stack_i32(state, 1), required_string(state, 2)) else {
+        return Ok(0);
+    };
+    let mut st = window_entry(state, index)?;
+    if let Some(w) = st.chat_windows.get_mut(&index)
+        && !w.messages.iter().any(|message| message == &group)
+    {
+        w.messages.push(group);
+    }
+    Ok(0)
+}
+
+/// `RemoveChatWindowMessages(index, group)` — unsubscribe window from group.
+fn remove_chat_window_messages(state: &mut LuaState) -> LuaResult<u32> {
+    let (Some(index), Some(group)) = (stack_i32(state, 1), required_string(state, 2)) else {
+        return Ok(0);
+    };
+    let mut st = window_entry(state, index)?;
+    if let Some(w) = st.chat_windows.get_mut(&index) {
+        w.messages.retain(|message| message != &group);
     }
     Ok(0)
 }
@@ -200,6 +243,7 @@ fn get_chat_window_messages(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "SetChatWindowAlpha", set_chat_window_alpha)?;
+    LuaApiMut::register_function(lua, "SetChatWindowSize", set_chat_window_size)?;
     LuaApiMut::register_function(lua, "SetChatWindowColor", set_chat_window_color)?;
     LuaApiMut::register_function(lua, "SetChatWindowLocked", set_chat_window_locked)?;
     LuaApiMut::register_function(
@@ -208,6 +252,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         set_chat_window_uninteractable,
     )?;
     LuaApiMut::register_function(lua, "AddChatWindowChannel", add_chat_window_channel)?;
+    LuaApiMut::register_function(lua, "AddChatWindowMessages", add_chat_window_messages)?;
+    LuaApiMut::register_function(lua, "RemoveChatWindowMessages", remove_chat_window_messages)?;
     LuaApiMut::register_function(lua, "ChangeChatColor", change_chat_color)?;
     LuaApiMut::register_function(lua, "GetChatWindowChannels", get_chat_window_channels)?;
     LuaApiMut::register_function(lua, "GetChatWindowMessages", get_chat_window_messages)?;

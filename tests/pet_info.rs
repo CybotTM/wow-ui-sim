@@ -169,3 +169,45 @@ fn pet_action_passive_lookup_is_state_backed() {
     assert!(unknown_false, "unknown actions should default to false");
     assert!(invalid_false, "invalid action IDs should return false");
 }
+
+#[test]
+fn pet_journal_ability_list_table_has_level_entries_and_info() {
+    let env = env();
+    let (has_three_slots, first_slot_ok, second_slot_level_ok, ability_info_ok): (
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local petID, speciesID = C_PetJournal.GetPetInfoByIndex(1)
+            local abilities = C_PetJournal.GetPetAbilityListTable(speciesID)
+            local firstAbilityID = abilities[1] and abilities[1].abilityID
+            local name, icon, petType = C_PetJournal.GetPetAbilityInfo(firstAbilityID)
+
+            return #abilities == 3,
+                   type(firstAbilityID) == "number" and abilities[1].level == 1,
+                   abilities[2] and abilities[2].level == 2,
+                   type(name) == "string" and type(icon) == "number" and type(petType) == "number"
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        has_three_slots,
+        "pet ability list should expose three slots"
+    );
+    assert!(
+        first_slot_ok,
+        "first pet ability slot should have an ID and level"
+    );
+    assert!(
+        second_slot_level_ok,
+        "second pet ability slot should preserve its unlock level"
+    );
+    assert!(
+        ability_info_ok,
+        "journal ability info should resolve generated ability IDs"
+    );
+}

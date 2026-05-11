@@ -531,6 +531,7 @@ pub struct TradeState {
 /// `GetChatWindow*` verb family.
 #[derive(Debug, Clone)]
 pub struct ChatWindow {
+    pub font_size: f32,
     pub alpha: f32,
     pub r: f32,
     pub g: f32,
@@ -548,6 +549,7 @@ pub struct ChatWindow {
 impl Default for ChatWindow {
     fn default() -> Self {
         Self {
+            font_size: 12.0,
             alpha: 1.0,
             r: 1.0,
             g: 1.0,

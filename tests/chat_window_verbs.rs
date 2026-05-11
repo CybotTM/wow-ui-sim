@@ -30,6 +30,15 @@ fn set_chat_window_alpha_clamps_out_of_range_values() {
     assert!((st.chat_windows[&2].alpha - 0.0).abs() < 1e-6);
 }
 
+#[test]
+fn set_chat_window_size_stores_font_size() {
+    let env = env();
+    env.exec("SetChatWindowSize(3, 16)").unwrap();
+    let st = env.state().borrow();
+    let w = st.chat_windows.get(&3).expect("window 3 must exist");
+    assert!((w.font_size - 16.0).abs() < 1e-6);
+}
+
 // ── SetChatWindowColor ────────────────────────────────────────────────────────
 
 #[test]
@@ -85,6 +94,21 @@ fn add_chat_window_channel_appends_unique_channels() {
     assert!(w.channel_names.contains("Trade"));
     assert!(w.channel_names.contains("General"));
     assert_eq!(w.channel_names.len(), 2);
+}
+
+#[test]
+fn add_and_remove_chat_window_messages_mutates_unique_groups() {
+    let env = env();
+    env.exec(
+        r#"AddChatWindowMessages(1, "PET_BATTLE_COMBAT_LOG")
+           AddChatWindowMessages(1, "SAY")
+           AddChatWindowMessages(1, "SAY")
+           RemoveChatWindowMessages(1, "PET_BATTLE_COMBAT_LOG")"#,
+    )
+    .unwrap();
+    let st = env.state().borrow();
+    let w = &st.chat_windows[&1];
+    assert_eq!(w.messages, vec!["SAY".to_string()]);
 }
 
 // ── ChangeChatColor ───────────────────────────────────────────────────────────
