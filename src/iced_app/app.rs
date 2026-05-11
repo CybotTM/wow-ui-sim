@@ -9,7 +9,7 @@ use std::rc::Rc;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
 
-#[cfg(not(unix))]
+#[cfg(not(target_os = "linux"))]
 use crate::inspector_server_stub as debug_server;
 use crate::lua_api::WowLuaEnv;
 use crate::lua_server;
@@ -17,7 +17,7 @@ use crate::render::{GlyphAtlas, WowFontSystem};
 use crate::saved_variables::SavedVariablesManager;
 use crate::texture::TextureManager;
 use debug_server::ScreenshotData;
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 use iced_layout_inspector::server as debug_server;
 
 use super::Message;
@@ -436,9 +436,9 @@ impl App {
         std::sync::mpsc::Receiver<lua_server::LuaCommand>,
     ) {
         let (cmd_rx, _guard) = debug_server::init();
-        #[cfg(unix)]
+        #[cfg(target_os = "linux")]
         std::mem::forget(_guard);
-        #[cfg(not(unix))]
+        #[cfg(not(target_os = "linux"))]
         let _ = _guard;
 
         let lua_rx = lua_server::init();

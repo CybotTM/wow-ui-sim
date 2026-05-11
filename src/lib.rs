@@ -33,7 +33,7 @@ pub mod global_slot_coverage;
 #[path = "../data/global_strings.rs"]
 pub mod global_strings;
 pub mod iced_app;
-#[cfg(not(unix))]
+#[cfg(not(target_os = "linux"))]
 pub mod inspector_server_stub;
 #[path = "../data/items.rs"]
 pub mod items;

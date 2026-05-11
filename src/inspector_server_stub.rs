@@ -1,11 +1,11 @@
-//! Windows stub for `iced_layout_inspector::server`.
+//! Non-Linux stub for `iced_layout_inspector::server`.
 //!
 //! The inspector's `server` feature pulls in `peercred-ipc`, which uses
-//! Linux-only socket options (`SO_PEERCRED`). On Windows we keep the public
-//! types the simulator references but replace the actual server logic with
-//! a no-op `init()` that returns a dead receiver. The match arms and field
-//! accesses in `iced_app/update_servers.rs`/`update.rs`/`app.rs` continue to
-//! compile and behave correctly (no commands ever arrive).
+//! Linux-only socket options (`SO_PEERCRED`). On Windows and macOS we keep
+//! the public types the simulator references but replace the actual server
+//! logic with a no-op `init()` that returns a dead receiver. The match arms
+//! and field accesses in `iced_app/update_servers.rs`/`update.rs`/`app.rs`
+//! continue to compile and behave correctly (no commands ever arrive).
 
 use tokio::sync::{mpsc, oneshot};
 

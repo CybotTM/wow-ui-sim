@@ -1,9 +1,9 @@
 //! App::update() method and related logic.
 
-#[cfg(not(unix))]
+#[cfg(not(target_os = "linux"))]
 use crate::inspector_server_stub::ScreenshotData;
 use iced::Task;
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 use iced_layout_inspector::server::ScreenshotData;
 use rilua::Val;
 use rustc_hash::FxHashSet;

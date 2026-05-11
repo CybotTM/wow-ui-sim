@@ -2,10 +2,10 @@
 
 use std::sync::mpsc;
 
-#[cfg(not(unix))]
+#[cfg(not(target_os = "linux"))]
 use crate::inspector_server_stub::Command as DebugCommand;
 use iced::{Task, window};
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 use iced_layout_inspector::server::Command as DebugCommand;
 
 use crate::lua_api::WowLuaEnv;
