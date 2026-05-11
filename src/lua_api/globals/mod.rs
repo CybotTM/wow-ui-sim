@@ -24,6 +24,7 @@ pub mod adventure_map;
 pub mod archaeology;
 pub mod auction_verbs;
 pub mod auras;
+pub mod bank_storage_verbs;
 pub mod battlefield_lfg_probes;
 pub mod battlefield_verbs;
 pub mod channel_verbs;

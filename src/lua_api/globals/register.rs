@@ -232,6 +232,7 @@ fn register_social_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn register_compat_and_admin(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::compat_overrides::register_all(lua)?;
     super::auction_verbs::register_all(lua)?;
+    super::bank_storage_verbs::register_all(lua)?;
     super::debug_api::register_all(lua)?;
     super::admin::register_all(lua)?;
     Ok(())

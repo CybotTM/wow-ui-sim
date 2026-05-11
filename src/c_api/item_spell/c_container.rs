@@ -72,6 +72,8 @@ fn register_container_query_methods(
 
 fn container_slot_count(bag: i32) -> i32 {
     match bag {
+        -4 => 7,
+        -1 => 28,
         0..=4 => 16,
         _ => 0,
     }
@@ -202,7 +204,7 @@ fn set_container_item_hyperlink(state: &mut LuaState, info: Val, bag_item: &BagI
 }
 
 fn c_container_get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
-    let _item_id = u32::from_stack(state, 1)?;
+    let _item_or_bag_id = i32::from_stack(state, 1)?;
     state.push(Val::Num(0.0));
     state.push(Val::Num(0.0));
     state.push(Val::Num(1.0));

@@ -94,3 +94,25 @@ pub(super) fn set_merchant_items(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.merchant_items = items;
     Ok(0)
 }
+
+pub(super) fn add_guild_bank_item(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::lua_api::state::BagItem;
+    let tab = i32::from_stack(state, 1)?;
+    let slot = i32::from_stack(state, 2)?;
+    let item_id = u32::from_stack(state, 3)?;
+    let stack = Option::<i32>::from_stack(state, 4)?;
+    borrow_state_mut(state)?.guild_bank_items.insert(
+        (tab, slot),
+        BagItem {
+            item_id,
+            stack_count: stack.unwrap_or(1),
+            hyperlink: None,
+        },
+    );
+    Ok(0)
+}
+
+pub(super) fn clear_guild_bank(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.guild_bank_items.clear();
+    Ok(0)
+}
