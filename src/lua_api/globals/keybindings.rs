@@ -1,10 +1,9 @@
 //! Keybinding global registrations.
 //!
-//! Backs the user-set side of WoW's binding API against
-//! `SimState.keybindings`. The sim has no `Bindings.xml` registry, so
-//! `GetNumBindings` / `GetBinding(index)` only iterate bindings the
-//! user has set via `SetBinding`; they do not expose a fixed command
-//! list the way retail does.
+//! Backs WoW's binding API against `SimState.keybindings` plus a small static
+//! command registry. User-set bindings live first in `GetBinding(index)`;
+//! registry rows follow so Blizzard settings panels can render bindable
+//! commands even before the user changes anything.
 //!
 //! Override bindings (`SetOverrideBinding` / `ClearOverrideBindings`)
 //! shadow base bindings during lookup and are matched by WoW's
@@ -13,6 +12,9 @@
 //!
 //! `init_keybindings` / `dispatch_key_binding` are called by the key
 //! dispatch module to seed default bindings and execute bound actions.
+
+#[path = "keybindings_c_api.rs"]
+mod keybindings_c_api;
 
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, pcall_function, table_get,
@@ -169,6 +171,10 @@ pub const BINDING_ACTIONS: &[BindingAction] = &[
         lua_code: "ToggleQuestLog()",
     },
     BindingAction {
+        action: "INTERACTTARGET",
+        lua_code: "",
+    },
+    BindingAction {
         action: "TARGETSELF",
         lua_code: "TargetUnit('player')",
     },
@@ -250,6 +256,24 @@ pub const BINDING_ACTIONS: &[BindingAction] = &[
         lua_code: "Quit()",
     },
 ];
+
+fn binding_registry_action_index(action: &str) -> Option<usize> {
+    BINDING_ACTIONS
+        .iter()
+        .position(|binding| binding.action == action)
+        .map(|index| index + 1)
+}
+
+fn push_binding_row(state: &mut LuaState, action: &str) -> LuaResult<u32> {
+    let (binding1, binding2) = default_keys_for_action(action);
+    let action = create_string(state, action);
+    let category = create_string(state, "BINDING_HEADER_OTHER");
+    state.push(action);
+    state.push(category);
+    push_opt_string(state, binding1);
+    push_opt_string(state, binding2);
+    Ok(4)
+}
 
 /// Default key→action assignments seeded by `init_keybindings`.
 const DEFAULT_KEYS: &[DefaultKey] = &[
@@ -509,6 +533,7 @@ pub fn get_binding(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1).unwrap_or(0);
     let sim = borrow_state(state)?;
     let idx_0 = (index - 1) as usize;
+    let user_binding_count = sim.keybindings.base.len();
     let entry = sim.keybindings.base.get(idx_0).cloned();
     drop(sim);
     match entry {
@@ -520,15 +545,20 @@ pub fn get_binding(state: &mut LuaState) -> LuaResult<u32> {
             Ok(2)
         }
         None => {
-            state.push(Val::Nil);
-            state.push(Val::Nil);
-            Ok(2)
+            let registry_index = idx_0.saturating_sub(user_binding_count);
+            let Some(binding) = BINDING_ACTIONS.get(registry_index) else {
+                state.push(Val::Nil);
+                state.push(Val::Nil);
+                return Ok(2);
+            };
+            push_binding_row(state, binding.action)
         }
     }
 }
 
 pub fn get_num_bindings(state: &mut LuaState) -> LuaResult<u32> {
-    let n = borrow_state(state)?.keybindings.base.len() as i32;
+    let user_bindings = borrow_state(state)?.keybindings.base.len();
+    let n = (user_bindings + BINDING_ACTIONS.len()) as i32;
     n.into_stack(state)
 }
 
@@ -674,7 +704,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_binding_read_globals(lua)?;
     register_binding_write_globals(lua)?;
     register_override_binding_globals(lua)?;
-    register_binding_persistence_globals(lua)
+    register_binding_persistence_globals(lua)?;
+    keybindings_c_api::register_c_keybindings_namespace(lua)
 }
 
 fn register_binding_read_globals(lua: &mut rilua::Lua) -> LuaResult<()> {

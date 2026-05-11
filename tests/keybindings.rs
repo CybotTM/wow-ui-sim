@@ -27,7 +27,7 @@ fn default_store_reports_empty_lookups() {
     assert_eq!(k1, None);
     assert_eq!(k2, None);
     assert_eq!(action, "");
-    assert_eq!(num, 0);
+    assert!(num > 0, "binding registry should expose default actions");
 }
 
 #[test]
@@ -127,17 +127,18 @@ fn get_binding_key_for_action_returns_first_match() {
 #[test]
 fn get_num_bindings_counts_user_set_entries() {
     let env = env();
-    let n: i64 = env
+    let (base_count, after_count): (i64, i64) = env
         .eval(
             r#"
+            local baseCount = GetNumBindings()
             SetBinding("A", "ACTIONA")
             SetBinding("B", "ACTIONB")
             SetBinding("A", "") -- unbind
-            return GetNumBindings()
+            return baseCount, GetNumBindings()
             "#,
         )
         .unwrap();
-    assert_eq!(n, 1);
+    assert_eq!(after_count, base_count + 1);
 }
 
 #[test]
@@ -257,4 +258,59 @@ fn save_load_bindings_are_noops_but_do_not_error() {
         )
         .unwrap();
     assert!(ok);
+}
+
+#[test]
+fn c_keybindings_index_resolves_registry_rows() {
+    let env = env();
+    let (has_index, action, category, key, custom_type_is_nil, tags_empty): (
+        bool,
+        String,
+        String,
+        Option<String>,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local index = C_KeyBindings.GetBindingIndex("INTERACTTARGET")
+            local action, category, key = GetBinding(index)
+            local tags = C_KeyBindings.GetSearchTagsForAction(action)
+            return type(index) == "number",
+                   action,
+                   category,
+                   key,
+                   C_KeyBindings.GetCustomBindingType(index) == nil,
+                   type(tags) == "table" and #tags == 0
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        has_index,
+        "C_KeyBindings should return concrete registry indexes"
+    );
+    assert_eq!(action, "INTERACTTARGET");
+    assert_eq!(category, "BINDING_HEADER_OTHER");
+    assert_eq!(key, None);
+    assert!(custom_type_is_nil);
+    assert!(tags_empty);
+}
+
+#[test]
+fn modified_clicks_round_trip_through_runtime_surface() {
+    let env = env();
+    let (default_self_cast, updated_self_cast, unknown_default): (String, String, String) = env
+        .eval(
+            r#"
+            local before = GetModifiedClick("SELFCAST")
+            SetModifiedClick("SELFCAST", "CTRL")
+            return before, GetModifiedClick("SELFCAST"), GetModifiedClick("UNKNOWN_ACTION")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(default_self_cast, "ALT");
+    assert_eq!(updated_self_cast, "CTRL");
+    assert_eq!(unknown_default, "NONE");
 }
