@@ -30,7 +30,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Pet Journal & Battle Pet UI (MoP-introduced system)
 - [x] Achievements & Calendar
 - [x] Encounter Journal (Mists adventure guide)
-- [ ] Currency / Token UI (legacy `GetCurrencyListSize` wrapper verified)
+- [x] Currency / Token UI (legacy `GetCurrencyListSize` wrapper verified)
 - [ ] Macro & key bindings
 - [ ] EditMode / interface options (Mists pre-EditMode — uses InterfaceOptionsFrame)
 - [ ] Action bars, micro menu, bag bar, status bars

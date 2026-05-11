@@ -3,7 +3,9 @@
 use crate::lua_api::LoaderEnv;
 
 use super::error::LoadError;
-use super::helpers::{escape_lua_string, lua_global_ref, lua_table_field_ref, rand_id};
+use super::helpers::{
+    escape_lua_string, generate_set_point_code, lua_global_ref, lua_table_field_ref, rand_id,
+};
 use super::helpers_anim::generate_animation_group_code;
 
 /// Apply animation groups from the frame and its inherited templates.
@@ -92,7 +94,7 @@ pub(crate) fn apply_thumb_texture(
     let thumb_name = resolved_texture_name(&resolved, name, "__thumb_");
     let parent_ref = lua_global_ref(name);
     let mut code = build_thumb_texture_header(&parent_ref, &thumb_name);
-    append_texture_common_properties(&mut code, &resolved);
+    append_texture_common_properties(&mut code, &resolved, name);
     append_thumb_texture_binding(&mut code, &resolved, &thumb_name);
     code.push_str("        end\n");
     env.exec(&code).map_err(|e| {
@@ -172,9 +174,14 @@ fn append_bar_texture_properties(code: &mut String, bar: &crate::xml::TextureXml
     append_texture_color_property(code, "bar", bar);
 }
 
-fn append_texture_common_properties(code: &mut String, texture: &crate::xml::TextureXml) {
+fn append_texture_common_properties(
+    code: &mut String,
+    texture: &crate::xml::TextureXml,
+    parent_name: &str,
+) {
     append_texture_source_properties(code, "thumb", texture);
     append_texture_size_property(code, "thumb", texture);
+    append_texture_anchor_property(code, "thumb", texture, parent_name);
     append_texture_tex_coords_property(code, "thumb", texture);
     append_texture_color_property(code, "thumb", texture);
     if texture.hidden == Some(true) {
@@ -256,10 +263,35 @@ fn append_texture_size_property(
     let height = size
         .y
         .or_else(|| size.abs_dimension.as_ref().and_then(|dim| dim.y));
-    if let (Some(width), Some(height)) = (width, height) {
-        code.push_str(&format!(
+    match (width, height) {
+        (Some(width), Some(height)) => code.push_str(&format!(
             "            {var_name}:SetSize({width}, {height})\n"
+        )),
+        (Some(width), None) => code.push_str(&format!("            {var_name}:SetWidth({width})\n")),
+        (None, Some(height)) => {
+            code.push_str(&format!("            {var_name}:SetHeight({height})\n"))
+        }
+        (None, None) => {}
+    }
+}
+
+fn append_texture_anchor_property(
+    code: &mut String,
+    var_name: &str,
+    texture: &crate::xml::TextureXml,
+    parent_name: &str,
+) {
+    if let Some(anchors) = &texture.anchors {
+        code.push_str(&format!("            {var_name}:ClearAllPoints()\n"));
+        code.push_str(&generate_set_point_code(
+            anchors,
+            var_name,
+            "parent",
+            parent_name,
+            "parent",
         ));
+    } else if texture.set_all_points == Some(true) {
+        code.push_str(&format!("            {var_name}:SetAllPoints(true)\n"));
     }
 }
 
