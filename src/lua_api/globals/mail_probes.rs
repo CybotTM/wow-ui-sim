@@ -6,7 +6,9 @@
 
 use crate::items;
 use crate::lua_api::globals::missing_surface::item_link_for_id;
-use crate::lua_api::methods::{borrow_state, create_string, create_string_static, create_table};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_string_static, create_table,
+};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -50,6 +52,19 @@ fn attachment_at(
         .cloned()
 }
 
+fn send_mail_attachment_at(
+    state: &LuaState,
+    raw_index: f64,
+) -> Option<crate::lua_api::state_types::MailAttachment> {
+    let index = mailbox_index(raw_index)?;
+    borrow_state(state)
+        .ok()?
+        .player
+        .send_mail_items
+        .get(index)?
+        .clone()
+}
+
 fn icon_for_item(item_id: u32) -> f64 {
     items::get_item(item_id)
         .map(|item| {
@@ -60,6 +75,24 @@ fn icon_for_item(item_id: u32) -> f64 {
             }
         })
         .unwrap_or(134400.0)
+}
+
+fn push_mail_attachment(
+    state: &mut LuaState,
+    attachment: crate::lua_api::state_types::MailAttachment,
+) -> LuaResult<u32> {
+    let item = items::get_item(attachment.item_id);
+    let name = item.map(|row| row.name).unwrap_or("Unknown");
+    let name = create_string_static(state, name);
+    state.push(name);
+    state.push(Val::Num(attachment.item_id as f64));
+    state.push(Val::Num(icon_for_item(attachment.item_id)));
+    state.push(Val::Num(attachment.count as f64));
+    state.push(Val::Num(
+        item.map(|row| row.quality as f64)
+            .unwrap_or(attachment.quality as f64),
+    ));
+    Ok(5)
 }
 
 fn get_inbox_num_items(state: &mut LuaState) -> LuaResult<u32> {
@@ -105,17 +138,7 @@ fn get_inbox_item(state: &mut LuaState) -> LuaResult<u32> {
     let Some(attachment) = attachment_at(state, mail_index, attachment_index) else {
         return Ok(0);
     };
-    let item = items::get_item(attachment.item_id);
-    let name = item.map(|row| row.name).unwrap_or("Unknown");
-    let name = create_string_static(state, name);
-    state.push(name);
-    state.push(Val::Num(attachment.item_id as f64));
-    state.push(Val::Num(icon_for_item(attachment.item_id)));
-    state.push(Val::Num(attachment.count as f64));
-    state.push(Val::Num(
-        item.map(|row| row.quality as f64)
-            .unwrap_or(attachment.quality as f64),
-    ));
+    push_mail_attachment(state, attachment)?;
     state.push(Val::Bool(true));
     state.push(Val::Bool(false));
     Ok(7)
@@ -167,6 +190,37 @@ fn has_inbox_item(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn has_send_mail_item(state: &mut LuaState) -> LuaResult<u32> {
+    let raw_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0);
+    state.push(Val::Bool(
+        send_mail_attachment_at(state, raw_index).is_some(),
+    ));
+    Ok(1)
+}
+
+fn get_send_mail_item(state: &mut LuaState) -> LuaResult<u32> {
+    let raw_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0);
+    let Some(attachment) = send_mail_attachment_at(state, raw_index) else {
+        return Ok(0);
+    };
+    push_mail_attachment(state, attachment)
+}
+
+fn get_send_mail_item_link(state: &mut LuaState) -> LuaResult<u32> {
+    let raw_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0);
+    let Some(attachment) = send_mail_attachment_at(state, raw_index) else {
+        return Ok(0);
+    };
+    match item_link_for_id(attachment.item_id) {
+        Some(link) => {
+            let link = create_string(state, &link);
+            state.push(link);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
 fn inbox_item_can_delete(state: &mut LuaState) -> LuaResult<u32> {
     let raw_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0);
     let deletable = inbox_entry(state, raw_index)
@@ -195,6 +249,12 @@ fn get_num_items(state: &mut LuaState) -> LuaResult<u32> {
     let count = borrow_state(state)?.player.inbox.len() as f64;
     state.push(Val::Num(count));
     Ok(1)
+}
+
+fn set_opening_all(state: &mut LuaState) -> LuaResult<u32> {
+    let opening = matches!(crate::lua_bridge::stack_val(state, 1), Val::Bool(true));
+    borrow_state_mut(state)?.player.opening_all_mail = opening;
+    Ok(0)
 }
 
 fn ensure_c_mail_table(state: &mut LuaState) -> GcRef<Table> {
@@ -228,6 +288,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetInboxText", get_inbox_text)?;
     LuaApiMut::register_function(lua, "GetInboxInvoiceInfo", get_inbox_invoice_info)?;
     LuaApiMut::register_function(lua, "HasInboxItem", has_inbox_item)?;
+    LuaApiMut::register_function(lua, "HasSendMailItem", has_send_mail_item)?;
+    LuaApiMut::register_function(lua, "GetSendMailItem", get_send_mail_item)?;
+    LuaApiMut::register_function(lua, "GetSendMailItemLink", get_send_mail_item_link)?;
     LuaApiMut::register_function(lua, "InboxItemCanDelete", inbox_item_can_delete)?;
     let state = lua.state_mut();
     let table_ref = ensure_c_mail_table(state);
@@ -235,5 +298,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     table_set_rust_fn_static(state, table_ref, "CanCheckInbox", can_check_inbox)?;
     table_set_rust_fn_static(state, table_ref, "HasInboxMoney", has_inbox_money)?;
     table_set_rust_fn_static(state, table_ref, "GetNumItems", get_num_items)?;
+    table_set_rust_fn_static(state, table_ref, "SetOpeningAll", set_opening_all)?;
     Ok(())
 }

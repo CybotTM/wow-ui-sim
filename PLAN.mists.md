@@ -19,7 +19,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Talents & glyphs (Mists uses talent rows + glyph slots, not retail trees)
 - [x] Quest log / objective tracker
 - [x] World map (zone overlays, quest pins, opacity slider already verified)
-- [ ] Mail (inbox, send, attachments, COD)
+- [x] Mail (inbox, send, attachments, COD)
 - [ ] Auction House (browse, bid, post, cancel)
 - [ ] Bank, ReagentBank, Void Storage, Guild Bank
 - [ ] Trade window & TradePlayerInputMoneyFrame (root cause fixed in triage)

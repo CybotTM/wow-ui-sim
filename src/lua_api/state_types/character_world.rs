@@ -181,6 +181,10 @@ pub struct PlayerState {
     pub send_mail_money: u64,
     /// COD amount on outgoing mail (copper).
     pub send_mail_cod: u64,
+    /// True while the send-mail tab is selected.
+    pub send_mail_showing: bool,
+    /// True while the Open All Mail helper is processing inbox contents.
+    pub opening_all_mail: bool,
     /// Counter for generating unique mail IDs.
     pub next_mail_id: u64,
     /// Current experience within the player's level. Drives `UnitXP("player")`.

@@ -26,7 +26,7 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref,
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
-use crate::lua_api::state_types::MailAttachment;
+use crate::lua_api::state_types::{CursorInfo, MailAttachment, MailMessage};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -85,13 +85,13 @@ fn send_mail(state: &mut LuaState) -> LuaResult<u32> {
         let mut st = borrow_state_mut(state)?;
         let items = drain_send_mail_items(&mut st.player.send_mail_items);
         let money = std::mem::take(&mut st.player.send_mail_money);
-        st.player.send_mail_cod = 0;
+        let cod = std::mem::take(&mut st.player.send_mail_cod);
 
         let id = st.player.next_mail_id;
         st.player.next_mail_id = st.player.next_mail_id.saturating_add(1);
-        st.player
-            .inbox
-            .push(build_mail(id, recipient, subject, body, money, items));
+        let mut mail = build_mail(id, recipient, subject, body, money, items);
+        mail.cod_amount = cod;
+        st.player.inbox.push(mail);
     }
     push_event(state, "MAIL_SEND_SUCCESS")?;
     push_event(state, "MAIL_INBOX_UPDATE")?;
@@ -174,6 +174,11 @@ fn close_inbox(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn check_inbox(state: &mut LuaState) -> LuaResult<u32> {
+    push_event(state, "MAIL_INBOX_UPDATE")?;
+    Ok(0)
+}
+
 fn take_inbox_item(state: &mut LuaState) -> LuaResult<u32> {
     let (Some(mail_index), Some(attachment_index)) = (stack_i32(state, 1), stack_i32(state, 2))
     else {
@@ -203,28 +208,46 @@ fn take_inbox_item(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn auto_loot_mail_item(state: &mut LuaState) -> LuaResult<u32> {
+    clear_inbox_payload_from_stack(state, true)
+}
+
+fn take_inbox_money(state: &mut LuaState) -> LuaResult<u32> {
+    clear_inbox_payload_from_stack(state, false)
+}
+
+fn clear_inbox_payload_from_stack(state: &mut LuaState, include_items: bool) -> LuaResult<u32> {
     let Some(mail_index) = stack_i32(state, 1) else {
         return Ok(0);
     };
-    let changed = {
-        let mut st = borrow_state_mut(state)?;
-        let Some(mail_index) = inbox_index(mail_index) else {
-            return Ok(0);
-        };
-        let Some(mail) = st.player.inbox.get_mut(mail_index) else {
-            return Ok(0);
-        };
-        if mail.money == 0 && mail.items.is_empty() {
-            return Ok(0);
-        }
-        mail.money = 0;
-        mail.items.clear();
-        true
-    };
+    let changed = clear_inbox_mail_payload(state, mail_index, include_items)?;
     if changed {
         push_event(state, "MAIL_INBOX_UPDATE")?;
     }
     Ok(0)
+}
+
+fn clear_inbox_mail_payload(
+    state: &mut LuaState,
+    mail_index: i32,
+    include_items: bool,
+) -> LuaResult<bool> {
+    let mut st = borrow_state_mut(state)?;
+    let Some(mail_index) = inbox_index(mail_index) else {
+        return Ok(false);
+    };
+    let Some(mail) = st.player.inbox.get_mut(mail_index) else {
+        return Ok(false);
+    };
+    Ok(clear_mail_payload(mail, include_items))
+}
+
+fn clear_mail_payload(mail: &mut MailMessage, include_items: bool) -> bool {
+    let changed = mail.money > 0 || (include_items && !mail.items.is_empty());
+    mail.money = 0;
+    if include_items {
+        mail.items.clear();
+    }
+    changed
 }
 
 fn delete_inbox_item(state: &mut LuaState) -> LuaResult<u32> {
@@ -268,20 +291,129 @@ fn get_send_mail_price(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn clear_send_mail(state: &mut LuaState) -> LuaResult<u32> {
+    let mut st = borrow_state_mut(state)?;
+    st.player.send_mail_items.fill(None);
+    st.player.send_mail_money = 0;
+    st.player.send_mail_cod = 0;
+    Ok(0)
+}
+
+fn set_send_mail_showing(state: &mut LuaState) -> LuaResult<u32> {
+    let showing = matches!(stack_val(state, 1), Val::Bool(true));
+    borrow_state_mut(state)?.player.send_mail_showing = showing;
+    Ok(0)
+}
+
+fn can_complain_inbox_item(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn click_send_mail_item_button(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = stack_i32(state, 1).and_then(inbox_index);
+    let remove = matches!(stack_val(state, 2), Val::Bool(true));
+
+    let changed = if remove {
+        remove_send_mail_item(state, slot)
+    } else {
+        attach_cursor_item_to_send_mail(state, slot)
+    };
+
+    if changed {
+        push_event(state, "MAIL_SEND_INFO_UPDATE")?;
+    }
+    Ok(0)
+}
+
+fn remove_send_mail_item(state: &mut LuaState, slot: Option<usize>) -> bool {
+    let Some(slot) = slot else {
+        return false;
+    };
+    let Ok(mut st) = borrow_state_mut(state) else {
+        return false;
+    };
+    let Some(attachment) = st
+        .player
+        .send_mail_items
+        .get_mut(slot)
+        .and_then(Option::take)
+    else {
+        return false;
+    };
+    st.cursor_item = Some(CursorInfo::Item {
+        item_id: attachment.item_id,
+        stack_count: attachment.count,
+        origin: crate::lua_api::state_types::CursorItemOrigin::Unknown,
+    });
+    true
+}
+
+fn attach_cursor_item_to_send_mail(state: &mut LuaState, slot: Option<usize>) -> bool {
+    let Ok(mut st) = borrow_state_mut(state) else {
+        return false;
+    };
+    let Some(CursorInfo::Item {
+        item_id,
+        stack_count,
+        ..
+    }) = st.cursor_item.clone()
+    else {
+        return false;
+    };
+    let Some(slot) = slot.or_else(|| first_free_send_mail_slot(&st.player.send_mail_items)) else {
+        return false;
+    };
+    if slot >= st.player.send_mail_items.len() {
+        return false;
+    }
+
+    let quality = crate::items::get_item(item_id)
+        .map(|item| item.quality as i32)
+        .unwrap_or(1);
+    st.player.send_mail_items[slot] = Some(MailAttachment {
+        item_id,
+        count: stack_count,
+        quality,
+    });
+    st.cursor_item = None;
+    true
+}
+
+fn first_free_send_mail_slot(slots: &[Option<MailAttachment>; 12]) -> Option<usize> {
+    slots.iter().position(Option::is_none)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_inbox_verbs(lua)?;
+    register_send_mail_verbs(lua)?;
+    Ok(())
+}
+
+fn register_inbox_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "SendMail", send_mail)?;
     LuaApiMut::register_function(lua, "DeleteMail", delete_mail)?;
     LuaApiMut::register_function(lua, "ForwardMail", forward_mail)?;
     LuaApiMut::register_function(lua, "CloseInbox", close_inbox)?;
+    LuaApiMut::register_function(lua, "CheckInbox", check_inbox)?;
     LuaApiMut::register_function(lua, "TakeInboxItem", take_inbox_item)?;
+    LuaApiMut::register_function(lua, "TakeInboxMoney", take_inbox_money)?;
     LuaApiMut::register_function(lua, "AutoLootMailItem", auto_loot_mail_item)?;
     LuaApiMut::register_function(lua, "DeleteInboxItem", delete_inbox_item)?;
     LuaApiMut::register_function(lua, "ReturnInboxItem", return_inbox_item)?;
     LuaApiMut::register_function(lua, "CloseMail", close_mail)?;
+    LuaApiMut::register_function(lua, "CanComplainInboxItem", can_complain_inbox_item)?;
+    Ok(())
+}
+
+fn register_send_mail_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "ClearSendMail", clear_send_mail)?;
     LuaApiMut::register_function(lua, "SetSendMailMoney", set_send_mail_money)?;
     LuaApiMut::register_function(lua, "GetSendMailMoney", get_send_mail_money)?;
     LuaApiMut::register_function(lua, "SetSendMailCOD", set_send_mail_cod)?;
     LuaApiMut::register_function(lua, "GetSendMailCOD", get_send_mail_cod)?;
     LuaApiMut::register_function(lua, "GetSendMailPrice", get_send_mail_price)?;
+    LuaApiMut::register_function(lua, "SetSendMailShowing", set_send_mail_showing)?;
+    LuaApiMut::register_function(lua, "ClickSendMailItemButton", click_send_mail_item_button)?;
     Ok(())
 }

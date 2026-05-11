@@ -143,8 +143,28 @@ fn coin_text(amount: i64, separator: &str) -> String {
 }
 
 fn c_currency_get_backpack_currency_info(state: &mut LuaState) -> LuaResult<u32> {
-    let _index = i32::from_stack(state, 1)?;
-    state.push(Val::Nil);
+    let index = i32::from_stack(state, 1)?;
+    let Some(entry) = currency_data::backpack_currencies().nth(index.saturating_sub(1) as usize)
+    else {
+        return Ok(0);
+    };
+    let info = create_table(state);
+    let name = create_string(state, entry.name);
+    table_set(
+        state,
+        info,
+        "currencyTypesID",
+        Val::Num(entry.currency_id as f64),
+    );
+    table_set(state, info, "name", name);
+    table_set(state, info, "quantity", Val::Num(entry.quantity as f64));
+    table_set(
+        state,
+        info,
+        "iconFileID",
+        Val::Num(entry.icon_file_id as f64),
+    );
+    state.push(info);
     Ok(1)
 }
 

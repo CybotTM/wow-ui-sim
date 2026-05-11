@@ -500,27 +500,6 @@ if rawget(_G, "GetGuildRosterSelection") == nil then
   end
 end
 
-if C_CurrencyInfo and type(C_CurrencyInfo.GetCurrencyInfo) == "function" then
-  local getCurrencyInfo = C_CurrencyInfo.GetCurrencyInfo
-  function C_CurrencyInfo.GetCurrencyInfo(currencyID)
-    local info = getCurrencyInfo(currencyID)
-    if info ~= nil then
-      return info
-    end
-    return {
-      name = "",
-      quantity = 0,
-      iconFileID = 0,
-      maxQuantity = 0,
-      discovered = true,
-      quality = 0,
-      isHeader = false,
-      isHeaderExpanded = false,
-      currencyID = currencyID or 0,
-    }
-  end
-end
-
 if rawget(_G, "C_ProductChoice") == nil then
   C_ProductChoice = {}
 end
@@ -865,6 +844,19 @@ if rawget(_G, "GetCurrencyListInfo") == nil then
       nil,
       false,
       info.currencyTypesID
+  end
+end
+
+if rawget(_G, "GetBackpackCurrencyInfo") == nil then
+  function GetBackpackCurrencyInfo(index)
+    if not C_CurrencyInfo or type(C_CurrencyInfo.GetBackpackCurrencyInfo) ~= "function" then
+      return nil
+    end
+    local info = C_CurrencyInfo.GetBackpackCurrencyInfo(index)
+    if type(info) ~= "table" then
+      return nil
+    end
+    return info.name, info.quantity or 0, info.iconFileID, info.currencyTypesID
   end
 end
 

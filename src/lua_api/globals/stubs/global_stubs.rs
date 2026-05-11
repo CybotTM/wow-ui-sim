@@ -149,7 +149,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
 static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetActionCooldown is SimState-backed in cooldown_probes.rs, not a stub.
     "GetAuctionHouseDepositRate",
-    "GetBackpackCurrencyInfo",
+    // GetBackpackCurrencyInfo is profile-wrapped over C_CurrencyInfo.
     // GetBattlefieldInstanceRunTime / GetBattlefieldStatus are
     // SimState-backed in battlefield_lfg_probes.rs, not stubs.
     // GetContainerNumFreeSlots is SimState-backed in inventory_counts.rs,
