@@ -22,7 +22,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Mail (inbox, send, attachments, COD)
 - [x] Auction House (browse, bid, post, cancel)
 - [x] Bank, ReagentBank, Void Storage, Guild Bank
-- [ ] Trade window & TradePlayerInputMoneyFrame (root cause fixed in triage)
+- [x] Trade window & TradePlayerInputMoneyFrame (root cause fixed in triage)
 - [ ] Friends, Who, Guild, Communities/Club finder
 - [ ] PvP UI (HonorFrame, BG queue, Conquest — backing API fixed in triage)
 - [ ] LFG / LFR / Raid Browser (Mists-era pre-group-finder rewrite)

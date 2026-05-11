@@ -223,9 +223,9 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetSummonConfirmSummoner",
     "GetSummonConfirmTimeLeft",
     // GetTitleName is SimState-backed in social_probes.rs, not a stub.
-    "GetTradePlayerItemInfo",
     "GetTradeSkillInfo",
-    "GetTradeTargetItemInfo",
+    // GetTradePlayerItemInfo / GetTradeTargetItemInfo are SimState-backed
+    // in trade_verbs.rs, not stubs.
     // GetXPExhaustion is SimState-backed in real/xp_honor_rest.rs, not a stub.
     // UnitArmor / UnitAttackPower / UnitCriticalStrike / UnitDamage /
     // UnitDefense / UnitDodge / UnitParry / UnitSpellHaste / UnitStat /
