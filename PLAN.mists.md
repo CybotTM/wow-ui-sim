@@ -29,7 +29,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Collections: mounts, pets, toys, heirlooms, transmog (no Wardrobe in MoP)
 - [x] Pet Journal & Battle Pet UI (MoP-introduced system)
 - [x] Achievements & Calendar
-- [ ] Encounter Journal (Mists adventure guide)
+- [x] Encounter Journal (Mists adventure guide)
 - [ ] Currency / Token UI (legacy `GetCurrencyListSize` wrapper verified)
 - [ ] Macro & key bindings
 - [ ] EditMode / interface options (Mists pre-EditMode — uses InterfaceOptionsFrame)
