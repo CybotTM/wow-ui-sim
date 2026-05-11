@@ -295,7 +295,7 @@ const LFD_RANDOM_DUNGEON_SEEDS: [LfdDungeonSeed; 2] = [
         name: "Random Heroic Dungeon",
         type_id: 6,
         subtype_id: 2,
-        min_level: 80,
+        min_level: 70,
         max_level: 80,
         rec_level: 80,
         max_players: 5,
@@ -430,10 +430,44 @@ const LFD_WAR_WITHIN_DUNGEON_SEEDS: [LfdDungeonSeed; 8] = [
     },
 ];
 
+const LFR_DUNGEON_SEEDS: [LfdDungeonSeed; 2] = [
+    LfdDungeonSeed {
+        dungeon_id: 416,
+        name: "Mogu'shan Vaults",
+        type_id: 3,
+        subtype_id: 1,
+        min_level: 70,
+        max_level: 80,
+        rec_level: 80,
+        max_players: 25,
+        expansion_level: 4,
+        texture_filename: "Interface/LFGFRAME/UI-LFR-BACKGROUND-MOGUSHANVAULTS",
+        description: "Enter the ancient mogu vaults in Raid Finder.",
+        is_random: false,
+        is_follower_dungeon: false,
+    },
+    LfdDungeonSeed {
+        dungeon_id: 417,
+        name: "Heart of Fear",
+        type_id: 3,
+        subtype_id: 1,
+        min_level: 70,
+        max_level: 80,
+        rec_level: 80,
+        max_players: 25,
+        expansion_level: 4,
+        texture_filename: "Interface/LFGFRAME/UI-LFR-BACKGROUND-HEARTOFFEAR",
+        description: "Assault the mantid heartland in Raid Finder.",
+        is_random: false,
+        is_follower_dungeon: false,
+    },
+];
+
 pub(in crate::lua_api::state) fn default_lfd_dungeons() -> Vec<LfdDungeonInfo> {
     LFD_RANDOM_DUNGEON_SEEDS
         .into_iter()
         .chain(LFD_WAR_WITHIN_DUNGEON_SEEDS)
+        .chain(LFR_DUNGEON_SEEDS)
         .map(LfdDungeonInfo::from)
         .collect()
 }

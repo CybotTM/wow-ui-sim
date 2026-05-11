@@ -37,7 +37,7 @@ fn get_lfg_random_dungeon_info() {
 }
 
 #[test]
-fn raid_finder_dungeon_globals_are_inert_when_no_raids_are_seeded() {
+fn raid_finder_dungeon_globals_return_seeded_lfr_rows() {
     let env = env();
     let result: String = env
         .eval(
@@ -49,15 +49,18 @@ fn raid_finder_dungeon_globals_are_inert_when_no_raids_are_seeded() {
                 return "info_type=" .. type(GetRFDungeonInfo)
             end
             local count = GetNumRFDungeons()
-            if count ~= 0 then return "count=" .. tostring(count) end
-            if GetRFDungeonInfo(1) ~= nil then return "unexpected_info" end
+            if count < 1 then return "count=" .. tostring(count) end
+            local id, name = GetRFDungeonInfo(1)
+            if type(id) ~= "number" then return "id_type=" .. type(id) end
+            if type(name) ~= "string" or name == "" then return "name=" .. tostring(name) end
+            if GetBestRFChoice() ~= id then return "best=" .. tostring(GetBestRFChoice()) end
             return "ok"
             "#,
         )
         .unwrap();
     assert_eq!(
         result, "ok",
-        "Raid Finder dungeon globals should be inert: {result}"
+        "Raid Finder dungeon globals should expose seeded LFR rows: {result}"
     );
 }
 
@@ -297,6 +300,10 @@ fn get_lfg_dungeon_num_encounters() {
             if type(n) ~= "number" then return "num_type=" .. type(n) end
             if n < 1 then return "count=" .. n end
             if c ~= 0 then return "completed=" .. c end
+            local bossName, _, isKilled = GetLFGDungeonEncounterInfo(1203, 1)
+            if type(bossName) ~= "string" or bossName == "" then return "boss=" .. tostring(bossName) end
+            if isKilled ~= false then return "killed=" .. tostring(isKilled) end
+            if GetLFGDungeonEncounterInfo(1203, 99) ~= nil then return "unexpected_boss" end
             local n2, c2 = GetLFGDungeonNumEncounters(9999)
             if n2 ~= 0 then return "unknown_count=" .. n2 end
             return "ok"

@@ -106,7 +106,8 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "CanUseLanguage",
     "DoesCurrentZoneHaveDungeon",
     "GetCVarBool",
-    "GetLFGDungeonEncounterInfo",
+    // GetLFGDungeonEncounterInfo is SimState-backed in
+    // battlefield_lfg_probes.rs, not a stub.
     "HasLFGRestrictions",
     "InActiveBattlefield",
     "InRepairMode",

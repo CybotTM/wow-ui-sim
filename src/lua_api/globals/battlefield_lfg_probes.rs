@@ -11,6 +11,7 @@
 //! - `GetLFGMode(category)`            → `("queued", nil)` after `JoinLFG`,
 //!   `("proposal", nil)` after the queue-pop timer fires, otherwise `(nil, nil)`.
 //! - `GetLFGDungeonNumEncounters(id)`  → `(numEncounters, numCompleted)`.
+//! - `GetLFGDungeonEncounterInfo(id, idx)` → `(name, texture, isKilled)`.
 //! - `GetLFDChoiceOrder()`             → array of dungeon IDs in seeded order.
 //! - `GetNumRandomDungeons()`          → count of random-flagged LFD entries.
 //! - `GetLFGRandomDungeonInfo(index)`  → `(id, name)` for 1-based random index.
@@ -35,8 +36,7 @@
 //! - `GetLFGQueuedList(category, t?)`   → selected queue ids by category.
 //! - `GetLFGQueueStats(category, id?)`  → queue-status display tuple.
 //! - `GetLFGLockList()`                → empty table. No server locks.
-//! - `GetBestRFChoice()`               → nil. No raid-finder state. Called from
-//!   `RaidFinderFrame_OnEvent(LFG_LOCK_INFO_RECEIVED)`.
+//! - `GetBestRFChoice()`               → first seeded raid-finder dungeon, or nil.
 //! - `GetRandomScenarioBestChoice()`   → nil. No scenario state. Same path.
 //! - `GetLFGDungeonRewards(id)`        → 7 zeros + nil spellID. Called from
 //!   `LFDQueueFrameRandom_UpdateFrame` when a random dungeon is selected.
@@ -257,6 +257,27 @@ fn get_lfg_random_cooldown_expiration(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_lfg_dungeon_encounter_info(state: &mut LuaState) -> LuaResult<u32> {
+    let dungeon_id = stack_i32(state, 1).unwrap_or(0);
+    let encounter_index = stack_i32(state, 2).unwrap_or(0);
+    let known = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .any(|d| d.dungeon_id == dungeon_id && dungeon_id > 0);
+    let encounter_in_range = (1..=3).any(|valid_index| valid_index == encounter_index);
+    if !known || !encounter_in_range {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+
+    let name = format!("Encounter {encounter_index}");
+    let name = create_string(state, &name);
+    state.push(name);
+    state.push(Val::Nil);
+    state.push(Val::Bool(false));
+    Ok(3)
+}
+
 /// `GetLFDChoiceOrder()` → array of dungeon IDs in seeded order.
 fn get_lfd_choice_order(state: &mut LuaState) -> LuaResult<u32> {
     let ids = borrow_state(state)?
@@ -317,8 +338,7 @@ fn raid_finder_dungeons(
     sim.lfd_dungeons.iter().filter(|d| d.max_players > 5)
 }
 
-/// `GetNumRFDungeons()` → count of raid-finder entries. The default sim data
-/// currently has no RF raids, so this is normally zero but still a real global.
+/// `GetNumRFDungeons()` → count of raid-finder entries.
 fn get_num_rf_dungeons(state: &mut LuaState) -> LuaResult<u32> {
     let count = {
         let sim = borrow_state(state)?;
@@ -430,11 +450,18 @@ fn get_lfg_lock_list(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-/// `GetBestRFChoice()` → raidID or nil. The sim has no raid-finder
-/// state, so always nil. Called from `RaidFinderFrame_OnEvent` when
-/// `LFG_LOCK_INFO_RECEIVED` fires.
+/// `GetBestRFChoice()` → first seeded raid-finder dungeon id, or nil.
+/// Called from `RaidFinderFrame_OnEvent` when `LFG_LOCK_INFO_RECEIVED` fires.
 fn get_best_rf_choice(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
+    let found = borrow_state(state).map(|sim| {
+        raid_finder_dungeons(&sim)
+            .next()
+            .map(|dungeon| dungeon.dungeon_id)
+    })?;
+    match found {
+        Some(id) => state.push(Val::Num(id as f64)),
+        None => state.push(Val::Nil),
+    }
     Ok(1)
 }
 
@@ -588,6 +615,14 @@ fn register_battlefield_queue_globals(lua: &mut rilua::Lua) -> crate::Result<()>
 }
 
 fn register_lfd_info_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_lfd_dungeon_info_globals(lua)?;
+    register_lfd_choice_globals(lua)?;
+    register_lfg_reward_globals(lua)?;
+    LuaApiMut::register_function(lua, "IsLFGDungeonJoinable", is_lfg_dungeon_joinable)?;
+    Ok(())
+}
+
+fn register_lfd_dungeon_info_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLFGDungeonInfo", get_lfg_dungeon_info)?;
     LuaApiMut::register_function(lua, "GetLFGMode", get_lfg_mode)?;
     LuaApiMut::register_function(
@@ -600,6 +635,15 @@ fn register_lfd_info_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetLFGRandomCooldownExpiration",
         get_lfg_random_cooldown_expiration,
     )?;
+    LuaApiMut::register_function(
+        lua,
+        "GetLFGDungeonEncounterInfo",
+        get_lfg_dungeon_encounter_info,
+    )?;
+    Ok(())
+}
+
+fn register_lfd_choice_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLFDChoiceOrder", get_lfd_choice_order)?;
     LuaApiMut::register_function(lua, "GetNumRandomDungeons", get_num_random_dungeons)?;
     LuaApiMut::register_function(lua, "GetLFGRandomDungeonInfo", get_lfg_random_dungeon_info)?;
@@ -610,11 +654,10 @@ fn register_lfd_info_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetRandomDungeonBestChoice",
         get_random_dungeon_best_choice,
     )?;
-    register_lfd_reward_globals(lua)?;
     Ok(())
 }
 
-fn register_lfd_reward_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+fn register_lfg_reward_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLFGDungeonRewards", get_lfg_dungeon_rewards)?;
     LuaApiMut::register_function(
         lua,
@@ -626,7 +669,6 @@ fn register_lfd_reward_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "DungeonAppearsInRandomLFD",
         dungeon_appears_in_random_lfd,
     )?;
-    LuaApiMut::register_function(lua, "IsLFGDungeonJoinable", is_lfg_dungeon_joinable)?;
     Ok(())
 }
 
