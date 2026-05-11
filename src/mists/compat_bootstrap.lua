@@ -922,3 +922,183 @@ end
 if rawget(_G, "MiniMapTrackingIcon") == nil then
   MiniMapTrackingIcon = noopFrame()
 end
+
+local MISTS_TALENT_LEVELS = { 15, 30, 45, 60, 75, 90 }
+local MISTS_TALENT_ROWS = {
+  { { 17565, "Speed of Light", 571558, 85499 }, { 17567, "Long Arm of the Law", 571557, 87172 }, { 17569, "Pursuit of Justice", 571559, 26023 } },
+  { { 17573, "Fist of Justice", 135906, 105593 }, { 17575, "Repentance", 135942, 20066 }, { 17577, "Blinding Light", 571553, 115750 } },
+  { { 17581, "Selfless Healer", 135964, 85804 }, { 17583, "Eternal Flame", 135433, 114163 }, { 17585, "Sacred Shield", 236249, 20925 } },
+  { { 17589, "Hand of Purity", 135970, 114039 }, { 17591, "Unbreakable Spirit", 135984, 114154 }, { 17593, "Clemency", 135863, 105622 } },
+  { { 17597, "Holy Avenger", 571555, 105809 }, { 17599, "Sanctified Wrath", 236262, 53376 }, { 17601, "Divine Purpose", 135897, 86172 } },
+  { { 17605, "Holy Prism", 613408, 114165 }, { 17607, "Light's Hammer", 613955, 114158 }, { 17609, "Execution Sentence", 613954, 114157 } },
+}
+local MISTS_TALENT_BY_ID = {}
+for tier, row in ipairs(MISTS_TALENT_ROWS) do
+  for column, data in ipairs(row) do
+    MISTS_TALENT_BY_ID[data[1]] = {
+      talentID = data[1],
+      name = data[2],
+      icon = data[3],
+      spellID = data[4],
+      tier = tier,
+      column = column,
+    }
+  end
+end
+
+if rawget(_G, "GetNumSpecGroups") == nil then
+  function GetNumSpecGroups(_inspect, _isPet)
+    return 1
+  end
+end
+
+if rawget(_G, "GetNumUnspentTalents") == nil then
+  function GetNumUnspentTalents()
+    return 0
+  end
+end
+
+if rawget(_G, "GetTalentTierInfo") == nil then
+  function GetTalentTierInfo(tier, _talentGroup, _inspect, _unit)
+    local unlockLevel = MISTS_TALENT_LEVELS[tonumber(tier) or 0] or 0
+    return unlockLevel > 0, 0, unlockLevel
+  end
+end
+
+local function mistsTalentInfoByPosition(tier, column)
+  local row = MISTS_TALENT_ROWS[tonumber(tier) or 0]
+  local data = row and row[tonumber(column) or 0]
+  return data and MISTS_TALENT_BY_ID[data[1]] or nil
+end
+
+local function mistsPushTalentInfo(info)
+  if not info then
+    return nil
+  end
+  return info.talentID,
+    info.name,
+    info.icon,
+    false,
+    true,
+    info.spellID,
+    nil,
+    info.tier,
+    info.column,
+    false,
+    false
+end
+
+if C_SpecializationInfo and type(C_SpecializationInfo.GetTalentInfo) ~= "function" then
+  function C_SpecializationInfo.GetTalentInfo(query)
+    if type(query) ~= "table" then
+      return nil
+    end
+    local info = mistsTalentInfoByPosition(query.tier, query.column)
+    if not info then
+      return nil
+    end
+    return {
+      talentID = info.talentID,
+      name = info.name,
+      icon = info.icon,
+      selected = false,
+      available = true,
+      spellID = info.spellID,
+      pvpTalentID = nil,
+      tier = info.tier,
+      column = info.column,
+      isKnown = false,
+      grantedByAura = false,
+    }
+  end
+end
+
+if rawget(_G, "GetTalentInfoByID") == nil then
+  function GetTalentInfoByID(talentID, _talentGroup)
+    return mistsPushTalentInfo(MISTS_TALENT_BY_ID[tonumber(talentID) or 0])
+  end
+end
+
+if rawget(_G, "GetTalentLink") == nil then
+  function GetTalentLink(talentID)
+    local info = MISTS_TALENT_BY_ID[tonumber(talentID) or 0]
+    return info and ("|cff71d5ff|Htalent:" .. info.talentID .. "|h[" .. info.name .. "]|h|r") or nil
+  end
+end
+
+if rawget(_G, "GetTalentClearInfo") == nil then
+  function GetTalentClearInfo()
+    return TALENT_FRAME_TALENT_POINTS or TALENTS, 0, nil, nil, 0
+  end
+end
+
+if rawget(_G, "LearnTalent") == nil then
+  function LearnTalent(_talentID)
+    return true
+  end
+end
+
+if rawget(_G, "RemoveTalent") == nil then
+  function RemoveTalent(_talentID)
+    return true
+  end
+end
+
+local MISTS_GLYPH_SOCKET_COUNT = 6
+
+if rawget(_G, "GetNumGlyphSockets") == nil then
+  function GetNumGlyphSockets()
+    return MISTS_GLYPH_SOCKET_COUNT
+  end
+end
+
+if rawget(_G, "GetNumGlyphs") == nil then
+  function GetNumGlyphs()
+    return 0
+  end
+end
+
+if rawget(_G, "GetSelectedGlyphSpellIndex") == nil then
+  function GetSelectedGlyphSpellIndex()
+    return nil
+  end
+end
+
+if rawget(_G, "GetGlyphClearInfo") == nil then
+  function GetGlyphClearInfo()
+    return nil, nil, nil, nil
+  end
+end
+
+if rawget(_G, "GetGlyphSocketInfo") == nil then
+  function GetGlyphSocketInfo(id, _talentGroup)
+    id = tonumber(id) or 0
+    if id < 1 or id > MISTS_GLYPH_SOCKET_COUNT then
+      return false, nil, id, nil, nil, nil
+    end
+    local glyphType = id <= 3 and GLYPH_TYPE_MAJOR or GLYPH_TYPE_MINOR
+    return true, glyphType, id, nil, nil, nil
+  end
+end
+
+if rawget(_G, "GlyphMatchesSocket") == nil then
+  function GlyphMatchesSocket(_id)
+    return HasPendingGlyphCast and HasPendingGlyphCast() or false
+  end
+end
+
+if rawget(_G, "IsGlyphFlagSet") == nil then
+  function IsGlyphFlagSet(_filter)
+    return false
+  end
+end
+
+if rawget(_G, "ToggleGlyphFilter") == nil then
+  function ToggleGlyphFilter(_filter)
+  end
+end
+
+if rawget(_G, "SetGlyphNameFilter") == nil then
+  function SetGlyphNameFilter(_text)
+  end
+end

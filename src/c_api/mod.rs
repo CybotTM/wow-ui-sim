@@ -33,6 +33,8 @@ pub mod c_wowtoken_secure;
 pub mod c_xml_util;
 pub mod item_spell;
 pub mod legacy_spell_book;
+#[cfg(feature = "client-mists")]
+mod mists_talents;
 pub mod permanent_shims;
 
 mod helpers;

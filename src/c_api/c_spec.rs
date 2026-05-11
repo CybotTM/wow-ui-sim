@@ -32,6 +32,8 @@ const C_SPECIALIZATION_INFO_METHODS: &[(&str, RustLuaFn)] = &[
     ),
     ("CanPlayerUseTalentUI", c_spec_can_player_use_talent_ui),
     ("GetActiveSpecGroup", c_spec_get_active_spec_group),
+    #[cfg(feature = "client-mists")]
+    ("GetTalentInfo", c_spec_get_talent_info),
     ("GetSpellsDisplay", c_spec_get_spells_display),
     ("GetSpecIDs", c_spec_get_spec_ids),
     ("SetSpecialization", c_spec_set_specialization),
@@ -144,6 +146,11 @@ fn c_spec_can_player_use_talent_ui(state: &mut LuaState) -> LuaResult<u32> {
 fn c_spec_get_active_spec_group(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(1.0));
     Ok(1)
+}
+
+#[cfg(feature = "client-mists")]
+fn c_spec_get_talent_info(state: &mut LuaState) -> LuaResult<u32> {
+    super::mists_talents::get_talent_info(state)
 }
 
 fn c_spec_get_spells_display(state: &mut LuaState) -> LuaResult<u32> {

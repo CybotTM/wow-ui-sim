@@ -15,8 +15,8 @@ In-flight (git status shows uncommitted work):
 Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
 
 - [x] Character panel (paperdoll, stats, titles, equipment manager)
-- [x] Spellbook & professions (in progress above)
-- [ ] Talents & glyphs (Mists uses talent rows + glyph slots, not retail trees)
+- [ ] Spellbook & professions: missing icons, layout problems
+- [x] Talents & glyphs (Mists uses talent rows + glyph slots, not retail trees)
 - [ ] Quest log / objective tracker
 - [ ] World map (zone overlays, quest pins, opacity slider already verified)
 - [ ] Mail (inbox, send, attachments, COD)
