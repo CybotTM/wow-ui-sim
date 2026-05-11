@@ -102,8 +102,8 @@ name = "frame_positions"
 harness = false
 
 # The `server` feature of iced-layout-inspector pulls in peercred-ipc, which is
-# Linux-only (uses SO_PEERCRED). Enable it only on unix targets.
-[target.'cfg(unix)'.dependencies]
+# Linux-only (uses SO_PEERCRED — macOS is unix but lacks this socket option).
+[target.'cfg(target_os = "linux")'.dependencies]
 iced-layout-inspector = { git = "https://github.com/Osso/iced-layout-inspector.git", tag = "v0.2.0", features = ["server"], optional = true }
 
 [build-dependencies]
