@@ -54,6 +54,14 @@ const WOW_TOKEN_PUBLIC_METHODS: &[(&str, WowTokenPublicMethod)] = &[
         "UpdateListedAuctionableTokens",
         c_wow_token_public_update_listed_auctionable_tokens,
     ),
+    (
+        "GetNumListedAuctionableTokens",
+        c_wow_token_public_get_num_listed_auctionable_tokens,
+    ),
+    (
+        "GetListedAuctionableTokenInfo",
+        c_wow_token_public_get_listed_auctionable_token_info,
+    ),
     ("UpdateMarketPrice", c_wow_token_public_update_market_price),
     (
         "IsAuctionableWowToken",
@@ -105,6 +113,28 @@ fn c_wow_token_public_buy_token(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_wow_token_public_update_listed_auctionable_tokens(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+fn c_wow_token_public_get_num_listed_auctionable_tokens(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.wow_token.listed_auctionable.len() as f64;
+    state.push(Val::Num(count));
+    Ok(1)
+}
+
+fn c_wow_token_public_get_listed_auctionable_token_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    if index < 1 {
+        return Ok(0);
+    }
+    let token = borrow_state(state)?
+        .wow_token
+        .listed_auctionable
+        .get((index - 1) as usize)
+        .cloned();
+    let Some(token) = token else { return Ok(0) };
+    state.push(Val::Num(token.auction_id as f64));
+    state.push(Val::Num(token.price as f64));
+    Ok(2)
 }
 
 fn c_wow_token_public_update_market_price(state: &mut LuaState) -> LuaResult<u32> {

@@ -3,6 +3,7 @@ use super::*;
 pub(in crate::lua_api::state) fn default_auction_browse_results() -> Vec<AuctionBrowseResult> {
     vec![
         AuctionBrowseResult {
+            auction_id: Some(1),
             item_id: 210935,
             item_level: 70,
             min_price: 25_000,
@@ -10,6 +11,7 @@ pub(in crate::lua_api::state) fn default_auction_browse_results() -> Vec<Auction
             contains_owner_item: false,
         },
         AuctionBrowseResult {
+            auction_id: Some(2),
             item_id: 122245,
             item_level: 50,
             min_price: 1_500_000,

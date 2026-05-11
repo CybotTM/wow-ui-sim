@@ -3,6 +3,7 @@
 //! refresh event dispatch, and the canonical-token id check.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::TokenAuctionInfo;
 
 const WOW_TOKEN_ITEM_ID: i32 = 122270;
 const TOKEN_RESULT_SUCCESS: i32 = 0;
@@ -141,6 +142,45 @@ fn update_listed_auctionable_tokens_is_a_silent_no_op() {
     let env = WowLuaEnv::new().unwrap();
     env.eval::<()>("C_WowTokenPublic.UpdateListedAuctionableTokens()")
         .unwrap();
+}
+
+#[test]
+fn get_num_listed_auctionable_tokens_reflects_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.state()
+        .borrow_mut()
+        .wow_token
+        .listed_auctionable
+        .push(TokenAuctionInfo {
+            auction_id: 77,
+            price: 250_000,
+            owner: "Seller".to_string(),
+        });
+
+    let count: i32 = env
+        .eval("return C_WowTokenPublic.GetNumListedAuctionableTokens()")
+        .unwrap();
+    assert_eq!(count, 1);
+}
+
+#[test]
+fn get_listed_auctionable_token_info_returns_row_values() {
+    let env = WowLuaEnv::new().unwrap();
+    env.state()
+        .borrow_mut()
+        .wow_token
+        .listed_auctionable
+        .push(TokenAuctionInfo {
+            auction_id: 77,
+            price: 250_000,
+            owner: "Seller".to_string(),
+        });
+
+    let (auction_id, price): (i64, i64) = env
+        .eval("return C_WowTokenPublic.GetListedAuctionableTokenInfo(1)")
+        .unwrap();
+    assert_eq!(auction_id, 77);
+    assert_eq!(price, 250_000);
 }
 
 #[test]

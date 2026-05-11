@@ -22,6 +22,7 @@ pub mod admin_vault;
 pub mod admin_zone_economy;
 pub mod adventure_map;
 pub mod archaeology;
+pub mod auction_verbs;
 pub mod auras;
 pub mod battlefield_lfg_probes;
 pub mod battlefield_verbs;

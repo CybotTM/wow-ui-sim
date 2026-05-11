@@ -155,6 +155,7 @@ fn browse_results_reflect_sim_state_mutation() {
         let mut state = env.state().borrow_mut();
         state.auction_browse_results.clear();
         state.auction_browse_results.push(AuctionBrowseResult {
+            auction_id: Some(99),
             item_id: 12345,
             item_level: 70,
             min_price: 99,

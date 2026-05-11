@@ -20,7 +20,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Quest log / objective tracker
 - [x] World map (zone overlays, quest pins, opacity slider already verified)
 - [x] Mail (inbox, send, attachments, COD)
-- [ ] Auction House (browse, bid, post, cancel)
+- [x] Auction House (browse, bid, post, cancel)
 - [ ] Bank, ReagentBank, Void Storage, Guild Bank
 - [ ] Trade window & TradePlayerInputMoneyFrame (root cause fixed in triage)
 - [ ] Friends, Who, Guild, Communities/Club finder

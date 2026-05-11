@@ -30,6 +30,7 @@ pub(super) fn add_auction_browse_result(state: &mut LuaState) -> LuaResult<u32> 
 
     let mut sim = borrow_state_mut(state)?;
     sim.auction_browse_results.push(AuctionBrowseResult {
+        auction_id,
         item_id,
         item_level,
         min_price,

@@ -5,6 +5,7 @@
 /// representative entries.
 #[derive(Debug, Clone)]
 pub struct AuctionBrowseResult {
+    pub auction_id: Option<i64>,
     pub item_id: i32,
     pub item_level: i32,
     /// Seller-posted minimum price in copper.
