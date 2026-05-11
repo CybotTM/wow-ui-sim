@@ -70,6 +70,18 @@ if RaidFrame and RaidFrame.RoleCount == nil then
   RaidFrame.RoleCount:Hide()
 end
 
+if rawget(_G, "__wow_sim_mists_spellbook_button_sizes_applied") ~= true then
+  for i = 1, 12 do
+    local button = rawget(_G, "SpellButton" .. i)
+    if button and button.GetWidth and button.SetSize
+       and (button:GetWidth() == 0 or button:GetHeight() == 0) then
+      button:SetSize(37, 37)
+    end
+  end
+
+  rawset(_G, "__wow_sim_mists_spellbook_button_sizes_applied", true)
+end
+
 function CombatLog_LoadUI()
   return true
 end

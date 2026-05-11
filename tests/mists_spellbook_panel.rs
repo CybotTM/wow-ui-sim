@@ -23,12 +23,52 @@ fn mists_spellbook_populates_visible_spell_buttons() {
                 local text = button and button.SpellName and button.SpellName:GetText()
                 local texture = button and button.IconTexture and button.IconTexture:GetTexture()
                 if text and text ~= "" and texture then
+                    if button:GetWidth() < 37 or button:GetHeight() < 37 then
+                        error(("SpellButton%d collapsed to %sx%s"):format(
+                            i,
+                            tostring(button:GetWidth()),
+                            tostring(button:GetHeight())
+                        ))
+                    end
                     populated = populated + 1
                 end
             end
 
             if populated == 0 then
                 error("spellbook has no populated spell buttons")
+            end
+
+            SpellBookFrameTabButton_OnClick(SpellBookFrameTabButton2)
+            SpellBook_UpdateProfTab()
+
+            local professionButtons = {}
+            for _, profession in ipairs({
+                PrimaryProfession1,
+                PrimaryProfession2,
+                SecondaryProfession1,
+                SecondaryProfession2,
+                SecondaryProfession3,
+            }) do
+                if profession then
+                    table.insert(professionButtons, profession.SpellButton1)
+                    table.insert(professionButtons, profession.SpellButton2)
+                end
+            end
+            local sizedProfessionButtons = 0
+            for _, button in ipairs(professionButtons) do
+                if button and button:IsShown() then
+                    if button:GetWidth() < 40 or button:GetHeight() < 40 then
+                        error(("profession button collapsed to %sx%s"):format(
+                            tostring(button:GetWidth()),
+                            tostring(button:GetHeight())
+                        ))
+                    end
+                    sizedProfessionButtons = sizedProfessionButtons + 1
+                end
+            end
+
+            if sizedProfessionButtons == 0 then
+                error("professions tab has no visible profession buttons")
             end
             "#,
             "dump-tree",
