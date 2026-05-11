@@ -7,11 +7,10 @@
 //! - `GetTalentInfo(tab, index)`  → nil — no pre-MoP tree to query.
 //! - `GetTalentInfoBySpecialization(...)` → nil — legacy talent-row helper,
 //!   same unsupported grid as `GetTalentInfo`.
-//! - `GetNumSpellTabs()`          → 1 (the class spellbook tab; specs /
-//!   pet tabs aren't modelled here).
+//! - `GetNumSpellTabs()`          → spellbook skill-line count.
 //! - `GetSpellTabInfo(tab)`       → `(name, icon, offset, numSpells,
-//!   isGuild, specID)` derived from `PlayerState.class_index` +
-//!   `active_spec_index`.
+//!   isGuild, offSpecID, shouldHide, specID)` derived from spellbook
+//!   data.
 //! - `GetPvpTalentSlotInfo(slot)` → minimal table (3 slots, all
 //!   unlocked but unselected).
 //! - `GetArenaOpponentSpec(idx)`  → 0 — the sim has no arena roster.
@@ -20,8 +19,8 @@
 //! - `GetSkillLineInfo(idx)`      → nil — matches `GetNumSkillLines`.
 //! - `GetSelectedSkill()`         → 0 — same rationale.
 
-use crate::lua_api::game_data::CLASS_LABELS;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::globals::spellbook_data;
+use crate::lua_api::methods::{create_string, create_table, table_set};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -53,37 +52,36 @@ fn get_talent_info_by_specialization(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-/// `GetNumSpellTabs()` — the sim collapses the spellbook into a
-/// single class tab.
+/// `GetNumSpellTabs()` — legacy spellbook tabs map to skill lines.
 fn get_num_spell_tabs(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(1.0));
+    state.push(Val::Num(spellbook_data::num_skill_lines() as f64));
     Ok(1)
 }
 
-/// `GetSpellTabInfo(tabIndex)` — retail:
-/// `(name, icon, offset, numSpells, isGuild, specID)`. The sim only
-/// exposes a single tab, so indexes outside `[1, 1]` return nil to
-/// match retail's "tab doesn't exist" shape.
+/// `GetSpellTabInfo(tabIndex)` — legacy clients expect:
+/// `(name, icon, offset, numSpells, isGuild, offSpecID, shouldHide, specID)`.
 fn get_spell_tab_info(state: &mut LuaState) -> LuaResult<u32> {
     let tab_index = stack_i32(state, 1).unwrap_or(0);
-    if tab_index != 1 {
+    let Some(skill_line) = spellbook_data::get_skill_line(tab_index) else {
         state.push(Val::Nil);
         return Ok(1);
-    }
-    let (class_label, spec_id) = {
-        let sim = borrow_state(state)?;
-        let class_idx = sim.player.class_index.max(1).min(CLASS_LABELS.len() as i32) as usize - 1;
-        (CLASS_LABELS[class_idx], sim.player.active_spec_index)
     };
-    let name = create_string(state, class_label);
-    let icon = create_string(state, "Interface\\Icons\\Spell_Holy_PowerWordShield");
+
+    let name = create_string(state, skill_line.name);
+    let offset = spellbook_data::skill_line_offset(tab_index);
+    let spell_count = skill_line.spells.len();
+    let off_spec_id = skill_line.off_spec_id.unwrap_or(0);
+    let spec_id = skill_line.spec_id.unwrap_or(0);
+
     state.push(name);
-    state.push(icon);
-    state.push(Val::Num(0.0)); // offset (first spell index in tab)
-    state.push(Val::Num(0.0)); // numSpells (tab-local spell count)
-    state.push(Val::Bool(false)); // isGuild
+    state.push(Val::Num(skill_line.icon_id as f64));
+    state.push(Val::Num(offset as f64));
+    state.push(Val::Num(spell_count as f64));
+    state.push(Val::Bool(false));
+    state.push(Val::Num(off_spec_id as f64));
+    state.push(Val::Bool(false));
     state.push(Val::Num(spec_id as f64));
-    Ok(6)
+    Ok(8)
 }
 
 /// `GetPvpTalentSlotInfo(slotIndex)` — retail returns a table with

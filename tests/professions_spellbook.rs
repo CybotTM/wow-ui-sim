@@ -71,6 +71,64 @@ fn test_mining_skill_line_in_spellbook() {
 }
 
 #[test]
+fn test_legacy_spell_tabs_expose_backing_skill_lines() {
+    let env = env();
+    let (tab_count, tab_name, item_offset, item_count): (i32, String, i32, i32) = env
+        .eval(
+            r#"
+            local name, _, itemOffset, itemCount = GetSpellTabInfo(1)
+            return GetNumSpellTabs(), name or "", itemOffset or -1, itemCount or -1
+            "#,
+        )
+        .unwrap();
+
+    assert!(tab_count > 1, "legacy spell tabs should expose skill lines");
+    assert_eq!(tab_name, "General");
+    assert_eq!(item_offset, 0);
+    assert!(item_count > 0, "first spell tab should contain spells");
+}
+
+#[test]
+fn test_legacy_spellbook_item_globals_return_mists_shape() {
+    let env = env();
+    let (slot_type, action_id, name, spell_id, texture, spell_info_name, spell_texture, is_passive): (
+        String,
+        i32,
+        String,
+        i32,
+        i32,
+        String,
+        i32,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local slotType, actionID = GetSpellBookItemInfo(1, BOOKTYPE_SPELL)
+            local name, _, spellID = GetSpellBookItemName(1, BOOKTYPE_SPELL)
+            local texture = GetSpellBookItemTexture(1, BOOKTYPE_SPELL)
+            local spellInfoName = GetSpellInfo(spellID)
+            local _, spellTexture = GetSpellTexture(spellID)
+            local isPassive = IsPassiveSpell(1, BOOKTYPE_SPELL)
+            return slotType or "", actionID or 0, name or "", spellID or 0,
+                texture or 0, spellInfoName or "", spellTexture or 0, isPassive
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(slot_type, "SPELL");
+    assert_eq!(action_id, 6603);
+    assert_eq!(name, "Auto Attack");
+    assert_eq!(spell_id, 6603);
+    assert!(texture > 0, "legacy texture should be a file data id");
+    assert_eq!(spell_info_name, "Auto Attack");
+    assert_eq!(
+        spell_texture, texture,
+        "legacy spell texture should match the spellbook item texture"
+    );
+    assert!(!is_passive);
+}
+
+#[test]
 fn test_spellbook_item_info_blacksmithing_slot() {
     let env = env();
     let (name, spell_id): (String, i32) = env

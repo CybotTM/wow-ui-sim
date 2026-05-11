@@ -32,6 +32,7 @@
 use super::helpers::ensure_namespace;
 use crate::c_api::item_spell::spell_link_for_id;
 use crate::lua_api::globals::action_bar_api::spell_cooldown_times;
+use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_string_static, create_table,
     create_table_with_capacity, frame_ref, table_set_num, table_set_static, val_to_string,
@@ -54,6 +55,8 @@ pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
     register_spell_methods(state, ns, SPELL_QUERY_METHODS)?;
     register_spell_methods(state, ns, SPELL_BOOLEAN_METHODS)?;
+    register_spell_methods(state, ns, SPELL_TARGET_METHODS)?;
+    register_legacy_spell_globals(state)?;
     Ok(())
 }
 
@@ -98,6 +101,17 @@ fn register_spell_methods(
     for &(name, func) in methods {
         table_set_rust_fn_static(state, table_ref, name, func)?;
     }
+    Ok(())
+}
+
+fn register_legacy_spell_globals(state: &mut LuaState) -> LuaResult<()> {
+    table_set_rust_fn_static(state, state.global, "GetSpellInfo", legacy_get_spell_info)?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetSpellTexture",
+        legacy_get_spell_texture,
+    )?;
     Ok(())
 }
 
@@ -153,6 +167,53 @@ fn get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
     state.push(texture);
     state.push(Val::Num(icon_id as f64));
     Ok(2)
+}
+
+fn legacy_get_spell_info(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id_arg = u32::from_stack(state, 1)?;
+    let Some(spell) = spells::get_spell(spell_id_arg) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let name = create_string(state, spell.name);
+    let sub_name = create_string(state, "");
+    state.push(name);
+    state.push(sub_name);
+    state.push(Val::Num(spell.icon_file_data_id as f64));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(spell_id_arg as f64));
+    state.push(Val::Num(spell.icon_file_data_id as f64));
+    Ok(8)
+}
+
+fn legacy_get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let first_arg = i32::from_stack(state, 1)?;
+    let Some(spell_id) = legacy_spell_id_from_arg(first_arg, has_book_type_arg(state)) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let icon_id = spells::get_spell(spell_id)
+        .map(|spell| spell.icon_file_data_id)
+        .unwrap_or(136243);
+    let texture_path = create_string(state, "Interface\\ICONS\\INV_Misc_QuestionMark");
+    state.push(texture_path);
+    state.push(Val::Num(icon_id as f64));
+    Ok(2)
+}
+
+fn legacy_spell_id_from_arg(first_arg: i32, has_book_type_arg: bool) -> Option<u32> {
+    if has_book_type_arg {
+        return spellbook_data::get_spell_at_slot(first_arg).map(|(_, entry, _)| entry.spell_id);
+    }
+    u32::try_from(first_arg).ok()
+}
+
+fn has_book_type_arg(state: &LuaState) -> bool {
+    !matches!(stack_val(state, 2), Val::Nil)
 }
 
 fn spell_power_min_cost(player_power_max: f32, cost: &crate::spell_power::SpellPowerCost) -> i32 {
