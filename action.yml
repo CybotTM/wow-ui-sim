@@ -5,20 +5,36 @@ inputs:
   addon:
     description: Addon directory name
     required: true
+  image-tag:
+    description: |
+      Override the ghcr.io/osso/wow-ui-sim image tag. By default the
+      action ref is used (e.g. @12.0.5 → :12.0.5). Set this when
+      pinning the action ref to a branch or SHA.
+    required: false
+    default: ""
 
 runs:
   using: composite
   steps:
-    - run: |
-        # Pin the image tag to the action ref (e.g. @12.0.5 → :12.0.5).
-        # Fall back to :latest for branch/sha refs.
-        REF="${{ github.action_ref }}"
-        case "$REF" in
-          [0-9]*) TAG="$REF" ;;
-          *)      TAG="latest" ;;
-        esac
-        echo "Using image ghcr.io/osso/wow-ui-sim:$TAG (action_ref=$REF)"
+    - shell: bash
+      env:
+        ACTION_REF: ${{ github.action_ref }}
+        IMAGE_TAG_OVERRIDE: ${{ inputs.image-tag }}
+      run: |
+        if [ -n "$IMAGE_TAG_OVERRIDE" ]; then
+          TAG="$IMAGE_TAG_OVERRIDE"
+        else
+          REF="${ACTION_REF#refs/tags/}"
+          REF="${REF#v}"
+          case "$REF" in
+            [0-9]*) TAG="$REF" ;;
+            *)
+              echo "::error::Cannot resolve image tag: action_ref='$ACTION_REF' is not a version tag. Pass image-tag input or pin the action to a version tag like @12.0.5."
+              exit 1
+              ;;
+          esac
+        fi
+        echo "Using image ghcr.io/osso/wow-ui-sim:$TAG"
         docker run --rm \
           -v ${{ github.workspace }}:/app/Interface/AddOns/${{ inputs.addon }} \
           ghcr.io/osso/wow-ui-sim:"$TAG" run-tests ${{ inputs.addon }}
-      shell: bash

@@ -58,9 +58,22 @@ CI image for running `run-tests` in addon CI pipelines. Published to `ghcr.io/os
 ```
 
 Action refs match the WoW interface version (e.g. `@12.0.5`). The
-action script resolves `GITHUB_ACTION_REF` to a matching image tag,
-so `@12.0.5` runs `ghcr.io/osso/wow-ui-sim:12.0.5`. Non-version refs
-(branches, SHAs) fall back to `:latest`.
+action resolves `github.action_ref` (passed through `env:` because
+composite actions don't expose it to `run:` directly) and pulls the
+matching image tag, so `@12.0.5` runs `ghcr.io/osso/wow-ui-sim:12.0.5`.
+
+When pinning the action to a branch or SHA, pass `image-tag`
+explicitly to choose which image to run:
+
+```yaml
+- uses: osso/wow-ui-sim@master
+  with:
+    addon: MyAddon
+    image-tag: 12.0.5
+```
+
+Without a resolvable version ref and no `image-tag`, the action
+fails fast rather than silently pulling `:latest`.
 
 End-to-end example: [Osso/test-wow-addon](https://github.com/Osso/test-wow-addon)
 — a minimal addon (TOC + one Lua file + `tests/`) and a workflow that
