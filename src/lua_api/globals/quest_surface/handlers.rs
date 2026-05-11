@@ -541,6 +541,27 @@ pub fn get_quest_index_for_watch(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn quest_poi_get_quest_id_by_visible_index(state: &mut LuaState) -> LuaResult<u32> {
+    let visible_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let (quest_id, log_index) = visible_quest_at_index(visible_index).unwrap_or((0, 0));
+    state.push(Val::Num(quest_id as f64));
+    state.push(Val::Num(log_index as f64));
+    Ok(2)
+}
+
+fn visible_quest_at_index(visible_index: i32) -> Option<(i32, i32)> {
+    if visible_index <= 0 {
+        return None;
+    }
+
+    if let Some(QuestLogEntry::Quest { quest_id, .. }) = entry_at(visible_index) {
+        return Some((*quest_id, visible_index));
+    }
+
+    watched_quest_id_at_index(visible_index)
+        .and_then(|quest_id| find_quest_by_id(quest_id).map(|(log_index, _)| (quest_id, log_index)))
+}
+
 pub fn get_quest_watch_index(state: &mut LuaState) -> LuaResult<u32> {
     let log_index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     let watch_index = entry_at(log_index)
@@ -561,6 +582,12 @@ pub fn is_quest_watched(state: &mut LuaState) -> LuaResult<u32> {
     let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     let watched = matches!(entry_at(index), Some(QuestLogEntry::Quest { .. }));
     state.push(Val::Bool(watched));
+    Ok(1)
+}
+
+pub fn is_quest_complete(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    state.push(Val::Bool(is_completed_quest(state, quest_id)?));
     Ok(1)
 }
 

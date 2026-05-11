@@ -18,7 +18,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Spellbook & professions: missing icons, layout problems
 - [x] Talents & glyphs (Mists uses talent rows + glyph slots, not retail trees)
 - [x] Quest log / objective tracker
-- [ ] World map (zone overlays, quest pins, opacity slider already verified)
+- [x] World map (zone overlays, quest pins, opacity slider already verified)
 - [ ] Mail (inbox, send, attachments, COD)
 - [ ] Auction House (browse, bid, post, cancel)
 - [ ] Bank, ReagentBank, Void Storage, Guild Bank

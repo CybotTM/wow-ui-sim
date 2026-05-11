@@ -108,6 +108,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "GetCVarBool",
     "GetLFGDungeonEncounterInfo",
     "HasLFGRestrictions",
+    "InActiveBattlefield",
     "InRepairMode",
     "IsCharacterNewlyBoosted",
     // GetLootMethod / GetMasterLooterThreshold are SimState-backed in
