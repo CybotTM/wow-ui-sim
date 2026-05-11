@@ -80,6 +80,10 @@ const C_MAP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
 const C_PVP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetActiveMatchState", c_pvp_get_active_match_state),
     ("GetCustomVictoryStatID", c_pvp_get_custom_victory_stat_id),
+    (
+        "JoinBattlefield",
+        super::super::battlefield_verbs::join_battlefield,
+    ),
     ("GetPVPDesired", super::super::pvp_probes::get_pvp_desired),
     (
         "GetPVPLastHonorGain",
@@ -263,14 +267,18 @@ fn c_pvp_is_active_battlefield(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_level_link_is_action_locked(state: &mut LuaState) -> LuaResult<u32> {
-    let is_locked = match crate::lua_bridge::stack_val(state, 1) {
-        Val::Num(slot) => borrow_state(state)?
-            .locked_action_slots
-            .contains(&(slot as i32)),
-        _ => false,
-    };
+    let is_locked = is_action_slot_locked(state)?;
     state.push(Val::Bool(is_locked));
     Ok(1)
+}
+
+fn is_action_slot_locked(state: &LuaState) -> LuaResult<bool> {
+    let Val::Num(slot) = crate::lua_bridge::stack_val(state, 1) else {
+        return Ok(false);
+    };
+    Ok(borrow_state(state)?
+        .locked_action_slots
+        .contains(&(slot as i32)))
 }
 
 fn c_pvp_get_active_match_state(state: &mut LuaState) -> LuaResult<u32> {

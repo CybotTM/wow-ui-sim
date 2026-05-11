@@ -15,6 +15,24 @@ const PVP_INFO_SCRIPT: &str = r#"
         return "unexpected_world_area"
     end
 
+    if GetNumBattlegroundTypes() < 5 then
+        return "missing_battleground_rows"
+    end
+
+    local name, canEnter, isHoliday, isRandom, bgID, description, mapID, maxPlayers, gameType, iconTexture, _, _, hasControllingHoliday = GetBattlegroundInfo(1)
+    if name ~= "Wintergrasp" or canEnter ~= true or isRandom ~= false or bgID ~= 571 or mapID ~= 571 or maxPlayers ~= 40 or hasControllingHoliday ~= 1 then
+        return "wrong_world_battleground_row"
+    end
+
+    name, canEnter, isHoliday, isRandom, bgID, description, mapID, maxPlayers, gameType, iconTexture, _, _, hasControllingHoliday = GetBattlegroundInfo(3)
+    if name ~= "Warsong Gulch" or canEnter ~= true or isRandom ~= false or bgID ~= 2 or mapID ~= 489 or maxPlayers ~= 10 or hasControllingHoliday ~= 0 then
+        return "wrong_specific_battleground_row"
+    end
+
+    if GetBattlegroundInfo(99) ~= nil then
+        return "unexpected_battleground_row"
+    end
+
     local holiday = C_PvP.GetHolidayBGInfo()
     if not holiday or holiday.bgID ~= 108 or holiday.bgIndex ~= 2 or holiday.name ~= "Warsong Scramble" or holiday.canQueue ~= true or holiday.minLevel ~= 10 then
         return "wrong_holiday_bg"

@@ -53,7 +53,7 @@ fn stack_truthy(state: &mut LuaState, index: i32) -> bool {
 /// `JoinBattlefield(index, joinAs)` — enter the queue at `index`
 /// (defaults to 1). `joinAs` is accepted but ignored (retail uses it to
 /// distinguish party/group join flavour; sim has one queue slot).
-fn join_battlefield(state: &mut LuaState) -> LuaResult<u32> {
+pub(super) fn join_battlefield(state: &mut LuaState) -> LuaResult<u32> {
     let index = stack_i32(state, 1).unwrap_or(1);
     {
         let mut st = borrow_state_mut(state)?;

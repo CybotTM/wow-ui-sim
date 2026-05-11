@@ -24,7 +24,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Bank, ReagentBank, Void Storage, Guild Bank
 - [x] Trade window & TradePlayerInputMoneyFrame (root cause fixed in triage)
 - [x] Friends, Who, Guild, Communities/Club finder
-- [ ] PvP UI (HonorFrame, BG queue, Conquest — backing API fixed in triage)
+- [x] PvP UI (HonorFrame, BG queue, Conquest — backing API fixed in triage)
 - [ ] LFG / LFR / Raid Browser (Mists-era pre-group-finder rewrite)
 - [ ] Collections: mounts, pets, toys, heirlooms, transmog (no Wardrobe in MoP)
 - [ ] Pet Journal & Battle Pet UI (MoP-introduced system)
