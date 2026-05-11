@@ -10,7 +10,14 @@ runs:
   using: composite
   steps:
     - run: |
+        # Pin the image tag to the action ref (e.g. @12.0.5 → :12.0.5).
+        # Fall back to :latest for branch/sha refs.
+        REF="${GITHUB_ACTION_REF:-latest}"
+        case "$REF" in
+          [0-9]*) TAG="$REF" ;;
+          *)      TAG="latest" ;;
+        esac
         docker run --rm \
           -v ${{ github.workspace }}:/app/Interface/AddOns/${{ inputs.addon }} \
-          ghcr.io/osso/wow-ui-sim run-tests ${{ inputs.addon }}
+          ghcr.io/osso/wow-ui-sim:"$TAG" run-tests ${{ inputs.addon }}
       shell: bash

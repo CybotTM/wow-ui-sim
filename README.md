@@ -41,10 +41,13 @@ Join the wowless Discord: <https://discord.gg/rTwWcfJXuz> — we have a `#wow-ui
 Run your addon's test suite in CI:
 
 ```yaml
-- uses: osso/wow-ui-sim@master
+- uses: osso/wow-ui-sim@12.0.5
   with:
     addon: MyAddon
 ```
+
+The action ref matches the WoW interface version it ships against
+(e.g. `@12.0.5`). Use `@master` to track unreleased changes.
 
 Tests live in `Interface/AddOns/MyAddon/tests/*.lua`:
 
