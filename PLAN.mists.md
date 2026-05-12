@@ -24,7 +24,7 @@ Parity hardening TODO:
 - [x] Add Collections item-action coverage for mount, toy, and heirloom rows; current coverage switches tabs and verifies data, but does not prove row actions work.
 - [x] Run the installed Mists addon matrix with normal saved variables enabled and record whether saved-var-backed startup still stays at zero addon-induced errors.
 - [x] Add a CI-friendly guard that enforces the zero Mists `lua-errors` baseline and the scripted panel parity runner.
-- [ ] Expand the CI guard beyond base startup: run the installed Mists addon matrix in CI and fail on any addon-induced `lua-errors` regression.
+- [x] Expand the CI guard beyond base startup: run the installed Mists addon matrix in CI and fail on any addon-induced `lua-errors` regression.
 - [ ] Add visual artifact comparison for the Mists panel parity runner so CI catches blank or materially-regressed panel renders, not just missing frame roots.
 - [ ] Audit Mists panel interactions against retail interaction coverage and add parity tests for any retail-supported workflow still missing under `client-mists`.
 
@@ -72,6 +72,13 @@ completed with `passed: 9` and `failed: 0`. Each
 `target/addon-harness/*-with-saved-vars-lua-errors.json` output remained an
 empty array, so normal SavedVariables loading stayed at `0` total Lua errors
 and `0` addon-induced errors across the installed Mists addon matrix.
+
+CI-style addon harness verification:
+`scripts/test-classic-addons.sh --profile mists --skip-clone --with-saved-vars --fail-on-addon-errors`
+completed with `passed: 9` and `failed: 0`. This matches the CI guard path for
+installed Mists addons: saved variables load normally, addon artifacts use the
+`*-with-saved-vars-lua-errors.json` suffix, and any addon-induced regression now
+fails the harness.
 
 Mists `lua-errors` baseline decision: refreshed
 `docs/baselines/mists-lua-errors.json` to the current clean `[]` capture after

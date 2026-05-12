@@ -13,9 +13,9 @@
 #      report the count of *addon-induced* errors (= new vs baseline)
 #   6. Tear down the symlink so the test directory is clean for the next run
 #
-# Pass criterion: wow-sim must boot without crashing (exit 0). Addon-induced
-# Lua errors are counted and reported but do NOT fail the harness — those
-# become Phase 8.3 stub work.
+# Pass criterion by default: wow-sim must boot without crashing (exit 0).
+# Addon-induced Lua errors are counted and reported. Pass
+# --fail-on-addon-errors to fail the harness on any addon-induced regression.
 #
 # Usage:
 #   scripts/test-classic-addons.sh                    # run every addon in manifest
@@ -24,6 +24,7 @@
 #   scripts/test-classic-addons.sh --skip-clone       # use already-cloned vendors
 #   scripts/test-classic-addons.sh --keep-symlinks    # don't tear down on finish
 #   scripts/test-classic-addons.sh --with-saved-vars  # load WTF SavedVariables
+#   scripts/test-classic-addons.sh --fail-on-addon-errors
 #
 # Exit codes:
 #   0  every addon's wow-sim invocation exited 0
@@ -44,6 +45,7 @@ PROFILE_FILTER=""
 SKIP_CLONE=0
 KEEP_SYMLINKS=0
 WITH_SAVED_VARS=0
+FAIL_ON_ADDON_ERRORS=0
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -51,6 +53,7 @@ while [ $# -gt 0 ]; do
         --skip-clone)     SKIP_CLONE=1; shift ;;
         --keep-symlinks)  KEEP_SYMLINKS=1; shift ;;
         --with-saved-vars) WITH_SAVED_VARS=1; shift ;;
+        --fail-on-addon-errors) FAIL_ON_ADDON_ERRORS=1; shift ;;
         --help|-h)
             sed -n '2,/^set -euo/p' "$0" | sed 's/^# \?//;$d'
             exit 0
@@ -233,6 +236,11 @@ run_addon() {
     local induced
     induced=$(addon_induced_errors "$profile" "$out")
     echo "  ✓ booted; $total distinct errors total, $induced addon-induced (vs baseline)"
+    if [ "$FAIL_ON_ADDON_ERRORS" -eq 1 ] && [ "$induced" != "0" ]; then
+        teardown
+        echo "  ✗ addon-induced lua-errors regression"
+        return 1
+    fi
 
     teardown
     return 0

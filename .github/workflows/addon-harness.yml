@@ -69,12 +69,20 @@ jobs:
           key: addon-harness-${{ matrix.addon.profile }}
 
       - name: Run harness for ${{ matrix.addon.name }}
-        run: ./scripts/test-classic-addons.sh ${{ matrix.addon.name }}
+        run: |
+          if [ "${{ matrix.addon.profile }}" = "mists" ]; then
+            ./scripts/test-classic-addons.sh \
+              --with-saved-vars \
+              --fail-on-addon-errors \
+              "${{ matrix.addon.name }}"
+          else
+            ./scripts/test-classic-addons.sh "${{ matrix.addon.name }}"
+          fi
 
       - name: Upload per-addon lua-errors
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: addon-${{ matrix.addon.profile }}-${{ matrix.addon.name }}-lua-errors
-          path: target/addon-harness/${{ matrix.addon.name }}-lua-errors.json
+          path: target/addon-harness/${{ matrix.addon.name }}*-lua-errors.json
           if-no-files-found: ignore
