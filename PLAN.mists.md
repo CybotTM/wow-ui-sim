@@ -40,9 +40,15 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 
 Cross-cutting follow-ups:
 
-- [ ] Re-run `scripts/test-classic-addons.sh --profile mists` after each panel batch lands; keep addon-induced errors at zero.
+- [x] Re-run `scripts/test-classic-addons.sh --profile mists` after each panel batch lands; keep addon-induced errors at zero.
 - [ ] Capture a panel parity baseline under `docs/baselines/mists-panels.md` (one row per panel: status, screenshot, gap notes) once the audit starts producing real signal.
 - [ ] Decide whether to refresh `docs/baselines/mists-lua-errors.json` after panel parity is reached, or keep it as the historical Phase 7.4 capture.
+
+Latest addon harness verification: `scripts/test-classic-addons.sh --profile mists`
+completed with `passed: 9` and `failed: 0`. Each
+`target/addon-harness/*-lua-errors.json` output remained an empty array, so all
+installed Mists addon targets stayed at `0` total Lua errors and `0`
+addon-induced errors.
 
 ## Current State
 
