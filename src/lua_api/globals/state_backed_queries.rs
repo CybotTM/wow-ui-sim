@@ -36,6 +36,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetSpecialization", get_specialization)?;
     LuaApiMut::register_function(lua, "GuildQuit", guild_quit)?;
     LuaApiMut::register_function(lua, "GetGuildInfo", c_guild_get_guild_info)?;
+    LuaApiMut::register_function(lua, "GetGMStatus", get_gm_status)?;
 
     let state = lua.state_mut();
     register_c_guild(state)?;
@@ -356,6 +357,11 @@ fn guild_quit(state: &mut LuaState) -> LuaResult<u32> {
         sim.world.guild_num_members = 0;
     }
     dispatch_event_now(state, "PLAYER_GUILD_UPDATE", &[])?;
+    Ok(0)
+}
+
+fn get_gm_status(state: &mut LuaState) -> LuaResult<u32> {
+    dispatch_event_now(state, "UPDATE_GM_STATUS", &[Val::Num(0.0)])?;
     Ok(0)
 }
 

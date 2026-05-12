@@ -158,6 +158,9 @@ fn push_addon_info(state: &mut LuaState, addon: &crate::lua_api::AddonInfo) -> u
     let folder_name = create_string(state, &addon.folder_name);
     let title = create_string(state, &addon.title);
     let notes = (!addon.notes.is_empty()).then(|| create_string(state, &addon.notes));
+    let reason = (!addon.enabled).then(|| create_string(state, "DISABLED"));
+    let security = addon_security_status(addon);
+    let security = create_string(state, &security);
     state.push(folder_name);
     state.push(title);
     if addon.notes.is_empty() {
@@ -166,7 +169,9 @@ fn push_addon_info(state: &mut LuaState, addon: &crate::lua_api::AddonInfo) -> u
         state.push(notes.unwrap_or(Val::Nil));
     }
     state.push(Val::Bool(addon.enabled));
-    4
+    state.push(reason.unwrap_or(Val::Nil));
+    state.push(security);
+    6
 }
 
 fn registry_bool(state: &mut LuaState, key: &'static str) -> bool {
@@ -452,21 +457,23 @@ fn c_addons_get_addon_notes(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_addons_get_addon_security(state: &mut LuaState) -> LuaResult<u32> {
-    let security = with_addon(state, stack_val(state, 1), |a| {
-        if let Some(security) = &a.security {
-            return security.clone();
-        }
-
-        if addon_is_secure_by_default(a) {
-            "SECURE".to_string()
-        } else {
-            "INSECURE".to_string()
-        }
-    })
-    .unwrap_or_else(|| "INSECURE".to_string());
+    let security = with_addon(state, stack_val(state, 1), addon_security_status)
+        .unwrap_or_else(|| "INSECURE".to_string());
     let v = create_string(state, &security);
     state.push(v);
     Ok(1)
+}
+
+fn addon_security_status(addon: &crate::lua_api::AddonInfo) -> String {
+    if let Some(security) = &addon.security {
+        return security.clone();
+    }
+
+    if addon_is_secure_by_default(addon) {
+        "SECURE".to_string()
+    } else {
+        "INSECURE".to_string()
+    }
 }
 
 fn addon_is_secure_by_default(addon: &crate::lua_api::AddonInfo) -> bool {

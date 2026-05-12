@@ -30,6 +30,9 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, mt, "SetPlayerTextureWidth", set_player_texture_width)?;
     table_set_rust_fn_static(state, mt, "SetMaxBytes", set_max_bytes)?;
     table_set_rust_fn_static(state, mt, "GetTextHeight", get_text_height)?;
+    table_set_rust_fn_static(state, mt, "NavigateHome", browser_navigate)?;
+    table_set_rust_fn_static(state, mt, "NavigateTo", browser_navigate)?;
+    table_set_rust_fn_static(state, mt, "OpenTicket", browser_navigate)?;
     Ok(())
 }
 
@@ -74,4 +77,11 @@ fn set_max_bytes(_state: &mut LuaState) -> LuaResult<u32> {
 fn get_text_height(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(12.0));
     Ok(1)
+}
+
+/// Classic Browser frame method. The simulator has no embedded browser
+/// engine, so navigation records no external side effect but must be callable
+/// by HelpFrame and other Blizzard panels.
+fn browser_navigate(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }

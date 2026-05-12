@@ -56,6 +56,39 @@ fn mists_game_menu_options_opens_interface_settings_without_lua_errors() {
                 and EditModeManagerFrame:IsShown() then
                 error("Mists interface options must not open retail EditMode")
             end
+
+            SettingsPanel.CloseButton:Click()
+            if SettingsPanel:IsShown() then
+                error("SettingsPanel did not close")
+            end
+            if GameMenuFrame == nil or GameMenuFrame:IsShown() ~= true then
+                error("GameMenuFrame did not reopen after closing options")
+            end
+
+            GameMenuButtonOptions:Click()
+            if SettingsPanel == nil or SettingsPanel:IsShown() ~= true then
+                error("SettingsPanel did not reopen from game-menu options")
+            end
+            SettingsPanel.ApplyButton:Click()
+            if not SettingsPanel:IsShown() then
+                error("Apply button should not close SettingsPanel")
+            end
+
+            SettingsPanel.CloseButton:Click()
+            GameMenuButtonHelp:Click()
+            if HelpFrame == nil or HelpFrame:IsShown() ~= true then
+                error("HelpFrame did not open")
+            end
+            HideUIPanel(HelpFrame)
+
+            ToggleGameMenu()
+            if GameMenuButtonAddons:IsShown() then
+                GameMenuButtonAddons:Click()
+                if AddonList == nil or AddonList:IsShown() ~= true then
+                    error("AddonList did not open")
+                end
+                HideUIPanel(AddonList)
+            end
             "#,
             "lua-errors",
         ])

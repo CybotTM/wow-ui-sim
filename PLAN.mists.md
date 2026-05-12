@@ -36,7 +36,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Action bars, micro menu, bag bar, status bars
 - [x] Nameplates (CVar defaults fixed in triage; verify rendering)
 - [x] Loot / group loot / personal loot UI
-- [ ] Game menu options breaks
+- [x] Game menu options breaks
 
 Cross-cutting follow-ups:
 
