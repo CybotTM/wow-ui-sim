@@ -17,7 +17,9 @@ pub enum Error {
     #[error("World of Warcraft installation not found")]
     WowInstallNotFound,
 
-    #[error("Blizzard UI sync incomplete: {missing} of {total} files missing (last error: {last_error})")]
+    #[error(
+        "Blizzard UI sync incomplete: {missing} of {total} files missing (last error: {last_error})"
+    )]
     BlizzardUiPartial {
         missing: usize,
         total: usize,

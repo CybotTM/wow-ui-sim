@@ -7,8 +7,8 @@
 
 use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_bridge::{FromStack, stack_val};
-use rilua::{LuaResult, Val};
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 // ── Action bars ───────────────────────────────────────────────────────────────
 
