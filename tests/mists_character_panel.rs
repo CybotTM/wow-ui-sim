@@ -76,6 +76,105 @@ fn mists_character_panel_populates_gear_and_reputation() {
     assert_no_lua_errors(&stdout, &stderr);
 }
 
+#[test]
+fn mists_character_subpanels_drive_titles_and_equipment_sets() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(env!("CARGO_BIN_EXE_wow-sim"))
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            ToggleCharacter("PaperDollFrame")
+            if not CharacterFrame or not CharacterFrame:IsShown() then
+                error("CharacterFrame did not open")
+            end
+
+            PaperDollFrame_SetSidebar(PaperDollFrame, 2)
+            local titlePane = PaperDollFrame.TitleManagerPane
+            if not titlePane or not titlePane:IsShown() then
+                error("TitleManagerPane did not open")
+            end
+
+            PaperDollTitlesPane_Update()
+            if not titlePane.titles or #titlePane.titles < 2 then
+                error("TitleManagerPane has no selectable title rows")
+            end
+
+            local selectedTitle = titlePane.titles[2]
+            PlayerTitleButton_OnClick({ titleId = selectedTitle.id })
+            PaperDollTitlesPane_Update()
+            if GetCurrentTitle() ~= selectedTitle.id then
+                error("title click did not update current title")
+            end
+            if titlePane.selected ~= selectedTitle.id then
+                error("title pane did not retain the selected title")
+            end
+
+            SetCurrentTitle(-1)
+            if not SetTitleByName(string.sub(selectedTitle.name, 1, 4)) then
+                error("SetTitleByName did not find the selected title")
+            end
+            if GetCurrentTitle() ~= selectedTitle.id then
+                error("SetTitleByName did not update current title")
+            end
+
+            local setName = "Codex Mists Set"
+            C_EquipmentSet.CreateEquipmentSet(setName, "Interface\\Icons\\INV_Misc_QuestionMark")
+            local setID = C_EquipmentSet.GetEquipmentSetID(setName)
+            if not setID then
+                error("equipment set was not created")
+            end
+
+            PaperDollFrame_SetSidebar(PaperDollFrame, 3)
+            local equipmentPane = PaperDollFrame.EquipmentManagerPane
+            if not equipmentPane or not equipmentPane:IsShown() then
+                error("EquipmentManagerPane did not open")
+            end
+
+            PaperDollEquipmentManagerPane_Update(true)
+            if not equipmentPane.equipmentSetIDs or #equipmentPane.equipmentSetIDs == 0 then
+                error("EquipmentManagerPane has no equipment-set rows")
+            end
+
+            GearSetButton_OnClick({ setID = setID }, "LeftButton", false)
+            if equipmentPane.selectedSetID ~= setID then
+                error("equipment set row click did not select the set")
+            end
+
+            PaperDollEquipmentManagerPaneEquipSet_OnClick(equipmentPane.EquipSet)
+            local _, _, _, isEquipped = C_EquipmentSet.GetEquipmentSetInfo(setID)
+            if not isEquipped then
+                error("equipment set equip button did not mark the set equipped")
+            end
+
+            C_EquipmentSet.IgnoreSlotForSave(1)
+            if not C_EquipmentSet.IsSlotIgnoredForSave(1) then
+                error("equipment manager did not persist ignored slot state")
+            end
+            "#,
+            "dump-tree",
+            "--filter-key",
+            "CharacterFrame",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+    assert!(
+        stdout.contains("EquipmentManagerPane") && stdout.contains("Codex Mists Set"),
+        "character dump did not include the selected equipment-manager row\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+}
+
 fn assert_no_lua_errors(stdout: &str, stderr: &str) {
     assert!(
         !stdout.contains("Lua error") && !stderr.contains("Lua error"),
