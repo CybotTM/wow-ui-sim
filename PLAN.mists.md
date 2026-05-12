@@ -29,7 +29,7 @@ Parity hardening TODO:
 - [x] Audit Mists panel interactions against retail interaction coverage and add parity tests for any retail-supported workflow still missing under `client-mists`.
 - [x] Add a low-signal visual-artifact gate to `scripts/mists-panel-parity.sh`: fail rows whose screenshot is mostly background or whose root-frame bounding box is too small for the panel being audited.
 - [x] Run panel parity with normal SavedVariables enabled and document/fix any panel that regresses only when real WTF state loads.
-- [ ] Expand the installed-addon matrix beyond startup: run `scripts/mists-panel-parity.sh` once per installed Mists addon enabled and fail on addon-induced panel `lua-errors` or visual regressions.
+- [x] Expand the installed-addon matrix beyond startup: run `scripts/mists-panel-parity.sh` once per installed Mists addon enabled and fail on addon-induced panel `lua-errors` or visual regressions.
 - [ ] Add a live connected-GUI Mists smoke runner that clicks every micro-menu/panel opener through `wow-cli`, then asserts `lua-errors` remains empty after real input dispatch.
 - [ ] Audit every Mists Blizzard LoD addon not represented in `docs/baselines/mists-panels.md` and add panel/interaction rows for any user-facing frame still outside the parity matrix.
 - [ ] Add a release-profile Mists CI proof command that runs zero `lua-errors`, installed-addon matrix, panel parity, interaction audit, and visual comparison with pipefail-safe logging.
@@ -105,6 +105,15 @@ all 23 panel rows passing. Artifacts were written under
 `target/mists-panel-parity-with-saved-vars/<slug>/`, and no panel produced a
 SavedVariables-only Lua, root-frame, visual-signal, or visual-baseline
 regression.
+
+Addon-backed panel parity verification:
+`scripts/test-mists-addon-panels.sh --skip-build --with-saved-vars` completed
+with `panel parity passed: 9` and `failed: 0`. The harness symlinked each
+installed Mists addon from `tools/classic-addon-manifest.tsv` one at a time,
+ran all 23 panel rows through `scripts/mists-panel-parity.sh --with-addons`,
+and wrote artifacts under `target/mists-addon-panel-parity/<addon>/<slug>/`.
+No installed addon produced panel `lua-errors`, root-frame failures,
+low-signal renders, or visual-baseline regressions.
 
 Panel artifact baseline: `docs/baselines/mists-panels.md` now references the
 retained `target/mists-panel-parity/<slug>/screenshot.webp` and

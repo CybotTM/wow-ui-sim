@@ -18,6 +18,7 @@ PANEL_FILTER=""
 VALIDATE_ONLY=0
 SKIP_BUILD=0
 LOAD_SAVED_VARS=0
+LOAD_THIRD_PARTY_ADDONS=0
 UPDATE_VISUAL_BASELINE=0
 VISUAL_UPDATE_FILE=""
 OUT_DIR_SET=0
@@ -35,6 +36,7 @@ while [ $# -gt 0 ]; do
         --timeout) TIMEOUT_SECONDS="$2"; shift 2 ;;
         --skip-build) SKIP_BUILD=1; shift ;;
         --with-saved-vars) LOAD_SAVED_VARS=1; shift ;;
+        --with-addons) LOAD_THIRD_PARTY_ADDONS=1; shift ;;
         --update-visual-baseline) UPDATE_VISUAL_BASELINE=1; shift ;;
         --validate-only) VALIDATE_ONLY=1; shift ;;
         --help|-h) usage; exit 0 ;;
@@ -49,6 +51,11 @@ fi
 SIM_SAVED_VAR_ARGS=(--no-saved-vars)
 if [ "$LOAD_SAVED_VARS" -eq 1 ]; then
     SIM_SAVED_VAR_ARGS=()
+fi
+
+SIM_ADDON_ARGS=(--no-addons)
+if [ "$LOAD_THIRD_PARTY_ADDONS" -eq 1 ]; then
+    SIM_ADDON_ARGS=()
 fi
 
 declare -A PANEL_SLUGS=()
@@ -192,7 +199,10 @@ LUA
 }
 
 run_wow_sim() {
-    local env_args=(WOW_SIM_NO_ADDONS=1)
+    local env_args=()
+    if [ "$LOAD_THIRD_PARTY_ADDONS" -eq 0 ]; then
+        env_args+=(WOW_SIM_NO_ADDONS=1)
+    fi
     if [ "$LOAD_SAVED_VARS" -eq 0 ]; then
         env_args+=(WOW_SIM_NO_SAVED_VARS=1)
     fi
@@ -312,17 +322,17 @@ run_panel() {
     write_panel_lua "$panel" "$root" "$lua_file"
 
     echo "=== $slug: $panel ==="
-    run_wow_sim --no-addons "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" lua-errors \
+    run_wow_sim "${SIM_ADDON_ARGS[@]}" "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" lua-errors \
         > "$json_file" 2> "$lua_stderr"
     fail_if_exec_or_lua_error "$panel lua-errors" "$lua_stderr" "$json_file"
     verify_lua_errors_json "$panel" "$json_file"
 
-    run_wow_sim --no-addons "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" dump-tree --filter-key "$root" \
+    run_wow_sim "${SIM_ADDON_ARGS[@]}" "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" dump-tree --filter-key "$root" \
         > "$dump_file" 2> "$dump_stderr"
     fail_if_exec_or_lua_error "$panel dump-tree" "$dump_stderr" "$dump_file"
     verify_dump_tree "$panel" "$slug" "$root" "$dump_file"
 
-    run_wow_sim --no-addons "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" screenshot \
+    run_wow_sim "${SIM_ADDON_ARGS[@]}" "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" screenshot \
         --filter "$root" --output "$screenshot_base" \
         > "$screenshot_stdout" 2> "$screenshot_stderr"
     fail_if_exec_or_lua_error "$panel screenshot" "$screenshot_stderr" "$screenshot_stdout"
