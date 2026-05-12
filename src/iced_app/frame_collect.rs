@@ -34,12 +34,7 @@ pub fn collect_subtree_ids(
     root_name: &str,
 ) -> FxHashSet<u64> {
     let mut ids = FxHashSet::default();
-    let root_id = registry.iter_ids().find(|&id| {
-        registry
-            .get(id)
-            .map(|f| f.name.as_deref() == Some(root_name))
-            .unwrap_or(false)
-    });
+    let root_id = find_best_named_root(registry, root_name);
     if let Some(root_id) = root_id {
         let mut queue = vec![root_id];
         while let Some(id) = queue.pop() {
@@ -50,6 +45,42 @@ pub fn collect_subtree_ids(
         }
     }
     ids
+}
+
+fn find_best_named_root(registry: &crate::widget::WidgetRegistry, root_name: &str) -> Option<u64> {
+    registry
+        .iter_ids()
+        .filter(|&id| {
+            registry
+                .get(id)
+                .is_some_and(|frame| frame.name.as_deref() == Some(root_name))
+        })
+        .max_by_key(|&id| named_root_score(registry, id))
+}
+
+fn named_root_score(registry: &crate::widget::WidgetRegistry, id: u64) -> (bool, u64, usize, u64) {
+    let Some(frame) = registry.get(id) else {
+        return (false, 0, 0, id);
+    };
+    let area = frame
+        .layout_rect
+        .map(|rect| rect.width * rect.height)
+        .unwrap_or_else(|| frame.width * frame.height)
+        .max(0.0) as u64;
+
+    (frame.visible, area, count_subtree_frames(registry, id), id)
+}
+
+fn count_subtree_frames(registry: &crate::widget::WidgetRegistry, root_id: u64) -> usize {
+    let mut count = 0;
+    let mut queue = vec![root_id];
+    while let Some(id) = queue.pop() {
+        count += 1;
+        if let Some(frame) = registry.get(id) {
+            queue.extend(frame.children.iter().copied());
+        }
+    }
+    count
 }
 
 /// Sort key type for frame rendering order within a strata bucket.
@@ -231,10 +262,36 @@ fn registration_set_matches(
 
 #[cfg(test)]
 mod tests {
-    use super::intra_strata_sort_key;
+    use super::{collect_subtree_ids, intra_strata_sort_key};
     use crate::widget::{AnchorPoint, Frame, WidgetRegistry, WidgetType};
 
     #[cfg(feature = "gui")]
+    #[test]
+    fn collect_subtree_ids_uses_best_matching_named_frame() {
+        let mut registry = WidgetRegistry::new();
+        let old_root = registry.register(Frame::new(
+            WidgetType::Frame,
+            Some("DuplicateRoot".to_string()),
+            None,
+        ));
+        let old_child = registry.register(Frame::new(WidgetType::Texture, None, Some(old_root)));
+        registry.add_child(old_root, old_child);
+
+        let mut new_root_frame =
+            Frame::new(WidgetType::Frame, Some("DuplicateRoot".to_string()), None);
+        new_root_frame.set_size(200.0, 100.0);
+        let new_root = registry.register(new_root_frame);
+        let new_child = registry.register(Frame::new(WidgetType::Texture, None, Some(new_root)));
+        registry.add_child(new_root, new_child);
+
+        let ids = collect_subtree_ids(&registry, "DuplicateRoot");
+
+        assert!(ids.contains(&new_root));
+        assert!(ids.contains(&new_child));
+        assert!(!ids.contains(&old_root));
+        assert!(!ids.contains(&old_child));
+    }
+
     #[test]
     fn excluded_overlay_names_are_not_hittable() {
         let mut registry = WidgetRegistry::new();

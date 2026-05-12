@@ -4,17 +4,21 @@
 # Reads docs/baselines/mists-panels.md, opens every panel row through wow-sim,
 # records per-panel lua-errors JSON, dumps the root frame tree, and captures a
 # filtered screenshot. A panel fails if its scripted root frame is missing,
-# hidden, visually empty, or emits Lua/exec errors.
+# hidden, visually empty, materially different from its visual baseline, or
+# emits Lua/exec errors.
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BASELINE="$REPO_ROOT/docs/baselines/mists-panels.md"
+VISUAL_BASELINE="$REPO_ROOT/docs/baselines/mists-panel-visuals.tsv"
 OUT_DIR="$REPO_ROOT/target/mists-panel-parity"
 TIMEOUT_SECONDS=120
 PANEL_FILTER=""
 VALIDATE_ONLY=0
 SKIP_BUILD=0
+UPDATE_VISUAL_BASELINE=0
+VISUAL_UPDATE_FILE=""
 
 usage() {
     sed -n '2,/^set -euo/p' "$0" | sed 's/^# \?//;$d'
@@ -24,9 +28,11 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --baseline) BASELINE="$2"; shift 2 ;;
         --out-dir) OUT_DIR="$2"; shift 2 ;;
+        --visual-baseline) VISUAL_BASELINE="$2"; shift 2 ;;
         --panel) PANEL_FILTER="$2"; shift 2 ;;
         --timeout) TIMEOUT_SECONDS="$2"; shift 2 ;;
         --skip-build) SKIP_BUILD=1; shift ;;
+        --update-visual-baseline) UPDATE_VISUAL_BASELINE=1; shift ;;
         --validate-only) VALIDATE_ONLY=1; shift ;;
         --help|-h) usage; exit 0 ;;
         *) echo "ERROR: unknown argument '$1'" >&2; exit 2 ;;
@@ -54,7 +60,7 @@ add_panel "Auction House: browse, bid, post, cancel" "auction-house" "AuctionFra
 add_panel "Bank, ReagentBank, Void Storage, Guild Bank" "bank-storage" "BankFrame" 'FireEvent("BANKFRAME_OPENED")'
 add_panel "Trade window and \`TradePlayerInputMoneyFrame\`" "trade" "TradeFrame" 'A_Admin.SetMoney(100000); InitiateTrade("NPC"); FireEvent("TRADE_SHOW")'
 add_panel "Friends, Who, Guild, Communities, Club Finder" "social" "FriendsFrame" 'ToggleFriendsFrame(1); FriendsFrame_ShowSubFrame("FriendsListFrame")'
-add_panel "PvP UI: HonorFrame, BG queue, Conquest" "pvp" "PVPQueueFrame" 'LoadAddOn("Blizzard_PVPUI"); PVPQueueFrame:Show(); PVPQueueFrame_Update(PVPQueueFrame)'
+add_panel "PvP UI: HonorFrame, BG queue, Conquest" "pvp" "PVPQueueFrame" 'LoadAddOn("Blizzard_PVPUI"); PVEFrame_ShowFrame("PVPQueueFrame", "HonorQueueFrame")'
 add_panel "LFG, LFR, Raid Browser" "lfg-lfr" "PVEFrame" 'LoadAddOn("Blizzard_PVEUI"); PVEFrame:Show(); GroupFinderFrame:Show()'
 add_panel "Collections: mounts, pets, toys, heirlooms, transmog" "collections" "CollectionsJournal" 'ToggleCollectionsJournal()'
 add_panel "Pet Journal and Battle Pet UI" "pet-journal" "CollectionsJournal" 'ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_PETS)'
@@ -64,7 +70,7 @@ add_panel "Currency and Token UI" "currency-token" "TokenFrame" 'ToggleCharacter
 add_panel "Macro and key bindings" "macro-keybindings" "SettingsPanel" 'SettingsPanel:OpenToCategory(KEY_BINDINGS)'
 add_panel "Interface options" "interface-options" "SettingsPanel" 'ToggleGameMenu(); GameMenuButtonOptions:Click(); SettingsPanel:OpenToCategory(Settings.INTERFACE_CATEGORY_ID)'
 add_panel "Action bars, micro menu, bag bar, status bars" "action-bars" "MainMenuBar" 'MainMenuBar:Show()'
-add_panel "Nameplates" "nameplates" "MistsNamePlateRenderProbe" 'local plate = CreateFrame("Frame", "MistsNamePlateRenderProbe", UIParent); plate:SetSize(128, 32); plate:SetPoint("CENTER"); plate:Show(); NamePlateDriverFrame:OnNamePlateCreated(plate); NamePlateDriverFrame:AcquireUnitFrame(plate); CompactUnitFrame_SetUpFrame(plate.UnitFrame, DefaultCompactNamePlateEnemyFrameSetup)'
+add_panel "Nameplates" "nameplates" "MistsNamePlateRenderProbe" 'local plate = CreateFrame("Frame", "MistsNamePlateRenderProbe", UIParent); plate:SetSize(128, 32); plate:SetPoint("CENTER"); plate:Show(); NamePlateDriverFrame:OnNamePlateCreated(plate); NamePlateDriverFrame:AcquireUnitFrame(plate); CompactUnitFrame_SetUpFrame(plate.UnitFrame, DefaultCompactNamePlateEnemyFrameSetup); plate.UnitFrame:Show()'
 add_panel "Loot, group loot, personal loot" "loot" "LootFrame" 'A_Admin.ClearLoot(); A_Admin.AddLootItem(6948, 1); FireEvent("LOOT_OPENED", false)'
 add_panel "Game menu options" "game-menu-options" "SettingsPanel" 'ToggleGameMenu(); GameMenuButtonOptions:Click()'
 
@@ -99,6 +105,10 @@ matches_panel_filter() {
 
 validate_manifest() {
     [ -f "$BASELINE" ] || { echo "ERROR: baseline not found: $BASELINE" >&2; return 2; }
+    if [ "$UPDATE_VISUAL_BASELINE" -eq 0 ] && [ ! -f "$VISUAL_BASELINE" ]; then
+        echo "ERROR: visual baseline not found: $VISUAL_BASELINE" >&2
+        return 2
+    fi
 
     local panel slug count=0 missing=0
     while IFS= read -r panel; do
@@ -119,6 +129,14 @@ validate_manifest() {
     fi
 
     echo "$count panel rows validated from $BASELINE"
+}
+
+visual_metrics_bin() {
+    echo "$REPO_ROOT/target/debug/panel-visual-metrics"
+}
+
+build_visual_metrics() {
+    cargo build --bin panel-visual-metrics
 }
 
 write_panel_lua() {
@@ -197,6 +215,15 @@ verify_screenshot() {
     fi
 }
 
+verify_visual_baseline() {
+    local slug="$1" screenshot_file="$2"
+    if [ "$UPDATE_VISUAL_BASELINE" -eq 1 ]; then
+        "$(visual_metrics_bin)" record "$slug" "$screenshot_file" >> "$VISUAL_UPDATE_FILE"
+    else
+        "$(visual_metrics_bin)" compare "$VISUAL_BASELINE" "$slug" "$screenshot_file"
+    fi
+}
+
 run_panel() {
     local panel="$1"
     local slug="${PANEL_SLUGS[$panel]}"
@@ -231,6 +258,7 @@ run_panel() {
         > "$screenshot_stdout" 2> "$screenshot_stderr"
     fail_if_exec_or_lua_error "$panel screenshot" "$screenshot_stderr" "$screenshot_stdout"
     verify_screenshot "$panel" "$screenshot_stderr" "$screenshot_file"
+    verify_visual_baseline "$slug" "$screenshot_file"
 }
 
 validate_manifest
@@ -242,6 +270,13 @@ mkdir -p "$OUT_DIR"
 if [ "$SKIP_BUILD" -eq 0 ]; then
     cargo build --bin wow-sim --no-default-features --features "sound,gui,casc,client-mists"
 fi
+build_visual_metrics
+
+if [ "$UPDATE_VISUAL_BASELINE" -eq 1 ]; then
+    mkdir -p "$(dirname "$VISUAL_BASELINE")"
+    VISUAL_UPDATE_FILE="$OUT_DIR/mists-panel-visuals.tsv"
+    printf '# slug\twidth\theight\tactive_pixels\tluma_stddev_milli\tahash\n' > "$VISUAL_UPDATE_FILE"
+fi
 
 selected=0
 while IFS= read -r panel; do
@@ -251,6 +286,11 @@ while IFS= read -r panel; do
         run_panel "$panel"
     fi
 done < <(read_baseline_panels)
+
+if [ "$UPDATE_VISUAL_BASELINE" -eq 1 ]; then
+    mv "$VISUAL_UPDATE_FILE" "$VISUAL_BASELINE"
+    echo "Updated visual baseline: $VISUAL_BASELINE"
+fi
 
 if [ "$selected" -eq 0 ]; then
     echo "ERROR: no panel matched filter '$PANEL_FILTER'" >&2
