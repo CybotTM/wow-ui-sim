@@ -168,17 +168,29 @@ fn get_num_saved_instances(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn get_saved_instance_info(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
-}
-
 fn get_num_saved_world_bosses(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
 }
 
-fn get_saved_world_boss_info(_state: &mut LuaState) -> LuaResult<u32> {
+fn get_saved_instance_info(state: &mut LuaState) -> LuaResult<u32> {
+    push_nil_values(state, 14);
+    Ok(14)
+}
+
+fn get_saved_world_boss_info(state: &mut LuaState) -> LuaResult<u32> {
+    push_nil_values(state, 3);
+    Ok(3)
+}
+
+fn set_saved_instance_extend(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+fn push_nil_values(state: &mut LuaState, count: usize) {
+    for _ in 0..count {
+        state.push(Val::Nil);
+    }
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -188,8 +200,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetWorldElapsedTimers", get_world_elapsed_timers)?;
     LuaApiMut::register_function(lua, "GetWorldElapsedTime", get_world_elapsed_time)?;
     LuaApiMut::register_function(lua, "GetNumSavedInstances", get_num_saved_instances)?;
-    LuaApiMut::register_function(lua, "GetSavedInstanceInfo", get_saved_instance_info)?;
     LuaApiMut::register_function(lua, "GetNumSavedWorldBosses", get_num_saved_world_bosses)?;
+    LuaApiMut::register_function(lua, "GetSavedInstanceInfo", get_saved_instance_info)?;
     LuaApiMut::register_function(lua, "GetSavedWorldBossInfo", get_saved_world_boss_info)?;
+    LuaApiMut::register_function(lua, "SetSavedInstanceExtend", set_saved_instance_extend)?;
     Ok(())
 }

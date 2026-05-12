@@ -73,6 +73,7 @@ fn load_runtime_addon_with_dependencies(
     crate::lua_api::workarounds::apply_for_runtime_addon_load(loader_env, addon_name);
     mark_addon_loaded(loader_env, addon_name);
     fire_addon_loaded(state, loader_env, addon_name);
+    loader_env.state().borrow_mut().invalidate_strata_buckets();
     crate::loader::trace_load_addon(origin, format!("event {addon_name}"));
     Ok(())
 }

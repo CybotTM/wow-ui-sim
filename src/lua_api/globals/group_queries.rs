@@ -269,31 +269,36 @@ fn get_raid_roster_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(12)
 }
 
-struct RaidRosterMember {
-    name: String,
-    class_index: i32,
-}
-
-fn raid_roster_member(state: &LuaState, index: usize) -> LuaResult<Option<RaidRosterMember>> {
+fn raid_roster_member(state: &LuaState, index: usize) -> LuaResult<Option<PartyMember>> {
     let st = borrow_state(state)?;
-    if !st.party_group_active || index == 0 {
+    let raid_active = st.party_group_active && st.party_members.len() >= 6;
+    if !raid_active || index == 0 {
         return Ok(None);
     }
-
     let member = if index == 1 {
-        Some(RaidRosterMember {
-            name: st.player.name.clone(),
-            class_index: st.player.class_index,
-        })
+        Some(player_as_raid_member(&st))
     } else {
-        st.party_members
-            .get(index - 2)
-            .map(|party_member| RaidRosterMember {
-                name: party_member.name.clone(),
-                class_index: party_member.class_index,
-            })
+        st.party_members.get(index - 2).cloned()
     };
     Ok(member)
+}
+
+fn player_as_raid_member(st: &crate::lua_api::state::SimState) -> PartyMember {
+    PartyMember {
+        name: st.player.name.clone(),
+        class_index: st.player.class_index,
+        level: st.player.level,
+        health: st.player.health,
+        health_max: st.player.health_max,
+        power: st.player.power,
+        power_max: st.player.power_max,
+        power_type: st.player.power_type,
+        power_type_name: String::new(),
+        is_leader: true,
+        dead_since: None,
+        buffs: Vec::new(),
+        debuffs: Vec::new(),
+    }
 }
 
 fn push_empty_raid_roster_info(state: &mut LuaState) {
@@ -302,23 +307,26 @@ fn push_empty_raid_roster_info(state: &mut LuaState) {
     }
 }
 
-fn push_raid_roster_info(state: &mut LuaState, index: usize, member: &RaidRosterMember) {
+fn push_raid_roster_info(state: &mut LuaState, index: usize, member: &PartyMember) {
     let name = create_string(state, &member.name);
     mark_secret_value(state, name);
+    let rank = if member.is_leader { 2.0 } else { 0.0 };
     let subgroup = ((index - 1) / 5 + 1) as f64;
-    let (_, class_file, _) = class_info(member.class_index);
+    let (class_name, class_file, _) = class_info(member.class_index);
+    let class_name = create_string_static(state, class_name);
     let class_file = create_string_static(state, class_file);
+    let zone = create_string_static(state, "");
     let assigned_role = create_string_static(state, "NONE");
 
     state.push(name);
-    state.push(Val::Nil);
+    state.push(Val::Num(rank));
     state.push(Val::Num(subgroup));
-    state.push(Val::Nil);
-    state.push(Val::Nil);
+    state.push(Val::Num(member.level as f64));
+    state.push(class_name);
     state.push(class_file);
-    state.push(Val::Nil);
-    state.push(Val::Nil);
-    state.push(Val::Nil);
+    state.push(zone);
+    state.push(Val::Bool(true));
+    state.push(Val::Bool(member.dead_since.is_some()));
     state.push(Val::Nil);
     state.push(Val::Nil);
     state.push(assigned_role);

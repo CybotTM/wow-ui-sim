@@ -138,6 +138,17 @@ if rawget(_G, "LFD_IsEmpowered") == nil then
   function LFD_IsEmpowered() return true end
 end
 
+if rawget(_G, "RaidFinderFrame_UpdateTab") == nil then
+  function RaidFinderFrame_UpdateTab()
+    if type(RaidFinderFrame_UpdateAvailability) == "function" then
+      return RaidFinderFrame_UpdateAvailability()
+    end
+    if RaidParentFrame and type(PanelTemplates_EnableTab) == "function" then
+      PanelTemplates_EnableTab(RaidParentFrame, 2)
+    end
+  end
+end
+
 -- SetGuildRosterSelection must never be a no-op. Mists FriendsFrame/GuildFrame
 -- code calls Set, then expects a later Get to return the new index; a no-op
 -- leaves the index unchanged and can send the guild roster UI into retry loops.

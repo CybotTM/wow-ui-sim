@@ -80,6 +80,48 @@ fn test_get_num_group_members_includes_player() {
 }
 
 #[test]
+fn test_raid_roster_info_includes_player_and_party_members() {
+    let env = env();
+    let (player_name, player_rank, party_name, party_rank): (String, i32, String, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerName("Aldric")
+            A_Admin.SetPartySize(6)
+            A_Admin.SetPartyMember(1, "Alpha", 1, 80)
+            local playerName, playerRank = GetRaidRosterInfo(1)
+            local partyName, partyRank = GetRaidRosterInfo(2)
+            return playerName, playerRank, partyName, partyRank
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(player_name, "Aldric");
+    assert_eq!(player_rank, 2);
+    assert_eq!(party_name, "Alpha");
+    assert_eq!(party_rank, 0);
+}
+
+#[test]
+fn test_raid_roster_info_has_row_for_every_group_member() {
+    let env = env();
+    let (group_count, last_name, last_rank): (i32, String, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(6)
+            A_Admin.SetPartyMember(6, "Foxtrot", 6, 80)
+            local groupCount = GetNumGroupMembers()
+            local name, rank = GetRaidRosterInfo(groupCount)
+            return groupCount, name, rank
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(group_count, 7);
+    assert_eq!(last_name, "Foxtrot");
+    assert_eq!(last_rank, 0);
+}
+
+#[test]
 fn test_get_num_group_members_zero_when_no_party() {
     let env = env();
     let count: i32 = env
