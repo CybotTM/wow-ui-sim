@@ -1,0 +1,260 @@
+#!/usr/bin/env bash
+# Scripted Mists panel parity runner.
+#
+# Reads docs/baselines/mists-panels.md, opens every panel row through wow-sim,
+# records per-panel lua-errors JSON, dumps the root frame tree, and captures a
+# filtered screenshot. A panel fails if its scripted root frame is missing,
+# hidden, visually empty, or emits Lua/exec errors.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+BASELINE="$REPO_ROOT/docs/baselines/mists-panels.md"
+OUT_DIR="$REPO_ROOT/target/mists-panel-parity"
+TIMEOUT_SECONDS=120
+PANEL_FILTER=""
+VALIDATE_ONLY=0
+SKIP_BUILD=0
+
+usage() {
+    sed -n '2,/^set -euo/p' "$0" | sed 's/^# \?//;$d'
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --baseline) BASELINE="$2"; shift 2 ;;
+        --out-dir) OUT_DIR="$2"; shift 2 ;;
+        --panel) PANEL_FILTER="$2"; shift 2 ;;
+        --timeout) TIMEOUT_SECONDS="$2"; shift 2 ;;
+        --skip-build) SKIP_BUILD=1; shift ;;
+        --validate-only) VALIDATE_ONLY=1; shift ;;
+        --help|-h) usage; exit 0 ;;
+        *) echo "ERROR: unknown argument '$1'" >&2; exit 2 ;;
+    esac
+done
+
+declare -A PANEL_SLUGS=()
+declare -A PANEL_ROOTS=()
+declare -A PANEL_OPENERS=()
+
+add_panel() {
+    local panel="$1" slug="$2" root="$3" opener="$4"
+    PANEL_SLUGS["$panel"]="$slug"
+    PANEL_ROOTS["$panel"]="$root"
+    PANEL_OPENERS["$panel"]="$opener"
+}
+
+add_panel "Character panel: paperdoll, stats, titles, equipment manager" "character" "CharacterFrame" 'ToggleCharacter("PaperDollFrame")'
+add_panel "Spellbook and professions" "spellbook-professions" "SpellBookFrame" 'ToggleSpellBook(BOOKTYPE_SPELL)'
+add_panel "Talents and glyphs" "talents-glyphs" "PlayerTalentFrame" 'ToggleTalentFrame()'
+add_panel "Quest log and objective tracker" "quest-log" "QuestLogFrame" 'ToggleQuestLog()'
+add_panel "World map" "world-map" "WorldMapFrame" 'ToggleWorldMap()'
+add_panel "Mail: inbox, send, attachments, COD" "mail" "MailFrame" 'MailFrame_Show()'
+add_panel "Auction House: browse, bid, post, cancel" "auction-house" "AuctionFrame" 'AuctionFrame_LoadUI(); AuctionFrame_Show()'
+add_panel "Bank, ReagentBank, Void Storage, Guild Bank" "bank-storage" "BankFrame" 'FireEvent("BANKFRAME_OPENED")'
+add_panel "Trade window and \`TradePlayerInputMoneyFrame\`" "trade" "TradeFrame" 'A_Admin.SetMoney(100000); InitiateTrade("NPC"); FireEvent("TRADE_SHOW")'
+add_panel "Friends, Who, Guild, Communities, Club Finder" "social" "FriendsFrame" 'ToggleFriendsFrame(1); FriendsFrame_ShowSubFrame("FriendsListFrame")'
+add_panel "PvP UI: HonorFrame, BG queue, Conquest" "pvp" "PVPQueueFrame" 'LoadAddOn("Blizzard_PVPUI"); PVPQueueFrame:Show(); PVPQueueFrame_Update(PVPQueueFrame)'
+add_panel "LFG, LFR, Raid Browser" "lfg-lfr" "PVEFrame" 'LoadAddOn("Blizzard_PVEUI"); PVEFrame:Show(); GroupFinderFrame:Show()'
+add_panel "Collections: mounts, pets, toys, heirlooms, transmog" "collections" "CollectionsJournal" 'ToggleCollectionsJournal()'
+add_panel "Pet Journal and Battle Pet UI" "pet-journal" "CollectionsJournal" 'ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_PETS)'
+add_panel "Achievements and Calendar" "achievements-calendar" "AchievementFrame" 'ToggleAchievementFrame()'
+add_panel "Encounter Journal" "encounter-journal" "EncounterJournal" 'ToggleEncounterJournal()'
+add_panel "Currency and Token UI" "currency-token" "TokenFrame" 'ToggleCharacter("TokenFrame")'
+add_panel "Macro and key bindings" "macro-keybindings" "SettingsPanel" 'SettingsPanel:OpenToCategory(KEY_BINDINGS)'
+add_panel "Interface options" "interface-options" "SettingsPanel" 'ToggleGameMenu(); GameMenuButtonOptions:Click(); SettingsPanel:OpenToCategory(Settings.INTERFACE_CATEGORY_ID)'
+add_panel "Action bars, micro menu, bag bar, status bars" "action-bars" "MainMenuBar" 'MainMenuBar:Show()'
+add_panel "Nameplates" "nameplates" "MistsNamePlateRenderProbe" 'local plate = CreateFrame("Frame", "MistsNamePlateRenderProbe", UIParent); plate:SetSize(128, 32); plate:SetPoint("CENTER"); plate:Show(); NamePlateDriverFrame:OnNamePlateCreated(plate); NamePlateDriverFrame:AcquireUnitFrame(plate); CompactUnitFrame_SetUpFrame(plate.UnitFrame, DefaultCompactNamePlateEnemyFrameSetup)'
+add_panel "Loot, group loot, personal loot" "loot" "LootFrame" 'A_Admin.ClearLoot(); A_Admin.AddLootItem(6948, 1); FireEvent("LOOT_OPENED", false)'
+add_panel "Game menu options" "game-menu-options" "SettingsPanel" 'ToggleGameMenu(); GameMenuButtonOptions:Click()'
+
+trim() {
+    local value="$*"
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
+    printf '%s' "$value"
+}
+
+read_baseline_panels() {
+    local line panel status
+    while IFS= read -r line || [ -n "$line" ]; do
+        [[ "$line" == \|* ]] || continue
+        IFS='|' read -r _ panel status _ <<< "$line"
+        panel="$(trim "$panel")"
+        status="$(trim "$status")"
+        [ "$panel" = "Panel" ] && continue
+        [ "$panel" = "---" ] && continue
+        [ -z "$panel" ] && continue
+        [ "$status" = "Pass" ] || continue
+        printf '%s\n' "$panel"
+    done < "$BASELINE"
+}
+
+matches_panel_filter() {
+    local panel="$1" slug="$2"
+    [ -z "$PANEL_FILTER" ] && return 0
+    [ "$PANEL_FILTER" = "$slug" ] && return 0
+    [[ "${panel,,}" == *"${PANEL_FILTER,,}"* ]]
+}
+
+validate_manifest() {
+    [ -f "$BASELINE" ] || { echo "ERROR: baseline not found: $BASELINE" >&2; return 2; }
+
+    local panel slug count=0 missing=0
+    while IFS= read -r panel; do
+        count=$((count + 1))
+        slug="${PANEL_SLUGS[$panel]:-}"
+        if [ -z "$slug" ]; then
+            echo "ERROR: no runner case for panel row: $panel" >&2
+            missing=$((missing + 1))
+        fi
+    done < <(read_baseline_panels)
+
+    if [ "$count" -eq 0 ]; then
+        echo "ERROR: no Pass panel rows found in $BASELINE" >&2
+        return 2
+    fi
+    if [ "$missing" -gt 0 ]; then
+        return 2
+    fi
+
+    echo "$count panel rows validated from $BASELINE"
+}
+
+write_panel_lua() {
+    local panel="$1" root="$2" lua_file="$3"
+    cat > "$lua_file" <<LUA
+local function assertRenderableRoot(name)
+    local frame = _G[name]
+    if frame == nil then
+        error(name .. " missing")
+    end
+    if frame.IsShown and not frame:IsShown() then
+        error(name .. " hidden")
+    end
+    if frame.GetWidth and (frame:GetWidth() or 0) <= 0 then
+        error(name .. " has no width")
+    end
+    if frame.GetHeight and (frame:GetHeight() or 0) <= 0 then
+        error(name .. " has no height")
+    end
+end
+
+${PANEL_OPENERS[$panel]}
+assertRenderableRoot("$root")
+LUA
+}
+
+run_wow_sim() {
+    WOW_SIM_NO_ADDONS=1 WOW_SIM_NO_SAVED_VARS=1 timeout "$TIMEOUT_SECONDS" "$REPO_ROOT/target/debug/wow-sim" "$@"
+}
+
+fail_if_exec_or_lua_error() {
+    local label="$1" stderr_file="$2" stdout_file="$3"
+    if grep -qE 'Lua error|\\[exec-lua\\] error' "$stderr_file" "$stdout_file"; then
+        echo "ERROR: $label emitted Lua/exec errors" >&2
+        return 1
+    fi
+}
+
+verify_lua_errors_json() {
+    local panel="$1" json_file="$2"
+    local count
+    count="$(jq 'length' "$json_file")"
+    if [ "$count" != "0" ]; then
+        echo "ERROR: $panel produced $count lua-errors" >&2
+        jq '.' "$json_file" >&2
+        return 1
+    fi
+}
+
+verify_dump_tree() {
+    local panel="$1" root="$2" dump_file="$3"
+    if ! grep -qE "(^|[[:space:]])${root//\\/\\\\} \\[[^]]+\\].* visible " "$dump_file"; then
+        echo "ERROR: $panel root $root is missing or hidden in dump tree" >&2
+        return 1
+    fi
+
+    local visible_renderables
+    visible_renderables="$(grep -Ec '\[(Texture|FontString|Button|StatusBar)\].* visible ' "$dump_file" || true)"
+    if [ "$visible_renderables" -eq 0 ]; then
+        echo "ERROR: $panel dump tree has no visible renderable descendants" >&2
+        return 1
+    fi
+}
+
+verify_screenshot() {
+    local panel="$1" stderr_file="$2" screenshot_file="$3"
+    local quads
+    quads="$(sed -n 's/.*QuadBatch: \([0-9][0-9]*\) quads.*/\1/p' "$stderr_file" | tail -1)"
+    if [ -z "$quads" ] || [ "$quads" -eq 0 ]; then
+        echo "ERROR: $panel screenshot emitted an empty render batch" >&2
+        return 1
+    fi
+    if [ ! -s "$screenshot_file" ]; then
+        echo "ERROR: $panel screenshot was not written: $screenshot_file" >&2
+        return 1
+    fi
+}
+
+run_panel() {
+    local panel="$1"
+    local slug="${PANEL_SLUGS[$panel]}"
+    local root="${PANEL_ROOTS[$panel]}"
+    local panel_dir="$OUT_DIR/$slug"
+    local lua_file="$panel_dir/open.lua"
+    local json_file="$panel_dir/lua-errors.json"
+    local lua_stderr="$panel_dir/lua-errors.stderr"
+    local dump_file="$panel_dir/dump-tree.txt"
+    local dump_stderr="$panel_dir/dump-tree.stderr"
+    local screenshot_base="$panel_dir/screenshot"
+    local screenshot_file="$panel_dir/screenshot.webp"
+    local screenshot_stderr="$panel_dir/screenshot.stderr"
+    local screenshot_stdout="$panel_dir/screenshot.stdout"
+
+    mkdir -p "$panel_dir"
+    write_panel_lua "$panel" "$root" "$lua_file"
+
+    echo "=== $slug: $panel ==="
+    run_wow_sim --no-addons --no-saved-vars --exec-lua "@$lua_file" lua-errors \
+        > "$json_file" 2> "$lua_stderr"
+    fail_if_exec_or_lua_error "$panel lua-errors" "$lua_stderr" "$json_file"
+    verify_lua_errors_json "$panel" "$json_file"
+
+    run_wow_sim --no-addons --no-saved-vars --exec-lua "@$lua_file" dump-tree --filter-key "$root" \
+        > "$dump_file" 2> "$dump_stderr"
+    fail_if_exec_or_lua_error "$panel dump-tree" "$dump_stderr" "$dump_file"
+    verify_dump_tree "$panel" "$root" "$dump_file"
+
+    run_wow_sim --no-addons --no-saved-vars --exec-lua "@$lua_file" screenshot \
+        --filter "$root" --output "$screenshot_base" \
+        > "$screenshot_stdout" 2> "$screenshot_stderr"
+    fail_if_exec_or_lua_error "$panel screenshot" "$screenshot_stderr" "$screenshot_stdout"
+    verify_screenshot "$panel" "$screenshot_stderr" "$screenshot_file"
+}
+
+validate_manifest
+if [ "$VALIDATE_ONLY" -eq 1 ]; then
+    exit 0
+fi
+
+mkdir -p "$OUT_DIR"
+if [ "$SKIP_BUILD" -eq 0 ]; then
+    cargo build --bin wow-sim --no-default-features --features "sound,gui,casc,client-mists"
+fi
+
+selected=0
+while IFS= read -r panel; do
+    slug="${PANEL_SLUGS[$panel]}"
+    if matches_panel_filter "$panel" "$slug"; then
+        selected=$((selected + 1))
+        run_panel "$panel"
+    fi
+done < <(read_baseline_panels)
+
+if [ "$selected" -eq 0 ]; then
+    echo "ERROR: no panel matched filter '$PANEL_FILTER'" >&2
+    exit 2
+fi
+
+echo "Mists panel parity passed for $selected panel(s). Artifacts: $OUT_DIR"

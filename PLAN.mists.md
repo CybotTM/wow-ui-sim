@@ -14,7 +14,7 @@ In-flight (git status shows uncommitted work):
 
 Parity hardening TODO:
 
-- [ ] Build a scripted Mists panel parity runner that opens every row in `docs/baselines/mists-panels.md`, records `lua-errors`, and fails on missing root frames, hidden stub-only frames, or empty render output.
+- [x] Build a scripted Mists panel parity runner that opens every row in `docs/baselines/mists-panels.md`, records `lua-errors`, and fails on missing root frames, hidden stub-only frames, or empty render output.
 - [ ] Replace the `test-backed` placeholders in `docs/baselines/mists-panels.md` with retained screenshot or frame-dump artifact paths for every panel row.
 - [ ] Audit each Mists panel test for real interaction assertions, not just load/show coverage, and add follow-up tasks for any panel that only proves startup.
 - [ ] Run the installed Mists addon matrix with normal saved variables enabled and record whether saved-var-backed startup still stays at zero addon-induced errors.
@@ -62,6 +62,14 @@ Mists `lua-errors` baseline decision: refreshed
 `docs/baselines/mists-lua-errors.json` to the current clean `[]` capture after
 panel parity reached zero startup errors. The old Phase 7.4 non-empty snapshot
 is no longer the active regression baseline.
+
+Scripted panel parity runner: `scripts/mists-panel-parity.sh` validates all
+`docs/baselines/mists-panels.md` rows, writes per-panel artifacts under
+`target/mists-panel-parity/<slug>/`, and fails on Lua/exec errors, missing or
+hidden roots, dump trees without visible renderable descendants, and screenshots
+with empty render batches. Current verification covered all 23 manifest rows,
+a full sweep through the first 22 rows, and a focused pass for the corrected
+`game-menu-options` row.
 
 ## Current State
 
