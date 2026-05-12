@@ -47,6 +47,36 @@ fn get_current_affixes_reflects_mutation() {
     assert_eq!(count, 2);
 }
 
+// ── C_ChallengeMode legacy map surface ───────────────────────────────────────
+
+#[test]
+fn challenge_mode_map_table_seeds_mists_challenge_map() {
+    let env = env();
+    let (count, challenge_id, name, map_id): (i32, i32, String, i32) = env
+        .eval(
+            r#"
+            local maps = C_ChallengeMode.GetMapTable()
+            local name, _, _, _, _, mapID = C_ChallengeMode.GetMapUIInfo(maps[1])
+            return #maps, maps[1], name, mapID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 1);
+    assert_eq!(challenge_id, 2);
+    assert_eq!(name, "Temple of the Jade Serpent");
+    assert_eq!(map_id, 429);
+}
+
+#[test]
+fn challenge_mode_best_time_defaults_empty() {
+    let env = env();
+    let (guild_best, realm_best): (Option<i32>, Option<i32>) = env
+        .eval("return C_ChallengeMode.GetChallengeBestTime(2)")
+        .unwrap();
+    assert_eq!(guild_best, None);
+    assert_eq!(realm_best, None);
+}
+
 // ── GetCurrentSeason ─────────────────────────────────────────────────────────
 
 #[test]

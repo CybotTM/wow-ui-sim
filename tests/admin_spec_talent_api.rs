@@ -25,6 +25,27 @@ fn test_set_spec_readable_via_get_specialization() {
 }
 
 #[test]
+fn test_inspect_specialization_returns_active_spec_id() {
+    let env = env();
+    let spec_id: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetSpec(3)
+            return GetInspectSpecialization("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(spec_id, 70);
+}
+
+#[test]
+fn test_specialization_role_by_id_returns_role_token() {
+    let env = env();
+    let role: String = env.eval("return GetSpecializationRoleByID(70)").unwrap();
+    assert_eq!(role, "DAMAGER");
+}
+
+#[test]
 fn test_set_spec_one() {
     let env = env();
     let spec: i32 = env

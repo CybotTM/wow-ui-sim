@@ -57,6 +57,75 @@ fn set_ranks_updates_count() {
 }
 
 #[test]
+fn get_num_members_in_rank_counts_roster_members_by_rank() {
+    use wow_ui_sim::lua_api::state::GuildMember;
+
+    let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().world.guild_members = vec![
+        GuildMember {
+            name: "Alpha".into(),
+            rank_index: 1,
+            online: true,
+        },
+        GuildMember {
+            name: "Beta".into(),
+            rank_index: 2,
+            online: false,
+        },
+        GuildMember {
+            name: "Gamma".into(),
+            rank_index: 2,
+            online: true,
+        },
+    ];
+
+    let counts: (i32, i32, i32) = env
+        .eval("return GetNumMembersInRank(1), GetNumMembersInRank(2), GetNumMembersInRank(3)")
+        .unwrap();
+
+    assert_eq!(counts, (1, 2, 0));
+}
+
+#[test]
+fn get_num_members_in_rank_returns_zero_without_guild() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("A_Admin.ClearGuild()").unwrap();
+    let count: i32 = env.eval("return GetNumMembersInRank(1)").unwrap();
+    assert_eq!(count, 0);
+}
+
+#[test]
+fn get_allowed_shifts_reports_rank_order_movement() {
+    let env = WowLuaEnv::new().unwrap();
+    install_three_ranks(&env);
+
+    let shifts: (bool, bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local firstUp, firstDown = GuildControlGetAllowedShifts(1)
+            local secondUp, secondDown = GuildControlGetAllowedShifts(2)
+            local thirdUp, thirdDown = GuildControlGetAllowedShifts(3)
+            return firstUp, firstDown, secondUp, secondDown, thirdUp, thirdDown
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        shifts,
+        (false, false, false, true, true, false),
+        "guild leader cannot move; middle ranks move down; last editable rank moves up",
+    );
+}
+
+#[test]
+fn get_allowed_shifts_returns_false_without_guild() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("A_Admin.ClearGuild()").unwrap();
+    let shifts: (bool, bool) = env.eval("return GuildControlGetAllowedShifts(2)").unwrap();
+    assert_eq!(shifts, (false, false));
+}
+
+#[test]
 fn get_rank_name_by_explicit_index() {
     let env = WowLuaEnv::new().unwrap();
     install_three_ranks(&env);
@@ -113,6 +182,21 @@ fn rank_flags_round_trip_as_boolean_array() {
         .eval(
             r#"
             local f = GuildControlGetRankFlags(2)
+            return f[1], f[2], f[3]
+            "#,
+        )
+        .unwrap();
+    assert_eq!(flags, (true, false, true));
+}
+
+#[test]
+fn c_guild_info_rank_flags_use_same_backing_state() {
+    let env = WowLuaEnv::new().unwrap();
+    install_three_ranks(&env);
+    let flags: (bool, bool, bool) = env
+        .eval(
+            r#"
+            local f = C_GuildInfo.GuildControlGetRankFlags(2)
             return f[1], f[2], f[3]
             "#,
         )

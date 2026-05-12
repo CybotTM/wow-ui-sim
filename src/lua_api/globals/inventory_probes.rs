@@ -8,13 +8,16 @@
 //! - `CanLootUnit(unit)`           — `unit is dead AND is_enemy`.
 //! - `CanMerchant()`               — `SimState.merchant_frame_open`.
 //! - `CanInspect(unit, showError?)` — unit resolves to a player-like entity.
+//! - `NotifyInspect(unit)`         — queue `INSPECT_READY` for inspectable
+//!                                   units.
 //! - `GetInventoryItemID/Link/Texture/Quality/Count` — player equipment
 //!   queries plus bag-slot texture fallbacks.
 
 use super::missing_surface::item_link_for_id;
+use crate::event::{Event, EventArg};
 use crate::items;
 use crate::lua_api::SimState;
-use crate::lua_api::methods::borrow_state;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut};
 use crate::lua_api::state_types::CursorInfo;
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
@@ -130,16 +133,61 @@ fn can_inspect(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let can = {
         let st = borrow_state(state)?;
-        match unit.as_str() {
-            "player" | "pet" | "vehicle" => true,
-            "target" => st.current_target.as_ref().is_some_and(|t| t.is_player),
-            "focus" => st.current_focus.as_ref().is_some_and(|t| t.is_player),
-            other => crate::lua_api::globals::unit_api::parse_party_index(other)
-                .is_some_and(|idx| st.party_group_active && idx < st.party_members.len()),
-        }
+        can_inspect_unit(&st, &unit)
     };
     state.push(Val::Bool(can));
     Ok(1)
+}
+
+fn notify_inspect(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let guid = {
+        let st = borrow_state(state)?;
+        if !can_inspect_unit(&st, &unit) {
+            return Ok(0);
+        }
+        inspect_guid_for_unit(&st, &unit)
+    };
+    borrow_state_mut(state)?.events.push(Event {
+        name: "INSPECT_READY".to_string(),
+        args: vec![EventArg::String(guid)],
+    });
+    Ok(0)
+}
+
+fn can_inspect_unit(st: &SimState, unit: &str) -> bool {
+    match unit {
+        "player" | "pet" | "vehicle" => true,
+        "target" => st
+            .current_target
+            .as_ref()
+            .is_some_and(|target| target.is_player),
+        "focus" => st
+            .current_focus
+            .as_ref()
+            .is_some_and(|target| target.is_player),
+        other => crate::lua_api::globals::unit_api::parse_party_index(other)
+            .is_some_and(|idx| st.party_group_active && idx < st.party_members.len()),
+    }
+}
+
+fn inspect_guid_for_unit(st: &SimState, unit: &str) -> String {
+    match unit {
+        "player" | "pet" | "vehicle" => "Player-0000-00000001".to_string(),
+        "target" => st
+            .current_target
+            .as_ref()
+            .map(|target| target.guid.clone())
+            .unwrap_or_else(|| "Creature-0000-00000000".to_string()),
+        "focus" => st
+            .current_focus
+            .as_ref()
+            .map(|focus| focus.guid.clone())
+            .unwrap_or_else(|| "Creature-0000-00000000".to_string()),
+        other => crate::lua_api::globals::unit_api::parse_party_index(other)
+            .map(|idx| format!("Player-0000-000000{:02}", idx + 2))
+            .unwrap_or_else(|| "Creature-0000-00000000".to_string()),
+    }
 }
 
 fn player_equipped_item_id(state: &mut LuaState, unit: &str, slot: i32) -> Option<u32> {
@@ -307,6 +355,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "CanLootUnit", can_loot_unit)?;
     LuaApiMut::register_function(lua, "CanMerchant", can_merchant)?;
     LuaApiMut::register_function(lua, "CanInspect", can_inspect)?;
+    LuaApiMut::register_function(lua, "NotifyInspect", notify_inspect)?;
     LuaApiMut::register_function(lua, "GetInventoryItemID", get_inventory_item_id)?;
     LuaApiMut::register_function(lua, "GetInventoryItemTexture", get_inventory_item_texture)?;
     LuaApiMut::register_function(lua, "GetInventoryItemLink", get_inventory_item_link)?;

@@ -1,7 +1,10 @@
 #![cfg(feature = "client-mists")]
 
+use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::process::Command;
+
+const MISTS_PANEL_ROW_COUNT: &str = "31 panel rows validated";
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -62,7 +65,7 @@ fn runner_manifest_covers_every_mists_panel_baseline_row() {
         "runner manifest validation failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
     assert!(
-        stdout.contains("23 panel rows validated"),
+        stdout.contains(MISTS_PANEL_ROW_COUNT),
         "runner should report all current panel rows, got:\n{stdout}"
     );
 }
@@ -84,7 +87,7 @@ fn runner_manifest_accepts_saved_vars_mode() {
         "saved-vars runner validation failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
     assert!(
-        stdout.contains("23 panel rows validated"),
+        stdout.contains(MISTS_PANEL_ROW_COUNT),
         "saved-vars mode should still validate all panel rows, got:\n{stdout}"
     );
 }
@@ -106,7 +109,7 @@ fn runner_manifest_accepts_addon_mode() {
         "addon-mode runner validation failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
     assert!(
-        stdout.contains("23 panel rows validated"),
+        stdout.contains(MISTS_PANEL_ROW_COUNT),
         "addon mode should still validate all panel rows, got:\n{stdout}"
     );
 }
@@ -174,6 +177,56 @@ fn live_gui_smoke_runner_accepts_focused_button_validation() {
         stdout.contains("1 Mists live GUI micro-button row(s) validated"),
         "focused live GUI smoke should validate exactly one row, got:\n{stdout}"
     );
+}
+
+#[test]
+fn lod_audit_documents_every_mists_load_on_demand_addon() {
+    let audit_path = repo_root().join("docs/baselines/mists-lod-audit.md");
+    let audit = std::fs::read_to_string(&audit_path).expect("failed to read Mists LoD audit");
+    let audited_addons = audited_lod_addons(&audit);
+    let addon_root = repo_root().join("Interface/BlizzardUI/Mists/AddOns");
+    let addon_entries =
+        std::fs::read_dir(&addon_root).expect("failed to read Mists Blizzard addons");
+    let missing: Vec<_> = addon_entries
+        .map(|entry| entry.expect("failed to read addon directory entry"))
+        .filter(|entry| {
+            let path = entry.path();
+            path.is_dir() && addon_has_load_on_demand_toc(&path)
+        })
+        .map(|entry| entry.file_name().to_string_lossy().into_owned())
+        .filter(|addon_name| !audited_addons.contains(addon_name.as_str()))
+        .collect();
+
+    assert!(
+        missing.is_empty(),
+        "Mists LoD audit is missing addon rows: {missing:?}"
+    );
+}
+
+fn audited_lod_addons(audit: &str) -> BTreeSet<&str> {
+    audit
+        .lines()
+        .filter_map(|line| {
+            let mut columns = line.split('|').map(str::trim);
+            columns.next()?;
+            let addon_name = columns.next()?;
+            addon_name.starts_with("Blizzard_").then_some(addon_name)
+        })
+        .collect()
+}
+
+fn addon_has_load_on_demand_toc(addon_dir: &std::path::Path) -> bool {
+    let Ok(entries) = std::fs::read_dir(addon_dir) else {
+        return false;
+    };
+
+    entries.filter_map(Result::ok).any(|entry| {
+        let path = entry.path();
+        path.extension().is_some_and(|ext| ext == "toc")
+            && std::fs::read_to_string(&path)
+                .map(|toc| toc.contains("## LoadOnDemand: 1"))
+                .unwrap_or(false)
+    })
 }
 
 #[test]

@@ -12,6 +12,12 @@
 //!                                              the player has no guild.
 //! - `GuildControlGetRankFlags(rankIndex?)`   — flag table (`{ bool, bool,
 //!                                              ... }`); `{}` when none.
+//! - `C_GuildInfo.GuildControlGetRankFlags(rankIndex?)` — namespace alias for
+//!                                                        the same data.
+//! - `GetNumMembersInRank(rankIndex)`         — number of roster entries with
+//!                                              the 1-based rank index.
+//! - `GuildControlGetAllowedShifts(rankIndex)` — whether a rank can move up
+//!                                               or down in the editable list.
 //!
 //! The sim models `world.guild_ranks: Vec<GuildRank>` plus a 1-based
 //! `world.guild_selected_rank`. Admin API:
@@ -19,7 +25,9 @@
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 /// Resolve the 1-based rank index the caller asked about: explicit arg
@@ -92,6 +100,44 @@ pub fn guild_control_get_num_ranks(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn get_num_members_in_rank(state: &mut LuaState) -> LuaResult<u32> {
+    let rank = Option::<f64>::from_stack(state, 1)?
+        .map(|n| n as i32)
+        .unwrap_or(0);
+    let count = {
+        let sim = borrow_state(state)?;
+        if sim.world.guild_name.is_some() && rank > 0 {
+            sim.world
+                .guild_members
+                .iter()
+                .filter(|member| member.rank_index == rank)
+                .count() as f64
+        } else {
+            0.0
+        }
+    };
+    state.push(Val::Num(count));
+    Ok(1)
+}
+
+pub fn guild_control_get_allowed_shifts(state: &mut LuaState) -> LuaResult<u32> {
+    let rank = Option::<f64>::from_stack(state, 1)?
+        .map(|n| n as i32)
+        .unwrap_or(0);
+    let (can_shift_up, can_shift_down) = {
+        let sim = borrow_state(state)?;
+        let rank_count = sim.world.guild_ranks.len() as i32;
+        if sim.world.guild_name.is_some() && rank > 1 && rank <= rank_count {
+            (rank > 2, rank < rank_count)
+        } else {
+            (false, false)
+        }
+    };
+    state.push(Val::Bool(can_shift_up));
+    state.push(Val::Bool(can_shift_down));
+    Ok(2)
+}
+
 pub fn guild_control_get_rank_flags(state: &mut LuaState) -> LuaResult<u32> {
     let flags = resolve_rank_index(state, 1)?.and_then(|idx| {
         borrow_state(state)
@@ -118,9 +164,45 @@ pub fn guild_control_get_rank_flags(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn ensure_c_guild_info_table(state: &mut LuaState) -> GcRef<Table> {
+    let key = state.gc.intern_string_static(b"C_GuildInfo");
+    let global = state.global;
+    let existing = state
+        .gc
+        .tables
+        .get(global)
+        .map(|table| table.get_str(key, &state.gc.string_arena));
+    if let Some(Val::Table(table_ref)) = existing {
+        return table_ref;
+    }
+
+    let new_table = create_table(state);
+    let Val::Table(table_ref) = new_table else {
+        unreachable!("create_table must return a table");
+    };
+    if let Some(global_table) = state.gc.tables.get_mut(global) {
+        let _ = global_table.raw_set(Val::Str(key), new_table, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(global);
+    table_ref
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
+    let c_guild_info = ensure_c_guild_info_table(state);
+
+    register_legacy_guild_control_globals(state)?;
+    table_set_rust_fn_static(
+        state,
+        c_guild_info,
+        "GuildControlGetRankFlags",
+        guild_control_get_rank_flags,
+    )?;
+    Ok(())
+}
+
+fn register_legacy_guild_control_globals(state: &mut LuaState) -> LuaResult<()> {
     let g = state.global;
     table_set_rust_fn_static(state, g, "GuildControlSetRank", guild_control_set_rank)?;
     table_set_rust_fn_static(
@@ -140,6 +222,13 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         g,
         "GuildControlGetRankFlags",
         guild_control_get_rank_flags,
+    )?;
+    table_set_rust_fn_static(state, g, "GetNumMembersInRank", get_num_members_in_rank)?;
+    table_set_rust_fn_static(
+        state,
+        g,
+        "GuildControlGetAllowedShifts",
+        guild_control_get_allowed_shifts,
     )?;
     Ok(())
 }

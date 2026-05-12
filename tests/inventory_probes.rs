@@ -146,3 +146,32 @@ fn can_inspect_false_for_empty_target() {
     let b: bool = env.eval(r#"return CanInspect("target")"#).unwrap();
     assert!(!b);
 }
+
+#[test]
+fn notify_inspect_queues_inspect_ready_for_player_guid() {
+    let env = env();
+    env.exec(r#"NotifyInspect("player")"#).unwrap();
+
+    let has_event = env.state().borrow().events.pending().iter().any(|event| {
+        event.name == "INSPECT_READY"
+            && event.args.iter().any(|arg| {
+                matches!(
+                    arg,
+                    wow_ui_sim::event::EventArg::String(guid)
+                        if guid == "Player-0000-00000001"
+                )
+            })
+    });
+
+    assert!(has_event);
+}
+
+#[test]
+fn notify_inspect_ignores_uninspectable_target() {
+    let env = env();
+    env.state().borrow_mut().current_target = None;
+    let before = env.state().borrow().events.pending().len();
+    env.exec(r#"NotifyInspect("target")"#).unwrap();
+    let after = env.state().borrow().events.pending().len();
+    assert_eq!(after, before);
+}

@@ -15,6 +15,9 @@
 //!   members={}, or nothing if no data.
 //! - `IsMythicPlusActive()` — returns the `is_active` bool.
 //! - `IsWeeklyRewardAvailable()` — returns the `is_weekly_reward_available` bool.
+//! - `RequestCurrentAffixes()` / `RequestMapInfo()` / `RequestRewards()` — no-ops.
+//! - `C_ChallengeMode.GetMapTable()` / `GetMapUIInfo()` — seeded Mists-era
+//!   challenge dungeon rows for the legacy ChallengesFrame.
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
@@ -78,22 +81,69 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
         "IsWeeklyRewardAvailable",
         is_weekly_reward_available,
     )?;
-    let challenge_mode = ensure_namespace(state, "C_ChallengeMode")?;
-    table_set_rust_fn_static(state, challenge_mode, "GetMapTable", get_map_table)?;
-    table_set_rust_fn_static(state, challenge_mode, "GetAffixInfo", get_affix_info)?;
-    table_set_rust_fn_static(
-        state,
-        challenge_mode,
-        "GetLeaverPenaltyWarningTimeLeft",
-        get_leaver_penalty_warning_time_left,
-    )?;
+    table_set_rust_fn_static(state, ns, "RequestCurrentAffixes", noop)?;
+    table_set_rust_fn_static(state, ns, "RequestMapInfo", noop)?;
+    table_set_rust_fn_static(state, ns, "RequestRewards", noop)?;
+    register_challenge_mode_surface(state)?;
     Ok(())
 }
 
-fn get_map_table(state: &mut LuaState) -> LuaResult<u32> {
+fn register_challenge_mode_surface(state: &mut LuaState) -> LuaResult<()> {
+    let ns = ensure_namespace(state, "C_ChallengeMode")?;
+    table_set_rust_fn_static(state, ns, "GetMapTable", challenge_get_map_table)?;
+    table_set_rust_fn_static(state, ns, "GetMapUIInfo", challenge_get_map_ui_info)?;
+    table_set_rust_fn_static(state, ns, "GetAffixInfo", get_affix_info)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetChallengeBestTime",
+        challenge_get_challenge_best_time,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetLeaverPenaltyWarningTimeLeft",
+        get_leaver_penalty_warning_time_left,
+    )?;
+    table_set_rust_fn_static(state, ns, "RequestLeaders", noop)?;
+    Ok(())
+}
+
+fn challenge_get_map_table(state: &mut LuaState) -> LuaResult<u32> {
     let maps = create_table(state);
+    set_table_array(state, maps, 1, Val::Num(2.0));
     state.push(maps);
     Ok(1)
+}
+
+fn challenge_get_map_ui_info(state: &mut LuaState) -> LuaResult<u32> {
+    let challenge_id = i32::from_stack(state, 1)?;
+    let (name, map_id) = challenge_map_ui_info(challenge_id);
+    let name = create_string(state, name);
+    state.push(name);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Num(map_id as f64));
+    Ok(6)
+}
+
+fn challenge_map_ui_info(challenge_id: i32) -> (&'static str, i32) {
+    match challenge_id {
+        2 => ("Temple of the Jade Serpent", 429),
+        _ => ("Unknown Challenge", 0),
+    }
+}
+
+fn challenge_get_challenge_best_time(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(2)
+}
+
+fn noop(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }
 
 fn get_affix_info(state: &mut LuaState) -> LuaResult<u32> {
