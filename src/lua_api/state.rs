@@ -234,6 +234,7 @@ macro_rules! build_empty_sim_state {
             pet_stables_open: false,
             merchant_items: Vec::new(),
             loot_slots: Vec::new(),
+            last_loot_roll_choice: None,
             auction_browse_items: Vec::new(),
             loot_method: LootMethodState::default(),
             gossip: GossipState::default(),

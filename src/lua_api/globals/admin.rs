@@ -46,7 +46,10 @@ use super::admin_crafting::{
     clear_known_recipes, learn_recipe, relearn_profession, seed_reagents_for_recipe,
     set_reagent_count, set_selected_profession, unlearn_profession, unlearn_recipe,
 };
-use super::admin_encounter::{end_loot_roll, simulate_boss_kill, start_loot_roll};
+use super::admin_encounter::{
+    add_loot_item, clear_loot, end_loot_roll, get_last_loot_roll_choice, simulate_boss_kill,
+    start_loot_roll,
+};
 use super::admin_equipment::{equip_item, unequip_item};
 use super::admin_events::{fire_event_admin, toggle_debug_anchors, toggle_debug_borders};
 use super::admin_mail::{add_mail, clear_inbox, set_inbox_count};
@@ -381,6 +384,9 @@ fn register_inventory_misc(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("ToggleDebugAnchors", toggle_debug_anchors)?;
     let b = super::admin_quests::register_quests(b)?
         .set_function("SimulateBossKill", simulate_boss_kill)?
+        .set_function("AddLootItem", add_loot_item)?
+        .set_function("ClearLoot", clear_loot)?
+        .set_function("GetLastLootRollChoice", get_last_loot_roll_choice)?
         .set_function("StartLootRoll", start_loot_roll)?
         .set_function("EndLootRoll", end_loot_roll)?;
     register_crafting(b)

@@ -48,8 +48,26 @@ fn get_num_loot_items_zero_when_no_loot_window() {
 
 #[test]
 fn get_num_loot_items_counts_seeded_slots() {
+    use wow_ui_sim::lua_api::state::BagItem;
+
     let env = env();
-    env.state().borrow_mut().loot_slots = vec![6948, 19019, 36942];
+    env.state().borrow_mut().loot_slots = vec![
+        BagItem {
+            item_id: 6948,
+            stack_count: 1,
+            hyperlink: None,
+        },
+        BagItem {
+            item_id: 19019,
+            stack_count: 1,
+            hyperlink: None,
+        },
+        BagItem {
+            item_id: 36942,
+            stack_count: 1,
+            hyperlink: None,
+        },
+    ];
     let n: i32 = env.eval("return GetNumLootItems()").unwrap();
     assert_eq!(n, 3);
 }
@@ -76,7 +94,11 @@ fn get_merchant_num_items_counts_seeded_items() {
 #[test]
 fn get_num_auction_items_list_reports_browse_size() {
     let env = env();
-    env.state().borrow_mut().auction_browse_items = vec![6948; 12];
+    {
+        let mut state = env.state().borrow_mut();
+        state.auction_browse_results.clear();
+        state.auction_browse_items = vec![6948; 12];
+    }
     let (n, total): (i32, i32) = env.eval(r#"return GetNumAuctionItems("list")"#).unwrap();
     assert_eq!(n, 12);
     assert_eq!(total, 12);

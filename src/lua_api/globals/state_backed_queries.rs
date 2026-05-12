@@ -11,6 +11,7 @@ use crate::lua_api::methods::{
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script, protected_call_state};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::{c_api::item_spell::item_link_for_id, items};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -26,6 +27,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLootRollItemLink", get_loot_roll_item_link)?;
     LuaApiMut::register_function(lua, "GetLootRollTimeLeft", get_loot_roll_time_left)?;
     LuaApiMut::register_function(lua, "GetActiveLootRollIDs", get_active_loot_roll_ids)?;
+    register_loot_slot_functions(lua)?;
     LuaApiMut::register_function(lua, "UnitRace", unit_race)?;
     LuaApiMut::register_function(lua, "UnitSex", unit_sex)?;
     LuaApiMut::register_function(lua, "UnitHonorLevel", unit_honor_level)?;
@@ -38,6 +40,18 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     register_c_guild(state)?;
     register_c_weekly_rewards(state)?;
+    Ok(())
+}
+
+fn register_loot_slot_functions(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "GetLootSlotInfo", get_loot_slot_info)?;
+    LuaApiMut::register_function(lua, "GetLootSlotLink", get_loot_slot_link)?;
+    LuaApiMut::register_function(lua, "GetLootSlotType", get_loot_slot_type)?;
+    LuaApiMut::register_function(lua, "LootSlotHasItem", loot_slot_has_item)?;
+    LuaApiMut::register_function(lua, "LootSlot", loot_slot)?;
+    LuaApiMut::register_function(lua, "IsFishingLoot", is_fishing_loot)?;
+    LuaApiMut::register_function(lua, "RollOnLoot", roll_on_loot)?;
+    LuaApiMut::register_function(lua, "ConfirmLootRoll", confirm_loot_roll)?;
     Ok(())
 }
 
@@ -166,6 +180,126 @@ fn get_active_loot_roll_ids(state: &mut LuaState) -> LuaResult<u32> {
     }
     state.push(array);
     Ok(1)
+}
+
+fn loot_slot_index(state: &mut LuaState) -> LuaResult<Option<usize>> {
+    let slot = i32::from_stack(state, 1)?;
+    Ok((slot > 0).then_some((slot - 1) as usize))
+}
+
+fn get_loot_slot_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(index) = loot_slot_index(state)? else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let Some(slot) = borrow_state(state)?.loot_slots.get(index).cloned() else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let item = items::get_item(slot.item_id);
+    let texture = item
+        .map(|item| item.icon_file_data_id)
+        .filter(|texture| *texture != 0)
+        .unwrap_or(134400);
+    let name = item.map(|item| item.name).unwrap_or("Unknown Item");
+    let quality = item.map(|item| item.quality).unwrap_or(1);
+
+    let name = create_string(state, name);
+    state.push(Val::Num(texture as f64));
+    state.push(name);
+    state.push(Val::Num(slot.stack_count.max(1) as f64));
+    state.push(Val::Nil);
+    state.push(Val::Num(quality as f64));
+    state.push(Val::Bool(false));
+    Ok(6)
+}
+
+fn get_loot_slot_link(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(index) = loot_slot_index(state)? else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let link = borrow_state(state)?.loot_slots.get(index).and_then(|slot| {
+        slot.hyperlink
+            .clone()
+            .or_else(|| item_link_for_id(slot.item_id))
+    });
+    match link {
+        Some(link) => {
+            let link = create_string(state, &link);
+            state.push(link);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_loot_slot_type(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(index) = loot_slot_index(state)? else {
+        state.push(Val::Num(0.0));
+        return Ok(1);
+    };
+    let slot_type = if borrow_state(state)?.loot_slots.get(index).is_some() {
+        1.0
+    } else {
+        0.0
+    };
+    state.push(Val::Num(slot_type));
+    Ok(1)
+}
+
+fn loot_slot_has_item(state: &mut LuaState) -> LuaResult<u32> {
+    let has_item = loot_slot_index(state)?.is_some_and(|index| {
+        borrow_state(state).is_ok_and(|sim| sim.loot_slots.get(index).is_some())
+    });
+    state.push(Val::Bool(has_item));
+    Ok(1)
+}
+
+fn loot_slot(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(index) = loot_slot_index(state)? else {
+        return Ok(0);
+    };
+    let removed = {
+        let mut sim = borrow_state_mut(state)?;
+        if index < sim.loot_slots.len() {
+            sim.loot_slots.remove(index);
+            sim.loot_frame_open = !sim.loot_slots.is_empty();
+            true
+        } else {
+            false
+        }
+    };
+    if removed {
+        dispatch_event_now(state, "LOOT_SLOT_CLEARED", &[Val::Num((index + 1) as f64)])?;
+    }
+    Ok(0)
+}
+
+fn is_fishing_loot(state: &mut LuaState) -> LuaResult<u32> {
+    let is_fishing = borrow_state(state)?
+        .loot_slots
+        .iter()
+        .any(|slot| slot.item_id == 6358);
+    state.push(Val::Bool(is_fishing));
+    Ok(1)
+}
+
+fn roll_on_loot(state: &mut LuaState) -> LuaResult<u32> {
+    let roll_id = i32::from_stack(state, 1)?;
+    let roll_type = i32::from_stack(state, 2)?;
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.world.loot_rolls.remove(&roll_id);
+        sim.last_loot_roll_choice = Some(roll_type);
+    }
+    dispatch_event_now(state, "CANCEL_LOOT_ROLL", &[Val::Num(roll_id as f64)])?;
+    Ok(0)
+}
+
+fn confirm_loot_roll(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }
 
 fn unit_race(state: &mut LuaState) -> LuaResult<u32> {
