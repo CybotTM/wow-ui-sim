@@ -1,8 +1,9 @@
 # Per-profile lua-errors baselines
 
 Snapshots of `wow-sim --no-addons --no-saved-vars lua-errors` output for each
-client profile. Captured 2026-04-30 at the heads documented in
-`scripts/setup-blizzard-ui.sh`.
+client profile. The original cross-profile set was captured 2026-04-30 at the
+heads documented in `scripts/setup-blizzard-ui.sh`; individual profile
+snapshots may be refreshed as their startup baselines become clean.
 
 ## Boot error counts
 
@@ -10,13 +11,16 @@ client profile. Captured 2026-04-30 at the heads documented in
 |--------------|------------------:|------------|
 | retail       |                 0 | `Gethe/wow-ui-source@b062d332` (12.0.5) |
 | wrath        |               128 | `Gethe/wow-ui-source@c4e0255f` (3.3.5) |
-| mists        |                54 | `Gethe/wow-ui-source@33d87412` (classic) |
+| mists        |                 0 | `Gethe/wow-ui-source@33d87412` (classic) |
 | era          |                98 | `Gethe/wow-ui-source@e0099491` (1.15.8 build 67156) |
 | anniversary  |                93 | `Gethe/wow-ui-source@b29b0d0a` (2.5.5 build 67157) |
 
 **Phase 7.5 reduction:** Era 124 → 98 (−26), Anniversary 118 → 93 (−25) after
 adding `src/era/compat_bootstrap.lua` (~30 vanilla-only stub globals shared
 between both profiles).
+
+**Mists panel parity refresh:** Mists 54 → 0 after the Pandaria panel parity
+audit reached a clean startup baseline.
 
 Snapshots are stored as `<profile>-lua-errors.json` next to this README.
 Re-capture by running, for each profile:

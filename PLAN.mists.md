@@ -42,13 +42,18 @@ Cross-cutting follow-ups:
 
 - [x] Re-run `scripts/test-classic-addons.sh --profile mists` after each panel batch lands; keep addon-induced errors at zero.
 - [x] Capture a panel parity baseline under `docs/baselines/mists-panels.md` (one row per panel: status, screenshot, gap notes) once the audit starts producing real signal.
-- [ ] Decide whether to refresh `docs/baselines/mists-lua-errors.json` after panel parity is reached, or keep it as the historical Phase 7.4 capture.
+- [x] Decide whether to refresh `docs/baselines/mists-lua-errors.json` after panel parity is reached, or keep it as the historical Phase 7.4 capture.
 
 Latest addon harness verification: `scripts/test-classic-addons.sh --profile mists`
 completed with `passed: 9` and `failed: 0`. Each
 `target/addon-harness/*-lua-errors.json` output remained an empty array, so all
 installed Mists addon targets stayed at `0` total Lua errors and `0`
 addon-induced errors.
+
+Mists `lua-errors` baseline decision: refreshed
+`docs/baselines/mists-lua-errors.json` to the current clean `[]` capture after
+panel parity reached zero startup errors. The old Phase 7.4 non-empty snapshot
+is no longer the active regression baseline.
 
 ## Current State
 
@@ -466,11 +471,10 @@ addon-specific fixes should follow the existing `tools/classic-addon-compat`
 layout documented in `tools/classic-addon-compat/README.md`; shared gaps still
 belong in the Mists bootstrap or Rust backing systems.
 
-Baseline guardrail: `docs/baselines/mists-lua-errors.json` was not updated
-during the cleanup. It remains the historical Phase 7.4 capture, and
-`git diff -- docs/baselines/mists-lua-errors.json` is empty. Do not rewrite it
-to bless startup errors; only refresh it after clean base startup is the
-intended documented baseline.
+Baseline guardrail: `docs/baselines/mists-lua-errors.json` is now refreshed to
+the clean panel-parity baseline because base Mists startup reports `0` distinct
+errors. Do not rewrite it to bless future startup errors; only refresh it again
+after another verified clean capture.
 
 ## Notes
 
