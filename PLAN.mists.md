@@ -16,7 +16,12 @@ Parity hardening TODO:
 
 - [x] Build a scripted Mists panel parity runner that opens every row in `docs/baselines/mists-panels.md`, records `lua-errors`, and fails on missing root frames, hidden stub-only frames, or empty render output.
 - [x] Replace the `test-backed` placeholders in `docs/baselines/mists-panels.md` with retained screenshot or frame-dump artifact paths for every panel row.
-- [ ] Audit each Mists panel test for real interaction assertions, not just load/show coverage, and add follow-up tasks for any panel that only proves startup.
+- [x] Audit each Mists panel test for real interaction assertions, not just load/show coverage, and add follow-up tasks for any panel that only proves startup.
+- [ ] Add Communities/Club Finder interaction coverage: select finder rows, switch finder modes, and assert the visible finder detail state changes instead of only showing `CommunitiesFrame`.
+- [ ] Add World Map interaction coverage: exercise zoom or map navigation plus a quest-pin click/selection path, not only map load and seeded POI data.
+- [ ] Add Character subpanel interaction coverage for titles and equipment manager flows, since current Mists character tests focus on gear slots and reputation rows.
+- [ ] Add Talents/Glyphs mutation coverage: select a Mists talent row option and glyph socket path, then assert the selected/learned state changes.
+- [ ] Add Collections item-action coverage for mount, toy, and heirloom rows; current coverage switches tabs and verifies data, but does not prove row actions work.
 - [ ] Run the installed Mists addon matrix with normal saved variables enabled and record whether saved-var-backed startup still stays at zero addon-induced errors.
 - [ ] Add a CI-friendly guard that enforces the zero Mists `lua-errors` baseline and the scripted panel parity runner.
 
@@ -75,6 +80,14 @@ Panel artifact baseline: `docs/baselines/mists-panels.md` now references the
 retained `target/mists-panel-parity/<slug>/screenshot.webp` and
 `target/mists-panel-parity/<slug>/dump-tree.txt` outputs for every panel row.
 The runner test rejects reintroducing `test-backed` placeholders.
+
+Mists panel interaction audit: tests with strong interaction/state assertions
+include quest/objective tracking, mail, auction house, bank/guild bank, trade,
+PvP queues, LFG/LFR/Raid Finder, pet journal/battle pets, achievements/calendar,
+encounter journal, currency/token, macro/keybindings, interface options, action
+bars, loot, and game menu options. Follow-up checkboxes above track the panels
+where coverage still proves mostly load/render/data rather than a user-visible
+interaction state change.
 
 ## Current State
 
