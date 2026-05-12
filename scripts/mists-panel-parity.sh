@@ -17,8 +17,10 @@ TIMEOUT_SECONDS=120
 PANEL_FILTER=""
 VALIDATE_ONLY=0
 SKIP_BUILD=0
+LOAD_SAVED_VARS=0
 UPDATE_VISUAL_BASELINE=0
 VISUAL_UPDATE_FILE=""
+OUT_DIR_SET=0
 
 usage() {
     sed -n '2,/^set -euo/p' "$0" | sed 's/^# \?//;$d'
@@ -27,17 +29,27 @@ usage() {
 while [ $# -gt 0 ]; do
     case "$1" in
         --baseline) BASELINE="$2"; shift 2 ;;
-        --out-dir) OUT_DIR="$2"; shift 2 ;;
+        --out-dir) OUT_DIR="$2"; OUT_DIR_SET=1; shift 2 ;;
         --visual-baseline) VISUAL_BASELINE="$2"; shift 2 ;;
         --panel) PANEL_FILTER="$2"; shift 2 ;;
         --timeout) TIMEOUT_SECONDS="$2"; shift 2 ;;
         --skip-build) SKIP_BUILD=1; shift ;;
+        --with-saved-vars) LOAD_SAVED_VARS=1; shift ;;
         --update-visual-baseline) UPDATE_VISUAL_BASELINE=1; shift ;;
         --validate-only) VALIDATE_ONLY=1; shift ;;
         --help|-h) usage; exit 0 ;;
         *) echo "ERROR: unknown argument '$1'" >&2; exit 2 ;;
     esac
 done
+
+if [ "$LOAD_SAVED_VARS" -eq 1 ] && [ "$OUT_DIR_SET" -eq 0 ]; then
+    OUT_DIR="$REPO_ROOT/target/mists-panel-parity-with-saved-vars"
+fi
+
+SIM_SAVED_VAR_ARGS=(--no-saved-vars)
+if [ "$LOAD_SAVED_VARS" -eq 1 ]; then
+    SIM_SAVED_VAR_ARGS=()
+fi
 
 declare -A PANEL_SLUGS=()
 declare -A PANEL_ROOTS=()
@@ -180,7 +192,11 @@ LUA
 }
 
 run_wow_sim() {
-    WOW_SIM_NO_ADDONS=1 WOW_SIM_NO_SAVED_VARS=1 timeout "$TIMEOUT_SECONDS" "$REPO_ROOT/target/debug/wow-sim" "$@"
+    local env_args=(WOW_SIM_NO_ADDONS=1)
+    if [ "$LOAD_SAVED_VARS" -eq 0 ]; then
+        env_args+=(WOW_SIM_NO_SAVED_VARS=1)
+    fi
+    env "${env_args[@]}" timeout "$TIMEOUT_SECONDS" "$REPO_ROOT/target/debug/wow-sim" "$@"
 }
 
 fail_if_exec_or_lua_error() {
@@ -296,17 +312,17 @@ run_panel() {
     write_panel_lua "$panel" "$root" "$lua_file"
 
     echo "=== $slug: $panel ==="
-    run_wow_sim --no-addons --no-saved-vars --exec-lua "@$lua_file" lua-errors \
+    run_wow_sim --no-addons "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" lua-errors \
         > "$json_file" 2> "$lua_stderr"
     fail_if_exec_or_lua_error "$panel lua-errors" "$lua_stderr" "$json_file"
     verify_lua_errors_json "$panel" "$json_file"
 
-    run_wow_sim --no-addons --no-saved-vars --exec-lua "@$lua_file" dump-tree --filter-key "$root" \
+    run_wow_sim --no-addons "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" dump-tree --filter-key "$root" \
         > "$dump_file" 2> "$dump_stderr"
     fail_if_exec_or_lua_error "$panel dump-tree" "$dump_stderr" "$dump_file"
     verify_dump_tree "$panel" "$slug" "$root" "$dump_file"
 
-    run_wow_sim --no-addons --no-saved-vars --exec-lua "@$lua_file" screenshot \
+    run_wow_sim --no-addons "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" screenshot \
         --filter "$root" --output "$screenshot_base" \
         > "$screenshot_stdout" 2> "$screenshot_stderr"
     fail_if_exec_or_lua_error "$panel screenshot" "$screenshot_stderr" "$screenshot_stdout"

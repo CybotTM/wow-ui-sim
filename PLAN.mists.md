@@ -28,7 +28,7 @@ Parity hardening TODO:
 - [x] Add visual artifact comparison for the Mists panel parity runner so CI catches blank or materially-regressed panel renders, not just missing frame roots.
 - [x] Audit Mists panel interactions against retail interaction coverage and add parity tests for any retail-supported workflow still missing under `client-mists`.
 - [x] Add a low-signal visual-artifact gate to `scripts/mists-panel-parity.sh`: fail rows whose screenshot is mostly background or whose root-frame bounding box is too small for the panel being audited.
-- [ ] Run panel parity with normal SavedVariables enabled and document/fix any panel that regresses only when real WTF state loads.
+- [x] Run panel parity with normal SavedVariables enabled and document/fix any panel that regresses only when real WTF state loads.
 - [ ] Expand the installed-addon matrix beyond startup: run `scripts/mists-panel-parity.sh` once per installed Mists addon enabled and fail on addon-induced panel `lua-errors` or visual regressions.
 - [ ] Add a live connected-GUI Mists smoke runner that clicks every micro-menu/panel opener through `wow-cli`, then asserts `lua-errors` remains empty after real input dispatch.
 - [ ] Audit every Mists Blizzard LoD addon not represented in `docs/baselines/mists-panels.md` and add panel/interaction rows for any user-facing frame still outside the parity matrix.
@@ -98,6 +98,13 @@ hidden roots, dump trees without visible renderable descendants, and screenshots
 with empty render batches. Current verification covered all 23 manifest rows,
 a full sweep through the first 22 rows, and a focused pass for the corrected
 `game-menu-options` row.
+
+SavedVariables-backed panel parity verification:
+`scripts/mists-panel-parity.sh --skip-build --with-saved-vars` completed with
+all 23 panel rows passing. Artifacts were written under
+`target/mists-panel-parity-with-saved-vars/<slug>/`, and no panel produced a
+SavedVariables-only Lua, root-frame, visual-signal, or visual-baseline
+regression.
 
 Panel artifact baseline: `docs/baselines/mists-panels.md` now references the
 retained `target/mists-panel-parity/<slug>/screenshot.webp` and

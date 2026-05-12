@@ -68,6 +68,28 @@ fn runner_manifest_covers_every_mists_panel_baseline_row() {
 }
 
 #[test]
+fn runner_manifest_accepts_saved_vars_mode() {
+    let output = Command::new(repo_root().join("scripts/mists-panel-parity.sh"))
+        .arg("--validate-only")
+        .arg("--with-saved-vars")
+        .current_dir(repo_root())
+        .output()
+        .expect("failed to run Mists panel parity runner");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "saved-vars runner validation failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        stdout.contains("23 panel rows validated"),
+        "saved-vars mode should still validate all panel rows, got:\n{stdout}"
+    );
+}
+
+#[test]
 fn panel_baseline_references_retained_runner_artifacts() {
     let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
     let baseline =
