@@ -26,7 +26,7 @@ Parity hardening TODO:
 - [x] Add a CI-friendly guard that enforces the zero Mists `lua-errors` baseline and the scripted panel parity runner.
 - [x] Expand the CI guard beyond base startup: run the installed Mists addon matrix in CI and fail on any addon-induced `lua-errors` regression.
 - [x] Add visual artifact comparison for the Mists panel parity runner so CI catches blank or materially-regressed panel renders, not just missing frame roots.
-- [ ] Audit Mists panel interactions against retail interaction coverage and add parity tests for any retail-supported workflow still missing under `client-mists`.
+- [x] Audit Mists panel interactions against retail interaction coverage and add parity tests for any retail-supported workflow still missing under `client-mists`.
 
 Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
 
