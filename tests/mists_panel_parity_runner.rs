@@ -133,6 +133,50 @@ fn addon_panel_matrix_validates_installed_mists_addons() {
 }
 
 #[test]
+fn live_gui_smoke_runner_validates_micro_button_rows() {
+    let output = Command::new(repo_root().join("scripts/mists-live-gui-smoke.sh"))
+        .arg("--validate-only")
+        .current_dir(repo_root())
+        .output()
+        .expect("failed to run Mists live GUI smoke validation");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "live GUI smoke validation failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        stdout.contains("14 Mists live GUI micro-button row(s) validated"),
+        "live GUI smoke should cover every Mists micro-button opener, got:\n{stdout}"
+    );
+}
+
+#[test]
+fn live_gui_smoke_runner_accepts_focused_button_validation() {
+    let output = Command::new(repo_root().join("scripts/mists-live-gui-smoke.sh"))
+        .arg("--validate-only")
+        .arg("--button")
+        .arg("CollectionsMicroButton")
+        .current_dir(repo_root())
+        .output()
+        .expect("failed to run focused Mists live GUI smoke validation");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "focused live GUI smoke validation failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        stdout.contains("1 Mists live GUI micro-button row(s) validated"),
+        "focused live GUI smoke should validate exactly one row, got:\n{stdout}"
+    );
+}
+
+#[test]
 fn panel_baseline_references_retained_runner_artifacts() {
     let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
     let baseline =

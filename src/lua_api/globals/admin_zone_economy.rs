@@ -5,10 +5,10 @@
 //! point in admin.rs imports these as pub(super) and weaves
 //! them into the A_Admin TableBuilder chain.
 
-use crate::lua_api::methods::borrow_state_mut;
-use crate::lua_bridge::FromStack;
-use rilua::LuaResult;
+use crate::lua_api::methods::{borrow_state_mut, frame_id_from_stack};
+use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 // ── Zone ──────────────────────────────────────────────────────────────────────
 
@@ -64,6 +64,43 @@ pub(super) fn set_money(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn set_item_level(state: &mut LuaState) -> LuaResult<u32> {
     let ilvl = f64::from_stack(state, 1)?;
     borrow_state_mut(state)?.player.item_level = ilvl as f32;
+    Ok(0)
+}
+
+/// `A_Admin.SetMousePosition(x, y)` — pass nil for either coordinate to clear
+/// the simulated cursor. Drives `GetCursorPosition()` and `Region:IsMouseOver`.
+pub(super) fn set_mouse_position(state: &mut LuaState) -> LuaResult<u32> {
+    let x = Option::<f64>::from_stack(state, 1)?;
+    let y = Option::<f64>::from_stack(state, 2)?;
+    let pos = match (x, y) {
+        (Some(x), Some(y)) => Some((x as f32, y as f32)),
+        _ => None,
+    };
+    borrow_state_mut(state)?.set_mouse_position(pos);
+    Ok(0)
+}
+
+/// `A_Admin.SetMouseOverFrame(frame)` moves the simulated cursor to the
+/// frame's resolved screen-space center and marks that frame as hovered.
+/// Passing nil clears both mouse-over fields.
+pub(super) fn set_mouse_over_frame(state: &mut LuaState) -> LuaResult<u32> {
+    if matches!(stack_val(state, 1), Val::Nil) {
+        let mut st = borrow_state_mut(state)?;
+        st.hovered_frame = None;
+        st.set_mouse_position(None);
+        return Ok(0);
+    }
+
+    let id = frame_id_from_stack(state, 1)?;
+    let mut st = borrow_state_mut(state)?;
+    st.resolve_rect_if_dirty(id);
+    let position = st.widgets.get(id).and_then(|frame| {
+        frame
+            .layout_rect
+            .map(|rect| (rect.x + rect.width / 2.0, rect.y + rect.height / 2.0))
+    });
+    st.hovered_frame = position.map(|_| id);
+    st.set_mouse_position(position);
     Ok(0)
 }
 

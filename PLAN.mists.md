@@ -30,7 +30,7 @@ Parity hardening TODO:
 - [x] Add a low-signal visual-artifact gate to `scripts/mists-panel-parity.sh`: fail rows whose screenshot is mostly background or whose root-frame bounding box is too small for the panel being audited.
 - [x] Run panel parity with normal SavedVariables enabled and document/fix any panel that regresses only when real WTF state loads.
 - [x] Expand the installed-addon matrix beyond startup: run `scripts/mists-panel-parity.sh` once per installed Mists addon enabled and fail on addon-induced panel `lua-errors` or visual regressions.
-- [ ] Add a live connected-GUI Mists smoke runner that clicks every micro-menu/panel opener through `wow-cli`, then asserts `lua-errors` remains empty after real input dispatch.
+- [x] Add a live connected-GUI Mists smoke runner that clicks every micro-menu/panel opener through `wow-cli`, then asserts `lua-errors` remains empty after real input dispatch.
 - [ ] Audit every Mists Blizzard LoD addon not represented in `docs/baselines/mists-panels.md` and add panel/interaction rows for any user-facing frame still outside the parity matrix.
 - [ ] Add a release-profile Mists CI proof command that runs zero `lua-errors`, installed-addon matrix, panel parity, interaction audit, and visual comparison with pipefail-safe logging.
 
