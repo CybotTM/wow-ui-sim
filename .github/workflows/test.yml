@@ -71,10 +71,22 @@ jobs:
         if: always()
         run: ./scripts/diff-lua-errors.sh docs/baselines/${{ matrix.profile }}-lua-errors.json lua-errors.json
 
+      - name: Enforce Mists zero-error and panel parity guard
+        if: matrix.profile == 'mists'
+        run: ./scripts/ci-mists-guard.sh --skip-build
+
       - name: Upload error baseline
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.profile }}-lua-errors
           path: lua-errors.json
+          if-no-files-found: ignore
+
+      - name: Upload Mists panel parity artifacts
+        if: always() && matrix.profile == 'mists'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mists-panel-parity
+          path: target/mists-panel-parity
           if-no-files-found: ignore
