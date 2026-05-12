@@ -15,7 +15,7 @@ In-flight (git status shows uncommitted work):
 Parity hardening TODO:
 
 - [x] Build a scripted Mists panel parity runner that opens every row in `docs/baselines/mists-panels.md`, records `lua-errors`, and fails on missing root frames, hidden stub-only frames, or empty render output.
-- [ ] Replace the `test-backed` placeholders in `docs/baselines/mists-panels.md` with retained screenshot or frame-dump artifact paths for every panel row.
+- [x] Replace the `test-backed` placeholders in `docs/baselines/mists-panels.md` with retained screenshot or frame-dump artifact paths for every panel row.
 - [ ] Audit each Mists panel test for real interaction assertions, not just load/show coverage, and add follow-up tasks for any panel that only proves startup.
 - [ ] Run the installed Mists addon matrix with normal saved variables enabled and record whether saved-var-backed startup still stays at zero addon-induced errors.
 - [ ] Add a CI-friendly guard that enforces the zero Mists `lua-errors` baseline and the scripted panel parity runner.
@@ -70,6 +70,11 @@ hidden roots, dump trees without visible renderable descendants, and screenshots
 with empty render batches. Current verification covered all 23 manifest rows,
 a full sweep through the first 22 rows, and a focused pass for the corrected
 `game-menu-options` row.
+
+Panel artifact baseline: `docs/baselines/mists-panels.md` now references the
+retained `target/mists-panel-parity/<slug>/screenshot.webp` and
+`target/mists-panel-parity/<slug>/dump-tree.txt` outputs for every panel row.
+The runner test rejects reintroducing `test-backed` placeholders.
 
 ## Current State
 

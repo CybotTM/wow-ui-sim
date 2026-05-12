@@ -66,3 +66,23 @@ fn runner_manifest_covers_every_mists_panel_baseline_row() {
         "runner should report all current panel rows, got:\n{stdout}"
     );
 }
+
+#[test]
+fn panel_baseline_references_retained_runner_artifacts() {
+    let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
+    let baseline =
+        std::fs::read_to_string(&baseline_path).expect("failed to read Mists panel baseline");
+
+    assert!(
+        !baseline.contains("test-backed:"),
+        "baseline still contains test-backed placeholders"
+    );
+    assert!(
+        baseline.contains("target/mists-panel-parity/character/screenshot.webp"),
+        "baseline should reference retained screenshot artifacts"
+    );
+    assert!(
+        baseline.contains("target/mists-panel-parity/game-menu-options/dump-tree.txt"),
+        "baseline should reference retained frame-dump artifacts"
+    );
+}
