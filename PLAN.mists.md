@@ -21,7 +21,7 @@ Parity hardening TODO:
 - [x] Add World Map interaction coverage: exercise zoom or map navigation plus a quest-pin click/selection path, not only map load and seeded POI data.
 - [x] Add Character subpanel interaction coverage for titles and equipment manager flows, since current Mists character tests focus on gear slots and reputation rows.
 - [x] Add Talents/Glyphs mutation coverage: select a Mists talent row option and glyph socket path, then assert the selected/learned state changes.
-- [ ] Add Collections item-action coverage for mount, toy, and heirloom rows; current coverage switches tabs and verifies data, but does not prove row actions work.
+- [x] Add Collections item-action coverage for mount, toy, and heirloom rows; current coverage switches tabs and verifies data, but does not prove row actions work.
 - [ ] Run the installed Mists addon matrix with normal saved variables enabled and record whether saved-var-backed startup still stays at zero addon-induced errors.
 - [ ] Add a CI-friendly guard that enforces the zero Mists `lua-errors` baseline and the scripted panel parity runner.
 

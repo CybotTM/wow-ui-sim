@@ -89,6 +89,94 @@ fn mists_collections_tabs_render_without_wardrobe() {
     assert_no_lua_errors(&stdout, &stderr);
 }
 
+#[test]
+fn mists_collections_rows_drive_mount_toy_and_heirloom_actions() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(wow_sim_binary())
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            ToggleCollectionsJournal()
+            if not CollectionsJournal or not CollectionsJournal:IsShown() then
+                error("CollectionsJournal did not open")
+            end
+
+            CollectionsJournal_SetTab(CollectionsJournal, 1)
+            CollectionsJournal_UpdateSelectedTab(CollectionsJournal)
+            MountJournal_UpdateMountList()
+            local mountID = C_MountJournal.GetDisplayedMountID(1)
+            if not mountID or mountID == 0 then
+                error("no displayed mount available")
+            end
+
+            local mountButton = { index = 1, spellID = select(2, C_MountJournal.GetDisplayedMountInfo(1)) }
+            MountListItem_OnClick(mountButton, "LeftButton")
+            if MountJournal.selectedMountID ~= mountID then
+                error("mount row click did not select displayed mount")
+            end
+
+            MountJournalMountButton_OnClick(MountJournal.MountButton)
+            local _, _, _, active = C_MountJournal.GetMountInfoByID(mountID)
+            if not active then
+                error("mount action did not summon selected mount")
+            end
+            MountJournalMountButton_OnClick(MountJournal.MountButton)
+            local _, _, _, activeAfterDismiss = C_MountJournal.GetMountInfoByID(mountID)
+            if activeAfterDismiss then
+                error("mount action did not dismiss active mount")
+            end
+
+            C_MountJournal.SetIsFavorite(1, true)
+            local isFavorite = C_MountJournal.GetIsFavorite(1)
+            if not isFavorite then
+                error("mount favorite action did not persist")
+            end
+
+            CollectionsJournal_SetTab(CollectionsJournal, 3)
+            CollectionsJournal_UpdateSelectedTab(CollectionsJournal)
+            local toyID = C_ToyBox.GetToyFromIndex(1)
+            if not toyID or toyID <= 0 then
+                error("no displayed toy available")
+            end
+
+            ToySpellButton_OnClick({ itemID = toyID }, "LeftButton")
+
+            C_ToyBox.SetIsFavorite(toyID, true)
+            if not C_ToyBox.GetIsFavorite(toyID) then
+                error("toy favorite action did not persist")
+            end
+
+            CollectionsJournal_SetTab(CollectionsJournal, 4)
+            CollectionsJournal_UpdateSelectedTab(CollectionsJournal)
+            local heirloomID = C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(1)
+            if not heirloomID or heirloomID == 0 then
+                error("no displayed heirloom available")
+            end
+
+            local beforeCount = GetItemCount(heirloomID)
+            HeirloomsJournalSpellButton_OnClick({ itemID = heirloomID }, "LeftButton")
+            if GetItemCount(heirloomID) <= beforeCount then
+                error("heirloom action did not create an heirloom copy")
+            end
+            "#,
+            "lua-errors",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+}
+
 fn assert_no_lua_errors(stdout: &str, stderr: &str) {
     assert!(
         stdout.trim().ends_with("[]")

@@ -40,31 +40,23 @@ fn displayed_mount_snapshot(
     st: &crate::lua_api::state::SimState,
     index: i32,
 ) -> Option<MountInfoSnapshot> {
-    displayed_mount(st, index).map(MountInfoSnapshot::from_mount)
+    displayed_mount(st, index).map(|mount| MountInfoSnapshot::from_state(st, mount))
 }
 
-fn push_mount_info(
-    state: &mut LuaState,
-    name: &str,
-    spell_id: f64,
-    icon: f64,
-    is_usable: bool,
-    is_collected: bool,
-    mount_id: f64,
-) -> u32 {
-    let name_val = create_string(state, name);
+fn push_mount_info(state: &mut LuaState, info: &MountInfoSnapshot) -> u32 {
+    let name_val = create_string(state, &info.name);
     state.push(name_val);
-    state.push(Val::Num(spell_id));
-    state.push(Val::Num(icon));
-    state.push(Val::Bool(false));
-    state.push(Val::Bool(is_usable));
+    state.push(Val::Num(info.spell_id));
+    state.push(Val::Num(info.icon));
+    state.push(Val::Bool(info.is_active));
+    state.push(Val::Bool(info.is_usable));
     state.push(Val::Num(0.0));
     state.push(Val::Bool(false));
     state.push(Val::Bool(false));
     state.push(Val::Nil);
     state.push(Val::Bool(false));
-    state.push(Val::Bool(is_collected));
-    state.push(Val::Num(mount_id));
+    state.push(Val::Bool(info.is_collected));
+    state.push(Val::Num(info.mount_id));
     12
 }
 
@@ -99,17 +91,22 @@ struct MountInfoSnapshot {
     name: String,
     spell_id: f64,
     icon: f64,
+    is_active: bool,
     is_usable: bool,
     is_collected: bool,
     mount_id: f64,
 }
 
 impl MountInfoSnapshot {
-    fn from_mount(m: &crate::lua_api::state_types::MountData) -> Self {
+    fn from_state(
+        st: &crate::lua_api::state::SimState,
+        m: &crate::lua_api::state_types::MountData,
+    ) -> Self {
         Self {
             name: m.name.clone(),
             spell_id: m.spell_id as f64,
             icon: m.icon as f64,
+            is_active: st.world.active_mount_id == Some(m.mount_id),
             is_usable: m.is_usable,
             is_collected: m.is_collected,
             mount_id: m.mount_id as f64,
@@ -117,15 +114,7 @@ impl MountInfoSnapshot {
     }
 
     fn push(self, state: &mut LuaState) -> u32 {
-        push_mount_info(
-            state,
-            &self.name,
-            self.spell_id,
-            self.icon,
-            self.is_usable,
-            self.is_collected,
-            self.mount_id,
-        )
+        push_mount_info(state, &self)
     }
 }
 
@@ -149,7 +138,7 @@ fn mount_get_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
             .mounts
             .iter()
             .find(|m| m.mount_id == mount_id)
-            .map(MountInfoSnapshot::from_mount)
+            .map(|mount| MountInfoSnapshot::from_state(&st, mount))
     };
     let Some(snapshot) = snapshot else {
         return Ok(0);
@@ -285,8 +274,8 @@ fn register_type_filter_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn register_mount_favorite_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
-    tb.set_function("GetIsFavorite", |state| (false, false).into_stack(state))?
-        .set_function("SetIsFavorite", |_state| Ok(0))?
+    tb.set_function("GetIsFavorite", mount_get_is_favorite)?
+        .set_function("SetIsFavorite", mount_set_is_favorite)?
         .set_function("GetMountLink", |state| {
             state.push(Val::Nil);
             Ok(1)
@@ -298,14 +287,78 @@ fn register_mount_favorite_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
 
 fn register_mount_action_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
     tb.set_function("Summon", |_state| Ok(0))?
-        .set_function("SummonByID", |_state| Ok(0))?
-        .set_function("Dismiss", |_state| Ok(0))?
+        .set_function("SummonByID", mount_summon_by_id)?
+        .set_function("Dismiss", mount_dismiss)?
         .set_function("SetSearch", mount_set_search)?
         .set_function("GetDynamicFlightModeSpellID", |state| {
             (0i32).into_stack(state)
         })?
         .set_function("PickupDynamicFlightMode", |_state| Ok(0))?
         .set_function("SwapDynamicFlightMode", |_state| Ok(0))
+}
+
+fn mount_id_from_display_index(st: &crate::lua_api::state::SimState, index: i32) -> Option<u32> {
+    displayed_mount(st, index)
+        .filter(|mount| mount.is_collected)
+        .map(|mount| mount.mount_id)
+}
+
+fn mount_get_is_favorite(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let result = {
+        let st = borrow_state(state)?;
+        let mount_id = mount_id_from_display_index(&st, index);
+        let is_favorite = mount_id
+            .map(|id| st.world.favorite_mounts.contains(&id))
+            .unwrap_or(false);
+        let can_favorite = mount_id.is_some();
+        (is_favorite, can_favorite)
+    };
+    result.into_stack(state)
+}
+
+fn mount_set_is_favorite(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let is_favorite = bool::from_stack(state, 2)?;
+    let mut st = borrow_state_mut(state)?;
+    let Some(mount_id) = mount_id_from_display_index(&st, index) else {
+        return Ok(0);
+    };
+
+    if is_favorite {
+        st.world.favorite_mounts.insert(mount_id);
+    } else {
+        st.world.favorite_mounts.remove(&mount_id);
+    }
+    Ok(0)
+}
+
+fn mount_summon_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let mount_id = u32::from_stack(state, 1)?;
+    let mut st = borrow_state_mut(state)?;
+    let can_summon_random_favorite = mount_id == 0 && !st.world.favorite_mounts.is_empty();
+    let target_mount_id = if can_summon_random_favorite {
+        st.world.favorite_mounts.iter().copied().min()
+    } else {
+        Some(mount_id)
+    };
+
+    let Some(target_mount_id) = target_mount_id else {
+        return Ok(0);
+    };
+    let is_usable =
+        st.world.mounts.iter().any(|mount| {
+            mount.mount_id == target_mount_id && mount.is_collected && mount.is_usable
+        });
+    if is_usable {
+        st.world.active_mount_id = Some(target_mount_id);
+    }
+    Ok(0)
+}
+
+fn mount_dismiss(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.world.active_mount_id = None;
+    Ok(0)
 }
 
 fn mount_set_search(state: &mut LuaState) -> LuaResult<u32> {
