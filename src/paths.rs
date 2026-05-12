@@ -148,13 +148,36 @@ fn addons_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
 
 fn bundled_addons_path_candidates() -> Vec<PathBuf> {
     let mut paths = Vec::new();
-    if let Ok(exe_path) = std::env::current_exe()
-        && let Some(exe_dir) = exe_path.parent()
-    {
-        paths.push(exe_dir.join("Interface/AddOns"));
+    if let Ok(exe_path) = std::env::current_exe() {
+        paths.extend(bundled_addons_path_candidates_for_exe(&exe_path));
     }
     paths.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/AddOns"));
     paths
+}
+
+fn bundled_addons_path_candidates_for_exe(exe_path: &Path) -> Vec<PathBuf> {
+    let Some(exe_dir) = exe_path.parent() else {
+        return Vec::new();
+    };
+
+    let mut paths = vec![exe_dir.join("Interface/AddOns")];
+    if let Some(resources_dir) = macos_app_resources_dir(exe_dir) {
+        paths.push(resources_dir.join("Interface/AddOns"));
+    }
+
+    paths
+}
+
+fn macos_app_resources_dir(exe_dir: &Path) -> Option<PathBuf> {
+    let contents_dir = exe_dir.parent()?;
+    if exe_dir.file_name()? != "MacOS" {
+        return None;
+    }
+    if contents_dir.file_name()? != "Contents" {
+        return None;
+    }
+
+    Some(contents_dir.join("Resources"))
 }
 
 fn addon_paths_for_install_root(root: &Path) -> [PathBuf; 3] {
@@ -256,4 +279,25 @@ fn env_path(var: &str) -> Option<PathBuf> {
     std::env::var_os(var)
         .filter(|value| !value.is_empty())
         .map(PathBuf::from)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+
+    use super::*;
+
+    #[test]
+    fn bundled_addons_candidates_include_macos_app_resources() {
+        let exe_path = Path::new("/Applications/WoW Sim.app/Contents/MacOS/wow-sim");
+
+        let candidates = bundled_addons_path_candidates_for_exe(exe_path);
+
+        assert!(
+            candidates.contains(&PathBuf::from(
+                "/Applications/WoW Sim.app/Contents/Resources/Interface/AddOns"
+            )),
+            "{candidates:#?}"
+        );
+    }
 }
