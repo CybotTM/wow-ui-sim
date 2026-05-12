@@ -41,7 +41,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 Cross-cutting follow-ups:
 
 - [x] Re-run `scripts/test-classic-addons.sh --profile mists` after each panel batch lands; keep addon-induced errors at zero.
-- [ ] Capture a panel parity baseline under `docs/baselines/mists-panels.md` (one row per panel: status, screenshot, gap notes) once the audit starts producing real signal.
+- [x] Capture a panel parity baseline under `docs/baselines/mists-panels.md` (one row per panel: status, screenshot, gap notes) once the audit starts producing real signal.
 - [ ] Decide whether to refresh `docs/baselines/mists-lua-errors.json` after panel parity is reached, or keep it as the historical Phase 7.4 capture.
 
 Latest addon harness verification: `scripts/test-classic-addons.sh --profile mists`
