@@ -80,18 +80,20 @@ pub(super) fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
     };
     let changed = store_simple_attribute(state, id, &name, value)?;
     let compatibility_dispatch = should_dispatch_unchanged_attribute(&name, value);
-    if (changed || secure_delegate_dispatch || compatibility_dispatch)
-        && let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged")
-    {
+    if changed || secure_delegate_dispatch || compatibility_dispatch {
         let frame = frame_ref(state, id)?;
-        dispatch_attribute_changed(
-            state,
-            handler,
-            frame,
-            name_arg,
-            value,
-            secure_delegate_dispatch,
-        );
+        if let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
+            dispatch_attribute_changed(
+                state,
+                handler,
+                frame,
+                name_arg,
+                value,
+                secure_delegate_dispatch,
+            );
+        } else {
+            dispatch_direct_attribute_changed(state, frame, name_arg, value);
+        }
     }
     Ok(0)
 }
@@ -139,6 +141,39 @@ pub(super) fn dispatch_attribute_changed(
     }
 
     if let Err(error) = call_result {
+        call_error_handler_state(state, &error.to_string());
+    }
+    state.top = call_base;
+}
+
+fn dispatch_direct_attribute_changed(state: &mut LuaState, frame: Val, name: Val, value: Val) {
+    let Ok(dispatcher) = state.load(
+        r#"
+        local frame, name, value = ...
+        local env = debug.getfenv(frame)
+        local fields = env and env[1]
+        local handler = fields and rawget(fields, "OnAttributeChanged")
+        if type(handler) ~= "function" then
+            local ok, direct = pcall(rawget, frame, "OnAttributeChanged")
+            if ok then
+                handler = direct
+            end
+        end
+        if type(handler) == "function" then
+            handler(frame, name, value)
+        end
+        "#,
+    ) else {
+        return;
+    };
+    let call_base = state.top;
+    state.ensure_stack(call_base + 4);
+    state.stack_set(call_base, Val::Function(dispatcher.gc_ref()));
+    state.stack_set(call_base + 1, frame);
+    state.stack_set(call_base + 2, name);
+    state.stack_set(call_base + 3, value);
+    state.top = call_base + 4;
+    if let Err(error) = state.call_function(call_base, 0) {
         call_error_handler_state(state, &error.to_string());
     }
     state.top = call_base;

@@ -32,7 +32,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Encounter Journal (Mists adventure guide)
 - [x] Currency / Token UI (legacy `GetCurrencyListSize` wrapper verified)
 - [x] Macro & key bindings
-- [ ] EditMode / interface options (Mists pre-EditMode — uses InterfaceOptionsFrame)
+- [x] EditMode / interface options (Mists pre-EditMode — uses InterfaceOptionsFrame)
 - [ ] Action bars, micro menu, bag bar, status bars
 - [ ] Nameplates (CVar defaults fixed in triage; verify rendering)
 - [ ] Loot / group loot / personal loot UI

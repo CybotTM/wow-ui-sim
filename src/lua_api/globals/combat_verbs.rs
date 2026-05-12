@@ -13,6 +13,8 @@
 //! - `SpellTargetUnit(unit)`  — no-op when no cast pending; consumes the
 //!   pending cast target when one exists
 //! - `SpellIsTargeting()`     — false until the sim models spell targeting
+//! - `SpellStopCasting()`     — clears the active cast marker and reports
+//!   whether anything was interrupted
 //! - `SpellCanTargetItem()`   — false until item-targeting cursor exists
 //! - `SpellCanTargetItemID()` — false until item-targeting cursor exists
 //! - `SpellStopCasting()`     — clears `SimState.casting`, returns true if it did
@@ -422,6 +424,16 @@ fn spell_is_targeting(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `SpellStopCasting()` — interrupt the active cast marker when one exists.
+fn spell_stop_casting(state: &mut LuaState) -> LuaResult<u32> {
+    let stopped = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.casting.take().is_some()
+    };
+    state.push(Val::Bool(stopped));
+    Ok(1)
+}
+
 /// `SpellCanTargetItem()` — item-targeting cursor is not modeled yet.
 fn spell_can_target_item(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
@@ -581,6 +593,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ClickSpecialAbility", click_special_ability)?;
     LuaApiMut::register_function(lua, "SpellTargetUnit", spell_target_unit)?;
     LuaApiMut::register_function(lua, "SpellIsTargeting", spell_is_targeting)?;
+    LuaApiMut::register_function(lua, "SpellStopCasting", spell_stop_casting)?;
     LuaApiMut::register_function(lua, "SpellCanTargetItem", spell_can_target_item)?;
     LuaApiMut::register_function(lua, "SpellCanTargetItemID", spell_can_target_item_id)?;
     LuaApiMut::register_function(lua, "SpellStopCasting", spell_stop_casting)?;

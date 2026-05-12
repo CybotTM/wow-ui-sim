@@ -6,6 +6,7 @@
 //! WoW don't expose.
 
 const WRATH_COMPAT_BOOTSTRAP_LUA: &str = include_str!("compat_bootstrap.lua");
+#[cfg(feature = "client-wrath")]
 const WRATH_COMPAT_FRAME_PROXIES_LUA: &str = include_str!("compat_frame_proxies.lua");
 
 /// Loads the wrath/mists-shared compat bootstrap (function stubs and Lua-5.0 aliases).

@@ -201,6 +201,32 @@ fn spell_item_targeting_helpers_default_false() {
     );
 }
 
+#[test]
+fn spell_stop_casting_clears_active_cast_and_reports_result() {
+    let env = env();
+    let (stopped, active_cleared, stopped_again): (bool, bool, bool) = env
+        .eval(
+            r#"
+            CastSpellByName("Fireball")
+            local stopped = SpellStopCasting()
+            local activeAfterStop = UnitCastingInfo("player")
+            local stoppedAgain = SpellStopCasting()
+            return stopped, activeAfterStop == nil, stoppedAgain
+            "#,
+        )
+        .unwrap();
+
+    assert!(stopped, "active cast should be interrupted");
+    assert!(
+        active_cleared,
+        "SpellStopCasting should clear UnitCastingInfo"
+    );
+    assert!(
+        !stopped_again,
+        "SpellStopCasting should report false when no cast is active"
+    );
+}
+
 // ── Monotonic cast ids ────────────────────────────────────────────────────────
 
 #[test]

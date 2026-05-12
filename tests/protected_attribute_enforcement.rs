@@ -195,3 +195,28 @@ fn unchanged_scalar_attribute_does_not_refire_on_attribute_changed() {
         "unchanged scalar attributes should not re-fire OnAttributeChanged"
     );
 }
+
+#[test]
+fn set_attribute_dispatches_direct_on_attribute_changed_method() {
+    let env = env();
+    let got: String = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "DirectAttributeChangedMethod", UIParent)
+
+            function frame:OnAttributeChanged(name, value)
+                self.result = name .. "=" .. tostring(value)
+            end
+
+            frame:SetAttribute("open-to-category", 7)
+
+            return frame.result or "missing"
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        got, "open-to-category=7",
+        "SetAttribute should dispatch direct OnAttributeChanged methods"
+    );
+}
