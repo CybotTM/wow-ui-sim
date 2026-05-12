@@ -17,7 +17,7 @@ Parity hardening TODO:
 - [x] Build a scripted Mists panel parity runner that opens every row in `docs/baselines/mists-panels.md`, records `lua-errors`, and fails on missing root frames, hidden stub-only frames, or empty render output.
 - [x] Replace the `test-backed` placeholders in `docs/baselines/mists-panels.md` with retained screenshot or frame-dump artifact paths for every panel row.
 - [x] Audit each Mists panel test for real interaction assertions, not just load/show coverage, and add follow-up tasks for any panel that only proves startup.
-- [ ] Add Communities/Club Finder interaction coverage: select finder rows, switch finder modes, and assert the visible finder detail state changes instead of only showing `CommunitiesFrame`.
+- [x] Add Communities/Club Finder interaction coverage: select finder rows, switch finder modes, and assert the visible finder detail state changes instead of only showing `CommunitiesFrame`.
 - [ ] Add World Map interaction coverage: exercise zoom or map navigation plus a quest-pin click/selection path, not only map load and seeded POI data.
 - [ ] Add Character subpanel interaction coverage for titles and equipment manager flows, since current Mists character tests focus on gear slots and reputation rows.
 - [ ] Add Talents/Glyphs mutation coverage: select a Mists talent row option and glyph socket path, then assert the selected/learned state changes.

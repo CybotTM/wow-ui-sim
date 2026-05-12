@@ -69,11 +69,74 @@ fn mists_social_panels_support_friends_who_guild_and_communities() {
             end
 
             CommunitiesFrame:Show()
-            if CommunitiesFrame.GuildFinderFrame then
-                CommunitiesFrame.GuildFinderFrame:Show()
+            local guildFinder = CommunitiesFrame.GuildFinderFrame
+            if not guildFinder then
+                error("GuildFinderFrame missing")
             end
-            if CommunitiesFrame.CommunityFinderFrame then
-                CommunitiesFrame.CommunityFinderFrame:Show()
+
+            guildFinder:Show()
+            guildFinder.isGuildType = true
+            guildFinder:OnEvent("CLUB_FINDER_PLAYER_PENDING_LIST_RECIEVED", Enum.ClubFinderRequestType.Guild)
+            guildFinder:UpdateType()
+            guildFinder:OnEvent("CLUB_FINDER_CLUB_LIST_RETURNED", Enum.ClubFinderRequestType.Guild)
+
+            if not guildFinder.GuildCards:IsShown() then
+                error("guild finder search cards did not show")
+            end
+            if #guildFinder.GuildCards.CardList < 1 then
+                error("guild finder search has no rows")
+            end
+            local guildCard = guildFinder.GuildCards.Cards and guildFinder.GuildCards.Cards[1]
+            if not (guildCard and guildCard:IsShown() and guildCard.cardInfo) then
+                error("guild finder first search row did not render")
+            end
+            if guildCard.Name:GetText() ~= guildCard.cardInfo.name then
+                error("guild finder search row name did not bind")
+            end
+            if not guildCard.RequestJoin:IsShown() then
+                error("guild finder search row did not expose request state")
+            end
+
+            guildFinder.ClubFinderPendingTab:OnClick()
+            if not guildFinder.PendingGuildCards:IsShown() or guildFinder.GuildCards:IsShown() then
+                error("guild finder pending tab did not switch visible card set")
+            end
+            if #guildFinder.PendingGuildCards.CardList < 1 then
+                error("guild finder pending list has no rows")
+            end
+            local pendingGuildCard = guildFinder.PendingGuildCards.Cards and guildFinder.PendingGuildCards.Cards[1]
+            if not (pendingGuildCard and pendingGuildCard:IsShown()) then
+                error("guild finder first pending row did not render")
+            end
+            if not pendingGuildCard.RequestStatus:IsShown() then
+                error("guild finder pending row did not show status")
+            end
+
+            guildFinder.isGuildType = false
+            guildFinder.selectedTab = 1
+            guildFinder:OnEvent("CLUB_FINDER_PLAYER_PENDING_LIST_RECIEVED", Enum.ClubFinderRequestType.Community)
+            guildFinder:UpdateType()
+            guildFinder:OnEvent("CLUB_FINDER_CLUB_LIST_RETURNED", Enum.ClubFinderRequestType.Community)
+
+            if not guildFinder.CommunityCards:IsShown() or guildFinder.GuildCards:IsShown() then
+                error("community finder search mode did not switch visible card set")
+            end
+            if #guildFinder.CommunityCards.CardList < 1 then
+                error("community finder search has no rows")
+            end
+            if guildFinder.CommunityCards.showingCards ~= true then
+                error("community finder search rows did not render")
+            end
+
+            guildFinder.ClubFinderPendingTab:OnClick()
+            if not guildFinder.PendingCommunityCards:IsShown() or guildFinder.CommunityCards:IsShown() then
+                error("community finder pending tab did not switch visible card set")
+            end
+            if #guildFinder.PendingCommunityCards.CardList < 1 then
+                error("community finder pending list has no rows")
+            end
+            if guildFinder.PendingCommunityCards.showingCards ~= true then
+                error("community finder pending rows did not render")
             end
             "#,
             "lua-errors",

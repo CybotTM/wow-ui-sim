@@ -412,7 +412,7 @@ fn send_message_ignores_unknown_stream() {
 }
 
 #[test]
-fn club_finder_queries_have_safe_empty_defaults() {
+fn club_finder_queries_have_seeded_card_defaults() {
     let env = env();
     let (
         enabled,
@@ -423,7 +423,26 @@ fn club_finder_queries_have_safe_empty_defaults() {
         guild_total,
         recruitment_shape,
         applicant_shape,
-    ): (bool, i32, i32, i32, i32, i32, bool, bool) = env
+        first_guild_name,
+        pending_guilds,
+        pending_status,
+        community_total,
+        first_community_name,
+    ): (
+        bool,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        bool,
+        bool,
+        String,
+        i32,
+        i32,
+        i32,
+        String,
+    ) = env
         .eval(
             r#"
             local recruitment = C_ClubFinder.GetClubRecruitmentSettings()
@@ -452,6 +471,9 @@ fn club_finder_queries_have_safe_empty_defaults() {
                 applicant.sortMembers == false and
                 applicant.sortNewest == false and
                 applicant.crossFaction == false
+            local guilds = C_ClubFinder.ReturnMatchingGuildList()
+            local pendingGuilds = C_ClubFinder.PlayerReturnPendingGuildsList()
+            local communities = C_ClubFinder.ReturnMatchingCommunityList()
             return
                 C_ClubFinder.IsEnabled(),
                 #C_ClubFinder.PlayerGetClubInvitationList(),
@@ -460,7 +482,12 @@ fn club_finder_queries_have_safe_empty_defaults() {
                 #C_ClubFinder.GetStatusOfPostingFromClubId("guild-0"),
                 C_ClubFinder.GetTotalMatchingGuildListSize(),
                 recruitmentShape,
-                applicantShape
+                applicantShape,
+                guilds[1].name,
+                #pendingGuilds,
+                C_ClubFinder.GetPlayerClubApplicationStatus(pendingGuilds[1].clubFinderGUID),
+                C_ClubFinder.GetTotalMatchingCommunityListSize(),
+                communities[1].name
             "#,
         )
         .unwrap();
@@ -469,7 +496,12 @@ fn club_finder_queries_have_safe_empty_defaults() {
     assert_eq!(applicants, 0);
     assert_eq!(pending, 0);
     assert_eq!(status_flags, 0);
-    assert_eq!(guild_total, 0);
+    assert_eq!(guild_total, 1);
     assert!(recruitment_shape);
     assert!(applicant_shape);
+    assert_eq!(first_guild_name, "Heroes of Azeroth");
+    assert_eq!(pending_guilds, 1);
+    assert_eq!(pending_status, 1);
+    assert_eq!(community_total, 1);
+    assert_eq!(first_community_name, "Timeless Isle Raiders");
 }
