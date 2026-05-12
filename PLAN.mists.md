@@ -12,6 +12,14 @@ In-flight (git status shows uncommitted work):
 - [x] Land professions spellbook coverage under `client-mists` — `tests/professions_spellbook.rs` is modified; verify, run, commit.
 - [x] Resolve `src/lua_api/globals/talent_spec_probes.rs` changes — confirm Mists talent specs match retail probes, then commit.
 
+Parity hardening TODO:
+
+- [ ] Build a scripted Mists panel parity runner that opens every row in `docs/baselines/mists-panels.md`, records `lua-errors`, and fails on missing root frames, hidden stub-only frames, or empty render output.
+- [ ] Replace the `test-backed` placeholders in `docs/baselines/mists-panels.md` with retained screenshot or frame-dump artifact paths for every panel row.
+- [ ] Audit each Mists panel test for real interaction assertions, not just load/show coverage, and add follow-up tasks for any panel that only proves startup.
+- [ ] Run the installed Mists addon matrix with normal saved variables enabled and record whether saved-var-backed startup still stays at zero addon-induced errors.
+- [ ] Add a CI-friendly guard that enforces the zero Mists `lua-errors` baseline and the scripted panel parity runner.
+
 Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
 
 - [x] Character panel (paperdoll, stats, titles, equipment manager)
@@ -67,7 +75,7 @@ is no longer the active regression baseline.
   - `GetExpansionLevel()` returns `LE_EXPANSION_MISTS_OF_PANDARIA`.
   - `ClassicExpansionAtLeast()` / `ClassicExpansionAtMost()` match MoP.
 - [x] Fixed TOC `[Game]` token under `client-mists` so it resolves to `Mists/`, not `Standard/`.
-- [x] Mists startup is still dirty: `lua-errors` reports `43` distinct errors with saved vars and third-party addons disabled.
+- [x] Mists startup is clean: `lua-errors` reports `0` distinct errors with saved variables and third-party addons disabled.
 
 ## Reproduction Commands
 
