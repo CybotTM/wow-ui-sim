@@ -142,6 +142,12 @@ __wow_legacy_action_bar_forward("GetTempShapeshiftBarIndex", "GetTempShapeshiftB
 __wow_legacy_action_bar_forward("GetVehicleBarIndex", "GetVehicleBarIndex")
 __wow_legacy_action_bar_forward("GetActionBarPage", "GetActionBarPage")
 __wow_legacy_action_bar_forward("ChangeActionBarPage", "SetActionBarPage")
+__wow_legacy_action_bar_forward("HasVehicleActionBar", "HasVehicleActionBar")
+__wow_legacy_action_bar_forward("HasOverrideActionBar", "HasOverrideActionBar")
+__wow_legacy_action_bar_forward("HasBonusActionBar", "HasBonusActionBar")
+__wow_legacy_action_bar_forward("HasTempShapeshiftActionBar", "HasTempShapeshiftActionBar")
+__wow_legacy_action_bar_forward("HasExtraActionBar", "HasExtraActionBar")
+__wow_legacy_action_bar_forward("IsPossessBarVisible", "IsPossessBarVisible")
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {

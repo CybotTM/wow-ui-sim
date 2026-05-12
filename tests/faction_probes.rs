@@ -200,3 +200,26 @@ fn set_watched_faction_zero_clears_all_flags() {
     assert_eq!(st.watched_faction_index, 0);
     assert!(st.factions.iter().all(|f| !f.is_watched));
 }
+
+#[test]
+fn get_watched_faction_info_returns_legacy_status_bar_tuple() {
+    let env = env();
+    seed_factions(&env);
+    env.exec("SetWatchedFaction(2)").unwrap();
+
+    let (name, standing, bottom, top, earned, faction_id): (String, i32, i64, i64, i64, i32) = env
+        .eval(
+            r#"
+            local name, standing, bottom, top, earned, factionID = GetWatchedFactionInfo()
+            return name, standing, bottom, top, earned, factionID
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(name, "The Wyrmrest Accord");
+    assert_eq!(standing, 6);
+    assert_eq!(bottom, 3_000);
+    assert_eq!(top, 8_999);
+    assert_eq!(earned, 5_500);
+    assert_eq!(faction_id, 1091);
+}

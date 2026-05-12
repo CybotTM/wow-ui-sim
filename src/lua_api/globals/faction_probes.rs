@@ -13,6 +13,8 @@
 //! - `SetWatchedFaction(index)`      → write
 //!   `SimState.watched_faction_index` and flip the matching entry's
 //!   `is_watched` flag; fires `UPDATE_FACTION`.
+//! - `GetWatchedFactionInfo()`       → legacy status-bar tuple for the
+//!   currently watched faction, or nil when no faction is watched.
 
 use crate::event::Event;
 use crate::lua_api::globals::reputation_data;
@@ -145,6 +147,34 @@ fn set_watched_faction(state: &mut LuaState) -> LuaResult<u32> {
     }
     push_update_faction_event(state)?;
     Ok(0)
+}
+
+fn get_watched_faction_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(entry) = watched_faction_entry(state)? else {
+        return Ok(0);
+    };
+
+    let name = create_string(state, &entry.name);
+    state.push(name);
+    state.push(Val::Num(entry.standing as f64));
+    state.push(Val::Num(entry.bottom as f64));
+    state.push(Val::Num(entry.top as f64));
+    state.push(Val::Num(entry.earned as f64));
+    state.push(Val::Num(entry.faction_id as f64));
+    Ok(6)
+}
+
+fn watched_faction_entry(
+    state: &LuaState,
+) -> LuaResult<Option<crate::lua_api::state::FactionEntry>> {
+    let sim = borrow_state(state)?;
+    let index = sim.watched_faction_index;
+    if index <= 0 {
+        return Ok(None);
+    }
+
+    let entry = sim.factions.get((index - 1) as usize).cloned();
+    Ok(entry)
 }
 
 fn reputation_entry_table(
@@ -366,6 +396,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetSelectedFaction", get_selected_faction)?;
     LuaApiMut::register_function(lua, "SetSelectedFaction", set_selected_faction)?;
     LuaApiMut::register_function(lua, "SetWatchedFaction", set_watched_faction)?;
+    LuaApiMut::register_function(lua, "GetWatchedFactionInfo", get_watched_faction_info)?;
     register_reputation_namespace(lua)?;
     Ok(())
 }
