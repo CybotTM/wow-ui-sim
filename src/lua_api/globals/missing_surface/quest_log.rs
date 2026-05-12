@@ -29,7 +29,7 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_set,
 };
 use crate::lua_api::sim_substates::{QuestLogEntry, QuestLogState};
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -40,6 +40,8 @@ pub(super) fn register_quest_log_surface(state: &mut LuaState) -> LuaResult<()> 
     for (name, func) in C_QUEST_LOG_METHODS {
         table_set_rust_fn_static(state, ns, name, *func)?;
     }
+    let globals = state.global;
+    table_set_rust_fn_static(state, globals, "GetQuestPOIs", get_quest_pois)?;
     Ok(())
 }
 
@@ -47,6 +49,7 @@ const C_QUEST_LOG_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetBountySetInfoForMapID", get_bounty_set_info_for_map_id),
     ("GetInfo", get_info),
     ("GetMapForQuestPOIs", get_map_for_quest_pois),
+    ("GetMaxNumQuests", get_max_num_quests),
     ("GetNextWaypoint", get_next_waypoint),
     ("GetNextWaypointForMap", get_next_waypoint_for_map),
     ("GetNumQuestObjectives", get_num_quest_objectives),
@@ -485,6 +488,41 @@ fn is_threat_quest(state: &mut LuaState) -> LuaResult<u32> {
 
 fn is_world_quest(state: &mut LuaState) -> LuaResult<u32> {
     quest_bool_field(state, |e| e.is_world_quest)
+}
+
+fn get_max_num_quests(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(25.0));
+    Ok(1)
+}
+
+fn get_quest_pois(state: &mut LuaState) -> LuaResult<u32> {
+    let Val::Table(out_table) = stack_val(state, 1) else {
+        return Ok(0);
+    };
+
+    let pois = {
+        let sim = borrow_state(state)?;
+        sim.quest_log_entries
+            .entries
+            .iter()
+            .filter_map(|entry| {
+                let map_id = entry.map_id?;
+                let (x, y) = entry.waypoint?;
+                Some((entry.quest_id, map_id, x, y))
+            })
+            .collect::<Vec<_>>()
+    };
+
+    for (index, (quest_id, map_id, x, y)) in pois.into_iter().enumerate() {
+        let info = create_table(state);
+        table_set(state, info, "questID", Val::Num(quest_id as f64));
+        table_set(state, info, "mapID", Val::Num(map_id as f64));
+        table_set(state, info, "x", Val::Num(x));
+        table_set(state, info, "y", Val::Num(y));
+        set_table_array(state, Val::Table(out_table), index as i64 + 1, info);
+    }
+
+    Ok(0)
 }
 
 fn set_map_for_quest_pois(state: &mut LuaState) -> LuaResult<u32> {

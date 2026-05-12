@@ -306,6 +306,16 @@ fn get_quests_on_map_returns_seeded_quest_pois() {
 }
 
 #[test]
+fn get_max_num_quests_returns_numeric_capacity() {
+    let env = env();
+    let max_num_quests: i32 = env.eval("return C_QuestLog.GetMaxNumQuests()").unwrap();
+    assert!(
+        max_num_quests > 0,
+        "QuestDataProvider needs a numeric quest-log capacity"
+    );
+}
+
+#[test]
 fn get_num_quest_objectives_uses_seeded_objectives() {
     let env = env();
     let count: i32 = env

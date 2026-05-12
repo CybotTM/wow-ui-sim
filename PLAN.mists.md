@@ -18,7 +18,7 @@ Parity hardening TODO:
 - [x] Replace the `test-backed` placeholders in `docs/baselines/mists-panels.md` with retained screenshot or frame-dump artifact paths for every panel row.
 - [x] Audit each Mists panel test for real interaction assertions, not just load/show coverage, and add follow-up tasks for any panel that only proves startup.
 - [x] Add Communities/Club Finder interaction coverage: select finder rows, switch finder modes, and assert the visible finder detail state changes instead of only showing `CommunitiesFrame`.
-- [ ] Add World Map interaction coverage: exercise zoom or map navigation plus a quest-pin click/selection path, not only map load and seeded POI data.
+- [x] Add World Map interaction coverage: exercise zoom or map navigation plus a quest-pin click/selection path, not only map load and seeded POI data.
 - [ ] Add Character subpanel interaction coverage for titles and equipment manager flows, since current Mists character tests focus on gear slots and reputation rows.
 - [ ] Add Talents/Glyphs mutation coverage: select a Mists talent row option and glyph socket path, then assert the selected/learned state changes.
 - [ ] Add Collections item-action coverage for mount, toy, and heirloom rows; current coverage switches tabs and verifies data, but does not prove row actions work.

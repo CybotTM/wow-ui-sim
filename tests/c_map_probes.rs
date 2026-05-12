@@ -94,6 +94,23 @@ fn get_map_children_info_with_all_descendants_walks_tree() {
 }
 
 #[test]
+fn get_map_info_exposes_cosmic_parent_for_mists_world_map() {
+    let env = env();
+    let (cosmic_type, azeroth_parent, dorn_parent): (i32, i32, i32) = env
+        .eval(
+            r#"
+            return C_Map.GetMapInfo(947).mapType,
+                   C_Map.GetMapInfo(946).parentMapID,
+                   C_Map.GetMapInfo(2248).parentMapID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(cosmic_type, 0, "947 should be the Cosmic map root");
+    assert_eq!(azeroth_parent, 947);
+    assert_eq!(dorn_parent, 947);
+}
+
+#[test]
 fn get_map_children_info_filters_by_map_type() {
     let env = env();
     // Azeroth (946) has a Continent (13) and Stormwind (84, Zone).

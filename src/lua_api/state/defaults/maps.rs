@@ -11,10 +11,18 @@ struct DefaultMapSeed {
 
 const DEFAULT_MAP_SEEDS: &[DefaultMapSeed] = &[
     DefaultMapSeed {
+        ui_map_id: 947,
+        name: "Cosmic",
+        map_type: 0,
+        parent_map_id: 0,
+        art_id: 0,
+        child_map_ids: &[946],
+    },
+    DefaultMapSeed {
         ui_map_id: 946,
         name: "Azeroth",
         map_type: 1,
-        parent_map_id: 0,
+        parent_map_id: 947,
         art_id: 0,
         child_map_ids: &[13],
     },
@@ -302,7 +310,7 @@ const DEFAULT_MAP_SEEDS: &[DefaultMapSeed] = &[
         ui_map_id: 2248,
         name: "Isle of Dorn",
         map_type: 3,
-        parent_map_id: 0,
+        parent_map_id: 947,
         art_id: 5920,
         child_map_ids: &[],
     },

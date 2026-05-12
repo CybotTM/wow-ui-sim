@@ -95,6 +95,23 @@ fn quest_watch_poi_probe_handles_all_watched_quests() {
 }
 
 #[test]
+fn get_quest_pois_fills_legacy_output_table() {
+    let env = env();
+    let (count, first_id, first_map_id): (i32, i32, i32) = env
+        .eval(
+            r#"
+            local pois = {}
+            GetQuestPOIs(pois)
+            return #pois, pois[1].questID, pois[1].mapID
+            "#,
+        )
+        .unwrap();
+    assert!(count > 0, "legacy quest POI table should be populated");
+    assert_eq!(first_id, 80000);
+    assert_eq!(first_map_id, 2248);
+}
+
+#[test]
 fn get_quest_log_time_left_nil_when_no_selection() {
     let env = env();
     let v: Option<f64> = env.eval("return GetQuestLogTimeLeft()").unwrap();

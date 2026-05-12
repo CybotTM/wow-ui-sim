@@ -45,6 +45,41 @@ fn mists_world_map_opens_with_zone_art_and_quest_pins() {
             if InActiveBattlefield() then
                 error("default simulator state should not be an active battlefield")
             end
+
+            WorldMapFrame:SetMapID(84)
+            WorldMapFrame:NavigateToParentMap()
+            if WorldMapFrame:GetMapID() ~= 13 then
+                error("WorldMapFrame did not navigate from Stormwind to Eastern Kingdoms")
+            end
+
+            WorldMapFrame:SetMapID(84)
+            WorldMapFrame:ResetZoom()
+            local beforeZoom = WorldMapFrame:GetCanvasZoomPercent()
+            WorldMapFrame:ZoomIn()
+            local afterZoom = WorldMapFrame:GetCanvasZoomPercent()
+            if afterZoom <= beforeZoom then
+                error("WorldMapFrame zoom-in did not increase canvas zoom")
+            end
+
+            WorldMapFrame:SetMapID(questMapID)
+            WorldMapFrame:RefreshAllDataProviders()
+            local questPin
+            for pin in WorldMapFrame:EnumeratePinsByTemplate("QuestPinTemplate") do
+                questPin = pin
+                break
+            end
+            if not questPin or not questPin.questID then
+                error("WorldMapFrame did not render an interactive quest pin")
+            end
+
+            questPin:OnClick("LeftButton")
+            if QuestMapFrame_GetDetailQuestID() ~= questPin.questID then
+                error("quest pin click did not select quest details")
+            end
+            local selectedLogIndex = GetQuestLogIndexByID(questPin.questID) or 0
+            if selectedLogIndex > 0 and GetQuestLogSelection() ~= selectedLogIndex then
+                error("quest pin click did not update quest-log selection")
+            end
             "#,
             "lua-errors",
         ])
