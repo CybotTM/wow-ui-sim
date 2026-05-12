@@ -49,7 +49,10 @@ bytemuck = { version = "1.21", features = ["derive"], optional = true }
 pollster = { version = "0.4", optional = true }
 webp = { version = "0.3.1", optional = true }
 rustc-hash = "2.1.2"
-asset-resolver = { git = "https://github.com/world-of-osso/asset-resolver", rev = "10bcc0f76c3e75097ec819f6ccdd9770614f5f30", optional = true }
+asset-resolver = { git = "https://github.com/world-of-osso/asset-resolver", rev = "6fb5a3fa2c02e24e9d4fbe04f2c79cbd6cd70347", optional = true }
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+tar = "0.4.45"
+flate2 = "1.1.9"
 
 [[bin]]
 name = "wow-sim"

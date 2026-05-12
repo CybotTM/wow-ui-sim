@@ -1,11 +1,24 @@
 //! CASC-backed Blizzard UI source synchronization.
 
-use std::path::{Path, PathBuf};
+use std::io::{self, Read};
+use std::path::{Component, Path, PathBuf};
 #[cfg(feature = "casc")]
 use std::sync::OnceLock;
+use std::time::Duration;
 
 const BLIZZARD_UI_MANIFEST: &str = include_str!("../data/blizzard-ui-files.txt");
 const COMPLETE_MARKER: &str = ".wow-ui-sim-blizzard-ui-complete";
+const GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
+    "live",
+    "beta",
+    "classic",
+    "classic_era",
+    "classic_anniversary",
+    "classic_beta",
+    "classic_ptr",
+];
+const GETHE_ARCHIVE_DOWNLOAD_RETRIES: usize = 3;
+const GETHE_ARCHIVE_USER_AGENT: &str = concat!("wow-ui-sim/", env!("CARGO_PKG_VERSION"));
 #[cfg(feature = "casc")]
 static CASC_CONFIGURED: OnceLock<bool> = OnceLock::new();
 
@@ -61,33 +74,19 @@ fn sync_blizzard_ui_entries<'a>(
         present: 0,
         missing: 0,
     };
+    let mut fallback_source = RepoFallbackSource::default();
     let mut last_missing_entry: Option<String> = None;
 
     for entry in entries {
         summary.total += 1;
-        let out_path = root.join(entry);
-        if out_path.is_file() {
-            summary.present += 1;
-            continue;
+        match sync_manifest_entry(root, entry, &mut fallback_source)? {
+            EntrySyncResult::Present => summary.present += 1,
+            EntrySyncResult::Extracted => summary.extracted += 1,
+            EntrySyncResult::Missing => {
+                summary.missing += 1;
+                last_missing_entry = Some(entry.to_string());
+            }
         }
-
-        let extracted = match manifest_entry_fdid(entry) {
-            Some(fdid) => extract_fdid(fdid, &out_path)?,
-            None => false,
-        };
-        if extracted {
-            summary.extracted += 1;
-            continue;
-        }
-
-        if let Some(fallback) = fallback_content_for(entry) {
-            write_fallback(&out_path, fallback)?;
-            summary.extracted += 1;
-            continue;
-        }
-
-        summary.missing += 1;
-        last_missing_entry = Some(entry.to_string());
     }
 
     if summary.missing > 0 {
@@ -103,10 +102,297 @@ fn sync_blizzard_ui_entries<'a>(
     Ok(summary)
 }
 
-/// Synthesized fallbacks for trivial Blizzard UI files when CASC extraction
-/// misses (partial install, build mismatch, etc). Only used for files whose
-/// content is small and well-known.
-fn fallback_content_for(entry: &str) -> Option<&'static str> {
+enum EntrySyncResult {
+    Present,
+    Extracted,
+    Missing,
+}
+
+fn sync_manifest_entry(
+    root: &Path,
+    entry: &str,
+    fallback_source: &mut RepoFallbackSource,
+) -> crate::Result<EntrySyncResult> {
+    let out_path = root.join(entry);
+    if out_path.is_file() {
+        return Ok(EntrySyncResult::Present);
+    }
+
+    if extract_manifest_entry(entry, &out_path)? {
+        return Ok(EntrySyncResult::Extracted);
+    }
+
+    if fallback_source.copy_entry(entry, &out_path)? {
+        return Ok(EntrySyncResult::Extracted);
+    }
+
+    if let Some(fallback) = synthesized_fallback_content_for(entry) {
+        write_synthesized_fallback(&out_path, fallback)?;
+        return Ok(EntrySyncResult::Extracted);
+    }
+
+    Ok(EntrySyncResult::Missing)
+}
+
+fn extract_manifest_entry(entry: &str, out_path: &Path) -> crate::Result<bool> {
+    match manifest_entry_fdid(entry) {
+        Some(fdid) => extract_fdid(fdid, out_path),
+        None => Ok(false),
+    }
+}
+
+#[derive(Default)]
+struct RepoFallbackSource {
+    roots: Option<Vec<PathBuf>>,
+}
+
+impl RepoFallbackSource {
+    fn copy_entry(&mut self, entry: &str, out_path: &Path) -> crate::Result<bool> {
+        for root in self.roots()?.iter() {
+            if copy_repo_fallback_entry_from_root(entry, out_path, root)? {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    fn roots(&mut self) -> crate::Result<&[PathBuf]> {
+        if self.roots.is_none() {
+            self.roots = Some(repo_fallback_roots()?);
+        }
+        Ok(self.roots.as_deref().expect("fallback roots initialized"))
+    }
+}
+
+fn copy_repo_fallback_entry_from_root(
+    entry: &str,
+    out_path: &Path,
+    root: &Path,
+) -> crate::Result<bool> {
+    if let Some(root) = normalize_source_root(root.to_path_buf()) {
+        let source_path = root.join(normalize_manifest_entry(entry));
+        if source_path.is_file() {
+            copy_fallback_file(&source_path, out_path)?;
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn repo_fallback_roots() -> crate::Result<Vec<PathBuf>> {
+    let mut roots = Vec::new();
+    if let Some(root) = std::env::var_os("WOW_SIM_BLIZZARD_UI_SOURCE_DIR").map(PathBuf::from) {
+        roots.push(root);
+    }
+
+    for branch in GETHE_WOW_UI_SOURCE_BRANCHES {
+        roots.push(ensure_cached_wow_ui_source_branch(branch)?);
+    }
+    Ok(roots)
+}
+
+fn ensure_cached_wow_ui_source_branch(branch: &str) -> crate::Result<PathBuf> {
+    let repo_root = cached_wow_ui_source_path(branch)?;
+    if repo_root.join("Interface/AddOns").is_dir() {
+        return Ok(repo_root);
+    }
+    download_wow_ui_source_archive(branch, &repo_root)?;
+    Ok(repo_root)
+}
+
+fn cached_wow_ui_source_path(branch: &str) -> crate::Result<PathBuf> {
+    dirs::cache_dir()
+        .map(|dir| dir.join("wow-ui-sim/wow-ui-source").join(branch))
+        .ok_or_else(|| crate::Error::Other("could not determine user cache directory".to_string()))
+}
+
+fn download_wow_ui_source_archive(branch: &str, repo_root: &Path) -> crate::Result<()> {
+    let parent = repo_root.parent().ok_or_else(|| {
+        crate::Error::Other(format!(
+            "Blizzard UI source cache path has no parent: {}",
+            repo_root.display()
+        ))
+    })?;
+    std::fs::create_dir_all(parent).map_err(|e| {
+        crate::Error::Other(format!(
+            "could not create Blizzard UI source cache directory {}: {e}",
+            parent.display()
+        ))
+    })?;
+
+    let temp_root = repo_root.with_extension("download");
+    remove_existing_path(&temp_root)?;
+
+    let archive_url = wow_ui_source_archive_url(branch);
+    let response = download_archive_response(&archive_url)?;
+    unpack_wow_ui_source_archive(response, &temp_root)?;
+
+    remove_existing_path(repo_root)?;
+    std::fs::rename(&temp_root, repo_root).map_err(|e| {
+        crate::Error::Other(format!(
+            "could not install Blizzard UI source cache {}: {e}",
+            repo_root.display()
+        ))
+    })
+}
+
+fn wow_ui_source_archive_url(branch: &str) -> String {
+    format!("https://github.com/Gethe/wow-ui-source/archive/refs/heads/{branch}.tar.gz")
+}
+
+fn download_archive_response(url: &str) -> crate::Result<impl Read> {
+    let client = reqwest::blocking::Client::builder()
+        .user_agent(GETHE_ARCHIVE_USER_AGENT)
+        .timeout(Duration::from_secs(60))
+        .build()
+        .map_err(|e| crate::Error::Other(format!("could not build HTTP client: {e}")))?;
+
+    let mut last_error = None;
+    for attempt in 1..=GETHE_ARCHIVE_DOWNLOAD_RETRIES {
+        match client
+            .get(url)
+            .send()
+            .and_then(reqwest::blocking::Response::error_for_status)
+        {
+            Ok(response) => return Ok(response),
+            Err(error) => {
+                last_error = Some(error);
+                if attempt < GETHE_ARCHIVE_DOWNLOAD_RETRIES {
+                    std::thread::sleep(Duration::from_millis(500 * attempt as u64));
+                }
+            }
+        }
+    }
+
+    Err(crate::Error::Other(format!(
+        "could not download Blizzard UI fallback archive {url}: {}",
+        last_error
+            .map(|error| error.to_string())
+            .unwrap_or_else(|| "unknown error".to_string())
+    )))
+}
+
+fn unpack_wow_ui_source_archive(reader: impl Read, repo_root: &Path) -> crate::Result<()> {
+    let decoder = flate2::read::GzDecoder::new(reader);
+    let mut archive = tar::Archive::new(decoder);
+    for entry in archive.entries().map_err(|e| {
+        crate::Error::Other(format!("could not read Blizzard UI fallback archive: {e}"))
+    })? {
+        unpack_wow_ui_source_entry(entry, repo_root)?;
+    }
+    Ok(())
+}
+
+fn unpack_wow_ui_source_entry<R: Read>(
+    entry: io::Result<tar::Entry<'_, R>>,
+    repo_root: &Path,
+) -> crate::Result<()> {
+    let mut entry = entry.map_err(|e| {
+        crate::Error::Other(format!("could not read Blizzard UI fallback entry: {e}"))
+    })?;
+    let entry_path = entry.path().map_err(|e| {
+        crate::Error::Other(format!(
+            "could not read Blizzard UI fallback entry path: {e}"
+        ))
+    })?;
+    let Some(relative_addon_path) = archived_addon_path(&entry_path) else {
+        return Ok(());
+    };
+    if entry.header().entry_type().is_dir() {
+        return Ok(());
+    }
+
+    let out_path = repo_root.join("Interface/AddOns").join(relative_addon_path);
+    create_parent_dir(&out_path, "Blizzard UI source")?;
+    entry.unpack(&out_path).map_err(|e| {
+        crate::Error::Other(format!(
+            "could not unpack Blizzard UI source {}: {e}",
+            out_path.display()
+        ))
+    })?;
+    Ok(())
+}
+
+fn create_parent_dir(path: &Path, label: &str) -> crate::Result<()> {
+    let Some(parent) = path.parent() else {
+        return Ok(());
+    };
+    std::fs::create_dir_all(parent).map_err(|e| {
+        crate::Error::Other(format!(
+            "could not create {label} directory {}: {e}",
+            parent.display()
+        ))
+    })
+}
+
+fn archived_addon_path(path: &Path) -> Option<PathBuf> {
+    let mut after_addons = false;
+    let mut relative = PathBuf::new();
+    for component in path.components() {
+        match component {
+            Component::Normal(name) if after_addons => relative.push(name),
+            Component::Normal(name) if name == "AddOns" => after_addons = true,
+            Component::CurDir => {}
+            _ if after_addons => return None,
+            _ => {}
+        }
+    }
+    after_addons
+        .then_some(relative)
+        .filter(|path| !path.as_os_str().is_empty())
+}
+
+fn remove_existing_path(path: &Path) -> crate::Result<()> {
+    match std::fs::metadata(path) {
+        Ok(metadata) if metadata.is_dir() => std::fs::remove_dir_all(path)
+            .map_err(|e| crate::Error::Other(format!("could not remove {}: {e}", path.display()))),
+        Ok(_) => std::fs::remove_file(path)
+            .map_err(|e| crate::Error::Other(format!("could not remove {}: {e}", path.display()))),
+        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(()),
+        Err(e) => Err(crate::Error::Other(format!(
+            "could not inspect {}: {e}",
+            path.display()
+        ))),
+    }
+}
+
+fn normalize_source_root(path: PathBuf) -> Option<PathBuf> {
+    if path.join("Interface/AddOns").is_dir() {
+        return Some(path.join("Interface/AddOns"));
+    }
+    if path.join("AddOns").is_dir() {
+        return Some(path.join("AddOns"));
+    }
+    path.is_dir().then_some(path)
+}
+
+fn normalize_manifest_entry(entry: &str) -> PathBuf {
+    entry.replace('\\', "/").split('/').collect()
+}
+
+fn copy_fallback_file(source_path: &Path, out_path: &Path) -> crate::Result<()> {
+    remove_missing_marker(out_path);
+    if let Some(parent) = out_path.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| {
+            crate::Error::Other(format!(
+                "could not create Blizzard UI fallback directory {}: {e}",
+                parent.display()
+            ))
+        })?;
+    }
+    std::fs::copy(source_path, out_path).map_err(|e| {
+        crate::Error::Other(format!(
+            "could not copy Blizzard UI fallback {} to {}: {e}",
+            source_path.display(),
+            out_path.display()
+        ))
+    })?;
+    Ok(())
+}
+
+/// Synthesized fallbacks for trivial Blizzard UI files when both CASC and the
+/// repo fallback miss. Only used for files whose content is small and well-known.
+fn synthesized_fallback_content_for(entry: &str) -> Option<&'static str> {
     match entry.replace('\\', "/").as_str() {
         "Blizzard_LoadLocale/LoadLocale.lua" => Some(concat!(
             "-- Synthesized fallback when CASC extraction misses this file.\n",
@@ -124,7 +410,8 @@ fn fallback_content_for(entry: &str) -> Option<&'static str> {
     }
 }
 
-fn write_fallback(out_path: &Path, contents: &str) -> crate::Result<()> {
+fn write_synthesized_fallback(out_path: &Path, contents: &str) -> crate::Result<()> {
+    remove_missing_marker(out_path);
     if let Some(parent) = out_path.parent() {
         std::fs::create_dir_all(parent).map_err(|e| {
             crate::Error::Other(format!(
@@ -208,7 +495,6 @@ fn configure_default_asset_resolver_root() {
     }
 }
 
-#[cfg(feature = "casc")]
 fn remove_missing_marker(path: &Path) {
     let extension = path.extension().and_then(|e| e.to_str()).unwrap_or("");
     let missing_marker = path.with_extension(format!("{extension}.missing"));
@@ -219,7 +505,54 @@ fn remove_missing_marker(path: &Path) {
 
 #[cfg(test)]
 mod tests {
-    use super::{manifest_entries, manifest_entry_fdid};
+    use super::{
+        copy_repo_fallback_entry_from_root, manifest_entries, manifest_entry_fdid,
+        normalize_source_root, unpack_wow_ui_source_archive,
+    };
+    use flate2::Compression;
+    use flate2::write::GzEncoder;
+    use std::io;
+    use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn unique_temp_dir(label: &str) -> PathBuf {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time before unix epoch")
+            .as_nanos();
+        std::env::temp_dir().join(format!(
+            "wow-ui-sim-blizzard-ui-sync-{label}-{}-{unique}",
+            std::process::id()
+        ))
+    }
+
+    fn build_test_archive() -> io::Result<Vec<u8>> {
+        let encoder = GzEncoder::new(Vec::new(), Compression::default());
+        let mut builder = tar::Builder::new(encoder);
+        write_tar_file(
+            &mut builder,
+            "wow-ui-source-live/Interface/AddOns/Blizzard_Test/Test.lua",
+            b"from archive\n",
+        )?;
+        write_tar_file(
+            &mut builder,
+            "wow-ui-source-live/README.md",
+            b"not an addon\n",
+        )?;
+        builder.into_inner()?.finish()
+    }
+
+    fn write_tar_file(
+        builder: &mut tar::Builder<GzEncoder<Vec<u8>>>,
+        path: &str,
+        contents: &[u8],
+    ) -> io::Result<()> {
+        let mut header = tar::Header::new_gnu();
+        header.set_size(contents.len() as u64);
+        header.set_mode(0o644);
+        header.set_cksum();
+        builder.append_data(&mut header, path, contents)
+    }
 
     #[test]
     fn manifest_preserves_blizzard_addon_case() {
@@ -239,5 +572,60 @@ mod tests {
             missing.is_empty(),
             "unmapped Blizzard UI files: {missing:?}"
         );
+    }
+
+    #[test]
+    fn repo_fallback_copies_manifest_entry_from_addons_root() {
+        let source_root = unique_temp_dir("source");
+        let out_root = unique_temp_dir("out");
+        let entry = "Blizzard_Test/Test.lua";
+        let source_path = source_root.join(entry);
+        let out_path = out_root.join(entry);
+        std::fs::create_dir_all(source_path.parent().expect("source parent"))
+            .expect("create source parent");
+        std::fs::write(&source_path, "from repo\n").expect("write source fallback");
+
+        let copied = copy_repo_fallback_entry_from_root(entry, &out_path, &source_root)
+            .expect("copy fallback entry");
+
+        assert!(copied);
+        assert_eq!(
+            std::fs::read_to_string(&out_path).expect("read copied fallback"),
+            "from repo\n"
+        );
+
+        std::fs::remove_dir_all(source_root).expect("remove source temp dir");
+        std::fs::remove_dir_all(out_root).expect("remove output temp dir");
+    }
+
+    #[test]
+    fn repo_fallback_accepts_gethe_repo_root() {
+        let repo_root = unique_temp_dir("repo");
+        let addons_root = repo_root.join("Interface/AddOns");
+        std::fs::create_dir_all(&addons_root).expect("create addons root");
+
+        let normalized = normalize_source_root(repo_root.clone());
+
+        assert_eq!(normalized, Some(addons_root));
+        std::fs::remove_dir_all(repo_root).expect("remove repo temp dir");
+    }
+
+    #[test]
+    fn archive_unpack_extracts_only_interface_addons() {
+        let repo_root = unique_temp_dir("archive");
+        let archive = build_test_archive().expect("build test archive");
+
+        unpack_wow_ui_source_archive(&archive[..], &repo_root).expect("unpack archive");
+
+        assert_eq!(
+            std::fs::read_to_string(repo_root.join("Interface/AddOns/Blizzard_Test/Test.lua"))
+                .expect("read unpacked addon file"),
+            "from archive\n"
+        );
+        assert!(
+            !repo_root.join("README.md").exists(),
+            "non-addon archive file should not be unpacked"
+        );
+        std::fs::remove_dir_all(repo_root).expect("remove repo temp dir");
     }
 }
