@@ -100,28 +100,32 @@ fn get_instance_info_returns_nil_for_absent_lfg_dungeon_id() {
 }
 
 #[test]
-fn saved_instance_info_defaults_to_empty_lockouts() {
+fn saved_raid_instance_counts_default_to_empty_lists() {
     let env = env();
-    let (saved_instances, saved_instance_fields, world_bosses, world_boss_fields): (
-        i32,
-        i32,
-        i32,
-        i32,
-    ) = env
+    let (saved_instances, world_bosses): (i32, i32) = env
+        .eval("return GetNumSavedInstances(), GetNumSavedWorldBosses()")
+        .unwrap();
+
+    assert_eq!(saved_instances, 0);
+    assert_eq!(world_bosses, 0);
+}
+
+#[test]
+fn absent_saved_raid_instance_rows_return_nil_fields() {
+    let env = env();
+    let (instance_is_nil, boss_is_nil, extend_return_count): (bool, bool, i32) = env
         .eval(
             r##"
-            return GetNumSavedInstances(),
-                select("#", GetSavedInstanceInfo(1)),
-                GetNumSavedWorldBosses(),
-                select("#", GetSavedWorldBossInfo(1))
+            local instanceName = GetSavedInstanceInfo(1)
+            local bossName = GetSavedWorldBossInfo(1)
+            return instanceName == nil, bossName == nil, select("#", SetSavedInstanceExtend(1, true))
             "##,
         )
         .unwrap();
 
-    assert_eq!(saved_instances, 0);
-    assert_eq!(saved_instance_fields, 0);
-    assert_eq!(world_bosses, 0);
-    assert_eq!(world_boss_fields, 0);
+    assert!(instance_is_nil);
+    assert!(boss_is_nil);
+    assert_eq!(extend_return_count, 0);
 }
 
 #[test]
