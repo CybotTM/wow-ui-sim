@@ -19,6 +19,7 @@ macro_rules! frame_defaults {
             height: 0.0,
             height_is_text_auto: false,
             anchors: Vec::new(),
+            xml_set_all_points: false,
             visible: true,
             show_hide_depth: 0,
             click_depth: 0,

@@ -602,6 +602,9 @@ pub fn apply_xml_set_all_points(
     }
     if has {
         let mut s = state.borrow_mut();
+        if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
+            frame.xml_set_all_points = true;
+        }
         set_all_points_inner(&mut s, frame_id);
     }
 }

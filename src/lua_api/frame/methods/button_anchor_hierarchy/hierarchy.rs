@@ -8,6 +8,7 @@ use crate::lua_api::methods::{
     frame_id_from_stack, frame_ref, table_get,
 };
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
+use crate::widget::{AnchorPoint, Frame, WidgetRegistry};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -45,13 +46,76 @@ pub(super) fn set_parent(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     }
     let mut sim = borrow_state_mut(state)?;
+    let old_parent_id = sim.widgets.get(id).and_then(|frame| frame.parent_id);
+    let retarget_all_points = should_retarget_parent_fill_anchors(&sim.widgets, id, old_parent_id);
     super::super::methods_hierarchy::reparent_widget(&mut sim.widgets, id, new_parent_id);
+    if retarget_all_points {
+        retarget_parent_fill_anchors(&mut sim.widgets, id, new_parent_id);
+    }
     if let Some(f) = sim.widgets.get_mut_visual(id) {
         f.default_parent = false;
     }
     sim.visible_on_update_cache = None;
     sim.widgets.mark_rect_dirty(id);
     Ok(0)
+}
+
+fn should_retarget_parent_fill_anchors(
+    widgets: &WidgetRegistry,
+    frame_id: u64,
+    parent_id: Option<u64>,
+) -> bool {
+    let Some(parent_id) = parent_id else {
+        return false;
+    };
+    let Some(frame) = widgets.get(frame_id) else {
+        return false;
+    };
+    frame.xml_set_all_points || frame_fills_parent(frame, parent_id)
+}
+
+fn frame_fills_parent(frame: &Frame, parent_id: u64) -> bool {
+    frame.anchors.len() == 2
+        && has_parent_fill_anchor(frame, AnchorPoint::TopLeft, parent_id)
+        && has_parent_fill_anchor(frame, AnchorPoint::BottomRight, parent_id)
+}
+
+fn has_parent_fill_anchor(frame: &Frame, point: AnchorPoint, parent_id: u64) -> bool {
+    frame.anchors.iter().any(|anchor| {
+        anchor.point == point
+            && anchor.relative_point == point
+            && anchor.relative_to_id == Some(parent_id as usize)
+            && anchor.x_offset == 0.0
+            && anchor.y_offset == 0.0
+    })
+}
+
+fn retarget_parent_fill_anchors(
+    widgets: &mut WidgetRegistry,
+    frame_id: u64,
+    new_parent_id: Option<u64>,
+) {
+    widgets.remove_all_anchor_dependents_for(frame_id);
+    if let Some(frame) = widgets.get_mut_visual(frame_id) {
+        frame.clear_all_points();
+        frame.set_point(
+            AnchorPoint::TopLeft,
+            new_parent_id.map(|id| id as usize),
+            AnchorPoint::TopLeft,
+            0.0,
+            0.0,
+        );
+        frame.set_point(
+            AnchorPoint::BottomRight,
+            new_parent_id.map(|id| id as usize),
+            AnchorPoint::BottomRight,
+            0.0,
+            0.0,
+        );
+    }
+    if let Some(parent_id) = new_parent_id {
+        widgets.add_anchor_dependent(parent_id, frame_id);
+    }
 }
 
 pub(super) fn get_num_children(state: &mut LuaState) -> LuaResult<u32> {

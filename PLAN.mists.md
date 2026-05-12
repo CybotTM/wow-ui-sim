@@ -34,7 +34,7 @@ Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors
 - [x] Macro & key bindings
 - [x] EditMode / interface options (Mists pre-EditMode — uses InterfaceOptionsFrame)
 - [x] Action bars, micro menu, bag bar, status bars
-- [ ] Nameplates (CVar defaults fixed in triage; verify rendering)
+- [x] Nameplates (CVar defaults fixed in triage; verify rendering)
 - [ ] Loot / group loot / personal loot UI
 - [ ] Game menu options breaks
 

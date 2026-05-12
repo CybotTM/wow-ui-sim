@@ -33,6 +33,13 @@ pub struct Frame {
     pub height_is_text_auto: bool,
     /// Anchors defining position.
     pub anchors: Vec<Anchor>,
+    /// XML template declared `setAllPoints="true"`.
+    ///
+    /// Some Blizzard object pools clear anchors immediately after creating a
+    /// frame, then reparent the pooled frame to its live owner. Keeping the XML
+    /// intent lets the hierarchy path restore parent-fill anchors for those
+    /// pooled template instances.
+    pub xml_set_all_points: bool,
     pub visible: bool,
     pub show_hide_depth: u16, // reentry depth for Show/Hide mutual recursion limit
     pub click_depth: u16,     // reentry depth for programmatic Button:Click recursion limit
