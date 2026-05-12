@@ -22,7 +22,7 @@ Parity hardening TODO:
 - [x] Add Character subpanel interaction coverage for titles and equipment manager flows, since current Mists character tests focus on gear slots and reputation rows.
 - [x] Add Talents/Glyphs mutation coverage: select a Mists talent row option and glyph socket path, then assert the selected/learned state changes.
 - [x] Add Collections item-action coverage for mount, toy, and heirloom rows; current coverage switches tabs and verifies data, but does not prove row actions work.
-- [ ] Run the installed Mists addon matrix with normal saved variables enabled and record whether saved-var-backed startup still stays at zero addon-induced errors.
+- [x] Run the installed Mists addon matrix with normal saved variables enabled and record whether saved-var-backed startup still stays at zero addon-induced errors.
 - [ ] Add a CI-friendly guard that enforces the zero Mists `lua-errors` baseline and the scripted panel parity runner.
 
 Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
@@ -62,6 +62,13 @@ completed with `passed: 9` and `failed: 0`. Each
 `target/addon-harness/*-lua-errors.json` output remained an empty array, so all
 installed Mists addon targets stayed at `0` total Lua errors and `0`
 addon-induced errors.
+
+SavedVariables-backed addon harness verification:
+`scripts/test-classic-addons.sh --profile mists --skip-clone --with-saved-vars`
+completed with `passed: 9` and `failed: 0`. Each
+`target/addon-harness/*-with-saved-vars-lua-errors.json` output remained an
+empty array, so normal SavedVariables loading stayed at `0` total Lua errors
+and `0` addon-induced errors across the installed Mists addon matrix.
 
 Mists `lua-errors` baseline decision: refreshed
 `docs/baselines/mists-lua-errors.json` to the current clean `[]` capture after

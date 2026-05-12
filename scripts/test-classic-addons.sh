@@ -23,6 +23,7 @@
 #   scripts/test-classic-addons.sh --profile wrath    # filter by profile
 #   scripts/test-classic-addons.sh --skip-clone       # use already-cloned vendors
 #   scripts/test-classic-addons.sh --keep-symlinks    # don't tear down on finish
+#   scripts/test-classic-addons.sh --with-saved-vars  # load WTF SavedVariables
 #
 # Exit codes:
 #   0  every addon's wow-sim invocation exited 0
@@ -42,12 +43,14 @@ NAME_FILTER=""
 PROFILE_FILTER=""
 SKIP_CLONE=0
 KEEP_SYMLINKS=0
+WITH_SAVED_VARS=0
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --profile)        PROFILE_FILTER="$2"; shift 2 ;;
         --skip-clone)     SKIP_CLONE=1; shift ;;
         --keep-symlinks)  KEEP_SYMLINKS=1; shift ;;
+        --with-saved-vars) WITH_SAVED_VARS=1; shift ;;
         --help|-h)
             sed -n '2,/^set -euo/p' "$0" | sed 's/^# \?//;$d'
             exit 0
@@ -209,9 +212,16 @@ run_addon() {
         return 1
     fi
 
-    local out="$OUT_DIR/$name-lua-errors.json"
+    local out_suffix=""
+    local saved_vars_env=(WOW_SIM_NO_SAVED_VARS=1)
+    if [ "$WITH_SAVED_VARS" -eq 1 ]; then
+        out_suffix="-with-saved-vars"
+        saved_vars_env=()
+    fi
+
+    local out="$OUT_DIR/$name${out_suffix}-lua-errors.json"
     echo "  → running lua-errors → $out"
-    if ! WOW_SIM_NO_SAVED_VARS=1 timeout 120 \
+    if ! env "${saved_vars_env[@]}" timeout 120 \
             "$REPO_ROOT/target/debug/wow-sim" lua-errors > "$out" 2>/dev/null; then
         teardown
         echo "  ✗ wow-sim exited nonzero — possible crash"
