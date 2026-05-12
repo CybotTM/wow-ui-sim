@@ -27,7 +27,7 @@ Parity hardening TODO:
 - [x] Expand the CI guard beyond base startup: run the installed Mists addon matrix in CI and fail on any addon-induced `lua-errors` regression.
 - [x] Add visual artifact comparison for the Mists panel parity runner so CI catches blank or materially-regressed panel renders, not just missing frame roots.
 - [x] Audit Mists panel interactions against retail interaction coverage and add parity tests for any retail-supported workflow still missing under `client-mists`.
-- [ ] Add a low-signal visual-artifact gate to `scripts/mists-panel-parity.sh`: fail rows whose screenshot is mostly background or whose root-frame bounding box is too small for the panel being audited.
+- [x] Add a low-signal visual-artifact gate to `scripts/mists-panel-parity.sh`: fail rows whose screenshot is mostly background or whose root-frame bounding box is too small for the panel being audited.
 - [ ] Run panel parity with normal SavedVariables enabled and document/fix any panel that regresses only when real WTF state loads.
 - [ ] Expand the installed-addon matrix beyond startup: run `scripts/mists-panel-parity.sh` once per installed Mists addon enabled and fail on addon-induced panel `lua-errors` or visual regressions.
 - [ ] Add a live connected-GUI Mists smoke runner that clicks every micro-menu/panel opener through `wow-cli`, then asserts `lua-errors` remains empty after real input dispatch.

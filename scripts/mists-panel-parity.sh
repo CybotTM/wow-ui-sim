@@ -42,12 +42,26 @@ done
 declare -A PANEL_SLUGS=()
 declare -A PANEL_ROOTS=()
 declare -A PANEL_OPENERS=()
+declare -A PANEL_MIN_ROOT_AREAS=()
+declare -A PANEL_MIN_FOREGROUND_PIXELS=()
+declare -A PANEL_MIN_FOREGROUND_BBOX_AREAS=()
+
+DEFAULT_MIN_ROOT_AREA=25000
+DEFAULT_MIN_FOREGROUND_PIXELS=500
+DEFAULT_MIN_FOREGROUND_BBOX_AREA=5000
 
 add_panel() {
     local panel="$1" slug="$2" root="$3" opener="$4"
     PANEL_SLUGS["$panel"]="$slug"
     PANEL_ROOTS["$panel"]="$root"
     PANEL_OPENERS["$panel"]="$opener"
+}
+
+set_panel_signal_gate() {
+    local slug="$1" min_root_area="$2" min_foreground_pixels="$3" min_foreground_bbox_area="$4"
+    PANEL_MIN_ROOT_AREAS["$slug"]="$min_root_area"
+    PANEL_MIN_FOREGROUND_PIXELS["$slug"]="$min_foreground_pixels"
+    PANEL_MIN_FOREGROUND_BBOX_AREAS["$slug"]="$min_foreground_bbox_area"
 }
 
 add_panel "Character panel: paperdoll, stats, titles, equipment manager" "character" "CharacterFrame" 'ToggleCharacter("PaperDollFrame")'
@@ -73,6 +87,8 @@ add_panel "Action bars, micro menu, bag bar, status bars" "action-bars" "MainMen
 add_panel "Nameplates" "nameplates" "MistsNamePlateRenderProbe" 'local plate = CreateFrame("Frame", "MistsNamePlateRenderProbe", UIParent); plate:SetSize(128, 32); plate:SetPoint("CENTER"); plate:Show(); NamePlateDriverFrame:OnNamePlateCreated(plate); NamePlateDriverFrame:AcquireUnitFrame(plate); CompactUnitFrame_SetUpFrame(plate.UnitFrame, DefaultCompactNamePlateEnemyFrameSetup); plate.UnitFrame:Show()'
 add_panel "Loot, group loot, personal loot" "loot" "LootFrame" 'A_Admin.ClearLoot(); A_Admin.AddLootItem(6948, 1); FireEvent("LOOT_OPENED", false)'
 add_panel "Game menu options" "game-menu-options" "SettingsPanel" 'ToggleGameMenu(); GameMenuButtonOptions:Click()'
+
+set_panel_signal_gate "nameplates" 3000 10 500
 
 trim() {
     local value="$*"
@@ -187,9 +203,17 @@ verify_lua_errors_json() {
 }
 
 verify_dump_tree() {
-    local panel="$1" root="$2" dump_file="$3"
+    local panel="$1" slug="$2" root="$3" dump_file="$4"
     if ! grep -qE "(^|[[:space:]])${root//\\/\\\\} \\[[^]]+\\].* visible " "$dump_file"; then
         echo "ERROR: $panel root $root is missing or hidden in dump tree" >&2
+        return 1
+    fi
+
+    local min_root_area max_root_area
+    min_root_area="${PANEL_MIN_ROOT_AREAS[$slug]:-$DEFAULT_MIN_ROOT_AREA}"
+    max_root_area="$(max_visible_root_area "$root" "$dump_file")"
+    if [ "$max_root_area" -lt "$min_root_area" ]; then
+        echo "ERROR: $panel root $root bounding box area $max_root_area is below minimum $min_root_area" >&2
         return 1
     fi
 
@@ -199,6 +223,23 @@ verify_dump_tree() {
         echo "ERROR: $panel dump tree has no visible renderable descendants" >&2
         return 1
     fi
+}
+
+max_visible_root_area() {
+    local root="$1" dump_file="$2"
+    awk -v root="$root" '
+        $0 ~ "(^|[[:space:]])" root " \\[[^]]+\\].* visible " {
+            if (match($0, /\(([0-9]+)x([0-9]+)\)/, dimensions)) {
+                area = dimensions[1] * dimensions[2]
+                if (area > max) {
+                    max = area
+                }
+            }
+        }
+        END {
+            print max + 0
+        }
+    ' "$dump_file"
 }
 
 verify_screenshot() {
@@ -213,6 +254,18 @@ verify_screenshot() {
         echo "ERROR: $panel screenshot was not written: $screenshot_file" >&2
         return 1
     fi
+}
+
+verify_visual_signal() {
+    local slug="$1" screenshot_file="$2"
+    local min_foreground_pixels min_foreground_bbox_area
+    min_foreground_pixels="${PANEL_MIN_FOREGROUND_PIXELS[$slug]:-$DEFAULT_MIN_FOREGROUND_PIXELS}"
+    min_foreground_bbox_area="${PANEL_MIN_FOREGROUND_BBOX_AREAS[$slug]:-$DEFAULT_MIN_FOREGROUND_BBOX_AREA}"
+    "$(visual_metrics_bin)" signal \
+        "$slug" \
+        "$screenshot_file" \
+        "$min_foreground_pixels" \
+        "$min_foreground_bbox_area"
 }
 
 verify_visual_baseline() {
@@ -251,13 +304,14 @@ run_panel() {
     run_wow_sim --no-addons --no-saved-vars --exec-lua "@$lua_file" dump-tree --filter-key "$root" \
         > "$dump_file" 2> "$dump_stderr"
     fail_if_exec_or_lua_error "$panel dump-tree" "$dump_stderr" "$dump_file"
-    verify_dump_tree "$panel" "$root" "$dump_file"
+    verify_dump_tree "$panel" "$slug" "$root" "$dump_file"
 
     run_wow_sim --no-addons --no-saved-vars --exec-lua "@$lua_file" screenshot \
         --filter "$root" --output "$screenshot_base" \
         > "$screenshot_stdout" 2> "$screenshot_stderr"
     fail_if_exec_or_lua_error "$panel screenshot" "$screenshot_stderr" "$screenshot_stdout"
     verify_screenshot "$panel" "$screenshot_stderr" "$screenshot_file"
+    verify_visual_signal "$slug" "$screenshot_file"
     verify_visual_baseline "$slug" "$screenshot_file"
 }
 
