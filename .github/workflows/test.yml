@@ -106,7 +106,7 @@ jobs:
     env:
       LIBGL_ALWAYS_SOFTWARE: "1"
       VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
-      WGPU_BACKEND: vulkan
+      WOW_SIM_SOFTWARE_RENDER: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -128,7 +128,8 @@ jobs:
             libgl1-mesa-dri \
             libudev-dev \
             mesa-vulkan-drivers \
-            pkg-config
+            pkg-config \
+            xvfb
 
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
@@ -136,7 +137,7 @@ jobs:
           key: mists-release-proof
 
       - name: Run Mists release proof
-        run: ./scripts/ci-mists-release-proof.sh --skip-clone
+        run: xvfb-run -a ./scripts/ci-mists-release-proof.sh --skip-clone
 
       - name: Upload Mists release proof artifacts
         if: always()

@@ -79,8 +79,8 @@ First CI proof dispatch:
 `Mists release proof` job reached the base panel parity lane, uploaded
 `mists-release-proof`, and failed on the first screenshot because the GitHub
 runner lacked a headless GPU adapter. The workflow now installs Mesa software
-Vulkan and pins the release-proof job to the lavapipe ICD for screenshot
-capture.
+Vulkan/GL packages, enables software rendering, and runs the release-proof
+script under `xvfb-run` so screenshot capture has a headless adapter.
 
 ## Remaining Gaps
 - The latest audited Mists panel workflows have no `Missing` rows in
