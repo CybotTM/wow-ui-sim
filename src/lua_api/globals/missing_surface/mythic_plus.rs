@@ -23,7 +23,9 @@ use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::state::MythicPlusWeeklyBest;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 const AFFIX_NAMES: &[(i32, &str)] = &[
@@ -57,6 +59,14 @@ const AFFIX_NAMES: &[(i32, &str)] = &[
 pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, state.global, "GetAffixInfo", get_affix_info)?;
     let ns = ensure_namespace(state, "C_MythicPlus")?;
+    register_mythic_plus_probe_handlers(state, ns)?;
+    register_mythic_plus_status_handlers(state, ns)?;
+    register_mythic_plus_request_handlers(state, ns)?;
+    register_challenge_mode_surface(state)?;
+    Ok(())
+}
+
+fn register_mythic_plus_probe_handlers(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "GetCurrentAffixes", get_current_affixes)?;
     table_set_rust_fn_static(state, ns, "GetCurrentSeason", get_current_season)?;
     table_set_rust_fn_static(state, ns, "GetRunHistory", get_run_history)?;
@@ -74,6 +84,10 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
     )?;
     table_set_rust_fn_static(state, ns, "GetOwnedKeystoneLevel", get_owned_keystone_level)?;
     table_set_rust_fn_static(state, ns, "GetWeeklyBestForMap", get_weekly_best_for_map)?;
+    Ok(())
+}
+
+fn register_mythic_plus_status_handlers(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "IsMythicPlusActive", is_mythic_plus_active)?;
     table_set_rust_fn_static(
         state,
@@ -81,10 +95,13 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
         "IsWeeklyRewardAvailable",
         is_weekly_reward_available,
     )?;
+    Ok(())
+}
+
+fn register_mythic_plus_request_handlers(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "RequestCurrentAffixes", noop)?;
     table_set_rust_fn_static(state, ns, "RequestMapInfo", noop)?;
     table_set_rust_fn_static(state, ns, "RequestRewards", noop)?;
-    register_challenge_mode_surface(state)?;
     Ok(())
 }
 
