@@ -1,6 +1,67 @@
 use super::*;
 
 #[test]
+fn missing_xml_include_reports_path_to_lua_error_handler() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        __xml_errors = {}
+        seterrorhandler(function(message)
+            table.insert(__xml_errors, message)
+        end)
+        "#,
+    )
+    .unwrap();
+
+    let temp_dir = tempfile::tempdir().unwrap();
+    let xml_path = temp_dir.path().join("root.xml");
+    let missing_path = temp_dir.path().join("missing.xml");
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
+        <Include file="missing.xml"/>
+    </Ui>"#,
+    )
+    .unwrap();
+
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx = AddonContext::new(
+        env.lua(),
+        "TestAddon",
+        addon_table,
+        temp_dir.path(),
+        false,
+        false,
+    )
+    .unwrap();
+    let result = load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    );
+
+    assert!(
+        result.is_err(),
+        "missing XML include should fail the XML load"
+    );
+
+    let captured: String = env
+        .eval("return table.concat(__xml_errors, [[\n---\n]])")
+        .unwrap();
+    assert!(
+        captured.contains(&missing_path.display().to_string()),
+        "Lua error should include missing include path, got: {captured}"
+    );
+    assert!(
+        !captured
+            .lines()
+            .any(|line| line == "IO error: No such file or directory (os error 2)"),
+        "Lua error should not be the old pathless IO message: {captured}"
+    );
+}
+
+#[test]
 fn test_xml_texture_color() {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join("wow-sim-test-texcolor");
