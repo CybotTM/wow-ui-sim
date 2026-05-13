@@ -5,7 +5,7 @@
 //! Lua state is correct on first open (IsVisible=true, anchors set, dimensions correct)
 //! but the rendering pipeline skips the spell item frames.
 
-mod common;
+use crate::common;
 #[path = "spellbook/common.rs"]
 mod spellbook_common;
 

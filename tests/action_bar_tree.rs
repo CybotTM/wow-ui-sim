@@ -25,7 +25,7 @@
 //!     ActionButton1Count      [FontString]  (0x0)   visible MEDIUM:54 x=559 y=1150
 //! ```
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 

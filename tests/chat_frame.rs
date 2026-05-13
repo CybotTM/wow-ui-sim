@@ -6,7 +6,7 @@
 //! presses Enter, and verifies the message was submitted via
 //! C_ChatInfo.SendChatMessage.
 
-mod common;
+use crate::common;
 #[path = "chat_frame/layout_lock.rs"]
 mod layout_lock;
 #[path = "chat_frame/scrollbar.rs"]

@@ -13,7 +13,7 @@
 //! crafting-state slice the panel would query if the parentKey wiring
 //! worked.
 
-mod common;
+use crate::common;
 
 use wow_ui_sim::loader::load_addon;
 

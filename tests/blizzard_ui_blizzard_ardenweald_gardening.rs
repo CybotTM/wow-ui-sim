@@ -3,7 +3,7 @@
 //! Cargo only auto-discovers `tests/*.rs`, so nested files under
 //! `tests/blizzard_ui/blizzard_ardenweald_gardening/` are re-exported here.
 
-mod common;
+use crate::common;
 
 #[path = "blizzard_ui/blizzard_ardenweald_gardening/load.rs"]
 mod load;

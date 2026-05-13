@@ -9,7 +9,7 @@
 //! CooldownBroadcaster) live in `test_showuipanel_lod_fixtures.rs`. All
 //! three binaries share `tests/common/panel_fixtures.rs`.
 
-mod common;
+use crate::common;
 
 use common::panel_fixtures::{blizzard_ui_dir, setup_env};
 use wow_ui_sim::loader::load_addon;

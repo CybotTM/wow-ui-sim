@@ -1,6 +1,6 @@
 //! Ignored diagnostics for Blizzard_PlayerSpells OnLoad and nil-call debugging.
 
-mod common;
+use crate::common;
 
 use common::panel_fixtures::{clear_recorded_lua_errors, setup_env};
 

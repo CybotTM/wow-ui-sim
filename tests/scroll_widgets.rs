@@ -2,7 +2,7 @@
 //!
 //! These tests cover scroll widgets and their templates from Blizzard_SharedXML.
 
-mod common;
+use crate::common;
 
 use common::env_with_shared_xml;
 use wow_ui_sim::lua_api::WowLuaEnv;

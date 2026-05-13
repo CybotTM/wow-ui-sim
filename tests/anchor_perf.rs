@@ -1,6 +1,5 @@
-mod common;
-#[path = "perf/anchor.rs"]
-mod perf_anchor;
+use crate::common;
+use crate::perf_anchor;
 
 use std::time::Duration;
 

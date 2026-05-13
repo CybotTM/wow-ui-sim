@@ -1,6 +1,5 @@
-mod common;
-#[path = "perf/create_frame.rs"]
-mod perf_create_frame;
+use crate::common;
+use crate::perf_create_frame;
 
 use std::time::Duration;
 

@@ -14,7 +14,7 @@
 //!   `#[ignore]`d because the broadcaster's runtime deps aren't brought
 //!   up by these panel tests).
 
-mod common;
+use crate::common;
 
 use common::panel_fixtures::setup_env;
 

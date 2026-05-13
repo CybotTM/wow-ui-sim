@@ -8,7 +8,7 @@
 
 #[path = "click_targeting/full_ui.rs"]
 mod click_targeting_full_ui;
-mod common;
+use crate::common;
 
 use click_targeting_full_ui::{drain_test_errors, env_with_full_ui, install_test_error_handler};
 use wow_ui_sim::lua_api::WowLuaEnv;

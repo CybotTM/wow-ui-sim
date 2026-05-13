@@ -1,10 +1,7 @@
-mod common;
-#[path = "perf/base_game.rs"]
-mod perf_base_game;
-#[path = "perf/game_ui.rs"]
-mod perf_game_ui;
-#[path = "perf/widget_registry.rs"]
-mod perf_widget_registry;
+use crate::common;
+use crate::perf_base_game;
+use crate::perf_game_ui;
+use crate::perf_widget_registry;
 
 use perf_game_ui::load_timed_game_ui;
 use perf_widget_registry::snapshot_widget_registry;

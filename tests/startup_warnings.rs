@@ -1,6 +1,6 @@
 //! Test that loading Blizzard addons and firing startup events produces no warnings.
 
-mod common;
+use crate::common;
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};

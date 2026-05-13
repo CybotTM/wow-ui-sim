@@ -5,7 +5,7 @@
 //! Loads the full Blizzard addon set, opens bags via keybind, and verifies
 //! that item slots are populated with real item data from the mock inventory.
 
-mod common;
+use crate::common;
 #[path = "common/keybinding_panel_fixtures.rs"]
 mod keybinding_panel_fixtures;
 

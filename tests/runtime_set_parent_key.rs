@@ -1,4 +1,4 @@
-mod common;
+use crate::common;
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 

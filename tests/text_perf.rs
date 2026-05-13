@@ -1,8 +1,7 @@
 #![cfg(feature = "gui")]
 
-mod common;
-#[path = "perf/text.rs"]
-mod perf_text;
+use crate::common;
+use crate::perf_text;
 
 use std::time::Duration;
 

@@ -5,7 +5,7 @@
 //! not the full-screen-wide 1024px layout that the state-dependent sizing bug
 //! produces.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};

@@ -4,7 +4,7 @@
 //!
 //! Covers TargetFrame visibility, F1–F6 party/enemy targeting keybinds.
 
-mod common;
+use crate::common;
 #[path = "render_order_support.rs"]
 mod render_order_support;
 

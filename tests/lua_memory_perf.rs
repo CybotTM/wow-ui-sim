@@ -1,10 +1,7 @@
-mod common;
-#[path = "perf/base_game.rs"]
-mod perf_base_game;
-#[path = "perf/game_ui.rs"]
-mod perf_game_ui;
-#[path = "perf/lua_memory.rs"]
-mod perf_lua_memory;
+use crate::common;
+use crate::perf_base_game;
+use crate::perf_game_ui;
+use crate::perf_lua_memory;
 
 use perf_game_ui::load_timed_game_ui;
 use perf_lua_memory::measure_settled_lua_memory_kib;

@@ -1,10 +1,7 @@
-mod common;
-#[path = "perf/base_game.rs"]
-mod perf_base_game;
-#[path = "perf/cases.rs"]
-mod perf_cases;
-#[path = "perf/game_ui.rs"]
-mod perf_game_ui;
+use crate::common;
+use crate::perf_base_game;
+use crate::perf_cases;
+use crate::perf_game_ui;
 
 use perf_cases::{PerfCase, run_game_ui_cases};
 

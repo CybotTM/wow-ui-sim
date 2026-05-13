@@ -1,6 +1,6 @@
 #![cfg(feature = "gui")]
 
-mod common;
+use crate::common;
 #[path = "render_order_support.rs"]
 mod render_order_support;
 

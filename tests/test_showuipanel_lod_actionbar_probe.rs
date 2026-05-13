@@ -9,7 +9,7 @@
 //! decision without re-doing the experiment. Both probes are
 //! `#[ignore]`d — they're an investigation record, not a regression gate.
 
-mod common;
+use crate::common;
 
 use common::panel_fixtures::{
     blizzard_ui_dir, install_lua_harness_stubs, load_panel_addons, recorded_lua_errors,

@@ -12,7 +12,7 @@
 //!
 //! Targeting tests (TargetFrame, F2–F6) are in `test_keybindings_targeting.rs`.
 
-mod common;
+use crate::common;
 #[path = "common/token_ui_fixtures.rs"]
 mod token_ui_fixtures;
 

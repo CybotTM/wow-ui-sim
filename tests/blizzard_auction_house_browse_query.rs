@@ -1,6 +1,6 @@
 //! Browse-query coverage for `Blizzard_AuctionHouseUI`.
 
-mod common;
+use crate::common;
 
 use common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};

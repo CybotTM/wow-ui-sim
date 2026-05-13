@@ -1,6 +1,6 @@
 //! Integration tests for keybinding dispatch — core world map panel details.
 
-mod common;
+use crate::common;
 #[path = "common/keybindings_panels_detail.rs"]
 mod keybindings_panels_detail;
 #[path = "common/token_ui_fixtures.rs"]

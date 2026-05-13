@@ -1,6 +1,6 @@
 //! Integration tests for ReputationFrame ShowUIPanel layout details.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;

@@ -3,7 +3,7 @@
 //! Verifies that transitive dependencies are loaded before the addons that
 //! need them, even when the dependency chain crosses base UI addon boundaries.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};

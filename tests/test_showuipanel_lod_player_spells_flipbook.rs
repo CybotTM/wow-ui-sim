@@ -1,6 +1,6 @@
 //! Integration tests for Blizzard_PlayerSpells spellbook flipbook behavior.
 
-mod common;
+use crate::common;
 
 use common::panel_fixtures::{
     clear_recorded_lua_errors, player_spells_panel_debug_snapshot, recorded_lua_errors, setup_env,

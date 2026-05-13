@@ -3,7 +3,7 @@
 //! Keep this file for behaviors that only exist after the relevant Blizzard
 //! addons and their startup sequence have loaded.
 
-mod common;
+use crate::common;
 #[path = "addon_coverage/panel_open.rs"]
 mod panel_open;
 

@@ -4,7 +4,7 @@
 //! `tests/blizzard_ui/blizzard_apidocumentation_generated/` are re-exported
 //! here.
 
-mod common;
+use crate::common;
 
 #[path = "blizzard_ui/blizzard_apidocumentation_generated/load.rs"]
 mod load;

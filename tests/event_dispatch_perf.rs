@@ -1,6 +1,5 @@
-mod common;
-#[path = "perf/event_dispatch.rs"]
-mod perf_event_dispatch;
+use crate::common;
+use crate::perf_event_dispatch;
 
 use std::time::Duration;
 

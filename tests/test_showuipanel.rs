@@ -5,7 +5,7 @@
 //! - ShowUIPanel shows a panel and HideUIPanel hides it
 //! - Panel area attributes (left/center/right) are registered correctly
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;

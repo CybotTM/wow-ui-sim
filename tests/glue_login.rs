@@ -1,6 +1,6 @@
 #![cfg(feature = "gui")]
 
-mod common;
+use crate::common;
 
 use iced::Point;
 use std::path::PathBuf;

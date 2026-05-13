@@ -3,7 +3,7 @@
 //! Drives the Lua-visible API and checks both the SimState side-effect and
 //! the `TRACKED_RECIPE_UPDATE` event payload.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use tempfile::tempdir;

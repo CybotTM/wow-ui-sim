@@ -1,6 +1,6 @@
 //! Integration tests for Blizzard_ZoneAbility and the C_ZoneAbility stub.
 
-mod common;
+use crate::common;
 
 use std::path::{Path, PathBuf};
 

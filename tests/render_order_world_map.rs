@@ -2,7 +2,7 @@
 
 #[path = "common/blizzard_addon_manifest.rs"]
 mod blizzard_addon_manifest;
-mod common;
+use crate::common;
 mod render_order_support;
 
 use render_order_support::*;

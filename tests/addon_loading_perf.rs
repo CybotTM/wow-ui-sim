@@ -1,8 +1,6 @@
-mod common;
-#[path = "perf/addon_loading.rs"]
-mod perf_addon_loading;
-#[path = "perf/base_game.rs"]
-mod perf_base_game;
+use crate::common;
+use crate::perf_addon_loading;
+use crate::perf_base_game;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;

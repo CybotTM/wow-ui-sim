@@ -5,7 +5,7 @@
 //! primary profession row. Mirrors the same test on master so layouts can be
 //! cross-checked across branches.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;

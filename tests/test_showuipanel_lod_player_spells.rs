@@ -5,7 +5,7 @@
 //! `test_showuipanel_lod_fixtures.rs` (harness/fixture coverage). All
 //! three share `tests/common/panel_fixtures.rs`.
 
-mod common;
+use crate::common;
 
 use common::panel_fixtures::{
     clear_recorded_lua_errors, player_spells_panel_debug_snapshot, recorded_lua_errors, setup_env,

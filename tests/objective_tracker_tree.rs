@@ -21,7 +21,7 @@
 //!       .HeaderText      [FontString]      text="Supply Run"
 //! ```
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 

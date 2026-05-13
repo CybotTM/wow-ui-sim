@@ -1,9 +1,8 @@
 #![cfg(feature = "gui")]
 
-mod common;
+use crate::common;
 
-#[path = "perf/base_game.rs"]
-mod perf_base_game;
+use crate::perf_base_game;
 
 use std::time::Duration;
 use std::time::Instant;

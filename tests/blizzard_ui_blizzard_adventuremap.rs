@@ -3,7 +3,7 @@
 //! Cargo only auto-discovers `tests/*.rs`, so nested files under
 //! `tests/blizzard_ui/blizzard_adventuremap/` are re-exported here.
 
-mod common;
+use crate::common;
 
 #[path = "blizzard_ui/blizzard_adventuremap/load.rs"]
 mod load;

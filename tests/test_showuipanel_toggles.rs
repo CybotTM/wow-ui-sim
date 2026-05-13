@@ -2,7 +2,7 @@
 //!
 //! Tests panel displacement, coexistence, and toggling via Blizzard global functions.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;

@@ -88,7 +88,7 @@ impl Deref for LockedEnv {
 #[macro_export]
 macro_rules! test_timeout {
     ($($body:tt)*) => {
-        common::with_timeout(120, move || { $($body)* })
+        $crate::common::with_timeout(120, move || { $($body)* })
     };
 }
 

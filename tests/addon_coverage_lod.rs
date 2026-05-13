@@ -1,6 +1,6 @@
 //! Blizzard LoadOnDemand addon coverage shards.
 
-mod common;
+use crate::common;
 
 use std::collections::{BTreeMap, HashSet};
 use std::panic::{self, AssertUnwindSafe};

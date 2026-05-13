@@ -3,7 +3,7 @@
 //! Keep this file for isolated helper logic and pure component behavior that
 //! does not require a full addon bootstrap.
 
-mod common;
+use crate::common;
 mod tooltip_full_env_helpers;
 
 use tooltip_full_env_helpers::{refresh_aura_frames, setup_full_env};

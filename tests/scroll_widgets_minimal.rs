@@ -1,6 +1,6 @@
 //! Tests for MinimalScrollBar and unnamed scroll widget template regressions.
 
-mod common;
+use crate::common;
 
 use common::env_with_shared_xml;
 use wow_ui_sim::xml::{XmlElement, parse_xml, register_template};

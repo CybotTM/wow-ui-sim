@@ -2,7 +2,7 @@
 
 //! Render order tests: strata bucket ordering and z-order correctness.
 
-mod common;
+use crate::common;
 mod render_order_support;
 
 use common::env_with_shared_xml;

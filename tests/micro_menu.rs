@@ -3,7 +3,7 @@
 //! Loads the base Blizzard UI, fires startup events, then clicks each micro
 //! menu button and verifies the corresponding panel frame is shown.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;

@@ -1,7 +1,7 @@
 #![cfg(feature = "gui")]
 //! Tests for spellbook geometry, layout locking, and tooltip rendering.
 
-mod common;
+use crate::common;
 #[path = "spellbook/common.rs"]
 mod spellbook_common;
 

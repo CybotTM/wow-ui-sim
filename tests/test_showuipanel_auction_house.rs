@@ -1,6 +1,6 @@
 //! Focused Auction House panel load/show coverage.
 
-mod common;
+use crate::common;
 
 use wow_ui_sim::loader::load_addon;
 

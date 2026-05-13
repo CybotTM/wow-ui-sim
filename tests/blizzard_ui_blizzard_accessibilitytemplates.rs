@@ -5,7 +5,7 @@
 //! files declared by the per-addon plan template need a flat re-export here
 //! to be reachable.
 
-mod common;
+use crate::common;
 
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/load.rs"]
 mod load;

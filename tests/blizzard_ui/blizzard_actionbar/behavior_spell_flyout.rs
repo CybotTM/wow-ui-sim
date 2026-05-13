@@ -5,7 +5,6 @@
 
 use crate::common;
 use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
-use crate::test_timeout;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::state::{SpellFlyoutInfo, SpellFlyoutSlot};
 

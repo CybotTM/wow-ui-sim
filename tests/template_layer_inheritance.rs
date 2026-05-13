@@ -6,7 +6,7 @@
 //! `BlackMarketUI`, …) call `self.TopTileStreaks:Hide()` in `OnLoad`, so the
 //! parentKey must reach the instance.
 
-mod common;
+use crate::common;
 
 use common::env_with_shared_xml;
 use std::path::PathBuf;

@@ -6,6 +6,7 @@ description = "World of Warcraft UI simulator for addon development"
 license = "GPL-3.0-only"
 default-run = "wow-sim"
 build = "build.rs"
+autotests = false
 
 [workspace]
 members = [".", "xtask"]
@@ -105,6 +106,10 @@ debug = "line-tables-only"
 [[test]]
 name = "frame_positions"
 harness = false
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"
 
 # The `server` feature of iced-layout-inspector pulls in peercred-ipc, which is
 # Linux-only (uses SO_PEERCRED — macOS is unix but lacks this socket option).

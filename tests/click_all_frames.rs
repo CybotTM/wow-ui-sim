@@ -3,7 +3,7 @@
 //! Loads all Blizzard addons once, then clicks frames grouped by UI area.
 //! Each group reports independently so failures are easy to locate.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;

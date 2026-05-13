@@ -1,6 +1,6 @@
 //! Layout lock for the Achievements panel.
 
-mod common;
+use crate::common;
 
 const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
     local EPS = 0.75

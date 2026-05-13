@@ -2,7 +2,7 @@
 
 //! Tests for MapCanvas pin infrastructure and world quest pin display.
 
-mod common;
+use crate::common;
 mod render_order_support;
 
 use render_order_support::env_with_isolated_world_map;

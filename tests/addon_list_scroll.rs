@@ -3,7 +3,7 @@
 //! These tests require a large collection of addons to populate the scroll list.
 //! They use the local WoW addon directory and skip in CI where it doesn't exist.
 
-mod common;
+use crate::common;
 
 use common::env_with_shared_xml;
 use wow_ui_sim::loader::find_toc_file;

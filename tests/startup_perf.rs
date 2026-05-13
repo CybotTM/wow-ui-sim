@@ -1,6 +1,5 @@
-mod common;
-#[path = "perf/base_game.rs"]
-mod perf_base_game;
+use crate::common;
+use crate::perf_base_game;
 
 use std::time::Duration;
 

@@ -8,7 +8,7 @@
 //! 4. Quad batch generation
 //! 5. GPU atlas upload
 
-mod common;
+use crate::common;
 
 use common::env_with_shared_xml;
 use wow_ui_sim::atlas::{ATLAS_DB, get_atlas_info};

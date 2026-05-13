@@ -4,7 +4,7 @@
 //! delegate both __index and __newindex to the underlying LightUserData so that
 //! children_keys and __frame_fields stay in sync.
 
-mod common;
+use crate::common;
 
 use common::env_with_shared_xml;
 

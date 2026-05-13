@@ -1,6 +1,6 @@
 //! Tests for professions: GetProfessions, GetProfessionInfo, C_TradeSkillUI.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 

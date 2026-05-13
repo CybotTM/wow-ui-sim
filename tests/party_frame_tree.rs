@@ -16,7 +16,7 @@
 //! from `master`: semantic child names and the EditMode selection subtree's
 //! strata/level chain.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 

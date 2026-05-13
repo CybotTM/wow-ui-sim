@@ -2,7 +2,6 @@
 
 use crate::common;
 use crate::common::blizzard_addon_harness::with_blizzard_addon_startup_shape;
-use crate::test_timeout;
 
 const ROOT: &str = "Blizzard_ActionBarController";
 const SEEDED_TEMP_SHAPESHIFT_BAR_INDEX: i32 = 9;

@@ -4,7 +4,7 @@
 //! These pool functions are defined in Blizzard's Lua code (Pools.lua in
 //! Blizzard_SharedXMLBase), so the tests need that addon loaded.
 
-mod common;
+use crate::common;
 
 use common::env_with_shared_xml;
 use wow_ui_sim::lua_api::WowLuaEnv;

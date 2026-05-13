@@ -2,7 +2,7 @@
 
 #[path = "hero_talents_render_visual/artifact_bbox.rs"]
 mod artifact_bbox;
-mod common;
+use crate::common;
 
 use std::cell::RefCell;
 use std::path::PathBuf;

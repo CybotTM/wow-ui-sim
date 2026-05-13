@@ -1,5 +1,4 @@
 use crate::common;
-use crate::test_timeout;
 
 use super::support::{drain_test_errors, frame_is_shown, install_test_error_handler, setup_env};
 

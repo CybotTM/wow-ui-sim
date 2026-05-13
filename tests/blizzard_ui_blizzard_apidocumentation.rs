@@ -3,7 +3,7 @@
 //! Cargo only auto-discovers `tests/*.rs`, so nested files under
 //! `tests/blizzard_ui/blizzard_apidocumentation/` are re-exported here.
 
-mod common;
+use crate::common;
 
 #[path = "blizzard_ui/blizzard_apidocumentation/behavior_add_documentation_table_routes_payload_kinds.rs"]
 mod behavior_add_documentation_table_routes_payload_kinds;

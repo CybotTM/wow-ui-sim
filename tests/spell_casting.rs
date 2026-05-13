@@ -4,7 +4,7 @@
 //! cast time), shows UnitCastingInfo, and on completion clears the cast and
 //! heals the target.
 
-mod common;
+use crate::common;
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 

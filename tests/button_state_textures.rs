@@ -5,7 +5,7 @@
 //! HighlightTexture, DisabledTexture) that should only render when the
 //! button is in the corresponding state.
 
-mod common;
+use crate::common;
 
 use common::env_with_shared_xml;
 use wow_ui_sim::iced_app::{RegistryQuadBatchParams, build_quad_batch_for_registry};

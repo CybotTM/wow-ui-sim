@@ -1,4 +1,4 @@
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};

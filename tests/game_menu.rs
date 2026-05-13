@@ -4,7 +4,7 @@
 //! buttons on Show (via InitButtons from MainMenuFrameMixin), lays them out
 //! vertically, and lives in the DIALOG strata.
 
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;

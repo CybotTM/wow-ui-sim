@@ -1,7 +1,7 @@
 #![cfg(feature = "gui")]
 //! Tests for NineSlice title bar textures and layout.
 
-mod common;
+use crate::common;
 
 use common::env_with_shared_xml;
 use wow_ui_sim::iced_app::{

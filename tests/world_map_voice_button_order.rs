@@ -1,4 +1,4 @@
-mod common;
+use crate::common;
 
 use std::path::PathBuf;
 use wow_ui_sim::iced_app::compute_frame_rect;
