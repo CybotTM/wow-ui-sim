@@ -335,9 +335,9 @@ pub const ENCOUNTER_EVENTS_VIEW_TYPE: SeqEnumDef =
 pub const ENCOUNTER_EVENTS_ORIENTATION: SeqEnumDef =
     ("EncounterEventsOrientation", &["Horizontal", "Vertical"]);
 
-pub const ENCOUNTER_EVENTS_ICON_DIRECTION: SeqEnumDef = (
+pub const ENCOUNTER_EVENTS_ICON_DIRECTION: EnumDef = (
     "EncounterEventsIconDirection",
-    &["Left", "Right", "Bottom", "Top"],
+    &[("Left", 0), ("Right", 1), ("Top", 0), ("Bottom", 1)],
 );
 
 pub const ENCOUNTER_EVENTS_VISIBILITY: SeqEnumDef = (

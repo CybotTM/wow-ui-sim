@@ -440,3 +440,40 @@ fn edit_mode_account_setting_ids_include_totem_action_bar() {
     assert_eq!(max_value, 33);
     assert_eq!(num_values, 34);
 }
+
+#[test]
+fn encounter_events_icon_direction_matches_blizzard_docs() {
+    let env = WowLuaEnv::new().expect("create Lua environment");
+
+    let (left, right, top, bottom, min_value, max_value, num_values): (
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+            local direction = Enum.EncounterEventsIconDirection
+            local meta = Enum.EncounterEventsIconDirectionMeta
+            return direction.Left,
+                direction.Right,
+                direction.Top,
+                direction.Bottom,
+                meta.MinValue,
+                meta.MaxValue,
+                meta.NumValues
+            "#,
+        )
+        .expect("read encounter events icon direction enum");
+
+    assert_eq!(left, 0);
+    assert_eq!(right, 1);
+    assert_eq!(top, 0);
+    assert_eq!(bottom, 1);
+    assert_eq!(min_value, 0);
+    assert_eq!(max_value, 1);
+    assert_eq!(num_values, 4);
+}
