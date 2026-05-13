@@ -59,6 +59,6 @@ promoted into `docs/baselines/mists-panels.md` and
 | Blizzard_StatusUI | Support | Status/dialog support dependency, not standalone panel. |
 | Blizzard_TalentUI | Covered | `Talents and glyphs`. |
 | Blizzard_TimeManager | Added | `Time manager and move pad LoD utilities`. |
-| Blizzard_TradeSkillUI | Gap task added | TradeSkillFrame loads, but the legacy Mists frame still needs `GetTradeSkill*` backing globals before it can enter the panel matrix. |
+| Blizzard_TradeSkillUI | Added | `TradeSkill panel`. |
 | Blizzard_TrainerUI | Gap task added | ClassTrainerFrame loads, but the Mists runtime is still missing legacy trainer-service globals and template wiring before it can enter the panel matrix. |
 | Blizzard_WowSurveyUI | Support/service | Survey prompt surface, not normal panel parity. |

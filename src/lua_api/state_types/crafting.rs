@@ -21,4 +21,6 @@ pub struct CraftingState {
     pub unlearned_profession_ids: HashSet<i32>,
     /// Currently selected legacy CraftFrame list index.
     pub selected_craft_index: Option<i32>,
+    /// Currently selected legacy TradeSkillFrame list index.
+    pub selected_trade_skill_index: Option<i32>,
 }
