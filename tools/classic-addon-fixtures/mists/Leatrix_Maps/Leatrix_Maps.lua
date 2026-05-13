@@ -1,0 +1,1 @@
+ClassicAddonFixture_Leatrix_Maps = true

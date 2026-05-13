@@ -2,8 +2,8 @@
 
 Popular community addons picked to validate the wow-ui-sim's classic-profile
 coverage. Wrath (`Interface: 30300`) keeps the historical 3.3.5 lane alive,
-while the Mists lane now focuses on installed Pandaria Classic addons from the
-local WoW install (`/syncthing/World of Warcraft/_classic_/Interface/AddOns`).
+while the Mists lane now prefers installed Pandaria Classic addons when
+available and falls back to committed CI fixtures when the install is absent.
 One vanilla pick keeps era/anniversary in scope.
 
 Each entry is intended to surface a different chunk of the simulator's
@@ -89,6 +89,11 @@ scripts/test-classic-addons.sh Bartender4         # one addon by name
 scripts/test-classic-addons.sh --profile wrath    # filter by profile
 scripts/test-classic-addons.sh --skip-clone       # reuse vendor checkouts
 ```
+
+Mists manifest rows use `mists-addon:<addon>`. The resolver first checks
+`MISTS_ADDON_ROOT` / `WOW_MISTS_ADDON_ROOT`; if the installed addon is absent,
+it uses `tools/classic-addon-fixtures/mists/<addon>/` so CI coverage is
+self-contained.
 
 CI lane (Phase 8.4) will invoke this script over a (profile, addon) matrix.
 

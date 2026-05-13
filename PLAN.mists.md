@@ -47,8 +47,12 @@ Parity hardening TODO:
 - [x] Audit and fix Mists font loading so Blizzard panels use the expected font assets instead of fallback/missing-font rendering.
 - [x] Add a retained release-proof artifact index under `docs/baselines/mists-release-proof.md` that records log paths, panel artifact directories, addon rows, and any remaining gaps from the latest full run.
 - [x] Wire the release-proof command into CI with artifact upload for logs, lua-error JSON, panel screenshots, and frame dumps once the local full proof is green.
+- [ ] Write brief in docs of `GitHub Actions Mists release-proof`
+- [ ] bottom tabs e.g reputation panel have the text missing
+- [ ] layouts problem even when no panel is open
+- [ ] fritz font is not loading? does it need the fallback by md5?
 - [ ] Run the new GitHub Actions Mists release-proof job via `workflow_dispatch`, record the run/artifact links in `docs/baselines/mists-release-proof.md`, and fix the first failing CI-only lane instead of relying on the local proof.
-- [ ] Make the Mists release-proof CI lane self-contained for installed-addon coverage: replace `/syncthing/World of Warcraft/_classic_/Interface/AddOns/...` assumptions with CI-available pinned addon fixtures or an explicit prepared artifact/cache step.
+- [x] Make the Mists release-proof CI lane self-contained for installed-addon coverage: replace `/syncthing/World of Warcraft/_classic_/Interface/AddOns/...` assumptions with CI-available pinned addon fixtures or an explicit prepared artifact/cache step.
 - [ ] Add release-proof artifact completeness validation that fails when `target/mists-release-proof/` is missing lane logs, the base `mists-release-lua-errors.json`, per-panel screenshots, or frame dumps before upload.
 - [ ] Promote the Mists release-proof job from opt-in to required PR/master validation after the CI environment has CASC data and installed-addon fixtures available.
 
@@ -162,7 +166,7 @@ interaction state change.
 - [x] Mists Blizzard UI source is Gethe `wow-ui-source` at `33d87412` (`5.5.3.67158`).
 - [x] Local WoW install active classic product is Pandaria Classic (`wow_classic` build `5.5.3.67158`).
 - [x] Classic addon harness can use installed local addon sources with `local:<absolute-path>`.
-- [x] Mists addon manifest points at installed Pandaria addons under `/syncthing/World of Warcraft/_classic_/Interface/AddOns`.
+- [x] Mists addon manifest resolves Pandaria addon rows via `mists-addon:<name>`, using installed addons when present and committed CI fixtures otherwise.
 - [x] Feature-gated Pandaria addon source tests exist under `client-mists`.
 - [x] Fixed Mists expansion helper state:
   - `GetExpansionLevel()` returns `LE_EXPANSION_MISTS_OF_PANDARIA`.

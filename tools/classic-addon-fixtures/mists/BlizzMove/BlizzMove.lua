@@ -1,0 +1,1 @@
+ClassicAddonFixture_BlizzMove = true

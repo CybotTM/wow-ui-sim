@@ -16,6 +16,8 @@ OUT_DIR="$REPO_ROOT/target/mists-addon-panel-parity"
 WOW_SIM_BIN="${WOW_SIM_BIN:-$REPO_ROOT/target/debug/wow-sim}"
 PANEL_VISUAL_METRICS_BIN="${PANEL_VISUAL_METRICS_BIN:-$REPO_ROOT/target/debug/panel-visual-metrics}"
 
+source "$REPO_ROOT/scripts/classic-addon-sources.sh"
+
 NAME_FILTER=""
 PANEL_FILTER=""
 SKIP_BUILD=0
@@ -69,17 +71,19 @@ should_skip_manifest_row() {
 
 validate_local_mists_source() {
     local name="$1" url="$2" subpath="$3"
-    if [[ "$url" != local:* ]]; then
-        echo "ERROR: Mists addon $name must use an installed local: source, got $url" >&2
+    if ! is_local_source "$url" && ! is_manifest_managed_source "$url"; then
+        echo "ERROR: Mists addon $name must use local: or mists-addon: source, got $url" >&2
         return 2
     fi
-    local src="${url#local:}/$subpath"
+    local src
+    src="$(resolve_addon_source_root "$name" mists "$url" "$REPO_ROOT/vendor/addons")/$subpath"
     [ -d "$src" ] || { echo "ERROR: Mists addon source missing: $src" >&2; return 2; }
 }
 
 install_symlink() {
     local name="$1" url="$2" subpath="$3"
-    local src="${url#local:}/$subpath"
+    local src
+    src="$(resolve_addon_source_root "$name" mists "$url" "$REPO_ROOT/vendor/addons")/$subpath"
     local dst="$ADDONS_DIR/$name"
     [ -d "$src" ] || { echo "ERROR: $src not found" >&2; return 1; }
     [ -L "$dst" ] && rm "$dst"

@@ -6,6 +6,8 @@
 #      - Git rows clone into vendor/addons/<name>/ if not present (idempotent)
 #        and check out the pinned ref
 #      - local:<absolute-path> rows use the existing on-disk addon directory
+#      - mists-addon:<addon> rows use the installed Mists addon when present,
+#        otherwise fall back to committed CI fixtures
 #   2. Symlink Interface/AddOns/<name> -> source/<subpath>
 #   3. Build wow-sim with the addon's profile feature
 #   4. Run lua-errors, save to target/addon-harness/<name>-lua-errors.json
@@ -42,6 +44,8 @@ ADDONS_DIR="$REPO_ROOT/Interface/AddOns"
 OUT_DIR="$REPO_ROOT/target/addon-harness"
 WOW_SIM_BIN="${WOW_SIM_BIN:-$REPO_ROOT/target/debug/wow-sim}"
 
+source "$REPO_ROOT/scripts/classic-addon-sources.sh"
+
 NAME_FILTER=""
 PROFILE_FILTER=""
 SKIP_CLONE=0
@@ -76,29 +80,13 @@ fi
 
 mkdir -p "$VENDOR_DIR" "$OUT_DIR"
 
-is_local_source() {
-    local url="$1"
-    [[ "$url" == local:* || "$url" == /* ]]
-}
-
-source_root() {
-    local name="$1" url="$2"
-    if [[ "$url" == local:* ]]; then
-        echo "${url#local:}"
-    elif [[ "$url" == /* ]]; then
-        echo "$url"
-    else
-        echo "$VENDOR_DIR/$name"
-    fi
-}
-
 ensure_source() {
-    local name="$1" url="$2" ref="$3"
-    if is_local_source "$url"; then
+    local name="$1" profile="$2" url="$3" ref="$4"
+    if is_local_source "$url" || is_manifest_managed_source "$url"; then
         local src
-        src=$(source_root "$name" "$url")
+        src=$(resolve_addon_source_root "$name" "$profile" "$url" "$VENDOR_DIR")
         [ -d "$src" ] || { echo "ERROR: local source $src not found" >&2; return 1; }
-        echo "  → using local source $src"
+        echo "  → using source $src"
         return 0
     fi
 
@@ -197,9 +185,9 @@ run_addon() {
     echo ""
     echo "=== $name ($profile) ==="
 
-    ensure_source "$name" "$url" "$ref"
+    ensure_source "$name" "$profile" "$url" "$ref"
     local src_root
-    src_root=$(source_root "$name" "$url")
+    src_root=$(resolve_addon_source_root "$name" "$profile" "$url" "$VENDOR_DIR")
     install_symlink "$name" "$src_root" "$subpath"
     install_compat_shims "$name"
 

@@ -1,0 +1,3 @@
+## Interface: 50504
+## Title: Plater CI Fixture
+Plater.lua

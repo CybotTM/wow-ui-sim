@@ -52,15 +52,20 @@ The full proof uses the `mists` rows from `tools/classic-addon-manifest.tsv`:
 
 | Addon | Source |
 |---|---|
-| `AllTheThings` | `local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/AllTheThings` |
-| `Auctionator` | `local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Auctionator` |
-| `BlizzMove` | `local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/BlizzMove` |
-| `DeModal` | `local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/DeModal` |
-| `DialogueUI` | `local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/DialogueUI` |
-| `Leatrix_Maps` | `local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Leatrix_Maps` |
-| `Leatrix_Plus` | `local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Leatrix_Plus` |
-| `Plater` | `local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Plater` |
-| `SimpleItemLevel` | `local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/SimpleItemLevel` |
+| `AllTheThings` | `mists-addon:AllTheThings` |
+| `Auctionator` | `mists-addon:Auctionator` |
+| `BlizzMove` | `mists-addon:BlizzMove` |
+| `DeModal` | `mists-addon:DeModal` |
+| `DialogueUI` | `mists-addon:DialogueUI` |
+| `Leatrix_Maps` | `mists-addon:Leatrix_Maps` |
+| `Leatrix_Plus` | `mists-addon:Leatrix_Plus` |
+| `Plater` | `mists-addon:Plater` |
+| `SimpleItemLevel` | `mists-addon:SimpleItemLevel` |
+
+`mists-addon:<name>` resolves to the installed addon under `MISTS_ADDON_ROOT`
+or `WOW_MISTS_ADDON_ROOT` when available. CI falls back to the committed
+fixtures under `tools/classic-addon-fixtures/mists/<name>/`, so the release
+proof no longer depends on a runner-local WoW install.
 
 Latest full-run result: `passed: 9`, `failed: 0` for startup, installed-addon
 panel parity, and installed-addon panel parity with SavedVariables.

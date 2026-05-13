@@ -18,13 +18,13 @@ Bartender4	wrath	https://github.com/Nevcairiel/Bartender4.git	master	.
 DBM-Wrath	wrath	https://github.com/DeadlyBossMods/DBM-Wrath.git	master	DBM-Core
 AtlasLootClassic	wrath	https://github.com/Hoizame/AtlasLootClassic.git	wotlk	AtlasLootClassic
 Skada-WoTLK	wrath	https://github.com/bkader/Skada-WoTLK.git	master	Skada
-AllTheThings	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/AllTheThings	-	.
-Auctionator	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Auctionator	-	.
-BlizzMove	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/BlizzMove	-	.
-DeModal	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/DeModal	-	.
-DialogueUI	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/DialogueUI	-	.
-Leatrix_Maps	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Leatrix_Maps	-	.
-Leatrix_Plus	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Leatrix_Plus	-	.
-Plater	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/Plater	-	.
-SimpleItemLevel	mists	local:/syncthing/World of Warcraft/_classic_/Interface/AddOns/SimpleItemLevel	-	.
+AllTheThings	mists	mists-addon:AllTheThings	-	.
+Auctionator	mists	mists-addon:Auctionator	-	.
+BlizzMove	mists	mists-addon:BlizzMove	-	.
+DeModal	mists	mists-addon:DeModal	-	.
+DialogueUI	mists	mists-addon:DialogueUI	-	.
+Leatrix_Maps	mists	mists-addon:Leatrix_Maps	-	.
+Leatrix_Plus	mists	mists-addon:Leatrix_Plus	-	.
+Plater	mists	mists-addon:Plater	-	.
+SimpleItemLevel	mists	mists-addon:SimpleItemLevel	-	.
 pfQuest-Vanilla	era	https://github.com/shagu/pfQuest.git	master	.
