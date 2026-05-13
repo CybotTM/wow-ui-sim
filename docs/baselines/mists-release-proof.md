@@ -79,6 +79,27 @@ uses `scripts/ci-mists-release-proof.sh --skip-clone` and uploads
 `target/mists-release-proof/`, including logs, base `lua-errors` JSON, panel
 screenshots, and frame dumps.
 
+## GitHub Actions Brief
+
+The GitHub Actions `Mists release proof` job is the CI version of the local
+release-profile proof command. It builds release `wow-sim`, `wow-cli`, and
+`panel-visual-metrics` for `client-mists`, then runs the zero `lua-errors`
+baseline, installed-addon startup matrix, panel parity with visual comparison,
+SavedVariables variants, connected-GUI micro-menu smoke, and interaction audit.
+
+Run it from the `Test` workflow with `workflow_dispatch` and
+`run_mists_release_proof=true`; normal retail/client-profile jobs are skipped
+for that manual proof run. The job is still opt-in because it needs the CI
+rendering path and addon fixtures to stay stable before it becomes required
+PR/master validation.
+
+If the job fails, inspect the uploaded `mists-release-proof` artifact first.
+Start with `logs/<lane>.log`, then open the matching panel or addon directory
+for `lua-errors.json`, `dump-tree.txt`, and `screenshot.webp`. Treat the first
+failing lane as the next fix target; do not refresh baselines just to hide a
+new CI-only `lua-errors`, missing root frame, blank render, or visual-regression
+failure.
+
 First CI proof dispatch attempts:
 `https://github.com/Osso/wow-ui-sim/actions/runs/25824999285`. The target
 `Mists release proof` job reached the base panel parity lane, uploaded

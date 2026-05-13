@@ -47,7 +47,7 @@ Parity hardening TODO:
 - [x] Audit and fix Mists font loading so Blizzard panels use the expected font assets instead of fallback/missing-font rendering.
 - [x] Add a retained release-proof artifact index under `docs/baselines/mists-release-proof.md` that records log paths, panel artifact directories, addon rows, and any remaining gaps from the latest full run.
 - [x] Wire the release-proof command into CI with artifact upload for logs, lua-error JSON, panel screenshots, and frame dumps once the local full proof is green.
-- [ ] Write brief in docs of `GitHub Actions Mists release-proof`
+- [x] Write brief in docs of `GitHub Actions Mists release-proof`
 - [ ] bottom tabs e.g reputation panel have the text missing
 - [ ] layouts problem even when no panel is open
 - [ ] fritz font is not loading? does it need the fallback by md5?
