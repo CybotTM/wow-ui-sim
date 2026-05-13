@@ -3,7 +3,8 @@
 #
 # Builds release binaries for the Mists profile, then runs the zero
 # `lua-errors` baseline, installed-addon startup matrix, base panel parity
-# with visual comparison, installed-addon panel matrix, and interaction audit.
+# with visual comparison, installed-addon panel matrix, saved-variable panel
+# parity, live GUI smoke, and interaction audit.
 # Every step writes a tee-style log while preserving the command exit status.
 
 set -euo pipefail
@@ -114,8 +115,27 @@ panel_parity_matrix() {
         "$REPO_ROOT/scripts/mists-panel-parity.sh" "${args[@]}"
 }
 
+panel_parity_with_saved_vars() {
+    local args=(--skip-build --with-saved-vars --out-dir "$OUT_DIR/panel-parity-with-saved-vars")
+    [ -n "$PANEL_FILTER" ] && args+=(--panel "$PANEL_FILTER")
+
+    WOW_SIM_BIN="$WOW_SIM_BIN" \
+    PANEL_VISUAL_METRICS_BIN="$PANEL_VISUAL_METRICS_BIN" \
+        "$REPO_ROOT/scripts/mists-panel-parity.sh" "${args[@]}"
+}
+
 installed_addon_panel_matrix() {
     local args=(--skip-build --out-dir "$OUT_DIR/addon-panel-parity")
+    [ -n "$PANEL_FILTER" ] && args+=(--panel "$PANEL_FILTER")
+    [ -n "$ADDON_FILTER" ] && args+=(--addon "$ADDON_FILTER")
+
+    WOW_SIM_BIN="$WOW_SIM_BIN" \
+    PANEL_VISUAL_METRICS_BIN="$PANEL_VISUAL_METRICS_BIN" \
+        "$REPO_ROOT/scripts/test-mists-addon-panels.sh" "${args[@]}"
+}
+
+installed_addon_panel_matrix_with_saved_vars() {
+    local args=(--skip-build --with-saved-vars --out-dir "$OUT_DIR/addon-panel-parity-with-saved-vars")
     [ -n "$PANEL_FILTER" ] && args+=(--panel "$PANEL_FILTER")
     [ -n "$ADDON_FILTER" ] && args+=(--addon "$ADDON_FILTER")
 
@@ -151,6 +171,8 @@ validate_plan() {
     echo "release proof lane: panel-parity"
     echo "release proof lane: visual-comparison"
     echo "release proof lane: installed-addon-panel-matrix"
+    echo "release proof lane: panel-parity-with-saved-vars"
+    echo "release proof lane: installed-addon-panel-matrix-with-saved-vars"
     echo "release proof lane: live-gui-smoke"
     echo "release proof lane: interaction-audit"
 }
@@ -169,6 +191,8 @@ run_logged_step zero-lua-errors zero_lua_errors
 run_logged_step installed-addon-matrix installed_addon_matrix
 run_logged_step panel-parity-and-visual-comparison panel_parity_matrix
 run_logged_step installed-addon-panel-matrix installed_addon_panel_matrix
+run_logged_step panel-parity-with-saved-vars panel_parity_with_saved_vars
+run_logged_step installed-addon-panel-matrix-with-saved-vars installed_addon_panel_matrix_with_saved_vars
 run_logged_step live-gui-smoke live_gui_smoke
 run_logged_step interaction-audit interaction_audit
 

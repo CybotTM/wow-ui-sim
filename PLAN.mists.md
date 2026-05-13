@@ -40,7 +40,11 @@ Parity hardening TODO:
 - [x] Add a release-profile Mists CI proof command that runs zero `lua-errors`, installed-addon matrix, panel parity, interaction audit, and visual comparison with pipefail-safe logging.
 - [x] Run the full release-profile Mists proof command locally with `--skip-clone`, document every failure, and fix the first failing lane instead of treating validation-only as sufficient.
 - [x] Add the connected-GUI micro-menu smoke runner as a release-proof lane using release `wow-sim` and `wow-cli`, so real input dispatch is part of the parity gate.
-- [ ] Extend the release proof to run panel parity and installed-addon panel parity with normal SavedVariables enabled, then fix any saved-var-only panel or addon regression.
+- [x] Extend the release proof to run panel parity and installed-addon panel parity with normal SavedVariables enabled, then fix any saved-var-only panel or addon regression.
+- [ ] Fix Mists action/micro/bag bar visual regression where lower bar slots render black/empty with clipped or offset highlight/hand affordances.
+- [ ] Fix Mists unit frame/action area visual regression where PlayerFrame/target-frame art overlaps or clips, target names like Khadgar render in cramped frames, gray placeholder bars leak, and right-side action slots render as broken black boxes.
+- [ ] Fix Mists specialization/talent UI layout overlap, then implement the `Learn` specialization flow so it switches from spec selection into the actual talents UI.
+- [ ] Audit and fix Mists font loading so Blizzard panels use the expected font assets instead of fallback/missing-font rendering.
 - [ ] Add a retained release-proof artifact index under `docs/baselines/mists-release-proof.md` that records log paths, panel artifact directories, addon rows, and any remaining gaps from the latest full run.
 - [ ] Wire the release-proof command into CI with artifact upload for logs, lua-error JSON, panel screenshots, and frame dumps once the local full proof is green.
 

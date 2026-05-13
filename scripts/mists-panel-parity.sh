@@ -51,6 +51,11 @@ if [ "$LOAD_SAVED_VARS" -eq 1 ] && [ "$OUT_DIR_SET" -eq 0 ]; then
     OUT_DIR="$REPO_ROOT/target/mists-panel-parity-with-saved-vars"
 fi
 
+case "$OUT_DIR" in
+    /*) ;;
+    *) OUT_DIR="$PWD/$OUT_DIR" ;;
+esac
+
 SIM_SAVED_VAR_ARGS=(--no-saved-vars)
 if [ "$LOAD_SAVED_VARS" -eq 1 ]; then
     SIM_SAVED_VAR_ARGS=()
