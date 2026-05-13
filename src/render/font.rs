@@ -8,6 +8,10 @@ use std::collections::HashMap;
 
 use cosmic_text::fontdb;
 
+#[cfg(feature = "casc")]
+#[path = "font_casc_fallback.rs"]
+mod font_casc_fallback;
+
 /// WoW font path constants (as they appear in Lua/XML).
 const WOW_FONT_FRIZ: &str = "Fonts\\FRIZQT__.TTF";
 const WOW_FONT_ARIAL_NARROW: &str = "Fonts\\ARIALN.TTF";
@@ -54,67 +58,67 @@ const WOW_FONT_FILES: &[WowFontFile] = &[
     WowFontFile {
         filename: "MORPHEUS.TTF",
         wow_paths: &["Fonts\\MORPHEUS.TTF", "Fonts\\MORPHEUS.ttf"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("81DFB1A8D2E8E5F88CC52B87184D1888"),
     },
     WowFontFile {
         filename: "MORPHEUS_CYR.TTF",
         wow_paths: &["Fonts\\MORPHEUS_CYR.TTF", "Fonts\\MORPHEUS_CYR.ttf"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("6F7F97CE27CC21B3CE3FB7DEC042EF6F"),
     },
     WowFontFile {
         filename: "SKURRI.TTF",
         wow_paths: &["Fonts\\SKURRI.TTF", "Fonts\\skurri.ttf"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("71642D3EFE9972983D3B4C5265402E93"),
     },
     WowFontFile {
         filename: "SKURRI_CYR.TTF",
         wow_paths: &["Fonts\\SKURRI_CYR.TTF"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("39512C75D1D6190C4318EB73365190E4"),
     },
     WowFontFile {
         filename: "K_Pagetext.TTF",
         wow_paths: &["Fonts\\K_Pagetext.TTF", "Fonts\\K_Pagetext.ttf"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("68B4590641A67D22C60A9C764AA8F639"),
     },
     WowFontFile {
         filename: "K_Damage.TTF",
         wow_paths: &["Fonts\\K_Damage.TTF", "Fonts\\K_Damage.ttf"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("267124985FE8E273FE9954DD59C57E2E"),
     },
     WowFontFile {
         filename: "2002.TTF",
         wow_paths: &["Fonts\\2002.TTF", "Fonts\\2002.ttf"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("D578A1888E2E5A893FBC6E28439233C6"),
     },
     WowFontFile {
         filename: "ARHei.ttf",
         wow_paths: &["Fonts\\ARHei.ttf"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("F622A11C55EE13A97DCEDD7D1E4CDBAD"),
     },
     WowFontFile {
         filename: "ARKai_C.ttf",
         wow_paths: &["Fonts\\ARKai_C.ttf", "Fonts\\ARKai_C.TTF"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("B06A317EAF8BD5166331CA2796015B73"),
     },
     WowFontFile {
         filename: "ARKai_T.ttf",
         wow_paths: &["Fonts\\ARKai_T.ttf", "Fonts\\ARKai_T.TTF"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("E2DFFF92C883E2A321CED396767E79DA"),
     },
     WowFontFile {
         filename: "bHEI00M.TTF",
         wow_paths: &["Fonts\\bHEI00M.TTF"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("6AD9B2C4A54D15683700CEB6263DFE05"),
     },
     WowFontFile {
         filename: "bHEI01B.TTF",
         wow_paths: &["Fonts\\bHEI01B.TTF"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("AEF77F819D6C1AB29C34B104BAFEC3AA"),
     },
     WowFontFile {
         filename: "bKAI00M.TTF",
         wow_paths: &["Fonts\\bKAI00M.TTF", "Fonts\\bKAI00M.ttf"],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("1056AFA8FA4B3589FC2FD6869057D3AC"),
     },
     WowFontFile {
         filename: "blei00d.ttf",
@@ -123,7 +127,7 @@ const WOW_FONT_FILES: &[WowFontFile] = &[
             "Fonts\\blei00d.TTF",
             "Fonts\\BLEI00D.TTF",
         ],
-        encoding_key_hex: None,
+        encoding_key_hex: Some("C0558AB41E6E62016686CF61AE0EC207"),
     },
 ];
 
@@ -716,7 +720,7 @@ mod tests {
 
     #[test]
     fn mists_specialty_fonts_resolve_without_default_fallback() {
-        if !asset_resolver_available() || try_casc_font_bytes("FRIZQT__.TTF").is_none() {
+        if !asset_resolver_available() {
             return;
         }
 
@@ -739,7 +743,7 @@ mod tests {
 
     #[test]
     fn mists_font_paths_are_registered() {
-        if !asset_resolver_available() || try_casc_font_bytes("FRIZQT__.TTF").is_none() {
+        if !asset_resolver_available() {
             return;
         }
 
@@ -770,6 +774,21 @@ mod tests {
                 "{path} should be registered for Mists font XML"
             );
         }
+    }
+
+    #[test]
+    fn friz_font_bytes_resolve_when_font_fdid_cache_entry_is_missing() {
+        if !asset_resolver_available() {
+            return;
+        }
+
+        let bytes = try_casc_font_bytes("FRIZQT__.TTF")
+            .expect("FRIZQT__.TTF should resolve through path or known encoding key");
+
+        assert!(
+            fontdb_family_name(&bytes).is_some(),
+            "FRIZQT__.TTF bytes should parse as a real font"
+        );
     }
 
     #[test]

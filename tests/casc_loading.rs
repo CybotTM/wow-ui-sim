@@ -11,7 +11,7 @@
 
 #![cfg(feature = "casc")]
 
-use wow_ui_sim::texture::TextureManager;
+use wow_ui_sim::{font::WowFontSystem, texture::TextureManager};
 
 fn casc_available() -> bool {
     if std::env::var("WOW_SIM_CASC").ok().as_deref() == Some("0") {
@@ -114,4 +114,16 @@ fn casc_resolves_baseline_fonts() {
             "{path} (fdid {fdid}) returned empty bytes"
         );
     }
+
+    let fs = WowFontSystem::new();
+    let friz = fs.family_name(Some("Fonts\\FRIZQT__.TTF")).unwrap();
+    let arialn = fs.family_name(Some("Fonts\\ARIALN.TTF")).unwrap();
+    let friz_cyr = fs.family_name(Some("Fonts\\FRIZQT___CYR.TTF")).unwrap();
+
+    assert_ne!(friz, arialn, "FRIZQT__ should not use ARIALN fallback");
+    assert_ne!(friz, friz_cyr, "FRIZQT__ should not use Cyrillic fallback");
+    assert_ne!(
+        arialn, friz_cyr,
+        "ARIALN should not use the Cyrillic fallback"
+    );
 }

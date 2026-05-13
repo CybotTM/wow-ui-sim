@@ -234,7 +234,7 @@ pub struct WowFontSystem {
 }
 ```
 
-Supported fonts: FRIZQT__.TTF (default), ARIALN.TTF, frizqt___cyr.ttf — loaded from CASC by default. FRIZQT__.TTF also has an embedded fallback (`assets/fonts/FRIZQT__.TTF`) used when CASC is unavailable. Uppercase path normalization for HashMap lookup, fallback to default if not found.
+Supported fonts include FRIZQT__.TTF (default), ARIALN.TTF, FRIZQT___CYR.TTF, and the Mists-era specialty fonts used by Blizzard XML. They load from CASC by default. If path/FDID resolution misses a known core font, the loader retries by the known CASC encoding key; it does not ship embedded font bytes. Uppercase path normalization is used for HashMap lookup, with unknown font paths falling back to the default family.
 
 ---
 

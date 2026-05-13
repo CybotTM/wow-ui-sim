@@ -27,13 +27,14 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 
 - [ ] `WowFontSystem::new()` takes no arguments and returns a font system populated with at least the FRIZQT__ family.
 - [ ] When CASC is available, `Fonts\FRIZQT__.TTF`, `Fonts\ARIALN.TTF`, and `Fonts\frizqt___cyr.ttf` all resolve to a real CASC-loaded face.
-- [ ] When CASC is unavailable (feature off, `WOW_SIM_CASC=0`, or the WoW install missing), `Fonts\FRIZQT__.TTF` still resolves via the embedded fallback at `assets/fonts/FRIZQT__.TTF` (`include_bytes!`). Other fonts may legitimately miss in this mode.
+- [ ] When CASC path/FDID resolution misses a known core WoW font, the font loader falls back to the known CASC encoding key instead of shipping embedded font bytes.
+- [ ] When CASC is unavailable (feature off, `WOW_SIM_CASC=0`, or the WoW install missing), `Fonts\FRIZQT__.TTF` may fall back to a system font family so text remains shapeable. Tests that require real WoW font metrics must require CASC.
 - [ ] An unknown font path (`Fonts\NONEXISTENT.TTF`) falls back to the FRIZQT__ family rather than returning `None`.
 
 ### Smoke verification
 
 - [x] Three baseline textures (`Interface\Buttons\UI-Panel-Button-Up`, `Interface\DialogFrame\UI-DialogBox-Background`, `Interface\Icons\INV_Misc_QuestionMark`) resolve end-to-end through `TextureManager.load` with the expected dimensions (`tests/casc_loading.rs::casc_resolves_baseline_textures`).
-- [x] `fonts/frizqt__.ttf`, `fonts/arialn.ttf`, `fonts/frizqt___cyr.ttf` resolve via `asset_resolver::lookup_path` and `asset_resolver::resolve_bytes` returns non-empty bytes (`tests/casc_loading.rs::casc_resolves_baseline_fonts`).
+- [x] `Fonts\FRIZQT__.TTF`, `Fonts\ARIALN.TTF`, and `Fonts\FRIZQT___CYR.TTF` resolve through `WowFontSystem` to distinct real WoW faces, including the known encoding-key fallback when raw FDID resolution misses (`tests/casc_loading.rs::casc_resolves_baseline_fonts`).
 
 ## How it works
 
@@ -45,10 +46,9 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 ## Implementation inventory
 
 - `src/texture/resolve.rs` — CASC tier for textures (`casc_enabled`, `casc_extract_dir`, `try_casc_resolve`)
-- `src/render/font.rs` — CASC tier for fonts (`casc_enabled`, `try_casc_font_bytes`) and `FRIZQT_FALLBACK` embedded bytes
-- `assets/fonts/FRIZQT__.TTF` — embedded no-CASC fallback (only on-repo asset)
+- `src/render/font.rs` — CASC tier for fonts (`casc_enabled`, `try_casc_font_bytes`) and known core-font encoding-key fallback for CASC cache misses
 - `examples/casc_smoke.rs` — verification harness for textures + fonts
-- `Cargo.toml` — `casc` feature gate (`dep:asset-resolver`), default-on
+- `Cargo.toml` — `casc` feature gate (`dep:asset-resolver`, `dep:cascette-client-storage`, `dep:cascette-crypto`), default-on
 
 ## Tests asserting this spec
 
