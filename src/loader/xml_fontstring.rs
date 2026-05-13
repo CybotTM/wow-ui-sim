@@ -173,6 +173,7 @@ fn append_fontstring_extra_code(
     parent_name: &str,
     resolved_text: &Option<String>,
 ) {
+    append_fontstring_font_code(code, fontstring);
     append_fontstring_text_code(code, resolved_text);
     append_fontstring_visual_code(code, fontstring);
     append_fontstring_parent_code(code, fontstring);
@@ -180,6 +181,15 @@ fn append_fontstring_extra_code(
     append_fontstring_key_values_code(code, fontstring);
     append_fontstring_scripts_code(code, fontstring);
     append_fontstring_alpha_visibility_code(code, fontstring);
+}
+
+fn append_fontstring_font_code(code: &mut String, fontstring: &crate::xml::FontStringXml) {
+    if let Some(font) = &fontstring.font {
+        code.push_str(&format!(
+            "\n        fs:SetFontObject(\"{}\")\n        ",
+            escape_lua_string(font)
+        ));
+    }
 }
 
 fn append_fontstring_text_code(code: &mut String, resolved_text: &Option<String>) {

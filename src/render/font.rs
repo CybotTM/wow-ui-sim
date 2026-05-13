@@ -32,24 +32,98 @@ struct FontEntry {
 struct WowFontFile {
     filename: &'static str,
     wow_paths: &'static [&'static str],
-    encoding_key_hex: &'static str,
+    encoding_key_hex: Option<&'static str>,
 }
 
 const WOW_FONT_FILES: &[WowFontFile] = &[
     WowFontFile {
         filename: "FRIZQT__.TTF",
         wow_paths: &[WOW_FONT_FRIZ, "Fonts\\frizqt__.ttf"],
-        encoding_key_hex: "DB472FF5CA74465BAA066021CD837645",
+        encoding_key_hex: Some("DB472FF5CA74465BAA066021CD837645"),
     },
     WowFontFile {
         filename: "ARIALN.TTF",
         wow_paths: &[WOW_FONT_ARIAL_NARROW, "Fonts\\arialn.ttf"],
-        encoding_key_hex: "B118D76FD2E2BDA9AAB0118B508D0FB1",
+        encoding_key_hex: Some("B118D76FD2E2BDA9AAB0118B508D0FB1"),
     },
     WowFontFile {
         filename: "FRIZQT___CYR.TTF",
         wow_paths: &["Fonts\\FRIZQT___CYR.TTF", "Fonts\\frizqt___cyr.ttf"],
-        encoding_key_hex: "78AEBA943ABCFF292438DA989CC1E728",
+        encoding_key_hex: Some("78AEBA943ABCFF292438DA989CC1E728"),
+    },
+    WowFontFile {
+        filename: "MORPHEUS.TTF",
+        wow_paths: &["Fonts\\MORPHEUS.TTF", "Fonts\\MORPHEUS.ttf"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "MORPHEUS_CYR.TTF",
+        wow_paths: &["Fonts\\MORPHEUS_CYR.TTF", "Fonts\\MORPHEUS_CYR.ttf"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "SKURRI.TTF",
+        wow_paths: &["Fonts\\SKURRI.TTF", "Fonts\\skurri.ttf"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "SKURRI_CYR.TTF",
+        wow_paths: &["Fonts\\SKURRI_CYR.TTF"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "K_Pagetext.TTF",
+        wow_paths: &["Fonts\\K_Pagetext.TTF", "Fonts\\K_Pagetext.ttf"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "K_Damage.TTF",
+        wow_paths: &["Fonts\\K_Damage.TTF", "Fonts\\K_Damage.ttf"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "2002.TTF",
+        wow_paths: &["Fonts\\2002.TTF", "Fonts\\2002.ttf"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "ARHei.ttf",
+        wow_paths: &["Fonts\\ARHei.ttf"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "ARKai_C.ttf",
+        wow_paths: &["Fonts\\ARKai_C.ttf", "Fonts\\ARKai_C.TTF"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "ARKai_T.ttf",
+        wow_paths: &["Fonts\\ARKai_T.ttf", "Fonts\\ARKai_T.TTF"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "bHEI00M.TTF",
+        wow_paths: &["Fonts\\bHEI00M.TTF"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "bHEI01B.TTF",
+        wow_paths: &["Fonts\\bHEI01B.TTF"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "bKAI00M.TTF",
+        wow_paths: &["Fonts\\bKAI00M.TTF", "Fonts\\bKAI00M.ttf"],
+        encoding_key_hex: None,
+    },
+    WowFontFile {
+        filename: "blei00d.ttf",
+        wow_paths: &[
+            "Fonts\\blei00d.ttf",
+            "Fonts\\blei00d.TTF",
+            "Fonts\\BLEI00D.TTF",
+        ],
+        encoding_key_hex: None,
     },
 ];
 
@@ -116,9 +190,11 @@ fn try_casc_font_bytes(font_file: &WowFontFile) -> Option<Vec<u8>> {
         write_cached_font_bytes(font_file.filename, &bytes);
         return Some(bytes);
     }
-    if let Some(bytes) = try_casc_font_bytes_by_encoding_key(font_file.encoding_key_hex) {
-        write_cached_font_bytes(font_file.filename, &bytes);
-        return Some(bytes);
+    if let Some(encoding_key_hex) = font_file.encoding_key_hex {
+        if let Some(bytes) = try_casc_font_bytes_by_encoding_key(encoding_key_hex) {
+            write_cached_font_bytes(font_file.filename, &bytes);
+            return Some(bytes);
+        }
     }
 
     let resolver = crate::asset_resolver_config::resolver();
@@ -553,9 +629,8 @@ mod tests {
     #[test]
     fn loads_wow_fonts() {
         let fs = WowFontSystem::new();
-        // 3 font files: FRIZQT__ (2 aliases), ARIALN (2 aliases), FRIZQT___CYR (2 aliases).
-        // All come from CASC; without CASC the font_map is empty and downstream
-        // shaping uses cosmic-text's default fonts.
+        // WoW UI font files come from CASC; without CASC the font_map is empty
+        // and downstream shaping uses cosmic-text's default fonts.
         if asset_resolver_available() {
             assert!(
                 !fs.font_map.is_empty(),
@@ -637,6 +712,64 @@ mod tests {
         let name = fs.family_name(Some("Fonts\\NONEXISTENT.TTF")).unwrap();
         let default_name = fs.family_name(Some(DEFAULT_WOW_FONT)).unwrap();
         assert_eq!(name, default_name);
+    }
+
+    #[test]
+    fn mists_specialty_fonts_resolve_without_default_fallback() {
+        if !asset_resolver_available() || try_casc_font_bytes("FRIZQT__.TTF").is_none() {
+            return;
+        }
+
+        let fs = WowFontSystem::new();
+        let default_name = fs.family_name(Some(DEFAULT_WOW_FONT)).unwrap();
+
+        for path in [
+            "Fonts\\MORPHEUS.ttf",
+            "Fonts\\skurri.ttf",
+            "Fonts\\K_Pagetext.ttf",
+            "Fonts\\K_Damage.ttf",
+        ] {
+            let family = fs.family_name(Some(path)).unwrap();
+            assert_ne!(
+                family, default_name,
+                "{path} should resolve to its own loaded WoW font family, not the default font"
+            );
+        }
+    }
+
+    #[test]
+    fn mists_font_paths_are_registered() {
+        if !asset_resolver_available() || try_casc_font_bytes("FRIZQT__.TTF").is_none() {
+            return;
+        }
+
+        let fs = WowFontSystem::new();
+
+        for path in [
+            "Fonts\\2002.TTF",
+            "Fonts\\ARHei.ttf",
+            "Fonts\\ARIALN.TTF",
+            "Fonts\\ARKai_C.ttf",
+            "Fonts\\ARKai_T.ttf",
+            "Fonts\\bHEI00M.TTF",
+            "Fonts\\bHEI01B.TTF",
+            "Fonts\\bKAI00M.TTF",
+            "Fonts\\blei00d.ttf",
+            "Fonts\\FRIZQT___CYR.TTF",
+            "Fonts\\FRIZQT__.TTF",
+            "Fonts\\K_Damage.ttf",
+            "Fonts\\K_Pagetext.ttf",
+            "Fonts\\MORPHEUS_CYR.TTF",
+            "Fonts\\MORPHEUS.ttf",
+            "Fonts\\SKURRI_CYR.TTF",
+            "Fonts\\skurri.ttf",
+        ] {
+            let key = normalize_wow_path(path);
+            assert!(
+                fs.font_map.contains_key(&key),
+                "{path} should be registered for Mists font XML"
+            );
+        }
     }
 
     #[test]

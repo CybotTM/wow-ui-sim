@@ -94,6 +94,29 @@ fn missing_xml_include_reports_path_to_lua_error_handler() {
 }
 
 #[test]
+fn fontstring_font_attribute_applies_font_object() {
+    let t = load_test_xml(
+        "fontstring-font-attribute",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="FontAttributeParent" parent="UIParent">
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString parentKey="Text" font="GameFontNormal"/>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.assert_lua_true(
+        "return (function() local font = FontAttributeParent.Text:GetFont(); return font == [[Fonts\\FRIZQT__.TTF]] end)()",
+        "FontString font attribute should apply the named font object",
+    );
+}
+
+#[test]
 fn test_xml_texture_color() {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join("wow-sim-test-texcolor");

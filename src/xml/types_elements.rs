@@ -238,6 +238,8 @@ pub struct FontStringXml {
     pub parent_key: Option<String>,
     #[serde(rename = "@inherits")]
     pub inherits: Option<String>,
+    #[serde(rename = "@font")]
+    pub font: Option<String>,
     #[serde(rename = "@mixin")]
     pub mixin: Option<String>,
     #[serde(rename = "@virtual")]
