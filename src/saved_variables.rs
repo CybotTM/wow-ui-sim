@@ -23,6 +23,8 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, Val};
 
+const EDIT_MODE_LAYOUT_ENV: &str = "WOW_SIM_EDIT_MODE_LAYOUT";
+
 use saved_variables_serialize::serialize_assignment;
 
 /// Read-only source for importing WTF saved variables from a real WoW installation.
@@ -202,6 +204,8 @@ impl SavedVariablesManager {
         let load_cache = table_get_static(state, c_edit_mode, "__LoadCache");
         let account_arg = optional_string_arg(state, account_cache.as_deref());
         let character_arg = optional_string_arg(state, character_cache.as_deref());
+        let preferred_layout = std::env::var(EDIT_MODE_LAYOUT_ENV).ok();
+        let preferred_layout_arg = optional_string_arg(state, preferred_layout.as_deref());
         call_function_state(
             state,
             load_cache,
@@ -209,6 +213,7 @@ impl SavedVariablesManager {
                 account_arg,
                 character_arg,
                 Val::Num(active_spec_index as f64),
+                preferred_layout_arg,
             ],
         )?;
         Ok(true)

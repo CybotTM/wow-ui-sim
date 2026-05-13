@@ -9139,6 +9139,33 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     return nil
   end
 
+  local function __wow_edit_mode_active_layout_from_override(layouts, preferredLayout)
+    if type(preferredLayout) ~= "string" or preferredLayout == "" then
+      return nil
+    end
+
+    local preferredIndex = tonumber(preferredLayout)
+    if preferredIndex and preferredIndex > 0 then
+      return preferredIndex
+    end
+
+    for index, layout in ipairs(layouts or {}) do
+      if layout.layoutName == preferredLayout then
+        return index
+      end
+    end
+
+    local loweredPreferredLayout = string.lower(preferredLayout)
+    for index, layout in ipairs(layouts or {}) do
+      local layoutName = type(layout.layoutName) == "string" and layout.layoutName or ""
+      if string.lower(layoutName) == loweredPreferredLayout then
+        return index
+      end
+    end
+
+    return nil
+  end
+
   function C_EditMode.GetAccountSettings()
     if __wow_edit_mode_account_setting_state == nil then
       __wow_edit_mode_account_setting_state = __wow_build_default_edit_mode_account_settings()
@@ -9181,9 +9208,10 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     table.sort(__wow_edit_mode_account_setting_state, function(a, b) return a.setting < b.setting end)
   end
 
-  function C_EditMode.__LoadCache(accountCache, characterCache, activeSpecIndex)
+  function C_EditMode.__LoadCache(accountCache, characterCache, activeSpecIndex, preferredLayout)
     local layouts, accountSettings = __wow_edit_mode_parse_account_cache(accountCache)
     local activeLayout = __wow_edit_mode_active_layout_from_character_cache(characterCache, activeSpecIndex)
+    activeLayout = __wow_edit_mode_active_layout_from_override(layouts, preferredLayout) or activeLayout
     __wow_edit_mode_layout_state = {
       layouts = layouts,
       activeLayout = activeLayout or __wow_edit_mode_layout_state.activeLayout or 1,

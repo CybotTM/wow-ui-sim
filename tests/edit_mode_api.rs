@@ -1,6 +1,8 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::{SavedVariablesManager, WtfConfig};
 
+const EDIT_MODE_LAYOUT_ENV: &str = "WOW_SIM_EDIT_MODE_LAYOUT";
+
 #[test]
 fn edit_mode_layout_api_persists_active_layout_and_saved_layouts() {
     let env = WowLuaEnv::new().expect("create Lua environment");
@@ -172,6 +174,57 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
     assert_eq!(point, "BOTTOM");
     assert_eq!(offset_x, 12.5);
     assert_eq!(setting_value, 1);
+}
+
+#[test]
+fn edit_mode_wtf_cache_can_override_active_layout_by_name() {
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let wtf_path = temp.path().join("WTF");
+    let account_path = wtf_path.join("Account/TestAccount");
+    let character_path = account_path.join("Test Realm/Testchar");
+    std::fs::create_dir_all(&character_path).expect("create WTF dirs");
+    std::fs::write(
+        account_path.join("edit-mode-cache-account.txt"),
+        concat!(
+            "2 0 ",
+            "9 Ultrawide 1 ",
+            "0 0 0 4 4 UIParent 0.0 0.0 -1 ## ",
+            "10 Widescreen 1 ",
+            "0 0 0 4 4 UIParent 0.0 0.0 -1 ##",
+            "\0"
+        ),
+    )
+    .expect("write account edit mode cache");
+    std::fs::write(
+        character_path.join("edit-mode-cache-character.txt"),
+        "2 2 2 2 0 0\0",
+    )
+    .expect("write character edit mode cache");
+
+    let _guard = EnvVarGuard::set(EDIT_MODE_LAYOUT_ENV, "Ultrawide");
+    let env = WowLuaEnv::new().expect("create Lua environment");
+    let mut saved_vars = SavedVariablesManager::with_storage_dir(temp.path().join("local-sv"));
+    saved_vars.set_wtf_config(WtfConfig::new(
+        &wtf_path,
+        "TestAccount",
+        "Test Realm",
+        "Testchar",
+    ));
+    env.loader_env()
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2))
+        .expect("load edit mode cache");
+
+    let (active, active_name): (i32, String) = env
+        .eval(
+            r#"
+            local info = C_EditMode.GetLayouts()
+            return info.activeLayout, info.layouts[info.activeLayout].layoutName
+            "#,
+        )
+        .expect("read overridden active edit mode layout");
+
+    assert_eq!(active, 1);
+    assert_eq!(active_name, "Ultrawide");
 }
 
 #[test]
@@ -662,4 +715,30 @@ fn edit_mode_profile_option_enums_match_blizzard_docs() {
         "#,
     )
     .expect("profile option enums should match Blizzard generated docs");
+}
+
+struct EnvVarGuard {
+    key: &'static str,
+    previous: Option<std::ffi::OsString>,
+}
+
+impl EnvVarGuard {
+    fn set(key: &'static str, value: &str) -> Self {
+        let previous = std::env::var_os(key);
+        unsafe {
+            std::env::set_var(key, value);
+        }
+        Self { key, previous }
+    }
+}
+
+impl Drop for EnvVarGuard {
+    fn drop(&mut self) {
+        unsafe {
+            match &self.previous {
+                Some(value) => std::env::set_var(self.key, value),
+                None => std::env::remove_var(self.key),
+            }
+        }
+    }
 }
