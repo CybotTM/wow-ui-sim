@@ -35,6 +35,11 @@ fast path now applies safe runtime effects for saved visibility, icon
 count/scale/padding, page number visibility, show-grid state, and button art
 without repacking saved anchors.
 
+Follow-up: documented raw/display conversion for saved action-bar profile
+settings. The cache stores compact raw slider values, so the action-bar fast
+path now reads through Blizzard's `GetSettingValue()` before applying display
+values such as icon-size percentages.
+
 Follow-up: documented cast-bar lock fidelity. Startup no longer overwrites the
 active saved profile's `LockToPlayerFrame` / `CastBarUnderneath` settings.
 

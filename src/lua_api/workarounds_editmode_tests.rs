@@ -679,6 +679,18 @@ const ACTION_BAR_PROFILE_REPLAY_STUBS: &str = r#"
             self.settingMapUpdated = true
         end
 
+        function frame:GetSettingValue(setting, useRawValue)
+            for _, settingInfo in ipairs(self.systemInfo.settings) do
+                if settingInfo.setting == setting then
+                    if not useRawValue
+                        and setting == Enum.EditModeActionBarSetting.IconSize then
+                        return 50 + (settingInfo.value * 10)
+                    end
+                    return settingInfo.value
+                end
+            end
+        end
+
         function frame:ApplySystemAnchor()
             self.anchorCalls = self.anchorCalls + 1
         end
@@ -757,7 +769,7 @@ const ACTION_BAR_PROFILE_REPLAY_STUBS: &str = r#"
                     { setting = Enum.EditModeActionBarSetting.Orientation, value = Enum.ActionBarOrientation.Vertical },
                     { setting = Enum.EditModeActionBarSetting.NumRows, value = 2 },
                     { setting = Enum.EditModeActionBarSetting.NumIcons, value = 8 },
-                    { setting = Enum.EditModeActionBarSetting.IconSize, value = 80 },
+                    { setting = Enum.EditModeActionBarSetting.IconSize, value = 3 },
                     { setting = Enum.EditModeActionBarSetting.IconPadding, value = 6 },
                     { setting = Enum.EditModeActionBarSetting.VisibleSetting, value = Enum.ActionBarVisibleSetting.Hidden },
                     { setting = Enum.EditModeActionBarSetting.HideBarArt, value = 1 },

@@ -87,6 +87,11 @@ number visibility, and button art refresh. This keeps Widescreen action-bar
 options from being merely preserved in `systemInfo` without changing the visible
 bar state.
 
+Follow-up: saved action-bar slider values are compact raw values. The fast path
+must read values through Blizzard's `GetSettingValue()` after `UpdateSettingMap()`
+so settings like `IconSize` use the converted display percentage; raw enum
+comparisons such as orientation and visibility still use raw values.
+
 Follow-up: startup no longer forces the active profile's cast bar to lock under
 the player frame. Saved profiles can intentionally set
 `Enum.EditModeCastBarSetting.LockToPlayerFrame = 0` and

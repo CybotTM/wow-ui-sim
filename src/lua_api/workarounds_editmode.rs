@@ -373,11 +373,27 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                 end
 
                 local setting = settingInfo.setting
-                local value = settingInfo.value
+                local function get_setting_value(useRawValue)
+                    if systemFrame.GetSettingValue then
+                        local ok, convertedValue = pcall(
+                            systemFrame.GetSettingValue,
+                            systemFrame,
+                            setting,
+                            useRawValue
+                        )
+                        if ok and convertedValue ~= nil then
+                            return convertedValue
+                        end
+                    end
+                    return settingInfo.value
+                end
+
+                local rawValue = get_setting_value(true)
+                local value = get_setting_value(false)
                 local valueBool = value == 1 or value == true
 
                 if setting == actionBarSettings.Orientation then
-                    systemFrame.isHorizontal = value == Enum.ActionBarOrientation.Horizontal
+                    systemFrame.isHorizontal = rawValue == Enum.ActionBarOrientation.Horizontal
                     systemFrame.addButtonsToRight = true
                     systemFrame.addButtonsToTop = systemFrame.isHorizontal
                     mark_action_bar_layout_dirty()
@@ -436,11 +452,11 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                     end
                 elseif setting == actionBarSettings.VisibleSetting
                     and Enum.ActionBarVisibleSetting then
-                    if value == Enum.ActionBarVisibleSetting.InCombat then
+                    if rawValue == Enum.ActionBarVisibleSetting.InCombat then
                         systemFrame.visibility = "InCombat"
-                    elseif value == Enum.ActionBarVisibleSetting.OutOfCombat then
+                    elseif rawValue == Enum.ActionBarVisibleSetting.OutOfCombat then
                         systemFrame.visibility = "OutOfCombat"
-                    elseif value == Enum.ActionBarVisibleSetting.Hidden then
+                    elseif rawValue == Enum.ActionBarVisibleSetting.Hidden then
                         systemFrame.visibility = "Hidden"
                     else
                         systemFrame.visibility = "Always"
