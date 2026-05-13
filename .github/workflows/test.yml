@@ -105,6 +105,7 @@ jobs:
     if: ${{ vars.RUN_MISTS_RELEASE_PROOF == '1' || (github.event_name == 'workflow_dispatch' && inputs.run_mists_release_proof) }}
     env:
       LIBGL_ALWAYS_SOFTWARE: "1"
+      MISTS_PANEL_SIGNAL_ONLY: "1"
       WOW_SIM_SOFTWARE_RENDER: "1"
       WGPU_BACKEND: gl
     steps:

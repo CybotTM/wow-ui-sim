@@ -23,6 +23,7 @@ SKIP_BUILD=0
 LOAD_SAVED_VARS=0
 LOAD_THIRD_PARTY_ADDONS=0
 UPDATE_VISUAL_BASELINE=0
+SIGNAL_ONLY_VISUALS="${MISTS_PANEL_SIGNAL_ONLY:-0}"
 VISUAL_UPDATE_FILE=""
 OUT_DIR_SET=0
 
@@ -41,6 +42,7 @@ while [ $# -gt 0 ]; do
         --with-saved-vars) LOAD_SAVED_VARS=1; shift ;;
         --with-addons) LOAD_THIRD_PARTY_ADDONS=1; shift ;;
         --update-visual-baseline) UPDATE_VISUAL_BASELINE=1; shift ;;
+        --signal-only-visuals) SIGNAL_ONLY_VISUALS=1; shift ;;
         --validate-only) VALIDATE_ONLY=1; shift ;;
         --help|-h) usage; exit 0 ;;
         *) echo "ERROR: unknown argument '$1'" >&2; exit 2 ;;
@@ -163,7 +165,7 @@ matches_panel_filter() {
 
 validate_manifest() {
     [ -f "$BASELINE" ] || { echo "ERROR: baseline not found: $BASELINE" >&2; return 2; }
-    if [ "$UPDATE_VISUAL_BASELINE" -eq 0 ] && [ ! -f "$VISUAL_BASELINE" ]; then
+    if [ "$UPDATE_VISUAL_BASELINE" -eq 0 ] && [ "$SIGNAL_ONLY_VISUALS" -eq 0 ] && [ ! -f "$VISUAL_BASELINE" ]; then
         echo "ERROR: visual baseline not found: $VISUAL_BASELINE" >&2
         return 2
     fi
@@ -325,6 +327,9 @@ verify_visual_signal() {
 
 verify_visual_baseline() {
     local slug="$1" screenshot_file="$2"
+    if [ "$SIGNAL_ONLY_VISUALS" -eq 1 ]; then
+        return 0
+    fi
     if [ "$UPDATE_VISUAL_BASELINE" -eq 1 ]; then
         "$(visual_metrics_bin)" record "$slug" "$screenshot_file" >> "$VISUAL_UPDATE_FILE"
     else

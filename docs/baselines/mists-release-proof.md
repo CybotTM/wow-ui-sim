@@ -93,6 +93,14 @@ for that manual proof run. The job is still opt-in because it needs the CI
 rendering path and addon fixtures to stay stable before it becomes required
 PR/master validation.
 
+The current GitHub-hosted proof job sets `MISTS_PANEL_SIGNAL_ONLY=1` because
+the runner does not have a WoW CASC install for texture/font extraction. In
+that mode the panel runner still rejects missing roots, Lua errors, empty
+render batches, background-only screenshots, and too-small foreground bounding
+boxes, but it skips comparison against the asset-rich local
+`docs/baselines/mists-panel-visuals.tsv` hashes. Remove that env var once CI has
+CASC data available.
+
 If the job fails, inspect the uploaded `mists-release-proof` artifact first.
 Start with `logs/<lane>.log`, then open the matching panel or addon directory
 for `lua-errors.json`, `dump-tree.txt`, and `screenshot.webp`. Treat the first
@@ -100,7 +108,7 @@ failing lane as the next fix target; do not refresh baselines just to hide a
 new CI-only `lua-errors`, missing root frame, blank render, or visual-regression
 failure.
 
-First CI proof dispatch attempts:
+CI proof dispatch attempts:
 `https://github.com/Osso/wow-ui-sim/actions/runs/25824999285`. The target
 `Mists release proof` job reached the base panel parity lane, uploaded
 `mists-release-proof`, and failed on the first screenshot because the GitHub
@@ -110,6 +118,15 @@ the same screenshot path with `active_backends: 0` under generic Xvfb. The
 workflow now installs the Mesa GL/OSMesa runtime packages, enables software
 rendering, runs the release-proof script under `xvfb-run`, and forces wgpu to
 the GL backend for screenshot capture.
+
+Follow-up dispatch:
+`https://github.com/Osso/wow-ui-sim/actions/runs/25832259479`. It used commit
+`1dde4bb4` and reached `panel-parity-and-visual-comparison`, then failed on the
+first `character` screenshot with `luminance contrast fell from 19063 to 7030`.
+The uploaded artifact showed no Lua errors, but the runner had no CASC install
+and logged missing character frame textures/icons, so the asset-rich local
+visual baseline was not comparable in CI. The workflow now runs the release
+proof with signal-only panel visuals until CASC data is available in CI.
 
 ## Remaining Gaps
 - The latest audited Mists panel workflows have no `Missing` rows in

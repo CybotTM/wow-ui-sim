@@ -170,6 +170,7 @@ validate_plan() {
     echo "release proof lane: installed-addon-matrix"
     echo "release proof lane: panel-parity"
     echo "release proof lane: visual-comparison"
+    [ "${MISTS_PANEL_SIGNAL_ONLY:-0}" = "1" ] && echo "release proof lane: signal-only-visuals"
     echo "release proof lane: installed-addon-panel-matrix"
     echo "release proof lane: panel-parity-with-saved-vars"
     echo "release proof lane: installed-addon-panel-matrix-with-saved-vars"
