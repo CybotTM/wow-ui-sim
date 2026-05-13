@@ -175,6 +175,67 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
 }
 
 #[test]
+fn edit_mode_wtf_cache_normalizes_indexed_system_rows() {
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let wtf_path = temp.path().join("WTF");
+    let account_path = wtf_path.join("Account/TestAccount");
+    let character_path = account_path.join("Test Realm/Testchar");
+    std::fs::create_dir_all(&character_path).expect("create WTF dirs");
+    std::fs::write(
+        account_path.join("edit-mode-cache-account.txt"),
+        concat!(
+            "1 0 ",
+            "10 Widescreen 6 ",
+            "0 0 0 4 4 UIParent 0.0 0.0 -1 ## ",
+            "3 7 0 4 4 UIParent 0.0 0.0 -1 ## ",
+            "6 1 0 4 4 UIParent 0.0 0.0 -1 ## ",
+            "15 1 0 4 4 UIParent 0.0 0.0 -1 ## ",
+            "20 3 0 4 4 UIParent 0.0 0.0 -1 ## ",
+            "1 -1 0 4 4 UIParent 0.0 0.0 -1 ##",
+            "\0"
+        ),
+    )
+    .expect("write account edit mode cache");
+    std::fs::write(
+        character_path.join("edit-mode-cache-character.txt"),
+        "1 1 1 1 1 1\0",
+    )
+    .expect("write character edit mode cache");
+
+    let env = WowLuaEnv::new().expect("create Lua environment");
+    let mut saved_vars = SavedVariablesManager::with_storage_dir(temp.path().join("local-sv"));
+    saved_vars.set_wtf_config(WtfConfig::new(
+        &wtf_path,
+        "TestAccount",
+        "Test Realm",
+        "Testchar",
+    ));
+    env.loader_env()
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2))
+        .expect("load edit mode cache");
+
+    let (layout_name, indices): (String, String) = env
+        .eval(
+            r#"
+            local info = C_EditMode.GetLayouts()
+            local layout = info.layouts[1]
+            local values = {}
+            for _, systemInfo in ipairs(layout.systems) do
+                table.insert(values, tostring(systemInfo.systemIndex))
+            end
+            return layout.layoutName, table.concat(values, ",")
+            "#,
+        )
+        .expect("read normalized edit mode indices");
+
+    assert_eq!(layout_name, "Widescreen");
+    assert_eq!(
+        indices, "1,8,2,2,4,-1",
+        "indexed WTF rows are zero-based, but singleton rows must remain -1"
+    );
+}
+
+#[test]
 fn edit_mode_cache_decodes_repeated_setting_chunks_as_large_value() {
     let temp = tempfile::tempdir().expect("create temp dir");
     let wtf_path = temp.path().join("WTF");
