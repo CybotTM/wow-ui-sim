@@ -477,3 +477,134 @@ fn encounter_events_icon_direction_matches_blizzard_docs() {
     assert_eq!(max_value, 1);
     assert_eq!(num_values, 4);
 }
+
+#[test]
+fn edit_mode_profile_option_enums_match_blizzard_docs() {
+    let env = WowLuaEnv::new().expect("create Lua environment");
+
+    env.exec(
+        r#"
+        local expected = {
+            ActionBarOrientation = { Horizontal = 0, Vertical = 1 },
+            ActionBarVisibleSetting = { Always = 0, InCombat = 1, OutOfCombat = 2, Hidden = 3 },
+            AuraFrameIconDirection = { Down = 0, Up = 1, Left = 0, Right = 1 },
+            AuraFrameIconWrap = { Down = 0, Up = 1, Left = 0, Right = 1 },
+            AuraFrameOrientation = { Horizontal = 0, Vertical = 1 },
+            AuraFrameVisibleSetting = { Always = 0, InCombat = 1, Hidden = 2 },
+            BagsDirection = { Left = 0, Right = 1, Up = 0, Down = 1 },
+            BagsOrientation = { Horizontal = 0, Vertical = 1 },
+            CooldownViewerBarContent = { IconAndName = 0, IconOnly = 1, NameOnly = 2 },
+            CooldownViewerIconDirection = { Left = 0, Right = 1 },
+            CooldownViewerOrientation = { Horizontal = 0, Vertical = 1 },
+            CooldownViewerVisibleSetting = { Always = 0, InCombat = 1, Hidden = 2 },
+            DamageMeterNumbers = { Minimal = 0, Compact = 1, Complete = 2 },
+            DamageMeterStyle = { Default = 0, Thin = 1, Bordered = 2, FullBackground = 3 },
+            DamageMeterVisibility = { Always = 0, InCombat = 1, Hidden = 2 },
+            EditModeActionBarSystemIndices = {
+                MainBar = 1, Bar2 = 2, Bar3 = 3, RightBar1 = 4, RightBar2 = 5,
+                ExtraBar1 = 6, ExtraBar2 = 7, ExtraBar3 = 8,
+                StanceBar = 11, PetActionBar = 12, PossessActionBar = 13,
+            },
+            EditModeAuraFrameSystemIndices = { BuffFrame = 1, DebuffFrame = 2, ExternalDefensivesFrame = 3 },
+            EditModeCooldownViewerSystemIndices = { Essential = 1, Utility = 2, BuffIcon = 3, BuffBar = 4 },
+            EditModeEncounterEventsSystemIndices = { Timeline = 1, CriticalWarnings = 2, MediumWarnings = 3, NormalWarnings = 4 },
+            EditModeStatusTrackingBarSystemIndices = { StatusTrackingBar1 = 1, StatusTrackingBar2 = 2 },
+            EditModeUnitFrameSystemIndices = { Player = 1, Target = 2, Focus = 3, Party = 4, Raid = 5, Boss = 6, Arena = 7, Pet = 8 },
+            EncounterEventsIconDirection = { Left = 0, Right = 1, Top = 0, Bottom = 1 },
+            EncounterEventsOrientation = { Horizontal = 0, Vertical = 1 },
+            EncounterEventsTooltipAnchor = { Hidden = 0, Default = 1, Cursor = 2 },
+            EncounterEventsViewType = { Timeline = 0, Bars = 1 },
+            EncounterEventsVisibility = { Always = 0, InEncounter = 1, DeprecatedHidden = 2 },
+            MicroMenuOrder = { Default = 0, Reverse = 1 },
+            MicroMenuOrientation = { Horizontal = 0, Vertical = 1 },
+            RaidAuraOrganizationType = { Legacy = 0, BuffsTopDebuffsBottom = 1, BuffsRightDebuffsLeft = 2 },
+            ViewArenaSize = { Two = 0, Three = 1 },
+            ViewRaidSize = { Ten = 0, TwentyFive = 1, Forty = 2 },
+            WidgetOpacityType = {
+                OneHundred = 0, Ninety = 1, Eighty = 2, Seventy = 3, Sixty = 4,
+                Fifty = 5, Forty = 6, Thirty = 7, Twenty = 8, Ten = 9, Zero = 10,
+            },
+        }
+
+        local settingEnums = {
+            EditModeAccountSetting = {
+                "ShowGrid", "GridSpacing", "SettingsExpanded", "ShowTargetAndFocus",
+                "ShowStanceBar", "ShowPetActionBar", "ShowPossessActionBar", "ShowCastBar",
+                "ShowEncounterBar", "ShowExtraAbilities", "ShowBuffsAndDebuffs",
+                "DeprecatedShowDebuffFrame", "ShowPartyFrames", "ShowRaidFrames",
+                "ShowTalkingHeadFrame", "ShowVehicleLeaveButton", "ShowBossFrames",
+                "ShowArenaFrames", "ShowLootFrame", "ShowHudTooltip", "ShowStatusTrackingBar2",
+                "ShowDurabilityFrame", "EnableSnap", "EnableAdvancedOptions", "ShowPetFrame",
+                "ShowTimerBars", "ShowVehicleSeatIndicator", "ShowArchaeologyBar",
+                "ShowCooldownViewer", "ShowPersonalResourceDisplay", "ShowEncounterEvents",
+                "ShowDamageMeter", "ShowExternalDefensives", "ShowTotemActionBar",
+            },
+            EditModeActionBarSetting = {
+                "Orientation", "NumRows", "NumIcons", "IconSize", "IconPadding",
+                "VisibleSetting", "HideBarArt", "DeprecatedSnapToSide",
+                "HideBarScrolling", "AlwaysShowButtons",
+            },
+            EditModeArchaeologyBarSetting = { "Size" },
+            EditModeAuraFrameSetting = {
+                "Orientation", "IconWrap", "IconDirection", "IconLimitBuffFrame",
+                "IconLimitDebuffFrame", "IconSize", "IconPadding", "DeprecatedShowFull",
+                "VisibleSetting", "Opacity", "ShowDispelType",
+            },
+            EditModeBagsSetting = { "Orientation", "Direction", "Size", "BagSlotPadding" },
+            EditModeCastBarSetting = { "BarSize", "LockToPlayerFrame", "ShowCastTime" },
+            EditModeChatFrameSetting = { "WidthHundreds", "WidthTensAndOnes", "HeightHundreds", "HeightTensAndOnes" },
+            EditModeCooldownViewerSetting = {
+                "Orientation", "IconLimit", "IconDirection", "IconSize", "IconPadding",
+                "Opacity", "VisibleSetting", "BarContent", "HideWhenInactive",
+                "ShowTimer", "ShowTooltips", "BarWidthScale",
+            },
+            EditModeDamageMeterSetting = {
+                "Visibility", "Style", "Numbers", "FrameWidth", "FrameHeight",
+                "Padding", "Transparency", "ObsoleteReuse1", "ShowSpecIcon",
+                "ShowClassColor", "BarHeight", "TextSize", "BackgroundTransparency",
+            },
+            EditModeDurabilityFrameSetting = { "Size" },
+            EditModeEncounterEventsSetting = {
+                "Orientation", "IconDirection", "ShowSpellName", "IconSize", "OverallSize",
+                "BackgroundTransparency", "Transparency", "Visibility", "TooltipAnchor",
+                "ShowTimer", "ViewType", "FlipHorizontally", "BarWidth", "Padding",
+            },
+            EditModeMicroMenuSetting = { "Orientation", "Order", "Size", "EyeSize" },
+            EditModeMinimapSetting = { "HeaderUnderneath", "RotateMinimap", "Size" },
+            EditModeObjectiveTrackerSetting = { "Height", "Opacity", "TextSize" },
+            EditModePersonalResourceDisplaySetting = { "HideHealthAndPower", "OnlyShowInCombat" },
+            EditModeStatusTrackingBarSetting = { "Height", "Width", "TextSize", "Size" },
+            EditModeTimerBarsSetting = { "Size" },
+            EditModeUnitFrameSetting = {
+                "HidePortrait", "CastBarUnderneath", "BuffsOnTop", "UseLargerFrame",
+                "UseRaidStylePartyFrames", "ShowPartyFrameBackground", "UseHorizontalGroups",
+                "CastBarOnSide", "ShowCastTime", "ViewRaidSize", "FrameWidth",
+                "FrameHeight", "DisplayBorder", "RaidGroupDisplayType", "SortPlayersBy",
+                "RowSize", "FrameSize", "ViewArenaSize", "AuraOrganizationType",
+                "IconSize", "Opacity", "BigDefensiveIconSize",
+            },
+            EditModeVehicleSeatIndicatorSetting = { "Size" },
+        }
+
+        for enumName, values in pairs(settingEnums) do
+            expected[enumName] = expected[enumName] or {}
+            for index, fieldName in ipairs(values) do
+                expected[enumName][fieldName] = index - 1
+            end
+        end
+
+        for enumName, fields in pairs(expected) do
+            local actual = Enum[enumName]
+            if type(actual) ~= "table" then
+                error(enumName .. " is not registered")
+            end
+            for fieldName, expectedValue in pairs(fields) do
+                if actual[fieldName] ~= expectedValue then
+                    error(string.format("%s.%s expected %s got %s", enumName, fieldName, tostring(expectedValue), tostring(actual[fieldName])))
+                end
+            end
+        end
+        "#,
+    )
+    .expect("profile option enums should match Blizzard generated docs");
+}
