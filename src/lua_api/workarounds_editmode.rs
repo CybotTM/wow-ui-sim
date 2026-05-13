@@ -163,20 +163,6 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
         end
     end
 
-    local function forceCastBarUnderPlayerFrame(layoutInfo)
-        if not layoutInfo or not layoutInfo.layouts then return end
-        local activeLayout = layoutInfo.layouts[layoutInfo.activeLayout]
-        if not activeLayout or not activeLayout.systems then return end
-        for _, systemInfo in ipairs(activeLayout.systems) do
-            if systemInfo.system == Enum.EditModeSystem.CastBar then
-                setSystemSetting(systemInfo, Enum.EditModeCastBarSetting.LockToPlayerFrame, 1)
-            elseif systemInfo.system == Enum.EditModeSystem.UnitFrame
-                and systemInfo.systemIndex == Enum.EditModeUnitFrameSystemIndices.Player then
-                setSystemSetting(systemInfo, Enum.EditModeUnitFrameSetting.CastBarUnderneath, 1)
-            end
-        end
-    end
-
     local function forceStandardPartyFrames(layoutInfo)
         if not layoutInfo or not layoutInfo.layouts then return end
         for _, preset in ipairs(layoutInfo.layouts) do
@@ -223,7 +209,6 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
         emm.layoutInfo.activeLayout = remapActiveLayoutAfterPresetPrepend(emm.layoutInfo, savedLayouts, presetCount)
     end
     mergeDefaultSettings(emm.layoutInfo)
-    forceCastBarUnderPlayerFrame(emm.layoutInfo)
     forceStandardPartyFrames(emm.layoutInfo)
     if not emm.accountSettings then
         emm.accountSettings = C_EditMode.GetAccountSettings()

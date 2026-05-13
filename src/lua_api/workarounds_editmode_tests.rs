@@ -175,6 +175,112 @@ fn setup_layout_info_clones_preset_layouts_without_copytable() {
 }
 
 #[test]
+fn setup_layout_info_preserves_saved_cast_bar_lock_settings() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                CastBar = 1,
+                UnitFrame = 2,
+            },
+            EditModeCastBarSetting = {
+                LockToPlayerFrame = 101,
+            },
+            EditModeLayoutType = {
+                Preset = 0,
+                Account = 1,
+            },
+            EditModeUnitFrameSetting = {
+                CastBarUnderneath = 201,
+            },
+            EditModeUnitFrameSystemIndices = {
+                Player = 301,
+            },
+        }
+
+        C_EditMode = {
+            GetLayouts = function()
+                return {
+                    activeLayout = 1,
+                    layouts = {
+                        {
+                            layoutIndex = 99,
+                            layoutName = "Detached Cast Bar",
+                            layoutType = Enum.EditModeLayoutType.Account,
+                            systems = {
+                                {
+                                    system = Enum.EditModeSystem.CastBar,
+                                    systemIndex = -1,
+                                    isInDefaultPosition = false,
+                                    anchorInfo = { point = "CENTER" },
+                                    settings = {
+                                        { setting = Enum.EditModeCastBarSetting.LockToPlayerFrame, value = 0 },
+                                    },
+                                },
+                                {
+                                    system = Enum.EditModeSystem.UnitFrame,
+                                    systemIndex = Enum.EditModeUnitFrameSystemIndices.Player,
+                                    isInDefaultPosition = false,
+                                    anchorInfo = { point = "LEFT" },
+                                    settings = {
+                                        { setting = Enum.EditModeUnitFrameSetting.CastBarUnderneath, value = 0 },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }
+            end,
+            GetAccountSettings = function()
+                return {}
+            end,
+        }
+
+        EditModePresetLayoutManager = {
+            presetLayoutInfo = {},
+        }
+
+        function tAppendAll(tbl, addedArray)
+            for i, element in ipairs(addedArray) do
+                table.insert(tbl, element)
+            end
+        end
+
+        EditModeManagerFrame = {}
+        "#,
+    )
+    .expect("install detached cast bar layout stubs");
+
+    env.exec(SETUP_LAYOUT_INFO_LUA)
+        .expect("run setup layout info");
+
+    let (lock_to_player, cast_bar_underneath): (i32, i32) = env
+        .eval(
+            r#"
+            local values = {}
+            for _, systemInfo in ipairs(EditModeManagerFrame.layoutInfo.layouts[1].systems) do
+                for _, settingInfo in ipairs(systemInfo.settings) do
+                    values[settingInfo.setting] = settingInfo.value
+                end
+            end
+            return values[Enum.EditModeCastBarSetting.LockToPlayerFrame],
+                values[Enum.EditModeUnitFrameSetting.CastBarUnderneath]
+            "#,
+        )
+        .expect("read active saved cast bar settings");
+
+    assert_eq!(
+        lock_to_player, 0,
+        "active saved cast bar lock setting must not be overwritten"
+    );
+    assert_eq!(
+        cast_bar_underneath, 0,
+        "active saved player frame cast bar setting must not be overwritten"
+    );
+}
+
+#[test]
 fn setup_layout_info_remaps_active_saved_layout_after_prepending_presets() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(

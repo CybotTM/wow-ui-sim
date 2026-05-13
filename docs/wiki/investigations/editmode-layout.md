@@ -80,6 +80,12 @@ action-bar fast path applies those fields directly instead of calling Blizzard
 handlers that iterate `self.actionButtons` before the simulator has a real Lua
 button array there.
 
+Follow-up: startup no longer forces the active profile's cast bar to lock under
+the player frame. Saved profiles can intentionally set
+`Enum.EditModeCastBarSetting.LockToPlayerFrame = 0` and
+`Enum.EditModeUnitFrameSetting.CastBarUnderneath = 0`; those values must remain
+profile data, while missing defaults are still filled from the preset map.
+
 Regression coverage lives in `tests/edit_mode_api.rs`.
 
 ## Files Modified

@@ -30,6 +30,9 @@ setting. Sparse saved layouts now merge missing defaults from Blizzard's modern
 preset map, and the action-bar bootstrap path applies those values without
 calling handlers that require an initialized `actionButtons` Lua array.
 
+Follow-up: documented cast-bar lock fidelity. Startup no longer overwrites the
+active saved profile's `LockToPlayerFrame` / `CastBarUnderneath` settings.
+
 ## [2026-05-13] update | CASC font path fallback
 
 Updated `investigations/casc-fdid-1579624-root-debug.md` after the standard
