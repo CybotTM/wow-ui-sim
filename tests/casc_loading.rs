@@ -61,6 +61,32 @@ fn casc_resolves_baseline_textures() {
 }
 
 #[test]
+fn casc_resolves_legacy_encoding_key_fallback_textures() {
+    if !casc_available() {
+        return;
+    }
+
+    let mut mgr = TextureManager::new();
+    let probes = [
+        "Interface\\Common\\CurrencyWindow",
+        "Interface\\FrameGeneral\\UIFrameMetal2x",
+        "Interface\\FrameGeneral\\UIFrameMetalHorizontal2x",
+        "Interface\\FrameGeneral\\UIFrameMetalVertical2x",
+        "Interface\\FrameGeneral\\UIFrameTabs",
+        "Interface\\Options\\OptionsExpandListButton",
+        "Interface\\PaperDollInfoFrame\\PaperDollInfoPart1",
+    ];
+
+    for path in probes {
+        let td = mgr
+            .load(path)
+            .unwrap_or_else(|| panic!("CASC fallback failed to resolve {path}"));
+        assert!(td.width > 0, "{path}: expected non-zero width");
+        assert!(td.height > 0, "{path}: expected non-zero height");
+    }
+}
+
+#[test]
 fn casc_resolves_baseline_fonts() {
     if !casc_available() {
         return;

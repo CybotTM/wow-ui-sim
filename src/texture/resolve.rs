@@ -79,7 +79,9 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
         return Some(out_path);
     }
 
-    resolver.ensure_cached(fdid, &out_path)
+    resolver.ensure_cached(fdid, &out_path).or_else(|| {
+        crate::casc_asset_fallback::ensure_known_asset_cached(&listfile_path, &out_path)
+    })
 }
 
 #[cfg(feature = "casc")]
