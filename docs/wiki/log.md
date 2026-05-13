@@ -29,6 +29,11 @@ canonical `Fonts/...` casing in the bundled listfile, normalize lookup keys
 without losing entry path casing, and skip noisy `resolve_bytes(fdid)` calls
 when the CASC resolution cache has no font FDID entry.
 
+Follow-up: documented the real rendering failure after the noise fix. Skipping
+missing font FDIDs suppressed the error but selected a system fallback font.
+Font loading now reads standard font bytes from local CASC archives by
+path-to-encoding resolution or known encoding-key fallback.
+
 ## [2026-05-08] update | Windows default GUI build and headless CI compile
 
 Updated `investigations/windows-port-build.md` after reproducing MSVC `LNK1189`

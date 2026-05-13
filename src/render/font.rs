@@ -32,20 +32,24 @@ struct FontEntry {
 struct WowFontFile {
     filename: &'static str,
     wow_paths: &'static [&'static str],
+    encoding_key_hex: &'static str,
 }
 
 const WOW_FONT_FILES: &[WowFontFile] = &[
     WowFontFile {
         filename: "FRIZQT__.TTF",
         wow_paths: &[WOW_FONT_FRIZ, "Fonts\\frizqt__.ttf"],
+        encoding_key_hex: "DB472FF5CA74465BAA066021CD837645",
     },
     WowFontFile {
         filename: "ARIALN.TTF",
         wow_paths: &[WOW_FONT_ARIAL_NARROW, "Fonts\\arialn.ttf"],
+        encoding_key_hex: "B118D76FD2E2BDA9AAB0118B508D0FB1",
     },
     WowFontFile {
-        filename: "frizqt___cyr.ttf",
-        wow_paths: &["Fonts\\frizqt___cyr.ttf"],
+        filename: "FRIZQT___CYR.TTF",
+        wow_paths: &["Fonts\\FRIZQT___CYR.TTF", "Fonts\\frizqt___cyr.ttf"],
+        encoding_key_hex: "78AEBA943ABCFF292438DA989CC1E728",
     },
 ];
 
@@ -78,6 +82,14 @@ static FONT_CASC_INITIALIZED: OnceLock<bool> = OnceLock::new();
 static FONT_CASC_RESOLUTION_CACHE: OnceLock<
     Option<asset_resolver::casc_cache::CascResolutionCache>,
 > = OnceLock::new();
+#[cfg(feature = "casc")]
+static FONT_CASC_READER: OnceLock<Option<CascFontReader>> = OnceLock::new();
+
+#[cfg(feature = "casc")]
+struct CascFontReader {
+    install: cascette_client_storage::Installation,
+    resolver: cascette_client_storage::resolver::ContentResolver,
+}
 
 #[cfg(feature = "casc")]
 fn casc_enabled() -> bool {
@@ -92,11 +104,18 @@ fn casc_enabled() -> bool {
 }
 
 #[cfg(feature = "casc")]
-fn try_casc_font_bytes(filename: &str) -> Option<Vec<u8>> {
+fn try_casc_font_bytes(font_file: &WowFontFile) -> Option<Vec<u8>> {
     if !casc_enabled() {
         return None;
     }
-    let path = format!("Fonts/{filename}");
+    let path = format!("Fonts/{}", font_file.filename);
+    if let Some(bytes) = try_casc_font_bytes_by_path(&path) {
+        return Some(bytes);
+    }
+    if let Some(bytes) = try_casc_font_bytes_by_encoding_key(font_file.encoding_key_hex) {
+        return Some(bytes);
+    }
+
     let resolver = crate::asset_resolver_config::resolver();
     let fdid =
         crate::limited_listfile::lookup_path(&path).or_else(|| resolver.lookup_path(&path))?;
@@ -104,6 +123,89 @@ fn try_casc_font_bytes(filename: &str) -> Option<Vec<u8>> {
         return None;
     }
     resolver.resolve_bytes(fdid)
+}
+
+#[cfg(feature = "casc")]
+fn try_casc_font_bytes_by_encoding_key(encoding_key_hex: &str) -> Option<Vec<u8>> {
+    let reader = FONT_CASC_READER
+        .get_or_init(init_casc_font_reader)
+        .as_ref()?;
+    let encoding_key = encoding_key_from_hex(encoding_key_hex)?;
+    run_font_casc_async(reader.install.read_file_by_encoding_key(&encoding_key)).ok()
+}
+
+#[cfg(feature = "casc")]
+fn try_casc_font_bytes_by_path(path: &str) -> Option<Vec<u8>> {
+    let reader = FONT_CASC_READER
+        .get_or_init(init_casc_font_reader)
+        .as_ref()?;
+    reader.read_path(path)
+}
+
+#[cfg(feature = "casc")]
+fn init_casc_font_reader() -> Option<CascFontReader> {
+    let install_root = asset_resolver::wow_install_path()?;
+    let data_path = asset_resolver::wow_data_path()?;
+    let casc_dir = asset_resolver::casc_resolver::casc_cache_dir_for_install(install_root).ok()?;
+    let root_data = std::fs::read(casc_dir.join("root.bin")).ok()?;
+    let encoding_data = std::fs::read(casc_dir.join("encoding.bin")).ok()?;
+
+    let resolver = cascette_client_storage::resolver::ContentResolver::new();
+    resolver.load_root_file(&root_data).ok()?;
+    resolver.load_encoding_file(&encoding_data).ok()?;
+
+    let install = cascette_client_storage::Installation::open(data_path).ok()?;
+    run_font_casc_async(install.initialize()).ok()?;
+
+    Some(CascFontReader { install, resolver })
+}
+
+#[cfg(feature = "casc")]
+impl CascFontReader {
+    fn read_path(&self, path: &str) -> Option<Vec<u8>> {
+        font_path_candidates(path).find_map(|candidate| self.read_exact_path(&candidate))
+    }
+
+    fn read_exact_path(&self, path: &str) -> Option<Vec<u8>> {
+        let encoding_key = self.resolver.resolve_path_to_encoding(path)?;
+        run_font_casc_async(self.install.read_file_by_encoding_key(&encoding_key)).ok()
+    }
+}
+
+#[cfg(feature = "casc")]
+fn font_path_candidates(path: &str) -> impl Iterator<Item = String> + '_ {
+    let slash_path = path.replace('\\', "/");
+    let backslash_path = slash_path.replace('/', "\\");
+    [slash_path, backslash_path].into_iter()
+}
+
+#[cfg(feature = "casc")]
+fn run_font_casc_async<F: std::future::Future>(future: F) -> F::Output {
+    tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .expect("font CASC runtime")
+        .block_on(future)
+}
+
+#[cfg(feature = "casc")]
+fn encoding_key_from_hex(hex: &str) -> Option<cascette_crypto::EncodingKey> {
+    let bytes = parse_hex_16(hex)?;
+    Some(cascette_crypto::EncodingKey::from_bytes(bytes))
+}
+
+#[cfg(feature = "casc")]
+fn parse_hex_16(hex: &str) -> Option<[u8; 16]> {
+    if hex.len() != 32 {
+        return None;
+    }
+
+    let mut bytes = [0u8; 16];
+    for (index, byte) in bytes.iter_mut().enumerate() {
+        let start = index * 2;
+        *byte = u8::from_str_radix(&hex[start..start + 2], 16).ok()?;
+    }
+    Some(bytes)
 }
 
 #[cfg(feature = "casc")]
@@ -276,7 +378,7 @@ fn load_wow_font(
     db: &mut fontdb::Database,
     font_map: &mut HashMap<String, FontEntry>,
 ) {
-    let Some(data) = try_casc_font_bytes(font_file.filename) else {
+    let Some(data) = try_casc_font_bytes(font_file) else {
         tracing::warn!("Font {} not found in CASC, skipping", font_file.filename);
         return;
     };
@@ -348,7 +450,7 @@ mod tests {
     #[test]
     fn loads_wow_fonts() {
         let fs = WowFontSystem::new();
-        // 3 font files: FRIZQT__ (2 aliases), ARIALN (2 aliases), frizqt___cyr (1 alias).
+        // 3 font files: FRIZQT__ (2 aliases), ARIALN (2 aliases), FRIZQT___CYR (2 aliases).
         // All come from CASC; without CASC the font_map is empty and downstream
         // shaping uses cosmic-text's default fonts.
         if asset_resolver_available() {
@@ -369,6 +471,34 @@ mod tests {
         {
             false
         }
+    }
+
+    #[cfg(feature = "casc")]
+    #[test]
+    fn loads_real_wow_fonts_from_casc() {
+        if !asset_resolver_available() {
+            return;
+        }
+
+        for font_file in WOW_FONT_FILES {
+            let data = try_casc_font_bytes(font_file)
+                .unwrap_or_else(|| panic!("{} CASC bytes", font_file.filename));
+            let family = fontdb_family_name(&data)
+                .unwrap_or_else(|| panic!("{} family name", font_file.filename));
+
+            assert!(
+                !family.is_empty(),
+                "expected {} to load a real family name",
+                font_file.filename
+            );
+        }
+
+        let friz_data = try_casc_font_bytes(&WOW_FONT_FILES[0]).expect("FRIZQT__.TTF CASC bytes");
+        let friz_family = fontdb_family_name(&friz_data).expect("FRIZQT__.TTF family name");
+        assert!(
+            friz_family.to_ascii_lowercase().contains("friz"),
+            "expected Friz Quadrata family, got {friz_family}"
+        );
     }
 
     #[test]

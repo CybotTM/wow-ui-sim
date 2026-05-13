@@ -6681,6 +6681,8 @@ version = "0.1.0"
 dependencies = [
  "asset-resolver",
  "bytemuck",
+ "cascette-client-storage",
+ "cascette-crypto",
  "clap",
  "cosmic-text",
  "dirs",

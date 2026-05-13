@@ -108,7 +108,11 @@ Fix:
 
 - Preserve canonical WoW font path casing in the bundled listfile (`Fonts/FRIZQT__.TTF`, `Fonts/ARIALN.TTF`, `Fonts/FRIZQT___CYR.TTF`).
 - Key bundled listfile lookups by normalized path while preserving the original path on `ListfileEntry`.
-- Before font byte resolution, check the CASC resolution cache for the FDID. If it is absent, skip the noisy `resolve_bytes(fdid)` path and let `WowFontSystem` fall back through its normal font fallback path.
+- Do not stop at skipping the noisy `resolve_bytes(fdid)` path. That suppresses the error but leaves `WowFontSystem` using a system fallback face, which is visibly wrong in the objective tracker.
+- Font loading now first tries path-to-encoding resolution from cached `root.bin` / `encoding.bin`, then falls back to the known standard font encoding keys and reads the real font bytes from the local CASC archives:
+  - `FRIZQT__.TTF`: `DB472FF5CA74465BAA066021CD837645`
+  - `ARIALN.TTF`: `B118D76FD2E2BDA9AAB0118B508D0FB1`
+  - `FRIZQT___CYR.TTF`: `78AEBA943ABCFF292438DA989CC1E728`
 
 ### Gethe 12.0.5 Check
 
