@@ -1974,6 +1974,142 @@ fn apply_system_anchors_replays_active_widescreen_singleton_settings() {
 }
 
 #[test]
+fn apply_system_anchors_replays_active_widescreen_aura_frame_settings() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                AuraFrame = 6,
+            },
+            EditModeAuraFrameSystemIndices = {
+                BuffFrame = 1,
+                DebuffFrame = 2,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local rows = {
+            [Enum.EditModeAuraFrameSystemIndices.BuffFrame] = {
+                {0, 0}, {1, 0}, {2, 0}, {3, 11}, {5, 5}, {6, 5},
+            },
+            [Enum.EditModeAuraFrameSystemIndices.DebuffFrame] = {
+                {0, 0}, {1, 0}, {2, 0}, {4, 8}, {5, 5}, {6, 5},
+            },
+        }
+
+        local function settingsFor(index)
+            local settings = {}
+            for _, pair in ipairs(rows[index] or {}) do
+                table.insert(settings, { setting = pair[1], value = pair[2] })
+            end
+            return settings
+        end
+
+        local function newAuraFrame(index, name)
+            local frame = {
+                system = Enum.EditModeSystem.AuraFrame,
+                systemIndex = index,
+                name = name,
+                replayedValues = {},
+            }
+
+            function frame:GetName()
+                return self.name
+            end
+            function frame:SetHasActiveChanges(value)
+                self.hasActiveChanges = value
+            end
+            function frame:UpdateSettingMap()
+                self.settingMapUpdated = true
+            end
+            function frame:GetSettingValue(setting)
+                for _, settingInfo in ipairs(self.systemInfo.settings or {}) do
+                    if settingInfo.setting == setting then
+                        return settingInfo.value
+                    end
+                end
+            end
+            function frame:UpdateSystemSetting(setting, entireSystemUpdate)
+                table.insert(self.replayedValues, tostring(setting) .. "=" .. tostring(self:GetSettingValue(setting)))
+                self.entireSystemUpdate = entireSystemUpdate
+            end
+            function frame:UpdateSystem(systemInfo)
+                self.updateSystemCalls = (self.updateSystemCalls or 0) + 1
+                self.systemInfo = systemInfo
+                for _, settingInfo in ipairs(systemInfo.settings or {}) do
+                    self:UpdateSystemSetting(settingInfo.setting, true)
+                end
+            end
+
+            return frame
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            requestedIndices = {},
+            registeredSystemFrames = {
+                newAuraFrame(Enum.EditModeAuraFrameSystemIndices.BuffFrame, "BuffFrame"),
+                newAuraFrame(Enum.EditModeAuraFrameSystemIndices.DebuffFrame, "DebuffFrame"),
+            },
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(system, systemIndex)
+            table.insert(self.requestedIndices, systemIndex)
+            return {
+                system = system,
+                systemIndex = systemIndex,
+                isInDefaultPosition = false,
+                anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 0, offsetY = 0 },
+                settings = settingsFor(systemIndex),
+            }
+        end
+        function EditModeManagerFrame:UpdateSystem(systemFrame)
+            systemFrame:UpdateSystem(systemFrame.systemInfo)
+        end
+        "#,
+    )
+    .expect("install aura frame stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply aura frame settings");
+
+    let (requested_indices, replayed_values, update_system_calls): (String, String, String) = env
+        .eval(
+            r#"
+            local replayedRows = {}
+            local updateRows = {}
+            for _, frame in ipairs(EditModeManagerFrame.registeredSystemFrames) do
+                table.insert(replayedRows, table.concat(frame.replayedValues, ","))
+                table.insert(updateRows, tostring(frame.updateSystemCalls or 0))
+            end
+            return table.concat(EditModeManagerFrame.requestedIndices, ","),
+                table.concat(replayedRows, "|"),
+                table.concat(updateRows, ",")
+            "#,
+        )
+        .expect("read aura frame replay state");
+
+    assert_eq!(requested_indices, "1,2");
+    assert_eq!(
+        replayed_values, "0=0,1=0,2=0,3=11,5=5,6=5|0=0,1=0,2=0,4=8,5=5,6=5",
+        "active Widescreen BuffFrame and DebuffFrame options should replay saved values"
+    );
+    assert_eq!(
+        update_system_calls, "1,1",
+        "AuraFrame rows should run through the manager update path"
+    );
+}
+
+#[test]
 fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
