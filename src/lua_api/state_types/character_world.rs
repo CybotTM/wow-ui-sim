@@ -11,12 +11,6 @@ use super::collections::{
 
 use super::super::state_defaults::*;
 
-mod seeded;
-use seeded::*;
-
-#[cfg(test)]
-mod tests;
-
 /// Computed character stats (base + gear).
 #[derive(Debug, Clone, Default)]
 pub struct CharacterStats {
@@ -509,6 +503,17 @@ pub struct GuildEvent {
     pub hour: i32,
 }
 
+struct GuildEventSeed {
+    event_type: &'static str,
+    player1: &'static str,
+    player2: Option<&'static str>,
+    rank_name: Option<&'static str>,
+    year: i32,
+    month: i32,
+    day: i32,
+    hour: i32,
+}
+
 /// One row of `GetGuildChallengeInfo(orderIndex)`: returns
 /// `(challengeType, current, max, gold, maxGold)`. `challenge_type` matches
 /// `GUILD_CHALLENGE_TYPE`*N* / `GUILD_CHALLENGE_LABEL`*N* in `GlobalStrings`.
@@ -706,4 +711,305 @@ pub fn seeded_world_state() -> WorldState {
     };
     apply_collection_defaults(&mut ws);
     ws
+}
+
+fn default_guild_ranks() -> Vec<GuildRank> {
+    vec![
+        GuildRank {
+            name: "Guild Leader".into(),
+            flags: vec![true; 21],
+        },
+        GuildRank {
+            name: "Officer".into(),
+            flags: vec![true; 21],
+        },
+        GuildRank {
+            name: "Member".into(),
+            flags: vec![false; 21],
+        },
+    ]
+}
+
+fn default_guild_members() -> Vec<GuildMember> {
+    vec![
+        GuildMember {
+            name: "Uther".into(),
+            rank_index: 1,
+            online: true,
+        },
+        GuildMember {
+            name: "Jaina".into(),
+            rank_index: 2,
+            online: false,
+        },
+    ]
+}
+
+fn default_guild_events() -> Vec<GuildEvent> {
+    default_guild_event_seeds()
+        .into_iter()
+        .map(build_guild_event)
+        .collect()
+}
+
+fn default_guild_event_seeds() -> [GuildEventSeed; 6] {
+    [
+        guild_event_seed("join", "Uther", None, None, (24, 9, 1, 18)),
+        guild_event_seed("invite", "Uther", Some("Jaina"), None, (24, 10, 4, 21)),
+        guild_event_seed("join", "Jaina", None, None, (24, 10, 4, 22)),
+        guild_event_seed(
+            "promote",
+            "Uther",
+            Some("Jaina"),
+            Some("Officer"),
+            (24, 11, 12, 19),
+        ),
+        guild_event_seed("quit", "Thrall", None, None, (25, 1, 6, 14)),
+        guild_event_seed("remove", "Uther", Some("Sylvanas"), None, (25, 2, 18, 23)),
+    ]
+}
+
+fn guild_event_seed(
+    event_type: &'static str,
+    player1: &'static str,
+    player2: Option<&'static str>,
+    rank_name: Option<&'static str>,
+    date: (i32, i32, i32, i32),
+) -> GuildEventSeed {
+    let (year, month, day, hour) = date;
+    GuildEventSeed {
+        event_type,
+        player1,
+        player2,
+        rank_name,
+        year,
+        month,
+        day,
+        hour,
+    }
+}
+
+fn build_guild_event(seed: GuildEventSeed) -> GuildEvent {
+    GuildEvent {
+        event_type: seed.event_type.into(),
+        player1: seed.player1.into(),
+        player2: seed.player2.map(String::from),
+        rank_name: seed.rank_name.map(String::from),
+        year: seed.year,
+        month: seed.month,
+        day: seed.day,
+        hour: seed.hour,
+    }
+}
+
+fn default_guild_motd() -> String {
+    "Raid invites tonight at 20:00 server. Repairs are on for progression.".into()
+}
+
+fn default_guild_info_text() -> String {
+    "Mythic-focused guild recruiting healers and a warlock for weekend raids.".into()
+}
+
+fn default_guild_challenges() -> Vec<GuildChallenge> {
+    vec![
+        GuildChallenge {
+            challenge_type: 1,
+            current: 5,
+            max: 7,
+            gold: 1250000,
+            max_gold: 1750000,
+        },
+        GuildChallenge {
+            challenge_type: 2,
+            current: 1,
+            max: 1,
+            gold: 5000000,
+            max_gold: 5000000,
+        },
+        GuildChallenge {
+            challenge_type: 3,
+            current: 1,
+            max: 3,
+            gold: 1000000,
+            max_gold: 3000000,
+        },
+        GuildChallenge {
+            challenge_type: 4,
+            current: 2,
+            max: 7,
+            gold: 500000,
+            max_gold: 1750000,
+        },
+    ]
+}
+
+fn default_world_pvp_areas() -> Vec<WorldPvpBattlegroundInfo> {
+    vec![
+        WorldPvpBattlegroundInfo {
+            bg_id: 571,
+            can_enter: true,
+            can_queue: true,
+            is_active: true,
+            max_level: 80,
+            min_level: 80,
+            name: "Wintergrasp".into(),
+            start_time: 900,
+        },
+        WorldPvpBattlegroundInfo {
+            bg_id: 607,
+            can_enter: false,
+            can_queue: false,
+            is_active: false,
+            max_level: 85,
+            min_level: 80,
+            name: "Tol Barad".into(),
+            start_time: 0,
+        },
+    ]
+}
+
+fn default_holiday_bg_info() -> RandomBGInfo {
+    RandomBGInfo {
+        bg_id: 108,
+        bg_index: 2,
+        can_queue: true,
+        has_random_win_today: false,
+        max_level: 80,
+        min_level: 10,
+        name: "Warsong Scramble".into(),
+    }
+}
+
+fn apply_collection_defaults(ws: &mut WorldState) {
+    let heirlooms = default_heirlooms();
+    ws.collected_heirlooms = heirlooms.iter().map(|h| h.item_id).collect();
+    ws.heirlooms = heirlooms;
+    ws.transmog_appearances = default_transmog_appearances();
+    ws.transmog_collected_shown = true;
+    ws.transmog_uncollected_shown = true;
+    ws.transmog_all_factions_shown = false;
+    ws.transmog_all_races_shown = false;
+    ws.transmog_class_filter = 2;
+    ws.transmog_source_type_filters = (1..=7).collect();
+    ws.transmog_search_text.clear();
+    ws.mounts = default_mounts();
+    ws.pets = default_pets();
+    ws.toys = default_toys();
+    ws.warband_scenes = default_warband_scenes();
+    ws.premade_listings = default_premade_listings();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// `WorldState::default()` returns a *fully empty* state (zero
+    /// fields, empty collections). Seeded defaults come from
+    /// `seeded_world_state()` — pin both contracts so callers that
+    /// want "vanilla WoW-like" state reach for the seeded helper and
+    /// anyone wiring a fresh sub-state can rely on Default being inert.
+    #[test]
+    fn world_default_is_empty_and_zeroed() {
+        let world = WorldState::default();
+        assert!(world.transmog_appearances.is_empty());
+        assert!(world.heirlooms.is_empty());
+        assert!(world.collected_heirlooms.is_empty());
+        assert_eq!(world.zone_id, 0);
+        assert!(world.zone_name.is_empty());
+        assert!(world.guild_name.is_none());
+        assert!(!world.guild_can_speak_in_chat);
+    }
+
+    #[test]
+    fn seeded_world_populates_collections_and_seed_fields() {
+        let world = seeded_world_state();
+        assert!(!world.transmog_appearances.is_empty());
+        assert!(!world.mounts.is_empty());
+        assert!(!world.pets.is_empty());
+        assert!(!world.toys.is_empty());
+        assert!(!world.warband_scenes.is_empty());
+        assert!(!world.heirlooms.is_empty());
+        assert!(!world.premade_listings.is_empty());
+        assert_eq!(world.collected_heirlooms.len(), world.heirlooms.len());
+        assert_eq!(world.zone_id, 1519);
+        assert_eq!(world.pvp_type, "contested");
+        assert!(world.guild_can_speak_in_chat);
+        assert_seeded_guild_event_log(&world);
+        assert_eq!(world.world_pvp_areas.len(), 2);
+        assert_eq!(world.world_pvp_areas[0].name, "Wintergrasp");
+        assert_eq!(world.world_pvp_areas[1].name, "Tol Barad");
+        assert_eq!(
+            world
+                .holiday_bg_info
+                .as_ref()
+                .expect("holiday bg info should be seeded")
+                .name,
+            "Warsong Scramble"
+        );
+        assert!(world.locklist_maps.is_empty());
+    }
+
+    fn assert_seeded_guild_event_log(world: &WorldState) {
+        assert_eq!(world.guild_events.len(), 6);
+        let promotion = &world.guild_events[3];
+        assert_eq!(promotion.event_type, "promote");
+        assert_eq!(promotion.player1, "Uther");
+        assert_eq!(promotion.player2.as_deref(), Some("Jaina"));
+        assert_eq!(promotion.rank_name.as_deref(), Some("Officer"));
+
+        let removal = world.guild_events.last().expect("guild event should exist");
+        assert_eq!(removal.event_type, "remove");
+        assert_eq!(removal.player1, "Uther");
+        assert_eq!(removal.player2.as_deref(), Some("Sylvanas"));
+        assert_eq!(
+            (removal.year, removal.month, removal.day, removal.hour),
+            (25, 2, 18, 23)
+        );
+    }
+
+    #[test]
+    fn transmog_default_appearances_populated() {
+        let world = seeded_world_state();
+        // 12 slots × 5 appearances each, plus 2 shirts and 1 tabard.
+        assert_eq!(world.transmog_appearances.len(), 63);
+
+        // Each armor slot has 4 collected + 1 uncollected
+        let head: Vec<_> = world
+            .transmog_appearances
+            .iter()
+            .filter(|a| a.category_id == 1)
+            .collect();
+        assert_eq!(head.len(), 5, "Head slot should have 5 appearances");
+        assert_eq!(head.iter().filter(|a| a.is_collected).count(), 4);
+        assert_eq!(head.iter().filter(|a| !a.is_collected).count(), 1);
+
+        // Source IDs are unique and sequential
+        let source_ids: HashSet<i32> = world
+            .transmog_appearances
+            .iter()
+            .map(|a| a.source_id)
+            .collect();
+        assert_eq!(source_ids.len(), 63, "All source IDs should be unique");
+    }
+
+    #[test]
+    fn heirloom_defaults_populated() {
+        let world = seeded_world_state();
+        assert_eq!(
+            world.heirlooms.len(),
+            11,
+            "should have 11 default heirlooms"
+        );
+        assert_eq!(world.heirlooms[0].name, "Burnished Helm of Might");
+        assert_eq!(world.heirlooms[0].equip_loc, "INVTYPE_HEAD");
+
+        let ids: HashSet<u32> = world.heirlooms.iter().map(|h| h.item_id).collect();
+        assert_eq!(ids.len(), 11, "all item IDs should be unique");
+        assert_eq!(
+            world.collected_heirlooms.len(),
+            11,
+            "all default heirlooms collected"
+        );
+        assert!(world.collected_heirlooms.contains(&122245));
+    }
 }
