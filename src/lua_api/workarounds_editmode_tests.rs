@@ -1177,6 +1177,9 @@ fn apply_system_anchors_replays_each_widescreen_action_bar_profile_row() {
             function frame:UpdateVisibility()
                 self.visibilityUpdated = true
             end
+            function frame:UpdateEndCaps(forceHide)
+                self.endCapsForceHide = forceHide
+            end
             function frame:SetShowGrid(showGrid, reason)
                 self.showGrid = showGrid
                 button:SetShowGrid(showGrid, reason)
@@ -1249,6 +1252,7 @@ fn apply_system_anchors_replays_each_widescreen_action_bar_profile_row() {
                     tostring(frame.iconSize),
                     tostring(frame.buttonPadding),
                     tostring(frame.hideBarArt),
+                    tostring(frame.endCapsForceHide),
                     tostring(frame.ActionBarPageNumber.shown),
                     tostring(button.showGrid),
                     frame.visibility or "_",
@@ -1263,7 +1267,7 @@ fn apply_system_anchors_replays_each_widescreen_action_bar_profile_row() {
     assert_eq!(requested_indices, "1,2,3,4,5,6,7,8,11,12,13");
     assert_eq!(
         replayed_rows,
-        "1:1:8:4:2:true:false:true:_|2:4:6:5:2:nil:nil:true:Always|3:1:12:2:2:nil:nil:false:Always|4:1:8:4:2:nil:nil:false:Always|5:1:8:4:2:nil:nil:true:Always|6:1:12:3:2:nil:nil:true:Always|7:1:12:5:2:nil:nil:true:Always|8:1:12:5:2:nil:nil:true:Always|11:3:nil:5:2:nil:nil:nil:_|12:1:nil:5:2:nil:nil:false:_|13:1:nil:5:2:nil:nil:nil:_",
+        "1:1:8:4:2:true:true:false:true:_|2:4:6:5:2:nil:nil:nil:true:Always|3:1:12:2:2:nil:nil:nil:false:Always|4:1:8:4:2:nil:nil:nil:false:Always|5:1:8:4:2:nil:nil:nil:true:Always|6:1:12:3:2:nil:nil:nil:true:Always|7:1:12:5:2:nil:nil:nil:true:Always|8:1:12:5:2:nil:nil:nil:true:Always|11:3:nil:5:2:nil:nil:nil:nil:_|12:1:nil:5:2:nil:nil:nil:false:_|13:1:nil:5:2:nil:nil:nil:nil:_",
         "each active Widescreen action-bar row should replay its saved profile settings"
     );
 }

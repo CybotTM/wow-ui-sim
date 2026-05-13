@@ -480,6 +480,9 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                     mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.HideBarArt then
                     systemFrame.hideBarArt = valueBool
+                    if systemFrame.UpdateEndCaps then
+                        pcall(systemFrame.UpdateEndCaps, systemFrame, systemFrame.hideBarArt)
+                    end
                     if systemFrame.BorderArt then
                         systemFrame.BorderArt:SetShown(not systemFrame.hideBarArt)
                     end
