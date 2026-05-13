@@ -38,7 +38,7 @@ Parity hardening TODO:
 - [x] Implement the legacy Mists `GetTradeSkill*` backing globals so Blizzard_TradeSkillUI can render and enter the panel parity matrix.
 - [x] Fix Mists Blizzard_TrainerUI legacy trainer-service globals and template wiring so ClassTrainerFrame can enter the panel parity matrix.
 - [x] Add a release-profile Mists CI proof command that runs zero `lua-errors`, installed-addon matrix, panel parity, interaction audit, and visual comparison with pipefail-safe logging.
-- [ ] Run the full release-profile Mists proof command locally with `--skip-clone`, document every failure, and fix the first failing lane instead of treating validation-only as sufficient.
+- [x] Run the full release-profile Mists proof command locally with `--skip-clone`, document every failure, and fix the first failing lane instead of treating validation-only as sufficient.
 - [ ] Add the connected-GUI micro-menu smoke runner as a release-proof lane using release `wow-sim` and `wow-cli`, so real input dispatch is part of the parity gate.
 - [ ] Extend the release proof to run panel parity and installed-addon panel parity with normal SavedVariables enabled, then fix any saved-var-only panel or addon regression.
 - [ ] Add a retained release-proof artifact index under `docs/baselines/mists-release-proof.md` that records log paths, panel artifact directories, addon rows, and any remaining gaps from the latest full run.
@@ -95,6 +95,16 @@ completed with `passed: 9` and `failed: 0`. This matches the CI guard path for
 installed Mists addons: saved variables load normally, addon artifacts use the
 `*-with-saved-vars-lua-errors.json` suffix, and any addon-induced regression now
 fails the harness.
+
+Release-profile proof verification: `scripts/ci-mists-release-proof.sh --skip-clone`
+initially failed in the `interaction-audit` lane because
+`docs/baselines/mists-panel-interactions.md` had `34` rows while the panel
+baseline had `37` passing rows. Added the missing Craft, TradeSkill, and Class
+trainer audit rows, then reran
+`scripts/ci-mists-release-proof.sh --skip-build --skip-clone`; all lanes passed.
+Artifacts were written under `target/mists-release-proof/`, including release
+logs, base panel artifacts, and installed-addon panel artifacts for all 9 Mists
+addon rows.
 
 Mists `lua-errors` baseline decision: refreshed
 `docs/baselines/mists-lua-errors.json` to the current clean `[]` capture after
