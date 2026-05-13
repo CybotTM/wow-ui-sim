@@ -2,52 +2,7 @@
 
 use crate::common;
 
-use std::path::PathBuf;
-
-use wow_ui_sim::loader::load_addon;
-use wow_ui_sim::lua_api::WowLuaEnv;
-
-fn env() -> WowLuaEnv {
-    WowLuaEnv::new().expect("Failed to create Lua environment")
-}
-
-fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
-        "CARGO_MANIFEST_DIR"
-    )))
-}
-
-fn env_with_professions_util() -> WowLuaEnv {
-    let env = env();
-    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
-
-    let ui = blizzard_ui_dir();
-    let addons = [
-        (
-            "Blizzard_SharedXMLGame",
-            ui.join("Blizzard_SharedXMLGame/Blizzard_SharedXMLGame.toc"),
-        ),
-        (
-            "Blizzard_Colors",
-            ui.join("Blizzard_Colors/Blizzard_Colors_Mainline.toc"),
-        ),
-        (
-            "Blizzard_StaticPopup",
-            ui.join("Blizzard_StaticPopup/Blizzard_StaticPopup.toc"),
-        ),
-        (
-            "Blizzard_FrameXMLUtil",
-            ui.join("Blizzard_FrameXMLUtil/Blizzard_FrameXMLUtil.toc"),
-        ),
-    ];
-
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("Failed to load Blizzard addon {name}: {err}"));
-    }
-
-    env
-}
+use crate::professions_api_helpers::{env, env_with_professions_util};
 
 // ============================================================================
 // GetProfessions / GetProfessionInfo
