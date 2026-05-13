@@ -3,17 +3,6 @@
 use wow_ui_sim::texture::TextureManager;
 
 fn main() {
-    if let Some(home) = dirs::home_dir() {
-        let root = home.join("Projects/world-of-osso/game-engine");
-        if root.exists() {
-            unsafe {
-                std::env::set_var("GAME_ENGINE_SHARED_ROOT", &root);
-            }
-            println!("set GAME_ENGINE_SHARED_ROOT = {}", root.display());
-        } else {
-            eprintln!("WARN: {} does not exist", root.display());
-        }
-    }
     unsafe {
         std::env::set_var("WOW_SIM_CASC", "1");
     }

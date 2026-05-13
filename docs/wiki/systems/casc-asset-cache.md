@@ -11,7 +11,7 @@ The simulator reads textures and fonts from a live WoW install via three stacked
 | Blizzard UI source cache | Extracted Blizzard Lua/XML/TOC source files | `~/.cache/wow-ui-sim/blizzard-ui/<Blizzard_...>` | `wow-cli casc sync-blizzard-ui` or GUI startup when the cache is missing | Persistent across processes; guarded by `.wow-ui-sim-blizzard-ui-complete` |
 | In-memory texture cache | `TextureData` (decoded RGBA) keyed by normalised wow path | `TextureManager::cache` | `TextureManager::load` on first hit | Per-process |
 
-The resolution sqlite is generated cache data, not repo data. `asset-resolver` keeps it under `$ASSET_RESOLVER_CACHE_DIR` when set, otherwise `$XDG_CACHE_HOME/asset-resolver` or `~/.cache/asset-resolver`. The path is product/build-key scoped so retail, classic, and future patch builds do not overwrite each other.
+The resolution sqlite is generated cache data, not repo data. wow-ui-sim constructs `asset-resolver` with an explicit cache root: `$ASSET_RESOLVER_CACHE_DIR` when set, otherwise `$XDG_CACHE_HOME/asset-resolver` or `~/.cache/asset-resolver`. The path is product/build-key scoped so retail, classic, and future patch builds do not overwrite each other. Runtime loading no longer depends on `GAME_ENGINE_SHARED_ROOT` or a sibling game-engine checkout.
 
 Without the resolution sqlite, first CASC use reads the local build config, extracts fresh `root.bin` and `encoding.bin` from the WoW install into the cache directory, and builds the sqlite. Warm starts become a single `Connection::open` plus per-FDID sqlite SELECTs.
 

@@ -85,7 +85,7 @@ impl SoundManager {
     }
 
     fn ensure_path_cached(&self, path: &str) -> Option<PathBuf> {
-        let resolver = asset_resolver::CascListfileResolver;
+        let resolver = crate::asset_resolver_config::resolver();
         let fdid = resolver.lookup_path(path)?;
         self.ensure_fdid_cached(fdid)
     }
@@ -101,7 +101,7 @@ fn ensure_sound_cached(fdid: u32, out_path: &Path) -> Option<PathBuf> {
     if out_path.is_file() {
         return Some(out_path.to_path_buf());
     }
-    let resolver = asset_resolver::CascListfileResolver;
+    let resolver = crate::asset_resolver_config::resolver();
     resolver.ensure_cached(fdid, out_path)
 }
 

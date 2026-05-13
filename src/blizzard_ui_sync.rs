@@ -441,7 +441,7 @@ fn extract_fdid(fdid: u32, out_path: &Path) -> crate::Result<bool> {
         ));
     }
     remove_missing_marker(out_path);
-    let resolver = asset_resolver::CascListfileResolver;
+    let resolver = crate::asset_resolver_config::resolver();
     Ok(resolver.ensure_cached(fdid, out_path).is_some())
 }
 
@@ -473,26 +473,8 @@ fn casc_available() -> bool {
         if std::env::var("WOW_SIM_CASC").ok().as_deref() == Some("0") {
             return false;
         }
-        configure_default_asset_resolver_root();
         asset_resolver::wow_install_path().is_some()
     })
-}
-
-#[cfg(feature = "casc")]
-fn configure_default_asset_resolver_root() {
-    if std::env::var_os("GAME_ENGINE_SHARED_ROOT").is_some() {
-        return;
-    }
-    let Some(home) = dirs::home_dir() else {
-        return;
-    };
-    let default_root = home.join("Projects/world-of-osso/game-engine");
-    if default_root.exists() {
-        // SAFETY: this runs behind a OnceLock before asset-resolver is initialized here.
-        unsafe {
-            std::env::set_var("GAME_ENGINE_SHARED_ROOT", default_root);
-        }
-    }
 }
 
 fn remove_missing_marker(path: &Path) {

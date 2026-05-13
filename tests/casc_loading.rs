@@ -62,10 +62,13 @@ fn casc_resolves_baseline_fonts() {
         "fonts/arialn.ttf",
         "fonts/frizqt___cyr.ttf",
     ];
+    let resolver = wow_ui_sim::asset_resolver_config::resolver();
     for path in probes {
-        let fdid =
-            asset_resolver::lookup_path(path).unwrap_or_else(|| panic!("listfile miss for {path}"));
-        let bytes = asset_resolver::resolve_bytes(fdid)
+        let fdid = resolver
+            .lookup_path(path)
+            .unwrap_or_else(|| panic!("listfile miss for {path}"));
+        let bytes = resolver
+            .resolve_bytes(fdid)
             .unwrap_or_else(|| panic!("resolve_bytes failed for {path} (fdid {fdid})"));
         assert!(
             !bytes.is_empty(),

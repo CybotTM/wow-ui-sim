@@ -4,12 +4,17 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SOURCE = Path.home() / "Projects/world-of-osso/game-engine/data/community-listfile.csv"
+DEFAULT_SOURCE = (
+    Path(os.environ["ASSET_RESOLVER_DATA_DIR"])
+    if "ASSET_RESOLVER_DATA_DIR" in os.environ
+    else Path.home() / ".cache/asset-resolver/data"
+) / "community-listfile.csv"
 DEFAULT_OUTPUT = ROOT / "data/wow-ui-sim-listfile.csv"
 MANIFEST_PATH = ROOT / "data/manifest_interface_data.rs"
 ATLAS_PATH = ROOT / "data/atlas.rs"

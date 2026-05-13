@@ -50,7 +50,7 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
         return None;
     }
 
-    let resolver = asset_resolver::CascListfileResolver;
+    let resolver = crate::asset_resolver_config::resolver();
 
     // Listfile entries always include the file extension; our normalized paths usually don't.
     // Try common UI asset extensions.
@@ -66,7 +66,7 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
         .flat_map(|b| {
             std::iter::once(b.clone()).chain(candidates.iter().map(move |ext| format!("{b}.{ext}")))
         })
-        .find_map(|p| lookup_casc_path(&resolver, &p))?;
+        .find_map(|p| lookup_casc_path(resolver, &p))?;
 
     let extract_dir = casc_extract_dir()?;
     let safe_relative = listfile_path.replace('\\', "/");

@@ -127,6 +127,10 @@ Updated `investigations/appearances-wardrobe-api.md` after Wardrobe rendered eve
 
 Created `investigations/adventure-guide-boss-icons.md` after tracing blank Encounter Journal boss icons to `EJ_GetCreatureInfo` returning `0` for missing creature icon fileDataIDs. Documented that Blizzard's boss button Lua relies on nil to select `UI-EJ-BOSS-Default`; `0` is truthy and makes `SetTexture(0)` clear the texture.
 
+## [2026-05-13] update | asset-resolver cache root decoupled from game-engine
+
+Updated `systems/casc-asset-cache.md` after moving `asset-resolver` path selection behind an explicit resolver config. wow-ui-sim now constructs the resolver with `$ASSET_RESOLVER_CACHE_DIR` or the normal user cache root and no longer sets `GAME_ENGINE_SHARED_ROOT` or assumes a local game-engine checkout for CASC/listfile cache data.
+
 ## [2026-05-01] update | Adventure Journal dungeon click stack overflow
 
 Updated `investigations/lfd-dungeon-list-empty.md` after reproducing the stack overflow from `EncounterJournal_DisplayInstance(1271)`. Documented the split between modern `C_EncounterJournal.GetInstanceInfo` slot 9 (`linkDungeonID`) and legacy `EJ_GetInstanceInfo` slot 9 (`shouldDisplayDifficulty`) plus the same-button `Button:Click()` reentry guard that prevents the programmatic overview-tab click loop from aborting the process.
