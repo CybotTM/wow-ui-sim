@@ -20,7 +20,7 @@ promoted into `docs/baselines/mists-panels.md` and
 | Blizzard_AuctionUI | Covered | Legacy auction path in `Auction House: browse, bid, post, cancel`. |
 | Blizzard_AutoCompletePopupList | Support | Autocomplete popup support, not standalone panel. |
 | Blizzard_BarbershopUI | Added | `NPC service LoD panels: barber and black market`. |
-| Blizzard_BattlefieldMap | Gap task added | BattlefieldMapFrame loads, but screenshot mode reports a `SetScale(0)` error during startup dispatch; needs a focused visual parity fix before entering the panel matrix. |
+| Blizzard_BattlefieldMap | Added | `Battlefield map LoD panel`. |
 | Blizzard_BehavioralMessaging | Support | Toast/message system loaded by events, not standalone panel. |
 | Blizzard_BindingUI | Covered | `Macro and key bindings`. |
 | Blizzard_BlackMarketUI | Added | `NPC service LoD panels: barber and black market`. |

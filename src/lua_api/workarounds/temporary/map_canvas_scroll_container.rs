@@ -49,6 +49,115 @@ local function __wow_ensure_map_canvas_scroll_container(frame)
   return scroll
 end
 
+local function __wow_ensure_map_canvas_scroll_size(frame, scroll)
+  if type(frame) ~= "table" or type(scroll) ~= "table" or type(scroll.SetSize) ~= "function" then
+    return
+  end
+
+  local scrollWidth = type(scroll.GetWidth) == "function" and scroll:GetWidth() or 0
+  local scrollHeight = type(scroll.GetHeight) == "function" and scroll:GetHeight() or 0
+  if scrollWidth > 0 and scrollHeight > 0 then
+    return
+  end
+
+  local frameWidth = type(frame.GetWidth) == "function" and frame:GetWidth() or 0
+  local frameHeight = type(frame.GetHeight) == "function" and frame:GetHeight() or 0
+  if frameWidth <= 0 or frameHeight <= 0 then
+    return
+  end
+
+  scroll:SetSize(frameWidth, frameHeight)
+end
+
+local function __wow_ensure_map_canvas_controller_size(scroll)
+  if type(scroll) ~= "table" then
+    return
+  end
+
+  local frame = nil
+  if type(scroll.GetMap) == "function" then
+    frame = scroll:GetMap()
+  elseif type(scroll.GetParent) == "function" then
+    frame = scroll:GetParent()
+  end
+  __wow_ensure_map_canvas_scroll_size(frame, scroll)
+end
+
+local function __wow_repair_zero_map_canvas_scale(scroll)
+  if type(scroll) ~= "table" or type(scroll.zoomLevels) ~= "table" or type(scroll.zoomLevels[1]) ~= "table" then
+    return
+  end
+  if scroll.zoomLevels[1].scale > 0 then
+    return
+  end
+
+  __wow_ensure_map_canvas_controller_size(scroll)
+  local alreadyRepairing = rawget(scroll, "__wow_repairing_zero_canvas_scale")
+  if not alreadyRepairing and type(scroll.CreateZoomLevels) == "function" then
+    rawset(scroll, "__wow_repairing_zero_canvas_scale", true)
+    scroll.zoomLevels = nil
+    scroll:CreateZoomLevels()
+    rawset(scroll, "__wow_repairing_zero_canvas_scale", nil)
+  end
+
+  if type(scroll.zoomLevels) ~= "table" or type(scroll.zoomLevels[1]) ~= "table" or scroll.zoomLevels[1].scale <= 0 then
+    scroll.baseScale = 1
+    scroll.zoomLevels = { { scale = 1, layerIndex = 1 } }
+  end
+
+  if type(scroll.targetScale) ~= "number" or scroll.targetScale <= 0 then
+    scroll.targetScale = scroll.zoomLevels[1].scale
+  end
+  if type(scroll.currentScale) == "number" and scroll.currentScale <= 0 then
+    scroll.currentScale = nil
+  end
+end
+
+local function __wow_patch_map_canvas_scroll_instance(scroll)
+  if type(scroll) ~= "table" or rawget(scroll, "__wow_zero_canvas_scale_patched") then
+    return
+  end
+
+  if type(scroll.CreateZoomLevels) == "function" then
+    local originalCreateZoomLevels = scroll.CreateZoomLevels
+    scroll.CreateZoomLevels = function(self, ...)
+      __wow_ensure_map_canvas_controller_size(self)
+      local result = originalCreateZoomLevels(self, ...)
+      __wow_repair_zero_map_canvas_scale(self)
+      return result
+    end
+  end
+
+  if type(scroll.InstantPanAndZoom) == "function" then
+    local originalInstantPanAndZoom = scroll.InstantPanAndZoom
+    scroll.InstantPanAndZoom = function(self, scale, ...)
+      __wow_ensure_map_canvas_controller_size(self)
+      if type(scale) == "number" and scale <= 0 then
+        __wow_repair_zero_map_canvas_scale(self)
+        scale = type(self.targetScale) == "number" and self.targetScale > 0 and self.targetScale or 1
+      end
+      return originalInstantPanAndZoom(self, scale, ...)
+    end
+  end
+
+  if type(scroll.ResetZoom) == "function" then
+    scroll.ResetZoom = function(self)
+      __wow_ensure_map_canvas_controller_size(self)
+      __wow_repair_zero_map_canvas_scale(self)
+      local scale = type(self.zoomLevels) == "table"
+        and type(self.zoomLevels[1]) == "table"
+        and self.zoomLevels[1].scale
+        or 1
+      if type(scale) ~= "number" or scale <= 0 then
+        scale = 1
+      end
+      self:InstantPanAndZoom(scale, 0.5, 0.5)
+    end
+  end
+
+  rawset(scroll, "__wow_zero_canvas_scale_patched", true)
+end
+
 local function __wow_try_init_map_canvas(frame)
   if type(frame) ~= "table" then
     return
@@ -64,6 +173,8 @@ local function __wow_try_init_map_canvas(frame)
     return
   end
 
+  __wow_patch_map_canvas_scroll_instance(scroll)
+  __wow_ensure_map_canvas_scroll_size(frame, scroll)
   rawset(frame, "__wow_map_canvas_onload_ran", true)
   local originalOnLoad = rawget(_G, "__wow_map_canvas_original_onload")
   if type(originalOnLoad) == "function" then
@@ -80,6 +191,8 @@ local function __wow_refresh_map_canvas_size(frame)
   if type(scroll) ~= "table" then
     return
   end
+  __wow_patch_map_canvas_scroll_instance(scroll)
+  __wow_ensure_map_canvas_scroll_size(frame, scroll)
 
   local child = rawget(scroll, "Child")
   local childWidth = type(child) == "table" and type(child.GetWidth) == "function" and child:GetWidth() or 0
@@ -95,8 +208,10 @@ local function __wow_refresh_map_canvas_size(frame)
 
   if mapID ~= nil and mapID ~= 0 and type(scroll.SetMapID) == "function" then
     scroll:SetMapID(mapID)
+    __wow_repair_zero_map_canvas_scale(scroll)
   elseif type(scroll.OnCanvasSizeChanged) == "function" then
     scroll:OnCanvasSizeChanged()
+    __wow_repair_zero_map_canvas_scale(scroll)
   end
 
   childWidth = type(child) == "table" and type(child.GetWidth) == "function" and child:GetWidth() or 0
@@ -291,6 +406,55 @@ if type(MapCanvasMixin) == "table" and not rawget(_G, "__wow_map_canvas_scroll_c
         return
       end
       return originalOnFrameSizeChanged(self, ...)
+    end
+  end
+
+  if type(MapCanvasScrollControllerMixin) == "table"
+    and type(MapCanvasScrollControllerMixin.ResetZoom) == "function"
+  then
+    MapCanvasScrollControllerMixin.ResetZoom = function(self)
+      __wow_ensure_map_canvas_controller_size(self)
+      __wow_repair_zero_map_canvas_scale(self)
+      local scale = type(self.zoomLevels) == "table"
+        and type(self.zoomLevels[1]) == "table"
+        and self.zoomLevels[1].scale
+        or 1
+      if type(scale) ~= "number" or scale <= 0 then
+        scale = 1
+      end
+      self:InstantPanAndZoom(scale, 0.5, 0.5)
+    end
+  end
+
+  if type(MapCanvasScrollControllerMixin) == "table"
+    and type(MapCanvasScrollControllerMixin.CreateZoomLevels) == "function"
+  then
+    local originalCreateZoomLevels = MapCanvasScrollControllerMixin.CreateZoomLevels
+    MapCanvasScrollControllerMixin.CreateZoomLevels = function(self, ...)
+      __wow_ensure_map_canvas_controller_size(self)
+      local result = originalCreateZoomLevels(self, ...)
+      if type(self.zoomLevels) == "table" and type(self.zoomLevels[1]) == "table" and self.zoomLevels[1].scale <= 0 then
+        self.baseScale = 1
+        for _, zoomLevel in ipairs(self.zoomLevels) do
+          if type(zoomLevel) == "table" and zoomLevel.scale <= 0 then
+            zoomLevel.scale = 1
+          end
+        end
+      end
+      return result
+    end
+  end
+
+  if type(MapCanvasScrollControllerMixin) == "table"
+    and type(MapCanvasScrollControllerMixin.InstantPanAndZoom) == "function"
+  then
+    local originalInstantPanAndZoom = MapCanvasScrollControllerMixin.InstantPanAndZoom
+    MapCanvasScrollControllerMixin.InstantPanAndZoom = function(self, scale, ...)
+      __wow_ensure_map_canvas_controller_size(self)
+      if type(scale) == "number" and scale <= 0 then
+        scale = 1
+      end
+      return originalInstantPanAndZoom(self, scale, ...)
     end
   end
 

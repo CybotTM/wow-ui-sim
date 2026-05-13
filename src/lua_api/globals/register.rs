@@ -61,6 +61,7 @@ fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetLegacyRaidDifficultyID",
         get_legacy_raid_difficulty_id,
     )?;
+    LuaApiMut::register_function(lua, "GetTickTime", get_tick_time)?;
     super::strings::register_all_ui_strings(lua)?;
     super::security::register_all(lua)?;
     super::keybindings::register_all(lua)?;
@@ -274,6 +275,11 @@ fn get_raid_difficulty_id(state: &mut rilua::vm::state::LuaState) -> rilua::LuaR
 
 fn get_legacy_raid_difficulty_id(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
     state.push(rilua::Val::Num(3.0));
+    Ok(1)
+}
+
+fn get_tick_time(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
+    state.push(rilua::Val::Num(1.0 / 60.0));
     Ok(1)
 }
 

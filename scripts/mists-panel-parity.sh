@@ -99,6 +99,7 @@ add_panel "PvP UI: HonorFrame, BG queue, Conquest" "pvp" "PVPQueueFrame" 'LoadAd
 add_panel "LFG, LFR, Raid Browser" "lfg-lfr" "PVEFrame" 'LoadAddOn("Blizzard_PVEUI"); PVEFrame:Show(); GroupFinderFrame:Show()'
 add_panel "Raid unit frames LoD panel" "raid-unit-frames" "RaidParentFrame" 'A_Admin.SetPartySize(6); A_Admin.SetInstanceInfo("Vault of Archavon", "raid", 16, 20); for i = 1, 6 do A_Admin.SetPartyMember(i, "Raider" .. i, ((i - 1) % 11) + 1, 90) end; LoadAddOn("Blizzard_RaidUI"); RaidParentFrame:Show(); RaidParentFrame_SetView(1); RaidFrame:Show(); RaidGroupFrame_Update(); for i = 1, 8 do local group = _G["RaidGroup" .. i]; if group then group:Show() end end'
 add_panel "Arena enemy unit frames LoD panel" "arena-unit-frames" "ArenaEnemyFrame1" 'A_Admin.SetInstanceInfo("Nagrand Arena", "arena", 0, 5); LoadAddOn("Blizzard_ArenaUI"); ArenaEnemyFrames_Enable(ArenaEnemyFrames); for i = 1, 5 do local frame = _G["ArenaEnemyFrame" .. i]; if frame then ArenaEnemyFrame_SetMysteryPlayer(frame); frame:Show() end end'
+add_panel "Battlefield map LoD panel" "battlefield-map" "BattlefieldMapFrame" 'ToggleBattlefieldMap(); BattlefieldMapFrame:RefreshAllDataProviders()'
 add_panel "Collections: mounts, pets, toys, heirlooms, transmog" "collections" "CollectionsJournal" 'ToggleCollectionsJournal()'
 add_panel "Pet Journal and Battle Pet UI" "pet-journal" "CollectionsJournal" 'ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_PETS)'
 add_panel "Achievements and Calendar" "achievements-calendar" "AchievementFrame" 'ToggleAchievementFrame()'
