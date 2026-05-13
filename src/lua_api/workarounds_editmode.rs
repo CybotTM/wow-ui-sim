@@ -449,11 +449,10 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                     systemFrame.numRows = value
                     mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.NumIcons then
-                    systemFrame.numButtonsShowable = value
-                    if hasActionButtons and systemFrame.UpdateShownButtons then
-                        pcall(systemFrame.UpdateShownButtons, systemFrame)
-                    end
-                    mark_action_bar_layout_dirty()
+                    -- Deferred: live Palaky/Ultrawide shows twelve main-bar
+                    -- buttons even though the cache stores NumIcons=8.
+                    -- Keep the existing visible-button state while the other
+                    -- profile settings replay.
                 elseif setting == actionBarSettings.IconSize then
                     systemFrame.iconSize = value
                     local iconScale = value / 100
