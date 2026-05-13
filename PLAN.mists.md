@@ -46,7 +46,7 @@ Parity hardening TODO:
 - [x] Fix Mists specialization/talent UI layout overlap, then implement the `Learn` specialization flow so it switches from spec selection into the actual talents UI.
 - [x] Audit and fix Mists font loading so Blizzard panels use the expected font assets instead of fallback/missing-font rendering.
 - [x] Add a retained release-proof artifact index under `docs/baselines/mists-release-proof.md` that records log paths, panel artifact directories, addon rows, and any remaining gaps from the latest full run.
-- [ ] Wire the release-proof command into CI with artifact upload for logs, lua-error JSON, panel screenshots, and frame dumps once the local full proof is green.
+- [x] Wire the release-proof command into CI with artifact upload for logs, lua-error JSON, panel screenshots, and frame dumps once the local full proof is green.
 
 Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
 

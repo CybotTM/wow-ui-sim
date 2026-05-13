@@ -7,8 +7,8 @@ under `target/mists-release-proof/`.
 
 `target/` artifacts are retained local outputs, not committed binary baselines.
 If the directory is missing after a clean build, regenerate it with the command
-above. CI should upload the same tree when the release-proof lane is wired into
-GitHub Actions.
+above. GitHub Actions uploads the same tree from the `Mists release proof` job
+as the `mists-release-proof` artifact.
 
 ## Lane Logs
 
@@ -65,10 +65,16 @@ The full proof uses the `mists` rows from `tools/classic-addon-manifest.tsv`:
 Latest full-run result: `passed: 9`, `failed: 0` for startup, installed-addon
 panel parity, and installed-addon panel parity with SavedVariables.
 
-## Remaining Gaps
+## CI Upload
 
-- CI upload is not wired yet; `target/mists-release-proof/` remains a local
-  retained artifact tree until the next PLAN item adds workflow upload.
+The `Test` workflow includes an opt-in `Mists release proof` job. It runs when
+`RUN_MISTS_RELEASE_PROOF` is set to `1` as a repository variable, or when a
+manual `workflow_dispatch` run sets `run_mists_release_proof` to true. The job
+uses `scripts/ci-mists-release-proof.sh --skip-clone` and uploads
+`target/mists-release-proof/`, including logs, base `lua-errors` JSON, panel
+screenshots, and frame dumps.
+
+## Remaining Gaps
 - The latest audited Mists panel workflows have no `Missing` rows in
   `docs/baselines/mists-panel-interactions.md`.
 - Mists-specific differences remain expected rather than gaps: Pandaria-era

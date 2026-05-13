@@ -5,6 +5,12 @@ on:
     branches: [master]
   pull_request:
   workflow_dispatch:
+    inputs:
+      run_mists_release_proof:
+        description: Run the full Mists release-proof lane and upload retained artifacts
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   cargo-test:
@@ -89,4 +95,41 @@ jobs:
         with:
           name: mists-panel-parity
           path: target/mists-panel-parity
+          if-no-files-found: ignore
+
+  mists-release-proof:
+    name: Mists release proof
+    runs-on: ubuntu-latest
+    if: ${{ vars.RUN_MISTS_RELEASE_PROOF == '1' || (github.event_name == 'workflow_dispatch' && inputs.run_mists_release_proof) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fetch Blizzard UI source (mists)
+        run: ./scripts/setup-blizzard-ui.sh mists
+
+      - name: Use CI cargo config
+        run: cp .cargo/config.ci.toml .cargo/config.toml
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libasound2-dev libudev-dev jq
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: mists-release-proof
+
+      - name: Run Mists release proof
+        run: ./scripts/ci-mists-release-proof.sh --skip-clone
+
+      - name: Upload Mists release proof artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mists-release-proof
+          path: target/mists-release-proof
           if-no-files-found: ignore
