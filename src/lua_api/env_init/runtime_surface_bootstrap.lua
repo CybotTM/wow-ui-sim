@@ -8924,6 +8924,18 @@ if C_EditMode == nil then
   C_EditMode = __wow_namespace()
 end
 if rawget(C_EditMode, "GetAccountSettings") == nil then
+  local function __wow_copy_edit_mode_value(value)
+    if type(value) ~= "table" then
+      return value
+    end
+
+    local copy = {}
+    for key, child in pairs(value) do
+      copy[__wow_copy_edit_mode_value(key)] = __wow_copy_edit_mode_value(child)
+    end
+    return copy
+  end
+
   local function __wow_default_edit_mode_account_setting(setting)
     if setting == Enum.EditModeAccountSetting.ShowGrid then
       return 0
@@ -8937,7 +8949,13 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     return 1
   end
 
-  function C_EditMode.GetAccountSettings()
+  local __wow_edit_mode_layout_state = {
+    layouts = {},
+    activeLayout = 1,
+  }
+  local __wow_edit_mode_account_setting_state = nil
+
+  local function __wow_build_default_edit_mode_account_settings()
     local settings = {}
     for _, setting in pairs(Enum.EditModeAccountSetting or {}) do
       if type(setting) == "number" then
@@ -8951,14 +8969,46 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     return settings
   end
 
+  function C_EditMode.GetAccountSettings()
+    if __wow_edit_mode_account_setting_state == nil then
+      __wow_edit_mode_account_setting_state = __wow_build_default_edit_mode_account_settings()
+    end
+    return __wow_copy_edit_mode_value(__wow_edit_mode_account_setting_state)
+  end
+
   function C_EditMode.GetLayouts()
-    return {
-      layouts = {},
-      activeLayout = 1,
+    return __wow_copy_edit_mode_value(__wow_edit_mode_layout_state)
+  end
+
+  function C_EditMode.SaveLayouts(saveInfo)
+    if type(saveInfo) ~= "table" then
+      return
+    end
+
+    __wow_edit_mode_layout_state = {
+      layouts = __wow_copy_edit_mode_value(saveInfo.layouts or {}),
+      activeLayout = saveInfo.activeLayout or __wow_edit_mode_layout_state.activeLayout or 1,
     }
   end
 
-  function C_EditMode.SetActiveLayout(_layoutIndex)
+  function C_EditMode.SetActiveLayout(layoutIndex)
+    if type(layoutIndex) == "number" then
+      __wow_edit_mode_layout_state.activeLayout = layoutIndex
+    end
+  end
+
+  function C_EditMode.SetAccountSetting(setting, value)
+    if __wow_edit_mode_account_setting_state == nil then
+      __wow_edit_mode_account_setting_state = __wow_build_default_edit_mode_account_settings()
+    end
+    for _, settingInfo in ipairs(__wow_edit_mode_account_setting_state) do
+      if settingInfo.setting == setting then
+        settingInfo.value = value
+        return
+      end
+    end
+    table.insert(__wow_edit_mode_account_setting_state, { setting = setting, value = value })
+    table.sort(__wow_edit_mode_account_setting_state, function(a, b) return a.setting < b.setting end)
   end
 end
 if WorldLootObjectExists == nil then

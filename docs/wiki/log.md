@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-13] update | EditMode active profile fallback
+
+Updated `investigations/editmode-layout.md` with the C_EditMode active profile
+state bug: the bootstrap fallback always returned `activeLayout = 1` and had a
+no-op `SetActiveLayout()`, so Blizzard selected the first preset layout instead
+of a saved profile. Documented the in-memory fallback state model and regression
+coverage.
+
 ## [2026-05-08] update | Windows default GUI build and headless CI compile
 
 Updated `investigations/windows-port-build.md` after reproducing MSVC `LNK1189`

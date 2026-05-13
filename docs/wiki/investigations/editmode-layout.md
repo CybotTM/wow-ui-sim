@@ -37,15 +37,32 @@ After 73e6032, `__index` checks the fenv table before Rust methods, so all `:Set
 
 `rawset(frame, key, nil)` fails — FrameRef is userdata, not a table. Per-frame fields must be accessed through `debug.getfenv(frame)[1]`.
 
+## Follow-up: Active Profile State
+
+The runtime bootstrap fallback for `C_EditMode.GetLayouts()` used to return
+`{ layouts = {}, activeLayout = 1 }` on every call, while
+`C_EditMode.SetActiveLayout()` was a no-op. Blizzard's
+`EditModeManagerFrameMixin:UpdateLayoutInfo()` prepends preset layouts before
+saved account/character layouts, so a hard-coded `activeLayout = 1` selects the
+first preset profile and presents the default UI.
+
+The fallback now keeps an in-memory `C_EditMode` state model:
+`SaveLayouts()` stores saved layout data, `SetActiveLayout()` updates the
+selected layout index, and `GetLayouts()` returns a defensive copy. Regression
+coverage lives in `tests/edit_mode_api.rs`.
+
 ## Files Modified
 
 - `src/lua_api/workarounds_editmode.rs`
 - `src/lua_api/globals/c_stubs_api.rs`
 - `tests/frame_positions.rs`, `tests/action_bar.rs`
+- `src/lua_api/env_init/runtime_surface_bootstrap.lua`
+- `tests/edit_mode_api.rs`
 
 ## Sources
 
 - [editmode-layout-fixes.md](../../editmode-layout-fixes.md) — full investigation
+- [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `C_EditMode` fallback state
 
 ## See Also
 
