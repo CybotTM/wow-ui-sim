@@ -9031,14 +9031,27 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     if type(encoded) ~= "string" then
       return settings
     end
+    local lastSetting = nil
+    local lastInfo = nil
+    local placeValue = 1
     for i = 1, string.len(encoded), 2 do
       local settingByte = string.byte(encoded, i)
       local valueByte = string.byte(encoded, i + 1)
       if settingByte and valueByte then
-        table.insert(settings, {
-          setting = settingByte - 35,
-          value = valueByte - 35,
-        })
+        local setting = settingByte - 35
+        local valueChunk = valueByte - 35
+        if setting == lastSetting and lastInfo then
+          placeValue = placeValue * 90
+          lastInfo.value = lastInfo.value + (valueChunk * placeValue)
+        else
+          lastInfo = {
+            setting = setting,
+            value = valueChunk,
+          }
+          table.insert(settings, lastInfo)
+          lastSetting = setting
+          placeValue = 1
+        end
       end
     end
     return settings
