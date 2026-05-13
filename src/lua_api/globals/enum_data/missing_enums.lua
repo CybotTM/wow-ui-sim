@@ -4890,9 +4890,9 @@ end
 
 if not Enum.EditModeAccountSettingMeta then
   Enum.EditModeAccountSettingMeta = {
-    MaxValue = 32,
+    MaxValue = 33,
     MinValue = 0,
-    NumValues = 33,
+    NumValues = 34,
   }
 end
 
@@ -5066,9 +5066,9 @@ end
 
 if not Enum.EditModeStatusTrackingBarSettingMeta then
   Enum.EditModeStatusTrackingBarSettingMeta = {
-    MaxValue = 2,
+    MaxValue = 3,
     MinValue = 0,
-    NumValues = 3,
+    NumValues = 4,
   }
 end
 
@@ -5098,9 +5098,9 @@ end
 
 if not Enum.EditModeUnitFrameSettingMeta then
   Enum.EditModeUnitFrameSettingMeta = {
-    MaxValue = 20,
+    MaxValue = 21,
     MinValue = 0,
-    NumValues = 21,
+    NumValues = 22,
   }
 end
 
