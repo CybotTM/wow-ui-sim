@@ -354,6 +354,18 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                 and actionButtons[1] ~= nil
                 and actionButtons.GetObjectType == nil
 
+            local function mark_action_bar_layout_dirty()
+                if systemFrame.MarkGridLayoutDirty then
+                    systemFrame:MarkGridLayoutDirty()
+                end
+                if systemFrame.MarkDividersDirty then
+                    systemFrame:MarkDividersDirty()
+                end
+                if systemFrame.MarkBarArtDirty then
+                    systemFrame:MarkBarArtDirty()
+                end
+            end
+
             local function apply_action_bar_setting(settingInfo)
                 local actionBarSettings = Enum and Enum.EditModeActionBarSetting
                 if not actionBarSettings then
@@ -368,67 +380,53 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                     systemFrame.isHorizontal = value == Enum.ActionBarOrientation.Horizontal
                     systemFrame.addButtonsToRight = true
                     systemFrame.addButtonsToTop = systemFrame.isHorizontal
-                    if systemFrame.MarkGridLayoutDirty then
-                        systemFrame:MarkGridLayoutDirty()
-                    end
-                    if systemFrame.MarkDividersDirty then
-                        systemFrame:MarkDividersDirty()
-                    end
-                    if systemFrame.MarkBarArtDirty then
-                        systemFrame:MarkBarArtDirty()
-                    end
+                    mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.NumRows then
                     systemFrame.numRows = value
-                    if systemFrame.MarkGridLayoutDirty then
-                        systemFrame:MarkGridLayoutDirty()
-                    end
-                    if systemFrame.MarkDividersDirty then
-                        systemFrame:MarkDividersDirty()
-                    end
-                    if systemFrame.MarkBarArtDirty then
-                        systemFrame:MarkBarArtDirty()
-                    end
+                    mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.NumIcons then
                     systemFrame.numButtonsShowable = value
-                    if systemFrame.MarkGridLayoutDirty then
-                        systemFrame:MarkGridLayoutDirty()
+                    if hasActionButtons and systemFrame.UpdateShownButtons then
+                        pcall(systemFrame.UpdateShownButtons, systemFrame)
                     end
-                    if systemFrame.MarkDividersDirty then
-                        systemFrame:MarkDividersDirty()
-                    end
+                    mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.IconSize then
                     systemFrame.iconSize = value
-                    if systemFrame.MarkGridLayoutDirty then
-                        systemFrame:MarkGridLayoutDirty()
+                    local iconScale = value / 100
+                    if systemFrame.EditModeSetScale then
+                        pcall(systemFrame.EditModeSetScale, systemFrame, iconScale)
                     end
-                    if systemFrame.MarkDividersDirty then
-                        systemFrame:MarkDividersDirty()
+                    if hasActionButtons then
+                        for _, actionButton in pairs(actionButtons) do
+                            local container = actionButton and actionButton.container
+                            if container and container.SetScale then
+                                pcall(container.SetScale, container, iconScale)
+                            end
+                        end
                     end
-                    if systemFrame.MarkBarArtDirty then
-                        systemFrame:MarkBarArtDirty()
+                    if systemFrame.Layout then
+                        pcall(systemFrame.Layout, systemFrame)
                     end
+                    if emm.UpdateActionBarLayout then
+                        pcall(emm.UpdateActionBarLayout, emm, systemFrame)
+                    end
+                    mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.IconPadding then
                     systemFrame.buttonPadding = value
-                    if systemFrame.MarkGridLayoutDirty then
-                        systemFrame:MarkGridLayoutDirty()
-                    end
-                    if systemFrame.MarkDividersDirty then
-                        systemFrame:MarkDividersDirty()
-                    end
-                    if systemFrame.MarkBarArtDirty then
-                        systemFrame:MarkBarArtDirty()
-                    end
+                    mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.HideBarArt then
                     systemFrame.hideBarArt = valueBool
                     if systemFrame.BorderArt then
                         systemFrame.BorderArt:SetShown(not systemFrame.hideBarArt)
                     end
-                    if systemFrame.MarkDividersDirty then
-                        systemFrame:MarkDividersDirty()
+                    if hasActionButtons then
+                        for _, actionButton in pairs(actionButtons) do
+                            if actionButton and actionButton.UpdateButtonArt then
+                                pcall(actionButton.UpdateButtonArt, actionButton)
+                            end
+                        end
                     end
-                    if systemFrame.MarkBarArtDirty then
-                        systemFrame:MarkBarArtDirty()
-                    end
+                    mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.HideBarScrolling then
                     if systemFrame.ActionBarPageNumber then
                         systemFrame.ActionBarPageNumber:SetShown(not valueBool)
@@ -447,8 +445,24 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                     else
                         systemFrame.visibility = "Always"
                     end
+                    if systemFrame.UpdateVisibility then
+                        pcall(systemFrame.UpdateVisibility, systemFrame)
+                    end
                 elseif setting == actionBarSettings.AlwaysShowButtons then
                     systemFrame.alwaysShowButtons = valueBool
+                    if hasActionButtons
+                        and systemFrame.SetShowGrid
+                        and ACTION_BUTTON_SHOW_GRID_REASON_CVAR then
+                        pcall(
+                            systemFrame.SetShowGrid,
+                            systemFrame,
+                            valueBool,
+                            ACTION_BUTTON_SHOW_GRID_REASON_CVAR
+                        )
+                    end
+                    if systemFrame.MarkDividersDirty then
+                        systemFrame:MarkDividersDirty()
+                    end
                 end
             end
 

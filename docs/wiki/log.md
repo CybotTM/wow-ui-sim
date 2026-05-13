@@ -30,6 +30,11 @@ setting. Sparse saved layouts now merge missing defaults from Blizzard's modern
 preset map, and the action-bar bootstrap path applies those values without
 calling handlers that require an initialized `actionButtons` Lua array.
 
+Follow-up: documented broader action-bar saved setting replay. The startup
+fast path now applies safe runtime effects for saved visibility, icon
+count/scale/padding, page number visibility, show-grid state, and button art
+without repacking saved anchors.
+
 Follow-up: documented cast-bar lock fidelity. Startup no longer overwrites the
 active saved profile's `LockToPlayerFrame` / `CastBarUnderneath` settings.
 

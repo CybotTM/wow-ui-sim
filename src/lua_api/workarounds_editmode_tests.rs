@@ -608,16 +608,34 @@ fn apply_system_anchors_skips_self_relative_saved_anchor() {
     );
 }
 
-#[test]
-fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.exec(
-        r#"
+const ACTION_BAR_PROFILE_REPLAY_STUBS: &str = r#"
         Enum = {
             EditModeSystem = {
                 ActionBar = 0,
             },
+            EditModeActionBarSetting = {
+                Orientation = 0,
+                NumRows = 1,
+                NumIcons = 2,
+                IconSize = 3,
+                IconPadding = 4,
+                VisibleSetting = 5,
+                HideBarArt = 6,
+                HideBarScrolling = 8,
+                AlwaysShowButtons = 9,
+            },
+            ActionBarOrientation = {
+                Horizontal = 0,
+                Vertical = 1,
+            },
+            ActionBarVisibleSetting = {
+                Always = 0,
+                InCombat = 1,
+                OutOfCombat = 2,
+                Hidden = 3,
+            },
         }
+        ACTION_BUTTON_SHOW_GRID_REASON_CVAR = 4
 
         UIParent = { name = "UIParent" }
         EditModeUtil = {
@@ -625,12 +643,28 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
             IsRightAnchoredActionBar = function() return false end,
         }
 
+        local actionButton = {
+            container = {},
+        }
+        function actionButton.container:SetScale(value)
+            self.scale = value
+        end
+        function actionButton:UpdateButtonArt()
+            self.buttonArtUpdated = true
+        end
+        function actionButton:SetShowGrid(showGrid, reason)
+            self.showGrid = showGrid
+            self.showGridReason = reason
+        end
+
         local frame = {
             system = Enum.EditModeSystem.ActionBar,
             systemIndex = 1,
             name = "MainActionBar",
             anchorCalls = 0,
-            actionButtons = { {} },
+            actionButtons = { actionButton },
+            ActionBarPageNumber = {},
+            BorderArt = {},
         }
 
         function frame:GetName()
@@ -649,8 +683,48 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
             self.anchorCalls = self.anchorCalls + 1
         end
 
+        function frame:EditModeSetScale(value)
+            self.editModeScale = value
+        end
+
+        function frame:UpdateShownButtons()
+            self.shownButtonsUpdated = true
+        end
+
+        function frame:Layout()
+            self.layoutUpdated = true
+        end
+
+        function frame:UpdateVisibility()
+            self.visibilityUpdated = true
+        end
+
+        function frame:SetShowGrid(showGrid, reason)
+            self.showGrid = showGrid
+            self.showGridReason = reason
+            for _, button in pairs(self.actionButtons) do
+                button:SetShowGrid(showGrid, reason)
+            end
+        end
+
         function frame:RefreshGridLayout()
             self.gridRefreshed = true
+        end
+
+        function frame:RefreshDividers()
+            self.dividersRefreshed = true
+        end
+
+        function frame:RefreshBarArt()
+            self.barArtRefreshed = true
+        end
+
+        function frame.BorderArt:SetShown(value)
+            self.shown = value
+        end
+
+        function frame.ActionBarPageNumber:SetShown(value)
+            self.shown = value
         end
 
         EditModeManagerFrame = {
@@ -661,6 +735,10 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
 
         function EditModeManagerFrame:InitSystemAnchors()
             self.initSystemAnchorsCalled = true
+        end
+
+        function EditModeManagerFrame:UpdateActionBarLayout(systemFrame)
+            self.actionBarLayoutUpdated = systemFrame == frame
         end
 
         function EditModeManagerFrame:GetActiveLayoutSystemInfo()
@@ -675,25 +753,92 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
                     offsetX = 208.2,
                     offsetY = 99.7,
                 },
-                settings = {},
+                settings = {
+                    { setting = Enum.EditModeActionBarSetting.Orientation, value = Enum.ActionBarOrientation.Vertical },
+                    { setting = Enum.EditModeActionBarSetting.NumRows, value = 2 },
+                    { setting = Enum.EditModeActionBarSetting.NumIcons, value = 8 },
+                    { setting = Enum.EditModeActionBarSetting.IconSize, value = 80 },
+                    { setting = Enum.EditModeActionBarSetting.IconPadding, value = 6 },
+                    { setting = Enum.EditModeActionBarSetting.VisibleSetting, value = Enum.ActionBarVisibleSetting.Hidden },
+                    { setting = Enum.EditModeActionBarSetting.HideBarArt, value = 1 },
+                    { setting = Enum.EditModeActionBarSetting.HideBarScrolling, value = 1 },
+                    { setting = Enum.EditModeActionBarSetting.AlwaysShowButtons, value = 1 },
+                },
             }
         end
 
         function EditModeManagerFrame:UpdateActionBarPositions()
             error("saved action bar anchors should not be repacked")
         end
-        "#,
-    )
-    .expect("install action bar stubs");
+"#;
 
+fn install_action_bar_profile_replay_stubs(env: &WowLuaEnv) {
+    env.exec(ACTION_BAR_PROFILE_REPLAY_STUBS)
+        .expect("install action bar stubs");
+}
+
+#[test]
+fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    install_action_bar_profile_replay_stubs(&env);
     env.exec(APPLY_SYSTEM_ANCHORS_LUA)
         .expect("apply action bar anchors");
 
-    let (anchor_calls, grid_refreshed): (i32, bool) = env
+    let (
+        anchor_calls,
+        grid_refreshed,
+        num_rows,
+        num_buttons,
+        button_padding,
+        edit_mode_scale,
+        button_scale,
+        visibility,
+        visibility_updated,
+        border_art_shown,
+        page_number_shown,
+        button_art_updated,
+        show_grid,
+        show_grid_reason,
+        layout_updated,
+        action_bar_layout_updated,
+    ): (
+        i32,
+        bool,
+        i32,
+        i32,
+        i32,
+        f64,
+        f64,
+        String,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        i32,
+        bool,
+        bool,
+    ) = env
         .eval(
             r#"
             local frame = EditModeManagerFrame.registeredSystemFrames[1]
-            return frame.anchorCalls, frame.gridRefreshed
+            local button = frame.actionButtons[1]
+            return frame.anchorCalls,
+                frame.gridRefreshed,
+                frame.numRows,
+                frame.numButtonsShowable,
+                frame.buttonPadding,
+                frame.editModeScale,
+                button.container.scale,
+                frame.visibility,
+                frame.visibilityUpdated,
+                frame.BorderArt.shown,
+                frame.ActionBarPageNumber.shown,
+                button.buttonArtUpdated,
+                button.showGrid,
+                button.showGridReason,
+                frame.layoutUpdated,
+                EditModeManagerFrame.actionBarLayoutUpdated
             "#,
         )
         .expect("read action bar state");
@@ -703,6 +848,23 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
         grid_refreshed,
         "action bar runtime layout should still refresh"
     );
+    assert_eq!(num_rows, 2);
+    assert_eq!(num_buttons, 8);
+    assert_eq!(button_padding, 6);
+    assert_eq!(edit_mode_scale, 0.8);
+    assert_eq!(button_scale, 0.8);
+    assert_eq!(visibility, "Hidden");
+    assert!(visibility_updated);
+    assert!(
+        !border_art_shown,
+        "HideBarArt should hide saved main-bar side art"
+    );
+    assert!(!page_number_shown);
+    assert!(button_art_updated);
+    assert!(show_grid);
+    assert_eq!(show_grid_reason, 4);
+    assert!(layout_updated);
+    assert!(action_bar_layout_updated);
 }
 
 #[test]

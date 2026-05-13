@@ -80,6 +80,13 @@ action-bar fast path applies those fields directly instead of calling Blizzard
 handlers that iterate `self.actionButtons` before the simulator has a real Lua
 button array there.
 
+Follow-up: the action-bar fast path now replays the safe runtime side effects
+for saved profile settings once a real Lua `actionButtons` array exists:
+visibility updates, show-grid state, icon count, icon scale, padding, page
+number visibility, and button art refresh. This keeps Widescreen action-bar
+options from being merely preserved in `systemInfo` without changing the visible
+bar state.
+
 Follow-up: startup no longer forces the active profile's cast bar to lock under
 the player frame. Saved profiles can intentionally set
 `Enum.EditModeCastBarSetting.LockToPlayerFrame = 0` and
