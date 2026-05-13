@@ -1,0 +1,149 @@
+# Rust Integration Test Target Size Brief
+
+Status: fixed in `02f1d5a6 Consolidate integration test harness`
+
+## Root Cause
+
+The large fresh `target/` directories are caused by Rust integration-test target
+fan-out, not by incremental compilation or stale build accumulation.
+
+Cargo treats every top-level `tests/*.rs` file as a separate integration-test
+crate. This repository currently exposes hundreds of those top-level test
+targets, so a full `cargo test` or `cargo test --no-run` links hundreds of
+standalone executables. Each executable pulls in the simulator library plus the
+large GUI, CASC, rendering, and Lua/runtime dependency graph.
+
+Observed in `../wow-ui-sim/.claude/worktrees/patient-swooping-pebble`:
+
+- `target/debug`: about 201 GiB
+- `target/debug/deps`: about 203 GiB
+- `target/debug/incremental`: 0 bytes
+- extensionless ELF executables in `target/debug/deps`: 925
+- total size of those executables: about 200.6 GiB
+- average executable size: about 222 MiB
+- Cargo metadata test targets for `wow-ui-sim`: 936
+- built executable names matching Cargo test targets: 916
+
+So the dominant cost is roughly:
+
+```text
+hundreds of integration-test binaries * ~220 MiB each = ~200 GiB target
+```
+
+## Why This Happens
+
+This is normal Cargo behavior, but it is the wrong test layout at this scale.
+
+The current shape is effectively:
+
+```text
+tests/a.rs
+tests/b.rs
+tests/c.rs
+...
+```
+
+Cargo links `a`, `b`, `c`, and every other top-level file as separate binaries.
+That is fine for a small number of integration tests. With hundreds of files it
+turns linking and disk usage into the main cost.
+
+Debug information is a secondary multiplier. One representative test binary was
+about 225 MiB and became about 113 MiB after stripping debug sections, so debug
+data accounts for a large fraction of each binary. Even stripped, however,
+hundreds of standalone binaries would still consume excessive space.
+
+## Preferred Test Layout
+
+Current implementation:
+
+- `Cargo.toml` sets `autotests = false`.
+- `Cargo.toml` declares the custom `frame_positions` target and one
+  consolidated `integration` test harness.
+- `tests/integration.rs` includes a build-script-generated module list.
+- `build.rs` discovers top-level `tests/*.rs` files and emits module
+  declarations into `OUT_DIR/integration_tests.rs`.
+- Existing test files remain in place, but Cargo no longer treats each one as a
+  separate linked test executable.
+
+Verified after the change:
+
+- `cargo metadata --no-deps --format-version 1` reports 2 test targets:
+  `frame_positions` and `integration`.
+- `cargo test --test integration --no-run` links one integration test binary.
+- Removing obsolete linked test executables reduced the local `target/` from
+  37 GiB to about 4 GiB.
+
+Consolidate top-level integration tests into a small number of harness crates,
+with the existing tests moved under module directories.
+
+Example:
+
+```text
+tests/
+  integration.rs
+  integration/
+    lua_api/
+    layout/
+    rendering/
+    casc/
+    blizzard_ui/
+```
+
+`tests/integration.rs` can declare:
+
+```rust
+mod integration;
+```
+
+Rust's test harness will still discover `#[test]` functions inside those
+modules, but Cargo links one integration-test binary instead of one binary per
+file.
+
+A practical split for this repository is probably a small set of harnesses, not
+one file per test and not necessarily one giant harness:
+
+- `tests/lua_api.rs`
+- `tests/rendering.rs`
+- `tests/layout.rs`
+- `tests/casc.rs`
+- `tests/blizzard_ui.rs`
+- `tests/perf.rs` for expensive or ignored performance tests
+- one harness per client-profile lane when feature gating requires it
+
+The first priority is reducing hundreds of top-level test crates to single-digit
+or low-double-digit harness crates.
+
+## Worktree Target Strategy
+
+Per-worktree `target/` directories avoid Cargo lock contention but multiply this
+problem by every active agent worktree. A single shared `CARGO_TARGET_DIR` saves
+disk, but parallel agents can block on Cargo's target lock.
+
+The workable compromise is a small pool of shared target directories, assigned
+per agent or per task lane:
+
+```text
+/syncthing/Sync/Projects/wow/.cargo-targets/wow-ui-sim-a
+/syncthing/Sync/Projects/wow/.cargo-targets/wow-ui-sim-b
+/syncthing/Sync/Projects/wow/.cargo-targets/wow-ui-sim-c
+/syncthing/Sync/Projects/wow/.cargo-targets/wow-ui-sim-d
+```
+
+That caps disk growth while reducing lock contention compared with one global
+target directory. It is still a mitigation. The root fix is consolidating the
+integration-test crates.
+
+## Command Guidance
+
+Avoid broad full-target test builds in disposable worktrees unless they are
+really needed:
+
+```bash
+cargo test specific_test_name
+cargo test --test lua_api specific_test_name
+cargo build --bin wow-sim
+```
+
+Avoid treating `target/debug/incremental` as the default suspect for large fresh
+targets in this repository. Check `target/debug/deps` and count linked test
+executables first.
