@@ -175,6 +175,61 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
 }
 
 #[test]
+fn edit_mode_account_cache_preserves_all_legacy_values_and_fills_new_defaults() {
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let wtf_path = temp.path().join("WTF");
+    let account_path = wtf_path.join("Account/TestAccount");
+    let character_path = account_path.join("Test Realm/Testchar");
+    std::fs::create_dir_all(&character_path).expect("create WTF dirs");
+    std::fs::write(
+        account_path.join("edit-mode-cache-account.txt"),
+        concat!(
+            "0 29 ",
+            "1 20 1 1 0 0 0 1 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1",
+            "\0"
+        ),
+    )
+    .expect("write account edit mode cache");
+    std::fs::write(character_path.join("edit-mode-cache-character.txt"), "1\0")
+        .expect("write character edit mode cache");
+
+    let env = WowLuaEnv::new().expect("create Lua environment");
+    let mut saved_vars = SavedVariablesManager::with_storage_dir(temp.path().join("local-sv"));
+    saved_vars.set_wtf_config(WtfConfig::new(
+        &wtf_path,
+        "TestAccount",
+        "Test Realm",
+        "Testchar",
+    ));
+    env.loader_env()
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1))
+        .expect("load edit mode cache");
+
+    let saved_values: String = env
+        .eval(
+            r#"
+            local settingMap = {}
+            for _, settingInfo in ipairs(C_EditMode.GetAccountSettings()) do
+                settingMap[settingInfo.setting] = settingInfo.value
+            end
+
+            local values = {}
+            for setting = Enum.EditModeAccountSetting.ShowGrid, Enum.EditModeAccountSetting.ShowTotemActionBar do
+                table.insert(values, tostring(setting) .. "=" .. tostring(settingMap[setting]))
+            end
+            return table.concat(values, ",")
+            "#,
+        )
+        .expect("read account settings");
+
+    assert_eq!(
+        saved_values,
+        "0=1,1=20,2=1,3=1,4=0,5=0,6=0,7=1,8=0,9=1,10=0,11=0,12=1,13=0,14=0,15=0,16=0,17=0,18=0,19=0,20=0,21=0,22=0,23=1,24=0,25=0,26=0,27=0,28=1,29=1,30=1,31=1,32=1,33=1",
+        "legacy account cache values should be preserved and newer profile options should be default-filled"
+    );
+}
+
+#[test]
 fn edit_mode_wtf_cache_normalizes_indexed_system_rows() {
     let temp = tempfile::tempdir().expect("create temp dir");
     let wtf_path = temp.path().join("WTF");
