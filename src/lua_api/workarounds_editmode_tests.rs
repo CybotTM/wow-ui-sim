@@ -1302,3 +1302,284 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
         "nil-index singleton settings should be applied after seeding"
     );
 }
+
+#[test]
+fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                CooldownViewer = 20,
+            },
+            EditModeCooldownViewerSetting = {
+                Orientation = 0,
+                IconLimit = 1,
+                IconDirection = 2,
+                IconSize = 3,
+                IconPadding = 4,
+                Opacity = 5,
+                VisibleSetting = 6,
+                BarContent = 7,
+                HideWhenInactive = 8,
+                ShowTimer = 9,
+                ShowTooltips = 10,
+                BarWidthScale = 11,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local setting = Enum.EditModeCooldownViewerSetting
+        local layoutRows = {
+            [0] = {
+                system = Enum.EditModeSystem.CooldownViewer,
+                systemIndex = 0,
+                isInDefaultPosition = false,
+                anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 0, offsetY = 0 },
+                settings = {
+                    { setting = setting.Orientation, value = 0 },
+                    { setting = setting.IconLimit, value = 12 },
+                    { setting = setting.IconDirection, value = 1 },
+                    { setting = setting.IconSize, value = 5 },
+                    { setting = setting.IconPadding, value = 2 },
+                    { setting = setting.Opacity, value = 100 },
+                    { setting = setting.VisibleSetting, value = 0 },
+                    { setting = setting.HideWhenInactive, value = 1 },
+                    { setting = setting.ShowTimer, value = 1 },
+                    { setting = setting.ShowTooltips, value = 1 },
+                },
+            },
+            [1] = {
+                system = Enum.EditModeSystem.CooldownViewer,
+                systemIndex = 1,
+                isInDefaultPosition = false,
+                anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 10, offsetY = 0 },
+                settings = {
+                    { setting = setting.Orientation, value = 0 },
+                    { setting = setting.IconLimit, value = 7 },
+                    { setting = setting.IconDirection, value = 1 },
+                    { setting = setting.IconSize, value = 5 },
+                    { setting = setting.IconPadding, value = 2 },
+                    { setting = setting.Opacity, value = 100 },
+                    { setting = setting.VisibleSetting, value = 0 },
+                    { setting = setting.HideWhenInactive, value = 1 },
+                    { setting = setting.ShowTimer, value = 1 },
+                    { setting = setting.ShowTooltips, value = 1 },
+                },
+            },
+            [2] = {
+                system = Enum.EditModeSystem.CooldownViewer,
+                systemIndex = 2,
+                isInDefaultPosition = false,
+                anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 20, offsetY = 0 },
+                settings = {
+                    { setting = setting.Orientation, value = 0 },
+                    { setting = setting.IconLimit, value = 1 },
+                    { setting = setting.IconDirection, value = 1 },
+                    { setting = setting.IconSize, value = 5 },
+                    { setting = setting.IconPadding, value = 5 },
+                    { setting = setting.Opacity, value = 100 },
+                    { setting = setting.VisibleSetting, value = 0 },
+                    { setting = setting.HideWhenInactive, value = 1 },
+                    { setting = setting.ShowTimer, value = 1 },
+                    { setting = setting.ShowTooltips, value = 1 },
+                },
+            },
+            [3] = {
+                system = Enum.EditModeSystem.CooldownViewer,
+                systemIndex = 3,
+                isInDefaultPosition = false,
+                anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 30, offsetY = 0 },
+                settings = {
+                    { setting = setting.Orientation, value = 1 },
+                    { setting = setting.IconLimit, value = 1 },
+                    { setting = setting.IconDirection, value = 0 },
+                    { setting = setting.IconSize, value = 5 },
+                    { setting = setting.IconPadding, value = 5 },
+                    { setting = setting.Opacity, value = 100 },
+                    { setting = setting.VisibleSetting, value = 0 },
+                    { setting = setting.BarContent, value = 0 },
+                    { setting = setting.HideWhenInactive, value = 1 },
+                    { setting = setting.ShowTimer, value = 1 },
+                    { setting = setting.ShowTooltips, value = 1 },
+                },
+            },
+        }
+
+        local function copySettings(settings)
+            local copied = {}
+            for index, settingInfo in ipairs(settings or {}) do
+                copied[index] = { setting = settingInfo.setting, value = settingInfo.value }
+            end
+            return copied
+        end
+
+        local function copySystemInfo(row)
+            return {
+                system = row.system,
+                systemIndex = row.systemIndex,
+                isInDefaultPosition = row.isInDefaultPosition,
+                anchorInfo = row.anchorInfo,
+                settings = copySettings(row.settings),
+            }
+        end
+
+        local function settingValue(systemInfo, settingId)
+            for _, settingInfo in ipairs(systemInfo.settings or {}) do
+                if settingInfo.setting == settingId then
+                    return settingInfo.value
+                end
+            end
+            return nil
+        end
+
+        local function newCooldownViewer(index)
+            local frame = {
+                system = Enum.EditModeSystem.CooldownViewer,
+                systemIndex = index,
+                name = "CooldownViewer" .. index,
+            }
+
+            function frame:GetName()
+                return self.name
+            end
+
+            function frame:SetHasActiveChanges(value)
+                self.hasActiveChanges = value
+            end
+
+            function frame:UpdateSettingMap()
+                self.settingMapUpdated = true
+            end
+
+            function frame:UpdateSystem(systemInfo)
+                self.updateSystemCalls = (self.updateSystemCalls or 0) + 1
+                self.appliedSettings = {}
+                for _, settingInfo in ipairs(systemInfo.settings or {}) do
+                    self.appliedSettings[settingInfo.setting] = settingInfo.value
+                end
+                self.orientation = settingValue(systemInfo, setting.Orientation)
+                self.iconLimit = settingValue(systemInfo, setting.IconLimit)
+                self.iconDirection = settingValue(systemInfo, setting.IconDirection)
+                self.iconSize = settingValue(systemInfo, setting.IconSize)
+                self.iconPadding = settingValue(systemInfo, setting.IconPadding)
+                self.opacity = settingValue(systemInfo, setting.Opacity)
+                self.visibleSetting = settingValue(systemInfo, setting.VisibleSetting)
+                self.barContent = settingValue(systemInfo, setting.BarContent)
+                self.hideWhenInactive = settingValue(systemInfo, setting.HideWhenInactive)
+                self.showTimer = settingValue(systemInfo, setting.ShowTimer)
+                self.showTooltips = settingValue(systemInfo, setting.ShowTooltips)
+                self.barWidthScale = settingValue(systemInfo, setting.BarWidthScale)
+            end
+
+            return frame
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = {
+                newCooldownViewer(0),
+                newCooldownViewer(1),
+                newCooldownViewer(2),
+                newCooldownViewer(3),
+            },
+            requestedIndices = {},
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(system, systemIndex)
+            table.insert(self.requestedIndices, systemIndex)
+            if system ~= Enum.EditModeSystem.CooldownViewer then
+                return nil
+            end
+            local row = layoutRows[systemIndex]
+            if not row then
+                return nil
+            end
+            return copySystemInfo(row)
+        end
+
+        function EditModeManagerFrame:UpdateSystem(systemFrame)
+            local systemInfo = systemFrame.systemInfo or self:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex)
+            systemFrame:UpdateSystem(systemInfo)
+        end
+        "#,
+    )
+    .expect("install cooldown viewer stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply cooldown viewer rows");
+
+    let (
+        requested_indices,
+        calls_0,
+        calls_1,
+        calls_2,
+        calls_3,
+        icon_limit_0,
+        icon_limit_1,
+        icon_padding_2,
+        orientation_3,
+        bar_content_3,
+        show_timer_3,
+        bar_width_scale_3,
+    ): (
+        String,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        Option<i32>,
+    ) = env
+        .eval(
+            r#"
+            local frames = EditModeManagerFrame.registeredSystemFrames
+            return table.concat(EditModeManagerFrame.requestedIndices, ","),
+                frames[1].updateSystemCalls,
+                frames[2].updateSystemCalls,
+                frames[3].updateSystemCalls,
+                frames[4].updateSystemCalls,
+                frames[1].iconLimit,
+                frames[2].iconLimit,
+                frames[3].iconPadding,
+                frames[4].orientation,
+                frames[4].barContent,
+                frames[4].showTimer,
+                frames[4].barWidthScale
+            "#,
+        )
+        .expect("read cooldown viewer state");
+
+    assert_eq!(
+        requested_indices, "0,1,2,3",
+        "each CooldownViewer systemIndex should request its matching saved row"
+    );
+    assert_eq!(calls_0, 1);
+    assert_eq!(calls_1, 1);
+    assert_eq!(calls_2, 1);
+    assert_eq!(calls_3, 1);
+    assert_eq!(icon_limit_0, 12);
+    assert_eq!(icon_limit_1, 7);
+    assert_eq!(icon_padding_2, 5);
+    assert_eq!(orientation_3, 1);
+    assert_eq!(bar_content_3, 0);
+    assert_eq!(show_timer_3, 1);
+    assert_eq!(
+        bar_width_scale_3, None,
+        "active Widescreen row should not invent absent BarWidthScale"
+    );
+}
