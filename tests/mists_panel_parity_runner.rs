@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::process::Command;
 
-const MISTS_PANEL_ROW_COUNT: &str = "31 panel rows validated";
+const MISTS_PANEL_ROW_COUNT: &str = "33 panel rows validated";
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -200,6 +200,21 @@ fn lod_audit_documents_every_mists_load_on_demand_addon() {
     assert!(
         missing.is_empty(),
         "Mists LoD audit is missing addon rows: {missing:?}"
+    );
+}
+
+#[test]
+fn raid_and_arena_lod_addons_are_panel_parity_rows() {
+    let audit_path = repo_root().join("docs/baselines/mists-lod-audit.md");
+    let audit = std::fs::read_to_string(&audit_path).expect("failed to read Mists LoD audit");
+
+    assert!(
+        audit.contains("| Blizzard_ArenaUI | Added |"),
+        "Blizzard_ArenaUI should be promoted into the panel parity matrix"
+    );
+    assert!(
+        audit.contains("| Blizzard_RaidUI | Added |"),
+        "Blizzard_RaidUI should be promoted into the panel parity matrix"
     );
 }
 

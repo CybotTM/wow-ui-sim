@@ -97,6 +97,8 @@ add_panel "Friends, Who, Guild, Communities, Club Finder" "social" "FriendsFrame
 add_panel "Inspect and guild control LoD panels" "inspect-guild-control" "InspectFrame" 'LoadAddOn("Blizzard_GuildControlUI"); ShowUIPanel(GuildControlUI); assertRenderableRoot("GuildControlUI"); LoadAddOn("Blizzard_InspectUI"); InspectFrame_Show("player"); FireEvent("INSPECT_READY", UnitGUID("player"))'
 add_panel "PvP UI: HonorFrame, BG queue, Conquest" "pvp" "PVPQueueFrame" 'LoadAddOn("Blizzard_PVPUI"); PVEFrame_ShowFrame("PVPQueueFrame", "HonorQueueFrame")'
 add_panel "LFG, LFR, Raid Browser" "lfg-lfr" "PVEFrame" 'LoadAddOn("Blizzard_PVEUI"); PVEFrame:Show(); GroupFinderFrame:Show()'
+add_panel "Raid unit frames LoD panel" "raid-unit-frames" "RaidParentFrame" 'A_Admin.SetPartySize(6); A_Admin.SetInstanceInfo("Vault of Archavon", "raid", 16, 20); for i = 1, 6 do A_Admin.SetPartyMember(i, "Raider" .. i, ((i - 1) % 11) + 1, 90) end; LoadAddOn("Blizzard_RaidUI"); RaidParentFrame:Show(); RaidParentFrame_SetView(1); RaidFrame:Show(); RaidGroupFrame_Update(); for i = 1, 8 do local group = _G["RaidGroup" .. i]; if group then group:Show() end end'
+add_panel "Arena enemy unit frames LoD panel" "arena-unit-frames" "ArenaEnemyFrame1" 'A_Admin.SetInstanceInfo("Nagrand Arena", "arena", 0, 5); LoadAddOn("Blizzard_ArenaUI"); ArenaEnemyFrames_Enable(ArenaEnemyFrames); for i = 1, 5 do local frame = _G["ArenaEnemyFrame" .. i]; if frame then ArenaEnemyFrame_SetMysteryPlayer(frame); frame:Show() end end'
 add_panel "Collections: mounts, pets, toys, heirlooms, transmog" "collections" "CollectionsJournal" 'ToggleCollectionsJournal()'
 add_panel "Pet Journal and Battle Pet UI" "pet-journal" "CollectionsJournal" 'ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_PETS)'
 add_panel "Achievements and Calendar" "achievements-calendar" "AchievementFrame" 'ToggleAchievementFrame()'
@@ -116,6 +118,7 @@ add_panel "Loot, group loot, personal loot" "loot" "LootFrame" 'A_Admin.ClearLoo
 add_panel "Game menu options" "game-menu-options" "SettingsPanel" 'ToggleGameMenu(); GameMenuButtonOptions:Click()'
 
 set_panel_signal_gate "nameplates" 3000 10 500
+set_panel_signal_gate "arena-unit-frames" 3000 10 500
 
 trim() {
     local value="$*"
@@ -156,7 +159,8 @@ validate_manifest() {
     local panel slug count=0 missing=0
     while IFS= read -r panel; do
         count=$((count + 1))
-        slug="${PANEL_SLUGS[$panel]:-}"
+        local panel_key="$panel"
+        slug="${PANEL_SLUGS[$panel_key]:-}"
         if [ -z "$slug" ]; then
             echo "ERROR: no runner case for panel row: $panel" >&2
             missing=$((missing + 1))
@@ -184,6 +188,7 @@ build_visual_metrics() {
 
 write_panel_lua() {
     local panel="$1" root="$2" lua_file="$3"
+    local panel_key="$panel"
     cat > "$lua_file" <<LUA
 local function assertRenderableRoot(name)
     local frame = _G[name]
@@ -201,7 +206,7 @@ local function assertRenderableRoot(name)
     end
 end
 
-${PANEL_OPENERS[$panel]}
+${PANEL_OPENERS[$panel_key]}
 assertRenderableRoot("$root")
 LUA
 }
@@ -244,7 +249,8 @@ verify_dump_tree() {
     fi
 
     local min_root_area max_root_area
-    min_root_area="${PANEL_MIN_ROOT_AREAS[$slug]:-$DEFAULT_MIN_ROOT_AREA}"
+    local slug_key="$slug"
+    min_root_area="${PANEL_MIN_ROOT_AREAS[$slug_key]:-$DEFAULT_MIN_ROOT_AREA}"
     max_root_area="$(max_visible_root_area "$root" "$dump_file")"
     if [ "$max_root_area" -lt "$min_root_area" ]; then
         echo "ERROR: $panel root $root bounding box area $max_root_area is below minimum $min_root_area" >&2
@@ -293,8 +299,9 @@ verify_screenshot() {
 verify_visual_signal() {
     local slug="$1" screenshot_file="$2"
     local min_foreground_pixels min_foreground_bbox_area
-    min_foreground_pixels="${PANEL_MIN_FOREGROUND_PIXELS[$slug]:-$DEFAULT_MIN_FOREGROUND_PIXELS}"
-    min_foreground_bbox_area="${PANEL_MIN_FOREGROUND_BBOX_AREAS[$slug]:-$DEFAULT_MIN_FOREGROUND_BBOX_AREA}"
+    local slug_key="$slug"
+    min_foreground_pixels="${PANEL_MIN_FOREGROUND_PIXELS[$slug_key]:-$DEFAULT_MIN_FOREGROUND_PIXELS}"
+    min_foreground_bbox_area="${PANEL_MIN_FOREGROUND_BBOX_AREAS[$slug_key]:-$DEFAULT_MIN_FOREGROUND_BBOX_AREA}"
     "$(visual_metrics_bin)" signal \
         "$slug" \
         "$screenshot_file" \
@@ -313,8 +320,9 @@ verify_visual_baseline() {
 
 run_panel() {
     local panel="$1"
-    local slug="${PANEL_SLUGS[$panel]}"
-    local root="${PANEL_ROOTS[$panel]}"
+    local panel_key="$panel"
+    local slug="${PANEL_SLUGS[$panel_key]}"
+    local root="${PANEL_ROOTS[$panel_key]}"
     local panel_dir="$OUT_DIR/$slug"
     local lua_file="$panel_dir/open.lua"
     local json_file="$panel_dir/lua-errors.json"
@@ -368,7 +376,8 @@ fi
 
 selected=0
 while IFS= read -r panel; do
-    slug="${PANEL_SLUGS[$panel]}"
+    panel_key="$panel"
+    slug="${PANEL_SLUGS[$panel_key]}"
     if matches_panel_filter "$panel" "$slug"; then
         selected=$((selected + 1))
         run_panel "$panel"

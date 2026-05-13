@@ -15,7 +15,7 @@ promoted into `docs/baselines/mists-panels.md` and
 | Blizzard_AccountSaveUI | Retail/account surface | Not a Mists in-game panel target. |
 | Blizzard_AchievementUI | Covered | `Achievements and Calendar`. |
 | Blizzard_ArchaeologyUI | Added | `Archaeology panel`. |
-| Blizzard_ArenaUI | Gap task added | Arena enemy frames load, but filtered screenshots are currently background-only and need rendering parity work before entering the panel matrix. |
+| Blizzard_ArenaUI | Added | `Arena enemy unit frames LoD panel`. |
 | Blizzard_AuctionHouseUI | Covered | `Auction House: browse, bid, post, cancel`. |
 | Blizzard_AuctionUI | Covered | Legacy auction path in `Auction House: browse, bid, post, cancel`. |
 | Blizzard_AutoCompletePopupList | Support | Autocomplete popup support, not standalone panel. |
@@ -51,7 +51,7 @@ promoted into `docs/baselines/mists-panels.md` and
 | Blizzard_MovePad | Added | `Time manager and move pad LoD utilities`. |
 | Blizzard_PVPUI | Covered | `PvP UI: HonorFrame, BG queue, Conquest`. |
 | Blizzard_QuestChoice | Added | `Quest choice LoD dialog`. |
-| Blizzard_RaidUI | Gap task added | RaidFrame loads and has a dump-tree bounding box, but filtered screenshots are currently background-only and need rendering parity work before entering the panel matrix. |
+| Blizzard_RaidUI | Added | `Raid unit frames LoD panel`. |
 | Blizzard_ReforgingUI | Added | `Item socketing, reforging, and upgrade LoD panels`. |
 | Blizzard_RemixArtifactTutorialUI | Non-Mists feature surface | Remix tutorial surface, not Pandaria panel parity. |
 | Blizzard_SharedMapDataProviders | Covered as dependency | `World map` and `Challenge mode LoD panel`. |
