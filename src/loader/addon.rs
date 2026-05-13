@@ -536,6 +536,14 @@ fn load_addon_file(
     result: &mut LoadResult,
     file: &std::path::Path,
 ) {
+    if !file.is_file() {
+        result.warnings.push(format!(
+            "{}: IO error: No such file or directory (os error 2)",
+            file.display()
+        ));
+        return;
+    }
+
     match file.extension().and_then(|ext| ext.to_str()).unwrap_or("") {
         "lua" => load_addon_lua_file(env, ctx, result, file),
         "xml" => load_addon_xml_file(env, ctx, result, file),
@@ -615,7 +623,7 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
     use crate::toc::TocFile;
 
-    use super::build_addon_context;
+    use super::{build_addon_context, load_addon_internal};
 
     #[test]
     fn blizzard_talent_ui_context_is_not_tainted() {
@@ -715,5 +723,44 @@ mod tests {
         let ctx = build_addon_context(&env.loader_env(), &toc, "TestAddon").unwrap();
 
         assert!(ctx.taint, "third-party addon code must be taint stamped");
+    }
+
+    #[test]
+    fn missing_toc_files_warn_without_calling_lua_error_handler() {
+        let env = WowLuaEnv::new().unwrap();
+        env.exec(
+            r#"
+            __missing_file_error_count = 0
+            seterrorhandler(function(message)
+                __missing_file_error_count = __missing_file_error_count + 1
+                __missing_file_last_error = message
+            end)
+            "#,
+        )
+        .unwrap();
+
+        let temp = tempfile::tempdir().unwrap();
+        let addon_dir = temp.path().join("MissingFiles");
+        std::fs::create_dir(&addon_dir).unwrap();
+        let toc = TocFile::parse(
+            &addon_dir,
+            "## Title: Missing Files\nMissing.lua\nMissing.xml\n",
+        );
+
+        let result = load_addon_internal(&env.loader_env(), &toc, None).unwrap();
+        let error_count: i32 = env.eval("return __missing_file_error_count").unwrap();
+
+        assert_eq!(error_count, 0);
+        assert_eq!(result.lua_files, 0);
+        assert_eq!(result.xml_files, 0);
+        assert_eq!(result.warnings.len(), 2);
+        assert!(
+            result
+                .warnings
+                .iter()
+                .all(|warning| warning.contains("No such file or directory")),
+            "missing TOC files should remain loader warnings: {:?}",
+            result.warnings
+        );
     }
 }
