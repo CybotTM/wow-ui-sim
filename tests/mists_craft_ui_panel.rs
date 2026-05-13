@@ -1,7 +1,7 @@
 #![cfg(feature = "client-mists")]
 
 use std::path::PathBuf;
-use std::process::Command;
+use std::process::{Command, Output};
 
 fn wow_sim_binary() -> PathBuf {
     std::env::var_os("CARGO_BIN_EXE_wow-sim")
@@ -82,7 +82,12 @@ fn mists_class_trainer_frame_load_ui_creates_renderable_class_trainer_frame() {
 
 fn assert_panel_loads_cleanly(panel_name: &str, filter_name: &str, exec_lua: &str) {
     let output_path = format!("/tmp/mists-{}-panel", panel_name.to_ascii_lowercase());
-    let output = Command::new("timeout")
+    let output = capture_panel_screenshot(filter_name, exec_lua, &output_path);
+    assert_panel_screenshot_output(panel_name, &output);
+}
+
+fn capture_panel_screenshot(filter_name: &str, exec_lua: &str, output_path: &str) -> Output {
+    Command::new("timeout")
         .arg("90")
         .arg(wow_sim_binary())
         .args([
@@ -94,11 +99,13 @@ fn assert_panel_loads_cleanly(panel_name: &str, filter_name: &str, exec_lua: &st
             "--filter",
             filter_name,
             "--output",
-            &output_path,
+            output_path,
         ])
         .output()
-        .expect("failed to run wow-sim screenshot");
+        .expect("failed to run wow-sim screenshot")
+}
 
+fn assert_panel_screenshot_output(panel_name: &str, output: &Output) {
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
 
@@ -106,14 +113,22 @@ fn assert_panel_loads_cleanly(panel_name: &str, filter_name: &str, exec_lua: &st
         output.status.success(),
         "{panel_name} screenshot failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
+    assert_panel_emitted_no_lua_errors(panel_name, &stdout, &stderr);
+    assert_panel_rendered_textures(panel_name, &stderr);
+}
+
+fn assert_panel_emitted_no_lua_errors(panel_name: &str, stdout: &str, stderr: &str) {
     assert!(
         !stdout.contains("Lua error")
             && !stderr.contains("Lua error")
             && !stderr.contains("[exec-lua] error"),
         "{panel_name} screenshot emitted Lua errors\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
+}
+
+fn assert_panel_rendered_textures(panel_name: &str, stderr: &str) {
     assert!(
-        parse_texture_request_count(&stderr).is_some_and(|count| count > 1),
+        parse_texture_request_count(stderr).is_some_and(|count| count > 1),
         "{panel_name} screenshot did not render panel textures\nstderr:\n{stderr}"
     );
 }
