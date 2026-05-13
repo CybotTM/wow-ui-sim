@@ -29,6 +29,10 @@ pub(crate) fn refresh_auto_text_height_after_width_change(state: &mut LuaState, 
     text::refresh_auto_text_height_after_width_change(state, id);
 }
 
+pub(crate) fn refresh_auto_text_width_after_zero_width(state: &mut LuaState, id: u64) {
+    text::update_auto_text_width(state, id);
+}
+
 pub(crate) fn get_text_num_lines(state: &mut LuaState) -> LuaResult<u32> {
     text::get_num_lines(state)
 }

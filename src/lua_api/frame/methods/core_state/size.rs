@@ -7,7 +7,9 @@ use super::helpers::{
 use crate::lua_api::frame::methods::methods_helpers::{
     can_change_protected_state_for, emit_addon_action_blocked,
 };
-use crate::lua_api::frame::methods::text_attribute_event::refresh_auto_text_height_after_width_change;
+use crate::lua_api::frame::methods::text_attribute_event::{
+    refresh_auto_text_height_after_width_change, refresh_auto_text_width_after_zero_width,
+};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, frame_ref, table_get_static,
 };
@@ -92,11 +94,14 @@ pub fn set_width(state: &mut LuaState) -> LuaResult<u32> {
         if current.width_is_text_auto {
             clear_auto_width_flag(&mut sim, id);
         }
+        drop(sim);
+        refresh_auto_text_width_after_zero_width(state, id);
         return Ok(0);
     }
 
     apply_explicit_width(&mut sim, id, width);
     drop(sim);
+    refresh_auto_text_width_after_zero_width(state, id);
     mark_nearest_layout_parent_dirty(state, id);
     refresh_auto_text_height_after_width_change(state, id);
     super::super::widgets::refresh_scroll_frames_for_resized_frame(state, id)?;

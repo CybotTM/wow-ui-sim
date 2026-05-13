@@ -275,7 +275,7 @@ pub(crate) fn refresh_auto_text_height_after_width_change(state: &mut LuaState, 
     }
 }
 
-fn update_auto_text_width(state: &mut LuaState, id: u64) {
+pub(crate) fn update_auto_text_width(state: &mut LuaState, id: u64) {
     if apply_anchor_pinned_width(state, id) {
         return;
     }
@@ -284,9 +284,10 @@ fn update_auto_text_width(state: &mut LuaState, id: u64) {
         let Ok(sim) = borrow_state(state) else {
             return;
         };
-        sim.widgets
-            .get(id)
-            .is_some_and(|frame| frame.width <= 0.0 || frame.width_is_text_auto)
+        sim.widgets.get(id).is_some_and(|frame| {
+            frame.widget_type == WidgetType::FontString
+                && (frame.width <= 0.0 || frame.width_is_text_auto)
+        })
     };
     if !should_update {
         return;

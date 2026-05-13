@@ -48,7 +48,7 @@ Parity hardening TODO:
 - [x] Add a retained release-proof artifact index under `docs/baselines/mists-release-proof.md` that records log paths, panel artifact directories, addon rows, and any remaining gaps from the latest full run.
 - [x] Wire the release-proof command into CI with artifact upload for logs, lua-error JSON, panel screenshots, and frame dumps once the local full proof is green.
 - [x] Write brief in docs of `GitHub Actions Mists release-proof`
-- [ ] bottom tabs e.g reputation panel have the text missing
+- [x] bottom tabs e.g reputation panel have the text missing
 - [ ] layouts problem even when no panel is open
 - [ ] fritz font is not loading? does it need the fallback by md5?
 - [ ] Run the new GitHub Actions Mists release-proof job via `workflow_dispatch`, record the run/artifact links in `docs/baselines/mists-release-proof.md`, and fix the first failing CI-only lane instead of relying on the local proof.

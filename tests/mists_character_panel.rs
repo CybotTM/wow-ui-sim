@@ -77,6 +77,56 @@ fn mists_character_panel_populates_gear_and_reputation() {
 }
 
 #[test]
+fn mists_character_bottom_tabs_size_their_text() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(env!("CARGO_BIN_EXE_wow-sim"))
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            ToggleCharacter("ReputationFrame")
+            local tabTextNames = {
+                "CharacterFrameTab1Text",
+                "CharacterFrameTab2Text",
+                "CharacterFrameTab3Text",
+                "CharacterFrameTab4Text",
+            }
+            for _, name in ipairs(tabTextNames) do
+                local fontString = _G[name]
+                if not fontString then
+                    error(name .. " is missing")
+                end
+                if type(fontString:GetText()) ~= "string" or fontString:GetText() == "" then
+                    error(name .. " has no text")
+                end
+                if fontString:GetStringWidth() <= 0 then
+                    error(name .. " has no measurable string width")
+                end
+                if fontString:GetWidth() <= 0 then
+                    error(name .. " has zero frame width")
+                end
+            end
+            "#,
+            "dump-tree",
+            "--filter",
+            "CharacterFrameTab",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+}
+
+#[test]
 fn mists_character_subpanels_drive_titles_and_equipment_sets() {
     let output = Command::new("timeout")
         .arg("90")
