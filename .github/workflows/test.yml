@@ -16,6 +16,7 @@ jobs:
   cargo-test:
     name: cargo test (retail)
     runs-on: ubuntu-latest
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.run_mists_release_proof) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,6 +38,7 @@ jobs:
   client-profile-smoke:
     name: ${{ matrix.profile }} build + lua-errors smoke
     runs-on: ubuntu-latest
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.run_mists_release_proof) }}
     strategy:
       fail-fast: false
       matrix:
@@ -101,6 +103,10 @@ jobs:
     name: Mists release proof
     runs-on: ubuntu-latest
     if: ${{ vars.RUN_MISTS_RELEASE_PROOF == '1' || (github.event_name == 'workflow_dispatch' && inputs.run_mists_release_proof) }}
+    env:
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
+      WGPU_BACKEND: vulkan
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -116,7 +122,13 @@ jobs:
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y pkg-config libasound2-dev libudev-dev jq
+          sudo apt-get install -y \
+            jq \
+            libasound2-dev \
+            libgl1-mesa-dri \
+            libudev-dev \
+            mesa-vulkan-drivers \
+            pkg-config
 
       - name: Rust cache
         uses: Swatinem/rust-cache@v2

@@ -74,6 +74,14 @@ uses `scripts/ci-mists-release-proof.sh --skip-clone` and uploads
 `target/mists-release-proof/`, including logs, base `lua-errors` JSON, panel
 screenshots, and frame dumps.
 
+First CI proof dispatch:
+`https://github.com/Osso/wow-ui-sim/actions/runs/25824999285`. The target
+`Mists release proof` job reached the base panel parity lane, uploaded
+`mists-release-proof`, and failed on the first screenshot because the GitHub
+runner lacked a headless GPU adapter. The workflow now installs Mesa software
+Vulkan and pins the release-proof job to the lavapipe ICD for screenshot
+capture.
+
 ## Remaining Gaps
 - The latest audited Mists panel workflows have no `Missing` rows in
   `docs/baselines/mists-panel-interactions.md`.
