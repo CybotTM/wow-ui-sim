@@ -34,7 +34,7 @@ Parity hardening TODO:
 - [x] Audit every Mists Blizzard LoD addon not represented in `docs/baselines/mists-panels.md` and add panel/interaction rows for any user-facing frame still outside the parity matrix.
 - [x] Fix Mists Blizzard_RaidUI and Blizzard_ArenaUI visual rendering so raid and arena unit frames can join the panel parity matrix without background-only screenshots.
 - [x] Fix Mists Blizzard_BattlefieldMap screenshot startup dispatch so BattlefieldMapFrame can enter the panel parity matrix without `SetScale(0)` errors.
-- [ ] Fix Mists Blizzard_CraftUI LoD construction so `CraftFrame_LoadUI()` creates a renderable `CraftFrame` for the panel parity matrix.
+- [x] Fix Mists Blizzard_CraftUI LoD construction so `CraftFrame_LoadUI()` creates a renderable `CraftFrame` for the panel parity matrix.
 - [ ] Implement the legacy Mists `GetTradeSkill*` backing globals so Blizzard_TradeSkillUI can render and enter the panel parity matrix.
 - [ ] Fix Mists Blizzard_TrainerUI legacy trainer-service globals and template wiring so ClassTrainerFrame can enter the panel parity matrix.
 - [ ] Add a release-profile Mists CI proof command that runs zero `lua-errors`, installed-addon matrix, panel parity, interaction audit, and visual comparison with pipefail-safe logging.

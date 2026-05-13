@@ -40,6 +40,7 @@ frame-tree dump for each panel row.
 | Pet Journal and Battle Pet UI | Pass | screenshot: `target/mists-panel-parity/pet-journal/screenshot.webp`; dump: `target/mists-panel-parity/pet-journal/dump-tree.txt` | No known current gaps. |
 | Achievements and Calendar | Pass | screenshot: `target/mists-panel-parity/achievements-calendar/screenshot.webp`; dump: `target/mists-panel-parity/achievements-calendar/dump-tree.txt` | No known current gaps. |
 | Archaeology panel | Pass | screenshot: `target/mists-panel-parity/archaeology/screenshot.webp`; dump: `target/mists-panel-parity/archaeology/dump-tree.txt` | Covers the archaeology LoD skill journal. |
+| Craft panel | Pass | screenshot: `target/mists-panel-parity/craft/screenshot.webp`; dump: `target/mists-panel-parity/craft/dump-tree.txt` | Covers the legacy CraftFrame LoD panel loaded by `CraftFrame_LoadUI()`. |
 | Encounter Journal | Pass | screenshot: `target/mists-panel-parity/encounter-journal/screenshot.webp`; dump: `target/mists-panel-parity/encounter-journal/dump-tree.txt` | No known current gaps. |
 | Challenge mode LoD panel | Pass | screenshot: `target/mists-panel-parity/challenges/screenshot.webp`; dump: `target/mists-panel-parity/challenges/dump-tree.txt` | Covers the legacy Mists challenge-mode dungeon list. |
 | Currency and Token UI | Pass | screenshot: `target/mists-panel-parity/currency-token/screenshot.webp`; dump: `target/mists-panel-parity/currency-token/dump-tree.txt` | Legacy `GetCurrencyListSize` wrapper remains verified. |

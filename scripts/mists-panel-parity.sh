@@ -104,6 +104,7 @@ add_panel "Collections: mounts, pets, toys, heirlooms, transmog" "collections" "
 add_panel "Pet Journal and Battle Pet UI" "pet-journal" "CollectionsJournal" 'ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_PETS)'
 add_panel "Achievements and Calendar" "achievements-calendar" "AchievementFrame" 'ToggleAchievementFrame()'
 add_panel "Archaeology panel" "archaeology" "ArchaeologyFrame" 'ArchaeologyFrame_LoadUI(); ShowUIPanel(ArchaeologyFrame)'
+add_panel "Craft panel" "craft" "CraftFrame" 'CraftFrame_LoadUI(); ShowUIPanel(CraftFrame)'
 add_panel "Encounter Journal" "encounter-journal" "EncounterJournal" 'ToggleEncounterJournal()'
 add_panel "Challenge mode LoD panel" "challenges" "ChallengesFrame" 'LoadAddOn("Blizzard_ChallengesUI"); LoadAddOn("Blizzard_PVEUI"); PVEFrame:Show(); ChallengesFrame:Show()'
 add_panel "Currency and Token UI" "currency-token" "TokenFrame" 'ToggleCharacter("TokenFrame")'

@@ -30,7 +30,7 @@ promoted into `docs/baselines/mists-panels.md` and
 | Blizzard_CombatLog | Covered by startup/chat surface | Chat/combat log support, not standalone panel. |
 | Blizzard_CombatText | Covered by startup surface | Floating combat text support, not standalone panel. |
 | Blizzard_Commentator | Out of Mists panel scope | Commentator/broadcast surface, not normal player UI parity. |
-| Blizzard_CraftUI | Gap task added | `CraftFrame_LoadUI()` is present, but `CraftFrame` is not created under the Mists runtime path; needs a focused LoD construction fix before entering the panel matrix. |
+| Blizzard_CraftUI | Added | `Craft panel`. |
 | Blizzard_CustomizationUI | Retail/account surface | Not a Mists in-game panel target. |
 | Blizzard_DebugTools | Support/debug | Developer/debug UI, not player panel parity. |
 | Blizzard_Dispatcher | Support | Dispatcher support, not standalone panel. |

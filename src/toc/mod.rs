@@ -332,6 +332,10 @@ impl TocFile {
     /// Check if addon is restricted to a game type incompatible with the active client profile.
     /// Tocs with `AllowLoadGameType: <type>` only load when that type matches the active profile.
     pub fn is_game_type_restricted(&self) -> bool {
+        if self.is_mists_legacy_craft_ui_toc() {
+            return false;
+        }
+
         let allowed: &[&str] = match crate::client_profile::ACTIVE {
             crate::client_profile::ClientProfile::Retail => &["mainline", "standard"],
             crate::client_profile::ClientProfile::Wrath => &["wrath", "wrath_classic", "classic"],
@@ -345,6 +349,15 @@ impl TocFile {
             .get("AllowLoadGameType")
             .map(|v| !v.split(',').any(|t| allowed.contains(&t.trim())))
             .unwrap_or(false)
+    }
+
+    fn is_mists_legacy_craft_ui_toc(&self) -> bool {
+        crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Mists
+            && self.folder_name() == Some("Blizzard_CraftUI")
+            && self
+                .metadata
+                .get("AllowLoadGameType")
+                .is_some_and(|value| value.split(',').any(|token| token.trim() == "wrath"))
     }
 
     /// Whether this addon should load for the requested screen kind.
@@ -428,10 +441,12 @@ impl TocFile {
     }
 
     fn folder_name_starts_with_blizzard(&self) -> bool {
-        self.addon_dir
-            .file_name()
-            .and_then(|name| name.to_str())
+        self.folder_name()
             .is_some_and(|name| name.starts_with("Blizzard_"))
+    }
+
+    fn folder_name(&self) -> Option<&str> {
+        self.addon_dir.file_name().and_then(|name| name.to_str())
     }
 }
 

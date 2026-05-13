@@ -19,4 +19,6 @@ pub struct CraftingState {
     /// Professions the player has abandoned. Populated by `AbandonSkill(skillLine)`
     /// and `A_Admin.UnlearnProfession(skillLineId)`. Filters all profession queries.
     pub unlearned_profession_ids: HashSet<i32>,
+    /// Currently selected legacy CraftFrame list index.
+    pub selected_craft_index: Option<i32>,
 }
