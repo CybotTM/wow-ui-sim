@@ -314,6 +314,7 @@ pub(crate) fn button_texture_should_show(
         "NormalTexture" => enabled && button_state == 0,
         "PushedTexture" => enabled && button_state == 1,
         "DisabledTexture" => !enabled,
+        "HighlightTexture" => false,
         _ => true,
     }
 }

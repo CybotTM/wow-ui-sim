@@ -192,6 +192,31 @@ fn highlight_texture_only_when_hovered() {
     );
 }
 
+#[test]
+fn highlight_texture_child_stays_hidden_until_hover_render_path() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestHighlightVisibility", UIParent)
+        btn:SetPoint("CENTER")
+        btn:SetSize(100, 30)
+        btn:SetNormalTexture("Interface/Buttons/UI-Panel-Button-Up")
+        btn:SetHighlightTexture("Interface/Buttons/UI-Panel-Button-Highlight")
+        btn:Show()
+    "#,
+    )
+    .unwrap();
+
+    let hidden: bool = env
+        .eval("return TestHighlightVisibility:GetHighlightTexture():IsShown() == false")
+        .unwrap();
+    assert!(
+        hidden,
+        "HighlightTexture child should stay hidden outside the hover render path"
+    );
+}
+
 /// Disabled button shows DisabledTexture instead of NormalTexture.
 /// Pressed/hovered state has no effect while disabled.
 #[test]
