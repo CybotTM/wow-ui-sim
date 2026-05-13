@@ -589,6 +589,9 @@ fn apply_system_anchors_skips_self_relative_saved_anchor() {
             EditModeSystem = {
                 Buffs = 6,
             },
+            EditModeAuraFrameSetting = {
+                IconSize = 5,
+            },
         }
 
         UIParent = { name = "UIParent" }
@@ -602,6 +605,8 @@ fn apply_system_anchors_skips_self_relative_saved_anchor() {
             systemIndex = 1,
             name = "BuffFrame",
             anchorCalls = 0,
+            settingCalls = 0,
+            gridLayoutCalls = 0,
         }
 
         function frame:GetName()
@@ -619,6 +624,16 @@ fn apply_system_anchors_skips_self_relative_saved_anchor() {
         function frame:ApplySystemAnchor()
             self.anchorCalls = self.anchorCalls + 1
             error("self-relative anchor should not be applied")
+        end
+
+        function frame:UpdateSystemSetting(setting, entireSystemUpdate)
+            self.settingCalls = self.settingCalls + 1
+            self.lastSetting = setting
+            self.lastEntireSystemUpdate = entireSystemUpdate
+        end
+
+        function frame:UpdateGridLayout()
+            self.gridLayoutCalls = self.gridLayoutCalls + 1
         end
 
         EditModeManagerFrame = {
@@ -643,7 +658,9 @@ fn apply_system_anchors_skips_self_relative_saved_anchor() {
                     offsetX = -13,
                     offsetY = -15,
                 },
-                settings = {},
+                settings = {
+                    { setting = Enum.EditModeAuraFrameSetting.IconSize, value = 5 },
+                },
             }
         end
 
@@ -661,11 +678,25 @@ fn apply_system_anchors_skips_self_relative_saved_anchor() {
     env.exec(APPLY_SYSTEM_ANCHORS_LUA)
         .expect("apply system anchors");
 
-    let (anchor_calls, has_active_changes, setting_map_updated): (i32, bool, bool) = env
+    let (
+        anchor_calls,
+        has_active_changes,
+        setting_map_updated,
+        setting_calls,
+        last_setting,
+        last_entire_system_update,
+        grid_layout_calls,
+    ): (i32, bool, bool, i32, i32, bool, i32) = env
         .eval(
             r#"
             local frame = EditModeManagerFrame.registeredSystemFrames[1]
-            return frame.anchorCalls, frame.hasActiveChanges, frame.settingMapUpdated
+            return frame.anchorCalls,
+                frame.hasActiveChanges,
+                frame.settingMapUpdated,
+                frame.settingCalls,
+                frame.lastSetting,
+                frame.lastEntireSystemUpdate,
+                frame.gridLayoutCalls
             "#,
         )
         .expect("read self-relative anchor state");
@@ -678,6 +709,16 @@ fn apply_system_anchors_skips_self_relative_saved_anchor() {
     assert!(
         setting_map_updated,
         "system settings should still be mapped"
+    );
+    assert_eq!(setting_calls, 1, "saved aura settings should replay");
+    assert_eq!(last_setting, 5);
+    assert!(
+        last_entire_system_update,
+        "replayed aura settings should use entire-system semantics"
+    );
+    assert_eq!(
+        grid_layout_calls, 1,
+        "self-relative aura systems should still run their final grid layout refresh"
     );
 }
 

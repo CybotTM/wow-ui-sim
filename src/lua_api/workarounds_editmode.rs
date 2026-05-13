@@ -349,6 +349,12 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
             end
         end
 
+        local function refresh_system_layout_after_setting_replay(systemFrame)
+            if systemFrame and systemFrame.UpdateGridLayout then
+                pcall(systemFrame.UpdateGridLayout, systemFrame)
+            end
+        end
+
         local function refresh_action_bar_system(systemFrame)
             local systemInfo = systemFrame.systemInfo
             local actionButtons = systemFrame.actionButtons
@@ -528,6 +534,7 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                 -- systems such as BuffFrame. Seed their layout state, but do
                 -- not hand that impossible anchor to SetPoint during startup.
                 replay_system_settings(systemFrame)
+                refresh_system_layout_after_setting_replay(systemFrame)
             else
                 pcall(emm.UpdateSystem, emm, systemFrame)
             end
