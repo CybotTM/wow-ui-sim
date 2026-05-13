@@ -9062,6 +9062,9 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     local relativeTo, offsetX, offsetY, settingsText
     system, cursor = __wow_edit_mode_read_number(tokens, cursor)
     systemIndex, cursor = __wow_edit_mode_read_number(tokens, cursor, -1)
+    if systemIndex >= 0 then
+      systemIndex = systemIndex + 1
+    end
     isInDefaultPosition, cursor = __wow_edit_mode_read_number(tokens, cursor)
     point, cursor = __wow_edit_mode_read_number(tokens, cursor)
     relativePoint, cursor = __wow_edit_mode_read_number(tokens, cursor)

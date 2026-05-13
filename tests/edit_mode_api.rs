@@ -118,10 +118,11 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
         totem_action_bar_default,
         name,
         system,
+        system_index,
         point,
         offset_x,
         setting_value,
-    ): (i32, i32, i32, i32, i32, i32, String, i32, String, f64, i32) = env
+    ): (i32, i32, i32, i32, i32, i32, String, i32, i32, String, f64, i32) = env
         .eval(
             r#"
             local info = C_EditMode.GetLayouts()
@@ -139,6 +140,7 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
                 accountSettingMap[Enum.EditModeAccountSetting.ShowTotemActionBar],
                 info.layouts[1].layoutName,
                 system.system,
+                system.systemIndex,
                 system.anchorInfo.point,
                 system.anchorInfo.offsetX,
                 system.settings[2].value
@@ -163,6 +165,10 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
     );
     assert_eq!(name, "Custom");
     assert_eq!(system, 0);
+    assert_eq!(
+        system_index, 1,
+        "WTF cache stores system indices zero-based, but Lua layout state must use EditMode enum values"
+    );
     assert_eq!(point, "BOTTOM");
     assert_eq!(offset_x, 12.5);
     assert_eq!(setting_value, 1);

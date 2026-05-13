@@ -1336,9 +1336,9 @@ fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
 
         local setting = Enum.EditModeCooldownViewerSetting
         local layoutRows = {
-            [0] = {
+            [1] = {
                 system = Enum.EditModeSystem.CooldownViewer,
-                systemIndex = 0,
+                systemIndex = 1,
                 isInDefaultPosition = false,
                 anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 0, offsetY = 0 },
                 settings = {
@@ -1354,9 +1354,9 @@ fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
                     { setting = setting.ShowTooltips, value = 1 },
                 },
             },
-            [1] = {
+            [2] = {
                 system = Enum.EditModeSystem.CooldownViewer,
-                systemIndex = 1,
+                systemIndex = 2,
                 isInDefaultPosition = false,
                 anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 10, offsetY = 0 },
                 settings = {
@@ -1372,9 +1372,9 @@ fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
                     { setting = setting.ShowTooltips, value = 1 },
                 },
             },
-            [2] = {
+            [3] = {
                 system = Enum.EditModeSystem.CooldownViewer,
-                systemIndex = 2,
+                systemIndex = 3,
                 isInDefaultPosition = false,
                 anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 20, offsetY = 0 },
                 settings = {
@@ -1390,9 +1390,9 @@ fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
                     { setting = setting.ShowTooltips, value = 1 },
                 },
             },
-            [3] = {
+            [4] = {
                 system = Enum.EditModeSystem.CooldownViewer,
-                systemIndex = 3,
+                systemIndex = 4,
                 isInDefaultPosition = false,
                 anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 30, offsetY = 0 },
                 settings = {
@@ -1483,10 +1483,10 @@ fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
         EditModeManagerFrame = {
             layoutInfo = {},
             registeredSystemFrames = {
-                newCooldownViewer(0),
                 newCooldownViewer(1),
                 newCooldownViewer(2),
                 newCooldownViewer(3),
+                newCooldownViewer(4),
             },
             requestedIndices = {},
         }
@@ -1565,7 +1565,7 @@ fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
         .expect("read cooldown viewer state");
 
     assert_eq!(
-        requested_indices, "0,1,2,3",
+        requested_indices, "1,2,3,4",
         "each CooldownViewer systemIndex should request its matching saved row"
     );
     assert_eq!(calls_0, 1);
