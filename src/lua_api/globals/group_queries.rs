@@ -29,6 +29,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, RustFn, Val};
 
 const QUEST_NPC_NAME: &str = "Quest Giver";
+const LE_PARTY_CATEGORY_HOME: i32 = 1;
+const LE_PARTY_CATEGORY_INSTANCE: i32 = 2;
 
 pub fn register_all(state: &mut LuaState) {
     register_group_status(state);
@@ -221,13 +223,13 @@ fn ensure_string_join(state: &mut LuaState) {
 }
 
 fn get_num_subgroup_members(state: &mut LuaState) -> LuaResult<u32> {
-    let n = active_party_count(state)? as f64;
+    let n = active_party_count_for_arg(state, 1)? as f64;
     state.push(Val::Num(n));
     Ok(1)
 }
 
 fn get_num_group_members(state: &mut LuaState) -> LuaResult<u32> {
-    let party_count = active_party_count(state)?;
+    let party_count = active_party_count_for_arg(state, 1)?;
     // Match mlua master: party_count + 1 (counting the player) when in a
     // group, else 0.
     let n = if party_count > 0 { party_count + 1 } else { 0 };
@@ -236,7 +238,7 @@ fn get_num_group_members(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_in_group(state: &mut LuaState) -> LuaResult<u32> {
-    let in_group = active_party_count(state)? > 0;
+    let in_group = active_party_count_for_arg(state, 1)? > 0;
     state.push(Val::Bool(in_group));
     Ok(1)
 }
@@ -367,6 +369,21 @@ pub(crate) fn active_party_count(state: &mut LuaState) -> LuaResult<usize> {
     } else {
         0
     })
+}
+
+fn active_party_count_for_arg(state: &mut LuaState, index: i32) -> LuaResult<usize> {
+    if party_category_arg(state, index)? == Some(LE_PARTY_CATEGORY_INSTANCE) {
+        return Ok(0);
+    }
+
+    active_party_count(state)
+}
+
+fn party_category_arg(state: &mut LuaState, index: i32) -> LuaResult<Option<i32>> {
+    let category = Option::<f64>::from_stack(state, index)?;
+    Ok(category
+        .map(|value| value as i32)
+        .filter(|value| matches!(*value, LE_PARTY_CATEGORY_HOME | LE_PARTY_CATEGORY_INSTANCE)))
 }
 
 fn unit_has_lfg_random_cooldown(state: &mut LuaState) -> LuaResult<u32> {

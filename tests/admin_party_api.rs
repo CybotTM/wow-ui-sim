@@ -279,7 +279,7 @@ fn test_group_queries_switch_between_solo_and_grouped_states() {
             local solo_subgroup_count = GetNumSubgroupMembers()
 
             A_Admin.SetPartySize(4)
-            return solo_in_group, solo_group_count, solo_subgroup_count, IsInGroup(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE), GetNumSubgroupMembers()
+            return solo_in_group, solo_group_count, solo_subgroup_count, IsInGroup(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumSubgroupMembers()
             "#,
         )
         .unwrap();
@@ -303,6 +303,38 @@ fn test_group_queries_switch_between_solo_and_grouped_states() {
     assert_eq!(
         grouped_subgroup_count, 4,
         "subgroup member count should match grouped party size"
+    );
+}
+
+#[test]
+fn test_party_category_queries_only_model_home_party() {
+    let env = env();
+    let (home, instance, home_count, instance_count): (bool, bool, i32, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(3)
+            return IsInGroup(LE_PARTY_CATEGORY_HOME),
+                   IsInGroup(LE_PARTY_CATEGORY_INSTANCE),
+                   GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),
+                   GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE)
+            "#,
+        )
+        .unwrap();
+    assert!(
+        home,
+        "home party category should reflect the simulated party"
+    );
+    assert!(
+        !instance,
+        "instance party category should stay false until LFG instance groups are modeled"
+    );
+    assert_eq!(
+        home_count, 4,
+        "home group count should include the local player"
+    );
+    assert_eq!(
+        instance_count, 0,
+        "instance group count should be zero without an instance party"
     );
 }
 
