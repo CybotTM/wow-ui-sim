@@ -203,51 +203,84 @@ pub(super) fn clear_attributes(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn execute_attribute(state: &mut LuaState) -> LuaResult<u32> {
+    let call = match execute_attribute_call(state)? {
+        Ok(call) => call,
+        Err(reason) => return push_execute_attribute_failure(state, reason),
+    };
+
+    match call.attr {
+        Val::Function(_) => execute_function_attribute(state, call.attr, &call.extra_args),
+        Val::Str(_) if call.frame_is_protected => {
+            execute_snippet_attribute(state, call.frame_id, call.attr, call.extra_args)
+        }
+        Val::Str(_) => push_execute_attribute_failure(state, "unsupported-unprotected-snippet"),
+        _ => push_execute_attribute_failure(state, "attribute-missing"),
+    }
+}
+
+struct ExecuteAttributeCall {
+    frame_id: u64,
+    frame_is_protected: bool,
+    attr: Val,
+    extra_args: Vec<Val>,
+}
+
+fn execute_attribute_call(
+    state: &mut LuaState,
+) -> LuaResult<Result<ExecuteAttributeCall, &'static str>> {
     let id = frame_id_from_stack(state, 1)?;
     let name_val = stack_val(state, 2);
     let Some(name) = val_to_string(state, name_val) else {
-        return push_execute_attribute_failure(state, "attribute-missing");
+        return Ok(Err("attribute-missing"));
     };
-    let attr = {
+    let (attr, frame_is_protected) = {
         let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .and_then(|frame| frame.attributes.get(name.as_str()).cloned())
+        let frame = sim.widgets.get(id);
+        let attr = frame.and_then(|frame| frame.attributes.get(name.as_str()).cloned());
+        let frame_is_protected = frame.is_some_and(|frame| frame.is_protected);
+        (attr, frame_is_protected)
     };
     let attr = attribute_to_val(state, attr.as_ref());
     let nargs = (state.top as i32 - state.base as i32) as usize;
     let extra_args = (3..=nargs)
         .map(|index| stack_val(state, index as i32))
         .collect::<Vec<_>>();
-    match attr {
-        Val::Function(_) => {
-            let results = protected_lua_pcall_state(state, attr, &extra_args)
-                .map_err(|error| error.to_string());
-            push_execute_attribute_result(state, results)
-        }
-        Val::Str(body_ref) => {
-            let is_protected = borrow_state(state)?
-                .widgets
-                .get(id)
-                .is_some_and(|frame| frame.is_protected);
-            if !is_protected {
-                return push_execute_attribute_failure(state, "unsupported-unprotected-snippet");
-            }
-            let Some(body) = val_to_string(state, Val::Str(body_ref)) else {
-                return push_execute_attribute_failure(state, "attribute-missing");
-            };
-            let Ok(snippet) = compile_execute_attribute_snippet(state, &body) else {
-                return push_execute_attribute_failure(state, "snippet-compile-failed");
-            };
-            let mut args = Vec::with_capacity(extra_args.len() + 1);
-            args.push(frame_ref(state, id)?);
-            args.extend(extra_args);
-            let results = protected_lua_pcall_state(state, Val::Function(snippet.gc_ref()), &args)
-                .map_err(|error| error.to_string());
-            push_execute_attribute_result(state, results)
-        }
-        _ => push_execute_attribute_failure(state, "attribute-missing"),
-    }
+    Ok(Ok(ExecuteAttributeCall {
+        frame_id: id,
+        frame_is_protected,
+        attr,
+        extra_args,
+    }))
+}
+
+fn execute_function_attribute(
+    state: &mut LuaState,
+    attr: Val,
+    extra_args: &[Val],
+) -> LuaResult<u32> {
+    let results =
+        protected_lua_pcall_state(state, attr, extra_args).map_err(|error| error.to_string());
+    push_execute_attribute_result(state, results)
+}
+
+fn execute_snippet_attribute(
+    state: &mut LuaState,
+    frame_id: u64,
+    attr: Val,
+    extra_args: Vec<Val>,
+) -> LuaResult<u32> {
+    let Some(body) = val_to_string(state, attr) else {
+        return push_execute_attribute_failure(state, "attribute-missing");
+    };
+    let Ok(snippet) = compile_execute_attribute_snippet(state, &body) else {
+        return push_execute_attribute_failure(state, "snippet-compile-failed");
+    };
+    let mut args = Vec::with_capacity(extra_args.len() + 1);
+    args.push(frame_ref(state, frame_id)?);
+    args.extend(extra_args);
+    let results = protected_lua_pcall_state(state, Val::Function(snippet.gc_ref()), &args)
+        .map_err(|error| error.to_string());
+    push_execute_attribute_result(state, results)
 }
 
 fn compile_execute_attribute_snippet(
