@@ -124,6 +124,14 @@ installed_addon_panel_matrix() {
         "$REPO_ROOT/scripts/test-mists-addon-panels.sh" "${args[@]}"
 }
 
+live_gui_smoke() {
+    local args=(--skip-build --out-dir "$OUT_DIR/live-gui-smoke")
+
+    WOW_SIM_BIN="$WOW_SIM_BIN" \
+    WOW_CLI_BIN="$WOW_CLI_BIN" \
+        "$REPO_ROOT/scripts/mists-live-gui-smoke.sh" "${args[@]}"
+}
+
 interaction_audit() {
     cargo test --release \
         --no-default-features \
@@ -143,6 +151,7 @@ validate_plan() {
     echo "release proof lane: panel-parity"
     echo "release proof lane: visual-comparison"
     echo "release proof lane: installed-addon-panel-matrix"
+    echo "release proof lane: live-gui-smoke"
     echo "release proof lane: interaction-audit"
 }
 
@@ -160,6 +169,7 @@ run_logged_step zero-lua-errors zero_lua_errors
 run_logged_step installed-addon-matrix installed_addon_matrix
 run_logged_step panel-parity-and-visual-comparison panel_parity_matrix
 run_logged_step installed-addon-panel-matrix installed_addon_panel_matrix
+run_logged_step live-gui-smoke live_gui_smoke
 run_logged_step interaction-audit interaction_audit
 
 echo ""
