@@ -1061,6 +1061,214 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
 }
 
 #[test]
+fn apply_system_anchors_replays_each_widescreen_action_bar_profile_row() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                ActionBar = 0,
+            },
+            EditModeActionBarSetting = {
+                Orientation = 0,
+                NumRows = 1,
+                NumIcons = 2,
+                IconSize = 3,
+                IconPadding = 4,
+                VisibleSetting = 5,
+                HideBarArt = 6,
+                HideBarScrolling = 8,
+                AlwaysShowButtons = 9,
+            },
+            ActionBarOrientation = {
+                Horizontal = 0,
+                Vertical = 1,
+            },
+            ActionBarVisibleSetting = {
+                Always = 0,
+                Hidden = 3,
+            },
+        }
+        ACTION_BUTTON_SHOW_GRID_REASON_CVAR = 4
+        UIParent = { name = "UIParent" }
+
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return true end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local setting = Enum.EditModeActionBarSetting
+        local rows = {
+            [1] = { {setting.Orientation, 0}, {setting.NumRows, 1}, {setting.NumIcons, 8}, {setting.IconSize, 4}, {setting.IconPadding, 2}, {setting.HideBarArt, 1}, {setting.HideBarScrolling, 1}, {setting.AlwaysShowButtons, 1} },
+            [2] = { {setting.Orientation, 0}, {setting.NumRows, 4}, {setting.NumIcons, 6}, {setting.IconSize, 5}, {setting.IconPadding, 2}, {setting.VisibleSetting, 0}, {setting.AlwaysShowButtons, 1} },
+            [3] = { {setting.Orientation, 0}, {setting.NumRows, 1}, {setting.NumIcons, 12}, {setting.IconSize, 2}, {setting.IconPadding, 2}, {setting.VisibleSetting, 0}, {setting.AlwaysShowButtons, 0} },
+            [4] = { {setting.Orientation, 0}, {setting.NumRows, 1}, {setting.NumIcons, 8}, {setting.IconSize, 4}, {setting.IconPadding, 2}, {setting.VisibleSetting, 0}, {setting.AlwaysShowButtons, 0} },
+            [5] = { {setting.Orientation, 0}, {setting.NumRows, 1}, {setting.NumIcons, 8}, {setting.IconSize, 4}, {setting.IconPadding, 2}, {setting.VisibleSetting, 0}, {setting.AlwaysShowButtons, 1} },
+            [6] = { {setting.Orientation, 0}, {setting.NumRows, 1}, {setting.NumIcons, 12}, {setting.IconSize, 3}, {setting.IconPadding, 2}, {setting.VisibleSetting, 0}, {setting.AlwaysShowButtons, 1} },
+            [7] = { {setting.Orientation, 0}, {setting.NumRows, 1}, {setting.NumIcons, 12}, {setting.IconSize, 5}, {setting.IconPadding, 2}, {setting.VisibleSetting, 0}, {setting.AlwaysShowButtons, 1} },
+            [8] = { {setting.Orientation, 0}, {setting.NumRows, 1}, {setting.NumIcons, 12}, {setting.IconSize, 5}, {setting.IconPadding, 2}, {setting.VisibleSetting, 0}, {setting.AlwaysShowButtons, 1} },
+            [11] = { {setting.Orientation, 0}, {setting.NumRows, 3}, {setting.IconSize, 5}, {setting.IconPadding, 2} },
+            [12] = { {setting.Orientation, 0}, {setting.NumRows, 1}, {setting.IconSize, 5}, {setting.IconPadding, 2}, {setting.AlwaysShowButtons, 0} },
+            [13] = { {setting.Orientation, 0}, {setting.NumRows, 1}, {setting.IconSize, 5}, {setting.IconPadding, 2} },
+        }
+
+        local function settingsFor(index)
+            local settings = {}
+            for _, pair in ipairs(rows[index] or {}) do
+                table.insert(settings, { setting = pair[1], value = pair[2] })
+            end
+            return settings
+        end
+
+        local function newActionBar(index)
+            local button = { container = {} }
+            function button.container:SetScale(value)
+                self.scale = value
+            end
+            function button:UpdateButtonArt()
+                self.buttonArtUpdated = true
+            end
+            function button:SetShowGrid(showGrid, reason)
+                self.showGrid = showGrid
+                self.showGridReason = reason
+            end
+
+            local frame = {
+                system = Enum.EditModeSystem.ActionBar,
+                systemIndex = index,
+                name = "ActionBar" .. tostring(index),
+                actionButtons = { button },
+                ActionBarPageNumber = {},
+                BorderArt = {},
+                Selection = {},
+            }
+
+            function frame:GetName()
+                return self.name
+            end
+            function frame:SetHasActiveChanges(value)
+                self.hasActiveChanges = value
+            end
+            function frame:UpdateSettingMap()
+                self.settingMapUpdated = true
+            end
+            function frame:ApplySystemAnchor()
+                self.anchorApplied = true
+            end
+            function frame.Selection:SetVerticalState(value)
+                self.verticalState = value
+            end
+            function frame:GetSettingValue(settingId)
+                for _, settingInfo in ipairs(self.systemInfo.settings) do
+                    if settingInfo.setting == settingId then
+                        return settingInfo.value
+                    end
+                end
+            end
+            function frame:UpdateShownButtons()
+                self.shownButtonsUpdated = true
+            end
+            function frame:EditModeSetScale(value)
+                self.editModeScale = value
+            end
+            function frame:Layout()
+                self.layoutUpdated = true
+            end
+            function frame:UpdateVisibility()
+                self.visibilityUpdated = true
+            end
+            function frame:SetShowGrid(showGrid, reason)
+                self.showGrid = showGrid
+                button:SetShowGrid(showGrid, reason)
+            end
+            function frame:RefreshGridLayout()
+                self.gridRefreshed = true
+            end
+            function frame:RefreshDividers()
+                self.dividersRefreshed = true
+            end
+            function frame:RefreshBarArt()
+                self.barArtRefreshed = true
+            end
+            function frame.BorderArt:SetShown(value)
+                self.shown = value
+            end
+            function frame.ActionBarPageNumber:SetShown(value)
+                self.shown = value
+            end
+
+            return frame
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            requestedIndices = {},
+            registeredSystemFrames = {
+                newActionBar(1), newActionBar(2), newActionBar(3), newActionBar(4),
+                newActionBar(5), newActionBar(6), newActionBar(7), newActionBar(8),
+                newActionBar(11), newActionBar(12), newActionBar(13),
+            },
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(system, systemIndex)
+            table.insert(self.requestedIndices, systemIndex)
+            return {
+                system = system,
+                systemIndex = systemIndex,
+                isInDefaultPosition = false,
+                anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 0, offsetY = 0 },
+                settings = settingsFor(systemIndex),
+            }
+        end
+        function EditModeManagerFrame:UpdateActionBarLayout(systemFrame)
+            systemFrame.actionBarLayoutUpdated = true
+        end
+        function EditModeManagerFrame:UpdateSystem()
+            error("active action bars should use the startup replay path")
+        end
+        "#,
+    )
+    .expect("install active action bar row stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply active action bar row settings");
+
+    let (requested_indices, replayed_rows): (String, String) = env
+        .eval(
+            r#"
+            local rows = {}
+            for _, frame in ipairs(EditModeManagerFrame.registeredSystemFrames) do
+                local button = frame.actionButtons[1]
+                table.insert(rows, table.concat({
+                    tostring(frame.systemIndex),
+                    tostring(frame.numRows),
+                    tostring(frame.numButtonsShowable),
+                    tostring(frame.iconSize),
+                    tostring(frame.buttonPadding),
+                    tostring(frame.hideBarArt),
+                    tostring(frame.ActionBarPageNumber.shown),
+                    tostring(button.showGrid),
+                    frame.visibility or "_",
+                }, ":"))
+            end
+            return table.concat(EditModeManagerFrame.requestedIndices, ","),
+                table.concat(rows, "|")
+            "#,
+        )
+        .expect("read action bar row replay state");
+
+    assert_eq!(requested_indices, "1,2,3,4,5,6,7,8,11,12,13");
+    assert_eq!(
+        replayed_rows,
+        "1:1:8:4:2:true:false:true:_|2:4:6:5:2:nil:nil:true:Always|3:1:12:2:2:nil:nil:false:Always|4:1:8:4:2:nil:nil:false:Always|5:1:8:4:2:nil:nil:true:Always|6:1:12:3:2:nil:nil:true:Always|7:1:12:5:2:nil:nil:true:Always|8:1:12:5:2:nil:nil:true:Always|11:3:nil:5:2:nil:nil:nil:_|12:1:nil:5:2:nil:nil:false:_|13:1:nil:5:2:nil:nil:nil:_",
+        "each active Widescreen action-bar row should replay its saved profile settings"
+    );
+}
+
+#[test]
 fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
