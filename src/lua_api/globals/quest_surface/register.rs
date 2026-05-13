@@ -6,8 +6,10 @@ use rilua::{LuaApiMut, LuaResult, Val};
 
 use super::SurfaceFn;
 use super::handlers::*;
+use super::legacy_globals::*;
+use super::task_quest::*;
 
-pub const QUEST_LOG_METHODS: &[(&'static str, SurfaceFn)] = &[
+pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
     ("GetInfo", get_quest_log_info),
     ("GetQuestIDForLogIndex", get_quest_id_for_log_index),
@@ -56,7 +58,7 @@ pub const QUEST_LOG_METHODS: &[(&'static str, SurfaceFn)] = &[
     ("GetSelectedQuest", get_selected_quest),
 ];
 
-pub const TASK_QUEST_METHODS: &[(&'static str, SurfaceFn)] = &[
+pub const TASK_QUEST_METHODS: &[(&str, SurfaceFn)] = &[
     ("IsActive", task_quest_is_active),
     (
         "DoesMapShowTaskQuestObjectives",
@@ -74,7 +76,7 @@ pub const TASK_QUEST_METHODS: &[(&'static str, SurfaceFn)] = &[
     ("GetQuestTimeLeftSeconds", task_quest_time_left_seconds),
 ];
 
-pub const GLOBAL_QUEST_FUNCTIONS: &[(&'static str, SurfaceFn)] = &[
+pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
     ("AddQuestWatch", noop),
     ("CollapseQuestHeader", noop),
     ("ExpandQuestHeader", noop),
