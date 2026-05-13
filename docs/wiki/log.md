@@ -15,6 +15,11 @@ Follow-up: documented the real WTF import path. EditMode layouts come from
 `edit-mode-cache-character.txt`. Startup now imports those cache files before
 Blizzard addons load, and Blizzard addons use the saved-variable-aware loader.
 
+Follow-up: documented the second-stage layout mapping bug. `C_EditMode` selected
+the saved layout, but `EditModeManagerFrame.layoutInfo` prepended presets and
+kept the old index, activating `Classic`; startup now remaps the active saved
+layout after prepending presets.
+
 ## [2026-05-08] update | Windows default GUI build and headless CI compile
 
 Updated `investigations/windows-port-build.md` after reproducing MSVC `LNK1189`

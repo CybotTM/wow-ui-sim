@@ -59,6 +59,13 @@ compact system/anchor/settings rows, and seeds `C_EditMode`. Blizzard addons
 are also loaded through the saved-variable-aware loader so Blizzard-owned WTF
 SavedVariables participate in full UI startup.
 
+Follow-up: `EditModeManagerFrame.layoutInfo` prepends Blizzard preset layouts
+before appending saved layouts. The active value from the character cache is an
+index into the saved layouts, so startup must remap it after the prepend; without
+that remap, `C_EditMode` selected `Widescreen` while `EditModeManagerFrame`
+activated the `Classic` preset. Preset-only compatibility tweaks must also avoid
+rewriting saved layout settings.
+
 Regression coverage lives in `tests/edit_mode_api.rs`.
 
 ## Files Modified
