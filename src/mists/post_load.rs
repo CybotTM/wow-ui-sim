@@ -12,3 +12,27 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
         let _ = env.exec(MISTS_POST_LOAD_LUA);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn post_load_hides_inactive_pvp_ready_dialog() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            PVPReadyDialog = CreateFrame("Frame", "PVPReadyDialog", UIParent)
+            PVPReadyDialog:Show()
+            "#,
+        )
+        .expect("dialog setup should run");
+
+        super::apply(&env);
+
+        let shown: bool = env
+            .eval("return PVPReadyDialog:IsShown()")
+            .expect("visibility probe should run");
+        assert!(!shown, "inactive PVPReadyDialog should not show at startup");
+    }
+}

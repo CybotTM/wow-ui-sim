@@ -82,6 +82,19 @@ if rawget(_G, "__wow_sim_mists_spellbook_button_sizes_applied") ~= true then
   rawset(_G, "__wow_sim_mists_spellbook_button_sizes_applied", true)
 end
 
+local function HideInactivePvpReadyDialog()
+  local dialog = rawget(_G, "PVPReadyDialog")
+  if not dialog or not dialog.Hide then
+    return
+  end
+
+  if dialog.activeIndex == nil then
+    dialog:Hide()
+  end
+end
+
+HideInactivePvpReadyDialog()
+
 function CombatLog_LoadUI()
   return true
 end

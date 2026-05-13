@@ -49,7 +49,7 @@ Parity hardening TODO:
 - [x] Wire the release-proof command into CI with artifact upload for logs, lua-error JSON, panel screenshots, and frame dumps once the local full proof is green.
 - [x] Write brief in docs of `GitHub Actions Mists release-proof`
 - [x] bottom tabs e.g reputation panel have the text missing
-- [ ] layouts problem even when no panel is open
+- [x] layouts problem even when no panel is open
 - [ ] fritz font is not loading? does it need the fallback by md5?
 - [ ] Run the new GitHub Actions Mists release-proof job via `workflow_dispatch`, record the run/artifact links in `docs/baselines/mists-release-proof.md`, and fix the first failing CI-only lane instead of relying on the local proof.
 - [x] Make the Mists release-proof CI lane self-contained for installed-addon coverage: replace `/syncthing/World of Warcraft/_classic_/Interface/AddOns/...` assumptions with CI-available pinned addon fixtures or an explicit prepared artifact/cache step.
