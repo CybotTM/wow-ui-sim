@@ -1815,6 +1815,165 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
 }
 
 #[test]
+fn apply_system_anchors_replays_active_widescreen_singleton_settings() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                CastBar = 1,
+                Minimap = 2,
+                ChatFrame = 8,
+                ObjectiveTracker = 12,
+                MicroMenu = 13,
+                Bags = 14,
+                DurabilityFrame = 16,
+                TimerBars = 17,
+                VehicleSeatIndicator = 18,
+                ArchaeologyBar = 19,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local widescreenRows = {
+            [Enum.EditModeSystem.CastBar] = { {0, 0}, {1, 0}, {2, 0} },
+            [Enum.EditModeSystem.Minimap] = { {0, 0}, {1, 0}, {2, 5} },
+            [Enum.EditModeSystem.ChatFrame] = { {0, 3}, {1, 48}, {2, 1}, {3, 20} },
+            [Enum.EditModeSystem.ObjectiveTracker] = { {0, 1}, {1, 0}, {2, 0} },
+            [Enum.EditModeSystem.MicroMenu] = { {0, 1}, {1, 0}, {2, 6}, {3, 4} },
+            [Enum.EditModeSystem.Bags] = { {0, 0}, {1, 0}, {2, 5} },
+            [Enum.EditModeSystem.DurabilityFrame] = { {0, 5} },
+            [Enum.EditModeSystem.TimerBars] = { {0, 0} },
+            [Enum.EditModeSystem.VehicleSeatIndicator] = { {0, 10} },
+            [Enum.EditModeSystem.ArchaeologyBar] = { {0, 0} },
+        }
+
+        local function settingsFor(system)
+            local settings = {}
+            for _, pair in ipairs(widescreenRows[system] or {}) do
+                table.insert(settings, { setting = pair[1], value = pair[2] })
+            end
+            return settings
+        end
+
+        local function newSingletonFrame(system, name)
+            local frame = {
+                system = system,
+                systemIndex = nil,
+                name = name,
+                replayedSettings = {},
+                replayedValues = {},
+            }
+
+            function frame:GetName()
+                return self.name
+            end
+            function frame:SetHasActiveChanges(value)
+                self.hasActiveChanges = value
+            end
+            function frame:UpdateSettingMap()
+                self.settingMapUpdated = true
+            end
+            function frame:GetSettingValue(setting)
+                for _, settingInfo in ipairs(self.systemInfo.settings or {}) do
+                    if settingInfo.setting == setting then
+                        return settingInfo.value
+                    end
+                end
+            end
+            function frame:UpdateSystemSetting(setting, entireSystemUpdate)
+                table.insert(self.replayedSettings, setting)
+                table.insert(self.replayedValues, tostring(setting) .. "=" .. tostring(self:GetSettingValue(setting)))
+                self.entireSystemUpdate = entireSystemUpdate
+            end
+            function frame:UpdateSystem(systemInfo)
+                self.updateSystemCalls = (self.updateSystemCalls or 0) + 1
+                self.systemInfo = systemInfo
+                for _, settingInfo in ipairs(systemInfo.settings or {}) do
+                    self:UpdateSystemSetting(settingInfo.setting, true)
+                end
+            end
+
+            return frame
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            requestedRows = {},
+            registeredSystemFrames = {
+                newSingletonFrame(Enum.EditModeSystem.CastBar, "PlayerCastingBarFrame"),
+                newSingletonFrame(Enum.EditModeSystem.Minimap, "MinimapCluster"),
+                newSingletonFrame(Enum.EditModeSystem.ChatFrame, "ChatFrame1"),
+                newSingletonFrame(Enum.EditModeSystem.ObjectiveTracker, "ObjectiveTrackerFrame"),
+                newSingletonFrame(Enum.EditModeSystem.MicroMenu, "MicroMenu"),
+                newSingletonFrame(Enum.EditModeSystem.Bags, "BagsBar"),
+                newSingletonFrame(Enum.EditModeSystem.DurabilityFrame, "DurabilityFrame"),
+                newSingletonFrame(Enum.EditModeSystem.TimerBars, "TimerBarsFrame"),
+                newSingletonFrame(Enum.EditModeSystem.VehicleSeatIndicator, "VehicleSeatIndicator"),
+                newSingletonFrame(Enum.EditModeSystem.ArchaeologyBar, "ArchaeologyBarFrame"),
+            },
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(system, systemIndex)
+            table.insert(self.requestedRows, tostring(system) .. ":" .. tostring(systemIndex))
+            return {
+                system = system,
+                systemIndex = systemIndex,
+                isInDefaultPosition = false,
+                anchorInfo = { point = "CENTER", relativeTo = UIParent, relativePoint = "CENTER", offsetX = 0, offsetY = 0 },
+                settings = settingsFor(system),
+            }
+        end
+        function EditModeManagerFrame:UpdateSystem(systemFrame)
+            systemFrame:UpdateSystem(systemFrame.systemInfo)
+        end
+        "#,
+    )
+    .expect("install active singleton stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply active singleton settings");
+
+    let (requested_rows, replayed_values, update_system_calls): (String, String, String) = env
+        .eval(
+            r#"
+            local replayedRows = {}
+            local updateRows = {}
+            for _, frame in ipairs(EditModeManagerFrame.registeredSystemFrames) do
+                table.insert(replayedRows, tostring(frame.system) .. ":" .. table.concat(frame.replayedValues, ","))
+                table.insert(updateRows, tostring(frame.updateSystemCalls or 0))
+            end
+            return table.concat(EditModeManagerFrame.requestedRows, "|"),
+                table.concat(replayedRows, "|"),
+                table.concat(updateRows, ",")
+            "#,
+        )
+        .expect("read singleton replay state");
+
+    assert_eq!(
+        requested_rows, "1:-1|2:-1|8:-1|12:-1|13:-1|14:-1|16:-1|17:-1|18:-1|19:-1",
+        "singleton Widescreen systems should request the saved -1 row"
+    );
+    assert_eq!(
+        replayed_values,
+        "1:0=0,1=0,2=0|2:0=0,1=0,2=5|8:0=3,1=48,2=1,3=20|12:0=1,1=0,2=0|13:0=1,1=0,2=6,3=4|14:0=0,1=0,2=5|16:0=5|17:0=0|18:0=10|19:0=0",
+        "every active Widescreen singleton option row should replay its saved setting values"
+    );
+    assert_eq!(
+        update_system_calls, "0,1,1,1,1,1,1,1,1,1",
+        "only the cast bar should use the direct startup replay branch"
+    );
+}
+
+#[test]
 fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
