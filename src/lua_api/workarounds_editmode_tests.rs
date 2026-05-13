@@ -1185,6 +1185,119 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
 }
 
 #[test]
+fn apply_system_anchors_replays_buffs_on_top_when_aura_update_exists() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                UnitFrame = 3,
+            },
+            EditModeUnitFrameSetting = {
+                BuffsOnTop = 2,
+                FrameSize = 16,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local frame = {
+            system = Enum.EditModeSystem.UnitFrame,
+            systemIndex = 2,
+            name = "TargetFrame",
+            updatedSettings = {},
+        }
+
+        function frame:GetName()
+            return self.name
+        end
+
+        function frame:SetHasActiveChanges(value)
+            self.hasActiveChanges = value
+        end
+
+        function frame:UpdateSettingMap()
+            self.settingMapUpdated = true
+        end
+
+        function frame:ApplySystemAnchor()
+            self.anchorApplied = true
+        end
+
+        function frame:UpdateAuras()
+            self.aurasUpdated = true
+        end
+
+        function frame:UpdateSystemSetting(setting, entireSystemUpdate)
+            table.insert(self.updatedSettings, tostring(setting) .. ":" .. tostring(entireSystemUpdate))
+            if setting == Enum.EditModeUnitFrameSetting.BuffsOnTop then
+                self:UpdateAuras()
+            end
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo()
+            return {
+                system = Enum.EditModeSystem.UnitFrame,
+                systemIndex = 2,
+                isInDefaultPosition = false,
+                anchorInfo = {
+                    point = "TOPLEFT",
+                    relativeTo = UIParent,
+                    relativePoint = "TOPLEFT",
+                    offsetX = 10,
+                    offsetY = -10,
+                },
+                settings = {
+                    { setting = Enum.EditModeUnitFrameSetting.BuffsOnTop, value = 0 },
+                    { setting = Enum.EditModeUnitFrameSetting.FrameSize, value = 0 },
+                },
+            }
+        end
+
+        function EditModeManagerFrame:UpdateSystem()
+            error("target frame startup should not run the full update path")
+        end
+        "#,
+    )
+    .expect("install target frame stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply target frame anchors");
+
+    let (updated_settings, auras_updated): (String, bool) = env
+        .eval(
+            r#"
+            local frame = EditModeManagerFrame.registeredSystemFrames[1]
+            return table.concat(frame.updatedSettings, ","),
+                frame.aurasUpdated or false
+            "#,
+        )
+        .expect("read target frame state");
+
+    assert_eq!(
+        updated_settings, "2:true,16:true",
+        "BuffsOnTop and FrameSize should both replay for unit frames with UpdateAuras"
+    );
+    assert!(
+        auras_updated,
+        "BuffsOnTop replay should be able to refresh unit-frame auras"
+    );
+}
+
+#[test]
 fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
