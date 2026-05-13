@@ -46,28 +46,30 @@ pub fn set_scale(state: &mut LuaState) -> LuaResult<u32> {
         emit_addon_action_blocked(state, id, "SetScale");
         return Ok(0);
     }
+    apply_scale_change(state, id, scale)?;
+    Ok(0)
+}
+
+fn apply_scale_change(state: &LuaState, id: u64, scale: f32) -> LuaResult<()> {
     let mut sim = borrow_state_mut(state)?;
-    let changed = sim
-        .widgets
-        .get(id)
-        .map(|f| f.scale != scale)
-        .unwrap_or(false);
-    if !changed {
-        return Ok(0);
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(());
+    };
+    if frame.scale == scale {
+        return Ok(());
     }
-    let parent_eff_scale = sim
-        .widgets
-        .get(id)
-        .and_then(|f| f.parent_id)
-        .and_then(|pid| sim.widgets.get(pid))
-        .map(|p| p.effective_scale)
+
+    let parent_eff_scale = frame
+        .parent_id
+        .and_then(|parent_id| sim.widgets.get(parent_id))
+        .map(|parent| parent.effective_scale)
         .unwrap_or(1.0);
-    if let Some(f) = sim.widgets.get_mut_visual(id) {
-        f.scale = scale;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.scale = scale;
     }
     sim.widgets.propagate_effective_scale(id, parent_eff_scale);
     sim.widgets.mark_rect_dirty(id);
-    Ok(0)
+    Ok(())
 }
 
 fn handle_non_positive_scale(state: &mut LuaState, id: u64) -> LuaResult<u32> {
