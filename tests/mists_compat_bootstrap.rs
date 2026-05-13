@@ -6,6 +6,21 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 use wow_ui_sim::xml::{FrameXml, XmlElement};
 
+type MistsStartupApiShape = (
+    i32,
+    i32,
+    String,
+    i32,
+    i32,
+    bool,
+    i32,
+    i32,
+    i32,
+    i32,
+    i32,
+    String,
+);
+
 const HONOR_FRAME_SHARED_LUA: &str = include_str!(
     "../Interface/BlizzardUI/Mists/AddOns/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua"
 );
@@ -224,23 +239,18 @@ fn mists_world_map_set_opacity_reproduces_nil_opacity_arithmetic() {
 #[test]
 fn mists_bootstrap_supplies_legacy_startup_api_shapes() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
+    let result = query_mists_startup_api_shape(&env);
 
-    let result: (
-        i32,
-        i32,
-        String,
-        i32,
-        i32,
-        bool,
-        i32,
-        i32,
-        i32,
-        i32,
-        i32,
-        String,
-    ) = env
-        .eval(
-            r#"
+    assert_eq!(
+        result,
+        expected_mists_startup_api_shape(),
+        "Mists startup helpers should return non-nil legacy API shapes"
+    );
+}
+
+fn query_mists_startup_api_shape(env: &WowLuaEnv) -> MistsStartupApiShape {
+    env.eval(
+        r#"
             local skillName, _header, _isExpanded, skillRank, tempPoints, _modifier, skillMaxRank = GetSkillLineInfo(GetSelectedSkill())
             SetGuildRosterSelection(7)
             local hk, contribution = GetPVPThisWeekStats()
@@ -257,27 +267,25 @@ fn mists_bootstrap_supplies_legacy_startup_api_shapes() {
                 skillMaxRank,
                 type(C_ProductChoice.GetChoices())
             "#,
-        )
-        .expect("Mists legacy startup APIs should be callable");
+    )
+    .expect("Mists legacy startup APIs should be callable")
+}
 
-    assert_eq!(
-        result,
-        (
-            11,
-            1,
-            "Weapon Skills".to_string(),
-            1,
-            0,
-            false,
-            0,
-            0,
-            19,
-            7,
-            1,
-            "table".to_string()
-        ),
-        "Mists startup helpers should return non-nil legacy API shapes"
-    );
+fn expected_mists_startup_api_shape() -> MistsStartupApiShape {
+    (
+        11,
+        1,
+        "Weapon Skills".to_string(),
+        1,
+        0,
+        false,
+        0,
+        0,
+        19,
+        7,
+        1,
+        "table".to_string(),
+    )
 }
 
 #[test]
