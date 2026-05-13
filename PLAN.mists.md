@@ -38,6 +38,11 @@ Parity hardening TODO:
 - [x] Implement the legacy Mists `GetTradeSkill*` backing globals so Blizzard_TradeSkillUI can render and enter the panel parity matrix.
 - [x] Fix Mists Blizzard_TrainerUI legacy trainer-service globals and template wiring so ClassTrainerFrame can enter the panel parity matrix.
 - [x] Add a release-profile Mists CI proof command that runs zero `lua-errors`, installed-addon matrix, panel parity, interaction audit, and visual comparison with pipefail-safe logging.
+- [ ] Run the full release-profile Mists proof command locally with `--skip-clone`, document every failure, and fix the first failing lane instead of treating validation-only as sufficient.
+- [ ] Add the connected-GUI micro-menu smoke runner as a release-proof lane using release `wow-sim` and `wow-cli`, so real input dispatch is part of the parity gate.
+- [ ] Extend the release proof to run panel parity and installed-addon panel parity with normal SavedVariables enabled, then fix any saved-var-only panel or addon regression.
+- [ ] Add a retained release-proof artifact index under `docs/baselines/mists-release-proof.md` that records log paths, panel artifact directories, addon rows, and any remaining gaps from the latest full run.
+- [ ] Wire the release-proof command into CI with artifact upload for logs, lua-error JSON, panel screenshots, and frame dumps once the local full proof is green.
 
 Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
 
