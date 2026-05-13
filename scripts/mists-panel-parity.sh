@@ -106,6 +106,7 @@ add_panel "Achievements and Calendar" "achievements-calendar" "AchievementFrame"
 add_panel "Archaeology panel" "archaeology" "ArchaeologyFrame" 'ArchaeologyFrame_LoadUI(); ShowUIPanel(ArchaeologyFrame)'
 add_panel "Craft panel" "craft" "CraftFrame" 'CraftFrame_LoadUI(); ShowUIPanel(CraftFrame)'
 add_panel "TradeSkill panel" "trade-skill" "TradeSkillFrame" 'TradeSkillFrame_LoadUI(); ShowUIPanel(TradeSkillFrame)'
+add_panel "Class trainer LoD panel" "class-trainer" "ClassTrainerFrame" 'ClassTrainerFrame_LoadUI(); ClassTrainerFrame_Show()'
 add_panel "Encounter Journal" "encounter-journal" "EncounterJournal" 'ToggleEncounterJournal()'
 add_panel "Challenge mode LoD panel" "challenges" "ChallengesFrame" 'LoadAddOn("Blizzard_ChallengesUI"); LoadAddOn("Blizzard_PVEUI"); PVEFrame:Show(); ChallengesFrame:Show()'
 add_panel "Currency and Token UI" "currency-token" "TokenFrame" 'ToggleCharacter("TokenFrame")'

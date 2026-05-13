@@ -41,10 +41,10 @@ fn create_children_and_finalize(
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     seed_child_parent_arrays(env, frame, frame_id)?;
-    create_child_frames(env, frame, name, subst_parent, inherits, timing)?;
     let layer_start = Instant::now();
     create_layer_children(env, frame, name, subst_parent, inherits, timing)?;
     timing.frame_layer_children_time += layer_start.elapsed();
+    create_child_frames(env, frame, name, subst_parent, inherits, timing)?;
     let anim_start = Instant::now();
     apply_animation_groups(env, frame, name, inherits)?;
     timing.frame_anim_time += anim_start.elapsed();

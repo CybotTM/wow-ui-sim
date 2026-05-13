@@ -56,6 +56,30 @@ fn mists_trade_skill_frame_load_ui_creates_renderable_trade_skill_frame() {
     );
 }
 
+#[test]
+fn mists_class_trainer_frame_load_ui_creates_renderable_class_trainer_frame() {
+    assert_panel_loads_cleanly(
+        "ClassTrainerFrame",
+        "ClassTrainerFrame",
+        r#"
+            ClassTrainerFrame_LoadUI()
+            if not ClassTrainerFrame then
+                error("ClassTrainerFrame was not created")
+            end
+            if not ClassTrainerExpandTabMiddle then
+                error("ClassTrainerExpandTabMiddle was not created")
+            end
+            ClassTrainerFrame_Show()
+            if not ClassTrainerFrame:IsShown() then
+                error("ClassTrainerFrame did not show")
+            end
+            if (ClassTrainerFrame:GetWidth() or 0) <= 0 or (ClassTrainerFrame:GetHeight() or 0) <= 0 then
+                error("ClassTrainerFrame has no renderable bounds")
+            end
+            "#,
+    );
+}
+
 fn assert_panel_loads_cleanly(panel_name: &str, filter_name: &str, exec_lua: &str) {
     let output_path = format!("/tmp/mists-{}-panel", panel_name.to_ascii_lowercase());
     let output = Command::new("timeout")

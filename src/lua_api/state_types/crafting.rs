@@ -23,4 +23,6 @@ pub struct CraftingState {
     pub selected_craft_index: Option<i32>,
     /// Currently selected legacy TradeSkillFrame list index.
     pub selected_trade_skill_index: Option<i32>,
+    /// Currently selected legacy ClassTrainerFrame service index.
+    pub selected_trainer_service_index: Option<i32>,
 }

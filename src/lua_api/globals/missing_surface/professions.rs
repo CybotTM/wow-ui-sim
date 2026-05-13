@@ -2,6 +2,8 @@
 mod professions_legacy_craft;
 #[path = "professions_legacy_trade_skill.rs"]
 mod professions_legacy_trade_skill;
+#[path = "professions_legacy_trainer.rs"]
+mod professions_legacy_trainer;
 mod professions_registration;
 mod professions_tables;
 mod professions_tracking;
@@ -16,6 +18,7 @@ use crate::lua_api::script_helpers::{fire_named_event_state, protected_lua_pcall
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use professions_legacy_craft::register_legacy_craft_globals;
 use professions_legacy_trade_skill::register_legacy_trade_skill_globals;
+use professions_legacy_trainer::register_legacy_trainer_globals;
 use professions_registration::{register_crafting_order_namespace, register_trade_skill_namespace};
 use professions_tables::{
     all_profession_tables, category_table, item_icon, item_link_value,
@@ -61,6 +64,7 @@ pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()>
     table_set_rust_fn_static(state, state.global, "AbandonSkill", abandon_skill)?;
     register_legacy_craft_globals(state)?;
     register_legacy_trade_skill_globals(state)?;
+    register_legacy_trainer_globals(state)?;
     Ok(())
 }
 

@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::process::Command;
 
-const MISTS_PANEL_ROW_COUNT: &str = "36 panel rows validated";
+const MISTS_PANEL_ROW_COUNT: &str = "37 panel rows validated";
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
