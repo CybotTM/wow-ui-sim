@@ -400,6 +400,138 @@ fn setup_layout_info_remaps_active_saved_layout_after_prepending_presets() {
 }
 
 #[test]
+fn setup_layout_info_preserves_distinct_saved_action_bar_profile_settings() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                ActionBar = 0,
+            },
+            EditModeActionBarSetting = {
+                IconSize = 3,
+                HideBarArt = 6,
+            },
+            EditModeActionBarSystemIndices = {
+                MainBar = 1,
+            },
+            EditModeLayoutType = {
+                Preset = 0,
+                Account = 1,
+            },
+        }
+
+        C_EditMode = {
+            GetLayouts = function()
+                return {
+                    activeLayout = 9,
+                    layouts = {
+                        {
+                            layoutIndex = 9,
+                            layoutName = "Ultrawide",
+                            layoutType = Enum.EditModeLayoutType.Account,
+                            systems = {
+                                {
+                                    system = Enum.EditModeSystem.ActionBar,
+                                    systemIndex = Enum.EditModeActionBarSystemIndices.MainBar,
+                                    isInDefaultPosition = false,
+                                    anchorInfo = { point = "BOTTOMRIGHT", offsetX = -407.5, offsetY = 87.3 },
+                                    settings = {
+                                        { setting = Enum.EditModeActionBarSetting.IconSize, value = 2 },
+                                        { setting = Enum.EditModeActionBarSetting.HideBarArt, value = 1 },
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            layoutIndex = 10,
+                            layoutName = "Widescreen",
+                            layoutType = Enum.EditModeLayoutType.Account,
+                            systems = {
+                                {
+                                    system = Enum.EditModeSystem.ActionBar,
+                                    systemIndex = Enum.EditModeActionBarSystemIndices.MainBar,
+                                    isInDefaultPosition = false,
+                                    anchorInfo = { point = "BOTTOMRIGHT", offsetX = -407.5, offsetY = 87.3 },
+                                    settings = {
+                                        { setting = Enum.EditModeActionBarSetting.IconSize, value = 4 },
+                                        { setting = Enum.EditModeActionBarSetting.HideBarArt, value = 1 },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }
+            end,
+            GetAccountSettings = function()
+                return {}
+            end,
+        }
+
+        EditModePresetLayoutManager = {
+            presetLayoutInfo = {
+                {
+                    layoutIndex = 1,
+                    layoutName = "Modern",
+                    layoutType = Enum.EditModeLayoutType.Preset,
+                    systems = {},
+                },
+                {
+                    layoutIndex = 2,
+                    layoutName = "Classic",
+                    layoutType = Enum.EditModeLayoutType.Preset,
+                    systems = {},
+                },
+            },
+        }
+
+        function tAppendAll(tbl, addedArray)
+            for _, element in ipairs(addedArray) do
+                table.insert(tbl, element)
+            end
+        end
+
+        EditModeManagerFrame = {}
+        "#,
+    )
+    .expect("install multi-profile edit mode stubs");
+
+    env.exec(SETUP_LAYOUT_INFO_LUA)
+        .expect("run setup layout info");
+
+    let (active_name, ultrawide_summary, widescreen_summary): (String, String, String) = env
+        .eval(
+            r#"
+            local layoutInfo = EditModeManagerFrame.layoutInfo
+            local function actionBarSummary(layout)
+                local systemInfo = layout.systems[1]
+                local values = {}
+                for _, settingInfo in ipairs(systemInfo.settings) do
+                    values[settingInfo.setting] = settingInfo.value
+                end
+                return table.concat({
+                    layout.layoutName,
+                    tostring(systemInfo.systemIndex),
+                    tostring(values[Enum.EditModeActionBarSetting.IconSize]),
+                    tostring(values[Enum.EditModeActionBarSetting.HideBarArt]),
+                }, ":")
+            end
+            return layoutInfo.layouts[layoutInfo.activeLayout].layoutName,
+                actionBarSummary(layoutInfo.layouts[3]),
+                actionBarSummary(layoutInfo.layouts[4])
+            "#,
+        )
+        .expect("read distinct saved action bar profile settings");
+
+    assert_eq!(
+        active_name, "Ultrawide",
+        "active layout ID should select the matching saved profile after presets are prepended"
+    );
+    assert_eq!(ultrawide_summary, "Ultrawide:1:2:1");
+    assert_eq!(widescreen_summary, "Widescreen:1:4:1");
+}
+
+#[test]
 fn setup_layout_info_merges_default_action_bar_settings_into_saved_layout() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
