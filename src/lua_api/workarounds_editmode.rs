@@ -210,8 +210,32 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
     end
     mergeDefaultSettings(emm.layoutInfo)
     forceStandardPartyFrames(emm.layoutInfo)
+    local function applyMissingAccountSettings()
+        local accountSettings = emm.AccountSettings
+        local accountEnum = Enum and Enum.EditModeAccountSetting
+        if not accountSettings or not accountEnum then
+            return
+        end
+        if accountSettings.SetTotemActionBarShown and accountEnum.ShowTotemActionBar then
+            local settingValue = nil
+            if emm.GetAccountSettingValueBool then
+                settingValue = emm:GetAccountSettingValueBool(accountEnum.ShowTotemActionBar)
+            else
+                for _, settingInfo in ipairs(emm.accountSettings or {}) do
+                    if settingInfo.setting == accountEnum.ShowTotemActionBar then
+                        settingValue = settingInfo.value == 1
+                        break
+                    end
+                end
+            end
+            if settingValue ~= nil then
+                accountSettings:SetTotemActionBarShown(settingValue)
+            end
+        end
+    end
     if emm.InitializeAccountSettings then
         emm:InitializeAccountSettings()
+        applyMissingAccountSettings()
     elseif not emm.accountSettings then
         emm.accountSettings = C_EditMode.GetAccountSettings()
     end

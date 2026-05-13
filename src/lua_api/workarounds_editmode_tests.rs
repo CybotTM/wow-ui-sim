@@ -520,6 +520,7 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
             EditModeAccountSetting = {
                 ShowGrid = 0,
                 GridSpacing = 1,
+                ShowTotemActionBar = 33,
             },
         }
 
@@ -534,6 +535,7 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
                 return {
                     { setting = Enum.EditModeAccountSetting.ShowGrid, value = 1 },
                     { setting = Enum.EditModeAccountSetting.GridSpacing, value = 42 },
+                    { setting = Enum.EditModeAccountSetting.ShowTotemActionBar, value = 0 },
                 }
             end,
         }
@@ -555,6 +557,13 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
             self.showGrid = self.accountSettings[1].value
             self.gridSpacing = self.accountSettings[2].value
         end
+
+        EditModeManagerFrame.AccountSettings = {
+            totemActionBarShown = true,
+        }
+        function EditModeManagerFrame.AccountSettings:SetTotemActionBarShown(value)
+            self.totemActionBarShown = value
+        end
         "#,
     )
     .expect("install account setting stubs");
@@ -562,12 +571,13 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
     env.exec(SETUP_LAYOUT_INFO_LUA)
         .expect("setup layout info should initialize account settings");
 
-    let (initialized, show_grid, grid_spacing): (bool, i32, i32) = env
-        .eval(
+    let (initialized, show_grid, grid_spacing, totem_action_bar_shown): (bool, i32, i32, bool) =
+        env.eval(
             r#"
             return EditModeManagerFrame.accountSettingsInitialized,
                 EditModeManagerFrame.showGrid,
-                EditModeManagerFrame.gridSpacing
+                EditModeManagerFrame.gridSpacing,
+                EditModeManagerFrame.AccountSettings.totemActionBarShown
             "#,
         )
         .expect("read account setting state");
@@ -578,6 +588,10 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
     );
     assert_eq!(show_grid, 1);
     assert_eq!(grid_spacing, 42);
+    assert!(
+        !totem_action_bar_shown,
+        "saved totem action bar visibility should be applied during account initialization"
+    );
 }
 
 #[test]
