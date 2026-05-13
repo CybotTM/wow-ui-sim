@@ -216,20 +216,33 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
         if not accountSettings or not accountEnum then
             return
         end
-        if accountSettings.SetTotemActionBarShown and accountEnum.ShowTotemActionBar then
+        local missingSetters = {
+            { setting = accountEnum.ShowTimerBars, setter = "SetTimerBarsShown" },
+            { setting = accountEnum.ShowVehicleSeatIndicator, setter = "SetVehicleSeatIndicatorShown" },
+            { setting = accountEnum.ShowArchaeologyBar, setter = "SetArchaeologyBarShown" },
+            { setting = accountEnum.ShowTotemActionBar, setter = "SetTotemActionBarShown" },
+        }
+        local function getAccountSettingBool(setting)
             local settingValue = nil
             if emm.GetAccountSettingValueBool then
-                settingValue = emm:GetAccountSettingValueBool(accountEnum.ShowTotemActionBar)
+                settingValue = emm:GetAccountSettingValueBool(setting)
             else
                 for _, settingInfo in ipairs(emm.accountSettings or {}) do
-                    if settingInfo.setting == accountEnum.ShowTotemActionBar then
+                    if settingInfo.setting == setting then
                         settingValue = settingInfo.value == 1
                         break
                     end
                 end
             end
-            if settingValue ~= nil then
-                accountSettings:SetTotemActionBarShown(settingValue)
+            return settingValue
+        end
+        for _, missingSetter in ipairs(missingSetters) do
+            local setter = missingSetter.setter and accountSettings[missingSetter.setter]
+            if missingSetter.setting and setter then
+                local settingValue = getAccountSettingBool(missingSetter.setting)
+                if settingValue ~= nil then
+                    setter(accountSettings, settingValue)
+                end
             end
         end
     end

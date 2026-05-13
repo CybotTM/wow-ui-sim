@@ -520,6 +520,9 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
             EditModeAccountSetting = {
                 ShowGrid = 0,
                 GridSpacing = 1,
+                ShowTimerBars = 25,
+                ShowVehicleSeatIndicator = 26,
+                ShowArchaeologyBar = 27,
                 ShowTotemActionBar = 33,
             },
         }
@@ -535,6 +538,9 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
                 return {
                     { setting = Enum.EditModeAccountSetting.ShowGrid, value = 1 },
                     { setting = Enum.EditModeAccountSetting.GridSpacing, value = 42 },
+                    { setting = Enum.EditModeAccountSetting.ShowTimerBars, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.ShowVehicleSeatIndicator, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.ShowArchaeologyBar, value = 0 },
                     { setting = Enum.EditModeAccountSetting.ShowTotemActionBar, value = 0 },
                 }
             end,
@@ -559,8 +565,20 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
         end
 
         EditModeManagerFrame.AccountSettings = {
+            timerBarsShown = true,
+            vehicleSeatIndicatorShown = true,
+            archaeologyBarShown = true,
             totemActionBarShown = true,
         }
+        function EditModeManagerFrame.AccountSettings:SetTimerBarsShown(value)
+            self.timerBarsShown = value
+        end
+        function EditModeManagerFrame.AccountSettings:SetVehicleSeatIndicatorShown(value)
+            self.vehicleSeatIndicatorShown = value
+        end
+        function EditModeManagerFrame.AccountSettings:SetArchaeologyBarShown(value)
+            self.archaeologyBarShown = value
+        end
         function EditModeManagerFrame.AccountSettings:SetTotemActionBarShown(value)
             self.totemActionBarShown = value
         end
@@ -571,12 +589,23 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
     env.exec(SETUP_LAYOUT_INFO_LUA)
         .expect("setup layout info should initialize account settings");
 
-    let (initialized, show_grid, grid_spacing, totem_action_bar_shown): (bool, i32, i32, bool) =
-        env.eval(
+    let (
+        initialized,
+        show_grid,
+        grid_spacing,
+        timer_bars_shown,
+        vehicle_seat_indicator_shown,
+        archaeology_bar_shown,
+        totem_action_bar_shown,
+    ): (bool, i32, i32, bool, bool, bool, bool) = env
+        .eval(
             r#"
             return EditModeManagerFrame.accountSettingsInitialized,
                 EditModeManagerFrame.showGrid,
                 EditModeManagerFrame.gridSpacing,
+                EditModeManagerFrame.AccountSettings.timerBarsShown,
+                EditModeManagerFrame.AccountSettings.vehicleSeatIndicatorShown,
+                EditModeManagerFrame.AccountSettings.archaeologyBarShown,
                 EditModeManagerFrame.AccountSettings.totemActionBarShown
             "#,
         )
@@ -588,6 +617,18 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
     );
     assert_eq!(show_grid, 1);
     assert_eq!(grid_spacing, 42);
+    assert!(
+        !timer_bars_shown,
+        "saved timer bars visibility should be applied during account initialization"
+    );
+    assert!(
+        !vehicle_seat_indicator_shown,
+        "saved vehicle seat visibility should be applied during account initialization"
+    );
+    assert!(
+        !archaeology_bar_shown,
+        "saved archaeology bar visibility should be applied during account initialization"
+    );
     assert!(
         !totem_action_bar_shown,
         "saved totem action bar visibility should be applied during account initialization"
