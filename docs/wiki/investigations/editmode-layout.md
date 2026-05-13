@@ -48,8 +48,18 @@ first preset profile and presents the default UI.
 
 The fallback now keeps an in-memory `C_EditMode` state model:
 `SaveLayouts()` stores saved layout data, `SetActiveLayout()` updates the
-selected layout index, and `GetLayouts()` returns a defensive copy. Regression
-coverage lives in `tests/edit_mode_api.rs`.
+selected layout index, and `GetLayouts()` returns a defensive copy.
+
+Real EditMode layout data is not a Lua SavedVariables file. WoW writes it to
+`WTF/Account/<account>/edit-mode-cache-account.txt`, while the active
+per-specialization selection lives in
+`WTF/Account/<account>/<realm>/<character>/edit-mode-cache-character.txt`.
+Startup now imports those cache files before Blizzard addons load, decodes the
+compact system/anchor/settings rows, and seeds `C_EditMode`. Blizzard addons
+are also loaded through the saved-variable-aware loader so Blizzard-owned WTF
+SavedVariables participate in full UI startup.
+
+Regression coverage lives in `tests/edit_mode_api.rs`.
 
 ## Files Modified
 
@@ -57,12 +67,16 @@ coverage lives in `tests/edit_mode_api.rs`.
 - `src/lua_api/globals/c_stubs_api.rs`
 - `tests/frame_positions.rs`, `tests/action_bar.rs`
 - `src/lua_api/env_init/runtime_surface_bootstrap.lua`
+- `src/saved_variables.rs`
+- `src/bin/wow_sim/main.rs`
+- `src/bin/wow_sim/addon_loading.rs`
 - `tests/edit_mode_api.rs`
 
 ## Sources
 
 - [editmode-layout-fixes.md](../../editmode-layout-fixes.md) — full investigation
 - [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `C_EditMode` fallback state
+- [saved_variables.rs](../../../src/saved_variables.rs) — WTF cache import bridge
 
 ## See Also
 

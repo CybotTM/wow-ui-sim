@@ -8969,6 +8969,137 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     return settings
   end
 
+  local __wow_edit_mode_frame_points = {
+    [0] = "CENTER",
+    [1] = "LEFT",
+    [2] = "RIGHT",
+    [3] = "TOP",
+    [4] = "BOTTOM",
+    [5] = "TOPLEFT",
+    [6] = "TOPRIGHT",
+    [7] = "BOTTOMLEFT",
+    [8] = "BOTTOMRIGHT",
+  }
+
+  local function __wow_edit_mode_tokens(text)
+    local tokens = {}
+    if type(text) ~= "string" then
+      return tokens
+    end
+    text = string.gsub(text, "%z", "")
+    for token in string.gmatch(text, "%S+") do
+      table.insert(tokens, token)
+    end
+    return tokens
+  end
+
+  local function __wow_edit_mode_read(tokens, cursor)
+    return tokens[cursor], cursor + 1
+  end
+
+  local function __wow_edit_mode_read_number(tokens, cursor, fallback)
+    local token
+    token, cursor = __wow_edit_mode_read(tokens, cursor)
+    return tonumber(token) or fallback or 0, cursor
+  end
+
+  local function __wow_edit_mode_decode_settings(encoded)
+    local settings = {}
+    if type(encoded) ~= "string" then
+      return settings
+    end
+    for i = 1, string.len(encoded), 2 do
+      local settingByte = string.byte(encoded, i)
+      local valueByte = string.byte(encoded, i + 1)
+      if settingByte and valueByte then
+        table.insert(settings, {
+          setting = settingByte - 35,
+          value = valueByte - 35,
+        })
+      end
+    end
+    return settings
+  end
+
+  local function __wow_edit_mode_parse_system(tokens, cursor)
+    local system, systemIndex, isInDefaultPosition, point, relativePoint
+    local relativeTo, offsetX, offsetY, settingsText
+    system, cursor = __wow_edit_mode_read_number(tokens, cursor)
+    systemIndex, cursor = __wow_edit_mode_read_number(tokens, cursor, -1)
+    isInDefaultPosition, cursor = __wow_edit_mode_read_number(tokens, cursor)
+    point, cursor = __wow_edit_mode_read_number(tokens, cursor)
+    relativePoint, cursor = __wow_edit_mode_read_number(tokens, cursor)
+    relativeTo, cursor = __wow_edit_mode_read(tokens, cursor)
+    offsetX, cursor = __wow_edit_mode_read_number(tokens, cursor)
+    offsetY, cursor = __wow_edit_mode_read_number(tokens, cursor)
+    _, cursor = __wow_edit_mode_read(tokens, cursor)
+    settingsText, cursor = __wow_edit_mode_read(tokens, cursor)
+
+    return {
+      system = system,
+      systemIndex = systemIndex,
+      isInDefaultPosition = isInDefaultPosition ~= 0,
+      anchorInfo = {
+        point = __wow_edit_mode_frame_points[point] or "CENTER",
+        relativeTo = relativeTo or "UIParent",
+        relativePoint = __wow_edit_mode_frame_points[relativePoint] or "CENTER",
+        offsetX = offsetX,
+        offsetY = offsetY,
+      },
+      settings = __wow_edit_mode_decode_settings(settingsText),
+    }, cursor
+  end
+
+  local function __wow_edit_mode_parse_account_cache(text)
+    local tokens = __wow_edit_mode_tokens(text)
+    local cursor = 1
+    local layoutCount, accountSettingCount
+    layoutCount, cursor = __wow_edit_mode_read_number(tokens, cursor)
+    accountSettingCount, cursor = __wow_edit_mode_read_number(tokens, cursor)
+
+    local accountSettings = {}
+    for setting = 0, accountSettingCount - 1 do
+      local value
+      value, cursor = __wow_edit_mode_read_number(tokens, cursor)
+      table.insert(accountSettings, { setting = setting, value = value })
+    end
+
+    local layouts = {}
+    for _ = 1, layoutCount do
+      local layoutIndex, layoutName, systemCount
+      layoutIndex, cursor = __wow_edit_mode_read_number(tokens, cursor)
+      layoutName, cursor = __wow_edit_mode_read(tokens, cursor)
+      systemCount, cursor = __wow_edit_mode_read_number(tokens, cursor)
+      local systems = {}
+      for systemIndex = 1, systemCount do
+        systems[systemIndex], cursor = __wow_edit_mode_parse_system(tokens, cursor)
+      end
+      table.insert(layouts, {
+        layoutIndex = layoutIndex,
+        layoutName = layoutName or "",
+        layoutType = Enum.EditModeLayoutType.Account,
+        systems = systems,
+      })
+    end
+
+    return layouts, accountSettings
+  end
+
+  local function __wow_edit_mode_active_layout_from_character_cache(text, activeSpecIndex)
+    local tokens = __wow_edit_mode_tokens(text)
+    local active = tonumber(tokens[activeSpecIndex or 1])
+    if active and active > 0 then
+      return active
+    end
+    for _, token in ipairs(tokens) do
+      active = tonumber(token)
+      if active and active > 0 then
+        return active
+      end
+    end
+    return nil
+  end
+
   function C_EditMode.GetAccountSettings()
     if __wow_edit_mode_account_setting_state == nil then
       __wow_edit_mode_account_setting_state = __wow_build_default_edit_mode_account_settings()
@@ -9009,6 +9140,18 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     end
     table.insert(__wow_edit_mode_account_setting_state, { setting = setting, value = value })
     table.sort(__wow_edit_mode_account_setting_state, function(a, b) return a.setting < b.setting end)
+  end
+
+  function C_EditMode.__LoadCache(accountCache, characterCache, activeSpecIndex)
+    local layouts, accountSettings = __wow_edit_mode_parse_account_cache(accountCache)
+    local activeLayout = __wow_edit_mode_active_layout_from_character_cache(characterCache, activeSpecIndex)
+    __wow_edit_mode_layout_state = {
+      layouts = layouts,
+      activeLayout = activeLayout or __wow_edit_mode_layout_state.activeLayout or 1,
+    }
+    if #accountSettings > 0 then
+      __wow_edit_mode_account_setting_state = accountSettings
+    end
   end
 end
 if WorldLootObjectExists == nil then

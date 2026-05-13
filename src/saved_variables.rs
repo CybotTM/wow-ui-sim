@@ -18,7 +18,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::lua_api::methods::call_function_state;
+use crate::lua_api::methods::{call_function_state, create_string, table_get_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, Val};
@@ -71,6 +71,22 @@ impl WtfConfig {
     pub fn character_saved_vars_file(&self, addon_name: &str) -> PathBuf {
         self.character_saved_vars_path()
             .join(format!("{}.lua", addon_name))
+    }
+
+    pub fn edit_mode_account_cache_file(&self) -> PathBuf {
+        self.wtf_path
+            .join("Account")
+            .join(&self.account)
+            .join("edit-mode-cache-account.txt")
+    }
+
+    pub fn edit_mode_character_cache_file(&self) -> PathBuf {
+        self.wtf_path
+            .join("Account")
+            .join(&self.account)
+            .join(&self.realm)
+            .join(&self.character)
+            .join("edit-mode-cache-character.txt")
     }
 }
 
@@ -165,6 +181,37 @@ impl SavedVariablesManager {
 
         self.wtf_loaded.insert(addon_name.to_string(), loaded > 0);
         Ok(loaded)
+    }
+
+    pub fn load_edit_mode_cache(
+        &self,
+        state: &mut LuaState,
+        active_spec_index: i32,
+    ) -> crate::Result<bool> {
+        let Some(config) = self.wtf_config.as_ref() else {
+            return Ok(false);
+        };
+
+        let account_cache = read_optional_file(&config.edit_mode_account_cache_file())?;
+        let character_cache = read_optional_file(&config.edit_mode_character_cache_file())?;
+        if account_cache.is_none() && character_cache.is_none() {
+            return Ok(false);
+        }
+
+        let c_edit_mode = LuaApiMut::get_global_val(state, "C_EditMode");
+        let load_cache = table_get_static(state, c_edit_mode, "__LoadCache");
+        let account_arg = optional_string_arg(state, account_cache.as_deref());
+        let character_arg = optional_string_arg(state, character_cache.as_deref());
+        call_function_state(
+            state,
+            load_cache,
+            &[
+                account_arg,
+                character_arg,
+                Val::Num(active_spec_index as f64),
+            ],
+        )?;
+        Ok(true)
     }
 
     /// Initialize saved variables for an addon before it loads.
@@ -360,6 +407,20 @@ impl Default for SavedVariablesManager {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn read_optional_file(path: &Path) -> crate::Result<Option<String>> {
+    if !path.exists() {
+        return Ok(None);
+    }
+    let content = fs::read_to_string(path).map_err(|e| crate::Error::Other(e.to_string()))?;
+    Ok(Some(content))
+}
+
+fn optional_string_arg(state: &mut LuaState, value: Option<&str>) -> Val {
+    value
+        .map(|text| create_string(state, text))
+        .unwrap_or(Val::Nil)
 }
 
 fn get_global(state: &mut LuaState, name: &str) -> Val {

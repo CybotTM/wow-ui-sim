@@ -250,7 +250,8 @@ fn init_and_load(
     // threshold hit.
     env.gc_stop();
     let mut saved_vars = configure_saved_vars(args);
-    addon_loading::load_blizzard_addons(&env, screen);
+    addon_loading::load_edit_mode_cache(&env, saved_vars.as_ref());
+    addon_loading::load_blizzard_addons(&env, &mut saved_vars, screen);
     addon_loading::load_third_party_addons(
         args.skip_addons(),
         args.is_test_command(),

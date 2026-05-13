@@ -17,8 +17,30 @@ pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
 /// Addon names that are test-only and should not be loaded in GUI mode.
 pub const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData", "WowBehaviorTest", "WowDiscovery"];
 
+pub fn load_edit_mode_cache(env: &WowLuaEnv, saved_vars: Option<&SavedVariablesManager>) {
+    let Some(saved_vars) = saved_vars else {
+        return;
+    };
+
+    let active_spec_index = env.state().borrow().player.active_spec_index;
+    match env
+        .loader_env()
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, active_spec_index))
+    {
+        Ok(true) => logging::println_elapsed("Loaded EditMode layout cache from WTF"),
+        Ok(false) => {}
+        Err(error) => logging::println_elapsed(&format!(
+            "Failed to load EditMode layout cache from WTF: {error}"
+        )),
+    }
+}
+
 /// Load Blizzard SharedXML and base UI addons (auto-discovered, dependency-sorted).
-pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
+pub fn load_blizzard_addons(
+    env: &WowLuaEnv,
+    saved_vars: &mut Option<SavedVariablesManager>,
+    screen: ScreenKind,
+) {
     let blizzard_ui_path = match wow_ui_sim::paths::default_blizzard_ui_addons_path() {
         Ok(path) => path,
         Err(e) => {
@@ -38,7 +60,7 @@ pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
     env.gc_stop();
 
     for (name, toc_path) in &addons {
-        load_one_blizzard_addon(env, name, toc_path, verbose, &mut total_timing);
+        load_one_blizzard_addon(env, name, toc_path, saved_vars, verbose, &mut total_timing);
         if name == "Blizzard_EnvironmentCleanup" {
             env.restore_post_cleanup_globals();
         }
@@ -56,10 +78,15 @@ fn load_one_blizzard_addon(
     env: &WowLuaEnv,
     name: &str,
     toc_path: &Path,
+    saved_vars: &mut Option<SavedVariablesManager>,
     verbose: bool,
     timing: &mut LoadTiming,
 ) {
-    match load_addon(&env.loader_env(), toc_path) {
+    let result = match saved_vars {
+        Some(saved_vars) => load_addon_with_saved_vars(&env.loader_env(), toc_path, saved_vars),
+        None => load_addon(&env.loader_env(), toc_path),
+    };
+    match result {
         Ok(r) => record_blizzard_addon_success(env, name, verbose, timing, r),
         Err(e) => println!("{} failed: {}", name, e),
     }

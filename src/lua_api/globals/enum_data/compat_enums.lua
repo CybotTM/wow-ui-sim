@@ -59,3 +59,11 @@ if not Enum.ExpansionLandingPageType then
     WarWithin = 2,
   }
 end
+
+if not CompactRaidGroupTypeEnum then
+  CompactRaidGroupTypeEnum = {
+    Party = Enum.EditModeUnitFrameSystemIndices.Party,
+    Raid = Enum.EditModeUnitFrameSystemIndices.Raid,
+    Arena = Enum.EditModeUnitFrameSystemIndices.Arena,
+  }
+end

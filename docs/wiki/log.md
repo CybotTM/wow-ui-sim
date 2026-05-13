@@ -10,6 +10,11 @@ no-op `SetActiveLayout()`, so Blizzard selected the first preset layout instead
 of a saved profile. Documented the in-memory fallback state model and regression
 coverage.
 
+Follow-up: documented the real WTF import path. EditMode layouts come from
+`edit-mode-cache-account.txt`; active per-spec selection comes from
+`edit-mode-cache-character.txt`. Startup now imports those cache files before
+Blizzard addons load, and Blizzard addons use the saved-variable-aware loader.
+
 ## [2026-05-08] update | Windows default GUI build and headless CI compile
 
 Updated `investigations/windows-port-build.md` after reproducing MSVC `LNK1189`
