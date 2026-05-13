@@ -834,6 +834,7 @@ const ACTION_BAR_PROFILE_REPLAY_STUBS: &str = r#"
             actionButtons = { actionButton },
             ActionBarPageNumber = {},
             BorderArt = {},
+            Selection = {},
         }
 
         function frame:GetName()
@@ -842,6 +843,10 @@ const ACTION_BAR_PROFILE_REPLAY_STUBS: &str = r#"
 
         function frame:SetHasActiveChanges(value)
             self.hasActiveChanges = value
+        end
+
+        function frame.Selection:SetVerticalState(value)
+            self.verticalState = value
         end
 
         function frame:UpdateSettingMap()
@@ -982,6 +987,7 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
         show_grid_reason,
         layout_updated,
         action_bar_layout_updated,
+        selection_vertical,
     ): (
         i32,
         bool,
@@ -997,6 +1003,7 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
         bool,
         bool,
         i32,
+        bool,
         bool,
         bool,
     ) = env
@@ -1019,7 +1026,8 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
                 button.showGrid,
                 button.showGridReason,
                 frame.layoutUpdated,
-                EditModeManagerFrame.actionBarLayoutUpdated
+                EditModeManagerFrame.actionBarLayoutUpdated,
+                frame.Selection.verticalState
             "#,
         )
         .expect("read action bar state");
@@ -1046,6 +1054,10 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
     assert_eq!(show_grid_reason, 4);
     assert!(layout_updated);
     assert!(action_bar_layout_updated);
+    assert!(
+        selection_vertical,
+        "vertical action bars should update EditMode selection state"
+    );
 }
 
 #[test]

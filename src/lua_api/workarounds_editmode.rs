@@ -439,6 +439,9 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
 
                 if setting == actionBarSettings.Orientation then
                     systemFrame.isHorizontal = rawValue == Enum.ActionBarOrientation.Horizontal
+                    if systemFrame.Selection and systemFrame.Selection.SetVerticalState then
+                        pcall(systemFrame.Selection.SetVerticalState, systemFrame.Selection, not systemFrame.isHorizontal)
+                    end
                     systemFrame.addButtonsToRight = true
                     systemFrame.addButtonsToTop = systemFrame.isHorizontal
                     mark_action_bar_layout_dirty()
