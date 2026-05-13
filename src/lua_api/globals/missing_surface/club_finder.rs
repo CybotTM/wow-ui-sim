@@ -20,11 +20,28 @@ const CLUB_FINDER_FLAG_DUNGEONS: f64 = 1.0;
 
 pub(super) fn register_club_finder_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_ClubFinder")?;
+    register_club_finder_default_handlers(state, table_ref)?;
+    register_club_finder_query_handlers(state, table_ref)?;
+    Ok(())
+}
+
+fn register_club_finder_default_handlers(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     register_same_handler(state, table_ref, EMPTY_TABLE_METHODS, empty_table)?;
     register_same_handler(state, table_ref, NOOP_METHODS, noop)?;
     register_same_handler(state, table_ref, TRUE_METHODS, return_true)?;
     register_same_handler(state, table_ref, FALSE_METHODS, return_false)?;
     register_same_handler(state, table_ref, ZERO_METHODS, return_zero)?;
+    table_set_rust_fn_static(state, table_ref, "GetClubFinderDisableReason", noop)?;
+    Ok(())
+}
+
+fn register_club_finder_query_handlers(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -37,6 +54,15 @@ pub(super) fn register_club_finder_surface(state: &mut LuaState) -> LuaResult<()
         "GetPlayerApplicantSettings",
         player_applicant_settings,
     )?;
+    register_club_finder_status_handlers(state, table_ref)?;
+    register_club_finder_list_handlers(state, table_ref)?;
+    Ok(())
+}
+
+fn register_club_finder_status_handlers(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetClubTypeFromFinderGUID", get_club_type)?;
     table_set_rust_fn_static(
         state,
@@ -62,6 +88,13 @@ pub(super) fn register_club_finder_surface(state: &mut LuaState) -> LuaResult<()
         "GetTotalMatchingGuildListSize",
         get_total_matching_guild_list_size,
     )?;
+    Ok(())
+}
+
+fn register_club_finder_list_handlers(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -81,7 +114,6 @@ pub(super) fn register_club_finder_surface(state: &mut LuaState) -> LuaResult<()
         matching_communities,
     )?;
     table_set_rust_fn_static(state, table_ref, "ReturnMatchingGuildList", matching_guilds)?;
-    table_set_rust_fn_static(state, table_ref, "GetClubFinderDisableReason", noop)?;
     Ok(())
 }
 
