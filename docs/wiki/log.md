@@ -45,6 +45,11 @@ invokes Blizzard's `InitializeAccountSettings()` after rebuilding layout info,
 so saved account toggles are applied rather than merely copied into
 `accountSettings`.
 
+Follow-up: documented sparse account cache reconciliation. Imported account
+settings now merge over defaults so older profiles still receive default values
+for newer account-level EditMode toggles before Blizzard initializes account
+settings.
+
 Follow-up: documented cast-bar lock fidelity. Startup no longer overwrites the
 active saved profile's `LockToPlayerFrame` / `CastBarUnderneath` settings.
 

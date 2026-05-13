@@ -8969,6 +8969,29 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     return settings
   end
 
+  local function __wow_merge_edit_mode_account_settings(accountSettings)
+    local merged = __wow_build_default_edit_mode_account_settings()
+    local bySetting = {}
+    for _, settingInfo in ipairs(merged) do
+      bySetting[settingInfo.setting] = settingInfo
+    end
+
+    for _, settingInfo in ipairs(accountSettings or {}) do
+      local existing = bySetting[settingInfo.setting]
+      if existing then
+        existing.value = settingInfo.value
+      else
+        table.insert(merged, {
+          setting = settingInfo.setting,
+          value = settingInfo.value,
+        })
+      end
+    end
+
+    table.sort(merged, function(a, b) return a.setting < b.setting end)
+    return merged
+  end
+
   local __wow_edit_mode_frame_points = {
     [0] = "CENTER",
     [1] = "LEFT",
@@ -9150,7 +9173,7 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
       activeLayout = activeLayout or __wow_edit_mode_layout_state.activeLayout or 1,
     }
     if #accountSettings > 0 then
-      __wow_edit_mode_account_setting_state = accountSettings
+      __wow_edit_mode_account_setting_state = __wow_merge_edit_mode_account_settings(accountSettings)
     end
   end
 end

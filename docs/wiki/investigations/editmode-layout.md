@@ -98,6 +98,12 @@ calls Blizzard's `InitializeAccountSettings()` after rebuilding layout info so
 saved grid, snap, advanced-options, and hidden-frame toggles are applied through
 the normal account-setting control path.
 
+Follow-up: account caches can be sparse when newer account options were added
+after the profile was saved. The bootstrap `C_EditMode.__LoadCache()` path now
+merges saved account values over the default account-setting list so omitted
+newer toggles, such as damage meter and external defensives, still have default
+values before `InitializeAccountSettings()` reads them.
+
 Follow-up: startup no longer forces the active profile's cast bar to lock under
 the player frame. Saved profiles can intentionally set
 `Enum.EditModeCastBarSetting.LockToPlayerFrame = 0` and

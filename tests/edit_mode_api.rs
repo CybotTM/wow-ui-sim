@@ -109,24 +109,32 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
         .with_state(|state| saved_vars.load_edit_mode_cache(state, 2))
         .expect("load edit mode cache");
 
-    let (active, layout_count, account_setting, name, system, point, offset_x, setting_value): (
-        i32,
-        i32,
-        i32,
-        String,
-        i32,
-        String,
-        f64,
-        i32,
-    ) = env
+    let (
+        active,
+        layout_count,
+        grid_spacing,
+        damage_meter_default,
+        external_defensives_default,
+        name,
+        system,
+        point,
+        offset_x,
+        setting_value,
+    ): (i32, i32, i32, i32, i32, String, i32, String, f64, i32) = env
         .eval(
             r#"
             local info = C_EditMode.GetLayouts()
             local settings = C_EditMode.GetAccountSettings()
+            local accountSettingMap = {}
+            for _, settingInfo in ipairs(settings) do
+                accountSettingMap[settingInfo.setting] = settingInfo.value
+            end
             local system = info.layouts[1].systems[1]
             return info.activeLayout,
                 #info.layouts,
-                settings[2].value,
+                accountSettingMap[Enum.EditModeAccountSetting.GridSpacing],
+                accountSettingMap[Enum.EditModeAccountSetting.ShowDamageMeter],
+                accountSettingMap[Enum.EditModeAccountSetting.ShowExternalDefensives],
                 info.layouts[1].layoutName,
                 system.system,
                 system.anchorInfo.point,
@@ -138,7 +146,15 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
 
     assert_eq!(active, 3);
     assert_eq!(layout_count, 1);
-    assert_eq!(account_setting, 100);
+    assert_eq!(grid_spacing, 100);
+    assert_eq!(
+        damage_meter_default, 1,
+        "missing newer account settings should be filled from defaults"
+    );
+    assert_eq!(
+        external_defensives_default, 1,
+        "missing newer account settings should be filled from defaults"
+    );
     assert_eq!(name, "Custom");
     assert_eq!(system, 0);
     assert_eq!(point, "BOTTOM");
