@@ -1,4 +1,4 @@
-use super::{SETUP_LAYOUT_INFO_LUA, WowLuaEnv};
+use super::{APPLY_SYSTEM_ANCHORS_LUA, SETUP_LAYOUT_INFO_LUA, WowLuaEnv};
 
 #[test]
 fn setup_layout_info_clones_preset_layouts_without_copytable() {
@@ -288,5 +288,509 @@ fn setup_layout_info_remaps_active_saved_layout_after_prepending_presets() {
     assert_eq!(
         saved_party_value, 1,
         "saved party-frame settings must not be overwritten by preset startup compatibility"
+    );
+}
+
+#[test]
+fn setup_layout_info_merges_default_action_bar_settings_into_saved_layout() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                CastBar = 1,
+                UnitFrame = 2,
+                ActionBar = 3,
+            },
+            EditModeCastBarSetting = {
+                LockToPlayerFrame = 101,
+            },
+            EditModeLayoutType = {
+                Preset = 0,
+                Account = 1,
+            },
+            EditModeUnitFrameSetting = {
+                CastBarUnderneath = 201,
+                UseRaidStylePartyFrames = 202,
+            },
+            EditModeUnitFrameSystemIndices = {
+                Player = 301,
+                Party = 302,
+            },
+            EditModeActionBarSetting = {
+                HideBarArt = 6,
+                AlwaysShowButtons = 9,
+            },
+        }
+
+        C_EditMode = {
+            GetLayouts = function()
+                return {
+                    activeLayout = 1,
+                    layouts = {
+                        {
+                            layoutIndex = 77,
+                            layoutName = "Saved Sparse",
+                            layoutType = Enum.EditModeLayoutType.Account,
+                            systems = {
+                                {
+                                    system = Enum.EditModeSystem.ActionBar,
+                                    systemIndex = 1,
+                                    isInDefaultPosition = false,
+                                    anchorInfo = { point = "BOTTOM" },
+                                    settings = {
+                                        { setting = Enum.EditModeActionBarSetting.AlwaysShowButtons, value = 1 },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }
+            end,
+            GetAccountSettings = function()
+                return {}
+            end,
+        }
+
+        EditModePresetLayoutManager = {
+            presetLayoutInfo = {},
+        }
+
+        function EditModePresetLayoutManager:GetAllDefaultSettingsForSystem(system, systemIndex)
+            if system == Enum.EditModeSystem.ActionBar and systemIndex == 1 then
+                return {
+                    [Enum.EditModeActionBarSetting.HideBarArt] = 0,
+                    [Enum.EditModeActionBarSetting.AlwaysShowButtons] = 0,
+                }
+            end
+            return {}
+        end
+
+        function tAppendAll(tbl, addedArray)
+            for i, element in ipairs(addedArray) do
+                table.insert(tbl, element)
+            end
+        end
+
+        EditModeManagerFrame = {}
+        "#,
+    )
+    .expect("install sparse saved layout stubs");
+
+    env.exec(SETUP_LAYOUT_INFO_LUA)
+        .expect("run setup layout info");
+
+    let (hide_bar_art, always_show_buttons): (i32, i32) = env
+        .eval(
+            r#"
+            local settings = EditModeManagerFrame.layoutInfo.layouts[1].systems[1].settings
+            local values = {}
+            for _, settingInfo in ipairs(settings) do
+                values[settingInfo.setting] = settingInfo.value
+            end
+            return values[Enum.EditModeActionBarSetting.HideBarArt],
+                values[Enum.EditModeActionBarSetting.AlwaysShowButtons]
+            "#,
+        )
+        .expect("read merged action bar settings");
+
+    assert_eq!(hide_bar_art, 0, "default side-art setting should be merged");
+    assert_eq!(
+        always_show_buttons, 1,
+        "saved values must override default settings"
+    );
+}
+
+#[test]
+fn apply_system_anchors_skips_self_relative_saved_anchor() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                Buffs = 6,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local frame = {
+            system = Enum.EditModeSystem.Buffs,
+            systemIndex = 1,
+            name = "BuffFrame",
+            anchorCalls = 0,
+        }
+
+        function frame:GetName()
+            return self.name
+        end
+
+        function frame:SetHasActiveChanges(value)
+            self.hasActiveChanges = value
+        end
+
+        function frame:UpdateSettingMap()
+            self.settingMapUpdated = true
+        end
+
+        function frame:ApplySystemAnchor()
+            self.anchorCalls = self.anchorCalls + 1
+            error("self-relative anchor should not be applied")
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+            layoutApplyInProgress = false,
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo()
+            return {
+                system = Enum.EditModeSystem.Buffs,
+                systemIndex = 1,
+                isInDefaultPosition = true,
+                anchorInfo = {
+                    point = "RIGHT",
+                    relativeTo = "BuffFrame",
+                    relativePoint = "BOTTOMRIGHT",
+                    offsetX = -13,
+                    offsetY = -15,
+                },
+                settings = {},
+            }
+        end
+
+        function EditModeManagerFrame:UpdateSystem()
+            error("self-relative anchor should not use the full update path")
+        end
+
+        function EditModeManagerFrame:UpdateActionBarPositions()
+            self.updateActionBarPositionsCalled = true
+        end
+        "#,
+    )
+    .expect("install edit mode anchor stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply system anchors");
+
+    let (anchor_calls, has_active_changes, setting_map_updated): (i32, bool, bool) = env
+        .eval(
+            r#"
+            local frame = EditModeManagerFrame.registeredSystemFrames[1]
+            return frame.anchorCalls, frame.hasActiveChanges, frame.settingMapUpdated
+            "#,
+        )
+        .expect("read self-relative anchor state");
+
+    assert_eq!(anchor_calls, 0, "self-relative anchors should be skipped");
+    assert!(
+        !has_active_changes,
+        "system should still be seeded as clean"
+    );
+    assert!(
+        setting_map_updated,
+        "system settings should still be mapped"
+    );
+}
+
+#[test]
+fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                ActionBar = 0,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return true end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local frame = {
+            system = Enum.EditModeSystem.ActionBar,
+            systemIndex = 1,
+            name = "MainActionBar",
+            anchorCalls = 0,
+            actionButtons = { {} },
+        }
+
+        function frame:GetName()
+            return self.name
+        end
+
+        function frame:SetHasActiveChanges(value)
+            self.hasActiveChanges = value
+        end
+
+        function frame:UpdateSettingMap()
+            self.settingMapUpdated = true
+        end
+
+        function frame:ApplySystemAnchor()
+            self.anchorCalls = self.anchorCalls + 1
+        end
+
+        function frame:RefreshGridLayout()
+            self.gridRefreshed = true
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+            layoutApplyInProgress = false,
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo()
+            return {
+                system = Enum.EditModeSystem.ActionBar,
+                systemIndex = 1,
+                isInDefaultPosition = false,
+                anchorInfo = {
+                    point = "BOTTOMLEFT",
+                    relativeTo = UIParent,
+                    relativePoint = "BOTTOMLEFT",
+                    offsetX = 208.2,
+                    offsetY = 99.7,
+                },
+                settings = {},
+            }
+        end
+
+        function EditModeManagerFrame:UpdateActionBarPositions()
+            error("saved action bar anchors should not be repacked")
+        end
+        "#,
+    )
+    .expect("install action bar stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply action bar anchors");
+
+    let (anchor_calls, grid_refreshed): (i32, bool) = env
+        .eval(
+            r#"
+            local frame = EditModeManagerFrame.registeredSystemFrames[1]
+            return frame.anchorCalls, frame.gridRefreshed
+            "#,
+        )
+        .expect("read action bar state");
+
+    assert_eq!(anchor_calls, 1, "saved action bar anchor should apply once");
+    assert!(
+        grid_refreshed,
+        "action bar runtime layout should still refresh"
+    );
+}
+
+#[test]
+fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                UnitFrame = 3,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local frame = {
+            system = Enum.EditModeSystem.UnitFrame,
+            systemIndex = 1,
+            name = "PlayerFrame",
+            anchorCalls = 0,
+        }
+
+        function frame:GetName()
+            return self.name
+        end
+
+        function frame:SetHasActiveChanges(value)
+            self.hasActiveChanges = value
+        end
+
+        function frame:UpdateSettingMap()
+            self.settingMapUpdated = true
+        end
+
+        function frame:ApplySystemAnchor()
+            self.anchorCalls = self.anchorCalls + 1
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+            layoutApplyInProgress = false,
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo()
+            return {
+                system = Enum.EditModeSystem.UnitFrame,
+                systemIndex = 1,
+                isInDefaultPosition = false,
+                anchorInfo = {
+                    point = "TOPLEFT",
+                    relativeTo = UIParent,
+                    relativePoint = "TOPLEFT",
+                    offsetX = -292.4,
+                    offsetY = -144.4,
+                },
+                settings = {
+                    { setting = 16, value = 0 },
+                },
+            }
+        end
+
+        function EditModeManagerFrame:UpdateSystem()
+            error("unit frame startup should not run the full update path")
+        end
+        "#,
+    )
+    .expect("install unit frame stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply unit frame anchors");
+
+    let (anchor_calls, has_active_changes, setting_map_updated): (i32, bool, bool) = env
+        .eval(
+            r#"
+            local frame = EditModeManagerFrame.registeredSystemFrames[1]
+            return frame.anchorCalls, frame.hasActiveChanges, frame.settingMapUpdated
+            "#,
+        )
+        .expect("read unit frame state");
+
+    assert_eq!(anchor_calls, 1, "saved unit frame anchor should apply");
+    assert!(!has_active_changes, "system should be seeded as clean");
+    assert!(
+        setting_map_updated,
+        "system settings should still be mapped"
+    );
+}
+
+#[test]
+fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                CastBar = 1,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local frame = {
+            system = Enum.EditModeSystem.CastBar,
+            systemIndex = nil,
+            name = "PlayerCastingBarFrame",
+        }
+
+        function frame:GetName()
+            return self.name
+        end
+
+        function frame:SetHasActiveChanges(value)
+            self.hasActiveChanges = value
+        end
+
+        function frame:UpdateSettingMap()
+            self.settingMapUpdated = true
+        end
+
+        function frame:ApplySystemAnchor()
+            error("cast bar startup should not apply a scale-affecting anchor")
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+            layoutApplyInProgress = false,
+            requestedSystemIndex = nil,
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(_system, systemIndex)
+            self.requestedSystemIndex = systemIndex
+            if systemIndex ~= -1 then
+                return nil
+            end
+            return {
+                system = Enum.EditModeSystem.CastBar,
+                systemIndex = -1,
+                isInDefaultPosition = false,
+                anchorInfo = {
+                    point = "CENTER",
+                    relativeTo = UIParent,
+                    relativePoint = "CENTER",
+                    offsetX = 0,
+                    offsetY = -174,
+                },
+                settings = {
+                    { setting = 1, value = 0 },
+                },
+            }
+        end
+
+        function EditModeManagerFrame:UpdateSystem()
+            error("nil-index singleton should be seeded directly")
+        end
+        "#,
+    )
+    .expect("install nil-index singleton stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply nil-index singleton anchors");
+
+    let (requested_system_index, has_active_changes, setting_map_updated): (i32, bool, bool) = env
+        .eval(
+            r#"
+            local frame = EditModeManagerFrame.registeredSystemFrames[1]
+            return EditModeManagerFrame.requestedSystemIndex,
+                frame.hasActiveChanges,
+                frame.settingMapUpdated
+            "#,
+        )
+        .expect("read nil-index singleton state");
+
+    assert_eq!(requested_system_index, -1);
+    assert!(!has_active_changes, "system should be seeded as clean");
+    assert!(
+        setting_map_updated,
+        "system settings should still be mapped"
     );
 }

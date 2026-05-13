@@ -66,6 +66,20 @@ that remap, `C_EditMode` selected `Widescreen` while `EditModeManagerFrame`
 activated the `Classic` preset. Preset-only compatibility tweaks must also avoid
 rewriting saved layout settings.
 
+Follow-up: selecting the saved layout still was not enough for the visible UI.
+The startup fast path for action bars seeded Widescreen `systemInfo` and replayed
+settings, but skipped `ApplySystemAnchor`, leaving bars at the temporary
+`TOPLEFT, 0, 0` anchor from `InitSystemAnchors()`. The fast path now applies the
+saved anchor before refreshing bar layout/art.
+
+Follow-up: the main action bar side art is an EditMode setting
+(`Enum.EditModeActionBarSetting.HideBarArt`), not independent renderer state.
+Sparse saved-layout rows can omit default-valued settings, so startup now merges
+missing defaults from Blizzard's modern preset map before seeding systems. The
+action-bar fast path applies those fields directly instead of calling Blizzard
+handlers that iterate `self.actionButtons` before the simulator has a real Lua
+button array there.
+
 Regression coverage lives in `tests/edit_mode_api.rs`.
 
 ## Files Modified

@@ -20,6 +20,16 @@ the saved layout, but `EditModeManagerFrame.layoutInfo` prepended presets and
 kept the old index, activating `Classic`; startup now remaps the active saved
 layout after prepending presets.
 
+Follow-up: documented the visible action-bar anchoring bug. The Widescreen
+layout was active and systemInfo was seeded, but action bars stayed at the
+temporary `TOPLEFT, 0, 0` anchor because the startup fast path skipped
+`ApplySystemAnchor`.
+
+Follow-up: documented main action-bar side art as the `HideBarArt` EditMode
+setting. Sparse saved layouts now merge missing defaults from Blizzard's modern
+preset map, and the action-bar bootstrap path applies those values without
+calling handlers that require an initialized `actionButtons` Lua array.
+
 ## [2026-05-13] update | CASC font path fallback
 
 Updated `investigations/casc-fdid-1579624-root-debug.md` after the standard

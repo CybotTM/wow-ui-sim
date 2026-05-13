@@ -20,6 +20,16 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
         table.insert(systemInfo.settings, { setting = setting, value = value })
     end
 
+    local function hasSystemSetting(systemInfo, setting)
+        if not systemInfo or not systemInfo.settings then return false end
+        for _, settingInfo in ipairs(systemInfo.settings) do
+            if settingInfo.setting == setting then
+                return true
+            end
+        end
+        return false
+    end
+
     local function copyAnchorInfo(anchorInfo)
         if type(anchorInfo) ~= "table" then
             return anchorInfo
@@ -76,6 +86,81 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
             }
         end
         return copy
+    end
+
+    local function defaultSettingsFromModernMap(systemInfo)
+        if not EditModePresetLayoutManager
+            or not EditModePresetLayoutManager.GetModernSystemMap then
+            return nil
+        end
+
+        local modernMap = EditModePresetLayoutManager:GetModernSystemMap()
+        local systemDefaults = modernMap and modernMap[systemInfo.system]
+        if type(systemDefaults) ~= "table" then
+            return nil
+        end
+
+        if systemInfo.systemIndex == nil or systemInfo.systemIndex == -1 then
+            if type(systemDefaults.settings) == "table" then
+                return systemDefaults.settings
+            end
+        end
+
+        local indexedDefaults = systemDefaults[systemInfo.systemIndex]
+        if type(indexedDefaults) == "table" then
+            return indexedDefaults.settings
+        end
+        return nil
+    end
+
+    local function defaultSettingsFromManager(systemInfo)
+        if not EditModePresetLayoutManager
+            or not EditModePresetLayoutManager.GetAllDefaultSettingsForSystem then
+            return nil
+        end
+
+        local ok, defaults = pcall(
+            EditModePresetLayoutManager.GetAllDefaultSettingsForSystem,
+            EditModePresetLayoutManager,
+            systemInfo.system,
+            systemInfo.systemIndex
+        )
+        if ok then
+            return defaults
+        end
+        return nil
+    end
+
+    local function mergeDefaultSystemSettings(systemInfo)
+        if not systemInfo
+            or not EditModePresetLayoutManager then
+            return
+        end
+
+        local defaults = defaultSettingsFromModernMap(systemInfo)
+        if not defaults and not EditModePresetLayoutManager.GetModernSystemMap then
+            defaults = defaultSettingsFromManager(systemInfo)
+        end
+        if type(defaults) ~= "table" then
+            return
+        end
+
+        for setting, value in pairs(defaults) do
+            if not hasSystemSetting(systemInfo, setting) then
+                setSystemSetting(systemInfo, setting, value)
+            end
+        end
+    end
+
+    local function mergeDefaultSettings(layoutInfo)
+        if not layoutInfo or not layoutInfo.layouts then return end
+        for _, layout in ipairs(layoutInfo.layouts) do
+            if layout.layoutType ~= Enum.EditModeLayoutType.Preset and layout.systems then
+                for _, systemInfo in ipairs(layout.systems) do
+                    mergeDefaultSystemSettings(systemInfo)
+                end
+            end
+        end
     end
 
     local function forceCastBarUnderPlayerFrame(layoutInfo)
@@ -137,6 +222,7 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
         tAppendAll(emm.layoutInfo.layouts, savedLayouts)
         emm.layoutInfo.activeLayout = remapActiveLayoutAfterPresetPrepend(emm.layoutInfo, savedLayouts, presetCount)
     end
+    mergeDefaultSettings(emm.layoutInfo)
     forceCastBarUnderPlayerFrame(emm.layoutInfo)
     forceStandardPartyFrames(emm.layoutInfo)
     if not emm.accountSettings then
@@ -188,8 +274,23 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                 or frameName == "CompactRaidFrameContainer"
         end
 
+        local function skips_full_startup_scale_update(systemFrame)
+            local frameName = system_frame_name(systemFrame)
+            -- Saved frame-size values are raw EditMode slider values. Running
+            -- full size updates during startup can transiently feed those raw
+            -- defaults into SetScale before the frame is fully ready.
+            return frameName == "PlayerFrame"
+                or frameName == "TargetFrame"
+                or frameName == "FocusFrame"
+                or frameName == "PlayerCastingBarFrame"
+        end
+
         local function seed_system_frame(systemFrame)
-            local systemInfo = emm:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex)
+            local systemIndex = systemFrame.systemIndex
+            if systemIndex == nil then
+                systemIndex = -1
+            end
+            local systemInfo = emm:GetActiveLayoutSystemInfo(systemFrame.system, systemIndex)
             if not systemInfo then
                 return
             end
@@ -198,26 +299,168 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
             systemFrame.systemInfo = systemInfo
             systemFrame:SetHasActiveChanges(false)
             systemFrame:UpdateSettingMap(true)
+            return true
+        end
+
+        local function anchor_targets_system_frame(systemFrame, anchorInfo)
+            if not systemFrame or type(anchorInfo) ~= "table" then
+                return false
+            end
+
+            local relativeTo = anchorInfo.relativeTo
+            if relativeTo == systemFrame then
+                return true
+            end
+
+            if type(relativeTo) == "string" and type(systemFrame.GetName) == "function" then
+                return relativeTo == systemFrame:GetName()
+            end
+
+            return false
+        end
+
+        local function apply_system_anchor_if_safe(systemFrame)
+            if not systemFrame or not systemFrame.ApplySystemAnchor then
+                return
+            end
+
+            local frameName = system_frame_name(systemFrame)
+            if frameName == "PlayerCastingBarFrame" then
+                return
+            end
+
+            local systemInfo = systemFrame.systemInfo
+            if anchor_targets_system_frame(systemFrame, systemInfo and systemInfo.anchorInfo) then
+                return
+            end
+
+            if frameName == "PlayerFrame"
+                and EditModeSystemMixin
+                and EditModeSystemMixin.ApplySystemAnchor then
+                pcall(EditModeSystemMixin.ApplySystemAnchor, systemFrame)
+                return
+            end
+
+            pcall(systemFrame.ApplySystemAnchor, systemFrame)
         end
 
         local function refresh_action_bar_system(systemFrame)
             local systemInfo = systemFrame.systemInfo
-            -- Replay the action-bar setting handlers without the full
-            -- EditMode frame update path.
-            for _, settingInfo in ipairs(systemInfo and systemInfo.settings or {}) do
-                if systemFrame.UpdateSystemSetting then
-                    pcall(
-                        systemFrame.UpdateSystemSetting,
-                        systemFrame,
-                        settingInfo.setting,
-                        true
-                    )
+            local actionButtons = systemFrame.actionButtons
+            local hasActionButtons = actionButtons
+                and actionButtons[1] ~= nil
+                and actionButtons.GetObjectType == nil
+
+            local function apply_action_bar_setting(settingInfo)
+                local actionBarSettings = Enum and Enum.EditModeActionBarSetting
+                if not actionBarSettings then
+                    return
+                end
+
+                local setting = settingInfo.setting
+                local value = settingInfo.value
+                local valueBool = value == 1 or value == true
+
+                if setting == actionBarSettings.Orientation then
+                    systemFrame.isHorizontal = value == Enum.ActionBarOrientation.Horizontal
+                    systemFrame.addButtonsToRight = true
+                    systemFrame.addButtonsToTop = systemFrame.isHorizontal
+                    if systemFrame.MarkGridLayoutDirty then
+                        systemFrame:MarkGridLayoutDirty()
+                    end
+                    if systemFrame.MarkDividersDirty then
+                        systemFrame:MarkDividersDirty()
+                    end
+                    if systemFrame.MarkBarArtDirty then
+                        systemFrame:MarkBarArtDirty()
+                    end
+                elseif setting == actionBarSettings.NumRows then
+                    systemFrame.numRows = value
+                    if systemFrame.MarkGridLayoutDirty then
+                        systemFrame:MarkGridLayoutDirty()
+                    end
+                    if systemFrame.MarkDividersDirty then
+                        systemFrame:MarkDividersDirty()
+                    end
+                    if systemFrame.MarkBarArtDirty then
+                        systemFrame:MarkBarArtDirty()
+                    end
+                elseif setting == actionBarSettings.NumIcons then
+                    systemFrame.numButtonsShowable = value
+                    if systemFrame.MarkGridLayoutDirty then
+                        systemFrame:MarkGridLayoutDirty()
+                    end
+                    if systemFrame.MarkDividersDirty then
+                        systemFrame:MarkDividersDirty()
+                    end
+                elseif setting == actionBarSettings.IconSize then
+                    systemFrame.iconSize = value
+                    if systemFrame.MarkGridLayoutDirty then
+                        systemFrame:MarkGridLayoutDirty()
+                    end
+                    if systemFrame.MarkDividersDirty then
+                        systemFrame:MarkDividersDirty()
+                    end
+                    if systemFrame.MarkBarArtDirty then
+                        systemFrame:MarkBarArtDirty()
+                    end
+                elseif setting == actionBarSettings.IconPadding then
+                    systemFrame.buttonPadding = value
+                    if systemFrame.MarkGridLayoutDirty then
+                        systemFrame:MarkGridLayoutDirty()
+                    end
+                    if systemFrame.MarkDividersDirty then
+                        systemFrame:MarkDividersDirty()
+                    end
+                    if systemFrame.MarkBarArtDirty then
+                        systemFrame:MarkBarArtDirty()
+                    end
+                elseif setting == actionBarSettings.HideBarArt then
+                    systemFrame.hideBarArt = valueBool
+                    if systemFrame.BorderArt then
+                        systemFrame.BorderArt:SetShown(not systemFrame.hideBarArt)
+                    end
+                    if systemFrame.MarkDividersDirty then
+                        systemFrame:MarkDividersDirty()
+                    end
+                    if systemFrame.MarkBarArtDirty then
+                        systemFrame:MarkBarArtDirty()
+                    end
+                elseif setting == actionBarSettings.HideBarScrolling then
+                    if systemFrame.ActionBarPageNumber then
+                        systemFrame.ActionBarPageNumber:SetShown(not valueBool)
+                    end
+                    if systemFrame.MarkBarArtDirty then
+                        systemFrame:MarkBarArtDirty()
+                    end
+                elseif setting == actionBarSettings.VisibleSetting
+                    and Enum.ActionBarVisibleSetting then
+                    if value == Enum.ActionBarVisibleSetting.InCombat then
+                        systemFrame.visibility = "InCombat"
+                    elseif value == Enum.ActionBarVisibleSetting.OutOfCombat then
+                        systemFrame.visibility = "OutOfCombat"
+                    elseif value == Enum.ActionBarVisibleSetting.Hidden then
+                        systemFrame.visibility = "Hidden"
+                    else
+                        systemFrame.visibility = "Always"
+                    end
+                elseif setting == actionBarSettings.AlwaysShowButtons then
+                    systemFrame.alwaysShowButtons = valueBool
                 end
             end
-            if systemFrame.RefreshGridLayout then
+
+            -- Replay the action-bar setting handlers without the full
+            -- EditMode frame update path. Some bars expose FrameRef userdata
+            -- through actionButtons during bootstrap; Blizzard's handlers call
+            -- pairs(self.actionButtons), which is not safe until the real Lua
+            -- array exists.
+            for _, settingInfo in ipairs(systemInfo and systemInfo.settings or {}) do
+                apply_action_bar_setting(settingInfo)
+            end
+            if hasActionButtons and systemFrame.RefreshGridLayout then
                 systemFrame:RefreshGridLayout()
             end
-            if systemFrame.RefreshDividers then
+            if hasActionButtons and systemFrame.RefreshDividers then
                 systemFrame:RefreshDividers()
             end
             if systemFrame.RefreshBarArt then
@@ -229,22 +472,30 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
             if is_bootstrap_action_bar(systemFrame) then
                 -- Full EditMode action-bar updates are expensive on the live
                 -- path and can stall startup. Seed just enough state for the
-                -- default-position layout pass to run, and let the normal bar
-                -- systems own their runtime layout afterward.
-                seed_system_frame(systemFrame)
-                refresh_action_bar_system(systemFrame)
-            elseif skips_expensive_startup_system_update(systemFrame) then
-                seed_system_frame(systemFrame)
-                if systemFrame.ApplySystemAnchor then
-                    pcall(systemFrame.ApplySystemAnchor, systemFrame)
+                -- layout pass to run, then apply the saved anchor directly.
+                if seed_system_frame(systemFrame) then
+                    apply_system_anchor_if_safe(systemFrame)
+                    refresh_action_bar_system(systemFrame)
                 end
+            elseif skips_expensive_startup_system_update(systemFrame) then
+                if seed_system_frame(systemFrame) then
+                    apply_system_anchor_if_safe(systemFrame)
+                end
+            elseif skips_full_startup_scale_update(systemFrame) then
+                if seed_system_frame(systemFrame) then
+                    apply_system_anchor_if_safe(systemFrame)
+                end
+            elseif seed_system_frame(systemFrame)
+                and anchor_targets_system_frame(systemFrame, systemFrame.systemInfo and systemFrame.systemInfo.anchorInfo) then
+                -- Saved layouts can contain self-relative anchors for dependent
+                -- systems such as BuffFrame. Seed their layout state, but do
+                -- not hand that impossible anchor to SetPoint during startup.
             else
                 pcall(emm.UpdateSystem, emm, systemFrame)
             end
         end
 
         emm.layoutApplyInProgress = false
-        pcall(emm.UpdateActionBarPositions, emm)
     "#;
 
 const FIX_ACTION_BAR_NAN_SIZE_LUA: &str = r#"
@@ -274,8 +525,6 @@ const FIX_ACTION_BAR_NAN_SIZE_LUA: &str = r#"
             end
         end
         MainActionBar:SetSize(lastOx + buttonWidth, buttonHeight)
-        pcall(EditModeManagerFrame.UpdateActionBarPositions,
-              EditModeManagerFrame)
     "#;
 
 /// Initialize EditMode layout info and apply system anchors.
@@ -358,8 +607,8 @@ fn apply_system_anchors(env: &WowLuaEnv) {
 ///
 /// Layout() produces NaN because the bar has no size yet when children try
 /// to resolve anchors relative to it (chicken-and-egg). Compute the bar
-/// size directly from the button grid, then re-run
-/// UpdateActionBarPositions to set the correct BOTTOMLEFT anchor.
+/// size directly from the button grid; saved EditMode anchors are applied
+/// separately and should not be repacked by Blizzard's automatic bar layout.
 fn fix_action_bar_nan_size(env: &WowLuaEnv) {
     let _ = env.exec(FIX_ACTION_BAR_NAN_SIZE_LUA);
 }
