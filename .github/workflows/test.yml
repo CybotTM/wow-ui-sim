@@ -105,8 +105,8 @@ jobs:
     if: ${{ vars.RUN_MISTS_RELEASE_PROOF == '1' || (github.event_name == 'workflow_dispatch' && inputs.run_mists_release_proof) }}
     env:
       LIBGL_ALWAYS_SOFTWARE: "1"
-      VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
       WOW_SIM_SOFTWARE_RENDER: "1"
+      WGPU_BACKEND: gl
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -125,8 +125,12 @@ jobs:
           sudo apt-get install -y \
             jq \
             libasound2-dev \
+            libegl1 \
             libgl1-mesa-dri \
+            libglx-mesa0 \
+            libosmesa6 \
             libudev-dev \
+            mesa-utils \
             mesa-vulkan-drivers \
             pkg-config \
             xvfb

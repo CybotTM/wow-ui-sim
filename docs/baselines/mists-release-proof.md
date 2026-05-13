@@ -74,13 +74,16 @@ uses `scripts/ci-mists-release-proof.sh --skip-clone` and uploads
 `target/mists-release-proof/`, including logs, base `lua-errors` JSON, panel
 screenshots, and frame dumps.
 
-First CI proof dispatch:
+First CI proof dispatch attempts:
 `https://github.com/Osso/wow-ui-sim/actions/runs/25824999285`. The target
 `Mists release proof` job reached the base panel parity lane, uploaded
 `mists-release-proof`, and failed on the first screenshot because the GitHub
-runner lacked a headless GPU adapter. The workflow now installs Mesa software
-Vulkan/GL packages, enables software rendering, and runs the release-proof
-script under `xvfb-run` so screenshot capture has a headless adapter.
+runner lacked a headless GPU adapter. Follow-up run
+`https://github.com/Osso/wow-ui-sim/actions/runs/25827656815` still failed in
+the same screenshot path with `active_backends: 0` under generic Xvfb. The
+workflow now installs the Mesa GL/OSMesa runtime packages, enables software
+rendering, runs the release-proof script under `xvfb-run`, and forces wgpu to
+the GL backend for screenshot capture.
 
 ## Remaining Gaps
 - The latest audited Mists panel workflows have no `Missing` rows in
