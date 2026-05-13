@@ -9,6 +9,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT_DIR="$REPO_ROOT/target/mists-live-gui-smoke"
+WOW_SIM_BIN="${WOW_SIM_BIN:-$REPO_ROOT/target/debug/wow-sim}"
+WOW_CLI_BIN="${WOW_CLI_BIN:-$REPO_ROOT/target/debug/wow-cli}"
 SKIP_BUILD=0
 VALIDATE_ONLY=0
 BUTTON_FILTER=""
@@ -91,7 +93,7 @@ start_gui() {
     mkdir -p "$OUT_DIR"
     LOG_FILE="$OUT_DIR/wow-sim.log"
     WOW_SIM_NO_ADDONS=1 WOW_SIM_NO_SAVED_VARS=1 \
-        "$REPO_ROOT/target/debug/wow-sim" --no-addons --no-saved-vars >"$LOG_FILE" 2>&1 &
+        "$WOW_SIM_BIN" --no-addons --no-saved-vars >"$LOG_FILE" 2>&1 &
     SIM_PID="$!"
     SOCKET="/tmp/wow-lua-$SIM_PID.sock"
 }
@@ -104,7 +106,7 @@ wait_for_gui_socket() {
             tail -n 80 "$LOG_FILE" >&2 || true
             return 1
         fi
-        if WOW_LUA_SOCKET="$SOCKET" "$REPO_ROOT/target/debug/wow-cli" lua -e 'print("READY")' 2>/dev/null | grep -q '^READY$'; then
+        if WOW_LUA_SOCKET="$SOCKET" "$WOW_CLI_BIN" lua -e 'print("READY")' 2>/dev/null | grep -q '^READY$'; then
             return 0
         fi
         sleep 1
@@ -229,7 +231,7 @@ LUA
 
 run_lua_file() {
     local file="$1"
-    WOW_LUA_SOCKET="$SOCKET" "$REPO_ROOT/target/debug/wow-cli" lua -f "$file"
+    WOW_LUA_SOCKET="$SOCKET" "$WOW_CLI_BIN" lua -f "$file"
 }
 
 install_error_probe() {

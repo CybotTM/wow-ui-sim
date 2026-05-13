@@ -13,6 +13,9 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BASELINE="$REPO_ROOT/docs/baselines/mists-panels.md"
 VISUAL_BASELINE="$REPO_ROOT/docs/baselines/mists-panel-visuals.tsv"
 OUT_DIR="$REPO_ROOT/target/mists-panel-parity"
+WOW_SIM_BIN="${WOW_SIM_BIN:-$REPO_ROOT/target/debug/wow-sim}"
+DEFAULT_VISUAL_METRICS_BIN="$REPO_ROOT/target/debug/panel-visual-metrics"
+PANEL_VISUAL_METRICS_BIN="${PANEL_VISUAL_METRICS_BIN:-$DEFAULT_VISUAL_METRICS_BIN}"
 TIMEOUT_SECONDS=120
 PANEL_FILTER=""
 VALIDATE_ONLY=0
@@ -183,11 +186,13 @@ validate_manifest() {
 }
 
 visual_metrics_bin() {
-    echo "$REPO_ROOT/target/debug/panel-visual-metrics"
+    echo "$PANEL_VISUAL_METRICS_BIN"
 }
 
 build_visual_metrics() {
-    cargo build --bin panel-visual-metrics
+    if [ ! -x "$(visual_metrics_bin)" ]; then
+        cargo build --bin panel-visual-metrics
+    fi
 }
 
 write_panel_lua() {
@@ -223,7 +228,7 @@ run_wow_sim() {
     if [ "$LOAD_SAVED_VARS" -eq 0 ]; then
         env_args+=(WOW_SIM_NO_SAVED_VARS=1)
     fi
-    env "${env_args[@]}" timeout "$TIMEOUT_SECONDS" "$REPO_ROOT/target/debug/wow-sim" "$@"
+    env "${env_args[@]}" timeout "$TIMEOUT_SECONDS" "$WOW_SIM_BIN" "$@"
 }
 
 fail_if_exec_or_lua_error() {

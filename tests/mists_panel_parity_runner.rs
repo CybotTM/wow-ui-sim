@@ -180,6 +180,37 @@ fn live_gui_smoke_runner_accepts_focused_button_validation() {
 }
 
 #[test]
+fn release_proof_command_validates_required_mists_lanes() {
+    let output = Command::new(repo_root().join("scripts/ci-mists-release-proof.sh"))
+        .arg("--validate-only")
+        .current_dir(repo_root())
+        .output()
+        .expect("failed to run Mists release proof validation");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "release proof validation failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+
+    for expected_lane in [
+        "zero-lua-errors",
+        "installed-addon-matrix",
+        "panel-parity",
+        "installed-addon-panel-matrix",
+        "interaction-audit",
+        "visual-comparison",
+    ] {
+        assert!(
+            stdout.contains(expected_lane),
+            "release proof validation should list {expected_lane}, got:\n{stdout}"
+        );
+    }
+}
+
+#[test]
 fn lod_audit_documents_every_mists_load_on_demand_addon() {
     let audit_path = repo_root().join("docs/baselines/mists-lod-audit.md");
     let audit = std::fs::read_to_string(&audit_path).expect("failed to read Mists LoD audit");

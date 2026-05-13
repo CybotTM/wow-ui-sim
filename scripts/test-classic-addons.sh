@@ -22,6 +22,7 @@
 #   scripts/test-classic-addons.sh Bartender4         # run a single addon by name
 #   scripts/test-classic-addons.sh --profile wrath    # filter by profile
 #   scripts/test-classic-addons.sh --skip-clone       # use already-cloned vendors
+#   scripts/test-classic-addons.sh --skip-build       # use an existing wow-sim binary
 #   scripts/test-classic-addons.sh --keep-symlinks    # don't tear down on finish
 #   scripts/test-classic-addons.sh --with-saved-vars  # load WTF SavedVariables
 #   scripts/test-classic-addons.sh --fail-on-addon-errors
@@ -39,10 +40,12 @@ COMPAT_ROOT="$REPO_ROOT/tools/classic-addon-compat"
 VENDOR_DIR="$REPO_ROOT/vendor/addons"
 ADDONS_DIR="$REPO_ROOT/Interface/AddOns"
 OUT_DIR="$REPO_ROOT/target/addon-harness"
+WOW_SIM_BIN="${WOW_SIM_BIN:-$REPO_ROOT/target/debug/wow-sim}"
 
 NAME_FILTER=""
 PROFILE_FILTER=""
 SKIP_CLONE=0
+SKIP_BUILD=0
 KEEP_SYMLINKS=0
 WITH_SAVED_VARS=0
 FAIL_ON_ADDON_ERRORS=0
@@ -51,6 +54,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --profile)        PROFILE_FILTER="$2"; shift 2 ;;
         --skip-clone)     SKIP_CLONE=1; shift ;;
+        --skip-build)     SKIP_BUILD=1; shift ;;
         --keep-symlinks)  KEEP_SYMLINKS=1; shift ;;
         --with-saved-vars) WITH_SAVED_VARS=1; shift ;;
         --fail-on-addon-errors) FAIL_ON_ADDON_ERRORS=1; shift ;;
@@ -206,13 +210,15 @@ run_addon() {
         fi
     }
 
-    echo "  → cargo build --features client-$profile"
-    if ! cargo build --bin wow-sim --no-default-features \
-            --features "sound,gui,casc,client-$profile" 2>&1 \
-            | tail -3; then
-        teardown
-        echo "  ✗ BUILD FAILED"
-        return 1
+    if [ "$SKIP_BUILD" -eq 0 ]; then
+        echo "  → cargo build --features client-$profile"
+        if ! cargo build --bin wow-sim --no-default-features \
+                --features "sound,gui,casc,client-$profile" 2>&1 \
+                | tail -3; then
+            teardown
+            echo "  ✗ BUILD FAILED"
+            return 1
+        fi
     fi
 
     local out_suffix=""
@@ -225,7 +231,7 @@ run_addon() {
     local out="$OUT_DIR/$name${out_suffix}-lua-errors.json"
     echo "  → running lua-errors → $out"
     if ! env "${saved_vars_env[@]}" timeout 120 \
-            "$REPO_ROOT/target/debug/wow-sim" lua-errors > "$out" 2>/dev/null; then
+            "$WOW_SIM_BIN" lua-errors > "$out" 2>/dev/null; then
         teardown
         echo "  ✗ wow-sim exited nonzero — possible crash"
         return 1

@@ -37,7 +37,7 @@ Parity hardening TODO:
 - [x] Fix Mists Blizzard_CraftUI LoD construction so `CraftFrame_LoadUI()` creates a renderable `CraftFrame` for the panel parity matrix.
 - [x] Implement the legacy Mists `GetTradeSkill*` backing globals so Blizzard_TradeSkillUI can render and enter the panel parity matrix.
 - [x] Fix Mists Blizzard_TrainerUI legacy trainer-service globals and template wiring so ClassTrainerFrame can enter the panel parity matrix.
-- [ ] Add a release-profile Mists CI proof command that runs zero `lua-errors`, installed-addon matrix, panel parity, interaction audit, and visual comparison with pipefail-safe logging.
+- [x] Add a release-profile Mists CI proof command that runs zero `lua-errors`, installed-addon matrix, panel parity, interaction audit, and visual comparison with pipefail-safe logging.
 
 Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
 

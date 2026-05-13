@@ -13,6 +13,8 @@ MANIFEST="$REPO_ROOT/tools/classic-addon-manifest.tsv"
 COMPAT_ROOT="$REPO_ROOT/tools/classic-addon-compat"
 ADDONS_DIR="$REPO_ROOT/Interface/AddOns"
 OUT_DIR="$REPO_ROOT/target/mists-addon-panel-parity"
+WOW_SIM_BIN="${WOW_SIM_BIN:-$REPO_ROOT/target/debug/wow-sim}"
+PANEL_VISUAL_METRICS_BIN="${PANEL_VISUAL_METRICS_BIN:-$REPO_ROOT/target/debug/panel-visual-metrics}"
 
 NAME_FILTER=""
 PANEL_FILTER=""
@@ -143,7 +145,8 @@ run_addon_panels() {
     ACTIVE_ADDON="$name"
     install_symlink "$name" "$url" "$subpath"
     install_compat_shims "$name"
-    if "$REPO_ROOT/scripts/mists-panel-parity.sh" "${args[@]}"; then
+    if WOW_SIM_BIN="$WOW_SIM_BIN" PANEL_VISUAL_METRICS_BIN="$PANEL_VISUAL_METRICS_BIN" \
+            "$REPO_ROOT/scripts/mists-panel-parity.sh" "${args[@]}"; then
         teardown_addon "$name"
         ACTIVE_ADDON=""
         return 0
