@@ -7,6 +7,9 @@ use crate::saved_variables::WtfConfig;
 const DEFAULT_ACCOUNT: &str = "50868465#2";
 const DEFAULT_REALM: &str = "Burning Blade";
 const DEFAULT_CHARACTER: &str = "Haky";
+const ENV_WTF_ACCOUNT: &str = "WOW_SIM_WTF_ACCOUNT";
+const ENV_WTF_REALM: &str = "WOW_SIM_WTF_REALM";
+const ENV_WTF_CHARACTER: &str = "WOW_SIM_WTF_CHARACTER";
 
 #[derive(Debug, Clone)]
 pub struct WowResourcePaths {
@@ -192,13 +195,13 @@ fn wtf_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
     let mut paths = Vec::new();
     push_env_path(&mut paths, "WOW_SIM_WTF_PATH");
 
-    if cfg!(windows) {
-        for root in install_roots_for_candidates(install_root) {
-            paths.push(root.join("_retail_/WTF"));
-            paths.push(root.join("_beta_/WTF"));
-            paths.push(root.join("_classic_/WTF"));
-        }
-    } else {
+    for root in install_roots_for_candidates(install_root) {
+        paths.push(root.join("_retail_/WTF"));
+        paths.push(root.join("_beta_/WTF"));
+        paths.push(root.join("_classic_/WTF"));
+    }
+
+    if !cfg!(windows) {
         paths.push(PathBuf::from("/syncthing/Sync/Projects/wow/WTF"));
         if let Some(home) = dirs::home_dir() {
             paths.push(home.join("Projects/wow/WTF"));
@@ -224,6 +227,8 @@ fn wow_install_roots() -> Vec<PathBuf> {
         roots.push(PathBuf::from(r"C:\World of Warcraft"));
         roots.push(PathBuf::from(r"C:\Program Files (x86)\World of Warcraft"));
         roots.push(PathBuf::from(r"C:\Program Files\World of Warcraft"));
+    } else {
+        roots.push(PathBuf::from("/syncthing/World of Warcraft"));
     }
 
     roots
@@ -231,23 +236,36 @@ fn wow_install_roots() -> Vec<PathBuf> {
 
 fn discover_wtf_identity(wtf_path: &std::path::Path) -> Option<(String, String, String)> {
     let account_root = wtf_path.join("Account");
-    let account = preferred_child_dir(&account_root, DEFAULT_ACCOUNT)?;
+    let account = preferred_child_dir(&account_root, &preferred_wtf_account())?;
     let account_path = account_root.join(&account);
-    let realm = preferred_child_dir(&account_path, DEFAULT_REALM)?;
-    let character = preferred_child_dir(&account_path.join(&realm), DEFAULT_CHARACTER)?;
+    let realm = preferred_child_dir(&account_path, &preferred_wtf_realm())?;
+    let character = preferred_child_dir(&account_path.join(&realm), &preferred_wtf_character())?;
     Some((account, realm, character))
 }
 
 fn default_wtf_identity(wtf_path: &std::path::Path) -> (String, String, String) {
     let account_root = wtf_path.join("Account");
-    let account = preferred_child_dir(&account_root, DEFAULT_ACCOUNT)
-        .unwrap_or_else(|| DEFAULT_ACCOUNT.to_string());
+    let account = preferred_wtf_account();
+    let account = preferred_child_dir(&account_root, &account).unwrap_or(account);
     let account_path = account_root.join(&account);
-    let realm = preferred_child_dir(&account_path, DEFAULT_REALM)
-        .unwrap_or_else(|| DEFAULT_REALM.to_string());
-    let character = preferred_child_dir(&account_path.join(&realm), DEFAULT_CHARACTER)
-        .unwrap_or_else(|| DEFAULT_CHARACTER.to_string());
+    let realm = preferred_wtf_realm();
+    let realm = preferred_child_dir(&account_path, &realm).unwrap_or(realm);
+    let character = preferred_wtf_character();
+    let character =
+        preferred_child_dir(&account_path.join(&realm), &character).unwrap_or(character);
     (account, realm, character)
+}
+
+fn preferred_wtf_account() -> String {
+    env_string(ENV_WTF_ACCOUNT).unwrap_or_else(|| DEFAULT_ACCOUNT.to_string())
+}
+
+fn preferred_wtf_realm() -> String {
+    env_string(ENV_WTF_REALM).unwrap_or_else(|| DEFAULT_REALM.to_string())
+}
+
+fn preferred_wtf_character() -> String {
+    env_string(ENV_WTF_CHARACTER).unwrap_or_else(|| DEFAULT_CHARACTER.to_string())
 }
 
 fn preferred_child_dir(parent: &std::path::Path, preferred: &str) -> Option<String> {
@@ -281,9 +299,15 @@ fn env_path(var: &str) -> Option<PathBuf> {
         .map(PathBuf::from)
 }
 
+fn env_string(var: &str) -> Option<String> {
+    std::env::var_os(var)
+        .filter(|value| !value.is_empty())
+        .map(|value| value.to_string_lossy().to_string())
+}
+
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     use super::*;
 
@@ -299,5 +323,65 @@ mod tests {
             )),
             "{candidates:#?}"
         );
+    }
+
+    #[test]
+    fn wtf_candidates_prefer_install_root_before_project_mirror_on_linux() {
+        let install_root = PathBuf::from("/tmp/wow-install");
+
+        let candidates = wtf_path_candidates(Some(&install_root));
+
+        let retail_wtf = install_root.join("_retail_/WTF");
+        let project_mirror = PathBuf::from("/syncthing/Sync/Projects/wow/WTF");
+        let retail_index = candidates
+            .iter()
+            .position(|path| path == &retail_wtf)
+            .expect("retail WTF should be a candidate");
+        let project_index = candidates
+            .iter()
+            .position(|path| path == &project_mirror)
+            .expect("project mirror should remain a fallback");
+        assert!(
+            retail_index < project_index,
+            "live install WTF should win over stale project mirrors"
+        );
+    }
+
+    #[test]
+    fn wtf_identity_can_target_palaky_from_environment() {
+        let temp = tempfile::tempdir().expect("create temp dir");
+        let palaky_path = temp.path().join("Account/50868465#2/Burning Blade/Palaky");
+        std::fs::create_dir_all(&palaky_path).expect("create Palaky WTF path");
+
+        let _guard = EnvVarGuard::set("WOW_SIM_WTF_CHARACTER", "Palaky");
+        let (_account, _realm, character) = default_wtf_identity(temp.path());
+
+        assert_eq!(character, "Palaky");
+    }
+
+    struct EnvVarGuard {
+        key: &'static str,
+        previous: Option<std::ffi::OsString>,
+    }
+
+    impl EnvVarGuard {
+        fn set(key: &'static str, value: &str) -> Self {
+            let previous = std::env::var_os(key);
+            unsafe {
+                std::env::set_var(key, value);
+            }
+            Self { key, previous }
+        }
+    }
+
+    impl Drop for EnvVarGuard {
+        fn drop(&mut self) {
+            unsafe {
+                match &self.previous {
+                    Some(value) => std::env::set_var(self.key, value),
+                    None => std::env::remove_var(self.key),
+                }
+            }
+        }
     }
 }
