@@ -598,7 +598,8 @@ const FIX_ACTION_BAR_NAN_SIZE_LUA: &str = r#"
         local buttonHeight = 45
         for i = 1, 12 do
             local c = _G["MainActionBarButtonContainer" .. i]
-            if c then
+            local isShown = not c or not c.IsShown or c:IsShown()
+            if c and isShown then
                 local cw, ch = c:GetSize()
                 if cw and cw == cw and cw > 0 then
                     buttonWidth = cw
@@ -607,9 +608,11 @@ const FIX_ACTION_BAR_NAN_SIZE_LUA: &str = r#"
                     buttonHeight = ch
                 end
             end
-            if c and c:GetNumPoints() > 0 then
-                local _, _, _, ox, _ = c:GetPoint(1)
-                if ox and ox == ox then lastOx = ox end
+            if c and isShown and c:GetNumPoints() > 0 then
+                local point, _, _, ox, _ = c:GetPoint(1)
+                if point == "BOTTOMLEFT" and ox and ox == ox and ox > lastOx then
+                    lastOx = ox
+                end
             end
         end
         MainActionBar:SetSize(lastOx + buttonWidth, buttonHeight)

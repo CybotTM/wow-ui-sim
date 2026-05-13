@@ -1,4 +1,6 @@
-use super::{APPLY_SYSTEM_ANCHORS_LUA, SETUP_LAYOUT_INFO_LUA, WowLuaEnv};
+use super::{
+    APPLY_SYSTEM_ANCHORS_LUA, FIX_ACTION_BAR_NAN_SIZE_LUA, SETUP_LAYOUT_INFO_LUA, WowLuaEnv,
+};
 
 #[test]
 fn setup_layout_info_clones_preset_layouts_without_copytable() {
@@ -1058,6 +1060,77 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
         selection_vertical,
         "vertical action bars should update EditMode selection state"
     );
+}
+
+#[test]
+fn fix_action_bar_size_ignores_hidden_right_anchored_buttons() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        MainActionBar = {
+            width = -472,
+            height = 45,
+        }
+
+        function MainActionBar:GetSize()
+            return self.width, self.height
+        end
+
+        function MainActionBar:SetSize(width, height)
+            self.width = width
+            self.height = height
+        end
+
+        local function newContainer(width, height, point, offsetX, shown)
+            return {
+                width = width,
+                height = height,
+                point = point,
+                offsetX = offsetX,
+                shown = shown,
+            }
+        end
+
+        function newContainerMethods(container)
+            function container:GetSize()
+                return self.width, self.height
+            end
+            function container:GetNumPoints()
+                return 1
+            end
+            function container:GetPoint()
+                return self.point, MainActionBar, self.point, self.offsetX, 0
+            end
+            function container:IsShown()
+                return self.shown
+            end
+            return container
+        end
+
+        for i = 1, 8 do
+            _G["MainActionBarButtonContainer" .. i] = newContainerMethods(
+                newContainer(40, 40, "BOTTOMLEFT", (i - 1) * 47, true)
+            )
+        end
+
+        for i = 9, 12 do
+            _G["MainActionBarButtonContainer" .. i] = newContainerMethods(
+                newContainer(40, 40, "BOTTOMRIGHT", -376 - ((i - 9) * 47), false)
+            )
+        end
+        "#,
+    )
+    .expect("install main action bar size stubs");
+
+    env.exec(FIX_ACTION_BAR_NAN_SIZE_LUA)
+        .expect("fix main action bar size");
+
+    let (width, height): (i32, i32) = env
+        .eval("return MainActionBar.width, MainActionBar.height")
+        .expect("read main action bar size");
+
+    assert_eq!(width, 369);
+    assert_eq!(height, 40);
 }
 
 #[test]
