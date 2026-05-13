@@ -40,6 +40,11 @@ settings. The cache stores compact raw slider values, so the action-bar fast
 path now reads through Blizzard's `GetSettingValue()` before applying display
 values such as icon-size percentages.
 
+Follow-up: documented account-level EditMode setting application. Startup now
+invokes Blizzard's `InitializeAccountSettings()` after rebuilding layout info,
+so saved account toggles are applied rather than merely copied into
+`accountSettings`.
+
 Follow-up: documented cast-bar lock fidelity. Startup no longer overwrites the
 active saved profile's `LockToPlayerFrame` / `CastBarUnderneath` settings.
 

@@ -210,7 +210,9 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
     end
     mergeDefaultSettings(emm.layoutInfo)
     forceStandardPartyFrames(emm.layoutInfo)
-    if not emm.accountSettings then
+    if emm.InitializeAccountSettings then
+        emm:InitializeAccountSettings()
+    elseif not emm.accountSettings then
         emm.accountSettings = C_EditMode.GetAccountSettings()
     end
 "#;

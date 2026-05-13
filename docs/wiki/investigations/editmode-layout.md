@@ -92,6 +92,12 @@ must read values through Blizzard's `GetSettingValue()` after `UpdateSettingMap(
 so settings like `IconSize` use the converted display percentage; raw enum
 comparisons such as orientation and visibility still use raw values.
 
+Follow-up: account-level EditMode settings are not per-system settings, so
+preserving `EditModeManagerFrame.accountSettings` is not enough. Startup now
+calls Blizzard's `InitializeAccountSettings()` after rebuilding layout info so
+saved grid, snap, advanced-options, and hidden-frame toggles are applied through
+the normal account-setting control path.
+
 Follow-up: startup no longer forces the active profile's cast bar to lock under
 the player frame. Saved profiles can intentionally set
 `Enum.EditModeCastBarSetting.LockToPlayerFrame = 0` and

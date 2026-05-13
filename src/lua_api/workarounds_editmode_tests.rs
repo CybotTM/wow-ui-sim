@@ -508,6 +508,79 @@ fn setup_layout_info_merges_default_action_bar_settings_into_saved_layout() {
 }
 
 #[test]
+fn setup_layout_info_initializes_account_settings_from_saved_cache() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeLayoutType = {
+                Preset = 0,
+                Account = 1,
+            },
+            EditModeAccountSetting = {
+                ShowGrid = 0,
+                GridSpacing = 1,
+            },
+        }
+
+        C_EditMode = {
+            GetLayouts = function()
+                return {
+                    activeLayout = 1,
+                    layouts = {},
+                }
+            end,
+            GetAccountSettings = function()
+                return {
+                    { setting = Enum.EditModeAccountSetting.ShowGrid, value = 1 },
+                    { setting = Enum.EditModeAccountSetting.GridSpacing, value = 42 },
+                }
+            end,
+        }
+
+        EditModePresetLayoutManager = {
+            presetLayoutInfo = {},
+        }
+
+        function tAppendAll(tbl, addedArray)
+            for i, element in ipairs(addedArray) do
+                table.insert(tbl, element)
+            end
+        end
+
+        EditModeManagerFrame = {}
+        function EditModeManagerFrame:InitializeAccountSettings()
+            self.accountSettings = C_EditMode.GetAccountSettings()
+            self.accountSettingsInitialized = true
+            self.showGrid = self.accountSettings[1].value
+            self.gridSpacing = self.accountSettings[2].value
+        end
+        "#,
+    )
+    .expect("install account setting stubs");
+
+    env.exec(SETUP_LAYOUT_INFO_LUA)
+        .expect("setup layout info should initialize account settings");
+
+    let (initialized, show_grid, grid_spacing): (bool, i32, i32) = env
+        .eval(
+            r#"
+            return EditModeManagerFrame.accountSettingsInitialized,
+                EditModeManagerFrame.showGrid,
+                EditModeManagerFrame.gridSpacing
+            "#,
+        )
+        .expect("read account setting state");
+
+    assert!(
+        initialized,
+        "saved account settings should be applied through Blizzard's initializer"
+    );
+    assert_eq!(show_grid, 1);
+    assert_eq!(grid_spacing, 42);
+}
+
+#[test]
 fn apply_system_anchors_skips_self_relative_saved_anchor() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
