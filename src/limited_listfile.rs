@@ -8,8 +8,7 @@ use std::sync::LazyLock;
 
 const BUNDLED_LISTFILE: &str = include_str!("../data/wow-ui-sim-listfile.csv");
 
-static BY_PATH: LazyLock<HashMap<&'static str, ListfileEntry>> =
-    LazyLock::new(parse_bundled_listfile);
+static BY_PATH: LazyLock<HashMap<String, ListfileEntry>> = LazyLock::new(parse_bundled_listfile);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ListfileEntry {
@@ -34,11 +33,11 @@ pub fn blizzard_ui_entries() -> impl Iterator<Item = ListfileEntry> {
     entries().filter(|entry| entry.path.starts_with("interface/addons/blizzard_"))
 }
 
-fn parse_bundled_listfile() -> HashMap<&'static str, ListfileEntry> {
+fn parse_bundled_listfile() -> HashMap<String, ListfileEntry> {
     BUNDLED_LISTFILE
         .lines()
         .filter_map(parse_row)
-        .map(|entry| (entry.path, entry))
+        .map(|entry| (normalize_path(entry.path), entry))
         .collect()
 }
 

@@ -74,6 +74,10 @@ use std::sync::OnceLock;
 
 #[cfg(feature = "casc")]
 static FONT_CASC_INITIALIZED: OnceLock<bool> = OnceLock::new();
+#[cfg(feature = "casc")]
+static FONT_CASC_RESOLUTION_CACHE: OnceLock<
+    Option<asset_resolver::casc_cache::CascResolutionCache>,
+> = OnceLock::new();
 
 #[cfg(feature = "casc")]
 fn casc_enabled() -> bool {
@@ -92,11 +96,25 @@ fn try_casc_font_bytes(filename: &str) -> Option<Vec<u8>> {
     if !casc_enabled() {
         return None;
     }
-    let path = format!("fonts/{}", filename.to_lowercase());
+    let path = format!("Fonts/{filename}");
     let resolver = crate::asset_resolver_config::resolver();
     let fdid =
         crate::limited_listfile::lookup_path(&path).or_else(|| resolver.lookup_path(&path))?;
+    if !casc_resolution_contains_fdid(fdid) {
+        return None;
+    }
     resolver.resolve_bytes(fdid)
+}
+
+#[cfg(feature = "casc")]
+fn casc_resolution_contains_fdid(fdid: u32) -> bool {
+    FONT_CASC_RESOLUTION_CACHE
+        .get_or_init(|| {
+            let install = asset_resolver::wow_install_path()?;
+            asset_resolver::casc_resolver::open_resolution_cache_for_install(install).ok()
+        })
+        .as_ref()
+        .is_some_and(|cache| cache.resolve_fdid(fdid).is_some())
 }
 
 #[cfg(not(feature = "casc"))]

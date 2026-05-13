@@ -1,6 +1,6 @@
 # CASC Known-Good Root Debug Probes
 
-FDID `1579624` and font FDID `615960` are present in the local CASC resolution cache and extract successfully. If another root parser cannot find these FDIDs, the likely failure is in MFST/root parsing, locale/content filtering, or build/cache selection rather than in the listfile path.
+FDID `1579624` is a known-good Blizzard UI file probe. Font FDID `615960` was present in one older local CASC resolution cache, but newer retail caches can miss the standard font FDIDs and fall back to path-based reads. If another root parser cannot find these FDIDs, check MFST/root parsing, locale/content filtering, build/cache selection, and path casing before treating the listfile entry as authoritative.
 
 ## Content
 
@@ -56,7 +56,7 @@ end
 
 ### FDID 615960: Friz Quadrata Font
 
-The standard WoW font `FRIZQT__.TTF` also resolves and extracts locally. This is a useful non-Lua probe because it lives under `fonts/` rather than `interface/addons/`.
+The standard WoW font `FRIZQT__.TTF` resolved and extracted in the older cache below. This is no longer a stable known-good probe: on the May 13, 2026 local retail cache, FDIDs `615960`, `615958`, and `615971` were absent from `resolution.sqlite`, and path fallback failed when the cached/listfile path was lowercase (`fonts/frizqt__.ttf`, `fonts/arialn.ttf`, `fonts/frizqt___cyr.ttf`).
 
 ```text
 fdid: 615960
@@ -73,7 +73,7 @@ The local listfiles agree:
 
 ```text
 data/wow-ui-sim-listfile.csv:
-615960;fonts/frizqt__.ttf
+615960;Fonts/FRIZQT__.TTF
 
 data/full-community-listfile.csv:
 615960;fonts/frizqt__.ttf
@@ -89,6 +89,26 @@ CASC: extracted FDID 615960 -> /tmp/fdid-font-check/615960.ttf
 ```
 
 Spelling note: the extension is `.ttf`, not `.tff`.
+
+### May 2026 Font Path-Casing Failure
+
+Symptom:
+
+```text
+asset-cache byte resolve failed: fdid 615960: CASC read FDID 615960 via listfile path fonts/frizqt__.ttf: read CASC path fonts/frizqt__.ttf: Content not found: Path not found in root file: fonts/frizqt__.ttf
+```
+
+Root cause:
+
+- `data/wow-ui-sim-listfile.csv` stored bundled font rows as lowercase paths.
+- `WowFontSystem` also lowercased the requested CASC font filename.
+- When the asset-resolver resolution cache did not contain those font FDIDs, `resolve_bytes(fdid)` fell back to the listfile path and asked CASC for the lowercase path, which this root file rejected.
+
+Fix:
+
+- Preserve canonical WoW font path casing in the bundled listfile (`Fonts/FRIZQT__.TTF`, `Fonts/ARIALN.TTF`, `Fonts/FRIZQT___CYR.TTF`).
+- Key bundled listfile lookups by normalized path while preserving the original path on `ListfileEntry`.
+- Before font byte resolution, check the CASC resolution cache for the FDID. If it is absent, skip the noisy `resolve_bytes(fdid)` path and let `WowFontSystem` fall back through its normal font fallback path.
 
 ### Gethe 12.0.5 Check
 

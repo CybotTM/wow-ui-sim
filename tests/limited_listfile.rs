@@ -13,3 +13,12 @@ fn bundled_limited_listfile_resolves_common_assets_case_insensitively() {
         Some(136243)
     );
 }
+
+#[test]
+fn bundled_limited_listfile_preserves_font_path_casing() {
+    let entry = wow_ui_sim::limited_listfile::lookup_entry("fonts/frizqt__.ttf")
+        .expect("FRIZQT__.TTF listfile entry");
+
+    assert_eq!(entry.fdid, 615960);
+    assert_eq!(entry.path, "Fonts/FRIZQT__.TTF");
+}

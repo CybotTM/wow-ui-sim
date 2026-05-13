@@ -20,6 +20,15 @@ the saved layout, but `EditModeManagerFrame.layoutInfo` prepended presets and
 kept the old index, activating `Classic`; startup now remaps the active saved
 layout after prepending presets.
 
+## [2026-05-13] update | CASC font path fallback
+
+Updated `investigations/casc-fdid-1579624-root-debug.md` after the standard
+font FDIDs (`615960`, `615958`, `615971`) failed through asset-resolver's
+path fallback with lowercase `fonts/...` paths. Documented the fix: preserve
+canonical `Fonts/...` casing in the bundled listfile, normalize lookup keys
+without losing entry path casing, and skip noisy `resolve_bytes(fdid)` calls
+when the CASC resolution cache has no font FDID entry.
+
 ## [2026-05-08] update | Windows default GUI build and headless CI compile
 
 Updated `investigations/windows-port-build.md` after reproducing MSVC `LNK1189`

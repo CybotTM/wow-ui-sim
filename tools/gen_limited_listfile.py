@@ -24,9 +24,9 @@ SCAN_PATHS = [
     ROOT / "Interface/AddOns",
 ]
 FONT_PATHS = [
-    "fonts/frizqt__.ttf",
-    "fonts/arialn.ttf",
-    "fonts/frizqt___cyr.ttf",
+    "Fonts/FRIZQT__.TTF",
+    "Fonts/ARIALN.TTF",
+    "Fonts/FRIZQT___CYR.TTF",
     "fonts/arheiuhk_bd.ttf",
     "fonts/morpheus.ttf",
     "fonts/skurri.ttf",

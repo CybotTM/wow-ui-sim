@@ -26,6 +26,15 @@ fn casc_available() -> bool {
     true
 }
 
+fn casc_resolution_contains_fdid(fdid: u32) -> bool {
+    let Some(install) = asset_resolver::wow_install_path() else {
+        return false;
+    };
+    asset_resolver::casc_resolver::open_resolution_cache_for_install(install)
+        .ok()
+        .is_some_and(|cache| cache.resolve_fdid(fdid).is_some())
+}
+
 #[test]
 fn casc_resolves_baseline_textures() {
     if !casc_available() {
@@ -58,15 +67,19 @@ fn casc_resolves_baseline_fonts() {
     }
 
     let probes = [
-        "fonts/frizqt__.ttf",
-        "fonts/arialn.ttf",
-        "fonts/frizqt___cyr.ttf",
+        "Fonts/FRIZQT__.TTF",
+        "Fonts/ARIALN.TTF",
+        "Fonts/FRIZQT___CYR.TTF",
     ];
     let resolver = wow_ui_sim::asset_resolver_config::resolver();
     for path in probes {
         let fdid = resolver
             .lookup_path(path)
             .unwrap_or_else(|| panic!("listfile miss for {path}"));
+        if !casc_resolution_contains_fdid(fdid) {
+            eprintln!("skipping {path}: fdid {fdid} missing from CASC resolution cache");
+            continue;
+        }
         let bytes = resolver
             .resolve_bytes(fdid)
             .unwrap_or_else(|| panic!("resolve_bytes failed for {path} (fdid {fdid})"));
