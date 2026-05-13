@@ -329,6 +329,24 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
             pcall(systemFrame.ApplySystemAnchor, systemFrame)
         end
 
+        local function replay_system_settings(systemFrame)
+            local systemInfo = systemFrame and systemFrame.systemInfo
+            if not systemInfo or not systemFrame.UpdateSystemSetting then
+                return
+            end
+
+            for _, settingInfo in ipairs(systemInfo.settings or {}) do
+                local setting = settingInfo.setting
+                local unitFrameSettings = Enum and Enum.EditModeUnitFrameSetting
+                local needsAuraUpdate = unitFrameSettings
+                    and setting == unitFrameSettings.BuffsOnTop
+                    and not systemFrame.UpdateAuras
+                if not needsAuraUpdate then
+                    pcall(systemFrame.UpdateSystemSetting, systemFrame, setting, true)
+                end
+            end
+        end
+
         local function refresh_action_bar_system(systemFrame)
             local systemInfo = systemFrame.systemInfo
             local actionButtons = systemFrame.actionButtons
@@ -465,16 +483,19 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
             elseif skips_expensive_startup_system_update(systemFrame) then
                 if seed_system_frame(systemFrame) then
                     apply_system_anchor_if_safe(systemFrame)
+                    replay_system_settings(systemFrame)
                 end
             elseif skips_full_startup_scale_update(systemFrame) then
                 if seed_system_frame(systemFrame) then
                     apply_system_anchor_if_safe(systemFrame)
+                    replay_system_settings(systemFrame)
                 end
             elseif seed_system_frame(systemFrame)
                 and anchor_targets_system_frame(systemFrame, systemFrame.systemInfo and systemFrame.systemInfo.anchorInfo) then
                 -- Saved layouts can contain self-relative anchors for dependent
                 -- systems such as BuffFrame. Seed their layout state, but do
                 -- not hand that impossible anchor to SetPoint during startup.
+                replay_system_settings(systemFrame)
             else
                 pcall(emm.UpdateSystem, emm, systemFrame)
             end

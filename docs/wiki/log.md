@@ -33,6 +33,11 @@ calling handlers that require an initialized `actionButtons` Lua array.
 Follow-up: documented cast-bar lock fidelity. Startup no longer overwrites the
 active saved profile's `LockToPlayerFrame` / `CastBarUnderneath` settings.
 
+Follow-up: documented saved setting replay for seeded EditMode systems. Startup
+now applies saved settings for systems that skip full `UpdateSystem()`, while
+deferring unit-frame `BuffsOnTop` if the seeded frame has no `UpdateAuras()`
+method and would otherwise add a ScriptErrors entry.
+
 ## [2026-05-13] update | CASC font path fallback
 
 Updated `investigations/casc-fdid-1579624-root-debug.md` after the standard

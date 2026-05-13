@@ -714,6 +714,10 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
             EditModeSystem = {
                 UnitFrame = 3,
             },
+            EditModeUnitFrameSetting = {
+                BuffsOnTop = 2,
+                FrameSize = 16,
+            },
         }
 
         UIParent = { name = "UIParent" }
@@ -727,6 +731,7 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
             systemIndex = 1,
             name = "PlayerFrame",
             anchorCalls = 0,
+            updatedSettings = {},
         }
 
         function frame:GetName()
@@ -743,6 +748,17 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
 
         function frame:ApplySystemAnchor()
             self.anchorCalls = self.anchorCalls + 1
+        end
+
+        function frame:UpdateSystemSetting(setting, entireSystemUpdate)
+            if setting == Enum.EditModeUnitFrameSetting.BuffsOnTop then
+                self.buffsAttempted = true
+                error("BuffsOnTop should not replay without UpdateAuras")
+            end
+            table.insert(self.updatedSettings, {
+                setting = setting,
+                entireSystemUpdate = entireSystemUpdate,
+            })
         end
 
         EditModeManagerFrame = {
@@ -768,7 +784,8 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
                     offsetY = -144.4,
                 },
                 settings = {
-                    { setting = 16, value = 0 },
+                    { setting = Enum.EditModeUnitFrameSetting.BuffsOnTop, value = 1 },
+                    { setting = Enum.EditModeUnitFrameSetting.FrameSize, value = 0 },
                 },
             }
         end
@@ -783,11 +800,23 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
     env.exec(APPLY_SYSTEM_ANCHORS_LUA)
         .expect("apply unit frame anchors");
 
-    let (anchor_calls, has_active_changes, setting_map_updated): (i32, bool, bool) = env
+    let (
+        anchor_calls,
+        has_active_changes,
+        setting_map_updated,
+        updated_setting,
+        entire_update,
+        buffs_attempted,
+    ): (i32, bool, bool, i32, bool, bool) = env
         .eval(
             r#"
             local frame = EditModeManagerFrame.registeredSystemFrames[1]
-            return frame.anchorCalls, frame.hasActiveChanges, frame.settingMapUpdated
+            return frame.anchorCalls,
+                frame.hasActiveChanges,
+                frame.settingMapUpdated,
+                frame.updatedSettings[1] and frame.updatedSettings[1].setting,
+                frame.updatedSettings[1] and frame.updatedSettings[1].entireSystemUpdate,
+                frame.buffsAttempted or false
             "#,
         )
         .expect("read unit frame state");
@@ -797,6 +826,18 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
     assert!(
         setting_map_updated,
         "system settings should still be mapped"
+    );
+    assert_eq!(
+        updated_setting, 16,
+        "saved unit-frame settings should be applied even when full UpdateSystem is skipped"
+    );
+    assert!(
+        entire_update,
+        "startup setting application should use the full-update flag"
+    );
+    assert!(
+        !buffs_attempted,
+        "BuffsOnTop should wait until an aura update method exists"
     );
 }
 
@@ -821,6 +862,7 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
             system = Enum.EditModeSystem.CastBar,
             systemIndex = nil,
             name = "PlayerCastingBarFrame",
+            updatedSettings = {},
         }
 
         function frame:GetName()
@@ -837,6 +879,13 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
 
         function frame:ApplySystemAnchor()
             error("cast bar startup should not apply a scale-affecting anchor")
+        end
+
+        function frame:UpdateSystemSetting(setting, entireSystemUpdate)
+            table.insert(self.updatedSettings, {
+                setting = setting,
+                entireSystemUpdate = entireSystemUpdate,
+            })
         end
 
         EditModeManagerFrame = {
@@ -882,13 +931,19 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
     env.exec(APPLY_SYSTEM_ANCHORS_LUA)
         .expect("apply nil-index singleton anchors");
 
-    let (requested_system_index, has_active_changes, setting_map_updated): (i32, bool, bool) = env
+    let (requested_system_index, has_active_changes, setting_map_updated, updated_setting): (
+        i32,
+        bool,
+        bool,
+        i32,
+    ) = env
         .eval(
             r#"
             local frame = EditModeManagerFrame.registeredSystemFrames[1]
             return EditModeManagerFrame.requestedSystemIndex,
                 frame.hasActiveChanges,
-                frame.settingMapUpdated
+                frame.settingMapUpdated,
+                frame.updatedSettings[1] and frame.updatedSettings[1].setting
             "#,
         )
         .expect("read nil-index singleton state");
@@ -898,5 +953,9 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
     assert!(
         setting_map_updated,
         "system settings should still be mapped"
+    );
+    assert_eq!(
+        updated_setting, 1,
+        "nil-index singleton settings should be applied after seeding"
     );
 }

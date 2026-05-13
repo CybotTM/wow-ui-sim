@@ -86,6 +86,15 @@ the player frame. Saved profiles can intentionally set
 `Enum.EditModeUnitFrameSetting.CastBarUnderneath = 0`; those values must remain
 profile data, while missing defaults are still filled from the preset map.
 
+Follow-up: some EditMode systems are intentionally seeded instead of sent through
+Blizzard's full `UpdateSystem()` during startup because those paths do expensive
+roster work or can apply scale before the frame is ready. Seeding still needs to
+replay saved settings, so the startup path now calls `UpdateSystemSetting()` for
+those systems after loading their saved `systemInfo`. Unit-frame
+`BuffsOnTop` is deferred when a seeded frame has no `UpdateAuras()` method,
+which keeps ScriptErrors clean without dropping the saved setting from the
+profile data.
+
 Regression coverage lives in `tests/edit_mode_api.rs`.
 
 ## Files Modified
