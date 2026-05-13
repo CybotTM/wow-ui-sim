@@ -8,6 +8,8 @@ use rilua::{LuaResult, Val};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+type RuntimeButtonTextureSlot<'a> = (&'static str, Option<&'a crate::xml::TextureXml>);
+
 pub(super) fn create_template_child_frames(
     state: &mut LuaState,
     state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
@@ -497,33 +499,37 @@ pub(super) fn ensure_runtime_button_texture_slots(
     frame_id: u64,
     frame: &crate::xml::FrameXml,
 ) -> LuaResult<()> {
-    let is_button = {
-        let sim = borrow_state(state)?;
-        sim.widgets
-            .get(frame_id)
-            .map(|widget| {
-                matches!(
-                    widget.widget_type,
-                    WidgetType::Button | WidgetType::CheckButton
-                )
-            })
-            .unwrap_or(false)
-    };
-    if !is_button {
+    if !is_runtime_button(state, frame_id)? {
         return Ok(());
     }
 
-    let slots = [
-        ("NormalTexture", frame.normal_texture()),
-        ("PushedTexture", frame.pushed_texture()),
-        ("HighlightTexture", frame.highlight_texture()),
-        ("DisabledTexture", frame.disabled_texture()),
-        ("CheckedTexture", frame.checked_texture()),
-        ("DisabledCheckedTexture", frame.disabled_checked_texture()),
-    ];
+    let aliases = create_runtime_button_texture_slots(state, frame_id, frame)?;
+    publish_runtime_button_texture_aliases(state, frame_id, aliases)
+}
+
+fn is_runtime_button(state: &LuaState, frame_id: u64) -> LuaResult<bool> {
+    let sim = borrow_state(state)?;
+    let is_button = sim
+        .widgets
+        .get(frame_id)
+        .map(|widget| {
+            matches!(
+                widget.widget_type,
+                WidgetType::Button | WidgetType::CheckButton
+            )
+        })
+        .unwrap_or(false);
+    Ok(is_button)
+}
+
+fn create_runtime_button_texture_slots(
+    state: &mut LuaState,
+    frame_id: u64,
+    frame: &crate::xml::FrameXml,
+) -> LuaResult<Vec<(String, u64)>> {
     let mut aliases = Vec::new();
     let mut sim = borrow_state_mut(state)?;
-    for (key, texture) in slots {
+    for (key, texture) in runtime_button_texture_slots(frame) {
         if let Some(texture) = texture {
             let texture_id =
                 crate::lua_api::frame::methods::methods_helpers::get_or_create_button_texture(
@@ -531,16 +537,44 @@ pub(super) fn ensure_runtime_button_texture_slots(
                 );
             if let Some(parent_key) = texture.parent_key.as_deref()
                 && parent_key != key
-                && let Some(button) = sim.widgets.get_mut_visual(frame_id)
             {
-                button
-                    .children_keys
-                    .insert(parent_key.to_string(), texture_id);
+                add_runtime_button_texture_alias(&mut sim, frame_id, parent_key, texture_id);
                 aliases.push((parent_key.to_string(), texture_id));
             }
         }
     }
-    drop(sim);
+    Ok(aliases)
+}
+
+fn runtime_button_texture_slots(frame: &crate::xml::FrameXml) -> [RuntimeButtonTextureSlot<'_>; 6] {
+    [
+        ("NormalTexture", frame.normal_texture()),
+        ("PushedTexture", frame.pushed_texture()),
+        ("HighlightTexture", frame.highlight_texture()),
+        ("DisabledTexture", frame.disabled_texture()),
+        ("CheckedTexture", frame.checked_texture()),
+        ("DisabledCheckedTexture", frame.disabled_checked_texture()),
+    ]
+}
+
+fn add_runtime_button_texture_alias(
+    sim: &mut crate::lua_api::SimState,
+    frame_id: u64,
+    parent_key: &str,
+    texture_id: u64,
+) {
+    if let Some(button) = sim.widgets.get_mut_visual(frame_id) {
+        button
+            .children_keys
+            .insert(parent_key.to_string(), texture_id);
+    }
+}
+
+fn publish_runtime_button_texture_aliases(
+    state: &mut LuaState,
+    frame_id: u64,
+    aliases: Vec<(String, u64)>,
+) -> LuaResult<()> {
     for (parent_key, texture_id) in aliases {
         crate::lua_api::globals::template::assign_parent_key(
             state,
