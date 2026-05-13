@@ -43,7 +43,7 @@ Parity hardening TODO:
 - [x] Extend the release proof to run panel parity and installed-addon panel parity with normal SavedVariables enabled, then fix any saved-var-only panel or addon regression.
 - [x] Fix Mists action/micro/bag bar visual regression where lower bar slots render black/empty with clipped or offset highlight/hand affordances.
 - [x] Fix Mists unit frame/action area visual regression where PlayerFrame/target-frame art overlaps or clips, target names like Khadgar render in cramped frames, gray placeholder bars leak, and right-side action slots render as broken black boxes.
-- [ ] Fix Mists specialization/talent UI layout overlap, then implement the `Learn` specialization flow so it switches from spec selection into the actual talents UI.
+- [x] Fix Mists specialization/talent UI layout overlap, then implement the `Learn` specialization flow so it switches from spec selection into the actual talents UI.
 - [ ] Audit and fix Mists font loading so Blizzard panels use the expected font assets instead of fallback/missing-font rendering.
 - [ ] Add a retained release-proof artifact index under `docs/baselines/mists-release-proof.md` that records log paths, panel artifact directories, addon rows, and any remaining gaps from the latest full run.
 - [ ] Wire the release-proof command into CI with artifact upload for logs, lua-error JSON, panel screenshots, and frame dumps once the local full proof is green.

@@ -154,6 +154,68 @@ fn mists_talents_and_glyphs_mutate_selected_state() {
     assert_no_lua_errors(&stdout, &stderr);
 }
 
+#[test]
+fn mists_specialization_learn_button_activates_spec_for_talents() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(env!("CARGO_BIN_EXE_wow-sim"))
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            A_Admin.SetSpec(4)
+            ToggleTalentFrame()
+            if not PlayerTalentFrame or not PlayerTalentFrame:IsShown() then
+                error("PlayerTalentFrame did not open")
+            end
+
+            PlayerTalentTab_OnClick(PlayerTalentFrameTab1)
+            PlayerTalentFrame_UpdateSpecFrame(PlayerTalentFrameSpecialization, 2)
+            local learnButton = PlayerTalentFrameSpecialization.learnButton
+            if not learnButton or not learnButton:IsEnabled() then
+                error("specialization Learn button was not enabled")
+            end
+
+            learnButton:Click()
+            local dialog = StaticPopup_FindVisible and StaticPopup_FindVisible("CONFIRM_LEARN_SPEC")
+            if not dialog or not dialog.button1 then
+                error("specialization Learn confirmation did not open")
+            end
+            dialog.button1:Click()
+
+            if C_SpecializationInfo.GetSpecialization() ~= 2 or GetSpecialization() ~= 2 then
+                error("specialization Learn did not activate the previewed spec")
+            end
+
+            PlayerTalentTab_OnClick(PlayerTalentFrameTab2)
+            if not PlayerTalentFrameTalents or not PlayerTalentFrameTalents:IsShown() then
+                error("talent rows did not become reachable after learning a spec")
+            end
+
+            local row = PlayerTalentFrameTalents.tier1
+            local button = row and row.talent1
+            if not button or not button:IsShown() or not button.icon or not button.icon:GetTexture() then
+                error("learned specialization did not expose populated talent buttons")
+            end
+            "#,
+            "dump-tree",
+            "--filter-key",
+            "PlayerTalentFrame",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+}
+
 fn assert_no_lua_errors(stdout: &str, stderr: &str) {
     assert!(
         !stdout.contains("Lua error") && !stderr.contains("Lua error"),
