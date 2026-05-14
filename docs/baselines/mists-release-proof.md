@@ -120,6 +120,27 @@ data-heavy, auction-focused, nameplate, map, dialogue, and item-level addons
 enabled, including Store/CatalogShop rows with normal SavedVariables loaded,
 without adding CI texture requirements or rerunning the release-proof wrapper.
 
+### Bounded Sample Coverage Audit
+
+The installed Mists addon manifest currently contains nine rows. Each row now
+has at least one bounded panel sample with normal SavedVariables enabled:
+
+| Addon | SavedVariables panel evidence |
+|---|---|
+| `AllTheThings` | Collections, TradeSkill |
+| `Auctionator` | Auction House, Mail |
+| `BlizzMove` | Store/CatalogShop |
+| `DeModal` | Store/CatalogShop, Character, Spellbook/professions, TradeSkill |
+| `DialogueUI` | Quest choice, Quest log |
+| `Leatrix_Maps` | World Map, Quest log |
+| `Leatrix_Plus` | Spellbook/professions, TradeSkill |
+| `Plater` | Nameplates, Action bars |
+| `SimpleItemLevel` | Character, Inspect/Guild Control |
+
+The remaining local coverage gap is enforcement: the artifact index records the
+bounded samples, but no local checker fails when a future manifest row lacks at
+least one saved-vars panel sample and retained artifact path.
+
 ## Lane Logs
 
 All lane logs live under `target/mists-release-proof/logs/`:
