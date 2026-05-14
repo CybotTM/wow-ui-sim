@@ -28,6 +28,24 @@ visual checks. A green CI signal-only run is therefore evidence that panels load
 produce render output, and stay free of `lua-errors`; it is not evidence that
 the rendered art matches local asset-backed Mists captures.
 
+## Local Non-Release Completion Audit
+
+Latest local debug-profile audit: 2026-05-14 on `classic-profile-rollout`,
+with artifacts retained under `target/mists-local-completion-audit/`.
+
+| Lane | Result | Artifact |
+|---|---|---|
+| Base Mists `lua-errors` with addons and SavedVariables disabled | `0` distinct errors | `target/mists-local-completion-audit/base-lua-errors.json` |
+| Base panel parity manifest validation | `37` panel rows validated | `target/mists-local-completion-audit/panel-parity-validate.log` |
+| Installed Mists addon panel manifest validation | `9` addon rows validated | `target/mists-local-completion-audit/addon-panel-validate.log` |
+| Live connected-GUI smoke validation and execution | Passed idle HUD, specialization Learn-to-talents, and micro-menu probes | `target/mists-local-completion-audit/live-gui-smoke.log` |
+| Installed Mists addon startup matrix | `passed: 9`, `failed: 0`, all rows `0` addon-induced errors | `target/mists-local-completion-audit/installed-addon-startup.log` |
+
+This audit is intentionally local and non-release: it uses debug `wow-sim` /
+`wow-cli` binaries and does not run the release-proof wrapper. Its purpose is to
+confirm the current working tree still satisfies the core Mists parity gates
+before adding or promoting any narrower follow-up task.
+
 ## Lane Logs
 
 All lane logs live under `target/mists-release-proof/logs/`:

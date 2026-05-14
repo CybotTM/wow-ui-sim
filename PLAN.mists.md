@@ -13,7 +13,7 @@ In-flight (git status shows uncommitted work):
 - [x] Resolve `src/lua_api/globals/talent_spec_probes.rs` changes — confirm Mists talent specs match retail probes, then commit.
 
 Parity hardening TODO:
-- [ ] Run a local non-release Mists completion audit covering base `lua-errors`, installed-addon startup, panel parity validation, installed-addon panel validation, and live-GUI smoke validation; promote the first failing or unproven lane to the next top-priority task instead of treating partial validation as completion.
+- [x] Run a local non-release Mists completion audit covering base `lua-errors`, installed-addon startup, panel parity validation, installed-addon panel validation, and live-GUI smoke validation; promote the first failing or unproven lane to the next top-priority task instead of treating partial validation as completion.
 - [ ] Reconcile `docs/baselines/mists-panel-interactions.md` with the expanded live connected-GUI smoke coverage, and add follow-up tasks for any panel workflow still backed only by load/show or static frame-dump evidence.
 - [ ] Re-capture local asset-backed HUD/action-bar/unit-frame evidence after the font and live-smoke fixes, then add a focused regression test for the first remaining confirmed visual/layout mismatch.
 - [x] Re-audit local Mists idle HUD and core panel screenshots with real local CASC assets, focusing on the previously reported unit-frame/action-bar layout regressions, missing bottom-tab text, specialization Learn flow, and font fallback symptoms; fix the first root-cause regression found.
