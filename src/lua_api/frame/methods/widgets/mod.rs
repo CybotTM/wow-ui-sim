@@ -8,6 +8,7 @@
 //! `RustFn`) that uses the helpers in `methods` to extract the frame
 //! ID from the first stack argument and borrow `SimState`.
 
+mod checkout;
 mod cooldown;
 mod editbox;
 pub mod message_frame;
@@ -41,6 +42,7 @@ pub(crate) fn toggle_checkbutton_for_click(state: &mut LuaState, id: u64) -> Lua
 pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
     texture::register_texture(state, metatable)?;
     cooldown::register_cooldown(state, metatable)?;
+    checkout::register_checkout(state, metatable)?;
     editbox::register_editbox(state, metatable)?;
     slider::register_slider(state, metatable)?;
     slider::register_shared_value(state, metatable)?;

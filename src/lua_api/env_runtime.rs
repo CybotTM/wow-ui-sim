@@ -317,6 +317,14 @@ fn install_screen_size_globals(env: &WowLuaEnv, width: f32, height: f32) {
         function GetPhysicalScreenSize()
             return GetScreenWidth(), GetScreenHeight()
         end
+
+        function GetScreenDPIScale()
+            return 1
+        end
+
+        function ConvertPixelsToUI(pixels, scale)
+            return pixels / (scale or 1)
+        end
         "#
     ));
 }

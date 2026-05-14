@@ -1,0 +1,131 @@
+#![cfg(feature = "client-mists")]
+
+use std::path::PathBuf;
+use std::process::Command;
+
+fn wow_sim_binary() -> PathBuf {
+    std::env::var_os("CARGO_BIN_EXE_wow-sim")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("target")
+                .join("debug")
+                .join("wow-sim")
+        })
+}
+
+#[test]
+fn mists_store_catalog_checkout_and_token_surfaces_are_interactive() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(wow_sim_binary())
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            STORE_COMMERCIAL_LUA,
+            "lua-errors",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "store commercial flow failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+}
+
+fn assert_no_lua_errors(stdout: &str, stderr: &str) {
+    assert!(
+        stdout.trim().ends_with("[]")
+            && !stdout.contains("Lua error")
+            && !stderr.contains("Lua error")
+            && !stderr.contains("[exec-lua] error"),
+        "store commercial flow emitted Lua errors\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+}
+
+const STORE_COMMERCIAL_LUA: &str = r#"
+    local function fail(message)
+        error(message, 0)
+    end
+
+    local function assertShown(frame, label)
+        if not frame or not frame:IsShown() then
+            fail(label .. " did not show")
+        end
+    end
+
+    LoadAddOn("Blizzard_CatalogShop")
+    LoadAddOn("Blizzard_WowTokenUI")
+    LoadAddOn("Blizzard_SimpleCheckout")
+
+    if type(StoreFrame) ~= "table" then
+        fail("StoreFrame missing")
+    end
+    if type(CatalogShopFrame) ~= "table" then
+        fail("CatalogShopFrame missing")
+    end
+    if type(WowTokenRedemptionFrame) ~= "table" then
+        fail("WowTokenRedemptionFrame missing")
+    end
+    if type(SimpleCheckout) ~= "table" then
+        fail("SimpleCheckout missing")
+    end
+
+    StoreMicroButton:GetScript("OnClick")(StoreMicroButton, "LeftButton", false)
+
+    CatalogShopFrame:Show()
+    assertShown(CatalogShopFrame, "CatalogShopFrame")
+
+    local categoryIDs = C_CatalogShop.GetAvailableCategoryIDs()
+    if not categoryIDs or #categoryIDs == 0 then
+        fail("CatalogShop categories missing")
+    end
+
+    CatalogShopFrame.ProductContainerFrame:Show()
+    CatalogShopFrame:OnCategorySelected(categoryIDs[1])
+
+    local productProvider = CatalogShopFrame.ProductContainerFrame.ProductsScrollBoxContainer.ScrollBox:GetDataProvider()
+    if not productProvider or productProvider:GetSize() == 0 then
+        fail("CatalogShop product provider missing")
+    end
+
+    local firstProduct = productProvider:FindElementDataByPredicate(function(elementData)
+        return elementData.elementType == CatalogShopConstants.ScrollViewElementType.Product
+    end)
+    if not firstProduct then
+        fail("CatalogShop first product missing")
+    end
+
+    if not CatalogShopFrame.ProductContainerFrame:TrySelectProduct(firstProduct) then
+        fail("CatalogShop product selection failed")
+    end
+    if CatalogShopFrame:GetSelectedProductInfo() ~= firstProduct then
+        fail("CatalogShop selected product did not persist")
+    end
+
+    CatalogShopFrame:PurchaseProduct()
+
+    SimpleCheckout:CalculateDesiredSize()
+    SimpleCheckout:RecalculateSize()
+    SimpleCheckout:Show()
+    assertShown(SimpleCheckout, "SimpleCheckout")
+    if SimpleCheckout:GetWidth() <= 0 or SimpleCheckout:GetHeight() <= 0 then
+        fail("SimpleCheckout did not calculate a usable size")
+    end
+    SimpleCheckout:Hide()
+
+    local price = C_WowTokenPublic.GetCurrentMarketPrice()
+    local tokenCount = C_WowTokenSecure.GetTokenCount()
+    if type(price) ~= "number" or price < 0 then
+        fail("WoW Token market price probe failed")
+    end
+    if type(tokenCount) ~= "number" or tokenCount < 0 then
+        fail("WoW Token secure count probe failed")
+    end
+    "#;
