@@ -31,7 +31,7 @@ HUD state and the Mists specialization Learn-to-talents flow.
 | Bank, ReagentBank, Void Storage, Guild Bank | Bank bags, reagent bank, void storage, guild bank data | `tests/mists_bank_storage_panel.rs::mists_bank_and_guild_bank_support_storage_flow` | Covered |
 | Trade window and `TradePlayerInputMoneyFrame` | Trade open, money input, accept/cancel paths | `tests/mists_trade_panel.rs::mists_trade_window_supports_money_input_flow` | Covered |
 | Friends, Who, Guild, Communities, Club Finder | Friends, who query, guild roster, club finder row/mode changes | `tests/mists_social_panels.rs::mists_social_panels_support_friends_who_guild_and_communities` | Covered |
-| Inspect and guild control LoD panels | Inspect paperdoll load and guild-control administration frame | `tests/mists_panel_parity_runner.rs::runner_manifest_covers_every_mists_panel_baseline_row` | Follow-up |
+| Inspect and guild control LoD panels | Inspect tab switching to guild details plus GuildControl tab/rank/permission interactions | `tests/mists_inspect_guild_control_interactions.rs::mists_inspect_and_guild_control_panels_support_interaction_flows` | Mists-specific |
 | PvP UI: HonorFrame, BG queue, Conquest | Honor, battleground queue, conquest/rated panel state | `tests/mists_pvp_ui_panel.rs::mists_pvp_ui_supports_honor_battleground_and_conquest_panels` | Covered |
 | LFG, LFR, Raid Browser | Dungeon finder, raid finder, raid browser selections | `tests/mists_lfg_lfr_panel.rs::mists_lfg_lfr_and_raid_finder_panels_render_with_seeded_choices` | Mists-specific |
 | Raid unit frames LoD panel | Raid roster seeding and legacy raid group frame rendering | `tests/mists_raid_arena_unit_frames.rs::mists_raid_unit_frames_emit_filtered_textures` | Mists-specific |

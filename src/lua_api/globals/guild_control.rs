@@ -23,8 +23,11 @@
 //! `world.guild_selected_rank`. Admin API:
 //! `A_Admin.SetGuildRanks({ {name, flags}, ... })` to install a roster.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, val_to_string,
+};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use rilua::RustFn;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -164,6 +167,100 @@ pub fn guild_control_get_rank_flags(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn guild_control_save_rank(state: &mut LuaState) -> LuaResult<u32> {
+    let name = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    let mut sim = borrow_state_mut(state)?;
+    let index = sim.world.guild_selected_rank - 1;
+    if index >= 0
+        && let Some(rank) = sim.world.guild_ranks.get_mut(index as usize)
+    {
+        rank.name = name;
+    }
+    Ok(0)
+}
+
+pub fn guild_control_set_rank_flag(state: &mut LuaState) -> LuaResult<u32> {
+    let flag_index = Option::<f64>::from_stack(state, 1)?
+        .map(|n| n as i32)
+        .unwrap_or(0);
+    let checked = bool::from_stack(state, 2).unwrap_or(false);
+    let mut sim = borrow_state_mut(state)?;
+    let rank_index = sim.world.guild_selected_rank - 1;
+    if flag_index > 0
+        && rank_index >= 0
+        && let Some(rank) = sim.world.guild_ranks.get_mut(rank_index as usize)
+    {
+        let slot = (flag_index - 1) as usize;
+        if rank.flags.len() <= slot {
+            rank.flags.resize(slot + 1, false);
+        }
+        rank.flags[slot] = checked;
+    }
+    Ok(0)
+}
+
+pub fn guild_control_add_rank(state: &mut LuaState) -> LuaResult<u32> {
+    let name = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "New Rank".to_string());
+    let mut sim = borrow_state_mut(state)?;
+    if sim.world.guild_name.is_some() && sim.world.guild_ranks.len() < 10 {
+        sim.world
+            .guild_ranks
+            .push(crate::lua_api::state::GuildRank {
+                name,
+                flags: Vec::new(),
+            });
+    }
+    Ok(0)
+}
+
+pub fn guild_control_del_rank(state: &mut LuaState) -> LuaResult<u32> {
+    let rank_index = Option::<f64>::from_stack(state, 1)?
+        .map(|n| n as i32)
+        .unwrap_or(0);
+    let mut sim = borrow_state_mut(state)?;
+    if rank_index > 1 && (rank_index as usize) <= sim.world.guild_ranks.len() {
+        sim.world.guild_ranks.remove((rank_index - 1) as usize);
+        if sim.world.guild_selected_rank == rank_index {
+            sim.world.guild_selected_rank = 0;
+        }
+    }
+    Ok(0)
+}
+
+pub fn guild_control_shift_rank_up(state: &mut LuaState) -> LuaResult<u32> {
+    let rank_index = Option::<f64>::from_stack(state, 1)?
+        .map(|n| n as i32)
+        .unwrap_or(0);
+    shift_rank(state, rank_index, -1)
+}
+
+pub fn guild_control_shift_rank_down(state: &mut LuaState) -> LuaResult<u32> {
+    let rank_index = Option::<f64>::from_stack(state, 1)?
+        .map(|n| n as i32)
+        .unwrap_or(0);
+    shift_rank(state, rank_index, 1)
+}
+
+fn shift_rank(state: &mut LuaState, rank_index: i32, direction: i32) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    let next_rank = rank_index + direction;
+    if rank_index > 1
+        && next_rank > 1
+        && (rank_index as usize) <= sim.world.guild_ranks.len()
+        && (next_rank as usize) <= sim.world.guild_ranks.len()
+    {
+        sim.world
+            .guild_ranks
+            .swap((rank_index - 1) as usize, (next_rank - 1) as usize);
+        if sim.world.guild_selected_rank == rank_index {
+            sim.world.guild_selected_rank = next_rank;
+        } else if sim.world.guild_selected_rank == next_rank {
+            sim.world.guild_selected_rank = rank_index;
+        }
+    }
+    Ok(0)
+}
+
 fn ensure_c_guild_info_table(state: &mut LuaState) -> GcRef<Table> {
     let key = state.gc.intern_string_static(b"C_GuildInfo");
     let global = state.global;
@@ -204,31 +301,26 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
 
 fn register_legacy_guild_control_globals(state: &mut LuaState) -> LuaResult<()> {
     let g = state.global;
-    table_set_rust_fn_static(state, g, "GuildControlSetRank", guild_control_set_rank)?;
-    table_set_rust_fn_static(
-        state,
-        g,
-        "GuildControlGetRankName",
-        guild_control_get_rank_name,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        g,
-        "GuildControlGetNumRanks",
-        guild_control_get_num_ranks,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        g,
-        "GuildControlGetRankFlags",
-        guild_control_get_rank_flags,
-    )?;
-    table_set_rust_fn_static(state, g, "GetNumMembersInRank", get_num_members_in_rank)?;
-    table_set_rust_fn_static(
-        state,
-        g,
-        "GuildControlGetAllowedShifts",
-        guild_control_get_allowed_shifts,
-    )?;
+    for (name, function) in LEGACY_GUILD_CONTROL_GLOBALS {
+        table_set_rust_fn_static(state, g, name, *function)?;
+    }
     Ok(())
 }
+
+const LEGACY_GUILD_CONTROL_GLOBALS: &[(&str, RustFn)] = &[
+    ("GuildControlSetRank", guild_control_set_rank),
+    ("GuildControlGetRankName", guild_control_get_rank_name),
+    ("GuildControlGetNumRanks", guild_control_get_num_ranks),
+    ("GuildControlGetRankFlags", guild_control_get_rank_flags),
+    ("GetNumMembersInRank", get_num_members_in_rank),
+    (
+        "GuildControlGetAllowedShifts",
+        guild_control_get_allowed_shifts,
+    ),
+    ("GuildControlSaveRank", guild_control_save_rank),
+    ("GuildControlSetRankFlag", guild_control_set_rank_flag),
+    ("GuildControlAddRank", guild_control_add_rank),
+    ("GuildControlDelRank", guild_control_del_rank),
+    ("GuildControlShiftRankUp", guild_control_shift_rank_up),
+    ("GuildControlShiftRankDown", guild_control_shift_rank_down),
+];

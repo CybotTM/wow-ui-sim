@@ -6,7 +6,7 @@ use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_api::state::BagItem;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
-use rilua::{LuaApiMut, LuaResult, Val};
+use rilua::{LuaApiMut, LuaResult, RustFn, Val};
 
 const MAX_BANK_BAG_SLOTS: i32 = 7;
 const GUILD_BANK_TAB_NAME: &str = "General";
@@ -32,35 +32,41 @@ fn register_bank_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_guild_bank_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
-    LuaApiMut::register_function(lua, "GetCurrentGuildBankTab", get_current_guild_bank_tab)?;
-    LuaApiMut::register_function(lua, "SetCurrentGuildBankTab", set_current_guild_bank_tab)?;
-    LuaApiMut::register_function(lua, "GetNumGuildBankTabs", get_num_guild_bank_tabs)?;
-    LuaApiMut::register_function(lua, "GetGuildBankTabInfo", get_guild_bank_tab_info)?;
-    LuaApiMut::register_function(lua, "GetGuildBankTabCost", get_guild_bank_tab_cost)?;
-    LuaApiMut::register_function(lua, "GetGuildBankText", get_guild_bank_text)?;
-    LuaApiMut::register_function(lua, "SetGuildBankText", set_guild_bank_text)?;
-    LuaApiMut::register_function(lua, "QueryGuildBankTab", query_guild_bank_tab)?;
-    LuaApiMut::register_function(lua, "GetGuildBankItemInfo", get_guild_bank_item_info)?;
-    LuaApiMut::register_function(lua, "GetGuildBankItemLink", get_guild_bank_item_link)?;
-    LuaApiMut::register_function(lua, "PickupGuildBankItem", pickup_guild_bank_item)?;
-    LuaApiMut::register_function(lua, "GetGuildBankMoney", get_guild_bank_money)?;
-    LuaApiMut::register_function(
-        lua,
-        "GetGuildBankWithdrawMoney",
-        get_guild_bank_withdraw_money,
-    )?;
-    LuaApiMut::register_function(lua, "DepositGuildBankMoney", deposit_guild_bank_money)?;
-    LuaApiMut::register_function(lua, "WithdrawGuildBankMoney", withdraw_guild_bank_money)?;
-    LuaApiMut::register_function(lua, "PickupGuildBankMoney", pickup_guild_bank_money)?;
-    LuaApiMut::register_function(
-        lua,
-        "CanWithdrawGuildBankMoney",
-        can_withdraw_guild_bank_money,
-    )?;
-    LuaApiMut::register_function(lua, "CanEditGuildBankTabInfo", can_edit_guild_bank_tab_info)?;
-    LuaApiMut::register_function(lua, "GetGuildTabardFiles", get_guild_tabard_files)?;
+    for (name, function) in GUILD_BANK_GLOBALS {
+        LuaApiMut::register_function(lua, name, *function)?;
+    }
     Ok(())
 }
+
+const GUILD_BANK_GLOBALS: &[(&str, RustFn)] = &[
+    ("GetCurrentGuildBankTab", get_current_guild_bank_tab),
+    ("SetCurrentGuildBankTab", set_current_guild_bank_tab),
+    ("GetNumGuildBankTabs", get_num_guild_bank_tabs),
+    ("GetGuildBankTabInfo", get_guild_bank_tab_info),
+    ("GetGuildBankTabCost", get_guild_bank_tab_cost),
+    ("GetGuildBankText", get_guild_bank_text),
+    ("SetGuildBankText", set_guild_bank_text),
+    ("QueryGuildBankTab", query_guild_bank_tab),
+    ("GetGuildBankItemInfo", get_guild_bank_item_info),
+    ("GetGuildBankItemLink", get_guild_bank_item_link),
+    ("PickupGuildBankItem", pickup_guild_bank_item),
+    ("GetGuildBankMoney", get_guild_bank_money),
+    ("GetGuildBankWithdrawMoney", get_guild_bank_withdraw_money),
+    (
+        "GetGuildBankWithdrawGoldLimit",
+        get_guild_bank_withdraw_gold_limit,
+    ),
+    (
+        "SetGuildBankWithdrawGoldLimit",
+        set_guild_bank_withdraw_gold_limit,
+    ),
+    ("DepositGuildBankMoney", deposit_guild_bank_money),
+    ("WithdrawGuildBankMoney", withdraw_guild_bank_money),
+    ("PickupGuildBankMoney", pickup_guild_bank_money),
+    ("CanWithdrawGuildBankMoney", can_withdraw_guild_bank_money),
+    ("CanEditGuildBankTabInfo", can_edit_guild_bank_tab_info),
+    ("GetGuildTabardFiles", get_guild_tabard_files),
+];
 
 fn register_c_guild_bank(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_GuildBank")?;
@@ -221,6 +227,15 @@ fn get_guild_bank_money(state: &mut LuaState) -> LuaResult<u32> {
 fn get_guild_bank_withdraw_money(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(-1.0));
     Ok(1)
+}
+
+fn get_guild_bank_withdraw_gold_limit(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn set_guild_bank_withdraw_gold_limit(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }
 
 fn deposit_guild_bank_money(state: &mut LuaState) -> LuaResult<u32> {

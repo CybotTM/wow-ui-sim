@@ -28,6 +28,7 @@ pub(crate) fn register_c_paper_doll_info_surface(state: &mut LuaState) -> LuaRes
         "IsInventorySlotEnabled",
         is_inventory_slot_enabled,
     )?;
+    table_set_rust_fn_static(state, ns, "GetInspectGuildInfo", get_inspect_guild_info)?;
     Ok(())
 }
 
@@ -74,6 +75,26 @@ fn is_inventory_slot_enabled(state: &mut LuaState) -> LuaResult<u32> {
         .is_some();
     state.push(Val::Bool(enabled));
     Ok(1)
+}
+
+fn get_inspect_guild_info(state: &mut LuaState) -> LuaResult<u32> {
+    let guild = {
+        let sim = borrow_state(state)?;
+        sim.world
+            .guild_name
+            .as_ref()
+            .map(|name| (name.clone(), sim.world.guild_num_members))
+    };
+
+    let Some((name, members)) = guild else {
+        return Ok(0);
+    };
+
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(members as f64));
+    let name = crate::lua_api::methods::create_string(state, &name);
+    state.push(name);
+    Ok(3)
 }
 
 fn armor_effectiveness(armor: f64, attacker_level: f64) -> f64 {
