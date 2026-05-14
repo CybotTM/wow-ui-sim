@@ -475,6 +475,24 @@ fn latest_local_panel_frame_dumps_have_visible_roots() {
     }
 }
 
+#[test]
+fn latest_local_panel_screenshots_are_non_empty() {
+    let screenshots = mists_panel_artifact_checks::retained_screenshot_artifacts(
+        &repo_root(),
+        LATEST_LOCAL_PANEL_ARTIFACT_ROOT,
+    );
+
+    assert_eq!(
+        screenshots.len(),
+        mists_panel_slugs().len(),
+        "each panel row should have one retained screenshot"
+    );
+
+    for artifact in screenshots {
+        mists_panel_artifact_checks::assert_non_empty_screenshot_artifact(&repo_root(), &artifact);
+    }
+}
+
 fn release_proof_artifact_test_dir(name: &str) -> PathBuf {
     repo_root()
         .join("target")

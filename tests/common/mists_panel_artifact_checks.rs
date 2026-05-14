@@ -31,6 +31,13 @@ pub fn retained_frame_dump_artifacts(repo_root: &Path, artifact_root: &str) -> V
         .collect()
 }
 
+pub fn retained_screenshot_artifacts(repo_root: &Path, artifact_root: &str) -> Vec<String> {
+    panel_slugs(repo_root, artifact_root)
+        .into_iter()
+        .map(|slug| format!("{artifact_root}{slug}/screenshot.webp"))
+        .collect()
+}
+
 pub fn assert_empty_lua_error_artifact(repo_root: &Path, artifact: &str) {
     let path = repo_root.join(artifact);
     assert!(
@@ -65,6 +72,21 @@ pub fn assert_frame_dump_has_visible_root(repo_root: &Path, artifact: &str) {
     assert!(
         contents.lines().any(is_visible_root_frame_dump_line),
         "frame dump artifact should contain a visible root frame marker: {artifact}"
+    );
+}
+
+pub fn assert_non_empty_screenshot_artifact(repo_root: &Path, artifact: &str) {
+    let path = repo_root.join(artifact);
+    assert!(
+        path.is_file(),
+        "screenshot artifact should exist: {artifact}"
+    );
+
+    let metadata = std::fs::metadata(&path)
+        .unwrap_or_else(|error| panic!("failed to stat {artifact}: {error}"));
+    assert!(
+        metadata.len() > 0,
+        "screenshot artifact should not be zero bytes: {artifact}"
     );
 }
 
