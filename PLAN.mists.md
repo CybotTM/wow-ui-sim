@@ -54,7 +54,7 @@ Parity hardening TODO:
 - [x] Run the new GitHub Actions Mists release-proof job via `workflow_dispatch`, record the run/artifact links in `docs/baselines/mists-release-proof.md`, and fix the first failing CI-only lane instead of relying on the local proof.
 - [x] Make the Mists release-proof CI lane self-contained for installed-addon coverage: replace `/syncthing/World of Warcraft/_classic_/Interface/AddOns/...` assumptions with CI-available pinned addon fixtures or an explicit prepared artifact/cache step.
 - [x] Add release-proof artifact completeness validation that fails when `target/mists-release-proof/` is missing lane logs, the base `mists-release-lua-errors.json`, per-panel screenshots, or frame dumps before upload.
-- [ ] Promote the Mists release-proof job from opt-in to required PR/master validation after the CI environment has CASC data and installed-addon fixtures available.
+- [x] Promote the Mists release-proof job from opt-in to required PR/master validation after the CI environment has CASC data and installed-addon fixtures available.
 
 Panel-by-panel parity audit (pass = panel renders + interacts + zero `lua-errors` under Mists):
 

@@ -73,12 +73,10 @@ panel parity, and installed-addon panel parity with SavedVariables.
 
 ## CI Upload
 
-The `Test` workflow includes an opt-in `Mists release proof` job. It runs when
-`RUN_MISTS_RELEASE_PROOF` is set to `1` as a repository variable, or when a
-manual `workflow_dispatch` run sets `run_mists_release_proof` to true. The job
-uses `scripts/ci-mists-release-proof.sh --skip-clone` and uploads
-`target/mists-release-proof/`, including logs, base `lua-errors` JSON, panel
-screenshots, and frame dumps.
+The `Test` workflow includes `Mists release proof` as a normal PR/master
+validation job. The job uses `scripts/ci-mists-release-proof.sh --skip-clone`
+and uploads `target/mists-release-proof/`, including logs, base `lua-errors`
+JSON, panel screenshots, and frame dumps.
 
 ## GitHub Actions Brief
 
@@ -88,11 +86,10 @@ release-profile proof command. It builds release `wow-sim`, `wow-cli`, and
 baseline, installed-addon startup matrix, panel parity with visual comparison,
 SavedVariables variants, connected-GUI micro-menu smoke, and interaction audit.
 
-Run it from the `Test` workflow with `workflow_dispatch` and
-`run_mists_release_proof=true`; normal retail/client-profile jobs are skipped
-for that manual proof run. The job is still opt-in because it needs the CI
-rendering path and addon fixtures to stay stable before it becomes required
-PR/master validation.
+It runs on pull requests, pushes to `master`, and manual `workflow_dispatch`
+runs alongside the normal retail and client-profile jobs. This makes the full
+Mists parity proof part of the required CI surface instead of a separate
+opt-in lane.
 
 The current GitHub-hosted proof job sets `MISTS_PANEL_SIGNAL_ONLY=1` because
 the runner does not have a WoW CASC install for texture/font extraction. In

@@ -212,6 +212,22 @@ fn release_proof_command_validates_required_mists_lanes() {
 }
 
 #[test]
+fn github_actions_runs_mists_release_proof_by_default() {
+    let workflow_path = repo_root().join(".github/workflows/test.yml");
+    let workflow = std::fs::read_to_string(&workflow_path).expect("failed to read workflow");
+    let proof_job = workflow_job_block(&workflow, "mists-release-proof");
+
+    assert!(
+        !proof_job.contains("RUN_MISTS_RELEASE_PROOF"),
+        "Mists release proof should not be gated by a repository variable"
+    );
+    assert!(
+        !proof_job.contains("run_mists_release_proof"),
+        "Mists release proof should not be gated by workflow_dispatch input"
+    );
+}
+
+#[test]
 fn release_proof_artifact_validation_rejects_missing_panel_screenshots() {
     let out_dir = release_proof_artifact_test_dir("missing-panel-screenshot");
     if out_dir.exists() {
@@ -356,6 +372,35 @@ fn release_proof_artifact_test_dir(name: &str) -> PathBuf {
         .join("target")
         .join("mists-release-proof-artifact-tests")
         .join(format!("{name}-{}", std::process::id()))
+}
+
+fn workflow_job_block(workflow: &str, job_name: &str) -> String {
+    let job_header = format!("  {job_name}:");
+    let mut in_job = false;
+    let mut lines = Vec::new();
+
+    for line in workflow.lines() {
+        if line == job_header {
+            in_job = true;
+            lines.push(line);
+            continue;
+        }
+        if in_job && starts_next_workflow_job(line) {
+            break;
+        }
+        if in_job {
+            lines.push(line);
+        }
+    }
+
+    assert!(in_job, "workflow should define {job_name} job");
+    lines.join("\n")
+}
+
+fn starts_next_workflow_job(line: &str) -> bool {
+    let is_job_indent = line.starts_with("  ") && !line.starts_with("    ");
+    let has_job_name = !line.trim().is_empty();
+    is_job_indent && has_job_name
 }
 
 fn run_release_proof_artifact_validation(out_dir: &std::path::Path) -> std::process::Output {

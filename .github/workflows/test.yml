@@ -5,18 +5,11 @@ on:
     branches: [master]
   pull_request:
   workflow_dispatch:
-    inputs:
-      run_mists_release_proof:
-        description: Run the full Mists release-proof lane and upload retained artifacts
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   cargo-test:
     name: cargo test (retail)
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.run_mists_release_proof) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,7 +31,6 @@ jobs:
   client-profile-smoke:
     name: ${{ matrix.profile }} build + lua-errors smoke
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.run_mists_release_proof) }}
     strategy:
       fail-fast: false
       matrix:
@@ -102,7 +94,6 @@ jobs:
   mists-release-proof:
     name: Mists release proof
     runs-on: ubuntu-latest
-    if: ${{ vars.RUN_MISTS_RELEASE_PROOF == '1' || (github.event_name == 'workflow_dispatch' && inputs.run_mists_release_proof) }}
     env:
       LIBGL_ALWAYS_SOFTWARE: "1"
       MISTS_PANEL_SIGNAL_ONLY: "1"
