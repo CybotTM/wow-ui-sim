@@ -559,6 +559,17 @@ fn test_string_split_method() {
 }
 
 #[test]
+fn test_string_split_method_accepts_delimiter_receiver() {
+    let env = env();
+    let (major, minor, build): (String, String, String) =
+        env.eval(r#"return ("."):split("12.0.5")"#).unwrap();
+    assert_eq!(
+        (major.as_str(), minor.as_str(), build.as_str()),
+        ("12", "0", "5")
+    );
+}
+
+#[test]
 fn test_format_alias() {
     let env = env();
     let result: String = env.eval("return format('%d items', 5)").unwrap();
