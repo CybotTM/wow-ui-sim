@@ -79,6 +79,40 @@ fn test_dropdown_list_button_text_frames_exist() {
 }
 
 #[test]
+fn test_dropdown_dynamic_buttons_create_named_children() {
+    let env = env();
+    env.exec(
+        r#"
+        local first = UIDropDownMenu_CreateInfo()
+        first.text = "First"
+        UIDropDownMenu_AddButton(first, 1)
+
+        local second = UIDropDownMenu_CreateInfo()
+        second.text = "Second"
+        UIDropDownMenu_AddButton(second, 1)
+    "#,
+    )
+    .unwrap();
+
+    let (normal_text_exists, icon_exists, invisible_button_exists): (bool, bool, bool) = env
+        .eval(
+            r#"
+        return DropDownList1Button2NormalText ~= nil,
+               DropDownList1Button2Icon ~= nil,
+               DropDownList1Button2InvisibleButton ~= nil
+    "#,
+        )
+        .unwrap();
+
+    assert!(normal_text_exists, "dynamic dropdown button should expose NormalText");
+    assert!(icon_exists, "dynamic dropdown button should expose Icon");
+    assert!(
+        invisible_button_exists,
+        "dynamic dropdown button should expose InvisibleButton"
+    );
+}
+
+#[test]
 fn test_dropdown_list_num_buttons_initially_zero() {
     let env = env();
     let num: i32 = env.eval("return DropDownList1.numButtons").unwrap();
