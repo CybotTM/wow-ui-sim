@@ -118,7 +118,6 @@ pub(super) fn parse_anchor_point_with_compat_warning(
 
 fn report_point_typo_compatibility(state: &mut LuaState) {
     let message = "Plumber typo compatibility: TOPELFT resolves as TOPLEFT.".to_string();
-    eprintln!("{message}");
     if let Ok(mut sim) = borrow_state_mut(state) {
         sim.console_output.push(message);
     }
