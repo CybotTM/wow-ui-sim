@@ -2323,6 +2323,9 @@ fn apply_system_anchors_replays_active_widescreen_singleton_settings() {
                     self:UpdateSystemSetting(settingInfo.setting, true)
                 end
             end
+            function frame:ApplySystemAnchor()
+                self.anchorCalls = (self.anchorCalls or 0) + 1
+            end
 
             return frame
         end
@@ -2367,18 +2370,26 @@ fn apply_system_anchors_replays_active_widescreen_singleton_settings() {
     env.exec(APPLY_SYSTEM_ANCHORS_LUA)
         .expect("apply active singleton settings");
 
-    let (requested_rows, replayed_values, update_system_calls): (String, String, String) = env
+    let (requested_rows, replayed_values, update_system_calls, anchor_calls): (
+        String,
+        String,
+        String,
+        String,
+    ) = env
         .eval(
             r#"
             local replayedRows = {}
             local updateRows = {}
+            local anchorRows = {}
             for _, frame in ipairs(EditModeManagerFrame.registeredSystemFrames) do
                 table.insert(replayedRows, tostring(frame.system) .. ":" .. table.concat(frame.replayedValues, ","))
                 table.insert(updateRows, tostring(frame.updateSystemCalls or 0))
+                table.insert(anchorRows, tostring(frame.system) .. ":" .. tostring(frame.anchorCalls or 0))
             end
             return table.concat(EditModeManagerFrame.requestedRows, "|"),
                 table.concat(replayedRows, "|"),
-                table.concat(updateRows, ",")
+                table.concat(updateRows, ","),
+                table.concat(anchorRows, "|")
             "#,
         )
         .expect("read singleton replay state");
@@ -2395,6 +2406,10 @@ fn apply_system_anchors_replays_active_widescreen_singleton_settings() {
     assert_eq!(
         update_system_calls, "0,1,1,1,1,1,1,1,1,1",
         "only the cast bar should use the direct startup replay branch"
+    );
+    assert_eq!(
+        anchor_calls, "1:0|2:1|8:1|12:1|13:1|14:1|16:1|17:1|18:1|19:1",
+        "ordinary singleton systems such as Minimap should apply saved anchors after UpdateSystem"
     );
 }
 
@@ -3001,5 +3016,83 @@ fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
     assert_eq!(
         bar_width_scale_3, None,
         "active Widescreen row should not invent absent BarWidthScale"
+    );
+}
+
+#[test]
+fn edit_mode_set_point_override_syncs_render_anchor_state() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+
+    env.exec(
+        r#"
+        local frame = CreateFrame("Frame", "MinimapCluster", UIParent)
+        frame:SetSize(240, 252)
+
+        local fields = debug.getfenv(frame)[1]
+        rawset(fields, "ClearAllPointsBase", function(self)
+            self.__editModePoints = {}
+        end)
+        rawset(fields, "ClearAllPoints", function(self)
+            self:ClearAllPointsBase()
+        end)
+        rawset(fields, "SetPointBase", function(self, point, relativeTo, relativePoint, offsetX, offsetY)
+            self.__editModePoints = self.__editModePoints or {}
+            table.insert(self.__editModePoints, {
+                point,
+                relativeTo or UIParent,
+                relativePoint or point,
+                offsetX or 0,
+                offsetY or 0,
+            })
+        end)
+        rawset(fields, "SetPoint", function(self, ...)
+            return self:SetPointBase(...)
+        end)
+        rawset(fields, "GetPoint", function(self, index)
+            local point = self.__editModePoints and self.__editModePoints[index or 1]
+            if point then
+                return unpack(point)
+            end
+        end)
+
+        EditModeManagerFrame = {
+            registeredSystemFrames = { frame },
+        }
+
+        function EditModeManagerFrame:OnEditModeSystemAnchorChanged()
+            self.anchorChanged = (self.anchorChanged or 0) + 1
+        end
+        "#,
+    )
+    .expect("install edit mode frame override stubs");
+
+    super::fix_set_point_override_3arg(&env);
+
+    let (num_points, right_delta, left): (i32, f64, f64) = env
+        .eval(
+            r#"
+            MinimapCluster:ClearAllPoints()
+            MinimapCluster:SetPoint("LEFT", UIParent, "LEFT", 0, 0)
+            MinimapCluster:ClearAllPoints()
+            MinimapCluster:SetPoint("RIGHT", UIParent, "RIGHT", 0, 0)
+            return MinimapCluster:GetNumPoints(),
+                math.abs(MinimapCluster:GetRight() - UIParent:GetRight()),
+                MinimapCluster:GetLeft()
+            "#,
+        )
+        .expect("read synced Rust anchor state");
+
+    assert_eq!(
+        num_points, 1,
+        "EditMode ClearAllPoints override must clear Rust anchors too"
+    );
+    assert!(
+        right_delta < 0.01,
+        "RIGHT anchor should reach Rust layout state, delta={right_delta}"
+    );
+    assert!(
+        left > 700.0,
+        "MinimapCluster should render on the right side after sync, left={left}"
     );
 }

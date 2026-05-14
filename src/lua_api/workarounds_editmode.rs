@@ -694,15 +694,21 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                     apply_system_anchor_if_safe(systemFrame)
                     replay_system_settings(systemFrame)
                 end
-            elseif seed_system_frame(systemFrame)
-                and anchor_targets_system_frame(systemFrame, systemFrame.systemInfo and systemFrame.systemInfo.anchorInfo) then
-                -- Saved layouts can contain self-relative anchors for dependent
-                -- systems such as BuffFrame. Seed their layout state, but do
-                -- not hand that impossible anchor to SetPoint during startup.
-                replay_system_settings(systemFrame)
-                refresh_system_layout_after_setting_replay(systemFrame)
             else
-                pcall(emm.UpdateSystem, emm, systemFrame)
+                local seeded = seed_system_frame(systemFrame)
+                if seeded
+                    and anchor_targets_system_frame(systemFrame, systemFrame.systemInfo and systemFrame.systemInfo.anchorInfo) then
+                    -- Saved layouts can contain self-relative anchors for dependent
+                    -- systems such as BuffFrame. Seed their layout state, but do
+                    -- not hand that impossible anchor to SetPoint during startup.
+                    replay_system_settings(systemFrame)
+                    refresh_system_layout_after_setting_replay(systemFrame)
+                else
+                    pcall(emm.UpdateSystem, emm, systemFrame)
+                    if seeded then
+                        apply_system_anchor_if_safe(systemFrame)
+                    end
+                end
             end
         end
 
@@ -895,28 +901,69 @@ fn patch_apply_system_anchor_nil_guard(env: &WowLuaEnv) {
     );
 }
 
-/// Fix SetPointOverride to handle the 3-arg SetPoint form.
-///
-/// Blizzard's `SetPointOverride(point, relativeTo, relativePoint, offsetX, offsetY)`
-/// always forwards all 5 args to `SetPointBase`. But `VerticalLayoutMixin` and other
-/// code calls the 3-arg form: `SetPoint("TOPRIGHT", x, y)`, where x,y are offsets
-/// relative to the parent. In that case `relativeTo` receives a number (the x offset)
-/// and `relativePoint` receives a number (the y offset), which is wrong.
-///
-/// OnSystemLoad already ran during addon loading, copying the original
-/// SetPointOverride into each frame's fields table. We replace it on each
-/// registered frame by writing a fixed version directly on the frame table.
-fn fix_set_point_override_3arg(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
+const SYNC_EDIT_MODE_SET_POINT_OVERRIDES_LUA: &str = r#"
         if not EditModeManagerFrame then return end
         local emm = EditModeManagerFrame
         if not emm.registeredSystemFrames then return end
+
+        local function frameFields(frame)
+            local ok, env = pcall(debug.getfenv, frame)
+            if ok and env then
+                return env[1]
+            end
+        end
+
+        local function callRustMethod(self, methodName, ...)
+            local fields = frameFields(self)
+            if not fields then return false end
+
+            local override = rawget(fields, methodName)
+            rawset(fields, methodName, nil)
+            local method = self[methodName]
+            local ok, err
+            if type(method) == "function" then
+                ok, err = pcall(method, self, ...)
+            else
+                ok, err = false, methodName .. " is not available"
+            end
+            rawset(fields, methodName, override)
+            return ok, err
+        end
+
+        local function syncRustAnchorFromLuaPoint(self)
+            local point, relativeTo, relativePoint, offsetX, offsetY = self:GetPoint(1)
+            if not point then return end
+            return callRustMethod(
+                self,
+                "SetPoint",
+                point,
+                relativeTo,
+                relativePoint,
+                offsetX or 0,
+                offsetY or 0
+            )
+        end
+
         for _, frame in ipairs(emm.registeredSystemFrames) do
-            if rawget(frame, "SetPoint") then
-                local base = rawget(frame, "SetPointBase") or frame.SetPointBase
+            local fields = frameFields(frame)
+            if fields and rawget(fields, "ClearAllPoints") then
+                local clearBase = rawget(fields, "ClearAllPointsBase")
+                if type(clearBase) ~= "function" then
+                    clearBase = rawget(fields, "ClearAllPoints")
+                end
+                rawset(fields, "ClearAllPoints", function(self)
+                    if type(clearBase) == "function" then
+                        clearBase(self)
+                    end
+                    callRustMethod(self, "ClearAllPoints")
+                    pcall(EditModeManagerFrame.OnEditModeSystemAnchorChanged, EditModeManagerFrame)
+                end)
+            end
+
+            if fields and rawget(fields, "SetPoint") then
+                local base = rawget(fields, "SetPointBase") or frame.SetPointBase
                 if base then
-                    rawset(frame, "SetPoint", function(self, point, relativeTo, relativePoint, offsetX, offsetY)
+                    rawset(fields, "SetPoint", function(self, point, relativeTo, relativePoint, offsetX, offsetY)
                         if type(relativeTo) == "number" then
                             offsetX = relativeTo
                             offsetY = relativePoint
@@ -924,6 +971,7 @@ fn fix_set_point_override_3arg(env: &WowLuaEnv) {
                             relativePoint = nil
                         end
                         base(self, point, relativeTo, relativePoint, offsetX, offsetY)
+                        pcall(syncRustAnchorFromLuaPoint, self)
                         if relativeTo then
                             pcall(self.SetSnappedToFrame, self, relativeTo)
                         end
@@ -932,8 +980,23 @@ fn fix_set_point_override_3arg(env: &WowLuaEnv) {
                 end
             end
         end
-    "#,
-    );
+    "#;
+
+/// Fix SetPointOverride to handle the 3-arg SetPoint form and keep Rust layout in sync.
+///
+/// Blizzard's `SetPointOverride(point, relativeTo, relativePoint, offsetX, offsetY)`
+/// always forwards all 5 args to `SetPointBase`. But `VerticalLayoutMixin` and other
+/// code calls the 3-arg form: `SetPoint("TOPRIGHT", x, y)`, where x,y are offsets
+/// relative to the parent. In that case `relativeTo` receives a number (the x offset)
+/// and `relativePoint` receives a number (the y offset), which is wrong.
+///
+/// OnSystemLoad already ran during addon loading, copying the original
+/// SetPointOverride into each frame's fields table. That Lua override updates
+/// EditMode's anchor bookkeeping, but it can bypass the simulator's Rust
+/// anchor state that drives rendering. We replace it on each registered frame
+/// and mirror the final Lua point through the real Rust SetPoint method.
+fn fix_set_point_override_3arg(env: &WowLuaEnv) {
+    let _ = env.exec(SYNC_EDIT_MODE_SET_POINT_OVERRIDES_LUA);
 }
 
 /// Guard action bar positioning methods against nil frame positions.
