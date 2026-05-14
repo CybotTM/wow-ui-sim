@@ -176,6 +176,23 @@ fn test_camera_zoom_globals_are_available() {
     assert_eq!(zoom, 0.0);
 }
 
+#[test]
+fn test_edit_box_max_bytes_roundtrip() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let max_bytes: i32 = env
+        .eval(
+            r#"
+        local editBox = CreateFrame("EditBox", "MaxBytesEditBox", UIParent)
+        editBox:SetMaxBytes(1024000)
+        return editBox:GetMaxBytes()
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(max_bytes, 1024000);
+}
+
 /// Test that RegisterEvent accepts a known valid WoW event.
 #[test]
 fn test_register_event_valid_name() {

@@ -140,6 +140,27 @@ pub(super) fn get_max_letters(state: &mut LuaState) -> LuaResult<u32> {
     (v as f64).into_stack(state)
 }
 
+pub(super) fn set_max_bytes(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let max = val_to_f64(stack_val(state, 2)) as i32;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.editbox_max_bytes = max;
+    }
+    Ok(0)
+}
+pub(super) fn get_max_bytes(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_max_bytes)
+        .unwrap_or(0);
+    drop(sim);
+    (v as f64).into_stack(state)
+}
+
 pub(super) fn set_multi_line(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let value = val_to_bool(stack_val(state, 2));

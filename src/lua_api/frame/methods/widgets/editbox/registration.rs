@@ -15,6 +15,8 @@ const EDITBOX_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("GetNumLetters", get_num_letters),
     ("SetMaxLetters", set_max_letters),
     ("GetMaxLetters", get_max_letters),
+    ("SetMaxBytes", set_max_bytes),
+    ("GetMaxBytes", get_max_bytes),
     ("SetMultiLine", set_multi_line),
     ("IsMultiLine", is_multi_line),
     ("SetAutoFocus", set_auto_focus),
