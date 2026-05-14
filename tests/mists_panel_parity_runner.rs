@@ -136,6 +136,17 @@ fn addon_panel_matrix_validates_installed_mists_addons() {
 }
 
 #[test]
+fn bounded_saved_vars_addon_samples_cover_installed_mists_addons() {
+    let manifest_addons = mists_addon_names().into_iter().collect::<BTreeSet<_>>();
+    let sample_addons = bounded_saved_vars_addon_sample_names();
+
+    assert_eq!(
+        manifest_addons, sample_addons,
+        "every installed Mists addon should have at least one bounded saved-vars panel sample"
+    );
+}
+
+#[test]
 fn live_gui_smoke_runner_validates_micro_button_rows() {
     let output = Command::new(repo_root().join("scripts/mists-live-gui-smoke.sh"))
         .arg("--validate-only")
@@ -513,6 +524,30 @@ fn mists_addon_names() -> Vec<String> {
             is_mists_addon_row(name, profile).then_some(name.to_owned())
         })
         .collect()
+}
+
+fn bounded_saved_vars_addon_sample_names() -> BTreeSet<String> {
+    let index_path = repo_root().join("docs/baselines/mists-release-proof.md");
+    let index = std::fs::read_to_string(&index_path)
+        .expect("failed to read Mists release-proof artifact index");
+
+    index
+        .lines()
+        .filter_map(saved_vars_sample_addon_name)
+        .collect()
+}
+
+fn saved_vars_sample_addon_name(line: &str) -> Option<String> {
+    let has_sample_artifact = line.contains("target/mists-local-addon-panel-sample/");
+    let is_saved_vars_row = line.contains("` + normal SavedVariables |");
+    if !has_sample_artifact || !is_saved_vars_row {
+        return None;
+    }
+
+    line.strip_prefix("| `")?
+        .split('`')
+        .next()
+        .map(str::to_owned)
 }
 
 fn is_mists_addon_row(name: &str, profile: &str) -> bool {
