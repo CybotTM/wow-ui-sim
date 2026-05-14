@@ -147,6 +147,17 @@ fn bounded_saved_vars_addon_samples_cover_installed_mists_addons() {
 }
 
 #[test]
+fn interaction_baseline_covers_every_passing_mists_panel() {
+    let panel_names = passing_mists_panel_names();
+    let interaction_names = interaction_covered_panel_names();
+
+    assert_eq!(
+        panel_names, interaction_names,
+        "every passing Mists panel should have interaction evidence or an explicit documented gap"
+    );
+}
+
+#[test]
 fn live_gui_smoke_runner_validates_micro_button_rows() {
     let output = Command::new(repo_root().join("scripts/mists-live-gui-smoke.sh"))
         .arg("--validate-only")
@@ -509,6 +520,54 @@ fn mists_panel_slugs() -> Vec<String> {
         })
         .map(str::to_owned)
         .collect()
+}
+
+fn passing_mists_panel_names() -> BTreeSet<String> {
+    let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
+    let baseline =
+        std::fs::read_to_string(&baseline_path).expect("failed to read Mists panel baseline");
+
+    baseline.lines().filter_map(passing_panel_name).collect()
+}
+
+fn passing_panel_name(line: &str) -> Option<String> {
+    let columns = markdown_table_columns(line);
+    let panel_name = columns.first()?;
+    let status = columns.get(1)?;
+    (*status == "Pass").then(|| panel_name.to_string())
+}
+
+fn interaction_covered_panel_names() -> BTreeSet<String> {
+    let interactions_path = repo_root().join("docs/baselines/mists-panel-interactions.md");
+    let interactions = std::fs::read_to_string(&interactions_path)
+        .expect("failed to read Mists panel interaction baseline");
+
+    interactions
+        .lines()
+        .filter_map(interaction_panel_name)
+        .collect()
+}
+
+fn interaction_panel_name(line: &str) -> Option<String> {
+    let columns = markdown_table_columns(line);
+    let panel_name = columns.first()?;
+    let status = columns.get(3)?;
+    is_interaction_evidence_or_gap(status).then(|| panel_name.to_string())
+}
+
+fn is_interaction_evidence_or_gap(status: &str) -> bool {
+    matches!(
+        status,
+        "Covered" | "Mists-specific" | "Follow-up" | "Missing"
+    )
+}
+
+fn markdown_table_columns(line: &str) -> Vec<&str> {
+    if !line.starts_with('|') {
+        return Vec::new();
+    }
+
+    line.trim_matches('|').split('|').map(str::trim).collect()
 }
 
 fn mists_addon_names() -> Vec<String> {
