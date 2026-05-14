@@ -467,6 +467,11 @@ fn panel_baseline_artifacts_exist_under_latest_local_tree() {
 }
 
 #[test]
+fn panel_baseline_schema_is_valid() {
+    mists_panel_artifact_checks::assert_panel_baseline_schema_is_valid(&repo_root());
+}
+
+#[test]
 fn latest_local_panel_lua_error_artifacts_are_empty() {
     let lua_error_artifacts = mists_panel_artifact_checks::retained_lua_error_artifacts(
         &repo_root(),
