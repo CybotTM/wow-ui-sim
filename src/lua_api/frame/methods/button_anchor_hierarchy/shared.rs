@@ -1,6 +1,8 @@
 //! Shared helper functions used across submodules.
 
-use crate::lua_api::methods::{borrow_state, extract_frame_id, frame_ref, val_to_string};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, extract_frame_id, frame_ref, val_to_string,
+};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
@@ -93,13 +95,32 @@ pub(super) fn resolve_relative_point_from_val(
         Val::Nil => Ok(default),
         Val::Str(_) => {
             let point_name = val_to_string(state, value).unwrap_or_default();
-            crate::widget::AnchorPoint::from_str(&point_name).ok_or_else(|| {
+            parse_anchor_point_with_compat_warning(state, &point_name).ok_or_else(|| {
                 runtime_error(format!(
                     "Frame:SetPoint(): Unknown region point {point_name}"
                 ))
             })
         }
         _ => Ok(default),
+    }
+}
+
+pub(super) fn parse_anchor_point_with_compat_warning(
+    state: &mut LuaState,
+    point_name: &str,
+) -> Option<crate::widget::AnchorPoint> {
+    let point = crate::widget::AnchorPoint::from_str(point_name)?;
+    if point_name.eq_ignore_ascii_case("TOPELFT") {
+        report_point_typo_compatibility(state);
+    }
+    Some(point)
+}
+
+fn report_point_typo_compatibility(state: &mut LuaState) {
+    let message = "Plumber typo compatibility: TOPELFT resolves as TOPLEFT.".to_string();
+    eprintln!("{message}");
+    if let Ok(mut sim) = borrow_state_mut(state) {
+        sim.console_output.push(message);
     }
 }
 

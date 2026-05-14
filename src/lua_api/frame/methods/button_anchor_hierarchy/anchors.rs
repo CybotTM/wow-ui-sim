@@ -12,7 +12,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
 
 use super::shared::{
-    frame_global_or_ref, opt_f32, resolve_anchor_target_id, resolve_relative_point_from_val,
+    frame_global_or_ref, opt_f32, parse_anchor_point_with_compat_warning, resolve_anchor_target_id,
+    resolve_relative_point_from_val,
 };
 
 // ── Line anchor helpers ───────────────────────────────────────────────────────
@@ -22,7 +23,7 @@ fn parse_line_anchor_args(
     frame_id: u64,
 ) -> LuaResult<(crate::widget::AnchorPoint, Option<u64>, f32, f32)> {
     let point_name = String::from_stack(state, 2)?;
-    let point = crate::widget::AnchorPoint::from_str(&point_name).ok_or_else(|| {
+    let point = parse_anchor_point_with_compat_warning(state, &point_name).ok_or_else(|| {
         runtime_error(format!(
             "Line anchor point must be a valid region point, got {point_name}"
         ))
@@ -407,7 +408,7 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
 
 fn set_point_anchor_from_stack(state: &mut LuaState) -> LuaResult<crate::widget::AnchorPoint> {
     let point_name = String::from_stack(state, 2)?;
-    let Some(point) = crate::widget::AnchorPoint::from_str(&point_name) else {
+    let Some(point) = parse_anchor_point_with_compat_warning(state, &point_name) else {
         return Err(runtime_error(format!(
             "Frame:SetPoint(): Invalid region point {point_name}"
         )));

@@ -27,6 +27,29 @@ fn test_set_point_basic() {
 }
 
 #[test]
+fn test_set_point_reports_plumber_topelft_typo_compatibility() {
+    let env = env();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "AnchorFrameTypo", UIParent)
+        f:SetPoint("TOPELFT", UIParent, "TOPELFT", 0, 0)
+        local point, _, relativePoint = f:GetPoint(1)
+        assert(point == "TOPLEFT", "point should canonicalize to TOPLEFT")
+        assert(relativePoint == "TOPLEFT", "relativePoint should canonicalize to TOPLEFT")
+    "#,
+    )
+    .unwrap();
+
+    let console_output = env.state().borrow().console_output.clone();
+    assert!(
+        console_output
+            .iter()
+            .any(|line| line.contains("Plumber typo compatibility: TOPELFT resolves as TOPLEFT.")),
+        "TOPELFT compatibility should be reported in console output, got {console_output:?}"
+    );
+}
+
+#[test]
 fn test_get_point_returns_values() {
     let env = env();
     // GetPoint returns (point, relativeTo, relativePoint, x, y) where relativeTo is a frame/nil
