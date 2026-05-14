@@ -65,7 +65,8 @@ Parity hardening TODO:
 - [x] Add a local Mists interaction-strength checker that flags interaction baseline rows whose cited test name or row notes still only prove load/show/no-lua-errors coverage.
 - [x] Add a local Mists interaction-reference checker that requires every `Covered` or `Mists-specific` row to cite at least one `tests/mists_*.rs` reference unless the row documents a non-Mists shared test exception.
 - [x] Add a local Mists interaction status checker that fails if any row is marked `Follow-up` or `Missing` without a matching unchecked PLAN.mists remediation task naming that panel.
-- [ ] Add a local Mists interaction baseline schema checker that fails if table rows have missing columns, unknown statuses, or duplicate panel names.
+- [x] Add a local Mists interaction baseline schema checker that fails if table rows have missing columns, unknown statuses, or duplicate panel names.
+- [ ] Add a local Mists panel baseline schema checker that fails if `docs/baselines/mists-panels.md` has malformed rows, unknown statuses, duplicate panel names, or missing screenshot/dump artifact references.
 - [x] Re-audit local Mists idle HUD and core panel screenshots with real local CASC assets, focusing on the previously reported unit-frame/action-bar layout regressions, missing bottom-tab text, specialization Learn flow, and font fallback symptoms; fix the first root-cause regression found.
 - [x] Add a non-CI Mists visual triage note that separates local asset-backed parity evidence from CI signal-only checks, so texture/font availability is not confused with panel parity completion.
 - [x] Extend the live connected-GUI Mists smoke runner to include the no-panel HUD state plus the specialization Learn-to-talents path, then fail on `lua-errors` or missing/hidden target frames after real input dispatch.

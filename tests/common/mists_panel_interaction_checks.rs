@@ -57,6 +57,16 @@ pub fn assert_follow_up_rows_have_plan_remediation(repo_root: &Path) {
     );
 }
 
+pub fn assert_interaction_baseline_schema_is_valid(repo_root: &Path) {
+    let baseline = read_mists_panel_interaction_baseline(repo_root);
+    let rows = interaction_table_rows(&baseline);
+
+    assert_table_rows_have_four_columns(&rows);
+    assert_table_rows_have_known_statuses(&rows);
+    assert_table_rows_have_no_empty_fields(&rows);
+    assert_table_rows_have_unique_panel_names(&rows);
+}
+
 fn interaction_test_references(repo_root: &Path) -> BTreeSet<String> {
     read_mists_panel_interaction_baseline(repo_root)
         .split('`')
@@ -137,6 +147,106 @@ fn normalized_text(text: &str) -> String {
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ")
+}
+
+fn interaction_table_rows(baseline: &str) -> Vec<&str> {
+    let mut found_header = false;
+    let mut rows = Vec::new();
+
+    for line in baseline.lines() {
+        if !found_header {
+            found_header = markdown_table_columns(line).first() == Some(&"Panel");
+            continue;
+        }
+        if line.trim().is_empty() {
+            break;
+        }
+
+        let columns = markdown_table_columns(line);
+        if line.starts_with('|') && !is_separator_row(&columns) {
+            rows.push(line);
+        }
+    }
+
+    rows
+}
+
+fn assert_table_rows_have_four_columns(rows: &[&str]) {
+    let malformed_rows = rows
+        .iter()
+        .copied()
+        .filter(|row| markdown_table_columns(row).len() != 4)
+        .collect::<Vec<_>>();
+
+    assert!(
+        malformed_rows.is_empty(),
+        "interaction baseline rows should have exactly four columns: {malformed_rows:?}"
+    );
+}
+
+fn assert_table_rows_have_known_statuses(rows: &[&str]) {
+    let unknown_status_rows = rows
+        .iter()
+        .copied()
+        .filter(|row| {
+            let columns = markdown_table_columns(row);
+            !is_known_status(columns[3])
+        })
+        .collect::<Vec<_>>();
+
+    assert!(
+        unknown_status_rows.is_empty(),
+        "interaction baseline rows should use known statuses: {unknown_status_rows:?}"
+    );
+}
+
+fn assert_table_rows_have_no_empty_fields(rows: &[&str]) {
+    let rows_with_empty_fields = rows
+        .iter()
+        .copied()
+        .filter(|row| {
+            markdown_table_columns(row)
+                .iter()
+                .any(|column| column.is_empty())
+        })
+        .collect::<Vec<_>>();
+
+    assert!(
+        rows_with_empty_fields.is_empty(),
+        "interaction baseline rows should not contain empty fields: {rows_with_empty_fields:?}"
+    );
+}
+
+fn assert_table_rows_have_unique_panel_names(rows: &[&str]) {
+    let mut seen_panel_names = BTreeSet::new();
+    let duplicate_panel_names = rows
+        .iter()
+        .filter_map(|row| {
+            markdown_table_columns(row)
+                .first()
+                .copied()
+                .map(str::to_owned)
+        })
+        .filter(|panel| !seen_panel_names.insert(panel.clone()))
+        .collect::<Vec<_>>();
+
+    assert!(
+        duplicate_panel_names.is_empty(),
+        "interaction baseline panel names should be unique: {duplicate_panel_names:?}"
+    );
+}
+
+fn is_separator_row(columns: &[&str]) -> bool {
+    columns
+        .iter()
+        .all(|column| column.chars().all(|ch| ch == '-'))
+}
+
+fn is_known_status(status: &str) -> bool {
+    matches!(
+        status,
+        "Covered" | "Mists-specific" | "Follow-up" | "Missing"
+    )
 }
 
 pub fn markdown_table_columns(line: &str) -> Vec<&str> {
