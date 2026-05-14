@@ -5,6 +5,8 @@ use std::path::PathBuf;
 use std::process::Command;
 
 const MISTS_PANEL_ROW_COUNT: &str = "38 panel rows validated";
+const LATEST_LOCAL_PANEL_ARTIFACT_ROOT: &str =
+    "target/mists-panel-parity-with-saved-vars-after-castspell/";
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -401,13 +403,39 @@ fn panel_baseline_references_retained_runner_artifacts() {
         "baseline still contains test-backed placeholders"
     );
     assert!(
-        baseline.contains("target/mists-panel-parity/character/screenshot.webp"),
+        baseline.contains(
+            "target/mists-panel-parity-with-saved-vars-after-castspell/character/screenshot.webp"
+        ),
         "baseline should reference retained screenshot artifacts"
     );
     assert!(
-        baseline.contains("target/mists-panel-parity/game-menu-options/dump-tree.txt"),
+        baseline.contains(
+            "target/mists-panel-parity-with-saved-vars-after-castspell/game-menu-options/dump-tree.txt"
+        ),
         "baseline should reference retained frame-dump artifacts"
     );
+}
+
+#[test]
+fn panel_baseline_artifacts_exist_under_latest_local_tree() {
+    let artifacts = latest_local_panel_artifacts();
+
+    assert_eq!(
+        artifacts.len(),
+        mists_panel_slugs().len() * 2,
+        "each panel row should reference one screenshot and one frame dump"
+    );
+
+    for artifact in artifacts {
+        assert!(
+            artifact.starts_with(LATEST_LOCAL_PANEL_ARTIFACT_ROOT),
+            "panel artifact should use the latest local panel parity output tree: {artifact}"
+        );
+        assert!(
+            repo_root().join(&artifact).is_file(),
+            "panel artifact path should exist locally: {artifact}"
+        );
+    }
 }
 
 fn release_proof_artifact_test_dir(name: &str) -> PathBuf {
@@ -513,13 +541,38 @@ fn mists_panel_slugs() -> Vec<String> {
     baseline
         .lines()
         .filter(|line| line.starts_with('|') && line.contains(" | Pass | "))
-        .filter_map(|line| {
-            line.split("target/mists-panel-parity/")
-                .nth(1)
-                .and_then(|path| path.split('/').next())
-        })
+        .filter_map(panel_slug_from_baseline_row)
         .map(str::to_owned)
         .collect()
+}
+
+fn panel_slug_from_baseline_row(line: &str) -> Option<&str> {
+    line.split(LATEST_LOCAL_PANEL_ARTIFACT_ROOT)
+        .nth(1)
+        .and_then(|path| path.split('/').next())
+}
+
+fn latest_local_panel_artifacts() -> Vec<String> {
+    let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
+    let baseline =
+        std::fs::read_to_string(&baseline_path).expect("failed to read Mists panel baseline");
+
+    baseline
+        .lines()
+        .filter(|line| line.starts_with('|') && line.contains(" | Pass | "))
+        .flat_map(panel_artifacts_from_baseline_row)
+        .collect()
+}
+
+fn panel_artifacts_from_baseline_row(line: &str) -> Vec<String> {
+    line.split('`')
+        .filter(|part| part.starts_with("target/") && is_panel_artifact_path(part))
+        .map(str::to_owned)
+        .collect()
+}
+
+fn is_panel_artifact_path(path: &str) -> bool {
+    path.ends_with("/screenshot.webp") || path.ends_with("/dump-tree.txt")
 }
 
 fn passing_mists_panel_names() -> BTreeSet<String> {

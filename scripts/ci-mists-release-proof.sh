@@ -206,11 +206,19 @@ parse_pass_panel_rows() {
         [ "$panel" = "Panel" ] && continue
         [ "$panel" = "---" ] && continue
         [ "$status" = "Pass" ] || continue
-        slug="${artifacts#*target/mists-panel-parity/}"
-        slug="${slug%%/*}"
+        slug="$(panel_slug_from_artifacts "$artifacts")"
         [ -n "$slug" ] || continue
         matches_artifact_panel_filter "$panel" "$slug" && printf '%s\n' "$slug"
     done < "$REPO_ROOT/docs/baselines/mists-panels.md"
+}
+
+panel_slug_from_artifacts() {
+    local artifacts="$1" path slug
+    path="${artifacts#*target/}"
+    [ "$path" != "$artifacts" ] || return 0
+    slug="${path#*/}"
+    slug="${slug%%/*}"
+    printf '%s\n' "$slug"
 }
 
 trim_artifact_cell() {
