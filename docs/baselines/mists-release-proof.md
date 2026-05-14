@@ -97,14 +97,17 @@ under test.
 | `DeModal` + normal SavedVariables | TradeSkill panel | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/demodal-trade-skill-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/demodal-trade-skill-with-saved-vars-after-castspell/DeModal/trade-skill/` |
 | `Leatrix_Plus` + normal SavedVariables | Spellbook and professions | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/leatrix-plus-spellbook-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/leatrix-plus-spellbook-with-saved-vars-after-castspell/Leatrix_Plus/spellbook-professions/` |
 | `Leatrix_Plus` + normal SavedVariables | TradeSkill panel | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/leatrix-plus-trade-skill-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/leatrix-plus-trade-skill-with-saved-vars-after-castspell/Leatrix_Plus/trade-skill/` |
+| `AllTheThings` + normal SavedVariables | Collections: mounts, pets, toys, heirlooms, transmog | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/allthethings-collections-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/allthethings-collections-with-saved-vars-after-castspell/AllTheThings/collections/` |
+| `AllTheThings` + normal SavedVariables | TradeSkill panel | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/allthethings-trade-skill-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/allthethings-trade-skill-with-saved-vars-after-castspell/AllTheThings/trade-skill/` |
 
 The full installed-addon screenshot matrix remains deferred locally because it
 is the expensive 9-addon by 38-panel release-proof-style lane. This sample keeps
 addon-panel evidence moving by covering the recently touched talent,
 HUD/action-bar, Store/CatalogShop, CharacterFrame, Spellbook/professions,
-and TradeSkill surfaces with frame-moving and UI-option addons enabled,
-including Store/CatalogShop rows with normal SavedVariables loaded, without
-adding CI texture requirements or rerunning the release-proof wrapper.
+Collections, and TradeSkill surfaces with frame-moving, UI-option, and
+data-heavy addons enabled, including Store/CatalogShop rows with normal
+SavedVariables loaded, without adding CI texture requirements or rerunning the
+release-proof wrapper.
 
 ## Lane Logs
 
