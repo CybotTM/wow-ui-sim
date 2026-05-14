@@ -274,7 +274,7 @@ local function reanchor_objective_tracker(frame)
         UIParentRightManagedFrameContainer,
         "TOPRIGHT",
         0,
-        11
+        0
     )
     frame:SetHeight(836.5)
 end
