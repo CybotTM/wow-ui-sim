@@ -241,6 +241,7 @@ pub(super) fn click(state: &mut LuaState) -> LuaResult<u32> {
     if !begin_click(state, id)? {
         return Ok(0);
     }
+    crate::lua_api::frame::methods::widgets::toggle_checkbutton_for_click(state, id)?;
     let Some(handler) = get_rilua_script(state, id, "OnClick") else {
         end_click(state, id);
         return Ok(0);

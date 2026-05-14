@@ -30,6 +30,10 @@ pub(crate) fn refresh_scroll_frames_for_resized_frame(
     slider::refresh_scroll_frames_for_resized_frame(state, resized_id)
 }
 
+pub(crate) fn toggle_checkbutton_for_click(state: &mut LuaState, id: u64) -> LuaResult<()> {
+    slider::toggle_checkbutton_for_click(state, id)
+}
+
 /// Register all widget-specific methods on the frame metatable.
 ///
 /// Call this after the standard frame metatable has been created,

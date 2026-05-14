@@ -27,7 +27,7 @@ HUD state and the Mists specialization Learn-to-talents flow.
 | World map | Zone art, zoom/navigation, quest pin selection, opacity path | `tests/mists_world_map_panel.rs::mists_world_map_opens_with_zone_art_and_quest_pins` | Covered |
 | Mail: inbox, send, attachments, COD | Inbox open, money take, attachment send, COD send | `tests/mists_mail_panel.rs::mists_mail_panel_supports_inbox_send_attachments_and_cod` | Covered |
 | Auction House: browse, bid, post, cancel | Browse query, bid placement, auction posting, cancel | `tests/mists_auction_house_panel.rs::mists_auction_house_supports_browse_bid_post_and_cancel` | Covered |
-| AddOn list and UI management LoD panels | AddOnList load, row management, and renderable management frame | `tests/mists_panel_parity_runner.rs::runner_manifest_covers_every_mists_panel_baseline_row` | Follow-up |
+| AddOn list and UI management LoD panels | AddOnList load, row toggle, reload-state, and enable-all visible state changes | `tests/mists_addonlist_interactions.rs::mists_addonlist_row_toggle_updates_visible_reload_state` | Mists-specific |
 | Bank, ReagentBank, Void Storage, Guild Bank | Bank bags, reagent bank, void storage, guild bank data | `tests/mists_bank_storage_panel.rs::mists_bank_and_guild_bank_support_storage_flow` | Covered |
 | Trade window and `TradePlayerInputMoneyFrame` | Trade open, money input, accept/cancel paths | `tests/mists_trade_panel.rs::mists_trade_window_supports_money_input_flow` | Covered |
 | Friends, Who, Guild, Communities, Club Finder | Friends, who query, guild roster, club finder row/mode changes | `tests/mists_social_panels.rs::mists_social_panels_support_friends_who_guild_and_communities` | Covered |

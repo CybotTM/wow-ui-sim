@@ -20,6 +20,7 @@ mod colorselect;
 mod scroll_controller;
 mod thumb_texture;
 pub(super) use checkbutton::register_checkbutton;
+pub(super) use checkbutton::toggle_checkbutton_for_click;
 pub(super) use colorselect::register_colorselect;
 
 // ---------------------------------------------------------------------------
