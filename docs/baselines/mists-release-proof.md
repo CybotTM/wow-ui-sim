@@ -28,6 +28,17 @@ visual checks. A green CI signal-only run is therefore evidence that panels load
 produce render output, and stay free of `lua-errors`; it is not evidence that
 the rendered art matches local asset-backed Mists captures.
 
+Latest local asset-backed HUD recapture: 2026-05-14 on
+`classic-profile-rollout`, retained under `target/mists-local-visual-audit/`.
+`idle-hud-recapture.webp` and `target-hud-recapture.webp` show the player and
+target unit frames using Mists art, populated action buttons, bag slots, micro
+buttons, minimap art, quest tracker text, and no gray placeholder bars or broken
+black action-slot boxes. Companion frame dumps
+`player-frame-recapture.dump`, `target-frame-visible-recapture.dump`, and
+`main-menu-bar-recapture.dump` verify the frame geometry and resolved texture
+paths behind those captures. The focused regression test is
+`tests/mists_hud_layout_regression.rs::mists_hud_keeps_unit_frames_and_bottom_bar_textured`.
+
 ## Local Non-Release Completion Audit
 
 Latest local debug-profile audit: 2026-05-14 on `classic-profile-rollout`,
