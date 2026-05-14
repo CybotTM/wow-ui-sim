@@ -19,7 +19,7 @@ Status meanings:
 
 | Mists panel row | Local `client-mists` evidence | Comparable retail coverage | Status |
 |---|---|---|---|
-| Character panel: paperdoll, stats, titles, equipment manager | `tests/mists_character_panel.rs`; `tests/mists_character_reputation_panels.rs` | Character/paperdoll, reputation, titles, and equipment-manager module rows in `PLAN.tests.md` | Comparable |
+| Character panel: paperdoll, stats, titles, equipment manager | `tests/mists_character_panel.rs`; `tests/mists_character_reputation_panels.rs` | Character/paperdoll, pet paper-doll, reputation, titles, and equipment-manager module rows in `PLAN.tests.md` | Comparable |
 | Spellbook and professions | `tests/mists_spellbook_panel.rs`; `tests/mists_craft_ui_panel.rs`; `tests/mists_trade_skill_api.rs`; `tests/professions_api.rs` | Retail SpellBook/PlayerSpells plus profession-surface rows in `PLAN.tests.md` | Comparable |
 | Talents and glyphs | `tests/mists_talents_glyphs_panel.rs` | Retail TalentUI/PlayerSpells talent rows | Mists-specific |
 | Quest log and objective tracker | `tests/mists_quest_panel.rs` | Quest log, quest watch, objective tracker rows | Comparable |

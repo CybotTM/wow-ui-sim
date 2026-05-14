@@ -20,7 +20,7 @@ HUD state and the Mists specialization Learn-to-talents flow.
 
 | Panel | Retail-supported workflow audited | Mists coverage | Status |
 |---|---|---|---|
-| Character panel: paperdoll, stats, titles, equipment manager | Gear slots, reputation rows, titles, equipment set selection | `tests/mists_character_panel.rs::mists_character_panel_populates_gear_and_reputation`; `tests/mists_character_panel.rs::mists_character_subpanels_drive_titles_and_equipment_sets` | Covered |
+| Character panel: paperdoll, stats, titles, equipment manager | Gear slots, reputation rows, titles, pet paper-doll tab, equipment set selection | `tests/mists_character_panel.rs::mists_character_panel_populates_gear_and_reputation`; `tests/mists_character_panel.rs::mists_character_pet_tab_stays_visible_when_pet_ui_is_seeded`; `tests/mists_character_panel.rs::mists_character_subpanels_drive_titles_and_equipment_sets` | Covered |
 | Spellbook and professions | Spell tab population and professions tab buttons | `tests/mists_spellbook_panel.rs::mists_spellbook_populates_visible_spell_buttons` | Covered |
 | Talents and glyphs | Talent selection mutation; glyph socket mutation | `tests/mists_talents_glyphs_panel.rs::mists_talents_and_glyphs_panel_populates_rows_and_sockets`; `tests/mists_talents_glyphs_panel.rs::mists_talents_and_glyphs_mutate_selected_state` | Mists-specific |
 | Quest log and objective tracker | Quest selection, watch state, objective tracker refresh | `tests/mists_quest_panel.rs::mists_quest_log_selects_entries_and_refreshes_tracker` | Covered |
