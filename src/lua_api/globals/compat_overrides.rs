@@ -100,7 +100,7 @@ end
 
 if string ~= nil and string.split == nil then
   function string.split(self, delimiter, limit)
-    return strsplittable(delimiter, self, limit)
+    return strsplit(delimiter, self, limit)
   end
 end
 "#;

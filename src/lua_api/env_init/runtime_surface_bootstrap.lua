@@ -293,12 +293,12 @@ do
     local stringIndex = stringMeta.__index
     if type(stringIndex) == "table" then
       function stringIndex:split(delimiter, limit)
-        return strsplittable(delimiter, self, limit)
+        return strsplit(delimiter, self, limit)
       end
     end
 
     function stringMeta:split(delimiter, limit)
-      return strsplittable(delimiter, self, limit)
+      return strsplit(delimiter, self, limit)
     end
   end
 end

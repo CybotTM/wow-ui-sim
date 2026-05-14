@@ -553,12 +553,7 @@ fn test_strsplittable() {
 fn test_string_split_method() {
     let env = env();
     let (a, b, c): (String, String, String) = env
-        .eval(
-            r#"
-            local t = ("a-b-c"):split("-")
-            return t[1], t[2], t[3]
-            "#,
-        )
+        .eval(r#"return ("a-b-c"):split("-")"#)
         .unwrap();
     assert_eq!((a.as_str(), b.as_str(), c.as_str()), ("a", "b", "c"));
 }
