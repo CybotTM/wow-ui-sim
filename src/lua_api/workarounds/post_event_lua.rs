@@ -283,31 +283,6 @@ local function reanchor_objective_tracker(frame)
     frame:SetHeight(height)
 end
 
-if EditModeManagerFrame then
-    local partySystem = EditModeManagerFrame:GetRegisteredSystemFrame(
-        Enum.EditModeSystem.UnitFrame,
-        Enum.EditModeUnitFrameSystemIndices.Party
-    )
-    if partySystem and partySystem.systemInfo and partySystem.systemInfo.settings then
-        for _, settingInfo in ipairs(partySystem.systemInfo.settings) do
-            if settingInfo.setting == Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames then
-                settingInfo.value = 0
-            end
-        end
-        if partySystem.UpdateSettingMap then
-            partySystem:UpdateSettingMap(true)
-        end
-        if partySystem.UpdateSystemSetting then
-            pcall(
-                partySystem.UpdateSystemSetting,
-                partySystem,
-                Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames,
-                true
-            )
-        end
-    end
-end
-
 if UpdateRaidAndPartyFrames then
     pcall(UpdateRaidAndPartyFrames)
 end
@@ -399,3 +374,50 @@ for i = 1, 12 do
     __wow_refresh_action_button(_G["ActionButton" .. i])
 end
 "###;
+
+#[cfg(test)]
+mod tests {
+    use super::POST_EVENT_FRAME_LAYOUT_WORKAROUND_LUA;
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn post_event_layout_preserves_saved_raid_style_party_frame_setting() {
+        let env = WowLuaEnv::new().expect("create Lua env");
+        env.exec(
+            r#"
+            Enum = {
+                EditModeSystem = { UnitFrame = 3 },
+                EditModeUnitFrameSystemIndices = { Party = 4 },
+                EditModeUnitFrameSetting = { UseRaidStylePartyFrames = 4 },
+            }
+
+            partySystem = {
+                systemInfo = {
+                    settings = {
+                        { setting = Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames, value = 1 },
+                    },
+                },
+            }
+
+            EditModeManagerFrame = {
+                GetRegisteredSystemFrame = function()
+                    return partySystem
+                end,
+            }
+            "#,
+        )
+        .expect("install party system stub");
+
+        env.exec(POST_EVENT_FRAME_LAYOUT_WORKAROUND_LUA)
+            .expect("run post-event layout workaround");
+
+        let value: i32 = env
+            .eval("return partySystem.systemInfo.settings[1].value")
+            .expect("read party style setting");
+
+        assert_eq!(
+            value, 1,
+            "post-event layout refresh must not force raid-style party frames off"
+        );
+    }
+}
