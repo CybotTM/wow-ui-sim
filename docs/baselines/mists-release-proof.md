@@ -124,6 +124,13 @@ data-heavy, auction-focused, nameplate, map, dialogue, and item-level addons
 enabled, including Store/CatalogShop rows with normal SavedVariables loaded,
 without adding CI texture requirements or rerunning the release-proof wrapper.
 
+## Validation Scope Limits
+
+The full installed-addon screenshot matrix remains a validation scope limit for
+local runs. The bounded installed-addon samples prove selected panels under each
+installed addon with normal SavedVariables enabled; they are not proof that every
+installed-addon panel screenshot has been exercised locally.
+
 ### Bounded Sample Coverage Audit
 
 The installed Mists addon manifest currently contains nine rows. Each row now
