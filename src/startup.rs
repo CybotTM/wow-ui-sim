@@ -474,6 +474,7 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     call_unit_frame_set_unit(env);
     fire_unit_aura(env);
 
+    fire("PET_UI_UPDATE");
     fire("BAG_UPDATE_DELAYED");
     fire("QUEST_LOG_UPDATE");
     resize_party_state(&mut env.state().borrow_mut(), 4);

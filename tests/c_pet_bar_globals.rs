@@ -145,6 +145,26 @@ fn get_pet_action_cooldown_reads_slot_cooldown() {
 }
 
 #[test]
+fn get_pet_action_slot_usable_reports_bound_slots_only() {
+    let env = env_with_pet_slots();
+    let (active_slot, passive_slot, empty_slot, out_of_range): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            return GetPetActionSlotUsable(1),
+                   GetPetActionSlotUsable(2),
+                   GetPetActionSlotUsable(7),
+                   GetPetActionSlotUsable(99)
+            "#,
+        )
+        .unwrap();
+
+    assert!(active_slot);
+    assert!(passive_slot);
+    assert!(!empty_slot);
+    assert!(!out_of_range);
+}
+
+#[test]
 fn cast_pet_action_toggles_active_and_fires_event() {
     let env = env_with_pet_slots();
     let fired: bool = env

@@ -194,9 +194,6 @@ fn mists_character_pet_tab_hides_when_pet_ui_is_absent() {
             if not CharacterFrame or not CharacterFrame:IsShown() then
                 error("CharacterFrame did not open")
             end
-            if PetPaperDollFrame_UpdateIsAvailable then
-                PetPaperDollFrame_UpdateIsAvailable()
-            end
             if CharacterFrameTab2 and CharacterFrameTab2:IsShown() then
                 error("pet tab is visible despite absent pet UI")
             end

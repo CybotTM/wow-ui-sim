@@ -5,6 +5,8 @@
 - [x] Guard Mists CharacterFrame default no-pet state so `CharacterFrameTab2` stays hidden when `HasPetUI()` is false.
 - [x] Refresh focused Mists Character panel parity artifacts after the pet UI state guard, including normal SavedVariables.
 - [x] Re-run focused Mists base `lua-errors` and installed-addon startup matrix after the pet UI state guard.
+- [x] Fix Mists CharacterFrame real open path so the Pet tab hides immediately when `HasPetUI()` is false, without manually calling `PetPaperDollFrame_UpdateIsAvailable()`.
+- [ ] Re-run focused installed-addon Mists Character panel matrix with normal SavedVariables after the pet UI open-path fix.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
 # Mists / Pandaria Classic Startup Plan

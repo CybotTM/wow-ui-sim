@@ -10,6 +10,7 @@
 //!   the bootstrap stub's previous shape.
 //! - `GetPetActionCooldown(index)` → `(start, duration, enable)` from
 //!   `slot.cooldown`. Missing entries report `(0, 0, 1)`.
+//! - `GetPetActionSlotUsable(index)` → true for bound pet action slots.
 //! - `CastPetAction(index, target?)` → toggles `is_active` on the indexed
 //!   slot, fires `PET_BAR_UPDATE`. Out-of-range / passive slots no-op.
 //! - `TogglePetAutocast(index)` → flips `auto_cast_enabled` on the indexed
@@ -129,6 +130,21 @@ fn get_pet_action_cooldown(state: &mut LuaState) -> LuaResult<u32> {
     Ok(3)
 }
 
+/// `GetPetActionSlotUsable(index)` — true when the indexed slot has a
+/// renderable/bound action. Classic pet bars use this only to dim icons.
+fn get_pet_action_slot_usable(state: &mut LuaState) -> LuaResult<u32> {
+    let usable = stack_i32(state, 1)
+        .and_then(slot_index_to_zero_based)
+        .and_then(|index| {
+            borrow_state(state)
+                .ok()
+                .and_then(|sim| sim.pet_actions.get(index).map(|slot| slot.has_action))
+        })
+        .unwrap_or(false);
+    state.push(Val::Bool(usable));
+    Ok(1)
+}
+
 /// Apply `mutate` to the pet slot at the 1-based Lua `index` argument and
 /// fire `PET_BAR_UPDATE` on success. `mutate` returns `true` to publish the
 /// event, `false` to no-op (slot empty / unsupported / passive).
@@ -222,6 +238,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetNumPetActions", get_num_pet_actions)?;
     LuaApiMut::register_function(lua, "GetPetActionInfo", get_pet_action_info)?;
     LuaApiMut::register_function(lua, "GetPetActionCooldown", get_pet_action_cooldown)?;
+    LuaApiMut::register_function(lua, "GetPetActionSlotUsable", get_pet_action_slot_usable)?;
     LuaApiMut::register_function(lua, "CastPetAction", cast_pet_action)?;
     LuaApiMut::register_function(lua, "TogglePetAutocast", toggle_pet_autocast)?;
     LuaApiMut::register_function(lua, "CancelPetPossess", cancel_pet_possess)?;

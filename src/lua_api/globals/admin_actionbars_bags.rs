@@ -6,6 +6,7 @@
 //! them into the A_Admin TableBuilder chain.
 
 use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_api::state::PetActionSlot;
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
@@ -36,8 +37,8 @@ pub(super) fn set_pet_action_slot(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
 
-    let mut state = borrow_state_mut(state)?;
-    if let Some(action) = state.pet_actions.get_mut(index) {
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(action) = sim.pet_actions.get_mut(index) {
         *action = PetActionSlot {
             has_action: true,
             name: Some(name),
@@ -51,6 +52,10 @@ pub(super) fn set_pet_action_slot(state: &mut LuaState) -> LuaResult<u32> {
             cooldown: None,
         };
     }
+    drop(sim);
+
+    fire_named_event_state(state, "PET_UI_UPDATE", &[]);
+    fire_named_event_state(state, "PET_BAR_UPDATE", &[]);
     Ok(0)
 }
 
