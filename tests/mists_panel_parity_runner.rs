@@ -438,6 +438,21 @@ fn panel_baseline_artifacts_exist_under_latest_local_tree() {
     }
 }
 
+#[test]
+fn latest_local_panel_lua_error_artifacts_are_empty() {
+    let lua_error_artifacts = latest_local_panel_lua_error_artifacts();
+
+    assert_eq!(
+        lua_error_artifacts.len(),
+        mists_panel_slugs().len(),
+        "each panel row should have one retained lua-errors artifact"
+    );
+
+    for artifact in lua_error_artifacts {
+        assert_empty_lua_error_artifact(&artifact);
+    }
+}
+
 fn release_proof_artifact_test_dir(name: &str) -> PathBuf {
     repo_root()
         .join("target")
@@ -562,6 +577,31 @@ fn latest_local_panel_artifacts() -> Vec<String> {
         .filter(|line| line.starts_with('|') && line.contains(" | Pass | "))
         .flat_map(panel_artifacts_from_baseline_row)
         .collect()
+}
+
+fn latest_local_panel_lua_error_artifacts() -> Vec<String> {
+    mists_panel_slugs()
+        .into_iter()
+        .map(|slug| format!("{LATEST_LOCAL_PANEL_ARTIFACT_ROOT}{slug}/lua-errors.json"))
+        .collect()
+}
+
+fn assert_empty_lua_error_artifact(artifact: &str) {
+    let path = repo_root().join(artifact);
+    assert!(
+        path.is_file(),
+        "lua-error artifact should exist: {artifact}"
+    );
+
+    let contents = std::fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("failed to read {artifact}: {error}"));
+    let errors: Vec<serde_json::Value> = serde_json::from_str(&contents)
+        .unwrap_or_else(|error| panic!("failed to parse {artifact}: {error}"));
+
+    assert!(
+        errors.is_empty(),
+        "lua-error artifact should contain an empty array: {artifact}"
+    );
 }
 
 fn panel_artifacts_from_baseline_row(line: &str) -> Vec<String> {
