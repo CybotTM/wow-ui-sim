@@ -107,16 +107,18 @@ under test.
 | `Leatrix_Maps` + normal SavedVariables | Quest log and objective tracker | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/leatrix-maps-quest-log-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/leatrix-maps-quest-log-with-saved-vars-after-castspell/Leatrix_Maps/quest-log/` |
 | `DialogueUI` + normal SavedVariables | Quest choice LoD dialog | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/dialogueui-quest-choice-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/dialogueui-quest-choice-with-saved-vars-after-castspell/DialogueUI/quest-choice/` |
 | `DialogueUI` + normal SavedVariables | Quest log and objective tracker | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/dialogueui-quest-log-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/dialogueui-quest-log-with-saved-vars-after-castspell/DialogueUI/quest-log/` |
+| `SimpleItemLevel` + normal SavedVariables | Character panel: paperdoll, stats, titles, equipment manager | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/simpleitemlevel-character-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/simpleitemlevel-character-with-saved-vars-after-castspell/SimpleItemLevel/character/` |
+| `SimpleItemLevel` + normal SavedVariables | Inspect and guild control LoD panels | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/simpleitemlevel-inspect-guild-control-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/simpleitemlevel-inspect-guild-control-with-saved-vars-after-castspell/SimpleItemLevel/inspect-guild-control/` |
 
 The full installed-addon screenshot matrix remains deferred locally because it
 is the expensive 9-addon by 38-panel release-proof-style lane. This sample keeps
 addon-panel evidence moving by covering the recently touched talent,
 HUD/action-bar, Store/CatalogShop, CharacterFrame, Spellbook/professions,
 Collections, TradeSkill, Auction House, Mail, Nameplates, World Map, Quest log,
-and Quest choice surfaces with frame-moving, UI-option, data-heavy,
-auction-focused, nameplate, map, and dialogue addons enabled, including
-Store/CatalogShop rows with normal SavedVariables loaded, without adding CI
-texture requirements or rerunning the release-proof wrapper.
+Quest choice, Character, and Inspect surfaces with frame-moving, UI-option,
+data-heavy, auction-focused, nameplate, map, dialogue, and item-level addons
+enabled, including Store/CatalogShop rows with normal SavedVariables loaded,
+without adding CI texture requirements or rerunning the release-proof wrapper.
 
 ## Lane Logs
 
