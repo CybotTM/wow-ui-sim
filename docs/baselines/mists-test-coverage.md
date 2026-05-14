@@ -20,7 +20,7 @@ Status meanings:
 | Mists panel row | Local `client-mists` evidence | Comparable retail coverage | Status |
 |---|---|---|---|
 | Character panel: paperdoll, stats, titles, equipment manager | `tests/mists_character_panel.rs`; `tests/mists_character_reputation_panels.rs` | Character/paperdoll, reputation, titles, and equipment-manager module rows in `PLAN.tests.md` | Comparable |
-| Spellbook and professions | `tests/mists_spellbook_panel.rs`; `tests/mists_craft_ui_panel.rs`; `tests/mists_trade_skill_api.rs`; `tests/professions_api.rs` | Retail SpellBook/PlayerSpells plus profession-surface rows in `PLAN.tests.md` | Weaker |
+| Spellbook and professions | `tests/mists_spellbook_panel.rs`; `tests/mists_craft_ui_panel.rs`; `tests/mists_trade_skill_api.rs`; `tests/professions_api.rs` | Retail SpellBook/PlayerSpells plus profession-surface rows in `PLAN.tests.md` | Comparable |
 | Talents and glyphs | `tests/mists_talents_glyphs_panel.rs` | Retail TalentUI/PlayerSpells talent rows | Mists-specific |
 | Quest log and objective tracker | `tests/mists_quest_panel.rs` | Quest log, quest watch, objective tracker rows | Comparable |
 | World map | `tests/mists_world_map_panel.rs`; `tests/mists_world_map_opacity.rs` | World map, map navigation, POI/pin rows | Comparable |
@@ -58,15 +58,15 @@ Status meanings:
 | Loot, group loot, personal loot | `tests/mists_loot_panel.rs` | Loot, group loot, and bonus/personal loot rows | Comparable |
 | Game menu options | `tests/mists_interface_options_panel.rs` | Game menu and settings rows | Comparable |
 
-## First Weaker Workflow
+## Closed Weaker Workflow
 
-The first Mists-applicable workflow with weaker evidence is the professions side
-of Spellbook. `tests/mists_spellbook_panel.rs` proves the spellbook opens,
-visible spell buttons render with icons/text, and profession tab buttons have
-valid size. It does not click or invoke a profession button and then assert the
-expected profession frame, cast/action record, or visible profession-detail
-state changes.
+The first Mists-applicable workflow with weaker evidence was the professions
+side of Spellbook. That gap is now covered by
+`tests/mists_spellbook_panel.rs::mists_spellbook_populates_visible_spell_buttons`:
+the test opens the profession tab, invokes a visible profession button through
+its Blizzard `OnClick` handler, and asserts the selected trade skill line
+changes to Mining.
 
-Promoted follow-up: add a Mists Spellbook/professions interaction test that
-clicks a visible profession button and asserts the resulting profession action
-path, instead of only proving the tab and buttons render.
+Next audit pass: re-run the interaction/retail comparison audit after this
+profession-action coverage and promote the first remaining weaker workflow, if
+one still exists.

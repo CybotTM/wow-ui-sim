@@ -6,6 +6,7 @@
 //! - `AttackTarget()`         — starts an "Auto Attack" cast marker
 //! - `StopAttack()`           — clears the Auto Attack marker
 //! - `CastSpell(id [, unit])`         — legacy signature, forwards to CastSpellByID
+//! - `CastSpell(slot, bookType)`      — legacy spellbook signature
 //! - `CastSpellByID(id [, unit])`     — starts/executes the spell
 //! - `CastSpellByName(name [, unit])` — resolves and starts/executes the spell
 //! - `ClickSpecialAbility(index)`     — index 1 => Auto Attack toggle,
@@ -357,9 +358,33 @@ pub(crate) fn cast_spell_by_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// `CastSpell(spellId [, unit])` — legacy entry; same effect as CastSpellByID.
+/// `CastSpell(spellId [, unit])` or `CastSpell(slot, bookType)` — legacy entry.
 fn cast_spell(state: &mut LuaState) -> LuaResult<u32> {
-    cast_spell_by_id(state)
+    let Some(first_arg) = stack_u32(state, 1) else {
+        return Ok(0);
+    };
+
+    if let Some(book_type) = Option::<String>::from_stack(state, 2)?
+        && is_spellbook_book_type(&book_type)
+    {
+        if let Some(spell_id) = spell_id_for_spellbook_slot(first_arg) {
+            execute_spell_by_id(state, spell_id)?;
+        }
+        return Ok(0);
+    }
+
+    let _unit = Option::<String>::from_stack(state, 2)?;
+    execute_spell_by_id(state, first_arg)?;
+    Ok(0)
+}
+
+fn is_spellbook_book_type(book_type: &str) -> bool {
+    matches!(book_type, "spell" | "pet" | "professions")
+}
+
+fn spell_id_for_spellbook_slot(slot: u32) -> Option<u32> {
+    let slot = i32::try_from(slot).ok()?;
+    spellbook_data::get_spell_at_slot(slot).map(|(_, entry, _)| entry.spell_id)
 }
 
 /// `CastSpellByName(name [, unit])` — set `SimState.casting` to the named spell.

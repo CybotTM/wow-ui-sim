@@ -70,6 +70,26 @@ fn mists_spellbook_populates_visible_spell_buttons() {
             if sizedProfessionButtons == 0 then
                 error("professions tab has no visible profession buttons")
             end
+
+            local miningButton = PrimaryProfession2 and PrimaryProfession2.SpellButton1
+            if miningButton == nil or miningButton:IsShown() ~= true then
+                error("mining profession button is not visible")
+            end
+            local onClick = miningButton:GetScript("OnClick")
+            if type(onClick) ~= "function" then
+                error("mining profession button has no OnClick handler")
+            end
+
+            local beforeLineName = GetTradeSkillLine()
+            if beforeLineName == "Mining" then
+                error("profession button test started with Mining already selected")
+            end
+
+            onClick(miningButton, "LeftButton")
+            local lineName = GetTradeSkillLine()
+            if lineName ~= "Mining" then
+                error("profession button click selected " .. tostring(lineName) .. " instead of Mining")
+            end
             "#,
             "dump-tree",
             "--filter-key",

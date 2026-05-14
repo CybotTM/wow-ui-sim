@@ -90,7 +90,7 @@ That follow-up is now covered by `tests/mists_store_commercial_panel.rs` and the
 `Store, CatalogShop, WowToken, and SimpleCheckout` row in
 `docs/baselines/mists-panels.md`.
 
-The current coverage index is `docs/baselines/mists-test-coverage.md`. Its
-first weaker Mists-applicable workflow is Spellbook/professions: the current
-test proves profession buttons render, but not that clicking one drives the
-expected profession action path.
+The current coverage index is `docs/baselines/mists-test-coverage.md`. Its first
+weaker Mists-applicable workflow was Spellbook/professions, and that is now
+covered by invoking a visible profession button through its Blizzard `OnClick`
+handler and asserting the selected trade skill line changes.
