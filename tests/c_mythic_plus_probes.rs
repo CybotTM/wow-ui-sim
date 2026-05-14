@@ -77,6 +77,24 @@ fn challenge_mode_best_time_defaults_empty() {
     assert_eq!(realm_best, None);
 }
 
+#[test]
+fn challenge_mode_reward_rows_default_to_three_empty_medal_times() {
+    let env = env();
+    let (num_medals, bronze_time, rewards): (i32, i32, i32) = env
+        .eval(
+            r#"
+            local times = C_ChallengeMode.GetChallengeModeMapTimes(429)
+            return C_ChallengeMode.GetNumMedals(429),
+                   times[1],
+                   C_ChallengeMode.GetNumChallengeMapRewards(429, 1)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(num_medals, 3);
+    assert_eq!(bronze_time, 2700);
+    assert_eq!(rewards, 0);
+}
+
 // ── GetCurrentSeason ─────────────────────────────────────────────────────────
 
 #[test]

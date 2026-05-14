@@ -215,6 +215,7 @@ macro_rules! build_empty_sim_state {
             quest_log_entries: QuestLogState::seeded(),
             pending_quest_offer: None,
             quest_choice_id: None,
+            quest_choice_response_id: None,
             quest_poi_map_id: None,
             selected_quest_log_id: None,
             abandon_quest_id: None,

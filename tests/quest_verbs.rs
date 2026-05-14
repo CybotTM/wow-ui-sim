@@ -84,6 +84,27 @@ fn quest_choice_set_active_writes_choice_id() {
     assert_eq!(env.state().borrow().quest_choice_id, Some(4567));
 }
 
+#[test]
+fn c_quest_choice_populates_seeded_options_and_records_response() {
+    let env = env();
+    let (choice_id, option_count, option_id, option_text): (i32, i32, i32, String) = env
+        .eval(
+            r#"
+            local choiceID, _question, optionCount = C_QuestChoice.GetQuestChoiceInfo()
+            local optionID, optionText = C_QuestChoice.GetQuestChoiceOptionInfo(0)
+            C_QuestChoice.SendQuestChoiceResponse(optionID)
+            return choiceID, optionCount, optionID, optionText
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(choice_id, 9001);
+    assert_eq!(option_count, 2);
+    assert_eq!(option_id, 101);
+    assert_eq!(option_text, "Aid the Shado-Pan");
+    assert_eq!(env.state().borrow().quest_choice_response_id, Some(101));
+}
+
 // ── QuestMapLogTitleButton_OnClick ────────────────────────────────────────────
 
 #[test]

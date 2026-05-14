@@ -32,6 +32,7 @@ mod pet_battles;
 mod player_info;
 mod profession_crafting;
 pub(crate) mod professions;
+mod quest_choice;
 mod quest_log;
 mod recruit_a_friend;
 mod report_system;
@@ -253,6 +254,7 @@ fn register_map_and_encounter_surfaces(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     mythic_plus::register_mythic_plus_surface(state)?;
+    quest_choice::register_quest_choice_surface(state)?;
     scenario_info::register_scenario_info_surface(state)?;
     warband_scene::register_warband_scene_surface(state)?;
     c_api::register_nameplate_tables(state)?;

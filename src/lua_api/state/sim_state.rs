@@ -197,6 +197,7 @@ pub struct SimState {
     pub quest_log_entries: QuestLogState,
     pub pending_quest_offer: Option<u32>,
     pub quest_choice_id: Option<u32>,
+    pub quest_choice_response_id: Option<u32>,
     pub quest_poi_map_id: Option<i32>,
     pub selected_quest_log_id: Option<u32>,
     pub abandon_quest_id: Option<u32>,

@@ -107,6 +107,13 @@ fn register_mythic_plus_request_handlers(state: &mut LuaState, ns: GcRef<Table>)
 
 fn register_challenge_mode_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_ChallengeMode")?;
+    register_challenge_map_handlers(state, ns)?;
+    register_challenge_reward_handlers(state, ns)?;
+    register_challenge_request_handlers(state, ns)?;
+    Ok(())
+}
+
+fn register_challenge_map_handlers(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "GetMapTable", challenge_get_map_table)?;
     table_set_rust_fn_static(state, ns, "GetMapUIInfo", challenge_get_map_ui_info)?;
     table_set_rust_fn_static(state, ns, "GetAffixInfo", get_affix_info)?;
@@ -116,6 +123,33 @@ fn register_challenge_mode_surface(state: &mut LuaState) -> LuaResult<()> {
         "GetChallengeBestTime",
         challenge_get_challenge_best_time,
     )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetChallengeModeMapTimes",
+        challenge_get_challenge_mode_map_times,
+    )?;
+    table_set_rust_fn_static(state, ns, "GetNumMedals", challenge_get_num_medals)?;
+    Ok(())
+}
+
+fn register_challenge_reward_handlers(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetChallengeMapRewardInfo",
+        challenge_get_challenge_map_reward_info,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetNumChallengeMapRewards",
+        challenge_get_num_challenge_map_rewards,
+    )?;
+    Ok(())
+}
+
+fn register_challenge_request_handlers(state: &mut LuaState, ns: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         ns,
@@ -157,6 +191,29 @@ fn challenge_get_challenge_best_time(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Nil);
     state.push(Val::Nil);
     Ok(2)
+}
+
+fn challenge_get_challenge_mode_map_times(state: &mut LuaState) -> LuaResult<u32> {
+    let times = create_table(state);
+    set_table_array(state, times, 1, Val::Num(45.0 * 60.0));
+    set_table_array(state, times, 2, Val::Num(30.0 * 60.0));
+    set_table_array(state, times, 3, Val::Num(15.0 * 60.0));
+    state.push(times);
+    Ok(1)
+}
+
+fn challenge_get_challenge_map_reward_info(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn challenge_get_num_challenge_map_rewards(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn challenge_get_num_medals(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(3.0));
+    Ok(1)
 }
 
 fn noop(_state: &mut LuaState) -> LuaResult<u32> {
