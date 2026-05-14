@@ -6,6 +6,7 @@
 //! them into the A_Admin TableBuilder chain.
 
 use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::state::PetActionSlot;
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -19,6 +20,37 @@ pub(super) fn set_action_slot(state: &mut LuaState) -> LuaResult<u32> {
     state.action_bars.insert(slot, spell_id);
     state.action_outfits.remove(&slot);
     state.equipped_gear_outfit_action_slots.remove(&slot);
+    Ok(0)
+}
+
+pub(super) fn set_pet_action_slot(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = u32::from_stack(state, 1)?;
+    let name = String::from_stack(state, 2)?;
+    let texture = String::from_stack(state, 3)?;
+    let spell_id = Option::<u32>::from_stack(state, 4)?;
+    let passive = Option::<bool>::from_stack(state, 5)?.unwrap_or(false);
+    let Some(index) = slot
+        .checked_sub(1)
+        .and_then(|slot| usize::try_from(slot).ok())
+    else {
+        return Ok(0);
+    };
+
+    let mut state = borrow_state_mut(state)?;
+    if let Some(action) = state.pet_actions.get_mut(index) {
+        *action = PetActionSlot {
+            has_action: true,
+            name: Some(name),
+            texture: Some(texture),
+            is_token: false,
+            is_active: false,
+            auto_cast_allowed: !passive,
+            auto_cast_enabled: false,
+            spell_id,
+            passive,
+            cooldown: None,
+        };
+    }
     Ok(0)
 }
 

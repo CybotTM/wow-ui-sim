@@ -24,7 +24,7 @@ use rilua::{LuaResult, Val};
 // entry-point file small. The parent TableBuilder chain wires these up.
 use super::admin_actionbars_bags::{
     add_bag_item, add_guild_bank_item, clear_action_bars, clear_action_slot, clear_bags,
-    clear_guild_bank, remove_bag_item, set_action_slot, set_merchant_items,
+    clear_guild_bank, remove_bag_item, set_action_slot, set_merchant_items, set_pet_action_slot,
 };
 use super::admin_addons::register_test_addon;
 use super::admin_auction_house::{
@@ -286,6 +286,7 @@ fn register_photo_sharing(b: TableBuilder) -> LuaResult<TableBuilder> {
 fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
     let b = b
         .set_function("SetActionSlot", set_action_slot)?
+        .set_function("SetPetActionSlot", set_pet_action_slot)?
         .set_function("ClearActionSlot", clear_action_slot)?
         .set_function("ClearActionBars", clear_action_bars)?
         .set_function("AddBagItem", add_bag_item)?

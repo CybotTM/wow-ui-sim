@@ -17,9 +17,11 @@
 //! - `CancelPetPossess()` → clears the active flag on every slot, fires
 //!   `PET_BAR_UPDATE`. Possession state itself is not modeled.
 //! - `PetHasActionBar()` → true when any slot has `has_action = true`.
+//! - `HasPetUI()` → `(hasPetUI, canGainXP)` from action slots / pet XP state.
 //!
 //! The `runtime_surface_bootstrap.lua` `if ... == nil` guards on
-//! `GetPetActionInfo`, `GetPetActionCooldown`, and `PetHasActionBar` are
+//! `GetPetActionInfo`, `GetPetActionCooldown`, `PetHasActionBar`, and
+//! per-profile `HasPetUI` bootstrap guards are
 //! now no-ops — registration here runs before the bootstrap script.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
@@ -202,6 +204,20 @@ fn pet_has_action_bar(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `HasPetUI()` — `(hasPetUI, canGainXP)`. The first return controls
+/// CharacterFrame's pet tab visibility; the second controls XP/info widgets
+/// in Cataclysm/Mists pet paper-doll code.
+fn has_pet_ui(state: &mut LuaState) -> LuaResult<u32> {
+    let (has_pet_ui, can_gain_xp) = {
+        let sim = borrow_state(state)?;
+        let has_pet_ui = sim.pet_actions.iter().any(|slot| slot.has_action);
+        (has_pet_ui, has_pet_ui && sim.pet.xp_max > 0)
+    };
+    state.push(Val::Bool(has_pet_ui));
+    state.push(Val::Bool(can_gain_xp));
+    Ok(2)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetNumPetActions", get_num_pet_actions)?;
     LuaApiMut::register_function(lua, "GetPetActionInfo", get_pet_action_info)?;
@@ -210,5 +226,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "TogglePetAutocast", toggle_pet_autocast)?;
     LuaApiMut::register_function(lua, "CancelPetPossess", cancel_pet_possess)?;
     LuaApiMut::register_function(lua, "PetHasActionBar", pet_has_action_bar)?;
+    LuaApiMut::register_function(lua, "HasPetUI", has_pet_ui)?;
     Ok(())
 }

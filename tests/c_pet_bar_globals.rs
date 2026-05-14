@@ -3,7 +3,7 @@
 //!
 //! Verifies `GetNumPetActions`, `GetPetActionInfo`, `GetPetActionCooldown`,
 //! `CastPetAction`, `TogglePetAutocast`, `CancelPetPossess`, and
-//! `PetHasActionBar` against `state.pet_actions`.
+//! `PetHasActionBar`/`HasPetUI` against `state.pet_actions`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::state::{PetActionSlot, SpellCooldownState};
@@ -247,4 +247,58 @@ fn pet_has_action_bar_reports_false_for_default_state() {
     let env = WowLuaEnv::new().unwrap();
     let has: bool = env.eval("return PetHasActionBar()").unwrap();
     assert!(!has, "default 10 empty slots should report no pet bar");
+}
+
+#[test]
+fn has_pet_ui_reports_true_when_any_slot_bound() {
+    let env = env_with_pet_slots();
+    let (has_pet_ui, can_gain_xp): (bool, bool) = env.eval("return HasPetUI()").unwrap();
+    assert!(has_pet_ui);
+    assert!(!can_gain_xp);
+}
+
+#[test]
+fn has_pet_ui_reports_xp_capable_when_pet_xp_is_seeded() {
+    let env = env_with_pet_slots();
+    env.state().borrow_mut().pet.xp_max = 10_000;
+    let (has_pet_ui, can_gain_xp): (bool, bool) = env.eval("return HasPetUI()").unwrap();
+    assert!(has_pet_ui);
+    assert!(can_gain_xp);
+}
+
+#[test]
+fn has_pet_ui_reports_false_for_default_state() {
+    let env = WowLuaEnv::new().unwrap();
+    let (has_pet_ui, can_gain_xp): (bool, bool) = env.eval("return HasPetUI()").unwrap();
+    assert!(!has_pet_ui);
+    assert!(!can_gain_xp);
+}
+
+#[test]
+fn admin_can_seed_pet_action_slot_for_panel_tests() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        A_Admin.SetPetActionSlot(
+            1,
+            "Claw",
+            "Interface/Icons/Ability_Druid_Rake",
+            16827
+        )
+        "#,
+    )
+    .unwrap();
+
+    let (has_pet_ui, name, spell_id): (bool, String, i32) = env
+        .eval(
+            r#"
+            local actionName, _, _, _, _, _, actionSpellID = GetPetActionInfo(1)
+            return HasPetUI(), actionName, actionSpellID
+            "#,
+        )
+        .unwrap();
+
+    assert!(has_pet_ui);
+    assert_eq!(name, "Claw");
+    assert_eq!(spell_id, 16827);
 }

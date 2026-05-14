@@ -102,3 +102,12 @@ fn pet_stats_globals_live_under_real_globals_boundary() {
         "pet-stat globals should stay classified as real modeled Lua globals",
     );
 }
+
+// ── GetPetSpellBonusDamage ───────────────────────────────────────────────────
+
+#[test]
+fn get_pet_spell_bonus_damage_defaults_zero() {
+    let env = env();
+    let bonus: i32 = env.eval("return GetPetSpellBonusDamage()").unwrap();
+    assert_eq!(bonus, 0);
+}

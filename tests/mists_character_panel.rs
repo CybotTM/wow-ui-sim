@@ -127,6 +127,55 @@ fn mists_character_bottom_tabs_size_their_text() {
 }
 
 #[test]
+fn mists_character_pet_tab_stays_visible_when_pet_ui_is_seeded() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(env!("CARGO_BIN_EXE_wow-sim"))
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            A_Admin.SetPetActionSlot(
+                1,
+                "Claw",
+                "Interface\\Icons\\Ability_Druid_Rake",
+                16827
+            )
+
+            ToggleCharacter("PetPaperDollFrame")
+            if not CharacterFrame or not CharacterFrame:IsShown() then
+                error("CharacterFrame did not open")
+            end
+            if not CharacterFrameTab2 or not CharacterFrameTab2:IsShown() then
+                error("pet tab is hidden despite seeded pet UI")
+            end
+            if not PetPaperDollFrame or not PetPaperDollFrame:IsShown() then
+                error("PetPaperDollFrame did not open")
+            end
+            "#,
+            "dump-tree",
+            "--filter-key",
+            "CharacterFrame",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+    assert!(
+        stdout.contains("PetPaperDollFrame") && stdout.contains("CharacterFrameTab2"),
+        "character dump did not include the visible pet panel/tab\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+}
+
+#[test]
 fn mists_character_subpanels_drive_titles_and_equipment_sets() {
     let output = Command::new("timeout")
         .arg("90")
