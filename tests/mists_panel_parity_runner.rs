@@ -175,6 +175,11 @@ fn interaction_baseline_avoids_load_only_evidence_names() {
 }
 
 #[test]
+fn interaction_baseline_covered_rows_cite_mists_tests() {
+    mists_panel_interaction_checks::assert_covered_rows_cite_mists_tests(&repo_root());
+}
+
+#[test]
 fn live_gui_smoke_runner_validates_micro_button_rows() {
     let output = Command::new(repo_root().join("scripts/mists-live-gui-smoke.sh"))
         .arg("--validate-only")
@@ -637,7 +642,7 @@ fn passing_mists_panel_names() -> BTreeSet<String> {
 }
 
 fn passing_panel_name(line: &str) -> Option<String> {
-    let columns = markdown_table_columns(line);
+    let columns = mists_panel_interaction_checks::markdown_table_columns(line);
     let panel_name = columns.first()?;
     let status = columns.get(1)?;
     (*status == "Pass").then(|| panel_name.to_string())
@@ -653,7 +658,7 @@ fn interaction_covered_panel_names() -> BTreeSet<String> {
 }
 
 fn interaction_panel_name(line: &str) -> Option<String> {
-    let columns = markdown_table_columns(line);
+    let columns = mists_panel_interaction_checks::markdown_table_columns(line);
     let panel_name = columns.first()?;
     let status = columns.get(3)?;
     is_interaction_evidence_or_gap(status).then(|| panel_name.to_string())
@@ -674,14 +679,6 @@ fn read_mists_panel_baseline() -> String {
 fn read_mists_panel_interaction_baseline() -> String {
     std::fs::read_to_string(repo_root().join("docs/baselines/mists-panel-interactions.md"))
         .expect("failed to read Mists panel interaction baseline")
-}
-
-fn markdown_table_columns(line: &str) -> Vec<&str> {
-    if !line.starts_with('|') {
-        return Vec::new();
-    }
-
-    line.trim_matches('|').split('|').map(str::trim).collect()
 }
 
 fn mists_addon_names() -> Vec<String> {

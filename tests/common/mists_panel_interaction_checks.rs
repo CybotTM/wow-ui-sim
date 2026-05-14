@@ -27,6 +27,20 @@ pub fn assert_interaction_rows_have_strong_evidence(repo_root: &Path) {
     );
 }
 
+pub fn assert_covered_rows_cite_mists_tests(repo_root: &Path) {
+    let baseline = read_mists_panel_interaction_baseline(repo_root);
+    let weak_rows = baseline
+        .lines()
+        .filter(|line| row_requires_mists_test_reference(line))
+        .filter(|line| !row_cites_mists_test_reference(line))
+        .collect::<Vec<_>>();
+
+    assert!(
+        weak_rows.is_empty(),
+        "covered interaction rows should cite at least one tests/mists_*.rs reference: {weak_rows:?}"
+    );
+}
+
 fn interaction_test_references(repo_root: &Path) -> BTreeSet<String> {
     read_mists_panel_interaction_baseline(repo_root)
         .split('`')
@@ -63,6 +77,28 @@ fn test_reference_name_is_weak(reference: &str) -> bool {
     weak_fragments
         .iter()
         .any(|fragment| reference.contains(fragment))
+}
+
+fn row_requires_mists_test_reference(line: &str) -> bool {
+    let columns = markdown_table_columns(line);
+    let Some(status) = columns.get(3) else {
+        return false;
+    };
+
+    matches!(*status, "Covered" | "Mists-specific")
+}
+
+fn row_cites_mists_test_reference(line: &str) -> bool {
+    line.split('`')
+        .any(|part| part.starts_with("tests/mists_") && part.contains(".rs::"))
+}
+
+pub fn markdown_table_columns(line: &str) -> Vec<&str> {
+    if !line.starts_with('|') {
+        return Vec::new();
+    }
+
+    line.trim_matches('|').split('|').map(str::trim).collect()
 }
 
 fn read_mists_panel_interaction_baseline(repo_root: &Path) -> String {
