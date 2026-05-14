@@ -146,14 +146,42 @@ pub fn ui_dropdown_menu_add_button(state: &mut LuaState) -> LuaResult<u32> {
     let new_index = increment_list_button_count(state, list_id);
 
     let btn_name = format!("DropDownList{}Button{}", level, new_index);
-    let btn_val = get_global(state, &btn_name);
-    let Some(btn_id) = extract_frame_id(state, btn_val) else {
-        return Ok(0);
-    };
+    let btn_id = find_or_create_dropdown_button(state, list_id, &btn_name, new_index)?;
 
     copy_info_to_button_fields(state, btn_id, info);
     apply_button_text_from_info(state, btn_id, info)?;
     Ok(0)
+}
+
+fn find_or_create_dropdown_button(
+    state: &mut LuaState,
+    list_id: u64,
+    btn_name: &str,
+    index: i32,
+) -> LuaResult<u64> {
+    let btn_val = get_global(state, btn_name);
+    if let Some(btn_id) = extract_frame_id(state, btn_val) {
+        return Ok(btn_id);
+    }
+
+    let btn_id = super::create_frame_instance(
+        state,
+        crate::widget::WidgetType::Button,
+        "Button",
+        Some(btn_name.to_string()),
+        Some(list_id),
+        true,
+        Some(index),
+    )?;
+    super::apply_runtime_template_chain(state, btn_id, Some("UIDropDownMenuButtonTemplate"), true)?;
+    super::replay_runtime_template_parent_links(
+        state,
+        btn_id,
+        Some("UIDropDownMenuButtonTemplate"),
+    )?;
+    super::dropdown_children::ensure_dropdown_button_children(state, btn_id, btn_name)?;
+    set_global_num(state, "UIDROPDOWNMENU_MAXBUTTONS", index as f64);
+    Ok(btn_id)
 }
 
 fn increment_list_button_count(state: &mut LuaState, list_id: u64) -> i32 {

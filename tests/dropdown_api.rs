@@ -113,6 +113,65 @@ fn test_dropdown_dynamic_buttons_create_named_children() {
 }
 
 #[test]
+fn test_dropdown_add_button_creates_buttons_past_seeded_range() {
+    let env = env();
+    env.exec(
+        r#"
+        for index = 1, 9 do
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = "Entry " .. index
+            UIDropDownMenu_AddButton(info, 1)
+        end
+    "#,
+    )
+    .unwrap();
+
+    let (button_exists, icon_exists, invisible_button_exists): (bool, bool, bool) = env
+        .eval(
+            r#"
+        return DropDownList1Button9 ~= nil,
+               DropDownList1Button9Icon ~= nil,
+               DropDownList1Button9InvisibleButton ~= nil
+    "#,
+        )
+        .unwrap();
+
+    assert!(button_exists, "dropdown button 9 should be created on demand");
+    assert!(icon_exists, "dropdown button 9 should expose Icon");
+    assert!(
+        invisible_button_exists,
+        "dropdown button 9 should expose InvisibleButton"
+    );
+}
+
+#[test]
+fn test_dropdown_createframes_attribute_refires_for_delegate() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+        local frame = CreateFrame("Frame", "DropdownCreateFramesDelegate", UIParent)
+        local count = 0
+        frame:SetScript("OnAttributeChanged", function(_, name, value)
+            if name == "createframes" and value == true then
+                count = count + 1
+            end
+        end)
+
+        frame:SetAttribute("createframes", true)
+        frame:SetAttribute("createframes", true)
+        return count
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        count, 2,
+        "dropdown delegates reuse createframes=true to request frame creation"
+    );
+}
+
+#[test]
 fn test_dropdown_list_num_buttons_initially_zero() {
     let env = env();
     let num: i32 = env.eval("return DropDownList1.numButtons").unwrap();

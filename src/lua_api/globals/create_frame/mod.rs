@@ -8,6 +8,7 @@
 //! `register_all` registers all globals on a rilua Lua state.
 
 mod dropdown_api;
+mod dropdown_children;
 mod helpers;
 pub mod helpers_shared;
 mod template_chain;
