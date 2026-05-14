@@ -47,7 +47,7 @@ with artifacts retained under `target/mists-local-completion-audit/`.
 | Lane | Result | Artifact |
 |---|---|---|
 | Base Mists `lua-errors` with addons and SavedVariables disabled | `0` distinct errors | `target/mists-local-completion-audit/base-lua-errors.json` |
-| Base panel parity execution | `37` panel rows passed with per-panel `lua-errors`, dump-tree, screenshot, root-frame, and visual checks | `target/mists-local-completion-audit/panel-parity.log`; artifacts under `target/mists-local-completion-audit/panel-parity/` |
+| Base panel parity execution | `38` panel rows passed with per-panel `lua-errors`, dump-tree, screenshot, root-frame, and visual checks | `target/mists-local-completion-audit/panel-parity.log`; artifacts under `target/mists-local-completion-audit/panel-parity/` |
 | Installed Mists addon panel manifest validation | `9` addon rows validated | `target/mists-local-completion-audit/addon-panel-validation.log` |
 | Live connected-GUI smoke validation and execution | Passed idle HUD, specialization Learn-to-talents, and micro-menu probes | `target/mists-local-completion-audit/live-gui-smoke.log` |
 | Installed Mists addon startup matrix | `passed: 9`, `failed: 0`, all rows `0` addon-induced errors | `target/mists-local-completion-audit/installed-addon-startup.log` |
@@ -58,11 +58,11 @@ This audit is intentionally local and non-release: it uses debug `wow-sim` /
 confirm the current working tree still satisfies the core Mists parity gates
 before adding or promoting any narrower follow-up task.
 
-The only weak lane in this local audit is installed-addon panel validation: it
-confirms all 9 installed Mists addon rows are present and resolvable, while the
-expensive full installed-addon panel screenshot matrix remains deliberately
-outside this local completion pass. The promoted follow-up is a bounded,
-non-release installed-addon panel parity sample that strengthens addon-panel
+The only intentionally bounded lane in this local audit is installed-addon
+panel validation: it confirms all 9 installed Mists addon rows are present and
+resolvable, while the expensive full installed-addon panel screenshot matrix
+remains deliberately outside this local completion pass. The retained
+non-release installed-addon panel parity sample below strengthens addon-panel
 evidence without reintroducing release-proof or CI texture work.
 
 ## Local Installed-Addon Panel Sample
@@ -75,12 +75,14 @@ under test.
 |---|---|---|---|
 | `BlizzMove` | Talents and glyphs | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-talents.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-talents/BlizzMove/talents-glyphs/` |
 | `BlizzMove` | Action bars, micro menu, bag bar, status bars | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-action-bars.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-action-bars/BlizzMove/action-bars/` |
+| `BlizzMove` | Store, CatalogShop, WowToken, and SimpleCheckout | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-store-commercial.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-store-commercial/BlizzMove/store-commercial/` |
 
 The full installed-addon screenshot matrix remains deferred locally because it
-is the expensive 9-addon by 37-panel release-proof-style lane. This sample keeps
-addon-panel evidence moving by covering the recently touched talent and
-HUD/action-bar surfaces with a frame-mutating addon enabled, without adding CI
-texture requirements or rerunning the release-proof wrapper.
+is the expensive 9-addon by 38-panel release-proof-style lane. This sample keeps
+addon-panel evidence moving by covering the recently touched talent,
+HUD/action-bar, and Store/CatalogShop surfaces with a frame-mutating addon
+enabled, without adding CI texture requirements or rerunning the release-proof
+wrapper.
 
 ## Lane Logs
 
