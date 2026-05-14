@@ -13,6 +13,9 @@ In-flight (git status shows uncommitted work):
 - [x] Resolve `src/lua_api/globals/talent_spec_probes.rs` changes — confirm Mists talent specs match retail probes, then commit.
 
 Parity hardening TODO:
+- [ ] Re-audit local Mists idle HUD and core panel screenshots with real local CASC assets, focusing on the previously reported unit-frame/action-bar layout regressions, missing bottom-tab text, specialization Learn flow, and font fallback symptoms; fix the first root-cause regression found.
+- [ ] Add a non-CI Mists visual triage note that separates local asset-backed parity evidence from CI signal-only checks, so texture/font availability is not confused with panel parity completion.
+- [ ] Extend the live connected-GUI Mists smoke runner to include the no-panel HUD state plus the specialization Learn-to-talents path, then fail on `lua-errors` or missing/hidden target frames after real input dispatch.
 - [x] Build a scripted Mists panel parity runner that opens every row in `docs/baselines/mists-panels.md`, records `lua-errors`, and fails on missing root frames, hidden stub-only frames, or empty render output.
 - [x] Replace the `test-backed` placeholders in `docs/baselines/mists-panels.md` with retained screenshot or frame-dump artifact paths for every panel row.
 - [x] Audit each Mists panel test for real interaction assertions, not just load/show coverage, and add follow-up tasks for any panel that only proves startup.
