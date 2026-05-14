@@ -348,6 +348,9 @@ fn test_hybrid_scroll_template() {
     let has_thumb: bool = env
         .eval("return TestHybridScrollBar.ThumbTexture ~= nil")
         .unwrap();
+    let has_global_thumb: bool = env
+        .eval("return TestHybridScrollBarThumbTexture ~= nil")
+        .unwrap();
     let has_top: bool = env
         .eval("return TestHybridScrollBar.ScrollBarTop ~= nil")
         .unwrap();
@@ -359,6 +362,10 @@ fn test_hybrid_scroll_template() {
         .unwrap();
 
     assert!(has_thumb, "HybridScrollBar should have ThumbTexture");
+    assert!(
+        has_global_thumb,
+        "HybridScrollBar ThumbTexture should be published as a named global"
+    );
     assert!(has_top, "HybridScrollBar should have ScrollBarTop");
     assert!(has_mid, "HybridScrollBar should have ScrollBarMiddle");
     assert!(has_bot, "HybridScrollBar should have ScrollBarBottom");

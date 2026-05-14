@@ -5,6 +5,7 @@ mod builders;
 mod fast_types;
 mod parser;
 mod runtime;
+mod runtime_synthetic_children;
 
 pub(super) use fast_types::{FastHandlerRef, FastLiteralValue, FastScriptInstall};
 
@@ -45,7 +46,9 @@ pub(crate) fn replay_runtime_template_parent_links(
     apply_template_parent_links(state, frame_id, &chain)
 }
 
-pub(crate) use runtime::ensure_runtime_slider_children;
+pub(crate) use runtime_synthetic_children::{
+    ensure_runtime_hybrid_scroll_bar_children, ensure_runtime_slider_children,
+};
 
 pub(crate) fn apply_runtime_template_chain_with_frame_overrides(
     state: &mut LuaState,
@@ -81,7 +84,7 @@ fn apply_runtime_template_chain_impl(
     apply_chain_entries(state, frame_id, &chain)?;
     apply_direct_frame_key_values(state, frame_id, direct_frame);
     create_runtime_template_child_frames(state, &state_rc, frame_id, &frame_name, &chain)?;
-    apply_runtime_template_loader_effects(state, inherits, &frame_name)?;
+    apply_runtime_template_loader_effects(state, frame_id, inherits, &frame_name, &chain)?;
 
     finalize_template_frame(
         state,
@@ -125,8 +128,10 @@ fn create_runtime_template_child_frames(
 
 fn apply_runtime_template_loader_effects(
     state: &mut LuaState,
+    frame_id: u64,
     inherits: &str,
     frame_name: &str,
+    chain: &[Arc<crate::xml::TemplateEntry>],
 ) -> LuaResult<()> {
     let runtime_frame = crate::xml::FrameXml::default();
     runtime::apply_runtime_template_loader_effects(
@@ -135,7 +140,8 @@ fn apply_runtime_template_loader_effects(
         frame_name,
         &runtime_frame,
         Some(inherits),
-    )
+    )?;
+    runtime::repair_runtime_template_chain_layer_parent_keys(state, frame_id, frame_name, chain)
 }
 
 // ---------------------------------------------------------------------------
