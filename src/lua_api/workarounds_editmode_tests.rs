@@ -2314,6 +2314,189 @@ fn apply_system_anchors_replays_active_widescreen_singleton_settings() {
 }
 
 #[test]
+fn apply_system_anchors_replays_remaining_active_widescreen_system_settings() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                EncounterBar = 4,
+                ExtraAbilities = 5,
+                TalkingHeadFrame = 7,
+                VehicleLeaveButton = 9,
+                LootFrame = 10,
+                HudTooltip = 11,
+                StatusTrackingBar = 15,
+                PersonalResourceDisplay = 21,
+                EncounterEvents = 22,
+                DamageMeter = 23,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local layoutRows = {
+            "4:-1:",
+            "5:-1:",
+            "7:-1:",
+            "9:-1:",
+            "10:-1:",
+            "11:-1:",
+            "15:1:3=10",
+            "15:2:3=10",
+            "21:-1:0=0,1=0",
+            "22:1:0=1,1=1,2=0,3=5,4=5,5=0,6=50,7=1,8=1,9=1,10=0,11=0,12=50,13=2",
+            "22:2:3=5,4=5,6=50,7=0,8=1",
+            "22:3:3=5,4=5,6=50,7=0,8=1",
+            "22:4:3=5,4=5,6=50,7=0,8=1",
+            "23:-1:0=0,1=0,2=1,3=0,4=13,5=2,6=50,8=1,9=1,10=1,11=5,12=50",
+        }
+
+        local systemsByKey = {}
+        for _, row in ipairs(layoutRows) do
+            local system, systemIndex, settings = string.match(row, "([^:]+):([^:]+):(.*)")
+            local key = system .. ":" .. systemIndex
+            local settingRows = {}
+            for setting, value in string.gmatch(settings or "", "([^=,]+)=([^=,]+)") do
+                table.insert(settingRows, {
+                    setting = tonumber(setting),
+                    value = tonumber(value),
+                })
+            end
+            systemsByKey[key] = {
+                system = tonumber(system),
+                systemIndex = tonumber(systemIndex),
+                isInDefaultPosition = false,
+                anchorInfo = {
+                    point = "CENTER",
+                    relativeTo = UIParent,
+                    relativePoint = "CENTER",
+                    offsetX = 0,
+                    offsetY = 0,
+                },
+                settings = settingRows,
+            }
+        end
+
+        local function newSystemFrame(system, systemIndex, name)
+            local frame = {
+                system = system,
+                systemIndex = systemIndex,
+                name = name,
+                replayedValues = {},
+            }
+
+            function frame:GetName()
+                return self.name
+            end
+            function frame:SetHasActiveChanges(value)
+                self.hasActiveChanges = value
+            end
+            function frame:UpdateSettingMap()
+                self.settingMapUpdated = true
+            end
+            function frame:GetSettingValue(setting)
+                for _, settingInfo in ipairs(self.systemInfo.settings or {}) do
+                    if settingInfo.setting == setting then
+                        return settingInfo.value
+                    end
+                end
+            end
+            function frame:UpdateSystemSetting(setting, entireSystemUpdate)
+                table.insert(self.replayedValues, tostring(setting) .. "=" .. tostring(self:GetSettingValue(setting)))
+                self.entireSystemUpdate = entireSystemUpdate
+            end
+            function frame:UpdateSystem(systemInfo)
+                self.updateSystemCalls = (self.updateSystemCalls or 0) + 1
+                self.systemInfo = systemInfo
+                for _, settingInfo in ipairs(systemInfo.settings or {}) do
+                    self:UpdateSystemSetting(settingInfo.setting, true)
+                end
+            end
+
+            return frame
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            requestedRows = {},
+            registeredSystemFrames = {
+                newSystemFrame(Enum.EditModeSystem.EncounterBar, nil, "EncounterBar"),
+                newSystemFrame(Enum.EditModeSystem.ExtraAbilities, nil, "ExtraAbilities"),
+                newSystemFrame(Enum.EditModeSystem.TalkingHeadFrame, nil, "TalkingHeadFrame"),
+                newSystemFrame(Enum.EditModeSystem.VehicleLeaveButton, nil, "VehicleLeaveButton"),
+                newSystemFrame(Enum.EditModeSystem.LootFrame, nil, "LootFrame"),
+                newSystemFrame(Enum.EditModeSystem.HudTooltip, nil, "HudTooltip"),
+                newSystemFrame(Enum.EditModeSystem.StatusTrackingBar, 1, "StatusTrackingBar1"),
+                newSystemFrame(Enum.EditModeSystem.StatusTrackingBar, 2, "StatusTrackingBar2"),
+                newSystemFrame(Enum.EditModeSystem.PersonalResourceDisplay, nil, "PersonalResourceDisplay"),
+                newSystemFrame(Enum.EditModeSystem.EncounterEvents, 1, "EncounterEventsTimeline"),
+                newSystemFrame(Enum.EditModeSystem.EncounterEvents, 2, "EncounterEventsCriticalWarnings"),
+                newSystemFrame(Enum.EditModeSystem.EncounterEvents, 3, "EncounterEventsMediumWarnings"),
+                newSystemFrame(Enum.EditModeSystem.EncounterEvents, 4, "EncounterEventsNormalWarnings"),
+                newSystemFrame(Enum.EditModeSystem.DamageMeter, nil, "DamageMeter"),
+            },
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(system, systemIndex)
+            local key = tostring(system) .. ":" .. tostring(systemIndex)
+            table.insert(self.requestedRows, key)
+            return systemsByKey[key]
+        end
+        function EditModeManagerFrame:UpdateSystem(systemFrame)
+            systemFrame:UpdateSystem(systemFrame.systemInfo)
+        end
+        "#,
+    )
+    .expect("install remaining widescreen system stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply remaining widescreen system settings");
+
+    let (requested_rows, replayed_values, update_system_calls): (String, String, String) = env
+        .eval(
+            r#"
+            local replayedRows = {}
+            local updateRows = {}
+            for _, frame in ipairs(EditModeManagerFrame.registeredSystemFrames) do
+                table.insert(
+                    replayedRows,
+                    tostring(frame.system) .. ":"
+                        .. tostring(frame.systemIndex or -1) .. ":"
+                        .. table.concat(frame.replayedValues, ",")
+                )
+                table.insert(updateRows, tostring(frame.updateSystemCalls or 0))
+            end
+            return table.concat(EditModeManagerFrame.requestedRows, "|"),
+                table.concat(replayedRows, "|"),
+                table.concat(updateRows, ",")
+            "#,
+        )
+        .expect("read remaining widescreen replay state");
+
+    assert_eq!(
+        requested_rows, "4:-1|5:-1|7:-1|9:-1|10:-1|11:-1|15:1|15:2|21:-1|22:1|22:2|22:3|22:4|23:-1",
+        "remaining Widescreen systems should request their active layout rows"
+    );
+    assert_eq!(
+        replayed_values,
+        "4:-1:|5:-1:|7:-1:|9:-1:|10:-1:|11:-1:|15:1:3=10|15:2:3=10|21:-1:0=0,1=0|22:1:0=1,1=1,2=0,3=5,4=5,5=0,6=50,7=1,8=1,9=1,10=0,11=0,12=50,13=2|22:2:3=5,4=5,6=50,7=0,8=1|22:3:3=5,4=5,6=50,7=0,8=1|22:4:3=5,4=5,6=50,7=0,8=1|23:-1:0=0,1=0,2=1,3=0,4=13,5=2,6=50,8=1,9=1,10=1,11=5,12=50",
+        "remaining active Widescreen settings should replay saved values"
+    );
+    assert_eq!(
+        update_system_calls, "1,1,1,1,1,1,1,1,1,1,1,1,1,1",
+        "remaining systems should apply settings through their normal UpdateSystem path"
+    );
+}
+
+#[test]
 fn apply_system_anchors_replays_active_widescreen_aura_frame_settings() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
