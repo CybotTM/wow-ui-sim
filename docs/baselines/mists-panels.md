@@ -62,4 +62,10 @@ frame-tree dump for each panel row.
 
 - `scripts/test-classic-addons.sh --profile mists`: `passed: 9`, `failed: 0`.
 - Each `target/addon-harness/*-lua-errors.json` array length was `0`.
-- `PLAN.mists.md` panel parity audit is checked through `Game menu options breaks`.
+- Rechecked after the glyph/currency texture-directory fix:
+  `scripts/mists-panel-parity.sh --with-saved-vars --out-dir target/mists-panel-parity-with-saved-vars-after-castspell --panel talents-glyphs --skip-build`
+  and the same command for `--panel currency-token` both passed.
+- `tests/mists_panel_artifact_logs.rs` verifies retained panel stderr artifacts
+  do not decode `BlizzardInterfaceArt/` as an image directory.
+- `PLAN.mists.md` local panel parity hardening tasks are checked through the
+  texture-directory retained-artifact verification.
