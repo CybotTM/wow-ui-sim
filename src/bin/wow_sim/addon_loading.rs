@@ -1,5 +1,6 @@
 //! Blizzard and third-party addon loading with timing/summary.
 
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use wow_ui_sim::loader::{
     LoadResult, LoadTiming, discover_blizzard_addons_for_screen, load_addon,
@@ -11,7 +12,6 @@ use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
-pub const USER_ADDONS_PATH: &str = "./Interface/AddOns";
 pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
 
 /// Addon names that are test-only and should not be loaded in GUI mode.
@@ -207,9 +207,9 @@ pub fn load_third_party_addons(
         return;
     }
 
-    let user_addons_path = PathBuf::from(USER_ADDONS_PATH);
     let exclude = if is_test { &[][..] } else { TEST_ADDONS };
-    let mut addons = scan_addons(&user_addons_path, exclude, screen);
+    let addon_paths = wow_ui_sim::paths::default_addons_paths();
+    let mut addons = scan_addon_paths(&addon_paths, exclude, screen);
     if is_test {
         let test_addons_path = PathBuf::from(TEST_ADDONS_PATH);
         addons.extend(scan_addons(&test_addons_path, &[], screen));
@@ -228,6 +228,25 @@ pub fn load_third_party_addons(
         load_single_addon(env, name, toc_path, saved_vars, &mut stats);
     }
     print_load_summary(&addons, &stats);
+}
+
+pub fn scan_addon_paths(
+    base_paths: &[PathBuf],
+    exclude: &[&str],
+    screen: ScreenKind,
+) -> Vec<(String, PathBuf)> {
+    let mut addons = Vec::new();
+    let mut seen = HashSet::new();
+
+    for base_path in base_paths {
+        for (name, toc_path) in scan_addons(base_path, exclude, screen) {
+            if seen.insert(name.clone()) {
+                addons.push((name, toc_path));
+            }
+        }
+    }
+
+    addons
 }
 
 pub fn scan_addons(
@@ -562,5 +581,44 @@ fn print_slowest_addons(addon_times: &[(String, std::time::Duration)]) {
     println!("\nSlowest addons:");
     for (name, time) in sorted.iter().take(10) {
         println!("  {:>7.1?}  {}", time, name);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn write_addon(root: &Path, name: &str) -> PathBuf {
+        let addon_dir = root.join(name);
+        std::fs::create_dir_all(&addon_dir).expect("create addon dir");
+        let toc_path = addon_dir.join(format!("{name}.toc"));
+        std::fs::write(&toc_path, "## Interface: 120005\nmain.lua\n").expect("write toc");
+        std::fs::write(addon_dir.join("main.lua"), "").expect("write lua");
+        toc_path
+    }
+
+    #[test]
+    fn scan_addon_paths_merges_roots_and_keeps_first_duplicate() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        let sim_root = temp.path().join("sim");
+        let wow_root = temp.path().join("wow");
+        let sim_shared_toc = write_addon(&sim_root, "SharedAddon");
+        write_addon(&sim_root, "SimulatorOnly");
+        write_addon(&wow_root, "SharedAddon");
+        write_addon(&wow_root, "WowOnly");
+
+        let addons = scan_addon_paths(&[sim_root.clone(), wow_root], &[], ScreenKind::Game);
+        let names: Vec<_> = addons.iter().map(|(name, _)| name.as_str()).collect();
+        let shared_toc = addons
+            .iter()
+            .find(|(name, _)| name == "SharedAddon")
+            .map(|(_, toc)| toc)
+            .expect("shared addon should be present");
+
+        assert_eq!(names, ["SharedAddon", "SimulatorOnly", "WowOnly"]);
+        assert_eq!(
+            shared_toc, &sim_shared_toc,
+            "the first addon root should win duplicate addon names"
+        );
     }
 }

@@ -63,6 +63,11 @@ pub fn default_addons_path() -> PathBuf {
     discover_wow_resources().addons_path
 }
 
+pub fn default_addons_paths() -> Vec<PathBuf> {
+    let install_root = first_existing_path(wow_install_roots());
+    existing_unique_paths(addons_path_candidates(install_root.as_ref()))
+}
+
 /// Blizzard UI addon root used by local benchmarks and dev binaries.
 pub fn default_blizzard_ui_addons_path() -> crate::Result<PathBuf> {
     if let Some(cache_path) = crate::blizzard_ui_sync::cached_blizzard_ui_addons_path() {
@@ -285,6 +290,20 @@ fn first_existing_path(paths: Vec<PathBuf>) -> Option<PathBuf> {
     paths
         .into_iter()
         .find_map(|path| path.exists().then(|| path.canonicalize().unwrap_or(path)))
+}
+
+fn existing_unique_paths(paths: Vec<PathBuf>) -> Vec<PathBuf> {
+    let mut unique = Vec::new();
+    let mut seen = std::collections::HashSet::new();
+
+    for path in paths.into_iter().filter(|path| path.exists()) {
+        let key = path.canonicalize().unwrap_or_else(|_| path.clone());
+        if seen.insert(key) {
+            unique.push(path);
+        }
+    }
+
+    unique
 }
 
 fn push_env_path(paths: &mut Vec<PathBuf>, var: &str) {
