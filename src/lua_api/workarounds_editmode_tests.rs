@@ -2325,6 +2325,7 @@ fn apply_system_anchors_replays_active_widescreen_aura_frame_settings() {
             EditModeAuraFrameSystemIndices = {
                 BuffFrame = 1,
                 DebuffFrame = 2,
+                ExternalDefensivesFrame = 3,
             },
         }
 
@@ -2340,6 +2341,9 @@ fn apply_system_anchors_replays_active_widescreen_aura_frame_settings() {
             },
             [Enum.EditModeAuraFrameSystemIndices.DebuffFrame] = {
                 {0, 0}, {1, 0}, {2, 0}, {4, 8}, {5, 5}, {6, 5},
+            },
+            [Enum.EditModeAuraFrameSystemIndices.ExternalDefensivesFrame] = {
+                {0, 0}, {1, 0}, {2, 1}, {3, 7}, {5, 5}, {6, 5}, {9, 70},
             },
         }
 
@@ -2396,6 +2400,7 @@ fn apply_system_anchors_replays_active_widescreen_aura_frame_settings() {
             registeredSystemFrames = {
                 newAuraFrame(Enum.EditModeAuraFrameSystemIndices.BuffFrame, "BuffFrame"),
                 newAuraFrame(Enum.EditModeAuraFrameSystemIndices.DebuffFrame, "DebuffFrame"),
+                newAuraFrame(Enum.EditModeAuraFrameSystemIndices.ExternalDefensivesFrame, "ExternalDefensivesFrame"),
             },
         }
 
@@ -2438,13 +2443,14 @@ fn apply_system_anchors_replays_active_widescreen_aura_frame_settings() {
         )
         .expect("read aura frame replay state");
 
-    assert_eq!(requested_indices, "1,2");
+    assert_eq!(requested_indices, "1,2,3");
     assert_eq!(
-        replayed_values, "0=0,1=0,2=0,3=11,5=5,6=5|0=0,1=0,2=0,4=8,5=5,6=5",
-        "active Widescreen BuffFrame and DebuffFrame options should replay saved values"
+        replayed_values,
+        "0=0,1=0,2=0,3=11,5=5,6=5|0=0,1=0,2=0,4=8,5=5,6=5|0=0,1=0,2=1,3=7,5=5,6=5,9=70",
+        "active Widescreen aura-frame options should replay saved values"
     );
     assert_eq!(
-        update_system_calls, "1,1",
+        update_system_calls, "1,1,1",
         "AuraFrame rows should run through the manager update path"
     );
 }
