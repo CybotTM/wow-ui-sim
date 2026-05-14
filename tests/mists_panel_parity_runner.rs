@@ -180,6 +180,11 @@ fn interaction_baseline_covered_rows_cite_mists_tests() {
 }
 
 #[test]
+fn interaction_follow_up_rows_have_plan_remediation() {
+    mists_panel_interaction_checks::assert_follow_up_rows_have_plan_remediation(&repo_root());
+}
+
+#[test]
 fn live_gui_smoke_runner_validates_micro_button_rows() {
     let output = Command::new(repo_root().join("scripts/mists-live-gui-smoke.sh"))
         .arg("--validate-only")

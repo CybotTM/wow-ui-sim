@@ -41,6 +41,22 @@ pub fn assert_covered_rows_cite_mists_tests(repo_root: &Path) {
     );
 }
 
+pub fn assert_follow_up_rows_have_plan_remediation(repo_root: &Path) {
+    let plan = read_mists_plan(repo_root);
+    let plan_tasks = unchecked_plan_tasks(&plan);
+    let baseline = read_mists_panel_interaction_baseline(repo_root);
+    let untracked_rows = baseline
+        .lines()
+        .filter_map(follow_up_or_missing_panel_name)
+        .filter(|panel| !has_matching_plan_task(panel, &plan_tasks))
+        .collect::<Vec<_>>();
+
+    assert!(
+        untracked_rows.is_empty(),
+        "Follow-up or Missing interaction rows need unchecked PLAN.mists remediation tasks: {untracked_rows:?}"
+    );
+}
+
 fn interaction_test_references(repo_root: &Path) -> BTreeSet<String> {
     read_mists_panel_interaction_baseline(repo_root)
         .split('`')
@@ -93,6 +109,36 @@ fn row_cites_mists_test_reference(line: &str) -> bool {
         .any(|part| part.starts_with("tests/mists_") && part.contains(".rs::"))
 }
 
+fn follow_up_or_missing_panel_name(line: &str) -> Option<String> {
+    let columns = markdown_table_columns(line);
+    let panel_name = columns.first()?;
+    let status = columns.get(3)?;
+
+    matches!(*status, "Follow-up" | "Missing").then(|| (*panel_name).to_owned())
+}
+
+fn unchecked_plan_tasks(plan: &str) -> Vec<String> {
+    plan.lines()
+        .filter(|line| line.starts_with("- [ ] "))
+        .map(normalized_text)
+        .collect()
+}
+
+fn has_matching_plan_task(panel: &str, plan_tasks: &[String]) -> bool {
+    let panel = normalized_text(panel);
+    plan_tasks.iter().any(|task| task.contains(&panel))
+}
+
+fn normalized_text(text: &str) -> String {
+    text.to_ascii_lowercase()
+        .chars()
+        .map(|ch| if ch.is_ascii_alphanumeric() { ch } else { ' ' })
+        .collect::<String>()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 pub fn markdown_table_columns(line: &str) -> Vec<&str> {
     if !line.starts_with('|') {
         return Vec::new();
@@ -104,4 +150,8 @@ pub fn markdown_table_columns(line: &str) -> Vec<&str> {
 fn read_mists_panel_interaction_baseline(repo_root: &Path) -> String {
     std::fs::read_to_string(repo_root.join("docs/baselines/mists-panel-interactions.md"))
         .expect("failed to read Mists panel interaction baseline")
+}
+
+fn read_mists_plan(repo_root: &Path) -> String {
+    std::fs::read_to_string(repo_root.join("PLAN.mists.md")).expect("failed to read Mists plan")
 }
