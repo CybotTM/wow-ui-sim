@@ -10,6 +10,24 @@ If the directory is missing after a clean build, regenerate it with the command
 above. GitHub Actions uploads the same tree from the `Mists release proof` job
 as the `mists-release-proof` artifact.
 
+## Visual Evidence Scope
+
+Treat local asset-backed captures and CI signal-only captures as different
+evidence classes. Local runs on a machine with WoW CASC data are the authority
+for visual parity questions such as Blizzard textures, font faces, action bar
+art, unit frame art, and bottom-tab text rendering. Recent local triage outputs
+live under `target/mists-local-visual-audit/`, including the idle HUD screenshot
+and CharacterFrame reputation dump used to verify Mists font and tab text
+rendering after the known-font CASC fallback fix.
+
+GitHub-hosted release-proof runs currently exercise panel roots, Lua errors,
+render-batch signal, screenshot non-blankness, frame dumps, interaction audit
+coverage, and artifact completeness. They do not prove texture/font visual
+parity while they run without a WoW CASC install and with signal-only panel
+visual checks. A green CI signal-only run is therefore evidence that panels load,
+produce render output, and stay free of `lua-errors`; it is not evidence that
+the rendered art matches local asset-backed Mists captures.
+
 ## Lane Logs
 
 All lane logs live under `target/mists-release-proof/logs/`:
