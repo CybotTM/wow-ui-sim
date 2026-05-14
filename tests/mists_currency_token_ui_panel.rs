@@ -15,7 +15,7 @@ fn wow_sim_binary() -> PathBuf {
 }
 
 #[test]
-fn mists_currency_and_token_ui_render_without_lua_errors() {
+fn mists_currency_token_ui_populates_rows_and_watched_tokens() {
     let output = Command::new("timeout")
         .arg("90")
         .arg(wow_sim_binary())

@@ -15,7 +15,7 @@ fn wow_sim_binary() -> PathBuf {
 }
 
 #[test]
-fn mists_macro_and_keybindings_panels_render_without_lua_errors() {
+fn mists_macro_selection_and_keybindings_mutate_state() {
     let output = Command::new("timeout")
         .arg("90")
         .arg(wow_sim_binary())

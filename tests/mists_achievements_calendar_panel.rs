@@ -15,7 +15,7 @@ fn wow_sim_binary() -> PathBuf {
 }
 
 #[test]
-fn mists_achievements_and_calendar_open_without_lua_errors() {
+fn mists_achievements_tabs_and_calendar_navigation_round_trip() {
     let output = Command::new("timeout")
         .arg("90")
         .arg(wow_sim_binary())

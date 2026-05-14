@@ -15,7 +15,7 @@ fn wow_sim_binary() -> PathBuf {
 }
 
 #[test]
-fn mists_game_menu_options_opens_interface_settings_without_lua_errors() {
+fn mists_game_menu_options_drives_settings_help_and_addons() {
     let output = Command::new("timeout")
         .arg("90")
         .arg(wow_sim_binary())

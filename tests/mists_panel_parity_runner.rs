@@ -170,6 +170,11 @@ fn interaction_baseline_references_existing_mists_tests() {
 }
 
 #[test]
+fn interaction_baseline_avoids_load_only_evidence_names() {
+    mists_panel_interaction_checks::assert_interaction_rows_have_strong_evidence(&repo_root());
+}
+
+#[test]
 fn live_gui_smoke_runner_validates_micro_button_rows() {
     let output = Command::new(repo_root().join("scripts/mists-live-gui-smoke.sh"))
         .arg("--validate-only")

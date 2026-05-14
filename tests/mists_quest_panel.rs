@@ -3,7 +3,7 @@
 use std::process::Command;
 
 #[test]
-fn mists_quest_log_and_objective_tracker_open_cleanly() {
+fn mists_quest_log_selects_entries_and_refreshes_tracker() {
     let output = Command::new("timeout")
         .arg("90")
         .arg(env!("CARGO_BIN_EXE_wow-sim"))

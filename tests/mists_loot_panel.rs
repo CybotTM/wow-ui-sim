@@ -15,7 +15,7 @@ fn wow_sim_binary() -> PathBuf {
 }
 
 #[test]
-fn mists_loot_group_and_bonus_roll_ui_render_without_lua_errors() {
+fn mists_loot_group_and_bonus_roll_actions_record_state() {
     let output = Command::new("timeout")
         .arg("90")
         .arg(wow_sim_binary())

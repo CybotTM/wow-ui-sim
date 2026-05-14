@@ -57,7 +57,7 @@ fn mists_trade_skill_frame_load_ui_creates_renderable_trade_skill_frame() {
 }
 
 #[test]
-fn mists_class_trainer_frame_load_ui_creates_renderable_class_trainer_frame() {
+fn mists_class_trainer_frame_loads_with_named_textures() {
     assert_panel_loads_cleanly(
         "ClassTrainerFrame",
         "ClassTrainerFrame",

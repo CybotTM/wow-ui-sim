@@ -15,7 +15,7 @@ fn wow_sim_binary() -> PathBuf {
 }
 
 #[test]
-fn mists_action_bag_micro_and_status_bars_interact_without_lua_errors() {
+fn mists_action_bag_micro_and_status_bars_update_slots_and_hover_scripts() {
     let output = Command::new("timeout")
         .arg("90")
         .arg(wow_sim_binary())
