@@ -105,16 +105,18 @@ under test.
 | `Plater` + normal SavedVariables | Action bars, micro menu, bag bar, status bars | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/plater-action-bars-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/plater-action-bars-with-saved-vars-after-castspell/Plater/action-bars/` |
 | `Leatrix_Maps` + normal SavedVariables | World map | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/leatrix-maps-world-map-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/leatrix-maps-world-map-with-saved-vars-after-castspell/Leatrix_Maps/world-map/` |
 | `Leatrix_Maps` + normal SavedVariables | Quest log and objective tracker | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/leatrix-maps-quest-log-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/leatrix-maps-quest-log-with-saved-vars-after-castspell/Leatrix_Maps/quest-log/` |
+| `DialogueUI` + normal SavedVariables | Quest choice LoD dialog | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/dialogueui-quest-choice-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/dialogueui-quest-choice-with-saved-vars-after-castspell/DialogueUI/quest-choice/` |
+| `DialogueUI` + normal SavedVariables | Quest log and objective tracker | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/dialogueui-quest-log-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/dialogueui-quest-log-with-saved-vars-after-castspell/DialogueUI/quest-log/` |
 
 The full installed-addon screenshot matrix remains deferred locally because it
 is the expensive 9-addon by 38-panel release-proof-style lane. This sample keeps
 addon-panel evidence moving by covering the recently touched talent,
 HUD/action-bar, Store/CatalogShop, CharacterFrame, Spellbook/professions,
-Collections, TradeSkill, Auction House, Mail, Nameplates, World Map, and Quest
-log surfaces with frame-moving, UI-option, data-heavy, auction-focused,
-nameplate, and map addons enabled, including Store/CatalogShop rows with normal
-SavedVariables loaded, without adding CI texture requirements or rerunning the
-release-proof wrapper.
+Collections, TradeSkill, Auction House, Mail, Nameplates, World Map, Quest log,
+and Quest choice surfaces with frame-moving, UI-option, data-heavy,
+auction-focused, nameplate, map, and dialogue addons enabled, including
+Store/CatalogShop rows with normal SavedVariables loaded, without adding CI
+texture requirements or rerunning the release-proof wrapper.
 
 ## Lane Logs
 
