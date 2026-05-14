@@ -2,6 +2,7 @@
 
 - [x] Back Mists CharacterFrame pet tab visibility with simulator pet UI state so seeded pets keep `CharacterFrameTab2` available while default no-pet state still hides it.
 - [x] Record Mists CharacterFrame pet paper-doll tab interaction coverage in the panel parity docs and audit guard.
+- [x] Guard Mists CharacterFrame default no-pet state so `CharacterFrameTab2` stays hidden when `HasPetUI()` is false.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
 # Mists / Pandaria Classic Startup Plan
