@@ -17,6 +17,7 @@ BUTTON_FILTER=""
 SIM_PID=""
 SOCKET=""
 LOG_FILE=""
+WOW_CLI_LUA_TIMEOUT_SECONDS="${MISTS_LIVE_GUI_CLI_TIMEOUT_SECONDS:-30}"
 
 MICRO_BUTTON_ROWS=(
     "CharacterMicroButton|CharacterFrame|mouse"
@@ -231,7 +232,7 @@ LUA
 
 run_lua_file() {
     local file="$1"
-    WOW_LUA_SOCKET="$SOCKET" "$WOW_CLI_BIN" lua -f "$file"
+    WOW_LUA_SOCKET="$SOCKET" timeout "$WOW_CLI_LUA_TIMEOUT_SECONDS" "$WOW_CLI_BIN" lua -f "$file"
 }
 
 install_error_probe() {

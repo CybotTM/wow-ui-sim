@@ -21,6 +21,8 @@ VALIDATE_ONLY=0
 SKIP_CLONE=0
 PANEL_FILTER=""
 ADDON_FILTER=""
+LIVE_GUI_SMOKE_TIMEOUT_SECONDS="${MISTS_LIVE_GUI_SMOKE_TIMEOUT_SECONDS:-300}"
+INTERACTION_AUDIT_TIMEOUT_SECONDS="${MISTS_INTERACTION_AUDIT_TIMEOUT_SECONDS:-600}"
 
 usage() {
     sed -n '2,/^set -euo/p' "$0" | sed 's/^# \?//;$d'
@@ -149,11 +151,13 @@ live_gui_smoke() {
 
     WOW_SIM_BIN="$WOW_SIM_BIN" \
     WOW_CLI_BIN="$WOW_CLI_BIN" \
+        timeout "$LIVE_GUI_SMOKE_TIMEOUT_SECONDS" \
         "$REPO_ROOT/scripts/mists-live-gui-smoke.sh" "${args[@]}"
 }
 
 interaction_audit() {
-    cargo test --release \
+    timeout "$INTERACTION_AUDIT_TIMEOUT_SECONDS" \
+        cargo test --release \
         --no-default-features \
         --features "sound,gui,casc,client-mists" \
         --test mists_panel_interaction_audit
