@@ -25,6 +25,7 @@ All lane logs live under `target/mists-release-proof/logs/`:
 | Installed addon panel matrix with SavedVariables | `target/mists-release-proof/logs/installed-addon-panel-matrix-with-saved-vars.log` |
 | Connected GUI micro-menu smoke | `target/mists-release-proof/logs/live-gui-smoke.log` |
 | Interaction audit | `target/mists-release-proof/logs/interaction-audit.log` |
+| Artifact completeness | `target/mists-release-proof/logs/artifact-completeness.log` |
 
 The base `lua-errors` JSON snapshot for the proof run is
 `target/mists-release-proof/mists-release-lua-errors.json`; the passing value is

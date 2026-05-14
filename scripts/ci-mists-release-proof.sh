@@ -18,6 +18,7 @@ PANEL_VISUAL_METRICS_BIN="$REPO_ROOT/target/release/panel-visual-metrics"
 
 SKIP_BUILD=0
 VALIDATE_ONLY=0
+VALIDATE_ARTIFACTS_ONLY=0
 SKIP_CLONE=0
 PANEL_FILTER=""
 ADDON_FILTER=""
@@ -36,6 +37,7 @@ while [ $# -gt 0 ]; do
         --skip-build) SKIP_BUILD=1; shift ;;
         --skip-clone) SKIP_CLONE=1; shift ;;
         --validate-only) VALIDATE_ONLY=1; shift ;;
+        --validate-artifacts-only) VALIDATE_ARTIFACTS_ONLY=1; shift ;;
         --help|-h) usage; exit 0 ;;
         *) echo "ERROR: unknown argument '$1'" >&2; exit 2 ;;
     esac
@@ -163,6 +165,122 @@ interaction_audit() {
         --test mists_panel_interaction_audit
 }
 
+artifact_file_exists() {
+    local path="$1"
+    if [ ! -s "$path" ]; then
+        echo "ERROR: missing artifact file: ${path#$OUT_DIR/}" >&2
+        return 1
+    fi
+}
+
+validate_lane_logs() {
+    local log_name missing=0
+    for log_name in \
+        build-release.log \
+        zero-lua-errors.log \
+        installed-addon-matrix.log \
+        panel-parity-and-visual-comparison.log \
+        installed-addon-panel-matrix.log \
+        panel-parity-with-saved-vars.log \
+        installed-addon-panel-matrix-with-saved-vars.log \
+        live-gui-smoke.log \
+        interaction-audit.log
+    do
+        artifact_file_exists "$LOG_DIR/$log_name" || missing=1
+    done
+    return "$missing"
+}
+
+validate_base_lua_errors_artifact() {
+    artifact_file_exists "$OUT_DIR/mists-release-lua-errors.json"
+}
+
+parse_pass_panel_rows() {
+    local line panel status artifacts slug
+    while IFS= read -r line || [ -n "$line" ]; do
+        [[ "$line" == \|* ]] || continue
+        IFS='|' read -r _ panel status artifacts _ <<< "$line"
+        panel="$(trim_artifact_cell "$panel")"
+        status="$(trim_artifact_cell "$status")"
+        artifacts="$(trim_artifact_cell "$artifacts")"
+        [ "$panel" = "Panel" ] && continue
+        [ "$panel" = "---" ] && continue
+        [ "$status" = "Pass" ] || continue
+        slug="${artifacts#*target/mists-panel-parity/}"
+        slug="${slug%%/*}"
+        [ -n "$slug" ] || continue
+        matches_artifact_panel_filter "$panel" "$slug" && printf '%s\n' "$slug"
+    done < "$REPO_ROOT/docs/baselines/mists-panels.md"
+}
+
+trim_artifact_cell() {
+    local value="$*"
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
+    printf '%s' "$value"
+}
+
+matches_artifact_panel_filter() {
+    local panel="$1" slug="$2"
+    [ -z "$PANEL_FILTER" ] && return 0
+    [ "$PANEL_FILTER" = "$slug" ] && return 0
+    [[ "${panel,,}" == *"${PANEL_FILTER,,}"* ]]
+}
+
+parse_mists_addon_names() {
+    local name profile url ref subpath
+    while IFS=$'\t' read -r name profile url ref subpath; do
+        [[ "$name" =~ ^# ]] && continue
+        [ -z "$name" ] && continue
+        [ "$name" = "name" ] && continue
+        [ "$profile" = "mists" ] || continue
+        [ -n "$ADDON_FILTER" ] && [ "$ADDON_FILTER" != "$name" ] && continue
+        printf '%s\n' "$name"
+    done < "$REPO_ROOT/tools/classic-addon-manifest.tsv"
+}
+
+validate_panel_artifact_dir() {
+    local matrix_dir="$1" slug="$2"
+    local missing=0
+    artifact_file_exists "$matrix_dir/$slug/screenshot.webp" || missing=1
+    artifact_file_exists "$matrix_dir/$slug/dump-tree.txt" || missing=1
+    artifact_file_exists "$matrix_dir/$slug/lua-errors.json" || missing=1
+    return "$missing"
+}
+
+validate_panel_matrix_artifacts() {
+    local matrix_dir="$1" slug missing=0
+    while IFS= read -r slug; do
+        validate_panel_artifact_dir "$matrix_dir" "$slug" || missing=1
+    done < <(parse_pass_panel_rows)
+    return "$missing"
+}
+
+validate_addon_panel_matrix_artifacts() {
+    local matrix_dir="$1" addon slug missing=0
+    while IFS= read -r addon; do
+        while IFS= read -r slug; do
+            validate_panel_artifact_dir "$matrix_dir/$addon" "$slug" || missing=1
+        done < <(parse_pass_panel_rows)
+    done < <(parse_mists_addon_names)
+    return "$missing"
+}
+
+validate_release_artifacts() {
+    local missing=0
+    validate_lane_logs || missing=1
+    validate_base_lua_errors_artifact || missing=1
+    validate_panel_matrix_artifacts "$OUT_DIR/panel-parity" || missing=1
+    validate_panel_matrix_artifacts "$OUT_DIR/panel-parity-with-saved-vars" || missing=1
+    validate_addon_panel_matrix_artifacts "$OUT_DIR/addon-panel-parity" || missing=1
+    validate_addon_panel_matrix_artifacts "$OUT_DIR/addon-panel-parity-with-saved-vars" || missing=1
+
+    if [ "$missing" -ne 0 ]; then
+        return 1
+    fi
+    echo "Mists release proof artifacts are complete: $OUT_DIR"
+}
+
 validate_plan() {
     "$REPO_ROOT/scripts/mists-panel-parity.sh" --validate-only
     "$REPO_ROOT/scripts/mists-live-gui-smoke.sh" --validate-only
@@ -180,10 +298,16 @@ validate_plan() {
     echo "release proof lane: installed-addon-panel-matrix-with-saved-vars"
     echo "release proof lane: live-gui-smoke"
     echo "release proof lane: interaction-audit"
+    echo "release proof lane: artifact-completeness"
 }
 
 if [ "$VALIDATE_ONLY" -eq 1 ]; then
     validate_plan
+    exit 0
+fi
+
+if [ "$VALIDATE_ARTIFACTS_ONLY" -eq 1 ]; then
+    validate_release_artifacts
     exit 0
 fi
 
@@ -200,6 +324,7 @@ run_logged_step panel-parity-with-saved-vars panel_parity_with_saved_vars
 run_logged_step installed-addon-panel-matrix-with-saved-vars installed_addon_panel_matrix_with_saved_vars
 run_logged_step live-gui-smoke live_gui_smoke
 run_logged_step interaction-audit interaction_audit
+run_logged_step artifact-completeness validate_release_artifacts
 
 echo ""
 echo "Mists release proof passed. Artifacts: $OUT_DIR"

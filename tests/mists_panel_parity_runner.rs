@@ -202,12 +202,68 @@ fn release_proof_command_validates_required_mists_lanes() {
         "installed-addon-panel-matrix",
         "interaction-audit",
         "visual-comparison",
+        "artifact-completeness",
     ] {
         assert!(
             stdout.contains(expected_lane),
             "release proof validation should list {expected_lane}, got:\n{stdout}"
         );
     }
+}
+
+#[test]
+fn release_proof_artifact_validation_rejects_missing_panel_screenshots() {
+    let out_dir = release_proof_artifact_test_dir("missing-panel-screenshot");
+    if out_dir.exists() {
+        std::fs::remove_dir_all(&out_dir).expect("failed to clean prior artifact fixture");
+    }
+    create_release_proof_artifact_fixture(&out_dir);
+
+    let missing_screenshot = out_dir
+        .join("panel-parity")
+        .join("character")
+        .join("screenshot.webp");
+    std::fs::remove_file(&missing_screenshot).expect("failed to remove screenshot fixture");
+
+    let output = run_release_proof_artifact_validation(&out_dir);
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        !output.status.success(),
+        "artifact validation should reject missing panel screenshots"
+    );
+    assert!(
+        stderr.contains("missing artifact file"),
+        "artifact validation should explain the missing file, got:\n{stderr}"
+    );
+    assert!(
+        stderr.contains("panel-parity/character/screenshot.webp"),
+        "artifact validation should identify the missing screenshot, got:\n{stderr}"
+    );
+}
+
+#[test]
+fn release_proof_artifact_validation_accepts_complete_artifacts() {
+    let out_dir = release_proof_artifact_test_dir("complete");
+    if out_dir.exists() {
+        std::fs::remove_dir_all(&out_dir).expect("failed to clean prior artifact fixture");
+    }
+    create_release_proof_artifact_fixture(&out_dir);
+
+    let output = run_release_proof_artifact_validation(&out_dir);
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "complete artifact validation failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        stdout.contains("Mists release proof artifacts are complete"),
+        "artifact validation should report success, got:\n{stdout}"
+    );
 }
 
 #[test]
@@ -293,4 +349,114 @@ fn panel_baseline_references_retained_runner_artifacts() {
         baseline.contains("target/mists-panel-parity/game-menu-options/dump-tree.txt"),
         "baseline should reference retained frame-dump artifacts"
     );
+}
+
+fn release_proof_artifact_test_dir(name: &str) -> PathBuf {
+    repo_root()
+        .join("target")
+        .join("mists-release-proof-artifact-tests")
+        .join(format!("{name}-{}", std::process::id()))
+}
+
+fn run_release_proof_artifact_validation(out_dir: &std::path::Path) -> std::process::Output {
+    Command::new(repo_root().join("scripts/ci-mists-release-proof.sh"))
+        .arg("--validate-artifacts-only")
+        .arg("--out-dir")
+        .arg(out_dir)
+        .current_dir(repo_root())
+        .output()
+        .expect("failed to run Mists release proof artifact validation")
+}
+
+fn create_release_proof_artifact_fixture(out_dir: &std::path::Path) {
+    create_required_lane_logs(out_dir);
+    write_file(out_dir.join("mists-release-lua-errors.json"), "[]\n");
+
+    let slugs = mists_panel_slugs();
+    create_panel_matrix_fixture(&out_dir.join("panel-parity"), &slugs);
+    create_panel_matrix_fixture(&out_dir.join("panel-parity-with-saved-vars"), &slugs);
+
+    let addons = mists_addon_names();
+    create_addon_panel_matrix_fixture(&out_dir.join("addon-panel-parity"), &addons, &slugs);
+    create_addon_panel_matrix_fixture(
+        &out_dir.join("addon-panel-parity-with-saved-vars"),
+        &addons,
+        &slugs,
+    );
+}
+
+fn create_required_lane_logs(out_dir: &std::path::Path) {
+    for log_name in [
+        "build-release.log",
+        "zero-lua-errors.log",
+        "installed-addon-matrix.log",
+        "panel-parity-and-visual-comparison.log",
+        "installed-addon-panel-matrix.log",
+        "panel-parity-with-saved-vars.log",
+        "installed-addon-panel-matrix-with-saved-vars.log",
+        "live-gui-smoke.log",
+        "interaction-audit.log",
+        "artifact-completeness.log",
+    ] {
+        write_file(out_dir.join("logs").join(log_name), "ok\n");
+    }
+}
+
+fn create_addon_panel_matrix_fixture(root: &std::path::Path, addons: &[String], slugs: &[String]) {
+    for addon in addons {
+        create_panel_matrix_fixture(&root.join(addon), slugs);
+    }
+}
+
+fn create_panel_matrix_fixture(root: &std::path::Path, slugs: &[String]) {
+    for slug in slugs {
+        let panel_dir = root.join(slug);
+        write_file(panel_dir.join("screenshot.webp"), "webp");
+        write_file(panel_dir.join("dump-tree.txt"), "frame tree\n");
+        write_file(panel_dir.join("lua-errors.json"), "[]\n");
+    }
+}
+
+fn mists_panel_slugs() -> Vec<String> {
+    let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
+    let baseline =
+        std::fs::read_to_string(&baseline_path).expect("failed to read Mists panel baseline");
+
+    baseline
+        .lines()
+        .filter(|line| line.starts_with('|') && line.contains(" | Pass | "))
+        .filter_map(|line| {
+            line.split("target/mists-panel-parity/")
+                .nth(1)
+                .and_then(|path| path.split('/').next())
+        })
+        .map(str::to_owned)
+        .collect()
+}
+
+fn mists_addon_names() -> Vec<String> {
+    let manifest_path = repo_root().join("tools/classic-addon-manifest.tsv");
+    let manifest = std::fs::read_to_string(&manifest_path).expect("failed to read addon manifest");
+
+    manifest
+        .lines()
+        .filter_map(|line| {
+            let mut columns = line.split('\t');
+            let name = columns.next()?;
+            let profile = columns.next()?;
+            is_mists_addon_row(name, profile).then_some(name.to_owned())
+        })
+        .collect()
+}
+
+fn is_mists_addon_row(name: &str, profile: &str) -> bool {
+    let is_data_row = !name.starts_with('#') && !name.is_empty() && name != "name";
+    let is_mists_profile = profile == "mists";
+    is_data_row && is_mists_profile
+}
+
+fn write_file(path: PathBuf, contents: &str) {
+    let parent = path.parent().expect("fixture path should have a parent");
+    std::fs::create_dir_all(parent).expect("failed to create fixture directory");
+    std::fs::write(path, contents).expect("failed to write fixture file");
 }
