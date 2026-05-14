@@ -1,0 +1,37 @@
+#![cfg(feature = "client-mists")]
+
+use std::process::Command;
+
+#[test]
+fn mists_startup_uses_known_font_keys_without_stale_path_errors() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(env!("CARGO_BIN_EXE_wow-sim"))
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "dump-tree",
+            "--filter",
+            "UIParent",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        !stderr.contains("asset-cache byte resolve failed: fdid 615960")
+            && !stderr.contains("asset-cache byte resolve failed: fdid 615958"),
+        "Mists startup should not report stale CASC path failures for known fonts\nstderr:\n{stderr}"
+    );
+    assert!(
+        !stderr.contains("Font FRIZQT__.TTF not found in CASC")
+            && !stderr.contains("Font ARIALN.TTF not found in CASC"),
+        "Mists startup should load core Blizzard fonts without falling back to system fonts\nstderr:\n{stderr}"
+    );
+}

@@ -189,16 +189,17 @@ fn try_casc_font_bytes(font_file: &WowFontFile) -> Option<Vec<u8>> {
     if let Some(bytes) = read_cached_font_bytes(font_file.filename) {
         return Some(bytes);
     }
-    let path = format!("Fonts/{}", font_file.filename);
-    if let Some(bytes) = try_casc_font_bytes_by_path(&path) {
-        write_cached_font_bytes(font_file.filename, &bytes);
-        return Some(bytes);
-    }
     if let Some(encoding_key_hex) = font_file.encoding_key_hex {
         if let Some(bytes) = try_casc_font_bytes_by_encoding_key(encoding_key_hex) {
             write_cached_font_bytes(font_file.filename, &bytes);
             return Some(bytes);
         }
+    }
+
+    let path = format!("Fonts/{}", font_file.filename);
+    if let Some(bytes) = try_casc_font_bytes_by_path(&path) {
+        write_cached_font_bytes(font_file.filename, &bytes);
+        return Some(bytes);
     }
 
     let resolver = crate::asset_resolver_config::resolver();
@@ -782,7 +783,7 @@ mod tests {
             return;
         }
 
-        let bytes = try_casc_font_bytes("FRIZQT__.TTF")
+        let bytes = try_casc_font_bytes(&WOW_FONT_FILES[0])
             .expect("FRIZQT__.TTF should resolve through path or known encoding key");
 
         assert!(
