@@ -6,6 +6,8 @@ use std::process::Command;
 
 #[path = "common/mists_panel_artifact_checks.rs"]
 mod mists_panel_artifact_checks;
+#[path = "common/mists_panel_interaction_checks.rs"]
+mod mists_panel_interaction_checks;
 
 const MISTS_PANEL_ROW_COUNT: &str = "38 panel rows validated";
 const LATEST_LOCAL_PANEL_ARTIFACT_ROOT: &str =
@@ -160,6 +162,11 @@ fn interaction_baseline_covers_every_passing_mists_panel() {
         panel_names, interaction_names,
         "every passing Mists panel should have interaction evidence or an explicit documented gap"
     );
+}
+
+#[test]
+fn interaction_baseline_references_existing_mists_tests() {
+    mists_panel_interaction_checks::assert_interaction_test_references_exist(&repo_root());
 }
 
 #[test]

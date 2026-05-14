@@ -61,7 +61,8 @@ Parity hardening TODO:
 - [x] Add a local Mists screenshot artifact checker that fails when any latest retained panel parity row is missing `screenshot.webp` or has a zero-byte screenshot.
 - [x] Add a local Mists screenshot format checker that fails when any latest retained panel screenshot is not a WebP image header.
 - [x] Add a local Mists panel artifact consistency checker that fails when the latest retained screenshot, frame-dump, and lua-error artifact slug sets diverge.
-- [ ] Add a local Mists interaction evidence checker that fails when `docs/baselines/mists-panel-interactions.md` references a missing `tests/mists_*.rs` file or missing test function.
+- [x] Add a local Mists interaction evidence checker that fails when `docs/baselines/mists-panel-interactions.md` references a missing `tests/mists_*.rs` file or missing test function.
+- [ ] Add a local Mists interaction-strength checker that flags interaction baseline rows whose cited test name or row notes still only prove load/show/no-lua-errors coverage.
 - [x] Re-audit local Mists idle HUD and core panel screenshots with real local CASC assets, focusing on the previously reported unit-frame/action-bar layout regressions, missing bottom-tab text, specialization Learn flow, and font fallback symptoms; fix the first root-cause regression found.
 - [x] Add a non-CI Mists visual triage note that separates local asset-backed parity evidence from CI signal-only checks, so texture/font availability is not confused with panel parity completion.
 - [x] Extend the live connected-GUI Mists smoke runner to include the no-panel HUD state plus the specialization Learn-to-talents path, then fail on `lua-errors` or missing/hidden target frames after real input dispatch.
