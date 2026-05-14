@@ -33,7 +33,8 @@ Parity hardening TODO:
 - [x] Re-run the live connected-GUI Mists smoke runner after the CatalogShop `SOUNDKIT` fix, and fix or promote the first real-input regression.
 - [x] Re-run the Mists panel interaction audit after the CatalogShop `SOUNDKIT` fix, and fix or promote the first interaction regression.
 - [x] Re-run focused Store/CatalogShop panel parity for the base profile after the CatalogShop `SOUNDKIT` fix, and fix or promote the first retained-artifact regression.
-- [ ] Re-run local 38-row Mists panel parity after the CatalogShop `SOUNDKIT` fix, and fix or promote the first full-matrix regression.
+- [x] Re-run local 38-row Mists panel parity after the CatalogShop `SOUNDKIT` fix, and fix or promote the first full-matrix regression.
+- [ ] Re-run local 38-row Mists panel parity with normal SavedVariables enabled after the CatalogShop `SOUNDKIT` fix, and fix or promote the first saved-vars full-matrix regression.
 - [x] Re-audit local Mists idle HUD and core panel screenshots with real local CASC assets, focusing on the previously reported unit-frame/action-bar layout regressions, missing bottom-tab text, specialization Learn flow, and font fallback symptoms; fix the first root-cause regression found.
 - [x] Add a non-CI Mists visual triage note that separates local asset-backed parity evidence from CI signal-only checks, so texture/font availability is not confused with panel parity completion.
 - [x] Extend the live connected-GUI Mists smoke runner to include the no-panel HUD state plus the specialization Learn-to-talents path, then fail on `lua-errors` or missing/hidden target frames after real input dispatch.

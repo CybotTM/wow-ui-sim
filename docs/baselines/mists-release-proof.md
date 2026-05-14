@@ -58,6 +58,7 @@ with artifacts retained under `target/mists-local-completion-audit/`.
 | Mists panel interaction audit | `1` Rust test suite passed; every pass panel remains represented in the interaction audit | `target/mists-local-completion-audit/interaction-audit.log` |
 | Post-CatalogShop `SOUNDKIT` interaction audit | `1` Rust test suite passed after the Store/CatalogShop soundkit coverage change | `cargo test --no-default-features --features sound,gui,casc,client-mists --test mists_panel_interaction_audit -- --nocapture` |
 | Post-CatalogShop `SOUNDKIT` focused Store panel parity | Store/CatalogShop row passed; per-panel `lua-errors` length `0`, root dump and screenshot refreshed after the sound constants fix | `target/mists-local-completion-audit/store-commercial-after-soundkit.log`; artifacts under `target/mists-panel-parity/store-commercial/` |
+| Post-CatalogShop `SOUNDKIT` full panel parity | All `38` panel rows passed; all per-panel `lua-errors.json` files have length `0`; screenshots and frame dumps refreshed | `target/mists-local-completion-audit/panel-parity-after-soundkit.log`; artifacts under `target/mists-panel-parity/` |
 
 This audit is intentionally local and non-release: it uses debug `wow-sim` /
 `wow-cli` binaries and does not run the release-proof wrapper. Its purpose is to
