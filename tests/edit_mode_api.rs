@@ -171,7 +171,7 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
         system_index, 1,
         "WTF cache stores system indices zero-based, but Lua layout state must use EditMode enum values"
     );
-    assert_eq!(point, "BOTTOM");
+    assert_eq!(point, "CENTER");
     assert_eq!(offset_x, 12.5);
     assert_eq!(setting_value, 1);
 }
@@ -225,6 +225,59 @@ fn edit_mode_wtf_cache_can_override_active_layout_by_name() {
 
     assert_eq!(active, 1);
     assert_eq!(active_name, "Ultrawide");
+}
+
+#[test]
+fn edit_mode_wtf_cache_decodes_frame_point_numbers_like_wow() {
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let wtf_path = temp.path().join("WTF");
+    let account_path = wtf_path.join("Account/TestAccount");
+    let character_path = account_path.join("Test Realm/Testchar");
+    std::fs::create_dir_all(&character_path).expect("create WTF dirs");
+    std::fs::write(
+        account_path.join("edit-mode-cache-account.txt"),
+        concat!(
+            "1 0 ",
+            "9 Ultrawide 3 ",
+            "2 -1 0 2 2 UIParent 0.0 0.0 -1 ## ",
+            "0 0 0 8 8 UIParent 0.0 0.0 -1 ## ",
+            "1 -1 0 4 4 UIParent 0.0 0.0 -1 ##",
+            "\0"
+        ),
+    )
+    .expect("write account edit mode cache");
+    std::fs::write(
+        character_path.join("edit-mode-cache-character.txt"),
+        "1 1 1 1 1 1\0",
+    )
+    .expect("write character edit mode cache");
+
+    let env = WowLuaEnv::new().expect("create Lua environment");
+    let mut saved_vars = SavedVariablesManager::with_storage_dir(temp.path().join("local-sv"));
+    saved_vars.set_wtf_config(WtfConfig::new(
+        &wtf_path,
+        "TestAccount",
+        "Test Realm",
+        "Testchar",
+    ));
+    env.loader_env()
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1))
+        .expect("load edit mode cache");
+
+    let (minimap_point, action_bar_point, cast_bar_point): (String, String, String) = env
+        .eval(
+            r#"
+            local systems = C_EditMode.GetLayouts().layouts[1].systems
+            return systems[1].anchorInfo.point,
+                systems[2].anchorInfo.point,
+                systems[3].anchorInfo.point
+            "#,
+        )
+        .expect("read decoded frame points");
+
+    assert_eq!(minimap_point, "TOPRIGHT");
+    assert_eq!(action_bar_point, "BOTTOMRIGHT");
+    assert_eq!(cast_bar_point, "CENTER");
 }
 
 #[test]

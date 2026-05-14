@@ -8993,14 +8993,14 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
   end
 
   local __wow_edit_mode_frame_points = {
-    [0] = "CENTER",
-    [1] = "LEFT",
-    [2] = "RIGHT",
-    [3] = "TOP",
-    [4] = "BOTTOM",
-    [5] = "TOPLEFT",
-    [6] = "TOPRIGHT",
-    [7] = "BOTTOMLEFT",
+    [0] = "TOPLEFT",
+    [1] = "TOP",
+    [2] = "TOPRIGHT",
+    [3] = "LEFT",
+    [4] = "CENTER",
+    [5] = "RIGHT",
+    [6] = "BOTTOMLEFT",
+    [7] = "BOTTOM",
     [8] = "BOTTOMRIGHT",
   }
 
