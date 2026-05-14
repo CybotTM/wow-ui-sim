@@ -50,6 +50,30 @@ fn test_set_point_reports_plumber_topelft_typo_compatibility() {
 }
 
 #[test]
+fn test_live_addon_script_handlers_are_accepted() {
+    let env = env();
+    env.exec(
+        r#"
+        local editBox = CreateFrame("EditBox", "ScriptHandlerEditBox", UIParent)
+        editBox:SetScript("OnCursorChanged", function() end)
+
+        local tooltip = CreateFrame("GameTooltip", "ScriptHandlerTooltip", UIParent)
+        tooltip:HookScript("OnTooltipSetDefaultAnchor", function() end)
+        tooltip:SetScript("OnTooltipSetFrameStack", function() end)
+        tooltip:SetScript("OnTooltipAddMoney", function() end)
+
+        local model = CreateFrame("Model", "ScriptHandlerModel", UIParent)
+        model:SetScript("OnModelLoaded", function() end)
+
+        assert(editBox:HasScript("OnCursorChanged"), "EditBox should accept OnCursorChanged")
+        assert(tooltip:HasScript("OnTooltipSetDefaultAnchor"), "GameTooltip should accept OnTooltipSetDefaultAnchor")
+        assert(model:HasScript("OnModelLoaded"), "Model should accept OnModelLoaded")
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn test_get_point_returns_values() {
     let env = env();
     // GetPoint returns (point, relativeTo, relativePoint, x, y) where relativeTo is a frame/nil

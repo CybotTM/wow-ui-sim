@@ -352,7 +352,8 @@ fn is_widget_specific_script_handler(widget_type: WidgetType, handler_name: &str
         | "OnTextSet"
         | "OnEditFocusGained"
         | "OnEditFocusLost"
-        | "OnInputLanguageChanged" => widget_type == WidgetType::EditBox,
+        | "OnInputLanguageChanged"
+        | "OnCursorChanged" => widget_type == WidgetType::EditBox,
         "OnCooldownDone" => matches!(widget_type, WidgetType::Cooldown),
         "OnValueChanged" => matches!(widget_type, WidgetType::Slider | WidgetType::StatusBar),
         "OnVerticalScroll" | "OnScrollRangeChanged" => {
@@ -360,10 +361,17 @@ fn is_widget_specific_script_handler(widget_type: WidgetType, handler_name: &str
         }
         "OnColorSelect" => matches!(widget_type, WidgetType::ColorSelect),
         "OnTooltipCleared"
+        | "OnTooltipAddMoney"
+        | "OnTooltipSetDefaultAnchor"
+        | "OnTooltipSetFrameStack"
         | "OnTooltipSetSpell"
         | "OnTooltipSetItem"
         | "OnTooltipSetUnit"
         | "OnTooltipSetFramestack" => widget_type == WidgetType::GameTooltip,
+        "OnModelLoaded" => matches!(
+            widget_type,
+            WidgetType::Model | WidgetType::ModelScene | WidgetType::PlayerModel
+        ),
         _ => false,
     }
 }
