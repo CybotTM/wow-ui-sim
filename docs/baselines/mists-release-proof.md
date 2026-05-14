@@ -49,6 +49,7 @@ with artifacts retained under `target/mists-local-completion-audit/`.
 | Base Mists `lua-errors` with addons and SavedVariables disabled | `0` distinct errors | `target/mists-local-completion-audit/base-lua-errors.json` |
 | Base panel parity execution | `38` panel rows passed with per-panel `lua-errors`, dump-tree, screenshot, root-frame, and visual checks | `target/mists-local-completion-audit/panel-parity.log`; artifacts under `target/mists-local-completion-audit/panel-parity/` |
 | Base panel parity with normal SavedVariables | `38` panel rows passed; all per-panel `lua-errors.json` files have length `0`; no saved-var-only panel regression found | `target/mists-local-saved-vars-panel-parity.log`; artifacts under `target/mists-local-saved-vars-panel-parity/` |
+| Retained local asset-backed visual artifact audit | All `38` documented panel rows have retained local saved-vars screenshots, frame dumps, and per-panel `lua-errors.json`; no empty retained artifact found | `target/mists-local-saved-vars-panel-parity/` |
 | Installed Mists addon panel manifest validation | `9` addon rows validated | `target/mists-local-completion-audit/addon-panel-validation.log` |
 | Live connected-GUI smoke validation and execution | Passed idle HUD, specialization Learn-to-talents, and micro-menu probes | `target/mists-local-completion-audit/live-gui-smoke.log` |
 | Installed Mists addon startup matrix | `passed: 9`, `failed: 0`, all rows `0` addon-induced errors | `target/mists-local-completion-audit/installed-addon-startup.log` |
