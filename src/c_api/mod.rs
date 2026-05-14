@@ -27,6 +27,7 @@ pub mod c_player_interaction_manager;
 pub mod c_spec;
 pub mod c_spell;
 pub mod c_spell_book;
+pub mod c_spell_diminish;
 pub mod c_texture;
 pub mod c_widget;
 pub mod c_wow_token_public;

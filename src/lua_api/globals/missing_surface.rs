@@ -56,7 +56,8 @@ use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
     c_artifact_ui, c_azerite_empowered_item, c_azerite_essence, c_azerite_item, c_barber_shop,
     c_behavioral_messaging, c_configuration_warnings, c_cursor, c_fog_of_war, c_major_factions,
-    c_map_exploration_info, c_paper_doll_info, c_player_interaction_manager, c_spell, c_widget,
+    c_map_exploration_info, c_paper_doll_info, c_player_interaction_manager, c_spell,
+    c_spell_diminish, c_widget,
 };
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
@@ -224,6 +225,7 @@ fn register_collection_surfaces(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_artifact_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_spell::register_c_spell_surface(state)?;
+    c_spell_diminish::register_c_spell_diminish_surface(state)?;
     c_widget::register_c_widget_surface(state)?;
     c_paper_doll_info::register_c_paper_doll_info_surface(state)?;
     c_artifact_ui::register_c_artifact_ui_surface(state)?;
