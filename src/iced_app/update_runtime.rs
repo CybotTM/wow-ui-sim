@@ -257,6 +257,8 @@ impl App {
             ));
             drop(state);
             env.set_screen_size(size.width, size.height);
+            let _ = env.fire_event("DISPLAY_SIZE_CHANGED");
+            let _ = env.fire_event("UI_SCALE_CHANGED");
         }
     }
 

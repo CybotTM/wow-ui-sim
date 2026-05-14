@@ -268,6 +268,10 @@ end
 
 pub(super) const POST_EVENT_FRAME_LAYOUT_WORKAROUND_LUA: &str = r#"
 local function reanchor_objective_tracker(frame)
+    local height = 836.5
+    if UIParentRightManagedFrameContainer and UIParentRightManagedFrameContainer.GetTop then
+        height = math.min(height, UIParentRightManagedFrameContainer:GetTop() or height)
+    end
     frame:ClearAllPoints()
     frame:SetPoint(
         "TOPRIGHT",
@@ -276,7 +280,7 @@ local function reanchor_objective_tracker(frame)
         0,
         0
     )
-    frame:SetHeight(836.5)
+    frame:SetHeight(height)
 end
 
 if EditModeManagerFrame then
@@ -321,6 +325,17 @@ if ObjectiveTrackerFrame then
         pcall(ObjectiveTrackerFrame.UpdateHeight, ObjectiveTrackerFrame)
     end
     reanchor_objective_tracker(ObjectiveTrackerFrame)
+end
+if not rawget(_G, "__wow_objective_tracker_resize_event_frame")
+    and CreateFrame
+    and ObjectiveTrackerFrame then
+    local resizeEventFrame = CreateFrame("Frame")
+    resizeEventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
+    resizeEventFrame:RegisterEvent("UI_SCALE_CHANGED")
+    resizeEventFrame:SetScript("OnEvent", function()
+        reanchor_objective_tracker(ObjectiveTrackerFrame)
+    end)
+    rawset(_G, "__wow_objective_tracker_resize_event_frame", resizeEventFrame)
 end
 if CompactPartyFrame then
     CompactPartyFrame:SetHeight(234)
