@@ -128,6 +128,22 @@ and logged missing character frame textures/icons, so the asset-rich local
 visual baseline was not comparable in CI. The workflow now runs the release
 proof with signal-only panel visuals until CASC data is available in CI.
 
+Follow-up dispatch:
+`https://github.com/Osso/wow-ui-sim/actions/runs/25832774071`. It used commit
+`c801aebe`, cleared the signal-only panel visual gate, and was canceled after
+the installed-addon panel matrix kept running past the previous failure point.
+The uploaded artifact showed the matrix was still progressing through addon
+panel rows, so the release proof now adds explicit deadlines to the later
+connected-GUI smoke and interaction-audit lanes instead of allowing those lanes
+to hang without a lane log.
+
+Passing dispatch:
+`https://github.com/Osso/wow-ui-sim/actions/runs/25834559363`. It used commit
+`5de67dca`, passed the `Mists release proof` job, and uploaded
+`mists-release-proof` at
+`https://github.com/Osso/wow-ui-sim/actions/runs/25834559363/artifacts/6985920313`.
+The proof ran from `2026-05-14T00:35:20Z` to `2026-05-14T02:29:12Z`.
+
 ## Remaining Gaps
 - The latest audited Mists panel workflows have no `Missing` rows in
   `docs/baselines/mists-panel-interactions.md`.
