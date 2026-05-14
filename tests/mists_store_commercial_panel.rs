@@ -76,6 +76,19 @@ const STORE_COMMERCIAL_LUA: &str = r#"
     if type(SimpleCheckout) ~= "table" then
         fail("SimpleCheckout missing")
     end
+    for _, soundKitKey in ipairs({
+        "CATALOG_SHOP_OPEN_LOADING_SCREEN",
+        "CATALOG_SHOP_LOADING_SCREEN_LOOP",
+        "CATALOG_SHOP_OPEN_SHOP_AFTER_LOAD",
+        "CATALOG_SHOP_GOLD_SHIMMER_START",
+        "CATALOG_SHOP_GOLD_SHIMMER_LOOP",
+        "CATALOG_SHOP_GOLD_SHIMMER_END",
+    }) do
+        if type(SOUNDKIT[soundKitKey]) ~= "number" then
+            fail("CatalogShop SOUNDKIT missing " .. soundKitKey)
+        end
+        PlaySound(SOUNDKIT[soundKitKey])
+    end
 
     StoreMicroButton:GetScript("OnClick")(StoreMicroButton, "LeftButton", false)
 

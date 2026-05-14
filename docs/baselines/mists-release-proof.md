@@ -52,8 +52,12 @@ with artifacts retained under `target/mists-local-completion-audit/`.
 | Retained local asset-backed visual artifact audit | All `38` documented panel rows have retained local saved-vars screenshots, frame dumps, and per-panel `lua-errors.json`; no empty retained artifact found | `target/mists-local-saved-vars-panel-parity/` |
 | Installed Mists addon panel manifest validation | `9` addon rows validated | `target/mists-local-completion-audit/addon-panel-validation.log` |
 | Live connected-GUI smoke validation and execution | Passed idle HUD, specialization Learn-to-talents, and micro-menu probes | `target/mists-local-completion-audit/live-gui-smoke.log` |
+| Post-CatalogShop `SOUNDKIT` live connected-GUI smoke | Passed idle HUD, specialization Learn-to-talents, Store micro-button, and other micro-menu probes after the sound constants fix | `target/mists-local-completion-audit/live-gui-smoke-after-soundkit.log` |
 | Installed Mists addon startup matrix | `passed: 9`, `failed: 0`, all rows `0` addon-induced errors | `target/mists-local-completion-audit/installed-addon-startup.log` |
+| Post-CatalogShop `SOUNDKIT` startup regression check | Base `lua-errors` length `0`; installed-addon matrix `passed: 9`, `failed: 0` after seeding the looping CatalogShop sound constants | `target/mists-local-completion-audit/base-lua-errors-after-soundkit.json`; `target/mists-local-completion-audit/installed-addon-startup-after-soundkit.log` |
 | Mists panel interaction audit | `1` Rust test suite passed; every pass panel remains represented in the interaction audit | `target/mists-local-completion-audit/interaction-audit.log` |
+| Post-CatalogShop `SOUNDKIT` interaction audit | `1` Rust test suite passed after the Store/CatalogShop soundkit coverage change | `cargo test --no-default-features --features sound,gui,casc,client-mists --test mists_panel_interaction_audit -- --nocapture` |
+| Post-CatalogShop `SOUNDKIT` focused Store panel parity | Store/CatalogShop row passed; per-panel `lua-errors` length `0`, root dump and screenshot refreshed after the sound constants fix | `target/mists-local-completion-audit/store-commercial-after-soundkit.log`; artifacts under `target/mists-panel-parity/store-commercial/` |
 
 This audit is intentionally local and non-release: it uses debug `wow-sim` /
 `wow-cli` binaries and does not run the release-proof wrapper. Its purpose is to
@@ -70,7 +74,7 @@ evidence without reintroducing release-proof or CI texture work.
 ## Local Installed-Addon Panel Sample
 
 Latest bounded local sample: 2026-05-14 on `classic-profile-rollout`, using
-debug `wow-sim` and the installed `BlizzMove` addon as the UI-mutating addon
+debug `wow-sim` plus the installed `BlizzMove` and `DeModal` UI-mutating addons
 under test.
 
 | Addon | Panel row | Result | Artifact |
@@ -79,13 +83,16 @@ under test.
 | `BlizzMove` | Action bars, micro menu, bag bar, status bars | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-action-bars.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-action-bars/BlizzMove/action-bars/` |
 | `BlizzMove` | Store, CatalogShop, WowToken, and SimpleCheckout | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-store-commercial.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-store-commercial/BlizzMove/store-commercial/` |
 | `BlizzMove` + normal SavedVariables | Store, CatalogShop, WowToken, and SimpleCheckout | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-store-commercial-with-saved-vars.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-store-commercial-with-saved-vars/BlizzMove/store-commercial/` |
+| `DeModal` + normal SavedVariables | Store, CatalogShop, WowToken, and SimpleCheckout | Passed after seeding the CatalogShop looping `SOUNDKIT` constants; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/demodal-store-commercial-with-saved-vars.log`; artifacts under `target/mists-local-addon-panel-sample/demodal-store-commercial-with-saved-vars/DeModal/store-commercial/` |
+| `DeModal` + normal SavedVariables | Character panel: paperdoll, stats, titles, equipment manager | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/demodal-character-with-saved-vars.log`; artifacts under `target/mists-local-addon-panel-sample/demodal-character-with-saved-vars/DeModal/character/` |
 
 The full installed-addon screenshot matrix remains deferred locally because it
 is the expensive 9-addon by 38-panel release-proof-style lane. This sample keeps
 addon-panel evidence moving by covering the recently touched talent,
-HUD/action-bar, and Store/CatalogShop surfaces with a frame-mutating addon
-enabled, including the Store/CatalogShop row with normal SavedVariables loaded,
-without adding CI texture requirements or rerunning the release-proof wrapper.
+HUD/action-bar, Store/CatalogShop, and CharacterFrame surfaces with
+frame-mutating addons enabled, including Store/CatalogShop rows with normal
+SavedVariables loaded, without adding CI texture requirements or rerunning the
+release-proof wrapper.
 
 ## Lane Logs
 
