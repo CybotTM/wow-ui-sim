@@ -62,3 +62,28 @@ No currently audited retail-supported panel workflow is marked `Missing`.
 Rows marked `Follow-up` are not counted as complete interaction parity yet:
 they load and render, but still need tests that drive a user-visible state
 change rather than only proving startup or frame construction.
+
+## Retail Module Comparison Audit
+
+Rechecked 2026-05-14 against the retail Blizzard UI module coverage plan at
+`/syncthing/Sync/Projects/wow/wow-ui-sim/PLAN.tests.md`. The first
+Mists-applicable user-facing gap is the commercial/store path:
+
+- Retail coverage has a full `Blizzard_AccountStore` module suite for
+  storefront state, category/item selection, purchase/refund actions, and
+  fullscreen escape behavior.
+- Mists does not ship `Blizzard_AccountStore`; the equivalent user-facing
+  surfaces are `Blizzard_StoreUI`, `Blizzard_CatalogShop`,
+  `Blizzard_WowTokenUI`, and `Blizzard_SimpleCheckout`.
+- Those Mists addons exist under
+  `Interface/BlizzardUI/Mists/AddOns/`, and a local load probe confirmed
+  `UIParentLoadAddOn("Blizzard_StoreUI")` succeeds with `StoreFrame` and
+  `CatalogShopFrame` defined and zero captured `lua-errors`.
+- Current Mists evidence only includes the live GUI
+  `StoreMicroButton -> StoreFrame_IsShown` probe. There is no retained
+  `docs/baselines/mists-panels.md` row, panel screenshot/dump artifact, or
+  interaction-audit row for Store/CatalogShop/WowToken/SimpleCheckout yet.
+
+Promoted follow-up: add a focused Mists store/commercial panel parity row and
+test coverage before treating retail store parity as proven under
+`client-mists`.
