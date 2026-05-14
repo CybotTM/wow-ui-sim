@@ -159,6 +159,23 @@ fn test_event_utils_rejects_non_event_method_names() {
     );
 }
 
+#[test]
+fn test_camera_zoom_globals_are_available() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let zoom: f64 = env
+        .eval(
+            r#"
+        CameraZoomIn(1)
+        CameraZoomOut(1)
+        return GetCameraZoom()
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(zoom, 0.0);
+}
+
 /// Test that RegisterEvent accepts a known valid WoW event.
 #[test]
 fn test_register_event_valid_name() {

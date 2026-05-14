@@ -19,6 +19,8 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "AgreeToSurvey",
     "AscendToRank",
     "AuctionHouseShowAuctionator",
+    "CameraZoomIn",
+    "CameraZoomOut",
     "CheckCharacterUndeleteCooldown",
     "ClearCursor",
     "ClearInspectPlayer",
@@ -169,6 +171,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetGossipNumActiveQuests are SimState-backed in gossip_probes.rs,
     // not stubs.
     "GetChannelName",
+    "GetCameraZoom",
     "GetGuildBankTabCost",
     "GetGuildBankTabInfo",
     "GetGuildBankText",
