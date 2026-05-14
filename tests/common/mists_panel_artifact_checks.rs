@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::path::Path;
 
 pub fn panel_slugs(repo_root: &Path, artifact_root: &str) -> Vec<String> {
@@ -113,6 +114,46 @@ pub fn assert_webp_screenshot_artifact(repo_root: &Path, artifact: &str) {
         b"WEBP",
         "screenshot artifact should be a WebP RIFF container: {artifact}"
     );
+}
+
+pub fn assert_panel_artifact_slug_sets_match(repo_root: &Path, artifact_root: &str) {
+    let expected_slugs = expected_panel_slug_set(repo_root, artifact_root);
+    let screenshot_slugs = artifact_slugs_with_file(repo_root, artifact_root, "screenshot.webp");
+    let frame_dump_slugs = artifact_slugs_with_file(repo_root, artifact_root, "dump-tree.txt");
+    let lua_error_slugs = artifact_slugs_with_file(repo_root, artifact_root, "lua-errors.json");
+
+    assert_eq!(
+        screenshot_slugs, expected_slugs,
+        "latest retained screenshot slug set should match the panel baseline"
+    );
+    assert_eq!(
+        frame_dump_slugs, expected_slugs,
+        "latest retained frame-dump slug set should match the panel baseline"
+    );
+    assert_eq!(
+        lua_error_slugs, expected_slugs,
+        "latest retained lua-error slug set should match the panel baseline"
+    );
+}
+
+fn expected_panel_slug_set(repo_root: &Path, artifact_root: &str) -> BTreeSet<String> {
+    panel_slugs(repo_root, artifact_root).into_iter().collect()
+}
+
+fn artifact_slugs_with_file(
+    repo_root: &Path,
+    artifact_root: &str,
+    artifact_name: &str,
+) -> BTreeSet<String> {
+    let root = repo_root.join(artifact_root);
+    let entries = std::fs::read_dir(&root)
+        .unwrap_or_else(|error| panic!("failed to read artifact root {artifact_root}: {error}"));
+
+    entries
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().join(artifact_name).is_file())
+        .filter_map(|entry| entry.file_name().into_string().ok())
+        .collect()
 }
 
 fn read_panel_baseline(repo_root: &Path) -> String {

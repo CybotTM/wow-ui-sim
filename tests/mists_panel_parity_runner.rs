@@ -511,6 +511,14 @@ fn latest_local_panel_screenshots_have_webp_headers() {
     }
 }
 
+#[test]
+fn latest_local_panel_artifact_slug_sets_match() {
+    mists_panel_artifact_checks::assert_panel_artifact_slug_sets_match(
+        &repo_root(),
+        LATEST_LOCAL_PANEL_ARTIFACT_ROOT,
+    );
+}
+
 fn release_proof_artifact_test_dir(name: &str) -> PathBuf {
     repo_root()
         .join("target")
