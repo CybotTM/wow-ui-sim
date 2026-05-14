@@ -19,7 +19,7 @@ frame-tree dump for each panel row.
 
 | Panel | Status | Artifacts | Gap notes |
 |---|---|---|---|
-| Character panel: paperdoll, stats, titles, equipment manager | Pass | screenshot: `target/mists-panel-parity-with-saved-vars-after-castspell/character/screenshot.webp`; dump: `target/mists-panel-parity-with-saved-vars-after-castspell/character/dump-tree.txt` | No known current gaps. |
+| Character panel: paperdoll, stats, titles, equipment manager | Pass | screenshot: `target/mists-panel-parity-with-saved-vars-after-castspell/character/screenshot.webp`; dump: `target/mists-panel-parity-with-saved-vars-after-castspell/character/dump-tree.txt` | Rechecked after the pet UI state guard; default no-pet state hides the pet tab and seeded pet UI shows it. |
 | Spellbook and professions | Pass | screenshot: `target/mists-panel-parity-with-saved-vars-after-castspell/spellbook-professions/screenshot.webp`; dump: `target/mists-panel-parity-with-saved-vars-after-castspell/spellbook-professions/dump-tree.txt` | No known current gaps. |
 | Talents and glyphs | Pass | screenshot: `target/mists-panel-parity-with-saved-vars-after-castspell/talents-glyphs/screenshot.webp`; dump: `target/mists-panel-parity-with-saved-vars-after-castspell/talents-glyphs/dump-tree.txt` | Mists talent rows and glyph slots are intentionally distinct from retail trees. |
 | Quest log and objective tracker | Pass | screenshot: `target/mists-panel-parity-with-saved-vars-after-castspell/quest-log/screenshot.webp`; dump: `target/mists-panel-parity-with-saved-vars-after-castspell/quest-log/dump-tree.txt` | No known current gaps. |
