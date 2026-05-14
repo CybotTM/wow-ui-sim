@@ -137,9 +137,11 @@ has at least one bounded panel sample with normal SavedVariables enabled:
 | `Plater` | Nameplates, Action bars |
 | `SimpleItemLevel` | Character, Inspect/Guild Control |
 
-The remaining local coverage gap is enforcement: the artifact index records the
-bounded samples, but no local checker fails when a future manifest row lacks at
-least one saved-vars panel sample and retained artifact path.
+Local enforcement now exists in
+`tests/mists_panel_parity_runner.rs::bounded_saved_vars_addon_samples_cover_installed_mists_addons`:
+the checker compares the installed Mists addon manifest rows against the
+SavedVariables sample rows recorded above and fails when a future addon lacks at
+least one retained saved-vars panel sample.
 
 ## Lane Logs
 

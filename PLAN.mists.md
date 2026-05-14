@@ -72,6 +72,8 @@ Parity hardening TODO:
 - [x] Fix Mists glyph panel texture resolution so opening the glyph panel does not request the directory path `/syncthing/World of Warcraft/_retail_/BlizzardInterfaceArt/` as an image.
 - [x] Add a local retained-artifact texture-error checker so Mists panel parity logs fail if any retained screenshot or `lua-errors` lane tries to decode `BlizzardInterfaceArt/` as an image directory.
 - [x] Re-run local Mists addon startup and focused panel parity after the glyph/currency texture-directory fix, then record or promote the first remaining `lua-errors` or texture-log regression.
+- [x] Reconcile stale Mists release-proof notes that still describe bounded saved-vars addon sample enforcement as a remaining local gap, now that `mists_panel_parity_runner` enforces it.
+- [x] Implement Mists `GameTooltip:SetGlyph` so hovering glyph sockets in `Blizzard_GlyphUI` does not throw and displays socket/glyph tooltip text.
 - [x] Re-audit local Mists idle HUD and core panel screenshots with real local CASC assets, focusing on the previously reported unit-frame/action-bar layout regressions, missing bottom-tab text, specialization Learn flow, and font fallback symptoms; fix the first root-cause regression found.
 - [x] Add a non-CI Mists visual triage note that separates local asset-backed parity evidence from CI signal-only checks, so texture/font availability is not confused with panel parity completion.
 - [x] Extend the live connected-GUI Mists smoke runner to include the no-panel HUD state plus the specialization Learn-to-talents path, then fail on `lua-errors` or missing/hidden target frames after real input dispatch.

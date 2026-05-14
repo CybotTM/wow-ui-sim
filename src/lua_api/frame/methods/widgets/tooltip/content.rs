@@ -4,8 +4,8 @@ use super::super::shared::opt_string;
 use super::line_frames::{table_array_get, tooltip_line_from_table};
 use super::sizing::refresh_tooltip_geometry;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
-    frame_ref, table_get, val_to_string,
+    borrow_state, borrow_state_mut, call_function_state, call_function_state_multi, create_string,
+    frame_id_from_stack, frame_ref, table_get, val_to_string,
 };
 use crate::lua_api::script_helpers::{call_void_function_with_fallback_state, get_script};
 use crate::lua_api::state::SEEDED_LOCAL_CHARACTER_GUID;
@@ -237,6 +237,101 @@ pub(super) fn set_talent(state: &mut LuaState) -> LuaResult<u32> {
         fire_tooltip_script(state, tooltip_id, "OnTooltipSetSpell");
     }
     Ok(0)
+}
+
+pub(super) fn set_glyph(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let socket_id = stack_val(state, 2);
+    let talent_group = stack_val(state, 3);
+    let info = glyph_socket_info(state, socket_id, talent_group)?;
+    let label = glyph_tooltip_label(state, socket_id, info.glyph_id)?;
+    set_tooltip_single_line(state, tooltip_id, label, info.spell_id)?;
+    fire_tooltip_script(state, tooltip_id, "OnTooltipSetSpell");
+    Ok(0)
+}
+
+struct GlyphSocketTooltipInfo {
+    glyph_id: Option<u32>,
+    spell_id: Option<u32>,
+}
+
+fn glyph_socket_info(
+    state: &mut LuaState,
+    socket_id: Val,
+    talent_group: Val,
+) -> LuaResult<GlyphSocketTooltipInfo> {
+    let globals = Val::Table(state.global);
+    let get_socket_info = table_get(state, globals, "GetGlyphSocketInfo");
+    if !matches!(get_socket_info, Val::Function(_)) {
+        return Ok(GlyphSocketTooltipInfo {
+            glyph_id: None,
+            spell_id: None,
+        });
+    }
+
+    let values = call_function_state_multi(state, get_socket_info, &[socket_id, talent_group])?;
+    Ok(GlyphSocketTooltipInfo {
+        glyph_id: value_as_u32(values.get(5).copied()),
+        spell_id: value_as_u32(values.get(3).copied()),
+    })
+}
+
+fn glyph_tooltip_label(
+    state: &mut LuaState,
+    socket_id: Val,
+    glyph_id: Option<u32>,
+) -> LuaResult<String> {
+    if let Some(glyph_id) = glyph_id
+        && let Some(name) = glyph_name_by_id(state, glyph_id)?
+    {
+        return Ok(name);
+    }
+
+    let slot = value_as_u32(Some(socket_id)).unwrap_or(0);
+    Ok(format!("Glyph Slot {slot}"))
+}
+
+fn glyph_name_by_id(state: &mut LuaState, glyph_id: u32) -> LuaResult<Option<String>> {
+    let globals = Val::Table(state.global);
+    let namespace = table_get(state, globals, "C_GlyphInfo");
+    let get_glyph_info = table_get(state, namespace, "GetGlyphInfoByID");
+    if !matches!(get_glyph_info, Val::Function(_)) {
+        return Ok(None);
+    }
+
+    let values = call_function_state_multi(state, get_glyph_info, &[Val::Num(glyph_id as f64)])?;
+    Ok(values
+        .first()
+        .copied()
+        .and_then(|value| val_to_string(state, value)))
+}
+
+fn value_as_u32(value: Option<Val>) -> Option<u32> {
+    match value {
+        Some(Val::Num(number)) if number > 0.0 => Some(number as u32),
+        _ => None,
+    }
+}
+
+fn set_tooltip_single_line(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    label: String,
+    spell_id: Option<u32>,
+) -> LuaResult<()> {
+    let line = TooltipLine {
+        left_text: label,
+        left_color: (1.0, 1.0, 1.0),
+        left_segments: Vec::new(),
+        right_text: None,
+        right_color: (1.0, 1.0, 1.0),
+        right_segments: Vec::new(),
+        wrap: false,
+        texture: None,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    apply_tooltip_lines(&mut sim, tooltip_id, vec![line], None, spell_id, true);
+    Ok(())
 }
 
 pub(super) fn set_mount_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {

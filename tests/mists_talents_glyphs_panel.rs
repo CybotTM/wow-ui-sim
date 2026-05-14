@@ -137,6 +137,19 @@ fn mists_talents_and_glyphs_mutate_selected_state() {
             if HasPendingGlyphCast() then
                 error("glyph socket click did not consume the pending glyph")
             end
+
+            GlyphFrameGlyph_OnEnter(socket)
+            if not GameTooltip:IsShown() then
+                error("glyph socket hover did not show GameTooltip")
+            end
+            if GameTooltip:NumLines() == 0 then
+                error("glyph socket hover did not populate GameTooltip")
+            end
+            local tooltipLine = GameTooltip:GetLeftLine(1)
+            local tooltipText = tooltipLine and tooltipLine:GetText()
+            if type(tooltipText) ~= "string" or not string.find(tooltipText, "Glyph") then
+                error("glyph socket hover did not expose glyph tooltip text")
+            end
             "#,
             "dump-tree",
             "--filter-key",
