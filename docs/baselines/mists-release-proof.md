@@ -65,6 +65,23 @@ outside this local completion pass. The promoted follow-up is a bounded,
 non-release installed-addon panel parity sample that strengthens addon-panel
 evidence without reintroducing release-proof or CI texture work.
 
+## Local Installed-Addon Panel Sample
+
+Latest bounded local sample: 2026-05-14 on `classic-profile-rollout`, using
+debug `wow-sim` and the installed `BlizzMove` addon as the UI-mutating addon
+under test.
+
+| Addon | Panel row | Result | Artifact |
+|---|---|---|---|
+| `BlizzMove` | Talents and glyphs | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-talents.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-talents/BlizzMove/talents-glyphs/` |
+| `BlizzMove` | Action bars, micro menu, bag bar, status bars | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-action-bars.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-action-bars/BlizzMove/action-bars/` |
+
+The full installed-addon screenshot matrix remains deferred locally because it
+is the expensive 9-addon by 37-panel release-proof-style lane. This sample keeps
+addon-panel evidence moving by covering the recently touched talent and
+HUD/action-bar surfaces with a frame-mutating addon enabled, without adding CI
+texture requirements or rerunning the release-proof wrapper.
+
 ## Lane Logs
 
 All lane logs live under `target/mists-release-proof/logs/`:
