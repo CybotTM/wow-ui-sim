@@ -40,7 +40,9 @@ Parity hardening TODO:
 - [x] Re-run the Mists panel interaction audit and coverage index comparison after the Spellbook/profession action coverage, then promote the first remaining weaker workflow or document that none are currently identified.
 - [x] Re-run focused Mists Spellbook/professions panel parity after the legacy `CastSpell(slot, bookType)` fix, with and without normal SavedVariables, and fix or promote the first panel-render or `lua-errors` regression.
 - [x] Re-run base Mists `lua-errors` and the installed-addon startup matrix after the legacy `CastSpell(slot, bookType)` fix, and fix or promote the first startup or addon-induced regression.
-- [ ] Re-run the live connected-GUI Mists smoke runner after the legacy `CastSpell(slot, bookType)` fix, and fix or promote the first real-input regression.
+- [x] Re-run the live connected-GUI Mists smoke runner after the legacy `CastSpell(slot, bookType)` fix, and fix or promote the first real-input regression.
+- [x] Run a bounded installed-addon Spellbook/professions panel sample after the legacy `CastSpell(slot, bookType)` fix, with normal SavedVariables enabled for one UI-mutating addon, and fix or promote the first addon-specific profession-action regression.
+- [ ] Re-run local 38-row Mists panel parity after the legacy `CastSpell(slot, bookType)` fix, and fix or promote the first full-matrix panel regression.
 - [x] Re-audit local Mists idle HUD and core panel screenshots with real local CASC assets, focusing on the previously reported unit-frame/action-bar layout regressions, missing bottom-tab text, specialization Learn flow, and font fallback symptoms; fix the first root-cause regression found.
 - [x] Add a non-CI Mists visual triage note that separates local asset-backed parity evidence from CI signal-only checks, so texture/font availability is not confused with panel parity completion.
 - [x] Extend the live connected-GUI Mists smoke runner to include the no-panel HUD state plus the specialization Learn-to-talents path, then fail on `lua-errors` or missing/hidden target frames after real input dispatch.
