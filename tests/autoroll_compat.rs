@@ -134,6 +134,31 @@ fn test_register_event_invalid_name() {
     );
 }
 
+#[test]
+fn test_event_utils_rejects_non_event_method_names() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let (player_login_valid, trigger_event_valid, player_login_callback): (bool, bool, bool) = env
+        .eval(
+            r#"
+        return C_EventUtils.IsEventValid("PLAYER_LOGIN"),
+               C_EventUtils.IsEventValid("TriggerEvent"),
+               C_EventUtils.IsCallbackEvent("PLAYER_LOGIN")
+    "#,
+        )
+        .unwrap();
+
+    assert!(player_login_valid, "known events should be valid");
+    assert!(
+        !trigger_event_valid,
+        "addon method names must not be reported as valid WoW events"
+    );
+    assert!(
+        !player_login_callback,
+        "PLAYER_LOGIN is registerable but not a callback event"
+    );
+}
+
 /// Test that RegisterEvent accepts a known valid WoW event.
 #[test]
 fn test_register_event_valid_name() {

@@ -13,6 +13,7 @@
 //! - `C_Bank.HasFullBankAccess()` — true (permissive default)
 //! - `C_NewItems.*` — permissive empty/default probes
 //! - `C_VignetteInfo.*` — empty vignette set for world-map refreshes
+//! - `C_EventUtils.*` — backed by the generated WoW event registry
 
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
@@ -36,6 +37,7 @@ pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
     register_flat_namespace(state, "C_Covenants", C_COVENANTS_METHODS)?;
     register_flat_namespace(state, "C_Soulbinds", C_SOULBINDS_METHODS)?;
     register_flat_namespace(state, "C_LevelLink", C_LEVEL_LINK_METHODS)?;
+    register_flat_namespace(state, "C_EventUtils", C_EVENT_UTILS_METHODS)?;
     Ok(())
 }
 
@@ -164,6 +166,11 @@ const C_NEW_ITEMS_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
 const C_VIGNETTE_INFO_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetVignettes", c_vignette_info_get_vignettes),
     ("GetVignetteInfo", c_vignette_info_get_vignette_info),
+];
+
+const C_EVENT_UTILS_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
+    ("IsEventValid", c_event_utils_is_event_valid),
+    ("IsCallbackEvent", c_event_utils_is_callback_event),
 ];
 
 const C_CONSOLE_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
@@ -403,6 +410,18 @@ fn c_vignette_info_get_vignettes(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_vignette_info_get_vignette_info(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+fn c_event_utils_is_event_valid(state: &mut LuaState) -> LuaResult<u32> {
+    let event_name = String::from_stack(state, 1).unwrap_or_default();
+    state.push(Val::Bool(crate::event::is_valid_event(&event_name)));
+    Ok(1)
+}
+
+fn c_event_utils_is_callback_event(state: &mut LuaState) -> LuaResult<u32> {
+    let event_name = String::from_stack(state, 1).unwrap_or_default();
+    state.push(Val::Bool(crate::event::is_callback_event(&event_name)));
+    Ok(1)
 }
 
 fn c_console_get_all_commands(state: &mut LuaState) -> LuaResult<u32> {
