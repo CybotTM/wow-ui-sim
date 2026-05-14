@@ -39,6 +39,19 @@ pub fn retained_screenshot_artifacts(repo_root: &Path, artifact_root: &str) -> V
         .collect()
 }
 
+pub fn retained_panel_log_artifacts(repo_root: &Path, artifact_root: &str) -> Vec<String> {
+    panel_slugs(repo_root, artifact_root)
+        .into_iter()
+        .flat_map(|slug| {
+            [
+                format!("{artifact_root}{slug}/lua-errors.stderr"),
+                format!("{artifact_root}{slug}/dump-tree.stderr"),
+                format!("{artifact_root}{slug}/screenshot.stderr"),
+            ]
+        })
+        .collect()
+}
+
 pub fn assert_retained_artifacts_use_root(repo_root: &Path, artifact_root: &str) {
     let stale_artifacts = retained_panel_artifacts(repo_root)
         .into_iter()
@@ -126,6 +139,36 @@ pub fn assert_webp_screenshot_artifact(repo_root: &Path, artifact: &str) {
         b"WEBP",
         "screenshot artifact should be a WebP RIFF container: {artifact}"
     );
+}
+
+pub fn assert_no_texture_directory_error(repo_root: &Path, artifact: &str) {
+    let path = repo_root.join(artifact);
+    assert!(
+        path.is_file(),
+        "panel log artifact should exist: {artifact}"
+    );
+
+    let contents = std::fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("failed to read panel log artifact {artifact}: {error}"));
+    assert!(
+        !contains_texture_directory_error(&contents),
+        "panel log artifact should not decode BlizzardInterfaceArt as an image directory: {artifact}"
+    );
+}
+
+pub fn assert_panel_logs_have_no_texture_directory_errors(repo_root: &Path, artifact_root: &str) {
+    let log_artifacts = retained_panel_log_artifacts(repo_root, artifact_root);
+    let expected_log_count = panel_slugs(repo_root, artifact_root).len() * 3;
+
+    assert_eq!(
+        log_artifacts.len(),
+        expected_log_count,
+        "each panel row should have lua-errors, dump-tree, and screenshot stderr artifacts"
+    );
+
+    for artifact in log_artifacts {
+        assert_no_texture_directory_error(repo_root, &artifact);
+    }
 }
 
 pub fn assert_panel_artifact_slug_sets_match(repo_root: &Path, artifact_root: &str) {
@@ -395,6 +438,10 @@ fn panel_artifacts_from_baseline_row(line: &str) -> Vec<String> {
 
 fn is_panel_artifact_path(path: &str) -> bool {
     path.ends_with("/screenshot.webp") || path.ends_with("/dump-tree.txt")
+}
+
+fn contains_texture_directory_error(contents: &str) -> bool {
+    contents.contains("BlizzardInterfaceArt/: The image format could not be determined")
 }
 
 fn is_visible_root_frame_dump_line(line: &str) -> bool {
