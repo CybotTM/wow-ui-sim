@@ -135,6 +135,7 @@ fn ensure_runtime_aura_state(state: &mut LuaState, ns: Val) {
 enum AuraFilter {
     Helpful,
     Harmful,
+    ExternalDefensive,
     /// Torghast anima powers. The sim has no MAW auras, so this variant
     /// matches nothing — preventing Blizzard_MawBuffs from showing outside
     /// Torghast when the player has any ordinary buff.
@@ -145,6 +146,8 @@ fn filter_from_str(filter: &str) -> AuraFilter {
     let upper = filter.to_uppercase();
     if upper.contains("MAW") {
         AuraFilter::Maw
+    } else if upper.contains("EXTERNAL_DEFENSIVE") {
+        AuraFilter::ExternalDefensive
     } else if upper.contains("HARMFUL") {
         AuraFilter::Harmful
     } else {
@@ -156,6 +159,7 @@ fn aura_matches_filter(aura: &AuraInfo, filter: AuraFilter) -> bool {
     match filter {
         AuraFilter::Helpful => aura.is_helpful,
         AuraFilter::Harmful => !aura.is_helpful,
+        AuraFilter::ExternalDefensive => false,
         AuraFilter::Maw => false,
     }
 }
@@ -203,6 +207,7 @@ fn collect_unit_auras(state: &mut LuaState, unit: &str, filter: AuraFilter) -> V
             match filter {
                 AuraFilter::Helpful => member.buffs.iter().collect(),
                 AuraFilter::Harmful => member.debuffs.iter().collect(),
+                AuraFilter::ExternalDefensive => return Vec::new(),
                 AuraFilter::Maw => return Vec::new(),
             }
         } else {
@@ -632,4 +637,37 @@ fn write_aura_flags(state: &mut LuaState, t: Val, aura: &AuraInfo, unit: &str) {
     table_set(state, t, "isHarmful", Val::Bool(!aura.is_helpful));
     table_set(state, t, "isNameplateOnly", Val::Bool(false));
     table_set(state, t, "isRaid", Val::Bool(aura.is_helpful));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn plain_helpful_aura() -> AuraInfo {
+        AuraInfo {
+            name: "Plain Buff".to_string(),
+            spell_id: 99021,
+            icon: 134973,
+            duration: 30.0,
+            expiration_time: 30.0,
+            applications: 1,
+            source_unit: "player".to_string(),
+            is_helpful: true,
+            is_stealable: false,
+            can_apply_aura: false,
+            is_from_player_or_player_pet: true,
+            aura_instance_id: 1,
+        }
+    }
+
+    #[test]
+    fn external_defensive_filter_does_not_match_plain_buffs() {
+        let aura = plain_helpful_aura();
+
+        assert!(aura_matches_filter(&aura, filter_from_str("HELPFUL")));
+        assert!(!aura_matches_filter(
+            &aura,
+            filter_from_str("HELPFUL|EXTERNAL_DEFENSIVE")
+        ));
+    }
 }
