@@ -314,6 +314,9 @@ fn resolve_texture_string(state: &LuaState, value: Val) -> (Option<String>, Opti
     let Some(raw) = val_to_string(state, value) else {
         return (None, None);
     };
+    if raw.trim().is_empty() {
+        return (None, None);
+    }
     let Ok(file_data_id) = raw.parse::<u32>() else {
         return (Some(raw), None);
     };

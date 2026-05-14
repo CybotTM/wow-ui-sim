@@ -84,6 +84,21 @@ fn test_extension_priority_order() {
 }
 
 #[test]
+fn resolve_path_rejects_directory_matches() {
+    let temp_dir = TempDir::new().unwrap();
+    let base = temp_dir.path();
+    fs::create_dir_all(base.join("GlyphPanel")).unwrap();
+
+    let mgr = TextureManager::new().with_addons_path(base);
+    let resolved = mgr.resolve_path("Interface/AddOns/GlyphPanel");
+
+    assert!(
+        resolved.is_none(),
+        "texture resolver must not return directories as image files"
+    );
+}
+
+#[test]
 fn test_fallback_to_png_when_no_webp() {
     let temp_dir = TempDir::new().unwrap();
     let base = temp_dir.path();

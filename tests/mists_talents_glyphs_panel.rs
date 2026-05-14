@@ -71,6 +71,7 @@ fn mists_talents_and_glyphs_panel_populates_rows_and_sockets() {
         "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
     assert_no_lua_errors(&stdout, &stderr);
+    assert_no_texture_directory_errors(&stdout, &stderr);
 }
 
 #[test]
@@ -152,6 +153,7 @@ fn mists_talents_and_glyphs_mutate_selected_state() {
         "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
     assert_no_lua_errors(&stdout, &stderr);
+    assert_no_texture_directory_errors(&stdout, &stderr);
 }
 
 #[test]
@@ -214,11 +216,20 @@ fn mists_specialization_learn_button_activates_spec_for_talents() {
         "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
     assert_no_lua_errors(&stdout, &stderr);
+    assert_no_texture_directory_errors(&stdout, &stderr);
 }
 
 fn assert_no_lua_errors(stdout: &str, stderr: &str) {
     assert!(
         !stdout.contains("Lua error") && !stderr.contains("Lua error"),
         "talents/glyphs opened with Lua errors\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+}
+
+fn assert_no_texture_directory_errors(stdout: &str, stderr: &str) {
+    assert!(
+        !stdout.contains("BlizzardInterfaceArt/: The image format could not be determined")
+            && !stderr.contains("BlizzardInterfaceArt/: The image format could not be determined"),
+        "talents/glyphs tried to load the BlizzardInterfaceArt directory as a texture\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
 }

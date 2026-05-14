@@ -9,6 +9,32 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
+#[test]
+fn set_texture_empty_string_clears_texture_path() {
+    let env = env();
+    let is_cleared: bool = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", nil, UIParent)
+            parent:Show()
+            local tex = parent:CreateTexture()
+            tex:Show()
+            tex:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+            tex:SetTexture("")
+            return tex:GetTexture() == nil
+            "#,
+        )
+        .unwrap();
+
+    assert!(is_cleared, "SetTexture(\"\") should clear the texture");
+
+    let visible_paths = env.state().borrow().widgets.visible_texture_paths();
+    assert!(
+        !visible_paths.iter().any(|path| path.is_empty()),
+        "empty texture paths should not reach the renderer: {visible_paths:?}"
+    );
+}
+
 // ---------------------------------------------------------------------------
 // 1. SetTextureSliceMargins / GetTextureSliceMargins
 // ---------------------------------------------------------------------------

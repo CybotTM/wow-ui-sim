@@ -254,7 +254,7 @@ impl TextureManager {
     fn try_resolve_in_dir(&self, base: &Path, path: &str) -> Option<PathBuf> {
         for ext in texture_extension_priority() {
             let file_path = base.join(format!("{}.{}", path, ext));
-            if file_path.exists() {
+            if file_path.is_file() {
                 return Some(file_path);
             }
         }
