@@ -419,3 +419,108 @@ fn test_startup_time_and_service_globals_exist() {
     assert_eq!(character_services_ty, "function");
     assert!(!has_trial_boost);
 }
+
+#[test]
+fn test_addon_startup_time_and_difficulty_globals_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        precise_ty,
+        precise_now,
+        server_time_ty,
+        server_time,
+        raid_difficulty_ty,
+        raid_difficulty_id,
+        legacy_raid_difficulty_ty,
+        legacy_raid_difficulty_id,
+    ): (String, f64, String, f64, String, i64, String, i64) = env
+        .eval(
+            r#"
+            return type(GetTimePreciseSec),
+                GetTimePreciseSec(),
+                type(GetServerTime),
+                GetServerTime(),
+                type(GetRaidDifficultyID),
+                GetRaidDifficultyID(),
+                type(GetLegacyRaidDifficultyID),
+                GetLegacyRaidDifficultyID()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(precise_ty, "function");
+    assert!(precise_now >= 0.0);
+    assert_eq!(server_time_ty, "function");
+    assert!(server_time > 1_700_000_000.0);
+    assert_eq!(raid_difficulty_ty, "function");
+    assert_eq!(raid_difficulty_id, 14);
+    assert_eq!(legacy_raid_difficulty_ty, "function");
+    assert_eq!(legacy_raid_difficulty_id, 3);
+}
+
+#[test]
+fn test_addon_startup_frame_scale_and_merchant_namespaces_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (dpi_ty, dpi_scale, merchant_ty, merchant_item_ty, raid_locks_ty, encounter_complete): (
+        String,
+        f64,
+        String,
+        String,
+        String,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local itemInfo = C_MerchantFrame.GetItemInfo(1)
+            return type(GetScreenDPIScale),
+                GetScreenDPIScale(),
+                type(C_MerchantFrame),
+                type(itemInfo),
+                type(C_RaidLocks),
+                C_RaidLocks.IsEncounterComplete(1)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(dpi_ty, "function");
+    assert_eq!(dpi_scale, 1.0);
+    assert_eq!(merchant_ty, "table");
+    assert_eq!(merchant_item_ty, "table");
+    assert_eq!(raid_locks_ty, "table");
+    assert!(!encounter_complete);
+}
+
+#[test]
+fn test_addon_startup_table_time_and_string_helpers_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (find_ty, found_index, found_value, difftime_ty, time_delta, colored, replaced): (
+        String,
+        i64,
+        String,
+        String,
+        i64,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local index, value = FindInTableIf({"a", "b"}, function(v) return v == "b" end)
+            return type(FindInTableIf),
+                index,
+                value,
+                type(difftime),
+                difftime(10, 3),
+                ("Requires a reload"):SetColorOrange(),
+                ("Hello {name}"):K_ReplaceVars({ name = "Palaky" })
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(find_ty, "function");
+    assert_eq!(found_index, 2);
+    assert_eq!(found_value, "b");
+    assert_eq!(difftime_ty, "function");
+    assert_eq!(time_delta, 7);
+    assert!(colored.starts_with("|c"));
+    assert!(colored.ends_with("|r"));
+    assert_eq!(replaced, "Hello Palaky");
+}

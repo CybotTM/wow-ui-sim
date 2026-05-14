@@ -2,6 +2,7 @@
 
 use wow_ui_sim::lua_api::AddonInfo;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use std::collections::HashMap;
 
 #[path = "addon_api/dependencies.rs"]
 mod addon_api_dependencies;
@@ -20,6 +21,11 @@ fn env_with_addons() -> WowLuaEnv {
             loaded: true,
             load_on_demand: false,
             load_time_secs: 0.0,
+            metadata: HashMap::from([
+                ("X-Prefix".to_string(), "MyPrefix".to_string()),
+                ("X-Acronym".to_string(), "MA".to_string()),
+                ("Version".to_string(), "1.2.3".to_string()),
+            ]),
             ..Default::default()
         });
         state.addons.push(AddonInfo {
@@ -223,7 +229,17 @@ fn test_get_addon_metadata() {
     let version: String = env
         .eval("return C_AddOns.GetAddOnMetadata('MyAddon', 'Version')")
         .unwrap();
-    assert_eq!(version, "@project-version@");
+    assert_eq!(version, "1.2.3");
+
+    let prefix: String = env
+        .eval("return C_AddOns.GetAddOnMetadata('MyAddon', 'X-Prefix')")
+        .unwrap();
+    assert_eq!(prefix, "MyPrefix");
+
+    let acronym: String = env
+        .eval("return C_AddOns.GetAddOnMetadata('MyAddon', 'X-Acronym')")
+        .unwrap();
+    assert_eq!(acronym, "MA");
 }
 
 #[test]

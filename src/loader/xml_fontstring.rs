@@ -129,12 +129,12 @@ fn build_fontstring_create_code(
         local fs = parent:CreateFontString("{}", "{}", {})
         "#,
         lua_global_ref(parent_name),
-        fs_name,
-        draw_layer,
+        escape_lua_string(fs_name),
+        escape_lua_string(draw_layer),
         if inherits.is_empty() {
             "nil".to_string()
         } else {
-            format!("\"{}\"", inherits)
+            format!("\"{}\"", escape_lua_string(inherits))
         }
     );
     if sub_level != 0 {
@@ -361,5 +361,22 @@ mod tests {
         let id = state_ref.widgets.get_id_by_name("TestFSResolved").unwrap();
         let frame = state_ref.widgets.get(id).unwrap();
         assert_eq!(frame.text.as_deref(), Some("Load out of date AddOns"));
+    }
+
+    #[test]
+    fn fontstring_create_code_escapes_generated_child_names() {
+        let code = build_fontstring_create_code(
+            &FontStringXml::default(),
+            "UIParent",
+            "ARTWORK",
+            0,
+            r#"Parent-|TInterface\AddOns\Addon\Icon:0|t.__fs_1"#,
+        );
+
+        assert!(
+            code.contains(
+                r#"CreateFontString("Parent-|TInterface\\AddOns\\Addon\\Icon:0|t.__fs_1""#
+            )
+        );
     }
 }

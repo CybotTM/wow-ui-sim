@@ -186,6 +186,8 @@ pub struct TexCoordsRectXml {
 pub struct MaskedTexturesXml {
     #[serde(rename = "MaskedTexture", default)]
     pub entries: Vec<MaskedTextureEntryXml>,
+    #[serde(rename = "$text", default)]
+    pub text: Option<String>,
 }
 
 /// A single MaskedTexture entry referencing a sibling texture by childKey.

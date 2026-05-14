@@ -130,4 +130,39 @@ mod tests {
         assert!(line.wants_horiz_tile());
         assert!(!line.wants_vert_tile());
     }
+
+    #[test]
+    fn test_parse_masked_textures_ignores_text_nodes() {
+        let xml = r#"
+            <Ui>
+                <Frame name="TestFrame">
+                    <Layers>
+                        <Layer level="ARTWORK">
+                            <MaskTexture parentKey="CircleMask">
+                                <MaskedTextures>
+                                    \
+                                    <MaskedTexture childKey="Portrait"/>
+                                </MaskedTextures>
+                            </MaskTexture>
+                        </Layer>
+                    </Layers>
+                </Frame>
+            </Ui>
+        "#;
+
+        let ui = parse_xml(xml).unwrap();
+        let frame = match &ui.elements[0] {
+            XmlElement::Frame(frame) => frame,
+            other => panic!("expected frame, got {:?}", other),
+        };
+        let layer = &frame.layers().next().unwrap().layers[0];
+        let mask = match &layer.elements[0] {
+            LayerElement::MaskTexture(mask) => mask,
+            other => panic!("expected mask texture, got {:?}", other),
+        };
+
+        let entries = &mask.masked_textures.as_ref().unwrap().entries;
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].child_key.as_deref(), Some("Portrait"));
+    }
 }

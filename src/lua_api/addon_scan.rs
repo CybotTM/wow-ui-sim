@@ -31,6 +31,7 @@ fn addon_info_from_toc(name: &str, toc: Option<&TocFile>) -> AddonInfo {
         load_on_demand,
         use_secure_env: t.is_secure_env(),
         dependencies: t.dependencies(),
+        metadata: t.metadata.clone(),
         default_enabled: t.default_enabled(),
         ..Default::default()
     }

@@ -35,6 +35,65 @@ if CreateColor == nil then
   end
 end
 
+if GetScreenDPIScale == nil then
+  function GetScreenDPIScale()
+    return 1
+  end
+end
+
+if difftime == nil and os ~= nil and os.difftime ~= nil then
+  difftime = os.difftime
+end
+
+if FindInTableIf == nil then
+  function FindInTableIf(tbl, predicate)
+    if type(tbl) ~= "table" or type(predicate) ~= "function" then
+      return nil
+    end
+    for index, value in ipairs(tbl) do
+      if predicate(value, index) then
+        return index, value
+      end
+    end
+    return nil
+  end
+end
+
+local function __wow_install_string_color_helper(name, color)
+  local method = "SetColor" .. name
+  if string[method] == nil then
+    string[method] = function(self)
+      return color:WrapTextInColorCode(self)
+    end
+  end
+end
+
+__wow_install_string_color_helper("Orange", CreateColor(1.00, 0.50, 0.25))
+__wow_install_string_color_helper("Yellow", CreateColor(1.00, 0.82, 0.00))
+__wow_install_string_color_helper("AddonBlue", CreateColor(0.11, 0.57, 0.76))
+
+if string.K_ReplaceVars == nil then
+  string.K_ReplaceVars = function(self, vars)
+    local text = tostring(self or "")
+    if type(vars) ~= "table" then
+      return text
+    end
+    return (text:gsub("({([^}]+)})", function(whole, key)
+      local replacement = vars[key]
+      if replacement == nil then
+        return whole
+      end
+      return tostring(replacement)
+    end))
+  end
+end
+
+if string.K_AddDefaultValueText == nil then
+  string.K_AddDefaultValueText = function(self)
+    return tostring(self or "")
+  end
+end
+
 if GetMoneyString == nil then
   -- Mirrors Blizzard's FormattingUtil.lua plain-text path with the
   -- 2-arg signature the simulator surfaces. The icon-texture escapes
@@ -6120,6 +6179,28 @@ C_ColorUtil = C_ColorUtil or __wow_namespace({
 C_CurveUtil = C_CurveUtil or __wow_namespace({
   CreateCurve = nil,
   CreateColorCurve = nil,
+})
+
+C_MerchantFrame = C_MerchantFrame or __wow_namespace({
+  GetItemInfo = function()
+    return {
+      name = "",
+      texture = nil,
+      price = 0,
+      stackCount = 1,
+      numAvailable = -1,
+      isPurchasable = false,
+      isUsable = false,
+      extendedCost = false,
+      currencyID = nil,
+      spellID = nil,
+    }
+  end,
+})
+
+C_RaidLocks = C_RaidLocks or __wow_namespace({
+  IsEncounterComplete = function() return false end,
+  RequestRaidInfo = __wow_noop,
 })
 
 C_EventUtils = C_EventUtils or __wow_namespace({

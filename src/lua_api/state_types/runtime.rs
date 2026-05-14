@@ -1,6 +1,6 @@
 //! Runtime / profiler types: cursor state, per-addon metrics, error records.
 
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 /// What is currently held on the cursor (drag-and-drop state).
 #[derive(Debug, Clone)]
@@ -116,6 +116,8 @@ pub struct AddonInfo {
     /// Required dependencies declared in TOC (`Dependencies` / `RequiredDep` / `RequiredDeps`).
     /// Surfaced to Lua via `C_AddOns.GetAddOnDependencies` as a variadic of strings.
     pub dependencies: Vec<String>,
+    /// Raw TOC metadata exposed through `C_AddOns.GetAddOnMetadata`.
+    pub metadata: HashMap<String, String>,
     /// Factory default enabled state, derived from `## DefaultState: disabled`
     /// (`false` only when the TOC opts out; otherwise `true`). Surfaced via
     /// `C_AddOns.IsAddOnDefaultEnabled` and used by the addon list's
@@ -137,6 +139,7 @@ impl Default for AddonInfo {
             load_time_secs: 0.0,
             runtime: AddonRuntimeMetrics::default(),
             dependencies: Vec::new(),
+            metadata: HashMap::new(),
             default_enabled: true,
         }
     }

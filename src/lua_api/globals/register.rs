@@ -53,6 +53,14 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
 fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     prewarm_hot_literal_registry(lua);
     LuaApiMut::register_function(lua, "GetTime", get_time)?;
+    LuaApiMut::register_function(lua, "GetTimePreciseSec", get_time)?;
+    LuaApiMut::register_function(lua, "GetServerTime", get_server_time)?;
+    LuaApiMut::register_function(lua, "GetRaidDifficultyID", get_raid_difficulty_id)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetLegacyRaidDifficultyID",
+        get_legacy_raid_difficulty_id,
+    )?;
     super::strings::register_all_ui_strings(lua)?;
     super::security::register_all(lua)?;
     super::keybindings::register_all(lua)?;
@@ -217,6 +225,32 @@ fn get_time(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
         sim.start_time.elapsed().as_secs_f64()
     };
     state.push(rilua::Val::Num(elapsed));
+    Ok(1)
+}
+
+fn get_server_time(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
+    let seconds = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|duration| duration.as_secs_f64())
+        .unwrap_or(0.0);
+    state.push(rilua::Val::Num(seconds));
+    Ok(1)
+}
+
+fn get_raid_difficulty_id(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
+    let difficulty_id = {
+        let sim = borrow_state(state)?;
+        match sim.world.instance_difficulty {
+            id if id > 0 => id,
+            _ => 14,
+        }
+    };
+    state.push(rilua::Val::Num(f64::from(difficulty_id)));
+    Ok(1)
+}
+
+fn get_legacy_raid_difficulty_id(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
+    state.push(rilua::Val::Num(3.0));
     Ok(1)
 }
 

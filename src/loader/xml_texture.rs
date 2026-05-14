@@ -204,8 +204,8 @@ fn emit_create_header(
         "#,
         lua_global_ref(parent_name),
         create_method,
-        tex_name,
-        draw_layer
+        escape_lua_string(tex_name),
+        escape_lua_string(draw_layer)
     );
     if sub_level != 0 {
         code.push_str(&format!(
@@ -329,4 +329,26 @@ pub(super) fn apply_texture_animations_xml(
         anim_code.push_str(&generate_animation_group_code(anim_group_xml, "frame"));
     }
     env.exec(&anim_code).ok();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn texture_create_code_escapes_generated_child_names() {
+        let code = build_texture_lua(
+            r#"Parent-|TInterface\AddOns\Addon\Icon:0|t.__tex_1"#,
+            &crate::xml::TextureXml::default(),
+            "UIParent",
+            "ARTWORK",
+            false,
+            false,
+            0,
+        );
+
+        assert!(
+            code.contains(r#"CreateTexture("Parent-|TInterface\\AddOns\\Addon\\Icon:0|t.__tex_1""#)
+        );
+    }
 }

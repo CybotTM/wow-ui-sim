@@ -132,15 +132,15 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
         return Cow::Borrowed(bytes);
     };
 
-    let Some(patch) = lua_source_patch_for_chunk(chunk_name) else {
-        return Cow::Borrowed(bytes);
-    };
+    let mut patched = normalize_unsupported_lua_escapes(source);
+    if let Some(patch) = lua_source_patch_for_chunk(chunk_name) {
+        patched = Cow::Owned(apply_lua_source_patch(&patched, patch.operations));
+    }
 
-    let patched = apply_lua_source_patch(source, patch.operations);
-    if patched == source {
+    if patched.as_ref() == source {
         return Cow::Borrowed(bytes);
     }
-    Cow::Owned(patched.into_bytes())
+    Cow::Owned(patched.into_owned().into_bytes())
 }
 
 struct LuaSourcePatch {
@@ -158,6 +158,72 @@ enum LuaSourcePatchOp {
         from: &'static str,
         to: &'static str,
     },
+}
+
+fn normalize_unsupported_lua_escapes(source: &str) -> Cow<'_, str> {
+    if !source.contains("\\x") && !source.contains("\\u") {
+        return Cow::Borrowed(source);
+    }
+
+    let mut output = String::with_capacity(source.len());
+    let mut chars = source.chars().peekable();
+    let mut changed = false;
+
+    while let Some(ch) = chars.next() {
+        if ch != '\\' {
+            output.push(ch);
+            continue;
+        }
+
+        match chars.peek().copied() {
+            Some('x') => {
+                chars.next();
+                if let Some(byte) = read_hex_byte(&mut chars) {
+                    write_decimal_lua_escape(&mut output, byte);
+                    changed = true;
+                } else {
+                    output.push('\\');
+                    output.push('x');
+                }
+            }
+            Some('u') => {
+                chars.next();
+                if let Some(ch) = read_unicode_escape(&mut chars) {
+                    output.push(ch);
+                    changed = true;
+                } else {
+                    output.push('\\');
+                    output.push('u');
+                }
+            }
+            _ => output.push('\\'),
+        }
+    }
+
+    if changed {
+        Cow::Owned(output)
+    } else {
+        Cow::Borrowed(source)
+    }
+}
+
+fn read_hex_byte(chars: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Option<u8> {
+    let high = chars.next()?.to_digit(16)?;
+    let low = chars.next()?.to_digit(16)?;
+    Some(((high << 4) | low) as u8)
+}
+
+fn read_unicode_escape(chars: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Option<char> {
+    let mut codepoint = 0;
+    for _ in 0..4 {
+        codepoint = (codepoint << 4) | chars.next()?.to_digit(16)?;
+    }
+    char::from_u32(codepoint)
+}
+
+fn write_decimal_lua_escape(output: &mut String, byte: u8) {
+    output.push('\\');
+    output.push_str(&format!("{byte:03}"));
 }
 
 const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
@@ -550,6 +616,22 @@ mod tests {
         let path =
             Path::new(r"C:\repo\Interface\BlizzardUI\Blizzard_UIParent\Mainline\UIParent.lua");
         assert!(wow_chunk_name(path).ends_with("/UIParent.lua"));
+    }
+
+    #[test]
+    fn lua_source_normalizes_hex_escapes_for_rilua() {
+        assert_eq!(
+            normalize_unsupported_lua_escapes(r#"return "\x1F""#).as_ref(),
+            r#"return "\031""#
+        );
+    }
+
+    #[test]
+    fn lua_source_normalizes_unicode_escapes_for_rilua() {
+        assert_eq!(
+            normalize_unsupported_lua_escapes(r#"return "\u2013""#).as_ref(),
+            "return \"\u{2013}\""
+        );
     }
 
     #[test]

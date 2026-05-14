@@ -1,6 +1,6 @@
 //! Blizzard and third-party addon loading with timing/summary.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use wow_ui_sim::loader::{
     LoadResult, LoadTiming, discover_blizzard_addons_for_screen, load_addon,
@@ -223,9 +223,17 @@ pub fn load_third_party_addons(
     }
 
     logging::println_elapsed(&format!("Loading {} addons...", addons.len()));
+    let enable_overrides = addon_enable_overrides(saved_vars.as_ref());
     let mut stats = LoadStats::default();
     for (name, toc_path) in &addons {
-        load_single_addon(env, name, toc_path, saved_vars, &mut stats);
+        load_or_register_single_addon(
+            env,
+            name,
+            toc_path,
+            saved_vars,
+            enable_overrides.as_ref(),
+            &mut stats,
+        );
     }
     print_load_summary(&addons, &stats);
 }
@@ -304,43 +312,71 @@ struct LoadStats {
     cache_misses: u32,
 }
 
-fn parse_addon_metadata(name: &str, toc_path: &Path) -> (String, String, bool) {
-    let toc = TocFile::from_file(toc_path).ok();
-    toc.as_ref()
-        .map(|t| {
-            let title = t
-                .metadata
-                .get("Title")
-                .cloned()
-                .unwrap_or_else(|| name.to_string());
-            let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
-            let lod = t
-                .metadata
-                .get("LoadOnDemand")
-                .map(|v| v == "1")
-                .unwrap_or(false);
-            (title, notes, lod)
-        })
-        .unwrap_or_else(|| (name.to_string(), String::new(), false))
+struct AddonMetadata {
+    title: String,
+    notes: String,
+    metadata: HashMap<String, String>,
+    load_on_demand: bool,
+    default_enabled: bool,
+    dependencies: Vec<String>,
+    use_secure_env: bool,
 }
 
-fn load_single_addon(
+fn parse_addon_metadata(name: &str, toc_path: &Path) -> AddonMetadata {
+    let Some(toc) = TocFile::from_file(toc_path).ok() else {
+        return AddonMetadata {
+            title: name.to_string(),
+            notes: String::new(),
+            metadata: HashMap::new(),
+            load_on_demand: false,
+            default_enabled: true,
+            dependencies: Vec::new(),
+            use_secure_env: false,
+        };
+    };
+
+    AddonMetadata {
+        title: toc
+            .metadata
+            .get("Title")
+            .cloned()
+            .unwrap_or_else(|| name.to_string()),
+        notes: toc.metadata.get("Notes").cloned().unwrap_or_default(),
+        metadata: toc.metadata.clone(),
+        load_on_demand: toc.is_load_on_demand(),
+        default_enabled: toc.default_enabled(),
+        dependencies: toc.dependencies(),
+        use_secure_env: toc.is_secure_env(),
+    }
+}
+
+fn load_or_register_single_addon(
     env: &WowLuaEnv,
     name: &str,
     toc_path: &Path,
     saved_vars: &mut Option<SavedVariablesManager>,
+    enable_overrides: Option<&HashMap<String, bool>>,
     stats: &mut LoadStats,
 ) {
-    let (title, notes, load_on_demand) = parse_addon_metadata(name, toc_path);
+    let metadata = parse_addon_metadata(name, toc_path);
+    let enabled = addon_enabled(name, &metadata, enable_overrides);
+    let should_load = enabled && !metadata.load_on_demand;
     env.register_addon(AddonInfo {
         folder_name: name.to_string(),
-        title,
-        notes,
-        enabled: true,
+        title: metadata.title,
+        notes: metadata.notes,
+        enabled,
         loaded: false,
-        load_on_demand,
+        load_on_demand: metadata.load_on_demand,
+        use_secure_env: metadata.use_secure_env,
+        dependencies: metadata.dependencies,
+        metadata: metadata.metadata,
+        default_enabled: metadata.default_enabled,
         ..Default::default()
     });
+    if !should_load {
+        return;
+    }
 
     let result = match saved_vars.as_mut() {
         Some(sv) => load_addon_with_saved_vars(&env.loader_env(), toc_path, sv),
@@ -357,6 +393,37 @@ fn load_single_addon(
             stats.fail_count += 1;
         }
     }
+}
+
+fn addon_enabled(
+    name: &str,
+    metadata: &AddonMetadata,
+    enable_overrides: Option<&HashMap<String, bool>>,
+) -> bool {
+    enable_overrides
+        .and_then(|overrides| overrides.get(name).copied())
+        .unwrap_or(metadata.default_enabled)
+}
+
+fn addon_enable_overrides(
+    saved_vars: Option<&SavedVariablesManager>,
+) -> Option<HashMap<String, bool>> {
+    let config = saved_vars?.wtf_config()?;
+    let path = config
+        .wtf_path
+        .join("Account")
+        .join(&config.account)
+        .join(&config.realm)
+        .join(&config.character)
+        .join("AddOns.txt");
+    let text = std::fs::read_to_string(path).ok()?;
+    let mut states = HashMap::new();
+    for line in text.lines() {
+        if let Some((name, state)) = line.split_once(':') {
+            states.insert(name.trim().to_string(), state.trim() == "enabled");
+        }
+    }
+    Some(states)
 }
 
 fn mark_addon_loaded(env: &WowLuaEnv, name: &str, r: &LoadResult) {
@@ -620,5 +687,55 @@ mod tests {
             shared_toc, &sim_shared_toc,
             "the first addon root should win duplicate addon names"
         );
+    }
+
+    #[test]
+    fn addon_enabled_uses_character_addons_txt_before_toc_default() {
+        let metadata = AddonMetadata {
+            title: "DisabledByCharacter".to_string(),
+            notes: String::new(),
+            metadata: HashMap::new(),
+            load_on_demand: false,
+            default_enabled: true,
+            dependencies: Vec::new(),
+            use_secure_env: false,
+        };
+        let overrides = HashMap::from([("DisabledByCharacter".to_string(), false)]);
+
+        assert!(!addon_enabled(
+            "DisabledByCharacter",
+            &metadata,
+            Some(&overrides)
+        ));
+        assert!(addon_enabled(
+            "MissingFromAddOnsTxt",
+            &metadata,
+            Some(&overrides)
+        ));
+    }
+
+    #[test]
+    fn addon_enable_overrides_reads_character_addons_txt() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        let addon_state_dir = temp.path().join("Account/Test/Burning Blade/Palaky");
+        std::fs::create_dir_all(&addon_state_dir).expect("create character dir");
+        std::fs::write(
+            addon_state_dir.join("AddOns.txt"),
+            "EnabledAddon: enabled\nDisabledAddon: disabled\n",
+        )
+        .expect("write AddOns.txt");
+
+        let mut saved_vars = SavedVariablesManager::new();
+        saved_vars.set_wtf_config(wow_ui_sim::saved_variables::WtfConfig::new(
+            temp.path(),
+            "Test",
+            "Burning Blade",
+            "Palaky",
+        ));
+
+        let overrides = addon_enable_overrides(Some(&saved_vars)).expect("read overrides");
+
+        assert_eq!(overrides.get("EnabledAddon"), Some(&true));
+        assert_eq!(overrides.get("DisabledAddon"), Some(&false));
     }
 }
