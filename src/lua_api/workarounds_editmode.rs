@@ -440,7 +440,10 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                 local needsAuraUpdate = unitFrameSettings
                     and setting == unitFrameSettings.BuffsOnTop
                     and not systemFrame.UpdateAuras
-                if not needsAuraUpdate then
+                if needsAuraUpdate then
+                    systemFrame.buffsOnTop = settingInfo.value == 1
+                        or settingInfo.value == true
+                else
                     pcall(systemFrame.UpdateSystemSetting, systemFrame, setting, true)
                 end
             end
@@ -509,10 +512,20 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                     systemFrame.numRows = value
                     mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.NumIcons then
-                    -- Deferred: live Palaky/Ultrawide shows twelve main-bar
-                    -- buttons even though the cache stores NumIcons=8.
-                    -- Keep the existing visible-button state while the other
-                    -- profile settings replay.
+                    local useRawValue = false
+                    if GameRulesUtil
+                        and GameRulesUtil.AllowBelowMinimumActionBarIcons then
+                        local ok, allowBelowMinimum = pcall(
+                            GameRulesUtil.AllowBelowMinimumActionBarIcons,
+                            GameRulesUtil
+                        )
+                        useRawValue = ok and allowBelowMinimum
+                    end
+                    systemFrame.numButtonsShowable = get_setting_value(useRawValue)
+                    if systemFrame.UpdateShownButtons then
+                        pcall(systemFrame.UpdateShownButtons, systemFrame)
+                    end
+                    mark_action_bar_layout_dirty()
                 elseif setting == actionBarSettings.IconSize then
                     systemFrame.iconSize = value
                     local iconScale = value / 100

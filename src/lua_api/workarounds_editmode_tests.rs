@@ -1304,10 +1304,7 @@ fn apply_system_anchors_does_not_repack_action_bars_after_saved_anchor() {
         "action bar runtime layout should still refresh"
     );
     assert_eq!(num_rows, 2);
-    assert_eq!(
-        num_buttons, 12,
-        "NumIcons is deferred; other action-bar settings should still replay"
-    );
+    assert_eq!(num_buttons, 8);
     assert_eq!(button_padding, 6);
     assert_eq!(edit_mode_scale, 0.8);
     assert_eq!(button_scale, 0.8);
@@ -1589,6 +1586,7 @@ fn apply_system_anchors_replays_each_widescreen_action_bar_profile_row() {
                     tostring(frame.systemIndex),
                     tostring(frame.numRows),
                     tostring(frame.numButtonsShowable),
+                    tostring(frame.shownButtonsUpdated),
                     tostring(frame.iconSize),
                     tostring(frame.buttonPadding),
                     tostring(frame.hideBarArt),
@@ -1607,13 +1605,13 @@ fn apply_system_anchors_replays_each_widescreen_action_bar_profile_row() {
     assert_eq!(requested_indices, "1,2,3,4,5,6,7,8,11,12,13");
     assert_eq!(
         replayed_rows,
-        "1:1:nil:4:2:true:true:false:true:_|2:4:nil:5:2:nil:nil:nil:true:Always|3:1:nil:2:2:nil:nil:nil:false:Always|4:1:nil:4:2:nil:nil:nil:false:Always|5:1:nil:4:2:nil:nil:nil:true:Always|6:1:nil:3:2:nil:nil:nil:true:Always|7:1:nil:5:2:nil:nil:nil:true:Always|8:1:nil:5:2:nil:nil:nil:true:Always|11:3:nil:5:2:nil:nil:nil:nil:_|12:1:nil:5:2:nil:nil:nil:false:_|13:1:nil:5:2:nil:nil:nil:nil:_",
-        "each active Widescreen action-bar row should replay saved settings except deferred NumIcons"
+        "1:1:8:true:4:2:true:true:false:true:_|2:4:6:true:5:2:nil:nil:nil:true:Always|3:1:12:true:2:2:nil:nil:nil:false:Always|4:1:8:true:4:2:nil:nil:nil:false:Always|5:1:8:true:4:2:nil:nil:nil:true:Always|6:1:12:true:3:2:nil:nil:nil:true:Always|7:1:12:true:5:2:nil:nil:nil:true:Always|8:1:12:true:5:2:nil:nil:nil:true:Always|11:3:nil:nil:5:2:nil:nil:nil:nil:_|12:1:nil:nil:5:2:nil:nil:nil:false:_|13:1:nil:nil:5:2:nil:nil:nil:nil:_",
+        "each active Widescreen action-bar row should replay saved settings"
     );
 }
 
 #[test]
-fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
+fn apply_system_anchors_seeds_unit_frame_settings_without_full_startup_update() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
         r#"
@@ -1660,7 +1658,7 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
         function frame:UpdateSystemSetting(setting, entireSystemUpdate)
             if setting == Enum.EditModeUnitFrameSetting.BuffsOnTop then
                 self.buffsAttempted = true
-                error("BuffsOnTop should not replay without UpdateAuras")
+                error("BuffsOnTop should not call UpdateSystemSetting without UpdateAuras")
             end
             table.insert(self.updatedSettings, {
                 setting = setting,
@@ -1713,8 +1711,9 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
         setting_map_updated,
         updated_setting,
         entire_update,
+        buffs_on_top,
         buffs_attempted,
-    ): (i32, bool, bool, i32, bool, bool) = env
+    ): (i32, bool, bool, i32, bool, bool, bool) = env
         .eval(
             r#"
             local frame = EditModeManagerFrame.registeredSystemFrames[1]
@@ -1723,6 +1722,7 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
                 frame.settingMapUpdated,
                 frame.updatedSettings[1] and frame.updatedSettings[1].setting,
                 frame.updatedSettings[1] and frame.updatedSettings[1].entireSystemUpdate,
+                frame.buffsOnTop,
                 frame.buffsAttempted or false
             "#,
         )
@@ -1743,8 +1743,12 @@ fn apply_system_anchors_seeds_unit_frame_without_full_startup_update() {
         "startup setting application should use the full-update flag"
     );
     assert!(
+        buffs_on_top,
+        "BuffsOnTop should still apply its saved value without refreshing auras"
+    );
+    assert!(
         !buffs_attempted,
-        "BuffsOnTop should wait until an aura update method exists"
+        "BuffsOnTop should not call the unsafe aura refresh path without UpdateAuras"
     );
 }
 
