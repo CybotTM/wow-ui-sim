@@ -135,8 +135,7 @@ pub fn extract_frame_id(state: &LuaState, val: Val) -> Option<u64> {
 }
 
 /// Get or create the per-frame fields table in the `__rilua_frame_fields`
-/// registry entry and bind it to the frame env slot that `debug.getfenv`
-/// callers read via `[1]`.
+/// registry entry.
 pub fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
     let fields_registry = registry_table_or_create(state, "__rilua_frame_fields");
     let Val::Table(fields_reg_ref) = fields_registry else {
@@ -167,8 +166,15 @@ pub fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
         created
     };
 
-    bind_frame_fields_env_slot(state, frame_id, fields);
     fields
+}
+
+pub(crate) fn get_frame_env_for_debug(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let fields = get_or_create_frame_fields(state, frame_id);
+    let env = get_or_create_frame_env(state, frame_id, fields);
+    state.push(env);
+    Ok(1)
 }
 
 /// Sync a child frame ref into a parent frame's table.
@@ -315,16 +321,44 @@ pub(crate) fn table_set_num(state: &mut LuaState, table: GcRef<Table>, key: f64,
     state.gc.barrier_back(table);
 }
 
-fn bind_frame_fields_env_slot(state: &mut LuaState, frame_id: u64, fields: Val) {
-    let cache = frame_ref_cache(state);
-    let frame_val = table_get_num(state, cache, frame_id as f64);
-    let Val::Table(frame_ref) = frame_val else {
-        return;
+fn get_or_create_frame_env(state: &mut LuaState, frame_id: u64, fields: Val) -> Val {
+    let envs = registry_table_or_create(state, "__rilua_frame_envs");
+    let Val::Table(envs_ref) = envs else {
+        return Val::Nil;
     };
-    if let Some(table) = state.gc.tables.get_mut(frame_ref) {
-        let _ = table.raw_set(Val::Num(1.0), fields, &state.gc.string_arena);
+
+    let existing = state
+        .gc
+        .tables
+        .get(envs_ref)
+        .map(|t| {
+            let int_val = t.get_int(frame_id as i64);
+            if int_val != Val::Nil {
+                int_val
+            } else {
+                t.get(Val::Num(frame_id as f64), &state.gc.string_arena)
+            }
+        })
+        .unwrap_or(Val::Nil);
+
+    let env = if let Val::Table(_) = existing {
+        existing
+    } else {
+        let created = create_table(state);
+        if let Some(reg) = state.gc.tables.get_mut(envs_ref) {
+            let _ = reg.raw_set(Val::Num(frame_id as f64), created, &state.gc.string_arena);
+        }
+        state.gc.barrier_back(envs_ref);
+        created
+    };
+
+    if let Val::Table(env_ref) = env {
+        if let Some(table) = state.gc.tables.get_mut(env_ref) {
+            let _ = table.raw_set(Val::Num(1.0), fields, &state.gc.string_arena);
+        }
+        state.gc.barrier_back(env_ref);
     }
-    state.gc.barrier_back(frame_ref);
+    env
 }
 
 // ── ID encoding ─────────────────────────────────────────────────────

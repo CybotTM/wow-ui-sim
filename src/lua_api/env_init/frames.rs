@@ -4,7 +4,8 @@ use crate::lua_api::frame::methods::{
     button_anchor_hierarchy, core_state, map_frames, misc, text_attribute_event, widgets,
 };
 use crate::lua_api::methods::{
-    borrow_state_mut, extract_frame_id, registry_set, table_set, val_to_string,
+    borrow_state_mut, extract_frame_id, get_frame_env_for_debug, registry_set, table_set,
+    val_to_string,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::{LuaApiMut, Val};
@@ -57,6 +58,12 @@ pub(super) fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     let frame_index = build_frame_index_table(state, frame_mt_ref);
     table_set(state, frame_mt, "__index", Val::Table(frame_index));
     table_set_rust_fn_static(state, frame_mt_ref, "__newindex", frame_newindex)?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "__wow_get_frame_env",
+        get_frame_env_for_debug,
+    )?;
 
     // Pin the shared frame metatable + its __index clone for the lifetime
     // of the VM. Method registration only happens here at init, so the

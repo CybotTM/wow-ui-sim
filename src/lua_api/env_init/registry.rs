@@ -21,6 +21,7 @@ pub(super) fn init_registry_tables(
     let _ = registry_table_or_create(lua_state, "__scripts");
     let _ = registry_table_or_create(lua_state, "__on_update_scripts");
     let _ = registry_table_or_create(lua_state, "__on_post_update_scripts");
+    let _ = registry_table_or_create(lua_state, "__rilua_frame_envs");
     let _ = registry_table_or_create(lua_state, "__rilua_frame_fields");
     // Register the error-reporting callback that loader/helpers.rs uses
     // in script handler wrappers. Without this, every chained handler

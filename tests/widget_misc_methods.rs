@@ -3,6 +3,29 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[test]
+fn test_frame_debug_env_does_not_change_table_length() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (f64, bool, String) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "TestFrameDebugEnvLength", UIParent)
+            frame:SetupMenu(function() end)
+            local fields = debug.getfenv(frame)[1]
+            return #frame, type(fields) == "table", tostring(rawget(frame, 1))
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result.0, 0.0,
+        "hidden frame fields should not occupy the frame array part: raw slot 1 was {}",
+        result.2
+    );
+    assert!(result.1, "debug.getfenv(frame)[1] should expose fields");
+}
+
+#[test]
 fn test_widget_misc_group_timer_method_surface_is_registered() {
     let env = WowLuaEnv::new().unwrap();
     let missing_method: Option<String> = env
