@@ -77,13 +77,14 @@ under test.
 | `BlizzMove` | Talents and glyphs | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-talents.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-talents/BlizzMove/talents-glyphs/` |
 | `BlizzMove` | Action bars, micro menu, bag bar, status bars | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-action-bars.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-action-bars/BlizzMove/action-bars/` |
 | `BlizzMove` | Store, CatalogShop, WowToken, and SimpleCheckout | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-store-commercial.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-store-commercial/BlizzMove/store-commercial/` |
+| `BlizzMove` + normal SavedVariables | Store, CatalogShop, WowToken, and SimpleCheckout | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/blizzmove-store-commercial-with-saved-vars.log`; artifacts under `target/mists-local-addon-panel-sample/blizzmove-store-commercial-with-saved-vars/BlizzMove/store-commercial/` |
 
 The full installed-addon screenshot matrix remains deferred locally because it
 is the expensive 9-addon by 38-panel release-proof-style lane. This sample keeps
 addon-panel evidence moving by covering the recently touched talent,
 HUD/action-bar, and Store/CatalogShop surfaces with a frame-mutating addon
-enabled, without adding CI texture requirements or rerunning the release-proof
-wrapper.
+enabled, including the Store/CatalogShop row with normal SavedVariables loaded,
+without adding CI texture requirements or rerunning the release-proof wrapper.
 
 ## Lane Logs
 
