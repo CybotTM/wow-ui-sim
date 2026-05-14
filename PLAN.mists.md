@@ -11,7 +11,7 @@
 - [x] Guard the Mists release-proof docs so the deferred full installed-addon screenshot matrix is recorded as a validation scope limit, not silently treated as completed local proof.
 - [x] Run the next local installed-addon panel parity shard with normal SavedVariables for a UI-mutating addon/panel combination not yet represented in the bounded sample, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the BlizzMove Spellbook/professions installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
-- [ ] Run the BlizzMove Quest log/objective tracker installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
+- [x] Run the BlizzMove Quest log/objective tracker installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
 # Mists / Pandaria Classic Startup Plan
