@@ -90,6 +90,31 @@ pub fn assert_non_empty_screenshot_artifact(repo_root: &Path, artifact: &str) {
     );
 }
 
+pub fn assert_webp_screenshot_artifact(repo_root: &Path, artifact: &str) {
+    let path = repo_root.join(artifact);
+    assert!(
+        path.is_file(),
+        "screenshot artifact should exist: {artifact}"
+    );
+
+    let bytes = std::fs::read(&path)
+        .unwrap_or_else(|error| panic!("failed to read screenshot artifact {artifact}: {error}"));
+    assert!(
+        bytes.len() >= 12,
+        "screenshot artifact should include a WebP header: {artifact}"
+    );
+    assert_eq!(
+        &bytes[0..4],
+        b"RIFF",
+        "screenshot artifact should start with RIFF: {artifact}"
+    );
+    assert_eq!(
+        &bytes[8..12],
+        b"WEBP",
+        "screenshot artifact should be a WebP RIFF container: {artifact}"
+    );
+}
+
 fn read_panel_baseline(repo_root: &Path) -> String {
     std::fs::read_to_string(repo_root.join("docs/baselines/mists-panels.md"))
         .expect("failed to read Mists panel baseline")
