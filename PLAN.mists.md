@@ -13,11 +13,6 @@ In-flight (git status shows uncommitted work):
 - [x] Resolve `src/lua_api/globals/talent_spec_probes.rs` changes — confirm Mists talent specs match retail probes, then commit.
 
 Parity hardening TODO:
-
-- [ ] Provision CI-visible Mists CASC texture/font data or an equivalent deterministic asset fixture so the required release-proof job no longer needs `MISTS_PANEL_SIGNAL_ONLY=1`.
-- [ ] Remove `MISTS_PANEL_SIGNAL_ONLY=1` from the required Mists release-proof workflow and re-enable full visual comparison against `docs/baselines/mists-panel-visuals.tsv` in CI.
-- [ ] Re-capture or validate the Mists panel visual baseline from the same asset-complete CI environment, then document the artifact/run links in `docs/baselines/mists-release-proof.md`.
-- [ ] Shard or cache the required Mists release-proof matrix if PR/master runtime remains too high after full visual comparison is enabled, while preserving zero `lua-errors`, addon matrix, panel parity, interaction audit, and artifact completeness gates.
 - [x] Build a scripted Mists panel parity runner that opens every row in `docs/baselines/mists-panels.md`, records `lua-errors`, and fails on missing root frames, hidden stub-only frames, or empty render output.
 - [x] Replace the `test-backed` placeholders in `docs/baselines/mists-panels.md` with retained screenshot or frame-dump artifact paths for every panel row.
 - [x] Audit each Mists panel test for real interaction assertions, not just load/show coverage, and add follow-up tasks for any panel that only proves startup.
