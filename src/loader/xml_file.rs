@@ -322,6 +322,9 @@ const FONT_LUA_TEMPLATE: &str = r#"
     GetFont = function(self)
         return self.__font, self.__height, self.__outline
     end,
+    GetFontObjectForAlphabet = function(self)
+        return self
+    end,
     SetFont = function(self, path, height, flags)
         self.__font = path
         if height then self.__height = height end
@@ -461,6 +464,9 @@ const FONT_FAMILY_LUA_TEMPLATE: &str = r#"
     end,
     GetFont = function(self)
         return self.__font, self.__height, self.__outline
+    end,
+    GetFontObjectForAlphabet = function(self)
+        return self
     end,
     SetJustifyH = function(self, justify)
         self.__justifyH = justify

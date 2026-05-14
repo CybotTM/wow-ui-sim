@@ -28,7 +28,7 @@ impl AnchorPoint {
             Self::Left
         } else if s.eq_ignore_ascii_case("RIGHT") {
             Self::Right
-        } else if s.eq_ignore_ascii_case("TOPLEFT") {
+        } else if s.eq_ignore_ascii_case("TOPLEFT") || s.eq_ignore_ascii_case("TOPELFT") {
             Self::TopLeft
         } else if s.eq_ignore_ascii_case("TOPRIGHT") {
             Self::TopRight
@@ -132,5 +132,15 @@ impl Default for Anchor {
             x_offset: 0.0,
             y_offset: 0.0,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::AnchorPoint;
+
+    #[test]
+    fn anchor_point_accepts_plumber_topelft_typo() {
+        assert_eq!(AnchorPoint::from_str("TOPELFT"), Some(AnchorPoint::TopLeft));
     }
 }

@@ -142,6 +142,7 @@ mod tests {
                                 <MaskedTextures>
                                     \
                                     <MaskedTexture childKey="Portrait"/>
+                                    \
                                 </MaskedTextures>
                             </MaskTexture>
                         </Layer>

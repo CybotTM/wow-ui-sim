@@ -1,6 +1,6 @@
 //! XML element type definitions: layers, textures, fontstrings, etc.
 
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 
 use super::types::FrameXml;
 use super::types_support::{
@@ -182,12 +182,45 @@ pub struct TexCoordsRectXml {
 }
 
 /// Container for MaskedTexture entries inside a MaskTexture element.
-#[derive(Debug, Deserialize, Default, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct MaskedTexturesXml {
-    #[serde(rename = "MaskedTexture", default)]
     pub entries: Vec<MaskedTextureEntryXml>,
-    #[serde(rename = "$text", default)]
-    pub text: Option<String>,
+}
+
+impl<'de> Deserialize<'de> for MaskedTexturesXml {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct RawMaskedTexturesXml {
+            #[serde(rename = "$value", default)]
+            nodes: Vec<MaskedTextureNodeXml>,
+        }
+
+        let raw = RawMaskedTexturesXml::deserialize(deserializer)?;
+        let entries = raw
+            .nodes
+            .into_iter()
+            .filter_map(|node| match node {
+                MaskedTextureNodeXml::MaskedTexture(entry) => Some(entry),
+                MaskedTextureNodeXml::Text(text) => {
+                    drop(text);
+                    None
+                }
+            })
+            .collect();
+
+        Ok(Self { entries })
+    }
+}
+
+#[derive(Debug, Deserialize, Clone)]
+enum MaskedTextureNodeXml {
+    #[serde(rename = "MaskedTexture")]
+    MaskedTexture(MaskedTextureEntryXml),
+    #[serde(rename = "$text")]
+    Text(String),
 }
 
 /// A single MaskedTexture entry referencing a sibling texture by childKey.

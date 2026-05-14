@@ -248,6 +248,16 @@ fn roman_font_overrides_with_all_fields() {
 }
 
 #[test]
+fn font_family_template_supports_simple_font_alphabet_lookup() {
+    assert!(FONT_FAMILY_LUA_TEMPLATE.contains("GetFontObjectForAlphabet"));
+}
+
+#[test]
+fn font_template_supports_simple_font_alphabet_lookup() {
+    assert!(FONT_LUA_TEMPLATE.contains("GetFontObjectForAlphabet"));
+}
+
+#[test]
 fn roman_font_overrides_no_roman_member() {
     let ff = crate::xml::FontFamilyXml {
         name: Some("TestFont".to_string()),

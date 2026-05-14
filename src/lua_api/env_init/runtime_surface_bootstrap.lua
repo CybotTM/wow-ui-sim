@@ -339,10 +339,26 @@ if GetGameTime == nil then
   end
 end
 
+local function __wow_normalize_time_table(dateTable)
+  if type(dateTable) ~= "table" then
+    return dateTable
+  end
+
+  local normalized = {}
+  for key, value in pairs(dateTable) do
+    if key == "sec" or key == "min" or key == "hour" or key == "day" or key == "month" or key == "year" then
+      normalized[key] = tonumber(value) or value
+    else
+      normalized[key] = value
+    end
+  end
+  return normalized
+end
+
 if time == nil then
   function time(dateTable)
     if os and type(os.time) == "function" then
-      return os.time(dateTable)
+      return os.time(__wow_normalize_time_table(dateTable))
     end
     return math.floor(GetTime())
   end
@@ -357,6 +373,18 @@ end
 if GetMoney == nil then
   function GetMoney()
     return 0
+  end
+end
+
+if MuteSoundFile == nil then
+  function MuteSoundFile()
+    return true
+  end
+end
+
+if UnmuteSoundFile == nil then
+  function UnmuteSoundFile()
+    return true
   end
 end
 
@@ -4772,10 +4800,11 @@ SecureTypes.CreateSecureFunction = SecureTypes.CreateSecureFunction or function(
 SecureTypes.CreateSecureNumber = SecureTypes.CreateSecureNumber or function(value) return value or 0 end
 SecureTypes.CreateSecureArray = SecureTypes.CreateSecureArray or function()
   local array = {}
-  function array:Insert(value)
+  local methods = {}
+  function methods:Insert(value)
     self[#self + 1] = value
   end
-  function array:Remove(value)
+  function methods:Remove(value)
     for index, existing in ipairs(self) do
       if existing == value then
         table.remove(self, index)
@@ -4784,12 +4813,12 @@ SecureTypes.CreateSecureArray = SecureTypes.CreateSecureArray or function()
     end
     return false
   end
-  function array:Clear()
+  function methods:Clear()
     for index = #self, 1, -1 do
       self[index] = nil
     end
   end
-  function array:Enumerate()
+  function methods:Enumerate()
     local index = 0
     return function()
       index = index + 1
@@ -4798,7 +4827,10 @@ SecureTypes.CreateSecureArray = SecureTypes.CreateSecureArray or function()
       end
     end
   end
-  return array
+  function methods:FindInTableIf(predicate)
+    return FindInTableIf(self, predicate)
+  end
+  return setmetatable(array, { __index = methods })
 end
 
 ProxyUtil = ProxyUtil or {}

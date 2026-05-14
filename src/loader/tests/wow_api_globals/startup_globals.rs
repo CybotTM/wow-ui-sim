@@ -492,25 +492,56 @@ fn test_addon_startup_frame_scale_and_merchant_namespaces_exist() {
 #[test]
 fn test_addon_startup_table_time_and_string_helpers_exist() {
     let env = WowLuaEnv::new().unwrap();
-    let (find_ty, found_index, found_value, difftime_ty, time_delta, colored, replaced): (
+    let (
+        find_ty,
+        found_index,
+        found_value,
+        secure_found_index,
+        secure_found_value,
+        secure_pair_count,
+        difftime_ty,
+        time_delta,
+        parsed_time,
+        colored,
+        replaced,
+        unmute_result,
+    ): (
         String,
         i64,
         String,
+        i64,
         String,
         i64,
         String,
+        i64,
+        i64,
         String,
+        String,
+        bool,
     ) = env
         .eval(
             r#"
             local index, value = FindInTableIf({"a", "b"}, function(v) return v == "b" end)
+            local secureArray = SecureTypes.CreateSecureArray()
+            secureArray:Insert("a")
+            secureArray:Insert("b")
+            local secureIndex, secureValue = secureArray:FindInTableIf(function(v) return v == "b" end)
+            local securePairCount = 0
+            for _ in pairs(secureArray) do
+                securePairCount = securePairCount + 1
+            end
             return type(FindInTableIf),
                 index,
                 value,
+                secureIndex,
+                secureValue,
+                securePairCount,
                 type(difftime),
                 difftime(10, 3),
+                time({ year = "2024", month = "6", day = "3", hour = "0", min = "41", sec = "7" }),
                 ("Requires a reload"):SetColorOrange(),
-                ("Hello {name}"):K_ReplaceVars({ name = "Palaky" })
+                ("Hello {name}"):K_ReplaceVars({ name = "Palaky" }),
+                UnmuteSoundFile(123)
             "#,
         )
         .unwrap();
@@ -518,9 +549,14 @@ fn test_addon_startup_table_time_and_string_helpers_exist() {
     assert_eq!(find_ty, "function");
     assert_eq!(found_index, 2);
     assert_eq!(found_value, "b");
+    assert_eq!(secure_found_index, 2);
+    assert_eq!(secure_found_value, "b");
+    assert_eq!(secure_pair_count, 2);
     assert_eq!(difftime_ty, "function");
     assert_eq!(time_delta, 7);
+    assert!(parsed_time > 0);
     assert!(colored.starts_with("|c"));
     assert!(colored.ends_with("|r"));
     assert_eq!(replaced, "Hello Palaky");
+    assert!(unmute_result);
 }
