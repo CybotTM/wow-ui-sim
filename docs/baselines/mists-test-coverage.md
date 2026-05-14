@@ -67,6 +67,8 @@ the test opens the profession tab, invokes a visible profession button through
 its Blizzard `OnClick` handler, and asserts the selected trade skill line
 changes to Mining.
 
-Next audit pass: re-run the interaction/retail comparison audit after this
-profession-action coverage and promote the first remaining weaker workflow, if
-one still exists.
+Post-fix audit: `cargo test --no-default-features --features
+sound,gui,casc,client-mists --test mists_panel_interaction_audit --
+--nocapture` passed on 2026-05-14, and this index has no remaining `Weaker`
+rows. No additional weaker Mists-applicable workflow is currently identified in
+the panel parity matrix.

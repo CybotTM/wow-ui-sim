@@ -59,10 +59,9 @@ HUD state and the Mists specialization Learn-to-talents flow.
 | Loot, group loot, personal loot | Loot slot take, group roll choice, bonus roll state | `tests/mists_loot_panel.rs::mists_loot_group_and_bonus_roll_ui_render_without_lua_errors` | Covered |
 | Game menu options | Options, help, addons, close/reopen behavior | `tests/mists_interface_options_panel.rs::mists_game_menu_options_opens_interface_settings_without_lua_errors` | Covered |
 
-No currently audited retail-supported panel workflow is marked `Missing`.
-Rows marked `Follow-up` are not counted as complete interaction parity yet:
-they load and render, but still need tests that drive a user-visible state
-change rather than only proving startup or frame construction.
+No currently audited retail-supported panel workflow is marked `Missing` or
+`Follow-up`. The post-Spellbook profession-action audit passed on 2026-05-14
+with no remaining weak interaction rows identified.
 
 ## Retail Module Comparison Audit
 
