@@ -82,6 +82,25 @@ fn test_get_map_world_size() {
     assert!(h > 0.0);
 }
 
+#[test]
+fn test_get_world_pos_from_map_pos_returns_instance_and_vector() {
+    let env = env();
+    let (instance_id, x, y): (i32, f64, f64) = env
+        .eval(
+            r#"
+        local pos = { x = 0.5, y = 0.25, GetXY = function(self) return self.x, self.y end }
+        local instanceID, worldPos = C_Map.GetWorldPosFromMapPos(2248, pos)
+        local x, y = worldPos:GetXY()
+        return instanceID, x, y
+    "#,
+        )
+        .unwrap();
+
+    assert!(instance_id >= 0);
+    assert!(x > 0.0);
+    assert!(y > 0.0);
+}
+
 // ============================================================================
 // Map art layer textures (world map tile rendering)
 // ============================================================================

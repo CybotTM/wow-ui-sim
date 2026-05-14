@@ -36,7 +36,8 @@
 
 use super::helpers::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, table_set, val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
+    val_to_string,
 };
 use crate::lua_api::state::MapData;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -61,6 +62,7 @@ const C_MAP_METHODS: &[(&str, RustLuaFn)] = &[
     ("GetMapInfoAtPosition", c_map_get_map_info_at_position),
     ("GetMapRectOnMap", c_map_get_map_rect_on_map),
     ("GetMapChildrenInfo", c_map_get_map_children_info),
+    ("GetWorldPosFromMapPos", c_map_get_world_pos_from_map_pos),
     ("GetPlayerMapPosition", c_map_get_player_map_position),
     ("GetBestMapForUnit", c_map_get_best_map_for_unit),
     ("GetCurrentMapID", c_map_get_current_map_id),
@@ -342,6 +344,66 @@ fn c_map_get_map_children_info(state: &mut LuaState) -> LuaResult<u32> {
     }
     state.push(array);
     Ok(1)
+}
+
+fn c_map_get_world_pos_from_map_pos(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    let normalized_pos = stack_val(state, 2);
+    if !borrow_state(state)?.maps.contains_key(&ui_map_id) {
+        return Ok(0);
+    }
+
+    let (width, height) = map_world_size(ui_map_id);
+    let x = normalized_coordinate(state, normalized_pos, "x") * width;
+    let y = normalized_coordinate(state, normalized_pos, "y") * height;
+    let world_pos = create_world_position_vector(state, x, y)?;
+
+    state.push(Val::Num(0.0));
+    state.push(world_pos);
+    Ok(2)
+}
+
+fn map_world_size(ui_map_id: i32) -> (f64, f64) {
+    let Some(map_art) = crate::map_art::get_map_art(ui_map_id as u32) else {
+        return (1000.0, 1000.0);
+    };
+    let Some(layer) = map_art.layers.first() else {
+        return (1000.0, 1000.0);
+    };
+    (layer.layer_width as f64, layer.layer_height as f64)
+}
+
+fn normalized_coordinate(state: &mut LuaState, position: Val, key: &str) -> f64 {
+    match table_get(state, position, key) {
+        Val::Num(value) => value.clamp(0.0, 1.0),
+        _ => 0.5,
+    }
+}
+
+fn create_world_position_vector(state: &mut LuaState, x: f64, y: f64) -> LuaResult<Val> {
+    let vector = create_table(state);
+    table_set(state, vector, "x", Val::Num(x));
+    table_set(state, vector, "y", Val::Num(y));
+    let Val::Table(vector_ref) = vector else {
+        unreachable!("create_table must return table");
+    };
+    table_set_rust_fn_static(state, vector_ref, "GetXY", world_position_get_xy)?;
+    Ok(Val::Table(vector_ref))
+}
+
+fn world_position_get_xy(state: &mut LuaState) -> LuaResult<u32> {
+    let position = stack_val(state, 1);
+    let x = match table_get(state, position, "x") {
+        Val::Num(value) => value,
+        _ => 0.0,
+    };
+    let y = match table_get(state, position, "y") {
+        Val::Num(value) => value,
+        _ => 0.0,
+    };
+    state.push(Val::Num(x));
+    state.push(Val::Num(y));
+    Ok(2)
 }
 
 fn c_map_get_player_map_position(state: &mut LuaState) -> LuaResult<u32> {
