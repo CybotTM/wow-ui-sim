@@ -47,15 +47,23 @@ with artifacts retained under `target/mists-local-completion-audit/`.
 | Lane | Result | Artifact |
 |---|---|---|
 | Base Mists `lua-errors` with addons and SavedVariables disabled | `0` distinct errors | `target/mists-local-completion-audit/base-lua-errors.json` |
-| Base panel parity manifest validation | `37` panel rows validated | `target/mists-local-completion-audit/panel-parity-validate.log` |
-| Installed Mists addon panel manifest validation | `9` addon rows validated | `target/mists-local-completion-audit/addon-panel-validate.log` |
+| Base panel parity execution | `37` panel rows passed with per-panel `lua-errors`, dump-tree, screenshot, root-frame, and visual checks | `target/mists-local-completion-audit/panel-parity.log`; artifacts under `target/mists-local-completion-audit/panel-parity/` |
+| Installed Mists addon panel manifest validation | `9` addon rows validated | `target/mists-local-completion-audit/addon-panel-validation.log` |
 | Live connected-GUI smoke validation and execution | Passed idle HUD, specialization Learn-to-talents, and micro-menu probes | `target/mists-local-completion-audit/live-gui-smoke.log` |
 | Installed Mists addon startup matrix | `passed: 9`, `failed: 0`, all rows `0` addon-induced errors | `target/mists-local-completion-audit/installed-addon-startup.log` |
+| Mists panel interaction audit | `1` Rust test suite passed; every pass panel remains represented in the interaction audit | `target/mists-local-completion-audit/interaction-audit.log` |
 
 This audit is intentionally local and non-release: it uses debug `wow-sim` /
 `wow-cli` binaries and does not run the release-proof wrapper. Its purpose is to
 confirm the current working tree still satisfies the core Mists parity gates
 before adding or promoting any narrower follow-up task.
+
+The only weak lane in this local audit is installed-addon panel validation: it
+confirms all 9 installed Mists addon rows are present and resolvable, while the
+expensive full installed-addon panel screenshot matrix remains deliberately
+outside this local completion pass. The promoted follow-up is a bounded,
+non-release installed-addon panel parity sample that strengthens addon-panel
+evidence without reintroducing release-proof or CI texture work.
 
 ## Lane Logs
 
