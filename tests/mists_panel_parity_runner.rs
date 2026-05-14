@@ -157,6 +157,27 @@ fn live_gui_smoke_runner_validates_micro_button_rows() {
 }
 
 #[test]
+fn live_gui_smoke_runner_validates_hud_and_specialization_probes() {
+    let output = Command::new(repo_root().join("scripts/mists-live-gui-smoke.sh"))
+        .arg("--validate-only")
+        .current_dir(repo_root())
+        .output()
+        .expect("failed to run Mists live GUI smoke validation");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "live GUI smoke validation failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        stdout.contains("2 Mists live GUI direct probe(s) validated"),
+        "live GUI smoke should validate idle HUD and specialization probes, got:\n{stdout}"
+    );
+}
+
+#[test]
 fn live_gui_smoke_runner_accepts_focused_button_validation() {
     let output = Command::new(repo_root().join("scripts/mists-live-gui-smoke.sh"))
         .arg("--validate-only")

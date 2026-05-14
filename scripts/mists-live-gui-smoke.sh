@@ -36,6 +36,11 @@ MICRO_BUTTON_ROWS=(
     "StoreMicroButton|probe:StoreFrame_IsShown|click"
 )
 
+DIRECT_PROBE_ROWS=(
+    "idle-hud|UIParent"
+    "specialization-learn|PlayerTalentFrame"
+)
+
 usage() {
     sed -n '2,/^set -euo/p' "$0" | sed 's/^# \?//;$d'
 }
@@ -77,6 +82,19 @@ validate_rows() {
         return 2
     fi
     echo "$count Mists live GUI micro-button row(s) validated"
+    validate_direct_probes
+}
+
+validate_direct_probes() {
+    local count=0 row probe root
+    for row in "${DIRECT_PROBE_ROWS[@]}"; do
+        IFS='|' read -r probe root <<<"$row"
+        [ -n "$probe" ] || { echo "ERROR: missing direct probe name" >&2; return 2; }
+        [ -n "$root" ] || { echo "ERROR: missing expected root for direct probe $probe" >&2; return 2; }
+        count=$((count + 1))
+    done
+
+    echo "$count Mists live GUI direct probe(s) validated"
 }
 
 cleanup() {
@@ -230,6 +248,166 @@ print("SMOKE_CLICK_OK", buttonName, rootName)
 LUA
 }
 
+write_direct_probe_lua() {
+    local path="$1" probe="$2"
+    case "$probe" in
+        idle-hud) write_idle_hud_lua "$path" ;;
+        specialization-learn) write_specialization_learn_lua "$path" ;;
+        *) echo "ERROR: unknown direct probe '$probe'" >&2; return 2 ;;
+    esac
+}
+
+write_idle_hud_lua() {
+    local path="$1"
+    cat >"$path" <<'LUA'
+local function fail(message)
+    error("SMOKE_FAIL idle-hud: " .. tostring(message), 0)
+end
+
+local function is_visible(frame)
+    if not frame then
+        return false
+    end
+    if frame.IsVisible then
+        return frame:IsVisible()
+    end
+    if frame.IsShown then
+        return frame:IsShown()
+    end
+    return true
+end
+
+local before = #(__mists_live_smoke_errors or {})
+for _, name in ipairs({
+    "UIParent",
+    "PlayerFrame",
+    "MainMenuBar",
+    "CharacterMicroButton",
+    "MainMenuMicroButton",
+    "MainMenuBarBackpackButton",
+}) do
+    if not is_visible(_G[name]) then
+        fail(name .. " missing or hidden before panel input")
+    end
+end
+
+for _, name in ipairs({
+    "CharacterFrame",
+    "SpellBookFrame",
+    "PlayerTalentFrame",
+}) do
+    if is_visible(_G[name]) then
+        fail(name .. " should not be visible in idle HUD state")
+    end
+end
+
+local after = #(__mists_live_smoke_errors or {})
+if after > before then
+    fail("lua error count changed from " .. before .. " to " .. after)
+end
+
+print("SMOKE_PROBE_OK", "idle-hud", "UIParent")
+LUA
+}
+
+write_specialization_learn_lua() {
+    local path="$1"
+    cat >"$path" <<'LUA'
+local function fail(message)
+    error("SMOKE_FAIL specialization-learn: " .. tostring(message), 0)
+end
+
+local function dispatch_click(button)
+    if not button then
+        fail("missing TalentMicroButton")
+    end
+    if type(button.Click) == "function" then
+        button:Click("LeftButton")
+        return
+    end
+    local on_click = button.GetScript and button:GetScript("OnClick")
+    if type(on_click) ~= "function" then
+        fail("TalentMicroButton has no clickable dispatch")
+    end
+    local ok, err = pcall(on_click, button, "LeftButton", false)
+    if not ok then
+        fail("TalentMicroButton click failed: " .. tostring(err))
+    end
+end
+
+local function click_button(button, label)
+    if not button then
+        fail("missing " .. label)
+    end
+    if button.IsEnabled and not button:IsEnabled() then
+        fail(label .. " disabled")
+    end
+    if type(button.Click) == "function" then
+        button:Click("LeftButton")
+        return
+    end
+    local on_click = button.GetScript and button:GetScript("OnClick")
+    if type(on_click) ~= "function" then
+        fail(label .. " has no OnClick script")
+    end
+    local ok, err = pcall(on_click, button, "LeftButton", false)
+    if not ok then
+        fail(label .. " click failed: " .. tostring(err))
+    end
+end
+
+local before = #(__mists_live_smoke_errors or {})
+if A_Admin and A_Admin.SetSpec then
+    A_Admin.SetSpec(4)
+end
+
+dispatch_click(TalentMicroButton)
+if not PlayerTalentFrame or not PlayerTalentFrame:IsShown() then
+    fail("PlayerTalentFrame did not open from TalentMicroButton")
+end
+
+if type(PlayerTalentTab_OnClick) == "function" and PlayerTalentFrameTab1 then
+    PlayerTalentTab_OnClick(PlayerTalentFrameTab1)
+end
+if type(PlayerTalentFrame_UpdateSpecFrame) == "function" then
+    PlayerTalentFrame_UpdateSpecFrame(PlayerTalentFrameSpecialization, 2)
+end
+
+local learn_button = PlayerTalentFrameSpecialization and PlayerTalentFrameSpecialization.learnButton
+click_button(learn_button, "specialization Learn button")
+
+local dialog = StaticPopup_FindVisible and StaticPopup_FindVisible("CONFIRM_LEARN_SPEC")
+if not dialog or not dialog.button1 then
+    fail("specialization Learn confirmation did not open")
+end
+click_button(dialog.button1, "specialization Learn confirmation")
+
+if C_SpecializationInfo.GetSpecialization() ~= 2 or GetSpecialization() ~= 2 then
+    fail("specialization Learn did not activate the previewed spec")
+end
+
+if type(PlayerTalentTab_OnClick) == "function" and PlayerTalentFrameTab2 then
+    PlayerTalentTab_OnClick(PlayerTalentFrameTab2)
+end
+if not PlayerTalentFrameTalents or not PlayerTalentFrameTalents:IsShown() then
+    fail("talents tab was not reachable after learning specialization")
+end
+
+local row = PlayerTalentFrameTalents.tier1
+local talent = row and row.talent1
+if not talent or not talent:IsShown() or not talent.icon or not talent.icon:GetTexture() then
+    fail("learned specialization did not expose a populated talent row")
+end
+
+local after = #(__mists_live_smoke_errors or {})
+if after > before then
+    fail("lua error count changed from " .. before .. " to " .. after)
+end
+
+print("SMOKE_PROBE_OK", "specialization-learn", "PlayerTalentFrame")
+LUA
+}
+
 run_lua_file() {
     local file="$1"
     WOW_LUA_SOCKET="$SOCKET" timeout "$WOW_CLI_LUA_TIMEOUT_SECONDS" "$WOW_CLI_BIN" lua -f "$file"
@@ -269,6 +447,28 @@ click_micro_buttons() {
     done < <(selected_rows)
 }
 
+run_direct_probes() {
+    local row probe root probe_file output
+    for row in "${DIRECT_PROBE_ROWS[@]}"; do
+        IFS='|' read -r probe root <<<"$row"
+        echo "=== probe:$probe -> $root ==="
+        probe_file="$OUT_DIR/probe-$probe.lua"
+        write_direct_probe_lua "$probe_file" "$probe"
+        output="$(run_lua_file "$probe_file")" || {
+            echo "$output" >&2
+            return 1
+        }
+        echo "$output"
+        if echo "$output" | grep -q 'SMOKE_FAIL\|SMOKE_LUA_ERROR'; then
+            return 1
+        fi
+        if ! echo "$output" | grep -q "SMOKE_PROBE_OK.*$probe"; then
+            echo "ERROR: $probe did not report a direct probe result" >&2
+            return 1
+        fi
+    done
+}
+
 assert_log_has_no_lua_errors() {
     if grep -q 'Lua error:' "$LOG_FILE"; then
         echo "ERROR: live GUI log contains Lua errors" >&2
@@ -292,6 +492,7 @@ trap 'cleanup; exit 130' INT TERM
 start_gui
 wait_for_gui_socket
 install_error_probe
+run_direct_probes
 click_micro_buttons
 assert_log_has_no_lua_errors
 
