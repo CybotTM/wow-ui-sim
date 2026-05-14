@@ -11,6 +11,8 @@
 //! 1. WTF directory (real WoW installation, if configured)
 //! 2. Simulator storage (`~/.local/share/wow-sim/SavedVariables/`)
 
+#[path = "saved_variables_parse.rs"]
+mod saved_variables_parse;
 #[path = "saved_variables_serialize.rs"]
 mod saved_variables_serialize;
 
@@ -25,6 +27,7 @@ use rilua::{LuaApiMut, Val};
 
 const EDIT_MODE_LAYOUT_ENV: &str = "WOW_SIM_EDIT_MODE_LAYOUT";
 
+use saved_variables_parse::parse_saved_variables_file;
 use saved_variables_serialize::serialize_assignment;
 
 /// Read-only source for importing WTF saved variables from a real WoW installation.
@@ -336,6 +339,10 @@ impl SavedVariablesManager {
     ) -> crate::Result<()> {
         let content = fs::read_to_string(path).map_err(|e| crate::Error::Other(e.to_string()))?;
         let content = content.strip_prefix('\u{feff}').unwrap_or(&content);
+        if parse_saved_variables_file(state, content).is_ok() {
+            return Ok(());
+        }
+
         let chunk_name = format!(
             "{}/{}",
             chunk_prefix,
