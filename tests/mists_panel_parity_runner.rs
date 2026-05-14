@@ -4,6 +4,9 @@ use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::process::Command;
 
+#[path = "common/mists_panel_artifact_checks.rs"]
+mod mists_panel_artifact_checks;
+
 const MISTS_PANEL_ROW_COUNT: &str = "38 panel rows validated";
 const LATEST_LOCAL_PANEL_ARTIFACT_ROOT: &str =
     "target/mists-panel-parity-with-saved-vars-after-castspell/";
@@ -394,9 +397,7 @@ fn addon_has_load_on_demand_toc(addon_dir: &std::path::Path) -> bool {
 
 #[test]
 fn panel_baseline_references_retained_runner_artifacts() {
-    let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
-    let baseline =
-        std::fs::read_to_string(&baseline_path).expect("failed to read Mists panel baseline");
+    let baseline = read_mists_panel_baseline();
 
     assert!(
         !baseline.contains("test-backed:"),
@@ -418,7 +419,7 @@ fn panel_baseline_references_retained_runner_artifacts() {
 
 #[test]
 fn panel_baseline_artifacts_exist_under_latest_local_tree() {
-    let artifacts = latest_local_panel_artifacts();
+    let artifacts = mists_panel_artifact_checks::retained_panel_artifacts(&repo_root());
 
     assert_eq!(
         artifacts.len(),
@@ -440,7 +441,10 @@ fn panel_baseline_artifacts_exist_under_latest_local_tree() {
 
 #[test]
 fn latest_local_panel_lua_error_artifacts_are_empty() {
-    let lua_error_artifacts = latest_local_panel_lua_error_artifacts();
+    let lua_error_artifacts = mists_panel_artifact_checks::retained_lua_error_artifacts(
+        &repo_root(),
+        LATEST_LOCAL_PANEL_ARTIFACT_ROOT,
+    );
 
     assert_eq!(
         lua_error_artifacts.len(),
@@ -449,7 +453,25 @@ fn latest_local_panel_lua_error_artifacts_are_empty() {
     );
 
     for artifact in lua_error_artifacts {
-        assert_empty_lua_error_artifact(&artifact);
+        mists_panel_artifact_checks::assert_empty_lua_error_artifact(&repo_root(), &artifact);
+    }
+}
+
+#[test]
+fn latest_local_panel_frame_dumps_have_visible_roots() {
+    let dump_artifacts = mists_panel_artifact_checks::retained_frame_dump_artifacts(
+        &repo_root(),
+        LATEST_LOCAL_PANEL_ARTIFACT_ROOT,
+    );
+
+    assert_eq!(
+        dump_artifacts.len(),
+        mists_panel_slugs().len(),
+        "each panel row should have one retained frame dump"
+    );
+
+    for artifact in dump_artifacts {
+        mists_panel_artifact_checks::assert_frame_dump_has_visible_root(&repo_root(), &artifact);
     }
 }
 
@@ -549,76 +571,11 @@ fn create_panel_matrix_fixture(root: &std::path::Path, slugs: &[String]) {
 }
 
 fn mists_panel_slugs() -> Vec<String> {
-    let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
-    let baseline =
-        std::fs::read_to_string(&baseline_path).expect("failed to read Mists panel baseline");
-
-    baseline
-        .lines()
-        .filter(|line| line.starts_with('|') && line.contains(" | Pass | "))
-        .filter_map(panel_slug_from_baseline_row)
-        .map(str::to_owned)
-        .collect()
-}
-
-fn panel_slug_from_baseline_row(line: &str) -> Option<&str> {
-    line.split(LATEST_LOCAL_PANEL_ARTIFACT_ROOT)
-        .nth(1)
-        .and_then(|path| path.split('/').next())
-}
-
-fn latest_local_panel_artifacts() -> Vec<String> {
-    let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
-    let baseline =
-        std::fs::read_to_string(&baseline_path).expect("failed to read Mists panel baseline");
-
-    baseline
-        .lines()
-        .filter(|line| line.starts_with('|') && line.contains(" | Pass | "))
-        .flat_map(panel_artifacts_from_baseline_row)
-        .collect()
-}
-
-fn latest_local_panel_lua_error_artifacts() -> Vec<String> {
-    mists_panel_slugs()
-        .into_iter()
-        .map(|slug| format!("{LATEST_LOCAL_PANEL_ARTIFACT_ROOT}{slug}/lua-errors.json"))
-        .collect()
-}
-
-fn assert_empty_lua_error_artifact(artifact: &str) {
-    let path = repo_root().join(artifact);
-    assert!(
-        path.is_file(),
-        "lua-error artifact should exist: {artifact}"
-    );
-
-    let contents = std::fs::read_to_string(&path)
-        .unwrap_or_else(|error| panic!("failed to read {artifact}: {error}"));
-    let errors: Vec<serde_json::Value> = serde_json::from_str(&contents)
-        .unwrap_or_else(|error| panic!("failed to parse {artifact}: {error}"));
-
-    assert!(
-        errors.is_empty(),
-        "lua-error artifact should contain an empty array: {artifact}"
-    );
-}
-
-fn panel_artifacts_from_baseline_row(line: &str) -> Vec<String> {
-    line.split('`')
-        .filter(|part| part.starts_with("target/") && is_panel_artifact_path(part))
-        .map(str::to_owned)
-        .collect()
-}
-
-fn is_panel_artifact_path(path: &str) -> bool {
-    path.ends_with("/screenshot.webp") || path.ends_with("/dump-tree.txt")
+    mists_panel_artifact_checks::panel_slugs(&repo_root(), LATEST_LOCAL_PANEL_ARTIFACT_ROOT)
 }
 
 fn passing_mists_panel_names() -> BTreeSet<String> {
-    let baseline_path = repo_root().join("docs/baselines/mists-panels.md");
-    let baseline =
-        std::fs::read_to_string(&baseline_path).expect("failed to read Mists panel baseline");
+    let baseline = read_mists_panel_baseline();
 
     baseline.lines().filter_map(passing_panel_name).collect()
 }
@@ -631,9 +588,7 @@ fn passing_panel_name(line: &str) -> Option<String> {
 }
 
 fn interaction_covered_panel_names() -> BTreeSet<String> {
-    let interactions_path = repo_root().join("docs/baselines/mists-panel-interactions.md");
-    let interactions = std::fs::read_to_string(&interactions_path)
-        .expect("failed to read Mists panel interaction baseline");
+    let interactions = read_mists_panel_interaction_baseline();
 
     interactions
         .lines()
@@ -653,6 +608,16 @@ fn is_interaction_evidence_or_gap(status: &str) -> bool {
         status,
         "Covered" | "Mists-specific" | "Follow-up" | "Missing"
     )
+}
+
+fn read_mists_panel_baseline() -> String {
+    std::fs::read_to_string(repo_root().join("docs/baselines/mists-panels.md"))
+        .expect("failed to read Mists panel baseline")
+}
+
+fn read_mists_panel_interaction_baseline() -> String {
+    std::fs::read_to_string(repo_root().join("docs/baselines/mists-panel-interactions.md"))
+        .expect("failed to read Mists panel interaction baseline")
 }
 
 fn markdown_table_columns(line: &str) -> Vec<&str> {
