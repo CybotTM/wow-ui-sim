@@ -199,15 +199,66 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
 
     if not EditModeManagerFrame then return end
     local emm = EditModeManagerFrame
+
+    local function savedLayoutsFromLayoutInfo(layoutInfo)
+        local savedLayouts = {}
+        local layoutType = Enum and Enum.EditModeLayoutType
+        if not layoutInfo or type(layoutInfo.layouts) ~= "table" then
+            return savedLayouts
+        end
+        for _, layout in ipairs(layoutInfo.layouts) do
+            if type(layout) == "table"
+                and (not layoutType or layout.layoutType ~= layoutType.Preset) then
+                table.insert(savedLayouts, layout)
+            end
+        end
+        return savedLayouts
+    end
+
+    local function updateLayoutCounts(savedLayouts)
+        if type(emm.UpdateLayoutCounts) == "function" then
+            local ok = pcall(emm.UpdateLayoutCounts, emm, savedLayouts or {})
+            if ok then
+                return
+            end
+        end
+
+        local layoutType = Enum and Enum.EditModeLayoutType
+        if type(layoutType) ~= "table" then
+            return
+        end
+
+        emm.numLayouts = {}
+        if layoutType.Account ~= nil then
+            emm.numLayouts[layoutType.Account] = 0
+        end
+        if layoutType.Character ~= nil then
+            emm.numLayouts[layoutType.Character] = 0
+        end
+
+        for _, layout in ipairs(savedLayouts or {}) do
+            if type(layout) == "table"
+                and layout.layoutType ~= nil
+                and layout.layoutType ~= layoutType.Preset then
+                emm.numLayouts[layout.layoutType] = (emm.numLayouts[layout.layoutType] or 0) + 1
+            end
+        end
+    end
+
+    local savedLayoutsForCounts
     if not emm.layoutInfo then
         local layoutInfo = C_EditMode.GetLayouts()
         emm.layoutInfo = layoutInfo
         local savedLayouts = copyLayouts(emm.layoutInfo.layouts)
+        savedLayoutsForCounts = copyLayouts(savedLayouts)
         emm.layoutInfo.layouts = copyLayouts(EditModePresetLayoutManager.presetLayoutInfo)
         local presetCount = #emm.layoutInfo.layouts
         tAppendAll(emm.layoutInfo.layouts, savedLayouts)
         emm.layoutInfo.activeLayout = remapActiveLayoutAfterPresetPrepend(emm.layoutInfo, savedLayouts, presetCount)
+    else
+        savedLayoutsForCounts = copyLayouts(savedLayoutsFromLayoutInfo(emm.layoutInfo))
     end
+    updateLayoutCounts(savedLayoutsForCounts)
     mergeDefaultSettings(emm.layoutInfo)
     forceStandardPartyFrames(emm.layoutInfo)
     local function applyAccountSettingOverrides()

@@ -41,8 +41,9 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(crate) use template_chain::{
-    apply_runtime_template_chain_with_frame_overrides, apply_template_scripts,
-    first_fast_install_miss, replay_runtime_template_parent_links, scripts_support_fast_install,
+    apply_runtime_template_chain, apply_runtime_template_chain_with_frame_overrides,
+    apply_template_scripts, first_fast_install_miss, replay_runtime_template_parent_links,
+    scripts_support_fast_install,
 };
 struct CreateFrameArgs {
     frame_type: String,

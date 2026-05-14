@@ -551,6 +551,62 @@ pub fn collect_texture_mixins(texture: &TextureXml) -> Vec<String> {
     })
 }
 
+/// Collect all key-value pairs for a texture by resolving its `inherits` chain.
+pub fn collect_texture_key_values(texture: &TextureXml) -> Vec<TemplateKeyValueInfo> {
+    with_texture_template_registry(|registry| {
+        let mut values = Vec::new();
+        let mut visited = HashSet::new();
+        collect_texture_key_values_from_inherits(
+            registry,
+            texture.inherits.as_deref(),
+            &mut visited,
+            &mut values,
+        );
+        append_texture_key_values(texture, &mut values);
+        values
+    })
+}
+
+fn collect_texture_key_values_from_inherits(
+    registry: &HashMap<String, TextureXml>,
+    inherits: Option<&str>,
+    visited: &mut HashSet<String>,
+    values: &mut Vec<TemplateKeyValueInfo>,
+) {
+    let Some(inherits) = inherits else { return };
+    for name in inherits.split(',').map(|s| s.trim()) {
+        if name.is_empty() || !visited.insert(name.to_string()) {
+            continue;
+        }
+        let Some(template) = registry.get(name) else {
+            continue;
+        };
+        collect_texture_key_values_from_inherits(
+            registry,
+            template.inherits.as_deref(),
+            visited,
+            values,
+        );
+        append_texture_key_values(template, values);
+    }
+}
+
+fn append_texture_key_values(texture: &TextureXml, values: &mut Vec<TemplateKeyValueInfo>) {
+    let Some(key_values) = &texture.key_values else {
+        return;
+    };
+    values.extend(
+        key_values
+            .values
+            .iter()
+            .map(|key_value| TemplateKeyValueInfo {
+                key: key_value.key.clone(),
+                value: key_value.value.clone(),
+                value_type: key_value.value_type.clone(),
+            }),
+    );
+}
+
 // ---------------------------------------------------------------------------
 // AnimationGroup template registry (virtual animation groups with mixin)
 // ---------------------------------------------------------------------------

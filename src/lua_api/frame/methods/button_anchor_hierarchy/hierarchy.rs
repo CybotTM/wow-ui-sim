@@ -4,7 +4,8 @@ use crate::lua_api::frame::methods::methods_helpers::{
     can_change_protected_state_for, emit_addon_action_blocked,
 };
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref,
+    borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id,
+    frame_id_from_stack, frame_ref, table_get,
 };
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
 use rilua::vm::state::LuaState;
@@ -227,7 +228,7 @@ pub(super) fn create_texture(state: &mut LuaState) -> LuaResult<u32> {
     let name = resolve_child_name(state, name_raw, parent_id);
     let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(parent_id));
     apply_draw_layer(&mut texture, layer);
-    if let Some(inherits) = inherits
+    if let Some(inherits) = inherits.as_deref()
         && let Some((width, height)) = crate::xml::get_texture_template_size(&inherits)
     {
         texture.set_size(width, height);
@@ -243,6 +244,7 @@ pub(super) fn create_texture(state: &mut LuaState) -> LuaResult<u32> {
         bind_named_child_global(state, n, child_id)?;
     }
     let val = frame_ref(state, child_id)?;
+    apply_texture_template_effects(state, val, inherits.as_deref())?;
     state.push(val);
     Ok(1)
 }
@@ -354,15 +356,116 @@ pub(super) fn create_line(state: &mut LuaState) -> LuaResult<u32> {
     let parent_id = frame_id_from_stack(state, 1)?;
     let name_raw: Option<String> = Option::<String>::from_stack(state, 2)?;
     let layer = opt_string(state, 3);
-    let _inherits = opt_string(state, 4);
+    let inherits = opt_string(state, 4);
     let name = resolve_child_name(state, name_raw, parent_id);
     let mut line = Frame::new(WidgetType::Line, name.clone(), Some(parent_id));
     apply_draw_layer(&mut line, layer);
     let child_id = line.id;
     register_child_widget(state, parent_id, child_id, line)?;
     let val = frame_ref(state, child_id)?;
+    apply_line_template_effects(state, child_id, val, inherits.as_deref())?;
     state.push(val);
     Ok(1)
+}
+
+fn apply_line_template_effects(
+    state: &mut LuaState,
+    line_id: u64,
+    line: Val,
+    inherits: Option<&str>,
+) -> LuaResult<()> {
+    let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
+        return Ok(());
+    };
+    if !crate::xml::get_template_chain(inherits).is_empty() {
+        crate::lua_api::globals::create_frame::apply_runtime_template_chain(
+            state,
+            line_id,
+            Some(inherits),
+            true,
+        )?;
+        return Ok(());
+    }
+    apply_texture_template_effects(state, line, Some(inherits))
+}
+
+fn apply_texture_template_effects(
+    state: &mut LuaState,
+    widget: Val,
+    inherits: Option<&str>,
+) -> LuaResult<()> {
+    let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
+        return Ok(());
+    };
+    let texture = crate::xml::TextureXml {
+        inherits: Some(inherits.to_string()),
+        ..Default::default()
+    };
+    apply_texture_template_mixins(state, widget, &texture)?;
+    apply_texture_template_key_values(state, widget, &texture);
+    Ok(())
+}
+
+fn apply_texture_template_mixins(
+    state: &mut LuaState,
+    widget: Val,
+    texture: &crate::xml::TextureXml,
+) -> LuaResult<()> {
+    let globals = Val::Table(state.global);
+    let mixin_func = table_get(state, globals, "Mixin");
+    if !matches!(mixin_func, Val::Function(_)) {
+        return Ok(());
+    }
+    for mixin_name in crate::xml::collect_texture_mixins(texture) {
+        let mixin_table = table_get(state, globals, &mixin_name);
+        if matches!(mixin_table, Val::Table(_)) {
+            call_function_state(state, mixin_func, &[widget, mixin_table])?;
+        }
+    }
+    Ok(())
+}
+
+fn apply_texture_template_key_values(
+    state: &mut LuaState,
+    widget: Val,
+    texture: &crate::xml::TextureXml,
+) {
+    let Val::Table(table_ref) = widget else {
+        return;
+    };
+    for key_value in crate::xml::collect_texture_key_values(texture) {
+        let key = create_string(state, &key_value.key);
+        let value =
+            texture_template_key_value(state, &key_value.value, key_value.value_type.as_deref());
+        if let Some(table) = state.gc.tables.get_mut(table_ref) {
+            let _ = table.raw_set(key, value, &state.gc.string_arena);
+        }
+        state.gc.barrier_back(table_ref);
+    }
+}
+
+fn texture_template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {
+    match value_type {
+        Some("number") => value.parse::<f64>().map(Val::Num).unwrap_or(Val::Nil),
+        Some("boolean") => Val::Bool(value.eq_ignore_ascii_case("true")),
+        Some("global") => resolve_global_path(state, value),
+        None if value.parse::<f64>().is_ok() => Val::Num(value.parse().unwrap()),
+        _ => create_string(state, value),
+    }
+}
+
+fn resolve_global_path(state: &mut LuaState, path: &str) -> Val {
+    let mut current = Val::Table(state.global);
+    for part in path.split('.') {
+        if part.is_empty() {
+            return Val::Nil;
+        }
+        current = table_get(state, current, part);
+        if matches!(current, Val::Nil) {
+            break;
+        }
+    }
+    current
 }
 
 pub(super) fn attach_texture(state: &mut LuaState) -> LuaResult<u32> {

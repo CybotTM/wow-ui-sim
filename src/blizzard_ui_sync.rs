@@ -433,6 +433,17 @@ fn manifest_entry_fdid(entry: &str) -> Option<u32> {
     crate::limited_listfile::lookup_path(&asset_path)
 }
 
+#[cfg(test)]
+fn manifest_entry_is_repo_fallback_only(entry: &str) -> bool {
+    matches!(
+        entry,
+        "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster.lua"
+            | "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster.toc"
+            | "Blizzard_CooldownBroadcaster/MessageQueue.lua"
+            | "Blizzard_CooldownBroadcaster/TrackedCooldowns.lua"
+    )
+}
+
 #[cfg(feature = "casc")]
 fn extract_fdid(fdid: u32, out_path: &Path) -> crate::Result<bool> {
     if !casc_available() {
@@ -489,7 +500,7 @@ fn remove_missing_marker(path: &Path) {
 mod tests {
     use super::{
         copy_repo_fallback_entry_from_root, manifest_entries, manifest_entry_fdid,
-        normalize_source_root, unpack_wow_ui_source_archive,
+        manifest_entry_is_repo_fallback_only, normalize_source_root, unpack_wow_ui_source_archive,
     };
     use flate2::Compression;
     use flate2::write::GzEncoder;
@@ -548,6 +559,7 @@ mod tests {
     fn manifest_entries_resolve_through_limited_listfile() {
         let missing: Vec<_> = manifest_entries()
             .filter(|entry| manifest_entry_fdid(entry).is_none())
+            .filter(|entry| !manifest_entry_is_repo_fallback_only(entry))
             .take(10)
             .collect();
         assert!(

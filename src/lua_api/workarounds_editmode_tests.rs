@@ -400,6 +400,87 @@ fn setup_layout_info_remaps_active_saved_layout_after_prepending_presets() {
 }
 
 #[test]
+fn setup_layout_info_updates_saved_layout_counts_after_prepending_presets() {
+    let env = WowLuaEnv::new().expect("env");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeLayoutType = {
+                Preset = 0,
+                Account = 1,
+                Character = 2,
+            },
+        }
+
+        C_EditMode = {
+            GetLayouts = function()
+                return {
+                    activeLayout = 10,
+                    layouts = {
+                        {
+                            layoutIndex = 10,
+                            layoutName = "Account Wide",
+                            layoutType = Enum.EditModeLayoutType.Account,
+                            systems = {},
+                        },
+                        {
+                            layoutIndex = 11,
+                            layoutName = "Character Wide",
+                            layoutType = Enum.EditModeLayoutType.Character,
+                            systems = {},
+                        },
+                    },
+                }
+            end,
+            GetAccountSettings = function()
+                return {}
+            end,
+        }
+
+        EditModePresetLayoutManager = {
+            presetLayoutInfo = {
+                {
+                    layoutIndex = 1,
+                    layoutName = "Modern",
+                    layoutType = Enum.EditModeLayoutType.Preset,
+                    systems = {},
+                },
+            },
+        }
+
+        function tAppendAll(tbl, addedArray)
+            for _, element in ipairs(addedArray) do
+                table.insert(tbl, element)
+            end
+        end
+
+        EditModeManagerFrame = {}
+        "#,
+    )
+    .expect("install edit mode stubs");
+
+    env.exec(SETUP_LAYOUT_INFO_LUA)
+        .expect("run setup layout info");
+
+    let (account_count, character_count, preset_counted): (i32, i32, bool) = env
+        .eval(
+            r#"
+            return EditModeManagerFrame.numLayouts[Enum.EditModeLayoutType.Account],
+                EditModeManagerFrame.numLayouts[Enum.EditModeLayoutType.Character],
+                EditModeManagerFrame.numLayouts[Enum.EditModeLayoutType.Preset] ~= nil
+            "#,
+        )
+        .expect("read layout counts");
+
+    assert_eq!(account_count, 1);
+    assert_eq!(character_count, 1);
+    assert!(
+        !preset_counted,
+        "preset layouts must not count against saved-layout limits"
+    );
+}
+
+#[test]
 fn setup_layout_info_preserves_distinct_saved_action_bar_profile_settings() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(

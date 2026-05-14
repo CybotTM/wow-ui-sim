@@ -8,6 +8,9 @@ use crate::common;
 
 use common::env_with_shared_xml;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::xml::{
+    FrameChildElement, FrameXml, KeyValueXml, KeyValuesXml, register_template,
+};
 
 /// Pool APIs live in Blizzard_SharedXMLBase/Pools.lua, so we need SharedXML loaded.
 fn env() -> WowLuaEnv {
@@ -589,4 +592,43 @@ fn test_line_set_start_end_point_offsets() {
     "#,
     )
     .unwrap();
+}
+
+#[test]
+fn test_create_line_applies_inherited_line_template_mixins_and_key_values() {
+    let env = bare_env();
+    register_template(
+        "RuntimeLineTemplate",
+        "Line",
+        FrameXml {
+            mixin: Some("RuntimeLineMixin".to_string()),
+            children: vec![FrameChildElement::KeyValues(KeyValuesXml {
+                values: vec![KeyValueXml {
+                    key: "isRuntimeLine".to_string(),
+                    value: "true".to_string(),
+                    value_type: Some("boolean".to_string()),
+                }],
+            })],
+            ..Default::default()
+        },
+    );
+
+    let (has_setup_line, key_value): (String, bool) = env
+        .eval(
+            r#"
+            RuntimeLineMixin = {
+                SetupLine = function(self)
+                    self.setupCalled = true
+                end,
+            }
+
+            local parent = CreateFrame("Frame", "RuntimeLineParent", UIParent)
+            local line = parent:CreateLine(nil, "OVERLAY", "RuntimeLineTemplate")
+            return type(line.SetupLine), line.isRuntimeLine == true
+            "#,
+        )
+        .expect("create line with inherited texture template");
+
+    assert_eq!(has_setup_line, "function");
+    assert!(key_value, "CreateLine should apply inherited template KeyValues");
 }
