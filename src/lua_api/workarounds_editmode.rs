@@ -210,47 +210,107 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
     end
     mergeDefaultSettings(emm.layoutInfo)
     forceStandardPartyFrames(emm.layoutInfo)
-    local function applyMissingAccountSettings()
+    local function applyAccountSettingOverrides()
         local accountSettings = emm.AccountSettings
         local accountEnum = Enum and Enum.EditModeAccountSetting
         if not accountSettings or not accountEnum then
             return
         end
-        local missingSetters = {
-            { setting = accountEnum.ShowTimerBars, setter = "SetTimerBarsShown" },
-            { setting = accountEnum.ShowVehicleSeatIndicator, setter = "SetVehicleSeatIndicatorShown" },
-            { setting = accountEnum.ShowArchaeologyBar, setter = "SetArchaeologyBarShown" },
-            { setting = accountEnum.ShowTotemActionBar, setter = "SetTotemActionBarShown" },
-        }
-        local function getAccountSettingBool(setting)
+
+        local function getAccountSettingValue(setting)
             local settingValue = nil
-            if emm.GetAccountSettingValueBool then
-                settingValue = emm:GetAccountSettingValueBool(setting)
+            if emm.GetAccountSettingValue then
+                settingValue = emm:GetAccountSettingValue(setting)
             else
                 for _, settingInfo in ipairs(emm.accountSettings or {}) do
                     if settingInfo.setting == setting then
-                        settingValue = settingInfo.value == 1
+                        settingValue = settingInfo.value
                         break
                     end
                 end
             end
             return settingValue
         end
-        for _, missingSetter in ipairs(missingSetters) do
-            local setter = missingSetter.setter and accountSettings[missingSetter.setter]
-            if missingSetter.setting and setter then
-                local settingValue = getAccountSettingBool(missingSetter.setting)
-                if settingValue ~= nil then
-                    setter(accountSettings, settingValue)
-                end
+
+        local function getAccountSettingBool(setting)
+            local settingValue = getAccountSettingValue(setting)
+            if settingValue == nil then
+                return nil
             end
+            return settingValue == 1 or settingValue == true
+        end
+
+        local function applyFrameSetting(setting, frame, setter, isBool)
+            if setting == nil or type(frame) ~= "table" or type(frame[setter]) ~= "function" then
+                return
+            end
+            local settingValue
+            if isBool then
+                settingValue = getAccountSettingBool(setting)
+            else
+                settingValue = getAccountSettingValue(setting)
+            end
+            if settingValue ~= nil then
+                pcall(frame[setter], frame, settingValue)
+            end
+        end
+
+        local managerSettings = {
+            { setting = accountEnum.ShowGrid, setter = "SetGridShown", isBool = true },
+            { setting = accountEnum.GridSpacing, setter = "SetGridSpacing" },
+            { setting = accountEnum.EnableSnap, setter = "SetEnableSnap", isBool = true },
+            { setting = accountEnum.EnableAdvancedOptions, setter = "SetEnableAdvancedOptions", isBool = true },
+        }
+        for _, settingInfo in ipairs(managerSettings) do
+            applyFrameSetting(settingInfo.setting, emm, settingInfo.setter, settingInfo.isBool)
+        end
+
+        local accountSettingSetters = {
+            { setting = accountEnum.SettingsExpanded, setter = "SetExpandedState" },
+            { setting = accountEnum.ShowTargetAndFocus, setter = "SetTargetAndFocusShown" },
+            { setting = accountEnum.ShowPartyFrames, setter = "SetPartyFramesShown" },
+            { setting = accountEnum.ShowRaidFrames, setter = "SetRaidFramesShown" },
+            { setting = accountEnum.ShowStanceBar, setter = "SetStanceBarShown" },
+            { setting = accountEnum.ShowPetActionBar, setter = "SetPetActionBarShown" },
+            { setting = accountEnum.ShowPossessActionBar, setter = "SetPossessActionBarShown" },
+            { setting = accountEnum.ShowCastBar, setter = "SetCastBarShown" },
+            { setting = accountEnum.ShowEncounterBar, setter = "SetEncounterBarShown" },
+            { setting = accountEnum.ShowExtraAbilities, setter = "SetExtraAbilitiesShown" },
+            { setting = accountEnum.ShowBuffsAndDebuffs, setter = "SetBuffsAndDebuffsShown" },
+            { setting = accountEnum.ShowExternalDefensives, setter = "SetExternalDefensivesShown" },
+            { setting = accountEnum.ShowTalkingHeadFrame, setter = "SetTalkingHeadFrameShown" },
+            { setting = accountEnum.ShowVehicleLeaveButton, setter = "SetVehicleLeaveButtonShown" },
+            { setting = accountEnum.ShowBossFrames, setter = "SetBossFramesShown" },
+            { setting = accountEnum.ShowArenaFrames, setter = "SetArenaFramesShown" },
+            { setting = accountEnum.ShowLootFrame, setter = "SetLootFrameShown" },
+            { setting = accountEnum.ShowHudTooltip, setter = "SetHudTooltipShown" },
+            { setting = accountEnum.ShowStatusTrackingBar2, setter = "SetStatusTrackingBar2Shown" },
+            { setting = accountEnum.ShowDurabilityFrame, setter = "SetDurabilityFrameShown" },
+            { setting = accountEnum.ShowPetFrame, setter = "SetPetFrameShown" },
+            { setting = accountEnum.ShowTimerBars, setter = "SetTimerBarsShown" },
+            { setting = accountEnum.ShowVehicleSeatIndicator, setter = "SetVehicleSeatIndicatorShown" },
+            { setting = accountEnum.ShowArchaeologyBar, setter = "SetArchaeologyBarShown" },
+            { setting = accountEnum.ShowCooldownViewer, setter = "SetCooldownViewerShown" },
+            { setting = accountEnum.ShowPersonalResourceDisplay, setter = "SetPersonalResourceDisplayShown" },
+            { setting = accountEnum.ShowEncounterEvents, setter = "SetEncounterEventsShown" },
+            { setting = accountEnum.ShowDamageMeter, setter = "SetDamageMeterShown" },
+            { setting = accountEnum.ShowTotemActionBar, setter = "SetTotemActionBarShown" },
+        }
+        for _, settingInfo in ipairs(accountSettingSetters) do
+            applyFrameSetting(settingInfo.setting, accountSettings, settingInfo.setter, true)
         end
     end
     if emm.InitializeAccountSettings then
         emm:InitializeAccountSettings()
-        applyMissingAccountSettings()
-    elseif not emm.accountSettings then
-        emm.accountSettings = C_EditMode.GetAccountSettings()
+        applyAccountSettingOverrides()
+    else
+        if not emm.accountSettings then
+            emm.accountSettings = C_EditMode.GetAccountSettings()
+        end
+        if emm.UpdateAccountSettingMap then
+            pcall(emm.UpdateAccountSettingMap, emm)
+        end
+        applyAccountSettingOverrides()
     end
 "#;
 

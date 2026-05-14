@@ -654,9 +654,36 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
             EditModeAccountSetting = {
                 ShowGrid = 0,
                 GridSpacing = 1,
+                SettingsExpanded = 2,
+                ShowTargetAndFocus = 3,
+                ShowPartyFrames = 4,
+                ShowRaidFrames = 5,
+                ShowStanceBar = 6,
+                ShowPetActionBar = 7,
+                ShowPossessActionBar = 8,
+                ShowCastBar = 9,
+                ShowEncounterBar = 10,
+                ShowExtraAbilities = 11,
+                ShowBuffsAndDebuffs = 12,
+                ShowExternalDefensives = 13,
+                ShowTalkingHeadFrame = 14,
+                ShowVehicleLeaveButton = 15,
+                ShowBossFrames = 16,
+                ShowArenaFrames = 17,
+                ShowLootFrame = 18,
+                ShowHudTooltip = 19,
+                ShowStatusTrackingBar2 = 20,
+                ShowDurabilityFrame = 21,
+                EnableSnap = 22,
+                EnableAdvancedOptions = 23,
+                ShowPetFrame = 24,
                 ShowTimerBars = 25,
                 ShowVehicleSeatIndicator = 26,
                 ShowArchaeologyBar = 27,
+                ShowCooldownViewer = 28,
+                ShowPersonalResourceDisplay = 29,
+                ShowEncounterEvents = 31,
+                ShowDamageMeter = 32,
                 ShowTotemActionBar = 33,
             },
         }
@@ -672,9 +699,17 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
                 return {
                     { setting = Enum.EditModeAccountSetting.ShowGrid, value = 1 },
                     { setting = Enum.EditModeAccountSetting.GridSpacing, value = 42 },
+                    { setting = Enum.EditModeAccountSetting.SettingsExpanded, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.ShowExternalDefensives, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.EnableSnap, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.EnableAdvancedOptions, value = 0 },
                     { setting = Enum.EditModeAccountSetting.ShowTimerBars, value = 0 },
                     { setting = Enum.EditModeAccountSetting.ShowVehicleSeatIndicator, value = 0 },
                     { setting = Enum.EditModeAccountSetting.ShowArchaeologyBar, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.ShowCooldownViewer, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.ShowPersonalResourceDisplay, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.ShowEncounterEvents, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.ShowDamageMeter, value = 0 },
                     { setting = Enum.EditModeAccountSetting.ShowTotemActionBar, value = 0 },
                 }
             end,
@@ -697,13 +732,37 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
             self.showGrid = self.accountSettings[1].value
             self.gridSpacing = self.accountSettings[2].value
         end
+        function EditModeManagerFrame:SetGridShown(value)
+            self.gridShown = value
+        end
+        function EditModeManagerFrame:SetGridSpacing(value)
+            self.gridSpacingSetter = value
+        end
+        function EditModeManagerFrame:SetEnableSnap(value)
+            self.snapEnabled = value
+        end
+        function EditModeManagerFrame:SetEnableAdvancedOptions(value)
+            self.advancedOptionsEnabled = value
+        end
 
         EditModeManagerFrame.AccountSettings = {
             timerBarsShown = true,
             vehicleSeatIndicatorShown = true,
             archaeologyBarShown = true,
+            cooldownViewerShown = true,
+            personalResourceDisplayShown = true,
+            encounterEventsShown = true,
+            damageMeterShown = true,
+            externalDefensivesShown = true,
             totemActionBarShown = true,
+            expanded = true,
         }
+        function EditModeManagerFrame.AccountSettings:SetExpandedState(value)
+            self.expanded = value
+        end
+        function EditModeManagerFrame.AccountSettings:SetExternalDefensivesShown(value)
+            self.externalDefensivesShown = value
+        end
         function EditModeManagerFrame.AccountSettings:SetTimerBarsShown(value)
             self.timerBarsShown = value
         end
@@ -712,6 +771,18 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
         end
         function EditModeManagerFrame.AccountSettings:SetArchaeologyBarShown(value)
             self.archaeologyBarShown = value
+        end
+        function EditModeManagerFrame.AccountSettings:SetCooldownViewerShown(value)
+            self.cooldownViewerShown = value
+        end
+        function EditModeManagerFrame.AccountSettings:SetPersonalResourceDisplayShown(value)
+            self.personalResourceDisplayShown = value
+        end
+        function EditModeManagerFrame.AccountSettings:SetEncounterEventsShown(value)
+            self.encounterEventsShown = value
+        end
+        function EditModeManagerFrame.AccountSettings:SetDamageMeterShown(value)
+            self.damageMeterShown = value
         end
         function EditModeManagerFrame.AccountSettings:SetTotemActionBarShown(value)
             self.totemActionBarShown = value
@@ -727,19 +798,57 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
         initialized,
         show_grid,
         grid_spacing,
+        grid_shown,
+        grid_spacing_setter,
+        snap_enabled,
+        advanced_options_enabled,
+        settings_expanded,
+        external_defensives_shown,
         timer_bars_shown,
         vehicle_seat_indicator_shown,
         archaeology_bar_shown,
+        cooldown_viewer_shown,
+        personal_resource_display_shown,
+        encounter_events_shown,
+        damage_meter_shown,
         totem_action_bar_shown,
-    ): (bool, i32, i32, bool, bool, bool, bool) = env
+    ): (
+        bool,
+        i32,
+        i32,
+        bool,
+        i32,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
         .eval(
             r#"
             return EditModeManagerFrame.accountSettingsInitialized,
                 EditModeManagerFrame.showGrid,
                 EditModeManagerFrame.gridSpacing,
+                EditModeManagerFrame.gridShown,
+                EditModeManagerFrame.gridSpacingSetter,
+                EditModeManagerFrame.snapEnabled,
+                EditModeManagerFrame.advancedOptionsEnabled,
+                EditModeManagerFrame.AccountSettings.expanded,
+                EditModeManagerFrame.AccountSettings.externalDefensivesShown,
                 EditModeManagerFrame.AccountSettings.timerBarsShown,
                 EditModeManagerFrame.AccountSettings.vehicleSeatIndicatorShown,
                 EditModeManagerFrame.AccountSettings.archaeologyBarShown,
+                EditModeManagerFrame.AccountSettings.cooldownViewerShown,
+                EditModeManagerFrame.AccountSettings.personalResourceDisplayShown,
+                EditModeManagerFrame.AccountSettings.encounterEventsShown,
+                EditModeManagerFrame.AccountSettings.damageMeterShown,
                 EditModeManagerFrame.AccountSettings.totemActionBarShown
             "#,
         )
@@ -751,6 +860,12 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
     );
     assert_eq!(show_grid, 1);
     assert_eq!(grid_spacing, 42);
+    assert!(grid_shown);
+    assert_eq!(grid_spacing_setter, 42);
+    assert!(!snap_enabled);
+    assert!(!advanced_options_enabled);
+    assert!(!settings_expanded);
+    assert!(!external_defensives_shown);
     assert!(
         !timer_bars_shown,
         "saved timer bars visibility should be applied during account initialization"
@@ -762,6 +877,22 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
     assert!(
         !archaeology_bar_shown,
         "saved archaeology bar visibility should be applied during account initialization"
+    );
+    assert!(
+        !cooldown_viewer_shown,
+        "saved cooldown viewer visibility should be applied during account initialization"
+    );
+    assert!(
+        !personal_resource_display_shown,
+        "saved personal resource display visibility should be applied during account initialization"
+    );
+    assert!(
+        !encounter_events_shown,
+        "saved encounter events visibility should be applied during account initialization"
+    );
+    assert!(
+        !damage_meter_shown,
+        "saved damage meter visibility should be applied during account initialization"
     );
     assert!(
         !totem_action_bar_shown,
