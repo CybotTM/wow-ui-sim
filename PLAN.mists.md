@@ -68,7 +68,8 @@ Parity hardening TODO:
 - [x] Add a local Mists interaction baseline schema checker that fails if table rows have missing columns, unknown statuses, or duplicate panel names.
 - [x] Add a local Mists panel baseline schema checker that fails if `docs/baselines/mists-panels.md` has malformed rows, unknown statuses, duplicate panel names, or missing screenshot/dump artifact references.
 - [x] Add a local Mists panel status checker that fails if any `Watch` or `Fail` row lacks a matching unchecked PLAN.mists remediation task naming that panel.
-- [ ] Add a local Mists retained-artifact freshness checker that fails if `docs/baselines/mists-panels.md` points at an artifact root different from the latest local panel parity root constant.
+- [x] Add a local Mists retained-artifact freshness checker that fails if `docs/baselines/mists-panels.md` points at an artifact root different from the latest local panel parity root constant.
+- [ ] Fix Mists glyph panel texture resolution so opening the glyph panel does not request the directory path `/syncthing/World of Warcraft/_retail_/BlizzardInterfaceArt/` as an image.
 - [x] Re-audit local Mists idle HUD and core panel screenshots with real local CASC assets, focusing on the previously reported unit-frame/action-bar layout regressions, missing bottom-tab text, specialization Learn flow, and font fallback symptoms; fix the first root-cause regression found.
 - [x] Add a non-CI Mists visual triage note that separates local asset-backed parity evidence from CI signal-only checks, so texture/font availability is not confused with panel parity completion.
 - [x] Extend the live connected-GUI Mists smoke runner to include the no-panel HUD state plus the specialization Learn-to-talents path, then fail on `lua-errors` or missing/hidden target frames after real input dispatch.

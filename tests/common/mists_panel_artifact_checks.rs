@@ -39,6 +39,18 @@ pub fn retained_screenshot_artifacts(repo_root: &Path, artifact_root: &str) -> V
         .collect()
 }
 
+pub fn assert_retained_artifacts_use_root(repo_root: &Path, artifact_root: &str) {
+    let stale_artifacts = retained_panel_artifacts(repo_root)
+        .into_iter()
+        .filter(|artifact| !artifact.starts_with(artifact_root))
+        .collect::<Vec<_>>();
+
+    assert!(
+        stale_artifacts.is_empty(),
+        "panel baseline should reference only the latest local artifact root {artifact_root}: {stale_artifacts:?}"
+    );
+}
+
 pub fn assert_empty_lua_error_artifact(repo_root: &Path, artifact: &str) {
     let path = repo_root.join(artifact);
     assert!(

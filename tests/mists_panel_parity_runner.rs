@@ -450,6 +450,14 @@ fn panel_baseline_artifacts_exist_under_latest_local_tree() {
 }
 
 #[test]
+fn panel_baseline_artifacts_use_latest_local_root() {
+    mists_panel_artifact_checks::assert_retained_artifacts_use_root(
+        &repo_root(),
+        LATEST_LOCAL_PANEL_ARTIFACT_ROOT,
+    );
+}
+
+#[test]
 fn panel_baseline_schema_is_valid() {
     mists_panel_artifact_checks::assert_panel_baseline_schema_is_valid(&repo_root());
 }
