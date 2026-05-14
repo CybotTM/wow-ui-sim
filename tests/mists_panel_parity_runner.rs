@@ -424,24 +424,7 @@ fn addon_has_load_on_demand_toc(addon_dir: &std::path::Path) -> bool {
 
 #[test]
 fn panel_baseline_references_retained_runner_artifacts() {
-    let baseline = read_mists_panel_baseline();
-
-    assert!(
-        !baseline.contains("test-backed:"),
-        "baseline still contains test-backed placeholders"
-    );
-    assert!(
-        baseline.contains(
-            "target/mists-panel-parity-with-saved-vars-after-castspell/character/screenshot.webp"
-        ),
-        "baseline should reference retained screenshot artifacts"
-    );
-    assert!(
-        baseline.contains(
-            "target/mists-panel-parity-with-saved-vars-after-castspell/game-menu-options/dump-tree.txt"
-        ),
-        "baseline should reference retained frame-dump artifacts"
-    );
+    mists_panel_artifact_checks::assert_baseline_references_retained_runner_artifacts(&repo_root());
 }
 
 #[test]
@@ -469,6 +452,11 @@ fn panel_baseline_artifacts_exist_under_latest_local_tree() {
 #[test]
 fn panel_baseline_schema_is_valid() {
     mists_panel_artifact_checks::assert_panel_baseline_schema_is_valid(&repo_root());
+}
+
+#[test]
+fn panel_watch_or_fail_rows_have_plan_remediation() {
+    mists_panel_artifact_checks::assert_watch_or_fail_rows_have_plan_remediation(&repo_root());
 }
 
 #[test]

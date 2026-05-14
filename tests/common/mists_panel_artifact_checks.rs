@@ -147,6 +147,44 @@ pub fn assert_panel_baseline_schema_is_valid(repo_root: &Path) {
     assert_panel_rows_have_screenshot_and_dump_refs(&rows);
 }
 
+pub fn assert_watch_or_fail_rows_have_plan_remediation(repo_root: &Path) {
+    let plan = read_mists_plan(repo_root);
+    let plan_tasks = unchecked_plan_tasks(&plan);
+    let baseline = read_panel_baseline(repo_root);
+    let rows = panel_table_rows(&baseline);
+    let untracked_rows = rows
+        .iter()
+        .filter_map(|row| watch_or_fail_panel_name(row))
+        .filter(|panel| !has_matching_plan_task(panel, &plan_tasks))
+        .collect::<Vec<_>>();
+
+    assert!(
+        untracked_rows.is_empty(),
+        "Watch or Fail panel rows need unchecked PLAN.mists remediation tasks: {untracked_rows:?}"
+    );
+}
+
+pub fn assert_baseline_references_retained_runner_artifacts(repo_root: &Path) {
+    let baseline = read_panel_baseline(repo_root);
+
+    assert!(
+        !baseline.contains("test-backed:"),
+        "baseline still contains test-backed placeholders"
+    );
+    assert!(
+        baseline.contains(
+            "target/mists-panel-parity-with-saved-vars-after-castspell/character/screenshot.webp"
+        ),
+        "baseline should reference retained screenshot artifacts"
+    );
+    assert!(
+        baseline.contains(
+            "target/mists-panel-parity-with-saved-vars-after-castspell/game-menu-options/dump-tree.txt"
+        ),
+        "baseline should reference retained frame-dump artifacts"
+    );
+}
+
 fn expected_panel_slug_set(repo_root: &Path, artifact_root: &str) -> BTreeSet<String> {
     panel_slugs(repo_root, artifact_root).into_iter().collect()
 }
@@ -291,9 +329,43 @@ fn is_known_panel_status(status: &str) -> bool {
     matches!(status, "Pass" | "Watch" | "Fail")
 }
 
+fn watch_or_fail_panel_name(row: &str) -> Option<String> {
+    let columns = crate::mists_panel_interaction_checks::markdown_table_columns(row);
+    let panel_name = columns.first()?;
+    let status = columns.get(1)?;
+
+    matches!(*status, "Watch" | "Fail").then(|| (*panel_name).to_owned())
+}
+
+fn unchecked_plan_tasks(plan: &str) -> Vec<String> {
+    plan.lines()
+        .filter(|line| line.starts_with("- [ ] "))
+        .map(normalized_text)
+        .collect()
+}
+
+fn has_matching_plan_task(panel: &str, plan_tasks: &[String]) -> bool {
+    let panel = normalized_text(panel);
+    plan_tasks.iter().any(|task| task.contains(&panel))
+}
+
+fn normalized_text(text: &str) -> String {
+    text.to_ascii_lowercase()
+        .chars()
+        .map(|ch| if ch.is_ascii_alphanumeric() { ch } else { ' ' })
+        .collect::<String>()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 fn read_panel_baseline(repo_root: &Path) -> String {
     std::fs::read_to_string(repo_root.join("docs/baselines/mists-panels.md"))
         .expect("failed to read Mists panel baseline")
+}
+
+fn read_mists_plan(repo_root: &Path) -> String {
+    std::fs::read_to_string(repo_root.join("PLAN.mists.md")).expect("failed to read Mists plan")
 }
 
 fn panel_slug_from_baseline_row<'a>(line: &'a str, artifact_root: &str) -> Option<&'a str> {
