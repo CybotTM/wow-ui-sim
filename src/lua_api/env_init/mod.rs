@@ -218,6 +218,21 @@ fn remove_sandbox_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         end
         "#,
     )?;
+    sync_string_metatable_to_global_string(lua)?;
+    Ok(())
+}
+
+pub(crate) fn sync_string_metatable_to_global_string(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(
+        r#"
+        if type(string) == "table" then
+            local string_meta = debug.getmetatable("")
+            if type(string_meta) == "table" then
+                string_meta.__index = string
+            end
+        end
+        "#,
+    )?;
     Ok(())
 }
 

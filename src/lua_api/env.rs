@@ -226,6 +226,11 @@ impl WowLuaEnv {
         );
     }
 
+    pub fn sync_string_metatable_to_global_string(&self) {
+        let mut lua = self.rilua_mut();
+        let _ = super::env_init::sync_string_metatable_to_global_string(&mut lua);
+    }
+
     /// Apply post-load workarounds for Blizzard code that depends on
     /// unimplemented engine features (AnimationGroups, EditMode, etc.).
     pub fn apply_post_load_workarounds(&self) {

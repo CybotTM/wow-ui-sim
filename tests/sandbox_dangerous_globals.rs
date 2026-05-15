@@ -92,6 +92,37 @@ fn string_dump_nil_on_g_retained_on_secureenv() {
 }
 
 #[test]
+fn dynamic_string_methods_use_sandboxed_string_table() {
+    let env = env();
+    env.restore_post_cleanup_globals();
+    env.eval::<()>(
+        r#"
+        local stringMeta = debug.getmetatable("")
+        stringMeta.__index = {}
+        "#,
+    )
+    .unwrap();
+    env.sync_string_metatable_to_global_string();
+    let (same_index, result): (bool, String) = env
+        .eval(
+            r#"
+            string.TEST_DYNAMIC_METHOD = function(str)
+                return str .. ":ok"
+            end
+            return debug.getmetatable("").__index == string,
+                   ("probe"):TEST_DYNAMIC_METHOD()
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        same_index,
+        "string method lookup must read the sandboxed _G.string table"
+    );
+    assert_eq!(result, "probe:ok");
+}
+
+#[test]
 fn math_randomseed_nil_on_g_retained_on_secureenv() {
     let env = env();
     let (g, secure): (String, String) = env

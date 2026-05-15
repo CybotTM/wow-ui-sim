@@ -71,6 +71,7 @@ pub fn load_blizzard_addons(
     env.gc_collect();
     let gc_dur = gc_start.elapsed();
 
+    env.sync_string_metatable_to_global_string();
     print_blizzard_summary(blizzard_start.elapsed(), &total_timing, gc_dur);
 }
 
