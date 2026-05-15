@@ -129,6 +129,10 @@ pub fn set_height(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(crate) fn mark_nearest_layout_parent_dirty(state: &mut LuaState, id: u64) {
+    if is_loading_addon(state) {
+        return;
+    }
+
     let Some(helper) = layout_dirty_helper(state) else {
         return;
     };
@@ -157,6 +161,10 @@ pub(crate) fn mark_nearest_layout_parent_dirty(state: &mut LuaState, id: u64) {
 }
 
 pub(crate) fn mark_visible_layout_subtree_dirty(state: &mut LuaState, id: u64) {
+    if is_loading_addon(state) {
+        return;
+    }
+
     let Some(helper) = layout_dirty_helper(state) else {
         return;
     };
@@ -194,4 +202,10 @@ fn layout_dirty_helper(state: &mut LuaState) -> Option<Val> {
         "__wow_mark_layout_frame_dirty",
     );
     matches!(helper, Val::Function(_)).then_some(helper)
+}
+
+fn is_loading_addon(state: &mut LuaState) -> bool {
+    borrow_state(state)
+        .map(|sim| sim.loading_addon_index.is_some())
+        .unwrap_or(false)
 }
