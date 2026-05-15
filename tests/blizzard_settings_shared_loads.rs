@@ -544,6 +544,30 @@ fn publishes_layout_factory_globals_for_canvas_and_vertical_modes() {
 }
 
 #[test]
+fn post_cleanup_restore_preserves_blizzard_settings_get_category() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Settings = Settings or {}
+        function Settings.GetCategory(name)
+            return "blizzard:" .. tostring(name)
+        end
+        "#,
+    )
+    .expect("install Settings.GetCategory sentinel");
+
+    env.restore_post_cleanup_globals();
+
+    let result: String = env
+        .eval(r#"return Settings.GetCategory("KrowiTest")"#)
+        .expect("Settings.GetCategory sentinel probe");
+    assert_eq!(
+        result, "blizzard:KrowiTest",
+        "post-cleanup bootstrap must not replace Blizzard's Settings.GetCategory implementation"
+    );
+}
+
+#[test]
 fn publishes_settings_panel_named_frame_with_high_strata_and_hidden_default() {
     let env = load_full_game_ui();
 

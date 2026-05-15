@@ -5868,17 +5868,19 @@ do
   rawset(Settings, "INTERFACE_CATEGORY_ID", interfaceCategory:GetID())
   rawset(Settings, "AUDIO_CATEGORY_ID", audioCategory:GetID())
 
-  function Settings.GetCategory(id)
-    id = tonumber(id)
-    if categories[id] == nil then
-      if id == rawget(Settings, "INTERFACE_CATEGORY_ID") then
-        return ensure_category(id, "Interface")
+  if rawget(Settings, "GetCategory") == nil then
+    function Settings.GetCategory(id)
+      id = tonumber(id)
+      if categories[id] == nil then
+        if id == rawget(Settings, "INTERFACE_CATEGORY_ID") then
+          return ensure_category(id, "Interface")
+        end
+        if id == rawget(Settings, "AUDIO_CATEGORY_ID") then
+          return ensure_category(id, "Audio")
+        end
       end
-      if id == rawget(Settings, "AUDIO_CATEGORY_ID") then
-        return ensure_category(id, "Audio")
-      end
+      return categories[id]
     end
-    return categories[id]
   end
 
   if type(settingsPanel) == "table" then
