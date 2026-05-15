@@ -168,6 +168,20 @@ fn test_color_globals_expose_expected_rgb_values() {
         )
         .unwrap();
     assert!(raid_ok);
+
+    let debuff_ok: bool = env
+        .eval(
+            r#"
+            local magic = DebuffTypeColor.Magic
+            return type(DebuffTypeColor) == "table"
+                and type(magic) == "table"
+                and type(magic.r) == "number"
+                and type(magic.g) == "number"
+                and type(magic.b) == "number"
+            "#,
+        )
+        .unwrap();
+    assert!(debuff_ok);
 }
 
 // ---------------------------------------------------------------------------

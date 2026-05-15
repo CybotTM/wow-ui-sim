@@ -78,6 +78,13 @@ pub(super) const RAID_CLASS_COLORS_DATA: &[(&'static str, (f64, f64, f64, f64))]
     ("TRAVELER", (1.00, 1.00, 1.00, 1.0)),
 ];
 
+const DEBUFF_TYPE_COLORS_DATA: &[(&str, (f64, f64, f64, f64))] = &[
+    ("Curse", (0.6, 0.0, 1.0, 1.0)),
+    ("Disease", (0.6, 0.4, 0.0, 1.0)),
+    ("Magic", (0.2, 0.6, 1.0, 1.0)),
+    ("Poison", (0.0, 0.6, 0.0, 1.0)),
+];
+
 // ── Color table field accessor helpers ───────────────────────────────────────
 
 fn color_channel(state: &mut LuaState, this: Val, key: &str, default: f64) -> f64 {
@@ -252,6 +259,16 @@ fn build_c_class_color(lua: &mut rilua::Lua) -> LuaResult<Val> {
     Ok(class_color_namespace)
 }
 
+fn build_debuff_type_colors(lua: &mut rilua::Lua) -> LuaResult<Val> {
+    let state = lua.state_mut();
+    let debuff_type_colors = create_table(state);
+    for &(debuff_type, (r, g, b, a)) in DEBUFF_TYPE_COLORS_DATA {
+        let color = make_rilua_color_table(state, r, g, b, a)?;
+        table_set(state, debuff_type_colors, debuff_type, color);
+    }
+    Ok(debuff_type_colors)
+}
+
 pub fn register_rilua_color_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     let state = lua.state_mut();
     for &(name, (r, g, b, a)) in NAMED_COLOR_GLOBALS {
@@ -260,6 +277,8 @@ pub fn register_rilua_color_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     }
     let raid_class_colors = build_raid_class_colors(lua)?;
     set_global_val(lua.state_mut(), "RAID_CLASS_COLORS", raid_class_colors);
+    let debuff_type_colors = build_debuff_type_colors(lua)?;
+    set_global_val(lua.state_mut(), "DebuffTypeColor", debuff_type_colors);
     let c_class_color = build_c_class_color(lua)?;
     set_global_val(lua.state_mut(), "C_ClassColor", c_class_color);
     Ok(())
