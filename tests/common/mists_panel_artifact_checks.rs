@@ -228,13 +228,13 @@ pub fn assert_baseline_references_retained_runner_artifacts(repo_root: &Path) {
     );
     assert!(
         baseline.contains(
-            "target/mists-panel-parity-with-saved-vars-after-castspell/character/screenshot.webp"
+            "target/mists-local-completion-audit-20260515/panel-parity-with-saved-vars-240/character/screenshot.webp"
         ),
         "baseline should reference retained screenshot artifacts"
     );
     assert!(
         baseline.contains(
-            "target/mists-panel-parity-with-saved-vars-after-castspell/game-menu-options/dump-tree.txt"
+            "target/mists-local-completion-audit-20260515/panel-parity-with-saved-vars-240/game-menu-options/dump-tree.txt"
         ),
         "baseline should reference retained frame-dump artifacts"
     );

@@ -11,7 +11,7 @@ mod mists_panel_interaction_checks;
 
 const MISTS_PANEL_ROW_COUNT: &str = "38 panel rows validated";
 const LATEST_LOCAL_PANEL_ARTIFACT_ROOT: &str =
-    "target/mists-panel-parity-with-saved-vars-after-castspell/";
+    "target/mists-local-completion-audit-20260515/panel-parity-with-saved-vars-240/";
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))

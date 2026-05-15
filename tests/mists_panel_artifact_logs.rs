@@ -8,7 +8,7 @@ mod mists_panel_artifact_checks;
 mod mists_panel_interaction_checks;
 
 const LATEST_LOCAL_PANEL_ARTIFACT_ROOT: &str =
-    "target/mists-panel-parity-with-saved-vars-after-castspell/";
+    "target/mists-local-completion-audit-20260515/panel-parity-with-saved-vars-240/";
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))

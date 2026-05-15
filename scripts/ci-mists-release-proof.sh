@@ -216,8 +216,9 @@ panel_slug_from_artifacts() {
     local artifacts="$1" path slug
     path="${artifacts#*target/}"
     [ "$path" != "$artifacts" ] || return 0
-    slug="${path#*/}"
-    slug="${slug%%/*}"
+    slug="${path%/screenshot.webp*}"
+    slug="${slug%/dump-tree.txt*}"
+    slug="${slug##*/}"
     printf '%s\n' "$slug"
 }
 
