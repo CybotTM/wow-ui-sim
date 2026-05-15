@@ -30,15 +30,23 @@ pub fn create_frame_instance(
         frame.user_id = user_id;
     }
 
+    let preserve_existing_name_binding = should_preserve_existing_root_frame_name(state, &name)?;
     let frame_id = frame.id;
-    register_and_attach_parent(state, frame, parent_id, parent_explicit, frame_id)?;
+    register_and_attach_parent(
+        state,
+        frame,
+        parent_id,
+        parent_explicit,
+        frame_id,
+        preserve_existing_name_binding,
+    )?;
     install_default_children(state, widget_type, frame_id)?;
     if widget_type == WidgetType::MessageFrame {
         crate::lua_api::frame::methods::widgets::message_frame::install_message_frame_fields(
             state, frame_id,
         )?;
     }
-    register_global_name(state, name, frame_id)?;
+    register_global_name(state, name, frame_id, preserve_existing_name_binding)?;
 
     Ok(frame_id)
 }
@@ -133,9 +141,14 @@ fn register_and_attach_parent(
     parent_id: Option<u64>,
     parent_explicit: bool,
     frame_id: u64,
+    preserve_existing_name_binding: bool,
 ) -> LuaResult<()> {
     let mut sim = borrow_state_mut(state)?;
-    sim.widgets.register(frame);
+    if preserve_existing_name_binding {
+        sim.widgets.register_preserving_existing_name(frame);
+    } else {
+        sim.widgets.register(frame);
+    }
     let Some(parent_id) = parent_id else {
         return Ok(());
     };
@@ -169,10 +182,14 @@ fn register_global_name(
     state: &mut LuaState,
     name: Option<String>,
     frame_id: u64,
+    preserve_existing_name_binding: bool,
 ) -> LuaResult<()> {
     let Some(name) = name else {
         return Ok(());
     };
+    if preserve_existing_name_binding {
+        return Ok(());
+    }
     let frame_val = frame_ref(state, frame_id)?;
     migrate_existing_global_frame_fields(state, &name, frame_val);
     let key = state.gc.intern_string(name.as_bytes());
@@ -183,6 +200,19 @@ fn register_global_name(
     state.gc.barrier_back(global);
     crate::lua_api::global_slots::refresh_installed_slots_for_name(state, &name);
     Ok(())
+}
+
+fn should_preserve_existing_root_frame_name(
+    state: &mut LuaState,
+    name: &Option<String>,
+) -> LuaResult<bool> {
+    let Some(name) = name.as_deref() else {
+        return Ok(false);
+    };
+    if !matches!(name, "UIParent" | "WorldFrame") {
+        return Ok(false);
+    }
+    Ok(borrow_state(state)?.widgets.get_id_by_name(name).is_some())
 }
 
 fn migrate_existing_global_frame_fields(state: &mut LuaState, name: &str, new_frame: Val) {

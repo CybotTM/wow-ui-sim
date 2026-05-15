@@ -111,6 +111,18 @@ impl WidgetRegistry {
         id
     }
 
+    pub fn register_preserving_existing_name(&mut self, widget: Frame) -> u64 {
+        let existing_name_binding = widget
+            .name
+            .as_ref()
+            .and_then(|name| self.names.get(name).map(|id| (name.clone(), *id)));
+        let id = self.register(widget);
+        if let Some((name, existing_id)) = existing_name_binding {
+            self.names.insert(name, existing_id);
+        }
+        id
+    }
+
     /// Get a widget by ID.
     pub fn get(&self, id: u64) -> Option<&Frame> {
         self.widgets.get(&id)

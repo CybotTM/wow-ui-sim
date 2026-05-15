@@ -226,6 +226,41 @@ mod tests {
     }
 
     #[test]
+    fn create_frame_named_ui_parent_preserves_existing_global() {
+        let env = WowLuaEnv::new().expect("env");
+
+        let result: String = env
+            .eval(
+                r#"
+                local original = UIParent
+                local replacement = CreateFrame("Frame", "UIParent")
+
+                if UIParent ~= original then
+                    return "global_replaced"
+                end
+                if replacement == original then
+                    return "returned_original"
+                end
+
+                local ok, err = pcall(function()
+                    replacement:SetAllPoints(UIParent)
+                end)
+                if not ok then
+                    return "set_all_points_failed:" .. tostring(err)
+                end
+
+                return "ok"
+            "#,
+            )
+            .expect("duplicate UIParent CreateFrame probe");
+
+        assert_eq!(
+            result, "ok",
+            "CreateFrame(\"Frame\", \"UIParent\") must not clobber the existing global UIParent: {result}"
+        );
+    }
+
+    #[test]
     fn create_frame_omitted_parent_is_nil() {
         let env = WowLuaEnv::new().expect("env");
 
