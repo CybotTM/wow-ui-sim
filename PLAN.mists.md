@@ -1,6 +1,7 @@
 # Goal
 
 - [x] Fix the Mists CharacterFrame stale pet availability path so `CharacterFrameTab2` hides even when the panel opens after the original `PET_UI_UPDATE` event has already fired.
+- [x] Run the Leatrix Plus Macro/Keybindings installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the SimpleItemLevel AddOn List installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the Plater AddOn List installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Back Mists CharacterFrame pet tab visibility with simulator pet UI state so seeded pets keep `CharacterFrameTab2` available while default no-pet state still hides it.
