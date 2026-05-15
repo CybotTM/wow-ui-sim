@@ -188,11 +188,10 @@ fn macos_app_resources_dir(exe_dir: &Path) -> Option<PathBuf> {
     Some(contents_dir.join("Resources"))
 }
 
-fn addon_paths_for_install_root(root: &Path) -> [PathBuf; 3] {
+fn addon_paths_for_install_root(root: &Path) -> [PathBuf; 2] {
     [
         root.join("_retail_/Interface/AddOns"),
         root.join("_beta_/Interface/AddOns"),
-        root.join("_classic_/Interface/AddOns"),
     ]
 }
 
@@ -363,6 +362,21 @@ mod tests {
         assert!(
             retail_index < project_index,
             "live install WTF should win over stale project mirrors"
+        );
+    }
+
+    #[test]
+    fn addon_candidates_do_not_mix_classic_addons_into_retail_loads() {
+        let install_root = PathBuf::from("/tmp/wow-install");
+
+        let candidates = addon_paths_for_install_root(&install_root);
+
+        assert_eq!(
+            candidates.as_slice(),
+            &[
+                install_root.join("_retail_/Interface/AddOns"),
+                install_root.join("_beta_/Interface/AddOns"),
+            ]
         );
     }
 
