@@ -35,6 +35,13 @@ fn get_num_quest_log_entries_reflects_state_mutation() {
     assert_eq!(total, 0);
 }
 
+#[test]
+fn get_max_num_quests_can_accept_returns_classic_limit() {
+    let env = env();
+    let max_quests: i32 = env.eval("return C_QuestLog.GetMaxNumQuestsCanAccept()").unwrap();
+    assert_eq!(max_quests, 25);
+}
+
 // ── GetInfo ───────────────────────────────────────────────────────────────────
 
 #[test]

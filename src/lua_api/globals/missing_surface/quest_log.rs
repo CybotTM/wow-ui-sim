@@ -1,6 +1,6 @@
 //! `C_QuestLog` probe surface backed by `SimState.quest_log_entries`.
 //!
-//! Migrates 17 entries off the namespace stub tables:
+//! Migrates 18 entries off the namespace stub tables:
 //!
 //! - `GetBountySetInfoForMapID(mapID)` — nil (no bounty board data).
 //! - `GetInfo(logIndex)` — returns QuestInfo table or nil.
@@ -10,6 +10,7 @@
 //! - `GetWorldQuestInfo(questID)` — returns WorldQuestInfo table or nil.
 //! - `GetAllCompletedQuestIDs()` — returns array of completed quest IDs.
 //! - `GetLogIndexForQuestID(questID)` — returns 1-based index or nil.
+//! - `GetMaxNumQuestsCanAccept()` — returns the quest accept cap.
 //! - `GetNumQuestLogEntries()` — returns (shownCount, totalCount).
 //! - `IsComplete(questID)` — returns bool.
 //! - `IsFailed(questID)` — returns bool.
@@ -56,6 +57,7 @@ const C_QUEST_LOG_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetAllCompletedQuestIDs", get_all_completed_quest_ids),
     ("GetQuestIDForLogIndex", get_quest_id_for_log_index),
     ("GetLogIndexForQuestID", get_log_index_for_quest_id),
+    ("GetMaxNumQuestsCanAccept", get_max_num_quests_can_accept),
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
     ("IsComplete", is_complete),
     ("IsFailed", is_failed),
@@ -398,6 +400,11 @@ fn get_log_index_for_quest_id(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => Ok(0),
     }
+}
+
+fn get_max_num_quests_can_accept(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(25.0));
+    Ok(1)
 }
 
 fn get_num_quest_log_entries(state: &mut LuaState) -> LuaResult<u32> {
