@@ -274,3 +274,27 @@ fn test_fire_event_runs_matching_unit_event_callback() {
         "callback owner should be the registering frame"
     );
 }
+
+#[test]
+fn test_register_unit_event_reports_registered_unit() {
+    let env = env();
+    let (registered, unit, invalid_registered): (bool, String, bool) = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            f:RegisterUnitEvent("UNIT_HEALTH", "player")
+            local registered, unit = f:IsEventRegistered("UNIT_HEALTH")
+
+            local invalid = CreateFrame("Frame")
+            invalid:RegisterUnitEvent("UNIT_HEALTH", "not_a_unit")
+            local invalidRegistered = invalid:IsEventRegistered("UNIT_HEALTH")
+
+            return registered, unit, invalidRegistered
+            "#,
+        )
+        .unwrap();
+
+    assert!(registered);
+    assert_eq!(unit, "player");
+    assert!(!invalid_registered);
+}

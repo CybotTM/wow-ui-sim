@@ -24,6 +24,7 @@ macro_rules! frame_defaults {
             click_depth: 0,
             collapses_layout: false,
             registered_events: HashSet::new(),
+            registered_unit_events: HashMap::new(),
             frame_level: 0,
             raise_order: 0,
             has_fixed_frame_level: false,

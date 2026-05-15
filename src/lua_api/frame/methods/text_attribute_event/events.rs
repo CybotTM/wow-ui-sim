@@ -38,13 +38,22 @@ pub(super) fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    // Unit args at 3+ are intentionally ignored (unit event filtering not implemented)
+    let Some(unit) = val_to_string(state, stack_val(state, 3)) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    if !super::unit_event::is_valid_unit_filter(&unit) {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    }
     let newly_registered = {
         let mut sim = borrow_state_mut(state)?;
-        sim.widgets
-            .get_mut(id)
-            .map(|f| f.registered_events.insert(event.clone()))
-            .unwrap_or(false)
+        sim.widgets.get_mut(id).is_some_and(|frame| {
+            frame
+                .registered_unit_events
+                .insert(event.clone(), unit.clone());
+            frame.registered_events.insert(event.clone())
+        })
     };
     if newly_registered {
         rilua_hlist_register_individual(state, id, &event)?;
@@ -89,7 +98,10 @@ fn mutate_registered_event_checked(
         .get_mut(id)
         .map(|frame| match op {
             RegisteredEventOp::Insert => frame.registered_events.insert(event.to_string()),
-            RegisteredEventOp::Remove => frame.registered_events.remove(event),
+            RegisteredEventOp::Remove => {
+                frame.registered_unit_events.remove(event);
+                frame.registered_events.remove(event)
+            }
         })
         .unwrap_or(false))
 }
@@ -117,6 +129,7 @@ pub(super) fn unregister_all_events(state: &mut LuaState) -> LuaResult<u32> {
         let mut sim = borrow_state_mut(state)?;
         if let Some(frame) = sim.widgets.get_mut(id) {
             frame.registered_events.clear();
+            frame.registered_unit_events.clear();
             frame.register_all_events = false;
         }
     }
@@ -140,14 +153,14 @@ pub(super) fn is_event_registered(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let event = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
     let sim = borrow_state(state)?;
-    let registered = sim
-        .widgets
-        .get(id)
+    let frame = sim.widgets.get(id);
+    let registered = frame
         .map(|frame| frame_has_registered_event(frame, &event))
         .unwrap_or(false);
+    let unit = frame.and_then(|frame| frame.registered_unit_events.get(&event).cloned());
     drop(sim);
     state.push(Val::Bool(registered));
-    state.push(Val::Nil);
+    super::unit_event::push_registered_unit(state, unit.as_deref());
     Ok(2)
 }
 

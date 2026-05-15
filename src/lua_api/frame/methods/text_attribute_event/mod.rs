@@ -8,6 +8,7 @@ pub(crate) mod callbacks;
 mod events;
 mod helpers;
 mod text;
+mod unit_event;
 
 use crate::lua_api::methods::call_function_state;
 use crate::lua_bridge::table_set_rust_fn_static;

@@ -11,6 +11,7 @@ impl Frame {
             + vec_bytes(&self.children)
             + vec_bytes(&self.anchors)
             + hash_set_string_bytes(&self.registered_events)
+            + hash_map_string_string_bytes(&self.registered_unit_events)
             + hash_set_string_bytes(&self.pass_through_buttons)
             + hash_map_string_attribute_value_bytes(&self.attributes)
             + hash_map_string_u64_bytes(&self.children_keys)
@@ -93,6 +94,14 @@ fn hash_set_string_bytes(values: &HashSet<String>) -> usize {
 fn hash_map_string_u64_bytes(values: &HashMap<String, u64>) -> usize {
     values.capacity() * std::mem::size_of::<(String, u64)>()
         + values.keys().map(String::capacity).sum::<usize>()
+}
+
+fn hash_map_string_string_bytes(values: &HashMap<String, String>) -> usize {
+    values.capacity() * std::mem::size_of::<(String, String)>()
+        + values
+            .iter()
+            .map(|(key, value)| key.capacity() + value.capacity())
+            .sum::<usize>()
 }
 
 fn hash_map_string_attribute_value_bytes(values: &HashMap<String, AttributeValue>) -> usize {

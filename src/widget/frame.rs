@@ -39,6 +39,8 @@ pub struct Frame {
     pub collapses_layout: bool,
     /// Events this frame is registered to receive.
     pub registered_events: HashSet<String>,
+    /// Unit filters for events registered via RegisterUnitEvent.
+    pub registered_unit_events: HashMap<String, String>,
     /// Frame level (draw order within strata).
     pub frame_level: i32,
     /// Raise/Lower order offset applied on top of `frame_level`.
