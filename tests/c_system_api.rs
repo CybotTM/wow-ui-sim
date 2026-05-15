@@ -520,16 +520,17 @@ fn test_c_creature_info_get_faction_info_unknown_nil() {
 #[test]
 fn test_c_covenants_get_covenant_data_kyrian() {
     let env = env();
-    let (id, name): (i32, String) = env
+    let (id, name, soulbind_count): (i32, String, i32) = env
         .eval(
             r#"
             local data = C_Covenants.GetCovenantData(1)
-            return data.ID, data.name
+            return data.ID, data.name, #data.soulbindIDs
             "#,
         )
         .unwrap();
     assert_eq!(id, 1);
     assert_eq!(name, "Kyrian");
+    assert_eq!(soulbind_count, 3);
 }
 
 #[test]
@@ -573,6 +574,20 @@ fn test_c_covenants_get_covenant_ids() {
     assert_eq!((a, b, c, d), (1, 2, 3, 4));
 }
 
+#[test]
+fn test_c_specialization_info_get_spec_ids_returns_table() {
+    let env = env();
+    let is_table: bool = env
+        .eval(
+            r#"
+            local specs = C_SpecializationInfo.GetSpecIDs(1)
+            return type(specs) == "table"
+            "#,
+        )
+        .unwrap();
+    assert!(is_table);
+}
+
 // ============================================================================
 // C_Soulbinds
 // ============================================================================
@@ -597,9 +612,9 @@ fn test_c_soulbinds_get_soulbind_data_defaults() {
             "#,
         )
         .unwrap();
-    assert_eq!(id, 0);
-    assert_eq!(name, "");
-    assert_eq!(covenant_id, 0);
+    assert_eq!(id, 1);
+    assert_eq!(name, "Pelagos");
+    assert_eq!(covenant_id, 1);
 }
 
 #[test]

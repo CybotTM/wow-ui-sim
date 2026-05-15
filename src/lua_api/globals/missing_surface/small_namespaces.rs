@@ -15,7 +15,7 @@
 //! - `C_VignetteInfo.*` — empty vignette set for world-map refreshes
 //! - `C_EventUtils.*` — backed by the generated WoW event registry
 
-use super::ensure_namespace;
+use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
@@ -445,17 +445,15 @@ fn c_covenants_get_covenant_data(state: &mut LuaState) -> LuaResult<u32> {
         Val::Num(value) if value.is_finite() => value as i32,
         _ => 0,
     };
-    let (id, name) = match covenant_id {
-        1 => (1, "Kyrian"),
-        2 => (2, "Venthyr"),
-        3 => (3, "Night Fae"),
-        4 => (4, "Necrolord"),
-        _ => (0, "None"),
-    };
+    let (id, name, texture_kit, soulbind_ids) = covenant_info(covenant_id);
     let covenant = create_table(state);
     let name = create_string(state, name);
+    let texture_kit = create_string(state, texture_kit);
+    let soulbinds = soulbind_ids_table(state, soulbind_ids);
     table_set(state, covenant, "ID", Val::Num(id as f64));
     table_set(state, covenant, "name", name);
+    table_set(state, covenant, "textureKit", texture_kit);
+    table_set(state, covenant, "soulbindIDs", soulbinds);
     state.push(covenant);
     Ok(1)
 }
@@ -488,13 +486,65 @@ fn c_soulbinds_get_active_soulbind_id(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_soulbinds_get_soulbind_data(state: &mut LuaState) -> LuaResult<u32> {
+    let soulbind_id = match crate::lua_bridge::stack_val(state, 1) {
+        Val::Num(value) if value.is_finite() => value as i32,
+        _ => 0,
+    };
+    let (id, name, covenant_id, texture_kit) = soulbind_info(soulbind_id);
     let soulbind = create_table(state);
-    let name = create_string(state, "");
-    table_set(state, soulbind, "ID", Val::Num(0.0));
+    let name = create_string(state, name);
+    let description = create_string(state, "");
+    let texture_kit = create_string(state, texture_kit);
+    let tree = create_table(state);
+    let model_scene_data = create_table(state);
+    table_set(state, soulbind, "ID", Val::Num(id as f64));
     table_set(state, soulbind, "name", name);
-    table_set(state, soulbind, "covenantID", Val::Num(0.0));
+    table_set(state, soulbind, "description", description);
+    table_set(state, soulbind, "textureKit", texture_kit);
+    table_set(state, soulbind, "covenantID", Val::Num(covenant_id as f64));
+    table_set(state, soulbind, "unlocked", Val::Bool(true));
+    table_set(state, soulbind, "cvarIndex", Val::Num(0.0));
+    table_set(state, soulbind, "tree", tree);
+    table_set(state, soulbind, "modelSceneData", model_scene_data);
+    table_set(state, soulbind, "activationSoundKitID", Val::Num(0.0));
     state.push(soulbind);
     Ok(1)
+}
+
+fn covenant_info(covenant_id: i32) -> (i32, &'static str, &'static str, &'static [i32]) {
+    match covenant_id {
+        1 => (1, "Kyrian", "Kyrian", &[1, 2, 3]),
+        2 => (2, "Venthyr", "Venthyr", &[4, 5, 6]),
+        3 => (3, "Night Fae", "NightFae", &[7, 8, 9]),
+        4 => (4, "Necrolord", "Necrolord", &[10, 11, 12]),
+        _ => (0, "None", "", &[]),
+    }
+}
+
+fn soulbind_ids_table(state: &mut LuaState, soulbind_ids: &[i32]) -> Val {
+    let table = create_table(state);
+    for (index, soulbind_id) in soulbind_ids.iter().copied().enumerate() {
+        set_table_array(state, table, index as i64 + 1, Val::Num(soulbind_id as f64));
+    }
+    table
+}
+
+fn soulbind_info(soulbind_id: i32) -> (i32, &'static str, i32, &'static str) {
+    match soulbind_id {
+        1 => (1, "Pelagos", 1, "Pelagos"),
+        2 => (2, "Kleia", 1, "Kleia"),
+        3 => (3, "Forgelite Prime Mikanikos", 1, "Mikanikos"),
+        4 => (4, "Nadjia the Mistblade", 2, "Nadjia"),
+        5 => (5, "Theotar the Mad Duke", 2, "Theotar"),
+        6 => (6, "General Draven", 2, "Draven"),
+        7 => (7, "Niya", 3, "Niya"),
+        8 => (8, "Dreamweaver", 3, "Dreamweaver"),
+        9 => (9, "Korayn", 3, "Korayn"),
+        10 => (10, "Plague Deviser Marileth", 4, "Marileth"),
+        11 => (11, "Emeni", 4, "Emeni"),
+        12 => (12, "Bonesmith Heirmir", 4, "Heirmir"),
+        _ => (0, "", 0, ""),
+    }
 }
 
 fn c_soulbinds_get_conduit_collection(state: &mut LuaState) -> LuaResult<u32> {
