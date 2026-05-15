@@ -58,7 +58,15 @@ pub(super) fn get_num_children(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let count = {
         let sim = borrow_state(state)?;
-        sim.widgets.get(id).map(|f| f.children.len()).unwrap_or(0) as i32
+        sim.widgets
+            .get(id)
+            .map(|f| {
+                f.children
+                    .iter()
+                    .filter(|&&cid| !is_region_type(&sim, cid))
+                    .count()
+            })
+            .unwrap_or(0) as i32
     };
     count.into_stack(state)
 }
@@ -69,7 +77,13 @@ pub(super) fn get_children(state: &mut LuaState) -> LuaResult<u32> {
         let sim = borrow_state(state)?;
         sim.widgets
             .get(id)
-            .map(|f| f.children.clone())
+            .map(|f| {
+                f.children
+                    .iter()
+                    .copied()
+                    .filter(|&cid| !is_region_type(&sim, cid))
+                    .collect::<Vec<_>>()
+            })
             .unwrap_or_default()
     };
     let count = children.len() as u32;

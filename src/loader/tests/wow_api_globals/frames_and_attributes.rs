@@ -152,6 +152,32 @@ fn test_create_texture_exposes_core_visual_methods() {
 }
 
 #[test]
+fn test_get_children_excludes_layer_regions() {
+    let env = WowLuaEnv::new().unwrap();
+    let (num_children, num_regions, first_child_key, first_region_key): (i64, i64, String, String) =
+        env.eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            local child = CreateFrame("Frame", nil, frame)
+            child:SetParentKey("childFrame")
+            local texture = frame:CreateTexture()
+            texture:SetParentKey("regionTexture")
+            local fontString = frame:CreateFontString()
+            fontString:SetParentKey("regionText")
+            return frame:GetNumChildren(), frame:GetNumRegions(),
+                ({ frame:GetChildren() })[1]:GetParentKey(),
+                ({ frame:GetRegions() })[1]:GetParentKey()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(num_children, 1);
+    assert_eq!(num_regions, 2);
+    assert_eq!(first_child_key, "childFrame");
+    assert_eq!(first_region_key, "regionTexture");
+}
+
+#[test]
 fn test_set_attribute_fires_on_attribute_changed() {
     let env = WowLuaEnv::new().unwrap();
     let (name_ty, seen_name, value_ty, seen_value, stored_ty, stored_value): (
