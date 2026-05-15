@@ -129,6 +129,7 @@ fn register_socket_and_currency_methods(
         state,
         table_ref,
         &[
+            ("GetBackpackToken", c_tooltip_get_backpack_token),
             ("GetCurrencyByID", c_tooltip_get_currency_by_id),
             ("GetCurrencyToken", c_tooltip_get_currency_token),
             ("GetSocketedItem", c_tooltip_get_socketed_item),

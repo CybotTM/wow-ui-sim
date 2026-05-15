@@ -77,6 +77,10 @@ pub(super) fn c_tooltip_get_currency_token(state: &mut LuaState) -> LuaResult<u3
     Ok(1)
 }
 
+pub(super) fn c_tooltip_get_backpack_token(state: &mut LuaState) -> LuaResult<u32> {
+    c_tooltip_get_currency_token(state)
+}
+
 pub(super) fn c_tooltip_get_item(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip = tooltip_for_item_source(state, stack_val(state, 1));
     state.push(tooltip);

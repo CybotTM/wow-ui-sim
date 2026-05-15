@@ -526,6 +526,33 @@ fn test_toggle_backpack_bootstrap_token_ui_does_not_nil_error() {
 }
 
 #[test]
+fn test_backpack_token_hover_populates_tooltip() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    install_test_error_handler(&env);
+    clear_recorded_lua_errors(&env);
+
+    env.exec(
+        r#"
+        GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+        GameTooltip:SetBackpackToken(1)
+        if not GameTooltip:IsShown() then
+            error("SetBackpackToken did not show GameTooltip")
+        end
+        if GameTooltip:NumLines() == 0 then
+            error("SetBackpackToken did not populate GameTooltip")
+        end
+        local info = C_TooltipInfo.GetBackpackToken(1)
+        if not info or not info.lines or not info.lines[1] then
+            error("C_TooltipInfo.GetBackpackToken did not return tooltip lines")
+        end
+        "#,
+    )
+    .unwrap();
+
+    assert_no_bag_open_errors(&env, "SetBackpackToken");
+}
+
+#[test]
 fn test_default_backpack_seed_items_do_not_use_question_mark_icons() {
     let env = setup_env();
     install_test_error_handler(&env);

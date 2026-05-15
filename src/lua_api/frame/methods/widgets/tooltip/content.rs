@@ -404,6 +404,13 @@ pub(super) fn set_bag_item(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
+pub(super) fn set_backpack_token(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let index = stack_val(state, 2);
+    let _ = populate_tooltip_from_method(state, tooltip_id, "GetBackpackToken", &[index], None)?;
+    Ok(0)
+}
+
 pub(super) fn set_currency_token(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
     let index = stack_val(state, 2);

@@ -41,7 +41,6 @@ C_TooltipInfo.GetArtifactPowerByID
 C_TooltipInfo.GetAzeriteEssence
 C_TooltipInfo.GetAzeriteEssenceSlot
 C_TooltipInfo.GetAzeritePower
-C_TooltipInfo.GetBackpackToken
 C_TooltipInfo.GetBagItemChild
 C_TooltipInfo.GetBuybackItem
 C_TooltipInfo.GetCompanionPet

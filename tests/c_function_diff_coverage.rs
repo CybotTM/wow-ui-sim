@@ -61,6 +61,7 @@ fn diff_c_functions_missing_excludes_reconciled_high_impact_functions() {
         "C_TooltipInfo.GetSocketGem",
         "C_TooltipInfo.GetExistingSocketGem",
         "C_TooltipInfo.GetWorldCursor",
+        "C_TooltipInfo.GetBackpackToken",
     ];
 
     for function_name in expected_absent {
@@ -91,6 +92,7 @@ fn reconciled_high_impact_c_functions_exist_at_runtime() {
                 { "C_TooltipInfo", "GetSocketGem" },
                 { "C_TooltipInfo", "GetExistingSocketGem" },
                 { "C_TooltipInfo", "GetWorldCursor" },
+                { "C_TooltipInfo", "GetBackpackToken" },
             }
 
             for _, expectation in ipairs(expectations) do
