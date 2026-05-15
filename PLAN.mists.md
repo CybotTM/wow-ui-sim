@@ -1,6 +1,7 @@
 # Goal
 
 - [x] Fix the Mists CharacterFrame stale pet availability path so `CharacterFrameTab2` hides even when the panel opens after the original `PET_UI_UPDATE` event has already fired.
+- [x] Run the AllTheThings Currency/Token installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the DeModal LFG/LFR installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the Leatrix Plus PvP installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the Leatrix Maps Battlefield Map installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
