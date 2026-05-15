@@ -25,6 +25,34 @@ use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+const AFFIX_NAMES: &[(i32, &str)] = &[
+    (2, "Skittish"),
+    (3, "Volcanic"),
+    (4, "Necrotic"),
+    (5, "Teeming"),
+    (6, "Raging"),
+    (7, "Bolstering"),
+    (8, "Sanguine"),
+    (9, "Tyrannical"),
+    (10, "Fortified"),
+    (11, "Bursting"),
+    (12, "Grievous"),
+    (13, "Explosive"),
+    (14, "Quaking"),
+    (120, "Awakened"),
+    (121, "Prideful"),
+    (122, "Inspiring"),
+    (123, "Spiteful"),
+    (124, "Storming"),
+    (147, "Xal'atath's Guile"),
+    (148, "Xal'atath's Bargain: Ascendant"),
+    (152, "Challenger's Peril"),
+    (158, "Xal'atath's Bargain: Voidbound"),
+    (159, "Xal'atath's Bargain: Oblivion"),
+    (160, "Xal'atath's Bargain: Devour"),
+    (162, "Xal'atath's Bargain: Pulsar"),
+];
+
 pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, state.global, "GetAffixInfo", get_affix_info)?;
     let ns = ensure_namespace(state, "C_MythicPlus")?;
@@ -93,27 +121,9 @@ fn get_affix_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn affix_name(affix_id: i32) -> Option<&'static str> {
-    match affix_id {
-        2 => Some("Skittish"),
-        3 => Some("Volcanic"),
-        4 => Some("Necrotic"),
-        5 => Some("Teeming"),
-        6 => Some("Raging"),
-        7 => Some("Bolstering"),
-        8 => Some("Sanguine"),
-        9 => Some("Tyrannical"),
-        10 => Some("Fortified"),
-        11 => Some("Bursting"),
-        12 => Some("Grievous"),
-        13 => Some("Explosive"),
-        14 => Some("Quaking"),
-        120 => Some("Awakened"),
-        121 => Some("Prideful"),
-        122 => Some("Inspiring"),
-        123 => Some("Spiteful"),
-        124 => Some("Storming"),
-        _ => None,
-    }
+    AFFIX_NAMES
+        .iter()
+        .find_map(|(id, name)| (*id == affix_id).then_some(*name))
 }
 
 fn affix_icon(affix_id: i32) -> i32 {
