@@ -150,6 +150,7 @@ under test.
 | `Auctionator` + normal SavedVariables | Interface options | Passed after the Plater Interface Options shard; per-panel `lua-errors` length `0`, visible `SettingsPanel` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/auctionator-interface-options-with-saved-vars-after-plater-interface-options/Auctionator/interface-options/` |
 | `Auctionator` + normal SavedVariables | Mail: inbox, send, attachments, COD | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/auctionator-mail-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/auctionator-mail-with-saved-vars-after-castspell/Auctionator/mail/` |
 | `Plater` + normal SavedVariables | Nameplates | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/plater-nameplates-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/plater-nameplates-with-saved-vars-after-castspell/Plater/nameplates/` |
+| `Plater` + normal SavedVariables | AddOn list and UI management LoD panels | Passed after the Leatrix_Plus AddOn List shard; per-panel `lua-errors` length `0`, visible `AddonList` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/plater-addon-list-with-saved-vars-after-leatrix-plus-addon-list/Plater/addon-list/` |
 | `Plater` + normal SavedVariables | Interface options | Passed after the Leatrix_Plus Interface Options shard; per-panel `lua-errors` length `0`, visible `SettingsPanel` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/plater-interface-options-with-saved-vars-after-leatrix-plus-interface-options/Plater/interface-options/` |
 | `Plater` + normal SavedVariables | Action bars, micro menu, bag bar, status bars | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/plater-action-bars-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/plater-action-bars-with-saved-vars-after-castspell/Plater/action-bars/` |
 | `Leatrix_Maps` + normal SavedVariables | World map | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/leatrix-maps-world-map-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/leatrix-maps-world-map-with-saved-vars-after-castspell/Leatrix_Maps/world-map/` |
@@ -193,7 +194,7 @@ has at least one bounded panel sample with normal SavedVariables enabled:
 | `DialogueUI` | Quest choice, AddOn List, Interface Options, Quest log |
 | `Leatrix_Maps` | World Map, AddOn List, Interface Options, Quest log |
 | `Leatrix_Plus` | Spellbook/professions, AddOn List, Interface Options, TradeSkill |
-| `Plater` | Nameplates, Interface Options, Action bars |
+| `Plater` | Nameplates, AddOn List, Interface Options, Action bars |
 | `SimpleItemLevel` | Character, Interface Options, Inspect/Guild Control |
 
 Local enforcement now exists in
