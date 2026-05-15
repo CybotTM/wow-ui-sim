@@ -119,6 +119,7 @@ static SUPPLEMENTAL_CURRENCY_NAMES: &[(i32, &str)] = &[
     (1533, "Wakening Essence"),
     (1710, "Seafarer's Dubloon"),
     (1580, "Seal of Wartorn Fate"),
+    (1560, "War Resources"),
     (1587, "War Supplies"),
     (1716, "Honorbound Service Medal"),
     (1717, "7th Legion Service Medal"),
