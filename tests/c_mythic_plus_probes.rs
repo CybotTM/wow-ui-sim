@@ -56,6 +56,24 @@ fn get_current_season_returns_14() {
     assert_eq!(season, 14);
 }
 
+// ── C_ChallengeMode map probes ────────────────────────────────────────────────
+
+#[test]
+fn challenge_mode_get_map_table_returns_iterable_table() {
+    let env = env();
+    let result: bool = env
+        .eval(
+            r#"
+            local maps = C_ChallengeMode.GetMapTable()
+            for _ in ipairs(maps) do
+            end
+            return type(maps) == "table"
+            "#,
+        )
+        .unwrap();
+    assert!(result);
+}
+
 // ── GetLastWeeklyChest ───────────────────────────────────────────────────────
 
 #[test]

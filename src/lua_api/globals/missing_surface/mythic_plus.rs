@@ -56,6 +56,7 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
     table_set_rust_fn_static(state, ns, "RequestMapInfo", noop)?;
     table_set_rust_fn_static(state, ns, "RequestRewards", noop)?;
     let challenge_mode = ensure_namespace(state, "C_ChallengeMode")?;
+    table_set_rust_fn_static(state, challenge_mode, "GetMapTable", get_map_table)?;
     table_set_rust_fn_static(
         state,
         challenge_mode,
@@ -67,6 +68,12 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
 
 fn noop(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+fn get_map_table(state: &mut LuaState) -> LuaResult<u32> {
+    let maps = create_table(state);
+    state.push(maps);
+    Ok(1)
 }
 
 fn get_current_affixes(state: &mut LuaState) -> LuaResult<u32> {
