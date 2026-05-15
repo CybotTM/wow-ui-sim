@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-14] add | Hybrid scrollbar thumb texture
+
+Created `investigations/hybrid-scrollbar-thumb-texture.md` after replacing the
+HybridScrollBar-specific placeholder fallback with XML-backed slider
+`<ThumbTexture>` application. Also documented the SharedXML test helper bug:
+tests were pointed at removed `Interface/BlizzardUI` instead of the simulator's
+Blizzard UI cache.
+
 ## [2026-05-13] update | EditMode active profile fallback
 
 Updated `investigations/editmode-layout.md` with the C_EditMode active profile

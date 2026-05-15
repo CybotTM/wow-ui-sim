@@ -95,6 +95,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[tooltip-double-shell]] | Fake bootstrap `NineSlice` plus Rust fallback shell caused duplicate tooltip chrome; Lua-owned shell still needs center fill |
 | [[glow-effects]] | Additive blending end-to-end; one gap: SetBorderBlendMode missing |
 | [[global-frame-index]] | Lazy `_G` lookup design; Phase 1 done, Phases 2-3 planned |
+| [[hybrid-scrollbar-thumb-texture]] | Runtime templates apply Blizzard `<ThumbTexture>` XML to intrinsic slider thumb children instead of creating HybridScrollBar placeholders |
 | [[world-map-frame-level-rebuilds]] | World map pins were forcing no-op `SetFrameLevel()` invalidations; steady-state bucket rebuilds are now gone |
 | [[root-region-render-order]] | Root-level regions in the same draw layer must sort by ascending creation id; the old reverse-id tie breaker made newer root regions draw underneath older ones |
 | [[world-map-create-texture-sublevel]] | World-map textures were created at sublevel 0 because `CreateTexture(..., subLevel)` ignored its fourth argument; immediate `SetDrawLayer()` repair churn is now gone |

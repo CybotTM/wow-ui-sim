@@ -81,7 +81,6 @@ fn apply_runtime_frame_templates(
     template_chain::ensure_runtime_slider_children(state, frame_id)?;
     let fire_on_load = borrow_state(state)?.suppress_runtime_on_load_depth == 0;
     template_chain::apply_runtime_template_chain(state, frame_id, runtime_inherits, fire_on_load)?;
-    template_chain::ensure_runtime_hybrid_scroll_bar_children(state, frame_id, runtime_inherits)?;
     replay_runtime_template_parent_links(state, frame_id, runtime_inherits)
 }
 

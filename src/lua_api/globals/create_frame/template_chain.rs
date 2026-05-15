@@ -46,9 +46,7 @@ pub(crate) fn replay_runtime_template_parent_links(
     apply_template_parent_links(state, frame_id, &chain)
 }
 
-pub(crate) use runtime_synthetic_children::{
-    ensure_runtime_hybrid_scroll_bar_children, ensure_runtime_slider_children,
-};
+pub(crate) use runtime_synthetic_children::ensure_runtime_slider_children;
 
 pub(crate) fn apply_runtime_template_chain_with_frame_overrides(
     state: &mut LuaState,

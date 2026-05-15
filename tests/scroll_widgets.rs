@@ -382,6 +382,49 @@ fn test_hybrid_scroll_template() {
     assert!(has_down, "HybridScrollBar should have ScrollDownButton");
 }
 
+#[test]
+fn test_hybrid_scroll_template_applies_declared_thumb_texture() {
+    let env = env_with_shared_xml();
+    assert!(
+        wow_ui_sim::xml::get_template_chain("HybridScrollBarTemplate")
+            .iter()
+            .any(|entry| entry.frame.thumb_texture().is_some()),
+        "SharedXML should register HybridScrollBarTemplate's inherited ThumbTexture"
+    );
+
+    env.exec(
+        r#"
+        local hsb = CreateFrame("Slider", "TestHybridScrollBarThumbXml", UIParent, "HybridScrollBarTemplate")
+        hsb:SetSize(16, 200)
+    "#,
+    )
+    .unwrap();
+
+    let applied: (bool, bool, f32, f32, String) = env
+        .eval(
+            r#"
+        local thumb = TestHybridScrollBarThumbXml:GetThumbTexture()
+        return thumb == TestHybridScrollBarThumbXmlThumbTexture,
+            TestHybridScrollBarThumbXml.thumbTexture == thumb,
+            thumb:GetWidth(),
+            thumb:GetHeight(),
+            thumb:GetTextureFilePath() or ""
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        applied,
+        (
+            true,
+            true,
+            18.0,
+            24.0,
+            "Interface\\Buttons\\UI-ScrollBar-Knob".to_string()
+        )
+    );
+}
+
 // ============================================================================
 // TextureKitConstants Tests (requires SharedXML)
 // ============================================================================

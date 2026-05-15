@@ -15,47 +15,12 @@ pub(crate) fn ensure_runtime_slider_children(state: &mut LuaState, frame_id: u64
     ensure_named_child(state, frame_id, "ThumbTexture", WidgetType::Texture)
 }
 
-pub(crate) fn ensure_runtime_hybrid_scroll_bar_children(
-    state: &mut LuaState,
-    frame_id: u64,
-    inherits: Option<&str>,
-) -> LuaResult<()> {
-    if !inherits_hybrid_scroll_bar(inherits) {
-        return Ok(());
-    }
-
-    for key in ["ScrollBarTop", "ScrollBarMiddle", "ScrollBarBottom"] {
-        ensure_named_child(state, frame_id, key, WidgetType::Texture)?;
-    }
-    for key in ["ScrollUpButton", "ScrollDownButton"] {
-        ensure_named_child(state, frame_id, key, WidgetType::Button)?;
-    }
-    Ok(())
-}
-
 fn is_slider(state: &LuaState, frame_id: u64) -> LuaResult<bool> {
     let sim = borrow_state(state)?;
     Ok(sim
         .widgets
         .get(frame_id)
         .is_some_and(|widget| widget.widget_type == WidgetType::Slider))
-}
-
-fn inherits_hybrid_scroll_bar(inherits: Option<&str>) -> bool {
-    let Some(inherits) = inherits else {
-        return false;
-    };
-    if inherits.split(',').map(str::trim).any(|name| {
-        name == "HybridScrollBarTemplate" || name == "HybridScrollBarBackgroundTemplate"
-    }) {
-        return true;
-    }
-    crate::xml::get_template_chain(inherits)
-        .iter()
-        .any(|entry| {
-            entry.name == "HybridScrollBarTemplate"
-                || entry.name == "HybridScrollBarBackgroundTemplate"
-        })
 }
 
 fn ensure_named_child(
