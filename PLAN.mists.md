@@ -2,7 +2,7 @@
 
 - [x] Fix the Mists CharacterFrame stale pet availability path so `CharacterFrameTab2` hides even when the panel opens after the original `PET_UI_UPDATE` event has already fired.
 - [x] Fix Mists bag item hover so `ContainerFrameItemButton_OnEnter` can call `GameTooltip:SetBagItem` without throwing, and verify the current PVP toggle path stays clean.
-- [ ] Fix the Mists specialization panel so the selected spec background art does not get covered by the wrong overlay texture.
+- [x] Fix the Mists specialization panel so the selected spec background art does not get covered by the wrong overlay texture.
 - [x] Fix Mists micro menu clicks for the Game Menu and Shop buttons so clicking the visible icons opens the expected panel.
 - [ ] Fix Mists objective tracker quest-header/button textures so tracked objectives do not render as bare text on a black panel.
 - [x] Update the Pandaria installed-addon contract tests to accept the `mists-addon:<name>` source resolver rows now used by the local/fixture matrix.

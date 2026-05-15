@@ -29,7 +29,7 @@ pub(crate) fn build_texture_quads(
     if let Some(color) = f.color_texture {
         let fill_bounds = apply_bar_fill(bounds, bar_fill);
         if let Some(ref grad) = f.gradient {
-            push_gradient_quad(batch, fill_bounds, grad, alpha);
+            push_gradient_quad(batch, fill_bounds, color, grad, tint);
         } else {
             batch.push_solid(
                 fill_bounds,
@@ -103,30 +103,38 @@ fn emit_bar_fill_fallback(
 fn push_gradient_quad(
     batch: &mut QuadBatch,
     bounds: Rectangle,
+    base: crate::widget::Color,
     grad: &crate::widget::Gradient,
-    alpha: f32,
+    tint: [f32; 4],
 ) {
-    let min = &grad.min_color;
-    let max = &grad.max_color;
+    let min = tinted_gradient_color(base, grad.min_color, tint);
+    let max = tinted_gradient_color(base, grad.max_color, tint);
     let (top_color, bottom_color) = if grad.vertical {
-        (
-            [max.r, max.g, max.b, max.a * alpha],
-            [min.r, min.g, min.b, min.a * alpha],
-        )
+        (max, min)
     } else {
-        (
-            [min.r, min.g, min.b, min.a * alpha],
-            [min.r, min.g, min.b, min.a * alpha],
-        )
+        (min, min)
     };
     let colors = if grad.vertical {
         [top_color, top_color, bottom_color, bottom_color]
     } else {
-        let right = [max.r, max.g, max.b, max.a * alpha];
-        let left = [min.r, min.g, min.b, min.a * alpha];
+        let right = max;
+        let left = min;
         [left, right, right, left]
     };
     batch.push_gradient(bounds, colors);
+}
+
+fn tinted_gradient_color(
+    base: crate::widget::Color,
+    stop: crate::widget::Color,
+    tint: [f32; 4],
+) -> [f32; 4] {
+    [
+        base.r * stop.r * tint[0],
+        base.g * stop.g * tint[1],
+        base.b * stop.b * tint[2],
+        base.a * stop.a * tint[3],
+    ]
 }
 
 /// Emit a textured quad with atlas cropping, three-slice, tiling, rotation, desaturation.
@@ -515,7 +523,7 @@ mod tests {
     use crate::atlas::get_render_atlas_info;
     use crate::iced_app::slice_render::{tile_slice_center_height, tile_slice_center_width};
     use crate::render::QuadBatch;
-    use crate::widget::{Frame, WidgetType};
+    use crate::widget::{Color, Frame, Gradient, WidgetType};
     use iced::{Point, Rectangle, Size};
 
     fn texture_frame_with_atlas(name: &str) -> Frame {
@@ -538,6 +546,30 @@ mod tests {
             tint: [1.0, 1.0, 1.0, 1.0],
             blend: BlendMode::Alpha,
         }
+    }
+
+    #[test]
+    fn color_texture_gradient_tints_stops_with_base_color() {
+        let mut batch = QuadBatch::new();
+        let mut frame = Frame::new(WidgetType::Texture, None, None);
+        frame.color_texture = Some(Color::new(0.306, 0.133, 0.031, 0.5));
+        frame.gradient = Some(Gradient {
+            vertical: true,
+            min_color: Color::new(1.0, 1.0, 1.0, 0.0),
+            max_color: Color::new(1.0, 1.0, 1.0, 0.8),
+        });
+
+        build_texture_quads(
+            &mut batch,
+            Rectangle::new(Point::ORIGIN, Size::new(430.0, 200.0)),
+            &frame,
+            None,
+            1.0,
+        );
+
+        assert_eq!(batch.vertices.len(), 4);
+        assert_eq!(batch.vertices[0].color, [0.306, 0.133, 0.031, 0.4]);
+        assert_eq!(batch.vertices[2].color, [0.306, 0.133, 0.031, 0.0]);
     }
 
     #[test]
