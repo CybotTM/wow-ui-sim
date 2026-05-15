@@ -80,7 +80,7 @@ mod tests {
     }
 
     #[test]
-    fn post_load_clears_main_backpack_slot_normal_textures_after_update() {
+    fn post_load_keeps_main_backpack_slot_normal_textures_after_update() {
         let env = WowLuaEnv::new().expect("env");
         env.exec(
             r#"
@@ -114,19 +114,19 @@ mod tests {
         )
         .expect("wrapped container updates should run");
 
-        let (backpack_cleared, other_bag_kept, original_called): (bool, bool, bool) = env
+        let (backpack_kept, other_bag_kept, original_called): (bool, bool, bool) = env
             .eval(
                 r#"
-                return ContainerFrame1Item1:GetNormalTexture():GetTexture() == nil
-                   and ContainerFrame1Item2:GetNormalTexture():GetTexture() == nil,
+                return ContainerFrame1Item1:GetNormalTexture():GetTexture() ~= nil
+                   and ContainerFrame1Item2:GetNormalTexture():GetTexture() ~= nil,
                    ContainerFrame2Item1:GetNormalTexture():GetTexture() ~= nil,
                    __mists_test_last_updated_container == "ContainerFrame2"
                 "#,
             )
             .expect("normal texture probe should run");
         assert!(
-            backpack_cleared,
-            "main backpack item buttons should rely on the backpack background slot wells"
+            backpack_kept,
+            "main backpack item buttons should keep their authored Mists quickslot normal art"
         );
         assert!(
             other_bag_kept,

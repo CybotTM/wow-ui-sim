@@ -9,6 +9,13 @@ tracking regression. EditMode profile cache files are not Lua SavedVariables, so
 startup now loads them through a separate WTF cache path when Lua SavedVariables
 are disabled.
 
+## [2026-05-15] update | Mists backpack slot chrome
+
+Updated `investigations/backpack-background-texture.md` with the Mists-specific
+container path: bag ID 0 uses `UI-BackpackBackground` and its item buttons still
+keep the authored `UI-Quickslot2` normal texture. Documented that clearing those
+normal textures in post-load code is the wrong fix for Mists slot chrome.
+
 ## [2026-05-14] add | Hybrid scrollbar thumb texture
 
 Created `investigations/hybrid-scrollbar-thumb-texture.md` after replacing the

@@ -128,3 +128,13 @@ simulator's container frame.
 
 - [[hero-spec-dialog-anchors]] — another `PortraitFrameFlatTemplate`-derived
   panel; useful for understanding how the Bg/NineSlice layers are wired.
+
+## Mists Note
+
+The Mists/Classic container path is different from the retail flat-panel path
+above. `ContainerFrame_GenerateFrame` selects
+`Interface\ContainerFrame\UI-BackpackBackground` for bag ID 0, and
+`ItemButtonTemplate` still gives every bag item button a `UI-Quickslot2`
+`NormalTexture`. Do not clear those normal textures in a post-load shim: doing
+so leaves only the baked backpack background wells and makes the main backpack
+slot chrome diverge from Blizzard's authored item-button template.

@@ -132,37 +132,6 @@ if rawget(_G, "__wow_sim_mists_spellbook_button_sizes_applied") ~= true then
   rawset(_G, "__wow_sim_mists_spellbook_button_sizes_applied", true)
 end
 
-local function ClearMainBackpackSlotNormalTextures(frame)
-  if not frame or type(frame.GetID) ~= "function" or frame:GetID() ~= 0 then
-    return
-  end
-
-  if type(frame.GetName) ~= "function" then
-    return
-  end
-
-  local frameName = frame:GetName()
-  local slotCount = frame.size or 0
-  for slot = 1, slotCount do
-    local button = rawget(_G, frameName .. "Item" .. slot)
-    if button and type(button.ClearNormalTexture) == "function" then
-      button:ClearNormalTexture()
-    end
-  end
-end
-
-if type(ContainerFrame_Update) == "function"
-   and rawget(_G, "__wow_sim_mists_backpack_slot_normals_wrapped") ~= true then
-  local originalContainerFrameUpdate = ContainerFrame_Update
-  function ContainerFrame_Update(frame, ...)
-    local result = originalContainerFrameUpdate(frame, ...)
-    ClearMainBackpackSlotNormalTextures(frame)
-    return result
-  end
-
-  rawset(_G, "__wow_sim_mists_backpack_slot_normals_wrapped", true)
-end
-
 local function HideInactivePvpReadyDialog()
   local dialog = rawget(_G, "PVPReadyDialog")
   if not dialog or not dialog.Hide then

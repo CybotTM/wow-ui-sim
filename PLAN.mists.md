@@ -97,6 +97,7 @@
 - [x] Fix the Mists main backpack regression where bag slots overlap and the backpack token badge throws `SetBackpackToken` nil errors.
 - [x] Fix the remaining Mists main backpack visual regression where empty backpack slot art appears compressed/overlaid even after `SetBackpackToken` no longer errors.
 - [x] Re-fix the Mists main backpack slot chrome so combined-backpack slot wells are not double-rendered with inherited `UI-Quickslot2` normal textures.
+- [x] Restore the authored Mists `UI-Quickslot2` normal textures on main backpack item buttons so the slot chrome follows Blizzard's item-button template instead of a post-load shim.
 - [ ] Run the full local installed-addon Mists panel parity matrix with normal SavedVariables from current clean state, retain artifacts, refresh references if they supersede older addon-panel samples, and fix or promote the first addon/panel failure instead of relying on prior shard evidence.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
