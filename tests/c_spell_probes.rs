@@ -105,6 +105,47 @@ fn test_get_spell_info_includes_cell_default_indicator_spells() {
 }
 
 #[test]
+fn test_get_spell_info_includes_cell_click_casting_resurrections() {
+    let env = env();
+    let names: Vec<String> = env
+        .eval(
+            r#"
+            local ids = {
+                61999,  -- Raise Ally
+                20484,  -- Rebirth
+                361227, -- Return
+                115178, -- Resuscitate
+                391054, -- Intercession
+                2006,   -- Resurrection
+                2008,   -- Ancestral Spirit
+                20707,  -- Soulstone
+            }
+            local names = {}
+            for i, spellID in ipairs(ids) do
+                local info = C_Spell.GetSpellInfo(spellID)
+                names[i] = info and info.name or ""
+            end
+            return names
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        names,
+        vec![
+            "Raise Ally",
+            "Rebirth",
+            "Return",
+            "Resuscitate",
+            "Intercession",
+            "Resurrection",
+            "Ancestral Spirit",
+            "Soulstone",
+        ]
+    );
+}
+
+#[test]
 fn test_get_spell_info_unknown_returns_nil() {
     let env = env();
     let is_nil: bool = env
