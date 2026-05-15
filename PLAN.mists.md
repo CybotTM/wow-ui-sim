@@ -92,7 +92,7 @@
 - [x] Run the final local non-CI Mists completion audit from current clean state, covering base `lua-errors`, retained panel artifact guards, installed-addon startup/panel tests, live-GUI smoke validation, and interaction coverage; promote any failure or weak evidence to a concrete top-priority task.
 - [x] Fix `scripts/test-mists-addon-panels.sh` so a successful full-addon sweep does not exit through the `interrupted` cleanup path after retaining complete artifacts.
 - [x] Route scripted Mists panel builds through a bounded cache target directory after the oversized repo-local `target/` cleanup, with fail-fast checks when `--skip-build` points at missing binaries.
-- [ ] Rebuild the Mists GUI runner in the bounded cache target, rerun the installed-addon Mists panel matrix from the first unproven addon (`BlizzMove`), and fix or promote the first real panel failure.
+- [x] Rebuild the Mists GUI runner in the bounded cache target, rerun the installed-addon Mists panel matrix from the first unproven addon (`BlizzMove`), and fix or promote the first real panel failure.
 - [ ] Run the full local installed-addon Mists panel parity matrix with normal SavedVariables from current clean state, retain artifacts, refresh references if they supersede older addon-panel samples, and fix or promote the first addon/panel failure instead of relying on prior shard evidence.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
