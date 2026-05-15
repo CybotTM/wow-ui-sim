@@ -317,6 +317,11 @@ pub fn compute_frame_rect_cached(
         return cached;
     }
 
+    // Break parent/anchor cycles. Real WoW tolerates invalid layout graphs
+    // without recursing forever; the unresolved edge falls back to zero rect
+    // for the recursive leg, then the outer frame result overwrites it.
+    cache.insert(id, missing_frame_layout());
+
     let result = registry
         .get(id)
         .map(|frame| {
