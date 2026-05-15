@@ -177,8 +177,8 @@ fn assert_manifest_row_matches_target(target: &PandariaAddonTarget, row: &[&str]
     assert_eq!(row[4], ".", "{} local subpath should be root", target.name);
     assert_eq!(
         row[2],
-        format!("local:{}/{}", INSTALLED_ADDON_ROOT, target.name),
-        "{} manifest URL should point at the installed addon directory",
+        format!("mists-addon:{}", target.name),
+        "{} manifest URL should use the installed-or-fixture Mists resolver",
         target.name
     );
 }

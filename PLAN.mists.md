@@ -2,6 +2,8 @@
 
 - [x] Fix the Mists CharacterFrame stale pet availability path so `CharacterFrameTab2` hides even when the panel opens after the original `PET_UI_UPDATE` event has already fired.
 - [x] Fix Mists bag item hover so `ContainerFrameItemButton_OnEnter` can call `GameTooltip:SetBagItem` without throwing, and verify the current PVP toggle path stays clean.
+- [x] Update the Pandaria installed-addon contract tests to accept the `mists-addon:<name>` source resolver rows now used by the local/fixture matrix.
+- [ ] Reproduce and fix the installed-addon AchievementFrame `expected Lua closure in execute` path from `ToggleAchievementFrame`, then retain focused Mists coverage for the clean route.
 - [x] Run the AllTheThings Currency/Token installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the DeModal LFG/LFR installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the Leatrix Plus PvP installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
