@@ -97,6 +97,7 @@ fn append_single_texture<'a>(
         &tex_name,
         &resolved,
         parent_name,
+        name_parent,
         &ct.draw_layer,
         ct.is_mask,
         ct.is_line,
@@ -222,6 +223,7 @@ fn append_single_fontstring(
     let code = build_fontstring_lua(
         fontstring,
         parent_name,
+        name_parent,
         draw_layer,
         sub_level,
         &fs_name,

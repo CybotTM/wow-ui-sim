@@ -251,6 +251,8 @@ fn button_texture_should_show(
 pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let texture_val = stack_val(state, 2);
+    let horiz_tile = opt_bool(state, 3);
+    let vert_tile = opt_bool(state, 4);
     let mut sim = borrow_state_mut(state)?;
     let mut order_changed = false;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
@@ -267,13 +269,16 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
             || frame.texture_file_data_id != file_data_id
             || frame.color_texture.is_some()
             || frame.atlas.is_some()
-            || frame.atlas_tex_coords.is_some();
+            || frame.atlas_tex_coords.is_some()
+            || horiz_tile.is_some_and(|enabled| frame.horiz_tile != enabled)
+            || vert_tile.is_some_and(|enabled| frame.vert_tile != enabled);
         frame.texture = path;
         frame.texture_file_data_id = file_data_id;
         frame.color_texture = None;
         clear_atlas_owned_tex_coords(frame);
         frame.atlas = None;
         frame.atlas_tex_coords = None;
+        apply_texture_tiling_flags(frame, horiz_tile, vert_tile);
         order_changed = changed && !had_render_source && has_render_source;
         if order_changed {
             frame.region_order = crate::widget::next_region_order();
@@ -283,6 +288,19 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
         sim.invalidate_strata_buckets();
     }
     Ok(0)
+}
+
+fn apply_texture_tiling_flags(
+    frame: &mut crate::widget::Frame,
+    horiz_tile: Option<bool>,
+    vert_tile: Option<bool>,
+) {
+    if let Some(enabled) = horiz_tile {
+        frame.horiz_tile = enabled;
+    }
+    if let Some(enabled) = vert_tile {
+        frame.vert_tile = enabled;
+    }
 }
 
 fn clear_atlas_owned_tex_coords(frame: &mut crate::widget::Frame) {

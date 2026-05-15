@@ -48,6 +48,29 @@ fn test_set_get_texture_path() {
 }
 
 #[test]
+fn test_set_texture_applies_tiling_flags() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "TexSetTextureTiles");
+    env.exec(&format!(
+        r#"{tex}:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Border", true, false)"#
+    ))
+    .unwrap();
+
+    let (horiz_tile, vert_tile): (bool, bool) = env
+        .eval(&format!("return {tex}:GetHorizTile(), {tex}:GetVertTile()"))
+        .unwrap();
+
+    assert!(
+        horiz_tile,
+        "SetTexture(path, true, false) should enable horizontal tiling"
+    );
+    assert!(
+        !vert_tile,
+        "SetTexture(path, true, false) should leave vertical tiling disabled"
+    );
+}
+
+#[test]
 fn test_set_texture_nil_clears() {
     let env = env();
     let (_, tex) = setup_texture(&env, "TexNil");

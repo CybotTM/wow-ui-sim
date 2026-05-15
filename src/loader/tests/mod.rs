@@ -4,6 +4,7 @@ mod account_store;
 mod button_text;
 mod button_textures;
 mod lua_loading;
+mod runtime_template_anchors;
 mod runtime_template_parenting;
 mod runtime_template_xml;
 mod screen_selection;

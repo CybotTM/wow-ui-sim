@@ -8,25 +8,23 @@ use super::helpers::{
     lua_table_field_ref,
 };
 use super::helpers_anim::generate_animation_group_code;
-use std::fmt::Write;
 
-fn append_file_code(code: &mut String, texture: &crate::xml::TextureXml) {
+fn emit_file_code(texture: &crate::xml::TextureXml) -> String {
     if let Some(file) = &texture.file {
-        let _ = write!(
-            code,
+        return format!(
             r#"
         tex:SetTexture("{}")
         "#,
             escape_lua_string(file)
         );
     }
+    String::new()
 }
 
-fn append_atlas_code(code: &mut String, texture: &crate::xml::TextureXml, is_mask: bool) {
+fn emit_atlas_code(texture: &crate::xml::TextureXml, is_mask: bool) -> String {
     if let Some(atlas) = &texture.atlas {
         let use_atlas_size = texture.use_atlas_size.unwrap_or(is_mask);
-        let _ = write!(
-            code,
+        return format!(
             r#"
         tex:SetAtlas("{}", {})
         "#,
@@ -34,40 +32,36 @@ fn append_atlas_code(code: &mut String, texture: &crate::xml::TextureXml, is_mas
             use_atlas_size
         );
     }
+    String::new()
 }
 
-fn append_tex_coords_code(code: &mut String, texture: &crate::xml::TextureXml) {
+fn emit_tex_coords_code(texture: &crate::xml::TextureXml) -> String {
     if let Some(tc) = &texture.tex_coords {
         let left = tc.left.unwrap_or(0.0);
         let right = tc.right.unwrap_or(1.0);
         let top = tc.top.unwrap_or(0.0);
         let bottom = tc.bottom.unwrap_or(1.0);
-        let _ = write!(
-            code,
+        return format!(
             r#"
         tex:SetTexCoord({}, {}, {}, {})
         "#,
             left, right, top, bottom
         );
     }
+    String::new()
 }
 
-fn append_size_code(code: &mut String, texture: &crate::xml::TextureXml) {
+fn emit_size_code(texture: &crate::xml::TextureXml) -> String {
     if let Some(size) = &texture.size {
         let (x, y) = get_size_values(size);
-        match (x, y) {
-            (Some(x), Some(y)) => {
-                let _ = write!(code, "\n        tex:SetSize({}, {})\n        ", x, y);
-            }
-            (Some(x), None) => {
-                let _ = write!(code, "\n        tex:SetWidth({})\n        ", x);
-            }
-            (None, Some(y)) => {
-                let _ = write!(code, "\n        tex:SetHeight({})\n        ", y);
-            }
-            _ => {}
-        }
+        return match (x, y) {
+            (Some(x), Some(y)) => format!("\n        tex:SetSize({}, {})\n        ", x, y),
+            (Some(x), None) => format!("\n        tex:SetWidth({})\n        ", x),
+            (None, Some(y)) => format!("\n        tex:SetHeight({})\n        ", y),
+            _ => String::new(),
+        };
     }
+    String::new()
 }
 
 /// Generate Lua code for texture source (file or atlas) and size.
@@ -76,11 +70,13 @@ fn append_size_code(code: &mut String, texture: &crate::xml::TextureXml) {
 /// matching WoW behavior where masks auto-size from their atlas.  This matters
 /// because the mask frame must be larger than the icon so the icon samples only
 /// the opaque center of the mask texture.
-fn append_texture_source_code(code: &mut String, texture: &crate::xml::TextureXml, is_mask: bool) {
-    append_file_code(code, texture);
-    append_atlas_code(code, texture, is_mask);
-    append_tex_coords_code(code, texture);
-    append_size_code(code, texture);
+fn generate_texture_source_code(texture: &crate::xml::TextureXml, is_mask: bool) -> String {
+    let mut code = String::new();
+    code.push_str(&emit_file_code(texture));
+    code.push_str(&emit_atlas_code(texture, is_mask));
+    code.push_str(&emit_tex_coords_code(texture));
+    code.push_str(&emit_size_code(texture));
+    code
 }
 
 fn texture_color_method(texture: &crate::xml::TextureXml) -> &'static str {
@@ -91,9 +87,8 @@ fn texture_color_method(texture: &crate::xml::TextureXml) -> &'static str {
     }
 }
 
-fn append_named_color_code(code: &mut String, name: &str, color_method: &str) {
-    let _ = write!(
-        code,
+fn emit_named_color_code(name: &str, color_method: &str) -> String {
+    format!(
         r#"
         do
             local c = {name}
@@ -104,12 +99,11 @@ fn append_named_color_code(code: &mut String, name: &str, color_method: &str) {
         "#,
         name = name,
         color_method = color_method
-    );
+    )
 }
 
-fn append_rgba_color_code(code: &mut String, color: &crate::xml::ColorXml, color_method: &str) {
-    let _ = write!(
-        code,
+fn emit_rgba_color_code(color: &crate::xml::ColorXml, color_method: &str) -> String {
+    format!(
         r#"
         tex:{color_method}({}, {}, {}, {})
         "#,
@@ -118,23 +112,47 @@ fn append_rgba_color_code(code: &mut String, color: &crate::xml::ColorXml, color
         color.b.unwrap_or(1.0),
         color.a.unwrap_or(1.0),
         color_method = color_method
-    );
+    )
 }
 
-fn append_color_code(code: &mut String, texture: &crate::xml::TextureXml) {
+fn emit_color_code(texture: &crate::xml::TextureXml) -> String {
     let Some(color) = &texture.color else {
-        return;
+        return String::new();
     };
     let color_method = texture_color_method(texture);
 
     if let Some(name) = &color.color {
-        append_named_color_code(code, name, color_method);
+        emit_named_color_code(name, color_method)
     } else {
-        append_rgba_color_code(code, color, color_method);
+        emit_rgba_color_code(color, color_method)
     }
 }
 
-fn append_tiling_flags_code(code: &mut String, texture: &crate::xml::TextureXml) {
+fn emit_gradient_code(texture: &crate::xml::TextureXml) -> String {
+    let Some(gradient) = &texture.gradient else {
+        return String::new();
+    };
+    let orientation = gradient.orientation.as_deref().unwrap_or("VERTICAL");
+    let min = gradient.min_color.as_ref();
+    let max = gradient.max_color.as_ref();
+    format!(
+        r#"
+        tex:SetGradient("{}", {{ r = {}, g = {}, b = {}, a = {} }}, {{ r = {}, g = {}, b = {}, a = {} }})
+        "#,
+        escape_lua_string(orientation),
+        min.and_then(|color| color.r).unwrap_or(1.0),
+        min.and_then(|color| color.g).unwrap_or(1.0),
+        min.and_then(|color| color.b).unwrap_or(1.0),
+        min.and_then(|color| color.a).unwrap_or(1.0),
+        max.and_then(|color| color.r).unwrap_or(1.0),
+        max.and_then(|color| color.g).unwrap_or(1.0),
+        max.and_then(|color| color.b).unwrap_or(1.0),
+        max.and_then(|color| color.a).unwrap_or(1.0),
+    )
+}
+
+fn emit_tiling_flags_code(texture: &crate::xml::TextureXml) -> String {
+    let mut code = String::new();
     if texture.wants_horiz_tile() {
         code.push_str("\n        tex:SetHorizTile(true)\n        ");
     }
@@ -144,36 +162,40 @@ fn append_tiling_flags_code(code: &mut String, texture: &crate::xml::TextureXml)
     if texture.set_all_points == Some(true) {
         code.push_str("\n        tex:SetAllPoints(true)\n        ");
     }
+    code
 }
 
-fn append_parent_key_code(code: &mut String, texture: &crate::xml::TextureXml) {
+fn emit_parent_key_code(texture: &crate::xml::TextureXml) -> String {
+    let mut code = String::new();
     if let Some(key) = &texture.parent_key {
         let parent_field = lua_table_field_ref("parent", key);
-        let _ = write!(
-            code,
+        code.push_str(&format!(
             r#"
         {} = tex
         "#,
             parent_field
-        );
+        ));
     }
     if let Some(parent_array) = &texture.parent_array {
         let array_ref = lua_table_field_ref("parent", parent_array);
-        let _ = write!(
-            code,
+        code.push_str(&format!(
             r#"
         {array_ref} = {array_ref} or {{}}
         table.insert({array_ref}, tex)
         "#,
-        );
+        ));
     }
+    code
 }
 
 /// Generate Lua code for texture visual properties (color, tiling, parentKey).
-fn append_texture_visual_code(code: &mut String, texture: &crate::xml::TextureXml) {
-    append_color_code(code, texture);
-    append_tiling_flags_code(code, texture);
-    append_parent_key_code(code, texture);
+fn generate_texture_visual_code(texture: &crate::xml::TextureXml) -> String {
+    let mut code = String::new();
+    code.push_str(&emit_color_code(texture));
+    code.push_str(&emit_gradient_code(texture));
+    code.push_str(&emit_tiling_flags_code(texture));
+    code.push_str(&emit_parent_key_code(texture));
+    code
 }
 
 /// Generate Lua Mixin() calls for texture mixins (from inherits and direct mixin attr).
@@ -192,16 +214,14 @@ fn generate_mixin_code(texture: &crate::xml::TextureXml) -> String {
     code
 }
 
-fn append_create_header(
-    code: &mut String,
+fn emit_create_header(
     tex_name: &str,
     parent_name: &str,
     create_method: &str,
     draw_layer: &str,
     sub_level: i32,
-) {
-    let _ = write!(
-        code,
+) -> String {
+    let mut code = format!(
         r#"
         local parent = {}
         local tex = parent:{}("{}", "{}")
@@ -212,51 +232,58 @@ fn append_create_header(
         escape_lua_string(draw_layer)
     );
     if sub_level != 0 {
-        let _ = write!(
-            code,
+        code.push_str(&format!(
             "\n        tex:SetDrawLayer(\"{}\", {})\n        ",
             draw_layer, sub_level
-        );
+        ));
     }
+    code
 }
 
-fn append_line_thickness(code: &mut String, texture: &crate::xml::TextureXml, is_line: bool) {
+fn emit_line_thickness(texture: &crate::xml::TextureXml, is_line: bool) -> String {
     if is_line {
         if let Some(t) = texture.thickness {
-            let _ = write!(code, "\n        tex:SetThickness({})\n        ", t);
+            return format!("\n        tex:SetThickness({})\n        ", t);
         }
     }
+    String::new()
 }
 
-fn append_texture_visibility(code: &mut String, texture: &crate::xml::TextureXml) {
+fn emit_texture_visibility(texture: &crate::xml::TextureXml) -> String {
+    let mut code = String::new();
     if texture.hidden == Some(true) {
         code.push_str("\n        tex:Hide()\n        ");
     }
     if let Some(a) = texture.alpha {
-        let _ = write!(code, "\n        tex:SetAlpha({})\n        ", a);
+        code.push_str(&format!("\n        tex:SetAlpha({})\n        ", a));
     }
     if let Some(mode) = texture.effective_blend_mode() {
-        let _ = write!(code, "\n        tex:SetBlendMode(\"{}\")\n        ", mode);
+        code.push_str(&format!(
+            "\n        tex:SetBlendMode(\"{}\")\n        ",
+            mode
+        ));
     }
+    code
 }
 
-fn append_masked_textures(code: &mut String, texture: &crate::xml::TextureXml, is_mask: bool) {
+fn emit_masked_textures(texture: &crate::xml::TextureXml, is_mask: bool) -> String {
     if !is_mask {
-        return;
+        return String::new();
     }
+    let mut code = String::new();
     if let Some(ref masked) = texture.masked_textures {
         for entry in &masked.entries {
             if let Some(ref key) = entry.child_key {
                 let parent_field = lua_table_field_ref("parent", key);
-                let _ = write!(
-                    code,
+                code.push_str(&format!(
                     r#"
         if {parent_field} then {parent_field}:AddMaskTexture(tex) end
         "#,
-                );
+                ));
             }
         }
     }
+    code
 }
 
 /// Build the Lua code string that creates and configures a texture.
@@ -264,6 +291,7 @@ pub(super) fn build_texture_lua(
     tex_name: &str,
     texture: &crate::xml::TextureXml,
     parent_name: &str,
+    subst_parent_name: &str,
     draw_layer: &str,
     is_mask: bool,
     is_line: bool,
@@ -276,22 +304,14 @@ pub(super) fn build_texture_lua(
     } else {
         "CreateTexture"
     };
-    let mut code = String::with_capacity(1024);
-    append_create_header(
-        &mut code,
-        tex_name,
-        parent_name,
-        create_method,
-        draw_layer,
-        sub_level,
-    );
+    let mut code = emit_create_header(tex_name, parent_name, create_method, draw_layer, sub_level);
     code.push_str(&generate_mixin_code(texture));
-    append_line_thickness(&mut code, texture, is_line);
-    append_texture_source_code(&mut code, texture, is_mask);
-    append_texture_visual_code(&mut code, texture);
-    append_texture_anchors(&mut code, texture, parent_name);
-    append_texture_visibility(&mut code, texture);
-    append_masked_textures(&mut code, texture, is_mask);
+    code.push_str(&emit_line_thickness(texture, is_line));
+    code.push_str(&generate_texture_source_code(texture, is_mask));
+    code.push_str(&generate_texture_visual_code(texture));
+    append_texture_anchors(&mut code, texture, subst_parent_name);
+    code.push_str(&emit_texture_visibility(texture));
+    code.push_str(&emit_masked_textures(texture, is_mask));
     code.push_str(&super::xml_frame_codegen::generate_key_values_code(
         texture.key_values.as_ref(),
         "tex",
