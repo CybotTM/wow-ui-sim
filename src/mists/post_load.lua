@@ -65,6 +65,56 @@ if type(LoadMicroButtonTextures) == "function"
   rawset(_G, "__wow_sim_mists_micro_button_textures_wrapped", true)
 end
 
+if type(ToggleStoreUI) == "function"
+   and rawget(_G, "__wow_sim_mists_store_toggle_wrapped") ~= true then
+  local function syncStoreFrameVisibility(shown)
+    rawset(_G, "__wow_sim_mists_store_shown", shown and true or false)
+    pcall(LoadAddOn, "Blizzard_CatalogShop")
+    local catalogFrame = rawget(_G, "CatalogShopFrame")
+    if catalogFrame and type(catalogFrame.SetShown) == "function" then
+      catalogFrame:SetShown(shown and true or false)
+    end
+  end
+
+  local originalStoreFrameIsShown = StoreFrame_IsShown
+  function StoreFrame_IsShown()
+    if rawget(_G, "__wow_sim_mists_store_shown") == true then
+      return true
+    end
+    return originalStoreFrameIsShown and originalStoreFrameIsShown() or false
+  end
+
+  function ToggleStoreUI()
+    local wasShown = rawget(_G, "__wow_sim_mists_store_shown") == true
+    syncStoreFrameVisibility(not wasShown)
+    if type(UpdateMicroButtons) == "function" then
+      UpdateMicroButtons()
+    end
+  end
+
+  if StoreMicroButton and type(StoreMicroButton.SetScript) == "function" then
+    StoreMicroButton:SetScript("OnClick", function(self)
+      return ToggleStoreUI()
+    end)
+  end
+  if type(StoreMicroButtonMixin) == "table" then
+    StoreMicroButtonMixin.OnClick = function(self)
+      return ToggleStoreUI()
+    end
+  end
+
+  if type(SetStoreUIShown) == "function" then
+    function SetStoreUIShown(shown, ...)
+      syncStoreFrameVisibility(shown)
+      if type(UpdateMicroButtons) == "function" then
+        UpdateMicroButtons()
+      end
+    end
+  end
+
+  rawset(_G, "__wow_sim_mists_store_toggle_wrapped", true)
+end
+
 if RaidFrame and RaidFrame.RoleCount == nil then
   RaidFrame.RoleCount = CreateFrame("Frame", nil, RaidFrame)
   RaidFrame.RoleCount:Hide()

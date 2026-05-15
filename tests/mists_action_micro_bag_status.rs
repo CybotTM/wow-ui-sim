@@ -50,6 +50,23 @@ fn mists_action_micro_bag_and_status_bars_are_interactive() {
             UpdateMicroButtons()
             MicroButtonTooltipText(nil, nil)
 
+            MainMenuMicroButton:Click()
+            if not (GameMenuFrame and GameMenuFrame:IsShown()) then
+                error("MainMenuMicroButton click did not show GameMenuFrame")
+            end
+            MainMenuMicroButton:Click()
+            if GameMenuFrame:IsShown() then
+                error("MainMenuMicroButton second click did not hide GameMenuFrame")
+            end
+
+            StoreMicroButton:Click()
+            if not (CatalogShopFrame and CatalogShopFrame:IsShown()) then
+                error("StoreMicroButton click did not show CatalogShopFrame")
+            end
+            if not StoreFrame_IsShown() then
+                error("StoreMicroButton click did not update store shown state")
+            end
+
             if not MainMenuBarBackpackButton or not CharacterBag0Slot then
                 error("Mists bag bar buttons are missing")
             end
