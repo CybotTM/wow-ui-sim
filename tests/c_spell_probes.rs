@@ -39,6 +39,21 @@ fn test_get_spell_info_has_required_fields() {
 }
 
 #[test]
+fn test_get_spell_info_ebon_might_self_buff() {
+    let env = env();
+    let (name, icon_id): (String, i64) = env
+        .eval(
+            r#"
+            local info = C_Spell.GetSpellInfo(395296)
+            return info.name, info.iconID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Ebon Might");
+    assert_eq!(icon_id, 5061347);
+}
+
+#[test]
 fn test_get_spell_info_unknown_returns_nil() {
     let env = env();
     let is_nil: bool = env

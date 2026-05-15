@@ -74,6 +74,7 @@ pub mod specializations;
 pub mod spell_description_resolver;
 #[path = "../data/spell_descriptions.rs"]
 pub mod spell_descriptions;
+pub mod spell_lookup;
 #[path = "../data/spell_power.rs"]
 pub mod spell_power;
 #[path = "../data/spells.rs"]

@@ -56,7 +56,7 @@ use crate::lua_api::script_helpers::{
 };
 use crate::lua_api::state_types::CursorInfo;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
-use crate::spells;
+use crate::spell_lookup as spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
