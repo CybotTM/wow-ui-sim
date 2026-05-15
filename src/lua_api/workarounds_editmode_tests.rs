@@ -1692,6 +1692,331 @@ fn apply_system_anchors_replays_each_widescreen_action_bar_profile_row() {
 }
 
 #[test]
+fn apply_system_anchors_converts_raw_action_bar_icon_size_before_scaling() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                ActionBar = 0,
+            },
+            EditModeActionBarSetting = {
+                IconSize = 3,
+            },
+            ActionBarOrientation = {
+                Horizontal = 0,
+                Vertical = 1,
+            },
+            EditModeSettingDisplayType = {
+                Slider = 1,
+            },
+        }
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return true end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+        EditModeSettingDisplayInfoManager = {
+            GetSystemSettingDisplayInfoMap = function()
+                return {
+                    [Enum.EditModeActionBarSetting.IconSize] = {
+                        minValue = 50,
+                        maxValue = 200,
+                        stepSize = 10,
+                        ConvertValueForDisplay = function(self, value)
+                            return math.max(self.minValue, math.min(self.maxValue, (value * self.stepSize) + self.minValue))
+                        end,
+                    },
+                }
+            end,
+        }
+
+        local button = { container = {} }
+        function button.container:SetScale(value)
+            if value <= 0 then
+                error("container received non-positive scale")
+            end
+            self.scale = value
+        end
+
+        local frame = {
+            system = Enum.EditModeSystem.ActionBar,
+            systemIndex = 1,
+            systemInfo = {
+                settings = {
+                    { setting = Enum.EditModeActionBarSetting.IconSize, value = 0 },
+                },
+            },
+            actionButtons = { button },
+            Selection = {},
+            dirtySettings = {},
+        }
+        function frame:GetName()
+            return "MainActionBar"
+        end
+        function frame:SetHasActiveChanges() end
+        function frame:UpdateSettingMap()
+            -- Simulate startup frames whose Blizzard OnSystemLoad did not
+            -- populate settingDisplayInfoMap before the fast replay path.
+            self.settingMap = {}
+            for _, settingInfo in ipairs(self.systemInfo.settings) do
+                local displayInfo = self.settingDisplayInfoMap and self.settingDisplayInfoMap[settingInfo.setting]
+                self.settingMap[settingInfo.setting] = {
+                    value = settingInfo.value,
+                    displayValue = displayInfo and displayInfo:ConvertValueForDisplay(settingInfo.value) or nil,
+                }
+            end
+        end
+        function frame:GetSettingValue(setting, useRawValue)
+            local settingInfo = self.settingMap[setting]
+            if useRawValue then
+                return settingInfo and settingInfo.value
+            end
+            return settingInfo and (settingInfo.displayValue or settingInfo.value)
+        end
+        function frame:ApplySystemAnchor() end
+        function frame:EditModeSetScale(value)
+            if value <= 0 then
+                error("frame received non-positive scale")
+            end
+            self.editModeScale = value
+        end
+        function frame:Layout() end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+            InitSystemAnchors = function() end,
+            GetActiveLayoutSystemInfo = function()
+                return frame.systemInfo
+            end,
+        }
+        "#,
+    )
+    .expect("install raw icon-size replay stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply system anchors should convert raw icon size before scaling");
+
+    let (frame_scale, button_scale): (f64, f64) = env
+        .eval(
+            r#"
+            local frame = EditModeManagerFrame.registeredSystemFrames[1]
+            return frame.editModeScale, frame.actionButtons[1].container.scale
+            "#,
+        )
+        .expect("read replayed scales");
+
+    assert_eq!(frame_scale, 0.5);
+    assert_eq!(button_scale, 0.5);
+}
+
+#[test]
+fn apply_system_anchors_seeds_display_info_before_cast_bar_scale_replay() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                CastBar = 1,
+            },
+            EditModeCastBarSetting = {
+                BarSize = 0,
+                LockToPlayerFrame = 1,
+            },
+            EditModeSettingDisplayType = {
+                Slider = 1,
+            },
+        }
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+        EditModeSettingDisplayInfoManager = {
+            GetSystemSettingDisplayInfoMap = function()
+                return {
+                    [Enum.EditModeCastBarSetting.BarSize] = {
+                        minValue = 100,
+                        maxValue = 150,
+                        stepSize = 10,
+                        ConvertValueForDisplay = function(self, value)
+                            return math.max(self.minValue, math.min(self.maxValue, (value * self.stepSize) + self.minValue))
+                        end,
+                    },
+                }
+            end,
+        }
+
+        local frame = {
+            system = Enum.EditModeSystem.CastBar,
+            systemIndex = 1,
+            systemInfo = {
+                settings = {
+                    { setting = Enum.EditModeCastBarSetting.BarSize, value = 0 },
+                    { setting = Enum.EditModeCastBarSetting.LockToPlayerFrame, value = 0 },
+                },
+                anchorInfo = { point = "BOTTOM", relativeTo = UIParent, relativePoint = "BOTTOM", offsetX = 0, offsetY = 0 },
+            },
+            dirtySettings = {},
+        }
+        function frame:GetName()
+            return "PlayerCastingBarFrame"
+        end
+        function frame:SetHasActiveChanges() end
+        function frame:UpdateSettingMap()
+            self.settingMap = {}
+            for _, settingInfo in ipairs(self.systemInfo.settings) do
+                local displayInfo = self.settingDisplayInfoMap and self.settingDisplayInfoMap[settingInfo.setting]
+                self.settingMap[settingInfo.setting] = {
+                    value = settingInfo.value,
+                    displayValue = displayInfo and displayInfo:ConvertValueForDisplay(settingInfo.value) or nil,
+                }
+                self.dirtySettings[settingInfo.setting] = true
+            end
+        end
+        function frame:GetSettingValue(setting)
+            local settingInfo = self.settingMap[setting]
+            return settingInfo and (settingInfo.displayValue or settingInfo.value)
+        end
+        function frame:GetSettingValueBool(setting)
+            return self:GetSettingValue(setting) == 1
+        end
+        function frame:IsSettingDirty(setting)
+            return self.dirtySettings[setting]
+        end
+        function frame:SetScale(value)
+            if value <= 0 then
+                error("cast bar received non-positive scale")
+            end
+            self.scale = value
+        end
+        function frame:ApplySystemAnchor() end
+        function frame:UpdateSystemSetting(setting)
+            if setting == Enum.EditModeCastBarSetting.BarSize then
+                self:SetScale(self:GetSettingValue(setting) / 100)
+            elseif setting == Enum.EditModeCastBarSetting.LockToPlayerFrame then
+                error("lock replay should not call full Blizzard cast-bar update")
+            end
+        end
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+            InitSystemAnchors = function() end,
+            GetActiveLayoutSystemInfo = function()
+                return frame.systemInfo
+            end,
+        }
+        "#,
+    )
+    .expect("install cast bar raw-size replay stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply system anchors should seed display info before cast bar scale replay");
+
+    let scale: f64 = env
+        .eval("return EditModeManagerFrame.registeredSystemFrames[1].scale")
+        .expect("read converted cast bar scale");
+
+    assert_eq!(scale, 1.0);
+}
+
+#[test]
+fn apply_system_anchors_replays_player_frame_size_without_cast_bar_side_effect() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = { UnitFrame = 2 },
+            EditModeUnitFrameSetting = { FrameSize = 16 },
+            EditModeUnitFrameSystemIndices = { Player = 1 },
+        }
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+        EditModeSettingDisplayInfoManager = {
+            GetSystemSettingDisplayInfoMap = function()
+                return {
+                    [Enum.EditModeUnitFrameSetting.FrameSize] = {
+                        minValue = 100,
+                        maxValue = 200,
+                        stepSize = 5,
+                        ConvertValueForDisplay = function(self, value)
+                            return math.max(self.minValue, math.min(self.maxValue, (value * self.stepSize) + self.minValue))
+                        end,
+                    },
+                }
+            end,
+        }
+        PlayerCastingBarFrame = {
+            UpdateSystemSettingBarSize = function()
+                error("player frame size replay should not update cast bar size during startup")
+            end,
+        }
+
+        local frame = {
+            system = Enum.EditModeSystem.UnitFrame,
+            systemIndex = Enum.EditModeUnitFrameSystemIndices.Player,
+            systemInfo = {
+                settings = {
+                    { setting = Enum.EditModeUnitFrameSetting.FrameSize, value = 0 },
+                },
+                anchorInfo = { point = "BOTTOM", relativeTo = UIParent, relativePoint = "BOTTOM", offsetX = 0, offsetY = 0 },
+            },
+            dirtySettings = {},
+        }
+        function frame:GetName() return "PlayerFrame" end
+        function frame:SetHasActiveChanges() end
+        function frame:UpdateSettingMap()
+            self.settingMap = {}
+            for _, settingInfo in ipairs(self.systemInfo.settings) do
+                local displayInfo = self.settingDisplayInfoMap and self.settingDisplayInfoMap[settingInfo.setting]
+                self.settingMap[settingInfo.setting] = {
+                    value = settingInfo.value,
+                    displayValue = displayInfo and displayInfo:ConvertValueForDisplay(settingInfo.value) or nil,
+                }
+                self.dirtySettings[settingInfo.setting] = true
+            end
+        end
+        function frame:GetSettingValue(setting, useRawValue)
+            local settingInfo = self.settingMap[setting]
+            if useRawValue then return settingInfo and settingInfo.value end
+            return settingInfo and (settingInfo.displayValue or settingInfo.value)
+        end
+        function frame:SetScale(value)
+            if value <= 0 then error("player frame received non-positive scale") end
+            self.scale = value
+        end
+        function frame:ApplySystemAnchor() end
+        function frame:UpdateSystemSetting(setting)
+            if setting == Enum.EditModeUnitFrameSetting.FrameSize then
+                self:SetScale(self:GetSettingValue(setting) / 100)
+                PlayerCastingBarFrame:UpdateSystemSettingBarSize()
+            end
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+            GetActiveLayoutSystemInfo = function() return frame.systemInfo end,
+        }
+        "#,
+    )
+    .expect("install player frame replay stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply system anchors should avoid player-frame cast-bar side effects");
+
+    let scale: f64 = env
+        .eval("return EditModeManagerFrame.registeredSystemFrames[1].scale")
+        .expect("read converted player frame scale");
+
+    assert_eq!(scale, 1.0);
+}
+
+#[test]
 fn apply_system_anchors_seeds_unit_frame_settings_without_full_startup_update() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(
@@ -2180,12 +2505,12 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
 
         function EditModeManagerFrame:GetActiveLayoutSystemInfo(_system, systemIndex)
             self.requestedSystemIndex = systemIndex
-            if systemIndex ~= -1 then
+            if systemIndex ~= nil then
                 return nil
             end
             return {
                 system = Enum.EditModeSystem.CastBar,
-                systemIndex = -1,
+                systemIndex = nil,
                 isInDefaultPosition = false,
                 anchorInfo = {
                     point = "CENTER",
@@ -2211,7 +2536,7 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
         .expect("apply nil-index singleton anchors");
 
     let (requested_system_index, has_active_changes, setting_map_updated, updated_setting): (
-        i32,
+        String,
         bool,
         bool,
         i32,
@@ -2219,7 +2544,7 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
         .eval(
             r#"
             local frame = EditModeManagerFrame.registeredSystemFrames[1]
-            return EditModeManagerFrame.requestedSystemIndex,
+            return tostring(EditModeManagerFrame.requestedSystemIndex),
                 frame.hasActiveChanges,
                 frame.settingMapUpdated,
                 frame.updatedSettings[1] and frame.updatedSettings[1].setting
@@ -2227,7 +2552,7 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
         )
         .expect("read nil-index singleton state");
 
-    assert_eq!(requested_system_index, -1);
+    assert_eq!(requested_system_index, "nil");
     assert!(!has_active_changes, "system should be seeded as clean");
     assert!(
         setting_map_updated,
@@ -2236,6 +2561,101 @@ fn apply_system_anchors_maps_nil_system_index_to_saved_singleton_index() {
     assert_eq!(
         updated_setting, 1,
         "nil-index singleton settings should be applied after seeding"
+    );
+}
+
+#[test]
+fn apply_system_anchors_falls_back_to_minus_one_for_nil_singletons() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                CastBar = 1,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local frame = {
+            system = Enum.EditModeSystem.CastBar,
+            systemIndex = nil,
+            name = "PlayerCastingBarFrame",
+            updatedSettings = {},
+        }
+
+        function frame:GetName() return self.name end
+        function frame:SetHasActiveChanges(value) self.hasActiveChanges = value end
+        function frame:UpdateSettingMap() self.settingMapUpdated = true end
+        function frame:ApplySystemAnchor() end
+        function frame:UpdateSystemSetting(setting, entireSystemUpdate)
+            table.insert(self.updatedSettings, {
+                setting = setting,
+                entireSystemUpdate = entireSystemUpdate,
+            })
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+            requestedSystemIndices = {},
+        }
+
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(_system, systemIndex)
+            table.insert(self.requestedSystemIndices, tostring(systemIndex))
+            if systemIndex ~= -1 then
+                return nil
+            end
+            return {
+                system = Enum.EditModeSystem.CastBar,
+                systemIndex = -1,
+                isInDefaultPosition = false,
+                anchorInfo = {
+                    point = "CENTER",
+                    relativeTo = UIParent,
+                    relativePoint = "CENTER",
+                    offsetX = 0,
+                    offsetY = -174,
+                },
+                settings = {
+                    { setting = 1, value = 0 },
+                },
+            }
+        end
+
+        function EditModeManagerFrame:UpdateSystem()
+            error("fallback singleton should be seeded directly")
+        end
+        "#,
+    )
+    .expect("install nil-index fallback stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply nil-index fallback singleton anchors");
+
+    let (requested_system_indices, setting_map_updated, updated_setting): (String, bool, i32) = env
+        .eval(
+            r#"
+            local frame = EditModeManagerFrame.registeredSystemFrames[1]
+            return table.concat(EditModeManagerFrame.requestedSystemIndices, ","),
+                frame.settingMapUpdated,
+                frame.updatedSettings[1] and frame.updatedSettings[1].setting
+            "#,
+        )
+        .expect("read nil-index fallback singleton state");
+
+    assert_eq!(requested_system_indices, "nil,-1");
+    assert!(
+        setting_map_updated,
+        "fallback system settings should still be mapped"
+    );
+    assert_eq!(
+        updated_setting, 1,
+        "fallback singleton settings should be applied after seeding"
     );
 }
 
@@ -2395,8 +2815,8 @@ fn apply_system_anchors_replays_active_widescreen_singleton_settings() {
         .expect("read singleton replay state");
 
     assert_eq!(
-        requested_rows, "1:-1|2:-1|8:-1|12:-1|13:-1|14:-1|16:-1|17:-1|18:-1|19:-1",
-        "singleton Widescreen systems should request the saved -1 row"
+        requested_rows, "1:nil|2:nil|8:nil|12:nil|13:nil|14:nil|16:nil|17:nil|18:nil|19:nil",
+        "singleton Widescreen systems should preserve nil system indices when the active layout has nil rows"
     );
     assert_eq!(
         replayed_values,
@@ -2582,8 +3002,9 @@ fn apply_system_anchors_replays_remaining_active_widescreen_system_settings() {
         .expect("read remaining widescreen replay state");
 
     assert_eq!(
-        requested_rows, "4:-1|5:-1|7:-1|9:-1|10:-1|11:-1|15:1|15:2|21:-1|22:1|22:2|22:3|22:4|23:-1",
-        "remaining Widescreen systems should request their active layout rows"
+        requested_rows,
+        "4:nil|4:-1|5:nil|5:-1|7:nil|7:-1|9:nil|9:-1|10:nil|10:-1|11:nil|11:-1|15:1|15:2|21:nil|21:-1|22:1|22:2|22:3|22:4|23:nil|23:-1",
+        "remaining Widescreen nil-index systems should try nil before saved-cache -1 fallback"
     );
     assert_eq!(
         replayed_values,

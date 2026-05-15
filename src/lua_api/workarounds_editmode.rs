@@ -363,6 +363,15 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
         end
         applyAccountSettingOverrides()
     end
+    if SetCVarBitfield and Enum and Enum.FrameTutorialAccount
+        and Enum.FrameTutorialAccount.EditModeManager then
+        pcall(
+            SetCVarBitfield,
+            "closedInfoFramesAccountWide",
+            Enum.FrameTutorialAccount.EditModeManager,
+            true
+        )
+    end
 "#;
 
 const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
@@ -370,7 +379,6 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
         local emm = EditModeManagerFrame
         if not emm.layoutInfo then return end
         emm.layoutApplyInProgress = true
-        emm:InitSystemAnchors()
 
         local function system_frame_name(systemFrame)
             if not systemFrame then
@@ -420,12 +428,46 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                 or frameName == "PlayerCastingBarFrame"
         end
 
+        local function ensure_setting_display_info_map(systemFrame)
+            if not EditModeSettingDisplayInfoManager
+                or not EditModeSettingDisplayInfoManager.GetSystemSettingDisplayInfoMap then
+                return
+            end
+
+            local displayInfoMap = systemFrame.settingDisplayInfoMap
+            local needsMap = not displayInfoMap
+            if displayInfoMap and systemFrame.systemInfo then
+                for _, settingInfo in ipairs(systemFrame.systemInfo.settings or {}) do
+                    if displayInfoMap[settingInfo.setting] == nil then
+                        needsMap = true
+                        break
+                    end
+                end
+            end
+            if not needsMap then
+                return
+            end
+
+            local ok, resolvedMap = pcall(
+                EditModeSettingDisplayInfoManager.GetSystemSettingDisplayInfoMap,
+                EditModeSettingDisplayInfoManager,
+                systemFrame.system
+            )
+            if ok and resolvedMap then
+                systemFrame.settingDisplayInfoMap = resolvedMap
+            end
+        end
+
+        for _, systemFrame in ipairs(emm.registeredSystemFrames or {}) do
+            ensure_setting_display_info_map(systemFrame)
+        end
+
         local function seed_system_frame(systemFrame)
             local systemIndex = systemFrame.systemIndex
-            if systemIndex == nil then
-                systemIndex = -1
-            end
             local systemInfo = emm:GetActiveLayoutSystemInfo(systemFrame.system, systemIndex)
+            if not systemInfo and systemIndex == nil then
+                systemInfo = emm:GetActiveLayoutSystemInfo(systemFrame.system, -1)
+            end
             if not systemInfo then
                 return
             end
@@ -433,6 +475,7 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
             systemFrame.savedSystemInfo = CopyTable(systemInfo)
             systemFrame.systemInfo = systemInfo
             systemFrame:SetHasActiveChanges(false)
+            ensure_setting_display_info_map(systemFrame)
             systemFrame:UpdateSettingMap(true)
             return true
         end
@@ -463,20 +506,66 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
             if frameName == "PlayerCastingBarFrame" then
                 return
             end
+            if frameName == "PlayerFrame" and PlayerCastingBarFrame then
+                return
+            end
 
             local systemInfo = systemFrame.systemInfo
             if anchor_targets_system_frame(systemFrame, systemInfo and systemInfo.anchorInfo) then
                 return
             end
 
-            if frameName == "PlayerFrame"
-                and EditModeSystemMixin
-                and EditModeSystemMixin.ApplySystemAnchor then
-                pcall(EditModeSystemMixin.ApplySystemAnchor, systemFrame)
+            pcall(systemFrame.ApplySystemAnchor, systemFrame)
+        end
+
+        local function update_system_setting_with_display_value(systemFrame, setting, displayValue)
+            if not systemFrame or not systemFrame.UpdateSystemSetting then
                 return
             end
 
-            pcall(systemFrame.ApplySystemAnchor, systemFrame)
+            local oldGetSettingValue = systemFrame.GetSettingValue
+            if oldGetSettingValue then
+                systemFrame.GetSettingValue = function(self, requestedSetting, ...)
+                    if requestedSetting == setting then
+                        return displayValue
+                    end
+                    return oldGetSettingValue(self, requestedSetting, ...)
+                end
+            end
+
+            pcall(systemFrame.UpdateSystemSetting, systemFrame, setting, true)
+
+            if oldGetSettingValue then
+                systemFrame.GetSettingValue = oldGetSettingValue
+            end
+        end
+
+        local function positive_display_value_for_setting(systemFrame, setting, rawValue)
+            local displayValue
+            if systemFrame.GetSettingValue then
+                local ok, value = pcall(systemFrame.GetSettingValue, systemFrame, setting)
+                if ok then
+                    displayValue = value
+                end
+            end
+            if not displayValue or displayValue <= 0 then
+                local displayInfo = systemFrame.settingDisplayInfoMap
+                    and systemFrame.settingDisplayInfoMap[setting]
+                if displayInfo and displayInfo.ConvertValueForDisplay then
+                    local ok, value = pcall(
+                        displayInfo.ConvertValueForDisplay,
+                        displayInfo,
+                        rawValue
+                    )
+                    if ok then
+                        displayValue = value
+                    end
+                end
+            end
+            if not displayValue or displayValue <= 0 then
+                displayValue = 100
+            end
+            return displayValue
         end
 
         local function replay_system_settings(systemFrame)
@@ -484,16 +573,64 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
             if not systemInfo or not systemFrame.UpdateSystemSetting then
                 return
             end
+            local frameName = system_frame_name(systemFrame)
 
             for _, settingInfo in ipairs(systemInfo.settings or {}) do
                 local setting = settingInfo.setting
                 local unitFrameSettings = Enum and Enum.EditModeUnitFrameSetting
+                local castBarSettings = Enum and Enum.EditModeCastBarSetting
                 local needsAuraUpdate = unitFrameSettings
                     and setting == unitFrameSettings.BuffsOnTop
                     and not systemFrame.UpdateAuras
+                local needsDirectFrameSizeReplay = (frameName == "PlayerFrame"
+                    or frameName == "TargetFrame"
+                    or frameName == "FocusFrame")
+                    and unitFrameSettings
+                    and setting == unitFrameSettings.FrameSize
+                local needsCastBarScaleReplay = frameName == "PlayerCastingBarFrame"
+                    and castBarSettings
+                    and setting == castBarSettings.BarSize
+                local needsCastBarLockReplay = frameName == "PlayerCastingBarFrame"
+                    and castBarSettings
+                    and setting == castBarSettings.LockToPlayerFrame
                 if needsAuraUpdate then
                     systemFrame.buffsOnTop = settingInfo.value == 1
                         or settingInfo.value == true
+                elseif needsDirectFrameSizeReplay then
+                    local frameSize = positive_display_value_for_setting(
+                        systemFrame,
+                        setting,
+                        settingInfo.value
+                    )
+                    if systemFrame.SetScale then
+                        pcall(systemFrame.SetScale, systemFrame, frameSize / 100)
+                    end
+                    update_system_setting_with_display_value(systemFrame, setting, frameSize)
+                elseif needsCastBarScaleReplay then
+                    local barSize = positive_display_value_for_setting(
+                        systemFrame,
+                        setting,
+                        settingInfo.value
+                    )
+                    if systemFrame.SetScale then
+                        pcall(systemFrame.SetScale, systemFrame, barSize / 100)
+                    end
+                    update_system_setting_with_display_value(systemFrame, setting, barSize)
+                elseif needsCastBarLockReplay then
+                    local locked = false
+                    if systemFrame.GetSettingValueBool then
+                        local ok, value = pcall(systemFrame.GetSettingValueBool, systemFrame, setting)
+                        locked = ok and value
+                    else
+                        locked = settingInfo.value == 1 or settingInfo.value == true
+                    end
+                    if locked then
+                        if PlayerFrame_AttachCastBar then
+                            pcall(PlayerFrame_AttachCastBar)
+                        end
+                    elseif systemFrame.attachedToPlayerFrame and PlayerFrame_DetachCastBar then
+                        pcall(PlayerFrame_DetachCastBar)
+                    end
                 else
                     pcall(systemFrame.UpdateSystemSetting, systemFrame, setting, true)
                 end
@@ -580,6 +717,9 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                 elseif setting == actionBarSettings.IconSize then
                     systemFrame.iconSize = value
                     local iconScale = value / 100
+                    if iconScale <= 0 then
+                        return
+                    end
                     if systemFrame.EditModeSetScale then
                         pcall(systemFrame.EditModeSetScale, systemFrame, iconScale)
                     end
@@ -777,13 +917,6 @@ pub fn init_edit_mode_layout(env: &WowLuaEnv) {
 /// attaching the cast bar.
 pub fn reapply_player_frame_anchor(env: &WowLuaEnv) {
     log_step(env, "reapply_player_frame_anchor", || {
-        let _ = env.exec(
-            r#"
-            if PlayerFrame and type(PlayerFrame.ApplySystemAnchor) == "function" then
-                pcall(PlayerFrame.ApplySystemAnchor, PlayerFrame)
-            end
-        "#,
-        );
         refresh_player_frame_state(env);
     });
 }
