@@ -10,11 +10,14 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+DEFAULT_MISTS_CARGO_TARGET_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/wow-ui-sim/cargo-targets/mists-panel-parity"
+CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-${MISTS_CARGO_TARGET_DIR:-$DEFAULT_MISTS_CARGO_TARGET_DIR}}"
+CARGO_INCREMENTAL="${CARGO_INCREMENTAL:-0}"
 BASELINE="$REPO_ROOT/docs/baselines/mists-panels.md"
 VISUAL_BASELINE="$REPO_ROOT/docs/baselines/mists-panel-visuals.tsv"
 OUT_DIR="$REPO_ROOT/target/mists-panel-parity"
-WOW_SIM_BIN="${WOW_SIM_BIN:-$REPO_ROOT/target/debug/wow-sim}"
-DEFAULT_VISUAL_METRICS_BIN="$REPO_ROOT/target/debug/panel-visual-metrics"
+WOW_SIM_BIN="${WOW_SIM_BIN:-$CARGO_TARGET_DIR/debug/wow-sim}"
+DEFAULT_VISUAL_METRICS_BIN="$CARGO_TARGET_DIR/debug/panel-visual-metrics"
 PANEL_VISUAL_METRICS_BIN="${PANEL_VISUAL_METRICS_BIN:-$DEFAULT_VISUAL_METRICS_BIN}"
 TIMEOUT_SECONDS=120
 PANEL_FILTER=""
@@ -26,6 +29,9 @@ UPDATE_VISUAL_BASELINE=0
 SIGNAL_ONLY_VISUALS="${MISTS_PANEL_SIGNAL_ONLY:-0}"
 VISUAL_UPDATE_FILE=""
 OUT_DIR_SET=0
+
+export CARGO_INCREMENTAL
+export CARGO_TARGET_DIR
 
 usage() {
     sed -n '2,/^set -euo/p' "$0" | sed 's/^# \?//;$d'
@@ -199,6 +205,7 @@ visual_metrics_bin() {
 
 build_visual_metrics() {
     if [ ! -x "$(visual_metrics_bin)" ]; then
+        echo "Building panel-visual-metrics in $CARGO_TARGET_DIR"
         cargo build --bin panel-visual-metrics
     fi
 }
@@ -384,6 +391,7 @@ fi
 
 mkdir -p "$OUT_DIR"
 if [ "$SKIP_BUILD" -eq 0 ]; then
+    echo "Building Mists wow-sim in $CARGO_TARGET_DIR"
     cargo build --bin wow-sim --no-default-features --features "sound,gui,casc,client-mists"
 fi
 build_visual_metrics
