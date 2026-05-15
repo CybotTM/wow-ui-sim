@@ -15,7 +15,6 @@ use super::LoadTiming;
 use super::addon::AddonContext;
 use super::bytecode_cache;
 use super::error::LoadError;
-use super::lua_escape_normalizer::normalize_unsupported_lua_escapes;
 
 /// Load a Lua file into the environment with addon varargs.
 pub fn load_lua_file(
@@ -133,7 +132,7 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
         return Cow::Borrowed(bytes);
     };
 
-    let mut patched = normalize_unsupported_lua_escapes(source);
+    let mut patched = Cow::Borrowed(source);
     if let Some(patch) = lua_source_patch_for_chunk(chunk_name) {
         patched = Cow::Owned(apply_lua_source_patch(&patched, patch.operations));
     }
