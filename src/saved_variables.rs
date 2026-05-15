@@ -322,13 +322,39 @@ impl SavedVariablesManager {
             return Ok(Val::Nil);
         }
 
-        self.load_lua_file(state, &path, "@SavedVariables")?;
+        if let Err(error) = self.load_lua_file(state, &path, "@SavedVariables") {
+            tracing::warn!(
+                "Ignoring invalid simulator SavedVariables file {} while loading {var_name}: {error}",
+                path.display()
+            );
+            self.load_wtf_variable_file(state, addon_name, per_character)?;
+        }
         let value = get_global(state, var_name);
         if matches!(value, Val::Table(_)) {
             return Ok(value);
         }
 
         Ok(Val::Nil)
+    }
+
+    fn load_wtf_variable_file(
+        &self,
+        state: &mut LuaState,
+        addon_name: &str,
+        per_character: bool,
+    ) -> crate::Result<()> {
+        let Some(config) = self.wtf_config.as_ref() else {
+            return Ok(());
+        };
+        let path = if per_character {
+            config.character_saved_vars_file(addon_name)
+        } else {
+            config.account_saved_vars_file(addon_name)
+        };
+        if !path.exists() {
+            return Ok(());
+        }
+        self.load_lua_file(state, &path, "@WTF")
     }
 
     fn load_lua_file(

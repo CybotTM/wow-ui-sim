@@ -315,11 +315,7 @@ impl TocFile {
         let mut vars: Vec<String> = Vec::new();
         for key in ["SavedVariables", "SavedVariablesMachine"] {
             if let Some(s) = self.metadata.get(key) {
-                vars.extend(
-                    s.split(',')
-                        .map(|v| v.trim().to_string())
-                        .filter(|v| !v.is_empty()),
-                );
+                vars.extend(split_metadata_list(s));
             }
         }
         vars
@@ -329,12 +325,7 @@ impl TocFile {
     pub fn saved_variables_per_character(&self) -> Vec<String> {
         self.metadata
             .get("SavedVariablesPerCharacter")
-            .map(|s| {
-                s.split(',')
-                    .map(|v| v.trim().to_string())
-                    .filter(|v| !v.is_empty())
-                    .collect()
-            })
+            .map(|s| split_metadata_list(s))
             .unwrap_or_default()
     }
 
@@ -531,6 +522,26 @@ Core.lua
         assert_eq!(
             toc.saved_variables(),
             vec!["TestAddonDB", "TestAddonPerCharDB"]
+        );
+    }
+
+    #[test]
+    fn test_saved_variables_split_whitespace_names() {
+        let contents = r#"
+## Title: TestAddon
+## SavedVariables: TestAddonDB TestAddonMinimapDB
+## SavedVariablesPerCharacter: TestAddonCharDB TestAddonCharMinimapDB
+Core.lua
+"#;
+        let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+        assert_eq!(
+            toc.saved_variables(),
+            vec!["TestAddonDB", "TestAddonMinimapDB"]
+        );
+        assert_eq!(
+            toc.saved_variables_per_character(),
+            vec!["TestAddonCharDB", "TestAddonCharMinimapDB"]
         );
     }
 

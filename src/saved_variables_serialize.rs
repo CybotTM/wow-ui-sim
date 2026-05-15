@@ -579,6 +579,81 @@ mod tests {
     }
 
     #[test]
+    fn test_invalid_local_saved_variables_do_not_abort_initialization() {
+        let dir = tempdir().unwrap();
+        let local_root = dir.path().join("LocalSavedVariables");
+        fs::create_dir_all(&local_root).unwrap();
+        fs::write(
+            local_root.join("TestAddon.lua"),
+            "\nTestDB TestMinimapDB = nil\n",
+        )
+        .unwrap();
+
+        let env = new_env();
+        let mut mgr = SavedVariablesManager::with_storage_dir(local_root);
+        with_state(&env, |state| {
+            mgr.init_for_addon(
+                state,
+                "TestAddon",
+                &["TestDB".to_string(), "TestMinimapDB".to_string()],
+                &[],
+            )
+        })
+        .unwrap();
+
+        let types: (String, String) = env
+            .eval("return type(TestDB), type(TestMinimapDB)")
+            .unwrap();
+        assert_eq!(types, ("nil".to_string(), "nil".to_string()));
+    }
+
+    #[test]
+    fn test_invalid_local_saved_variables_fall_back_to_wtf_source() {
+        let dir = tempdir().unwrap();
+        let wtf_root = dir.path().join("WTF");
+        let local_root = dir.path().join("LocalSavedVariables");
+        let wtf_path = wtf_root
+            .join("Account")
+            .join("TestAccount")
+            .join("SavedVariables");
+        fs::create_dir_all(&wtf_path).unwrap();
+        fs::create_dir_all(&local_root).unwrap();
+        fs::write(
+            local_root.join("TestAddon.lua"),
+            "\nTestDB TestMinimapDB = nil\n",
+        )
+        .unwrap();
+        fs::write(
+            wtf_path.join("TestAddon.lua"),
+            "\nTestDB = { [\"source\"] = \"wtf\" }\nTestMinimapDB = { [\"hide\"] = true }\n",
+        )
+        .unwrap();
+
+        let env = new_env();
+        let mut mgr = SavedVariablesManager::with_storage_dir(local_root);
+        mgr.set_wtf_config(WtfConfig::new(
+            &wtf_root,
+            "TestAccount",
+            "Realm",
+            "Character",
+        ));
+        with_state(&env, |state| {
+            mgr.init_for_addon(
+                state,
+                "TestAddon",
+                &["TestDB".to_string(), "TestMinimapDB".to_string()],
+                &[],
+            )
+        })
+        .unwrap();
+
+        let values: (String, bool) = env
+            .eval("return TestDB.source, TestMinimapDB.hide")
+            .unwrap();
+        assert_eq!(values, ("wtf".to_string(), true));
+    }
+
+    #[test]
     fn test_serialize_format_matches_wow() {
         let env = new_env();
         env.exec(
