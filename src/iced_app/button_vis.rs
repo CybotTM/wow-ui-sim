@@ -42,11 +42,28 @@ pub fn should_skip_frame(
     }
 
     let state_override = resolve_button_visibility(f, id, registry, pressed_frame);
+    if state_override.is_some() && has_hidden_ancestor(f, registry) {
+        return true;
+    }
     match state_override {
         Some(false) => true,
         Some(true) => false,
-        None => !f.visible,
+        None => !registry.is_ancestor_visible(id),
     }
+}
+
+fn has_hidden_ancestor(f: &crate::widget::Frame, registry: &WidgetRegistry) -> bool {
+    let mut current_id = f.parent_id;
+    while let Some(id) = current_id {
+        let Some(parent) = registry.get(id) else {
+            return true;
+        };
+        if !parent.visible {
+            return true;
+        }
+        current_id = parent.parent_id;
+    }
+    false
 }
 
 fn parent_draw_layer_is_disabled(f: &crate::widget::Frame, registry: &WidgetRegistry) -> bool {
@@ -222,6 +239,37 @@ mod tests {
         assert!(
             skipped,
             "disabled button should not render HIGHLIGHT draw-layer children on hover",
+        );
+    }
+
+    #[test]
+    fn hidden_button_suppresses_state_texture_child() {
+        let mut registry = WidgetRegistry::new();
+
+        let mut parent = Frame::new(WidgetType::Button, Some("Parent".to_string()), None);
+        parent.visible = false;
+        let parent_id = parent.id;
+        registry.register(parent);
+
+        let child = Frame::new(
+            WidgetType::Texture,
+            Some("NormalTexture".to_string()),
+            Some(parent_id),
+        );
+        let child_id = child.id;
+        registry.register(child);
+        registry.add_child(parent_id, child_id);
+        registry
+            .get_mut(parent_id)
+            .unwrap()
+            .children_keys
+            .insert("NormalTexture".to_string(), child_id);
+
+        let child = registry.get(child_id).unwrap();
+        let skipped = should_skip_frame(child, child_id, 1.0, &None, &registry, None, None);
+        assert!(
+            skipped,
+            "state texture child should stay hidden when its button parent is hidden",
         );
     }
 }

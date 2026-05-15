@@ -149,6 +149,31 @@ fn normal_vs_pressed_texture() {
     );
 }
 
+#[test]
+fn state_texture_child_stays_hidden_when_button_is_hidden() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestHiddenStateTex", UIParent)
+        btn:SetPoint("CENTER")
+        btn:SetSize(100, 30)
+        btn:SetNormalTexture("Interface/Buttons/UI-Panel-Button-Up")
+        btn:Hide()
+    "#,
+    )
+    .unwrap();
+
+    let batch = build_batch_for_button(&env, "TestHiddenStateTex", None, None);
+    assert!(
+        !batch
+            .texture_requests
+            .iter()
+            .any(|r| r.path.to_lowercase().contains("button-up")),
+        "hidden buttons should not render state texture children"
+    );
+}
+
 /// HighlightTexture renders only when hovered.
 #[test]
 fn highlight_texture_only_when_hovered() {
