@@ -131,6 +131,7 @@ under test.
 | `BlizzMove` + normal SavedVariables | Game menu options | Passed after the Spellbook tab layout fix; per-panel `lua-errors` length `0`, visible `SettingsPanel` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/blizzmove-game-menu-options-with-saved-vars-after-spellbook-tabs/BlizzMove/game-menu-options/` |
 | `BlizzMove` + normal SavedVariables | Quest choice LoD dialog | Passed after the Game menu options shard; per-panel `lua-errors` length `0`, visible `QuestChoiceFrame` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/blizzmove-quest-choice-with-saved-vars-after-game-menu-options/BlizzMove/quest-choice/` |
 | `DeModal` + normal SavedVariables | Store, CatalogShop, WowToken, and SimpleCheckout | Passed after seeding the CatalogShop looping `SOUNDKIT` constants; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/demodal-store-commercial-with-saved-vars.log`; artifacts under `target/mists-local-addon-panel-sample/demodal-store-commercial-with-saved-vars/DeModal/store-commercial/` |
+| `DeModal` + normal SavedVariables | AddOn list and UI management LoD panels | Passed after the Interface Options sweep; per-panel `lua-errors` length `0`, visible `AddonList` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/demodal-addon-list-with-saved-vars-after-interface-options-sweep/DeModal/addon-list/` |
 | `DeModal` + normal SavedVariables | Character panel: paperdoll, stats, titles, equipment manager | Passed; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/demodal-character-with-saved-vars.log`; artifacts under `target/mists-local-addon-panel-sample/demodal-character-with-saved-vars/DeModal/character/` |
 | `DeModal` + normal SavedVariables | Interface options | Passed after the AllTheThings Interface Options shard; per-panel `lua-errors` length `0`, visible `SettingsPanel` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/demodal-interface-options-with-saved-vars-after-allthethings-interface-options/DeModal/interface-options/` |
 | `DeModal` + normal SavedVariables | Spellbook and professions | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/demodal-spellbook-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/demodal-spellbook-with-saved-vars-after-castspell/DeModal/spellbook-professions/` |
@@ -183,7 +184,7 @@ has at least one bounded panel sample with normal SavedVariables enabled:
 | `AllTheThings` | Collections, Achievements/Calendar, Interface Options, TradeSkill |
 | `Auctionator` | Auction House, Interface Options, Mail |
 | `BlizzMove` | All 38 panel slugs |
-| `DeModal` | Store/CatalogShop, Character, Interface Options, Spellbook/professions, TradeSkill |
+| `DeModal` | Store/CatalogShop, AddOn List, Character, Interface Options, Spellbook/professions, TradeSkill |
 | `DialogueUI` | Quest choice, Interface Options, Quest log |
 | `Leatrix_Maps` | World Map, Interface Options, Quest log |
 | `Leatrix_Plus` | Spellbook/professions, Interface Options, TradeSkill |
