@@ -162,6 +162,7 @@ under test.
 | `DialogueUI` + normal SavedVariables | Interface options | Passed after the Leatrix_Maps Interface Options shard; per-panel `lua-errors` length `0`, visible `SettingsPanel` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/dialogueui-interface-options-with-saved-vars-after-leatrix-maps-interface-options/DialogueUI/interface-options/` |
 | `DialogueUI` + normal SavedVariables | Quest log and objective tracker | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/dialogueui-quest-log-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/dialogueui-quest-log-with-saved-vars-after-castspell/DialogueUI/quest-log/` |
 | `SimpleItemLevel` + normal SavedVariables | Character panel: paperdoll, stats, titles, equipment manager | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/simpleitemlevel-character-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/simpleitemlevel-character-with-saved-vars-after-castspell/SimpleItemLevel/character/` |
+| `SimpleItemLevel` + normal SavedVariables | AddOn list and UI management LoD panels | Passed after the Plater AddOn List shard; per-panel `lua-errors` length `0`, visible `AddonList` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/simpleitemlevel-addon-list-with-saved-vars-after-plater-addon-list/SimpleItemLevel/addon-list/` |
 | `SimpleItemLevel` + normal SavedVariables | Interface options | Passed after the DialogueUI Interface Options shard; per-panel `lua-errors` length `0`, visible `SettingsPanel` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/simpleitemlevel-interface-options-with-saved-vars-after-dialogueui-interface-options/SimpleItemLevel/interface-options/` |
 | `SimpleItemLevel` + normal SavedVariables | Inspect and guild control LoD panels | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/simpleitemlevel-inspect-guild-control-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/simpleitemlevel-inspect-guild-control-with-saved-vars-after-castspell/SimpleItemLevel/inspect-guild-control/` |
 
@@ -195,7 +196,7 @@ has at least one bounded panel sample with normal SavedVariables enabled:
 | `Leatrix_Maps` | World Map, AddOn List, Interface Options, Quest log |
 | `Leatrix_Plus` | Spellbook/professions, AddOn List, Interface Options, TradeSkill |
 | `Plater` | Nameplates, AddOn List, Interface Options, Action bars |
-| `SimpleItemLevel` | Character, Interface Options, Inspect/Guild Control |
+| `SimpleItemLevel` | Character, AddOn List, Interface Options, Inspect/Guild Control |
 
 Local enforcement now exists in
 `tests/mists_panel_parity_runner.rs::bounded_saved_vars_addon_samples_cover_installed_mists_addons`:
