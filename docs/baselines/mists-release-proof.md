@@ -151,13 +151,11 @@ under test.
 
 The full installed-addon screenshot matrix remains deferred locally because it
 is the expensive 9-addon by 38-panel release-proof-style lane. This sample keeps
-addon-panel evidence moving by covering the recently touched talent,
-HUD/action-bar, Store/CatalogShop, CharacterFrame, Spellbook/professions,
-Collections, TradeSkill, Auction House, Mail, Nameplates, World Map, Quest log,
-Quest choice, Character, and Inspect surfaces with frame-moving, UI-option,
-data-heavy, auction-focused, nameplate, map, dialogue, and item-level addons
-enabled, including Store/CatalogShop rows with normal SavedVariables loaded,
-without adding CI texture requirements or rerunning the release-proof wrapper.
+addon-panel evidence moving by covering every panel slug once under BlizzMove
+with normal SavedVariables enabled, plus targeted rows under the remaining
+installed addons for data-heavy, auction-focused, nameplate, map, dialogue, and
+item-level integrations, without adding CI texture requirements or rerunning the
+release-proof wrapper.
 
 ## Validation Scope Limits
 
@@ -175,7 +173,7 @@ has at least one bounded panel sample with normal SavedVariables enabled:
 |---|---|
 | `AllTheThings` | Collections, TradeSkill |
 | `Auctionator` | Auction House, Mail |
-| `BlizzMove` | Store/CatalogShop |
+| `BlizzMove` | All 38 panel slugs |
 | `DeModal` | Store/CatalogShop, Character, Spellbook/professions, TradeSkill |
 | `DialogueUI` | Quest choice, Quest log |
 | `Leatrix_Maps` | World Map, Quest log |
