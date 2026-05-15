@@ -10,6 +10,7 @@ mod error;
 pub(crate) mod helpers;
 pub(crate) mod helpers_anim;
 mod load_addon_trace;
+mod lua_escape_normalizer;
 pub(crate) mod lua_file;
 pub(crate) mod precompiled;
 mod xml_file;
