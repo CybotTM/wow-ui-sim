@@ -67,6 +67,17 @@ fn test_set_spec_overrides_previous() {
     assert_eq!(spec, 4);
 }
 
+#[test]
+fn test_get_num_spec_groups_reports_active_player_group() {
+    let env = env();
+    let (num_groups, active_group): (i32, i32) = env
+        .eval("return GetNumSpecGroups(false), C_SpecializationInfo.GetActiveSpecGroup(false)")
+        .unwrap();
+
+    assert_eq!(num_groups, 1);
+    assert_eq!(active_group, 1);
+}
+
 // ============================================================================
 // SetTalentRank
 // ============================================================================

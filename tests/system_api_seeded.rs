@@ -59,6 +59,10 @@ fn test_c_encounter_timeline_returns_seeded_visible_event() {
         if not C_EncounterTimeline.HasVisibleEvents() then
             return "missing_visible_events"
         end
+        if C_EncounterTimeline.AddEditModeEvents() == nil then
+            return "missing_edit_mode_duration"
+        end
+        C_EncounterTimeline.CancelEditModeEvents()
 
         return "ok"
     "#,

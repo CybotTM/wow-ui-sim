@@ -131,6 +131,66 @@ fn test_get_num_raid_members_counts_raid_including_player() {
 }
 
 #[test]
+fn test_get_raid_roster_info_covers_player_and_all_party_members() {
+    let env = env();
+    let (all_have_roster_data, last_subgroup): (bool, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(9)
+            local count = GetNumGroupMembers()
+            for i = 1, count do
+                local name, _, subgroup, _, _, classFile, _, _, _, _, _, role = GetRaidRosterInfo(i)
+                if name == nil or subgroup == nil or classFile == nil or role == nil then
+                    return false, -1
+                end
+            end
+            local _, _, lastSubgroup = GetRaidRosterInfo(count)
+            return true, lastSubgroup
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        all_have_roster_data,
+        "raid roster should include the player plus every simulated party member"
+    );
+    assert_eq!(
+        last_subgroup, 2,
+        "ten raid members should fill two five-player subgroups"
+    );
+}
+
+#[test]
+fn test_get_raid_roster_info_covers_forced_party_raid_frames() {
+    let env = env();
+    let (all_have_roster_data, last_subgroup): (bool, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(4)
+            local count = GetNumGroupMembers()
+            for i = 1, count do
+                local name, _, subgroup, _, _, classFile, _, _, _, _, _, role = GetRaidRosterInfo(i)
+                if name == nil or subgroup == nil or classFile == nil or role == nil then
+                    return false, -1
+                end
+            end
+            local _, _, lastSubgroup = GetRaidRosterInfo(count)
+            return true, lastSubgroup
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        all_have_roster_data,
+        "Edit Mode can force raid frame layout while the simulated group is still a party"
+    );
+    assert_eq!(
+        last_subgroup, 1,
+        "five visible group members should remain in the first subgroup"
+    );
+}
+
+#[test]
 fn test_get_num_party_members_matches_subgroup_count() {
     let env = env();
     let count: i32 = env

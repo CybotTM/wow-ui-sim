@@ -3457,6 +3457,8 @@ C_EncounterTimeline = __wow_merge_namespace(C_EncounterTimeline, {
   end,
   HasActiveEvents = function() return true end,
   HasVisibleEvents = function() return true end,
+  AddEditModeEvents = function() return 30 end,
+  CancelEditModeEvents = function() end,
 })
 
 local __wow_encounter_events_state = {

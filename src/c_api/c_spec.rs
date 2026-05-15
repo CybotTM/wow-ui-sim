@@ -75,6 +75,7 @@ const C_SPECIALIZATION_INFO_METHODS: &[(&str, RustLuaFn)] = &[
 ];
 
 const LEGACY_SPECIALIZATION_GLOBALS: &[(&str, RustLuaFn)] = &[
+    ("GetNumSpecGroups", get_num_spec_groups),
     ("GetNumSpecializations", get_num_specializations),
     ("GetSpecializationInfoByID", get_specialization_info_by_id),
     ("GetSpecializationRole", get_specialization_role),
@@ -366,6 +367,11 @@ fn register_legacy_specialization_globals(state: &mut LuaState) -> LuaResult<()>
         table_set_rust_fn_static(state, state.global, name, *rust_fn)?;
     }
     Ok(())
+}
+
+fn get_num_spec_groups(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(1.0));
+    Ok(1)
 }
 
 fn get_num_specializations(state: &mut LuaState) -> LuaResult<u32> {

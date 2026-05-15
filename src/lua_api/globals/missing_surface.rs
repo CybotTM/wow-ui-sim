@@ -19,6 +19,7 @@ mod delves_ui;
 mod encoding_util;
 mod encounter_events;
 mod encounter_journal;
+mod encounter_warnings;
 mod friend_list;
 mod garrison;
 mod gossip_info;
@@ -254,6 +255,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     area_poi::register_area_poi_surface(state)?;
     auction_house::register_auction_house_surface(state)?;
     encounter_events::register_encounter_events_surface(state)?;
+    encounter_warnings::register_encounter_warnings_surface(state)?;
     creature_info::register_creature_info_surface(state)?;
     delves_ui::register_delves_ui_surface(state)?;
     encounter_journal::register_encounter_journal_surface(state)?;

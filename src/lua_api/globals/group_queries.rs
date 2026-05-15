@@ -18,7 +18,7 @@
 #[path = "group_queries_relationships.rs"]
 mod relationships;
 
-use crate::lua_api::game_data::{CLASS_LABELS, PartyMember};
+use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::globals::security::mark_secret_value;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_get, table_set};
 use crate::lua_bridge::FromStack;
@@ -244,13 +244,30 @@ fn get_raid_roster_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(12)
 }
 
-fn raid_roster_member(state: &LuaState, index: usize) -> LuaResult<Option<PartyMember>> {
+struct RaidRosterMember {
+    name: String,
+    class_index: i32,
+}
+
+fn raid_roster_member(state: &LuaState, index: usize) -> LuaResult<Option<RaidRosterMember>> {
     let st = borrow_state(state)?;
-    let raid_active = st.party_group_active && st.party_members.len() >= 6 && index > 0;
-    let member = raid_active
-        .then(|| st.party_members.get(index - 1))
-        .flatten()
-        .cloned();
+    if !st.party_group_active || index == 0 {
+        return Ok(None);
+    }
+
+    let member = if index == 1 {
+        Some(RaidRosterMember {
+            name: st.player.name.clone(),
+            class_index: st.player.class_index,
+        })
+    } else {
+        st.party_members
+            .get(index - 2)
+            .map(|party_member| RaidRosterMember {
+                name: party_member.name.clone(),
+                class_index: party_member.class_index,
+            })
+    };
     Ok(member)
 }
 
@@ -260,7 +277,7 @@ fn push_empty_raid_roster_info(state: &mut LuaState) {
     }
 }
 
-fn push_raid_roster_info(state: &mut LuaState, index: usize, member: &PartyMember) {
+fn push_raid_roster_info(state: &mut LuaState, index: usize, member: &RaidRosterMember) {
     let name = create_string(state, &member.name);
     mark_secret_value(state, name);
     let subgroup = ((index - 1) / 5 + 1) as f64;
