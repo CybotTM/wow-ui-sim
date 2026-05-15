@@ -2059,21 +2059,55 @@ if UnitGetAvailableRoles == nil then
 end
 
 if debugstack == nil then
+  local function debugstack_source(info)
+    local source = info and info.source or nil
+    if type(source) ~= "string" or source == "" then
+      source = info and info.short_src or "?"
+    end
+    if source:sub(1, 1) == "@" then
+      return "[" .. source:sub(2) .. "]"
+    end
+    return source
+  end
+
+  local function debugstack_line(info)
+    local source = debugstack_source(info)
+    local currentline = tonumber(info and info.currentline) or -1
+    if currentline > 0 then
+      source = source .. ":" .. currentline
+    else
+      source = source .. ":"
+    end
+
+    if info and type(info.name) == "string" and info.name ~= "" then
+      return source .. ": in function '" .. info.name .. "'"
+    end
+    if info and info.what == "main" then
+      return source .. ": in main chunk"
+    end
+    if info and type(info.linedefined) == "number" and info.linedefined > 0 then
+      return source .. ": in function <" .. debugstack_source(info) .. ":" .. info.linedefined .. ">"
+    end
+    return source .. " ?"
+  end
+
   function debugstack(level, count1, count2)
-    if not debug or not debug.traceback then
+    if not debug or not debug.getinfo then
       return ""
     end
     local start = (tonumber(level) or 1) + 1
-    local tb = debug.traceback("", start) or ""
-    tb = tb:gsub("^\n?stack traceback:\n?", "")
-    tb = tb:gsub("^%s+", "")
+    local lines = {}
+    local depth = start
+    while true do
+      local info = debug.getinfo(depth, "Sln")
+      if not info then break end
+      lines[#lines + 1] = debugstack_line(info)
+      depth = depth + 1
+    end
+
     if count1 or count2 then
       local top = tonumber(count1) or 12
       local bottom = tonumber(count2) or 10
-      local lines = {}
-      for line in tb:gmatch("([^\n]*)\n?") do
-        if line ~= "" then lines[#lines + 1] = line end
-      end
       if #lines > top + bottom then
         local kept = {}
         for i = 1, top do kept[#kept + 1] = lines[i] end
@@ -2082,8 +2116,9 @@ if debugstack == nil then
         return table.concat(kept, "\n") .. "\n"
       end
     end
-    if tb ~= "" and not tb:match("\n$") then tb = tb .. "\n" end
-    return tb
+    local stack = table.concat(lines, "\n")
+    if stack ~= "" then stack = stack .. "\n" end
+    return stack
   end
 end
 

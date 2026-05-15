@@ -112,6 +112,41 @@ fn test_startup_service_globals_exist() {
     assert_eq!(issecure_ty, "function");
     assert!(secure);
 }
+
+#[test]
+fn debugstack_uses_wow_bracketed_file_locations() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result = env.exec_named(
+        r#"
+        local function current_folder()
+            local stack = debugstack()
+            __debugstack_stack = stack
+            local _, _, luafilepath = string.find(stack, "[%[](.-)[%]]")
+            local i = 1
+            local lastPart
+            while string.find(luafilepath, "([/].+)", i) do
+                local startPoint
+                startPoint, _, lastPart = string.find(luafilepath, "([/].+)", i)
+                i = startPoint + 1
+            end
+            return string.gsub(luafilepath, lastPart, "")
+        end
+        __debugstack_folder = current_folder()
+        "#,
+        "@Interface/AddOns/Angleur/angTemplates/LegolandoTemplates/Legolando_MouseScanAnim/Legolando_MouseScanAnim.lua",
+    );
+    if let Err(error) = result {
+        let stack: String = env.eval("__debugstack_stack").unwrap_or_default();
+        panic!("debugstack path extraction failed: {error}; stack={stack:?}");
+    }
+
+    let folder: String = env.eval("__debugstack_folder").unwrap();
+    assert_eq!(
+        folder,
+        "Interface/AddOns/Angleur/angTemplates/LegolandoTemplates/Legolando_MouseScanAnim"
+    );
+}
 #[test]
 fn test_old_stack_startup_globals_exist_on_rilua_path() {
     let env = WowLuaEnv::new().unwrap();
