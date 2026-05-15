@@ -50,6 +50,22 @@ const DEFAULT_MAP_SEEDS: &[DefaultMapSeed] = &[
         art_id: 5920,
         child_map_ids: &[],
     },
+    DefaultMapSeed {
+        ui_map_id: 1409,
+        name: "Exile's Reach",
+        map_type: 3,
+        parent_map_id: 0,
+        art_id: 0,
+        child_map_ids: &[],
+    },
+    DefaultMapSeed {
+        ui_map_id: 1670,
+        name: "Oribos",
+        map_type: 3,
+        parent_map_id: 0,
+        art_id: 0,
+        child_map_ids: &[],
+    },
 ];
 
 /// Seed the `SimState.maps` table with the handful of ui-map ids

@@ -43,6 +43,21 @@ fn test_get_map_info_has_name_field() {
 }
 
 #[test]
+fn test_get_map_info_has_shadowlands_compat_maps() {
+    let env = env();
+    let (exiles_reach, oribos): (String, String) = env
+        .eval(
+            r#"
+            return C_Map.GetMapInfo(1409).name,
+                   C_Map.GetMapInfo(1670).name
+            "#,
+        )
+        .unwrap();
+    assert_eq!(exiles_reach, "Exile's Reach");
+    assert_eq!(oribos, "Oribos");
+}
+
+#[test]
 fn test_get_best_map_for_unit() {
     let env = env();
     let map_id: i32 = env
