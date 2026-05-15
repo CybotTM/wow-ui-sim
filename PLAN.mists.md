@@ -51,6 +51,7 @@
 - [x] Add exact-label regression coverage for the Mists Spellbook bottom tabs so the `What's Changed` tab cannot render as an empty shell again.
 - [x] Run the AllTheThings Achievements/Calendar installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the Leatrix_Plus Interface Options installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
+- [x] Run the Plater Interface Options installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
 # Mists / Pandaria Classic Startup Plan
