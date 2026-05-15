@@ -392,6 +392,18 @@ pub(super) fn set_action(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_bag_item(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let args = [stack_val(state, 2), stack_val(state, 3)];
+    let has_lines = populate_tooltip_from_method(state, tooltip_id, "GetBagItem", &args, None)?;
+    if has_lines {
+        fire_tooltip_script(state, tooltip_id, "OnTooltipSetItem");
+    }
+    state.push(Val::Bool(false));
+    state.push(Val::Nil);
+    Ok(2)
+}
+
 pub(super) fn set_currency_token(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
     let index = stack_val(state, 2);
@@ -591,4 +603,27 @@ pub(super) fn set_trade_skill_item(state: &mut LuaState) -> LuaResult<u32> {
         fire_tooltip_script(state, tooltip_id, "OnTooltipSetItem");
     }
     Ok(0)
+}
+
+pub(super) fn is_equipped_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _tooltip_id = frame_id_from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+pub(super) fn reset_secondary_compare_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _tooltip_id = frame_id_from_stack(state, 1)?;
+    Ok(0)
+}
+
+pub(super) fn advance_secondary_compare_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _tooltip_id = frame_id_from_stack(state, 1)?;
+    Ok(0)
+}
+
+pub(super) fn set_compare_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _tooltip_id = frame_id_from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(false));
+    Ok(2)
 }

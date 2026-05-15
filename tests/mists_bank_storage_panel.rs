@@ -25,6 +25,7 @@ fn mists_bank_and_guild_bank_support_storage_flow() {
             "--exec-lua",
             r#"
             A_Admin.ClearBags()
+            A_Admin.AddBagItem(0, 1, 6948, 1)
             A_Admin.AddBagItem(-1, 1, 6948, 1)
             A_Admin.ClearGuildBank()
             A_Admin.AddGuildBankItem(1, 1, 6948, 1)
@@ -32,6 +33,22 @@ fn mists_bank_and_guild_bank_support_storage_flow() {
             FireEvent("BANKFRAME_OPENED")
             if not (BankFrame and BankFrame:IsShown()) then
                 error("BankFrame did not open")
+            end
+
+            OpenAllBags()
+            local hoveredBagItem = false
+            for index = 1, 36 do
+                local bagButton = _G["ContainerFrame1Item" .. index]
+                if bagButton and bagButton:IsShown() then
+                    ContainerFrameItemButton_OnEnter(bagButton)
+                    if GameTooltip:IsShown() then
+                        hoveredBagItem = true
+                        break
+                    end
+                end
+            end
+            if not hoveredBagItem then
+                error("bag item hover did not show GameTooltip")
             end
 
             local bankSlots, full = GetNumBankSlots()

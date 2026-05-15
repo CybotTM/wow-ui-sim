@@ -52,6 +52,7 @@ const TOOLTIP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetToyByItemID", set_toy_by_item_id),
     ("SetHyperlink", set_hyperlink),
     ("SetAction", set_action),
+    ("SetBagItem", set_bag_item),
     ("SetCurrencyToken", set_currency_token),
     ("SetInventoryItem", set_inventory_item),
     ("SetSocketedItem", set_socketed_item),
@@ -90,6 +91,13 @@ const TOOLTIP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("CopyTooltip", copy_tooltip),
     ("SetFrameStack", set_frame_stack),
     ("AddFontStrings", add_font_strings),
+    ("IsEquippedItem", is_equipped_item),
+    ("ResetSecondaryCompareItem", reset_secondary_compare_item),
+    (
+        "AdvanceSecondaryCompareItem",
+        advance_secondary_compare_item,
+    ),
+    ("SetCompareItem", set_compare_item),
 ];
 
 pub(super) fn register_tooltip(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {

@@ -78,6 +78,42 @@ fn mists_pvp_ui_supports_honor_battleground_and_conquest_panels() {
     assert_no_lua_errors(&stdout, &stderr);
 }
 
+#[test]
+fn mists_toggle_pvp_frame_routes_through_group_finder_without_errors() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(wow_sim_binary())
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            TogglePVPFrame()
+            if not (PVEFrame and PVEFrame:IsShown()) then
+                error("PVEFrame did not open")
+            end
+            if not (PVPQueueFrame and PVPQueueFrame:IsShown()) then
+                error("PVPQueueFrame did not open")
+            end
+            if not (HonorQueueFrame and HonorQueueFrame:IsShown()) then
+                error("HonorQueueFrame did not open")
+            end
+            "#,
+            "lua-errors",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+}
+
 fn assert_no_lua_errors(stdout: &str, stderr: &str) {
     assert!(
         !stdout.contains("Lua error")
