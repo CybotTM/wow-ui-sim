@@ -42,6 +42,22 @@ fn test_add_mask_texture_no_duplicates() {
 }
 
 #[test]
+fn test_named_mask_texture_publishes_global() {
+    let env = env();
+    let published: bool = env
+        .eval(
+            r#"
+        local f = CreateFrame("Frame", nil, UIParent)
+        local mask = f:CreateMaskTexture("NamedMaskTextureGlobal", "BACKGROUND")
+        return NamedMaskTextureGlobal == mask
+    "#,
+        )
+        .unwrap();
+
+    assert!(published, "named MaskTexture regions should publish globals");
+}
+
+#[test]
 fn test_get_mask_texture_nil() {
     let env = env();
     let (_, tex) = setup_texture(&env, "MaskNil");

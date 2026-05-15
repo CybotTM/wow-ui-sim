@@ -272,6 +272,9 @@ pub(super) fn create_mask_texture(state: &mut LuaState) -> LuaResult<u32> {
     texture.object_type_name = Some("MaskTexture".to_string());
     let child_id = texture.id;
     register_child_widget(state, parent_id, child_id, texture)?;
+    if let Some(ref n) = name {
+        bind_named_child_global(state, n, child_id)?;
+    }
     let val = frame_ref(state, child_id)?;
     state.push(val);
     Ok(1)
