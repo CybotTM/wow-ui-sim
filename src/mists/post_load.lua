@@ -108,6 +108,39 @@ end
 
 RefreshCharacterPetTabAvailability()
 
+local function ResizeVisibleSpellBookBottomTabs()
+  if type(SpellBookFrame) ~= "table" or type(PanelTemplates_TabResize) ~= "function" then
+    return
+  end
+
+  for index = 1, 5 do
+    local tab = rawget(_G, "SpellBookFrameTabButton" .. index)
+    if tab and tab:IsShown() then
+      PanelTemplates_TabResize(tab, 0, nil, 36, SpellBookFrame.maxTabWidth or 88)
+    end
+  end
+end
+
+local function PatchSpellBookBottomTabSizing()
+  if type(SpellBookFrame) ~= "table"
+     or type(SpellBookFrame.Update) ~= "function"
+     or rawget(_G, "__wow_sim_mists_spellbook_tabs_wrapped") == true then
+    return
+  end
+
+  local original = SpellBookFrame.Update
+  function SpellBookFrame:Update(...)
+    local result = { original(self, ...) }
+    ResizeVisibleSpellBookBottomTabs()
+    return unpack(result)
+  end
+
+  rawset(_G, "__wow_sim_mists_spellbook_tabs_wrapped", true)
+end
+
+PatchSpellBookBottomTabSizing()
+ResizeVisibleSpellBookBottomTabs()
+
 function CombatLog_LoadUI()
   return true
 end

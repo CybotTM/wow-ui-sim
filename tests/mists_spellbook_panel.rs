@@ -38,6 +38,39 @@ fn mists_spellbook_populates_visible_spell_buttons() {
                 error("spellbook has no populated spell buttons")
             end
 
+            local expectedTabs = {
+                SpellBookFrameTabButton1,
+                SpellBookFrameTabButton2,
+                SpellBookFrameTabButton3,
+                SpellBookFrameTabButton4,
+            }
+            local previousRight = nil
+            for index, tab in ipairs(expectedTabs) do
+                if not tab or not tab:IsShown() then
+                    error(("spellbook bottom tab %d is missing or hidden"):format(index))
+                end
+                local text = tab:GetText()
+                if type(text) ~= "string" or text == "" then
+                    error(("spellbook bottom tab %d has empty text"):format(index))
+                end
+                local label = tab:GetFontString()
+                local labelWidth = label and label:GetWidth() or 0
+                if tab:GetWidth() + 0.5 < labelWidth + 40 then
+                    error(("spellbook bottom tab %d is too narrow: tab=%s text=%s"):format(
+                        index,
+                        tostring(tab:GetWidth()),
+                        tostring(labelWidth)
+                    ))
+                end
+                if previousRight and tab:GetLeft() < previousRight - 15.5 then
+                    error(("spellbook bottom tab %d overlaps the previous tab"):format(index))
+                end
+                previousRight = tab:GetRight()
+            end
+            if SpellBookFrameTabButton5 and SpellBookFrameTabButton5:IsShown() then
+                error("unexpected fifth spellbook bottom tab is visible")
+            end
+
             SpellBookFrameTabButton_OnClick(SpellBookFrameTabButton2)
             SpellBook_UpdateProfTab()
 

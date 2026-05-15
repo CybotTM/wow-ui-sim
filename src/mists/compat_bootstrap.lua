@@ -32,6 +32,10 @@ if LE_UNIT_STAT_SPIRIT == nil then
   LE_UNIT_STAT_SPIRIT = 5
 end
 
+if rawget(_G, "WHAT_HAS_CHANGED") == nil then
+  WHAT_HAS_CHANGED = "What's Changed"
+end
+
 -- Mists Classic only has classes through Monk. The shared retail-backed
 -- implementation includes Demon Hunter and Evoker, which lets Mists-only
 -- Blizzard code request specs/colors for classes that do not exist in MoP.
