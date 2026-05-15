@@ -61,6 +61,7 @@
 - [x] Run the DeModal AddOn List installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the AllTheThings AddOn List installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the Auctionator AddOn List installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
+- [x] Run the DialogueUI AddOn List installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
 # Mists / Pandaria Classic Startup Plan
