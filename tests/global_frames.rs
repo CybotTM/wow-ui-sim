@@ -596,3 +596,13 @@ fn test_all_named_frame_globals_exist() {
         assert!(exists, "{} should exist as a global", name);
     }
 }
+
+#[test]
+fn test_builtin_auction_house_frame_starts_hidden() {
+    let env = env();
+    let shown: bool = env.eval("return AuctionHouseFrame:IsShown()").unwrap();
+    assert!(
+        !shown,
+        "AuctionHouseFrame is a load-on-demand panel and must not start shown"
+    );
+}
