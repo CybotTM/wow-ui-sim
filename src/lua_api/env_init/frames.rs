@@ -4,8 +4,8 @@ use crate::lua_api::frame::methods::{
     button_anchor_hierarchy, core_state, map_frames, misc, text_attribute_event, widgets,
 };
 use crate::lua_api::methods::{
-    borrow_state_mut, extract_frame_id, get_frame_env_for_debug, registry_set, table_set,
-    val_to_string,
+    borrow_state_mut, extract_frame_id, get_frame_env_for_debug, get_or_create_frame_fields,
+    registry_set, table_set, val_to_string,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::{LuaApiMut, Val};
@@ -85,6 +85,7 @@ fn frame_newindex(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u3
     };
 
     assign_frame_table_field(state, table_ref, key_val, value);
+    assign_frame_fields_value(state, parent_id, key_val, value);
 
     let Some(key) = string_key(state, key_val) else {
         return Ok(0);
@@ -108,6 +109,22 @@ fn assign_frame_table_field(
         let _ = table.raw_set(key_val, value, &state.gc.string_arena);
     }
     state.gc.barrier_back(table_ref);
+}
+
+fn assign_frame_fields_value(
+    state: &mut rilua::vm::state::LuaState,
+    frame_id: u64,
+    key_val: Val,
+    value: Val,
+) {
+    let fields = get_or_create_frame_fields(state, frame_id);
+    let Val::Table(fields_ref) = fields else {
+        return;
+    };
+    if let Some(table) = state.gc.tables.get_mut(fields_ref) {
+        let _ = table.raw_set(key_val, value, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(fields_ref);
 }
 
 fn string_key(state: &mut rilua::vm::state::LuaState, key_val: Val) -> Option<String> {

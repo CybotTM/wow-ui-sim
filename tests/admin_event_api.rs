@@ -38,6 +38,110 @@ fn test_fire_event_handler_receives_event_and_args() {
     assert!(!arg2);
 }
 
+#[test]
+fn test_event_handler_survives_garbage_collection() {
+    let env = env();
+    let received: bool = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_ENTERING_WORLD")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "PLAYER_ENTERING_WORLD" then
+                    _G.__gc_event_received = true
+                end
+            end)
+            collectgarbage("collect")
+            FireEvent("PLAYER_ENTERING_WORLD")
+            return _G.__gc_event_received == true
+            "#,
+        )
+        .unwrap();
+    assert!(received, "event handler closure should stay valid after GC");
+}
+
+#[test]
+fn test_event_handler_with_traceback_survives_garbage_collection() {
+    let env = env();
+    let received: bool = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_ENTERING_WORLD")
+            local function makeHandler()
+                local marker = "alive"
+                return function(self, event)
+                    if event == "PLAYER_ENTERING_WORLD" and marker == "alive" then
+                        _G.__protected_gc_event_received = true
+                    end
+                end
+            end
+            f:SetScript("OnEvent", makeHandler())
+            collectgarbage("collect")
+            FireEvent("PLAYER_ENTERING_WORLD")
+            return _G.__protected_gc_event_received == true
+            "#,
+        )
+        .unwrap();
+    assert!(
+        received,
+        "protected event dispatch should keep closures valid after GC"
+    );
+}
+
+#[test]
+fn test_hooked_event_handler_survives_garbage_collection() {
+    let env = env();
+    let (base_called, hook_called): (bool, bool) = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_ENTERING_WORLD")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "PLAYER_ENTERING_WORLD" then
+                    _G.__hook_gc_base = true
+                end
+            end)
+            f:HookScript("OnEvent", function(self, event)
+                if event == "PLAYER_ENTERING_WORLD" then
+                    _G.__hook_gc_hook = true
+                end
+            end)
+            collectgarbage("collect")
+            FireEvent("PLAYER_ENTERING_WORLD")
+            return _G.__hook_gc_base == true, _G.__hook_gc_hook == true
+            "#,
+        )
+        .unwrap();
+    assert!(base_called, "base event handler should survive GC");
+    assert!(hook_called, "hooked event handler should survive GC");
+}
+
+#[test]
+fn test_frame_method_event_dispatch_survives_garbage_collection() {
+    let env = env();
+    let received: bool = env
+        .eval(
+            r#"
+            do
+                local f = CreateFrame("Frame")
+                function f:PLAYER_ENTERING_WORLD()
+                    _G.__method_dispatch_gc_received = true
+                end
+                f:SetScript("OnEvent", function(self, event, ...)
+                    self[event](self, ...)
+                end)
+                f:RegisterEvent("PLAYER_ENTERING_WORLD")
+            end
+            collectgarbage("collect")
+            FireEvent("PLAYER_ENTERING_WORLD")
+            return _G.__method_dispatch_gc_received == true
+            "#,
+        )
+        .unwrap();
+    assert!(received, "frame table methods should stay valid after GC");
+}
+
 // ============================================================================
 // Only registered frames receive the event
 // ============================================================================
