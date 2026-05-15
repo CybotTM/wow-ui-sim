@@ -74,6 +74,24 @@ fn challenge_mode_get_map_table_returns_iterable_table() {
     assert!(result);
 }
 
+#[test]
+fn affix_info_returns_name_description_and_icon() {
+    let env = env();
+    let (global_name, challenge_name, description_type, icon): (String, String, String, i32) = env
+        .eval(
+            r#"
+            local globalName, description, icon = GetAffixInfo(9)
+            local challengeName = C_ChallengeMode.GetAffixInfo(9)
+            return globalName, challengeName, type(description), icon
+            "#,
+        )
+        .unwrap();
+    assert_eq!(global_name, "Tyrannical");
+    assert_eq!(challenge_name, "Tyrannical");
+    assert_eq!(description_type, "string");
+    assert_ne!(icon, 0);
+}
+
 // ── GetLastWeeklyChest ───────────────────────────────────────────────────────
 
 #[test]

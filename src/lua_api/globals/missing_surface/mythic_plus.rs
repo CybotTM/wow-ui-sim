@@ -19,13 +19,14 @@
 //! - `RequestCurrentAffixes()` / `RequestMapInfo()` / `RequestRewards()` — no-ops.
 
 use super::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::{borrow_state, create_table, table_set};
+use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::state::MythicPlusWeeklyBest;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()> {
+    table_set_rust_fn_static(state, state.global, "GetAffixInfo", get_affix_info)?;
     let ns = ensure_namespace(state, "C_MythicPlus")?;
     table_set_rust_fn_static(state, ns, "GetCurrentAffixes", get_current_affixes)?;
     table_set_rust_fn_static(state, ns, "GetCurrentSeason", get_current_season)?;
@@ -57,6 +58,7 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
     table_set_rust_fn_static(state, ns, "RequestRewards", noop)?;
     let challenge_mode = ensure_namespace(state, "C_ChallengeMode")?;
     table_set_rust_fn_static(state, challenge_mode, "GetMapTable", get_map_table)?;
+    table_set_rust_fn_static(state, challenge_mode, "GetAffixInfo", get_affix_info)?;
     table_set_rust_fn_static(
         state,
         challenge_mode,
@@ -74,6 +76,48 @@ fn get_map_table(state: &mut LuaState) -> LuaResult<u32> {
     let maps = create_table(state);
     state.push(maps);
     Ok(1)
+}
+
+fn get_affix_info(state: &mut LuaState) -> LuaResult<u32> {
+    let affix_id = i32::from_stack(state, 1)?;
+    let Some(name) = affix_name(affix_id) else {
+        return Ok(0);
+    };
+
+    let name = create_string(state, name);
+    let description = create_string(state, "");
+    state.push(name);
+    state.push(description);
+    state.push(Val::Num(affix_icon(affix_id) as f64));
+    Ok(3)
+}
+
+fn affix_name(affix_id: i32) -> Option<&'static str> {
+    match affix_id {
+        2 => Some("Skittish"),
+        3 => Some("Volcanic"),
+        4 => Some("Necrotic"),
+        5 => Some("Teeming"),
+        6 => Some("Raging"),
+        7 => Some("Bolstering"),
+        8 => Some("Sanguine"),
+        9 => Some("Tyrannical"),
+        10 => Some("Fortified"),
+        11 => Some("Bursting"),
+        12 => Some("Grievous"),
+        13 => Some("Explosive"),
+        14 => Some("Quaking"),
+        120 => Some("Awakened"),
+        121 => Some("Prideful"),
+        122 => Some("Inspiring"),
+        123 => Some("Spiteful"),
+        124 => Some("Storming"),
+        _ => None,
+    }
+}
+
+fn affix_icon(affix_id: i32) -> i32 {
+    136243 + affix_id
 }
 
 fn get_current_affixes(state: &mut LuaState) -> LuaResult<u32> {
