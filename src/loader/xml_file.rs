@@ -314,10 +314,27 @@ const FONT_LUA_TEMPLATE: &str = r#"
     __height = {font_height},
     __outline = "{font_outline}",
     __r = 1.0, __g = 1.0, __b = 1.0,
+    __shadowR = 0.0, __shadowG = 0.0, __shadowB = 0.0, __shadowA = 0.0,
+    __shadowX = 0.0, __shadowY = 0.0,
     __justifyH = "{justify_h}",
     __justifyV = "{justify_v}",
     SetTextColor = function(self, r, g, b)
         self.__r = r; self.__g = g; self.__b = b
+    end,
+    SetShadowColor = function(self, r, g, b, a)
+        self.__shadowR = r or 0
+        self.__shadowG = g or 0
+        self.__shadowB = b or 0
+        self.__shadowA = a or 1
+    end,
+    GetShadowColor = function(self)
+        return self.__shadowR, self.__shadowG, self.__shadowB, self.__shadowA
+    end,
+    SetShadowOffset = function(self, x, y)
+        self.__shadowX = x or 0; self.__shadowY = y or 0
+    end,
+    GetShadowOffset = function(self)
+        return self.__shadowX, self.__shadowY
     end,
     GetFont = function(self)
         return self.__font, self.__height, self.__outline
@@ -349,6 +366,12 @@ const FONT_LUA_TEMPLATE: &str = r#"
         if source.__r then self.__r = source.__r end
         if source.__g then self.__g = source.__g end
         if source.__b then self.__b = source.__b end
+        if source.__shadowR then self.__shadowR = source.__shadowR end
+        if source.__shadowG then self.__shadowG = source.__shadowG end
+        if source.__shadowB then self.__shadowB = source.__shadowB end
+        if source.__shadowA then self.__shadowA = source.__shadowA end
+        if source.__shadowX then self.__shadowX = source.__shadowX end
+        if source.__shadowY then self.__shadowY = source.__shadowY end
         if source.__justifyH then self.__justifyH = source.__justifyH end
         if source.__justifyV then self.__justifyV = source.__justifyV end
     end,
@@ -362,6 +385,15 @@ const FONT_LUA_TEMPLATE: &str = r#"
     GetObjectType = function() return "Font" end,
     IsObjectType = function(_, t) return t == "Font" end,
 }
+
+local __font_index = {}
+for key, value in pairs({name}) do
+    if type(value) == "function" then
+        __font_index[key] = value
+        {name}[key] = nil
+    end
+end
+setmetatable({name}, { __index = __font_index })
 "#;
 
 /// Create a Font object in Lua from XML definition.
@@ -449,6 +481,8 @@ const FONT_FAMILY_LUA_TEMPLATE: &str = r#"
     __height = 12.0,
     __outline = "",
     __r = 1.0, __g = 1.0, __b = 1.0,
+    __shadowR = 0.0, __shadowG = 0.0, __shadowB = 0.0, __shadowA = 0.0,
+    __shadowX = 0.0, __shadowY = 0.0,
     __justifyH = "CENTER",
     __justifyV = "MIDDLE",
     SetTextColor = function(self, r, g, b)
@@ -456,6 +490,21 @@ const FONT_FAMILY_LUA_TEMPLATE: &str = r#"
     end,
     GetTextColor = function(self)
         return self.__r, self.__g, self.__b
+    end,
+    SetShadowColor = function(self, r, g, b, a)
+        self.__shadowR = r or 0
+        self.__shadowG = g or 0
+        self.__shadowB = b or 0
+        self.__shadowA = a or 1
+    end,
+    GetShadowColor = function(self)
+        return self.__shadowR, self.__shadowG, self.__shadowB, self.__shadowA
+    end,
+    SetShadowOffset = function(self, x, y)
+        self.__shadowX = x or 0; self.__shadowY = y or 0
+    end,
+    GetShadowOffset = function(self)
+        return self.__shadowX, self.__shadowY
     end,
     SetFont = function(self, font, height, flags)
         if font then self.__font = font end
@@ -487,8 +536,23 @@ const FONT_FAMILY_LUA_TEMPLATE: &str = r#"
         if source.__r then self.__r = source.__r end
         if source.__g then self.__g = source.__g end
         if source.__b then self.__b = source.__b end
+        if source.__shadowR then self.__shadowR = source.__shadowR end
+        if source.__shadowG then self.__shadowG = source.__shadowG end
+        if source.__shadowB then self.__shadowB = source.__shadowB end
+        if source.__shadowA then self.__shadowA = source.__shadowA end
+        if source.__shadowX then self.__shadowX = source.__shadowX end
+        if source.__shadowY then self.__shadowY = source.__shadowY end
     end,
 }
+
+local __font_index = {}
+for key, value in pairs({name}) do
+    if type(value) == "function" then
+        __font_index[key] = value
+        {name}[key] = nil
+    end
+end
+setmetatable({name}, { __index = __font_index })
 "#;
 
 fn create_font_family_object(

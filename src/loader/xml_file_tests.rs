@@ -253,6 +253,41 @@ fn font_family_template_supports_simple_font_alphabet_lookup() {
 }
 
 #[test]
+fn font_family_template_supports_shadow_methods() {
+    let env = crate::lua_api::WowLuaEnv::new().expect("env");
+    let lua_code = FONT_FAMILY_LUA_TEMPLATE.replace("{name}", "XmlFamilyShadowProbe");
+    env.exec(&lua_code)
+        .expect("font family template should load");
+
+    let (r, g, b, a, x, y, metatable_type, index_type): (
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            XmlFamilyShadowProbe:SetShadowColor(0.2, 0.3, 0.4, 0.5)
+            XmlFamilyShadowProbe:SetShadowOffset(3, -4)
+            local r, g, b, a = XmlFamilyShadowProbe:GetShadowColor()
+            local x, y = XmlFamilyShadowProbe:GetShadowOffset()
+            local mt = getmetatable(XmlFamilyShadowProbe)
+            return r, g, b, a, x, y, type(mt), type(mt and mt.__index)
+            "#,
+        )
+        .expect("font family shadow API should round trip");
+
+    assert_eq!((r, g, b, a), (0.2, 0.3, 0.4, 0.5));
+    assert_eq!((x, y), (3.0, -4.0));
+    assert_eq!(metatable_type, "table");
+    assert_eq!(index_type, "table");
+}
+
+#[test]
 fn font_template_supports_simple_font_alphabet_lookup() {
     assert!(FONT_LUA_TEMPLATE.contains("GetFontObjectForAlphabet"));
 }

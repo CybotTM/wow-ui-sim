@@ -154,6 +154,29 @@ fn test_create_font_shadow() {
 }
 
 #[test]
+fn test_font_string_shadow_methods() {
+    let env = env();
+    let (r, g, b, a, x, y): (f64, f64, f64, f64, f64, f64) = env
+        .eval(
+            r#"
+            local f = UIParent:CreateFontString("FontStringShadowProbe", "ARTWORK")
+            f:SetShadowColor(0.2, 0.3, 0.4, 0.5)
+            f:SetShadowOffset(3, -4)
+            local r, g, b, a = f:GetShadowColor()
+            local x, y = f:GetShadowOffset()
+            return r, g, b, a, x, y
+            "#,
+        )
+        .unwrap();
+
+    assert!((r - 0.2).abs() < 0.0001);
+    assert!((g - 0.3).abs() < 0.0001);
+    assert!((b - 0.4).abs() < 0.0001);
+    assert!((a - 0.5).abs() < 0.0001);
+    assert_eq!((x, y), (3.0, -4.0));
+}
+
+#[test]
 fn test_create_font_justify() {
     let env = env();
     let (h, v): (String, String) = env

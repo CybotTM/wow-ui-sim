@@ -3,6 +3,7 @@
 use super::super::shared::{opt_bool, opt_string};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
 use crate::lua_bridge::{IntoStack, stack_val};
+use crate::widget::Color;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -65,21 +66,64 @@ pub(super) fn get_draw_layer(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn set_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = frame_id_from_stack(state, 1);
+    let id = frame_id_from_stack(state, 1)?;
+    let x = number_arg(state, 2, 0.0);
+    let y = number_arg(state, 3, 0.0);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.shadow_offset = (x, y);
+    }
     Ok(0)
 }
 
 pub(super) fn get_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = frame_id_from_stack(state, 1);
-    (0.0_f64, 0.0_f64).into_stack(state)
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let (x, y) = sim
+        .widgets
+        .get(id)
+        .map(|frame| frame.shadow_offset)
+        .unwrap_or((0.0, 0.0));
+    drop(sim);
+    (x as f64, y as f64).into_stack(state)
 }
 
 pub(super) fn set_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = frame_id_from_stack(state, 1);
+    let id = frame_id_from_stack(state, 1)?;
+    let color = Color::new(
+        number_arg(state, 2, 0.0),
+        number_arg(state, 3, 0.0),
+        number_arg(state, 4, 0.0),
+        number_arg(state, 5, 1.0),
+    );
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.shadow_color = color;
+    }
     Ok(0)
 }
 
 pub(super) fn get_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = frame_id_from_stack(state, 1);
-    (0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64).into_stack(state)
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let color = sim
+        .widgets
+        .get(id)
+        .map(|frame| frame.shadow_color)
+        .unwrap_or_else(|| Color::new(0.0, 0.0, 0.0, 1.0));
+    drop(sim);
+    (
+        color.r as f64,
+        color.g as f64,
+        color.b as f64,
+        color.a as f64,
+    )
+        .into_stack(state)
+}
+
+fn number_arg(state: &LuaState, index: i32, default: f32) -> f32 {
+    match stack_val(state, index) {
+        Val::Num(value) => value as f32,
+        _ => default,
+    }
 }
