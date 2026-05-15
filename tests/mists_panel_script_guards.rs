@@ -52,3 +52,17 @@ fn installed_addon_panel_runner_separates_exit_and_interrupt_cleanup() {
         "INT/TERM cleanup should use the interrupt-specific path"
     );
 }
+
+#[test]
+fn mists_panel_runner_fails_on_texture_manager_load_errors() {
+    let script = read_script("scripts/mists-panel-parity.sh");
+
+    assert!(
+        script.contains("fail_if_runtime_log_error"),
+        "panel runner should centralize runtime stderr/stdout failure checks"
+    );
+    assert!(
+        script.contains("TexMgr") && script.contains("Load error"),
+        "panel runner should fail when a panel emits texture-manager load errors"
+    );
+}

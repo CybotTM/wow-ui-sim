@@ -246,10 +246,10 @@ run_wow_sim() {
     env "${env_args[@]}" timeout "$TIMEOUT_SECONDS" "$WOW_SIM_BIN" "$@"
 }
 
-fail_if_exec_or_lua_error() {
+fail_if_runtime_log_error() {
     local label="$1" stderr_file="$2" stdout_file="$3"
-    if grep -qE 'Lua error|\\[exec-lua\\] error' "$stderr_file" "$stdout_file"; then
-        echo "ERROR: $label emitted Lua/exec errors" >&2
+    if grep -qE 'Lua error|\[exec-lua\] error|\[TexMgr\] Load error' "$stderr_file" "$stdout_file"; then
+        echo "ERROR: $label emitted runtime log errors" >&2
         return 1
     fi
 }
@@ -367,18 +367,18 @@ run_panel() {
     echo "=== $slug: $panel ==="
     run_wow_sim "${SIM_ADDON_ARGS[@]}" "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" lua-errors \
         > "$json_file" 2> "$lua_stderr"
-    fail_if_exec_or_lua_error "$panel lua-errors" "$lua_stderr" "$json_file"
+    fail_if_runtime_log_error "$panel lua-errors" "$lua_stderr" "$json_file"
     verify_lua_errors_json "$panel" "$json_file"
 
     run_wow_sim "${SIM_ADDON_ARGS[@]}" "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" dump-tree --filter-key "$root" \
         > "$dump_file" 2> "$dump_stderr"
-    fail_if_exec_or_lua_error "$panel dump-tree" "$dump_stderr" "$dump_file"
+    fail_if_runtime_log_error "$panel dump-tree" "$dump_stderr" "$dump_file"
     verify_dump_tree "$panel" "$slug" "$root" "$dump_file"
 
     run_wow_sim "${SIM_ADDON_ARGS[@]}" "${SIM_SAVED_VAR_ARGS[@]}" --exec-lua "@$lua_file" screenshot \
         --filter "$root" --output "$screenshot_base" \
         > "$screenshot_stdout" 2> "$screenshot_stderr"
-    fail_if_exec_or_lua_error "$panel screenshot" "$screenshot_stderr" "$screenshot_stdout"
+    fail_if_runtime_log_error "$panel screenshot" "$screenshot_stderr" "$screenshot_stdout"
     verify_screenshot "$panel" "$screenshot_stderr" "$screenshot_file"
     verify_visual_signal "$slug" "$screenshot_file"
     verify_visual_baseline "$slug" "$screenshot_file"
