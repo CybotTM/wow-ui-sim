@@ -66,6 +66,26 @@ fn mists_quest_log_selects_entries_and_refreshes_tracker() {
             if not trackerTitle or not trackerTitle:find("Objectives", 1, true) then
                 error("watch frame title did not render objectives text")
             end
+
+            local probeLine = WatchFrame.linePool:Acquire()
+            local fontPath, fontSize = probeLine.text:GetFont()
+            WatchFrame.linePool:Release(probeLine)
+            if not fontPath or not fontPath:find("FRIZQT", 1, true) or fontSize ~= 12 then
+                error("watch frame objective lines did not inherit WatchFontTemplate")
+            end
+
+            local collapseTexture = WatchFrameCollapseExpandButton:GetNormalTexture()
+            local collapsePath = collapseTexture and collapseTexture:GetTexture()
+            if not collapsePath or not collapsePath:find("UI-Panel-QuestHideButton", 1, true) then
+                error("watch frame collapse button texture was missing")
+            end
+
+            local poiButton = WatchFrameLines.poiTable and WatchFrameLines.poiTable.numeric[1]
+            local poiTexture = poiButton and poiButton.Display and poiButton.Display.Icon
+            local poiPath = poiTexture and poiTexture:GetTexture()
+            if not poiPath or not poiPath:find("UI-QuestPoi-NumberIcons", 1, true) then
+                error("watch frame quest POI texture was missing")
+            end
             "#,
             "lua-errors",
         ])

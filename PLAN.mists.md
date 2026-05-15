@@ -4,7 +4,7 @@
 - [x] Fix Mists bag item hover so `ContainerFrameItemButton_OnEnter` can call `GameTooltip:SetBagItem` without throwing, and verify the current PVP toggle path stays clean.
 - [x] Fix the Mists specialization panel so the selected spec background art does not get covered by the wrong overlay texture.
 - [x] Fix Mists micro menu clicks for the Game Menu and Shop buttons so clicking the visible icons opens the expected panel.
-- [ ] Fix Mists objective tracker quest-header/button textures so tracked objectives do not render as bare text on a black panel.
+- [x] Fix Mists objective tracker quest-header/button textures so tracked objectives do not render as bare text on a black panel.
 - [x] Update the Pandaria installed-addon contract tests to accept the `mists-addon:<name>` source resolver rows now used by the local/fixture matrix.
 - [ ] Reproduce and fix the installed-addon AchievementFrame `expected Lua closure in execute` path from `ToggleAchievementFrame`, then retain focused Mists coverage for the clean route.
 - [x] Run the AllTheThings Currency/Token installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.

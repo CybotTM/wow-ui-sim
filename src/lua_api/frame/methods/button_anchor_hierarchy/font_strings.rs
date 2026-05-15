@@ -7,6 +7,7 @@ use crate::lua_api::methods::{
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+use std::collections::HashSet;
 
 use super::shared::{bind_named_child_global, opt_string};
 
@@ -244,12 +245,108 @@ fn apply_font_inherit(
     inherits: Option<&str>,
 ) {
     let Some(inherits) = inherits else { return };
-    let font_object = table_get(state, Val::Table(state.global), inherits);
+    let mut visited = HashSet::new();
+    apply_font_inherit_names(state, fontstring, inherits, &mut visited);
+}
+
+fn apply_font_inherit_names(
+    state: &mut LuaState,
+    fontstring: &mut crate::widget::Frame,
+    inherits: &str,
+    visited: &mut HashSet<String>,
+) {
+    for name in inherits.split(',').map(str::trim) {
+        if name.is_empty() || !visited.insert(name.to_string()) {
+            continue;
+        }
+        if apply_font_object_by_name(state, fontstring, name) {
+            continue;
+        }
+        if let Some(template) = crate::xml::get_font_string_template(name) {
+            apply_font_string_template(state, fontstring, &template, visited);
+        }
+    }
+}
+
+fn apply_font_object_by_name(
+    state: &mut LuaState,
+    fontstring: &mut crate::widget::Frame,
+    name: &str,
+) -> bool {
+    let font_object = table_get(state, Val::Table(state.global), name);
     if !matches!(font_object, Val::Table(_)) {
-        return;
+        return false;
     }
 
     apply_font_object_fields(state, fontstring, font_object);
+    true
+}
+
+fn apply_font_string_template(
+    state: &mut LuaState,
+    fontstring: &mut crate::widget::Frame,
+    template: &crate::xml::FontStringXml,
+    visited: &mut HashSet<String>,
+) {
+    if let Some(inherits) = template.inherits.as_deref() {
+        apply_font_inherit_names(state, fontstring, inherits, visited);
+    }
+    if let Some(font) = template.font.as_deref() {
+        apply_font_inherit_names(state, fontstring, font, visited);
+    }
+    apply_font_string_template_fields(state, fontstring, template);
+}
+
+fn apply_font_string_template_fields(
+    state: &mut LuaState,
+    fontstring: &mut crate::widget::Frame,
+    template: &crate::xml::FontStringXml,
+) {
+    if let Some(justify_h) = template.justify_h.as_deref() {
+        fontstring.justify_h = crate::widget::TextJustify::from_wow_str(justify_h);
+    }
+    if let Some(justify_v) = template.justify_v.as_deref() {
+        fontstring.justify_v = crate::widget::TextJustify::from_wow_str(justify_v);
+    }
+    if let Some(height) = template
+        .font_height
+        .as_ref()
+        .and_then(|font_height| font_height.value())
+    {
+        fontstring.font_size = height as f32;
+    }
+    if let Some(color) = template_color(state, template.color.as_ref()) {
+        fontstring.text_color = color;
+    }
+}
+
+fn template_color(
+    state: &mut LuaState,
+    color: Option<&crate::xml::ColorXml>,
+) -> Option<crate::widget::Color> {
+    let color = color?;
+    if let Some(name) = color.color.as_deref() {
+        return named_color(state, name);
+    }
+    Some(crate::widget::Color::new(
+        color.r.unwrap_or(1.0),
+        color.g.unwrap_or(1.0),
+        color.b.unwrap_or(1.0),
+        color.a.unwrap_or(1.0),
+    ))
+}
+
+fn named_color(state: &mut LuaState, name: &str) -> Option<crate::widget::Color> {
+    let table = table_get(state, Val::Table(state.global), name);
+    if !matches!(table, Val::Table(_)) {
+        return None;
+    }
+    Some(crate::widget::Color::new(
+        font_field_number(state, table.clone(), "r", "r").unwrap_or(1.0) as f32,
+        font_field_number(state, table.clone(), "g", "g").unwrap_or(1.0) as f32,
+        font_field_number(state, table.clone(), "b", "b").unwrap_or(1.0) as f32,
+        font_field_number(state, table, "a", "a").unwrap_or(1.0) as f32,
+    ))
 }
 
 fn apply_font_string_template_mixins(state: &mut LuaState, child_id: u64, inherits: Option<&str>) {
