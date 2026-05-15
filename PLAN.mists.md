@@ -83,7 +83,7 @@
 - [x] Re-fix the Mists CharacterFrame pet tab path so `CharacterFrameTab2` stays hidden when pet availability is false, including the case where the character panel opens after the pet state event.
 - [x] Re-fix Mists bottom tab rendering so Spellbook/Professions/Core Abilities and character-panel tabs keep their labels/textures instead of clipping, overlapping, or leaving empty shells.
 - [x] Re-fix Mists objective tracker quest-header/button texture rendering so tracked quests show the expected tracker chrome instead of bare text on a black panel.
-- [ ] Run the next local non-CI Mists completion audit after the FontString/achievement fixes, covering base `lua-errors`, Mists panel parity with saved vars, installed-addon startup/panel validation, live-GUI smoke validation, and interaction-baseline guards; promote the first failing or unproven lane to a top-priority task.
+- [x] Run the next local non-CI Mists completion audit after the FontString/achievement fixes, covering base `lua-errors`, Mists panel parity with saved vars, installed-addon startup/panel validation, live-GUI smoke validation, and interaction-baseline guards; promote the first failing or unproven lane to a top-priority task.
 - [ ] Refresh the retained local Mists parity artifact references if the completion audit writes a newer artifact root, and verify the baseline guards still reject stale screenshot/dump/log references.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
