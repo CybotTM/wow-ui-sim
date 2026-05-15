@@ -213,6 +213,10 @@ fn mists_character_pet_tab_hides_when_pet_ui_is_absent() {
         "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
     );
     assert_no_lua_errors(&stdout, &stderr);
+    assert!(
+        !stdout.contains("CharacterFrameTab2Text [FontString] (14x10) visible"),
+        "hidden pet tab leaked its text region as visible\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
 }
 
 #[test]

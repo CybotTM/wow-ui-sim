@@ -3,6 +3,7 @@
 - [x] Back Mists CharacterFrame pet tab visibility with simulator pet UI state so seeded pets keep `CharacterFrameTab2` available while default no-pet state still hides it.
 - [x] Record Mists CharacterFrame pet paper-doll tab interaction coverage in the panel parity docs and audit guard.
 - [x] Guard Mists CharacterFrame default no-pet state so `CharacterFrameTab2` stays hidden when `HasPetUI()` is false.
+- [x] Fix Mists CharacterFrame frame dumps so child regions of the hidden no-pet `CharacterFrameTab2` report inherited hidden visibility instead of appearing as visible Pet tab remnants.
 - [x] Refresh focused Mists Character panel parity artifacts after the pet UI state guard, including normal SavedVariables.
 - [x] Re-run focused Mists base `lua-errors` and installed-addon startup matrix after the pet UI state guard.
 - [x] Fix Mists CharacterFrame real open path so the Pet tab hides immediately when `HasPetUI()` is false, without manually calling `PetPaperDollFrame_UpdateIsAvailable()`.

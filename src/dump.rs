@@ -247,7 +247,8 @@ fn emit_frame_line(
 ) {
     let indent = "  ".repeat(depth);
     let rect = compute_frame_rect(ctx.widgets, id, ctx.screen_width, ctx.screen_height);
-    emit_frame_summary_line(frame, display_name, &indent, &rect, ctx);
+    let effective_visible = ctx.widgets.is_ancestor_visible(id);
+    emit_frame_summary_line(frame, display_name, &indent, &rect, ctx, effective_visible);
     emit_anchor_lines(
         ctx.widgets,
         frame,
@@ -271,8 +272,13 @@ fn emit_frame_summary_line(
     indent: &str,
     rect: &LayoutRect,
     ctx: &mut DumpRenderCtx<'_>,
+    effective_visible: bool,
 ) {
-    let vis = if frame.visible { "visible" } else { "hidden" };
+    let vis = if effective_visible {
+        "visible"
+    } else {
+        "hidden"
+    };
     let strata_str = format!(" {}:{}", frame.frame_strata.as_str(), frame.frame_level);
     let mask_str = if frame.is_mask { " MASK" } else { "" };
     let owner_str = resolve_addon_name(ctx.addon_names, frame.owner_addon)
