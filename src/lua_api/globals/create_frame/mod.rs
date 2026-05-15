@@ -22,7 +22,7 @@ use crate::lua_bridge::stack_val;
 use crate::widget::WidgetType;
 use helpers::set_global_raw;
 use rilua::vm::state::LuaState;
-use rilua::{LuaApiMut, LuaResult, Val};
+use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
 // ---------------------------------------------------------------------------
 // CreateFrame
@@ -38,6 +38,29 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
     apply_runtime_frame_templates(state, frame_id, runtime_inherits.as_deref())?;
     let frame_val = frame_ref(state, frame_id)?;
     state.push(frame_val);
+    Ok(1)
+}
+
+pub fn enumerate_frames(state: &mut LuaState) -> LuaResult<u32> {
+    let current = stack_val(state, 1);
+    let after_id = if current == Val::Nil {
+        0
+    } else {
+        extract_frame_id(state, current)
+            .ok_or_else(|| runtime_error("bad argument #1 to 'EnumerateFrames' (Frame expected)"))?
+    };
+
+    let next_id = {
+        let sim = borrow_state(state)?;
+        sim.widgets.next_id_after(after_id)
+    };
+
+    if let Some(next_id) = next_id {
+        let frame = frame_ref(state, next_id)?;
+        state.push(frame);
+    } else {
+        state.push(Val::Nil);
+    }
     Ok(1)
 }
 
@@ -188,6 +211,7 @@ pub fn register_global_frames(lua: &mut rilua::Lua) -> LuaResult<()> {
 /// onto the rilua Lua state.
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "CreateFrame", create_frame)?;
+    LuaApiMut::register_function(lua, "EnumerateFrames", enumerate_frames)?;
     register_global_frames(lua)?;
     dropdown_api::register_dropdown_constants(lua)?;
     dropdown_api::register_dropdown_mutators(lua)?;
@@ -286,5 +310,38 @@ mod tests {
             Some("UIParent"),
             "passing nil as the name still uses the legacy UIParent default"
         );
+    }
+
+    #[test]
+    fn enumerate_frames_walks_created_frames() {
+        let env = WowLuaEnv::new().expect("env");
+
+        let result: String = env
+            .eval(
+                r#"
+                local first = EnumerateFrames()
+                if first == nil then
+                    return "missing_first"
+                end
+
+                local second = EnumerateFrames(first)
+                if second == nil or second == first then
+                    return "missing_second"
+                end
+
+                local target = CreateFrame("Frame", "EnumerateFramesTarget", UIParent)
+                local object = EnumerateFrames()
+                while object do
+                    if object == target then
+                        return "ok"
+                    end
+                    object = EnumerateFrames(object)
+                end
+                return "target_not_found"
+            "#,
+            )
+            .expect("EnumerateFrames should be callable");
+
+        assert_eq!(result, "ok");
     }
 }
