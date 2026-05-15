@@ -484,7 +484,7 @@ mod tests {
     }
 
     #[test]
-    fn test_local_storage_takes_precedence_over_wtf_import_source() {
+    fn test_wtf_import_source_takes_precedence_over_local_storage() {
         let dir = tempdir().unwrap();
         let wtf_root = dir.path().join("WTF");
         let local_root = dir.path().join("LocalSavedVariables");
@@ -515,14 +515,14 @@ mod tests {
         ));
 
         let loaded = with_state(&env, |state| mgr.load_wtf_for_addon(state, "TestAddon")).unwrap();
-        assert_eq!(loaded, 0);
+        assert_eq!(loaded, 1);
         with_state(&env, |state| {
             mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
         })
         .unwrap();
 
         let source: String = env.eval("return TestDB.source").unwrap();
-        assert_eq!(source, "local");
+        assert_eq!(source, "wtf");
     }
 
     #[test]

@@ -157,10 +157,6 @@ impl SavedVariablesManager {
         if self.wtf_loaded.contains_key(addon_name) {
             return Ok(0);
         }
-        if self.has_local_storage_for_addon(addon_name) {
-            self.wtf_loaded.insert(addon_name.to_string(), false);
-            return Ok(0);
-        }
 
         let files = [
             (
@@ -433,11 +429,6 @@ impl SavedVariablesManager {
                 .join(format!("{}.lua", addon_name));
         }
         self.storage_dir.join(format!("{}.lua", addon_name))
-    }
-
-    fn has_local_storage_for_addon(&self, addon_name: &str) -> bool {
-        self.storage_path(addon_name, false).exists()
-            || self.storage_path(addon_name, true).exists()
     }
 }
 
