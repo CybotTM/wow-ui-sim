@@ -9,7 +9,7 @@ use super::types_support::{KeyValuesXml, ScriptsXml};
 pub struct AnimationGroupXml {
     #[serde(rename = "@name")]
     pub name: Option<String>,
-    #[serde(rename = "@parentKey")]
+    #[serde(rename = "@parentKey", alias = "@parentkey")]
     pub parent_key: Option<String>,
     #[serde(rename = "@parentArray")]
     pub parent_array: Option<String>,
@@ -54,7 +54,7 @@ pub enum AnimationElement {
 pub struct AnimationXml {
     #[serde(rename = "@name")]
     pub name: Option<String>,
-    #[serde(rename = "@parentKey")]
+    #[serde(rename = "@parentKey", alias = "@parentkey")]
     pub parent_key: Option<String>,
     #[serde(rename = "@childKey")]
     pub child_key: Option<String>,

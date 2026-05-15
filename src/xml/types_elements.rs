@@ -62,7 +62,7 @@ pub struct TextureXml {
     pub name: Option<String>,
     #[serde(rename = "@inherits")]
     pub inherits: Option<String>,
-    #[serde(rename = "@parentKey")]
+    #[serde(rename = "@parentKey", alias = "@parentkey")]
     pub parent_key: Option<String>,
     #[serde(rename = "@file")]
     pub file: Option<String>,
@@ -234,7 +234,7 @@ pub struct MaskedTextureEntryXml {
 pub struct FontStringXml {
     #[serde(rename = "@name")]
     pub name: Option<String>,
-    #[serde(rename = "@parentKey")]
+    #[serde(rename = "@parentKey", alias = "@parentkey")]
     pub parent_key: Option<String>,
     #[serde(rename = "@inherits")]
     pub inherits: Option<String>,
@@ -559,7 +559,7 @@ pub struct ActorsXml {
 pub struct ActorXml {
     #[serde(rename = "@name")]
     pub name: Option<String>,
-    #[serde(rename = "@parentKey")]
+    #[serde(rename = "@parentKey", alias = "@parentkey")]
     pub parent_key: Option<String>,
     #[serde(rename = "@mixin")]
     pub mixin: Option<String>,

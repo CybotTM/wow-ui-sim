@@ -55,6 +55,35 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_lowercase_parentkey_alias() {
+        let xml = r#"
+            <Ui>
+                <Frame name="Parent">
+                    <Frames>
+                        <Button name="Child" parentkey="angleurKey"/>
+                    </Frames>
+                </Frame>
+            </Ui>
+        "#;
+
+        let ui = parse_xml(xml).unwrap();
+        let parent = match &ui.elements[0] {
+            XmlElement::Frame(frame) => frame,
+            other => panic!("expected frame, got {:?}", other),
+        };
+        let frames = match &parent.children[0] {
+            FrameChildElement::Frames(frames) => frames,
+            other => panic!("expected frames section, got {:?}", other),
+        };
+        let child = match &frames.elements[0] {
+            FrameElement::Button(frame) => frame,
+            other => panic!("expected button, got {:?}", other),
+        };
+
+        assert_eq!(child.parent_key.as_deref(), Some("angleurKey"));
+    }
+
+    #[test]
     fn test_parse_element_key_values() {
         let xml = r#"
             <Ui>

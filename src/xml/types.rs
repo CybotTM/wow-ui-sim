@@ -120,7 +120,7 @@ pub struct FrameXml {
     pub name: Option<String>,
     #[serde(rename = "@parent")]
     pub parent: Option<String>,
-    #[serde(rename = "@parentKey")]
+    #[serde(rename = "@parentKey", alias = "@parentkey")]
     pub parent_key: Option<String>,
     #[serde(rename = "@inherits")]
     pub inherits: Option<String>,
