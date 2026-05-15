@@ -59,6 +59,19 @@ validate_manifest() {
     echo "$count installed Mists addon row(s) validated from $MANIFEST"
 }
 
+validate_runner_binaries() {
+    [ -x "$WOW_SIM_BIN" ] || {
+        echo "ERROR: wow-sim binary not found or not executable: $WOW_SIM_BIN" >&2
+        echo "       Rebuild it or rerun without --skip-build." >&2
+        return 2
+    }
+    [ -x "$PANEL_VISUAL_METRICS_BIN" ] || {
+        echo "ERROR: panel-visual-metrics binary not found or not executable: $PANEL_VISUAL_METRICS_BIN" >&2
+        echo "       Rebuild it or rerun without --skip-build." >&2
+        return 2
+    }
+}
+
 should_skip_manifest_row() {
     local name="${1:-}" profile="${2:-}"
     [[ "$name" =~ ^# ]] && return 0
@@ -112,6 +125,7 @@ remove_symlink() {
     local name="$1"
     local dst="$ADDONS_DIR/$name"
     [ -L "$dst" ] && rm "$dst"
+    return 0
 }
 
 remove_compat_shims() {
@@ -130,6 +144,15 @@ teardown_addon() {
     if [ "$KEEP_SYMLINKS" -eq 0 ]; then
         remove_symlink "$name"
         remove_compat_shims "$name"
+    fi
+    return 0
+}
+
+finish_active_addon() {
+    local name="$ACTIVE_ADDON"
+    ACTIVE_ADDON=""
+    if [ -n "$name" ]; then
+        teardown_addon "$name" || true
     fi
 }
 
@@ -151,19 +174,23 @@ run_addon_panels() {
     install_compat_shims "$name"
     if WOW_SIM_BIN="$WOW_SIM_BIN" PANEL_VISUAL_METRICS_BIN="$PANEL_VISUAL_METRICS_BIN" \
             "$REPO_ROOT/scripts/mists-panel-parity.sh" "${args[@]}"; then
-        teardown_addon "$name"
-        ACTIVE_ADDON=""
+        finish_active_addon
         return 0
     fi
-    teardown_addon "$name"
-    ACTIVE_ADDON=""
+    finish_active_addon
     return 1
 }
 
-cleanup_active_addon() {
+cleanup_active_addon_on_exit() {
+    if [ -n "$ACTIVE_ADDON" ]; then
+        finish_active_addon
+    fi
+}
+
+cleanup_active_addon_on_interrupt() {
     if [ -n "$ACTIVE_ADDON" ]; then
         echo "ERROR: interrupted; removing addon symlinks for $ACTIVE_ADDON" >&2
-        teardown_addon "$ACTIVE_ADDON"
+        finish_active_addon
     fi
 }
 
@@ -176,8 +203,9 @@ mkdir -p "$OUT_DIR"
 if [ "$SKIP_BUILD" -eq 0 ]; then
     cargo build --bin wow-sim --no-default-features --features "sound,gui,casc,client-mists"
 fi
-trap cleanup_active_addon EXIT
-trap 'cleanup_active_addon; exit 130' INT TERM
+validate_runner_binaries
+trap cleanup_active_addon_on_exit EXIT
+trap 'cleanup_active_addon_on_interrupt; exit 130' INT TERM
 
 declare -i pass=0 fail=0
 while IFS=$'\t' read -r name profile url ref subpath; do
