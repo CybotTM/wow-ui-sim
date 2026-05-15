@@ -3,7 +3,7 @@
 - [x] Fix the Mists specialization panel selected-spec view so the intended parchment/background art is not covered by the incorrect large overlay texture.
 - [x] Fix the Mists Game Menu bottom/border texture anchoring so the lower chrome does not spill outside the menu frame.
 - [x] Fix Mists micro menu Game Menu and Shop buttons so the visible icons dispatch clicks and open the expected panels.
-- [ ] Fix Mists objective tracker quest/header/button texture loading so tracked objectives show tracker chrome instead of bare text on a black/empty panel.
+- [x] Fix Mists objective tracker quest/header/button texture loading so tracked objectives show tracker chrome instead of bare text on a black/empty panel.
 - [x] Fix the Mists CharacterFrame stale pet availability path so `CharacterFrameTab2` hides even when the panel opens after the original `PET_UI_UPDATE` event has already fired.
 - [x] Fix Mists bag item hover so `ContainerFrameItemButton_OnEnter` can call `GameTooltip:SetBagItem` without throwing, and verify the current PVP toggle path stays clean.
 - [x] Fix the Mists specialization panel so the selected spec background art does not get covered by the wrong overlay texture.
