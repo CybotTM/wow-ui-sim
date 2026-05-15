@@ -79,12 +79,23 @@ fn mists_quest_log_selects_entries_and_refreshes_tracker() {
             if not collapsePath or not collapsePath:find("UI-Panel-QuestHideButton", 1, true) then
                 error("watch frame collapse button texture was missing")
             end
+            if not WatchFrameCollapseExpandButton:IsVisible()
+                or WatchFrameCollapseExpandButton:GetWidth() <= 0
+                or WatchFrameCollapseExpandButton:GetHeight() <= 0 then
+                error("watch frame collapse button chrome is not renderable")
+            end
 
             local poiButton = WatchFrameLines.poiTable and WatchFrameLines.poiTable.numeric[1]
             local poiTexture = poiButton and poiButton.Display and poiButton.Display.Icon
             local poiPath = poiTexture and poiTexture:GetTexture()
             if not poiPath or not poiPath:find("UI-QuestPoi-NumberIcons", 1, true) then
                 error("watch frame quest POI texture was missing")
+            end
+            if not poiButton:IsVisible()
+                or not poiTexture:IsVisible()
+                or poiTexture:GetWidth() <= 0
+                or poiTexture:GetHeight() <= 0 then
+                error("watch frame quest POI chrome is not renderable")
             end
             "#,
             "lua-errors",
