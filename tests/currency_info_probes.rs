@@ -40,6 +40,48 @@ fn get_currency_info_returns_seeded_valorstones_row() {
 }
 
 #[test]
+fn get_currency_info_covers_saved_instances_currency_ids() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local ids = {
+                81, 515, 2588, 3363, 241, 391, 416, 402, 697, 738,
+                752, 776, 777, 789, 823, 824, 994, 1101, 1129, 1149,
+                1155, 1166, 1220, 1226, 1273, 1275, 1299, 1314, 1342,
+                1501, 1508, 1533, 1710, 1580, 1587, 1716, 1717, 1718,
+                1721, 1719, 1755, 1803, 1754, 1191, 1602, 1792, 1822,
+                1767, 1828, 1810, 1813, 1816, 1819, 1820, 1885, 1889,
+                1904, 1906, 1931, 1977, 1979, 2009, 2000, 2003, 2245,
+                2123, 2797, 2045, 2118, 2122, 2409, 2410, 2411, 2412,
+                2413, 2533, 2594, 2650, 2651, 2777, 2796, 2706, 2707,
+                2708, 2709, 2774, 2657, 2912, 2806, 2807, 2809, 2812,
+                2800, 3010, 2778, 3089, 2803, 2815, 3056, 3008, 2813,
+                2914, 2915, 2916, 2917, 3023, 3100, 3090, 3218, 3220,
+                3226, 3116, 3107, 3108, 3109, 3110, 3132, 3149, 3278,
+                3303, 3356, 3269, 3284, 3286, 3288, 3290, 3141, 3319,
+                3316, 3376, 3377, 3379, 3385, 3392, 3400, 3373, 3393,
+                3405, 3256, 3257, 3258, 3259, 3260, 3261, 3262, 3263,
+                3264, 3265, 3266, 3028, 3310, 3212, 3378, 3383, 3341,
+                3343, 3345, 3347, 3418,
+            }
+            for _, id in ipairs(ids) do
+                local info = C_CurrencyInfo.GetCurrencyInfo(id)
+                if not info or type(info.name) ~= "string" or info.name == "" then
+                    return "missing:" .. tostring(id)
+                end
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "SavedInstances currency sort needs every tracked currency to expose a name: {result}"
+    );
+}
+
+#[test]
 fn get_currency_info_exposes_all_retail_fields() {
     let env = env();
     let (has_id, has_name, has_desc, has_qty, has_max_qty, has_quality, has_icon): (
