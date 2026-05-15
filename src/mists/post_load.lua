@@ -95,6 +95,19 @@ end
 
 HideInactivePvpReadyDialog()
 
+local function RefreshCharacterPetTabAvailability()
+  if type(PetPaperDollFrame_UpdateIsAvailable) ~= "function" then
+    return
+  end
+  if type(PetPaperDollFrame) ~= "table" or type(CharacterFrameTab2) ~= "table" then
+    return
+  end
+
+  PetPaperDollFrame_UpdateIsAvailable()
+end
+
+RefreshCharacterPetTabAvailability()
+
 function CombatLog_LoadUI()
   return true
 end
