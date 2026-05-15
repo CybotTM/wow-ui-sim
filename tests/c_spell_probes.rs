@@ -54,6 +54,57 @@ fn test_get_spell_info_ebon_might_self_buff() {
 }
 
 #[test]
+fn test_get_spell_info_includes_cell_default_indicator_spells() {
+    let env = env();
+    let names: Vec<String> = env
+        .eval(
+            r#"
+            local ids = {
+                377509, -- Dream Projection
+                52042,  -- Healing Stream Totem
+                170906, -- Food & Drink
+                167152, -- Refreshment
+                430,    -- Drink
+                43182,  -- Drink
+                172786, -- Drink
+                308433, -- Food & Drink
+                369162, -- Drink
+                456574, -- Cinder Nectar
+                461063, -- Quiet Contemplation
+                132403, -- Shield of the Righteous
+                132404, -- Shield Block
+            }
+            local names = {}
+            for i, spellID in ipairs(ids) do
+                local info = C_Spell.GetSpellInfo(spellID)
+                names[i] = info and info.name or ""
+            end
+            return names
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        names,
+        vec![
+            "Dream Projection",
+            "Healing Stream Totem",
+            "Food & Drink",
+            "Refreshment",
+            "Drink",
+            "Drink",
+            "Drink",
+            "Food & Drink",
+            "Drink",
+            "Cinder Nectar",
+            "Quiet Contemplation",
+            "Shield of the Righteous",
+            "Shield Block",
+        ]
+    );
+}
+
+#[test]
 fn test_get_spell_info_unknown_returns_nil() {
     let env = env();
     let is_nil: bool = env

@@ -353,6 +353,7 @@ fn load_spell_text_column(
 /// - `data/traits.rs`: spell_id, overrides_spell_id, visible_spell_id, override_icon fields
 /// - `src/lua_api/globals/spellbook_data.rs`: spell(N) and passive(N) calls
 /// - Hardcoded baseline: action bar spells, trinket/item procs not covered elsewhere
+/// - Addon compatibility: spell names that installed addons index directly during load
 fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
     let trait_ids = collect_ids_from_file(
         "data/traits.rs",
@@ -368,18 +369,21 @@ fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Err
         &["spell(", "passive("],
     )?;
     let baseline_ids: BTreeSet<u32> = BASELINE_SPELL_IDS.iter().copied().collect();
+    let addon_compat_ids: BTreeSet<u32> = ADDON_COMPAT_SPELL_IDS.iter().copied().collect();
 
     println!(
-        "Required spell IDs: {} (traits: {}, spellbook: {}, baseline: {})",
-        trait_ids.len() + spellbook_ids.len() + baseline_ids.len(),
+        "Required spell IDs: {} (traits: {}, spellbook: {}, baseline: {}, addon compat: {})",
+        trait_ids.len() + spellbook_ids.len() + baseline_ids.len() + addon_compat_ids.len(),
         trait_ids.len(),
         spellbook_ids.len(),
         baseline_ids.len(),
+        addon_compat_ids.len(),
     );
 
     let mut all = trait_ids;
     all.extend(&spellbook_ids);
     all.extend(&baseline_ids);
+    all.extend(&addon_compat_ids);
     println!("Required spell IDs (deduplicated): {}", all.len());
     Ok(all)
 }
@@ -387,6 +391,16 @@ fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Err
 const BASELINE_SPELL_IDS: &[u32] = &[
     100, 116, 2018, 2575, 2576, 2657, 395296, 1230084, 1232418, 1232421, 1234430, 1242031, 1247534,
     1272143, 1279510,
+];
+
+/// Retail addons sometimes build lookup tables keyed by localized spell names
+/// during file load, so `C_Spell.GetSpellInfo` must know these IDs before any
+/// character spellbook or trait data references them.
+const ADDON_COMPAT_SPELL_IDS: &[u32] = &[
+    // Cell/Defaults/Indicator_DefaultSpells.lua
+    430, 1064, 73920, 108280, 52042, 197995, 114911, 382311, 207778, 114083, 377509, 322118, 170906,
+    167152, 43182, 172786, 308433, 369162, 456574, 461063, 195181, 203819, 192081, 215479, 132403,
+    132404,
 ];
 
 fn collect_ids_from_file(
