@@ -220,6 +220,44 @@ fn mists_character_pet_tab_hides_when_pet_ui_is_absent() {
 }
 
 #[test]
+fn mists_character_pet_tab_rehides_stale_tab_when_panel_opens() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(env!("CARGO_BIN_EXE_wow-sim"))
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            FireEvent("PET_UI_UPDATE")
+            CharacterFrameTab2:Show()
+
+            ToggleCharacter("PaperDollFrame")
+            if not CharacterFrame or not CharacterFrame:IsShown() then
+                error("CharacterFrame did not open")
+            end
+            if CharacterFrameTab2:IsShown() then
+                error("stale pet tab stayed visible despite absent pet UI")
+            end
+            "#,
+            "dump-tree",
+            "--filter-key",
+            "CharacterFrame",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+}
+
+#[test]
 fn mists_character_subpanels_drive_titles_and_equipment_sets() {
     let output = Command::new("timeout")
         .arg("90")

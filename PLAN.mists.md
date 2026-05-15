@@ -80,7 +80,7 @@
 - [x] Run the DialogueUI AddOn List installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the Leatrix_Maps AddOn List installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the Leatrix_Plus AddOn List installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
-- [ ] Re-fix the Mists CharacterFrame pet tab path so `CharacterFrameTab2` stays hidden when pet availability is false, including the case where the character panel opens after the pet state event.
+- [x] Re-fix the Mists CharacterFrame pet tab path so `CharacterFrameTab2` stays hidden when pet availability is false, including the case where the character panel opens after the pet state event.
 - [ ] Re-fix Mists bottom tab rendering so Spellbook/Professions/Core Abilities and character-panel tabs keep their labels/textures instead of clipping, overlapping, or leaving empty shells.
 - [ ] Re-fix Mists objective tracker quest-header/button texture rendering so tracked quests show the expected tracker chrome instead of bare text on a black panel.
 - [ ] Run the next local non-CI Mists completion audit after the FontString/achievement fixes, covering base `lua-errors`, Mists panel parity with saved vars, installed-addon startup/panel validation, live-GUI smoke validation, and interaction-baseline guards; promote the first failing or unproven lane to a top-priority task.

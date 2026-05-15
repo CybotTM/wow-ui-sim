@@ -146,6 +146,9 @@ end
 HideInactivePvpReadyDialog()
 
 local function RefreshCharacterPetTabAvailability()
+  if rawget(_G, "__wow_sim_mists_refreshing_character_pet_tab") == true then
+    return
+  end
   if type(PetPaperDollFrame_UpdateIsAvailable) ~= "function" then
     return
   end
@@ -153,9 +156,28 @@ local function RefreshCharacterPetTabAvailability()
     return
   end
 
+  rawset(_G, "__wow_sim_mists_refreshing_character_pet_tab", true)
   PetPaperDollFrame_UpdateIsAvailable()
+  rawset(_G, "__wow_sim_mists_refreshing_character_pet_tab", false)
 end
 
+local function PatchCharacterPetTabOpenRefresh()
+  if type(ToggleCharacter) ~= "function"
+     or rawget(_G, "__wow_sim_mists_character_pet_tab_refresh_wrapped") == true then
+    return
+  end
+
+  local original = ToggleCharacter
+  function ToggleCharacter(...)
+    local result = { original(...) }
+    RefreshCharacterPetTabAvailability()
+    return unpack(result)
+  end
+
+  rawset(_G, "__wow_sim_mists_character_pet_tab_refresh_wrapped", true)
+end
+
+PatchCharacterPetTabOpenRefresh()
 RefreshCharacterPetTabAvailability()
 
 local function ResizeVisibleSpellBookBottomTabs()
