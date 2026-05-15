@@ -141,6 +141,7 @@ under test.
 | `AllTheThings` + normal SavedVariables | Achievements and Calendar | Passed after the Spellbook tab label guard; per-panel `lua-errors` length `0`, visible `AchievementFrame` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/allthethings-achievements-calendar-with-saved-vars-after-spellbook-label-guard/AllTheThings/achievements-calendar/` |
 | `AllTheThings` + normal SavedVariables | TradeSkill panel | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/allthethings-trade-skill-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/allthethings-trade-skill-with-saved-vars-after-castspell/AllTheThings/trade-skill/` |
 | `Auctionator` + normal SavedVariables | Auction House: browse, bid, post, cancel | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/auctionator-auction-house-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/auctionator-auction-house-with-saved-vars-after-castspell/Auctionator/auction-house/` |
+| `Auctionator` + normal SavedVariables | Interface options | Passed after the Plater Interface Options shard; per-panel `lua-errors` length `0`, visible `SettingsPanel` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/auctionator-interface-options-with-saved-vars-after-plater-interface-options/Auctionator/interface-options/` |
 | `Auctionator` + normal SavedVariables | Mail: inbox, send, attachments, COD | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/auctionator-mail-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/auctionator-mail-with-saved-vars-after-castspell/Auctionator/mail/` |
 | `Plater` + normal SavedVariables | Nameplates | Passed after the legacy `CastSpell(slot, bookType)` fix; per-panel `lua-errors` length `0`, root dump and screenshot written | `target/mists-local-addon-panel-sample/plater-nameplates-with-saved-vars-after-castspell.log`; artifacts under `target/mists-local-addon-panel-sample/plater-nameplates-with-saved-vars-after-castspell/Plater/nameplates/` |
 | `Plater` + normal SavedVariables | Interface options | Passed after the Leatrix_Plus Interface Options shard; per-panel `lua-errors` length `0`, visible `SettingsPanel` root dump and screenshot written | Artifacts under `target/mists-local-addon-panel-sample/plater-interface-options-with-saved-vars-after-leatrix-plus-interface-options/Plater/interface-options/` |
@@ -175,7 +176,7 @@ has at least one bounded panel sample with normal SavedVariables enabled:
 | Addon | SavedVariables panel evidence |
 |---|---|
 | `AllTheThings` | Collections, Achievements/Calendar, TradeSkill |
-| `Auctionator` | Auction House, Mail |
+| `Auctionator` | Auction House, Interface Options, Mail |
 | `BlizzMove` | All 38 panel slugs |
 | `DeModal` | Store/CatalogShop, Character, Spellbook/professions, TradeSkill |
 | `DialogueUI` | Quest choice, Quest log |
