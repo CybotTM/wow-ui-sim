@@ -18,6 +18,7 @@
 mod audit_api;
 mod csv_util;
 mod gen_atlas;
+mod gen_currencies;
 mod gen_encounter_journal;
 mod gen_global_strings;
 mod gen_items;
@@ -197,6 +198,8 @@ enum GenerateTarget {
     Items,
     /// Generate data/atlas.rs from UiTextureAtlas CSVs
     Atlas,
+    /// Generate data/currencies.rs from CurrencyTypes CSV
+    Currencies,
     /// Generate data/global_strings.rs from GlobalStrings CSV
     GlobalStrings,
     /// Generate data/manifest_interface_data.rs from ManifestInterfaceData CSV
@@ -290,6 +293,7 @@ fn run_generator(target: GenerateTarget) {
         GenerateTarget::Spells => gen_spells::run(),
         GenerateTarget::Items => gen_items::run(),
         GenerateTarget::Atlas => gen_atlas::run(),
+        GenerateTarget::Currencies => gen_currencies::run(),
         GenerateTarget::GlobalStrings => gen_global_strings::run(),
         GenerateTarget::Manifest => gen_manifest::run(),
         GenerateTarget::Traits => gen_traits::run(),

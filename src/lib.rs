@@ -19,6 +19,8 @@ pub mod blizzard_ui_sync;
 pub mod c_api;
 pub mod casc_asset_fallback;
 pub mod config;
+#[path = "../data/currencies.rs"]
+pub mod currencies;
 pub mod cvars;
 pub mod debug_helpers;
 pub mod dump;
