@@ -285,25 +285,14 @@ fn blizzard_deprecated_specialization_get_talent_info_returns_nil_when_backing_r
 }
 
 #[test]
-fn blizzard_deprecated_specialization_talent_constants_resolve_to_nil_via_auto_empty_tables() {
+fn blizzard_deprecated_specialization_talent_constants_are_populated() {
     let env = load_full_game_ui();
 
-    let both_nil: bool = env
-        .eval("return MAX_TALENT_TIERS == nil and NUM_TALENT_COLUMNS == nil")
+    let (max_talent_tiers, num_talent_columns): (i32, i32) = env
+        .eval("return MAX_TALENT_TIERS, NUM_TALENT_COLUMNS")
         .expect("talent-constants query should succeed");
-    assert!(
-        both_nil,
-        "Deprecated_TalentConsts.lua lines 8-9 read \
-         `Constants.TalentTierConstants.MAX_TALENT_TIERS` and \
-         `Constants.TalentConsts.NumTalentColumns`. Constants has an `__index` metamethod \
-         (src/lua_api/env_init/enums.rs:32-43) that lazily creates an empty table on miss \
-         and rawsets it on Constants. Neither TalentTierConstants nor TalentConsts is \
-         pre-populated by the simulator (no Rust registration for these sub-tables), so \
-         both materialize as empty no-key tables — and reading .MAX_TALENT_TIERS / \
-         .NumTalentColumns on plain empty tables returns nil. The two globals end up nil. \
-         This documents a known coverage gap: real WoW populates these constants, but our \
-         simulator doesn't"
-    );
+    assert_eq!(max_talent_tiers, 7);
+    assert_eq!(num_talent_columns, 3);
 }
 
 #[test]

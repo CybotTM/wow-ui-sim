@@ -9,6 +9,7 @@ const MISSING_ENUMS_LUA: &str = include_str!("../globals/enum_data/missing_enums
 const COMPAT_ENUMS_LUA: &str = include_str!("../globals/enum_data/compat_enums.lua");
 const MISSING_CONSTANTS_LUA: &str = include_str!("../globals/enum_data/missing_constants.lua");
 const CONSTANTS_VALUES_LUA: &str = include_str!("../globals/enum_data/constants_values.lua");
+const COMPAT_CONSTANTS_LUA: &str = include_str!("../globals/enum_data/compat_constants.lua");
 
 pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
@@ -43,6 +44,7 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     )?;
     lua.exec(MISSING_CONSTANTS_LUA)?;
     lua.exec(CONSTANTS_VALUES_LUA)?;
+    lua.exec(COMPAT_CONSTANTS_LUA)?;
     Ok(())
 }
 
