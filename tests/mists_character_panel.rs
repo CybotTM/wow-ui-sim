@@ -108,6 +108,66 @@ fn mists_character_bottom_tabs_size_their_text() {
                     error(name .. " has zero frame width")
                 end
             end
+
+            local visibleTabs = {
+                CharacterFrameTab1,
+                CharacterFrameTab3,
+                CharacterFrameTab4,
+            }
+            local function assertVisibleTabChrome(tab)
+                local name = tab:GetName()
+                local normalVisible = _G[name .. "Left"]:IsVisible()
+                    and _G[name .. "Middle"]:IsVisible()
+                    and _G[name .. "Right"]:IsVisible()
+                local activeVisible = _G[name .. "LeftDisabled"]:IsVisible()
+                    and _G[name .. "MiddleDisabled"]:IsVisible()
+                    and _G[name .. "RightDisabled"]:IsVisible()
+                if not normalVisible and not activeVisible then
+                    error(name .. " has no visible tab texture set")
+                end
+                for _, suffix in ipairs({
+                    "Left",
+                    "Middle",
+                    "Right",
+                    "LeftDisabled",
+                    "MiddleDisabled",
+                    "RightDisabled",
+                }) do
+                    local texture = _G[name .. suffix]
+                    if not texture or type(texture:GetTexture()) ~= "string" then
+                        error(name .. suffix .. " has no texture")
+                    end
+                end
+            end
+
+            for _, tab in ipairs(visibleTabs) do
+                local name = tab:GetName()
+                if not tab:IsShown() then
+                    error(name .. " is unexpectedly hidden")
+                end
+                if type(tab:GetText()) ~= "string" or tab:GetText() == "" then
+                    error(name .. " has no tab label")
+                end
+                assertVisibleTabChrome(tab)
+            end
+
+            if CharacterFrameTab2:IsShown() then
+                error("pet tab is visible despite absent pet UI")
+            end
+            for _, suffix in ipairs({
+                "Left",
+                "Middle",
+                "Right",
+                "LeftDisabled",
+                "MiddleDisabled",
+                "RightDisabled",
+                "Text",
+            }) do
+                local region = _G["CharacterFrameTab2" .. suffix]
+                if region and region:IsVisible() then
+                    error("hidden pet tab leaked visible " .. suffix)
+                end
+            end
             "#,
             "dump-tree",
             "--filter",

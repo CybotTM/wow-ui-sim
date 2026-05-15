@@ -44,6 +44,35 @@ fn mists_spellbook_populates_visible_spell_buttons() {
                 { frame = SpellBookFrameTabButton3, text = "Core Abilities" },
                 { frame = SpellBookFrameTabButton4, text = "What's Changed" },
             }
+            local function assertVisibleTabChrome(index, tab)
+                local name = tab:GetName()
+                local normalVisible = _G[name .. "Left"]:IsVisible()
+                    and _G[name .. "Middle"]:IsVisible()
+                    and _G[name .. "Right"]:IsVisible()
+                local activeVisible = _G[name .. "LeftDisabled"]:IsVisible()
+                    and _G[name .. "MiddleDisabled"]:IsVisible()
+                    and _G[name .. "RightDisabled"]:IsVisible()
+                if not normalVisible and not activeVisible then
+                    error(("spellbook bottom tab %d has no visible texture set"):format(index))
+                end
+                for _, suffix in ipairs({
+                    "Left",
+                    "Middle",
+                    "Right",
+                    "LeftDisabled",
+                    "MiddleDisabled",
+                    "RightDisabled",
+                }) do
+                    local texture = _G[name .. suffix]
+                    if not texture or type(texture:GetTexture()) ~= "string" then
+                        error(("spellbook bottom tab %d %s texture has no asset"):format(
+                            index,
+                            suffix
+                        ))
+                    end
+                end
+            end
+
             local previousRight = nil
             for index, expected in ipairs(expectedTabs) do
                 local tab = expected.frame
@@ -73,10 +102,25 @@ fn mists_spellbook_populates_visible_spell_buttons() {
                 if previousRight and tab:GetLeft() < previousRight - 15.5 then
                     error(("spellbook bottom tab %d overlaps the previous tab"):format(index))
                 end
+                assertVisibleTabChrome(index, tab)
                 previousRight = tab:GetRight()
             end
             if SpellBookFrameTabButton5 and SpellBookFrameTabButton5:IsShown() then
                 error("unexpected fifth spellbook bottom tab is visible")
+            end
+            for _, suffix in ipairs({
+                "Left",
+                "Middle",
+                "Right",
+                "LeftDisabled",
+                "MiddleDisabled",
+                "RightDisabled",
+                "Text",
+            }) do
+                local region = _G["SpellBookFrameTabButton5" .. suffix]
+                if region and region:IsVisible() then
+                    error("hidden fifth spellbook tab leaked visible " .. suffix)
+                end
             end
 
             SpellBookFrameTabButton_OnClick(SpellBookFrameTabButton2)
