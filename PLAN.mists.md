@@ -48,6 +48,7 @@
 - [x] Run the BlizzMove Game menu options installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Run the BlizzMove Quest choice installed-addon panel parity shard with normal SavedVariables, document retained artifacts, and fix the first panel-specific `lua-errors` or render regression before broadening.
 - [x] Update the Mists release-proof bounded sample coverage audit so it records that BlizzMove has retained normal-SavedVariables artifacts for all 38 panel slugs.
+- [x] Add exact-label regression coverage for the Mists Spellbook bottom tabs so the `What's Changed` tab cannot render as an empty shell again.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
 # Mists / Pandaria Classic Startup Plan

@@ -39,19 +39,27 @@ fn mists_spellbook_populates_visible_spell_buttons() {
             end
 
             local expectedTabs = {
-                SpellBookFrameTabButton1,
-                SpellBookFrameTabButton2,
-                SpellBookFrameTabButton3,
-                SpellBookFrameTabButton4,
+                { frame = SpellBookFrameTabButton1, text = "Spellbook" },
+                { frame = SpellBookFrameTabButton2, text = "Professions" },
+                { frame = SpellBookFrameTabButton3, text = "Core Abilities" },
+                { frame = SpellBookFrameTabButton4, text = "What's Changed" },
             }
             local previousRight = nil
-            for index, tab in ipairs(expectedTabs) do
+            for index, expected in ipairs(expectedTabs) do
+                local tab = expected.frame
                 if not tab or not tab:IsShown() then
                     error(("spellbook bottom tab %d is missing or hidden"):format(index))
                 end
                 local text = tab:GetText()
                 if type(text) ~= "string" or text == "" then
                     error(("spellbook bottom tab %d has empty text"):format(index))
+                end
+                if text ~= expected.text then
+                    error(("spellbook bottom tab %d text is %q instead of %q"):format(
+                        index,
+                        tostring(text),
+                        expected.text
+                    ))
                 end
                 local label = tab:GetFontString()
                 local labelWidth = label and label:GetWidth() or 0
