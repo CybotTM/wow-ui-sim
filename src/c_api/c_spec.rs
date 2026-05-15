@@ -78,6 +78,10 @@ const LEGACY_SPECIALIZATION_GLOBALS: &[(&str, RustLuaFn)] = &[
     ("GetNumSpecGroups", get_num_spec_groups),
     ("GetNumSpecializations", get_num_specializations),
     ("GetSpecializationInfoByID", get_specialization_info_by_id),
+    (
+        "GetSpecializationInfoForClassID",
+        get_specialization_info_for_class_id,
+    ),
     ("GetSpecializationRole", get_specialization_role),
     ("GetSpecializationRoleEnum", get_specialization_role_enum),
     (
@@ -405,6 +409,23 @@ fn get_specialization_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(7)
 }
 
+fn get_specialization_info_for_class_id(state: &mut LuaState) -> LuaResult<u32> {
+    let class_id = match stack_val(state, 1) {
+        Val::Num(n) => n as u32,
+        _ => 0,
+    };
+    let spec_index = match stack_val(state, 2) {
+        Val::Num(n) if n >= 1.0 => n as usize,
+        _ => return Ok(0),
+    };
+    let Some(spec) = specializations::specs_for_class(class_id).nth(spec_index - 1) else {
+        return Ok(0);
+    };
+
+    push_class_specialization_info(state, spec);
+    Ok(9)
+}
+
 fn get_specialization_role(state: &mut LuaState) -> LuaResult<u32> {
     let Some(role) = requested_spec_role(state) else {
         state.push(Val::Nil);
@@ -475,6 +496,23 @@ fn requested_or_active_spec(
 }
 
 fn push_specialization_info(state: &mut LuaState, spec: &specializations::SpecInfo) {
+    push_specialization_identity(state, spec);
+    state.push(Val::Num(spec.primary_stat as f64));
+    state.push(Val::Num(0.0));
+    state.push(Val::Nil);
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(true));
+}
+
+fn push_class_specialization_info(state: &mut LuaState, spec: &specializations::SpecInfo) {
+    push_specialization_identity(state, spec);
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(true));
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+}
+
+fn push_specialization_identity(state: &mut LuaState, spec: &specializations::SpecInfo) {
     let spec_name = create_string(state, spec.name);
     let spec_description = create_string(state, spec.description);
     let spec_role = create_string(state, spec.role);
@@ -483,11 +521,6 @@ fn push_specialization_info(state: &mut LuaState, spec: &specializations::SpecIn
     state.push(spec_description);
     state.push(Val::Num(spec.icon_file_data_id as f64));
     state.push(spec_role);
-    state.push(Val::Num(spec.primary_stat as f64));
-    state.push(Val::Num(0.0));
-    state.push(Val::Nil);
-    state.push(Val::Num(0.0));
-    state.push(Val::Bool(true));
 }
 
 fn spec_display_spell_ids(spec_id: i32) -> Option<Vec<u32>> {

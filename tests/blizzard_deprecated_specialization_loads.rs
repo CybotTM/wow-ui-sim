@@ -186,6 +186,28 @@ fn blizzard_deprecated_specialization_installs_four_direct_aliases_as_functions(
 }
 
 #[test]
+fn specialization_info_for_class_id_returns_nothing_past_class_specs() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+
+    let returns_nothing_past_end: bool = env
+        .eval(
+            r##"
+            local count = C_SpecializationInfo.GetNumSpecializationsForClassID(2)
+            local lastSpecID = GetSpecializationInfoForClassID(2, count)
+            local pastEndReturns = select("#", GetSpecializationInfoForClassID(2, count + 1))
+            return count > 0 and lastSpecID ~= nil and pastEndReturns == 0
+            "##,
+        )
+        .expect("specialization class lookup contract should be queryable");
+
+    assert!(
+        returns_nothing_past_end,
+        "GetSpecializationInfoForClassID is documented mayreturnnothing and addons such as \
+         Syndicator iterate until it returns nil/no values"
+    );
+}
+
+#[test]
 fn blizzard_deprecated_specialization_direct_aliases_are_identity_equal_to_c_spec_info() {
     let env = load_full_game_ui();
 
