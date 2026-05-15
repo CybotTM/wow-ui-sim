@@ -438,6 +438,15 @@ pub fn get_font_string_template(name: &str) -> Option<FontStringXml> {
     with_font_string_template_registry(|registry| registry.get(name).cloned())
 }
 
+/// Collect all mixins for a FontString by resolving its `inherits` chain.
+pub fn collect_font_string_mixins(inherits: Option<&str>, own_mixin: Option<&str>) -> Vec<String> {
+    with_font_string_template_registry(|registry| {
+        collect_inherited_mixins(inherits, own_mixin, |name| {
+            registry.get(name).and_then(|p| p.mixin.clone())
+        })
+    })
+}
+
 /// Register a virtual texture template.
 pub fn register_texture_template(name: &str, texture: TextureXml) {
     with_texture_template_registry_mut(|registry| {

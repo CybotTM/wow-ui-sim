@@ -1,6 +1,41 @@
 use super::*;
 
 #[test]
+fn test_fontstring_template_inherits_apply_mixin_methods() {
+    let t = load_test_xml(
+        "fontstring-template-mixin-inherits",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                TestFontStringElementMixin = {};
+                function TestFontStringElementMixin:Init(value)
+                    self.initializedValue = value;
+                end
+            </Script>
+            <FontString name="TestFontStringElementTemplate" mixin="TestFontStringElementMixin" virtual="true"/>
+            <Frame name="FontStringTemplateMixinParent">
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString parentKey="Text" inherits="TestFontStringElementTemplate"/>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            assert(FontStringTemplateMixinParent.Text.Init ~= nil, "inherited FontString mixin should provide Init")
+            FontStringTemplateMixinParent.Text:Init("from-template")
+            assert(FontStringTemplateMixinParent.Text.initializedValue == "from-template", "inherited FontString mixin should run")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_runtime_action_button_template_creates_named_children() {
     let t = load_test_xml(
         "runtime-action-button-template",

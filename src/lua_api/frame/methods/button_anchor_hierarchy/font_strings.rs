@@ -217,6 +217,7 @@ pub(super) fn create_font_string(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(ref n) = name {
         bind_named_child_global(state, n, child_id)?;
     }
+    apply_font_string_template_mixins(state, child_id, inherits.as_deref());
     let val = frame_ref(state, child_id)?;
     state.push(val);
     Ok(1)
@@ -249,6 +250,19 @@ fn apply_font_inherit(
     }
 
     apply_font_object_fields(state, fontstring, font_object);
+}
+
+fn apply_font_string_template_mixins(state: &mut LuaState, child_id: u64, inherits: Option<&str>) {
+    let mixins = crate::xml::collect_font_string_mixins(inherits, None);
+    if mixins.is_empty() {
+        return;
+    }
+
+    crate::lua_api::globals::create_frame::apply_frame_mixins(
+        state,
+        child_id,
+        Some(&mixins.join(",")),
+    );
 }
 
 pub(crate) fn apply_font_object_fields(
