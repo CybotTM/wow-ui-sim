@@ -8906,6 +8906,12 @@ end
 if rawget(C_FriendList, "GetNumOnlineFriends") == nil then
   function C_FriendList.GetNumOnlineFriends() return 0 end
 end
+if rawget(C_FriendList, "GetNumIgnores") == nil then
+  function C_FriendList.GetNumIgnores() return 0 end
+end
+if rawget(C_FriendList, "GetIgnoreName") == nil then
+  function C_FriendList.GetIgnoreName() return nil end
+end
 if GetNumMacros == nil then
   function GetNumMacros() return 2, 1 end
 end

@@ -307,6 +307,12 @@ fn test_c_friend_list_returns_seeded_wow_friends() {
         if C_FriendList.GetNumOnlineFriends() ~= 1 then
             return "online_count=" .. tostring(C_FriendList.GetNumOnlineFriends())
         end
+        if C_FriendList.GetNumIgnores() ~= 0 then
+            return "ignore_count=" .. tostring(C_FriendList.GetNumIgnores())
+        end
+        if C_FriendList.GetIgnoreName(1) ~= nil then
+            return "unexpected_ignore_name"
+        end
 
         local info = C_FriendList.GetFriendInfoByIndex(1)
         if not info then

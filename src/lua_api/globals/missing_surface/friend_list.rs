@@ -62,6 +62,8 @@ pub(super) fn register_friend_list_surface(state: &mut LuaState) -> LuaResult<()
         "GetNumOnlineFriends",
         get_num_online_friends,
     )?;
+    table_set_rust_fn_static(state, table_ref, "GetNumIgnores", get_num_ignores)?;
+    table_set_rust_fn_static(state, table_ref, "GetIgnoreName", get_ignore_name)?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -89,6 +91,17 @@ fn get_num_friends(state: &mut LuaState) -> LuaResult<u32> {
 fn get_num_online_friends(state: &mut LuaState) -> LuaResult<u32> {
     let count = FRIEND_LIST_ROWS.iter().filter(|row| row.connected).count();
     state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_num_ignores(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_ignore_name(state: &mut LuaState) -> LuaResult<u32> {
+    let _index = i32::from_stack(state, 1)?;
+    state.push(Val::Nil);
     Ok(1)
 }
 
