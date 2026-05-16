@@ -292,7 +292,7 @@ pub struct KeyValuesXml {
 pub struct KeyValueXml {
     #[serde(rename = "@key")]
     pub key: String,
-    #[serde(rename = "@value")]
+    #[serde(rename = "@value", default)]
     pub value: String,
     #[serde(rename = "@type")]
     pub value_type: Option<String>,

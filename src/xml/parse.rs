@@ -4,7 +4,8 @@ use super::types::UiXml;
 
 /// Parse a WoW UI XML file from a string.
 pub fn parse_xml(xml: &str) -> Result<UiXml, quick_xml::DeError> {
-    quick_xml::de::from_str(xml)
+    let fixed = preprocess_xml(xml);
+    quick_xml::de::from_str(&fixed)
 }
 
 /// Parse a WoW UI XML file from disk.
@@ -15,13 +16,53 @@ pub fn parse_xml_file(path: &std::path::Path) -> Result<UiXml, XmlLoadError> {
         path: path.to_path_buf(),
         source,
     })?;
-    let contents = strip_packager_xml_comments(&contents);
+    Ok(parse_xml(&contents)?)
+}
+
+fn preprocess_xml(xml: &str) -> String {
+    let contents = strip_packager_xml_comments(xml);
+    let contents = strip_regular_xml_comments(&contents);
     let fixed = strip_duplicate_self_closing(&contents, "Size");
     let fixed = strip_duplicate_self_closing(&fixed, "TexCoords");
     let fixed = strip_duplicate_script_handlers(&fixed);
+    let fixed = normalize_attribute_equals_spacing(&fixed);
     let fixed = normalize_whitespace_padded_bools(&fixed);
     let fixed = normalize_whitespace_padded_numbers(&fixed);
-    Ok(parse_xml(&fixed)?)
+    remove_empty_numeric_attrs(&fixed)
+}
+
+/// Normalize XML attributes whose equals sign has stray whitespace.
+///
+/// Retail accepts forms like `value ="0"`, but quick-xml's serde attribute lookup can miss the
+/// field name in these addon/Blizzard XML files. Keep this as a text-level preparse fixup so the
+/// downstream strongly typed XML model stays strict.
+fn normalize_attribute_equals_spacing(xml: &str) -> String {
+    use regex::Regex;
+    use std::sync::OnceLock;
+    static RE: OnceLock<Regex> = OnceLock::new();
+    let re = RE.get_or_init(attribute_equals_spacing_regex);
+    re.replace_all(xml, r#"$1=""#).into_owned()
+}
+
+fn attribute_equals_spacing_regex() -> regex::Regex {
+    regex::Regex::new(r#"\b([A-Za-z_][A-Za-z0-9_:.-]*)\s+=""#)
+        .expect("attribute-equals-spacing regex compiles")
+}
+
+/// Remove ordinary XML comments after source-packager comment wrappers have been handled.
+///
+/// quick-xml serde can still try to deserialize XML-looking text inside comments in some addon
+/// files. Retail ignores normal comments, so strip them before typed deserialization.
+fn strip_regular_xml_comments(xml: &str) -> String {
+    use regex::Regex;
+    use std::sync::OnceLock;
+    static RE: OnceLock<Regex> = OnceLock::new();
+    let re = RE.get_or_init(regular_xml_comment_regex);
+    re.replace_all(xml, "").into_owned()
+}
+
+fn regular_xml_comment_regex() -> regex::Regex {
+    regex::Regex::new(r#"(?s)<!--.*?-->"#).expect("regular-xml-comment regex compiles")
 }
 
 /// Strip leading/trailing whitespace inside boolean-valued XML attribute values.
@@ -69,6 +110,27 @@ fn padded_number_attr_regex() -> regex::Regex {
 
 fn trim_padded_number_attr(caps: &regex::Captures<'_>) -> String {
     format!(r#"="{}""#, caps[1].trim())
+}
+
+/// Remove blank values from XML attributes that the UI schema treats as numeric.
+///
+/// Some addon XML ships entries like `<AbsDimension x="-25" y="" />`. Retail's loader accepts
+/// these as an omitted coordinate, while serde rejects the empty string before our optional fields
+/// can default it later. Restrict this to known numeric attribute names so text attributes such as
+/// `name=""` keep their original value.
+fn remove_empty_numeric_attrs(xml: &str) -> String {
+    use regex::Regex;
+    use std::sync::OnceLock;
+    static RE: OnceLock<Regex> = OnceLock::new();
+    let re = RE.get_or_init(empty_numeric_attr_regex);
+    re.replace_all(xml, "").into_owned()
+}
+
+fn empty_numeric_attr_regex() -> regex::Regex {
+    regex::Regex::new(
+        r#"\s(?:x|y|left|right|top|bottom|width|height|scale|alpha|value|inset|spacing|padding|degrees|duration|delay|order|level|bytes)="""#,
+    )
+    .expect("empty-numeric-attr regex compiles")
 }
 
 /// Strip CurseForge/BigWigs packager XML comment markers so source-form addons parse correctly.
