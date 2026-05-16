@@ -297,22 +297,21 @@ Scripted panel parity runner: `scripts/mists-panel-parity.sh` validates all
 `docs/baselines/mists-panels.md` rows, writes per-panel artifacts under
 `target/mists-panel-parity/<slug>/`, and fails on Lua/exec errors, missing or
 hidden roots, dump trees without visible renderable descendants, and screenshots
-with empty render batches. Current verification covered all 23 manifest rows,
-a full sweep through the first 22 rows, and a focused pass for the corrected
-`game-menu-options` row.
+with empty render batches. Current verification covered all 38 manifest rows in
+one saved-variables-backed sweep.
 
 SavedVariables-backed panel parity verification:
-`scripts/mists-panel-parity.sh --skip-build --with-saved-vars` completed with
-all 23 panel rows passing. Artifacts were written under
-`target/mists-panel-parity-with-saved-vars/<slug>/`, and no panel produced a
-SavedVariables-only Lua, root-frame, visual-signal, or visual-baseline
-regression.
+`scripts/mists-panel-parity.sh --skip-build --with-saved-vars --out-dir target/mists-final-local-audit/panel-parity-with-saved-vars`
+completed with all 38 panel rows passing. Artifacts were written under
+`target/mists-final-local-audit/panel-parity-with-saved-vars/<slug>/`, and no
+panel produced a SavedVariables-only Lua, root-frame, visual-signal, or
+visual-baseline regression.
 
 Addon-backed panel parity verification:
 `scripts/test-mists-addon-panels.sh --skip-build --with-saved-vars` completed
 with `panel parity passed: 9` and `failed: 0`. The harness symlinked each
 installed Mists addon from `tools/classic-addon-manifest.tsv` one at a time,
-ran all 23 panel rows through `scripts/mists-panel-parity.sh --with-addons`,
+ran the panel rows through `scripts/mists-panel-parity.sh --with-addons`,
 and wrote artifacts under `target/mists-addon-panel-parity/<addon>/<slug>/`.
 No installed addon produced panel `lua-errors`, root-frame failures,
 low-signal renders, or visual-baseline regressions.
