@@ -10,7 +10,7 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if matches!(
         addon_name,
-        "Blizzard_CharacterFrame" | "Blizzard_Collections"
+        "Blizzard_CharacterFrame" | "Blizzard_Collections" | "Blizzard_TalentUI"
     ) {
         let _ = env.exec(MISTS_POST_LOAD_LUA);
     }

@@ -213,6 +213,59 @@ end
 PatchSpellBookBottomTabSizing()
 ResizeVisibleSpellBookBottomTabs()
 
+local function LayoutSpecializationBody(frame)
+  if type(frame) ~= "table" or type(frame.spellsScroll) ~= "table" then
+    return
+  end
+
+  local scrollChild = frame.spellsScroll.child
+  if type(scrollChild) ~= "table"
+     or type(scrollChild.description) ~= "table"
+     or type(scrollChild.Seperator) ~= "table" then
+    return
+  end
+
+  local separator = scrollChild.Seperator
+  separator:ClearAllPoints()
+  separator:SetPoint("TOP", scrollChild.description, "BOTTOM", 0, -8)
+
+  local ability1 = scrollChild.abilityButton1
+  local ability2 = scrollChild.abilityButton2
+  local ability3 = scrollChild.abilityButton3
+  local ability4 = scrollChild.abilityButton4
+  if not (ability1 and ability2 and ability3 and ability4) then
+    return
+  end
+
+  ability1:ClearAllPoints()
+  ability1:SetPoint("TOPLEFT", separator, "BOTTOMLEFT", -5, -18)
+  ability2:ClearAllPoints()
+  ability2:SetPoint("TOPLEFT", ability1, "TOPLEFT", 180, 0)
+  ability3:ClearAllPoints()
+  ability3:SetPoint("TOPLEFT", ability1, "BOTTOMLEFT", 0, -20)
+  ability4:ClearAllPoints()
+  ability4:SetPoint("TOPLEFT", ability3, "TOPLEFT", 180, 0)
+end
+
+local function PatchSpecializationBodyLayout()
+  if type(PlayerTalentFrame_UpdateSpecFrame) ~= "function"
+     or rawget(_G, "__wow_sim_mists_specialization_body_layout_wrapped") == true then
+    return
+  end
+
+  local original = PlayerTalentFrame_UpdateSpecFrame
+  function PlayerTalentFrame_UpdateSpecFrame(frame, ...)
+    local result = { original(frame, ...) }
+    LayoutSpecializationBody(frame)
+    return unpack(result)
+  end
+
+  rawset(_G, "__wow_sim_mists_specialization_body_layout_wrapped", true)
+end
+
+PatchSpecializationBodyLayout()
+LayoutSpecializationBody(rawget(_G, "PlayerTalentFrameSpecialization"))
+
 function CombatLog_LoadUI()
   return true
 end

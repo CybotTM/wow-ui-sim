@@ -187,6 +187,25 @@ fn mists_specialization_learn_button_activates_spec_for_talents() {
 
             PlayerTalentTab_OnClick(PlayerTalentFrameTab1)
             PlayerTalentFrame_UpdateSpecFrame(PlayerTalentFrameSpecialization, 2)
+            local scrollChild = PlayerTalentFrameSpecialization.spellsScroll
+              and PlayerTalentFrameSpecialization.spellsScroll.child
+            local description = scrollChild and scrollChild.description
+            local separator = scrollChild and scrollChild.Seperator
+            local firstAbility = scrollChild and scrollChild.abilityButton1
+            if not description or not separator or not firstAbility then
+                error("specialization body frames are missing")
+            end
+            local _, descriptionBottom = description:GetRect()
+            local _, separatorBottom, _, separatorHeight = separator:GetRect()
+            local _, firstAbilityBottom, _, firstAbilityHeight = firstAbility:GetRect()
+            local separatorTop = separatorBottom + separatorHeight
+            local firstAbilityTop = firstAbilityBottom + firstAbilityHeight
+            if separatorTop > descriptionBottom - 6 then
+                error("specialization divider overlaps description body")
+            end
+            if firstAbilityTop > separatorBottom - 12 then
+                error("specialization ability row crowds divider")
+            end
             local learnButton = PlayerTalentFrameSpecialization.learnButton
             if not learnButton or not learnButton:IsEnabled() then
                 error("specialization Learn button was not enabled")
