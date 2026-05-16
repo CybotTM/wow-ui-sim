@@ -300,6 +300,7 @@ pub fn scan_addons(
             addons.push(addon);
         }
     }
+    addons.sort_by(|(left, _), (right, _)| left.cmp(right));
     addons
 }
 

@@ -217,15 +217,23 @@ fn macos_app_resources_dir(exe_dir: &Path) -> Option<PathBuf> {
 }
 
 fn addon_paths_for_install_root(root: &Path) -> Vec<PathBuf> {
-    addon_paths_for_install_root_with_beta(root, include_beta_addons())
-}
-
-fn addon_paths_for_install_root_with_beta(root: &Path, include_beta: bool) -> Vec<PathBuf> {
-    let mut paths = vec![root.join("_retail_/Interface/AddOns")];
-    if include_beta {
-        paths.push(root.join("_beta_/Interface/AddOns"));
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => {
+            let mut paths = vec![root.join("_retail_/Interface/AddOns")];
+            if include_beta_addons() {
+                paths.push(root.join("_beta_/Interface/AddOns"));
+            }
+            paths
+        }
+        crate::client_profile::ClientProfile::Wrath
+        | crate::client_profile::ClientProfile::Mists => {
+            vec![root.join("_classic_/Interface/AddOns")]
+        }
+        crate::client_profile::ClientProfile::Era
+        | crate::client_profile::ClientProfile::Anniversary => {
+            vec![root.join("_classic_era_/Interface/AddOns")]
+        }
     }
-    paths
 }
 
 fn include_beta_addons() -> bool {
@@ -233,6 +241,15 @@ fn include_beta_addons() -> bool {
         let value = value.to_string_lossy();
         value != "0" && !value.eq_ignore_ascii_case("false")
     })
+}
+
+#[cfg(test)]
+fn addon_paths_for_install_root_with_beta(root: &Path, include_beta: bool) -> Vec<PathBuf> {
+    let mut paths = vec![root.join("_retail_/Interface/AddOns")];
+    if include_beta {
+        paths.push(root.join("_beta_/Interface/AddOns"));
+    }
+    paths
 }
 
 fn wtf_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
@@ -273,6 +290,10 @@ fn wow_install_roots() -> Vec<PathBuf> {
         roots.push(PathBuf::from(r"C:\Program Files\World of Warcraft"));
     } else {
         roots.push(PathBuf::from("/syncthing/World of Warcraft"));
+        if let Some(home) = dirs::home_dir() {
+            roots.push(home.join("Games/World of Warcraft"));
+            roots.push(home.join("World of Warcraft"));
+        }
     }
 
     roots
@@ -509,5 +530,15 @@ mod tests {
 
         let resolved = resolve_blizzard_ui_addons_path(root.path()).expect("resolve path");
         assert_eq!(resolved, vendor);
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_addon_candidates_use_classic_install_flavor_only() {
+        let root = Path::new("/tmp/wow-install");
+        assert_eq!(
+            addon_paths_for_install_root(root),
+            vec![root.join("_classic_/Interface/AddOns")]
+        );
     }
 }

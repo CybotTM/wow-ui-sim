@@ -373,10 +373,9 @@ fn init_environment(
     init_sound(env);
     {
         let mut state = env.state().borrow_mut();
-        let mut addon_base_paths = vec![
-            runtime_blizzard_ui_addons_path_with_setup().map_err(startup_blizzard_ui_help)?,
-            PathBuf::from("./Interface/AddOns"),
-        ];
+        let mut addon_base_paths =
+            vec![runtime_blizzard_ui_addons_path_with_setup().map_err(startup_blizzard_ui_help)?];
+        addon_base_paths.extend(wow_ui_sim::paths::default_addons_paths());
         if args.is_test_command() {
             addon_base_paths.push(PathBuf::from("./Interface/TestAddOns"));
         }
