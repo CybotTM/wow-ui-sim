@@ -34,3 +34,35 @@ fn anchor_points_default_relative_point_and_reject_invalid_values() {
         "invalid relative point should reject the anchor"
     );
 }
+
+#[test]
+fn explicit_hidden_false_restores_frame_shown_state() {
+    let state = Rc::new(RefCell::new(crate::lua_api::SimState::default()));
+    let frame_id = {
+        let mut state = state.borrow_mut();
+        let frame = crate::widget::Frame::new(crate::widget::WidgetType::Frame, None, None);
+        state.widgets.register(frame)
+    };
+
+    state.borrow_mut().set_frame_visible(frame_id, false);
+    apply_xml_hidden(
+        &state,
+        frame_id,
+        &FrameXml {
+            hidden: Some(false),
+            ..FrameXml::default()
+        },
+        "",
+    );
+
+    let is_shown = state
+        .borrow()
+        .widgets
+        .get(frame_id)
+        .expect("test frame should remain registered")
+        .visible;
+    assert!(
+        is_shown,
+        "explicit hidden=\"false\" must override an inherited hidden=true template"
+    );
+}

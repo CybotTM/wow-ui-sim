@@ -383,8 +383,8 @@ pub fn apply_xml_hidden(
             }
         }
     }
-    if hidden == Some(true) {
-        state.borrow_mut().set_frame_visible(frame_id, false);
+    if let Some(hidden) = hidden {
+        state.borrow_mut().set_frame_visible(frame_id, !hidden);
     }
 }
 
