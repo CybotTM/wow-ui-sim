@@ -23,7 +23,7 @@ const PACK_FILE: &str = "pack.bin";
 // Old packs without a version header are rejected on load.
 const PACK_MAGIC: &[u8; 8] = b"WOWBC002";
 const PACK_HEADER_LEN: usize = PACK_MAGIC.len() + 4;
-const MAX_PACK_SIZE: u64 = 100 * 1024 * 1024;
+const MAX_PACK_SIZE: u64 = 768 * 1024 * 1024;
 
 #[derive(Default)]
 struct CacheState {
@@ -123,8 +123,14 @@ fn ensure_loaded(state: &mut CacheState) {
             let _ = std::fs::remove_file(&pack);
         } else {
             let mut bytes = Vec::new();
-            if file.read_to_end(&mut bytes).is_ok() && load_pack_bytes(state, &bytes) {
+            if let Ok(_) = file.read_to_end(&mut bytes)
+                && let Some(valid_len) = load_pack_bytes(state, &bytes)
+            {
                 state.pack_exists = true;
+                if valid_len < bytes.len() {
+                    drop(file);
+                    let _ = truncate_pack(&pack, valid_len);
+                }
             } else {
                 // Pack file existed but was wrong magic or wrong
                 // whitelist version — remove it so the next write
@@ -162,9 +168,9 @@ fn lookup_with_legacy_fallback(
     Some(bytecode)
 }
 
-fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> bool {
+fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> Option<usize> {
     if bytes.len() < PACK_HEADER_LEN || &bytes[..PACK_MAGIC.len()] != PACK_MAGIC {
-        return false;
+        return None;
     }
     let version_bytes: [u8; 4] = bytes[PACK_MAGIC.len()..PACK_HEADER_LEN]
         .try_into()
@@ -172,7 +178,7 @@ fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> bool {
     if u32::from_le_bytes(version_bytes) != WHITELIST_VERSION {
         // Slot ABI / whitelist version changed since this pack was
         // written. Discard the whole pack so fresh entries replace it.
-        return false;
+        return None;
     }
 
     state.values.clear();
@@ -180,14 +186,13 @@ fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> bool {
 
     let mut pos = PACK_HEADER_LEN;
     while pos + 12 <= bytes.len() {
+        let entry_start = pos;
         let hash = u64::from_le_bytes(bytes[pos..pos + 8].try_into().unwrap());
         pos += 8;
         let len = u32::from_le_bytes(bytes[pos..pos + 4].try_into().unwrap()) as usize;
         pos += 4;
         if pos + len > bytes.len() {
-            state.values.clear();
-            state.index.clear();
-            return false;
+            return Some(entry_start);
         }
         let offset = state.values.len();
         state.values.extend_from_slice(&bytes[pos..pos + len]);
@@ -195,7 +200,14 @@ fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> bool {
         pos += len;
     }
 
-    pos == bytes.len()
+    Some(pos)
+}
+
+fn truncate_pack(path: &Path, len: usize) -> std::io::Result<()> {
+    std::fs::OpenOptions::new()
+        .write(true)
+        .open(path)?
+        .set_len(len as u64)
 }
 
 fn migrate_legacy_cache(state: &mut CacheState) -> std::io::Result<()> {
@@ -322,7 +334,7 @@ mod tests {
     fn load_pack_bytes_accepts_current_version_header() {
         let bytes = synth_pack_bytes(PACK_MAGIC, WHITELIST_VERSION, &[(SENTINEL_HASH, b"xyz")]);
         let mut state = CacheState::default();
-        assert!(load_pack_bytes(&mut state, &bytes));
+        assert_eq!(load_pack_bytes(&mut state, &bytes), Some(bytes.len()));
         assert_eq!(state.index.get(&SENTINEL_HASH).copied(), Some((0, 3)));
         assert_eq!(&state.values[..3], b"xyz");
     }
@@ -332,7 +344,7 @@ mod tests {
         let stale_version = WHITELIST_VERSION.wrapping_add(1);
         let bytes = synth_pack_bytes(PACK_MAGIC, stale_version, &[(1, b"z")]);
         let mut state = CacheState::default();
-        assert!(!load_pack_bytes(&mut state, &bytes));
+        assert_eq!(load_pack_bytes(&mut state, &bytes), None);
         assert!(state.index.is_empty());
         assert!(state.values.is_empty());
     }
@@ -344,7 +356,7 @@ mod tests {
         let legacy_magic = *b"WOWBC001";
         let bytes = synth_pack_bytes(&legacy_magic, WHITELIST_VERSION, &[(1, b"z")]);
         let mut state = CacheState::default();
-        assert!(!load_pack_bytes(&mut state, &bytes));
+        assert_eq!(load_pack_bytes(&mut state, &bytes), None);
     }
 
     #[test]
@@ -355,7 +367,23 @@ mod tests {
         bytes.extend_from_slice(PACK_MAGIC);
         bytes.extend_from_slice(&[0u8; 3]); // only 3 of 4 version bytes
         let mut state = CacheState::default();
-        assert!(!load_pack_bytes(&mut state, &bytes));
+        assert_eq!(load_pack_bytes(&mut state, &bytes), None);
+    }
+
+    #[test]
+    fn load_pack_bytes_keeps_valid_prefix_before_torn_entry() {
+        let mut bytes = synth_pack_bytes(PACK_MAGIC, WHITELIST_VERSION, &[(SENTINEL_HASH, b"xyz")]);
+        bytes.extend_from_slice(&2_u64.to_le_bytes());
+        bytes.extend_from_slice(&16_u32.to_le_bytes());
+        bytes.extend_from_slice(b"partial");
+
+        let mut state = CacheState::default();
+        assert_eq!(
+            load_pack_bytes(&mut state, &bytes),
+            Some(PACK_HEADER_LEN + 12 + 3)
+        );
+        assert_eq!(state.index.get(&SENTINEL_HASH).copied(), Some((0, 3)));
+        assert_eq!(&state.values[..3], b"xyz");
     }
 
     #[test]
@@ -376,6 +404,16 @@ mod tests {
         b"abc".hash(&mut hasher);
         "=@chunk".hash(&mut hasher);
         assert_eq!(legacy, hasher.finish());
+    }
+
+    #[test]
+    fn max_pack_size_allows_full_addon_warm_cache() {
+        let full_addon_pack_budget = 512 * 1024 * 1024;
+
+        assert!(
+            MAX_PACK_SIZE >= full_addon_pack_budget,
+            "full addon cache observed at 454 MiB; cap must keep it reusable"
+        );
     }
 
     #[test]
