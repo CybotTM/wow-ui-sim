@@ -10,6 +10,7 @@ const DEFAULT_CHARACTER: &str = "Haky";
 const ENV_WTF_ACCOUNT: &str = "WOW_SIM_WTF_ACCOUNT";
 const ENV_WTF_REALM: &str = "WOW_SIM_WTF_REALM";
 const ENV_WTF_CHARACTER: &str = "WOW_SIM_WTF_CHARACTER";
+const ENV_INCLUDE_BETA_ADDONS: &str = "WOW_SIM_INCLUDE_BETA_ADDONS";
 
 #[derive(Debug, Clone)]
 pub struct WowResourcePaths {
@@ -188,11 +189,23 @@ fn macos_app_resources_dir(exe_dir: &Path) -> Option<PathBuf> {
     Some(contents_dir.join("Resources"))
 }
 
-fn addon_paths_for_install_root(root: &Path) -> [PathBuf; 2] {
-    [
-        root.join("_retail_/Interface/AddOns"),
-        root.join("_beta_/Interface/AddOns"),
-    ]
+fn addon_paths_for_install_root(root: &Path) -> Vec<PathBuf> {
+    addon_paths_for_install_root_with_beta(root, include_beta_addons())
+}
+
+fn addon_paths_for_install_root_with_beta(root: &Path, include_beta: bool) -> Vec<PathBuf> {
+    let mut paths = vec![root.join("_retail_/Interface/AddOns")];
+    if include_beta {
+        paths.push(root.join("_beta_/Interface/AddOns"));
+    }
+    paths
+}
+
+fn include_beta_addons() -> bool {
+    std::env::var_os(ENV_INCLUDE_BETA_ADDONS).is_some_and(|value| {
+        let value = value.to_string_lossy();
+        value != "0" && !value.eq_ignore_ascii_case("false")
+    })
 }
 
 fn wtf_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
@@ -366,10 +379,22 @@ mod tests {
     }
 
     #[test]
-    fn addon_candidates_do_not_mix_classic_addons_into_retail_loads() {
+    fn addon_candidates_do_not_mix_beta_addons_into_retail_loads() {
         let install_root = PathBuf::from("/tmp/wow-install");
 
-        let candidates = addon_paths_for_install_root(&install_root);
+        let candidates = addon_paths_for_install_root_with_beta(&install_root, false);
+
+        assert_eq!(
+            candidates.as_slice(),
+            &[install_root.join("_retail_/Interface/AddOns")]
+        );
+    }
+
+    #[test]
+    fn addon_candidates_can_include_beta_addons_when_requested() {
+        let install_root = PathBuf::from("/tmp/wow-install");
+
+        let candidates = addon_paths_for_install_root_with_beta(&install_root, true);
 
         assert_eq!(
             candidates.as_slice(),
