@@ -35,6 +35,8 @@ use saved_variables_parse::parse_saved_variables_file_with_cache;
 use saved_variables_serialize::serialize_assignment;
 use saved_variables_table_size_cache::{load_table_size_cache, save_table_size_cache};
 
+const DEFAULT_MAX_SAVED_VARIABLE_BYTES: u64 = 2 * 1024 * 1024;
+
 /// Read-only source for importing WTF saved variables from a real WoW installation.
 ///
 /// Writes always go to `SavedVariablesManager::storage_dir`, never back to this
@@ -111,6 +113,7 @@ pub struct SavedVariablesManager {
     wtf_config: Option<WtfConfig>,
     wtf_loaded: HashMap<String, bool>,
     loaded_values: HashMap<String, Vec<(String, Val)>>,
+    max_load_bytes: Option<u64>,
 }
 
 impl SavedVariablesManager {
@@ -132,6 +135,7 @@ impl SavedVariablesManager {
             wtf_config: None,
             wtf_loaded: HashMap::new(),
             loaded_values: HashMap::new(),
+            max_load_bytes: max_load_bytes_from_env(),
         }
     }
 
@@ -148,6 +152,10 @@ impl SavedVariablesManager {
 
     pub fn wtf_config(&self) -> Option<&WtfConfig> {
         self.wtf_config.as_ref()
+    }
+
+    pub fn set_max_load_bytes(&mut self, max_load_bytes: Option<u64>) {
+        self.max_load_bytes = max_load_bytes;
     }
 
     /// Load WTF saved variables for an addon from a real WoW installation.
@@ -405,6 +413,9 @@ impl SavedVariablesManager {
         path: &Path,
         chunk_prefix: &str,
     ) -> crate::Result<()> {
+        if self.should_skip_load(path)? {
+            return Ok(());
+        }
         let content = fs::read_to_string(path).map_err(|e| crate::Error::Other(e.to_string()))?;
         let content = content.strip_prefix('\u{feff}').unwrap_or(&content);
         let mut table_size_cache = load_table_size_cache(&self.storage_dir, path);
@@ -479,6 +490,19 @@ impl SavedVariablesManager {
                 .join(format!("{}.lua", addon_name));
         }
         self.storage_dir.join(format!("{}.lua", addon_name))
+    }
+
+    fn has_local_storage_for_addon(&self, addon_name: &str) -> bool {
+        self.storage_path(addon_name, false).exists()
+            || self.storage_path(addon_name, true).exists()
+    }
+
+    fn should_skip_load(&self, path: &Path) -> crate::Result<bool> {
+        let Some(max_load_bytes) = self.max_load_bytes else {
+            return Ok(false);
+        };
+        let metadata = fs::metadata(path).map_err(|e| crate::Error::Other(e.to_string()))?;
+        Ok(metadata.len() > max_load_bytes)
     }
 }
 
@@ -579,6 +603,14 @@ fn seed_missing_globals(state: &mut LuaState, variable_names: &[String]) {
     }
 }
 
+fn max_load_bytes_from_env() -> Option<u64> {
+    match std::env::var("WOW_SIM_MAX_SAVED_VARIABLE_BYTES") {
+        Ok(value) if value == "0" => None,
+        Ok(value) => value.parse().ok(),
+        Err(_) => Some(DEFAULT_MAX_SAVED_VARIABLE_BYTES),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::fs;
@@ -589,6 +621,29 @@ mod tests {
     use rilua::Val;
 
     use super::{SavedVariablesManager, get_global};
+
+    #[test]
+    fn oversized_local_saved_variables_seed_nil_instead_of_loading() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        fs::write(
+            dir.path().join("HugeAddon.lua"),
+            "\nHugeDB = { value = 'should not load' }\n",
+        )
+        .expect("write saved variables");
+
+        let env = WowLuaEnv::new().expect("env");
+        let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
+        mgr.set_max_load_bytes(Some(8));
+
+        {
+            let mut lua = env.rilua_mut();
+            mgr.init_for_addon(lua.state_mut(), "HugeAddon", &["HugeDB".to_string()], &[])
+                .expect("saved variable init should not fail");
+        }
+
+        let value_type: String = env.eval("return type(HugeDB)").expect("probe should run");
+        assert_eq!(value_type, "nil");
+    }
 
     #[test]
     fn saved_variables_restore_after_addon_top_level_defaults() {
