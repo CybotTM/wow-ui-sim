@@ -8839,6 +8839,9 @@ end
 if GetNumMacros == nil then
   function GetNumMacros() return 2, 1 end
 end
+if ACCOUNT_BINDINGS == nil then ACCOUNT_BINDINGS = 1 end
+if CHARACTER_BINDINGS == nil then CHARACTER_BINDINGS = 2 end
+if CHARACTERBINDINGS == nil then CHARACTERBINDINGS = CHARACTER_BINDINGS end
 if GetMacroInfo == nil then
   function GetMacroInfo(index)
     if index == 1 then
@@ -8849,6 +8852,23 @@ if GetMacroInfo == nil then
     end
     return nil
   end
+end
+if GetMacroBody == nil then
+  function GetMacroBody(index)
+    local _, _, body = GetMacroInfo(index)
+    return body
+  end
+end
+if CreateMacro == nil then
+  function CreateMacro(name, icon, body, perCharacter)
+    return perCharacter and 121 or 1
+  end
+end
+if DeleteMacro == nil then
+  function DeleteMacro(indexOrName) end
+end
+if CursorHasMacro == nil then
+  function CursorHasMacro() return false end
 end
 __wow_loose_macro_icons = {
   "INV_Misc_QuestionMark",
@@ -8889,6 +8909,21 @@ end
 if GetMacroItemIcons == nil then
   function GetMacroItemIcons(iconTable)
     return __wow_append_icons(iconTable, __wow_macro_item_icons)
+  end
+end
+if GetContainerItemInfo == nil and C_Container ~= nil then
+  function GetContainerItemInfo(...)
+    return C_Container.GetContainerItemInfo(...)
+  end
+end
+if GetSpellBookItemName == nil and C_SpellBook ~= nil then
+  function GetSpellBookItemName(...)
+    return C_SpellBook.GetSpellBookItemName(...)
+  end
+end
+if GetSpellBookItemInfo == nil and C_SpellBook ~= nil then
+  function GetSpellBookItemInfo(...)
+    return C_SpellBook.GetSpellBookItemInfo(...)
   end
 end
 
