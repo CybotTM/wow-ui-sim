@@ -129,6 +129,24 @@ fn test_legacy_spellbook_item_globals_return_mists_shape() {
 }
 
 #[test]
+fn legacy_spellbook_item_info_has_classic_shape() {
+    let env = env();
+    let has_retail_info: bool = env
+        .eval(
+            r#"
+            local _, _, spellInfo = GetSpellBookItemInfo(1, BOOKTYPE_SPELL)
+            return spellInfo ~= nil
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        !has_retail_info,
+        "legacy GetSpellBookItemInfo should not expose retail spellInfo"
+    );
+}
+
+#[test]
 fn test_spellbook_item_info_blacksmithing_slot() {
     let env = env();
     let (name, spell_id): (String, i32) = env

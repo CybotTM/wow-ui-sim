@@ -83,9 +83,7 @@ fn get_spell_book_item_info(state: &mut LuaState) -> LuaResult<u32> {
     let slot_type = create_string(state, "SPELL");
     state.push(slot_type);
     state.push(Val::Num(entry.spell_id as f64));
-    state.push(Val::Num(entry.spell_id as f64));
-    state.push(Val::Bool(entry.is_passive));
-    Ok(4)
+    Ok(2)
 }
 
 fn get_spell_book_item_texture(state: &mut LuaState) -> LuaResult<u32> {

@@ -130,7 +130,10 @@ fn get_spell_description(state: &mut LuaState) -> LuaResult<u32> {
 ///
 /// Retail fields: `name, iconID, originalIconID, castTime, minRange, maxRange, spellID`.
 fn get_spell_info(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = u32::from_stack(state, 1)?;
+    let Some(spell_id) = numeric_spell_id(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
     let Some(spell) = spells::get_spell(spell_id) else {
         state.push(Val::Nil);
         return Ok(1);
@@ -170,7 +173,10 @@ fn get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn legacy_get_spell_info(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id_arg = u32::from_stack(state, 1)?;
+    let Some(spell_id_arg) = numeric_spell_id(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
     let Some(spell) = spells::get_spell(spell_id_arg) else {
         state.push(Val::Nil);
         return Ok(1);
@@ -482,9 +488,22 @@ fn numeric_spell_id(state: &LuaState, index: i32) -> Option<u32> {
     let value = stack_val(state, index);
     match value {
         Val::Num(n) if n.is_finite() && n >= 0.0 => Some(n as u32),
-        Val::Str(_) => val_to_string(state, value)?.parse::<u32>().ok(),
+        Val::Str(_) => {
+            let input = val_to_string(state, value)?;
+            input
+                .parse::<u32>()
+                .ok()
+                .or_else(|| spell_id_by_name(&input))
+        }
         _ => None,
     }
+}
+
+fn spell_id_by_name(name: &str) -> Option<u32> {
+    let needle = name.to_ascii_lowercase();
+    spells::SPELL_DB
+        .entries()
+        .find_map(|(id, spell)| (spell.name.to_ascii_lowercase() == needle).then_some(*id))
 }
 
 /// `C_Spell.GetSpellTradeSkillLink(spellID)` → trade-skill recipe link, or

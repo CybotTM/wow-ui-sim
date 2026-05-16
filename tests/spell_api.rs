@@ -116,6 +116,20 @@ fn test_spellbook_get_item_info_nil_invalid() {
 }
 
 #[test]
+fn test_c_spell_get_spell_info_accepts_spell_name() {
+    let env = env();
+    let spell_id: i32 = env
+        .eval(
+            r#"
+            local info = C_Spell.GetSpellInfo("Auto Attack")
+            return info and info.spellID or 0
+            "#,
+        )
+        .unwrap();
+    assert_eq!(spell_id, 6603);
+}
+
+#[test]
 fn test_spellbook_get_item_texture_valid() {
     let env = env();
     let is_number: bool = env
