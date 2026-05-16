@@ -68,6 +68,17 @@ fn get_spell_tab_info_nil_for_out_of_range_index() {
     assert_eq!(v, None);
 }
 
+#[test]
+fn get_specialization_info_for_class_id_stops_after_class_specs() {
+    let env = env();
+    let (first_spec_id, fourth_spec_id): (i32, Option<i32>) = env
+        .eval("return GetSpecializationInfoForClassID(2, 1), GetSpecializationInfoForClassID(2, 4)")
+        .unwrap();
+
+    assert_eq!(first_spec_id, 65);
+    assert_eq!(fourth_spec_id, None);
+}
+
 // ── PvP talents ───────────────────────────────────────────────────────────────
 
 #[test]

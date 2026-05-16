@@ -50,6 +50,7 @@ const C_QUEST_LOG_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetInfo", get_info),
     ("GetMapForQuestPOIs", get_map_for_quest_pois),
     ("GetMaxNumQuests", get_max_num_quests),
+    ("GetMaxNumQuestsCanAccept", get_max_num_quests),
     ("GetNextWaypoint", get_next_waypoint),
     ("GetNextWaypointForMap", get_next_waypoint_for_map),
     ("GetNumQuestObjectives", get_num_quest_objectives),

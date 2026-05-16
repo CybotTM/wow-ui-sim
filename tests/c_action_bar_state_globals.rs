@@ -88,6 +88,23 @@ fn vehicle_bar_index_reads_state() {
 }
 
 #[test]
+fn special_bar_indexes_return_default_numbers_when_inactive() {
+    let env = WowLuaEnv::new().expect("env");
+
+    let indexes: (i32, i32, i32) = env
+        .eval(
+            r#"
+            return C_ActionBar.GetVehicleBarIndex(),
+                C_ActionBar.GetOverrideBarIndex(),
+                C_ActionBar.GetTempShapeshiftBarIndex()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(indexes, (1, 1, 1));
+}
+
+#[test]
 fn temp_shapeshift_bar_index_reads_state() {
     let env = WowLuaEnv::new().expect("env");
     {
