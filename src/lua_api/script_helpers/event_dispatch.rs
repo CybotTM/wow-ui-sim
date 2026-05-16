@@ -148,11 +148,17 @@ pub fn dispatch_script(
     let Val::Function(func_ref) = handler_val else {
         return Ok(());
     };
+    let (owner_addon, _, _) = handler_log_metadata(lua.state(), widget_id);
     let func = rilua::Function::from_gc_ref(func_ref);
+    let previous_addon = replace_executing_addon(lua.state(), owner_addon);
     match lua.call_function(&func, &args) {
-        Ok(_) => Ok(()),
+        Ok(_) => {
+            replace_executing_addon(lua.state(), previous_addon);
+            Ok(())
+        }
         Err(e) => {
             call_error_handler(lua, &e.to_string());
+            replace_executing_addon(lua.state(), previous_addon);
             Ok(())
         }
     }
@@ -189,9 +195,11 @@ pub fn dispatch_on_update(
         let (owner_addon, addon_name, frame_name) = handler_log_metadata(lua.state(), frame_id);
         let func = rilua::Function::from_gc_ref(func_ref);
         let start = Instant::now();
+        let previous_addon = replace_executing_addon(lua.state(), owner_addon);
         if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
             call_error_handler(lua, &e.to_string());
         }
+        replace_executing_addon(lua.state(), previous_addon);
         let elapsed = start.elapsed();
         record_frame_timing(lua.state(), owner_addon, &start);
         log_dispatched_handler(
@@ -229,6 +237,20 @@ fn handler_log_metadata(
         .get(frame_id)
         .and_then(|frame| frame.name.clone());
     (owner_addon, addon_name, frame_name)
+}
+
+fn replace_executing_addon(state: &LuaState, owner_addon: Option<u16>) -> Option<u16> {
+    use crate::lua_api::env::WowLuaAppData;
+
+    let Some(app) = state.app_data::<WowLuaAppData>() else {
+        return None;
+    };
+    let Ok(mut sim) = app.sim_state.try_borrow_mut() else {
+        return None;
+    };
+    let previous_addon = sim.executing_addon_index;
+    sim.executing_addon_index = owner_addon;
+    previous_addon
 }
 
 fn log_dispatched_handler(

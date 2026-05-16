@@ -4,6 +4,8 @@ use crate::lua_api::{SimState, WowLuaEnv};
 use crate::startup::settle_headless_startup;
 use std::collections::BTreeMap;
 
+const ERRORS_BY_ADDON_ENV: &str = "WOW_SIM_LUA_ERRORS_BY_ADDON";
+
 /// A unique Lua error with its occurrence count.
 #[derive(serde::Serialize)]
 struct LuaError {
@@ -44,10 +46,42 @@ pub fn run_lua_errors(
 
     print_rehash_stats();
     print_intern_stats();
+    print_errors_by_addon_if_requested(env);
 
     let errors = collect_unique_errors(env);
     let json = serde_json::to_string_pretty(&errors).expect("JSON serialization failed");
     println!("{json}");
+}
+
+fn print_errors_by_addon_if_requested(env: &WowLuaEnv) {
+    if std::env::var_os(ERRORS_BY_ADDON_ENV).is_none() {
+        return;
+    }
+
+    let state = env.state().borrow();
+    for line in errors_by_addon_lines(&state) {
+        eprintln!("{line}");
+    }
+}
+
+fn errors_by_addon_lines(state: &SimState) -> Vec<String> {
+    let grouped = grouped_errors_by_addon(state);
+    if grouped.is_empty() {
+        return Vec::new();
+    }
+
+    let mut lines = vec![String::from("[lua-errors] errors by addon:")];
+    for (addon_name, messages) in grouped {
+        lines.push(format!("  {addon_name}: {} error(s)", messages.len()));
+        for message in messages {
+            lines.push(format!("    {}", indent_continuation_lines(&message)));
+        }
+    }
+    lines
+}
+
+fn indent_continuation_lines(message: &str) -> String {
+    message.replace('\n', "\n    ")
 }
 
 #[cfg(feature = "rehash-stats")]
@@ -258,7 +292,7 @@ fn restore_stderr(saved: Option<i32>) {
 
 #[cfg(test)]
 mod tests {
-    use super::{collect_unique_errors, grouped_errors_by_addon};
+    use super::{collect_unique_errors, errors_by_addon_lines, grouped_errors_by_addon};
     use crate::lua_api::AddonInfo;
     use crate::lua_api::WowLuaEnv;
     use rilua::LuaApi;
@@ -312,6 +346,41 @@ mod tests {
             Some(&vec![String::from(
                 "[OnLoad] SomeFrame: boom\nstack traceback:\n\t[C]: in function 'error'"
             )])
+        );
+    }
+
+    #[test]
+    fn errors_by_addon_lines_include_counts_and_indented_tracebacks() {
+        let env = WowLuaEnv::new().expect("lua env");
+        env.register_addon(AddonInfo {
+            folder_name: "TraceAddon".to_string(),
+            title: "TraceAddon".to_string(),
+            enabled: true,
+            loaded: true,
+            ..Default::default()
+        });
+        let loading_index = {
+            let state = env.state().borrow();
+            state
+                .addons
+                .iter()
+                .position(|addon| addon.folder_name == "TraceAddon")
+                .expect("TraceAddon should be registered") as u16
+        };
+        env.state().borrow_mut().loading_addon_index = Some(loading_index);
+
+        crate::lua_api::script_helpers::collect_lua_error(
+            env.rilua().state(),
+            "runtime error: Interface/AddOns/TraceAddon/Main.lua:4: boom\nstack traceback:\n\t[C]: in function 'error'",
+        );
+
+        let state = env.state().borrow();
+        let lines = errors_by_addon_lines(&state);
+        assert_eq!(lines[0], "[lua-errors] errors by addon:");
+        assert_eq!(lines[1], "  TraceAddon: 1 error(s)");
+        assert_eq!(
+            lines[2],
+            "    boom\n    stack traceback:\n    \t[C]: in function 'error'"
         );
     }
 }

@@ -209,10 +209,10 @@ impl WowLuaEnv {
         let start = Instant::now();
         self.state.borrow_mut().executing_addon_index = addon_idx;
         let call_result = call_rilua_function(lua, handler, call_args);
-        self.state.borrow_mut().executing_addon_index = None;
         if let Err(error) = call_result {
             call_error_handler(lua, &error.to_string());
         }
+        self.state.borrow_mut().executing_addon_index = None;
         let elapsed = start.elapsed();
         record_addon_time(&self.state, addon_idx, &start);
         log_widget_handler_timing(&self.state, widget_id, addon_idx, handler_name, elapsed);

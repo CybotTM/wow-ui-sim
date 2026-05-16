@@ -260,11 +260,11 @@ impl WowLuaEnv {
             let mut lua = self.lua.borrow_mut();
             call_rilua_function(&mut lua, callback, &[])
         };
-        self.state.borrow_mut().executing_addon_index = None;
         if let Err(error) = call_result {
             let mut lua = self.lua.borrow_mut();
             call_error_handler(&mut lua, &error.to_string());
         }
+        self.state.borrow_mut().executing_addon_index = None;
         record_addon_time(&self.state, owner_addon, &start);
     }
 
