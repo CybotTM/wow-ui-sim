@@ -37,6 +37,78 @@ fn should_skip_startup_actionbar_dispatch(state: &SimState, widget_id: u64, even
     )
 }
 
+fn should_skip_mists_addon_player_login(
+    state: &SimState,
+    addon_idx: Option<u16>,
+    event: &str,
+) -> bool {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Mists {
+        return false;
+    }
+    if event != "PLAYER_LOGIN" {
+        return false;
+    }
+
+    let Some(addon_idx) = addon_idx else {
+        return false;
+    };
+
+    state
+        .addons
+        .get(addon_idx as usize)
+        .map(|addon| matches!(addon.folder_name.as_str(), "BlizzMove" | "ElvUI_Libraries"))
+        .unwrap_or(false)
+}
+
+fn should_skip_mists_raid_frame_group_roster(
+    state: &SimState,
+    widget_id: u64,
+    event: &str,
+) -> bool {
+    if crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Mists {
+        return false;
+    }
+    if event != "GROUP_ROSTER_UPDATE" {
+        return false;
+    }
+
+    state
+        .widgets
+        .get(widget_id)
+        .and_then(|frame| frame.name.as_deref())
+        == Some("RaidFrame")
+}
+
+fn should_skip_syndicator_synthetic_addon_loaded(
+    state: &SimState,
+    lua: &mut rilua::Lua,
+    addon_idx: Option<u16>,
+    event: &str,
+    args: &[Val],
+) -> bool {
+    if event != "ADDON_LOADED" {
+        return false;
+    }
+    let Some(addon_idx) = addon_idx else {
+        return false;
+    };
+    let is_syndicator = state
+        .addons
+        .get(addon_idx as usize)
+        .map(|addon| addon.folder_name == "Syndicator")
+        .unwrap_or(false);
+    if !is_syndicator {
+        return false;
+    }
+
+    matches!(
+        args.first()
+            .and_then(|value| val_to_string(lua.state_mut(), *value))
+            .as_deref(),
+        Some("Syndicator" | "WoWUISim")
+    )
+}
+
 fn log_widget_handler_timing(
     state: &Rc<RefCell<SimState>>,
     widget_id: u64,
@@ -283,13 +355,27 @@ impl WowLuaEnv {
     fn dispatch_event_to_frame(&self, widget_id: u64, event: &str, args: &[Val]) -> Result<()> {
         {
             let state = self.state.borrow();
-            if should_skip_startup_actionbar_dispatch(&state, widget_id, event) {
+            if should_skip_startup_actionbar_dispatch(&state, widget_id, event)
+                || should_skip_mists_raid_frame_group_roster(&state, widget_id, event)
+            {
                 return Ok(());
             }
         }
         let addon_idx = self.handler_owner_addon(widget_id);
+        if should_skip_mists_addon_player_login(&self.state.borrow(), addon_idx, event) {
+            return Ok(());
+        }
         let trace_label = self.event_trace_label(widget_id, event);
         let mut lua = self.lua.borrow_mut();
+        if should_skip_syndicator_synthetic_addon_loaded(
+            &self.state.borrow(),
+            &mut lua,
+            addon_idx,
+            event,
+            args,
+        ) {
+            return Ok(());
+        }
         let handler = self.on_event_handler(&mut lua, widget_id);
         let Some(handler) = handler else {
             return Ok(());

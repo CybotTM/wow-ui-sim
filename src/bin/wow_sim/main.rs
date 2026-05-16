@@ -294,6 +294,9 @@ fn init_and_load(
     startup_trace::time_load_step("load Blizzard addons", || {
         addon_loading::load_blizzard_addons(&env, &mut saved_vars, screen)
     });
+    startup_trace::time_load_step("apply post-Blizzard load workarounds", || {
+        apply_post_load_workarounds(&env)
+    });
     startup_trace::time_load_step("load third-party addons", || {
         addon_loading::load_third_party_addons(
             args.skip_addons(),
