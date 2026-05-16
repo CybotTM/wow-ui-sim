@@ -214,6 +214,13 @@ pub(super) fn c_tooltip_get_toy_by_item_id(state: &mut LuaState) -> LuaResult<u3
     Ok(1)
 }
 
+pub(super) fn c_tooltip_get_heirloom_by_item_id(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = u32::from_stack(state, 1)?;
+    let tooltip = tooltip_for_item_id(state, item_id);
+    state.push(tooltip);
+    Ok(1)
+}
+
 pub(super) fn c_tooltip_get_socketed_item(state: &mut LuaState) -> LuaResult<u32> {
     use crate::lua_api::globals::missing_surface::item_socket_info;
     let tooltip = item_socket_info::socketed_item_id(state)

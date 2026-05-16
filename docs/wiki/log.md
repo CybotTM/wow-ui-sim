@@ -9,6 +9,13 @@ tracking regression. EditMode profile cache files are not Lua SavedVariables, so
 startup now loads them through a separate WTF cache path when Lua SavedVariables
 are disabled.
 
+## [2026-05-15] add | Mists heirloom tooltip
+
+Created `investigations/mists-heirloom-tooltip.md` after the Mists Collections
+heirloom button path threw on missing `GameTooltip:SetHeirloomByItemID`.
+Documented that the fix belongs on the tooltip widget/data surface and routes
+through `C_TooltipInfo.GetHeirloomByItemID`, reusing item tooltip data.
+
 ## [2026-05-15] add | Mists addon-panel resume mistake
 
 Created `investigations/mists-addon-panel-resume-error.md` after incorrectly

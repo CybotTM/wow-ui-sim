@@ -99,7 +99,7 @@
 - [x] Re-fix the Mists main backpack slot chrome so combined-backpack slot wells are not double-rendered with inherited `UI-Quickslot2` normal textures.
 - [x] Restore the authored Mists `UI-Quickslot2` normal textures on main backpack item buttons so the slot chrome follows Blizzard's item-button template instead of a post-load shim.
 - [x] Run the full local installed-addon Mists panel parity matrix with normal SavedVariables from current clean state, retain artifacts, refresh references if they supersede older addon-panel samples, and fix or promote the first addon/panel failure instead of relying on prior shard evidence.
-- [ ] Recover retained full 38-panel Mists addon evidence or recapture only the currently unproven rows (`DeModal`, `DialogueUI`, `Leatrix_Maps`, `Leatrix_Plus`) under normal SavedVariables, then update the release-proof index so it no longer treats the full local installed-addon screenshot matrix as deferred only when current artifacts prove all nine installed addon rows.
+- [x] Implement the missing Mists heirloom item-button API expected by `Blizzard_HeirloomCollection.lua` so `SetHeirloomByItemID` does not throw when Collections/Heirlooms initializes.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
 # Mists / Pandaria Classic Startup Plan

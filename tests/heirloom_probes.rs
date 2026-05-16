@@ -94,6 +94,26 @@ fn get_heirloom_item_id_returns_zero_out_of_range() {
 }
 
 #[test]
+fn set_heirloom_by_item_id_populates_game_tooltip() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            GameTooltip:ClearLines()
+            GameTooltip:SetHeirloomByItemID(122245)
+            if GameTooltip:NumLines() == 0 then
+                return "missing lines"
+            end
+            local left = GameTooltip:GetLeftLine(1)
+            return left and left:GetText() or "missing first line"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "Polished Helm of Valor");
+}
+
+#[test]
 fn create_heirloom_adds_collected_item_to_bag() {
     let env = env();
     let result: String = env

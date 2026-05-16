@@ -225,6 +225,17 @@ pub(super) fn set_toy_by_item_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_heirloom_by_item_id(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let item_id = stack_val(state, 2);
+    let has_lines =
+        populate_tooltip_from_method(state, tooltip_id, "GetHeirloomByItemID", &[item_id], None)?;
+    if has_lines {
+        fire_tooltip_script(state, tooltip_id, "OnTooltipSetItem");
+    }
+    Ok(0)
+}
+
 pub(super) fn set_talent(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
     let args = [
