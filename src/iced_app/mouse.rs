@@ -5,8 +5,9 @@ use rilua::Val;
 
 use super::app::App;
 use super::mouse_drag::{
-    apply_sizing, find_drag_script_target, find_slider_drag_target, frame_motion_scripts_allowed,
-    moving_drag_anchor_update, reanchor_moving_drag_frame, sizing_drag_update,
+    active_motion_drag_frame, apply_sizing, find_drag_script_target, find_slider_drag_target,
+    frame_motion_scripts_allowed, moving_drag_anchor_update, reanchor_moving_drag_frame,
+    sizing_drag_update,
 };
 
 /// Minimum distance (in pixels) the mouse must move while held to start a drag.
@@ -75,37 +76,38 @@ impl App {
             return;
         }
 
-        let changed = {
-            let env = self.env.borrow();
-            let mut state = env.state().borrow_mut();
-            let Some(drag_id) = state.active_drag_frame else {
-                return;
-            };
-            let screen_size = self.screen_size.get();
-
-            state.ensure_layout_rects();
-
-            if let Some((new_width, new_height)) = sizing_drag_update(&state, drag_id, dx, dy) {
-                apply_sizing(&mut state, drag_id, new_width, new_height);
-                true
-            } else if let Some((parent_id, x_offset, y_offset)) = moving_drag_anchor_update(
-                &state,
-                drag_id,
-                dx,
-                dy,
-                screen_size.width,
-                screen_size.height,
-            ) {
-                reanchor_moving_drag_frame(&mut state, drag_id, parent_id, x_offset, y_offset);
-                true
-            } else {
-                false
-            }
-        };
-
-        if changed {
+        if self.update_active_drag_motion(dx, dy) {
             self.mark_all_strata_dirty();
         }
+    }
+
+    fn update_active_drag_motion(&self, dx: f32, dy: f32) -> bool {
+        let env = self.env.borrow();
+        let mut state = env.state().borrow_mut();
+        let Some(active_drag_id) = state.active_drag_frame else {
+            return false;
+        };
+        let drag_id = active_motion_drag_frame(&state, active_drag_id);
+        let screen_size = self.screen_size.get();
+
+        state.ensure_layout_rects();
+
+        if let Some((new_width, new_height)) = sizing_drag_update(&state, drag_id, dx, dy) {
+            apply_sizing(&mut state, drag_id, new_width, new_height);
+            return true;
+        }
+        if let Some((parent_id, x_offset, y_offset)) = moving_drag_anchor_update(
+            &state,
+            drag_id,
+            dx,
+            dy,
+            screen_size.width,
+            screen_size.height,
+        ) {
+            reanchor_moving_drag_frame(&mut state, drag_id, parent_id, x_offset, y_offset);
+            return true;
+        }
+        false
     }
 
     fn update_hovered_frame(&mut self, pos: Point) {

@@ -46,6 +46,23 @@ pub(super) fn moving_drag_anchor_update(
     Some((parent_id, new_left - parent_x, -(new_top - parent_y)))
 }
 
+pub(super) fn active_motion_drag_frame(
+    state: &crate::lua_api::SimState,
+    active_drag_id: u64,
+) -> u64 {
+    let mut current = Some(active_drag_id);
+    while let Some(id) = current {
+        let Some(frame) = state.widgets.get(id) else {
+            return active_drag_id;
+        };
+        if frame.is_moving || frame.is_sizing {
+            return id;
+        }
+        current = frame.parent_id;
+    }
+    active_drag_id
+}
+
 pub(super) fn clamp_axis_to_viewport(position: f32, size: f32, viewport_size: f32) -> f32 {
     if size >= viewport_size {
         0.0

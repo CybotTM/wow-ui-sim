@@ -187,6 +187,58 @@ fn moving_drag_updates_frame_anchor_to_follow_mouse() {
 }
 
 #[test]
+fn drag_start_on_child_moves_parent_started_by_handler() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            DelegatedDragParent = CreateFrame("Frame", "DelegatedDragParent", UIParent)
+            DelegatedDragParent:SetSize(100, 100)
+            DelegatedDragParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            DelegatedDragParent:SetMovable(true)
+
+            DelegatedDragSelection = CreateFrame("Frame", "DelegatedDragSelection", DelegatedDragParent)
+            DelegatedDragSelection:SetAllPoints()
+            DelegatedDragSelection:EnableMouse(true)
+            DelegatedDragSelection:RegisterForDrag("LeftButton")
+            DelegatedDragSelection:SetScript("OnDragStart", function()
+                DelegatedDragParent:StartMoving()
+            end)
+            DelegatedDragSelection:SetScript("OnDragStop", function()
+                DelegatedDragParent:StopMovingOrSizing()
+            end)
+            "#,
+        )
+        .expect("delegated drag frame setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    app.handle_mouse_move(Point::new(120.0, 120.0));
+    app.handle_mouse_down(Point::new(120.0, 120.0));
+    app.handle_mouse_move(Point::new(140.0, 140.0));
+
+    let (point, relative_to, relative_point, x, y): (String, String, String, f64, f64) = app
+        .env
+        .borrow()
+        .eval(
+            r#"
+            local point, relativeTo, relativePoint, x, y = DelegatedDragParent:GetPoint(1)
+            local relativeName = relativeTo and relativeTo:GetName() or "nil"
+            return point, relativeName, relativePoint, x, y
+            "#,
+        )
+        .expect("delegated moving drag anchor query should succeed");
+
+    assert_eq!(point, "TOPLEFT");
+    assert_eq!(relative_to, "UIParent");
+    assert_eq!(relative_point, "TOPLEFT");
+    assert_eq!(x, 120.0, "parent started by child drag should move in x");
+    assert_eq!(y, -120.0, "parent started by child drag should move in y");
+}
+
+#[test]
 fn moving_drag_clamps_frame_to_screen_when_enabled() {
     let mut app = build_test_app(ScreenKind::Game);
 
