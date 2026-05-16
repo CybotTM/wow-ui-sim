@@ -333,6 +333,9 @@ fn load_addon_files(
             use_secure_env: toc.file_use_secure_env(index).unwrap_or(ctx.use_secure_env),
             taint: ctx.taint,
         };
+        if std::env::var("WOW_SIM_VERBOSE").is_ok() {
+            println!("  loading file {}", file_rel.display());
+        }
         load_addon_file(env, &file_ctx, result, &resolved_file);
     }
 }
