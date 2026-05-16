@@ -2,7 +2,9 @@
 
 use super::super::shared::{opt_f32, opt_string, val_to_bool, val_to_f64};
 use super::content::fire_tooltip_script;
-use super::line_frames::{line_color_segments, normal_font_color, table_array_get};
+use super::line_frames::{
+    line_color_segments, normal_font_color, sync_tooltip_line_frame, table_array_get,
+};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref, table_get,
     val_to_string,
@@ -57,6 +59,8 @@ pub(super) fn add_line(state: &mut LuaState) -> LuaResult<u32> {
         wrap,
         texture: None,
     });
+    drop(sim);
+    let _ = sync_tooltip_line_frame(state, id, false, line_index)?;
     Ok(0)
 }
 
@@ -74,6 +78,8 @@ pub(super) fn add_double_line(state: &mut LuaState) -> LuaResult<u32> {
     );
     let right_segments = processing_right_line_color_segments(state, id, line_index, &args);
     push_double_tooltip_line(state, id, args, left_segments, right_segments)?;
+    let _ = sync_tooltip_line_frame(state, id, false, line_index)?;
+    let _ = sync_tooltip_line_frame(state, id, true, line_index)?;
 
     Ok(0)
 }
