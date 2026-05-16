@@ -9,6 +9,15 @@ tracking regression. EditMode profile cache files are not Lua SavedVariables, so
 startup now loads them through a separate WTF cache path when Lua SavedVariables
 are disabled.
 
+## [2026-05-15] add | Mists addon-panel resume mistake
+
+Created `investigations/mists-addon-panel-resume-error.md` after incorrectly
+rerunning already-proven Mists addon panel rows from `AllTheThings`. The page
+records the direct rule: resume from the first unproven addon, which was
+`Plater` for this run, and use `--start-at` / stable artifact roots instead of
+discarding retained evidence. The resumed `Plater` and `SimpleItemLevel` rows
+now have retained pass artifacts under the shared cache audit root.
+
 ## [2026-05-15] update | Mists backpack slot chrome
 
 Updated `investigations/backpack-background-texture.md` with the Mists-specific

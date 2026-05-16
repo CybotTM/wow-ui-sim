@@ -5,6 +5,9 @@
 # addon at a time into Interface/AddOns, and runs scripts/mists-panel-parity.sh
 # with third-party addons enabled. Any panel lua-error, missing frame,
 # low-signal render, or visual-baseline regression fails that addon row.
+# Use --start-at <addon> to resume from a known manifest row without rerunning
+# earlier addons. Completed full-addon rows also write .passed under their
+# artifact directory so interrupted runs against the same --out-dir skip them.
 
 set -euo pipefail
 
@@ -25,6 +28,7 @@ export CARGO_TARGET_DIR
 source "$REPO_ROOT/scripts/classic-addon-sources.sh"
 
 NAME_FILTER=""
+START_AT=""
 PANEL_FILTER=""
 SKIP_BUILD=0
 WITH_SAVED_VARS=0
@@ -39,6 +43,7 @@ usage() {
 while [ $# -gt 0 ]; do
     case "$1" in
         --addon) NAME_FILTER="$2"; shift 2 ;;
+        --start-at) START_AT="$2"; shift 2 ;;
         --panel) PANEL_FILTER="$2"; shift 2 ;;
         --out-dir) OUT_DIR="$2"; shift 2 ;;
         --skip-build) SKIP_BUILD=1; shift ;;
@@ -53,11 +58,17 @@ done
 validate_manifest() {
     [ -f "$MANIFEST" ] || { echo "ERROR: manifest not found: $MANIFEST" >&2; return 2; }
     local count=0
+    local reached_start=0
     while IFS=$'\t' read -r name profile url ref subpath; do
         should_skip_manifest_row "$name" "$profile" && continue
+        should_skip_before_start "$name" reached_start && continue
         validate_local_mists_source "$name" "$url" "$subpath"
         count=$((count + 1))
     done < "$MANIFEST"
+    if [ -n "$START_AT" ] && [ -z "$NAME_FILTER" ] && [ "$reached_start" -eq 0 ]; then
+        echo "ERROR: --start-at addon not found in installed Mists manifest rows: $START_AT" >&2
+        return 2
+    fi
     if [ "$count" -eq 0 ]; then
         echo "ERROR: no installed Mists addons matched filter '$NAME_FILTER'" >&2
         return 2
@@ -86,6 +97,36 @@ should_skip_manifest_row() {
     [ "$profile" != "mists" ] && return 0
     [ -n "$NAME_FILTER" ] && [ "$NAME_FILTER" != "$name" ] && return 0
     return 1
+}
+
+should_skip_before_start() {
+    local name="$1"
+    local -n reached_start_ref="$2"
+    [ -z "$START_AT" ] && return 1
+    [ -n "$NAME_FILTER" ] && return 1
+    [ "$reached_start_ref" -eq 1 ] && return 1
+    if [ "$name" = "$START_AT" ]; then
+        reached_start_ref=1
+        return 1
+    fi
+    return 0
+}
+
+addon_pass_marker() {
+    local name="$1"
+    [ -n "$PANEL_FILTER" ] && return 1
+    echo "$OUT_DIR/$name/.passed"
+}
+
+should_skip_completed_addon() {
+    local name="$1"
+    local marker
+    marker="$(addon_pass_marker "$name")" || return 1
+    [ -f "$marker" ] || return 1
+    echo ""
+    echo "=== $name (mists panels) ==="
+    echo "Skipping $name; existing pass marker: $marker"
+    return 0
 }
 
 validate_local_mists_source() {
@@ -180,6 +221,10 @@ run_addon_panels() {
     install_compat_shims "$name"
     if WOW_SIM_BIN="$WOW_SIM_BIN" PANEL_VISUAL_METRICS_BIN="$PANEL_VISUAL_METRICS_BIN" \
             "$REPO_ROOT/scripts/mists-panel-parity.sh" "${args[@]}"; then
+        local marker
+        if marker="$(addon_pass_marker "$name")"; then
+            touch "$marker"
+        fi
         finish_active_addon
         return 0
     fi
@@ -215,8 +260,14 @@ trap cleanup_active_addon_on_exit EXIT
 trap 'cleanup_active_addon_on_interrupt; exit 130' INT TERM
 
 declare -i pass=0 fail=0
+declare -i reached_start=0
 while IFS=$'\t' read -r name profile url ref subpath; do
     should_skip_manifest_row "$name" "$profile" && continue
+    should_skip_before_start "$name" reached_start && continue
+    if should_skip_completed_addon "$name"; then
+        pass+=1
+        continue
+    fi
     if run_addon_panels "$name" "$url" "$subpath"; then
         pass+=1
     else

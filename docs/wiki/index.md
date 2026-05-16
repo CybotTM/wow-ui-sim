@@ -44,6 +44,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 |------|---------|
 | [[action-bar-spell-icons]] | 4 bugs: SetDrawLayer no-op, draw order, sublevel ignored, textureSubLevel not parsed |
 | [[addon-load-order]] | Bag buttons partially initialized at load; workaround mirrors real WoW event recovery |
+| [[mists-addon-panel-resume-error]] | Mists addon-panel matrix must resume from first unproven addon; rerunning passed rows from `AllTheThings` was the mistake, and `--start-at` / `.passed` markers guard against repeating it |
 | [[casc-fdid-1579624-root-debug]] | FDID 1579624 root/CASC resolution data, CRLF hash proof, and parser debugging checklist |
 | [[windows-casc-blizzard-taint]] | Windows CASC-synced Blizzard UI cache needed TOC/folder-name taint semantics plus runtime LoadAddOn stack-taint clearing |
 | [[achievement-panel-hide]] | Achievement panel hide now uses Blizzard's managed panel path; animation completion also fires child animation `OnFinished` scripts for alert hide XML |
