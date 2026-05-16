@@ -105,7 +105,7 @@
 - [x] Fix the Mists Spellbook `What's Changed` tab so it renders populated change content instead of an empty panel with only the player class title.
 - [x] Fix Mists Collections list row interactions so visible mount/pet/toy/heirloom rows can be clicked/selected instead of rendering as inert list entries, including the `GameTooltip:SetCompanionPet` path used by pet rows.
 - [x] Fix the Mists LFD/LFR queued-state indicator so joining a working queue shows the expected minimap/LFG eye instead of leaving the queue status UI hidden.
-- [ ] Fix the Mists Store/CatalogShop item list so the Shop panel displays available products instead of opening an empty storefront shell.
+- [x] Fix the Mists Store/CatalogShop item list so the Shop panel displays available products instead of opening an empty storefront shell.
 - [x] Fix the Mists micro-menu Game Menu button so clicking the visible button opens the game menu panel in the live UI.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 

@@ -92,7 +92,6 @@ const STORE_COMMERCIAL_LUA: &str = r#"
 
     StoreMicroButton:GetScript("OnClick")(StoreMicroButton, "LeftButton", false)
 
-    CatalogShopFrame:Show()
     assertShown(CatalogShopFrame, "CatalogShopFrame")
 
     local categoryIDs = C_CatalogShop.GetAvailableCategoryIDs()
@@ -100,8 +99,7 @@ const STORE_COMMERCIAL_LUA: &str = r#"
         fail("CatalogShop categories missing")
     end
 
-    CatalogShopFrame.ProductContainerFrame:Show()
-    CatalogShopFrame:OnCategorySelected(categoryIDs[1])
+    assertShown(CatalogShopFrame.ProductContainerFrame, "CatalogShop ProductContainerFrame")
 
     local productProvider = CatalogShopFrame.ProductContainerFrame.ProductsScrollBoxContainer.ScrollBox:GetDataProvider()
     if not productProvider or productProvider:GetSize() == 0 then
@@ -113,6 +111,19 @@ const STORE_COMMERCIAL_LUA: &str = r#"
     end)
     if not firstProduct then
         fail("CatalogShop first product missing")
+    end
+
+    local visibleProductFrames = 0
+    CatalogShopFrame.ProductContainerFrame.ProductsScrollBoxContainer.ScrollBox:ForEachFrame(function(frame, elementData)
+        if elementData.elementType == CatalogShopConstants.ScrollViewElementType.Product then
+            if not frame:IsShown() or frame:GetWidth() <= 0 or frame:GetHeight() <= 0 then
+                fail("CatalogShop product frame not visible or sized")
+            end
+            visibleProductFrames = visibleProductFrames + 1
+        end
+    end)
+    if visibleProductFrames == 0 then
+        fail("CatalogShop rendered product frames missing")
     end
 
     if not CatalogShopFrame.ProductContainerFrame:TrySelectProduct(firstProduct) then
