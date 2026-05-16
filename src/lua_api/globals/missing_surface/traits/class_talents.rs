@@ -77,6 +77,10 @@ const CLASS_TALENTS_CONFIG_METHODS: &[(&str, rilua::RustFn)] = &[
         "HasUnspentHeroTalentPoints",
         c_class_talents_has_unspent_hero_talent_points,
     ),
+    (
+        "InitializeViewLoadout",
+        c_class_talents_initialize_view_loadout,
+    ),
     ("LoadConfig", c_class_talents_load_config),
 ];
 
@@ -167,6 +171,13 @@ fn c_class_talents_get_active_hero_talent_spec(state: &mut LuaState) -> LuaResul
         Some(subtree_id) => state.push(Val::Num(subtree_id as f64)),
         None => state.push(Val::Nil),
     }
+    Ok(1)
+}
+
+fn c_class_talents_initialize_view_loadout(state: &mut LuaState) -> LuaResult<u32> {
+    let _spec_id = u32::from_stack(state, 1)?;
+    let _level = u32::from_stack(state, 2)?;
+    state.push(Val::Bool(true));
     Ok(1)
 }
 

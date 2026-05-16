@@ -117,3 +117,26 @@ fn legacy_spell_globals_exist_for_addons() {
         "legacy spell globals should exist for addon compatibility: {result}"
     );
 }
+
+#[test]
+fn class_talents_initialize_view_loadout_exists_for_addons() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        if type(C_ClassTalents.InitializeViewLoadout) ~= "function" then
+            return "missing_InitializeViewLoadout"
+        end
+        if C_ClassTalents.InitializeViewLoadout(70, 80) ~= true then
+            return "initialize_result=" .. tostring(C_ClassTalents.InitializeViewLoadout(70, 80))
+        end
+        return "ok"
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "C_ClassTalents.InitializeViewLoadout should exist for talent-tree addons: {result}"
+    );
+}
