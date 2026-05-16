@@ -170,12 +170,7 @@ fn print_blizzard_summary(
     t: &LoadTiming,
     gc_dur: std::time::Duration,
 ) {
-    let cache_total = t.cache_hits + t.cache_misses;
-    let cache_info = if cache_total > 0 {
-        format!(", bytecode cache: {}/{} hits", t.cache_hits, cache_total)
-    } else {
-        String::new()
-    };
+    let cache_info = format_cache_info(t);
     logging::println_elapsed(&format!(
         "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?} [compile={:.2?} call={:.2?}] gc={gc_dur:.2?}{cache_info})",
         t.io_time,
@@ -309,8 +304,6 @@ struct LoadStats {
     success_count: usize,
     fail_count: usize,
     addon_times: Vec<(String, std::time::Duration)>,
-    cache_hits: u32,
-    cache_misses: u32,
 }
 
 struct AddonMetadata {
@@ -444,8 +437,6 @@ fn record_addon_success(name: &str, r: &LoadResult, stats: &mut LoadStats) {
     stats.total_xml += r.xml_files;
     stats.total_warnings += r.warnings.len();
     stats.total_timing.accumulate(&r.timing);
-    stats.cache_hits += r.timing.cache_hits;
-    stats.cache_misses += r.timing.cache_misses;
     stats.success_count += 1;
 }
 
@@ -558,7 +549,7 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
         stats.total_lua, stats.total_xml, stats.total_warnings
     );
     print_timing_breakdown(&stats.total_timing);
-    print_cache_stats(stats.cache_hits, stats.cache_misses);
+    print_cache_stats(&stats.total_timing);
     print_slowest_addons(&stats.addon_times);
 }
 
@@ -634,13 +625,27 @@ fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -
     );
 }
 
-fn print_cache_stats(hits: u32, misses: u32) {
-    if hits == 0 && misses == 0 {
+fn print_cache_stats(t: &LoadTiming) {
+    if t.cache_hits == 0 && t.cache_misses == 0 {
         return;
     }
-    let total = hits + misses;
-    let pct = 100.0 * hits as f64 / total as f64;
-    println!("Bytecode cache: {}/{} hits ({:.0}%)", hits, total, pct);
+    println!("Bytecode cache: {}", format_cache_summary(t));
+}
+
+fn format_cache_info(t: &LoadTiming) -> String {
+    if t.cache_hits == 0 && t.cache_misses == 0 {
+        return String::new();
+    }
+    format!(", bytecode cache: {}", format_cache_summary(t))
+}
+
+fn format_cache_summary(t: &LoadTiming) -> String {
+    let total = t.cache_hits + t.cache_misses;
+    let pct = 100.0 * t.cache_hits as f64 / total as f64;
+    format!(
+        "{}/{} hits ({:.0}%, lookup_miss={} replay_fail={})",
+        t.cache_hits, total, pct, t.cache_lookup_misses, t.cache_replay_failures
+    )
 }
 
 fn print_slowest_addons(addon_times: &[(String, std::time::Duration)]) {
@@ -651,6 +656,9 @@ fn print_slowest_addons(addon_times: &[(String, std::time::Duration)]) {
         println!("  {:>7.1?}  {}", time, name);
     }
 }
+
+#[cfg(test)]
+mod addon_loading_cache_tests;
 
 #[cfg(test)]
 mod tests {

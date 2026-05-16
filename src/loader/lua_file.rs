@@ -463,11 +463,19 @@ fn load_cached_or_compile(
     let legacy_hash = bytecode_cache::legacy_content_hash(bytes, chunk_name);
 
     if !bytecode_cache::is_disabled() {
-        if let Some(bytecode) = bytecode_cache::get_with_legacy_fallback(hash, legacy_hash)
-            && let Ok(func) = compile_with_rilua(lua, &bytecode, chunk_name)
-        {
-            timing.cache_hits += 1;
-            return Ok(func);
+        match bytecode_cache::get_with_legacy_fallback(hash, legacy_hash) {
+            Some(bytecode) => match compile_with_rilua(lua, &bytecode, chunk_name) {
+                Ok(func) => {
+                    timing.cache_hits += 1;
+                    return Ok(func);
+                }
+                Err(_) => {
+                    timing.cache_replay_failures += 1;
+                }
+            },
+            None => {
+                timing.cache_lookup_misses += 1;
+            }
         }
     }
 
@@ -684,5 +692,45 @@ mod tests {
             second_lua.val_as_bytes(second_value).unwrap(),
             chunk_name.as_bytes()
         );
+    }
+
+    #[test]
+    fn load_cached_or_compile_counts_bytecode_cache_lookup_misses() {
+        let chunk_name = unique_cache_chunk_name("lua_file_cache_lookup_miss");
+        let source = format!("return {:?}", chunk_name);
+
+        let mut lua = rilua::Lua::new().unwrap();
+        let mut timing = LoadTiming::default();
+        {
+            let state = lua.state_mut();
+            load_cached_or_compile(state, source.as_bytes(), &chunk_name, &mut timing)
+        }
+        .expect("source compile should succeed");
+
+        assert_eq!(timing.cache_hits, 0);
+        assert_eq!(timing.cache_misses, 1);
+        assert_eq!(timing.cache_lookup_misses, 1);
+        assert_eq!(timing.cache_replay_failures, 0);
+    }
+
+    #[test]
+    fn load_cached_or_compile_counts_bytecode_replay_failures() {
+        let chunk_name = unique_cache_chunk_name("lua_file_cache_replay_failure");
+        let source = format!("return {:?}", chunk_name);
+        let hash = bytecode_cache::content_hash(source.as_bytes(), &chunk_name);
+        bytecode_cache::put(hash, b"not valid lua bytecode");
+
+        let mut lua = rilua::Lua::new().unwrap();
+        let mut timing = LoadTiming::default();
+        {
+            let state = lua.state_mut();
+            load_cached_or_compile(state, source.as_bytes(), &chunk_name, &mut timing)
+        }
+        .expect("source compile should recover after cache replay failure");
+
+        assert_eq!(timing.cache_hits, 0);
+        assert_eq!(timing.cache_misses, 1);
+        assert_eq!(timing.cache_lookup_misses, 0);
+        assert_eq!(timing.cache_replay_failures, 1);
     }
 }

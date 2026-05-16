@@ -160,6 +160,10 @@ pub struct LoadTiming {
     pub cache_hits: u32,
     /// Number of Lua files compiled from source (cache miss)
     pub cache_misses: u32,
+    /// Number of Lua bytecode cache misses with no matching entry.
+    pub cache_lookup_misses: u32,
+    /// Number of Lua bytecode cache entries that failed to reload.
+    pub cache_replay_failures: u32,
 }
 
 impl LoadTiming {
@@ -200,6 +204,8 @@ impl LoadTiming {
         self.saved_vars_time += other.saved_vars_time;
         self.cache_hits += other.cache_hits;
         self.cache_misses += other.cache_misses;
+        self.cache_lookup_misses += other.cache_lookup_misses;
+        self.cache_replay_failures += other.cache_replay_failures;
     }
 }
 

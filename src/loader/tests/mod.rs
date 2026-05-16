@@ -197,11 +197,15 @@ fn load_timing_accumulate_includes_bytecode_cache_counts() {
     let mut total = LoadTiming {
         cache_hits: 2,
         cache_misses: 3,
+        cache_lookup_misses: 11,
+        cache_replay_failures: 13,
         ..Default::default()
     };
     let nested = LoadTiming {
         cache_hits: 5,
         cache_misses: 7,
+        cache_lookup_misses: 17,
+        cache_replay_failures: 19,
         ..Default::default()
     };
 
@@ -209,6 +213,8 @@ fn load_timing_accumulate_includes_bytecode_cache_counts() {
 
     assert_eq!(total.cache_hits, 7);
     assert_eq!(total.cache_misses, 10);
+    assert_eq!(total.cache_lookup_misses, 28);
+    assert_eq!(total.cache_replay_failures, 32);
 }
 
 #[test]
