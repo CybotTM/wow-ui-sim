@@ -223,6 +223,42 @@ if rawget(_G, "RaidFinderFrame_UpdateTab") == nil then
   end
 end
 
+if rawget(_G, "ToggleGuildFinder") == nil then
+  function ToggleGuildFinder()
+    local ok, reason = LoadAddOn("Blizzard_Communities")
+    if ok == false then
+      return false, reason
+    end
+    if not CommunitiesFrame or not COMMUNITIES_FRAME_DISPLAY_MODES then
+      return false, "MISSING_COMMUNITIES_FRAME"
+    end
+
+    if type(ShowUIPanel) == "function" then
+      ShowUIPanel(CommunitiesFrame)
+    else
+      CommunitiesFrame:Show()
+    end
+    if type(CommunitiesFrame.SelectClub) == "function" then
+      CommunitiesFrame:SelectClub(nil)
+    end
+
+    local guildFinder = CommunitiesFrame.GuildFinderFrame
+    if not guildFinder then
+      return false, "MISSING_GUILD_FINDER"
+    end
+    CommunitiesFrame:SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.GUILD_FINDER)
+    guildFinder.isGuildType = true
+    guildFinder.selectedTab = 1
+    guildFinder:UpdateType()
+
+    if type(guildFinder.OnEvent) == "function" and C_ClubFinder and Enum and Enum.ClubFinderRequestType then
+      guildFinder:OnEvent("CLUB_FINDER_PLAYER_PENDING_LIST_RECIEVED", Enum.ClubFinderRequestType.Guild)
+      guildFinder:OnEvent("CLUB_FINDER_CLUB_LIST_RETURNED", Enum.ClubFinderRequestType.Guild)
+    end
+    return true
+  end
+end
+
 -- SetGuildRosterSelection must never be a no-op. Mists FriendsFrame/GuildFrame
 -- code calls Set, then expects a later Get to return the new index; a no-op
 -- leaves the index unchanged and can send the guild roster UI into retry loops.

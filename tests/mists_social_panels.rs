@@ -69,6 +69,35 @@ fn mists_social_panels_support_friends_who_guild_and_communities() {
             end
 
             CommunitiesFrame:Show()
+            CommunitiesFrame.CommunitiesList:Update()
+            local guildFinderEntry
+            CommunitiesFrame.CommunitiesList.ScrollBox:ForEachFrame(function(frame, elementData)
+                if elementData and elementData.setGuildFinder then
+                    guildFinderEntry = frame
+                end
+            end)
+            if not guildFinderEntry then
+                error("guild finder list entry did not render")
+            end
+            guildFinderEntry:Click("LeftButton")
+            if not CommunitiesFrame.GuildFinderFrame:IsShown()
+                or CommunitiesFrame:GetDisplayMode() ~= COMMUNITIES_FRAME_DISPLAY_MODES.GUILD_FINDER
+                or CommunitiesFrame.GuildFinderFrame.isGuildType ~= true then
+                error("guild finder list entry click did not open guild finder mode")
+            end
+
+            CommunitiesFrame:SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.CHAT)
+            local toggled, toggleReason = ToggleGuildFinder()
+            if toggled == false then
+                error("ToggleGuildFinder failed: " .. tostring(toggleReason))
+            end
+            if not CommunitiesFrame:IsShown()
+                or not CommunitiesFrame.GuildFinderFrame:IsShown()
+                or CommunitiesFrame:GetDisplayMode() ~= COMMUNITIES_FRAME_DISPLAY_MODES.GUILD_FINDER
+                or CommunitiesFrame.GuildFinderFrame.isGuildType ~= true then
+                error("ToggleGuildFinder did not open guild finder mode")
+            end
+
             local guildFinder = CommunitiesFrame.GuildFinderFrame
             if not guildFinder then
                 error("GuildFinderFrame missing")
