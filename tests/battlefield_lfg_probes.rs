@@ -90,6 +90,13 @@ fn get_num_battleground_entries_one_when_queued() {
     assert_eq!(n, 1);
 }
 
+#[test]
+fn get_num_battleground_types_reports_no_listed_battlegrounds() {
+    let env = env();
+    let n: i32 = env.eval("return GetNumBattlegroundTypes()").unwrap();
+    assert_eq!(n, 0);
+}
+
 // ── GetLFGDungeonInfo / Mode / NumEncounters ──────────────────────────────────
 
 #[test]
@@ -105,6 +112,13 @@ fn get_lfg_mode_returns_two_nils() {
     let (a, b): (Option<String>, Option<String>) = env.eval("return GetLFGMode(1)").unwrap();
     assert_eq!(a, None);
     assert_eq!(b, None);
+}
+
+#[test]
+fn get_lfg_random_cooldown_expiration_is_inert() {
+    let env = env();
+    let expiration: i32 = env.eval("return GetLFGRandomCooldownExpiration()").unwrap();
+    assert_eq!(expiration, 0);
 }
 
 #[test]

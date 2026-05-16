@@ -126,6 +126,11 @@ fn get_num_battleground_entries(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_num_battleground_types(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
 /// `GetWorldPVPQueueStatus(index)` — retail returns 7 values. The sim
 /// doesn't seed world PvP queues, so every index reports the inert queue
 /// shape Blizzard UI uses for "not queued".
@@ -245,6 +250,11 @@ fn get_lfg_dungeon_num_encounters(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Num(0.0));
     }
     Ok(2)
+}
+
+fn get_lfg_random_cooldown_expiration(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
 }
 
 /// `GetLFDChoiceOrder()` → array of dungeon IDs in seeded order.
@@ -556,6 +566,7 @@ fn register_battlefield_queue_globals(lua: &mut rilua::Lua) -> crate::Result<()>
         "GetNumBattlegroundEntries",
         get_num_battleground_entries,
     )?;
+    LuaApiMut::register_function(lua, "GetNumBattlegroundTypes", get_num_battleground_types)?;
     LuaApiMut::register_function(lua, "GetWorldPVPQueueStatus", get_world_pvp_queue_status)?;
     Ok(())
 }
@@ -568,6 +579,11 @@ fn register_lfd_info_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetLFGDungeonNumEncounters",
         get_lfg_dungeon_num_encounters,
     )?;
+    LuaApiMut::register_function(
+        lua,
+        "GetLFGRandomCooldownExpiration",
+        get_lfg_random_cooldown_expiration,
+    )?;
     LuaApiMut::register_function(lua, "GetLFDChoiceOrder", get_lfd_choice_order)?;
     LuaApiMut::register_function(lua, "GetNumRandomDungeons", get_num_random_dungeons)?;
     LuaApiMut::register_function(lua, "GetLFGRandomDungeonInfo", get_lfg_random_dungeon_info)?;
@@ -578,6 +594,11 @@ fn register_lfd_info_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetRandomDungeonBestChoice",
         get_random_dungeon_best_choice,
     )?;
+    register_lfd_reward_globals(lua)?;
+    Ok(())
+}
+
+fn register_lfd_reward_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLFGDungeonRewards", get_lfg_dungeon_rewards)?;
     LuaApiMut::register_function(
         lua,

@@ -267,6 +267,20 @@ fn test_default_guild_name() {
     assert_eq!(name, "Heroes of Azeroth");
 }
 
+#[test]
+fn test_legacy_get_guild_info_matches_c_guild() {
+    let env = env();
+    let (legacy_name, c_name): (String, String) = env
+        .eval(
+            r#"
+            return (GetGuildInfo("player")), (C_Guild.GetGuildInfo("player"))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(legacy_name, "Heroes of Azeroth");
+    assert_eq!(legacy_name, c_name);
+}
+
 // ============================================================================
 // GuildQuit
 // ============================================================================

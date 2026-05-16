@@ -31,6 +31,36 @@ fn is_inventory_item_locked_true_when_cursor_holds_that_slot() {
     assert!(!b);
 }
 
+#[test]
+fn get_inventory_item_durability_returns_full_durability_for_equipped_items() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.player.equipped_items.insert(
+            16,
+            wow_ui_sim::lua_api::state::EquippedItem {
+                item_id: 19019,
+                enchant_id: 0,
+                gem_ids: [0; 3],
+            },
+        );
+    }
+
+    let (current, max): (i32, i32) = env
+        .eval("return GetInventoryItemDurability(16)")
+        .expect("GetInventoryItemDurability should be callable");
+    assert_eq!((current, max), (100, 100));
+}
+
+#[test]
+fn get_inventory_item_durability_returns_nil_for_empty_slots() {
+    let env = env();
+    let has_value: bool = env
+        .eval("return GetInventoryItemDurability(99) ~= nil")
+        .expect("GetInventoryItemDurability should be callable");
+    assert!(!has_value);
+}
+
 // ── IsEquippableItem / IsConsumableItem ───────────────────────────────────────
 
 #[test]

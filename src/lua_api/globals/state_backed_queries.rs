@@ -31,6 +31,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ResetCursor", reset_cursor)?;
     LuaApiMut::register_function(lua, "GetSpecialization", get_specialization)?;
     LuaApiMut::register_function(lua, "GuildQuit", guild_quit)?;
+    LuaApiMut::register_function(lua, "GetGuildInfo", c_guild_get_guild_info)?;
 
     let state = lua.state_mut();
     register_c_guild(state)?;

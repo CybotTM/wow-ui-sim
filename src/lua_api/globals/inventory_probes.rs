@@ -281,6 +281,25 @@ fn get_inventory_item_count(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_inventory_item_durability(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot) = stack_i32(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let is_equipped = borrow_state(state)?
+        .player
+        .equipped_items
+        .contains_key(&slot);
+    if is_equipped {
+        state.push(Val::Num(100.0));
+        state.push(Val::Num(100.0));
+        Ok(2)
+    } else {
+        state.push(Val::Nil);
+        Ok(1)
+    }
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsInventoryItemLocked", is_inventory_item_locked)?;
     LuaApiMut::register_function(lua, "IsEquippableItem", is_equippable_item)?;
@@ -299,5 +318,10 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     )?;
     LuaApiMut::register_function(lua, "GetInventoryItemQuality", get_inventory_item_quality)?;
     LuaApiMut::register_function(lua, "GetInventoryItemCount", get_inventory_item_count)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetInventoryItemDurability",
+        get_inventory_item_durability,
+    )?;
     Ok(())
 }

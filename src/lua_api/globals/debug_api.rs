@@ -1,6 +1,6 @@
 //! `C_Debug` debug-window helpers.
 
-use crate::lua_api::methods::{borrow_state_mut, create_table, val_to_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table, val_to_string};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -85,7 +85,20 @@ fn view_in_debug_window(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn debug_profile_start(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn debug_profile_stop(state: &mut LuaState) -> LuaResult<u32> {
+    let elapsed_ms = borrow_state(state)?.start_time.elapsed().as_secs_f64() * 1000.0;
+    state.push(Val::Num(elapsed_ms));
+    Ok(1)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(lua, "debugprofilestart", debug_profile_start)?;
+    LuaApiMut::register_function(lua, "debugprofilestop", debug_profile_stop)?;
+
     let state = lua.state_mut();
     let ns = ensure_namespace_table(state, "C_Debug");
     table_set_rust_fn_static(state, ns, "PrintToDebugWindow", print_to_debug_window)?;

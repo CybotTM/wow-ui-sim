@@ -222,6 +222,25 @@ fn instance_abandon_vote_and_shutdown_helpers_return_numeric_pairs() {
 }
 
 #[test]
+fn profiling_helpers_return_elapsed_milliseconds() {
+    let env = env();
+    let (start_type, first, second): (String, f64, f64) = env
+        .eval(
+            r#"
+            local startResult = debugprofilestart()
+            local first = debugprofilestop()
+            local second = debugprofilestop()
+            return type(startResult), first, second
+            "#,
+        )
+        .expect("debug profiling helpers should be callable");
+
+    assert_eq!(start_type, "nil");
+    assert!(first >= 0.0);
+    assert!(second >= first);
+}
+
+#[test]
 fn startup_party_chat_and_targeting_globals_are_callable() {
     let env = env();
     let (
