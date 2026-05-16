@@ -130,8 +130,7 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
         Val::Num(n) => Some(n as i32),
         _ => None,
     };
-    let widget_type = WidgetType::from_str(&frame_type)
-        .ok_or_else(|| rilua::runtime_error(format!("unknown frame type '{frame_type}'")))?;
+    let widget_type = resolve_runtime_widget_type(&frame_type)?;
     Ok(CreateFrameArgs {
         frame_type,
         widget_type,
@@ -141,6 +140,15 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
         inherits,
         id,
     })
+}
+
+fn resolve_runtime_widget_type(frame_type: &str) -> LuaResult<WidgetType> {
+    let mapped_frame_type =
+        crate::xml::widget_type_for_tag(frame_type).map(|(widget_type, _)| widget_type);
+    let widget_type_name = mapped_frame_type.unwrap_or(frame_type);
+
+    WidgetType::from_str(widget_type_name)
+        .ok_or_else(|| rilua::runtime_error(format!("unknown frame type '{frame_type}'")))
 }
 
 fn resolve_frame_name(
@@ -247,6 +255,28 @@ mod tests {
             .eval("local p = RiluaCreateFrameChild:GetParent(); return p and p:GetName()")
             .expect("eval parent name");
         assert_eq!(parent_name.as_deref(), Some("UIParent"));
+    }
+
+    #[test]
+    fn create_frame_accepts_intrinsic_widget_aliases() {
+        let env = WowLuaEnv::new().expect("env");
+
+        let result: String = env
+            .eval(
+                r#"
+                local dropdown = CreateFrame("DropDownToggleButton", "RuntimeDropDownToggle", UIParent)
+                local eventButton = CreateFrame("EventButton", "RuntimeEventButton", UIParent)
+                return table.concat({
+                    dropdown:GetObjectType(),
+                    tostring(dropdown:IsObjectType("Button")),
+                    eventButton:GetObjectType(),
+                    tostring(eventButton:IsObjectType("Button")),
+                }, "|")
+            "#,
+            )
+            .expect("CreateFrame should accept intrinsic aliases");
+
+        assert_eq!(result, "Button|true|Button|true");
     }
 
     #[test]

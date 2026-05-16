@@ -437,6 +437,11 @@ const DIRECT_WIDGET_MAPPINGS: &[WidgetTagMapping] = &[
     ("Minimap", ("Minimap", None)),
     ("DropdownButton", ("Button", Some("DropdownButton"))),
     (
+        "DropDownToggleButton",
+        ("Button", Some("DropDownToggleButton")),
+    ),
+    ("EventButton", ("Button", Some("EventButton"))),
+    (
         "ContainedAlertFrame",
         ("Button", Some("ContainedAlertFrame")),
     ),
@@ -517,6 +522,14 @@ mod tests {
         assert_eq!(
             widget_type_for_tag("ContainedAlertFrame"),
             Some(("Button", Some("ContainedAlertFrame")))
+        );
+        assert_eq!(
+            widget_type_for_tag("DropDownToggleButton"),
+            Some(("Button", Some("DropDownToggleButton")))
+        );
+        assert_eq!(
+            widget_type_for_tag("EventButton"),
+            Some(("Button", Some("EventButton")))
         );
     }
 
