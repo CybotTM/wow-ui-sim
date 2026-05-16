@@ -120,6 +120,29 @@ fn test_case_insensitive_loading() {
 }
 
 #[test]
+fn test_addon_texture_resolves_from_secondary_addons_path() {
+    let first_root = TempDir::new().unwrap();
+    let second_root = TempDir::new().unwrap();
+    let texture_dir = second_root.path().join("Chattynator").join("Assets");
+    fs::create_dir_all(&texture_dir).unwrap();
+
+    let texture_path = texture_dir.join("ChatTabMiddle.png");
+    let img = image::RgbaImage::from_pixel(1, 1, image::Rgba([16, 32, 48, 255]));
+    img.save(&texture_path).unwrap();
+
+    let mut mgr = TextureManager::new().with_addons_paths([
+        first_root.path().to_path_buf(),
+        second_root.path().to_path_buf(),
+    ]);
+    let result = mgr.load("Interface/AddOns/Chattynator/Assets/ChatTabMiddle");
+
+    assert!(
+        result.is_some(),
+        "Should resolve addon textures from every configured addon root"
+    );
+}
+
+#[test]
 fn test_simcommands_minimap_placeholder_resolves_from_default_addons_path() {
     let mut mgr = TextureManager::new().with_addons_path(crate::paths::default_addons_path());
 

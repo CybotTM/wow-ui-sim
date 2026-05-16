@@ -387,7 +387,7 @@ impl App {
     /// Create texture manager, font system, and glyph atlas.
     fn init_rendering(env_rc: &Rc<RefCell<WowLuaEnv>>) -> RenderResources {
         let mut tex_mgr =
-            TextureManager::new().with_addons_path(crate::paths::default_addons_path());
+            TextureManager::new().with_addons_paths(crate::paths::default_addons_paths());
         if Self::eager_startup_texture_preloads_enabled() {
             let class_name = {
                 let env = env_rc.borrow();

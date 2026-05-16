@@ -219,7 +219,8 @@ fn create_texture_manager() -> wow_ui_sim::texture::TextureManager {
     use wow_ui_sim::texture::TextureManager;
 
     let config = wow_ui_sim::config::SimConfig::load();
-    let mut mgr = TextureManager::new().with_addons_path(wow_ui_sim::paths::default_addons_path());
+    let mut mgr =
+        TextureManager::new().with_addons_paths(wow_ui_sim::paths::default_addons_paths());
     mgr.preload_talent_textures(790);
     mgr.preload_talent_panel_textures(&config.player_class);
     mgr

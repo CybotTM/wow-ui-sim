@@ -15,8 +15,8 @@ use image_blp::types::BlpContent;
 /// Texture manager that loads and caches textures.
 #[derive(Debug)]
 pub struct TextureManager {
-    /// Base path to addons directory (for addon textures).
-    addons_path: Option<PathBuf>,
+    /// Base paths to addon directories (for addon textures).
+    addons_paths: Vec<PathBuf>,
     /// Cache of loaded texture data (path -> RGBA pixels).
     cache: HashMap<String, TextureData>,
     /// Cache of texture dimensions keyed by normalized WoW path.
@@ -43,7 +43,7 @@ impl TextureManager {
     /// Create a new texture manager.
     pub fn new() -> Self {
         Self {
-            addons_path: None,
+            addons_paths: Vec::new(),
             cache: HashMap::new(),
             size_cache: HashMap::new(),
             bc_cache: HashMap::new(),
@@ -55,7 +55,13 @@ impl TextureManager {
 
     /// Set the addons directory path for addon textures.
     pub fn with_addons_path(mut self, path: impl Into<PathBuf>) -> Self {
-        self.addons_path = Some(path.into());
+        self.addons_paths = vec![path.into()];
+        self
+    }
+
+    /// Set all addon directory paths for addon textures.
+    pub fn with_addons_paths(mut self, paths: impl IntoIterator<Item = PathBuf>) -> Self {
+        self.addons_paths = paths.into_iter().collect();
         self
     }
 

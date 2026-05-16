@@ -222,10 +222,12 @@ impl TextureManager {
             .strip_prefix("Interface/AddOns/")
             .or_else(|| normalized_path.strip_prefix("interface/Addons/"))
             .or_else(|| normalized_path.strip_prefix("interface/addons/"))
-            && let Some(addons_path) = &self.addons_path
-            && let Some(result) = self.try_resolve_in_dir(addons_path, addon_relative)
         {
-            return Some(result);
+            for addons_path in &self.addons_paths {
+                if let Some(result) = self.try_resolve_in_dir(addons_path, addon_relative) {
+                    return Some(result);
+                }
+            }
         }
 
         if let Some(result) = try_casc_resolve(normalized_path) {
