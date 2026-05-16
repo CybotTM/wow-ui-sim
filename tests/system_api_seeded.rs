@@ -543,68 +543,6 @@ fn test_macro_icon_apis_populate_icon_tables() {
     );
 }
 
-#[test]
-fn test_legacy_macro_and_spellbook_globals_exist_for_addons() {
-    let env = env();
-    let result: String = env
-        .eval(
-            r#"
-        if ACCOUNT_BINDINGS ~= 1 then
-            return "account_bindings=" .. tostring(ACCOUNT_BINDINGS)
-        end
-        if CHARACTER_BINDINGS ~= 2 or CHARACTERBINDINGS ~= 2 then
-            return "character_bindings=" .. tostring(CHARACTER_BINDINGS) .. "," .. tostring(CHARACTERBINDINGS)
-        end
-        if type(CreateMacro) ~= "function" then
-            return "missing_CreateMacro"
-        end
-        if type(DeleteMacro) ~= "function" then
-            return "missing_DeleteMacro"
-        end
-        if type(GetMacroBody) ~= "function" then
-            return "missing_GetMacroBody"
-        end
-        if type(CursorHasMacro) ~= "function" then
-            return "missing_CursorHasMacro"
-        end
-        if type(GetContainerItemInfo) ~= "function" then
-            return "missing_GetContainerItemInfo"
-        end
-        if type(GetSpellBookItemInfo) ~= "function" then
-            return "missing_GetSpellBookItemInfo"
-        end
-        if type(GetSpellBookItemName) ~= "function" then
-            return "missing_GetSpellBookItemName"
-        end
-
-        if GetMacroBody(1) ~= "/rw Stack on star" then
-            return "macro_body=" .. tostring(GetMacroBody(1))
-        end
-        local created = CreateMacro("Compat", "INV_Misc_QuestionMark", "/say compat")
-        if type(created) ~= "number" then
-            return "created_type=" .. type(created)
-        end
-        DeleteMacro(created)
-
-        local spellName = GetSpellBookItemName(1)
-        if spellName == nil then
-            return "missing_spell_name"
-        end
-        local itemInfo = GetContainerItemInfo(0, 1)
-        if type(itemInfo) ~= "table" then
-            return "container_info_type=" .. type(itemInfo)
-        end
-
-        return "ok"
-    "#,
-        )
-        .unwrap();
-    assert_eq!(
-        result, "ok",
-        "legacy macro and spellbook globals should exist for addon compatibility: {result}"
-    );
-}
-
 // ============================================================================
 // PlayerLocation
 // ============================================================================

@@ -8911,6 +8911,7 @@ if GetMacroItemIcons == nil then
     return __wow_append_icons(iconTable, __wow_macro_item_icons)
   end
 end
+if GAME_LOCALE == nil then GAME_LOCALE = GetLocale() end
 if GetContainerItemInfo == nil and C_Container ~= nil then
   function GetContainerItemInfo(...)
     return C_Container.GetContainerItemInfo(...)
@@ -8925,6 +8926,31 @@ if GetSpellBookItemInfo == nil and C_SpellBook ~= nil then
   function GetSpellBookItemInfo(...)
     return C_SpellBook.GetSpellBookItemInfo(...)
   end
+end
+if GetSpellBookItemTexture == nil and C_SpellBook ~= nil then
+  function GetSpellBookItemTexture(...)
+    return C_SpellBook.GetSpellBookItemTexture(...)
+  end
+end
+if GetSpellInfo == nil and C_Spell ~= nil then
+  function GetSpellInfo(spellID)
+    local info = C_Spell.GetSpellInfo(spellID)
+    if info == nil then
+      return nil
+    end
+    return info.name, nil, info.iconID, info.castTime, info.minRange, info.maxRange, info.spellID
+  end
+end
+if GetSpellTexture == nil and C_Spell ~= nil then
+  function GetSpellTexture(spellID)
+    return C_Spell.GetSpellTexture(spellID)
+  end
+end
+if IsPassiveSpell == nil then
+  function IsPassiveSpell(spellID) return false end
+end
+if SpellBook_GetSpellBookSlot == nil then
+  function SpellBook_GetSpellBookSlot(slot, offset) return slot end
 end
 
 C_Macro = C_Macro or __wow_namespace()
