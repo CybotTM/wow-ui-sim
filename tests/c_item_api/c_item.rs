@@ -234,6 +234,20 @@ fn test_c_item_get_item_class_info() {
 }
 
 #[test]
+fn test_c_item_get_item_class_info_retail_tradeskill() {
+    let env = env();
+    let name: String = env.eval("return C_Item.GetItemClassInfo(7)").unwrap();
+    assert_eq!(name, "Tradeskill");
+}
+
+#[test]
+fn test_c_item_get_item_class_info_retail_battle_pets() {
+    let env = env();
+    let name: String = env.eval("return C_Item.GetItemClassInfo(17)").unwrap();
+    assert_eq!(name, "Battle Pets");
+}
+
+#[test]
 fn test_c_item_get_detailed_item_level_info() {
     let env = env();
     let (a, b, c): (i32, i32, i32) = env

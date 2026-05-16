@@ -98,6 +98,23 @@ fn test_multiple_hook_scripts_chain_in_order() {
 }
 
 #[test]
+fn test_scroll_frame_accepts_horizontal_scroll_script() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: bool = env
+        .eval(
+            r#"
+        local frame = CreateFrame("ScrollFrame", "HorizontalScrollScriptFrame", UIParent)
+        frame:SetScript("OnHorizontalScroll", function() end)
+        frame:HookScript("OnHorizontalScroll", function() end)
+        return frame:HasScript("OnHorizontalScroll")
+    "#,
+        )
+        .unwrap();
+
+    assert!(result, "ScrollFrame should support OnHorizontalScroll");
+}
+
+#[test]
 fn test_set_script_invalid_handler_errors() {
     let env = WowLuaEnv::new().unwrap();
     let result = env.exec(
