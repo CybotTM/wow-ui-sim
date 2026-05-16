@@ -198,6 +198,8 @@ impl LoadTiming {
         self.lua_call_time += other.lua_call_time;
         self.lua_exec_time += other.lua_exec_time;
         self.saved_vars_time += other.saved_vars_time;
+        self.cache_hits += other.cache_hits;
+        self.cache_misses += other.cache_misses;
     }
 }
 

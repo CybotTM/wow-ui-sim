@@ -193,6 +193,25 @@ fn preload_shared_templates(env: &WowLuaEnv) {
 }
 
 #[test]
+fn load_timing_accumulate_includes_bytecode_cache_counts() {
+    let mut total = LoadTiming {
+        cache_hits: 2,
+        cache_misses: 3,
+        ..Default::default()
+    };
+    let nested = LoadTiming {
+        cache_hits: 5,
+        cache_misses: 7,
+        ..Default::default()
+    };
+
+    total.accumulate(&nested);
+
+    assert_eq!(total.cache_hits, 7);
+    assert_eq!(total.cache_misses, 10);
+}
+
+#[test]
 fn test_load_lua_file() {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join("wow-sim-test");
