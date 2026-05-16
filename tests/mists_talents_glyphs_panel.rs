@@ -187,6 +187,20 @@ fn mists_specialization_learn_button_activates_spec_for_talents() {
 
             PlayerTalentTab_OnClick(PlayerTalentFrameTab1)
             PlayerTalentFrame_UpdateSpecFrame(PlayerTalentFrameSpecialization, 2)
+            PlayerTalentFrame_UpdateTabs()
+            local previousRight
+            for index = 1, 3 do
+                local tab = _G["PlayerTalentFrameTab" .. index]
+                if not tab or not tab:IsShown() then
+                    error("expected visible talent tab " .. tostring(index))
+                end
+                local left, _, width = tab:GetRect()
+                if previousRight and math.abs(left - (previousRight - 15)) > 1 then
+                    error("talent tab spacing drifted for tab " .. tostring(index))
+                end
+                previousRight = left + width
+            end
+
             local scrollChild = PlayerTalentFrameSpecialization.spellsScroll
               and PlayerTalentFrameSpecialization.spellsScroll.child
             local description = scrollChild and scrollChild.description

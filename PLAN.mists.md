@@ -101,7 +101,7 @@
 - [x] Run the full local installed-addon Mists panel parity matrix with normal SavedVariables from current clean state, retain artifacts, refresh references if they supersede older addon-panel samples, and fix or promote the first addon/panel failure instead of relying on prior shard evidence.
 - [x] Implement the missing Mists heirloom item-button API expected by `Blizzard_HeirloomCollection.lua` so `SetHeirloomByItemID` does not throw when Collections/Heirlooms initializes.
 - [x] Fix the Mists Specialization tab body layout so the description and preferred-weapon text are not clipped at the left edge and align with the panel artwork/divider.
-- [ ] Fix the Mists TalentFrame bottom tab spacing so `Specialization`, `Talents`, and `Glyphs` use Blizzard's intended adjacent tab geometry instead of uneven gaps.
+- [x] Fix the Mists TalentFrame bottom tab spacing so `Specialization`, `Talents`, and `Glyphs` use Blizzard's intended adjacent tab geometry instead of uneven gaps.
 - [ ] Fix the Mists Spellbook `What's Changed` tab so it renders populated change content instead of an empty panel with only the player class title.
 - [ ] Fix Mists Collections list row interactions so visible mount/pet/toy/heirloom rows can be clicked/selected instead of rendering as inert list entries, including the `GameTooltip:SetCompanionPet` path used by pet rows.
 - [ ] Fix the Mists LFD/LFR queued-state indicator so joining a working queue shows the expected minimap/LFG eye instead of leaving the queue status UI hidden.

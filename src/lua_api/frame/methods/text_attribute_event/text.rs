@@ -564,13 +564,20 @@ pub(super) fn frame_text_value(
 
 fn frame_text_measurement(state: &LuaState, id: u64) -> (String, Option<String>, f32) {
     let sim = borrow_state(state).expect("sim state should exist");
-    let frame = sim.widgets.get(id);
-    frame
-        .map(|f| {
-            let text = frame_text_value(&sim, f, true).unwrap_or_default();
-            (text, f.font.clone(), f.font_size)
-        })
-        .unwrap_or_else(|| (String::new(), None, 12.0))
+    let Some(frame) = sim.widgets.get(id) else {
+        return (String::new(), None, 12.0);
+    };
+    let measurement_frame = frame
+        .children_keys
+        .get("Text")
+        .and_then(|&child_id| sim.widgets.get(child_id))
+        .unwrap_or(frame);
+    let text = frame_text_value(&sim, measurement_frame, true).unwrap_or_default();
+    (
+        text,
+        measurement_frame.font.clone(),
+        measurement_frame.font_size,
+    )
 }
 
 fn frame_text_scale_value(state: &LuaState, id: u64) -> f64 {
