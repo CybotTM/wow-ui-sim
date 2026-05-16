@@ -79,7 +79,22 @@ pub fn legacy_content_hash(bytes: &[u8], chunk_name: &str) -> u64 {
 }
 
 fn cache_dir() -> Option<PathBuf> {
-    Some(dirs::cache_dir()?.join("wow-ui-sim").join("lua-bytecode"))
+    Some(
+        dirs::cache_dir()?
+            .join("wow-ui-sim")
+            .join("lua-bytecode")
+            .join(cache_namespace()),
+    )
+}
+
+fn cache_namespace() -> String {
+    cache_namespace_for_manifest(env!("CARGO_MANIFEST_DIR"))
+}
+
+fn cache_namespace_for_manifest(manifest_dir: &str) -> String {
+    let mut hasher = DefaultHasher::new();
+    manifest_dir.hash(&mut hasher);
+    format!("worktree-{:016x}", hasher.finish())
 }
 
 fn pack_path() -> Option<PathBuf> {
@@ -405,6 +420,17 @@ mod tests {
         WHITELIST_VERSION.wrapping_add(1).hash(&mut hasher);
         let stale = hasher.finish();
         assert_ne!(base, stale);
+    }
+
+    #[test]
+    fn cache_namespace_distinguishes_parallel_worktrees() {
+        let retail = cache_namespace_for_manifest("/syncthing/Sync/Projects/wow/wow-ui-sim");
+        let classic =
+            cache_namespace_for_manifest("/syncthing/Sync/Projects/wow/wow-ui-sim-classic");
+
+        assert_ne!(retail, classic);
+        assert!(retail.starts_with("worktree-"));
+        assert!(classic.starts_with("worktree-"));
     }
 
     #[test]
