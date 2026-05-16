@@ -1,6 +1,38 @@
 use super::*;
 
 #[test]
+fn xml_process_time_excludes_script_file_load_time() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_dir = tempfile::tempdir().unwrap();
+    let xml_path = temp_dir.path().join("root.xml");
+    let lua_path = temp_dir.path().join("large.lua");
+    let lua_body = (0..2_000)
+        .map(|index| format!("_G.__xml_timing_value = {index}\n"))
+        .collect::<String>();
+
+    std::fs::write(&xml_path, r#"<Ui><Script file="large.lua"/></Ui>"#).unwrap();
+    std::fs::write(&lua_path, lua_body).unwrap();
+
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx = AddonContext::new(
+        env.lua(),
+        "TestAddon",
+        addon_table,
+        temp_dir.path(),
+        false,
+        false,
+    )
+    .unwrap();
+    let mut timing = LoadTiming::default();
+    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut timing).unwrap();
+
+    assert!(
+        timing.lua_exec_time > timing.xml_process_time,
+        "external <Script> Lua time should not be double-counted as XML process time: {timing:?}"
+    );
+}
+
+#[test]
 fn missing_xml_include_reports_path_to_lua_error_handler() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(

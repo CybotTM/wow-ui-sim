@@ -164,6 +164,10 @@ pub struct LoadTiming {
 
 impl LoadTiming {
     pub fn total(&self) -> Duration {
+        self.independently_counted_time()
+    }
+
+    pub(crate) fn independently_counted_time(&self) -> Duration {
         self.io_time
             + self.xml_parse_time
             + self.xml_process_time

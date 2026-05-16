@@ -37,22 +37,37 @@ pub fn load_xml_file(
 
     let xml_dir = path.parent().unwrap_or(Path::new("."));
     let mut lua_count = 0;
-    let process_start = Instant::now();
-
     for element in &ui.elements {
-        lua_count += process_element(env, element, xml_dir, ctx, timing).map_err(|e| {
-            if !matches!(e, LoadError::Lua(_)) {
-                let _ = env.with_state(|state| {
-                    call_error_handler_state(state, &e.to_string());
-                    Ok::<(), crate::Error>(())
-                });
-            }
-            e
-        })?;
+        lua_count += process_element_with_exclusive_timing(env, element, xml_dir, ctx, timing)
+            .map_err(|e| {
+                if !matches!(e, LoadError::Lua(_)) {
+                    let _ = env.with_state(|state| {
+                        call_error_handler_state(state, &e.to_string());
+                        Ok::<(), crate::Error>(())
+                    });
+                }
+                e
+            })?;
     }
-    timing.xml_process_time += process_start.elapsed();
 
     Ok(lua_count)
+}
+
+fn process_element_with_exclusive_timing(
+    env: &LoaderEnv<'_>,
+    element: &XmlElement,
+    xml_dir: &Path,
+    ctx: &AddonContext,
+    timing: &mut LoadTiming,
+) -> Result<usize, LoadError> {
+    let counted_before = timing.independently_counted_time();
+    let process_start = Instant::now();
+    let result = process_element(env, element, xml_dir, ctx, timing);
+    let counted_child_time = timing
+        .independently_counted_time()
+        .saturating_sub(counted_before);
+    timing.xml_process_time += process_start.elapsed().saturating_sub(counted_child_time);
+    result
 }
 
 /// Process a single top-level XML element.
