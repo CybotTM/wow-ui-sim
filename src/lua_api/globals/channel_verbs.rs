@@ -5,6 +5,7 @@
 //!
 //! - `GetChannelList()` — returns `(id, name, disabled)` triples.
 //! - `GetChannelName(channel)` — resolves local channel IDs / names.
+//! - `EnumerateServerChannels()` — returns server-managed channel names.
 //! - `JoinChannelByName(name)`   — append new channel if missing.
 //! - `JoinTemporaryChannel(name)` — alias of `JoinChannelByName`; retail
 //!                                   auto-removes these on logout. Not
@@ -185,6 +186,10 @@ fn get_channel_name(state: &mut LuaState) -> LuaResult<u32> {
     Ok(4)
 }
 
+fn enumerate_server_channels(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 fn get_channel_info_from_identifier(state: &mut LuaState) -> LuaResult<u32> {
     let Some(identifier) = channel_identifier(state, 1) else {
         return Ok(0);
@@ -350,6 +355,7 @@ fn swap_chat_channel_links(state: &mut LuaState) -> LuaResult<u32> {
 fn register_channel_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetChannelList", get_channel_list)?;
     LuaApiMut::register_function(lua, "GetChannelName", get_channel_name)?;
+    LuaApiMut::register_function(lua, "EnumerateServerChannels", enumerate_server_channels)?;
     LuaApiMut::register_function(lua, "JoinChannelByName", join_channel_by_name)?;
     LuaApiMut::register_function(lua, "JoinTemporaryChannel", join_temporary_channel)?;
     LuaApiMut::register_function(lua, "ChannelLeave", channel_leave)?;

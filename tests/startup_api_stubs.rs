@@ -548,6 +548,67 @@ fn startup_world_map_auxiliary_globals_are_callable() {
 }
 
 #[test]
+fn startup_client_time_camera_and_channel_globals_are_callable() {
+    let env = env();
+    let (
+        is_windows_type,
+        is_windows,
+        request_time_ok,
+        camera_verbs_ok,
+        server_channel_count,
+        pvp_lifetime_hks,
+        pvp_lifetime_rank,
+        modified_click_default,
+        modified_click_updated,
+    ): (String, bool, bool, bool, i64, f64, f64, String, String) = env
+        .eval(
+            r#"
+            local channels = { EnumerateServerChannels() }
+            local lifetimeHKs, lifetimeRank = GetPVPLifetimeStats()
+            local before = GetModifiedClick("SELFCAST")
+            SetModifiedClick("SELFCAST", "NONE")
+            local cameraVerbsOK = true
+            for _, name in ipairs({
+                "MoveViewOutStart", "MoveViewOutStop",
+                "MoveViewInStart", "MoveViewInStop",
+                "MoveViewLeftStart", "MoveViewLeftStop",
+                "MoveViewRightStart", "MoveViewRightStop",
+                "MoveViewUpStart", "MoveViewUpStop",
+                "MoveViewDownStart", "MoveViewDownStop",
+            }) do
+                cameraVerbsOK = cameraVerbsOK and pcall(_G[name], 1.0, 0, true)
+            end
+            return type(IsWindowsClient()),
+                   IsWindowsClient(),
+                   pcall(RequestTimePlayed),
+                   cameraVerbsOK,
+                   #channels,
+                   lifetimeHKs,
+                   lifetimeRank,
+                   before,
+                   GetModifiedClick("SELFCAST")
+            "#,
+        )
+        .expect("client/time/camera/channel globals should be callable");
+
+    assert_eq!(is_windows_type, "boolean");
+    assert!(
+        !is_windows,
+        "the Linux-hosted simulator should not report a Windows client"
+    );
+    assert!(request_time_ok, "RequestTimePlayed should be a callable no-op");
+    assert!(camera_verbs_ok, "camera movement verbs should be callable no-ops");
+    assert_eq!(
+        server_channel_count, 0,
+        "sim should not seed any server-managed chat channels"
+    );
+    assert_eq!(pvp_lifetime_hks, 0.0);
+    assert_eq!(pvp_lifetime_rank, 0.0);
+    assert_eq!(modified_click_default, "NONE");
+    assert_eq!(modified_click_updated, "NONE");
+}
+
+#[test]
 fn startup_pvp_match_state_defaults_to_inactive() {
     let env = env();
     let state: i32 = env

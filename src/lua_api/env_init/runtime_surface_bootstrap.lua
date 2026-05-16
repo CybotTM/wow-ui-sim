@@ -5322,6 +5322,48 @@ if IsMacClient == nil then
     return false
   end
 end
+if IsWindowsClient == nil then
+  function IsWindowsClient()
+    return false
+  end
+end
+
+if RequestTimePlayed == nil then
+  function RequestTimePlayed()
+  end
+end
+
+for _, __wow_camera_verb in ipairs({
+  "MoveViewOutStart", "MoveViewOutStop",
+  "MoveViewInStart", "MoveViewInStop",
+  "MoveViewLeftStart", "MoveViewLeftStop",
+  "MoveViewRightStart", "MoveViewRightStop",
+  "MoveViewUpStart", "MoveViewUpStop",
+  "MoveViewDownStart", "MoveViewDownStop",
+}) do
+  if _G[__wow_camera_verb] == nil then
+    _G[__wow_camera_verb] = function()
+    end
+  end
+end
+
+if GetPVPLifetimeStats == nil then
+  function GetPVPLifetimeStats()
+    return 0, 0
+  end
+end
+
+local __wow_modified_clicks = __wow_modified_clicks or {}
+if GetModifiedClick == nil then
+  function GetModifiedClick(action)
+    return __wow_modified_clicks[action] or "NONE"
+  end
+end
+if SetModifiedClick == nil then
+  function SetModifiedClick(action, modifier)
+    __wow_modified_clicks[action] = modifier or "NONE"
+  end
+end
 
 if UnitClass == nil then
   function UnitClass(_unit)
