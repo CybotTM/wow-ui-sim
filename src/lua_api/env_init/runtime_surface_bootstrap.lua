@@ -3662,19 +3662,25 @@ local __wow_seeded_damage_meter_session = {
     },
   },
 }
+
+local function __wow_has_seeded_damage_meter_session_type(sessionType)
+  return sessionType == Enum.DamageMeterSessionType.Overall
+    or sessionType == Enum.DamageMeterSessionType.Current
+end
+
 C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
   IsDamageMeterAvailable = function() return true, nil end,
   GetAvailableCombatSessions = function() return { { sessionID = 1 } } end,
   GetCurrentCombatSessionID = function() return 1 end,
   GetDamageMeterEntries = function() return {} end,
   GetCombatSessionFromType = function(sessionType, damageType)
-    if sessionType == Enum.DamageMeterSessionType.Overall and damageType == Enum.DamageMeterType.DamageDone then
+    if __wow_has_seeded_damage_meter_session_type(sessionType) and damageType == Enum.DamageMeterType.DamageDone then
       return __wow_seeded_damage_meter_session
     end
     return nil
   end,
   GetCombatSessionSourceFromType = function(sessionType, damageType, sourceGUID, sourceCreatureID)
-    if sessionType ~= Enum.DamageMeterSessionType.Overall then
+    if not __wow_has_seeded_damage_meter_session_type(sessionType) then
       return nil
     end
     if damageType ~= Enum.DamageMeterType.DamageDone then
@@ -3713,7 +3719,7 @@ C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
     return __wow_seeded_damage_meter_source
   end,
   GetSessionDurationSeconds = function(sessionType, sessionID)
-    if sessionType == Enum.DamageMeterSessionType.Overall or sessionID == __wow_seeded_damage_meter_session.sessionID then
+    if __wow_has_seeded_damage_meter_session_type(sessionType) or sessionID == __wow_seeded_damage_meter_session.sessionID then
       return __wow_seeded_damage_meter_session.durationSeconds
     end
     return 0

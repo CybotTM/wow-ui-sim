@@ -152,6 +152,56 @@ fn test_c_damage_meter_returns_seeded_session_and_source_data() {
 }
 
 #[test]
+fn test_c_damage_meter_current_session_returns_seeded_data() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        local currentSession = C_DamageMeter.GetCombatSessionFromType(
+            Enum.DamageMeterSessionType.Current,
+            Enum.DamageMeterType.DamageDone
+        )
+        if not currentSession then
+            return "missing_current_session"
+        end
+        if currentSession.sessionID ~= 1 then
+            return "session_id=" .. tostring(currentSession.sessionID)
+        end
+
+        local topSource = currentSession.combatSources[1]
+        if not topSource then
+            return "missing_top_source"
+        end
+
+        local sourceSession = C_DamageMeter.GetCombatSessionSourceFromType(
+            Enum.DamageMeterSessionType.Current,
+            Enum.DamageMeterType.DamageDone,
+            topSource.sourceGUID,
+            topSource.sourceCreatureID
+        )
+        if not sourceSession then
+            return "missing_current_source_session"
+        end
+        if sourceSession.totalAmount ~= topSource.totalAmount then
+            return "source_total=" .. tostring(sourceSession.totalAmount)
+        end
+
+        local durationSeconds = C_DamageMeter.GetSessionDurationSeconds(Enum.DamageMeterSessionType.Current)
+        if durationSeconds <= 0 then
+            return "duration=" .. tostring(durationSeconds)
+        end
+
+        return "ok"
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "C_DamageMeter should expose seeded data for the current damage session: {result}"
+    );
+}
+
+#[test]
 fn test_sound_system_driver_functions_return_seeded_devices() {
     let env = env();
     let result: String = env
