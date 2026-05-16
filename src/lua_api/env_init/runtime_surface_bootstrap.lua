@@ -2183,6 +2183,7 @@ if mapvalues == nil then
 end
 
 local __wow_namespace_names = setmetatable({}, { __mode = "k" })
+local __wow_logged_nil_symbols = {}
 local __wow_namespace_mt = {
   __index = function(t, key)
     __wow_log_nil_symbol_access(__wow_namespace_names[t], key)
@@ -2198,6 +2199,12 @@ function __wow_log_nil_symbol_access(container, key)
   if type(__wow_record_nil_symbol_access) ~= "function" then
     return
   end
+
+  local cacheKey = tostring(container) .. "\001" .. tostring(key)
+  if __wow_logged_nil_symbols[cacheKey] then
+    return
+  end
+  __wow_logged_nil_symbols[cacheKey] = true
 
   local source
   local line

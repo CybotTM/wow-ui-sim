@@ -532,6 +532,9 @@ const VERBOSE_WARNING_ADDONS: &[&str] = &[
 ];
 
 fn print_addon_warnings(name: &str, warnings: &[String]) {
+    if std::env::var("WOW_SIM_DEBUG_NIL_GLOBALS").is_err() {
+        return;
+    }
     if warnings.is_empty() || !VERBOSE_WARNING_ADDONS.contains(&name) {
         return;
     }

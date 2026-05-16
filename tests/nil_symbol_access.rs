@@ -36,6 +36,24 @@ fn missing_global_lookup_is_logged_with_addon_name() {
 }
 
 #[test]
+fn repeated_missing_global_lookup_is_logged_once() {
+    let env = env_with_loading_addon("TestAddon");
+
+    env.exec(
+        r#"
+        local _ = MissingGlobalSymbol
+        local _ = MissingGlobalSymbol
+        "#,
+    )
+    .expect("missing global lookup should not error");
+
+    let records = env.state().borrow().nil_symbol_accesses.clone();
+    assert_eq!(records.len(), 1, "expected one nil global access record");
+    assert_eq!(records[0].container, "_G");
+    assert_eq!(records[0].key, "MissingGlobalSymbol");
+}
+
+#[test]
 fn missing_c_namespace_lookup_is_logged_with_addon_name() {
     let env = env_with_loading_addon("TestAddon");
 
