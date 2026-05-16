@@ -260,7 +260,7 @@ impl TextureManager {
         }
 
         let file_path = base.join(path);
-        if file_path.exists() {
+        if file_path.is_file() {
             return Some(file_path);
         }
 
@@ -363,11 +363,11 @@ fn texture_extension_priority() -> &'static [&'static str] {
 fn find_case_insensitive_file(dir: &Path, name: &str) -> Option<PathBuf> {
     for ext in texture_extension_priority() {
         let with_ext = format!("{name}.{ext}");
-        if let Some(entry) = find_case_insensitive(dir, &with_ext) {
+        if let Some(entry) = find_case_insensitive(dir, &with_ext).filter(|entry| entry.is_file()) {
             return Some(entry);
         }
     }
-    find_case_insensitive(dir, name)
+    find_case_insensitive(dir, name).filter(|entry| entry.is_file())
 }
 
 fn find_case_insensitive_dir(dir: &Path, name: &str) -> Option<PathBuf> {

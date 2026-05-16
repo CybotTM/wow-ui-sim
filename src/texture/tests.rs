@@ -396,6 +396,21 @@ fn test_load_bc_with_telemetry_caches_non_blp_paths() {
     );
 }
 
+#[test]
+fn resolve_path_ignores_directories() {
+    let temp_dir = TempDir::new().unwrap();
+    let base = temp_dir.path();
+    fs::create_dir_all(base.join("Interface/AddOns/TestAddon/Media/FolderTexture")).unwrap();
+
+    let mgr = TextureManager::new().with_addons_path(base);
+
+    assert_eq!(
+        mgr.resolve_path("Interface/AddOns/TestAddon/Media/FolderTexture"),
+        None,
+        "directory paths must not be passed to the image decoder"
+    );
+}
+
 fn test_dxtn(content: Vec<u8>, format: DxtnFormat) -> BlpDxtn {
     BlpDxtn {
         format,
