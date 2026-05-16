@@ -11,6 +11,10 @@ fn test_normalize_wow_path() {
         "Interface/DialogFrame/UI-DialogBox-Background"
     );
     assert_eq!(
+        normalize_wow_path(r"Interface\\AddOns\\MinimapButtonButton\\Media\\Logo.blp"),
+        "Interface/AddOns/MinimapButtonButton/Media/Logo"
+    );
+    assert_eq!(
         normalize_wow_path("Interface\\BUTTONS\\UI-Panel-Button-Up.blp"),
         "Interface/BUTTONS/UI-Panel-Button-Up"
     );

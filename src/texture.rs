@@ -369,8 +369,7 @@ fn first_bc_image(dxtn: image_blp::types::direct::dxtn::BlpDxtn) -> Option<Arc<[
 
 /// Normalize a WoW texture path.
 pub fn normalize_wow_path(path: &str) -> String {
-    // Replace backslashes with forward slashes
-    let normalized = path.replace('\\', "/");
+    let normalized = collapse_path_separators(&path.replace('\\', "/"));
     // Remove file extension if present
     if let Some(pos) = normalized.rfind('.')
         && normalized[pos..].len() <= 5
@@ -378,6 +377,23 @@ pub fn normalize_wow_path(path: &str) -> String {
         return normalized[..pos].to_string();
     }
     normalized
+}
+
+fn collapse_path_separators(path: &str) -> String {
+    let mut collapsed = String::with_capacity(path.len());
+    let mut last_was_separator = false;
+    for ch in path.chars() {
+        if ch == '/' {
+            if !last_was_separator {
+                collapsed.push(ch);
+            }
+            last_was_separator = true;
+        } else {
+            collapsed.push(ch);
+            last_was_separator = false;
+        }
+    }
+    collapsed
 }
 
 /// Fix 1-bit alpha decoded by image-blp as literal 0/1 byte values.

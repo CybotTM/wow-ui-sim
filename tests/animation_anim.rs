@@ -69,6 +69,20 @@ fn animation_set_degrees_no_error() {
     .unwrap();
 }
 
+#[test]
+fn rotation_animation_set_radians_no_error() {
+    let env = setup();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestAnimRadians", UIParent)
+        local ag = f:CreateAnimationGroup()
+        local anim = ag:CreateAnimation("Rotation")
+        anim:SetRadians(math.pi * 2)
+    "#,
+    )
+    .unwrap();
+}
+
 // ============================================================================
 // Anim: state query methods (IsStopped, IsDelaying, GetProgress, GetSmoothProgress, GetElapsed)
 // ============================================================================

@@ -11,7 +11,8 @@ pub fn run_cache_texture(path: &str, force: bool) -> Result<(), Box<dyn std::err
         print_removed_missing_sentinels(&normalized);
     }
 
-    let mut mgr = TextureManager::new();
+    let mut mgr =
+        TextureManager::new().with_addons_paths(wow_ui_sim::paths::default_addons_paths());
     let load_start = Instant::now();
     let result = mgr.load(path);
     let elapsed = load_start.elapsed();
