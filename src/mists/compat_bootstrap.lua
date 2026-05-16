@@ -1074,14 +1074,19 @@ local function mistsPushTalentInfo(info)
     false
 end
 
-if C_SpecializationInfo and type(C_SpecializationInfo.GetTalentInfo) ~= "function" then
+C_SpecializationInfo = C_SpecializationInfo or {}
+local mistsOriginalGetTalentInfo = C_SpecializationInfo.GetTalentInfo
+do
   function C_SpecializationInfo.GetTalentInfo(query)
     if type(query) ~= "table" then
-      return nil
+      return mistsOriginalGetTalentInfo and mistsOriginalGetTalentInfo(query) or nil
     end
-    local info = mistsTalentInfoByPosition(query.tier, query.column)
+    local info = MISTS_TALENT_BY_ID[tonumber(query.talentID or query.talentIndex) or 0]
     if not info then
-      return nil
+      info = mistsTalentInfoByPosition(query.tier, query.column)
+    end
+    if not info then
+      return mistsOriginalGetTalentInfo and mistsOriginalGetTalentInfo(query) or nil
     end
     return {
       talentID = info.talentID,
@@ -1106,8 +1111,8 @@ if rawget(_G, "GetTalentInfoByID") == nil then
 end
 
 if rawget(_G, "GetTalentLink") == nil then
-  function GetTalentLink(talentID)
-    local info = MISTS_TALENT_BY_ID[tonumber(talentID) or 0]
+  function GetTalentLink(first, second)
+    local info = MISTS_TALENT_BY_ID[tonumber(second or first) or 0]
     return info and ("|cff71d5ff|Htalent:" .. info.talentID .. "|h[" .. info.name .. "]|h|r") or nil
   end
 end
@@ -1118,8 +1123,14 @@ if rawget(_G, "GetTalentClearInfo") == nil then
   end
 end
 
-if rawget(_G, "LearnTalent") == nil then
-  function LearnTalent(talentID)
+do
+  function LearnTalent(first, second)
+    local talentID = second
+    if type(first) == "table" then
+      talentID = first.talentID or first.talentIndex
+    elseif talentID == nil then
+      talentID = first
+    end
     local info = MISTS_TALENT_BY_ID[tonumber(talentID) or 0]
     if not info then
       return false
@@ -1129,7 +1140,7 @@ if rawget(_G, "LearnTalent") == nil then
   end
 end
 
-if rawget(_G, "LearnTalents") == nil then
+do
   function LearnTalents(...)
     local learned = false
     for i = 1, select("#", ...) do
@@ -1143,7 +1154,7 @@ if rawget(_G, "LearnTalents") == nil then
   end
 end
 
-if rawget(_G, "RemoveTalent") == nil then
+do
   function RemoveTalent(talentID)
     local info = MISTS_TALENT_BY_ID[tonumber(talentID) or 0]
     if not info then
@@ -1165,8 +1176,10 @@ local MISTS_GLYPH_BY_ID = {
     spellID = 635,
   },
 }
+local MISTS_GLYPH_LIST = { 5001 }
 local MISTS_GLYPH_SOCKETS = {}
 local MISTS_PENDING_GLYPH_ID = nil
+local MISTS_PENDING_GLYPH_INDEX = nil
 
 local function mistsGlyphInfo(glyphID)
   return MISTS_GLYPH_BY_ID[tonumber(glyphID) or 0]
@@ -1180,13 +1193,13 @@ end
 
 if rawget(_G, "GetNumGlyphs") == nil then
   function GetNumGlyphs()
-    return 0
+    return #MISTS_GLYPH_LIST
   end
 end
 
 if rawget(_G, "GetSelectedGlyphSpellIndex") == nil then
   function GetSelectedGlyphSpellIndex()
-    return nil
+    return MISTS_PENDING_GLYPH_INDEX
   end
 end
 
@@ -1218,12 +1231,13 @@ end
 
 if rawget(_G, "GetGlyphInfo") == nil then
   function GetGlyphInfo(index)
-    local glyphID = index == 1 and 5001 or nil
+    local glyphID = MISTS_GLYPH_LIST[tonumber(index) or 0]
     local glyph = glyphID and mistsGlyphInfo(glyphID)
     if not glyph then
       return nil
     end
-    return glyph.name, glyph.glyphType, true, glyph.icon, glyphID, nil, ""
+    local link = "|cff71d5ff|Hglyph:" .. glyphID .. "|h[" .. glyph.name .. "]|h|r"
+    return glyph.name, glyph.glyphType, true, glyph.icon, glyphID, link, ""
   end
 end
 
@@ -1248,6 +1262,7 @@ if rawget(_G, "PlaceGlyphInSocket") == nil then
     end
     MISTS_GLYPH_SOCKETS[id] = MISTS_PENDING_GLYPH_ID
     MISTS_PENDING_GLYPH_ID = nil
+    MISTS_PENDING_GLYPH_INDEX = nil
     if type(GlyphFrameGlyph_UpdateSlot) == "function" then
       GlyphFrameGlyph_UpdateSlot(_G["GlyphFrameGlyph" .. id])
     end
@@ -1276,7 +1291,21 @@ C_GlyphInfo.UseGlyph = function(glyphID)
     return false
   end
   MISTS_PENDING_GLYPH_ID = tonumber(glyphID)
+  MISTS_PENDING_GLYPH_INDEX = nil
+  for index, listedGlyphID in ipairs(MISTS_GLYPH_LIST) do
+    if listedGlyphID == MISTS_PENDING_GLYPH_ID then
+      MISTS_PENDING_GLYPH_INDEX = index
+      break
+    end
+  end
   return true
+end
+
+if rawget(_G, "CastGlyph") == nil then
+  function CastGlyph(index)
+    local glyphID = MISTS_GLYPH_LIST[tonumber(index) or 0]
+    return C_GlyphInfo.UseGlyph(glyphID)
+  end
 end
 
 if rawget(_G, "IsGlyphFlagSet") == nil then

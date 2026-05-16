@@ -101,13 +101,17 @@ fn mists_talents_and_glyphs_mutate_selected_state() {
             if PlayerTalentFrame_GetTalentSelections() ~= talentID then
                 error("talent row click did not select the talent")
             end
-
-            if not LearnTalents(PlayerTalentFrame_GetTalentSelections()) then
-                error("LearnTalents did not accept the selected talent")
+            if not PlayerTalentFrameTalents.learnButton or not PlayerTalentFrameTalents.learnButton:IsEnabled() then
+                error("talent learn button did not enable after selecting a talent")
             end
-            local _, _, _, selected, _, _, _, _, _, isKnown = GetTalentInfoByID(talentID)
-            if not selected or not isKnown then
-                error("learned talent did not update selected/known state")
+            local learnOnClick = PlayerTalentFrameTalents.learnButton:GetScript("OnClick")
+            if type(learnOnClick) ~= "function" then
+                error("talent learn button did not expose an OnClick script")
+            end
+            learnOnClick(PlayerTalentFrameTalents.learnButton)
+            local _, _, _, clickedSelected, _, _, _, _, _, clickedKnown = GetTalentInfoByID(talentID)
+            if not clickedSelected or not clickedKnown then
+                error("talent learn button did not learn the selected talent")
             end
 
             if type(PlayerTalentFrame_ShowGlyphFrame) == "function" then
@@ -118,20 +122,41 @@ fn mists_talents_and_glyphs_mutate_selected_state() {
             if not GlyphFrame or not GlyphFrame:IsShown() then
                 error("GlyphFrame did not open")
             end
+            if GetNumGlyphs() == 0 then
+                error("glyph list had no entries")
+            end
+            GlyphFrame_UpdateGlyphList()
+
+            local glyphListButton
+            for i = 1, GetNumGlyphs() do
+                local candidate = _G["GlyphFrameScrollFrameButton" .. i]
+                if candidate and candidate:IsShown() and candidate.glyphID then
+                    glyphListButton = candidate
+                    break
+                end
+            end
+            if not glyphListButton or not glyphListButton:IsShown() or not glyphListButton.glyphID then
+                error("glyph list did not show a selectable glyph")
+            end
+            local selectedGlyphID = glyphListButton.glyphID
+            local _, _, _, _, expectedGlyphSpell = C_GlyphInfo.GetGlyphInfoByID(selectedGlyphID)
+            GlyphFrameSpell_OnClick(glyphListButton, "LeftButton")
+            if not HasPendingGlyphCast() then
+                error("glyph list click did not start a pending glyph cast")
+            end
 
             local socket = GlyphFrameGlyph1
             if not socket or not socket:IsShown() then
                 error("glyph socket did not exist")
             end
 
-            C_GlyphInfo.UseGlyph(5001)
             if not GlyphMatchesSocket(socket:GetID()) then
                 error("pending glyph did not match the socket")
             end
 
             GlyphFrameGlyph_OnClick(socket, "LeftButton")
             local enabled, _, _, glyphSpell, _, glyphID = GetGlyphSocketInfo(socket:GetID())
-            if not enabled or glyphSpell ~= 635 or glyphID ~= 5001 then
+            if not enabled or glyphSpell ~= expectedGlyphSpell or glyphID ~= selectedGlyphID then
                 error("glyph socket click did not install the pending glyph")
             end
             if HasPendingGlyphCast() then

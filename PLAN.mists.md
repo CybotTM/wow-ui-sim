@@ -107,6 +107,7 @@
 - [x] Fix the Mists LFD/LFR queued-state indicator so joining a working queue shows the expected minimap/LFG eye instead of leaving the queue status UI hidden.
 - [x] Fix the Mists Store/CatalogShop item list so the Shop panel displays available products instead of opening an empty storefront shell.
 - [x] Fix the Mists micro-menu Game Menu button so clicking the visible button opens the game menu panel in the live UI.
+- [x] Fix Mists talent and glyph interactions so the real talent row plus Learn button flow commits a selected talent, and the visible glyph list populates/selects a pending glyph before socket placement.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
 
 ## Lower Priority / Perf-Gated Evidence
