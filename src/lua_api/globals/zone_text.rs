@@ -7,6 +7,7 @@
 //!                              none.
 //! - `GetMinimapZoneText()`   — what the minimap header renders: sub-zone
 //!                              when available, else the zone.
+//! - `GetBindLocation()`      — the player's hearth/bind location.
 //! - `GetRealZoneText()`      — the "real" zone label, which in instances is
 //!                              the instance name (e.g. `"Deadmines"`) and
 //!                              matches `GetZoneText()` otherwise.
@@ -56,6 +57,11 @@ pub fn get_minimap_zone_text(state: &mut LuaState) -> LuaResult<u32> {
             sim.world.sub_zone_name.clone()
         }
     };
+    push_string(state, &text)
+}
+
+pub fn get_bind_location(state: &mut LuaState) -> LuaResult<u32> {
+    let text = borrow_state(state)?.bind_location.clone();
     push_string(state, &text)
 }
 
@@ -126,8 +132,32 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     table_set_rust_fn_static(state, g, "GetZoneText", get_zone_text)?;
     table_set_rust_fn_static(state, g, "GetSubZoneText", get_sub_zone_text)?;
     table_set_rust_fn_static(state, g, "GetMinimapZoneText", get_minimap_zone_text)?;
+    table_set_rust_fn_static(state, g, "GetBindLocation", get_bind_location)?;
     table_set_rust_fn_static(state, g, "GetRealZoneText", get_real_zone_text)?;
     let c_pvp = ensure_c_pvp_table(state);
     table_set_rust_fn_static(state, c_pvp, "GetZonePVPInfo", get_zone_pvp_info)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn default_bind_location_is_seeded() {
+        let env = WowLuaEnv::new().unwrap();
+        let bind_location: String = env.eval("return GetBindLocation()").unwrap();
+
+        assert_eq!(bind_location, "Stormwind City");
+    }
+
+    #[test]
+    fn admin_can_set_bind_location() {
+        let env = WowLuaEnv::new().unwrap();
+        env.exec(r#"A_Admin.SetBindLocation("Razor Hill")"#)
+            .unwrap();
+        let bind_location: String = env.eval("return GetBindLocation()").unwrap();
+
+        assert_eq!(bind_location, "Razor Hill");
+    }
 }

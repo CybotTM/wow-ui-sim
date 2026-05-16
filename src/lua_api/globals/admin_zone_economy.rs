@@ -27,6 +27,12 @@ pub(super) fn set_sub_zone(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_bind_location(state: &mut LuaState) -> LuaResult<u32> {
+    let name = String::from_stack(state, 1)?;
+    borrow_state_mut(state)?.bind_location = name;
+    Ok(0)
+}
+
 pub(super) fn set_instance_info(state: &mut LuaState) -> LuaResult<u32> {
     let name = String::from_stack(state, 1)?;
     let inst_type = String::from_stack(state, 2)?;

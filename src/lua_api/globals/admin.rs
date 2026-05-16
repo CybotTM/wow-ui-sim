@@ -63,10 +63,10 @@ use super::admin_pvp_guild::{
 use super::admin_spec::{reset_talents, set_spec, set_talent_rank, set_talent_selection};
 use super::admin_vault::{clear_vault, set_vault_activity, set_vault_rewards};
 use super::admin_zone_economy::{
-    set_alt_key_down, set_control_key_down, set_guild_emblem, set_guild_ranks, set_in_instance,
-    set_instance_info, set_item_level, set_meta_key_down, set_money, set_net_stats,
-    set_shift_key_down, set_store_frame_shown, set_sub_zone, set_timerunning_season_id, set_zone,
-    set_zone_pvp,
+    set_alt_key_down, set_bind_location, set_control_key_down, set_guild_emblem, set_guild_ranks,
+    set_in_instance, set_instance_info, set_item_level, set_meta_key_down, set_money,
+    set_net_stats, set_shift_key_down, set_store_frame_shown, set_sub_zone,
+    set_timerunning_season_id, set_zone, set_zone_pvp,
 };
 
 // ── Entry point ──────────────────────────────────────────────────────────────
@@ -156,6 +156,7 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
 fn register_zone_and_economy(b: TableBuilder) -> LuaResult<TableBuilder> {
     b.set_function("SetZone", set_zone)?
         .set_function("SetSubZone", set_sub_zone)?
+        .set_function("SetBindLocation", set_bind_location)?
         .set_function("SetInstanceInfo", set_instance_info)?
         .set_function("SetInInstance", set_in_instance)?
         .set_function("SetMoney", set_money)?

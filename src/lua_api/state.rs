@@ -162,6 +162,7 @@ macro_rules! build_empty_sim_state {
             anim_sync_times: $collections.anim_sync_times,
             player: PlayerState::seeded(),
             player_xp: PlayerXpState::default(),
+            bind_location: "Stormwind City".into(),
             world: super::state_types::seeded_world_state(),
             bag_items: $collections.bag_items,
             tracked_recipes: $collections.tracked_recipes,

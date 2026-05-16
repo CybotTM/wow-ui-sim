@@ -146,6 +146,7 @@ pub struct SimState {
 
     pub player: PlayerState,
     pub player_xp: PlayerXpState,
+    pub bind_location: String,
     pub world: WorldState,
     pub bag_items: HashMap<(i32, i32), BagItem>,
     pub tracked_recipes: TrackedRecipes,
