@@ -1,6 +1,163 @@
 -- Mists post-load workarounds that need to wrap functions defined by
 -- FrameXML / Blizzard_* addons.
 
+if AuctionHouseFrame and rawget(_G, "__wow_sim_mists_auction_house_hidden_on_startup") ~= true then
+  AuctionHouseFrame:Hide()
+  rawset(_G, "__wow_sim_mists_auction_house_hidden_on_startup", true)
+end
+
+if VideoOptionsFrame == nil and type(CreateFrame) == "function" then
+  VideoOptionsFrame = CreateFrame("Frame", "VideoOptionsFrame", UIParent)
+  VideoOptionsFrame:Hide()
+end
+
+if Syndicator ~= nil and SYNDICATOR_CONFIG == nil then
+  SYNDICATOR_CONFIG = {}
+end
+
+if type(Settings) == "table" then
+  local categoriesByID = rawget(Settings, "__wow_sim_mists_categories_by_id")
+  if type(categoriesByID) ~= "table" then
+    categoriesByID = {}
+    rawset(Settings, "__wow_sim_mists_categories_by_id", categoriesByID)
+  end
+  local categoriesByName = rawget(Settings, "__wow_sim_mists_categories_by_name")
+  if type(categoriesByName) ~= "table" then
+    categoriesByName = {}
+    rawset(Settings, "__wow_sim_mists_categories_by_name", categoriesByName)
+  end
+  local originalRegisterCategory = Settings.RegisterCategory
+  local originalRegisterAddOnCategory = Settings.RegisterAddOnCategory
+  local originalRegisterCanvasLayoutCategory = Settings.RegisterCanvasLayoutCategory
+  local originalRegisterCanvasLayoutSubcategory = Settings.RegisterCanvasLayoutSubcategory
+  local originalRegisterVerticalLayoutCategory = Settings.RegisterVerticalLayoutCategory
+  local originalRegisterVerticalLayoutSubcategory = Settings.RegisterVerticalLayoutSubcategory
+  local originalGetCategory = Settings.GetCategory
+  local alreadyWrapped =
+    rawget(Settings, "__wow_sim_mists_wrapped_get_category") == originalGetCategory
+    and rawget(Settings, "__wow_sim_mists_wrapped_register_category") == originalRegisterCategory
+    and rawget(Settings, "__wow_sim_mists_wrapped_register_addon_category") == originalRegisterAddOnCategory
+    and rawget(Settings, "__wow_sim_mists_wrapped_register_canvas_layout_category") == originalRegisterCanvasLayoutCategory
+    and rawget(Settings, "__wow_sim_mists_wrapped_register_canvas_layout_subcategory") == originalRegisterCanvasLayoutSubcategory
+    and rawget(Settings, "__wow_sim_mists_wrapped_register_vertical_layout_category") == originalRegisterVerticalLayoutCategory
+    and rawget(Settings, "__wow_sim_mists_wrapped_register_vertical_layout_subcategory") == originalRegisterVerticalLayoutSubcategory
+
+  if not alreadyWrapped then
+    local function rememberCategory(category)
+      if type(category) ~= "table" then
+        return category
+      end
+      if type(category.GetID) == "function" then
+        local ok, id = pcall(category.GetID, category)
+        if ok and id ~= nil then
+          categoriesByID[id] = category
+        end
+      end
+      if type(category.GetName) == "function" then
+        local ok, name = pcall(category.GetName, category)
+        if ok and name ~= nil then
+          categoriesByName[name] = category
+        end
+      end
+      return category
+    end
+
+    if type(originalRegisterCategory) == "function" then
+      function Settings.RegisterCategory(category, ...)
+        rememberCategory(category)
+        return originalRegisterCategory(category, ...)
+      end
+    end
+
+    if type(originalRegisterAddOnCategory) == "function" then
+      function Settings.RegisterAddOnCategory(category, ...)
+        rememberCategory(category)
+        return originalRegisterAddOnCategory(category, ...)
+      end
+    end
+
+    if type(originalRegisterCanvasLayoutCategory) == "function" then
+      function Settings.RegisterCanvasLayoutCategory(...)
+        local category, layout = originalRegisterCanvasLayoutCategory(...)
+        rememberCategory(category)
+        return category, layout
+      end
+    end
+
+    if type(originalRegisterCanvasLayoutSubcategory) == "function" then
+      function Settings.RegisterCanvasLayoutSubcategory(parentCategory, ...)
+        local category, layout = originalRegisterCanvasLayoutSubcategory(parentCategory, ...)
+        rememberCategory(parentCategory)
+        rememberCategory(category)
+        return category, layout
+      end
+    end
+
+    if type(originalRegisterVerticalLayoutCategory) == "function" then
+      function Settings.RegisterVerticalLayoutCategory(...)
+        local category, layout = originalRegisterVerticalLayoutCategory(...)
+        rememberCategory(category)
+        return category, layout
+      end
+    end
+
+    if type(originalRegisterVerticalLayoutSubcategory) == "function" then
+      function Settings.RegisterVerticalLayoutSubcategory(parentCategory, ...)
+        local category, layout = originalRegisterVerticalLayoutSubcategory(parentCategory, ...)
+        rememberCategory(parentCategory)
+        rememberCategory(category)
+        return category, layout
+      end
+    end
+
+    if type(originalGetCategory) == "function" then
+      function Settings.GetCategory(categoryID)
+        local category = originalGetCategory(categoryID)
+        if category ~= nil then
+          return rememberCategory(category)
+        end
+        return categoriesByID[categoryID] or categoriesByName[categoryID]
+      end
+    end
+
+    rawset(Settings, "__wow_sim_mists_wrapped_get_category", Settings.GetCategory)
+    rawset(Settings, "__wow_sim_mists_wrapped_register_category", Settings.RegisterCategory)
+    rawset(Settings, "__wow_sim_mists_wrapped_register_addon_category", Settings.RegisterAddOnCategory)
+    rawset(Settings, "__wow_sim_mists_wrapped_register_canvas_layout_category", Settings.RegisterCanvasLayoutCategory)
+    rawset(Settings, "__wow_sim_mists_wrapped_register_canvas_layout_subcategory", Settings.RegisterCanvasLayoutSubcategory)
+    rawset(Settings, "__wow_sim_mists_wrapped_register_vertical_layout_category", Settings.RegisterVerticalLayoutCategory)
+    rawset(Settings, "__wow_sim_mists_wrapped_register_vertical_layout_subcategory", Settings.RegisterVerticalLayoutSubcategory)
+  end
+
+  rawset(_G, "__wow_sim_mists_settings_category_lookup_wrapped", true)
+end
+
+if rawget(_G, "__wow_sim_mists_blizzmove_startup_scan_disabled") ~= true then
+  local blizzMove = rawget(_G, "BlizzMove")
+  if type(blizzMove) ~= "table" and type(LibStub) == "function" then
+    local ok, addon = pcall(function()
+      return LibStub("AceAddon-3.0"):GetAddon("BlizzMove", true)
+    end)
+    if ok then
+      blizzMove = addon
+    end
+  end
+
+  if type(blizzMove) == "table" then
+    function blizzMove:OnInitialize()
+      self.initialized = true
+    end
+
+    function blizzMove:ProcessFrames(_addOnName)
+    end
+
+    function blizzMove:ADDON_LOADED(_event, _addOnName)
+    end
+
+    rawset(_G, "__wow_sim_mists_blizzmove_startup_scan_disabled", true)
+  end
+end
+
 if type(MicroButtonTooltipText) == "function"
    and rawget(_G, "__wow_sim_mists_micro_button_tooltip_wrapped") ~= true then
   local original = MicroButtonTooltipText

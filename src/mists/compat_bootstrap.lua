@@ -32,6 +32,11 @@ function GetBuildInfo()
   return "5.5.3", "61837", "May 16 2026", 50503, "", " "
 end
 
+if rawget(_G, "C_ArtifactUI") ~= nil then
+  rawset(_G, "__wow_sim_mists_C_ArtifactUI", C_ArtifactUI)
+  rawset(_G, "C_ArtifactUI", false)
+end
+
 if LE_UNIT_STAT_SPIRIT == nil then
   LE_UNIT_STAT_SPIRIT = 5
 end
@@ -41,6 +46,32 @@ if LE_ITEM_BIND_ON_ACQUIRE == nil then LE_ITEM_BIND_ON_ACQUIRE = 1 end
 if LE_ITEM_BIND_ON_EQUIP == nil then LE_ITEM_BIND_ON_EQUIP = 2 end
 if LE_ITEM_BIND_ON_USE == nil then LE_ITEM_BIND_ON_USE = 3 end
 if LE_ITEM_BIND_QUEST == nil then LE_ITEM_BIND_QUEST = 4 end
+
+C_Item = C_Item or {}
+if C_Item.GetItemStats == nil then
+  function C_Item.GetItemStats()
+    return {}
+  end
+end
+
+C_MerchantFrame = C_MerchantFrame or {}
+if C_MerchantFrame.SellAllJunkItems == nil then
+  function C_MerchantFrame.SellAllJunkItems()
+  end
+end
+
+C_ItemSocketInfo = C_ItemSocketInfo or {}
+if C_ItemSocketInfo.IsArtifactRelicItem == nil then
+  function C_ItemSocketInfo.IsArtifactRelicItem()
+    return false
+  end
+end
+
+if rawget(_G, "IsArtifactRelicItem") == nil then
+  function IsArtifactRelicItem(...)
+    return C_ItemSocketInfo.IsArtifactRelicItem(...)
+  end
+end
 
 if rawget(_G, "WHAT_HAS_CHANGED") == nil then
   WHAT_HAS_CHANGED = "What's Changed"

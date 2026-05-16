@@ -21,6 +21,137 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
 
     #[test]
+    fn post_load_hides_auction_house_until_opened() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            AuctionHouseFrame = CreateFrame("Frame", "AuctionHouseFrame", UIParent)
+            AuctionHouseFrame:Show()
+            "#,
+        )
+        .expect("auction house setup should run");
+
+        super::apply(&env);
+
+        let shown: bool = env
+            .eval("return AuctionHouseFrame:IsShown()")
+            .expect("auction house visibility probe should run");
+        assert!(!shown, "AuctionHouseFrame should not start open");
+    }
+
+    #[test]
+    fn post_load_remembers_settings_categories_by_id_for_addons() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            Settings = {}
+            local nextID = 0
+            local Category = {}
+            Category.__index = Category
+            function Category:GetID() return self.ID end
+            function Category:GetName() return self.name end
+            function Category:CreateSubcategory(name)
+              nextID = nextID + 1
+              local subcategory = setmetatable({ ID = nextID, name = name, parent = self }, Category)
+              return subcategory
+            end
+            function Settings.RegisterCanvasLayoutCategory(frame, name)
+              nextID = nextID + 1
+              return setmetatable({ ID = nextID, name = name }, Category), {}
+            end
+            function Settings.RegisterCanvasLayoutSubcategory(parentCategory, frame, name)
+              return parentCategory:CreateSubcategory(name), {}
+            end
+            function Settings.RegisterAddOnCategory(category) end
+            function Settings.GetCategory(categoryID) return nil end
+            "#,
+        )
+        .expect("settings setup should run");
+
+        super::apply(&env);
+
+        let ok: bool = env
+            .eval(
+                r#"
+                local category = Settings.RegisterCanvasLayoutCategory(CreateFrame("Frame"), "Probe")
+                local id = category:GetID()
+                Settings.RegisterAddOnCategory(category)
+                local found = Settings.GetCategory(id)
+                local subcategory = Settings.RegisterCanvasLayoutSubcategory(found, CreateFrame("Frame"), "Sub")
+                return found == category and subcategory.parent == category
+                "#,
+            )
+            .expect("settings category lookup probe should run");
+        assert!(ok, "registered addon categories should resolve by ID");
+    }
+
+    #[test]
+    fn settings_category_lookup_survives_runtime_surface_restore() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            Settings = {}
+            local nextID = 0
+            local Category = {}
+            Category.__index = Category
+            function Category:GetID() return self.ID end
+            function Category:GetName() return self.name end
+            function Settings.RegisterCanvasLayoutCategory(frame, name)
+              nextID = nextID + 1
+              return setmetatable({ ID = nextID, name = name }, Category), {}
+            end
+            function Settings.RegisterAddOnCategory(category) end
+            function Settings.GetCategory(categoryID) return nil end
+            "#,
+        )
+        .expect("settings setup should run");
+
+        super::apply(&env);
+        env.restore_post_cleanup_globals();
+
+        let ok: bool = env
+            .eval(
+                r#"
+                local category = Settings.RegisterCanvasLayoutCategory(CreateFrame("Frame"), "Probe")
+                local id = category:GetID()
+                Settings.RegisterAddOnCategory(category)
+                return Settings.GetCategory(id) == category
+                "#,
+            )
+            .expect("settings category lookup probe should run");
+        assert!(
+            ok,
+            "runtime surface restore should not replace the Mists Settings.GetCategory wrapper"
+        );
+    }
+
+    #[test]
+    fn post_load_disables_blizzmove_startup_frame_scan() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            BlizzMove = {}
+            function BlizzMove:ProcessFrames(addOnName)
+              rawset(_G, "__blizzmove_processed", addOnName)
+            end
+            "#,
+        )
+        .expect("blizzmove setup should run");
+
+        super::apply(&env);
+        env.exec("BlizzMove:ProcessFrames('Blizzard_UIParent')")
+            .expect("wrapped ProcessFrames should run");
+
+        let processed: Option<String> = env
+            .eval("return rawget(_G, '__blizzmove_processed')")
+            .expect("blizzmove probe should run");
+        assert_eq!(
+            processed, None,
+            "Mists startup should not let BlizzMove recursively scan simulator frame geometry"
+        );
+    }
+
+    #[test]
     fn post_load_hides_inactive_pvp_ready_dialog() {
         let env = WowLuaEnv::new().expect("env");
         env.exec(
