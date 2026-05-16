@@ -635,6 +635,36 @@ fn test_c_timer_new_timer_id_shares_timer_id_space() {
     assert_eq!(ids.2 - ids.1, 1.0, "timer ids should advance by one");
 }
 
+#[test]
+fn test_c_timer_new_timer_callback_receives_handle() {
+    let env = WowLuaEnv::new().unwrap();
+    let expected_id: f64 = env
+        .eval(
+            r#"
+            _timer_callback_id = nil
+            local handle = C_Timer.NewTimer(0, function(timerObject)
+                _timer_callback_id = timerObject.__id
+            end)
+            return handle.__id
+            "#,
+        )
+        .unwrap();
+
+    env.process_timers().unwrap();
+
+    let callback_id: f64 = env.eval("return _timer_callback_id or 0").unwrap();
+    assert_eq!(callback_id, expected_id);
+}
+
+#[test]
+fn test_runscript_executes_lua_string() {
+    let env = WowLuaEnv::new().unwrap();
+    let value: i32 = env
+        .eval("RunScript('_runscript_probe = 42'); return _runscript_probe")
+        .unwrap();
+    assert_eq!(value, 42);
+}
+
 // ---------------------------------------------------------------------------
 // C_CVar, C_AddOns
 // ---------------------------------------------------------------------------
