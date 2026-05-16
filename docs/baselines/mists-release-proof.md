@@ -43,6 +43,9 @@ paths behind those captures. The focused regression test is
 
 Latest local debug-profile audit: 2026-05-14 on `classic-profile-rollout`,
 with artifacts retained under `target/mists-local-completion-audit/`.
+Focused local refreshes on 2026-05-16 rechecked the current saved-vars panel
+artifact tree, installed-addon startup matrix, and live connected-GUI smoke
+after the recent LFG, micro-menu, Collections, and Store fixes.
 
 | Lane | Result | Artifact |
 |---|---|---|
@@ -70,6 +73,9 @@ with artifacts retained under `target/mists-local-completion-audit/`.
 | Post-pet UI state guard startup regression check | Base Mists `lua-errors` length `0`; installed-addon startup matrix `passed: 9`, `failed: 0`, with `0` addon-induced errors for every installed Mists addon | `target/mists-pet-ui-startup-regression/base-lua-errors.json`; `target/addon-harness/*-lua-errors.json` |
 | Post-pet open-path focused addon Character panel matrix | All `9` installed Mists addons passed the Character panel row with normal SavedVariables after the real open-path `PET_UI_UPDATE` fix; every per-addon Character `lua-errors.json` file has length `0` | Artifacts under `target/mists-character-addon-panel-after-pet-ui-open-path-fix/` |
 | Post-pet open-path focused Character panel parity | Base Mists `lua-errors` length `0`; Character panel row passed with and without normal SavedVariables after startup began firing `PET_UI_UPDATE`; both per-panel Character `lua-errors.json` files have length `0` | `target/mists-pet-open-path-refresh/base-lua-errors.json`; artifacts under `target/mists-character-after-pet-open-path-fix/base/` and `target/mists-character-after-pet-open-path-fix/with-saved-vars/` |
+| 2026-05-16 saved-vars panel artifact refresh | All `38` panel rows passed with normal SavedVariables; per-panel `lua-errors.json`, dump-tree, and screenshot artifacts refreshed under the final local-audit root | `target/mists-final-local-audit/panel-parity-with-saved-vars/` |
+| 2026-05-16 saved-vars installed-addon startup matrix | `passed: 9`, `failed: 0`; every installed Mists addon row reported `0` total and `0` addon-induced errors with normal SavedVariables enabled | `target/addon-harness/*-with-saved-vars-lua-errors.json` |
+| 2026-05-16 live connected-GUI smoke | Passed idle HUD, specialization Learn-to-talents, Store, Collections, Game Menu, and the remaining visible micro-menu probes through real `wow-cli` input dispatch | `target/mists-live-gui-smoke-current/` |
 
 This audit is intentionally local and non-release: it uses debug `wow-sim` /
 `wow-cli` binaries and does not run the release-proof wrapper. Its purpose is to
