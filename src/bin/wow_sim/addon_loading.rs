@@ -12,7 +12,9 @@ use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
+mod blizzard_dependencies;
 mod cache_summary;
+use blizzard_dependencies::load_required_blizzard_dependencies_for_addons;
 use cache_summary::{format_cache_info, print_cache_stats};
 
 pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
@@ -213,6 +215,7 @@ pub fn load_third_party_addons(
         let test_addons_path = PathBuf::from(TEST_ADDONS_PATH);
         addons.extend(scan_addons(&test_addons_path, &[], screen));
     }
+    load_required_blizzard_dependencies_for_addons(env, saved_vars, screen, &addons);
     wow_ui_sim::loader::sort_addons_by_dependencies(&mut addons);
     if skip_addons {
         addons.retain(|(name, _)| TEST_ADDONS.iter().any(|t| t == name));
@@ -235,6 +238,14 @@ pub fn load_third_party_addons(
         );
     }
     print_load_summary(&addons, &stats);
+}
+
+fn is_addon_loaded(env: &WowLuaEnv, name: &str) -> bool {
+    env.state()
+        .borrow()
+        .addons
+        .iter()
+        .any(|addon| addon.folder_name == name && addon.loaded)
 }
 
 pub fn scan_addon_paths(
