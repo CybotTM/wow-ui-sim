@@ -71,6 +71,32 @@ if SetErrorCallstackHeight == nil then
   end
 end
 
+if RunScript == nil then
+  function RunScript(script)
+    if type(script) ~= "string" then
+      return nil
+    end
+    local chunk, err = loadstring(script)
+    if not chunk then
+      error(err)
+    end
+    return chunk()
+  end
+end
+
+if CallErrorHandler == nil then
+  function CallErrorHandler(message)
+    if message == nil or message == "unknown" then
+      return message
+    end
+    local handler = geterrorhandler and geterrorhandler()
+    if type(handler) == "function" then
+      return handler(message)
+    end
+    error(message)
+  end
+end
+
 if GetErrorCallstackHeight == nil then
   function GetErrorCallstackHeight()
     return 0

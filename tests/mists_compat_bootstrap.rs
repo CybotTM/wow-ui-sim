@@ -90,7 +90,9 @@ fn mists_bootstrap_reports_pandaria_as_the_current_classic_expansion() {
 fn mists_bootstrap_exposes_classic_addon_compatibility_globals() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 
-    let result: (bool, bool, bool, bool, bool, bool) = env
+    let result: (
+        bool, bool, bool, bool, bool, bool, bool, bool, bool, bool, bool, bool,
+    ) = env
         .eval(
             r#"
             local _, _, _, build = GetBuildInfo()
@@ -99,14 +101,22 @@ fn mists_bootstrap_exposes_classic_addon_compatibility_globals() {
                 GetLegacyRaidDifficultyID() == 1,
                 type(GetTimePreciseSec()) == "number",
                 Enum.ItemQuality.Good == Enum.ItemQuality.Uncommon,
-                type(time({ year = 2026 })) == "number"
+                type(time({ year = "2026", month = "5", day = "16", hour = "12", min = "30", sec = "45" })) == "number",
+                difftime(20, 12) == 8,
+                C_ArtifactUI == false,
+                type(C_MerchantFrame.SellAllJunkItems) == "function",
+                type(C_Item.GetItemStats(12345)) == "table",
+                IsArtifactRelicItem(12345) == false,
+                type(EnumerateFrames()) == "table"
             "#,
         )
         .expect("Mists addon compatibility globals should be callable");
 
     assert_eq!(
         result,
-        (true, true, true, true, true, true),
+        (
+            true, true, true, true, true, true, true, true, true, true, true, true,
+        ),
         "Mists should expose classic-era globals used by installed addons"
     );
 }

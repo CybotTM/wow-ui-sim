@@ -166,8 +166,14 @@ if GetScreenDPIScale == nil then
   end
 end
 
-if difftime == nil and os ~= nil and os.difftime ~= nil then
-  difftime = os.difftime
+if difftime == nil then
+  if os ~= nil and os.difftime ~= nil then
+    difftime = os.difftime
+  else
+    function difftime(time1, time0)
+      return (time1 or 0) - (time0 or 0)
+    end
+  end
 end
 
 if FindInTableIf == nil then

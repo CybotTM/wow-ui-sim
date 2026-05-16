@@ -137,6 +137,10 @@ local function __wow_curve_methods(prefix)
     self.points[#self.points + 1] = { x = x or 0, y = y or 0 }
   end
 
+  function methods:ClearPoints()
+    self.points = {}
+  end
+
   function methods:SetType(curveType)
     self.curveType = curveType or 0
   end

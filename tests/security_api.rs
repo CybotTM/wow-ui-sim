@@ -160,6 +160,24 @@ fn test_securecallfunction() {
     assert_eq!(result, 7);
 }
 
+#[test]
+fn test_securecallfunction_passes_table_self_to_unbound_method() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local mixin = {}
+            function mixin:GetName()
+                return self.name
+            end
+            local object = { name = "category" }
+            return securecallfunction(mixin.GetName, object)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "category");
+}
+
 // ============================================================================
 // secureexecuterange
 // ============================================================================

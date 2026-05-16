@@ -32,12 +32,15 @@ if time == nil then
     function time(dateTable)
         if os and type(os.time) == "function" then
             if type(dateTable) == "table" then
-                dateTable.year = dateTable.year or 1970
-                dateTable.month = dateTable.month or 1
-                dateTable.day = dateTable.day or 1
-                dateTable.hour = dateTable.hour or 0
-                dateTable.min = dateTable.min or 0
-                dateTable.sec = dateTable.sec or 0
+                dateTable = {
+                    year = tonumber(dateTable.year) or 1970,
+                    month = tonumber(dateTable.month) or 1,
+                    day = tonumber(dateTable.day or dateTable.mday) or 1,
+                    hour = tonumber(dateTable.hour) or 0,
+                    min = tonumber(dateTable.min) or 0,
+                    sec = tonumber(dateTable.sec) or 0,
+                    isdst = dateTable.isdst,
+                }
             end
             return os.time(__wow_normalize_time_table(dateTable))
         end
