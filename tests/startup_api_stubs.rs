@@ -431,9 +431,10 @@ fn startup_resurrection_probe_defaults_false_and_is_callable() {
 #[test]
 fn startup_quest_link_and_date_helpers_are_callable() {
     let env = env();
-    let (quest_link_type, quest_link, calendar_type, calendar_year_type): (
+    let (quest_link_type, quest_link, reset_time, calendar_type, calendar_year_type): (
         String,
         String,
+        f64,
         String,
         String,
     ) = env
@@ -443,6 +444,7 @@ fn startup_quest_link_and_date_helpers_are_callable() {
             local calendar = date("*t", 0)
             return type(link),
                    link or "",
+                   GetQuestResetTime(),
                    type(calendar),
                    type(calendar and calendar.year)
             "#,
@@ -454,8 +456,34 @@ fn startup_quest_link_and_date_helpers_are_callable() {
         quest_link.contains("|Hquest:80000|h[The Lost Expedition]|h"),
         "GetQuestLink should return a colored quest hyperlink"
     );
+    assert_eq!(reset_time, 0.0);
     assert_eq!(calendar_type, "table");
     assert_eq!(calendar_year_type, "number");
+}
+
+#[test]
+fn startup_legacy_auto_complete_realms_global_matches_namespace() {
+    let env = env();
+    let (global_type, namespace_type, same_table, realm_count): (String, String, bool, i64) = env
+        .eval(
+            r#"
+            local globalRealms = GetAutoCompleteRealms()
+            local namespaceRealms = C_AutoComplete.GetAutoCompleteRealms()
+            return type(GetAutoCompleteRealms),
+                   type(C_AutoComplete.GetAutoCompleteRealms),
+                   type(globalRealms) == "table" and type(namespaceRealms) == "table",
+                   #globalRealms
+            "#,
+        )
+        .expect("legacy autocomplete realm global should be callable");
+
+    assert_eq!(global_type, "function");
+    assert_eq!(namespace_type, "function");
+    assert!(
+        same_table,
+        "global and namespaced autocomplete realm probes should both return tables"
+    );
+    assert_eq!(realm_count, 0);
 }
 
 #[test]

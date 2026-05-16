@@ -5352,6 +5352,11 @@ if GetPVPLifetimeStats == nil then
     return 0, 0
   end
 end
+if GetQuestResetTime == nil then
+  function GetQuestResetTime()
+    return 0
+  end
+end
 
 local __wow_modified_clicks = __wow_modified_clicks or {}
 if GetModifiedClick == nil then
@@ -9954,6 +9959,11 @@ C_SuperTrack = __wow_merge_namespace(C_SuperTrack, {
 C_AutoComplete = __wow_merge_namespace(C_AutoComplete, {
   GetAutoCompleteRealms = function() return {} end,
 })
+if GetAutoCompleteRealms == nil then
+  function GetAutoCompleteRealms()
+    return C_AutoComplete.GetAutoCompleteRealms()
+  end
+end
 C_TransmogOutfitInfo = C_TransmogOutfitInfo or __wow_namespace({
   __activeOutfitID = 0,
   __currentlyViewedOutfitID = 0,
