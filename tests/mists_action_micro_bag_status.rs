@@ -50,9 +50,16 @@ fn mists_action_micro_bag_and_status_bars_are_interactive() {
             UpdateMicroButtons()
             MicroButtonTooltipText(nil, nil)
 
-            MainMenuMicroButton:Click()
+            A_Admin.SetMouseOverFrame(MainMenuMicroButton)
+            MainMenuMicroButton:GetScript("OnMouseDown")(MainMenuMicroButton, "LeftButton")
+            local onClick = MainMenuMicroButton:GetScript("OnClick")
+            if onClick then
+                onClick(MainMenuMicroButton, "LeftButton", false)
+            end
+            MainMenuMicroButton:GetScript("OnMouseUp")(MainMenuMicroButton, "LeftButton")
+            A_Admin.SetMouseOverFrame(nil)
             if not (GameMenuFrame and GameMenuFrame:IsShown()) then
-                error("MainMenuMicroButton click did not show GameMenuFrame")
+                error("MainMenuMicroButton live click sequence did not show GameMenuFrame")
             end
             MainMenuMicroButton:Click()
             if GameMenuFrame:IsShown() then

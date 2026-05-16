@@ -58,12 +58,18 @@ end
 if type(MainMenuMicroButtonMixin) == "table" and not MainMenuMicroButtonMixin.__wow_uisim_click_patched then
     MainMenuMicroButtonMixin.__wow_uisim_click_patched = true
     MainMenuMicroButtonMixin.OnClick = function(self, button, down)
+        if self and self.down then
+            return
+        end
         return __wow_toggle_main_menu()
     end
 end
 
 if type(MainMenuMicroButton) == "table" and type(MainMenuMicroButton.SetScript) == "function" then
     MainMenuMicroButton:SetScript("OnClick", function(self, button, down)
+        if self and self.down then
+            return
+        end
         return __wow_toggle_main_menu()
     end)
 end
