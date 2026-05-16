@@ -15,6 +15,7 @@ use super::xml_file::load_xml_file;
 use super::*;
 use crate::lua_api::WowLuaEnv;
 use crate::lua_api::methods::{call_function as call_rilua_function, val_to_string};
+use crate::saved_variables::SavedVariablesManager;
 use rilua::{LuaApi, LuaApiMut, Val};
 
 /// Test context holding environment and temp directory for cleanup.
@@ -250,6 +251,40 @@ fn test_load_lua_file() {
     let value: i32 = env.eval("return TEST_VAR").unwrap();
     assert_eq!(value, 42);
     std::fs::remove_file(&lua_path).ok();
+}
+
+#[test]
+fn saved_variables_restore_after_addon_files_load() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_dir = tempfile::tempdir().expect("tempdir");
+    let addon_dir = temp_dir.path().join("TestAddon");
+    let saved_vars_dir = temp_dir.path().join("SavedVariables");
+    std::fs::create_dir_all(&addon_dir).expect("addon dir");
+    std::fs::create_dir_all(&saved_vars_dir).expect("saved variables dir");
+    std::fs::write(
+        addon_dir.join("TestAddon.toc"),
+        "## Interface: 50503\n## SavedVariables: TestDB\nTestAddon.lua\n",
+    )
+    .expect("write toc");
+    std::fs::write(addon_dir.join("TestAddon.lua"), "TestDB = {}").expect("write addon lua");
+    std::fs::write(
+        saved_vars_dir.join("TestAddon.lua"),
+        "\nTestDB = { [\"source\"] = \"saved\", [\"DataCode\"] = \"4\" }\n",
+    )
+    .expect("write saved variables");
+
+    let mut saved_vars = SavedVariablesManager::with_storage_dir(saved_vars_dir);
+    load_addon_with_saved_vars(
+        &env.loader_env(),
+        &addon_dir.join("TestAddon.toc"),
+        &mut saved_vars,
+    )
+    .expect("addon should load");
+
+    let source: String = env.eval("return TestDB.source").expect("source probe");
+    let data_code: String = env.eval("return TestDB.DataCode").expect("data code probe");
+    assert_eq!(source, "saved");
+    assert_eq!(data_code, "4");
 }
 
 #[test]

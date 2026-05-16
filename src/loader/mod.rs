@@ -2,6 +2,7 @@
 
 mod addon;
 mod addon_order;
+mod addon_saved_variables;
 pub(crate) mod button;
 pub(crate) mod bytecode;
 pub(crate) mod bytecode_cache;

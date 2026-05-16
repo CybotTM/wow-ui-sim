@@ -105,6 +105,7 @@ pub struct SavedVariablesManager {
     registered_per_char: HashMap<String, Vec<String>>,
     wtf_config: Option<WtfConfig>,
     wtf_loaded: HashMap<String, bool>,
+    loaded_values: HashMap<String, Vec<(String, Val)>>,
 }
 
 impl SavedVariablesManager {
@@ -125,6 +126,7 @@ impl SavedVariablesManager {
             registered_per_char: HashMap::new(),
             wtf_config: None,
             wtf_loaded: HashMap::new(),
+            loaded_values: HashMap::new(),
         }
     }
 
@@ -229,7 +231,26 @@ impl SavedVariablesManager {
         self.init_registered_globals(state, addon_name, saved_vars, false)?;
         self.init_registered_globals(state, addon_name, saved_vars_per_char, true)?;
         self.remember_registered_vars(addon_name, saved_vars, saved_vars_per_char);
+        self.remember_loaded_values(state, addon_name, saved_vars, saved_vars_per_char);
         Ok(())
+    }
+
+    /// Restore saved-variable globals that addon top-level code clobbered with
+    /// an empty table after the persisted value had already loaded.
+    pub fn restore_clobbered_globals(&mut self, state: &mut LuaState, addon_name: &str) -> usize {
+        let Some(values) = self.loaded_values.get(addon_name).cloned() else {
+            return 0;
+        };
+
+        let mut restored = 0;
+        for (name, loaded_value) in values {
+            let current_value = get_global(state, &name);
+            if should_restore_clobbered_value(state, loaded_value, current_value) {
+                set_global(state, &name, loaded_value);
+                restored += 1;
+            }
+        }
+        restored
     }
 
     /// Seed declared SavedVariables globals with empty tables without touching
@@ -304,6 +325,21 @@ impl SavedVariablesManager {
             self.registered_per_char
                 .insert(addon_name.to_string(), saved_vars_per_char.to_vec());
         }
+    }
+
+    fn remember_loaded_values(
+        &mut self,
+        state: &mut LuaState,
+        addon_name: &str,
+        saved_vars: &[String],
+        saved_vars_per_char: &[String],
+    ) {
+        let values = saved_vars
+            .iter()
+            .chain(saved_vars_per_char.iter())
+            .map(|name| (name.clone(), get_global(state, name)))
+            .collect();
+        self.loaded_values.insert(addon_name.to_string(), values);
     }
 
     fn load_variable(
@@ -473,6 +509,51 @@ fn create_empty_table(state: &mut LuaState) -> Val {
     Val::Table(state.gc.alloc_table(Table::new()))
 }
 
+fn table_has_entries(state: &LuaState, value: Val) -> bool {
+    let Val::Table(table_ref) = value else {
+        return false;
+    };
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        return false;
+    };
+
+    table.array_slice().iter().any(|value| !value.is_nil()) || !table.hash_entries().is_empty()
+}
+
+fn should_restore_clobbered_value(state: &LuaState, loaded_value: Val, current_value: Val) -> bool {
+    // GTFO-style saved variables carry a schema marker and are sometimes
+    // reset to `{}` by top-level addon code before VARIABLES_LOADED.
+    // Require the marker so huge addon-managed caches are not rehydrated
+    // after an intentional empty-table reset.
+    table_has_entries(state, loaded_value)
+        && table_has_string_key(state, loaded_value, b"DataCode")
+        && table_is_empty(state, current_value)
+}
+
+fn table_has_string_key(state: &LuaState, value: Val, key: &[u8]) -> bool {
+    let Val::Table(table_ref) = value else {
+        return false;
+    };
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        return false;
+    };
+
+    table.hash_entries().iter().any(|(entry_key, _)| {
+        let Val::Str(string_ref) = entry_key else {
+            return false;
+        };
+        state
+            .gc
+            .string_arena
+            .get(*string_ref)
+            .is_some_and(|string| string.data() == key)
+    })
+}
+
+fn table_is_empty(state: &LuaState, value: Val) -> bool {
+    matches!(value, Val::Table(_)) && !table_has_entries(state, value)
+}
+
 fn seed_missing_globals(state: &mut LuaState, variable_names: &[String]) {
     for variable_name in variable_names {
         let already_present = !matches!(get_global(state, variable_name), Val::Nil);
@@ -481,5 +562,53 @@ fn seed_missing_globals(state: &mut LuaState, variable_names: &[String]) {
         }
         let empty_table = create_empty_table(state);
         set_global(state, variable_name, empty_table);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use crate::lua_api::WowLuaEnv;
+    use rilua::{LuaApi, LuaApiMut};
+
+    use super::SavedVariablesManager;
+
+    #[test]
+    fn saved_variables_restore_after_addon_top_level_defaults() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        fs::write(
+            dir.path().join("GTFO.lua"),
+            "\nGTFOData = { [\"DataCode\"] = \"4\", [\"source\"] = \"saved\" }\n",
+        )
+        .expect("write saved variables");
+
+        let env = WowLuaEnv::new().expect("env");
+        let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
+        let saved_vars = ["GTFOData".to_string()];
+
+        {
+            let mut lua = env.rilua_mut();
+            mgr.init_for_addon(lua.state_mut(), "GTFO", &saved_vars, &[])
+                .expect("saved variable init should not fail");
+        }
+
+        env.exec("GTFOData = {}")
+            .expect("addon top-level defaults should run");
+
+        {
+            let mut lua = env.rilua_mut();
+            let restored = mgr.restore_clobbered_globals(lua.state_mut(), "GTFO");
+            assert_eq!(restored, 1);
+        }
+
+        let data_code: String = env
+            .eval("return GTFOData.DataCode")
+            .expect("probe should run");
+        let source: String = env
+            .eval("return GTFOData.source")
+            .expect("probe should run");
+        assert_eq!(data_code, "4");
+        assert_eq!(source, "saved");
     }
 }

@@ -11,8 +11,10 @@ use rilua::Val;
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
-use std::time::Instant;
 
+use super::addon_saved_variables::{
+    maybe_init_saved_variables, maybe_restore_clobbered_saved_variables,
+};
 use super::error::LoadError;
 use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
@@ -64,47 +66,6 @@ impl<'a> AddonContext<'a> {
     }
 }
 
-/// Initialize saved variables for an addon (WTF first, then JSON fallback).
-fn init_saved_variables(
-    env: &LoaderEnv<'_>,
-    toc: &TocFile,
-    folder_name: &str,
-    mgr: &mut SavedVariablesManager,
-) -> Vec<String> {
-    let mut warnings = Vec::new();
-    let wtf_result = env.with_state(|state| mgr.load_wtf_for_addon(state, folder_name));
-    match wtf_result {
-        Ok(count) if count > 0 => {
-            tracing::debug!(
-                "Loaded {} WTF SavedVariables file(s) for {}",
-                count,
-                toc.name
-            );
-        }
-        Ok(_) => {}
-        Err(e) => {
-            warnings.push(format!(
-                "Failed to load WTF SavedVariables for {}: {}",
-                folder_name, e
-            ));
-        }
-    }
-
-    let saved_vars = toc.saved_variables();
-    let saved_vars_per_char = toc.saved_variables_per_character();
-    if (!saved_vars.is_empty() || !saved_vars_per_char.is_empty())
-        && let Err(e) = env.with_state(|state| {
-            mgr.init_for_addon(state, folder_name, &saved_vars, &saved_vars_per_char)
-        })
-    {
-        warnings.push(format!(
-            "Failed to initialize saved variables for {}: {}",
-            folder_name, e
-        ));
-    }
-    warnings
-}
-
 /// Internal addon loading with optional saved variables.
 pub fn load_addon_internal(
     env: &LoaderEnv<'_>,
@@ -125,13 +86,15 @@ pub fn load_addon_internal(
         warnings: Vec::new(),
     };
 
-    maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
+    let saved_vars_mgr =
+        maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
     let _loading_guard = register_loading_addon(env, folder_name, toc);
     let ctx = build_addon_context(env, toc, folder_name)?;
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
     let addon_name = result.name.clone();
 
     load_addon_files(env, toc, folder_name, &ctx, &mut result);
+    maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
     mark_addon_loaded(env, folder_name);
@@ -383,49 +346,6 @@ fn mark_addon_loaded(env: &LoaderEnv<'_>, folder_name: &str) {
         addon.loaded = true;
     }
     state.loading_addon_index = None;
-}
-
-fn maybe_init_saved_variables(
-    env: &LoaderEnv<'_>,
-    toc: &TocFile,
-    folder_name: &str,
-    saved_vars_mgr: Option<&mut SavedVariablesManager>,
-    result: &mut LoadResult,
-) {
-    let sv_start = Instant::now();
-    match saved_vars_mgr {
-        Some(mgr) => result
-            .warnings
-            .extend(init_saved_variables(env, toc, folder_name, mgr)),
-        None => seed_console_saved_variables_without_persistence(env, toc, folder_name, result),
-    }
-    result.timing.saved_vars_time = sv_start.elapsed();
-}
-
-fn seed_console_saved_variables_without_persistence(
-    env: &LoaderEnv<'_>,
-    toc: &TocFile,
-    folder_name: &str,
-    result: &mut LoadResult,
-) {
-    if folder_name != "Blizzard_Console" {
-        return;
-    }
-
-    let saved_vars = toc.saved_variables();
-    if saved_vars.is_empty() {
-        return;
-    }
-
-    if let Err(error) = env.with_state(|state| {
-        SavedVariablesManager::seed_declared_globals(state, &saved_vars, &[]);
-        Ok::<(), crate::Error>(())
-    }) {
-        result.warnings.push(format!(
-            "Failed to seed console saved variables for {} without persistence: {}",
-            folder_name, error
-        ));
-    }
 }
 
 fn build_addon_context<'a>(
