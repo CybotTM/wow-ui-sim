@@ -12,6 +12,9 @@ use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
+mod cache_summary;
+use cache_summary::{format_cache_info, print_cache_stats};
+
 pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
 
 /// Addon names that are test-only and should not be loaded in GUI mode.
@@ -625,29 +628,6 @@ fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -
     );
 }
 
-fn print_cache_stats(t: &LoadTiming) {
-    if t.cache_hits == 0 && t.cache_misses == 0 {
-        return;
-    }
-    println!("Bytecode cache: {}", format_cache_summary(t));
-}
-
-fn format_cache_info(t: &LoadTiming) -> String {
-    if t.cache_hits == 0 && t.cache_misses == 0 {
-        return String::new();
-    }
-    format!(", bytecode cache: {}", format_cache_summary(t))
-}
-
-fn format_cache_summary(t: &LoadTiming) -> String {
-    let total = t.cache_hits + t.cache_misses;
-    let pct = 100.0 * t.cache_hits as f64 / total as f64;
-    format!(
-        "{}/{} hits ({:.0}%, lookup_miss={} replay_fail={})",
-        t.cache_hits, total, pct, t.cache_lookup_misses, t.cache_replay_failures
-    )
-}
-
 fn print_slowest_addons(addon_times: &[(String, std::time::Duration)]) {
     let mut sorted = addon_times.to_vec();
     sorted.sort_by(|a, b| b.1.cmp(&a.1));
@@ -656,9 +636,6 @@ fn print_slowest_addons(addon_times: &[(String, std::time::Duration)]) {
         println!("  {:>7.1?}  {}", time, name);
     }
 }
-
-#[cfg(test)]
-mod addon_loading_cache_tests;
 
 #[cfg(test)]
 mod tests {

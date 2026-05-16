@@ -199,6 +199,8 @@ fn load_timing_accumulate_includes_bytecode_cache_counts() {
         cache_misses: 3,
         cache_lookup_misses: 11,
         cache_replay_failures: 13,
+        cache_store_successes: 23,
+        cache_store_failures: 29,
         ..Default::default()
     };
     let nested = LoadTiming {
@@ -206,6 +208,8 @@ fn load_timing_accumulate_includes_bytecode_cache_counts() {
         cache_misses: 7,
         cache_lookup_misses: 17,
         cache_replay_failures: 19,
+        cache_store_successes: 31,
+        cache_store_failures: 37,
         ..Default::default()
     };
 
@@ -215,6 +219,8 @@ fn load_timing_accumulate_includes_bytecode_cache_counts() {
     assert_eq!(total.cache_misses, 10);
     assert_eq!(total.cache_lookup_misses, 28);
     assert_eq!(total.cache_replay_failures, 32);
+    assert_eq!(total.cache_store_successes, 54);
+    assert_eq!(total.cache_store_failures, 66);
 }
 
 #[test]

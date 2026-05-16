@@ -33,6 +33,13 @@ struct CacheState {
     index: HashMap<u64, (usize, usize)>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PutResult {
+    Stored,
+    Unchanged,
+    Failed,
+}
+
 fn cache_state() -> &'static Mutex<CacheState> {
     static STATE: OnceLock<Mutex<CacheState>> = OnceLock::new();
     STATE.get_or_init(|| Mutex::new(CacheState::default()))
@@ -90,23 +97,26 @@ pub fn get_with_legacy_fallback(hash: u64, legacy_hash: u64) -> Option<Vec<u8>> 
 }
 
 /// Save compiled bytecode to cache.
-pub fn put(hash: u64, bytecode: &[u8]) {
+pub fn put(hash: u64, bytecode: &[u8]) -> PutResult {
     let mut state = match cache_state().lock() {
         Ok(state) => state,
-        Err(_) => return,
+        Err(_) => return PutResult::Failed,
     };
     ensure_loaded(&mut state);
 
     if let Some((offset, len)) = state.index.get(&hash).copied()
         && state.values[offset..offset + len] == *bytecode
     {
-        return;
+        return PutResult::Unchanged;
     }
 
     let offset = state.values.len();
     state.values.extend_from_slice(bytecode);
     state.index.insert(hash, (offset, bytecode.len()));
-    let _ = append_pack_entry(&mut state, hash, bytecode);
+    match append_pack_entry(&mut state, hash, bytecode) {
+        Ok(()) => PutResult::Stored,
+        Err(_) => PutResult::Failed,
+    }
 }
 
 fn ensure_loaded(state: &mut CacheState) {
@@ -414,6 +424,18 @@ mod tests {
             MAX_PACK_SIZE >= full_addon_pack_budget,
             "full addon cache observed at 454 MiB; cap must keep it reusable"
         );
+    }
+
+    #[test]
+    fn put_reports_stored_and_unchanged_entries() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system time before unix epoch")
+            .as_nanos();
+        let hash = content_hash(format!("source-{unique}").as_bytes(), "=@put-test");
+
+        assert_eq!(put(hash, b"compiled"), PutResult::Stored);
+        assert_eq!(put(hash, b"compiled"), PutResult::Unchanged);
     }
 
     #[test]

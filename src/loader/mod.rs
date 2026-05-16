@@ -164,6 +164,10 @@ pub struct LoadTiming {
     pub cache_lookup_misses: u32,
     /// Number of Lua bytecode cache entries that failed to reload.
     pub cache_replay_failures: u32,
+    /// Number of Lua bytecode cache entries written to disk.
+    pub cache_store_successes: u32,
+    /// Number of Lua bytecode cache entries that failed to write.
+    pub cache_store_failures: u32,
 }
 
 impl LoadTiming {
@@ -206,6 +210,8 @@ impl LoadTiming {
         self.cache_misses += other.cache_misses;
         self.cache_lookup_misses += other.cache_lookup_misses;
         self.cache_replay_failures += other.cache_replay_failures;
+        self.cache_store_successes += other.cache_store_successes;
+        self.cache_store_failures += other.cache_store_failures;
     }
 }
 

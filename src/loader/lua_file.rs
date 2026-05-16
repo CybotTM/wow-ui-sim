@@ -14,6 +14,7 @@ use std::time::Instant;
 use super::LoadTiming;
 use super::addon::AddonContext;
 use super::bytecode_cache;
+use super::bytecode_cache::PutResult;
 use super::error::LoadError;
 
 /// Load a Lua file into the environment with addon varargs.
@@ -483,7 +484,11 @@ fn load_cached_or_compile(
     let func = compile_from_source(lua, bytes, chunk_name)?;
     if !bytecode_cache::is_disabled() {
         let bytecode = crate::loader::bytecode::dump_function(lua, &func)?;
-        bytecode_cache::put(hash, &bytecode);
+        match bytecode_cache::put(hash, &bytecode) {
+            PutResult::Stored => timing.cache_store_successes += 1,
+            PutResult::Unchanged => {}
+            PutResult::Failed => timing.cache_store_failures += 1,
+        }
     }
     Ok(func)
 }
@@ -711,6 +716,8 @@ mod tests {
         assert_eq!(timing.cache_misses, 1);
         assert_eq!(timing.cache_lookup_misses, 1);
         assert_eq!(timing.cache_replay_failures, 0);
+        assert_eq!(timing.cache_store_successes, 1);
+        assert_eq!(timing.cache_store_failures, 0);
     }
 
     #[test]
@@ -732,5 +739,7 @@ mod tests {
         assert_eq!(timing.cache_misses, 1);
         assert_eq!(timing.cache_lookup_misses, 0);
         assert_eq!(timing.cache_replay_failures, 1);
+        assert_eq!(timing.cache_store_successes, 1);
+        assert_eq!(timing.cache_store_failures, 0);
     }
 }
