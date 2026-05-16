@@ -154,6 +154,33 @@ fn test_create_font_shadow() {
 }
 
 #[test]
+fn test_standard_font_objects_expose_methods_through_metatable_index() {
+    let env = env();
+    let result: (String, String, String, bool) = env
+        .eval(
+            r#"
+            local mt = getmetatable(GameFontNormal)
+            local index = mt and mt.__index
+            GameFontNormal:SetShadowColor(0.2, 0.3, 0.4, 0.5)
+            local r, g, b, a = GameFontNormal:GetShadowColor()
+            return type(mt), type(index), type(index and index.SetShadowColor),
+                r == 0.2 and g == 0.3 and b == 0.4 and a == 0.5
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result,
+        (
+            "table".to_string(),
+            "table".to_string(),
+            "function".to_string(),
+            true
+        )
+    );
+}
+
+#[test]
 fn test_font_string_shadow_methods() {
     let env = env();
     let (r, g, b, a, x, y): (f64, f64, f64, f64, f64, f64) = env

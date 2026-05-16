@@ -499,11 +499,29 @@ pub(super) fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()>
 pub(crate) fn create_font_object(state: &mut LuaState, name: Option<&str>) -> Val {
     let font = create_table_with_capacity(state, FONT_OBJECT_HASH_FIELDS);
     font_set_defaults(state, font, name);
-    let _ = add_font_methods(state, font);
+    attach_font_methods_metatable(state, font);
     if let Some(name) = name {
         set_global_val(state, name, font);
     }
     font
+}
+
+fn attach_font_methods_metatable(state: &mut LuaState, font: Val) {
+    let Val::Table(font_ref) = font else {
+        return;
+    };
+
+    let methods = create_table(state);
+    let _ = add_font_methods(state, methods);
+    let mt = create_table(state);
+    table_set_static(state, mt, "__index", methods);
+
+    if let Val::Table(mt_ref) = mt {
+        if let Some(font_table) = state.gc.tables.get_mut(font_ref) {
+            font_table.set_metatable(Some(mt_ref));
+        }
+        state.gc.barrier_back(font_ref);
+    }
 }
 
 // ── Top-level Font API functions ──────────────────────────────────────────────

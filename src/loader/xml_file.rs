@@ -4,7 +4,7 @@ use crate::lua_api::LoaderEnv;
 use crate::lua_api::globals::security::mark_secure_state;
 use crate::lua_api::methods::create_string;
 use crate::lua_api::script_helpers::call_error_handler_state;
-use crate::xml::{FrameXml, UiXml, XmlElement, parse_xml_file};
+use crate::xml::{FrameXml, XmlElement, parse_xml_file};
 use rilua::{Function, LuaApiMut};
 use std::path::Path;
 use std::time::Instant;
@@ -36,71 +36,23 @@ pub fn load_xml_file(
     timing.xml_parse_time += xml_start.elapsed();
 
     let xml_dir = path.parent().unwrap_or(Path::new("."));
-    let result = process_xml_elements(env, &ui, xml_dir, ctx, timing);
-
-    result
-}
-
-fn process_xml_elements(
-    env: &LoaderEnv<'_>,
-    ui: &UiXml,
-    xml_dir: &Path,
-    ctx: &AddonContext,
-    timing: &mut LoadTiming,
-) -> Result<usize, LoadError> {
-    if ctx.taint {
-        return process_xml_elements_with_current_stack(env, ui, xml_dir, ctx, timing);
-    }
-
-    let saved_taints =
-        env.with_state(|state| Ok::<_, LoadError>(crate::loader::stack_taint::clear(state)))?;
-    let result = process_xml_elements_with_current_stack(env, ui, xml_dir, ctx, timing);
-    env.with_state(|state| {
-        crate::loader::stack_taint::restore(state, saved_taints);
-        Ok::<(), LoadError>(())
-    })?;
-    result
-}
-
-fn process_xml_elements_with_current_stack(
-    env: &LoaderEnv<'_>,
-    ui: &UiXml,
-    xml_dir: &Path,
-    ctx: &AddonContext,
-    timing: &mut LoadTiming,
-) -> Result<usize, LoadError> {
     let mut lua_count = 0;
-    ui.elements.iter().try_for_each(|element| {
-        process_element_with_exclusive_timing(env, element, xml_dir, ctx, timing)
-            .map(|count| lua_count += count)
-            .map_err(|e| {
-                if !matches!(e, LoadError::Lua(_)) {
-                    let _ = env.with_state(|state| {
-                        call_error_handler_state(state, &e.to_string());
-                        Ok::<(), crate::Error>(())
-                    });
-                }
-                e
-            })
-    })?;
-    Ok(lua_count)
-}
-
-fn process_element_with_exclusive_timing(
-    env: &LoaderEnv<'_>,
-    element: &XmlElement,
-    xml_dir: &Path,
-    ctx: &AddonContext,
-    timing: &mut LoadTiming,
-) -> Result<usize, LoadError> {
-    let counted_before = timing.independently_counted_time();
     let process_start = Instant::now();
-    let result = process_element(env, element, xml_dir, ctx, timing);
-    let counted_child_time = timing
-        .independently_counted_time()
-        .saturating_sub(counted_before);
-    timing.xml_process_time += process_start.elapsed().saturating_sub(counted_child_time);
-    result
+
+    for element in &ui.elements {
+        lua_count += process_element(env, element, xml_dir, ctx, timing).map_err(|e| {
+            if !matches!(e, LoadError::Lua(_)) {
+                let _ = env.with_state(|state| {
+                    call_error_handler_state(state, &e.to_string());
+                    Ok::<(), crate::Error>(())
+                });
+            }
+            e
+        })?;
+    }
+    timing.xml_process_time += process_start.elapsed();
+
+    Ok(lua_count)
 }
 
 /// Process a single top-level XML element.
@@ -357,91 +309,14 @@ fn process_frame_element(
 /// Lua template for Font objects. Placeholders: {name}, {font_path}, {font_height},
 /// {font_outline}, {justify_h}, {justify_v}.
 const FONT_LUA_TEMPLATE: &str = r#"
-{name} = {
-    __font = "{font_path}",
-    __height = {font_height},
-    __outline = "{font_outline}",
-    __r = 1.0, __g = 1.0, __b = 1.0,
-    __shadowR = 0.0, __shadowG = 0.0, __shadowB = 0.0, __shadowA = 0.0,
-    __shadowX = 0.0, __shadowY = 0.0,
-    __justifyH = "{justify_h}",
-    __justifyV = "{justify_v}",
-    SetTextColor = function(self, r, g, b)
-        self.__r = r; self.__g = g; self.__b = b
-    end,
-    SetShadowColor = function(self, r, g, b, a)
-        self.__shadowR = r or 0
-        self.__shadowG = g or 0
-        self.__shadowB = b or 0
-        self.__shadowA = a or 1
-    end,
-    GetShadowColor = function(self)
-        return self.__shadowR, self.__shadowG, self.__shadowB, self.__shadowA
-    end,
-    SetShadowOffset = function(self, x, y)
-        self.__shadowX = x or 0; self.__shadowY = y or 0
-    end,
-    GetShadowOffset = function(self)
-        return self.__shadowX, self.__shadowY
-    end,
-    GetFont = function(self)
-        return self.__font, self.__height, self.__outline
-    end,
-    GetFontObjectForAlphabet = function(self)
-        return self
-    end,
-    SetFont = function(self, path, height, flags)
-        self.__font = path
-        if height then self.__height = height end
-        if flags then self.__outline = flags end
-    end,
-    SetJustifyH = function(self, justify)
-        self.__justifyH = justify
-    end,
-    GetJustifyH = function(self)
-        return self.__justifyH
-    end,
-    SetJustifyV = function(self, justify)
-        self.__justifyV = justify
-    end,
-    GetJustifyV = function(self)
-        return self.__justifyV
-    end,
-    CopyFontObject = function(self, source)
-        if source.__font then self.__font = source.__font end
-        if source.__height then self.__height = source.__height end
-        if source.__outline then self.__outline = source.__outline end
-        if source.__r then self.__r = source.__r end
-        if source.__g then self.__g = source.__g end
-        if source.__b then self.__b = source.__b end
-        if source.__shadowR then self.__shadowR = source.__shadowR end
-        if source.__shadowG then self.__shadowG = source.__shadowG end
-        if source.__shadowB then self.__shadowB = source.__shadowB end
-        if source.__shadowA then self.__shadowA = source.__shadowA end
-        if source.__shadowX then self.__shadowX = source.__shadowX end
-        if source.__shadowY then self.__shadowY = source.__shadowY end
-        if source.__justifyH then self.__justifyH = source.__justifyH end
-        if source.__justifyV then self.__justifyV = source.__justifyV end
-    end,
-    SetFontObject = function(self, target)
-        if type(target) == "string" then target = _G[target] end
-        if target then self.__fontObject = target end
-    end,
-    GetFontObject = function(self)
-        return self.__fontObject
-    end,
-    GetObjectType = function() return "Font" end,
-    IsObjectType = function(_, t) return t == "Font" end,
-}
-
-local __font_index = {}
-for key, value in pairs({name}) do
-    if type(value) == "function" then
-        __font_index[key] = value
-        {name}[key] = nil
-    end
-end
-setmetatable({name}, { __index = __font_index })
+{name} = CreateFont("{name}")
+{name}:SetFont("{font_path}", {font_height}, "{font_outline}")
+{name}:SetJustifyH("{justify_h}")
+{name}:SetJustifyV("{justify_v}")
+{name}.__font = "{font_path}"
+{name}.__height = {font_height}
+{name}.__outline = "{font_outline}"
+{name}.__r = 1.0; {name}.__g = 1.0; {name}.__b = 1.0
 "#;
 
 /// Create a Font object in Lua from XML definition.
@@ -507,100 +382,35 @@ fn append_font_override_lines(
     // Re-apply explicit overrides from the XML so they win over inherited values.
     if font.font.is_some() {
         copy_code.push_str(&format!("{name}.__font = \"{font_path}\"\n"));
+        copy_code.push_str(&format!("{name}.__fontPath = \"{font_path}\"\n"));
     }
     if let Some(h) = font.height {
         copy_code.push_str(&format!("{name}.__height = {h}\n"));
+        copy_code.push_str(&format!("{name}.__fontHeight = {h}\n"));
     }
     if let Some(o) = &font.outline {
         copy_code.push_str(&format!("{name}.__outline = \"{o}\"\n"));
+        copy_code.push_str(&format!("{name}.__fontFlags = \"{o}\"\n"));
     }
     if let Some(jh) = &font.justify_h {
-        copy_code.push_str(&format!("{name}.__justifyH = \"{jh}\"\n"));
+        copy_code.push_str(&format!("{name}:SetJustifyH(\"{jh}\")\n"));
     }
     if let Some(jv) = &font.justify_v {
-        copy_code.push_str(&format!("{name}.__justifyV = \"{jv}\"\n"));
+        copy_code.push_str(&format!("{name}:SetJustifyV(\"{jv}\")\n"));
     }
 }
 
 /// Create a FontFamily object in Lua from XML definition.
 const FONT_FAMILY_LUA_TEMPLATE: &str = r#"
-{name} = {
-    __font = "Fonts/FRIZQT__.TTF",
-    __height = 12.0,
-    __outline = "",
-    __r = 1.0, __g = 1.0, __b = 1.0,
-    __shadowR = 0.0, __shadowG = 0.0, __shadowB = 0.0, __shadowA = 0.0,
-    __shadowX = 0.0, __shadowY = 0.0,
-    __justifyH = "CENTER",
-    __justifyV = "MIDDLE",
-    SetTextColor = function(self, r, g, b)
-        self.__r = r; self.__g = g; self.__b = b
-    end,
-    GetTextColor = function(self)
-        return self.__r, self.__g, self.__b
-    end,
-    SetShadowColor = function(self, r, g, b, a)
-        self.__shadowR = r or 0
-        self.__shadowG = g or 0
-        self.__shadowB = b or 0
-        self.__shadowA = a or 1
-    end,
-    GetShadowColor = function(self)
-        return self.__shadowR, self.__shadowG, self.__shadowB, self.__shadowA
-    end,
-    SetShadowOffset = function(self, x, y)
-        self.__shadowX = x or 0; self.__shadowY = y or 0
-    end,
-    GetShadowOffset = function(self)
-        return self.__shadowX, self.__shadowY
-    end,
-    SetFont = function(self, font, height, flags)
-        if font then self.__font = font end
-        if height then self.__height = height end
-        if flags then self.__outline = flags end
-    end,
-    GetFont = function(self)
-        return self.__font, self.__height, self.__outline
-    end,
-    GetFontObjectForAlphabet = function(self)
-        return self
-    end,
-    SetJustifyH = function(self, justify)
-        self.__justifyH = justify
-    end,
-    GetJustifyH = function(self)
-        return self.__justifyH
-    end,
-    SetJustifyV = function(self, justify)
-        self.__justifyV = justify
-    end,
-    GetJustifyV = function(self)
-        return self.__justifyV
-    end,
-    CopyFontObject = function(self, source)
-        if source.__font then self.__font = source.__font end
-        if source.__height then self.__height = source.__height end
-        if source.__outline then self.__outline = source.__outline end
-        if source.__r then self.__r = source.__r end
-        if source.__g then self.__g = source.__g end
-        if source.__b then self.__b = source.__b end
-        if source.__shadowR then self.__shadowR = source.__shadowR end
-        if source.__shadowG then self.__shadowG = source.__shadowG end
-        if source.__shadowB then self.__shadowB = source.__shadowB end
-        if source.__shadowA then self.__shadowA = source.__shadowA end
-        if source.__shadowX then self.__shadowX = source.__shadowX end
-        if source.__shadowY then self.__shadowY = source.__shadowY end
-    end,
-}
-
-local __font_index = {}
-for key, value in pairs({name}) do
-    if type(value) == "function" then
-        __font_index[key] = value
-        {name}[key] = nil
-    end
-end
-setmetatable({name}, { __index = __font_index })
+{name} = CreateFont("{name}")
+{name}:SetFont("Fonts/FRIZQT__.TTF", 12.0, "")
+{name}:SetTextColor(1.0, 1.0, 1.0)
+{name}:SetJustifyH("CENTER")
+{name}:SetJustifyV("MIDDLE")
+{name}.__font = "Fonts/FRIZQT__.TTF"
+{name}.__height = 12.0
+{name}.__outline = ""
+{name}.__r = 1.0; {name}.__g = 1.0; {name}.__b = 1.0
 "#;
 
 fn create_font_family_object(
@@ -634,12 +444,15 @@ fn build_roman_font_overrides(name: &str, font_family: &crate::xml::FontFamilyXm
     if let Some(path) = &font.font {
         let p = path.replace('\\', "/");
         code.push_str(&format!("{name}.__font = \"{p}\"\n"));
+        code.push_str(&format!("{name}.__fontPath = \"{p}\"\n"));
     }
     if let Some(h) = font.height {
         code.push_str(&format!("{name}.__height = {h}\n"));
+        code.push_str(&format!("{name}.__fontHeight = {h}\n"));
     }
     if let Some(o) = &font.outline {
         code.push_str(&format!("{name}.__outline = \"{o}\"\n"));
+        code.push_str(&format!("{name}.__fontFlags = \"{o}\"\n"));
     }
     code
 }

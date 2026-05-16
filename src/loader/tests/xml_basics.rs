@@ -36,6 +36,31 @@ fn test_hidden_xml_parent_does_not_hide_child_shown_flag() {
 }
 
 #[test]
+fn test_xml_font_redefinition_keeps_font_object_metatable_methods() {
+    let ctx = load_test_xml(
+        "font-object-redefinition-methods",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Font name="GameFontNormal" font="Fonts\FRIZQT__.TTF" height="12"/>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        r#"
+        (function()
+            local mt = getmetatable(GameFontNormal)
+            local index = mt and mt.__index
+            GameFontNormal:SetShadowColor(0.1, 0.2, 0.3, 0.4)
+            return type(index) == "table" and type(index.SetShadowColor) == "function"
+                and type(GameFontNormal.SetShadowColor) == "function"
+        end)()
+        "#,
+        "XML Font definitions should use the same Font object surface as CreateFont",
+    );
+}
+
+#[test]
 fn test_nested_xml_frame_parent_attribute_overrides_containing_frame() {
     let ctx = load_test_xml(
         "nested-explicit-parent",
@@ -515,6 +540,34 @@ fn test_xml_keyvalues_on_fontstring_and_texture() {
         "Texture KeyValue number"
     );
     std::fs::remove_file(&xml_path).ok();
+}
+
+#[test]
+fn test_layer_child_names_escape_backslashes_in_generated_lua() {
+    let ctx = load_test_xml(
+        "layer-child-name-escaping",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="Addon\CategoryFrame" parent="UIParent">
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <Texture name="$parentIcon"/>
+                        <FontString name="$parentLabel"/>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        r#"return _G["Addon\\CategoryFrameIcon"] ~= nil"#,
+        "texture names with backslashes should be valid generated Lua strings",
+    );
+    ctx.assert_lua_true(
+        r#"return _G["Addon\\CategoryFrameLabel"] ~= nil"#,
+        "fontstring names with backslashes should be valid generated Lua strings",
+    );
 }
 
 #[test]
