@@ -165,7 +165,7 @@ pub fn call_error_handler_state(state: &mut LuaState, error_msg: &str) {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum LuaErrorEmitPolicy {
-    /// Record/normalize/count only.
+    /// Do not record or mirror the error.
     Never,
     /// Mirror to stderr + GUI console only for the first normalized occurrence.
     FirstOccurrenceOnly,
@@ -320,6 +320,9 @@ fn prepare_protected_call_stack(state: &mut LuaState, call_base: usize, func: Va
 }
 
 fn record_protected_call_error(state: &LuaState, error_val: Val, emit_policy: LuaErrorEmitPolicy) {
+    if emit_policy == LuaErrorEmitPolicy::Never {
+        return;
+    }
     if let Some(error_msg) = val_to_string(state, error_val) {
         let _ = sink_lua_error(state, &error_msg, emit_policy);
     }

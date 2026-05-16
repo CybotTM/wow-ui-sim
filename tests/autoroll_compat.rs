@@ -135,6 +135,27 @@ fn test_register_event_invalid_name() {
 }
 
 #[test]
+fn test_pcall_caught_register_event_error_is_not_recorded() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let ok: bool = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame", "PCallEventFrame")
+            local ok = pcall(f.RegisterEvent, f, "WOWLESS_NOPE")
+            return ok
+            "#,
+        )
+        .unwrap();
+
+    assert!(!ok, "pcall should catch the invalid RegisterEvent error");
+    assert!(
+        env.state().borrow().lua_error_records.is_empty(),
+        "pcall-caught errors should not be surfaced through lua-errors"
+    );
+}
+
+#[test]
 fn test_event_utils_rejects_non_event_method_names() {
     let env = WowLuaEnv::new().unwrap();
 
