@@ -237,6 +237,14 @@ pub fn settle_headless_startup(env: &WowLuaEnv) {
     run_extra_update_ticks(env, 2);
 }
 
+/// Fire startup events needed for `lua-errors` without doing render/layout
+/// settling that only dump and screenshot commands need.
+pub fn collect_lua_error_startup(env: &WowLuaEnv) {
+    let screen = env.state().borrow().screen_kind;
+    fire_startup_events_for_screen(env, screen);
+    process_pending_timers(env);
+}
+
 /// Fire startup events for headless test mode (skips IsLoggedIn override).
 pub fn fire_startup_events_headless(env: &WowLuaEnv) {
     env.set_screen_mode(ScreenKind::Game);

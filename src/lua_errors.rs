@@ -1,7 +1,7 @@
 //! `lua-errors` subcommand: load UI, collect Lua errors, output unique errors as JSON.
 
 use crate::lua_api::{SimState, WowLuaEnv};
-use crate::startup::settle_headless_startup;
+use crate::startup::collect_lua_error_startup;
 use std::collections::BTreeMap;
 
 const ERRORS_BY_ADDON_ENV: &str = "WOW_SIM_LUA_ERRORS_BY_ADDON";
@@ -32,7 +32,7 @@ pub fn run_lua_errors(
     // Suppress stderr during startup events (errors are collected in SimState)
     let saved_stderr = suppress_stderr();
 
-    settle_headless_startup(env);
+    collect_lua_error_startup(env);
 
     restore_stderr(saved_stderr);
 
