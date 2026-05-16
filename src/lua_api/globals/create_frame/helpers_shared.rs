@@ -56,6 +56,11 @@ fn install_default_children(
     widget_type: WidgetType,
     frame_id: u64,
 ) -> LuaResult<()> {
+    if widget_type == WidgetType::EditBox {
+        register_named_child(state, frame_id, "Text", WidgetType::FontString)?;
+        return Ok(());
+    }
+
     if widget_type != WidgetType::Slider {
         return Ok(());
     }

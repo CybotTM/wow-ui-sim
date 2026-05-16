@@ -220,6 +220,23 @@ fn named_fontstring_is_globally_reachable() {
 }
 
 #[test]
+fn editbox_exposes_backing_fontstring_region() {
+    let env = env();
+    let (region_type, same_as_text_key): (String, bool) = env
+        .eval(
+            r#"
+            local editbox = CreateFrame("EditBox", "EditBoxRegionProbe", UIParent)
+            local region = editbox:GetRegions()
+            return region and region:GetObjectType() or "nil", region == editbox.Text
+            "#,
+        )
+        .expect("EditBox GetRegions probe should run");
+
+    assert_eq!(region_type, "FontString");
+    assert!(same_as_text_key);
+}
+
+#[test]
 fn reputation_filter_dropdown_opens_with_blizzard_menu_renderer() {
     let env = env();
     load_blizzard_addons(&env);
