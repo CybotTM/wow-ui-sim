@@ -106,25 +106,12 @@ fn wow_string_format(state: &mut LuaState) -> LuaResult<u32> {
         None => return delegate(state, original, &args),
     };
 
-    if format_requires_string_arg(&fmt) {
-        match args.get(1).copied() {
-            None => {
-                return Err(runtime_error(
-                    "bad argument #2 to '?' (string expected, got no value)",
-                ));
-            }
-            Some(Val::Nil) => {
-                return Err(runtime_error(
-                    "bad argument #2 to '?' (string expected, got nil)",
-                ));
-            }
-            _ => {}
-        }
-    }
+    validate_required_string_arg(&fmt, &args)?;
 
     // Fast path: plain format string.
     if !fmt.contains('F') && !fmt.contains('$') {
-        return delegate(state, original, &args);
+        let normalized_args = normalize_nil_numeric_args(&fmt, &args);
+        return delegate(state, original, &normalized_args);
     }
 
     let rest: Vec<Val> = args.iter().skip(1).copied().collect();
@@ -133,7 +120,8 @@ fn wow_string_format(state: &mut LuaState) -> LuaResult<u32> {
     let mut delegated: Vec<Val> = Vec::with_capacity(new_rest.len() + 1);
     delegated.push(new_fmt_val);
     delegated.extend(new_rest);
-    delegate(state, original, &delegated)
+    let normalized_args = normalize_nil_numeric_args(&new_fmt, &delegated);
+    delegate(state, original, &normalized_args)
 }
 
 fn read_stack_args(state: &LuaState) -> Vec<Val> {
@@ -178,14 +166,129 @@ fn format_requires_string_arg(fmt: &str) -> bool {
     false
 }
 
+fn validate_required_string_arg(fmt: &str, args: &[Val]) -> LuaResult<()> {
+    if !format_requires_string_arg(fmt) {
+        return Ok(());
+    }
+
+    match args.get(1).copied() {
+        None => Err(runtime_error(
+            "bad argument #2 to '?' (string expected, got no value)",
+        )),
+        Some(Val::Nil) => Err(runtime_error(
+            "bad argument #2 to '?' (string expected, got nil)",
+        )),
+        _ => Ok(()),
+    }
+}
+
+fn normalize_nil_numeric_args(fmt: &str, args: &[Val]) -> Vec<Val> {
+    if !args.iter().any(|arg| matches!(arg, Val::Nil)) {
+        return args.to_vec();
+    }
+
+    let mut normalized = args.to_vec();
+    for index in numeric_format_arg_indices(fmt) {
+        if matches!(normalized.get(index), Some(Val::Nil)) {
+            normalized[index] = Val::Num(0.0);
+        }
+    }
+    normalized
+}
+
+fn numeric_format_arg_indices(fmt: &str) -> Vec<usize> {
+    let bytes = fmt.as_bytes();
+    let mut indices = Vec::new();
+    let mut arg_index = 1;
+    let mut i = 0;
+
+    while i < bytes.len() {
+        if bytes[i] != b'%' {
+            i += 1;
+            continue;
+        }
+        if i + 1 < bytes.len() && bytes[i + 1] == b'%' {
+            i += 2;
+            continue;
+        }
+
+        let mut j = i + 1;
+        while j < bytes.len()
+            && matches!(
+                bytes[j] as char,
+                '-' | '+' | ' ' | '#' | '0' | '.' | '1'..='9'
+            )
+        {
+            j += 1;
+        }
+        if j >= bytes.len() {
+            break;
+        }
+
+        if matches!(
+            bytes[j] as char,
+            'c' | 'd' | 'i' | 'u' | 'o' | 'x' | 'X' | 'f' | 'e' | 'E' | 'g' | 'G'
+        ) {
+            indices.push(arg_index);
+        }
+
+        arg_index += 1;
+        i = j + 1;
+    }
+
+    indices
+}
+
 fn delegate(state: &mut LuaState, original: Val, args: &[Val]) -> LuaResult<u32> {
     match call_function_state(state, original, args) {
         Ok(value) => {
             state.push(value);
             Ok(1)
         }
-        Err(e) => Err(e),
+        Err(e) => {
+            trace_format_error(state, args);
+            Err(e)
+        }
     }
+}
+
+fn trace_format_error(state: &LuaState, args: &[Val]) {
+    if std::env::var_os("WOW_SIM_TRACE_STRING_FORMAT_ERRORS").is_none() {
+        return;
+    }
+
+    let fmt = args
+        .first()
+        .and_then(|value| describe_string_value(state, *value))
+        .unwrap_or_else(|| "<missing format>".to_string());
+    let arg_types = args
+        .iter()
+        .enumerate()
+        .skip(1)
+        .map(|(index, value)| format!("#{index}:{}", describe_value(state, *value)))
+        .collect::<Vec<_>>()
+        .join(", ");
+    eprintln!("[string.format] failed fmt={fmt:?} args=[{arg_types}]");
+}
+
+fn describe_value(state: &LuaState, value: Val) -> String {
+    match value {
+        Val::Nil => "nil".to_string(),
+        Val::Bool(value) => format!("boolean:{value}"),
+        Val::Num(value) => format!("number:{value}"),
+        Val::Str(_) => describe_string_value(state, value)
+            .map(|value| format!("string:{value:?}"))
+            .unwrap_or_else(|| "string:<missing>".to_string()),
+        _ => value.type_name().to_string(),
+    }
+}
+
+fn describe_string_value(state: &LuaState, value: Val) -> Option<String> {
+    let Val::Str(string_ref) = value else {
+        return None;
+    };
+    let bytes = state.gc.string_arena.get(string_ref)?.data();
+    Some(String::from_utf8_lossy(bytes).to_string())
 }
 
 #[cfg(test)]
@@ -205,6 +308,15 @@ mod tests {
             .eval(r#"return string.format("%2$s %1$s %.1F", "first", "second", 3.25)"#)
             .expect("patched format should still work");
         assert_eq!(out, "second first 3.2");
+    }
+
+    #[test]
+    fn nil_numeric_format_args_are_zero() {
+        let env = WowLuaEnv::new().expect("env");
+        let out: String = env
+            .eval(r#"return string.format("%d %.1f %2$d", nil, nil)"#)
+            .expect("nil numeric args should format as zero");
+        assert_eq!(out, "0 0.0 0");
     }
 }
 
