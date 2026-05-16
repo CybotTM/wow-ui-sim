@@ -130,17 +130,29 @@ fn with_addon<R>(
 }
 
 fn addon_metadata(addon: &crate::lua_api::AddonInfo, field: &str) -> Option<String> {
-    match field {
-        "Group" => Some(addon.folder_name.clone()),
-        "Title" => Some(addon.title.clone()),
-        "Notes" => (!addon.notes.is_empty()).then(|| addon.notes.clone()),
-        "Version" => addon
-            .metadata
-            .get(field)
-            .cloned()
-            .or_else(|| Some("@project-version@".to_string())),
-        _ => addon.metadata.get(field).cloned(),
+    if field.eq_ignore_ascii_case("Group") {
+        return Some(addon.folder_name.clone());
     }
+    if field.eq_ignore_ascii_case("Title") {
+        return Some(addon.title.clone());
+    }
+    if field.eq_ignore_ascii_case("Notes") {
+        return (!addon.notes.is_empty()).then(|| addon.notes.clone());
+    }
+    if field.eq_ignore_ascii_case("Version") {
+        let version = find_addon_metadata(addon, field);
+        return version.or_else(|| Some("@project-version@".to_string()));
+    }
+
+    find_addon_metadata(addon, field)
+}
+
+fn find_addon_metadata(addon: &crate::lua_api::AddonInfo, field: &str) -> Option<String> {
+    addon
+        .metadata
+        .iter()
+        .find(|(key, _)| key.eq_ignore_ascii_case(field))
+        .map(|(_, value)| value.clone())
 }
 
 fn push_addon_info(state: &mut LuaState, addon: &crate::lua_api::AddonInfo) -> u32 {

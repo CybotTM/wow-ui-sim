@@ -231,6 +231,11 @@ fn test_get_addon_metadata() {
         .unwrap();
     assert_eq!(version, "1.2.3");
 
+    let lowercase_version: String = env
+        .eval("return C_AddOns.GetAddOnMetadata('MyAddon', 'version')")
+        .unwrap();
+    assert_eq!(lowercase_version, "1.2.3");
+
     let prefix: String = env
         .eval("return C_AddOns.GetAddOnMetadata('MyAddon', 'X-Prefix')")
         .unwrap();
@@ -353,6 +358,11 @@ fn test_legacy_get_addon_metadata() {
         .eval("return GetAddOnMetadata('MyAddon', 'Title')")
         .unwrap();
     assert_eq!(title, "My Addon Title");
+
+    let version: String = env
+        .eval("return GetAddOnMetadata('MyAddon', 'version')")
+        .unwrap();
+    assert_eq!(version, "1.2.3");
 }
 
 // ============================================================================
