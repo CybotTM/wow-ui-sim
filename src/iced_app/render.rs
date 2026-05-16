@@ -249,7 +249,7 @@ impl App {
 
         let env = self.env.borrow();
         let mut font_sys = self.font_system.borrow_mut();
-        let strata_buckets = self.resolve_layout_and_buckets(&env, &mut font_sys);
+        let (strata_buckets, layout_changed) = self.resolve_layout_and_buckets(&env, &mut font_sys);
         let state = env.state().borrow();
 
         self.emit_dirty_strata_batches(
@@ -260,6 +260,9 @@ impl App {
             &state,
             &mut font_sys,
         );
+        if layout_changed {
+            *self.cached_hittable.borrow_mut() = None;
+        }
         self.rebuild_hit_grid_if_needed(&state, &strata_buckets, size);
         drop(state);
         self.store_rebuilt_strata_buckets(&env, strata_buckets);
@@ -510,10 +513,11 @@ impl App {
         &self,
         env: &crate::lua_api::WowLuaEnv,
         font_sys: &mut WowFontSystem,
-    ) -> Vec<Vec<u64>> {
+    ) -> (Vec<Vec<u64>>, bool) {
         let mut state = env.state().borrow_mut();
         let t0 = std::time::Instant::now();
         super::tooltip::update_tooltip_sizes(&mut state, font_sys);
+        let layout_changed = state.widgets.has_pending_layout_work();
         state.ensure_layout_rects();
         let layout_dur = t0.elapsed();
         let t1 = std::time::Instant::now();
@@ -525,7 +529,7 @@ impl App {
                 crate::logging::global_elapsed_prefix()
             );
         }
-        state.strata_buckets.take().unwrap()
+        (state.strata_buckets.take().unwrap(), layout_changed)
     }
 
     fn rebuild_hit_grid_if_needed(

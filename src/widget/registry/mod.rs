@@ -524,6 +524,11 @@ impl WidgetRegistry {
         }
     }
 
+    /// Whether the next layout pass can change one or more cached frame rects.
+    pub fn has_pending_layout_work(&self) -> bool {
+        !self.pending_layout_ids.is_empty() || !self.rect_dirty_ids.is_empty()
+    }
+
     /// Check if this specific frame (not ancestors) is in `rect_dirty_ids`.
     pub fn is_rect_dirty_self(&self, id: u64) -> bool {
         self.rect_dirty_ids.contains(&id)
