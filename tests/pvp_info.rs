@@ -64,3 +64,37 @@ fn pvp_info_methods_use_seeded_world_and_locklist_state() {
         .expect("C_PvP methods should be queryable");
     assert_eq!(result, "ok");
 }
+
+#[test]
+fn get_personal_rated_info_returns_retail_shaped_inert_tuple() {
+    let env = env();
+
+    let (count, rating, season_best, weekly_best, has_won, pvp_tier_is_nil): (
+        i32,
+        i32,
+        i32,
+        i32,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r##"
+            local rating, seasonBest, weeklyBest, seasonPlayed, seasonWon,
+                  weeklyPlayed, weeklyWon, lastWeeksBest, hasWon, pvpTier,
+                  ranking, roundsSeasonPlayed, roundsSeasonWon,
+                  roundsWeeklyPlayed, roundsWeeklyWon = GetPersonalRatedInfo(1)
+            return select("#", GetPersonalRatedInfo(1)),
+                   rating,
+                   seasonBest,
+                   weeklyBest,
+                   hasWon,
+                   pvpTier == nil
+            "##,
+        )
+        .unwrap();
+
+    assert_eq!(count, 15);
+    assert_eq!((rating, season_best, weekly_best), (0, 0, 0));
+    assert!(!has_won);
+    assert!(pvp_tier_is_nil);
+}

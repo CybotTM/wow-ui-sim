@@ -3,6 +3,7 @@
 
 use std::time::Instant;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::MirrorTimer;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("WowLuaEnv init")
@@ -37,6 +38,20 @@ fn unit_is_dead_tracks_party_member_dead_since() {
     }
     let b: bool = env.eval(r#"return UnitIsDeadOrGhost("party1")"#).unwrap();
     assert!(b);
+}
+
+#[test]
+fn unit_is_feign_death_tracks_player_mirror_timer() {
+    let env = env();
+    env.state().borrow_mut().world.mirror_timers.push(MirrorTimer {
+        name: "FEIGNDEATH".into(),
+        ..MirrorTimer::default()
+    });
+
+    let player_feigning: bool = env.eval(r#"return UnitIsFeignDeath("player")"#).unwrap();
+    let target_feigning: bool = env.eval(r#"return UnitIsFeignDeath("target")"#).unwrap();
+    assert!(player_feigning);
+    assert!(!target_feigning);
 }
 
 // ── UnitIsUnconscious ─────────────────────────────────────────────────────────

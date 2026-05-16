@@ -52,6 +52,26 @@ pub(super) fn get_pvp_last_honor_gain(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_personal_rated_info(state: &mut LuaState) -> LuaResult<u32> {
+    let _bracket_index = stack_i32(state, 1).unwrap_or(0);
+    state.push(Val::Num(0.0)); // rating
+    state.push(Val::Num(0.0)); // seasonBest
+    state.push(Val::Num(0.0)); // weeklyBest
+    state.push(Val::Num(0.0)); // seasonPlayed
+    state.push(Val::Num(0.0)); // seasonWon
+    state.push(Val::Num(0.0)); // weeklyPlayed
+    state.push(Val::Num(0.0)); // weeklyWon
+    state.push(Val::Num(0.0)); // lastWeeksBest
+    state.push(Val::Bool(false)); // hasWon
+    state.push(Val::Nil); // pvpTier
+    state.push(Val::Num(0.0)); // ranking
+    state.push(Val::Num(0.0)); // roundsSeasonPlayed
+    state.push(Val::Num(0.0)); // roundsSeasonWon
+    state.push(Val::Num(0.0)); // roundsWeeklyPlayed
+    state.push(Val::Num(0.0)); // roundsWeeklyWon
+    Ok(15)
+}
+
 pub(super) fn is_sub_zone_pvp(state: &mut LuaState) -> LuaResult<u32> {
     let flag = borrow_state(state)?.world.is_sub_zone_pvp;
     state.push(Val::Bool(flag));
@@ -170,6 +190,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsInActiveWorldPVP", is_in_active_world_pvp)?;
     LuaApiMut::register_function(lua, "GetPVPDesired", get_pvp_desired)?;
     LuaApiMut::register_function(lua, "GetPVPLastHonorGain", get_pvp_last_honor_gain)?;
+    LuaApiMut::register_function(lua, "GetPersonalRatedInfo", get_personal_rated_info)?;
     LuaApiMut::register_function(lua, "IsSubZonePVP", is_sub_zone_pvp)?;
     LuaApiMut::register_function(lua, "GetWorldPVPAreaInfo", get_world_pvp_area_info)?;
     LuaApiMut::register_function(lua, "GetHolidayBGInfo", get_holiday_bg_info)?;
