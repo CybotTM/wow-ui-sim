@@ -142,6 +142,8 @@ impl WowLuaEnv {
             remaining: iterations,
             cancelled: false,
             owner_addon,
+            callback_receives_timer: false,
+            callback_arg: None,
         };
         self.state.borrow_mut().rilua_timers.push_back(timer);
         Ok(id)
@@ -244,13 +246,36 @@ impl WowLuaEnv {
         (!matches!(callback, Val::Nil)).then_some(callback)
     }
 
-    fn fire_timer_callback(&self, owner_addon: Option<u16>, callback: Val) {
+    fn fire_timer_callback(
+        &self,
+        owner_addon: Option<u16>,
+        callback: Val,
+        timer_id: u64,
+        callback_receives_timer: bool,
+        callback_arg: Option<Val>,
+    ) {
         let start = Instant::now();
         let addon_name = self.addon_folder_name(owner_addon);
         self.state.borrow_mut().executing_addon_index = owner_addon;
         let call_result = {
             let mut lua = self.lua.borrow_mut();
-            call_rilua_function(&mut lua, callback, &[])
+            let args = if let Some(arg) = callback_arg {
+                vec![arg]
+            } else if callback_receives_timer {
+                match crate::lua_api::timer_layout::create_timer_handle_table(
+                    lua.state_mut(),
+                    timer_id,
+                ) {
+                    Ok(handle) => vec![handle],
+                    Err(error) => {
+                        call_error_handler(&mut lua, &error.to_string());
+                        Vec::new()
+                    }
+                }
+            } else {
+                Vec::new()
+            };
+            call_rilua_function(&mut lua, callback, &args)
         };
         if let Err(error) = call_result {
             let mut lua = self.lua.borrow_mut();
@@ -370,7 +395,13 @@ fn process_timer_queue(
             continue;
         };
 
-        env.fire_timer_callback(timer.owner_addon, callback);
+        env.fire_timer_callback(
+            timer.owner_addon,
+            callback,
+            timer.id,
+            timer.callback_receives_timer,
+            timer.callback_arg,
+        );
         fired += 1;
 
         if reschedule_timer(&mut timer, now) {

@@ -73,6 +73,8 @@ fn defer_lfg_search_results_event(state: &mut LuaState) -> LuaResult<()> {
             remaining: None,
             cancelled: false,
             owner_addon,
+            callback_receives_timer: false,
+            callback_arg: None,
         });
     Ok(())
 }

@@ -160,6 +160,10 @@ pub struct RiluaPendingTimer {
     pub cancelled: bool,
     /// Addon that created this timer.
     pub owner_addon: Option<u16>,
+    /// Whether the callback receives the timer handle as its first argument.
+    pub callback_receives_timer: bool,
+    /// Original timer handle table passed back to NewTimer/NewTicker callbacks.
+    pub callback_arg: Option<Val>,
 }
 
 // ── C_Timer.After ────────────────────────────────────────────────────────────
@@ -200,6 +204,8 @@ fn timer_after(state: &mut LuaState) -> LuaResult<u32> {
         remaining: None,
         cancelled: false,
         owner_addon,
+        callback_receives_timer: false,
+        callback_arg: None,
     };
 
     {
@@ -218,7 +224,7 @@ fn timer_after(state: &mut LuaState) -> LuaResult<u32> {
 ///
 /// The table has a `__id` field (the timer ID as a number) and a `Cancel`
 /// function that nils out the callback entry, marking the timer as cancelled.
-fn create_timer_handle_table(state: &mut LuaState, timer_id: u64) -> LuaResult<Val> {
+pub(crate) fn create_timer_handle_table(state: &mut LuaState, timer_id: u64) -> LuaResult<Val> {
     let handle = TableBuilder::new(state)
         .set("__id", timer_id)?
         .set_function("Cancel", timer_handle_cancel)?
@@ -303,6 +309,7 @@ fn timer_new_ticker(state: &mut LuaState) -> LuaResult<u32> {
 
     let id = next_timer_id();
     store_timer_callback(state, id, callback);
+    let handle = create_timer_handle_table(state, id)?;
 
     let interval = Duration::from_secs_f64(seconds);
     let timer = RiluaPendingTimer {
@@ -312,10 +319,11 @@ fn timer_new_ticker(state: &mut LuaState) -> LuaResult<u32> {
         remaining: iterations,
         cancelled: false,
         owner_addon: None,
+        callback_receives_timer: true,
+        callback_arg: Some(handle),
     };
     enqueue_timer(state, timer)?;
 
-    let handle = create_timer_handle_table(state, id)?;
     state.push(handle);
     Ok(1)
 }
@@ -329,6 +337,7 @@ fn timer_new_timer(state: &mut LuaState) -> LuaResult<u32> {
 
     let id = next_timer_id();
     store_timer_callback(state, id, callback);
+    let handle = create_timer_handle_table(state, id)?;
 
     let timer = RiluaPendingTimer {
         id,
@@ -337,10 +346,11 @@ fn timer_new_timer(state: &mut LuaState) -> LuaResult<u32> {
         remaining: None,
         cancelled: false,
         owner_addon: None,
+        callback_receives_timer: true,
+        callback_arg: Some(handle),
     };
     enqueue_timer(state, timer)?;
 
-    let handle = create_timer_handle_table(state, id)?;
     state.push(handle);
     Ok(1)
 }

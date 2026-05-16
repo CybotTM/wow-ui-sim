@@ -142,6 +142,8 @@ fn schedule_lfg_queue_pop(state: &mut LuaState, delay: f64) -> LuaResult<()> {
             remaining: None,
             cancelled: false,
             owner_addon,
+            callback_receives_timer: false,
+            callback_arg: None,
         });
     Ok(())
 }
