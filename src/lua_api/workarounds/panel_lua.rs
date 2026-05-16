@@ -445,3 +445,86 @@ if type(DamageMeter) == "table" and type(DamageMeter.ForEachSessionWindow) == "f
     end)
 end
 "#;
+
+pub(super) const SETTINGS_CANVAS_LAYOUT_HIDE_LUA: &str = r#"
+local function __wow_hide_settings_canvas_frame(frame, layout)
+    if type(frame) ~= "table" or type(frame.Hide) ~= "function" then
+        return
+    end
+
+    local panel = rawget(_G, "SettingsPanel")
+    local isCurrentCanvas = false
+    if type(panel) == "table"
+        and type(panel.IsShown) == "function"
+        and panel:IsShown()
+        and type(panel.GetCurrentLayout) == "function"
+    then
+        local ok, currentLayout = pcall(panel.GetCurrentLayout, panel)
+        isCurrentCanvas = ok and currentLayout == layout
+    end
+
+    if not isCurrentCanvas then
+        frame:Hide()
+    end
+end
+
+local function __wow_hide_registered_settings_canvas_frames()
+    local panel = rawget(_G, "SettingsPanel")
+    if type(panel) ~= "table"
+        or type(panel.GetAllCategories) ~= "function"
+        or type(panel.GetLayout) ~= "function"
+    then
+        return
+    end
+
+    local ok, categories = pcall(panel.GetAllCategories, panel)
+    if not ok or type(categories) ~= "table" then
+        return
+    end
+
+    for _, category in ipairs(categories) do
+        local layoutOk, layout = pcall(panel.GetLayout, panel, category)
+        if layoutOk
+            and type(layout) == "table"
+            and type(layout.GetFrame) == "function"
+            and type(layout.GetLayoutType) == "function"
+            and SettingsLayoutMixin
+            and layout:GetLayoutType() == SettingsLayoutMixin.LayoutType.Canvas
+        then
+            local frameOk, frame = pcall(layout.GetFrame, layout)
+            if frameOk then
+                __wow_hide_settings_canvas_frame(frame, layout)
+            end
+        end
+    end
+end
+
+local function __wow_patch_settings_canvas_registration()
+    if type(Settings) ~= "table" or rawget(Settings, "__wow_canvas_layout_hide_patch") then
+        return
+    end
+
+    if type(Settings.RegisterCanvasLayoutCategory) == "function" then
+        local original = Settings.RegisterCanvasLayoutCategory
+        Settings.RegisterCanvasLayoutCategory = function(frame, ...)
+            local category, layout = original(frame, ...)
+            __wow_hide_settings_canvas_frame(frame, layout)
+            return category, layout
+        end
+    end
+
+    if type(Settings.RegisterCanvasLayoutSubcategory) == "function" then
+        local original = Settings.RegisterCanvasLayoutSubcategory
+        Settings.RegisterCanvasLayoutSubcategory = function(parentCategory, frame, ...)
+            local category, layout = original(parentCategory, frame, ...)
+            __wow_hide_settings_canvas_frame(frame, layout)
+            return category, layout
+        end
+    end
+
+    rawset(Settings, "__wow_canvas_layout_hide_patch", true)
+end
+
+__wow_patch_settings_canvas_registration()
+__wow_hide_registered_settings_canvas_frames()
+"#;

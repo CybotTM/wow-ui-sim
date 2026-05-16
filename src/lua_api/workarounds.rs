@@ -136,6 +136,10 @@ const POST_LOAD_WORKAROUNDS: &[WorkaroundStep] = &[
         label: "patch_auth_challenge_frame_parent",
         apply: patch_auth_challenge_frame_parent_from_env,
     },
+    WorkaroundStep {
+        label: "patch_settings_canvas_layout_visibility",
+        apply: patch_settings_canvas_layout_visibility,
+    },
 ];
 
 pub fn apply(env: &crate::lua_api::WowLuaEnv) {
@@ -154,6 +158,10 @@ fn init_edit_mode_layout(env: &crate::lua_api::WowLuaEnv) {
 
 fn init_chat_type_colors(env: &crate::lua_api::WowLuaEnv) {
     crate::lua_api::chat_init::init_chat_type_colors(env);
+}
+
+fn patch_settings_canvas_layout_visibility(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(SETTINGS_CANVAS_LAYOUT_HIDE_LUA);
 }
 
 fn patch_housing_dashboard_preload_from_env(env: &crate::lua_api::WowLuaEnv) {
@@ -279,4 +287,78 @@ fn log_step(env: &crate::lua_api::WowLuaEnv, label: &str, apply_step: impl FnOnc
             started.elapsed()
         ),
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SETTINGS_CANVAS_LAYOUT_HIDE_LUA;
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn settings_canvas_registration_hides_frame_until_displayed() {
+        let env = WowLuaEnv::new().expect("env should initialize");
+        env.exec(
+            r#"
+            SettingsLayoutMixin = { LayoutType = { Canvas = "Canvas" } }
+
+            local categories = {}
+            local layouts = {}
+
+            SettingsPanel = {
+                shown = false,
+                currentLayout = nil,
+                GetAllCategories = function()
+                    return categories
+                end,
+                GetLayout = function(_, category)
+                    return layouts[category]
+                end,
+                IsShown = function(self)
+                    return self.shown
+                end,
+                GetCurrentLayout = function(self)
+                    return self.currentLayout
+                end,
+            }
+
+            Settings = {
+                RegisterCanvasLayoutCategory = function(frame, name)
+                    local category = { name = name }
+                    local layout = {
+                        frame = frame,
+                        GetFrame = function(self)
+                            return self.frame
+                        end,
+                        GetLayoutType = function()
+                            return SettingsLayoutMixin.LayoutType.Canvas
+                        end,
+                    }
+                    table.insert(categories, category)
+                    layouts[category] = layout
+                    return category, layout
+                end,
+            }
+            "#,
+        )
+        .expect("fake settings surface should install");
+
+        env.exec(SETTINGS_CANVAS_LAYOUT_HIDE_LUA)
+            .expect("settings canvas workaround should apply");
+
+        let hidden_after_register: bool = env
+            .eval(
+                r#"
+                local frame = CreateFrame("Frame", "SettingsCanvasLeakProbe")
+                frame:Show()
+                local category, layout = Settings.RegisterCanvasLayoutCategory(frame, "Probe")
+                return not frame:IsShown()
+                "#,
+            )
+            .expect("registration probe should run");
+
+        assert!(
+            hidden_after_register,
+            "settings canvas frame should be hidden after registration"
+        );
+    }
 }
