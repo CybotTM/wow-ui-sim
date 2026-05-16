@@ -130,6 +130,16 @@ if GetDungeonDifficultyID == nil then
         return DifficultyUtil.ID.DungeonNormal
     end
 end
+if GetRaidDifficultyID == nil then
+    function GetRaidDifficultyID()
+        return DifficultyUtil.ID.PrimaryRaidNormal
+    end
+end
+if GetLegacyRaidDifficultyID == nil then
+    function GetLegacyRaidDifficultyID()
+        return 1
+    end
+end
 if GetDifficultyInfo == nil then
     function GetDifficultyInfo(difficultyID)
         return DifficultyUtil.GetDifficultyName(difficultyID) or PLAYER_DIFFICULTY1 or "Normal",

@@ -15,6 +15,12 @@ if IsInventoryItemProfessionBag == nil then
         return false
     end
 end
+
+if IsArtifactRelicItem == nil then
+    function IsArtifactRelicItem()
+        return false
+    end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {

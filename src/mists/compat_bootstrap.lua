@@ -28,9 +28,19 @@ if rawget(_G, "ClassicExpansionAtMost") == nil then
   end
 end
 
+function GetBuildInfo()
+  return "5.5.3", "61837", "May 16 2026", 50503, "", " "
+end
+
 if LE_UNIT_STAT_SPIRIT == nil then
   LE_UNIT_STAT_SPIRIT = 5
 end
+
+if LE_ITEM_BIND_NONE == nil then LE_ITEM_BIND_NONE = 0 end
+if LE_ITEM_BIND_ON_ACQUIRE == nil then LE_ITEM_BIND_ON_ACQUIRE = 1 end
+if LE_ITEM_BIND_ON_EQUIP == nil then LE_ITEM_BIND_ON_EQUIP = 2 end
+if LE_ITEM_BIND_ON_USE == nil then LE_ITEM_BIND_ON_USE = 3 end
+if LE_ITEM_BIND_QUEST == nil then LE_ITEM_BIND_QUEST = 4 end
 
 if rawget(_G, "WHAT_HAS_CHANGED") == nil then
   WHAT_HAS_CHANGED = "What's Changed"
@@ -496,6 +506,10 @@ do
     local row = quality_colors[quality] or quality_colors[1]
     return row[1], row[2], row[3], row[4]
   end
+end
+
+if Enum and Enum.ItemQuality and Enum.ItemQuality.Good == nil then
+  Enum.ItemQuality.Good = Enum.ItemQuality.Uncommon
 end
 
 if rawget(_G, "C_LootHistory") == nil then

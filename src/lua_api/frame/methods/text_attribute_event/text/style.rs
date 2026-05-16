@@ -182,6 +182,68 @@ pub(crate) fn get_text_color(state: &mut LuaState) -> LuaResult<u32> {
     Ok(4)
 }
 
+pub(crate) fn set_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let r = val_to_f32(stack_val(state, 2), 0.0);
+    let g = val_to_f32(stack_val(state, 3), 0.0);
+    let b = val_to_f32(stack_val(state, 4), 0.0);
+    let a = val_to_f32(stack_val(state, 5), 1.0);
+    let new_color = crate::widget::Color::new(r, g, b, a);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.shadow_color = new_color;
+    }
+    Ok(0)
+}
+
+pub(crate) fn get_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let (r, g, b, a) = sim
+        .widgets
+        .get(id)
+        .map(|f| {
+            (
+                f.shadow_color.r,
+                f.shadow_color.g,
+                f.shadow_color.b,
+                f.shadow_color.a,
+            )
+        })
+        .unwrap_or((0.0_f32, 0.0_f32, 0.0_f32, 0.0_f32));
+    drop(sim);
+    state.push(Val::Num(r as f64));
+    state.push(Val::Num(g as f64));
+    state.push(Val::Num(b as f64));
+    state.push(Val::Num(a as f64));
+    Ok(4)
+}
+
+pub(crate) fn set_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let x = val_to_f32(stack_val(state, 2), 0.0);
+    let y = val_to_f32(stack_val(state, 3), 0.0);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.shadow_offset = (x, y);
+    }
+    Ok(0)
+}
+
+pub(crate) fn get_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let (x, y) = sim
+        .widgets
+        .get(id)
+        .map(|f| f.shadow_offset)
+        .unwrap_or((0.0_f32, 0.0_f32));
+    drop(sim);
+    state.push(Val::Num(x as f64));
+    state.push(Val::Num(y as f64));
+    Ok(2)
+}
+
 pub(crate) fn set_justify_h(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(justification) = val_to_string(state, stack_val(state, 2)) else {

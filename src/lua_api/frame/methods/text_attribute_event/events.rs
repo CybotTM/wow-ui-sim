@@ -303,15 +303,23 @@ fn script_supported(state: &LuaState, frame_id: u64, handler_name: &str) -> bool
     let Ok(sim) = borrow_state(state) else {
         return false;
     };
-    let Some(widget_type) = sim.widgets.get(frame_id).map(|frame| frame.widget_type) else {
+    let Some(frame) = sim.widgets.get(frame_id) else {
         return false;
     };
-    script_supported_for_widget(widget_type, handler_name)
+    script_supported_for_widget(
+        frame.widget_type,
+        frame.object_type_name.as_deref(),
+        handler_name,
+    )
 }
 
-fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> bool {
+fn script_supported_for_widget(
+    widget_type: WidgetType,
+    object_type_name: Option<&str>,
+    handler_name: &str,
+) -> bool {
     is_widget_agnostic_script_handler(handler_name)
-        || is_widget_specific_script_handler(widget_type, handler_name)
+        || is_widget_specific_script_handler(widget_type, object_type_name, handler_name)
 }
 
 fn is_widget_agnostic_script_handler(handler_name: &str) -> bool {
@@ -320,7 +328,11 @@ fn is_widget_agnostic_script_handler(handler_name: &str) -> bool {
         || is_hyperlink_script_handler(handler_name)
 }
 
-fn is_widget_specific_script_handler(widget_type: WidgetType, handler_name: &str) -> bool {
+fn is_widget_specific_script_handler(
+    widget_type: WidgetType,
+    object_type_name: Option<&str>,
+    handler_name: &str,
+) -> bool {
     match handler_name {
         "OnClick" | "PreClick" | "PostClick" => {
             matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
@@ -343,16 +355,23 @@ fn is_widget_specific_script_handler(widget_type: WidgetType, handler_name: &str
         | "OnTooltipAddMoney"
         | "OnTooltipSetDefaultAnchor"
         | "OnTooltipSetFrameStack"
+        | "OnTooltipSetQuest"
         | "OnTooltipSetSpell"
         | "OnTooltipSetItem"
         | "OnTooltipSetUnit"
         | "OnTooltipSetFramestack" => widget_type == WidgetType::GameTooltip,
-        "OnModelLoaded" => matches!(
-            widget_type,
-            WidgetType::Model | WidgetType::ModelScene | WidgetType::PlayerModel
-        ),
+        "OnModelLoaded" | "OnModelCleared" | "OnDressModel" => {
+            supports_model_script_handler(widget_type, object_type_name)
+        }
         _ => false,
     }
+}
+
+fn supports_model_script_handler(widget_type: WidgetType, object_type_name: Option<&str>) -> bool {
+    matches!(
+        widget_type,
+        WidgetType::Model | WidgetType::ModelScene | WidgetType::PlayerModel
+    ) || object_type_name == Some("ModelSceneActor")
 }
 
 fn supports_enable_disable_script(widget_type: WidgetType) -> bool {
@@ -694,14 +713,35 @@ mod tests {
 
     #[test]
     fn script_supported_for_widget_combines_shared_and_widget_specific_handlers() {
-        assert!(script_supported_for_widget(WidgetType::Frame, "OnShow"));
+        assert!(script_supported_for_widget(
+            WidgetType::Frame,
+            None,
+            "OnShow"
+        ));
         assert!(script_supported_for_widget(
             WidgetType::EditBox,
+            None,
             "OnTextChanged"
         ));
         assert!(!script_supported_for_widget(
             WidgetType::Frame,
+            None,
             "OnTextChanged"
+        ));
+        assert!(script_supported_for_widget(
+            WidgetType::PlayerModel,
+            None,
+            "OnModelLoaded"
+        ));
+        assert!(script_supported_for_widget(
+            WidgetType::Frame,
+            Some("ModelSceneActor"),
+            "OnModelLoaded"
+        ));
+        assert!(!script_supported_for_widget(
+            WidgetType::Frame,
+            None,
+            "OnModelLoaded"
         ));
     }
 }

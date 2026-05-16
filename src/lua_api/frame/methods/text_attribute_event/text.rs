@@ -14,9 +14,10 @@ pub(super) use formatting::{
 use metrics::{approximate_text_height, approximate_text_width};
 pub(super) use style::{
     can_non_space_wrap, can_word_wrap, get_hyperlink_format, get_hyperlinks_enabled,
-    get_indented_word_wrap, get_justify_h, get_justify_v, get_max_lines, get_text_color,
-    get_text_scale, get_word_wrap, set_fixed_color, set_hyperlink_format, set_hyperlinks_enabled,
-    set_indented_word_wrap, set_justify_h, set_justify_v, set_max_lines, set_non_space_wrap,
+    get_indented_word_wrap, get_justify_h, get_justify_v, get_max_lines, get_shadow_color,
+    get_shadow_offset, get_text_color, get_text_scale, get_word_wrap, set_fixed_color,
+    set_hyperlink_format, set_hyperlinks_enabled, set_indented_word_wrap, set_justify_h,
+    set_justify_v, set_max_lines, set_non_space_wrap, set_shadow_color, set_shadow_offset,
     set_text_color, set_text_scale, set_word_wrap,
 };
 

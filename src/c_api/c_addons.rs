@@ -142,7 +142,6 @@ fn addon_metadata(addon: &crate::lua_api::AddonInfo, field: &str) -> Option<Stri
         let version = find_addon_metadata(addon, field);
         return version.or_else(|| Some("@project-version@".to_string()));
     }
-
     find_addon_metadata(addon, field)
 }
 

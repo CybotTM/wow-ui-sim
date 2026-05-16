@@ -652,3 +652,24 @@ fn test_model_scene_actor_management_tracks_created_indexed_and_taken_actors() {
         Some("ModelSceneActor")
     );
 }
+
+#[test]
+fn test_model_scene_actor_accepts_model_loaded_script() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local scene = CreateFrame("ModelScene", "TestModelSceneActorScripts", UIParent)
+        local actor = scene:CreateActor("ScriptedActor", "ModelSceneActorTemplate")
+        actor:SetScript("OnModelLoaded", function() end)
+        _G.actor_model_loaded_script_registered = actor:HasScript("OnModelLoaded")
+    "#,
+    )
+    .unwrap();
+
+    let registered: bool = env
+        .eval("return _G.actor_model_loaded_script_registered")
+        .unwrap();
+
+    assert!(registered);
+}

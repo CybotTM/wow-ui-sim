@@ -87,6 +87,31 @@ fn mists_bootstrap_reports_pandaria_as_the_current_classic_expansion() {
 }
 
 #[test]
+fn mists_bootstrap_exposes_classic_addon_compatibility_globals() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let result: (bool, bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local _, _, _, build = GetBuildInfo()
+            return build < 60000,
+                GetRaidDifficultyID() == 14,
+                GetLegacyRaidDifficultyID() == 1,
+                type(GetTimePreciseSec()) == "number",
+                Enum.ItemQuality.Good == Enum.ItemQuality.Uncommon,
+                type(time({ year = 2026 })) == "number"
+            "#,
+        )
+        .expect("Mists addon compatibility globals should be callable");
+
+    assert_eq!(
+        result,
+        (true, true, true, true, true, true),
+        "Mists should expose classic-era globals used by installed addons"
+    );
+}
+
+#[test]
 fn mists_toc_game_token_resolves_to_mists_subdirectory() {
     let toc = TocFile::parse(
         std::path::Path::new("Blizzard_CharacterFrame"),

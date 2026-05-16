@@ -1,6 +1,6 @@
 //! Draw layer and shadow methods.
 
-use super::super::shared::{opt_bool, opt_string};
+use super::super::shared::{opt_bool, opt_f32, opt_string};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
 use crate::lua_bridge::{IntoStack, stack_val};
 use crate::widget::Color;
@@ -67,8 +67,8 @@ pub(super) fn get_draw_layer(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let x = number_arg(state, 2, 0.0);
-    let y = number_arg(state, 3, 0.0);
+    let x = opt_f32(state, 2).unwrap_or(0.0);
+    let y = opt_f32(state, 3).unwrap_or(0.0);
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.shadow_offset = (x, y);
@@ -90,15 +90,13 @@ pub(super) fn get_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let color = Color::new(
-        number_arg(state, 2, 0.0),
-        number_arg(state, 3, 0.0),
-        number_arg(state, 4, 0.0),
-        number_arg(state, 5, 1.0),
-    );
+    let r = opt_f32(state, 2).unwrap_or(0.0);
+    let g = opt_f32(state, 3).unwrap_or(0.0);
+    let b = opt_f32(state, 4).unwrap_or(0.0);
+    let a = opt_f32(state, 5).unwrap_or(1.0);
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.shadow_color = color;
+        frame.shadow_color = Color::new(r, g, b, a);
     }
     Ok(0)
 }
@@ -119,11 +117,4 @@ pub(super) fn get_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
         color.a as f64,
     )
         .into_stack(state)
-}
-
-fn number_arg(state: &LuaState, index: i32, default: f32) -> f32 {
-    match stack_val(state, index) {
-        Val::Num(value) => value as f32,
-        _ => default,
-    }
 }

@@ -73,6 +73,10 @@ fn register_font_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult
     table_set_rust_fn_static(state, table, "SetFontHeight", text::set_font_height)?;
     table_set_rust_fn_static(state, table, "SetTextHeight", text::set_text_height)?;
     table_set_rust_fn_static(state, table, "GetFontHeight", text::get_font_height)?;
+    table_set_rust_fn_static(state, table, "SetShadowColor", text::set_shadow_color)?;
+    table_set_rust_fn_static(state, table, "GetShadowColor", text::get_shadow_color)?;
+    table_set_rust_fn_static(state, table, "SetShadowOffset", text::set_shadow_offset)?;
+    table_set_rust_fn_static(state, table, "GetShadowOffset", text::get_shadow_offset)?;
     Ok(())
 }
 

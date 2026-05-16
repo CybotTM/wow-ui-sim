@@ -1,7 +1,10 @@
+//! Tests for addon API functions (addon_api.rs).
+
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::Path;
 use std::sync::Mutex;
+
 use wow_ui_sim::lua_api::AddonInfo;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -28,6 +31,7 @@ fn env_with_addons() -> WowLuaEnv {
                 ("X-Prefix".to_string(), "MyPrefix".to_string()),
                 ("X-Acronym".to_string(), "MA".to_string()),
                 ("Version".to_string(), "1.2.3".to_string()),
+                ("X-oUF".to_string(), "ElvUF".to_string()),
             ]),
             ..Default::default()
         });
@@ -275,6 +279,11 @@ fn test_get_addon_metadata() {
         .eval("return C_AddOns.GetAddOnMetadata('MyAddon', 'X-Acronym')")
         .unwrap();
     assert_eq!(acronym, "MA");
+
+    let custom: String = env
+        .eval("return C_AddOns.GetAddOnMetadata('MyAddon', 'X-oUF')")
+        .unwrap();
+    assert_eq!(custom, "ElvUF");
 }
 
 #[test]

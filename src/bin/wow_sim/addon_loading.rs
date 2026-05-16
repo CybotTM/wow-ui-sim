@@ -327,7 +327,9 @@ fn loadable_toc_path(path: &Path, screen: ScreenKind) -> Option<PathBuf> {
     let supported_game_type = !toc.is_ptr_only() && !toc.is_game_type_restricted();
     let supported_interface = load_out_of_date_addons()
         || toc.supports_interface_version(wow_ui_sim::toc::RETAIL_INTERFACE_VERSION);
-    (supports_screen && supported_game_type && supported_interface).then_some(toc_path)
+    let eager_addon = !toc.is_load_on_demand();
+    (supports_screen && supported_game_type && supported_interface && eager_addon)
+        .then_some(toc_path)
 }
 
 fn load_out_of_date_addons() -> bool {

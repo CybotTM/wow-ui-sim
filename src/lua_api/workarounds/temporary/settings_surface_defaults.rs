@@ -291,7 +291,7 @@ do
         end
 
         if rawget(Settings, "RegisterAddOnCategory") == nil then
-            function Settings.RegisterAddOnCategory(_category) end
+            function Settings.RegisterAddOnCategory(category) return category end
         end
 
         local audioLayout = ensure_layout(audioCategory)

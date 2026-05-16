@@ -274,6 +274,7 @@ fn register_loading_addon(
     state.loading_addon_index = Some(addon_idx);
     if let Some(addon) = state.addons.get_mut(addon_idx as usize) {
         addon.use_secure_env = toc.is_secure_env();
+        addon.metadata = toc.metadata.clone();
         addon.dependencies = toc.dependencies();
         addon.default_enabled = toc.default_enabled();
     }
