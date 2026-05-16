@@ -156,6 +156,7 @@ fn register_misc_content_methods(state: &mut LuaState, table_ref: GcRef<Table>) 
             ("GetPetAction", c_tooltip_get_pet_action),
             ("GetShapeshift", c_tooltip_get_shapeshift),
             ("GetMountBySpellID", c_tooltip_get_mount_by_spell_id),
+            ("GetCompanionPet", c_tooltip_get_companion_pet),
             ("GetTalent", c_tooltip_get_talent),
             ("GetToyByItemID", c_tooltip_get_toy_by_item_id),
             ("GetHeirloomByItemID", c_tooltip_get_heirloom_by_item_id),

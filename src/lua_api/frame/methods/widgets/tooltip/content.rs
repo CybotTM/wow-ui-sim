@@ -360,6 +360,13 @@ pub(super) fn set_mount_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_companion_pet(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let pet_id = stack_val(state, 2);
+    let _ = populate_tooltip_from_method(state, tooltip_id, "GetCompanionPet", &[pet_id], None)?;
+    Ok(0)
+}
+
 pub(super) fn set_hyperlink(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
     let Some(link) = opt_string(state, 2) else {

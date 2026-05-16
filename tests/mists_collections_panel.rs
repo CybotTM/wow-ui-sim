@@ -177,6 +177,60 @@ fn mists_collections_rows_drive_mount_toy_and_heirloom_actions() {
     assert_no_lua_errors(&stdout, &stderr);
 }
 
+#[test]
+fn mists_collections_pet_row_selects_and_shows_tooltip() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(wow_sim_binary())
+        .args([
+            "--no-addons",
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            ToggleCollectionsJournal()
+            CollectionsJournal_SetTab(CollectionsJournal, 2)
+            CollectionsJournal_UpdateSelectedTab(CollectionsJournal)
+            PetJournal_UpdatePetList()
+
+            local row = PetJournal.ScrollBox:FindFrameByPredicate(function(frame)
+                return frame.index == 2
+            end)
+            if not row or not row:IsShown() or not row.petID then
+                error("second pet row is not visible")
+            end
+            if type(row:GetScript("OnClick")) ~= "function" then
+                error("pet row has no OnClick handler")
+            end
+
+            row:GetScript("OnClick")(row, "LeftButton")
+            if PetJournalPetCard.petID ~= row.petID or PetJournalPetCard.petIndex ~= row.index then
+                error("pet row click did not select its pet card")
+            end
+
+            local dragButton = row.dragButton
+            if not dragButton or type(dragButton:GetScript("OnEnter")) ~= "function" then
+                error("pet row drag button has no tooltip handler")
+            end
+            dragButton:GetScript("OnEnter")(dragButton)
+            if not GameTooltip:IsShown() or GameTooltip:NumLines() == 0 then
+                error("pet row tooltip did not populate")
+            end
+            "#,
+            "lua-errors",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+}
+
 fn assert_no_lua_errors(stdout: &str, stderr: &str) {
     assert!(
         stdout.trim().ends_with("[]")

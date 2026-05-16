@@ -1,5 +1,6 @@
 use super::super::{
-    LINE_TYPE_SPELL_NAME, TOOLTIP_TYPE_ITEM, TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT_AURA,
+    LINE_TYPE_SPELL_NAME, TOOLTIP_TYPE_COMPANION_PET, TOOLTIP_TYPE_ITEM, TOOLTIP_TYPE_SPELL,
+    TOOLTIP_TYPE_UNIT_AURA,
 };
 use super::builders::{
     empty_tooltip, pet_action_spell_id, push_plain_line, push_tooltip_line, tooltip_for_item_id,
@@ -205,6 +206,41 @@ pub(super) fn c_tooltip_get_mount_by_spell_id(state: &mut LuaState) -> LuaResult
     let tooltip = tooltip_for_mount_spell_id(state, spell_id);
     state.push(tooltip);
     Ok(1)
+}
+
+pub(super) fn c_tooltip_get_companion_pet(state: &mut LuaState) -> LuaResult<u32> {
+    let pet_id = Option::<String>::from_stack(state, 1)?;
+    let tooltip = pet_id
+        .as_deref()
+        .and_then(|pet_id| tooltip_for_companion_pet(state, pet_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_COMPANION_PET));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn tooltip_for_companion_pet(state: &mut LuaState, pet_id: &str) -> Option<Val> {
+    let pet = {
+        let sim = borrow_state(state).ok()?;
+        sim.world
+            .pets
+            .iter()
+            .find(|pet| pet.pet_id == pet_id)
+            .cloned()
+    }?;
+
+    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_COMPANION_PET);
+    let lines = table_get(state, tooltip, "lines");
+    push_plain_line(state, lines, 1, &pet.name);
+    push_plain_line(
+        state,
+        lines,
+        2,
+        &format!("Level {} Battle Pet", pet.level.max(1)),
+    );
+    let pet_id = create_string(state, &pet.pet_id);
+    table_set(state, tooltip, "id", pet_id);
+    table_set(state, tooltip, "speciesID", Val::Num(pet.species_id as f64));
+    Some(tooltip)
 }
 
 pub(super) fn c_tooltip_get_toy_by_item_id(state: &mut LuaState) -> LuaResult<u32> {
