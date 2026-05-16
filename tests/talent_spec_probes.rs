@@ -22,6 +22,15 @@ fn get_talent_info_returns_nil() {
     assert_eq!(v, None);
 }
 
+#[test]
+fn get_talent_info_by_specialization_returns_nil() {
+    let env = env();
+    let v: Option<String> = env
+        .eval("return GetTalentInfoBySpecialization(1, 1, 1)")
+        .unwrap();
+    assert_eq!(v, None);
+}
+
 // ── Spellbook tabs ────────────────────────────────────────────────────────────
 
 #[test]

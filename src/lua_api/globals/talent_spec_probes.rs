@@ -5,6 +5,8 @@
 //! - `GetNumTalentTabs()`         → 0 (pre-MoP talent trees were dropped;
 //!   modern addons that still probe this expect a falsy / zero result).
 //! - `GetTalentInfo(tab, index)`  → nil — no pre-MoP tree to query.
+//! - `GetTalentInfoBySpecialization(...)` → nil — legacy talent-row helper,
+//!   same unsupported grid as `GetTalentInfo`.
 //! - `GetNumSpellTabs()`          → 1 (the class spellbook tab; specs /
 //!   pet tabs aren't modelled here).
 //! - `GetSpellTabInfo(tab)`       → `(name, icon, offset, numSpells,
@@ -40,6 +42,13 @@ fn get_num_talent_tabs(state: &mut LuaState) -> LuaResult<u32> {
 /// `GetTalentInfo(tabIndex, talentIndex)` — nil because the sim
 /// doesn't model the pre-MoP tree.
 fn get_talent_info(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+/// `GetTalentInfoBySpecialization(...)` — nil because the sim
+/// doesn't model the obsolete talent-row grid.
+fn get_talent_info_by_specialization(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Nil);
     Ok(1)
 }
@@ -130,6 +139,11 @@ fn get_selected_skill(state: &mut LuaState) -> LuaResult<u32> {
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetNumTalentTabs", get_num_talent_tabs)?;
     LuaApiMut::register_function(lua, "GetTalentInfo", get_talent_info)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetTalentInfoBySpecialization",
+        get_talent_info_by_specialization,
+    )?;
     LuaApiMut::register_function(lua, "GetNumSpellTabs", get_num_spell_tabs)?;
     LuaApiMut::register_function(lua, "GetSpellTabInfo", get_spell_tab_info)?;
     LuaApiMut::register_function(lua, "GetPvpTalentSlotInfo", get_pvp_talent_slot_info)?;
