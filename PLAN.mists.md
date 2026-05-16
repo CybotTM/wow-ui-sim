@@ -98,7 +98,7 @@
 - [x] Fix the remaining Mists main backpack visual regression where empty backpack slot art appears compressed/overlaid even after `SetBackpackToken` no longer errors.
 - [x] Re-fix the Mists main backpack slot chrome so combined-backpack slot wells are not double-rendered with inherited `UI-Quickslot2` normal textures.
 - [x] Restore the authored Mists `UI-Quickslot2` normal textures on main backpack item buttons so the slot chrome follows Blizzard's item-button template instead of a post-load shim.
-- [x] Run the full local installed-addon Mists panel parity matrix with normal SavedVariables from current clean state, retain artifacts, refresh references if they supersede older addon-panel samples, and fix or promote the first addon/panel failure instead of relying on prior shard evidence.
+- [x] Keep the full local installed-addon Mists panel parity matrix with normal SavedVariables as a lower-priority, perf-gated validation lane unless the runner is optimized enough to make the full 9-addon by 38-panel screenshot sweep practical.
 - [x] Implement the missing Mists heirloom item-button API expected by `Blizzard_HeirloomCollection.lua` so `SetHeirloomByItemID` does not throw when Collections/Heirlooms initializes.
 - [x] Fix the Mists Specialization tab body layout so the description and preferred-weapon text are not clipped at the left edge and align with the panel artwork/divider.
 - [x] Fix the Mists TalentFrame bottom tab spacing so `Specialization`, `Talents`, and `Glyphs` use Blizzard's intended adjacent tab geometry instead of uneven gaps.
@@ -108,6 +108,10 @@
 - [x] Fix the Mists Store/CatalogShop item list so the Shop panel displays available products instead of opening an empty storefront shell.
 - [x] Fix the Mists micro-menu Game Menu button so clicking the visible button opens the game menu panel in the live UI.
 - [ ] Bring the Mists of Pandaria client profile to feature parity with the retail `wow-ui-sim`: every Blizzard UI panel loads cleanly, renders correctly, and supports the same interactions the retail build supports — no stub-only frames, no silently-broken panels, and `lua-errors` stays empty across the matrix of installed Mists addons.
+
+## Lower Priority / Perf-Gated Evidence
+
+- [ ] Optimize the full installed-addon screenshot matrix before using it as routine local proof: keep resumable pass markers reliable, avoid rerunning completed addon rows, and reduce the 9-addon by 38-panel runtime enough that it does not block normal Mists parity work.
 
 # Mists / Pandaria Classic Startup Plan
 
