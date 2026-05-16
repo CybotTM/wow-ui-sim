@@ -147,6 +147,25 @@ fn test_addon_texture_resolves_from_secondary_addons_path() {
 }
 
 #[test]
+fn test_addon_texture_prefix_is_case_insensitive() {
+    let root = TempDir::new().unwrap();
+    let texture_dir = root.path().join("BetterBlizzFrames").join("media");
+    fs::create_dir_all(&texture_dir).unwrap();
+
+    let texture_path = texture_dir.join("smooth.png");
+    let img = image::RgbaImage::from_pixel(1, 1, image::Rgba([16, 32, 48, 255]));
+    img.save(&texture_path).unwrap();
+
+    let mut mgr = TextureManager::new().with_addons_path(root.path());
+    let result = mgr.load(r"Interface\Addons\BetterBlizzFrames\media\smooth");
+
+    assert!(
+        result.is_some(),
+        "Should resolve addon textures when AddOns casing differs"
+    );
+}
+
+#[test]
 fn test_simcommands_minimap_placeholder_resolves_from_default_addons_path() {
     let mut mgr = TextureManager::new().with_addons_path(crate::paths::default_addons_path());
 

@@ -218,11 +218,7 @@ impl TextureManager {
 
     /// Resolve a WoW texture path to a file system path.
     pub fn resolve_path(&self, normalized_path: &str) -> Option<PathBuf> {
-        if let Some(addon_relative) = normalized_path
-            .strip_prefix("Interface/AddOns/")
-            .or_else(|| normalized_path.strip_prefix("interface/Addons/"))
-            .or_else(|| normalized_path.strip_prefix("interface/addons/"))
-        {
+        if let Some(addon_relative) = strip_addons_prefix(normalized_path) {
             for addons_path in &self.addons_paths {
                 if let Some(result) = self.try_resolve_in_dir(addons_path, addon_relative) {
                     return Some(result);
@@ -286,6 +282,14 @@ impl TextureManager {
         }
         find_case_insensitive_file(&current, file_name)
     }
+}
+
+fn strip_addons_prefix(path: &str) -> Option<&str> {
+    let prefix_len = "Interface/AddOns/".len();
+    let (prefix, rest) = path.split_at_checked(prefix_len)?;
+    prefix
+        .eq_ignore_ascii_case("Interface/AddOns/")
+        .then_some(rest)
 }
 
 fn normalize_crop_request_key(path: &str) -> String {
