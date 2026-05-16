@@ -447,6 +447,10 @@ fn get_or_create_font_object_store(state: &mut LuaState) -> Val {
 
 pub(crate) fn set_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    if is_simple_html_frame(state, id) {
+        return set_simple_html_font_object(state, id);
+    }
+
     let font_object = match stack_val(state, 2) {
         Val::Nil => return Err(runtime_error("SetFontObject requires a font object")),
         Val::Table(_) => stack_val(state, 2),
@@ -482,6 +486,44 @@ pub(crate) fn set_font_object(state: &mut LuaState) -> LuaResult<u32> {
         apply_font_object_snapshot(frame, &fields);
     }
     Ok(0)
+}
+
+fn set_simple_html_font_object(state: &mut LuaState, id: u64) -> LuaResult<u32> {
+    let text_type = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    let font_object = resolve_font_object_arg(state, stack_val(state, 3))?;
+    let fields = read_font_object_fields(state, font_object);
+    set_simple_html_font(
+        state,
+        id,
+        text_type,
+        fields.font,
+        fields.font_size,
+        fields.font_outline.map(simple_html_font_flags),
+    );
+    Ok(0)
+}
+
+fn resolve_font_object_arg(state: &mut LuaState, value: Val) -> LuaResult<Val> {
+    match value {
+        Val::Table(_) => Ok(value),
+        Val::Str(_) => {
+            let name = val_to_string(state, value)
+                .ok_or_else(|| runtime_error("SetFontObject requires a font object"))?;
+            let font_object = table_get(state, Val::Table(state.global), &name);
+            matches!(font_object, Val::Table(_))
+                .then_some(font_object)
+                .ok_or_else(|| runtime_error("SetFontObject requires a font object"))
+        }
+        _ => Err(runtime_error("SetFontObject requires a font object")),
+    }
+}
+
+fn simple_html_font_flags(outline: crate::widget::TextOutline) -> String {
+    match outline {
+        crate::widget::TextOutline::None => String::new(),
+        crate::widget::TextOutline::Outline => "OUTLINE".to_string(),
+        crate::widget::TextOutline::ThickOutline => "THICKOUTLINE".to_string(),
+    }
 }
 
 pub(crate) fn get_font_object(state: &mut LuaState) -> LuaResult<u32> {

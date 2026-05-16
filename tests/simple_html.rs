@@ -182,6 +182,29 @@ fn test_per_texttype_set_font() {
 }
 
 #[test]
+fn test_per_texttype_set_font_object_by_name() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local font = CreateFont("TestHTMLHeadingFont")
+        font:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
+
+        local f = CreateFrame("SimpleHTML", "TestHTMLFontObject", UIParent)
+        f:SetFontObject("h1", "TestHTMLHeadingFont")
+    "#,
+    )
+    .unwrap();
+
+    let (font, size, flags): (String, f64, String) = env
+        .eval(r#"return TestHTMLFontObject:GetFont("h1")"#)
+        .unwrap();
+    assert_eq!(font, "Fonts\\FRIZQT__.TTF");
+    assert_eq!(size, 24.0);
+    assert_eq!(flags, "OUTLINE");
+}
+
+#[test]
 fn test_get_content_height_nonzero_with_text() {
     let env = WowLuaEnv::new().unwrap();
 
