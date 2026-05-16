@@ -271,6 +271,20 @@ pub(super) fn trigger_callback_event(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(crate) fn trigger_callback_event_for_frame(
+    state: &mut LuaState,
+    frame_id: u64,
+    event: &str,
+    args: &[Val],
+) {
+    let callbacks = callback_event_table(state, frame_id, event, false)
+        .ok()
+        .flatten()
+        .map(|event_table| callback_entries(state, event_table))
+        .unwrap_or_default();
+    dispatch_callbacks(state, &callbacks, args);
+}
+
 pub(super) fn setup_menu(_state: &mut LuaState) -> LuaResult<u32> {
     let state = _state;
     let frame = stack_val(state, 1);

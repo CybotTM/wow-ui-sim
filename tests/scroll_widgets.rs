@@ -200,6 +200,32 @@ fn test_scrollbar_has_thumb_texture() {
     assert!(has_thumb, "ScrollBar should have ThumbTexture");
 }
 
+#[test]
+fn test_legacy_scrollbar_supports_scrollutil_percentage_api() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local sf = CreateFrame("ScrollFrame", "LegacyScrollUtilFrame", UIParent, "UIPanelScrollFrameTemplate")
+        sf:SetSize(200, 100)
+
+        local child = CreateFrame("Frame", nil, sf)
+        child:SetSize(200, 200)
+        sf:SetScrollChild(child)
+
+        ScrollUtil.InitScrollFrameWithScrollBar(sf, sf.ScrollBar)
+        child:SetHeight(240)
+        sf.ScrollBar:SetScrollPercentage(0.5, ScrollBoxConstants.NoScrollInterpolation)
+        "#,
+    )
+    .unwrap();
+
+    let scroll_percentage: f64 = env
+        .eval("return LegacyScrollUtilFrame.ScrollBar:GetScrollPercentage()")
+        .unwrap();
+    assert_eq!(scroll_percentage, 0.5);
+}
+
 // ============================================================================
 // ListScrollFrameTemplate Tests (requires SharedXML)
 // ============================================================================

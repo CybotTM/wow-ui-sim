@@ -1,4 +1,6 @@
-use super::{assign_texture_payload, ensure_named_child_texture, get_named_child_texture_id};
+use super::thumb_texture::{
+    assign_texture_payload, ensure_named_child_texture, get_named_child_texture_id,
+};
 use crate::lua_api::methods::{
     borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref, get_or_create_frame_fields,
     table_get, table_set,

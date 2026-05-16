@@ -9,7 +9,7 @@ use crate::lua_api::script_helpers::{
     call_error_handler_state, get_script, protected_lua_pcall_state,
 };
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn, table_set_rust_fn_static};
-use crate::widget::{Frame, WidgetType};
+use crate::widget::WidgetType;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -17,6 +17,8 @@ use rilua::{LuaResult, Val};
 
 mod checkbutton;
 mod colorselect;
+mod scroll_controller;
+mod thumb_texture;
 pub(super) use checkbutton::register_checkbutton;
 pub(super) use colorselect::register_colorselect;
 
@@ -117,86 +119,6 @@ pub(super) fn is_dragging_thumb(state: &mut LuaState) -> LuaResult<u32> {
     let v = sim.active_slider_thumb_drag_frame == Some(id);
     drop(sim);
     v.into_stack(state)
-}
-
-fn get_named_child_texture_id(state: &LuaState, id: u64, key: &str) -> Option<u64> {
-    borrow_state(state)
-        .ok()?
-        .widgets
-        .get(id)
-        .and_then(|frame| frame.children_keys.get(key).copied())
-}
-
-fn ensure_named_child_texture(state: &mut LuaState, id: u64, key: &str) -> LuaResult<u64> {
-    if let Some(child_id) = get_named_child_texture_id(state, id, key) {
-        return Ok(child_id);
-    }
-
-    let child = Frame::new(WidgetType::Texture, None, Some(id));
-    let child_id = child.id;
-    let mut sim = borrow_state_mut(state)?;
-    sim.widgets.register(child);
-    sim.widgets.add_child(id, child_id);
-    if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.children_keys.insert(key.to_string(), child_id);
-    }
-    Ok(child_id)
-}
-
-fn assign_texture_payload(
-    state: &mut LuaState,
-    child_id: u64,
-    texture_value: Val,
-) -> LuaResult<()> {
-    let mut sim = borrow_state_mut(state)?;
-    let Some(child) = sim.widgets.get_mut_visual(child_id) else {
-        return Ok(());
-    };
-    match texture_value {
-        Val::Num(value) => {
-            child.texture_file_data_id = Some(value as i64);
-            child.texture = None;
-        }
-        Val::Str(value) => {
-            let Some(raw) = state.gc.string_arena.get(value) else {
-                return Ok(());
-            };
-            child.texture = Some(String::from_utf8_lossy(raw.data()).to_string());
-            child.texture_file_data_id = None;
-        }
-        _ => {}
-    }
-    Ok(())
-}
-
-pub(super) fn set_thumb_texture(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let texture_value = stack_val(state, 2);
-    if let Some(child_id) = extract_frame_id(state, texture_value) {
-        let mut sim = borrow_state_mut(state)?;
-        if let Some(frame) = sim.widgets.get_mut_visual(id) {
-            frame
-                .children_keys
-                .insert("ThumbTexture".to_string(), child_id);
-        }
-        return Ok(0);
-    }
-
-    let child_id = ensure_named_child_texture(state, id, "ThumbTexture")?;
-    assign_texture_payload(state, child_id, texture_value)?;
-    Ok(0)
-}
-
-pub(super) fn get_thumb_texture(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    match get_named_child_texture_id(state, id, "ThumbTexture") {
-        Some(child_id) => {
-            let thumb = frame_ref(state, child_id)?;
-            state.push(thumb);
-        }
-        None => state.push(Val::Nil),
-    }
-    Ok(1)
 }
 
 // ---------------------------------------------------------------------------
@@ -674,8 +596,60 @@ pub(super) fn register_slider(state: &mut LuaState, metatable: GcRef<Table>) -> 
     table_set_rust_fn_static(state, metatable, "SetStepsPerPage", set_steps_per_page)?;
     table_set_rust_fn_static(state, metatable, "GetStepsPerPage", get_steps_per_page)?;
     table_set_rust_fn_static(state, metatable, "IsDraggingThumb", is_dragging_thumb)?;
-    table_set_rust_fn_static(state, metatable, "SetThumbTexture", set_thumb_texture)?;
-    table_set_rust_fn_static(state, metatable, "GetThumbTexture", get_thumb_texture)?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetThumbTexture",
+        thumb_texture::set_thumb_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetThumbTexture",
+        thumb_texture::get_thumb_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetScrollPercentage",
+        scroll_controller::set_scroll_percentage,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetScrollPercentage",
+        scroll_controller::get_scroll_percentage,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetVisibleExtentPercentage",
+        scroll_controller::set_visible_extent_percentage,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetVisibleExtentPercentage",
+        scroll_controller::get_visible_extent_percentage,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetPanExtentPercentage",
+        scroll_controller::set_pan_extent_percentage,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetPanExtentPercentage",
+        scroll_controller::get_pan_extent_percentage,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "ScrollStepInDirection",
+        scroll_controller::scroll_step_in_direction,
+    )?;
     Ok(())
 }
 

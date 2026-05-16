@@ -350,6 +350,12 @@ pub struct Frame {
     pub slider_obey_step_on_drag: bool,
     /// Number of steps per page for slider.
     pub slider_steps_per_page: i32,
+    /// ScrollController-compatible position for slider-backed scrollbars.
+    pub slider_scroll_percentage: f64,
+    /// ScrollController-compatible visible extent percentage.
+    pub slider_visible_extent_percentage: f64,
+    /// ScrollController-compatible pan extent percentage.
+    pub slider_pan_extent_percentage: f64,
 
     // --- StatusBar fields ---
     /// Current statusbar value.

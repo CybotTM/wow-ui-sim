@@ -180,6 +180,9 @@ macro_rules! frame_defaults {
             slider_orientation: "HORIZONTAL".to_string(),
             slider_obey_step_on_drag: false,
             slider_steps_per_page: 1,
+            slider_scroll_percentage: 0.0,
+            slider_visible_extent_percentage: 0.0,
+            slider_pan_extent_percentage: 0.0,
 
             // StatusBar
             statusbar_value: 0.0,
