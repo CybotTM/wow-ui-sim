@@ -66,6 +66,19 @@ fn mists_action_micro_bag_and_status_bars_are_interactive() {
                 error("MainMenuMicroButton second click did not hide GameMenuFrame")
             end
 
+            A_Admin.SetMouseOverFrame(MainMenuMicroButton)
+            MainMenuMicroButton:GetScript("OnMouseDown")(MainMenuMicroButton, "LeftButton")
+            MainMenuMicroButton:GetScript("OnMouseUp")(MainMenuMicroButton, "LeftButton")
+            local clickAfterMouseUp = MainMenuMicroButton:GetScript("OnClick")
+            if clickAfterMouseUp then
+                clickAfterMouseUp(MainMenuMicroButton, "LeftButton", false)
+            end
+            A_Admin.SetMouseOverFrame(nil)
+            if not GameMenuFrame:IsShown() then
+                error("MainMenuMicroButton OnMouseUp/OnClick order closed GameMenuFrame")
+            end
+            HideUIPanel(GameMenuFrame)
+
             StoreMicroButton:Click()
             if not (CatalogShopFrame and CatalogShopFrame:IsShown()) then
                 error("StoreMicroButton click did not show CatalogShopFrame")

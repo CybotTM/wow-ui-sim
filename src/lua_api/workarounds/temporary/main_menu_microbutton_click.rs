@@ -55,22 +55,83 @@ local function __wow_toggle_main_menu()
     end
 end
 
+local function __wow_wrap_main_menu_mouse_scripts(button)
+    if type(button) ~= "table" or button.__wow_uisim_mouse_scripts_wrapped or type(button.GetScript) ~= "function" or type(button.SetScript) ~= "function" then
+        return
+    end
+    button.__wow_uisim_mouse_scripts_wrapped = true
+
+    local onMouseDown = button:GetScript("OnMouseDown")
+    if type(onMouseDown) == "function" then
+        button:SetScript("OnMouseDown", function(self, ...)
+            if self then
+                self.__wow_uisim_onclick_seen_this_press = nil
+                self.__wow_uisim_suppress_next_click_toggle = nil
+            end
+            return onMouseDown(self, ...)
+        end)
+    end
+
+    local onMouseUp = button:GetScript("OnMouseUp")
+    if type(onMouseUp) == "function" then
+        button:SetScript("OnMouseUp", function(self, ...)
+            local gameMenuFrame = rawget(_G, "GameMenuFrame")
+            local wasShown = gameMenuFrame and gameMenuFrame:IsShown()
+            local clickAlreadyRan = self and self.__wow_uisim_onclick_seen_this_press
+            local result = onMouseUp(self, ...)
+            if self then
+                self.__wow_uisim_onclick_seen_this_press = nil
+                local isShown = gameMenuFrame and gameMenuFrame:IsShown()
+                if wasShown ~= isShown and not clickAlreadyRan then
+                    self.__wow_uisim_suppress_next_click_toggle = true
+                end
+            end
+            return result
+        end)
+    end
+end
+
 if type(MainMenuMicroButtonMixin) == "table" and not MainMenuMicroButtonMixin.__wow_uisim_click_patched then
     MainMenuMicroButtonMixin.__wow_uisim_click_patched = true
     MainMenuMicroButtonMixin.OnClick = function(self, button, down)
-        if self and self.down then
+        if self and self.__wow_uisim_suppress_next_click_toggle then
+            self.__wow_uisim_suppress_next_click_toggle = nil
             return
         end
-        return __wow_toggle_main_menu()
+        if self and self.down then
+            self.__wow_uisim_onclick_seen_this_press = true
+            return
+        end
+        if self then
+            self.__wow_uisim_onclick_seen_this_press = true
+        end
+        local result = __wow_toggle_main_menu()
+        if self then
+            self.__wow_uisim_onclick_seen_this_press = nil
+        end
+        return result
     end
 end
 
 if type(MainMenuMicroButton) == "table" and type(MainMenuMicroButton.SetScript) == "function" then
+    __wow_wrap_main_menu_mouse_scripts(MainMenuMicroButton)
     MainMenuMicroButton:SetScript("OnClick", function(self, button, down)
-        if self and self.down then
+        if self and self.__wow_uisim_suppress_next_click_toggle then
+            self.__wow_uisim_suppress_next_click_toggle = nil
             return
         end
-        return __wow_toggle_main_menu()
+        if self and self.down then
+            self.__wow_uisim_onclick_seen_this_press = true
+            return
+        end
+        if self then
+            self.__wow_uisim_onclick_seen_this_press = true
+        end
+        local result = __wow_toggle_main_menu()
+        if self then
+            self.__wow_uisim_onclick_seen_this_press = nil
+        end
+        return result
     end)
 end
 "#;
