@@ -162,8 +162,8 @@ fn c_item_does_item_exist(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_item_does_item_exist_by_id(state: &mut LuaState) -> LuaResult<u32> {
     let exists = parse_item_id_from_val(state, stack_val(state, 1))
-        .and_then(items::get_item)
-        .is_some();
+        .map(item_id_has_synthetic_data)
+        .unwrap_or(false);
     state.push(Val::Bool(exists));
     Ok(1)
 }
@@ -259,10 +259,14 @@ fn item_data_exists(state: &mut LuaState, value: Val) -> LuaResult<bool> {
 
 fn c_item_is_item_data_cached_by_id(state: &mut LuaState) -> LuaResult<u32> {
     let cached = parse_item_id_from_val(state, stack_val(state, 1))
-        .and_then(items::get_item)
-        .is_some();
+        .map(item_id_has_synthetic_data)
+        .unwrap_or(false);
     state.push(Val::Bool(cached));
     Ok(1)
+}
+
+fn item_id_has_synthetic_data(item_id: u32) -> bool {
+    item_id > 0
 }
 
 fn c_item_get_item_icon_by_id(state: &mut LuaState) -> LuaResult<u32> {

@@ -71,6 +71,17 @@ fn test_c_item_get_item_info_instant_by_id() {
 }
 
 #[test]
+fn test_c_item_unknown_positive_item_ids_have_synthetic_cached_data() {
+    let env = env();
+    let (exists, cached): (bool, bool) = env
+        .eval("return C_Item.DoesItemExistByID(224116), C_Item.IsItemDataCachedByID(224116)")
+        .unwrap();
+
+    assert!(exists, "synthetic item data should make positive item IDs exist");
+    assert!(cached, "synthetic item data should already be cached");
+}
+
+#[test]
 fn test_c_item_get_item_info_instant_by_link() {
     let env = env();
     let item_id: i64 = env
