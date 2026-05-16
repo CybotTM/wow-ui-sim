@@ -25,6 +25,11 @@ const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
         "GetCurrencyContainerInfo",
         c_currency_get_currency_container_info,
     ),
+    ("GetAzeriteCurrencyID", c_currency_get_azerite_currency_id),
+    (
+        "GetWarResourcesCurrencyID",
+        c_currency_get_war_resources_currency_id,
+    ),
 ];
 
 pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
@@ -223,6 +228,16 @@ fn c_currency_get_currency_info_from_link(state: &mut LuaState) -> LuaResult<u32
         return Ok(0);
     };
     push_currency_info_by_id(state, currency_id)
+}
+
+fn c_currency_get_azerite_currency_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(1553.0));
+    Ok(1)
+}
+
+fn c_currency_get_war_resources_currency_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(1560.0));
+    Ok(1)
 }
 
 fn c_currency_get_currency_container_info(state: &mut LuaState) -> LuaResult<u32> {

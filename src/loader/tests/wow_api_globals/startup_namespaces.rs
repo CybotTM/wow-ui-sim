@@ -5,23 +5,28 @@ use super::super::*;
 #[test]
 fn test_bootstrap_fills_existing_namespace_defaults() {
     let env = WowLuaEnv::new().unwrap();
-    let (trade_ty, trade_value, quest_ty, quest_value, color_ty, hex_ty): (
-        String,
-        i64,
-        String,
-        bool,
-        String,
-        String,
-    ) = env
+    let (
+        trade_ty,
+        trade_value,
+        quest_ty,
+        quest_value,
+        color_ty,
+        hex_ty,
+        campaign_ty,
+        campaign_name,
+    ): (String, i64, String, bool, String, String, String, String) = env
         .eval(
             r#"
             local color = C_ColorOverrides.GetColorForQuality(0)
+            local campaign = C_CampaignInfo.GetCampaignInfo(290)
             return type(C_TradeSkillUI.GetProfessionSkillLineID),
                 C_TradeSkillUI.GetProfessionSkillLineID(7),
                 type(C_QuestLog.ReadyForTurnIn),
                 C_QuestLog.ReadyForTurnIn(42),
                 type(C_ColorOverrides.GetColorForQuality),
-                type(color and color.GenerateHexColorMarkup)
+                type(color and color.GenerateHexColorMarkup),
+                type(C_CampaignInfo.GetCampaignInfo),
+                campaign.name
             "#,
         )
         .unwrap();
@@ -32,6 +37,8 @@ fn test_bootstrap_fills_existing_namespace_defaults() {
     assert!(!quest_value);
     assert_eq!(color_ty, "function");
     assert_eq!(hex_ty, "function");
+    assert_eq!(campaign_ty, "function");
+    assert_eq!(campaign_name, "Broken Shore");
 }
 #[test]
 fn test_startup_bootstrap_namespaces_exist() {

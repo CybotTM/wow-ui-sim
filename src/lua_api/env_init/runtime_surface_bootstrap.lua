@@ -9030,6 +9030,17 @@ C_CampaignInfo = __wow_merge_namespace(C_CampaignInfo, {
   GetCampaignID = function(campaignID)
     return tonumber(campaignID) or 0
   end,
+  GetCampaignInfo = function(campaignID)
+    local id = tonumber(campaignID) or 0
+    local names = {
+      [290] = "Broken Shore",
+    }
+    return {
+      campaignID = id,
+      id = id,
+      name = names[id] or ("Campaign " .. tostring(id)),
+    }
+  end,
   GetState = function(_campaignID)
     return Enum and Enum.CampaignState and Enum.CampaignState.Invalid or 0
   end,

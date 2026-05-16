@@ -552,11 +552,22 @@ fn test_c_currency_info_api() {
         .unwrap();
     assert!(size >= 0);
 
-    for f in &["GetCurrencyListInfo", "GetCoinTextureString"] {
+    for f in &[
+        "GetCurrencyListInfo",
+        "GetCoinTextureString",
+        "GetAzeriteCurrencyID",
+        "GetWarResourcesCurrencyID",
+    ] {
         let expr = format!("return type(C_CurrencyInfo.{})", f);
         let ty: String = env.eval(&expr).unwrap();
         assert_eq!(ty, "function");
     }
+
+    let (azerite_id, war_resources_id): (i32, i32) = env
+        .eval("return C_CurrencyInfo.GetAzeriteCurrencyID(), C_CurrencyInfo.GetWarResourcesCurrencyID()")
+        .unwrap();
+    assert_eq!(azerite_id, 1553);
+    assert_eq!(war_resources_id, 1560);
 }
 
 // ---------------------------------------------------------------------------
