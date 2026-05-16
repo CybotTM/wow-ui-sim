@@ -4,7 +4,7 @@ use crate::lua_api::LoaderEnv;
 use crate::lua_api::globals::security::mark_secure_state;
 use crate::lua_api::methods::create_string;
 use crate::lua_api::script_helpers::call_error_handler_state;
-use crate::xml::{FrameXml, XmlElement, parse_xml_file};
+use crate::xml::{FrameXml, UiXml, XmlElement, parse_xml_file};
 use rilua::{Function, LuaApiMut};
 use std::path::Path;
 use std::time::Instant;
@@ -36,9 +36,43 @@ pub fn load_xml_file(
     timing.xml_parse_time += xml_start.elapsed();
 
     let xml_dir = path.parent().unwrap_or(Path::new("."));
+    let result = process_xml_elements(env, &ui, xml_dir, ctx, timing);
+
+    result
+}
+
+fn process_xml_elements(
+    env: &LoaderEnv<'_>,
+    ui: &UiXml,
+    xml_dir: &Path,
+    ctx: &AddonContext,
+    timing: &mut LoadTiming,
+) -> Result<usize, LoadError> {
+    if ctx.taint {
+        return process_xml_elements_with_current_stack(env, ui, xml_dir, ctx, timing);
+    }
+
+    let saved_taints =
+        env.with_state(|state| Ok::<_, LoadError>(crate::loader::stack_taint::clear(state)))?;
+    let result = process_xml_elements_with_current_stack(env, ui, xml_dir, ctx, timing);
+    env.with_state(|state| {
+        crate::loader::stack_taint::restore(state, saved_taints);
+        Ok::<(), LoadError>(())
+    })?;
+    result
+}
+
+fn process_xml_elements_with_current_stack(
+    env: &LoaderEnv<'_>,
+    ui: &UiXml,
+    xml_dir: &Path,
+    ctx: &AddonContext,
+    timing: &mut LoadTiming,
+) -> Result<usize, LoadError> {
     let mut lua_count = 0;
-    for element in &ui.elements {
-        lua_count += process_element_with_exclusive_timing(env, element, xml_dir, ctx, timing)
+    ui.elements.iter().try_for_each(|element| {
+        process_element_with_exclusive_timing(env, element, xml_dir, ctx, timing)
+            .map(|count| lua_count += count)
             .map_err(|e| {
                 if !matches!(e, LoadError::Lua(_)) {
                     let _ = env.with_state(|state| {
@@ -47,9 +81,8 @@ pub fn load_xml_file(
                     });
                 }
                 e
-            })?;
-    }
-
+            })
+    })?;
     Ok(lua_count)
 }
 

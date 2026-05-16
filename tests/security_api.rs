@@ -515,6 +515,7 @@ fn test_loadstring_taints() {
     let result: bool = env
         .eval(
             r#"
+            forceinsecure()
             local f = loadstring("return issecure()")
             return f()
             "#,
@@ -529,6 +530,7 @@ fn test_issecurevariable_detects_taint() {
     let result: bool = env
         .eval(
             r#"
+            forceinsecure()
             loadstring("_G.TAINTED_VAR = 1")()
             local secure = issecurevariable("TAINTED_VAR")
             return secure
@@ -544,6 +546,7 @@ fn test_secure_map_rejects_secret_keys_and_values() {
     let (key_error, value_error, stored_value): (String, String, String) = env
         .eval(
             r#"
+            forceinsecure()
             local map = SecureTypes.CreateSecureMap()
             local secretKey = loadstring("return 1")
             local secretValue = loadstring("return 2")
@@ -591,6 +594,7 @@ fn test_issecretvalue_tainted() {
     let result: bool = env
         .eval(
             r#"
+            forceinsecure()
             local f = loadstring("return 1")
             return issecretvalue(f)
             "#,
@@ -612,6 +616,7 @@ fn test_canaccessvalue_tainted() {
     let result: bool = env
         .eval(
             r#"
+            forceinsecure()
             local f = loadstring("return 1")
             return canaccessvalue(f)
             "#,
@@ -635,6 +640,7 @@ fn test_canaccessallvalues_one_tainted() {
     let result: bool = env
         .eval(
             r#"
+            forceinsecure()
             local f = loadstring("return 1")
             return canaccessallvalues(print, f, type)
             "#,

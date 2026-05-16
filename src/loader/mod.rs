@@ -12,6 +12,7 @@ pub(crate) mod helpers_anim;
 mod load_addon_trace;
 pub(crate) mod lua_file;
 pub(crate) mod precompiled;
+pub(crate) mod stack_taint;
 mod xml_file;
 mod xml_fontstring;
 mod xml_frame;

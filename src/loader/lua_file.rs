@@ -101,7 +101,14 @@ fn execute_compiled_lua_file(
     if ctx.use_secure_env {
         mark_secure_state(state, &func).map_err(|e| report_lua_load_error(state, e))?;
     }
-    exec_addon_func(state, func, ctx).map_err(|e| contextual_lua_load_error(state, e, chunk_name))
+    let result = if ctx.taint {
+        exec_addon_func(state, func, ctx)
+    } else {
+        crate::loader::stack_taint::with_secure_stack(state, |state| {
+            exec_addon_func(state, func, ctx)
+        })
+    };
+    result.map_err(|e| contextual_lua_load_error(state, e, chunk_name))
 }
 
 fn contextual_lua_load_error(
@@ -428,8 +435,6 @@ fn replace_once_with_line_ending_fallback(source: &str, from: &str, to: &str) ->
     }
     source.replacen(&from.replace('\n', "\r\n"), &to.replace('\n', "\r\n"), 1)
 }
-/// Execute a compiled addon function.
-/// Taint is already stamped on the function's GC header by the caller.
 fn exec_addon_func(
     state: &mut LuaState,
     func: rilua::Function,

@@ -143,14 +143,15 @@ fn tainting_loadstring(state: &mut LuaState) -> LuaResult<u32> {
     let mut args = (0..nargs)
         .map(|index| state.stack_get(state.base + index))
         .collect::<Vec<_>>();
-    if let Some(source) = args.first_mut() {
+    let should_taint = !rilua::api::state_is_secure(state);
+    if should_taint && let Some(source) = args.first_mut() {
         if let Some(wrapped_source) = wrap_loadstring_source(state, *source) {
             *source = wrapped_source;
         }
     }
     let results = protected_lua_pcall_state(state, original, &args)
         .map_err(|error| runtime_error(format!("loadstring wrapper failed: {error}")))?;
-    if let Some(Val::Function(func_ref)) = results.first().copied() {
+    if should_taint && let Some(Val::Function(func_ref)) = results.first().copied() {
         let func = rilua::Function::from_gc_ref(func_ref);
         stamp_addon_taint_state(state, &func, LOADSTRING_TAINT_MARKER);
     }
