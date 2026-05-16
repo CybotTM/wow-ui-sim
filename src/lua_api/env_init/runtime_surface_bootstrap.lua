@@ -14,8 +14,24 @@ local function __wow_make_color(r, g, b, a)
     return self.r, self.g, self.b, self.a
   end
 
+  local function channel_byte(value)
+    return math.floor((value or 0) * 255 + 0.5)
+  end
+
+  function color:GetRGBAsBytes()
+    return channel_byte(self.r), channel_byte(self.g), channel_byte(self.b)
+  end
+
+  function color:GetRGBAAsBytes()
+    return channel_byte(self.r), channel_byte(self.g), channel_byte(self.b), channel_byte(self.a or 1)
+  end
+
   function color:GenerateHexColor()
     return string.format("FF%02X%02X%02X", math.floor(self.r * 255), math.floor(self.g * 255), math.floor(self.b * 255))
+  end
+
+  function color:GenerateHexColorNoAlpha()
+    return string.format("%02X%02X%02X", self:GetRGBAsBytes())
   end
 
   function color:GenerateHexColorMarkup()

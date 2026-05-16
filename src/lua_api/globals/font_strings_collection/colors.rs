@@ -110,6 +110,18 @@ fn hex_from_rgb(r: f64, g: f64, b: f64) -> String {
     )
 }
 
+fn color_channel_byte(value: f64) -> i64 {
+    ((value * 255.0) + 0.5).floor() as i64
+}
+
+fn rgb_bytes_from_color(r: f64, g: f64, b: f64) -> (i64, i64, i64) {
+    (
+        color_channel_byte(r),
+        color_channel_byte(g),
+        color_channel_byte(b),
+    )
+}
+
 // ── Color table constructor ───────────────────────────────────────────────────
 
 fn register_color_access_methods(state: &mut LuaState, t_ref: ColorTableRef) -> LuaResult<()> {
@@ -124,6 +136,19 @@ fn register_color_access_methods(state: &mut LuaState, t_ref: ColorTableRef) -> 
         let a = color_channel(state, this, "a", 1.0);
         (r, g, b, a).into_stack(state)
     })?;
+    table_set_rust_fn_static(state, t_ref, "GetRGBAsBytes", |state| {
+        let this = stack_val(state, 1);
+        let (r, g, b) = color_rgb(state, this);
+        let (r, g, b) = rgb_bytes_from_color(r, g, b);
+        (r, g, b).into_stack(state)
+    })?;
+    table_set_rust_fn_static(state, t_ref, "GetRGBAAsBytes", |state| {
+        let this = stack_val(state, 1);
+        let (r, g, b) = color_rgb(state, this);
+        let a = color_channel(state, this, "a", 1.0);
+        let (r, g, b) = rgb_bytes_from_color(r, g, b);
+        (r, g, b, color_channel_byte(a)).into_stack(state)
+    })?;
     Ok(())
 }
 
@@ -132,6 +157,13 @@ fn register_color_format_methods(state: &mut LuaState, t_ref: ColorTableRef) -> 
         let this = stack_val(state, 1);
         let (r, g, b) = color_rgb(state, this);
         let hex = hex_from_rgb(r, g, b);
+        create_string(state, &hex).into_stack(state)
+    })?;
+    table_set_rust_fn_static(state, t_ref, "GenerateHexColorNoAlpha", |state| {
+        let this = stack_val(state, 1);
+        let (r, g, b) = color_rgb(state, this);
+        let (r, g, b) = rgb_bytes_from_color(r, g, b);
+        let hex = format!("{r:02X}{g:02X}{b:02X}");
         create_string(state, &hex).into_stack(state)
     })?;
     table_set_rust_fn_static(state, t_ref, "WrapTextInColorCode", |state| {
