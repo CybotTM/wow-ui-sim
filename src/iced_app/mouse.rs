@@ -164,6 +164,7 @@ impl App {
     }
 
     pub(super) fn handle_mouse_down(&mut self, pos: Point) {
+        self.sync_mouse_position(pos);
         {
             let env = self.env.borrow();
             let _ = env
@@ -220,6 +221,7 @@ impl App {
     }
 
     pub(super) fn handle_mouse_up(&mut self, pos: Point) {
+        self.sync_mouse_position(pos);
         {
             let env = self.env.borrow();
             let _ = env
@@ -321,6 +323,7 @@ impl App {
     }
 
     pub(super) fn handle_right_mouse_down(&mut self, pos: Point) {
+        self.sync_mouse_position(pos);
         {
             let env = self.env.borrow();
             let _ = env
@@ -368,6 +371,7 @@ impl App {
     }
 
     pub(super) fn handle_right_mouse_up(&mut self, pos: Point) {
+        self.sync_mouse_position(pos);
         {
             let env = self.env.borrow();
             let _ = env

@@ -2,6 +2,73 @@ use super::test_support::*;
 use super::*;
 use crate::screen::ScreenKind;
 
+#[cfg(feature = "client-mists")]
+#[test]
+fn mists_main_menu_micro_button_opens_game_menu_from_mouse_hit_test() {
+    let mut app = build_test_app(ScreenKind::Game);
+    load_blizzard_game_ui_for_mouse_test(&app);
+    rebuild_hittable_cache(&app);
+
+    let (button_id, click_pos) = {
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let button = state
+            .widgets
+            .get_by_name("MainMenuMicroButton")
+            .expect("MainMenuMicroButton should exist");
+        let rect = button
+            .layout_rect
+            .expect("MainMenuMicroButton should have a layout rect");
+        (
+            button.id,
+            Point::new(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0),
+        )
+    };
+
+    let hit_id = app.hit_test_mouse_button(click_pos, "LeftButton");
+    assert_eq!(
+        hit_id,
+        Some(button_id),
+        "mouse hit test should target MainMenuMicroButton at its visual center"
+    );
+
+    app.handle_mouse_down(click_pos);
+    app.handle_mouse_up(click_pos);
+
+    let shown: bool = app
+        .env
+        .borrow()
+        .eval("return GameMenuFrame and GameMenuFrame:IsShown() or false")
+        .expect("GameMenuFrame visibility should be readable");
+    assert!(shown, "mouse click should open GameMenuFrame");
+}
+
+#[cfg(feature = "client-mists")]
+fn load_blizzard_game_ui_for_mouse_test(app: &App) {
+    use crate::loader::{discover_blizzard_addons_for_screen, load_addon};
+
+    let env = app.env.borrow();
+    env.set_screen_mode(ScreenKind::Game);
+
+    if let Some(framexml_toc) = crate::client_profile::blizzard_ui_framexml_toc() {
+        load_addon(&env.loader_env(), &framexml_toc).expect("FrameXML should load");
+    }
+
+    let addons_dir = crate::client_profile::blizzard_ui_addons_dir();
+    let addons = discover_blizzard_addons_for_screen(&addons_dir, ScreenKind::Game);
+    for (name, toc_path) in addons {
+        load_addon(&env.loader_env(), &toc_path)
+            .unwrap_or_else(|err| panic!("{name} should load: {err}"));
+        if name == "Blizzard_EnvironmentCleanup" {
+            env.restore_post_cleanup_globals();
+        }
+    }
+
+    env.apply_post_load_workarounds();
+    crate::startup::settle_headless_startup(&env);
+}
+
 #[test]
 fn mouse_wheel_dispatch_requires_frame_mouse_wheel_enabled() {
     let mut app = build_test_app(ScreenKind::Game);
