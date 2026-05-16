@@ -140,3 +140,62 @@ fn class_talents_initialize_view_loadout_exists_for_addons() {
         "C_ClassTalents.InitializeViewLoadout should exist for talent-tree addons: {result}"
     );
 }
+
+#[test]
+fn player_login_legacy_globals_exist_for_addons() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        if type(IsOnTournamentRealm) ~= "function" then
+            return "missing_IsOnTournamentRealm"
+        end
+        if IsOnTournamentRealm() ~= false then
+            return "tournament_realm=" .. tostring(IsOnTournamentRealm())
+        end
+        if type(GetNumDisplayChannels) ~= "function" then
+            return "missing_GetNumDisplayChannels"
+        end
+        if GetNumDisplayChannels() ~= 0 then
+            return "display_channels=" .. tostring(GetNumDisplayChannels())
+        end
+        if type(GetChannelDisplayInfo) ~= "function" then
+            return "missing_GetChannelDisplayInfo"
+        end
+        if GetChannelDisplayInfo(1) ~= nil then
+            return "channel_info=" .. tostring(GetChannelDisplayInfo(1))
+        end
+        return "ok"
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "PLAYER_LOGIN legacy globals should exist for addon compatibility: {result}"
+    );
+}
+
+#[test]
+fn restricted_actions_state_is_numeric_for_addons() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        if type(C_RestrictedActions.GetAddOnRestrictionState) ~= "function" then
+            return "missing_GetAddOnRestrictionState"
+        end
+        local combatState = C_RestrictedActions.GetAddOnRestrictionState(Enum.AddOnRestrictionType.Combat)
+        if combatState ~= 0 then
+            return "combat_state=" .. tostring(combatState)
+        end
+        return "ok"
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "restricted action state should be numeric so addons can compare it: {result}"
+    );
+}

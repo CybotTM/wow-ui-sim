@@ -8842,6 +8842,21 @@ end
 if ACCOUNT_BINDINGS == nil then ACCOUNT_BINDINGS = 1 end
 if CHARACTER_BINDINGS == nil then CHARACTER_BINDINGS = 2 end
 if CHARACTERBINDINGS == nil then CHARACTERBINDINGS = CHARACTER_BINDINGS end
+if IsOnTournamentRealm == nil then
+  function IsOnTournamentRealm()
+    return false
+  end
+end
+if GetNumDisplayChannels == nil then
+  function GetNumDisplayChannels()
+    return 0
+  end
+end
+if GetChannelDisplayInfo == nil then
+  function GetChannelDisplayInfo(_index)
+    return nil
+  end
+end
 if GetMacroInfo == nil then
   function GetMacroInfo(index)
     if index == 1 then
@@ -9846,6 +9861,9 @@ C_HousingCatalog = __wow_merge_namespace(C_HousingCatalog, {
 C_RestrictedActions = __wow_merge_namespace(C_RestrictedActions, {
   CheckAllowProtectedFunctions = function()
     return true
+  end,
+  GetAddOnRestrictionState = function(_restrictionType)
+    return 0
   end,
 })
 C_ScriptedAnimations = C_ScriptedAnimations or __wow_namespace()

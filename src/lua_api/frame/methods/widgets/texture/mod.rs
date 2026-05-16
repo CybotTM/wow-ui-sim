@@ -50,6 +50,7 @@ const TEXTURE_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetCenterColor", color::set_center_color),
     // Rotation
     ("SetRotation", rotation_mask::set_rotation),
+    ("SetRadians", rotation_mask::set_rotation),
     ("GetRotation", rotation_mask::get_rotation),
     // Mask
     ("SetMask", rotation_mask::set_mask),

@@ -123,6 +123,22 @@ fn test_set_rotation_roundtrip() {
 }
 
 #[test]
+fn test_set_radians_alias_roundtrip() {
+    let env = env();
+    let quarter_turn = std::f64::consts::FRAC_PI_2;
+    let radians: f64 = env
+        .eval(
+            r#"
+            local tex = CreateFrame("Frame"):CreateTexture()
+            tex:SetRadians(math.pi / 2)
+            return tex:GetRotation()
+            "#,
+        )
+        .unwrap();
+    assert!((radians - quarter_turn).abs() < 0.0001, "got {radians}");
+}
+
+#[test]
 fn test_get_rotation_default() {
     let env = env();
     let radians: f64 = env
