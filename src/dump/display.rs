@@ -29,12 +29,16 @@ pub(crate) fn resolve_display_name(widgets: &WidgetRegistry, frame: &Frame, id: 
         return name.clone();
     }
     if let Some(ref text) = frame.text {
-        if text.len() > 20 {
-            return format!("\"{}...\"", &text[..17]);
+        if text.chars().count() > 20 {
+            return format!("\"{}...\"", first_chars(text, 17));
         }
         return format!("\"{text}\"");
     }
     frame.name.as_deref().unwrap_or("(anonymous)").to_string()
+}
+
+fn first_chars(value: &str, count: usize) -> String {
+    value.chars().take(count).collect()
 }
 
 fn parent_key_matches_current_parent(
@@ -254,5 +258,24 @@ pub(crate) fn resolve_texture_format(wow_path: &str) -> String {
             format!(" ({ext})")
         }
         None => " (MISSING)".to_string(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::widget::{Frame, WidgetRegistry};
+
+    #[test]
+    fn display_name_truncates_utf8_text_on_char_boundary() {
+        let mut widgets = WidgetRegistry::new();
+        let mut frame = Frame::default();
+        frame.text = Some("|cffff3333明天启程 |rwith a long suffix".to_string());
+        let id = frame.id;
+        widgets.register(frame);
+
+        let display_name = resolve_display_name(&widgets, widgets.get(id).unwrap(), id);
+
+        assert_eq!(display_name, "\"|cffff3333明天启程 |r...\"");
     }
 }
