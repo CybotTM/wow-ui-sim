@@ -16,6 +16,8 @@ mod blizzard_dependencies;
 mod cache_summary;
 use blizzard_dependencies::load_required_blizzard_dependencies_for_addons;
 use cache_summary::{format_cache_info, print_cache_stats};
+mod enable_state;
+use enable_state::{addon_enable_overrides, addon_enabled, dependency_aware_enable_overrides};
 
 pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
 
@@ -226,6 +228,8 @@ pub fn load_third_party_addons(
 
     logging::println_elapsed(&format!("Loading {} addons...", addons.len()));
     let enable_overrides = addon_enable_overrides(saved_vars.as_ref());
+    let effective_enable_overrides =
+        dependency_aware_enable_overrides(&addons, enable_overrides.as_ref());
     let mut stats = LoadStats::default();
     for (name, toc_path) in &addons {
         load_or_register_single_addon(
@@ -233,7 +237,7 @@ pub fn load_third_party_addons(
             name,
             toc_path,
             saved_vars,
-            enable_overrides.as_ref(),
+            effective_enable_overrides.as_ref(),
             &mut stats,
         );
     }
@@ -401,38 +405,6 @@ fn load_or_register_single_addon(
             stats.fail_count += 1;
         }
     }
-}
-
-fn addon_enabled(
-    name: &str,
-    metadata: &AddonMetadata,
-    enable_overrides: Option<&HashMap<String, bool>>,
-) -> bool {
-    match enable_overrides {
-        Some(overrides) => overrides.get(name).copied().unwrap_or(false),
-        None => metadata.default_enabled,
-    }
-}
-
-fn addon_enable_overrides(
-    saved_vars: Option<&SavedVariablesManager>,
-) -> Option<HashMap<String, bool>> {
-    let config = saved_vars?.wtf_config()?;
-    let path = config
-        .wtf_path
-        .join("Account")
-        .join(&config.account)
-        .join(&config.realm)
-        .join(&config.character)
-        .join("AddOns.txt");
-    let text = std::fs::read_to_string(path).ok()?;
-    let mut states = HashMap::new();
-    for line in text.lines() {
-        if let Some((name, state)) = line.split_once(':') {
-            states.insert(name.trim().to_string(), state.trim() == "enabled");
-        }
-    }
-    Some(states)
 }
 
 fn mark_addon_loaded(env: &WowLuaEnv, name: &str, r: &LoadResult) {
@@ -688,55 +660,5 @@ mod tests {
             shared_toc, &sim_shared_toc,
             "the first addon root should win duplicate addon names"
         );
-    }
-
-    #[test]
-    fn addon_enabled_uses_character_addons_txt_before_toc_default() {
-        let metadata = AddonMetadata {
-            title: "DisabledByCharacter".to_string(),
-            notes: String::new(),
-            metadata: HashMap::new(),
-            load_on_demand: false,
-            default_enabled: true,
-            dependencies: Vec::new(),
-            use_secure_env: false,
-        };
-        let overrides = HashMap::from([("DisabledByCharacter".to_string(), false)]);
-
-        assert!(!addon_enabled(
-            "DisabledByCharacter",
-            &metadata,
-            Some(&overrides)
-        ));
-        assert!(!addon_enabled(
-            "MissingFromAddOnsTxt",
-            &metadata,
-            Some(&overrides)
-        ));
-    }
-
-    #[test]
-    fn addon_enable_overrides_reads_character_addons_txt() {
-        let temp = tempfile::tempdir().expect("tempdir");
-        let addon_state_dir = temp.path().join("Account/Test/Burning Blade/Palaky");
-        std::fs::create_dir_all(&addon_state_dir).expect("create character dir");
-        std::fs::write(
-            addon_state_dir.join("AddOns.txt"),
-            "EnabledAddon: enabled\nDisabledAddon: disabled\n",
-        )
-        .expect("write AddOns.txt");
-
-        let mut saved_vars = SavedVariablesManager::new();
-        saved_vars.set_wtf_config(wow_ui_sim::saved_variables::WtfConfig::new(
-            temp.path(),
-            "Test",
-            "Burning Blade",
-            "Palaky",
-        ));
-
-        let overrides = addon_enable_overrides(Some(&saved_vars)).expect("read overrides");
-
-        assert_eq!(overrides.get("EnabledAddon"), Some(&true));
-        assert_eq!(overrides.get("DisabledAddon"), Some(&false));
     }
 }
