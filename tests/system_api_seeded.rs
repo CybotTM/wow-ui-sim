@@ -202,6 +202,86 @@ fn test_c_damage_meter_current_session_returns_seeded_data() {
 }
 
 #[test]
+fn test_c_damage_meter_returns_empty_sessions_for_unseeded_meter_types() {
+    let env = env();
+    let result: String = env.eval(r#"
+        for name, damageType in pairs(Enum.DamageMeterType) do
+            if damageType ~= Enum.DamageMeterType.DamageDone then
+                local byId = C_DamageMeter.GetCombatSessionFromID(1, damageType)
+                if type(byId) ~= "table" then
+                    return "by_id_" .. name .. "=" .. type(byId)
+                end
+                if type(byId.combatSources) ~= "table" then
+                    return "by_id_sources_" .. name .. "=" .. type(byId.combatSources)
+                end
+                if #byId.combatSources ~= 0 then
+                    return "by_id_source_count_" .. name .. "=" .. tostring(#byId.combatSources)
+                end
+                if byId.totalAmount ~= 0 or byId.maxAmount ~= 0 or byId.durationSeconds ~= 0 then
+                    return "by_id_totals_" .. name
+                end
+
+                local byType = C_DamageMeter.GetCombatSessionFromType(
+                    Enum.DamageMeterSessionType.Overall,
+                    damageType
+                )
+                if type(byType) ~= "table" then
+                    return "by_type_" .. name .. "=" .. type(byType)
+                end
+                if type(byType.combatSources) ~= "table" then
+                    return "by_type_sources_" .. name .. "=" .. type(byType.combatSources)
+                end
+                if #byType.combatSources ~= 0 then
+                    return "by_type_source_count_" .. name .. "=" .. tostring(#byType.combatSources)
+                end
+
+                local sourceById = C_DamageMeter.GetCombatSessionSourceFromID(1, damageType, nil, nil)
+                if type(sourceById) ~= "table" then
+                    return "source_by_id_" .. name .. "=" .. type(sourceById)
+                end
+                if type(sourceById.combatSpells) ~= "table" then
+                    return "source_by_id_spells_" .. name .. "=" .. type(sourceById.combatSpells)
+                end
+                if #sourceById.combatSpells ~= 0 then
+                    return "source_by_id_spell_count_" .. name .. "=" .. tostring(#sourceById.combatSpells)
+                end
+
+                local sourceByType = C_DamageMeter.GetCombatSessionSourceFromType(
+                    Enum.DamageMeterSessionType.Overall,
+                    damageType,
+                    nil,
+                    nil
+                )
+                if type(sourceByType) ~= "table" then
+                    return "source_by_type_" .. name .. "=" .. type(sourceByType)
+                end
+                if type(sourceByType.combatSpells) ~= "table" then
+                    return "source_by_type_spells_" .. name .. "=" .. type(sourceByType.combatSpells)
+                end
+            end
+        end
+
+        local damageSession = C_DamageMeter.GetCombatSessionFromID(1, Enum.DamageMeterType.DamageDone)
+        local topSource = damageSession.combatSources[1]
+        local sourceWithoutCreatureID = C_DamageMeter.GetCombatSessionSourceFromID(
+            1,
+            Enum.DamageMeterType.DamageDone,
+            topSource.sourceGUID,
+            nil
+        )
+        if not sourceWithoutCreatureID or sourceWithoutCreatureID.sourceGUID ~= topSource.sourceGUID then
+            return "source_without_creature_id"
+        end
+
+        return "ok"
+    "#).unwrap();
+    assert_eq!(
+        result, "ok",
+        "C_DamageMeter should return empty sessions for valid unseeded meter types: {result}"
+    );
+}
+
+#[test]
 fn test_sound_system_driver_functions_return_seeded_devices() {
     let env = env();
     let result: String = env

@@ -3686,6 +3686,37 @@ local __wow_seeded_damage_meter_session = {
   },
 }
 
+local function __wow_empty_damage_meter_session(sessionID)
+  return {
+    sessionID = sessionID,
+    totalAmount = 0,
+    maxAmount = 0,
+    durationSeconds = 0,
+    combatSources = {},
+  }
+end
+
+local function __wow_empty_damage_meter_source()
+  return {
+    totalAmount = 0,
+    maxAmount = 0,
+    amountPerSecond = 0,
+    combatSpells = {},
+  }
+end
+
+local function __wow_is_known_damage_meter_type(damageType)
+  if type(Enum) ~= "table" or type(Enum.DamageMeterType) ~= "table" then
+    return false
+  end
+  for _, knownType in pairs(Enum.DamageMeterType) do
+    if damageType == knownType then
+      return true
+    end
+  end
+  return false
+end
+
 local function __wow_has_seeded_damage_meter_session_type(sessionType)
   return sessionType == Enum.DamageMeterSessionType.Overall
     or sessionType == Enum.DamageMeterSessionType.Current
@@ -3700,6 +3731,9 @@ C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
     if __wow_has_seeded_damage_meter_session_type(sessionType) and damageType == Enum.DamageMeterType.DamageDone then
       return __wow_seeded_damage_meter_session
     end
+    if __wow_has_seeded_damage_meter_session_type(sessionType) and __wow_is_known_damage_meter_type(damageType) then
+      return __wow_empty_damage_meter_session(__wow_seeded_damage_meter_session.sessionID)
+    end
     return nil
   end,
   GetCombatSessionSourceFromType = function(sessionType, damageType, sourceGUID, sourceCreatureID)
@@ -3707,12 +3741,15 @@ C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
       return nil
     end
     if damageType ~= Enum.DamageMeterType.DamageDone then
+      if __wow_is_known_damage_meter_type(damageType) then
+        return __wow_empty_damage_meter_source()
+      end
       return nil
     end
     if sourceGUID ~= __wow_seeded_damage_meter_source.sourceGUID then
       return nil
     end
-    if sourceCreatureID ~= __wow_seeded_damage_meter_source.sourceCreatureID then
+    if sourceCreatureID ~= nil and sourceCreatureID ~= __wow_seeded_damage_meter_source.sourceCreatureID then
       return nil
     end
     return __wow_seeded_damage_meter_source
@@ -3722,6 +3759,9 @@ C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
       return nil
     end
     if damageType ~= Enum.DamageMeterType.DamageDone then
+      if __wow_is_known_damage_meter_type(damageType) then
+        return __wow_empty_damage_meter_session(sessionID)
+      end
       return nil
     end
     return __wow_seeded_damage_meter_session
@@ -3731,12 +3771,15 @@ C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
       return nil
     end
     if damageType ~= Enum.DamageMeterType.DamageDone then
+      if __wow_is_known_damage_meter_type(damageType) then
+        return __wow_empty_damage_meter_source()
+      end
       return nil
     end
     if sourceGUID ~= __wow_seeded_damage_meter_source.sourceGUID then
       return nil
     end
-    if sourceCreatureID ~= __wow_seeded_damage_meter_source.sourceCreatureID then
+    if sourceCreatureID ~= nil and sourceCreatureID ~= __wow_seeded_damage_meter_source.sourceCreatureID then
       return nil
     end
     return __wow_seeded_damage_meter_source
