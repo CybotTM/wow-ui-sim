@@ -312,4 +312,21 @@ mod tests {
         assert!(result.2, "C_Timer should remain registered");
         assert!(result.3, "UI strings should remain registered");
     }
+
+    #[test]
+    fn get_server_time_returns_unix_seconds_for_addon_date_calls() {
+        let env = WowLuaEnv::new().expect("failed to create Lua environment");
+
+        let result: (String, bool) = env
+            .eval(
+                r#"
+                local now = GetServerTime()
+                return type(now), date("*t", now).year >= 2024
+                "#,
+            )
+            .expect("GetServerTime should be date-compatible");
+
+        assert_eq!(result.0, "number");
+        assert!(result.1, "GetServerTime should return current Unix seconds");
+    }
 }

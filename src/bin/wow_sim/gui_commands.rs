@@ -1,4 +1,5 @@
 use super::CommandDispatch;
+use super::Commands;
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
@@ -15,6 +16,131 @@ pub(super) fn run_gui(dispatch: CommandDispatch) -> Result<(), Box<dyn std::erro
         dispatch.exec_lua,
         dispatch.exec_lua_secure,
     )
+}
+
+pub(super) fn dispatch_headless_click_probe(
+    dispatch: CommandDispatch,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let Some(Commands::HeadlessClickProbe {
+        panel,
+        width,
+        height,
+    }) = dispatch.command
+    else {
+        unreachable!("dispatch_headless_click_probe only fires for Commands::HeadlessClickProbe");
+    };
+    let plan = headless_click_probe_plan(&panel)?;
+    wow_ui_sim::iced_app::run_headless_named_click_probe(
+        dispatch.env,
+        dispatch.saved_vars,
+        iced::Size::new(width as f32, height as f32),
+        plan.setup_lua,
+        plan.clicks,
+    )
+    .map_err(Box::<dyn std::error::Error>::from)
+}
+
+struct HeadlessClickProbePlan<'a> {
+    setup_lua: &'a str,
+    clicks: &'a [wow_ui_sim::iced_app::NamedClick<'a>],
+}
+
+fn headless_click_probe_plan(
+    panel: &str,
+) -> Result<HeadlessClickProbePlan<'static>, Box<dyn std::error::Error>> {
+    match panel {
+        "achievements" => Ok(achievements_click_probe_plan()),
+        "talents" => Ok(talents_click_probe_plan()),
+        _ => Err(format!("unknown headless click probe panel: {panel}").into()),
+    }
+}
+
+pub(super) fn dispatch_screenshot(dispatch: CommandDispatch) {
+    let Some(Commands::Screenshot {
+        output,
+        width,
+        height,
+        filter,
+        crop,
+        dump_tree,
+    }) = dispatch.command
+    else {
+        unreachable!("dispatch_screenshot only fires for Commands::Screenshot");
+    };
+    run_screenshot(
+        &dispatch.env,
+        &dispatch.font_system,
+        ScreenshotCommand {
+            output,
+            width,
+            height,
+            filter,
+            crop,
+            delay: dispatch.delay,
+            exec_lua: dispatch.exec_lua.as_deref(),
+            exec_lua_secure: dispatch.exec_lua_secure,
+            dump_tree,
+        },
+    );
+}
+
+pub(super) fn dispatch_dump_texture(dispatch: CommandDispatch) {
+    let Some(Commands::DumpTexture {
+        output,
+        filter,
+        frame_filter,
+    }) = dispatch.command
+    else {
+        unreachable!("dispatch_dump_texture only fires for Commands::DumpTexture");
+    };
+    run_dump_texture(
+        &dispatch.env,
+        &dispatch.font_system,
+        output,
+        filter,
+        frame_filter,
+    );
+}
+
+fn achievements_click_probe_plan() -> HeadlessClickProbePlan<'static> {
+    HeadlessClickProbePlan {
+        setup_lua: r#"
+            ToggleAchievementFrame()
+            if not AchievementFrame or not AchievementFrame:IsShown() then
+                error("AchievementFrame did not open")
+            end
+        "#,
+        clicks: &[
+            wow_ui_sim::iced_app::NamedClick {
+                frame_name: "AchievementFrameTab2",
+            },
+            wow_ui_sim::iced_app::NamedClick {
+                frame_name: "AchievementFrameTab1",
+            },
+        ],
+    }
+}
+
+fn talents_click_probe_plan() -> HeadlessClickProbePlan<'static> {
+    HeadlessClickProbePlan {
+        setup_lua: r#"
+            ToggleTalentFrame()
+            if not PlayerTalentFrame or not PlayerTalentFrame:IsShown() then
+                error("PlayerTalentFrame did not open")
+            end
+        "#,
+        clicks: &[
+            wow_ui_sim::iced_app::NamedClick {
+                frame_name: "PlayerTalentFrameTab2",
+            },
+            wow_ui_sim::iced_app::NamedClick {
+                frame_name: "PlayerTalentFrameTab3",
+            },
+            wow_ui_sim::iced_app::NamedClick {
+                frame_name: "PlayerTalentFrameTab1",
+            },
+        ],
+    }
 }
 
 pub(super) struct ScreenshotCommand<'a> {

@@ -127,6 +127,18 @@ enum Commands {
         frame_filter: Option<String>,
     },
 
+    /// Hidden regression helper: boot the GUI App headlessly and click named frames.
+    #[cfg(feature = "gui")]
+    #[command(hide = true)]
+    HeadlessClickProbe {
+        #[arg(value_parser = ["achievements", "talents"])]
+        panel: String,
+        #[arg(long, default_value_t = 1024)]
+        width: u32,
+        #[arg(long, default_value_t = 768)]
+        height: u32,
+    },
+
     /// Resolve a WoW texture path through the CASC pipeline and pre-cache it on disk.
     ///
     /// Skips addon loading. Useful to extract a single texture (or retry a previously
@@ -552,7 +564,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
     match dispatch.command {
         Some(Commands::DumpTree { .. }) => dispatch_dump_tree(dispatch),
         #[cfg(feature = "gui")]
-        Some(Commands::Screenshot { .. }) => dispatch_screenshot(dispatch),
+        Some(Commands::Screenshot { .. }) => gui_commands::dispatch_screenshot(dispatch),
         Some(Commands::LuaErrors) => run_lua_errors(&dispatch),
         Some(Commands::SelfTest {
             max_ticks,
@@ -562,7 +574,11 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
             run_addon_tests(&dispatch, addon_name);
         }
         #[cfg(feature = "gui")]
-        Some(Commands::DumpTexture { .. }) => dispatch_dump_texture(dispatch),
+        Some(Commands::DumpTexture { .. }) => gui_commands::dispatch_dump_texture(dispatch),
+        #[cfg(feature = "gui")]
+        Some(Commands::HeadlessClickProbe { .. }) => {
+            gui_commands::dispatch_headless_click_probe(dispatch)?
+        }
         Some(Commands::CacheTexture { .. }) => {
             unreachable!("CacheTexture is handled before init_and_load");
         }
@@ -602,55 +618,6 @@ fn dispatch_dump_tree(dispatch: CommandDispatch) {
             exec_lua: dispatch.exec_lua.as_deref(),
             exec_lua_secure: dispatch.exec_lua_secure,
         },
-    );
-}
-
-#[cfg(feature = "gui")]
-fn dispatch_screenshot(dispatch: CommandDispatch) {
-    let Some(Commands::Screenshot {
-        output,
-        width,
-        height,
-        filter,
-        crop,
-        dump_tree,
-    }) = dispatch.command
-    else {
-        unreachable!("dispatch_screenshot only fires for Commands::Screenshot");
-    };
-    gui_commands::run_screenshot(
-        &dispatch.env,
-        &dispatch.font_system,
-        gui_commands::ScreenshotCommand {
-            output,
-            width,
-            height,
-            filter,
-            crop,
-            delay: dispatch.delay,
-            exec_lua: dispatch.exec_lua.as_deref(),
-            exec_lua_secure: dispatch.exec_lua_secure,
-            dump_tree,
-        },
-    );
-}
-
-#[cfg(feature = "gui")]
-fn dispatch_dump_texture(dispatch: CommandDispatch) {
-    let Some(Commands::DumpTexture {
-        output,
-        filter,
-        frame_filter,
-    }) = dispatch.command
-    else {
-        unreachable!("dispatch_dump_texture only fires for Commands::DumpTexture");
-    };
-    gui_commands::run_dump_texture(
-        &dispatch.env,
-        &dispatch.font_system,
-        output,
-        filter,
-        frame_filter,
     );
 }
 

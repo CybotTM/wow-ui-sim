@@ -25,6 +25,8 @@ mod button_vis;
 #[cfg(feature = "gui")]
 mod casting;
 #[cfg(feature = "gui")]
+mod click_probe;
+#[cfg(feature = "gui")]
 mod hit_grid;
 #[cfg(feature = "gui")]
 mod keybinds;
@@ -100,6 +102,8 @@ pub use benchmark::{
     BenchmarkPhase, LfgPanelBenchmarkReport, SpellbookBenchmarkReport,
     benchmark_lfg_panel_open_in_gui, benchmark_spellbook_open_in_gui,
 };
+#[cfg(feature = "gui")]
+pub use click_probe::{NamedClick, run_headless_named_click_probe};
 #[cfg(feature = "gui")]
 pub use render::{DirtyStrataRebuildParams, rebuild_dirty_strata_batches_for_registry};
 #[cfg(feature = "gui")]

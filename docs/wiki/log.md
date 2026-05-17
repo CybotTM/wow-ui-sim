@@ -9,6 +9,10 @@ tracking regression. EditMode profile cache files are not Lua SavedVariables, so
 startup now loads them through a separate WTF cache path when Lua SavedVariables
 are disabled.
 
+## [2026-05-17] investigation | Mists panel stack overflow layout cycle
+
+Created `investigations/mists-panel-stack-overflow-layout-cycle.md` after reproducing the Achievements/Talents abort through the real GUI click path. Documented that the root cause was active layout resolution re-entering through parent/anchor cycles, not the Lua open-panel path, and recorded the new `headless-click-probe` regression check.
+
 ## [2026-05-17] investigation | unanchored frame render leak
 
 Created `investigations/unanchored-frame-render-leak.md` after tracing the startup stray editbox/dropdown to render-list fallback geometry for unanchored frames. The render path now matches Lua rect validity and skips descendants of unanchored frames too.
