@@ -3654,15 +3654,46 @@ C_AccountStore = __wow_merge_namespace(C_AccountStore, {
   GetCurrencyAvailable = function() return 0 end,
 })
 
+local function __wow_damage_meter_spell_details(unitName, unitClassFilename, amount)
+  return {
+    amount = amount or 0,
+    classification = "normal",
+    isMob = false,
+    isPet = false,
+    specIconID = 0,
+    unitClassFilename = unitClassFilename or "PALADIN",
+    unitName = unitName or "Player",
+  }
+end
+
+local function __wow_damage_meter_spell(spellID, amount, amountPerSecond, unitName, unitClassFilename)
+  return {
+    spellID = spellID,
+    totalAmount = amount or 0,
+    amountPerSecond = amountPerSecond or 0,
+    creatureName = unitName or "Player",
+    overkillAmount = 0,
+    isAvoidable = false,
+    isDeadly = false,
+    combatSpellDetails = __wow_damage_meter_spell_details(unitName, unitClassFilename, amount),
+  }
+end
+
 local __wow_seeded_damage_meter_source = {
   name = "Player",
   isLocalPlayer = true,
   sourceGUID = "Player-1-00000001",
   sourceCreatureID = 1,
   totalAmount = 52000,
+  maxAmount = 52000,
   amountPerSecond = 1300,
+  classFilename = "PALADIN",
+  classification = "normal",
+  deathRecapID = 0,
+  deathTimeSeconds = 0,
+  specIconID = 0,
   combatSpells = {
-    { spellID = 19750, totalAmount = 52000, amountPerSecond = 1300 },
+    __wow_damage_meter_spell(19750, 52000, 1300, "Player", "PALADIN"),
   },
 }
 local __wow_seeded_damage_meter_session = {
@@ -3678,9 +3709,15 @@ local __wow_seeded_damage_meter_session = {
       sourceGUID = "Creature-1-00000002",
       sourceCreatureID = 2,
       totalAmount = 3333,
+      maxAmount = 3333,
       amountPerSecond = 83.325,
+      classFilename = "WARRIOR",
+      classification = "normal",
+      deathRecapID = 0,
+      deathTimeSeconds = 0,
+      specIconID = 0,
       combatSpells = {
-        { spellID = 1337, totalAmount = 3333, amountPerSecond = 83.325 },
+        __wow_damage_meter_spell(1337, 3333, 83.325, "Companion", "WARRIOR"),
       },
     },
   },
