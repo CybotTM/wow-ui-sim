@@ -13,6 +13,7 @@ The full Mists addon pass reported these startup failures:
 - `SecureGroupHeaders.lua:951` compared nil aura sort keys because Mists Blizzard code destructures `AuraUtil.ForEachAura` callbacks as legacy `UnitAura` tuples.
 - ElvUI slider skinning hit `string.find` with nil anchor data because simulator-created Slider `Low`, `High`, and `Text` fontstrings had no default points.
 - ElvUI Tooltip initialization failed at `GameTooltipText:FontTemplate(...)` because the method was added through one Font object's metatable but not visible on other Font objects.
+- ElvUI DataTexts durability initialization failed because `GetInventoryItemDurability` was missing from the inventory probe globals.
 
 ### Root Causes
 
@@ -26,6 +27,8 @@ The slider error came from incomplete default child geometry. Real slider label 
 
 The Tooltip font error came from simulator Font objects each receiving a fresh metatable. Real WoW exposes a shared object-type method table for Font objects, so ElvUI's `AddAPI(GameFontNormal)` mutation of the Font metatable must also make `FontTemplate` visible on `GameTooltipText` and `GameTooltipHeaderText`.
 
+The durability error was a missing inventory global. The simulator already tracked equipped item presence, but had no wear model; returning full current/max durability for equipped player slots and nil for empty slots matches the addon-facing shape without inventing persistent damage state.
+
 ### Fix Pattern
 
 Keep the fixes at the compatibility surface that owns each behavior:
@@ -35,8 +38,9 @@ Keep the fixes at the compatibility surface that owns each behavior:
 - `mists/post_load.lua` patches `AuraUtil.ForEachAura` after Blizzard creates `AuraUtil`, adapting callbacks back to the Mists legacy tuple.
 - `helpers_shared.rs` anchors generated Slider `Low`, `High`, and `Text` fontstrings at creation time.
 - Font objects use a shared registry-backed metatable, because addon metatable mutations target the object type, not only one global Font instance.
+- `inventory_probes.rs` exposes `GetInventoryItemDurability(slot)` from equipped item presence, returning full durability for modeled equipped items and nil for empty slots.
 
-The full-addon probe after these fixes still reports separate ElvUI/Syndicator/StaticPopup issues, but no longer reports `SecureGroupHeaders`, `string.trim`, scrollbar `btn`, residual slider `string.find`, ElvUI Chat `SecureHook`, or ElvUI Tooltip `FontTemplate` errors.
+The full-addon probe after these fixes still reports separate ElvUI/Syndicator/StaticPopup issues, but no longer reports `SecureGroupHeaders`, `string.trim`, scrollbar `btn`, residual slider `string.find`, ElvUI Chat `SecureHook`, ElvUI Tooltip `FontTemplate`, or ElvUI DataTexts durability errors.
 
 ### Screen Size and ElvUIParent Placement
 
@@ -61,6 +65,7 @@ ElvUI's `E:AddAPI(GameFontNormal)` adds methods such as `FontTemplate` to the Fo
 - [mists/post_load.lua](../../../src/mists/post_load.lua) — post-load Mists AuraUtil tuple adapter
 - [helpers_shared.rs](../../../src/lua_api/globals/create_frame/helpers_shared.rs) — default Slider label anchoring
 - [fonts.rs](../../../src/lua_api/globals/font_strings_collection/fonts.rs) — shared Font object metatable registration
+- [inventory_probes.rs](../../../src/lua_api/globals/inventory_probes.rs) — inventory item durability probe
 - [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — bootstrap screen-size fallback
 - [env_runtime.rs](../../../src/lua_api/env_runtime.rs) — runtime screen-size globals and resize event dispatch
 - [mists/post_load.lua](../../../src/mists/post_load.lua) — Mists `RedockChatWindows` compatibility

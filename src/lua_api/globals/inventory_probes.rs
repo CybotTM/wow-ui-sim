@@ -292,6 +292,22 @@ fn get_inventory_item_broken(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_inventory_item_durability(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot) = stack_i32(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let has_equipped_item = player_equipped_item_id(state, "player", slot).is_some();
+    if !has_equipped_item {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+
+    state.push(Val::Num(100.0));
+    state.push(Val::Num(100.0));
+    Ok(2)
+}
+
 fn get_inventory_item_equipped_unusable(state: &mut LuaState) -> LuaResult<u32> {
     let _unit = Option::<String>::from_stack(state, 1)?;
     let _slot = stack_i32(state, 2);
@@ -360,6 +376,11 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetInventoryItemTexture", get_inventory_item_texture)?;
     LuaApiMut::register_function(lua, "GetInventoryItemLink", get_inventory_item_link)?;
     LuaApiMut::register_function(lua, "GetInventoryItemBroken", get_inventory_item_broken)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetInventoryItemDurability",
+        get_inventory_item_durability,
+    )?;
     LuaApiMut::register_function(
         lua,
         "GetInventoryItemEquippedUnusable",

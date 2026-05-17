@@ -180,6 +180,19 @@ fn test_get_inventory_item_broken() {
 }
 
 #[test]
+fn test_get_inventory_item_durability() {
+    let env = env();
+    let (durability, max_durability): (i32, i32) =
+        env.eval(r#"return GetInventoryItemDurability(1)"#).unwrap();
+    assert_eq!((durability, max_durability), (100, 100));
+
+    let empty_slot_is_nil: bool = env
+        .eval(r#"return GetInventoryItemDurability(19) == nil"#)
+        .unwrap();
+    assert!(empty_slot_is_nil, "Empty slot should return nil");
+}
+
+#[test]
 fn test_get_inventory_item_cooldown() {
     let env = env();
     let (start, dur, enabled): (f64, f64, i32) = env
