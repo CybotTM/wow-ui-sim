@@ -62,6 +62,27 @@ if type(Settings) == "table" then
       return category
     end
 
+    local function hideFrame(frame)
+      if type(frame) ~= "table" then
+        return
+      end
+      if type(frame.SetShown) == "function" then
+        pcall(frame.SetShown, frame, false)
+      elseif type(frame.Hide) == "function" then
+        pcall(frame.Hide, frame)
+      end
+    end
+
+    local function hideCanvasLayoutFrame(layout)
+      if type(layout) ~= "table" or type(layout.GetFrame) ~= "function" then
+        return
+      end
+      local ok, frame = pcall(layout.GetFrame, layout)
+      if ok then
+        hideFrame(frame)
+      end
+    end
+
     if type(originalRegisterCategory) == "function" then
       function Settings.RegisterCategory(category, ...)
         rememberCategory(category)
@@ -80,6 +101,7 @@ if type(Settings) == "table" then
       function Settings.RegisterCanvasLayoutCategory(...)
         local category, layout = originalRegisterCanvasLayoutCategory(...)
         rememberCategory(category)
+        hideCanvasLayoutFrame(layout)
         return category, layout
       end
     end
@@ -89,6 +111,7 @@ if type(Settings) == "table" then
         local category, layout = originalRegisterCanvasLayoutSubcategory(parentCategory, ...)
         rememberCategory(parentCategory)
         rememberCategory(category)
+        hideCanvasLayoutFrame(layout)
         return category, layout
       end
     end

@@ -126,6 +126,63 @@ mod tests {
     }
 
     #[test]
+    fn post_load_hides_registered_settings_canvas_layouts() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            Settings = {}
+            local nextID = 0
+            local Category = {}
+            Category.__index = Category
+            function Category:GetID() return self.ID end
+            function Category:GetName() return self.name end
+            function Category:CreateSubcategory(name)
+              nextID = nextID + 1
+              return setmetatable({ ID = nextID, name = name }, Category)
+            end
+            local function createLayout(frame)
+              return { GetFrame = function() return frame end }
+            end
+            function Settings.RegisterCanvasLayoutCategory(frame, name)
+              nextID = nextID + 1
+              return setmetatable({ ID = nextID, name = name }, Category), createLayout(frame)
+            end
+            function Settings.RegisterCanvasLayoutSubcategory(parentCategory, frame, name)
+              return parentCategory:CreateSubcategory(name), createLayout(frame)
+            end
+            function Settings.RegisterAddOnCategory(category) end
+            function Settings.GetCategory(categoryID) return nil end
+            "#,
+        )
+        .expect("settings setup should run");
+
+        super::apply(&env);
+
+        let (main_hidden, sub_hidden): (bool, bool) = env
+            .eval(
+                r#"
+                local mainFrame = CreateFrame("Frame", "SettingsMainCanvasProbe", UIParent)
+                local subFrame = CreateFrame("Frame", "SettingsSubCanvasProbe", UIParent)
+                mainFrame:Show()
+                subFrame:Show()
+                local category = Settings.RegisterCanvasLayoutCategory(mainFrame, "Probe")
+                local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, subFrame, "Sub")
+                return not mainFrame:IsShown(), not subFrame:IsShown()
+                "#,
+            )
+            .expect("settings layout visibility probe should run");
+
+        assert!(
+            main_hidden,
+            "registered settings canvas category frames should start hidden"
+        );
+        assert!(
+            sub_hidden,
+            "registered settings canvas subcategory frames should start hidden"
+        );
+    }
+
+    #[test]
     fn post_load_disables_blizzmove_startup_frame_scan() {
         let env = WowLuaEnv::new().expect("env");
         env.exec(
