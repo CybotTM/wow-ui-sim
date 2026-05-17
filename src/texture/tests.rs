@@ -182,6 +182,30 @@ fn test_addon_texture_prefix_is_case_insensitive() {
 }
 
 #[test]
+fn test_addon_texture_searches_all_configured_addon_roots() {
+    let bundled_dir = TempDir::new().unwrap();
+    let install_dir = TempDir::new().unwrap();
+    fs::create_dir_all(install_dir.path().join("AllTheThings/assets")).unwrap();
+
+    let texture_path = install_dir
+        .path()
+        .join("AllTheThings/assets/Discord_2_64.webp");
+    let img = image::RgbaImage::from_pixel(1, 1, image::Rgba([128, 128, 128, 255]));
+    img.save(&texture_path).unwrap();
+
+    let mut mgr = TextureManager::new().with_addons_paths(vec![
+        bundled_dir.path().to_path_buf(),
+        install_dir.path().to_path_buf(),
+    ]);
+    let result = mgr.load(r"interface/Addons\AllTheThings\assets\Discord_2_64");
+
+    assert!(
+        result.is_some(),
+        "addon textures should resolve from later discovered addon roots"
+    );
+}
+
+#[test]
 fn test_simcommands_minimap_placeholder_resolves_from_default_addons_path() {
     let mut mgr = TextureManager::new().with_addons_path(crate::paths::default_addons_path());
 

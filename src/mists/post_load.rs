@@ -10,7 +10,7 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if matches!(
         addon_name,
-        "Blizzard_CharacterFrame" | "Blizzard_Collections" | "Blizzard_TalentUI"
+        "Blizzard_CharacterFrame" | "Blizzard_Collections" | "Blizzard_TalentUI" | "GTFO"
     ) {
         let _ = env.exec(MISTS_POST_LOAD_LUA);
     }
@@ -146,6 +146,32 @@ mod tests {
             .eval("return GTFOConfigOpened")
             .expect("gtfo popup probe should run");
         assert!(!opened, "GTFO startup config popup should be suppressed");
+    }
+
+    #[test]
+    fn runtime_gtfo_load_suppresses_startup_config_popup() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            GTFOConfigOpened = false
+            function GTFO_DisplayConfigPopupMessage()
+                GTFOConfigOpened = true
+            end
+            "#,
+        )
+        .expect("gtfo popup setup should run");
+
+        super::apply_for_runtime_addon_load(&env.loader_env(), "GTFO");
+        env.exec("GTFO_DisplayConfigPopupMessage()")
+            .expect("wrapped popup should run");
+
+        let opened: bool = env
+            .eval("return GTFOConfigOpened")
+            .expect("gtfo popup probe should run");
+        assert!(
+            !opened,
+            "GTFO popup should be suppressed after the addon defines it"
+        );
     }
 
     #[test]
