@@ -34,12 +34,20 @@ Keep the fixes at the compatibility surface that owns each behavior:
 
 The full-addon probe after these fixes still reports separate ElvUI/Syndicator/StaticPopup issues, but no longer reports `SecureGroupHeaders`, `string.trim`, scrollbar `btn`, or residual slider `string.find` errors.
 
+### Screen Size and ElvUIParent Placement
+
+The ElvUI install panel text and raid-control position shared a later geometry root cause. ElvUI sets `UIParent:SetScale(0.64)` and expects `GetScreenWidth()` / `GetScreenHeight()` to return UI units, while `GetPhysicalScreenSize()` returns physical pixels. The simulator returned fixed physical values for all three during bootstrap, so ElvUI sized `ElvUIParent` to `1024x768` logical units under a `0.64` scale. That produced a physically smaller parent anchored to the bottom of the screen, pushing `RaidUtility_ShowButton` toward the middle and making install-panel content appear displaced or covered.
+
+The fix keeps `GetPhysicalScreenSize()` physical, but makes `GetScreenWidth()` / `GetScreenHeight()` divide by `UIParent:GetEffectiveScale()`. `WowLuaEnv::set_screen_size()` also fires `DISPLAY_SIZE_CHANGED` and `UI_SCALE_CHANGED` so addons recompute layout when screenshot/GUI paths resize after addon startup.
+
 ## Sources
 
 - [shared_bootstrap.lua](../../../src/lua_api/env_init/shared_bootstrap.lua) — trim alias compatibility
 - [frame_metatable.rs](../../../src/lua_api/methods/frame_metatable.rs) — per-widget method filtering
 - [mists/post_load.lua](../../../src/mists/post_load.lua) — post-load Mists AuraUtil tuple adapter
 - [helpers_shared.rs](../../../src/lua_api/globals/create_frame/helpers_shared.rs) — default Slider label anchoring
+- [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — bootstrap screen-size fallback
+- [env_runtime.rs](../../../src/lua_api/env_runtime.rs) — runtime screen-size globals and resize event dispatch
 - [PLAN.md](../../../PLAN.md) — remaining Mists full-addon error list
 
 ## See Also

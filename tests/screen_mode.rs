@@ -115,3 +115,23 @@ fn screen_size_globals_follow_canvas_dimensions() {
     assert_eq!(physical_width, 1646);
     assert_eq!(physical_height, 822);
 }
+
+#[test]
+fn screen_size_globals_report_ui_units_after_ui_parent_scale() {
+    let env = WowLuaEnv::new().unwrap();
+    env.set_screen_size(1024.0, 768.0);
+
+    let (width, height, physical_width, physical_height): (f64, f64, i32, i32) = env
+        .eval(
+            r#"
+        UIParent:SetScale(0.64)
+        return GetScreenWidth(), GetScreenHeight(), GetPhysicalScreenSize()
+    "#,
+        )
+        .unwrap();
+
+    assert!((width - 1600.0).abs() < 0.001);
+    assert!((height - 1200.0).abs() < 0.001);
+    assert_eq!(physical_width, 1024);
+    assert_eq!(physical_height, 768);
+}

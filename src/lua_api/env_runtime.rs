@@ -73,13 +73,17 @@ impl WowLuaEnv {
 
     /// Update screen dimensions in SimState and resize UIParent/WorldFrame to match.
     pub fn set_screen_size(&self, width: f32, height: f32) {
-        let mut state = self.state.borrow_mut();
-        state.screen_width = width;
-        state.screen_height = height;
-        state.invalidate_strata_buckets();
-        state.widgets.clear_all_layout_rects();
-        update_screen_widgets_for_dimensions(&mut state, width, height);
+        {
+            let mut state = self.state.borrow_mut();
+            state.screen_width = width;
+            state.screen_height = height;
+            state.invalidate_strata_buckets();
+            state.widgets.clear_all_layout_rects();
+            update_screen_widgets_for_dimensions(&mut state, width, height);
+        }
         install_screen_size_globals(self, width, height);
+        let _ = self.fire_event("DISPLAY_SIZE_CHANGED");
+        let _ = self.fire_event("UI_SCALE_CHANGED");
     }
 
     /// Select which UI surface should be loaded.
@@ -332,15 +336,17 @@ fn install_screen_size_globals(env: &WowLuaEnv, width: f32, height: f32) {
     let _ = env.exec(&format!(
         r#"
         function GetScreenWidth()
-            return {width}
+            local scale = UIParent and UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1
+            return {width} / scale
         end
 
         function GetScreenHeight()
-            return {height}
+            local scale = UIParent and UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1
+            return {height} / scale
         end
 
         function GetPhysicalScreenSize()
-            return GetScreenWidth(), GetScreenHeight()
+            return {width}, {height}
         end
 
         function GetScreenDPIScale()

@@ -12,6 +12,7 @@ are disabled.
 ## [2026-05-17] investigation | Mists ElvUI startup compatibility
 
 Created `investigations/mists-elvui-startup-compat.md` after the full-addon Mists probe isolated ElvUI startup failures to trim aliases, overexposed MessageFrame methods on plain frames, Mists AuraUtil tuple shape, and unanchored Slider label fontstrings.
+Updated it after tracing ElvUI install text displacement and raid-control centering to fixed physical screen-size globals under `UIParent` scale; runtime screen-size changes now also dispatch display/scale events.
 
 ## [2026-05-17] update | frame field environment numeric slot
 
