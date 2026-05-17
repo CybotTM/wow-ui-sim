@@ -1,16 +1,20 @@
 //! Event registration, script handlers, and hlist data structure helpers.
 
+mod script_binding_args;
+
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack, val_to_string};
 use crate::lua_api::script_helpers::{
-    get_script as get_rilua_script, remove_script as remove_rilua_script,
-    set_script as set_rilua_script,
+    ScriptBinding, get_script_binding as get_rilua_script_binding,
+    remove_script_binding as remove_rilua_script_binding, set_script as set_rilua_script,
+    set_script_binding as set_rilua_script_binding,
 };
 use crate::lua_bridge::stack_val;
 use crate::widget::WidgetType;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
+use rilua::{LuaResult, Val, runtime_error};
+use script_binding_args::{build_hooked_script, optional_script_binding_from_stack};
 
 // ── Event registration ───────────────────────────────────────────────────────
 
@@ -247,7 +251,7 @@ pub(super) fn set_script(state: &mut LuaState) -> LuaResult<u32> {
     let handler = stack_val(state, 3);
     ensure_script_supported(state, frame_id, &handler_name)?;
     if matches!(handler, Val::Nil) {
-        remove_rilua_script(state, frame_id, &handler_name);
+        remove_rilua_script_binding(state, frame_id, &handler_name, ScriptBinding::Normal);
     } else {
         if !matches!(handler, Val::Function(_)) {
             return Err(runtime_error(format!(
@@ -263,7 +267,9 @@ pub(super) fn get_script(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let handler_name = val_to_string(state, stack_val(state, 2))
         .ok_or_else(|| runtime_error("GetScript: handler name required"))?;
-    let handler = get_rilua_script(state, frame_id, &handler_name).unwrap_or(Val::Nil);
+    let binding = optional_script_binding_from_stack(state, 3)?;
+    let handler =
+        get_rilua_script_binding(state, frame_id, &handler_name, binding).unwrap_or(Val::Nil);
     state.push(handler);
     Ok(1)
 }
@@ -272,8 +278,9 @@ pub(super) fn has_script(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let handler_name = val_to_string(state, stack_val(state, 2))
         .ok_or_else(|| runtime_error("HasScript: handler name required"))?;
+    let binding = optional_script_binding_from_stack(state, 3)?;
     let has_script = if is_animation_script_container(state, frame_id) {
-        get_rilua_script(state, frame_id, &handler_name).is_some()
+        get_rilua_script_binding(state, frame_id, &handler_name, binding).is_some()
     } else {
         script_supported(state, frame_id, &handler_name)
     };
@@ -287,41 +294,17 @@ pub(super) fn hook_script(state: &mut LuaState) -> LuaResult<u32> {
         .ok_or_else(|| runtime_error("HookScript: handler name required"))?;
     ensure_script_supported(state, frame_id, &handler_name)?;
     let hook = stack_val(state, 3);
+    let binding = optional_script_binding_from_stack(state, 4)?;
     if !matches!(hook, Val::Function(_)) {
         return Err(runtime_error(format!(
             "HookScript: hook for '{handler_name}' must be a function"
         )));
     }
-    let old = get_rilua_script(state, frame_id, &handler_name).unwrap_or(Val::Nil);
+    let old = get_rilua_script_binding(state, frame_id, &handler_name, binding).unwrap_or(Val::Nil);
     let chained = build_hooked_script(state, old, hook)?;
-    set_rilua_script(state, frame_id, &handler_name, chained);
+    set_rilua_script_binding(state, frame_id, &handler_name, binding, chained);
     state.push(Val::Bool(true));
     Ok(1)
-}
-
-fn build_hooked_script(state: &mut LuaState, old: Val, hook: Val) -> LuaResult<Val> {
-    let func = state.load(
-        r#"
-        local old, hook = ...
-        if old == nil then
-            return hook
-        end
-        return function(...)
-            old(...)
-            hook(...)
-        end
-    "#,
-    )?;
-    let call_base = state.top;
-    state.ensure_stack(call_base + 4);
-    state.stack_set(call_base, Val::Function(func.gc_ref()));
-    state.stack_set(call_base + 1, old);
-    state.stack_set(call_base + 2, hook);
-    state.top = call_base + 3;
-    state.call_function(call_base, 1)?;
-    let result = state.stack_get(call_base);
-    state.top = call_base;
-    Ok(result)
 }
 
 fn ensure_script_supported(state: &LuaState, frame_id: u64, handler_name: &str) -> LuaResult<()> {

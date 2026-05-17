@@ -295,23 +295,25 @@ impl WowLuaEnv {
     ) -> Result<()> {
         let addon_idx = self.handler_owner_addon(widget_id);
         let mut lua = self.lua.borrow_mut();
-        let handler = {
+        let handlers = {
             let state = lua.state_mut();
-            get_script(state, widget_id, handler_name)
+            crate::lua_api::script_helpers::get_scripts_for_dispatch(state, widget_id, handler_name)
         };
-        let Some(handler) = handler else {
+        if handlers.is_empty() {
             return Ok(());
         };
 
         let call_args = self.build_script_call_args(&mut lua, widget_id, extra_args)?;
-        self.call_widget_handler(
-            &mut lua,
-            widget_id,
-            addon_idx,
-            handler_name,
-            handler,
-            &call_args,
-        );
+        for handler in handlers {
+            self.call_widget_handler(
+                &mut lua,
+                widget_id,
+                addon_idx,
+                handler_name,
+                handler,
+                &call_args,
+            );
+        }
         Ok(())
     }
 

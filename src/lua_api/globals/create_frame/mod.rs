@@ -218,6 +218,7 @@ pub fn register_global_frames(lua: &mut rilua::Lua) -> LuaResult<()> {
 /// Register all globals from create_frame.rs, global_frames.rs, and dropdown_api.rs
 /// onto the rilua Lua state.
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
+    super::loader_script_bindings::register_all(lua)?;
     LuaApiMut::register_function(lua, "CreateFrame", create_frame)?;
     LuaApiMut::register_function(lua, "EnumerateFrames", enumerate_frames)?;
     register_global_frames(lua)?;

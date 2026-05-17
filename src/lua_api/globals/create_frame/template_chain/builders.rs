@@ -7,6 +7,8 @@ mod builder_function_family;
 mod builder_global_family;
 #[path = "builder_method_family.rs"]
 mod builder_method_family;
+#[path = "register_handler_builders.rs"]
+mod register_handler_builders;
 
 pub(super) use self::assignment_builders::build_assignment_handler;
 use self::assignment_builders::{
@@ -17,8 +19,13 @@ use self::assignment_builders::{
 use self::builder_function_family::build_function_family_handler;
 use self::builder_global_family::build_global_family_handler;
 use self::builder_method_family::build_method_family_handler;
-use crate::lua_api::methods::{create_string, frame_ref, table_set};
-use crate::lua_api::script_helpers::{get_script, remove_script, set_script};
+use self::register_handler_builders::{
+    build_register_for_clicks_handler, build_register_for_drag_handler,
+};
+use crate::lua_api::methods::create_string;
+use crate::lua_api::script_helpers::{
+    ScriptBinding, get_script, remove_script, set_script, set_script_binding,
+};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -34,51 +41,6 @@ pub(super) fn load_template(
         .map_err(|error| rilua::runtime_error(error.to_string()));
     state.global_slots = saved_slots;
     result
-}
-
-fn build_register_for_clicks_handler(
-    state: &mut LuaState,
-    first: &str,
-    second: Option<&str>,
-    third: Option<&str>,
-) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local first, second, third = ...
-            return function(self, ...)
-                return self:RegisterForClicks(first, second, third)
-            end
-        "#,
-        "template-register-for-clicks-handler",
-    )?;
-    let first = create_string(state, first);
-    let second = second
-        .map(|value| create_string(state, value))
-        .unwrap_or(Val::Nil);
-    let third = third
-        .map(|value| create_string(state, value))
-        .unwrap_or(Val::Nil);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[first, second, third],
-    )
-}
-
-fn build_register_for_drag_handler(state: &mut LuaState, button: &str) -> LuaResult<Val> {
-    let builder = load_template(
-        state,
-        r#"
-            local button = ...
-            return function(self, ...)
-                return self:RegisterForDrag(button)
-            end
-        "#,
-        "template-register-for-drag-handler",
-    )?;
-    let button = create_string(state, button);
-    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[button])
 }
 
 fn build_set_alpha_handler(state: &mut LuaState, alpha: f64) -> LuaResult<Val> {
@@ -631,11 +593,8 @@ pub(super) fn install_fast_handler(
         FastScriptInstall::Set(handler_ref) => {
             install_set_handler(state, frame_id, handler_name, handler_ref)?
         }
-        FastScriptInstall::Intrinsic { handler, new_first } if handler_name == "OnUpdate" => {
-            install_chained_handler(state, frame_id, handler_name, handler, new_first)?
-        }
-        FastScriptInstall::Intrinsic { handler, .. } => {
-            install_intrinsic_handler(state, frame_id, handler_name, handler)?
+        FastScriptInstall::Intrinsic { handler, new_first } => {
+            install_intrinsic_handler(state, frame_id, handler_name, handler, new_first)?
         }
         FastScriptInstall::Chain { handler, new_first } => {
             install_chained_handler(state, frame_id, handler_name, handler, new_first)?
@@ -665,15 +624,24 @@ fn install_intrinsic_handler(
     frame_id: u64,
     handler_name: &'static str,
     handler_ref: FastHandlerRef<'_>,
+    new_first: bool,
 ) -> LuaResult<()> {
-    let frame = frame_ref(state, frame_id)?;
-    let intrinsic_name = format!("{handler_name}_Intrinsic");
+    let binding = if new_first {
+        ScriptBinding::Precall
+    } else {
+        ScriptBinding::Postcall
+    };
     if matches!(handler_ref, FastHandlerRef::NoOp) {
-        table_set(state, frame, &intrinsic_name, Val::Nil);
+        crate::lua_api::script_helpers::remove_script_binding(
+            state,
+            frame_id,
+            handler_name,
+            binding,
+        );
         return Ok(());
     }
     if let Some(handler) = build_fast_handler(state, handler_ref)? {
-        table_set(state, frame, &intrinsic_name, handler);
+        set_script_binding(state, frame_id, handler_name, binding, handler);
     }
     Ok(())
 }

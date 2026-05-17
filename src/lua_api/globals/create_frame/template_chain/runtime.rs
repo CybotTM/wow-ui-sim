@@ -2,7 +2,6 @@ use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::{
     borrow_lua, borrow_state, borrow_state_mut, frame_ref, state_handle,
 };
-use crate::lua_api::script_helpers::get_script;
 use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -602,10 +601,10 @@ fn normalize_edit_mode_selection_layers(
 
 pub(super) fn fire_frame_on_load(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
     let frame = frame_ref(state, frame_id)?;
-    let intrinsic = crate::lua_api::methods::table_get_static(state, frame, "OnLoad_Intrinsic");
-    call_handler_with_frame(state, intrinsic, frame)?;
-    if let Some(on_load) = get_script(state, frame_id, "OnLoad") {
-        call_handler_with_frame(state, on_load, frame)?;
+    for handler in
+        crate::lua_api::script_helpers::get_scripts_for_dispatch(state, frame_id, "OnLoad")
+    {
+        call_handler_with_frame(state, handler, frame)?;
     }
     crate::lua_api::frame::methods::core_state::size::mark_nearest_layout_parent_dirty(
         state, frame_id,

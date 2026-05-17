@@ -1,6 +1,6 @@
 use super::{
-    call_error_handler, call_error_handler_state, get_script, protected_lua_pcall_state,
-    registry_table, table_get_str,
+    call_error_handler, call_error_handler_state, get_scripts_for_dispatch,
+    protected_lua_pcall_state, registry_table, table_get_str,
 };
 use crate::lua_api::handler_timing;
 use crate::lua_api::methods::{create_string, frame_ref};
@@ -23,10 +23,8 @@ pub fn get_event_listeners(state: &mut LuaState, event: &str) -> Vec<u64> {
 
 pub fn fire_named_event_state(state: &mut LuaState, event_name: &str, args: &[Val]) {
     for widget_id in get_event_listeners(state, event_name) {
-        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
-            continue;
-        };
-        if !matches!(handler, Val::Function(_)) {
+        let handlers = get_scripts_for_dispatch(state, widget_id, "OnEvent");
+        if handlers.is_empty() {
             continue;
         }
         let Ok(frame) = frame_ref(state, widget_id) else {
@@ -37,8 +35,13 @@ pub fn fire_named_event_state(state: &mut LuaState, event_name: &str, args: &[Va
         call_args.push(frame);
         call_args.push(event_name_val);
         call_args.extend_from_slice(args);
-        if let Err(error) = protected_lua_pcall_state(state, handler, &call_args) {
-            call_error_handler_state(state, &error);
+        for handler in handlers {
+            if !matches!(handler, Val::Function(_)) {
+                continue;
+            }
+            if let Err(error) = protected_lua_pcall_state(state, handler, &call_args) {
+                call_error_handler_state(state, &error);
+            }
         }
     }
 }
@@ -130,13 +133,13 @@ pub fn dispatch_script(
     handler_name: &str,
     extra_args: &[Val],
 ) -> rilua::LuaResult<()> {
-    let handler = {
+    let handlers = {
         let state = lua.state_mut();
-        get_script(state, widget_id, handler_name)
+        get_scripts_for_dispatch(state, widget_id, handler_name)
     };
-    let Some(handler_val) = handler else {
+    if handlers.is_empty() {
         return Ok(());
-    };
+    }
 
     let frame_val = {
         let state = lua.state_mut();
@@ -145,23 +148,19 @@ pub fn dispatch_script(
     let mut args = vec![frame_val];
     args.extend_from_slice(extra_args);
 
-    let Val::Function(func_ref) = handler_val else {
-        return Ok(());
-    };
-    let (owner_addon, _, _) = handler_log_metadata(lua.state(), widget_id);
-    let func = rilua::Function::from_gc_ref(func_ref);
-    let previous_addon = replace_executing_addon(lua.state(), owner_addon);
-    match lua.call_function(&func, &args) {
-        Ok(_) => {
-            replace_executing_addon(lua.state(), previous_addon);
-            Ok(())
-        }
-        Err(e) => {
+    for handler_val in handlers {
+        let Val::Function(func_ref) = handler_val else {
+            continue;
+        };
+        let (owner_addon, _, _) = handler_log_metadata(lua.state(), widget_id);
+        let func = rilua::Function::from_gc_ref(func_ref);
+        let previous_addon = replace_executing_addon(lua.state(), owner_addon);
+        if let Err(e) = lua.call_function(&func, &args) {
             call_error_handler(lua, &e.to_string());
-            replace_executing_addon(lua.state(), previous_addon);
-            Ok(())
         }
+        replace_executing_addon(lua.state(), previous_addon);
     }
+    Ok(())
 }
 
 /// Dispatch OnUpdate handlers for visible frames via rilua.
@@ -178,37 +177,39 @@ pub fn dispatch_on_update(
 ) -> rilua::LuaResult<()> {
     let elapsed_val = Val::Num(elapsed);
     for &frame_id in frame_ids {
-        let handler = {
+        let handlers = {
             let state = lua.state_mut();
-            get_script(state, frame_id, "OnUpdate")
+            get_scripts_for_dispatch(state, frame_id, "OnUpdate")
         };
-        let Some(handler_val) = handler else {
+        if handlers.is_empty() {
             continue;
         };
         let frame_val = {
             let state = lua.state_mut();
             frame_ref(state, frame_id)?
         };
-        let Val::Function(func_ref) = handler_val else {
-            continue;
-        };
-        let (owner_addon, addon_name, frame_name) = handler_log_metadata(lua.state(), frame_id);
-        let func = rilua::Function::from_gc_ref(func_ref);
-        let start = Instant::now();
-        let previous_addon = replace_executing_addon(lua.state(), owner_addon);
-        if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
-            call_error_handler(lua, &e.to_string());
+        for handler_val in handlers {
+            let Val::Function(func_ref) = handler_val else {
+                continue;
+            };
+            let (owner_addon, addon_name, frame_name) = handler_log_metadata(lua.state(), frame_id);
+            let func = rilua::Function::from_gc_ref(func_ref);
+            let start = Instant::now();
+            let previous_addon = replace_executing_addon(lua.state(), owner_addon);
+            if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
+                call_error_handler(lua, &e.to_string());
+            }
+            replace_executing_addon(lua.state(), previous_addon);
+            let elapsed = start.elapsed();
+            record_frame_timing(lua.state(), owner_addon, &start);
+            log_dispatched_handler(
+                addon_name.as_deref(),
+                "OnUpdate",
+                frame_name.as_deref(),
+                frame_id,
+                elapsed,
+            );
         }
-        replace_executing_addon(lua.state(), previous_addon);
-        let elapsed = start.elapsed();
-        record_frame_timing(lua.state(), owner_addon, &start);
-        log_dispatched_handler(
-            addon_name.as_deref(),
-            "OnUpdate",
-            frame_name.as_deref(),
-            frame_id,
-            elapsed,
-        );
     }
     Ok(())
 }

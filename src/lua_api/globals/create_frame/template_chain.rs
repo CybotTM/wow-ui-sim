@@ -181,15 +181,14 @@ fn apply_chain_entries(
     frame_id: u64,
     chain: &[Arc<crate::xml::TemplateEntry>],
 ) -> LuaResult<()> {
-    let mut has_intrinsic_base = false;
     for entry in chain {
         runtime::ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
         apply_frame_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
         apply_template_key_values(state, frame_id, entry.frame.all_key_values());
+        let entry_is_intrinsic = entry.frame.intrinsic == Some(true);
         if let Some(scripts) = entry.frame.scripts() {
-            apply_template_scripts_impl(state, frame_id, scripts, has_intrinsic_base)?;
+            apply_template_scripts_impl(state, frame_id, scripts, entry_is_intrinsic)?;
         }
-        has_intrinsic_base |= entry.frame.intrinsic == Some(true);
     }
     Ok(())
 }
@@ -290,14 +289,14 @@ fn apply_template_scripts_impl(
     state: &mut LuaState,
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
-    chain_default_scripts: bool,
+    intrinsic_default_scripts: bool,
 ) -> LuaResult<()> {
-    if apply_fast_scripts(state, frame_id, scripts, chain_default_scripts)? {
+    if apply_fast_scripts(state, frame_id, scripts, intrinsic_default_scripts)? {
         return Ok(());
     }
 
-    let script_code = if chain_default_scripts {
-        crate::loader::helpers::generate_scripts_code_chaining_default_handlers(scripts)
+    let script_code = if intrinsic_default_scripts {
+        crate::loader::helpers::generate_intrinsic_scripts_code(scripts)
     } else {
         crate::loader::helpers::generate_scripts_code(scripts)
     };
@@ -339,9 +338,9 @@ fn apply_fast_scripts(
     state: &mut LuaState,
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
-    chain_default_scripts: bool,
+    intrinsic_default_scripts: bool,
 ) -> LuaResult<bool> {
-    let Some(installs) = collect_fast_handlers(scripts, chain_default_scripts) else {
+    let Some(installs) = collect_fast_handlers(scripts, intrinsic_default_scripts) else {
         return Ok(false);
     };
     if installs.is_empty() {
@@ -357,28 +356,28 @@ fn apply_fast_scripts(
 
 fn collect_fast_handlers(
     scripts: &crate::xml::ScriptsXml,
-    chain_default_scripts: bool,
+    intrinsic_default_scripts: bool,
 ) -> Option<Vec<(&'static str, FastScriptInstall<'_>)>> {
     let mut handlers = Vec::new();
     collect_fast_handler_group(
         &mut handlers,
         base_method_only_handlers(scripts),
-        chain_default_scripts,
+        intrinsic_default_scripts,
     )?;
     collect_fast_handler_group(
         &mut handlers,
         pointer_method_only_handlers(scripts),
-        chain_default_scripts,
+        intrinsic_default_scripts,
     )?;
     collect_fast_handler_group(
         &mut handlers,
         text_method_only_handlers(scripts),
-        chain_default_scripts,
+        intrinsic_default_scripts,
     )?;
     collect_fast_handler_group(
         &mut handlers,
         state_method_only_handlers(scripts),
-        chain_default_scripts,
+        intrinsic_default_scripts,
     )?;
     Some(handlers)
 }
@@ -389,13 +388,13 @@ type FastHandler<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
 fn collect_fast_handler_group<'a>(
     handlers: &mut Vec<(&'static str, FastScriptInstall<'a>)>,
     group: impl IntoIterator<Item = FastHandler<'a>>,
-    chain_default_scripts: bool,
+    intrinsic_default_scripts: bool,
 ) -> Option<()> {
     for (handler_name, script) in group {
         let Some(script) = script else {
             continue;
         };
-        let install = fast_script_install(handler_name, script, chain_default_scripts)?;
+        let install = fast_script_install(handler_name, script, intrinsic_default_scripts)?;
         handlers.push((handler_name, install));
     }
     Some(())
@@ -418,7 +417,7 @@ fn first_fast_handler_miss_in_group<'a>(
 fn fast_script_install<'a>(
     handler_name: &'static str,
     script: &'a crate::xml::ScriptBodyXml,
-    chain_default_scripts: bool,
+    intrinsic_default_scripts: bool,
 ) -> Option<FastScriptInstall<'a>> {
     let handler = fast_handler_ref(handler_name, script)?;
     match script.intrinsic_order.as_deref() {
@@ -441,7 +440,7 @@ fn fast_script_install<'a>(
                 new_first: false,
             }),
             Some(_) => None,
-            None if chain_default_scripts => Some(FastScriptInstall::Chain {
+            None if intrinsic_default_scripts => Some(FastScriptInstall::Intrinsic {
                 handler,
                 new_first: true,
             }),

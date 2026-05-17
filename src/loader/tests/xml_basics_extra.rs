@@ -287,12 +287,160 @@ fn test_xml_intrinsic_onupdate_runs_during_update_tick() {
                 <Scripts>
                     <OnUpdate intrinsicOrder="postcall">
                         INTRINSIC_ONUPDATE_COUNT = (INTRINSIC_ONUPDATE_COUNT or 0) + 1
+                        if INTRINSIC_ONUPDATE_ORDER then
+                            table.insert(INTRINSIC_ONUPDATE_ORDER, "intrinsic")
+                        end
                     </OnUpdate>
                 </Scripts>
             </Frame>
         </Ui>"#,
     );
 
+    t.assert_lua_true(
+        "return IntrinsicOnUpdateFrame:GetScript('OnUpdate') == nil",
+        "inline intrinsic OnUpdate should not occupy the normal script binding",
+    );
+
     t.env.fire_on_update(0.016).unwrap();
     t.assert_lua_str("return tostring(INTRINSIC_ONUPDATE_COUNT)", "1");
+
+    t.env
+        .exec(
+            r#"
+            INTRINSIC_ONUPDATE_ORDER = {}
+            IntrinsicOnUpdateFrame:SetScript("OnUpdate", function()
+                table.insert(INTRINSIC_ONUPDATE_ORDER, "normal")
+            end)
+        "#,
+        )
+        .unwrap();
+
+    t.env.fire_on_update(0.016).unwrap();
+    t.assert_lua_str(
+        "return table.concat(INTRINSIC_ONUPDATE_ORDER, ',')",
+        "normal,intrinsic",
+    );
+}
+
+#[test]
+fn test_intrinsic_onupdate_uses_separate_binding_from_runtime_script() {
+    let t = load_test_xml(
+        "test-intrinsic-onupdate-bindings",
+        r#"<Ui>
+            <Frame name="IntrinsicOnUpdateBindingFrame" parent="UIParent">
+                <Scripts>
+                    <OnUpdate method="OnIntrinsicUpdate" intrinsicOrder="postcall"/>
+                </Scripts>
+            </Frame>
+        </Ui>"#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            INTRINSIC_ONUPDATE_BINDING_ORDER = {}
+            function IntrinsicOnUpdateBindingFrame:OnIntrinsicUpdate()
+                table.insert(INTRINSIC_ONUPDATE_BINDING_ORDER, "intrinsic")
+            end
+        "#,
+        )
+        .unwrap();
+
+    t.assert_lua_true(
+        "return IntrinsicOnUpdateBindingFrame:GetScript('OnUpdate') == nil",
+        "GetScript should only expose the normal script binding",
+    );
+
+    t.env.fire_on_update(0.016).unwrap();
+    t.assert_lua_str(
+        "return table.concat(INTRINSIC_ONUPDATE_BINDING_ORDER, ',')",
+        "intrinsic",
+    );
+
+    t.env
+        .exec(
+            r#"
+            INTRINSIC_ONUPDATE_BINDING_ORDER = {}
+            IntrinsicOnUpdateBindingFrame:SetScript("OnUpdate", function()
+                table.insert(INTRINSIC_ONUPDATE_BINDING_ORDER, "normal")
+            end)
+        "#,
+        )
+        .unwrap();
+    t.env.fire_on_update(0.016).unwrap();
+    t.assert_lua_str(
+        "return table.concat(INTRINSIC_ONUPDATE_BINDING_ORDER, ',')",
+        "normal,intrinsic",
+    );
+
+    t.env
+        .exec(
+            r#"
+            INTRINSIC_ONUPDATE_BINDING_ORDER = {}
+            IntrinsicOnUpdateBindingFrame:SetScript("OnUpdate", nil)
+        "#,
+        )
+        .unwrap();
+    t.env.fire_on_update(0.016).unwrap();
+    t.assert_lua_str(
+        "return table.concat(INTRINSIC_ONUPDATE_BINDING_ORDER, ',')",
+        "intrinsic",
+    );
+
+    t.env
+        .exec(
+            r#"
+            INTRINSIC_ONUPDATE_BINDING_ORDER = {}
+            IntrinsicOnUpdateBindingFrame:HookScript("OnUpdate", function()
+                table.insert(INTRINSIC_ONUPDATE_BINDING_ORDER, "hook")
+            end)
+        "#,
+        )
+        .unwrap();
+    t.env.fire_on_update(0.016).unwrap();
+    t.assert_lua_str(
+        "return table.concat(INTRINSIC_ONUPDATE_BINDING_ORDER, ',')",
+        "hook,intrinsic",
+    );
+}
+
+#[test]
+fn test_intrinsic_template_default_script_uses_precall_binding() {
+    let t = load_test_xml(
+        "test-intrinsic-template-default-bindings",
+        r#"<Ui>
+            <Frame name="IntrinsicDefaultBase" virtual="true" intrinsic="true">
+                <Scripts>
+                    <OnUpdate>
+                        table.insert(INTRINSIC_TEMPLATE_ORDER, "intrinsic")
+                    </OnUpdate>
+                </Scripts>
+            </Frame>
+            <Frame name="IntrinsicDefaultDerived" parent="UIParent" inherits="IntrinsicDefaultBase">
+                <Scripts>
+                    <OnUpdate>
+                        table.insert(INTRINSIC_TEMPLATE_ORDER, "normal")
+                    </OnUpdate>
+                </Scripts>
+            </Frame>
+        </Ui>"#,
+    );
+
+    t.env
+        .exec("INTRINSIC_TEMPLATE_ORDER = {}")
+        .expect("seed order table");
+    t.assert_lua_true(
+        "return IntrinsicDefaultDerived:GetScript('OnUpdate') ~= nil",
+        "derived template script should occupy the normal binding",
+    );
+    t.assert_lua_true(
+        "return IntrinsicDefaultDerived:GetScript('OnUpdate', 0) ~= nil",
+        "intrinsic template default script should occupy the precall binding",
+    );
+
+    t.env.fire_on_update(0.016).unwrap();
+    t.assert_lua_str(
+        "return table.concat(INTRINSIC_TEMPLATE_ORDER, ',')",
+        "intrinsic,normal",
+    );
 }

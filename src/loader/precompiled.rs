@@ -11,19 +11,15 @@ const REPORT_SCRIPT_ERROR_KEY: &str = "__report_script_error";
 const FIRE_ONLOAD_SOURCE: &str = r#"
     local __report, frame = ...
     if not frame then return end
-    if type(frame.OnLoad_Intrinsic) == "function" then
-        local ok, err = pcall(frame.OnLoad_Intrinsic, frame)
-        if not ok then
-            __report("[OnLoad_Intrinsic] " .. tostring(err))
-        end
-    end
-    local handler = frame:GetScript("OnLoad")
-    if handler then
-        local ok, err = pcall(handler, frame)
-        if not ok then
-            local name = frame.GetName and frame:GetName() or "?"
-            local stack = debugstack and debugstack() or ""
-            __report("[OnLoad] " .. name .. ": " .. tostring(err) .. (stack ~= "" and ("\n" .. stack) or ""))
+    for _, bindingType in ipairs({0, 1, 2}) do
+        local handler = frame:GetScript("OnLoad", bindingType)
+        if handler then
+            local ok, err = pcall(handler, frame)
+            if not ok then
+                local name = frame.GetName and frame:GetName() or "?"
+                local stack = debugstack and debugstack() or ""
+                __report("[OnLoad] " .. name .. ": " .. tostring(err) .. (stack ~= "" and ("\n" .. stack) or ""))
+            end
         end
     end
 "#;
@@ -31,18 +27,14 @@ const FIRE_ONLOAD_SOURCE: &str = r#"
 const FIRE_ONSHOW_SOURCE: &str = r#"
     local __report, frame = ...
     if not frame or not frame:IsVisible() then return end
-    local handler = frame:GetScript("OnShow")
-    if handler then
-        local ok, err = pcall(handler, frame)
-        if not ok then
-            local name = frame.GetName and frame:GetName() or "?"
-            __report("[OnShow] " .. name .. ": " .. tostring(err))
-        end
-    end
-    if type(frame.OnShow_Intrinsic) == "function" then
-        local ok, err = pcall(frame.OnShow_Intrinsic, frame)
-        if not ok then
-            __report("[OnShow_Intrinsic] " .. tostring(err))
+    for _, bindingType in ipairs({0, 1, 2}) do
+        local handler = frame:GetScript("OnShow", bindingType)
+        if handler then
+            local ok, err = pcall(handler, frame)
+            if not ok then
+                local name = frame.GetName and frame:GetName() or "?"
+                __report("[OnShow] " .. name .. ": " .. tostring(err))
+            end
         end
     end
 "#;

@@ -359,12 +359,18 @@ fn append_script_handler_with_options(
     target: &str,
     handler_name: &str,
     script: &crate::xml::ScriptBodyXml,
-    chain_default_handler: bool,
+    default_binding: Option<u8>,
 ) {
+    let script_binding =
+        intrinsic_binding_index(script.intrinsic_order.as_deref()).or(default_binding);
     if script_clears_handler(script) {
-        code.push_str(&format!(
-            "\n        {target}:SetScript(\"{handler_name}\", nil)\n        "
-        ));
+        if let Some(binding) = script_binding {
+            emit_set_script_binding(code, target, handler_name, binding, "nil");
+        } else {
+            code.push_str(&format!(
+                "\n        {target}:SetScript(\"{handler_name}\", nil)\n        "
+            ));
+        }
         return;
     }
 
@@ -372,35 +378,41 @@ fn append_script_handler_with_options(
         return;
     };
 
-    // intrinsicOrder="precall"/"postcall" — store as {EventName}_Intrinsic property
-    // instead of SetScript. The fire_onload/fire_onshow dispatchers call these
-    // before/after the regular handler respectively.
-    if let Some(order) = script.intrinsic_order.as_deref() {
-        if (order == "precall" || order == "postcall") && handler_name == "OnUpdate" {
-            emit_chained_handler(code, target, handler_name, &new_handler, order == "precall");
-            return;
-        }
-
-        if order == "precall" || order == "postcall" {
-            code.push_str(&format!(
-                "\n        {target}.{handler_name}_Intrinsic = {new_handler}\n        "
-            ));
-            return;
-        }
+    if let Some(binding) = script_binding {
+        emit_set_script_binding(code, target, handler_name, binding, &new_handler);
+        return;
     }
 
     match script.inherit.as_deref() {
         Some("prepend") => emit_chained_handler(code, target, handler_name, &new_handler, false),
         Some("append") => emit_chained_handler(code, target, handler_name, &new_handler, true),
-        None if chain_default_handler => {
-            emit_chained_handler(code, target, handler_name, &new_handler, true)
-        }
         _ => {
             code.push_str(&format!(
                 "\n        {target}:SetScript(\"{handler_name}\", {new_handler})\n        "
             ));
         }
     }
+}
+
+fn intrinsic_binding_index(order: Option<&str>) -> Option<u8> {
+    match order {
+        Some("precall") => Some(0),
+        Some("postcall") => Some(2),
+        _ => None,
+    }
+}
+
+fn emit_set_script_binding(
+    code: &mut String,
+    target: &str,
+    handler_name: &str,
+    binding: u8,
+    handler_expr: &str,
+) {
+    let helper = crate::lua_api::globals::loader_script_bindings::SET_SCRIPT_BINDING_GLOBAL;
+    code.push_str(&format!(
+        "\n        {helper}({target}, \"{handler_name}\", {binding}, {handler_expr})\n        "
+    ));
 }
 
 /// Emit a chained handler that wraps the existing handler (new_first=true → new runs first).
@@ -524,18 +536,18 @@ pub fn apply_script_handlers(
     target: &str,
     handlers: &[(&'static str, Option<&crate::xml::ScriptBodyXml>)],
 ) -> String {
-    apply_script_handlers_with_options(target, handlers, false)
+    apply_script_handlers_with_options(target, handlers, None)
 }
 
 fn apply_script_handlers_with_options(
     target: &str,
     handlers: &[(&'static str, Option<&crate::xml::ScriptBodyXml>)],
-    chain_default_handlers: bool,
+    default_binding: Option<u8>,
 ) -> String {
     let mut code = String::new();
     for (name, script) in handlers {
         if let Some(s) = script {
-            append_script_handler_with_options(&mut code, target, name, s, chain_default_handlers);
+            append_script_handler_with_options(&mut code, target, name, s, default_binding);
         }
     }
     code
@@ -546,49 +558,33 @@ pub fn generate_scripts_code(scripts: &crate::xml::ScriptsXml) -> String {
     generate_scripts_code_for_target("frame", scripts)
 }
 
-/// Generate Lua code that chains default script handlers with existing handlers.
-///
-/// Used when a derived template applies scripts after an intrinsic base template:
-/// Blizzard keeps both intrinsic and style handlers in the event path.
-pub fn generate_scripts_code_chaining_default_handlers(scripts: &crate::xml::ScriptsXml) -> String {
-    generate_scripts_code_for_target_with_options("frame", scripts, true)
+pub fn generate_intrinsic_scripts_code(scripts: &crate::xml::ScriptsXml) -> String {
+    generate_scripts_code_for_target_with_options("frame", scripts, Some(0))
 }
 
 /// Generate Lua code for setting script handlers on a named Lua variable.
 pub fn generate_scripts_code_for_target(target: &str, scripts: &crate::xml::ScriptsXml) -> String {
-    generate_scripts_code_for_target_with_options(target, scripts, false)
+    generate_scripts_code_for_target_with_options(target, scripts, None)
 }
 
 fn generate_scripts_code_for_target_with_options(
     target: &str,
     scripts: &crate::xml::ScriptsXml,
-    chain_default_handlers: bool,
+    default_binding: Option<u8>,
 ) -> String {
-    let mut code = lifecycle_handlers(target, scripts);
-    if chain_default_handlers {
-        code = lifecycle_handlers_chaining_default_handlers(target, scripts);
-        code.push_str(&input_handlers_chaining_default_handlers(target, scripts));
-    } else {
-        code.push_str(&input_handlers(target, scripts));
-    }
+    let mut code = lifecycle_handlers_with_options(target, scripts, default_binding);
+    code.push_str(&input_handlers_with_options(
+        target,
+        scripts,
+        default_binding,
+    ));
     code
-}
-
-fn lifecycle_handlers(target: &str, scripts: &crate::xml::ScriptsXml) -> String {
-    lifecycle_handlers_with_options(target, scripts, false)
-}
-
-fn lifecycle_handlers_chaining_default_handlers(
-    target: &str,
-    scripts: &crate::xml::ScriptsXml,
-) -> String {
-    lifecycle_handlers_with_options(target, scripts, true)
 }
 
 fn lifecycle_handlers_with_options(
     target: &str,
     scripts: &crate::xml::ScriptsXml,
-    chain_default_handlers: bool,
+    default_binding: Option<u8>,
 ) -> String {
     apply_script_handlers_with_options(
         target,
@@ -611,25 +607,14 @@ fn lifecycle_handlers_with_options(
             ("OnDragStop", scripts.on_drag_stop.last()),
             ("OnReceiveDrag", scripts.on_receive_drag.last()),
         ],
-        chain_default_handlers,
+        default_binding,
     )
-}
-
-fn input_handlers(target: &str, scripts: &crate::xml::ScriptsXml) -> String {
-    input_handlers_with_options(target, scripts, false)
-}
-
-fn input_handlers_chaining_default_handlers(
-    target: &str,
-    scripts: &crate::xml::ScriptsXml,
-) -> String {
-    input_handlers_with_options(target, scripts, true)
 }
 
 fn input_handlers_with_options(
     target: &str,
     scripts: &crate::xml::ScriptsXml,
-    chain_default_handlers: bool,
+    default_binding: Option<u8>,
 ) -> String {
     apply_script_handlers_with_options(
         target,
@@ -659,7 +644,7 @@ fn input_handlers_with_options(
             ("OnHyperlinkEnter", scripts.on_hyperlink_enter.last()),
             ("OnHyperlinkLeave", scripts.on_hyperlink_leave.last()),
         ],
-        chain_default_handlers,
+        default_binding,
     )
 }
 
