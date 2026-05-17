@@ -499,6 +499,37 @@ local function __wow_hide_registered_settings_canvas_frames()
     end
 end
 
+local function __wow_show_current_settings_canvas_frame()
+    local panel = rawget(_G, "SettingsPanel")
+    if type(panel) ~= "table"
+        or type(panel.GetCurrentCategory) ~= "function"
+        or type(panel.GetLayout) ~= "function"
+    then
+        return
+    end
+
+    local categoryOk, category = pcall(panel.GetCurrentCategory, panel)
+    if not categoryOk or type(category) ~= "table" then
+        return
+    end
+
+    local layoutOk, layout = pcall(panel.GetLayout, panel, category)
+    if not layoutOk
+        or type(layout) ~= "table"
+        or type(layout.GetFrame) ~= "function"
+        or type(layout.GetLayoutType) ~= "function"
+        or not SettingsLayoutMixin
+        or layout:GetLayoutType() ~= SettingsLayoutMixin.LayoutType.Canvas
+    then
+        return
+    end
+
+    local frameOk, frame = pcall(layout.GetFrame, layout)
+    if frameOk and type(frame) == "table" and type(frame.Show) == "function" then
+        frame:Show()
+    end
+end
+
 local function __wow_patch_settings_canvas_registration()
     if type(Settings) ~= "table" or rawget(Settings, "__wow_canvas_layout_hide_patch") then
         return
@@ -519,6 +550,16 @@ local function __wow_patch_settings_canvas_registration()
             local category, layout = original(parentCategory, frame, ...)
             __wow_hide_settings_canvas_frame(frame, layout)
             return category, layout
+        end
+    end
+
+    if type(Settings.OpenToCategory) == "function" then
+        local original = Settings.OpenToCategory
+        Settings.OpenToCategory = function(...)
+            local result = original(...)
+            __wow_hide_registered_settings_canvas_frames()
+            __wow_show_current_settings_canvas_frame()
+            return result
         end
     end
 

@@ -307,6 +307,7 @@ mod tests {
             SettingsPanel = {
                 shown = false,
                 currentLayout = nil,
+                currentCategory = nil,
                 GetAllCategories = function()
                     return categories
                 end,
@@ -318,6 +319,9 @@ mod tests {
                 end,
                 GetCurrentLayout = function(self)
                     return self.currentLayout
+                end,
+                GetCurrentCategory = function(self)
+                    return self.currentCategory
                 end,
             }
 
@@ -336,6 +340,12 @@ mod tests {
                     table.insert(categories, category)
                     layouts[category] = layout
                     return category, layout
+                end,
+                OpenToCategory = function(category)
+                    SettingsPanel.shown = true
+                    SettingsPanel.currentCategory = category
+                    SettingsPanel.currentLayout = layouts[category]
+                    return category
                 end,
             }
             "#,
@@ -359,6 +369,29 @@ mod tests {
         assert!(
             hidden_after_register,
             "settings canvas frame should be hidden after registration"
+        );
+
+        let opened_canvas_visible_others_hidden: bool = env
+            .eval(
+                r#"
+                local first = SettingsCanvasLeakProbe
+                local firstCategory = SettingsPanel:GetAllCategories()[1]
+                local second = CreateFrame("Frame", "SettingsSecondCanvasLeakProbe")
+                second:Show()
+                local secondCategory = Settings.RegisterCanvasLayoutCategory(second, "Second")
+
+                Settings.OpenToCategory(firstCategory)
+                local firstOpened = first:IsShown() and not second:IsShown()
+
+                Settings.OpenToCategory(secondCategory)
+                return firstOpened and (not first:IsShown()) and second:IsShown()
+                "#,
+            )
+            .expect("open category probe should run");
+
+        assert!(
+            opened_canvas_visible_others_hidden,
+            "opening a settings category should show only that category's canvas"
         );
     }
 }
