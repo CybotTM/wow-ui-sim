@@ -100,6 +100,31 @@ fn get_instance_info_returns_nil_for_absent_lfg_dungeon_id() {
 }
 
 #[test]
+fn saved_instance_info_defaults_to_empty_lockouts() {
+    let env = env();
+    let (saved_instances, saved_instance_fields, world_bosses, world_boss_fields): (
+        i32,
+        i32,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r##"
+            return GetNumSavedInstances(),
+                select("#", GetSavedInstanceInfo(1)),
+                GetNumSavedWorldBosses(),
+                select("#", GetSavedWorldBossInfo(1))
+            "##,
+        )
+        .unwrap();
+
+    assert_eq!(saved_instances, 0);
+    assert_eq!(saved_instance_fields, 0);
+    assert_eq!(world_bosses, 0);
+    assert_eq!(world_boss_fields, 0);
+}
+
+#[test]
 fn get_mirror_timer_info_returns_unknown_sentinel_when_unset() {
     let env = env();
     let (name, start, max, scale, paused, label, spell_id): (

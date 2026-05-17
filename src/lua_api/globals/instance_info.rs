@@ -16,6 +16,10 @@
 //! - `GetWorldElapsedTimers()`      → no active timer IDs by default.
 //! - `GetWorldElapsedTime(id)`      → `(id, 0, 0)` so scenario / challenge
 //!   timer probes avoid nil arithmetic when no timer state is seeded.
+//! - `GetNumSavedInstances()` / `GetNumSavedWorldBosses()` → zero, because
+//!   no raid-lock backing store is seeded by default.
+//! - `GetSavedInstanceInfo(index)` / `GetSavedWorldBossInfo(index)` → no
+//!   values for empty slots.
 
 use crate::lua_api::methods::{borrow_state, create_string, val_to_string};
 use crate::lua_bridge::stack_val;
@@ -159,11 +163,33 @@ fn get_world_elapsed_time(state: &mut LuaState) -> LuaResult<u32> {
     Ok(3)
 }
 
+fn get_num_saved_instances(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_saved_instance_info(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn get_num_saved_world_bosses(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_saved_world_boss_info(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetInstanceInfo", get_instance_info)?;
     LuaApiMut::register_function(lua, "GetMirrorTimerInfo", get_mirror_timer_info)?;
     LuaApiMut::register_function(lua, "GetMirrorTimerProgress", get_mirror_timer_progress)?;
     LuaApiMut::register_function(lua, "GetWorldElapsedTimers", get_world_elapsed_timers)?;
     LuaApiMut::register_function(lua, "GetWorldElapsedTime", get_world_elapsed_time)?;
+    LuaApiMut::register_function(lua, "GetNumSavedInstances", get_num_saved_instances)?;
+    LuaApiMut::register_function(lua, "GetSavedInstanceInfo", get_saved_instance_info)?;
+    LuaApiMut::register_function(lua, "GetNumSavedWorldBosses", get_num_saved_world_bosses)?;
+    LuaApiMut::register_function(lua, "GetSavedWorldBossInfo", get_saved_world_boss_info)?;
     Ok(())
 }
