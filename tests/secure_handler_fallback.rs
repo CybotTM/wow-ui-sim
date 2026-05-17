@@ -148,6 +148,28 @@ fn execute_restricted_environment_allows_math_string_and_print() {
 }
 
 #[test]
+fn execute_restricted_environment_allows_table_maxn_for_click_cast_loops() {
+    let env = env();
+    let applied: String = env
+        .eval(
+            r#"
+            local owner = CreateFrame("Frame", nil, UIParent)
+            SecureHandlerExecute(owner, [[
+                local keybinds = {}
+                local count = 0
+                for i = 1, table.maxn(keybinds) do
+                    count = count + 1
+                end
+                self:SetAttribute("loopCount", count)
+            ]])
+            return tostring(owner:GetAttribute("loopCount"))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(applied, "0");
+}
+
+#[test]
 fn execute_callmethod_propagates_tainted_args_to_insecure_method() {
     let env = env();
     let (called, returned_is_secret): (bool, bool) = env

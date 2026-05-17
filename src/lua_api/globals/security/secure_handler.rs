@@ -85,6 +85,7 @@ local restricted_env = setmetatable({
     print = print,
     select = select,
     string = readonly_copy(string),
+    table = readonly_copy(table),
     tonumber = tonumber,
     tostring = tostring,
     type = type,
