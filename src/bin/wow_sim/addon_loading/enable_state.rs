@@ -72,7 +72,7 @@ fn collect_new_dependency_enables(
         if !effective.get(name).copied().unwrap_or(false) {
             continue;
         }
-        for dependency in toc.dependencies().into_iter().chain(toc.optional_deps()) {
+        for dependency in toc.dependencies() {
             if !addon_tocs.contains_key(&dependency) {
                 continue;
             }
@@ -155,7 +155,27 @@ mod tests {
     }
 
     #[test]
-    fn dependency_aware_overrides_enable_installed_optional_deps() {
+    fn dependency_aware_overrides_enable_required_deps() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        let addons = vec![
+            write_addon_toc(
+                temp.path(),
+                "ParentAddon",
+                "## Interface: 120005\n## Dependencies: RequiredAddon\n",
+            ),
+            write_addon_toc(temp.path(), "RequiredAddon", "## Interface: 120005\n"),
+        ];
+        let overrides = HashMap::from([("ParentAddon".to_string(), true)]);
+
+        let effective =
+            dependency_aware_enable_overrides(&addons, Some(&overrides)).expect("effective map");
+
+        assert_eq!(effective.get("ParentAddon"), Some(&true));
+        assert_eq!(effective.get("RequiredAddon"), Some(&true));
+    }
+
+    #[test]
+    fn dependency_aware_overrides_do_not_enable_absent_optional_deps() {
         let temp = tempfile::tempdir().expect("tempdir");
         let addons = vec![
             write_addon_toc(
@@ -171,7 +191,7 @@ mod tests {
             dependency_aware_enable_overrides(&addons, Some(&overrides)).expect("effective map");
 
         assert_eq!(effective.get("ParentAddon"), Some(&true));
-        assert_eq!(effective.get("OptionalAddon"), Some(&true));
+        assert_eq!(effective.get("OptionalAddon"), None);
     }
 
     #[test]
