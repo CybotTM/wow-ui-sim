@@ -9,6 +9,10 @@ tracking regression. EditMode profile cache files are not Lua SavedVariables, so
 startup now loads them through a separate WTF cache path when Lua SavedVariables
 are disabled.
 
+## [2026-05-17] update | minimap mask clipping
+
+Updated `investigations/minimap-map-ring-alignment.md` after fixing minimap rendering to use the stored/default minimap mask texture instead of synthetic circle clipping. The shader now treats RGB mask intensity as coverage for opaque black/white masks.
+
 ## [2026-05-17] investigation | minimap map/ring correction
 
 Created `investigations/minimap-map-ring-alignment.md` to record the correction that the active minimap bug is the map texture/mask/ring alignment, not the SimCommands minimap button. The note documents the reasoning error and directs future debugging at minimap mask/clip/ring geometry.

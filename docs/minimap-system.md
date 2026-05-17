@@ -14,7 +14,7 @@ are about real minimap state, real mask handling, and actual content overlays.
 - **Frame creation**: `CreateFrame("Minimap", ...)` creates a proper frame
 - **Child hierarchy**: Zoom buttons, backdrop, border texture render as children
 - **Basic map quad**: `build_minimap_quads()` emits a sim-bundled placeholder map (`Interface\\AddOns\\SimCommands\\textures\\minimap-placeholder.webp`, 256x256 stylized zone render)
-- **Circular clipping**: `FLAG_CIRCLE_CLIP` in `quad.wgsl` clips the minimap quad to a circle
+- **Mask clipping**: minimap quads use `UIMinimapMask` (or `SetMaskTexture()` state) through the GPU mask-texture path
 - **Zoom state**: `SetZoom()` / `GetZoom()` persist and clamp zoom instead of returning constants
 - **Lua surface coverage**: minimap methods exist, with many still as no-op compatibility stubs
 - **Global registration**: `Minimap` is registered as a Lua global in `global_frames.rs`
@@ -22,10 +22,8 @@ are about real minimap state, real mask handling, and actual content overlays.
 ### What's Missing
 
 - **Real map content**: the minimap still renders a fixed placeholder texture, not zone/map data
-- **Mask texture state**: `SetMaskTexture` is still a no-op stub, so Blizzard/UI code cannot drive
-  the clip shape
-- **Mask-accurate contour**: current clip is a mathematical circle, not the real minimap mask
-  contour used by WoW
+- **Mask-accurate contour edge cases**: `SetMaskTexture` drives the GPU mask now, but the simulator
+  still does not model all minimap content layers that real WoW clips through the mask
 - **Texture inputs**: `SetBlipTexture`, `SetIconTexture`, `SetPOIArrowTexture`, and related
   setters are still stubs
 - **Player arrow**: Not rendered
@@ -37,9 +35,9 @@ are about real minimap state, real mask handling, and actual content overlays.
 | File | Purpose |
 |------|---------|
 | `src/widget/mod.rs:23-42` | `WidgetType::Minimap` enum variant |
-| `src/iced_app/quad_builders_textures.rs` | `build_minimap_quads()` — placeholder map + circle clip |
+| `src/iced_app/quad_builders_textures.rs` | `build_minimap_quads()` — placeholder map + mask texture clipping |
 | `src/iced_app/quad_builders.rs` | Dispatch: `WidgetType::Minimap => build_minimap_quads(...)` |
-| `src/lua_api/frame/methods/methods_misc.rs` | Minimap methods: real zoom state plus texture/blob stubs |
+| `src/lua_api/frame/methods/map_frames.rs` | Minimap methods: real zoom and texture state plus remaining blob stubs |
 | `src/lua_api/globals/global_frames.rs` | `Minimap` global registration |
 | `src/render/shader/quad.wgsl` | WGSL shader — current `FLAG_CIRCLE_CLIP` path |
 | `Interface/BlizzardUI/Blizzard_Minimap/Mainline/Minimap.xml` | Blizzard minimap XML definition |

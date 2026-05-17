@@ -36,6 +36,33 @@ pub fn apply_mask_texture(
     ));
 }
 
+/// Apply a direct mask texture path to recently emitted quads.
+///
+/// This is used by widget types like `Minimap`, where the mask is stored as
+/// frame state rather than as a child mask texture frame.
+pub fn apply_mask_path(
+    batch: &mut QuadBatch,
+    vert_before: usize,
+    icon_bounds: Rectangle,
+    mask_path: &str,
+) {
+    let count = batch.vertices.len() - vert_before;
+    if count == 0 {
+        return;
+    }
+    let mask_info = MaskInfo {
+        path: mask_path.to_string(),
+        screen_rect: icon_bounds,
+        tex_coords: (0.0, 1.0, 0.0, 1.0),
+    };
+    apply_mask_to_quads(batch, vert_before, mask_info);
+    batch.mask_texture_requests.push(TextureRequest::new(
+        mask_path,
+        vert_before as u32,
+        count as u32,
+    ));
+}
+
 struct MaskInfo {
     path: String,
     screen_rect: Rectangle,

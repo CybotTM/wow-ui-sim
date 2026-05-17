@@ -497,28 +497,35 @@ fn apply_desaturate_flag(batch: &mut QuadBatch, vert_before: usize) {
     }
 }
 
-/// Build quads for a Minimap widget - map texture clipped to a circle.
+const DEFAULT_MINIMAP_MASK_TEXTURE: &str = r"Interface\HUD\UIMinimapMask";
+
+/// Build quads for a Minimap widget - map texture clipped by the active minimap mask.
 pub(crate) fn build_minimap_quads(
     batch: &mut QuadBatch,
     bounds: Rectangle,
-    _f: &crate::widget::Frame,
+    f: &crate::widget::Frame,
     alpha: f32,
 ) {
-    use crate::render::shader::FLAG_CIRCLE_CLIP;
+    let vert_before = batch.vertices.len();
     batch.push_textured_path(
         bounds,
         r"Interface\AddOns\SimCommands\textures\minimap-placeholder",
         [1.0, 1.0, 1.0, alpha],
         BlendMode::Alpha,
     );
-    batch.set_extra_flags(4, FLAG_CIRCLE_CLIP);
+    let mask_texture = f
+        .minimap_mask_texture
+        .as_deref()
+        .unwrap_or(DEFAULT_MINIMAP_MASK_TEXTURE);
+    crate::iced_app::masking::apply_mask_path(batch, vert_before, bounds, mask_texture);
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
-        BlendMode, TexturedSlice, build_texture_quads, emit_texture_fill, remap_atlas_crop,
-        stretch_slice_render, tile_slice_render,
+        BlendMode, DEFAULT_MINIMAP_MASK_TEXTURE, TexturedSlice, build_minimap_quads,
+        build_texture_quads, emit_texture_fill, remap_atlas_crop, stretch_slice_render,
+        tile_slice_render,
     };
     use crate::atlas::get_render_atlas_info;
     use crate::iced_app::slice_render::{tile_slice_center_height, tile_slice_center_width};
@@ -546,6 +553,43 @@ mod tests {
             tint: [1.0, 1.0, 1.0, 1.0],
             blend: BlendMode::Alpha,
         }
+    }
+
+    #[test]
+    fn minimap_uses_default_mask_texture() {
+        let mut batch = QuadBatch::new();
+        let frame = Frame::new(WidgetType::Minimap, Some("Minimap".to_string()), None);
+        let bounds = Rectangle::new(Point::new(0.0, 0.0), Size::new(140.0, 140.0));
+
+        build_minimap_quads(&mut batch, bounds, &frame, 1.0);
+
+        assert_eq!(batch.mask_texture_requests.len(), 1);
+        assert_eq!(
+            batch.mask_texture_requests[0].path,
+            DEFAULT_MINIMAP_MASK_TEXTURE
+        );
+        assert!(
+            batch
+                .vertices
+                .iter()
+                .all(|vertex| vertex.mask_tex_index == -2)
+        );
+    }
+
+    #[test]
+    fn minimap_respects_set_mask_texture_state() {
+        let mut batch = QuadBatch::new();
+        let mut frame = Frame::new(WidgetType::Minimap, Some("Minimap".to_string()), None);
+        frame.minimap_mask_texture = Some(r"Interface\CharacterFrame\TempPortraitAlphaMask".into());
+        let bounds = Rectangle::new(Point::new(0.0, 0.0), Size::new(140.0, 140.0));
+
+        build_minimap_quads(&mut batch, bounds, &frame, 1.0);
+
+        assert_eq!(batch.mask_texture_requests.len(), 1);
+        assert_eq!(
+            batch.mask_texture_requests[0].path,
+            r"Interface\CharacterFrame\TempPortraitAlphaMask"
+        );
     }
 
     #[test]

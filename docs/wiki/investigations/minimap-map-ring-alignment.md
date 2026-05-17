@@ -20,11 +20,18 @@ The investigation should start from backing render/model state:
 - Make `Minimap` rendering respect the correct mask/clip aperture.
 - Compare the rendered map texture against the ring opening, not against addon buttons or debug controls.
 
+### Resolution
+
+The root cause was the minimap render path, not addon button placement. `build_minimap_quads()` emitted the placeholder map with a synthetic full-quad circle clip and ignored `Frame.minimap_mask_texture`, so the visible map did not match Blizzard's mask aperture.
+
+The fix routes minimap rendering through the existing GPU mask-texture path. Minimap quads now use `Frame.minimap_mask_texture` when set and otherwise default to `Interface\HUD\UIMinimapMask`. The shader also treats mask RGB intensity as coverage, because the default minimap mask is a black/white opaque texture rather than an alpha-only mask.
+
 ## Sources
 
 - [PLAN.md](../../../PLAN.md) — active task explicitly states this is not the SimCommands minimap button.
 - [quad_builders_textures.rs](../../../src/iced_app/quad_builders_textures.rs) — current minimap renderer uses synthetic circle clipping.
 - [map_frames.rs](../../../src/lua_api/frame/methods/map_frames.rs) — `SetMaskTexture` stores minimap mask state.
+- [quad.wgsl](../../../src/render/shader/quad.wgsl) — mask sampling uses both alpha and RGB mask intensity.
 
 ## See Also
 
