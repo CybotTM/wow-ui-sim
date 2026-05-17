@@ -23,6 +23,16 @@ fn event_dispatch_trace_enabled(event: &str) -> bool {
     filter == "*" || filter.split(',').any(|name| name.trim() == event)
 }
 
+fn trace_event_phase(event: &str, phase: &str, started: Instant) {
+    if !event_dispatch_trace_enabled(event) {
+        return;
+    }
+    eprintln!(
+        "[event-dispatch] event={event} phase={phase} duration_ms={:.3}",
+        started.elapsed().as_secs_f64() * 1000.0
+    );
+}
+
 fn should_skip_startup_actionbar_dispatch(state: &SimState, widget_id: u64, event: &str) -> bool {
     if event != "PLAYER_ENTERING_WORLD" {
         return false;
@@ -56,7 +66,7 @@ fn should_skip_mists_addon_player_login(
     state
         .addons
         .get(addon_idx as usize)
-        .map(|addon| matches!(addon.folder_name.as_str(), "BlizzMove" | "ElvUI_Libraries"))
+        .map(|addon| addon.folder_name == "ElvUI_Libraries")
         .unwrap_or(false)
 }
 
@@ -215,13 +225,17 @@ impl WowLuaEnv {
 
     /// Fire an event with arguments to all registered frames.
     pub fn fire_event_with_args(&self, event: &str, args: &[Val]) -> Result<()> {
+        let collect_started = Instant::now();
         let listeners = {
             let mut lua = self.lua.borrow_mut();
             get_event_listeners(lua.state_mut(), event)
         };
+        trace_event_phase(event, "collect-listeners", collect_started);
+        let dispatch_started = Instant::now();
         for widget_id in listeners {
             self.dispatch_event_to_frame(widget_id, event, args)?;
         }
+        trace_event_phase(event, "dispatch-listeners", dispatch_started);
         if event == "PLAYER_ENTERING_WORLD" {
             self.apply_post_event_workarounds();
         }

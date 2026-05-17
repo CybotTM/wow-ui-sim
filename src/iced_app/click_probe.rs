@@ -34,15 +34,26 @@ pub fn run_headless_named_click_probe(
         .set_screen_size(screen_size.width, screen_size.height);
 
     let _ = app.update(Message::ProcessTimers(Instant::now()));
+    let setup_started = Instant::now();
     app.env
         .borrow()
         .exec(setup_lua)
         .map_err(|error| format!("setup Lua failed: {error}"))?;
+    eprintln!(
+        "[headless-click-probe] setup Lua completed in {:.2?}",
+        setup_started.elapsed()
+    );
     let _ = app.update(Message::ProcessTimers(Instant::now()));
 
     for click in clicks {
+        let click_started = Instant::now();
         eprintln!("[headless-click-probe] clicking {}", click.frame_name);
         click_named_frame(&mut app, screen_size, click.frame_name)?;
+        eprintln!(
+            "[headless-click-probe] clicked {} in {:.2?}",
+            click.frame_name,
+            click_started.elapsed()
+        );
     }
 
     Ok(())

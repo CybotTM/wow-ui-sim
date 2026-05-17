@@ -117,6 +117,32 @@ Re-profiled with the same setup (talent panel open, 12s perf record):
 
 Tests: `animation_anim`, `animation_group`, `animation_group_state`, `anim_target_visibility` — 64 tests, all green.
 
+## Problem 5: Full-addon Mists first talent open pays deferred AceAddon enable queue
+
+### Symptom
+
+With third-party addons loaded, the Mists talent panel did open, but the first `ToggleTalentFrame()` looked like a hang. `headless-click-probe talents` showed the process survived, but setup Lua took 30-40s before any tab clicks ran.
+
+### Root Cause
+
+The simulator skipped BlizzMove's `PLAYER_LOGIN` handler under Mists. BlizzMove embeds AceAddon-3.0, and that skipped login handler left AceAddon's `enablequeue` populated after startup:
+
+```text
+initializequeue=0 enablequeue=27 IsLoggedIn=true
+```
+
+The next non-early `ADDON_LOADED` event was `Blizzard_TalentUI`. AceAddon treated that late addon load as a chance to flush the pending enable queue, so `LoadAddOn("Blizzard_TalentUI")` paid unrelated addon enable work. Profiling showed `EnableAddon ElvUI` was the expensive queued item, while Blizzard_TalentUI's own files loaded in well under a second.
+
+### Fix
+
+Let BlizzMove receive `PLAYER_LOGIN` again. That flushes the AceAddon queue during startup, where it belongs, instead of charging the first talent-panel open.
+
+`headless-click-probe` now logs setup and click durations so this failure mode is visible. After the fix, full-addon/no-saved-vars talent setup dropped to under 1s and tab clicks stayed under ~1s.
+
+### Follow-up
+
+This moves the remaining ElvUI login cost back to `PLAYER_LOGIN` and exposes an existing ElvUI/oUF aura error (`button:SetSize` nil). Track that separately from the talent-open regression.
+
 ## Benchmark Binary
 
 `src/bin/bench_talents.rs` — loads all addons, fires startup events, then opens/closes the talent panel 10 times. Use `RUSTFLAGS="-C force-frame-pointers=yes"` for flamegraph profiling.
