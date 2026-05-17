@@ -5420,7 +5420,10 @@ if GetPVPLifetimeStats == nil then
 end
 if GetQuestResetTime == nil then
   function GetQuestResetTime()
-    return 0
+    if C_DateAndTime and type(C_DateAndTime.GetSecondsUntilDailyReset) == "function" then
+      return C_DateAndTime.GetSecondsUntilDailyReset()
+    end
+    return 86400
   end
 end
 
