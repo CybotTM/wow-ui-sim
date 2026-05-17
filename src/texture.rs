@@ -119,6 +119,11 @@ impl TextureManager {
         };
 
         telemetry.resolve_elapsed = resolve_start.elapsed();
+        if !file_path.is_file() {
+            self.not_found.insert(normalized.to_string());
+            return false;
+        }
+
         let (loaded, load_telemetry) = self.load_texture_with_telemetry(&file_path);
         telemetry.decode_elapsed = load_telemetry.decode_elapsed;
         let Some(data) = loaded else {
@@ -417,6 +422,10 @@ pub fn fix_1bit_alpha(pixels: &mut [u8]) {
 
 /// Load texture data from a file.
 fn load_texture_file(path: &Path) -> Result<TextureData, Box<dyn std::error::Error + Send + Sync>> {
+    if !path.is_file() {
+        return Err(format!("texture path is not a file: {}", path.display()).into());
+    }
+
     // Check if it's a BLP file
     let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
 

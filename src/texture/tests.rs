@@ -411,6 +411,18 @@ fn resolve_path_ignores_directories() {
     );
 }
 
+#[test]
+fn load_texture_file_rejects_directories_before_image_decode() {
+    let temp_dir = TempDir::new().unwrap();
+
+    let err = load_texture_file(temp_dir.path()).expect_err("directory should not decode");
+
+    assert!(
+        err.to_string().contains("texture path is not a file"),
+        "directory rejection should be explicit, got: {err}"
+    );
+}
+
 fn test_dxtn(content: Vec<u8>, format: DxtnFormat) -> BlpDxtn {
     BlpDxtn {
         format,
