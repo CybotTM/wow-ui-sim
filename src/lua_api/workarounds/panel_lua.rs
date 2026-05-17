@@ -574,4 +574,40 @@ pub(super) const CLOSE_STARTUP_SPECIAL_WINDOWS_LUA: &str = r#"
 if type(CloseAllWindows) == "function" then
     CloseAllWindows(1)
 end
+
+if type(CloseProfessionsItemFlyout) == "function" then
+    pcall(CloseProfessionsItemFlyout)
+end
 "#;
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    use super::CLOSE_STARTUP_SPECIAL_WINDOWS_LUA;
+
+    #[test]
+    fn startup_window_cleanup_closes_professions_flyout() {
+        let env = WowLuaEnv::new().expect("env should initialize");
+        env.exec(
+            r#"
+            __professionsFlyoutClosed = false
+            function CloseProfessionsItemFlyout()
+                __professionsFlyoutClosed = true
+            end
+            "#,
+        )
+        .expect("fake professions flyout close surface should install");
+
+        env.exec(CLOSE_STARTUP_SPECIAL_WINDOWS_LUA)
+            .expect("startup window cleanup should run");
+
+        let closed: bool = env
+            .eval("return __professionsFlyoutClosed")
+            .expect("close probe should run");
+        assert!(
+            closed,
+            "startup cleanup should close professions item flyout"
+        );
+    }
+}
