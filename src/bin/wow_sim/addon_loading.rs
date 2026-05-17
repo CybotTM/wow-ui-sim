@@ -309,7 +309,16 @@ fn loadable_toc_path(path: &Path, screen: ScreenKind) -> Option<PathBuf> {
     let toc = TocFile::from_file(&toc_path).ok()?;
     let supports_screen = toc.allows_screen(screen);
     let supported_game_type = !toc.is_ptr_only() && !toc.is_game_type_restricted();
-    (supports_screen && supported_game_type).then_some(toc_path)
+    let supported_interface = load_out_of_date_addons()
+        || toc.supports_interface_version(wow_ui_sim::toc::RETAIL_INTERFACE_VERSION);
+    (supports_screen && supported_game_type && supported_interface).then_some(toc_path)
+}
+
+fn load_out_of_date_addons() -> bool {
+    std::env::var_os("WOW_SIM_LOAD_OUT_OF_DATE_ADDONS").is_some_and(|value| {
+        let value = value.to_string_lossy();
+        value == "1" || value.eq_ignore_ascii_case("true")
+    })
 }
 
 /// Accumulated statistics from loading addons.
@@ -629,10 +638,14 @@ mod tests {
     use super::*;
 
     fn write_addon(root: &Path, name: &str) -> PathBuf {
+        write_addon_with_toc(root, name, "## Interface: 120005\nmain.lua\n")
+    }
+
+    fn write_addon_with_toc(root: &Path, name: &str, toc: &str) -> PathBuf {
         let addon_dir = root.join(name);
         std::fs::create_dir_all(&addon_dir).expect("create addon dir");
         let toc_path = addon_dir.join(format!("{name}.toc"));
-        std::fs::write(&toc_path, "## Interface: 120005\nmain.lua\n").expect("write toc");
+        std::fs::write(&toc_path, toc).expect("write toc");
         std::fs::write(addon_dir.join("main.lua"), "").expect("write lua");
         toc_path
     }
@@ -660,5 +673,21 @@ mod tests {
             shared_toc, &sim_shared_toc,
             "the first addon root should win duplicate addon names"
         );
+    }
+
+    #[test]
+    fn scan_addons_skips_out_of_date_interfaces_by_default() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        write_addon_with_toc(
+            temp.path(),
+            "CurrentAddon",
+            "## Interface: 120005\nmain.lua\n",
+        );
+        write_addon_with_toc(temp.path(), "OldAddon", "## Interface: 120001\nmain.lua\n");
+
+        let addons = scan_addons(temp.path(), &[], ScreenKind::Game);
+        let names: Vec<_> = addons.iter().map(|(name, _)| name.as_str()).collect();
+
+        assert_eq!(names, ["CurrentAddon"]);
     }
 }

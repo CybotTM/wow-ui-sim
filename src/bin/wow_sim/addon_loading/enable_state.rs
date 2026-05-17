@@ -10,7 +10,10 @@ pub(super) fn addon_enabled(
     enable_overrides: Option<&HashMap<String, bool>>,
 ) -> bool {
     match enable_overrides {
-        Some(overrides) => overrides.get(name).copied().unwrap_or(false),
+        Some(overrides) => overrides
+            .get(name)
+            .copied()
+            .unwrap_or(metadata.default_enabled),
         None => metadata.default_enabled,
     }
 }
@@ -122,8 +125,20 @@ mod tests {
             &metadata,
             Some(&overrides)
         ));
-        assert!(!addon_enabled(
+        assert!(addon_enabled(
             "MissingFromAddOnsTxt",
+            &metadata,
+            Some(&overrides)
+        ));
+    }
+
+    #[test]
+    fn addon_enabled_preserves_disabled_toc_default_when_missing_from_addons_txt() {
+        let metadata = metadata(false);
+        let overrides = HashMap::new();
+
+        assert!(!addon_enabled(
+            "DefaultDisabledAddon",
             &metadata,
             Some(&overrides)
         ));
