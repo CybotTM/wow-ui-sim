@@ -30,7 +30,7 @@ pub(super) fn apply_subtree_hit_grid_change(
         let Some(f) = registry.get(id) else { continue };
         if became_visible {
             grid.remove(id);
-            if let Some(rect) = hittable_rect(f) {
+            if let Some(rect) = hittable_rect(registry, id, f) {
                 grid.insert(id, rect);
             }
         } else {
@@ -41,7 +41,14 @@ pub(super) fn apply_subtree_hit_grid_change(
 }
 
 /// Compute the hit-testable rectangle for a frame, if eligible.
-fn hittable_rect(f: &crate::widget::Frame) -> Option<iced::Rectangle> {
+fn hittable_rect(
+    registry: &crate::widget::WidgetRegistry,
+    id: u64,
+    f: &crate::widget::Frame,
+) -> Option<iced::Rectangle> {
+    if !crate::layout::frame_has_render_layout(registry, id) {
+        return None;
+    }
     let mouse_enabled =
         f.mouse_enabled || matches!(f.widget_type, crate::widget::WidgetType::EditBox);
     if !f.visible || f.effective_alpha <= 0.0 || !mouse_enabled {

@@ -155,14 +155,15 @@ pub(super) struct SingleStrataEmit<'a> {
 pub(super) fn build_render_list(
     bucket: &[u64],
     registry: &crate::widget::WidgetRegistry,
-    screen_size: (f32, f32),
+    _screen_size: (f32, f32),
 ) -> Vec<(u64, crate::LayoutRect, Option<crate::LayoutRect>, f32)> {
     let mut list = Vec::new();
     for &id in bucket {
         let Some(f) = registry.get(id) else { continue };
-        let rect = f.layout_rect.unwrap_or_else(|| {
-            crate::layout::compute_frame_rect(registry, id, screen_size.0, screen_size.1)
-        });
+        if !crate::layout::frame_has_render_layout(registry, id) {
+            continue;
+        }
+        let Some(rect) = f.layout_rect else { continue };
         let clip_rect = resolve_clip_rect(id, registry);
         let eff_alpha = resolve_eff_alpha(f, registry);
         if eff_alpha <= 0.0 {

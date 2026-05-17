@@ -4,11 +4,13 @@ use rustc_hash::FxHashMap;
 
 #[path = "iced_app/layout_line.rs"]
 mod layout_line;
+#[path = "layout_render_eligibility.rs"]
+mod layout_render_eligibility;
 
 use crate::LayoutRect;
 use crate::widget::{AnchorPoint, WidgetRegistry, WidgetType};
-
 use layout_line::resolve_line_frame_rect;
+pub use layout_render_eligibility::{frame_has_layout_anchor, frame_has_render_layout};
 
 /// Cached layout result: computed rect + effective scale.
 #[derive(Clone, Copy)]

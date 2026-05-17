@@ -146,6 +146,9 @@ fn hittable_frame_entry(
     id: u64,
 ) -> Option<HittableFrameEntry> {
     let frame = registry.get(id)?;
+    if !crate::layout::frame_has_render_layout(registry, id) {
+        return None;
+    }
     let rect = frame.layout_rect?;
 
     is_frame_hittable(frame).then(|| {
@@ -229,6 +232,32 @@ mod tests {
             .collect();
 
         assert_eq!(collected_ids, vec![included_id]);
+    }
+
+    #[test]
+    fn unanchored_frames_are_not_hittable_at_parent_origin() {
+        let mut registry = WidgetRegistry::new();
+        let mut parent = Frame::new(WidgetType::Frame, Some("UIParent".to_string()), None);
+        parent.id = 1;
+        parent.layout_rect = Some(crate::LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: 1600.0,
+            height: 1200.0,
+        });
+        registry.register(parent);
+
+        let child = register_hittable_frame(&mut registry, "UnanchoredPanel", 0);
+        registry.get_mut(child).unwrap().parent_id = Some(1);
+        registry.add_child(1, child);
+
+        let strata_buckets = vec![vec![child]];
+        let collected = super::collect_hittable_frames(&registry, &strata_buckets);
+
+        assert!(
+            collected.hittable.is_empty(),
+            "visible unanchored frames should not be mouse targets at parent origin"
+        );
     }
 
     #[test]
