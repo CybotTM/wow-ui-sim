@@ -136,6 +136,22 @@ fn test_securecall() {
 }
 
 #[test]
+fn test_securecall_accepts_global_function_name() {
+    let env = env();
+    let result: i32 = env
+        .eval(
+            r#"
+            function SecureCallNameProbe(a, b)
+                return a + b
+            end
+            return securecall("SecureCallNameProbe", 3, 4)
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result, 7);
+}
+
+#[test]
 fn test_securecallfunction() {
     let env = env();
     let result: i32 = env

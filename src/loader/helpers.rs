@@ -361,6 +361,13 @@ fn append_script_handler_with_options(
     script: &crate::xml::ScriptBodyXml,
     chain_default_handler: bool,
 ) {
+    if script_clears_handler(script) {
+        code.push_str(&format!(
+            "\n        {target}:SetScript(\"{handler_name}\", nil)\n        "
+        ));
+        return;
+    }
+
     let Some(new_handler) = build_handler_expr(handler_name, script) else {
         return;
     };
@@ -460,6 +467,20 @@ fn chained_handler_lua(
         end
         "#
     )
+}
+
+fn script_clears_handler(script: &crate::xml::ScriptBodyXml) -> bool {
+    if script.method.is_some() {
+        return false;
+    }
+    if let Some(function_name) = script.function.as_deref() {
+        return function_name.trim().is_empty();
+    }
+    script
+        .body
+        .as_deref()
+        .map(|body| body.trim().is_empty())
+        .unwrap_or(true)
 }
 
 /// WoW implicit parameter names for inline XML script bodies.

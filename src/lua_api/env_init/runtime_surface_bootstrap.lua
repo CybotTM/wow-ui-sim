@@ -4801,6 +4801,20 @@ if SecureTypes == nil then
   SecureTypes = {}
 end
 
+do
+  local __wow_original_securecall = securecall
+  if type(__wow_original_securecall) == "function" and not rawget(_G, "__wow_securecall_accepts_names") then
+    function securecall(fn, ...)
+      if type(fn) == "string" then
+        fn = _G[fn]
+      end
+      return __wow_original_securecall(fn, ...)
+    end
+
+    rawset(_G, "__wow_securecall_accepts_names", true)
+  end
+end
+
 local function __wow_securetypes_call(fn, ...)
   if type(securecallfunction) == "function" then
     return securecallfunction(fn, ...)

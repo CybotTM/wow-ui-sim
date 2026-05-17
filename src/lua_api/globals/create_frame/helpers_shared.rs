@@ -149,38 +149,112 @@ fn register_and_attach_parent(
     preserve_existing_name_binding: bool,
 ) -> LuaResult<()> {
     let mut sim = borrow_state_mut(state)?;
+    let replaced_frame_id =
+        find_replaced_frame_id(&sim, &frame, frame_id, preserve_existing_name_binding);
     if preserve_existing_name_binding {
         sim.widgets.register_preserving_existing_name(frame);
     } else {
         sim.widgets.register(frame);
     }
+    if let Some(replaced_frame_id) = replaced_frame_id {
+        retire_replaced_named_frame(&mut sim, replaced_frame_id, frame_id);
+    }
     let Some(parent_id) = parent_id else {
         return Ok(());
     };
     sim.widgets.add_child(parent_id, frame_id);
+    inherit_parent_render_state(&mut sim, frame_id, parent_id, parent_explicit);
+    sim.invalidate_strata_buckets();
+    Ok(())
+}
+
+fn find_replaced_frame_id(
+    sim: &SimState,
+    frame: &Frame,
+    frame_id: u64,
+    preserve_existing_name_binding: bool,
+) -> Option<u64> {
+    if preserve_existing_name_binding {
+        return None;
+    }
+    frame
+        .name
+        .as_deref()
+        .and_then(|name| sim.widgets.get_id_by_name(name))
+        .filter(|existing_id| *existing_id != frame_id)
+}
+
+fn inherit_parent_render_state(
+    sim: &mut SimState,
+    frame_id: u64,
+    parent_id: u64,
+    parent_explicit: bool,
+) {
     let Some(parent) = sim.widgets.get(parent_id) else {
-        return Ok(());
+        return;
     };
     let parent_strata = parent.frame_strata;
     let parent_level = parent.frame_level;
     let parent_alpha = parent.effective_alpha;
     let parent_scale = parent.effective_scale;
-    if let Some(child) = sim.widgets.get_mut_visual(frame_id) {
-        if !child.has_fixed_frame_strata {
-            child.frame_strata = parent_strata;
-        }
-        if parent_explicit {
-            child.frame_level = parent_level + 1;
-        }
-        child.effective_alpha = if child.visible {
-            parent_alpha * child.alpha
-        } else {
-            0.0
-        };
-        child.effective_scale = parent_scale * child.scale;
+
+    let Some(child) = sim.widgets.get_mut_visual(frame_id) else {
+        return;
+    };
+    if !child.has_fixed_frame_strata {
+        child.frame_strata = parent_strata;
     }
+    if parent_explicit {
+        child.frame_level = parent_level + 1;
+    }
+    child.effective_alpha = if child.visible {
+        parent_alpha * child.alpha
+    } else {
+        0.0
+    };
+    child.effective_scale = parent_scale * child.scale;
+}
+
+fn retire_replaced_named_frame(sim: &mut SimState, old_frame_id: u64, new_frame_id: u64) {
+    let old_parent_id = sim
+        .widgets
+        .get(old_frame_id)
+        .and_then(|frame| frame.parent_id);
+    let (old_children, old_children_keys) = match sim.widgets.get_mut_visual(old_frame_id) {
+        Some(old_frame) => {
+            old_frame.visible = false;
+            old_frame.effective_alpha = 0.0;
+            old_frame.parent_id = None;
+            (
+                std::mem::take(&mut old_frame.children),
+                std::mem::take(&mut old_frame.children_keys),
+            )
+        }
+        None => return,
+    };
+
+    if let Some(old_parent_id) = old_parent_id
+        && let Some(old_parent) = sim.widgets.get_mut(old_parent_id)
+    {
+        old_parent
+            .children
+            .retain(|child_id| *child_id != old_frame_id);
+        old_parent
+            .children_keys
+            .retain(|_, child_id| *child_id != old_frame_id);
+    }
+
+    for child_id in old_children {
+        sim.widgets.add_child(new_frame_id, child_id);
+    }
+
+    if let Some(new_frame) = sim.widgets.get_mut(new_frame_id) {
+        for (key, child_id) in old_children_keys {
+            new_frame.children_keys.entry(key).or_insert(child_id);
+        }
+    }
+    sim.visible_on_update_cache = None;
     sim.invalidate_strata_buckets();
-    Ok(())
 }
 
 fn register_global_name(

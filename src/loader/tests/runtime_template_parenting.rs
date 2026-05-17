@@ -76,6 +76,60 @@ fn test_action_button_updates_use_registry_frame_refs_for_anonymous_buttons() {
 }
 
 #[test]
+fn test_anonymous_runtime_button_parent_key_attaches_to_parent() {
+    let t = load_test_xml(
+        "runtime-anon-button-parent-key",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="AnonymousButtonTemplate" virtual="true">
+                <Frames>
+                    <Button parentKey="ActionButton"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local frame = CreateFrame("Frame", "AnonymousButtonParentKeyProbe", UIParent, "AnonymousButtonTemplate")
+            assert(frame.ActionButton ~= nil, "anonymous runtime button parentKey should attach to the parent")
+            assert(frame.ActionButton:GetObjectType() == "Button", "anonymous runtime child should be a button")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_empty_direct_script_overrides_inherited_template_script() {
+    let t = load_test_xml(
+        "runtime-empty-script-clears-inherited",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="EmptyScriptBaseTemplate" virtual="true">
+                <Scripts>
+                    <OnUpdate>
+                        EMPTY_SCRIPT_BASE_CALLED = true
+                    </OnUpdate>
+                </Scripts>
+            </Frame>
+            <Frame name="EmptyScriptOverrideFrame" parent="UIParent" inherits="EmptyScriptBaseTemplate">
+                <Scripts>
+                    <OnUpdate></OnUpdate>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.assert_lua_true(
+        "return EmptyScriptOverrideFrame:GetScript('OnUpdate') == nil",
+        "an explicitly empty script should clear the inherited handler",
+    );
+}
+
+#[test]
 fn test_runtime_template_mixin_and_key_values_apply() {
     let t = load_test_xml(
         "runtime-template-mixin-keyvalues",

@@ -102,6 +102,42 @@ fn test_recreated_named_parent_keeps_lua_child_field() {
 }
 
 #[test]
+fn test_recreated_named_frame_retires_old_widget_and_reparents_children() {
+    let (t, _) = load_test_lua(
+        "test-g-recreate-retires-old-frame",
+        r#"
+        local oldParent = CreateFrame("Frame", "RecreatedVisibleParent", UIParent)
+        oldParent:Show()
+        local child = CreateFrame("Frame", "RecreatedVisibleParentChild", oldParent)
+        oldParent.Child = child
+
+        local newParent = CreateFrame("Frame", "RecreatedVisibleParent", UIParent)
+
+        OLD_PARENT_HIDDEN = not oldParent:IsShown()
+        CHILD_PARENT_IS_NEW = child:GetParent() == newParent
+        NEW_PARENT_HAS_CHILD = newParent.Child == child
+        GLOBAL_IS_NEW_PARENT = _G.RecreatedVisibleParent == newParent
+        "#,
+    );
+    t.assert_lua_true(
+        "return OLD_PARENT_HIDDEN",
+        "recreated named frame should retire the stale old widget",
+    );
+    t.assert_lua_true(
+        "return CHILD_PARENT_IS_NEW",
+        "children of the stale frame should be reparented to the replacement",
+    );
+    t.assert_lua_true(
+        "return NEW_PARENT_HAS_CHILD",
+        "replacement frame should keep parentKey-style child fields",
+    );
+    t.assert_lua_true(
+        "return GLOBAL_IS_NEW_PARENT",
+        "global name should point to the replacement frame",
+    );
+}
+
+#[test]
 fn test_xml_named_frame_in_global() {
     let t = load_test_xml(
         "test-g-xml",

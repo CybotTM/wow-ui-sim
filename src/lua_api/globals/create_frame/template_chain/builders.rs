@@ -18,7 +18,7 @@ use self::builder_function_family::build_function_family_handler;
 use self::builder_global_family::build_global_family_handler;
 use self::builder_method_family::build_method_family_handler;
 use crate::lua_api::methods::{create_string, frame_ref, table_set};
-use crate::lua_api::script_helpers::{get_script, set_script};
+use crate::lua_api::script_helpers::{get_script, remove_script, set_script};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -629,43 +629,75 @@ pub(super) fn install_fast_handler(
 ) -> LuaResult<()> {
     match install {
         FastScriptInstall::Set(handler_ref) => {
-            if let Some(handler) = build_fast_handler(state, handler_ref)? {
-                set_script(state, frame_id, handler_name, handler);
-            }
+            install_set_handler(state, frame_id, handler_name, handler_ref)?
         }
         FastScriptInstall::Intrinsic { handler, new_first } if handler_name == "OnUpdate" => {
-            let Some(new_handler) = build_fast_handler(state, handler)? else {
-                return Ok(());
-            };
-            let Some(old_handler) = get_script(state, frame_id, handler_name) else {
-                set_script(state, frame_id, handler_name, new_handler);
-                return Ok(());
-            };
-            let chained =
-                build_chained_handler(state, old_handler, new_handler, handler_name, new_first)?;
-            set_script(state, frame_id, handler_name, chained);
+            install_chained_handler(state, frame_id, handler_name, handler, new_first)?
         }
         FastScriptInstall::Intrinsic { handler, .. } => {
-            let Some(handler) = build_fast_handler(state, handler)? else {
-                return Ok(());
-            };
-            let frame = frame_ref(state, frame_id)?;
-            let intrinsic_name = format!("{handler_name}_Intrinsic");
-            table_set(state, frame, &intrinsic_name, handler);
+            install_intrinsic_handler(state, frame_id, handler_name, handler)?
         }
         FastScriptInstall::Chain { handler, new_first } => {
-            let Some(new_handler) = build_fast_handler(state, handler)? else {
-                return Ok(());
-            };
-            let Some(old_handler) = get_script(state, frame_id, handler_name) else {
-                set_script(state, frame_id, handler_name, new_handler);
-                return Ok(());
-            };
-            let chained =
-                build_chained_handler(state, old_handler, new_handler, handler_name, new_first)?;
-            set_script(state, frame_id, handler_name, chained);
+            install_chained_handler(state, frame_id, handler_name, handler, new_first)?
         }
     }
+    Ok(())
+}
+
+fn install_set_handler(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &'static str,
+    handler_ref: FastHandlerRef<'_>,
+) -> LuaResult<()> {
+    if matches!(handler_ref, FastHandlerRef::NoOp) {
+        remove_script(state, frame_id, handler_name);
+        return Ok(());
+    }
+    if let Some(handler) = build_fast_handler(state, handler_ref)? {
+        set_script(state, frame_id, handler_name, handler);
+    }
+    Ok(())
+}
+
+fn install_intrinsic_handler(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &'static str,
+    handler_ref: FastHandlerRef<'_>,
+) -> LuaResult<()> {
+    let frame = frame_ref(state, frame_id)?;
+    let intrinsic_name = format!("{handler_name}_Intrinsic");
+    if matches!(handler_ref, FastHandlerRef::NoOp) {
+        table_set(state, frame, &intrinsic_name, Val::Nil);
+        return Ok(());
+    }
+    if let Some(handler) = build_fast_handler(state, handler_ref)? {
+        table_set(state, frame, &intrinsic_name, handler);
+    }
+    Ok(())
+}
+
+fn install_chained_handler(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &'static str,
+    handler_ref: FastHandlerRef<'_>,
+    new_first: bool,
+) -> LuaResult<()> {
+    if matches!(handler_ref, FastHandlerRef::NoOp) {
+        remove_script(state, frame_id, handler_name);
+        return Ok(());
+    }
+    let Some(new_handler) = build_fast_handler(state, handler_ref)? else {
+        return Ok(());
+    };
+    let Some(old_handler) = get_script(state, frame_id, handler_name) else {
+        set_script(state, frame_id, handler_name, new_handler);
+        return Ok(());
+    };
+    let chained = build_chained_handler(state, old_handler, new_handler, handler_name, new_first)?;
+    set_script(state, frame_id, handler_name, chained);
     Ok(())
 }
 
