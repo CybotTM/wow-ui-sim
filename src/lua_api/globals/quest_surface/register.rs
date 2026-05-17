@@ -95,6 +95,7 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&'static str, SurfaceFn)] = &[
     ("GetQuestLogRewardArtifactXP", return_zero),
     ("GetQuestLogRewardHonor", return_zero),
     ("GetQuestLogRewardTitle", return_nil),
+    ("QuestHasPOIInfo", return_false),
     ("GetNumQuestRewards", get_num_quest_rewards),
     ("GetNumQuestChoices", return_zero),
     ("GetQuestItemInfo", get_quest_item_info),

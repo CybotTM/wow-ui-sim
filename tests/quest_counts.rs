@@ -59,6 +59,42 @@ fn quest_map_update_all_quests_returns_seeded_quest_count() {
 }
 
 #[test]
+fn quest_has_poi_info_matches_seeded_quest_info() {
+    let env = env();
+    let (has_poi, info_has_poi, missing_has_poi): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local questID = C_QuestLog.GetQuestIDForLogIndex(2)
+            local info = C_QuestLog.GetInfo(2)
+            return QuestHasPOIInfo(questID), info.hasLocalPOI, QuestHasPOIInfo(999999)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(has_poi, info_has_poi);
+    assert!(!missing_has_poi);
+}
+
+#[test]
+fn quest_watch_poi_probe_handles_all_watched_quests() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            for index = 1, C_QuestLog.GetNumQuestWatches() do
+                local questID = C_QuestLog.GetQuestIDForQuestWatchIndex(index)
+                local hasPoi = QuestHasPOIInfo(questID)
+                if type(hasPoi) ~= "boolean" then
+                    return "poi_type_" .. tostring(index) .. "=" .. type(hasPoi)
+                end
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn get_quest_log_time_left_nil_when_no_selection() {
     let env = env();
     let v: Option<f64> = env.eval("return GetQuestLogTimeLeft()").unwrap();
