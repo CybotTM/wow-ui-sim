@@ -14,6 +14,8 @@ use std::{collections::HashSet, io};
 
 use super::helpers::set_global_val;
 
+#[path = "c_addons_missing.rs"]
+mod c_addons_missing;
 #[path = "c_addons_registration.rs"]
 mod c_addons_registration;
 
@@ -244,6 +246,16 @@ fn c_addons_get_num_addons(state: &mut LuaState) -> LuaResult<u32> {
 fn c_addons_get_addon_info(state: &mut LuaState) -> LuaResult<u32> {
     let addon = stack_val(state, 1);
     let Some(index) = addon_index_from_value(state, addon) else {
+        if let Val::Str(_) = addon
+            && let Some(addon_name) = val_to_string(state, addon)
+            && addon_name.starts_with("Blizzard_")
+            && !addon_exists(state, &addon_name)
+        {
+            return Ok(c_addons_missing::push_missing_addon_info(
+                state,
+                &addon_name,
+            ));
+        }
         state.push(Val::Nil);
         return Ok(1);
     };
@@ -514,6 +526,9 @@ pub fn c_addons_load_addon(state: &mut LuaState) -> LuaResult<u32> {
     let Some(addon_name) = addon_name_from_value(state, stack_val(state, 1)) else {
         return push_load_result(state, false, Some("MISSING"));
     };
+    if !addon_exists(state, &addon_name) {
+        return push_load_result(state, false, Some("MISSING"));
+    }
     if with_addon(state, stack_val(state, 1), |a| a.loaded).unwrap_or(false) {
         return push_load_result(state, true, None);
     }

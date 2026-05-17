@@ -88,6 +88,33 @@ fn test_get_addon_info_not_found() {
     assert!(is_nil);
 }
 
+#[test]
+fn test_get_addon_info_missing_blizzard_addon_reports_reason() {
+    let env = env_with_addons();
+    let (name, loadable, reason): (String, bool, String) = env
+        .eval(
+            r#"
+            local name, _, _, loadable, reason =
+                C_AddOns.GetAddOnInfo("Blizzard_DefinitelyMissing")
+            return name, loadable, reason
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Blizzard_DefinitelyMissing");
+    assert!(!loadable);
+    assert_eq!(reason, "MISSING");
+}
+
+#[test]
+fn test_load_missing_blizzard_addon_reports_missing_reason() {
+    let env = env_with_addons();
+    let (loaded, reason): (bool, String) = env
+        .eval(r#"return C_AddOns.LoadAddOn("Blizzard_DefinitelyMissing")"#)
+        .unwrap();
+    assert!(!loaded);
+    assert_eq!(reason, "MISSING");
+}
+
 // ============================================================================
 // C_AddOns.IsAddOnLoaded
 // ============================================================================

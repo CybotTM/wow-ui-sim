@@ -408,9 +408,10 @@ fn addon_enabled(
     metadata: &AddonMetadata,
     enable_overrides: Option<&HashMap<String, bool>>,
 ) -> bool {
-    enable_overrides
-        .and_then(|overrides| overrides.get(name).copied())
-        .unwrap_or(metadata.default_enabled)
+    match enable_overrides {
+        Some(overrides) => overrides.get(name).copied().unwrap_or(false),
+        None => metadata.default_enabled,
+    }
 }
 
 fn addon_enable_overrides(
@@ -707,7 +708,7 @@ mod tests {
             &metadata,
             Some(&overrides)
         ));
-        assert!(addon_enabled(
+        assert!(!addon_enabled(
             "MissingFromAddOnsTxt",
             &metadata,
             Some(&overrides)
