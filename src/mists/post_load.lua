@@ -521,3 +521,37 @@ local function PatchMistsCollectionsJournal()
 end
 
 PatchMistsCollectionsJournal()
+
+local function PatchMistsAuraUtilForEachAura()
+  if type(AuraUtil) ~= "table"
+     or type(UnitAura) ~= "function"
+     or rawget(_G, "__wow_sim_mists_aura_util_tuple_patched") == true then
+    return
+  end
+
+  function AuraUtil.ForEachAura(unitToken, filter, maxCount, callback)
+    if type(callback) ~= "function" then
+      return
+    end
+    local index = 1
+    while maxCount == nil or index <= maxCount do
+      local name, icon, applications, dispelName, duration, expirationTime, sourceUnit,
+          isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff,
+          castByPlayer, nameplateShowAll, timeMod, shouldConsolidate =
+          UnitAura(unitToken, index, filter)
+      if not name then
+        return
+      end
+      if callback(name, icon, applications, dispelName, duration, expirationTime, sourceUnit,
+          isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff,
+          castByPlayer, nameplateShowAll, timeMod, shouldConsolidate) then
+        return
+      end
+      index = index + 1
+    end
+  end
+
+  rawset(_G, "__wow_sim_mists_aura_util_tuple_patched", true)
+end
+
+PatchMistsAuraUtilForEachAura()

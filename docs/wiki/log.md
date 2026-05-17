@@ -9,6 +9,10 @@ tracking regression. EditMode profile cache files are not Lua SavedVariables, so
 startup now loads them through a separate WTF cache path when Lua SavedVariables
 are disabled.
 
+## [2026-05-17] investigation | Mists ElvUI startup compatibility
+
+Created `investigations/mists-elvui-startup-compat.md` after the full-addon Mists probe isolated ElvUI startup failures to trim aliases, overexposed MessageFrame methods on plain frames, Mists AuraUtil tuple shape, and unanchored Slider label fontstrings.
+
 ## [2026-05-17] update | frame field environment numeric slot
 
 Updated `systems/frame-data-flow.md` after tracing the ElvUI/oUF aura `button:SetSize` startup error to frame field storage occupying raw numeric key `1`. Frame refs now keep addon array slots free while `debug.getfenv(frame)[1]` remains a compatibility view onto normal frame fields.

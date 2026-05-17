@@ -642,11 +642,24 @@ if table.getn == nil then
   table.getn = getn
 end
 
+local function __wow_escape_trim_chars(chars)
+  return tostring(chars):gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+end
+
 if strtrim == nil then
-  function strtrim(value)
+  function strtrim(value, chars)
     value = tostring(value or "")
-    return (value:gsub("^%s+", ""):gsub("%s+$", ""))
+    if chars == nil then
+      return (value:gsub("^%s+", ""):gsub("%s+$", ""))
+    end
+
+    local escapedChars = __wow_escape_trim_chars(chars)
+    return (value:gsub("^[" .. escapedChars .. "]+", ""):gsub("[" .. escapedChars .. "]+$", ""))
   end
+end
+
+if string ~= nil and string.trim == nil then
+  string.trim = strtrim
 end
 
 if Clamp == nil then

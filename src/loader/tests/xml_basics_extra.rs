@@ -117,6 +117,23 @@ fn fontstring_font_attribute_applies_font_object() {
 }
 
 #[test]
+fn slider_orientation_attribute_applies() {
+    let t = load_test_xml(
+        "slider-orientation-attribute",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Slider name="VerticalSlider" parent="UIParent" orientation="VERTICAL"/>
+        </Ui>
+        "#,
+    );
+
+    t.assert_lua_true(
+        "return VerticalSlider:GetOrientation() == 'VERTICAL'",
+        "Slider orientation attribute should seed GetOrientation",
+    );
+}
+
+#[test]
 fn test_xml_texture_color() {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join("wow-sim-test-texcolor");

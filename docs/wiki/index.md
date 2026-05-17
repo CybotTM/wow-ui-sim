@@ -45,6 +45,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[action-bar-spell-icons]] | 4 bugs: SetDrawLayer no-op, draw order, sublevel ignored, textureSubLevel not parsed |
 | [[addon-load-order]] | Bag buttons partially initialized at load; workaround mirrors real WoW event recovery |
 | [[mists-panel-stack-overflow-layout-cycle]] | Achievements/Talents panel clicks aborted from layout cache recursion on cyclic parent/anchor dependencies; `headless-click-probe` now exercises the real GUI click path |
+| [[mists-elvui-startup-compat]] | Mists ElvUI startup errors came from separate simulator surface gaps: trim aliases, MessageFrame-only methods visible on plain frames, AuraUtil tuple shape, and unanchored Slider label fontstrings |
 | [[mists-addon-panel-resume-error]] | Mists addon-panel matrix must resume from first unproven addon; rerunning passed rows from `AllTheThings` was the mistake, and `--start-at` / `.passed` markers guard against repeating it |
 | [[mists-heirloom-tooltip]] | Mists Collections heirloom buttons need `GameTooltip:SetHeirloomByItemID`, routed through `C_TooltipInfo.GetHeirloomByItemID`, so heirloom tooltip initialization does not throw |
 | [[minimap-map-ring-alignment]] | Active minimap bug is map texture/mask/ring alignment, not the SimCommands minimap button; debug the minimap render mask/clip and ring aperture directly |

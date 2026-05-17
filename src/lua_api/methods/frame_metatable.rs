@@ -12,7 +12,7 @@ pub(super) fn frame_metatable_for_widget_type(
     base_mt_ref: GcRef<Table>,
     widget_type: WidgetType,
 ) -> Val {
-    if matches!(widget_type, WidgetType::Frame | WidgetType::WorldFrame) {
+    if matches!(widget_type, WidgetType::WorldFrame) {
         return Val::Table(base_mt_ref);
     }
 
@@ -35,8 +35,7 @@ fn build_widget_metatable(
     widget_type: WidgetType,
 ) -> Option<Val> {
     let source_index = metatable_index_table(state, base_mt_ref)?;
-    let hidden_methods = hidden_method_names(widget_type);
-    let index_clone = clone_index_without_methods(state, source_index, hidden_methods)?;
+    let index_clone = clone_index_for_widget(state, source_index, widget_type)?;
     let mt_clone = clone_metatable_with_index(state, base_mt_ref, index_clone)?;
     Some(Val::Table(mt_clone))
 }
@@ -49,32 +48,57 @@ fn metatable_index_table(state: &mut LuaState, mt_ref: GcRef<Table>) -> Option<G
     }
 }
 
-fn hidden_method_names(widget_type: WidgetType) -> &'static [&'static str] {
+fn hidden_scroll_frame_method(name: &str) -> bool {
+    matches!(
+        name,
+        "GetVerticalScroll"
+            | "SetVerticalScroll"
+            | "GetVerticalScrollRange"
+            | "GetScrollChild"
+            | "SetScrollChild"
+            | "UpdateScrollChildRect"
+    )
+}
+
+fn hidden_message_frame_method(name: &str) -> bool {
+    matches!(
+        name,
+        "ScrollUp"
+            | "ScrollDown"
+            | "PageUp"
+            | "PageDown"
+            | "ScrollToTop"
+            | "ScrollToBottom"
+            | "AtTop"
+            | "AtBottom"
+            | "GetMaxScrollRange"
+            | "SetScrollOffset"
+            | "GetScrollOffset"
+            | "SetScrollAllowed"
+            | "IsScrollAllowed"
+    )
+}
+
+fn hidden_method_for_widget(widget_type: WidgetType, name: &str) -> bool {
     match widget_type {
-        WidgetType::ScrollFrame => &["SetMaxLines"],
-        WidgetType::StatusBar => &["SetStatusBarAtlas"],
-        _ => &[
-            "GetVerticalScroll",
-            "SetVerticalScroll",
-            "GetVerticalScrollRange",
-            "GetScrollChild",
-            "SetScrollChild",
-            "UpdateScrollChildRect",
-        ],
+        WidgetType::MessageFrame => hidden_scroll_frame_method(name),
+        WidgetType::ScrollFrame => name == "SetMaxLines" || hidden_message_frame_method(name),
+        WidgetType::StatusBar => hidden_scroll_frame_method(name) || name == "SetStatusBarAtlas",
+        _ => hidden_scroll_frame_method(name) || hidden_message_frame_method(name),
     }
 }
 
-fn clone_index_without_methods(
+fn clone_index_for_widget(
     state: &mut LuaState,
     source_index: GcRef<Table>,
-    hidden_methods: &[&str],
+    widget_type: WidgetType,
 ) -> Option<GcRef<Table>> {
     let Val::Table(index_clone) = create_table(state) else {
         return None;
     };
 
     for (entry_key, entry_value) in table_entries(state, source_index) {
-        if !is_any_string_key(state, entry_key, hidden_methods) {
+        if !is_hidden_string_key(state, entry_key, widget_type) {
             raw_set(state, index_clone, entry_key, entry_value);
         }
     }
@@ -125,8 +149,8 @@ fn table_str_value(
         .unwrap_or(Val::Nil)
 }
 
-fn is_any_string_key(state: &LuaState, key: Val, expected: &[&str]) -> bool {
-    string_key_name(state, key).is_some_and(|name| expected.contains(&name))
+fn is_hidden_string_key(state: &LuaState, key: Val, widget_type: WidgetType) -> bool {
+    string_key_name(state, key).is_some_and(|name| hidden_method_for_widget(widget_type, name))
 }
 
 fn is_string_key(state: &LuaState, key: Val, expected: &str) -> bool {

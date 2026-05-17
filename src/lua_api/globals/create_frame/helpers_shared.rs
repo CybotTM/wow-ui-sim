@@ -2,7 +2,7 @@
 
 use crate::lua_api::SimState;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_ref, sync_child_to_rilua};
-use crate::widget::{Frame, FrameStrata, WidgetType};
+use crate::widget::{AnchorPoint, Frame, FrameStrata, WidgetType};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -84,6 +84,7 @@ fn register_named_child(
 ) -> LuaResult<u64> {
     let mut child = Frame::new(child_type, None, Some(parent_id));
     child.parent_key = Some(key.to_string());
+    anchor_slider_label_child(&mut child, parent_id, key);
     let child_id = child.id;
     {
         let mut sim = borrow_state_mut(state)?;
@@ -95,6 +96,18 @@ fn register_named_child(
     }
     sync_child_to_rilua(state, parent_id, key, child_id)?;
     Ok(child_id)
+}
+
+fn anchor_slider_label_child(child: &mut Frame, parent_id: u64, key: &str) {
+    let anchor = match key {
+        "Low" => Some((AnchorPoint::TopLeft, AnchorPoint::BottomLeft)),
+        "High" => Some((AnchorPoint::TopRight, AnchorPoint::BottomRight)),
+        "Text" => Some((AnchorPoint::Bottom, AnchorPoint::Top)),
+        _ => None,
+    };
+    if let Some((point, relative_point)) = anchor {
+        child.set_point(point, Some(parent_id as usize), relative_point, 0.0, 0.0);
+    }
 }
 
 fn should_preserve_object_type_name(widget_type: WidgetType, frame_type: &str) -> bool {

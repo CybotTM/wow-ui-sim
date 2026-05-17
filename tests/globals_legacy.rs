@@ -287,6 +287,37 @@ fn test_frame_runtime_lookup_filters_wrong_type_methods() {
 }
 
 #[test]
+fn test_frame_runtime_lookup_filters_message_frame_methods_from_scrollframe() {
+    let env = env();
+    let result: (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "MethodFilterPlainFrame")
+            local scroll = CreateFrame("ScrollFrame", "MethodFilterPlainScroll")
+            local message = CreateFrame("ScrollingMessageFrame", "MethodFilterMessage")
+            return frame.ScrollUp == nil,
+                   scroll.ScrollUp == nil,
+                   scroll.SetMaxLines == nil,
+                   type(message.ScrollUp) == "function"
+            "#,
+        )
+        .unwrap();
+    assert!(result.0, "Frame should not expose MessageFrame ScrollUp");
+    assert!(
+        result.1,
+        "ScrollFrame should not expose MessageFrame ScrollUp"
+    );
+    assert!(
+        result.2,
+        "ScrollFrame should not expose MessageFrame SetMaxLines"
+    );
+    assert!(
+        result.3,
+        "ScrollingMessageFrame should still expose MessageFrame ScrollUp"
+    );
+}
+
+#[test]
 fn test_fontstring_runtime_lookup_hides_extra_title_methods() {
     let env = env();
     let result: (bool, bool, bool) = env

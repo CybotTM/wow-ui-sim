@@ -519,6 +519,34 @@ fn test_create_slider_has_children() {
     assert!(has_thumb, "Slider should have ThumbTexture");
 }
 
+#[test]
+fn test_create_slider_default_fontstrings_are_anchored() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local slider = CreateFrame("Slider", "TestSliderAnchoredChildren", UIParent)
+        slider:SetSize(200, 20)
+    "#,
+    )
+    .unwrap();
+
+    let anchored: bool = env
+        .eval(
+            r#"
+            local lowPoint, _, lowRelative = TestSliderAnchoredChildren.Low:GetPoint()
+            local highPoint, _, highRelative = TestSliderAnchoredChildren.High:GetPoint()
+            local textPoint, _, textRelative = TestSliderAnchoredChildren.Text:GetPoint()
+            return lowPoint == "TOPLEFT" and lowRelative == "BOTTOMLEFT"
+               and highPoint == "TOPRIGHT" and highRelative == "BOTTOMRIGHT"
+               and textPoint == "BOTTOM" and textRelative == "TOP"
+            "#,
+        )
+        .unwrap();
+
+    assert!(anchored, "Slider label fontstrings should have points");
+}
+
 // ============================================================================
 // CreateTexture and CreateFontString Tests
 // ============================================================================

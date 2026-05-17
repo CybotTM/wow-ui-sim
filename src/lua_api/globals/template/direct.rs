@@ -665,6 +665,28 @@ pub fn apply_xml_letters(
     }
 }
 
+/// Resolve and apply Slider `orientation` from template chain + instance XML.
+pub fn apply_xml_slider_orientation(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    frame: &FrameXml,
+    inherits: &str,
+) {
+    let mut orientation = frame.orientation.clone();
+    if orientation.is_none() && !inherits.is_empty() {
+        for entry in &*crate::xml::get_template_chain(inherits) {
+            if let Some(value) = entry.frame.orientation.clone() {
+                orientation = Some(value);
+            }
+        }
+    }
+    if let Some(value) = orientation
+        && let Some(f) = state.borrow_mut().widgets.get_mut_visual(frame_id)
+    {
+        f.slider_orientation = value.to_uppercase();
+    }
+}
+
 /// Merge size values from a SizeXml into accumulators.
 fn merge_size(
     width: &mut Option<f32>,

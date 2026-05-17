@@ -528,6 +528,23 @@ fn test_strtrim() {
 }
 
 #[test]
+fn test_string_trim_alias() {
+    let env = env();
+    let result: (String, String) = env
+        .eval(r#"return string.trim('  hello  '), ('xxhellox'):trim('x')"#)
+        .unwrap();
+    assert_eq!(result.0, "hello");
+    assert_eq!(result.1, "hello");
+}
+
+#[test]
+fn test_strtrim_custom_chars() {
+    let env = env();
+    let result: String = env.eval("return strtrim('\\nhello\\r', '\\n\\r')").unwrap();
+    assert_eq!(result, "hello");
+}
+
+#[test]
 fn test_strjoin() {
     let env = env();
     let result: String = env.eval("return strjoin(',', 'a', 'b', 'c')").unwrap();
