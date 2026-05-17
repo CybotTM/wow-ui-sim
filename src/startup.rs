@@ -202,7 +202,7 @@ pub fn fire_startup_events(env: &WowLuaEnv) {
     fire_login_sequence(env, false);
     fire_world_enter_sequence(env);
     fire_post_login_events(env);
-    close_startup_windows_before_first_frame(env);
+    crate::lua_api::workarounds::close_startup_special_windows_before_first_frame(env);
     fire_simple_event(env, "FIRST_FRAME_RENDERED");
     unblock_hidden_splash_alerts(env);
     env.apply_post_event_workarounds();
@@ -424,18 +424,6 @@ fn fire_world_enter_sequence(env: &WowLuaEnv) {
         &[Val::Bool(true), Val::Bool(false)],
     ) {
         log_with_timestamp(env, &format!("Error firing PLAYER_ENTERING_WORLD: {e}"));
-    }
-}
-
-fn close_startup_windows_before_first_frame(env: &WowLuaEnv) {
-    if let Err(e) = env.exec(
-        r#"
-        if type(CloseAllWindows) == "function" then
-            CloseAllWindows(1)
-        end
-        "#,
-    ) {
-        log_with_timestamp(env, &format!("[Startup] CloseAllWindows failed: {e}"));
     }
 }
 

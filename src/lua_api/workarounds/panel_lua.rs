@@ -569,3 +569,9 @@ end
 __wow_patch_settings_canvas_registration()
 __wow_hide_registered_settings_canvas_frames()
 "#;
+
+pub(super) const CLOSE_STARTUP_SPECIAL_WINDOWS_LUA: &str = r#"
+if type(CloseAllWindows) == "function" then
+    CloseAllWindows(1)
+end
+"#;
