@@ -69,6 +69,26 @@ fn test_get_frame_metatable_without_instance_returns_shared_metatable() {
 }
 
 #[test]
+fn test_get_font_string_metatable_exposes_text_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let (mt_ty, mt_index_ty, set_text_ty, set_formatted_text_ty): (String, String, String, String) =
+        env.eval(
+            r#"
+            local mt = GetFontStringMetatable()
+            return type(mt),
+                type(mt and mt.__index),
+                type(mt and mt.__index and mt.__index.SetText),
+                type(mt and mt.__index and mt.__index.SetFormattedText)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(mt_ty, "table");
+    assert_eq!(mt_index_ty, "table");
+    assert_eq!(set_text_ty, "function");
+    assert_eq!(set_formatted_text_ty, "function");
+}
+
+#[test]
 fn test_create_texture_exposes_core_visual_methods() {
     let env = WowLuaEnv::new().unwrap();
     let (

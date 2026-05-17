@@ -1242,6 +1242,19 @@ if GetFrameMetatable == nil then
   end
 end
 
+if GetFontStringMetatable == nil then
+  function GetFontStringMetatable(fontString)
+    if fontString == nil then
+      if CreateFrame == nil then
+        return nil
+      end
+      local frame = CreateFrame("Frame")
+      fontString = frame and frame:CreateFontString()
+    end
+    return fontString and getmetatable(fontString) or nil
+  end
+end
+
 do
   local frameMeta = GetFrameMetatable and GetFrameMetatable()
   local frameIndex = frameMeta and frameMeta.__index

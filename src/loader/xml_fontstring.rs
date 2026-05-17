@@ -146,6 +146,24 @@ fn build_fontstring_create_code(
     code
 }
 
+fn generate_fontstring_mixin_code(fontstring: &crate::xml::FontStringXml) -> String {
+    let mixins = crate::xml::collect_font_string_mixins(
+        fontstring.inherits.as_deref(),
+        fontstring.mixin.as_deref(),
+    );
+    if mixins.is_empty() {
+        return String::new();
+    }
+
+    let mut code = String::new();
+    for mixin in mixins {
+        code.push_str(&format!(
+            "\n        if {mixin} then Mixin(fs, {mixin}) end\n        "
+        ));
+    }
+    code
+}
+
 /// Generate Lua code for fontstring text, anchors, alpha, and visibility.
 fn build_fontstring_extra_code(
     fontstring: &crate::xml::FontStringXml,
@@ -261,6 +279,7 @@ pub(super) fn build_fontstring_lua(
 ) -> String {
     let mut code =
         build_fontstring_create_code(fontstring, parent_name, draw_layer, sub_level, fs_name);
+    code.push_str(&generate_fontstring_mixin_code(fontstring));
     code.push_str(&build_fontstring_extra_code(
         fontstring,
         parent_name,
@@ -378,5 +397,31 @@ mod tests {
                 r#"CreateFontString("Parent-|TInterface\\AddOns\\Addon\\Icon:0|t.__fs_1""#
             )
         );
+    }
+
+    #[test]
+    fn xml_fontstring_direct_mixin_applies_to_created_fontstring() {
+        let env = WowLuaEnv::new().unwrap();
+        env.exec(
+            r#"
+            CreateFrame("Frame", "TestFSMixinParent", UIParent)
+            TestFontStringMixin = {}
+            function TestFontStringMixin:Describe()
+                return "mixed"
+            end
+            "#,
+        )
+        .unwrap();
+
+        let fs = FontStringXml {
+            name: Some("TestFSMixed".to_string()),
+            mixin: Some("TestFontStringMixin".to_string()),
+            ..Default::default()
+        };
+        create_fontstring_from_xml(&env.loader_env(), &fs, "TestFSMixinParent", "ARTWORK", 0)
+            .unwrap();
+
+        let result: String = env.eval("return TestFSMixed:Describe()").unwrap();
+        assert_eq!(result, "mixed");
     }
 }
