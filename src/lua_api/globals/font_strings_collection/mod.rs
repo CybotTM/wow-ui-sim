@@ -23,6 +23,7 @@ pub mod colors;
 pub mod fonts;
 pub mod mount_journal;
 pub mod pet_journal;
+mod standard_fonts;
 pub mod toy_box;
 
 // Re-export the public API so callers importing from this module still work.

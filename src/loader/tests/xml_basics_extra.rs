@@ -94,6 +94,39 @@ fn missing_xml_include_reports_path_to_lua_error_handler() {
 }
 
 #[test]
+fn test_hidden_xml_parent_does_not_hide_child_shown_flag() {
+    let ctx = load_test_xml(
+        "hidden-parent-child-shown",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="HiddenParent" parent="UIParent" hidden="true">
+                <Frames>
+                    <Frame name="HiddenParentChild"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        "return HiddenParent ~= nil and HiddenParentChild ~= nil",
+        "frames should exist",
+    );
+    ctx.assert_lua_true(
+        "return HiddenParent:IsShown() == false",
+        "parent should start hidden",
+    );
+    ctx.assert_lua_true(
+        "return HiddenParentChild:IsShown() == true",
+        "child should keep its own shown flag even when parent starts hidden",
+    );
+    ctx.assert_lua_true(
+        "return HiddenParentChild:IsVisible() == false",
+        "child should not be effectively visible while parent is hidden",
+    );
+}
+
+#[test]
 fn fontstring_font_attribute_applies_font_object() {
     let t = load_test_xml(
         "fontstring-font-attribute",
@@ -113,6 +146,55 @@ fn fontstring_font_attribute_applies_font_object() {
     t.assert_lua_true(
         "return (function() local font = FontAttributeParent.Text:GetFont(); return font == [[Fonts\\FRIZQT__.TTF]] end)()",
         "FontString font attribute should apply the named font object",
+    );
+}
+
+#[test]
+fn test_xml_font_redefinition_keeps_font_object_metatable_methods() {
+    let ctx = load_test_xml(
+        "font-object-redefinition-methods",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Font name="GameFontNormal" font="Fonts\FRIZQT__.TTF" height="12"/>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        r#"
+        (function()
+            local mt = getmetatable(GameFontNormal)
+            local index = mt and mt.__index
+            GameFontNormal:SetShadowColor(0.1, 0.2, 0.3, 0.4)
+            return type(index) == "table" and type(index.SetShadowColor) == "function"
+                and type(GameFontNormal.SetShadowColor) == "function"
+        end)()
+        "#,
+        "XML Font definitions should use the same Font object surface as CreateFont",
+    );
+}
+
+#[test]
+fn test_font_objects_share_metatable_mutations() {
+    let ctx = load_test_xml(
+        "font-object-shared-metatable",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Font name="SharedFontOne" font="Fonts\FRIZQT__.TTF" height="12"/>
+            <Font name="SharedFontTwo" font="Fonts\FRIZQT__.TTF" height="12"/>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        r#"
+        (function()
+            getmetatable(SharedFontOne).__index.ExtraFontMethod = function() return "ok" end
+            return getmetatable(SharedFontOne) == getmetatable(SharedFontTwo)
+                and SharedFontTwo:ExtraFontMethod() == "ok"
+        end)()
+        "#,
+        "Font objects should share metatable additions by object type",
     );
 }
 

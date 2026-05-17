@@ -2,8 +2,8 @@
 //! register_standard_font_objects, and the per-font-object method table.
 
 use crate::lua_api::methods::{
-    create_string, create_string_static, create_table, create_table_with_capacity, table_get,
-    table_get_static, table_set, table_set_static, val_to_string,
+    create_string, create_string_static, create_table, create_table_with_capacity, registry_get,
+    registry_set, table_get, table_get_static, table_set, table_set_static, val_to_string,
 };
 use crate::lua_bridge::table_set_rust_fn_static;
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
@@ -13,141 +13,26 @@ use rilua::vm::table::Table as RiluaTable;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
 use super::set_global_val;
+use super::standard_fonts::STANDARD_FONTS;
 
 type FontTableRef = GcRef<RiluaTable>;
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 const DEFAULT_FONT_PATH: &str = "Fonts\\FRIZQT__.TTF";
+const FONT_METATABLE_REGISTRY_KEY: &str = "__wow_font_object_metatable";
 const FONT_OBJECT_HASH_FIELDS: usize = 42;
-
-/// (name, height, flags, r, g, b)
-const STANDARD_FONTS: &[(&'static str, f64, &str, f64, f64, f64)] = &[
-    ("GameFontNormal", 12.0, "", 1.0, 0.82, 0.0),
-    ("GameFontNormalSmall", 10.0, "", 1.0, 0.82, 0.0),
-    ("GameFontNormalLarge", 16.0, "", 1.0, 0.82, 0.0),
-    ("GameFontNormalHuge", 20.0, "", 1.0, 0.82, 0.0),
-    ("GameFontNormalMed1", 13.0, "", 1.0, 0.82, 0.0),
-    ("GameFontNormalMed2", 13.0, "", 1.0, 0.82, 0.0),
-    ("GameFontNormalMed3", 14.0, "", 1.0, 0.82, 0.0),
-    ("GameFontHighlight", 12.0, "", 1.0, 1.0, 1.0),
-    ("GameFontHighlightSmall", 10.0, "", 1.0, 1.0, 1.0),
-    (
-        "GameFontHighlightSmallOutline",
-        10.0,
-        "OUTLINE",
-        1.0,
-        1.0,
-        1.0,
-    ),
-    ("GameFontHighlightLarge", 16.0, "", 1.0, 1.0, 1.0),
-    ("GameFontHighlightHuge", 20.0, "", 1.0, 1.0, 1.0),
-    ("GameFontHighlightMedium", 14.0, "", 1.0, 1.0, 1.0),
-    ("GameFontHighlightMed2", 13.0, "", 1.0, 1.0, 1.0),
-    ("GameFontHighlightOutline", 12.0, "OUTLINE", 1.0, 1.0, 1.0),
-    ("GameFontDisable", 12.0, "", 0.5, 0.5, 0.5),
-    ("GameFontDisableSmall", 10.0, "", 0.5, 0.5, 0.5),
-    ("GameFontDisableLarge", 16.0, "", 0.5, 0.5, 0.5),
-    ("GameFontRed", 12.0, "", 1.0, 0.1, 0.1),
-    ("GameFontRedSmall", 10.0, "", 1.0, 0.1, 0.1),
-    ("GameFontRedLarge", 16.0, "", 1.0, 0.1, 0.1),
-    ("GameFontGreen", 12.0, "", 0.1, 1.0, 0.1),
-    ("GameFontGreenSmall", 10.0, "", 0.1, 1.0, 0.1),
-    ("GameFontGreenLarge", 16.0, "", 0.1, 1.0, 0.1),
-    ("GameFontWhite", 12.0, "", 1.0, 1.0, 1.0),
-    ("GameFontWhiteSmall", 10.0, "", 1.0, 1.0, 1.0),
-    ("GameFontWhiteTiny", 9.0, "", 1.0, 1.0, 1.0),
-    ("GameFontBlack", 12.0, "", 0.0, 0.0, 0.0),
-    ("GameFontBlackSmall", 10.0, "", 0.0, 0.0, 0.0),
-    ("GameFontBlackMedium", 14.0, "", 0.0, 0.0, 0.0),
-    ("NumberFontNormal", 14.0, "OUTLINE", 1.0, 1.0, 1.0),
-    ("NumberFontNormalSmall", 12.0, "OUTLINE", 1.0, 1.0, 1.0),
-    ("NumberFontNormalLarge", 16.0, "OUTLINE", 1.0, 1.0, 1.0),
-    ("NumberFontNormalHuge", 24.0, "OUTLINE", 1.0, 1.0, 1.0),
-    ("NumberFontNormalRightRed", 14.0, "OUTLINE", 1.0, 0.1, 0.1),
-    (
-        "NumberFontNormalRightYellow",
-        14.0,
-        "OUTLINE",
-        1.0,
-        1.0,
-        0.0,
-    ),
-    ("ChatFontNormal", 14.0, "", 1.0, 1.0, 1.0),
-    ("ChatFontSmall", 12.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Small", 10.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Med1", 12.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Med2", 13.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Med3", 14.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Large", 16.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Huge1", 20.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Huge2", 24.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Outline", 12.0, "OUTLINE", 1.0, 1.0, 1.0),
-    (
-        "SystemFont_OutlineThick_Huge2",
-        24.0,
-        "OUTLINE, THICKOUTLINE",
-        1.0,
-        1.0,
-        1.0,
-    ),
-    (
-        "SystemFont_OutlineThick_Huge4",
-        32.0,
-        "OUTLINE, THICKOUTLINE",
-        1.0,
-        1.0,
-        1.0,
-    ),
-    (
-        "SystemFont_OutlineThick_WTF",
-        64.0,
-        "OUTLINE, THICKOUTLINE",
-        1.0,
-        1.0,
-        1.0,
-    ),
-    ("SystemFont_Shadow_Small", 10.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Shadow_Med1", 12.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Shadow_Med2", 13.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Shadow_Med3", 14.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Shadow_Large", 16.0, "", 1.0, 1.0, 1.0),
-    (
-        "SystemFont_Shadow_Large_Outline",
-        16.0,
-        "OUTLINE",
-        1.0,
-        1.0,
-        1.0,
-    ),
-    ("SystemFont_Shadow_Huge1", 20.0, "", 1.0, 1.0, 1.0),
-    ("GameTooltipHeader", 14.0, "", 1.0, 1.0, 1.0),
-    ("GameTooltipHeaderText", 14.0, "", 1.0, 1.0, 1.0),
-    ("GameTooltipText", 12.0, "", 1.0, 1.0, 1.0),
-    ("GameTooltipTextSmall", 10.0, "", 1.0, 1.0, 1.0),
-    ("ObjectiveFont", 12.0, "", 0.8, 0.8, 0.8),
-    ("SubZoneTextFont", 26.0, "OUTLINE", 1.0, 0.82, 0.0),
-    ("PVPInfoTextFont", 20.0, "OUTLINE", 1.0, 0.1, 0.1),
-    ("FriendsFont_Normal", 12.0, "", 1.0, 1.0, 1.0),
-    ("FriendsFont_Small", 10.0, "", 1.0, 1.0, 1.0),
-    ("FriendsFont_Large", 14.0, "", 1.0, 1.0, 1.0),
-    ("FriendsFont_UserText", 11.0, "", 1.0, 1.0, 1.0),
-];
 
 // ── Low-level field helpers ───────────────────────────────────────────────────
 
-const TEXT_COLOR_KEYS: [&str; 4] = [
-    "__textColorR",
-    "__textColorG",
-    "__textColorB",
-    "__textColorA",
-];
-const SHADOW_COLOR_KEYS: [&str; 4] = [
-    "__shadowColorR",
-    "__shadowColorG",
-    "__shadowColorB",
-    "__shadowColorA",
-];
+/// Fetch a numeric font field by dynamic `&str` key. Prefer
+/// [`font_f64_static`] for compile-time-literal keys.
+pub(super) fn font_f64(state: &mut LuaState, font: Val, key: &str) -> f64 {
+    match table_get(state, font, key) {
+        Val::Num(n) => n,
+        _ => 0.0,
+    }
+}
 
 /// Fetch a numeric font field by compile-time-literal key. Routes
 /// through `table_get_static` → `intern_string_static` so the key
@@ -169,7 +54,7 @@ pub(super) fn font_str_static(state: &mut LuaState, font: Val, key: &'static str
 
 pub(super) fn font_set_defaults(state: &mut LuaState, font: Val, name: Option<&str>) {
     table_set_static(state, font, "__fontHeight", Val::Num(0.0));
-    let empty = create_string_static(state, "");
+    let empty = create_string(state, "");
     table_set_static(state, font, "__fontFlags", empty);
     table_set_static(state, font, "__textColorR", Val::Num(1.0));
     table_set_static(state, font, "__textColorG", Val::Num(1.0));
@@ -253,11 +138,11 @@ fn add_font_text_color_methods(state: &mut LuaState, font_ref: FontTableRef) -> 
 }
 
 fn font_set_text_color(state: &mut LuaState) -> LuaResult<u32> {
-    set_rgba_component_fields(state, TEXT_COLOR_KEYS)
+    set_rgba_component_fields(state, "__textColor")
 }
 
 fn font_get_text_color(state: &mut LuaState) -> LuaResult<u32> {
-    get_rgba_component_fields(state, TEXT_COLOR_KEYS)
+    get_rgba_component_fields(state, "__textColor")
 }
 
 fn add_font_shadow_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
@@ -269,11 +154,11 @@ fn add_font_shadow_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaR
 }
 
 fn font_set_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
-    set_rgba_component_fields(state, SHADOW_COLOR_KEYS)
+    set_rgba_component_fields(state, "__shadowColor")
 }
 
 fn font_get_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
-    get_rgba_component_fields(state, SHADOW_COLOR_KEYS)
+    get_rgba_component_fields(state, "__shadowColor")
 }
 
 fn font_set_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
@@ -292,25 +177,28 @@ fn font_get_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
     (x, y).into_stack(state)
 }
 
-fn set_rgba_component_fields(state: &mut LuaState, keys: [&'static str; 4]) -> LuaResult<u32> {
+/// Read r,g,b,a from stack (2..=5, a defaulting to 1.0) and store on the
+/// font under `{prefix}R`, `{prefix}G`, `{prefix}B`, `{prefix}A`.
+fn set_rgba_component_fields(state: &mut LuaState, prefix: &str) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let r = f64::from_stack(state, 2)?;
     let g = f64::from_stack(state, 3)?;
     let b = f64::from_stack(state, 4)?;
     let a = Option::<f64>::from_stack(state, 5)?.unwrap_or(1.0);
-    for (key, value) in keys.into_iter().zip([r, g, b, a]) {
-        table_set_static(state, font, key, Val::Num(value));
+    let components = [("R", r), ("G", g), ("B", b), ("A", a)];
+    for (suffix, value) in components {
+        let key = format!("{prefix}{suffix}");
+        table_set(state, font, &key, Val::Num(value));
     }
     Ok(0)
 }
 
-fn get_rgba_component_fields(state: &mut LuaState, keys: [&'static str; 4]) -> LuaResult<u32> {
+fn get_rgba_component_fields(state: &mut LuaState, prefix: &str) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    let [r_key, g_key, b_key, a_key] = keys;
-    let r = font_f64_static(state, font, r_key);
-    let g = font_f64_static(state, font, g_key);
-    let b = font_f64_static(state, font, b_key);
-    let a = font_f64_static(state, font, a_key);
+    let r = font_f64(state, font, &format!("{prefix}R"));
+    let g = font_f64(state, font, &format!("{prefix}G"));
+    let b = font_f64(state, font, &format!("{prefix}B"));
+    let a = font_f64(state, font, &format!("{prefix}A"));
     (r, g, b, a).into_stack(state)
 }
 
@@ -418,9 +306,9 @@ fn font_copy_font_object(state: &mut LuaState) -> LuaResult<u32> {
     copy_font_string_alias(state, dest, src, "__fontPath", "__font");
     copy_font_number_alias(state, dest, src, "__fontHeight", "__height");
     copy_font_string_alias(state, dest, src, "__fontFlags", "__outline");
-    copy_color_components(state, dest, src, TEXT_COLOR_KEYS);
+    copy_color_components(state, dest, src, "__textColor");
     copy_xml_text_color_components(state, dest, src);
-    copy_color_components(state, dest, src, SHADOW_COLOR_KEYS);
+    copy_color_components(state, dest, src, "__shadowColor");
     copy_font_number(state, dest, src, "__shadowOffsetX");
     copy_font_number(state, dest, src, "__shadowOffsetY");
     copy_font_string(state, dest, src, "__justifyH");
@@ -511,17 +399,29 @@ fn attach_font_methods_metatable(state: &mut LuaState, font: Val) {
         return;
     };
 
+    let mt = shared_font_metatable(state);
+    let Val::Table(mt_ref) = mt else {
+        return;
+    };
+
+    if let Some(font_table) = state.gc.tables.get_mut(font_ref) {
+        font_table.set_metatable(Some(mt_ref));
+    }
+    state.gc.barrier_back(font_ref);
+}
+
+fn shared_font_metatable(state: &mut LuaState) -> Val {
+    let existing = registry_get(state, FONT_METATABLE_REGISTRY_KEY);
+    if let Val::Table(_) = existing {
+        return existing;
+    }
+
     let methods = create_table(state);
     let _ = add_font_methods(state, methods);
     let mt = create_table(state);
     table_set_static(state, mt, "__index", methods);
-
-    if let Val::Table(mt_ref) = mt {
-        if let Some(font_table) = state.gc.tables.get_mut(font_ref) {
-            font_table.set_metatable(Some(mt_ref));
-        }
-        state.gc.barrier_back(font_ref);
-    }
+    registry_set(state, FONT_METATABLE_REGISTRY_KEY, mt);
+    mt
 }
 
 // ── Top-level Font API functions ──────────────────────────────────────────────
@@ -545,23 +445,33 @@ pub fn get_fonts(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_font_info(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(font) = resolve_font_object(state, stack_val(state, 1)) else {
-        let info = create_table(state);
-        let empty = create_string_static(state, "");
-        table_set(state, info, "name", empty);
-        table_set(state, info, "height", Val::Num(0.0));
-        let empty = create_string_static(state, "");
-        table_set(state, info, "outline", empty);
-        let empty = create_string_static(state, "");
-        table_set(state, info, "flags", empty);
-        let color = font_color_info(state, Val::Nil);
-        table_set(state, info, "color", color);
-        return info.into_stack(state);
+    let info = match resolve_font_object(state, stack_val(state, 1)) {
+        Some(font) => populated_font_info(state, font),
+        None => empty_font_info(state),
     };
+
+    info.into_stack(state)
+}
+
+fn empty_font_info(state: &mut LuaState) -> Val {
+    let info = create_table(state);
+    let empty = create_string(state, "");
+    table_set(state, info, "name", empty);
+    table_set(state, info, "height", Val::Num(0.0));
+    let empty = create_string(state, "");
+    table_set(state, info, "outline", empty);
+    let empty = create_string(state, "");
+    table_set(state, info, "flags", empty);
+    let color = font_color_info(state, Val::Nil);
+    table_set(state, info, "color", color);
+    info
+}
+
+fn populated_font_info(state: &mut LuaState, font: Val) -> Val {
     let info = create_table(state);
     let name = match table_get_static(state, font, "__name") {
         Val::Str(_) => table_get_static(state, font, "__name"),
-        _ => create_string_static(state, ""),
+        _ => create_string(state, ""),
     };
     table_set(state, info, "name", name);
     let height = font_f64_static(state, font, "__fontHeight");
@@ -581,7 +491,7 @@ pub fn get_font_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "fontFlags", font_flags);
     let color = font_color_info(state, font);
     table_set(state, info, "color", color);
-    info.into_stack(state)
+    info
 }
 
 fn font_color_info(state: &mut LuaState, font: Val) -> Val {
@@ -698,11 +608,12 @@ fn copy_font_bool(state: &mut LuaState, dest: Val, src: Val, key: &'static str) 
     }
 }
 
-fn copy_color_components(state: &mut LuaState, dest: Val, src: Val, keys: [&'static str; 4]) {
-    for key in keys {
-        let value = table_get_static(state, src, key);
+fn copy_color_components(state: &mut LuaState, dest: Val, src: Val, prefix: &'static str) {
+    for suffix in ["R", "G", "B", "A"] {
+        let key = format!("{prefix}{suffix}");
+        let value = table_get(state, src, &key);
         if matches!(value, Val::Num(_)) {
-            table_set_static(state, dest, key, value);
+            table_set(state, dest, &key, value);
         }
     }
 }
@@ -713,13 +624,13 @@ fn copy_xml_text_color_components(state: &mut LuaState, dest: Val, src: Val) {
         ("__textColorG", "__g"),
         ("__textColorB", "__b"),
     ] {
-        let already_copied = table_get_static(state, dest, dest_key);
+        let already_copied = table_get(state, dest, dest_key);
         if matches!(already_copied, Val::Num(_)) {
             continue;
         }
-        let value = table_get_static(state, src, source_key);
+        let value = table_get(state, src, source_key);
         if matches!(value, Val::Num(_)) {
-            table_set_static(state, dest, dest_key, value);
+            table_set(state, dest, dest_key, value);
         }
     }
 }
