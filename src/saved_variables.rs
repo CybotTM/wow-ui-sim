@@ -172,7 +172,6 @@ impl SavedVariablesManager {
         if self.wtf_loaded.contains_key(addon_name) {
             return Ok(0);
         }
-
         let files = [
             (
                 config.account_saved_vars_file(addon_name),
@@ -492,11 +491,6 @@ impl SavedVariablesManager {
         self.storage_dir.join(format!("{}.lua", addon_name))
     }
 
-    fn has_local_storage_for_addon(&self, addon_name: &str) -> bool {
-        self.storage_path(addon_name, false).exists()
-            || self.storage_path(addon_name, true).exists()
-    }
-
     fn should_skip_load(&self, path: &Path) -> crate::Result<bool> {
         let Some(max_load_bytes) = self.max_load_bytes else {
             return Ok(false);
@@ -620,7 +614,7 @@ mod tests {
     use rilua::LuaApiMut;
     use rilua::Val;
 
-    use super::{SavedVariablesManager, get_global};
+    use super::{SavedVariablesManager, WtfConfig, get_global};
 
     #[test]
     fn oversized_local_saved_variables_seed_nil_instead_of_loading() {
@@ -643,6 +637,49 @@ mod tests {
 
         let value_type: String = env.eval("return type(HugeDB)").expect("probe should run");
         assert_eq!(value_type, "nil");
+    }
+
+    #[test]
+    fn wtf_saved_variables_win_over_simulator_storage() {
+        let local_dir = tempfile::tempdir().expect("local tempdir");
+        let wtf_dir = tempfile::tempdir().expect("wtf tempdir");
+        let wtf_account_dir = wtf_dir.path().join("Account/TestAccount/SavedVariables");
+        fs::create_dir_all(&wtf_account_dir).expect("create wtf saved variables dir");
+        fs::write(
+            wtf_account_dir.join("BlizzMove.lua"),
+            "\nBlizzMoveDB = { source = 'wtf' }\n",
+        )
+        .expect("write wtf saved variables");
+        fs::write(
+            local_dir.path().join("BlizzMove.lua"),
+            "\nBlizzMoveDB = { source = 'local' }\n",
+        )
+        .expect("write local saved variables");
+
+        let env = WowLuaEnv::new().expect("env");
+        let mut mgr = SavedVariablesManager::with_storage_dir(local_dir.path().to_path_buf());
+        mgr.set_wtf_config(WtfConfig::new(
+            wtf_dir.path(),
+            "TestAccount",
+            "TestRealm",
+            "TestCharacter",
+        ));
+        let saved_vars = ["BlizzMoveDB".to_string()];
+
+        {
+            let mut lua = env.rilua_mut();
+            let loaded = mgr
+                .load_wtf_for_addon(lua.state_mut(), "BlizzMove")
+                .expect("wtf load should succeed");
+            assert_eq!(loaded, 1);
+            mgr.init_for_addon(lua.state_mut(), "BlizzMove", &saved_vars, &[])
+                .expect("saved variable init should not fail");
+        }
+
+        let source: String = env
+            .eval("return BlizzMoveDB.source")
+            .expect("probe should run");
+        assert_eq!(source, "wtf");
     }
 
     #[test]
