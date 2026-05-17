@@ -15,14 +15,6 @@ if Syndicator ~= nil and SYNDICATOR_CONFIG == nil then
   SYNDICATOR_CONFIG = {}
 end
 
-if type(GTFO_DisplayConfigPopupMessage) == "function"
-   and rawget(_G, "__wow_sim_mists_gtfo_config_popup_suppressed") ~= true then
-  function GTFO_DisplayConfigPopupMessage()
-  end
-
-  rawset(_G, "__wow_sim_mists_gtfo_config_popup_suppressed", true)
-end
-
 if type(Settings) == "table" then
   local categoriesByID = rawget(Settings, "__wow_sim_mists_categories_by_id")
   if type(categoriesByID) ~= "table" then
