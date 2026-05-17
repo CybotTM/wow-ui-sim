@@ -9,6 +9,10 @@ tracking regression. EditMode profile cache files are not Lua SavedVariables, so
 startup now loads them through a separate WTF cache path when Lua SavedVariables
 are disabled.
 
+## [2026-05-17] update | frame field environment numeric slot
+
+Updated `systems/frame-data-flow.md` after tracing the ElvUI/oUF aura `button:SetSize` startup error to frame field storage occupying raw numeric key `1`. Frame refs now keep addon array slots free while `debug.getfenv(frame)[1]` remains a compatibility view onto normal frame fields.
+
 ## [2026-05-17] update | Mists talent first-open latency
 
 Updated `investigations/talent-performance.md` after tracing full-addon Mists talent first-open latency to a deferred AceAddon enable queue. BlizzMove's skipped `PLAYER_LOGIN` left 27 queued Ace addons until `ADDON_LOADED("Blizzard_TalentUI")`; allowing BlizzMove to receive login again makes the talent load itself sub-second, with remaining ElvUI login cost tracked separately.

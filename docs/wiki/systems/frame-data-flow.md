@@ -1,46 +1,46 @@
 # Frame Data Flow
 
-The simulator maintains two parallel systems that stay in sync through a shared `id: u64`. Rust owns layout and rendering state; Lua owns mixin methods, script handlers, and custom properties.
+The simulator maintains two parallel systems that stay in sync through a shared `id: u64`. Rust owns layout and rendering state; Lua frame-ref tables own mixin methods, script handlers, and custom properties.
 
 ## Parallel Systems
 
 | System | Storage | Contents |
 |--------|---------|----------|
 | Rust (`SimState`) | `WidgetRegistry` HashMap | Frame geometry, visibility, event registrations |
-| Lua globals | `__frame_fields`, `__scripts` | Mixin methods, handlers, custom properties |
+| Lua frame refs | `__frame_refs`, `__scripts` | Mixin methods, handlers, custom properties |
 
-Each `FrameHandle` userdata holds only `id: u64` — everything else is looked up at call time.
+Each frame ref is a backed Lua table whose backing data encodes the widget ID. Everything else is looked up at call time.
 
 ## Global Lua Tables
 
 | Table | Key structure | Purpose |
 |-------|--------------|---------|
-| `__frame_fields[frame_id][key]` | nested: id → string | Mixin methods and custom properties |
+| `__frame_refs[frame_id]` | id → backed table | Lua frame refs, including mixin methods and custom properties |
 | `__scripts["{frame_id}_{handler}"]` | string | Script handler functions |
-| `__frame_{frame_id}` | individual globals | Frame userdata for event dispatch |
 | `_G["FrameName"]` | named globals | Named frame references |
 
 ## Method Lookup Order (`__index`)
 
 When Lua reads `frame.SomeKey`:
 
-1. **mlua method table** — Rust-registered methods (`SetSize`, `SetPoint`, etc.); cannot be overridden from Lua
+1. **rilua method table** — Rust-registered methods (`SetSize`, `SetPoint`, etc.); cannot be overridden from Lua
 2. **`children_keys`** — Rust HashMap for child frame refs (`frame.Text`, `frame.NormalTexture`)
-3. **`__frame_fields[id]["SomeKey"]`** — mixin methods and custom properties
-4. **Fallback stubs** — hardcoded `Clear`, `Lower`, `Raise`
-5. **nil**
+3. **frame table fields** — mixin methods and custom properties
+4. **nil**
 
 Critical implication: Rust methods shadow mixin methods. `self.SetShownBase = self.SetShown` stores nil because `self.SetShown` via `__index` step 1 returns the method result only when called, not as a value.
 
 ## Property Storage (`__newindex`)
 
 When Lua assigns `frame.Key = value`:
-- `FrameHandle` userdata → stored in `children_keys` (Rust) AND `__frame_fields[id]["Key"]`
-- Any other value → stored only in `__frame_fields[id]["Key"]`
+- child frame ref → stored in `children_keys` (Rust) and on the frame table
+- any other value → stored on the frame table
+
+`debug.getfenv(frame)[1]` is a compatibility view onto the frame table. It must not consume raw numeric key `1` on the frame itself, because addons such as oUF use frames as array-like containers (`element[1]`, `table.insert(element, button)`). A previous implementation stored the hidden field table at raw `frame[1]`, causing ElvUI/oUF aura updates to treat the field table as an aura button and fail at `button:SetSize`.
 
 ## Mixin Application
 
-`Mixin(target, MixinTable)` iterates the mixin table and assigns each key to the target via `__newindex`, landing in `__frame_fields`. Applied at two points: inside `apply_templates_from_registry()` (before frame name available in Lua) and again after `CreateFrame()` returns in xml_frame.rs (redundant but harmless).
+`Mixin(target, MixinTable)` iterates the mixin table and assigns each key to the target via `__newindex`, landing on the frame table. Applied at two points: inside `apply_templates_from_registry()` (before frame name available in Lua) and again after `CreateFrame()` returns in xml_frame.rs (redundant but harmless).
 
 Template chain order: `[TemplateBase, TemplateA, TemplateB]` (depth-first, parents before children). Within each template: Mixin → Size → Anchors → KeyValues → Layers → Children → Scripts.
 
@@ -51,10 +51,10 @@ fire_event("PLAYER_LOGIN")
   ├─ Rust: state.widgets.get_event_listeners("PLAYER_LOGIN") → Vec<u64>
   └─ For each id:
        ├─ Lua: __scripts["{id}_OnEvent"] → handler function
-       ├─ Lua: _G["__frame_{id}"] → FrameHandle userdata
+       ├─ Lua: __frame_refs[id] → frame ref table
        └─ Call: handler(frame, "PLAYER_LOGIN", ...args)
             └─ self:OnEvent(...)  →  __index lookup for "OnEvent"
-                 └─ __frame_fields[id]["OnEvent"]  ← from Mixin
+                 └─ frame.OnEvent  ← from Mixin
 ```
 
 ## Frame Creation Order (xml_frame.rs)
@@ -63,7 +63,7 @@ fire_event("PLAYER_LOGIN")
 1. CreateFrame(type, name, parent, inherits)
    ├─ register_new_frame() → assigns frame_id
    ├─ create_widget_type_defaults() → button textures etc.
-   ├─ set _G["name"] and _G["__frame_{id}"]
+   ├─ set _G["name"] and cache frame ref in __frame_refs
    └─ apply_templates_from_registry()
        └─ for each template: mixin → size → anchors → keyValues → layers → children → scripts
 
@@ -87,6 +87,8 @@ fire_event("PLAYER_LOGIN")
 ## Sources
 
 - [frame-data-flow.md](../../frame-data-flow.md) — parallel systems, __index order, Mixin flow, event dispatch, creation sequence, pitfalls
+- [methods.rs](../../../src/lua_api/methods.rs) — frame ref cache and frame-field compatibility behavior
+- [shared_bootstrap.lua](../../../src/lua_api/env_init/shared_bootstrap.lua) — `debug.getfenv(frame)` compatibility view
 
 ## See Also
 

@@ -207,10 +207,7 @@ if debug ~= nil and debug.getfenv ~= nil then
 
   function debug.getfenv(obj)
     if __wow_is_frame_backed_table(obj) then
-      if type(__wow_get_frame_env) == "function" then
-        return __wow_get_frame_env(obj)
-      end
-      return {}
+      return { obj }
     end
     return __wow_debug_getfenv(obj)
   end
