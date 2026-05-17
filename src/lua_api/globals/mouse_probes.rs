@@ -15,10 +15,13 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 fn get_cursor_position(state: &mut LuaState) -> LuaResult<u32> {
-    let (x, y) = {
+    let cursor_position = {
         let sim = borrow_state(state)?;
-        sim.mouse_position.unwrap_or((0.0, 0.0))
+        sim.mouse_position
+            .map(|(x, renderer_y)| (x, sim.screen_height - renderer_y))
+            .unwrap_or((0.0, 0.0))
     };
+    let (x, y) = cursor_position;
     state.push(Val::Num(x as f64));
     state.push(Val::Num(y as f64));
     Ok(2)

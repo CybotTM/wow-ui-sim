@@ -436,7 +436,7 @@ fn test_get_cursor_position_reads_mouse_state() {
 
     let (x, y): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
     assert!((x - 200.0).abs() < 0.1, "x should be 200, got {x}");
-    assert!((y - 300.0).abs() < 0.1, "y should be 300, got {y}");
+    assert!((y - 900.0).abs() < 0.1, "y should be 900, got {y}");
 }
 
 #[test]

@@ -24,7 +24,21 @@ fn get_cursor_position_reads_mouse_position() {
         .set_mouse_position(Some((320.5, 240.25)));
     let (x, y): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
     assert!((x - 320.5).abs() < 1e-3);
-    assert!((y - 240.25).abs() < 1e-3);
+    assert!((y - 959.75).abs() < 1e-3);
+}
+
+#[test]
+fn get_cursor_position_flips_renderer_y_to_lua_screen_y() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.screen_height = 768.0;
+        state.set_mouse_position(Some((12.0, 24.0)));
+    }
+
+    let (x, y): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
+    assert_eq!(x, 12.0);
+    assert_eq!(y, 744.0);
 }
 
 // ── GetMouseFocus ─────────────────────────────────────────────────────────────
