@@ -1045,3 +1045,6 @@ Pages created:
 - reference/cli-commands.md
 - reference/addon-compatibility.md
 - reference/development-phases.md
+## [2026-05-16] ingest | addon startup Settings and item-load investigation
+
+Created `investigations/addon-startup-settings-and-item-load.md` to capture the root causes behind addon startup errors: registered Settings canvases must start hidden, forbidden attribute delegates need secure dispatch, item subclasses must return enUS keyword-compatible names or nil, and positive live item IDs need synthetic placeholder item info so item-load callbacks terminate.

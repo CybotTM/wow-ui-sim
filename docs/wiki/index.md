@@ -107,3 +107,4 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[windows-port-build]] | Windows default builds failed at `iced_dynamic.dll` with MSVC `LNK1189`; `fast-build` is opt-in so default GUI builds avoid the forced DLL link, while headless CI gates GUI-only tests |
 | [[three-slice-button-tiling]] | Escape menu button stripes came from inactive `HighlightTexture` children rendering every frame; standard button highlight children now render only on hover or locked highlight |
 | [[dialog-background-dxt3-stripes]] | Escape-menu dialog background stripes came from treating DXT3 BLPs as BC3 on the raw compressed upload path; DXT3 now falls back to RGBA until BC2 atlas support exists |
+| [[addon-startup-settings-and-item-load]] | Addon startup failures can share roots in Settings canvas visibility, secure attribute delegate taint boundaries, and synthetic C_Item item-load behavior |

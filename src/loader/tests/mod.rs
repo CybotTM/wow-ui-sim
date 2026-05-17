@@ -692,4 +692,5 @@ mod layout_size;
 mod minimap_specialized;
 mod wow_api;
 mod wow_api_globals;
+mod wow_api_item;
 mod wow_api_tooltip;

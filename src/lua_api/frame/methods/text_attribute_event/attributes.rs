@@ -9,6 +9,7 @@ use crate::lua_api::methods::{
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_script as get_rilua_script, protected_lua_pcall_state,
 };
+use crate::lua_api::taint::{clear_active_stack_taint, restore_active_stack_taint};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -73,17 +74,24 @@ pub(super) fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     }
     let name_arg = create_string(state, &name);
-    let force_dispatch = {
+    let secure_delegate_dispatch = {
         let sim = borrow_state(state)?;
         sim.widgets.get(id).is_some_and(|frame| frame.forbidden)
     };
     let changed = store_simple_attribute(state, id, &name, value)?;
     let compatibility_dispatch = should_dispatch_unchanged_attribute(&name, value);
-    if (changed || force_dispatch || compatibility_dispatch)
+    if (changed || secure_delegate_dispatch || compatibility_dispatch)
         && let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged")
     {
         let frame = frame_ref(state, id)?;
-        dispatch_attribute_changed(state, handler, frame, name_arg, value);
+        dispatch_attribute_changed(
+            state,
+            handler,
+            frame,
+            name_arg,
+            value,
+            secure_delegate_dispatch,
+        );
     }
     Ok(0)
 }
@@ -105,6 +113,7 @@ pub(super) fn dispatch_attribute_changed(
     frame: Val,
     name: Val,
     value: Val,
+    secure_dispatch: bool,
 ) {
     let Ok(dispatcher) = state.load(
         r#"
@@ -122,7 +131,14 @@ pub(super) fn dispatch_attribute_changed(
     state.stack_set(call_base + 3, name);
     state.stack_set(call_base + 4, value);
     state.top = call_base + 5;
-    if let Err(error) = state.call_function(call_base, 0) {
+
+    let saved_taints = secure_dispatch.then(|| clear_active_stack_taint(state));
+    let call_result = state.call_function(call_base, 0);
+    if let Some(saved_taints) = saved_taints {
+        restore_active_stack_taint(state, saved_taints);
+    }
+
+    if let Err(error) = call_result {
         call_error_handler_state(state, &error.to_string());
     }
     state.top = call_base;

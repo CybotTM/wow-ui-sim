@@ -481,7 +481,16 @@ fn test_c_item_get_sub_class_info() {
     let name: String = env
         .eval("return C_Item.GetItemSubClassInfo(Enum.ItemClass.Tradegoods, 4)")
         .unwrap();
-    assert!(!name.is_empty());
+    assert_eq!(name, "Jewelcrafting");
+}
+
+#[test]
+fn test_c_item_get_sub_class_info_returns_nil_for_unknown_subclass() {
+    let env = WowLuaEnv::new().unwrap();
+    let is_nil: bool = env
+        .eval("return C_Item.GetItemSubClassInfo(Enum.ItemClass.Tradegoods, 999) == nil")
+        .unwrap();
+    assert!(is_nil);
 }
 
 #[test]

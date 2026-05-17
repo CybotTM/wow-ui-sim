@@ -240,6 +240,7 @@ pub(crate) fn sync_string_metatable_to_global_string(lua: &mut rilua::Lua) -> cr
 #[cfg(test)]
 mod tests {
     use super::{global_slots_disabled_from_env, install_global_slots_from_env};
+    use crate::lua_api::WowLuaEnv;
     use crate::lua_api::env::WowLuaAppData;
     use crate::lua_api::state::SimState;
     use rilua::{Lua, LuaApi, LuaApiMut};
@@ -273,5 +274,50 @@ mod tests {
             .app_data::<WowLuaAppData>()
             .expect("app data should exist");
         assert!(app.global_slots.is_none());
+    }
+
+    #[test]
+    fn settings_canvas_category_frames_show_only_when_opened() {
+        let env = WowLuaEnv::new().expect("fresh wow lua env");
+
+        let visible_states: (bool, bool, bool, bool) = env
+            .eval(
+                r#"
+                local first = CreateFrame("Frame", "SettingsCanvasFirstProbe", UIParent)
+                local second = CreateFrame("Frame", "SettingsCanvasSecondProbe", UIParent)
+                first:Show()
+                second:Show()
+
+                local firstCategory = InterfaceOptions_AddCategory(first, "First Probe")
+                local secondCategory = InterfaceOptions_AddCategory(second, "Second Probe")
+                local hiddenAfterRegister = (not first:IsShown()) and (not second:IsShown())
+
+                Settings.OpenToCategory(firstCategory:GetID())
+                local firstOpen = first:IsShown() and not second:IsShown()
+
+                Settings.OpenToCategory(secondCategory:GetID())
+                local secondOpen = (not first:IsShown()) and second:IsShown()
+
+                return hiddenAfterRegister, firstOpen, secondOpen, firstCategory:GetName() == "First Probe"
+                "#,
+            )
+            .expect("settings canvas visibility probe should run");
+
+        assert!(
+            visible_states.0,
+            "registering addon settings category frames should hide their canvases"
+        );
+        assert!(
+            visible_states.1,
+            "opening first category should show only its canvas"
+        );
+        assert!(
+            visible_states.2,
+            "opening second category should hide the previous canvas"
+        );
+        assert!(
+            visible_states.3,
+            "registered settings category should preserve its display name"
+        );
     }
 }

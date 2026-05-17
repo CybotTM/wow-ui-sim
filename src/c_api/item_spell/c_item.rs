@@ -155,14 +155,14 @@ fn register_c_item_methods(
 }
 
 fn c_item_does_item_exist(state: &mut LuaState) -> LuaResult<u32> {
-    let exists = item_data_exists(state, stack_val(state, 1))?;
+    let exists = item_may_exist(state, stack_val(state, 1))?;
     state.push(Val::Bool(exists));
     Ok(1)
 }
 
 fn c_item_does_item_exist_by_id(state: &mut LuaState) -> LuaResult<u32> {
     let exists = parse_item_id_from_val(state, stack_val(state, 1))
-        .map(item_id_has_synthetic_data)
+        .map(item_id_may_exist)
         .unwrap_or(false);
     state.push(Val::Bool(exists));
     Ok(1)
@@ -233,12 +233,12 @@ fn c_item_get_item_name(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_item_is_item_data_cached(state: &mut LuaState) -> LuaResult<u32> {
-    let cached = item_data_exists(state, stack_val(state, 1))?;
+    let cached = item_may_exist(state, stack_val(state, 1))?;
     state.push(Val::Bool(cached));
     Ok(1)
 }
 
-fn item_data_exists(state: &mut LuaState, value: Val) -> LuaResult<bool> {
+fn item_may_exist(state: &mut LuaState, value: Val) -> LuaResult<bool> {
     Ok(match value {
         Val::Table(_) => {
             let bag = match table_get(state, value, "bagID") {
@@ -252,9 +252,13 @@ fn item_data_exists(state: &mut LuaState, value: Val) -> LuaResult<bool> {
             borrow_state(state)?.get_bag_item(bag, slot).is_some()
         }
         _ => parse_item_id_from_val(state, value)
-            .and_then(items::get_item)
-            .is_some(),
+            .map(item_id_may_exist)
+            .unwrap_or(false),
     })
+}
+
+fn item_id_may_exist(item_id: u32) -> bool {
+    item_id > 0
 }
 
 fn c_item_is_item_data_cached_by_id(state: &mut LuaState) -> LuaResult<u32> {
@@ -266,7 +270,7 @@ fn c_item_is_item_data_cached_by_id(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn item_id_has_synthetic_data(item_id: u32) -> bool {
-    item_id > 0
+    item_id_may_exist(item_id)
 }
 
 fn c_item_get_item_icon_by_id(state: &mut LuaState) -> LuaResult<u32> {
@@ -348,7 +352,7 @@ fn c_item_get_item_info_instant(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(crate) fn push_item_info(state: &mut LuaState, item_id: u32) -> LuaResult<u32> {
     let Some(item) = items::get_item(item_id) else {
-        return Ok(0);
+        return push_unknown_item_info(state, item_id);
     };
     let item_name = create_string(state, item.name);
     let item_link = create_string(state, &item_link_for_id(item_id).unwrap_or_default());
@@ -377,6 +381,53 @@ pub(crate) fn push_item_info(state: &mut LuaState, item_id: u32) -> LuaResult<u3
     state.push(Val::Num(0.0));
     state.push(Val::Bool(false));
     Ok(17)
+}
+
+fn push_unknown_item_info(state: &mut LuaState, item_id: u32) -> LuaResult<u32> {
+    let item_name = create_string(state, "Unknown");
+    let item_link = create_string(
+        state,
+        &format!("|cnIQ1:|Hitem:{item_id}::::::::80:70:::::::::|h[Unknown]|h|r"),
+    );
+    let class_name = create_string(state, "Miscellaneous");
+    let subclass_name = create_string(state, "Junk");
+    let equip_loc = create_string(state, "");
+    push_item_info_values(
+        state,
+        item_name,
+        item_link,
+        class_name,
+        subclass_name,
+        equip_loc,
+    );
+    Ok(17)
+}
+
+fn push_item_info_values(
+    state: &mut LuaState,
+    item_name: Val,
+    item_link: Val,
+    class_name: Val,
+    subclass_name: Val,
+    equip_loc: Val,
+) {
+    state.push(item_name);
+    state.push(item_link);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(class_name);
+    state.push(subclass_name);
+    state.push(Val::Num(1.0));
+    state.push(equip_loc);
+    state.push(Val::Num(134400.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(15.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(false));
 }
 
 fn c_item_get_item_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -410,7 +461,13 @@ fn item_level_for_id(item_id: u32) -> f64 {
 fn c_item_get_item_sub_class_info(state: &mut LuaState) -> LuaResult<u32> {
     let class_id = i32::from_stack(state, 1)?;
     let subclass_id = i32::from_stack(state, 2)?;
-    let name = create_string(state, item_subclass_name(class_id, subclass_id));
+    let name = item_subclass_name(class_id, subclass_id);
+    if name == "Unknown" {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+
+    let name = create_string(state, name);
     state.push(name);
     state.push(Val::Bool(class_id == 2 || class_id == 4));
     Ok(2)

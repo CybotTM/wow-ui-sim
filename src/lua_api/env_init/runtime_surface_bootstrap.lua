@@ -2162,7 +2162,7 @@ end
 
 if issecure == nil then
   function issecure()
-    return true
+    return not (debug and debug.getstacktaint and debug.getstacktaint())
   end
 end
 
@@ -6073,6 +6073,65 @@ do
       end
     end
 
+    local nextDynamicCategoryID = 1000
+
+    local function set_category_frame_shown(category, shown)
+      local frame = category and category.frame or nil
+      if type(frame) ~= "table" then
+        return
+      end
+      if type(frame.SetShown) == "function" then
+        pcall(frame.SetShown, frame, shown)
+        return
+      end
+      if shown and type(frame.Show) == "function" then
+        pcall(frame.Show, frame)
+      elseif not shown and type(frame.Hide) == "function" then
+        pcall(frame.Hide, frame)
+      end
+    end
+
+    local function hide_inactive_category_frames(activeCategory)
+      for _, registeredCategory in pairs(categories) do
+        if registeredCategory ~= activeCategory then
+          set_category_frame_shown(registeredCategory, false)
+        end
+      end
+    end
+
+    if rawget(Settings, "RegisterCanvasLayoutCategory") == nil then
+      function Settings.RegisterCanvasLayoutCategory(frame, name, parentCategory)
+        nextDynamicCategoryID = nextDynamicCategoryID + 1
+        local categoryName = name
+        if categoryName == nil and type(frame) == "table" then
+          categoryName = rawget(frame, "name") or rawget(frame, "Name")
+          if categoryName == nil and type(frame.GetName) == "function" then
+            categoryName = frame:GetName()
+          end
+        end
+        local category = ensure_category(nextDynamicCategoryID, categoryName or "AddOn")
+        category.frame = frame
+        category.parentCategory = parentCategory
+        settingsPanel._layouts[category:GetID()] = {
+          frame = frame,
+          GetFrame = function(self) return self.frame end,
+        }
+        set_category_frame_shown(category, false)
+        return category, settingsPanel._layouts[category:GetID()]
+      end
+    end
+
+    if rawget(Settings, "RegisterCanvasLayoutSubcategory") == nil then
+      function Settings.RegisterCanvasLayoutSubcategory(parentCategory, frame, name)
+        local category = Settings.RegisterCanvasLayoutCategory(frame, name, parentCategory)
+        return category, settingsPanel._layouts[category:GetID()]
+      end
+    end
+
+    if rawget(Settings, "RegisterAddOnCategory") == nil then
+      function Settings.RegisterAddOnCategory(_category) end
+    end
+
     local audioLayout = ensure_layout(audioCategory)
     if #audioLayout:GetInitializers() == 0 then
       local setting = {
@@ -6106,8 +6165,23 @@ do
       if type(panel.Show) == "function" then
         pcall(panel.Show, panel)
       end
+      hide_inactive_category_frames(category)
+      set_category_frame_shown(category, true)
       return category
     end
+  end
+end
+
+if rawget(_G, "InterfaceOptions_AddCategory") == nil then
+  function InterfaceOptions_AddCategory(frame, addonName, position)
+    if Settings and type(Settings.RegisterCanvasLayoutCategory) == "function" then
+      local category = Settings.RegisterCanvasLayoutCategory(frame, addonName, position)
+      if type(Settings.RegisterAddOnCategory) == "function" then
+        Settings.RegisterAddOnCategory(category)
+      end
+      return category
+    end
+    return frame
   end
 end
 

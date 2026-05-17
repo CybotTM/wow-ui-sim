@@ -41,6 +41,79 @@ fn get_item_name_by_id_falls_back_to_unknown_for_missing_item() {
 }
 
 #[test]
+fn item_existence_by_id_matches_seeded_item_database() {
+    let env = env();
+    let exists: bool = env
+        .eval(&format!(
+            "return C_Item.DoesItemExistByID({KNOWN_ITEM_ID})"
+        ))
+        .unwrap();
+    let positive_id_may_exist: bool = env
+        .eval("return C_Item.DoesItemExistByID(999999999)")
+        .unwrap();
+    assert!(exists);
+    assert!(positive_id_may_exist);
+}
+
+#[test]
+fn item_data_cached_by_id_matches_seeded_item_database() {
+    let env = env();
+    let cached: bool = env
+        .eval(&format!(
+            "return C_Item.IsItemDataCachedByID({KNOWN_ITEM_ID})"
+        ))
+        .unwrap();
+    let missing_cached: bool = env
+        .eval("return C_Item.IsItemDataCachedByID(999999999)")
+        .unwrap();
+    assert!(cached);
+    assert!(missing_cached);
+}
+
+#[test]
+fn get_item_info_returns_placeholder_for_missing_positive_item_id() {
+    let env = env();
+    let item_info: (String, String, i32) = env
+        .eval(
+            r#"
+            local name, link, quality = C_Item.GetItemInfo(999999999)
+            return name, link, quality
+            "#,
+        )
+        .unwrap();
+    assert_eq!(item_info.0, "Unknown");
+    assert!(item_info.1.contains("Hitem:999999999"));
+    assert_eq!(item_info.2, 0);
+}
+
+#[test]
+fn request_load_item_data_fires_for_synthetic_item_data() {
+    let env = env();
+    let callbacks: (bool, bool) = env
+        .eval(&format!(
+            r#"
+            local knownLoaded = false
+            local missingLoaded = false
+            ItemEventListener = {{
+                FireCallbacks = function(_, itemID)
+                    if itemID == {KNOWN_ITEM_ID} then
+                        knownLoaded = true
+                    elseif itemID == 999999999 then
+                        missingLoaded = true
+                    end
+                end
+            }}
+            C_Item.RequestLoadItemDataByID({KNOWN_ITEM_ID})
+            C_Item.RequestLoadItemDataByID(999999999)
+            return knownLoaded, missingLoaded
+            "#
+        ))
+        .unwrap();
+    assert!(callbacks.0);
+    assert!(callbacks.1);
+}
+
+#[test]
 fn get_item_quality_by_id_returns_db_quality() {
     let env = env();
     let quality: i32 = env
