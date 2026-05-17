@@ -174,6 +174,7 @@ fn child_visually_contains(child: &crate::widget::Frame, pos: iced::Point) -> bo
     rect_contains_screen_point(child.layout_rect, pos)
 }
 
+#[cfg(test)]
 fn frame_visually_contains(
     widgets: &crate::widget::WidgetRegistry,
     frame_id: u64,
