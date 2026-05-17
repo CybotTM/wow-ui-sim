@@ -126,6 +126,29 @@ mod tests {
     }
 
     #[test]
+    fn post_load_suppresses_gtfo_startup_config_popup() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            GTFOConfigOpened = false
+            function GTFO_DisplayConfigPopupMessage()
+                GTFOConfigOpened = true
+            end
+            "#,
+        )
+        .expect("gtfo popup setup should run");
+
+        super::apply(&env);
+        env.exec("GTFO_DisplayConfigPopupMessage()")
+            .expect("wrapped popup should run");
+
+        let opened: bool = env
+            .eval("return GTFOConfigOpened")
+            .expect("gtfo popup probe should run");
+        assert!(!opened, "GTFO startup config popup should be suppressed");
+    }
+
+    #[test]
     fn post_load_disables_blizzmove_startup_frame_scan() {
         let env = WowLuaEnv::new().expect("env");
         env.exec(
@@ -208,6 +231,41 @@ mod tests {
             .expect("pet availability probe should run");
         assert!(hidden, "absent pet UI should mark PetPaperDollFrame hidden");
         assert!(!tab_shown, "absent pet UI should hide CharacterFrameTab2");
+    }
+
+    #[test]
+    fn post_load_hides_duplicate_character_frame_title() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            CharacterFrame = CreateFrame("Frame", "CharacterFrame", UIParent)
+            CharacterFrame.TitleText = CharacterFrame:CreateFontString("CharacterFrameDirectTitle")
+            CharacterFrame.TitleText:Show()
+            CharacterFrame.TitleContainer = CreateFrame("Frame", "CharacterFrameTitleContainer", CharacterFrame)
+            CharacterFrame.TitleContainer.TitleText = CharacterFrame.TitleContainer:CreateFontString("CharacterFrameContainerTitle")
+            CharacterFrame.TitleContainer.TitleText:Show()
+            "#,
+        )
+        .expect("character title setup should run");
+
+        super::apply(&env);
+
+        let (direct_shown, container_shown): (bool, bool) = env
+            .eval(
+                r#"
+                return CharacterFrame.TitleText:IsShown(),
+                       CharacterFrame.TitleContainer.TitleText:IsShown()
+                "#,
+            )
+            .expect("title visibility probe should run");
+        assert!(
+            direct_shown,
+            "direct CharacterFrame title should remain visible"
+        );
+        assert!(
+            !container_shown,
+            "stale TitleContainer title should be hidden to avoid doubled panel titles"
+        );
     }
 
     #[test]

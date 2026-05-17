@@ -15,6 +15,14 @@ if Syndicator ~= nil and SYNDICATOR_CONFIG == nil then
   SYNDICATOR_CONFIG = {}
 end
 
+if type(GTFO_DisplayConfigPopupMessage) == "function"
+   and rawget(_G, "__wow_sim_mists_gtfo_config_popup_suppressed") ~= true then
+  function GTFO_DisplayConfigPopupMessage()
+  end
+
+  rawset(_G, "__wow_sim_mists_gtfo_config_popup_suppressed", true)
+end
+
 if type(Settings) == "table" then
   local categoriesByID = rawget(Settings, "__wow_sim_mists_categories_by_id")
   if type(categoriesByID) ~= "table" then
@@ -336,6 +344,22 @@ end
 
 PatchCharacterPetTabOpenRefresh()
 RefreshCharacterPetTabAvailability()
+
+local function HideDuplicateCharacterFrameTitle()
+  if type(CharacterFrame) ~= "table" then
+    return
+  end
+
+  local directTitle = CharacterFrame.TitleText
+  local titleContainer = CharacterFrame.TitleContainer
+  local containerTitle = type(titleContainer) == "table" and titleContainer.TitleText or nil
+  if directTitle ~= nil and containerTitle ~= nil and directTitle ~= containerTitle
+     and type(containerTitle.Hide) == "function" then
+    containerTitle:Hide()
+  end
+end
+
+HideDuplicateCharacterFrameTitle()
 
 local function ResizeVisibleSpellBookBottomTabs()
   if type(SpellBookFrame) ~= "table" or type(PanelTemplates_TabResize) ~= "function" then
