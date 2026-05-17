@@ -71,7 +71,8 @@ fn deepest_hover_target_through_visible_children(
         }
     }
 
-    grid.contains(frame_id, pos).then_some(frame_id)
+    (grid.contains(frame_id, pos) && ancestor_clips_contain(widgets, frame_id, pos))
+        .then_some(frame_id)
 }
 
 fn deepest_click_target_through_visible_children(
@@ -99,6 +100,7 @@ fn deepest_click_target_through_visible_children(
     }
 
     if grid.contains(frame_id, pos)
+        && ancestor_clips_contain(widgets, frame_id, pos)
         && frame_has_mouse_button_action(frame, env, frame_id, button_name, down)
     {
         Some(frame_id)
@@ -119,7 +121,7 @@ fn visible_descendants_at_point_by_z_order(
         .filter(|&child_id| {
             widgets
                 .get(child_id)
-                .is_some_and(|child| child_visually_contains(child, pos))
+                .is_some_and(|child| frame_visually_contains(widgets, child_id, child, pos))
         })
         .collect();
     child_ids.sort_by_key(|&child_id| {
@@ -139,7 +141,46 @@ fn child_visually_contains(child: &crate::widget::Frame, pos: iced::Point) -> bo
     if !child.visible {
         return false;
     }
-    let Some(rect) = child.layout_rect else {
+    rect_contains_screen_point(child.layout_rect, pos)
+}
+
+fn frame_visually_contains(
+    widgets: &crate::widget::WidgetRegistry,
+    frame_id: u64,
+    frame: &crate::widget::Frame,
+    pos: iced::Point,
+) -> bool {
+    child_visually_contains(frame, pos) && ancestor_clips_contain(widgets, frame_id, pos)
+}
+
+fn ancestor_clips_contain(
+    widgets: &crate::widget::WidgetRegistry,
+    frame_id: u64,
+    pos: iced::Point,
+) -> bool {
+    let mut current_id = frame_id;
+    while let Some(parent_id) = widgets.get(current_id).and_then(|frame| frame.parent_id) {
+        let Some(parent) = widgets.get(parent_id) else {
+            break;
+        };
+        if parent_clips_child(parent, current_id)
+            && !rect_contains_screen_point(parent.layout_rect, pos)
+        {
+            return false;
+        }
+        current_id = parent_id;
+    }
+    true
+}
+
+fn parent_clips_child(parent: &crate::widget::Frame, child_id: u64) -> bool {
+    parent.clips_children
+        || (matches!(parent.widget_type, crate::widget::WidgetType::ScrollFrame)
+            && parent.scroll_child_id == Some(child_id))
+}
+
+fn rect_contains_screen_point(rect: Option<crate::LayoutRect>, pos: iced::Point) -> bool {
+    let Some(rect) = rect else {
         return false;
     };
     let scale = crate::render::texture::UI_SCALE;
@@ -180,4 +221,113 @@ fn frame_has_mouse_button_action(
     let script = if down { "OnMouseDown" } else { "OnMouseUp" };
     crate::iced_app::frame_collect::frame_mouse_registration_matches(frame, button_name, down)
         && env.has_script_handler(frame_id, script)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::frame_visually_contains;
+    use crate::widget::{Frame, WidgetRegistry, WidgetType};
+
+    fn register_frame(
+        registry: &mut WidgetRegistry,
+        widget_type: WidgetType,
+        parent_id: Option<u64>,
+        rect: crate::LayoutRect,
+    ) -> u64 {
+        let mut frame = Frame::new(widget_type, None, parent_id);
+        frame.visible = true;
+        frame.effective_alpha = 1.0;
+        frame.layout_rect = Some(rect);
+        let id = frame.id;
+        registry.register(frame);
+        if let Some(parent_id) = parent_id {
+            registry.add_child(parent_id, id);
+        }
+        id
+    }
+
+    fn rect(x: f32, y: f32, width: f32, height: f32) -> crate::LayoutRect {
+        crate::LayoutRect {
+            x,
+            y,
+            width,
+            height,
+        }
+    }
+
+    #[test]
+    fn scroll_child_descendant_outside_scroll_frame_is_not_visually_hittable() {
+        let mut registry = WidgetRegistry::new();
+        let scroll_frame = register_frame(
+            &mut registry,
+            WidgetType::ScrollFrame,
+            None,
+            rect(0.0, 0.0, 100.0, 100.0),
+        );
+        let scroll_child = register_frame(
+            &mut registry,
+            WidgetType::Frame,
+            Some(scroll_frame),
+            rect(0.0, 0.0, 100.0, 300.0),
+        );
+        let button = register_frame(
+            &mut registry,
+            WidgetType::Button,
+            Some(scroll_child),
+            rect(10.0, 150.0, 80.0, 20.0),
+        );
+        registry
+            .get_mut_visual(scroll_frame)
+            .expect("scroll frame should exist")
+            .scroll_child_id = Some(scroll_child);
+
+        let button_frame = registry.get(button).expect("button should exist");
+        assert!(
+            !frame_visually_contains(
+                &registry,
+                button,
+                button_frame,
+                iced::Point::new(20.0, 160.0)
+            ),
+            "scroll-frame clipped descendants below the viewport should not be hit-test candidates"
+        );
+    }
+
+    #[test]
+    fn scroll_child_descendant_inside_scroll_frame_stays_visually_hittable() {
+        let mut registry = WidgetRegistry::new();
+        let scroll_frame = register_frame(
+            &mut registry,
+            WidgetType::ScrollFrame,
+            None,
+            rect(0.0, 0.0, 100.0, 100.0),
+        );
+        let scroll_child = register_frame(
+            &mut registry,
+            WidgetType::Frame,
+            Some(scroll_frame),
+            rect(0.0, 0.0, 100.0, 300.0),
+        );
+        let button = register_frame(
+            &mut registry,
+            WidgetType::Button,
+            Some(scroll_child),
+            rect(10.0, 50.0, 80.0, 20.0),
+        );
+        registry
+            .get_mut_visual(scroll_frame)
+            .expect("scroll frame should exist")
+            .scroll_child_id = Some(scroll_child);
+
+        let button_frame = registry.get(button).expect("button should exist");
+        assert!(
+            frame_visually_contains(
+                &registry,
+                button,
+                button_frame,
+                iced::Point::new(20.0, 60.0)
+            ),
+            "scroll-frame clipped descendants inside the viewport should remain hittable"
+        );
+    }
 }
