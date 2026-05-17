@@ -155,15 +155,17 @@ pub(super) struct SingleStrataEmit<'a> {
 pub(super) fn build_render_list(
     bucket: &[u64],
     registry: &crate::widget::WidgetRegistry,
-    _screen_size: (f32, f32),
+    screen_size: (f32, f32),
 ) -> Vec<(u64, crate::LayoutRect, Option<crate::LayoutRect>, f32)> {
     let mut list = Vec::new();
     for &id in bucket {
         let Some(f) = registry.get(id) else { continue };
-        if !crate::layout::frame_has_render_layout(registry, id) {
+        if !has_renderable_rect(registry, f, id) {
             continue;
         }
-        let Some(rect) = f.layout_rect else { continue };
+        let rect = f.layout_rect.unwrap_or_else(|| {
+            crate::layout::compute_frame_rect(registry, id, screen_size.0, screen_size.1)
+        });
         let clip_rect = resolve_clip_rect(id, registry);
         let eff_alpha = resolve_eff_alpha(f, registry);
         if eff_alpha <= 0.0 {
@@ -175,6 +177,50 @@ pub(super) fn build_render_list(
         list.push((id, rect, clip_rect, eff_alpha));
     }
     list
+}
+
+fn has_renderable_rect(
+    registry: &crate::widget::WidgetRegistry,
+    frame: &crate::widget::Frame,
+    id: u64,
+) -> bool {
+    if !has_own_renderable_rect(registry, frame, id) {
+        return false;
+    }
+    let mut current = frame.parent_id;
+    while let Some(parent_id) = current {
+        let Some(parent) = registry.get(parent_id) else {
+            return false;
+        };
+        if !has_own_renderable_rect(registry, parent, parent_id) {
+            return false;
+        }
+        current = parent.parent_id;
+    }
+    true
+}
+
+fn has_own_renderable_rect(
+    registry: &crate::widget::WidgetRegistry,
+    frame: &crate::widget::Frame,
+    id: u64,
+) -> bool {
+    !frame.anchors.is_empty()
+        || frame.name.as_deref() == Some("UIParent")
+        || id == 1
+        || is_statusbar_bar_child(registry, frame)
+}
+
+fn is_statusbar_bar_child(
+    registry: &crate::widget::WidgetRegistry,
+    frame: &crate::widget::Frame,
+) -> bool {
+    let Some(parent_id) = frame.parent_id else {
+        return false;
+    };
+    registry
+        .get(parent_id)
+        .is_some_and(|parent| parent.statusbar_bar_id == Some(frame.id))
 }
 
 /// Resolve effective alpha for a frame, with button-state-texture parent fallback.
@@ -481,8 +527,8 @@ fn append_hover_highlight_from_frame(
 
 #[cfg(test)]
 mod tests {
-    use super::resolve_eff_alpha;
-    use crate::widget::{Frame, WidgetRegistry, WidgetType};
+    use super::{build_render_list, resolve_eff_alpha};
+    use crate::widget::{AnchorPoint, Frame, WidgetRegistry, WidgetType};
 
     #[test]
     fn button_state_texture_alpha_fallback_multiplies_own_alpha() {
@@ -516,6 +562,108 @@ mod tests {
         assert!(
             (alpha - 0.32).abs() < f32::EPSILON,
             "expected hidden button texture alpha fallback to keep child alpha, got {alpha}"
+        );
+    }
+
+    #[test]
+    fn render_list_skips_unanchored_child_frames() {
+        let mut registry = WidgetRegistry::new();
+
+        let mut root = Frame::new(WidgetType::Frame, Some("UIParent".to_string()), None);
+        root.layout_rect = Some(crate::LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: 1024.0,
+            height: 768.0,
+        });
+        let root_id = root.id;
+        registry.register(root);
+
+        let mut unanchored = Frame::new(WidgetType::EditBox, None, Some(root_id));
+        unanchored.set_size(256.0, 32.0);
+        let unanchored_id = unanchored.id;
+        registry.register(unanchored);
+        registry.add_child(root_id, unanchored_id);
+
+        let render_list = build_render_list(&[unanchored_id], &registry, (1024.0, 768.0));
+
+        assert!(
+            render_list.is_empty(),
+            "unanchored children have no valid WoW rect and should not render at parent origin"
+        );
+    }
+
+    #[test]
+    fn render_list_keeps_anchored_child_frames() {
+        let mut registry = WidgetRegistry::new();
+
+        let mut root = Frame::new(WidgetType::Frame, Some("UIParent".to_string()), None);
+        root.layout_rect = Some(crate::LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: 1024.0,
+            height: 768.0,
+        });
+        let root_id = root.id;
+        registry.register(root);
+
+        let mut anchored = Frame::new(WidgetType::EditBox, None, Some(root_id));
+        anchored.set_size(256.0, 32.0);
+        anchored.set_point(
+            AnchorPoint::TopLeft,
+            Some(root_id as usize),
+            AnchorPoint::TopLeft,
+            20.0,
+            -20.0,
+        );
+        let anchored_id = anchored.id;
+        registry.register(anchored);
+        registry.add_child(root_id, anchored_id);
+
+        let render_list = build_render_list(&[anchored_id], &registry, (1024.0, 768.0));
+
+        assert_eq!(render_list.len(), 1);
+        assert_eq!(render_list[0].0, anchored_id);
+    }
+
+    #[test]
+    fn render_list_skips_children_of_unanchored_frames() {
+        let mut registry = WidgetRegistry::new();
+
+        let mut root = Frame::new(WidgetType::Frame, Some("UIParent".to_string()), None);
+        root.layout_rect = Some(crate::LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: 1024.0,
+            height: 768.0,
+        });
+        let root_id = root.id;
+        registry.register(root);
+
+        let mut unanchored = Frame::new(WidgetType::EditBox, None, Some(root_id));
+        unanchored.set_size(256.0, 32.0);
+        let unanchored_id = unanchored.id;
+        registry.register(unanchored);
+        registry.add_child(root_id, unanchored_id);
+
+        let mut child_texture = Frame::new(WidgetType::Texture, None, Some(unanchored_id));
+        child_texture.set_size(256.0, 32.0);
+        child_texture.set_point(
+            AnchorPoint::TopLeft,
+            Some(unanchored_id as usize),
+            AnchorPoint::TopLeft,
+            0.0,
+            0.0,
+        );
+        let child_id = child_texture.id;
+        registry.register(child_texture);
+        registry.add_child(unanchored_id, child_id);
+
+        let render_list = build_render_list(&[child_id], &registry, (1024.0, 768.0));
+
+        assert!(
+            render_list.is_empty(),
+            "children anchored to an unanchored frame should not render through a fallback parent-origin rect"
         );
     }
 }

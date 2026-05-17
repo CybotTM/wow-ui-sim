@@ -97,6 +97,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[tooltip-alignment]] | NineSlice inner box vs outer bounds; 15px effective inset |
 | [[tooltip-layout-timing]] | Tooltip sizing ran after layout resolution, so one frame could use stale bounds |
 | [[tooltip-double-shell]] | Fake bootstrap `NineSlice` plus Rust fallback shell caused duplicate tooltip chrome; Lua-owned shell still needs center fill |
+| [[unanchored-frame-render-leak]] | Unanchored frames have no valid WoW rect but were rendered at parent origin; render-list filtering now skips them and their descendants |
 | [[glow-effects]] | Additive blending end-to-end; one gap: SetBorderBlendMode missing |
 | [[global-frame-index]] | Lazy `_G` lookup design; Phase 1 done, Phases 2-3 planned |
 | [[hybrid-scrollbar-thumb-texture]] | Runtime templates apply Blizzard `<ThumbTexture>` XML to intrinsic slider thumb children instead of creating HybridScrollBar placeholders |
