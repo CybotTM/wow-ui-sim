@@ -1,4 +1,5 @@
 use crate::iced_app::app::App;
+use rustc_hash::FxHashSet;
 
 impl App {
     /// Hit test to find frame under cursor (uses cached rects from render pass).
@@ -62,17 +63,7 @@ fn deepest_hover_target_through_visible_children(
     frame_id: u64,
     pos: iced::Point,
 ) -> Option<u64> {
-    let frame = widgets.get(frame_id)?;
-    for child_id in visible_descendants_at_point_by_z_order(widgets, frame, pos) {
-        if let Some(target) =
-            deepest_hover_target_through_visible_children(widgets, grid, child_id, pos)
-        {
-            return Some(target);
-        }
-    }
-
-    (grid.contains(frame_id, pos) && ancestor_clips_contain(widgets, frame_id, pos))
-        .then_some(frame_id)
+    deepest_target_through_visible_children(widgets, grid, frame_id, pos, |_, _| true)
 }
 
 fn deepest_click_target_through_visible_children(
@@ -84,28 +75,66 @@ fn deepest_click_target_through_visible_children(
     button_name: &str,
     down: bool,
 ) -> Option<u64> {
-    let frame = widgets.get(frame_id)?;
-    for child_id in visible_descendants_at_point_by_z_order(widgets, frame, pos) {
-        if let Some(target) = deepest_click_target_through_visible_children(
-            widgets,
-            env,
-            grid,
-            child_id,
-            pos,
-            button_name,
-            down,
-        ) {
-            return Some(target);
+    deepest_target_through_visible_children(widgets, grid, frame_id, pos, |frame, id| {
+        frame_has_mouse_button_action(frame, env, id, button_name, down)
+    })
+}
+
+fn deepest_target_through_visible_children(
+    widgets: &crate::widget::WidgetRegistry,
+    grid: &crate::iced_app::hit_grid::HitGrid,
+    frame_id: u64,
+    pos: iced::Point,
+    accepts_frame: impl Fn(&crate::widget::Frame, u64) -> bool,
+) -> Option<u64> {
+    let mut stack = vec![HitVisit::Enter(frame_id)];
+    let mut seen = FxHashSet::default();
+
+    while let Some(visit) = stack.pop() {
+        match visit {
+            HitVisit::Enter(current_id) => {
+                if !seen.insert(current_id) {
+                    continue;
+                }
+                let Some(frame) = widgets.get(current_id) else {
+                    continue;
+                };
+                stack.push(HitVisit::Check(current_id));
+                let child_ids = visible_descendants_at_point_by_z_order(widgets, frame, pos);
+                stack.extend(child_ids.into_iter().rev().map(HitVisit::Enter));
+            }
+            HitVisit::Check(current_id) => {
+                let Some(frame) = widgets.get(current_id) else {
+                    continue;
+                };
+                if target_contains_point(widgets, grid, current_id, frame, pos)
+                    && accepts_frame(frame, current_id)
+                {
+                    return Some(current_id);
+                }
+            }
         }
     }
 
-    if grid.contains(frame_id, pos)
-        && ancestor_clips_contain(widgets, frame_id, pos)
-        && frame_has_mouse_button_action(frame, env, frame_id, button_name, down)
-    {
-        Some(frame_id)
+    None
+}
+
+enum HitVisit {
+    Enter(u64),
+    Check(u64),
+}
+
+fn target_contains_point(
+    widgets: &crate::widget::WidgetRegistry,
+    grid: &crate::iced_app::hit_grid::HitGrid,
+    frame_id: u64,
+    frame: &crate::widget::Frame,
+    pos: iced::Point,
+) -> bool {
+    if grid.contains(frame_id, pos) && ancestor_clips_contain(widgets, frame_id, pos) {
+        frame.effective_alpha > 0.0
     } else {
-        None
+        false
     }
 }
 
@@ -121,7 +150,8 @@ fn visible_descendants_at_point_by_z_order(
         .filter(|&child_id| {
             widgets
                 .get(child_id)
-                .is_some_and(|child| frame_visually_contains(widgets, child_id, child, pos))
+                .is_some_and(|child| child_visually_contains(child, pos))
+                && direct_parent_clip_contains(frame, child_id, pos)
         })
         .collect();
     child_ids.sort_by_key(|&child_id| {
@@ -153,13 +183,25 @@ fn frame_visually_contains(
     child_visually_contains(frame, pos) && ancestor_clips_contain(widgets, frame_id, pos)
 }
 
+fn direct_parent_clip_contains(
+    parent: &crate::widget::Frame,
+    child_id: u64,
+    pos: iced::Point,
+) -> bool {
+    !parent_clips_child(parent, child_id) || rect_contains_screen_point(parent.layout_rect, pos)
+}
+
 fn ancestor_clips_contain(
     widgets: &crate::widget::WidgetRegistry,
     frame_id: u64,
     pos: iced::Point,
 ) -> bool {
     let mut current_id = frame_id;
+    let mut seen = FxHashSet::default();
     while let Some(parent_id) = widgets.get(current_id).and_then(|frame| frame.parent_id) {
+        if !seen.insert(current_id) || seen.contains(&parent_id) {
+            return false;
+        }
         let Some(parent) = widgets.get(parent_id) else {
             break;
         };
@@ -225,8 +267,13 @@ fn frame_has_mouse_button_action(
 
 #[cfg(test)]
 mod tests {
-    use super::frame_visually_contains;
+    use super::{
+        deepest_click_target_through_visible_children,
+        deepest_hover_target_through_visible_children, frame_visually_contains,
+    };
+    use crate::iced_app::hit_grid::HitGrid;
     use crate::widget::{Frame, WidgetRegistry, WidgetType};
+    use iced::{Point, Rectangle, Size};
 
     fn register_frame(
         registry: &mut WidgetRegistry,
@@ -253,6 +300,31 @@ mod tests {
             width,
             height,
         }
+    }
+
+    fn set_mouse_enabled(registry: &mut WidgetRegistry, frame_id: u64) {
+        registry
+            .get_mut_visual(frame_id)
+            .expect("frame should exist")
+            .mouse_enabled = true;
+    }
+
+    fn grid_for_all_frames(registry: &WidgetRegistry) -> HitGrid {
+        let frames = registry
+            .iter_ids()
+            .filter_map(|id| {
+                let frame = registry.get(id)?;
+                let rect = frame.layout_rect?;
+                Some((
+                    id,
+                    Rectangle::new(
+                        Point::new(rect.x, rect.y),
+                        Size::new(rect.width, rect.height),
+                    ),
+                ))
+            })
+            .collect();
+        HitGrid::new(frames, 200.0, 200.0)
     }
 
     #[test]
@@ -328,6 +400,57 @@ mod tests {
                 iced::Point::new(20.0, 60.0)
             ),
             "scroll-frame clipped descendants inside the viewport should remain hittable"
+        );
+    }
+
+    #[test]
+    fn click_hit_testing_handles_deep_visible_child_chain_iteratively() {
+        let mut registry = WidgetRegistry::new();
+        let hit_rect = rect(0.0, 0.0, 100.0, 100.0);
+        let root = register_frame(&mut registry, WidgetType::Frame, None, hit_rect);
+        let mut parent = root;
+
+        for _ in 0..20_000 {
+            parent = register_frame(&mut registry, WidgetType::Frame, Some(parent), hit_rect);
+        }
+        let leaf = register_frame(&mut registry, WidgetType::Button, Some(parent), hit_rect);
+        set_mouse_enabled(&mut registry, leaf);
+        let grid = grid_for_all_frames(&registry);
+
+        assert_eq!(
+            deepest_click_target_through_visible_children(
+                &registry,
+                &grid,
+                root,
+                Point::new(50.0, 50.0),
+                "LeftButton"
+            ),
+            Some(leaf)
+        );
+    }
+
+    #[test]
+    fn hover_hit_testing_handles_deep_visible_child_chain_iteratively() {
+        let mut registry = WidgetRegistry::new();
+        let hit_rect = rect(0.0, 0.0, 100.0, 100.0);
+        let root = register_frame(&mut registry, WidgetType::Frame, None, hit_rect);
+        set_mouse_enabled(&mut registry, root);
+        let mut parent = root;
+
+        for _ in 0..20_000 {
+            parent = register_frame(&mut registry, WidgetType::Frame, Some(parent), hit_rect);
+            set_mouse_enabled(&mut registry, parent);
+        }
+        let grid = grid_for_all_frames(&registry);
+
+        assert_eq!(
+            deepest_hover_target_through_visible_children(
+                &registry,
+                &grid,
+                root,
+                Point::new(50.0, 50.0)
+            ),
+            Some(parent)
         );
     }
 }
