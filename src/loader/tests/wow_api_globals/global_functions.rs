@@ -133,6 +133,34 @@ fn test_strtrim() {
 }
 
 #[test]
+fn test_get_player_info_by_guid_returns_player_identity() {
+    let env = WowLuaEnv::new().unwrap();
+    let (localized_class, english_class, localized_race, english_race, sex, name, realm): (
+        String,
+        String,
+        String,
+        String,
+        i32,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            return GetPlayerInfoByGUID(UnitGUID("player"))
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(localized_class, "Paladin");
+    assert_eq!(english_class, "PALADIN");
+    assert_eq!(localized_race, "Human");
+    assert_eq!(english_race, "Human");
+    assert_eq!(sex, 2);
+    assert!(!name.is_empty());
+    assert!(!realm.is_empty());
+}
+
+#[test]
 fn test_geterrorhandler() {
     let env = WowLuaEnv::new().unwrap();
     let ty: String = env.eval("return type(geterrorhandler())").unwrap();

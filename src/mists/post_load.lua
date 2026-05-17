@@ -555,3 +555,28 @@ local function PatchMistsAuraUtilForEachAura()
 end
 
 PatchMistsAuraUtilForEachAura()
+
+local function PatchMistsRedockChatWindows()
+  if rawget(_G, "RedockChatWindows") ~= nil
+     or type(FCF_DockFrame) ~= "function"
+     or type(FCFDock_SelectWindow) ~= "function" then
+    return
+  end
+
+  function RedockChatWindows()
+    local dockIndex = 1
+    for _, chatFrameName in ipairs(CHAT_FRAMES or {}) do
+      local chatFrame = _G[chatFrameName]
+      if chatFrame and chatFrame:IsShown() then
+        FCF_DockFrame(chatFrame, dockIndex, chatFrame == ChatFrame1)
+        dockIndex = dockIndex + 1
+      end
+    end
+
+    if ChatFrame1 and GENERAL_CHAT_DOCK then
+      FCFDock_SelectWindow(GENERAL_CHAT_DOCK, ChatFrame1)
+    end
+  end
+end
+
+PatchMistsRedockChatWindows()

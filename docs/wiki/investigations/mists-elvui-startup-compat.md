@@ -40,6 +40,12 @@ The ElvUI install panel text and raid-control position shared a later geometry r
 
 The fix keeps `GetPhysicalScreenSize()` physical, but makes `GetScreenWidth()` / `GetScreenHeight()` divide by `UIParent:GetEffectiveScale()`. `WowLuaEnv::set_screen_size()` also fires `DISPLAY_SIZE_CHANGED` and `UI_SCALE_CHANGED` so addons recompute layout when screenshot/GUI paths resize after addon startup.
 
+### ElvUI Chat Hook Targets
+
+ElvUI Chat initialized far enough to create chat frames, then aborted while installing AceHook secure hooks. The first missing target was `RedockChatWindows`, which Mists static popup definitions also call. After adding that Mists post-load function, the next missing hook target was the runtime global `GetPlayerInfoByGUID`, which Blizzard chat code and ElvUI both expect.
+
+`RedockChatWindows` belongs in Mists post-load compatibility because it depends on Blizzard chat globals such as `FCF_DockFrame` and `GENERAL_CHAT_DOCK`. `GetPlayerInfoByGUID` belongs in the shared runtime surface because it is a WoW global used across chat, social queue, static popup, and shared unit utilities. After both were present, the ElvUI Chat `SecureHook` startup error disappeared and `ChatFrame1` was parented to visible `LeftChatPanel`.
+
 ## Sources
 
 - [shared_bootstrap.lua](../../../src/lua_api/env_init/shared_bootstrap.lua) — trim alias compatibility
@@ -48,6 +54,7 @@ The fix keeps `GetPhysicalScreenSize()` physical, but makes `GetScreenWidth()` /
 - [helpers_shared.rs](../../../src/lua_api/globals/create_frame/helpers_shared.rs) — default Slider label anchoring
 - [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — bootstrap screen-size fallback
 - [env_runtime.rs](../../../src/lua_api/env_runtime.rs) — runtime screen-size globals and resize event dispatch
+- [mists/post_load.lua](../../../src/mists/post_load.lua) — Mists `RedockChatWindows` compatibility
 - [PLAN.md](../../../PLAN.md) — remaining Mists full-addon error list
 
 ## See Also
