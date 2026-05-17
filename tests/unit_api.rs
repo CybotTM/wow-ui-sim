@@ -305,6 +305,18 @@ fn test_unit_guid_party_member() {
     assert_eq!(guid, "Player-0000-00000002");
 }
 
+#[test]
+fn test_unit_creature_id_target_from_guid() {
+    let env = env();
+    env.eval::<()>("A_Admin.SetTarget('Hogger', 11, 1, true)")
+        .unwrap();
+
+    let creature_id: i32 = env.eval("return UnitCreatureID('target')").unwrap();
+    let player_creature_id: Option<i32> = env.eval("return UnitCreatureID('player')").unwrap();
+    assert_eq!(creature_id, 0);
+    assert_eq!(player_creature_id, None);
+}
+
 // ============================================================================
 // UnitLevel / UnitEffectiveLevel
 // ============================================================================

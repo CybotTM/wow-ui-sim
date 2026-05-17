@@ -122,6 +122,29 @@ fn unit_guid(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn unit_creature_id(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let creature_id = {
+        let Ok(sim) = borrow_state(state) else {
+            return Ok(0);
+        };
+        creature_id_from_guid(&guid_for_unit(&sim, &unit))
+    };
+    match creature_id {
+        Some(id) => state.push(Val::Num(id as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn creature_id_from_guid(guid: &str) -> Option<i32> {
+    let mut parts = guid.split('-');
+    if parts.next()? != "Creature" {
+        return None;
+    }
+    parts.nth(4)?.parse().ok()
+}
+
 fn guid_for_unit(sim: &crate::lua_api::state::SimState, unit: &str) -> String {
     match unit {
         "player" => "Player-0000-00000001".to_string(),
@@ -298,6 +321,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UnitFullName", unit_full_name)?;
     LuaApiMut::register_function(lua, "UnitClassBase", unit_class_base)?;
     LuaApiMut::register_function(lua, "UnitGUID", unit_guid)?;
+    LuaApiMut::register_function(lua, "UnitCreatureID", unit_creature_id)?;
     LuaApiMut::register_function(lua, "UnitTokenFromGUID", unit_token_from_guid)?;
     LuaApiMut::register_function(lua, "UnitCreatureFamily", unit_creature_family)?;
     LuaApiMut::register_function(lua, "UnitPlayerControlled", unit_player_controlled)?;
