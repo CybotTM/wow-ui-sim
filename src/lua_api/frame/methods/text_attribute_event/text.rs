@@ -1,6 +1,7 @@
 //! Text-related RustFn methods: SetText, GetText, font, color, justification, wrapping.
 
 mod formatting;
+mod metrics;
 mod simple_html;
 mod style;
 
@@ -10,6 +11,7 @@ pub(super) use formatting::{
     set_font_objects_to_try, set_formatted_text, set_text_height, set_text_to_fit,
     try_apply_default_text,
 };
+use metrics::{approximate_text_height, approximate_text_width};
 pub(super) use style::{
     can_non_space_wrap, can_word_wrap, get_hyperlink_format, get_hyperlinks_enabled,
     get_indented_word_wrap, get_justify_h, get_justify_v, get_max_lines, get_text_color,
@@ -19,7 +21,6 @@ pub(super) use style::{
 };
 
 use super::helpers::val_to_f32;
-use crate::font::WowFontSystem;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, frame_id_from_stack,
     get_or_create_frame_fields, table_set,
@@ -591,8 +592,7 @@ pub(super) fn measure_text_width(state: &LuaState, id: u64) -> f64 {
             .measure_text_width(&text, font.as_deref(), font_size) as f64
             * text_scale;
     }
-    let mut fallback = WowFontSystem::new();
-    fallback.measure_text_width(&text, font.as_deref(), font_size) as f64 * text_scale
+    approximate_text_width(&text, font_size) as f64 * text_scale
 }
 
 fn measure_text_height(state: &LuaState, id: u64, wrap_width: Option<f32>) -> f64 {
@@ -612,8 +612,7 @@ fn measure_text_height(state: &LuaState, id: u64, wrap_width: Option<f32>) -> f6
         ) as f64
             * text_scale;
     }
-    let mut fallback = WowFontSystem::new();
-    fallback.measure_text_height(&text, font.as_deref(), font_size, wrap_width) as f64 * text_scale
+    approximate_text_height(&text, font_size, wrap_width) as f64 * text_scale
 }
 
 pub(super) fn get_string_width(state: &mut LuaState) -> LuaResult<u32> {
