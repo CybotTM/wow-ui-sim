@@ -15,6 +15,8 @@ use std::rc::Rc;
 use tempfile::tempdir;
 use tokio::sync::mpsc;
 
+const ALL_STRATA_DIRTY: u16 = 0x3ff;
+
 fn build_test_app(screen_kind: ScreenKind) -> App {
     build_test_app_with_texture_manager(screen_kind, TextureManager::new())
 }
@@ -542,6 +544,42 @@ fn process_timers_skips_visible_warmup_while_draw_work_is_pending() {
             .get("pending-skip-warmup")
             .is_none(),
         "visible warmup should be skipped while draw work is already pending"
+    );
+}
+
+#[test]
+fn process_timers_skips_visible_warmup_while_strata_are_dirty() {
+    let temp_dir = tempdir().unwrap();
+    let texture_path = temp_dir.path().join("dirty-skip-warmup.png");
+    let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0xcc, 0x88, 0x44, 0xff]));
+    image.save(&texture_path).unwrap();
+
+    let mut app = build_test_app(ScreenKind::Game);
+    app.screen_size.set(Size::new(1024.0, 768.0));
+    app.selected_rot_level = "Off".to_string();
+    app.strata_dirty.set(ALL_STRATA_DIRTY);
+    app.textures_pending.set(false);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "DirtySkipWarmupFrame", UIParent)
+            local texture = frame:CreateTexture(nil, "ARTWORK")
+            texture:SetTexture("dirty-skip-warmup")
+        "#,
+        )
+        .unwrap();
+        let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
+    }
+
+    let _task = app.handle_process_timers(Instant::now());
+    assert!(
+        app.texture_manager
+            .borrow()
+            .get("dirty-skip-warmup")
+            .is_none(),
+        "visible warmup should be skipped while strata need a render rebuild"
     );
 }
 

@@ -371,7 +371,8 @@ impl App {
         queued_preloads_pending: bool,
         stage_timings: &mut TickStageTimings,
     ) -> bool {
-        if queued_preloads_pending || self.textures_pending.get() {
+        if queued_preloads_pending || self.textures_pending.get() || self.has_pending_render_work()
+        {
             return false;
         }
 
@@ -380,6 +381,15 @@ impl App {
             self.preload_visible_textures_with_budget(std::time::Duration::from_millis(10));
         stage_timings.preload += started.elapsed();
         loaded
+    }
+
+    fn has_pending_render_work(&self) -> bool {
+        self.strata_dirty.get() != 0
+            || self
+                .pending_dirty_ids
+                .borrow()
+                .as_ref()
+                .is_some_and(|ids| !ids.is_empty())
     }
 
     fn run_pending_lua_for_tick(&mut self, stage_timings: &mut TickStageTimings) -> bool {
