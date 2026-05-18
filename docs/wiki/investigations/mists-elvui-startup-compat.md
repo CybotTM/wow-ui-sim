@@ -15,6 +15,7 @@ The full Mists addon pass reported these startup failures:
 - ElvUI Tooltip initialization failed at `GameTooltipText:FontTemplate(...)` because the method was added through one Font object's metatable but not visible on other Font objects.
 - ElvUI DataTexts durability initialization failed because `GetInventoryItemDurability` was missing from the inventory probe globals.
 - `ElvUI_StaticPopup1` ran Blizzard `GameDialogMixin:OnUpdate` instead of ElvUI's popup update handler, so `StaticPopup_OnUpdate` compared nil `dialog.timeleft` against zero.
+- The `ElvUI Installation` close button rendered but was hard to click because ElvUI's scaled parent made the button resolve to a 20x20 screen rect while raw, unscaled `SetHitRectInsets(6, 6, 7, 7)` collapsed the clickable area to a tiny center strip.
 
 ### Root Causes
 
@@ -65,6 +66,8 @@ ElvUI creates `ElvUI_StaticPopup*` frames from a template that clears the inheri
 
 The fix keeps simulator-driven layout invalidation from stealing an already installed custom `OnUpdate`: before invoking the Lua layout-dirty helper, the Rust call site snapshots existing `OnUpdate` handlers for the target layout frame and its parent chain, then restores any handler that `MarkDirty()` changed. The full Mists ElvUI probe now keeps `ElvUI_StaticPopup1` on ElvUI's handler after `E:StaticPopup_Show("INCOMPATIBLE_ADDON", ...)`, and the `StaticPopup.lua:451` nil-timeleft error no longer appears.
 
+The install close-button hitbox error was a coordinate-space mismatch. Layout rects are already scaled by the frame's effective scale, but hit-grid construction subtracted `SetHitRectInsets` values as if they were already in that scaled space. Scaling the insets by `frame.effective_scale` before building hit rectangles keeps ElvUI's skinned close buttons clickable across scaled parents.
+
 ## Sources
 
 - [shared_bootstrap.lua](../../../src/lua_api/env_init/shared_bootstrap.lua) — trim alias compatibility
@@ -76,6 +79,7 @@ The fix keeps simulator-driven layout invalidation from stealing an already inst
 - [size.rs](../../../src/lua_api/frame/methods/core_state/size.rs) — layout dirty `OnUpdate` snapshot/restore
 - [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — bootstrap screen-size fallback
 - [env_runtime.rs](../../../src/lua_api/env_runtime.rs) — runtime screen-size globals and resize event dispatch
+- [frame_collect.rs](../../../src/iced_app/frame_collect.rs) — scaled hit-rect inset conversion for hit testing
 - [mists/post_load.lua](../../../src/mists/post_load.lua) — Mists `RedockChatWindows` compatibility
 - [PLAN.md](../../../PLAN.md) — remaining Mists full-addon error list
 

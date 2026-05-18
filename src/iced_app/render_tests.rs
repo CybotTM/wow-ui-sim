@@ -249,6 +249,45 @@ mod tests {
     }
 
     #[test]
+    fn scaled_frames_scale_hit_rect_insets() {
+        let app = build_test_app();
+        app.env
+            .borrow()
+            .exec(
+                r#"
+                ScaledHitInsetButton = CreateFrame("Button", "ScaledHitInsetButton", UIParent)
+                ScaledHitInsetButton:SetSize(32, 32)
+                ScaledHitInsetButton:SetScale(0.625)
+                ScaledHitInsetButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+                ScaledHitInsetButton:EnableMouse(true)
+                ScaledHitInsetButton:SetHitRectInsets(6, 6, 7, 7)
+            "#,
+            )
+            .expect("scaled hit inset frame setup should succeed");
+
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let strata_buckets = state
+            .get_strata_buckets()
+            .expect("visible strata buckets should exist")
+            .clone();
+        let frame_id = state
+            .widgets
+            .get_id_by_name("ScaledHitInsetButton")
+            .expect("scaled hit inset button should exist");
+        let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
+        let hittable = build_hittable_rects(&collected, &state.widgets);
+        let (_, rect) = hittable
+            .iter()
+            .find(|(id, _)| *id == frame_id)
+            .expect("scaled hit inset button should be hittable");
+
+        assert_eq!(rect.width, 12.5);
+        assert_eq!(rect.height, 11.25);
+    }
+
+    #[test]
     fn cached_button_normal_texture_alpha_restores_after_hover_hide() {
         let temp_dir = tempdir().unwrap();
         let normal_path = "Interface/Buttons/UI-Panel-Button-Up";
