@@ -160,6 +160,22 @@ fn test_build_tree_shows_texture_path() {
 }
 
 #[test]
+fn test_build_tree_does_not_resolve_texture_format_by_default() {
+    let reg = build_basic_registry();
+    let names: Vec<String> = vec![];
+    let lines = build_tree(&reg, &names, None, None, false, false, 1024.0, 768.0);
+    let texture_line = lines
+        .iter()
+        .find(|line| line.contains("[texture] Interface/Icons/foo"))
+        .expect("texture line should exist");
+
+    assert!(
+        !texture_line.contains("(MISSING)"),
+        "default dump-tree should not initialize texture resolution"
+    );
+}
+
+#[test]
 fn test_build_tree_shows_anchor_lines() {
     let reg = build_basic_registry();
     let names: Vec<String> = vec![];
