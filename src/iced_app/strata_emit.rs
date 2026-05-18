@@ -339,7 +339,7 @@ pub fn build_hittable_rects(
         .map(|&(id, r)| {
             let (il, ir, it, ib) = registry
                 .get(id)
-                .map(|f| f.hit_rect_insets)
+                .map(super::frame_collect::scaled_hit_rect_insets)
                 .unwrap_or((0.0, 0.0, 0.0, 0.0));
             (
                 id,

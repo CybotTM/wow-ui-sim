@@ -185,6 +185,12 @@ pub fn frame_accepts_mouse_button(frame: &crate::widget::Frame, button_name: &st
         && frame_has_registered_mouse_button(frame, button_name)
 }
 
+pub fn scaled_hit_rect_insets(frame: &crate::widget::Frame) -> (f32, f32, f32, f32) {
+    let scale = frame.effective_scale;
+    let (left, right, top, bottom) = frame.hit_rect_insets;
+    (left * scale, right * scale, top * scale, bottom * scale)
+}
+
 fn frame_has_registered_mouse_button(frame: &crate::widget::Frame, button_name: &str) -> bool {
     if frame.registered_mouse_buttons.is_empty() {
         return true;

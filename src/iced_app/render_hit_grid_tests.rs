@@ -112,6 +112,46 @@ mod hit_grid_tests {
         );
     }
 
+    #[test]
+    fn hit_rect_insets_scale_with_frame_scale() {
+        let app = build_test_app();
+        app.env
+            .borrow()
+            .exec(
+                r#"
+                ScaledHitInsetButton = CreateFrame("Button", "ScaledHitInsetButton", UIParent)
+                ScaledHitInsetButton:SetSize(50, 50)
+                ScaledHitInsetButton:SetScale(0.5)
+                ScaledHitInsetButton:SetHitRectInsets(6, 6, 7, 7)
+                ScaledHitInsetButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+                ScaledHitInsetButton:EnableMouse(true)
+            "#,
+            )
+            .expect("scaled hit inset setup should succeed");
+
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let strata_buckets = state
+            .get_strata_buckets()
+            .expect("visible strata buckets should exist")
+            .clone();
+        let frame_id = state
+            .widgets
+            .get_id_by_name("ScaledHitInsetButton")
+            .expect("scaled hit inset button should exist");
+        let collected =
+            super::super::frame_collect::collect_hittable_frames(&state.widgets, &strata_buckets);
+        let hittable = build_hittable_rects(&collected, &state.widgets);
+        let (_, rect) = hittable
+            .iter()
+            .find(|(id, _)| *id == frame_id)
+            .expect("scaled hit inset button should be hittable");
+
+        assert_eq!(rect.width, 19.0);
+        assert_eq!(rect.height, 18.0);
+    }
+
     fn move_alpha_zero_button(app: &App) {
         app.env
             .borrow()
