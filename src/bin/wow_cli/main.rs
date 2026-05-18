@@ -118,6 +118,17 @@ enum Commands {
         crop: Option<String>,
     },
 
+    /// Move the running GUI's in-app mouse cursor and print the hovered frame
+    MouseMove {
+        /// Canvas-space x coordinate
+        #[arg(long)]
+        x: f32,
+
+        /// Canvas-space y coordinate
+        #[arg(long)]
+        y: f32,
+    },
+
     /// Extract textures referenced by addons to WebP format (standalone)
     ExtractTextures {
         /// Path to addons directory to scan
@@ -256,6 +267,7 @@ fn handle_command(command: Commands) {
             filter,
             crop,
         } => take_screenshot(&output, width, height, filter, crop),
+        Commands::MouseMove { x, y } => mouse_move(x, y),
         Commands::ExtractTextures {
             addons,
             interface,
@@ -513,6 +525,17 @@ fn take_screenshot(
         crop,
     ) {
         Ok(msg) => println!("{}", msg),
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    }
+}
+
+fn mouse_move(x: f32, y: f32) {
+    let socket = resolve_socket();
+    match client::mouse_move(&socket, x, y) {
+        Ok(output) => println!("{output}"),
         Err(e) => {
             eprintln!("Error: {}", e);
             std::process::exit(1);

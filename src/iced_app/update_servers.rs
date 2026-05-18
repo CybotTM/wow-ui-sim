@@ -91,6 +91,7 @@ impl App {
                 crop,
                 respond,
             } => self.handle_lua_screenshot(output, width, height, filter, crop, respond),
+            LuaCommand::MouseMove { x, y, respond } => self.handle_lua_mouse_move(x, y, respond),
         }
     }
 
@@ -98,6 +99,25 @@ impl App {
         let response = self.exec_lua_command(&code);
         let _ = respond.send(response);
         self.invalidate_after_lua_mutation();
+    }
+
+    fn handle_lua_mouse_move(&mut self, x: f32, y: f32, respond: mpsc::Sender<LuaResponse>) {
+        self.handle_mouse_move(iced::Point::new(x, y));
+        let target = self.hovered_frame_name();
+        let _ = respond.send(LuaResponse::Output(target));
+    }
+
+    fn hovered_frame_name(&self) -> String {
+        let Some(id) = self.hovered_frame else {
+            return "nil".to_string();
+        };
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        state
+            .widgets
+            .get(id)
+            .and_then(|frame| frame.name.clone())
+            .unwrap_or_else(|| format!("#{id}"))
     }
 
     fn handle_lua_dump_tree(

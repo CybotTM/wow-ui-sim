@@ -50,6 +50,13 @@ pub enum Request {
         /// Crop the output image to WxH+X+Y (e.g., 700x150+400+650)
         crop: Option<String>,
     },
+    /// Move the in-app mouse cursor and dispatch hover scripts.
+    MouseMove {
+        /// Canvas-space x coordinate
+        x: f32,
+        /// Canvas-space y coordinate
+        y: f32,
+    },
 }
 
 /// Response from the Lua server.
@@ -91,6 +98,11 @@ pub enum LuaCommand {
         height: u32,
         filter: Option<String>,
         crop: Option<String>,
+        respond: mpsc::Sender<Response>,
+    },
+    MouseMove {
+        x: f32,
+        y: f32,
         respond: mpsc::Sender<Response>,
     },
 }
@@ -299,6 +311,7 @@ fn send_app_command_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>)
             filter,
             crop,
         } => send_screenshot_command(cmd_tx, output, width, height, filter, crop),
+        Request::MouseMove { x, y } => send_mouse_move_command(cmd_tx, x, y),
     }
 }
 
@@ -352,6 +365,10 @@ fn send_screenshot_command(
     })
 }
 
+fn send_mouse_move_command(cmd_tx: &mpsc::Sender<LuaCommand>, x: f32, y: f32) -> Response {
+    send_command(cmd_tx, |respond| LuaCommand::MouseMove { x, y, respond })
+}
+
 fn write_response(stream: &mut UnixStream, response: &Response) -> std::io::Result<()> {
     writeln!(stream, "{}", serde_json::to_string(response).unwrap())
 }
@@ -403,6 +420,15 @@ pub mod client {
             Response::Tree(_) => Err("Unexpected tree".into()),
             Response::Quads(_) => Err("Unexpected quads".into()),
         }
+    }
+
+    /// Move the in-app mouse cursor.
+    pub fn mouse_move<P: AsRef<Path>>(socket: P, x: f32, y: f32) -> Result<String, String> {
+        let response = send_request(socket, Request::MouseMove { x, y })?;
+        response_result(response, |response| match response {
+            Response::Output(s) => Some(s),
+            _ => None,
+        })
     }
 
     /// Ping the server.
