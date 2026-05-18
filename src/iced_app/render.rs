@@ -244,7 +244,7 @@ impl App {
         };
         let effective_dirty = self.prune_dirty_strata(dirty, dirty_ids.as_ref());
         if effective_dirty == 0 {
-            return self.finish_without_strata_rebuild();
+            return self.finish_without_strata_rebuild(size);
         }
 
         let env = self.env.borrow();
@@ -455,9 +455,25 @@ impl App {
         )
     }
 
-    fn finish_without_strata_rebuild(&self) -> u16 {
+    fn finish_without_strata_rebuild(&self, size: Size) -> u16 {
+        self.rebuild_hit_grid_after_layout_only_change(size);
         self.apply_hit_grid_changes();
         0
+    }
+
+    fn rebuild_hit_grid_after_layout_only_change(&self, size: Size) {
+        let env = self.env.borrow();
+        let mut state = env.state().borrow_mut();
+        if !state.widgets.has_pending_layout_work() {
+            return;
+        }
+
+        state.ensure_layout_rects();
+        let Some(strata_buckets) = state.get_strata_buckets().cloned() else {
+            return;
+        };
+        *self.cached_hittable.borrow_mut() = None;
+        self.rebuild_hit_grid_if_needed(&state, &strata_buckets, size);
     }
 
     /// Emit quads for dirty strata into the cache.
@@ -568,3 +584,5 @@ impl App {
 
 #[cfg(test)]
 include!("render_tests.rs");
+#[cfg(test)]
+include!("render_hit_grid_tests.rs");

@@ -165,54 +165,6 @@ mod tests {
         app.rebuild_dirty_strata(size, dirty_mask)
     }
 
-    #[test]
-    fn layout_move_updates_cached_hit_grid_rects() {
-        let app = build_test_app();
-        app.env
-            .borrow()
-            .exec(
-                r#"
-                MovingHitButton = CreateFrame("Button", "MovingHitButton", UIParent)
-                MovingHitButton:SetSize(100, 40)
-                MovingHitButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -20)
-                MovingHitButton:EnableMouse(true)
-                MovingHitButton:RegisterForClicks("LeftButtonUp")
-            "#,
-            )
-            .expect("moving hit button setup should succeed");
-
-        let size = Size::new(800.0, 600.0);
-        app.mark_all_strata_dirty();
-        app.rebuild_dirty_strata(size, app.strata_dirty.get());
-
-        let original_point = Point::new(30.0, 30.0);
-        let moved_point = Point::new(330.0, 30.0);
-        let initial_target = app.hit_test_mouse_button(original_point, "LeftButton");
-        assert!(initial_target.is_some(), "button should start at original rect");
-
-        app.env
-            .borrow()
-            .exec(
-                r#"
-                MovingHitButton:ClearAllPoints()
-                MovingHitButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 320, -20)
-            "#,
-            )
-            .expect("moving hit button should succeed");
-        rebuild_after_widget_dirty(&app, size);
-
-        let stale_target = app.hit_test_mouse_button(original_point, "LeftButton");
-        let moved_target = app.hit_test_mouse_button(moved_point, "LeftButton");
-        assert_eq!(
-            stale_target, None,
-            "original rect should stop accepting clicks after layout moves"
-        );
-        assert_eq!(
-            moved_target, initial_target,
-            "moved rect should accept clicks after layout rebuild"
-        );
-    }
-
     fn texture_request_alphas(app: &App, needle: &str) -> Vec<f32> {
         let mut alphas = Vec::new();
         let strata = app.cached_strata_quads.borrow();
