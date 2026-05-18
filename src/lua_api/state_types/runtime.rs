@@ -1,6 +1,6 @@
 //! Runtime / profiler types: cursor state, per-addon metrics, error records.
 
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 /// What is currently held on the cursor (drag-and-drop state).
 #[derive(Debug, Clone)]
@@ -142,6 +142,40 @@ impl Default for AddonInfo {
             metadata: HashMap::new(),
             default_enabled: true,
         }
+    }
+}
+
+/// Saved addon enable state, keyed by addon folder name rather than list index.
+///
+/// WoW's persisted addon state is a name-based list, so reset behavior must not
+/// depend on whatever order addons happen to be registered in this session.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct AddonEnableSnapshot {
+    pub known_addons: HashSet<String>,
+    pub disabled_addons: HashSet<String>,
+}
+
+impl AddonEnableSnapshot {
+    pub fn from_addons(addons: &[AddonInfo]) -> Self {
+        let known_addons = addons
+            .iter()
+            .map(|addon| addon.folder_name.clone())
+            .collect();
+        let disabled_addons = addons
+            .iter()
+            .filter(|addon| !addon.enabled)
+            .map(|addon| addon.folder_name.clone())
+            .collect();
+        Self {
+            known_addons,
+            disabled_addons,
+        }
+    }
+
+    pub fn saved_enabled(&self, addon_name: &str) -> Option<bool> {
+        self.known_addons
+            .contains(addon_name)
+            .then(|| !self.disabled_addons.contains(addon_name))
     }
 }
 

@@ -1,7 +1,7 @@
 //! AddonList glue confirm-disable dialog behavior for `Blizzard_AddOnList`.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_glue_smoke_shape;
-use wow_ui_sim::lua_api::AddonInfo;
+use wow_ui_sim::lua_api::{AddonEnableSnapshot, AddonInfo};
 
 const ROOT: &str = "Blizzard_AddOnList";
 const OUTDATED_ADDON: &str = "AddonListOutdatedProbe";
@@ -76,7 +76,7 @@ fn seed_dialog_addons(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     state.addons.clear();
     state.addons.push(addon_info(OUTDATED_ADDON));
     state.addons.push(addon_info(CURRENT_ADDON));
-    state.addon_saved_enable_state = Some(vec![true, true]);
+    state.addon_saved_enable_state = Some(AddonEnableSnapshot::from_addons(&state.addons));
 }
 
 fn addon_info(folder_name: &str) -> AddonInfo {

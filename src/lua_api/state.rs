@@ -330,8 +330,8 @@ use super::game_data::{
 };
 pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
-    AchievementStatistic, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
-    AuctionBrowseResult, AuctionItemClassFilter, AuctionReplicateItem, AuctionRowInfo,
+    AchievementStatistic, AddonEnableSnapshot, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics,
+    AreaPoiInfo, AuctionBrowseResult, AuctionItemClassFilter, AuctionReplicateItem, AuctionRowInfo,
     AuctionSellQuote, AuctionSellQuoteKind, AuctionSortSpec, AzeriteEssenceInfo,
     AzeriteEssenceMilestoneInfo, AzeriteEssenceState, BagItem, BarberShopAlternateFormRace,
     BarberShopCategory, BarberShopCharacterData, BarberShopOption, BarberShopState, BidAuction,

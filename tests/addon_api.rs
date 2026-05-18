@@ -642,6 +642,36 @@ fn test_save_addons_baseline_includes_all_addons() {
 }
 
 #[test]
+fn test_save_addons_snapshot_is_keyed_by_addon_name() {
+    let env = env_with_two_user_addons();
+    env.exec("C_AddOns.DisableAddOn('AddonB')").unwrap();
+    env.exec("C_AddOns.SaveAddOns()").unwrap();
+
+    {
+        let mut state = env.state().borrow_mut();
+        let addon_b = state
+            .addons
+            .iter()
+            .position(|addon| addon.folder_name == "AddonB")
+            .expect("AddonB registered");
+        let addon_b = state.addons.remove(addon_b);
+        state.addons.insert(0, addon_b);
+    }
+
+    env.exec("C_AddOns.EnableAllAddOns()").unwrap();
+    env.exec("C_AddOns.ResetAddOns()").unwrap();
+
+    assert!(
+        enabled_state(&env, "AddonA"),
+        "ResetAddOns must not apply AddonB's saved disabled state by index"
+    );
+    assert!(
+        !enabled_state(&env, "AddonB"),
+        "ResetAddOns must restore the disabled addon by folder name"
+    );
+}
+
+#[test]
 fn test_reset_addons_no_op_when_nothing_saved() {
     // Without a prior SaveAddOns, ResetAddOns must not clobber the live
     // state — there's no baseline to revert to.

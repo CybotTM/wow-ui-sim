@@ -60,14 +60,14 @@ pub use loader_env::LoaderEnv;
 pub use message_frame::MessageFrameData;
 pub use simple_html::SimpleHtmlData;
 pub use state::{
-    AddonInfo, AdventureMapInset, AdventureMapQuestInfo, AdventureMapQuestOffer,
-    AdventureMapQuestPortrait, AdventureMapState, AdventureMapZoneChoice, AlliedRaceInfo,
-    AlliedRaceRacialAbility, ArtifactInfo, AzeriteEmpoweredItemState, AzeriteEmpoweredPowerText,
-    AzeriteEmpoweredSelectionKey, AzeriteItemState, BarberShopAlternateFormRace,
-    BarberShopCategory, BarberShopCharacterData, BarberShopOption, BarberShopState,
-    FactionParagonInfo, HousingState, ItemLocationData, LossOfControlInfo, MajorFactionData,
-    PendingTimer, ProfessionQualityInfo, RenownLevelInfo, SimState, SpellFlyoutInfo,
-    SpellFlyoutSlot, tick_party_health,
+    AddonEnableSnapshot, AddonInfo, AdventureMapInset, AdventureMapQuestInfo,
+    AdventureMapQuestOffer, AdventureMapQuestPortrait, AdventureMapState, AdventureMapZoneChoice,
+    AlliedRaceInfo, AlliedRaceRacialAbility, ArtifactInfo, AzeriteEmpoweredItemState,
+    AzeriteEmpoweredPowerText, AzeriteEmpoweredSelectionKey, AzeriteItemState,
+    BarberShopAlternateFormRace, BarberShopCategory, BarberShopCharacterData, BarberShopOption,
+    BarberShopState, FactionParagonInfo, HousingState, ItemLocationData, LossOfControlInfo,
+    MajorFactionData, PendingTimer, ProfessionQualityInfo, RenownLevelInfo, SimState,
+    SpellFlyoutInfo, SpellFlyoutSlot, tick_party_health,
 };
 pub use tooltip::TooltipData;
 

@@ -9,7 +9,7 @@ pub struct SimState {
     pub rilua_timers: VecDeque<crate::lua_api::timer_layout::RiluaPendingTimer>,
     pub focused_frame_id: Option<u64>,
     pub addons: Vec<AddonInfo>,
-    pub addon_saved_enable_state: Option<Vec<bool>>,
+    pub addon_saved_enable_state: Option<AddonEnableSnapshot>,
     pub addon_saved_version_check_enabled: Option<bool>,
     pub system_chat_log: Vec<String>,
     pub adventure_map: AdventureMapState,

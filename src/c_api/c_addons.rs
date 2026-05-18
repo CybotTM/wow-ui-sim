@@ -1,9 +1,9 @@
 use crate::loader::LoadError;
-use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::{
     borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, registry_get,
     registry_set, state_handle, val_to_string,
 };
+use crate::lua_api::{AddonEnableSnapshot, LoaderEnv};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -370,8 +370,7 @@ fn c_addons_disable_all_addons(state: &mut LuaState) -> LuaResult<u32> {
 fn c_addons_save_addons(state: &mut LuaState) -> LuaResult<u32> {
     let version_check_enabled = registry_bool(state, ADDON_VERSION_CHECK_KEY);
     let mut sim = borrow_state_mut(state)?;
-    let snapshot: Vec<bool> = sim.addons.iter().map(|a| a.enabled).collect();
-    sim.addon_saved_enable_state = Some(snapshot);
+    sim.addon_saved_enable_state = Some(AddonEnableSnapshot::from_addons(&sim.addons));
     sim.addon_saved_version_check_enabled = Some(version_check_enabled);
     Ok(0)
 }
@@ -380,8 +379,8 @@ fn c_addons_reset_addons(state: &mut LuaState) -> LuaResult<u32> {
     let saved_version_check_enabled = {
         let mut sim = borrow_state_mut(state)?;
         if let Some(snapshot) = sim.addon_saved_enable_state.clone() {
-            for (idx, &saved_enabled) in snapshot.iter().enumerate() {
-                if let Some(addon) = sim.addons.get_mut(idx) {
+            for addon in &mut sim.addons {
+                if let Some(saved_enabled) = snapshot.saved_enabled(&addon.folder_name) {
                     addon.enabled = saved_enabled;
                 }
             }
