@@ -87,22 +87,17 @@ fn timer_subscription(interval: std::time::Duration) -> Subscription<Message> {
 }
 
 impl App {
-    /// Build the title bar with FPS counter, frame time, canvas size, and mouse coords.
+    /// Build the title bar with FPS counter, frame time, and canvas size.
     fn build_title_bar(&self) -> Element<'_, Message> {
-        let mouse_str = match self.mouse_position {
-            Some(pos) => format!(" | mouse:({:.0},{:.0})", pos.x, pos.y),
-            None => String::new(),
-        };
         let screen = self.screen_size.get();
         let screen_str = format!(" | screen:{}x{}", screen.width as i32, screen.height as i32);
         let title_text = format!(
-            "WoW UI Simulator  [{:.1} FPS | tick:{:.2}ms | draw:{:.2}ms | other:{:.2}ms{}{}]",
+            "WoW UI Simulator  [{:.1} FPS | tick:{:.2}ms | draw:{:.2}ms | other:{:.2}ms{}]",
             self.fps,
             self.tick_time_display,
             self.draw_time_display,
             self.other_time_display,
-            screen_str,
-            mouse_str
+            screen_str
         );
         text(title_text).size(20).color(palette::GOLD).into()
     }
