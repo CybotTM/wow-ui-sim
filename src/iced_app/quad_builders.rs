@@ -461,6 +461,9 @@ fn emit_fontstring_quads(
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
     frame: &FrameQuadEmit<'_>,
 ) {
+    if is_tooltip_line_frame(frame) {
+        return;
+    }
     if let Some((fs, ga)) = text_ctx
         && let Some(ref txt) = frame.widget.text
     {
@@ -484,6 +487,28 @@ fn emit_fontstring_quads(
             },
         );
     }
+}
+
+fn is_tooltip_line_frame(frame: &FrameQuadEmit<'_>) -> bool {
+    let Some(parent_id) = frame.widget.parent_id else {
+        return false;
+    };
+    let Some(parent) = frame.registry.get(parent_id) else {
+        return false;
+    };
+    parent.widget_type == WidgetType::GameTooltip
+        && frame
+            .widget
+            .parent_key
+            .as_deref()
+            .is_some_and(is_tooltip_line_parent_key)
+}
+
+fn is_tooltip_line_parent_key(parent_key: &str) -> bool {
+    parent_key
+        .strip_prefix("TextLeft")
+        .or_else(|| parent_key.strip_prefix("TextRight"))
+        .is_some_and(|suffix| !suffix.is_empty() && suffix.chars().all(|ch| ch.is_ascii_digit()))
 }
 
 fn emit_quest_blob_quads(batch: &mut QuadBatch, frame: &FrameQuadEmit<'_>) {

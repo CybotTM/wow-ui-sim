@@ -225,3 +225,58 @@ fn emit_widget_text_quads_uses_text_segment_colors() {
     assert!(has_glyph_color(&batch, [1.0, 0.0, 0.0, 1.0]));
     assert!(has_glyph_color(&batch, [0.0, 1.0, 0.0, 1.0]));
 }
+
+#[test]
+fn tooltip_line_fontstrings_do_not_render_as_generic_fontstrings() {
+    let mut registry = WidgetRegistry::new();
+    let mut tooltip = Frame::new(
+        WidgetType::GameTooltip,
+        Some("GameTooltip".to_string()),
+        None,
+    );
+    tooltip.id = 1;
+    let mut line = Frame::new(
+        WidgetType::FontString,
+        Some("GameTooltipTextLeft1".to_string()),
+        Some(1),
+    );
+    line.id = 2;
+    line.parent_key = Some("TextLeft1".to_string());
+    line.text = Some("Tooltip line backing text must not render twice".to_string());
+    registry.register(tooltip);
+    registry.register(line);
+
+    let widget = registry
+        .get(2)
+        .expect("tooltip line fontstring should be registered");
+    let frame = FrameQuadEmit {
+        id: 2,
+        widget,
+        bounds: Rectangle::new(iced::Point::ORIGIN, iced::Size::new(0.0, 0.0)),
+        clip_bounds: None,
+        bar_fill: None,
+        pressed_frame: None,
+        hovered_frame: None,
+        message_frames: None,
+        tooltip_data: None,
+        quest_blobs: None,
+        registry: &registry,
+        elapsed_secs: 0.0,
+        eff_alpha: 1.0,
+    };
+
+    let mut batch = QuadBatch::new();
+    let mut font_sys = WowFontSystem::new();
+    let mut glyph_atlas = GlyphAtlas::new();
+    let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
+
+    emit_frame_quads(&mut batch, &mut text_ctx, frame);
+
+    assert!(
+        batch
+            .vertices
+            .iter()
+            .all(|vertex| vertex.tex_index != GLYPH_ATLAS_TEX_INDEX),
+        "tooltip line backing FontStrings should not emit their own glyphs"
+    );
+}
