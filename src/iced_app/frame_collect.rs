@@ -204,12 +204,19 @@ pub fn frame_mouse_registration_matches(
     }
 
     let edge = if down { "Down" } else { "Up" };
-    frame
-        .registered_mouse_buttons
-        .contains(&format!("{button_name}{edge}"))
-        || frame
-            .registered_mouse_buttons
-            .contains(&format!("Any{edge}"))
+    registration_set_matches(
+        &frame.registered_mouse_buttons,
+        &format!("{button_name}{edge}"),
+    ) || registration_set_matches(&frame.registered_mouse_buttons, &format!("Any{edge}"))
+}
+
+fn registration_set_matches(
+    registrations: &std::collections::HashSet<String>,
+    target: &str,
+) -> bool {
+    registrations
+        .iter()
+        .any(|registered| registered.eq_ignore_ascii_case(target))
 }
 
 #[cfg(test)]

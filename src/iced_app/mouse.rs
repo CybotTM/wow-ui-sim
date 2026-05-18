@@ -644,12 +644,19 @@ fn frame_click_registration_matches(
     }
 
     let edge = if down { "Down" } else { "Up" };
-    frame
-        .registered_click_buttons
-        .contains(&format!("{button_name}{edge}"))
-        || frame
-            .registered_click_buttons
-            .contains(&format!("Any{edge}"))
+    registration_set_matches(
+        &frame.registered_click_buttons,
+        &format!("{button_name}{edge}"),
+    ) || registration_set_matches(&frame.registered_click_buttons, &format!("Any{edge}"))
+}
+
+fn registration_set_matches(
+    registrations: &std::collections::HashSet<String>,
+    target: &str,
+) -> bool {
+    registrations
+        .iter()
+        .any(|registered| registered.eq_ignore_ascii_case(target))
 }
 
 fn mark_button_state_visuals_dirty(state: &mut crate::lua_api::SimState, frame_id: Option<u64>) {
@@ -679,6 +686,10 @@ mod test_support;
 #[cfg(test)]
 #[path = "mouse_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "mouse_registration_tests.rs"]
+mod registration_tests;
 
 #[cfg(test)]
 #[path = "mouse_hover_tests.rs"]
