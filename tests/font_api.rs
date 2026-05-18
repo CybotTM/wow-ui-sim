@@ -285,6 +285,28 @@ fn text_region_reports_truncation_when_text_exceeds_width() {
 }
 
 #[test]
+fn font_string_get_wrapped_width_uses_active_wrap_width() {
+    let env = env();
+    let (string_width, wrapped_width): (f64, f64) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "WrappedWidthProbeParent", UIParent)
+            local fs = frame:CreateFontString("WrappedWidthProbe", "ARTWORK", "GameFontNormal")
+            fs:SetText("This is long enough to wrap")
+            fs:SetWordWrap(true)
+            fs:SetWidth(60)
+            return fs:GetStringWidth(), fs:GetWrappedWidth()
+            "#,
+        )
+        .unwrap();
+    assert!(
+        string_width > 60.0,
+        "test text should be wider than the wrap width"
+    );
+    assert_eq!(wrapped_width, 60.0);
+}
+
+#[test]
 fn create_font_string_inherits_named_font_object_properties() {
     let env = env();
     let (path, height, flags): (String, f64, String) = env

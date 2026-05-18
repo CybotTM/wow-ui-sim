@@ -126,3 +126,48 @@ fn rect_queries_return_nothing_for_unanchored_frame() {
         .expect("eval should succeed");
     assert_eq!(result, "nil");
 }
+
+#[test]
+fn child_anchored_to_unanchored_parent_has_no_queryable_rect() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "UnanchoredParentProbe", UIParent)
+            parent:SetSize(100, 100)
+
+            local child = CreateFrame("Frame", "ChildOfUnanchoredParentProbe", parent)
+            child:SetSize(20, 20)
+            child:SetPoint("CENTER", parent, "CENTER", 0, 0)
+
+            return type(child:GetRect())
+            "#,
+        )
+        .expect("eval should succeed");
+    assert_eq!(result, "nil");
+}
+
+#[test]
+fn waypoint_style_fit_content_skips_child_without_queryable_ancestor_chain() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "WaypointFitParentProbe", UIParent)
+            parent:SetSize(100, 100)
+
+            local child = CreateFrame("Frame", "WaypointFitChildProbe", parent)
+            child:SetSize(20, 20)
+            child:SetPoint("CENTER", parent, "CENTER", 0, 0)
+
+            local parentLeft = parent:GetLeft()
+            local childLeft = child:GetRect()
+            if childLeft then
+                return tostring(childLeft - parentLeft)
+            end
+            return "skipped"
+            "#,
+        )
+        .expect("eval should succeed");
+    assert_eq!(result, "skipped");
+}

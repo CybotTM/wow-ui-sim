@@ -451,21 +451,7 @@ pub(crate) fn set_font_object(state: &mut LuaState) -> LuaResult<u32> {
         return set_simple_html_font_object(state, id);
     }
 
-    let font_object = match stack_val(state, 2) {
-        Val::Nil => return Err(runtime_error("SetFontObject requires a font object")),
-        Val::Table(_) => stack_val(state, 2),
-        Val::Str(_) => {
-            let name = val_to_string(state, stack_val(state, 2))
-                .ok_or_else(|| runtime_error("SetFontObject requires a font object"))?;
-            let resolved = table_get(state, Val::Table(state.global), &name);
-            if matches!(resolved, Val::Table(_)) {
-                resolved
-            } else {
-                return Err(runtime_error("SetFontObject requires a font object"));
-            }
-        }
-        _ => return Err(runtime_error("SetFontObject requires a font object")),
-    };
+    let font_object = resolve_font_object_arg(state, stack_val(state, 2))?;
     let store = get_or_create_font_object_store(state);
     if table_get(state, store, &id.to_string()) == font_object {
         return Ok(0);
@@ -555,6 +541,21 @@ pub(crate) fn set_font_objects_to_try(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(crate) fn get_unbounded_string_width(state: &mut LuaState) -> LuaResult<u32> {
     get_string_width(state)
+}
+
+pub(crate) fn get_wrapped_width(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let string_width = measure_text_width(state, id);
+    let wrap_width = read_active_wrap_width(state, id);
+    let wrapped_width = wrap_width.map_or(string_width, |width| string_width.min(width));
+    state.push(Val::Num(wrapped_width));
+    Ok(1)
+}
+
+fn read_active_wrap_width(state: &LuaState, id: u64) -> Option<f64> {
+    let sim = borrow_state(state).ok()?;
+    let frame = sim.widgets.get(id)?;
+    (frame.word_wrap && frame.width > 0.0).then_some(f64::from(frame.width))
 }
 
 pub(crate) fn set_text_to_fit(state: &mut LuaState) -> LuaResult<u32> {

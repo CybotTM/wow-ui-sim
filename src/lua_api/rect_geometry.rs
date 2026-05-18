@@ -34,9 +34,8 @@ use rilua::{LuaResult, Val};
 
 /// Resolve the frame's layout rect, computing it if dirty or unset.
 ///
-/// Returns `None` when the frame has no anchors (queryable-rect guard
-/// — matches Blizzard's "unanchored frames have no GetRect"
-/// behaviour), when the frame isn't in the registry, or when the
+/// Returns `None` when the frame or any ancestor has no queryable
+/// layout anchor, when the frame isn't in the registry, or when the
 /// rect still can't be resolved after an invalidation pass.
 ///
 /// Returned tuple is `(rect, effective_scale, screen_height)` — all
@@ -48,14 +47,12 @@ fn resolve_queryable_rect(
 ) -> LuaResult<Option<(crate::LayoutRect, f32, f32)>> {
     let needs_resolve = {
         let sim = borrow_state(state)?;
+        if !crate::layout::frame_has_render_layout(&sim.widgets, id) {
+            return Ok(None);
+        };
         let Some(frame) = sim.widgets.get(id) else {
             return Ok(None);
         };
-        let has_queryable_rect =
-            !frame.anchors.is_empty() || frame.name.as_deref() == Some("UIParent") || id == 1;
-        if !has_queryable_rect {
-            return Ok(None);
-        }
         frame.layout_rect.is_none() || sim.widgets.is_rect_dirty(id)
     };
 

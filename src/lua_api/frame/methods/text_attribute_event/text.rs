@@ -7,7 +7,7 @@ mod style;
 
 pub(super) use formatting::{
     apply_default_text, get_font, get_font_height, get_font_object, get_unbounded_string_width,
-    is_truncated, scale_text_to_fit, set_font, set_font_height, set_font_object,
+    get_wrapped_width, is_truncated, scale_text_to_fit, set_font, set_font_height, set_font_object,
     set_font_objects_to_try, set_formatted_text, set_text_height, set_text_to_fit,
     try_apply_default_text,
 };
