@@ -119,7 +119,7 @@ fn visible_descendants_at_point_by_z_order(
 /// contain the screen-space point. Used for hit-test descent through any
 /// visible frame, regardless of mouse-enabled status.
 fn child_visually_contains(child: &crate::widget::Frame, pos: iced::Point) -> bool {
-    if !child.visible || child.effective_alpha <= 0.0 {
+    if !child.visible {
         return false;
     }
     let Some(rect) = child.layout_rect else {

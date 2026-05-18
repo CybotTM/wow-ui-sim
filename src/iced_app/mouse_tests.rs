@@ -666,6 +666,44 @@ fn register_for_mouse_restricts_physical_mouse_button_events() {
 }
 
 #[test]
+fn alpha_zero_mouse_enabled_frames_remain_clickable() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            AlphaZeroClickButton = CreateFrame("Button", "AlphaZeroClickButton", UIParent)
+            AlphaZeroClickButton:SetSize(100, 100)
+            AlphaZeroClickButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            AlphaZeroClickButton:EnableMouse(true)
+            AlphaZeroClickButton:SetAlpha(0)
+            AlphaZeroClickButton:SetScript("OnClick", function()
+                __alpha_zero_clicks = (__alpha_zero_clicks or 0) + 1
+            end)
+            __alpha_zero_clicks = 0
+            "#,
+        )
+        .expect("alpha-zero click setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    let click_pos = Point::new(150.0, 150.0);
+    app.handle_mouse_down(click_pos);
+    app.handle_mouse_up(click_pos);
+
+    let clicks: f64 = app
+        .env
+        .borrow()
+        .eval("return __alpha_zero_clicks")
+        .expect("alpha-zero click count should be readable");
+    assert_eq!(
+        clicks, 1.0,
+        "alpha controls rendering, not mouse hit-test eligibility"
+    );
+}
+
+#[test]
 fn propagated_mouse_clicks_fire_parent_mouse_handlers() {
     let mut app = build_test_app(ScreenKind::Game);
 

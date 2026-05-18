@@ -110,17 +110,18 @@ pub fn intra_strata_sort_key(
     }
 }
 
-/// Build a hit-test list from visible-only strata buckets.
+/// Build a hit-test list from the widget registry.
 ///
 /// Returns visible, mouse-enabled frames sorted by strata/level/id,
 /// excluding non-interactive overlays.
+/// Alpha is intentionally ignored: in WoW, transparent mouse-enabled
+/// frames still receive mouse events.
 pub fn collect_hittable_frames(
     registry: &crate::widget::WidgetRegistry,
-    strata_buckets: &[Vec<u64>],
+    _strata_buckets: &[Vec<u64>],
 ) -> CollectedFrames {
-    let mut hittable: Vec<HittableFrameEntry> = strata_buckets
-        .iter()
-        .flat_map(|bucket| bucket.iter().copied())
+    let mut hittable: Vec<HittableFrameEntry> = registry
+        .iter_ids()
         .filter_map(|id| hittable_frame_entry(registry, id))
         .collect();
 
@@ -164,7 +165,6 @@ fn hittable_frame_entry(
 
 fn is_frame_hittable(frame: &crate::widget::Frame) -> bool {
     frame.visible
-        && frame.effective_alpha > 0.0
         && (frame.mouse_enabled || matches!(frame.widget_type, WidgetType::EditBox))
         && !is_hit_test_excluded(frame)
 }
