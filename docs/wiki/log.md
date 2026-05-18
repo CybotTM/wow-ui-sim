@@ -9,6 +9,10 @@ tracking regression. EditMode profile cache files are not Lua SavedVariables, so
 startup now loads them through a separate WTF cache path when Lua SavedVariables
 are disabled.
 
+## [2026-05-18] investigation | ElvUI tooltip skin ordering
+
+Updated `investigations/tooltip-double-shell.md` after tracing Character panel item tooltips under ElvUI to direct `GameTooltip` skin textures rendering after the tooltip frame's internal text emitter. `GameTooltip` now renders direct texture regions before the tooltip frame/text while still deferring direct FontStrings above it.
+
 ## [2026-05-18] investigation | Mists full-addon login profile
 
 Updated `investigations/talent-performance.md` with a fresh full-addon Mists login profile. Startup is currently dominated by third-party Lua compilation (`16.73s` compile out of `25.64s` third-party addon load, bytecode cache `1/1395` hits), with AllTheThings and RaiderIO DB addons as the largest contributors.
