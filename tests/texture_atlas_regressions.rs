@@ -199,6 +199,62 @@ fn set_atlas_propagates_to_parent_button_normal_texture() {
     );
 }
 
+#[test]
+fn empty_set_atlas_clears_texture_instead_of_using_empty_atlas_db_entry() {
+    let env = env();
+    env.exec(
+        r#"
+        local tex = UIParent:CreateTexture("EmptyAtlasClearsTexture", "BACKGROUND")
+        tex:SetTexture("Interface\\Buttons\\WHITE8X8")
+        tex:SetAtlas("")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let tex_id = state
+        .widgets
+        .get_id_by_name("EmptyAtlasClearsTexture")
+        .unwrap();
+    let tex = state.widgets.get(tex_id).unwrap();
+    assert_eq!(
+        tex.texture, None,
+        "SetAtlas(\"\") should clear texture path"
+    );
+    assert_eq!(tex.atlas, None, "SetAtlas(\"\") should clear atlas name");
+}
+
+#[test]
+fn empty_set_atlas_clears_parent_button_slot_texture() {
+    let env = env();
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "EmptyAtlasClearsButtonSlot", UIParent)
+        btn:SetSize(32, 32)
+        local tex = btn:CreateTexture(nil, "BACKGROUND", nil, nil, "NormalTexture")
+        btn:SetNormalTexture(tex)
+        tex:SetAtlas("checkbox-minimal")
+        tex:SetAtlas("")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let btn_id = state
+        .widgets
+        .get_id_by_name("EmptyAtlasClearsButtonSlot")
+        .unwrap();
+    let btn = state.widgets.get(btn_id).unwrap();
+    assert_eq!(
+        btn.normal_texture, None,
+        "SetAtlas(\"\") on NormalTexture child should clear parent normal_texture"
+    );
+    assert_eq!(
+        btn.normal_tex_coords, None,
+        "SetAtlas(\"\") on NormalTexture child should clear parent normal_tex_coords"
+    );
+}
+
 /// Child texture with parentKey "PushedTexture" calling SetAtlas should
 /// propagate to parent button's pushed_texture / pushed_tex_coords.
 #[test]

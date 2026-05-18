@@ -20,6 +20,11 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let Some(atlas_name) = atlas_name else {
         return Ok(0);
     };
+    if atlas_name.trim().is_empty() {
+        let mut sim = borrow_state_mut(state)?;
+        clear_atlas_texture(&mut sim.widgets, id);
+        return Ok(0);
+    }
     let Some(lookup) = crate::atlas::get_render_atlas_info(&atlas_name) else {
         let mut sim = borrow_state_mut(state)?;
         if let Some(frame) = sim.widgets.get_mut_visual(id) {
@@ -34,6 +39,19 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     apply_atlas(&mut sim.widgets, id, &atlas_name, &lookup, use_atlas_size);
     Ok(0)
+}
+
+fn clear_atlas_texture(widgets: &mut crate::widget::WidgetRegistry, id: u64) {
+    let parent_info = collect_parent_slot(widgets, id);
+    if let Some(frame) = widgets.get_mut_visual(id) {
+        frame.atlas = None;
+        frame.texture = None;
+        frame.tex_coords = None;
+        frame.atlas_tex_coords = None;
+    }
+    if let Some((parent_id, parent_key)) = parent_info {
+        clear_button_slot(widgets, parent_id, &parent_key);
+    }
 }
 
 /// Write the atlas onto the child frame, then mirror the slot into the
@@ -149,6 +167,43 @@ fn propagate_atlas_to_button_slot(
         "DisabledCheckedTexture" => {
             parent.disabled_checked_texture = Some(texture_path);
             parent.disabled_checked_tex_coords = Some(tex_coords);
+        }
+        _ => {}
+    }
+}
+
+fn clear_button_slot(
+    widgets: &mut crate::widget::WidgetRegistry,
+    parent_id: u64,
+    parent_key: &str,
+) {
+    let Some(parent) = widgets.get_mut_visual(parent_id) else {
+        return;
+    };
+    match parent_key {
+        "NormalTexture" => {
+            parent.normal_texture = None;
+            parent.normal_tex_coords = None;
+        }
+        "PushedTexture" => {
+            parent.pushed_texture = None;
+            parent.pushed_tex_coords = None;
+        }
+        "HighlightTexture" => {
+            parent.highlight_texture = None;
+            parent.highlight_tex_coords = None;
+        }
+        "DisabledTexture" => {
+            parent.disabled_texture = None;
+            parent.disabled_tex_coords = None;
+        }
+        "CheckedTexture" => {
+            parent.checked_texture = None;
+            parent.checked_tex_coords = None;
+        }
+        "DisabledCheckedTexture" => {
+            parent.disabled_checked_texture = None;
+            parent.disabled_checked_tex_coords = None;
         }
         _ => {}
     }
