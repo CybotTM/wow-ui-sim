@@ -16,9 +16,7 @@ impl App {
 
         let env = self.env.borrow();
         let state = env.state().borrow();
-        let initial_id = grid.topmost_matching_at(pos, |id| {
-            deepest_hover_target_through_visible_children(&state.widgets, grid, id, pos).is_some()
-        })?;
+        let initial_id = grid.topmost_matching_at(pos, |_| true)?;
         deepest_hover_target_through_visible_children(&state.widgets, grid, initial_id, pos)
     }
 
