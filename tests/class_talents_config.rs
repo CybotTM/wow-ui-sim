@@ -101,3 +101,37 @@ fn get_trait_tree_for_unknown_spec_returns_nil() {
         .unwrap();
     assert!(is_nil, "unknown specs should not map to a tree id");
 }
+
+#[test]
+fn initialize_view_loadout_drives_trait_node_spec_visibility() {
+    let env = env();
+    let (active_config, holy_visible, prot_visible, ret_visible): (i32, bool, bool, bool) = env
+        .eval(
+            r#"
+            local configID = Constants.TraitConsts.VIEW_TRAIT_CONFIG_ID
+
+            C_ClassTalents.InitializeViewLoadout(65, 80)
+            local holyNode = C_Traits.GetNodeInfo(configID, 99839)
+
+            C_ClassTalents.InitializeViewLoadout(66, 80)
+            local protNode = C_Traits.GetNodeInfo(configID, 99838)
+
+            C_ClassTalents.InitializeViewLoadout(70, 80)
+            local retNode = C_Traits.GetNodeInfo(configID, 99837)
+
+            return C_ClassTalents.GetActiveConfigID(),
+                   holyNode and holyNode.isVisible or false,
+                   protNode and protNode.isVisible or false,
+                   retNode and retNode.isVisible or false
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        active_config, 201,
+        "viewing another spec must not replace the active loadout"
+    );
+    assert!(holy_visible, "Holy hero selection node should be visible");
+    assert!(prot_visible, "Protection hero selection node should be visible");
+    assert!(ret_visible, "Retribution hero selection node should be visible");
+}

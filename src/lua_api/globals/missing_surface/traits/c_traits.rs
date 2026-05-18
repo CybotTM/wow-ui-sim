@@ -272,8 +272,13 @@ fn optional_trait_u32(value: u32) -> Val {
 }
 
 fn c_traits_initialize_view_loadout(state: &mut LuaState) -> LuaResult<u32> {
-    let _config_id = i32::from_stack(state, 1)?;
+    let config_id = i32::from_stack(state, 1)?;
     let _tree_id = i32::from_stack(state, 2)?;
+    if let Some(spec_id) = config_spec_id(config_id) {
+        borrow_state_mut(state)?
+            .talents
+            .initialize_view_loadout(spec_id);
+    }
     state.push(Val::Bool(true));
     Ok(1)
 }

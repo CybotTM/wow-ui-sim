@@ -142,6 +142,8 @@ fn default_loadout_states_for_spec(active_spec_id: u32) -> HashMap<i32, TalentLo
 pub struct TalentState {
     /// Active spec ID for the current loadout state.
     pub active_spec_id: u32,
+    /// Spec currently loaded into the talent viewer surface.
+    pub view_spec_id: Option<u32>,
     /// Per-node purchased ranks: node_id → ranks_purchased (default 0).
     pub node_ranks: HashMap<u32, u32>,
     /// Per-node selected entry (for choice nodes): node_id → entry_id.
@@ -197,6 +199,7 @@ impl TalentState {
 
         Self {
             active_spec_id,
+            view_spec_id: None,
             node_ranks,
             node_selections,
             group_currency_map,
@@ -403,6 +406,10 @@ impl TalentState {
         self.ensure_config_state(self.active_config_id);
         self.can_change_talents = can_change;
         self.has_starter_build = has_starter;
+    }
+
+    pub fn initialize_view_loadout(&mut self, spec_id: u32) {
+        self.view_spec_id = Some(spec_id);
     }
 
     pub fn switch_to_loadout(&mut self, spec_id: u32, config_id: i32) {

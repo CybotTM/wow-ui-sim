@@ -175,8 +175,11 @@ fn c_class_talents_get_active_hero_talent_spec(state: &mut LuaState) -> LuaResul
 }
 
 fn c_class_talents_initialize_view_loadout(state: &mut LuaState) -> LuaResult<u32> {
-    let _spec_id = u32::from_stack(state, 1)?;
+    let spec_id = u32::from_stack(state, 1)?;
     let _level = u32::from_stack(state, 2)?;
+    borrow_state_mut(state)?
+        .talents
+        .initialize_view_loadout(spec_id);
     state.push(Val::Bool(true));
     Ok(1)
 }

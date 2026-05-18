@@ -86,10 +86,11 @@ fn fire_trait_tree_currency_info_updated_for_node(state: &mut LuaState, node_id:
 
 fn current_spec_id(state: &LuaState) -> Option<u32> {
     let sim = borrow_state(state).ok()?;
-    let class_id = sim.player.class_index as u32;
-    let spec_index = sim.player.active_spec_index.max(1) as usize - 1;
-    specializations::specs_for_class(class_id)
-        .nth(spec_index)
+    sim.talents.view_spec_id.or_else(|| player_spec_id(&sim))
+}
+fn player_spec_id(state: &crate::lua_api::SimState) -> Option<u32> {
+    specializations::specs_for_class(state.player.class_index as u32)
+        .nth(state.player.active_spec_index.max(1) as usize - 1)
         .map(|spec| spec.id)
 }
 
@@ -214,9 +215,10 @@ fn spec_set_contains_active_spec(spec_set_id: u32, state: &crate::lua_api::SimSt
     if spec_set_id == 0 {
         return true;
     }
-    let active_spec_id = specializations::specs_for_class(state.player.class_index as u32)
-        .nth((state.player.active_spec_index - 1).max(0) as usize)
-        .map(|spec| spec.id)
+    let active_spec_id = state
+        .talents
+        .view_spec_id
+        .or_else(|| player_spec_id(state))
         .unwrap_or(66);
     match spec_set_id {
         27 => active_spec_id == 65,
