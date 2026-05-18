@@ -249,6 +249,41 @@ fn test_character_slot_hover_tooltip_produces_quads() {
 
 #[cfg(feature = "gui")]
 #[test]
+fn test_character_slot_hover_sizes_tooltip_before_render_pass() {
+    let env = setup_full_env();
+    open_character_panel(&env);
+
+    let slot_id = {
+        let state = env.state().borrow();
+        state
+            .widgets
+            .get_id_by_name("CharacterHeadSlot")
+            .expect("CharacterHeadSlot should exist after opening character panel")
+    };
+
+    env.state().borrow_mut().hovered_frame = Some(slot_id);
+    env.fire_script_handler(slot_id, "OnEnter", vec![]).unwrap();
+
+    let (shown, lines, width, height): (bool, f64, f64, f64) = env
+        .eval("return GameTooltip:IsShown(), GameTooltip:NumLines(), GameTooltip:GetWidth(), GameTooltip:GetHeight()")
+        .expect("GameTooltip geometry should be queryable after slot hover");
+    assert!(shown, "character slot hover should show GameTooltip");
+    assert!(
+        lines > 0.0,
+        "character slot hover should populate tooltip lines"
+    );
+    assert!(
+        width > 0.0,
+        "tooltip width should be resolved before the next render pass, got {width}"
+    );
+    assert!(
+        height > 0.0,
+        "tooltip height should be resolved before the next render pass, got {height}"
+    );
+}
+
+#[cfg(feature = "gui")]
+#[test]
 fn test_character_slot_hover_tooltip_is_positioned_to_right_of_slot() {
     use wow_ui_sim::render::font::WowFontSystem;
 

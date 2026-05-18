@@ -4,6 +4,7 @@ mod content;
 mod line_data;
 mod line_frames;
 mod owner;
+mod sizing;
 
 use self::content::*;
 use self::line_data::*;

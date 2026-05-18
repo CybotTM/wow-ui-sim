@@ -2,6 +2,7 @@
 
 use super::super::shared::opt_string;
 use super::line_frames::{table_array_get, tooltip_line_from_table};
+use super::sizing::refresh_tooltip_geometry;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
     frame_ref, table_get, val_to_string,
@@ -69,7 +70,7 @@ fn apply_tooltip_lines(
     td.unit_token = None;
     td.unit_name = None;
     td.unit_guid = None;
-    sim.widgets.mark_rect_dirty(tooltip_id);
+    refresh_tooltip_geometry(sim, tooltip_id);
     sim.set_frame_visible(tooltip_id, visible);
 }
 

@@ -1,6 +1,7 @@
 //! Tooltip line frame helpers.
 
 use super::super::shared::{opt_f32, opt_string};
+use super::sizing::refresh_tooltip_geometry;
 use crate::lua_api::globals::create_frame::create_frame_instance;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, frame_id_from_stack, frame_ref, table_get, val_to_string,
@@ -261,6 +262,7 @@ fn add_texture_line(
             wrap: false,
             texture: Some(texture),
         });
+    refresh_tooltip_geometry(&mut sim, tooltip_id);
     Ok(0)
 }
 

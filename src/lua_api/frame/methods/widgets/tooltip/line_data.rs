@@ -5,6 +5,7 @@ use super::content::fire_tooltip_script;
 use super::line_frames::{
     line_color_segments, normal_font_color, sync_tooltip_line_frame, table_array_get,
 };
+use super::sizing::refresh_tooltip_geometry;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref, table_get,
     val_to_string,
@@ -24,7 +25,7 @@ pub(super) fn clear_lines(state: &mut LuaState) -> LuaResult<u32> {
     td.unit_token = None;
     td.unit_name = None;
     td.unit_guid = None;
-    sim.widgets.mark_rect_dirty(id);
+    refresh_tooltip_geometry(&mut sim, id);
     drop(sim);
     fire_tooltip_script(state, id, "OnTooltipCleared");
     Ok(0)
@@ -60,7 +61,7 @@ pub(super) fn add_line(state: &mut LuaState) -> LuaResult<u32> {
         wrap,
         texture: None,
     });
-    sim.widgets.mark_rect_dirty(id);
+    refresh_tooltip_geometry(&mut sim, id);
     drop(sim);
     let _ = sync_tooltip_line_frame(state, id, false, line_index)?;
     Ok(0)
@@ -158,7 +159,7 @@ fn push_double_tooltip_line(
         wrap: args.wrap,
         texture: None,
     });
-    sim.widgets.mark_rect_dirty(tooltip_id);
+    refresh_tooltip_geometry(&mut sim, tooltip_id);
     Ok(())
 }
 
@@ -261,7 +262,7 @@ pub(super) fn set_custom_line_spacing(state: &mut LuaState) -> LuaResult<u32> {
     let spacing = val_to_f64(stack_val(state, 2)) as f32;
     let mut sim = borrow_state_mut(state)?;
     sim.tooltips.entry(id).or_default().line_spacing = Some(spacing);
-    sim.widgets.mark_rect_dirty(id);
+    refresh_tooltip_geometry(&mut sim, id);
     Ok(0)
 }
 
@@ -283,7 +284,7 @@ pub(super) fn set_minimum_width(state: &mut LuaState) -> LuaResult<u32> {
     let width = val_to_f64(stack_val(state, 2)) as f32;
     let mut sim = borrow_state_mut(state)?;
     sim.tooltips.entry(id).or_default().min_width = width;
-    sim.widgets.mark_rect_dirty(id);
+    refresh_tooltip_geometry(&mut sim, id);
     Ok(0)
 }
 
@@ -304,7 +305,7 @@ pub(super) fn set_allow_show_with_no_lines(state: &mut LuaState) -> LuaResult<u3
     let value = val_to_bool(stack_val(state, 2));
     let mut sim = borrow_state_mut(state)?;
     sim.tooltips.entry(id).or_default().allow_show_with_no_lines = value;
-    sim.widgets.mark_rect_dirty(id);
+    refresh_tooltip_geometry(&mut sim, id);
     Ok(0)
 }
 
@@ -316,7 +317,7 @@ pub(super) fn set_custom_word_wrap_min_width(state: &mut LuaState) -> LuaResult<
         .entry(id)
         .or_default()
         .custom_word_wrap_min_width = Some(width);
-    sim.widgets.mark_rect_dirty(id);
+    refresh_tooltip_geometry(&mut sim, id);
     Ok(0)
 }
 
@@ -325,7 +326,7 @@ pub(super) fn set_shrink_to_fit_wrapped(state: &mut LuaState) -> LuaResult<u32> 
     let value = val_to_bool(stack_val(state, 2));
     let mut sim = borrow_state_mut(state)?;
     sim.tooltips.entry(id).or_default().shrink_to_fit_wrapped = value;
-    sim.widgets.mark_rect_dirty(id);
+    refresh_tooltip_geometry(&mut sim, id);
     Ok(0)
 }
 
@@ -394,6 +395,7 @@ pub(super) fn set_padding(state: &mut LuaState) -> LuaResult<u32> {
     let padding = val_to_f64(stack_val(state, 2)) as f32;
     let mut sim = borrow_state_mut(state)?;
     sim.tooltips.entry(id).or_default().padding = padding;
+    refresh_tooltip_geometry(&mut sim, id);
     Ok(0)
 }
 
@@ -415,6 +417,7 @@ pub(super) fn clear_padding(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(td) = sim.tooltips.get_mut(&id) {
         td.padding = 0.0;
     }
+    refresh_tooltip_geometry(&mut sim, id);
     Ok(0)
 }
 
@@ -425,5 +428,6 @@ pub(super) fn append_text(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(last) = sim.tooltips.entry(id).or_default().lines.last_mut() {
         last.left_text.push_str(&text);
     }
+    refresh_tooltip_geometry(&mut sim, id);
     Ok(0)
 }

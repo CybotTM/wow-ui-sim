@@ -404,6 +404,48 @@ fn hover_after_gui_resize_uses_resized_screen_coordinates() {
 }
 
 #[test]
+fn mouse_hover_sizes_tooltip_before_next_resize_or_draw() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            TooltipHoverButton = CreateFrame("Button", "TooltipHoverButton", UIParent)
+            TooltipHoverButton:SetSize(100, 40)
+            TooltipHoverButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            TooltipHoverButton:EnableMouse(true)
+            TooltipHoverButton:SetScript("OnEnter", function(self)
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                GameTooltip:ClearLines()
+                GameTooltip:AddLine("Tooltip hover should size before draw")
+                GameTooltip:Show()
+            end)
+            "#,
+        )
+        .expect("tooltip hover setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    app.handle_mouse_move(Point::new(150.0, 120.0));
+
+    let (shown, width, height): (bool, f64, f64) = app
+        .env
+        .borrow()
+        .eval("return GameTooltip:IsShown(), GameTooltip:GetWidth(), GameTooltip:GetHeight()")
+        .expect("tooltip geometry should be readable after hover");
+    assert!(shown, "tooltip should be shown by the hover script");
+    assert!(
+        width > 0.0,
+        "tooltip width should be resolved by the hover event, got {width}"
+    );
+    assert!(
+        height > 0.0,
+        "tooltip height should be resolved by the hover event, got {height}"
+    );
+}
+
+#[test]
 fn syncing_same_gui_size_does_not_trigger_resize_refresh() {
     let app = build_test_app(ScreenKind::Game);
     rebuild_hittable_cache(&app);
