@@ -257,9 +257,26 @@ impl App {
             ));
             drop(state);
             env.set_screen_size(size.width, size.height);
+            *self.cached_hittable.borrow_mut() = None;
+            self.mark_all_strata_dirty();
             let _ = env.fire_event("DISPLAY_SIZE_CHANGED");
             let _ = env.fire_event("UI_SCALE_CHANGED");
+            self.rebuild_hit_grid_after_screen_resize(size);
         }
+    }
+
+    fn rebuild_hit_grid_after_screen_resize(&self, size: iced::Size) {
+        let env = self.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let Some(strata_buckets) = state.get_strata_buckets().cloned() else {
+            return;
+        };
+        let collected =
+            super::frame_collect::collect_hittable_frames(&state.widgets, &strata_buckets);
+        let hittable = super::strata_emit::build_hittable_rects(&collected, &state.widgets);
+        let grid = super::hit_grid::HitGrid::new(hittable, size.width, size.height);
+        *self.cached_hittable.borrow_mut() = Some(grid);
     }
 
     pub(crate) fn drain_console(&mut self) {

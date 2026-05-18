@@ -350,6 +350,60 @@ fn moving_inside_canvas_off_hovered_frame_fires_on_leave() {
 }
 
 #[test]
+fn hover_after_gui_resize_uses_resized_screen_coordinates() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            ResizeAnchoredButton = CreateFrame("Button", "ResizeAnchoredButton", UIParent)
+            ResizeAnchoredButton:SetSize(50, 50)
+            ResizeAnchoredButton:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -20, 20)
+            ResizeAnchoredButton:EnableMouse(true)
+            ResizeAnchoredButton:SetScript("OnEnter", function()
+                __resize_anchor_enter = (__resize_anchor_enter or 0) + 1
+            end)
+            __resize_anchor_enter = 0
+            "#,
+        )
+        .expect("resize anchored hover setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    app.sync_screen_size_to_state(iced::Size::new(1024.0, 768.0));
+    app.screen_size.set(iced::Size::new(1024.0, 768.0));
+
+    let resized_center = {
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let button_id = state
+            .widgets
+            .get_id_by_name("ResizeAnchoredButton")
+            .expect("ResizeAnchoredButton should exist");
+        let rect = state
+            .widgets
+            .get(button_id)
+            .and_then(|frame| frame.layout_rect)
+            .expect("ResizeAnchoredButton should have a resized layout rect");
+        Point::new(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0)
+    };
+
+    app.handle_mouse_move(resized_center);
+
+    let enter_count: f64 = app
+        .env
+        .borrow()
+        .eval("return __resize_anchor_enter")
+        .expect("resize hover counter should be readable");
+    assert_eq!(
+        enter_count, 1.0,
+        "hover after GUI resize should use resized frame coordinates"
+    );
+}
+
+#[test]
 fn moving_inside_same_hovered_frame_does_not_dirty_render_state() {
     let mut app = build_test_app(ScreenKind::Game);
 
