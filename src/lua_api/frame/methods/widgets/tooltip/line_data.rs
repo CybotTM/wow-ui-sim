@@ -19,8 +19,11 @@ pub(super) fn clear_lines(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
     let td = sim.tooltips.entry(id).or_default();
-    td.clear_content_state();
-    td.reset_layout_constraints();
+    td.lines.clear();
+    td.spell_id = None;
+    td.unit_token = None;
+    td.unit_name = None;
+    td.unit_guid = None;
     sim.widgets.mark_rect_dirty(id);
     drop(sim);
     fire_tooltip_script(state, id, "OnTooltipCleared");

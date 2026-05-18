@@ -93,8 +93,8 @@ fn record_tooltip_owner(
     td.anchor_type = args.anchor_kind.clone();
     td.anchor_x_offset = args.x_offset;
     td.anchor_y_offset = args.y_offset;
-    td.clear_content_state();
-    td.reset_layout_constraints();
+    td.lines.clear();
+    td.spell_id = None;
     sim.widgets.mark_rect_dirty(tooltip_id);
     // Tooltip owners commonly reapply SetOwner during periodic refreshes.
     // Keep the tooltip shown so identical refreshes don't churn show/hide state.
@@ -478,9 +478,7 @@ fn frame_stack_parent_line(parent_label: String) -> TooltipLine {
 
 fn clear_tooltip_lines(state: &mut LuaState, tooltip_id: u64) -> LuaResult<()> {
     let mut sim = borrow_state_mut(state)?;
-    let td = sim.tooltips.entry(tooltip_id).or_default();
-    td.clear_content_state();
-    td.reset_layout_constraints();
+    sim.tooltips.entry(tooltip_id).or_default().lines.clear();
     Ok(())
 }
 
