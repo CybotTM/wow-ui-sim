@@ -226,30 +226,53 @@ impl TextureManager {
             }
         }
 
+        if is_legacy_paperdoll_slot_path(normalized_path)
+            && let Some(result) = try_blizzard_interface_art_resolve(self, normalized_path)
+        {
+            return Some(result);
+        }
+
         if let Some(result) = try_casc_resolve(normalized_path) {
             return Some(result);
         }
 
         // Fallback: an extracted Interface dump. Covers entries the live CASC
         // has GC'd but the older dump still has on disk.
-        if let Some(blizzard_art_root) = blizzard_interface_art_root()
-            && blizzard_art_root.exists()
-        {
-            if let Some(result) = self.try_resolve_in_dir(&blizzard_art_root, normalized_path) {
-                return Some(result);
-            }
-            let lower = normalized_path.to_ascii_lowercase();
-            if !lower.starts_with("interface/") {
-                let prefixed = format!("Interface/{normalized_path}");
-                if let Some(result) = self.try_resolve_in_dir(&blizzard_art_root, &prefixed) {
-                    return Some(result);
-                }
-            }
+        if let Some(result) = try_blizzard_interface_art_resolve(self, normalized_path) {
+            return Some(result);
         }
 
         None
     }
+}
 
+fn try_blizzard_interface_art_resolve(
+    texture_manager: &TextureManager,
+    normalized_path: &str,
+) -> Option<PathBuf> {
+    let blizzard_art_root = blizzard_interface_art_root()?;
+    if !blizzard_art_root.exists() {
+        return None;
+    }
+    if let Some(result) = texture_manager.try_resolve_in_dir(&blizzard_art_root, normalized_path) {
+        return Some(result);
+    }
+    let lower = normalized_path.to_ascii_lowercase();
+    if !lower.starts_with("interface/") {
+        let prefixed = format!("Interface/{normalized_path}");
+        if let Some(result) = texture_manager.try_resolve_in_dir(&blizzard_art_root, &prefixed) {
+            return Some(result);
+        }
+    }
+    None
+}
+
+fn is_legacy_paperdoll_slot_path(normalized_path: &str) -> bool {
+    let lower = normalized_path.to_ascii_lowercase();
+    lower.starts_with("interface/paperdoll/ui-paperdoll-slot-")
+}
+
+impl TextureManager {
     /// Try to resolve a path within a given base directory.
     fn try_resolve_in_dir(&self, base: &Path, path: &str) -> Option<PathBuf> {
         for ext in texture_extension_priority() {
