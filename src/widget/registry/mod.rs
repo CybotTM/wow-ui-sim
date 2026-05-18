@@ -529,6 +529,37 @@ impl WidgetRegistry {
         !self.pending_layout_ids.is_empty() || !self.rect_dirty_ids.is_empty()
     }
 
+    /// Snapshot pending layout roots before a layout pass drains them.
+    pub fn pending_layout_roots(&self) -> Vec<u64> {
+        let mut roots: FxHashSet<u64> = self.pending_layout_ids.clone();
+        roots.extend(self.rect_dirty_ids.iter().copied());
+        self.prune_descendant_layout_roots(roots)
+    }
+
+    fn prune_descendant_layout_roots(&self, roots: FxHashSet<u64>) -> Vec<u64> {
+        let mut pruned: Vec<u64> = roots
+            .iter()
+            .copied()
+            .filter(|id| !self.has_layout_root_ancestor(*id, &roots))
+            .collect();
+        pruned.sort_unstable();
+        pruned
+    }
+
+    fn has_layout_root_ancestor(&self, id: u64, roots: &FxHashSet<u64>) -> bool {
+        let mut current = self.widgets.get(&id).and_then(|frame| frame.parent_id);
+        while let Some(parent_id) = current {
+            if roots.contains(&parent_id) {
+                return true;
+            }
+            current = self
+                .widgets
+                .get(&parent_id)
+                .and_then(|frame| frame.parent_id);
+        }
+        false
+    }
+
     /// Check if this specific frame (not ancestors) is in `rect_dirty_ids`.
     pub fn is_rect_dirty_self(&self, id: u64) -> bool {
         self.rect_dirty_ids.contains(&id)

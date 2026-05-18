@@ -15,6 +15,7 @@ use super::app::App;
 use super::frame_collect::collect_hittable_frames;
 use super::state::CanvasMessage;
 use super::strata_emit::build_hittable_rects;
+use super::update_helpers::apply_subtree_hit_grid_change;
 
 #[path = "render_draw_frame.rs"]
 mod draw_frame;
@@ -249,7 +250,7 @@ impl App {
 
         let env = self.env.borrow();
         let mut font_sys = self.font_system.borrow_mut();
-        let (strata_buckets, layout_changed) = self.resolve_layout_and_buckets(&env, &mut font_sys);
+        let (strata_buckets, layout_roots) = self.resolve_layout_and_buckets(&env, &mut font_sys);
         let state = env.state().borrow();
 
         self.emit_dirty_strata_batches(
@@ -260,7 +261,7 @@ impl App {
             &state,
             &mut font_sys,
         );
-        if layout_changed {
+        if !self.repair_hit_grid_after_layout_changes(&state, &layout_roots) {
             *self.cached_hittable.borrow_mut() = None;
         }
         self.rebuild_hit_grid_if_needed(&state, &strata_buckets, size);
@@ -529,11 +530,11 @@ impl App {
         &self,
         env: &crate::lua_api::WowLuaEnv,
         font_sys: &mut WowFontSystem,
-    ) -> (Vec<Vec<u64>>, bool) {
+    ) -> (Vec<Vec<u64>>, Vec<u64>) {
         let mut state = env.state().borrow_mut();
         let t0 = std::time::Instant::now();
         super::tooltip::update_tooltip_sizes(&mut state, font_sys);
-        let layout_changed = state.widgets.has_pending_layout_work();
+        let layout_roots = state.widgets.pending_layout_roots();
         state.ensure_layout_rects();
         let layout_dur = t0.elapsed();
         let t1 = std::time::Instant::now();
@@ -545,7 +546,29 @@ impl App {
                 crate::logging::global_elapsed_prefix()
             );
         }
-        (state.strata_buckets.take().unwrap(), layout_changed)
+        (state.strata_buckets.take().unwrap(), layout_roots)
+    }
+
+    fn repair_hit_grid_after_layout_changes(
+        &self,
+        state: &crate::lua_api::SimState,
+        layout_roots: &[u64],
+    ) -> bool {
+        if layout_roots.is_empty() {
+            return true;
+        }
+        const MAX_INCREMENTAL_HIT_GRID_LAYOUT_ROOTS: usize = 512;
+        if layout_roots.len() > MAX_INCREMENTAL_HIT_GRID_LAYOUT_ROOTS {
+            return false;
+        }
+        let mut grid_ref = self.cached_hittable.borrow_mut();
+        let Some(grid) = grid_ref.as_mut() else {
+            return false;
+        };
+        for &root_id in layout_roots {
+            apply_subtree_hit_grid_change(grid, &state.widgets, root_id, true);
+        }
+        true
     }
 
     fn rebuild_hit_grid_if_needed(

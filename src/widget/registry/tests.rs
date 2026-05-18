@@ -78,6 +78,25 @@ fn visible_texture_paths_ignores_children_under_hidden_parents() {
 }
 
 #[test]
+fn pending_layout_roots_prunes_descendants_of_dirty_roots() {
+    let mut registry = WidgetRegistry::default();
+    registry.register(frame(1, WidgetType::Frame, None, FrameStrata::High));
+    registry.register(frame(2, WidgetType::Frame, Some(1), FrameStrata::High));
+    registry.register(frame(3, WidgetType::Button, Some(2), FrameStrata::High));
+    registry.add_child(1, 2);
+    registry.add_child(2, 3);
+
+    registry.mark_rect_dirty(1);
+    registry.mark_rect_dirty(3);
+
+    assert_eq!(
+        registry.pending_layout_roots(),
+        vec![1],
+        "incremental layout repair should walk the top dirty root once"
+    );
+}
+
+#[test]
 fn add_child_reparents_child_and_updates_effective_alpha() {
     let mut registry = WidgetRegistry::default();
 
