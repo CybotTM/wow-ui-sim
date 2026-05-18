@@ -1,5 +1,6 @@
 //! Event registration, script handlers, and hlist data structure helpers.
 
+mod mouse_implied;
 mod script_binding_args;
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack, val_to_string};
@@ -10,6 +11,7 @@ use crate::lua_api::script_helpers::{
 };
 use crate::lua_bridge::stack_val;
 use crate::widget::WidgetType;
+use mouse_implied::imply_mouse_enabled_for_mouse_handler;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -259,6 +261,7 @@ pub(super) fn set_script(state: &mut LuaState) -> LuaResult<u32> {
             )));
         }
         set_rilua_script(state, frame_id, &handler_name, handler);
+        imply_mouse_enabled_for_mouse_handler(state, frame_id, &handler_name)?;
     }
     Ok(0)
 }
@@ -303,6 +306,7 @@ pub(super) fn hook_script(state: &mut LuaState) -> LuaResult<u32> {
     let old = get_rilua_script_binding(state, frame_id, &handler_name, binding).unwrap_or(Val::Nil);
     let chained = build_hooked_script(state, old, hook)?;
     set_rilua_script_binding(state, frame_id, &handler_name, binding, chained);
+    imply_mouse_enabled_for_mouse_handler(state, frame_id, &handler_name)?;
     state.push(Val::Bool(true));
     Ok(1)
 }

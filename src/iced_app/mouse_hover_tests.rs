@@ -99,6 +99,64 @@ fn hit_test_reflects_frames_shown_by_previous_clicks() {
 }
 
 #[test]
+fn mouse_edge_scripts_imply_mouse_enabled_and_update_hit_grid() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            ImpliedMouseFrame = CreateFrame("Frame", "ImpliedMouseFrame", UIParent)
+            ImpliedMouseFrame:SetSize(100, 100)
+            ImpliedMouseFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            __implied_mouse_down = 0
+            "#,
+        )
+        .expect("implied mouse setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    app.handle_mouse_down(Point::new(150.0, 150.0));
+
+    let before_script: f64 = app
+        .env
+        .borrow()
+        .eval("return __implied_mouse_down")
+        .expect("initial mouse counter should be readable");
+    assert_eq!(before_script, 0.0);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            ImpliedMouseFrame:SetScript("OnMouseDown", function(_, button)
+                if button == "LeftButton" then
+                    __implied_mouse_down = __implied_mouse_down + 1
+                end
+            end)
+            "#,
+        )
+        .expect("setting OnMouseDown should succeed");
+    }
+
+    app.handle_mouse_down(Point::new(150.0, 150.0));
+
+    let (mouse_enabled, after_script): (bool, f64) = app
+        .env
+        .borrow()
+        .eval("return ImpliedMouseFrame:IsMouseEnabled(), __implied_mouse_down")
+        .expect("implied mouse state should be readable");
+    assert!(
+        mouse_enabled,
+        "setting OnMouseDown should imply EnableMouse(true)"
+    );
+    assert_eq!(
+        after_script, 1.0,
+        "hit grid should accept the frame without a full rebuild after SetScript"
+    );
+}
+
+#[test]
 fn disabled_buttons_only_run_hover_motion_scripts_when_opted_in() {
     let mut app = build_test_app(ScreenKind::Game);
 

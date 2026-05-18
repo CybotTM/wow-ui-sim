@@ -35,6 +35,7 @@ pub(crate) mod sim_substates;
 pub mod simple_html;
 pub mod state;
 mod state_defaults;
+mod state_hit_grid;
 pub(crate) mod state_render;
 pub(crate) mod state_types;
 pub(crate) mod string_format;

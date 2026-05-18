@@ -19,7 +19,14 @@ fn set_frame_input_flag(
     let enable = arg_bool(state, 2);
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut(id) {
+        let was_mouse_eligible =
+            frame.mouse_enabled || frame.widget_type == crate::widget::WidgetType::EditBox;
         apply(frame, enable);
+        let is_mouse_eligible =
+            frame.mouse_enabled || frame.widget_type == crate::widget::WidgetType::EditBox;
+        if was_mouse_eligible != is_mouse_eligible {
+            sim.queue_hit_grid_eligibility_change(id);
+        }
     }
     Ok(0)
 }
