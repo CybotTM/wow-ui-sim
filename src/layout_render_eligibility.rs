@@ -13,17 +13,21 @@ pub fn frame_has_layout_anchor(
 
 pub fn frame_has_render_layout(registry: &WidgetRegistry, id: u64) -> bool {
     let mut current_id = id;
+    let mut is_target = true;
     for _ in 0..64 {
         let Some(frame) = registry.get(current_id) else {
             return false;
         };
-        if !frame_has_layout_anchor(registry, frame, current_id) {
+        if !frame_has_layout_anchor(registry, frame, current_id)
+            && (is_target || frame.layout_rect.is_none())
+        {
             return false;
         }
         let Some(parent_id) = frame.parent_id else {
             return true;
         };
         current_id = parent_id;
+        is_target = false;
     }
     false
 }
