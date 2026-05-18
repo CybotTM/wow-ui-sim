@@ -29,13 +29,21 @@ ElvUI can add tooltip skin textures directly under `GameTooltip` instead of only
 
 `GameTooltip` now uses tooltip-specific region placement: direct texture regions render before the tooltip frame/text, while direct FontString regions remain deferred above it. The keyed `NineSlice` child still keeps the existing pre-frame behavior.
 
+## 2026-05-18 ElvUI tooltip scale clipping
+
+After the direct-region ordering fix, ElvUI item tooltips could still show text outside the visible tooltip shell. The tooltip frame had a stored UI-unit size such as `211x166`, but ElvUI's effective scale rendered that frame as `181x142`. Normal FontStrings already multiply font size by `effective_scale`; `GameTooltip`'s internal text renderer did not, so the shell scaled down while the tooltip text stayed at unscaled pixel size.
+
+`GameTooltip` now passes `effective_scale` into the tooltip renderer and scales tooltip font sizes, line spacing, and text insets before emitting glyph quads. Tooltip measurement remains in unscaled UI units, so the frame size and scaled rendered text now agree.
+
 ## Verification
 
 - `cargo test --test tooltip_text` passes, including `test_tooltip_nineslice_child_accessible`
 - `iced_app::tooltip::tests::tooltip_renderer_skips_fallback_background_when_lua_nineslice_exists` passes
 - `iced_app::tooltip::tests::tooltip_renderer_keeps_opaque_center_when_lua_nineslice_exists` passes
 - `state_render_buckets::tests::tooltip_texture_regions_render_before_internal_text_emitter` passes
+- `iced_app::tooltip::tooltip_tests::tooltip_renderer_scales_text_with_effective_scale` passes
 - Full-addon Mists screenshot repro with `GameTooltip:SetInventoryItem("player", 1)` shows the ElvUI tooltip text above the skinned tooltip body.
+- Full-addon Mists screenshot repro after the scale fix shows the tooltip text contained inside the ElvUI skinned tooltip bounds.
 
 ## Sources
 

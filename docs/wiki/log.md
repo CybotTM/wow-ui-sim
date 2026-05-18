@@ -1101,6 +1101,10 @@ Updated `investigations/appearances-wardrobe-api.md` with the follow-up Wardrobe
 
 ## [2026-05-01] update | Wardrobe class dropdown and set fallback
 
+## [2026-05-18] investigation | ElvUI tooltip scale clipping
+
+Updated `investigations/tooltip-double-shell.md` with the follow-up ElvUI tooltip clipping root cause. Tooltip frame bounds were scaled by ElvUI effective scale, but internal `GameTooltip` glyph emission was not; tooltip text now scales font size, line spacing, and text insets with the frame effective scale.
+
 Updated `investigations/appearances-wardrobe-api.md` with the Wardrobe class dropdown casing/color contract and the `C_TransmogSets.GetBaseSets()` nil fallback stack overflow. Documented that class display names come from localized `className`, colors from uppercase `classFile`, and empty set surfaces must return tables.
 
 ## [2026-04-12] ingest | transparent wrapper render-order investigation

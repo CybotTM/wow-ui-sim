@@ -337,7 +337,7 @@ pub fn build_tooltip_quads(
         font_sys,
         glyph_atlas,
     };
-    emit_tooltip_lines(&mut text_renderer, data, tooltip.bounds);
+    emit_tooltip_lines(&mut text_renderer, data, tooltip.bounds, tooltip.eff_scale);
 }
 
 /// Render tooltip background: nine-slice border with black fill, or solid fallback.
@@ -375,22 +375,24 @@ fn emit_tooltip_lines(
     text_renderer: &mut TooltipTextRenderer<'_>,
     data: &TooltipRenderData,
     bounds: Rectangle,
+    eff_scale: f32,
 ) {
-    let insets = tooltip_text_insets();
+    let insets = scaled_tooltip_text_insets(eff_scale);
     let content_x = bounds.x + insets.left;
     let content_width = bounds.width - insets.left - insets.right;
     let mut y = bounds.y + insets.top;
 
     for line in &data.lines {
+        let font_size = scaled_tooltip_font_size(line.font_size, eff_scale);
         let line_height = if line.wrap && !line.left_text.is_empty() {
             text_renderer.font_sys.measure_text_height(
                 &line.left_text,
                 None,
-                line.font_size,
+                font_size,
                 Some(content_width),
             )
         } else {
-            line.measured_height
+            line.measured_height * eff_scale
         };
 
         emit_tooltip_line(
@@ -402,9 +404,10 @@ fn emit_tooltip_lines(
                 width: content_width,
                 height: line_height,
             },
+            eff_scale,
         );
 
-        y += line_height + data.line_spacing;
+        y += line_height + data.line_spacing * eff_scale;
     }
 }
 
@@ -425,6 +428,20 @@ fn tooltip_text_insets() -> TooltipTextInsets {
     }
 }
 
+fn scaled_tooltip_text_insets(eff_scale: f32) -> TooltipTextInsets {
+    let insets = tooltip_text_insets();
+    TooltipTextInsets {
+        left: insets.left * eff_scale,
+        right: insets.right * eff_scale,
+        top: insets.top * eff_scale,
+        bottom: insets.bottom * eff_scale,
+    }
+}
+
+fn scaled_tooltip_font_size(font_size: f32, eff_scale: f32) -> f32 {
+    font_size * eff_scale
+}
+
 fn tooltip_center_inset(piece_extent: u32) -> f32 {
     (piece_extent as f32 - TOOLTIP_CENTER_OVERLAP).max(0.0)
 }
@@ -435,6 +452,7 @@ pub struct TooltipRender<'a> {
     pub tooltip_data: Option<&'a HashMap<u64, TooltipRenderData>>,
     pub id: u64,
     pub eff_alpha: f32,
+    pub eff_scale: f32,
     pub draw_background: bool,
 }
 
@@ -471,20 +489,22 @@ fn emit_tooltip_line(
     tr: &mut TooltipTextRenderer<'_>,
     line: &TooltipLineRender,
     placement: TooltipLinePlacement,
+    eff_scale: f32,
 ) {
+    let font_size = scaled_tooltip_font_size(line.font_size, eff_scale);
     let right_width = line
         .right_text
         .as_ref()
-        .map(|t| measure_tooltip_text_width(tr.font_sys, t, line.font_size));
+        .map(|t| measure_tooltip_text_width(tr.font_sys, t, font_size));
 
     let left_width = match right_width {
         Some(rw) if rw > 0.0 => (placement.width - rw - DOUBLE_LINE_GAP).max(0.0),
         _ => placement.width,
     };
-    emit_left_tooltip_text(tr, line, placement, left_width);
+    emit_left_tooltip_text(tr, line, placement, left_width, font_size);
 
     if let Some(ref right_text) = line.right_text {
-        emit_right_tooltip_text(tr, line, placement, left_width, right_text);
+        emit_right_tooltip_text(tr, line, placement, left_width, right_text, font_size);
     }
 }
 
@@ -493,6 +513,7 @@ fn emit_left_tooltip_text(
     line: &TooltipLineRender,
     placement: TooltipLinePlacement,
     left_width: f32,
+    font_size: f32,
 ) {
     let left_bounds = tooltip_line_bounds(placement.x, placement.y, left_width, placement.height);
     emit_tooltip_text_segments(
@@ -502,7 +523,7 @@ fn emit_left_tooltip_text(
             segments: &line.left_segments,
             bounds: left_bounds,
             justify: TextJustify::Left,
-            font_size: line.font_size,
+            font_size,
             color: line.left_color,
             wrap: line.wrap,
         },
@@ -515,6 +536,7 @@ fn emit_right_tooltip_text(
     placement: TooltipLinePlacement,
     left_width: f32,
     right_text: &str,
+    font_size: f32,
 ) {
     let right_x = placement.x + left_width + DOUBLE_LINE_GAP;
     let right_w = (placement.width - left_width - DOUBLE_LINE_GAP).max(0.0);
@@ -526,7 +548,7 @@ fn emit_right_tooltip_text(
             segments: &line.right_segments,
             bounds: right_bounds,
             justify: TextJustify::Right,
-            font_size: line.font_size,
+            font_size,
             color: line.right_color,
             wrap: false,
         },

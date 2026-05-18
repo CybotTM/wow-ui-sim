@@ -99,6 +99,10 @@ fn render_single_line_tooltip_batch(
 }
 
 fn build_single_line_tooltip_batch(bounds: Rectangle) -> QuadBatch {
+    build_single_line_tooltip_batch_with_scale(bounds, 1.0)
+}
+
+fn build_single_line_tooltip_batch_with_scale(bounds: Rectangle, eff_scale: f32) -> QuadBatch {
     let data = TooltipRenderData {
         lines: vec![single_header_tooltip_line()],
         line_spacing: TOOLTIP_LINE_SPACING,
@@ -116,6 +120,7 @@ fn build_single_line_tooltip_batch(bounds: Rectangle) -> QuadBatch {
             tooltip_data: Some(&tooltip_data),
             id: 42,
             eff_alpha: 1.0,
+            eff_scale,
             draw_background: true,
         },
         &mut text_ctx,
@@ -309,6 +314,7 @@ fn tooltip_renderer_emits_inline_color_segments() {
             tooltip_data: Some(&tooltip_data),
             id: 42,
             eff_alpha: 1.0,
+            eff_scale: 1.0,
             draw_background: false,
         },
         &mut text_ctx,
@@ -358,6 +364,7 @@ fn tooltip_renderer_wraps_inline_color_segments() {
             tooltip_data: Some(&tooltip_data),
             id: 42,
             eff_alpha: 1.0,
+            eff_scale: 1.0,
             draw_background: false,
         },
         &mut text_ctx,
@@ -448,6 +455,27 @@ fn tooltip_text_quads_start_inside_rendered_border_bounds() {
 }
 
 #[test]
+fn tooltip_renderer_scales_text_with_effective_scale() {
+    let mut font_sys = WowFontSystem::new();
+    let line = single_header_tooltip_line();
+    let insets = tooltip_text_insets();
+    let text_width = font_sys.measure_text_width(&line.left_text, None, line.font_size);
+    let unscaled_width = text_width + insets.left + insets.right;
+    let scaled_bounds = Rectangle::new(
+        Point::new(100.0, 200.0),
+        Size::new(unscaled_width * 0.5, 30.0),
+    );
+
+    let batch = build_single_line_tooltip_batch_with_scale(scaled_bounds, 0.5);
+    let glyph_bounds = glyph_bounds(&batch).expect("tooltip text should emit glyph vertices");
+
+    assert!(
+        glyph_bounds.2 <= scaled_bounds.x + scaled_bounds.width,
+        "scaled tooltip text should stay inside the scaled tooltip width"
+    );
+}
+
+#[test]
 fn tooltip_renderer_skips_fallback_background_when_lua_nineslice_exists() {
     let data = TooltipRenderData {
         lines: vec![TooltipLineRender {
@@ -477,6 +505,7 @@ fn tooltip_renderer_skips_fallback_background_when_lua_nineslice_exists() {
             tooltip_data: Some(&tooltip_data),
             id: 42,
             eff_alpha: 1.0,
+            eff_scale: 1.0,
             draw_background: false,
         },
         &mut text_ctx,
@@ -522,6 +551,7 @@ fn tooltip_renderer_keeps_opaque_center_when_lua_nineslice_exists() {
             tooltip_data: Some(&tooltip_data),
             id: 42,
             eff_alpha: 1.0,
+            eff_scale: 1.0,
             draw_background: false,
         },
         &mut text_ctx,

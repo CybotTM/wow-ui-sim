@@ -375,6 +375,7 @@ fn emit_tooltip_quads(
             tooltip_data: frame.tooltip_data,
             id: frame.id,
             eff_alpha: frame.eff_alpha,
+            eff_scale: frame.widget.effective_scale,
             draw_background: !frame.widget.children_keys.contains_key("NineSlice"),
         },
         text_ctx,
