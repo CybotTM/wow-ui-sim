@@ -218,6 +218,152 @@ fn test_set_height_same_value_no_render_dirty() {
 }
 
 #[test]
+fn test_child_hide_does_not_replace_layout_parent_onupdate() {
+    let (t, _) = load_test_lua(
+        "test-child-hide-keeps-layout-parent-onupdate",
+        r#"
+        local parent = CreateFrame("Frame", "HideLayoutParentFrame", UIParent)
+        local child = CreateFrame("Frame", "HideLayoutChildFrame", parent)
+        local customUpdate = function() end
+        local layoutUpdate = function() end
+
+        function parent:IsLayoutFrame()
+            return true
+        end
+
+        function parent:MarkDirty()
+            self:SetScript("OnUpdate", self.OnUpdate)
+        end
+
+        parent.OnUpdate = layoutUpdate
+        parent:SetScript("OnUpdate", customUpdate)
+        parent:Hide()
+
+        _G.HideLayoutParentKeptCustomUpdate = parent:GetScript("OnUpdate") == customUpdate
+    "#,
+    );
+
+    t.assert_lua_true(
+        "return HideLayoutParentKeptCustomUpdate",
+        "hiding a layout parent should not let child visibility dispatch replace its custom OnUpdate script",
+    );
+}
+
+#[test]
+fn test_show_does_not_replace_layout_frame_onupdate() {
+    let (t, _) = load_test_lua(
+        "test-show-keeps-layout-frame-onupdate",
+        r#"
+        local frame = CreateFrame("Frame", "ShowLayoutFrame", UIParent)
+        local customUpdate = function() end
+        local layoutUpdate = function() end
+
+        function frame:IsLayoutFrame()
+            return true
+        end
+
+        function frame:MarkDirty()
+            self:SetScript("OnUpdate", self.OnUpdate)
+        end
+
+        frame:Hide()
+        frame.OnUpdate = layoutUpdate
+        frame:SetScript("OnUpdate", customUpdate)
+        frame:Show()
+
+        _G.ShowLayoutFrameKeptCustomUpdate = frame:GetScript("OnUpdate") == customUpdate
+    "#,
+    );
+
+    t.assert_lua_true(
+        "return ShowLayoutFrameKeptCustomUpdate",
+        "showing a layout frame should not replace its custom OnUpdate script",
+    );
+}
+
+#[test]
+fn test_layout_dirty_helper_preserves_custom_onupdate() {
+    let (t, _) = load_test_lua(
+        "test-layout-dirty-helper-keeps-custom-onupdate",
+        r#"
+        local frame = CreateFrame("Frame", "DirtyHelperLayoutFrame", UIParent)
+        local customUpdate = function() end
+        local layoutUpdate = function() end
+
+        function frame:IsLayoutFrame()
+            return true
+        end
+
+        function frame:MarkDirty()
+            self:SetScript("OnUpdate", self.OnUpdate)
+        end
+
+        frame.OnUpdate = layoutUpdate
+        frame:SetScript("OnUpdate", customUpdate)
+        __wow_mark_layout_frame_dirty(frame)
+
+        _G.DirtyHelperKeptCustomUpdate = frame:GetScript("OnUpdate") == customUpdate
+    "#,
+    );
+
+    t.assert_lua_true(
+        "return DirtyHelperKeptCustomUpdate",
+        "simulator layout dirty helper should preserve an already installed custom OnUpdate script",
+    );
+}
+
+#[test]
+fn test_layout_dirty_preserves_custom_parent_onupdate_through_recursive_markdirty() {
+    let (t, _) = load_test_lua(
+        "test-layout-dirty-keeps-recursive-parent-onupdate",
+        r#"
+        local parent = CreateFrame("Frame", "DirtyRecursiveParentFrame", UIParent)
+        local child = CreateFrame("Frame", "DirtyRecursiveChildFrame", parent)
+        local grandchild = CreateFrame("Frame", "DirtyRecursiveGrandchildFrame", child)
+        local customUpdate = function() end
+        local parentLayoutUpdate = function() end
+        local childLayoutUpdate = function() end
+
+        function parent:IsLayoutFrame()
+            return true
+        end
+
+        function parent:MarkDirty()
+            self:SetScript("OnUpdate", self.OnUpdate)
+        end
+
+        function child:IsLayoutFrame()
+            return true
+        end
+
+        function child:MarkDirty()
+            self:SetScript("OnUpdate", self.OnUpdate)
+            local frameParent = self:GetParent()
+            while frameParent do
+                if frameParent.IsLayoutFrame and frameParent:IsLayoutFrame() then
+                    frameParent:MarkDirty()
+                    return
+                end
+                frameParent = frameParent:GetParent()
+            end
+        end
+
+        parent.OnUpdate = parentLayoutUpdate
+        child.OnUpdate = childLayoutUpdate
+        parent:SetScript("OnUpdate", customUpdate)
+        grandchild:SetWidth(10)
+
+        _G.DirtyRecursiveParentKeptCustomUpdate = parent:GetScript("OnUpdate") == customUpdate
+    "#,
+    );
+
+    t.assert_lua_true(
+        "return DirtyRecursiveParentKeptCustomUpdate",
+        "simulator layout dirtying should preserve custom OnUpdate handlers clobbered by recursive parent MarkDirty calls",
+    );
+}
+
+#[test]
 fn test_zero_size() {
     let (t, _) = load_test_lua(
         "layout-zero-size",

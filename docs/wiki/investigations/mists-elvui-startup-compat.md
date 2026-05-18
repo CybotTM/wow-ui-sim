@@ -1,6 +1,6 @@
 # Mists ElvUI Startup Compatibility
 
-Full-addon Mists startup exposed several unrelated simulator compatibility gaps that made ElvUI and Blizzard aura headers fail before the remaining addon errors could be isolated: missing trim aliases, plain frames exposing MessageFrame-only methods, Mists aura callbacks using the wrong tuple shape, scaled screen-size mismatches, missing chat hook globals, and per-Font-object metatables.
+Full-addon Mists startup exposed several unrelated simulator compatibility gaps that made ElvUI and Blizzard aura headers fail before the remaining addon errors could be isolated: missing trim aliases, plain frames exposing MessageFrame-only methods, Mists aura callbacks using the wrong tuple shape, scaled screen-size mismatches, missing chat hook globals, per-Font-object metatables, and simulator-driven layout dirtying that clobbered ElvUI popup scripts.
 
 ## Content
 
@@ -14,6 +14,7 @@ The full Mists addon pass reported these startup failures:
 - ElvUI slider skinning hit `string.find` with nil anchor data because simulator-created Slider `Low`, `High`, and `Text` fontstrings had no default points.
 - ElvUI Tooltip initialization failed at `GameTooltipText:FontTemplate(...)` because the method was added through one Font object's metatable but not visible on other Font objects.
 - ElvUI DataTexts durability initialization failed because `GetInventoryItemDurability` was missing from the inventory probe globals.
+- `ElvUI_StaticPopup1` ran Blizzard `GameDialogMixin:OnUpdate` instead of ElvUI's popup update handler, so `StaticPopup_OnUpdate` compared nil `dialog.timeleft` against zero.
 
 ### Root Causes
 
@@ -58,6 +59,12 @@ ElvUI Chat initialized far enough to create chat frames, then aborted while inst
 
 ElvUI's `E:AddAPI(GameFontNormal)` adds methods such as `FontTemplate` to the Font object's metatable. The simulator previously attached a new metatable to each Font table, so `GameTooltipText` had the base Rust Font methods but not ElvUI's metatable additions. Reusing one registry-backed Font metatable matches the object-type API shape and removes the `Tooltip.lua:1089` startup failure from the full-addon Mists probe.
 
+### Layout Dirty OnUpdate Preservation
+
+ElvUI creates `ElvUI_StaticPopup*` frames from a template that clears the inherited Blizzard static-popup scripts, then installs `E.StaticPopup_OnUpdate`. The simulator's automatic layout invalidation called Blizzard `MarkDirty()` while processing size and text changes. `BaseLayoutMixin:MarkDirty()` optimizes dirty frames by assigning `self.OnUpdate`; when a layout child recursively dirtied its parent, that replaced the popup's ElvUI handler with `GameDialogMixin:OnUpdate`.
+
+The fix keeps simulator-driven layout invalidation from stealing an already installed custom `OnUpdate`: before invoking the Lua layout-dirty helper, the Rust call site snapshots existing `OnUpdate` handlers for the target layout frame and its parent chain, then restores any handler that `MarkDirty()` changed. The full Mists ElvUI probe now keeps `ElvUI_StaticPopup1` on ElvUI's handler after `E:StaticPopup_Show("INCOMPATIBLE_ADDON", ...)`, and the `StaticPopup.lua:451` nil-timeleft error no longer appears.
+
 ## Sources
 
 - [shared_bootstrap.lua](../../../src/lua_api/env_init/shared_bootstrap.lua) — trim alias compatibility
@@ -66,6 +73,7 @@ ElvUI's `E:AddAPI(GameFontNormal)` adds methods such as `FontTemplate` to the Fo
 - [helpers_shared.rs](../../../src/lua_api/globals/create_frame/helpers_shared.rs) — default Slider label anchoring
 - [fonts.rs](../../../src/lua_api/globals/font_strings_collection/fonts.rs) — shared Font object metatable registration
 - [inventory_probes.rs](../../../src/lua_api/globals/inventory_probes.rs) — inventory item durability probe
+- [size.rs](../../../src/lua_api/frame/methods/core_state/size.rs) — layout dirty `OnUpdate` snapshot/restore
 - [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — bootstrap screen-size fallback
 - [env_runtime.rs](../../../src/lua_api/env_runtime.rs) — runtime screen-size globals and resize event dispatch
 - [mists/post_load.lua](../../../src/mists/post_load.lua) — Mists `RedockChatWindows` compatibility

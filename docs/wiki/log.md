@@ -16,6 +16,7 @@ Updated it after tracing ElvUI install text displacement and raid-control center
 Updated it again after fixing ElvUI Chat initialization: Mists now provides `RedockChatWindows`, and the shared runtime surface provides `GetPlayerInfoByGUID`.
 Updated it again after fixing ElvUI Tooltip font initialization: Font objects now share an object-type metatable, so ElvUI `FontTemplate` additions made through `GameFontNormal` are visible on `GameTooltipText`.
 Updated it again after adding `GetInventoryItemDurability`; ElvUI DataTexts now sees the expected inventory durability global and the full-addon probe no longer reports that startup error.
+Updated it again after tracing the ElvUI static-popup `OnUpdate` error to simulator-driven layout dirtying. The size/layout dirty path now snapshots and restores existing custom `OnUpdate` handlers across recursive layout-parent `MarkDirty()` calls, so `ElvUI_StaticPopup1` keeps ElvUI's handler after `E:StaticPopup_Show`.
 
 ## [2026-05-17] update | frame field environment numeric slot
 

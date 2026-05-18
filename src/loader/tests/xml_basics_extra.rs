@@ -199,6 +199,63 @@ fn test_font_objects_share_metatable_mutations() {
 }
 
 #[test]
+fn test_empty_script_tag_clears_inherited_handler() {
+    let ctx = load_test_xml(
+        "empty-script-clears-inherited-handler",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="BaseClearScriptTemplate" virtual="true">
+                <Scripts>
+                    <OnUpdate>_G.CLEAR_SCRIPT_BASE = true</OnUpdate>
+                </Scripts>
+            </Frame>
+            <Frame name="DerivedClearScriptTemplate" inherits="BaseClearScriptTemplate" virtual="true">
+                <Scripts>
+                    <OnUpdate></OnUpdate>
+                </Scripts>
+            </Frame>
+            <Frame name="ClearScriptFrame" parent="UIParent" inherits="DerivedClearScriptTemplate"/>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        "return ClearScriptFrame:GetScript('OnUpdate') == nil",
+        "An explicit empty XML script tag should clear the inherited handler",
+    );
+}
+
+#[test]
+fn test_empty_runtime_template_script_clears_intrinsic_handler() {
+    let ctx = load_test_xml(
+        "empty-runtime-template-script-clears-intrinsic-handler",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="IntrinsicClearScriptFrame" intrinsic="true">
+                <Scripts>
+                    <OnUpdate>_G.CLEAR_SCRIPT_INTRINSIC = true</OnUpdate>
+                </Scripts>
+            </Frame>
+            <Frame name="DerivedRuntimeClearScriptTemplate" inherits="IntrinsicClearScriptFrame" virtual="true">
+                <Scripts>
+                    <OnUpdate></OnUpdate>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    ctx.env
+        .exec(r#"CreateFrame("Frame", "RuntimeClearScriptFrame", UIParent, "DerivedRuntimeClearScriptTemplate")"#)
+        .unwrap();
+
+    ctx.assert_lua_true(
+        "return RuntimeClearScriptFrame:GetScript('OnUpdate') == nil",
+        "An explicit empty runtime template script tag should clear an intrinsic handler",
+    );
+}
+
+#[test]
 fn slider_orientation_attribute_applies() {
     let t = load_test_xml(
         "slider-orientation-attribute",

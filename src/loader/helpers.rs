@@ -375,6 +375,9 @@ fn append_script_handler_with_options(
     }
 
     let Some(new_handler) = build_handler_expr(handler_name, script) else {
+        code.push_str(&format!(
+            "\n        {target}:SetScript(\"{handler_name}\", nil)\n        "
+        ));
         return;
     };
 

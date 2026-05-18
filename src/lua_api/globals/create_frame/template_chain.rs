@@ -431,6 +431,9 @@ fn fast_script_install<'a>(
     intrinsic_default_scripts: bool,
 ) -> Option<FastScriptInstall<'a>> {
     let handler = fast_handler_ref(handler_name, script)?;
+    if matches!(handler, FastHandlerRef::NoOp) {
+        return Some(FastScriptInstall::Set(handler));
+    }
     match script.intrinsic_order.as_deref() {
         Some("precall") => Some(FastScriptInstall::Intrinsic {
             handler,

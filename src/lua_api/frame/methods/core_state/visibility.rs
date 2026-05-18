@@ -83,21 +83,25 @@ fn show_or_hide(state: &mut LuaState, id: u64, shown: bool) -> LuaResult<()> {
 
     let result = drain_visibility_handlers(state, id, shown);
 
-    {
-        let mut sim = borrow_state_mut(state)?;
-        sim.set_frame_visible(id, shown);
-        if let Some(frame) = sim.widgets.get_mut(id) {
-            frame.show_hide_depth = 0;
-        }
-        sim.global_show_hide_depth = depth;
-    }
+    reset_visibility_dispatch_state(state, id, shown, depth)?;
 
     result?;
-    if shown {
-        super::size::mark_visible_layout_subtree_dirty(state, id);
-    } else {
-        super::size::mark_nearest_layout_parent_dirty(state, id);
+    super::size::mark_nearest_layout_parent_dirty(state, id);
+    Ok(())
+}
+
+fn reset_visibility_dispatch_state(
+    state: &mut LuaState,
+    id: u64,
+    shown: bool,
+    previous_depth: u32,
+) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    sim.set_frame_visible(id, shown);
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        frame.show_hide_depth = 0;
     }
+    sim.global_show_hide_depth = previous_depth;
     Ok(())
 }
 
@@ -199,7 +203,6 @@ fn fire_visibility_handler_recursive(
         }
     }
 
-    super::size::mark_nearest_layout_parent_dirty(state, frame_id);
     Ok(())
 }
 

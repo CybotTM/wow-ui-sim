@@ -211,7 +211,8 @@ fn dispatch_on_update_handler(
     let start = Instant::now();
     let previous_addon = replace_executing_addon(lua.state(), owner_addon);
     if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
-        call_error_handler(lua, &e.to_string());
+        let error = handler_error_message("OnUpdate", frame_name.as_deref(), &e.to_string());
+        call_error_handler(lua, &error);
     }
     replace_executing_addon(lua.state(), previous_addon);
     let elapsed = start.elapsed();
@@ -225,6 +226,13 @@ fn dispatch_on_update_handler(
         frame_id,
         elapsed,
     );
+}
+
+fn handler_error_message(handler_name: &str, frame_name: Option<&str>, error: &str) -> String {
+    match frame_name {
+        Some(name) => format!("[{handler_name}] {name}: {error}"),
+        None => format!("[{handler_name}] <unnamed>: {error}"),
+    }
 }
 
 fn handler_log_metadata(
