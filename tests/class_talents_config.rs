@@ -135,3 +135,46 @@ fn initialize_view_loadout_drives_trait_node_spec_visibility() {
     assert!(prot_visible, "Protection hero selection node should be visible");
     assert!(ret_visible, "Retribution hero selection node should be visible");
 }
+
+#[test]
+fn non_paladin_view_loadouts_have_consistent_subtree_visibility_and_currency() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local configID = Constants.TraitConsts.VIEW_TRAIT_CONFIG_ID
+
+            local function checkClass(classID)
+                local numSpecs = C_SpecializationInfo.GetNumSpecializationsForClassID(classID)
+                for specIndex = 1, numSpecs do
+                    local specID = GetSpecializationInfoForClassID(classID, specIndex)
+                    local treeID = C_ClassTalents.GetTraitTreeForSpec(specID)
+                    if not treeID then
+                        return "missing_tree:" .. tostring(classID) .. ":" .. tostring(specID)
+                    end
+
+                    C_ClassTalents.InitializeViewLoadout(specID, 80)
+                    local nodes = C_Traits.GetTreeNodes(treeID)
+                    for _, nodeID in ipairs(nodes) do
+                        local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+                        if nodeInfo and nodeInfo.isVisible and nodeInfo.subTreeID then
+                            local subtreeInfo = C_Traits.GetSubTreeInfo(configID, nodeInfo.subTreeID)
+                            if not (subtreeInfo and subtreeInfo.traitCurrencyID) then
+                                return "missing_currency:" .. tostring(classID) .. ":" .. tostring(specID) .. ":" .. tostring(nodeInfo.subTreeID)
+                            end
+                        end
+                    end
+                end
+                return "ok"
+            end
+
+            return checkClass(6)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "Death Knight cache warmup should not expose visible subtree nodes without currencies"
+    );
+}

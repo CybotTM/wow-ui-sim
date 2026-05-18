@@ -1,6 +1,9 @@
 use super::*;
 mod registration;
 
+static SUBTREE_CURRENCY_IDS: std::sync::LazyLock<std::collections::HashMap<u32, u32>> =
+    std::sync::LazyLock::new(build_subtree_currency_ids);
+
 pub(super) fn register_c_traits(state: &mut LuaState) -> LuaResult<()> {
     registration::register_c_traits(state)
 }
@@ -284,12 +287,41 @@ fn c_traits_initialize_view_loadout(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn subtree_trait_currency_id(subtree_id: u32) -> Option<u32> {
-    match subtree_id {
-        48 => Some(2986),
-        49 => Some(2987),
-        50 => Some(2988),
-        _ => None,
+    SUBTREE_CURRENCY_IDS.get(&subtree_id).copied()
+}
+
+fn build_subtree_currency_ids() -> std::collections::HashMap<u32, u32> {
+    let mut by_tree: std::collections::HashMap<u32, Vec<u32>> = std::collections::HashMap::new();
+    for subtree in TRAIT_SUBTREE_DB.values() {
+        by_tree.entry(subtree.tree_id).or_default().push(subtree.id);
     }
+
+    let mut map = std::collections::HashMap::new();
+    for (tree_id, mut subtree_ids) in by_tree {
+        subtree_ids.sort_unstable();
+        let Some(tree) = TRAIT_TREE_DB.get(&tree_id) else {
+            continue;
+        };
+        let Some(currency_ids) = hero_currency_ids(tree.currency_ids, subtree_ids.len()) else {
+            continue;
+        };
+        for (subtree_id, currency_id) in subtree_ids.into_iter().zip(currency_ids.iter().copied()) {
+            map.insert(subtree_id, currency_id);
+        }
+    }
+    map
+}
+
+fn hero_currency_ids(currency_ids: &'static [u32], subtree_count: usize) -> Option<&'static [u32]> {
+    if subtree_count == 0 || currency_ids.len() < subtree_count {
+        return None;
+    }
+    let start = if currency_ids.len() >= subtree_count + 2 {
+        2
+    } else {
+        currency_ids.len() - subtree_count
+    };
+    currency_ids.get(start..start + subtree_count)
 }
 
 fn active_hero_currency_id(state: &LuaState) -> Option<u32> {

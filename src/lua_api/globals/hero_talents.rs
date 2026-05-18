@@ -3,14 +3,73 @@
 use crate::lua_api::SimState;
 use crate::traits::{TRAIT_COND_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_TREE_DB};
 use std::collections::{HashMap, HashSet};
+use std::sync::LazyLock;
+
+static SPEC_SET_BY_SPEC_ID: LazyLock<HashMap<u32, u32>> = LazyLock::new(build_spec_set_map);
 
 pub(crate) fn spec_id_to_spec_set(spec_id: u32) -> u32 {
-    match spec_id {
-        65 => 27,
-        66 => 28,
-        70 => 29,
-        _ => 0,
+    SPEC_SET_BY_SPEC_ID.get(&spec_id).copied().unwrap_or(0)
+}
+
+pub(crate) fn class_tree_for_spec(spec_id: u32) -> Option<u32> {
+    let class_id = crate::specializations::spec_by_id(spec_id)?.class_id;
+    class_tree_id_for_class(class_id)
+}
+
+fn build_spec_set_map() -> HashMap<u32, u32> {
+    let mut spec_sets = HashMap::new();
+    for class_id in 1..=13 {
+        let specs = crate::specializations::specs_for_class(class_id).collect::<Vec<_>>();
+        let Some(tree_id) = class_tree_id_for_class(class_id) else {
+            continue;
+        };
+        let Some(tree) = TRAIT_TREE_DB.get(&tree_id) else {
+            continue;
+        };
+        for (spec, spec_set_id) in specs.into_iter().zip(tree_spec_sets(tree)) {
+            spec_sets.insert(spec.id, spec_set_id);
+        }
     }
+    spec_sets
+}
+
+fn class_tree_id_for_class(class_id: u32) -> Option<u32> {
+    match class_id {
+        1 => Some(1000), // Warrior
+        2 => Some(790),  // Paladin
+        3 => Some(795),  // Hunter
+        4 => Some(852),  // Rogue
+        5 => Some(720),  // Priest
+        6 => Some(850),  // Death Knight
+        7 => Some(872),  // Shaman
+        8 => Some(658),  // Mage
+        9 => Some(786),  // Warlock
+        10 => Some(774), // Monk
+        11 => Some(793), // Druid
+        12 => Some(701), // Demon Hunter
+        13 => Some(854), // Evoker
+        _ => None,
+    }
+}
+
+fn tree_spec_sets(tree: &crate::traits::TraitTreeInfo) -> Vec<u32> {
+    let mut spec_sets = HashSet::new();
+    for &node_id in tree.node_ids {
+        let Some(node) = TRAIT_NODE_DB.get(&node_id) else {
+            continue;
+        };
+        for &cond_id in node.cond_ids.iter().chain(node.group_cond_ids.iter()) {
+            let Some(cond) = TRAIT_COND_DB.get(&cond_id) else {
+                continue;
+            };
+            if cond.cond_type == 1 && cond.spec_set_id != 0 {
+                spec_sets.insert(cond.spec_set_id);
+            }
+        }
+    }
+    let mut spec_sets = spec_sets.into_iter().collect::<Vec<_>>();
+    spec_sets.sort_unstable();
+    spec_sets
 }
 
 fn find_spec_set_condition(cond_ids: &[u32]) -> u32 {

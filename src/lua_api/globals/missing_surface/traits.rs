@@ -220,12 +220,7 @@ fn spec_set_contains_active_spec(spec_set_id: u32, state: &crate::lua_api::SimSt
         .view_spec_id
         .or_else(|| player_spec_id(state))
         .unwrap_or(66);
-    match spec_set_id {
-        27 => active_spec_id == 65,
-        28 => active_spec_id == 66,
-        29 => active_spec_id == 70,
-        _ => true,
-    }
+    hero_talents::spec_id_to_spec_set(active_spec_id) == spec_set_id
 }
 
 fn check_spec_conditions_met(
@@ -319,21 +314,7 @@ fn has_unspent_talent_points(state: &crate::lua_api::SimState) -> bool {
 }
 
 fn class_talent_tree_for_spec(spec_id: u32) -> Option<u32> {
-    let required_spec_set = hero_talents::spec_id_to_spec_set(spec_id);
-    if required_spec_set == 0 {
-        return None;
-    }
-
-    TRAIT_TREE_DB.values().find_map(|tree| {
-        tree.node_ids
-            .iter()
-            .any(|node_id| {
-                TRAIT_NODE_DB
-                    .get(node_id)
-                    .is_some_and(|node| trait_node_spec_set(node) == required_spec_set)
-            })
-            .then_some(tree.id)
-    })
+    hero_talents::class_tree_for_spec(spec_id)
 }
 
 fn starter_build_candidate(
