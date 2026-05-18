@@ -26,6 +26,7 @@ macro_rules! build_empty_sim_state {
             focused_frame_id: $runtime.focused_frame_id,
             addons: $collections.addons,
             addon_saved_enable_state: None,
+            addon_saved_version_check_enabled: None,
             system_chat_log: Vec::new(),
             adventure_map: AdventureMapState::default(),
             encounter_journal: EncounterJournalState::default(),

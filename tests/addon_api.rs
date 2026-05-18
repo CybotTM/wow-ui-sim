@@ -359,6 +359,29 @@ fn test_version_check_toggle() {
     assert!(!disabled);
 }
 
+#[test]
+fn test_save_reset_addons_restores_version_check_state() {
+    let env = env_with_addons();
+
+    env.eval::<()>(
+        r#"
+        C_AddOns.SetAddonVersionCheck(false)
+        C_AddOns.SaveAddOns()
+        C_AddOns.SetAddonVersionCheck(true)
+        C_AddOns.ResetAddOns()
+    "#,
+    )
+    .unwrap();
+
+    let restored: bool = env
+        .eval("return C_AddOns.IsAddonVersionCheckEnabled()")
+        .unwrap();
+    assert!(
+        !restored,
+        "ResetAddOns should restore the version-check state saved by SaveAddOns"
+    );
+}
+
 // ============================================================================
 // Legacy global functions
 // ============================================================================

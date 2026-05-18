@@ -1,5 +1,3 @@
-//! C_AddOns, legacy addon globals, and LoadAddOn implementation.
-
 use crate::loader::LoadError;
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::{
@@ -369,28 +367,29 @@ fn c_addons_disable_all_addons(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// `C_AddOns.SaveAddOns()` — commit the current per-addon enable state as
-/// the new baseline. Subsequent `ResetAddOns` calls revert back to this
-/// snapshot. Called by the addon list when the user clicks Okay.
 fn c_addons_save_addons(state: &mut LuaState) -> LuaResult<u32> {
+    let version_check_enabled = registry_bool(state, ADDON_VERSION_CHECK_KEY);
     let mut sim = borrow_state_mut(state)?;
     let snapshot: Vec<bool> = sim.addons.iter().map(|a| a.enabled).collect();
     sim.addon_saved_enable_state = Some(snapshot);
+    sim.addon_saved_version_check_enabled = Some(version_check_enabled);
     Ok(0)
 }
 
-/// `C_AddOns.ResetAddOns()` — restore per-addon enable state from the last
-/// `SaveAddOns` snapshot. No-op when no snapshot exists. Called by the
-/// addon list when the user clicks Cancel, so pending toggles get reverted.
 fn c_addons_reset_addons(state: &mut LuaState) -> LuaResult<u32> {
-    let mut sim = borrow_state_mut(state)?;
-    let Some(snapshot) = sim.addon_saved_enable_state.clone() else {
-        return Ok(0);
-    };
-    for (idx, &saved_enabled) in snapshot.iter().enumerate() {
-        if let Some(addon) = sim.addons.get_mut(idx) {
-            addon.enabled = saved_enabled;
+    let saved_version_check_enabled = {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(snapshot) = sim.addon_saved_enable_state.clone() {
+            for (idx, &saved_enabled) in snapshot.iter().enumerate() {
+                if let Some(addon) = sim.addons.get_mut(idx) {
+                    addon.enabled = saved_enabled;
+                }
+            }
         }
+        sim.addon_saved_version_check_enabled
+    };
+    if let Some(enabled) = saved_version_check_enabled {
+        set_registry_bool(state, ADDON_VERSION_CHECK_KEY, enabled);
     }
     Ok(0)
 }
