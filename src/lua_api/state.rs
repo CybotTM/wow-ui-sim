@@ -569,8 +569,8 @@ macro_rules! build_empty_runtime_state {
 const INITIAL_REPORT_TOKEN: i64 = 1;
 const INITIAL_ANIM_GROUP_ID: u64 = 1;
 const INITIAL_CAST_ID: u32 = 1;
-const DEFAULT_SCREEN_WIDTH: f32 = 1600.0;
-const DEFAULT_SCREEN_HEIGHT: f32 = 1200.0;
+const DEFAULT_SCREEN_WIDTH: f32 = 1024.0;
+const DEFAULT_SCREEN_HEIGHT: f32 = 768.0;
 
 impl EmptyRuntimeState {
     fn new() -> Self {

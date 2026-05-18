@@ -86,6 +86,34 @@ fn glue_login_permanent_defaults_remain_registered() {
 }
 
 #[test]
+fn default_screen_size_matches_screen_globals_and_ui_parent() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let screen_metrics: (f64, f64, f64, f64, i32, i32) = env
+        .eval(
+            r#"
+        return GetScreenWidth(), GetScreenHeight(), UIParent:GetWidth(), UIParent:GetHeight(), GetPhysicalScreenSize()
+    "#,
+        )
+        .unwrap();
+    let (
+        screen_width,
+        screen_height,
+        ui_parent_width,
+        ui_parent_height,
+        physical_width,
+        physical_height,
+    ) = screen_metrics;
+
+    assert_eq!(screen_width, 1024.0);
+    assert_eq!(screen_height, 768.0);
+    assert_eq!(physical_width, 1024);
+    assert_eq!(physical_height, 768);
+    assert_eq!(ui_parent_width, 1024.0);
+    assert_eq!(ui_parent_height, 768.0);
+}
+
+#[test]
 fn screen_size_globals_follow_canvas_dimensions() {
     let env = WowLuaEnv::new().unwrap();
     env.set_screen_size(813.0, 822.0);

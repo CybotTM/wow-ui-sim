@@ -18,6 +18,7 @@ Updated it again after fixing ElvUI Tooltip font initialization: Font objects no
 Updated it again after adding `GetInventoryItemDurability`; ElvUI DataTexts now sees the expected inventory durability global and the full-addon probe no longer reports that startup error.
 Updated it again after tracing the ElvUI static-popup `OnUpdate` error to simulator-driven layout dirtying. The size/layout dirty path now snapshots and restores existing custom `OnUpdate` handlers across recursive layout-parent `MarkDirty()` calls, so `ElvUI_StaticPopup1` keeps ElvUI's handler after `E:StaticPopup_Show`.
 Updated it again after tracing the ElvUI Installation close-button click failure to unscaled `SetHitRectInsets` in hit-grid construction. Hit rectangles now scale insets by the frame's effective scale before subtracting them from scaled layout rects.
+Updated it again after finding the remaining ElvUI installer and raid-control placement issue: startup screen globals reported 1024x768 while `SimState`/`UIParent` still defaulted to 1600x1200, so ElvUI anchored a correctly sized parent inside the wrong root canvas.
 
 ## [2026-05-17] update | SetAtlas empty clear semantics
 

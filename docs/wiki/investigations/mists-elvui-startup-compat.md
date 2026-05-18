@@ -16,6 +16,7 @@ The full Mists addon pass reported these startup failures:
 - ElvUI DataTexts durability initialization failed because `GetInventoryItemDurability` was missing from the inventory probe globals.
 - `ElvUI_StaticPopup1` ran Blizzard `GameDialogMixin:OnUpdate` instead of ElvUI's popup update handler, so `StaticPopup_OnUpdate` compared nil `dialog.timeleft` against zero.
 - The `ElvUI Installation` close button rendered but was hard to click because ElvUI's scaled parent made the button resolve to a 20x20 screen rect while raw, unscaled `SetHitRectInsets(6, 6, 7, 7)` collapsed the clickable area to a tiny center strip.
+- The `ElvUI Installation` panel and `RaidUtility_ShowButton` could still land in the wrong screen region after that hitbox fix because startup screen state was split: Lua reported a 1024x768 physical screen, while the backing `SimState` and root `UIParent` layout still defaulted to 1600x1200.
 
 ### Root Causes
 
@@ -68,6 +69,8 @@ The fix keeps simulator-driven layout invalidation from stealing an already inst
 
 The install close-button hitbox error was a coordinate-space mismatch. Layout rects are already scaled by the frame's effective scale, but hit-grid construction subtracted `SetHitRectInsets` values as if they were already in that scaled space. Scaling the insets by `frame.effective_scale` before building hit rectangles keeps ElvUI's skinned close buttons clickable across scaled parents.
 
+The remaining installer/raid-control placement issue was a startup-state mismatch, not an ElvUI-specific anchor bug. `runtime_surface_bootstrap.lua` exposed `GetScreenWidth()`, `GetScreenHeight()`, and `GetPhysicalScreenSize()` as 1024x768 before `set_screen_size()` runs, but `SimState` seeded `UIParent` and `WorldFrame` with 1600x1200. ElvUI sized `ElvUIParent` from the 1024x768 screen globals, then anchored it inside the larger 1600x1200 `UIParent`, offsetting descendants and their click targets. The default `SimState` screen dimensions now match the bootstrap 1024x768 physical screen; the regression checks that a fresh env reports matching screen globals and `UIParent` size.
+
 ## Sources
 
 - [shared_bootstrap.lua](../../../src/lua_api/env_init/shared_bootstrap.lua) — trim alias compatibility
@@ -79,6 +82,7 @@ The install close-button hitbox error was a coordinate-space mismatch. Layout re
 - [size.rs](../../../src/lua_api/frame/methods/core_state/size.rs) — layout dirty `OnUpdate` snapshot/restore
 - [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — bootstrap screen-size fallback
 - [env_runtime.rs](../../../src/lua_api/env_runtime.rs) — runtime screen-size globals and resize event dispatch
+- [state.rs](../../../src/lua_api/state.rs) — default backing screen dimensions for built-in root frames
 - [frame_collect.rs](../../../src/iced_app/frame_collect.rs) — scaled hit-rect inset conversion for hit testing
 - [mists/post_load.lua](../../../src/mists/post_load.lua) — Mists `RedockChatWindows` compatibility
 - [PLAN.md](../../../PLAN.md) — remaining Mists full-addon error list
