@@ -682,22 +682,25 @@ impl SimState {
     fn collect_cursor_tooltip_positions(&self, mx: f32, my: f32) -> Vec<(u64, Anchor)> {
         self.tooltips
             .iter()
-            .filter(|(_, td)| {
-                matches!(
-                    td.anchor_type.as_str(),
-                    "ANCHOR_CURSOR" | "ANCHOR_CURSOR_RIGHT" | "ANCHOR_CURSOR_LEFT"
-                )
-            })
-            .map(|(&tooltip_id, td)| {
-                (
-                    tooltip_id,
-                    build_cursor_anchor(mx, my, td.anchor_x_offset, td.anchor_y_offset),
-                )
+            .filter_map(|(&tooltip_id, td)| {
+                let visible = self.widgets.get(tooltip_id)?.visible;
+                (td.anchor_type.starts_with("ANCHOR_CURSOR") && visible).then(|| {
+                    let anchor =
+                        build_cursor_anchor(mx, my, td.anchor_x_offset, td.anchor_y_offset);
+                    (tooltip_id, anchor)
+                })
             })
             .collect()
     }
 
     fn reanchor_tooltip_to_cursor(&mut self, tooltip_id: u64, anchor: Anchor) {
+        if self
+            .widgets
+            .get(tooltip_id)
+            .is_some_and(|frame| frame.anchors == [anchor.clone()])
+        {
+            return;
+        }
         let Some(frame) = self.widgets.get_mut_visual(tooltip_id) else {
             return;
         };

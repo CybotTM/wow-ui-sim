@@ -89,7 +89,7 @@ impl AnchorPoint {
 }
 
 /// An anchor defines how a widget is positioned relative to another widget.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Anchor {
     /// The point on this widget to anchor.
     pub point: AnchorPoint,
