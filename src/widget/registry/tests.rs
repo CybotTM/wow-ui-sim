@@ -97,6 +97,22 @@ fn pending_layout_roots_prunes_descendants_of_dirty_roots() {
 }
 
 #[test]
+fn mark_rect_dirty_marks_frame_for_visual_rebuild() {
+    let mut registry = WidgetRegistry::default();
+    registry.register(frame(1, WidgetType::Frame, None, FrameStrata::High));
+
+    registry.mark_rect_dirty(1);
+    let batch = registry.take_render_dirty_batch();
+
+    assert_eq!(batch.strata_mask, 1u16 << FrameStrata::High.as_index());
+    assert_eq!(
+        batch.frame_ids,
+        Some(FxHashSet::from_iter([1])),
+        "layout changes must also invalidate cached quads"
+    );
+}
+
+#[test]
 fn add_child_reparents_child_and_updates_effective_alpha() {
     let mut registry = WidgetRegistry::default();
 

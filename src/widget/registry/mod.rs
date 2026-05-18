@@ -521,6 +521,7 @@ impl WidgetRegistry {
     pub fn mark_rect_dirty(&mut self, id: u64) {
         if self.widgets.contains_key(&id) {
             self.rect_dirty_ids.insert(id);
+            self.record_visual_dirty(id);
         }
     }
 

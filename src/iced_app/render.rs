@@ -450,6 +450,7 @@ impl App {
         prune_irrelevant_dirty_strata(
             dirty,
             dirty_ids,
+            &state.widgets,
             state.strata_buckets.as_deref(),
             &strata_cache,
             &snapshot_cache,

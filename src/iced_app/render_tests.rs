@@ -579,6 +579,7 @@ mod tests {
 
     #[test]
     fn prune_irrelevant_dirty_strata_skips_cached_strata_without_bucket_or_snapshot_hits() {
+        let registry = crate::widget::WidgetRegistry::new();
         let dirty_ids = FxHashSet::from_iter([99_u64]);
         let buckets = vec![vec![1_u64, 2_u64]];
         let cached = std::array::from_fn(|i| (i == 0).then(|| Arc::new(QuadBatch::new())));
@@ -589,6 +590,7 @@ mod tests {
         let pruned = prune_irrelevant_dirty_strata(
             dirty_mask(0),
             Some(&dirty_ids),
+            &registry,
             Some(&buckets),
             &cached,
             &snapshots,
@@ -602,6 +604,7 @@ mod tests {
 
     #[test]
     fn prune_irrelevant_dirty_strata_keeps_strata_when_snapshot_must_be_removed() {
+        let registry = crate::widget::WidgetRegistry::new();
         let dirty_ids = FxHashSet::from_iter([3_u64]);
         let buckets = vec![vec![1_u64, 2_u64]];
         let cached = std::array::from_fn(|i| (i == 0).then(|| Arc::new(QuadBatch::new())));
@@ -612,6 +615,7 @@ mod tests {
         let pruned = prune_irrelevant_dirty_strata(
             dirty_mask(0),
             Some(&dirty_ids),
+            &registry,
             Some(&buckets),
             &cached,
             &snapshots,
@@ -626,6 +630,7 @@ mod tests {
 
     #[test]
     fn prune_irrelevant_dirty_strata_keeps_strata_when_bucket_contains_dirty_frame() {
+        let registry = crate::widget::WidgetRegistry::new();
         let dirty_ids = FxHashSet::from_iter([2_u64]);
         let buckets = vec![vec![1_u64, 2_u64]];
         let cached = std::array::from_fn(|i| (i == 0).then(|| Arc::new(QuadBatch::new())));
@@ -636,6 +641,7 @@ mod tests {
         let pruned = prune_irrelevant_dirty_strata(
             dirty_mask(0),
             Some(&dirty_ids),
+            &registry,
             Some(&buckets),
             &cached,
             &snapshots,

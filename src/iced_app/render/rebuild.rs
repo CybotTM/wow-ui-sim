@@ -373,6 +373,7 @@ fn snapshot_offsets(batch: &QuadBatch) -> (usize, usize, usize, usize) {
 pub(super) fn prune_irrelevant_dirty_strata(
     dirty: u16,
     dirty_ids: Option<&FxHashSet<u64>>,
+    registry: &crate::widget::WidgetRegistry,
     strata_buckets: Option<&[Vec<u64>]>,
     cached_strata: &StrataBatchCache,
     snapshot_cache: &StrataSnapshotCache,
@@ -393,6 +394,7 @@ pub(super) fn prune_irrelevant_dirty_strata(
         if strata_needs_rebuild(
             strata_idx,
             dirty_ids,
+            registry,
             strata_buckets,
             cached_strata,
             snapshot_cache,
@@ -408,6 +410,7 @@ pub(super) fn prune_irrelevant_dirty_strata(
 fn strata_needs_rebuild(
     strata_idx: usize,
     dirty_ids: &FxHashSet<u64>,
+    registry: &crate::widget::WidgetRegistry,
     strata_buckets: &[Vec<u64>],
     cached_strata: &StrataBatchCache,
     snapshot_cache: &StrataSnapshotCache,
@@ -427,7 +430,9 @@ fn strata_needs_rebuild(
         return true;
     }
 
-    dirty_ids.iter().any(|id| snapshots.contains_key(id))
+    snapshots
+        .keys()
+        .any(|id| frame_or_ancestor_is_dirty(*id, dirty_ids, registry))
 }
 
 /// Rebuild cached strata batches for the given dirty mask and frame IDs.
@@ -464,9 +469,12 @@ pub fn rebuild_dirty_strata_batches_for_registry(
 
 #[cfg(test)]
 mod tests {
-    use super::frame_or_ancestor_is_dirty;
-    use crate::widget::{Frame, WidgetRegistry, WidgetType};
+    use super::{frame_or_ancestor_is_dirty, prune_irrelevant_dirty_strata};
+    use crate::render::{FrameQuadSnapshot, QuadBatch};
+    use crate::widget::{Frame, FrameStrata, WidgetRegistry, WidgetType};
     use rustc_hash::FxHashSet;
+    use std::collections::HashMap;
+    use std::sync::Arc;
 
     #[test]
     fn cached_descendants_of_dirty_parents_are_not_clean() {
@@ -499,6 +507,53 @@ mod tests {
         assert!(
             frame_or_ancestor_is_dirty(child_id, &dirty_ids, &registry),
             "cached child snapshots must be discarded when the parent frame is dirty"
+        );
+    }
+
+    #[test]
+    fn dirty_ancestor_of_cached_child_keeps_strata_rebuild() {
+        let mut registry = WidgetRegistry::new();
+
+        let mut parent = Frame::new(WidgetType::Frame, Some("Parent".to_string()), None);
+        parent.frame_strata = FrameStrata::High;
+        let parent_id = parent.id;
+        registry.register(parent);
+
+        let mut child = Frame::new(
+            WidgetType::Texture,
+            Some("ChildTexture".to_string()),
+            Some(parent_id),
+        );
+        child.frame_strata = FrameStrata::High;
+        let child_id = child.id;
+        registry.register(child);
+        registry.add_child(parent_id, child_id);
+
+        let strata_idx = FrameStrata::High.as_index();
+        let dirty = 1u16 << strata_idx;
+        let dirty_ids = FxHashSet::from_iter([parent_id]);
+        let mut strata_buckets = vec![Vec::new(); FrameStrata::COUNT];
+        strata_buckets[strata_idx].push(child_id);
+        let mut strata_cache = std::array::from_fn(|_| None);
+        strata_cache[strata_idx] = Some(Arc::new(QuadBatch::new()));
+        let mut snapshot_cache = std::array::from_fn(|_| None);
+        snapshot_cache[strata_idx] = Some(HashMap::from_iter([(
+            child_id,
+            FrameQuadSnapshot::default(),
+        )]));
+
+        let pruned = prune_irrelevant_dirty_strata(
+            dirty,
+            Some(&dirty_ids),
+            &registry,
+            Some(&strata_buckets),
+            &strata_cache,
+            &snapshot_cache,
+        );
+
+        assert_eq!(
+            pruned, dirty,
+            "moving a non-emitting ancestor must rebuild cached child quads"
         );
     }
 }
