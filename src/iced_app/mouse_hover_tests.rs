@@ -404,6 +404,25 @@ fn hover_after_gui_resize_uses_resized_screen_coordinates() {
 }
 
 #[test]
+fn syncing_same_gui_size_does_not_trigger_resize_refresh() {
+    let app = build_test_app(ScreenKind::Game);
+    rebuild_hittable_cache(&app);
+    app.strata_dirty.set(0);
+
+    app.sync_screen_size_to_state(iced::Size::new(800.0, 600.0));
+
+    assert_eq!(
+        app.strata_dirty.get(),
+        0,
+        "matching startup size should not dirty render state as a resize"
+    );
+    assert!(
+        app.cached_hittable.borrow().is_some(),
+        "matching startup size should keep the existing hit grid"
+    );
+}
+
+#[test]
 fn moving_inside_same_hovered_frame_does_not_dirty_render_state() {
     let mut app = build_test_app(ScreenKind::Game);
 

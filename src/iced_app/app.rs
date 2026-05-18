@@ -211,7 +211,7 @@ impl AppInitialSelections {
 }
 
 macro_rules! app_from_initial_state {
-    ($init:ident, $selections:ident, $now:ident) => {
+    ($init:ident, $selections:ident, $now:ident, $initial_screen_size:ident) => {
         App {
             env: $init.env,
             log_messages: $init.log_messages,
@@ -226,7 +226,7 @@ macro_rules! app_from_initial_state {
             mouse_down_pos: None,
             dragging: false,
             scroll_offset: 0.0,
-            screen_size: std::cell::Cell::new(Size::new(800.0, 600.0)),
+            screen_size: std::cell::Cell::new($initial_screen_size),
             debug_rx: Some($init.cmd_rx),
             pending_screenshot: None,
             lua_rx: Some($init.lua_rx),
@@ -288,6 +288,7 @@ impl App {
         let (env_rc, saved_vars) = Self::take_init_params();
         let config = crate::config::SimConfig::load();
         Self::apply_config_to_state(&env_rc, &config);
+        Self::set_initial_gui_screen_size(&env_rc);
 
         Self::run_startup_sequence(&env_rc);
         env_rc
@@ -326,7 +327,15 @@ impl App {
     pub(crate) fn build_app(init: AppInit) -> Self {
         let now = std::time::Instant::now();
         let selections = AppInitialSelections::from_config(&init.config);
-        app_from_initial_state!(init, selections, now)
+        let initial_screen_size = current_env_screen_size(&init.env);
+        app_from_initial_state!(init, selections, now, initial_screen_size)
+    }
+
+    fn set_initial_gui_screen_size(env_rc: &Rc<RefCell<WowLuaEnv>>) {
+        let initial_size = super::app_icon::initial_window_size();
+        env_rc
+            .borrow()
+            .set_screen_size(initial_size.width, initial_size.height);
     }
 
     /// Apply saved config to SimState before startup events fire.
@@ -472,6 +481,12 @@ impl App {
     }
 }
 
+fn current_env_screen_size(env: &Rc<RefCell<WowLuaEnv>>) -> Size {
+    let env = env.borrow();
+    let state = env.state().borrow();
+    Size::new(state.screen_width, state.screen_height)
+}
+
 impl App {
     /// Mark specific strata as dirty (need quad re-emit + GPU re-upload).
     pub(crate) fn mark_strata_dirty(&self, mask: u16) {
@@ -600,6 +615,7 @@ mod tests {
             WowLuaEnv::new().expect("Failed to create Lua environment"),
         ));
         env.borrow().set_screen_mode(screen_kind);
+        env.borrow().set_screen_size(800.0, 600.0);
 
         let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
@@ -643,6 +659,27 @@ mod tests {
             app.compute_tick_interval(),
             Some(std::time::Duration::from_secs(1)),
         );
+    }
+
+    #[test]
+    fn gui_boot_seeds_sim_state_with_initial_window_size() {
+        let env = Rc::new(RefCell::new(
+            WowLuaEnv::new().expect("Failed to create Lua environment"),
+        ));
+
+        App::set_initial_gui_screen_size(&env);
+
+        assert_eq!(
+            current_env_screen_size(&env),
+            super::super::app_icon::initial_window_size()
+        );
+    }
+
+    #[test]
+    fn app_screen_size_starts_from_sim_state_size() {
+        let app = build_test_app(ScreenKind::Game);
+
+        assert_eq!(app.screen_size.get(), current_env_screen_size(&app.env));
     }
 
     #[test]
