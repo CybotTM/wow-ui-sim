@@ -68,7 +68,6 @@ fn load_blizzard_game_ui_for_mouse_test(app: &App) {
     env.apply_post_load_workarounds();
     crate::startup::settle_headless_startup(&env);
 }
-
 #[test]
 fn mouse_wheel_dispatch_requires_frame_mouse_wheel_enabled() {
     let mut app = build_test_app(ScreenKind::Game);
@@ -124,7 +123,6 @@ fn mouse_wheel_dispatch_requires_frame_mouse_wheel_enabled() {
         "mouse wheel scripts should fire once the frame enables mouse wheel"
     );
 }
-
 #[test]
 fn drag_start_can_transfer_to_delegate_and_abort_before_mouse_up() {
     let mut app = build_test_app(ScreenKind::Game);
@@ -186,7 +184,6 @@ fn drag_start_can_transfer_to_delegate_and_abort_before_mouse_up() {
         "mouse up should not fire OnDragStop after AbortDrag already cleared the drag"
     );
 }
-
 #[test]
 fn moving_drag_updates_frame_anchor_to_follow_mouse() {
     let mut app = build_test_app(ScreenKind::Game);
@@ -251,6 +248,36 @@ fn moving_drag_updates_frame_anchor_to_follow_mouse() {
     );
     assert_eq!(x, 120.0, "mouse delta should advance the frame x offset");
     assert_eq!(y, -120.0, "mouse delta should advance the frame y offset");
+}
+#[test]
+fn scaled_moving_drag_converts_screen_delta_to_anchor_offset() {
+    let mut app = build_test_app(ScreenKind::Game);
+    let env = app.env.borrow();
+    env.exec(
+        r#"
+        ScaledMovingDragFrame = CreateFrame("Frame", "ScaledMovingDragFrame", UIParent)
+        ScaledMovingDragFrame:SetSize(100, 100)
+        ScaledMovingDragFrame:SetScale(0.5)
+        ScaledMovingDragFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+        ScaledMovingDragFrame:SetMovable(true)
+        ScaledMovingDragFrame:EnableMouse(true)
+        ScaledMovingDragFrame:RegisterForDrag("LeftButton")
+        ScaledMovingDragFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+        "#,
+    )
+    .expect("scaled moving drag frame setup should succeed");
+    drop(env);
+    rebuild_hittable_cache(&app);
+    app.handle_mouse_move(Point::new(75.0, 75.0));
+    app.handle_mouse_down(Point::new(75.0, 75.0));
+    app.handle_mouse_move(Point::new(95.0, 95.0));
+    let (x, y): (f64, f64) = app
+        .env
+        .borrow()
+        .eval("local _, _, _, x, y = ScaledMovingDragFrame:GetPoint(1); return x, y")
+        .expect("scaled moving drag anchor query should succeed");
+    assert_eq!(x, 140.0, "20 screen pixels should become 40 UI units");
+    assert_eq!(y, -140.0, "20 screen pixels should become 40 UI units");
 }
 
 #[test]
