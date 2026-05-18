@@ -85,6 +85,23 @@ impl Default for TooltipData {
     }
 }
 
+impl TooltipData {
+    pub fn clear_content_state(&mut self) {
+        self.lines.clear();
+        self.spell_id = None;
+        self.unit_token = None;
+        self.unit_name = None;
+        self.unit_guid = None;
+    }
+
+    pub fn reset_layout_constraints(&mut self) {
+        self.min_width = 0.0;
+        self.padding = 0.0;
+        self.custom_word_wrap_min_width = None;
+        self.shrink_to_fit_wrapped = true;
+    }
+}
+
 pub(crate) const DEFAULT_CURSOR_Y_OFFSET: f32 = 20.0;
 
 pub(crate) fn build_cursor_anchor(mx: f32, my: f32, x_offset: f32, y_offset: f32) -> Anchor {
