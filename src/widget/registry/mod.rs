@@ -259,7 +259,7 @@ impl WidgetRegistry {
     pub fn visible_texture_paths(&self) -> Vec<String> {
         let mut paths = FxHashSet::default();
         for frame in self.widgets.values() {
-            if !frame.visible {
+            if !self.is_ancestor_visible(frame.id) {
                 continue;
             }
             for path in [

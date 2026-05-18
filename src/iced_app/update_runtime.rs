@@ -42,7 +42,7 @@ impl App {
         }
         self.clear_failed_texture_requests();
         self.merge_widget_dirty_into_render_state();
-        self.preload_current_render_requests_preserving_dirty(Some(
+        self.preload_render_texture_requests_preserving_dirty(Some(
             std::time::Duration::from_millis(25),
         ));
     }
@@ -63,7 +63,7 @@ impl App {
         }
         self.clear_failed_texture_requests();
         self.mark_all_strata_dirty();
-        self.preload_current_render_requests_preserving_dirty(Some(
+        self.preload_render_texture_requests_preserving_dirty(Some(
             std::time::Duration::from_millis(25),
         ));
     }
@@ -319,8 +319,7 @@ impl App {
         self.set_main_thread_phase("process_timers");
         let tick_started = std::time::Instant::now();
         let mut stage_timings = TickStageTimings::default();
-        let queued_preloads_pending = self.has_queued_texture_preloads();
-        let outcome = self.run_timer_tick_stages(queued_preloads_pending, &mut stage_timings);
+        let outcome = self.run_timer_tick_stages(&mut stage_timings);
 
         self.finish_timer_tick(
             tick_started,
@@ -330,19 +329,13 @@ impl App {
         )
     }
 
-    fn run_timer_tick_stages(
-        &mut self,
-        queued_preloads_pending: bool,
-        stage_timings: &mut TickStageTimings,
-    ) -> TimerTickOutcome {
-        let mut redraw_needed =
-            self.preload_visible_textures_for_tick(queued_preloads_pending, stage_timings);
+    fn run_timer_tick_stages(&mut self, stage_timings: &mut TickStageTimings) -> TimerTickOutcome {
+        let mut redraw_needed = self.preload_visible_textures_for_tick(stage_timings);
         redraw_needed |= self.run_pending_lua_for_tick(stage_timings);
 
         let combined = self.collect_tick_work(stage_timings);
         redraw_needed |= self.mark_tick_dirty(combined, stage_timings);
-        redraw_needed |=
-            self.preload_pending_render_requests_for_tick(queued_preloads_pending, stage_timings);
+        redraw_needed |= self.preload_pending_render_requests_for_tick(stage_timings);
 
         TimerTickOutcome {
             combined,
@@ -366,13 +359,8 @@ impl App {
         true
     }
 
-    fn preload_visible_textures_for_tick(
-        &self,
-        queued_preloads_pending: bool,
-        stage_timings: &mut TickStageTimings,
-    ) -> bool {
-        if queued_preloads_pending || self.textures_pending.get() || self.has_pending_render_work()
-        {
+    fn preload_visible_textures_for_tick(&self, stage_timings: &mut TickStageTimings) -> bool {
+        if self.textures_pending.get() || self.has_pending_render_work() {
             return false;
         }
 
@@ -424,13 +412,12 @@ impl App {
 
     fn preload_pending_render_requests_for_tick(
         &self,
-        queued_preloads_pending: bool,
         stage_timings: &mut TickStageTimings,
     ) -> bool {
         let has_cached_render_requests = !self.cached_render_request_paths().is_empty();
-        if self.strata_dirty.get() != 0 || queued_preloads_pending || has_cached_render_requests {
+        if self.strata_dirty.get() != 0 || has_cached_render_requests {
             let started = std::time::Instant::now();
-            let preloaded = self.preload_current_render_requests_preserving_dirty(Some(
+            let preloaded = self.preload_render_texture_requests_preserving_dirty(Some(
                 std::time::Duration::from_millis(25),
             ));
             stage_timings.preload += started.elapsed();

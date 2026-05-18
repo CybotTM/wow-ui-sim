@@ -629,7 +629,7 @@ fn process_timers_skips_visible_warmup_while_strata_are_dirty() {
 }
 
 #[test]
-fn process_timers_prioritizes_queued_preloads_over_visible_warmup() {
+fn process_timers_treats_queued_preloads_as_background_work() {
     let temp_dir = tempdir().unwrap();
     let visible_texture = addon_texture_path("queued-visible");
     let queued_texture = addon_texture_path("queued-target");
@@ -661,24 +661,34 @@ fn process_timers_prioritizes_queued_preloads_over_visible_warmup() {
     let task = app.handle_process_timers(Instant::now());
     let action = pollster::block_on(async {
         iced_runtime::task::into_stream(task)
-            .expect("queued preload progress should request a redraw")
+            .expect("visible warmup progress should request a redraw")
             .next()
             .await
             .expect("task should emit a redraw action")
     });
+    assert!(
+        matches!(action, Action::Window(WindowAction::RedrawAll)),
+        "visible warmup progress should still request a redraw"
+    );
 
     let tex_mgr = app.texture_manager.borrow();
     assert!(
-        tex_mgr.get(&queued_texture).is_some(),
-        "queued preloads should still decode during the tick"
+        tex_mgr.get(&queued_texture).is_none(),
+        "background queued preloads should not decode during the GUI timer tick"
     );
     assert!(
-        tex_mgr.get(&visible_texture).is_none(),
-        "queued preloads should bypass tick visible warmup to avoid duplicate decode work"
+        tex_mgr.get(&visible_texture).is_some(),
+        "visible texture warmup should still run when render work is otherwise idle"
     );
+    drop(tex_mgr);
     assert!(
-        matches!(action, Action::Window(WindowAction::RedrawAll)),
-        "queued preload progress should still request a redraw"
+        app.env
+            .borrow()
+            .state()
+            .borrow()
+            .pending_texture_preloads
+            .contains(&queued_texture),
+        "background queued preloads should remain queued for explicit/background processing"
     );
 }
 

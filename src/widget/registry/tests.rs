@@ -59,6 +59,25 @@ fn take_render_dirty_batch_returns_none_ids_for_full_rebuild_sentinel() {
 }
 
 #[test]
+fn visible_texture_paths_ignores_children_under_hidden_parents() {
+    let mut registry = WidgetRegistry::default();
+    let mut parent = frame(1, WidgetType::Frame, None, FrameStrata::High);
+    parent.visible = false;
+    let mut child = frame(2, WidgetType::Texture, Some(1), FrameStrata::High);
+    child.visible = true;
+    child.texture = Some("Interface/WorldMap/HiddenTile".to_string());
+
+    registry.register(parent);
+    registry.register(child);
+    registry.add_child(1, 2);
+
+    assert!(
+        registry.visible_texture_paths().is_empty(),
+        "hidden parent subtrees must not enter visible texture warmup"
+    );
+}
+
+#[test]
 fn add_child_reparents_child_and_updates_effective_alpha() {
     let mut registry = WidgetRegistry::default();
 

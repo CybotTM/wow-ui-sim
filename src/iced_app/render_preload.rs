@@ -179,16 +179,24 @@ fn duration_ms(duration: std::time::Duration) -> f64 {
 
 impl App {
     pub(crate) fn preload_initial_texture_requests(&self) {
-        let _ = self.preload_current_render_requests(None);
+        let _ = self.preload_render_texture_requests(None);
     }
 
-    pub(crate) fn preload_current_render_requests_preserving_dirty(
+    pub(crate) fn preload_render_texture_requests_preserving_dirty(
         &self,
         budget: Option<std::time::Duration>,
     ) -> bool {
+        self.preload_texture_requests_preserving_dirty(budget, false)
+    }
+
+    fn preload_texture_requests_preserving_dirty(
+        &self,
+        budget: Option<std::time::Duration>,
+        include_background_queue: bool,
+    ) -> bool {
         let dirty_before = self.strata_dirty.get();
         let pending_ids_before = self.pending_dirty_ids.borrow().clone();
-        let redraw_needed = self.preload_current_render_requests(budget);
+        let redraw_needed = self.preload_texture_requests(budget, include_background_queue);
         if dirty_before != 0 {
             self.mark_strata_dirty(dirty_before);
             *self.pending_dirty_ids.borrow_mut() = pending_ids_before;
@@ -196,13 +204,33 @@ impl App {
         redraw_needed
     }
 
+    #[cfg(test)]
     pub(crate) fn preload_current_render_requests(
         &self,
         budget: Option<std::time::Duration>,
     ) -> bool {
+        self.preload_texture_requests(budget, true)
+    }
+
+    pub(crate) fn preload_render_texture_requests(
+        &self,
+        budget: Option<std::time::Duration>,
+    ) -> bool {
+        self.preload_texture_requests(budget, false)
+    }
+
+    fn preload_texture_requests(
+        &self,
+        budget: Option<std::time::Duration>,
+        include_background_queue: bool,
+    ) -> bool {
         let mut pass = self.begin_texture_preload_pass(budget);
         let deadline = self.texture_preload_deadline(budget);
-        let queued_progress = self.preload_queued_textures_until(deadline, pass.log_enabled);
+        let queued_progress = if include_background_queue {
+            self.preload_queued_textures_until(deadline, pass.log_enabled)
+        } else {
+            QueuedTexturePreloadProgress::default()
+        };
 
         self.finish_texture_preload_pass(&mut pass, queued_progress)
     }
