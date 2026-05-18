@@ -143,6 +143,37 @@ Let BlizzMove receive `PLAYER_LOGIN` again. That flushes the AceAddon queue duri
 
 This moves the remaining ElvUI login cost back to `PLAYER_LOGIN` and exposes an existing ElvUI/oUF aura error (`button:SetSize` nil). Track that separately from the talent-open regression.
 
+## 2026-05-18 Full-addon Login Profile
+
+A fresh Mists full-addon `lua-errors` profile, after the startup error fixes, still returns `[]` for Lua errors but shows login time dominated by third-party Lua compilation rather than simulator XML frame setup or SavedVariables:
+
+```text
+Blizzard addons loaded in 9.21s
+Third-party addons total time: 25.64s
+Lua exec: 18.25s
+  compile: 16.73s
+  call: 1.52s
+SavedVars: 54.32ms
+Bytecode cache: 1/1395 hits
+```
+
+Slowest third-party addons in that run:
+
+```text
+6.4s  AllTheThings
+3.1s  RaiderIO_DB_EU_M
+2.5s  RaiderIO_DB_US_M
+2.0s  ElvUI
+2.0s  Plater
+1.6s  RaiderIO_DB_TW_M
+1.4s  RaiderIO_DB_EU_R
+1.1s  RaiderIO_DB_US_R
+822ms RaiderIO_DB_TW_R
+816ms ElvUI_Libraries
+```
+
+The next optimization target should be compile/cache behavior for large addon Lua files, not SavedVariables or XML frame construction. The bytecode cache is effectively cold on this path (`1/1395` hits), so improving cache hit rate or precompiled chunk reuse is likely to move login time more than micro-optimizing frame creation.
+
 ## Benchmark Binary
 
 `src/bin/bench_talents.rs` — loads all addons, fires startup events, then opens/closes the talent panel 10 times. Use `RUSTFLAGS="-C force-frame-pointers=yes"` for flamegraph profiling.
