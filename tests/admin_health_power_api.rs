@@ -87,6 +87,13 @@ fn test_set_player_power_current() {
 }
 
 #[test]
+fn unit_power_bar_id_defaults_to_zero() {
+    let env = env();
+    let power_bar_id: i32 = env.eval(r#"return UnitPowerBarID("player")"#).unwrap();
+    assert_eq!(power_bar_id, 0);
+}
+
+#[test]
 fn test_set_player_power_max() {
     let env = env();
     let power_max: i32 = env

@@ -202,7 +202,7 @@ impl App {
         {
             let env = self.env.borrow();
             let mut state = env.state().borrow_mut();
-            super::app::resize_party_state(&mut state, size);
+            crate::startup::resize_party_state(&mut state, size);
             drop(state);
             crate::startup::refresh_party_frames(&env);
         }

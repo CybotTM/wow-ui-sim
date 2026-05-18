@@ -5,6 +5,7 @@
 //! - `GetAlternateFormInfo()` — returns `(hasAlternateForm, inAlternateForm)` bools.
 //! - `GetContentDifficultyCreatureForPlayer(unitToken)` — returns an
 //!   `Enum.RelativeContentDifficulty` number (default 2 = equal).
+//! - `GetGlidingInfo()` — returns movement-backed skyriding/gliding state.
 //! - `GetPlayerMythicPlusRatingSummary(playerToken)` — returns a
 //!   `MythicPlusRatingSummary` table or nothing if no data.
 //! - `IsPlayerEligibleForNPE()` — returns `(isEligible, failureReason)`.
@@ -32,6 +33,7 @@ pub(super) fn register_player_info_surface(state: &mut LuaState) -> LuaResult<()
     )?;
     table_set_rust_fn_static(state, ns, "GetDisplayID", get_display_id)?;
     table_set_rust_fn_static(state, ns, "GetNativeDisplayID", get_native_display_id)?;
+    table_set_rust_fn_static(state, ns, "GetGlidingInfo", get_gliding_info)?;
     table_set_rust_fn_static(
         state,
         ns,
@@ -97,6 +99,19 @@ fn get_display_id(state: &mut LuaState) -> LuaResult<u32> {
 fn get_native_display_id(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
+}
+
+fn get_gliding_info(state: &mut LuaState) -> LuaResult<u32> {
+    let movement = borrow_state(state)?.player.movement.clone();
+    let forward_speed = if movement.flying || movement.moving {
+        100.0
+    } else {
+        0.0
+    };
+    state.push(Val::Bool(movement.flying));
+    state.push(Val::Bool(movement.flying || movement.mounted));
+    state.push(Val::Num(forward_speed));
+    Ok(3)
 }
 
 fn get_content_difficulty_creature(state: &mut LuaState) -> LuaResult<u32> {

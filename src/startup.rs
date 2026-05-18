@@ -172,6 +172,16 @@ pub fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
     }
 }
 
+/// Finish startup animation groups that were kicked by login/update events
+/// before the first rendered frame is captured.
+pub fn settle_startup_animation_groups(env: &WowLuaEnv) {
+    if let Err(e) =
+        crate::lua_api::frame::methods::button_anchor_hierarchy::advance_animation_groups(env, 2.0)
+    {
+        log_with_timestamp(env, &format!("[Startup animations] error: {e}"));
+    }
+}
+
 fn dismiss_headless_glue_overlays(env: &WowLuaEnv) {
     let screen = env.state().borrow().screen_kind;
     if screen == ScreenKind::Game {
@@ -224,6 +234,7 @@ pub fn settle_headless_startup(env: &WowLuaEnv) {
     let screen = env.state().borrow().screen_kind;
     fire_startup_events_for_screen(env, screen);
     env.apply_post_event_workarounds();
+    settle_startup_animation_groups(env);
     dismiss_headless_glue_overlays(env);
     {
         let mut state = env.state().borrow_mut();
@@ -438,6 +449,11 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     fire("QUEST_LOG_UPDATE");
     resize_party_state(&mut env.state().borrow_mut(), 4);
     refresh_party_frames(env);
+    fire("ACTIONBAR_UPDATE_STATE");
+    fire("ACTIONBAR_UPDATE_COOLDOWN");
+    fire("UPDATE_BONUS_ACTIONBAR");
+    fire("PLAYER_CAN_GLIDE_CHANGED");
+    fire("PLAYER_IS_GLIDING_CHANGED");
     fire("UPDATE_BINDINGS");
     fire("DISPLAY_SIZE_CHANGED");
     fire("UI_SCALE_CHANGED");
@@ -456,7 +472,7 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     seed_buff_durations(env);
 }
 
-fn resize_party_state(state: &mut crate::lua_api::SimState, size: usize) {
+pub(crate) fn resize_party_state(state: &mut crate::lua_api::SimState, size: usize) {
     let clamped_size = size.min(4);
     let defaults = crate::lua_api::game_data::default_party();
     while state.party_members.len() < clamped_size {

@@ -34,6 +34,29 @@ fn get_alternate_form_info_reflects_mutation() {
     assert!(!in_form);
 }
 
+// ── GetGlidingInfo ───────────────────────────────────────────────────────────
+
+#[test]
+fn get_gliding_info_defaults_to_grounded() {
+    let env = env();
+    let (is_gliding, can_glide, forward_speed): (bool, bool, f64) =
+        env.eval("return C_PlayerInfo.GetGlidingInfo()").unwrap();
+    assert!(!is_gliding);
+    assert!(!can_glide);
+    assert_eq!(forward_speed, 0.0);
+}
+
+#[test]
+fn get_gliding_info_reflects_movement_state() {
+    let env = env();
+    env.state().borrow_mut().player.movement.flying = true;
+    let (is_gliding, can_glide, forward_speed): (bool, bool, f64) =
+        env.eval("return C_PlayerInfo.GetGlidingInfo()").unwrap();
+    assert!(is_gliding);
+    assert!(can_glide);
+    assert!(forward_speed > 0.0);
+}
+
 // ── GetContentDifficultyCreatureForPlayer ─────────────────────────────────────
 
 #[test]

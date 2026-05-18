@@ -354,7 +354,7 @@ impl App {
             falling: config.movement.falling,
             swimming: config.movement.swimming,
         };
-        resize_party_state(&mut state, usize::from(config.party_size.min(4)));
+        crate::startup::resize_party_state(&mut state, usize::from(config.party_size.min(4)));
     }
 
     /// Extract init params from thread-local storage.
@@ -363,6 +363,7 @@ impl App {
         fire_startup_events(env_rc);
         let env_ref = env_rc.borrow();
         env_ref.apply_post_event_workarounds();
+        crate::startup::settle_startup_animation_groups(&env_ref);
         let _ = crate::lua_api::hide_runtime_hidden_frames(env_ref.lua());
         env_ref.state().borrow_mut().widgets.rebuild_anchor_index();
     }
@@ -469,21 +470,6 @@ impl App {
         crate::logging::set_blocking_phase(phase);
         *self.main_thread_phase.borrow_mut() = (phase, std::time::Instant::now());
     }
-}
-
-pub(crate) fn resize_party_state(state: &mut crate::lua_api::SimState, size: usize) {
-    let clamped_size = size.min(4);
-    let defaults = crate::lua_api::game_data::default_party();
-    while state.party_members.len() < clamped_size {
-        let next_idx = state.party_members.len();
-        let Some(member) = defaults.get(next_idx).cloned() else {
-            break;
-        };
-        state.party_members.push(member);
-    }
-    state.party_members.truncate(clamped_size);
-    state.party_group_active = clamped_size > 0;
-    state.party_leader_index = None;
 }
 
 impl App {

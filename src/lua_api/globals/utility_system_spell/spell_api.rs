@@ -172,6 +172,12 @@ fn unit_power_type(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
+fn unit_power_bar_id(state: &mut LuaState) -> LuaResult<u32> {
+    let _unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
 fn unit_get_incoming_heals(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
@@ -272,6 +278,7 @@ pub(super) fn register_spell_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "UnitHealthMax", unit_health_max)?;
     LuaApiMut::register_function(lua, "UnitPower", unit_power)?;
     LuaApiMut::register_function(lua, "UnitPowerMax", unit_power_max)?;
+    LuaApiMut::register_function(lua, "UnitPowerBarID", unit_power_bar_id)?;
     LuaApiMut::register_function(lua, "UnitPowerType", unit_power_type)?;
     LuaApiMut::register_function(lua, "UnitGetIncomingHeals", unit_get_incoming_heals)?;
     LuaApiMut::register_function(lua, "UnitGetTotalAbsorbs", unit_get_total_absorbs)?;
