@@ -31,6 +31,7 @@ pub(super) fn moving_drag_anchor_update(
     }
 
     let rect = frame.layout_rect?;
+    let scale = frame.effective_scale.max(1e-6);
     let parent_id = frame.parent_id;
     let (parent_x, parent_y) = parent_id
         .and_then(|id| state.widgets.get(id).and_then(|parent| parent.layout_rect))
@@ -43,7 +44,11 @@ pub(super) fn moving_drag_anchor_update(
         new_left = clamp_axis_to_viewport(new_left, rect.width, screen_width);
         new_top = clamp_axis_to_viewport(new_top, rect.height, screen_height);
     }
-    Some((parent_id, new_left - parent_x, -(new_top - parent_y)))
+    Some((
+        parent_id,
+        (new_left - parent_x) / scale,
+        -(new_top - parent_y) / scale,
+    ))
 }
 
 pub(super) fn active_motion_drag_frame(
@@ -210,13 +215,18 @@ fn reanchor_to_fixed_corner(
     fixed_screen_y: f32,
 ) {
     let parent_id = state.widgets.get(drag_id).and_then(|f| f.parent_id);
+    let scale = state
+        .widgets
+        .get(drag_id)
+        .map(|f| f.effective_scale.max(1e-6))
+        .unwrap_or(1.0);
     let (parent_x, parent_y) = parent_id
         .and_then(|id| state.widgets.get(id).and_then(|p| p.layout_rect))
         .map(|r| (r.x, r.y))
         .unwrap_or((0.0, 0.0));
 
-    let x_offset = fixed_screen_x - parent_x;
-    let y_offset = -(fixed_screen_y - parent_y);
+    let x_offset = (fixed_screen_x - parent_x) / scale;
+    let y_offset = -(fixed_screen_y - parent_y) / scale;
 
     state.widgets.remove_all_anchor_dependents_for(drag_id);
     if let Some(pid) = parent_id {

@@ -688,6 +688,10 @@ mod test_support;
 mod tests;
 
 #[cfg(test)]
+#[path = "mouse_drag_scaled_tests.rs"]
+mod drag_scaled_tests;
+
+#[cfg(test)]
 #[path = "mouse_registration_tests.rs"]
 mod registration_tests;
 
