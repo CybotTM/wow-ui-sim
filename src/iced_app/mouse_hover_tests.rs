@@ -348,3 +348,61 @@ fn moving_inside_canvas_off_hovered_frame_fires_on_leave() {
         "moving to empty canvas should clear the app hover target"
     );
 }
+
+#[test]
+fn moving_inside_same_hovered_frame_does_not_dirty_render_state() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            SameHoverButton = CreateFrame("Button", "SameHoverButton", UIParent)
+            SameHoverButton:SetSize(100, 100)
+            SameHoverButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            SameHoverButton:EnableMouse(true)
+            SameHoverButton:SetScript("OnEnter", function()
+                __same_hover_enter = (__same_hover_enter or 0) + 1
+            end)
+            SameHoverButton:SetScript("OnLeave", function()
+                __same_hover_leave = (__same_hover_leave or 0) + 1
+            end)
+            __same_hover_enter = 0
+            __same_hover_leave = 0
+            "#,
+        )
+        .expect("same-hover test setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    app.handle_mouse_move(Point::new(150.0, 150.0));
+    drain_mouse_move_dirty(&app);
+
+    app.handle_mouse_move(Point::new(160.0, 160.0));
+    let (dirty_mask, dirty_ids) = drain_mouse_move_dirty(&app);
+    let (enter_count, leave_count): (f64, f64) = app
+        .env
+        .borrow()
+        .eval("return __same_hover_enter, __same_hover_leave")
+        .expect("same-hover counters should be readable");
+
+    assert_eq!(enter_count, 1.0, "OnEnter should only fire once");
+    assert_eq!(
+        leave_count, 0.0,
+        "OnLeave should not fire inside same frame"
+    );
+    assert_eq!(dirty_mask, 0, "same-hover movement should not dirty strata");
+    assert!(
+        dirty_ids.is_some_and(|ids| ids.is_empty()),
+        "same-hover movement should not dirty frame IDs"
+    );
+}
+
+fn drain_mouse_move_dirty(app: &App) -> (u16, Option<rustc_hash::FxHashSet<u64>>) {
+    app.env
+        .borrow()
+        .state()
+        .borrow()
+        .widgets
+        .take_render_dirty_with_ids()
+}
