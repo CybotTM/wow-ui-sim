@@ -7,6 +7,7 @@ mod tooltip_hover_helpers;
 
 use tooltip_full_env_helpers::setup_full_env;
 use tooltip_hover_helpers::{open_character_panel, refresh_buff_frame};
+use iced::{Point, Rectangle};
 
 const HOVER_FIRST_VISIBLE_BUFF_ICON_LUA: &str = r#"
     local totalButtons = 0
@@ -299,6 +300,105 @@ fn test_character_slot_hover_tooltip_is_positioned_to_right_of_slot() {
         "Tooltip should remain on-screen after character slot hover: tooltip={:?}",
         tooltip_rect
     );
+}
+
+#[cfg(feature = "gui")]
+#[test]
+fn test_character_slot_remains_hit_target_after_tooltip_resizes() {
+    use wow_ui_sim::render::font::WowFontSystem;
+
+    let env = setup_full_env();
+    open_character_panel(&env);
+
+    let slot_id = {
+        let state = env.state().borrow();
+        state
+            .widgets
+            .get_id_by_name("CharacterHeadSlot")
+            .expect("CharacterHeadSlot should exist after opening character panel")
+    };
+    let slot_center = frame_center(&env, slot_id);
+
+    let pre_tooltip_target = topmost_hit_at(&env, slot_center)
+        .expect("slot center should resolve to a hit target before its tooltip opens");
+
+    env.state().borrow_mut().hovered_frame = Some(slot_id);
+    env.fire_script_handler(slot_id, "OnEnter", vec![]).unwrap();
+
+    let mut font_sys = WowFontSystem::new();
+    {
+        let mut state = env.state().borrow_mut();
+        wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
+        state.ensure_layout_rects();
+    }
+
+    let gt_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("GameTooltip")
+        .unwrap();
+    assert_ne!(
+        topmost_hit_at(&env, slot_center),
+        Some(gt_id),
+        "GameTooltip must not become the hit target at the original slot cursor position"
+    );
+    assert_eq!(
+        topmost_hit_at(&env, slot_center),
+        Some(pre_tooltip_target),
+        "tooltip open/resize should not change the hit target at the original slot cursor position; before={} after={}",
+        frame_label(&env, pre_tooltip_target),
+        topmost_hit_at(&env, slot_center)
+            .map(|id| frame_label(&env, id))
+            .unwrap_or_else(|| "<none>".to_string())
+    );
+}
+
+fn frame_center(env: &wow_ui_sim::lua_api::WowLuaEnv, frame_id: u64) -> Point {
+    let state = env.state().borrow();
+    let rect = wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, frame_id, 1024.0, 768.0);
+    Point::new(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0)
+}
+
+fn topmost_hit_at(env: &wow_ui_sim::lua_api::WowLuaEnv, point: Point) -> Option<u64> {
+    let mut state = env.state().borrow_mut();
+    state.ensure_layout_rects();
+    let buckets = state
+        .get_strata_buckets()
+        .expect("strata buckets should be available")
+        .clone();
+    let collected = wow_ui_sim::iced_app::frame_collect::collect_hittable_frames(
+        &state.widgets,
+        &buckets,
+    );
+    let hittable = wow_ui_sim::iced_app::build_hittable_rects(&collected, &state.widgets);
+    hittable
+        .iter()
+        .rev()
+        .find(|(_, rect)| rect_contains(rect, point))
+        .map(|(id, _)| *id)
+}
+
+fn frame_label(env: &wow_ui_sim::lua_api::WowLuaEnv, id: u64) -> String {
+    let state = env.state().borrow();
+    state
+        .widgets
+        .get(id)
+        .map(|frame| {
+            frame
+                .name
+                .clone()
+                .or_else(|| frame.parent_key.clone())
+                .unwrap_or_else(|| format!("frame#{id}"))
+        })
+        .unwrap_or_else(|| format!("missing#{id}"))
+}
+
+fn rect_contains(rect: &Rectangle, point: Point) -> bool {
+    point.x >= rect.x
+        && point.x <= rect.x + rect.width
+        && point.y >= rect.y
+        && point.y <= rect.y + rect.height
 }
 
 #[cfg(feature = "gui")]
