@@ -129,6 +129,7 @@ impl App {
     }
 
     fn handle_canvas_event(&mut self, canvas_msg: CanvasMessage) -> Task<Message> {
+        let is_mouse_move = matches!(canvas_msg, CanvasMessage::MouseMove(_));
         match canvas_msg {
             CanvasMessage::MouseMove(pos) => self.handle_mouse_move(pos),
             CanvasMessage::MouseLeave => self.handle_mouse_leave(),
@@ -138,11 +139,21 @@ impl App {
             CanvasMessage::RightMouseUp(pos) => self.handle_right_mouse_up(pos),
             CanvasMessage::MiddleClick(pos) => self.handle_middle_click(pos),
         }
-        if self.strata_dirty.get() != 0 || self.textures_pending.get() {
+        if self.canvas_event_needs_redraw(is_mouse_move) {
             request_redraw_task()
         } else {
             Task::none()
         }
+    }
+
+    fn canvas_event_needs_redraw(&self, is_mouse_move: bool) -> bool {
+        if self.strata_dirty.get() != 0 {
+            return true;
+        }
+        if is_mouse_move {
+            return self.env.borrow().state().borrow().cursor_item.is_some();
+        }
+        self.textures_pending.get()
     }
 
     pub(super) fn handle_key_press(&mut self, key: &str, text: Option<&str>, captured_at: Instant) {

@@ -1,6 +1,7 @@
 use super::*;
 use crate::iced_app::app::AppInit;
 use crate::iced_app::render;
+use crate::lua_api::state::CursorInfo;
 use crate::render::{FrameQuadSnapshot, QuadBatch, TextureRequest};
 use crate::screen::ScreenKind;
 use crate::texture::TextureManager;
@@ -383,6 +384,50 @@ fn canvas_event_requests_redraw_when_it_leaves_dirty_strata() {
     assert!(
         matches!(action, Action::Window(WindowAction::RedrawAll)),
         "canvas event should request redraw when it leaves strata dirty"
+    );
+}
+
+#[test]
+fn mouse_move_ignores_pending_texture_redraw_when_nothing_visual_changed() {
+    let mut app = build_test_app(ScreenKind::Game);
+    app.strata_dirty.set(0);
+    app.textures_pending.set(true);
+    {
+        let env = app.env.borrow();
+        let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
+    }
+
+    let task = app.handle_canvas_event(CanvasMessage::MouseMove(iced::Point::new(10.0, 10.0)));
+
+    assert!(
+        iced_runtime::task::into_stream(task).is_none(),
+        "pending textures alone must not turn mouse movement into a redraw loop"
+    );
+}
+
+#[test]
+fn mouse_move_with_cursor_item_still_requests_redraw() {
+    let mut app = build_test_app(ScreenKind::Game);
+    app.strata_dirty.set(0);
+    app.textures_pending.set(false);
+    {
+        let env = app.env.borrow();
+        env.state().borrow_mut().cursor_item = Some(CursorInfo::Spell { spell_id: 123 });
+        let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
+    }
+
+    let task = app.handle_canvas_event(CanvasMessage::MouseMove(iced::Point::new(10.0, 10.0)));
+    let action = pollster::block_on(async {
+        iced_runtime::task::into_stream(task)
+            .expect("cursor item movement should request a redraw")
+            .next()
+            .await
+            .expect("task should emit a redraw action")
+    });
+
+    assert!(
+        matches!(action, Action::Window(WindowAction::RedrawAll)),
+        "cursor-carried overlay still needs to follow mouse movement"
     );
 }
 
