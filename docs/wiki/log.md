@@ -18,6 +18,10 @@ Updated it again after fixing ElvUI Tooltip font initialization: Font objects no
 Updated it again after adding `GetInventoryItemDurability`; ElvUI DataTexts now sees the expected inventory durability global and the full-addon probe no longer reports that startup error.
 Updated it again after tracing the ElvUI static-popup `OnUpdate` error to simulator-driven layout dirtying. The size/layout dirty path now snapshots and restores existing custom `OnUpdate` handlers across recursive layout-parent `MarkDirty()` calls, so `ElvUI_StaticPopup1` keeps ElvUI's handler after `E:StaticPopup_Show`.
 
+## [2026-05-17] update | SetAtlas empty clear semantics
+
+Updated `systems/texture-atlas.md` after tracing missing Character panel paper-doll elements to `SetAtlas("")` resolving the generated empty-name atlas entry (`Interface\castingbar\uicastingbarstandardflipbook`). Empty atlas names now clear texture/atlas state and clear propagated parent button slots, which restores ElvUI-stripped equipment slot rendering.
+
 ## [2026-05-17] update | frame field environment numeric slot
 
 Updated `systems/frame-data-flow.md` after tracing the ElvUI/oUF aura `button:SetSize` startup error to frame field storage occupying raw numeric key `1`. Frame refs now keep addon array slots free while `debug.getfenv(frame)[1]` remains a compatibility view onto normal frame fields.

@@ -65,7 +65,11 @@ result_left = atlas_left + user_left * (atlas_right - atlas_left)
 
 `SetAtlas(atlasName, useAtlasSize, filterMode, resetTexCoords)` — looks up atlas info, detects nine-slice kit, sets `frame.nine_slice_atlas` or calls `apply_atlas_to_frame()` (sets texture path, UV coords, tiling hints). If `useAtlasSize`, sets frame width/height from atlas dimensions.
 
+`SetAtlas("")` is a clear operation. This matters because ElvUI's `StripTextures()` calls `SetTexture(E.ClearTexture)` followed by `SetAtlas("")`; the generated atlas database contains an accidental empty-name entry pointing at a casting-bar flipbook, but the Lua API must treat the empty atlas name as clearing texture/atlas state rather than resolving that entry.
+
 **Button texture propagation**: child textures with standard parentKeys (NormalTexture, PushedTexture, etc.) sync atlas info to the parent button's state fields. Custom parentKeys render independently.
+
+When a standard button texture child is cleared with `SetAtlas("")`, the corresponding parent button slot is cleared too. Without that propagation, stripped Normal/Pushed/Highlight children can leave stale parent button texture fields behind for the render path.
 
 ## Deferred Texture Loading
 
@@ -74,6 +78,7 @@ Quad batch uses `push_textured_path()` with deferred loading: quads store a path
 ## Sources
 
 - [texture-atlas-system.md](../../texture-atlas-system.md) — TextureManager, AtlasInfo, nine-slice kits, tex coord remapping, StatusBar fill
+- [atlas.rs](../../../src/lua_api/frame/methods/widgets/texture/atlas.rs) — `SetAtlas("")` clear semantics and button slot propagation
 
 ## See Also
 
