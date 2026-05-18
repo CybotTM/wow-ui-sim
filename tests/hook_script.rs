@@ -135,6 +135,22 @@ fn test_set_script_invalid_handler_errors() {
 }
 
 #[test]
+fn test_frame_supports_enable_disable_scripts() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: bool = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            f:SetScript("OnEnable", function() end)
+            f:SetScript("OnDisable", function() end)
+            return f:HasScript("OnEnable") and f:HasScript("OnDisable")
+            "#,
+        )
+        .unwrap();
+    assert!(result, "plain Frame should accept OnEnable and OnDisable");
+}
+
+#[test]
 fn test_has_script_returns_false_for_onclick_on_plain_frame() {
     let env = WowLuaEnv::new().unwrap();
     let result: bool = env

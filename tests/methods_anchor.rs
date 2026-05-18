@@ -103,6 +103,23 @@ fn test_set_point_default_relative_point() {
 }
 
 #[test]
+fn test_set_point_accepts_nil_relative_to() {
+    let env = env();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "AnchorFrameNilRelativeTo", UIParent)
+        f:SetPoint("TOPLEFT", nil)
+        local point, relTo, relPoint, x, y = f:GetPoint(1)
+        assert(point == "TOPLEFT", "point should be TOPLEFT")
+        assert(relTo == UIParent, "nil relativeTo should resolve to parent")
+        assert(relPoint == "TOPLEFT", "relativePoint should default to point")
+        assert(x == 0 and y == 0, "offsets should default to zero")
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn test_set_point_multiple() {
     let env = env();
     let num: i32 = env

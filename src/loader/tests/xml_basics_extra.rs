@@ -150,6 +150,41 @@ fn fontstring_font_attribute_applies_font_object() {
 }
 
 #[test]
+fn layer_fontstring_without_anchors_gets_default_center_point() {
+    let ctx = load_test_xml(
+        "layer-fontstring-default-anchor",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="DefaultFontStringAnchorParent" parent="UIParent">
+                <Size x="300" y="40"/>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <FontString name="$parentText" inherits="GameFontHighlight" text="Title Text">
+                            <Size x="235" y="20"/>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        r#"
+        (function()
+            local point, relativeTo, relativePoint, x, y = DefaultFontStringAnchorParentText:GetPoint(1)
+            return point == "CENTER"
+                and relativeTo == DefaultFontStringAnchorParent
+                and relativePoint == "CENTER"
+                and x == 0
+                and y == 0
+        end)()
+        "#,
+        "XML layer FontStrings without explicit anchors should default to parent center",
+    );
+}
+
+#[test]
 fn test_xml_font_redefinition_keeps_font_object_metatable_methods() {
     let ctx = load_test_xml(
         "font-object-redefinition-methods",

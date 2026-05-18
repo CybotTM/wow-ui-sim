@@ -18,8 +18,6 @@ use rilua::vm::table::Table;
 use rilua::{LuaResult, Val, runtime_error};
 use script_binding_args::{build_hooked_script, optional_script_binding_from_stack};
 
-// ── Event registration ───────────────────────────────────────────────────────
-
 pub(super) fn register_event(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(event) = val_to_string(state, stack_val(state, 2)) else {
@@ -33,11 +31,9 @@ pub(super) fn register_event(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(newly_registered && !restricted));
     Ok(1)
 }
-
 fn insert_registered_event_checked(state: &mut LuaState, id: u64, event: &str) -> LuaResult<bool> {
     mutate_registered_event_checked(state, id, event, RegisteredEventOp::Insert)
 }
-
 pub(super) fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(event) = val_to_string(state, stack_val(state, 2)) else {
@@ -62,7 +58,6 @@ pub(super) fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(newly_registered));
     Ok(1)
 }
-
 pub(super) fn unregister_event(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(event) = val_to_string(state, stack_val(state, 2)) else {
@@ -76,11 +71,9 @@ pub(super) fn unregister_event(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(was_registered));
     Ok(1)
 }
-
 fn remove_registered_event_checked(state: &mut LuaState, id: u64, event: &str) -> LuaResult<bool> {
     mutate_registered_event_checked(state, id, event, RegisteredEventOp::Remove)
 }
-
 enum RegisteredEventOp {
     Insert,
     Remove,
@@ -99,7 +92,6 @@ fn mutate_registered_event_checked(
         RegisteredEventOp::Remove => sim.widgets.unregister_event_listener(id, event),
     })
 }
-
 fn ensure_registerable_event(state: &mut LuaState, id: u64, event: &str) -> LuaResult<()> {
     if crate::event::is_registerable_event(event) {
         return Ok(());
@@ -116,7 +108,6 @@ fn ensure_registerable_event(state: &mut LuaState, id: u64, event: &str) -> LuaR
         frame_name, frame_name, event
     )))
 }
-
 pub(super) fn unregister_all_events(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     {
@@ -126,7 +117,6 @@ pub(super) fn unregister_all_events(state: &mut LuaState) -> LuaResult<u32> {
     rilua_hlist_unregister_all(state, id)?;
     Ok(0)
 }
-
 pub(super) fn register_all_events(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     {
@@ -136,7 +126,6 @@ pub(super) fn register_all_events(state: &mut LuaState) -> LuaResult<u32> {
     rilua_hlist_register_all(state, id)?;
     Ok(0)
 }
-
 pub(super) fn is_event_registered(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let event = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
@@ -151,11 +140,9 @@ pub(super) fn is_event_registered(state: &mut LuaState) -> LuaResult<u32> {
     super::unit_event::push_registered_unit(state, unit.as_deref());
     Ok(2)
 }
-
 fn frame_has_registered_event(frame: &crate::widget::Frame, event: &str) -> bool {
     frame.registered_events.contains(event)
 }
-
 pub(super) fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(event) = val_to_string(state, stack_val(state, 2)) else {
@@ -176,7 +163,6 @@ pub(super) fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(!restricted));
     Ok(1)
 }
-
 pub(super) fn register_unit_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(event) = val_to_string(state, stack_val(state, 2)) else {
@@ -222,8 +208,6 @@ pub(super) fn get_propagate_keyboard_input(state: &mut LuaState) -> LuaResult<u3
     state.push(Val::Bool(val));
     Ok(1)
 }
-
-// ── Script handlers ──────────────────────────────────────────────────────────
 
 pub(super) fn set_script(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
@@ -377,7 +361,8 @@ fn supports_model_script_handler(widget_type: WidgetType, object_type_name: Opti
 fn supports_enable_disable_script(widget_type: WidgetType) -> bool {
     matches!(
         widget_type,
-        WidgetType::Button
+        WidgetType::Frame
+            | WidgetType::Button
             | WidgetType::CheckButton
             | WidgetType::EditBox
             | WidgetType::Slider
@@ -457,8 +442,6 @@ fn is_animation_script_container(state: &LuaState, frame_id: u64) -> bool {
             | "Animation"
     )
 }
-
-// ── hlist helpers ────────────────────────────────────────────────────────────
 
 /// Insert `id` into the per-event hlist stored in registry["__event_individual"][event].
 pub(super) fn rilua_hlist_register_individual(

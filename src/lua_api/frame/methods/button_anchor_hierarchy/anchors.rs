@@ -144,6 +144,9 @@ pub(super) fn parse_set_point_args(
     let arg6 = stack_val(state, 6);
 
     if arg3 == Val::Nil {
+        if arg4 == Val::Nil {
+            return Ok((None, point, 0.0, 0.0));
+        }
         if matches!(arg4, Val::Num(_)) {
             let x_offset = num_opt(arg4).unwrap_or(0.0);
             let y_offset = num_opt(arg5).unwrap_or(0.0);

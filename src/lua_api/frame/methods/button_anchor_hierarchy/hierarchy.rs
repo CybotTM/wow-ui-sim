@@ -127,7 +127,7 @@ pub(super) fn get_num_children(state: &mut LuaState) -> LuaResult<u32> {
             .map(|f| {
                 f.children
                     .iter()
-                    .filter(|&&cid| !is_region_type(&sim, cid))
+                    .filter(|&&cid| is_frame_child(&sim, cid))
                     .count()
             })
             .unwrap_or(0) as i32
@@ -150,10 +150,18 @@ pub(super) fn get_children(state: &mut LuaState) -> LuaResult<u32> {
             })
             .unwrap_or_default()
     };
-    let count = children.len() as u32;
+    let mut count = 0u32;
     for child_id in children {
+        let is_child_frame = {
+            let sim = borrow_state(state)?;
+            is_frame_child(&sim, child_id)
+        };
+        if !is_child_frame {
+            continue;
+        }
         let val = frame_ref(state, child_id)?;
         state.push(val);
+        count += 1;
     }
     Ok(count)
 }
@@ -186,6 +194,22 @@ fn is_region_type(sim: &crate::lua_api::SimState, cid: u64) -> bool {
             )
         })
         .unwrap_or(false)
+}
+
+fn is_frame_child(sim: &crate::lua_api::SimState, cid: u64) -> bool {
+    sim.widgets
+        .get(cid)
+        .map(|child| !is_region_widget_type(child.widget_type))
+        .unwrap_or(false)
+}
+
+fn is_region_widget_type(widget_type: crate::widget::WidgetType) -> bool {
+    matches!(
+        widget_type,
+        crate::widget::WidgetType::Texture
+            | crate::widget::WidgetType::FontString
+            | crate::widget::WidgetType::Line
+    )
 }
 
 pub(super) fn get_regions(state: &mut LuaState) -> LuaResult<u32> {

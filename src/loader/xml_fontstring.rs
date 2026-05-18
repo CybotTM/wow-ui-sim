@@ -213,6 +213,8 @@ fn append_fontstring_anchor_code(
             parent_name,
             "parent",
         ));
+    } else if fontstring.set_all_points != Some(true) {
+        code.push_str("\n        fs:SetPoint(\"CENTER\", parent, \"CENTER\", 0, 0)\n        ");
     }
 }
 
