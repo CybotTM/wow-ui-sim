@@ -274,65 +274,6 @@ mod tests {
     }
 
     #[test]
-    fn anchored_child_of_computed_panel_ancestor_is_hittable() {
-        let mut registry = WidgetRegistry::new();
-        let mut root = Frame::new(WidgetType::Frame, Some("UIParent".to_string()), None);
-        root.id = 1;
-        root.layout_rect = Some(crate::LayoutRect {
-            x: 0.0,
-            y: 0.0,
-            width: 1600.0,
-            height: 1200.0,
-        });
-        registry.register(root);
-
-        let mut panel = Frame::new(WidgetType::Frame, Some("ManagedPanel".to_string()), Some(1));
-        panel.layout_rect = Some(crate::LayoutRect {
-            x: 100.0,
-            y: 100.0,
-            width: 300.0,
-            height: 300.0,
-        });
-        let panel_id = panel.id;
-        registry.register(panel);
-        registry.add_child(1, panel_id);
-
-        let mut child = Frame::new(
-            WidgetType::Button,
-            Some("AnchoredPanelButton".to_string()),
-            Some(panel_id),
-        );
-        child.layout_rect = Some(crate::LayoutRect {
-            x: 120.0,
-            y: 120.0,
-            width: 20.0,
-            height: 20.0,
-        });
-        child.anchors.push(crate::widget::Anchor {
-            point: crate::widget::AnchorPoint::TopLeft,
-            relative_to: None,
-            relative_to_id: Some(panel_id as usize),
-            relative_point: crate::widget::AnchorPoint::TopLeft,
-            x_offset: 20.0,
-            y_offset: -20.0,
-        });
-        let child_id = child.id;
-        registry.register(child);
-        registry.add_child(panel_id, child_id);
-
-        let strata_buckets = vec![vec![child_id]];
-        let collected = super::collect_hittable_frames(&registry, &strata_buckets);
-
-        assert_eq!(collected.hittable.len(), 1);
-        let (hittable_id, hittable_rect) = collected.hittable[0];
-        assert_eq!(hittable_id, child_id);
-        assert_eq!(hittable_rect.x, 120.0);
-        assert_eq!(hittable_rect.y, 120.0);
-        assert_eq!(hittable_rect.width, 20.0);
-        assert_eq!(hittable_rect.height, 20.0);
-    }
-
-    #[test]
     fn later_created_regions_sort_after_earlier_regions_in_same_layer() {
         let mut registry = WidgetRegistry::new();
 

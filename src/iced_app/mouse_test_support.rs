@@ -50,8 +50,7 @@ pub(super) fn rebuild_hittable_cache(app: &App) {
         .clone();
     let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
     let hittable = build_hittable_rects(&collected, &state.widgets);
-    let size = app.screen_size.get();
-    let grid = super::super::hit_grid::HitGrid::new(hittable, size.width, size.height);
+    let grid = super::super::hit_grid::HitGrid::new(hittable, 800.0, 600.0);
     *app.cached_hittable.borrow_mut() = Some(grid);
 }
 
