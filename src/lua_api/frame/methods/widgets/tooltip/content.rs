@@ -69,6 +69,7 @@ fn apply_tooltip_lines(
     td.unit_token = None;
     td.unit_name = None;
     td.unit_guid = None;
+    sim.widgets.mark_rect_dirty(tooltip_id);
     sim.set_frame_visible(tooltip_id, visible);
 }
 
