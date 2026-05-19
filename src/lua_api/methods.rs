@@ -562,7 +562,7 @@ pub fn create_table_with_capacity(state: &mut LuaState, hash_capacity: usize) ->
 pub fn create_table_with_fields(state: &mut LuaState, fields: &[(&'static str, Val)]) -> Val {
     let table_ref = state.gc.alloc_table(Table::with_sizes(0, fields.len()));
     for &(key, value) in fields {
-        let key_ref = state.gc.intern_string(key.as_bytes());
+        let key_ref = state.gc.intern_string_static(key.as_bytes());
         if let Some(t) = state.gc.tables.get_mut(table_ref) {
             let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
         }
