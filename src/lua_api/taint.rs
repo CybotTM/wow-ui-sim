@@ -32,7 +32,7 @@ const CLOSURE_TAINT_KEY: &str = "__closure_taint";
 fn get_or_create_closure_taint_table(
     state: &mut LuaState,
 ) -> rilua::vm::gc::arena::GcRef<rilua::vm::table::Table> {
-    let key = state.gc.intern_string(CLOSURE_TAINT_KEY.as_bytes());
+    let key = state.gc.intern_string_static(CLOSURE_TAINT_KEY.as_bytes());
     if let Some(reg) = state.gc.tables.get(state.registry) {
         if let rilua::Val::Table(t) = reg.get_str(key, &state.gc.string_arena) {
             return t;
