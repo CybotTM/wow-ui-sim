@@ -21,17 +21,14 @@ pub(super) fn refresh_tooltip_geometry(sim: &mut crate::lua_api::state::SimState
         return;
     };
 
-    let changed = if let Some(frame) = sim.widgets.get_mut_visual(tooltip_id) {
-        let changed = frame.width != width || frame.height != height;
+    if let Some(frame) = sim.widgets.get_mut_visual(tooltip_id) {
         frame.width = width;
         frame.height = height;
-        changed
-    } else {
-        false
-    };
-    if changed {
-        sim.widgets.mark_rect_dirty(tooltip_id);
     }
+    // Tooltip content refreshes can happen after the frame already has a cached
+    // layout rect from a previous owner/anchor. The measured size may be the
+    // same, but the cached rect can still be stale until the next resize/dump.
+    sim.widgets.mark_rect_dirty(tooltip_id);
 }
 
 fn estimated_tooltip_size(td: Option<&TooltipData>) -> Option<(f32, f32)> {
@@ -102,5 +99,77 @@ fn tooltip_line_font_size(index: usize) -> f32 {
         TOOLTIP_HEADER_FONT_SIZE
     } else {
         TOOLTIP_BODY_FONT_SIZE
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::refresh_tooltip_geometry;
+    use crate::lua_api::state::SimState;
+    use crate::lua_api::tooltip::{TooltipData, TooltipLine};
+    use crate::widget::{Frame, WidgetType};
+
+    fn tooltip_line(text: &str) -> TooltipLine {
+        TooltipLine {
+            left_text: text.to_string(),
+            left_color: (1.0, 1.0, 1.0),
+            left_segments: Vec::new(),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            right_segments: Vec::new(),
+            wrap: false,
+            texture: None,
+        }
+    }
+
+    #[test]
+    fn refresh_tooltip_geometry_marks_rect_dirty_when_size_is_unchanged() {
+        let mut sim = SimState::default();
+        let tooltip_id = 42;
+        let mut frame = Frame {
+            id: tooltip_id,
+            widget_type: WidgetType::GameTooltip,
+            visible: true,
+            ..Default::default()
+        };
+        frame.anchors.push(crate::widget::Anchor {
+            point: crate::widget::AnchorPoint::Left,
+            relative_to: None,
+            relative_to_id: None,
+            relative_point: crate::widget::AnchorPoint::Left,
+            x_offset: 0.0,
+            y_offset: 0.0,
+        });
+        sim.widgets.register(frame);
+        sim.tooltips.insert(
+            tooltip_id,
+            TooltipData {
+                lines: vec![tooltip_line("Stable tooltip")],
+                ..Default::default()
+            },
+        );
+
+        refresh_tooltip_geometry(&mut sim, tooltip_id);
+        sim.widgets.clear_rect_dirty(tooltip_id);
+        let (width, height) = sim
+            .widgets
+            .get(tooltip_id)
+            .map(|frame| (frame.width, frame.height))
+            .expect("tooltip frame should exist");
+        if let Some(frame) = sim.widgets.get_mut(tooltip_id) {
+            frame.layout_rect = Some(crate::LayoutRect {
+                x: 100.0,
+                y: 100.0,
+                width: width + 500.0,
+                height,
+            });
+        }
+
+        refresh_tooltip_geometry(&mut sim, tooltip_id);
+
+        assert!(
+            sim.widgets.is_rect_dirty_self(tooltip_id),
+            "tooltip content refresh should invalidate stale layout even when measured size is unchanged"
+        );
     }
 }
