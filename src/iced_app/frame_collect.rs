@@ -152,7 +152,7 @@ fn hittable_frame_entry(
     }
     let rect = frame.layout_rect?;
 
-    is_frame_hittable(frame).then(|| {
+    is_frame_hittable(registry, id, frame).then(|| {
         (
             id,
             frame.frame_strata,
@@ -163,8 +163,12 @@ fn hittable_frame_entry(
     })
 }
 
-fn is_frame_hittable(frame: &crate::widget::Frame) -> bool {
-    frame.visible
+fn is_frame_hittable(
+    registry: &crate::widget::WidgetRegistry,
+    id: u64,
+    frame: &crate::widget::Frame,
+) -> bool {
+    registry.is_ancestor_visible(id)
         && (frame.mouse_enabled || matches!(frame.widget_type, WidgetType::EditBox))
         && !is_hit_test_excluded(frame)
 }
@@ -228,7 +232,7 @@ fn registration_set_matches(
 #[cfg(test)]
 mod tests {
     use super::intra_strata_sort_key;
-    use crate::widget::{Frame, WidgetRegistry, WidgetType};
+    use crate::widget::{AnchorPoint, Frame, WidgetRegistry, WidgetType};
 
     #[test]
     fn excluded_overlay_names_are_not_hittable() {
@@ -270,6 +274,41 @@ mod tests {
         assert!(
             collected.hittable.is_empty(),
             "visible unanchored frames should not be mouse targets at parent origin"
+        );
+    }
+
+    #[test]
+    fn frames_under_hidden_ancestors_are_not_hittable() {
+        let mut registry = WidgetRegistry::new();
+        let mut parent = Frame::new(WidgetType::Frame, Some("HiddenPanel".to_string()), None);
+        parent.id = 1;
+        parent.visible = false;
+        parent.layout_rect = Some(crate::LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: 300.0,
+            height: 300.0,
+        });
+        registry.register(parent);
+
+        let child = register_hittable_frame(&mut registry, "HiddenPanelChild", 20);
+        let child_frame = registry.get_mut(child).unwrap();
+        child_frame.parent_id = Some(1);
+        child_frame.set_point(
+            AnchorPoint::TopLeft,
+            Some(1),
+            AnchorPoint::TopLeft,
+            20.0,
+            20.0,
+        );
+        registry.add_child(1, child);
+
+        let strata_buckets = vec![vec![child]];
+        let collected = super::collect_hittable_frames(&registry, &strata_buckets);
+
+        assert!(
+            collected.hittable.is_empty(),
+            "mouse-enabled children of hidden panels must not remain in the hit grid"
         );
     }
 

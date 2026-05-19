@@ -51,7 +51,7 @@ fn hittable_rect(
     }
     let mouse_enabled =
         f.mouse_enabled || matches!(f.widget_type, crate::widget::WidgetType::EditBox);
-    if !f.visible || !mouse_enabled {
+    if !registry.is_ancestor_visible(id) || !mouse_enabled {
         return None;
     }
     if f.name
