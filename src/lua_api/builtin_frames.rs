@@ -330,10 +330,7 @@ const VISIBLE_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[
     ("InterfaceOptionsFrame", None),
 ];
 
-const HIDDEN_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[
-    ("AuctionHouseFrame", None),
-    ("LFGListFrame", Some((400.0, 500.0))),
-];
+const HIDDEN_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[("LFGListFrame", Some((400.0, 500.0)))];
 
 fn register_stub_frame_specs(
     widgets: &mut WidgetRegistry,

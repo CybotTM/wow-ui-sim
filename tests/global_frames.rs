@@ -582,7 +582,6 @@ fn test_all_named_frame_globals_exist() {
         "NamePlateDriverFrame",
         "UIErrorsFrame",
         "InterfaceOptionsFrame",
-        "AuctionHouseFrame",
         "SideDressUpFrame",
         "ContainerFrameCombinedBags",
         "LootFrame",
@@ -598,11 +597,11 @@ fn test_all_named_frame_globals_exist() {
 }
 
 #[test]
-fn test_builtin_auction_house_frame_starts_hidden() {
+fn test_auction_house_frame_is_load_on_demand() {
     let env = env();
-    let shown: bool = env.eval("return AuctionHouseFrame:IsShown()").unwrap();
+    let exists: bool = env.eval("return AuctionHouseFrame ~= nil").unwrap();
     assert!(
-        !shown,
-        "AuctionHouseFrame is a load-on-demand panel and must not start shown"
+        !exists,
+        "AuctionHouseFrame is a load-on-demand panel and must not exist before Blizzard_AuctionHouseUI loads"
     );
 }
