@@ -292,14 +292,7 @@ fn log_dispatched_handler(
 }
 
 fn handler_source_label(state: &LuaState, func_ref: GcRef<Closure>) -> Option<String> {
-    let closure = state.gc.closures.get(func_ref)?;
-    let lua_closure = closure.as_lua()?;
-    let proto = lua_closure.proto.as_ref();
-    if proto.source.is_empty() {
-        return None;
-    }
-
-    Some(format!("{}:{}", proto.source, proto.line_defined))
+    handler_timing::lua_closure_source_label(state, func_ref)
 }
 
 fn record_frame_timing(state: &LuaState, owner_addon: Option<u16>, start: &Instant) {

@@ -9,7 +9,7 @@ use crate::font::WowFontSystem;
 use crate::lua_api::methods::{call_function as call_rilua_function, registry_get};
 use crate::lua_api::script_helpers::call_error_handler;
 use crate::screen::ScreenKind;
-use rilua::{LuaApiMut, Val};
+use rilua::{LuaApi, LuaApiMut, Val};
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
@@ -266,14 +266,24 @@ impl WowLuaEnv {
             call_error_handler(&mut lua, &error.to_string());
         }
         self.state.borrow_mut().executing_addon_index = None;
-        crate::lua_api::handler_timing::log(
+        let source = self.timer_callback_source_label(callback);
+        crate::lua_api::handler_timing::log_with_source(
             addon_name.as_deref(),
             "C_Timer",
             None,
             0,
             start.elapsed(),
+            source.as_deref(),
         );
         record_addon_time(&self.state, owner_addon, &start);
+    }
+
+    fn timer_callback_source_label(&self, callback: Val) -> Option<String> {
+        let Val::Function(func_ref) = callback else {
+            return None;
+        };
+        let lua = self.lua.borrow();
+        crate::lua_api::handler_timing::lua_closure_source_label(lua.state(), func_ref)
     }
 
     fn addon_folder_name(&self, owner_addon: Option<u16>) -> Option<String> {

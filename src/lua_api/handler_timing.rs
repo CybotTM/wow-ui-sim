@@ -2,6 +2,10 @@ use std::borrow::Cow;
 use std::sync::OnceLock;
 use std::time::Duration;
 
+use rilua::vm::closure::Closure;
+use rilua::vm::gc::arena::GcRef;
+use rilua::vm::state::LuaState;
+
 const BUILTIN_ADDON_NAME: &str = "__BuiltIn";
 const HANDLER_TIMING_ENV: &str = "WOW_SIM_LOG_HANDLER_TIMINGS";
 
@@ -51,6 +55,20 @@ pub(crate) fn log_with_source(
             source,
         )
     );
+}
+
+pub(crate) fn lua_closure_source_label(
+    state: &LuaState,
+    func_ref: GcRef<Closure>,
+) -> Option<String> {
+    let closure = state.gc.closures.get(func_ref)?;
+    let lua_closure = closure.as_lua()?;
+    let proto = lua_closure.proto.as_ref();
+    if proto.source.is_empty() {
+        return None;
+    }
+
+    Some(format!("{}:{}", proto.source, proto.line_defined))
 }
 
 fn min_duration_ms() -> Option<f64> {
