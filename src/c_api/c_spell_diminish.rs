@@ -1,7 +1,7 @@
 //! `C_SpellDiminish` surface for spell-diminish status trays.
 
 use crate::c_api::helpers::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::{create_string, create_table, table_set};
+use crate::lua_api::methods::{create_string, create_table, table_set_static};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -126,9 +126,9 @@ fn category_info_table(state: &mut LuaState, category: SpellDiminishCategory) ->
     let info = create_table(state);
     let name = create_string(state, category.name);
     let icon = create_string(state, category.icon);
-    table_set(state, info, "category", Val::Num(category.id as f64));
-    table_set(state, info, "name", name);
-    table_set(state, info, "icon", icon);
+    table_set_static(state, info, "category", Val::Num(category.id as f64));
+    table_set_static(state, info, "name", name);
+    table_set_static(state, info, "icon", icon);
     info
 }
 

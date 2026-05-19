@@ -48,8 +48,8 @@ use super::helpers::ensure_namespace;
 use crate::c_api::item_spell::spell_link_for_id;
 use crate::lua_api::globals::action_bar_api::spell_cooldown_times;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, frame_ref, table_set,
-    table_set_num, val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_table, frame_ref, table_set_num,
+    table_set_static, val_to_string,
 };
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
@@ -161,23 +161,23 @@ fn get_spell_info(state: &mut LuaState) -> LuaResult<u32> {
     };
     let info = create_table(state);
     let name = create_string(state, spell.name);
-    table_set(state, info, "name", name);
-    table_set(
+    table_set_static(state, info, "name", name);
+    table_set_static(
         state,
         info,
         "iconID",
         Val::Num(spell.icon_file_data_id as f64),
     );
-    table_set(
+    table_set_static(
         state,
         info,
         "originalIconID",
         Val::Num(spell.icon_file_data_id as f64),
     );
-    table_set(state, info, "castTime", Val::Num(0.0));
-    table_set(state, info, "minRange", Val::Num(0.0));
-    table_set(state, info, "maxRange", Val::Num(0.0));
-    table_set(state, info, "spellID", Val::Num(spell_id as f64));
+    table_set_static(state, info, "castTime", Val::Num(0.0));
+    table_set_static(state, info, "minRange", Val::Num(0.0));
+    table_set_static(state, info, "maxRange", Val::Num(0.0));
+    table_set_static(state, info, "spellID", Val::Num(spell_id as f64));
     state.push(info);
     Ok(1)
 }
@@ -216,23 +216,23 @@ fn build_spell_power_cost_info(
     let total_cost = min_cost + cost.optional_cost.max(0);
     let power_name = create_string(state, crate::spell_power::power_type_name(cost.power_type));
 
-    table_set(
+    table_set_static(
         state,
         Val::Table(info),
         "type",
         Val::Num(cost.power_type as f64),
     );
-    table_set(state, Val::Table(info), "name", power_name);
-    table_set(state, Val::Table(info), "cost", Val::Num(total_cost as f64));
+    table_set_static(state, Val::Table(info), "name", power_name);
+    table_set_static(state, Val::Table(info), "cost", Val::Num(total_cost as f64));
     for &(name, value) in &[
         ("minCost", min_cost as f64),
         ("costPercent", cost.cost_pct as f64),
         ("costPerSec", cost.cost_per_sec as f64),
         ("requiredAuraID", cost.required_aura_id as f64),
     ] {
-        table_set(state, Val::Table(info), name, Val::Num(value));
+        table_set_static(state, Val::Table(info), name, Val::Num(value));
     }
-    table_set(
+    table_set_static(
         state,
         Val::Table(info),
         "hasRequiredAura",
@@ -275,11 +275,11 @@ fn get_spell_power_cost(state: &mut LuaState) -> LuaResult<u32> {
 fn get_spell_charges(state: &mut LuaState) -> LuaResult<u32> {
     let _spell_id = u32::from_stack(state, 1)?;
     let charges = create_table(state);
-    table_set(state, charges, "currentCharges", Val::Num(0.0));
-    table_set(state, charges, "maxCharges", Val::Num(0.0));
-    table_set(state, charges, "cooldownStartTime", Val::Num(0.0));
-    table_set(state, charges, "cooldownDuration", Val::Num(0.0));
-    table_set(state, charges, "chargeModRate", Val::Num(1.0));
+    table_set_static(state, charges, "currentCharges", Val::Num(0.0));
+    table_set_static(state, charges, "maxCharges", Val::Num(0.0));
+    table_set_static(state, charges, "cooldownStartTime", Val::Num(0.0));
+    table_set_static(state, charges, "cooldownDuration", Val::Num(0.0));
+    table_set_static(state, charges, "chargeModRate", Val::Num(1.0));
     state.push(charges);
     Ok(1)
 }
@@ -374,11 +374,11 @@ fn get_spell_cooldown(state: &mut LuaState) -> LuaResult<u32> {
     };
     let is_active = duration > 0.0;
     let info = create_table(state);
-    table_set(state, info, "startTime", Val::Num(start));
-    table_set(state, info, "duration", Val::Num(duration));
-    table_set(state, info, "isEnabled", Val::Bool(true));
-    table_set(state, info, "isActive", Val::Bool(is_active));
-    table_set(state, info, "modRate", Val::Num(1.0));
+    table_set_static(state, info, "startTime", Val::Num(start));
+    table_set_static(state, info, "duration", Val::Num(duration));
+    table_set_static(state, info, "isEnabled", Val::Bool(true));
+    table_set_static(state, info, "isActive", Val::Bool(is_active));
+    table_set_static(state, info, "modRate", Val::Num(1.0));
     state.push(info);
     Ok(1)
 }
@@ -657,11 +657,11 @@ fn get_spell_loss_of_control_cooldown_info(state: &mut LuaState) -> LuaResult<u3
         return Ok(1);
     };
     let table = create_table(state);
-    table_set(state, table, "startTime", Val::Num(info.start_time));
-    table_set(state, table, "duration", Val::Num(info.duration));
-    table_set(state, table, "modRate", Val::Num(info.mod_rate as f64));
-    table_set(state, table, "isActive", Val::Bool(info.is_active));
-    table_set(
+    table_set_static(state, table, "startTime", Val::Num(info.start_time));
+    table_set_static(state, table, "duration", Val::Num(info.duration));
+    table_set_static(state, table, "modRate", Val::Num(info.mod_rate as f64));
+    table_set_static(state, table, "isActive", Val::Bool(info.is_active));
+    table_set_static(
         state,
         table,
         "shouldReplaceNormalCooldown",

@@ -3,8 +3,8 @@
 use crate::c_api::ensure_namespace;
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, frame_ref, table_set,
-    table_set_num,
+    borrow_state, borrow_state_mut, create_string, create_table, frame_ref, table_set_num,
+    table_set_static,
 };
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
@@ -249,15 +249,15 @@ fn set_spell_power_cost_identity_fields(
     power_name: Val,
 ) {
     let info = Val::Table(info);
-    table_set(state, info, "type", Val::Num(cost.power_type as f64));
-    table_set(state, info, "name", power_name);
-    table_set(
+    table_set_static(state, info, "type", Val::Num(cost.power_type as f64));
+    table_set_static(state, info, "name", power_name);
+    table_set_static(
         state,
         info,
         "requiredAuraID",
         Val::Num(cost.required_aura_id as f64),
     );
-    table_set(
+    table_set_static(
         state,
         info,
         "hasRequiredAura",
@@ -273,10 +273,10 @@ fn set_spell_power_cost_amount_fields(
     total_cost: i32,
 ) {
     let info = Val::Table(info);
-    table_set(state, info, "cost", Val::Num(total_cost as f64));
-    table_set(state, info, "minCost", Val::Num(min_cost as f64));
-    table_set(state, info, "costPercent", Val::Num(cost.cost_pct as f64));
-    table_set(
+    table_set_static(state, info, "cost", Val::Num(total_cost as f64));
+    table_set_static(state, info, "minCost", Val::Num(min_cost as f64));
+    table_set_static(state, info, "costPercent", Val::Num(cost.cost_pct as f64));
+    table_set_static(
         state,
         info,
         "costPerSec",
@@ -389,10 +389,10 @@ fn c_spell_book_get_spell_book_item_cooldown(state: &mut LuaState) -> LuaResult<
     }
 
     let cooldown = create_table(state);
-    table_set(state, cooldown, "startTime", Val::Num(0.0));
-    table_set(state, cooldown, "duration", Val::Num(0.0));
-    table_set(state, cooldown, "isEnabled", Val::Bool(false));
-    table_set(state, cooldown, "modRate", Val::Num(1.0));
+    table_set_static(state, cooldown, "startTime", Val::Num(0.0));
+    table_set_static(state, cooldown, "duration", Val::Num(0.0));
+    table_set_static(state, cooldown, "isEnabled", Val::Bool(false));
+    table_set_static(state, cooldown, "modRate", Val::Num(1.0));
     state.push(cooldown);
     Ok(1)
 }
@@ -448,11 +448,11 @@ fn c_spell_book_get_spell_book_item_loss_of_control_cooldown_info(
         return Ok(1);
     }
     let info = create_table(state);
-    table_set(state, info, "isActive", Val::Bool(false));
-    table_set(state, info, "startTime", Val::Num(0.0));
-    table_set(state, info, "duration", Val::Num(0.0));
-    table_set(state, info, "modRate", Val::Num(1.0));
-    table_set(state, info, "shouldReplaceNormalCooldown", Val::Bool(false));
+    table_set_static(state, info, "isActive", Val::Bool(false));
+    table_set_static(state, info, "startTime", Val::Num(0.0));
+    table_set_static(state, info, "duration", Val::Num(0.0));
+    table_set_static(state, info, "modRate", Val::Num(1.0));
+    table_set_static(state, info, "shouldReplaceNormalCooldown", Val::Bool(false));
     state.push(info);
     Ok(1)
 }
@@ -538,20 +538,20 @@ fn set_skill_line_identity_fields(
     skill_line: &spellbook_data::SkillLineData,
 ) {
     let name = create_string(state, skill_line.name);
-    table_set(state, info, "name", name);
-    table_set(
+    table_set_static(state, info, "name", name);
+    table_set_static(
         state,
         info,
         "itemIndexOffset",
         Val::Num(spellbook_data::skill_line_offset(index) as f64),
     );
-    table_set(
+    table_set_static(
         state,
         info,
         "numSpellBookItems",
         Val::Num(skill_line.spells.len() as f64),
     );
-    table_set(state, info, "iconID", Val::Num(skill_line.icon_id as f64));
+    table_set_static(state, info, "iconID", Val::Num(skill_line.icon_id as f64));
 }
 
 fn set_skill_line_spec_fields(
@@ -559,7 +559,7 @@ fn set_skill_line_spec_fields(
     info: Val,
     skill_line: &spellbook_data::SkillLineData,
 ) {
-    table_set(
+    table_set_static(
         state,
         info,
         "specID",
@@ -568,7 +568,7 @@ fn set_skill_line_spec_fields(
             .map(|id| Val::Num(id as f64))
             .unwrap_or(Val::Nil),
     );
-    table_set(
+    table_set_static(
         state,
         info,
         "offSpecID",
@@ -577,7 +577,7 @@ fn set_skill_line_spec_fields(
             .map(|id| Val::Num(id as f64))
             .unwrap_or(Val::Nil),
     );
-    table_set(state, info, "shouldHide", Val::Bool(false));
+    table_set_static(state, info, "shouldHide", Val::Bool(false));
 }
 
 fn c_spell_book_has_pet_spells(state: &mut LuaState) -> LuaResult<u32> {
@@ -679,20 +679,20 @@ fn spellbook_item_info(state: &mut LuaState, slot: i32) -> Option<Val> {
     let sub_name_val = create_string(state, "");
 
     let info = create_table(state);
-    table_set(state, info, "actionID", Val::Num(entry.spell_id as f64));
-    table_set(state, info, "spellID", Val::Num(entry.spell_id as f64));
-    table_set(state, info, "itemType", Val::Num(1.0));
-    table_set(state, info, "name", name_val);
-    table_set(state, info, "subName", sub_name_val);
-    table_set(state, info, "iconID", Val::Num(icon_id as f64));
-    table_set(state, info, "isPassive", Val::Bool(entry.is_passive));
-    table_set(
+    table_set_static(state, info, "actionID", Val::Num(entry.spell_id as f64));
+    table_set_static(state, info, "spellID", Val::Num(entry.spell_id as f64));
+    table_set_static(state, info, "itemType", Val::Num(1.0));
+    table_set_static(state, info, "name", name_val);
+    table_set_static(state, info, "subName", sub_name_val);
+    table_set_static(state, info, "iconID", Val::Num(icon_id as f64));
+    table_set_static(state, info, "isPassive", Val::Bool(entry.is_passive));
+    table_set_static(
         state,
         info,
         "isOffSpec",
         Val::Bool(skill_line.off_spec_id.is_some()),
     );
-    table_set(
+    table_set_static(
         state,
         info,
         "skillLineIndex",
