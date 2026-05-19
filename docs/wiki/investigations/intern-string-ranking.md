@@ -123,12 +123,21 @@ the call site stayed on content-keyed interning. After the rilua GC/string fixes
 landed, the simulator now uses `hot_metatable_key(..., RILUA_FRAME_REFS)` for
 this registry lookup.
 
+The same retry also made static registry-key interning safe for the script
+registry tables. `__scripts`, `__scripts_pre`, `__scripts_post`,
+`__on_update_scripts`, and `__on_post_update_scripts` now use
+`intern_string_static` through `registry_key_ref`, removing roughly another
+222K startup intern calls without changing handler-key semantics.
+
 ## Follow-ups
 
 - **rilua**: reproduce the mismatch in a minimal test case, then either fix `intern_string_static` or document the hazard (e.g. forbid `intern_string_static` for keys later looked up via plain `intern_string`).
 - **wow-ui-sim**: rerun `intern-stats` after the `__rilua_frame_refs` migration
   and rank the remaining hot literal candidates.
-- **wow-ui-sim**: `__scripts` keys are synthesised as `format!("{widget_id}_{handler_name}")` — unavoidable. The per-handler suffix (`_OnAttributeChanged`) could be a shared `&'static str` if we switch to a two-level key table (`scripts[widget][handler]`).
+- **wow-ui-sim**: script handler keys are still synthesised as
+  `format!("{widget_id}_{handler_name}")`. The per-handler suffix
+  (`_OnAttributeChanged`) could be a shared `&'static str` if we switch to a
+  two-level key table (`scripts[widget][handler]`).
 
 ## Sources
 

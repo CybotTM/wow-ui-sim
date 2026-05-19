@@ -6,6 +6,7 @@
 
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::string::LuaString;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, Val};
 
@@ -57,11 +58,8 @@ impl ScriptBinding {
 
 /// Get a named table from rilua's registry, returning None if absent.
 ///
-/// Use the content-keyed intern path here. The registry table itself is
-/// hot, but script handler storage is also where LoD XML lifecycle failures
-/// surface first when the static-intern path goes unstable mid-cycle.
 pub fn registry_table(state: &mut LuaState, key: &'static str) -> Option<GcRef<Table>> {
-    let key_ref = state.gc.intern_string(key.as_bytes());
+    let key_ref = registry_key_ref(state, key);
     let registry = state.gc.tables.get(state.registry)?;
     match registry.get_str(key_ref, &state.gc.string_arena) {
         Val::Table(t) => Some(t),
@@ -75,7 +73,7 @@ pub fn registry_table_or_create(state: &mut LuaState, key: &'static str) -> GcRe
         return existing;
     }
     let new_table = state.gc.alloc_table(Table::new());
-    let key_ref = state.gc.intern_string(key.as_bytes());
+    let key_ref = registry_key_ref(state, key);
     let registry = state.registry;
     if let Some(reg) = state.gc.tables.get_mut(registry) {
         let _ = reg.raw_set(
@@ -86,6 +84,10 @@ pub fn registry_table_or_create(state: &mut LuaState, key: &'static str) -> GcRe
     }
     state.gc.barrier_back(registry);
     new_table
+}
+
+fn registry_key_ref(state: &mut LuaState, key: &'static str) -> GcRef<LuaString> {
+    state.gc.intern_string_static(key.as_bytes())
 }
 
 /// Set a string-keyed value in a table.
