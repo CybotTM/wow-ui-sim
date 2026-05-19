@@ -136,6 +136,10 @@ removed roughly 688K more startup intern calls: total `intern_string` traffic
 fell from about 2.33M to about 1.66M, and `"string"`, `"table"`, `"function"`,
 `"number"`, and `"nil"` disappeared from the top 40.
 
+The event hlist membership key `_s` was another static simulator-owned key.
+Switching `rilua_hlist_set` to `intern_string_static(b"_s")` removed roughly
+28K more startup intern calls and dropped `_s` out of the top 40.
+
 ## Follow-ups
 
 - **rilua**: reproduce the mismatch in a minimal test case, then either fix `intern_string_static` or document the hazard (e.g. forbid `intern_string_static` for keys later looked up via plain `intern_string`).

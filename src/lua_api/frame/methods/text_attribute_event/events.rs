@@ -678,7 +678,7 @@ fn clear_hlist_tail(state: &mut LuaState, tbl: GcRef<Table>, set: GcRef<Table>, 
 
 /// Get or create the "_s" set sub-table of a hlist table.
 pub(super) fn rilua_hlist_set(state: &mut LuaState, tbl: GcRef<Table>) -> GcRef<Table> {
-    let key_ref = state.gc.intern_string(b"_s");
+    let key_ref = state.gc.intern_string_static(b"_s");
     let existing = state
         .gc
         .tables
