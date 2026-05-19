@@ -368,7 +368,44 @@ pub fn unpack_id(id: u64) -> (u32, u32) {
 
 /// Create a Lua string Val from a Rust &str.
 pub fn create_string(state: &mut LuaState, s: &str) -> Val {
+    if let Some(static_value) = static_string_for_hot_literal(s) {
+        return create_string_static(state, static_value);
+    }
     Val::Str(state.gc.intern_string(s.as_bytes()))
+}
+
+const HOT_STATIC_LITERALS: &[&str] = &[
+    "",
+    "ADDON_LOADED",
+    "ANY",
+    "GameFontHighlight",
+    "GameFontHighlightSmall",
+    "HighlightTexture",
+    "NormalTexture",
+    "NumberFontNormal",
+    "OnClick",
+    "OnEnter",
+    "OnHide",
+    "OnLeave",
+    "OnLoad",
+    "OnMouseDown",
+    "OnShow",
+    "PushedTexture",
+    "Text",
+    "UIParent",
+    "Unknown",
+    "icon",
+    "main",
+    "n",
+    "spell",
+    "type",
+];
+
+fn static_string_for_hot_literal(value: &str) -> Option<&'static str> {
+    HOT_STATIC_LITERALS
+        .iter()
+        .copied()
+        .find(|candidate| *candidate == value)
 }
 
 /// Like [`create_string`] but interns `s` through the pointer-keyed
