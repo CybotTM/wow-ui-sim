@@ -7,6 +7,7 @@ mod map_lua;
 mod panel_lua;
 mod post_event_lua;
 mod runtime_surfaces;
+mod temporary;
 
 use character_lua::*;
 use early_lua::*;
@@ -149,7 +150,7 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub fn close_startup_special_windows_before_first_frame(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(CLOSE_STARTUP_SPECIAL_WINDOWS_LUA);
+    temporary::startup_windows::close_before_first_frame(env);
 }
 
 fn patch_edit_mode_manager(env: &crate::lua_api::WowLuaEnv) {
