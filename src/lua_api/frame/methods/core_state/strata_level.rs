@@ -21,7 +21,9 @@ pub fn set_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
     let Some(s) = crate::widget::FrameStrata::from_str(&strata) else {
         return Ok(0);
     };
+    let mut strata_changed = false;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        strata_changed |= frame.frame_strata != s;
         frame.frame_strata = s;
         frame.has_fixed_frame_strata = true;
     }
@@ -37,10 +39,13 @@ pub fn set_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
         if child.has_fixed_frame_strata {
             continue;
         }
+        strata_changed |= child.frame_strata != s;
         child.frame_strata = s;
         queue.extend(child.children.iter().copied());
     }
-    sim.invalidate_strata_buckets();
+    if strata_changed {
+        sim.invalidate_strata_buckets();
+    }
     Ok(0)
 }
 

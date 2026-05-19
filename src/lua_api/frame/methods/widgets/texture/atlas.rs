@@ -251,12 +251,18 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let texture_val = stack_val(state, 2);
     let mut sim = borrow_state_mut(state)?;
-    let mut changed = false;
+    let mut order_changed = false;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         let Some((path, file_data_id)) = resolve_texture_value(state, texture_val) else {
             return Ok(0);
         };
-        changed = frame.texture != path
+        let had_render_source = frame.texture.is_some()
+            || frame.texture_file_data_id.is_some()
+            || frame.color_texture.is_some()
+            || frame.atlas.is_some()
+            || frame.atlas_tex_coords.is_some();
+        let has_render_source = path.is_some() || file_data_id.is_some();
+        let changed = frame.texture != path
             || frame.texture_file_data_id != file_data_id
             || frame.color_texture.is_some()
             || frame.atlas.is_some()
@@ -267,11 +273,12 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
         clear_atlas_owned_tex_coords(frame);
         frame.atlas = None;
         frame.atlas_tex_coords = None;
-        if changed {
+        order_changed = changed && !had_render_source && has_render_source;
+        if order_changed {
             frame.region_order = crate::widget::next_region_order();
         }
     }
-    if changed {
+    if order_changed {
         sim.invalidate_strata_buckets();
     }
     Ok(0)

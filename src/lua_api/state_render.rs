@@ -28,21 +28,20 @@ impl SimState {
         self.strata_buckets.as_ref()
     }
 
-    /// Build per-strata ID buckets for visible frames only, sorted by render order.
+    /// Build per-strata ID buckets for shown layout frames, sorted by render order.
     ///
-    /// A frame is included if its "render alpha" > 0: either its own
-    /// `effective_alpha > 0`, or (for button state textures with `visible=false`
-    /// but `alpha > 0`) its parent's `effective_alpha > 0`. Frames with
-    /// explicit `alpha=0` (glow/anim textures) are always excluded.
+    /// Alpha is filtered later while emitting render lists. Keeping transparent
+    /// but shown frames in the order cache avoids rebuilding all strata buckets
+    /// when fade animations cross alpha zero.
     fn build_strata_buckets(&mut self) -> Vec<Vec<u64>> {
-        // Step 1: Collect visible frame IDs per strata (unordered).
+        // Step 1: Collect frame IDs per strata (unordered).
         let mut visible: HashSet<u64> = HashSet::new();
         let mut strata_map: Vec<Vec<u64>> = vec![Vec::new(); crate::widget::FrameStrata::COUNT];
         for id in self.widgets.iter_ids() {
             let Some(f) = self.widgets.get(id) else {
                 continue;
             };
-            if self.frame_render_alpha(f) <= 0.0 {
+            if !self.frame_belongs_in_strata_bucket(id, f) {
                 continue;
             }
             visible.insert(id);
@@ -64,6 +63,18 @@ impl SimState {
             }
         }
         buckets
+    }
+
+    fn frame_belongs_in_strata_bucket(&self, id: u64, frame: &crate::widget::Frame) -> bool {
+        self.widgets.is_ancestor_visible(id) || self.hidden_button_texture_has_visible_parent(frame)
+    }
+
+    fn hidden_button_texture_has_visible_parent(&self, frame: &crate::widget::Frame) -> bool {
+        frame.alpha > 0.0
+            && uses_parent_alpha_fallback(frame)
+            && frame
+                .parent_id
+                .is_some_and(|parent_id| self.widgets.is_ancestor_visible(parent_id))
     }
 
     /// Find root frames in a strata: no parent, parent in different strata, or parent not visible.
@@ -672,107 +683,5 @@ fn collect_transitive_anchor_dependent_ids(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::widget::{Frame, FrameStrata, WidgetType};
-
-    fn test_frame(
-        id: u64,
-        widget_type: WidgetType,
-        parent_id: Option<u64>,
-        visible: bool,
-    ) -> Frame {
-        let mut frame = Frame {
-            id,
-            widget_type,
-            parent_id,
-            visible,
-            width: 10.0,
-            height: 10.0,
-            layout_rect: Some(crate::LayoutRect {
-                x: 0.0,
-                y: 0.0,
-                width: 10.0,
-                height: 10.0,
-            }),
-            ..Default::default()
-        };
-        frame.effective_alpha = if visible { 1.0 } else { 0.0 };
-        frame
-    }
-
-    fn register_child(
-        state: &mut SimState,
-        id: u64,
-        widget_type: WidgetType,
-        parent_id: u64,
-        visible: bool,
-    ) {
-        state
-            .widgets
-            .register(test_frame(id, widget_type, Some(parent_id), visible));
-        state.widgets.add_child(parent_id, id);
-    }
-
-    fn medium_bucket(state: &mut SimState) -> Vec<u64> {
-        state
-            .get_strata_buckets()
-            .unwrap()
-            .get(FrameStrata::Medium.as_index())
-            .cloned()
-            .unwrap_or_default()
-    }
-
-    #[test]
-    fn show_visible_region_repairs_parent_subtree_without_invalidating_buckets() {
-        let mut state = SimState::default();
-        state
-            .widgets
-            .register(test_frame(1, WidgetType::Frame, None, true));
-        register_child(&mut state, 2, WidgetType::Texture, 1, true);
-        register_child(&mut state, 3, WidgetType::Texture, 1, false);
-        register_child(&mut state, 4, WidgetType::Frame, 1, true);
-        register_child(&mut state, 5, WidgetType::Texture, 4, true);
-        register_child(&mut state, 6, WidgetType::FontString, 1, true);
-
-        assert_eq!(medium_bucket(&mut state), vec![1, 2, 4, 5, 6]);
-        assert!(state.strata_buckets.is_some());
-
-        state.set_frame_visible(3, true);
-
-        assert!(state.strata_buckets.is_some());
-        assert_eq!(medium_bucket(&mut state), vec![1, 2, 3, 4, 5, 6]);
-    }
-
-    #[test]
-    fn show_visible_child_frame_repairs_parent_subtree_without_invalidating_buckets() {
-        let mut state = SimState::default();
-        state
-            .widgets
-            .register(test_frame(10, WidgetType::Frame, None, true));
-        register_child(&mut state, 11, WidgetType::Texture, 10, true);
-        register_child(&mut state, 12, WidgetType::Frame, 10, false);
-        register_child(&mut state, 13, WidgetType::Texture, 12, true);
-        register_child(&mut state, 14, WidgetType::FontString, 10, true);
-
-        assert_eq!(medium_bucket(&mut state), vec![10, 11, 14]);
-        assert!(state.strata_buckets.is_some());
-
-        state.set_frame_visible(12, true);
-
-        assert!(state.strata_buckets.is_some());
-        assert_eq!(medium_bucket(&mut state), vec![10, 11, 12, 13, 14]);
-    }
-
-    #[test]
-    fn show_root_frame_still_falls_back_to_full_invalidation() {
-        let mut state = SimState::default();
-        state
-            .widgets
-            .register(test_frame(20, WidgetType::Frame, None, false));
-        let _ = medium_bucket(&mut state);
-
-        state.set_frame_visible(20, true);
-
-        assert!(state.strata_buckets.is_none());
-    }
+    include!("state_render_tests.rs");
 }

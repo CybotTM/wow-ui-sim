@@ -285,6 +285,69 @@ fn same_draw_layer_preserves_cached_strata_buckets() {
 }
 
 #[test]
+fn same_frame_strata_preserves_cached_strata_buckets() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local frame = CreateFrame("Frame", "SameStrataFrame", UIParent)
+        frame:SetSize(80, 80)
+        frame:SetPoint("CENTER")
+        frame:SetFrameStrata("MEDIUM")
+        frame:Show()
+    "#,
+    )
+    .unwrap();
+
+    let _ = build_strata_buckets(&env);
+    assert!(
+        env.state().borrow().strata_buckets.is_some(),
+        "building buckets should populate the cache"
+    );
+
+    env.exec(r#"SameStrataFrame:SetFrameStrata("MEDIUM")"#)
+        .unwrap();
+
+    assert!(
+        env.state().borrow().strata_buckets.is_some(),
+        "no-op SetFrameStrata should not invalidate cached strata buckets"
+    );
+}
+
+#[test]
+fn replacing_existing_texture_preserves_cached_strata_buckets() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "ReplaceTextureParent", UIParent)
+        parent:SetSize(80, 80)
+        parent:SetPoint("CENTER")
+        parent:Show()
+
+        local icon = parent:CreateTexture("ReplaceTextureIcon", "BACKGROUND")
+        icon:SetAllPoints()
+        icon:SetTexture("Interface\\Buttons\\UI-Quickslot2")
+    "#,
+    )
+    .unwrap();
+
+    let _ = build_strata_buckets(&env);
+    assert!(
+        env.state().borrow().strata_buckets.is_some(),
+        "building buckets should populate the cache"
+    );
+
+    env.exec(r#"ReplaceTextureIcon:SetTexture("Interface\\Buttons\\UI-Quickslot")"#)
+        .unwrap();
+
+    assert!(
+        env.state().borrow().strata_buckets.is_some(),
+        "replacing an existing texture source should not rebuild strata buckets"
+    );
+}
+
+#[test]
 fn set_texture_moves_region_after_existing_same_layer_siblings() {
     let env = env_with_shared_xml();
 

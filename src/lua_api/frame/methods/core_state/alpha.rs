@@ -25,10 +25,6 @@ pub fn set_alpha(state: &mut LuaState) -> LuaResult<u32> {
     }
 
     let mut sim = borrow_state_mut(state)?;
-    let old_render_alpha = sim
-        .widgets
-        .get(id)
-        .map(|frame| sim.frame_render_alpha(frame));
     let Some(frame) = sim.widgets.get(id) else {
         return Ok(0);
     };
@@ -41,7 +37,6 @@ pub fn set_alpha(state: &mut LuaState) -> LuaResult<u32> {
         frame.alpha = clamped;
     }
     sim.widgets.propagate_effective_alpha(id, parent_eff);
-    invalidate_strata_buckets_after_alpha_boundary_change(&mut sim, id, old_render_alpha);
     Ok(0)
 }
 
@@ -80,39 +75,12 @@ pub fn set_alpha_from_boolean(state: &mut LuaState) -> LuaResult<u32> {
     if !changed {
         return Ok(0);
     }
-    let old_render_alpha = sim
-        .widgets
-        .get(id)
-        .map(|frame| sim.frame_render_alpha(frame));
     let parent_eff = parent_effective_alpha(&sim, id);
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.alpha = new_alpha;
     }
     sim.widgets.propagate_effective_alpha(id, parent_eff);
-    invalidate_strata_buckets_after_alpha_boundary_change(&mut sim, id, old_render_alpha);
     Ok(0)
-}
-
-fn invalidate_strata_buckets_after_alpha_boundary_change(
-    sim: &mut crate::lua_api::SimState,
-    id: u64,
-    old_render_alpha: Option<f32>,
-) {
-    let Some(old_render_alpha) = old_render_alpha else {
-        return;
-    };
-    let new_render_alpha = sim
-        .widgets
-        .get(id)
-        .map(|frame| sim.frame_render_alpha(frame))
-        .unwrap_or(0.0);
-    if render_alpha_crossed_zero(old_render_alpha, new_render_alpha) {
-        sim.invalidate_strata_buckets();
-    }
-}
-
-fn render_alpha_crossed_zero(old_render_alpha: f32, new_render_alpha: f32) -> bool {
-    (old_render_alpha <= 0.0) != (new_render_alpha <= 0.0)
 }
 
 pub fn set_ignore_parent_alpha(state: &mut LuaState) -> LuaResult<u32> {
@@ -158,7 +126,7 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
 
     #[test]
-    fn set_alpha_to_zero_invalidates_strata_buckets() {
+    fn set_alpha_to_zero_preserves_strata_buckets() {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
         env.exec(
             r#"
@@ -174,13 +142,13 @@ mod tests {
         env.exec(r#"AlphaBucketTexture:SetAlpha(0)"#).unwrap();
 
         assert!(
-            env.state().borrow().strata_buckets.is_none(),
-            "SetAlpha crossing to zero should invalidate strata buckets",
+            env.state().borrow().strata_buckets.is_some(),
+            "SetAlpha crossing to zero should not invalidate strata buckets",
         );
     }
 
     #[test]
-    fn set_alpha_from_zero_invalidates_strata_buckets() {
+    fn set_alpha_from_zero_preserves_strata_buckets() {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
         env.exec(
             r#"
@@ -198,8 +166,8 @@ mod tests {
             .unwrap();
 
         assert!(
-            env.state().borrow().strata_buckets.is_none(),
-            "SetAlpha crossing from zero should invalidate strata buckets",
+            env.state().borrow().strata_buckets.is_some(),
+            "SetAlpha crossing from zero should not invalidate strata buckets",
         );
     }
 
