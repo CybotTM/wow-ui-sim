@@ -2,7 +2,7 @@ use crate::c_api::ensure_namespace;
 use crate::c_api::item_spell::{helpers::global_table, item_link_for_id};
 use crate::items;
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, table_set, table_set_num,
+    borrow_state, create_string, create_table, table_set, table_set_num, table_set_static,
 };
 use crate::lua_api::state::BagItem;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -32,7 +32,7 @@ pub(crate) fn register_c_item_upgrade(state: &mut LuaState) -> LuaResult<()> {
 fn c_item_upgrade_set_location(state: &mut LuaState) -> LuaResult<u32> {
     let location = stack_val(state, 1);
     let storage = global_table(state, "__item_upgrade_state");
-    table_set(state, storage, "location", location);
+    table_set_static(state, storage, "location", location);
     Ok(0)
 }
 
@@ -45,7 +45,7 @@ fn c_item_upgrade_can_upgrade_item(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_item_upgrade_clear(state: &mut LuaState) -> LuaResult<u32> {
     let storage = global_table(state, "__item_upgrade_state");
-    table_set(state, storage, "location", Val::Nil);
+    table_set_static(state, storage, "location", Val::Nil);
     Ok(0)
 }
 
@@ -188,19 +188,19 @@ fn build_container_item_info(state: &mut LuaState, bag_item: &BagItem) -> Val {
     let item_id = bag_item.item_id;
     let item = items::get_item(item_id);
     let info = create_table(state);
-    table_set(state, info, "itemID", Val::Num(item_id as f64));
+    table_set_static(state, info, "itemID", Val::Num(item_id as f64));
     let icon_file_id = item
         .map(|item| item.icon_file_data_id)
         .filter(|icon| *icon != 0)
         .unwrap_or(134400);
     let quality = item.map(|item| item.quality).unwrap_or(0);
     set_container_item_stack_and_quality(state, info, bag_item, icon_file_id, quality);
-    table_set(state, info, "isFiltered", Val::Bool(false));
-    table_set(state, info, "isLocked", Val::Bool(false));
-    table_set(state, info, "isBound", Val::Bool(false));
-    table_set(state, info, "hasNoValue", Val::Bool(false));
-    table_set(state, info, "isReadable", Val::Bool(false));
-    table_set(state, info, "IsReadable", Val::Bool(false));
+    table_set_static(state, info, "isFiltered", Val::Bool(false));
+    table_set_static(state, info, "isLocked", Val::Bool(false));
+    table_set_static(state, info, "isBound", Val::Bool(false));
+    table_set_static(state, info, "hasNoValue", Val::Bool(false));
+    table_set_static(state, info, "isReadable", Val::Bool(false));
+    table_set_static(state, info, "IsReadable", Val::Bool(false));
     set_container_item_hyperlink(state, info, bag_item);
     info
 }
@@ -212,14 +212,14 @@ fn set_container_item_stack_and_quality(
     icon_file_id: u32,
     quality: u8,
 ) {
-    table_set(
+    table_set_static(
         state,
         info,
         "stackCount",
         Val::Num(bag_item.stack_count as f64),
     );
-    table_set(state, info, "iconFileID", Val::Num(icon_file_id as f64));
-    table_set(state, info, "quality", Val::Num(quality as f64));
+    table_set_static(state, info, "iconFileID", Val::Num(icon_file_id as f64));
+    table_set_static(state, info, "quality", Val::Num(quality as f64));
 }
 
 fn set_container_item_hyperlink(state: &mut LuaState, info: Val, bag_item: &BagItem) {
@@ -231,9 +231,9 @@ fn set_container_item_hyperlink(state: &mut LuaState, info: Val, bag_item: &BagI
     match hyperlink {
         Some(link) => {
             let hyperlink = create_string(state, &link);
-            table_set(state, info, "hyperlink", hyperlink);
+            table_set_static(state, info, "hyperlink", hyperlink);
         }
-        None => table_set(state, info, "hyperlink", Val::Nil),
+        None => table_set_static(state, info, "hyperlink", Val::Nil),
     }
 }
 
@@ -330,9 +330,9 @@ fn c_container_get_item_quest_info(state: &mut LuaState) -> LuaResult<u32> {
     let _bag = i32::from_stack(state, 1)?;
     let _slot = i32::from_stack(state, 2)?;
     let info = create_table(state);
-    table_set(state, info, "isQuestItem", Val::Bool(false));
-    table_set(state, info, "questID", Val::Nil);
-    table_set(state, info, "isActive", Val::Bool(false));
+    table_set_static(state, info, "isQuestItem", Val::Bool(false));
+    table_set_static(state, info, "questID", Val::Nil);
+    table_set_static(state, info, "isActive", Val::Bool(false));
     state.push(info);
     Ok(1)
 }

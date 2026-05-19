@@ -511,7 +511,7 @@ fn c_auction_house_get_max_owned_auction_buyout(state: &mut LuaState) -> LuaResu
 
 fn push_owned_auction_table(state: &mut LuaState, entry: &OwnedAuction) -> Val {
     let t = push_auction_row_table(state, entry);
-    table_set(state, t, "status", Val::Num(entry.status as f64));
+    table_set_static(state, t, "status", Val::Num(entry.status as f64));
     t
 }
 
@@ -520,36 +520,36 @@ fn push_bid_auction_table(state: &mut LuaState, entry: &BidAuction) -> Val {
     match &entry.bidder {
         Some(bidder) => {
             let bidder_val = create_string(state, bidder);
-            table_set(state, t, "bidder", bidder_val);
+            table_set_static(state, t, "bidder", bidder_val);
         }
-        None => table_set(state, t, "bidder", Val::Nil),
+        None => table_set_static(state, t, "bidder", Val::Nil),
     }
     t
 }
 
 fn push_item_key_table(state: &mut LuaState, item_id: i32, item_level: i32) -> Val {
     let item_key = create_table(state);
-    table_set(state, item_key, "itemID", Val::Num(item_id as f64));
-    table_set(state, item_key, "itemLevel", Val::Num(item_level as f64));
-    table_set(state, item_key, "itemSuffix", Val::Num(0.0));
-    table_set(state, item_key, "battlePetSpeciesID", Val::Num(0.0));
+    table_set_static(state, item_key, "itemID", Val::Num(item_id as f64));
+    table_set_static(state, item_key, "itemLevel", Val::Num(item_level as f64));
+    table_set_static(state, item_key, "itemSuffix", Val::Num(0.0));
+    table_set_static(state, item_key, "battlePetSpeciesID", Val::Num(0.0));
     item_key
 }
 
 fn push_item_key_info_table(state: &mut LuaState, item: &items::ItemInfo) -> Val {
     let info = create_table(state);
     let item_name = create_string(state, item.name);
-    table_set(state, info, "itemName", item_name);
-    table_set(state, info, "iconFileID", Val::Num(item_icon_file_id(item)));
-    table_set(state, info, "quality", Val::Num(item.quality as f64));
-    table_set(
+    table_set_static(state, info, "itemName", item_name);
+    table_set_static(state, info, "iconFileID", Val::Num(item_icon_file_id(item)));
+    table_set_static(state, info, "quality", Val::Num(item.quality as f64));
+    table_set_static(
         state,
         info,
         "isCommodity",
         Val::Bool(item_is_commodity(item)),
     );
-    table_set(state, info, "battlePetLink", Val::Nil);
-    table_set(state, info, "appearanceLink", Val::Nil);
+    table_set_static(state, info, "battlePetLink", Val::Nil);
+    table_set_static(state, info, "appearanceLink", Val::Nil);
     info
 }
 
@@ -675,18 +675,18 @@ fn set_common_auction_row_fields(
     time_left: i32,
     time_left_seconds: i64,
 ) {
-    table_set(state, row_table, "itemKey", item_key);
-    table_set(state, row_table, "auctionID", Val::Num(auction_id as f64));
-    table_set(state, row_table, "quantity", Val::Num(quantity as f64));
-    table_set(state, row_table, "bidAmount", Val::Num(bid_amount as f64));
-    table_set(
+    table_set_static(state, row_table, "itemKey", item_key);
+    table_set_static(state, row_table, "auctionID", Val::Num(auction_id as f64));
+    table_set_static(state, row_table, "quantity", Val::Num(quantity as f64));
+    table_set_static(state, row_table, "bidAmount", Val::Num(bid_amount as f64));
+    table_set_static(
         state,
         row_table,
         "buyoutAmount",
         Val::Num(buyout_amount as f64),
     );
-    table_set(state, row_table, "timeLeft", Val::Num(time_left as f64));
-    table_set(
+    table_set_static(state, row_table, "timeLeft", Val::Num(time_left as f64));
+    table_set_static(
         state,
         row_table,
         "timeLeftSeconds",

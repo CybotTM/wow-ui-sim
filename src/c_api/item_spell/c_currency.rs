@@ -1,7 +1,7 @@
 use crate::c_api::ensure_namespace;
 use crate::lua_api::globals::currency_data;
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, table_set, val_to_string,
+    borrow_state, create_string, create_table, table_set_static, val_to_string,
 };
 use crate::lua_api::state::CurrencyInfo;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -54,28 +54,28 @@ fn c_currency_get_list_info(state: &mut LuaState) -> LuaResult<u32> {
     };
     let info = create_table(state);
     let name = create_string(state, entry.name);
-    table_set(
+    table_set_static(
         state,
         info,
         "currencyTypesID",
         Val::Num(entry.currency_id as f64),
     );
-    table_set(state, info, "name", name);
-    table_set(state, info, "quantity", Val::Num(entry.quantity as f64));
-    table_set(
+    table_set_static(state, info, "name", name);
+    table_set_static(state, info, "quantity", Val::Num(entry.quantity as f64));
+    table_set_static(
         state,
         info,
         "iconFileID",
         Val::Num(entry.icon_file_id as f64),
     );
-    table_set(state, info, "isHeader", Val::Bool(entry.is_header));
-    table_set(
+    table_set_static(state, info, "isHeader", Val::Bool(entry.is_header));
+    table_set_static(
         state,
         info,
         "isHeaderExpanded",
         Val::Bool(entry.is_header_expanded),
     );
-    table_set(state, info, "quality", Val::Num(entry.quality as f64));
+    table_set_static(state, info, "quality", Val::Num(entry.quality as f64));
     state.push(info);
     Ok(1)
 }
@@ -106,12 +106,12 @@ fn push_currency_info_table(state: &mut LuaState, info: &CurrencyInfo) -> Val {
 fn write_currency_identity_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
     let name = create_string(state, &info.name);
     let description = create_string(state, &info.description);
-    table_set(state, t, "currencyID", Val::Num(info.currency_id as f64));
-    table_set(state, t, "name", name);
-    table_set(state, t, "description", description);
-    table_set(state, t, "iconFileID", Val::Num(info.icon_file_id as f64));
-    table_set(state, t, "quality", Val::Num(info.quality as f64));
-    table_set(
+    table_set_static(state, t, "currencyID", Val::Num(info.currency_id as f64));
+    table_set_static(state, t, "name", name);
+    table_set_static(state, t, "description", description);
+    table_set_static(state, t, "iconFileID", Val::Num(info.icon_file_id as f64));
+    table_set_static(state, t, "quality", Val::Num(info.quality as f64));
+    table_set_static(
         state,
         t,
         "currencyListDepth",
@@ -120,16 +120,16 @@ fn write_currency_identity_fields(state: &mut LuaState, t: Val, info: &CurrencyI
 }
 
 fn write_currency_quantity_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
-    table_set(state, t, "quantity", Val::Num(info.quantity as f64));
-    table_set(state, t, "maxQuantity", Val::Num(info.max_quantity as f64));
-    table_set(state, t, "totalEarned", Val::Num(info.total_earned as f64));
-    table_set(
+    table_set_static(state, t, "quantity", Val::Num(info.quantity as f64));
+    table_set_static(state, t, "maxQuantity", Val::Num(info.max_quantity as f64));
+    table_set_static(state, t, "totalEarned", Val::Num(info.total_earned as f64));
+    table_set_static(
         state,
         t,
         "trackedQuantity",
         Val::Num(info.tracked_quantity as f64),
     );
-    table_set(
+    table_set_static(
         state,
         t,
         "useTotalEarnedForMaxQty",
@@ -138,50 +138,50 @@ fn write_currency_quantity_fields(state: &mut LuaState, t: Val, info: &CurrencyI
 }
 
 fn write_currency_flag_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
-    table_set(state, t, "isHeader", Val::Bool(info.is_header));
-    table_set(
+    table_set_static(state, t, "isHeader", Val::Bool(info.is_header));
+    table_set_static(
         state,
         t,
         "isHeaderExpanded",
         Val::Bool(info.is_header_expanded),
     );
-    table_set(
+    table_set_static(
         state,
         t,
         "isShowInBackpack",
         Val::Bool(info.is_show_in_backpack),
     );
-    table_set(state, t, "discovered", Val::Bool(info.discovered));
-    table_set(state, t, "isTradeable", Val::Bool(info.is_tradeable));
-    table_set(state, t, "isTypeUnused", Val::Bool(info.is_type_unused));
+    table_set_static(state, t, "discovered", Val::Bool(info.discovered));
+    table_set_static(state, t, "isTradeable", Val::Bool(info.is_tradeable));
+    table_set_static(state, t, "isTypeUnused", Val::Bool(info.is_type_unused));
 }
 
 fn write_currency_weekly_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
-    table_set(
+    table_set_static(
         state,
         t,
         "canEarnPerWeek",
         Val::Bool(info.can_earn_per_week),
     );
-    table_set(
+    table_set_static(
         state,
         t,
         "maxWeeklyQuantity",
         Val::Num(info.max_weekly_quantity as f64),
     );
-    table_set(
+    table_set_static(
         state,
         t,
         "quantityEarnedThisWeek",
         Val::Num(info.quantity_earned_this_week as f64),
     );
-    table_set(
+    table_set_static(
         state,
         t,
         "rechargingAmountPerCycle",
         Val::Num(info.recharging_amount_per_cycle as f64),
     );
-    table_set(
+    table_set_static(
         state,
         t,
         "rechargingCycleDurationMS",
@@ -190,16 +190,16 @@ fn write_currency_weekly_fields(state: &mut LuaState, t: Val, info: &CurrencyInf
 }
 
 fn write_currency_transfer_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
-    table_set(
+    table_set_static(
         state,
         t,
         "isAccountTransferable",
         Val::Bool(info.is_account_transferable),
     );
-    table_set(state, t, "isAccountWide", Val::Bool(info.is_account_wide));
+    table_set_static(state, t, "isAccountWide", Val::Bool(info.is_account_wide));
     match info.transfer_percentage {
-        Some(pct) => table_set(state, t, "transferPercentage", Val::Num(pct)),
-        None => table_set(state, t, "transferPercentage", Val::Nil),
+        Some(pct) => table_set_static(state, t, "transferPercentage", Val::Num(pct)),
+        None => table_set_static(state, t, "transferPercentage", Val::Nil),
     }
 }
 
@@ -271,12 +271,12 @@ fn push_currency_display_info_by_id(
     let t = create_table(state);
     let name = create_string(state, &info.name);
     let description = create_string(state, &info.description);
-    table_set(state, t, "actualAmount", Val::Num(quantity as f64));
-    table_set(state, t, "displayAmount", Val::Num(quantity as f64));
-    table_set(state, t, "name", name);
-    table_set(state, t, "description", description);
-    table_set(state, t, "icon", Val::Num(info.icon_file_id as f64));
-    table_set(state, t, "quality", Val::Num(info.quality as f64));
+    table_set_static(state, t, "actualAmount", Val::Num(quantity as f64));
+    table_set_static(state, t, "displayAmount", Val::Num(quantity as f64));
+    table_set_static(state, t, "name", name);
+    table_set_static(state, t, "description", description);
+    table_set_static(state, t, "icon", Val::Num(info.icon_file_id as f64));
+    table_set_static(state, t, "quality", Val::Num(info.quality as f64));
     state.push(t);
     Ok(1)
 }

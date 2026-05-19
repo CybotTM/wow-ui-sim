@@ -6,7 +6,9 @@ use super::{
 };
 use crate::items;
 use crate::lua_api::globals::profession_data;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_get, table_set};
+use crate::lua_api::methods::{
+    borrow_state, create_string, create_table, table_get, table_set, table_set_static,
+};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -83,20 +85,20 @@ pub(super) fn category_table(
 
     let table = create_table(state);
     let name = create_string(state, category.name);
-    table_set(
+    table_set_static(
         state,
         table,
         "categoryID",
         Val::Num(category.category_id as f64),
     );
-    table_set(state, table, "name", name);
-    table_set(
+    table_set_static(state, table, "name", name);
+    table_set_static(
         state,
         table,
         "parentCategoryID",
         Val::Num(category.parent_category_id as f64),
     );
-    table_set(state, table, "uiOrder", Val::Num(category.ui_order as f64));
+    table_set_static(state, table, "uiOrder", Val::Num(category.ui_order as f64));
     table
 }
 
@@ -121,25 +123,25 @@ pub(super) fn reagent_info_table(
     };
 
     let table = create_table(state);
-    table_set(state, table, "itemID", Val::Num(reagent.item_id as f64));
-    table_set(
+    table_set_static(state, table, "itemID", Val::Num(reagent.item_id as f64));
+    table_set_static(
         state,
         table,
         "numRequired",
         Val::Num(reagent.quantity as f64),
     );
-    table_set(
+    table_set_static(
         state,
         table,
         "quantityRequired",
         Val::Num(reagent.quantity as f64),
     );
-    table_set(state, table, "reagentType", Val::Num(1.0));
+    table_set_static(state, table, "reagentType", Val::Num(1.0));
     let name = items::get_item(reagent.item_id)
         .map(|item| item.name)
         .unwrap_or("Unknown");
     let name = create_string(state, name);
-    table_set(state, table, "name", name);
+    table_set_static(state, table, "name", name);
     table
 }
 
@@ -175,19 +177,19 @@ fn reagent_slot_table(
     let table = create_table(state);
     let reagents = reagent_entry_table(state, reagent);
     let variable_quantities = create_table(state);
-    table_set(state, table, "reagents", reagents);
-    table_set(state, table, "slotIndex", Val::Num((index + 1) as f64));
-    table_set(state, table, "dataSlotIndex", Val::Num((index + 1) as f64));
-    table_set(state, table, "reagentType", Val::Num(1.0));
-    table_set(state, table, "required", Val::Bool(true));
-    table_set(state, table, "hiddenInCraftingForm", Val::Bool(false));
-    table_set(
+    table_set_static(state, table, "reagents", reagents);
+    table_set_static(state, table, "slotIndex", Val::Num((index + 1) as f64));
+    table_set_static(state, table, "dataSlotIndex", Val::Num((index + 1) as f64));
+    table_set_static(state, table, "reagentType", Val::Num(1.0));
+    table_set_static(state, table, "required", Val::Bool(true));
+    table_set_static(state, table, "hiddenInCraftingForm", Val::Bool(false));
+    table_set_static(
         state,
         table,
         "quantityRequired",
         Val::Num(reagent.quantity as f64),
     );
-    table_set(state, table, "variableQuantities", variable_quantities);
+    table_set_static(state, table, "variableQuantities", variable_quantities);
     table
 }
 
@@ -236,7 +238,7 @@ fn populate_profession_table(
 
 fn populate_missing_recipe_info_table(state: &mut LuaState, table: Val) {
     set_number_field(state, table, "recipeID", 0.0);
-    table_set(state, table, "name", Val::Nil);
+    table_set_static(state, table, "name", Val::Nil);
     set_bool_field(state, table, "craftable", false);
 }
 
@@ -265,13 +267,13 @@ fn populate_recipe_schematic_table(
     set_number_field(state, table, "recipeID", recipe.recipe_id as f64);
     set_string_field(state, table, "name", recipe.name);
     if recipe.output_item_id == 0 {
-        table_set(state, table, "outputItemID", Val::Nil);
+        table_set_static(state, table, "outputItemID", Val::Nil);
     } else {
         set_number_field(state, table, "outputItemID", recipe.output_item_id as f64);
     }
     set_number_field(state, table, "quantityMin", recipe.output_quantity as f64);
     set_number_field(state, table, "quantityMax", recipe.output_quantity as f64);
-    table_set(
+    table_set_static(
         state,
         table,
         "reagentSlotSchematics",

@@ -19,7 +19,7 @@ use crate::items;
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, create_table_with_fields,
-    table_set,
+    table_set_static,
 };
 use crate::lua_api::state::{
     AuctionBrowseResult, AuctionItemClassFilter, AuctionRowInfo, AuctionSellQuote,

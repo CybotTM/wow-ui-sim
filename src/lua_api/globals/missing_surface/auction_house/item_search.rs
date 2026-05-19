@@ -32,10 +32,10 @@ fn c_auction_house_make_item_key(state: &mut LuaState) -> LuaResult<u32> {
     let item_suffix = optional_int_arg(state, 3)?;
     let battle_pet_species_id = optional_int_arg(state, 4)?;
     let item_key = create_table(state);
-    table_set(state, item_key, "itemID", Val::Num(item_id as f64));
-    table_set(state, item_key, "itemLevel", Val::Num(item_level as f64));
-    table_set(state, item_key, "itemSuffix", Val::Num(item_suffix as f64));
-    table_set(
+    table_set_static(state, item_key, "itemID", Val::Num(item_id as f64));
+    table_set_static(state, item_key, "itemLevel", Val::Num(item_level as f64));
+    table_set_static(state, item_key, "itemSuffix", Val::Num(item_suffix as f64));
+    table_set_static(
         state,
         item_key,
         "battlePetSpeciesID",
@@ -208,31 +208,31 @@ fn available_post_count_for_location(state: &mut LuaState, location: Val) -> Lua
 fn push_browse_result_table(state: &mut LuaState, row: &AuctionBrowseResult) -> Val {
     let t = create_table(state);
     let item_key = create_table(state);
-    table_set(state, item_key, "itemID", Val::Num(row.item_id as f64));
-    table_set(
+    table_set_static(state, item_key, "itemID", Val::Num(row.item_id as f64));
+    table_set_static(
         state,
         item_key,
         "itemLevel",
         Val::Num(row.item_level as f64),
     );
-    table_set(state, item_key, "itemSuffix", Val::Num(0.0));
-    table_set(state, item_key, "battlePetSpeciesID", Val::Num(0.0));
+    table_set_static(state, item_key, "itemSuffix", Val::Num(0.0));
+    table_set_static(state, item_key, "battlePetSpeciesID", Val::Num(0.0));
 
-    table_set(state, t, "itemKey", item_key);
-    table_set(state, t, "minPrice", Val::Num(row.min_price as f64));
-    table_set(
+    table_set_static(state, t, "itemKey", item_key);
+    table_set_static(state, t, "minPrice", Val::Num(row.min_price as f64));
+    table_set_static(
         state,
         t,
         "totalQuantity",
         Val::Num(row.total_quantity as f64),
     );
-    table_set(
+    table_set_static(
         state,
         t,
         "containsOwnerItem",
         Val::Bool(row.contains_owner_item),
     );
-    table_set(state, t, "appearanceLink", Val::Nil);
+    table_set_static(state, t, "appearanceLink", Val::Nil);
     t
 }
 
@@ -396,12 +396,12 @@ fn set_item_search_result_identity_fields(
         Some(name) => create_string(state, name),
         None => Val::Nil,
     };
-    table_set(state, table, "owners", owners);
-    table_set(state, table, "timeLeft", Val::Num(entry.time_left as f64));
-    table_set(state, table, "auctionID", Val::Num(entry.auction_id as f64));
-    table_set(state, table, "quantity", Val::Num(entry.quantity as f64));
-    table_set(state, table, "itemLink", item_link);
-    table_set(state, table, "bidder", bidder);
+    table_set_static(state, table, "owners", owners);
+    table_set_static(state, table, "timeLeft", Val::Num(entry.time_left as f64));
+    table_set_static(state, table, "auctionID", Val::Num(entry.auction_id as f64));
+    table_set_static(state, table, "quantity", Val::Num(entry.quantity as f64));
+    table_set_static(state, table, "itemLink", item_link);
+    table_set_static(state, table, "bidder", bidder);
 }
 
 fn set_item_search_result_flag_fields(
@@ -409,19 +409,19 @@ fn set_item_search_result_flag_fields(
     table: Val,
     entry: &ItemSearchResultInfo,
 ) {
-    table_set(
+    table_set_static(
         state,
         table,
         "containsOwnerItem",
         Val::Bool(entry.contains_owner_item),
     );
-    table_set(
+    table_set_static(
         state,
         table,
         "containsAccountItem",
         Val::Bool(entry.contains_account_item),
     );
-    table_set(
+    table_set_static(
         state,
         table,
         "containsSocketedItem",
@@ -434,15 +434,15 @@ fn set_item_search_result_price_fields(
     table: Val,
     entry: &ItemSearchResultInfo,
 ) {
-    table_set(state, table, "minBid", Val::Num(entry.min_bid as f64));
-    table_set(state, table, "bidAmount", Val::Num(entry.bid_amount as f64));
-    table_set(
+    table_set_static(state, table, "minBid", Val::Num(entry.min_bid as f64));
+    table_set_static(state, table, "bidAmount", Val::Num(entry.bid_amount as f64));
+    table_set_static(
         state,
         table,
         "buyoutAmount",
         Val::Num(entry.buyout_amount as f64),
     );
-    table_set(
+    table_set_static(
         state,
         table,
         "timeLeftSeconds",
