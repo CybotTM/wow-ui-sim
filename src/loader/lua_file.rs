@@ -469,8 +469,10 @@ fn load_cached_or_compile(
     let legacy_hash = bytecode_cache::legacy_content_hash(bytes, chunk_name);
 
     if !bytecode_cache::is_disabled() {
-        match bytecode_cache::get_with_legacy_fallback(hash, legacy_hash) {
-            Some(bytecode) => match compile_with_rilua(lua, &bytecode, chunk_name) {
+        match bytecode_cache::with_cached_bytecode(hash, legacy_hash, |bytecode| {
+            compile_with_rilua(lua, bytecode, chunk_name)
+        }) {
+            Some(result) => match result {
                 Ok(func) => {
                     timing.cache_hits += 1;
                     return Ok(func);
@@ -520,10 +522,7 @@ fn compile_from_source(
 
 /// Compile Lua source code using rilua's compiler (pure Rust).
 ///
-/// This is the rilua-side equivalent of `compile_from_source`. It compiles
-/// source code and returns a rilua Function handle. Used as a parallel
-/// compilation path for Phase 3 migration — the mlua path remains active
-/// until the full VM switch.
+/// This compiles source or cached bytecode and returns a rilua Function handle.
 pub fn compile_with_rilua<L: LuaApiMut>(
     lua: &mut L,
     bytes: &[u8],

@@ -101,14 +101,19 @@ fn pack_path() -> Option<PathBuf> {
     Some(cache_dir()?.join(PACK_FILE))
 }
 
-/// Load cached bytecode for the current hash, falling back to a
-/// migrated legacy hash when present. A successful legacy hit is
-/// promoted under the current hash immediately so subsequent lookups no
-/// longer need the fallback.
-pub fn get_with_legacy_fallback(hash: u64, legacy_hash: u64) -> Option<Vec<u8>> {
+/// Load cached bytecode and pass it to a callback.
+///
+/// Current-key hits borrow directly from the in-memory pack instead of cloning
+/// the cached chunk. Legacy hits still clone once because promotion appends a
+/// second entry under the current hash.
+pub fn with_cached_bytecode<R>(
+    hash: u64,
+    legacy_hash: u64,
+    callback: impl FnOnce(&[u8]) -> R,
+) -> Option<R> {
     let mut state = cache_state().lock().ok()?;
     ensure_loaded(&mut state);
-    lookup_with_legacy_fallback(&mut state, hash, legacy_hash)
+    with_cached_bytecode_from_state(&mut state, hash, legacy_hash, callback)
 }
 
 /// Save compiled bytecode to cache.
@@ -139,31 +144,8 @@ fn ensure_loaded(state: &mut CacheState) {
         return;
     }
 
-    if let Some(pack) = pack_path()
-        && let Ok(mut file) = std::fs::File::open(&pack)
-    {
-        let file_size = file.metadata().map(|meta| meta.len()).unwrap_or(0);
-        if file_size > MAX_PACK_SIZE {
-            drop(file);
-            let _ = std::fs::remove_file(&pack);
-        } else {
-            let mut bytes = Vec::new();
-            if let Ok(_) = file.read_to_end(&mut bytes)
-                && let Some(valid_len) = load_pack_bytes(state, &bytes)
-            {
-                state.pack_exists = true;
-                if valid_len < bytes.len() {
-                    drop(file);
-                    let _ = truncate_pack(&pack, valid_len);
-                }
-            } else {
-                // Pack file existed but was wrong magic or wrong
-                // whitelist version — remove it so the next write
-                // starts a clean file.
-                drop(file);
-                let _ = std::fs::remove_file(&pack);
-            }
-        }
+    if let Some(pack) = pack_path() {
+        state.pack_exists = load_pack_from_path(state, &pack);
     }
 
     if !state.pack_exists {
@@ -171,6 +153,39 @@ fn ensure_loaded(state: &mut CacheState) {
     }
 
     state.initialized = true;
+}
+
+fn load_pack_from_path(state: &mut CacheState, pack: &Path) -> bool {
+    let Ok(mut file) = std::fs::File::open(pack) else {
+        return false;
+    };
+
+    if file.metadata().map(|meta| meta.len()).unwrap_or(0) > MAX_PACK_SIZE {
+        drop(file);
+        let _ = std::fs::remove_file(pack);
+        return false;
+    }
+
+    let mut bytes = Vec::new();
+    if file.read_to_end(&mut bytes).is_err() {
+        return false;
+    }
+
+    let original_len = bytes.len();
+    let Some(valid_len) = load_pack_bytes(state, bytes) else {
+        // Pack file existed but was wrong magic or wrong whitelist version.
+        // Remove it so the next write starts a clean file.
+        drop(file);
+        let _ = std::fs::remove_file(pack);
+        return false;
+    };
+
+    if valid_len < original_len {
+        drop(file);
+        let _ = truncate_pack(pack, valid_len);
+    }
+
+    true
 }
 
 fn lookup_with_legacy_fallback(
@@ -193,7 +208,21 @@ fn lookup_with_legacy_fallback(
     Some(bytecode)
 }
 
-fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> Option<usize> {
+fn with_cached_bytecode_from_state<R>(
+    state: &mut CacheState,
+    hash: u64,
+    legacy_hash: u64,
+    callback: impl FnOnce(&[u8]) -> R,
+) -> Option<R> {
+    if let Some((offset, len)) = state.index.get(&hash).copied() {
+        return Some(callback(&state.values[offset..offset + len]));
+    }
+
+    let bytecode = lookup_with_legacy_fallback(state, hash, legacy_hash)?;
+    Some(callback(&bytecode))
+}
+
+fn load_pack_bytes(state: &mut CacheState, mut bytes: Vec<u8>) -> Option<usize> {
     if bytes.len() < PACK_HEADER_LEN || &bytes[..PACK_MAGIC.len()] != PACK_MAGIC {
         return None;
     }
@@ -206,8 +235,7 @@ fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> Option<usize> {
         return None;
     }
 
-    state.values.clear();
-    state.index.clear();
+    let mut index = HashMap::new();
 
     let mut pos = PACK_HEADER_LEN;
     while pos + 12 <= bytes.len() {
@@ -217,14 +245,18 @@ fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> Option<usize> {
         let len = u32::from_le_bytes(bytes[pos..pos + 4].try_into().unwrap()) as usize;
         pos += 4;
         if pos + len > bytes.len() {
+            bytes.truncate(entry_start);
+            state.values = bytes;
+            state.index = index;
             return Some(entry_start);
         }
-        let offset = state.values.len();
-        state.values.extend_from_slice(&bytes[pos..pos + len]);
-        state.index.insert(hash, (offset, len));
+        index.insert(hash, (pos, len));
         pos += len;
     }
 
+    bytes.truncate(pos);
+    state.values = bytes;
+    state.index = index;
     Some(pos)
 }
 
@@ -358,10 +390,30 @@ mod tests {
     #[test]
     fn load_pack_bytes_accepts_current_version_header() {
         let bytes = synth_pack_bytes(PACK_MAGIC, WHITELIST_VERSION, &[(SENTINEL_HASH, b"xyz")]);
+        let expected_len = bytes.len();
+        let payload_offset = PACK_HEADER_LEN + 8 + 4;
         let mut state = CacheState::default();
-        assert_eq!(load_pack_bytes(&mut state, &bytes), Some(bytes.len()));
-        assert_eq!(state.index.get(&SENTINEL_HASH).copied(), Some((0, 3)));
-        assert_eq!(&state.values[..3], b"xyz");
+        assert_eq!(load_pack_bytes(&mut state, bytes), Some(expected_len));
+        assert_eq!(
+            state.index.get(&SENTINEL_HASH).copied(),
+            Some((payload_offset, 3))
+        );
+        assert_eq!(&state.values[payload_offset..payload_offset + 3], b"xyz");
+    }
+
+    #[test]
+    fn load_pack_bytes_indexes_payloads_in_place() {
+        let bytes = synth_pack_bytes(PACK_MAGIC, WHITELIST_VERSION, &[(SENTINEL_HASH, b"xyz")]);
+        let expected_len = bytes.len();
+        let payload_offset = PACK_HEADER_LEN + 8 + 4;
+        let mut state = CacheState::default();
+
+        assert_eq!(load_pack_bytes(&mut state, bytes), Some(expected_len));
+        assert_eq!(
+            state.index.get(&SENTINEL_HASH).copied(),
+            Some((payload_offset, 3))
+        );
+        assert_eq!(&state.values[payload_offset..payload_offset + 3], b"xyz");
     }
 
     #[test]
@@ -369,7 +421,7 @@ mod tests {
         let stale_version = WHITELIST_VERSION.wrapping_add(1);
         let bytes = synth_pack_bytes(PACK_MAGIC, stale_version, &[(1, b"z")]);
         let mut state = CacheState::default();
-        assert_eq!(load_pack_bytes(&mut state, &bytes), None);
+        assert_eq!(load_pack_bytes(&mut state, bytes), None);
         assert!(state.index.is_empty());
         assert!(state.values.is_empty());
     }
@@ -381,7 +433,7 @@ mod tests {
         let legacy_magic = *b"WOWBC001";
         let bytes = synth_pack_bytes(&legacy_magic, WHITELIST_VERSION, &[(1, b"z")]);
         let mut state = CacheState::default();
-        assert_eq!(load_pack_bytes(&mut state, &bytes), None);
+        assert_eq!(load_pack_bytes(&mut state, bytes), None);
     }
 
     #[test]
@@ -392,7 +444,7 @@ mod tests {
         bytes.extend_from_slice(PACK_MAGIC);
         bytes.extend_from_slice(&[0u8; 3]); // only 3 of 4 version bytes
         let mut state = CacheState::default();
-        assert_eq!(load_pack_bytes(&mut state, &bytes), None);
+        assert_eq!(load_pack_bytes(&mut state, bytes), None);
     }
 
     #[test]
@@ -404,11 +456,15 @@ mod tests {
 
         let mut state = CacheState::default();
         assert_eq!(
-            load_pack_bytes(&mut state, &bytes),
+            load_pack_bytes(&mut state, bytes),
             Some(PACK_HEADER_LEN + 12 + 3)
         );
-        assert_eq!(state.index.get(&SENTINEL_HASH).copied(), Some((0, 3)));
-        assert_eq!(&state.values[..3], b"xyz");
+        let payload_offset = PACK_HEADER_LEN + 8 + 4;
+        assert_eq!(
+            state.index.get(&SENTINEL_HASH).copied(),
+            Some((payload_offset, 3))
+        );
+        assert_eq!(&state.values[payload_offset..payload_offset + 3], b"xyz");
     }
 
     #[test]
@@ -481,5 +537,24 @@ mod tests {
             Some((b"compiled".len(), b"compiled".len()))
         );
         assert_eq!(&state.values[b"compiled".len()..], b"compiled");
+    }
+
+    #[test]
+    fn with_cached_bytecode_borrows_current_hits() {
+        let mut state = CacheState::default();
+        state.values.extend_from_slice(b"current-bytecode");
+        state.index.insert(SENTINEL_HASH, (0, state.values.len()));
+        let pack_ptr = state.values.as_ptr();
+
+        let borrowed =
+            with_cached_bytecode_from_state(&mut state, SENTINEL_HASH, SENTINEL_HASH, |bytes| {
+                bytes.as_ptr() == pack_ptr
+            })
+            .expect("current cache hit should call callback");
+
+        assert!(
+            borrowed,
+            "current cache hits should pass a borrowed slice from the in-memory pack"
+        );
     }
 }

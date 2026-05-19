@@ -15,8 +15,9 @@ pub fn load_chunk<L: LuaApiMut>(
     let chunk_name = format!("@generated/{tag}/{hash:016x}");
 
     if !bytecode_cache::is_disabled() {
-        if let Some(bytecode) = bytecode_cache::get_with_legacy_fallback(hash, legacy_hash)
-            && let Ok(func) = LuaApiMut::load_bytes(lua, &bytecode, &chunk_name)
+        if let Some(result) = bytecode_cache::with_cached_bytecode(hash, legacy_hash, |bytecode| {
+            LuaApiMut::load_bytes(lua, bytecode, &chunk_name)
+        }) && let Ok(func) = result
         {
             return Ok(func);
         }
@@ -65,8 +66,9 @@ mod tests {
         let results = lua.call_function(&func, &[]).unwrap();
         let value = results.into_iter().next().expect("chunk returns a value");
         assert_eq!(lua.val_as_bytes(value).unwrap(), tag.as_bytes());
+        let cached = crate::loader::bytecode_cache::with_cached_bytecode(hash, hash, |_| ());
         assert!(
-            crate::loader::bytecode_cache::get_with_legacy_fallback(hash, hash).is_some(),
+            cached.is_some(),
             "generated chunk should be written to bytecode cache"
         );
     }
