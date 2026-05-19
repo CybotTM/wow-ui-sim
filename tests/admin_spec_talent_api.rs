@@ -78,6 +78,23 @@ fn test_get_num_spec_groups_reports_active_player_group() {
     assert_eq!(active_group, 1);
 }
 
+#[test]
+fn test_get_specialization_mastery_spells_returns_iterable_table() {
+    let env = env();
+    let (is_table, iterated): (bool, bool) = env
+        .eval(
+            r#"
+            local masterySpells = C_SpecializationInfo.GetSpecializationMasterySpells(2)
+            for _ in ipairs(masterySpells) do end
+            return type(masterySpells) == "table", true
+            "#,
+        )
+        .unwrap();
+
+    assert!(is_table);
+    assert!(iterated);
+}
+
 // ============================================================================
 // SetTalentRank
 // ============================================================================
