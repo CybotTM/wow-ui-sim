@@ -255,6 +255,7 @@ impl WowLuaEnv {
 
     fn fire_timer_callback(&self, owner_addon: Option<u16>, callback: Val) {
         let start = Instant::now();
+        let addon_name = self.addon_folder_name(owner_addon);
         self.state.borrow_mut().executing_addon_index = owner_addon;
         let call_result = {
             let mut lua = self.lua.borrow_mut();
@@ -265,7 +266,23 @@ impl WowLuaEnv {
             call_error_handler(&mut lua, &error.to_string());
         }
         self.state.borrow_mut().executing_addon_index = None;
+        crate::lua_api::handler_timing::log(
+            addon_name.as_deref(),
+            "C_Timer",
+            None,
+            0,
+            start.elapsed(),
+        );
         record_addon_time(&self.state, owner_addon, &start);
+    }
+
+    fn addon_folder_name(&self, owner_addon: Option<u16>) -> Option<String> {
+        let addon_index = owner_addon? as usize;
+        self.state
+            .borrow()
+            .addons
+            .get(addon_index)
+            .map(|addon| addon.folder_name.clone())
     }
 
     fn remove_timer_callback(&self, timer_id: u64) {
