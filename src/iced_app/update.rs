@@ -657,3 +657,7 @@ fn sample_display_metrics(
 #[cfg(test)]
 #[path = "update_tests.rs"]
 mod update_tests;
+
+#[cfg(test)]
+#[path = "resize_event_tests.rs"]
+mod resize_event_tests;

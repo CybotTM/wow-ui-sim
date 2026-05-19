@@ -260,7 +260,6 @@ impl App {
             *self.cached_hittable.borrow_mut() = None;
             self.mark_all_strata_dirty();
             let _ = env.fire_event("DISPLAY_SIZE_CHANGED");
-            let _ = env.fire_event("UI_SCALE_CHANGED");
             self.rebuild_hit_grid_after_screen_resize(size);
         }
     }
