@@ -47,3 +47,45 @@ fn friend_list_get_who_info_returns_seeded_who_rows() {
         "C_FriendList.GetWhoInfo should expose seeded WhoInfo rows"
     );
 }
+
+#[test]
+fn friend_list_friend_info_uses_social_friend_state() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local first = C_FriendList.GetFriendInfoByIndex(1)
+            if not first then
+                return "expected_first_friend"
+            end
+            if first.name ~= "Arthax" then
+                return "expected_social_friend_name:" .. tostring(first.name)
+            end
+            if first.guid ~= "Player-1-0000A001" then
+                return "expected_social_friend_guid:" .. tostring(first.guid)
+            end
+            if not first.connected then
+                return "expected_online_social_friend"
+            end
+
+            local byName = C_FriendList.GetFriendInfoByName("Durotan")
+            if not byName then
+                return "expected_name_lookup"
+            end
+            if byName.connected then
+                return "expected_offline_social_friend"
+            end
+            if C_FriendList.GetFriendInfoByName("Alyth") ~= nil then
+                return "hardcoded_friend_row_leaked"
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "C_FriendList friend rows should be backed by SimState.social_friends"
+    );
+}
