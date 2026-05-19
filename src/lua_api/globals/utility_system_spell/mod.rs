@@ -321,7 +321,7 @@ pub fn type_fn(state: &mut LuaState) -> LuaResult<u32> {
         Val::Function(_) => "function",
         Val::Userdata(_) | Val::LightUserdata(_) | Val::Thread(_) => "userdata",
     };
-    let s = state.gc.intern_string(type_name.as_bytes());
+    let s = state.gc.intern_string_static(type_name.as_bytes());
     state.push(Val::Str(s));
     Ok(1)
 }
@@ -678,4 +678,28 @@ fn register_system_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "geterrorhandler", geterrorhandler)?;
     LuaApiMut::register_function(lua, "assertsafe", assertsafe)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn type_global_returns_wow_type_names() {
+        let env = WowLuaEnv::new().expect("fresh Lua env");
+        let result: (String, String, String, String, String) = env
+            .eval("return type('x'), type({}), type(function() end), type(1), type(nil)")
+            .expect("type results");
+
+        assert_eq!(
+            result,
+            (
+                "string".to_string(),
+                "table".to_string(),
+                "function".to_string(),
+                "number".to_string(),
+                "nil".to_string(),
+            )
+        );
+    }
 }

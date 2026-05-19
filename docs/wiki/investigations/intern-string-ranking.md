@@ -129,6 +129,13 @@ registry tables. `__scripts`, `__scripts_pre`, `__scripts_post`,
 `intern_string_static` through `registry_key_ref`, removing roughly another
 222K startup intern calls without changing handler-key semantics.
 
+Follow-up caller tracing showed the largest remaining content-keyed caller was
+the simulator's WoW `type(v)` override (`utility_system_spell::type_fn`), not
+rilua's base `type`. Switching those static type names to `intern_string_static`
+removed roughly 688K more startup intern calls: total `intern_string` traffic
+fell from about 2.33M to about 1.66M, and `"string"`, `"table"`, `"function"`,
+`"number"`, and `"nil"` disappeared from the top 40.
+
 ## Follow-ups
 
 - **rilua**: reproduce the mismatch in a minimal test case, then either fix `intern_string_static` or document the hazard (e.g. forbid `intern_string_static` for keys later looked up via plain `intern_string`).
