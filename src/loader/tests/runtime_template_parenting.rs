@@ -130,6 +130,41 @@ fn test_empty_direct_script_overrides_inherited_template_script() {
 }
 
 #[test]
+fn test_empty_script_override_preserves_intrinsic_onupdate_binding() {
+    let t = load_test_xml(
+        "runtime-empty-script-keeps-intrinsic",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="EmptyScriptIntrinsicTemplate" virtual="true">
+                <Scripts>
+                    <OnUpdate intrinsicOrder="postcall">
+                        EMPTY_SCRIPT_INTRINSIC_CALLED = true
+                    </OnUpdate>
+                </Scripts>
+            </Frame>
+            <Frame name="EmptyScriptIntrinsicOverrideFrame" parent="UIParent" inherits="EmptyScriptIntrinsicTemplate">
+                <Scripts>
+                    <OnUpdate></OnUpdate>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.assert_lua_true(
+        "return EmptyScriptIntrinsicOverrideFrame:GetScript('OnUpdate') == nil",
+        "empty XML OnUpdate should leave the normal binding clear",
+    );
+
+    t.env.fire_on_update(0.016).unwrap();
+
+    t.assert_lua_true(
+        "return EMPTY_SCRIPT_INTRINSIC_CALLED == true",
+        "empty XML OnUpdate should not clear the inherited intrinsic binding",
+    );
+}
+
+#[test]
 fn test_runtime_template_mixin_and_key_values_apply() {
     let t = load_test_xml(
         "runtime-template-mixin-keyvalues",
