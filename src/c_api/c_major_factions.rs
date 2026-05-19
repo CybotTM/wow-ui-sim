@@ -16,7 +16,7 @@
 use crate::c_api::helpers::ensure_namespace;
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, create_table_with_fields,
-    table_set, table_set_num,
+    table_set_num, table_set_static,
 };
 use crate::lua_api::state::{MajorFactionData, RenownLevelInfo};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
@@ -135,11 +135,11 @@ fn set_major_faction_descriptive_fields(state: &mut LuaState, table: Val, data: 
     let texture_kit = create_string(state, &data.texture_kit);
     let unlock_description = optional_string_val(state, data.unlock_description.as_ref());
     let faction_font_color = create_faction_font_color(state, data);
-    table_set(state, table, "name", name);
-    table_set(state, table, "isUnlocked", Val::Bool(data.is_unlocked));
-    table_set(state, table, "unlockDescription", unlock_description);
-    table_set(state, table, "textureKit", texture_kit);
-    table_set(state, table, "factionFontColor", faction_font_color);
+    table_set_static(state, table, "name", name);
+    table_set_static(state, table, "isUnlocked", Val::Bool(data.is_unlocked));
+    table_set_static(state, table, "unlockDescription", unlock_description);
+    table_set_static(state, table, "textureKit", texture_kit);
+    table_set_static(state, table, "factionFontColor", faction_font_color);
 }
 
 fn set_major_faction_numbers(state: &mut LuaState, table: Val, data: &MajorFactionData) {
@@ -149,37 +149,37 @@ fn set_major_faction_numbers(state: &mut LuaState, table: Val, data: &MajorFacti
 }
 
 fn set_major_faction_identity_numbers(state: &mut LuaState, table: Val, data: &MajorFactionData) {
-    table_set(state, table, "factionID", number(data.faction_id));
-    table_set(
+    table_set_static(state, table, "factionID", number(data.faction_id));
+    table_set_static(
         state,
         table,
         "expansionFilter",
         number(data.expansion_filter as i64),
     );
-    table_set(
+    table_set_static(
         state,
         table,
         "expansionID",
         number(data.expansion_filter as i64),
     );
-    table_set(state, table, "maxLevel", number(data.max_level as i64));
-    table_set(state, table, "uiPriority", number(data.ui_priority as i64));
+    table_set_static(state, table, "maxLevel", number(data.max_level as i64));
+    table_set_static(state, table, "uiPriority", number(data.ui_priority as i64));
 }
 
 fn set_major_faction_progress_numbers(state: &mut LuaState, table: Val, data: &MajorFactionData) {
-    table_set(
+    table_set_static(
         state,
         table,
         "renownLevel",
         number(data.renown_level as i64),
     );
-    table_set(
+    table_set_static(
         state,
         table,
         "renownReputationEarned",
         number(data.renown_reputation_earned as i64),
     );
-    table_set(
+    table_set_static(
         state,
         table,
         "renownLevelThreshold",
@@ -188,13 +188,13 @@ fn set_major_faction_progress_numbers(state: &mut LuaState, table: Val, data: &M
 }
 
 fn set_major_faction_sound_numbers(state: &mut LuaState, table: Val, data: &MajorFactionData) {
-    table_set(
+    table_set_static(
         state,
         table,
         "celebrationSoundKit",
         number(data.celebration_sound_kit as i64),
     );
-    table_set(
+    table_set_static(
         state,
         table,
         "renownFanfareSoundKitID",

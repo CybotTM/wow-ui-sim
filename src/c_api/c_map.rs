@@ -41,7 +41,7 @@
 use super::helpers::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
-    val_to_string,
+    table_set_static, val_to_string,
 };
 use crate::lua_api::state::MapData;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -287,11 +287,11 @@ fn compose_rect_in_parent(
 fn push_map_details_table(state: &mut LuaState, map: &MapData) -> Val {
     let t = create_table(state);
     let name = create_string(state, &map.name);
-    table_set(state, t, "mapID", Val::Num(map.ui_map_id as f64));
-    table_set(state, t, "name", name);
-    table_set(state, t, "mapType", Val::Num(map.map_type as f64));
-    table_set(state, t, "parentMapID", Val::Num(map.parent_map_id as f64));
-    table_set(state, t, "flags", Val::Num(map.flags as f64));
+    table_set_static(state, t, "mapID", Val::Num(map.ui_map_id as f64));
+    table_set_static(state, t, "name", name);
+    table_set_static(state, t, "mapType", Val::Num(map.map_type as f64));
+    table_set_static(state, t, "parentMapID", Val::Num(map.parent_map_id as f64));
+    table_set_static(state, t, "flags", Val::Num(map.flags as f64));
     t
 }
 
@@ -398,8 +398,8 @@ fn normalized_coordinate(state: &mut LuaState, position: Val, key: &str) -> f64 
 
 fn create_world_position_vector(state: &mut LuaState, x: f64, y: f64) -> LuaResult<Val> {
     let vector = create_table(state);
-    table_set(state, vector, "x", Val::Num(x));
-    table_set(state, vector, "y", Val::Num(y));
+    table_set_static(state, vector, "x", Val::Num(x));
+    table_set_static(state, vector, "y", Val::Num(y));
     let Val::Table(vector_ref) = vector else {
         unreachable!("create_table must return table");
     };

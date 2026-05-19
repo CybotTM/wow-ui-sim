@@ -19,7 +19,7 @@
 use crate::c_api::helpers::ensure_namespace;
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, create_table_with_fields,
-    table_set, table_set_num,
+    table_set_num, table_set_static,
 };
 use crate::lua_api::state::{AlliedRaceInfo, AlliedRaceRacialAbility};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
@@ -105,9 +105,9 @@ fn build_racial_ability_entry(state: &mut LuaState, ability: &AlliedRaceRacialAb
     let entry = create_table(state);
     let name = create_string(state, &ability.name);
     let description = create_string(state, &ability.description);
-    table_set(state, entry, "name", name);
-    table_set(state, entry, "description", description);
-    table_set(state, entry, "icon", Val::Num(ability.icon as f64));
+    table_set_static(state, entry, "name", name);
+    table_set_static(state, entry, "description", description);
+    table_set_static(state, entry, "icon", Val::Num(ability.icon as f64));
     entry
 }
 

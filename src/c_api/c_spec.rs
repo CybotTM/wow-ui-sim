@@ -3,7 +3,8 @@
 use crate::lua_api::game_data::{CLASS_LABELS, CastingState};
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, frame_id_from_stack, table_set,
+    borrow_state, borrow_state_mut, create_string, create_table, frame_id_from_stack,
+    table_set_static,
 };
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -291,17 +292,17 @@ fn c_spec_get_pvp_talent_slot_info(state: &mut LuaState) -> LuaResult<u32> {
 
     let info = create_table(state);
     let available_talent_ids = create_table(state);
-    table_set(state, info, "enabled", Val::Bool(true));
-    table_set(state, info, "locked", Val::Bool(false));
-    table_set(
+    table_set_static(state, info, "enabled", Val::Bool(true));
+    table_set_static(state, info, "locked", Val::Bool(false));
+    table_set_static(
         state,
         info,
         "level",
         Val::Num(20.0 + ((slot_index - 1) * 10) as f64),
     );
-    table_set(state, info, "selectedTalentID", Val::Nil);
-    table_set(state, info, "slotIndex", Val::Num(slot_index as f64));
-    table_set(state, info, "availableTalentIDs", available_talent_ids);
+    table_set_static(state, info, "selectedTalentID", Val::Nil);
+    table_set_static(state, info, "slotIndex", Val::Num(slot_index as f64));
+    table_set_static(state, info, "availableTalentIDs", available_talent_ids);
     state.push(info);
     Ok(1)
 }
@@ -341,12 +342,12 @@ fn c_spec_get_pvp_talent_info(state: &mut LuaState) -> LuaResult<u32> {
     let info = create_table(state);
     let name = create_string(state, "PvP Talent");
     let icon = create_string(state, "Interface\\Icons\\Spell_Holy_PowerWordShield");
-    table_set(state, info, "talentID", Val::Num(talent_id as f64));
-    table_set(state, info, "name", name);
-    table_set(state, info, "icon", icon);
-    table_set(state, info, "unlocked", Val::Bool(true));
-    table_set(state, info, "dependenciesUnmet", Val::Bool(false));
-    table_set(state, info, "dependenciesUnmetReason", Val::Nil);
+    table_set_static(state, info, "talentID", Val::Num(talent_id as f64));
+    table_set_static(state, info, "name", name);
+    table_set_static(state, info, "icon", icon);
+    table_set_static(state, info, "unlocked", Val::Bool(true));
+    table_set_static(state, info, "dependenciesUnmet", Val::Bool(false));
+    table_set_static(state, info, "dependenciesUnmetReason", Val::Nil);
     state.push(info);
     Ok(1)
 }
