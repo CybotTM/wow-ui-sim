@@ -441,10 +441,8 @@ fn c_map_get_player_map_position(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
 
-    let t = create_table(state);
-    table_set(state, t, "x", Val::Num(position.0));
-    table_set(state, t, "y", Val::Num(position.1));
-    state.push(t);
+    let position = create_world_position_vector(state, position.0, position.1)?;
+    state.push(position);
     Ok(1)
 }
 

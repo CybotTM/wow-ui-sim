@@ -143,6 +143,21 @@ fn get_player_map_position_returns_default_center() {
 }
 
 #[test]
+fn get_player_map_position_supports_get_xy() {
+    let env = env();
+    let (x, y): (f64, f64) = env
+        .eval(
+            r#"
+            local pos = C_Map.GetPlayerMapPosition(84, "player")
+            return pos:GetXY()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(x, 0.5);
+    assert_eq!(y, 0.5);
+}
+
+#[test]
 fn get_player_map_position_reflects_sim_state_mutation() {
     let env = env();
     {
