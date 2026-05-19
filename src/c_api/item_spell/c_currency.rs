@@ -15,6 +15,7 @@ const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
         "GetBackpackCurrencyInfo",
         c_currency_get_backpack_currency_info,
     ),
+    ("GetBasicCurrencyInfo", c_currency_get_basic_currency_info),
     ("GetCoinTextureString", c_currency_get_coin_texture_string),
     ("GetCurrencyInfo", c_currency_get_currency_info),
     (
@@ -220,6 +221,15 @@ fn c_currency_get_currency_info(state: &mut LuaState) -> LuaResult<u32> {
     push_currency_info_by_id(state, currency_id)
 }
 
+fn c_currency_get_basic_currency_info(state: &mut LuaState) -> LuaResult<u32> {
+    let currency_id = i32::from_stack(state, 1)?;
+    let quantity = match stack_val(state, 2) {
+        Val::Num(n) => n as i32,
+        _ => 0,
+    };
+    push_currency_display_info_by_id(state, currency_id, quantity)
+}
+
 fn c_currency_get_currency_info_from_link(state: &mut LuaState) -> LuaResult<u32> {
     let Some(link) = val_to_string(state, stack_val(state, 1)) else {
         return Ok(0);
@@ -243,6 +253,14 @@ fn c_currency_get_war_resources_currency_id(state: &mut LuaState) -> LuaResult<u
 fn c_currency_get_currency_container_info(state: &mut LuaState) -> LuaResult<u32> {
     let currency_id = i32::from_stack(state, 1)?;
     let quantity = i32::from_stack(state, 2)?;
+    push_currency_display_info_by_id(state, currency_id, quantity)
+}
+
+fn push_currency_display_info_by_id(
+    state: &mut LuaState,
+    currency_id: i32,
+    quantity: i32,
+) -> LuaResult<u32> {
     let info = borrow_state(state)?
         .currency_info
         .get(&currency_id)

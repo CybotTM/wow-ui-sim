@@ -6,6 +6,9 @@
 //! - `C_CurrencyInfo.GetCurrencyInfoFromLink(link)` — parses the
 //!   currency id out of a `|Hcurrency:<id>:...` hyperlink and returns
 //!   the same structure.
+//! - `C_CurrencyInfo.GetBasicCurrencyInfo(currencyID, quantity?)`
+//!   — returns the retail `CurrencyDisplayInfo` structure used by
+//!   addon hover tooltips.
 //! - `C_CurrencyInfo.GetCurrencyContainerInfo(currencyID, quantity)`
 //!   — returns the 6-field `CurrencyDisplayInfo` structure with
 //!   `actualAmount` / `displayAmount` set to the passed quantity.
@@ -113,6 +116,38 @@ fn get_currency_info_exposes_all_retail_fields() {
     assert!(has_max_qty);
     assert!(has_quality);
     assert!(has_icon);
+}
+
+#[test]
+fn get_basic_currency_info_returns_display_info_for_saved_instances_hover() {
+    let env = env();
+    let (name, description, icon, quality, display, actual): (
+        String,
+        String,
+        i32,
+        i32,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+            local info = C_CurrencyInfo.GetBasicCurrencyInfo(2245, 17)
+            return info.name,
+                   info.description,
+                   info.icon,
+                   info.quality,
+                   info.displayAmount,
+                   info.actualAmount
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(name, "Valorstones");
+    assert!(!description.is_empty());
+    assert_eq!(icon, 5868905);
+    assert_eq!(quality, 3);
+    assert_eq!(display, 17);
+    assert_eq!(actual, 17);
 }
 
 #[test]
