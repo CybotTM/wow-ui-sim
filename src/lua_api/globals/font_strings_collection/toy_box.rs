@@ -1,6 +1,8 @@
 //! C_ToyBox namespace.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_string_static,
+};
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -67,7 +69,7 @@ fn toy_get_info(state: &mut LuaState) -> LuaResult<u32> {
             .map(|toy| (toy.item_id as f64, toy.name.clone(), toy.icon as f64))
     };
     let Some((tid, name, icon)) = info else {
-        let empty_name = create_string(state, "");
+        let empty_name = create_string_static(state, "");
         state.push(Val::Num(0.0));
         state.push(empty_name);
         state.push(Val::Num(0.0));

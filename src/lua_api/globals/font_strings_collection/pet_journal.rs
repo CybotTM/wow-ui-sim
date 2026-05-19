@@ -1,6 +1,8 @@
 //! C_PetJournal namespace.
 
-use crate::lua_api::methods::{borrow_state, create_string, create_table, val_to_string};
+use crate::lua_api::methods::{
+    borrow_state, create_string, create_string_static, create_table, val_to_string,
+};
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -84,7 +86,7 @@ fn push_pet_info_by_index(state: &mut LuaState, pet: &PetInfoSnapshot) -> u32 {
 
 fn push_pet_info_by_pet_id(state: &mut LuaState, pet: &PetInfoSnapshot) -> u32 {
     let name = create_string(state, &pet.name);
-    let empty = create_string(state, "");
+    let empty = create_string_static(state, "");
     state.push(Val::Num(pet.species_id as f64));
     state.push(Val::Nil);
     state.push(Val::Num(pet.level as f64));
@@ -107,7 +109,7 @@ fn push_pet_info_by_pet_id(state: &mut LuaState, pet: &PetInfoSnapshot) -> u32 {
 
 fn push_pet_info_by_species_id(state: &mut LuaState, pet: &PetInfoSnapshot) -> u32 {
     let name = create_string(state, &pet.name);
-    let empty = create_string(state, "");
+    let empty = create_string_static(state, "");
     state.push(name);
     state.push(Val::Num(pet.icon as f64));
     state.push(Val::Num(pet.pet_type as f64));

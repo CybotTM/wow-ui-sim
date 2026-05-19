@@ -168,7 +168,7 @@ pub(super) fn font_str_static(state: &mut LuaState, font: Val, key: &'static str
 
 pub(super) fn font_set_defaults(state: &mut LuaState, font: Val, name: Option<&str>) {
     table_set_static(state, font, "__fontHeight", Val::Num(0.0));
-    let empty = create_string(state, "");
+    let empty = create_string_static(state, "");
     table_set_static(state, font, "__fontFlags", empty);
     table_set_static(state, font, "__textColorR", Val::Num(1.0));
     table_set_static(state, font, "__textColorG", Val::Num(1.0));
@@ -528,12 +528,12 @@ pub fn get_fonts(state: &mut LuaState) -> LuaResult<u32> {
 pub fn get_font_info(state: &mut LuaState) -> LuaResult<u32> {
     let Some(font) = resolve_font_object(state, stack_val(state, 1)) else {
         let info = create_table(state);
-        let empty = create_string(state, "");
+        let empty = create_string_static(state, "");
         table_set(state, info, "name", empty);
         table_set(state, info, "height", Val::Num(0.0));
-        let empty = create_string(state, "");
+        let empty = create_string_static(state, "");
         table_set(state, info, "outline", empty);
-        let empty = create_string(state, "");
+        let empty = create_string_static(state, "");
         table_set(state, info, "flags", empty);
         let color = font_color_info(state, Val::Nil);
         table_set(state, info, "color", color);
@@ -542,7 +542,7 @@ pub fn get_font_info(state: &mut LuaState) -> LuaResult<u32> {
     let info = create_table(state);
     let name = match table_get_static(state, font, "__name") {
         Val::Str(_) => table_get_static(state, font, "__name"),
-        _ => create_string(state, ""),
+        _ => create_string_static(state, ""),
     };
     table_set(state, info, "name", name);
     let height = font_f64_static(state, font, "__fontHeight");

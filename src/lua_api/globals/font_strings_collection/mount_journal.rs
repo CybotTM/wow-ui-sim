@@ -1,6 +1,8 @@
 //! C_MountJournal namespace.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_string_static, create_table,
+};
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -168,7 +170,7 @@ fn mount_get_info_extra_by_id(state: &mut LuaState) -> LuaResult<u32> {
     let Some(mount_type) = mount_type else {
         return Ok(0);
     };
-    let empty = create_string(state, "");
+    let empty = create_string_static(state, "");
     let source = create_string(state, "Drop");
     state.push(Val::Num(0.0));
     state.push(empty);
