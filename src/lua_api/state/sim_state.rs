@@ -34,6 +34,7 @@ pub struct SimState {
     pub pending_hit_grid_changes: Vec<(u64, bool)>,
     pub pending_texture_preloads: BTreeSet<String>,
     pub animation_groups: HashMap<u64, AnimGroupState>,
+    pub active_animation_groups: HashSet<u64>,
     pub next_anim_group_id: u64,
     pub anim_frame_to_group: HashMap<u64, u64>,
     pub anim_frame_to_anim: HashMap<u64, (u64, usize)>,

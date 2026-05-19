@@ -21,7 +21,7 @@ pub(crate) fn advance_animation_groups(
     let mut finished_animation_scripts = Vec::new();
     let mut loop_scripts = Vec::new();
     let mut sim = env.state().borrow_mut();
-    let group_ids: Vec<u64> = sim.animation_groups.keys().copied().collect();
+    let group_ids: Vec<u64> = sim.active_animation_groups.iter().copied().collect();
     for group_id in group_ids {
         let Some(result) = advance_animation_group(
             &mut sim,
@@ -34,6 +34,7 @@ pub(crate) fn advance_animation_groups(
         };
         apply_animation_group_outcome(&mut sim, &result);
         sync_action_bar_busy_for_group(&mut sim, group_id);
+        super::refresh_active_animation_group(&mut sim, group_id);
         for _ in 0..result.loop_count {
             loop_scripts.push(result.frame_id);
         }
@@ -50,16 +51,13 @@ pub(crate) fn stop_animation_groups_for_hidden_subtree(
     sim: &mut crate::lua_api::state::SimState,
     root_id: u64,
 ) {
-    let mut subtree_ids = std::collections::HashSet::new();
-    collect_subtree_ids(sim, root_id, &mut subtree_ids);
-
     let group_ids: Vec<u64> = sim
-        .animation_groups
+        .active_animation_groups
         .iter()
-        .filter_map(|(&group_id, group)| {
-            subtree_ids
-                .contains(&group.owner_frame_id)
-                .then_some(group_id)
+        .filter_map(|&group_id| {
+            let group = sim.animation_groups.get(&group_id)?;
+            let owner_is_hidden = frame_is_in_subtree(&sim.widgets, group.owner_frame_id, root_id);
+            (animation_group_needs_stop(group) && owner_is_hidden).then_some(group_id)
         })
         .collect();
 
@@ -69,26 +67,27 @@ pub(crate) fn stop_animation_groups_for_hidden_subtree(
         }
         apply_group_flipbook_state(sim, group_id);
         sync_action_bar_busy_for_group(sim, group_id);
+        super::refresh_active_animation_group(sim, group_id);
     }
 }
 
-fn collect_subtree_ids(
-    sim: &crate::lua_api::state::SimState,
-    frame_id: u64,
-    subtree_ids: &mut std::collections::HashSet<u64>,
-) {
-    if !subtree_ids.insert(frame_id) {
-        return;
-    }
+fn animation_group_needs_stop(group: &crate::lua_api::animation::AnimGroupState) -> bool {
+    group.playing || group.paused || group.pending_finish
+}
 
-    let children = sim
-        .widgets
-        .get(frame_id)
-        .map(|frame| frame.children.clone())
-        .unwrap_or_default();
-    for child_id in children {
-        collect_subtree_ids(sim, child_id, subtree_ids);
+fn frame_is_in_subtree(
+    widgets: &crate::widget::WidgetRegistry,
+    frame_id: u64,
+    root_id: u64,
+) -> bool {
+    let mut current_id = Some(frame_id);
+    while let Some(frame_id) = current_id {
+        if frame_id == root_id {
+            return true;
+        }
+        current_id = widgets.get(frame_id).and_then(|frame| frame.parent_id);
     }
+    false
 }
 
 fn stop_group(group: &mut crate::lua_api::animation::AnimGroupState) {

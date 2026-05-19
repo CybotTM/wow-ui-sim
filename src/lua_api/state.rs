@@ -49,6 +49,7 @@ macro_rules! build_empty_sim_state {
             pending_hit_grid_changes: $collections.pending_hit_grid_changes,
             pending_texture_preloads: $collections.pending_texture_preloads,
             animation_groups: $collections.animation_groups,
+            active_animation_groups: $collections.active_animation_groups,
             next_anim_group_id: $runtime.next_anim_group_id,
             anim_frame_to_group: $collections.anim_frame_to_group,
             anim_frame_to_anim: $collections.anim_frame_to_anim,
@@ -356,7 +357,6 @@ pub use super::frame_substates::{
     FogOfWarFrameState, PendingPlayerReport, QuestBlobState, UnitPositionFrameState,
     UnitPositionPlayerPingTexture, UnitPositionUnit,
 };
-
 mod defaults;
 mod sim_state;
 mod support_types;
@@ -406,6 +406,7 @@ struct EmptyStateCollections {
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,
+    active_animation_groups: HashSet<u64>,
     anim_sync_times: HashMap<String, std::time::Duration>,
     anim_frame_to_group: HashMap<u64, u64>,
     anim_frame_to_anim: HashMap<u64, (u64, usize)>,

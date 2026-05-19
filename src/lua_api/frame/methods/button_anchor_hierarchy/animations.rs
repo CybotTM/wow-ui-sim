@@ -39,6 +39,18 @@ pub(super) fn resolve_animation_group_id(
     })
 }
 
+fn refresh_active_animation_group(sim: &mut crate::lua_api::SimState, group_id: u64) {
+    let active = sim
+        .animation_groups
+        .get(&group_id)
+        .is_some_and(|group| group.playing || group.paused || group.pending_finish);
+    if active {
+        sim.active_animation_groups.insert(group_id);
+    } else {
+        sim.active_animation_groups.remove(&group_id);
+    }
+}
+
 pub(super) fn resolve_anim_target_id(
     sim: &crate::lua_api::SimState,
     owner_id: u64,
@@ -173,6 +185,7 @@ pub(super) fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
             group.pending_finish = false;
             group.reverse = reverse;
         }
+        refresh_active_animation_group(&mut sim, group_id);
         apply_group_flipbook_state(&mut sim, group_id);
         sync_action_bar_busy_for_group(&mut sim, group_id);
     }
@@ -189,6 +202,7 @@ pub(super) fn animation_group_pause(state: &mut LuaState) -> LuaResult<u32> {
             group.playing = false;
             group.paused = true;
         }
+        refresh_active_animation_group(&mut sim, group_id);
         sync_action_bar_busy_for_group(&mut sim, group_id);
     }
     Ok(0)
@@ -208,6 +222,7 @@ pub(super) fn animation_group_stop(state: &mut LuaState) -> LuaResult<u32> {
                 animation.elapsed = 0.0;
             }
         }
+        refresh_active_animation_group(&mut sim, group_id);
         apply_group_flipbook_state(&mut sim, group_id);
         sync_action_bar_busy_for_group(&mut sim, group_id);
     }
@@ -273,6 +288,7 @@ pub(super) fn animation_group_restart(state: &mut LuaState) -> LuaResult<u32> {
                 animation.elapsed = 0.0;
             }
         }
+        refresh_active_animation_group(&mut sim, group_id);
         apply_group_flipbook_state(&mut sim, group_id);
     }
     Ok(0)
@@ -281,12 +297,13 @@ pub(super) fn animation_group_restart(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn animation_group_finish(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(group_id) = resolve_animation_group_id(&sim, frame_id)
-        && let Some(group) = sim.animation_groups.get_mut(&group_id)
-    {
-        group.playing = true;
-        group.paused = false;
-        group.pending_finish = true;
+    if let Some(group_id) = resolve_animation_group_id(&sim, frame_id) {
+        if let Some(group) = sim.animation_groups.get_mut(&group_id) {
+            group.playing = true;
+            group.paused = false;
+            group.pending_finish = true;
+        }
+        refresh_active_animation_group(&mut sim, group_id);
     }
     Ok(0)
 }

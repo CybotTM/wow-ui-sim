@@ -195,6 +195,32 @@ fn test_animation_runtime_exposes_core_configuration_methods() {
 }
 
 #[test]
+fn hiding_parent_stops_active_child_animation_group() {
+    let env = WowLuaEnv::new().unwrap();
+    let (playing, paused, done): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", nil, UIParent)
+            local child = CreateFrame("Frame", nil, parent)
+            local group = child:CreateAnimationGroup()
+            local animation = group:CreateAnimation("Alpha")
+            animation:SetDuration(10)
+            group:Play()
+            parent:Hide()
+            return group:IsPlaying(), group:IsPaused(), group:IsDone()
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        !playing,
+        "hiding a parent should stop playing child animations"
+    );
+    assert!(!paused, "stopped child animations should not remain paused");
+    assert!(done, "stopped child animations should be marked done");
+}
+
+#[test]
 fn test_flipbook_animation_runtime_exposes_configuration_surface() {
     let env = WowLuaEnv::new().unwrap();
     let (
