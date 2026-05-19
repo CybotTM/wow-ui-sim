@@ -3,7 +3,7 @@
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
     extract_frame_id, frame_id_from_stack, get_or_create_frame_fields, table_get, table_get_static,
-    table_set, val_to_string,
+    table_set, table_set_static, val_to_string,
 };
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use crate::quest_poi_blobs;
@@ -184,7 +184,7 @@ pub fn register_font_strings(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_self(state)?;
     let font_strings = collect_varargs_table(state, 2);
     table_set(state, fields, "fontStrings", font_strings);
-    table_set(state, fields, "__registeredFontStrings", font_strings);
+    table_set_static(state, fields, "__registeredFontStrings", font_strings);
     Ok(0)
 }
 
@@ -196,7 +196,7 @@ pub fn register_font_string(state: &mut LuaState) -> LuaResult<u32> {
     let font_strings = ensure_registry_table(state, fields, "fontStrings");
     let font_string = stack_val(state, 2);
     set_table_entry(state, font_strings, font_string, Val::Bool(true));
-    table_set(state, fields, "__registeredFontStrings", font_strings);
+    table_set_static(state, fields, "__registeredFontStrings", font_strings);
     Ok(0)
 }
 
@@ -455,7 +455,7 @@ pub fn set_to_defaults(state: &mut LuaState) -> LuaResult<u32> {
         }
     }
     let fields = get_or_create_frame_fields(state, id);
-    table_set(state, fields, "__minimap_zoom", Val::Num(0.0));
+    table_set_static(state, fields, "__minimap_zoom", Val::Num(0.0));
     Ok(0)
 }
 

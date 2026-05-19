@@ -3,7 +3,7 @@ use super::thumb_texture::{
 };
 use crate::lua_api::methods::{
     borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref, get_or_create_frame_fields,
-    table_get, table_set,
+    table_get_static, table_set_static,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::closure::RustFn;
@@ -14,9 +14,9 @@ use rilua::{LuaResult, Val};
 
 use super::super::shared::val_to_f64;
 
-fn read_color_component(state: &mut LuaState, id: u64, key: &str, default: f64) -> f64 {
+fn read_color_component(state: &mut LuaState, id: u64, key: &'static str, default: f64) -> f64 {
     let fields = get_or_create_frame_fields(state, id);
-    match table_get(state, fields, key) {
+    match table_get_static(state, fields, key) {
         Val::Num(value) => value,
         _ => default,
     }
@@ -24,10 +24,10 @@ fn read_color_component(state: &mut LuaState, id: u64, key: &str, default: f64) 
 
 fn write_color_components(state: &mut LuaState, id: u64, rgba: (f64, f64, f64, f64)) {
     let fields = get_or_create_frame_fields(state, id);
-    table_set(state, fields, "__color_r", Val::Num(rgba.0));
-    table_set(state, fields, "__color_g", Val::Num(rgba.1));
-    table_set(state, fields, "__color_b", Val::Num(rgba.2));
-    table_set(state, fields, "__color_a", Val::Num(rgba.3));
+    table_set_static(state, fields, "__color_r", Val::Num(rgba.0));
+    table_set_static(state, fields, "__color_g", Val::Num(rgba.1));
+    table_set_static(state, fields, "__color_b", Val::Num(rgba.2));
+    table_set_static(state, fields, "__color_a", Val::Num(rgba.3));
 }
 
 fn rgb_to_hsv(r: f64, g: f64, b: f64) -> (f64, f64, f64) {

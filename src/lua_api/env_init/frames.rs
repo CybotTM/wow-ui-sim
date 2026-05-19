@@ -5,7 +5,7 @@ use crate::lua_api::frame::methods::{
 };
 use crate::lua_api::methods::{
     borrow_state_mut, extract_frame_id, get_frame_env_for_debug, get_or_create_frame_fields,
-    registry_set, table_set, val_to_string,
+    registry_set, table_set_static, val_to_string,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::{LuaApiMut, Val};
@@ -34,7 +34,7 @@ pub(crate) fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
 pub(super) fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let frame_mt = Val::Table(state.gc.alloc_table(rilua::vm::table::Table::new()));
-    table_set(state, frame_mt, "__index", frame_mt);
+    table_set_static(state, frame_mt, "__index", frame_mt);
     registry_set(state, "__rilua_frame_mt", frame_mt);
 
     let Val::Table(frame_mt_ref) = frame_mt else {
@@ -56,7 +56,7 @@ pub(super) fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     // stable for the lifetime of the VM (method registration only happens
     // here at init).
     let frame_index = build_frame_index_table(state, frame_mt_ref);
-    table_set(state, frame_mt, "__index", Val::Table(frame_index));
+    table_set_static(state, frame_mt, "__index", Val::Table(frame_index));
     table_set_rust_fn_static(state, frame_mt_ref, "__newindex", frame_newindex)?;
     table_set_rust_fn_static(
         state,

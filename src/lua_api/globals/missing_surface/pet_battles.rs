@@ -21,8 +21,8 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::globals::pet_battles::get_or_create_runtime_state;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
-    val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_get_static,
+    table_set, val_to_string,
 };
 use crate::lua_api::state::PetBattlePet;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
@@ -267,7 +267,7 @@ fn runtime_ability_info(
 }
 
 fn runtime_ability_table(state: &mut LuaState, ability_id: i32) -> Option<Val> {
-    let runtime_state = table_get(state, Val::Table(state.global), "__wow_pet_battle_state");
+    let runtime_state = table_get_static(state, Val::Table(state.global), "__wow_pet_battle_state");
     let abilities = table_get(state, runtime_state, "abilitiesByID");
     let Val::Table(abilities_ref) = abilities else {
         return None;

@@ -9,7 +9,7 @@ use crate::lua_api::globals::font_strings_collection::fonts::create_font_object;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
     frame_id_from_stack, registry_get, registry_set, registry_table_or_create, table_get,
-    table_set, val_to_string,
+    table_get_static, table_set, table_set_static, val_to_string,
 };
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -194,18 +194,18 @@ fn read_cached_formatted_text(
     if !matches!(entry, Val::Table(_)) {
         return None;
     }
-    let cached_formatter = table_get(state, entry, "__formatter");
+    let cached_formatter = table_get_static(state, entry, "__formatter");
     if cached_formatter != formatter {
         return None;
     }
-    let cached_signature_val = table_get(state, entry, "__signature");
+    let cached_signature_val = table_get_static(state, entry, "__signature");
     let cached_signature = val_to_string(state, cached_signature_val)?;
     if cached_signature != signature {
         return None;
     }
-    let cached_result_val = table_get(state, entry, "__result");
+    let cached_result_val = table_get_static(state, entry, "__result");
     let result = val_to_string(state, cached_result_val)?;
-    let width_hint = match table_get(state, entry, "__width_hint") {
+    let width_hint = match table_get_static(state, entry, "__width_hint") {
         Val::Num(width) => Some(width as f32),
         _ => None,
     };
@@ -230,13 +230,13 @@ fn write_cached_formatted_text(
         .and_then(|sim| sim.widgets.get(id).map(|frame| frame.width));
     let signature_val = create_string(state, signature);
     let result_val = create_string(state, result);
-    table_set(state, entry, "__formatter", formatter);
-    table_set(state, entry, "__signature", signature_val);
-    table_set(state, entry, "__result", result_val);
+    table_set_static(state, entry, "__formatter", formatter);
+    table_set_static(state, entry, "__signature", signature_val);
+    table_set_static(state, entry, "__result", result_val);
     if let Some(width_hint) = width_hint {
-        table_set(state, entry, "__width_hint", Val::Num(width_hint as f64));
+        table_set_static(state, entry, "__width_hint", Val::Num(width_hint as f64));
     } else {
-        table_set(state, entry, "__width_hint", Val::Nil);
+        table_set_static(state, entry, "__width_hint", Val::Nil);
     }
     table_set(state, store, &id_key, entry);
 }
