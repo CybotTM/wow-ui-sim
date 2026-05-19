@@ -132,6 +132,32 @@ fn gui_startup_settles_bounded_on_update_work_before_interactive_ticks() {
 }
 
 #[test]
+fn gui_startup_closes_windows_created_by_startup_timers() {
+    let env = build_env();
+    env.borrow()
+        .exec(
+            r#"
+            C_Timer.After(0, function()
+                Baganator_WelcomeFrame = CreateFrame("Frame", "Baganator_WelcomeFrame", UIParent)
+                Baganator_WelcomeFrame:Show()
+            end)
+            "#,
+        )
+        .expect("startup timer window setup should succeed");
+
+    App::run_startup_sequence(&env);
+
+    let shown: bool = env
+        .borrow()
+        .eval("return Baganator_WelcomeFrame and Baganator_WelcomeFrame:IsShown() or false")
+        .expect("startup timer window visibility should be readable");
+    assert!(
+        !shown,
+        "startup cleanup should also close windows created by startup timers"
+    );
+}
+
+#[test]
 fn parse_fast_tick_ms_accepts_positive_integers() {
     assert_eq!(parse_fast_tick_ms("1"), Some(1));
     assert_eq!(parse_fast_tick_ms(" 8 "), Some(8));

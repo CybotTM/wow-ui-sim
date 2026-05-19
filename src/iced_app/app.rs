@@ -376,6 +376,7 @@ impl App {
         crate::startup::settle_startup_animation_groups(&env_ref);
         crate::startup::process_pending_timers(&env_ref);
         Self::settle_gui_startup_on_update(&env_ref);
+        crate::lua_api::workarounds::close_startup_special_windows_before_first_frame(&env_ref);
         let _ = crate::lua_api::hide_runtime_hidden_frames(env_ref.lua());
         env_ref.state().borrow_mut().widgets.rebuild_anchor_index();
     }
