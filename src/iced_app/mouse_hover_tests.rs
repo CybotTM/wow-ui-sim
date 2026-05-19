@@ -1,6 +1,7 @@
 use super::test_support::*;
 use super::*;
 use crate::screen::ScreenKind;
+use iced::widget::shader::Program;
 
 #[test]
 fn hit_test_reflects_frames_shown_by_previous_clicks() {
@@ -400,6 +401,70 @@ fn hover_after_gui_resize_uses_resized_screen_coordinates() {
     assert_eq!(
         enter_count, 1.0,
         "hover after GUI resize should use resized frame coordinates"
+    );
+}
+
+#[test]
+fn first_draw_at_actual_canvas_size_rebuilds_resize_dependent_hover_rects() {
+    let mut app = build_test_app(ScreenKind::Game);
+    let startup_size = iced::Size::new(1024.0, 768.0);
+    let actual_canvas_size = iced::Size::new(920.0, 640.0);
+
+    app.env
+        .borrow()
+        .set_screen_size(startup_size.width, startup_size.height);
+    app.screen_size.set(startup_size);
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            StartupResizeAnchoredButton = CreateFrame("Button", "StartupResizeAnchoredButton", UIParent)
+            StartupResizeAnchoredButton:SetSize(50, 50)
+            StartupResizeAnchoredButton:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -20, 20)
+            StartupResizeAnchoredButton:EnableMouse(true)
+            StartupResizeAnchoredButton:SetScript("OnEnter", function()
+                __startup_resize_enter = (__startup_resize_enter or 0) + 1
+            end)
+            __startup_resize_enter = 0
+            "#,
+        )
+        .expect("startup resize hover setup should succeed");
+        env.state().borrow_mut().ensure_layout_rects();
+    }
+
+    let _primitive = <&crate::iced_app::App as Program<crate::iced_app::Message>>::draw(
+        &&app,
+        &(),
+        iced::mouse::Cursor::Unavailable,
+        iced::Rectangle::new(iced::Point::ORIGIN, actual_canvas_size),
+    );
+
+    let resized_center = {
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let button_id = state
+            .widgets
+            .get_id_by_name("StartupResizeAnchoredButton")
+            .expect("StartupResizeAnchoredButton should exist");
+        let rect = state
+            .widgets
+            .get(button_id)
+            .and_then(|frame| frame.layout_rect)
+            .expect("StartupResizeAnchoredButton should have a resized layout rect");
+        Point::new(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0)
+    };
+
+    app.handle_mouse_move(resized_center);
+
+    let enter_count: f64 = app
+        .env
+        .borrow()
+        .eval("return __startup_resize_enter")
+        .expect("startup resize hover counter should be readable");
+    assert_eq!(
+        enter_count, 1.0,
+        "first GUI draw at actual canvas size should make bottom-right hit testing use resized coordinates"
     );
 }
 
