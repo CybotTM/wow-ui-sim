@@ -2,7 +2,7 @@
 
 use super::ensure_namespace;
 use crate::lua_api::game_data::{RACE_DATA, class_info_by_index};
-use crate::lua_api::methods::{create_string, create_table, table_set};
+use crate::lua_api::methods::{create_string, create_table, table_set_static};
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
@@ -61,9 +61,9 @@ fn c_creature_info_get_class_info(state: &mut LuaState) -> LuaResult<u32> {
     let info = create_table(state);
     let class_name = create_string(state, class_label);
     let class_file = create_string(state, class_file);
-    table_set(state, info, "className", class_name);
-    table_set(state, info, "classFile", class_file);
-    table_set(state, info, "classID", Val::Num(class_id as f64));
+    table_set_static(state, info, "className", class_name);
+    table_set_static(state, info, "classFile", class_file);
+    table_set_static(state, info, "classID", Val::Num(class_id as f64));
     state.push(info);
     Ok(1)
 }
@@ -74,9 +74,9 @@ fn c_creature_info_get_race_info(state: &mut LuaState) -> LuaResult<u32> {
     let info = create_table(state);
     let race_name = create_string(state, race_name);
     let client_file = create_string(state, client_file);
-    table_set(state, info, "raceName", race_name);
-    table_set(state, info, "clientFileString", client_file);
-    table_set(state, info, "raceID", Val::Num(race_id as f64));
+    table_set_static(state, info, "raceName", race_name);
+    table_set_static(state, info, "clientFileString", client_file);
+    table_set_static(state, info, "raceID", Val::Num(race_id as f64));
     state.push(info);
     Ok(1)
 }
@@ -115,8 +115,8 @@ fn c_creature_info_get_creature_type_info(state: &mut LuaState) -> LuaResult<u32
     };
     let info = create_table(state);
     let name = create_string(state, creature_type_name);
-    table_set(state, info, "name", name);
-    table_set(
+    table_set_static(state, info, "name", name);
+    table_set_static(
         state,
         info,
         "creatureTypeID",
@@ -144,9 +144,9 @@ fn c_creature_info_get_faction_info(state: &mut LuaState) -> LuaResult<u32> {
     let info = create_table(state);
     let name = create_string(state, name);
     let group_tag = create_string(state, group_tag);
-    table_set(state, info, "name", name);
-    table_set(state, info, "groupTag", group_tag);
-    table_set(state, info, "factionID", Val::Num(faction_id as f64));
+    table_set_static(state, info, "name", name);
+    table_set_static(state, info, "groupTag", group_tag);
+    table_set_static(state, info, "factionID", Val::Num(faction_id as f64));
     state.push(info);
     Ok(1)
 }

@@ -14,7 +14,9 @@
 //! `AnimaDiversionDataProvider.lua:330` renders into the pin tooltip.
 
 use super::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_get, table_set};
+use crate::lua_api::methods::{
+    borrow_state, create_string, create_table, table_get, table_set_static,
+};
 use crate::lua_api::state::GarrisonTalentInfo;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -87,52 +89,52 @@ fn build_talent_info_table(state: &mut LuaState, info: &GarrisonTalentInfo) -> V
     set_progression_fields(state, entry, info);
     set_research_fields(state, entry, info);
     let costs = build_currency_costs_table(state, info);
-    table_set(state, entry, "researchCurrencyCosts", costs);
+    table_set_static(state, entry, "researchCurrencyCosts", costs);
     entry
 }
 
 fn set_identity_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentInfo) {
     let name = create_string(state, &info.name);
     let description = create_string(state, &info.description);
-    table_set(state, entry, "id", Val::Num(info.id as f64));
-    table_set(state, entry, "name", name);
-    table_set(state, entry, "description", description);
-    table_set(state, entry, "icon", Val::Num(info.icon as f64));
-    table_set(state, entry, "tier", Val::Num(info.tier as f64));
-    table_set(state, entry, "uiOrder", Val::Num(info.ui_order as f64));
+    table_set_static(state, entry, "id", Val::Num(info.id as f64));
+    table_set_static(state, entry, "name", name);
+    table_set_static(state, entry, "description", description);
+    table_set_static(state, entry, "icon", Val::Num(info.icon as f64));
+    table_set_static(state, entry, "tier", Val::Num(info.tier as f64));
+    table_set_static(state, entry, "uiOrder", Val::Num(info.ui_order as f64));
 }
 
 fn set_progression_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentInfo) {
-    table_set(
+    table_set_static(
         state,
         entry,
         "talentRank",
         Val::Num(info.talent_rank as f64),
     );
-    table_set(
+    table_set_static(
         state,
         entry,
         "talentMaxRank",
         Val::Num(info.talent_max_rank as f64),
     );
-    table_set(
+    table_set_static(
         state,
         entry,
         "isBeingResearched",
         Val::Bool(info.is_being_researched),
     );
-    table_set(state, entry, "researched", Val::Bool(info.researched));
-    table_set(state, entry, "selected", Val::Bool(info.selected));
+    table_set_static(state, entry, "researched", Val::Bool(info.researched));
+    table_set_static(state, entry, "selected", Val::Bool(info.selected));
 }
 
 fn set_research_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentInfo) {
-    table_set(
+    table_set_static(
         state,
         entry,
         "perkSpellID",
         Val::Num(info.perk_spell_id as f64),
     );
-    table_set(
+    table_set_static(
         state,
         entry,
         "talentAvailability",
@@ -142,20 +144,20 @@ fn set_research_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentIn
 }
 
 fn set_research_timing_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentInfo) {
-    table_set(
+    table_set_static(
         state,
         entry,
         "researchDuration",
         Val::Num(info.research_duration as f64),
     );
-    table_set(state, entry, "startTime", Val::Num(info.start_time as f64));
-    table_set(
+    table_set_static(state, entry, "startTime", Val::Num(info.start_time as f64));
+    table_set_static(
         state,
         entry,
         "timeRemaining",
         Val::Num(info.time_remaining as f64),
     );
-    table_set(
+    table_set_static(
         state,
         entry,
         "researchGoldCost",
@@ -167,13 +169,13 @@ fn build_currency_costs_table(state: &mut LuaState, info: &GarrisonTalentInfo) -
     let costs = create_table(state);
     for (cost_index, cost) in info.research_currency_costs.iter().enumerate() {
         let cost_entry = create_table(state);
-        table_set(
+        table_set_static(
             state,
             cost_entry,
             "currencyType",
             Val::Num(cost.currency_type as f64),
         );
-        table_set(
+        table_set_static(
             state,
             cost_entry,
             "currencyQuantity",

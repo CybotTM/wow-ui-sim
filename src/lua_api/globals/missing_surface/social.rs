@@ -8,7 +8,7 @@
 //!   `C_FriendList.FriendInfo` tables (one per seeded friend).
 
 use super::ensure_namespace;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set_static};
 use crate::lua_api::state_types::SocialFriend;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -65,16 +65,16 @@ fn push_friend_info_table(state: &mut LuaState, friend: &SocialFriend) -> Val {
     let note = create_string(state, &friend.note);
     let guid = create_string(state, &friend.guid);
 
-    table_set(state, t, "name", name);
-    table_set(state, t, "level", Val::Num(friend.level as f64));
-    table_set(state, t, "area", area);
-    table_set(state, t, "className", class_name);
-    table_set(state, t, "notes", note);
-    table_set(state, t, "connected", Val::Bool(friend.is_online));
-    table_set(state, t, "guid", guid);
-    table_set(state, t, "afk", Val::Bool(false));
-    table_set(state, t, "dnd", Val::Bool(false));
-    table_set(state, t, "rafLinkType", Val::Num(0.0));
+    table_set_static(state, t, "name", name);
+    table_set_static(state, t, "level", Val::Num(friend.level as f64));
+    table_set_static(state, t, "area", area);
+    table_set_static(state, t, "className", class_name);
+    table_set_static(state, t, "notes", note);
+    table_set_static(state, t, "connected", Val::Bool(friend.is_online));
+    table_set_static(state, t, "guid", guid);
+    table_set_static(state, t, "afk", Val::Bool(false));
+    table_set_static(state, t, "dnd", Val::Bool(false));
+    table_set_static(state, t, "rafLinkType", Val::Num(0.0));
 
     t
 }

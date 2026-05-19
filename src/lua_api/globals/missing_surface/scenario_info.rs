@@ -12,7 +12,7 @@
 //!   bool flag.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set_static};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -45,19 +45,19 @@ fn get_scenario_info(state: &mut LuaState) -> LuaResult<u32> {
     drop(sim);
     let t = create_table(state);
     let name_val = create_string(state, &s.name);
-    table_set(state, t, "name", name_val);
-    table_set(state, t, "currentStage", Val::Num(s.current_step as f64));
-    table_set(state, t, "numStages", Val::Num(s.num_steps as f64));
-    table_set(state, t, "scenarioID", Val::Num(s.scenario_id as f64));
-    table_set(state, t, "type", Val::Num(s.scenario_type as f64));
+    table_set_static(state, t, "name", name_val);
+    table_set_static(state, t, "currentStage", Val::Num(s.current_step as f64));
+    table_set_static(state, t, "numStages", Val::Num(s.num_steps as f64));
+    table_set_static(state, t, "scenarioID", Val::Num(s.scenario_id as f64));
+    table_set_static(state, t, "type", Val::Num(s.scenario_type as f64));
     let kit_val = create_string(state, &s.texture_kit);
-    table_set(state, t, "uiTextureKit", kit_val);
-    table_set(state, t, "isComplete", Val::Bool(false));
-    table_set(state, t, "flags", Val::Num(0.0));
-    table_set(state, t, "money", Val::Num(0.0));
-    table_set(state, t, "xp", Val::Num(0.0));
+    table_set_static(state, t, "uiTextureKit", kit_val);
+    table_set_static(state, t, "isComplete", Val::Bool(false));
+    table_set_static(state, t, "flags", Val::Num(0.0));
+    table_set_static(state, t, "money", Val::Num(0.0));
+    table_set_static(state, t, "xp", Val::Num(0.0));
     let area_val = create_string(state, "");
-    table_set(state, t, "area", area_val);
+    table_set_static(state, t, "area", area_val);
     state.push(t);
     Ok(1)
 }
@@ -80,18 +80,18 @@ fn get_scenario_step_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     let t = create_table(state);
-    table_set(state, t, "stepID", Val::Num(step.step_id as f64));
+    table_set_static(state, t, "stepID", Val::Num(step.step_id as f64));
     let title_val = create_string(state, &step.title);
-    table_set(state, t, "title", title_val);
+    table_set_static(state, t, "title", title_val);
     let desc_val = create_string(state, &step.description);
-    table_set(state, t, "description", desc_val);
-    table_set(state, t, "numCriteria", Val::Num(step.num_criteria as f64));
-    table_set(state, t, "isBonusStep", Val::Bool(step.is_bonus_step));
-    table_set(state, t, "stepFailed", Val::Bool(false));
-    table_set(state, t, "shouldShowBonusObjective", Val::Bool(false));
-    table_set(state, t, "isForCurrentStepOnly", Val::Bool(false));
+    table_set_static(state, t, "description", desc_val);
+    table_set_static(state, t, "numCriteria", Val::Num(step.num_criteria as f64));
+    table_set_static(state, t, "isBonusStep", Val::Bool(step.is_bonus_step));
+    table_set_static(state, t, "stepFailed", Val::Bool(false));
+    table_set_static(state, t, "shouldShowBonusObjective", Val::Bool(false));
+    table_set_static(state, t, "isForCurrentStepOnly", Val::Bool(false));
     if let Some(quest_id) = step.bonus_reward_quest_id {
-        table_set(state, t, "rewardQuestID", Val::Num(quest_id as f64));
+        table_set_static(state, t, "rewardQuestID", Val::Num(quest_id as f64));
     }
     state.push(t);
     Ok(1)

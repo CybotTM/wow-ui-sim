@@ -13,6 +13,7 @@
 use super::ensure_namespace;
 use crate::lua_api::methods::{
     borrow_state, create_string, create_table, table_get, table_set, table_set_num,
+    table_set_static,
 };
 use crate::lua_api::state::AreaPoiInfo;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -112,24 +113,24 @@ fn push_area_poi_info_table(state: &mut LuaState, poi: &AreaPoiInfo) -> Val {
     let t = create_table(state);
     let name = create_string(state, &poi.name);
     let position = create_table(state);
-    table_set(state, position, "x", Val::Num(poi.position.0));
-    table_set(state, position, "y", Val::Num(poi.position.1));
+    table_set_static(state, position, "x", Val::Num(poi.position.0));
+    table_set_static(state, position, "y", Val::Num(poi.position.1));
     let Val::Table(position_ref) = position else {
         unreachable!("create_table must return table");
     };
     table_set_rust_fn_static(state, position_ref, "GetXY", area_poi_position_get_xy)
         .expect("failed to register area poi position getter");
 
-    table_set(state, t, "areaPoiID", Val::Num(poi.area_poi_id as f64));
+    table_set_static(state, t, "areaPoiID", Val::Num(poi.area_poi_id as f64));
     push_optional_number(state, t, "uiMapID", poi.ui_map_id);
-    table_set(state, t, "name", name);
-    table_set(state, t, "position", Val::Table(position_ref));
-    table_set(state, t, "isCurrentEvent", Val::Bool(poi.is_current_event));
-    table_set(state, t, "shouldGlow", Val::Bool(poi.should_glow));
-    table_set(state, t, "highlightVignettesOnHover", Val::Bool(false));
-    table_set(state, t, "highlightWorldQuestsOnHover", Val::Bool(false));
-    table_set(state, t, "isAlwaysOnFlightmap", Val::Bool(false));
-    table_set(state, t, "isPrimaryMapForPOI", Val::Bool(true));
+    table_set_static(state, t, "name", name);
+    table_set_static(state, t, "position", Val::Table(position_ref));
+    table_set_static(state, t, "isCurrentEvent", Val::Bool(poi.is_current_event));
+    table_set_static(state, t, "shouldGlow", Val::Bool(poi.should_glow));
+    table_set_static(state, t, "highlightVignettesOnHover", Val::Bool(false));
+    table_set_static(state, t, "highlightWorldQuestsOnHover", Val::Bool(false));
+    table_set_static(state, t, "isAlwaysOnFlightmap", Val::Bool(false));
+    table_set_static(state, t, "isPrimaryMapForPOI", Val::Bool(true));
 
     push_optional_string(state, t, "atlasName", poi.atlas_name.as_deref());
     push_optional_string(state, t, "description", poi.description.as_deref());
