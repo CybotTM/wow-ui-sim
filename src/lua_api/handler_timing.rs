@@ -19,12 +19,37 @@ pub(crate) fn log(
     widget_id: u64,
     duration: Duration,
 ) {
+    log_with_source(
+        addon_name,
+        handler_name,
+        frame_name,
+        widget_id,
+        duration,
+        None,
+    );
+}
+
+pub(crate) fn log_with_source(
+    addon_name: Option<&str>,
+    handler_name: &str,
+    frame_name: Option<&str>,
+    widget_id: u64,
+    duration: Duration,
+    source: Option<&str>,
+) {
     if !should_log(duration) {
         return;
     }
     eprintln!(
         "{}",
-        format_log(addon_name, handler_name, frame_name, widget_id, duration)
+        format_log(
+            addon_name,
+            handler_name,
+            frame_name,
+            widget_id,
+            duration,
+            source,
+        )
     );
 }
 
@@ -49,13 +74,19 @@ fn format_log(
     frame_name: Option<&str>,
     widget_id: u64,
     duration: Duration,
+    source: Option<&str>,
 ) -> String {
     let addon = addon_name.unwrap_or(BUILTIN_ADDON_NAME);
     let frame = frame_label(frame_name, widget_id);
-    format!(
+    let mut line = format!(
         "[handler] addon={addon} handler={handler_name} frame={frame} duration_ms={:.3}",
         duration.as_secs_f64() * 1000.0
-    )
+    );
+    if let Some(source) = source.filter(|source| !source.is_empty()) {
+        line.push_str(" source=");
+        line.push_str(source);
+    }
+    line
 }
 
 fn frame_label<'a>(frame_name: Option<&'a str>, widget_id: u64) -> Cow<'a, str> {
@@ -105,7 +136,14 @@ mod tests {
 
     #[test]
     fn format_log_uses_builtin_fallbacks() {
-        let line = format_log(None, "OnUpdate", None, 42, Duration::from_micros(1250));
+        let line = format_log(
+            None,
+            "OnUpdate",
+            None,
+            42,
+            Duration::from_micros(1250),
+            None,
+        );
         assert_eq!(
             line,
             "[handler] addon=__BuiltIn handler=OnUpdate frame=#42 duration_ms=1.250"
@@ -120,10 +158,27 @@ mod tests {
             Some("GameMenuFrame"),
             7,
             Duration::from_micros(500),
+            None,
         );
         assert_eq!(
             line,
             "[handler] addon=Blizzard_UIParent handler=OnShow frame=GameMenuFrame duration_ms=0.500"
+        );
+    }
+
+    #[test]
+    fn format_log_includes_source_when_known() {
+        let line = format_log(
+            Some("MacroToolkit"),
+            "OnUpdate",
+            None,
+            56392,
+            Duration::from_millis(51),
+            Some("@Interface/AddOns/MacroToolkit/modules/showtooltipMock.lua:42"),
+        );
+        assert_eq!(
+            line,
+            "[handler] addon=MacroToolkit handler=OnUpdate frame=#56392 duration_ms=51.000 source=@Interface/AddOns/MacroToolkit/modules/showtooltipMock.lua:42"
         );
     }
 

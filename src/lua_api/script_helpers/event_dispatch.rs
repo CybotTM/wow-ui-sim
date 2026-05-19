@@ -4,6 +4,7 @@ use super::{
 };
 use crate::lua_api::handler_timing;
 use crate::lua_api::methods::{create_string, frame_ref};
+use rilua::vm::closure::Closure;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -192,26 +193,38 @@ pub fn dispatch_on_update(
             let Val::Function(func_ref) = handler_val else {
                 continue;
             };
-            let (owner_addon, addon_name, frame_name) = handler_log_metadata(lua.state(), frame_id);
-            let func = rilua::Function::from_gc_ref(func_ref);
-            let start = Instant::now();
-            let previous_addon = replace_executing_addon(lua.state(), owner_addon);
-            if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
-                call_error_handler(lua, &e.to_string());
-            }
-            replace_executing_addon(lua.state(), previous_addon);
-            let elapsed = start.elapsed();
-            record_frame_timing(lua.state(), owner_addon, &start);
-            log_dispatched_handler(
-                addon_name.as_deref(),
-                "OnUpdate",
-                frame_name.as_deref(),
-                frame_id,
-                elapsed,
-            );
+            dispatch_on_update_handler(lua, frame_id, frame_val, elapsed_val, func_ref);
         }
     }
     Ok(())
+}
+
+fn dispatch_on_update_handler(
+    lua: &mut rilua::Lua,
+    frame_id: u64,
+    frame_val: Val,
+    elapsed_val: Val,
+    func_ref: GcRef<Closure>,
+) {
+    let (owner_addon, addon_name, frame_name) = handler_log_metadata(lua.state(), frame_id);
+    let func = rilua::Function::from_gc_ref(func_ref);
+    let start = Instant::now();
+    let previous_addon = replace_executing_addon(lua.state(), owner_addon);
+    if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
+        call_error_handler(lua, &e.to_string());
+    }
+    replace_executing_addon(lua.state(), previous_addon);
+    let elapsed = start.elapsed();
+    record_frame_timing(lua.state(), owner_addon, &start);
+    log_dispatched_handler(
+        lua.state(),
+        func_ref,
+        addon_name.as_deref(),
+        "OnUpdate",
+        frame_name.as_deref(),
+        frame_id,
+        elapsed,
+    );
 }
 
 fn handler_log_metadata(
@@ -255,6 +268,8 @@ fn replace_executing_addon(state: &LuaState, owner_addon: Option<u16>) -> Option
 }
 
 fn log_dispatched_handler(
+    state: &LuaState,
+    func_ref: GcRef<Closure>,
     addon_name: Option<&str>,
     handler_name: &str,
     frame_name: Option<&str>,
@@ -265,7 +280,26 @@ fn log_dispatched_handler(
         return;
     }
 
-    handler_timing::log(addon_name, handler_name, frame_name, frame_id, elapsed);
+    let source = handler_source_label(state, func_ref);
+    handler_timing::log_with_source(
+        addon_name,
+        handler_name,
+        frame_name,
+        frame_id,
+        elapsed,
+        source.as_deref(),
+    );
+}
+
+fn handler_source_label(state: &LuaState, func_ref: GcRef<Closure>) -> Option<String> {
+    let closure = state.gc.closures.get(func_ref)?;
+    let lua_closure = closure.as_lua()?;
+    let proto = lua_closure.proto.as_ref();
+    if proto.source.is_empty() {
+        return None;
+    }
+
+    Some(format!("{}:{}", proto.source, proto.line_defined))
 }
 
 fn record_frame_timing(state: &LuaState, owner_addon: Option<u16>, start: &Instant) {
