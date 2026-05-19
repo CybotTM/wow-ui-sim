@@ -61,6 +61,28 @@ fn test_event_handler_survives_garbage_collection() {
 }
 
 #[test]
+fn test_register_event_callback_uses_event_dispatch_index() {
+    let env = env();
+    let received: bool = env
+        .eval(
+            r#"
+            local received = false
+            local f = CreateFrame("Frame")
+            f:RegisterEventCallback("MINIMAP_PING")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "MINIMAP_PING" then
+                    received = true
+                end
+            end)
+            FireEvent("MINIMAP_PING")
+            return received
+            "#,
+        )
+        .unwrap();
+    assert!(received);
+}
+
+#[test]
 fn test_event_handler_with_traceback_survives_garbage_collection() {
     let env = env();
     let received: bool = env

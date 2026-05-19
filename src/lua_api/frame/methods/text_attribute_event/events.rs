@@ -192,6 +192,7 @@ pub(super) fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     }
     let restricted = crate::event::is_restricted_event(&event);
     drop(sim);
+    rilua_hlist_register_individual(state, id, &event)?;
     state.push(Val::Bool(!restricted));
     Ok(1)
 }
