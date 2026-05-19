@@ -50,7 +50,9 @@ const TIMER_CALLBACKS_KEY: &str = "__rilua_timer_callbacks";
 /// Get or create the registry table that stores timer callbacks.
 /// Returns a `GcRef<Table>` for the callback table.
 fn timer_callback_table(state: &mut LuaState) -> rilua::vm::gc::arena::GcRef<Table> {
-    let key_ref = state.gc.intern_string(TIMER_CALLBACKS_KEY.as_bytes());
+    let key_ref = state
+        .gc
+        .intern_string_static(TIMER_CALLBACKS_KEY.as_bytes());
     let registry = state.gc.tables.get(state.registry);
     if let Some(reg) = registry {
         if let Val::Table(t) = reg.get_str(key_ref, &state.gc.string_arena) {
@@ -79,7 +81,9 @@ pub(crate) fn store_timer_callback(state: &mut LuaState, timer_id: u64, callback
 
 /// Remove a timer callback from the registry table (called after firing/cancel).
 pub fn remove_timer_callback(state: &mut LuaState, timer_id: u64) {
-    let key_ref = state.gc.intern_string(TIMER_CALLBACKS_KEY.as_bytes());
+    let key_ref = state
+        .gc
+        .intern_string_static(TIMER_CALLBACKS_KEY.as_bytes());
     let registry = state.gc.tables.get(state.registry);
     let Some(reg) = registry else { return };
     let callback_table = match reg.get_str(key_ref, &state.gc.string_arena) {
@@ -94,7 +98,9 @@ pub fn remove_timer_callback(state: &mut LuaState, timer_id: u64) {
 
 /// Retrieve a stored timer callback by ID.
 pub fn get_timer_callback(state: &mut LuaState, timer_id: u64) -> Val {
-    let key_ref = state.gc.intern_string(TIMER_CALLBACKS_KEY.as_bytes());
+    let key_ref = state
+        .gc
+        .intern_string_static(TIMER_CALLBACKS_KEY.as_bytes());
     // Resolve the callback table GcRef from the registry.
     let callback_table_ref = {
         let reg_key = state.registry;
