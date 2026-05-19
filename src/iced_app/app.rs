@@ -374,6 +374,8 @@ impl App {
         env_ref.apply_post_event_workarounds();
         crate::startup::settle_startup_animation_groups(&env_ref);
         crate::startup::process_pending_timers(&env_ref);
+        crate::startup::fire_gui_startup_on_update_tick(&env_ref);
+        crate::startup::process_pending_timers(&env_ref);
         let _ = crate::lua_api::hide_runtime_hidden_frames(env_ref.lua());
         env_ref.state().borrow_mut().widgets.rebuild_anchor_index();
     }
@@ -611,10 +613,14 @@ mod tests {
     use iced::Size;
     use tokio::sync::mpsc;
 
-    fn build_test_app(screen_kind: ScreenKind) -> App {
-        let env = Rc::new(RefCell::new(
+    fn build_env() -> Rc<RefCell<WowLuaEnv>> {
+        Rc::new(RefCell::new(
             WowLuaEnv::new().expect("Failed to create Lua environment"),
-        ));
+        ))
+    }
+
+    fn build_test_app(screen_kind: ScreenKind) -> App {
+        let env = build_env();
         env.borrow().set_screen_mode(screen_kind);
         env.borrow().set_screen_size(800.0, 600.0);
 
@@ -664,9 +670,7 @@ mod tests {
 
     #[test]
     fn gui_boot_seeds_sim_state_with_initial_window_size() {
-        let env = Rc::new(RefCell::new(
-            WowLuaEnv::new().expect("Failed to create Lua environment"),
-        ));
+        let env = build_env();
 
         App::set_initial_gui_screen_size(&env);
 
@@ -685,9 +689,7 @@ mod tests {
 
     #[test]
     fn gui_startup_drains_ready_timers_before_interactive_ticks() {
-        let env = Rc::new(RefCell::new(
-            WowLuaEnv::new().expect("Failed to create Lua environment"),
-        ));
+        let env = build_env();
         env.borrow()
             .exec(
                 r#"
@@ -705,10 +707,32 @@ mod tests {
             .borrow()
             .eval("return __gui_startup_timer_fired")
             .expect("startup timer result should be readable");
-        assert_eq!(
-            fired, 1.0,
-            "GUI startup should settle ready timers before the first interactive tick"
-        );
+        assert_eq!(fired, 1.0, "ready startup timers should be settled");
+    }
+
+    #[test]
+    fn gui_startup_runs_one_on_update_before_interactive_ticks() {
+        let env = build_env();
+        env.borrow()
+            .exec(
+                r#"
+                __gui_startup_on_update_fired = 0
+                local frame = CreateFrame("Frame")
+                frame:SetScript("OnUpdate", function(self)
+                    __gui_startup_on_update_fired = __gui_startup_on_update_fired + 1
+                    self:SetScript("OnUpdate", nil)
+                end)
+                "#,
+            )
+            .expect("startup OnUpdate setup should succeed");
+
+        App::run_startup_sequence(&env);
+
+        let fired: f64 = env
+            .borrow()
+            .eval("return __gui_startup_on_update_fired")
+            .expect("startup OnUpdate result should be readable");
+        assert_eq!(fired, 1.0, "one-shot startup OnUpdate should be settled");
     }
 
     #[test]

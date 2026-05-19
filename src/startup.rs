@@ -163,6 +163,13 @@ pub fn fire_one_on_update_tick(env: &WowLuaEnv) {
     normalize_headless_frame_positions(env);
 }
 
+/// Fire one GUI startup OnUpdate tick without applying headless-only layout normalizers.
+pub fn fire_gui_startup_on_update_tick(env: &WowLuaEnv) {
+    if let Err(e) = env.fire_on_update(0.016) {
+        log_with_timestamp(env, &format!("[GUI OnUpdate tick] error: {e}"));
+    }
+}
+
 /// Fire extra OnUpdate ticks so deferred UI can process in headless commands.
 pub fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
     for _ in 0..n {
