@@ -109,18 +109,25 @@ Interpretation:
 - Post-migration, the **hash primitive itself is basically gone** as a
   bottleneck. The remaining interning cost is now the surrounding
   bucket-walk / dedup work inside `intern_string` and `intern_hashed`.
-- `frame_ref_cache` (`__rilua_frame_refs`, 286K calls/startup) is still the
-  highest-leverage deferred site if the `OnLoad` regression chain can be
-  resolved.
+- `frame_ref_cache` (`__rilua_frame_refs`, 286K calls/startup) has since been
+  moved to the hot metatable-key registry. A 2026-05-19 retry in an isolated
+  worktree no longer reproduced the old `OnLoad` cascade, and full addon
+  `lua-errors` returned `[]` with the migration applied.
 
-### Still deferred: `rilua_methods::frame_ref_cache`
+### Resolved: `rilua_methods::frame_ref_cache`
 
-`frame_ref_cache` is the single biggest intern call site (286K calls of `__rilua_frame_refs`) but migrating it causes a secondary cascade: ~300 Blizzard addons fail with "attempt to call method 'OnLoad' (a nil value)". The rilua-side GC-colour fix does not cover this path. Root cause not yet identified; left as a follow-up. Call-site is commented in `frame_ref_cache` so the next migration attempt doesn't repeat the experiment blind.
+`frame_ref_cache` was the single biggest intern call site (286K calls of
+`__rilua_frame_refs`). Earlier attempts to use the pointer-keyed hot-literal
+path caused broad "attempt to call method 'OnLoad' (a nil value)" failures, so
+the call site stayed on content-keyed interning. After the rilua GC/string fixes
+landed, the simulator now uses `hot_metatable_key(..., RILUA_FRAME_REFS)` for
+this registry lookup.
 
 ## Follow-ups
 
 - **rilua**: reproduce the mismatch in a minimal test case, then either fix `intern_string_static` or document the hazard (e.g. forbid `intern_string_static` for keys later looked up via plain `intern_string`).
-- **wow-ui-sim**: once the rilua side is safe, land the `registry_*` migration — the counter says it will remove ~930K intern calls from a cold startup (74% of `intern_string` traffic).
+- **wow-ui-sim**: rerun `intern-stats` after the `__rilua_frame_refs` migration
+  and rank the remaining hot literal candidates.
 - **wow-ui-sim**: `__scripts` keys are synthesised as `format!("{widget_id}_{handler_name}")` — unavoidable. The per-handler suffix (`_OnAttributeChanged`) could be a shared `&'static str` if we switch to a two-level key table (`scripts[widget][handler]`).
 
 ## Sources

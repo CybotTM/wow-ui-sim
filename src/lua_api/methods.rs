@@ -95,7 +95,6 @@ pub fn borrow_lua(state: &LuaState) -> LuaResult<Rc<std::cell::RefCell<rilua::Lu
 
 // ── Frame ref creation and caching ───────────────────────────────────
 
-const FRAME_REFS_KEY: &str = "__rilua_frame_refs";
 const FRAME_MT_CACHE_KEY: &str = "__rilua_frame_mt_cache";
 
 /// Get or create a rilua frame-backed table for the given widget ID.
@@ -228,15 +227,7 @@ pub fn mark_frame_ref_cache_no_traverse(state: &mut LuaState) {
 /// Get or create the frame ref cache table in the registry.
 /// Pre-sized for ~3000 frames (typical Blizzard UI load).
 fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
-    // NOTE: Do NOT use intern_string_static here. Even with the mid-cycle
-    // Black-colour fix in rilua, migrating this specific call site to the
-    // pointer-keyed cache still destabilizes the Blizzard startup path.
-    // The original symptom was a broad "OnLoad (a nil value)" cascade; later
-    // attempts also hung PartyFrame/CompactUnitFrame regressions behind group
-    // UI startup. Root cause is still not isolated, so this site stays on the
-    // content-keyed intern path until that investigation is complete. See
-    // docs/wiki/investigations/intern-string-ranking.md.
-    let key_ref = state.gc.intern_string(FRAME_REFS_KEY.as_bytes());
+    let key_ref = hot_metatable_key(state, metatable_idx::RILUA_FRAME_REFS);
     let registry = state.gc.tables.get(state.registry);
     if let Some(reg) = registry
         && let Val::Table(cache) = reg.get_str(key_ref, &state.gc.string_arena)

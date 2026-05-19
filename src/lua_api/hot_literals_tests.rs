@@ -325,16 +325,21 @@ fn hot_metatable_key_prefers_bootstrap_handle() {
 
     let env = WowLuaEnv::new().expect("fresh wow lua env");
     let mut lua = env.rilua_mut();
-    let expected = {
-        let state = lua.state();
-        state
-            .app_data::<crate::lua_api::env::WowLuaAppData>()
-            .and_then(|app| app.hot_literals.as_ref())
-            .expect("hot_literals populated")
-            .metatable_key(metatable_idx::RILUA_FRAME_MT)
-    };
-    let actual = hot_metatable_key(lua.state_mut(), metatable_idx::RILUA_FRAME_MT);
-    assert_eq!(actual, expected);
+    for index in [
+        metatable_idx::RILUA_FRAME_MT,
+        metatable_idx::RILUA_FRAME_REFS,
+    ] {
+        let expected = {
+            let state = lua.state();
+            state
+                .app_data::<crate::lua_api::env::WowLuaAppData>()
+                .and_then(|app| app.hot_literals.as_ref())
+                .expect("hot_literals populated")
+                .metatable_key(index)
+        };
+        let actual = hot_metatable_key(lua.state_mut(), index);
+        assert_eq!(actual, expected);
+    }
 }
 
 /// The shared metatable accessor must still fall back when no bootstrap
@@ -344,12 +349,15 @@ fn hot_metatable_key_falls_back_without_bootstrap_registry() {
     use rilua::{Lua, LuaApiMut};
 
     let mut lua = Lua::new().expect("fresh rilua VM");
-    let expected = {
-        let state = lua.state_mut();
-        state
-            .gc
-            .intern_string_static(HOT_METATABLE_KEYS[metatable_idx::RILUA_FRAME_MT])
-    };
-    let actual = hot_metatable_key(lua.state_mut(), metatable_idx::RILUA_FRAME_MT);
-    assert_eq!(actual, expected);
+    for index in [
+        metatable_idx::RILUA_FRAME_MT,
+        metatable_idx::RILUA_FRAME_REFS,
+    ] {
+        let expected = {
+            let state = lua.state_mut();
+            state.gc.intern_string_static(HOT_METATABLE_KEYS[index])
+        };
+        let actual = hot_metatable_key(lua.state_mut(), index);
+        assert_eq!(actual, expected);
+    }
 }
