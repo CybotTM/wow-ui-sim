@@ -536,8 +536,8 @@ fn ensure_error_handler(state: &mut LuaState) -> rilua::LuaResult<Val> {
     Ok(handler)
 }
 
-pub(crate) fn registry_value(state: &mut LuaState, key: &str) -> Val {
-    let key_ref = state.gc.intern_string(key.as_bytes());
+pub(crate) fn registry_value(state: &mut LuaState, key: &'static str) -> Val {
+    let key_ref = state.gc.intern_string_static(key.as_bytes());
     state
         .gc
         .tables
@@ -546,8 +546,8 @@ pub(crate) fn registry_value(state: &mut LuaState, key: &str) -> Val {
         .unwrap_or(Val::Nil)
 }
 
-pub(crate) fn set_registry_value(state: &mut LuaState, key: &str, value: Val) {
-    let key_ref = state.gc.intern_string(key.as_bytes());
+pub(crate) fn set_registry_value(state: &mut LuaState, key: &'static str, value: Val) {
+    let key_ref = state.gc.intern_string_static(key.as_bytes());
     let registry = state.registry;
     if let Some(table) = state.gc.tables.get_mut(registry) {
         let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
