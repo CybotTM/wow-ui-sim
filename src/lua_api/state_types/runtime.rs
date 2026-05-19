@@ -107,8 +107,6 @@ pub struct AddonInfo {
     pub title: String,
     /// Notes/description from TOC metadata.
     pub notes: String,
-    /// Raw TOC metadata, including addon-specific `X-*` keys used by libraries.
-    pub metadata: HashMap<String, String>,
     /// Whether the addon is currently enabled.
     pub enabled: bool,
     /// Whether the addon was successfully loaded.
@@ -141,7 +139,6 @@ impl Default for AddonInfo {
             folder_name: String::new(),
             title: String::new(),
             notes: String::new(),
-            metadata: HashMap::new(),
             enabled: false,
             loaded: false,
             load_on_demand: false,

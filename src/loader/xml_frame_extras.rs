@@ -267,7 +267,9 @@ fn append_texture_size_property(
         (Some(width), Some(height)) => code.push_str(&format!(
             "            {var_name}:SetSize({width}, {height})\n"
         )),
-        (Some(width), None) => code.push_str(&format!("            {var_name}:SetWidth({width})\n")),
+        (Some(width), None) => {
+            code.push_str(&format!("            {var_name}:SetWidth({width})\n"))
+        }
         (None, Some(height)) => {
             code.push_str(&format!("            {var_name}:SetHeight({height})\n"))
         }

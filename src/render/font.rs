@@ -8,10 +8,6 @@ use std::collections::HashMap;
 
 use cosmic_text::fontdb;
 
-#[cfg(feature = "casc")]
-#[path = "font_casc_fallback.rs"]
-mod font_casc_fallback;
-
 /// WoW font path constants (as they appear in Lua/XML).
 const WOW_FONT_FRIZ: &str = "Fonts\\FRIZQT__.TTF";
 const WOW_FONT_ARIAL_NARROW: &str = "Fonts\\ARIALN.TTF";

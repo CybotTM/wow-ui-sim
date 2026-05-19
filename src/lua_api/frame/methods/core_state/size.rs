@@ -173,43 +173,6 @@ pub(crate) fn mark_nearest_layout_parent_dirty(state: &mut LuaState, id: u64) {
     }
 }
 
-pub(crate) fn mark_visible_layout_subtree_dirty(state: &mut LuaState, id: u64) {
-    if is_loading_addon(state) {
-        return;
-    }
-
-    let Some(helper) = layout_dirty_helper(state) else {
-        return;
-    };
-
-    let descendants = {
-        let Ok(sim) = borrow_state(state) else {
-            return Vec::new();
-        };
-        let mut descendants = vec![id];
-        let mut index = 0;
-        while let Some(current_id) = descendants.get(index).copied() {
-            index += 1;
-            if let Some(frame) = sim.widgets.get(current_id) {
-                descendants.extend(frame.children.iter().copied());
-            }
-        }
-        descendants
-            .into_iter()
-            .filter(|&descendant_id| sim.widgets.is_ancestor_visible(descendant_id))
-            .collect::<Vec<_>>()
-    };
-
-    for descendant_id in descendants {
-        let Ok(frame) = frame_ref(state, descendant_id) else {
-            continue;
-        };
-        let previous_on_updates = on_update_snapshot(state, descendant_id);
-        let _ = call_function_state(state, helper, &[frame]);
-        restore_custom_on_updates(state, previous_on_updates);
-    }
-}
-
 fn on_update_snapshot(state: &mut LuaState, id: u64) -> Vec<(u64, Val)> {
     let ancestor_ids = {
         let Ok(sim) = borrow_state(state) else {

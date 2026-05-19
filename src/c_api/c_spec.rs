@@ -64,10 +64,6 @@ const LEGACY_SPECIALIZATION_GLOBALS: &[(&str, RustLuaFn)] = &[
         get_specialization_info_for_class_id,
     ),
     ("GetSpecializationInfoByID", get_specialization_info_by_id),
-    (
-        "GetSpecializationInfoForClassID",
-        get_specialization_info_for_class_id,
-    ),
     ("GetInspectSpecialization", get_inspect_specialization),
     ("GetSpecializationRoleByID", get_specialization_role_by_id),
     ("GetSpecializationRole", get_specialization_role),
@@ -423,25 +419,6 @@ fn get_num_specializations(state: &mut LuaState) -> LuaResult<u32> {
     let count = specializations::specs_for_class(class_id).count() as f64;
     state.push(Val::Num(count));
     Ok(1)
-}
-
-fn get_specialization_info_for_class_id(state: &mut LuaState) -> LuaResult<u32> {
-    let class_id = match stack_val(state, 1) {
-        Val::Num(n) => n as u32,
-        _ => 0,
-    };
-    let requested_index = match stack_val(state, 2) {
-        Val::Num(n) => n as usize,
-        _ => 1,
-    };
-    if requested_index == 0 {
-        return Ok(0);
-    }
-    let Some(spec) = specializations::specs_for_class(class_id).nth(requested_index - 1) else {
-        return Ok(0);
-    };
-    push_specialization_info(state, spec);
-    Ok(10)
 }
 
 fn get_specialization_info_by_id(state: &mut LuaState) -> LuaResult<u32> {

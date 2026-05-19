@@ -43,6 +43,7 @@ use crate::lua_api::script_helpers::{
 use crate::lua_api::state_types::CursorInfo;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use crate::spell_lookup as spells;
+use crate::spells::SPELL_DB;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -501,7 +502,7 @@ fn numeric_spell_id(state: &LuaState, index: i32) -> Option<u32> {
 
 fn spell_id_by_name(name: &str) -> Option<u32> {
     let needle = name.to_ascii_lowercase();
-    spells::SPELL_DB
+    SPELL_DB
         .entries()
         .find_map(|(id, spell)| (spell.name.to_ascii_lowercase() == needle).then_some(*id))
 }

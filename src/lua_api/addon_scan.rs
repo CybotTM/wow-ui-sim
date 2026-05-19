@@ -27,7 +27,6 @@ fn addon_info_from_toc(name: &str, toc: Option<&TocFile>) -> AddonInfo {
         folder_name: name.to_string(),
         title,
         notes,
-        metadata: t.metadata.clone(),
         enabled: true,
         load_on_demand,
         use_secure_env: t.is_secure_env(),
