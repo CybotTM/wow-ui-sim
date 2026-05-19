@@ -570,7 +570,7 @@ mod tests {
     use std::fs;
 
     use crate::lua_api::WowLuaEnv;
-    use rilua::{LuaApi, LuaApiMut};
+    use rilua::LuaApiMut;
 
     use super::SavedVariablesManager;
 

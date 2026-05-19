@@ -1,8 +1,11 @@
 use super::set_global;
-use crate::lua_api::methods::{create_string, table_set, table_set_num};
+use crate::lua_api::methods::{create_string, table_set_num};
 use rilua::Val;
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::string::LuaString;
 use rilua::vm::table::Table;
+use std::collections::HashMap;
 
 pub(super) fn parse_saved_variables_file(state: &mut LuaState, source: &str) -> Result<(), String> {
     Parser::new(state, source).parse_file()
@@ -12,6 +15,7 @@ struct Parser<'a, 's> {
     state: &'a mut LuaState,
     bytes: &'s [u8],
     pos: usize,
+    key_cache: HashMap<String, GcRef<LuaString>>,
 }
 
 impl<'a, 's> Parser<'a, 's> {
@@ -20,6 +24,7 @@ impl<'a, 's> Parser<'a, 's> {
             state,
             bytes: source.as_bytes(),
             pos: 0,
+            key_cache: HashMap::new(),
         }
     }
 
@@ -90,7 +95,7 @@ impl<'a, 's> Parser<'a, 's> {
                 self.skip_ws();
                 self.expect_byte(b'=')?;
                 let value = self.parse_value()?;
-                table_set(self.state, table, &key, value);
+                self.set_table_string_key(table, &key, value);
             } else {
                 let value = self.parse_value()?;
                 table_set_num(self.state, table_ref, next_array_index, value);
@@ -120,9 +125,33 @@ impl<'a, 's> Parser<'a, 's> {
         value: Val,
     ) {
         match key {
-            SavedVarKey::String(key) => table_set(self.state, table, &key, value),
+            SavedVarKey::String(key) => self.set_table_string_key(table, &key, value),
             SavedVarKey::Number(key) => table_set_num(self.state, table_ref, key, value),
         }
+    }
+
+    fn set_table_string_key(&mut self, table: Val, key: &str, value: Val) {
+        let Val::Table(table_ref) = table else { return };
+        let stack_slot = self.state.top;
+        self.state.ensure_stack(stack_slot + 1);
+        self.state.stack_set(stack_slot, value);
+        self.state.top = stack_slot + 1;
+
+        let key_ref = self.intern_saved_var_key(key);
+        if let Some(table) = self.state.gc.tables.get_mut(table_ref) {
+            let _ = table.raw_set(Val::Str(key_ref), value, &self.state.gc.string_arena);
+        }
+        self.state.gc.barrier_back(table_ref);
+        self.state.top = stack_slot;
+    }
+
+    fn intern_saved_var_key(&mut self, key: &str) -> GcRef<LuaString> {
+        if let Some(&key_ref) = self.key_cache.get(key) {
+            return key_ref;
+        }
+        let key_ref = self.state.gc.intern_string(key.as_bytes());
+        self.key_cache.insert(key.to_string(), key_ref);
+        key_ref
     }
 
     fn next_field_is_named_assignment(&self) -> bool {
