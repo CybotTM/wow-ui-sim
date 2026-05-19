@@ -62,8 +62,10 @@ pub fn load_blizzard_addons(
     let blizzard_start = std::time::Instant::now();
     let mut total_timing = LoadTiming::default();
 
-    // Stop GC during bulk loading — collect once at the end instead of
-    // incremental sweeps on every allocation.
+    // Keep GC stopped during bulk loading. `init_and_load` restarts and
+    // collects once after third-party addons and post-load workarounds have
+    // finished, so restarting here would make third-party addon load pay
+    // incremental GC costs.
     env.gc_stop();
 
     for (name, toc_path) in &addons {
@@ -73,13 +75,8 @@ pub fn load_blizzard_addons(
         }
     }
 
-    let gc_start = std::time::Instant::now();
-    env.gc_restart();
-    env.gc_collect();
-    let gc_dur = gc_start.elapsed();
-
     env.sync_string_metatable_to_global_string();
-    print_blizzard_summary(blizzard_start.elapsed(), &total_timing, gc_dur);
+    print_blizzard_summary(blizzard_start.elapsed(), &total_timing);
 }
 
 fn load_one_blizzard_addon(
@@ -172,14 +169,10 @@ fn print_blizzard_frame_detail(t: &LoadTiming) {
     );
 }
 
-fn print_blizzard_summary(
-    elapsed: std::time::Duration,
-    t: &LoadTiming,
-    gc_dur: std::time::Duration,
-) {
+fn print_blizzard_summary(elapsed: std::time::Duration, t: &LoadTiming) {
     let cache_info = format_cache_info(t);
     logging::println_elapsed(&format!(
-        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?} [compile={:.2?} call={:.2?}] gc={gc_dur:.2?}{cache_info})",
+        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?} [compile={:.2?} call={:.2?}] gc=deferred{cache_info})",
         t.io_time,
         t.xml_parse_time,
         t.xml_process_time,
