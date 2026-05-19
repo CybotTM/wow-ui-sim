@@ -240,7 +240,7 @@ fn init_and_load(
     Box<dyn std::error::Error>,
 > {
     let env = WowLuaEnv::new().expect("failed to create Lua env");
-    let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
+    let font_system = Rc::new(RefCell::new(font_system_for_command(args)));
     init_environment(args, &env, &font_system)?;
     env.set_screen_mode(screen);
 
@@ -263,6 +263,14 @@ fn init_and_load(
     apply_post_load_workarounds(&env);
     restart_gc_after_bootstrap(&env);
     Ok((env, font_system, saved_vars))
+}
+
+fn font_system_for_command(args: &Args) -> WowFontSystem {
+    if matches!(args.command, Some(Commands::LuaErrors)) {
+        WowFontSystem::new_without_casc()
+    } else {
+        WowFontSystem::new()
+    }
 }
 
 fn apply_post_load_workarounds(env: &WowLuaEnv) {

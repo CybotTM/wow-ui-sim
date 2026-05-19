@@ -227,11 +227,25 @@ fn try_casc_font_bytes(_filename: &str) -> Option<Vec<u8>> {
 impl WowFontSystem {
     /// Create a new font system with WoW fonts loaded from CASC (or system fallback).
     pub fn new() -> Self {
+        Self::new_with_options(true)
+    }
+
+    /// Create a font system without opening CASC.
+    ///
+    /// Non-rendering commands use this to avoid paying CASC startup cost when
+    /// they only need text metrics good enough for Lua-side layout.
+    pub fn new_without_casc() -> Self {
+        Self::new_with_options(false)
+    }
+
+    fn new_with_options(load_casc_fonts: bool) -> Self {
         let mut db = fontdb::Database::new();
         let mut font_map = HashMap::new();
 
-        for font_file in WOW_FONT_FILES {
-            load_wow_font(font_file, &mut db, &mut font_map);
+        if load_casc_fonts {
+            for font_file in WOW_FONT_FILES {
+                load_wow_font(font_file, &mut db, &mut font_map);
+            }
         }
         if font_map.is_empty() {
             load_system_font_fallback(&mut db, &mut font_map);
@@ -460,6 +474,16 @@ mod tests {
                 fs.font_map.keys().collect::<Vec<_>>()
             );
         }
+    }
+
+    #[test]
+    fn no_casc_constructor_registers_font_aliases() {
+        let fs = WowFontSystem::new_without_casc();
+
+        assert!(
+            fs.family_name(Some(WOW_FONT_FRIZ)).is_some(),
+            "non-rendering commands should get font aliases without opening CASC"
+        );
     }
 
     fn asset_resolver_available() -> bool {
