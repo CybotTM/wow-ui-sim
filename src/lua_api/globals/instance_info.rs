@@ -21,7 +21,7 @@
 //! - `GetSavedInstanceInfo(index)` / `GetSavedWorldBossInfo(index)` → no
 //!   values for empty slots.
 
-use crate::lua_api::methods::{borrow_state, create_string, val_to_string};
+use crate::lua_api::methods::{borrow_state, create_string, create_string_static, val_to_string};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -122,13 +122,13 @@ fn get_mirror_timer_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn push_unknown_mirror_timer(state: &mut LuaState) {
-    let name_val = create_string(state, "UNKNOWN");
+    let name_val = create_string_static(state, "UNKNOWN");
     state.push(name_val);
     state.push(Val::Num(0.0));
     state.push(Val::Num(0.0));
     state.push(Val::Num(0.0));
     state.push(Val::Num(0.0));
-    let label_val = create_string(state, "");
+    let label_val = create_string_static(state, "");
     state.push(label_val);
     state.push(Val::Num(0.0));
 }

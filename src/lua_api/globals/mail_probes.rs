@@ -6,7 +6,7 @@
 
 use crate::items;
 use crate::lua_api::globals::missing_surface::item_link_for_id;
-use crate::lua_api::methods::{borrow_state, create_string, create_table};
+use crate::lua_api::methods::{borrow_state, create_string, create_string_static, create_table};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -107,7 +107,7 @@ fn get_inbox_item(state: &mut LuaState) -> LuaResult<u32> {
     };
     let item = items::get_item(attachment.item_id);
     let name = item.map(|row| row.name).unwrap_or("Unknown");
-    let name = create_string(state, name);
+    let name = create_string_static(state, name);
     state.push(name);
     state.push(Val::Num(attachment.item_id as f64));
     state.push(Val::Num(icon_for_item(attachment.item_id)));
@@ -143,8 +143,8 @@ fn get_inbox_text(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     let body = create_string(state, &mail.body);
-    let empty_sender = create_string(state, "");
-    let empty_subject = create_string(state, "");
+    let empty_sender = create_string_static(state, "");
+    let empty_subject = create_string_static(state, "");
     state.push(body);
     state.push(empty_sender);
     state.push(empty_subject);

@@ -48,8 +48,8 @@ use super::helpers::ensure_namespace;
 use crate::c_api::item_spell::spell_link_for_id;
 use crate::lua_api::globals::action_bar_api::spell_cooldown_times;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, frame_ref, table_set_num,
-    table_set_static, val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_string_static, create_table, frame_ref,
+    table_set_num, table_set_static, val_to_string,
 };
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
@@ -357,7 +357,7 @@ fn get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
     let name = spells::get_spell(spell_id)
         .map(|spell| spell.name)
         .unwrap_or("Unknown");
-    let name_string = create_string(state, name);
+    let name_string = create_string_static(state, name);
     state.push(name_string);
     Ok(1)
 }

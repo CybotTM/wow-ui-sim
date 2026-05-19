@@ -3,8 +3,8 @@
 use crate::c_api::ensure_namespace;
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, frame_ref, table_set_num,
-    table_set_static,
+    borrow_state, borrow_state_mut, create_string, create_string_static, create_table, frame_ref,
+    table_set_num, table_set_static,
 };
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
@@ -349,7 +349,7 @@ fn c_spell_book_get_spell_book_item_name(state: &mut LuaState) -> LuaResult<u32>
             let name = spells::get_spell(entry.spell_id)
                 .map(|spell| spell.name)
                 .unwrap_or("Unknown");
-            let name = create_string(state, name);
+            let name = create_string_static(state, name);
             state.push(name);
         }
         None => state.push(Val::Nil),
@@ -675,8 +675,8 @@ fn spellbook_item_info(state: &mut LuaState, slot: i32) -> Option<Val> {
     let spell = spells::get_spell(entry.spell_id);
     let name = spell.map(|spell| spell.name).unwrap_or("Unknown");
     let icon_id = spell.map(|spell| spell.icon_file_data_id).unwrap_or(136243);
-    let name_val = create_string(state, name);
-    let sub_name_val = create_string(state, "");
+    let name_val = create_string_static(state, name);
+    let sub_name_val = create_string_static(state, "");
 
     let info = create_table(state);
     table_set_static(state, info, "actionID", Val::Num(entry.spell_id as f64));
