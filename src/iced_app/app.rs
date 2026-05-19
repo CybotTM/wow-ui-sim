@@ -373,6 +373,7 @@ impl App {
         let env_ref = env_rc.borrow();
         env_ref.apply_post_event_workarounds();
         crate::startup::settle_startup_animation_groups(&env_ref);
+        crate::startup::process_pending_timers(&env_ref);
         let _ = crate::lua_api::hide_runtime_hidden_frames(env_ref.lua());
         env_ref.state().borrow_mut().widgets.rebuild_anchor_index();
     }
@@ -680,6 +681,34 @@ mod tests {
         let app = build_test_app(ScreenKind::Game);
 
         assert_eq!(app.screen_size.get(), current_env_screen_size(&app.env));
+    }
+
+    #[test]
+    fn gui_startup_drains_ready_timers_before_interactive_ticks() {
+        let env = Rc::new(RefCell::new(
+            WowLuaEnv::new().expect("Failed to create Lua environment"),
+        ));
+        env.borrow()
+            .exec(
+                r#"
+                __gui_startup_timer_fired = 0
+                C_Timer.After(0, function()
+                    __gui_startup_timer_fired = __gui_startup_timer_fired + 1
+                end)
+                "#,
+            )
+            .expect("startup timer setup should succeed");
+
+        App::run_startup_sequence(&env);
+
+        let fired: f64 = env
+            .borrow()
+            .eval("return __gui_startup_timer_fired")
+            .expect("startup timer result should be readable");
+        assert_eq!(
+            fired, 1.0,
+            "GUI startup should settle ready timers before the first interactive tick"
+        );
     }
 
     #[test]
