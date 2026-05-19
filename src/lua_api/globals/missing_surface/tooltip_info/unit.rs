@@ -6,7 +6,9 @@ use super::builders::{empty_tooltip, push_plain_line, push_tooltip_line};
 use super::spell::tooltip_for_spell_id;
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::methods::{borrow_state, create_string, table_get, table_set};
-use crate::lua_api::state::{PartyMember, PlayerState, RACE_DATA, SimState, TargetInfo};
+use crate::lua_api::state::{
+    PartyMember, PlayerState, RACE_DATA, SEEDED_LOCAL_CHARACTER_GUID, SimState, TargetInfo,
+};
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
@@ -104,7 +106,7 @@ pub(super) fn unit_tooltip_info(state: &LuaState, unit: &str) -> Option<UnitTool
 fn unit_guid(state: &LuaState, unit: &str) -> Option<String> {
     let sim = borrow_state(state).ok()?;
     match unit {
-        "player" => Some("Player-0000-00000001".to_string()),
+        "player" => Some(SEEDED_LOCAL_CHARACTER_GUID.to_string()),
         "target" => sim
             .current_target
             .as_ref()

@@ -13,7 +13,9 @@
 
 use crate::lua_api::game_data::{CLASS_LABELS, class_info_by_index};
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_string_static,
+};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -91,7 +93,7 @@ fn set_current_title(state: &mut LuaState) -> LuaResult<u32> {
         };
         sim.current_title = resolved;
     }
-    let unit = create_string(state, "player");
+    let unit = create_string_static(state, "player");
     dispatch_event_now(state, "UNIT_NAME_UPDATE", &[unit])?;
     Ok(0)
 }
@@ -104,8 +106,8 @@ fn get_num_classes(state: &mut LuaState) -> LuaResult<u32> {
 fn get_class_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = stack_i32(state, 1).unwrap_or(1);
     let (class_name, class_file, class_id) = class_info_by_index(index);
-    let class_name = create_string(state, class_name);
-    let class_file = create_string(state, class_file);
+    let class_name = create_string_static(state, class_name);
+    let class_file = create_string_static(state, class_file);
     state.push(class_name);
     state.push(class_file);
     state.push(Val::Num(class_id as f64));

@@ -8,6 +8,7 @@ use crate::lua_api::methods::{
     frame_ref, table_get, val_to_string,
 };
 use crate::lua_api::script_helpers::{call_void_function_with_fallback_state, get_script};
+use crate::lua_api::state::SEEDED_LOCAL_CHARACTER_GUID;
 use crate::lua_api::tooltip::TooltipLine;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -110,7 +111,7 @@ fn populate_tooltip_from_method(
 fn unit_guid_for_token(state: &LuaState, unit_token: &str) -> Option<String> {
     let sim = borrow_state(state).ok()?;
     match unit_token {
-        "player" => Some("Player-0000-00000001".to_string()),
+        "player" => Some(SEEDED_LOCAL_CHARACTER_GUID.to_string()),
         "target" => Some(
             sim.current_target
                 .as_ref()

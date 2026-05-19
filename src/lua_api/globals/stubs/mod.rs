@@ -56,7 +56,7 @@ pub fn stub_zero(state: &mut LuaState) -> LuaResult<u32> {
 
 /// Returns `"NONE"` for role APIs that expect a string token.
 pub fn stub_role_none(state: &mut LuaState) -> LuaResult<u32> {
-    let value = state.gc.intern_string(b"NONE");
+    let value = state.gc.intern_string_static(b"NONE");
     state.push(Val::Str(value));
     Ok(1)
 }

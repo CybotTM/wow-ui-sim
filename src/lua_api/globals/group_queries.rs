@@ -20,7 +20,9 @@ mod relationships;
 
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::globals::security::mark_secret_value;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_get, table_set};
+use crate::lua_api::methods::{
+    borrow_state, create_string, create_string_static, create_table, table_get, table_set,
+};
 use crate::lua_bridge::FromStack;
 use rilua::vm::closure::{Closure, RustClosure};
 use rilua::vm::state::LuaState;
@@ -282,8 +284,8 @@ fn push_raid_roster_info(state: &mut LuaState, index: usize, member: &RaidRoster
     mark_secret_value(state, name);
     let subgroup = ((index - 1) / 5 + 1) as f64;
     let (_, class_file, _) = class_info(member.class_index);
-    let class_file = create_string(state, class_file);
-    let assigned_role = create_string(state, "NONE");
+    let class_file = create_string_static(state, class_file);
+    let assigned_role = create_string_static(state, "NONE");
 
     state.push(name);
     state.push(Val::Nil);
@@ -472,8 +474,8 @@ fn unit_class(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     let (class_name, class_file, class_id) = class_info(class_index);
-    let class_name_val = create_string(state, class_name);
-    let class_file_val = create_string(state, class_file);
+    let class_name_val = create_string_static(state, class_name);
+    let class_file_val = create_string_static(state, class_file);
     state.push(class_name_val);
     state.push(class_file_val);
     state.push(Val::Num(class_id as f64));

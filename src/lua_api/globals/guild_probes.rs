@@ -36,7 +36,7 @@
 
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
-use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::methods::{borrow_state, create_string, create_string_static};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -303,9 +303,9 @@ fn get_guild_roster_info(state: &mut LuaState) -> LuaResult<u32> {
 fn push_roster_row_values(state: &mut LuaState, row: &RosterRow) {
     let name = create_string(state, &row.name);
     let rank = create_string(state, &row.rank_name);
-    let class_label = create_string(state, row.class_label);
-    let class_file = create_string(state, row.class_file);
-    let empty = create_string(state, "");
+    let class_label = create_string_static(state, row.class_label);
+    let class_file = create_string_static(state, row.class_file);
+    let empty = create_string_static(state, "");
 
     state.push(name); // 1: name
     state.push(rank); // 2: rankName

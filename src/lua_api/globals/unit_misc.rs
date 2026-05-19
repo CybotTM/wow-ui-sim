@@ -1,7 +1,7 @@
 //! Misc unit globals that do not fit the core group-query bucket.
 
 use crate::lua_api::globals::security::mark_secret_value;
-use crate::lua_api::methods::{borrow_state, create_string, create_table};
+use crate::lua_api::methods::{borrow_state, create_string, create_string_static, create_table};
 use crate::lua_api::state::SEEDED_LOCAL_CHARACTER_GUID;
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -66,7 +66,7 @@ fn unit_full_name(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let name = unit_name_for(state, &unit);
     let name = create_string(state, &name);
-    let realm = create_string(state, SIM_REALM);
+    let realm = create_string_static(state, SIM_REALM);
     if unit_identity_is_secret(&unit) {
         mark_secret_value(state, name);
         mark_secret_value(state, realm);
@@ -105,7 +105,7 @@ fn unit_class_base(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     let (_, class_file, _) = crate::lua_api::game_data::class_info_by_index(class_index);
-    let class_file = create_string(state, class_file);
+    let class_file = create_string_static(state, class_file);
     state.push(class_file);
     Ok(1)
 }
@@ -212,7 +212,7 @@ fn unit_token_from_guid(state: &mut LuaState) -> LuaResult<u32> {
             state.push(Val::Nil);
             return Ok(1);
         };
-        if guid == "Player-0000-00000001" {
+        if guid == SEEDED_LOCAL_CHARACTER_GUID {
             Some("player".to_string())
         } else {
             target_or_focus_token_from_guid(&sim, &guid)

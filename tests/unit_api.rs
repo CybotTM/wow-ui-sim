@@ -281,7 +281,7 @@ fn test_get_unit_name_no_target() {
 fn test_unit_guid_player() {
     let env = env();
     let guid: String = env.eval("return UnitGUID('player')").unwrap();
-    assert_eq!(guid, "Player-0000-00000001");
+    assert_eq!(guid, "Player-1-00000001");
 }
 
 #[test]
