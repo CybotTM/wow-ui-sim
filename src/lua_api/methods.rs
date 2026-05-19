@@ -191,7 +191,7 @@ pub fn sync_child_to_rilua(
     let Val::Table(parent_ref) = parent_val else {
         return Ok(());
     };
-    let key_ref = state.gc.intern_string(key.as_bytes());
+    let key_ref = intern_string_maybe_static(state, key);
     // Short-circuit if parent[key] already points at this exact child.
     // Startup loops (e.g. PartyFrame:InitializePartyMemberFrames) call
     // SetParentKey on every OnShow pass; a no-op second pass must not
@@ -368,10 +368,7 @@ pub fn unpack_id(id: u64) -> (u32, u32) {
 
 /// Create a Lua string Val from a Rust &str.
 pub fn create_string(state: &mut LuaState, s: &str) -> Val {
-    if let Some(static_value) = static_string_for_hot_literal(s) {
-        return create_string_static(state, static_value);
-    }
-    Val::Str(state.gc.intern_string(s.as_bytes()))
+    Val::Str(intern_string_maybe_static(state, s))
 }
 
 const HOT_STATIC_LITERALS: &[&str] = &[
@@ -406,6 +403,16 @@ fn static_string_for_hot_literal(value: &str) -> Option<&'static str> {
         .iter()
         .copied()
         .find(|candidate| *candidate == value)
+}
+
+fn intern_string_maybe_static(
+    state: &mut LuaState,
+    value: &str,
+) -> GcRef<rilua::vm::string::LuaString> {
+    if let Some(static_value) = static_string_for_hot_literal(value) {
+        return state.gc.intern_string_static(static_value.as_bytes());
+    }
+    state.gc.intern_string(value.as_bytes())
 }
 
 /// Like [`create_string`] but interns `s` through the pointer-keyed
@@ -610,7 +617,7 @@ pub fn create_table_with_fields(state: &mut LuaState, fields: &[(&'static str, V
 /// Set a string key on an existing table Val.
 pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
     table_set_with_key(state, table, value, |state| {
-        state.gc.intern_string(key.as_bytes())
+        intern_string_maybe_static(state, key)
     });
 }
 
@@ -644,7 +651,7 @@ where
 
 /// Get a string key from a table Val.
 pub fn table_get(state: &mut LuaState, table: Val, key: &str) -> Val {
-    table_get_with_key(state, table, |state| state.gc.intern_string(key.as_bytes()))
+    table_get_with_key(state, table, |state| intern_string_maybe_static(state, key))
 }
 
 /// Like [`table_get`] but interns `key` through the pointer-keyed static
