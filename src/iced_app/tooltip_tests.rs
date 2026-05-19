@@ -377,6 +377,33 @@ fn tooltip_renderer_wraps_inline_color_segments() {
 }
 
 #[test]
+fn tooltip_measurement_ignores_hidden_wow_markup_payload() {
+    let visible_name = "[Seal of the Silent Vigil]";
+    let raw_item_link = "|cffa335ee|Hitem:238036::::::::80:70::13:1:3524:8:40:1279:38:8:46:224073:47:231756:48:226024:49:231768:50:231756:51:231756:52:231756:53:231756|h[Seal of the Silent Vigil]|h|r";
+    let tooltip = TooltipData {
+        lines: vec![TooltipLine {
+            left_text: raw_item_link.to_string(),
+            left_color: (0.64, 0.21, 0.93),
+            left_segments: Vec::new(),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            right_segments: Vec::new(),
+            wrap: false,
+            texture: None,
+        }],
+        ..TooltipData::default()
+    };
+    let mut font_sys = WowFontSystem::new();
+    let measured = measure_tooltip_content_width(&tooltip, &mut font_sys);
+    let visible_width = font_sys.measure_text_width(visible_name, None, TOOLTIP_HEADER_FONT_SIZE);
+
+    assert!(
+        measured <= visible_width + 1.0,
+        "tooltip sizing should measure displayed item text, not hidden hyperlink payload: measured={measured}, visible_width={visible_width}"
+    );
+}
+
+#[test]
 fn tooltip_text_insets_account_for_tooltip_nine_slice_overlap() {
     let insets = tooltip_text_insets();
     assert_eq!(

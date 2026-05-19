@@ -114,7 +114,12 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
     for (i, line) in td.lines.iter().enumerate() {
         let font_size = tooltip_line_font_size(i);
         let line_height = if line.wrap && !line.left_text.is_empty() {
-            font_system.measure_text_height(&line.left_text, None, font_size, Some(content_width))
+            measure_tooltip_text_height(
+                font_system,
+                &line.left_text,
+                font_size,
+                Some(content_width),
+            )
         } else {
             (font_size * 1.2).ceil()
         };
@@ -144,11 +149,11 @@ fn measure_tooltip_content_width(
     }
     for (i, line) in td.lines.iter().enumerate() {
         let font_size = tooltip_line_font_size(i);
-        let left_w = font_system.measure_text_width(&line.left_text, None, font_size);
+        let left_w = measure_tooltip_text_width(font_system, &line.left_text, font_size);
         let right_w = line
             .right_text
             .as_ref()
-            .map(|t| font_system.measure_text_width(t, None, font_size))
+            .map(|t| measure_tooltip_text_width(font_system, t, font_size))
             .unwrap_or(0.0);
         let line_width = if right_w > 0.0 {
             left_w + right_w + DOUBLE_LINE_GAP
@@ -183,11 +188,28 @@ fn tooltip_has_wrapped_lines(td: &crate::lua_api::tooltip::TooltipData) -> bool 
 }
 
 fn tooltip_line_has_width_text(line: &crate::lua_api::tooltip::TooltipLine) -> bool {
-    !line.left_text.trim().is_empty()
+    !tooltip_visible_text(&line.left_text).trim().is_empty()
         || line
             .right_text
             .as_ref()
-            .is_some_and(|text| !text.trim().is_empty())
+            .is_some_and(|text| !tooltip_visible_text(text).trim().is_empty())
+}
+
+fn measure_tooltip_text_width(font_system: &mut WowFontSystem, text: &str, font_size: f32) -> f32 {
+    font_system.measure_text_width(&tooltip_visible_text(text), None, font_size)
+}
+
+fn measure_tooltip_text_height(
+    font_system: &mut WowFontSystem,
+    text: &str,
+    font_size: f32,
+    wrap_width: Option<f32>,
+) -> f32 {
+    font_system.measure_text_height(&tooltip_visible_text(text), None, font_size, wrap_width)
+}
+
+fn tooltip_visible_text(text: &str) -> String {
+    crate::render::strip_wow_markup(text)
 }
 
 /// Collect render data for all visible tooltips with lines.
@@ -453,7 +475,7 @@ fn emit_tooltip_line(
     let right_width = line
         .right_text
         .as_ref()
-        .map(|t| tr.font_sys.measure_text_width(t, None, line.font_size));
+        .map(|t| measure_tooltip_text_width(tr.font_sys, t, line.font_size));
 
     let left_width = match right_width {
         Some(rw) if rw > 0.0 => (placement.width - rw - DOUBLE_LINE_GAP).max(0.0),
