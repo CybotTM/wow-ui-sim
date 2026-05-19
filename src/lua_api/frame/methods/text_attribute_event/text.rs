@@ -264,7 +264,10 @@ pub(crate) fn refresh_auto_text_height_after_width_change(state: &mut LuaState, 
             return;
         };
         sim.widgets.get(id).is_some_and(|frame| {
-            frame.widget_type == WidgetType::FontString && frame.height_is_text_auto
+            frame.widget_type == WidgetType::FontString
+                && (frame.height_is_text_auto
+                    || (frame.height.abs() <= f32::EPSILON
+                        && frame.text.as_ref().is_some_and(|text| !text.is_empty())))
         })
     };
     if should_refresh {
@@ -724,25 +727,4 @@ fn measured_line_height(frame: &crate::widget::Frame) -> f32 {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::prepare_stripped_text;
-    use crate::widget::WidgetType;
-
-    #[test]
-    fn prepare_stripped_text_uses_html_stripping_for_simple_html() {
-        let stripped = prepare_stripped_text(
-            WidgetType::SimpleHTML,
-            Some("<p>Hello <b>World</b></p>".to_string()),
-        );
-        assert_eq!(stripped.as_deref(), Some("Hello World"));
-    }
-
-    #[test]
-    fn prepare_stripped_text_uses_wow_markup_stripping_for_font_strings() {
-        let stripped = prepare_stripped_text(
-            WidgetType::FontString,
-            Some("|cff00ff00Hello|r".to_string()),
-        );
-        assert_eq!(stripped.as_deref(), Some("Hello"));
-    }
-}
+mod tests;

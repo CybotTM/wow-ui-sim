@@ -66,6 +66,7 @@ pub fn set_size(state: &mut LuaState) -> LuaResult<u32> {
 
     apply_explicit_size(&mut sim, id, width, height);
     drop(sim);
+    refresh_auto_text_height_after_width_change(state, id);
     mark_nearest_layout_parent_dirty(state, id);
     super::super::widgets::refresh_scroll_frames_for_resized_frame(state, id)?;
     Ok(0)
@@ -123,6 +124,7 @@ pub fn set_height(state: &mut LuaState) -> LuaResult<u32> {
 
     apply_explicit_height(&mut sim, id, height);
     drop(sim);
+    refresh_auto_text_height_after_width_change(state, id);
     mark_nearest_layout_parent_dirty(state, id);
     super::super::widgets::refresh_scroll_frames_for_resized_frame(state, id)?;
     Ok(0)

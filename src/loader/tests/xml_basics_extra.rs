@@ -444,3 +444,30 @@ fn test_intrinsic_template_default_script_uses_precall_binding() {
         "intrinsic,normal",
     );
 }
+
+#[test]
+fn test_xml_fontstring_zero_height_uses_text_height() {
+    let t = load_test_xml(
+        "test-xml-fontstring-zero-height",
+        r#"<Ui>
+            <Frame name="ZeroHeightFontStringParent" parent="UIParent">
+                <Size x="300" y="32"/>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString name="ZeroHeightFontStringLabel" parentKey="Label" text="Visible label" inherits="GameFontHighlight">
+                            <Size x="260" y="0"/>
+                            <Anchors>
+                                <Anchor point="LEFT"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Ui>"#,
+    );
+
+    t.assert_lua_true(
+        "return ZeroHeightFontStringParent.Label:GetHeight() > 0",
+        "FontString XML labels with explicit zero height should use their measured text height",
+    );
+}
