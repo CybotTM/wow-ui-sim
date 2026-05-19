@@ -446,6 +446,54 @@ fn mouse_hover_sizes_tooltip_before_next_resize_or_draw() {
 }
 
 #[test]
+fn hover_after_lua_shows_hidden_subtree_rebuilds_hit_state_before_resize() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            RuntimeShownParent = CreateFrame("Frame", "RuntimeShownParent", UIParent)
+            RuntimeShownParent:SetSize(140, 80)
+            RuntimeShownParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 200, -160)
+            RuntimeShownParent:Hide()
+
+            RuntimeShownChild = CreateFrame("Button", "RuntimeShownChild", RuntimeShownParent)
+            RuntimeShownChild:SetSize(60, 30)
+            RuntimeShownChild:SetPoint("TOPLEFT", RuntimeShownParent, "TOPLEFT", 20, -20)
+            RuntimeShownChild:EnableMouse(true)
+            RuntimeShownChild:SetScript("OnEnter", function()
+                __runtime_shown_child_enter = (__runtime_shown_child_enter or 0) + 1
+            end)
+            __runtime_shown_child_enter = 0
+            "#,
+        )
+        .expect("runtime shown subtree setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    app.strata_dirty.set(0);
+
+    app.env
+        .borrow()
+        .exec("RuntimeShownParent:Show()")
+        .expect("showing hidden subtree should succeed");
+    app.invalidate_after_lua_mutation();
+
+    app.handle_mouse_move(Point::new(230.0, 195.0));
+
+    let enter_count: f64 = app
+        .env
+        .borrow()
+        .eval("return __runtime_shown_child_enter")
+        .expect("runtime shown child counter should be readable");
+    assert_eq!(
+        enter_count, 1.0,
+        "newly shown child should receive hover before the next GUI resize or draw"
+    );
+}
+
+#[test]
 fn syncing_same_gui_size_does_not_trigger_resize_refresh() {
     let app = build_test_app(ScreenKind::Game);
     rebuild_hittable_cache(&app);

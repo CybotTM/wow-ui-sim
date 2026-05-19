@@ -113,6 +113,55 @@ mod hit_grid_tests {
     }
 
     #[test]
+    fn shown_hidden_subtree_is_hit_testable_without_resize() {
+        let mut app = build_test_app();
+        app.env
+            .borrow()
+            .exec(
+                r#"
+                RuntimeShownParent = CreateFrame("Frame", "RuntimeShownParent", UIParent)
+                RuntimeShownParent:SetSize(140, 80)
+                RuntimeShownParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 200, -160)
+                RuntimeShownParent:Hide()
+
+                RuntimeShownChild = CreateFrame("Button", "RuntimeShownChild", RuntimeShownParent)
+                RuntimeShownChild:SetSize(60, 30)
+                RuntimeShownChild:SetPoint("TOPLEFT", RuntimeShownParent, "TOPLEFT", 20, -20)
+                RuntimeShownChild:EnableMouse(true)
+                RuntimeShownChild:SetScript("OnEnter", function()
+                    __runtime_shown_child_enter = (__runtime_shown_child_enter or 0) + 1
+                end)
+                __runtime_shown_child_enter = 0
+            "#,
+            )
+            .expect("runtime shown subtree setup should succeed");
+
+        let size = Size::new(800.0, 600.0);
+        app.mark_all_strata_dirty();
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+        app.strata_dirty.set(0);
+
+        app.env
+            .borrow()
+            .exec("RuntimeShownParent:Show()")
+            .expect("showing hidden subtree should succeed");
+        app.invalidate_after_lua_mutation();
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+
+        app.handle_mouse_move(Point::new(230.0, 195.0));
+
+        let enter_count: f64 = app
+            .env
+            .borrow()
+            .eval("return __runtime_shown_child_enter")
+            .expect("runtime shown child counter should be readable");
+        assert_eq!(
+            enter_count, 1.0,
+            "newly shown child should receive hover without waiting for GUI resize"
+        );
+    }
+
+    #[test]
     fn hit_rect_insets_scale_with_frame_scale() {
         let app = build_test_app();
         app.env
