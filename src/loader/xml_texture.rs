@@ -366,6 +366,7 @@ mod tests {
             r#"Parent-|TInterface\AddOns\Addon\Icon:0|t.__tex_1"#,
             &crate::xml::TextureXml::default(),
             "UIParent",
+            "UIParent",
             "ARTWORK",
             false,
             false,

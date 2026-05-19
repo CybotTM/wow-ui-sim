@@ -326,7 +326,7 @@ fn loadable_toc_path(path: &Path, screen: ScreenKind) -> Option<PathBuf> {
     let supports_screen = toc.allows_screen(screen);
     let supported_game_type = !toc.is_ptr_only() && !toc.is_game_type_restricted();
     let supported_interface = load_out_of_date_addons()
-        || toc.supports_interface_version(wow_ui_sim::toc::RETAIL_INTERFACE_VERSION);
+        || toc.supports_interface_version(wow_ui_sim::toc::ACTIVE_INTERFACE_VERSION);
     let eager_addon = !toc.is_load_on_demand();
     (supports_screen && supported_game_type && supported_interface && eager_addon)
         .then_some(toc_path)
@@ -687,7 +687,14 @@ mod tests {
     use super::*;
 
     fn write_addon(root: &Path, name: &str) -> PathBuf {
-        write_addon_with_toc(root, name, "## Interface: 120005\nmain.lua\n")
+        write_addon_with_toc(
+            root,
+            name,
+            &format!(
+                "## Interface: {}\nmain.lua\n",
+                wow_ui_sim::toc::ACTIVE_INTERFACE_VERSION
+            ),
+        )
     }
 
     fn write_addon_with_toc(root: &Path, name: &str, toc: &str) -> PathBuf {
@@ -730,7 +737,10 @@ mod tests {
         write_addon_with_toc(
             temp.path(),
             "CurrentAddon",
-            "## Interface: 120005\nmain.lua\n",
+            &format!(
+                "## Interface: {}\nmain.lua\n",
+                wow_ui_sim::toc::ACTIVE_INTERFACE_VERSION
+            ),
         );
         write_addon_with_toc(temp.path(), "OldAddon", "## Interface: 120001\nmain.lua\n");
 
@@ -761,5 +771,17 @@ mod tests {
 
         assert_eq!(sorted[0].name, "SlowAddon");
         assert_eq!(sorted[1].name, "FastAddon");
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn scan_addons_accepts_mists_interface_version() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        write_addon_with_toc(temp.path(), "ElvUI", "## Interface: 50503\nmain.lua\n");
+
+        let addons = scan_addons(temp.path(), &[], ScreenKind::Game);
+        let names: Vec<_> = addons.iter().map(|(name, _)| name.as_str()).collect();
+
+        assert_eq!(names, ["ElvUI"]);
     }
 }

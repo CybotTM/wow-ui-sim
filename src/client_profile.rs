@@ -25,6 +25,15 @@ impl ClientProfile {
             ClientProfile::Anniversary => "Anniversary",
         }
     }
+
+    pub const fn interface_version(self) -> u32 {
+        match self {
+            ClientProfile::Retail => 120005,
+            ClientProfile::Wrath => 38001,
+            ClientProfile::Mists => 50503,
+            ClientProfile::Era | ClientProfile::Anniversary => 11507,
+        }
+    }
 }
 
 #[cfg(all(

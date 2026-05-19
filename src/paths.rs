@@ -257,9 +257,7 @@ fn wtf_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
     push_env_path(&mut paths, "WOW_SIM_WTF_PATH");
 
     for root in install_roots_for_candidates(install_root) {
-        paths.push(root.join("_retail_/WTF"));
-        paths.push(root.join("_beta_/WTF"));
-        paths.push(root.join("_classic_/WTF"));
+        paths.extend(wtf_paths_for_install_root(&root));
     }
 
     if !cfg!(windows) {
@@ -270,6 +268,22 @@ fn wtf_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
     }
 
     paths
+}
+
+fn wtf_paths_for_install_root(root: &Path) -> Vec<PathBuf> {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => {
+            vec![root.join("_retail_/WTF"), root.join("_beta_/WTF")]
+        }
+        crate::client_profile::ClientProfile::Wrath
+        | crate::client_profile::ClientProfile::Mists => {
+            vec![root.join("_classic_/WTF")]
+        }
+        crate::client_profile::ClientProfile::Era
+        | crate::client_profile::ClientProfile::Anniversary => {
+            vec![root.join("_classic_era_/WTF")]
+        }
+    }
 }
 
 fn install_roots_for_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
@@ -411,20 +425,33 @@ mod tests {
 
         let candidates = wtf_path_candidates(Some(&install_root));
 
-        let retail_wtf = install_root.join("_retail_/WTF");
+        let profile_wtf = wtf_paths_for_install_root(&install_root)
+            .into_iter()
+            .next()
+            .expect("active profile should have a WTF candidate");
         let project_mirror = PathBuf::from("/syncthing/Sync/Projects/wow/WTF");
-        let retail_index = candidates
+        let profile_index = candidates
             .iter()
-            .position(|path| path == &retail_wtf)
-            .expect("retail WTF should be a candidate");
+            .position(|path| path == &profile_wtf)
+            .expect("profile WTF should be a candidate");
         let project_index = candidates
             .iter()
             .position(|path| path == &project_mirror)
             .expect("project mirror should remain a fallback");
         assert!(
-            retail_index < project_index,
+            profile_index < project_index,
             "live install WTF should win over stale project mirrors"
         );
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_wtf_candidates_use_classic_install_flavor_only() {
+        let install_root = PathBuf::from("/tmp/wow-install");
+
+        let candidates = wtf_paths_for_install_root(&install_root);
+
+        assert_eq!(candidates.as_slice(), &[install_root.join("_classic_/WTF")]);
     }
 
     #[test]
