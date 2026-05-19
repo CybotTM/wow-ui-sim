@@ -2,7 +2,7 @@
 
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref,
-    sync_child_to_rilua, table_get, val_to_string,
+    sync_child_to_rilua, table_get, table_get_static, val_to_string,
 };
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
@@ -296,11 +296,25 @@ pub(crate) fn read_font_object_fields(state: &mut LuaState, font_object: Val) ->
             .map(|justify| crate::widget::TextJustify::from_wow_str(&justify)),
         justify_v: font_field_string(state, font_object.clone(), "__justifyV", "__justifyV")
             .map(|justify| crate::widget::TextJustify::from_wow_str(&justify)),
-        text_color: read_color(state, font_object.clone(), "__textColor"),
-        shadow_color: read_color(state, font_object.clone(), "__shadowColor"),
+        text_color: read_color(state, font_object.clone(), TEXT_COLOR_FIELD_KEYS),
+        shadow_color: read_color(state, font_object.clone(), SHADOW_COLOR_FIELD_KEYS),
         shadow_offset: read_shadow_offset(state, font_object),
     }
 }
+
+const TEXT_COLOR_FIELD_KEYS: [&str; 4] = [
+    "__textColorR",
+    "__textColorG",
+    "__textColorB",
+    "__textColorA",
+];
+
+const SHADOW_COLOR_FIELD_KEYS: [&str; 4] = [
+    "__shadowColorR",
+    "__shadowColorG",
+    "__shadowColorB",
+    "__shadowColorA",
+];
 
 pub(crate) fn apply_font_object_snapshot(
     fontstring: &mut crate::widget::Frame,
@@ -366,14 +380,14 @@ pub(crate) fn font_object_snapshot_changes_frame(
 fn font_field_string(
     state: &mut LuaState,
     table: Val,
-    primary: &str,
-    fallback: &str,
+    primary: &'static str,
+    fallback: &'static str,
 ) -> Option<String> {
-    let primary_value = table_get(state, table.clone(), primary);
+    let primary_value = table_get_static(state, table.clone(), primary);
     match primary_value {
         Val::Str(_) => val_to_string(state, primary_value),
         _ => {
-            let fallback_value = table_get(state, table, fallback);
+            let fallback_value = table_get_static(state, table, fallback);
             val_to_string(state, fallback_value)
         }
     }
@@ -382,39 +396,27 @@ fn font_field_string(
 fn font_field_number(
     state: &mut LuaState,
     table: Val,
-    primary: &str,
-    fallback: &str,
+    primary: &'static str,
+    fallback: &'static str,
 ) -> Option<f64> {
-    match table_get(state, table.clone(), primary) {
+    match table_get_static(state, table.clone(), primary) {
         Val::Num(value) => Some(value),
-        _ => match table_get(state, table, fallback) {
+        _ => match table_get_static(state, table, fallback) {
             Val::Num(value) => Some(value),
             _ => None,
         },
     }
 }
 
-fn read_color(state: &mut LuaState, table: Val, prefix: &str) -> Option<crate::widget::Color> {
-    let r = font_field_number(
-        state,
-        table.clone(),
-        &format!("{prefix}R"),
-        &format!("{prefix}R"),
-    )?;
-    let g = font_field_number(
-        state,
-        table.clone(),
-        &format!("{prefix}G"),
-        &format!("{prefix}G"),
-    )?;
-    let b = font_field_number(
-        state,
-        table.clone(),
-        &format!("{prefix}B"),
-        &format!("{prefix}B"),
-    )?;
-    let a = font_field_number(state, table, &format!("{prefix}A"), &format!("{prefix}A"))
-        .unwrap_or(1.0);
+fn read_color(
+    state: &mut LuaState,
+    table: Val,
+    keys: [&'static str; 4],
+) -> Option<crate::widget::Color> {
+    let r = font_field_number(state, table.clone(), keys[0], keys[0])?;
+    let g = font_field_number(state, table.clone(), keys[1], keys[1])?;
+    let b = font_field_number(state, table.clone(), keys[2], keys[2])?;
+    let a = font_field_number(state, table, keys[3], keys[3]).unwrap_or(1.0);
     Some(crate::widget::Color::new(
         r as f32, g as f32, b as f32, a as f32,
     ))
