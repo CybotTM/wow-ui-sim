@@ -67,7 +67,7 @@ fn visible_same_strata_subtree_ids(state: &SimState, subtree_ids: &HashSet<u64>)
             state
                 .widgets
                 .get(id)
-                .is_some_and(|frame| state.frame_render_alpha(frame) > 0.0)
+                .is_some_and(|frame| state.frame_belongs_in_strata_bucket(id, frame))
         })
         .collect()
 }

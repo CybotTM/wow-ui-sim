@@ -96,3 +96,36 @@ fn show_root_frame_still_falls_back_to_full_invalidation() {
 
     assert!(state.strata_buckets.is_none());
 }
+
+#[test]
+fn show_tooltip_root_appends_without_invalidating_buckets() {
+    let mut state = SimState::default();
+    state
+        .widgets
+        .register(test_frame(30, WidgetType::Frame, None, true));
+
+    let mut tooltip = test_frame(31, WidgetType::GameTooltip, Some(30), false);
+    tooltip.frame_strata = FrameStrata::Tooltip;
+    state.widgets.register(tooltip);
+    state.widgets.add_child(30, 31);
+
+    let _ = state.get_strata_buckets();
+    assert!(state.strata_buckets.is_some());
+
+    state.set_frame_visible(31, true);
+
+    assert!(
+        state.strata_buckets.is_some(),
+        "showing a tooltip root should append to the tooltip bucket without full invalidation"
+    );
+    let tooltip_bucket = state
+        .strata_buckets
+        .as_ref()
+        .unwrap()
+        .get(FrameStrata::Tooltip.as_index())
+        .unwrap();
+    assert!(
+        tooltip_bucket.contains(&31),
+        "shown tooltip should be present in the cached tooltip bucket"
+    );
+}

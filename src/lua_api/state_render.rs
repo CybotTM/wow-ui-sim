@@ -394,7 +394,9 @@ impl SimState {
         self.widgets.propagate_effective_alpha(id, parent_eff);
         if visible {
             // Show: insert newly-visible frames AFTER propagating alpha.
-            if !self.try_repair_strata_buckets_after_show(id) {
+            if !self.try_repair_strata_buckets_after_show(id)
+                && !self.try_append_tooltip_root_after_show(id)
+            {
                 self.invalidate_strata_buckets();
             }
         }
@@ -418,6 +420,30 @@ impl SimState {
         splice_strata_bucket_repair(&mut buckets[repair_plan.strata_idx], repair_plan)
     }
 
+    fn try_append_tooltip_root_after_show(&mut self, shown_id: u64) -> bool {
+        let Some(frame) = self.widgets.get(shown_id) else {
+            return false;
+        };
+        if self.frame_bucket_strata(frame) != crate::widget::FrameStrata::Tooltip {
+            return false;
+        }
+        let Some(repair_plan) = build_strata_bucket_repair_plan(self, shown_id) else {
+            return false;
+        };
+        let Some(bucket) = self
+            .strata_buckets
+            .as_mut()
+            .and_then(|buckets| buckets.get_mut(repair_plan.strata_idx))
+        else {
+            return false;
+        };
+        if bucket.iter().any(|&id| id == shown_id) {
+            return true;
+        }
+        bucket.extend(repair_plan.replacement_segment);
+        true
+    }
+
     fn visible_same_strata_ancestor(&self, id: u64) -> Option<u64> {
         let frame = self.widgets.get(id)?;
         let target_strata = self.frame_bucket_strata(frame).as_index();
@@ -428,7 +454,7 @@ impl SimState {
                 return None;
             }
             if self.frame_bucket_strata(parent).as_index() == target_strata
-                && self.frame_render_alpha(parent) > 0.0
+                && self.frame_belongs_in_strata_bucket(parent_id, parent)
             {
                 return Some(parent_id);
             }
@@ -470,20 +496,6 @@ impl SimState {
             );
         }
         self.strata_buckets = None;
-    }
-
-    pub(crate) fn frame_render_alpha(&self, frame: &crate::widget::Frame) -> f32 {
-        if frame.effective_alpha > 0.0 {
-            return frame.effective_alpha;
-        }
-        if frame.alpha > 0.0 && uses_parent_alpha_fallback(frame) {
-            return frame
-                .parent_id
-                .and_then(|parent_id| self.widgets.get(parent_id))
-                .map(|parent| parent.effective_alpha)
-                .unwrap_or(0.0);
-        }
-        0.0
     }
 
     pub(crate) fn frame_bucket_strata(
