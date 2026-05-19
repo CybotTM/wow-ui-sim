@@ -1,0 +1,50 @@
+const HOT_STATIC_LITERALS: &[&str] = &[
+    "",
+    "ADDON_LOADED",
+    "AND",
+    "ANY",
+    "BackdropTemplateMixin",
+    "CHAT_MSG_LOOT",
+    "GameFontHighlight",
+    "GameFontHighlightSmall",
+    "GameFontNormal",
+    "HighlightTexture",
+    "IconBorder",
+    "LOOT",
+    "Middle",
+    "Name",
+    "NONE",
+    "NormalTexture",
+    "NumberFontNormal",
+    "OnBackdropLoaded",
+    "OnBackdropSizeChanged",
+    "OnClick",
+    "OnEnter",
+    "OnHide",
+    "OnLeave",
+    "OnLoad",
+    "OnMouseDown",
+    "OnShow",
+    "PushedTexture",
+    "SecureActionButtonMixin",
+    "SecureActionButton_OnClick",
+    "SecureHandler_OnLoad",
+    "Text",
+    "UIParent",
+    "Unknown",
+    "__rilua_timer_callbacks",
+    "action",
+    "icon",
+    "main",
+    "n",
+    "pressAndHoldAction",
+    "spell",
+    "type",
+];
+
+pub(super) fn get(value: &str) -> Option<&'static str> {
+    HOT_STATIC_LITERALS
+        .iter()
+        .copied()
+        .find(|candidate| *candidate == value)
+}

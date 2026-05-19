@@ -21,6 +21,7 @@ use std::cell::{Ref, RefMut};
 use std::rc::Rc;
 
 mod frame_metatable;
+mod hot_static_literals;
 use frame_metatable::frame_metatable_for_widget_type;
 
 /// Extract the frame ID (u64) from a Lua argument (a backed table).
@@ -371,57 +372,11 @@ pub fn create_string(state: &mut LuaState, s: &str) -> Val {
     Val::Str(intern_string_maybe_static(state, s))
 }
 
-const HOT_STATIC_LITERALS: &[&str] = &[
-    "",
-    "ADDON_LOADED",
-    "ANY",
-    "GameFontHighlight",
-    "GameFontHighlightSmall",
-    "GameFontNormal",
-    "HighlightTexture",
-    "IconBorder",
-    "LOOT",
-    "Middle",
-    "Name",
-    "NormalTexture",
-    "NumberFontNormal",
-    "OnBackdropLoaded",
-    "OnBackdropSizeChanged",
-    "OnClick",
-    "OnEnter",
-    "OnHide",
-    "OnLeave",
-    "OnLoad",
-    "OnMouseDown",
-    "OnShow",
-    "PushedTexture",
-    "SecureActionButtonMixin",
-    "SecureActionButton_OnClick",
-    "Text",
-    "UIParent",
-    "Unknown",
-    "CHAT_MSG_LOOT",
-    "__rilua_timer_callbacks",
-    "icon",
-    "main",
-    "n",
-    "pressAndHoldAction",
-    "spell",
-    "type",
-];
-
-fn static_string_for_hot_literal(value: &str) -> Option<&'static str> {
-    HOT_STATIC_LITERALS
-        .iter()
-        .copied()
-        .find(|candidate| *candidate == value)
-}
-
 fn intern_string_maybe_static(
     state: &mut LuaState,
     value: &str,
 ) -> GcRef<rilua::vm::string::LuaString> {
-    if let Some(static_value) = static_string_for_hot_literal(value) {
+    if let Some(static_value) = hot_static_literals::get(value) {
         return state.gc.intern_string_static(static_value.as_bytes());
     }
     state.gc.intern_string(value.as_bytes())
