@@ -92,6 +92,33 @@ fn dropdown_setup_creates_all_and_player_radios_out_of_glue() {
     });
 }
 
+#[test]
+fn dropdown_player_radio_uses_seeded_local_character_identity() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let (player_radio_text, player_radio_value): (String, String) = env
+            .eval(
+                r#"
+                local radios = {}
+                AddonList:GetScript("OnShow")(AddonList)
+
+                local rootDescription = {
+                    SetTag = function() end,
+                    CreateRadio = function(_, text, isSelected, setSelected, value)
+                        table.insert(radios, { text = text, value = value })
+                    end,
+                }
+
+                AddonList.Dropdown.menuGenerator(AddonList.Dropdown, rootDescription)
+                return radios[2].text, radios[2].value
+                "#,
+            )
+            .expect("AddonList dropdown player identity probe must run cleanly");
+
+        assert_eq!(player_radio_text, "Uther");
+        assert_eq!(player_radio_value, "Player-1-00000001");
+    });
+}
+
 type DropdownProbe = (
     String,
     i64,

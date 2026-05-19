@@ -299,37 +299,6 @@ pub const XP_LEVELS: &[(&'static str, f64)] = &[
     ("100%", 1.0),
 ];
 
-/// Pick a random WoW-style player name using the current time as a seed.
-pub fn random_player_name() -> String {
-    const NAMES: &[&str] = &[
-        "Arthas",
-        "Jaina",
-        "Thrall",
-        "Varian",
-        "Anduin",
-        "Garrosh",
-        "Tyrande",
-        "Malfurion",
-        "Illidan",
-        "Khadgar",
-        "Genn",
-        "Baine",
-        "Rokhan",
-        "Thalyssra",
-        "Alleria",
-        "Turalyon",
-        "Calia",
-        "Lothraxion",
-        "Velen",
-        "Yrel",
-    ];
-    let nanos = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.subsec_nanos() as usize)
-        .unwrap_or(0);
-    NAMES[nanos % NAMES.len()].to_string()
-}
-
 /// Default party member definitions: (name, class_index, health_max, power, power_max, power_type, power_type_name).
 const DEFAULT_PARTY_MEMBERS: &[(&'static str, i32, i32, i32, i32, i32, &str)] = &[
     ("Thrynn", 2, 120_000, 80_000, 80_000, 0, "MANA"), // Paladin

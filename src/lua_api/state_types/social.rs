@@ -1,5 +1,12 @@
 //! BattleNet / social friend list + summon-request state.
 
+/// Seeded local character identity used by in-game player APIs and glue
+/// character-list data. Keeping these aligned prevents UI like AddOnList from
+/// showing a random current-player name that is not present in the account's
+/// character list.
+pub const SEEDED_LOCAL_CHARACTER_NAME: &str = "Uther";
+pub const SEEDED_LOCAL_CHARACTER_GUID: &str = "Player-1-00000001";
+
 /// One BattleNet friend entry. Drives `C_BattleNet.GetAccountInfoByGUID`,
 /// `GetFriendAccountInfo`, `GetFriendNumAccounts`, and `GetNumFriends`.
 /// The `game_accounts` vec holds all WoW (and other Blizzard game)

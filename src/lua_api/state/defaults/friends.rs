@@ -32,9 +32,9 @@ fn uther_online_friend() -> BnetFriend {
 
 fn uther_stormwind_account() -> BnetGameAccount {
     BnetGameAccount {
-        wow_account_guid: "Player-1-00000001".into(),
+        wow_account_guid: SEEDED_LOCAL_CHARACTER_GUID.into(),
         game_account_id: 200001,
-        character_name: "Uther".into(),
+        character_name: SEEDED_LOCAL_CHARACTER_NAME.into(),
         realm_name: "Stormwind".into(),
         realm_display_name: "Stormwind".into(),
         realm_id: 1,

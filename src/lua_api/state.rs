@@ -326,7 +326,6 @@ pub use super::game_data::{
 use super::game_data::{
     default_action_bars, default_allied_races, default_major_faction_renown_levels,
     default_major_factions, default_model_scenes, default_party, default_player_buffs,
-    random_player_name,
 };
 pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
@@ -344,8 +343,9 @@ pub use super::state_types::{
     LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MovementState,
     MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
     MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer,
-    PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
-    SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
+    PlayerState, PlayerXpState, SEEDED_LOCAL_CHARACTER_GUID, SEEDED_LOCAL_CHARACTER_NAME,
+    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState,
+    TokenAuctionInfo, WorldState, WowTokenState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -595,7 +595,7 @@ impl SimState {
         self.major_factions = default_major_factions();
         self.major_faction_renown_levels = default_major_faction_renown_levels();
         crate::lua_api::globals::keybindings::init_keybindings(self);
-        self.player.name = random_player_name();
+        self.player.name = SEEDED_LOCAL_CHARACTER_NAME.to_string();
         self.player.power = 50_000;
         self.player.power_max = 100_000;
         self.player.buffs = default_player_buffs();

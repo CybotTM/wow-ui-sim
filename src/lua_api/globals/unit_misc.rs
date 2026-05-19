@@ -2,6 +2,7 @@
 
 use crate::lua_api::globals::security::mark_secret_value;
 use crate::lua_api::methods::{borrow_state, create_string, create_table};
+use crate::lua_api::state::SEEDED_LOCAL_CHARACTER_GUID;
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -147,7 +148,7 @@ fn creature_id_from_guid(guid: &str) -> Option<i32> {
 
 fn guid_for_unit(sim: &crate::lua_api::state::SimState, unit: &str) -> String {
     match unit {
-        "player" => "Player-0000-00000001".to_string(),
+        "player" => SEEDED_LOCAL_CHARACTER_GUID.to_string(),
         "target" => target_guid(sim),
         "focus" => focus_guid(sim),
         other => party_guid_for_unit(other).unwrap_or_else(|| UNKNOWN_CREATURE_GUID.to_string()),
