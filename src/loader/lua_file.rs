@@ -136,19 +136,18 @@ fn wow_chunk_name(path: &Path) -> String {
 }
 
 fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
+    let Some(patch) = lua_source_patch_for_chunk(chunk_name) else {
+        return Cow::Borrowed(bytes);
+    };
     let Ok(source) = std::str::from_utf8(bytes) else {
         return Cow::Borrowed(bytes);
     };
 
-    let mut patched = Cow::Borrowed(source);
-    if let Some(patch) = lua_source_patch_for_chunk(chunk_name) {
-        patched = Cow::Owned(apply_lua_source_patch(&patched, patch.operations));
-    }
-
-    if patched.as_ref() == source {
+    let patched = apply_lua_source_patch(source, patch.operations);
+    if patched == source {
         return Cow::Borrowed(bytes);
     }
-    Cow::Owned(patched.into_owned().into_bytes())
+    Cow::Owned(patched.into_bytes())
 }
 
 struct LuaSourcePatch {
@@ -394,10 +393,16 @@ const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
 ];
 
 fn lua_source_patch_for_chunk(chunk_name: &str) -> Option<&'static LuaSourcePatch> {
-    let normalized_chunk_name = chunk_name.replace('\\', "/");
+    let normalized_chunk_name;
+    let chunk_name = if chunk_name.contains('\\') {
+        normalized_chunk_name = chunk_name.replace('\\', "/");
+        normalized_chunk_name.as_str()
+    } else {
+        chunk_name
+    };
     LUA_SOURCE_PATCHES
         .iter()
-        .find(|patch| normalized_chunk_name.ends_with(patch.suffix))
+        .find(|patch| chunk_name.ends_with(patch.suffix))
 }
 
 fn apply_lua_source_patch(source: &str, operations: &[LuaSourcePatchOp]) -> String {
@@ -588,18 +593,23 @@ mod tests {
         assert_eq!(results, vec![rilua::Val::Num(1.0)]);
     }
 
-    /// A function handle reloaded from cached bytecode must accept `setfenv`
-    /// exactly like one produced by fresh compilation. This protects the
-    /// invariant documented on `load_cached_or_compile`: regardless of
-    /// whether `compile_with_rilua` consumed source or bytecode,
-    /// `state_set_fenv` can still retarget the returned closure so
-    /// downstream `mark_secure_state` works on cache hits.
+    #[test]
+    fn patch_lua_source_skips_unpatched_decode_and_matches_windows_paths() {
+        let bytes = b"\xFF\xFEunpatched lua bytes";
+        let patched = patch_lua_source(bytes, "@Interface/AddOns/TestAddon/Unpatched.lua");
+        assert!(matches!(patched, Cow::Borrowed(_)));
+
+        let patch = lua_source_patch_for_chunk(
+            r"@Interface\AddOns\Blizzard_PetBattleUI\Blizzard_PetBattleUI.lua",
+        );
+        assert!(patch.is_some());
+    }
+
     #[test]
     fn bytecode_replayed_function_accepts_setfenv() {
         use rilua::LuaApiMut;
 
         let mut lua = rilua::Lua::new().unwrap();
-        // Fresh compile -> get a Function whose prototype we can dump.
         let func_from_source =
             compile_with_rilua(&mut lua, b"return MARK_SECURE_PROBE", "@cache_test")
                 .expect("source compile should succeed");
@@ -613,24 +623,18 @@ mod tests {
                 .expect("closure exists");
             match closure {
                 rilua::vm::closure::Closure::Lua(cl) => cl.proto.clone(),
-                rilua::vm::closure::Closure::Rust(_) => {
-                    panic!("compiled source should produce a Lua closure")
-                }
+                rilua::vm::closure::Closure::Rust(_) => panic!("expected Lua closure"),
             }
         };
 
-        // Dump to Lua 5.1 bytecode bytes — what bytecode_cache would store.
         let bytecode = {
             let state = lua.state_mut();
             rilua::vm::dump::dump(&proto, Some(&state.gc.string_arena), false)
         };
 
-        // Simulate a cache hit: feed bytecode back through the same entry
-        // point the loader uses on miss.
         let func_from_bytecode = compile_with_rilua(&mut lua, &bytecode, "@cache_test")
             .expect("bytecode replay should succeed");
 
-        // Build a fresh env table, point it at a sentinel value.
         let env_table = LuaApiMut::create_table(&mut lua);
         {
             let state = lua.state_mut();
@@ -639,12 +643,9 @@ mod tests {
             env_table.raw_set(state, key, sentinel).unwrap();
         }
 
-        // Swap the replayed closure's fenv — the secureenv path.
         rilua::api::state_set_fenv(lua.state_mut(), &func_from_bytecode, &env_table)
             .expect("state_set_fenv should accept bytecode-replayed closure");
 
-        // The replayed chunk should resolve MARK_SECURE_PROBE through the
-        // swapped env, not _G (where it's nil).
         let results = lua.call_function(&func_from_bytecode, &[]).unwrap();
         let resolved = results.into_iter().next().expect("chunk returns a value");
         let rilua::Val::Str(s) = resolved else {
