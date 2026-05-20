@@ -1,24 +1,15 @@
 use crate::widget::WidgetRegistry;
 use std::collections::HashSet;
 
+#[path = "state_render_buckets/trace.rs"]
+mod trace;
+
+pub(super) use trace::should_trace_strata_invalidations;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct RegionEntry {
     depth: u32,
     id: u64,
-}
-
-pub(super) fn should_trace_strata_invalidations(start_time: &std::time::Instant) -> bool {
-    if std::env::var_os("WOW_SIM_TRACE_STRATA_INVALIDATIONS").is_none() {
-        return false;
-    }
-
-    let after_ms = std::env::var("WOW_SIM_TRACE_STRATA_INVALIDATIONS_AFTER_MS")
-        .ok()
-        .and_then(|value| value.parse::<u64>().ok());
-    match after_ms {
-        Some(ms) => start_time.elapsed() >= std::time::Duration::from_millis(ms),
-        None => true,
-    }
 }
 
 pub(super) fn uses_parent_alpha_fallback(frame: &crate::widget::Frame) -> bool {
