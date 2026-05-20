@@ -332,3 +332,41 @@ fn late_resolve_anchor_with_parent_prefix_suffix() {
         "late-bind must substitute $parentHeader2 to InfoPanelHeader2"
     );
 }
+
+#[test]
+fn anchor_dependents_keep_forward_and_reverse_indexes_in_sync() {
+    let mut registry = WidgetRegistry::default();
+
+    registry.add_anchor_dependent(10, 2);
+    registry.add_anchor_dependent(11, 2);
+    registry.add_anchor_dependent(10, 3);
+
+    assert_eq!(
+        registry.get_anchor_dependents(10),
+        Some(&FxHashSet::from_iter([2, 3]))
+    );
+    assert_eq!(
+        registry.frame_anchor_targets.get(&2),
+        Some(&FxHashSet::from_iter([10, 11]))
+    );
+
+    registry.remove_anchor_dependent(10, 2);
+
+    assert_eq!(
+        registry.get_anchor_dependents(10),
+        Some(&FxHashSet::from_iter([3]))
+    );
+    assert_eq!(
+        registry.frame_anchor_targets.get(&2),
+        Some(&FxHashSet::from_iter([11]))
+    );
+
+    registry.remove_all_anchor_dependents_for(2);
+
+    assert_eq!(
+        registry.get_anchor_dependents(10),
+        Some(&FxHashSet::from_iter([3]))
+    );
+    assert!(registry.get_anchor_dependents(11).is_none());
+    assert!(registry.frame_anchor_targets.get(&2).is_none());
+}

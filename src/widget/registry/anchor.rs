@@ -214,10 +214,24 @@ impl WidgetRegistry {
             .entry(target_id)
             .or_default()
             .insert(frame_id);
+        self.frame_anchor_targets
+            .entry(frame_id)
+            .or_default()
+            .insert(target_id);
     }
 
     /// Remove `frame_id` from `target_id`'s dependents.
     pub fn remove_anchor_dependent(&mut self, target_id: u64, frame_id: u64) {
+        if let Some(set) = self.frame_anchor_targets.get_mut(&frame_id) {
+            set.remove(&target_id);
+            if set.is_empty() {
+                self.frame_anchor_targets.remove(&frame_id);
+            }
+        }
+        self.remove_anchor_dependent_from_target(target_id, frame_id);
+    }
+
+    fn remove_anchor_dependent_from_target(&mut self, target_id: u64, frame_id: u64) {
         if let Some(set) = self.anchor_dependents.get_mut(&target_id) {
             set.remove(&frame_id);
             if set.is_empty() {
@@ -226,21 +240,12 @@ impl WidgetRegistry {
         }
     }
 
-    /// Remove `frame_id` from all reverse-index entries by reading its current
-    /// anchors to find the targets.
+    /// Remove `frame_id` from every reverse-index entry it is registered in.
     pub fn remove_all_anchor_dependents_for(&mut self, frame_id: u64) {
-        let targets: Vec<u64> = self
-            .widgets
-            .get(&frame_id)
-            .map(|f| {
-                f.anchors
-                    .iter()
-                    .filter_map(|a| a.relative_to_id.map(|t| t as u64))
-                    .collect()
-            })
-            .unwrap_or_default();
-        for target in targets {
-            self.remove_anchor_dependent(target, frame_id);
+        if let Some(targets) = self.frame_anchor_targets.remove(&frame_id) {
+            for target in targets {
+                self.remove_anchor_dependent_from_target(target, frame_id);
+            }
         }
     }
 
@@ -254,6 +259,7 @@ impl WidgetRegistry {
     /// and frame creation.
     pub fn rebuild_anchor_index(&mut self) {
         self.anchor_dependents.clear();
+        self.frame_anchor_targets.clear();
         let frame_ids: Vec<u64> = self.widgets.keys().copied().collect();
         for frame_id in frame_ids {
             self.resolve_named_anchor_targets_for_frame(frame_id);
