@@ -215,6 +215,45 @@ fn add_child_repairs_missing_parent_child_entry() {
 }
 
 #[test]
+fn event_listeners_use_index_without_scanning_widgets() {
+    let mut registry = WidgetRegistry::default();
+    registry.register(frame(1, WidgetType::Frame, None, FrameStrata::Medium));
+    registry.register(frame(2, WidgetType::Frame, None, FrameStrata::Medium));
+    registry.register(frame(3, WidgetType::Frame, None, FrameStrata::Medium));
+
+    assert!(registry.register_event_listener(2, "PLAYER_LOGIN"));
+    assert!(registry.register_event_listener(1, "PLAYER_LOGIN"));
+    registry.register_all_event_listener(3);
+
+    assert_eq!(registry.get_event_listeners("PLAYER_LOGIN"), vec![1, 2, 3]);
+    assert_eq!(registry.get_event_listeners("PLAYER_LOGOUT"), vec![3]);
+}
+
+#[test]
+fn event_listener_index_updates_on_unregisters() {
+    let mut registry = WidgetRegistry::default();
+    registry.register(frame(1, WidgetType::Frame, None, FrameStrata::Medium));
+    registry.register(frame(2, WidgetType::Frame, None, FrameStrata::Medium));
+
+    assert!(registry.register_event_listener(1, "PLAYER_LOGIN"));
+    assert!(registry.register_unit_event_listener(1, "UNIT_HEALTH", "player"));
+    registry.register_all_event_listener(2);
+
+    assert!(registry.unregister_event_listener(1, "PLAYER_LOGIN"));
+    assert_eq!(registry.get_event_listeners("PLAYER_LOGIN"), vec![2]);
+
+    registry.unregister_all_event_listeners(1);
+    assert_eq!(registry.get_event_listeners("UNIT_HEALTH"), vec![2]);
+    assert!(
+        registry
+            .get(1)
+            .expect("frame should remain registered")
+            .registered_unit_events
+            .is_empty()
+    );
+}
+
+#[test]
 fn late_resolve_anchor_with_parent_prefix_suffix() {
     // Reproduces the Communities Guild Info panel bug: a child frame is
     // anchored to `$parentHeader2` but Header2 (a layer Texture) is

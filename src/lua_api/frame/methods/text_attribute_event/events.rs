@@ -54,12 +54,7 @@ pub(super) fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
     }
     let newly_registered = {
         let mut sim = borrow_state_mut(state)?;
-        sim.widgets.get_mut(id).is_some_and(|frame| {
-            frame
-                .registered_unit_events
-                .insert(event.clone(), unit.clone());
-            frame.registered_events.insert(event.clone())
-        })
+        sim.widgets.register_unit_event_listener(id, &event, &unit)
     };
     if newly_registered {
         rilua_hlist_register_individual(state, id, &event)?;
@@ -99,17 +94,10 @@ fn mutate_registered_event_checked(
 ) -> LuaResult<bool> {
     ensure_registerable_event(state, id, event)?;
     let mut sim = borrow_state_mut(state)?;
-    Ok(sim
-        .widgets
-        .get_mut(id)
-        .map(|frame| match op {
-            RegisteredEventOp::Insert => frame.registered_events.insert(event.to_string()),
-            RegisteredEventOp::Remove => {
-                frame.registered_unit_events.remove(event);
-                frame.registered_events.remove(event)
-            }
-        })
-        .unwrap_or(false))
+    Ok(match op {
+        RegisteredEventOp::Insert => sim.widgets.register_event_listener(id, event),
+        RegisteredEventOp::Remove => sim.widgets.unregister_event_listener(id, event),
+    })
 }
 
 fn ensure_registerable_event(state: &mut LuaState, id: u64, event: &str) -> LuaResult<()> {
@@ -133,11 +121,7 @@ pub(super) fn unregister_all_events(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     {
         let mut sim = borrow_state_mut(state)?;
-        if let Some(frame) = sim.widgets.get_mut(id) {
-            frame.registered_events.clear();
-            frame.registered_unit_events.clear();
-            frame.register_all_events = false;
-        }
+        sim.widgets.unregister_all_event_listeners(id);
     }
     rilua_hlist_unregister_all(state, id)?;
     Ok(0)
@@ -147,9 +131,7 @@ pub(super) fn register_all_events(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     {
         let mut sim = borrow_state_mut(state)?;
-        if let Some(frame) = sim.widgets.get_mut(id) {
-            frame.register_all_events = true;
-        }
+        sim.widgets.register_all_event_listener(id);
     }
     rilua_hlist_register_all(state, id)?;
     Ok(0)
@@ -186,12 +168,10 @@ pub(super) fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
             event
         )));
     }
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut(id) {
-        f.registered_events.insert(event.clone());
-    }
+    borrow_state_mut(state)?
+        .widgets
+        .register_event_listener(id, &event);
     let restricted = crate::event::is_restricted_event(&event);
-    drop(sim);
     rilua_hlist_register_individual(state, id, &event)?;
     state.push(Val::Bool(!restricted));
     Ok(1)
@@ -209,11 +189,9 @@ pub(super) fn register_unit_event_callback(state: &mut LuaState) -> LuaResult<u3
         return Ok(1);
     }
     let unit_filter = val_to_string(state, stack_val(state, 4));
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(f) = sim.widgets.get_mut(id) {
-        f.registered_events.insert(event.clone());
-    }
-    drop(sim);
+    borrow_state_mut(state)?
+        .widgets
+        .register_event_listener(id, &event);
     rilua_hlist_register_individual(state, id, &event)?;
     super::callbacks::register_unit_callback(state, id, &event, callback, unit_filter.as_deref())?;
     let restricted = crate::event::is_restricted_event(&event);

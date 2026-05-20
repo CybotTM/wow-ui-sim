@@ -30,6 +30,10 @@ pub struct WidgetRegistry {
     names: FxHashMap<String, u64>,
     /// Widget IDs in creation order (monotonically increasing, always sorted).
     ordered_ids: Vec<u64>,
+    /// Reverse event index for frames registered for a specific event.
+    event_listeners: FxHashMap<String, FxHashSet<u64>>,
+    /// Reverse event index for frames registered for every event.
+    all_event_listeners: FxHashSet<u64>,
     /// Frame IDs whose visual properties changed since last render.
     /// Checked and drained by the render loop.
     render_dirty_ids: RefCell<FxHashSet<u64>>,
@@ -59,6 +63,8 @@ impl WidgetRegistry {
             ),
             names: FxHashMap::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
             ordered_ids: Vec::with_capacity(Self::INITIAL_CAPACITY),
+            event_listeners: FxHashMap::with_capacity_and_hasher(512, Default::default()),
+            all_event_listeners: FxHashSet::with_capacity_and_hasher(64, Default::default()),
             render_dirty_ids: RefCell::new(FxHashSet::with_capacity_and_hasher(
                 256,
                 Default::default(),
@@ -193,19 +199,105 @@ impl WidgetRegistry {
     /// Individual RegisterEvent listeners fire before RegisterAllEvents listeners.
     /// Within each group, frames fire in creation order (ascending ID).
     pub fn get_event_listeners(&self, event: &str) -> Vec<u64> {
-        let mut individual = Vec::new();
-        let mut all_events = Vec::new();
-        for frame in self.widgets.values() {
-            if frame_is_registered_for_event(frame, event) {
-                individual.push(frame.id);
-            } else if frame.register_all_events {
-                all_events.push(frame.id);
-            }
-        }
+        let mut individual = self
+            .event_listeners
+            .get(event)
+            .map(|listeners| listeners.iter().copied().collect::<Vec<_>>())
+            .unwrap_or_default();
+        let mut all_events = self
+            .all_event_listeners
+            .iter()
+            .copied()
+            .filter(|id| !individual.contains(id))
+            .collect::<Vec<_>>();
         individual.sort_unstable();
         all_events.sort_unstable();
         individual.extend(all_events);
         individual
+    }
+
+    pub fn register_event_listener(&mut self, id: u64, event: &str) -> bool {
+        let was_inserted = self
+            .widgets
+            .get_mut(&id)
+            .map(|frame| frame.registered_events.insert(event.to_string()))
+            .unwrap_or(false);
+        if was_inserted {
+            self.event_listeners
+                .entry(event.to_string())
+                .or_default()
+                .insert(id);
+        }
+        was_inserted
+    }
+
+    pub fn register_unit_event_listener(&mut self, id: u64, event: &str, unit: &str) -> bool {
+        let was_inserted = self
+            .widgets
+            .get_mut(&id)
+            .map(|frame| {
+                frame
+                    .registered_unit_events
+                    .insert(event.to_string(), unit.to_string());
+                frame.registered_events.insert(event.to_string())
+            })
+            .unwrap_or(false);
+        if was_inserted {
+            self.event_listeners
+                .entry(event.to_string())
+                .or_default()
+                .insert(id);
+        }
+        was_inserted
+    }
+
+    pub fn unregister_event_listener(&mut self, id: u64, event: &str) -> bool {
+        let was_removed = self
+            .widgets
+            .get_mut(&id)
+            .map(|frame| {
+                frame.registered_unit_events.remove(event);
+                frame.registered_events.remove(event)
+            })
+            .unwrap_or(false);
+        if was_removed {
+            self.remove_event_listener_index(id, event);
+        }
+        was_removed
+    }
+
+    pub fn unregister_all_event_listeners(&mut self, id: u64) {
+        let registered_events = self
+            .widgets
+            .get_mut(&id)
+            .map(|frame| {
+                let registered_events = frame.registered_events.iter().cloned().collect::<Vec<_>>();
+                frame.registered_events.clear();
+                frame.registered_unit_events.clear();
+                frame.register_all_events = false;
+                registered_events
+            })
+            .unwrap_or_default();
+        for event in registered_events {
+            self.remove_event_listener_index(id, &event);
+        }
+        self.all_event_listeners.remove(&id);
+    }
+
+    pub fn register_all_event_listener(&mut self, id: u64) {
+        if let Some(frame) = self.widgets.get_mut(&id) {
+            frame.register_all_events = true;
+            self.all_event_listeners.insert(id);
+        }
+    }
+
+    fn remove_event_listener_index(&mut self, id: u64, event: &str) {
+        if let Some(listeners) = self.event_listeners.get_mut(event) {
+            listeners.remove(&id);
+            if listeners.is_empty() {
+                self.event_listeners.remove(event);
+            }
+        }
     }
 
     /// Add a child to a parent widget.
@@ -637,10 +729,6 @@ impl WidgetRegistry {
             .or_default()
             .insert(source);
     }
-}
-
-fn frame_is_registered_for_event(frame: &Frame, event: &str) -> bool {
-    frame.registered_events.contains(event)
 }
 
 #[cfg(test)]
