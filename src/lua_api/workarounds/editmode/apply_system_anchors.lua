@@ -127,9 +127,6 @@
             end
 
             local frameName = system_frame_name(systemFrame)
-            if frameName == "PlayerCastingBarFrame" then
-                return
-            end
             if frameName == "PlayerFrame" and PlayerCastingBarFrame then
                 return
             end
@@ -140,6 +137,68 @@
             end
 
             pcall(systemFrame.ApplySystemAnchor, systemFrame)
+        end
+
+        local function is_unlocked_cast_bar(systemFrame)
+            if system_frame_name(systemFrame) ~= "PlayerCastingBarFrame" then
+                return false
+            end
+            local castBarSettings = Enum and Enum.EditModeCastBarSetting
+            if not castBarSettings then
+                return false
+            end
+            local lockSetting = castBarSettings.LockToPlayerFrame
+            if lockSetting == nil then
+                return false
+            end
+            if systemFrame.GetSettingValueBool then
+                local ok, locked = pcall(systemFrame.GetSettingValueBool, systemFrame, lockSetting)
+                if ok then
+                    return not locked
+                end
+            end
+            local systemInfo = systemFrame.systemInfo
+            for _, settingInfo in ipairs(systemInfo and systemInfo.settings or {}) do
+                if settingInfo.setting == lockSetting then
+                    return not (settingInfo.value == 1 or settingInfo.value == true)
+                end
+            end
+            return false
+        end
+
+        local function apply_anchor_info_directly(systemFrame)
+            local anchorInfo = systemFrame and systemFrame.systemInfo and systemFrame.systemInfo.anchorInfo
+            if not anchorInfo then
+                return false
+            end
+            local fields = debug and debug.getfenv and debug.getfenv(systemFrame)
+            fields = fields and fields[1]
+            local clearAllPoints = fields and rawget(fields, "ClearAllPointsBase")
+            clearAllPoints = clearAllPoints or systemFrame.ClearAllPointsBase
+            local setPoint = fields and rawget(fields, "SetPointBase")
+            setPoint = setPoint or systemFrame.SetPointBase
+            if not setPoint then
+                return false
+            end
+            local relativeTo = anchorInfo.relativeTo
+            if type(relativeTo) == "string" then
+                relativeTo = _G[relativeTo]
+            end
+            if not relativeTo then
+                relativeTo = UIParent
+            end
+            if clearAllPoints then
+                clearAllPoints(systemFrame)
+            end
+            setPoint(
+                systemFrame,
+                anchorInfo.point or "CENTER",
+                relativeTo,
+                anchorInfo.relativePoint or anchorInfo.point or "CENTER",
+                anchorInfo.offsetX or 0,
+                anchorInfo.offsetY or 0
+            )
+            return true
         end
 
         local function update_system_setting_with_display_value(systemFrame, setting, displayValue)
@@ -455,8 +514,12 @@
                 end
             elseif skips_full_startup_scale_update(systemFrame) then
                 if seed_system_frame(systemFrame) then
-                    apply_system_anchor_if_safe(systemFrame)
                     replay_system_settings(systemFrame)
+                    if is_unlocked_cast_bar(systemFrame) then
+                        if not apply_anchor_info_directly(systemFrame) then
+                            apply_system_anchor_if_safe(systemFrame)
+                        end
+                    end
                 end
             else
                 local seeded = seed_system_frame(systemFrame)
