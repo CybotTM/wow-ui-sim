@@ -53,12 +53,12 @@ mod voice_chat;
 mod warband_scene;
 mod zone_ability;
 
+use crate::c_api::temporary_shims::c_configuration_warnings;
 use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
     c_artifact_ui, c_azerite_empowered_item, c_azerite_essence, c_azerite_item, c_barber_shop,
-    c_behavioral_messaging, c_configuration_warnings, c_cursor, c_fog_of_war, c_major_factions,
-    c_map_exploration_info, c_paper_doll_info, c_player_interaction_manager, c_spell,
-    c_spell_diminish, c_widget,
+    c_behavioral_messaging, c_cursor, c_fog_of_war, c_major_factions, c_map_exploration_info,
+    c_paper_doll_info, c_player_interaction_manager, c_spell, c_spell_diminish, c_widget,
 };
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
@@ -274,7 +274,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     battle_net::register_battle_net_surface(state)?;
-    c_configuration_warnings::register_c_configuration_warnings_surface(state)?;
+    c_configuration_warnings::register_c_configuration_warnings(state)?;
     character_services::register_character_services_surface(state)?;
     chat_bubbles::register_chat_bubbles_surface(state)?;
     club_finder::register_club_finder_surface(state)?;

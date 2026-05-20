@@ -1,4 +1,9 @@
-//! `C_ConfigurationWarnings` glue warnings surface.
+//! C_ConfigurationWarnings temporary shim — warning state is not modeled.
+//!
+//! The shared bootstrap asks this namespace for visible warnings during
+//! startup. Until the simulator has a real configuration-warning source,
+//! expose an empty list plus a local "seen" cache so callers can exercise the
+//! API shape without inventing warning data.
 
 use crate::c_api::ensure_namespace;
 use crate::lua_api::methods::{create_table, table_get, table_set, val_to_string};
@@ -8,7 +13,7 @@ use rilua::{LuaResult, Val};
 
 const SEEN_WARNINGS_KEY: &str = "__wow_seen_warnings";
 
-pub fn register_c_configuration_warnings_surface(state: &mut LuaState) -> LuaResult<()> {
+pub fn register_c_configuration_warnings(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_ConfigurationWarnings")?;
     table_set_rust_fn_static(
         state,
