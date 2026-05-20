@@ -5,10 +5,9 @@
 #[path = "hero_talents/rendering.rs"]
 mod hero_talents_rendering;
 
-use std::path::PathBuf;
-
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 use wow_ui_sim::render::shader::load_texture_or_crop;
 use wow_ui_sim::texture::TextureManager;
 
@@ -20,7 +19,7 @@ fn env_with_full_ui() -> WowLuaEnv {
     let env = env();
     env.set_screen_size(1024.0, 768.0);
 
-    let ui = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
+    let ui = default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced");
     {
         let mut state = env.state().borrow_mut();
         state.addon_base_paths = vec![ui.clone()];
