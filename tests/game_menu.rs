@@ -7,6 +7,7 @@
 use crate::common;
 
 use std::path::PathBuf;
+use iced::Point;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::paths::default_blizzard_ui_addons_path;
@@ -221,6 +222,70 @@ fn test_game_menu_buttons_created_on_show() {
         assert!(
             count >= 8,
             "Expected at least 8 active buttons after Show(), got {count}"
+        );
+    }
+}
+
+#[test]
+fn test_game_menu_options_button_hitbox_matches_visual_center() {
+    test_timeout! {
+        let env = setup_env();
+        env.exec("GameMenuFrame:Show()").unwrap();
+
+        let button_debug_name: String = env
+            .eval(
+                r#"
+                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                    if btn:GetText() == "Options" then
+                        return btn:GetDebugName()
+                    end
+                end
+                return ""
+            "#,
+            )
+            .unwrap();
+        let button_id: u64 = button_debug_name
+            .rsplit_once(':')
+            .and_then(|(_, id)| id.parse().ok())
+            .unwrap_or_else(|| panic!("Options button debug name should end with an internal id, got {button_debug_name:?}"));
+
+        let center = {
+            let mut state = env.state().borrow_mut();
+            state.ensure_layout_rects();
+            let rect = state
+                .widgets
+                .get(button_id)
+                .and_then(|frame| frame.layout_rect)
+                .expect("Options game-menu button should have a resolved rect");
+            let center = Point::new(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
+            state.set_mouse_position(Some((center.x, center.y)));
+            state.hovered_frame = Some(button_id);
+            center
+        };
+
+        let result: String = env
+            .eval(
+                r#"
+                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                    if btn:GetText() == "Options" then
+                        if not btn:IsMouseOver() then
+                            return "not_mouse_over"
+                        end
+                        if not btn:IsMouseMotionFocus() then
+                            return "not_mouse_motion_focus"
+                        end
+                        return "ok"
+                    end
+                end
+                return "missing_options_button"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(
+            result, "ok",
+            "Options visual center should hit and hover its button at ({}, {}) for widget id {button_id}: {result}",
+            center.x, center.y
         );
     }
 }
