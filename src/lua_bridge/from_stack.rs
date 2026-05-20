@@ -282,7 +282,7 @@ impl FromStack for String {
                     .ok_or_else(|| {
                         runtime_error(format!("string at argument {index} has been collected"))
                     })?;
-                String::from_utf8(bytes.to_vec()).map_err(|_| {
+                std::str::from_utf8(bytes).map(str::to_owned).map_err(|_| {
                     runtime_error(format!("string at argument {index} is not valid UTF-8"))
                 })
             }
@@ -351,4 +351,42 @@ fn runtime_error(msg: impl Into<String>) -> LuaError {
         level: 1,
         traceback: vec![],
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::FromStack;
+    use rilua::LuaApiMut;
+    use rilua::Val;
+
+    #[test]
+    fn string_from_stack_validates_before_allocating_result() {
+        let mut lua = rilua::Lua::new().expect("lua should initialize");
+        let state = lua.state_mut();
+        let key = state.gc.intern_string(b"hello");
+        state.ensure_stack(state.base + 1);
+        state.stack_set(state.base, Val::Str(key));
+        state.top = state.base + 1;
+
+        let value = String::from_stack(state, 1).expect("valid UTF-8 string should convert");
+
+        assert_eq!(value, "hello");
+    }
+
+    #[test]
+    fn string_from_stack_rejects_invalid_utf8_without_copying_first() {
+        let mut lua = rilua::Lua::new().expect("lua should initialize");
+        let state = lua.state_mut();
+        let key = state.gc.intern_string(&[0xff]);
+        state.ensure_stack(state.base + 1);
+        state.stack_set(state.base, Val::Str(key));
+        state.top = state.base + 1;
+
+        let error = String::from_stack(state, 1).expect_err("invalid UTF-8 should fail");
+
+        assert!(
+            error.to_string().contains("not valid UTF-8"),
+            "unexpected error: {error}"
+        );
+    }
 }

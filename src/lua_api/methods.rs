@@ -399,7 +399,7 @@ pub fn create_string_bytes(state: &mut LuaState, bytes: &[u8]) -> Val {
 pub fn val_to_string(state: &LuaState, val: Val) -> Option<String> {
     let Val::Str(str_ref) = val else { return None };
     let lua_str = state.gc.string_arena.get(str_ref)?;
-    String::from_utf8(lua_str.data().to_vec()).ok()
+    std::str::from_utf8(lua_str.data()).ok().map(str::to_owned)
 }
 
 // ── Function calling ────────────────────────────────────────────────
@@ -649,8 +649,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::{
-        borrow_state, create_table, frame_ref, table_get, table_get_static, table_set,
-        table_set_static,
+        borrow_state, create_string_bytes, create_table, frame_ref, table_get, table_get_static,
+        table_set, table_set_static, val_to_string,
     };
     use crate::lua_api::WowLuaEnv;
     use rilua::LuaApiMut;
@@ -701,5 +701,18 @@ mod tests {
         assert_eq!(table_get_static(state, table, "staticKey"), Val::Num(40.0));
         assert_eq!(table_get(state, table, "missingKey"), Val::Nil);
         assert_eq!(table_get_static(state, Val::Nil, "staticKey"), Val::Nil);
+    }
+
+    #[test]
+    fn val_to_string_validates_lua_string_bytes_before_allocating_result() {
+        let env = WowLuaEnv::new().expect("env");
+        let mut lua = env.rilua_mut();
+        let state = lua.state_mut();
+
+        let valid = create_string_bytes(state, b"hello");
+        let invalid = create_string_bytes(state, &[0xff]);
+
+        assert_eq!(val_to_string(state, valid).as_deref(), Some("hello"));
+        assert_eq!(val_to_string(state, invalid), None);
     }
 }
