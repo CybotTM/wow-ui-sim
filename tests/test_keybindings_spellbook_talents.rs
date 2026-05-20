@@ -547,3 +547,73 @@ fn talent_panel_has_at_least_one_visible_talent_node_frame() {
         );
     }
 }
+
+#[test]
+fn talent_panel_hero_spec_button_uses_protection_hero_icon_atlases() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (PlayerSpellsUtil and type(PlayerSpellsUtil.ToggleClassTalentFrame) == "function") then
+                    return "missing_toggle_class_talent_frame"
+                end
+
+                PlayerSpellsUtil.ToggleClassTalentFrame()
+
+                local talentsFrame = PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame
+                if not (talentsFrame and talentsFrame:IsShown()) then
+                    return "talents_frame_not_shown"
+                end
+
+                local heroButton = talentsFrame.HeroTalentsContainer and talentsFrame.HeroTalentsContainer.HeroSpecButton
+                if not (heroButton and heroButton:IsShown()) then
+                    return "hero_button_not_shown"
+                end
+
+                local icon1Atlas = heroButton.Icon1 and heroButton.Icon1:GetAtlas()
+                if icon1Atlas ~= "talents-heroclass-paladin-lightsmith" then
+                    return "bad_icon1:" .. tostring(icon1Atlas)
+                end
+
+                heroButton:Click()
+                if not (HeroTalentsSelectionDialog and HeroTalentsSelectionDialog:IsShown()) then
+                    return "selection_dialog_not_shown"
+                end
+
+                local seen = {}
+                for _, specFrame in pairs(HeroTalentsSelectionDialog.specFramesBySubTreeID or {}) do
+                    local atlas = specFrame.SpecImage and specFrame.SpecImage:GetAtlas()
+                    if atlas then
+                        seen[atlas] = true
+                    end
+                end
+
+                if not seen["talents-heroclass-paladin-lightsmith"] then
+                    return "missing_lightsmith_dialog_icon"
+                end
+                if not seen["talents-heroclass-paladin-templar"] then
+                    return "missing_templar_dialog_icon"
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Talent panel hero icon flow produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "Protection hero talent picker should render atlas-backed hero icons: {result}"
+        );
+    }
+}
