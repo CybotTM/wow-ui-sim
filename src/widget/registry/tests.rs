@@ -215,6 +215,27 @@ fn add_child_repairs_missing_parent_child_entry() {
 }
 
 #[test]
+fn register_indexes_existing_children_for_duplicate_free_add_child() {
+    let mut registry = WidgetRegistry::default();
+    let mut parent = frame(1, WidgetType::Frame, None, FrameStrata::High);
+    parent.children.push(2);
+    let child = frame(2, WidgetType::Texture, Some(1), FrameStrata::High);
+
+    registry.register(parent);
+    registry.register(child);
+    registry.add_child(1, 2);
+
+    assert_eq!(
+        registry
+            .get(1)
+            .expect("parent should remain registered")
+            .children,
+        vec![2],
+        "pre-existing child list entries should be indexed at registration"
+    );
+}
+
+#[test]
 fn event_listeners_use_index_without_scanning_widgets() {
     let mut registry = WidgetRegistry::default();
     registry.register(frame(1, WidgetType::Frame, None, FrameStrata::Medium));

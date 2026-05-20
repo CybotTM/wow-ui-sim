@@ -30,6 +30,8 @@ pub struct WidgetRegistry {
     names: FxHashMap<String, u64>,
     /// Widget IDs in creation order (monotonically increasing, always sorted).
     ordered_ids: Vec<u64>,
+    /// Existing parent-child edges for O(1) duplicate checks.
+    child_links: FxHashSet<(u64, u64)>,
     /// Reverse event index for frames registered for a specific event.
     event_listeners: FxHashMap<String, FxHashSet<u64>>,
     /// Reverse event index for frames registered for every event.
@@ -63,6 +65,7 @@ impl WidgetRegistry {
             ),
             names: FxHashMap::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
             ordered_ids: Vec::with_capacity(Self::INITIAL_CAPACITY),
+            child_links: Self::initial_id_pair_set(),
             event_listeners: FxHashMap::with_capacity_and_hasher(512, Default::default()),
             all_event_listeners: FxHashSet::with_capacity_and_hasher(64, Default::default()),
             render_dirty_ids: RefCell::new(FxHashSet::with_capacity_and_hasher(
@@ -78,15 +81,17 @@ impl WidgetRegistry {
                 Self::INITIAL_CAPACITY,
                 Default::default(),
             ),
-            rect_dirty_ids: FxHashSet::with_capacity_and_hasher(
-                Self::INITIAL_CAPACITY,
-                Default::default(),
-            ),
-            pending_layout_ids: FxHashSet::with_capacity_and_hasher(
-                Self::INITIAL_CAPACITY,
-                Default::default(),
-            ),
+            rect_dirty_ids: Self::initial_id_set(),
+            pending_layout_ids: Self::initial_id_set(),
         }
+    }
+
+    fn initial_id_set() -> FxHashSet<u64> {
+        FxHashSet::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default())
+    }
+
+    fn initial_id_pair_set() -> FxHashSet<(u64, u64)> {
+        FxHashSet::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default())
     }
 
     /// Register a new widget.
@@ -109,6 +114,14 @@ impl WidgetRegistry {
         }
         if widget.layout_rect.is_none() {
             self.pending_layout_ids.insert(id);
+        }
+        if !is_new && let Some(existing) = self.widgets.get(&id) {
+            for &child_id in &existing.children {
+                self.child_links.remove(&(id, child_id));
+            }
+        }
+        for &child_id in &widget.children {
+            self.child_links.insert((id, child_id));
         }
         self.widgets.insert(id, widget);
         if is_new {
@@ -312,25 +325,21 @@ impl WidgetRegistry {
             .get(&child_id)
             .and_then(|child| child.parent_id);
         if old_parent_id != Some(parent_id) {
-            if let Some(old_parent_id) = old_parent_id
-                && let Some(old_parent) = self.widgets.get_mut(&old_parent_id)
-            {
-                old_parent.children.retain(|&id| id != child_id);
-                old_parent
-                    .children_keys
-                    .retain(|_, mapped_id| *mapped_id != child_id);
+            if let Some(old_parent_id) = old_parent_id {
+                self.child_links.remove(&(old_parent_id, child_id));
+                if let Some(old_parent) = self.widgets.get_mut(&old_parent_id) {
+                    old_parent.children.retain(|&id| id != child_id);
+                    old_parent
+                        .children_keys
+                        .retain(|_, mapped_id| *mapped_id != child_id);
+                }
             }
             if let Some(child) = self.widgets.get_mut(&child_id) {
                 child.parent_id = Some(parent_id);
             }
         }
         if let Some(parent) = self.widgets.get_mut(&parent_id) {
-            let child_already_registered =
-                old_parent_id == Some(parent_id) && parent.children.contains(&child_id);
-            if !child_already_registered {
-                if old_parent_id != Some(parent_id) {
-                    parent.children.retain(|&id| id != child_id);
-                }
+            if self.child_links.insert((parent_id, child_id)) {
                 parent.children.push(child_id);
             }
         }
