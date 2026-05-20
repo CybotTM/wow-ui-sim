@@ -28,7 +28,6 @@
 //!   id, returns mount_id or nil.
 //! - `GetVisibilityInfo(spellID, filter)` → `(false, true, false)` — most
 //!   spells visible but not custom-pinned.
-//! - `IsPriorityAura(spellID)` → false (permissive).
 //! - `IsSelfBuff(spellID)` → true when `implicit_target == 1` (Self), else false.
 //! - `IsSpellUsable(spellID)` → `(true, false)` when spell is known;
 //!   `(false, false)` otherwise.
@@ -105,7 +104,6 @@ const SPELL_QUERY_METHODS: &[(&str, SpellScriptFn)] = &[
 const SPELL_BOOLEAN_METHODS: &[(&str, SpellScriptFn)] = &[
     ("DoesSpellExist", does_spell_exist),
     ("IsSpellDataCached", is_spell_data_cached),
-    ("IsPriorityAura", is_priority_aura),
     ("IsSelfBuff", is_self_buff),
     ("IsSpellPassive", is_spell_passive),
     ("IsAutoAttackSpell", is_auto_attack_spell),
@@ -452,15 +450,6 @@ fn does_spell_exist(state: &mut LuaState) -> LuaResult<u32> {
 fn is_spell_data_cached(state: &mut LuaState) -> LuaResult<u32> {
     let spell_id = u32::from_stack(state, 1)?;
     state.push(Val::Bool(spell_id != 0));
-    Ok(1)
-}
-
-/// `C_Spell.IsPriorityAura(spellID)` → `false`.
-///
-/// The sim does not model priority aura ordering; always false.
-fn is_priority_aura(state: &mut LuaState) -> LuaResult<u32> {
-    let _spell_id = u32::from_stack(state, 1)?;
-    state.push(Val::Bool(false));
     Ok(1)
 }
 
