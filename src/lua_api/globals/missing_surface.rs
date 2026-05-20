@@ -54,8 +54,9 @@ mod zone_ability;
 
 use crate::c_api::permanent_shims::c_nameplate;
 use crate::c_api::temporary_shims::{
-    c_behavioral_messaging, c_configuration_warnings, c_spell_classification, c_spell_counts,
-    c_spell_priority_aura, c_spell_static_fallbacks, c_spell_target,
+    c_behavioral_messaging, c_configuration_warnings, c_party_info_instance_abandon,
+    c_spell_classification, c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks,
+    c_spell_target,
 };
 use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -299,6 +300,7 @@ fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
 fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     death_recap::register_death_recap_surface(state)?;
     party_info::register_party_info_surface(state)?;
+    c_party_info_instance_abandon::register_c_party_info_instance_abandon(state)?;
     player_info::register_player_info_surface(state)?;
     lfg_info::register_lfg_info_surface(state)?;
     pet_battles::register_pet_battles_surface(state)?;

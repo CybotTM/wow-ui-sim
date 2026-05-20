@@ -3,6 +3,7 @@ pub mod c_black_market;
 pub mod c_calendar;
 pub mod c_configuration_warnings;
 pub mod c_lfg_info;
+pub mod c_party_info_instance_abandon;
 pub mod c_perks_program;
 pub mod c_spell_classification;
 pub mod c_spell_counts;

@@ -11,60 +11,18 @@
 //!   (≥5 for party, ≥40 for raid).
 //! - `C_PartyInfo.IsPartyInJailersTower()` — always false (Torghast stub).
 //! - `C_PartyInfo.GetInviteConfirmationInfo(guid)` — nil for all guids.
-//! - `C_PartyInfo.GetInstanceAbandonVoteTime()` — `0, 0`.
-//! - `C_PartyInfo.GetInstanceAbandonShutdownTime()` — `0, 0`.
-//! - `C_PartyInfo.GetInstanceAbandonVoteResponse()` — nil.
-//! - `C_PartyInfo.GetNumInstanceAbandonGroupVoteResponses()` — `0`.
-//! - `C_PartyInfo.CanStartInstanceAbandonVote()` — false.
-//! - `C_PartyInfo.StartInstanceAbandonVote()` — no-op.
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::globals::group_queries::active_party_count;
 use crate::lua_api::methods::create_table;
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
-use rilua::vm::closure::RustFn;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 const AVAILABLE_LOOT_METHODS: [i32; 5] = [0, 1, 2, 3, 4];
-const INSTANCE_ABANDON_METHODS: &[PartyInfoMethod] = &[
-    PartyInfoMethod {
-        name: "GetInstanceAbandonVoteTime",
-        handler: c_party_info_get_instance_abandon_vote_time,
-    },
-    PartyInfoMethod {
-        name: "GetInstanceAbandonShutdownTime",
-        handler: c_party_info_get_instance_abandon_shutdown_time,
-    },
-    PartyInfoMethod {
-        name: "GetInstanceAbandonVoteResponse",
-        handler: c_party_info_get_instance_abandon_vote_response,
-    },
-    PartyInfoMethod {
-        name: "SetInstanceAbandonVoteResponse",
-        handler: c_party_info_set_instance_abandon_vote_response,
-    },
-    PartyInfoMethod {
-        name: "GetNumInstanceAbandonGroupVoteResponses",
-        handler: c_party_info_get_num_instance_abandon_group_vote_responses,
-    },
-    PartyInfoMethod {
-        name: "CanStartInstanceAbandonVote",
-        handler: c_party_info_can_start_instance_abandon_vote,
-    },
-    PartyInfoMethod {
-        name: "StartInstanceAbandonVote",
-        handler: c_party_info_start_instance_abandon_vote,
-    },
-];
-
-struct PartyInfoMethod {
-    name: &'static str,
-    handler: RustFn,
-}
 
 pub(super) fn register_party_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_PartyInfo")?;
@@ -108,23 +66,6 @@ fn register_invite_and_tower_stubs(state: &mut LuaState, table_ref: GcRef<Table>
         "GetInviteConfirmationInfo",
         c_party_info_get_invite_confirmation_info,
     )?;
-    register_instance_abandon_stubs(state, table_ref)?;
-    Ok(())
-}
-
-fn register_instance_abandon_stubs(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
-    register_party_info_methods(state, table_ref, INSTANCE_ABANDON_METHODS)?;
-    Ok(())
-}
-
-fn register_party_info_methods(
-    state: &mut LuaState,
-    table_ref: GcRef<Table>,
-    methods: &[PartyInfoMethod],
-) -> LuaResult<()> {
-    for method in methods {
-        table_set_rust_fn_static(state, table_ref, method.name, method.handler)?;
-    }
     Ok(())
 }
 
@@ -217,45 +158,6 @@ fn c_party_info_is_party_in_jailers_tower(state: &mut LuaState) -> LuaResult<u32
 /// clubId)` for a pending invite. Sim has no invite queue.
 fn c_party_info_get_invite_confirmation_info(state: &mut LuaState) -> LuaResult<u32> {
     let _ = state; // consume argument
-    Ok(0)
-}
-
-fn c_party_info_get_instance_abandon_vote_time(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    Ok(2)
-}
-
-fn c_party_info_get_instance_abandon_shutdown_time(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    Ok(2)
-}
-
-fn c_party_info_get_instance_abandon_vote_response(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
-    Ok(1)
-}
-
-fn c_party_info_set_instance_abandon_vote_response(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = Option::<bool>::from_stack(state, 1)?;
-    Ok(0)
-}
-
-fn c_party_info_get_num_instance_abandon_group_vote_responses(
-    state: &mut LuaState,
-) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
-    Ok(1)
-}
-
-fn c_party_info_can_start_instance_abandon_vote(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-fn c_party_info_start_instance_abandon_vote(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = state;
     Ok(0)
 }
 
