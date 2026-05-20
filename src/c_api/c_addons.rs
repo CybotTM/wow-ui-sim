@@ -1,3 +1,5 @@
+use super::helpers::set_global_val;
+use crate::addon_enable_state::save_local_addon_enable_overrides;
 use crate::loader::LoadError;
 use crate::lua_api::methods::{
     borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, registry_get,
@@ -5,12 +7,9 @@ use crate::lua_api::methods::{
 };
 use crate::lua_api::{AddonEnableSnapshot, LoaderEnv};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
-use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
+use rilua::{LuaResult, Val, vm::state::LuaState};
 use std::path::{Path, PathBuf};
 use std::{collections::HashSet, io};
-
-use super::helpers::set_global_val;
 
 #[path = "c_addons_missing.rs"]
 mod c_addons_missing;
@@ -372,6 +371,9 @@ fn c_addons_save_addons(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     sim.addon_saved_enable_state = Some(AddonEnableSnapshot::from_addons(&sim.addons));
     sim.addon_saved_version_check_enabled = Some(version_check_enabled);
+    if let Err(error) = save_local_addon_enable_overrides(&sim.addons) {
+        eprintln!("[C_AddOns] failed to save local AddOns.txt: {error}");
+    }
     Ok(0)
 }
 

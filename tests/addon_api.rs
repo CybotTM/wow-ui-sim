@@ -1,8 +1,8 @@
 //! Tests for addon API functions (addon_api.rs).
 
+use std::collections::HashMap;
 use wow_ui_sim::lua_api::AddonInfo;
 use wow_ui_sim::lua_api::WowLuaEnv;
-use std::collections::HashMap;
 
 #[path = "addon_api/dependencies.rs"]
 mod addon_api_dependencies;

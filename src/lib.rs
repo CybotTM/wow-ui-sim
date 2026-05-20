@@ -7,6 +7,7 @@
 #[allow(unused_imports)]
 use iced_dynamic;
 
+pub mod addon_enable_state;
 pub mod addon_tests;
 pub mod app_icon_render;
 pub mod asset_resolver_config;

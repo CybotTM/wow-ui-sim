@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+use wow_ui_sim::addon_enable_state::{local_addons_txt_path, read_addon_enable_overrides};
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::toc::TocFile;
 
@@ -21,6 +22,10 @@ pub(super) fn addon_enabled(
 pub(super) fn addon_enable_overrides(
     saved_vars: Option<&SavedVariablesManager>,
 ) -> Option<HashMap<String, bool>> {
+    if let Ok(overrides) = read_addon_enable_overrides(&local_addons_txt_path()) {
+        return Some(overrides);
+    }
+
     let config = saved_vars?.wtf_config()?;
     let path = config
         .wtf_path
@@ -29,14 +34,7 @@ pub(super) fn addon_enable_overrides(
         .join(&config.realm)
         .join(&config.character)
         .join("AddOns.txt");
-    let text = std::fs::read_to_string(path).ok()?;
-    let mut states = HashMap::new();
-    for line in text.lines() {
-        if let Some((name, state)) = line.split_once(':') {
-            states.insert(name.trim().to_string(), state.trim() == "enabled");
-        }
-    }
-    Some(states)
+    read_addon_enable_overrides(&path).ok()
 }
 
 pub(super) fn dependency_aware_enable_overrides(
@@ -49,11 +47,15 @@ pub(super) fn dependency_aware_enable_overrides(
 
     loop {
         let newly_enabled = collect_new_dependency_enables(&addon_tocs, overrides, &effective);
-        if newly_enabled.is_empty() {
+        let newly_disabled = collect_new_dependency_disables(&addon_tocs, &effective);
+        if newly_enabled.is_empty() && newly_disabled.is_empty() {
             return Some(effective);
         }
         for name in newly_enabled {
             effective.insert(name, true);
+        }
+        for name in newly_disabled {
+            effective.insert(name, false);
         }
     }
 }
@@ -90,10 +92,58 @@ fn collect_new_dependency_enables(
     newly_enabled
 }
 
+fn collect_new_dependency_disables(
+    addon_tocs: &HashMap<String, TocFile>,
+    effective: &HashMap<String, bool>,
+) -> Vec<String> {
+    let mut newly_disabled = Vec::new();
+    for (name, toc) in addon_tocs {
+        if !effective.get(name).copied().unwrap_or(false) {
+            continue;
+        }
+        if toc
+            .dependencies()
+            .iter()
+            .any(|dependency| effective.get(dependency) == Some(&false))
+        {
+            newly_disabled.push(name.clone());
+        }
+    }
+    newly_disabled
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::path::Path;
+    use std::sync::Mutex;
+
+    static ADDONS_TXT_ENV_LOCK: Mutex<()> = Mutex::new(());
+
+    struct ScopedAddonsTxtEnv {
+        previous: Option<std::ffi::OsString>,
+    }
+
+    impl ScopedAddonsTxtEnv {
+        fn set(path: &Path) -> Self {
+            let previous = std::env::var_os("WOW_SIM_ADDONS_TXT");
+            unsafe {
+                std::env::set_var("WOW_SIM_ADDONS_TXT", path);
+            }
+            Self { previous }
+        }
+    }
+
+    impl Drop for ScopedAddonsTxtEnv {
+        fn drop(&mut self) {
+            unsafe {
+                match &self.previous {
+                    Some(previous) => std::env::set_var("WOW_SIM_ADDONS_TXT", previous),
+                    None => std::env::remove_var("WOW_SIM_ADDONS_TXT"),
+                }
+            }
+        }
+    }
 
     fn metadata(default_enabled: bool) -> super::super::AddonMetadata {
         super::super::AddonMetadata {
@@ -146,7 +196,9 @@ mod tests {
 
     #[test]
     fn addon_enable_overrides_reads_character_addons_txt() {
+        let _guard = ADDONS_TXT_ENV_LOCK.lock().expect("env lock");
         let temp = tempfile::tempdir().expect("tempdir");
+        let _env = ScopedAddonsTxtEnv::set(&temp.path().join("missing-local-AddOns.txt"));
         let addon_state_dir = temp.path().join("Account/Test/Burning Blade/Palaky");
         std::fs::create_dir_all(&addon_state_dir).expect("create character dir");
         std::fs::write(
@@ -167,6 +219,35 @@ mod tests {
 
         assert_eq!(overrides.get("EnabledAddon"), Some(&true));
         assert_eq!(overrides.get("DisabledAddon"), Some(&false));
+    }
+
+    #[test]
+    fn addon_enable_overrides_prefers_local_addons_txt() {
+        let _guard = ADDONS_TXT_ENV_LOCK.lock().expect("env lock");
+        let temp = tempfile::tempdir().expect("tempdir");
+        let local_path = temp.path().join("local-AddOns.txt");
+        let _env = ScopedAddonsTxtEnv::set(&local_path);
+        std::fs::write(&local_path, "LocalDisabled: disabled\n").expect("write local AddOns.txt");
+
+        let wtf_dir = temp.path().join("wtf");
+        let addon_state_dir = wtf_dir.join("Account/Test/Burning Blade/Palaky");
+        std::fs::create_dir_all(&addon_state_dir).expect("create character dir");
+        std::fs::write(
+            addon_state_dir.join("AddOns.txt"),
+            "LocalDisabled: enabled\n",
+        )
+        .expect("write WTF AddOns.txt");
+        let mut saved_vars = SavedVariablesManager::new();
+        saved_vars.set_wtf_config(wow_ui_sim::saved_variables::WtfConfig::new(
+            &wtf_dir,
+            "Test",
+            "Burning Blade",
+            "Palaky",
+        ));
+
+        let overrides = addon_enable_overrides(Some(&saved_vars)).expect("read overrides");
+
+        assert_eq!(overrides.get("LocalDisabled"), Some(&false));
     }
 
     #[test]
@@ -230,5 +311,28 @@ mod tests {
 
         assert_eq!(effective.get("ParentAddon"), Some(&true));
         assert_eq!(effective.get("OptionalAddon"), Some(&false));
+    }
+
+    #[test]
+    fn dependency_aware_overrides_disable_addons_with_disabled_required_deps() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        let addons = vec![
+            write_addon_toc(
+                temp.path(),
+                "PluginAddon",
+                "## Interface: 120005\n## Dependencies: RequiredAddon\n",
+            ),
+            write_addon_toc(temp.path(), "RequiredAddon", "## Interface: 120005\n"),
+        ];
+        let overrides = HashMap::from([
+            ("PluginAddon".to_string(), true),
+            ("RequiredAddon".to_string(), false),
+        ]);
+
+        let effective =
+            dependency_aware_enable_overrides(&addons, Some(&overrides)).expect("effective map");
+
+        assert_eq!(effective.get("RequiredAddon"), Some(&false));
+        assert_eq!(effective.get("PluginAddon"), Some(&false));
     }
 }
