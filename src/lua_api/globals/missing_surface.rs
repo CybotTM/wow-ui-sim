@@ -55,7 +55,7 @@ mod zone_ability;
 
 use crate::c_api::temporary_shims::{
     c_behavioral_messaging, c_configuration_warnings, c_spell_classification, c_spell_counts,
-    c_spell_priority_aura, c_spell_target,
+    c_spell_priority_aura, c_spell_static_fallbacks, c_spell_target,
 };
 use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -232,6 +232,7 @@ fn register_artifact_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_spell_classification::register_c_spell_classification_shims(state)?;
     c_spell_counts::register_c_spell_count_shims(state)?;
     c_spell_priority_aura::register_c_spell_priority_aura(state)?;
+    c_spell_static_fallbacks::register_c_spell_static_fallbacks(state)?;
     c_spell_target::register_c_spell_target_shims(state)?;
     c_spell_diminish::register_c_spell_diminish_surface(state)?;
     c_widget::register_c_widget_surface(state)?;

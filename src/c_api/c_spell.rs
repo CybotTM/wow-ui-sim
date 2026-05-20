@@ -8,10 +8,7 @@
 //! - `GetSpellDescription(spellID)` → localized spell description, or empty.
 //! - `GetSpellTexture(spellID)` → `(fallbackTexturePath, fileDataID)`.
 //! - `GetSpellPowerCost(spellID)` → `SpellPowerCostInfo[]` table or nil.
-//! - `GetSpellCharges(spellID)` → zeroed `SpellChargeInfo` table.
-//! - `GetOverrideSpell(spellID)` → same spell ID.
 //! - `GetSchoolString(mask)` → localized school name for a bitmask.
-//! - `GetMawPowerBorderAtlasBySpellID(spellID)` → nil.
 //! - `PickupSpell(spellID)` → sets cursor to a spell and fires `CURSOR_CHANGED`.
 //! - `GetSpellLink(spellID)` → spell hyperlink string or nil.
 //! - `GetSpellName(spellID)` → localized name or `"Unknown"`.
@@ -64,13 +61,7 @@ const SPELL_QUERY_METHODS: &[(&str, SpellScriptFn)] = &[
     ("GetSpellInfo", get_spell_info),
     ("GetSpellTexture", get_spell_texture),
     ("GetSpellPowerCost", get_spell_power_cost),
-    ("GetSpellCharges", get_spell_charges),
-    ("GetOverrideSpell", get_override_spell),
     ("GetSchoolString", get_school_string),
-    (
-        "GetMawPowerBorderAtlasBySpellID",
-        get_maw_power_border_atlas_by_spell_id,
-    ),
     ("PickupSpell", pickup_spell),
     ("GetSpellLink", get_spell_link),
     ("GetSpellName", get_spell_name),
@@ -243,24 +234,6 @@ fn get_spell_power_cost(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn get_spell_charges(state: &mut LuaState) -> LuaResult<u32> {
-    let _spell_id = u32::from_stack(state, 1)?;
-    let charges = create_table(state);
-    table_set_static(state, charges, "currentCharges", Val::Num(0.0));
-    table_set_static(state, charges, "maxCharges", Val::Num(0.0));
-    table_set_static(state, charges, "cooldownStartTime", Val::Num(0.0));
-    table_set_static(state, charges, "cooldownDuration", Val::Num(0.0));
-    table_set_static(state, charges, "chargeModRate", Val::Num(1.0));
-    state.push(charges);
-    Ok(1)
-}
-
-fn get_override_spell(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = u32::from_stack(state, 1)?;
-    state.push(Val::Num(spell_id as f64));
-    Ok(1)
-}
-
 fn get_school_string(state: &mut LuaState) -> LuaResult<u32> {
     let school_mask = u32::from_stack(state, 1)?;
     let school = match school_mask {
@@ -303,12 +276,6 @@ fn pickup_spell(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.cursor_item = Some(CursorInfo::Spell { spell_id });
     fire_cursor_changed(state);
     Ok(0)
-}
-
-fn get_maw_power_border_atlas_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
-    let _spell_id = u32::from_stack(state, 1)?;
-    state.push(Val::Nil);
-    Ok(1)
 }
 
 fn get_spell_link(state: &mut LuaState) -> LuaResult<u32> {

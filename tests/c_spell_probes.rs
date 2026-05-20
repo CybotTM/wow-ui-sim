@@ -12,6 +12,22 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("WowLuaEnv init")
 }
 
+fn formatted_player_attack_power_damage(env: &WowLuaEnv, formula: &str) -> String {
+    let lua = format!(
+        r#"
+        local function fmt(v)
+            if math.abs(v) >= 100 or math.abs(v - math.floor(v + 0.5)) < 0.001 then
+                return tostring(math.floor(v + 0.5))
+            end
+            return string.format('%.1f', v)
+        end
+        local ap = UnitAttackPower('player')
+        return fmt({formula})
+        "#
+    );
+    env.eval(&lua).unwrap()
+}
+
 // ── GetSpellInfo ─────────────────────────────────────────────────────────────
 
 #[test]
@@ -169,9 +185,7 @@ fn test_get_spell_info_original_icon_matches_icon() {
 #[test]
 fn test_get_spell_description_resolves_spell_placeholders() {
     let env = env();
-    let avengers_shield_damage: String = env
-        .eval("local function fmt(v) if math.abs(v) >= 100 or math.abs(v - math.floor(v + 0.5)) < 0.001 then return tostring(math.floor(v + 0.5)) else return string.format('%.1f', v) end end local ap = UnitAttackPower('player'); return fmt(ap * 1.55)")
-        .unwrap();
+    let avengers_shield_damage = formatted_player_attack_power_damage(&env, "ap * 1.55");
     let desc: String = env
         .eval("return C_Spell.GetSpellDescription(31935)")
         .unwrap();
@@ -189,9 +203,7 @@ fn test_get_spell_description_resolves_spell_placeholders() {
 #[test]
 fn test_get_spell_description_resolves_named_dmg_variable() {
     let env = env();
-    let eye_beam_damage: String = env
-        .eval("local function fmt(v) if math.abs(v) >= 100 or math.abs(v - math.floor(v + 0.5)) < 0.001 then return tostring(math.floor(v + 0.5)) else return string.format('%.1f', v) end end local ap = UnitAttackPower('player'); return fmt(ap * 0.4026 * 10)")
-        .unwrap();
+    let eye_beam_damage = formatted_player_attack_power_damage(&env, "ap * 0.4026 * 10");
     let desc: String = env
         .eval("return C_Spell.GetSpellDescription(198013)")
         .unwrap();
@@ -209,9 +221,8 @@ fn test_get_spell_description_resolves_named_dmg_variable() {
 #[test]
 fn test_get_spell_description_resolves_consecration_dmg_expression() {
     let env = env();
-    let consecration_damage: String = env
-        .eval("local function fmt(v) if math.abs(v) >= 100 or math.abs(v - math.floor(v + 0.5)) < 0.001 then return tostring(math.floor(v + 0.5)) else return string.format('%.1f', v) end end local ap = UnitAttackPower('player'); return fmt(ap * 0.05 * 12 * 1.05)")
-        .unwrap();
+    let consecration_damage =
+        formatted_player_attack_power_damage(&env, "ap * 0.05 * 12 * 1.05");
     let desc: String = env
         .eval("return C_Spell.GetSpellDescription(26573)")
         .unwrap();
