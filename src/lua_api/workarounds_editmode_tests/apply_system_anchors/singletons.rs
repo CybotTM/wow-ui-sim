@@ -389,6 +389,115 @@ fn apply_system_anchors_replays_active_widescreen_singleton_settings() {
 }
 
 #[test]
+fn apply_system_anchors_preserves_addon_hidden_singleton_visibility() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                MicroMenu = 13,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        local frame = {
+            system = Enum.EditModeSystem.MicroMenu,
+            systemIndex = nil,
+            name = "MicroMenuContainer",
+            shown = false,
+        }
+
+        function frame:GetName()
+            return self.name
+        end
+        function frame:SetHasActiveChanges(value)
+            self.hasActiveChanges = value
+        end
+        function frame:UpdateSettingMap()
+            self.settingMapUpdated = true
+        end
+        function frame:IsShown()
+            return self.shown
+        end
+        function frame:Show()
+            self.shown = true
+        end
+        function frame:Hide()
+            self.shown = false
+            self.hideCalls = (self.hideCalls or 0) + 1
+        end
+        function frame:ApplySystemAnchor()
+            self.anchorCalls = (self.anchorCalls or 0) + 1
+        end
+        function frame:UpdateSystem(systemInfo)
+            self.updateSystemCalls = (self.updateSystemCalls or 0) + 1
+            self.systemInfo = systemInfo
+            self:Show()
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+        }
+
+        function EditModeManagerFrame:InitSystemAnchors()
+            self.initSystemAnchorsCalled = true
+        end
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(system, systemIndex)
+            return {
+                system = system,
+                systemIndex = systemIndex,
+                isInDefaultPosition = false,
+                anchorInfo = { point = "TOP", relativeTo = UIParent, relativePoint = "TOP", offsetX = 0, offsetY = 0 },
+                settings = {},
+            }
+        end
+        function EditModeManagerFrame:UpdateSystem(systemFrame)
+            systemFrame:UpdateSystem(systemFrame.systemInfo)
+        end
+        "#,
+    )
+    .expect("install hidden singleton stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply singleton anchors without resurrecting addon-hidden frame");
+
+    let (shown, update_calls, anchor_calls, hide_calls): (bool, i64, i64, i64) = env
+        .eval(
+            r#"
+            local frame = EditModeManagerFrame.registeredSystemFrames[1]
+            return frame:IsShown(),
+                frame.updateSystemCalls or 0,
+                frame.anchorCalls or 0,
+                frame.hideCalls or 0
+            "#,
+        )
+        .expect("read hidden singleton replay state");
+
+    assert!(
+        !shown,
+        "startup EditMode replay must not resurrect addon-hidden frames"
+    );
+    assert_eq!(
+        update_calls, 1,
+        "hidden singleton still needs UpdateSystem for layout state"
+    );
+    assert_eq!(
+        anchor_calls, 1,
+        "hidden singleton still needs anchor replay for later re-show"
+    );
+    assert_eq!(
+        hide_calls, 1,
+        "frame should be hidden again after UpdateSystem temporarily shows it"
+    );
+}
+
+#[test]
 fn apply_system_anchors_replays_remaining_active_widescreen_system_settings() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.exec(

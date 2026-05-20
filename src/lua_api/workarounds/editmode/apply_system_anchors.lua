@@ -201,6 +201,26 @@
             return true
         end
 
+        local function preserve_hidden_state(systemFrame, update)
+            if not systemFrame or type(update) ~= "function" then
+                return
+            end
+
+            local wasShown = true
+            if systemFrame.IsShown then
+                local ok, shown = pcall(systemFrame.IsShown, systemFrame)
+                if ok then
+                    wasShown = shown
+                end
+            end
+
+            update()
+
+            if not wasShown and systemFrame.Hide then
+                pcall(systemFrame.Hide, systemFrame)
+            end
+        end
+
         local function update_system_setting_with_display_value(systemFrame, setting, displayValue)
             if not systemFrame or not systemFrame.UpdateSystemSetting then
                 return
@@ -531,10 +551,12 @@
                     replay_system_settings(systemFrame)
                     refresh_system_layout_after_setting_replay(systemFrame)
                 else
-                    pcall(emm.UpdateSystem, emm, systemFrame)
-                    if seeded then
-                        apply_system_anchor_if_safe(systemFrame)
-                    end
+                    preserve_hidden_state(systemFrame, function()
+                        pcall(emm.UpdateSystem, emm, systemFrame)
+                        if seeded then
+                            apply_system_anchor_if_safe(systemFrame)
+                        end
+                    end)
                 end
             end
         end
