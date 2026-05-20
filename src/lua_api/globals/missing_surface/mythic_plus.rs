@@ -4,7 +4,6 @@
 //!
 //! - `GetCurrentAffixes()` — returns array of `{id, seasonID}` tables.
 //! - `GetCurrentSeason()` — returns the current season id number.
-//! - `GetLastWeeklyChest()` — returns nil (no chest tracked by default).
 //! - `GetRunHistory(includePrev, includeIncomplete, currentSeasonOnly)` —
 //!   returns array of `MythicPlusRunInfo` tables.
 //! - `GetSeasonBestAffixScoreInfoForMap(mapID)` — returns affixScores
@@ -16,7 +15,6 @@
 //!   members={}, or nothing if no data.
 //! - `IsMythicPlusActive()` — returns the `is_active` bool.
 //! - `IsWeeklyRewardAvailable()` — returns the `is_weekly_reward_available` bool.
-//! - `RequestCurrentAffixes()` / `RequestMapInfo()` / `RequestRewards()` — no-ops.
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
@@ -58,7 +56,6 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
     let ns = ensure_namespace(state, "C_MythicPlus")?;
     table_set_rust_fn_static(state, ns, "GetCurrentAffixes", get_current_affixes)?;
     table_set_rust_fn_static(state, ns, "GetCurrentSeason", get_current_season)?;
-    table_set_rust_fn_static(state, ns, "GetLastWeeklyChest", get_last_weekly_chest)?;
     table_set_rust_fn_static(state, ns, "GetRunHistory", get_run_history)?;
     table_set_rust_fn_static(
         state,
@@ -81,9 +78,6 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
         "IsWeeklyRewardAvailable",
         is_weekly_reward_available,
     )?;
-    table_set_rust_fn_static(state, ns, "RequestCurrentAffixes", noop)?;
-    table_set_rust_fn_static(state, ns, "RequestMapInfo", noop)?;
-    table_set_rust_fn_static(state, ns, "RequestRewards", noop)?;
     let challenge_mode = ensure_namespace(state, "C_ChallengeMode")?;
     table_set_rust_fn_static(state, challenge_mode, "GetMapTable", get_map_table)?;
     table_set_rust_fn_static(state, challenge_mode, "GetAffixInfo", get_affix_info)?;
@@ -94,10 +88,6 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
         get_leaver_penalty_warning_time_left,
     )?;
     Ok(())
-}
-
-fn noop(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
 }
 
 fn get_map_table(state: &mut LuaState) -> LuaResult<u32> {
@@ -147,12 +137,6 @@ fn get_current_season(state: &mut LuaState) -> LuaResult<u32> {
     let season = borrow_state(state)?.mythic_plus.current_season;
     state.push(Val::Num(season as f64));
     Ok(1)
-}
-
-fn get_last_weekly_chest(state: &mut LuaState) -> LuaResult<u32> {
-    // No weekly chest tracked by default — return nothing (mayreturnnothing).
-    let _ = state;
-    Ok(0)
 }
 
 fn get_run_history(state: &mut LuaState) -> LuaResult<u32> {

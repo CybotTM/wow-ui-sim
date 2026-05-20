@@ -55,9 +55,9 @@ mod zone_ability;
 use crate::c_api::permanent_shims::c_nameplate;
 use crate::c_api::temporary_shims::{
     c_behavioral_messaging, c_character_services, c_configuration_warnings, c_gossip_info,
-    c_party_info_instance_abandon, c_party_info_static_fallbacks, c_pet_battles_static_fallbacks,
-    c_spell_classification, c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks,
-    c_spell_target,
+    c_mythic_plus, c_party_info_instance_abandon, c_party_info_static_fallbacks,
+    c_pet_battles_static_fallbacks, c_spell_classification, c_spell_counts, c_spell_priority_aura,
+    c_spell_static_fallbacks, c_spell_target,
 };
 use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -283,6 +283,7 @@ fn register_map_and_encounter_surfaces(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     mythic_plus::register_mythic_plus_surface(state)?;
+    c_mythic_plus::register_c_mythic_plus_shims(state)?;
     scenario_info::register_scenario_info_surface(state)?;
     warband_scene::register_warband_scene_surface(state)?;
     c_nameplate::register_c_nameplate(state)?;

@@ -69,9 +69,10 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_Map GetMapArtID / GetMapChildrenInfo / GetPlayerMapPosition
     // are SimState-backed (via `maps` + `player_map_position`) in
     // missing_surface/c_map.rs, not stubs.
-    // C_MythicPlus GetCurrentAffixes / GetCurrentSeason / GetLastWeeklyChest /
-    // GetRunHistory / GetSeasonBestAffixScoreInfoForMap / GetWeeklyChestRewardLevel /
-    // Request* are SimState-backed in missing_surface/mythic_plus.rs, not stubs.
+    // C_MythicPlus GetCurrentAffixes / GetCurrentSeason / GetRunHistory /
+    // GetSeasonBestAffixScoreInfoForMap / GetWeeklyChestRewardLevel are
+    // SimState-backed in missing_surface/mythic_plus.rs. GetLastWeeklyChest
+    // and Request* live in temporary_shims until cache/refresh state exists.
     // C_NamePlate GetNamePlateForUnit / GetNamePlates are registered in
     // missing_surface/nameplate.rs (nil and empty-table respectively).
     // C_PartyInfo probes are registered in missing_surface/party_info.rs.

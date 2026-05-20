@@ -121,6 +121,22 @@ fn get_last_weekly_chest_returns_nothing_by_default() {
     assert_eq!(count, 0, "no weekly chest tracked by default");
 }
 
+#[test]
+fn request_helpers_are_callable_noops() {
+    let env = env();
+    let ok: bool = env
+        .eval(
+            r#"
+            C_MythicPlus.RequestCurrentAffixes()
+            C_MythicPlus.RequestMapInfo()
+            C_MythicPlus.RequestRewards()
+            return true
+            "#,
+        )
+        .unwrap();
+    assert!(ok);
+}
+
 // ── GetRunHistory ─────────────────────────────────────────────────────────────
 
 #[test]

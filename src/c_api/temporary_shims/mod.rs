@@ -5,6 +5,7 @@ pub mod c_character_services;
 pub mod c_configuration_warnings;
 pub mod c_gossip_info;
 pub mod c_lfg_info;
+pub mod c_mythic_plus;
 pub mod c_party_info_instance_abandon;
 pub mod c_party_info_static_fallbacks;
 pub mod c_perks_program;
