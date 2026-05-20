@@ -250,6 +250,27 @@ fn secure_action_target_calls_target_unit() {
 }
 
 #[test]
+fn click_bindings_fallback_left_click_targets_unit() {
+    test_timeout! {
+        let env = env();
+        env.exec("ClearTarget()").expect("ClearTarget");
+
+        let binding_type: i32 = env
+            .eval("return C_ClickBindings.GetBindingType('LeftButton', C_ClickBindings.MakeModifiers())")
+            .unwrap();
+        assert_eq!(
+            binding_type, 2,
+            "temporary click-binding fallback should route left-click through ExecuteBinding"
+        );
+
+        env.exec("C_ClickBindings.ExecuteBinding('party1', 'LeftButton', 0)")
+            .expect("execute click binding");
+        let target_name: String = env.eval("return UnitName('target')").unwrap();
+        assert_eq!(target_name, "Thrynn");
+    }
+}
+
+#[test]
 fn secure_action_spell_calls_cast_spell_by_id() {
     test_timeout! {
         let env = env();

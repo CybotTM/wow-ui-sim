@@ -2,6 +2,7 @@ pub mod c_behavioral_messaging;
 pub mod c_black_market;
 pub mod c_calendar;
 pub mod c_character_services;
+pub mod c_click_bindings;
 pub mod c_configuration_warnings;
 pub mod c_gossip_info;
 pub mod c_lfg_info;
