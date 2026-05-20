@@ -89,6 +89,15 @@ fn get_pet_info_by_pet_id_returns_nil() {
     assert_eq!(result_count, 0);
 }
 
+#[test]
+fn get_ability_info_by_id_unknown_returns_nil() {
+    let env = env();
+    let ability_name: Option<String> = env
+        .eval("local _, name = C_PetBattles.GetAbilityInfoByID(987654); return name")
+        .unwrap();
+    assert!(ability_name.is_none());
+}
+
 // ── GetPetStats ───────────────────────────────────────────────────────────────
 
 #[test]

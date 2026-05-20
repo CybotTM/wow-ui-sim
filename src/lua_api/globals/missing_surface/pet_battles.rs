@@ -82,15 +82,8 @@ fn get_ability_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Num(pet_type));
         return Ok(7);
     }
-    // Return a minimal placeholder: name, icon(0), maxCharges, splitDescriptionComponents
-    let name = create_string(state, &format!("Ability {ability_id}"));
-    state.push(name);
-    state.push(Val::Num(0.0)); // icon
-    state.push(Val::Num(1.0)); // maxCharges
-    // splitDescriptionComponents: empty table
-    let desc = create_table(state);
-    state.push(desc);
-    Ok(4)
+    state.push(Val::Nil);
+    Ok(1)
 }
 
 fn get_active_pet(state: &mut LuaState) -> LuaResult<u32> {
