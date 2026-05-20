@@ -95,6 +95,15 @@ fn registry_key_ref(state: &mut LuaState, key: &'static str) -> GcRef<LuaString>
 /// Set a string-keyed value in a table.
 pub fn table_set_str(state: &mut LuaState, table: GcRef<Table>, key: &str, value: Val) {
     let key_ref = state.gc.intern_string(key.as_bytes());
+    table_set_str_ref(state, table, key_ref, value);
+}
+
+fn table_set_str_ref(
+    state: &mut LuaState,
+    table: GcRef<Table>,
+    key_ref: GcRef<LuaString>,
+    value: Val,
+) {
     if let Some(t) = state.gc.tables.get_mut(table) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
@@ -129,7 +138,7 @@ pub fn get_script_binding(
     handler_name: &str,
     binding: ScriptBinding,
 ) -> Option<Val> {
-    let handler_key = state.gc.intern_string(handler_name.as_bytes());
+    let handler_key = script_handler_key_ref(state, handler_name);
     get_script_binding_ref(state, widget_id, handler_key, binding)
 }
 
@@ -171,7 +180,8 @@ pub fn set_script_binding(
     let scripts = registry_table_or_create(state, binding.registry_key());
     let handlers =
         script_frame_table(state, scripts, widget_id, true).expect("created handler table");
-    table_set_str(state, handlers, handler_name, func);
+    let handler_key = script_handler_key_ref(state, handler_name);
+    table_set_str_ref(state, handlers, handler_key, func);
     sync_on_update_cache(state, widget_id, handler_name);
 
     state.top = stack_slot;
@@ -190,7 +200,8 @@ pub fn remove_script_binding(
 ) {
     if let Some(scripts) = registry_table(state, binding.registry_key()) {
         if let Some(handlers) = script_frame_table(state, scripts, widget_id, false) {
-            table_set_str(state, handlers, handler_name, Val::Nil);
+            let handler_key = script_handler_key_ref(state, handler_name);
+            table_set_str_ref(state, handlers, handler_key, Val::Nil);
         }
     }
     sync_on_update_cache(state, widget_id, handler_name);
@@ -230,7 +241,7 @@ pub fn get_scripts_for_dispatch(
     widget_id: u64,
     handler_name: &str,
 ) -> Vec<Val> {
-    let handler_key = state.gc.intern_string(handler_name.as_bytes());
+    let handler_key = script_handler_key_ref(state, handler_name);
     let mut scripts = Vec::with_capacity(3);
     for binding in [
         ScriptBinding::Precall,
@@ -250,7 +261,8 @@ fn sync_on_update_cache(state: &mut LuaState, widget_id: u64, handler_name: &str
         "OnPostUpdate" => ON_POST_UPDATE_SCRIPTS_KEY,
         _ => return,
     };
-    let value = if any_script_binding_present(state, widget_id, handler_name) {
+    let handler_key = script_handler_key_ref(state, handler_name);
+    let value = if any_script_binding_present_ref(state, widget_id, handler_key) {
         Val::Bool(true)
     } else {
         Val::Nil
@@ -263,14 +275,49 @@ fn sync_on_update_cache(state: &mut LuaState, widget_id: u64, handler_name: &str
     on_update_cache::sync_on_update_runtime_cache(state, widget_id);
 }
 
-fn any_script_binding_present(state: &mut LuaState, widget_id: u64, handler_name: &str) -> bool {
+fn any_script_binding_present_ref(
+    state: &mut LuaState,
+    widget_id: u64,
+    handler_key: GcRef<LuaString>,
+) -> bool {
     [
         ScriptBinding::Precall,
         ScriptBinding::Normal,
         ScriptBinding::Postcall,
     ]
     .into_iter()
-    .any(|binding| get_script_binding(state, widget_id, handler_name, binding).is_some())
+    .any(|binding| get_script_binding_ref(state, widget_id, handler_key, binding).is_some())
+}
+
+fn script_handler_key_ref(state: &mut LuaState, handler_name: &str) -> GcRef<LuaString> {
+    match static_script_handler_name(handler_name) {
+        Some(static_name) => state.gc.intern_string_static(static_name),
+        None => state.gc.intern_string(handler_name.as_bytes()),
+    }
+}
+
+fn static_script_handler_name(handler_name: &str) -> Option<&'static [u8]> {
+    match handler_name {
+        "OnLoad" => Some(b"OnLoad"),
+        "OnHide" => Some(b"OnHide"),
+        "OnUpdate" => Some(b"OnUpdate"),
+        "OnPostUpdate" => Some(b"OnPostUpdate"),
+        "OnAttributeChanged" => Some(b"OnAttributeChanged"),
+        "OnClick" => Some(b"OnClick"),
+        "OnShow" => Some(b"OnShow"),
+        "OnEnter" => Some(b"OnEnter"),
+        "OnLeave" => Some(b"OnLeave"),
+        "OnEvent" => Some(b"OnEvent"),
+        "OnMouseUp" => Some(b"OnMouseUp"),
+        "OnMouseDown" => Some(b"OnMouseDown"),
+        "OnSizeChanged" => Some(b"OnSizeChanged"),
+        "OnDragStart" => Some(b"OnDragStart"),
+        "OnDragStop" => Some(b"OnDragStop"),
+        "OnEnable" => Some(b"OnEnable"),
+        "OnDisable" => Some(b"OnDisable"),
+        "OnFinished" => Some(b"OnFinished"),
+        _ => None,
+    }
 }
 
 // ── Error handler ───────────────────────────────────────────────────
