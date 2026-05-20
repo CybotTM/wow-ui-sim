@@ -9,9 +9,11 @@ use crate::common;
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    default_blizzard_ui_addons_path()
+        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
 }
 
 /// Minimal addon set needed to load GameMenuFrame (mirrors test_keybindings.rs).
@@ -35,6 +37,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
     ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
     ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
+    ("Blizzard_Menu", "Blizzard_Menu.toc"),
     (
         "Blizzard_AccessibilityTemplates",
         "Blizzard_AccessibilityTemplates.toc",
@@ -45,6 +48,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Mainline.toc"),
     ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
+    ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
@@ -103,12 +107,13 @@ fn setup_env() -> WowLuaEnv {
     let ui = blizzard_ui_dir();
     for (name, toc) in BLIZZARD_ADDONS {
         let toc_path = ui.join(name).join(toc);
-        if !toc_path.exists() {
-            continue;
-        }
-        if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("[load {name}] FAILED: {e}");
-        }
+        assert!(
+            toc_path.exists(),
+            "missing {name} fixture TOC at {}",
+            toc_path.display()
+        );
+        load_addon(&env.loader_env(), &toc_path)
+            .unwrap_or_else(|error| panic!("[load {name}] FAILED: {error}"));
     }
 
     env.apply_post_load_workarounds();
