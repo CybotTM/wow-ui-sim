@@ -6,7 +6,6 @@
 //! - `C_GossipInfo.GetActiveQuests()` — array of `GossipQuestUIInfo` tables
 //! - `C_GossipInfo.GetAvailableQuests()` — array of `GossipQuestUIInfo` tables
 //! - `C_GossipInfo.GetText()` — greeting/body text for the open gossip frame
-//! - `C_GossipInfo.GetPoiForUiMapID(uiMapID)` — nil (permissive stub)
 //! - `C_GossipInfo.SelectAvailableQuest(questID)` — opens QUEST_DETAIL
 //! - `C_GossipInfo.SelectActiveQuest(questID)` — opens QUEST_PROGRESS
 //! - `C_GossipInfo.CloseGossip()` — closes the active gossip dialog
@@ -38,12 +37,6 @@ pub(super) fn register_gossip_info_surface(state: &mut LuaState) -> LuaResult<()
         c_gossip_info_get_available_quests,
     )?;
     table_set_rust_fn_static(state, table_ref, "GetText", c_gossip_info_get_text)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetPoiForUiMapID",
-        c_gossip_info_get_poi_for_ui_map_id,
-    )?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -97,11 +90,6 @@ fn c_gossip_info_get_text(state: &mut LuaState) -> LuaResult<u32> {
     let text = borrow_state(state)?.gossip.text.clone();
     let text = create_string(state, &text);
     state.push(text);
-    Ok(1)
-}
-
-fn c_gossip_info_get_poi_for_ui_map_id(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
     Ok(1)
 }
 

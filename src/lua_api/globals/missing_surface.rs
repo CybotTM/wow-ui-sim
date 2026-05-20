@@ -54,7 +54,7 @@ mod zone_ability;
 
 use crate::c_api::permanent_shims::c_nameplate;
 use crate::c_api::temporary_shims::{
-    c_behavioral_messaging, c_character_services, c_configuration_warnings,
+    c_behavioral_messaging, c_character_services, c_configuration_warnings, c_gossip_info,
     c_party_info_instance_abandon, c_party_info_static_fallbacks, c_spell_classification,
     c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks, c_spell_target,
 };
@@ -259,6 +259,11 @@ fn register_interaction_surfaces(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
+    register_map_and_encounter_surfaces(state)?;
+    register_world_activity_surfaces(state)
+}
+
+fn register_map_and_encounter_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_map::register_c_map_surface(state)?;
     achievement_info::register_achievement_info_surface(state)?;
     area_poi::register_area_poi_surface(state)?;
@@ -271,6 +276,11 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_fog_of_war::register_fog_of_war_surface(state)?;
     c_map_exploration_info::register_c_map_exploration_info_surface(state)?;
     gossip_info::register_gossip_info_surface(state)?;
+    c_gossip_info::register_c_gossip_info_shims(state)?;
+    Ok(())
+}
+
+fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     mythic_plus::register_mythic_plus_surface(state)?;
     scenario_info::register_scenario_info_surface(state)?;
     warband_scene::register_warband_scene_surface(state)?;
