@@ -168,7 +168,7 @@ fn apply_system_anchors_seeds_display_info_before_cast_bar_scale_replay() {
                 anchorInfo = { point = "BOTTOM", relativeTo = UIParent, relativePoint = "BOTTOM", offsetX = 0, offsetY = 0 },
             },
             dirtySettings = {},
-            setPointCalls = 0,
+            setPointBaseCalls = 0,
         }
         function frame:GetName()
             return "PlayerCastingBarFrame"
@@ -202,10 +202,16 @@ fn apply_system_anchors_seeds_display_info_before_cast_bar_scale_replay() {
             self.scale = value
         end
         function frame:ClearAllPoints()
-            self.clearedPoints = true
+            error("startup cast-bar anchor replay should not call the EditMode ClearAllPoints override")
         end
-        function frame:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY)
-            self.setPointCalls = self.setPointCalls + 1
+        function frame:ClearAllPointsBase()
+            self.clearedBasePoints = true
+        end
+        function frame:SetPoint()
+            error("startup cast-bar anchor replay should not call the EditMode SetPoint override")
+        end
+        function frame:SetPointBase(point, relativeTo, relativePoint, offsetX, offsetY)
+            self.setPointBaseCalls = self.setPointBaseCalls + 1
             self.point = point
             self.relativeTo = relativeTo
             self.relativePoint = relativePoint
@@ -229,6 +235,9 @@ fn apply_system_anchors_seeds_display_info_before_cast_bar_scale_replay() {
             GetActiveLayoutSystemInfo = function()
                 return frame.systemInfo
             end,
+            OnEditModeSystemAnchorChanged = function()
+                error("startup cast-bar anchor replay should not notify full EditMode layout")
+            end,
         }
         "#,
     )
@@ -247,7 +256,7 @@ fn apply_system_anchors_seeds_display_info_before_cast_bar_scale_replay() {
         .eval(
             r#"
             local f = EditModeManagerFrame.registeredSystemFrames[1]
-            return f.scale, f.setPointCalls, f.anchorCalls or 0, f.point, f.relativePoint
+            return f.scale, f.setPointBaseCalls, f.anchorCalls or 0, f.point, f.relativePoint
             "#,
         )
         .expect("read converted cast bar scale and anchor replay");
@@ -255,7 +264,7 @@ fn apply_system_anchors_seeds_display_info_before_cast_bar_scale_replay() {
     assert_eq!(scale, 1.0);
     assert_eq!(
         set_point_calls, 1,
-        "unlocked cast bars should apply saved anchorInfo directly"
+        "unlocked cast bars should apply saved anchorInfo through base SetPoint"
     );
     assert_eq!(
         anchor_calls, 0,

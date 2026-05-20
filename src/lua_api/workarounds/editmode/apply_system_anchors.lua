@@ -168,7 +168,16 @@
 
         local function apply_anchor_info_directly(systemFrame)
             local anchorInfo = systemFrame and systemFrame.systemInfo and systemFrame.systemInfo.anchorInfo
-            if not anchorInfo or not systemFrame.SetPoint then
+            if not anchorInfo then
+                return false
+            end
+            local fields = debug and debug.getfenv and debug.getfenv(systemFrame)
+            fields = fields and fields[1]
+            local clearAllPoints = fields and rawget(fields, "ClearAllPointsBase")
+            clearAllPoints = clearAllPoints or systemFrame.ClearAllPointsBase
+            local setPoint = fields and rawget(fields, "SetPointBase")
+            setPoint = setPoint or systemFrame.SetPointBase
+            if not setPoint then
                 return false
             end
             local relativeTo = anchorInfo.relativeTo
@@ -178,10 +187,11 @@
             if not relativeTo then
                 relativeTo = UIParent
             end
-            if systemFrame.ClearAllPoints then
-                systemFrame:ClearAllPoints()
+            if clearAllPoints then
+                clearAllPoints(systemFrame)
             end
-            systemFrame:SetPoint(
+            setPoint(
+                systemFrame,
                 anchorInfo.point or "CENTER",
                 relativeTo,
                 anchorInfo.relativePoint or anchorInfo.point or "CENTER",
