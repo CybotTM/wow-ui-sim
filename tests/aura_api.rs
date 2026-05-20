@@ -265,6 +265,26 @@ fn test_c_unit_auras_get_aura_data_by_index() {
 }
 
 #[test]
+fn test_c_unit_auras_get_unit_auras_returns_iterable_table() {
+    let env = env();
+    let result: (bool, bool, bool) = env
+        .eval(
+            r#"
+            local helpful = C_UnitAuras.GetUnitAuras("player", "HELPFUL")
+            local harmful = C_UnitAuras.GetUnitAuras("player", "HARMFUL")
+            return type(helpful) == "table",
+                helpful[1] ~= nil and helpful[1].auraInstanceID ~= nil,
+                type(harmful) == "table" and harmful[1] == nil
+        "#,
+        )
+        .unwrap();
+
+    assert!(result.0, "GetUnitAuras should return a table");
+    assert!(result.1, "HELPFUL table should contain aura data");
+    assert!(result.2, "empty filters should return an empty table, not nil");
+}
+
+#[test]
 fn test_c_unit_auras_get_aura_data_by_index_harmful() {
     let env = env();
     let is_nil: bool = env

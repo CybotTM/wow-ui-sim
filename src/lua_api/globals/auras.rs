@@ -25,6 +25,7 @@
 use crate::lua_api::game_data::AuraInfo;
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, table_get, table_set,
+    table_set_num,
 };
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::stack_val;
@@ -81,6 +82,7 @@ fn install_c_unit_auras_methods(state: &mut LuaState, ns: Val) {
                 get_aura_data_by_aura_instance_id,
             ),
             ("GetAuraDataBySpellName", get_aura_data_by_spell_name),
+            ("GetUnitAuras", get_unit_auras),
             ("GetBuffDataByIndex", get_buff_data_by_index),
             ("GetDebuffDataByIndex", get_debuff_data_by_index),
             ("GetPlayerAuraBySpellID", get_player_aura_by_spell_id),
@@ -304,6 +306,25 @@ fn get_aura_data_by_index(state: &mut LuaState) -> LuaResult<u32> {
     let index = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
     let filter_str = Option::<String>::from_stack(state, 3)?.unwrap_or_default();
     push_aura_at_filtered_index(state, &unit, filter_from_str(&filter_str), index);
+    Ok(1)
+}
+
+fn get_unit_auras(state: &mut LuaState) -> LuaResult<u32> {
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let filter_str = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
+    let table = create_table(state);
+
+    if let Val::Table(table_ref) = table {
+        for (index, aura) in collect_visible_unit_auras(state, &unit, filter_from_str(&filter_str))
+            .into_iter()
+            .enumerate()
+        {
+            let aura_table = build_aura_table(state, &aura, &unit);
+            table_set_num(state, table_ref, (index + 1) as f64, aura_table);
+        }
+    }
+
+    state.push(table);
     Ok(1)
 }
 
