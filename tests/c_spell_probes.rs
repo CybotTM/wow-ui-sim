@@ -388,6 +388,23 @@ fn test_is_priority_aura_returns_false() {
     assert!(!result);
 }
 
+// ── Temporary classification shims ───────────────────────────────────────────
+
+#[test]
+fn test_spell_classification_shims_return_false() {
+    let env = env();
+    let (passive, ranged, press_hold): (bool, bool, bool) = env
+        .eval(
+            "return C_Spell.IsSpellPassive(116),
+                    C_Spell.IsRangedAutoAttackSpell(116),
+                    C_Spell.IsPressHoldReleaseSpell(116)",
+        )
+        .unwrap();
+    assert!(!passive);
+    assert!(!ranged);
+    assert!(!press_hold);
+}
+
 // ── IsSelfBuff ────────────────────────────────────────────────────────────────
 
 #[test]

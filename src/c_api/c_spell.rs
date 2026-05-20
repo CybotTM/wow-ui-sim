@@ -15,10 +15,7 @@
 //! - `PickupSpell(spellID)` → sets cursor to a spell and fires `CURSOR_CHANGED`.
 //! - `GetSpellLink(spellID)` → spell hyperlink string or nil.
 //! - `GetSpellName(spellID)` → localized name or `"Unknown"`.
-//! - `IsSpellPassive(spellID)` → false.
 //! - `IsAutoAttackSpell(spellID)` → true for spell 6603.
-//! - `IsRangedAutoAttackSpell(spellID)` → false.
-//! - `IsPressHoldReleaseSpell(spellID)` → false.
 //! - `IsSpellHelpful(spellID)` → true for self-targeted spells.
 //! - `IsSpellHarmful(spellID)` → true for known non-self-targeted spells.
 //! - `GetMountFromSpell(spellID)` → scans `world.mounts` for matching spell
@@ -96,10 +93,7 @@ const SPELL_BOOLEAN_METHODS: &[(&str, SpellScriptFn)] = &[
     ("DoesSpellExist", does_spell_exist),
     ("IsSpellDataCached", is_spell_data_cached),
     ("IsSelfBuff", is_self_buff),
-    ("IsSpellPassive", is_spell_passive),
     ("IsAutoAttackSpell", is_auto_attack_spell),
-    ("IsRangedAutoAttackSpell", is_ranged_auto_attack_spell),
-    ("IsPressHoldReleaseSpell", is_press_hold_release_spell),
     ("IsSpellHelpful", is_spell_helpful),
     ("IsSpellHarmful", is_spell_harmful),
     ("IsSpellUsable", is_spell_usable),
@@ -422,27 +416,9 @@ fn is_self_buff(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn is_spell_passive(state: &mut LuaState) -> LuaResult<u32> {
-    let _spell_id = u32::from_stack(state, 1)?;
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
 fn is_auto_attack_spell(state: &mut LuaState) -> LuaResult<u32> {
     let spell_id = u32::from_stack(state, 1)?;
     state.push(Val::Bool(spell_id == 6603));
-    Ok(1)
-}
-
-fn is_ranged_auto_attack_spell(state: &mut LuaState) -> LuaResult<u32> {
-    let _spell_id = u32::from_stack(state, 1)?;
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-fn is_press_hold_release_spell(state: &mut LuaState) -> LuaResult<u32> {
-    let _spell_id = u32::from_stack(state, 1)?;
-    state.push(Val::Bool(false));
     Ok(1)
 }
 
