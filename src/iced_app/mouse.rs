@@ -696,5 +696,9 @@ mod drag_scaled_tests;
 mod registration_tests;
 
 #[cfg(test)]
+#[path = "mouse_party_tests.rs"]
+mod party_tests;
+
+#[cfg(test)]
 #[path = "mouse_hover_tests.rs"]
 mod hover_tests;
