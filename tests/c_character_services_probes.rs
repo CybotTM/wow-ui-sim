@@ -82,6 +82,15 @@ fn has_required_service_for_character_upgrade_returns_false() {
 }
 
 #[test]
+fn get_character_service_display_info_returns_empty_table() {
+    let env = env();
+    let count: i32 = env
+        .eval("return #C_CharacterServices.GetCharacterServiceDisplayInfo()")
+        .unwrap();
+    assert_eq!(count, 0);
+}
+
+#[test]
 fn assign_functions_are_callable_without_error() {
     let env = env();
     let ok: bool = env

@@ -54,9 +54,9 @@ mod zone_ability;
 
 use crate::c_api::permanent_shims::c_nameplate;
 use crate::c_api::temporary_shims::{
-    c_behavioral_messaging, c_configuration_warnings, c_party_info_instance_abandon,
-    c_party_info_static_fallbacks, c_spell_classification, c_spell_counts, c_spell_priority_aura,
-    c_spell_static_fallbacks, c_spell_target,
+    c_behavioral_messaging, c_character_services, c_configuration_warnings,
+    c_party_info_instance_abandon, c_party_info_static_fallbacks, c_spell_classification,
+    c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks, c_spell_target,
 };
 use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -285,6 +285,7 @@ fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     battle_net::register_battle_net_surface(state)?;
     c_configuration_warnings::register_c_configuration_warnings(state)?;
     character_services::register_character_services_surface(state)?;
+    c_character_services::register_c_character_services_shims(state)?;
     chat_bubbles::register_chat_bubbles_surface(state)?;
     club_finder::register_club_finder_surface(state)?;
     club_info::register_club_info_surface(state)?;
