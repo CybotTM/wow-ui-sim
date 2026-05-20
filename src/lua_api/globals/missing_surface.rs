@@ -54,7 +54,7 @@ mod warband_scene;
 mod zone_ability;
 
 use crate::c_api::temporary_shims::{
-    c_behavioral_messaging, c_configuration_warnings, c_spell_priority_aura,
+    c_behavioral_messaging, c_configuration_warnings, c_spell_priority_aura, c_spell_target,
 };
 use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -229,6 +229,7 @@ fn register_collection_surfaces(state: &mut LuaState) -> LuaResult<()> {
 fn register_artifact_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_spell::register_c_spell_surface(state)?;
     c_spell_priority_aura::register_c_spell_priority_aura(state)?;
+    c_spell_target::register_c_spell_target_shims(state)?;
     c_spell_diminish::register_c_spell_diminish_surface(state)?;
     c_widget::register_c_widget_surface(state)?;
     c_paper_doll_info::register_c_paper_doll_info_surface(state)?;

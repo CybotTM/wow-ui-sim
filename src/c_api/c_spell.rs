@@ -31,9 +31,6 @@
 //! - `IsSelfBuff(spellID)` → true when `implicit_target == 1` (Self), else false.
 //! - `IsSpellUsable(spellID)` → `(true, false)` when spell is known;
 //!   `(false, false)` otherwise.
-//! - `TargetSpellIsEnchanting()` → false.
-//! - `TargetSpellJumpsUpgradeTrack()` → false.
-//! - `TargetSpellReplacesBonusTree()` → false.
 //! - `GetSpellTradeSkillLink(spellID)` → recipe link from
 //!   `state.spell_trade_skill_links`, or nil.
 //! - `GetSpellIDForSpellIdentifier(identifier)` → resolved spell id from
@@ -65,7 +62,6 @@ pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
     register_spell_methods(state, ns, SPELL_QUERY_METHODS)?;
     register_spell_methods(state, ns, SPELL_BOOLEAN_METHODS)?;
-    register_spell_methods(state, ns, SPELL_TARGET_METHODS)?;
     Ok(())
 }
 
@@ -112,18 +108,6 @@ const SPELL_BOOLEAN_METHODS: &[(&str, SpellScriptFn)] = &[
     ("IsSpellHelpful", is_spell_helpful),
     ("IsSpellHarmful", is_spell_harmful),
     ("IsSpellUsable", is_spell_usable),
-];
-
-const SPELL_TARGET_METHODS: &[(&str, SpellScriptFn)] = &[
-    ("TargetSpellIsEnchanting", target_spell_is_enchanting),
-    (
-        "TargetSpellJumpsUpgradeTrack",
-        target_spell_jumps_upgrade_track,
-    ),
-    (
-        "TargetSpellReplacesBonusTree",
-        target_spell_replaces_bonus_tree,
-    ),
 ];
 
 fn register_spell_methods(
@@ -526,24 +510,6 @@ fn is_known_spell_for_usability(state: &mut LuaState, spell_id: u32) -> bool {
     borrow_state(state)
         .map(|sim| sim.known_spells.contains(&spell_id))
         .unwrap_or(false)
-}
-
-/// `C_Spell.TargetSpellIsEnchanting()` → `false`.
-fn target_spell_is_enchanting(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-/// `C_Spell.TargetSpellJumpsUpgradeTrack()` → `false`.
-fn target_spell_jumps_upgrade_track(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-/// `C_Spell.TargetSpellReplacesBonusTree()` → `false`.
-fn target_spell_replaces_bonus_tree(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
 }
 
 fn numeric_spell_id(state: &LuaState, index: i32) -> Option<u32> {
