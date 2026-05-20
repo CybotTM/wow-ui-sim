@@ -128,6 +128,35 @@ fn default_keybindings_dispatch_on_init() {
     assert!(fired, "B should dispatch the default OPENALLBAGS binding");
 }
 
+#[test]
+fn action_button_key_dispatch_casts_once_through_button_down() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.SetActionSlot(1, 19750)
+        local button = CreateFrame("Button", "ActionButton1", UIParent, "SecureActionButtonTemplate")
+        button.action = 1
+        button:SetButtonState("NORMAL")
+
+        _G.spellcast_start_count = 0
+        local listener = CreateFrame("Frame")
+        listener:RegisterEvent("UNIT_SPELLCAST_START")
+        listener:SetScript("OnEvent", function()
+            _G.spellcast_start_count = _G.spellcast_start_count + 1
+        end)
+        "#,
+    )
+    .unwrap();
+
+    env.send_key_press("1", None).unwrap();
+
+    let count: i64 = env.eval("return _G.spellcast_start_count").unwrap();
+    assert_eq!(
+        count, 1,
+        "ACTIONBUTTON1 key dispatch should not call both ActionButtonDown and UseAction"
+    );
+}
+
 // ── EditBox text input ────────────────────────────────────────────────────────
 
 #[test]

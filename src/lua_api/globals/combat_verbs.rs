@@ -182,6 +182,9 @@ fn start_instant_spell_cooldowns(state: &mut LuaState, spell_id: u32) {
 
 pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaResult<()> {
     if let Some(skill_line_id) = spellbook_data::profession_skill_line_for_spell(spell_id) {
+        crate::logging::eprintln_elapsed(&format!(
+            "[spellcast] REDIRECT spell_id={spell_id} profession_skill_line={skill_line_id}"
+        ));
         crate::lua_api::globals::missing_surface::professions::open_trade_skill_for_skill_line(
             state,
             skill_line_id,
@@ -190,6 +193,9 @@ pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaRes
     }
 
     if !spell_can_execute_now(state, spell_id)? {
+        crate::logging::eprintln_elapsed(&format!(
+            "[spellcast] BLOCKED spell_id={spell_id} reason=spell_can_execute_now_false"
+        ));
         return Ok(());
     }
 
@@ -197,6 +203,7 @@ pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaRes
         return Ok(());
     }
 
+    crate::logging::eprintln_elapsed(&format!("[spellcast] INSTANT spell_id={spell_id}"));
     start_instant_spell_cooldowns(state, spell_id);
     apply_spell_to_target(state, spell_id);
     Ok(())
@@ -218,6 +225,9 @@ fn start_timed_spell_cast(state: &mut LuaState, spell_id: u32) -> bool {
         &icon_path,
         cast_time_ms as f64 / 1000.0,
     );
+    crate::logging::eprintln_elapsed(&format!(
+        "[spellcast] START spell_id={spell_id} name={spell_name} duration_ms={cast_time_ms}"
+    ));
     let player = create_string(state, "player");
     let spell_id_val = Val::Num(spell_id as f64);
     fire_named_event_state(state, "UNIT_SPELLCAST_START", &[player, spell_id_val]);
@@ -413,15 +423,23 @@ fn spell_stop_targeting(_state: &mut LuaState) -> LuaResult<u32> {
 
 fn use_action(state: &mut LuaState) -> LuaResult<u32> {
     let Some(slot) = stack_u32(state, 1) else {
+        crate::logging::eprintln_elapsed("[spellcast] UseAction ignored reason=missing_slot");
         return Ok(0);
     };
     let spell_id = {
         let st = borrow_state(state)?;
         st.action_bars.get(&slot).copied()
     };
-    if let Some(spell_id) = spell_id {
-        execute_spell_by_id(state, spell_id)?;
-    }
+    let Some(spell_id) = spell_id else {
+        crate::logging::eprintln_elapsed(&format!(
+            "[spellcast] UseAction slot={slot} ignored reason=empty_slot"
+        ));
+        return Ok(0);
+    };
+    crate::logging::eprintln_elapsed(&format!(
+        "[spellcast] UseAction slot={slot} spell_id={spell_id}"
+    ));
+    execute_spell_by_id(state, spell_id)?;
     Ok(0)
 }
 
