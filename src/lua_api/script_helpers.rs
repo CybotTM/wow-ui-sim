@@ -297,25 +297,76 @@ fn script_handler_key_ref(state: &mut LuaState, handler_name: &str) -> GcRef<Lua
 }
 
 fn static_script_handler_name(handler_name: &str) -> Option<&'static [u8]> {
+    static_mouse_script_handler_name(handler_name)
+        .or_else(|| static_input_script_handler_name(handler_name))
+        .or_else(|| static_animation_script_handler_name(handler_name))
+        .or_else(|| static_lifecycle_script_handler_name(handler_name))
+}
+
+fn static_mouse_script_handler_name(handler_name: &str) -> Option<&'static [u8]> {
     match handler_name {
-        "OnLoad" => Some(b"OnLoad"),
-        "OnHide" => Some(b"OnHide"),
-        "OnUpdate" => Some(b"OnUpdate"),
-        "OnPostUpdate" => Some(b"OnPostUpdate"),
-        "OnAttributeChanged" => Some(b"OnAttributeChanged"),
         "OnClick" => Some(b"OnClick"),
-        "OnShow" => Some(b"OnShow"),
+        "OnDoubleClick" => Some(b"OnDoubleClick"),
+        "PreClick" => Some(b"PreClick"),
+        "PostClick" => Some(b"PostClick"),
         "OnEnter" => Some(b"OnEnter"),
         "OnLeave" => Some(b"OnLeave"),
-        "OnEvent" => Some(b"OnEvent"),
-        "OnMouseUp" => Some(b"OnMouseUp"),
         "OnMouseDown" => Some(b"OnMouseDown"),
-        "OnSizeChanged" => Some(b"OnSizeChanged"),
+        "OnMouseUp" => Some(b"OnMouseUp"),
+        "OnMouseWheel" => Some(b"OnMouseWheel"),
         "OnDragStart" => Some(b"OnDragStart"),
         "OnDragStop" => Some(b"OnDragStop"),
+        "OnReceiveDrag" => Some(b"OnReceiveDrag"),
+        _ => None,
+    }
+}
+
+fn static_input_script_handler_name(handler_name: &str) -> Option<&'static [u8]> {
+    match handler_name {
+        "OnEnterPressed" => Some(b"OnEnterPressed"),
+        "OnEscapePressed" => Some(b"OnEscapePressed"),
+        "OnTabPressed" => Some(b"OnTabPressed"),
+        "OnSpacePressed" => Some(b"OnSpacePressed"),
+        "OnArrowPressed" => Some(b"OnArrowPressed"),
+        "OnTextChanged" => Some(b"OnTextChanged"),
+        "OnTextSet" => Some(b"OnTextSet"),
+        "OnChar" => Some(b"OnChar"),
+        "OnEditFocusGained" => Some(b"OnEditFocusGained"),
+        "OnEditFocusLost" => Some(b"OnEditFocusLost"),
+        "OnInputLanguageChanged" => Some(b"OnInputLanguageChanged"),
+        "OnKeyDown" => Some(b"OnKeyDown"),
+        "OnKeyUp" => Some(b"OnKeyUp"),
+        "OnValueChanged" => Some(b"OnValueChanged"),
+        "OnHyperlinkClick" => Some(b"OnHyperlinkClick"),
+        "OnHyperlinkEnter" => Some(b"OnHyperlinkEnter"),
+        "OnHyperlinkLeave" => Some(b"OnHyperlinkLeave"),
+        _ => None,
+    }
+}
+
+fn static_animation_script_handler_name(handler_name: &str) -> Option<&'static [u8]> {
+    match handler_name {
+        "OnPlay" => Some(b"OnPlay"),
+        "OnFinished" => Some(b"OnFinished"),
+        "OnStop" => Some(b"OnStop"),
+        "OnLoop" => Some(b"OnLoop"),
+        "OnPause" => Some(b"OnPause"),
+        _ => None,
+    }
+}
+
+fn static_lifecycle_script_handler_name(handler_name: &str) -> Option<&'static [u8]> {
+    match handler_name {
+        "OnLoad" => Some(b"OnLoad"),
+        "OnEvent" => Some(b"OnEvent"),
+        "OnUpdate" => Some(b"OnUpdate"),
+        "OnPostUpdate" => Some(b"OnPostUpdate"),
+        "OnShow" => Some(b"OnShow"),
+        "OnHide" => Some(b"OnHide"),
         "OnEnable" => Some(b"OnEnable"),
         "OnDisable" => Some(b"OnDisable"),
-        "OnFinished" => Some(b"OnFinished"),
+        "OnSizeChanged" => Some(b"OnSizeChanged"),
+        "OnAttributeChanged" => Some(b"OnAttributeChanged"),
         _ => None,
     }
 }
