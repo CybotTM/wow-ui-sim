@@ -30,6 +30,7 @@ const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
     ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
     ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
+    ("Blizzard_Menu", "Blizzard_Menu.toc"),
     (
         "Blizzard_AccessibilityTemplates",
         "Blizzard_AccessibilityTemplates.toc",
@@ -40,6 +41,7 @@ const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Mainline.toc"),
     ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
+    ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
