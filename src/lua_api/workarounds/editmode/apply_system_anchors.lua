@@ -539,6 +539,8 @@
                         if not apply_anchor_info_directly(systemFrame) then
                             apply_system_anchor_if_safe(systemFrame)
                         end
+                    else
+                        apply_system_anchor_if_safe(systemFrame)
                     end
                 end
             else
