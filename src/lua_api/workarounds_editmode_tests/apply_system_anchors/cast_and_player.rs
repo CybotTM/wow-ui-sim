@@ -168,6 +168,7 @@ fn apply_system_anchors_seeds_display_info_before_cast_bar_scale_replay() {
                 anchorInfo = { point = "BOTTOM", relativeTo = UIParent, relativePoint = "BOTTOM", offsetX = 0, offsetY = 0 },
             },
             dirtySettings = {},
+            setPointCalls = 0,
         }
         function frame:GetName()
             return "PlayerCastingBarFrame"
@@ -200,7 +201,20 @@ fn apply_system_anchors_seeds_display_info_before_cast_bar_scale_replay() {
             end
             self.scale = value
         end
-        function frame:ApplySystemAnchor() end
+        function frame:ClearAllPoints()
+            self.clearedPoints = true
+        end
+        function frame:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY)
+            self.setPointCalls = self.setPointCalls + 1
+            self.point = point
+            self.relativeTo = relativeTo
+            self.relativePoint = relativePoint
+            self.offsetX = offsetX
+            self.offsetY = offsetY
+        end
+        function frame:ApplySystemAnchor()
+            self.anchorCalls = (self.anchorCalls or 0) + 1
+        end
         function frame:UpdateSystemSetting(setting)
             if setting == Enum.EditModeCastBarSetting.BarSize then
                 self:SetScale(self:GetSettingValue(setting) / 100)
@@ -223,11 +237,32 @@ fn apply_system_anchors_seeds_display_info_before_cast_bar_scale_replay() {
     env.exec(APPLY_SYSTEM_ANCHORS_LUA)
         .expect("apply system anchors should seed display info before cast bar scale replay");
 
-    let scale: f64 = env
-        .eval("return EditModeManagerFrame.registeredSystemFrames[1].scale")
-        .expect("read converted cast bar scale");
+    let (scale, set_point_calls, anchor_calls, point, relative_point): (
+        f64,
+        i64,
+        i64,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local f = EditModeManagerFrame.registeredSystemFrames[1]
+            return f.scale, f.setPointCalls, f.anchorCalls or 0, f.point, f.relativePoint
+            "#,
+        )
+        .expect("read converted cast bar scale and anchor replay");
 
     assert_eq!(scale, 1.0);
+    assert_eq!(
+        set_point_calls, 1,
+        "unlocked cast bars should apply saved anchorInfo directly"
+    );
+    assert_eq!(
+        anchor_calls, 0,
+        "direct cast-bar anchor replay should avoid the hookable ApplySystemAnchor path"
+    );
+    assert_eq!(point, "BOTTOM");
+    assert_eq!(relative_point, "BOTTOM");
 }
 
 #[test]
