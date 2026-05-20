@@ -426,13 +426,62 @@ fn strata_needs_rebuild(
         .get(strata_idx)
         .map(Vec::as_slice)
         .unwrap_or(&[]);
-    if bucket.iter().any(|id| dirty_ids.contains(id)) {
+    if bucket
+        .iter()
+        .any(|id| dirty_bucket_frame_needs_rebuild(*id, dirty_ids, registry, snapshots))
+    {
         return true;
     }
 
-    snapshots
-        .keys()
-        .any(|id| frame_or_ancestor_is_dirty(*id, dirty_ids, registry))
+    snapshots.keys().any(|id| {
+        snapshot_frame_or_dirty_ancestor_needs_rebuild(*id, dirty_ids, registry, snapshots)
+    })
+}
+
+fn dirty_bucket_frame_needs_rebuild(
+    id: u64,
+    dirty_ids: &FxHashSet<u64>,
+    registry: &crate::widget::WidgetRegistry,
+    snapshots: &HashMap<u64, FrameQuadSnapshot>,
+) -> bool {
+    if !dirty_ids.contains(&id) {
+        return false;
+    }
+
+    let Some(snapshot) = snapshots.get(&id) else {
+        return registry
+            .get(id)
+            .is_none_or(|frame| frame.effective_alpha > 0.0);
+    };
+    if !snapshot.vertices.is_empty() {
+        return true;
+    }
+
+    registry
+        .get(id)
+        .is_none_or(|frame| frame.effective_alpha > 0.0)
+}
+
+fn snapshot_frame_or_dirty_ancestor_needs_rebuild(
+    id: u64,
+    dirty_ids: &FxHashSet<u64>,
+    registry: &crate::widget::WidgetRegistry,
+    snapshots: &HashMap<u64, FrameQuadSnapshot>,
+) -> bool {
+    let snapshot_has_quads = snapshots
+        .get(&id)
+        .is_some_and(|snapshot| !snapshot.vertices.is_empty());
+    let mut current_id = Some(id);
+    while let Some(frame_id) = current_id {
+        if dirty_bucket_frame_needs_rebuild(frame_id, dirty_ids, registry, snapshots) {
+            return true;
+        }
+        if dirty_ids.contains(&frame_id) && snapshot_has_quads {
+            return true;
+        }
+        current_id = registry.get(frame_id).and_then(|frame| frame.parent_id);
+    }
+    false
 }
 
 /// Rebuild cached strata batches for the given dirty mask and frame IDs.
