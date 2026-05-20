@@ -53,12 +53,12 @@ mod voice_chat;
 mod warband_scene;
 mod zone_ability;
 
-use crate::c_api::temporary_shims::c_configuration_warnings;
+use crate::c_api::temporary_shims::{c_behavioral_messaging, c_configuration_warnings};
 use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
     c_artifact_ui, c_azerite_empowered_item, c_azerite_essence, c_azerite_item, c_barber_shop,
-    c_behavioral_messaging, c_cursor, c_fog_of_war, c_major_factions, c_map_exploration_info,
-    c_paper_doll_info, c_player_interaction_manager, c_spell, c_spell_diminish, c_widget,
+    c_cursor, c_fog_of_war, c_major_factions, c_map_exploration_info, c_paper_doll_info,
+    c_player_interaction_manager, c_spell, c_spell_diminish, c_widget,
 };
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
@@ -244,7 +244,7 @@ fn register_artifact_surfaces(state: &mut LuaState) -> LuaResult<()> {
 fn register_interaction_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_ardenweald_gardening::register_c_ardenweald_gardening_surface(state)?;
     c_arrow_callout_manager::register_c_arrow_callout_manager_surface(state)?;
-    c_behavioral_messaging::register_c_behavioral_messaging_surface(state)?;
+    c_behavioral_messaging::register_c_behavioral_messaging(state)?;
     c_player_interaction_manager::register_c_player_interaction_manager_surface(state)?;
     Ok(())
 }

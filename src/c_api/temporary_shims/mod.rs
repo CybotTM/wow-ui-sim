@@ -1,3 +1,4 @@
+pub mod c_behavioral_messaging;
 pub mod c_black_market;
 pub mod c_calendar;
 pub mod c_configuration_warnings;
