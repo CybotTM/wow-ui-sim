@@ -88,6 +88,14 @@ pub fn setup_full_env() -> WowLuaEnv {
     env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
 
     load_blizzard_addons(&env, &ui);
+    env.exec(
+        r#"
+        if type(UIPanelWindows) == "table" and type(UIPanelWindows_Initialize) == "function" then
+            UIPanelWindows_Initialize()
+        end
+        "#,
+    )
+    .expect("refresh UIPanelWindows after tooltip fixture load order");
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
     wow_ui_sim::startup::process_pending_timers(&env);
@@ -106,9 +114,8 @@ fn load_blizzard_addons(env: &WowLuaEnv, ui: &Path) {
         } else {
             continue;
         };
-        if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("[load {name}] FAILED: {error}");
-        }
+        load_addon(&env.loader_env(), &toc_path)
+            .unwrap_or_else(|error| panic!("load {name} from {}: {error}", toc_path.display()));
     }
 }
 
@@ -138,16 +145,43 @@ fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
 use event_helpers::fire_player_entering_world;
 
 fn ensure_player_frame_for_aura_tests(env: &WowLuaEnv) {
-    env.exec(
-        r#"
-        if not PlayerFrame then
-            PlayerFrame = CreateFrame("Frame", "PlayerFrame", UIParent)
-        end
-        PlayerFrame.unit = "player"
-        "#,
-    )
-    .expect("Failed to create PlayerFrame stub for aura tests");
+    env.exec(PLAYER_FRAME_STATUS_BAR_STUBS_LUA)
+        .expect("Failed to create PlayerFrame stub for aura tests");
 }
+
+const PLAYER_FRAME_STATUS_BAR_STUBS_LUA: &str = r#"
+    if not PlayerFrame then
+        PlayerFrame = CreateFrame("Frame", "PlayerFrame", UIParent)
+    end
+    PlayerFrame.unit = "player"
+    local function ensureStatusBar(name)
+        local bar = _G[name] or CreateFrame("StatusBar", name, UIParent)
+        function bar:ShowStatusBarText()
+            self.statusBarTextShown = true
+        end
+        function bar:HideStatusBarText()
+            self.statusBarTextShown = nil
+        end
+        return bar
+    end
+    PlayerFrameHealthBar = ensureStatusBar("PlayerFrameHealthBar")
+    PlayerFrameManaBar = ensureStatusBar("PlayerFrameManaBar")
+    PetFrameHealthBar = ensureStatusBar("PetFrameHealthBar")
+    PetFrameManaBar = ensureStatusBar("PetFrameManaBar")
+    function PlayerFrame_GetHealthBar()
+        return PlayerFrameHealthBar
+    end
+    function PlayerFrame_GetManaBar()
+        return PlayerFrameManaBar
+    end
+    function PlayerFrame_GetAlternatePowerBar()
+        return nil
+    end
+    StatusTrackingBarManager = StatusTrackingBarManager or {}
+    function StatusTrackingBarManager:SetTextLocked(locked)
+        self.textLocked = locked
+    end
+"#;
 
 pub fn refresh_aura_frames(env: &WowLuaEnv) {
     env.exec(

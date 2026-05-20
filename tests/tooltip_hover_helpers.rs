@@ -7,12 +7,16 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 pub fn open_character_panel(env: &WowLuaEnv) {
     env.exec(
         r#"
-        local btn = CharacterMicroButton
-        assert(btn, "CharacterMicroButton should exist")
-        local onclick = btn:GetScript("OnClick")
-        assert(onclick, "CharacterMicroButton should have an OnClick handler")
-        onclick(btn, "LeftButton", false)
+        if CharacterFrame and CharacterFrame:IsShown() then
+            CharacterFrame:Hide()
+        end
+        assert(not CharacterFrame:IsShown(), "CharacterFrame should start hidden")
+        PanelTemplates_SetTab(CharacterFrame, PaperDollFrame:GetID())
+        CharacterFrame:ShowSubFrame("PaperDollFrame")
+        ShowUIPanel(CharacterFrame)
+        CharacterFrame:RefreshDisplay()
         assert(CharacterFrame and CharacterFrame:IsShown(), "CharacterFrame should be shown")
+        assert(CharacterFrame:GetNumPoints() > 0, "CharacterFrame should have a panel anchor")
         assert(CharacterHeadSlot ~= nil, "CharacterHeadSlot should exist")
         "#,
     )
