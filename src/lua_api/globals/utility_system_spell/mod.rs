@@ -148,6 +148,9 @@ pub fn t_filter(state: &mut LuaState) -> LuaResult<u32> {
 
     let mut kept = Vec::new();
     for value in table_values {
+        if matches!(value, Val::Nil) {
+            continue;
+        }
         let keep = match crate::lua_api::methods::call_function_state(state, predicate, &[value]) {
             Ok(result) => matches!(result, Val::Bool(true)),
             Err(_) => false,
@@ -167,7 +170,8 @@ pub fn t_filter(state: &mut LuaState) -> LuaResult<u32> {
         }
     }
     state.gc.barrier_back(table_ref);
-    Ok(0)
+    state.push(table);
+    Ok(1)
 }
 
 pub use table_util::t_invert;

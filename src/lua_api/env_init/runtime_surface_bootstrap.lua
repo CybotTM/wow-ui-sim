@@ -1505,7 +1505,7 @@ if tFilter == nil then
     local len = #t
     for i = 1, len do
       local value = t[i]
-      if predicate(value, i, t) then
+      if value ~= nil and predicate(value, i, t) then
         if out ~= i then
           t[out] = value
         end

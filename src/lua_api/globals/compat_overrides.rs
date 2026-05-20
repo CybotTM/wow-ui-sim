@@ -83,7 +83,7 @@ if tFilter == nil then
     local out = 1
     for index = 1, #t do
       local value = t[index]
-      if predicate(value, index, t) then
+      if value ~= nil and predicate(value, index, t) then
         if out ~= index then
           t[out] = value
         end
