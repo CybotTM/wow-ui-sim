@@ -75,7 +75,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_NamePlate GetNamePlateForUnit / GetNamePlates are registered in
     // missing_surface/nameplate.rs (nil and empty-table respectively).
     // C_PartyInfo probes are registered in missing_surface/party_info.rs.
-    // C_PetBattles 15 probes are registered in missing_surface/pet_battles.rs.
+    // Most C_PetBattles probes are registered in
+    // missing_surface/pet_battles.rs; static pet-journal fallbacks live in
+    // temporary_shims until the broader journal model exists.
     // GetBattleState / GetNumPets remain in pet_battles.rs (env_init) so
     // `petIndex > GetNumPets(...)` keeps working as a numeric comparison.
     // C_PlayerInfo probes are registered in missing_surface/player_info.rs.

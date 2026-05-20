@@ -9,13 +9,11 @@
 //! - `GetPetAbilityInfo(owner, petIndex, abilityIndex)` — name, icon, maxCharges.
 //! - `GetPetAbilityList(owner, petIndex)` — array of ability IDs + enabled flags.
 //! - `GetPetInfo(owner, petIndex)` — name, texture, selected, level, maxXP, xp, ..
-//! - `GetPetInfoByPetID(petID)` — returns nil (no battle-pet journal in sim).
 //! - `GetPetStats(owner, petIndex)` — health, maxHealth, power, speed, petType.
 //! - `GetPlayerInfo(owner)` — returns owner index (pass-through numeric stub).
 //! - `GetRoundTimingInfo()` — timeRemaining, turnTime.
 //! - `GetTurnResult(owner)` — last-turn result code.
 //! - `GetXP(owner, petIndex)` — xp, maxXp for the pet.
-//! - `IsPlayerNPC()` — always false in the sim.
 //! - `StartPVPMatchmaking()` — sets `is_matchmaking = true` on state.
 
 use super::{ensure_namespace, set_table_array};
@@ -43,13 +41,11 @@ pub(super) fn register_pet_battles_surface(state: &mut LuaState) -> LuaResult<()
     table_set_rust_fn_static(state, ns, "GetPetAbilityInfo", get_pet_ability_info)?;
     table_set_rust_fn_static(state, ns, "GetPetAbilityList", get_pet_ability_list)?;
     table_set_rust_fn_static(state, ns, "GetPetInfo", get_pet_info)?;
-    table_set_rust_fn_static(state, ns, "GetPetInfoByPetID", get_pet_info_by_pet_id)?;
     table_set_rust_fn_static(state, ns, "GetPetStats", get_pet_stats)?;
     table_set_rust_fn_static(state, ns, "GetPlayerInfo", get_player_info)?;
     table_set_rust_fn_static(state, ns, "GetRoundTimingInfo", get_round_timing_info)?;
     table_set_rust_fn_static(state, ns, "GetTurnResult", get_turn_result)?;
     table_set_rust_fn_static(state, ns, "GetXP", get_xp)?;
-    table_set_rust_fn_static(state, ns, "IsPlayerNPC", is_player_npc)?;
     table_set_rust_fn_static(state, ns, "StartPVPMatchmaking", start_pvp_matchmaking)?;
     Ok(())
 }
@@ -188,11 +184,6 @@ fn get_pet_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(15)
 }
 
-fn get_pet_info_by_pet_id(_state: &mut LuaState) -> LuaResult<u32> {
-    // No battle-pet journal integration in the sim.
-    Ok(0)
-}
-
 fn get_pet_stats(state: &mut LuaState) -> LuaResult<u32> {
     let pet = resolve_pet(state, 1, 2);
     let Some(p) = pet else {
@@ -242,12 +233,6 @@ fn get_xp(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(p.xp as f64));
     state.push(Val::Num(p.max_xp as f64));
     Ok(2)
-}
-
-fn is_player_npc(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = state;
-    state.push(Val::Bool(false));
-    Ok(1)
 }
 
 fn runtime_ability_info(

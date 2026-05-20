@@ -80,6 +80,15 @@ fn get_pet_info_out_of_range_returns_nil() {
     assert!(result.is_none(), "out-of-range slot should return nil");
 }
 
+#[test]
+fn get_pet_info_by_pet_id_returns_nil() {
+    let env = env();
+    let result_count: i32 = env
+        .eval("return select('#', C_PetBattles.GetPetInfoByPetID('BattlePet-0-000000000000'))")
+        .unwrap();
+    assert_eq!(result_count, 0);
+}
+
 // ── GetPetStats ───────────────────────────────────────────────────────────────
 
 #[test]
