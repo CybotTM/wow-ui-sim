@@ -84,6 +84,8 @@ pub struct App {
     pub(crate) scroll_offset: f32,
     /// Current canvas size (updated each frame for layout calculations).
     pub(crate) screen_size: std::cell::Cell<Size>,
+    /// True after WoW startup events have run against real canvas bounds.
+    pub(crate) gui_startup_complete: std::cell::Cell<bool>,
     pub(crate) debug_rx: Option<mpsc::Receiver<debug_server::Command>>,
     pub(crate) pending_screenshot: Option<oneshot::Sender<Result<ScreenshotData, String>>>,
     pub(crate) lua_rx: Option<std::sync::mpsc::Receiver<lua_server::LuaCommand>>,
@@ -228,6 +230,7 @@ macro_rules! app_from_initial_state {
             dragging: false,
             scroll_offset: 0.0,
             screen_size: std::cell::Cell::new($initial_screen_size),
+            gui_startup_complete: std::cell::Cell::new(false),
             debug_rx: Some($init.cmd_rx),
             pending_screenshot: None,
             lua_rx: Some($init.lua_rx),
@@ -289,17 +292,8 @@ impl App {
         let (env_rc, saved_vars) = Self::take_init_params();
         let config = crate::config::SimConfig::load();
         Self::apply_config_to_state(&env_rc, &config);
-        Self::set_initial_gui_screen_size(&env_rc);
 
-        Self::run_startup_sequence(&env_rc);
-        env_rc
-            .borrow()
-            .state()
-            .borrow_mut()
-            .initialize_render_state();
-        // Eagerly resolve all pending layouts so the first render doesn't pay the cost.
-        env_rc.borrow().state().borrow_mut().ensure_layout_rects();
-        let log_messages = Self::collect_startup_logs(&env_rc);
+        let log_messages = Vec::new();
 
         let (texture_manager, font_system, glyph_atlas) = Self::init_rendering(&env_rc);
         let (cmd_rx, lua_rx) = Self::init_servers();
@@ -319,8 +313,6 @@ impl App {
             config,
         });
 
-        app.preload_initial_texture_requests();
-
         (app, Task::none())
     }
 
@@ -330,13 +322,6 @@ impl App {
         let selections = AppInitialSelections::from_config(&init.config);
         let initial_screen_size = current_env_screen_size(&init.env);
         app_from_initial_state!(init, selections, now, initial_screen_size)
-    }
-
-    fn set_initial_gui_screen_size(env_rc: &Rc<RefCell<WowLuaEnv>>) {
-        let initial_size = super::app_icon::initial_window_size();
-        env_rc
-            .borrow()
-            .set_screen_size(initial_size.width, initial_size.height);
     }
 
     /// Apply saved config to SimState before startup events fire.
@@ -388,21 +373,30 @@ impl App {
         }
     }
 
+    pub(crate) fn ensure_gui_startup_for_canvas_size(&self, size: Size) {
+        if self.gui_startup_complete.get() {
+            return;
+        }
+
+        self.screen_size.set(size);
+        self.env.borrow().set_screen_size(size.width, size.height);
+        Self::run_startup_sequence(&self.env);
+        {
+            let env = self.env.borrow();
+            let mut state = env.state().borrow_mut();
+            state.initialize_render_state();
+            state.ensure_layout_rects();
+        }
+        self.preload_initial_texture_requests();
+        self.gui_startup_complete.set(true);
+    }
+
     fn take_init_params() -> (Rc<RefCell<WowLuaEnv>>, Option<SavedVariablesManager>) {
         let env = INIT_ENV
             .with(|cell| cell.borrow_mut().take())
             .expect("WowLuaEnv not initialized");
         let saved_vars = INIT_SAVED_VARS.with(|cell| cell.borrow_mut().take());
         (Rc::new(RefCell::new(env)), saved_vars)
-    }
-
-    /// Drain console output collected during startup.
-    fn collect_startup_logs(env_rc: &Rc<RefCell<WowLuaEnv>>) -> Vec<String> {
-        let mut log_messages = vec!["UI loaded. Press Ctrl+R to reload.".to_string()];
-        let env = env_rc.borrow();
-        let mut state = env.state().borrow_mut();
-        log_messages.append(&mut state.console_output);
-        log_messages
     }
 
     /// Create texture manager, font system, and glyph atlas.

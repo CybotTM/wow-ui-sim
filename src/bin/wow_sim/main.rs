@@ -240,6 +240,18 @@ fn init_and_load(
     Box<dyn std::error::Error>,
 > {
     let env = WowLuaEnv::new().expect("failed to create Lua env");
+    let (w, h) = match &args.command {
+        #[cfg(feature = "gui")]
+        Some(Commands::Screenshot { width, height, .. }) => (*width as f32, *height as f32),
+        Some(Commands::DumpTree { width, height, .. }) => (*width as f32, *height as f32),
+        None => {
+            // For GUI command, start directly at the logical default size (1024x768)
+            (1024.0, 768.0)
+        }
+        _ => (1600.0, 1200.0),
+    };
+    env.set_screen_size(w, h);
+
     let font_system = Rc::new(RefCell::new(font_system_for_command(args)));
     init_environment(args, &env, &font_system)?;
     env.set_screen_mode(screen);

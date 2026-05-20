@@ -37,18 +37,19 @@ pub struct WidgetRegistry {
     /// Reverse event index for frames registered for every event.
     all_event_listeners: FxHashSet<u64>,
     /// Frame IDs whose visual properties changed since last render.
-    /// Checked and drained by the render loop.
     render_dirty_ids: RefCell<FxHashSet<u64>>,
     /// Dirty provenance captured while a specific script/method is running.
     render_dirty_sources: RefCell<FxHashMap<u64, FxHashSet<RenderDirtySource>>>,
     /// Current source context for dirty attribution.
     current_dirty_source: RefCell<Option<RenderDirtySource>>,
-    /// Reverse index: target_id → set of frame IDs anchored to it.
+    /// Reverse index: target_id -> set of frame IDs anchored to it.
     pub(super) anchor_dependents: FxHashMap<u64, FxHashSet<u64>>,
-    /// Forward index: frame_id → set of target IDs it is anchored to.
+    /// Forward index: frame_id -> set of target IDs it is anchored to.
     pub(super) frame_anchor_targets: FxHashMap<u64, FxHashSet<u64>>,
     /// Frames with `rect_dirty = true`, for fast lookup in `ensure_layout_rects`.
     rect_dirty_ids: FxHashSet<u64>,
+    /// Layout roots whose hit-grid entries must be repaired even after layout resolves.
+    hit_grid_dirty_ids: FxHashSet<u64>,
     /// Frames with `layout_rect = None` that need layout computation.
     pending_layout_ids: FxHashSet<u64>,
 }
@@ -88,6 +89,7 @@ impl WidgetRegistry {
                 Default::default(),
             ),
             rect_dirty_ids: Self::initial_id_set(),
+            hit_grid_dirty_ids: Self::initial_id_set(),
             pending_layout_ids: Self::initial_id_set(),
         }
     }
@@ -623,13 +625,18 @@ impl WidgetRegistry {
         }
     }
 
-    /// Mark a frame as rect-dirty root. O(1) — no subtree walk.
+    /// Mark a frame as rect-dirty root. O(1), no subtree walk.
     /// Descendants discover dirtiness lazily via `is_rect_dirty` ancestor walk.
     pub fn mark_rect_dirty(&mut self, id: u64) {
         if self.widgets.contains_key(&id) {
             self.rect_dirty_ids.insert(id);
+            self.hit_grid_dirty_ids.insert(id);
             self.record_visual_dirty(id);
         }
+    }
+
+    pub fn drain_hit_grid_dirty(&mut self) -> FxHashSet<u64> {
+        std::mem::take(&mut self.hit_grid_dirty_ids)
     }
 
     /// Whether the next layout pass can change one or more cached frame rects.
@@ -668,13 +675,11 @@ impl WidgetRegistry {
         false
     }
 
-    /// Check if this specific frame (not ancestors) is in `rect_dirty_ids`.
     pub fn is_rect_dirty_self(&self, id: u64) -> bool {
         self.rect_dirty_ids.contains(&id)
     }
 
     /// Check if a frame or any ancestor is rect-dirty.
-    /// Pure ancestor walk using `rect_dirty_ids` as single source of truth.
     pub fn is_rect_dirty(&self, id: u64) -> bool {
         let mut current = Some(id);
         while let Some(cid) = current {
@@ -700,12 +705,10 @@ impl WidgetRegistry {
         roots
     }
 
-    /// Clear rect-dirty on a single frame (after layout recomputation).
     pub fn clear_rect_dirty(&mut self, id: u64) {
         self.rect_dirty_ids.remove(&id);
     }
 
-    /// Clear rect-dirty for a frame and all descendants.
     pub fn clear_rect_dirty_subtree(&mut self, id: u64) {
         self.rect_dirty_ids.remove(&id);
         let children = self
@@ -718,17 +721,14 @@ impl WidgetRegistry {
         }
     }
 
-    /// Drain rect_dirty_ids. Returns the set for callers that need it.
     pub fn drain_rect_dirty(&mut self) -> FxHashSet<u64> {
         std::mem::take(&mut self.rect_dirty_ids)
     }
 
-    /// Drain pending_layout_ids (frames missing layout_rect).
     pub fn drain_pending_layout(&mut self) -> FxHashSet<u64> {
         std::mem::take(&mut self.pending_layout_ids)
     }
 
-    /// Mark a frame's layout as resolved: remove from pending set.
     pub fn mark_layout_resolved(&mut self, id: u64) {
         self.pending_layout_ids.remove(&id);
     }

@@ -721,3 +721,7 @@ mod party_tests;
 #[cfg(test)]
 #[path = "mouse_hover_tests.rs"]
 mod hover_tests;
+
+#[cfg(test)]
+#[path = "mouse_hit_grid_tests.rs"]
+mod hit_grid_tests;

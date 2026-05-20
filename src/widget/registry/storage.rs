@@ -13,6 +13,7 @@ pub(super) fn registry_storage_estimate_bytes(registry: &WidgetRegistry) -> usiz
         + hash_map_u64_hash_set_u64_bytes(&registry.anchor_dependents)
         + hash_map_u64_hash_set_u64_bytes(&registry.frame_anchor_targets)
         + hash_set_u64_bytes(&registry.rect_dirty_ids)
+        + hash_set_u64_bytes(&registry.hit_grid_dirty_ids)
         + hash_set_u64_bytes(&registry.pending_layout_ids)
 }
 

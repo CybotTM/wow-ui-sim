@@ -60,15 +60,33 @@ fn game_screen_keeps_idle_on_update_heartbeat() {
 }
 
 #[test]
-fn gui_boot_seeds_sim_state_with_initial_window_size() {
-    let env = build_env();
+fn gui_startup_uses_first_real_canvas_size_for_display_size_changed() {
+    let app = build_test_app(ScreenKind::Game);
+    app.env
+        .borrow()
+        .exec(
+            r#"
+            __startup_display_width = nil
+            __startup_display_height = nil
+            local frame = CreateFrame("Frame")
+            frame:RegisterEvent("DISPLAY_SIZE_CHANGED")
+            frame:SetScript("OnEvent", function()
+                __startup_display_width = GetScreenWidth()
+                __startup_display_height = GetScreenHeight()
+            end)
+            "#,
+        )
+        .expect("startup size recorder should install");
 
-    App::set_initial_gui_screen_size(&env);
+    app.ensure_gui_startup_for_canvas_size(Size::new(1266.0, 822.0));
 
-    assert_eq!(
-        current_env_screen_size(&env),
-        super::super::app_icon::initial_window_size()
-    );
+    let (width, height): (f64, f64) = app
+        .env
+        .borrow()
+        .eval("return __startup_display_width, __startup_display_height")
+        .expect("startup size should be readable");
+    assert_eq!(width, 1266.0);
+    assert_eq!(height, 822.0);
 }
 
 #[test]

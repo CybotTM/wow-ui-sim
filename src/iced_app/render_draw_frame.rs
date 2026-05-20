@@ -42,8 +42,12 @@ impl App {
 
     fn sync_draw_bounds(&self, bounds: Rectangle) -> Size {
         let size = bounds.size();
-        self.screen_size.set(size);
-        self.sync_screen_size_to_state(size);
+        if self.gui_startup_complete.get() {
+            self.screen_size.set(size);
+            self.sync_screen_size_to_state(size);
+        } else {
+            self.ensure_gui_startup_for_canvas_size(size);
+        }
         size
     }
 

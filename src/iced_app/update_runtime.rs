@@ -181,8 +181,13 @@ impl App {
     pub(super) fn apply_hit_grid_changes(&self) {
         let env = self.env.borrow();
         let mut state = env.state().borrow_mut();
+        let layout_roots = state.widgets.pending_layout_roots();
+        if !layout_roots.is_empty() {
+            state.ensure_layout_rects();
+        }
+        let hit_grid_roots = state.widgets.drain_hit_grid_dirty();
         let changes = std::mem::take(&mut state.pending_hit_grid_changes);
-        if changes.is_empty() {
+        if changes.is_empty() && layout_roots.is_empty() && hit_grid_roots.is_empty() {
             return;
         }
         drop(state);
@@ -192,6 +197,12 @@ impl App {
             return;
         };
         let state = env.state().borrow();
+        for root_id in hit_grid_roots {
+            apply_subtree_hit_grid_change(grid, &state.widgets, root_id, true);
+        }
+        for root_id in layout_roots {
+            apply_subtree_hit_grid_change(grid, &state.widgets, root_id, true);
+        }
         for (root_id, became_visible) in changes {
             apply_subtree_hit_grid_change(grid, &state.widgets, root_id, became_visible);
         }
@@ -330,6 +341,9 @@ impl App {
     pub(super) fn handle_process_timers(&mut self, captured_at: Instant) -> Task<Message> {
         if self.drop_stale_timer_tick(captured_at) {
             return Task::none();
+        }
+        if !self.gui_startup_complete.get() {
+            return request_redraw_task();
         }
 
         self.set_main_thread_phase("process_timers");

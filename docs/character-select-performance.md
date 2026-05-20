@@ -65,7 +65,10 @@ Result:
 
 ## Problem 2: First Real Resize Rebuild
 
-After the texture fix, the remaining bad frame was tied to the first real window-size settle:
+After the texture fix, the remaining bad frame was tied to the first real window-size settle.
+The original capture below was from the older path where the GUI inherited the
+`SimState` default size (`1600x1200`) before Iced reported the actual canvas
+size:
 
 ```text
 Window size: 853x872 (was 1600x1200)
@@ -75,7 +78,16 @@ Window size: 853x872 (was 1600x1200)
 
 ### What was happening
 
-`set_screen_size()` invalidated all cached layout rects. On the next draw, `ensure_layout_rects()` rebuilt layout for the whole pending tree after the window changed from the default `1600x1200` to the actual canvas size.
+`set_screen_size()` invalidated all cached layout rects. On the next draw,
+`ensure_layout_rects()` rebuilt layout for the whole pending tree after the
+window changed from the startup size to the actual canvas size.
+
+Current GUI startup waits until the first Iced draw reports the real canvas
+bounds before dispatching WoW startup events, initializing render state, and
+resolving first-frame layout. `init_and_load()` still seeds the environment with
+the logical window fallback (`1024x768`) before addon file loading because Iced
+does not expose canvas bounds until the application is running; GUI startup
+events no longer treat that fallback as authoritative.
 
 Relevant files:
 
