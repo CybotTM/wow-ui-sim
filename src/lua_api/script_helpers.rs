@@ -14,6 +14,8 @@ use crate::lua_api::methods::{call_function_state, val_to_string};
 
 mod event_dispatch;
 mod on_update_cache;
+#[cfg(test)]
+mod tests;
 
 pub use event_dispatch::{dispatch_on_update, fire_named_event_state, get_event_listeners};
 pub use on_update_cache::reconcile_on_update_runtime_cache_if_dirty;
@@ -102,6 +104,10 @@ pub fn table_set_str(state: &mut LuaState, table: GcRef<Table>, key: &str, value
 /// Get a string-keyed value from a table.
 pub fn table_get_str(state: &mut LuaState, table: GcRef<Table>, key: &str) -> Val {
     let key_ref = state.gc.intern_string(key.as_bytes());
+    table_get_str_ref(state, table, key_ref)
+}
+
+fn table_get_str_ref(state: &LuaState, table: GcRef<Table>, key_ref: GcRef<LuaString>) -> Val {
     state
         .gc
         .tables
@@ -123,9 +129,19 @@ pub fn get_script_binding(
     handler_name: &str,
     binding: ScriptBinding,
 ) -> Option<Val> {
+    let handler_key = state.gc.intern_string(handler_name.as_bytes());
+    get_script_binding_ref(state, widget_id, handler_key, binding)
+}
+
+fn get_script_binding_ref(
+    state: &mut LuaState,
+    widget_id: u64,
+    handler_key: GcRef<LuaString>,
+    binding: ScriptBinding,
+) -> Option<Val> {
     let scripts = registry_table(state, binding.registry_key())?;
-    let key = format!("{}_{}", widget_id, handler_name);
-    match table_get_str(state, scripts, &key) {
+    let handlers = script_frame_table(state, scripts, widget_id, false)?;
+    match table_get_str_ref(state, handlers, handler_key) {
         Val::Nil => None,
         val => Some(val),
     }
@@ -153,8 +169,9 @@ pub fn set_script_binding(
     state.top = stack_slot + 1;
 
     let scripts = registry_table_or_create(state, binding.registry_key());
-    let key = format!("{}_{}", widget_id, handler_name);
-    table_set_str(state, scripts, &key, func);
+    let handlers =
+        script_frame_table(state, scripts, widget_id, true).expect("created handler table");
+    table_set_str(state, handlers, handler_name, func);
     sync_on_update_cache(state, widget_id, handler_name);
 
     state.top = stack_slot;
@@ -172,10 +189,40 @@ pub fn remove_script_binding(
     binding: ScriptBinding,
 ) {
     if let Some(scripts) = registry_table(state, binding.registry_key()) {
-        let key = format!("{}_{}", widget_id, handler_name);
-        table_set_str(state, scripts, &key, Val::Nil);
+        if let Some(handlers) = script_frame_table(state, scripts, widget_id, false) {
+            table_set_str(state, handlers, handler_name, Val::Nil);
+        }
     }
     sync_on_update_cache(state, widget_id, handler_name);
+}
+
+fn script_frame_table(
+    state: &mut LuaState,
+    scripts: GcRef<Table>,
+    widget_id: u64,
+    create: bool,
+) -> Option<GcRef<Table>> {
+    let key = widget_id as i64;
+    if let Some(table) = state.gc.tables.get(scripts)
+        && let Val::Table(existing) = table.get_int(key)
+    {
+        return Some(existing);
+    }
+
+    if !create {
+        return None;
+    }
+
+    let handlers = state.gc.alloc_table(Table::with_sizes(0, 4));
+    if let Some(table) = state.gc.tables.get_mut(scripts) {
+        let _ = table.raw_set(
+            Val::Num(widget_id as f64),
+            Val::Table(handlers),
+            &state.gc.string_arena,
+        );
+    }
+    state.gc.barrier_back(scripts);
+    Some(handlers)
 }
 
 pub fn get_scripts_for_dispatch(
@@ -183,14 +230,18 @@ pub fn get_scripts_for_dispatch(
     widget_id: u64,
     handler_name: &str,
 ) -> Vec<Val> {
-    [
+    let handler_key = state.gc.intern_string(handler_name.as_bytes());
+    let mut scripts = Vec::with_capacity(3);
+    for binding in [
         ScriptBinding::Precall,
         ScriptBinding::Normal,
         ScriptBinding::Postcall,
-    ]
-    .into_iter()
-    .filter_map(|binding| get_script_binding(state, widget_id, handler_name, binding))
-    .collect()
+    ] {
+        if let Some(script) = get_script_binding_ref(state, widget_id, handler_key, binding) {
+            scripts.push(script);
+        }
+    }
+    scripts
 }
 
 fn sync_on_update_cache(state: &mut LuaState, widget_id: u64, handler_name: &str) {
@@ -558,164 +609,4 @@ pub(crate) fn set_registry_value(state: &mut LuaState, key: &'static str, value:
 /// Collect a Lua error into SimState for later retrieval.
 pub fn collect_lua_error(state: &LuaState, msg: &str) -> bool {
     sink_lua_error(state, msg, LuaErrorEmitPolicy::Never).is_first
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::lua_api::WowLuaEnv;
-    use rilua::LuaApi;
-
-    #[test]
-    fn protected_lua_pcall_state_caches_wrapper_factory() {
-        let mut lua = rilua::Lua::new().expect("lua should initialize");
-        let direct = lua
-            .state_mut()
-            .load("return function(value) return value end")
-            .expect("wrapper source should compile");
-        let direct_func = call_function_state(lua.state_mut(), Val::Function(direct.gc_ref()), &[])
-            .expect("direct function should build");
-
-        let first_results =
-            protected_lua_pcall_state(lua.state_mut(), direct_func, &[Val::Num(7.0)])
-                .expect("first protected call should succeed");
-        assert_eq!(first_results, vec![Val::Num(7.0)]);
-
-        let first_factory =
-            registry_value(lua.state_mut(), "__protected_lua_pcall_wrapper_factory");
-        assert!(
-            !matches!(first_factory, Val::Nil),
-            "wrapper factory should be cached in the registry"
-        );
-
-        let second_results =
-            protected_lua_pcall_state(lua.state_mut(), direct_func, &[Val::Num(9.0)])
-                .expect("second protected call should succeed");
-        assert_eq!(second_results, vec![Val::Num(9.0)]);
-
-        let second_factory =
-            registry_value(lua.state_mut(), "__protected_lua_pcall_wrapper_factory");
-        assert_eq!(
-            first_factory, second_factory,
-            "cached wrapper factory should be reused"
-        );
-    }
-
-    #[test]
-    fn protected_lua_pcall_state_returns_traceback_on_error() {
-        let mut lua = rilua::Lua::new().expect("lua should initialize");
-        lua.exec(
-            r#"
-            function __traceback_probe()
-                local function inner()
-                    error("protected boom")
-                end
-                inner()
-            end
-            "#,
-        )
-        .expect("probe source should load");
-
-        let loader = lua
-            .state_mut()
-            .load("return __traceback_probe")
-            .expect("probe loader should compile");
-        let func = call_function_state(lua.state_mut(), Val::Function(loader.gc_ref()), &[])
-            .expect("probe function should exist");
-        let error = protected_lua_pcall_state(lua.state_mut(), func, &[])
-            .expect_err("protected call should fail");
-
-        assert!(
-            error.contains("protected boom"),
-            "error should include original failure, got: {error}"
-        );
-        assert!(
-            error.contains("stack traceback:"),
-            "error should include Lua traceback, got: {error}"
-        );
-        assert!(
-            error.contains("inner"),
-            "traceback should include failing call path, got: {error}"
-        );
-    }
-
-    #[test]
-    fn call_error_handler_state_mirrors_first_seen_errors_to_console_output() {
-        let env = WowLuaEnv::new().expect("env should initialize");
-        {
-            let mut lua = env.rilua_mut();
-            call_error_handler_state(lua.state_mut(), "boom");
-            call_error_handler_state(lua.state_mut(), "boom");
-        }
-
-        let state = env.state().borrow();
-        let mirrored: Vec<_> = state
-            .console_output
-            .iter()
-            .filter(|line| line.starts_with("Lua error: boom"))
-            .collect();
-        assert_eq!(
-            mirrored.len(),
-            1,
-            "duplicate Lua errors should be deduped in GUI console output"
-        );
-    }
-
-    #[test]
-    fn collect_lua_error_tracks_records_and_counts_without_console_mirroring() {
-        let env = WowLuaEnv::new().expect("env should initialize");
-        {
-            let lua = env.rilua();
-            let _ = collect_lua_error(lua.state(), "boom");
-            let _ = collect_lua_error(lua.state(), "boom");
-        }
-
-        let state = env.state().borrow();
-        assert_eq!(state.lua_errors.len(), 2, "raw errors should be recorded");
-        assert_eq!(
-            state.lua_error_records.len(),
-            2,
-            "addon-attributed records should be recorded"
-        );
-        assert_eq!(
-            state.lua_error_counts.get("boom"),
-            Some(&2),
-            "normalized counts should increment"
-        );
-        assert!(
-            state
-                .console_output
-                .iter()
-                .all(|line| !line.starts_with("Lua error: boom")),
-            "collector-only path should not mirror to GUI console"
-        );
-    }
-
-    #[test]
-    fn active_error_handler_callback_failures_use_canonical_sink() {
-        let env = WowLuaEnv::new().expect("env should initialize");
-        {
-            let mut lua = env.rilua_mut();
-            lua.exec("seterrorhandler(function(msg) error('handler boom: ' .. msg) end)")
-                .expect("seterrorhandler should install callback");
-            call_error_handler_state(lua.state_mut(), "root boom");
-            call_error_handler_state(lua.state_mut(), "root boom");
-        }
-
-        let state = env.state().borrow();
-        assert_eq!(
-            state.lua_error_counts.get("root boom"),
-            Some(&2),
-            "original errors should be counted through canonical sink"
-        );
-        let handler_count = state
-            .lua_error_counts
-            .iter()
-            .find_map(|(key, count)| key.contains("handler boom: root boom").then_some(*count))
-            .unwrap_or(0);
-        assert_eq!(
-            handler_count, 2,
-            "error handler callback failures should also be counted via canonical sink"
-        );
-    }
 }
