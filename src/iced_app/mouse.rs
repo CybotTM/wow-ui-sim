@@ -171,7 +171,7 @@ impl App {
                 .borrow_mut()
                 .set_mouse_button_down("LeftButton", true);
         }
-        let hit_frame = self.hit_test_mouse_button(pos, "LeftButton");
+        let hit_frame = self.hit_test_mouse_button(pos, "LeftButton", true);
 
         // Focus/unfocus EditBox on click
         self.update_editbox_focus(hit_frame);
@@ -228,7 +228,7 @@ impl App {
                 .set_mouse_button_down("LeftButton", false);
         }
         let (was_dragging, drag_source) = self.take_left_drag_state();
-        let released_on = self.hit_test_mouse_button(pos, "LeftButton");
+        let released_on = self.hit_test_mouse_button(pos, "LeftButton", false);
 
         if was_dragging {
             self.finish_drag(drag_source, released_on);
@@ -328,7 +328,7 @@ impl App {
                 .borrow_mut()
                 .set_mouse_button_down("RightButton", true);
         }
-        let Some(frame_id) = self.hit_test_mouse_button(pos, "RightButton") else {
+        let Some(frame_id) = self.hit_test_mouse_button(pos, "RightButton", true) else {
             return;
         };
         if !self.is_frame_enabled(frame_id) {
@@ -389,7 +389,7 @@ impl App {
             return;
         }
 
-        let released_on = self.hit_test_mouse_button(pos, "RightButton");
+        let released_on = self.hit_test_mouse_button(pos, "RightButton", false);
         if let Some(frame_id) = released_on {
             let clicks_on_up = self.frame_clicks_on_edge(frame_id, "RightButton", false);
             {
@@ -634,13 +634,15 @@ impl App {
     }
 }
 
-fn frame_click_registration_matches(
+pub(crate) fn frame_click_registration_matches(
     frame: &crate::widget::Frame,
     button_name: &str,
     down: bool,
 ) -> bool {
     if frame.registered_click_buttons.is_empty() {
-        return !down && button_name == "LeftButton";
+        return matches!(frame.widget_type, crate::widget::WidgetType::Button)
+            && !down
+            && button_name == "LeftButton";
     }
 
     let edge = if down { "Down" } else { "Up" };
@@ -648,6 +650,23 @@ fn frame_click_registration_matches(
         &frame.registered_click_buttons,
         &format!("{button_name}{edge}"),
     ) || registration_set_matches(&frame.registered_click_buttons, &format!("Any{edge}"))
+}
+
+pub(crate) fn frame_click_registration_accepts_button(
+    frame: &crate::widget::Frame,
+    button_name: &str,
+) -> bool {
+    if frame.registered_click_buttons.is_empty() {
+        return matches!(frame.widget_type, crate::widget::WidgetType::Button)
+            && button_name == "LeftButton";
+    }
+
+    registration_set_matches(
+        &frame.registered_click_buttons,
+        &format!("{button_name}Down"),
+    ) || registration_set_matches(&frame.registered_click_buttons, &format!("{button_name}Up"))
+        || registration_set_matches(&frame.registered_click_buttons, "AnyDown")
+        || registration_set_matches(&frame.registered_click_buttons, "AnyUp")
 }
 
 fn registration_set_matches(

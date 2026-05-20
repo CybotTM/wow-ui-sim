@@ -34,7 +34,7 @@ mod hit_grid_tests {
 
         let original_point = Point::new(30.0, 30.0);
         let moved_point = Point::new(330.0, 30.0);
-        let initial_target = app.hit_test_mouse_button(original_point, "LeftButton");
+        let initial_target = app.hit_test_mouse_button(original_point, "LeftButton", false);
         assert!(initial_target.is_some(), "button should start at original rect");
 
         app.env
@@ -48,8 +48,8 @@ mod hit_grid_tests {
             .expect("moving hit button should succeed");
         rebuild_after_widget_dirty(&app, size);
 
-        let stale_target = app.hit_test_mouse_button(original_point, "LeftButton");
-        let moved_target = app.hit_test_mouse_button(moved_point, "LeftButton");
+        let stale_target = app.hit_test_mouse_button(original_point, "LeftButton", false);
+        let moved_target = app.hit_test_mouse_button(moved_point, "LeftButton", false);
         assert_eq!(
             stale_target, None,
             "original rect should stop accepting clicks after layout moves"
@@ -83,7 +83,7 @@ mod hit_grid_tests {
 
         let original_point = Point::new(30.0, 30.0);
         let moved_point = Point::new(330.0, 30.0);
-        let initial_target = app.hit_test_mouse_button(original_point, "LeftButton");
+        let initial_target = app.hit_test_mouse_button(original_point, "LeftButton", false);
         assert!(
             initial_target.is_some(),
             "alpha-zero button should start at original rect"
@@ -96,8 +96,8 @@ mod hit_grid_tests {
         app.merge_pending_dirty_ids(Some(FxHashSet::from_iter([frame_id])));
         let rebuilt = app.rebuild_dirty_strata(size, dirty_mask(strata_index));
 
-        let stale_target = app.hit_test_mouse_button(original_point, "LeftButton");
-        let moved_target = app.hit_test_mouse_button(moved_point, "LeftButton");
+        let stale_target = app.hit_test_mouse_button(original_point, "LeftButton", false);
+        let moved_target = app.hit_test_mouse_button(moved_point, "LeftButton", false);
         assert_eq!(
             rebuilt, 0,
             "alpha-zero hit-only movement should reproduce the pruned render path"

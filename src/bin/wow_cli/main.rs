@@ -129,6 +129,17 @@ enum Commands {
         y: f32,
     },
 
+    /// Click the running GUI's in-app mouse and print the clicked frame
+    MouseClick {
+        /// Canvas-space x coordinate
+        #[arg(long)]
+        x: f32,
+
+        /// Canvas-space y coordinate
+        #[arg(long)]
+        y: f32,
+    },
+
     /// Extract textures referenced by addons to WebP format (standalone)
     ExtractTextures {
         /// Path to addons directory to scan
@@ -268,6 +279,7 @@ fn handle_command(command: Commands) {
             crop,
         } => take_screenshot(&output, width, height, filter, crop),
         Commands::MouseMove { x, y } => mouse_move(x, y),
+        Commands::MouseClick { x, y } => mouse_click(x, y),
         Commands::ExtractTextures {
             addons,
             interface,
@@ -533,8 +545,16 @@ fn take_screenshot(
 }
 
 fn mouse_move(x: f32, y: f32) {
+    run_mouse_command(|socket| client::mouse_move(socket, x, y));
+}
+
+fn mouse_click(x: f32, y: f32) {
+    run_mouse_command(|socket| client::mouse_click(socket, x, y));
+}
+
+fn run_mouse_command(command: impl FnOnce(&Path) -> Result<String, String>) {
     let socket = resolve_socket();
-    match client::mouse_move(&socket, x, y) {
+    match command(&socket) {
         Ok(output) => println!("{output}"),
         Err(e) => {
             eprintln!("Error: {}", e);

@@ -57,6 +57,13 @@ pub enum Request {
         /// Canvas-space y coordinate
         y: f32,
     },
+    /// Click the in-app mouse at a canvas-space coordinate.
+    MouseClick {
+        /// Canvas-space x coordinate
+        x: f32,
+        /// Canvas-space y coordinate
+        y: f32,
+    },
 }
 
 /// Response from the Lua server.
@@ -101,6 +108,11 @@ pub enum LuaCommand {
         respond: mpsc::Sender<Response>,
     },
     MouseMove {
+        x: f32,
+        y: f32,
+        respond: mpsc::Sender<Response>,
+    },
+    MouseClick {
         x: f32,
         y: f32,
         respond: mpsc::Sender<Response>,
@@ -312,6 +324,7 @@ fn send_app_command_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>)
             crop,
         } => send_screenshot_command(cmd_tx, output, width, height, filter, crop),
         Request::MouseMove { x, y } => send_mouse_move_command(cmd_tx, x, y),
+        Request::MouseClick { x, y } => send_mouse_click_command(cmd_tx, x, y),
     }
 }
 
@@ -367,6 +380,10 @@ fn send_screenshot_command(
 
 fn send_mouse_move_command(cmd_tx: &mpsc::Sender<LuaCommand>, x: f32, y: f32) -> Response {
     send_command(cmd_tx, |respond| LuaCommand::MouseMove { x, y, respond })
+}
+
+fn send_mouse_click_command(cmd_tx: &mpsc::Sender<LuaCommand>, x: f32, y: f32) -> Response {
+    send_command(cmd_tx, |respond| LuaCommand::MouseClick { x, y, respond })
 }
 
 fn write_response(stream: &mut UnixStream, response: &Response) -> std::io::Result<()> {
@@ -425,6 +442,15 @@ pub mod client {
     /// Move the in-app mouse cursor.
     pub fn mouse_move<P: AsRef<Path>>(socket: P, x: f32, y: f32) -> Result<String, String> {
         let response = send_request(socket, Request::MouseMove { x, y })?;
+        response_result(response, |response| match response {
+            Response::Output(s) => Some(s),
+            _ => None,
+        })
+    }
+
+    /// Click the in-app mouse and return the clicked/hovered frame.
+    pub fn mouse_click<P: AsRef<Path>>(socket: P, x: f32, y: f32) -> Result<String, String> {
+        let response = send_request(socket, Request::MouseClick { x, y })?;
         response_result(response, |response| match response {
             Response::Output(s) => Some(s),
             _ => None,
