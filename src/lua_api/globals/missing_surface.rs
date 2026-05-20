@@ -28,7 +28,6 @@ mod item_socket_info;
 mod item_spell;
 mod lfg_info;
 mod mythic_plus;
-mod nameplate;
 mod party_info;
 mod pet_battles;
 mod player_info;
@@ -53,6 +52,7 @@ mod voice_chat;
 mod warband_scene;
 mod zone_ability;
 
+use crate::c_api::permanent_shims::c_nameplate;
 use crate::c_api::temporary_shims::{
     c_behavioral_messaging, c_configuration_warnings, c_spell_classification, c_spell_counts,
     c_spell_priority_aura, c_spell_static_fallbacks, c_spell_target,
@@ -273,7 +273,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     mythic_plus::register_mythic_plus_surface(state)?;
     scenario_info::register_scenario_info_surface(state)?;
     warband_scene::register_warband_scene_surface(state)?;
-    nameplate::register_nameplate_surface(state)?;
+    c_nameplate::register_c_nameplate(state)?;
     ui_widget_manager::register_ui_widget_manager_surface(state)?;
     anima_diversion::register_anima_diversion_surface(state)?;
     garrison::register_garrison_talent_surface(state)?;
