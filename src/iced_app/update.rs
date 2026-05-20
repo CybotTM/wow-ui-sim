@@ -125,7 +125,7 @@ impl App {
                 self.log_messages.push(format!("Fired: {}", event));
             }
         }
-        self.invalidate_after_lua_mutation();
+        self.flush_post_script_updates();
     }
 
     fn handle_canvas_event(&mut self, canvas_msg: CanvasMessage) -> Task<Message> {
@@ -499,7 +499,7 @@ impl App {
                 eprintln!("[exec-lua] Error: {}", e);
             }
             drop(env);
-            self.invalidate();
+            self.flush_post_script_updates();
         }
     }
 

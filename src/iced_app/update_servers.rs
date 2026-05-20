@@ -98,8 +98,8 @@ impl App {
 
     fn handle_lua_exec(&mut self, code: String, respond: mpsc::Sender<LuaResponse>) {
         let response = self.exec_lua_command(&code);
+        self.flush_post_script_updates();
         let _ = respond.send(response);
-        self.invalidate_after_lua_mutation();
     }
 
     fn handle_lua_mouse_move(&mut self, x: f32, y: f32, respond: mpsc::Sender<LuaResponse>) {
@@ -300,9 +300,39 @@ fn drain_lua_commands(rx: Option<&mpsc::Receiver<LuaCommand>>) -> Vec<LuaCommand
 
 #[cfg(test)]
 mod tests {
-    use super::{combine_console_and_captured, drain_lua_commands};
+    use super::{App, combine_console_and_captured, drain_lua_commands};
+    use crate::iced_app::app::AppInit;
+    use crate::lua_api::WowLuaEnv;
     use crate::lua_server::LuaCommand;
+    use crate::render::{GlyphAtlas, WowFontSystem};
+    use crate::screen::ScreenKind;
+    use crate::texture::TextureManager;
+    use std::cell::RefCell;
+    use std::rc::Rc;
     use std::sync::mpsc;
+
+    fn build_test_app_with_lua_rx(lua_rx: mpsc::Receiver<LuaCommand>) -> App {
+        let env = Rc::new(RefCell::new(
+            WowLuaEnv::new().expect("failed to create Lua environment"),
+        ));
+        env.borrow().set_screen_mode(ScreenKind::Game);
+        env.borrow().set_screen_size(800.0, 600.0);
+
+        let (_cmd_tx, cmd_rx) = tokio::sync::mpsc::channel(1);
+        App::build_app(AppInit {
+            env,
+            log_messages: Vec::new(),
+            texture_manager: Rc::new(RefCell::new(TextureManager::new())),
+            font_system: Rc::new(RefCell::new(WowFontSystem::new())),
+            glyph_atlas: Rc::new(RefCell::new(GlyphAtlas::new())),
+            cmd_rx,
+            lua_rx,
+            debug_borders: false,
+            debug_anchors: false,
+            saved_vars: None,
+            config: crate::config::SimConfig::default(),
+        })
+    }
 
     #[test]
     fn combine_console_and_captured_prefers_newline_when_both_present() {
@@ -368,5 +398,43 @@ mod tests {
                 ..
             } if filter == "uigroupmanager"
         ));
+    }
+
+    #[test]
+    fn lua_exec_settles_immediate_layout_on_update_before_next_command() {
+        let (tx, rx) = mpsc::channel();
+        let mut app = build_test_app_with_lua_rx(rx);
+        app.last_on_update_time = std::time::Instant::now() - std::time::Duration::from_millis(20);
+        let (respond, response_rx) = mpsc::channel();
+
+        tx.send(LuaCommand::Exec {
+            code: r#"
+                __layout_tick_count = 0
+                DeferredLayoutFrame = CreateFrame("Frame", "DeferredLayoutFrame", UIParent)
+                DeferredLayoutFrame:Show()
+                DeferredLayoutFrame:SetScript("OnUpdate", function(self)
+                    __layout_tick_count = __layout_tick_count + 1
+                    self:SetScript("OnUpdate", nil)
+                end)
+            "#
+            .to_string(),
+            respond,
+        })
+        .expect("Lua exec command should queue");
+
+        app.process_lua_commands();
+        let _ = response_rx
+            .recv()
+            .expect("Lua exec command should respond after settling updates");
+
+        let ticks: f64 = app
+            .env
+            .borrow()
+            .eval("return __layout_tick_count")
+            .expect("layout tick count should be readable");
+        assert_eq!(
+            ticks, 1.0,
+            "Lua IPC mutations should settle immediate layout OnUpdate work before the next command"
+        );
     }
 }
