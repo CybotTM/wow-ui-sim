@@ -30,8 +30,7 @@ use crate::lua_api::methods::{
     table_get_static, val_to_string,
 };
 use crate::lua_bridge::stack_val;
-use rilua::vm::callinfo::LUA_MULTRET;
-use rilua::vm::execute::{CallResult, execute};
+use rilua::stdlib::base::{lua_ipairs, lua_next};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 use std::cell::RefCell;
@@ -272,8 +271,8 @@ fn custom_next(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     }
-    let original = registry_get(state, ORIGINAL_NEXT_KEY);
-    delegate_multivalue(state, original, &[tbl, key])
+    let _ = key;
+    lua_next(state)
 }
 
 // ── ipairs(frame) children iterator ──────────────────────────────────────────
@@ -319,8 +318,7 @@ fn custom_ipairs(state: &mut LuaState) -> LuaResult<u32> {
             "bad argument #1 to 'ipairs' (table expected, got {value_type}){site}"
         )));
     }
-    let original = registry_get(state, ORIGINAL_IPAIRS_KEY);
-    delegate_multivalue(state, original, &[value])
+    lua_ipairs(state)
 }
 
 fn describe_ipairs_callsite(state: &mut LuaState) -> String {
@@ -355,34 +353,6 @@ fn describe_ipairs_callsite(state: &mut LuaState) -> String {
         }
     }
     String::new()
-}
-
-/// Call a Lua function and leave ALL its return values on the stack —
-/// unlike `call_function_state` which only keeps the first. Needed for
-/// `next` and `ipairs` which return 2-3 values.
-fn delegate_multivalue(state: &mut LuaState, func: Val, args: &[Val]) -> LuaResult<u32> {
-    let Val::Function(_) = func else {
-        return Err(runtime_error("delegate_multivalue: expected function"));
-    };
-    let func_idx = state.top;
-    state.ensure_stack(func_idx + 1 + args.len());
-    state.stack_set(func_idx, func);
-    state.top = func_idx + 1;
-    for &arg in args {
-        let top = state.top;
-        state.stack_set(top, arg);
-        state.top = top + 1;
-    }
-    let save_base = state.base;
-    state.base = func_idx + 1;
-    let result = match state.precall(func_idx, LUA_MULTRET)? {
-        CallResult::Lua => execute(state),
-        CallResult::Rust => Ok(()),
-    };
-    let nresults = (state.top as i32 - func_idx as i32).max(0) as u32;
-    state.base = save_base;
-    result?;
-    Ok(nresults)
 }
 
 /// Iterator body for `ipairs(frame)`. Called as `iter(state, control)`
