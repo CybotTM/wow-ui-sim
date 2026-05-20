@@ -18,7 +18,9 @@ mod table_util;
 
 use crate::c_api::c_wowtoken_secure;
 use crate::c_api::permanent_shims::c_model_info;
-use crate::c_api::temporary_shims::{c_black_market, c_calendar, c_lfg_info, c_perks_program};
+use crate::c_api::temporary_shims::{
+    c_black_market, c_calendar, c_lfg_info, c_perks_program, c_texture_file_data,
+};
 use crate::lua_api::methods::call_function_state_multi;
 use crate::lua_api::script_helpers::{
     call_error_handler_state, protected_call_state, protected_lua_pcall_state, registry_value,
@@ -634,6 +636,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     c_wowtoken_secure::register_c_wowtoken_secure(state)?;
     crate::c_api::c_wow_token_public::register_c_wow_token_public(state)?;
     c_texture::register_c_texture(state)?;
+    c_texture_file_data::register_c_texture_file_data(state)?;
     c_xml_util::register_c_xml_util(state)?;
     c_addons::register_legacy_addon_globals(state)?;
     c_spec::register_widget_container_mixin(state)?;

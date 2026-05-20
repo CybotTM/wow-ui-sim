@@ -27,12 +27,6 @@ pub fn register_c_texture(state: &mut LuaState) -> LuaResult<()> {
         "GetAtlasExists",
         c_texture_get_atlas_exists,
     )?;
-    table_set_rust_fn_static(
-        state,
-        c_texture_ref,
-        "GetFilenameFromFileDataID",
-        c_texture_get_filename_from_file_data_id,
-    )?;
     set_global_val(state, "C_Texture", c_texture);
     Ok(())
 }
@@ -66,10 +60,6 @@ pub fn c_texture_get_atlas_info(state: &mut LuaState) -> LuaResult<u32> {
     attach_raw_size(state, info_ref, raw_size);
     state.push(info);
     Ok(1)
-}
-
-pub fn c_texture_get_filename_from_file_data_id(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
 }
 
 fn build_raw_size(state: &mut LuaState, width: f64, height: f64) -> Val {

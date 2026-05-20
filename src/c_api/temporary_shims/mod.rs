@@ -4,3 +4,4 @@ pub mod c_calendar;
 pub mod c_configuration_warnings;
 pub mod c_lfg_info;
 pub mod c_perks_program;
+pub mod c_texture_file_data;
