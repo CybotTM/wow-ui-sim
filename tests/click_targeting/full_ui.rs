@@ -9,7 +9,10 @@ const CLICK_TARGETING_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -53,7 +56,7 @@ const CLICK_TARGETING_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
+    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil_Mainline.toc"),
     ("Blizzard_Menu", "Blizzard_Menu.toc"),
     ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
     ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
@@ -65,14 +68,14 @@ const CLICK_TARGETING_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIPanels_Game",
         "Blizzard_UIPanels_Game_Mainline.toc",
     ),
-    ("Blizzard_BuffFrame", "Blizzard_BuffFrame.toc"),
     ("Blizzard_SpellDiminishUI", "Blizzard_SpellDiminishUI.toc"),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
     ("Blizzard_UnitFrame", "Blizzard_UnitFrame_Mainline.toc"),
 ];
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
 }
 
 fn blizzard_toc(addon: &str, toc_name: &str) -> PathBuf {
@@ -91,7 +94,8 @@ pub(crate) fn env_with_full_ui() -> WowLuaEnv {
 
     for (name, toc_name) in CLICK_TARGETING_ADDONS {
         let toc_path = blizzard_toc(name, toc_name);
-        let _ = load_addon(&env.loader_env(), &toc_path);
+        load_addon(&env.loader_env(), &toc_path)
+            .unwrap_or_else(|err| panic!("load {name} from {}: {err}", toc_path.display()));
         env.apply_runtime_addon_load_workarounds(name);
     }
     env.apply_post_load_workarounds();
