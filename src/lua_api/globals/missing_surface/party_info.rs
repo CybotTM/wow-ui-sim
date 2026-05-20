@@ -9,8 +9,6 @@
 //!   0 if in party, nil when solo.
 //! - `C_PartyInfo.IsPartyFull()` — true when party is at capacity
 //!   (≥5 for party, ≥40 for raid).
-//! - `C_PartyInfo.IsPartyInJailersTower()` — always false (Torghast stub).
-//! - `C_PartyInfo.GetInviteConfirmationInfo(guid)` — nil for all guids.
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::globals::group_queries::active_party_count;
@@ -28,7 +26,6 @@ pub(super) fn register_party_info_surface(state: &mut LuaState) -> LuaResult<()>
     let table_ref = ensure_namespace(state, "C_PartyInfo")?;
     register_group_membership_probes(state, table_ref)?;
     register_loot_method_probes(state, table_ref)?;
-    register_invite_and_tower_stubs(state, table_ref)?;
     Ok(())
 }
 
@@ -50,22 +47,6 @@ fn register_group_membership_probes(
     )?;
     table_set_rust_fn_static(state, table_ref, "IsPartyFull", c_party_info_is_party_full)?;
     table_set_rust_fn_static(state, table_ref, "LeaveParty", c_party_info_leave_party)?;
-    Ok(())
-}
-
-fn register_invite_and_tower_stubs(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "IsPartyInJailersTower",
-        c_party_info_is_party_in_jailers_tower,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetInviteConfirmationInfo",
-        c_party_info_get_invite_confirmation_info,
-    )?;
     Ok(())
 }
 
@@ -143,21 +124,6 @@ fn c_party_info_is_party_full(state: &mut LuaState) -> LuaResult<u32> {
 fn c_party_info_leave_party(state: &mut LuaState) -> LuaResult<u32> {
     crate::lua_api::globals::group_verbs::clear_party_roster(state)?;
     crate::lua_api::globals::group_verbs::push_event(state, "GROUP_ROSTER_UPDATE")?;
-    Ok(0)
-}
-
-/// `IsPartyInJailersTower()` — Torghast layer probe; always false in the
-/// simulator (no Torghast state modelled).
-fn c_party_info_is_party_in_jailers_tower(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-/// `GetInviteConfirmationInfo(guid)` — returns nil for all guids.
-/// In retail returns `(inviterName, relationship, friendInfo, isQuickJoin,
-/// clubId)` for a pending invite. Sim has no invite queue.
-fn c_party_info_get_invite_confirmation_info(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = state; // consume argument
     Ok(0)
 }
 
