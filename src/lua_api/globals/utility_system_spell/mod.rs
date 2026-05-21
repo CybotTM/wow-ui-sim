@@ -20,7 +20,7 @@ use crate::c_api::c_wowtoken_secure;
 use crate::c_api::permanent_shims::c_model_info;
 use crate::c_api::temporary_shims::{
     c_black_market, c_calendar, c_lfg_info, c_perks_program, c_specialization_mastery,
-    c_texture_file_data,
+    c_specialization_pvp_talents, c_texture_file_data,
 };
 use crate::lua_api::methods::call_function_state_multi;
 use crate::lua_api::script_helpers::{
@@ -648,6 +648,7 @@ fn register_system_tables(state: &mut LuaState) -> LuaResult<()> {
 fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<()> {
     c_spec::register_c_specialization_info(state)?;
     c_specialization_mastery::register_c_specialization_mastery_shim(state)?;
+    c_specialization_pvp_talents::register_c_specialization_pvp_talent_shims(state)?;
     c_model_info::register_c_model_info(state)?;
     Ok(())
 }

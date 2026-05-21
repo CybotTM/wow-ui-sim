@@ -4,7 +4,6 @@ use crate::lua_api::game_data::{CLASS_LABELS, CastingState};
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, frame_id_from_stack,
-    table_set_static,
 };
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -53,26 +52,6 @@ const C_SPECIALIZATION_INFO_METHODS: &[(&str, RustLuaFn)] = &[
     ("GetSpellsDisplay", c_spec_get_spells_display),
     ("GetSpecIDs", c_spec_get_spec_ids),
     ("SetSpecialization", c_spec_set_specialization),
-    ("GetPvpTalentSlotInfo", c_spec_get_pvp_talent_slot_info),
-    (
-        "GetPvpTalentSlotUnlockLevel",
-        c_spec_get_pvp_talent_slot_unlock_level,
-    ),
-    ("GetPvpTalentInfo", c_spec_get_pvp_talent_info),
-    (
-        "GetPvpTalentUnlockLevel",
-        c_spec_get_pvp_talent_unlock_level,
-    ),
-    (
-        "GetInspectSelectedPvpTalent",
-        c_spec_get_inspect_selected_pvp_talent,
-    ),
-    (
-        "GetAllSelectedPvpTalentIDs",
-        c_spec_get_all_selected_pvp_talent_ids,
-    ),
-    ("IsPvpTalentLocked", c_spec_is_pvp_talent_locked),
-    ("SetPvpTalentLocked", c_spec_set_pvp_talent_locked),
 ];
 
 const LEGACY_SPECIALIZATION_GLOBALS: &[(&str, RustLuaFn)] = &[
@@ -285,103 +264,6 @@ fn start_specialization_change(state: &mut LuaState, target_index: i32) -> LuaRe
         cast_id,
     });
     Ok(true)
-}
-
-fn c_spec_get_pvp_talent_slot_info(state: &mut LuaState) -> LuaResult<u32> {
-    let slot_index = match stack_val(state, 1) {
-        Val::Num(n) => n as i32,
-        _ => 0,
-    };
-    if !is_pvp_talent_slot_index_valid(slot_index) {
-        state.push(Val::Nil);
-        return Ok(1);
-    }
-
-    let info = create_table(state);
-    let available_talent_ids = create_table(state);
-    table_set_static(state, info, "enabled", Val::Bool(true));
-    table_set_static(state, info, "locked", Val::Bool(false));
-    table_set_static(
-        state,
-        info,
-        "level",
-        Val::Num(20.0 + ((slot_index - 1) * 10) as f64),
-    );
-    table_set_static(state, info, "selectedTalentID", Val::Nil);
-    table_set_static(state, info, "slotIndex", Val::Num(slot_index as f64));
-    table_set_static(state, info, "availableTalentIDs", available_talent_ids);
-    state.push(info);
-    Ok(1)
-}
-
-fn is_pvp_talent_slot_index_valid(slot_index: i32) -> bool {
-    const FIRST_PVP_TALENT_SLOT: i32 = 1;
-    const LAST_PVP_TALENT_SLOT: i32 = 3;
-
-    matches!(slot_index, FIRST_PVP_TALENT_SLOT..=LAST_PVP_TALENT_SLOT)
-}
-
-fn c_spec_get_pvp_talent_slot_unlock_level(state: &mut LuaState) -> LuaResult<u32> {
-    let slot_index = match stack_val(state, 1) {
-        Val::Num(n) => n as i32,
-        _ => 0,
-    };
-    let level = match slot_index {
-        1 => 20.0,
-        2 => 30.0,
-        3 => 40.0,
-        _ => 0.0,
-    };
-    state.push(Val::Num(level));
-    Ok(1)
-}
-
-fn c_spec_get_pvp_talent_info(state: &mut LuaState) -> LuaResult<u32> {
-    let talent_id = match stack_val(state, 1) {
-        Val::Num(n) => n as i32,
-        _ => 0,
-    };
-    if talent_id <= 0 {
-        state.push(Val::Nil);
-        return Ok(1);
-    }
-
-    let info = create_table(state);
-    let name = create_string(state, "PvP Talent");
-    let icon = create_string(state, "Interface\\Icons\\Spell_Holy_PowerWordShield");
-    table_set_static(state, info, "talentID", Val::Num(talent_id as f64));
-    table_set_static(state, info, "name", name);
-    table_set_static(state, info, "icon", icon);
-    table_set_static(state, info, "unlocked", Val::Bool(true));
-    table_set_static(state, info, "dependenciesUnmet", Val::Bool(false));
-    table_set_static(state, info, "dependenciesUnmetReason", Val::Nil);
-    state.push(info);
-    Ok(1)
-}
-
-fn c_spec_get_pvp_talent_unlock_level(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(20.0));
-    Ok(1)
-}
-
-fn c_spec_get_inspect_selected_pvp_talent(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
-    Ok(1)
-}
-
-fn c_spec_get_all_selected_pvp_talent_ids(state: &mut LuaState) -> LuaResult<u32> {
-    let selected = create_table(state);
-    state.push(selected);
-    Ok(1)
-}
-
-fn c_spec_is_pvp_talent_locked(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-fn c_spec_set_pvp_talent_locked(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
 }
 
 fn register_legacy_specialization_globals(state: &mut LuaState) -> LuaResult<()> {
