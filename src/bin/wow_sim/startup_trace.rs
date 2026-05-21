@@ -29,7 +29,7 @@ pub(super) fn apply_resource_limits() {
         }
         libc::sched_setaffinity(0, std::mem::size_of::<libc::cpu_set_t>(), &cpuset);
     }
-    logging::println_elapsed(&format!("Resource limits: {max_cores} CPU core(s)"));
+    logging::eprintln_elapsed(&format!("Resource limits: {max_cores} CPU core(s)"));
 }
 
 #[cfg(not(target_os = "linux"))]
