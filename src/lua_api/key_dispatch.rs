@@ -1,5 +1,5 @@
-//! Key press dispatch: Escape handling, OnKeyDown propagation, GameMenuFrame
-//! toggle, and EditBox text editing.
+//! Key press dispatch: Escape handling, OnKeyDown propagation, and EditBox text
+//! editing.
 //!
 //! This is a rilua port of the master-era `key_dispatch.rs`. The public entry
 //! point is `WowLuaEnv::send_key_press`.
@@ -11,8 +11,6 @@
 //!   the return.
 //! - Keybinding dispatch is backed by `SimState.keybindings` (not registry
 //!   tables), via `dispatch_key_binding` in the keybindings module.
-//! - There is no `fire_on_show_recursive`; GameMenuFrame's OnShow is fired
-//!   via the existing `fire_script_handler` helper.
 
 use std::ops::Range;
 
@@ -87,8 +85,11 @@ impl WowLuaEnv {
 
     // ── Escape ────────────────────────────────────────────────────────────────
 
-    /// Priority: focused EditBox OnEscapePressed → clear target →
-    /// CloseSpecialWindows → CloseAllWindows → toggle GameMenuFrame.
+    /// Priority: focused EditBox OnEscapePressed → keybinding dispatch.
+    ///
+    /// The default ESCAPE binding runs Blizzard's `ToggleGameMenu()`, whose
+    /// retail ordering closes Settings, static popups, menus, spell targeting,
+    /// and the game menu itself. Duplicating that close stack here causes drift.
     fn dispatch_escape(&self) -> Result<()> {
         let focused = self.state.borrow().focused_frame_id;
         if let Some(fid) = focused {
@@ -96,27 +97,9 @@ impl WowLuaEnv {
                 return Ok(());
             }
         }
-        if self.clear_target_if_any()? {
-            return Ok(());
-        }
-        if self.close_special_windows()? {
-            return Ok(());
-        }
-        if self.close_all_windows()? {
-            return Ok(());
-        }
-        self.toggle_game_menu()
-    }
-
-    /// Clear the current target (if any) by calling `ClearTarget()` in Lua.
-    /// Returns `true` if a target was cleared.
-    fn clear_target_if_any(&self) -> Result<bool> {
-        let has_target = self.state.borrow().current_target.is_some();
-        if has_target {
-            self.exec("ClearTarget()")?;
-            return Ok(true);
-        }
-        Ok(false)
+        let mut lua = self.lua.borrow_mut();
+        super::globals::keybindings::dispatch_key_binding(&mut lua, "ESCAPE")?;
+        Ok(())
     }
 
     // ── General key dispatch ──────────────────────────────────────────────────
@@ -258,114 +241,6 @@ impl WowLuaEnv {
         let frame_arg = frame_ref(lua.state_mut(), widget_id)?;
         let result = call_function(&mut lua, handler, &[frame_arg])?;
         Ok(is_truthy(result))
-    }
-
-    // ── Special-window helpers ────────────────────────────────────────────────
-
-    /// Iterate `UISpecialFrames` and hide any visible frames. Returns `true`
-    /// if at least one was closed.
-    fn close_special_windows(&self) -> Result<bool> {
-        let names = self.read_special_frame_names()?;
-        Ok(self.hide_visible_frames(&names))
-    }
-
-    /// Read the `UISpecialFrames` sequence from Lua globals.
-    fn read_special_frame_names(&self) -> Result<Vec<String>> {
-        let mut lua = self.lua.borrow_mut();
-        let state = lua.state_mut();
-        let global_key = state.gc.intern_string_static(b"UISpecialFrames");
-        let global = state
-            .gc
-            .tables
-            .get(state.global)
-            .map(|t| t.get_str(global_key, &state.gc.string_arena))
-            .unwrap_or(Val::Nil);
-        let Val::Table(tref) = global else {
-            return Ok(vec![]);
-        };
-        let Some(table) = state.gc.tables.get(tref) else {
-            return Ok(vec![]);
-        };
-        let len = table.len(&state.gc.string_arena);
-        let mut out = Vec::with_capacity(len);
-        for i in 1..=len {
-            let v = table.get_int(i as i64);
-            if let Val::Str(s) = v {
-                if let Some(ls) = state.gc.string_arena.get(s) {
-                    out.push(String::from_utf8_lossy(ls.data()).into_owned());
-                }
-            }
-        }
-        Ok(out)
-    }
-
-    /// Hide each named frame that is currently visible. Returns `true` if any
-    /// frame was hidden.
-    fn hide_visible_frames(&self, names: &[String]) -> bool {
-        let mut closed = false;
-        for name in names {
-            let id = self.state.borrow().widgets.get_id_by_name(name);
-            if let Some(id) = id {
-                let is_visible = self
-                    .state
-                    .borrow()
-                    .widgets
-                    .get(id)
-                    .map(|f| f.visible)
-                    .unwrap_or(false);
-                if is_visible {
-                    self.state.borrow_mut().set_frame_visible(id, false);
-                    closed = true;
-                }
-            }
-        }
-        closed
-    }
-
-    /// Call the Lua `CloseAllWindows()` global. Returns `false` if it is not
-    /// defined (e.g. in unit tests).
-    fn close_all_windows(&self) -> Result<bool> {
-        let func: Val = {
-            let mut lua = self.lua.borrow_mut();
-            let state = lua.state_mut();
-            let key = state.gc.intern_string_static(b"CloseAllWindows");
-            state
-                .gc
-                .tables
-                .get(state.global)
-                .map(|t| t.get_str(key, &state.gc.string_arena))
-                .unwrap_or(Val::Nil)
-        };
-        if matches!(func, Val::Nil) {
-            return Ok(false);
-        }
-        let mut lua = self.lua.borrow_mut();
-        let result = call_function(&mut lua, func, &[])?;
-        Ok(is_truthy(result))
-    }
-
-    // ── GameMenuFrame toggle ──────────────────────────────────────────────────
-
-    /// Toggle the GameMenuFrame: show it if hidden, hide it if visible.
-    fn toggle_game_menu(&self) -> Result<()> {
-        let id = self.state.borrow().widgets.get_id_by_name("GameMenuFrame");
-        let Some(id) = id else {
-            return Ok(());
-        };
-        let is_visible = self
-            .state
-            .borrow()
-            .widgets
-            .get(id)
-            .map(|f| f.visible)
-            .unwrap_or(false);
-        if is_visible {
-            self.state.borrow_mut().set_frame_visible(id, false);
-        } else {
-            self.state.borrow_mut().set_frame_visible(id, true);
-            self.fire_script_handler(id, "OnShow", vec![])?;
-        }
-        Ok(())
     }
 
     // ── EditBox text editing ──────────────────────────────────────────────────

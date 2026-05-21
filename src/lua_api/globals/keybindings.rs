@@ -250,6 +250,10 @@ pub const BINDING_ACTIONS: &[BindingAction] = &[
 /// Default key→action assignments seeded by `init_keybindings`.
 const DEFAULT_KEYS: &[DefaultKey] = &[
     DefaultKey {
+        key: "ESCAPE",
+        action: "TOGGLEGAMEMENU",
+    },
+    DefaultKey {
         key: "BACKSPACE",
         action: "TOGGLEBACKPACK",
     },

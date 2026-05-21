@@ -53,30 +53,45 @@ fn esc_does_not_error_with_no_focus() {
 }
 
 #[test]
-fn esc_closes_special_frame_that_is_visible() {
+fn esc_dispatches_blizzard_toggle_game_menu_binding() {
     let env = env();
-    // Register a named frame in UISpecialFrames; ESC should hide it.
     env.exec(
         r#"
-        local f = CreateFrame("Frame", "TestSpecialFrame", UIParent)
-        f:Show()
-        UISpecialFrames = UISpecialFrames or {}
-        table.insert(UISpecialFrames, "TestSpecialFrame")
-        -- Prevent CloseAllWindows from swallowing the result
-        _G.CloseAllWindows = function() return nil end
+        _G.escape_count = 0
+        function ToggleGameMenu()
+            _G.escape_count = _G.escape_count + 1
+        end
         "#,
     )
     .unwrap();
 
-    let visible_before: bool = env.eval(r#"return TestSpecialFrame:IsVisible()"#).unwrap();
-    assert!(visible_before, "frame should start visible");
-
     env.send_key_press("ESCAPE", None).unwrap();
 
-    let visible_after: bool = env
-        .eval(r#"return TestSpecialFrame:IsVisible()"#)
-        .unwrap_or(true);
-    assert!(!visible_after, "ESC should have hidden the special frame");
+    let count: i32 = env.eval("return _G.escape_count").unwrap();
+    assert_eq!(count, 1, "ESC should run the TOGGLEGAMEMENU binding");
+}
+
+#[test]
+fn spell_stop_casting_clears_active_cast() {
+    let env = env();
+    let (first_stop, casting_after_first, second_stop): (bool, bool, bool) = env
+        .eval(
+            r#"
+            CastSpellByID(19750)
+            local firstStop = SpellStopCasting()
+            local castingAfterFirst = UnitCastingInfo("player") ~= nil
+            local secondStop = SpellStopCasting()
+            return firstStop, castingAfterFirst, secondStop
+            "#,
+        )
+        .unwrap();
+
+    assert!(first_stop, "SpellStopCasting should report an interrupted cast");
+    assert!(!casting_after_first, "SpellStopCasting should clear casting state");
+    assert!(
+        !second_stop,
+        "SpellStopCasting should return false when nothing is casting"
+    );
 }
 
 // ── Keybinding dispatch ───────────────────────────────────────────────────────
