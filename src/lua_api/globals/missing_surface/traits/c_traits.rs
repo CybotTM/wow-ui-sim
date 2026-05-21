@@ -7,6 +7,7 @@ static SUBTREE_CURRENCY_IDS: std::sync::LazyLock<std::collections::HashMap<u32, 
 const CONFIG_INFO_HASH_FIELDS: usize = 4;
 const ENTRY_INFO_HASH_FIELDS: usize = 8;
 const DEFINITION_INFO_HASH_FIELDS: usize = 6;
+const CONDITION_INFO_HASH_FIELDS: usize = 15;
 
 pub(super) fn register_c_traits(state: &mut LuaState) -> LuaResult<()> {
     registration::register_c_traits(state)
@@ -190,7 +191,7 @@ fn c_traits_get_condition_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
 
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, CONDITION_INFO_HASH_FIELDS);
     push_condition_base_fields(state, info, cond_id, cond);
     let is_met = trait_condition_is_met(state, cond);
     push_condition_state_fields(state, info, cond, is_met);
