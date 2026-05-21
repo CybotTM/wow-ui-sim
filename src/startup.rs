@@ -216,13 +216,23 @@ fn unblock_hidden_splash_alerts(env: &WowLuaEnv) {
 /// Fire startup events to simulate WoW login sequence.
 pub fn fire_startup_events(env: &WowLuaEnv) {
     env.set_screen_mode(ScreenKind::Game);
-    fire_login_sequence(env, false);
-    fire_world_enter_sequence(env);
-    fire_post_login_events(env);
-    crate::lua_api::workarounds::close_startup_special_windows_before_first_frame(env);
-    fire_simple_event(env, "FIRST_FRAME_RENDERED");
-    unblock_hidden_splash_alerts(env);
-    env.apply_post_event_workarounds();
+    time_startup_step(env, "login sequence", || fire_login_sequence(env, false));
+    time_startup_step(env, "world enter sequence", || {
+        fire_world_enter_sequence(env)
+    });
+    time_startup_step(env, "post-login events", || fire_post_login_events(env));
+    time_startup_step(env, "close startup special windows", || {
+        crate::lua_api::workarounds::close_startup_special_windows_before_first_frame(env)
+    });
+    time_startup_step(env, "FIRST_FRAME_RENDERED", || {
+        fire_simple_event(env, "FIRST_FRAME_RENDERED")
+    });
+    time_startup_step(env, "unblock hidden splash alerts", || {
+        unblock_hidden_splash_alerts(env)
+    });
+    time_startup_step(env, "post-event workarounds", || {
+        env.apply_post_event_workarounds()
+    });
 }
 
 /// Fire startup events for a selected top-level screen.
@@ -267,9 +277,21 @@ pub fn collect_lua_error_startup(env: &WowLuaEnv) {
 /// Fire startup events for headless test mode (skips IsLoggedIn override).
 pub fn fire_startup_events_headless(env: &WowLuaEnv) {
     env.set_screen_mode(ScreenKind::Game);
-    fire_login_sequence(env, true);
-    fire_world_enter_sequence(env);
-    fire_post_login_events(env);
+    time_startup_step(env, "login sequence", || fire_login_sequence(env, true));
+    time_startup_step(env, "world enter sequence", || {
+        fire_world_enter_sequence(env)
+    });
+    time_startup_step(env, "post-login events", || fire_post_login_events(env));
+}
+
+fn time_startup_step(env: &WowLuaEnv, label: &str, step: impl FnOnce()) {
+    let start = std::time::Instant::now();
+    log_with_timestamp(env, &format!("[Startup] begin {label}"));
+    step();
+    log_with_timestamp(
+        env,
+        &format!("[Startup] end {label} in {:.2?}", start.elapsed()),
+    );
 }
 
 /// Fire ADDON_LOADED, VARIABLES_LOADED, PLAYER_LOGIN and optionally set IsLoggedIn.
