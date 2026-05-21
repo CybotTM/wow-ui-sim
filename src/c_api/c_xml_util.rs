@@ -1,6 +1,8 @@
 //! C_XMLUtil: template info lookup.
 
-use crate::lua_api::methods::{create_string, create_table, val_to_string};
+use crate::lua_api::methods::{
+    create_string, create_table, create_table_with_capacity, val_to_string,
+};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -8,6 +10,9 @@ use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 use super::helpers::set_global_val;
+
+const TEMPLATE_INFO_HASH_FIELDS: usize = 7;
+const TEMPLATE_KEY_VALUE_HASH_FIELDS: usize = 3;
 
 pub fn register_c_xml_util(state: &mut LuaState) -> LuaResult<()> {
     let c_xml_util = create_table(state);
@@ -33,7 +38,7 @@ pub fn c_xml_util_get_template_info(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let info_table = create_table(state);
+    let info_table = create_table_with_capacity(state, TEMPLATE_INFO_HASH_FIELDS);
     let Val::Table(info_ref) = info_table else {
         unreachable!("create_table must return a table");
     };
@@ -62,7 +67,7 @@ fn build_key_values_table(
 }
 
 fn build_key_value_entry(state: &mut LuaState, kv: &crate::xml::TemplateKeyValueInfo) -> Val {
-    let entry = create_table(state);
+    let entry = create_table_with_capacity(state, TEMPLATE_KEY_VALUE_HASH_FIELDS);
     let Val::Table(entry_ref) = entry else {
         unreachable!("create_table must return a table");
     };
