@@ -68,32 +68,36 @@ impl Drop for WowLuaEnv {
 impl WowLuaEnv {
     /// Create a new WoW Lua environment with the API initialized.
     pub fn new() -> Result<Self> {
-        let state = Rc::new(RefCell::new(SimState::default()));
-        let lua = Rc::new(RefCell::new(Self::new_rilua(Rc::clone(&state))));
-        init_builtin_frames(&state);
-        clear_templates();
-        register_intrinsic_templates();
-        {
+        crate::logging::eprintln_elapsed("[Startup] WowLuaEnv::new begin");
+        let state = timed_startup_phase("SimState::default complete", || {
+            Rc::new(RefCell::new(SimState::default()))
+        });
+        crate::logging::init_process_start_time(state.borrow().start_time);
+
+        let lua = timed_startup_phase("rilua VM created", || {
+            Rc::new(RefCell::new(Self::new_rilua(Rc::clone(&state))))
+        });
+
+        timed_startup_phase("builtin frames initialized", || init_builtin_frames(&state));
+        timed_startup_phase("template registry cleared", clear_templates);
+        timed_startup_phase(
+            "intrinsic templates registered",
+            register_intrinsic_templates,
+        );
+        timed_startup_phase("initial app_data lua handle installed", || {
+            install_app_data_lua_handle(&lua, &lua)
+        });
+
+        timed_startup_phase("init_lua_state complete", || {
             let mut lua_ref = lua.borrow_mut();
-            let app_data = lua_ref
-                .state_mut()
-                .app_data_mut::<WowLuaAppData>()
-                .expect("WowLuaEnv rilua app_data should always exist");
-            app_data.lua = Some(Rc::clone(&lua));
-        }
-        {
-            let mut lua_ref = lua.borrow_mut();
-            init_lua_state(&mut lua_ref, Rc::clone(&state))?;
-        }
+            init_lua_state(&mut lua_ref, Rc::clone(&state))
+        })?;
+
         let env = Self { lua, state };
-        {
-            let mut lua = env.lua.borrow_mut();
-            let app_data = lua
-                .state_mut()
-                .app_data_mut::<WowLuaAppData>()
-                .expect("WowLuaEnv rilua app_data should always exist");
-            app_data.lua = Some(Rc::clone(&env.lua));
-        }
+        timed_startup_phase("final app_data lua handle installed", || {
+            install_app_data_lua_handle(&env.lua, &env.lua)
+        });
+        crate::logging::eprintln_elapsed("[Startup] WowLuaEnv::new complete");
         Ok(env)
     }
 
@@ -265,4 +269,23 @@ impl WowLuaEnv {
         }
         super::workarounds::apply_post_event(self);
     }
+}
+
+fn timed_startup_phase<T>(label: &str, action: impl FnOnce() -> T) -> T {
+    let phase_start = std::time::Instant::now();
+    let result = action();
+    crate::logging::eprintln_elapsed(&format!(
+        "[Startup] {label} in {:.2?}",
+        phase_start.elapsed()
+    ));
+    result
+}
+
+fn install_app_data_lua_handle(lua: &Rc<RefCell<rilua::Lua>>, handle: &Rc<RefCell<rilua::Lua>>) {
+    let mut lua_ref = lua.borrow_mut();
+    let app_data = lua_ref
+        .state_mut()
+        .app_data_mut::<WowLuaAppData>()
+        .expect("WowLuaEnv rilua app_data should always exist");
+    app_data.lua = Some(Rc::clone(handle));
 }

@@ -2,6 +2,7 @@ mod addon_loading;
 mod cache_texture;
 #[cfg(feature = "gui")]
 mod gui_commands;
+mod startup_trace;
 
 use cache_texture::run_cache_texture;
 use clap::{Parser, Subcommand};
@@ -165,6 +166,8 @@ impl Args {
 
 fn main() {
     wow_ui_sim::stack::ensure_large_stack();
+    startup_trace::print_process_started();
+    startup_trace::apply_resource_limits();
     set_cwd_to_exe_dir_for_gui_launch();
     if let Err(error) = run_main() {
         report_fatal_error(error.as_ref());
@@ -250,9 +253,19 @@ fn init_and_load(
         }
         _ => (1600.0, 1200.0),
     };
+    let phase_start = Instant::now();
     env.set_screen_size(w, h);
+    logging::eprintln_elapsed(&format!(
+        "[Startup] screen size set to {w:.0}x{h:.0} in {:.2?}",
+        phase_start.elapsed()
+    ));
 
-    let font_system = Rc::new(RefCell::new(font_system_for_command(args)));
+    let phase_start = Instant::now();
+    let font_system = Rc::new(RefCell::new(startup_trace::font_system_for_command(args)));
+    logging::eprintln_elapsed(&format!(
+        "[Startup] font system created in {:.2?}",
+        phase_start.elapsed()
+    ));
     init_environment(args, &env, &font_system)?;
     env.set_screen_mode(screen);
 
@@ -275,14 +288,6 @@ fn init_and_load(
     apply_post_load_workarounds(&env);
     restart_gc_after_bootstrap(&env);
     Ok((env, font_system, saved_vars))
-}
-
-fn font_system_for_command(args: &Args) -> WowFontSystem {
-    if matches!(args.command, Some(Commands::LuaErrors)) {
-        WowFontSystem::new_without_casc()
-    } else {
-        WowFontSystem::new()
-    }
 }
 
 fn apply_post_load_workarounds(env: &WowLuaEnv) {
@@ -358,35 +363,12 @@ fn init_sound(env: &WowLuaEnv) {
     }
 }
 
-#[cfg(target_os = "linux")]
-fn apply_resource_limits() {
-    let max_cores: usize = std::env::var("WOW_SIM_MAX_CORES")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(2);
-    unsafe {
-        let mut cpuset: libc::cpu_set_t = std::mem::zeroed();
-        for i in 0..max_cores {
-            libc::CPU_SET(i, &mut cpuset);
-        }
-        libc::sched_setaffinity(0, std::mem::size_of::<libc::cpu_set_t>(), &cpuset);
-    }
-    logging::println_elapsed(&format!("Resource limits: {max_cores} CPU core(s)"));
-}
-
-#[cfg(not(target_os = "linux"))]
-fn apply_resource_limits() {
-    // RLIMIT_AS and sched_setaffinity are Linux-specific; the simulator runs
-    // unconstrained on other platforms.
-}
-
 fn init_environment(
     args: &Args,
     env: &WowLuaEnv,
     font_system: &Rc<RefCell<WowFontSystem>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     logging::init_process_start_time(env.state().borrow().start_time);
-    apply_resource_limits();
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
         .init();

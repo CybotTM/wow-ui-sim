@@ -108,11 +108,16 @@ fn try_casc_font_bytes(font_file: &WowFontFile) -> Option<Vec<u8>> {
     if !casc_enabled() {
         return None;
     }
+    if let Some(bytes) = read_cached_font_bytes(font_file.filename) {
+        return Some(bytes);
+    }
     let path = format!("Fonts/{}", font_file.filename);
     if let Some(bytes) = try_casc_font_bytes_by_path(&path) {
+        write_cached_font_bytes(font_file.filename, &bytes);
         return Some(bytes);
     }
     if let Some(bytes) = try_casc_font_bytes_by_encoding_key(font_file.encoding_key_hex) {
+        write_cached_font_bytes(font_file.filename, &bytes);
         return Some(bytes);
     }
 
@@ -122,7 +127,32 @@ fn try_casc_font_bytes(font_file: &WowFontFile) -> Option<Vec<u8>> {
     if !casc_resolution_contains_fdid(fdid) {
         return None;
     }
-    resolver.resolve_bytes(fdid)
+    let bytes = resolver.resolve_bytes(fdid)?;
+    write_cached_font_bytes(font_file.filename, &bytes);
+    Some(bytes)
+}
+
+#[cfg(feature = "casc")]
+fn read_cached_font_bytes(filename: &str) -> Option<Vec<u8>> {
+    std::fs::read(font_cache_path(filename)?).ok()
+}
+
+#[cfg(feature = "casc")]
+fn write_cached_font_bytes(filename: &str, bytes: &[u8]) {
+    let Some(path) = font_cache_path(filename) else {
+        return;
+    };
+    let Some(parent) = path.parent() else {
+        return;
+    };
+    if std::fs::create_dir_all(parent).is_ok() {
+        let _ = std::fs::write(path, bytes);
+    }
+}
+
+#[cfg(feature = "casc")]
+fn font_cache_path(filename: &str) -> Option<std::path::PathBuf> {
+    Some(dirs::cache_dir()?.join("wow-ui-sim/fonts").join(filename))
 }
 
 #[cfg(feature = "casc")]
@@ -144,20 +174,50 @@ fn try_casc_font_bytes_by_path(path: &str) -> Option<Vec<u8>> {
 
 #[cfg(feature = "casc")]
 fn init_casc_font_reader() -> Option<CascFontReader> {
+    crate::logging::eprintln_elapsed("[Startup] font CASC reader init begin");
+    let total_start = std::time::Instant::now();
     let install_root = asset_resolver::wow_install_path()?;
     let data_path = asset_resolver::wow_data_path()?;
     let casc_dir = asset_resolver::casc_resolver::casc_cache_dir_for_install(install_root).ok()?;
-    let root_data = std::fs::read(casc_dir.join("root.bin")).ok()?;
-    let encoding_data = std::fs::read(casc_dir.join("encoding.bin")).ok()?;
 
-    let resolver = cascette_client_storage::resolver::ContentResolver::new();
-    resolver.load_root_file(&root_data).ok()?;
-    resolver.load_encoding_file(&encoding_data).ok()?;
+    let root_data = timed_font_phase("font CASC root.bin read", || {
+        std::fs::read(casc_dir.join("root.bin"))
+    })
+    .ok()?;
+    let encoding_data = timed_font_phase("font CASC encoding.bin read", || {
+        std::fs::read(casc_dir.join("encoding.bin"))
+    })
+    .ok()?;
 
-    let install = cascette_client_storage::Installation::open(data_path).ok()?;
-    run_font_casc_async(install.initialize()).ok()?;
+    let resolver = timed_font_phase("font CASC resolver built", || {
+        build_font_casc_resolver(&root_data, &encoding_data)
+    })?;
 
+    let install = timed_font_phase("font CASC installation opened", || {
+        cascette_client_storage::Installation::open(data_path)
+    })
+    .ok()?;
+    timed_font_phase("font CASC installation initialized", || {
+        run_font_casc_async(install.initialize())
+    })
+    .ok()?;
+
+    crate::logging::eprintln_elapsed(&format!(
+        "[Startup] font CASC reader init complete in {:.2?}",
+        total_start.elapsed()
+    ));
     Some(CascFontReader { install, resolver })
+}
+
+#[cfg(feature = "casc")]
+fn build_font_casc_resolver(
+    root_data: &[u8],
+    encoding_data: &[u8],
+) -> Option<cascette_client_storage::resolver::ContentResolver> {
+    let resolver = cascette_client_storage::resolver::ContentResolver::new();
+    resolver.load_root_file(root_data).ok()?;
+    resolver.load_encoding_file(encoding_data).ok()?;
+    Some(resolver)
 }
 
 #[cfg(feature = "casc")]
@@ -239,30 +299,41 @@ impl WowFontSystem {
     }
 
     fn new_with_options(load_casc_fonts: bool) -> Self {
+        crate::logging::eprintln_elapsed(&format!(
+            "[Startup] WowFontSystem::new begin casc={load_casc_fonts}"
+        ));
+        let total_start = std::time::Instant::now();
         let mut db = fontdb::Database::new();
         let mut font_map = HashMap::new();
 
         if load_casc_fonts {
-            for font_file in WOW_FONT_FILES {
-                load_wow_font(font_file, &mut db, &mut font_map);
-            }
+            load_wow_fonts(&mut db, &mut font_map);
         }
         if font_map.is_empty() {
-            load_system_font_fallback(&mut db, &mut font_map);
+            timed_font_phase("font system fallback loaded", || {
+                load_system_font_fallback(&mut db, &mut font_map)
+            });
         }
 
         if font_map.is_empty() {
-            db.load_system_fonts();
+            timed_font_phase("system fonts loaded", || db.load_system_fonts());
         }
 
-        let font_system = cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db);
-        let swash_cache = cosmic_text::SwashCache::new();
+        let font_system = timed_font_phase("cosmic font system built", || {
+            cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db)
+        });
+        let swash_cache = timed_font_phase("swash cache created", cosmic_text::SwashCache::new);
 
-        Self {
+        let result = Self {
             font_system,
             swash_cache,
             font_map,
-        }
+        };
+        crate::logging::eprintln_elapsed(&format!(
+            "[Startup] WowFontSystem::new complete in {:.2?}",
+            total_start.elapsed()
+        ));
+        result
     }
 
     /// Get the fontdb family name for a WoW font path.
@@ -406,6 +477,24 @@ fn load_wow_font(
         font_file.filename,
         family_name
     );
+}
+
+fn load_wow_fonts(db: &mut fontdb::Database, font_map: &mut HashMap<String, FontEntry>) {
+    for font_file in WOW_FONT_FILES {
+        timed_font_phase(&format!("font {} loaded", font_file.filename), || {
+            load_wow_font(font_file, db, font_map)
+        });
+    }
+}
+
+fn timed_font_phase<T>(label: &str, action: impl FnOnce() -> T) -> T {
+    let phase_start = std::time::Instant::now();
+    let result = action();
+    crate::logging::eprintln_elapsed(&format!(
+        "[Startup] {label} in {:.2?}",
+        phase_start.elapsed()
+    ));
+    result
 }
 
 fn load_system_font_fallback(db: &mut fontdb::Database, font_map: &mut HashMap<String, FontEntry>) {
