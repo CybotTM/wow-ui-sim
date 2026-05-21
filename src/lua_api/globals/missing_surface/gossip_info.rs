@@ -13,13 +13,19 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, table_set,
+    borrow_state, borrow_state_mut, create_string, create_table, create_table_with_capacity,
+    table_set,
 };
 use crate::lua_api::sim_substates::{GossipOption, GossipQuestRow};
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+
+const GOSSIP_FRIENDSHIP_HASH_FIELDS: usize = 5;
+const GOSSIP_FRIENDSHIP_RANKS_HASH_FIELDS: usize = 2;
+const GOSSIP_OPTION_HASH_FIELDS: usize = 8;
+const GOSSIP_QUEST_HASH_FIELDS: usize = 12;
 
 pub(super) fn register_gossip_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_GossipInfo")?;
@@ -167,7 +173,7 @@ fn quest_id_arg(state: &mut LuaState) -> LuaResult<Option<u32>> {
 }
 
 fn c_gossip_info_get_friendship_reputation(state: &mut LuaState) -> LuaResult<u32> {
-    let table = create_table(state);
+    let table = create_table_with_capacity(state, GOSSIP_FRIENDSHIP_HASH_FIELDS);
     table_set(state, table, "friendshipFactionID", Val::Num(0.0));
     table_set(state, table, "reaction", Val::Num(0.0));
     table_set(state, table, "currentReactionThreshold", Val::Num(0.0));
@@ -178,7 +184,7 @@ fn c_gossip_info_get_friendship_reputation(state: &mut LuaState) -> LuaResult<u3
 }
 
 fn c_gossip_info_get_friendship_reputation_ranks(state: &mut LuaState) -> LuaResult<u32> {
-    let table = create_table(state);
+    let table = create_table_with_capacity(state, GOSSIP_FRIENDSHIP_RANKS_HASH_FIELDS);
     table_set(state, table, "currentLevel", Val::Num(0.0));
     table_set(state, table, "maxLevel", Val::Num(0.0));
     state.push(table);
@@ -186,7 +192,7 @@ fn c_gossip_info_get_friendship_reputation_ranks(state: &mut LuaState) -> LuaRes
 }
 
 fn push_option_table(state: &mut LuaState, opt: &GossipOption) -> Val {
-    let t = create_table(state);
+    let t = create_table_with_capacity(state, GOSSIP_OPTION_HASH_FIELDS);
     table_set(
         state,
         t,
@@ -215,7 +221,7 @@ fn push_option_table(state: &mut LuaState, opt: &GossipOption) -> Val {
 }
 
 fn push_quest_table(state: &mut LuaState, row: &GossipQuestRow) -> Val {
-    let t = create_table(state);
+    let t = create_table_with_capacity(state, GOSSIP_QUEST_HASH_FIELDS);
     table_set(state, t, "questID", Val::Num(row.quest_id as f64));
     table_set(state, t, "questInfoID", Val::Num(row.quest_info_id as f64));
     table_set(state, t, "questLevel", Val::Num(row.quest_level as f64));
