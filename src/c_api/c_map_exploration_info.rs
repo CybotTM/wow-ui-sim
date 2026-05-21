@@ -2,11 +2,14 @@
 
 use crate::c_api::ensure_namespace;
 use crate::c_api::helpers::set_table_array;
-use crate::lua_api::methods::{create_table, table_get, table_set};
+use crate::lua_api::methods::{create_table, create_table_with_capacity, table_get, table_set};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use std::collections::HashSet;
+
+const EXPLORED_OVERLAY_HASH_FIELDS: usize = 8;
+const HIT_RECT_HASH_FIELDS: usize = 4;
 
 pub(crate) fn register_c_map_exploration_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_MapExplorationInfo")?;
@@ -111,7 +114,7 @@ fn build_explored_overlay_entry(
     state: &mut LuaState,
     overlay: &crate::map_exploration::MapExplorationOverlay,
 ) -> Val {
-    let entry = create_table(state);
+    let entry = create_table_with_capacity(state, EXPLORED_OVERLAY_HASH_FIELDS);
     table_set(state, entry, "offsetX", Val::Num(overlay.offset_x as f64));
     table_set(state, entry, "offsetY", Val::Num(overlay.offset_y as f64));
     table_set(
@@ -157,7 +160,7 @@ fn build_hit_rect_table(
     overlay: &crate::map_exploration::MapExplorationOverlay,
 ) -> Val {
     let (left, right, top, bottom) = overlay_hit_rect_bounds(overlay);
-    let hit_rect = create_table(state);
+    let hit_rect = create_table_with_capacity(state, HIT_RECT_HASH_FIELDS);
     table_set(state, hit_rect, "top", Val::Num(top as f64));
     table_set(state, hit_rect, "bottom", Val::Num(bottom as f64));
     table_set(state, hit_rect, "left", Val::Num(left as f64));
