@@ -1,8 +1,8 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::globals::hero_talents;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, create_table, frame_ref,
-    table_set,
+    borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
+    create_table_with_capacity, frame_ref, table_set,
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_api::talent_state;
@@ -25,6 +25,9 @@ type LuaTableRef = rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>;
 const DELVES_COMPANION_CONFIG_ID: i32 = 9201;
 const DELVES_COMPANION_TRAIT_TREE_ID: u32 = 9201;
 const DELVES_COMPANION_NODE_IDS: [u32; 3] = [9301, 9302, 9303];
+const ACTIVE_ENTRY_HASH_FIELDS: usize = 2;
+const VISIBLE_EDGE_HASH_FIELDS: usize = 4;
+const NODE_INFO_HASH_FIELDS: usize = 29;
 
 pub(super) fn register_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_traits::register_c_traits(state)?;
@@ -392,7 +395,7 @@ fn push_node_active_entry(state: &mut LuaState, info: Val, lookup_node_id: Optio
         return;
     };
 
-    let active_entry = create_table(state);
+    let active_entry = create_table_with_capacity(state, ACTIVE_ENTRY_HASH_FIELDS);
     let rank = borrow_state(state)
         .ok()
         .and_then(|sim| lookup_node_id.and_then(|id| sim.talents.node_ranks.get(&id).copied()))
@@ -440,7 +443,7 @@ fn push_node_visible_edges(
 ) {
     let visible_edges = create_table(state);
     for (index, edge) in node.edges.iter().enumerate() {
-        let edge_info = create_table(state);
+        let edge_info = create_table_with_capacity(state, VISIBLE_EDGE_HASH_FIELDS);
         table_set(
             state,
             edge_info,
@@ -667,7 +670,7 @@ fn push_missing_node_status_fields(state: &mut LuaState, info: Val) {
 }
 
 fn push_node_info(state: &mut LuaState, node_id: i32) -> Val {
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, NODE_INFO_HASH_FIELDS);
     table_set(state, info, "ID", Val::Num(node_id as f64));
     table_set(state, info, "id", Val::Num(node_id as f64));
     let lookup_node_id = u32::try_from(node_id).ok();
