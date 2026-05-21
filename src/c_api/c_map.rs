@@ -24,10 +24,6 @@
 //!   recursively walks the subtree. Returns nothing when the map is
 //!   unknown, an empty array when it exists but has no children
 //!   matching the filter.
-//! - `C_Map.GetMapGroupID(uiMapID)` — returns nothing; the simulator
-//!   has no seeded sibling map groups yet.
-//! - `C_Map.GetMapGroupMembersInfo(uiMapGroupID)` — returns an empty
-//!   array for addon code that probes optional map-group siblings.
 //! - `C_Map.GetPlayerMapPosition(uiMapID, unitToken)` — returns
 //!   `{x, y}` vector2 from `SimState.player_map_position` for any
 //!   known map, or `nil` for an unknown map / non-player unit.
@@ -66,8 +62,6 @@ const C_MAP_METHODS: &[(&str, RustLuaFn)] = &[
     ("GetMapInfoAtPosition", c_map_get_map_info_at_position),
     ("GetMapRectOnMap", c_map_get_map_rect_on_map),
     ("GetMapChildrenInfo", c_map_get_map_children_info),
-    ("GetMapGroupID", c_map_get_map_group_id),
-    ("GetMapGroupMembersInfo", c_map_get_map_group_members_info),
     ("GetWorldPosFromMapPos", c_map_get_world_pos_from_map_pos),
     ("GetPlayerMapPosition", c_map_get_player_map_position),
     ("GetBestMapForUnit", c_map_get_best_map_for_unit),
@@ -349,16 +343,6 @@ fn c_map_get_map_children_info(state: &mut LuaState) -> LuaResult<u32> {
         set_table_array(state, array, index as i64 + 1, entry);
     }
     state.push(array);
-    Ok(1)
-}
-
-fn c_map_get_map_group_id(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
-}
-
-fn c_map_get_map_group_members_info(state: &mut LuaState) -> LuaResult<u32> {
-    let members = create_table(state);
-    state.push(members);
     Ok(1)
 }
 
