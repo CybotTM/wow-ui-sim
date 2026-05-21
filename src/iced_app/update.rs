@@ -29,16 +29,12 @@ impl App {
         let task = match message {
             Message::CanvasEvent(cm) => self.handle_canvas_event(cm),
             Message::ProcessTimers(captured_at) => self.handle_process_timers(captured_at),
-            msg => {
-                self.dispatch_simple_message(msg);
-                Task::none()
-            }
+            msg => self.dispatch_simple_message(msg),
         };
         Task::batch([task, ipc_task])
     }
 
-    /// Handle messages that always return `Task::none()`.
-    fn dispatch_simple_message(&mut self, message: Message) {
+    fn dispatch_simple_message(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::FireEvent(event) => self.handle_fire_event(&event),
             Message::Scroll(dx, dy) => self.handle_scroll(dx, dy),
@@ -55,13 +51,11 @@ impl App {
             | Message::InspectorVisibleToggled(_)
             | Message::InspectorMouseEnabledToggled(_)
             | Message::InspectorApply => self.handle_inspector_message(message),
-            Message::ToggleFramesPanel => {
-                self.frames_panel_collapsed = !self.frames_panel_collapsed
-            }
+            Message::ToggleFramesPanel => self.toggle_frames_panel(),
             Message::XpLevelChanged(ref label) => self.handle_xp_level_changed(label),
             Message::PartySizeChanged(ref label) => self.handle_party_size_changed(label),
             Message::KeyPress(ref key, ref text, captured_at) => {
-                self.handle_simple_key_press(key, text.as_deref(), captured_at)
+                return self.handle_key_press_message(key, text.as_deref(), captured_at);
             }
             Message::PlayerClassChanged(ref name) => self.handle_player_class_changed(name),
             Message::PlayerRaceChanged(ref name) => self.handle_player_race_changed(name),
@@ -74,6 +68,20 @@ impl App {
             // Handled in update() directly:
             Message::CanvasEvent(_) | Message::ProcessTimers(_) => unreachable!(),
         }
+        Task::none()
+    }
+
+    fn toggle_frames_panel(&mut self) {
+        self.frames_panel_collapsed = !self.frames_panel_collapsed;
+    }
+
+    fn handle_key_press_message(
+        &mut self,
+        key: &str,
+        text: Option<&str>,
+        captured_at: Instant,
+    ) -> Task<Message> {
+        self.handle_simple_key_press(key, text, captured_at)
     }
 
     fn handle_inspector_message(&mut self, message: Message) {
@@ -90,7 +98,12 @@ impl App {
         }
     }
 
-    fn handle_simple_key_press(&mut self, key: &str, text: Option<&str>, captured_at: Instant) {
+    fn handle_simple_key_press(
+        &mut self,
+        key: &str,
+        text: Option<&str>,
+        captured_at: Instant,
+    ) -> Task<Message> {
         let (phase, phase_elapsed) = crate::logging::blocking_phase_snapshot();
         let dropped_stale_ticks = self.dropped_stale_timer_ticks.take();
         let oldest_stale_tick_age = self.oldest_dropped_timer_tick_age.take();
@@ -108,10 +121,10 @@ impl App {
         crate::logging::eprintln_elapsed(&message);
         if key == "ESCAPE" && self.options_modal_visible {
             self.options_modal_visible = false;
-            return;
+            return Task::none();
         }
 
-        self.handle_key_press(key, text, captured_at);
+        self.handle_key_press(key, text, captured_at)
     }
 
     // ── Event handlers ──────────────────────────────────────────────────
@@ -156,7 +169,12 @@ impl App {
         self.textures_pending.get()
     }
 
-    pub(super) fn handle_key_press(&mut self, key: &str, text: Option<&str>, captured_at: Instant) {
+    pub(super) fn handle_key_press(
+        &mut self,
+        key: &str,
+        text: Option<&str>,
+        captured_at: Instant,
+    ) -> Task<Message> {
         let dispatch_started = Instant::now();
         let env = self.env.borrow();
         if let Err(e) = env.send_key_press(key, text) {
@@ -170,6 +188,17 @@ impl App {
             captured_at.elapsed()
         ));
         self.invalidate_after_lua_mutation();
+        if self.key_press_needs_redraw() {
+            request_redraw_task()
+        } else {
+            Task::none()
+        }
+    }
+
+    fn key_press_needs_redraw(&self) -> bool {
+        self.strata_dirty.get() != 0
+            || self.textures_pending.get()
+            || self.env.borrow().state().borrow().casting.is_some()
     }
 
     fn handle_xp_level_changed(&mut self, label: &str) {
@@ -657,6 +686,10 @@ fn sample_display_metrics(
 #[cfg(test)]
 #[path = "update_tests.rs"]
 mod update_tests;
+
+#[cfg(test)]
+#[path = "update_key_tests.rs"]
+mod update_key_tests;
 
 #[cfg(test)]
 #[path = "resize_event_tests.rs"]

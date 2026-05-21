@@ -210,7 +210,7 @@ fn invalidate_after_lua_mutation_keeps_incremental_dirty_ids() {
 fn party_size_change_updates_group_state_and_selection() {
     let mut app = build_test_app(ScreenKind::Game);
 
-    app.dispatch_simple_message(Message::PartySizeChanged("4".to_string()));
+    let _ = app.dispatch_simple_message(Message::PartySizeChanged("4".to_string()));
 
     assert_eq!(app.selected_party_size, "4");
     let env = app.env.borrow();
@@ -270,7 +270,7 @@ fn queued_stale_timer_ticks_do_not_run_tick_work() {
     );
 
     app.options_modal_visible = true;
-    app.dispatch_simple_message(Message::KeyPress(
+    let _ = app.dispatch_simple_message(Message::KeyPress(
         "ESCAPE".to_string(),
         None,
         Instant::now(),

@@ -195,7 +195,7 @@ impl App {
                 None
             }
             DebugCommand::Key { key, respond } => {
-                self.handle_key_press(&key, None, std::time::Instant::now());
+                let _ = self.handle_key_press(&key, None, std::time::Instant::now());
                 let _ = respond.send(Ok(()));
                 None
             }
