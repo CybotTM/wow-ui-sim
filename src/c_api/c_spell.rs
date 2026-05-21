@@ -17,8 +17,6 @@
 //! - `IsSpellHarmful(spellID)` → true for known non-self-targeted spells.
 //! - `GetMountFromSpell(spellID)` → scans `world.mounts` for matching spell
 //!   id, returns mount_id or nil.
-//! - `GetVisibilityInfo(spellID, filter)` → `(false, true, false)` — most
-//!   spells visible but not custom-pinned.
 //! - `IsSelfBuff(spellID)` → true when `implicit_target == 1` (Self), else false.
 //! - `IsSpellUsable(spellID)` → `(true, false)` when spell is known;
 //!   `(false, false)` otherwise.
@@ -67,7 +65,6 @@ const SPELL_QUERY_METHODS: &[(&str, SpellScriptFn)] = &[
     ("GetSpellName", get_spell_name),
     ("GetSpellCooldown", get_spell_cooldown),
     ("GetMountFromSpell", get_mount_from_spell),
-    ("GetVisibilityInfo", get_visibility_info),
     ("GetSpellTradeSkillLink", get_spell_trade_skill_link),
     (
         "GetSpellIDForSpellIdentifier",
@@ -339,19 +336,6 @@ fn get_mount_from_spell(state: &mut LuaState) -> LuaResult<u32> {
         None => state.push(Val::Nil),
     }
     Ok(1)
-}
-
-/// `C_Spell.GetVisibilityInfo(spellID, filter)` → `(hasCustom, alwaysShowMine, showForMySpec)`.
-///
-/// Permissive: most spells are shown for the current spec but not custom-pinned.
-fn get_visibility_info(state: &mut LuaState) -> LuaResult<u32> {
-    // hasCustom=false: no user-defined custom visibility overrides.
-    // alwaysShowMine=true: always show if cast by the player.
-    // showForMySpec=false: not spec-pinned.
-    state.push(Val::Bool(false));
-    state.push(Val::Bool(true));
-    state.push(Val::Bool(false));
-    Ok(3)
 }
 
 /// `C_Spell.DoesSpellExist(spellID)` -> `bool`.

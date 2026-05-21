@@ -7,7 +7,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
 }
 
 fn deprecated_spell_script_toc() -> PathBuf {
@@ -212,7 +213,7 @@ fn blizzard_deprecated_spell_script_installs_three_wrapper_closures() {
          (string→Enum lookup wrapper that maps `\"RAID_INCOMBAT\"` / `\"RAID_OUTOFCOMBAT\"` / \
          `\"ENEMY_TARGET\"` to Enum.SpellAuraVisibilityType variants \
          (RaidInCombat / RaidOutOfCombat / EnemyTarget) before delegating to \
-         C_Spell.GetVisibilityInfo at c_spell.rs:90)"
+         the temporary C_Spell.GetVisibilityInfo visibility shim)"
     );
 }
 
@@ -253,7 +254,7 @@ fn blizzard_deprecated_spell_script_visibility_wrapper_translates_string_keys() 
     assert!(
         translated,
         "Calling SpellGetVisibilityInfo(0, 'RAID_INCOMBAT') must return the canonical \
-         (false, true, false) tuple from C_Spell.GetVisibilityInfo (c_spell.rs:418-426). \
+         (false, true, false) tuple from the temporary C_Spell.GetVisibilityInfo shim. \
          The wrapper translates `'RAID_INCOMBAT'` → Enum.SpellAuraVisibilityType.RaidInCombat \
          via the local visiblityTypeLookup table at lines 24-28, then forwards to the \
          registered Rust impl. The (hasCustom=false, alwaysShowMine=true, \
