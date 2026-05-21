@@ -1,7 +1,8 @@
 use crate::c_api::ensure_namespace;
 use crate::lua_api::globals::currency_data;
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, table_set_static, val_to_string,
+    borrow_state, create_string, create_table, create_table_with_capacity, table_set_static,
+    val_to_string,
 };
 use crate::lua_api::state::CurrencyInfo;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -32,6 +33,7 @@ const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
         c_currency_get_war_resources_currency_id,
     ),
 ];
+const CURRENCY_INFO_HASH_FIELDS: usize = 24;
 
 pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_CurrencyInfo")?;
@@ -94,7 +96,7 @@ fn c_currency_get_backpack_currency_info(state: &mut LuaState) -> LuaResult<u32>
 }
 
 fn push_currency_info_table(state: &mut LuaState, info: &CurrencyInfo) -> Val {
-    let t = create_table(state);
+    let t = create_table_with_capacity(state, CURRENCY_INFO_HASH_FIELDS);
     write_currency_identity_fields(state, t, info);
     write_currency_quantity_fields(state, t, info);
     write_currency_flag_fields(state, t, info);
@@ -309,6 +311,32 @@ pub(super) fn register_c_bank(state: &mut LuaState) -> LuaResult<()> {
 fn c_bank_fetch_deposited_money(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn get_currency_info_returns_seeded_full_row() {
+        let env = WowLuaEnv::new().expect("env should initialize");
+        let (name, field_count): (String, i32) = env
+            .eval(
+                r#"
+                local info = C_CurrencyInfo.GetCurrencyInfo(2245)
+                local count = 0
+                for _ in pairs(info) do
+                    count = count + 1
+                end
+                return info.name, count
+                "#,
+            )
+            .expect("currency info should evaluate");
+
+        assert_eq!(name, "Valorstones");
+        assert_eq!(field_count, CURRENCY_INFO_HASH_FIELDS as i32);
+    }
 }
 
 fn c_bank_fetch_num_purchased_bank_tabs(state: &mut LuaState) -> LuaResult<u32> {
