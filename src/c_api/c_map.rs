@@ -36,8 +36,8 @@
 
 use super::helpers::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
-    table_set_static, val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_table, create_table_with_capacity,
+    table_get, table_set, table_set_static, val_to_string,
 };
 use crate::lua_api::state::MapData;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -86,6 +86,7 @@ fn register_c_map_methods(state: &mut LuaState, table_ref: LuaTableRef) -> LuaRe
 
 const DEFAULT_PLAYER_MAP_ID: i32 = 2248;
 const DEFAULT_MAP_ART_BACKGROUND_ATLAS: &str = "AdventureMap_TileBg";
+const MAP_DETAILS_HASH_FIELDS: usize = 5;
 
 fn c_map_get_map_art_background_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let ui_map_id = i32::from_stack(state, 1)?;
@@ -279,7 +280,7 @@ fn compose_rect_in_parent(
 }
 
 fn push_map_details_table(state: &mut LuaState, map: &MapData) -> Val {
-    let t = create_table(state);
+    let t = create_table_with_capacity(state, MAP_DETAILS_HASH_FIELDS);
     let name = create_string(state, &map.name);
     table_set_static(state, t, "mapID", Val::Num(map.ui_map_id as f64));
     table_set_static(state, t, "name", name);
