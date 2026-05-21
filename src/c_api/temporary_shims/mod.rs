@@ -8,6 +8,7 @@ pub mod c_gossip_info;
 pub mod c_lfg_info;
 pub mod c_map_groups;
 pub mod c_mythic_plus;
+pub mod c_paper_doll_stagger;
 pub mod c_party_info_instance_abandon;
 pub mod c_party_info_static_fallbacks;
 pub mod c_perks_program;

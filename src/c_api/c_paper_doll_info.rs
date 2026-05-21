@@ -20,7 +20,6 @@ pub(crate) fn register_c_paper_doll_info_surface(state: &mut LuaState) -> LuaRes
         "GetArmorEffectivenessAgainstTarget",
         get_armor_effectiveness_against_target,
     )?;
-    table_set_rust_fn_static(state, ns, "GetStaggerPercentage", get_stagger_percentage)?;
     Ok(())
 }
 
@@ -42,11 +41,6 @@ fn get_armor_effectiveness_against_target(state: &mut LuaState) -> LuaResult<u32
     };
 
     state.push(Val::Num(armor_effectiveness(armor, target_level)));
-    Ok(1)
-}
-
-fn get_stagger_percentage(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
     Ok(1)
 }
 
