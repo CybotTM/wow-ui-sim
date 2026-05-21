@@ -33,8 +33,8 @@ use super::helpers::ensure_namespace;
 use crate::c_api::item_spell::spell_link_for_id;
 use crate::lua_api::globals::action_bar_api::spell_cooldown_times;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_string_static, create_table, frame_ref,
-    table_set_num, table_set_static, val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_string_static, create_table,
+    create_table_with_capacity, frame_ref, table_set_num, table_set_static, val_to_string,
 };
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
@@ -46,6 +46,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 type SpellScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
+
+const SPELL_INFO_HASH_FIELDS: usize = 7;
 
 pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
@@ -118,7 +120,7 @@ fn get_spell_info(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, SPELL_INFO_HASH_FIELDS);
     let name = create_string(state, spell.name);
     table_set_static(state, info, "name", name);
     table_set_static(
