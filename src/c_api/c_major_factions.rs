@@ -28,18 +28,6 @@ pub(crate) fn register_c_major_factions_surface(state: &mut LuaState) -> LuaResu
     table_set_rust_fn_static(state, ns, "GetMajorFactionData", get_major_faction_data)?;
     table_set_rust_fn_static(state, ns, "GetRenownLevels", get_renown_levels)?;
     table_set_rust_fn_static(state, ns, "GetMajorFactionIDs", get_major_faction_ids)?;
-    table_set_rust_fn_static(
-        state,
-        ns,
-        "IsMajorFactionHiddenFromExpansionPage",
-        is_major_faction_hidden_from_expansion_page,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        ns,
-        "ShouldDisplayMajorFactionAsJourney",
-        should_display_major_faction_as_journey,
-    )?;
     Ok(())
 }
 
@@ -87,18 +75,6 @@ fn get_major_faction_ids(state: &mut LuaState) -> LuaResult<u32> {
         );
     }
     state.push(sequence);
-    Ok(1)
-}
-
-fn is_major_faction_hidden_from_expansion_page(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = i64::from_stack(state, 1);
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-fn should_display_major_faction_as_journey(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = i64::from_stack(state, 1);
-    state.push(Val::Bool(false));
     Ok(1)
 }
 

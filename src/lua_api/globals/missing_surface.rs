@@ -55,7 +55,7 @@ mod zone_ability;
 use crate::c_api::permanent_shims::c_nameplate;
 use crate::c_api::temporary_shims::{
     c_behavioral_messaging, c_character_services, c_click_bindings, c_configuration_warnings,
-    c_gossip_info, c_map_groups, c_mythic_plus, c_paper_doll_stagger,
+    c_gossip_info, c_major_faction_display, c_map_groups, c_mythic_plus, c_paper_doll_stagger,
     c_party_info_instance_abandon, c_party_info_static_fallbacks, c_pet_battles_static_fallbacks,
     c_spell_classification, c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks,
     c_spell_target,
@@ -231,6 +231,13 @@ fn register_collection_surfaces(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_artifact_surfaces(state: &mut LuaState) -> LuaResult<()> {
+    register_spell_and_widget_surfaces(state)?;
+    register_item_power_surfaces(state)?;
+    register_character_progression_surfaces(state)?;
+    Ok(())
+}
+
+fn register_spell_and_widget_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_spell::register_c_spell_surface(state)?;
     c_spell_classification::register_c_spell_classification_shims(state)?;
     c_spell_counts::register_c_spell_count_shims(state)?;
@@ -239,6 +246,10 @@ fn register_artifact_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_spell_target::register_c_spell_target_shims(state)?;
     c_spell_diminish::register_c_spell_diminish_surface(state)?;
     c_widget::register_c_widget_surface(state)?;
+    Ok(())
+}
+
+fn register_item_power_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_paper_doll_info::register_c_paper_doll_info_surface(state)?;
     c_paper_doll_stagger::register_c_paper_doll_stagger_shim(state)?;
     c_artifact_ui::register_c_artifact_ui_surface(state)?;
@@ -246,9 +257,14 @@ fn register_artifact_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_azerite_item::register_c_azerite_item_surface(state)?;
     c_azerite_essence::register_c_azerite_essence_surface(state)?;
     c_azerite_empowered_item::register_c_azerite_empowered_item_surface(state)?;
+    Ok(())
+}
+
+fn register_character_progression_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_barber_shop::register_c_barber_shop_surface(state)?;
     c_cursor::register_c_cursor_surface(state)?;
     c_major_factions::register_c_major_factions_surface(state)?;
+    c_major_faction_display::register_c_major_faction_display_shims(state)?;
     c_allied_races::register_c_allied_races_surface(state)?;
     Ok(())
 }
