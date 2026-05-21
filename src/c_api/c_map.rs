@@ -50,6 +50,8 @@ use std::collections::HashSet;
 type LuaTableRef = GcRef<Table>;
 type RustLuaFn = rilua::vm::closure::RustFn;
 
+const MAP_ART_LAYER_HASH_FIELDS: usize = 7;
+
 const C_MAP_METHODS: &[(&str, RustLuaFn)] = &[
     (
         "GetMapArtBackgroundAtlas",
@@ -125,7 +127,7 @@ fn c_map_get_map_art_layers(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn create_map_art_layer_table(state: &mut LuaState, layer: &crate::map_art::MapArtLayer) -> Val {
-    let layer_info = create_table(state);
+    let layer_info = create_table_with_capacity(state, MAP_ART_LAYER_HASH_FIELDS);
     table_set_num_field(state, layer_info, "layerWidth", layer.layer_width as f64);
     table_set_num_field(state, layer_info, "layerHeight", layer.layer_height as f64);
     table_set_num_field(state, layer_info, "tileWidth", layer.tile_width as f64);
