@@ -31,6 +31,7 @@ const ERROR_HANDLER_KEY: &str = "__error_handler";
 const PROTECTED_LUA_PCALL_WRAPPER_FACTORY_KEY: &str = "__protected_lua_pcall_wrapper_factory";
 const LUA_MULTRET: i32 = -1;
 const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
+const SCRIPT_HANDLER_TABLE_HASH_SLOTS: usize = 8;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ScriptBinding {
@@ -224,7 +225,9 @@ fn script_frame_table(
         return None;
     }
 
-    let handlers = state.gc.alloc_table(Table::with_sizes(0, 4));
+    let handlers = state
+        .gc
+        .alloc_table(Table::with_sizes(0, SCRIPT_HANDLER_TABLE_HASH_SLOTS));
     if let Some(table) = state.gc.tables.get_mut(scripts) {
         let _ = table.raw_set(
             Val::Num(widget_id as f64),

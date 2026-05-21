@@ -67,6 +67,17 @@ fn script_handlers_use_numeric_frame_subtables() {
         Val::Table(table) => table,
         other => panic!("expected numeric frame subtable, got {other:?}"),
     };
+    let frame_table_hash_size = lua
+        .state()
+        .gc
+        .tables
+        .get(frame_table)
+        .expect("frame script table is live")
+        .hash_size();
+    assert_eq!(
+        frame_table_hash_size,
+        SCRIPT_HANDLER_TABLE_HASH_SLOTS as u32
+    );
     assert!(matches!(
         table_get_str(lua.state_mut(), frame_table, "OnEvent"),
         Val::Function(_)
