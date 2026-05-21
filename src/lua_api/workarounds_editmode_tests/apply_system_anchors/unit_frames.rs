@@ -286,3 +286,183 @@ fn apply_system_anchors_replays_active_widescreen_unit_frame_settings() {
         "every active Widescreen unit-frame setting on shortcut frames should replay"
     );
 }
+
+#[test]
+fn apply_system_anchors_batches_compact_unit_frame_startup_refreshes() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = {
+                UnitFrame = 3,
+            },
+        }
+
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        EditModeSystemMixin = {}
+        function EditModeSystemMixin.UpdateSystemSetting(self, setting, entireSystemUpdate)
+            table.insert(self.baseUpdates, tostring(setting) .. ":" .. tostring(entireSystemUpdate))
+        end
+
+        local function newFrame(name, systemIndex)
+            local frame = {
+                system = Enum.EditModeSystem.UnitFrame,
+                systemIndex = systemIndex,
+                name = name,
+                baseUpdates = {},
+                clearedSettings = {},
+            }
+
+            function frame:GetName()
+                return self.name
+            end
+
+            function frame:SetHasActiveChanges(value)
+                self.hasActiveChanges = value
+            end
+
+            function frame:UpdateSettingMap(updateDirtySettings)
+                self.settingMapUpdated = updateDirtySettings
+            end
+
+            function frame:ApplySystemAnchor()
+                self.anchorApplied = true
+            end
+
+            function frame:ClearDirtySetting(setting)
+                table.insert(self.clearedSettings, tostring(setting))
+            end
+
+            function frame:UpdateSystemSetting()
+                error("compact unit frame startup should use batched refresh")
+            end
+
+            return frame
+        end
+
+        PartyFrame = newFrame("PartyFrame", 4)
+        function PartyFrame:UpdatePartyMemberBackground()
+            self.backgroundUpdates = (self.backgroundUpdates or 0) + 1
+        end
+        function PartyFrame:UpdatePaddingAndLayout()
+            self.paddingUpdates = (self.paddingUpdates or 0) + 1
+        end
+        function PartyFrame:UpdateSelectionVerticalState()
+            self.selectionUpdates = (self.selectionUpdates or 0) + 1
+        end
+        function PartyFrame:UpdateSystemSettingFrameSize()
+            self.frameSizeUpdates = (self.frameSizeUpdates or 0) + 1
+        end
+
+        CompactRaidFrameContainer = newFrame("CompactRaidFrameContainer", 5)
+        function CompactRaidFrameContainer:TryUpdate()
+            self.tryUpdates = (self.tryUpdates or 0) + 1
+        end
+        function CompactRaidFrameContainer:Layout()
+            self.layouts = (self.layouts or 0) + 1
+        end
+        function CompactRaidFrameContainer:ApplyMultipleToFrames()
+            self.applyMultiple = (self.applyMultiple or 0) + 1
+        end
+
+        CompactArenaFrame = newFrame("CompactArenaFrame", 7)
+        function CompactArenaFrame:RefreshMembers()
+            self.refreshMembers = (self.refreshMembers or 0) + 1
+        end
+
+        CompactPartyFrame = {
+            refreshMembers = 0,
+            RefreshMembers = function(self)
+                self.refreshMembers = self.refreshMembers + 1
+            end,
+        }
+        compactRaidGroupBorderUpdates = 0
+        function CompactRaidGroup_UpdateBorder()
+            compactRaidGroupBorderUpdates = compactRaidGroupBorderUpdates + 1
+        end
+        raidAndPartyUpdates = 0
+        function UpdateRaidAndPartyFrames()
+            raidAndPartyUpdates = raidAndPartyUpdates + 1
+        end
+        function DefaultCompactMiniFrameSetup() end
+        function CompactUnitFrame_UpdateAllFromEditMode() end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = {
+                PartyFrame,
+                CompactRaidFrameContainer,
+                CompactArenaFrame,
+            },
+            raidContainerFlowUpdates = 0,
+        }
+
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(system, systemIndex)
+            return {
+                system = system,
+                systemIndex = systemIndex,
+                isInDefaultPosition = false,
+                anchorInfo = {
+                    point = "CENTER",
+                    relativeTo = UIParent,
+                    relativePoint = "CENTER",
+                    offsetX = 0,
+                    offsetY = 0,
+                },
+                settings = {
+                    { setting = 10, value = 1 },
+                    { setting = 11, value = 1 },
+                    { setting = 12, value = 1 },
+                },
+            }
+        end
+
+        function EditModeManagerFrame:UpdateSystem()
+            error("compact unit frame startup should not run full UpdateSystem")
+        end
+
+        function EditModeManagerFrame:UpdateRaidContainerFlow()
+            self.raidContainerFlowUpdates = self.raidContainerFlowUpdates + 1
+        end
+        "#,
+    )
+    .expect("install compact unit frame batch stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply compact unit frame batched settings");
+
+    let summary: String = env
+        .eval(
+            r#"
+            return table.concat({
+                table.concat(PartyFrame.baseUpdates, ","),
+                tostring(PartyFrame.backgroundUpdates),
+                tostring(PartyFrame.paddingUpdates),
+                tostring(PartyFrame.selectionUpdates),
+                tostring(PartyFrame.frameSizeUpdates),
+                table.concat(CompactRaidFrameContainer.baseUpdates, ","),
+                tostring(CompactRaidFrameContainer.tryUpdates),
+                tostring(CompactRaidFrameContainer.layouts),
+                tostring(CompactRaidFrameContainer.applyMultiple),
+                tostring(EditModeManagerFrame.raidContainerFlowUpdates),
+                table.concat(CompactArenaFrame.baseUpdates, ","),
+                tostring(CompactArenaFrame.refreshMembers),
+                tostring(compactRaidGroupBorderUpdates),
+                tostring(CompactPartyFrame.refreshMembers),
+                tostring(raidAndPartyUpdates),
+            }, "|")
+            "#,
+        )
+        .expect("read compact unit frame batch counters");
+
+    assert_eq!(
+        summary,
+        "10:true,11:true,12:true|1|2|1|1|10:true,11:true,12:true|1|1|2|1|10:true,11:true,12:true|1|1|1|1",
+        "compact unit startup should mirror settings and run one batched refresh per subsystem"
+    );
+}

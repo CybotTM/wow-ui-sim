@@ -346,6 +346,103 @@
             end
         end
 
+        local function mirror_and_clear_compact_unit_frame_settings(systemFrame)
+            local systemInfo = systemFrame and systemFrame.systemInfo
+            if not systemInfo then
+                return
+            end
+
+            for _, settingInfo in ipairs(systemInfo.settings or {}) do
+                if EditModeSystemMixin and EditModeSystemMixin.UpdateSystemSetting then
+                    pcall(EditModeSystemMixin.UpdateSystemSetting, systemFrame, settingInfo.setting, true)
+                end
+                if systemFrame.ClearDirtySetting then
+                    pcall(systemFrame.ClearDirtySetting, systemFrame, settingInfo.setting)
+                end
+            end
+        end
+
+        local function refresh_compact_frame_art()
+            if CompactRaidFrameContainer and CompactRaidFrameContainer.ApplyMultipleToFrames then
+                pcall(
+                    CompactRaidFrameContainer.ApplyMultipleToFrames,
+                    CompactRaidFrameContainer,
+                    "mini",
+                    DefaultCompactMiniFrameSetup,
+                    "normal",
+                    CompactUnitFrame_UpdateAllFromEditMode,
+                    "group",
+                    CompactRaidGroup_UpdateBorder
+                )
+            end
+        end
+
+        local function replay_compact_unit_frame_settings(systemFrame)
+            local frameName = system_frame_name(systemFrame)
+            if frameName ~= "PartyFrame"
+                and frameName ~= "CompactArenaFrame"
+                and frameName ~= "CompactRaidFrameContainer" then
+                return false
+            end
+            if not EditModeSystemMixin or not EditModeSystemMixin.UpdateSystemSetting then
+                return false
+            end
+
+            mirror_and_clear_compact_unit_frame_settings(systemFrame)
+
+            if frameName == "PartyFrame" then
+                if CompactPartyFrame and CompactRaidGroup_UpdateBorder then
+                    pcall(CompactRaidGroup_UpdateBorder, CompactPartyFrame)
+                end
+                if UpdateRaidAndPartyFrames then
+                    pcall(UpdateRaidAndPartyFrames)
+                end
+                if CompactPartyFrame and CompactPartyFrame.RefreshMembers then
+                    pcall(CompactPartyFrame.RefreshMembers, CompactPartyFrame)
+                end
+                if PartyFrame and PartyFrame.UpdatePartyMemberBackground then
+                    pcall(PartyFrame.UpdatePartyMemberBackground, PartyFrame)
+                end
+                if PartyFrame and PartyFrame.UpdatePaddingAndLayout then
+                    pcall(PartyFrame.UpdatePaddingAndLayout, PartyFrame)
+                end
+                if systemFrame.UpdateSelectionVerticalState then
+                    pcall(systemFrame.UpdateSelectionVerticalState, systemFrame)
+                end
+                if systemFrame.UpdateSystemSettingFrameSize then
+                    pcall(systemFrame.UpdateSystemSettingFrameSize, systemFrame)
+                end
+                return true
+            end
+
+            if frameName == "CompactRaidFrameContainer" then
+                if CompactRaidFrameContainer and CompactRaidFrameContainer.TryUpdate then
+                    pcall(CompactRaidFrameContainer.TryUpdate, CompactRaidFrameContainer)
+                end
+                if CompactRaidFrameContainer and CompactRaidFrameContainer.Layout then
+                    pcall(CompactRaidFrameContainer.Layout, CompactRaidFrameContainer)
+                end
+                refresh_compact_frame_art()
+                if EditModeManagerFrame and EditModeManagerFrame.UpdateRaidContainerFlow then
+                    pcall(EditModeManagerFrame.UpdateRaidContainerFlow, EditModeManagerFrame)
+                end
+                return true
+            end
+
+            if frameName == "CompactArenaFrame" then
+                refresh_compact_frame_art()
+                if systemFrame.RefreshMembers then
+                    pcall(systemFrame.RefreshMembers, systemFrame)
+                end
+                if PartyFrame and PartyFrame.UpdatePaddingAndLayout then
+                    pcall(PartyFrame.UpdatePaddingAndLayout, PartyFrame)
+                end
+                return true
+            end
+
+            return false
+        end
+
         local function refresh_action_bar_system(systemFrame)
             local systemInfo = systemFrame.systemInfo
             local actionButtons = systemFrame.actionButtons
@@ -530,7 +627,9 @@
             elseif skips_expensive_startup_system_update(systemFrame) then
                 if seed_system_frame(systemFrame) then
                     apply_system_anchor_if_safe(systemFrame)
-                    replay_system_settings(systemFrame)
+                    if not replay_compact_unit_frame_settings(systemFrame) then
+                        replay_system_settings(systemFrame)
+                    end
                 end
             elseif skips_full_startup_scale_update(systemFrame) then
                 if seed_system_frame(systemFrame) then
