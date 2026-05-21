@@ -1,6 +1,9 @@
 //! Tests for addon API functions (addon_api.rs).
 
 use std::collections::HashMap;
+use std::ffi::OsString;
+use std::path::Path;
+use std::sync::Mutex;
 use wow_ui_sim::lua_api::AddonInfo;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -563,6 +566,35 @@ fn test_is_addon_default_enabled_unknown_returns_false() {
 
 // ── C_AddOns.SaveAddOns / ResetAddOns ─────────────────────────────────────────
 
+static ADDONS_TXT_ENV_LOCK: Mutex<()> = Mutex::new(());
+
+struct ScopedAddonsTxtEnv {
+    previous: Option<OsString>,
+}
+
+impl ScopedAddonsTxtEnv {
+    fn set(path: &Path) -> Self {
+        let previous = std::env::var_os("WOW_SIM_ADDONS_TXT");
+        unsafe {
+            std::env::set_var("WOW_SIM_ADDONS_TXT", path);
+        }
+        Self { previous }
+    }
+}
+
+impl Drop for ScopedAddonsTxtEnv {
+    fn drop(&mut self) {
+        match self.previous.take() {
+            Some(previous) => unsafe {
+                std::env::set_var("WOW_SIM_ADDONS_TXT", previous);
+            },
+            None => unsafe {
+                std::env::remove_var("WOW_SIM_ADDONS_TXT");
+            },
+        }
+    }
+}
+
 fn env_with_two_user_addons() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     {
@@ -591,6 +623,21 @@ fn enabled_state(env: &WowLuaEnv, name: &str) -> bool {
         .find(|a| a.folder_name == name)
         .expect("addon registered")
         .enabled
+}
+
+#[test]
+fn test_save_addons_writes_local_addons_txt() {
+    let _env_lock = ADDONS_TXT_ENV_LOCK.lock().expect("env lock");
+    let temp = tempfile::tempdir().expect("tempdir");
+    let path = temp.path().join("local").join("AddOns.txt");
+    let _env = ScopedAddonsTxtEnv::set(&path);
+    let env = env_with_two_user_addons();
+
+    env.exec("C_AddOns.DisableAddOn('AddonB')").unwrap();
+    env.exec("C_AddOns.SaveAddOns()").unwrap();
+
+    let text = std::fs::read_to_string(&path).expect("read written AddOns.txt");
+    assert_eq!(text, "AddonA: enabled\nAddonB: disabled\n");
 }
 
 #[test]
