@@ -223,12 +223,6 @@ fn register_spell_flyout_queries(
         "GetFlyoutSlotInfo",
         get_flyout_slot_info,
     )?;
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetCallPetSpellInfo",
-        get_call_pet_spell_info,
-    )?;
     Ok(())
 }
 
@@ -653,13 +647,6 @@ fn push_flyout_slot_info(state: &mut LuaState, slot: SpellFlyoutSlot) {
     state.push(Val::Bool(slot.is_known));
     state.push(spell_name);
     state.push(Val::Num(slot.spec_id as f64));
-}
-
-fn get_call_pet_spell_info(state: &mut LuaState) -> LuaResult<u32> {
-    let _spell_id = u32::from_stack(state, 1)?;
-    state.push(Val::Nil);
-    state.push(Val::Nil);
-    Ok(2)
 }
 
 fn push_empty_flyout_slot(state: &mut LuaState) {

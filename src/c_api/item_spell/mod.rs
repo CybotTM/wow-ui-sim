@@ -6,6 +6,7 @@ pub(crate) mod helpers;
 
 use super::c_spell;
 use super::c_spell_book;
+use super::temporary_shims::c_spell_book_call_pet;
 use super::temporary_shims::c_spell_static_fallbacks;
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
@@ -27,5 +28,6 @@ pub(crate) fn register_item_and_spell_surfaces(state: &mut LuaState) -> LuaResul
     c_spell::register_c_spell_surface(state)?;
     c_spell_static_fallbacks::register_c_spell_static_fallbacks(state)?;
     c_spell_book::register_c_spell_book(state)?;
+    c_spell_book_call_pet::register_spell_book_call_pet_shim(state)?;
     Ok(())
 }

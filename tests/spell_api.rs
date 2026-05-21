@@ -181,6 +181,23 @@ fn test_spellbook_has_pet_spells() {
 }
 
 #[test]
+fn test_get_call_pet_spell_info_defaults_to_no_pet_spell() {
+    let env = env();
+    let (is_function, first_is_nil, second_is_nil): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local spellID, texture = GetCallPetSpellInfo(1)
+            return type(GetCallPetSpellInfo) == "function", spellID == nil, texture == nil
+            "#,
+        )
+        .unwrap();
+
+    assert!(is_function);
+    assert!(first_is_nil);
+    assert!(second_is_nil);
+}
+
+#[test]
 fn test_spellbook_namespace_functions_survive_gc() {
     let env = env();
     let result: String = env
