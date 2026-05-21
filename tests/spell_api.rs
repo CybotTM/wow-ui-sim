@@ -239,6 +239,19 @@ fn test_spellbook_get_override_spell() {
 }
 
 #[test]
+fn test_spellbook_get_item_auto_cast_defaults_disabled() {
+    let env = env();
+    let (enabled, auto_cast_allowed): (bool, bool) = env
+        .eval(
+            "return C_SpellBook.GetSpellBookItemAutoCast(1, Enum.SpellBookSpellBank.Player)",
+        )
+        .unwrap();
+
+    assert!(!enabled);
+    assert!(!auto_cast_allowed);
+}
+
+#[test]
 fn test_spellbook_is_spell_known() {
     let env = env();
     let known: bool = env.eval("return C_SpellBook.IsSpellKnown(1)").unwrap();

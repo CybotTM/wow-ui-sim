@@ -114,20 +114,8 @@ fn register_spell_book_item_status_queries(
     table_set_rust_fn_static(
         state,
         table_ref,
-        "GetSpellBookItemAutoCast",
-        c_spell_book_get_spell_book_item_auto_cast,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
         "GetSpellBookItemPowerCost",
         c_spell_book_get_spell_book_item_power_cost,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetSpellBookItemLossOfControlCooldownInfo",
-        c_spell_book_get_spell_book_item_loss_of_control_cooldown_info,
     )?;
     Ok(())
 }
@@ -385,19 +373,6 @@ fn c_spell_book_get_spell_book_item_texture(state: &mut LuaState) -> LuaResult<u
     Ok(1)
 }
 
-fn c_spell_book_get_spell_book_item_auto_cast(state: &mut LuaState) -> LuaResult<u32> {
-    let slot = i32::from_stack(state, 1)?;
-    let _spell_bank = Option::<i32>::from_stack(state, 2)?;
-    if spellbook_data::get_spell_at_slot(slot).is_none() {
-        state.push(Val::Bool(false));
-        state.push(Val::Bool(false));
-        return Ok(2);
-    }
-    state.push(Val::Bool(false));
-    state.push(Val::Bool(false));
-    Ok(2)
-}
-
 fn c_spell_book_get_spell_book_item_power_cost(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 1)?;
     let _spell_bank = Option::<i32>::from_stack(state, 2)?;
@@ -409,25 +384,6 @@ fn c_spell_book_get_spell_book_item_power_cost(state: &mut LuaState) -> LuaResul
         Some(power_costs) => state.push(power_costs),
         None => state.push(Val::Nil),
     }
-    Ok(1)
-}
-
-fn c_spell_book_get_spell_book_item_loss_of_control_cooldown_info(
-    state: &mut LuaState,
-) -> LuaResult<u32> {
-    let slot = i32::from_stack(state, 1)?;
-    let _spell_bank = Option::<i32>::from_stack(state, 2)?;
-    if spellbook_data::get_spell_at_slot(slot).is_none() {
-        state.push(Val::Nil);
-        return Ok(1);
-    }
-    let info = create_table(state);
-    table_set_static(state, info, "isActive", Val::Bool(false));
-    table_set_static(state, info, "startTime", Val::Num(0.0));
-    table_set_static(state, info, "duration", Val::Num(0.0));
-    table_set_static(state, info, "modRate", Val::Num(1.0));
-    table_set_static(state, info, "shouldReplaceNormalCooldown", Val::Bool(false));
-    state.push(info);
     Ok(1)
 }
 
