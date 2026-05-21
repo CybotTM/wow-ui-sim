@@ -3,14 +3,16 @@ use std::path::{Path, PathBuf};
 
 use super::saved_variables_parse::{SavedVariablesTableSize, SavedVariablesTableSizeCache};
 
-const TABLE_SIZE_CACHE_FILE: &str = ".saved-variable-table-sizes.tsv";
+const TABLE_SIZE_CACHE_DIR: &str = ".saved-variable-table-sizes";
+const FNV_OFFSET_BASIS: u64 = 0xcbf29ce484222325;
+const FNV_PRIME: u64 = 0x100000001b3;
 
 pub(super) fn load_table_size_cache(
     storage_dir: &Path,
     source_path: &Path,
 ) -> SavedVariablesTableSizeCache {
     let source_key = table_size_cache_source_key(source_path);
-    let Ok(contents) = fs::read_to_string(table_size_cache_path(storage_dir)) else {
+    let Ok(contents) = fs::read_to_string(table_size_cache_path(storage_dir, &source_key)) else {
         return SavedVariablesTableSizeCache::default();
     };
 
@@ -31,12 +33,13 @@ pub(super) fn save_table_size_cache(
     source_path: &Path,
     cache: &SavedVariablesTableSizeCache,
 ) -> crate::Result<()> {
-    fs::create_dir_all(storage_dir).map_err(|error| crate::Error::Other(error.to_string()))?;
-
     let source_key = table_size_cache_source_key(source_path);
-    let cache_path = table_size_cache_path(storage_dir);
-    let mut lines = existing_cache_lines_for_other_sources(&cache_path, &source_key);
+    let cache_path = table_size_cache_path(storage_dir, &source_key);
+    if let Some(parent) = cache_path.parent() {
+        fs::create_dir_all(parent).map_err(|error| crate::Error::Other(error.to_string()))?;
+    }
 
+    let mut lines = Vec::new();
     for (table_path, size) in cache.iter() {
         lines.push(format!(
             "{}\t{}\t{}\t{}",
@@ -54,21 +57,10 @@ pub(super) fn save_table_size_cache(
     fs::write(cache_path, contents).map_err(|error| crate::Error::Other(error.to_string()))
 }
 
-fn existing_cache_lines_for_other_sources(cache_path: &Path, source_key: &str) -> Vec<String> {
-    let Ok(contents) = fs::read_to_string(cache_path) else {
-        return Vec::new();
-    };
-    contents
-        .lines()
-        .filter_map(|line| {
-            let (cached_source, _, _) = parse_table_size_cache_line(line)?;
-            (cached_source != source_key).then(|| line.to_string())
-        })
-        .collect()
-}
-
-fn table_size_cache_path(storage_dir: &Path) -> PathBuf {
-    storage_dir.join(TABLE_SIZE_CACHE_FILE)
+fn table_size_cache_path(storage_dir: &Path, source_key: &str) -> PathBuf {
+    storage_dir
+        .join(TABLE_SIZE_CACHE_DIR)
+        .join(format!("{:016x}.tsv", stable_hash(source_key.as_bytes())))
 }
 
 fn table_size_cache_source_key(path: &Path) -> String {
@@ -76,6 +68,15 @@ fn table_size_cache_source_key(path: &Path) -> String {
         .unwrap_or_else(|_| path.to_path_buf())
         .to_string_lossy()
         .into_owned()
+}
+
+fn stable_hash(bytes: &[u8]) -> u64 {
+    let mut hash = FNV_OFFSET_BASIS;
+    for byte in bytes {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(FNV_PRIME);
+    }
+    hash
 }
 
 fn parse_table_size_cache_line(line: &str) -> Option<(String, String, SavedVariablesTableSize)> {
@@ -129,4 +130,63 @@ fn unescape_table_size_cache_field(value: &str) -> Option<String> {
         index += 3;
     }
     String::from_utf8(output).ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::saved_variables_parse::{
+        SavedVariablesTableSize, SavedVariablesTableSizeCache,
+    };
+    use super::{
+        load_table_size_cache, save_table_size_cache, table_size_cache_path,
+        table_size_cache_source_key,
+    };
+
+    #[test]
+    fn cache_file_is_scoped_to_one_saved_variables_source() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let source = dir.path().join("Addon.lua");
+        let source_key = table_size_cache_source_key(&source);
+        let mut cache = SavedVariablesTableSizeCache::default();
+        cache.insert(
+            "AddonDB.child",
+            SavedVariablesTableSize {
+                array_count: 3,
+                hash_count: 5,
+            },
+        );
+
+        save_table_size_cache(dir.path(), &source, &cache).expect("save cache");
+
+        let scoped_path = table_size_cache_path(dir.path(), &source_key);
+        assert!(scoped_path.exists());
+        assert!(!dir.path().join(".saved-variable-table-sizes.tsv").exists());
+
+        let loaded = load_table_size_cache(dir.path(), &source);
+        assert_eq!(
+            loaded.get("AddonDB.child"),
+            Some(SavedVariablesTableSize {
+                array_count: 3,
+                hash_count: 5,
+            })
+        );
+    }
+
+    #[test]
+    fn legacy_monolithic_cache_is_not_scanned() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let source = dir.path().join("Addon.lua");
+        std::fs::write(
+            dir.path().join(".saved-variable-table-sizes.tsv"),
+            format!(
+                "{}\tAddonDB.child\t99\t99\n",
+                table_size_cache_source_key(&source)
+            ),
+        )
+        .expect("write legacy monolithic cache");
+
+        let loaded = load_table_size_cache(dir.path(), &source);
+
+        assert!(loaded.get("AddonDB.child").is_none());
+    }
 }
