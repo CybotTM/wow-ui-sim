@@ -51,10 +51,6 @@ const C_SPECIALIZATION_INFO_METHODS: &[(&str, RustLuaFn)] = &[
     ("CanPlayerUseTalentUI", c_spec_can_player_use_talent_ui),
     ("GetActiveSpecGroup", c_spec_get_active_spec_group),
     ("GetSpellsDisplay", c_spec_get_spells_display),
-    (
-        "GetSpecializationMasterySpells",
-        c_spec_get_specialization_mastery_spells,
-    ),
     ("GetSpecIDs", c_spec_get_spec_ids),
     ("SetSpecialization", c_spec_set_specialization),
     ("GetPvpTalentSlotInfo", c_spec_get_pvp_talent_slot_info),
@@ -234,12 +230,6 @@ fn c_spec_get_spells_display(state: &mut LuaState) -> LuaResult<u32> {
         }
     }
     state.gc.barrier_back(spells_ref);
-    state.push(spells);
-    Ok(1)
-}
-
-fn c_spec_get_specialization_mastery_spells(state: &mut LuaState) -> LuaResult<u32> {
-    let spells = create_table(state);
     state.push(spells);
     Ok(1)
 }

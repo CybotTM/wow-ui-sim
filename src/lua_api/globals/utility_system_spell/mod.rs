@@ -19,7 +19,8 @@ mod table_util;
 use crate::c_api::c_wowtoken_secure;
 use crate::c_api::permanent_shims::c_model_info;
 use crate::c_api::temporary_shims::{
-    c_black_market, c_calendar, c_lfg_info, c_perks_program, c_texture_file_data,
+    c_black_market, c_calendar, c_lfg_info, c_perks_program, c_specialization_mastery,
+    c_texture_file_data,
 };
 use crate::lua_api::methods::call_function_state_multi;
 use crate::lua_api::script_helpers::{
@@ -628,11 +629,30 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     spell_api::register_spell_globals(lua)?;
 
     let state = lua.state_mut();
+    register_system_tables(state)?;
+    register_specialization_and_model_tables(state)?;
+    register_auxiliary_c_tables(state)?;
+    c_addons::register_legacy_addon_globals(state)?;
+    c_spec::register_widget_container_mixin(state)?;
+
+    Ok(())
+}
+
+fn register_system_tables(state: &mut LuaState) -> LuaResult<()> {
     table_util::register_table_util(state)?;
     c_addons::register_c_addons(state)?;
     c_addon_profiler::register_c_addon_profiler(state)?;
+    Ok(())
+}
+
+fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<()> {
     c_spec::register_c_specialization_info(state)?;
+    c_specialization_mastery::register_c_specialization_mastery_shim(state)?;
     c_model_info::register_c_model_info(state)?;
+    Ok(())
+}
+
+fn register_auxiliary_c_tables(state: &mut LuaState) -> LuaResult<()> {
     c_lfg_info::register_c_lfg_info(state)?;
     c_black_market::register_c_black_market(state)?;
     c_calendar::register_c_calendar(state)?;
@@ -642,9 +662,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     c_texture::register_c_texture(state)?;
     c_texture_file_data::register_c_texture_file_data(state)?;
     c_xml_util::register_c_xml_util(state)?;
-    c_addons::register_legacy_addon_globals(state)?;
-    c_spec::register_widget_container_mixin(state)?;
-
     Ok(())
 }
 
