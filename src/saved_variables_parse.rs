@@ -7,8 +7,37 @@ use rilua::vm::string::LuaString;
 use rilua::vm::table::Table;
 use std::collections::HashMap;
 
-pub(super) fn parse_saved_variables_file(state: &mut LuaState, source: &str) -> Result<(), String> {
-    Parser::new(state, source).parse_file()
+pub(super) fn parse_saved_variables_file_with_cache(
+    state: &mut LuaState,
+    source: &str,
+    table_size_cache: Option<&mut SavedVariablesTableSizeCache>,
+) -> Result<(), String> {
+    Parser::new(state, source, table_size_cache).parse_file()
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub(super) struct SavedVariablesTableSize {
+    pub array_count: usize,
+    pub hash_count: usize,
+}
+
+#[derive(Debug, Default)]
+pub(super) struct SavedVariablesTableSizeCache {
+    sizes: HashMap<String, SavedVariablesTableSize>,
+}
+
+impl SavedVariablesTableSizeCache {
+    pub(super) fn get(&self, path: &str) -> Option<SavedVariablesTableSize> {
+        self.sizes.get(path).copied()
+    }
+
+    pub(super) fn insert(&mut self, path: impl Into<String>, size: SavedVariablesTableSize) {
+        self.sizes.insert(path.into(), size);
+    }
+
+    pub(super) fn iter(&self) -> impl Iterator<Item = (&str, SavedVariablesTableSize)> {
+        self.sizes.iter().map(|(path, size)| (path.as_str(), *size))
+    }
 }
 
 struct Parser<'a, 's> {
@@ -16,15 +45,21 @@ struct Parser<'a, 's> {
     bytes: &'s [u8],
     pos: usize,
     key_cache: HashMap<String, GcRef<LuaString>>,
+    table_size_cache: Option<&'a mut SavedVariablesTableSizeCache>,
 }
 
 impl<'a, 's> Parser<'a, 's> {
-    fn new(state: &'a mut LuaState, source: &'s str) -> Self {
+    fn new(
+        state: &'a mut LuaState,
+        source: &'s str,
+        table_size_cache: Option<&'a mut SavedVariablesTableSizeCache>,
+    ) -> Self {
         Self {
             state,
             bytes: source.as_bytes(),
             pos: 0,
             key_cache: HashMap::new(),
+            table_size_cache,
         }
     }
 
@@ -34,7 +69,7 @@ impl<'a, 's> Parser<'a, 's> {
             let name = self.parse_identifier()?;
             self.skip_ws();
             self.expect_byte(b'=')?;
-            let value = self.parse_value()?;
+            let value = self.parse_value(Some(&name))?;
             set_global(self.state, &name, value);
             self.skip_field_separator();
             self.skip_ws();
@@ -42,39 +77,12 @@ impl<'a, 's> Parser<'a, 's> {
         Ok(())
     }
 
-    fn parse_value(&mut self) -> Result<Val, String> {
-        self.skip_ws();
-        match self.peek_byte() {
-            Some(b'{') => self.parse_table(),
-            Some(b'"') | Some(b'\'') => {
-                let value = self.parse_string()?;
-                Ok(create_string(self.state, &value))
-            }
-            Some(b'-' | b'0'..=b'9') => self.parse_number().map(Val::Num),
-            Some(b't') => {
-                self.expect_keyword("true")?;
-                Ok(Val::Bool(true))
-            }
-            Some(b'f') => {
-                self.expect_keyword("false")?;
-                Ok(Val::Bool(false))
-            }
-            Some(b'n') => {
-                self.expect_keyword("nil")?;
-                Ok(Val::Nil)
-            }
-            Some(_) => Err(self.error("unsupported SavedVariables value")),
-            None => Err(self.error("unexpected end of file")),
-        }
-    }
-
-    fn parse_table(&mut self) -> Result<Val, String> {
+    fn parse_table(&mut self, table_path: Option<&str>) -> Result<Val, String> {
         self.expect_byte(b'{')?;
-        let table = Val::Table(self.state.gc.alloc_table(Table::new()));
-        let Val::Table(table_ref) = table else {
-            unreachable!("fresh table is always a table")
-        };
+        let (table, table_ref) = self.allocate_table(table_path);
         let mut next_array_index = 1.0;
+        let mut array_count = 0usize;
+        let mut hash_count = 0usize;
 
         loop {
             self.skip_ws();
@@ -83,29 +91,105 @@ impl<'a, 's> Parser<'a, 's> {
             }
 
             if self.consume_byte(b'[') {
-                let key = self.parse_key()?;
-                self.skip_ws();
-                self.expect_byte(b']')?;
-                self.skip_ws();
-                self.expect_byte(b'=')?;
-                let value = self.parse_value()?;
-                self.set_table_key(table, table_ref, key, value);
+                self.parse_bracket_table_field(table, table_ref, table_path)?;
+                hash_count += 1;
             } else if self.next_field_is_named_assignment() {
-                let key = self.parse_identifier()?;
-                self.skip_ws();
-                self.expect_byte(b'=')?;
-                let value = self.parse_value()?;
-                self.set_table_string_key(table, &key, value);
+                self.parse_named_table_field(table, table_path)?;
+                hash_count += 1;
             } else {
-                let value = self.parse_value()?;
-                table_set_num(self.state, table_ref, next_array_index, value);
+                self.parse_array_table_field(table_ref, table_path, next_array_index)?;
                 next_array_index += 1.0;
+                array_count += 1;
             }
 
             self.skip_field_separator();
         }
 
+        self.record_table_size(table_path, array_count, hash_count);
         Ok(table)
+    }
+
+    fn allocate_table(
+        &mut self,
+        table_path: Option<&str>,
+    ) -> (Val, rilua::vm::gc::arena::GcRef<Table>) {
+        let size_hint = self.size_hint_for(table_path);
+        let table = Val::Table(self.state.gc.alloc_table(Table::with_sizes(
+            size_hint.array_count,
+            size_hint.hash_count,
+        )));
+        let Val::Table(table_ref) = table else {
+            unreachable!("fresh table is always a table")
+        };
+        (table, table_ref)
+    }
+
+    fn record_table_size(
+        &mut self,
+        table_path: Option<&str>,
+        array_count: usize,
+        hash_count: usize,
+    ) {
+        if let (Some(cache), Some(path)) = (&mut self.table_size_cache, table_path) {
+            cache.insert(
+                path,
+                SavedVariablesTableSize {
+                    array_count,
+                    hash_count,
+                },
+            );
+        }
+    }
+
+    fn parse_bracket_table_field(
+        &mut self,
+        table: Val,
+        table_ref: rilua::vm::gc::arena::GcRef<Table>,
+        table_path: Option<&str>,
+    ) -> Result<(), String> {
+        let key = self.parse_key()?;
+        self.skip_ws();
+        self.expect_byte(b']')?;
+        self.skip_ws();
+        self.expect_byte(b'=')?;
+        let child_path = table_path.map(|path| key.child_path(path));
+        let value = self.parse_value(child_path.as_deref())?;
+        self.set_table_key(table, table_ref, key, value);
+        Ok(())
+    }
+
+    fn parse_named_table_field(
+        &mut self,
+        table: Val,
+        table_path: Option<&str>,
+    ) -> Result<(), String> {
+        let key = self.parse_identifier()?;
+        self.skip_ws();
+        self.expect_byte(b'=')?;
+        let child_path = table_path.map(|path| format!("{path}.{key}"));
+        let value = self.parse_value(child_path.as_deref())?;
+        self.set_table_string_key(table, &key, value);
+        Ok(())
+    }
+
+    fn parse_array_table_field(
+        &mut self,
+        table_ref: rilua::vm::gc::arena::GcRef<Table>,
+        table_path: Option<&str>,
+        next_array_index: f64,
+    ) -> Result<(), String> {
+        let child_path = table_path
+            .map(|path| format!("{path}[{}]", format_lua_number_for_path(next_array_index)));
+        let value = self.parse_value(child_path.as_deref())?;
+        table_set_num(self.state, table_ref, next_array_index, value);
+        Ok(())
+    }
+
+    fn size_hint_for(&self, table_path: Option<&str>) -> SavedVariablesTableSize {
+        table_path
+            .and_then(|path| self.table_size_cache.as_deref()?.get(path))
+            .map(SavedVariablesTableSize::capped)
+            .unwrap_or_default()
     }
 
     fn parse_key(&mut self) -> Result<SavedVarKey, String> {
@@ -320,11 +404,73 @@ impl<'a, 's> Parser<'a, 's> {
     fn error(&self, message: &str) -> String {
         format!("{message} at byte {}", self.pos)
     }
+
+    fn parse_string_value(&mut self) -> Result<Val, String> {
+        let value = self.parse_string()?;
+        Ok(create_string(self.state, &value))
+    }
+
+    fn parse_keyword_value(&mut self, byte: u8) -> Result<Val, String> {
+        if byte == b't' {
+            self.expect_keyword("true")?;
+            return Ok(Val::Bool(true));
+        }
+        if byte == b'f' {
+            self.expect_keyword("false")?;
+            return Ok(Val::Bool(false));
+        }
+        if byte == b'n' {
+            self.expect_keyword("nil")?;
+            return Ok(Val::Nil);
+        }
+        Err(self.error("unsupported SavedVariables value"))
+    }
+
+    fn parse_value(&mut self, table_path: Option<&str>) -> Result<Val, String> {
+        self.skip_ws();
+        let byte = if let Some(byte) = self.peek_byte() {
+            byte
+        } else {
+            return Err(self.error("unexpected end of file"));
+        };
+        if byte == b'{' {
+            return self.parse_table(table_path);
+        }
+        if is_quote_byte(byte) {
+            return self.parse_string_value();
+        }
+        if byte == b'-' || byte.is_ascii_digit() {
+            return self.parse_number().map(Val::Num);
+        }
+        self.parse_keyword_value(byte)
+    }
 }
 
 enum SavedVarKey {
     String(String),
     Number(f64),
+}
+
+impl SavedVarKey {
+    fn child_path(&self, parent: &str) -> String {
+        match self {
+            SavedVarKey::String(key) if is_identifier(key) => format!("{parent}.{key}"),
+            SavedVarKey::String(key) => format!("{parent}[\"{}\"]", escape_path_string(key)),
+            SavedVarKey::Number(key) => format!("{parent}[{}]", format_lua_number_for_path(*key)),
+        }
+    }
+}
+
+impl SavedVariablesTableSize {
+    const MAX_CACHED_ARRAY_COUNT: usize = 1_000_000;
+    const MAX_CACHED_HASH_COUNT: usize = 1_000_000;
+
+    fn capped(self) -> Self {
+        Self {
+            array_count: self.array_count.min(Self::MAX_CACHED_ARRAY_COUNT),
+            hash_count: self.hash_count.min(Self::MAX_CACHED_HASH_COUNT),
+        }
+    }
 }
 
 fn is_ident_start(byte: Option<u8>) -> bool {
@@ -333,6 +479,29 @@ fn is_ident_start(byte: Option<u8>) -> bool {
 
 fn is_ident_continue(byte: Option<u8>) -> bool {
     matches!(byte, Some(b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_'))
+}
+
+fn is_quote_byte(byte: u8) -> bool {
+    byte == b'"' || byte == b'\''
+}
+
+fn is_identifier(value: &str) -> bool {
+    let mut bytes = value.bytes();
+    if !is_ident_start(bytes.next()) {
+        return false;
+    }
+    bytes.all(|byte| is_ident_continue(Some(byte)))
+}
+
+fn escape_path_string(value: &str) -> String {
+    value.replace('\\', "\\\\").replace('"', "\\\"")
+}
+
+fn format_lua_number_for_path(value: f64) -> String {
+    if value.fract() == 0.0 {
+        return format!("{value:.0}");
+    }
+    value.to_string()
 }
 
 #[cfg(test)]
@@ -348,7 +517,7 @@ mod tests {
         let mut lua = env.rilua_mut();
         let state = lua.state_mut();
 
-        parse_saved_variables_file(
+        parse_saved_variables_file_with_cache(
             state,
             r#"
                 TEST_SV = {
@@ -358,6 +527,7 @@ mod tests {
                     [42] = false,
                 }
                 "#,
+            None,
         )
         .unwrap();
 
@@ -369,18 +539,91 @@ mod tests {
         let env = WowLuaEnv::new().unwrap();
         {
             let mut lua = env.rilua_mut();
-            parse_saved_variables_file(
+            parse_saved_variables_file_with_cache(
                 lua.state_mut(),
                 r#"
                     TEST_SV = {
                         ["localized"] = "Café",
                     }
                     "#,
+                None,
             )
             .unwrap();
         }
 
         let localized: String = env.eval("return TEST_SV.localized").unwrap();
         assert_eq!(localized, "Café");
+    }
+
+    #[test]
+    fn records_table_sizes_by_stable_path() {
+        let env = WowLuaEnv::new().unwrap();
+        let mut lua = env.rilua_mut();
+        let mut cache = SavedVariablesTableSizeCache::default();
+
+        parse_saved_variables_file_with_cache(
+            lua.state_mut(),
+            r#"
+                TEST_SV = {
+                    account = {
+                        enabled = true,
+                        count = 3,
+                    },
+                    list = {
+                        "one",
+                        "two",
+                    },
+                }
+                "#,
+            Some(&mut cache),
+        )
+        .unwrap();
+
+        assert_eq!(
+            cache.get("TEST_SV.account"),
+            Some(SavedVariablesTableSize {
+                array_count: 0,
+                hash_count: 2,
+            })
+        );
+        assert_eq!(
+            cache.get("TEST_SV.list"),
+            Some(SavedVariablesTableSize {
+                array_count: 2,
+                hash_count: 0,
+            })
+        );
+    }
+
+    #[test]
+    fn uses_recorded_table_size_when_allocating_table() {
+        let env = WowLuaEnv::new().unwrap();
+        let mut lua = env.rilua_mut();
+        let mut cache = SavedVariablesTableSizeCache::default();
+        cache.insert(
+            "TEST_SV",
+            SavedVariablesTableSize {
+                array_count: 8,
+                hash_count: 16,
+            },
+        );
+
+        parse_saved_variables_file_with_cache(
+            lua.state_mut(),
+            r#"
+                TEST_SV = {
+                    first = true,
+                }
+                "#,
+            Some(&mut cache),
+        )
+        .unwrap();
+
+        let Val::Table(table_ref) = get_global(lua.state_mut(), "TEST_SV") else {
+            panic!("TEST_SV should be a table");
+        };
+        let table = lua.state_mut().gc.tables.get(table_ref).unwrap();
+        assert_eq!(table.array_len(), 8);
+        assert_eq!(table.hash_size(), 16);
     }
 }

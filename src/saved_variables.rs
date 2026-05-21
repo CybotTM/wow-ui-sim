@@ -18,6 +18,8 @@ mod saved_variables_details_tests;
 mod saved_variables_parse;
 #[path = "saved_variables_serialize.rs"]
 mod saved_variables_serialize;
+#[path = "saved_variables_table_size_cache.rs"]
+mod saved_variables_table_size_cache;
 
 use std::collections::HashMap;
 use std::fs;
@@ -29,9 +31,9 @@ use rilua::vm::table::Table;
 use rilua::{LuaApiMut, Val};
 
 const EDIT_MODE_LAYOUT_ENV: &str = "WOW_SIM_EDIT_MODE_LAYOUT";
-
-use saved_variables_parse::parse_saved_variables_file;
+use saved_variables_parse::parse_saved_variables_file_with_cache;
 use saved_variables_serialize::serialize_assignment;
+use saved_variables_table_size_cache::{load_table_size_cache, save_table_size_cache};
 
 /// Read-only source for importing WTF saved variables from a real WoW installation.
 ///
@@ -405,7 +407,11 @@ impl SavedVariablesManager {
     ) -> crate::Result<()> {
         let content = fs::read_to_string(path).map_err(|e| crate::Error::Other(e.to_string()))?;
         let content = content.strip_prefix('\u{feff}').unwrap_or(&content);
-        if parse_saved_variables_file(state, content).is_ok() {
+        let mut table_size_cache = load_table_size_cache(&self.storage_dir, path);
+        if parse_saved_variables_file_with_cache(state, content, Some(&mut table_size_cache))
+            .is_ok()
+        {
+            save_table_size_cache(&self.storage_dir, path, &table_size_cache)?;
             return Ok(());
         }
 
@@ -578,9 +584,11 @@ mod tests {
     use std::fs;
 
     use crate::lua_api::WowLuaEnv;
+    use crate::lua_api::methods::table_get_static;
     use rilua::LuaApiMut;
+    use rilua::Val;
 
-    use super::SavedVariablesManager;
+    use super::{SavedVariablesManager, get_global};
 
     #[test]
     fn saved_variables_restore_after_addon_top_level_defaults() {
@@ -618,5 +626,62 @@ mod tests {
             .expect("probe should run");
         assert_eq!(data_code, "4");
         assert_eq!(source, "saved");
+    }
+
+    #[test]
+    fn saved_variables_table_size_cache_persists_between_manager_instances() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let saved_vars_file = dir.path().join("Large.lua");
+        fs::write(
+            &saved_vars_file,
+            r#"
+                TEST_SV = {
+                    child = {
+                        k1 = true, k2 = true, k3 = true,
+                        k4 = true, k5 = true, k6 = true,
+                        k7 = true, k8 = true, k9 = true,
+                    },
+                }
+            "#,
+        )
+        .expect("write saved variables");
+
+        let env = WowLuaEnv::new().expect("env");
+        {
+            let mut lua = env.rilua_mut();
+            let manager = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
+            manager
+                .load_lua_file(lua.state_mut(), &saved_vars_file, "@test")
+                .expect("initial parse should persist table sizes");
+        }
+
+        fs::write(
+            &saved_vars_file,
+            r#"
+                TEST_SV = {
+                    child = {
+                        k1 = true,
+                    },
+                }
+            "#,
+        )
+        .expect("rewrite saved variables");
+
+        {
+            let mut lua = env.rilua_mut();
+            let manager = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
+            manager
+                .load_lua_file(lua.state_mut(), &saved_vars_file, "@test")
+                .expect("second parse should use persisted table sizes");
+
+            let state = lua.state_mut();
+            let root = get_global(state, "TEST_SV");
+            let child = table_get_static(state, root, "child");
+            let Val::Table(child_ref) = child else {
+                panic!("TEST_SV.child should be a table");
+            };
+            let child_table = state.gc.tables.get(child_ref).unwrap();
+            assert_eq!(child_table.hash_size(), 16);
+        }
     }
 }
