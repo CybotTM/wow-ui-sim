@@ -161,27 +161,7 @@ fn register_spell_book_state_queries(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    register_spell_book_override_queries(state, table_ref)?;
     register_spell_book_owned_state_queries(state, table_ref)?;
-    Ok(())
-}
-
-fn register_spell_book_override_queries(
-    state: &mut LuaState,
-    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
-) -> LuaResult<()> {
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetOverrideSpell",
-        c_spell_book_get_override_spell,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "FindSpellOverrideByID",
-        c_spell_book_get_override_spell,
-    )?;
     Ok(())
 }
 
@@ -448,12 +428,6 @@ fn c_spell_book_get_spell_book_item_loss_of_control_cooldown_info(
     table_set_static(state, info, "modRate", Val::Num(1.0));
     table_set_static(state, info, "shouldReplaceNormalCooldown", Val::Bool(false));
     state.push(info);
-    Ok(1)
-}
-
-fn c_spell_book_get_override_spell(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = u32::from_stack(state, 1)?;
-    state.push(Val::Num(spell_id as f64));
     Ok(1)
 }
 

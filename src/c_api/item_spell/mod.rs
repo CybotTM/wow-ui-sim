@@ -28,6 +28,6 @@ pub(crate) fn register_item_and_spell_surfaces(state: &mut LuaState) -> LuaResul
     c_spell::register_c_spell_surface(state)?;
     c_spell_static_fallbacks::register_c_spell_static_fallbacks(state)?;
     c_spell_book::register_c_spell_book(state)?;
-    c_spell_book_call_pet::register_spell_book_call_pet_shim(state)?;
+    c_spell_book_call_pet::register_spell_book_static_shims(state)?;
     Ok(())
 }
