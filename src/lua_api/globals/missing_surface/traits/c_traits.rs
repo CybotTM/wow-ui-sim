@@ -4,6 +4,10 @@ mod registration;
 static SUBTREE_CURRENCY_IDS: std::sync::LazyLock<std::collections::HashMap<u32, u32>> =
     std::sync::LazyLock::new(build_subtree_currency_ids);
 
+const CONFIG_INFO_HASH_FIELDS: usize = 4;
+const ENTRY_INFO_HASH_FIELDS: usize = 8;
+const DEFINITION_INFO_HASH_FIELDS: usize = 6;
+
 pub(super) fn register_c_traits(state: &mut LuaState) -> LuaResult<()> {
     registration::register_c_traits(state)
 }
@@ -37,7 +41,7 @@ fn c_traits_get_config_id_by_tree_id(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_traits_get_config_info(state: &mut LuaState) -> LuaResult<u32> {
     let config_id = i32::from_stack(state, 1)?;
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, CONFIG_INFO_HASH_FIELDS);
     table_set(state, info, "ID", Val::Num(config_id as f64));
     table_set(state, info, "id", Val::Num(config_id as f64));
     let name = create_string(state, config_name(config_id));
@@ -70,7 +74,7 @@ fn c_traits_get_entry_info(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, ENTRY_INFO_HASH_FIELDS);
     table_set(state, info, "entryID", Val::Num(entry.id as f64));
     table_set(
         state,
@@ -140,7 +144,7 @@ fn push_definition_text_fields(
 }
 
 fn push_definition_info_table(state: &mut LuaState, definition: &crate::traits::TraitDefInfo) {
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, DEFINITION_INFO_HASH_FIELDS);
     push_definition_numeric_fields(state, info, definition);
     push_definition_text_fields(state, info, definition);
     state.push(info);
