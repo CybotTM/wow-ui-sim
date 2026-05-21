@@ -8,7 +8,7 @@ use crate::lua_api::SimState;
 use crate::lua_api::globals::lua_duration_object::new_duration_object_value;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
-    extract_frame_id, frame_ref, table_get, table_set,
+    create_table_with_capacity, extract_frame_id, frame_ref, table_get, table_set,
 };
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::stack_val;
@@ -20,6 +20,9 @@ use std::rc::Rc;
 
 const C_ACTION_BAR: &str = "C_ActionBar";
 const NUM_ACTIONBAR_PAGES: i32 = 6;
+const ACTION_COOLDOWN_HASH_FIELDS: usize = 4;
+const ACTION_CHARGES_HASH_FIELDS: usize = 5;
+const ACTION_LOC_COOLDOWN_HASH_FIELDS: usize = 5;
 
 fn stack_slot(state: &LuaState) -> Option<u32> {
     stack_slot_at(state, 1)
@@ -311,7 +314,7 @@ fn get_action_loss_of_control_cooldown(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_action_loss_of_control_cooldown_info(state: &mut LuaState) -> LuaResult<u32> {
     let _ = stack_val(state, 1);
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, ACTION_LOC_COOLDOWN_HASH_FIELDS);
     table_set(state, info, "isActive", Val::Bool(false));
     table_set(state, info, "startTime", Val::Num(0.0));
     table_set(state, info, "duration", Val::Num(0.0));
@@ -467,7 +470,7 @@ fn get_action_cooldown(state: &mut LuaState) -> LuaResult<u32> {
             .map(|spell_id| spell_cooldown_times(&sim, spell_id, now))
             .unwrap_or((0.0, 0.0))
     };
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, ACTION_COOLDOWN_HASH_FIELDS);
     table_set(state, info, "startTime", Val::Num(start));
     table_set(state, info, "duration", Val::Num(duration));
     table_set(state, info, "isEnabled", Val::Bool(true));
@@ -478,7 +481,7 @@ fn get_action_cooldown(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_action_charges(state: &mut LuaState) -> LuaResult<u32> {
     let _ = stack_val(state, 1);
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, ACTION_CHARGES_HASH_FIELDS);
     table_set(state, info, "currentCharges", Val::Num(0.0));
     table_set(state, info, "maxCharges", Val::Num(0.0));
     table_set(state, info, "cooldownStartTime", Val::Num(0.0));
