@@ -24,14 +24,16 @@
 
 use crate::lua_api::game_data::AuraInfo;
 use crate::lua_api::methods::{
-    borrow_state, call_function_state, create_string, create_table, table_get, table_set,
-    table_set_num,
+    borrow_state, call_function_state, create_string, create_table, create_table_with_capacity,
+    table_get, table_set, table_set_num,
 };
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::stack_val;
 use rilua::vm::closure::{Closure, RustClosure};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, RustFn, Val};
+
+const AURA_DATA_HASH_FIELDS: usize = 23;
 
 pub fn register_all(state: &mut LuaState) {
     let ns = ensure_c_unit_auras(state);
@@ -605,7 +607,7 @@ fn is_truthy(value: Val) -> bool {
 // ── Aura table builder ───────────────────────────────────────────────────────
 
 fn build_aura_table(state: &mut LuaState, aura: &AuraInfo, unit: &str) -> Val {
-    let t = create_table(state);
+    let t = create_table_with_capacity(state, AURA_DATA_HASH_FIELDS);
     write_aura_identity(state, t, aura, unit);
     write_aura_flags(state, t, aura, unit);
     t
