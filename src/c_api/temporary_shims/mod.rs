@@ -23,3 +23,4 @@ pub mod c_spell_priority_aura;
 pub mod c_spell_static_fallbacks;
 pub mod c_spell_target;
 pub mod c_texture_file_data;
+pub mod c_ui_widget_manager_power_bar;

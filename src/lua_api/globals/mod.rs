@@ -103,7 +103,6 @@ pub mod state_backed_queries;
 pub mod store_frame;
 pub mod strings;
 pub mod stubs;
-pub mod system_api_runtime;
 pub mod talent_spec_probes;
 pub mod targeting_verbs;
 pub mod template;

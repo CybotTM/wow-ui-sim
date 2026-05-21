@@ -66,11 +66,6 @@ fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::keybindings::register_all(lua)?;
     super::permanent_shims::register_all(lua.state_mut());
     super::action_bar_api::register_all(lua)?;
-    // Replace selected namespace stub entries with constants ported from
-    // master (C_UIWidgetManager.GetPowerBarWidgetSetID, a couple of
-    // C_PlayerInfo probes). Runs right after the stub pass so the
-    // constants override the generic stub_nil fallbacks.
-    super::system_api_runtime::patch_namespace_stubs(lua.state_mut());
     LuaApiMut::register_function(lua, "UpdateUIParentPosition", update_ui_parent_position)?;
     // Must run after stubs so the fixture aura data overrides the
     // stub_nil registrations for C_UnitAuras.GetAuraSlots & friends.
@@ -79,11 +74,21 @@ fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_frame_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_frame_foundation_globals(lua)?;
+    register_frame_context_globals(lua)?;
+    Ok(())
+}
+
+fn register_frame_foundation_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::create_frame::register_all(lua)?;
     super::font_strings_collection::register_all(lua)?;
     super::utility_system_spell::register_all(lua)?;
     super::net_stats::register_all(lua)?;
     super::store_frame::register_all(lua)?;
+    Ok(())
+}
+
+fn register_frame_context_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::unit_probes::register_all(lua)?;
     super::unit_misc::register_all(lua)?;
     super::inventory_slot::register_all(lua)?;
@@ -124,9 +129,20 @@ fn register_core_surfaces(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_action_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_action_and_item_verbs(lua)?;
+    register_social_and_world_verbs(lua)?;
+    register_ui_action_verbs(lua)?;
+    Ok(())
+}
+
+fn register_action_and_item_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::combat_verbs::register_all(lua)?;
     super::inventory_verbs::register_all(lua)?;
     super::mail_verbs::register_all(lua)?;
+    Ok(())
+}
+
+fn register_social_and_world_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::group_verbs::register_all(lua)?;
     super::guild_verbs::register_all(lua)?;
     super::quest_verbs::register_all(lua)?;
@@ -138,6 +154,10 @@ fn register_action_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::offer_verbs::register_all(lua)?;
     super::trade_verbs::register_all(lua)?;
     super::movement_verbs::register_all(lua)?;
+    Ok(())
+}
+
+fn register_ui_action_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::panel_toggle_verbs::register_all(lua)?;
     super::voice_chat_verbs::register_all(lua)?;
     super::message_verbs::register_all(lua)?;
