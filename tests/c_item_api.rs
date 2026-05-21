@@ -49,3 +49,16 @@ fn use_equipment_set_updates_equipped_inventory_items() {
         .unwrap();
     assert_eq!(equipped_id, 211993);
 }
+
+#[test]
+fn equipment_set_lock_state_defaults_to_unlocked() {
+    let env = support::env();
+    let contains_locked_items: bool = env
+        .eval(
+            "C_EquipmentSet.CreateEquipmentSet('Default Gear', ''); \
+             local setID = C_EquipmentSet.GetEquipmentSetID('Default Gear'); \
+             return C_EquipmentSet.EquipmentSetContainsLockedItems(setID)",
+        )
+        .unwrap();
+    assert!(!contains_locked_items);
+}

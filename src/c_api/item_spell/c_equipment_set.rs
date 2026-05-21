@@ -37,10 +37,6 @@ const C_EQUIPMENT_SET_METHODS: &[(&str, rilua::RustFn)] = &[
     ("SaveEquipmentSet", c_save_equipment_set),
     ("UseEquipmentSet", c_use_equipment_set),
     ("PickupEquipmentSet", c_pickup_equipment_set),
-    (
-        "EquipmentSetContainsLockedItems",
-        c_equipment_set_contains_locked_items,
-    ),
     ("GetEquipmentSetID", c_get_equipment_set_id),
     ("GetEquipmentSetIDs", c_get_equipment_set_ids),
     ("GetNumEquipmentSets", c_get_num_equipment_sets),
@@ -304,12 +300,6 @@ fn c_pickup_equipment_set(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_can_use_equipment_sets(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
-    Ok(1)
-}
-
-fn c_equipment_set_contains_locked_items(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = i32::from_stack(state, 1)?;
-    state.push(Val::Bool(false));
     Ok(1)
 }
 
