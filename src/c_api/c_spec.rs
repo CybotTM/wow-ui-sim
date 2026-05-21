@@ -157,7 +157,24 @@ fn c_spec_get_specialization_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_spec_get_spec_ids(state: &mut LuaState) -> LuaResult<u32> {
+    let class_id = match stack_val(state, 1) {
+        Val::Num(n) if n > 0.0 => n as u32,
+        _ => borrow_state(state)?.player.class_index as u32,
+    };
     let spec_ids = create_table(state);
+    let Val::Table(spec_ids_ref) = spec_ids else {
+        unreachable!("create_table must return a table");
+    };
+    for (index, spec) in specializations::specs_for_class(class_id).enumerate() {
+        if let Some(table) = state.gc.tables.get_mut(spec_ids_ref) {
+            let _ = table.raw_set(
+                Val::Num((index + 1) as f64),
+                Val::Num(spec.id as f64),
+                &state.gc.string_arena,
+            );
+        }
+    }
+    state.gc.barrier_back(spec_ids_ref);
     state.push(spec_ids);
     Ok(1)
 }

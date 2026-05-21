@@ -577,15 +577,17 @@ fn test_c_covenants_get_covenant_ids() {
 #[test]
 fn test_c_specialization_info_get_spec_ids_returns_table() {
     let env = env();
-    let is_table: bool = env
+    let (is_table, holy, protection, retribution): (bool, i32, i32, i32) = env
         .eval(
             r#"
             local specs = C_SpecializationInfo.GetSpecIDs(1)
-            return type(specs) == "table"
+            local paladinSpecs = C_SpecializationInfo.GetSpecIDs(2)
+            return type(specs) == "table", paladinSpecs[1], paladinSpecs[2], paladinSpecs[3]
             "#,
         )
         .unwrap();
     assert!(is_table);
+    assert_eq!((holy, protection, retribution), (65, 66, 70));
 }
 
 // ============================================================================
