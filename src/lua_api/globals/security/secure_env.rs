@@ -13,7 +13,9 @@ const CREATE_SECURE_ENV_LUA: &str = r##"
     local genv = _G
     local secureenv = {}
     for k, v in pairs(genv) do
-        secureenv[k] = v
+        if k ~= "SOUNDKIT" then
+            secureenv[k] = v
+        end
     end
     if genv.Enum then
         local se = {}

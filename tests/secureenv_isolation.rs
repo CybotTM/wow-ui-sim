@@ -220,3 +220,31 @@ fn shared_table_mutation_propagates_both_ways() {
         "mutations to a pre-existing shared table should be visible from _G"
     );
 }
+
+#[test]
+fn secureenv_reads_replaced_soundkit_from_global_env() {
+    let env = env();
+
+    env.exec(
+        r#"
+            SOUNDKIT = { UI_IG_STORE_WINDOW_OPEN_BUTTON = 39512 }
+        "#,
+    )
+    .unwrap();
+
+    let sound_id: f64 = env
+        .eval(
+            r#"
+            local result
+            local probe = function()
+                result = SOUNDKIT.UI_IG_STORE_WINDOW_OPEN_BUTTON
+            end
+            debug.setfenv(probe, __secureenv)
+            probe()
+            return result
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(sound_id, 39512.0);
+}

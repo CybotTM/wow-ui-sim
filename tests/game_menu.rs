@@ -50,6 +50,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
     ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
+    ("Blizzard_SimpleCheckout", "Blizzard_SimpleCheckout.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
@@ -410,5 +411,63 @@ fn test_game_menu_hide() {
         // Verify the frame itself reports hidden.
         let is_visible: bool = env.eval("return GameMenuFrame:IsVisible()").unwrap();
         assert!(!is_visible, "GameMenuFrame:IsVisible() should be false after Hide()");
+    }
+}
+
+#[test]
+fn test_game_menu_shop_button_opens_store_and_menu_can_reopen_after_store_closes() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env
+            .eval(
+                r#"
+                GameMenuFrame:Show()
+
+                local shopButton
+                for button in GameMenuFrame.buttonPool:EnumerateActive() do
+                    local text = button:GetText()
+                    if text == BLIZZARD_STORE then
+                        shopButton = button
+                        break
+                    end
+                end
+                if not shopButton then
+                    return "missing-shop-button"
+                end
+
+                local onclick = shopButton:GetScript("OnClick")
+                if type(onclick) ~= "function" then
+                    return "missing-onclick"
+                end
+
+                local ok, err = pcall(onclick, shopButton, "LeftButton", false)
+                if not ok then
+                    return "onclick-error:" .. tostring(err)
+                end
+
+                if not StoreFrame:IsShown() then
+                    return "store-not-shown action=" .. tostring(StoreFrame:GetAttribute("action"))
+                end
+
+                StoreFrame_SetShown(false, G_GameMenuFrameContextKey)
+                if StoreFrame:IsShown() then
+                    return "store-still-shown-after-close"
+                end
+
+                if not GameMenuFrame:IsShown() then
+                    ToggleGameMenu()
+                    if not GameMenuFrame:IsShown() then
+                        return "menu-did-not-reopen"
+                    end
+                    return "menu-reopened-only-after-toggle"
+                end
+
+                return "ok"
+                "#,
+            )
+            .unwrap();
+
+        assert_eq!(result, "ok");
     }
 }
