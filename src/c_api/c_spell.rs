@@ -48,6 +48,7 @@ use rilua::{LuaResult, Val};
 type SpellScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
 
 const SPELL_INFO_HASH_FIELDS: usize = 7;
+const SPELL_COOLDOWN_HASH_FIELDS: usize = 5;
 
 pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
@@ -310,7 +311,7 @@ fn get_spell_cooldown(state: &mut LuaState) -> LuaResult<u32> {
         spell_cooldown_times(&sim, spell_id, now)
     };
     let is_active = duration > 0.0;
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, SPELL_COOLDOWN_HASH_FIELDS);
     table_set_static(state, info, "startTime", Val::Num(start));
     table_set_static(state, info, "duration", Val::Num(duration));
     table_set_static(state, info, "isEnabled", Val::Bool(true));
