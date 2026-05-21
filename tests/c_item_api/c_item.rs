@@ -54,6 +54,17 @@ fn test_c_item_get_item_info_returns_nil() {
 }
 
 #[test]
+fn test_c_item_targeting_defaults_false() {
+    let env = env();
+    let (helpful, harmful): (bool, bool) = env
+        .eval("return C_Item.IsHelpfulItem(6948), C_Item.IsHarmfulItem(6948)")
+        .unwrap();
+
+    assert!(!helpful);
+    assert!(!harmful);
+}
+
+#[test]
 fn test_c_item_get_item_info_returns_data() {
     let env = env();
     let name: String = env.eval("return C_Item.GetItemInfo(6948)").unwrap();

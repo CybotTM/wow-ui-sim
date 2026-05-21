@@ -133,8 +133,6 @@ fn register_c_item_inventory_queries(
             ("GetItemGUID", c_item_get_item_guid),
             ("IsBound", c_item_is_bound),
             ("IsBoundToAccountUntilEquip", c_item_is_bound),
-            ("IsHelpfulItem", c_item_is_helpful_item),
-            ("IsHarmfulItem", c_item_is_harmful_item),
             (
                 "GetItemInventorySlotInfo",
                 c_item_get_item_inventory_slot_info,
@@ -587,18 +585,6 @@ fn c_item_get_item_guid(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => state.push(Val::Nil),
     }
-    Ok(1)
-}
-
-fn c_item_is_helpful_item(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = stack_val(state, 1);
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-fn c_item_is_harmful_item(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = stack_val(state, 1);
-    state.push(Val::Bool(false));
     Ok(1)
 }
 
