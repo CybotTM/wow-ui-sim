@@ -473,6 +473,60 @@ fn self_only_spell_succeeds_with_no_target() {
 }
 
 #[test]
+fn paladin_aura_spell_applies_player_buff() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("create env");
+        env.exec("A_Admin.ClearBuffs()").expect("clear seeded buffs");
+
+        env.exec("CastSpellByID(465)").expect("cast Devotion Aura");
+
+        let (is_casting, aura_name, aura_spell_id): (bool, Option<String>, Option<i32>) = env
+            .eval(
+                r#"
+                local aura = C_UnitAuras.GetPlayerAuraBySpellID(465)
+                return UnitCastingInfo("player") ~= nil,
+                    aura and aura.name or nil,
+                    aura and aura.spellId or nil
+                "#,
+            )
+            .unwrap();
+
+        assert!(!is_casting, "Paladin aura should be instant, not a cast bar spell");
+        assert_eq!(aura_name.as_deref(), Some("Devotion Aura"));
+        assert_eq!(aura_spell_id, Some(465));
+    }
+}
+
+#[test]
+fn paladin_aura_spell_replaces_previous_paladin_aura() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("create env");
+        env.exec("A_Admin.ClearBuffs()").expect("clear seeded buffs");
+
+        env.exec("CastSpellByID(465)").expect("cast Devotion Aura");
+        env.exec("CastSpellByID(32223)").expect("cast Crusader Aura");
+
+        let (devotion_present, crusader_name, helpful_count): (bool, Option<String>, i32) = env
+            .eval(
+                r#"
+                local devotion = C_UnitAuras.GetPlayerAuraBySpellID(465) ~= nil
+                local crusader = C_UnitAuras.GetPlayerAuraBySpellID(32223)
+                local count = 0
+                AuraUtil.ForEachAura("player", "HELPFUL", nil, function()
+                    count = count + 1
+                end)
+                return devotion, crusader and crusader.name or nil, count
+                "#,
+            )
+            .unwrap();
+
+        assert!(!devotion_present, "new Paladin aura should replace the previous aura");
+        assert_eq!(crusader_name.as_deref(), Some("Crusader Aura"));
+        assert_eq!(helpful_count, 1);
+    }
+}
+
+#[test]
 fn ui_error_message_wired_with_blizzard_ui() {
     test_timeout! {
         let env = env_with_full_blizzard_ui();

@@ -110,6 +110,10 @@ pub enum SpellTargetType {
     SelfOnly,
 }
 
+fn is_paladin_aura_spell(spell_id: u32) -> bool {
+    matches!(spell_id, 465 | 32223 | 317920 | 183435)
+}
+
 /// Classify a spell by its target type using the `implicit_target` field
 /// from SpellEffect.db2 (auto-generated into `data/spells.rs`).
 ///
@@ -161,6 +165,10 @@ pub fn apply_spell_to_state(
     state: &std::rc::Rc<std::cell::RefCell<super::state::SimState>>,
     spell_id: u32,
 ) -> Option<String> {
+    if apply_player_aura_spell(state, spell_id) {
+        return Some("player".to_string());
+    }
+
     let amount = spell_effect_amount(spell_id);
     if amount == 0 {
         return None;
@@ -170,6 +178,58 @@ pub fn apply_spell_to_state(
         SpellTargetType::Helpful => apply_heal_to_target(state, amount),
         SpellTargetType::SelfOnly => None,
     }
+}
+
+fn apply_player_aura_spell(
+    state: &std::rc::Rc<std::cell::RefCell<super::state::SimState>>,
+    spell_id: u32,
+) -> bool {
+    if !is_paladin_aura_spell(spell_id) {
+        return false;
+    }
+    let Some(spell) = crate::spell_lookup::get_spell(spell_id) else {
+        return false;
+    };
+
+    let mut sim = state.borrow_mut();
+    let aura_instance_id = existing_or_next_player_aura_instance_id(&sim, spell_id);
+    sim.player
+        .buffs
+        .retain(|aura| !is_paladin_aura_spell(aura.spell_id as u32));
+    sim.player.buffs.push(AuraInfo {
+        name: spell.name.to_string(),
+        spell_id: spell_id as i32,
+        icon: spell.icon_file_data_id as i32,
+        duration: 0.0,
+        expiration_time: 0.0,
+        applications: 0,
+        source_unit: "player".to_string(),
+        is_helpful: true,
+        is_stealable: false,
+        can_apply_aura: true,
+        is_from_player_or_player_pet: true,
+        aura_instance_id,
+    });
+    true
+}
+
+fn existing_or_next_player_aura_instance_id(sim: &super::state::SimState, spell_id: u32) -> i32 {
+    sim.player
+        .buffs
+        .iter()
+        .find(|aura| aura.spell_id == spell_id as i32)
+        .map(|aura| aura.aura_instance_id)
+        .unwrap_or_else(|| next_player_aura_instance_id(sim))
+}
+
+fn next_player_aura_instance_id(sim: &super::state::SimState) -> i32 {
+    sim.player
+        .buffs
+        .iter()
+        .map(|aura| aura.aura_instance_id)
+        .max()
+        .unwrap_or(0)
+        + 1
 }
 
 fn apply_damage_to_target(
