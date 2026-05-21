@@ -52,7 +52,6 @@ fn c_item_upgrade_clear(state: &mut LuaState) -> LuaResult<u32> {
 pub(crate) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Container")?;
     register_container_query_methods(state, table_ref)?;
-    register_container_action_methods(state, table_ref)?;
     Ok(())
 }
 
@@ -80,28 +79,6 @@ fn register_container_query_methods(
             ("ContainerIDToInventoryID", c_container_id_to_inventory_id),
             ("GetBagName", c_container_get_bag_name),
             ("SetBagSlotFlag", c_container_set_bag_slot_flag),
-            (
-                "GetContainerItemPurchaseInfo",
-                c_container_get_item_purchase_info,
-            ),
-            ("GetContainerItemQuestInfo", c_container_get_item_quest_info),
-            ("IsContainerFiltered", c_container_is_container_filtered),
-            ("IsBattlePayItem", c_container_is_battle_pay_item),
-        ],
-    )
-}
-
-fn register_container_action_methods(
-    state: &mut LuaState,
-    table_ref: GcRef<Table>,
-) -> LuaResult<()> {
-    register_container_methods(
-        state,
-        table_ref,
-        &[
-            ("UseContainerItem", c_container_noop),
-            ("PickupContainerItem", c_container_noop),
-            ("SplitContainerItem", c_container_noop),
         ],
     )
 }
@@ -316,41 +293,5 @@ fn c_container_set_bag_slot_flag(state: &mut LuaState) -> LuaResult<u32> {
     let storage = bag_slot_flags_storage(state);
     let key = bag_slot_flag_key(bag, flag);
     table_set(state, storage, &key, Val::Bool(value));
-    Ok(0)
-}
-
-fn c_container_get_item_purchase_info(state: &mut LuaState) -> LuaResult<u32> {
-    let _bag = i32::from_stack(state, 1)?;
-    let _slot = i32::from_stack(state, 2)?;
-    state.push(Val::Nil);
-    Ok(1)
-}
-
-fn c_container_get_item_quest_info(state: &mut LuaState) -> LuaResult<u32> {
-    let _bag = i32::from_stack(state, 1)?;
-    let _slot = i32::from_stack(state, 2)?;
-    let info = create_table(state);
-    table_set_static(state, info, "isQuestItem", Val::Bool(false));
-    table_set_static(state, info, "questID", Val::Nil);
-    table_set_static(state, info, "isActive", Val::Bool(false));
-    state.push(info);
-    Ok(1)
-}
-
-fn c_container_is_container_filtered(state: &mut LuaState) -> LuaResult<u32> {
-    let _bag = i32::from_stack(state, 1)?;
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-fn c_container_is_battle_pay_item(state: &mut LuaState) -> LuaResult<u32> {
-    let _bag = i32::from_stack(state, 1)?;
-    let _slot = i32::from_stack(state, 2)?;
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-fn c_container_noop(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = state;
     Ok(0)
 }
