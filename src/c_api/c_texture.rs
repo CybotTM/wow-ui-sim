@@ -51,10 +51,8 @@ pub fn c_texture_get_atlas_info(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let info = create_table(state);
-    let Val::Table(info_ref) = info else {
-        unreachable!("create_table must return a table");
-    };
+    let info_ref = state.gc.alloc_table(Table::with_sizes(0, 10));
+    let info = Val::Table(info_ref);
     let raw_size = build_raw_size(state, lookup.width() as f64, lookup.height() as f64);
     fill_atlas_info_table(state, info_ref, &atlas_name, &lookup);
     attach_raw_size(state, info_ref, raw_size);
@@ -63,10 +61,8 @@ pub fn c_texture_get_atlas_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn build_raw_size(state: &mut LuaState, width: f64, height: f64) -> Val {
-    let raw_size = create_table(state);
-    let Val::Table(raw_size_ref) = raw_size else {
-        unreachable!("create_table must return a table");
-    };
+    let raw_size_ref = state.gc.alloc_table(Table::with_sizes(2, 0));
+    let raw_size = Val::Table(raw_size_ref);
     if let Some(table) = state.gc.tables.get_mut(raw_size_ref) {
         let _ = table.raw_set(Val::Num(1.0), Val::Num(width), &state.gc.string_arena);
         let _ = table.raw_set(Val::Num(2.0), Val::Num(height), &state.gc.string_arena);
