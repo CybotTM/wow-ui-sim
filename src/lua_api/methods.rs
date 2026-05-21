@@ -121,7 +121,6 @@ pub fn frame_ref(state: &mut LuaState, id: u64) -> LuaResult<Val> {
     state.gc.pin_object(Val::Table(table_ref));
     let val = Val::Table(table_ref);
     table_set_num(state, cache, id as f64, val);
-    let _ = get_or_create_frame_fields(state, id);
     Ok(val)
 }
 
@@ -158,7 +157,7 @@ pub fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
     let fields = if let Val::Table(_) = existing {
         existing
     } else {
-        let created = create_table(state);
+        let created = Val::Table(state.gc.alloc_table(Table::with_sizes(0, 4)));
         if let Some(reg) = state.gc.tables.get_mut(fields_reg_ref) {
             let _ = reg.raw_set(Val::Num(frame_id as f64), created, &state.gc.string_arena);
         }
