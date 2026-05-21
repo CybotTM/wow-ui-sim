@@ -153,6 +153,13 @@ pub fn close_startup_special_windows_before_first_frame(env: &crate::lua_api::Wo
     temporary::startup_windows::close_before_first_frame(env);
 }
 
+pub(crate) fn sanitize_imported_wtf_addon_saved_variables(
+    state: &mut rilua::vm::state::LuaState,
+    addon_name: &str,
+) {
+    temporary::details_saved_variables::sanitize_imported_wtf_addon(state, addon_name);
+}
+
 fn patch_edit_mode_manager(env: &crate::lua_api::WowLuaEnv) {
     crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
 }

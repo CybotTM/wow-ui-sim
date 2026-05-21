@@ -11,6 +11,9 @@
 //! 1. WTF directory (real WoW installation, if configured)
 //! 2. Simulator storage (`~/.local/share/wow-sim/SavedVariables/`)
 
+#[cfg(test)]
+#[path = "saved_variables_details_tests.rs"]
+mod saved_variables_details_tests;
 #[path = "saved_variables_parse.rs"]
 mod saved_variables_parse;
 #[path = "saved_variables_serialize.rs"]
@@ -177,7 +180,12 @@ impl SavedVariablesManager {
                 continue;
             }
             match self.load_lua_file(state, &path, "@WTF") {
-                Ok(()) => loaded += 1,
+                Ok(()) => {
+                    crate::lua_api::workarounds::sanitize_imported_wtf_addon_saved_variables(
+                        state, addon_name,
+                    );
+                    loaded += 1;
+                }
                 Err(error) => tracing::warn!("Failed to load {description}: {error}"),
             }
         }
