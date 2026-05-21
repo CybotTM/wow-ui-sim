@@ -18,10 +18,6 @@ const C_ADDONS_QUERY_METHODS: &[(&str, RustLuaFn)] = &[
     ("GetAddOnSecurity", c_addons_get_addon_security),
     ("GetAddOnDependencies", c_addons_get_addon_dependencies),
     ("IsAddOnDefaultEnabled", c_addons_is_addon_default_enabled),
-    (
-        "GetScriptsDisallowedForBeta",
-        c_addons_get_scripts_disallowed_for_beta,
-    ),
 ];
 
 const C_ADDONS_STATE_METHODS: &[(&str, RustLuaFn)] = &[

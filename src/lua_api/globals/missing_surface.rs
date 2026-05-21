@@ -54,11 +54,11 @@ mod zone_ability;
 
 use crate::c_api::permanent_shims::c_nameplate;
 use crate::c_api::temporary_shims::{
-    c_behavioral_messaging, c_character_services, c_click_bindings, c_configuration_warnings,
-    c_gossip_info, c_major_faction_display, c_map_groups, c_mythic_plus, c_paper_doll_stagger,
-    c_party_info_instance_abandon, c_party_info_static_fallbacks, c_pet_battles_static_fallbacks,
-    c_spell_classification, c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks,
-    c_spell_target, c_ui_widget_manager_power_bar,
+    c_addons_beta_policy, c_behavioral_messaging, c_character_services, c_click_bindings,
+    c_configuration_warnings, c_gossip_info, c_major_faction_display, c_map_groups, c_mythic_plus,
+    c_paper_doll_stagger, c_party_info_instance_abandon, c_party_info_static_fallbacks,
+    c_pet_battles_static_fallbacks, c_spell_classification, c_spell_counts, c_spell_priority_aura,
+    c_spell_static_fallbacks, c_spell_target, c_ui_widget_manager_power_bar,
 };
 use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -103,6 +103,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_legacy_global_shims(lua)?;
     let state = lua.state_mut();
     seed_placeholder_global_tables(state);
+    c_addons_beta_policy::register_c_addons_beta_policy(state)?;
     register_item_trait_surfaces(state)?;
     register_world_namespace_surfaces(state)?;
     register_social_namespace_surfaces(state)?;

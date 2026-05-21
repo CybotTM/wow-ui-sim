@@ -1,5 +1,3 @@
-//! Tests for addon API functions (addon_api.rs).
-
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::Path;
@@ -9,6 +7,8 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[path = "addon_api/dependencies.rs"]
 mod addon_api_dependencies;
+#[path = "addon_api/beta_policy.rs"]
+mod addon_api_beta_policy;
 #[path = "addon_api/profiler.rs"]
 mod addon_api_profiler;
 

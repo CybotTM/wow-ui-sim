@@ -473,11 +473,6 @@ fn addon_is_secure_by_default(addon: &crate::lua_api::AddonInfo) -> bool {
     addon.folder_name == "__BuiltIn" || addon.folder_name.starts_with("Blizzard_")
 }
 
-fn c_addons_get_scripts_disallowed_for_beta(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
 /// `C_AddOns.GetAddOnDependencies(indexOrName) → ...string`
 ///
 /// Returns one return value per declared dependency from the addon's TOC
