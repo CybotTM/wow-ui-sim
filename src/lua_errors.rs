@@ -86,6 +86,7 @@ fn indent_continuation_lines(message: &str) -> String {
 
 #[cfg(feature = "rehash-stats")]
 fn print_rehash_stats() {
+    const TOP_N: usize = 20;
     let s = rilua::vm::rehash_stats::snapshot();
     eprintln!(
         "[rehash-stats] total={} from_empty={} grow={} frame_backed={} nonframe={}",
@@ -97,6 +98,8 @@ fn print_rehash_stats() {
         &s.to_zero_from,
         "from",
     );
+    print_rehash_callsite_top(TOP_N);
+    print_rehash_lua_site_top(TOP_N);
 }
 
 #[cfg(feature = "rehash-stats")]
@@ -108,6 +111,22 @@ fn print_size_histogram(header: &str, buckets: &[u64; 16], entry_prefix: &str) {
         }
         let size = if i == 0 { 0 } else { 1u32 << i };
         eprintln!("  {entry_prefix} {size:>6}: {count}");
+    }
+}
+
+#[cfg(feature = "rehash-stats")]
+fn print_rehash_callsite_top(limit: usize) {
+    eprintln!("[rehash-stats] top_{limit}_rust_callsites:");
+    for ((file, line, column), count) in rilua::vm::rehash_stats::snapshot_callsite_top(limit) {
+        eprintln!("  {count:>10} x {file}:{line}:{column}");
+    }
+}
+
+#[cfg(feature = "rehash-stats")]
+fn print_rehash_lua_site_top(limit: usize) {
+    eprintln!("[rehash-stats] top_{limit}_lua_settable_sites:");
+    for ((source, line), count) in rilua::vm::rehash_stats::snapshot_lua_site_top(limit) {
+        eprintln!("  {count:>10} x {source}:{line}");
     }
 }
 
