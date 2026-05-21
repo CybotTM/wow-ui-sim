@@ -8,6 +8,7 @@ use super::c_spell;
 use super::c_spell_book;
 use super::temporary_shims::c_container_defaults;
 use super::temporary_shims::c_item_targeting;
+use super::temporary_shims::c_item_upgrade_availability;
 use super::temporary_shims::c_spell_book_call_pet;
 use super::temporary_shims::c_spell_static_fallbacks;
 use rilua::LuaResult;
@@ -24,6 +25,7 @@ pub(crate) fn register_item_and_spell_surfaces(state: &mut LuaState) -> LuaResul
     c_item::register_c_item(state)?;
     c_item_targeting::register_c_item_targeting_shims(state)?;
     c_container::register_c_item_upgrade(state)?;
+    c_item_upgrade_availability::register_c_item_upgrade_availability(state)?;
     c_container::register_c_container(state)?;
     c_container_defaults::register_c_container_default_shims(state)?;
     c_currency::register_c_currency_info(state)?;

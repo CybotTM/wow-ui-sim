@@ -238,6 +238,21 @@ fn test_c_container_default_shims_have_safe_shapes() {
 }
 
 #[test]
+fn test_c_item_upgrade_availability_defaults_false() {
+    let env = env();
+    let can_upgrade: bool = env
+        .eval(
+            r#"
+            local location = { bagID = 0, slotIndex = 1 }
+            return C_ItemUpgrade.CanUpgradeItem(location)
+            "#,
+        )
+        .unwrap();
+
+    assert!(!can_upgrade);
+}
+
+#[test]
 fn test_c_container_default_stack_count_is_one() {
     let env = env();
     env.exec("A_Admin.AddBagItem(0, 1, 6948)").unwrap();

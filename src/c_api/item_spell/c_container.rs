@@ -16,12 +16,6 @@ pub(crate) fn register_c_item_upgrade(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
-        "CanUpgradeItem",
-        c_item_upgrade_can_upgrade_item,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
         "SetItemUpgradeFromLocation",
         c_item_upgrade_set_location,
     )?;
@@ -34,13 +28,6 @@ fn c_item_upgrade_set_location(state: &mut LuaState) -> LuaResult<u32> {
     let storage = global_table(state, "__item_upgrade_state");
     table_set_static(state, storage, "location", location);
     Ok(0)
-}
-
-fn c_item_upgrade_can_upgrade_item(state: &mut LuaState) -> LuaResult<u32> {
-    let _location = stack_val(state, 1);
-    let can_upgrade = false;
-    state.push(Val::Bool(can_upgrade));
-    Ok(1)
 }
 
 fn c_item_upgrade_clear(state: &mut LuaState) -> LuaResult<u32> {
