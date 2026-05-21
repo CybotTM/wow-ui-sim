@@ -52,6 +52,7 @@ pub(super) fn init_lua_state(
     // those two points the mark phase is paused.
     super::globals::register_globals(lua, state.clone())?;
     bootstrap::init_runtime_surface_bootstrap(lua)?;
+    crate::lua_api::workarounds::apply_permanent_bootstrap(lua)?;
     // secureenv is shallow-copied from `_G` here. It keeps its copy of
     // the dangerous globals (dofile / loadfile / require / string.dump /
     // math.randomseed) so secure chunks — which Blizzard trusts —

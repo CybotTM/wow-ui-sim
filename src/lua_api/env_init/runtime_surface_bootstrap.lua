@@ -6243,21 +6243,6 @@ end
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 BaseActionButtonMixin = BaseActionButtonMixin or {}
 
--- AchievementDisplayMixin: stubbed in the simulator. The live mixin
--- (Blizzard_FrameXML/AchievementDisplayFrame.lua) renders bullet rows
--- via a frame pool keyed off `GetAchievementInfo`. The simulator skips
--- the bullet rendering — the AlliedRaces panel that drives this method
--- is already cosmetic without 3D models — and only records the ID list
--- so addons that round-trip `self.achievementIds` see what they wrote.
--- A post-load workaround re-installs this stub after Blizzard FrameXML
--- loads, because that file overwrites `AchievementDisplayMixin = {}`.
-AchievementDisplayMixin = AchievementDisplayMixin or {}
-if rawget(AchievementDisplayMixin, "SetAchievements") == nil then
-  function AchievementDisplayMixin:SetAchievements(achievementIds)
-    self.achievementIds = achievementIds
-  end
-end
-
 ActionButtonSpellAlertManager = ActionButtonSpellAlertManager or __wow_namespace({
   _defaultAlertType = 1,
   activeAlerts = {},

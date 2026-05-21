@@ -5,6 +5,7 @@ mod early_lua;
 mod map_canvas;
 mod map_lua;
 mod panel_lua;
+mod permanent;
 mod post_event_lua;
 mod runtime_surfaces;
 mod temporary;
@@ -147,6 +148,10 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     for step in POST_LOAD_WORKAROUNDS {
         log_step(env, step.label, || (step.apply)(env));
     }
+}
+
+pub(crate) fn apply_permanent_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    permanent::apply_bootstrap(lua)
 }
 
 pub fn close_startup_special_windows_before_first_frame(env: &crate::lua_api::WowLuaEnv) {
