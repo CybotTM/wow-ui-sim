@@ -2,8 +2,8 @@
 //! register_standard_font_objects, and the per-font-object method table.
 
 use crate::lua_api::methods::{
-    create_string, create_string_static, create_table, table_get, table_get_static, table_set,
-    table_set_static, val_to_string,
+    create_string, create_string_static, create_table, create_table_with_capacity, table_get,
+    table_get_static, table_set, table_set_static, val_to_string,
 };
 use crate::lua_bridge::table_set_rust_fn_static;
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
@@ -19,6 +19,7 @@ type FontTableRef = GcRef<RiluaTable>;
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 const DEFAULT_FONT_PATH: &str = "Fonts\\FRIZQT__.TTF";
+const FONT_OBJECT_HASH_FIELDS: usize = 42;
 
 /// (name, height, flags, r, g, b)
 const STANDARD_FONTS: &[(&'static str, f64, &str, f64, f64, f64)] = &[
@@ -496,7 +497,7 @@ pub(super) fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()>
 }
 
 pub(crate) fn create_font_object(state: &mut LuaState, name: Option<&str>) -> Val {
-    let font = create_table(state);
+    let font = create_table_with_capacity(state, FONT_OBJECT_HASH_FIELDS);
     font_set_defaults(state, font, name);
     let _ = add_font_methods(state, font);
     if let Some(name) = name {
