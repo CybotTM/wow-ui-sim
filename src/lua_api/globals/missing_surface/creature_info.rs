@@ -2,11 +2,18 @@
 
 use super::ensure_namespace;
 use crate::lua_api::game_data::{RACE_DATA, class_info_by_index};
-use crate::lua_api::methods::{create_string, create_table, table_set_static};
+use crate::lua_api::methods::{
+    create_string, create_table, create_table_with_capacity, table_set_static,
+};
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+
+const CREATURE_CLASS_INFO_HASH_FIELDS: usize = 3;
+const CREATURE_RACE_INFO_HASH_FIELDS: usize = 3;
+const CREATURE_TYPE_INFO_HASH_FIELDS: usize = 2;
+const CREATURE_FACTION_INFO_HASH_FIELDS: usize = 3;
 
 pub(super) fn register_creature_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_CreatureInfo")?;
@@ -58,7 +65,7 @@ pub(super) fn register_creature_info_surface(state: &mut LuaState) -> LuaResult<
 fn c_creature_info_get_class_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1).unwrap_or(1);
     let (class_label, class_file, class_id) = class_info_by_index(index);
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, CREATURE_CLASS_INFO_HASH_FIELDS);
     let class_name = create_string(state, class_label);
     let class_file = create_string(state, class_file);
     table_set_static(state, info, "className", class_name);
@@ -71,7 +78,7 @@ fn c_creature_info_get_class_info(state: &mut LuaState) -> LuaResult<u32> {
 fn c_creature_info_get_race_info(state: &mut LuaState) -> LuaResult<u32> {
     let race_id = i32::from_stack(state, 1).unwrap_or(1);
     let (race_name, client_file, race_id) = creature_race_info_by_id(race_id);
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, CREATURE_RACE_INFO_HASH_FIELDS);
     let race_name = create_string(state, race_name);
     let client_file = create_string(state, client_file);
     table_set_static(state, info, "raceName", race_name);
@@ -113,7 +120,7 @@ fn c_creature_info_get_creature_type_info(state: &mut LuaState) -> LuaResult<u32
         10 => "Other",
         _ => "Unknown",
     };
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, CREATURE_TYPE_INFO_HASH_FIELDS);
     let name = create_string(state, creature_type_name);
     table_set_static(state, info, "name", name);
     table_set_static(
@@ -141,7 +148,7 @@ fn c_creature_info_get_faction_info(state: &mut LuaState) -> LuaResult<u32> {
     let Some((name, group_tag)) = creature_faction_info(faction_id) else {
         return Ok(0);
     };
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, CREATURE_FACTION_INFO_HASH_FIELDS);
     let name = create_string(state, name);
     let group_tag = create_string(state, group_tag);
     table_set_static(state, info, "name", name);
