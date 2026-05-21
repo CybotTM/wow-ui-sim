@@ -111,6 +111,7 @@ fn assign_frame_table_field(
     state.gc.barrier_back(table_ref);
 }
 
+#[cfg_attr(feature = "rehash-stats", track_caller)]
 fn assign_frame_fields_value(
     state: &mut rilua::vm::state::LuaState,
     frame_id: u64,

@@ -300,6 +300,7 @@ fn table_get_num(state: &LuaState, table: GcRef<Table>, key: f64) -> Val {
 }
 
 /// Set a numeric-keyed value in a table.
+#[cfg_attr(feature = "rehash-stats", track_caller)]
 pub(crate) fn table_set_num(state: &mut LuaState, table: GcRef<Table>, key: f64, value: Val) {
     if let Some(t) = state.gc.tables.get_mut(table) {
         let int_key = key as i64;
@@ -581,6 +582,7 @@ pub fn create_table_with_fields(state: &mut LuaState, fields: &[(&'static str, V
 }
 
 /// Set a string key on an existing table Val.
+#[cfg_attr(feature = "rehash-stats", track_caller)]
 pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
     table_set_with_key(state, table, value, |state| {
         intern_string_maybe_static(state, key)
@@ -591,12 +593,14 @@ pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
 /// cache. Callers must pass the same `&'static str` pointer that the
 /// matching `table_get_static` uses for lookup — content-dedupe works
 /// too, but the fast path only triggers when the pointer matches.
+#[cfg_attr(feature = "rehash-stats", track_caller)]
 pub fn table_set_static(state: &mut LuaState, table: Val, key: &'static str, value: Val) {
     table_set_with_key(state, table, value, |state| {
         state.gc.intern_string_static(key.as_bytes())
     });
 }
 
+#[cfg_attr(feature = "rehash-stats", track_caller)]
 fn table_set_with_key<F>(state: &mut LuaState, table: Val, value: Val, intern_key: F)
 where
     F: FnOnce(&mut LuaState) -> GcRef<rilua::vm::string::LuaString>,
