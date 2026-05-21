@@ -16,23 +16,6 @@ pub(crate) fn should_log(duration: Duration) -> bool {
     duration.as_secs_f64() * 1000.0 >= min_duration_ms
 }
 
-pub(crate) fn log(
-    addon_name: Option<&str>,
-    handler_name: &str,
-    frame_name: Option<&str>,
-    widget_id: u64,
-    duration: Duration,
-) {
-    log_with_source(
-        addon_name,
-        handler_name,
-        frame_name,
-        widget_id,
-        duration,
-        None,
-    );
-}
-
 pub(crate) fn log_with_source(
     addon_name: Option<&str>,
     handler_name: &str,

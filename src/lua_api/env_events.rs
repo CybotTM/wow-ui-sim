@@ -7,7 +7,7 @@ use crate::lua_api::methods::{
     call_function as call_rilua_function, create_string, frame_ref, val_to_string,
 };
 use crate::lua_api::script_helpers::{call_error_handler, get_event_listeners, get_script};
-use rilua::{LuaApiMut, Val};
+use rilua::{LuaApi, LuaApiMut, Val};
 use std::cell::RefCell;
 use std::env;
 use std::rc::Rc;
@@ -43,6 +43,7 @@ fn log_widget_handler_timing(
     addon_idx: Option<u16>,
     handler_name: &str,
     duration: Duration,
+    source: Option<&str>,
 ) {
     if !handler_timing::should_log(duration) {
         return;
@@ -60,13 +61,21 @@ fn log_widget_handler_timing(
         (addon_name, frame_name)
     };
 
-    handler_timing::log(
+    handler_timing::log_with_source(
         addon_name.as_deref(),
         handler_name,
         frame_name.as_deref(),
         widget_id,
         duration,
+        source,
     );
+}
+
+fn widget_handler_source_label(lua: &rilua::Lua, handler: Val) -> Option<String> {
+    let Val::Function(func_ref) = handler else {
+        return None;
+    };
+    handler_timing::lua_closure_source_label(lua.state(), func_ref)
 }
 
 fn global_hash_entries(
@@ -215,7 +224,15 @@ impl WowLuaEnv {
         self.state.borrow_mut().executing_addon_index = None;
         let elapsed = start.elapsed();
         record_addon_time(&self.state, addon_idx, &start);
-        log_widget_handler_timing(&self.state, widget_id, addon_idx, handler_name, elapsed);
+        let source = widget_handler_source_label(lua, handler);
+        log_widget_handler_timing(
+            &self.state,
+            widget_id,
+            addon_idx,
+            handler_name,
+            elapsed,
+            source.as_deref(),
+        );
     }
 
     fn event_trace_label(&self, widget_id: u64, event: &str) -> Option<EventTraceLabel> {
