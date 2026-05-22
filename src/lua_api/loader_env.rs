@@ -17,25 +17,6 @@ use std::rc::Rc;
 
 use super::state::SimState;
 
-const UNIT_POSITION_FRAME_MIXIN_PATCH_LUA: &str = r#"
-if UnitPositionFrameMixin ~= nil then
-    local orig = UnitPositionFrameMixin.OnHide
-    UnitPositionFrameMixin.OnHide = function(self, ...)
-        if self.dataProvider then
-            return orig(self, ...)
-        end
-    end
-end
-if GroupMembersPinMixin ~= nil then
-    local orig = GroupMembersPinMixin.OnHide
-    GroupMembersPinMixin.OnHide = function(self, ...)
-        if self.dataProvider then
-            return orig(self, ...)
-        end
-    end
-end
-"#;
-
 const QUEST_LOG_MIXIN_PATCH_LUA: &str = r#"
 local function SafeGetCurrentMapID(self)
     local parent = self:GetParent()
@@ -234,15 +215,6 @@ impl<'a> LoaderEnv<'a> {
             &mut lua,
             Rc::clone(&self.state),
         )
-    }
-
-    /// Patch `UnitPositionFrameMixin:OnHide` to no-op when `self.dataProvider`
-    /// is nil. `OnHide` fires before `SetDataProvider`/`OnAcquired` when a
-    /// frame inheriting the mixin is hidden during initial load, producing
-    /// `attempt to index field 'dataProvider' (a nil value)` at
-    /// GroupMembersDataProvider.lua:90.
-    pub fn patch_unit_position_frame_mixin(&self) -> crate::Result<()> {
-        self.exec(UNIT_POSITION_FRAME_MIXIN_PATCH_LUA)
     }
 
     /// Patch `QuestLogMixin:GetCurrentMapID` to guard against nil parent.

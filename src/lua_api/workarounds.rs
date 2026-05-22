@@ -11,6 +11,7 @@ pub(crate) use runtime_surfaces::{
     patch_account_store_set_storefront, patch_glueparent_uiparent_attributes,
     patch_map_canvas_scroll_container, patch_playerspells_onload_backfill,
     patch_shared_xml_anim_mixins, patch_uiparent_managed_frame_mixin,
+    patch_unit_position_frame_mixin,
 };
 use std::time::Instant;
 

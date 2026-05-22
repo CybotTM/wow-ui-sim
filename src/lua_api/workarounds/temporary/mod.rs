@@ -43,4 +43,5 @@ pub(crate) mod tooltip_nineslice_surface;
 pub(crate) mod ui_parent_panel_toggles;
 pub(crate) mod uiparent_managed_frame_mixin;
 pub(crate) mod uiparent_onupdate_worklists;
+pub(crate) mod unit_position_frame_mixin;
 pub(crate) mod vignette_pin_template;

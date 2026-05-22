@@ -200,7 +200,7 @@ fn patch_glueparent_uiparent_attributes(env: &LoaderEnv<'_>, result: &mut LoadRe
 }
 
 fn patch_unit_position_frame_mixin(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = env.patch_unit_position_frame_mixin() {
+    if let Err(e) = crate::lua_api::workarounds::patch_unit_position_frame_mixin(env) {
         push_patch_warning(
             result,
             "Blizzard_SharedMapDataProviders",

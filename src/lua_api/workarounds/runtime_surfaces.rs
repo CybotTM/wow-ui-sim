@@ -209,3 +209,9 @@ pub(crate) fn patch_uiparent_managed_frame_mixin(
 ) -> Result<(), crate::Error> {
     temporary::uiparent_managed_frame_mixin::patch(env)
 }
+
+pub(crate) fn patch_unit_position_frame_mixin(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) -> Result<(), crate::Error> {
+    temporary::unit_position_frame_mixin::patch(env)
+}
