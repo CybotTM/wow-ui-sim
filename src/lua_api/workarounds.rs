@@ -1,7 +1,6 @@
 //! Post-load workarounds that are still required on the live rilua path.
 
 mod character_lua;
-mod map_canvas;
 mod panel_lua;
 mod permanent;
 mod post_event_lua;
@@ -11,7 +10,6 @@ mod temporary;
 pub(crate) use temporary::source_patches::patch_lua_source;
 
 use character_lua::*;
-use map_canvas::*;
 use panel_lua::*;
 use post_event_lua::*;
 pub(crate) use runtime_surfaces::patch_account_store_set_storefront;
@@ -259,7 +257,7 @@ fn patch_auction_house_runtime_surface(env: &crate::lua_api::LoaderEnv<'_>) {
 
 fn patch_runtime_map_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if addon_name == "Blizzard_MapCanvas" {
-        patch_map_canvas_scroll_container(env);
+        temporary::map_canvas_scroll_container::patch(env);
     }
     if matches!(
         addon_name,

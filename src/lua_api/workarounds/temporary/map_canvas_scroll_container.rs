@@ -1,6 +1,12 @@
-pub(super) fn patch_map_canvas_scroll_container(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA);
-}
+//! Temporary MapCanvas scroll-container bootstrap repair.
+//!
+//! Some MapCanvas startup paths run before the simulator has fully connected
+//! the live frame, scroll container, canvas child, and map art sizing. Keep this
+//! isolated until MapCanvas XML/runtime construction matches Blizzard state.
+
+use crate::lua_api::LoaderEnv;
+#[cfg(test)]
+use crate::lua_api::WowLuaEnv;
 
 const MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA: &str = r#"
 if type(ClearCachedActivitiesForPlayer) ~= "function" then
@@ -345,3 +351,209 @@ if type(ToggleWorldMap) == "function" and not rawget(_G, "__wow_toggle_world_map
   rawset(_G, "__wow_toggle_world_map_refresh_patched", true)
 end
     "#;
+
+pub(crate) fn patch(env: &LoaderEnv<'_>) {
+    let _ = env.exec(MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA);
+}
+
+#[cfg(test)]
+pub(crate) fn patch_env(env: &WowLuaEnv) {
+    let _ = env.exec(MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn seeds_scroll_container_before_running_map_canvas_onload_once() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            original_onload_calls = 0
+            scroll = {
+                Child = {},
+                IsObjectType = function(self, objectType)
+                    return objectType == "ScrollFrame"
+                end,
+            }
+            frame = {
+                GetNumChildren = function()
+                    return 1
+                end,
+                GetChildren = function()
+                    return scroll
+                end,
+            }
+            MapCanvasMixin = {
+                OnLoad = function(self)
+                    original_onload_calls = original_onload_calls + 1
+                    self.originalOnLoadSawScroll = self.ScrollContainer == scroll
+                end,
+            }
+            "#,
+        )
+        .expect("map canvas onload fixture should install");
+
+        patch_env(&env);
+
+        let (onload_calls, has_scroll, onload_saw_scroll, onload_ran): (i64, bool, bool, bool) =
+            env.eval(
+                r#"
+                MapCanvasMixin.OnLoad(frame)
+                MapCanvasMixin.OnLoad(frame)
+                return original_onload_calls,
+                    frame.ScrollContainer == scroll,
+                    frame.originalOnLoadSawScroll == true,
+                    frame.__wow_map_canvas_onload_ran == true
+                "#,
+            )
+            .expect("patched map canvas onload should run");
+
+        assert_eq!(onload_calls, 1);
+        assert!(has_scroll);
+        assert!(onload_saw_scroll);
+        assert!(onload_ran);
+    }
+
+    #[test]
+    fn sizes_zero_canvas_from_map_art_layer_on_set_map_id() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            child = {
+                TiledBackground = {
+                    SetSize = function(self, width, height)
+                        self.width = width
+                        self.height = height
+                    end,
+                },
+                GetWidth = function(self)
+                    return self.width or 0
+                end,
+                GetHeight = function(self)
+                    return self.height or 0
+                end,
+                SetSize = function(self, width, height)
+                    self.width = width
+                    self.height = height
+                end,
+            }
+            scroll = {
+                Child = child,
+                CalculateScaleExtents = function(self)
+                    self.calculatedScale = true
+                end,
+                CalculateScrollExtents = function(self)
+                    self.calculatedScroll = true
+                end,
+            }
+            frame = {
+                ScrollContainer = scroll,
+                OnCanvasSizeChanged = function(self)
+                    self.canvasSizeChanged = true
+                end,
+            }
+            C_Map = {
+                GetMapArtLayers = function(mapID)
+                    if mapID == 947 then
+                        return { { layerWidth = 1000, layerHeight = 500 } }
+                    end
+                    return nil
+                end,
+            }
+            MapCanvasMixin = {
+                OnLoad = function() end,
+                SetMapID = function(self, mapID)
+                    self.mapID = mapID
+                    return "map-set"
+                end,
+            }
+            "#,
+        )
+        .expect("map canvas sizing fixture should install");
+
+        patch_env(&env);
+
+        let (
+            result,
+            child_width,
+            child_height,
+            background_width,
+            background_height,
+            calculated_scale,
+            calculated_scroll,
+            canvas_size_changed,
+        ): (String, i64, i64, i64, i64, bool, bool, bool) = env
+            .eval(
+                r#"
+                local result = MapCanvasMixin.SetMapID(frame, 947)
+                return result,
+                    child.width,
+                    child.height,
+                    child.TiledBackground.width,
+                    child.TiledBackground.height,
+                    scroll.calculatedScale == true,
+                    scroll.calculatedScroll == true,
+                    frame.canvasSizeChanged == true
+                "#,
+            )
+            .expect("patched map canvas SetMapID should size the canvas");
+
+        assert_eq!(result, "map-set");
+        assert_eq!(child_width, 1000);
+        assert_eq!(child_height, 500);
+        assert_eq!(background_width, 2000);
+        assert_eq!(background_height, 1000);
+        assert!(calculated_scale);
+        assert!(calculated_scroll);
+        assert!(canvas_size_changed);
+    }
+
+    #[test]
+    fn creates_zoom_levels_before_scroll_controller_queries() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            C_Map = {
+                GetMapArtLayers = function(mapID)
+                    if mapID == 947 then
+                        return {
+                            { minScale = 0.75 },
+                            { minScale = 1.5 },
+                        }
+                    end
+                    return nil
+                end,
+            }
+            MapCanvasMixin = { OnLoad = function() end }
+            MapCanvasScrollControllerMixin = {
+                GetCurrentLayerIndex = function()
+                    error("missing zoom levels")
+                end,
+            }
+            scroll = { mapID = 947 }
+            "#,
+        )
+        .expect("map canvas zoom fixture should install");
+
+        patch_env(&env);
+
+        let (layer_index, first_scale, second_layer, target_scale): (i64, f64, i64, f64) = env
+            .eval(
+                r#"
+                local layerIndex = MapCanvasScrollControllerMixin.GetCurrentLayerIndex(scroll)
+                return layerIndex,
+                    scroll.zoomLevels[1].scale,
+                    scroll.zoomLevels[2].layerIndex,
+                    scroll.targetScale
+                "#,
+            )
+            .expect("patched zoom layer query should create fallback zoom levels");
+
+        assert_eq!(layer_index, 1);
+        assert_eq!(first_scale, 0.75);
+        assert_eq!(second_layer, 2);
+        assert_eq!(target_scale, 0.75);
+    }
+}

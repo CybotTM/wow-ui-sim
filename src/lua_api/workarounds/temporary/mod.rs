@@ -19,6 +19,7 @@ pub(crate) mod item_quality_color_data_methods;
 pub(crate) mod item_socketing_tooltips;
 pub(crate) mod main_menu_microbutton_click;
 pub(crate) mod map_canvas_data_provider_pin;
+pub(crate) mod map_canvas_scroll_container;
 pub(crate) mod map_exploration_pin;
 pub(crate) mod mount_journal_dynamic_flight_popup;
 pub(crate) mod objective_tracker_quest_header;
