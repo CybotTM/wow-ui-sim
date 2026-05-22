@@ -19,6 +19,7 @@ pub(crate) mod damage_meter_scrollbox;
 pub(crate) mod details_saved_variables;
 pub(crate) mod fog_of_war_pin;
 pub(crate) mod game_time_calendar_invites;
+pub(crate) mod glueparent_uiparent_attributes;
 pub(crate) mod housing_dashboard_preload;
 pub(crate) mod item_quality_color_data_methods;
 pub(crate) mod item_socketing_tooltips;

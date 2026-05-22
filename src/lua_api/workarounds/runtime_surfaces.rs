@@ -197,3 +197,9 @@ pub(crate) fn patch_map_canvas_scroll_container(
 ) -> Result<(), crate::Error> {
     temporary::map_canvas_scroll_container::patch(env)
 }
+
+pub(crate) fn patch_glueparent_uiparent_attributes(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) -> Result<(), crate::Error> {
+    temporary::glueparent_uiparent_attributes::patch(env)
+}

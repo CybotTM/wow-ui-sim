@@ -188,29 +188,8 @@ fn patch_uiparent_managed_frame_mixin(env: &LoaderEnv<'_>, result: &mut LoadResu
     }
 }
 
-/// `Blizzard_GlueParent/Mainline/GlueParent.lua:74` does `UIParent = self` in
-/// `GlueParentMixin:OnLoad`, aliasing the global to the glue-screen frame.
-/// In real WoW that's harmless because the glue addon only loads on the
-/// character-select screen, but the simulator loads everything — so
-/// `UpdateUIPanelPositions` reads `UIParent:GetAttribute("TOP_OFFSET")` off
-/// the GlueParent frame and gets nil, blowing up panel-frame anchoring.
-/// Re-apply the static `<Attribute>` block from
-/// `Blizzard_UIParent/Mainline/UIParent.xml` so the in-game panel manager
-/// sees the values it expects.
 fn patch_glueparent_uiparent_attributes(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = env.exec(
-        r#"
-        if UIParent and type(UIParent.SetAttribute) == "function" then
-            UIParent:SetAttribute("DEFAULT_FRAME_WIDTH", 384)
-            UIParent:SetAttribute("TOP_OFFSET", -116)
-            UIParent:SetAttribute("LEFT_OFFSET", 16)
-            UIParent:SetAttribute("CENTER_OFFSET", 384)
-            UIParent:SetAttribute("RIGHT_OFFSET", 768)
-            UIParent:SetAttribute("RIGHT_OFFSET_BUFFER", 80)
-            UIParent:SetAttribute("PANEl_SPACING_X", 32)
-        end
-        "#,
-    ) {
+    if let Err(e) = crate::lua_api::workarounds::patch_glueparent_uiparent_attributes(env) {
         push_patch_warning(
             result,
             "Blizzard_GlueParent",
