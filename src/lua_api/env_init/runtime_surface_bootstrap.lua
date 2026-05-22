@@ -10777,14 +10777,6 @@ C_XMLUtil = C_XMLUtil or __wow_namespace({
   end,
 })
 
-C_ToyBoxInfo = __wow_merge_namespace(C_ToyBoxInfo, {
-  IsUsingDefaultFilters = function() return true end,
-})
-
-C_HeirloomInfo = __wow_merge_namespace(C_HeirloomInfo, {
-  IsUsingDefaultFilters = function() return true end,
-})
-
 C_TransmogCollection = __wow_merge_namespace(C_TransmogCollection, {
   IsUsingDefaultFilters = function() return true end,
 })
