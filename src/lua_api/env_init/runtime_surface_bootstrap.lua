@@ -3329,19 +3329,6 @@ if GetAutoQuestPopUp == nil then
   function GetAutoQuestPopUp(_index) return nil, nil end
 end
 
--- Not in a scenario by default. Blizzard_ScenarioObjectiveTracker.lua:186
--- calls `numStages > 0` on the returned value, so numStages must be a
--- real zero, not nil.
-C_Scenario = __wow_merge_namespace(C_Scenario, {
-  GetInfo = function()
-    -- scenarioName, currentStage, numStages, flags, _, _, _, xp, money,
-    -- scenarioType, _, textureKit, scenarioID
-    return nil, 0, 0, 0, nil, nil, nil, 0, 0, 0, nil, "evergreen-scenario", 0
-  end,
-  IsInScenario = function() return false end,
-  GetStepInfo = function() return nil, 0, 0, false, false, 0, 0, 0, 0, false, false end,
-})
-
 -- AccountStore / DamageMeter / CooldownViewer: Blizzard data-provider init
 -- iterates the returned category / session / cooldown list with ipairs.
 -- None of these subsystems are simulated; return empty tables.
