@@ -1,4 +1,11 @@
-pub(super) const MAP_EXPLORATION_PIN_WORKAROUND_LUA: &str = r#"
+//! Temporary MapExploration pin refresh repair.
+//!
+//! Map exploration pins need nil-safe sizing, load-finalization, and retry
+//! behavior until map texture/provider state matches Blizzard startup data.
+
+use crate::lua_api::{LoaderEnv, WowLuaEnv};
+
+const MAP_EXPLORATION_PIN_WORKAROUND_LUA: &str = r#"
 local function __wow_size_map_exploration_pin(pin)
     if type(pin) ~= "table" then
         return
@@ -235,3 +242,192 @@ for _, mapName in ipairs({ "WorldMapFrame", "BattlefieldMapFrame" }) do
     __wow_patch_live_map_exploration_pins(_G[mapName])
 end
 "#;
+
+pub(crate) fn patch(env: &WowLuaEnv) {
+    let _ = env.exec(MAP_EXPLORATION_PIN_WORKAROUND_LUA);
+}
+
+pub(crate) fn patch_for_runtime_addon_load(env: &LoaderEnv<'_>) {
+    let _ = env.exec(MAP_EXPLORATION_PIN_WORKAROUND_LUA);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn install_mixin_fixture(env: &WowLuaEnv) {
+        env.exec(
+            r#"
+            acquired_calls = 0
+            refresh_calls = 0
+            update_calls = 0
+            canvas_size_calls = 0
+            alpha_calls = 0
+            show_calls = 0
+            reset_calls = 0
+            MapExplorationPinMixin = {
+                OnAcquired = function(self, dataProvider)
+                    acquired_calls = acquired_calls + 1
+                    self.dataProvider = dataProvider
+                end,
+                RefreshOverlays = function(self, fullUpdate)
+                    refresh_calls = refresh_calls + 1
+                    self.lastFullUpdate = fullUpdate
+                    return "refreshed"
+                end,
+                OnUpdate = function(self, elapsed)
+                    update_calls = update_calls + 1
+                    self.elapsed = elapsed
+                    return "updated"
+                end,
+            }
+            "#,
+        )
+        .expect("map exploration mixin fixture should install");
+    }
+
+    fn waiting_pin_fixture() -> &'static str {
+        r#"
+        {
+            isWaitingForLoad = true,
+            shown = false,
+            OnCanvasSizeChanged = function(self)
+                canvas_size_calls = canvas_size_calls + 1
+            end,
+            GetMap = function()
+                return {
+                    GetMapID = function()
+                        return 42
+                    end,
+                    AreDetailLayersLoaded = function()
+                        return true
+                    end,
+                    GetCanvasContainer = function()
+                        return {}
+                    end,
+                }
+            end,
+            textureLoadGroup = {
+                IsFullyLoaded = function()
+                    return true
+                end,
+                Reset = function()
+                    reset_calls = reset_calls + 1
+                end,
+            },
+            overlayTexturePool = {
+                GetNumActive = function()
+                    return 0
+                end,
+            },
+            RefreshAlpha = function(self)
+                alpha_calls = alpha_calls + 1
+            end,
+            IsShown = function(self)
+                return self.shown
+            end,
+            Show = function(self)
+                show_calls = show_calls + 1
+                self.shown = true
+            end,
+        }
+        "#
+    }
+
+    #[test]
+    fn acquired_pin_is_sized_and_finalized() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        install_mixin_fixture(&env);
+        patch(&env);
+
+        let script = r#"
+                local pin = __PIN_FIXTURE__
+                MapExplorationPinMixin.OnAcquired(pin, "provider")
+                return acquired_calls,
+                    canvas_size_calls,
+                    alpha_calls,
+                    pin.isWaitingForLoad == true,
+                    reset_calls
+                "#
+        .replace("__PIN_FIXTURE__", waiting_pin_fixture());
+
+        let (acquired, canvas, alpha, waiting, reset): (i64, i64, i64, bool, i64) = env
+            .eval(&script)
+            .expect("wrapped OnAcquired should size and finalize");
+
+        assert_eq!(acquired, 1);
+        assert_eq!(canvas, 1);
+        assert_eq!(alpha, 1);
+        assert!(!waiting);
+        assert_eq!(reset, 1);
+    }
+
+    #[test]
+    fn refresh_overlays_ensures_zoom_level_and_returns_original_result() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        install_mixin_fixture(&env);
+        patch(&env);
+
+        let (result, refreshes, zoom_scale, canvas_calls): (String, i64, f64, i64) = env
+            .eval(
+                r#"
+                local container = {}
+                local pin = {
+                    OnCanvasSizeChanged = function()
+                        canvas_size_calls = canvas_size_calls + 1
+                    end,
+                    GetMap = function()
+                        return {
+                            GetCanvasContainer = function()
+                                return container
+                            end,
+                        }
+                    end,
+                }
+                local result = MapExplorationPinMixin.RefreshOverlays(pin, true)
+                return result,
+                    refresh_calls,
+                    container.zoomLevels[1].scale,
+                    canvas_size_calls
+                "#,
+            )
+            .expect("wrapped RefreshOverlays should ensure zoom levels");
+
+        assert_eq!(result, "refreshed");
+        assert_eq!(refreshes, 1);
+        assert_eq!(zoom_scale, 1.0);
+        assert_eq!(canvas_calls, 1);
+    }
+
+    #[test]
+    fn update_shows_waiting_hidden_pin_before_original_update() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        install_mixin_fixture(&env);
+        patch(&env);
+
+        let (result, updates, shows, shown): (String, i64, i64, bool) = env
+            .eval(
+                r#"
+                local pin = {
+                    isWaitingForLoad = true,
+                    shown = false,
+                    IsShown = function(self)
+                        return self.shown
+                    end,
+                    Show = function(self)
+                        show_calls = show_calls + 1
+                        self.shown = true
+                    end,
+                }
+                local result = MapExplorationPinMixin.OnUpdate(pin, 0.25)
+                return result, update_calls, show_calls, pin.shown
+                "#,
+            )
+            .expect("wrapped OnUpdate should show waiting hidden pin");
+
+        assert_eq!(result, "updated");
+        assert_eq!(updates, 1);
+        assert_eq!(shows, 1);
+        assert!(shown);
+    }
+}

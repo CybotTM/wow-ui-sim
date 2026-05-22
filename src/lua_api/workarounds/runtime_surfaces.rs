@@ -173,7 +173,7 @@ pub(super) fn patch_fog_of_war_pin_mixin(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub(super) fn patch_map_exploration_pin_mixin(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(MAP_EXPLORATION_PIN_WORKAROUND_LUA);
+    temporary::map_exploration_pin::patch(env);
 }
 
 pub(super) fn patch_map_canvas_data_provider_attachment(env: &crate::lua_api::WowLuaEnv) {
@@ -201,7 +201,7 @@ pub(super) fn patch_fog_of_war_pin_mixin_for_runtime_addon_load(
 pub(super) fn patch_map_exploration_pin_mixin_for_runtime_addon_load(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) {
-    let _ = env.exec(MAP_EXPLORATION_PIN_WORKAROUND_LUA);
+    temporary::map_exploration_pin::patch_for_runtime_addon_load(env);
 }
 
 pub(super) fn patch_toggle_collections_journal_for_runtime_addon_load(

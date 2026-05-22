@@ -2,7 +2,6 @@
 
 mod character_lua;
 mod map_canvas;
-mod map_lua;
 mod panel_lua;
 mod permanent;
 mod post_event_lua;
@@ -13,7 +12,6 @@ pub(crate) use temporary::source_patches::patch_lua_source;
 
 use character_lua::*;
 use map_canvas::*;
-use map_lua::*;
 use panel_lua::*;
 use post_event_lua::*;
 pub(crate) use runtime_surfaces::patch_account_store_set_storefront;
