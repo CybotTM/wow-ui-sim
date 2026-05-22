@@ -10909,36 +10909,6 @@ if rawget(_G, "ToggleEncounterJournal") == nil then
   end
 end
 
-C_MajorFactions = __wow_merge_namespace(C_MajorFactions, {
-  GetMajorFactionData = function(factionID)
-    return {
-      factionID = factionID or 0,
-      name = "",
-      description = "",
-      textureKit = "majorfactions",
-      renownLevel = 1,
-      renownLevelThreshold = 1,
-      renownReputationEarned = 0,
-      isUnlocked = false,
-    }
-  end,
-  HasMaximumRenown = function(_factionID)
-    return false
-  end,
-  GetCurrentRenownLevel = function(_factionID)
-    return 1
-  end,
-  GetRenownRewardsForLevel = function(_factionID, _level)
-    return {}
-  end,
-  ShouldUseJourneyRewardTrack = function(_factionID)
-    return false
-  end,
-  GetRenownNPCFactionID = function()
-    return 0
-  end,
-})
-
 if IsPlayerInWorld == nil then
   function IsPlayerInWorld()
     return true
