@@ -8,8 +8,8 @@ pub(crate) use temporary::source_patches::patch_lua_source;
 
 use runtime_surfaces::*;
 pub(crate) use runtime_surfaces::{
-    patch_account_store_set_storefront, patch_playerspells_onload_backfill,
-    patch_shared_xml_anim_mixins,
+    patch_account_store_set_storefront, patch_map_canvas_scroll_container,
+    patch_playerspells_onload_backfill, patch_shared_xml_anim_mixins,
 };
 use std::time::Instant;
 
@@ -254,7 +254,7 @@ fn patch_auction_house_runtime_surface(env: &crate::lua_api::LoaderEnv<'_>) {
 
 fn patch_runtime_map_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if addon_name == "Blizzard_MapCanvas" {
-        temporary::map_canvas_scroll_container::patch(env);
+        let _ = temporary::map_canvas_scroll_container::patch(env);
     }
     if matches!(
         addon_name,

@@ -352,13 +352,14 @@ if type(ToggleWorldMap) == "function" and not rawget(_G, "__wow_toggle_world_map
 end
     "#;
 
-pub(crate) fn patch(env: &LoaderEnv<'_>) {
-    let _ = env.exec(MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA);
+pub(crate) fn patch(env: &LoaderEnv<'_>) -> Result<(), crate::Error> {
+    env.exec(MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA)
 }
 
 #[cfg(test)]
 pub(crate) fn patch_env(env: &WowLuaEnv) {
-    let _ = env.exec(MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA);
+    env.exec(MAP_CANVAS_SCROLL_CONTAINER_WORKAROUND_LUA)
+        .expect("MapCanvas scroll-container workaround should install");
 }
 
 #[cfg(test)]

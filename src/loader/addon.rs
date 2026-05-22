@@ -1,6 +1,5 @@
 //! Addon loading internals.
 
-mod map_canvas_patch;
 mod nil_symbol_reports;
 
 use crate::lua_api::LoaderEnv;
@@ -19,7 +18,6 @@ use super::error::LoadError;
 use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
 use super::{LoadResult, LoadTiming};
-use map_canvas_patch::patch_map_canvas_scroll_container;
 use nil_symbol_reports::append_nil_symbol_access_warnings;
 
 /// Context for loading addon files (name, private table, and addon root for path resolution).
@@ -163,6 +161,17 @@ fn patch_shared_xml_anim_mixins(env: &LoaderEnv<'_>, result: &mut LoadResult) {
             result,
             "Blizzard_SharedXML",
             "patch Blizzard_SharedXML animation mixins",
+            &e,
+        );
+    }
+}
+
+fn patch_map_canvas_scroll_container(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    if let Err(e) = crate::lua_api::workarounds::patch_map_canvas_scroll_container(env) {
+        push_patch_warning(
+            result,
+            "Blizzard_MapCanvas",
+            "patch map canvas scroll container",
             &e,
         );
     }
