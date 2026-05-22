@@ -6778,14 +6778,6 @@ if GetIconForRoleEnum == nil then
 end
 
 C_Sound = C_Sound or __wow_namespace()
-if C_UI == nil then
-  C_UI = __wow_namespace()
-end
-if C_UI.DoesAnyDisplayHaveNotch == nil then
-  function C_UI.DoesAnyDisplayHaveNotch()
-    return false
-  end
-end
 
 if C_CharacterCreation == nil then
   C_CharacterCreation = __wow_namespace()

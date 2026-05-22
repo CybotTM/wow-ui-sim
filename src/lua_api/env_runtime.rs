@@ -355,13 +355,6 @@ fn install_screen_mode_globals(
             return {is_glue}
         end
 
-        if C_Glue == nil then
-            C_Glue = {{}}
-        end
-
-        function C_Glue.IsOnGlueScreen()
-            return {is_glue}
-        end
         "#
     ));
 }

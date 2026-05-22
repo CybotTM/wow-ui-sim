@@ -17,6 +17,7 @@ pub mod c_azerite_item;
 pub mod c_barber_shop;
 pub mod c_cursor;
 pub mod c_fog_of_war;
+pub mod c_glue;
 pub mod c_major_factions;
 pub mod c_map;
 pub mod c_map_exploration_info;
@@ -27,6 +28,7 @@ pub mod c_spell;
 pub mod c_spell_book;
 pub mod c_spell_diminish;
 pub mod c_texture;
+pub mod c_ui;
 pub mod c_widget;
 pub mod c_wow_token_public;
 pub mod c_wowtoken_secure;
@@ -55,6 +57,7 @@ use rilua::vm::state::LuaState;
 
 pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResult<()> {
     register_specialization_and_model_tables(state)?;
+    register_glue_and_display_tables(state)?;
     register_auxiliary_utility_tables(state)
 }
 
@@ -66,6 +69,11 @@ fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<(
     )?;
     permanent_shims::c_model_info::register_c_model_info(state)?;
     Ok(())
+}
+
+fn register_glue_and_display_tables(state: &mut LuaState) -> LuaResult<()> {
+    c_glue::register_c_glue(state)?;
+    c_ui::register_c_ui(state)
 }
 
 fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {

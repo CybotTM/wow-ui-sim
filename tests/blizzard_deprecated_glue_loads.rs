@@ -54,8 +54,7 @@ fn blizzard_deprecated_glue_toc_is_minimal_with_no_flags_or_deps() {
     assert!(
         toc.dependencies().is_empty(),
         "Blizzard_DeprecatedGlue declares NO dependencies — the single shim simply reads \
-         from the always-loaded C_Glue namespace (src/lua_api/env_init/shared_bootstrap.lua:\
-         1293-1301)"
+         from the always-loaded C_Glue namespace registered by src/c_api/c_glue.rs"
     );
 
     let toc_text = std::fs::read_to_string(deprecated_glue_toc())
@@ -139,9 +138,8 @@ fn blizzard_deprecated_glue_publishes_is_on_glue_screen_as_boolean_not_function(
     assert!(
         !value,
         "When this addon loads on the Game screen (the only screen it auto-discovers on), \
-         `C_Glue.IsOnGlueScreen()` returns false (src/lua_api/env_init/shared_bootstrap.lua:\
-         1298-1300 returns `__wow_screen_mode_is_glue == true`). Therefore the materialized \
-         `IsOnGlueScreen` boolean must be false in this load context"
+         `C_Glue.IsOnGlueScreen()` returns false from the SimState-backed C_Glue surface. \
+         Therefore the materialized `IsOnGlueScreen` boolean must be false in this load context"
     );
 }
 

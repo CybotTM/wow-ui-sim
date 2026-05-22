@@ -1314,44 +1314,6 @@ do
   end
 end
 
-if C_Glue == nil then
-  C_Glue = {}
-end
-
-if C_Glue.IsOnGlueScreen == nil then
-  function C_Glue.IsOnGlueScreen()
-    return __wow_screen_mode_is_glue == true
-  end
-end
-
-if C_Glue.IsFirstLoadThisSession == nil then
-  function C_Glue.IsFirstLoadThisSession()
-    return false
-  end
-end
-
-if C_UI == nil then
-  C_UI = {}
-end
-
-if C_UI.ShouldUIParentAvoidNotch == nil then
-  function C_UI.ShouldUIParentAvoidNotch()
-    return false
-  end
-end
-
-if C_UI.DoesAnyDisplayHaveNotch == nil then
-  function C_UI.DoesAnyDisplayHaveNotch()
-    return false
-  end
-end
-
-if C_UI.GetTopLeftNotchSafeRegion == nil then
-  function C_UI.GetTopLeftNotchSafeRegion()
-    return 0, 0, 0, 0
-  end
-end
-
 if C_Login == nil then
   C_Login = {}
 end
