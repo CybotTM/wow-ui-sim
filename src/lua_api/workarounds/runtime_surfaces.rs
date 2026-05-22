@@ -234,7 +234,7 @@ pub(super) fn ensure_adventure_map_frame_surface_for_runtime_addon_load(
 }
 
 pub(super) fn patch_item_quality_color_data_methods(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(ITEM_QUALITY_COLOR_DATA_METHODS_WORKAROUND_LUA);
+    temporary::item_quality_color_data_methods::patch(env);
 }
 
 pub(super) fn patch_artifact_ui_show_panel_guard(env: &crate::lua_api::LoaderEnv<'_>) {

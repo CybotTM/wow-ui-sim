@@ -44,52 +44,6 @@ pub(super) const CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA: &str = r#"
     rawset(_G, "__wow_catalog_shop_product_card_defaults_wrapped", true)
 "#;
 
-pub(super) const ITEM_QUALITY_COLOR_DATA_METHODS_WORKAROUND_LUA: &str = r#"
-    if rawget(_G, "__wow_item_quality_color_data_methods_wrapped") then
-        return
-    end
-
-    local function ensureColorDataMethods(colorData)
-        if type(colorData) ~= "table" then
-            return
-        end
-
-        if type(colorData.GetRGB) ~= "function" then
-            function colorData:GetRGB()
-                return self.r, self.g, self.b
-            end
-        end
-
-        if type(colorData.GetRGBA) ~= "function" then
-            function colorData:GetRGBA()
-                return self.r, self.g, self.b, self.a or 1
-            end
-        end
-    end
-
-    local function ensureAllItemQualityColorMethods()
-        if type(ITEM_QUALITY_COLORS) ~= "table" then
-            return
-        end
-
-        for _, colorData in pairs(ITEM_QUALITY_COLORS) do
-            ensureColorDataMethods(colorData)
-        end
-    end
-
-    ensureAllItemQualityColorMethods()
-
-    if type(ColorManager) == "table" and type(ColorManager.UpdateColorsForItemQuality) == "function" then
-        local originalUpdateColorsForItemQuality = ColorManager.UpdateColorsForItemQuality
-        function ColorManager.UpdateColorsForItemQuality(...)
-            originalUpdateColorsForItemQuality(...)
-            ensureAllItemQualityColorMethods()
-        end
-    end
-
-    rawset(_G, "__wow_item_quality_color_data_methods_wrapped", true)
-"#;
-
 pub(super) const ARTIFACT_UI_SHOW_PANEL_GUARD_WORKAROUND_LUA: &str = r#"
     if rawget(_G, "__wow_artifact_ui_show_panel_guard_wrapped") then
         return
