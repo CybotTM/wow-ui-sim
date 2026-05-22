@@ -25,6 +25,7 @@ pub mod c_perks_program;
 pub mod c_pet_battles_static_fallbacks;
 pub mod c_ping;
 pub mod c_shared_character_services;
+pub mod c_social_queue;
 pub mod c_specialization_mastery;
 pub mod c_specialization_pvp_talents;
 pub mod c_spell_book_call_pet;

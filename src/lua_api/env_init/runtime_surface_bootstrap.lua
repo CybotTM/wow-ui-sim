@@ -2461,17 +2461,6 @@ C_CharacterServices = __wow_merge_namespace(C_CharacterServices, {
   end,
 })
 
-C_SocialQueue = __wow_merge_namespace(C_SocialQueue, {
-  GetAllGroups = function() return {} end,
-  GetConfig = function() return {} end,
-  GetGroupForPlayer = function() return nil end,
-  GetGroupInfo = function() return nil end,
-  GetGroupMembers = function() return {} end,
-  GetGroupQueues = function() return {} end,
-  RequestToJoin = __wow_noop,
-  SignalToastDisplayed = __wow_noop,
-})
-
 C_EventScheduler = __wow_merge_namespace(C_EventScheduler, {})
 
 local function __wow_event_scheduler_seed_state()
