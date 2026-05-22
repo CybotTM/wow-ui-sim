@@ -100,56 +100,6 @@ if type(UIParent) == "table"
 end
 "#;
 
-pub(super) const CHAT_VOICE_BUTTON_SURFACE_WORKAROUND_LUA: &str = r#"
-local defaultChatFrame = DEFAULT_CHAT_FRAME or ChatFrame1
-local defaultEditBox = rawget(_G, "ChatFrame1EditBox")
-if type(defaultChatFrame) == "table" and type(defaultEditBox) == "table" then
-    if defaultChatFrame.editBox == nil then
-        defaultChatFrame.editBox = defaultEditBox
-    end
-    if defaultEditBox.chatFrame == nil then
-        defaultEditBox.chatFrame = defaultChatFrame
-    end
-    if DEFAULT_CHAT_FRAME == nil then
-        DEFAULT_CHAT_FRAME = defaultChatFrame
-    end
-end
-
-local channelButton = ChatFrameChannelButton
-if type(channelButton) == "table" then
-    local icon = channelButton.Icon
-    if icon == nil and type(channelButton.CreateTexture) == "function" then
-        icon = channelButton:CreateTexture(nil, "OVERLAY")
-        channelButton.Icon = icon
-    end
-
-    if icon ~= nil then
-        if type(icon.SetParentKey) == "function" then
-            pcall(icon.SetParentKey, icon, "Icon", true)
-        end
-        if type(icon.GetWidth) == "function" and type(icon.GetHeight) == "function"
-            and (icon:GetWidth() == 0 or icon:GetHeight() == 0)
-            and type(icon.SetSize) == "function" then
-            icon:SetSize(channelButton.fixedIconWidth or 15, channelButton.fixedIconHeight or 15)
-        end
-        if type(icon.GetNumPoints) == "function" and icon:GetNumPoints() == 0
-            and type(icon.SetPoint) == "function" then
-            icon:SetPoint("CENTER", channelButton, "CENTER", 0, 0)
-        end
-        if type(icon.SetAtlas) == "function" then
-            icon:SetAtlas("chatframe-button-icon-voicechat")
-        end
-        if type(icon.Show) == "function" then
-            icon:Show()
-        end
-    end
-end
-
-if QuickJoinToastButton == nil and type(CreateFrame) == "function" and UIParent ~= nil then
-    QuickJoinToastButton = CreateFrame("Button", "QuickJoinToastButton", UIParent)
-end
-"#;
-
 pub(super) const ITEM_SOCKETING_TOOLTIPS_WORKAROUND_LUA: &str = r#"
 local frame = ItemSocketingFrame
 local container = frame and frame.SocketingContainer

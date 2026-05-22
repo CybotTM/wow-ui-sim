@@ -43,7 +43,7 @@ pub(super) fn patch_character_select_selected_name(env: &crate::lua_api::WowLuaE
 }
 
 pub(super) fn patch_chat_voice_button_surface(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(CHAT_VOICE_BUTTON_SURFACE_WORKAROUND_LUA);
+    temporary::chat_voice_button_surface::patch(env);
 }
 
 pub(super) fn patch_item_socketing_tooltips(env: &crate::lua_api::WowLuaEnv) {
