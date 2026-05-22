@@ -7,6 +7,8 @@ use rilua::vm::string::LuaString;
 use rilua::vm::table::Table;
 use std::collections::HashMap;
 
+const MAX_CACHED_TABLE_PATH_BYTES: usize = 8192;
+
 pub(super) fn parse_saved_variables_file_with_cache(
     state: &mut LuaState,
     source: &str,
@@ -152,7 +154,7 @@ impl<'a, 's> Parser<'a, 's> {
         self.expect_byte(b']')?;
         self.skip_ws();
         self.expect_byte(b'=')?;
-        let child_path = table_path.map(|path| key.child_path(path));
+        let child_path = table_path.and_then(|path| key.child_path(path));
         let value = self.parse_value(child_path.as_deref())?;
         self.set_table_key(table, table_ref, key, value);
         Ok(())
@@ -166,7 +168,7 @@ impl<'a, 's> Parser<'a, 's> {
         let key = self.parse_identifier()?;
         self.skip_ws();
         self.expect_byte(b'=')?;
-        let child_path = table_path.map(|path| format!("{path}.{key}"));
+        let child_path = table_path.and_then(|path| extend_cached_table_path(path, &key));
         let value = self.parse_value(child_path.as_deref())?;
         self.set_table_string_key(table, &key, value);
         Ok(())
@@ -178,8 +180,10 @@ impl<'a, 's> Parser<'a, 's> {
         table_path: Option<&str>,
         next_array_index: f64,
     ) -> Result<(), String> {
-        let child_path = table_path
-            .map(|path| format!("{path}[{}]", format_lua_number_for_path(next_array_index)));
+        let child_path = table_path.and_then(|path| {
+            let index = format_lua_number_for_path(next_array_index);
+            bracket_cached_table_path(path, &index)
+        });
         let value = self.parse_value(child_path.as_deref())?;
         table_set_num(self.state, table_ref, next_array_index, value);
         Ok(())
@@ -452,11 +456,15 @@ enum SavedVarKey {
 }
 
 impl SavedVarKey {
-    fn child_path(&self, parent: &str) -> String {
+    fn child_path(&self, parent: &str) -> Option<String> {
         match self {
-            SavedVarKey::String(key) if is_identifier(key) => format!("{parent}.{key}"),
-            SavedVarKey::String(key) => format!("{parent}[\"{}\"]", escape_path_string(key)),
-            SavedVarKey::Number(key) => format!("{parent}[{}]", format_lua_number_for_path(*key)),
+            SavedVarKey::String(key) if is_identifier(key) => extend_cached_table_path(parent, key),
+            SavedVarKey::String(key) => {
+                bracket_cached_table_path(parent, &format!("\"{}\"", escape_path_string(key)))
+            }
+            SavedVarKey::Number(key) => {
+                bracket_cached_table_path(parent, &format_lua_number_for_path(*key))
+            }
         }
     }
 }
@@ -495,6 +503,33 @@ fn is_identifier(value: &str) -> bool {
 
 fn escape_path_string(value: &str) -> String {
     value.replace('\\', "\\\\").replace('"', "\\\"")
+}
+
+fn extend_cached_table_path(parent: &str, child: &str) -> Option<String> {
+    cached_table_path_from_parts(parent, ".", child, "")
+}
+
+fn bracket_cached_table_path(parent: &str, child: &str) -> Option<String> {
+    cached_table_path_from_parts(parent, "[", child, "]")
+}
+
+fn cached_table_path_from_parts(
+    parent: &str,
+    prefix: &str,
+    child: &str,
+    suffix: &str,
+) -> Option<String> {
+    let total_len = parent.len() + prefix.len() + child.len() + suffix.len();
+    if total_len > MAX_CACHED_TABLE_PATH_BYTES {
+        return None;
+    }
+
+    let mut path = String::with_capacity(total_len);
+    path.push_str(parent);
+    path.push_str(prefix);
+    path.push_str(child);
+    path.push_str(suffix);
+    Some(path)
 }
 
 fn format_lua_number_for_path(value: f64) -> String {
@@ -625,5 +660,28 @@ mod tests {
         let table = lua.state_mut().gc.tables.get(table_ref).unwrap();
         assert_eq!(table.array_len(), 8);
         assert_eq!(table.hash_size(), 16);
+    }
+
+    #[test]
+    fn drops_table_size_paths_after_oversized_key() {
+        let env = WowLuaEnv::new().unwrap();
+        let mut lua = env.rilua_mut();
+        let mut cache = SavedVariablesTableSizeCache::default();
+        let long_key = "x".repeat(MAX_CACHED_TABLE_PATH_BYTES);
+        let source = format!(
+            r#"
+                TEST_SV = {{
+                    ["{long_key}"] = {{
+                        child = {{}},
+                    }},
+                }}
+                "#
+        );
+
+        parse_saved_variables_file_with_cache(lua.state_mut(), &source, Some(&mut cache)).unwrap();
+
+        let longest_path = cache.iter().map(|(path, _)| path.len()).max().unwrap_or(0);
+        assert!(longest_path <= MAX_CACHED_TABLE_PATH_BYTES);
+        assert!(cache.get("TEST_SV").is_some());
     }
 }

@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use super::saved_variables_parse::{SavedVariablesTableSize, SavedVariablesTableSizeCache};
 
 const TABLE_SIZE_CACHE_DIR: &str = ".saved-variable-table-sizes";
+const MAX_TABLE_SIZE_CACHE_BYTES: u64 = 64 * 1024 * 1024;
 const FNV_OFFSET_BASIS: u64 = 0xcbf29ce484222325;
 const FNV_PRIME: u64 = 0x100000001b3;
 
@@ -12,7 +13,11 @@ pub(super) fn load_table_size_cache(
     source_path: &Path,
 ) -> SavedVariablesTableSizeCache {
     let source_key = table_size_cache_source_key(source_path);
-    let Ok(contents) = fs::read_to_string(table_size_cache_path(storage_dir, &source_key)) else {
+    let cache_path = table_size_cache_path(storage_dir, &source_key);
+    if is_oversized_cache_file(&cache_path) {
+        return SavedVariablesTableSizeCache::default();
+    }
+    let Ok(contents) = fs::read_to_string(cache_path) else {
         return SavedVariablesTableSizeCache::default();
     };
 
@@ -61,6 +66,12 @@ fn table_size_cache_path(storage_dir: &Path, source_key: &str) -> PathBuf {
     storage_dir
         .join(TABLE_SIZE_CACHE_DIR)
         .join(format!("{:016x}.tsv", stable_hash(source_key.as_bytes())))
+}
+
+fn is_oversized_cache_file(path: &Path) -> bool {
+    fs::metadata(path)
+        .map(|metadata| metadata.len() > MAX_TABLE_SIZE_CACHE_BYTES)
+        .unwrap_or(false)
 }
 
 fn table_size_cache_source_key(path: &Path) -> String {
@@ -138,8 +149,8 @@ mod tests {
         SavedVariablesTableSize, SavedVariablesTableSizeCache,
     };
     use super::{
-        load_table_size_cache, save_table_size_cache, table_size_cache_path,
-        table_size_cache_source_key,
+        MAX_TABLE_SIZE_CACHE_BYTES, load_table_size_cache, save_table_size_cache,
+        table_size_cache_path, table_size_cache_source_key,
     };
 
     #[test]
@@ -184,6 +195,23 @@ mod tests {
             ),
         )
         .expect("write legacy monolithic cache");
+
+        let loaded = load_table_size_cache(dir.path(), &source);
+
+        assert!(loaded.get("AddonDB.child").is_none());
+    }
+
+    #[test]
+    fn oversized_scoped_cache_file_is_ignored() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let source = dir.path().join("Addon.lua");
+        let source_key = table_size_cache_source_key(&source);
+        let cache_path = table_size_cache_path(dir.path(), &source_key);
+        std::fs::create_dir_all(cache_path.parent().expect("cache dir")).expect("cache dir");
+        let oversized = std::fs::File::create(&cache_path).expect("cache file");
+        oversized
+            .set_len(MAX_TABLE_SIZE_CACHE_BYTES + 1)
+            .expect("resize cache file");
 
         let loaded = load_table_size_cache(dir.path(), &source);
 

@@ -392,6 +392,7 @@ fn load_or_register_single_addon(
         return;
     }
 
+    print_verbose_addon_start(name);
     let result = match saved_vars.as_mut() {
         Some(sv) => load_addon_with_saved_vars(&env.loader_env(), toc_path, sv),
         None => load_addon(&env.loader_env(), toc_path),
@@ -406,6 +407,12 @@ fn load_or_register_single_addon(
             println!("✗ {} failed: {}", name, e);
             stats.fail_count += 1;
         }
+    }
+}
+
+fn print_verbose_addon_start(name: &str) {
+    if std::env::var("WOW_SIM_VERBOSE").is_ok() {
+        eprintln!("→ {name} loading...");
     }
 }
 
