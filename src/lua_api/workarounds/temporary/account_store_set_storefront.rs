@@ -18,6 +18,12 @@ if type(AccountStoreMixin) == "table" then
 end
 if type(AccountStoreFrame) == "table" then
     AccountStoreFrame.SetStoreFrontID = __wow_account_store_set_storefront_id
+    if AccountStoreFrame.storeFrontID == nil
+        and type(Constants) == "table"
+        and type(Constants.AccountStoreConsts) == "table"
+    then
+        AccountStoreFrame:SetStoreFrontID(Constants.AccountStoreConsts.PlunderstormStoreFrontID)
+    end
 end
 "#;
 
@@ -40,6 +46,7 @@ mod tests {
         let env = WowLuaEnv::new().expect("lua env should initialize");
         env.exec(
             r#"
+            Constants = { AccountStoreConsts = { PlunderstormStoreFrontID = 99 } }
             AccountStoreMixin = {}
             AccountStoreFrame = {}
             "#,
@@ -61,5 +68,45 @@ mod tests {
 
         assert_eq!(mixin_storefront_id, 44);
         assert_eq!(frame_storefront_id, 55);
+    }
+
+    #[test]
+    fn seeds_default_storefront_when_live_frame_has_no_id() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            Constants = { AccountStoreConsts = { PlunderstormStoreFrontID = 99 } }
+            AccountStoreMixin = {}
+            AccountStoreFrame = {}
+            "#,
+        )
+        .expect("account store fixture should install");
+
+        patch_env(&env);
+
+        let storefront_id: i64 = env
+            .eval("return AccountStoreFrame.storeFrontID")
+            .expect("default account store storefront id should be seeded");
+        assert_eq!(storefront_id, 99);
+    }
+
+    #[test]
+    fn preserves_existing_storefront_when_live_frame_already_has_id() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            Constants = { AccountStoreConsts = { PlunderstormStoreFrontID = 99 } }
+            AccountStoreMixin = {}
+            AccountStoreFrame = { storeFrontID = 77 }
+            "#,
+        )
+        .expect("account store fixture should install");
+
+        patch_env(&env);
+
+        let storefront_id: i64 = env
+            .eval("return AccountStoreFrame.storeFrontID")
+            .expect("existing account store storefront id should survive patching");
+        assert_eq!(storefront_id, 77);
     }
 }

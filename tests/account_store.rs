@@ -46,6 +46,81 @@ fn env() -> WowLuaEnv {
 }
 
 #[test]
+fn get_categories_returns_empty_array_by_default() {
+    let env = env();
+    let count: i64 = env.eval(r#"return #C_AccountStore.GetCategories(42)"#).unwrap();
+    assert_eq!(count, 0, "unseeded account store has no categories");
+}
+
+#[test]
+fn get_categories_returns_seeded_category_ids_in_stable_order() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_categories.insert(
+            20,
+            AccountStoreCategoryInfo {
+                id: 20,
+                name: "Services".to_string(),
+                category_type: 2,
+                icon: 200,
+            },
+        );
+        state.account_store_categories.insert(
+            10,
+            AccountStoreCategoryInfo {
+                id: 10,
+                name: "Mounts".to_string(),
+                category_type: 1,
+                icon: 100,
+            },
+        );
+    }
+    let (count, first, second): (i64, i64, i64) = env
+        .eval(
+            r#"
+            local categories = C_AccountStore.GetCategories(42)
+            return #categories, categories[1], categories[2]
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 2);
+    assert_eq!(first, 10);
+    assert_eq!(second, 20);
+}
+
+#[test]
+fn get_currency_available_returns_zero_when_unseeded() {
+    let env = env();
+    let amount: i64 = env
+        .eval(r#"return C_AccountStore.GetCurrencyAvailable(1828)"#)
+        .unwrap();
+    assert_eq!(amount, 0, "unknown account-store currency defaults to zero");
+}
+
+#[test]
+fn get_currency_available_returns_seeded_amount() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_currency_info.insert(
+            1828,
+            AccountStoreCurrencyInfo {
+                id: 1828,
+                amount: 1200,
+                max_quantity: Some(5000),
+                name: "Trader Tender".to_string(),
+                icon: 4242,
+            },
+        );
+    }
+    let amount: i64 = env
+        .eval(r#"return C_AccountStore.GetCurrencyAvailable(1828)"#)
+        .unwrap();
+    assert_eq!(amount, 1200);
+}
+
+#[test]
 fn begin_purchase_records_item_and_returns_success_by_default() {
     // AccountStoreBaseCardMixin:SelectCard wires the confirmation popup's
     // OnAccept to call C_AccountStore.BeginPurchase(self.itemID). The default

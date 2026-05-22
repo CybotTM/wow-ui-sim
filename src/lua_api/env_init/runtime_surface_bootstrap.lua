@@ -3508,13 +3508,6 @@ if rawget(C_EncounterEvents, "PlayEventSound") == nil then
   end
 end
 
-C_AccountStore = __wow_merge_namespace(C_AccountStore, {
-  GetCategories = function() return {} end,
-  GetCategoryInfo = function() return nil end,
-  GetItemInfo = function() return nil end,
-  GetCurrencyAvailable = function() return 0 end,
-})
-
 local function __wow_damage_meter_spell_details(unitName, unitClassFilename, amount)
   return {
     amount = amount or 0,

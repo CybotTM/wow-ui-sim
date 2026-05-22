@@ -21,7 +21,14 @@ pub(super) fn register_account_store_surface(state: &mut LuaState) -> LuaResult<
     let table_ref = ensure_namespace(state, "C_AccountStore")?;
     table_set_rust_fn_static(state, table_ref, "BeginPurchase", begin_purchase)?;
     table_set_rust_fn_static(state, table_ref, "RefundItem", refund_item)?;
+    table_set_rust_fn_static(state, table_ref, "GetCategories", get_categories)?;
     table_set_rust_fn_static(state, table_ref, "GetCategoryItems", get_category_items)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetCurrencyAvailable",
+        get_currency_available,
+    )?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -65,6 +72,31 @@ fn refund_item(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_categories(state: &mut LuaState) -> LuaResult<u32> {
+    let mut category_ids = borrow_state(state)?
+        .account_store_categories
+        .keys()
+        .copied()
+        .collect::<Vec<_>>();
+    category_ids.sort_unstable();
+
+    let array = create_table(state);
+    let Val::Table(array_ref) = array else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    for (index, category_id) in category_ids.iter().enumerate() {
+        table_set_num(
+            state,
+            array_ref,
+            (index + 1) as f64,
+            Val::Num(*category_id as f64),
+        );
+    }
+    state.push(array);
+    Ok(1)
+}
+
 fn get_category_items(state: &mut LuaState) -> LuaResult<u32> {
     let category_id = i64::from_stack(state, 1)?;
     let item_ids = borrow_state(state)?
@@ -100,6 +132,17 @@ fn get_currency_id_for_store(state: &mut LuaState) -> LuaResult<u32> {
         Some(id) => state.push(Val::Num(id as f64)),
         None => state.push(Val::Nil),
     }
+    Ok(1)
+}
+
+fn get_currency_available(state: &mut LuaState) -> LuaResult<u32> {
+    let currency_id = i64::from_stack(state, 1)?;
+    let amount = borrow_state(state)?
+        .account_store_currency_info
+        .get(&currency_id)
+        .map(|info| info.amount)
+        .unwrap_or_default();
+    state.push(Val::Num(amount as f64));
     Ok(1)
 }
 
