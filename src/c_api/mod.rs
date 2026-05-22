@@ -39,3 +39,33 @@ mod helpers;
 
 pub(crate) use helpers::{ensure_global_table, ensure_namespace, global_val, set_global_val};
 pub use permanent_shims::c_map_api;
+
+use rilua::LuaResult;
+use rilua::vm::state::LuaState;
+
+pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResult<()> {
+    register_specialization_and_model_tables(state)?;
+    register_auxiliary_utility_tables(state)
+}
+
+fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<()> {
+    c_spec::register_c_specialization_info(state)?;
+    temporary_shims::c_specialization_mastery::register_c_specialization_mastery_shim(state)?;
+    temporary_shims::c_specialization_pvp_talents::register_c_specialization_pvp_talent_shims(
+        state,
+    )?;
+    permanent_shims::c_model_info::register_c_model_info(state)?;
+    Ok(())
+}
+
+fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
+    temporary_shims::c_lfg_info::register_c_lfg_info(state)?;
+    temporary_shims::c_black_market::register_c_black_market(state)?;
+    temporary_shims::c_calendar::register_c_calendar(state)?;
+    temporary_shims::c_perks_program::register_c_perks_program(state)?;
+    c_wowtoken_secure::register_c_wowtoken_secure(state)?;
+    c_wow_token_public::register_c_wow_token_public(state)?;
+    c_texture::register_c_texture(state)?;
+    temporary_shims::c_texture_file_data::register_c_texture_file_data(state)?;
+    c_xml_util::register_c_xml_util(state)
+}

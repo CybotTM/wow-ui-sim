@@ -10,18 +10,9 @@
 
 mod c_addon_profiler;
 mod c_addons;
-mod c_spec;
-mod c_texture;
-mod c_xml_util;
 mod spell_api;
 mod table_util;
 
-use crate::c_api::c_wowtoken_secure;
-use crate::c_api::permanent_shims::c_model_info;
-use crate::c_api::temporary_shims::{
-    c_black_market, c_calendar, c_lfg_info, c_perks_program, c_specialization_mastery,
-    c_specialization_pvp_talents, c_texture_file_data,
-};
 use crate::lua_api::methods::call_function_state_multi;
 use crate::lua_api::script_helpers::{
     call_error_handler_state, protected_call_state, protected_lua_pcall_state, registry_value,
@@ -630,10 +621,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
 
     let state = lua.state_mut();
     register_system_tables(state)?;
-    register_specialization_and_model_tables(state)?;
-    register_auxiliary_c_tables(state)?;
+    crate::c_api::register_utility_bootstrap_tables(state)?;
     c_addons::register_legacy_addon_globals(state)?;
-    c_spec::register_widget_container_mixin(state)?;
+    crate::c_api::c_spec::register_widget_container_mixin(state)?;
 
     Ok(())
 }
@@ -642,27 +632,6 @@ fn register_system_tables(state: &mut LuaState) -> LuaResult<()> {
     table_util::register_table_util(state)?;
     c_addons::register_c_addons(state)?;
     c_addon_profiler::register_c_addon_profiler(state)?;
-    Ok(())
-}
-
-fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<()> {
-    c_spec::register_c_specialization_info(state)?;
-    c_specialization_mastery::register_c_specialization_mastery_shim(state)?;
-    c_specialization_pvp_talents::register_c_specialization_pvp_talent_shims(state)?;
-    c_model_info::register_c_model_info(state)?;
-    Ok(())
-}
-
-fn register_auxiliary_c_tables(state: &mut LuaState) -> LuaResult<()> {
-    c_lfg_info::register_c_lfg_info(state)?;
-    c_black_market::register_c_black_market(state)?;
-    c_calendar::register_c_calendar(state)?;
-    c_perks_program::register_c_perks_program(state)?;
-    c_wowtoken_secure::register_c_wowtoken_secure(state)?;
-    crate::c_api::c_wow_token_public::register_c_wow_token_public(state)?;
-    c_texture::register_c_texture(state)?;
-    c_texture_file_data::register_c_texture_file_data(state)?;
-    c_xml_util::register_c_xml_util(state)?;
     Ok(())
 }
 
