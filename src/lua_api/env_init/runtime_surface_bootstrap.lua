@@ -3694,15 +3694,6 @@ C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
   end,
 })
 
-C_Navigation = __wow_merge_namespace(C_Navigation, {
-  WasClampedToScreen = function() return false end,
-  GetTargetState = function() return 0 end,
-  HasValidScreenPosition = function() return false end,
-  GetDistance = function() return 0 end,
-  GetNearestPartyMemberToken = function() return nil end,
-  GetFrame = function() return nil end,
-})
-
 local __wow_housing_entry_type = Enum.HousingCatalogEntryType and Enum.HousingCatalogEntryType.Decor or 0
 local __wow_housing_all_category_id = Constants.HousingCatalogConsts.HOUSING_CATALOG_ALL_CATEGORY_ID
 

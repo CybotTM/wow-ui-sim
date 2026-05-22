@@ -99,6 +99,7 @@ fn register_glue_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_service_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_minimap::register_c_minimap_shims(state)?;
+    temporary_shims::c_navigation::register_c_navigation_shims(state)?;
     temporary_shims::c_ping::register_c_ping_shims(state)?;
     temporary_shims::c_shared_character_services::register_c_shared_character_services_shims(
         state,
