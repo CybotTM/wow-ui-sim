@@ -2442,24 +2442,9 @@ C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
 })
 
 -- C_LFGList is state-backed via `src/lua_api/globals/lfg_list.rs`.
-
-C_AddOnProfiler = __wow_merge_namespace(C_AddOnProfiler, {
-  CheckForPerformanceMessage = function() return nil end,
-})
-
-C_Ping = __wow_merge_namespace(C_Ping, {
-  GetDefaultPingOptions = function() return {} end,
-})
-
-C_ZoneAbility = __wow_merge_namespace(C_ZoneAbility, {
-  GetActiveAbilities = function() return {} end,
-})
-
-if rawget(C_ZoneAbility, "GetActiveAbilities") == nil then
-  function C_ZoneAbility.GetActiveAbilities()
-    return {}
-  end
-end
+-- C_AddOnProfiler is state-backed via `src/c_api/c_addon_profiler.rs`.
+-- C_Ping.GetDefaultPingOptions is a temporary shim in `src/c_api/temporary_shims/c_ping.rs`.
+-- C_ZoneAbility is state-backed via `src/lua_api/globals/missing_surface/zone_ability.rs`.
 
 C_AuthChallenge = __wow_merge_namespace(C_AuthChallenge, {
   SetFrame = __wow_noop,

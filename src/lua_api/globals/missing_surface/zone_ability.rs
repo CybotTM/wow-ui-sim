@@ -115,3 +115,44 @@ fn table_get_int(state: &LuaState, table: Val, index: i32) -> Val {
         .map(|t| t.get_int(index as i64))
         .unwrap_or(Val::Nil)
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn active_abilities_default_to_empty_list() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let count: i32 = env
+            .eval("local abilities = C_ZoneAbility.GetActiveAbilities(); return #abilities")
+            .expect("active abilities should be queryable");
+
+        assert_eq!(count, 0);
+    }
+
+    #[test]
+    fn active_abilities_return_copied_seed_data() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let (count, spell_id, tutorial_text): (i32, i32, String) = env
+            .eval(
+                r#"
+                C_ZoneAbility._state.activeAbilities = {
+                    {
+                        zoneAbilityID = 1,
+                        uiPriority = 2,
+                        spellID = 372610,
+                        tutorialText = "Skyward Ascent",
+                    },
+                }
+
+                local abilities = C_ZoneAbility.GetActiveAbilities()
+                return #abilities, abilities[1].spellID, abilities[1].tutorialText
+                "#,
+            )
+            .expect("seeded active abilities should be returned");
+
+        assert_eq!(count, 1);
+        assert_eq!(spell_id, 372610);
+        assert_eq!(tutorial_text, "Skyward Ascent");
+    }
+}
