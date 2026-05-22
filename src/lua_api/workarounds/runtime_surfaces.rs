@@ -352,7 +352,7 @@ pub(super) fn patch_character_frame_title_refresh(env: &crate::lua_api::WowLuaEn
 }
 
 pub(super) fn refresh_character_frame_surface(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(CHARACTER_FRAME_SURFACE_REFRESH_WORKAROUND_LUA);
+    temporary::character_frame_surface_refresh::patch(env);
 }
 
 pub(super) fn patch_fog_of_war_pin_mixin_for_runtime_addon_load(

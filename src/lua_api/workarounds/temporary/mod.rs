@@ -1,5 +1,6 @@
 //! Temporary Lua workarounds with explicit retirement paths.
 
+pub(crate) mod character_frame_surface_refresh;
 pub(crate) mod chat_voice_button_surface;
 pub(crate) mod damage_meter_scrollbox;
 pub(crate) mod details_saved_variables;
