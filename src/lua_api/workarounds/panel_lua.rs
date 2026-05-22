@@ -303,35 +303,3 @@ function ToggleCollectionsJournal(tabIndex)
     end
 end
 "#;
-
-pub(super) const MOUNT_JOURNAL_DYNAMIC_FLIGHT_POPUP_WORKAROUND_LUA: &str = r#"
-local function __wow_patch_mount_journal_dynamic_flight_animation()
-    if type(MountJournalToggleDynamicFlightFlyoutButtonMixin) ~= "table" then
-        return
-    end
-    if rawget(_G, "__wow_mount_journal_dynamic_flight_popup_patched") then
-        return
-    end
-    if type(MountJournalToggleDynamicFlightFlyoutButtonMixin.UpdateUnspentGlyphsAnimation) ~= "function" then
-        return
-    end
-
-    MountJournalToggleDynamicFlightFlyoutButtonMixin.UpdateUnspentGlyphsAnimation = function(self)
-        local isPopupOpen = type(self.IsPopupOpen) == "function" and self:IsPopupOpen() or false
-        if self.UnspentGlyphsAnim and type(self.UnspentGlyphsAnim.SetPlaying) == "function" then
-            self.UnspentGlyphsAnim:SetPlaying(self.canSpendDragonridingGlyphs and not isPopupOpen)
-        end
-
-        local popup = rawget(self, "popup")
-        local popupButton = type(popup) == "table" and rawget(popup, "OpenDynamicFlightSkillTreeButton") or nil
-        local popupAnim = popupButton and popupButton.UnspentGlyphsAnim or nil
-        if popupAnim and type(popupAnim.SetPlaying) == "function" then
-            popupAnim:SetPlaying(self.canSpendDragonridingGlyphs and isPopupOpen)
-        end
-    end
-
-    rawset(_G, "__wow_mount_journal_dynamic_flight_popup_patched", true)
-end
-
-__wow_patch_mount_journal_dynamic_flight_animation()
-"#;

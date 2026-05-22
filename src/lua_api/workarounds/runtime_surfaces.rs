@@ -453,7 +453,7 @@ pub(super) fn patch_toggle_collections_journal_for_runtime_addon_load(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) {
     let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
-    let _ = env.exec(MOUNT_JOURNAL_DYNAMIC_FLIGHT_POPUP_WORKAROUND_LUA);
+    temporary::mount_journal_dynamic_flight_popup::patch(env);
 }
 
 pub(super) fn patch_toggle_encounter_journal_for_runtime_addon_load(
