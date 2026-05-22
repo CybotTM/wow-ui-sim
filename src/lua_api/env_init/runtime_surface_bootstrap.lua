@@ -3720,18 +3720,6 @@ C_Navigation = __wow_merge_namespace(C_Navigation, {
   GetFrame = function() return nil end,
 })
 
-C_TaxiMap = __wow_merge_namespace(C_TaxiMap, {
-  GetAllTaxiNodes = function()
-    return {}
-  end,
-  GetTaxiNodesForMap = function()
-    return {}
-  end,
-  ShouldMapShowTaxiNodes = function()
-    return true
-  end,
-})
-
 local __wow_housing_entry_type = Enum.HousingCatalogEntryType and Enum.HousingCatalogEntryType.Decor or 0
 local __wow_housing_all_category_id = Constants.HousingCatalogConsts.HOUSING_CATALOG_ALL_CATEGORY_ID
 

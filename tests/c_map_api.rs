@@ -680,19 +680,19 @@ fn test_c_fog_of_war_returns_nil_for_unknown_map() {
 #[test]
 fn test_get_all_taxi_nodes() {
     let env = env();
-    let is_table: bool = env
-        .eval("return type(C_TaxiMap.GetAllTaxiNodes(1)) == 'table'")
+    let count: i32 = env
+        .eval("return #C_TaxiMap.GetAllTaxiNodes(1)")
         .unwrap();
-    assert!(is_table);
+    assert_eq!(count, 0);
 }
 
 #[test]
 fn test_get_taxi_nodes_for_map() {
     let env = env();
-    let is_table: bool = env
-        .eval("return type(C_TaxiMap.GetTaxiNodesForMap(1)) == 'table'")
+    let count: i32 = env
+        .eval("return #C_TaxiMap.GetTaxiNodesForMap(1)")
         .unwrap();
-    assert!(is_table);
+    assert_eq!(count, 0);
 }
 
 #[test]
