@@ -3133,11 +3133,6 @@ C_PetBattles = __wow_merge_namespace(C_PetBattles, {
   ShouldShowPetSelect = function() return false end,
 })
 
-C_VoiceChat = __wow_merge_namespace(C_VoiceChat, {
-  GetTtsVoices = function() return {} end,
-  IsTranscriptionAllowed = function() return false end,
-})
-
 C_ClubFinder = __wow_merge_namespace(C_ClubFinder, {
   GetClubRecruitmentSettings = function()
     return {

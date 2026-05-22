@@ -163,6 +163,22 @@ fn get_output_volume_returns_seeded_value() {
     assert!((vol - 1.0).abs() < 1e-6);
 }
 
+#[test]
+fn transcription_and_tts_voices_default_to_unavailable() {
+    let env = env();
+    let (transcription_allowed, voice_count): (bool, i32) = env
+        .eval(
+            r#"
+            local voices = C_VoiceChat.GetTtsVoices()
+            return C_VoiceChat.IsTranscriptionAllowed(), #voices
+            "#,
+        )
+        .unwrap();
+
+    assert!(!transcription_allowed);
+    assert_eq!(voice_count, 0);
+}
+
 // ── GetNumActiveChannels / GetNumMembers ──────────────────────────────────────
 
 #[test]

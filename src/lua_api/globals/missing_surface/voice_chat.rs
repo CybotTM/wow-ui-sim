@@ -9,6 +9,7 @@
 //! - `GetMasterVolumeScale()` — returns master volume scale.
 //! - `GetMicrophoneVolume()` — returns microphone volume or nil.
 //! - `GetOutputVolume()` — returns output volume or nil.
+//! - `GetTtsVoices()` — returns an empty list until TTS voice catalogs exist.
 //! - `GetNumActiveChannels()` — returns count of seeded channels.
 //! - `GetNumMembers(channelID)` — returns member count for a channel.
 //! - `IsDeafened()` — returns deafened bool or nil.
@@ -16,6 +17,7 @@
 //! - `IsMuted()` — returns muted bool or nil.
 //! - `IsParentalDisabled()` — returns parental-disabled bool.
 //! - `IsTalking()` — returns talking bool or nil.
+//! - `IsTranscriptionAllowed()` — returns false until transcription policy exists.
 
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_table, table_set};
@@ -37,6 +39,7 @@ pub(super) fn register_voice_chat_surface(state: &mut LuaState) -> LuaResult<()>
     table_set_rust_fn_static(state, ns, "GetMasterVolumeScale", get_master_volume_scale)?;
     table_set_rust_fn_static(state, ns, "GetMicrophoneVolume", get_microphone_volume)?;
     table_set_rust_fn_static(state, ns, "GetOutputVolume", get_output_volume)?;
+    table_set_rust_fn_static(state, ns, "GetTtsVoices", get_tts_voices)?;
     table_set_rust_fn_static(state, ns, "GetNumActiveChannels", get_num_active_channels)?;
     table_set_rust_fn_static(state, ns, "GetNumMembers", get_num_members)?;
     table_set_rust_fn_static(state, ns, "IsDeafened", is_deafened)?;
@@ -44,6 +47,12 @@ pub(super) fn register_voice_chat_surface(state: &mut LuaState) -> LuaResult<()>
     table_set_rust_fn_static(state, ns, "IsMuted", is_muted)?;
     table_set_rust_fn_static(state, ns, "IsParentalDisabled", is_parental_disabled)?;
     table_set_rust_fn_static(state, ns, "IsTalking", is_talking)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "IsTranscriptionAllowed",
+        is_transcription_allowed,
+    )?;
     Ok(())
 }
 
@@ -128,6 +137,12 @@ fn get_output_volume(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_tts_voices(state: &mut LuaState) -> LuaResult<u32> {
+    let voices = create_table(state);
+    state.push(voices);
+    Ok(1)
+}
+
 fn get_num_active_channels(state: &mut LuaState) -> LuaResult<u32> {
     let count = borrow_state(state)?.voice_chat.channels.len();
     state.push(Val::Num(count as f64));
@@ -174,5 +189,10 @@ fn is_parental_disabled(state: &mut LuaState) -> LuaResult<u32> {
 fn is_talking(state: &mut LuaState) -> LuaResult<u32> {
     let v = borrow_state(state)?.voice_chat.talking;
     state.push(Val::Bool(v));
+    Ok(1)
+}
+
+fn is_transcription_allowed(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
     Ok(1)
 }
