@@ -10949,19 +10949,6 @@ C_MajorFactions = __wow_merge_namespace(C_MajorFactions, {
   end,
 })
 
-C_LootJournal = __wow_merge_namespace(C_LootJournal, {
-  GetItemSets = function(_classID, _specID)
-    return {}
-  end,
-  GetItemSetItems = function(_setID)
-    return {}
-  end,
-})
-
-C_SpecializationInfo = __wow_merge_namespace(C_SpecializationInfo, {
-  GetInspectSelectedPvpTalent = function() return nil end,
-})
-
 if IsPlayerInWorld == nil then
   function IsPlayerInWorld()
     return true

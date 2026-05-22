@@ -101,6 +101,7 @@ fn register_glue_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_contribution_collector::register_c_contribution_collector(state)?;
     temporary_shims::c_cooldown_viewer::register_c_cooldown_viewer_shims(state)?;
     temporary_shims::c_date_and_time::register_c_date_and_time_shims(state)?;
+    temporary_shims::c_journal_defaults::register_c_journal_default_shims(state)?;
     temporary_shims::c_perks_program::register_c_perks_program(state)
 }
 
