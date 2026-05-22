@@ -254,11 +254,11 @@ pub(super) fn patch_auction_house_browse_results_event_from_env(env: &crate::lua
 }
 
 pub(super) fn patch_auction_house_search_context_aliases(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(AUCTION_HOUSE_SEARCH_CONTEXT_ALIASES_WORKAROUND_LUA);
+    temporary::auction_house_search_context_aliases::patch(env);
 }
 
 pub(super) fn patch_auction_house_search_context_aliases_from_env(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(AUCTION_HOUSE_SEARCH_CONTEXT_ALIASES_WORKAROUND_LUA);
+    temporary::auction_house_search_context_aliases::patch_env(env);
 }
 
 pub(super) fn patch_auth_challenge_frame_parent(env: &crate::lua_api::LoaderEnv<'_>) {

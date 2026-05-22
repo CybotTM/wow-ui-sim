@@ -170,23 +170,3 @@ pub(super) const AUCTION_HOUSE_BROWSE_RESULTS_EVENT_WORKAROUND_LUA: &str = r#"
 
     rawset(_G, "__wow_auction_house_browse_results_event_wrapped", true)
 "#;
-
-pub(super) const AUCTION_HOUSE_SEARCH_CONTEXT_ALIASES_WORKAROUND_LUA: &str = r#"
-    if rawget(_G, "__wow_auction_house_search_context_aliases_patched") then
-        return
-    end
-
-    if type(AuctionHouseSearchContext) ~= "table" then
-        return
-    end
-
-    if AuctionHouseSearchContext.Auctions == nil then
-        AuctionHouseSearchContext.Auctions = AuctionHouseSearchContext.AllAuctions
-    end
-
-    if AuctionHouseSearchContext.BrowseFavorites == nil then
-        AuctionHouseSearchContext.BrowseFavorites = AuctionHouseSearchContext.AllFavorites
-    end
-
-    rawset(_G, "__wow_auction_house_search_context_aliases_patched", true)
-"#;
