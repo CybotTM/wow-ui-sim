@@ -1,7 +1,6 @@
 //! Post-load workarounds that are still required on the live rilua path.
 
 mod character_lua;
-mod early_lua;
 mod map_canvas;
 mod map_lua;
 mod panel_lua;
@@ -13,7 +12,6 @@ mod temporary;
 pub(crate) use temporary::source_patches::patch_lua_source;
 
 use character_lua::*;
-use early_lua::*;
 use map_canvas::*;
 use map_lua::*;
 use panel_lua::*;
