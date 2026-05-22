@@ -379,7 +379,7 @@ fn load_addon_lua_file(
             .warnings
             .push(format!("{}: {}", file.display(), error)),
     }
-    apply_cpp_mixin_stubs(env);
+    crate::lua_api::workarounds::apply_cpp_mixin_stubs_after_lua_file(env);
 }
 
 fn load_addon_xml_file(
@@ -397,37 +397,6 @@ fn load_addon_xml_file(
             .warnings
             .push(format!("{}: {}", file.display(), error)),
     }
-}
-
-/// Patch Lua mixin tables with methods normally provided by the C++ engine.
-///
-/// WoW's C++ engine provides OnLoad for certain base control button mixins.
-/// The Lua side creates empty tables (e.g. `ModelSceneControlButtonMixin = {}`),
-/// and derived mixins call `BaseMixin.OnLoad(self)` expecting the C++ method.
-/// Runs after each .lua file so stubs are available before the next .xml file
-/// creates frames that depend on them.
-fn apply_cpp_mixin_stubs(env: &LoaderEnv<'_>) {
-    let _ = env.exec(
-        r#"
-        local ModelSceneControlButtonMixin = rawget(_G, "ModelSceneControlButtonMixin")
-        if ModelSceneControlButtonMixin and not ModelSceneControlButtonMixin.OnLoad then
-            ModelSceneControlButtonMixin.OnLoad = function() end
-        end
-        local PerksModelSceneControlButtonMixin = rawget(_G, "PerksModelSceneControlButtonMixin")
-        if PerksModelSceneControlButtonMixin and not PerksModelSceneControlButtonMixin.OnLoad then
-            PerksModelSceneControlButtonMixin.OnLoad = function() end
-        end
-        local PetActionBarMixin = rawget(_G, "PetActionBarMixin")
-        if PetActionBarMixin and PetActionBarMixin.Update and not PetActionBarMixin._update_guarded then
-            PetActionBarMixin._update_guarded = true
-            local origUpdate = PetActionBarMixin.Update
-            PetActionBarMixin.Update = function(self)
-                if not self.actionButtons or #self.actionButtons == 0 then return end
-                return origUpdate(self)
-            end
-        end
-        "#,
-    );
 }
 
 #[cfg(test)]

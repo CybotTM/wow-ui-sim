@@ -15,6 +15,7 @@ pub(crate) mod character_select_selected_name;
 pub(crate) mod chat_voice_button_surface;
 pub(crate) mod collections_journal_namespace;
 pub(crate) mod container_frame_token_tracker;
+pub(crate) mod cpp_mixin_stubs;
 pub(crate) mod damage_meter_scrollbox;
 pub(crate) mod details_saved_variables;
 pub(crate) mod environment_cleanup_restore;

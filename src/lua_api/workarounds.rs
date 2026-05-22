@@ -161,6 +161,10 @@ pub(crate) fn sanitize_imported_wtf_addon_saved_variables(
     temporary::details_saved_variables::sanitize_imported_wtf_addon(state, addon_name);
 }
 
+pub(crate) fn apply_cpp_mixin_stubs_after_lua_file(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = temporary::cpp_mixin_stubs::patch_after_lua_file(env);
+}
+
 fn patch_edit_mode_manager(env: &crate::lua_api::WowLuaEnv) {
     crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
 }
