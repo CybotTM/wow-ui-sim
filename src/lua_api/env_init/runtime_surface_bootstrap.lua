@@ -9824,14 +9824,6 @@ C_SuperTrack = __wow_merge_namespace(C_SuperTrack, {
   ClearSuperTrackedMapPin = __wow_noop,
   GetSuperTrackedMapPin = function() return end,
 })
-C_AutoComplete = __wow_merge_namespace(C_AutoComplete, {
-  GetAutoCompleteRealms = function() return {} end,
-})
-if GetAutoCompleteRealms == nil then
-  function GetAutoCompleteRealms()
-    return C_AutoComplete.GetAutoCompleteRealms()
-  end
-end
 C_TransmogOutfitInfo = C_TransmogOutfitInfo or __wow_namespace({
   __activeOutfitID = 0,
   __currentlyViewedOutfitID = 0,
