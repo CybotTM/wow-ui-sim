@@ -21,7 +21,7 @@ pub(super) fn patch_uiparent_onupdate_worklists(env: &crate::lua_api::WowLuaEnv)
 }
 
 pub(super) fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(VIGNETTE_PIN_TEMPLATE_WORKAROUND_LUA);
+    temporary::vignette_pin_template::patch(env);
 }
 
 pub(super) fn patch_character_select_selected_name(env: &crate::lua_api::WowLuaEnv) {
