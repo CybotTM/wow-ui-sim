@@ -88,6 +88,7 @@ fn register_glue_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_auth_challenge::register_c_auth_challenge_shims(state)?;
     temporary_shims::c_auto_complete::register_c_auto_complete_shims(state)?;
     temporary_shims::c_chat_info::register_c_chat_info_shims(state)?;
+    temporary_shims::c_color_pvp_defaults::register_color_and_pvp_default_shims(state)?;
     temporary_shims::c_lfg_info::register_c_lfg_info(state)?;
     temporary_shims::c_black_market::register_c_black_market(state)?;
     temporary_shims::c_calendar::register_c_calendar(state)?;

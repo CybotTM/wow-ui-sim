@@ -9,6 +9,7 @@ pub mod c_chat_info;
 pub mod c_class_trial;
 pub mod c_click_bindings;
 pub mod c_club_notifications;
+pub mod c_color_pvp_defaults;
 pub mod c_configuration_warnings;
 pub mod c_container_defaults;
 pub mod c_contribution_collector;

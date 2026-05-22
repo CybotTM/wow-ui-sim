@@ -10771,18 +10771,6 @@ C_QuestLog = __wow_merge_namespace(C_QuestLog, {
   GetQuestIDForQuestWatchIndex = function() return nil end,
 })
 
-C_ColorOverrides = __wow_merge_namespace(C_ColorOverrides, {
-  GetColorForQuality = function()
-    return CreateColor(1, 1, 1)
-  end,
-})
-
-C_PvP = __wow_merge_namespace(C_PvP, {
-  IsInBrawl = function() return false end,
-  IsSoloShuffle = function() return false end,
-  GetArenaCrowdControlInfo = function() return nil, 0, 0 end,
-})
-
 C_XMLUtil = C_XMLUtil or __wow_namespace({
   GetTemplateInfo = function()
     return nil
