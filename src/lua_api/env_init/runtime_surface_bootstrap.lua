@@ -3110,14 +3110,6 @@ if rawget(C_UnitAurasPrivate, "GetAuraDataByAuraInstanceIDPrivate") == nil then
   end
 end
 
-C_PetBattles = __wow_merge_namespace(C_PetBattles, {
-  GetAllEffectNames = function() return end,
-  GetAbilityState = function() return false, 0, 0 end,
-  GetActivePet = function() return 1 end,
-  IsTrapAvailable = function() return false, 0 end,
-  ShouldShowPetSelect = function() return false end,
-})
-
 C_Map = __wow_merge_namespace(C_Map, {})
 UiMapPoint = __wow_merge_namespace(UiMapPoint, {})
 C_MapExplorationInfo = __wow_merge_namespace(C_MapExplorationInfo, {})

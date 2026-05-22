@@ -221,6 +221,27 @@ fn is_player_npc_returns_false() {
     assert!(!is_npc);
 }
 
+#[test]
+fn static_fallbacks_return_safe_default_shapes() {
+    let env = env();
+    let (effect_count, trap_ready, trap_error, should_select): (i32, bool, i32, bool) = env
+        .eval(
+            r##"
+            local trapReady, trapError = C_PetBattles.IsTrapAvailable()
+            return
+                select("#", C_PetBattles.GetAllEffectNames()),
+                trapReady,
+                trapError,
+                C_PetBattles.ShouldShowPetSelect()
+            "##,
+        )
+        .unwrap();
+    assert_eq!(effect_count, 0);
+    assert!(!trap_ready);
+    assert_eq!(trap_error, 0);
+    assert!(!should_select);
+}
+
 // ── StartPVPMatchmaking ───────────────────────────────────────────────────────
 
 #[test]
