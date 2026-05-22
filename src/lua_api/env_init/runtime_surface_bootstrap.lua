@@ -4512,13 +4512,6 @@ C_CatalogShop = __wow_merge_namespace(C_CatalogShop, {
   ProductSelectedTelemetry = __wow_noop,
 })
 
-C_Calendar = __wow_merge_namespace(C_Calendar, {
-  GetNumPendingInvites = function() return 0 end,
-  GetClubCalendarEvents = function()
-    return {}
-  end,
-})
-
 C_WowTokenSecure = __wow_merge_namespace(C_WowTokenSecure, {
   CancelRedeem = __wow_noop,
   GetBalanceRedeemAmount = function() return 0 end,

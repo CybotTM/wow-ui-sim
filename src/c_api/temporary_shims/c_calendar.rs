@@ -34,6 +34,7 @@ pub fn register_c_calendar(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, t_ref, "GetNumGuildEvents", return_zero)?;
     table_set_rust_fn_static(state, t_ref, "GetNumInvites", return_zero)?;
     table_set_rust_fn_static(state, t_ref, "GetNumPendingInvites", return_zero)?;
+    table_set_rust_fn_static(state, t_ref, "GetClubCalendarEvents", empty_table_result)?;
     table_set_rust_fn_static(state, t_ref, "AreNamesReady", return_true)?;
     table_set_rust_fn_static(state, t_ref, "IsActionPending", return_false)?;
     table_set_rust_fn_static(state, t_ref, "CanAddEvent", return_false)?;
