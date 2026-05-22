@@ -4512,10 +4512,6 @@ C_CatalogShop = __wow_merge_namespace(C_CatalogShop, {
   ProductSelectedTelemetry = __wow_noop,
 })
 
-C_CraftingOrders = __wow_merge_namespace(C_CraftingOrders, {
-  GetPersonalOrdersInfo = function() return {} end,
-})
-
 C_Calendar = __wow_merge_namespace(C_Calendar, {
   GetNumPendingInvites = function() return 0 end,
   GetClubCalendarEvents = function()

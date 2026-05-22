@@ -176,6 +176,7 @@ const CRAFTING_ORDER_METHODS: &[NamespaceMethod] = &[
     ("GetCrafterOrders", stub_empty_table),
     ("GetCraftingOrderTime", stub_zero),
     ("GetOrderClaimInfo", c_crafting_orders_get_order_claim_info),
+    ("GetPersonalOrdersInfo", stub_empty_table),
     ("OpenCrafterCraftingOrders", stub_noop),
     ("OrderCanBeRecrafted", stub_false),
     ("ShouldShowCraftingOrderTab", stub_false),
