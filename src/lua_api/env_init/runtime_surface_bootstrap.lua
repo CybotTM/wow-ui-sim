@@ -9784,14 +9784,6 @@ C_HousingCatalog = __wow_merge_namespace(C_HousingCatalog, {
   end,
   GetProductAvailabilityTimeRemainingSecs = function() return 1 end,
 })
-C_RestrictedActions = __wow_merge_namespace(C_RestrictedActions, {
-  CheckAllowProtectedFunctions = function()
-    return true
-  end,
-  GetAddOnRestrictionState = function(_restrictionType)
-    return 0
-  end,
-})
 C_ScriptedAnimations = C_ScriptedAnimations or __wow_namespace()
 C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
