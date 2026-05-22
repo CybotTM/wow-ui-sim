@@ -3138,15 +3138,6 @@ C_VoiceChat = __wow_merge_namespace(C_VoiceChat, {
   IsTranscriptionAllowed = function() return false end,
 })
 
-C_TTSSettings = __wow_merge_namespace(C_TTSSettings, {
-  GetSpeechVolume = function() return 100 end,
-  SetSpeechVolume = __wow_noop,
-  GetSpeechRate = function() return 0 end,
-  SetSpeechRate = __wow_noop,
-  GetVoiceOptionID = function() return 0 end,
-  SetVoiceOptionID = __wow_noop,
-})
-
 C_ClubFinder = __wow_merge_namespace(C_ClubFinder, {
   GetClubRecruitmentSettings = function()
     return {

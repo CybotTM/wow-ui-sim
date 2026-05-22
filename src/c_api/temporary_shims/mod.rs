@@ -36,4 +36,5 @@ pub mod c_spell_static_fallbacks;
 pub mod c_spell_target;
 pub mod c_texture_file_data;
 pub mod c_transmog_outfit_slots;
+pub mod c_tts_settings;
 pub mod c_ui_widget_manager_power_bar;

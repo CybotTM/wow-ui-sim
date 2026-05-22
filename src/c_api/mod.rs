@@ -97,5 +97,6 @@ fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
     c_wow_token_public::register_c_wow_token_public(state)?;
     c_texture::register_c_texture(state)?;
     temporary_shims::c_texture_file_data::register_c_texture_file_data(state)?;
+    temporary_shims::c_tts_settings::register_c_tts_settings_shims(state)?;
     c_xml_util::register_c_xml_util(state)
 }
