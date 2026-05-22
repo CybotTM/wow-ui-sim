@@ -9,6 +9,7 @@ pub(crate) mod housing_dashboard_preload;
 pub(crate) mod item_socketing_tooltips;
 pub(crate) mod main_menu_microbutton_click;
 pub(crate) mod mount_journal_dynamic_flight_popup;
+pub(crate) mod objective_tracker_quest_header;
 pub(crate) mod paging_controls_page_text;
 pub(crate) mod settings_canvas_visibility;
 pub(crate) mod source_patches;
