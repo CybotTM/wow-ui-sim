@@ -10,6 +10,8 @@ mod post_event_lua;
 mod runtime_surfaces;
 mod temporary;
 
+pub(crate) use temporary::source_patches::patch_lua_source;
+
 use character_lua::*;
 use early_lua::*;
 use map_canvas::*;
