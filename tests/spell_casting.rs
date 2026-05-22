@@ -136,12 +136,20 @@ fn instant_spell_does_not_show_cast_bar() {
 
 /// Load all Blizzard addons and fire startup events.
 fn env_with_full_blizzard_ui() -> WowLuaEnv {
-    use std::path::PathBuf;
+    let ui = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
+    env_with_blizzard_ui_from(ui)
+}
 
+fn env_with_cached_blizzard_ui() -> WowLuaEnv {
+    let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available for cached full UI tests");
+    env_with_blizzard_ui_from(ui)
+}
+
+fn env_with_blizzard_ui_from(ui: std::path::PathBuf) -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("create env");
     env.set_screen_size(1024.0, 768.0);
 
-    let ui = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
     {
         let mut state = env.state().borrow_mut();
         state.addon_base_paths = vec![ui.clone()];
@@ -523,6 +531,50 @@ fn paladin_aura_spell_replaces_previous_paladin_aura() {
         assert!(!devotion_present, "new Paladin aura should replace the previous aura");
         assert_eq!(crusader_name.as_deref(), Some("Crusader Aura"));
         assert_eq!(helpful_count, 1);
+    }
+}
+
+#[test]
+fn paladin_aura_cast_refreshes_blizzard_buff_frame() {
+    test_timeout! {
+        let env = env_with_cached_blizzard_ui();
+        install_test_error_handler(&env);
+        env.exec(
+            r#"
+            A_Admin.ClearBuffs()
+            if BuffFrame then
+                BuffFrame:Update()
+            end
+            CastSpellByID(465)
+            "#,
+        )
+        .expect("cast Devotion Aura through Blizzard UI");
+
+        let (aura_present, buff_frame_count, first_button_shown): (bool, i32, bool) = env
+            .eval(
+                r#"
+                local aura = C_UnitAuras.GetPlayerAuraBySpellID(465)
+                local count = BuffFrame and BuffFrame.auraInfo and #BuffFrame.auraInfo or -1
+                local first = BuffFrame and BuffFrame.auraFrames and BuffFrame.auraFrames[1]
+                return aura ~= nil, count, first and first:IsShown() or false
+                "#,
+            )
+            .unwrap();
+        let errors = drain_test_errors(&env);
+
+        assert!(aura_present, "cast should add Devotion Aura to player auras");
+        assert!(
+            errors.is_empty(),
+            "no Lua errors expected while updating BuffFrame: {errors:?}"
+        );
+        assert!(
+            buff_frame_count > 0,
+            "BuffFrame should rebuild auraInfo after an aura cast"
+        );
+        assert!(
+            first_button_shown,
+            "BuffFrame should show an aura button after an aura cast"
+        );
     }
 }
 

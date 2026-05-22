@@ -30,11 +30,14 @@
 //! stub_nil entries that slipped through the stubs pass.
 
 use crate::lua_api::env::WowLuaAppData;
-use crate::lua_api::game_data::{self, CastingState, SpellCooldownState, SpellTargetType};
+use crate::lua_api::game_data::{
+    self, CastingState, SpellCooldownState, SpellEffectResult, SpellTargetType,
+};
 use crate::lua_api::globals::spell_api::spell_cast_time;
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id, table_get,
+    borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
+    extract_frame_id, table_get, table_set,
 };
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{FromStack, stack_val};
@@ -246,10 +249,24 @@ fn apply_spell_to_target(state: &mut LuaState, spell_id: u32) {
     let Some(app_data) = state.app_data::<WowLuaAppData>().cloned() else {
         return;
     };
-    if let Some(unit_id) = game_data::apply_spell_to_state(&app_data.sim_state, spell_id) {
-        let unit = create_string(state, &unit_id);
-        fire_named_event_state(state, "UNIT_HEALTH", &[unit]);
+    match game_data::apply_spell_to_state(&app_data.sim_state, spell_id) {
+        Some(SpellEffectResult::UnitHealthChanged(unit_id)) => {
+            let unit = create_string(state, &unit_id);
+            fire_named_event_state(state, "UNIT_HEALTH", &[unit]);
+        }
+        Some(SpellEffectResult::PlayerAurasChanged) => {
+            let unit = create_string(state, "player");
+            let update_info = aura_full_update_info(state);
+            fire_named_event_state(state, "UNIT_AURA", &[unit, update_info]);
+        }
+        None => {}
     }
+}
+
+fn aura_full_update_info(state: &mut LuaState) -> Val {
+    let info = create_table(state);
+    table_set(state, info, "isFullUpdate", Val::Bool(true));
+    info
 }
 
 fn read_action_slot(state: &mut LuaState, button: Val) -> Option<u32> {

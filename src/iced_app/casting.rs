@@ -39,8 +39,17 @@ pub(super) fn apply_spell_effect(
     env: &crate::lua_api::WowLuaEnv,
     spell_id: u32,
 ) {
-    if let Some(unit_id) = crate::lua_api::game_data::apply_spell_to_state(state, spell_id) {
-        let _ = env.fire_event_with_args("UNIT_HEALTH", &[env.lua_string(&unit_id)]);
+    match crate::lua_api::game_data::apply_spell_to_state(state, spell_id) {
+        Some(crate::lua_api::game_data::SpellEffectResult::UnitHealthChanged(unit_id)) => {
+            let _ = env.fire_event_with_args("UNIT_HEALTH", &[env.lua_string(&unit_id)]);
+        }
+        Some(crate::lua_api::game_data::SpellEffectResult::PlayerAurasChanged) => {
+            let unit = env.lua_string("player");
+            if let Ok(info) = env.eval::<rilua::Val>("return { isFullUpdate = true }") {
+                let _ = env.fire_event_with_args("UNIT_AURA", &[unit, info]);
+            }
+        }
+        None => {}
     }
 }
 

@@ -99,6 +99,11 @@ pub struct SpellCooldownState {
     pub duration: f64,
 }
 
+pub enum SpellEffectResult {
+    UnitHealthChanged(String),
+    PlayerAurasChanged,
+}
+
 /// Spell target type: determines which units a spell can be cast on.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SpellTargetType {
@@ -160,13 +165,13 @@ pub fn spell_effect_amount(spell_id: u32) -> i32 {
 }
 
 /// Apply spell effect to state: damage enemy or heal friendly/self.
-/// Returns the unit_id that was affected (for UNIT_HEALTH event).
+/// Returns the changed state kind so callers can fire the matching UI event.
 pub fn apply_spell_to_state(
     state: &std::rc::Rc<std::cell::RefCell<super::state::SimState>>,
     spell_id: u32,
-) -> Option<String> {
+) -> Option<SpellEffectResult> {
     if apply_player_aura_spell(state, spell_id) {
-        return Some("player".to_string());
+        return Some(SpellEffectResult::PlayerAurasChanged);
     }
 
     let amount = spell_effect_amount(spell_id);
@@ -174,8 +179,12 @@ pub fn apply_spell_to_state(
         return None;
     }
     match spell_target_type(spell_id) {
-        SpellTargetType::Harmful => apply_damage_to_target(state, amount),
-        SpellTargetType::Helpful => apply_heal_to_target(state, amount),
+        SpellTargetType::Harmful => {
+            apply_damage_to_target(state, amount).map(SpellEffectResult::UnitHealthChanged)
+        }
+        SpellTargetType::Helpful => {
+            apply_heal_to_target(state, amount).map(SpellEffectResult::UnitHealthChanged)
+        }
         SpellTargetType::SelfOnly => None,
     }
 }
