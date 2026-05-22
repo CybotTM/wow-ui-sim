@@ -17,7 +17,7 @@ pub(super) fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_
 }
 
 pub(super) fn patch_uiparent_onupdate_worklists(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(UIPARENT_ONUPDATE_WORKLISTS_WORKAROUND_LUA);
+    temporary::uiparent_onupdate_worklists::patch(env);
 }
 
 pub(super) fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {
