@@ -8,3 +8,7 @@ mod achievement_display;
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     achievement_display::apply_bootstrap(lua)
 }
+
+pub(crate) fn reapply_achievement_display_after_blizzard_load(env: &crate::lua_api::WowLuaEnv) {
+    achievement_display::reapply_after_blizzard_load(env);
+}
