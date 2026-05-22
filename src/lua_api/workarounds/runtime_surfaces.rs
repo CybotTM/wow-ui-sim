@@ -203,3 +203,9 @@ pub(crate) fn patch_glueparent_uiparent_attributes(
 ) -> Result<(), crate::Error> {
     temporary::glueparent_uiparent_attributes::patch(env)
 }
+
+pub(crate) fn patch_uiparent_managed_frame_mixin(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) -> Result<(), crate::Error> {
+    temporary::uiparent_managed_frame_mixin::patch(env)
+}

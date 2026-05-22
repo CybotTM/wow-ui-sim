@@ -178,7 +178,7 @@ fn patch_map_canvas_scroll_container(env: &LoaderEnv<'_>, result: &mut LoadResul
 }
 
 fn patch_uiparent_managed_frame_mixin(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = env.patch_managed_frame_mixin() {
+    if let Err(e) = crate::lua_api::workarounds::patch_uiparent_managed_frame_mixin(env) {
         push_patch_warning(
             result,
             "Blizzard_UIParent",
