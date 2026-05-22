@@ -2454,11 +2454,6 @@ C_AuthChallenge = __wow_merge_namespace(C_AuthChallenge, {
   DidChallengeSucceed = function() return false end,
 })
 
-C_ClassTrial = __wow_merge_namespace(C_ClassTrial, {
-  IsClassTrialCharacter = function() return false end,
-  GetClassTrialLogoutTimeSeconds = function() return 0 end,
-})
-
 C_CharacterServices = __wow_merge_namespace(C_CharacterServices, {
   HasRequiredBoostForClassTrial = function() return false end,
   GetCharacterServiceDisplayInfo = function() return {} end,
