@@ -10642,18 +10642,6 @@ C_TradeSkillUI = __wow_merge_namespace(C_TradeSkillUI, {
   -- by `register_profession_surface` before runtime-surface bootstrap runs.
 })
 
-C_QuestLog = __wow_merge_namespace(C_QuestLog, {
-  ReadyForTurnIn = function()
-    return false
-  end,
-  -- World-quest watch list: empty (no watched quests).
-  GetNumWorldQuestWatches = function() return 0 end,
-  GetQuestIDForWorldQuestWatchIndex = function() return nil end,
-  -- Objective-tracker iteration for active quests: empty.
-  GetNumQuestWatches = function() return 0 end,
-  GetQuestIDForQuestWatchIndex = function() return nil end,
-})
-
 C_XMLUtil = C_XMLUtil or __wow_namespace({
   GetTemplateInfo = function()
     return nil
