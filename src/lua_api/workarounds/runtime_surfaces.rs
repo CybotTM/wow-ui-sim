@@ -1,10 +1,7 @@
 use super::*;
 
 pub(super) fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(GETGLOBAL_HELPER_LUA);
-    let _ = env.exec(TOGGLE_ACHIEVEMENT_FRAME_LUA);
-    let _ = env.exec(TOGGLE_ENCOUNTER_JOURNAL_LUA);
-    let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
+    temporary::ui_parent_panel_toggles::patch(env);
     temporary::main_menu_microbutton_click::patch(env);
 }
 
@@ -115,14 +112,14 @@ pub(super) fn patch_map_exploration_pin_mixin_for_runtime_addon_load(
 pub(super) fn patch_toggle_collections_journal_for_runtime_addon_load(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) {
-    let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
+    temporary::ui_parent_panel_toggles::patch_collections_journal_loader(env);
     temporary::mount_journal_dynamic_flight_popup::patch(env);
 }
 
 pub(super) fn patch_toggle_encounter_journal_for_runtime_addon_load(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) {
-    let _ = env.exec(TOGGLE_ENCOUNTER_JOURNAL_LUA);
+    temporary::ui_parent_panel_toggles::patch_encounter_journal_loader(env);
 }
 
 pub(super) fn patch_map_canvas_data_provider_attachment_for_runtime_addon_load(

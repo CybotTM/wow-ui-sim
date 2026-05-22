@@ -1,6 +1,5 @@
 //! Post-load workarounds that are still required on the live rilua path.
 
-mod character_lua;
 mod panel_lua;
 mod permanent;
 mod post_event_lua;
@@ -9,7 +8,6 @@ mod temporary;
 
 pub(crate) use temporary::source_patches::patch_lua_source;
 
-use character_lua::*;
 use panel_lua::*;
 use post_event_lua::*;
 pub(crate) use runtime_surfaces::patch_account_store_set_storefront;
