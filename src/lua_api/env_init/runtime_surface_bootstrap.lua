@@ -2461,10 +2461,6 @@ C_CharacterServices = __wow_merge_namespace(C_CharacterServices, {
   end,
 })
 
-C_SharedCharacterServices = __wow_merge_namespace(C_SharedCharacterServices, {
-  GetUpgradeDistributions = function() return {} end,
-})
-
 C_SocialQueue = __wow_merge_namespace(C_SocialQueue, {
   GetAllGroups = function() return {} end,
   GetConfig = function() return {} end,

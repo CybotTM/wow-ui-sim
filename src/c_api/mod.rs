@@ -88,6 +88,9 @@ fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_contribution_collector::register_c_contribution_collector(state)?;
     temporary_shims::c_perks_program::register_c_perks_program(state)?;
     temporary_shims::c_ping::register_c_ping_shims(state)?;
+    temporary_shims::c_shared_character_services::register_c_shared_character_services_shims(
+        state,
+    )?;
     temporary_shims::c_transmog_outfit_slots::register_c_transmog_outfit_slot_shims(state)?;
     c_wowtoken_secure::register_c_wowtoken_secure(state)?;
     c_wow_token_public::register_c_wow_token_public(state)?;
