@@ -10036,51 +10036,6 @@ end
 if rawget(C_ProfSpecs, "ShouldShowSpecTab") == nil then
   function C_ProfSpecs.ShouldShowSpecTab() return true end
 end
-local __wow_reincarnation_state = {
-  active = false,
-  character = nil,
-}
-C_Reincarnation = __wow_merge_namespace(C_Reincarnation, {
-  _state = __wow_reincarnation_state,
-})
-if rawget(C_Reincarnation, "IsReincarnating") == nil then
-  function C_Reincarnation.IsReincarnating()
-    return C_Reincarnation._state.active == true
-  end
-end
-if rawget(C_Reincarnation, "GetReincarnatingCharacter") == nil then
-  function C_Reincarnation.GetReincarnatingCharacter()
-    return C_Reincarnation._state.character
-  end
-end
-if rawget(C_Reincarnation, "StartReincarnation") == nil then
-  function C_Reincarnation.StartReincarnation(character)
-    if C_Reincarnation._state.active then
-      return false
-    end
-    if character ~= nil and type(character) ~= "table" then
-      return false
-    end
-    local guid = character and tostring(character.guid or "") or "reincarnation-guid"
-    local name = character and tostring(character.name or "") or "Reincarnating Character"
-    C_Reincarnation._state.active = true
-    C_Reincarnation._state.character = {
-      guid = guid,
-      name = name,
-    }
-    return true
-  end
-end
-if rawget(C_Reincarnation, "StopReincarnation") == nil then
-  function C_Reincarnation.StopReincarnation()
-    if not C_Reincarnation._state.active then
-      return false
-    end
-    C_Reincarnation._state.active = false
-    C_Reincarnation._state.character = nil
-    return true
-  end
-end
 if rawget(C_ProfSpecs, "GetDefaultSpecSkillLine") == nil then
   function C_ProfSpecs.GetDefaultSpecSkillLine() return 164 end
 end
