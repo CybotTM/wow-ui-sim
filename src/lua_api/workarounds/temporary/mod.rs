@@ -32,5 +32,6 @@ pub(crate) mod settings_canvas_visibility;
 pub(crate) mod source_patches;
 pub(crate) mod startup_windows;
 pub(crate) mod talent_edge_frame_level_sync;
+pub(crate) mod tooltip_nineslice_surface;
 pub(crate) mod uiparent_onupdate_worklists;
 pub(crate) mod vignette_pin_template;

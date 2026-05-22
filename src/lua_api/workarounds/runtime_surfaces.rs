@@ -63,38 +63,7 @@ pub(super) fn patch_lfg_lock_list(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub(super) fn patch_tooltip_nineslice_surface(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local function ensure_tooltip_nineslice(tooltip)
-            if type(tooltip) ~= "table" or tooltip.NineSlice ~= nil then
-                return
-            end
-
-            if type(CreateFrame) ~= "function" or type(NineSliceUtil) ~= "table" then
-                return
-            end
-
-            local nineSlice = CreateFrame("Frame", nil, tooltip, "NineSlicePanelTemplate")
-            if nineSlice == nil then
-                return
-            end
-
-            tooltip.NineSlice = nineSlice
-            if type(nineSlice.SetParentKey) == "function" then
-                pcall(nineSlice.SetParentKey, nineSlice, "NineSlice", true)
-            end
-            if type(NineSliceUtil.DisableSharpening) == "function" then
-                NineSliceUtil.DisableSharpening(nineSlice)
-            end
-            if type(SharedTooltip_SetBackdropStyle) == "function" then
-                pcall(SharedTooltip_SetBackdropStyle, tooltip, nil, false)
-            end
-        end
-
-        ensure_tooltip_nineslice(GameTooltip)
-        ensure_tooltip_nineslice(GlueTooltip)
-        "#,
-    );
+    temporary::tooltip_nineslice_surface::patch(env);
 }
 
 pub(super) fn patch_container_frame_token_tracker(env: &crate::lua_api::WowLuaEnv) {
