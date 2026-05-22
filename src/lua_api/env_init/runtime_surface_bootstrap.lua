@@ -3720,64 +3720,6 @@ C_Navigation = __wow_merge_namespace(C_Navigation, {
   GetFrame = function() return nil end,
 })
 
-C_DateAndTime = __wow_merge_namespace(C_DateAndTime, {
-  GetCurrentCalendarTime = function()
-    return __wow_make_calendar_time(0, 0)
-  end,
-  GetServerTimeLocal = function()
-    return 0
-  end,
-  AdjustTimeByDays = function(calendarTime, deltaDays)
-    local time = __wow_copy_table(calendarTime)
-    time.monthDay = (time.monthDay or 14) + (tonumber(deltaDays) or 0)
-    return time
-  end,
-  AdjustTimeByMinutes = function(calendarTime, deltaMinutes)
-    local base = __wow_copy_table(calendarTime)
-    local totalMinutes = ((base.hour or 12) * 60) + (base.minute or 0) + (tonumber(deltaMinutes) or 0)
-    local hour = math.floor(totalMinutes / 60)
-    local minute = totalMinutes % 60
-    while minute < 0 do
-      minute = minute + 60
-      hour = hour - 1
-    end
-    while minute >= 60 do
-      minute = minute - 60
-      hour = hour + 1
-    end
-    while hour < 0 do
-      hour = hour + 24
-      base.monthDay = (base.monthDay or 14) - 1
-    end
-    while hour >= 24 do
-      hour = hour - 24
-      base.monthDay = (base.monthDay or 14) + 1
-    end
-    base.hour = hour
-    base.minute = minute
-    return base
-  end,
-  GetCalendarTimeFromEpoch = function(epoch)
-    local seconds = tonumber(epoch) or 0
-    if seconds > 1000000000000 then
-      seconds = seconds / 1000000
-    end
-    local totalMinutes = math.floor(seconds / 60)
-    local dayOffset = math.floor(totalMinutes / 1440) % 30
-    local minuteOffset = totalMinutes % 1440
-    return __wow_make_calendar_time(dayOffset, minuteOffset)
-  end,
-  GetWeeklyResetStartTime = function()
-    return 0
-  end,
-  GetSecondsUntilDailyReset = function()
-    return 86400
-  end,
-  GetSecondsUntilWeeklyReset = function()
-    return 604800
-  end,
-})
-
 C_TaxiMap = __wow_merge_namespace(C_TaxiMap, {
   GetAllTaxiNodes = function()
     return {}

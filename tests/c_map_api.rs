@@ -324,6 +324,36 @@ fn test_get_calendar_time_from_microsecond_epoch_is_bounded() {
 }
 
 #[test]
+fn test_adjust_time_by_minutes_crosses_day_boundaries() {
+    let env = env();
+    let (previous_day, previous_hour, previous_minute, next_day, next_hour, next_minute): (
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+            local base = C_DateAndTime.GetCurrentCalendarTime()
+            local previous = C_DateAndTime.AdjustTimeByMinutes(base, -13 * 60)
+            local next = C_DateAndTime.AdjustTimeByMinutes(base, 13 * 60)
+            return previous.monthDay, previous.hour, previous.minute,
+                next.monthDay, next.hour, next.minute
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(previous_day, 13);
+    assert_eq!(previous_hour, 23);
+    assert_eq!(previous_minute, 0);
+    assert_eq!(next_day, 15);
+    assert_eq!(next_hour, 1);
+    assert_eq!(next_minute, 0);
+}
+
+#[test]
 fn test_get_club_calendar_events_defaults_empty() {
     let env = env();
     let count: i32 = env
