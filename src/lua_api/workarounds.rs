@@ -202,7 +202,7 @@ fn apply_post_event_bootstrap(env: &crate::lua_api::WowLuaEnv) {
 }
 
 fn patch_post_event_frame_layout(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(POST_EVENT_FRAME_LAYOUT_WORKAROUND_LUA);
+    temporary::post_event_frame_layout::patch(env);
 }
 
 fn refresh_post_event_surfaces(env: &crate::lua_api::WowLuaEnv) {
