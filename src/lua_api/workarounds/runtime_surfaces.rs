@@ -9,7 +9,7 @@ pub(super) fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub(super) fn patch_damage_meter_initial_scrollbox_extent(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(DAMAGE_METER_INITIAL_SCROLLBOX_EXTENT_LUA);
+    temporary::damage_meter_scrollbox::patch(env);
 }
 
 pub(super) fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_>) {
