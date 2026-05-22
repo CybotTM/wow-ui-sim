@@ -7,7 +7,6 @@ mod anima_diversion;
 mod area_poi;
 mod auction_house;
 mod battle_net;
-mod c_map;
 mod character_select;
 mod character_services;
 mod chat_bubbles;
@@ -52,20 +51,7 @@ mod voice_chat;
 mod warband_scene;
 mod zone_ability;
 
-use crate::c_api::permanent_shims::c_nameplate;
-use crate::c_api::temporary_shims::{
-    c_addons_beta_policy, c_behavioral_messaging, c_character_services, c_click_bindings,
-    c_configuration_warnings, c_gossip_info, c_major_faction_display, c_map_groups, c_mythic_plus,
-    c_paper_doll_stagger, c_party_info_instance_abandon, c_party_info_static_fallbacks,
-    c_pet_battles_static_fallbacks, c_spell_classification, c_spell_counts, c_spell_priority_aura,
-    c_spell_static_fallbacks, c_spell_target, c_ui_widget_manager_power_bar,
-};
-use crate::c_api::{
-    c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
-    c_artifact_ui, c_azerite_empowered_item, c_azerite_essence, c_azerite_item, c_barber_shop,
-    c_cursor, c_fog_of_war, c_major_factions, c_map_exploration_info, c_paper_doll_info,
-    c_player_interaction_manager, c_spell, c_spell_diminish, c_widget,
-};
+use crate::c_api;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
 };
@@ -103,7 +89,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_legacy_global_shims(lua)?;
     let state = lua.state_mut();
     seed_placeholder_global_tables(state);
-    c_addons_beta_policy::register_c_addons_beta_policy(state)?;
+    c_api::register_addon_policy_tables(state)?;
     register_item_trait_surfaces(state)?;
     register_world_namespace_surfaces(state)?;
     register_social_namespace_surfaces(state)?;
@@ -239,44 +225,19 @@ fn register_artifact_surfaces(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_spell_and_widget_surfaces(state: &mut LuaState) -> LuaResult<()> {
-    c_spell::register_c_spell_surface(state)?;
-    c_spell_classification::register_c_spell_classification_shims(state)?;
-    c_spell_counts::register_c_spell_count_shims(state)?;
-    c_spell_priority_aura::register_c_spell_priority_aura(state)?;
-    c_spell_static_fallbacks::register_c_spell_static_fallbacks(state)?;
-    c_spell_target::register_c_spell_target_shims(state)?;
-    c_spell_diminish::register_c_spell_diminish_surface(state)?;
-    c_widget::register_c_widget_surface(state)?;
-    Ok(())
+    c_api::register_spell_and_widget_tables(state)
 }
 
 fn register_item_power_surfaces(state: &mut LuaState) -> LuaResult<()> {
-    c_paper_doll_info::register_c_paper_doll_info_surface(state)?;
-    c_paper_doll_stagger::register_c_paper_doll_stagger_shim(state)?;
-    c_artifact_ui::register_c_artifact_ui_surface(state)?;
-    c_artifact_relic_forge_ui::register_c_artifact_relic_forge_ui_surface(state)?;
-    c_azerite_item::register_c_azerite_item_surface(state)?;
-    c_azerite_essence::register_c_azerite_essence_surface(state)?;
-    c_azerite_empowered_item::register_c_azerite_empowered_item_surface(state)?;
-    Ok(())
+    c_api::register_item_power_tables(state)
 }
 
 fn register_character_progression_surfaces(state: &mut LuaState) -> LuaResult<()> {
-    c_barber_shop::register_c_barber_shop_surface(state)?;
-    c_cursor::register_c_cursor_surface(state)?;
-    c_major_factions::register_c_major_factions_surface(state)?;
-    c_major_faction_display::register_c_major_faction_display_shims(state)?;
-    c_allied_races::register_c_allied_races_surface(state)?;
-    Ok(())
+    c_api::register_character_progression_tables(state)
 }
 
 fn register_interaction_surfaces(state: &mut LuaState) -> LuaResult<()> {
-    c_ardenweald_gardening::register_c_ardenweald_gardening_surface(state)?;
-    c_arrow_callout_manager::register_c_arrow_callout_manager_surface(state)?;
-    c_behavioral_messaging::register_c_behavioral_messaging(state)?;
-    c_click_bindings::register_c_click_bindings_fallback(state)?;
-    c_player_interaction_manager::register_c_player_interaction_manager_surface(state)?;
-    Ok(())
+    c_api::register_interaction_tables(state)
 }
 
 fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
@@ -285,8 +246,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_map_and_encounter_surfaces(state: &mut LuaState) -> LuaResult<()> {
-    c_map::register_c_map_surface(state)?;
-    c_map_groups::register_c_map_group_shims(state)?;
+    c_api::register_map_prefix_tables(state)?;
     achievement_info::register_achievement_info_surface(state)?;
     area_poi::register_area_poi_surface(state)?;
     auction_house::register_auction_house_surface(state)?;
@@ -295,21 +255,20 @@ fn register_map_and_encounter_surfaces(state: &mut LuaState) -> LuaResult<()> {
     creature_info::register_creature_info_surface(state)?;
     delves_ui::register_delves_ui_surface(state)?;
     encounter_journal::register_encounter_journal_surface(state)?;
-    c_fog_of_war::register_fog_of_war_surface(state)?;
-    c_map_exploration_info::register_c_map_exploration_info_surface(state)?;
+    c_api::register_map_environment_tables(state)?;
     gossip_info::register_gossip_info_surface(state)?;
-    c_gossip_info::register_c_gossip_info_shims(state)?;
+    c_api::register_gossip_info_tables(state)?;
     Ok(())
 }
 
 fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     mythic_plus::register_mythic_plus_surface(state)?;
-    c_mythic_plus::register_c_mythic_plus_shims(state)?;
+    c_api::register_world_activity_tables(state)?;
     scenario_info::register_scenario_info_surface(state)?;
     warband_scene::register_warband_scene_surface(state)?;
-    c_nameplate::register_c_nameplate(state)?;
+    c_api::register_nameplate_tables(state)?;
     ui_widget_manager::register_ui_widget_manager_surface(state)?;
-    c_ui_widget_manager_power_bar::register_c_ui_widget_manager_power_bar(state)?;
+    c_api::register_ui_widget_power_bar_tables(state)?;
     anima_diversion::register_anima_diversion_surface(state)?;
     garrison::register_garrison_talent_surface(state)?;
     Ok(())
@@ -317,9 +276,9 @@ fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     battle_net::register_battle_net_surface(state)?;
-    c_configuration_warnings::register_c_configuration_warnings(state)?;
+    c_api::register_configuration_warning_tables(state)?;
     character_services::register_character_services_surface(state)?;
-    c_character_services::register_c_character_services_shims(state)?;
+    c_api::register_character_services_tables(state)?;
     chat_bubbles::register_chat_bubbles_surface(state)?;
     club_finder::register_club_finder_surface(state)?;
     club_info::register_club_info_surface(state)?;
@@ -335,12 +294,11 @@ fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
 fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     death_recap::register_death_recap_surface(state)?;
     party_info::register_party_info_surface(state)?;
-    c_party_info_instance_abandon::register_c_party_info_instance_abandon(state)?;
-    c_party_info_static_fallbacks::register_c_party_info_static_fallbacks(state)?;
+    c_api::register_party_info_fallback_tables(state)?;
     player_info::register_player_info_surface(state)?;
     lfg_info::register_lfg_info_surface(state)?;
     pet_battles::register_pet_battles_surface(state)?;
-    c_pet_battles_static_fallbacks::register_c_pet_battles_static_fallbacks(state)?;
+    c_api::register_pet_battle_fallback_tables(state)?;
     account_services::register_account_services_surface(state)?;
     account_store::register_account_store_surface(state)?;
     report_system::register_report_system_surface(state)?;
