@@ -12,6 +12,7 @@ fn toybox_and_heirloom_filter_defaults_are_registered() {
             r#"
             if C_ToyBoxInfo.IsUsingDefaultFilters() ~= true then return "toybox" end
             if C_HeirloomInfo.IsUsingDefaultFilters() ~= true then return "heirloom" end
+            if C_TransmogCollection.IsUsingDefaultFilters() ~= true then return "transmog" end
             return "ok"
             "#,
         )

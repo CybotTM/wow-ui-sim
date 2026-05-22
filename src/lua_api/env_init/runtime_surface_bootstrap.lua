@@ -10648,10 +10648,6 @@ C_XMLUtil = C_XMLUtil or __wow_namespace({
   end,
 })
 
-C_TransmogCollection = __wow_merge_namespace(C_TransmogCollection, {
-  IsUsingDefaultFilters = function() return true end,
-})
-
 local function __wow_make_transmog_location(slotName, slotID, transmogType, modification)
   local location = {
     slotName = tostring(slotName or ""),
