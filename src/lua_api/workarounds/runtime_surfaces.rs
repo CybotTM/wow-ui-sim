@@ -129,13 +129,13 @@ pub(super) fn patch_map_canvas_data_provider_attachment_for_runtime_addon_load(
 }
 
 pub(super) fn ensure_adventure_map_frame_surface(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(ADVENTURE_MAP_FRAME_SURFACE_LUA);
+    temporary::adventure_map_frame_surface::patch(env);
 }
 
 pub(super) fn ensure_adventure_map_frame_surface_for_runtime_addon_load(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) {
-    let _ = env.exec(ADVENTURE_MAP_FRAME_SURFACE_LUA);
+    temporary::adventure_map_frame_surface::patch_loader(env);
 }
 
 pub(super) fn patch_item_quality_color_data_methods(env: &crate::lua_api::LoaderEnv<'_>) {

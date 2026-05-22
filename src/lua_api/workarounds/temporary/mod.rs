@@ -2,6 +2,7 @@
 
 pub(crate) mod account_store_set_storefront;
 pub(crate) mod action_bar_button_event_fanout;
+pub(crate) mod adventure_map_frame_surface;
 pub(crate) mod artifact_ui_show_panel_guard;
 pub(crate) mod auction_house_browse_results_event;
 pub(crate) mod auction_house_categories_refresh_count;

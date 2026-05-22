@@ -1,4 +1,12 @@
-pub(super) const ADVENTURE_MAP_FRAME_SURFACE_LUA: &str = r#"
+//! Temporary AdventureMap frame-surface bootstrap repair.
+//!
+//! The AdventureMap panel is lazy-loaded by Blizzard UI, but simulator startup
+//! and runtime addon loads can reach map-canvas paths before the frame surface,
+//! border frame, inset pool, and providers are fully wired.
+
+use crate::lua_api::{LoaderEnv, WowLuaEnv};
+
+const ADVENTURE_MAP_FRAME_SURFACE_LUA: &str = r#"
 local function __wow_seed_adventure_map_canvas_state(frame)
     frame.dataProviders = frame.dataProviders or {}
     frame.dataProviderEventsCount = frame.dataProviderEventsCount or {}
@@ -149,3 +157,92 @@ if type(AdventureMapFrame) == "table" then
     __wow_seed_adventure_map_inset_pool(AdventureMapFrame)
 end
 "#;
+
+pub(crate) fn patch(env: &WowLuaEnv) {
+    let _ = env.exec(ADVENTURE_MAP_FRAME_SURFACE_LUA);
+}
+
+pub(crate) fn patch_loader(env: &LoaderEnv<'_>) {
+    let _ = env.exec(ADVENTURE_MAP_FRAME_SURFACE_LUA);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn creates_missing_adventure_map_frame_surface() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            MapCanvasMixin = {}
+            AdventureMapMixin = {}
+            AdventureMap_QuestChoiceDataProviderMixin = { name = "choice" }
+            AdventureMap_QuestOfferDataProviderMixin = { name = "offer" }
+            QuestSessionDataProviderMixin = { name = "session" }
+            "#,
+        )
+        .expect("adventure-map fixture should install");
+
+        patch(&env);
+
+        let (
+            has_frame,
+            has_scroll_container,
+            has_scroll_child,
+            has_border_frame,
+            has_underlay,
+            has_pin_definitions,
+        ): (bool, bool, bool, bool, bool, bool) = env
+            .eval(
+                r#"
+                return type(AdventureMapFrame) == "table",
+                    type(AdventureMapFrame.ScrollContainer) == "table",
+                    type(AdventureMapFrame.ScrollContainer.Child) == "table",
+                    type(AdventureMapFrame.BorderFrame) == "table",
+                    type(AdventureMapFrame.BorderFrame.Underlay) == "table",
+                    type(AdventureMapFrame.pinFrameLevelsManager.definitions) == "table"
+                "#,
+            )
+            .expect("created adventure-map surface should be readable");
+
+        assert!(has_frame);
+        assert!(has_scroll_container);
+        assert!(has_scroll_child);
+        assert!(has_border_frame);
+        assert!(has_underlay);
+        assert!(has_pin_definitions);
+    }
+
+    #[test]
+    fn preserves_existing_adventure_map_border_frame() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            existingBorderFrame = {
+                SetPortraitToAsset = function() end,
+                Underlay = {},
+            }
+            AdventureMapFrame = {
+                BorderFrame = existingBorderFrame,
+                pinFrameLevelsManager = { definitions = { existing = true } },
+            }
+            "#,
+        )
+        .expect("existing adventure-map fixture should install");
+
+        patch(&env);
+
+        let (same_border, kept_definitions): (bool, bool) = env
+            .eval(
+                r#"
+                return AdventureMapFrame.BorderFrame == existingBorderFrame,
+                    AdventureMapFrame.pinFrameLevelsManager.definitions.existing == true
+                "#,
+            )
+            .expect("preserved adventure-map surface should be readable");
+
+        assert!(same_border);
+        assert!(kept_definitions);
+    }
+}
