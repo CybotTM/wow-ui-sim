@@ -31,7 +31,7 @@ const ERROR_HANDLER_KEY: &str = "__error_handler";
 const PROTECTED_LUA_PCALL_WRAPPER_FACTORY_KEY: &str = "__protected_lua_pcall_wrapper_factory";
 const LUA_MULTRET: i32 = -1;
 const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
-const SCRIPT_HANDLER_TABLE_HASH_SLOTS: usize = 8;
+const SCRIPT_HANDLER_TABLE_HASH_SLOTS: usize = 16;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ScriptBinding {
