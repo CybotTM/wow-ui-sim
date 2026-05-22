@@ -177,7 +177,7 @@ pub(super) fn patch_map_exploration_pin_mixin(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub(super) fn patch_map_canvas_data_provider_attachment(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(MAP_CANVAS_DATA_PROVIDER_WORKAROUND_LUA);
+    temporary::map_canvas_data_provider_pin::patch(env);
 }
 
 pub(super) fn patch_character_create_defaults(env: &crate::lua_api::WowLuaEnv) {
@@ -220,7 +220,7 @@ pub(super) fn patch_toggle_encounter_journal_for_runtime_addon_load(
 pub(super) fn patch_map_canvas_data_provider_attachment_for_runtime_addon_load(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) {
-    let _ = env.exec(MAP_CANVAS_DATA_PROVIDER_WORKAROUND_LUA);
+    temporary::map_canvas_data_provider_pin::patch_for_runtime_addon_load(env);
 }
 
 pub(super) fn ensure_adventure_map_frame_surface(env: &crate::lua_api::WowLuaEnv) {
