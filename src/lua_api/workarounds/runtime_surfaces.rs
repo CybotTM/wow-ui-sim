@@ -238,7 +238,7 @@ pub(super) fn patch_item_quality_color_data_methods(env: &crate::lua_api::Loader
 }
 
 pub(super) fn patch_artifact_ui_show_panel_guard(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(ARTIFACT_UI_SHOW_PANEL_GUARD_WORKAROUND_LUA);
+    temporary::artifact_ui_show_panel_guard::patch(env);
 }
 
 pub(super) fn patch_auction_house_categories_refresh_count(env: &crate::lua_api::LoaderEnv<'_>) {

@@ -1,6 +1,7 @@
 //! Temporary Lua workarounds with explicit retirement paths.
 
 pub(crate) mod action_bar_button_event_fanout;
+pub(crate) mod artifact_ui_show_panel_guard;
 pub(crate) mod auction_house_categories_refresh_count;
 pub(crate) mod auction_house_search_context_aliases;
 pub(crate) mod auth_challenge_frame_parent;
