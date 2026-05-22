@@ -533,8 +533,8 @@ fn cached_table_path_from_parts(
 }
 
 fn format_lua_number_for_path(value: f64) -> String {
-    if value.fract() == 0.0 {
-        return format!("{value:.0}");
+    if value.fract() == 0.0 && value >= i64::MIN as f64 && value <= i64::MAX as f64 {
+        return (value as i64).to_string();
     }
     value.to_string()
 }
@@ -683,5 +683,12 @@ mod tests {
         let longest_path = cache.iter().map(|(path, _)| path.len()).max().unwrap_or(0);
         assert!(longest_path <= MAX_CACHED_TABLE_PATH_BYTES);
         assert!(cache.get("TEST_SV").is_some());
+    }
+
+    #[test]
+    fn formats_integer_table_paths_without_float_formatting() {
+        assert_eq!(format_lua_number_for_path(42.0), "42");
+        assert_eq!(format_lua_number_for_path(-7.0), "-7");
+        assert_eq!(format_lua_number_for_path(3.5), "3.5");
     }
 }
