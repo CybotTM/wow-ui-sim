@@ -17,40 +17,6 @@ use std::rc::Rc;
 
 use super::state::SimState;
 
-const QUEST_LOG_MIXIN_PATCH_LUA: &str = r#"
-local function SafeGetCurrentMapID(self)
-    local parent = self:GetParent()
-    if parent and parent:IsShown() then
-        return parent:GetMapID()
-    end
-    return C_Map.GetBestMapForUnit("player")
-end
--- Patch the mixin for future frames
-if QuestLogMixin ~= nil then
-    QuestLogMixin.GetCurrentMapID = SafeGetCurrentMapID
-end
--- Patch the existing QuestMapFrame instance directly
-if QuestMapFrame then
-    QuestMapFrame.GetCurrentMapID = SafeGetCurrentMapID
-end
-
-if type(QuestMapFrame_UpdateAll) == "function" and not rawget(_G, "__wow_quest_map_update_all_patched") then
-    local originalUpdateAll = QuestMapFrame_UpdateAll
-    QuestMapFrame_UpdateAll = function(numPOIs)
-        local parent = QuestMapFrame and QuestMapFrame:GetParent() or nil
-        if parent == nil then
-            QuestMapFrame.UpdatePOIs(QuestMapFrame)
-            if not numPOIs then
-                QuestMapUpdateAllQuests()
-            end
-            return
-        end
-        return originalUpdateAll(numPOIs)
-    end
-    rawset(_G, "__wow_quest_map_update_all_patched", true)
-end
-"#;
-
 pub struct LoaderEnv<'a> {
     lua: Rc<std::cell::RefCell<rilua::Lua>>,
     state: Rc<std::cell::RefCell<SimState>>,
@@ -215,14 +181,6 @@ impl<'a> LoaderEnv<'a> {
             &mut lua,
             Rc::clone(&self.state),
         )
-    }
-
-    /// Patch `QuestLogMixin:GetCurrentMapID` to guard against nil parent.
-    /// During startup, `QUEST_LOG_UPDATE` fires before the QuestLog is
-    /// parented to WorldMapFrame, causing `self:GetParent():IsShown()`
-    /// at QuestMapFrame.lua:279 to error.
-    pub fn patch_quest_log_mixin(&self) -> crate::Result<()> {
-        self.exec(QUEST_LOG_MIXIN_PATCH_LUA)
     }
 
     pub fn create_addon_table(&self) -> Result<Val> {

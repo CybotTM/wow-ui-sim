@@ -215,3 +215,9 @@ pub(crate) fn patch_unit_position_frame_mixin(
 ) -> Result<(), crate::Error> {
     temporary::unit_position_frame_mixin::patch(env)
 }
+
+pub(crate) fn patch_quest_log_mixin(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) -> Result<(), crate::Error> {
+    temporary::quest_log_mixin::patch(env)
+}

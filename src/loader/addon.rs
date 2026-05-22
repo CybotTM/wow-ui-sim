@@ -211,7 +211,7 @@ fn patch_unit_position_frame_mixin(env: &LoaderEnv<'_>, result: &mut LoadResult)
 }
 
 fn patch_quest_log_mixin(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = env.patch_quest_log_mixin() {
+    if let Err(e) = crate::lua_api::workarounds::patch_quest_log_mixin(env) {
         push_patch_warning(result, "Blizzard_UIPanels_Game", "patch QuestLogMixin", &e);
     }
 }
