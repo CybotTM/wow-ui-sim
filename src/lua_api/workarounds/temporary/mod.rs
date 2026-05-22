@@ -10,6 +10,7 @@ pub(crate) mod auth_challenge_frame_parent;
 pub(crate) mod catalog_shop_product_card_defaults;
 pub(crate) mod character_create_defaults;
 pub(crate) mod character_frame_surface_refresh;
+pub(crate) mod character_select_selected_name;
 pub(crate) mod chat_voice_button_surface;
 pub(crate) mod collections_journal_namespace;
 pub(crate) mod container_frame_token_tracker;

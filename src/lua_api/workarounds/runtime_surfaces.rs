@@ -25,21 +25,7 @@ pub(super) fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub(super) fn patch_character_select_selected_name(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if type(CharacterSelect_SetSelectedCharacterName) == "function"
-            and not rawget(_G, "__wow_character_select_selected_name_patched") then
-            local original = CharacterSelect_SetSelectedCharacterName
-            CharacterSelect_SetSelectedCharacterName = function(name, timerunningSeasonID)
-                if type(CharSelectCharacterName) ~= "table" then
-                    return
-                end
-                return original(name, timerunningSeasonID)
-            end
-            rawset(_G, "__wow_character_select_selected_name_patched", true)
-        end
-        "#,
-    );
+    temporary::character_select_selected_name::patch(env);
 }
 
 pub(super) fn patch_chat_voice_button_surface(env: &crate::lua_api::WowLuaEnv) {
