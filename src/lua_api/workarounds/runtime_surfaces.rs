@@ -344,7 +344,7 @@ pub(super) fn patch_map_canvas_data_provider_attachment(env: &crate::lua_api::Wo
 }
 
 pub(super) fn patch_character_create_defaults(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(CHARACTER_CREATE_DEFAULTS_WORKAROUND_LUA);
+    temporary::character_create_defaults::patch(env);
 }
 
 pub(super) fn patch_character_frame_title_refresh(env: &crate::lua_api::WowLuaEnv) {
