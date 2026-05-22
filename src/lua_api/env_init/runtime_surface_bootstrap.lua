@@ -3133,39 +3133,6 @@ C_PetBattles = __wow_merge_namespace(C_PetBattles, {
   ShouldShowPetSelect = function() return false end,
 })
 
-C_ClubFinder = __wow_merge_namespace(C_ClubFinder, {
-  GetClubRecruitmentSettings = function()
-    return {
-      playStyleDungeon = false,
-      playStyleRaids = false,
-      playStylePvp = false,
-      playStyleRP = false,
-      playStyleSocial = false,
-      maxLevelOnly = false,
-      enableListing = false,
-    }
-  end,
-  GetPlayerApplicantSettings = function()
-    return {
-      playStyleDungeon = false,
-      playStyleRaids = false,
-      playStylePvp = false,
-      playStyleRP = false,
-      playStyleSocial = false,
-      roleTank = false,
-      roleHealer = false,
-      roleDps = false,
-      sizeSmall = false,
-      sizeMedium = false,
-      sizeLarge = false,
-      sortRelevance = true,
-      sortMembers = false,
-      sortNewest = false,
-      crossFaction = false,
-    }
-  end,
-})
-
 C_Map = __wow_merge_namespace(C_Map, {})
 UiMapPoint = __wow_merge_namespace(UiMapPoint, {})
 C_MapExplorationInfo = __wow_merge_namespace(C_MapExplorationInfo, {})

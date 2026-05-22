@@ -414,23 +414,53 @@ fn send_message_ignores_unknown_stream() {
 #[test]
 fn club_finder_queries_have_safe_empty_defaults() {
     let env = env();
-    let (enabled, invites, applicants, pending, status_flags, guild_total): (
-        bool,
-        i32,
-        i32,
-        i32,
-        i32,
-        i32,
-    ) = env
+    let (
+        enabled,
+        invites,
+        applicants,
+        pending,
+        status_flags,
+        guild_total,
+        recruitment_shape,
+        applicant_shape,
+    ): (bool, i32, i32, i32, i32, i32, bool, bool) = env
         .eval(
             r#"
+            local recruitment = C_ClubFinder.GetClubRecruitmentSettings()
+            local applicant = C_ClubFinder.GetPlayerApplicantSettings()
+            local recruitmentShape =
+                recruitment.playStyleDungeon == false and
+                recruitment.playStyleRaids == false and
+                recruitment.playStylePvp == false and
+                recruitment.playStyleRP == false and
+                recruitment.playStyleSocial == false and
+                recruitment.maxLevelOnly == false and
+                recruitment.enableListing == false
+            local applicantShape =
+                applicant.playStyleDungeon == false and
+                applicant.playStyleRaids == false and
+                applicant.playStylePvp == false and
+                applicant.playStyleRP == false and
+                applicant.playStyleSocial == false and
+                applicant.roleTank == false and
+                applicant.roleHealer == false and
+                applicant.roleDps == false and
+                applicant.sizeSmall == false and
+                applicant.sizeMedium == false and
+                applicant.sizeLarge == false and
+                applicant.sortRelevance == true and
+                applicant.sortMembers == false and
+                applicant.sortNewest == false and
+                applicant.crossFaction == false
             return
                 C_ClubFinder.IsEnabled(),
                 #C_ClubFinder.PlayerGetClubInvitationList(),
                 #C_ClubFinder.ReturnClubApplicantList("guild-0"),
                 #C_ClubFinder.ReturnPendingClubApplicantList("guild-0"),
                 #C_ClubFinder.GetStatusOfPostingFromClubId("guild-0"),
-                C_ClubFinder.GetTotalMatchingGuildListSize()
+                C_ClubFinder.GetTotalMatchingGuildListSize(),
+                recruitmentShape,
+                applicantShape
             "#,
         )
         .unwrap();
@@ -440,4 +470,6 @@ fn club_finder_queries_have_safe_empty_defaults() {
     assert_eq!(pending, 0);
     assert_eq!(status_flags, 0);
     assert_eq!(guild_total, 0);
+    assert!(recruitment_shape);
+    assert!(applicant_shape);
 }

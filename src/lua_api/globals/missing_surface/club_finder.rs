@@ -5,7 +5,7 @@
 //! collections rather than nil namespace fallbacks.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::create_table;
+use crate::lua_api::methods::{create_table, table_set};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -19,6 +19,18 @@ pub(super) fn register_club_finder_surface(state: &mut LuaState) -> LuaResult<()
     register_same_handler(state, table_ref, TRUE_METHODS, return_true)?;
     register_same_handler(state, table_ref, FALSE_METHODS, return_false)?;
     register_same_handler(state, table_ref, ZERO_METHODS, return_zero)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetClubRecruitmentSettings",
+        club_recruitment_settings,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetPlayerApplicantSettings",
+        player_applicant_settings,
+    )?;
     table_set_rust_fn_static(state, table_ref, "GetClubFinderDisableReason", noop)?;
     Ok(())
 }
@@ -91,6 +103,50 @@ const NOOP_METHODS: &[&str] = &[
     "SetRecruitmentLocale",
     "SetRecruitmentSettings",
 ];
+
+const PLAY_STYLE_SETTINGS: &[&str] = &[
+    "playStyleDungeon",
+    "playStyleRaids",
+    "playStylePvp",
+    "playStyleRP",
+    "playStyleSocial",
+];
+
+const PLAYER_APPLICANT_FALSE_SETTINGS: &[&str] = &[
+    "roleTank",
+    "roleHealer",
+    "roleDps",
+    "sizeSmall",
+    "sizeMedium",
+    "sizeLarge",
+    "sortMembers",
+    "sortNewest",
+    "crossFaction",
+];
+
+fn club_recruitment_settings(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    set_false_fields(state, table, PLAY_STYLE_SETTINGS);
+    table_set(state, table, "maxLevelOnly", Val::Bool(false));
+    table_set(state, table, "enableListing", Val::Bool(false));
+    state.push(table);
+    Ok(1)
+}
+
+fn player_applicant_settings(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    set_false_fields(state, table, PLAY_STYLE_SETTINGS);
+    set_false_fields(state, table, PLAYER_APPLICANT_FALSE_SETTINGS);
+    table_set(state, table, "sortRelevance", Val::Bool(true));
+    state.push(table);
+    Ok(1)
+}
+
+fn set_false_fields(state: &mut LuaState, table: Val, fields: &[&str]) {
+    for field in fields {
+        table_set(state, table, field, Val::Bool(false));
+    }
+}
 
 fn empty_table(state: &mut LuaState) -> LuaResult<u32> {
     let table = create_table(state);
