@@ -169,7 +169,7 @@ pub(super) fn patch_objective_tracker_quest_header(env: &crate::lua_api::WowLuaE
 }
 
 pub(super) fn patch_fog_of_war_pin_mixin(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(FOG_OF_WAR_PIN_WORKAROUND_LUA);
+    temporary::fog_of_war_pin::patch(env);
 }
 
 pub(super) fn patch_map_exploration_pin_mixin(env: &crate::lua_api::WowLuaEnv) {
@@ -195,7 +195,7 @@ pub(super) fn refresh_character_frame_surface(env: &crate::lua_api::WowLuaEnv) {
 pub(super) fn patch_fog_of_war_pin_mixin_for_runtime_addon_load(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) {
-    let _ = env.exec(FOG_OF_WAR_PIN_WORKAROUND_LUA);
+    temporary::fog_of_war_pin::patch_for_runtime_addon_load(env);
 }
 
 pub(super) fn patch_map_exploration_pin_mixin_for_runtime_addon_load(

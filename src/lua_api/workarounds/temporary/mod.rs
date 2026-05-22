@@ -12,6 +12,7 @@ pub(crate) mod character_frame_surface_refresh;
 pub(crate) mod chat_voice_button_surface;
 pub(crate) mod damage_meter_scrollbox;
 pub(crate) mod details_saved_variables;
+pub(crate) mod fog_of_war_pin;
 pub(crate) mod housing_dashboard_preload;
 pub(crate) mod item_quality_color_data_methods;
 pub(crate) mod item_socketing_tooltips;
