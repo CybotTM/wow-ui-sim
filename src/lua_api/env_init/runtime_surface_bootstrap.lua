@@ -3694,12 +3694,6 @@ C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
   end,
 })
 
-C_CooldownViewer = __wow_merge_namespace(C_CooldownViewer, {
-  GetCooldownViewerCategorySet = function() return {} end,
-  GetCooldownViewerCooldownInfo = function() return nil end,
-  GetCooldownID = function() return nil end,
-})
-
 C_Minimap = __wow_merge_namespace(C_Minimap, {
   GetNumTrackingTypes = function() return 0 end,
   GetTrackingInfo = function() return nil end,

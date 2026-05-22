@@ -79,6 +79,12 @@ fn register_glue_and_display_tables(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
+    register_glue_auxiliary_shims(state)?;
+    register_service_auxiliary_shims(state)?;
+    register_token_texture_xml_tables(state)
+}
+
+fn register_glue_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_auth_challenge::register_c_auth_challenge_shims(state)?;
     temporary_shims::c_lfg_info::register_c_lfg_info(state)?;
     temporary_shims::c_black_market::register_c_black_market(state)?;
@@ -86,15 +92,22 @@ fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_class_trial::register_c_class_trial_shims(state)?;
     temporary_shims::c_club_notifications::register_c_club_notification_shims(state)?;
     temporary_shims::c_contribution_collector::register_c_contribution_collector(state)?;
+    temporary_shims::c_cooldown_viewer::register_c_cooldown_viewer_shims(state)?;
     temporary_shims::c_date_and_time::register_c_date_and_time_shims(state)?;
-    temporary_shims::c_perks_program::register_c_perks_program(state)?;
+    temporary_shims::c_perks_program::register_c_perks_program(state)
+}
+
+fn register_service_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_ping::register_c_ping_shims(state)?;
     temporary_shims::c_shared_character_services::register_c_shared_character_services_shims(
         state,
     )?;
     temporary_shims::c_social_queue::register_c_social_queue_shims(state)?;
     temporary_shims::c_taxi_map::register_c_taxi_map_shims(state)?;
-    temporary_shims::c_transmog_outfit_slots::register_c_transmog_outfit_slot_shims(state)?;
+    temporary_shims::c_transmog_outfit_slots::register_c_transmog_outfit_slot_shims(state)
+}
+
+fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {
     c_wowtoken_secure::register_c_wowtoken_secure(state)?;
     c_wow_token_public::register_c_wow_token_public(state)?;
     c_texture::register_c_texture(state)?;
