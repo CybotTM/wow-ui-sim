@@ -55,13 +55,7 @@ pub(super) fn patch_action_bar_button_event_fanout(env: &crate::lua_api::WowLuaE
 }
 
 pub(super) fn patch_game_time_defaults(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if type(GameTimeFrame) == "table" and GameTimeFrame.pendingCalendarInvites == nil then
-            GameTimeFrame.pendingCalendarInvites = 0
-        end
-        "#,
-    );
+    temporary::game_time_calendar_invites::patch(env);
 }
 
 /// Initialize `LFGLockList` so the Dungeons & Raids panel can populate
