@@ -67,35 +67,7 @@ pub(super) fn patch_tooltip_nineslice_surface(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub(super) fn patch_container_frame_token_tracker(env: &crate::lua_api::WowLuaEnv) {
-    // Startup emits a consolidated ADDON_LOADED("WoWUISim") event after
-    // bootstrap. Bag setup expects Blizzard_TokenUI's per-addon callback to
-    // have initialized ContainerFrameSettingsManager.TokenTracker.
-    let _ = env.exec(
-        r#"
-        if type(ContainerFrameSettingsManager) ~= "table" then
-            return
-        end
-        if ContainerFrameSettingsManager.TokenTracker ~= nil then
-            return
-        end
-        if type(ContainerFrameSettingsManager.OnAddonLoaded) ~= "function" then
-            return
-        end
-
-        local tokenUiLoaded = false
-        if type(C_AddOns) == "table" and type(C_AddOns.IsAddOnLoaded) == "function" then
-            tokenUiLoaded = C_AddOns.IsAddOnLoaded("Blizzard_TokenUI")
-        end
-
-        if tokenUiLoaded then
-            pcall(
-                ContainerFrameSettingsManager.OnAddonLoaded,
-                ContainerFrameSettingsManager,
-                "Blizzard_TokenUI"
-            )
-        end
-        "#,
-    );
+    temporary::container_frame_token_tracker::patch(env);
 }
 
 pub(super) fn patch_paging_controls_page_text(env: &crate::lua_api::WowLuaEnv) {
