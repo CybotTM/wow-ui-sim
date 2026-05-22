@@ -33,7 +33,7 @@ pub(crate) use runtime::{
     addon_taint_name, is_blizzard_addon, record_addon_time, update_threshold_counters,
 };
 
-// Re-export the three functions called from globals/environment_restore.rs.
+// Re-export the three functions reused by the EnvironmentCleanup restore workaround.
 pub(crate) use bootstrap::init_runtime_surface_bootstrap;
 pub(crate) use bootstrap::init_shared_bootstrap;
 pub(crate) use enums::init_enum_globals;
