@@ -220,7 +220,7 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     patch_runtime_map_addon_surfaces(env, addon_name);
     if addon_name == "Blizzard_Collections" {
         patch_toggle_collections_journal_for_runtime_addon_load(env);
-        patch_collections_journal_namespace(env);
+        temporary::collections_journal_namespace::patch(env);
     }
     if addon_name == "Blizzard_EncounterJournal" {
         patch_toggle_encounter_journal_for_runtime_addon_load(env);
@@ -276,7 +276,7 @@ fn patch_runtime_map_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_n
 
 pub fn apply_for_runtime_addon_preload(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if addon_name == "Blizzard_Collections" {
-        patch_collections_journal_namespace(env);
+        temporary::collections_journal_namespace::patch(env);
     }
     if matches!(
         addon_name,

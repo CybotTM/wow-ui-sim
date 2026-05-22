@@ -10,6 +10,7 @@ pub(crate) mod catalog_shop_product_card_defaults;
 pub(crate) mod character_create_defaults;
 pub(crate) mod character_frame_surface_refresh;
 pub(crate) mod chat_voice_button_surface;
+pub(crate) mod collections_journal_namespace;
 pub(crate) mod damage_meter_scrollbox;
 pub(crate) mod details_saved_variables;
 pub(crate) mod fog_of_war_pin;
