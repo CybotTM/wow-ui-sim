@@ -272,18 +272,5 @@ pub(super) fn patch_auth_challenge_frame_parent_from_env(env: &crate::lua_api::W
 pub(crate) fn patch_account_store_set_storefront(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) -> Result<(), crate::Error> {
-    env.exec(
-        r#"
-        local function __wow_account_store_set_storefront_id(self, storeFrontID)
-            self.storeFrontID = storeFrontID
-        end
-
-        if type(AccountStoreMixin) == "table" then
-            AccountStoreMixin.SetStoreFrontID = __wow_account_store_set_storefront_id
-        end
-        if type(AccountStoreFrame) == "table" then
-            AccountStoreFrame.SetStoreFrontID = __wow_account_store_set_storefront_id
-        end
-        "#,
-    )
+    temporary::account_store_set_storefront::patch(env)
 }
