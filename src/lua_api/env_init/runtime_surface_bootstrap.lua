@@ -3166,11 +3166,6 @@ C_ClubFinder = __wow_merge_namespace(C_ClubFinder, {
   end,
 })
 
-C_PartyInfo = __wow_merge_namespace(C_PartyInfo, {
-  AllowedToDoPartyConversion = function() return false end,
-  IsPartyWalkIn = function() return false end,
-})
-
 C_Map = __wow_merge_namespace(C_Map, {})
 UiMapPoint = __wow_merge_namespace(UiMapPoint, {})
 C_MapExplorationInfo = __wow_merge_namespace(C_MapExplorationInfo, {})
