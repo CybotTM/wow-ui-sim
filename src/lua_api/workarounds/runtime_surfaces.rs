@@ -262,11 +262,11 @@ pub(super) fn patch_auction_house_search_context_aliases_from_env(env: &crate::l
 }
 
 pub(super) fn patch_auth_challenge_frame_parent(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(AUTH_CHALLENGE_FRAME_PARENT_WORKAROUND_LUA);
+    temporary::auth_challenge_frame_parent::patch(env);
 }
 
 pub(super) fn patch_auth_challenge_frame_parent_from_env(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(AUTH_CHALLENGE_FRAME_PARENT_WORKAROUND_LUA);
+    temporary::auth_challenge_frame_parent::patch_env(env);
 }
 
 pub(crate) fn patch_account_store_set_storefront(
