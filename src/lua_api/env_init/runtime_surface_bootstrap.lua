@@ -4512,24 +4512,6 @@ C_CatalogShop = __wow_merge_namespace(C_CatalogShop, {
   ProductSelectedTelemetry = __wow_noop,
 })
 
-C_WowTokenSecure = __wow_merge_namespace(C_WowTokenSecure, {
-  CancelRedeem = __wow_noop,
-  GetBalanceRedeemAmount = function() return 0 end,
-  SetBalanceAmountString = __wow_noop,
-  GetBalanceRedemptionInfo = function() return 0, 0, false, nil end,
-  GetGameTimeRedemptionInfo = function() return false, 0 end,
-  GetRemainingGameTime = function() return 0 end,
-  CanRedeemForBalance = function() return false end,
-  RedeemToken = __wow_noop,
-  WillKickFromWorld = function() return false end,
-  GetTokenCount = function() return 0 end,
-  RedeemTokenConfirm = __wow_noop,
-  IsRedemptionStillValid = function() return false end,
-  ConfirmSellToken = __wow_noop,
-  ConfirmBuyToken = __wow_noop,
-  GetPriceLockDuration = function() return 0 end,
-})
-
 if EnumUtil == nil then
   EnumUtil = {}
 end
