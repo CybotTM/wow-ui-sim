@@ -224,10 +224,7 @@ impl WowLuaEnv {
     /// Restore globals that EnvironmentCleanup nil'd but later addons need.
     pub fn restore_post_cleanup_globals(&self) {
         let mut lua = self.rilua_mut();
-        let _ = super::globals::environment_restore::restore_post_cleanup_globals(
-            &mut lua,
-            Rc::clone(&self.state),
-        );
+        let _ = super::workarounds::restore_post_cleanup_globals(&mut lua, Rc::clone(&self.state));
     }
 
     pub fn sync_string_metatable_to_global_string(&self) {

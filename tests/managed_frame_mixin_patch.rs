@@ -1,5 +1,5 @@
-//! Pin `UIParentManagedFrameMixin:OnShow` / `OnHide` post-load patch
-//! (`MANAGED_FRAME_MIXIN_PATCH_LUA` in `src/lua_api/loader_env.rs`,
+//! Pin `UIParentManagedFrameMixin:OnShow` / `OnHide` temporary workaround
+//! (`src/lua_api/workarounds/temporary/uiparent_managed_frame_mixin.rs`,
 //! installed after `Blizzard_UIParent`).
 //!
 //! Blizzard wires `self.layoutParent` via `<KeyValue type="global">`
@@ -12,6 +12,7 @@
 //! exercised without loading Blizzard_UIParent.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::workarounds::patch_uiparent_managed_frame_mixin;
 
 fn env_with_patch() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("WowLuaEnv init");
@@ -28,9 +29,7 @@ fn env_with_patch() -> WowLuaEnv {
         "#,
     )
     .unwrap();
-    env.loader_env()
-        .patch_managed_frame_mixin()
-        .expect("patch install");
+    patch_uiparent_managed_frame_mixin(&env.loader_env()).expect("patch install");
     env
 }
 
@@ -137,8 +136,7 @@ fn on_show_is_noop_when_layout_parent_missing_method() {
 fn patch_is_inert_when_mixin_global_is_nil() {
     let env = WowLuaEnv::new().expect("WowLuaEnv init");
     // Do NOT define the mixin; patch must silently no-op.
-    env.loader_env()
-        .patch_managed_frame_mixin()
+    patch_uiparent_managed_frame_mixin(&env.loader_env())
         .expect("patch must not error when mixin global is absent");
     let nil_still: bool = env.eval("return UIParentManagedFrameMixin == nil").unwrap();
     assert!(nil_still);

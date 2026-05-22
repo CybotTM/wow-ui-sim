@@ -4,14 +4,15 @@ mod permanent;
 mod runtime_surfaces;
 mod temporary;
 
+pub(crate) use temporary::environment_cleanup_restore::restore_post_cleanup_globals;
 pub(crate) use temporary::source_patches::patch_lua_source;
 
+pub use runtime_surfaces::patch_uiparent_managed_frame_mixin;
 use runtime_surfaces::*;
 pub(crate) use runtime_surfaces::{
     patch_account_store_set_storefront, patch_glueparent_uiparent_attributes,
     patch_map_canvas_scroll_container, patch_playerspells_onload_backfill, patch_quest_log_mixin,
-    patch_shared_xml_anim_mixins, patch_uiparent_managed_frame_mixin,
-    patch_unit_position_frame_mixin,
+    patch_shared_xml_anim_mixins, patch_unit_position_frame_mixin,
 };
 use std::time::Instant;
 

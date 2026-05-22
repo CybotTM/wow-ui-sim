@@ -177,10 +177,7 @@ impl<'a> LoaderEnv<'a> {
 
     pub fn restore_post_cleanup_globals(&self) -> crate::Result<()> {
         let mut lua = self.lua.borrow_mut();
-        super::globals::environment_restore::restore_post_cleanup_globals(
-            &mut lua,
-            Rc::clone(&self.state),
-        )
+        super::workarounds::restore_post_cleanup_globals(&mut lua, Rc::clone(&self.state))
     }
 
     pub fn create_addon_table(&self) -> Result<Val> {
