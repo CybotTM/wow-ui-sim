@@ -13397,20 +13397,6 @@ if GetAvailableBandwidth == nil then
   end
 end
 
-C_Club = C_Club or __wow_namespace()
-if rawget(C_Club, "GetClubStreamNotificationSettings") == nil then
-  function C_Club.GetClubStreamNotificationSettings(_clubId)
-    return {}
-  end
-end
-
-C_WarbandScene = C_WarbandScene or __wow_namespace()
-if rawget(C_WarbandScene, "SearchWarbandSceneEntries") == nil then
-  function C_WarbandScene.SearchWarbandSceneEntries(_searchParams)
-    return {}
-  end
-end
-
 C_TransmogOutfitInfo = C_TransmogOutfitInfo or __wow_namespace()
 if rawget(C_TransmogOutfitInfo, "GetTransmogOutfitSlotFromInventorySlot") == nil then
   function C_TransmogOutfitInfo.GetTransmogOutfitSlotFromInventorySlot(inventorySlot)

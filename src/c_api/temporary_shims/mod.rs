@@ -4,6 +4,7 @@ pub mod c_black_market;
 pub mod c_calendar;
 pub mod c_character_services;
 pub mod c_click_bindings;
+pub mod c_club_notifications;
 pub mod c_configuration_warnings;
 pub mod c_container_defaults;
 pub mod c_contribution_collector;
