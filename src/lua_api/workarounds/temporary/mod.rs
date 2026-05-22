@@ -1,5 +1,6 @@
 //! Temporary Lua workarounds with explicit retirement paths.
 
+pub(crate) mod action_bar_button_event_fanout;
 pub(crate) mod character_create_defaults;
 pub(crate) mod character_frame_surface_refresh;
 pub(crate) mod chat_voice_button_surface;

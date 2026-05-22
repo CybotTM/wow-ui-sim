@@ -51,14 +51,7 @@ pub(super) fn patch_item_socketing_tooltips(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub(super) fn patch_action_bar_button_event_fanout(env: &crate::lua_api::WowLuaEnv) {
-    let trace_fanout = std::env::var_os("WOW_SIM_TRACE_ACTIONBAR_BUTTON_FANOUT").is_some();
-    let script = action_bar_button_event_fanout_script(trace_fanout);
-    let _ = env.exec(&script);
-}
-
-pub(super) fn action_bar_button_event_fanout_script(trace_fanout: bool) -> String {
-    let trace_fanout = if trace_fanout { "true" } else { "false" };
-    ACTION_BAR_BUTTON_EVENT_FANOUT_WORKAROUND_LUA.replace("{trace_fanout}", trace_fanout)
+    temporary::action_bar_button_event_fanout::patch(env);
 }
 
 pub(super) fn patch_game_time_defaults(env: &crate::lua_api::WowLuaEnv) {
