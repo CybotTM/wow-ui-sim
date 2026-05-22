@@ -1,4 +1,5 @@
 pub mod c_addons_beta_policy;
+pub mod c_auth_challenge;
 pub mod c_behavioral_messaging;
 pub mod c_black_market;
 pub mod c_calendar;

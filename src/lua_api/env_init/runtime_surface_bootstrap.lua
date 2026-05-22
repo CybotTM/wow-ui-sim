@@ -2446,14 +2446,6 @@ C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
 -- C_Ping.GetDefaultPingOptions is a temporary shim in `src/c_api/temporary_shims/c_ping.rs`.
 -- C_ZoneAbility is state-backed via `src/lua_api/globals/missing_surface/zone_ability.rs`.
 
-C_AuthChallenge = __wow_merge_namespace(C_AuthChallenge, {
-  SetFrame = __wow_noop,
-  Submit = __wow_noop,
-  Cancel = __wow_noop,
-  OnTabPressed = __wow_noop,
-  DidChallengeSucceed = function() return false end,
-})
-
 C_CharacterServices = __wow_merge_namespace(C_CharacterServices, {
   HasRequiredBoostForClassTrial = function() return false end,
   GetCharacterServiceDisplayInfo = function() return {} end,
