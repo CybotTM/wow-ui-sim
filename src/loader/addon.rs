@@ -258,72 +258,8 @@ fn patch_quest_log_mixin(env: &LoaderEnv<'_>, result: &mut LoadResult) {
     }
 }
 
-const PLAYERSPELLS_ONLOAD_BACKFILL_PATCH: &str = r#"
-    local function backfill_onload(frame, needs_init)
-        if not frame or not needs_init then
-            return
-        end
-        if type(frame.OnLoad) == "function" then
-            frame:OnLoad()
-            return
-        end
-        local handler = frame.GetScript and frame:GetScript("OnLoad")
-        if type(handler) == "function" then
-            handler(frame)
-        end
-    end
-
-    local function backfill_playerspells_tab(frame_tab)
-        if not PlayerSpellsFrame or not PlayerSpellsUtil or not PlayerSpellsUtil.FrameTabs then
-            return
-        end
-
-        if frame_tab == PlayerSpellsUtil.FrameTabs.ClassSpecializations then
-            backfill_onload(
-                PlayerSpellsFrame.SpecFrame,
-                PlayerSpellsFrame.SpecFrame and PlayerSpellsFrame.SpecFrame.SpecContentFramePool == nil
-            )
-        elseif frame_tab == PlayerSpellsUtil.FrameTabs.ClassTalents then
-            backfill_onload(
-                PlayerSpellsFrame.TalentsFrame,
-                PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame.initialBasePanOffsetX == nil
-            )
-        elseif frame_tab == PlayerSpellsUtil.FrameTabs.SpellBook then
-            backfill_onload(
-                PlayerSpellsFrame.SpellBookFrame,
-                PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.internalTabTracker == nil
-            )
-        end
-    end
-
-    if PlayerSpellsFrame then
-        backfill_onload(PlayerSpellsFrame, PlayerSpellsFrame.internalTabTracker == nil)
-        if not __wow_uisim_playerspells_backfill_wrapped then
-            __wow_uisim_playerspells_backfill_wrapped = true
-
-            if type(PlayerSpellsFrame.TrySetTab) == "function" then
-                local original_try_set_tab = PlayerSpellsFrame.TrySetTab
-                PlayerSpellsFrame.TrySetTab = function(self, frame_tab)
-                    backfill_playerspells_tab(frame_tab)
-                    return original_try_set_tab(self, frame_tab)
-                end
-            end
-
-            if type(PlayerSpellsFrame.SetInspecting) == "function" then
-                local original_set_inspecting = PlayerSpellsFrame.SetInspecting
-                PlayerSpellsFrame.SetInspecting = function(self, inspect_unit, inspect_string, inspect_string_level)
-                    if inspect_unit or inspect_string then
-                        backfill_playerspells_tab(PlayerSpellsUtil.FrameTabs.ClassTalents)
-                    end
-                    return original_set_inspecting(self, inspect_unit, inspect_string, inspect_string_level)
-                end
-            end
-        end
-    end
-"#;
-
 fn patch_playerspells_onload_backfill(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = env.exec(PLAYERSPELLS_ONLOAD_BACKFILL_PATCH) {
+    if let Err(e) = crate::lua_api::workarounds::patch_playerspells_onload_backfill(env) {
         push_patch_warning(
             result,
             "Blizzard_PlayerSpells",

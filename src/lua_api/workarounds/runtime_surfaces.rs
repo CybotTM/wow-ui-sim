@@ -179,3 +179,9 @@ pub(crate) fn patch_account_store_set_storefront(
 ) -> Result<(), crate::Error> {
     temporary::account_store_set_storefront::patch(env)
 }
+
+pub(crate) fn patch_playerspells_onload_backfill(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) -> Result<(), crate::Error> {
+    temporary::player_spells_onload_backfill::patch(env)
+}

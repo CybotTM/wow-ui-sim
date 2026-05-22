@@ -6,8 +6,10 @@ mod temporary;
 
 pub(crate) use temporary::source_patches::patch_lua_source;
 
-pub(crate) use runtime_surfaces::patch_account_store_set_storefront;
 use runtime_surfaces::*;
+pub(crate) use runtime_surfaces::{
+    patch_account_store_set_storefront, patch_playerspells_onload_backfill,
+};
 use std::time::Instant;
 
 struct WorkaroundStep {
