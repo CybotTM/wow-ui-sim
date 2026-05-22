@@ -1,13 +1,11 @@
 //! Post-load workarounds that are still required on the live rilua path.
 
 mod permanent;
-mod post_event_lua;
 mod runtime_surfaces;
 mod temporary;
 
 pub(crate) use temporary::source_patches::patch_lua_source;
 
-use post_event_lua::*;
 pub(crate) use runtime_surfaces::patch_account_store_set_storefront;
 use runtime_surfaces::*;
 use std::time::Instant;
@@ -184,7 +182,7 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
 }
 
 fn apply_post_event_bootstrap(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(REFRESH_ACTION_BUTTONS_LUA);
+    temporary::post_event_action_button_refresh::patch(env);
     crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
     crate::lua_api::workarounds_editmode::reapply_player_frame_anchor(env);
     crate::lua_api::chat_init::init_chat_type_colors(env);
