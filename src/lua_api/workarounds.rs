@@ -180,7 +180,7 @@ fn init_chat_type_colors(env: &crate::lua_api::WowLuaEnv) {
 }
 
 fn patch_settings_canvas_layout_visibility(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(SETTINGS_CANVAS_LAYOUT_HIDE_LUA);
+    temporary::settings_canvas_visibility::patch(env);
 }
 
 fn patch_housing_dashboard_preload_from_env(env: &crate::lua_api::WowLuaEnv) {
@@ -306,111 +306,4 @@ fn log_step(env: &crate::lua_api::WowLuaEnv, label: &str, apply_step: impl FnOnc
             started.elapsed()
         ),
     );
-}
-
-#[cfg(test)]
-mod tests {
-    use super::SETTINGS_CANVAS_LAYOUT_HIDE_LUA;
-    use crate::lua_api::WowLuaEnv;
-
-    #[test]
-    fn settings_canvas_registration_hides_frame_until_displayed() {
-        let env = WowLuaEnv::new().expect("env should initialize");
-        env.exec(
-            r#"
-            SettingsLayoutMixin = { LayoutType = { Canvas = "Canvas" } }
-
-            local categories = {}
-            local layouts = {}
-
-            SettingsPanel = {
-                shown = false,
-                currentLayout = nil,
-                currentCategory = nil,
-                GetAllCategories = function()
-                    return categories
-                end,
-                GetLayout = function(_, category)
-                    return layouts[category]
-                end,
-                IsShown = function(self)
-                    return self.shown
-                end,
-                GetCurrentLayout = function(self)
-                    return self.currentLayout
-                end,
-                GetCurrentCategory = function(self)
-                    return self.currentCategory
-                end,
-            }
-
-            Settings = {
-                RegisterCanvasLayoutCategory = function(frame, name)
-                    local category = { name = name }
-                    local layout = {
-                        frame = frame,
-                        GetFrame = function(self)
-                            return self.frame
-                        end,
-                        GetLayoutType = function()
-                            return SettingsLayoutMixin.LayoutType.Canvas
-                        end,
-                    }
-                    table.insert(categories, category)
-                    layouts[category] = layout
-                    return category, layout
-                end,
-                OpenToCategory = function(category)
-                    SettingsPanel.shown = true
-                    SettingsPanel.currentCategory = category
-                    SettingsPanel.currentLayout = layouts[category]
-                    return category
-                end,
-            }
-            "#,
-        )
-        .expect("fake settings surface should install");
-
-        env.exec(SETTINGS_CANVAS_LAYOUT_HIDE_LUA)
-            .expect("settings canvas workaround should apply");
-
-        let hidden_after_register: bool = env
-            .eval(
-                r#"
-                local frame = CreateFrame("Frame", "SettingsCanvasLeakProbe")
-                frame:Show()
-                local category, layout = Settings.RegisterCanvasLayoutCategory(frame, "Probe")
-                return not frame:IsShown()
-                "#,
-            )
-            .expect("registration probe should run");
-
-        assert!(
-            hidden_after_register,
-            "settings canvas frame should be hidden after registration"
-        );
-
-        let opened_canvas_visible_others_hidden: bool = env
-            .eval(
-                r#"
-                local first = SettingsCanvasLeakProbe
-                local firstCategory = SettingsPanel:GetAllCategories()[1]
-                local second = CreateFrame("Frame", "SettingsSecondCanvasLeakProbe")
-                second:Show()
-                local secondCategory = Settings.RegisterCanvasLayoutCategory(second, "Second")
-
-                Settings.OpenToCategory(firstCategory)
-                local firstOpened = first:IsShown() and not second:IsShown()
-
-                Settings.OpenToCategory(secondCategory)
-                return firstOpened and (not first:IsShown()) and second:IsShown()
-                "#,
-            )
-            .expect("open category probe should run");
-
-        assert!(
-            opened_canvas_visible_others_hidden,
-            "opening a settings category should show only that category's canvas"
-        );
-    }
 }
