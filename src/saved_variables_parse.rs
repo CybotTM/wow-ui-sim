@@ -33,6 +33,15 @@ impl SavedVariablesTableSizeCache {
         self.sizes.get(path).copied()
     }
 
+    pub(super) fn insert_if_changed(&mut self, path: &str, size: SavedVariablesTableSize) -> bool {
+        if self.get(path) == Some(size) {
+            return false;
+        }
+
+        self.insert(path, size);
+        true
+    }
+
     pub(super) fn insert(&mut self, path: impl Into<String>, size: SavedVariablesTableSize) {
         self.sizes.insert(path.into(), size);
     }
@@ -133,7 +142,7 @@ impl<'a, 's> Parser<'a, 's> {
         hash_count: usize,
     ) {
         if let (Some(cache), Some(path)) = (&mut self.table_size_cache, table_path) {
-            cache.insert(
+            cache.insert_if_changed(
                 path,
                 SavedVariablesTableSize {
                     array_count,
@@ -690,5 +699,24 @@ mod tests {
         assert_eq!(format_lua_number_for_path(42.0), "42");
         assert_eq!(format_lua_number_for_path(-7.0), "-7");
         assert_eq!(format_lua_number_for_path(3.5), "3.5");
+    }
+
+    #[test]
+    fn skips_unchanged_table_size_cache_writes() {
+        let mut cache = SavedVariablesTableSizeCache::default();
+        let size = SavedVariablesTableSize {
+            array_count: 3,
+            hash_count: 5,
+        };
+
+        assert!(cache.insert_if_changed("AddonDB.profile", size));
+        assert!(!cache.insert_if_changed("AddonDB.profile", size));
+
+        let changed_size = SavedVariablesTableSize {
+            array_count: 3,
+            hash_count: 6,
+        };
+        assert!(cache.insert_if_changed("AddonDB.profile", changed_size));
+        assert_eq!(cache.get("AddonDB.profile"), Some(changed_size));
     }
 }
