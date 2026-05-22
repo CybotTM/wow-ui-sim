@@ -242,7 +242,7 @@ pub(super) fn patch_artifact_ui_show_panel_guard(env: &crate::lua_api::LoaderEnv
 }
 
 pub(super) fn patch_auction_house_categories_refresh_count(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(AUCTION_HOUSE_CATEGORIES_REFRESH_COUNT_WORKAROUND_LUA);
+    temporary::auction_house_categories_refresh_count::patch(env);
 }
 
 pub(super) fn patch_auction_house_browse_results_event(env: &crate::lua_api::LoaderEnv<'_>) {

@@ -85,28 +85,6 @@ pub(super) const ARTIFACT_UI_SHOW_PANEL_GUARD_WORKAROUND_LUA: &str = r#"
     rawset(_G, "__wow_artifact_ui_show_panel_guard_wrapped", true)
 "#;
 
-pub(super) const AUCTION_HOUSE_CATEGORIES_REFRESH_COUNT_WORKAROUND_LUA: &str = r#"
-    local function getNumElementsForRefresh()
-        return type(AuctionCategories) == "table" and #AuctionCategories or 0
-    end
-
-    local categoriesList = AuctionHouseFrame and AuctionHouseFrame.CategoriesList or nil
-    if type(categoriesList) == "table"
-        and type(categoriesList.GetNumElementsForRefresh) ~= "function" then
-        categoriesList.GetNumElementsForRefresh = getNumElementsForRefresh
-    end
-
-    if type(AuctionHouseCategoriesListMixin) ~= "table" then
-        return
-    end
-
-    if type(AuctionHouseCategoriesListMixin.GetNumElementsForRefresh) == "function" then
-        return
-    end
-
-    AuctionHouseCategoriesListMixin.GetNumElementsForRefresh = getNumElementsForRefresh
-"#;
-
 pub(super) const AUCTION_HOUSE_BROWSE_RESULTS_EVENT_WORKAROUND_LUA: &str = r#"
     if rawget(_G, "__wow_auction_house_browse_results_event_wrapped") then
         return
