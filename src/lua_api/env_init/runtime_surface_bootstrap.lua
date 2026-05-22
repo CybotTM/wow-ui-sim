@@ -2446,21 +2446,6 @@ C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
 -- C_Ping.GetDefaultPingOptions is a temporary shim in `src/c_api/temporary_shims/c_ping.rs`.
 -- C_ZoneAbility is state-backed via `src/lua_api/globals/missing_surface/zone_ability.rs`.
 
-C_CharacterServices = __wow_merge_namespace(C_CharacterServices, {
-  HasRequiredBoostForClassTrial = function() return false end,
-  GetCharacterServiceDisplayInfo = function() return {} end,
-  GetVASDistributions = function() return {} end,
-  GetCharacterServiceDisplayData = function(_boostType)
-    return {
-      boostLevel = GetMaxPlayerLevel and GetMaxPlayerLevel() or 80,
-      flowTitle = CHARACTER_UPGRADE or "Character Upgrade",
-      popupInfo = {
-        textureKit = "characterupdate",
-      },
-    }
-  end,
-})
-
 C_EventScheduler = __wow_merge_namespace(C_EventScheduler, {})
 
 local function __wow_event_scheduler_seed_state()

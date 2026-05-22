@@ -72,22 +72,55 @@ fn clearing_upgrade_boost_type_returns_nil_again() {
 #[test]
 fn has_required_service_for_character_upgrade_returns_false() {
     let env = env();
-    let result: bool = env
-        .eval("return C_CharacterServices.HasRequiredServiceForCharacterUpgrade()")
+    let (has_upgrade, has_class_trial): (bool, bool) = env
+        .eval(
+            r#"
+            return
+                C_CharacterServices.HasRequiredServiceForCharacterUpgrade(),
+                C_CharacterServices.HasRequiredBoostForClassTrial()
+            "#,
+        )
         .unwrap();
     assert!(
-        !result,
+        !has_upgrade,
         "should return false — no active service by default"
+    );
+    assert!(
+        !has_class_trial,
+        "should return false — no active trial boost by default"
     );
 }
 
 #[test]
 fn get_character_service_display_info_returns_empty_table() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_CharacterServices.GetCharacterServiceDisplayInfo()")
+    let (display_count, vas_count): (i32, i32) = env
+        .eval(
+            r#"
+            return
+                #C_CharacterServices.GetCharacterServiceDisplayInfo(),
+                #C_CharacterServices.GetVASDistributions()
+            "#,
+        )
         .unwrap();
-    assert_eq!(count, 0);
+    assert_eq!(display_count, 0);
+    assert_eq!(vas_count, 0);
+}
+
+#[test]
+fn get_character_service_display_data_returns_default_shape() {
+    let env = env();
+    let has_shape: bool = env
+        .eval(
+            r#"
+            local data = C_CharacterServices.GetCharacterServiceDisplayData()
+            return data.boostLevel == 80 and
+                data.flowTitle == "Character Upgrade" and
+                data.popupInfo.textureKit == "characterupdate"
+            "#,
+        )
+        .unwrap();
+    assert!(has_shape);
 }
 
 #[test]
