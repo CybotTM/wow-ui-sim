@@ -248,7 +248,7 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
         let _ = patch_account_store_set_storefront(env);
     }
     if addon_name == "Blizzard_CatalogShop" {
-        let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
+        temporary::catalog_shop_product_card_defaults::patch_for_runtime_addon_load(env);
     }
     if addon_name == "Blizzard_DamageMeter" {
         patch_damage_meter_initial_scrollbox_extent(env);

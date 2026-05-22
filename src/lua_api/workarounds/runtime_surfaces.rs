@@ -161,7 +161,7 @@ pub(super) fn patch_talent_edge_frame_level_sync(env: &crate::lua_api::WowLuaEnv
 }
 
 pub(super) fn patch_catalog_shop_product_card_defaults(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
+    temporary::catalog_shop_product_card_defaults::patch(env);
 }
 
 pub(super) fn patch_objective_tracker_quest_header(env: &crate::lua_api::WowLuaEnv) {

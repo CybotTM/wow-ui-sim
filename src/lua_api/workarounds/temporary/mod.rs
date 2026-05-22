@@ -5,6 +5,7 @@ pub(crate) mod artifact_ui_show_panel_guard;
 pub(crate) mod auction_house_categories_refresh_count;
 pub(crate) mod auction_house_search_context_aliases;
 pub(crate) mod auth_challenge_frame_parent;
+pub(crate) mod catalog_shop_product_card_defaults;
 pub(crate) mod character_create_defaults;
 pub(crate) mod character_frame_surface_refresh;
 pub(crate) mod chat_voice_button_surface;
