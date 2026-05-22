@@ -3,6 +3,8 @@
 //! The Calendar UI loads against an empty calendar:
 //! - `GetMonthInfo(offset)` returns a sane month skeleton so OnLoad code
 //!   indexing `.month`/`.year`/`.numDays`/`.firstWeekday` doesn't crash.
+//! - `GetDefaultGuildFilter` returns the empty guild filter used by calendar
+//!   invite setup.
 //! - `EventGetTypesDisplayOrdered` returns an empty array so `ipairs` over
 //!   the dropdown setup at load time is well-formed.
 //! - All other commonly-called methods return safe defaults (no events,
@@ -22,6 +24,12 @@ pub fn register_c_calendar(state: &mut LuaState) -> LuaResult<()> {
         unreachable!("C_Calendar must be a table");
     };
     table_set_rust_fn_static(state, t_ref, "GetMonthInfo", get_month_info)?;
+    table_set_rust_fn_static(
+        state,
+        t_ref,
+        "GetDefaultGuildFilter",
+        get_default_guild_filter,
+    )?;
     table_set_rust_fn_static(state, t_ref, "GetMaxCreateDate", empty_date_info)?;
     table_set_rust_fn_static(state, t_ref, "GetMinDate", empty_date_info)?;
     table_set_rust_fn_static(
@@ -42,6 +50,15 @@ pub fn register_c_calendar(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, t_ref, "OpenCalendar", noop)?;
     table_set_rust_fn_static(state, t_ref, "CloseEvent", noop)?;
     Ok(())
+}
+
+fn get_default_guild_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let t = create_table(state);
+    table_set(state, t, "minLevel", Val::Num(1.0));
+    table_set(state, t, "maxLevel", Val::Num(80.0));
+    table_set(state, t, "rank", Val::Num(1.0));
+    state.push(t);
+    Ok(1)
 }
 
 fn noop(_state: &mut LuaState) -> LuaResult<u32> {

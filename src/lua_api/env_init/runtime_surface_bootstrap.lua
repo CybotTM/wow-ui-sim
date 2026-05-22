@@ -10909,16 +10909,6 @@ if rawget(_G, "ToggleEncounterJournal") == nil then
   end
 end
 
-C_Calendar = __wow_merge_namespace(C_Calendar, {
-  GetDefaultGuildFilter = function()
-    return {
-      minLevel = 1,
-      maxLevel = GetMaxLevelForLatestExpansion(),
-      rank = 1,
-    }
-  end,
-})
-
 C_MajorFactions = __wow_merge_namespace(C_MajorFactions, {
   GetMajorFactionData = function(factionID)
     return {
