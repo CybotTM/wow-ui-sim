@@ -1,8 +1,7 @@
 use crate::c_api::ensure_namespace;
 use crate::lua_api::globals::currency_data;
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, create_table_with_capacity, table_set_static,
-    val_to_string,
+    borrow_state, create_string, create_table_with_capacity, table_set_static, val_to_string,
 };
 use crate::lua_api::state::CurrencyInfo;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -17,6 +16,8 @@ const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
         c_currency_get_backpack_currency_info,
     ),
     ("GetBasicCurrencyInfo", c_currency_get_basic_currency_info),
+    ("GetCoinIcon", c_currency_get_coin_icon),
+    ("GetCoinText", c_currency_get_coin_text),
     ("GetCoinTextureString", c_currency_get_coin_texture_string),
     ("GetCurrencyInfo", c_currency_get_currency_info),
     (
@@ -33,7 +34,12 @@ const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
         c_currency_get_war_resources_currency_id,
     ),
 ];
+const CURRENCY_LIST_INFO_HASH_FIELDS: usize = 7;
 const CURRENCY_INFO_HASH_FIELDS: usize = 24;
+const CURRENCY_DISPLAY_INFO_HASH_FIELDS: usize = 6;
+const GOLD_COIN_ICON_FILE_ID: i32 = 133784;
+const SILVER_COIN_ICON_FILE_ID: i32 = 133785;
+const COPPER_COIN_ICON_FILE_ID: i32 = 133786;
 
 pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_CurrencyInfo")?;
@@ -54,7 +60,7 @@ fn c_currency_get_list_info(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, CURRENCY_LIST_INFO_HASH_FIELDS);
     let name = create_string(state, entry.name);
     table_set_static(
         state,
@@ -87,6 +93,53 @@ fn c_currency_get_coin_texture_string(state: &mut LuaState) -> LuaResult<u32> {
     let amount = create_string(state, &format!("{amount}"));
     state.push(amount);
     Ok(1)
+}
+
+fn c_currency_get_coin_icon(state: &mut LuaState) -> LuaResult<u32> {
+    let amount = i64::from_stack(state, 1)?;
+    let icon = coin_icon_for_amount(amount);
+    state.push(Val::Num(icon as f64));
+    Ok(1)
+}
+
+fn c_currency_get_coin_text(state: &mut LuaState) -> LuaResult<u32> {
+    let amount = i64::from_stack(state, 1)?;
+    let separator = Option::<String>::from_stack(state, 2)?.unwrap_or_else(|| ", ".to_string());
+    let text = coin_text(amount, &separator);
+    let text = create_string(state, &text);
+    state.push(text);
+    Ok(1)
+}
+
+fn coin_icon_for_amount(amount: i64) -> i32 {
+    let abs_amount = amount.unsigned_abs();
+    if abs_amount >= 10_000 {
+        return GOLD_COIN_ICON_FILE_ID;
+    }
+    if abs_amount >= 100 {
+        return SILVER_COIN_ICON_FILE_ID;
+    }
+    COPPER_COIN_ICON_FILE_ID
+}
+
+fn coin_text(amount: i64, separator: &str) -> String {
+    let sign = if amount < 0 { "-" } else { "" };
+    let abs_amount = amount.unsigned_abs();
+    let gold = abs_amount / 10_000;
+    let silver = (abs_amount / 100) % 100;
+    let copper = abs_amount % 100;
+
+    let mut parts = Vec::new();
+    if gold > 0 {
+        parts.push(format!("{sign}{gold} Gold"));
+    }
+    if silver > 0 {
+        parts.push(format!("{silver} Silver"));
+    }
+    if copper > 0 || parts.is_empty() {
+        parts.push(format!("{copper} Copper"));
+    }
+    parts.join(separator)
 }
 
 fn c_currency_get_backpack_currency_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -270,7 +323,7 @@ fn push_currency_display_info_by_id(
     let Some(info) = info else {
         return Ok(0);
     };
-    let t = create_table(state);
+    let t = create_table_with_capacity(state, CURRENCY_DISPLAY_INFO_HASH_FIELDS);
     let name = create_string(state, &info.name);
     let description = create_string(state, &info.description);
     table_set_static(state, t, "actualAmount", Val::Num(quantity as f64));
@@ -336,6 +389,52 @@ mod tests {
 
         assert_eq!(name, "Valorstones");
         assert_eq!(field_count, CURRENCY_INFO_HASH_FIELDS as i32);
+    }
+
+    #[test]
+    fn coin_text_formats_gold_silver_and_copper_parts() {
+        assert_eq!(coin_text(0, ", "), "0 Copper");
+        assert_eq!(coin_text(99, ", "), "99 Copper");
+        assert_eq!(coin_text(12_345, " / "), "1 Gold / 23 Silver / 45 Copper");
+        assert_eq!(coin_text(-10_000, ", "), "-1 Gold");
+    }
+
+    #[test]
+    fn coin_icon_uses_highest_nonzero_denomination() {
+        assert_eq!(coin_icon_for_amount(99), COPPER_COIN_ICON_FILE_ID);
+        assert_eq!(coin_icon_for_amount(100), SILVER_COIN_ICON_FILE_ID);
+        assert_eq!(coin_icon_for_amount(10_000), GOLD_COIN_ICON_FILE_ID);
+        assert_eq!(coin_icon_for_amount(-10_000), GOLD_COIN_ICON_FILE_ID);
+    }
+
+    #[test]
+    fn coin_icon_and_text_are_registered_on_c_currency_info() {
+        let env = WowLuaEnv::new().expect("env should initialize");
+        let (coin_icon, coin_text): (i32, String) = env
+            .eval(
+                "return C_CurrencyInfo.GetCoinIcon(12345), C_CurrencyInfo.GetCoinText(12345, ' / ')",
+            )
+            .expect("coin helpers should evaluate");
+
+        assert_eq!(coin_icon, GOLD_COIN_ICON_FILE_ID);
+        assert_eq!(coin_text, "1 Gold / 23 Silver / 45 Copper");
+    }
+
+    #[test]
+    fn coin_helpers_can_be_aliased_by_deprecated_currency_script() {
+        let env = WowLuaEnv::new().expect("env should initialize");
+        let aliases_match: bool = env
+            .eval(
+                r#"
+                GetCoinIcon = C_CurrencyInfo.GetCoinIcon
+                GetCoinText = C_CurrencyInfo.GetCoinText
+                return GetCoinIcon == C_CurrencyInfo.GetCoinIcon
+                    and GetCoinText == C_CurrencyInfo.GetCoinText
+                "#,
+            )
+            .expect("coin aliases should evaluate");
+
+        assert!(aliases_match);
     }
 }
 

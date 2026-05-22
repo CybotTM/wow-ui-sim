@@ -563,6 +563,8 @@ fn test_c_currency_info_api() {
 
     for f in &[
         "GetCurrencyListInfo",
+        "GetCoinIcon",
+        "GetCoinText",
         "GetCoinTextureString",
         "GetAzeriteCurrencyID",
         "GetWarResourcesCurrencyID",
