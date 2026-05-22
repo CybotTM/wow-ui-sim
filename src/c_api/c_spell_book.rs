@@ -3,8 +3,8 @@
 use crate::c_api::ensure_namespace;
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_string_static, create_table, frame_ref,
-    table_set_num, table_set_static,
+    borrow_state, borrow_state_mut, create_string, create_string_static, create_table,
+    create_table_with_capacity, frame_ref, table_set_num, table_set_static,
 };
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
@@ -15,6 +15,9 @@ use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+
+const SPELLBOOK_SKILL_LINE_INFO_HASH_FIELDS: usize = 7;
+const SPELLBOOK_ITEM_INFO_HASH_FIELDS: usize = 9;
 
 pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_SpellBook")?;
@@ -448,7 +451,7 @@ fn c_spell_book_get_spell_book_skill_line_info(state: &mut LuaState) -> LuaResul
         return Ok(1);
     };
 
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, SPELLBOOK_SKILL_LINE_INFO_HASH_FIELDS);
     set_skill_line_identity_fields(state, info, index, skill_line);
     set_skill_line_spec_fields(state, info, skill_line);
     state.push(info);
@@ -595,7 +598,7 @@ fn spellbook_item_info(state: &mut LuaState, slot: i32) -> Option<Val> {
     let name_val = create_string_static(state, name);
     let sub_name_val = create_string_static(state, "");
 
-    let info = create_table(state);
+    let info = create_table_with_capacity(state, SPELLBOOK_ITEM_INFO_HASH_FIELDS);
     table_set_static(state, info, "actionID", Val::Num(entry.spell_id as f64));
     table_set_static(state, info, "spellID", Val::Num(entry.spell_id as f64));
     table_set_static(state, info, "itemType", Val::Num(1.0));
