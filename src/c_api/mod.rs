@@ -18,6 +18,7 @@ pub mod c_barber_shop;
 pub mod c_cursor;
 pub mod c_fog_of_war;
 pub mod c_glue;
+pub mod c_login;
 pub mod c_major_factions;
 pub mod c_map;
 pub mod c_map_exploration_info;
@@ -73,6 +74,7 @@ fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<(
 
 fn register_glue_and_display_tables(state: &mut LuaState) -> LuaResult<()> {
     c_glue::register_c_glue(state)?;
+    c_login::register_c_login(state)?;
     c_ui::register_c_ui(state)
 }
 

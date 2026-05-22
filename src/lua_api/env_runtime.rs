@@ -85,16 +85,7 @@ impl WowLuaEnv {
     /// Select which UI surface should be loaded.
     pub fn set_screen_mode(&self, screen_kind: ScreenKind) {
         self.state.borrow_mut().set_screen_kind(screen_kind);
-        let (aurora_state, connected_to_wow, wow_connection_state, has_realm_list) =
-            screen_kind.login_state();
-        install_screen_mode_globals(
-            self,
-            screen_kind,
-            aurora_state,
-            connected_to_wow,
-            wow_connection_state,
-            has_realm_list,
-        );
+        install_screen_mode_globals(self, screen_kind);
     }
 
     /// Toggle whether the simulated player is logged into the world.
@@ -330,14 +321,7 @@ fn install_screen_size_globals(env: &WowLuaEnv, width: f32, height: f32) {
     ));
 }
 
-fn install_screen_mode_globals(
-    env: &WowLuaEnv,
-    screen_kind: ScreenKind,
-    aurora_state: i32,
-    connected_to_wow: bool,
-    wow_connection_state: i32,
-    has_realm_list: bool,
-) {
+fn install_screen_mode_globals(env: &WowLuaEnv, screen_kind: ScreenKind) {
     let is_glue = if screen_kind.is_glue() {
         "true"
     } else {
@@ -346,11 +330,6 @@ fn install_screen_mode_globals(
     let _ = env.exec(&format!(
         r#"
         __wow_screen_mode_is_glue = {is_glue}
-        __wow_login_aurora_state = {aurora_state}
-        __wow_login_connected_to_wow = {connected_to_wow}
-        __wow_login_wow_connection_state = {wow_connection_state}
-        __wow_login_has_realm_list = {has_realm_list}
-
         function InGlue()
             return {is_glue}
         end
