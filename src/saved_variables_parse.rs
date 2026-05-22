@@ -5,7 +5,7 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::string::LuaString;
 use rilua::vm::table::Table;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 const MAX_CACHED_TABLE_PATH_BYTES: usize = 8192;
 
@@ -25,7 +25,7 @@ pub(super) struct SavedVariablesTableSize {
 
 #[derive(Debug, Default)]
 pub(super) struct SavedVariablesTableSizeCache {
-    sizes: HashMap<String, SavedVariablesTableSize>,
+    sizes: FxHashMap<String, SavedVariablesTableSize>,
 }
 
 impl SavedVariablesTableSizeCache {
@@ -46,7 +46,7 @@ struct Parser<'a, 's> {
     state: &'a mut LuaState,
     bytes: &'s [u8],
     pos: usize,
-    key_cache: HashMap<String, GcRef<LuaString>>,
+    key_cache: FxHashMap<String, GcRef<LuaString>>,
     table_size_cache: Option<&'a mut SavedVariablesTableSizeCache>,
 }
 
@@ -60,7 +60,7 @@ impl<'a, 's> Parser<'a, 's> {
             state,
             bytes: source.as_bytes(),
             pos: 0,
-            key_cache: HashMap::new(),
+            key_cache: FxHashMap::default(),
             table_size_cache,
         }
     }
