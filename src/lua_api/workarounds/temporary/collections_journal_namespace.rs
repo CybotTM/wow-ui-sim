@@ -17,11 +17,26 @@ if type(C_MountJournal) == "table" then
             return nil
         end
     end
+    if rawget(C_MountJournal, "ApplyMountEquipment") == nil then
+        function C_MountJournal.ApplyMountEquipment(_mountID)
+        end
+    end
+    if rawget(C_MountJournal, "Pickup") == nil then
+        function C_MountJournal.Pickup(_mountID)
+        end
+    end
 end
 
-if type(C_PetJournal) == "table" and rawget(C_PetJournal, "IsUsingDefaultFilters") == nil then
-    function C_PetJournal.IsUsingDefaultFilters()
-        return true
+if type(C_PetJournal) == "table" then
+    if rawget(C_PetJournal, "IsUsingDefaultFilters") == nil then
+        function C_PetJournal.IsUsingDefaultFilters()
+            return true
+        end
+    end
+    if rawget(C_PetJournal, "PetCanBeReleased") == nil then
+        function C_PetJournal.PetCanBeReleased(_petID)
+            return false
+        end
     end
 end
 
@@ -57,19 +72,32 @@ mod tests {
 
         patch(&loader_env);
 
-        let (mount_defaults, displayed_id_is_nil, pet_defaults): (bool, bool, bool) = env
+        let (
+            mount_defaults,
+            displayed_id_is_nil,
+            applied_mount_equipment_is_nil,
+            picked_up_mount_is_nil,
+            pet_defaults,
+            pet_can_be_released,
+        ): (bool, bool, bool, bool, bool, bool) = env
             .eval(
                 r#"
                 return C_MountJournal.IsUsingDefaultFilters(),
                     C_MountJournal.GetDisplayedMountID(1) == nil,
-                    C_PetJournal.IsUsingDefaultFilters()
+                    C_MountJournal.ApplyMountEquipment(1) == nil,
+                    C_MountJournal.Pickup(1) == nil,
+                    C_PetJournal.IsUsingDefaultFilters(),
+                    C_PetJournal.PetCanBeReleased("pet")
                 "#,
             )
             .expect("journal namespace defaults should be callable");
 
         assert!(mount_defaults);
         assert!(displayed_id_is_nil);
+        assert!(applied_mount_equipment_is_nil);
+        assert!(picked_up_mount_is_nil);
         assert!(pet_defaults);
+        assert!(!pet_can_be_released);
     }
 
     #[test]
@@ -84,10 +112,19 @@ mod tests {
                 GetDisplayedMountID = function()
                     return 123
                 end,
+                ApplyMountEquipment = function()
+                    return "applied"
+                end,
+                Pickup = function()
+                    return "picked"
+                end,
             }
             C_PetJournal = {
                 IsUsingDefaultFilters = function()
                     return false
+                end,
+                PetCanBeReleased = function()
+                    return true
                 end,
             }
             "#,
@@ -97,19 +134,32 @@ mod tests {
 
         patch(&loader_env);
 
-        let (mount_defaults, displayed_id, pet_defaults): (bool, i64, bool) = env
+        let (
+            mount_defaults,
+            displayed_id,
+            applied_mount_equipment,
+            picked_up_mount,
+            pet_defaults,
+            pet_can_be_released,
+        ): (bool, i64, String, String, bool, bool) = env
             .eval(
                 r#"
                 return C_MountJournal.IsUsingDefaultFilters(),
                     C_MountJournal.GetDisplayedMountID(1),
-                    C_PetJournal.IsUsingDefaultFilters()
+                    C_MountJournal.ApplyMountEquipment(1),
+                    C_MountJournal.Pickup(1),
+                    C_PetJournal.IsUsingDefaultFilters(),
+                    C_PetJournal.PetCanBeReleased("pet")
                 "#,
             )
             .expect("existing journal namespace defaults should be callable");
 
         assert!(!mount_defaults);
         assert_eq!(displayed_id, 123);
+        assert_eq!(applied_mount_equipment, "applied");
+        assert_eq!(picked_up_mount, "picked");
         assert!(!pet_defaults);
+        assert!(pet_can_be_released);
     }
 
     #[test]
