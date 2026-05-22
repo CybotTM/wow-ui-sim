@@ -219,27 +219,6 @@ CombatLogInbound = CombatLogInbound or {
   end,
 }
 
-C_GossipInfo = C_GossipInfo or __wow_namespace()
-if rawget(C_GossipInfo, "GetFriendshipReputation") == nil then
-  function C_GossipInfo.GetFriendshipReputation(_factionID)
-    return {
-      friendshipFactionID = 0,
-      reaction = 0,
-      currentReactionThreshold = 0,
-      nextReactionThreshold = 0,
-      currentStanding = 0,
-    }
-  end
-end
-if rawget(C_GossipInfo, "GetFriendshipReputationRanks") == nil then
-  function C_GossipInfo.GetFriendshipReputationRanks(_factionID)
-    return {
-      currentLevel = 0,
-      maxLevel = 0,
-    }
-  end
-end
-
 if FCF_OnUpdate == nil then
   FCF_OnUpdate = __wow_noop
 end

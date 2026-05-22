@@ -55,6 +55,28 @@ fn get_poi_for_ui_map_id_returns_nil() {
 }
 
 #[test]
+fn friendship_reputation_defaults_are_zeroed_tables() {
+    let env = env();
+    let result: (i32, i32, i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            local rep = C_GossipInfo.GetFriendshipReputation(1)
+            local ranks = C_GossipInfo.GetFriendshipReputationRanks(1)
+            return
+                rep.friendshipFactionID,
+                rep.reaction,
+                rep.currentReactionThreshold,
+                rep.nextReactionThreshold,
+                rep.currentStanding,
+                ranks.currentLevel,
+                ranks.maxLevel
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, (0, 0, 0, 0, 0, 0, 0));
+}
+
+#[test]
 fn get_text_returns_seeded_gossip_text() {
     let env = env();
 
