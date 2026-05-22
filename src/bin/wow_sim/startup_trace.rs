@@ -1,6 +1,17 @@
 use wow_ui_sim::font::WowFontSystem;
 use wow_ui_sim::logging;
 
+pub(super) fn time_load_step<T>(name: &str, action: impl FnOnce() -> T) -> T {
+    wow_ui_sim::logging::eprintln_elapsed(&format!("[Startup] begin {name}"));
+    let started = std::time::Instant::now();
+    let result = action();
+    wow_ui_sim::logging::eprintln_elapsed(&format!(
+        "[Startup] end {name} in {:.2?}",
+        started.elapsed()
+    ));
+    result
+}
+
 pub(super) fn print_process_started() {
     eprintln!(
         "[  0.000s] [startup] wow-sim process started pid={}",

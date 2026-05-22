@@ -3,7 +3,6 @@ mod cache_texture;
 #[cfg(feature = "gui")]
 mod gui_commands;
 mod startup_trace;
-
 use cache_texture::run_cache_texture;
 use clap::{Parser, Subcommand};
 use std::cell::RefCell;
@@ -273,18 +272,25 @@ fn init_and_load(
     // (closures + frame tables + registry entries stay live), and we'd
     // rather walk them once in a final full_gc than mark them on every
     // threshold hit.
-    env.gc_stop();
-    let mut saved_vars = configure_saved_vars(args);
-    addon_loading::load_edit_mode_cache(&env, saved_vars.as_ref());
-    addon_loading::load_blizzard_addons(&env, &mut saved_vars, screen);
-    addon_loading::load_third_party_addons(
-        args.skip_addons(),
-        args.is_test_command(),
-        &env,
-        &mut saved_vars,
-        screen,
-    );
-    env.sync_addon_names_to_lua();
+    startup_trace::time_load_step("stop GC", || env.gc_stop());
+    let mut saved_vars =
+        startup_trace::time_load_step("configure saved variables", || configure_saved_vars(args));
+    startup_trace::time_load_step("load edit mode cache", || {
+        addon_loading::load_edit_mode_cache(&env, saved_vars.as_ref())
+    });
+    startup_trace::time_load_step("load Blizzard addons", || {
+        addon_loading::load_blizzard_addons(&env, &mut saved_vars, screen)
+    });
+    startup_trace::time_load_step("load third-party addons", || {
+        addon_loading::load_third_party_addons(
+            args.skip_addons(),
+            args.is_test_command(),
+            &env,
+            &mut saved_vars,
+            screen,
+        )
+    });
+    startup_trace::time_load_step("sync addon names to Lua", || env.sync_addon_names_to_lua());
     apply_post_load_workarounds(&env);
     restart_gc_after_bootstrap(&env);
     Ok((env, font_system, saved_vars))
