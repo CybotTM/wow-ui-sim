@@ -136,11 +136,6 @@ fn instant_spell_does_not_show_cast_bar() {
 
 /// Load all Blizzard addons and fire startup events.
 fn env_with_full_blizzard_ui() -> WowLuaEnv {
-    let ui = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
-    env_with_blizzard_ui_from(ui)
-}
-
-fn env_with_cached_blizzard_ui() -> WowLuaEnv {
     let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path()
         .expect("Blizzard UI cache should be available for cached full UI tests");
     env_with_blizzard_ui_from(ui)
@@ -372,42 +367,87 @@ fn cast_bar_visible_during_cast() {
 }
 
 #[test]
-fn cast_bar_attaches_through_normal_edit_mode_path_after_startup_fix() {
+fn cast_bar_respects_edit_mode_lock_setting_after_startup_fix() {
     test_timeout! {
         let env = env_with_full_blizzard_ui();
 
-        env.apply_post_event_workarounds();
-
-        let attached_after_post_event: bool = env
+        let (lock_value, attached_after_post_event, parent_after_post_event): (i64, bool, String) = env
             .eval(
                 r#"
-                return PlayerCastingBarFrame:IsAttachedToPlayerFrame() or false
+                local cast = PlayerCastingBarFrame
+                local parent = cast and cast:GetParent()
+                local lockValue = cast and cast.GetSettingValue
+                    and cast:GetSettingValue(Enum.EditModeCastBarSetting.LockToPlayerFrame)
+                    or -1
+                return lockValue,
+                    cast:IsAttachedToPlayerFrame() or false,
+                    parent and parent:GetName() or "nil"
                 "#,
             )
             .unwrap();
 
+        assert_eq!(lock_value, 0, "default layout keeps the cast bar unlocked");
         assert!(
-            attached_after_post_event,
-            "post-event startup should attach the cast bar without a dedicated direct-attach workaround"
+            !attached_after_post_event,
+            "unlocked startup cast bar should stay under the frame manager"
+        );
+        assert_eq!(
+            parent_after_post_event, "UIParentBottomManagedFrameContainer",
+            "unlocked startup cast bar should remain frame-manager parented"
         );
 
-        let (apply_ok, attached_after_manual_player_anchor): (bool, bool) = env
+        let (player_apply_ok, attached_after_player_anchor): (bool, bool) = env
             .eval(
                 r#"
                 PlayerFrame_DetachCastBar()
-                local applyOk = pcall(function()
+                local playerApplyOk = pcall(function()
                     PlayerFrame:ApplySystemAnchor()
                 end)
-                return applyOk, PlayerCastingBarFrame:IsAttachedToPlayerFrame() or false
+                return playerApplyOk, PlayerCastingBarFrame:IsAttachedToPlayerFrame() or false
                 "#,
             )
             .unwrap();
 
-        assert!(apply_ok, "PlayerFrame:ApplySystemAnchor should still run successfully");
+        assert!(player_apply_ok, "PlayerFrame:ApplySystemAnchor should still run successfully");
         assert!(
-            attached_after_manual_player_anchor,
-            "reapplying the normal player-frame anchor path should reattach the cast bar after detach"
+            !attached_after_player_anchor,
+            "player-frame anchoring should not override the cast bar's unlocked edit-mode setting"
         );
+
+        let (cast_apply_ok, attached_after_cast_anchor, parent_after_cast_anchor): (
+            bool,
+            bool,
+            String,
+        ) = env
+            .eval(
+                r#"
+                for _, settingInfo in ipairs(PlayerCastingBarFrame.systemInfo.settings or {}) do
+                    if settingInfo.setting == Enum.EditModeCastBarSetting.LockToPlayerFrame then
+                        settingInfo.value = 1
+                    end
+                end
+                PlayerCastingBarFrame:UpdateSettingMap(true)
+
+                local castApplyOk = pcall(function()
+                    PlayerCastingBarFrame:ApplySystemAnchor()
+                end)
+                local parent = PlayerCastingBarFrame:GetParent()
+                return castApplyOk,
+                    PlayerCastingBarFrame:IsAttachedToPlayerFrame() or false,
+                    parent and parent:GetName() or "nil"
+                "#,
+            )
+            .unwrap();
+
+        assert!(
+            cast_apply_ok,
+            "PlayerCastingBarFrame:ApplySystemAnchor should handle locked mode"
+        );
+        assert!(
+            attached_after_cast_anchor,
+            "locked cast-bar edit-mode anchor path should attach to PlayerFrame"
+        );
+        assert_eq!(parent_after_cast_anchor, "PlayerFrame");
     }
 }
 
@@ -537,7 +577,7 @@ fn paladin_aura_spell_replaces_previous_paladin_aura() {
 #[test]
 fn paladin_aura_cast_refreshes_blizzard_buff_frame() {
     test_timeout! {
-        let env = env_with_cached_blizzard_ui();
+        let env = env_with_full_blizzard_ui();
         install_test_error_handler(&env);
         env.exec(
             r#"
