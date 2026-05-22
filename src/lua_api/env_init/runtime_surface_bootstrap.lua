@@ -2412,35 +2412,6 @@ Kiosk = __wow_merge_namespace(Kiosk, {
   IsCompetitiveModeEnabled = function() return false end,
 })
 
-C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
-  PerformEmote = function() return false end,
-  CancelEmote = __wow_noop,
-  IsValidChatLine = function() return false end,
-  ReplaceIconAndGroupExpressions = function(message) return message end,
-  SendChatMessage = function(...)
-    local fn = rawget(_G, "__wow_send_chat_message")
-    if type(fn) == "function" then
-      return fn(...)
-    end
-  end,
-  AreOutgoingAddonChatMessagesRestricted = function() return false end,
-  GetNumReservedChatWindows = function() return 0 end,
-  GetNumActiveChannels = function() return 0 end,
-  GetChannelRulesetForChannelID = function() return 0 end,
-  GetChannelRuleset = function() return 0 end,
-  GetChannelInfoFromIdentifier = function() return nil end,
-  GetChatLineText = function() return nil end,
-  IsTimerunningPlayer = function() return false end,
-  UncensorChatLine = __wow_noop,
-  DropCautionaryChatMessage = __wow_noop,
-  SendCautionaryChatMessage = __wow_noop,
-  GetChannelShortcut = function(index) return tostring(index or "") end,
-  GetGeneralChannelLocalID = function() return 0 end,
-  GetGeneralChannelID = function() return 0 end,
-  GetChannelShortcutForChannelID = function() return "" end,
-  IsChannelRegionalForChannelID = function() return false end,
-})
-
 -- C_LFGList is state-backed via `src/lua_api/globals/lfg_list.rs`.
 -- C_AddOnProfiler is state-backed via `src/c_api/c_addon_profiler.rs`.
 -- C_Ping.GetDefaultPingOptions is a temporary shim in `src/c_api/temporary_shims/c_ping.rs`.
