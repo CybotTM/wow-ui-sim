@@ -185,3 +185,9 @@ pub(crate) fn patch_playerspells_onload_backfill(
 ) -> Result<(), crate::Error> {
     temporary::player_spells_onload_backfill::patch(env)
 }
+
+pub(crate) fn patch_shared_xml_anim_mixins(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) -> Result<(), crate::Error> {
+    temporary::shared_xml_anim_mixins::patch(env)
+}

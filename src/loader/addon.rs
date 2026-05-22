@@ -157,38 +157,8 @@ fn patch_account_store_set_storefront(env: &LoaderEnv<'_>, result: &mut LoadResu
     }
 }
 
-const SHARED_XML_ANIM_MIXIN_PATCH: &str = r#"
-    local mixins = {
-        VisibleWhilePlayingAnimGroupMixin,
-        TargetsVisibleWhilePlayingAnimGroupMixin,
-        SyncedAnimGroupMixin,
-    }
-
-    for _, mixin in ipairs(mixins) do
-        if type(mixin) == "table" and type(mixin.SetPlaying) ~= "function" then
-            function mixin:SetPlaying(playing)
-                if playing then
-                    if type(self.Show) == "function" then
-                        self:Show()
-                    end
-                    if type(self.PlaySynced) == "function" then
-                        self:PlaySynced()
-                    else
-                        self:Play()
-                    end
-                else
-                    self:Stop()
-                    if type(self.Hide) == "function" then
-                        self:Hide()
-                    end
-                end
-            end
-        end
-    end
-"#;
-
 fn patch_shared_xml_anim_mixins(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = env.exec(SHARED_XML_ANIM_MIXIN_PATCH) {
+    if let Err(e) = crate::lua_api::workarounds::patch_shared_xml_anim_mixins(env) {
         push_patch_warning(
             result,
             "Blizzard_SharedXML",

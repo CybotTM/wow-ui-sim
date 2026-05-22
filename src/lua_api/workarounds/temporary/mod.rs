@@ -34,6 +34,7 @@ pub(crate) mod player_spells_onload_backfill;
 pub(crate) mod post_event_action_button_refresh;
 pub(crate) mod post_event_frame_layout;
 pub(crate) mod settings_canvas_visibility;
+pub(crate) mod shared_xml_anim_mixins;
 pub(crate) mod source_patches;
 pub(crate) mod startup_windows;
 pub(crate) mod talent_edge_frame_level_sync;

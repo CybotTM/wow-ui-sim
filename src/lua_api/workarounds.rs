@@ -9,6 +9,7 @@ pub(crate) use temporary::source_patches::patch_lua_source;
 use runtime_surfaces::*;
 pub(crate) use runtime_surfaces::{
     patch_account_store_set_storefront, patch_playerspells_onload_backfill,
+    patch_shared_xml_anim_mixins,
 };
 use std::time::Instant;
 
