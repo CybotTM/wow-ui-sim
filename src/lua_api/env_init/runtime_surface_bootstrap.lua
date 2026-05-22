@@ -9784,7 +9784,6 @@ C_HousingCatalog = __wow_merge_namespace(C_HousingCatalog, {
   end,
   GetProductAvailabilityTimeRemainingSecs = function() return 1 end,
 })
-C_ScriptedAnimations = C_ScriptedAnimations or __wow_namespace()
 C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
 C_ContentTracking = __wow_merge_namespace(C_ContentTracking, {
@@ -10782,12 +10781,6 @@ C_PvP = __wow_merge_namespace(C_PvP, {
   IsInBrawl = function() return false end,
   IsSoloShuffle = function() return false end,
   GetArenaCrowdControlInfo = function() return nil, 0, 0 end,
-})
-
-C_ScriptedAnimations = __wow_merge_namespace(C_ScriptedAnimations, {
-  GetAllScriptedAnimationEffects = function()
-    return {}
-  end,
 })
 
 C_XMLUtil = C_XMLUtil or __wow_namespace({
