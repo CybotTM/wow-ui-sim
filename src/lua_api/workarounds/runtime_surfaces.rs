@@ -156,7 +156,7 @@ pub(super) fn patch_container_frame_token_tracker(env: &crate::lua_api::WowLuaEn
 }
 
 pub(super) fn patch_paging_controls_page_text(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA);
+    temporary::paging_controls_page_text::patch(env);
 }
 
 pub(super) fn patch_achievement_display_set_achievements(env: &crate::lua_api::WowLuaEnv) {
@@ -166,44 +166,6 @@ pub(super) fn patch_achievement_display_set_achievements(env: &crate::lua_api::W
 pub(super) fn patch_talent_edge_frame_level_sync(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(TALENT_EDGE_FRAME_LEVEL_SYNC_WORKAROUND_LUA);
 }
-
-pub(super) const PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA: &str = r#"
-    if type(PagingControlsMixin) ~= "table"
-        or type(PagingControlsMixin.UpdateControls) ~= "function" then
-        return
-    end
-
-    if rawget(_G, "__wow_paging_controls_update_controls_wrapper") then
-        return
-    end
-
-    local original_update_controls = PagingControlsMixin.UpdateControls
-    PagingControlsMixin.UpdateControls = function(self, ...)
-        original_update_controls(self, ...)
-
-        local pageText = self and self.PageText
-        if type(pageText) ~= "table" or type(pageText.SetText) ~= "function" then
-            return
-        end
-
-        local currentPage = tonumber(self.currentPage) or 1
-        local maxPages = tonumber(self.maxPages) or 1
-        local formatString
-        local formatted
-
-        if self.displayMaxPages then
-            formatString = self.currentPageWithMaxText or PAGE_NUMBER_WITH_MAX
-            formatted = string.format(formatString, currentPage, maxPages)
-        else
-            formatString = self.currentPageOnlyText or PAGE_NUMBER
-            formatted = string.format(formatString, currentPage)
-        end
-
-        pageText:SetText(formatted)
-    end
-
-    rawset(_G, "__wow_paging_controls_update_controls_wrapper", true)
-"#;
 
 pub(super) const TALENT_EDGE_FRAME_LEVEL_SYNC_WORKAROUND_LUA: &str = r#"
     if rawget(_G, "__wow_talent_edge_frame_level_sync_wrapped") then

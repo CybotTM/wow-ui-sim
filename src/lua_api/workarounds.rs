@@ -213,7 +213,7 @@ fn refresh_post_event_surfaces(env: &crate::lua_api::WowLuaEnv) {
 
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if addon_name == "Blizzard_PagedContent" {
-        let _ = env.exec(PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA);
+        temporary::paging_controls_page_text::patch_loader(env);
     }
     if matches!(
         addon_name,
