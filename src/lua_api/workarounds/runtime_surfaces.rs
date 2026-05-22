@@ -164,37 +164,8 @@ pub(super) fn patch_achievement_display_set_achievements(env: &crate::lua_api::W
 }
 
 pub(super) fn patch_talent_edge_frame_level_sync(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(TALENT_EDGE_FRAME_LEVEL_SYNC_WORKAROUND_LUA);
+    temporary::talent_edge_frame_level_sync::patch(env);
 }
-
-pub(super) const TALENT_EDGE_FRAME_LEVEL_SYNC_WORKAROUND_LUA: &str = r#"
-    if rawget(_G, "__wow_talent_edge_frame_level_sync_wrapped") then
-        return
-    end
-
-    if type(TalentFrameBaseMixin) ~= "table"
-        or type(TalentFrameBaseMixin.UpdateButtonFrameLevel) ~= "function"
-        or type(TalentFrameBaseMixin.MarkEdgesDirty) ~= "function" then
-        return
-    end
-
-    local originalUpdateButtonFrameLevel = TalentFrameBaseMixin.UpdateButtonFrameLevel
-
-    TalentFrameBaseMixin.UpdateButtonFrameLevel = function(self, talentButton, ...)
-        local oldLevel = (talentButton and talentButton.GetFrameLevel) and talentButton:GetFrameLevel() or nil
-        local result = originalUpdateButtonFrameLevel(self, talentButton, ...)
-        if not talentButton or type(self) ~= "table" or type(self.MarkEdgesDirty) ~= "function" then
-            return result
-        end
-        local newLevel = talentButton.GetFrameLevel and talentButton:GetFrameLevel() or nil
-        if oldLevel ~= nil and newLevel ~= nil and oldLevel ~= newLevel then
-            self:MarkEdgesDirty(talentButton)
-        end
-        return result
-    end
-
-    rawset(_G, "__wow_talent_edge_frame_level_sync_wrapped", true)
-"#;
 
 pub(super) const OBJECTIVE_TRACKER_QUEST_HEADER_WORKAROUND_LUA: &str = r#"
         local function ensure_quest_header_text()

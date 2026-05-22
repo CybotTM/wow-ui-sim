@@ -219,7 +219,7 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
         addon_name,
         "Blizzard_SharedTalentUI" | "Blizzard_PlayerSpells"
     ) {
-        let _ = env.exec(TALENT_EDGE_FRAME_LEVEL_SYNC_WORKAROUND_LUA);
+        temporary::talent_edge_frame_level_sync::patch_loader(env);
     }
     patch_runtime_map_addon_surfaces(env, addon_name);
     if addon_name == "Blizzard_Collections" {
