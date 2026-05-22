@@ -269,69 +269,6 @@ function ToggleEncounterJournal()
 end
 "#;
 
-pub(super) const MAIN_MENU_MICROBUTTON_CLICK_WORKAROUND_LUA: &str = r#"
-local function __wow_show_game_menu(frame)
-    if type(ShowUIPanel) == "function" then
-        ShowUIPanel(frame)
-    end
-    if type(frame.IsShown) == "function" and not frame:IsShown() and type(frame.Show) == "function" then
-        frame:Show()
-    end
-end
-
-local function __wow_hide_game_menu(frame)
-    if type(HideUIPanel) == "function" then
-        HideUIPanel(frame)
-    end
-    if type(frame.IsShown) == "function" and frame:IsShown() and type(frame.Hide) == "function" then
-        frame:Hide()
-    end
-end
-
-local function __wow_toggle_main_menu()
-    local gameMenuFrame = rawget(_G, "GameMenuFrame")
-    if not gameMenuFrame then
-        return
-    end
-    if type(AreAllPanelsDisallowed) == "function" and AreAllPanelsDisallowed() then
-        return
-    end
-    if gameMenuFrame:IsShown() then
-        if type(PlaySound) == "function" and SOUNDKIT and SOUNDKIT.IG_MAINMENU_QUIT then
-            PlaySound(SOUNDKIT.IG_MAINMENU_QUIT)
-        end
-        __wow_hide_game_menu(gameMenuFrame)
-    else
-        if type(SettingsPanel) == "table" and type(SettingsPanel.IsShown) == "function" and SettingsPanel:IsShown() and type(SettingsPanel.Close) == "function" then
-            SettingsPanel:Close()
-        end
-        if type(CloseMenus) == "function" then
-            CloseMenus()
-        end
-        if type(CloseAllWindows) == "function" then
-            CloseAllWindows()
-        end
-        if type(PlaySound) == "function" and SOUNDKIT and SOUNDKIT.IG_MAINMENU_OPEN then
-            PlaySound(SOUNDKIT.IG_MAINMENU_OPEN)
-        end
-        __wow_show_game_menu(gameMenuFrame)
-    end
-end
-
-if type(MainMenuMicroButtonMixin) == "table" and not MainMenuMicroButtonMixin.__wow_uisim_click_patched then
-    MainMenuMicroButtonMixin.__wow_uisim_click_patched = true
-    MainMenuMicroButtonMixin.OnClick = function(self, button, down)
-        return __wow_toggle_main_menu()
-    end
-end
-
-if type(MainMenuMicroButton) == "table" and type(MainMenuMicroButton.SetScript) == "function" then
-    MainMenuMicroButton:SetScript("OnClick", function(self, button, down)
-        return __wow_toggle_main_menu()
-    end)
-end
-"#;
-
 pub(super) const TOGGLE_COLLECTIONS_JOURNAL_LUA: &str = r#"
 function ToggleCollectionsJournal(tabIndex)
     if DISALLOW_FRAME_TOGGLING then

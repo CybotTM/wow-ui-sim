@@ -5,7 +5,7 @@ pub(super) fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(TOGGLE_ACHIEVEMENT_FRAME_LUA);
     let _ = env.exec(TOGGLE_ENCOUNTER_JOURNAL_LUA);
     let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
-    let _ = env.exec(MAIN_MENU_MICROBUTTON_CLICK_WORKAROUND_LUA);
+    temporary::main_menu_microbutton_click::patch(env);
 }
 
 pub(super) fn patch_damage_meter_initial_scrollbox_extent(env: &crate::lua_api::LoaderEnv<'_>) {
