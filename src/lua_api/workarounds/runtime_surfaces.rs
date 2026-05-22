@@ -47,7 +47,7 @@ pub(super) fn patch_chat_voice_button_surface(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub(super) fn patch_item_socketing_tooltips(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(ITEM_SOCKETING_TOOLTIPS_WORKAROUND_LUA);
+    temporary::item_socketing_tooltips::patch(env);
 }
 
 pub(super) fn patch_action_bar_button_event_fanout(env: &crate::lua_api::WowLuaEnv) {

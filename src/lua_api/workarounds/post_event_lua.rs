@@ -100,43 +100,6 @@ if type(UIParent) == "table"
 end
 "#;
 
-pub(super) const ITEM_SOCKETING_TOOLTIPS_WORKAROUND_LUA: &str = r#"
-local frame = ItemSocketingFrame
-local container = frame and frame.SocketingContainer
-if type(container) ~= "table" then
-    return
-end
-
-local function install_socket_on_enter(socket, socketIndex)
-    if type(socket) ~= "table" or type(socket.SetScript) ~= "function" then
-        return
-    end
-    socket:SetScript("OnEnter", function(self)
-        if type(GameTooltip) ~= "table" then
-            return
-        end
-        if type(GameTooltip.SetOwner) == "function" then
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        end
-        if type(GameTooltip.SetSocketGem) == "function" then
-            GameTooltip:SetSocketGem(socketIndex)
-        end
-        if type(GameTooltip.NumLines) == "function"
-            and GameTooltip:NumLines() == 0
-            and type(GameTooltip.AddLine) == "function" then
-            GameTooltip:AddLine("Socket Gem " .. tostring(socketIndex))
-        end
-        if type(GameTooltip.Show) == "function" then
-            GameTooltip:Show()
-        end
-    end)
-end
-
-install_socket_on_enter(container.Socket1, 1)
-install_socket_on_enter(container.Socket2, 2)
-install_socket_on_enter(container.Socket3, 3)
-"#;
-
 pub(super) const ACTION_BAR_BUTTON_EVENT_FANOUT_WORKAROUND_LUA: &str = r##"
 if type(ActionBarButtonEventsFrameMixin) ~= "table" then
     return
