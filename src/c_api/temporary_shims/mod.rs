@@ -4,6 +4,7 @@ pub mod c_auto_complete;
 pub mod c_behavioral_messaging;
 pub mod c_black_market;
 pub mod c_calendar;
+pub mod c_campaign_covenant_defaults;
 pub mod c_character_services;
 pub mod c_chat_info;
 pub mod c_class_trial;
