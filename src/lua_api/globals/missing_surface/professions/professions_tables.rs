@@ -7,11 +7,18 @@ use super::{
 use crate::items;
 use crate::lua_api::globals::profession_data;
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, table_get, table_set, table_set_static,
+    borrow_state, create_string, create_table, create_table_with_capacity, table_get, table_set,
+    table_set_static,
 };
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+
+const PROFESSION_TABLE_HASH_FIELDS: usize = 9;
+const CATEGORY_TABLE_HASH_FIELDS: usize = 4;
+const RECIPE_INFO_HASH_FIELDS: usize = 9;
+const REAGENT_INFO_HASH_FIELDS: usize = 5;
+const RECIPE_SCHEMATIC_HASH_FIELDS: usize = 6;
 
 pub(super) fn skill_line_id_table(state: &mut LuaState) -> Val {
     let table = create_table(state);
@@ -60,7 +67,7 @@ pub(super) fn profession_table(
     state: &mut LuaState,
     profession: Option<&profession_data::ProfessionInfo>,
 ) -> Val {
-    let table = create_table(state);
+    let table = create_table_with_capacity(state, PROFESSION_TABLE_HASH_FIELDS);
     set_number_field(
         state,
         table,
@@ -83,7 +90,7 @@ pub(super) fn category_table(
         return Val::Nil;
     };
 
-    let table = create_table(state);
+    let table = create_table_with_capacity(state, CATEGORY_TABLE_HASH_FIELDS);
     let name = create_string(state, category.name);
     table_set_static(
         state,
@@ -106,7 +113,7 @@ pub(super) fn recipe_info_table(
     state: &mut LuaState,
     recipe: Option<&profession_data::RecipeEntry>,
 ) -> Val {
-    let table = create_table(state);
+    let table = create_table_with_capacity(state, RECIPE_INFO_HASH_FIELDS);
     match recipe {
         Some(recipe) => populate_recipe_info_table(state, table, recipe),
         None => populate_missing_recipe_info_table(state, table),
@@ -122,7 +129,7 @@ pub(super) fn reagent_info_table(
         return Val::Nil;
     };
 
-    let table = create_table(state);
+    let table = create_table_with_capacity(state, REAGENT_INFO_HASH_FIELDS);
     table_set_static(state, table, "itemID", Val::Num(reagent.item_id as f64));
     table_set_static(
         state,
@@ -149,7 +156,7 @@ pub(super) fn recipe_schematic_table(
     state: &mut LuaState,
     recipe: Option<&profession_data::RecipeEntry>,
 ) -> Val {
-    let table = create_table(state);
+    let table = create_table_with_capacity(state, RECIPE_SCHEMATIC_HASH_FIELDS);
     match recipe {
         Some(recipe) => populate_recipe_schematic_table(state, table, recipe),
         None => set_number_field(state, table, "recipeID", 0.0),

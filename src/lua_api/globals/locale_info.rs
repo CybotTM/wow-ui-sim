@@ -14,7 +14,7 @@
 //! list is fixed per client build. If a test needs to fake a locale, it can
 //! override `GetAvailableLocaleInfo` at runtime.
 
-use crate::lua_api::methods::{create_string, create_table};
+use crate::lua_api::methods::{create_string, create_table, create_table_with_capacity};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -25,6 +25,8 @@ struct LocaleInfo {
     english_name: &'static str,
     display_name: &'static str,
 }
+
+const LOCALE_INFO_ENTRY_HASH_FIELDS: usize = 4;
 
 const LOCALES: &[LocaleInfo] = &[
     LocaleInfo {
@@ -125,7 +127,7 @@ fn set_array_index(state: &mut LuaState, list_val: Val, index: i64, value: Val) 
 pub fn get_available_locale_info(state: &mut LuaState) -> LuaResult<u32> {
     let list = create_table(state);
     for (idx, locale) in LOCALES.iter().enumerate() {
-        let entry = create_table(state);
+        let entry = create_table_with_capacity(state, LOCALE_INFO_ENTRY_HASH_FIELDS);
         set_entry_field(state, entry, "localeId", Val::Num(locale.locale_id as f64));
         let locale_name = create_string(state, locale.locale_name);
         set_entry_field(state, entry, "localeName", locale_name);
