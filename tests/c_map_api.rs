@@ -415,8 +415,24 @@ fn test_minimap_is_inside_quest_blob() {
 #[test]
 fn test_minimap_get_view_radius() {
     let env = env();
-    let radius: f64 = env.eval("return C_Minimap.GetViewRadius()").unwrap();
+    let (radius, tracking_count, info_is_nil, filter_id, spell_id): (f64, i32, bool, i32, i32) =
+        env.eval(
+            r#"
+            local filter = C_Minimap.GetTrackingFilter()
+            return
+                C_Minimap.GetViewRadius(),
+                C_Minimap.GetNumTrackingTypes(),
+                C_Minimap.GetTrackingInfo(1) == nil,
+                filter.filterID,
+                filter.spellID
+            "#,
+        )
+        .unwrap();
     assert!(radius > 0.0);
+    assert_eq!(tracking_count, 0);
+    assert!(info_is_nil);
+    assert_eq!(filter_id, 0);
+    assert_eq!(spell_id, 0);
 }
 
 #[test]

@@ -3694,17 +3694,6 @@ C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
   end,
 })
 
-C_Minimap = __wow_merge_namespace(C_Minimap, {
-  GetNumTrackingTypes = function() return 0 end,
-  GetTrackingInfo = function() return nil end,
-  GetTrackingFilter = function()
-    return { filterID = 0, spellID = 0 }
-  end,
-  SetTracking = __wow_noop,
-  ClearAllTracking = __wow_noop,
-  GetViewRadius = function() return 200 end,
-})
-
 C_Navigation = __wow_merge_namespace(C_Navigation, {
   WasClampedToScreen = function() return false end,
   GetTargetState = function() return 0 end,
