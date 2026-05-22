@@ -9786,25 +9786,6 @@ C_HousingCatalog = __wow_merge_namespace(C_HousingCatalog, {
 })
 C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
-C_ContentTracking = __wow_merge_namespace(C_ContentTracking, {
-  -- AchievementObjectiveTracker iterates `#trackedAchievements` at load.
-  -- Return an empty list so the subsequent for-loop is a no-op.
-  GetTrackedIDs = function() return {} end,
-  IsTracking = function() return false end,
-})
-
--- InitiativeTasksObjectiveTracker indexes `.trackedIDs` on the returned
--- value, so return a real table even when there are no initiatives.
-C_NeighborhoodInitiative = __wow_merge_namespace(C_NeighborhoodInitiative, {
-  IsInitiativeEnabled = function() return false end,
-  GetAvailableHouseXP = function() return 0 end,
-  GetTrackedInitiativeTasks = function()
-    return { trackedIDs = {} }
-  end,
-  GetInitiativeTaskInfo = function() return nil end,
-  RemoveTrackedInitiativeTask = __wow_noop,
-  AddTrackedInitiativeTask = __wow_noop,
-})
 C_Widget = C_Widget or __wow_namespace()
 C_TransmogOutfitInfo = C_TransmogOutfitInfo or __wow_namespace({
   __activeOutfitID = 0,

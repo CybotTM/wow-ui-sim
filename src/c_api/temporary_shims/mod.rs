@@ -48,6 +48,7 @@ pub mod c_spell_target;
 pub mod c_super_track;
 pub mod c_taxi_map;
 pub mod c_texture_file_data;
+pub mod c_tracking_defaults;
 pub mod c_transmog_outfit_slots;
 pub mod c_tts_settings;
 pub mod c_ui_widget_manager_power_bar;
