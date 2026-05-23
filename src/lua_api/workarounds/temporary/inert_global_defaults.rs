@@ -1,0 +1,166 @@
+//! Temporary inert global defaults for unmodeled world/social state.
+//!
+//! These functions are startup compatibility fallbacks. The simulator does not
+//! model battleground queues, social restrictions, commentator mode, or group
+//! role composition yet, so keep the defaults explicit in the workaround layer.
+
+const INERT_GLOBAL_DEFAULTS_LUA: &str = r#"
+if GetCurrentRegionName == nil then
+    function GetCurrentRegionName() return "US" end
+end
+if GetDefaultLanguage == nil then
+    function GetDefaultLanguage() return "Common", 1 end
+end
+if GetMaxBattlefieldID == nil then
+    function GetMaxBattlefieldID() return 0 end
+end
+if IsActiveBattlefieldArena == nil then
+    function IsActiveBattlefieldArena() return false end
+end
+if UnitExists == nil then
+    function UnitExists(unit)
+        return unit == "player"
+    end
+end
+
+C_SocialRestrictions = C_SocialRestrictions or __wow_namespace()
+if rawget(C_SocialRestrictions, "IsChatDisabled") == nil then
+    function C_SocialRestrictions.IsChatDisabled() return false end
+end
+C_Commentator = C_Commentator or __wow_namespace()
+if rawget(C_Commentator, "IsSpectating") == nil then
+    function C_Commentator.IsSpectating() return false end
+end
+if rawget(C_Commentator, "SendAddonMessage") == nil then
+    function C_Commentator.SendAddonMessage(_prefix, _message, _channel)
+        return Enum and Enum.SendAddonMessageResult and Enum.SendAddonMessageResult.Success or 0
+    end
+end
+
+C_GuildBank = C_GuildBank or __wow_namespace()
+
+if GetGuildFactionGroup == nil then
+    function GetGuildFactionGroup()
+        return 1
+    end
+end
+if GetGroupMemberCounts == nil then
+    function GetGroupMemberCounts()
+        return {
+            TANK = 0,
+            HEALER = 0,
+            DAMAGER = 0,
+            NOROLE = 0,
+        }
+    end
+end
+if GetLootSpecialization == nil then
+    function GetLootSpecialization()
+        return 0
+    end
+end
+if HasLootSpecializations == nil then
+    function HasLootSpecializations()
+        return true
+    end
+end
+if CanShowSetRoleButton == nil then
+    function CanShowSetRoleButton()
+        return false
+    end
+end
+
+if GetSpellConfirmationPromptsInfo == nil then
+    function GetSpellConfirmationPromptsInfo()
+        return {}
+    end
+end
+
+if GetActiveLootRollIDs == nil then
+    function GetActiveLootRollIDs()
+        return {}
+    end
+end
+
+if GetNumArenaOpponents == nil then
+    function GetNumArenaOpponents()
+        return 0
+    end
+end
+"#;
+
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(INERT_GLOBAL_DEFAULTS_LUA)?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn installs_region_social_and_group_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                local counts = GetGroupMemberCounts()
+                if GetCurrentRegionName() ~= "US" then return "region" end
+                local languageName, languageID = GetDefaultLanguage()
+                if languageName ~= "Common" or languageID ~= 1 then return "language" end
+                if GetMaxBattlefieldID() ~= 0 then return "battlefield_id" end
+                if IsActiveBattlefieldArena() ~= false then return "battlefield_arena" end
+                if UnitExists("player") ~= true or UnitExists("target") ~= false then return "unit" end
+                if C_SocialRestrictions.IsChatDisabled() ~= false then return "social" end
+                if C_Commentator.IsSpectating() ~= false then return "spectating" end
+                if C_Commentator.SendAddonMessage("A", "B", "WHISPER") ~= Enum.SendAddonMessageResult.Success then return "send" end
+                if type(C_GuildBank) ~= "table" then return "guild_bank" end
+                if GetGuildFactionGroup() ~= 1 then return "guild_faction" end
+                if counts.TANK ~= 0 or counts.HEALER ~= 0 or counts.DAMAGER ~= 0 or counts.NOROLE ~= 0 then return "counts" end
+                if GetLootSpecialization() ~= 0 then return "loot_spec" end
+                if HasLootSpecializations() ~= true then return "has_loot_specs" end
+                if CanShowSetRoleButton() ~= false then return "role_button" end
+                if #GetSpellConfirmationPromptsInfo() ~= 0 then return "spell_prompts" end
+                if #GetActiveLootRollIDs() ~= 0 then return "loot_rolls" end
+                if GetNumArenaOpponents() ~= 0 then return "arena" end
+                return "ok"
+                "#,
+            )
+            .expect("inert defaults should be callable");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn preserves_existing_members() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            function GetCurrentRegionName() return "EU" end
+            C_SocialRestrictions.IsChatDisabled = function() return true end
+            C_Commentator.ExistingMember = 7
+            "#,
+        )
+        .expect("fixture should install existing members");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("inert defaults should apply");
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                if GetCurrentRegionName() ~= "EU" then return "overwrote_global" end
+                if C_SocialRestrictions.IsChatDisabled() ~= true then return "overwrote_namespace_member" end
+                if C_Commentator.ExistingMember ~= 7 then return "lost_member" end
+                if type(C_Commentator.SendAddonMessage) ~= "function" then return "missing_default" end
+                return "ok"
+                "#,
+            )
+            .expect("preservation probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
