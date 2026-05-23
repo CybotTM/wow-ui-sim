@@ -174,6 +174,24 @@ fn c_cvar_surface_is_not_runtime_bootstrap_fallback() {
 }
 
 #[test]
+fn color_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("C_UIColor"),
+        "C_UIColor defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("C_ColorUtil"),
+        "C_ColorUtil defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("QuestDifficultyColors"),
+        "Quest difficulty color defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env
