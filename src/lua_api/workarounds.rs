@@ -173,6 +173,11 @@ fn apply_temporary_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    apply_core_temporary_namespace_bootstrap(lua)?;
+    apply_feature_temporary_namespace_bootstrap(lua)
+}
+
+fn apply_core_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::adventure_journal_fallbacks::apply_bootstrap(lua)?;
     temporary::color_defaults::apply_bootstrap(lua)?;
     temporary::container_portrait_texture::apply_bootstrap(lua)?;
@@ -186,7 +191,12 @@ fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()
     temporary::legacy_action_bar_globals::apply_bootstrap(lua)?;
     temporary::legacy_container_globals::apply_bootstrap(lua)?;
     temporary::legacy_spell_globals::apply_bootstrap(lua)?;
+    Ok(())
+}
+
+fn apply_feature_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::macro_defaults::apply_bootstrap(lua)?;
+    temporary::object_api_request_load_callbacks::apply_bootstrap(lua)?;
     temporary::profession_specs_defaults::apply_bootstrap(lua)?;
     temporary::proxy_object_factories::apply_bootstrap(lua)?;
     temporary::sound_driver_defaults::apply_bootstrap(lua)?;

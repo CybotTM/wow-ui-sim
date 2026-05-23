@@ -6579,33 +6579,6 @@ if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
   end)
 end
 
-if C_Item ~= nil and type(C_Item.RequestLoadItemDataByID) ~= "function" then
-  function C_Item.RequestLoadItemDataByID(itemID)
-    if ItemEventListener and type(ItemEventListener.FireCallbacks) == "function" then
-      ItemEventListener:FireCallbacks(itemID)
-    end
-    return true
-  end
-end
-
-if C_Spell ~= nil and type(C_Spell.RequestLoadSpellData) ~= "function" then
-  function C_Spell.RequestLoadSpellData(spellID)
-    if SpellEventListener and type(SpellEventListener.FireCallbacks) == "function" then
-      SpellEventListener:FireCallbacks(spellID)
-    end
-    return true
-  end
-end
-
-if C_QuestLog ~= nil and type(C_QuestLog.RequestLoadQuestByID) ~= "function" then
-  function C_QuestLog.RequestLoadQuestByID(questID)
-    if QuestEventListener and type(QuestEventListener.FireCallbacks) == "function" then
-      QuestEventListener:FireCallbacks(questID)
-    end
-    return true
-  end
-end
-
 AUTOCOMPLETE_LIST = AUTOCOMPLETE_LIST or {}
 AUTOCOMPLETE_LIST.ADDFRIEND = AUTOCOMPLETE_LIST.ADDFRIEND or {}
 if type(setprinthandler) ~= "function" then

@@ -230,6 +230,22 @@ fn container_portrait_texture_default_is_not_runtime_bootstrap_fallback() {
 }
 
 #[test]
+fn request_load_callbacks_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    for callback in [
+        "RequestLoadItemDataByID",
+        "RequestLoadSpellData",
+        "RequestLoadQuestByID",
+    ] {
+        assert!(
+            !bootstrap.contains(callback),
+            "{callback} must live in its C API owner or explicit temporary ObjectAPI workaround boundary, not runtime bootstrap"
+        );
+    }
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env
