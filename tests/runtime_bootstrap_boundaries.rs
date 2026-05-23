@@ -276,6 +276,10 @@ fn formatting_utility_defaults_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 
     for symbol in [
+        "GetText",
+        "BreakUpLargeNumbers",
+        "CalculateStringEditDistance",
+        "tAppendAll",
         "GetScreenDPIScale",
         "FindInTableIf",
         "GetMoneyString",
@@ -298,6 +302,22 @@ fn formatting_utility_defaults_are_not_runtime_bootstrap_fallbacks() {
         !bootstrap.contains("string.K_AddDefaultValueText"),
         "K_AddDefaultValueText fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
     );
+    assert!(
+        !bootstrap.contains("stringIndex:split"),
+        "string split fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    for text_global in [
+        "BACK = BACK",
+        "NEXT = NEXT",
+        "PREVIEW = PREVIEW",
+        "CUSTOMIZE = CUSTOMIZE",
+        "FINISH = FINISH",
+    ] {
+        assert!(
+            !bootstrap.contains(text_global),
+            "{text_global} fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+        );
+    }
     assert!(
         !bootstrap.contains("difftime = os.difftime"),
         "difftime fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"

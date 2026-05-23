@@ -5,6 +5,99 @@
 //! modeled formatting subsystem.
 
 const FORMATTING_UTILITY_DEFAULTS_LUA: &str = r#"
+if GetText == nil then
+  function GetText(token)
+    if type(token) ~= "string" then
+      return token
+    end
+    local value = rawget(_G, token)
+    return value ~= nil and value or token
+  end
+end
+
+BACK = BACK or "Back"
+NEXT = NEXT or "Next"
+PREVIEW = PREVIEW or "Preview"
+CUSTOMIZE = CUSTOMIZE or "Customize"
+FINISH = FINISH or "Finish"
+
+if BreakUpLargeNumbers == nil then
+  function BreakUpLargeNumbers(value)
+    return tostring(value)
+  end
+end
+
+if CalculateStringEditDistance == nil then
+  function CalculateStringEditDistance(firstString, secondString)
+    if type(firstString) ~= "string" or type(secondString) ~= "string" then
+      return 0
+    end
+    local firstLen = #firstString
+    local secondLen = #secondString
+    if firstLen == 0 then return secondLen end
+    if secondLen == 0 then return firstLen end
+
+    local previousRow = {}
+    for column = 0, secondLen do
+      previousRow[column] = column
+    end
+
+    local currentRow = {}
+    for row = 1, firstLen do
+      currentRow[0] = row
+      local firstChar = firstString:byte(row)
+      for column = 1, secondLen do
+        local substitutionCost = (firstChar == secondString:byte(column)) and 0 or 1
+        local deletion = previousRow[column] + 1
+        local insertion = currentRow[column - 1] + 1
+        local substitution = previousRow[column - 1] + substitutionCost
+        currentRow[column] = math.min(deletion, insertion, substitution)
+      end
+      for column = 0, secondLen do
+        previousRow[column] = currentRow[column]
+      end
+    end
+
+    return previousRow[secondLen]
+  end
+end
+
+do
+  local stringMeta = getmetatable("")
+  local function splitStringMethod(self, delimiterOrInput, limit)
+    if type(self) == "string" and type(delimiterOrInput) == "string" and #self <= 4 and #delimiterOrInput > #self then
+      return strsplit(self, delimiterOrInput, limit)
+    end
+    return strsplit(delimiterOrInput, self, limit)
+  end
+  if type(stringMeta) == "table" then
+    local stringIndex = stringMeta.__index
+    if type(stringIndex) == "table" then
+      function stringIndex:split(delimiter, limit)
+        return splitStringMethod(self, delimiter, limit)
+      end
+    end
+
+    function stringMeta:split(delimiter, limit)
+      return splitStringMethod(self, delimiter, limit)
+    end
+  end
+end
+
+if tAppendAll == nil then
+  function tAppendAll(tbl, addedArray)
+    if type(tbl) ~= "table" or type(addedArray) ~= "table" then
+      return tbl
+    end
+
+    for _, value in ipairs(addedArray) do
+      table.insert(tbl, value)
+    end
+
+    return tbl
+  end
+end
+
 if GetScreenDPIScale == nil then
   function GetScreenDPIScale()
     return 1
@@ -150,6 +243,17 @@ mod tests {
         let result: String = env
             .eval(
                 r#"
+                TOKEN_TEXT = "Resolved"
+                if GetText("TOKEN_TEXT") ~= "Resolved" then return "gettext" end
+                if GetText("MISSING_TOKEN") ~= "MISSING_TOKEN" then return "gettext_missing" end
+                if GetText(42) ~= 42 then return "gettext_passthrough" end
+                if BACK ~= "Back" or NEXT ~= "Next" or PREVIEW ~= "Preview" then return "text_defaults" end
+                if BreakUpLargeNumbers(12345) ~= "12345" then return "breakup" end
+                if CalculateStringEditDistance("kitten", "sitting") ~= 3 then return "edit_distance" end
+                local first, second = ("a,b,c"):split(",")
+                if first ~= "a" or second ~= "b" then return "split_method" end
+                local appended = tAppendAll({ "a" }, { "b", "c" })
+                if #appended ~= 3 or appended[2] ~= "b" or appended[3] ~= "c" then return "append" end
                 if GetScreenDPIScale() ~= 1 then return "dpi" end
                 if difftime(10, 3) ~= 7 then return "difftime" end
                 local index, value = FindInTableIf({ "a", "b", "c" }, function(v) return v == "b" end)
