@@ -108,7 +108,7 @@ pub(super) fn default_toys() -> Vec<ToyData> {
         is_usable: collected,
     };
     vec![
-        t(166779, "Transmorpher Beacon", 2823166, true),
+        t(166779, "Hearthstone Game Table", 2823166, true),
         t(13379, "Piccolo of the Flaming Fire", 134208, true),
         t(34480, "Romantic Picnic Basket", 236571, true),
         t(33927, "Brewfest Pony Keg", 132790, true),
