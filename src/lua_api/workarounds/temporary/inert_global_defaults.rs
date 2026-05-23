@@ -39,6 +39,39 @@ end
 
 C_GuildBank = C_GuildBank or __wow_namespace()
 
+C_FriendList = C_FriendList or __wow_namespace()
+if rawget(C_FriendList, "GetNumFriends") == nil then
+    function C_FriendList.GetNumFriends() return 0 end
+end
+if rawget(C_FriendList, "GetNumOnlineFriends") == nil then
+    function C_FriendList.GetNumOnlineFriends() return 0 end
+end
+if rawget(C_FriendList, "GetNumIgnores") == nil then
+    function C_FriendList.GetNumIgnores() return 0 end
+end
+if rawget(C_FriendList, "GetIgnoreName") == nil then
+    function C_FriendList.GetIgnoreName() return nil end
+end
+
+if ACCOUNT_BINDINGS == nil then ACCOUNT_BINDINGS = 1 end
+if CHARACTER_BINDINGS == nil then CHARACTER_BINDINGS = 2 end
+if CHARACTERBINDINGS == nil then CHARACTERBINDINGS = CHARACTER_BINDINGS end
+if IsOnTournamentRealm == nil then
+    function IsOnTournamentRealm()
+        return false
+    end
+end
+if GetNumDisplayChannels == nil then
+    function GetNumDisplayChannels()
+        return 0
+    end
+end
+if GetChannelDisplayInfo == nil then
+    function GetChannelDisplayInfo(_index)
+        return nil
+    end
+end
+
 if GetGuildFactionGroup == nil then
     function GetGuildFactionGroup()
         return 1
@@ -116,6 +149,14 @@ mod tests {
                 if C_Commentator.IsSpectating() ~= false then return "spectating" end
                 if C_Commentator.SendAddonMessage("A", "B", "WHISPER") ~= Enum.SendAddonMessageResult.Success then return "send" end
                 if type(C_GuildBank) ~= "table" then return "guild_bank" end
+                if type(C_FriendList.GetNumFriends()) ~= "number" then return "friends" end
+                if type(C_FriendList.GetNumOnlineFriends()) ~= "number" then return "online_friends" end
+                if C_FriendList.GetNumIgnores() ~= 0 then return "ignores" end
+                if C_FriendList.GetIgnoreName(1) ~= nil then return "ignore_name" end
+                if ACCOUNT_BINDINGS ~= 1 or CHARACTER_BINDINGS ~= 2 or CHARACTERBINDINGS ~= CHARACTER_BINDINGS then return "bindings" end
+                if IsOnTournamentRealm() ~= false then return "tournament" end
+                if GetNumDisplayChannels() ~= 0 then return "display_channels" end
+                if GetChannelDisplayInfo(1) ~= nil then return "channel_display_info" end
                 if GetGuildFactionGroup() ~= 1 then return "guild_faction" end
                 if counts.TANK ~= 0 or counts.HEALER ~= 0 or counts.DAMAGER ~= 0 or counts.NOROLE ~= 0 then return "counts" end
                 if GetLootSpecialization() ~= 0 then return "loot_spec" end
@@ -140,6 +181,8 @@ mod tests {
             function GetCurrentRegionName() return "EU" end
             C_SocialRestrictions.IsChatDisabled = function() return true end
             C_Commentator.ExistingMember = 7
+            C_FriendList.GetNumFriends = function() return 3 end
+            ACCOUNT_BINDINGS = 9
             "#,
         )
         .expect("fixture should install existing members");
@@ -156,6 +199,9 @@ mod tests {
                 if C_SocialRestrictions.IsChatDisabled() ~= true then return "overwrote_namespace_member" end
                 if C_Commentator.ExistingMember ~= 7 then return "lost_member" end
                 if type(C_Commentator.SendAddonMessage) ~= "function" then return "missing_default" end
+                if C_FriendList.GetNumFriends() ~= 3 then return "overwrote_friend_list" end
+                if type(C_FriendList.GetNumOnlineFriends) ~= "function" then return "missing_friend_default" end
+                if ACCOUNT_BINDINGS ~= 9 then return "overwrote_binding" end
                 return "ok"
                 "#,
             )

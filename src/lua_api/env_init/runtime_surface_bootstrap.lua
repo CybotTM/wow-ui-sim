@@ -6801,40 +6801,8 @@ if Sound_GameSystem_RestartSoundSystem == nil then
   function Sound_GameSystem_RestartSoundSystem() end
 end
 
--- Friend list: sim has no social layer.
-C_FriendList = C_FriendList or __wow_namespace()
-if rawget(C_FriendList, "GetNumFriends") == nil then
-  function C_FriendList.GetNumFriends() return 0 end
-end
-if rawget(C_FriendList, "GetNumOnlineFriends") == nil then
-  function C_FriendList.GetNumOnlineFriends() return 0 end
-end
-if rawget(C_FriendList, "GetNumIgnores") == nil then
-  function C_FriendList.GetNumIgnores() return 0 end
-end
-if rawget(C_FriendList, "GetIgnoreName") == nil then
-  function C_FriendList.GetIgnoreName() return nil end
-end
 if GetNumMacros == nil then
   function GetNumMacros() return 2, 1 end
-end
-if ACCOUNT_BINDINGS == nil then ACCOUNT_BINDINGS = 1 end
-if CHARACTER_BINDINGS == nil then CHARACTER_BINDINGS = 2 end
-if CHARACTERBINDINGS == nil then CHARACTERBINDINGS = CHARACTER_BINDINGS end
-if IsOnTournamentRealm == nil then
-  function IsOnTournamentRealm()
-    return false
-  end
-end
-if GetNumDisplayChannels == nil then
-  function GetNumDisplayChannels()
-    return 0
-  end
-end
-if GetChannelDisplayInfo == nil then
-  function GetChannelDisplayInfo(_index)
-    return nil
-  end
 end
 if GetMacroInfo == nil then
   function GetMacroInfo(index)
