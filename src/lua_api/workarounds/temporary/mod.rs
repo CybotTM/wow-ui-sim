@@ -36,6 +36,7 @@ pub(crate) mod inert_global_defaults;
 pub(crate) mod item_quality_color_data_methods;
 pub(crate) mod item_socketing_tooltips;
 pub(crate) mod kiosk_namespace_defaults;
+pub(crate) mod legacy_action_bar_globals;
 pub(crate) mod legacy_container_globals;
 pub(crate) mod legacy_spell_globals;
 pub(crate) mod lfg_legacy_defaults;

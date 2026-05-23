@@ -6650,57 +6650,6 @@ C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
 C_Widget = C_Widget or __wow_namespace()
 C_Macro = C_Macro or __wow_namespace()
-local __wow_native_has_action = rawget(_G, "HasAction")
-local __wow_native_get_action_texture = rawget(_G, "GetActionTexture")
-C_ActionBar = C_ActionBar or __wow_namespace({
-  HasVehicleActionBar = function() return false end,
-  HasOverrideActionBar = function() return false end,
-  GetOverrideBarSkin = function() return nil end,
-  HasBonusActionBar = function() return false end,
-  HasTempShapeshiftActionBar = function() return false end,
-  HasExtraActionBar = function() return false end,
-  IsPossessBarVisible = function() return false end,
-  HasAssistedCombatActionButtons = function() return false end,
-  IsAssistedCombatAction = function() return false end,
-  GetVehicleBarIndex = function() return 1 end,
-  GetOverrideBarIndex = function() return 1 end,
-  GetTempShapeshiftBarIndex = function() return 1 end,
-  GetBonusBarIndex = function() return 1 end,
-  GetExtraBarIndex = function() return 1 end,
-  GetMultiCastBarIndex = function() return 1 end,
-  GetActionBarPage = function() return 1 end,
-  SetActionBarPage = __wow_noop,
-  HasAction = function(slot)
-    if type(__wow_native_has_action) == "function" then
-      return __wow_native_has_action(slot)
-    end
-    return false
-  end,
-  IsPressHoldReleaseSpell = function() return false end,
-  GetActionTexture = function(slot)
-    if type(__wow_native_get_action_texture) == "function" then
-      return __wow_native_get_action_texture(slot)
-    end
-    return nil
-  end,
-  UsesActionText = function() return false end,
-  GetActionText = function() return "" end,
-  FindSpellActionButtons = function() return {} end,
-  FindPetActionButtons = function() return {} end,
-  FindFlyoutActionButtons = function() return {} end,
-  GetPetActionPetBarIndices = function() return {} end,
-})
-if rawget(C_ActionBar, "GetBonusBarOffset") == nil then
-  function C_ActionBar.GetBonusBarOffset()
-    local index = tonumber(C_ActionBar.GetBonusBarIndex and C_ActionBar.GetBonusBarIndex() or 1) or 1
-    return math.max(0, index - 6)
-  end
-end
-if GetBonusBarOffset == nil then
-  function GetBonusBarOffset()
-    return C_ActionBar.GetBonusBarOffset()
-  end
-end
 if type(C_SpellBook) ~= "table" then
   C_SpellBook = __wow_namespace()
 end
