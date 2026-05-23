@@ -10008,32 +10008,6 @@ C_Traits = C_Traits or __wow_namespace({
   end,
 })
 
-C_TradeSkillUI = __wow_merge_namespace(C_TradeSkillUI, {
-  GetProfessionSkillLineID = function(professionID)
-    return tonumber(professionID) or 0
-  end,
-  IsGuildTradeSkillsEnabled = function()
-    return false
-  end,
-  GetTradeSkillTexture = function()
-    return nil
-  end,
-  GetTradeSkillDisplayName = function()
-    return ""
-  end,
-  OpenTradeSkill = function()
-    local frame = rawget(_G, "ProfessionsFrame")
-    if frame ~= nil and type(frame.Show) == "function" then
-      frame:Show()
-    end
-    return frame ~= nil
-  end,
-  -- GetRecipesTracked / IsRecipeTracked / SetRecipeTracked are now backed
-  -- by Rust functions in `globals/rilua_missing_surface/professions.rs`.
-  -- The merge here is a no-op because those names are already populated
-  -- by `register_profession_surface` before runtime-surface bootstrap runs.
-})
-
 C_XMLUtil = C_XMLUtil or __wow_namespace({
   GetTemplateInfo = function()
     return nil
