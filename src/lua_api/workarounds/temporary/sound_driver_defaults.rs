@@ -7,6 +7,31 @@ const SOUND_DRIVER_DEFAULTS_LUA: &str = r#"
 if type(C_CombatAudioAlert) ~= "table" then
     C_CombatAudioAlert = {}
 end
+if type(C_Sound) ~= "table" then
+    C_Sound = {}
+end
+if rawget(C_Sound, "GetSoundScaledVolume") == nil then
+    function C_Sound.GetSoundScaledVolume()
+        return 1
+    end
+end
+if rawget(C_Sound, "IsPlaying") == nil then
+    function C_Sound.IsPlaying()
+        return false
+    end
+end
+if rawget(C_Sound, "PlayItemSound") == nil then
+    function C_Sound.PlayItemSound() end
+end
+if rawget(C_Sound, "PlaySound") == nil then
+    function C_Sound.PlaySound() end
+end
+if rawget(C_Sound, "PlaySoundFile") == nil then
+    function C_Sound.PlaySoundFile() end
+end
+if rawget(C_Sound, "PlayVocalErrorSound") == nil then
+    function C_Sound.PlayVocalErrorSound() end
+end
 if Sound_GameSystem_GetNumOutputDrivers == nil then
     function Sound_GameSystem_GetNumOutputDrivers() return 1 end
 end
@@ -74,6 +99,13 @@ mod tests {
                 r#"
                 if Sound_GameSystem_GetNumOutputDrivers() ~= 1 then return "game_output_count" end
                 if type(C_CombatAudioAlert) ~= "table" then return "combat_audio_alert" end
+                if type(C_Sound) ~= "table" then return "sound_namespace" end
+                if C_Sound.GetSoundScaledVolume() ~= 1 then return "sound_volume" end
+                if C_Sound.IsPlaying() ~= false then return "sound_playing" end
+                C_Sound.PlayItemSound(1)
+                C_Sound.PlaySound(1)
+                C_Sound.PlaySoundFile("silent.ogg")
+                C_Sound.PlayVocalErrorSound(1)
                 if Sound_GameSystem_GetOutputDriverNameByIndex(0) ~= "Silent Output Device" then return "game_output_name" end
                 if Sound_GameSystem_GetOutputDriverNameByIndex(1) ~= nil then return "game_output_extra" end
                 if Sound_GameSystem_GetNumInputDrivers() ~= 1 then return "game_input_count" end
@@ -97,6 +129,7 @@ mod tests {
         env.exec(
             r#"
             C_CombatAudioAlert = { Existing = true }
+            C_Sound = { Existing = true, IsPlaying = function() return true end }
             function Sound_GameSystem_GetNumOutputDrivers() return 4 end
             function Sound_ChatSystem_GetOutputDriverNameByIndex() return "Existing Voice" end
             "#,
@@ -113,6 +146,9 @@ mod tests {
                 r#"
                 if Sound_GameSystem_GetNumOutputDrivers() ~= 4 then return "overwrote_count" end
                 if C_CombatAudioAlert.Existing ~= true then return "overwrote_combat_audio" end
+                if C_Sound.Existing ~= true then return "overwrote_sound_namespace" end
+                if C_Sound.IsPlaying() ~= true then return "overwrote_sound_method" end
+                if type(C_Sound.PlayVocalErrorSound) ~= "function" then return "missing_vocal_error" end
                 if Sound_ChatSystem_GetOutputDriverNameByIndex(0) ~= "Existing Voice" then return "overwrote_name" end
                 if type(Sound_GameSystem_GetInputDriverNameByIndex) ~= "function" then return "missing_game_input" end
                 if type(Sound_GameSystem_RestartSoundSystem) ~= "function" then return "missing_restart" end

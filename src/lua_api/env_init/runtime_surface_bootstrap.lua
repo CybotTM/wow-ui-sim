@@ -4665,8 +4665,6 @@ if GetIconForRoleEnum == nil then
   end
 end
 
-C_Sound = C_Sound or __wow_namespace()
-
 if C_CharacterCreation == nil then
   C_CharacterCreation = __wow_namespace()
 end

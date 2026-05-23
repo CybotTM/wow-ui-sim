@@ -61,6 +61,10 @@ fn audio_defaults_are_not_runtime_bootstrap_fallbacks() {
         !bootstrap.contains("C_CombatAudioAlert"),
         "combat audio defaults must live in the explicit temporary sound workaround boundary"
     );
+    assert!(
+        !bootstrap.contains("C_Sound"),
+        "C_Sound defaults must live in the explicit temporary sound workaround boundary"
+    );
 }
 
 #[test]
