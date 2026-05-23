@@ -121,6 +121,7 @@ fn register_service_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_super_track::register_c_super_track_shims(state)?;
     temporary_shims::c_taxi_map::register_c_taxi_map_shims(state)?;
     temporary_shims::c_tracking_defaults::register_tracking_default_shims(state)?;
+    temporary_shims::c_trade_info::register_c_trade_info_shims(state)?;
     temporary_shims::c_transmog_outfit_slots::register_c_transmog_outfit_slot_shims(state)
 }
 

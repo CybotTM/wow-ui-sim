@@ -6663,14 +6663,6 @@ if GameTime_GetTime == nil then
     return "12:00"
   end
 end
-if C_TradeInfo == nil then
-  C_TradeInfo = __wow_namespace()
-end
-if rawget(C_TradeInfo, "ShouldShowTradeOfferWarning") == nil then
-  function C_TradeInfo.ShouldShowTradeOfferWarning()
-    return false
-  end
-end
 if type(UIFrameManager) ~= "table" then
   UIFrameManager = __wow_namespace()
 end
