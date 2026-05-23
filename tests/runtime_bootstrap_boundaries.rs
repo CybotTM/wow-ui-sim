@@ -250,6 +250,7 @@ fn tail_inert_globals_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 
     for fallback in [
+        "IsPlayerInWorld",
         "GetItemLevelColor",
         "ClearCursorHoveredItem",
         "SetCursorHoveredItem",

@@ -1,10 +1,16 @@
 //! Temporary inert global defaults for unmodeled world/social state.
 //!
 //! These functions are startup compatibility fallbacks. The simulator does not
-//! model battleground queues, social restrictions, commentator mode, or group
-//! role composition yet, so keep the defaults explicit in the workaround layer.
+//! model world-entry state, battleground queues, social restrictions,
+//! commentator mode, or group role composition yet, so keep the defaults
+//! explicit in the workaround layer.
 
 const INERT_GLOBAL_DEFAULTS_LUA: &str = r#"
+if IsPlayerInWorld == nil then
+    function IsPlayerInWorld()
+        return true
+    end
+end
 if GetCurrentRegionName == nil then
     function GetCurrentRegionName() return "US" end
 end
@@ -216,6 +222,7 @@ mod tests {
             .eval(
                 r#"
                 local counts = GetGroupMemberCounts()
+                if IsPlayerInWorld() ~= true then return "player_world" end
                 if GetCurrentRegionName() ~= "US" then return "region" end
                 local languageName, languageID = GetDefaultLanguage()
                 if languageName ~= "Common" or languageID ~= 1 then return "language" end
@@ -263,6 +270,7 @@ mod tests {
         let env = WowLuaEnv::new().expect("lua env should initialize");
         env.exec(
             r#"
+            function IsPlayerInWorld() return false end
             function GetCurrentRegionName() return "EU" end
             C_SocialRestrictions.IsChatDisabled = function() return true end
             C_Commentator.ExistingMember = 7
@@ -283,6 +291,7 @@ mod tests {
         let result: String = env
             .eval(
                 r#"
+                if IsPlayerInWorld() ~= false then return "overwrote_world_state" end
                 if GetCurrentRegionName() ~= "EU" then return "overwrote_global" end
                 if C_SocialRestrictions.IsChatDisabled() ~= true then return "overwrote_namespace_member" end
                 if C_Commentator.ExistingMember ~= 7 then return "lost_member" end

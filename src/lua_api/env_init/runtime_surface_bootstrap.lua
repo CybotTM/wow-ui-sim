@@ -6636,12 +6636,6 @@ if rawget(_G, "ToggleEncounterJournal") == nil then
   end
 end
 
-if IsPlayerInWorld == nil then
-  function IsPlayerInWorld()
-    return true
-  end
-end
-
 if CreateTemplateInfoCache == nil then
   function CreateTemplateInfoCache()
     local cache = {
