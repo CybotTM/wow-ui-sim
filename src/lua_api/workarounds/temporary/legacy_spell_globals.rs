@@ -20,6 +20,32 @@ if GetSpellBookItemTexture == nil and C_SpellBook ~= nil then
         return C_SpellBook.GetSpellBookItemTexture(...)
     end
 end
+if IsPlayerSpell == nil and C_SpellBook ~= nil then
+    function IsPlayerSpell(spellID)
+        return C_SpellBook.IsSpellKnown(spellID, Enum.SpellBookSpellBank.Player)
+    end
+end
+if IsSpellKnownOrOverridesKnown == nil and C_SpellBook ~= nil then
+    function IsSpellKnownOrOverridesKnown(spellID, isPet)
+        local spellBank = isPet and Enum.SpellBookSpellBank.Pet or Enum.SpellBookSpellBank.Player
+        return C_SpellBook.IsSpellInSpellBook(spellID, spellBank, true)
+    end
+end
+if FindFlyoutSlotBySpellID == nil and C_SpellBook ~= nil then
+    function FindFlyoutSlotBySpellID(spellID)
+        return C_SpellBook.FindFlyoutSlotBySpellID(spellID)
+    end
+end
+if FindSpellOverrideByID == nil and C_SpellBook ~= nil then
+    function FindSpellOverrideByID(spellID)
+        return C_SpellBook.FindSpellOverrideByID(spellID)
+    end
+end
+if FindBaseSpellByID == nil and C_SpellBook ~= nil then
+    function FindBaseSpellByID(spellID)
+        return C_SpellBook.FindBaseSpellByID(spellID)
+    end
+end
 if GetSpellInfo == nil and C_Spell ~= nil then
     function GetSpellInfo(spellID)
         local info = C_Spell.GetSpellInfo(spellID)
@@ -66,16 +92,24 @@ mod tests {
 
         let result: String = env
             .eval(
-                r#"
+                r##"
                 if type(GetSpellBookItemName) ~= "function" then return "book_name" end
                 if type(GetSpellBookItemInfo) ~= "function" then return "book_info" end
                 if type(GetSpellBookItemTexture) ~= "function" then return "book_texture" end
+                if type(IsPlayerSpell) ~= "function" then return "is_player_spell" end
+                if type(IsSpellKnownOrOverridesKnown) ~= "function" then return "known_or_override" end
+                if type(FindFlyoutSlotBySpellID) ~= "function" then return "flyout_slot" end
+                if type(FindSpellOverrideByID) ~= "function" then return "spell_override" end
+                if type(FindBaseSpellByID) ~= "function" then return "base_spell" end
                 if type(GetSpellInfo) ~= "function" then return "spell_info" end
                 if type(GetSpellTexture) ~= "function" then return "spell_texture" end
                 if IsPassiveSpell(116) ~= false then return "passive" end
                 if SpellBook_GetSpellBookSlot(3, 20) ~= 3 then return "slot" end
+                if FindSpellOverrideByID(116) ~= 116 then return "override_value" end
+                if select("#", FindFlyoutSlotBySpellID(116)) ~= 0 then return "flyout_value" end
+                if select("#", FindBaseSpellByID(116)) ~= 0 then return "base_value" end
                 return "ok"
-                "#,
+                "##,
             )
             .expect("legacy spell global probe should run");
 

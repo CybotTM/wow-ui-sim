@@ -6650,14 +6650,6 @@ C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
 C_Widget = C_Widget or __wow_namespace()
 C_Macro = C_Macro or __wow_namespace()
-if type(C_SpellBook) ~= "table" then
-  C_SpellBook = __wow_namespace()
-end
-if rawget(C_SpellBook, "FindSpellOverrideByID") == nil then
-  function C_SpellBook.FindSpellOverrideByID(_spellID)
-    return nil
-  end
-end
 if GameTime_GetTime == nil then
   function GameTime_GetTime(_useLocalTime)
     return "12:00"

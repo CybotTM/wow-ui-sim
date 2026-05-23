@@ -17,6 +17,8 @@ pub(crate) fn register_spell_book_static_shims(state: &mut LuaState) -> LuaResul
     let ns = ensure_namespace(state, "C_SpellBook")?;
     table_set_rust_fn_static(state, ns, "GetOverrideSpell", get_override_spell)?;
     table_set_rust_fn_static(state, ns, "FindSpellOverrideByID", get_override_spell)?;
+    table_set_rust_fn_static(state, ns, "FindFlyoutSlotBySpellID", return_no_values)?;
+    table_set_rust_fn_static(state, ns, "FindBaseSpellByID", return_no_values)?;
     table_set_rust_fn_static(
         state,
         ns,
@@ -42,6 +44,10 @@ fn get_override_spell(state: &mut LuaState) -> LuaResult<u32> {
     let spell_id = u32::from_stack(state, 1)?;
     state.push(Val::Num(spell_id as f64));
     Ok(1)
+}
+
+fn return_no_values(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }
 
 fn get_call_pet_spell_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -74,4 +80,25 @@ fn get_spell_book_item_loss_of_control_cooldown_info(state: &mut LuaState) -> Lu
     table_set_static(state, info, "shouldReplaceNormalCooldown", Val::Bool(false));
     state.push(info);
     Ok(1)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn deprecated_spell_book_targets_are_explicit_noops_or_identity_fallbacks() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let result: (i32, i32, i32) = env
+            .eval(
+                r##"
+                return C_SpellBook.FindSpellOverrideByID(116),
+                    select("#", C_SpellBook.FindFlyoutSlotBySpellID(116)),
+                    select("#", C_SpellBook.FindBaseSpellByID(116))
+                "##,
+            )
+            .expect("deprecated spellbook targets should be callable");
+
+        assert_eq!(result, (116, 0, 0));
+    }
 }
