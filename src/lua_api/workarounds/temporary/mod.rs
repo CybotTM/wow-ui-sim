@@ -18,6 +18,7 @@ pub(crate) mod combat_log_state;
 pub(crate) mod container_frame_token_tracker;
 pub(crate) mod cpp_mixin_stubs;
 pub(crate) mod damage_meter_scrollbox;
+pub(crate) mod damage_meter_state;
 pub(crate) mod details_saved_variables;
 pub(crate) mod encounter_state;
 pub(crate) mod environment_cleanup_restore;
