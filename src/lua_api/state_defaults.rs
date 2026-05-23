@@ -440,161 +440,187 @@ fn heirloom_from_seed(seed: &HeirloomSeed) -> HeirloomData {
 }
 
 pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
-    use std::collections::HashMap;
+    DEFAULT_PREMADE_LISTINGS
+        .iter()
+        .enumerate()
+        .map(premade_listing_from_seed)
+        .collect()
+}
 
-    /// `Enum.LFGEntryGeneralPlaystyle` codes as named constants — the
-    /// raw numbers are otherwise opaque in the seed table.
-    const PLAYSTYLE_LEARNING: i32 = 1;
-    const PLAYSTYLE_FUN_RELAXED: i32 = 2;
-    const PLAYSTYLE_FUN_SERIOUS: i32 = 3;
+/// `Enum.LFGEntryGeneralPlaystyle` codes as named constants; raw numbers are
+/// otherwise opaque in the seed table.
+const PLAYSTYLE_LEARNING: i32 = 1;
+const PLAYSTYLE_FUN_RELAXED: i32 = 2;
+const PLAYSTYLE_FUN_SERIOUS: i32 = 3;
 
-    /// Faction id encoding for `leaderFactionGroup` (`PLAYER_FACTION_GROUP`):
-    /// 0 = Horde, 1 = Alliance.
-    const FACTION_HORDE: i32 = 0;
-    const FACTION_ALLIANCE: i32 = 1;
+/// Faction id encoding for `leaderFactionGroup` (`PLAYER_FACTION_GROUP`):
+/// 0 = Horde, 1 = Alliance.
+const FACTION_HORDE: i32 = 0;
+const FACTION_ALLIANCE: i32 = 1;
 
-    let mut id = 0u32;
-    let l = |id: &mut u32,
-             name: &str,
-             comment: &str,
-             leader: &str,
-             activity: u32,
-             tanks: i32,
-             healers: i32,
-             damagers: i32,
-             max: i32,
-             playstyle: i32,
-             faction: i32| {
-        *id += 1;
-        PremadeListing {
-            search_result_id: *id,
-            name: name.to_string(),
-            comment: comment.to_string(),
-            leader_name: leader.to_string(),
-            activity_id: activity,
-            num_members: tanks + healers + damagers,
-            max_members: max,
-            voice_chat: String::new(),
-            auto_accept: false,
-            is_delisted: false,
-            party_guid: format!("Party-3-0000-1234-{:08X}", *id),
-            tanks,
-            healers,
-            damagers,
-            no_role: 0,
-            classes_by_role: HashMap::new(),
-            general_playstyle: playstyle,
-            cross_faction_listing: false,
-            leader_faction_group: faction,
-            num_bnet_friends: 0,
-            num_char_friends: 0,
-            num_guild_mates: 0,
-        }
-    };
-    vec![
-        l(
-            &mut id,
-            "+15 Mists chill run",
-            "Know mechanics, 2.5k io",
-            "Thrallx",
-            1195,
-            1,
-            1,
-            1,
-            5,
-            PLAYSTYLE_FUN_SERIOUS,
-            FACTION_HORDE,
-        ),
-        l(
-            &mut id,
-            "+12 Siege weekly",
-            "Weekly key, all welcome",
-            "Jainavx",
-            1188,
-            0,
-            1,
-            1,
-            5,
-            PLAYSTYLE_FUN_RELAXED,
-            FACTION_ALLIANCE,
-        ),
-        l(
-            &mut id,
-            "Nerub-ar Palace HC fresh",
-            "AOTC prog, be geared",
-            "Anduin",
-            1296,
-            2,
-            3,
-            7,
-            20,
-            PLAYSTYLE_FUN_SERIOUS,
-            FACTION_ALLIANCE,
-        ),
-        l(
-            &mut id,
-            "Nerub-ar Palace N learn",
-            "Learning run, patient",
-            "Sylvanas",
-            1295,
-            2,
-            2,
-            4,
-            20,
-            PLAYSTYLE_LEARNING,
-            FACTION_HORDE,
-        ),
-        l(
-            &mut id,
-            "World Boss — Aggregation",
-            "Quick kill, summon up",
-            "Khadgar",
-            1350,
-            3,
-            4,
-            11,
-            40,
-            PLAYSTYLE_FUN_RELAXED,
-            FACTION_ALLIANCE,
-        ),
-        l(
-            &mut id,
-            "2v2 Arena chill",
-            "Just capping",
-            "Garrosh",
-            491,
-            0,
-            0,
-            1,
-            2,
-            PLAYSTYLE_FUN_RELAXED,
-            FACTION_HORDE,
-        ),
-        l(
-            &mut id,
-            "RBG yolo",
-            "Casual RBG, no rage",
-            "Velen",
-            493,
-            1,
-            2,
-            4,
-            10,
-            PLAYSTYLE_FUN_RELAXED,
-            FACTION_ALLIANCE,
-        ),
-        l(
-            &mut id,
-            "WQ group Ringing Deeps",
-            "Doing WQs together",
-            "Malfurion",
-            1700,
-            0,
-            0,
-            3,
-            5,
-            PLAYSTYLE_FUN_RELAXED,
-            FACTION_ALLIANCE,
-        ),
-    ]
+struct PremadeListingSeed {
+    name: &'static str,
+    comment: &'static str,
+    leader_name: &'static str,
+    activity_id: u32,
+    tanks: i32,
+    healers: i32,
+    damagers: i32,
+    max_members: i32,
+    general_playstyle: i32,
+    leader_faction_group: i32,
+}
+
+const DEFAULT_PREMADE_LISTINGS: [PremadeListingSeed; 8] = [
+    premade_listing(
+        "+15 Mists chill run",
+        "Know mechanics, 2.5k io",
+        "Thrallx",
+        1195,
+        1,
+        1,
+        1,
+        5,
+        PLAYSTYLE_FUN_SERIOUS,
+        FACTION_HORDE,
+    ),
+    premade_listing(
+        "+12 Siege weekly",
+        "Weekly key, all welcome",
+        "Jainavx",
+        1188,
+        0,
+        1,
+        1,
+        5,
+        PLAYSTYLE_FUN_RELAXED,
+        FACTION_ALLIANCE,
+    ),
+    premade_listing(
+        "Nerub-ar Palace HC fresh",
+        "AOTC prog, be geared",
+        "Anduin",
+        1296,
+        2,
+        3,
+        7,
+        20,
+        PLAYSTYLE_FUN_SERIOUS,
+        FACTION_ALLIANCE,
+    ),
+    premade_listing(
+        "Nerub-ar Palace N learn",
+        "Learning run, patient",
+        "Sylvanas",
+        1295,
+        2,
+        2,
+        4,
+        20,
+        PLAYSTYLE_LEARNING,
+        FACTION_HORDE,
+    ),
+    premade_listing(
+        "World Boss — Aggregation",
+        "Quick kill, summon up",
+        "Khadgar",
+        1350,
+        3,
+        4,
+        11,
+        40,
+        PLAYSTYLE_FUN_RELAXED,
+        FACTION_ALLIANCE,
+    ),
+    premade_listing(
+        "2v2 Arena chill",
+        "Just capping",
+        "Garrosh",
+        491,
+        0,
+        0,
+        1,
+        2,
+        PLAYSTYLE_FUN_RELAXED,
+        FACTION_HORDE,
+    ),
+    premade_listing(
+        "RBG yolo",
+        "Casual RBG, no rage",
+        "Velen",
+        493,
+        1,
+        2,
+        4,
+        10,
+        PLAYSTYLE_FUN_RELAXED,
+        FACTION_ALLIANCE,
+    ),
+    premade_listing(
+        "WQ group Ringing Deeps",
+        "Doing WQs together",
+        "Malfurion",
+        1700,
+        0,
+        0,
+        3,
+        5,
+        PLAYSTYLE_FUN_RELAXED,
+        FACTION_ALLIANCE,
+    ),
+];
+
+const fn premade_listing(
+    name: &'static str,
+    comment: &'static str,
+    leader_name: &'static str,
+    activity_id: u32,
+    tanks: i32,
+    healers: i32,
+    damagers: i32,
+    max_members: i32,
+    general_playstyle: i32,
+    leader_faction_group: i32,
+) -> PremadeListingSeed {
+    PremadeListingSeed {
+        name,
+        comment,
+        leader_name,
+        activity_id,
+        tanks,
+        healers,
+        damagers,
+        max_members,
+        general_playstyle,
+        leader_faction_group,
+    }
+}
+
+fn premade_listing_from_seed((index, seed): (usize, &PremadeListingSeed)) -> PremadeListing {
+    let search_result_id = index as u32 + 1;
+
+    PremadeListing {
+        search_result_id,
+        name: seed.name.to_string(),
+        comment: seed.comment.to_string(),
+        leader_name: seed.leader_name.to_string(),
+        activity_id: seed.activity_id,
+        num_members: seed.tanks + seed.healers + seed.damagers,
+        max_members: seed.max_members,
+        voice_chat: String::new(),
+        auto_accept: false,
+        is_delisted: false,
+        party_guid: format!("Party-3-0000-1234-{search_result_id:08X}"),
+        tanks: seed.tanks,
+        healers: seed.healers,
+        damagers: seed.damagers,
+        no_role: 0,
+        classes_by_role: HashMap::new(),
+        general_playstyle: seed.general_playstyle,
+        cross_faction_listing: false,
+        leader_faction_group: seed.leader_faction_group,
+        num_bnet_friends: 0,
+        num_char_friends: 0,
+        num_guild_mates: 0,
+    }
 }
