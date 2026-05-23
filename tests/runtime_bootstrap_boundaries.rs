@@ -168,6 +168,24 @@ fn proxy_object_factories_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn callback_registry_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("CallbackRegistryMixin"),
+        "CallbackRegistryMixin defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("CallbackRegistrantMixin"),
+        "CallbackRegistrantMixin defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("CVarCallbackRegistry"),
+        "CVarCallbackRegistry defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn c_cvar_surface_is_not_runtime_bootstrap_fallback() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 
