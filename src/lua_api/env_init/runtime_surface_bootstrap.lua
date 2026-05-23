@@ -4279,10 +4279,6 @@ C_RaidLocks = C_RaidLocks or __wow_namespace({
   RequestRaidInfo = __wow_noop,
 })
 
-C_EventUtils = C_EventUtils or __wow_namespace({
-  IsEventValid = function() return true end,
-})
-
 C_FunctionContainers = C_FunctionContainers or __wow_namespace({
   CreateCallback = nil,
 })
