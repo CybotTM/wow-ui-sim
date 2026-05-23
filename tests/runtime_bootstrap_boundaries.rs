@@ -157,6 +157,14 @@ fn proxy_object_factories_are_not_runtime_bootstrap_fallbacks() {
         !bootstrap.contains("CreateUnitHealPredictionCalculator"),
         "UnitHealPrediction proxy factory must live in the explicit temporary workaround boundary, not runtime bootstrap"
     );
+    assert!(
+        !bootstrap.contains("ProxyUtil"),
+        "ProxyUtil defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("ProxyConvertableMixin"),
+        "ProxyConvertableMixin defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
 }
 
 #[test]

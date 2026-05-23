@@ -15,6 +15,67 @@ C_FunctionContainers = C_FunctionContainers or __wow_namespace({
   CreateCallback = nil,
 })
 
+ProxyUtil = ProxyUtil or {}
+ProxyConvertableMixin = ProxyConvertableMixin or {}
+ProxyUtil.CreateProxy = ProxyUtil.CreateProxy or function(value) return value end
+ProxyUtil.CreateProxyMixin = ProxyUtil.CreateProxyMixin or function() return {} end
+ProxyUtil.SetPrivateReference = ProxyUtil.SetPrivateReference or __wow_noop
+ProxyUtil.ReleasePrivateReference = ProxyUtil.ReleasePrivateReference or __wow_noop
+
+if type(ProxyConvertableMixin.Init) ~= "function" then
+  function ProxyConvertableMixin:Init(proxy, proxies, permitOverwrite)
+    self.proxy = proxy or self
+    if proxies and type(proxies.AddProxy) == "function" then
+      proxies:AddProxy(self, permitOverwrite)
+    end
+    self.__proxy_tags = self.__proxy_tags or {}
+    return self.__proxy_tags
+  end
+end
+
+if type(ProxyConvertableMixin.ToProxy) ~= "function" then
+  function ProxyConvertableMixin:ToProxy()
+    return self.proxy or self
+  end
+end
+
+if type(ProxyUtil.CreateProxyDirectory) ~= "function"
+  or type(ProxyUtil.CreateProxyDirectory().AddProxy) ~= "function"
+then
+  function ProxyUtil.CreateProxyDirectory()
+    local proxies = {
+      __private_by_public = setmetatable({}, { __mode = "k" }),
+      __public_by_private = setmetatable({}, { __mode = "k" }),
+    }
+
+    function proxies:AddProxy(object, _permitOverwrite)
+      local public = object and type(object.ToProxy) == "function" and object:ToProxy() or object
+      if public ~= nil then
+        self.__private_by_public[public] = object
+        self.__public_by_private[object] = public
+      end
+    end
+
+    function proxies:RemoveProxy(public)
+      local private = self.__private_by_public[public]
+      self.__private_by_public[public] = nil
+      if private ~= nil then
+        self.__public_by_private[private] = nil
+      end
+    end
+
+    function proxies:ToPrivate(public)
+      return self.__private_by_public[public] or public
+    end
+
+    function proxies:ToPublic(private)
+      return self.__public_by_private[private] or private
+    end
+
+    return proxies
+  end
+end
+
 local __wow_proxy_object_id = 1
 
 local function __wow_next_proxy_label(prefix)
@@ -232,6 +293,13 @@ mod tests {
                 if type(C_CurveUtil.CreateCurve) ~= "function" then return "curve" end
                 if type(C_CurveUtil.CreateColorCurve) ~= "function" then return "color_curve" end
                 if type(C_FunctionContainers.CreateCallback) ~= "function" then return "callback" end
+                if type(ProxyUtil.CreateProxy) ~= "function" then return "proxy" end
+                if type(ProxyUtil.CreateProxyMixin) ~= "function" then return "proxy_mixin" end
+                if type(ProxyUtil.CreateProxyDirectory) ~= "function" then return "proxy_directory" end
+                if type(ProxyUtil.CreateProxyDirectory().AddProxy) ~= "function" then return "proxy_directory_add" end
+                if type(ProxyConvertableMixin) ~= "table" then return "convertable_mixin" end
+                if type(ProxyConvertableMixin.Init) ~= "function" then return "convertable_init" end
+                if type(ProxyConvertableMixin.ToProxy) ~= "function" then return "convertable_to_proxy" end
                 if type(CreateAbbreviateConfig) ~= "function" then return "abbreviate" end
                 if type(CreateUnitHealPredictionCalculator) ~= "function" then return "heal_prediction" end
                 local curve = C_CurveUtil.CreateCurve()
@@ -240,6 +308,17 @@ mod tests {
                 if curve:Evaluate(5) ~= 15 then return "evaluate" end
                 local callback = C_FunctionContainers.CreateCallback(function(value) return value + 1 end)
                 if callback:Invoke(41) ~= 42 then return "invoke" end
+                local value = { name = "proxy-value" }
+                if ProxyUtil.CreateProxy(value) ~= value then return "proxy_identity" end
+                local directory = ProxyUtil.CreateProxyDirectory()
+                if directory:ToPrivate(value) ~= value then return "to_private" end
+                if directory:ToPublic(value) ~= value then return "to_public" end
+                local private = {}
+                local public = {}
+                private.ToProxy = ProxyConvertableMixin.ToProxy
+                ProxyConvertableMixin.Init(private, public, directory)
+                if directory:ToPrivate(public) ~= private then return "registered_private" end
+                if directory:ToPublic(private) ~= public then return "registered_public" end
                 local config = CreateAbbreviateConfig({})
                 config:SetAbbreviateNumberData({ value = 1 })
                 if config:GetAbbreviateNumberData().value ~= 1 then return "config" end

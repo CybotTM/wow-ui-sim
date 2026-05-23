@@ -2766,19 +2766,6 @@ SecureTypes.CreateSecureArray = SecureTypes.CreateSecureArray or function()
   return setmetatable(array, { __index = methods })
 end
 
-ProxyUtil = ProxyUtil or {}
-ProxyConvertableMixin = ProxyConvertableMixin or {}
-ProxyUtil.CreateProxy = ProxyUtil.CreateProxy or function(value) return value end
-ProxyUtil.CreateProxyMixin = ProxyUtil.CreateProxyMixin or function() return {} end
-ProxyUtil.SetPrivateReference = ProxyUtil.SetPrivateReference or __wow_noop
-ProxyUtil.ReleasePrivateReference = ProxyUtil.ReleasePrivateReference or __wow_noop
-ProxyUtil.CreateProxyDirectory = ProxyUtil.CreateProxyDirectory or function()
-  return {
-    ToPrivate = function(_, value) return value end,
-    ToPublic = function(_, value) return value end,
-  }
-end
-
 if CreateFramePool == nil then
   function CreateFramePool(frameType, parent, template, resetter)
     local pool = {
@@ -7626,60 +7613,6 @@ if type(CVarCallbackRegistry.SetCVarCachable) ~= "function" then
   function CVarCallbackRegistry:SetCVarCachable(name)
     self.__cvars = self.__cvars or {}
     self.__cvars[name] = true
-  end
-end
-
-if type(ProxyConvertableMixin.Init) ~= "function" then
-  function ProxyConvertableMixin:Init(proxy, proxies, permitOverwrite)
-    self.proxy = proxy or self
-    if proxies and type(proxies.AddProxy) == "function" then
-      proxies:AddProxy(self, permitOverwrite)
-    end
-    self.__proxy_tags = self.__proxy_tags or {}
-    return self.__proxy_tags
-  end
-end
-
-if type(ProxyConvertableMixin.ToProxy) ~= "function" then
-  function ProxyConvertableMixin:ToProxy()
-    return self.proxy or self
-  end
-end
-
-if type(ProxyUtil.CreateProxyDirectory) ~= "function"
-  or type(ProxyUtil.CreateProxyDirectory().AddProxy) ~= "function"
-then
-  function ProxyUtil.CreateProxyDirectory()
-    local proxies = {
-      __private_by_public = setmetatable({}, { __mode = "k" }),
-      __public_by_private = setmetatable({}, { __mode = "k" }),
-    }
-
-    function proxies:AddProxy(object, _permitOverwrite)
-      local public = object and type(object.ToProxy) == "function" and object:ToProxy() or object
-      if public ~= nil then
-        self.__private_by_public[public] = object
-        self.__public_by_private[object] = public
-      end
-    end
-
-    function proxies:RemoveProxy(public)
-      local private = self.__private_by_public[public]
-      self.__private_by_public[public] = nil
-      if private ~= nil then
-        self.__public_by_private[private] = nil
-      end
-    end
-
-    function proxies:ToPrivate(public)
-      return self.__private_by_public[public] or public
-    end
-
-    function proxies:ToPublic(private)
-      return self.__public_by_private[private] or private
-    end
-
-    return proxies
   end
 end
 
