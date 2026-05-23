@@ -4287,8 +4287,6 @@ C_FunctionContainers = C_FunctionContainers or __wow_namespace({
   CreateCallback = nil,
 })
 
-C_Club = C_Club or __wow_namespace()
-
 local __wow_proxy_object_id = 1
 
 local function __wow_next_proxy_label(prefix)
@@ -4426,15 +4424,6 @@ if rawget(C_FunctionContainers, "CreateCallback") == nil then
       _callback = fn,
       _cancelled = false,
     })
-  end
-end
-
-if rawget(C_Club, "GetClubInfo") == nil then
-  function C_Club.GetClubInfo(clubId)
-    if clubId == nil then
-      return nil
-    end
-    return { id = clubId }
   end
 end
 
