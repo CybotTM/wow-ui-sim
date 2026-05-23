@@ -6585,66 +6585,6 @@ if type(setprinthandler) ~= "function" then
   function setprinthandler() end
 end
 
-local function __wow_make_transmog_location(slotName, slotID, transmogType, modification)
-  local location = {
-    slotName = tostring(slotName or ""),
-    slotID = tonumber(slotID) or 0,
-    transmogType = tonumber(transmogType) or 0,
-    modification = tonumber(modification) or 0,
-  }
-
-  function location:IsAppearance()
-    return true
-  end
-
-  function location:IsIllusion()
-    return false
-  end
-
-  function location:IsEitherHand()
-    return self.slotName == "MAINHANDSLOT" or self.slotName == "SECONDHANDSLOT"
-  end
-
-  function location:IsSecondary()
-    return self.slotName == "SECONDHANDSLOT"
-  end
-
-  function location:IsMainHand()
-    return self.slotName == "MAINHANDSLOT"
-  end
-
-  function location:GetSlotName()
-    return self.slotName
-  end
-
-  function location:IsEqual(other)
-    return type(other) == "table"
-      and self.slotName == other.slotName
-      and self.slotID == other.slotID
-      and self.transmogType == other.transmogType
-      and self.modification == other.modification
-  end
-
-  return location
-end
-
-TransmogUtil = TransmogUtil or __wow_namespace()
-if rawget(TransmogUtil, "GetTransmogLocation") == nil then
-  function TransmogUtil.GetTransmogLocation(slotName, transmogType, modification)
-    return __wow_make_transmog_location(slotName, 0, transmogType, modification)
-  end
-end
-if rawget(TransmogUtil, "CreateTransmogLocation") == nil then
-  function TransmogUtil.CreateTransmogLocation(slotID, transmogType, modification)
-    return __wow_make_transmog_location("", slotID, transmogType, modification)
-  end
-end
-if rawget(TransmogUtil, "GetBestItemModifiedAppearanceID") == nil then
-  function TransmogUtil.GetBestItemModifiedAppearanceID(_itemID)
-    return nil
-  end
-end
-
 if rawget(_G, "ToggleCollectionsJournal") == nil then
   function ToggleCollectionsJournal(tabIndex)
     if DISALLOW_FRAME_TOGGLING then
