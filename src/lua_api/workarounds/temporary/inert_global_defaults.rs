@@ -72,6 +72,27 @@ if GetChannelDisplayInfo == nil then
     end
 end
 
+if BNGetNumFriends == nil then
+    function BNGetNumFriends() return 0, 0, 0, 0 end
+end
+if BNGetNumFriendInvites == nil then
+    function BNGetNumFriendInvites() return 0 end
+end
+if BNGetFriendInfo == nil then
+    function BNGetFriendInfo() return nil end
+end
+if Ambiguate == nil then
+    function Ambiguate(fullName, context)
+        if context == "none" then
+            return fullName
+        end
+        return string.match(fullName, "^(.-)%-.+$") or fullName
+    end
+end
+if AreTalentsLocked == nil then
+    function AreTalentsLocked() return false end
+end
+
 if GetGuildFactionGroup == nil then
     function GetGuildFactionGroup()
         return 1
@@ -157,6 +178,13 @@ mod tests {
                 if IsOnTournamentRealm() ~= false then return "tournament" end
                 if GetNumDisplayChannels() ~= 0 then return "display_channels" end
                 if GetChannelDisplayInfo(1) ~= nil then return "channel_display_info" end
+                local bnetTotal, bnetOnline, bnetFavorite, bnetMobile = BNGetNumFriends()
+                if bnetTotal ~= 0 or bnetOnline ~= 0 or bnetFavorite ~= 0 or bnetMobile ~= 0 then return "bnet_counts" end
+                if BNGetNumFriendInvites() ~= 0 then return "bnet_invites" end
+                if BNGetFriendInfo(1) ~= nil then return "bnet_info" end
+                if Ambiguate("Alyth-Realm", "short") ~= "Alyth" then return "ambiguate_short" end
+                if Ambiguate("Alyth-Realm", "none") ~= "Alyth-Realm" then return "ambiguate_none" end
+                if AreTalentsLocked() ~= false then return "talents_locked" end
                 if GetGuildFactionGroup() ~= 1 then return "guild_faction" end
                 if counts.TANK ~= 0 or counts.HEALER ~= 0 or counts.DAMAGER ~= 0 or counts.NOROLE ~= 0 then return "counts" end
                 if GetLootSpecialization() ~= 0 then return "loot_spec" end
@@ -183,6 +211,8 @@ mod tests {
             C_Commentator.ExistingMember = 7
             C_FriendList.GetNumFriends = function() return 3 end
             ACCOUNT_BINDINGS = 9
+            function BNGetNumFriends() return 5, 4, 3, 2 end
+            function Ambiguate() return "Existing" end
             "#,
         )
         .expect("fixture should install existing members");
@@ -202,6 +232,10 @@ mod tests {
                 if C_FriendList.GetNumFriends() ~= 3 then return "overwrote_friend_list" end
                 if type(C_FriendList.GetNumOnlineFriends) ~= "function" then return "missing_friend_default" end
                 if ACCOUNT_BINDINGS ~= 9 then return "overwrote_binding" end
+                local total, online, favorite, mobile = BNGetNumFriends()
+                if total ~= 5 or online ~= 4 or favorite ~= 3 or mobile ~= 2 then return "overwrote_bnet_counts" end
+                if Ambiguate("A-B", "short") ~= "Existing" then return "overwrote_ambiguate" end
+                if type(BNGetNumFriendInvites) ~= "function" then return "missing_bnet_default" end
                 return "ok"
                 "#,
             )

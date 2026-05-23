@@ -6732,27 +6732,6 @@ if GetLFGCategoryForID == nil then
   function GetLFGCategoryForID() return 0 end
 end
 
--- Battle.net friends count: sim has no BNet connection.
-if BNGetNumFriends == nil then
-  function BNGetNumFriends() return 0, 0, 0, 0 end
-end
-if BNGetNumFriendInvites == nil then
-  function BNGetNumFriendInvites() return 0 end
-end
-if BNGetFriendInfo == nil then
-  function BNGetFriendInfo() return nil end
-end
-if Ambiguate == nil then
-  function Ambiguate(fullName, context)
-    if context == "none" then
-      return fullName
-    end
-    return string.match(fullName, "^(.-)%-.+$") or fullName
-  end
-end
-if AreTalentsLocked == nil then
-  function AreTalentsLocked() return false end
-end
 if GAME_LOCALE == nil then GAME_LOCALE = GetLocale() end
 if GetContainerItemInfo == nil and C_Container ~= nil then
   function GetContainerItemInfo(...)
