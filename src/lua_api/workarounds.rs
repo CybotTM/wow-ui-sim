@@ -180,6 +180,7 @@ fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()
     temporary::inert_global_defaults::apply_bootstrap(lua)?;
     temporary::kiosk_namespace_defaults::apply_bootstrap(lua)?;
     temporary::lfg_legacy_defaults::apply_bootstrap(lua)?;
+    temporary::legacy_container_globals::apply_bootstrap(lua)?;
     temporary::legacy_spell_globals::apply_bootstrap(lua)?;
     temporary::macro_defaults::apply_bootstrap(lua)?;
     temporary::sound_driver_defaults::apply_bootstrap(lua)?;

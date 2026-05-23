@@ -6338,12 +6338,6 @@ if rawget(C_StoreSecure, "ClearPreGeneratedExternalTransactionID") == nil then
   end
 end
 
-if GAME_LOCALE == nil then GAME_LOCALE = GetLocale() end
-if GetContainerItemInfo == nil and C_Container ~= nil then
-  function GetContainerItemInfo(...)
-    return C_Container.GetContainerItemInfo(...)
-  end
-end
 -- GetAvailableLocaleInfo is registered from Rust
 -- (src/lua_api/globals/locale_info.rs). Returns the 12-locale retail list
 -- as { localeId, localeName, englishName, displayName } entries.
