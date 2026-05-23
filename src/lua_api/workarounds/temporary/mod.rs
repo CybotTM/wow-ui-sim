@@ -34,6 +34,7 @@ pub(crate) mod inert_global_defaults;
 pub(crate) mod item_quality_color_data_methods;
 pub(crate) mod item_socketing_tooltips;
 pub(crate) mod kiosk_namespace_defaults;
+pub(crate) mod lfg_legacy_defaults;
 pub(crate) mod lfg_lock_list;
 pub(crate) mod macro_defaults;
 pub(crate) mod main_menu_microbutton_click;

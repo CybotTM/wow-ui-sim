@@ -151,26 +151,35 @@ pub(crate) fn apply_permanent_bootstrap(lua: &mut rilua::Lua) -> crate::Result<(
 }
 
 pub(crate) fn apply_temporary_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    apply_temporary_state_bootstrap(lua)?;
+    apply_temporary_namespace_bootstrap(lua)
+}
+
+fn apply_temporary_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::event_scheduler_state::apply_bootstrap(lua)?;
     temporary::combat_log_state::apply_bootstrap(lua)?;
     temporary::damage_meter_state::apply_bootstrap(lua)?;
     temporary::encounter_state::apply_bootstrap(lua)?;
-    temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
-    temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::housing_catalog_state::apply_bootstrap(lua)?;
-    temporary::inert_global_defaults::apply_bootstrap(lua)?;
-    temporary::kiosk_namespace_defaults::apply_bootstrap(lua)?;
-    temporary::macro_defaults::apply_bootstrap(lua)?;
     temporary::map_runtime_state::apply_bootstrap(lua)?;
     temporary::perks_activities_state::apply_bootstrap(lua)?;
     temporary::private_aura_state::apply_bootstrap(lua)?;
     temporary::reputation_state::apply_bootstrap(lua)?;
     temporary::secure_transfer_state::apply_bootstrap(lua)?;
-    temporary::sound_driver_defaults::apply_bootstrap(lua)?;
     temporary::store_glue_state::apply_bootstrap(lua)?;
-    temporary::trade_skill_ui_fallbacks::apply_bootstrap(lua)?;
     temporary::unit_auras_state::apply_bootstrap(lua)?;
     temporary::video_options_state::apply_bootstrap(lua)
+}
+
+fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
+    temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
+    temporary::inert_global_defaults::apply_bootstrap(lua)?;
+    temporary::kiosk_namespace_defaults::apply_bootstrap(lua)?;
+    temporary::lfg_legacy_defaults::apply_bootstrap(lua)?;
+    temporary::macro_defaults::apply_bootstrap(lua)?;
+    temporary::sound_driver_defaults::apply_bootstrap(lua)?;
+    temporary::trade_skill_ui_fallbacks::apply_bootstrap(lua)
 }
 
 pub fn close_startup_special_windows_before_first_frame(env: &crate::lua_api::WowLuaEnv) {

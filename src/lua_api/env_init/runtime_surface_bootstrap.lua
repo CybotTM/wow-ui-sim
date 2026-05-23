@@ -6727,11 +6727,6 @@ if rawget(C_StoreSecure, "ClearPreGeneratedExternalTransactionID") == nil then
   end
 end
 
--- Additional LFG helpers.
-if GetLFGCategoryForID == nil then
-  function GetLFGCategoryForID() return 0 end
-end
-
 if GAME_LOCALE == nil then GAME_LOCALE = GetLocale() end
 if GetContainerItemInfo == nil and C_Container ~= nil then
   function GetContainerItemInfo(...)
