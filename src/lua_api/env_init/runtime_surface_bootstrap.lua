@@ -5387,67 +5387,11 @@ C_PetBattles.ForfeitGame = function()
   __wow_pet_battle_state.battleState = __wow_pet_battle_finished_state
 end
 
--- LFG group-finder probes. Neither applies in the sim: no group-finder
--- usage and no active proposal. `GetLFGProposal` returns 15 values
--- callers destructure, so match that shape.
-if rawget(C_LFGInfo or {}, "CanPlayerUseGroupFinder") == nil then
-  C_LFGInfo = C_LFGInfo or __wow_namespace()
-  function C_LFGInfo.CanPlayerUseGroupFinder()
-    return false, ""
-  end
-end
-if rawget(C_LFGInfo or {}, "IsInLFGFollowerDungeon") == nil then
-  C_LFGInfo = C_LFGInfo or __wow_namespace()
-  function C_LFGInfo.IsInLFGFollowerDungeon()
-    return false
-  end
-end
-if GetLFGProposal == nil then
-  function GetLFGProposal()
-    -- (proposalExists, id, typeID, subtypeID, name, backgroundTexture,
-    --  role, hasResponded, totalEncounters/numBosses, completedEncounters,
-    --  numMembers, isLeader, isHoliday, _, isSilent)
-    return false, 0, 0, 0, "", "", "", false, 0, 0, 0, false, false, nil, false
-  end
-end
-if GetLFGProposalEncounter == nil then
-  function GetLFGProposalEncounter(_i)
-    return "", "", false
-  end
-end
-if GetLFGInfoServer == nil then
-  function GetLFGInfoServer()
-    return false, false, false, false, false, 0, 0, 0, ""
-  end
-end
-if GetLFGRoleUpdate == nil then
-  function GetLFGRoleUpdate()
-    -- (inProgress, slots, members, category, lfgID, bgQueue)
-    return false, 0, 0, 0, 0, false
-  end
-end
-if GetLFGQueuedList == nil then
-  function GetLFGQueuedList(_category, queuedList)
-    queuedList = queuedList or {}
-    for key in pairs(queuedList) do
-      queuedList[key] = nil
-    end
-    return queuedList
-  end
-end
-if GetLFGReadyCheckUpdate == nil then
-  function GetLFGReadyCheckUpdate()
-    return false, false
-  end
-end
 function HasCompletedAnyAchievement()
   return true
 end
 function CanShowAchievementUI()
   return true
-end
-if GetPartyLFGID == nil then
-  function GetPartyLFGID() return 0 end
 end
 
 -- Adventure journal: fallback only; Rust registration seeds visible suggestions.
