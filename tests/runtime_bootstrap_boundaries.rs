@@ -108,6 +108,16 @@ fn transmog_sets_surface_is_not_runtime_bootstrap_fallback() {
 }
 
 #[test]
+fn duration_util_surface_is_not_runtime_bootstrap_fallback() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("C_DurationUtil"),
+        "C_DurationUtil must be registered by its Rust Lua duration object surface, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env

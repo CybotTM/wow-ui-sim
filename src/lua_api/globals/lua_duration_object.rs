@@ -12,8 +12,8 @@
 //! since that only guards string keys).
 //!
 //! Wired from `register_tail_globals` in `register.rs`, after
-//! `missing_surface::register_all` — runs before the
-//! `runtime_surface_bootstrap.lua` fallback, so the Rust surface wins.
+//! `missing_surface::register_all`, so the duration surface is installed before
+//! Blizzard/addon Lua can request duration objects.
 
 use crate::lua_api::methods::{create_table, registry_get, registry_set, table_set_static};
 use rilua::LuaApiMut;
