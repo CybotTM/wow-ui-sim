@@ -5,6 +5,16 @@
 
 use crate::lua_api::{LoaderEnv, WowLuaEnv};
 
+const CATALOG_SHOP_SOUNDKIT_DEFAULTS_LUA: &str = r#"
+SOUNDKIT = SOUNDKIT or {}
+if SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU == nil then
+    SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU = 303824
+end
+if SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON == nil then
+    SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON = 303826
+end
+"#;
+
 const CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA: &str = r#"
 if rawget(_G, "__wow_catalog_shop_product_card_defaults_wrapped") then
     return
@@ -49,6 +59,11 @@ end
 rawset(_G, "__wow_catalog_shop_product_card_defaults_wrapped", true)
 "#;
 
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(CATALOG_SHOP_SOUNDKIT_DEFAULTS_LUA)?;
+    Ok(())
+}
+
 pub(crate) fn patch(env: &WowLuaEnv) {
     let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
 }
@@ -60,6 +75,27 @@ pub(crate) fn patch_for_runtime_addon_load(env: &LoaderEnv<'_>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn installs_catalog_shop_soundkit_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("catalog shop soundkit defaults should apply");
+        }
+
+        let (nav, button): (i64, i64) = env
+            .eval(
+                r#"
+                return SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU,
+                    SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON
+                "#,
+            )
+            .expect("catalog shop soundkit defaults should be readable");
+
+        assert_eq!(nav, 303824);
+        assert_eq!(button, 303826);
+    }
 
     fn install_layout_fixture(env: &WowLuaEnv) {
         env.exec(

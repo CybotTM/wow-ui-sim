@@ -268,6 +268,21 @@ fn tail_inert_globals_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn catalog_shop_soundkit_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    for fallback in [
+        "CATALOG_SHOP_SELECT_NAV_MENU",
+        "CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON",
+    ] {
+        assert!(
+            !bootstrap.contains(fallback),
+            "{fallback} must live in the explicit temporary Catalog Shop workaround boundary, not runtime bootstrap"
+        );
+    }
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env
