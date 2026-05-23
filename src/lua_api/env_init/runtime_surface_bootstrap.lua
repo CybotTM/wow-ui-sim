@@ -43,12 +43,6 @@ if ReloadUI == nil then
   end
 end
 
-if GetLocale == nil then
-  function GetLocale()
-    return "enUS"
-  end
-end
-
 if GetMoney == nil then
   function GetMoney()
     return 0

@@ -4,6 +4,11 @@
 //! Blizzard/addon callers that still use pre-namespace names.
 
 const LEGACY_CONTAINER_GLOBALS_LUA: &str = r#"
+if GetLocale == nil then
+    function GetLocale()
+        return "enUS"
+    end
+end
 if GAME_LOCALE == nil then
     GAME_LOCALE = GetLocale()
 end
@@ -35,6 +40,7 @@ mod tests {
         let result: String = env
             .eval(
                 r#"
+                if GetLocale() ~= "enUS" then return "get_locale" end
                 if GAME_LOCALE ~= GetLocale() then return "locale" end
                 if type(GetContainerItemInfo) ~= "function" then return "container_info" end
                 local item_info = GetContainerItemInfo(0, 1)
@@ -53,6 +59,7 @@ mod tests {
         env.exec(
             r#"
             GAME_LOCALE = "custom"
+            GetLocale = function() return "frFR" end
             GetContainerItemInfo = function() return "existing" end
             "#,
         )
@@ -63,11 +70,12 @@ mod tests {
             super::apply_bootstrap(&mut lua).expect("legacy container globals should apply");
         }
 
-        let (locale, item_info): (String, String) = env
-            .eval("return GAME_LOCALE, GetContainerItemInfo(0, 1)")
+        let (game_locale, locale, item_info): (String, String, String) = env
+            .eval("return GAME_LOCALE, GetLocale(), GetContainerItemInfo(0, 1)")
             .expect("legacy container preservation probe should run");
 
-        assert_eq!(locale, "custom");
+        assert_eq!(game_locale, "custom");
+        assert_eq!(locale, "frFR");
         assert_eq!(item_info, "existing");
     }
 }

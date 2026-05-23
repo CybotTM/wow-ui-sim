@@ -463,6 +463,16 @@ fn container_portrait_texture_default_is_not_runtime_bootstrap_fallback() {
 }
 
 #[test]
+fn locale_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("function GetLocale"),
+        "GetLocale default must live in the explicit temporary legacy/global locale workaround boundary, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn request_load_callbacks_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 
