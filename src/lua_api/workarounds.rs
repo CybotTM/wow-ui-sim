@@ -180,6 +180,7 @@ fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()
 fn apply_core_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::adventure_journal_fallbacks::apply_bootstrap(lua)?;
     temporary::catalog_shop_product_card_defaults::apply_bootstrap(lua)?;
+    temporary::client_info_defaults::apply_bootstrap(lua)?;
     temporary::color_defaults::apply_bootstrap(lua)?;
     temporary::container_portrait_texture::apply_bootstrap(lua)?;
     temporary::debug_environment_defaults::apply_bootstrap(lua)?;

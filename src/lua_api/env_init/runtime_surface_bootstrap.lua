@@ -2766,52 +2766,6 @@ SecureTypes.CreateSecureArray = SecureTypes.CreateSecureArray or function()
   return setmetatable(array, { __index = methods })
 end
 
-if GetBuildInfo == nil then
-  function GetBuildInfo()
-    return "12.0.5", "66102", "Apr 14 2026", 120005, "", " "
-  end
-end
-
-if GetRealmName == nil then
-  function GetRealmName()
-    return "SimulatedRealm"
-  end
-end
-
-if GetNormalizedRealmName == nil then
-  function GetNormalizedRealmName()
-    return "SimulatedRealm"
-  end
-end
-
-if GetRealmID == nil then
-  function GetRealmID()
-    return 1
-  end
-end
-
-if GetExpansionLevel == nil then
-  function GetExpansionLevel()
-    return 10
-  end
-end
-
-if IsMacClient == nil then
-  function IsMacClient()
-    return false
-  end
-end
-if IsWindowsClient == nil then
-  function IsWindowsClient()
-    return false
-  end
-end
-
-if RequestTimePlayed == nil then
-  function RequestTimePlayed()
-  end
-end
-
 for _, __wow_camera_verb in ipairs({
   "MoveViewOutStart", "MoveViewOutStop",
   "MoveViewInStart", "MoveViewInStop",
@@ -3097,46 +3051,6 @@ end
 if PlayerHasToy == nil then
   function PlayerHasToy(itemID)
     return C_ToyBox ~= nil and C_ToyBox.GetToyInfo ~= nil and C_ToyBox.GetToyInfo(itemID) ~= nil
-  end
-end
-
-if GetClientDisplayExpansionLevel == nil then
-  function GetClientDisplayExpansionLevel()
-    return 10
-  end
-end
-
-if GetAccountExpansionLevel == nil then
-  function GetAccountExpansionLevel()
-    return GetClientDisplayExpansionLevel()
-  end
-end
-
-if GetMaxLevelForExpansionLevel == nil then
-  function GetMaxLevelForExpansionLevel(_expansion_level)
-    return GetMaxPlayerLevel()
-  end
-end
-
-if GetMaxLevelForPlayerExpansion == nil then
-  function GetMaxLevelForPlayerExpansion()
-    return GetMaxLevelForExpansionLevel(GetAccountExpansionLevel())
-  end
-end
-
-if GetExpansionDisplayInfo == nil then
-  function GetExpansionDisplayInfo(_expansionLevel, _desiredReleaseType)
-    return {
-      logo = 0,
-      banner = "",
-      features = {},
-      highResBackgroundID = 0,
-      lowResBackgroundID = 0,
-      textureKit = "",
-      glueAmbianceSoundKit = nil,
-      glueMusicSoundKit = nil,
-      glueCreditsSoundKit = nil,
-    }
   end
 end
 
