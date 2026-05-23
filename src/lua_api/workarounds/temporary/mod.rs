@@ -56,6 +56,7 @@ pub(crate) mod post_event_action_button_refresh;
 pub(crate) mod post_event_frame_layout;
 pub(crate) mod private_aura_state;
 pub(crate) mod profession_specs_defaults;
+pub(crate) mod proxy_object_factories;
 pub(crate) mod quest_log_mixin;
 pub(crate) mod reputation_state;
 pub(crate) mod secure_transfer_state;

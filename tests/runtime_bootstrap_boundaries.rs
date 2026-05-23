@@ -138,6 +138,28 @@ fn event_utils_surface_is_not_runtime_bootstrap_fallback() {
 }
 
 #[test]
+fn proxy_object_factories_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("C_CurveUtil"),
+        "C_CurveUtil proxy factories must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("C_FunctionContainers"),
+        "C_FunctionContainers proxy factories must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("CreateAbbreviateConfig"),
+        "AbbreviateConfig proxy factory must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("CreateUnitHealPredictionCalculator"),
+        "UnitHealPrediction proxy factory must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env
