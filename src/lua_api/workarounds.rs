@@ -154,6 +154,7 @@ pub(crate) fn apply_temporary_bootstrap(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::event_scheduler_state::apply_bootstrap(lua)?;
     temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
+    temporary::perks_activities_state::apply_bootstrap(lua)?;
     temporary::secure_transfer_state::apply_bootstrap(lua)?;
     temporary::video_options_state::apply_bootstrap(lua)
 }

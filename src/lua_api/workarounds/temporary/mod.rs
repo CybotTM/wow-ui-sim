@@ -36,6 +36,7 @@ pub(crate) mod map_exploration_pin;
 pub(crate) mod mount_journal_dynamic_flight_popup;
 pub(crate) mod objective_tracker_quest_header;
 pub(crate) mod paging_controls_page_text;
+pub(crate) mod perks_activities_state;
 pub(crate) mod player_spells_onload_backfill;
 pub(crate) mod post_event_action_button_refresh;
 pub(crate) mod post_event_frame_layout;
