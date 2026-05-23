@@ -4166,28 +4166,6 @@ if bit == nil then
   }
 end
 
-C_MerchantFrame = C_MerchantFrame or __wow_namespace({
-  GetItemInfo = function()
-    return {
-      name = "",
-      texture = nil,
-      price = 0,
-      stackCount = 1,
-      numAvailable = -1,
-      isPurchasable = false,
-      isUsable = false,
-      extendedCost = false,
-      currencyID = nil,
-      spellID = nil,
-    }
-  end,
-})
-
-C_RaidLocks = C_RaidLocks or __wow_namespace({
-  IsEncounterComplete = function() return false end,
-  RequestRaidInfo = __wow_noop,
-})
-
 TextureKitConstants = TextureKitConstants or {
   SetVisibility = true,
   DoNotSetVisibility = false,
