@@ -172,6 +172,7 @@ fn apply_temporary_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    temporary::adventure_journal_fallbacks::apply_bootstrap(lua)?;
     temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::inert_global_defaults::apply_bootstrap(lua)?;
