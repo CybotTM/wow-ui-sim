@@ -36,6 +36,7 @@ pub(crate) mod main_menu_microbutton_click;
 pub(crate) mod map_canvas_data_provider_pin;
 pub(crate) mod map_canvas_scroll_container;
 pub(crate) mod map_exploration_pin;
+pub(crate) mod map_runtime_state;
 pub(crate) mod mount_journal_dynamic_flight_popup;
 pub(crate) mod objective_tracker_quest_header;
 pub(crate) mod paging_controls_page_text;
