@@ -6803,13 +6803,6 @@ if rawget(C_CharacterCreation, "CreateCharacter") == nil then
   end
 end
 
--- C_GameRules.* probes listed in PLAN are registered from Rust
--- (src/lua_api/globals/game_rules.rs), backed by SimState::game_rules.
--- Admin: A_Admin.SetGameRule(name, value) / A_Admin.SetActiveGameMode(mode,
--- glueScreen?). Merge the stub-namespace __index so unimplemented members
--- (IsHardcoreActive, etc.) still return the no-op function expected by
--- Blizzard callsites.
-C_GameRules = __wow_merge_namespace(C_GameRules, {})
 GameRulesUtil = GameRulesUtil or {}
 if rawget(GameRulesUtil, "ShouldShowPlayerCastBar") == nil then
   function GameRulesUtil.ShouldShowPlayerCastBar()
