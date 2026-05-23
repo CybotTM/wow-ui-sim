@@ -22,6 +22,7 @@ pub(crate) mod environment_cleanup_restore;
 pub(crate) mod fog_of_war_pin;
 pub(crate) mod game_time_calendar_invites;
 pub(crate) mod glueparent_uiparent_attributes;
+pub(crate) mod guild_info_namespace_fallback;
 pub(crate) mod housing_dashboard_preload;
 pub(crate) mod item_quality_color_data_methods;
 pub(crate) mod item_socketing_tooltips;

@@ -8944,12 +8944,6 @@ end
 -- Guild bank: not simulated; single callsite in GuildControlUI.
 C_GuildBank = C_GuildBank or __wow_namespace()
 
--- C_GuildInfo.GetClubId / IsGuildOfficer / CanSpeakInGuildChat /
--- GetMOTD / SetMOTD / GetInfoText / SetInfoText are registered from Rust
--- (src/lua_api/globals/guild_info.rs), backed by SimState::world fields.
--- Merge the stub-namespace __index fallback so other unimplemented
--- C_GuildInfo members resolve to the no-op metamethod.
-C_GuildInfo = __wow_merge_namespace(C_GuildInfo, {})
 -- GetAvailableLocaleInfo is registered from Rust
 -- (src/lua_api/globals/locale_info.rs). Returns the 12-locale retail list
 -- as { localeId, localeName, englishName, displayName } entries.
