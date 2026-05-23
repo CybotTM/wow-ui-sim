@@ -32,11 +32,6 @@ if StaticPopup_Show == nil then
   end
 end
 
-if ReloadUI == nil then
-  function ReloadUI()
-  end
-end
-
 if UI_SPECIAL_FRAMES == nil then
   UI_SPECIAL_FRAMES = {}
 end

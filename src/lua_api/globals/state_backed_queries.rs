@@ -20,6 +20,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetMoney", get_money)?;
     LuaApiMut::register_function(lua, "GetAverageItemLevel", get_average_item_level)?;
     LuaApiMut::register_function(lua, "FireEvent", fire_event)?;
+    LuaApiMut::register_function(lua, "ReloadUI", reload_ui)?;
     LuaApiMut::register_function(lua, "GetLootRollItemInfo", get_loot_roll_item_info)?;
     LuaApiMut::register_function(lua, "GetLootRollItemLink", get_loot_roll_item_link)?;
     LuaApiMut::register_function(lua, "GetLootRollTimeLeft", get_loot_roll_time_left)?;
@@ -81,6 +82,15 @@ fn fire_event(state: &mut LuaState) -> LuaResult<u32> {
         args.push(crate::lua_bridge::stack_val(state, slot));
     }
     dispatch_event_now(state, &event_name, &args)?;
+    Ok(0)
+}
+
+fn reload_ui(state: &mut LuaState) -> LuaResult<u32> {
+    dispatch_event_now(
+        state,
+        "PLAYER_ENTERING_WORLD",
+        &[Val::Bool(false), Val::Bool(true)],
+    )?;
     Ok(0)
 }
 

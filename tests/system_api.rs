@@ -300,6 +300,34 @@ fn test_reload_ui_exists() {
     assert!(is_func);
 }
 
+#[test]
+fn test_reload_ui_dispatches_entering_world_reload_event() {
+    let env = env();
+    let (received, is_initial, is_reload): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local received = false
+            local gotInitial, gotReload
+            local frame = CreateFrame("Frame")
+            frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+            frame:SetScript("OnEvent", function(self, event, isInitial, isReloadUI)
+                if event == "PLAYER_ENTERING_WORLD" then
+                    received = true
+                    gotInitial = isInitial
+                    gotReload = isReloadUI
+                end
+            end)
+            ReloadUI()
+            return received, gotInitial, gotReload
+            "#,
+        )
+        .unwrap();
+
+    assert!(received);
+    assert!(!is_initial);
+    assert!(is_reload);
+}
+
 // ============================================================================
 // Generated stub overrides
 // ============================================================================

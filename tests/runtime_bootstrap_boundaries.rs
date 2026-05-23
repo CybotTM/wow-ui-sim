@@ -699,3 +699,13 @@ fn achievement_category_queries_are_not_runtime_bootstrap_fallbacks() {
         );
     }
 }
+
+#[test]
+fn reload_ui_is_not_runtime_bootstrap_fallback() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("function ReloadUI"),
+        "ReloadUI must be registered by the Rust event API, not runtime bootstrap"
+    );
+}
