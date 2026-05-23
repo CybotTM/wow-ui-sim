@@ -1,56 +1,3 @@
-local function __wow_make_color(r, g, b, a)
-  local color = {
-    r = r or 1,
-    g = g or 1,
-    b = b or 1,
-    a = a or 1,
-  }
-
-  function color:GetRGB()
-    return self.r, self.g, self.b
-  end
-
-  function color:GetRGBA()
-    return self.r, self.g, self.b, self.a
-  end
-
-  local function channel_byte(value)
-    return math.floor((value or 0) * 255 + 0.5)
-  end
-
-  function color:GetRGBAsBytes()
-    return channel_byte(self.r), channel_byte(self.g), channel_byte(self.b)
-  end
-
-  function color:GetRGBAAsBytes()
-    return channel_byte(self.r), channel_byte(self.g), channel_byte(self.b), channel_byte(self.a or 1)
-  end
-
-  function color:GenerateHexColor()
-    return string.format("FF%02X%02X%02X", math.floor(self.r * 255), math.floor(self.g * 255), math.floor(self.b * 255))
-  end
-
-  function color:GenerateHexColorNoAlpha()
-    return string.format("%02X%02X%02X", self:GetRGBAsBytes())
-  end
-
-  function color:GenerateHexColorMarkup()
-    return "|c" .. self:GenerateHexColor()
-  end
-
-  function color:WrapTextInColorCode(text)
-    return self:GenerateHexColorMarkup() .. tostring(text or "") .. "|r"
-  end
-
-  return color
-end
-
-if CreateColor == nil then
-  function CreateColor(r, g, b, a)
-    return __wow_make_color(r, g, b, a)
-  end
-end
-
 local function __wow_noop()
 end
 
@@ -6749,13 +6696,13 @@ __global_mt.__index = function(t, key)
   end
 
   if key == "HIGHLIGHT_FONT_COLOR" then
-    value = __wow_make_color(1, 1, 1, 1)
+    value = CreateColor(1, 1, 1, 1)
   elseif __wow_is_color_constant_key(key) then
-    value = __wow_make_color(1, 1, 1, 1)
+    value = CreateColor(1, 1, 1, 1)
   elseif key == "PLAYER_FACTION_COLOR_HORDE" then
-    value = __wow_make_color(1, 0.1, 0.1, 1)
+    value = CreateColor(1, 0.1, 0.1, 1)
   elseif key == "PLAYER_FACTION_COLOR_ALLIANCE" then
-    value = __wow_make_color(0.2, 0.4, 1, 1)
+    value = CreateColor(0.2, 0.4, 1, 1)
   elseif type(key) == "string" and key:match("^C_[A-Za-z0-9_]+$") then
     __wow_log_nil_symbol_access("_G", key)
     value = __wow_attach_namespace_name(__wow_namespace(), key)

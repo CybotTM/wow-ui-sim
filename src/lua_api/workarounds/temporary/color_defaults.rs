@@ -4,6 +4,59 @@
 //! simulator has a real color registry surface.
 
 const COLOR_DEFAULTS_LUA: &str = r#"
+local function __wow_make_color(r, g, b, a)
+  local color = {
+    r = r or 1,
+    g = g or 1,
+    b = b or 1,
+    a = a or 1,
+  }
+
+  function color:GetRGB()
+    return self.r, self.g, self.b
+  end
+
+  function color:GetRGBA()
+    return self.r, self.g, self.b, self.a
+  end
+
+  local function channel_byte(value)
+    return math.floor((value or 0) * 255 + 0.5)
+  end
+
+  function color:GetRGBAsBytes()
+    return channel_byte(self.r), channel_byte(self.g), channel_byte(self.b)
+  end
+
+  function color:GetRGBAAsBytes()
+    return channel_byte(self.r), channel_byte(self.g), channel_byte(self.b), channel_byte(self.a or 1)
+  end
+
+  function color:GenerateHexColor()
+    return string.format("FF%02X%02X%02X", math.floor(self.r * 255), math.floor(self.g * 255), math.floor(self.b * 255))
+  end
+
+  function color:GenerateHexColorNoAlpha()
+    return string.format("%02X%02X%02X", self:GetRGBAsBytes())
+  end
+
+  function color:GenerateHexColorMarkup()
+    return "|c" .. self:GenerateHexColor()
+  end
+
+  function color:WrapTextInColorCode(text)
+    return self:GenerateHexColorMarkup() .. tostring(text or "") .. "|r"
+  end
+
+  return color
+end
+
+if CreateColor == nil then
+  function CreateColor(r, g, b, a)
+    return __wow_make_color(r, g, b, a)
+  end
+end
+
 local function __wow_color_merge_namespace(existing, defaults)
   local namespace = type(existing) == "table" and existing or {}
   for key, value in pairs(defaults or {}) do
@@ -91,6 +144,14 @@ mod tests {
                 if not foundTradeskillColor then return "tradeskill" end
                 if C_ColorUtil.GenerateTextColorCode({ r = 1, g = 0.5, b = 0 }) ~= "ffff7f00" then return "text_code" end
                 if C_ColorUtil.WrapTextInColorCode("Ready", "ff112233") ~= "|cff112233Ready|r" then return "wrap" end
+                local color = CreateColor(0.25, 0.5, 0.75, 0.8)
+                local r, g, b, a = color:GetRGBA()
+                if r ~= 0.25 or g ~= 0.5 or b ~= 0.75 or a ~= 0.8 then return "rgba" end
+                local rb, gb, bb, ab = color:GetRGBAAsBytes()
+                if rb ~= 64 or gb ~= 128 or bb ~= 191 or ab ~= 204 then return "bytes" end
+                if color:GenerateHexColor() ~= "FF3F7FBF" then return "hex" end
+                if color:GenerateHexColorNoAlpha() ~= "4080BF" then return "hex_no_alpha" end
+                if color:WrapTextInColorCode("Ready") ~= "|cFF3F7FBFReady|r" then return "color_wrap" end
                 if QuestDifficultyColors.impossible.g ~= 0.10 then return "quest" end
                 if QuestDifficultyHighlightColors.standard.g ~= 1.00 then return "highlight" end
                 return "ok"

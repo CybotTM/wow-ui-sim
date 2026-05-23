@@ -373,6 +373,14 @@ fn color_defaults_are_not_runtime_bootstrap_fallbacks() {
         "C_ColorUtil defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
     );
     assert!(
+        !bootstrap.contains("function CreateColor"),
+        "CreateColor default must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("__wow_make_color"),
+        "color construction helper must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
         !bootstrap.contains("QuestDifficultyColors"),
         "Quest difficulty color defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
     );
