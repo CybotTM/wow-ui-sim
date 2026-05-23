@@ -22,6 +22,7 @@ pub mod c_gossip_info;
 pub mod c_item_targeting;
 pub mod c_item_upgrade_availability;
 pub mod c_journal_defaults;
+pub mod c_level_link_spell_lock;
 pub mod c_lfg_info;
 pub mod c_major_faction_display;
 pub mod c_map_groups;

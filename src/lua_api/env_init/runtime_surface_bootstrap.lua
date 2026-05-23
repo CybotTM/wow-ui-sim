@@ -8941,34 +8941,6 @@ if rawget(C_Commentator, "SendAddonMessage") == nil then
   end
 end
 
--- C_LevelLink.IsActionLocked is registered from Rust
--- (src/lua_api/globals/missing_surface/small_namespaces.rs), backed by
--- SimState::locked_action_slots. The _state table below still backs the
--- bootstrap-only IsSpellLocked implementation.
-local __wow_level_link_state = type(C_LevelLink) == "table" and rawget(C_LevelLink, "_state") or nil
-C_LevelLink = __wow_merge_namespace(C_LevelLink, {
-  _state = __wow_level_link_state or {
-    lockedSpells = {},
-    lastSpellQuery = nil,
-  },
-})
-
-if rawget(C_LevelLink, "IsSpellLocked") == nil then
-  function C_LevelLink.IsSpellLocked(spellID)
-    local normalized = tonumber(spellID)
-    if normalized == nil then
-      C_LevelLink._state.lastSpellQuery = nil
-      return false
-    end
-    local entry = C_LevelLink._state.lockedSpells[normalized]
-    C_LevelLink._state.lastSpellQuery = normalized
-    if type(entry) == "table" then
-      return entry.locked == true
-    end
-    return entry == true
-  end
-end
-
 -- Guild bank: not simulated; single callsite in GuildControlUI.
 C_GuildBank = C_GuildBank or __wow_namespace()
 
