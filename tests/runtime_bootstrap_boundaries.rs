@@ -51,6 +51,18 @@ fn game_time_defaults_are_not_runtime_bootstrap_fallbacks() {
         !bootstrap.contains("GameTime_GetTime"),
         "GameTime defaults must live in the explicit temporary GameTime/calendar workaround boundary"
     );
+    assert!(
+        !bootstrap.contains("function GetGameTime"),
+        "GetGameTime default must live in the explicit temporary GameTime/calendar workaround boundary"
+    );
+    assert!(
+        !bootstrap.contains("__wow_normalize_time_table"),
+        "time() normalization helper must live in the explicit temporary GameTime/calendar workaround boundary"
+    );
+    assert!(
+        !bootstrap.contains("function time(dateTable)"),
+        "time() default must live in the explicit temporary GameTime/calendar workaround boundary"
+    );
 }
 
 #[test]

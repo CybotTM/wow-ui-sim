@@ -6,6 +6,37 @@
 use crate::lua_api::WowLuaEnv;
 
 const GAME_TIME_BOOTSTRAP_LUA: &str = r#"
+if GetGameTime == nil then
+    function GetGameTime()
+        return 12, 0
+    end
+end
+
+local function __wow_normalize_time_table(dateTable)
+    if type(dateTable) ~= "table" then
+        return dateTable
+    end
+
+    local normalized = {}
+    for key, value in pairs(dateTable) do
+        if key == "sec" or key == "min" or key == "hour" or key == "day" or key == "month" or key == "year" then
+            normalized[key] = tonumber(value) or value
+        else
+            normalized[key] = value
+        end
+    end
+    return normalized
+end
+
+if time == nil then
+    function time(dateTable)
+        if os and type(os.time) == "function" then
+            return os.time(__wow_normalize_time_table(dateTable))
+        end
+        return math.floor(GetTime())
+    end
+end
+
 if GameTime_GetTime == nil then
     function GameTime_GetTime(_useLocalTime)
         return "12:00"
@@ -48,6 +79,33 @@ mod tests {
             .expect("game time default should be callable");
 
         assert_eq!(time, "12:00");
+    }
+
+    #[test]
+    fn installs_missing_game_time_globals() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec("GetGameTime = nil; time = nil")
+            .expect("game time fixture should clear globals");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            apply_bootstrap(&mut lua).expect("game time bootstrap should apply");
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                local hour, minute = GetGameTime()
+                if hour ~= 12 or minute ~= 0 then return "clock" end
+                if type(time) ~= "function" then return "time_missing" end
+                local value = time({ year = "2024", month = "1", day = "2", hour = "3", min = "4", sec = "5" })
+                if type(value) ~= "number" then return "time_value" end
+                return "ok"
+                "#,
+            )
+            .expect("game time globals should be callable");
+
+        assert_eq!(result, "ok");
     }
 
     #[test]

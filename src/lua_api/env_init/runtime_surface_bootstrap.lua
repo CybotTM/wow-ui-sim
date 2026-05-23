@@ -43,37 +43,6 @@ if ReloadUI == nil then
   end
 end
 
-if GetGameTime == nil then
-  function GetGameTime()
-    return 12, 0
-  end
-end
-
-local function __wow_normalize_time_table(dateTable)
-  if type(dateTable) ~= "table" then
-    return dateTable
-  end
-
-  local normalized = {}
-  for key, value in pairs(dateTable) do
-    if key == "sec" or key == "min" or key == "hour" or key == "day" or key == "month" or key == "year" then
-      normalized[key] = tonumber(value) or value
-    else
-      normalized[key] = value
-    end
-  end
-  return normalized
-end
-
-if time == nil then
-  function time(dateTable)
-    if os and type(os.time) == "function" then
-      return os.time(__wow_normalize_time_table(dateTable))
-    end
-    return math.floor(GetTime())
-  end
-end
-
 if GetLocale == nil then
   function GetLocale()
     return "enUS"
@@ -1704,6 +1673,9 @@ function __wow_log_nil_symbol_access(container, key)
     return
   end
 
+  if __wow_logged_nil_symbols == nil then
+    __wow_logged_nil_symbols = {}
+  end
   local cacheKey = tostring(container) .. "\001" .. tostring(key)
   if __wow_logged_nil_symbols[cacheKey] then
     return
