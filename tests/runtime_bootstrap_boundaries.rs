@@ -11,6 +11,19 @@ fn c_macro_namespace_is_not_generic_runtime_bootstrap_fallback() {
 }
 
 #[test]
+fn state_backed_namespaces_are_not_generic_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    for namespace in ["C_PaperDollInfo", "C_Widget"] {
+        let fallback = format!("{namespace} = {namespace} or __wow_namespace()");
+        assert!(
+            !bootstrap.contains(&fallback),
+            "{namespace} must be registered by its Rust C API surface, not generic runtime bootstrap"
+        );
+    }
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env
@@ -22,6 +35,25 @@ fn c_macro_namespace_still_has_rust_backed_macro_text() {
             "#,
         )
         .expect("C_Macro probe should run");
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn state_backed_namespaces_still_have_registered_members() {
+    let env = WowLuaEnv::new().expect("lua env should initialize");
+    let result: String = env
+        .eval(
+            r#"
+            if type(C_PaperDollInfo) ~= "table" then return "missing_paper_doll" end
+            if type(C_PaperDollInfo.GetArmorEffectiveness) ~= "function" then return "missing_armor" end
+            if type(C_Widget) ~= "table" then return "missing_widget" end
+            if type(C_Widget.IsFrameWidget) ~= "function" then return "missing_widget_fn" end
+            if C_Widget.IsFrameWidget({}) ~= false then return "widget_table" end
+            return "ok"
+            "#,
+        )
+        .expect("state-backed namespace probe should run");
 
     assert_eq!(result, "ok");
 }
