@@ -272,6 +272,39 @@ fn client_info_defaults_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn formatting_utility_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    for symbol in [
+        "GetScreenDPIScale",
+        "FindInTableIf",
+        "GetMoneyString",
+        "GetColorForCurrencyReward",
+        "ConsoleGetColorFromType",
+        "ConsoleGetFontHeight",
+        "ConsoleSetFontHeight",
+        "AbbreviateLargeNumbers",
+    ] {
+        assert!(
+            !bootstrap.contains(&format!("function {symbol}")),
+            "{symbol} fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+        );
+    }
+    assert!(
+        !bootstrap.contains("string.K_ReplaceVars"),
+        "K_ReplaceVars fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("string.K_AddDefaultValueText"),
+        "K_AddDefaultValueText fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("difftime = os.difftime"),
+        "difftime fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn c_cvar_surface_is_not_runtime_bootstrap_fallback() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 

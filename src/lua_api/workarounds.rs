@@ -185,6 +185,7 @@ fn apply_core_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Resu
     temporary::container_portrait_texture::apply_bootstrap(lua)?;
     temporary::debug_environment_defaults::apply_bootstrap(lua)?;
     temporary::difficulty_pvp_util_defaults::apply_bootstrap(lua)?;
+    temporary::formatting_utility_defaults::apply_bootstrap(lua)?;
     temporary::game_time_calendar_invites::apply_bootstrap(lua)?;
     temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
