@@ -17,11 +17,20 @@ end
 if GetDefaultLanguage == nil then
     function GetDefaultLanguage() return "Common", 1 end
 end
+if GetAlternativeDefaultLanguage == nil then
+    function GetAlternativeDefaultLanguage() return nil end
+end
 if GetMaxBattlefieldID == nil then
     function GetMaxBattlefieldID() return 0 end
 end
 if IsActiveBattlefieldArena == nil then
     function IsActiveBattlefieldArena() return false end
+end
+if IsPVPTimerRunning == nil then
+    function IsPVPTimerRunning() return false end
+end
+if HasArtifactEquipped == nil then
+    function HasArtifactEquipped() return false end
 end
 if UnitExists == nil then
     function UnitExists(unit)
@@ -226,8 +235,11 @@ mod tests {
                 if GetCurrentRegionName() ~= "US" then return "region" end
                 local languageName, languageID = GetDefaultLanguage()
                 if languageName ~= "Common" or languageID ~= 1 then return "language" end
+                if GetAlternativeDefaultLanguage() ~= nil then return "alt_language" end
                 if GetMaxBattlefieldID() ~= 0 then return "battlefield_id" end
                 if IsActiveBattlefieldArena() ~= false then return "battlefield_arena" end
+                if IsPVPTimerRunning() ~= false then return "pvp_timer" end
+                if HasArtifactEquipped() ~= false then return "artifact" end
                 if UnitExists("player") ~= true or UnitExists("target") ~= false then return "unit" end
                 if C_SocialRestrictions.IsChatDisabled() ~= false then return "social" end
                 if C_Commentator.IsSpectating() ~= false then return "spectating" end
@@ -272,6 +284,9 @@ mod tests {
             r#"
             function IsPlayerInWorld() return false end
             function GetCurrentRegionName() return "EU" end
+            function GetAlternativeDefaultLanguage() return "Orcish", 2 end
+            function IsPVPTimerRunning() return true end
+            function HasArtifactEquipped() return true end
             C_SocialRestrictions.IsChatDisabled = function() return true end
             C_Commentator.ExistingMember = 7
             C_FriendList.GetNumFriends = function() return 3 end
@@ -293,6 +308,10 @@ mod tests {
                 r#"
                 if IsPlayerInWorld() ~= false then return "overwrote_world_state" end
                 if GetCurrentRegionName() ~= "EU" then return "overwrote_global" end
+                local altLanguageName, altLanguageID = GetAlternativeDefaultLanguage()
+                if altLanguageName ~= "Orcish" or altLanguageID ~= 2 then return "overwrote_alt_language" end
+                if IsPVPTimerRunning() ~= true then return "overwrote_pvp_timer" end
+                if HasArtifactEquipped() ~= true then return "overwrote_artifact" end
                 if C_SocialRestrictions.IsChatDisabled() ~= true then return "overwrote_namespace_member" end
                 if C_Commentator.ExistingMember ~= 7 then return "lost_member" end
                 if type(C_Commentator.SendAddonMessage) ~= "function" then return "missing_default" end

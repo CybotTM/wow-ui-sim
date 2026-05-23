@@ -709,3 +709,19 @@ fn reload_ui_is_not_runtime_bootstrap_fallback() {
         "ReloadUI must be registered by the Rust event API, not runtime bootstrap"
     );
 }
+
+#[test]
+fn inert_world_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    for symbol in [
+        "HasArtifactEquipped",
+        "IsPVPTimerRunning",
+        "GetAlternativeDefaultLanguage",
+    ] {
+        assert!(
+            !bootstrap.contains(&format!("function {symbol}")),
+            "{symbol} fallback must live in the explicit temporary inert-global workaround boundary"
+        );
+    }
+}

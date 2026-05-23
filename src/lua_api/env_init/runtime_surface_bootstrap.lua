@@ -1,24 +1,6 @@
 local function __wow_noop()
 end
 
-if HasArtifactEquipped == nil then
-  function HasArtifactEquipped()
-    return false
-  end
-end
-
-if IsPVPTimerRunning == nil then
-  function IsPVPTimerRunning()
-    return false
-  end
-end
-
-if GetAlternativeDefaultLanguage == nil then
-  function GetAlternativeDefaultLanguage()
-    return nil
-  end
-end
-
 local __wow_clock_start = os.clock and os.clock() or 0
 
 if StaticPopup_Hide == nil then
