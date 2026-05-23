@@ -6622,23 +6622,6 @@ if type(setprinthandler) ~= "function" then
   function setprinthandler() end
 end
 
-C_Traits = C_Traits or __wow_namespace({
-  GetTreeNodes = function() return {} end,
-  GetNodeInfo = function()
-    return {
-      ranksIncreased = 0,
-      entryIDToRanksIncreased = {},
-      totalMaxRanks = 0,
-    }
-  end,
-})
-
-C_XMLUtil = C_XMLUtil or __wow_namespace({
-  GetTemplateInfo = function()
-    return nil
-  end,
-})
-
 local function __wow_make_transmog_location(slotName, slotID, transmogType, modification)
   local location = {
     slotName = tostring(slotName or ""),

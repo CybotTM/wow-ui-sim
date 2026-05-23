@@ -206,6 +206,20 @@ fn merchant_and_raid_lock_defaults_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn state_backed_traits_and_xml_util_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("C_Traits ="),
+        "C_Traits must be registered by the Rust trait surface, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("C_XMLUtil ="),
+        "C_XMLUtil must be registered by the Rust XML utility surface, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env
