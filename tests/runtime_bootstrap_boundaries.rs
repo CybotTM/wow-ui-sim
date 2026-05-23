@@ -673,3 +673,13 @@ fn economy_inventory_queries_are_not_runtime_bootstrap_fallbacks() {
         );
     }
 }
+
+#[test]
+fn channel_queries_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("function GetChannelList"),
+        "GetChannelList must be registered by the Rust channel API, not runtime bootstrap"
+    );
+}
