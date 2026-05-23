@@ -6649,7 +6649,6 @@ end
 C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
 C_Widget = C_Widget or __wow_namespace()
-C_Macro = C_Macro or __wow_namespace()
 if GameTime_GetTime == nil then
   function GameTime_GetTime(_useLocalTime)
     return "12:00"
