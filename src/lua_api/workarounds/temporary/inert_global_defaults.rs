@@ -118,6 +118,11 @@ if HasLootSpecializations == nil then
         return true
     end
 end
+if WorldLootObjectExists == nil then
+    function WorldLootObjectExists(_unit)
+        return false
+    end
+end
 if CanShowSetRoleButton == nil then
     function CanShowSetRoleButton()
         return false
@@ -189,6 +194,7 @@ mod tests {
                 if counts.TANK ~= 0 or counts.HEALER ~= 0 or counts.DAMAGER ~= 0 or counts.NOROLE ~= 0 then return "counts" end
                 if GetLootSpecialization() ~= 0 then return "loot_spec" end
                 if HasLootSpecializations() ~= true then return "has_loot_specs" end
+                if WorldLootObjectExists("player") ~= false then return "world_loot_object" end
                 if CanShowSetRoleButton() ~= false then return "role_button" end
                 if #GetSpellConfirmationPromptsInfo() ~= 0 then return "spell_prompts" end
                 if #GetActiveLootRollIDs() ~= 0 then return "loot_rolls" end
@@ -213,6 +219,7 @@ mod tests {
             ACCOUNT_BINDINGS = 9
             function BNGetNumFriends() return 5, 4, 3, 2 end
             function Ambiguate() return "Existing" end
+            function WorldLootObjectExists() return true end
             "#,
         )
         .expect("fixture should install existing members");
@@ -236,6 +243,7 @@ mod tests {
                 if total ~= 5 or online ~= 4 or favorite ~= 3 or mobile ~= 2 then return "overwrote_bnet_counts" end
                 if Ambiguate("A-B", "short") ~= "Existing" then return "overwrote_ambiguate" end
                 if type(BNGetNumFriendInvites) ~= "function" then return "missing_bnet_default" end
+                if WorldLootObjectExists("player") ~= true then return "overwrote_world_loot_object" end
                 return "ok"
                 "#,
             )

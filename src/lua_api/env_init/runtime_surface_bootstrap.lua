@@ -6646,12 +6646,6 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     end
   end
 end
-if WorldLootObjectExists == nil then
-  function WorldLootObjectExists(_unit)
-    return false
-  end
-end
-
 C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
 C_Widget = C_Widget or __wow_namespace()
