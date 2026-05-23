@@ -6646,7 +6646,6 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     end
   end
 end
-C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
 if type(UIFrameManager) ~= "table" then
   UIFrameManager = __wow_namespace()
 end

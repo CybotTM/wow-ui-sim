@@ -4,6 +4,9 @@
 //! options UI probes inert while making the unsupported device list explicit.
 
 const SOUND_DRIVER_DEFAULTS_LUA: &str = r#"
+if type(C_CombatAudioAlert) ~= "table" then
+    C_CombatAudioAlert = {}
+end
 if Sound_GameSystem_GetNumOutputDrivers == nil then
     function Sound_GameSystem_GetNumOutputDrivers() return 1 end
 end
@@ -70,6 +73,7 @@ mod tests {
             .eval(
                 r#"
                 if Sound_GameSystem_GetNumOutputDrivers() ~= 1 then return "game_output_count" end
+                if type(C_CombatAudioAlert) ~= "table" then return "combat_audio_alert" end
                 if Sound_GameSystem_GetOutputDriverNameByIndex(0) ~= "Silent Output Device" then return "game_output_name" end
                 if Sound_GameSystem_GetOutputDriverNameByIndex(1) ~= nil then return "game_output_extra" end
                 if Sound_GameSystem_GetNumInputDrivers() ~= 1 then return "game_input_count" end
@@ -92,6 +96,7 @@ mod tests {
         let env = WowLuaEnv::new().expect("lua env should initialize");
         env.exec(
             r#"
+            C_CombatAudioAlert = { Existing = true }
             function Sound_GameSystem_GetNumOutputDrivers() return 4 end
             function Sound_ChatSystem_GetOutputDriverNameByIndex() return "Existing Voice" end
             "#,
@@ -107,6 +112,7 @@ mod tests {
             .eval(
                 r#"
                 if Sound_GameSystem_GetNumOutputDrivers() ~= 4 then return "overwrote_count" end
+                if C_CombatAudioAlert.Existing ~= true then return "overwrote_combat_audio" end
                 if Sound_ChatSystem_GetOutputDriverNameByIndex(0) ~= "Existing Voice" then return "overwrote_name" end
                 if type(Sound_GameSystem_GetInputDriverNameByIndex) ~= "function" then return "missing_game_input" end
                 if type(Sound_GameSystem_RestartSoundSystem) ~= "function" then return "missing_restart" end
