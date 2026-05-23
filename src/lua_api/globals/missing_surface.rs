@@ -186,10 +186,26 @@ fn install_date_alias(lua: &mut rilua::Lua) -> LuaResult<()> {
 }
 
 fn seed_placeholder_global_tables(state: &mut LuaState) {
-    ensure_global_table(state, "UISpecialFrames");
+    seed_ui_special_frame_tables(state);
     ensure_global_table(state, "StaticPopupDialogs");
     ensure_global_table(state, "UIPanelWindows");
     ensure_global_table(state, "SOUNDKIT");
+}
+
+fn seed_ui_special_frame_tables(state: &mut LuaState) {
+    let Ok(special_frames) = ensure_namespace(state, "UISpecialFrames") else {
+        return;
+    };
+    let key_ref = state.gc.intern_string_static(b"UI_SPECIAL_FRAMES");
+    let global = state.global;
+    if let Some(globals) = state.gc.tables.get_mut(global) {
+        let _ = globals.raw_set(
+            Val::Str(key_ref),
+            Val::Table(special_frames),
+            &state.gc.string_arena,
+        );
+    }
+    state.gc.barrier_back(global);
 }
 
 fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {

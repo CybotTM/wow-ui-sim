@@ -725,3 +725,17 @@ fn inert_world_defaults_are_not_runtime_bootstrap_fallbacks() {
         );
     }
 }
+
+#[test]
+fn special_frame_tables_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("UI_SPECIAL_FRAMES"),
+        "UI_SPECIAL_FRAMES must be seeded by the Rust global table surface, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("UISpecialFrames ="),
+        "UISpecialFrames must be seeded by the Rust global table surface, not runtime bootstrap"
+    );
+}

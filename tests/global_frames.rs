@@ -545,7 +545,9 @@ fn test_party_member_frame_pool() {
 #[test]
 fn test_ui_special_frames_exists() {
     let env = env();
-    let is_table: bool = env.eval("return type(UISpecialFrames) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(UISpecialFrames) == 'table' and UI_SPECIAL_FRAMES == UISpecialFrames")
+        .unwrap();
     assert!(is_table);
 }
 

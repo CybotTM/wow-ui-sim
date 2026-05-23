@@ -14,14 +14,6 @@ if StaticPopup_Show == nil then
   end
 end
 
-if UI_SPECIAL_FRAMES == nil then
-  UI_SPECIAL_FRAMES = {}
-end
-
-if UISpecialFrames == nil then
-  UISpecialFrames = UI_SPECIAL_FRAMES
-end
-
 if IsExpansionTrial == nil then
   function IsExpansionTrial()
     return false
