@@ -197,6 +197,7 @@ fn apply_core_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Resu
 
 fn apply_feature_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::assisted_combat_manager_defaults::apply_bootstrap(lua)?;
+    temporary::base_nine_slice_dialog_defaults::apply_bootstrap(lua)?;
     temporary::macro_defaults::apply_bootstrap(lua)?;
     temporary::object_api_request_load_callbacks::apply_bootstrap(lua)?;
     temporary::profession_specs_defaults::apply_bootstrap(lua)?;

@@ -7683,23 +7683,6 @@ then
   end
 end
 
-if type(BaseNineSliceDialogMixin) ~= "table" then
-  BaseNineSliceDialogMixin = {}
-end
-
-if type(BaseNineSliceDialogMixin.OnShow) ~= "function" then
-  function BaseNineSliceDialogMixin:OnShow()
-  end
-end
-
-if type(BaseNineSliceDialogMixin.OnCloseClick) ~= "function" then
-  function BaseNineSliceDialogMixin:OnCloseClick()
-    if type(self.Hide) == "function" then
-      self:Hide()
-    end
-  end
-end
-
 if type(CallbackRegistrantMixin) ~= "table" then
   CallbackRegistrantMixin = {}
 end
