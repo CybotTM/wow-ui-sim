@@ -6579,16 +6579,6 @@ if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
   end)
 end
 
-if C_Container ~= nil and type(C_Container.SetBagPortraitTexture) ~= "function" then
-  function C_Container.SetBagPortraitTexture(texture, bagID)
-    if texture ~= nil and type(texture.SetTexture) == "function" then
-      local inventoryID = C_Container.ContainerIDToInventoryID and C_Container.ContainerIDToInventoryID(bagID)
-      local portraitTexture = inventoryID and GetInventoryItemTexture("player", inventoryID)
-      texture:SetTexture(portraitTexture)
-    end
-  end
-end
-
 if C_Item ~= nil and type(C_Item.RequestLoadItemDataByID) ~= "function" then
   function C_Item.RequestLoadItemDataByID(itemID)
     if ItemEventListener and type(ItemEventListener.FireCallbacks) == "function" then
