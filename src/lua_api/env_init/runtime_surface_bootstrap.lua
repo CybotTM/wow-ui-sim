@@ -7528,64 +7528,6 @@ __global_mt.__newindex = function(t, key, value)
 end
 setmetatable(_G, __global_mt)
 __wow_seed_namespace_names()
-if type(CreateAnchor) ~= "function" then
-  function CreateAnchor(point, relativeTo, relativePoint, x, y)
-    return {
-      point = point,
-      relativeTo = relativeTo,
-      relativePoint = relativePoint or point,
-      x = x or 0,
-      y = y or 0,
-    }
-  end
-end
-
-if type(GetFinalNameFromTextureKit) ~= "function" then
-  function GetFinalNameFromTextureKit(formatString, textureKit)
-    if type(formatString) ~= "string" then
-      return nil
-    end
-    if textureKit == nil or textureKit == "" then
-      return (formatString:gsub("%%s_?", ""):gsub("_$", ""))
-    end
-    return formatString:gsub("%%s", textureKit)
-  end
-end
-
-if type(SetClampedTextureRotation) ~= "function" then
-  function SetClampedTextureRotation(texture, rotation)
-    if texture and type(texture.SetRotation) == "function" then
-      texture:SetRotation(rotation or 0)
-    end
-  end
-end
-
-if type(CopyValuesAsKeys) ~= "function" then
-  function CopyValuesAsKeys(values)
-    local result = {}
-    if type(values) ~= "table" then
-      return result
-    end
-    for _, value in pairs(values) do
-      result[value] = true
-    end
-    return result
-  end
-end
-
-if type(GetMicroIconForRole) ~= "function" then
-  function GetMicroIconForRole(role)
-    if type(role) ~= "string" then
-      return "roleicon"
-    end
-    return "roleicon-" .. role:lower()
-  end
-end
-
-if type(PingSystemInitializer) ~= "function" then
-  function PingSystemInitializer(_category)
-  end
-end
 
 if type(CallbackRegistryMixin) ~= "table" then
   CallbackRegistryMixin = {}

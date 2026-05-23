@@ -67,6 +67,7 @@ pub(crate) mod seconds_formatter_defaults;
 pub(crate) mod secure_transfer_state;
 pub(crate) mod settings_canvas_visibility;
 pub(crate) mod shared_xml_anim_mixins;
+pub(crate) mod shared_xml_utility_defaults;
 pub(crate) mod sound_driver_defaults;
 pub(crate) mod source_patches;
 pub(crate) mod startup_windows;

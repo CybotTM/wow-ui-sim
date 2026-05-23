@@ -202,6 +202,7 @@ fn apply_feature_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::R
     temporary::profession_specs_defaults::apply_bootstrap(lua)?;
     temporary::proxy_object_factories::apply_bootstrap(lua)?;
     temporary::seconds_formatter_defaults::apply_bootstrap(lua)?;
+    temporary::shared_xml_utility_defaults::apply_bootstrap(lua)?;
     temporary::sound_driver_defaults::apply_bootstrap(lua)?;
     temporary::static_model_info_defaults::apply_bootstrap(lua)?;
     temporary::trade_skill_ui_fallbacks::apply_bootstrap(lua)?;
