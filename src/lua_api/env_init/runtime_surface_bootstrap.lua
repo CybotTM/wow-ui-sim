@@ -6721,15 +6721,6 @@ if rawget(UIFrameManager_ManagedFrameMixin, "UpdateFrameState") == nil then
     self:SetShown(show)
   end
 end
-if type(_G.IsPressHoldReleaseSpell) ~= "function" then
-  function IsPressHoldReleaseSpell(...)
-    if C_Spell and type(C_Spell.IsPressHoldReleaseSpell) == "function" then
-      return C_Spell.IsPressHoldReleaseSpell(...)
-    end
-    return false
-  end
-end
-
 local function __wow_copy_mixin_methods(target, source)
   if type(target) ~= "table" or type(source) ~= "table" then
     return target

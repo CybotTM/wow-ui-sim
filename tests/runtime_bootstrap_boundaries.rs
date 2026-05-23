@@ -34,6 +34,16 @@ fn profession_spec_defaults_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn legacy_spell_wrappers_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("IsPressHoldReleaseSpell"),
+        "legacy spell wrappers must live in the explicit temporary legacy spell workaround boundary"
+    );
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env

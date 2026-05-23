@@ -65,6 +65,11 @@ if IsPassiveSpell == nil then
         return false
     end
 end
+if IsPressHoldReleaseSpell == nil and C_Spell ~= nil then
+    function IsPressHoldReleaseSpell(...)
+        return C_Spell.IsPressHoldReleaseSpell(...)
+    end
+end
 if SpellBook_GetSpellBookSlot == nil then
     function SpellBook_GetSpellBookSlot(slot, _offset)
         return slot
@@ -104,6 +109,8 @@ mod tests {
                 if type(GetSpellInfo) ~= "function" then return "spell_info" end
                 if type(GetSpellTexture) ~= "function" then return "spell_texture" end
                 if IsPassiveSpell(116) ~= false then return "passive" end
+                if type(IsPressHoldReleaseSpell) ~= "function" then return "press_hold_type" end
+                if IsPressHoldReleaseSpell(116) ~= false then return "press_hold_value" end
                 if SpellBook_GetSpellBookSlot(3, 20) ~= 3 then return "slot" end
                 if FindSpellOverrideByID(116) ~= 116 then return "override_value" end
                 if select("#", FindFlyoutSlotBySpellID(116)) ~= 0 then return "flyout_value" end
@@ -123,9 +130,13 @@ mod tests {
             r#"
             GetSpellInfo = function() return "existing" end
             IsPassiveSpell = function() return true end
+            IsPressHoldReleaseSpell = function() return true end
             C_Spell = {
                 GetSpellInfo = function()
                     return { name = "new" }
+                end,
+                IsPressHoldReleaseSpell = function()
+                    return false
                 end,
             }
             "#,
@@ -137,11 +148,12 @@ mod tests {
             super::apply_bootstrap(&mut lua).expect("legacy spell globals should apply");
         }
 
-        let (spell_name, passive): (String, bool) = env
-            .eval("return GetSpellInfo(1), IsPassiveSpell(1)")
+        let (spell_name, passive, press_hold): (String, bool, bool) = env
+            .eval("return GetSpellInfo(1), IsPassiveSpell(1), IsPressHoldReleaseSpell(1)")
             .expect("legacy spell preservation probe should run");
 
         assert_eq!(spell_name, "existing");
         assert!(passive);
+        assert!(press_hold);
     }
 }
