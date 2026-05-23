@@ -154,7 +154,8 @@ pub(crate) fn apply_temporary_bootstrap(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::event_scheduler_state::apply_bootstrap(lua)?;
     temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
-    temporary::secure_transfer_state::apply_bootstrap(lua)
+    temporary::secure_transfer_state::apply_bootstrap(lua)?;
+    temporary::video_options_state::apply_bootstrap(lua)
 }
 
 pub fn close_startup_special_windows_before_first_frame(env: &crate::lua_api::WowLuaEnv) {
