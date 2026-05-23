@@ -121,79 +121,90 @@ pub(super) fn default_toys() -> Vec<ToyData> {
     ]
 }
 
-pub(super) fn default_warband_scenes() -> Vec<WarbandSceneData> {
-    let s = |warband_scene_id,
-             name: &str,
-             description: &str,
-             source: &str,
-             quality,
-             texture_kit: &str,
-             is_collected,
-             is_favorite,
-             has_fanfare,
-             source_type| WarbandSceneData {
-        warband_scene_id,
-        name: name.to_string(),
-        description: description.to_string(),
-        source: source.to_string(),
-        quality,
-        texture_kit: texture_kit.to_string(),
-        is_collected,
-        is_favorite,
-        has_fanfare,
-        source_type,
-    };
+struct WarbandSceneSeed {
+    id: u32,
+    name: &'static str,
+    description: &'static str,
+    source: &'static str,
+    quality: i32,
+    texture_kit: &'static str,
+    is_collected: bool,
+    is_favorite: bool,
+    has_fanfare: bool,
+    source_type: i32,
+}
 
-    vec![
-        s(
-            1,
-            "Harbor Camp",
-            "A windswept camp overlooking the harbor.",
-            "Rewarded from the opening Warband questline.",
-            2,
-            "campcollection-bg-image1",
-            true,
-            true,
-            false,
-            1,
-        ),
-        s(
-            2,
-            "Evergreen Grove",
-            "A quiet glade with druidic furnishings.",
-            "Purchased from the Trading Post.",
-            3,
-            "campcollection-bg-image2",
-            true,
-            false,
-            false,
-            2,
-        ),
-        s(
-            3,
-            "Storm Camp",
-            "A fortified site built for foul weather.",
-            "Complete a seasonal event to unlock.",
-            3,
-            "campcollection-bg-image3",
-            false,
-            false,
-            false,
-            3,
-        ),
-        s(
-            4,
-            "Dragonflight Perch",
-            "A high cliffside camp with dragonriding access.",
-            "Earned from a meta achievement.",
-            4,
-            "campcollection-bg-image4",
-            false,
-            false,
-            false,
-            4,
-        ),
-    ]
+const DEFAULT_WARBAND_SCENES: [WarbandSceneSeed; 4] = [
+    WarbandSceneSeed {
+        id: 1,
+        name: "Harbor Camp",
+        description: "A windswept camp overlooking the harbor.",
+        source: "Rewarded from the opening Warband questline.",
+        quality: 2,
+        texture_kit: "campcollection-bg-image1",
+        is_collected: true,
+        is_favorite: true,
+        has_fanfare: false,
+        source_type: 1,
+    },
+    WarbandSceneSeed {
+        id: 2,
+        name: "Evergreen Grove",
+        description: "A quiet glade with druidic furnishings.",
+        source: "Purchased from the Trading Post.",
+        quality: 3,
+        texture_kit: "campcollection-bg-image2",
+        is_collected: true,
+        is_favorite: false,
+        has_fanfare: false,
+        source_type: 2,
+    },
+    WarbandSceneSeed {
+        id: 3,
+        name: "Storm Camp",
+        description: "A fortified site built for foul weather.",
+        source: "Complete a seasonal event to unlock.",
+        quality: 3,
+        texture_kit: "campcollection-bg-image3",
+        is_collected: false,
+        is_favorite: false,
+        has_fanfare: false,
+        source_type: 3,
+    },
+    WarbandSceneSeed {
+        id: 4,
+        name: "Dragonflight Perch",
+        description: "A high cliffside camp with dragonriding access.",
+        source: "Earned from a meta achievement.",
+        quality: 4,
+        texture_kit: "campcollection-bg-image4",
+        is_collected: false,
+        is_favorite: false,
+        has_fanfare: false,
+        source_type: 4,
+    },
+];
+
+pub(super) fn default_warband_scenes() -> Vec<WarbandSceneData> {
+    DEFAULT_WARBAND_SCENES
+        .iter()
+        .map(warband_scene_from_seed)
+        .collect()
+}
+
+fn warband_scene_from_seed(seed: &WarbandSceneSeed) -> WarbandSceneData {
+    WarbandSceneData {
+        warband_scene_id: seed.id,
+        name: seed.name.to_string(),
+        description: seed.description.to_string(),
+        source: seed.source.to_string(),
+        quality: seed.quality,
+        texture_kit: seed.texture_kit.to_string(),
+        is_collected: seed.is_collected,
+        is_favorite: seed.is_favorite,
+        has_fanfare: seed.has_fanfare,
+        source_type: seed.source_type,
+    }
 }
 
 /// Default transmog appearances: ~5 per armor slot + weapon slots.
