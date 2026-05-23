@@ -178,6 +178,12 @@ fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()
 }
 
 fn apply_core_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    apply_core_foundation_defaults(lua)?;
+    apply_core_legacy_defaults(lua)?;
+    Ok(())
+}
+
+fn apply_core_foundation_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::adventure_journal_fallbacks::apply_bootstrap(lua)?;
     temporary::catalog_shop_product_card_defaults::apply_bootstrap(lua)?;
     temporary::client_info_defaults::apply_bootstrap(lua)?;
@@ -185,11 +191,16 @@ fn apply_core_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Resu
     temporary::container_portrait_texture::apply_bootstrap(lua)?;
     temporary::debug_environment_defaults::apply_bootstrap(lua)?;
     temporary::difficulty_pvp_util_defaults::apply_bootstrap(lua)?;
+    temporary::display_scale_defaults::apply_bootstrap(lua)?;
     temporary::formatting_utility_defaults::apply_bootstrap(lua)?;
     temporary::game_time_calendar_invites::apply_bootstrap(lua)?;
     temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::inert_global_defaults::apply_bootstrap(lua)?;
+    Ok(())
+}
+
+fn apply_core_legacy_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::kiosk_namespace_defaults::apply_bootstrap(lua)?;
     temporary::lfg_legacy_defaults::apply_bootstrap(lua)?;
     temporary::legacy_action_bar_globals::apply_bootstrap(lua)?;

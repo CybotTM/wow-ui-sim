@@ -343,24 +343,6 @@ if GetStatisticsCategoryList == nil then
   end
 end
 
-if GetDefaultScale == nil then
-  function GetDefaultScale()
-    return 1
-  end
-end
-
-if GetMinRenderScale == nil then
-  function GetMinRenderScale()
-    return 0.5
-  end
-end
-
-if GetMaxRenderScale == nil then
-  function GetMaxRenderScale()
-    return 1.0
-  end
-end
-
 if IsExpansionTrial == nil then
   function IsExpansionTrial()
     return false

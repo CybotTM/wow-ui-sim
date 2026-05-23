@@ -325,6 +325,18 @@ fn performance_metric_defaults_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn display_scale_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    for symbol in ["GetDefaultScale", "GetMinRenderScale", "GetMaxRenderScale"] {
+        assert!(
+            !bootstrap.contains(&format!("function {symbol}")),
+            "{symbol} fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+        );
+    }
+}
+
+#[test]
 fn c_cvar_surface_is_not_runtime_bootstrap_fallback() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 
