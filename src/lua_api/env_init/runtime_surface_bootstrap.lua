@@ -7683,54 +7683,6 @@ then
   end
 end
 
-if type(GetAppropriateTopLevelParent) ~= "function" then
-  __wow_root_ui_parent = rawget(_G, "UIParent")
-  __wow_alternate_top_level_parent = nil
-
-  function SetAlternateTopLevelParent(parent)
-    __wow_alternate_top_level_parent = parent
-    if type(EventRegistry) == "table" and type(EventRegistry.TriggerEvent) == "function" then
-      EventRegistry:TriggerEvent("UI.AlternateTopLevelParentChanged", parent)
-    end
-  end
-
-  function ClearAlternateTopLevelParent()
-    __wow_alternate_top_level_parent = nil
-    if type(EventRegistry) == "table" and type(EventRegistry.TriggerEvent) == "function" then
-      EventRegistry:TriggerEvent("UI.AlternateTopLevelParentChanged")
-    end
-  end
-
-  function GetAppropriateTopLevelParent(optionalExcludedParent)
-    if __wow_alternate_top_level_parent
-      and type(__wow_alternate_top_level_parent.IsShown) == "function"
-      and __wow_alternate_top_level_parent:IsShown()
-      and (not optionalExcludedParent or __wow_alternate_top_level_parent ~= optionalExcludedParent)
-    then
-      return __wow_alternate_top_level_parent
-    end
-
-    if __wow_root_ui_parent ~= nil and __wow_root_ui_parent ~= optionalExcludedParent then
-      return __wow_root_ui_parent
-    end
-
-    return UIParent or GlueParent
-  end
-
-  function SetAppropriateTopLevelParent(frame)
-    local parent = GetAppropriateTopLevelParent()
-    if frame and parent and type(frame.SetParent) == "function" then
-      frame:SetParent(parent)
-    end
-  end
-end
-
-if type(GetAppropriateTooltip) ~= "function" then
-  function GetAppropriateTooltip()
-    return UIParent and GameTooltip or GlueTooltip
-  end
-end
-
 if type(BaseNineSliceDialogMixin) ~= "table" then
   BaseNineSliceDialogMixin = {}
 end
