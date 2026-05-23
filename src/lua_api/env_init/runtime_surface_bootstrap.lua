@@ -548,13 +548,6 @@ local function __wow_ensure_glue_character_select_surface()
   IsExpansionTrial = function()
     return false
   end
-
-  C_RecruitAFriend = C_RecruitAFriend or {}
-  if type(C_RecruitAFriend.GetRecruitInfo) ~= "function" then
-    function C_RecruitAFriend.GetRecruitInfo()
-      return false, nil
-    end
-  end
 end
 
 __wow_ensure_glue_character_select_surface()
