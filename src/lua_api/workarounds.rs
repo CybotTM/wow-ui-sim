@@ -158,6 +158,7 @@ pub(crate) fn apply_temporary_bootstrap(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::housing_catalog_state::apply_bootstrap(lua)?;
+    temporary::kiosk_namespace_defaults::apply_bootstrap(lua)?;
     temporary::map_runtime_state::apply_bootstrap(lua)?;
     temporary::perks_activities_state::apply_bootstrap(lua)?;
     temporary::private_aura_state::apply_bootstrap(lua)?;

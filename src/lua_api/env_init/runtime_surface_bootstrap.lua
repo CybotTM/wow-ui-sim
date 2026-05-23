@@ -2407,11 +2407,6 @@ local function __wow_make_calendar_time(dayOffset, minuteOffset)
   }
 end
 
-Kiosk = __wow_merge_namespace(Kiosk, {
-  IsEnabled = function() return false end,
-  IsCompetitiveModeEnabled = function() return false end,
-})
-
 -- C_LFGList is state-backed via `src/lua_api/globals/lfg_list.rs`.
 -- C_AddOnProfiler is state-backed via `src/c_api/c_addon_profiler.rs`.
 -- C_Ping.GetDefaultPingOptions is a temporary shim in `src/c_api/temporary_shims/c_ping.rs`.

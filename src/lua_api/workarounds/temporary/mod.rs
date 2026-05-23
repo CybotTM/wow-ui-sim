@@ -32,6 +32,7 @@ pub(crate) mod housing_catalog_state;
 pub(crate) mod housing_dashboard_preload;
 pub(crate) mod item_quality_color_data_methods;
 pub(crate) mod item_socketing_tooltips;
+pub(crate) mod kiosk_namespace_defaults;
 pub(crate) mod lfg_lock_list;
 pub(crate) mod main_menu_microbutton_click;
 pub(crate) mod map_canvas_data_provider_pin;
