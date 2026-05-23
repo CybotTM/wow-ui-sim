@@ -8,7 +8,29 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    blizzard_ui_candidates()
+        .into_iter()
+        .find(|path| path.exists())
+        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
+}
+
+fn blizzard_ui_candidates() -> Vec<PathBuf> {
+    let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let mut candidates = vec![
+        blizzard_ui_cache_dir(),
+        project_root.join("Interface/BlizzardUI"),
+        project_root.join("../reference-addons.new/wow-ui-source/Interface/AddOns"),
+        project_root.join("../Interface/AddOns"),
+    ];
+    candidates.retain(|path| !path.as_os_str().is_empty());
+    candidates
+}
+
+fn blizzard_ui_cache_dir() -> PathBuf {
+    std::env::var_os("HOME")
+        .map(PathBuf::from)
+        .map(|home| home.join(".cache/wow-ui-sim/blizzard-ui"))
+        .unwrap_or_default()
 }
 
 fn performance_bar_dir() -> PathBuf {

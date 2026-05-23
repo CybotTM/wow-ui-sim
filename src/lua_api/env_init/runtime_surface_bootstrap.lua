@@ -311,48 +311,6 @@ if ActionButtonUtil.GetActionBarStatusForFlyout == nil then
   end
 end
 
-if GetFramerate == nil then
-  function GetFramerate()
-    return 60
-  end
-end
-
-if UpdateAddOnMemoryUsage == nil then
-  function UpdateAddOnMemoryUsage()
-    return 0
-  end
-end
-
-if UpdateAddOnCPUUsage == nil then
-  function UpdateAddOnCPUUsage()
-    return 0
-  end
-end
-
-if ResetCPUUsage == nil then
-  function ResetCPUUsage()
-    return 0
-  end
-end
-
-if GetAddOnMemoryUsage == nil then
-  function GetAddOnMemoryUsage(_name)
-    return 0
-  end
-end
-
-if GetAddOnCPUUsage == nil then
-  function GetAddOnCPUUsage(_name)
-    return 0
-  end
-end
-
-if GetFrameCPUUsage == nil then
-  function GetFrameCPUUsage(_frame, _includeChildren)
-    return 0, 0
-  end
-end
-
 if GetCategoryList == nil then
   function GetCategoryList()
     return {}
