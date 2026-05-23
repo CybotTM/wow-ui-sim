@@ -44,6 +44,16 @@ fn legacy_spell_wrappers_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn game_time_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("GameTime_GetTime"),
+        "GameTime defaults must live in the explicit temporary GameTime/calendar workaround boundary"
+    );
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env

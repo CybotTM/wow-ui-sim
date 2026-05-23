@@ -6647,11 +6647,6 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
   end
 end
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
-if GameTime_GetTime == nil then
-  function GameTime_GetTime(_useLocalTime)
-    return "12:00"
-  end
-end
 if type(UIFrameManager) ~= "table" then
   UIFrameManager = __wow_namespace()
 end
