@@ -1,4 +1,4 @@
-//! Temporary `C_TransmogOutfitInfo` slot-location fallback surface.
+//! Temporary `C_TransmogOutfitInfo` fallback surface.
 //!
 //! Outfit slot-location metadata is static enough for Blizzard startup, but
 //! the simulator does not yet model the full transmog outfit system. Keep
@@ -12,9 +12,13 @@ use rilua::LuaResult;
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
+const ACTIVE_OUTFIT_ID_KEY: &str = "__activeOutfitID";
+const CURRENTLY_VIEWED_OUTFIT_ID_KEY: &str = "__currentlyViewedOutfitID";
+const PENDING_SHEATHE_CATEGORIES_KEY: &str = "__pendingSheatheCategories";
 const APPEARANCE_TYPE_FALLBACK: f64 = 0.0;
 const ILLUSION_TYPE_FALLBACK: f64 = 1.0;
 const NONE_COLLECTION_TYPE_FALLBACK: f64 = 0.0;
+const VALID_SHEATHE_SLOT_TRANSMOG_ID: f64 = 190001.0;
 
 #[derive(Clone, Copy)]
 struct OutfitSlotSpec {
@@ -89,6 +93,42 @@ const fn appearance_slot(
 
 pub(crate) fn register_c_transmog_outfit_slot_shims(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_TransmogOutfitInfo")?;
+    register_outfit_state_methods(state, ns)?;
+    register_outfit_slot_methods(state, ns)
+}
+
+fn register_outfit_state_methods(
+    state: &mut LuaState,
+    ns: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    table_set_rust_fn_static(state, ns, "GetActiveOutfitID", get_active_outfit_id)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetCurrentlyViewedOutfitID",
+        get_currently_viewed_outfit_id,
+    )?;
+    table_set_rust_fn_static(state, ns, "GetOutfitInfo", get_outfit_info)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetAllTransmogOutfitOptionSheatheCategoryInfo",
+        get_all_transmog_outfit_option_sheathe_category_info,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "SetPendingTransmogSheatheCategory",
+        set_pending_transmog_sheathe_category,
+    )?;
+    table_set_rust_fn_static(state, ns, "ChangeToOutfit", change_to_outfit)?;
+    table_set_rust_fn_static(state, ns, "ClearOutfit", clear_outfit)
+}
+
+fn register_outfit_slot_methods(
+    state: &mut LuaState,
+    ns: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         ns,
@@ -102,6 +142,139 @@ pub(crate) fn register_c_transmog_outfit_slot_shims(state: &mut LuaState) -> Lua
         "GetAllSlotLocationInfo",
         get_all_slot_location_info,
     )
+}
+
+fn get_active_outfit_id(state: &mut LuaState) -> LuaResult<u32> {
+    let outfit_id = outfit_id_value(state, ACTIVE_OUTFIT_ID_KEY);
+    state.push(outfit_id);
+    Ok(1)
+}
+
+fn get_currently_viewed_outfit_id(state: &mut LuaState) -> LuaResult<u32> {
+    let outfit_id = outfit_id_value(state, CURRENTLY_VIEWED_OUTFIT_ID_KEY);
+    state.push(outfit_id);
+    Ok(1)
+}
+
+fn outfit_id_value(state: &mut LuaState, key: &str) -> Val {
+    let namespace = global_val(state, "C_TransmogOutfitInfo");
+    match table_get(state, namespace, key) {
+        Val::Num(id) => Val::Num(id),
+        _ => Val::Num(0.0),
+    }
+}
+
+fn get_outfit_info(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn get_all_transmog_outfit_option_sheathe_category_info(state: &mut LuaState) -> LuaResult<u32> {
+    let slot_transmog_id = number_or_numeric_string(state, stack_val(state, 1));
+    if slot_transmog_id != Some(VALID_SHEATHE_SLOT_TRANSMOG_ID) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+
+    let categories = create_table(state);
+    let sheathe_categories = [
+        ("Default", 0.0),
+        ("Back", 1.0),
+        ("Side", 2.0),
+        ("Hide", 3.0),
+    ];
+    for (index, (name, fallback)) in sheathe_categories.iter().enumerate() {
+        let entry = sheathe_category_info(state, name, *fallback);
+        set_table_array(state, categories, index as i64 + 1, entry);
+    }
+    state.push(categories);
+    Ok(1)
+}
+
+fn sheathe_category_info(state: &mut LuaState, name: &'static str, fallback: f64) -> Val {
+    let entry = create_table(state);
+    let category = enum_variant_number(
+        state,
+        "TransmogOutfitSlotOptionSheatheCategory",
+        name,
+        fallback,
+    );
+    table_set(state, entry, "sheatheCategory", Val::Num(category));
+    let category_name = create_string(state, name);
+    table_set(state, entry, "categoryName", category_name);
+    entry
+}
+
+fn set_pending_transmog_sheathe_category(state: &mut LuaState) -> LuaResult<u32> {
+    let slot_id = lua_key_string(state, stack_val(state, 1));
+    let option_id = lua_key_string(state, stack_val(state, 2));
+    let category = stack_val(state, 3);
+    let pending = pending_sheathe_categories(state);
+    let key = format!("{slot_id}:{option_id}");
+    table_set(state, pending, &key, category);
+    Ok(0)
+}
+
+fn lua_key_string(state: &mut LuaState, value: Val) -> String {
+    match value {
+        Val::Num(number) if number.fract() == 0.0 => format!("{}", number as i64),
+        other => val_to_string(state, other).unwrap_or_else(|| "nil".to_string()),
+    }
+}
+
+fn pending_sheathe_categories(state: &mut LuaState) -> Val {
+    let namespace = global_val(state, "C_TransmogOutfitInfo");
+    match table_get(state, namespace, PENDING_SHEATHE_CATEGORIES_KEY) {
+        table @ Val::Table(_) => table,
+        _ => {
+            let table = create_table(state);
+            table_set(state, namespace, PENDING_SHEATHE_CATEGORIES_KEY, table);
+            table
+        }
+    }
+}
+
+fn change_to_outfit(state: &mut LuaState) -> LuaResult<u32> {
+    if lua_truthy(stack_val(state, 2)) {
+        reset_outfit_state(state);
+        return Ok(0);
+    }
+
+    let outfit_id = number_or_numeric_string(state, stack_val(state, 1)).unwrap_or(0.0);
+    set_outfit_ids(state, outfit_id);
+    Ok(0)
+}
+
+fn clear_outfit(state: &mut LuaState) -> LuaResult<u32> {
+    reset_outfit_state(state);
+    Ok(0)
+}
+
+fn lua_truthy(value: Val) -> bool {
+    !matches!(value, Val::Nil | Val::Bool(false))
+}
+
+fn reset_outfit_state(state: &mut LuaState) {
+    set_outfit_ids(state, 0.0);
+    let namespace = global_val(state, "C_TransmogOutfitInfo");
+    let empty_pending = create_table(state);
+    table_set(
+        state,
+        namespace,
+        PENDING_SHEATHE_CATEGORIES_KEY,
+        empty_pending,
+    );
+}
+
+fn set_outfit_ids(state: &mut LuaState, outfit_id: f64) {
+    let namespace = global_val(state, "C_TransmogOutfitInfo");
+    table_set(state, namespace, ACTIVE_OUTFIT_ID_KEY, Val::Num(outfit_id));
+    table_set(
+        state,
+        namespace,
+        CURRENTLY_VIEWED_OUTFIT_ID_KEY,
+        Val::Num(outfit_id),
+    );
 }
 
 fn get_transmog_outfit_slot_from_inventory_slot(state: &mut LuaState) -> LuaResult<u32> {
@@ -259,5 +432,46 @@ mod tests {
                 "MAINHANDSLOT".to_string()
             )
         );
+    }
+
+    #[test]
+    fn outfit_state_methods_track_active_outfit_and_pending_sheathe_categories() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let result: String = env
+            .eval(
+                r#"
+                if C_TransmogOutfitInfo.GetActiveOutfitID() ~= 0 then return "active" end
+                if C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID() ~= 0 then return "viewed" end
+                if C_TransmogOutfitInfo.GetOutfitInfo(7) ~= nil then return "outfit_info" end
+
+                local categoryInfo = C_TransmogOutfitInfo.GetAllTransmogOutfitOptionSheatheCategoryInfo(190001)
+                if #categoryInfo ~= 4 then return "category_count" end
+                if categoryInfo[1].categoryName ~= "Default" then return "default_category" end
+                if categoryInfo[4].categoryName ~= "Hide" then return "hide_category" end
+                if C_TransmogOutfitInfo.GetAllTransmogOutfitOptionSheatheCategoryInfo(0) ~= nil then
+                    return "unexpected_category"
+                end
+
+                C_TransmogOutfitInfo.ChangeToOutfit(7, false)
+                if C_TransmogOutfitInfo.GetActiveOutfitID() ~= 7 then return "changed_active" end
+                if C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID() ~= 7 then return "changed_viewed" end
+
+                C_TransmogOutfitInfo.SetPendingTransmogSheatheCategory(16, 2, Enum.TransmogOutfitSlotOptionSheatheCategory.Side)
+                local pending = rawget(C_TransmogOutfitInfo, "__pendingSheatheCategories")
+                if pending["16:2"] ~= Enum.TransmogOutfitSlotOptionSheatheCategory.Side then return "pending" end
+
+                C_TransmogOutfitInfo.ChangeToOutfit(7, true)
+                if C_TransmogOutfitInfo.GetActiveOutfitID() ~= 0 then return "cleared_active" end
+                if next(rawget(C_TransmogOutfitInfo, "__pendingSheatheCategories")) ~= nil then return "cleared_pending" end
+
+                C_TransmogOutfitInfo.ChangeToOutfit(9, false)
+                C_TransmogOutfitInfo.ClearOutfit()
+                if C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID() ~= 0 then return "clear_outfit" end
+                return "ok"
+                "#,
+            )
+            .expect("outfit state methods should be queryable");
+
+        assert_eq!(result, "ok");
     }
 }
