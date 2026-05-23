@@ -683,3 +683,19 @@ fn channel_queries_are_not_runtime_bootstrap_fallbacks() {
         "GetChannelList must be registered by the Rust channel API, not runtime bootstrap"
     );
 }
+
+#[test]
+fn achievement_category_queries_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    for symbol in [
+        "GetCategoryList",
+        "GetGuildCategoryList",
+        "GetStatisticsCategoryList",
+    ] {
+        assert!(
+            !bootstrap.contains(&format!("function {symbol}")),
+            "{symbol} must be registered by the Rust achievement API, not runtime bootstrap"
+        );
+    }
+}

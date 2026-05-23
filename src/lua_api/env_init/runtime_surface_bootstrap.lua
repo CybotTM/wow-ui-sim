@@ -37,30 +37,12 @@ if ReloadUI == nil then
   end
 end
 
-if GetCategoryList == nil then
-  function GetCategoryList()
-    return {}
-  end
-end
-
 if UI_SPECIAL_FRAMES == nil then
   UI_SPECIAL_FRAMES = {}
 end
 
 if UISpecialFrames == nil then
   UISpecialFrames = UI_SPECIAL_FRAMES
-end
-
-if GetGuildCategoryList == nil then
-  function GetGuildCategoryList()
-    return {}
-  end
-end
-
-if GetStatisticsCategoryList == nil then
-  function GetStatisticsCategoryList()
-    return {}
-  end
 end
 
 if IsExpansionTrial == nil then
