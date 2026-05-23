@@ -10590,61 +10590,6 @@ if AssistedCombatManager.AddSpellTooltipLine == nil then
   end
 end
 
-local __wow_store_glue_state = rawget(_G, "__wow_store_glue_state")
-if type(__wow_store_glue_state) ~= "table" then
-  __wow_store_glue_state = {
-    disconnectOnLogout = false,
-    vasProductReady = false,
-    purchaseStateByGuid = {},
-    requestedQueueGuids = {},
-    requestCharacterQueueTimeCount = 0,
-    updateVASPurchaseStatesCount = 0,
-    lastRequestedQueueGuid = nil,
-  }
-  rawset(_G, "__wow_store_glue_state", __wow_store_glue_state)
-end
-
-local function __wow_store_glue_state_table()
-  local state = __wow_store_glue_state
-  if type(state.purchaseStateByGuid) ~= "table" then
-    state.purchaseStateByGuid = {}
-  end
-  if type(state.requestedQueueGuids) ~= "table" then
-    state.requestedQueueGuids = {}
-  end
-  return state
-end
-
-C_StoreGlue = __wow_merge_namespace(C_StoreGlue, {
-  _state = __wow_store_glue_state_table(),
-  GetDisconnectOnLogout = function()
-    return __wow_store_glue_state_table().disconnectOnLogout == true
-  end,
-  GetVASProductReady = function()
-    return __wow_store_glue_state_table().vasProductReady == true
-  end,
-  GetVASPurchaseStateInfo = function(guid)
-    local state = __wow_store_glue_state_table()
-    local record = state.purchaseStateByGuid[tostring(guid)] or state.purchaseStateByGuid[guid]
-    if type(record) ~= "table" then
-      return 0, 0, nil
-    end
-    return tonumber(record.purchaseState) or 0, tonumber(record.productID) or 0, record.result
-  end,
-  RequestCharacterQueueTime = function(guid)
-    local state = __wow_store_glue_state_table()
-    table.insert(state.requestedQueueGuids, guid)
-    state.requestCharacterQueueTimeCount = (tonumber(state.requestCharacterQueueTimeCount) or 0) + 1
-    state.lastRequestedQueueGuid = guid
-    return true
-  end,
-  UpdateVASPurchaseStates = function()
-    local state = __wow_store_glue_state_table()
-    state.updateVASPurchaseStatesCount = (tonumber(state.updateVASPurchaseStatesCount) or 0) + 1
-    return true
-  end,
-})
-
 local __wow_combat_log_namespace_state = rawget(_G, "__wow_combat_log_state")
 if type(__wow_combat_log_namespace_state) ~= "table" then
   __wow_combat_log_namespace_state = {
