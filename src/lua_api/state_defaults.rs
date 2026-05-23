@@ -213,101 +213,115 @@ fn warband_scene_from_seed(seed: &WarbandSceneSeed) -> WarbandSceneData {
 ///   Head=1, Shoulder=2, Back=3, Chest=4, Shirt=5, Tabard=6, Wrist=7,
 ///   Hands=8, Waist=9, Legs=10, Feet=11, OneHSword=14, Staff=23, Shield=18
 pub(super) fn default_transmog_appearances() -> Vec<TransmogAppearance> {
-    let mut sid = 0i32; // auto-increment source_id
-    let mut vid = 0i32; // auto-increment visual_id
-    let a = |sid: &mut i32, vid: &mut i32, cat: i32, item: i32, collected: bool, src: i32| {
-        *sid += 1;
-        *vid += 1;
-        TransmogAppearance {
-            source_id: *sid,
-            visual_id: *vid,
-            category_id: cat,
-            item_id: item,
-            is_collected: collected,
-            source_type: src,
-            item_mod_id: 0,
-        }
-    };
-    // Source types: JournalEncounter=1, Quest=2, Vendor=3, WorldDrop=4
-    vec![
-        // Head (cat 1)
-        a(&mut sid, &mut vid, 1, 31110, true, 1), // Helm of Wrath
-        a(&mut sid, &mut vid, 1, 34333, true, 1), // Onslaught Greathelm
-        a(&mut sid, &mut vid, 1, 44006, true, 2), // Titan-forged Plate Helm
-        a(&mut sid, &mut vid, 1, 77154, true, 1), // Colossal Dragonplate Helmet
-        a(&mut sid, &mut vid, 1, 99999, false, 4), // Uncollected head piece
-        // Shoulder (cat 2)
-        a(&mut sid, &mut vid, 2, 30055, true, 1), // Pauldrons of the Fallen Champion
-        a(&mut sid, &mut vid, 2, 34392, true, 1), // Onslaught Shoulderblades
-        a(&mut sid, &mut vid, 2, 50853, true, 1), // Boneguard Commander's Pauldrons
-        a(&mut sid, &mut vid, 2, 77166, true, 1), // Backbreaker Spaulders
-        a(&mut sid, &mut vid, 2, 99998, false, 3), // Uncollected shoulders
-        // Back (cat 3)
-        a(&mut sid, &mut vid, 3, 27878, true, 1), // Cloak of the Pit Stalker
-        a(&mut sid, &mut vid, 3, 34241, true, 1), // Cloak of Unforgivable Sin
-        a(&mut sid, &mut vid, 3, 65108, true, 2), // Wrap of Unity
-        a(&mut sid, &mut vid, 3, 77098, true, 4), // Cape of Vaulted Secrets
-        a(&mut sid, &mut vid, 3, 99997, false, 4), // Uncollected cloak
-        // Chest (cat 4)
-        a(&mut sid, &mut vid, 4, 30129, true, 1), // Breastplate of the Lightbinder
-        a(&mut sid, &mut vid, 4, 34215, true, 1), // Onslaught Breastplate
-        a(&mut sid, &mut vid, 4, 50078, true, 1), // Thassarian's Battleplate
-        a(&mut sid, &mut vid, 4, 77171, true, 1), // Colossal Dragonplate Battleplate
-        a(&mut sid, &mut vid, 4, 99996, false, 3), // Uncollected chest
-        // Shirt (cat 5)
-        a(&mut sid, &mut vid, 5, 16059, true, 3), // Common Brown Shirt
-        a(&mut sid, &mut vid, 5, 4330, true, 3),  // Stylish Red Shirt
-        // Tabard (cat 6)
-        a(&mut sid, &mut vid, 6, 5976, true, 3), // Guild Tabard
-        // Wrist (cat 7)
-        a(&mut sid, &mut vid, 7, 30067, true, 1), // Bracers of Maliciousness
-        a(&mut sid, &mut vid, 7, 34431, true, 1), // Wristguards of Tranquil Thought
-        a(&mut sid, &mut vid, 7, 50611, true, 1), // Bracers of Dark Reckoning
-        a(&mut sid, &mut vid, 7, 77162, true, 4), // Dragonbone Wargreaves
-        a(&mut sid, &mut vid, 7, 99995, false, 4), // Uncollected bracers
-        // Hands (cat 8)
-        a(&mut sid, &mut vid, 8, 30113, true, 1), // Gloves of the Fallen Defender
-        a(&mut sid, &mut vid, 8, 34342, true, 1), // Handguards of the Dawn
-        a(&mut sid, &mut vid, 8, 50610, true, 1), // Gauntlets of Overexposure
-        a(&mut sid, &mut vid, 8, 77160, true, 1), // Colossal Dragonplate Gauntlets
-        a(&mut sid, &mut vid, 8, 99994, false, 2), // Uncollected gloves
-        // Waist (cat 9)
-        a(&mut sid, &mut vid, 9, 30034, true, 1), // Belt of One-Hundred Deaths
-        a(&mut sid, &mut vid, 9, 34485, true, 1), // Girdle of the Fearless
-        a(&mut sid, &mut vid, 9, 50069, true, 1), // Belt of Broken Bones
-        a(&mut sid, &mut vid, 9, 77164, true, 4), // Gorge Stalker Belt
-        a(&mut sid, &mut vid, 9, 99993, false, 3), // Uncollected belt
-        // Legs (cat 10)
-        a(&mut sid, &mut vid, 10, 30126, true, 1), // Leggings of the Fallen
-        a(&mut sid, &mut vid, 10, 34180, true, 1), // Onslaught Legguards
-        a(&mut sid, &mut vid, 10, 50063, true, 1), // Legguards of Lost Hope
-        a(&mut sid, &mut vid, 10, 77155, true, 1), // Colossal Dragonplate Legguards
-        a(&mut sid, &mut vid, 10, 99992, false, 2), // Uncollected legs
-        // Feet (cat 11)
-        a(&mut sid, &mut vid, 11, 30032, true, 1), // Red Riding Boots
-        a(&mut sid, &mut vid, 11, 34567, true, 1), // Boots of the Protector
-        a(&mut sid, &mut vid, 11, 50607, true, 1), // Treads of Impending Resurrection
-        a(&mut sid, &mut vid, 11, 77159, true, 4), // Mosshide Treads
-        a(&mut sid, &mut vid, 11, 99991, false, 4), // Uncollected boots
-        // One-Hand Sword (cat 14)
-        a(&mut sid, &mut vid, 14, 28573, true, 1), // Despair
-        a(&mut sid, &mut vid, 14, 34247, true, 1), // Apolyon, the Soul-Render
-        a(&mut sid, &mut vid, 14, 50070, true, 1), // Glorenzelg, High-Blade of the Silver Hand
-        a(&mut sid, &mut vid, 14, 77188, true, 1), // Gurthalak, Voice of the Deeps
-        a(&mut sid, &mut vid, 14, 99990, false, 1), // Uncollected sword
-        // Staff (cat 23)
-        a(&mut sid, &mut vid, 23, 30723, true, 1), // Staff of Infinite Mysteries
-        a(&mut sid, &mut vid, 23, 34182, true, 1), // Grand Magister's Staff of Torrents
-        a(&mut sid, &mut vid, 23, 50731, true, 4), // Archus, Greatstaff of Antonidas
-        a(&mut sid, &mut vid, 23, 77196, true, 1), // Ti'tahk, the Steps of Time
-        a(&mut sid, &mut vid, 23, 99989, false, 4), // Uncollected staff
-        // Shield (cat 18)
-        a(&mut sid, &mut vid, 18, 28606, true, 1), // Shield of Impenetrable Darkness
-        a(&mut sid, &mut vid, 18, 34185, true, 1), // Sword Breaker's Bulwark
-        a(&mut sid, &mut vid, 18, 50729, true, 1), // Icecrown Glacial Wall
-        a(&mut sid, &mut vid, 18, 77167, true, 4), // Blackhorn's Mighty Bulwark
-        a(&mut sid, &mut vid, 18, 99988, false, 3), // Uncollected shield
-    ]
+    DEFAULT_TRANSMOG_APPEARANCES
+        .iter()
+        .enumerate()
+        .map(transmog_appearance_from_seed)
+        .collect()
+}
+
+struct TransmogAppearanceSeed {
+    category_id: i32,
+    item_id: i32,
+    is_collected: bool,
+    source_type: i32,
+}
+
+// Source types: JournalEncounter=1, Quest=2, Vendor=3, WorldDrop=4.
+const DEFAULT_TRANSMOG_APPEARANCES: [TransmogAppearanceSeed; 63] = [
+    t(1, 31110, true, 1),
+    t(1, 34333, true, 1),
+    t(1, 44006, true, 2),
+    t(1, 77154, true, 1),
+    t(1, 99999, false, 4),
+    t(2, 30055, true, 1),
+    t(2, 34392, true, 1),
+    t(2, 50853, true, 1),
+    t(2, 77166, true, 1),
+    t(2, 99998, false, 3),
+    t(3, 27878, true, 1),
+    t(3, 34241, true, 1),
+    t(3, 65108, true, 2),
+    t(3, 77098, true, 4),
+    t(3, 99997, false, 4),
+    t(4, 30129, true, 1),
+    t(4, 34215, true, 1),
+    t(4, 50078, true, 1),
+    t(4, 77171, true, 1),
+    t(4, 99996, false, 3),
+    t(5, 16059, true, 3),
+    t(5, 4330, true, 3),
+    t(6, 5976, true, 3),
+    t(7, 30067, true, 1),
+    t(7, 34431, true, 1),
+    t(7, 50611, true, 1),
+    t(7, 77162, true, 4),
+    t(7, 99995, false, 4),
+    t(8, 30113, true, 1),
+    t(8, 34342, true, 1),
+    t(8, 50610, true, 1),
+    t(8, 77160, true, 1),
+    t(8, 99994, false, 2),
+    t(9, 30034, true, 1),
+    t(9, 34485, true, 1),
+    t(9, 50069, true, 1),
+    t(9, 77164, true, 4),
+    t(9, 99993, false, 3),
+    t(10, 30126, true, 1),
+    t(10, 34180, true, 1),
+    t(10, 50063, true, 1),
+    t(10, 77155, true, 1),
+    t(10, 99992, false, 2),
+    t(11, 30032, true, 1),
+    t(11, 34567, true, 1),
+    t(11, 50607, true, 1),
+    t(11, 77159, true, 4),
+    t(11, 99991, false, 4),
+    t(14, 28573, true, 1),
+    t(14, 34247, true, 1),
+    t(14, 50070, true, 1),
+    t(14, 77188, true, 1),
+    t(14, 99990, false, 1),
+    t(23, 30723, true, 1),
+    t(23, 34182, true, 1),
+    t(23, 50731, true, 4),
+    t(23, 77196, true, 1),
+    t(23, 99989, false, 4),
+    t(18, 28606, true, 1),
+    t(18, 34185, true, 1),
+    t(18, 50729, true, 1),
+    t(18, 77167, true, 4),
+    t(18, 99988, false, 3),
+];
+
+const fn t(
+    category_id: i32,
+    item_id: i32,
+    is_collected: bool,
+    source_type: i32,
+) -> TransmogAppearanceSeed {
+    TransmogAppearanceSeed {
+        category_id,
+        item_id,
+        is_collected,
+        source_type,
+    }
+}
+
+fn transmog_appearance_from_seed(
+    (index, seed): (usize, &TransmogAppearanceSeed),
+) -> TransmogAppearance {
+    let appearance_id = index as i32 + 1;
+
+    TransmogAppearance {
+        source_id: appearance_id,
+        visual_id: appearance_id,
+        category_id: seed.category_id,
+        item_id: seed.item_id,
+        is_collected: seed.is_collected,
+        source_type: seed.source_type,
+        item_mod_id: 0,
+    }
 }
 
 pub(super) fn default_heirlooms() -> Vec<HeirloomData> {
