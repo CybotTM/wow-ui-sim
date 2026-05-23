@@ -186,6 +186,32 @@ fn callback_registry_defaults_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn pool_constructor_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("function CreateFramePool"),
+        "CreateFramePool fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("CreateTexturePool ="),
+        "CreateTexturePool fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("CreateFontStringPool ="),
+        "CreateFontStringPool fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("function CreateFramePoolCollection"),
+        "CreateFramePoolCollection fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("function CreateFrameFactory"),
+        "CreateFrameFactory fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn c_cvar_surface_is_not_runtime_bootstrap_fallback() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 

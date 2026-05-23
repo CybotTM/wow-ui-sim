@@ -192,6 +192,7 @@ fn apply_core_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Resu
     temporary::legacy_action_bar_globals::apply_bootstrap(lua)?;
     temporary::legacy_container_globals::apply_bootstrap(lua)?;
     temporary::legacy_spell_globals::apply_bootstrap(lua)?;
+    temporary::pool_constructor_defaults::apply_bootstrap(lua)?;
     Ok(())
 }
 
