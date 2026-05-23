@@ -6753,54 +6753,6 @@ end
 if AreTalentsLocked == nil then
   function AreTalentsLocked() return false end
 end
-if Sound_GameSystem_GetNumOutputDrivers == nil then
-  function Sound_GameSystem_GetNumOutputDrivers() return 1 end
-end
-if Sound_GameSystem_GetOutputDriverNameByIndex == nil then
-  function Sound_GameSystem_GetOutputDriverNameByIndex(index)
-    if index == 0 then
-      return "Silent Output Device"
-    end
-    return nil
-  end
-end
-if Sound_GameSystem_GetNumInputDrivers == nil then
-  function Sound_GameSystem_GetNumInputDrivers() return 1 end
-end
-if Sound_GameSystem_GetInputDriverNameByIndex == nil then
-  function Sound_GameSystem_GetInputDriverNameByIndex(index)
-    if index == 0 then
-      return "Silent Input Device"
-    end
-    return nil
-  end
-end
-if Sound_ChatSystem_GetNumOutputDrivers == nil then
-  function Sound_ChatSystem_GetNumOutputDrivers() return 1 end
-end
-if Sound_ChatSystem_GetOutputDriverNameByIndex == nil then
-  function Sound_ChatSystem_GetOutputDriverNameByIndex(index)
-    if index == 0 then
-      return "Silent Voice Output Device"
-    end
-    return nil
-  end
-end
-if Sound_ChatSystem_GetNumInputDrivers == nil then
-  function Sound_ChatSystem_GetNumInputDrivers() return 1 end
-end
-if Sound_ChatSystem_GetInputDriverNameByIndex == nil then
-  function Sound_ChatSystem_GetInputDriverNameByIndex(index)
-    if index == 0 then
-      return "Silent Voice Input Device"
-    end
-    return nil
-  end
-end
-if Sound_GameSystem_RestartSoundSystem == nil then
-  function Sound_GameSystem_RestartSoundSystem() end
-end
-
 if GAME_LOCALE == nil then GAME_LOCALE = GetLocale() end
 if GetContainerItemInfo == nil and C_Container ~= nil then
   function GetContainerItemInfo(...)

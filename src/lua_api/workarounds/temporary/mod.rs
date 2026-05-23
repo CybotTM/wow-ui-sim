@@ -54,6 +54,7 @@ pub(crate) mod reputation_state;
 pub(crate) mod secure_transfer_state;
 pub(crate) mod settings_canvas_visibility;
 pub(crate) mod shared_xml_anim_mixins;
+pub(crate) mod sound_driver_defaults;
 pub(crate) mod source_patches;
 pub(crate) mod startup_windows;
 pub(crate) mod store_glue_state;

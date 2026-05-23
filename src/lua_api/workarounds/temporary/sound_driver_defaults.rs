@@ -1,0 +1,120 @@
+//! Temporary silent sound-driver defaults.
+//!
+//! The simulator does not model selectable audio devices. These defaults keep
+//! options UI probes inert while making the unsupported device list explicit.
+
+const SOUND_DRIVER_DEFAULTS_LUA: &str = r#"
+if Sound_GameSystem_GetNumOutputDrivers == nil then
+    function Sound_GameSystem_GetNumOutputDrivers() return 1 end
+end
+if Sound_GameSystem_GetOutputDriverNameByIndex == nil then
+    function Sound_GameSystem_GetOutputDriverNameByIndex(index)
+        if index == 0 then
+            return "Silent Output Device"
+        end
+        return nil
+    end
+end
+if Sound_GameSystem_GetNumInputDrivers == nil then
+    function Sound_GameSystem_GetNumInputDrivers() return 1 end
+end
+if Sound_GameSystem_GetInputDriverNameByIndex == nil then
+    function Sound_GameSystem_GetInputDriverNameByIndex(index)
+        if index == 0 then
+            return "Silent Input Device"
+        end
+        return nil
+    end
+end
+if Sound_ChatSystem_GetNumOutputDrivers == nil then
+    function Sound_ChatSystem_GetNumOutputDrivers() return 1 end
+end
+if Sound_ChatSystem_GetOutputDriverNameByIndex == nil then
+    function Sound_ChatSystem_GetOutputDriverNameByIndex(index)
+        if index == 0 then
+            return "Silent Voice Output Device"
+        end
+        return nil
+    end
+end
+if Sound_ChatSystem_GetNumInputDrivers == nil then
+    function Sound_ChatSystem_GetNumInputDrivers() return 1 end
+end
+if Sound_ChatSystem_GetInputDriverNameByIndex == nil then
+    function Sound_ChatSystem_GetInputDriverNameByIndex(index)
+        if index == 0 then
+            return "Silent Voice Input Device"
+        end
+        return nil
+    end
+end
+if Sound_GameSystem_RestartSoundSystem == nil then
+    function Sound_GameSystem_RestartSoundSystem() end
+end
+"#;
+
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(SOUND_DRIVER_DEFAULTS_LUA)?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn installs_silent_sound_driver_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                if Sound_GameSystem_GetNumOutputDrivers() ~= 1 then return "game_output_count" end
+                if Sound_GameSystem_GetOutputDriverNameByIndex(0) ~= "Silent Output Device" then return "game_output_name" end
+                if Sound_GameSystem_GetOutputDriverNameByIndex(1) ~= nil then return "game_output_extra" end
+                if Sound_GameSystem_GetNumInputDrivers() ~= 1 then return "game_input_count" end
+                if Sound_GameSystem_GetInputDriverNameByIndex(0) ~= "Silent Input Device" then return "game_input_name" end
+                if Sound_ChatSystem_GetNumOutputDrivers() ~= 1 then return "chat_output_count" end
+                if Sound_ChatSystem_GetOutputDriverNameByIndex(0) ~= "Silent Voice Output Device" then return "chat_output_name" end
+                if Sound_ChatSystem_GetNumInputDrivers() ~= 1 then return "chat_input_count" end
+                if Sound_ChatSystem_GetInputDriverNameByIndex(0) ~= "Silent Voice Input Device" then return "chat_input_name" end
+                Sound_GameSystem_RestartSoundSystem()
+                return "ok"
+                "#,
+            )
+            .expect("sound defaults should be callable");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn preserves_existing_sound_driver_members() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            function Sound_GameSystem_GetNumOutputDrivers() return 4 end
+            function Sound_ChatSystem_GetOutputDriverNameByIndex() return "Existing Voice" end
+            "#,
+        )
+        .expect("fixture should install existing sound members");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("sound defaults should apply");
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                if Sound_GameSystem_GetNumOutputDrivers() ~= 4 then return "overwrote_count" end
+                if Sound_ChatSystem_GetOutputDriverNameByIndex(0) ~= "Existing Voice" then return "overwrote_name" end
+                if type(Sound_GameSystem_GetInputDriverNameByIndex) ~= "function" then return "missing_game_input" end
+                if type(Sound_GameSystem_RestartSoundSystem) ~= "function" then return "missing_restart" end
+                return "ok"
+                "#,
+            )
+            .expect("sound preservation probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
