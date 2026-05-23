@@ -146,6 +146,57 @@ if GetNumArenaOpponents == nil then
         return 0
     end
 end
+
+if GetItemLevelColor == nil then
+    function GetItemLevelColor()
+        return 1, 1, 1
+    end
+end
+if ClearCursorHoveredItem == nil then
+    function ClearCursorHoveredItem()
+        return nil
+    end
+end
+if SetCursorHoveredItem == nil then
+    function SetCursorHoveredItem(_itemLocation)
+        return nil
+    end
+end
+if SetCursorHoveredItemTradeItem == nil then
+    function SetCursorHoveredItemTradeItem(_enabled)
+        return nil
+    end
+end
+if UnitInSubgroup == nil then
+    function UnitInSubgroup(unit)
+        if unit == nil or unit == "player" then
+            return false
+        end
+        return type(UnitInParty) == "function" and UnitInParty(unit) or false
+    end
+end
+
+if GetNumGuildPerks == nil then
+    function GetNumGuildPerks()
+        return 0
+    end
+end
+if RequestGuildRewards == nil then
+    function RequestGuildRewards()
+        return nil
+    end
+end
+if GetGuildRenameRequired == nil then
+    function GetGuildRenameRequired()
+        return false
+    end
+end
+if GetAvailableBandwidth == nil then
+    function GetAvailableBandwidth()
+        local bandwidthIn, bandwidthOut = GetNetStats()
+        return math.max(tonumber(bandwidthIn) or 0, tonumber(bandwidthOut) or 0)
+    end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -244,6 +295,9 @@ mod tests {
                 if Ambiguate("A-B", "short") ~= "Existing" then return "overwrote_ambiguate" end
                 if type(BNGetNumFriendInvites) ~= "function" then return "missing_bnet_default" end
                 if WorldLootObjectExists("player") ~= true then return "overwrote_world_loot_object" end
+                if type(ClearCursorHoveredItem) ~= "function" then return "missing_cursor_hover_default" end
+                if UnitInSubgroup("player") ~= false then return "bad_player_subgroup_default" end
+                if GetNumGuildPerks() ~= 0 then return "bad_guild_perks_default" end
                 return "ok"
                 "#,
             )
