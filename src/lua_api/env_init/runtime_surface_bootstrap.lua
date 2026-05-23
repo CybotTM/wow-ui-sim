@@ -6642,36 +6642,6 @@ if IsPlayerInWorld == nil then
   end
 end
 
-AssistedCombatManager = AssistedCombatManager or {}
-if AssistedCombatManager.HasActionSpell == nil then
-  function AssistedCombatManager:HasActionSpell()
-    return false
-  end
-end
-if AssistedCombatManager.GetActionSpellID == nil then
-  function AssistedCombatManager:GetActionSpellID()
-    return 0
-  end
-end
-if AssistedCombatManager.GetActionSpellDescription == nil then
-  function AssistedCombatManager:GetActionSpellDescription()
-    return ""
-  end
-end
-if AssistedCombatManager.SetCanHighlightSpellbookSpells == nil then
-  function AssistedCombatManager:SetCanHighlightSpellbookSpells(_enabled)
-  end
-end
-if AssistedCombatManager.ShouldHighlightSpellbookSpell == nil then
-  function AssistedCombatManager:ShouldHighlightSpellbookSpell(_spellID)
-    return false
-  end
-end
-if AssistedCombatManager.AddSpellTooltipLine == nil then
-  function AssistedCombatManager:AddSpellTooltipLine(_tooltip, _spellID, _overriddenSpellID)
-  end
-end
-
 if CreateTemplateInfoCache == nil then
   function CreateTemplateInfoCache()
     local cache = {
