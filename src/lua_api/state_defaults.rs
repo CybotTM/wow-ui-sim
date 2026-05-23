@@ -325,128 +325,118 @@ fn transmog_appearance_from_seed(
 }
 
 pub(super) fn default_heirlooms() -> Vec<HeirloomData> {
-    let h = |id, name: &str, loc: &str, icon, lvl, src: &str, min, max| HeirloomData {
-        item_id: id,
-        name: name.into(),
-        equip_loc: loc.into(),
+    DEFAULT_HEIRLOOMS.iter().map(heirloom_from_seed).collect()
+}
+
+struct HeirloomSeed {
+    item_id: u32,
+    name: &'static str,
+    equip_loc: &'static str,
+    icon: u32,
+    upgrade_level: i32,
+    source: &'static str,
+    min_level: i32,
+    max_level: i32,
+}
+
+const DEFAULT_HEIRLOOMS: [HeirloomSeed; 11] = [
+    heirloom(122245, "Burnished Helm of Might", "INVTYPE_HEAD", 133071, 6),
+    heirloom(
+        122355,
+        "Polished Breastplate of Valor",
+        "INVTYPE_CHEST",
+        132633,
+        6,
+    ),
+    heirloom(
+        122356,
+        "Polished Spaulders of Valor",
+        "INVTYPE_SHOULDER",
+        132633,
+        6,
+    ),
+    heirloom(
+        122382,
+        "Preened Ironfeather Shoulders",
+        "INVTYPE_SHOULDER",
+        135033,
+        6,
+    ),
+    heirloom(
+        122384,
+        "Tattered Dreadmist Robe",
+        "INVTYPE_CHEST",
+        132673,
+        6,
+    ),
+    heirloom(
+        122247,
+        "Burnished Legplates of Might",
+        "INVTYPE_LEGS",
+        133071,
+        6,
+    ),
+    heirloom(
+        122250,
+        "Mystical Kilt of Elements",
+        "INVTYPE_LEGS",
+        134188,
+        6,
+    ),
+    heirloom(122266, "Balanced Heartseeker", "INVTYPE_WEAPON", 135274, 6),
+    heirloom(
+        122389,
+        "Bloodied Arcanite Reaper",
+        "INVTYPE_2HWEAPON",
+        135277,
+        6,
+    ),
+    heirloom(
+        122390,
+        "Dignified Headmaster's Charge",
+        "INVTYPE_2HWEAPON",
+        135146,
+        6,
+    ),
+    heirloom(
+        187997,
+        "Eternal Amulet of the Redeemed",
+        "INVTYPE_NECK",
+        133280,
+        0,
+    ),
+];
+
+const fn heirloom(
+    item_id: u32,
+    name: &'static str,
+    equip_loc: &'static str,
+    icon: u32,
+    upgrade_level: i32,
+) -> HeirloomSeed {
+    HeirloomSeed {
+        item_id,
+        name,
+        equip_loc,
         icon,
-        upgrade_level: lvl,
-        source: src.into(),
-        min_level: min,
-        max_level: max,
-    };
-    vec![
-        h(
-            122245,
-            "Burnished Helm of Might",
-            "INVTYPE_HEAD",
-            133071,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            122355,
-            "Polished Breastplate of Valor",
-            "INVTYPE_CHEST",
-            132633,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            122356,
-            "Polished Spaulders of Valor",
-            "INVTYPE_SHOULDER",
-            132633,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            122382,
-            "Preened Ironfeather Shoulders",
-            "INVTYPE_SHOULDER",
-            135033,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            122384,
-            "Tattered Dreadmist Robe",
-            "INVTYPE_CHEST",
-            132673,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            122247,
-            "Burnished Legplates of Might",
-            "INVTYPE_LEGS",
-            133071,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            122250,
-            "Mystical Kilt of Elements",
-            "INVTYPE_LEGS",
-            134188,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            122266,
-            "Balanced Heartseeker",
-            "INVTYPE_WEAPON",
-            135274,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            122389,
-            "Bloodied Arcanite Reaper",
-            "INVTYPE_2HWEAPON",
-            135277,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            122390,
-            "Dignified Headmaster's Charge",
-            "INVTYPE_2HWEAPON",
-            135146,
-            6,
-            "Vendor",
-            1,
-            50,
-        ),
-        h(
-            187997,
-            "Eternal Amulet of the Redeemed",
-            "INVTYPE_NECK",
-            133280,
-            0,
-            "Vendor",
-            1,
-            50,
-        ),
-    ]
+        upgrade_level,
+        source: "Vendor",
+        min_level: 1,
+        max_level: 50,
+    }
+}
+
+fn heirloom_from_seed(seed: &HeirloomSeed) -> HeirloomData {
+    HeirloomData {
+        item_id: seed.item_id,
+        name: seed.name.into(),
+        equip_loc: seed.equip_loc.into(),
+        icon: seed.icon,
+        upgrade_level: seed.upgrade_level,
+        source: seed.source.into(),
+        min_level: seed.min_level,
+        max_level: seed.max_level,
+    }
 }
 
 pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
