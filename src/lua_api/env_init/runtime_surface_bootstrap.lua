@@ -4166,42 +4166,6 @@ if bit == nil then
   }
 end
 
-local __cvars = rawget(_G, "__wow_cvars") or {}
-rawset(_G, "__wow_cvars", __cvars)
--- Pre-seed CVars that Blizzard OnLoad code reads before any addon has
--- a chance to SetCVar. Each default matches the value WoW ships with.
-local __cvar_defaults = {
-  timeMgrAlarmTime = "0",
-  timeMgrUseMilitaryTime = "0",
-  timeMgrUseLocalTime = "0",
-  showTimestamps = "none",
-  spellActivationOverlayOpacity = "1.0",
-}
-for k, v in pairs(__cvar_defaults) do
-  if __cvars[k] == nil then __cvars[k] = v end
-end
-
-C_CVar = C_CVar or __wow_namespace({
-  GetCVar = function(name)
-    return __cvars[name]
-  end,
-  SetCVar = function(name, value)
-    __cvars[name] = value == nil and nil or tostring(value)
-    return true
-  end,
-  GetCVarBool = function(name)
-    local value = __cvars[name]
-    return value ~= nil and value ~= "0" and value ~= false
-  end,
-  GetCVarDefault = function(name)
-    return __cvars[name] or "0"
-  end,
-  RegisterCVar = __wow_noop,
-  ResetTestCVars = __wow_noop,
-  GetCVarBitfield = function() return false end,
-  SetCVarBitfield = function() return true end,
-})
-
 C_UIColor = C_UIColor or __wow_namespace({
   GetColors = function()
     return {

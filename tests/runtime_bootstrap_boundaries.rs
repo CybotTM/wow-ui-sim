@@ -160,6 +160,20 @@ fn proxy_object_factories_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn c_cvar_surface_is_not_runtime_bootstrap_fallback() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("C_CVar"),
+        "C_CVar must be registered by the Rust SimState cvar surface, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("__wow_cvars"),
+        "CVar storage must stay in SimState.cvars, not a Lua-only runtime bootstrap table"
+    );
+}
+
+#[test]
 fn c_macro_namespace_still_has_rust_backed_macro_text() {
     let env = WowLuaEnv::new().expect("lua env should initialize");
     let result: String = env

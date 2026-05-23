@@ -1,7 +1,7 @@
 //! `SetCVar` / `GetCVar` globals + `C_CVar.{Set,Get,GetDefault}CVar`.
 //! All routes through `SimState.cvars` (which is seeded from
 //! `cvars.yaml` and persists overrides to disk) so the in-game CVar
-//! surface, the in-Lua bootstrap defaults, and the simulator's
+//! surface and the simulator's
 //! Rust-side knobs (e.g. `Brightness=50`, `Contrast=50`, `Gamma=1.0`
 //! from `cvars.yaml`) all read the same store.
 //!
@@ -243,12 +243,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
-/// Override the bootstrap-defined
-/// `C_CVar.{Set,Get,GetBool,GetDefault,Register,Get/SetBitfield}CVar`
-/// with Rust impls that route through `SimState.cvars`. The bootstrap's
-/// fallbacks read/write a Lua-only `__cvars` table — that table doesn't
-/// know about the YAML defaults (Brightness/Contrast/Gamma/etc.), so
-/// the in-game settings sliders would otherwise see nil for them.
+/// Register `C_CVar.{Set,Get,GetBool,GetDefault,Register,Get/SetBitfield}CVar`
+/// with Rust impls that route through `SimState.cvars`.
 fn install_c_cvar_namespace(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let table_ref = ensure_c_cvar_table(state);
