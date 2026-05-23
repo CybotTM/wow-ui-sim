@@ -35,6 +35,7 @@ pub mod c_party_info_static_fallbacks;
 pub mod c_perks_program;
 pub mod c_pet_battles_static_fallbacks;
 pub mod c_ping;
+pub mod c_prototype_dialog;
 pub mod c_reincarnation;
 pub mod c_restricted_actions;
 pub mod c_scenario;
