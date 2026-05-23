@@ -188,7 +188,8 @@ fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()
     temporary::profession_specs_defaults::apply_bootstrap(lua)?;
     temporary::sound_driver_defaults::apply_bootstrap(lua)?;
     temporary::static_model_info_defaults::apply_bootstrap(lua)?;
-    temporary::trade_skill_ui_fallbacks::apply_bootstrap(lua)
+    temporary::trade_skill_ui_fallbacks::apply_bootstrap(lua)?;
+    temporary::ui_frame_manager_defaults::apply_bootstrap(lua)
 }
 
 pub fn close_startup_special_windows_before_first_frame(env: &crate::lua_api::WowLuaEnv) {

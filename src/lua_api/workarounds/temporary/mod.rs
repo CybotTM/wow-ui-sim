@@ -69,6 +69,7 @@ pub(crate) mod store_glue_state;
 pub(crate) mod talent_edge_frame_level_sync;
 pub(crate) mod tooltip_nineslice_surface;
 pub(crate) mod trade_skill_ui_fallbacks;
+pub(crate) mod ui_frame_manager_defaults;
 pub(crate) mod ui_parent_panel_toggles;
 pub(crate) mod uiparent_managed_frame_mixin;
 pub(crate) mod uiparent_onupdate_worklists;

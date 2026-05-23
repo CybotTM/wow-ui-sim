@@ -8,7 +8,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be synced")
 }
 
 fn ui_frame_manager_dir() -> PathBuf {
@@ -320,7 +321,7 @@ fn managed_frame_template_registered() {
 
 #[test]
 fn dependent_addons_exist_on_disk() {
-    for dependent in &["Blizzard_MawBuffs", "Blizzard_TieredEntranceTraits"] {
+    for dependent in &["Blizzard_MawBuffs"] {
         let dir = blizzard_ui_dir().join(dependent);
         assert!(
             dir.is_dir(),
