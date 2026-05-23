@@ -163,6 +163,7 @@ fn apply_temporary_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::housing_catalog_state::apply_bootstrap(lua)?;
     temporary::map_runtime_state::apply_bootstrap(lua)?;
     temporary::perks_activities_state::apply_bootstrap(lua)?;
+    temporary::player_spells_onload_backfill::apply_bootstrap(lua)?;
     temporary::private_aura_state::apply_bootstrap(lua)?;
     temporary::reputation_state::apply_bootstrap(lua)?;
     temporary::secure_transfer_state::apply_bootstrap(lua)?;
