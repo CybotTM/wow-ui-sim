@@ -163,6 +163,7 @@ pub(crate) fn apply_temporary_bootstrap(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::secure_transfer_state::apply_bootstrap(lua)?;
     temporary::store_glue_state::apply_bootstrap(lua)?;
     temporary::trade_skill_ui_fallbacks::apply_bootstrap(lua)?;
+    temporary::unit_auras_state::apply_bootstrap(lua)?;
     temporary::video_options_state::apply_bootstrap(lua)
 }
 

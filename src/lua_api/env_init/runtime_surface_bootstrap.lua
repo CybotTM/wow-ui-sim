@@ -2417,39 +2417,6 @@ Kiosk = __wow_merge_namespace(Kiosk, {
 -- C_Ping.GetDefaultPingOptions is a temporary shim in `src/c_api/temporary_shims/c_ping.rs`.
 -- C_ZoneAbility is state-backed via `src/lua_api/globals/missing_surface/zone_ability.rs`.
 
-C_UnitAuras = __wow_merge_namespace(C_UnitAuras, {
-  SetPrivateWarningTextAnchor = __wow_noop,
-})
-
-if C_UnitAuras._blockedAuras == nil then
-  C_UnitAuras._blockedAuras = {}
-end
-
-if C_UnitAuras._providerSwitched == nil then
-  C_UnitAuras._providerSwitched = false
-end
-
-if C_UnitAuras.AddBlockedAura == nil then
-  function C_UnitAuras.AddBlockedAura(unitToken, auraInstanceID)
-    if unitToken == nil or auraInstanceID == nil then
-      return
-    end
-    C_UnitAuras._blockedAuras[tostring(unitToken) .. ":" .. tostring(auraInstanceID)] = true
-  end
-end
-
-if C_UnitAuras.SwitchAuraDataProvider == nil then
-  function C_UnitAuras.SwitchAuraDataProvider()
-    C_UnitAuras._providerSwitched = true
-  end
-end
-
-if C_UnitAuras.ResetAuraDataProvider == nil then
-  function C_UnitAuras.ResetAuraDataProvider()
-    C_UnitAuras._providerSwitched = false
-  end
-end
-
 if AuraUtil == nil then
   AuraUtil = {}
 end
