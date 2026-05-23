@@ -260,57 +260,6 @@ if GetCursorMoney == nil then
   end
 end
 
-if ActionButtonUtil == nil then
-  ActionButtonUtil = {}
-end
-
-ActionButtonUtil.ActionBarActionStatus = ActionButtonUtil.ActionBarActionStatus or {
-  NotMissing = 1,
-  MissingFromAllBars = 2,
-  OnInactiveBonusBar = 3,
-  OnDisabledActionBar = 4,
-}
-
-ActionButtonUtil.ActionBarButtonNames = ActionButtonUtil.ActionBarButtonNames or {}
-
-if ActionButtonUtil.ShowAllActionButtonGrids == nil then
-  ActionButtonUtil.ShowAllActionButtonGrids = __wow_noop
-end
-
-if ActionButtonUtil.HideAllActionButtonGrids == nil then
-  ActionButtonUtil.HideAllActionButtonGrids = __wow_noop
-end
-
-if ActionButtonUtil.SetAllQuickKeybindButtonHighlights == nil then
-  ActionButtonUtil.SetAllQuickKeybindButtonHighlights = __wow_noop
-end
-
-if ActionButtonUtil.ShowAllQuickKeybindButtonHighlights == nil then
-  ActionButtonUtil.ShowAllQuickKeybindButtonHighlights = __wow_noop
-end
-
-if ActionButtonUtil.HideAllQuickKeybindButtonHighlights == nil then
-  ActionButtonUtil.HideAllQuickKeybindButtonHighlights = __wow_noop
-end
-
-if ActionButtonUtil.GetActionBarStatusForSpell == nil then
-  function ActionButtonUtil.GetActionBarStatusForSpell(_spellID, _excludeNonPlayerBars, _excludeSpecialPlayerBars)
-    return ActionButtonUtil.ActionBarActionStatus.NotMissing
-  end
-end
-
-if ActionButtonUtil.GetActionBarStatusForPetAction == nil then
-  function ActionButtonUtil.GetActionBarStatusForPetAction(_petActionID)
-    return ActionButtonUtil.ActionBarActionStatus.NotMissing
-  end
-end
-
-if ActionButtonUtil.GetActionBarStatusForFlyout == nil then
-  function ActionButtonUtil.GetActionBarStatusForFlyout(_flyoutActionID)
-    return ActionButtonUtil.ActionBarActionStatus.NotMissing
-  end
-end
-
 if GetCategoryList == nil then
   function GetCategoryList()
     return {}

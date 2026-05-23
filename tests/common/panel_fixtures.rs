@@ -217,34 +217,31 @@ pub fn install_uiparent_load_addon_seam(env: &WowLuaEnv) {
 pub fn install_action_button_util_stub(env: &WowLuaEnv) {
     env.exec(
         r#"
-        if not ActionButtonUtil then
-            ActionButtonUtil = {
-                ActionBarActionStatus = {
-                    NotMissing = 1,
-                    MissingFromAllBars = 2,
-                    OnInactiveBonusBar = 3,
-                    OnDisabledActionBar = 4,
-                },
-            }
+        ActionButtonUtil = ActionButtonUtil or {}
+        ActionButtonUtil.ActionBarActionStatus = ActionButtonUtil.ActionBarActionStatus or {
+            NotMissing = 1,
+            MissingFromAllBars = 2,
+            OnInactiveBonusBar = 3,
+            OnDisabledActionBar = 4,
+        }
 
-            __test_action_bar_status_for_spell = {}
-            __test_action_bar_status_for_pet_action = {}
-            __test_action_bar_status_for_flyout = {}
+        __test_action_bar_status_for_spell = {}
+        __test_action_bar_status_for_pet_action = {}
+        __test_action_bar_status_for_flyout = {}
 
-            function ActionButtonUtil.GetActionBarStatusForSpell(spellID)
-                local override = spellID and __test_action_bar_status_for_spell[spellID]
-                return override or ActionButtonUtil.ActionBarActionStatus.NotMissing
-            end
+        function ActionButtonUtil.GetActionBarStatusForSpell(spellID)
+            local override = spellID and __test_action_bar_status_for_spell[spellID]
+            return override or ActionButtonUtil.ActionBarActionStatus.NotMissing
+        end
 
-            function ActionButtonUtil.GetActionBarStatusForPetAction(petActionID)
-                local override = petActionID and __test_action_bar_status_for_pet_action[petActionID]
-                return override or ActionButtonUtil.ActionBarActionStatus.NotMissing
-            end
+        function ActionButtonUtil.GetActionBarStatusForPetAction(petActionID)
+            local override = petActionID and __test_action_bar_status_for_pet_action[petActionID]
+            return override or ActionButtonUtil.ActionBarActionStatus.NotMissing
+        end
 
-            function ActionButtonUtil.GetActionBarStatusForFlyout(flyoutActionID)
-                local override = flyoutActionID and __test_action_bar_status_for_flyout[flyoutActionID]
-                return override or ActionButtonUtil.ActionBarActionStatus.NotMissing
-            end
+        function ActionButtonUtil.GetActionBarStatusForFlyout(flyoutActionID)
+            local override = flyoutActionID and __test_action_bar_status_for_flyout[flyoutActionID]
+            return override or ActionButtonUtil.ActionBarActionStatus.NotMissing
         end
         "#,
     )

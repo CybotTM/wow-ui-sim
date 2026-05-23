@@ -337,6 +337,16 @@ fn display_scale_defaults_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn action_button_util_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("ActionButtonUtil"),
+        "ActionButtonUtil defaults must live in the explicit temporary action-bar workaround boundary, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn c_cvar_surface_is_not_runtime_bootstrap_fallback() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 

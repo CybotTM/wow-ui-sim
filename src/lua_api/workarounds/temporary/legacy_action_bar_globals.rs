@@ -5,6 +5,60 @@
 //! no longer required.
 
 const LEGACY_ACTION_BAR_GLOBALS_LUA: &str = r#"
+if ActionButtonUtil == nil then
+  ActionButtonUtil = {}
+end
+
+local function __wow_legacy_action_bar_noop()
+end
+
+ActionButtonUtil.ActionBarActionStatus = ActionButtonUtil.ActionBarActionStatus or {
+  NotMissing = 1,
+  MissingFromAllBars = 2,
+  OnInactiveBonusBar = 3,
+  OnDisabledActionBar = 4,
+}
+
+ActionButtonUtil.ActionBarButtonNames = ActionButtonUtil.ActionBarButtonNames or {}
+
+if ActionButtonUtil.ShowAllActionButtonGrids == nil then
+  ActionButtonUtil.ShowAllActionButtonGrids = __wow_legacy_action_bar_noop
+end
+
+if ActionButtonUtil.HideAllActionButtonGrids == nil then
+  ActionButtonUtil.HideAllActionButtonGrids = __wow_legacy_action_bar_noop
+end
+
+if ActionButtonUtil.SetAllQuickKeybindButtonHighlights == nil then
+  ActionButtonUtil.SetAllQuickKeybindButtonHighlights = __wow_legacy_action_bar_noop
+end
+
+if ActionButtonUtil.ShowAllQuickKeybindButtonHighlights == nil then
+  ActionButtonUtil.ShowAllQuickKeybindButtonHighlights = __wow_legacy_action_bar_noop
+end
+
+if ActionButtonUtil.HideAllQuickKeybindButtonHighlights == nil then
+  ActionButtonUtil.HideAllQuickKeybindButtonHighlights = __wow_legacy_action_bar_noop
+end
+
+if ActionButtonUtil.GetActionBarStatusForSpell == nil then
+  function ActionButtonUtil.GetActionBarStatusForSpell(_spellID, _excludeNonPlayerBars, _excludeSpecialPlayerBars)
+    return ActionButtonUtil.ActionBarActionStatus.NotMissing
+  end
+end
+
+if ActionButtonUtil.GetActionBarStatusForPetAction == nil then
+  function ActionButtonUtil.GetActionBarStatusForPetAction(_petActionID)
+    return ActionButtonUtil.ActionBarActionStatus.NotMissing
+  end
+end
+
+if ActionButtonUtil.GetActionBarStatusForFlyout == nil then
+  function ActionButtonUtil.GetActionBarStatusForFlyout(_flyoutActionID)
+    return ActionButtonUtil.ActionBarActionStatus.NotMissing
+  end
+end
+
 local function __wow_legacy_action_bar_forward(globalName, methodName)
     if _G[globalName] == nil and C_ActionBar ~= nil and type(C_ActionBar[methodName]) == "function" then
         _G[globalName] = function(...)
@@ -81,5 +135,32 @@ mod tests {
             .expect("preserved legacy action-bar global should run");
 
         assert_eq!(offset, 42);
+    }
+
+    #[test]
+    fn installs_action_button_util_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                local enum = ActionButtonUtil and ActionButtonUtil.ActionBarActionStatus
+                if not enum then return "missing_enum" end
+                if enum.NotMissing ~= 1 or enum.MissingFromAllBars ~= 2 then return "bad_enum" end
+                if type(ActionButtonUtil.ActionBarButtonNames) ~= "table" then return "missing_names" end
+                if ActionButtonUtil.GetActionBarStatusForSpell(1) ~= enum.NotMissing then return "spell" end
+                if ActionButtonUtil.GetActionBarStatusForPetAction(1) ~= enum.NotMissing then return "pet" end
+                if ActionButtonUtil.GetActionBarStatusForFlyout(1) ~= enum.NotMissing then return "flyout" end
+                ActionButtonUtil.ShowAllActionButtonGrids()
+                ActionButtonUtil.HideAllActionButtonGrids()
+                ActionButtonUtil.SetAllQuickKeybindButtonHighlights()
+                ActionButtonUtil.ShowAllQuickKeybindButtonHighlights()
+                ActionButtonUtil.HideAllQuickKeybindButtonHighlights()
+                return "ok"
+                "#,
+            )
+            .expect("ActionButtonUtil defaults should run");
+
+        assert_eq!(result, "ok");
     }
 }
