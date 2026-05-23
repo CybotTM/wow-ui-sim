@@ -60,6 +60,7 @@ pub(crate) mod shared_xml_anim_mixins;
 pub(crate) mod sound_driver_defaults;
 pub(crate) mod source_patches;
 pub(crate) mod startup_windows;
+pub(crate) mod static_model_info_defaults;
 pub(crate) mod store_glue_state;
 pub(crate) mod talent_edge_frame_level_sync;
 pub(crate) mod tooltip_nineslice_surface;

@@ -5394,18 +5394,6 @@ function CanShowAchievementUI()
   return true
 end
 
-if type(StaticModelInfo) ~= "table" then
-  StaticModelInfo = {}
-end
-if rawget(StaticModelInfo, "CreateModelSceneEntry") == nil then
-  function StaticModelInfo.CreateModelSceneEntry(sceneID, displayID)
-    return {
-      sceneID = sceneID,
-      displayID = displayID,
-    }
-  end
-end
-
 local __wow_store_state = rawget(_G, "__wow_store_state")
 if type(__wow_store_state) ~= "table" then
   local featuredGroupID = 501

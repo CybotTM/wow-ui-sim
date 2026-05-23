@@ -182,6 +182,7 @@ fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()
     temporary::lfg_legacy_defaults::apply_bootstrap(lua)?;
     temporary::macro_defaults::apply_bootstrap(lua)?;
     temporary::sound_driver_defaults::apply_bootstrap(lua)?;
+    temporary::static_model_info_defaults::apply_bootstrap(lua)?;
     temporary::trade_skill_ui_fallbacks::apply_bootstrap(lua)
 }
 
