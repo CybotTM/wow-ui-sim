@@ -2766,54 +2766,6 @@ SecureTypes.CreateSecureArray = SecureTypes.CreateSecureArray or function()
   return setmetatable(array, { __index = methods })
 end
 
-if AddSourceLocationExclude == nil then
-  function AddSourceLocationExclude()
-  end
-end
-
-if GetGlobalEnvironment == nil then
-  function GetGlobalEnvironment()
-    return _G
-  end
-end
-
-if GetButtonMetatable == nil then
-  function GetButtonMetatable()
-    if CreateFrame == nil then
-      return nil
-    end
-    local frame = CreateFrame("Button")
-    return frame and getmetatable(frame) or nil
-  end
-end
-
-if GetEditBoxMetatable == nil then
-  function GetEditBoxMetatable()
-    if CreateFrame == nil then
-      return nil
-    end
-    local frame = CreateFrame("EditBox")
-    return frame and getmetatable(frame) or nil
-  end
-end
-
-if secretwrap == nil then
-  function secretwrap(fn)
-    return fn
-  end
-end
-
-if GetCallstackHeight == nil then
-  function GetCallstackHeight()
-    return 0
-  end
-end
-
-if SetErrorCallstackHeight == nil then
-  function SetErrorCallstackHeight()
-  end
-end
-
 if GetBuildInfo == nil then
   function GetBuildInfo()
     return "12.0.5", "66102", "Apr 14 2026", 120005, "", " "

@@ -25,6 +25,7 @@ pub(crate) mod container_portrait_texture;
 pub(crate) mod cpp_mixin_stubs;
 pub(crate) mod damage_meter_scrollbox;
 pub(crate) mod damage_meter_state;
+pub(crate) mod debug_environment_defaults;
 pub(crate) mod details_saved_variables;
 pub(crate) mod difficulty_pvp_util_defaults;
 pub(crate) mod encounter_state;
