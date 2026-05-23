@@ -661,3 +661,15 @@ fn state_backed_namespaces_still_have_registered_members() {
 
     assert_eq!(result, "ok");
 }
+
+#[test]
+fn economy_inventory_queries_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    for symbol in ["GetMoney", "GetAverageItemLevel", "GetCursorMoney"] {
+        assert!(
+            !bootstrap.contains(&format!("function {symbol}")),
+            "{symbol} must be registered by the Rust state/inventory API, not runtime bootstrap"
+        );
+    }
+}

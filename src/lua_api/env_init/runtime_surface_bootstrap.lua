@@ -43,27 +43,9 @@ if ReloadUI == nil then
   end
 end
 
-if GetMoney == nil then
-  function GetMoney()
-    return 0
-  end
-end
-
-if GetCursorMoney == nil then
-  function GetCursorMoney()
-    return 0
-  end
-end
-
 if GetCategoryList == nil then
   function GetCategoryList()
     return {}
-  end
-end
-
-if GetAverageItemLevel == nil then
-  function GetAverageItemLevel()
-    return 0, 0, 0
   end
 end
 
