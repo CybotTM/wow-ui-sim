@@ -49,13 +49,16 @@ if type(UIParent) == "table"
     local wrapper = rawget(_G, "__wow_ui_parent_onupdate_worklist_wrapper")
     if wrapper == nil or UIParent:GetScript("OnUpdate") ~= wrapper then
         wrapper = function(self, elapsed)
-            if type(CHAT_FRAMES) ~= "table" or next(CHAT_FRAMES) ~= nil then
+            if type(FCF_OnUpdate) == "function"
+                and (type(CHAT_FRAMES) ~= "table" or next(CHAT_FRAMES) ~= nil) then
                 FCF_OnUpdate(elapsed)
             end
-            if type(PULSEBUTTONS) ~= "table" or next(PULSEBUTTONS) ~= nil then
+            if type(ButtonPulse_OnUpdate) == "function"
+                and (type(PULSEBUTTONS) ~= "table" or next(PULSEBUTTONS) ~= nil) then
                 ButtonPulse_OnUpdate(elapsed)
             end
-            if type(SHINES_TO_ANIMATE) ~= "table" or next(SHINES_TO_ANIMATE) ~= nil then
+            if type(AnimatedShine_OnUpdate) == "function"
+                and (type(SHINES_TO_ANIMATE) ~= "table" or next(SHINES_TO_ANIMATE) ~= nil) then
                 AnimatedShine_OnUpdate(elapsed)
             end
             if type(HelpOpenWebTicketButton_OnUpdate) == "function" then
@@ -148,6 +151,44 @@ mod tests {
 
         assert_eq!(empty_count, 1);
         assert_eq!(populated_count, 5);
+    }
+
+    #[test]
+    fn uiparent_wrapper_skips_missing_global_handlers() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        install_onupdate_globals(&env);
+        env.exec(
+            r#"
+            ButtonPulse_OnUpdate = nil
+            AnimatedShine_OnUpdate = nil
+            UIParent = {
+                scripts = {},
+                GetScript = function(self, event)
+                    return self.scripts[event]
+                end,
+                SetScript = function(self, event, script)
+                    self.scripts[event] = script
+                end,
+            }
+            "#,
+        )
+        .expect("UIParent OnUpdate missing-handler surface should install");
+
+        patch(&env);
+
+        let call_count: i64 = env
+            .eval(
+                r#"
+                CHAT_FRAMES = { "chat" }
+                PULSEBUTTONS = { "pulse" }
+                SHINES_TO_ANIMATE = { "shine" }
+                UIParent.scripts.OnUpdate(UIParent, 0.1)
+                return #calls
+                "#,
+            )
+            .expect("UIParent OnUpdate wrapper should tolerate missing handlers");
+
+        assert_eq!(call_count, 1);
     }
 
     fn install_onupdate_globals(env: &WowLuaEnv) {
