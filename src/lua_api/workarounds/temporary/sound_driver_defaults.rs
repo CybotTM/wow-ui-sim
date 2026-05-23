@@ -10,6 +10,16 @@ end
 if type(C_Sound) ~= "table" then
     C_Sound = {}
 end
+if MuteSoundFile == nil then
+    function MuteSoundFile()
+        return true
+    end
+end
+if UnmuteSoundFile == nil then
+    function UnmuteSoundFile()
+        return true
+    end
+end
 if rawget(C_Sound, "GetSoundScaledVolume") == nil then
     function C_Sound.GetSoundScaledVolume()
         return 1
@@ -102,6 +112,8 @@ mod tests {
                 if type(C_Sound) ~= "table" then return "sound_namespace" end
                 if C_Sound.GetSoundScaledVolume() ~= 1 then return "sound_volume" end
                 if C_Sound.IsPlaying() ~= false then return "sound_playing" end
+                if MuteSoundFile(123) ~= true then return "mute" end
+                if UnmuteSoundFile(123) ~= true then return "unmute" end
                 C_Sound.PlayItemSound(1)
                 C_Sound.PlaySound(1)
                 C_Sound.PlaySoundFile("silent.ogg")
@@ -130,6 +142,7 @@ mod tests {
             r#"
             C_CombatAudioAlert = { Existing = true }
             C_Sound = { Existing = true, IsPlaying = function() return true end }
+            function MuteSoundFile() return "muted" end
             function Sound_GameSystem_GetNumOutputDrivers() return 4 end
             function Sound_ChatSystem_GetOutputDriverNameByIndex() return "Existing Voice" end
             "#,
@@ -148,6 +161,8 @@ mod tests {
                 if C_CombatAudioAlert.Existing ~= true then return "overwrote_combat_audio" end
                 if C_Sound.Existing ~= true then return "overwrote_sound_namespace" end
                 if C_Sound.IsPlaying() ~= true then return "overwrote_sound_method" end
+                if MuteSoundFile(1) ~= "muted" then return "overwrote_mute" end
+                if UnmuteSoundFile(1) ~= true then return "missing_unmute" end
                 if type(C_Sound.PlayVocalErrorSound) ~= "function" then return "missing_vocal_error" end
                 if Sound_ChatSystem_GetOutputDriverNameByIndex(0) ~= "Existing Voice" then return "overwrote_name" end
                 if type(Sound_GameSystem_GetInputDriverNameByIndex) ~= "function" then return "missing_game_input" end

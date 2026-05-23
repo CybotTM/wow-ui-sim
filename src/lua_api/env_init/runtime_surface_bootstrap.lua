@@ -55,18 +55,6 @@ if GetMoney == nil then
   end
 end
 
-if MuteSoundFile == nil then
-  function MuteSoundFile()
-    return true
-  end
-end
-
-if UnmuteSoundFile == nil then
-  function UnmuteSoundFile()
-    return true
-  end
-end
-
 if GetCursorMoney == nil then
   function GetCursorMoney()
     return 0
