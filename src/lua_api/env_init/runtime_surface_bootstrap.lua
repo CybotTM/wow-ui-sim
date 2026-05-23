@@ -7151,67 +7151,6 @@ if rawget(TransmogUtil, "GetBestItemModifiedAppearanceID") == nil then
   end
 end
 
-C_TransmogSets = C_TransmogSets or __wow_namespace()
-if rawget(C_TransmogSets, "GetBaseSetID") == nil then
-  function C_TransmogSets.GetBaseSetID(_setID)
-    return 0
-  end
-end
-if rawget(C_TransmogSets, "GetVariantSets") == nil then
-  function C_TransmogSets.GetVariantSets(_setID)
-    return {}
-  end
-end
-if rawget(C_TransmogSets, "GetSetInfo") == nil then
-  function C_TransmogSets.GetSetInfo(_setID)
-    return {
-      setID = 0,
-      name = "",
-      collected = false,
-    }
-  end
-end
-if rawget(C_TransmogSets, "GetSetPrimaryAppearances") == nil then
-  function C_TransmogSets.GetSetPrimaryAppearances(_setID)
-    return {}
-  end
-end
-if rawget(C_TransmogSets, "GetBaseSets") == nil then
-  function C_TransmogSets.GetBaseSets()
-    return {}
-  end
-end
-if rawget(C_TransmogSets, "GetAllSets") == nil then
-  function C_TransmogSets.GetAllSets()
-    return {}
-  end
-end
-if rawget(C_TransmogSets, "GetUsableSets") == nil then
-  function C_TransmogSets.GetUsableSets()
-    return {}
-  end
-end
-if rawget(C_TransmogSets, "HasAvailableSets") == nil then
-  function C_TransmogSets.HasAvailableSets()
-    return false
-  end
-end
-if rawget(C_TransmogSets, "IsBaseSetCollected") == nil then
-  function C_TransmogSets.IsBaseSetCollected(_setID)
-    return false
-  end
-end
-if rawget(C_TransmogSets, "GetSourcesForSlot") == nil then
-  function C_TransmogSets.GetSourcesForSlot(_setID, _slotID)
-    return {}
-  end
-end
-if rawget(C_TransmogSets, "GetAllSetAppearancesByID") == nil then
-  function C_TransmogSets.GetAllSetAppearancesByID(_setID)
-    return {}
-  end
-end
-
 if rawget(_G, "ToggleCollectionsJournal") == nil then
   function ToggleCollectionsJournal(tabIndex)
     if DISALLOW_FRAME_TOGGLING then

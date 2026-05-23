@@ -1048,3 +1048,7 @@ Pages created:
 ## [2026-05-16] ingest | addon startup Settings and item-load investigation
 
 Created `investigations/addon-startup-settings-and-item-load.md` to capture the root causes behind addon startup errors: registered Settings canvases must start hidden, forbidden attribute delegates need secure dispatch, item subclasses must return enUS keyword-compatible names or nil, and positive live item IDs need synthetic placeholder item info so item-load callbacks terminate.
+
+## [2026-05-23] update | transmog sets shim boundary
+
+Updated `investigations/appearances-wardrobe-api.md` after moving `C_TransmogSets` empty/default set APIs out of `runtime_surface_bootstrap.lua` and into `src/c_api/temporary_shims/c_transmog_sets.rs`. The investigation still records the same wardrobe contract: `GetBaseSets()` and related set APIs must return empty tables rather than nil until real set inventory state exists.
