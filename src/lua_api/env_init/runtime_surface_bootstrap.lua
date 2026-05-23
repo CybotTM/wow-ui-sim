@@ -25,16 +25,6 @@ if GetChannelList == nil then
   end
 end
 
-CombatLogInbound = CombatLogInbound or {
-  GenerateMessage = function()
-    return "", 1, 1, 1
-  end,
-}
-
-if FCF_OnUpdate == nil then
-  FCF_OnUpdate = __wow_noop
-end
-
 local __wow_clock_start = os.clock and os.clock() or 0
 
 if StaticPopup_Hide == nil then

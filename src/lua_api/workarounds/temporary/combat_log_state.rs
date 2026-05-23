@@ -4,6 +4,12 @@
 //! fixture explicit rather than presenting it as complete C API behavior.
 
 const COMBAT_LOG_STATE_LUA: &str = r#"
+CombatLogInbound = CombatLogInbound or {
+    GenerateMessage = function()
+        return "", 1, 1, 1
+    end,
+}
+
 if type(C_CombatLog) ~= "table" then
     C_CombatLog = {}
 end
@@ -226,6 +232,10 @@ mod tests {
                 r#"
                 if C_CombatLog.GetEntryCount() ~= 0 or C_CombatLogSecure.GetEntryCount() ~= 0 then
                     return "bad_default_count"
+                end
+                local message, red, green, blue = CombatLogInbound.GenerateMessage()
+                if message ~= "" or red ~= 1 or green ~= 1 or blue ~= 1 then
+                    return "bad_inbound_default"
                 end
                 C_CombatLog._state.entries = {
                     { "first", 1 },

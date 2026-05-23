@@ -6,6 +6,13 @@
 
 use crate::lua_api::WowLuaEnv;
 
+const FCF_ONUPDATE_DEFAULT_LUA: &str = r#"
+if FCF_OnUpdate == nil then
+    function FCF_OnUpdate()
+    end
+end
+"#;
+
 const UIPARENT_ONUPDATE_WORKLISTS_WORKAROUND_LUA: &str = r#"
 if type(FCF_OnUpdate) == "function" and rawget(_G, "__wow_fcf_onupdate_wrapper") ~= FCF_OnUpdate then
     local original_fcf_onupdate = FCF_OnUpdate
@@ -71,6 +78,11 @@ if type(UIParent) == "table"
 end
 "#;
 
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(FCF_ONUPDATE_DEFAULT_LUA)?;
+    Ok(())
+}
+
 pub(crate) fn patch(env: &WowLuaEnv) {
     let _ = env.exec(UIPARENT_ONUPDATE_WORKLISTS_WORKAROUND_LUA);
 }
@@ -78,6 +90,23 @@ pub(crate) fn patch(env: &WowLuaEnv) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn installs_fcf_onupdate_default() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                if type(FCF_OnUpdate) ~= "function" then return "missing" end
+                if FCF_OnUpdate(0.1) ~= nil then return "return" end
+                return "ok"
+                "#,
+            )
+            .expect("FCF_OnUpdate default should run");
+
+        assert_eq!(result, "ok");
+    }
 
     #[test]
     fn global_onupdate_wrappers_skip_empty_worklists() {

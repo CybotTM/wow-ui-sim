@@ -527,6 +527,20 @@ fn assisted_combat_manager_defaults_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn combat_log_and_chat_onupdate_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("CombatLogInbound"),
+        "CombatLogInbound defaults must live in the explicit temporary combat-log workaround boundary, not runtime bootstrap"
+    );
+    assert!(
+        !bootstrap.contains("FCF_OnUpdate == nil"),
+        "FCF_OnUpdate default must live in the explicit temporary UIParent OnUpdate workaround boundary, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn seconds_formatter_defaults_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 

@@ -169,6 +169,7 @@ fn apply_temporary_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::secure_transfer_state::apply_bootstrap(lua)?;
     temporary::store_glue_state::apply_bootstrap(lua)?;
     temporary::unit_auras_state::apply_bootstrap(lua)?;
+    temporary::uiparent_onupdate_worklists::apply_bootstrap(lua)?;
     temporary::video_options_state::apply_bootstrap(lua)
 }
 
