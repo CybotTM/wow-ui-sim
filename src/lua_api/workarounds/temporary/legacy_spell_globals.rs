@@ -70,6 +70,11 @@ if IsPressHoldReleaseSpell == nil and C_Spell ~= nil then
         return C_Spell.IsPressHoldReleaseSpell(...)
     end
 end
+if IsSelectedSpellBookItem == nil then
+    function IsSelectedSpellBookItem(_slotIndex, _unit)
+        return false
+    end
+end
 if SpellBook_GetSpellBookSlot == nil then
     function SpellBook_GetSpellBookSlot(slot, _offset)
         return slot
@@ -111,6 +116,7 @@ mod tests {
                 if IsPassiveSpell(116) ~= false then return "passive" end
                 if type(IsPressHoldReleaseSpell) ~= "function" then return "press_hold_type" end
                 if IsPressHoldReleaseSpell(116) ~= false then return "press_hold_value" end
+                if IsSelectedSpellBookItem(1, "player") ~= false then return "selected_spellbook" end
                 if SpellBook_GetSpellBookSlot(3, 20) ~= 3 then return "slot" end
                 if FindSpellOverrideByID(116) ~= 116 then return "override_value" end
                 if select("#", FindFlyoutSlotBySpellID(116)) ~= 0 then return "flyout_value" end
@@ -131,6 +137,7 @@ mod tests {
             GetSpellInfo = function() return "existing" end
             IsPassiveSpell = function() return true end
             IsPressHoldReleaseSpell = function() return true end
+            IsSelectedSpellBookItem = function() return true end
             C_Spell = {
                 GetSpellInfo = function()
                     return { name = "new" }
@@ -148,12 +155,15 @@ mod tests {
             super::apply_bootstrap(&mut lua).expect("legacy spell globals should apply");
         }
 
-        let (spell_name, passive, press_hold): (String, bool, bool) = env
-            .eval("return GetSpellInfo(1), IsPassiveSpell(1), IsPressHoldReleaseSpell(1)")
+        let (spell_name, passive, press_hold, selected): (String, bool, bool, bool) = env
+            .eval(
+                "return GetSpellInfo(1), IsPassiveSpell(1), IsPressHoldReleaseSpell(1), IsSelectedSpellBookItem(1)",
+            )
             .expect("legacy spell preservation probe should run");
 
         assert_eq!(spell_name, "existing");
         assert!(passive);
         assert!(press_hold);
+        assert!(selected);
     }
 }

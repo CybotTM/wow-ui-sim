@@ -14,14 +14,6 @@ if StaticPopup_Show == nil then
   end
 end
 
-local function __wow_ensure_spellbook_surface()
-  rawset(_G, "IsSelectedSpellBookItem", function(_slotIndex, _unit)
-    return false
-  end)
-end
-
-__wow_ensure_spellbook_surface()
-
 local function __wow_dispatcher_invoke_callback(callbackData, ...)
   local callback = callbackData and callbackData.Callback
   if type(callback) == "function" then
@@ -2670,12 +2662,6 @@ if SetItemButtonNormalTextureVertexColor == nil then
       return
     end
     SetItemButtonTextureVertexColor(button, r, g, b)
-  end
-end
-
-if IsSelectedSpellBookItem == nil then
-  function IsSelectedSpellBookItem(_slotIndex, _unit)
-    return false
   end
 end
 

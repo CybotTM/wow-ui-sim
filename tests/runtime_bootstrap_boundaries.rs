@@ -41,6 +41,10 @@ fn legacy_spell_wrappers_are_not_runtime_bootstrap_fallbacks() {
         !bootstrap.contains("IsPressHoldReleaseSpell"),
         "legacy spell wrappers must live in the explicit temporary legacy spell workaround boundary"
     );
+    assert!(
+        !bootstrap.contains("IsSelectedSpellBookItem"),
+        "legacy spellbook selection fallback must live in the explicit temporary legacy spell workaround boundary"
+    );
 }
 
 #[test]
