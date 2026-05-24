@@ -39,6 +39,7 @@ fn c_item_upgrade_clear(state: &mut LuaState) -> LuaResult<u32> {
 pub(crate) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Container")?;
     register_container_query_methods(state, table_ref)?;
+    register_legacy_container_globals(state)?;
     Ok(())
 }
 
@@ -86,6 +87,19 @@ fn register_container_methods(
         table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
+}
+
+fn register_legacy_container_globals(state: &mut LuaState) -> LuaResult<()> {
+    let global = state.global;
+    register_container_methods(
+        state,
+        global,
+        &[
+            ("GetContainerNumSlots", c_container_get_num_slots),
+            ("GetContainerItemID", c_container_get_item_id),
+            ("GetContainerItemLink", c_container_get_item_link),
+        ],
+    )
 }
 
 fn c_container_get_num_slots(state: &mut LuaState) -> LuaResult<u32> {

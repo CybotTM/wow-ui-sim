@@ -248,7 +248,13 @@ fn close_socket_info_marks_closed_and_clears_pending_gems() {
 #[test]
 fn artifact_relic_detection_supports_item_ids_and_links() {
     let env = env();
-    let (number_match, link_match, table_match, non_match): (bool, bool, bool, bool) = env
+    let (number_match, link_match, table_match, non_match, global_match): (
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
         .eval(
             r#"
             C_ItemSocketInfo._state.artifactRelicItemIDs = {
@@ -257,7 +263,8 @@ fn artifact_relic_detection_supports_item_ids_and_links() {
             return C_ItemSocketInfo.IsArtifactRelicItem(12345),
                    C_ItemSocketInfo.IsArtifactRelicItem("item:12345::::::::70:::::::"),
                    C_ItemSocketInfo.IsArtifactRelicItem({ itemID = 12345 }),
-                   not C_ItemSocketInfo.IsArtifactRelicItem(99999)
+                   not C_ItemSocketInfo.IsArtifactRelicItem(99999),
+                   IsArtifactRelicItem("item:12345::::::::70:::::::")
             "#,
         )
         .unwrap();
@@ -269,6 +276,7 @@ fn artifact_relic_detection_supports_item_ids_and_links() {
         "table payloads with itemID should be supported"
     );
     assert!(non_match, "unknown item IDs should return false");
+    assert!(global_match, "legacy global should share the Rust implementation");
 }
 
 #[test]

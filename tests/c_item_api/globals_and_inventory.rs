@@ -66,6 +66,20 @@ fn test_legacy_get_container_num_slots() {
 }
 
 #[test]
+fn test_legacy_get_container_item_id() {
+    let env = env();
+    let item_id: i32 = env.eval("return GetContainerItemID(0, 1)").unwrap();
+    assert_eq!(item_id, 6948);
+}
+
+#[test]
+fn test_legacy_get_container_item_link() {
+    let env = env();
+    let link: String = env.eval("return GetContainerItemLink(0, 1)").unwrap();
+    assert!(link.contains("Hitem:6948"));
+}
+
+#[test]
 fn test_get_inventory_slot_info() {
     let env = env();
     let (slot, texture, check_relic): (i32, i32, bool) = env

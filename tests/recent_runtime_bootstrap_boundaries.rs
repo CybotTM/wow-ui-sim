@@ -580,6 +580,17 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function debug.getfenv",
             "temporary debug/environment workaround",
         ),
+        (
+            "function GetContainerNumSlots",
+            "Rust C_Container owner",
+        ),
+        ("function GetContainerItemID", "Rust C_Container owner"),
+        ("function GetContainerItemLink", "Rust C_Container owner"),
+        (
+            "function GetTradeSkillTexture",
+            "temporary trade-skill UI workaround",
+        ),
+        ("function IsArtifactRelicItem", "Rust item socket owner"),
 ];
 
 #[test]

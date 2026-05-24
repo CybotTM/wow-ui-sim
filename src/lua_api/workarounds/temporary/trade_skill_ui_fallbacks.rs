@@ -41,6 +41,17 @@ if rawget(C_TradeSkillUI, "GetTradeSkillTexture") == nil then
     end
 end
 
+if GetTradeSkillTexture == nil then
+    function GetTradeSkillTexture(...)
+        if type(C_TradeSkillUI) == "table"
+            and type(C_TradeSkillUI.GetTradeSkillTexture) == "function"
+        then
+            return C_TradeSkillUI.GetTradeSkillTexture(...)
+        end
+        return nil
+    end
+end
+
 if rawget(C_TradeSkillUI, "GetTradeSkillDisplayName") == nil then
     function C_TradeSkillUI.GetTradeSkillDisplayName()
         return ""
@@ -97,6 +108,12 @@ mod tests {
                 end
                 if type(C_TradeSkillUI.GetTradeSkillTexture) ~= "function" then
                     return "missing_rust_texture"
+                end
+                if type(GetTradeSkillTexture) ~= "function" then
+                    return "missing_global_texture"
+                end
+                if GetTradeSkillTexture() ~= C_TradeSkillUI.GetTradeSkillTexture() then
+                    return "bad_global_texture"
                 end
                 if C_TradeSkillUI.GetTradeSkillDisplayName() ~= "" then
                     return "bad_display_name"

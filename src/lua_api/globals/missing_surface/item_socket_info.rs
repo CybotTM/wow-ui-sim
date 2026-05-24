@@ -53,6 +53,13 @@ pub(super) fn register_item_socket_info_surface(state: &mut LuaState) -> LuaResu
     for &(name, func) in SOCKET_METHODS {
         table_set_rust_fn_static(state, table_ref, name, func)?;
     }
+    let global = state.global;
+    table_set_rust_fn_static(
+        state,
+        global,
+        "IsArtifactRelicItem",
+        c_item_socket_info_is_artifact_relic_item,
+    )?;
     Ok(())
 }
 
