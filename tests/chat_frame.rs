@@ -151,7 +151,7 @@ const CHAT_VOICE_BUTTON_SURFACE_LUA: &str = r#"
     assert(icon, "ChatFrameChannelButton.Icon should exist")
     local point, relativeTo, relativePoint, offsetX, offsetY = icon:GetPoint(1)
     local iconAtlasCount = 0
-    for _, child in ipairs({ button:GetChildren() }) do
+    for _, child in ipairs({ button:GetRegions() }) do
         if child:GetObjectType() == "Texture" and child:GetAtlas() == "chatframe-button-icon-voicechat" then
             iconAtlasCount = iconAtlasCount + 1
         end

@@ -104,6 +104,14 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "function GetTutorialsEnabled",
             "temporary camera/tutorial workaround",
         ),
+        (
+            "__wow_ensure_chat_voice_button_surface",
+            "temporary chat voice button workaround",
+        ),
+        (
+            "function __wow_apply_chat_voice_button_surface",
+            "temporary chat voice button workaround",
+        ),
     ] {
         assert!(
             !bootstrap.contains(needle),

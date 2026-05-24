@@ -188,12 +188,17 @@ fn apply_core_foundation_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::adventure_journal_fallbacks::apply_bootstrap(lua)?;
     temporary::camera_tutorial_defaults::apply_bootstrap(lua)?;
     temporary::catalog_shop_product_card_defaults::apply_bootstrap(lua)?;
+    temporary::chat_voice_button_surface::apply_bootstrap(lua)?;
     temporary::chat_window_defaults::apply_bootstrap(lua)?;
     temporary::client_info_defaults::apply_bootstrap(lua)?;
     temporary::color_defaults::apply_bootstrap(lua)?;
     temporary::container_portrait_texture::apply_bootstrap(lua)?;
     temporary::debug_environment_defaults::apply_bootstrap(lua)?;
     temporary::difficulty_pvp_util_defaults::apply_bootstrap(lua)?;
+    apply_core_dispatcher_and_format_defaults(lua)
+}
+
+fn apply_core_dispatcher_and_format_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::dispatcher_callback_defaults::apply_bootstrap(lua)?;
     temporary::dispatcher_surface::apply_bootstrap(lua)?;
     temporary::display_scale_defaults::apply_bootstrap(lua)?;
@@ -297,6 +302,21 @@ fn refresh_post_event_surfaces(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
+    patch_runtime_core_addon_surfaces(env, addon_name);
+    patch_runtime_journal_addon_surfaces(env, addon_name);
+    patch_runtime_feature_addon_surfaces(env, addon_name);
+}
+
+fn patch_runtime_core_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
+    if matches!(
+        addon_name,
+        "Blizzard_ChatFrame"
+            | "Blizzard_QuickJoin"
+            | "Blizzard_Channels"
+            | "Blizzard_VoiceToggleButton"
+    ) {
+        temporary::chat_voice_button_surface::patch_loader(env);
+    }
     if addon_name == "Blizzard_PagedContent" {
         temporary::paging_controls_page_text::patch_loader(env);
     }
@@ -307,6 +327,9 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
         temporary::talent_edge_frame_level_sync::patch_loader(env);
     }
     patch_runtime_map_addon_surfaces(env, addon_name);
+}
+
+fn patch_runtime_journal_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if addon_name == "Blizzard_Collections" {
         patch_toggle_collections_journal_for_runtime_addon_load(env);
         temporary::collections_journal_namespace::patch(env);
@@ -317,6 +340,9 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     if addon_name == "Blizzard_AdventureMap" {
         ensure_adventure_map_frame_surface_for_runtime_addon_load(env);
     }
+}
+
+fn patch_runtime_feature_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if matches!(addon_name, "Blizzard_ArtifactUI" | "Blizzard_Colors") {
         patch_item_quality_color_data_methods(env);
     }

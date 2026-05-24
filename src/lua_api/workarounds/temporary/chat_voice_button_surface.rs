@@ -5,59 +5,89 @@
 //! relationships until the simulator models the full chat frame creation
 //! path.
 
-use crate::lua_api::WowLuaEnv;
+use crate::lua_api::{LoaderEnv, WowLuaEnv};
 
 const CHAT_VOICE_BUTTON_SURFACE_WORKAROUND_LUA: &str = r#"
-local defaultChatFrame = DEFAULT_CHAT_FRAME or ChatFrame1
-local defaultEditBox = rawget(_G, "ChatFrame1EditBox")
-if type(defaultChatFrame) == "table" and type(defaultEditBox) == "table" then
-    if defaultChatFrame.editBox == nil then
-        defaultChatFrame.editBox = defaultEditBox
+function __wow_apply_chat_voice_button_surface()
+    local defaultChatFrame = DEFAULT_CHAT_FRAME or ChatFrame1
+    local defaultEditBox = rawget(_G, "ChatFrame1EditBox")
+    if type(defaultChatFrame) == "table" and type(defaultEditBox) == "table" then
+        if defaultChatFrame.editBox == nil then
+            defaultChatFrame.editBox = defaultEditBox
+        end
+        if defaultEditBox.chatFrame == nil then
+            defaultEditBox.chatFrame = defaultChatFrame
+        end
+        if DEFAULT_CHAT_FRAME == nil then
+            DEFAULT_CHAT_FRAME = defaultChatFrame
+        end
     end
-    if defaultEditBox.chatFrame == nil then
-        defaultEditBox.chatFrame = defaultChatFrame
+
+    local channelButton = ChatFrameChannelButton
+    if type(channelButton) == "table" then
+        local icon = channelButton.Icon
+        if type(channelButton.CreateTexture) == "function"
+            and (icon == nil
+                or type(icon.GetAtlas) ~= "function"
+                or icon:GetAtlas() ~= "chatframe-button-icon-voicechat") then
+            icon = channelButton:CreateTexture(nil, "OVERLAY")
+            channelButton.Icon = icon
+        end
+
+        if icon ~= nil then
+            if type(icon.SetParentKey) == "function" then
+                pcall(icon.SetParentKey, icon, "Icon", true)
+            end
+            if type(icon.GetWidth) == "function" and type(icon.GetHeight) == "function"
+                and (icon:GetWidth() == 0 or icon:GetHeight() == 0)
+                and type(icon.SetSize) == "function" then
+                icon:SetSize(channelButton.fixedIconWidth or 15, channelButton.fixedIconHeight or 15)
+            end
+            if type(icon.GetNumPoints) == "function" and icon:GetNumPoints() == 0
+                and type(icon.SetPoint) == "function" then
+                icon:SetPoint("CENTER", channelButton, "CENTER", 0, 0)
+            end
+            if type(icon.SetAtlas) == "function" then
+                icon:SetAtlas("chatframe-button-icon-voicechat")
+            else
+                rawset(icon, "atlas", "chatframe-button-icon-voicechat")
+            end
+            if type(icon.Show) == "function" then
+                icon:Show()
+            end
+        end
     end
-    if DEFAULT_CHAT_FRAME == nil then
-        DEFAULT_CHAT_FRAME = defaultChatFrame
+
+    if QuickJoinToastButton == nil and type(CreateFrame) == "function" and UIParent ~= nil then
+        QuickJoinToastButton = CreateFrame("Button", "QuickJoinToastButton", UIParent)
     end
 end
 
-local channelButton = ChatFrameChannelButton
-if type(channelButton) == "table" then
-    local icon = channelButton.Icon
-    if icon == nil and type(channelButton.CreateTexture) == "function" then
-        icon = channelButton:CreateTexture(nil, "OVERLAY")
-        channelButton.Icon = icon
-    end
+_G.__wow_apply_chat_voice_button_surface()
 
-    if icon ~= nil then
-        if type(icon.SetParentKey) == "function" then
-            pcall(icon.SetParentKey, icon, "Icon", true)
+if C_AddOns and type(C_AddOns.LoadAddOn) == "function" and not rawget(_G, "__wow_chat_voice_button_surface_load_hooked") then
+    rawset(_G, "__wow_chat_voice_button_surface_load_hooked", true)
+    hooksecurefunc(C_AddOns, "LoadAddOn", function(addonName)
+        if addonName == "Blizzard_ChatFrame"
+            or addonName == "Blizzard_QuickJoin"
+            or addonName == "Blizzard_Channels"
+            or addonName == "Blizzard_VoiceToggleButton" then
+            _G.__wow_apply_chat_voice_button_surface()
         end
-        if type(icon.GetWidth) == "function" and type(icon.GetHeight) == "function"
-            and (icon:GetWidth() == 0 or icon:GetHeight() == 0)
-            and type(icon.SetSize) == "function" then
-            icon:SetSize(channelButton.fixedIconWidth or 15, channelButton.fixedIconHeight or 15)
-        end
-        if type(icon.GetNumPoints) == "function" and icon:GetNumPoints() == 0
-            and type(icon.SetPoint) == "function" then
-            icon:SetPoint("CENTER", channelButton, "CENTER", 0, 0)
-        end
-        if type(icon.SetAtlas) == "function" then
-            icon:SetAtlas("chatframe-button-icon-voicechat")
-        end
-        if type(icon.Show) == "function" then
-            icon:Show()
-        end
-    end
-end
-
-if QuickJoinToastButton == nil and type(CreateFrame) == "function" and UIParent ~= nil then
-    QuickJoinToastButton = CreateFrame("Button", "QuickJoinToastButton", UIParent)
+    end)
 end
 "#;
 
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(CHAT_VOICE_BUTTON_SURFACE_WORKAROUND_LUA)?;
+    Ok(())
+}
+
 pub(crate) fn patch(env: &WowLuaEnv) {
+    let _ = env.exec(CHAT_VOICE_BUTTON_SURFACE_WORKAROUND_LUA);
+}
+
+pub(crate) fn patch_loader(env: &LoaderEnv<'_>) {
     let _ = env.exec(CHAT_VOICE_BUTTON_SURFACE_WORKAROUND_LUA);
 }
 

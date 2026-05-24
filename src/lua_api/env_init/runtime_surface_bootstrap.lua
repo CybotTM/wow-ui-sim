@@ -96,42 +96,6 @@ local function __wow_install_frame_helpers(frame)
   return frame
 end
 
-local function __wow_ensure_chat_voice_button_surface()
-  local uiParent = rawget(_G, "UIParent")
-  QuickJoinToastButton = QuickJoinToastButton or __wow_install_frame_helpers(__wow_ensure_named_frame("Button", "QuickJoinToastButton", uiParent))
-
-  local channelButton = rawget(_G, "ChatFrameChannelButton")
-  if channelButton == nil then
-    return
-  end
-
-  local icon = rawget(channelButton, "Icon")
-  if icon ~= nil then
-    if type(icon.SetParentKey) == "function" then
-      pcall(icon.SetParentKey, icon, "Icon", true)
-    end
-    if type(icon.GetWidth) == "function" and type(icon.GetHeight) == "function"
-        and (icon:GetWidth() == 0 or icon:GetHeight() == 0)
-        and type(icon.SetSize) == "function" then
-      icon:SetSize(channelButton.fixedIconWidth or 15, channelButton.fixedIconHeight or 15)
-    end
-    if type(icon.GetNumPoints) == "function" and icon:GetNumPoints() == 0
-        and type(icon.SetPoint) == "function" then
-      icon:SetPoint("CENTER", channelButton, "CENTER", 0, 0)
-    end
-    if type(icon.SetAtlas) == "function" then
-      icon:SetAtlas("chatframe-button-icon-voicechat")
-    else
-      rawset(icon, "atlas", "chatframe-button-icon-voicechat")
-    end
-    if type(icon.Show) == "function" then
-      icon:Show()
-    end
-  end
-end
-
-__wow_ensure_chat_voice_button_surface()
-
 local function __wow_ensure_startup_navigation_surface()
   local uiParent = rawget(_G, "UIParent")
 
@@ -4892,11 +4856,6 @@ if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
       __wow_ensure_achievement_search_previews()
       __wow_patch_achievement_search_preview_selection()
       __wow_patch_achievement_summary_empty_text_overlap()
-    elseif addonName == "Blizzard_ChatFrame"
-      or addonName == "Blizzard_QuickJoin"
-      or addonName == "Blizzard_Channels"
-      or addonName == "Blizzard_VoiceToggleButton" then
-      __wow_ensure_chat_voice_button_surface()
     elseif addonName == "Blizzard_CharacterSelectNavBar" then
       __wow_patch_character_select_nav_bar()
     elseif addonName == "Blizzard_UIParent"
