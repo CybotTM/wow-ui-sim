@@ -12,6 +12,7 @@ pub(crate) mod auction_house_search_context_aliases;
 pub(crate) mod auth_challenge_frame_parent;
 pub(crate) mod base_nine_slice_dialog_defaults;
 pub(crate) mod callback_registry_defaults;
+pub(crate) mod camera_tutorial_defaults;
 pub(crate) mod catalog_shop_product_card_defaults;
 pub(crate) mod character_create_defaults;
 pub(crate) mod character_frame_surface_refresh;

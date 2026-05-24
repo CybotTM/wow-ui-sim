@@ -1,18 +1,6 @@
 local function __wow_noop()
 end
 
-if GetCameraFOVDefaults == nil then
-  function GetCameraFOVDefaults()
-    return 0, 30, 110
-  end
-end
-
-if GetTutorialsEnabled == nil then
-  function GetTutorialsEnabled()
-    return false
-  end
-end
-
 local function __wow_ensure_named_frame(frameType, name, parent)
   local existing = rawget(_G, name)
   if existing ~= nil then

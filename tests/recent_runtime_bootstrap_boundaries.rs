@@ -96,6 +96,14 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "function SetChatWindowSavedPosition",
             "temporary chat-window workaround",
         ),
+        (
+            "function GetCameraFOVDefaults",
+            "temporary camera/tutorial workaround",
+        ),
+        (
+            "function GetTutorialsEnabled",
+            "temporary camera/tutorial workaround",
+        ),
     ] {
         assert!(
             !bootstrap.contains(needle),
