@@ -39,6 +39,7 @@ pub(crate) mod fog_of_war_pin;
 pub(crate) mod formatting_utility_defaults;
 pub(crate) mod game_rules_namespace_fallback;
 pub(crate) mod game_time_calendar_invites;
+pub(crate) mod glue_character_select_defaults;
 pub(crate) mod glueparent_uiparent_attributes;
 pub(crate) mod guild_info_namespace_fallback;
 pub(crate) mod housing_catalog_state;

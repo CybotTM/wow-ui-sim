@@ -1,6 +1,7 @@
 #[test]
 fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+    let shared_bootstrap = include_str!("../src/lua_api/env_init/shared_bootstrap.lua");
 
     for (needle, owner) in [
         ("function ReloadUI", "Rust event API"),
@@ -56,10 +57,34 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
         ),
         ("DISPATCHER_VERSION = 2.0", "temporary Dispatcher surface workaround"),
         ("Dispatcher = dispatcher", "temporary Dispatcher surface workaround"),
+        (
+            "function GetSpecializationInfoForSpecID",
+            "temporary glue character-select workaround",
+        ),
+        (
+            "function GetCharacterUndeleteStatus",
+            "temporary glue character-select workaround",
+        ),
+        (
+            "function IsCharacterTimerunning",
+            "temporary glue character-select workaround",
+        ),
+        (
+            "function ShouldShowExpansionUpgradeBanner",
+            "temporary glue character-select workaround",
+        ),
+        (
+            "function GetCharacterListGroupsInfo",
+            "temporary glue character-select workaround",
+        ),
     ] {
         assert!(
             !bootstrap.contains(needle),
             "{needle} fallback must live in the explicit {owner}, not runtime bootstrap"
+        );
+        assert!(
+            !shared_bootstrap.contains(needle),
+            "{needle} fallback must live in the explicit {owner}, not shared bootstrap"
         );
     }
 }

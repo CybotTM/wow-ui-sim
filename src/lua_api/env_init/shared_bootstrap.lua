@@ -1429,12 +1429,6 @@ if GetActiveTimerunningSeasonID == nil then
   end
 end
 
-if GetCharacterUndeleteStatus == nil then
-  function GetCharacterUndeleteStatus()
-    return false, false, 0, 0
-  end
-end
-
 if GetCharacterListUpdate == nil then
   local function __wow_character_select_event(frame, event, ...)
     if type(frame) == "table" and type(frame.OnEvent) == "function" then

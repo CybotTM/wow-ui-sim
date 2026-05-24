@@ -1,39 +1,9 @@
 local function __wow_noop()
 end
 
-if GetSpecializationInfoForSpecID == nil then
-  function GetSpecializationInfoForSpecID(_specID)
-    return nil, ""
-  end
-end
-
-if GetCharacterUndeleteStatus == nil then
-  function GetCharacterUndeleteStatus()
-    return false, false, 0, 0
-  end
-end
-
-if IsCharacterTimerunning == nil then
-  function IsCharacterTimerunning(_characterIndex)
-    return false
-  end
-end
-
-if ShouldShowExpansionUpgradeBanner == nil then
-  function ShouldShowExpansionUpgradeBanner()
-    return false
-  end
-end
-
 if GetCameraFOVDefaults == nil then
   function GetCameraFOVDefaults()
     return 0, 30, 110
-  end
-end
-
-if GetCharacterListGroupsInfo == nil then
-  function GetCharacterListGroupsInfo()
-    return {}
   end
 end
 
