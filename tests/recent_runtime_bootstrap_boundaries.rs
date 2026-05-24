@@ -185,6 +185,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function UnitGetAvailableRoles",
             "temporary legacy LFG workaround",
         ),
+        (
+            "function IsTutorialFlagged",
+            "temporary camera/tutorial workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (

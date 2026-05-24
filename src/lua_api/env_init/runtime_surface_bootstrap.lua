@@ -647,12 +647,6 @@ if LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP == nil then
   LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP = 10
 end
 
-if IsTutorialFlagged == nil then
-  function IsTutorialFlagged()
-    return false
-  end
-end
-
 if GetNumArenaOpponentSpecs == nil then
   function GetNumArenaOpponentSpecs()
     return 0

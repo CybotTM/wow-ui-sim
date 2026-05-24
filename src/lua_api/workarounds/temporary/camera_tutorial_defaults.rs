@@ -16,6 +16,12 @@ if GetTutorialsEnabled == nil then
     return false
   end
 end
+
+if IsTutorialFlagged == nil then
+  function IsTutorialFlagged()
+    return false
+  end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -37,6 +43,7 @@ mod tests {
                 local currentFov, minFov, maxFov = GetCameraFOVDefaults()
                 if currentFov ~= 0 or minFov ~= 30 or maxFov ~= 110 then return "fov" end
                 if GetTutorialsEnabled() ~= false then return "tutorials" end
+                if IsTutorialFlagged(1) ~= false then return "tutorial_flagged" end
                 return "ok"
                 "#,
             )
