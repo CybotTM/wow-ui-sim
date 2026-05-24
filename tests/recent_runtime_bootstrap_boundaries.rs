@@ -186,6 +186,20 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary legacy LFG workaround",
         ),
         ("function GetActionInfo", "Rust action slot state surface"),
+        ("function IsTrialAccount", "temporary client-info workaround"),
+        (
+            "function IsRestrictedAccount",
+            "temporary client-info workaround",
+        ),
+        (
+            "function GetFileStreamingStatus",
+            "temporary client-info workaround",
+        ),
+        (
+            "function GetBackgroundLoadingStatus",
+            "temporary client-info workaround",
+        ),
+        ("function GetWebTicket", "temporary client-info workaround"),
         ("PlayerLocation = {}", "temporary PlayerLocation workaround"),
         (
             "function PlayerLocation:CreateFromGUID",

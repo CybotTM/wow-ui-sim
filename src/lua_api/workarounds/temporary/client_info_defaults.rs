@@ -53,6 +53,18 @@ if GetExpansionTrialInfo == nil then
   end
 end
 
+if IsTrialAccount == nil then
+  function IsTrialAccount()
+    return false
+  end
+end
+
+if IsRestrictedAccount == nil then
+  function IsRestrictedAccount()
+    return false
+  end
+end
+
 if IsMacClient == nil then
   function IsMacClient()
     return false
@@ -115,6 +127,24 @@ if GetExpansionDisplayInfo == nil then
     }
   end
 end
+
+if GetFileStreamingStatus == nil then
+  function GetFileStreamingStatus()
+    return 0
+  end
+end
+
+if GetBackgroundLoadingStatus == nil then
+  function GetBackgroundLoadingStatus()
+    return 0
+  end
+end
+
+if GetWebTicket == nil then
+  function GetWebTicket()
+    return nil
+  end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -144,6 +174,7 @@ mod tests {
                 if IsExpansionTrial() ~= false then return "expansion_trial" end
                 local isExpansionTrial, expansionTrialRemaining = GetExpansionTrialInfo()
                 if isExpansionTrial ~= false or expansionTrialRemaining ~= 0 then return "expansion_trial_info" end
+                if IsTrialAccount() ~= false or IsRestrictedAccount() ~= false then return "account_restrictions" end
                 if IsMacClient() ~= false or IsWindowsClient() ~= false then return "platform" end
                 local primaryGraphicsApi, fallbackGraphicsApi = GetGraphicsAPIs()
                 if primaryGraphicsApi ~= "D3D12" or fallbackGraphicsApi ~= "D3D11" then return "graphics_api" end
@@ -154,6 +185,8 @@ mod tests {
                 if GetMaxLevelForPlayerExpansion() ~= GetMaxPlayerLevel() then return "player_max_level" end
                 local info = GetExpansionDisplayInfo(10)
                 if type(info) ~= "table" or info.textureKit ~= "" or type(info.features) ~= "table" then return "display_info" end
+                if GetFileStreamingStatus() ~= 0 or GetBackgroundLoadingStatus() ~= 0 then return "streaming_status" end
+                if GetWebTicket() ~= nil then return "web_ticket" end
                 return "ok"
                 "#,
             )

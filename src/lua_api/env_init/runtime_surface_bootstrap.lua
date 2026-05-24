@@ -647,27 +647,9 @@ if LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP == nil then
   LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP = 10
 end
 
-if IsTrialAccount == nil then
-  function IsTrialAccount()
-    return false
-  end
-end
-
-if IsRestrictedAccount == nil then
-  function IsRestrictedAccount()
-    return false
-  end
-end
-
 if IsTutorialFlagged == nil then
   function IsTutorialFlagged()
     return false
-  end
-end
-
-if GetFileStreamingStatus == nil then
-  function GetFileStreamingStatus()
-    return 0
   end
 end
 
@@ -680,18 +662,6 @@ end
 if GetErrorCallstackHeight == nil then
   function GetErrorCallstackHeight()
     return 0
-  end
-end
-
-if GetBackgroundLoadingStatus == nil then
-  function GetBackgroundLoadingStatus()
-    return 0
-  end
-end
-
-if GetWebTicket == nil then
-  function GetWebTicket()
-    return nil
   end
 end
 
