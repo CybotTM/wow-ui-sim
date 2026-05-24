@@ -625,12 +625,6 @@ end
 -- registered from Rust (src/lua_api/globals/zone_text.rs), backed by
 -- SimState::world. Tests drive the values via A_Admin.SetZone / SetSubZone
 -- / SetInstanceInfo.
-if UnitGroupRolesAssigned == nil then
-  function UnitGroupRolesAssigned() return "NONE" end
-end
-if UnitGroupRolesAssignedEnum == nil then
-  function UnitGroupRolesAssignedEnum() return -1 end
-end
 if GetInventoryItemID == nil then
   function GetInventoryItemID() return nil end
 end

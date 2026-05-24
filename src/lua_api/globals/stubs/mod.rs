@@ -54,19 +54,6 @@ pub fn stub_zero(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-/// Returns `"NONE"` for role APIs that expect a string token.
-pub fn stub_role_none(state: &mut LuaState) -> LuaResult<u32> {
-    let value = state.gc.intern_string_static(b"NONE");
-    state.push(Val::Str(value));
-    Ok(1)
-}
-
-/// Returns the no-role enum value used by Blizzard APIs.
-pub fn stub_role_none_enum(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(-1.0));
-    Ok(1)
-}
-
 /// Returns `(0, false)` for merchant repair cost checks.
 pub fn stub_repair_all_cost(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));

@@ -55,6 +55,18 @@ if GetIconForRoleEnum == nil then
     end
 end
 
+if UnitGroupRolesAssigned == nil then
+    function UnitGroupRolesAssigned()
+        return "NONE"
+    end
+end
+
+if UnitGroupRolesAssignedEnum == nil then
+    function UnitGroupRolesAssignedEnum()
+        return -1
+    end
+end
+
 if rawget(C_LFGInfo or {}, "CanPlayerUseGroupFinder") == nil then
     C_LFGInfo = C_LFGInfo or __wow_namespace()
     function C_LFGInfo.CanPlayerUseGroupFinder()
@@ -170,6 +182,44 @@ mod tests {
             .expect("legacy LFG icon preservation probe should run");
 
         assert_eq!(icon, "existing");
+    }
+
+    #[test]
+    fn installs_unit_group_role_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let roles: (String, i32) = env
+            .eval(
+                r#"return UnitGroupRolesAssigned("player"), UnitGroupRolesAssignedEnum("player")"#,
+            )
+            .expect("legacy unit group role probe should run");
+
+        assert_eq!(roles, ("NONE".to_string(), -1));
+    }
+
+    #[test]
+    fn preserves_existing_unit_group_role_function() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            function UnitGroupRolesAssigned() return "TANK" end
+            function UnitGroupRolesAssignedEnum() return 0 end
+            "#,
+        )
+        .expect("fixture should install existing unit role functions");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("legacy LFG defaults should apply");
+        }
+
+        let roles: (String, i32) = env
+            .eval(
+                r#"return UnitGroupRolesAssigned("player"), UnitGroupRolesAssignedEnum("player")"#,
+            )
+            .expect("legacy unit group role preservation probe should run");
+
+        assert_eq!(roles, ("TANK".to_string(), 0));
     }
 
     #[test]

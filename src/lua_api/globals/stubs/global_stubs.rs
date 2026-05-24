@@ -6,8 +6,7 @@ use rilua::vm::state::LuaState;
 use crate::lua_bridge::FromStack;
 
 use super::{
-    is_nil_global, set_global_fn, stub_false, stub_nil, stub_repair_all_cost, stub_role_none,
-    stub_role_none_enum, stub_true, stub_zero,
+    is_nil_global, set_global_fn, stub_false, stub_nil, stub_repair_all_cost, stub_true, stub_zero,
 };
 
 const CURRENT_EXPANSION_LEVEL: f64 = 10.0;
@@ -257,8 +256,6 @@ static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("GetServerExpansionLevel", stub_current_expansion_level),
     ("GetNumExpansions", stub_num_expansions),
     ("GetRepairAllCost", stub_repair_all_cost),
-    ("UnitGroupRolesAssigned", stub_role_none),
-    ("UnitGroupRolesAssignedEnum", stub_role_none_enum),
     // Transmog wardrobe needs `IsUnitModelReadyForUI("player")` to return
     // true so model-reload paths progress instead of bailing out. We don't
     // simulate model load timing — the model is always "ready".

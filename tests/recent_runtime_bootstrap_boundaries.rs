@@ -141,6 +141,14 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "temporary legacy LFG workaround",
         ),
         (
+            "function UnitGroupRolesAssigned",
+            "temporary legacy LFG workaround",
+        ),
+        (
+            "function UnitGroupRolesAssignedEnum",
+            "temporary legacy LFG workaround",
+        ),
+        (
             "function GetCurrentEnvironment",
             "temporary debug/environment workaround",
         ),
