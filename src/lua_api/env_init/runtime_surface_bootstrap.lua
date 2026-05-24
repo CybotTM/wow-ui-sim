@@ -2377,31 +2377,6 @@ if AddTooltipDataAccessor == nil then
   end
 end
 
-if RegisterEventCallback == nil then
-  function RegisterEventCallback(_event, _callback)
-  end
-end
-
-if DevTools_AddMessageHandler == nil then
-  function DevTools_AddMessageHandler(_handler)
-  end
-end
-
-if UnregisterEventCallback == nil then
-  function UnregisterEventCallback(_event, _callback)
-  end
-end
-
-if RegisterUnitEventCallback == nil then
-  function RegisterUnitEventCallback(_event, _callback, _unit)
-  end
-end
-
-if UnregisterUnitEventCallback == nil then
-  function UnregisterUnitEventCallback(_event, _callback, _unit)
-  end
-end
-
 if GetScreenWidth == nil then
   function GetScreenWidth()
     return 1024
