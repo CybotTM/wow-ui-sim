@@ -123,6 +123,11 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GetLFGRoleShortageRewards",
             "temporary legacy LFG workaround",
         ),
+        ("function UnitClass", "Rust unit query owner"),
+        ("function UnitRace", "Rust unit state owner"),
+        ("function UnitNameUnmodified", "Rust unit query owner"),
+        ("function UnitSex", "Rust unit state owner"),
+        ("function UnitIsDead", "Rust unit liveness owner"),
         (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",

@@ -1041,24 +1041,6 @@ if GetQuestResetTime == nil then
   end
 end
 
-if UnitClass == nil then
-  function UnitClass(_unit)
-    return "Paladin", "PALADIN", 2
-  end
-end
-
-if UnitRace == nil then
-  function UnitRace(_unit)
-    return "Human", "Human", 1
-  end
-end
-
-if UnitNameUnmodified == nil then
-  function UnitNameUnmodified(_unit)
-    return "SimPlayer", GetRealmName()
-  end
-end
-
 if GetChatTypeIndex == nil then
   function GetChatTypeIndex()
     return 1
@@ -1089,21 +1071,9 @@ if GetProfessionSkillLineID == nil then
   end
 end
 
-if UnitSex == nil then
-  function UnitSex()
-    return 2
-  end
-end
-
 if UnitIsGhost == nil then
   function UnitIsGhost(_unit)
     return false
-  end
-end
-
-if UnitIsDead == nil then
-  function UnitIsDead(_unit)
-    return UnitHealth(_unit) <= 0
   end
 end
 
