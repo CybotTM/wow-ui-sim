@@ -1126,12 +1126,6 @@ if GetUnitTotalModifiedMaxHealthPercent == nil then
   end
 end
 
-if GetTotemInfo == nil then
-  function GetTotemInfo(_slot)
-    return false, nil, 0, 0, nil
-  end
-end
-
 if GetDifficultyInfo == nil then
   function GetDifficultyInfo(_difficultyID)
     return "Normal", 0, false, false, false, false

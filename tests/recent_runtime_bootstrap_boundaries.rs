@@ -178,6 +178,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GetSpecializationInfoForClassID",
             "Rust C_SpecializationInfo owner",
         ),
+        ("function GetTotemInfo", "temporary totem defaults workaround"),
         ("function UnitIsPossessed", "Rust unit relationship owner"),
         ("LE_REALM_RELATION_SAME", "Rust unit relationship owner"),
         (
