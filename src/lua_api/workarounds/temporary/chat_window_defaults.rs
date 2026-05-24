@@ -1,0 +1,141 @@
+//! Temporary chat window defaults.
+//!
+//! Chat window persistence and initial chat color tables are not backed by a
+//! full account settings model yet. Keep those startup defaults explicit here
+//! until saved chat layout/state is modeled.
+
+const CHAT_WINDOW_DEFAULTS_LUA: &str = r#"
+ChatTypeInfo = ChatTypeInfo or {}
+ChatTypeInfo.SYSTEM = ChatTypeInfo.SYSTEM or {
+  r = 1,
+  g = 1,
+  b = 0,
+  id = 1,
+}
+ChatTypeInfo.BN_WHISPER = ChatTypeInfo.BN_WHISPER or {
+  r = 0,
+  g = 1,
+  b = 0.96470594406128,
+  id = 19,
+}
+
+local __wow_chat_window_state = __wow_chat_window_state or {}
+
+local function __wow_is_chat_window_shown_by_default(id)
+  return id == 1
+end
+
+local function __wow_is_chat_window_docked_by_default(id)
+  return id == 1
+end
+
+if GetChatWindowInfo == nil then
+  function GetChatWindowInfo(id)
+    local realId = id or 1
+    local chat = __wow_chat_window_state[realId]
+    local shown = __wow_is_chat_window_shown_by_default(realId)
+    local docked = __wow_is_chat_window_docked_by_default(realId)
+    if chat and chat.shown ~= nil then
+      shown = chat.shown == true
+    end
+    if chat and chat.docked ~= nil then
+      docked = chat.docked == true
+    end
+    return "Chat " .. tostring(realId), 12, 0, 0, 0, 0.25, shown, false, docked, false
+  end
+end
+
+if SetChatWindowShown == nil then
+  function SetChatWindowShown(id, shown)
+    local chat = __wow_chat_window_state[id] or {}
+    chat.shown = shown == true
+    __wow_chat_window_state[id] = chat
+  end
+end
+
+if GetChatWindowSavedDimensions == nil then
+  function GetChatWindowSavedDimensions(id)
+    local chat = __wow_chat_window_state[id]
+    if not chat then
+      return nil, nil
+    end
+    return chat.width, chat.height
+  end
+end
+
+if SetChatWindowSavedDimensions == nil then
+  function SetChatWindowSavedDimensions(id, width, height)
+    local chat = __wow_chat_window_state[id] or {}
+    chat.width = width
+    chat.height = height
+    __wow_chat_window_state[id] = chat
+  end
+end
+
+if GetChatWindowSavedPosition == nil then
+  function GetChatWindowSavedPosition(id)
+    local chat = __wow_chat_window_state[id]
+    if not chat then
+      return nil, nil, nil
+    end
+    return chat.point, chat.xOffset, chat.yOffset
+  end
+end
+
+if SetChatWindowSavedPosition == nil then
+  function SetChatWindowSavedPosition(id, point, xOffset, yOffset)
+    local chat = __wow_chat_window_state[id] or {}
+    chat.point = point
+    chat.xOffset = xOffset
+    chat.yOffset = yOffset
+    __wow_chat_window_state[id] = chat
+  end
+end
+"#;
+
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(CHAT_WINDOW_DEFAULTS_LUA)?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn installs_chat_window_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                if type(ChatTypeInfo) ~= "table" then return "chat_type_table" end
+                if ChatTypeInfo.SYSTEM.r ~= 1 or ChatTypeInfo.SYSTEM.g ~= 1 or ChatTypeInfo.SYSTEM.b ~= 0 then
+                  return "system_color"
+                end
+                if ChatTypeInfo.BN_WHISPER.id ~= 19 then return "bn_whisper" end
+
+                local name, fontSize, r, g, b, alpha, shown, locked, docked = GetChatWindowInfo(2)
+                if name ~= "Chat 2" or fontSize ~= 12 then return "info_shape" end
+                if r ~= 0 or g ~= 0 or b ~= 0 or alpha ~= 0.25 then return "info_color" end
+                if shown ~= false or locked ~= false or docked ~= false then return "hidden_defaults" end
+
+                SetChatWindowShown(2, true)
+                if select(7, GetChatWindowInfo(2)) ~= true then return "shown_state" end
+
+                SetChatWindowSavedDimensions(2, 430, 120)
+                local width, height = GetChatWindowSavedDimensions(2)
+                if width ~= 430 or height ~= 120 then return "dimensions" end
+
+                SetChatWindowSavedPosition(2, "BOTTOMLEFT", 11, 22)
+                local point, xOffset, yOffset = GetChatWindowSavedPosition(2)
+                if point ~= "BOTTOMLEFT" or xOffset ~= 11 or yOffset ~= 22 then return "position" end
+
+                return "ok"
+                "#,
+            )
+            .expect("chat window defaults probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}

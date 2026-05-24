@@ -77,6 +77,25 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "function GetCharacterListGroupsInfo",
             "temporary glue character-select workaround",
         ),
+        ("ChatTypeInfo =", "temporary chat-window workaround"),
+        ("function GetChatWindowInfo", "temporary chat-window workaround"),
+        ("function SetChatWindowShown", "temporary chat-window workaround"),
+        (
+            "function GetChatWindowSavedDimensions",
+            "temporary chat-window workaround",
+        ),
+        (
+            "function SetChatWindowSavedDimensions",
+            "temporary chat-window workaround",
+        ),
+        (
+            "function GetChatWindowSavedPosition",
+            "temporary chat-window workaround",
+        ),
+        (
+            "function SetChatWindowSavedPosition",
+            "temporary chat-window workaround",
+        ),
     ] {
         assert!(
             !bootstrap.contains(needle),
