@@ -651,69 +651,6 @@ end
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 BaseActionButtonMixin = BaseActionButtonMixin or {}
 
-ActionButtonSpellAlertManager = ActionButtonSpellAlertManager or __wow_namespace({
-  _defaultAlertType = 1,
-  activeAlerts = {},
-})
-
-local function __wow_action_button_alert_fields(button)
-  local env = debug.getfenv and debug.getfenv(button)
-  if type(env) ~= "table" then
-    return nil
-  end
-  local fields = env[1]
-  if type(fields) ~= "table" then
-    fields = {}
-    env[1] = fields
-  end
-  return fields
-end
-
-if rawget(ActionButtonSpellAlertManager, "HasAlert") == nil then
-  function ActionButtonSpellAlertManager:HasAlert(button)
-    local alertType = self.activeAlerts and self.activeAlerts[button]
-    if alertType ~= nil then
-      return true, alertType
-    end
-    return false
-  end
-end
-
-if rawget(ActionButtonSpellAlertManager, "ShowAlert") == nil then
-  function ActionButtonSpellAlertManager:ShowAlert(button, alertType)
-    if button == nil then
-      return
-    end
-    alertType = alertType or self._defaultAlertType or 1
-    self.activeAlerts[button] = alertType
-    local fields = __wow_action_button_alert_fields(button)
-    local alert = fields and rawget(fields, "SpellActivationAlert")
-    if alert == nil then
-      alert = CreateFrame("Frame", nil, UIParent or button)
-      if fields then
-        rawset(fields, "SpellActivationAlert", alert)
-      end
-      button.SpellActivationAlert = alert
-    end
-    button:Show()
-    alert:Show()
-  end
-end
-
-if rawget(ActionButtonSpellAlertManager, "HideAlert") == nil then
-  function ActionButtonSpellAlertManager:HideAlert(button)
-    if button == nil then
-      return
-    end
-    self.activeAlerts[button] = nil
-    local fields = __wow_action_button_alert_fields(button)
-    local alert = fields and rawget(fields, "SpellActivationAlert")
-    if alert ~= nil then
-      alert:Hide()
-    end
-  end
-end
-
 if bit == nil then
   local function normalize(v)
     v = math.floor(tonumber(v) or 0)

@@ -59,6 +59,69 @@ if ActionButtonUtil.GetActionBarStatusForFlyout == nil then
   end
 end
 
+ActionButtonSpellAlertManager = ActionButtonSpellAlertManager or {
+  _defaultAlertType = 1,
+  activeAlerts = {},
+}
+
+local function __wow_legacy_action_button_alert_fields(button)
+  local env = debug.getfenv and debug.getfenv(button)
+  if type(env) ~= "table" then
+    return nil
+  end
+  local fields = env[1]
+  if type(fields) ~= "table" then
+    fields = {}
+    env[1] = fields
+  end
+  return fields
+end
+
+if rawget(ActionButtonSpellAlertManager, "HasAlert") == nil then
+  function ActionButtonSpellAlertManager:HasAlert(button)
+    local alertType = self.activeAlerts and self.activeAlerts[button]
+    if alertType ~= nil then
+      return true, alertType
+    end
+    return false
+  end
+end
+
+if rawget(ActionButtonSpellAlertManager, "ShowAlert") == nil then
+  function ActionButtonSpellAlertManager:ShowAlert(button, alertType)
+    if button == nil then
+      return
+    end
+    alertType = alertType or self._defaultAlertType or 1
+    self.activeAlerts[button] = alertType
+    local fields = __wow_legacy_action_button_alert_fields(button)
+    local alert = fields and rawget(fields, "SpellActivationAlert")
+    if alert == nil then
+      alert = CreateFrame("Frame", nil, UIParent or button)
+      if fields then
+        rawset(fields, "SpellActivationAlert", alert)
+      end
+      button.SpellActivationAlert = alert
+    end
+    button:Show()
+    alert:Show()
+  end
+end
+
+if rawget(ActionButtonSpellAlertManager, "HideAlert") == nil then
+  function ActionButtonSpellAlertManager:HideAlert(button)
+    if button == nil then
+      return
+    end
+    self.activeAlerts[button] = nil
+    local fields = __wow_legacy_action_button_alert_fields(button)
+    local alert = fields and rawget(fields, "SpellActivationAlert")
+    if alert ~= nil then
+      alert:Hide()
+    end
+  end
+end
+
 local function __wow_legacy_action_bar_forward(globalName, methodName)
     if _G[globalName] == nil and C_ActionBar ~= nil and type(C_ActionBar[methodName]) == "function" then
         _G[globalName] = function(...)
@@ -151,6 +214,10 @@ mod tests {
                 if ActionButtonUtil.GetActionBarStatusForSpell(1) ~= enum.NotMissing then return "spell" end
                 if ActionButtonUtil.GetActionBarStatusForPetAction(1) ~= enum.NotMissing then return "pet" end
                 if ActionButtonUtil.GetActionBarStatusForFlyout(1) ~= enum.NotMissing then return "flyout" end
+                if type(ActionButtonSpellAlertManager) ~= "table" then return "missing_alert_manager" end
+                if type(ActionButtonSpellAlertManager.HasAlert) ~= "function" then return "missing_has_alert" end
+                if type(ActionButtonSpellAlertManager.ShowAlert) ~= "function" then return "missing_show_alert" end
+                if type(ActionButtonSpellAlertManager.HideAlert) ~= "function" then return "missing_hide_alert" end
                 ActionButtonUtil.ShowAllActionButtonGrids()
                 ActionButtonUtil.HideAllActionButtonGrids()
                 ActionButtonUtil.SetAllQuickKeybindButtonHighlights()
@@ -160,6 +227,38 @@ mod tests {
                 "#,
             )
             .expect("ActionButtonUtil defaults should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn spell_alert_manager_tracks_and_toggles_alert_frame() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                local button = CreateFrame("Button", "TemporarySpellAlertButton", UIParent)
+                local before = ActionButtonSpellAlertManager:HasAlert(button)
+
+                ActionButtonSpellAlertManager:ShowAlert(button, 7)
+                local during, alertType = ActionButtonSpellAlertManager:HasAlert(button)
+                local alert = button.SpellActivationAlert
+                local shownDuring = alert ~= nil and alert:IsShown()
+
+                ActionButtonSpellAlertManager:HideAlert(button)
+                local after = ActionButtonSpellAlertManager:HasAlert(button)
+                local shownAfter = alert ~= nil and alert:IsShown()
+
+                if before then return "bad_before" end
+                if not during or alertType ~= 7 then return "bad_during" end
+                if not shownDuring then return "bad_shown" end
+                if after then return "bad_after" end
+                if shownAfter then return "bad_hidden" end
+                return "ok"
+                "#,
+            )
+            .expect("spell-alert manager defaults should run");
 
         assert_eq!(result, "ok");
     }

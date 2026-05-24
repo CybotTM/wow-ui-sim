@@ -598,6 +598,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ("if min == nil", "globals compat-overrides owner"),
         ("if strlen == nil", "globals compat-overrides owner"),
         ("if sort == nil", "globals compat-overrides owner"),
+        (
+            "ActionButtonSpellAlertManager =",
+            "temporary legacy action-bar workaround",
+        ),
+        (
+            "__wow_action_button_alert_fields",
+            "temporary legacy action-bar workaround",
+        ),
 ];
 
 #[test]
