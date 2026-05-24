@@ -274,6 +274,19 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GetNumArenaOpponentSpecs",
             "temporary inert global workaround",
         ),
+        ("SecureTypes = {}", "temporary secure types workaround"),
+        (
+            "SecureTypes.CreateSecureMap",
+            "temporary secure types workaround",
+        ),
+        (
+            "SecureTypes.CreateSecureArray",
+            "temporary secure types workaround",
+        ),
+        (
+            "__wow_securecall_accepts_names",
+            "temporary secure types workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (
