@@ -120,6 +120,11 @@ if rawget(PVPUtil, "GetCurrentSeasonNumber") == nil then
     end
 end
 
+if GetPVPLifetimeStats == nil then
+    function GetPVPLifetimeStats()
+        return 0, 0
+    end
+end
 if GetDungeonDifficultyID == nil then
     function GetDungeonDifficultyID()
         return DifficultyUtil.ID.DungeonNormal
@@ -164,6 +169,9 @@ mod tests {
                 if PVPUtil.GetBracketName(1) ~= "" then return "bracket" end
                 if PVPUtil.IsInActiveBattlefield() ~= false then return "battlefield" end
                 if PVPUtil.GetCurrentSeasonNumber() ~= 0 then return "season" end
+                local lifetimeHKs, lifetimeRank = GetPVPLifetimeStats()
+                if lifetimeHKs ~= 0 then return "lifetime_hks" end
+                if lifetimeRank ~= 0 then return "lifetime_rank" end
                 return "ok"
                 "#,
             )
@@ -184,6 +192,7 @@ mod tests {
             PVPUtil = {
                 GetTierName = function() return "rank" end,
             }
+            GetPVPLifetimeStats = function() return 12, 3 end
             "#,
         )
         .expect("fixture should install existing utility members");
@@ -201,6 +210,9 @@ mod tests {
                 if DifficultyUtil.IsPrimaryRaid(14) ~= true then return "difficulty_fill" end
                 if PVPUtil.GetTierName(1) ~= "rank" then return "pvp_existing" end
                 if PVPUtil.GetTierDescription(1) ~= "" then return "pvp_fill" end
+                local lifetimeHKs, lifetimeRank = GetPVPLifetimeStats()
+                if lifetimeHKs ~= 12 then return "lifetime_hks" end
+                if lifetimeRank ~= 3 then return "lifetime_rank" end
                 return "ok"
                 "#,
             )

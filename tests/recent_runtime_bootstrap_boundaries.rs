@@ -104,6 +104,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ("MoveViewOutStart", "temporary camera/tutorial workaround"),
         ("MoveViewDownStop", "temporary camera/tutorial workaround"),
         (
+            "function GetPVPLifetimeStats",
+            "temporary difficulty/PVP utility workaround",
+        ),
+        (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
         ),
