@@ -879,18 +879,6 @@ if CopyTable == nil then
   end
 end
 
-if TextureKitConstants == nil then
-  TextureKitConstants = {
-    SetVisibility = true,
-    DoNotSetVisibility = false,
-    UseAtlasSize = true,
-    IgnoreAtlasSize = false,
-    AddressModeClamp = 1,
-    AddressModeWrap = 2,
-    AddressModeAllowAssetToDetermine = 3,
-  }
-end
-
 if GetFrameMetatable == nil then
   function GetFrameMetatable(frame)
     if frame == nil then

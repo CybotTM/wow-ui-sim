@@ -608,6 +608,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ),
         ("if bit == nil", "globals compat-overrides owner"),
         ("bit = {", "globals compat-overrides owner"),
+        (
+            "TextureKitConstants =",
+            "temporary shared XML utility workaround",
+        ),
 ];
 
 #[test]

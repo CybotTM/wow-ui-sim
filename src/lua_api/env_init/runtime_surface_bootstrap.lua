@@ -651,16 +651,6 @@ end
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 BaseActionButtonMixin = BaseActionButtonMixin or {}
 
-TextureKitConstants = TextureKitConstants or {
-  SetVisibility = true,
-  DoNotSetVisibility = false,
-  UseAtlasSize = true,
-  IgnoreAtlasSize = false,
-  AddressModeClamp = 1,
-  AddressModeWrap = 2,
-  AddressModeAllowAssetToDetermine = 3,
-}
-
 if C_CharacterCreation == nil then
   C_CharacterCreation = __wow_namespace()
 end

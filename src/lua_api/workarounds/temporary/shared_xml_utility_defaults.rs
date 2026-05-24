@@ -37,6 +37,18 @@ if type(SetClampedTextureRotation) ~= "function" then
   end
 end
 
+if TextureKitConstants == nil then
+  TextureKitConstants = {
+    SetVisibility = true,
+    DoNotSetVisibility = false,
+    UseAtlasSize = true,
+    IgnoreAtlasSize = false,
+    AddressModeClamp = 1,
+    AddressModeWrap = 2,
+    AddressModeAllowAssetToDetermine = 3,
+  }
+end
+
 if type(CopyValuesAsKeys) ~= "function" then
   function CopyValuesAsKeys(values)
     local result = {}
@@ -146,6 +158,14 @@ mod tests {
                 if GetFinalNameFromTextureKit("%s_topper", "") ~= "topper" then return "texture_kit_empty" end
                 local keys = CopyValuesAsKeys({ "a", "b" })
                 if keys.a ~= true or keys.b ~= true then return "copy_values" end
+                if type(TextureKitConstants) ~= "table" then return "texture_constants" end
+                if TextureKitConstants.SetVisibility ~= true then return "texture_set_visibility" end
+                if TextureKitConstants.DoNotSetVisibility ~= false then return "texture_do_not_set_visibility" end
+                if TextureKitConstants.UseAtlasSize ~= true then return "texture_use_atlas" end
+                if TextureKitConstants.IgnoreAtlasSize ~= false then return "texture_ignore_atlas" end
+                if TextureKitConstants.AddressModeClamp ~= 1 then return "texture_clamp" end
+                if TextureKitConstants.AddressModeWrap ~= 2 then return "texture_wrap" end
+                if TextureKitConstants.AddressModeAllowAssetToDetermine ~= 3 then return "texture_asset_address" end
                 local enum = EnumUtil.MakeEnum("Foo", "Bar")
                 if enum.Foo ~= 1 or enum.Bar ~= 2 then return "enum" end
                 local counter = CreateCounter()
@@ -183,6 +203,7 @@ mod tests {
             function CreateCounter() return "existing_counter" end
             function GetOrCreateTableEntry() return "existing_entry" end
             function GenerateClosure() return "existing_closure" end
+            TextureKitConstants = { UseAtlasSize = "existing_texture_constant" }
             "#,
         )
         .expect("fixture should install existing utility globals");
@@ -202,6 +223,7 @@ mod tests {
                 if CreateCounter() ~= "existing_counter" then return "overwrote_counter" end
                 if GetOrCreateTableEntry() ~= "existing_entry" then return "overwrote_table_entry" end
                 if GenerateClosure() ~= "existing_closure" then return "overwrote_closure" end
+                if TextureKitConstants.UseAtlasSize ~= "existing_texture_constant" then return "overwrote_texture_constants" end
                 if type(SetClampedTextureRotation) ~= "function" then return "missing_rotation" end
                 if type(GetMicroIconForRole) ~= "function" then return "missing_role_icon" end
                 if type(PingSystemInitializer) ~= "function" then return "missing_ping" end
