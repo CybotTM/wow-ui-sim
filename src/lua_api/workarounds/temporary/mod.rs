@@ -47,6 +47,7 @@ pub(crate) mod guild_info_namespace_fallback;
 pub(crate) mod housing_catalog_state;
 pub(crate) mod housing_dashboard_preload;
 pub(crate) mod inert_global_defaults;
+pub(crate) mod inventory_query_defaults;
 pub(crate) mod item_quality_color_data_methods;
 pub(crate) mod item_socketing_tooltips;
 pub(crate) mod kiosk_namespace_defaults;

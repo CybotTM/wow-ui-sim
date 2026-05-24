@@ -625,9 +625,6 @@ end
 -- registered from Rust (src/lua_api/globals/zone_text.rs), backed by
 -- SimState::world. Tests drive the values via A_Admin.SetZone / SetSubZone
 -- / SetInstanceInfo.
-if GetInventoryItemID == nil then
-  function GetInventoryItemID() return nil end
-end
 if GetChatWindowChannels == nil then
   function GetChatWindowChannels() return end
 end

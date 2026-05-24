@@ -149,6 +149,14 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "temporary legacy LFG workaround",
         ),
         (
+            "function GetInventoryItemID",
+            "Rust inventory state probe",
+        ),
+        (
+            "function GetInventoryItemsForSlot",
+            "temporary inventory query workaround",
+        ),
+        (
             "function GetCurrentEnvironment",
             "temporary debug/environment workaround",
         ),
