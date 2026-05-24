@@ -8,9 +8,14 @@ fn env() -> WowLuaEnv {
 #[test]
 fn default_returns_false() {
     let env = env();
-    let result: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
+    let in_tower: bool = env.eval("return IsInJailersTower()").unwrap();
+    let on_ground_floor: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
     assert!(
-        !result,
+        !in_tower,
+        "should return false when no Torghast run is active"
+    );
+    assert!(
+        !on_ground_floor,
         "should return false when no Torghast run is active"
     );
 }
@@ -26,8 +31,10 @@ fn active_floor_1_returns_true() {
             floor: 1,
         };
     }
-    let result: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
-    assert!(result, "active run on floor 1 should return true");
+    let in_tower: bool = env.eval("return IsInJailersTower()").unwrap();
+    let on_ground_floor: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
+    assert!(in_tower, "active run should return true");
+    assert!(on_ground_floor, "active run on floor 1 should return true");
 }
 
 #[test]
@@ -41,8 +48,13 @@ fn active_floor_2_returns_false() {
             floor: 2,
         };
     }
-    let result: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
-    assert!(!result, "active run on floor 2 should return false");
+    let in_tower: bool = env.eval("return IsInJailersTower()").unwrap();
+    let on_ground_floor: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
+    assert!(in_tower, "active run should return true");
+    assert!(
+        !on_ground_floor,
+        "active run on floor 2 should return false"
+    );
 }
 
 #[test]

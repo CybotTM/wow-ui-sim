@@ -1846,12 +1846,6 @@ if IsInventoryItemProfessionBag == nil then
   end
 end
 
-if IsInJailersTower == nil then
-  function IsInJailersTower()
-    return false
-  end
-end
-
 TooltipDataProcessor = TooltipDataProcessor or __wow_namespace({
   AllTypes = 0,
   AddTooltipPostCall = __wow_noop,
