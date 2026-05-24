@@ -60,6 +60,7 @@ fn register_unit_queries(state: &mut LuaState) {
     set_global(state, "UnitNameUnmodified", unit_name_unmodified);
     set_global(state, "UnitClass", unit_class);
     set_global(state, "UnitLevel", unit_level);
+    set_global(state, "UnitEffectiveLevel", unit_level);
     set_global(state, "UnitClassification", unit_classification);
     set_global(state, "UnitCreatureType", unit_creature_type);
     set_global(

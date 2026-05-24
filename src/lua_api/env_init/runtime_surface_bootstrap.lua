@@ -1130,12 +1130,6 @@ if UnitPosition == nil then
   end
 end
 
-if UnitEffectiveLevel == nil then
-  function UnitEffectiveLevel(unit)
-    return UnitLevel(unit)
-  end
-end
-
 if GetMaxPlayerLevel == nil then
   function GetMaxPlayerLevel()
     return 80

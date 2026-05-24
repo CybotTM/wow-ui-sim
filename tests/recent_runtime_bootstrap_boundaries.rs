@@ -153,6 +153,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ("function UnitName", "Rust unit query owner"),
         ("function UnitGUID", "Rust unit metadata owner"),
         ("function UnitLevel", "Rust unit query owner"),
+        ("function UnitEffectiveLevel", "Rust unit query owner"),
         (
             "function UnitAffectingCombat",
             "Rust unit combat owner",
