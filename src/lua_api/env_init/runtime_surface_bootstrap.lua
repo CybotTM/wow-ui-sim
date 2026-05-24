@@ -1,8 +1,6 @@
 local function __wow_noop()
 end
 
-local __wow_clock_start = os.clock and os.clock() or 0
-
 local function __wow_dispatcher_invoke_callback(callbackData, ...)
   local callback = callbackData and callbackData.Callback
   if type(callback) == "function" then
@@ -1191,21 +1189,6 @@ if GetChannelName == nil then
       return 0, channel, 0, false
     end
     return 0, nil, 0, false
-  end
-end
-
-if GetTime == nil then
-  function GetTime()
-    if os.clock == nil then
-      return 0
-    end
-    return os.clock() - __wow_clock_start
-  end
-end
-
-if rawget(_G, "time") == nil then
-  function time()
-    return GetTime()
   end
 end
 

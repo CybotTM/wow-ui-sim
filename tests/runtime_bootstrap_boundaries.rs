@@ -60,11 +60,19 @@ fn game_time_defaults_are_not_runtime_bootstrap_fallbacks() {
         "GetGameTime default must live in the explicit temporary GameTime/calendar workaround boundary"
     );
     assert!(
+        !bootstrap.contains("function GetTime"),
+        "GetTime must be registered by the Rust global surface, not runtime bootstrap"
+    );
+    assert!(
         !bootstrap.contains("__wow_normalize_time_table"),
         "time() normalization helper must live in the explicit temporary GameTime/calendar workaround boundary"
     );
     assert!(
         !bootstrap.contains("function time(dateTable)"),
+        "time() default must live in the explicit temporary GameTime/calendar workaround boundary"
+    );
+    assert!(
+        !bootstrap.contains("function time()"),
         "time() default must live in the explicit temporary GameTime/calendar workaround boundary"
     );
 }
