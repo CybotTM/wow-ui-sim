@@ -257,6 +257,15 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "RegisterWidgetVisTypeTemplate = __wow_noop",
             "temporary UI widget manager workaround",
         ),
+        ("Settings = Settings", "temporary Settings surface workaround"),
+        (
+            "function InterfaceOptions_AddCategory",
+            "temporary Settings surface workaround",
+        ),
+        (
+            "function Settings.RegisterCanvasLayoutCategory",
+            "temporary Settings surface workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (

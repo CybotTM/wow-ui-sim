@@ -88,6 +88,7 @@ pub(crate) mod secure_execute_range;
 pub(crate) mod secure_reference_defaults;
 pub(crate) mod secure_transfer_state;
 pub(crate) mod settings_canvas_visibility;
+pub(crate) mod settings_surface_defaults;
 pub(crate) mod shared_xml_anim_mixins;
 pub(crate) mod shared_xml_utility_defaults;
 pub(crate) mod sound_driver_defaults;
