@@ -70,6 +70,7 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
     register_c_item_existence_queries(state, table_ref)?;
     register_c_item_metadata_queries(state, table_ref)?;
     register_c_item_inventory_queries(state, table_ref)?;
+    table_set_rust_fn_static(state, state.global, "GetItemID", c_item_get_item_id)?;
     Ok(())
 }
 

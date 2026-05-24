@@ -284,6 +284,8 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary portrait texture workaround",
         ),
         ("function issecure", "rilua taint runtime"),
+        ("function GetItemID", "Rust C_Item owner"),
+        ("__wow_extract_item_id", "Rust C_Item owner"),
         ("AuraUtil.AuraFilters", "Rust aura owner"),
         ("AuraUtil.CreateFilterString", "Rust aura owner"),
         ("AuraUtil.UnpackAuraData", "Rust aura owner"),

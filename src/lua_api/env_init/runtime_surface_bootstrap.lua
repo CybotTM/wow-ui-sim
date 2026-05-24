@@ -670,41 +670,6 @@ if GetContainerItemLink == nil and C_Container ~= nil then
   end
 end
 
-if GetItemID == nil then
-  local function __wow_extract_item_id(value)
-    if value == nil then
-      return nil
-    end
-    if type(value) == "number" then
-      return value > 0 and math.floor(value) or nil
-    end
-    if type(value) ~= "string" then
-      return nil
-    end
-
-    local link_id = value:match("|Hitem:(%d+)")
-    if link_id ~= nil then
-      return tonumber(link_id)
-    end
-
-    local raw_id = value:match("^item:(%d+)")
-    if raw_id ~= nil then
-      return tonumber(raw_id)
-    end
-
-    local numeric = tonumber(value)
-    if numeric ~= nil and numeric > 0 then
-      return math.floor(numeric)
-    end
-
-    return nil
-  end
-
-  function GetItemID(itemInfo)
-    return __wow_extract_item_id(itemInfo)
-  end
-end
-
 if GetTradeSkillTexture == nil and C_TradeSkillUI ~= nil then
   function GetTradeSkillTexture(...)
     return C_TradeSkillUI.GetTradeSkillTexture(...)
