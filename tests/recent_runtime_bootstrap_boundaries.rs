@@ -606,6 +606,8 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "__wow_action_button_alert_fields",
             "temporary legacy action-bar workaround",
         ),
+        ("if bit == nil", "globals compat-overrides owner"),
+        ("bit = {", "globals compat-overrides owner"),
 ];
 
 #[test]

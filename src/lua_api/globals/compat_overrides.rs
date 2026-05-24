@@ -105,6 +105,106 @@ if string ~= nil and string.split == nil then
     return strsplit(delimiter, self, limit)
   end
 end
+
+if bit == nil then
+  local UINT32_MODULO = 2 ^ 32
+  local UINT32_MASK = UINT32_MODULO - 1
+
+  local function normalize(v)
+    v = math.floor(tonumber(v) or 0)
+    if v < 0 then
+      v = UINT32_MODULO + v
+    end
+    return v % UINT32_MODULO
+  end
+
+  local function fold(values, identity, step)
+    local result = identity
+    for i = 1, #values do
+      result = step(result, normalize(values[i]))
+    end
+    return normalize(result)
+  end
+
+  local function lshift(a, n)
+    return normalize(normalize(a) * (2 ^ normalize(n)))
+  end
+
+  local function rshift(a, n)
+    return math.floor(normalize(a) / (2 ^ normalize(n)))
+  end
+
+  local function band2(a, b)
+    local result = 0
+    local bitValue = 1
+    a = normalize(a)
+    b = normalize(b)
+    while a > 0 or b > 0 do
+      local abit = a % 2
+      local bbit = b % 2
+      if abit == 1 and bbit == 1 then
+        result = result + bitValue
+      end
+      a = math.floor(a / 2)
+      b = math.floor(b / 2)
+      bitValue = bitValue * 2
+    end
+    return result
+  end
+
+  local function bor2(a, b)
+    local result = 0
+    local bitValue = 1
+    a = normalize(a)
+    b = normalize(b)
+    while a > 0 or b > 0 do
+      local abit = a % 2
+      local bbit = b % 2
+      if abit == 1 or bbit == 1 then
+        result = result + bitValue
+      end
+      a = math.floor(a / 2)
+      b = math.floor(b / 2)
+      bitValue = bitValue * 2
+    end
+    return result
+  end
+
+  bit = {
+    band = function(...)
+      return fold({...}, UINT32_MASK, band2)
+    end,
+    bor = function(...)
+      return fold({...}, 0, bor2)
+    end,
+    bxor = function(a, b)
+      a = normalize(a)
+      b = normalize(b)
+      local result = 0
+      local bitValue = 1
+      while a > 0 or b > 0 do
+        local abit = a % 2
+        local bbit = b % 2
+        if abit ~= bbit then
+          result = result + bitValue
+        end
+        a = math.floor(a / 2)
+        b = math.floor(b / 2)
+        bitValue = bitValue * 2
+      end
+      return result
+    end,
+    bnot = function(a)
+      return UINT32_MASK - normalize(a)
+    end,
+    lshift = lshift,
+    rshift = rshift,
+    arshift = rshift,
+    mod = function(a, b)
+      return normalize(a) % normalize(b)
+    end,
+  }
+end
 "#;
 
 /// Install `print` / `A_Print` / `next` / `ipairs` overrides on the rilua
@@ -413,6 +513,28 @@ mod tests {
                 "#,
             )
             .expect("legacy alias probe should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn installs_legacy_bit_library() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let result: String = env
+            .eval(
+                r#"
+                if bit.band(12, 10) ~= 8 then return "band" end
+                if bit.bor(12, 10) ~= 14 then return "bor" end
+                if bit.bxor(12, 10) ~= 6 then return "bxor" end
+                if bit.bnot(0) ~= 4294967295 then return "bnot" end
+                if bit.lshift(1, 3) ~= 8 then return "lshift" end
+                if bit.rshift(16, 2) ~= 4 then return "rshift" end
+                if bit.arshift(16, 2) ~= 4 then return "arshift" end
+                if bit.mod(17, 5) ~= 2 then return "mod" end
+                return "ok"
+                "#,
+            )
+            .expect("bit compatibility probe should run");
 
         assert_eq!(result, "ok");
     }
