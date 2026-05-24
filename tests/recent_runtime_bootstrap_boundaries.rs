@@ -50,6 +50,12 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "function DevTools_AddMessageHandler",
             "temporary dispatcher callback workaround",
         ),
+        (
+            "__wow_ensure_dispatcher_surface",
+            "temporary Dispatcher surface workaround",
+        ),
+        ("DISPATCHER_VERSION = 2.0", "temporary Dispatcher surface workaround"),
+        ("Dispatcher = dispatcher", "temporary Dispatcher surface workaround"),
     ] {
         assert!(
             !bootstrap.contains(needle),

@@ -30,6 +30,7 @@ pub(crate) mod debug_environment_defaults;
 pub(crate) mod details_saved_variables;
 pub(crate) mod difficulty_pvp_util_defaults;
 pub(crate) mod dispatcher_callback_defaults;
+pub(crate) mod dispatcher_surface;
 pub(crate) mod display_scale_defaults;
 pub(crate) mod encounter_state;
 pub(crate) mod environment_cleanup_restore;
