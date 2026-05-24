@@ -533,6 +533,16 @@ fn tail_inert_globals_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn weapon_enchant_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    assert!(
+        !bootstrap.contains("function GetWeaponEnchantInfo"),
+        "GetWeaponEnchantInfo must live in the explicit temporary weapon-enchant workaround boundary, not runtime bootstrap"
+    );
+}
+
+#[test]
 fn catalog_shop_soundkit_defaults_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 

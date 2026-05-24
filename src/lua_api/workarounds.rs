@@ -200,6 +200,7 @@ fn apply_core_foundation_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::game_rules_namespace_fallback::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::inert_global_defaults::apply_bootstrap(lua)?;
+    temporary::weapon_enchant_defaults::apply_bootstrap(lua)?;
     Ok(())
 }
 

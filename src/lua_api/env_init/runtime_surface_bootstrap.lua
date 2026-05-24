@@ -37,12 +37,6 @@ if GetCharacterListGroupsInfo == nil then
   end
 end
 
-if GetWeaponEnchantInfo == nil then
-  function GetWeaponEnchantInfo()
-    return false, 0, 0, 0, false, 0, 0, 0
-  end
-end
-
 if GetTutorialsEnabled == nil then
   function GetTutorialsEnabled()
     return false

@@ -97,3 +97,4 @@ pub(crate) mod unit_auras_state;
 pub(crate) mod unit_position_frame_mixin;
 pub(crate) mod video_options_state;
 pub(crate) mod vignette_pin_template;
+pub(crate) mod weapon_enchant_defaults;
