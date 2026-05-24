@@ -35,6 +35,12 @@ if GetExpansionLevel == nil then
   end
 end
 
+if GetUpgradeExpansionLevel == nil then
+  function GetUpgradeExpansionLevel()
+    return 80
+  end
+end
+
 if IsExpansionTrial == nil then
   function IsExpansionTrial()
     return false
@@ -56,6 +62,12 @@ end
 if IsWindowsClient == nil then
   function IsWindowsClient()
     return false
+  end
+end
+
+if GetGraphicsAPIs == nil then
+  function GetGraphicsAPIs()
+    return "D3D12", "D3D11"
   end
 end
 
@@ -128,10 +140,13 @@ mod tests {
                 if GetRealmName() ~= "SimulatedRealm" or GetNormalizedRealmName() ~= "SimulatedRealm" then return "realm" end
                 if GetRealmID() ~= 1 then return "realm_id" end
                 if GetExpansionLevel() ~= 10 then return "expansion" end
+                if GetUpgradeExpansionLevel() ~= 80 then return "upgrade_expansion" end
                 if IsExpansionTrial() ~= false then return "expansion_trial" end
                 local isExpansionTrial, expansionTrialRemaining = GetExpansionTrialInfo()
                 if isExpansionTrial ~= false or expansionTrialRemaining ~= 0 then return "expansion_trial_info" end
                 if IsMacClient() ~= false or IsWindowsClient() ~= false then return "platform" end
+                local primaryGraphicsApi, fallbackGraphicsApi = GetGraphicsAPIs()
+                if primaryGraphicsApi ~= "D3D12" or fallbackGraphicsApi ~= "D3D11" then return "graphics_api" end
                 if not pcall(RequestTimePlayed) then return "time_played" end
                 if GetClientDisplayExpansionLevel() ~= 10 then return "client_expansion" end
                 if GetAccountExpansionLevel() ~= 10 then return "account_expansion" end

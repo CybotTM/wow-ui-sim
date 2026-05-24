@@ -7,12 +7,6 @@ if GetSpecializationInfoForSpecID == nil then
   end
 end
 
-if GetUpgradeExpansionLevel == nil then
-  function GetUpgradeExpansionLevel()
-    return 80
-  end
-end
-
 if GetCharacterUndeleteStatus == nil then
   function GetCharacterUndeleteStatus()
     return false, false, 0, 0
@@ -34,12 +28,6 @@ end
 if GetCameraFOVDefaults == nil then
   function GetCameraFOVDefaults()
     return 0, 30, 110
-  end
-end
-
-if GetGraphicsAPIs == nil then
-  function GetGraphicsAPIs()
-    return "D3D12", "D3D11"
   end
 end
 

@@ -1441,12 +1441,6 @@ if GetMaxRenderScale == nil then
   end
 end
 
-if GetUpgradeExpansionLevel == nil then
-  function GetUpgradeExpansionLevel()
-    return 80
-  end
-end
-
 if GetCharacterUndeleteStatus == nil then
   function GetCharacterUndeleteStatus()
     return false, false, 0, 0
