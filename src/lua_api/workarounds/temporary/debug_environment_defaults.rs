@@ -71,6 +71,98 @@ if SetErrorCallstackHeight == nil then
   end
 end
 
+if GetErrorCallstackHeight == nil then
+  function GetErrorCallstackHeight()
+    return 0
+  end
+end
+
+if debugstack == nil then
+  local function debugstack_source(info)
+    local source = info and info.source or nil
+    if type(source) ~= "string" or source == "" then
+      source = info and info.short_src or "?"
+    end
+    if source:sub(1, 1) == "@" then
+      return "[" .. source:sub(2) .. "]"
+    end
+    return source
+  end
+
+  local function debugstack_line(info)
+    local source = debugstack_source(info)
+    local currentline = tonumber(info and info.currentline) or -1
+    if currentline > 0 then
+      source = source .. ":" .. currentline
+    else
+      source = source .. ":"
+    end
+
+    if info and type(info.name) == "string" and info.name ~= "" then
+      return source .. ": in function '" .. info.name .. "'"
+    end
+    if info and info.what == "main" then
+      return source .. ": in main chunk"
+    end
+    if info and type(info.linedefined) == "number" and info.linedefined > 0 then
+      return source .. ": in function <" .. debugstack_source(info) .. ":" .. info.linedefined .. ">"
+    end
+    return source .. " ?"
+  end
+
+  function debugstack(level, count1, count2)
+    if not debug or not debug.getinfo then
+      return ""
+    end
+    local start = (tonumber(level) or 1) + 1
+    local lines = {}
+    local depth = start
+    while true do
+      local info = debug.getinfo(depth, "Sln")
+      if not info then break end
+      lines[#lines + 1] = debugstack_line(info)
+      depth = depth + 1
+    end
+
+    if count1 or count2 then
+      local top = tonumber(count1) or 12
+      local bottom = tonumber(count2) or 10
+      if #lines > top + bottom then
+        local kept = {}
+        for i = 1, top do kept[#kept + 1] = lines[i] end
+        kept[#kept + 1] = "..."
+        for i = #lines - bottom + 1, #lines do kept[#kept + 1] = lines[i] end
+        return table.concat(kept, "\n") .. "\n"
+      end
+    end
+    local stack = table.concat(lines, "\n")
+    if stack ~= "" then stack = stack .. "\n" end
+    return stack
+  end
+end
+
+if debuglocals == nil then
+  function debuglocals(level)
+    if not debug or not debug.getinfo or not debug.getlocal then
+      return ""
+    end
+    local start = (tonumber(level) or 1) + 1
+    local info = debug.getinfo(start, "fS")
+    if not info then return "" end
+    local parts = {}
+    local i = 1
+    while true do
+      local name, value = debug.getlocal(start, i)
+      if not name then break end
+      if not name:match("^%(") then
+        parts[#parts + 1] = string.format("%s = %s", name, tostring(value))
+      end
+      i = i + 1
+    end
+    return table.concat(parts, "\n")
+  end
+end
+
 if debug ~= nil and debug.getfenv ~= nil then
   local __wow_debug_getfenv = debug.getfenv
   local function __wow_is_frame_backed_table(obj)
@@ -124,6 +216,11 @@ mod tests {
                 if type(GetEditBoxMetatable()) ~= "table" then return "editbox_metatable" end
                 if secretwrap(marker)() ~= "wrapped" then return "secretwrap" end
                 if GetCallstackHeight() ~= 0 then return "callstack_height" end
+                if GetErrorCallstackHeight() ~= 0 then return "error_callstack_height" end
+                if type(debugstack) ~= "function" then return "debugstack_type" end
+                if not string.find(debugstack(1), "in main chunk", 1, true) then return "debugstack_value" end
+                if type(debuglocals) ~= "function" then return "debuglocals_type" end
+                if type(debuglocals(1)) ~= "string" then return "debuglocals_value" end
                 SetErrorCallstackHeight(4)
                 AddSourceLocationExclude("example.lua")
                 return "ok"

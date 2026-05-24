@@ -249,34 +249,23 @@ fn pool_constructor_defaults_are_not_runtime_bootstrap_fallbacks() {
 fn debug_environment_defaults_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 
-    assert!(
-        !bootstrap.contains("function GetGlobalEnvironment"),
-        "GetGlobalEnvironment fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
-    );
-    assert!(
-        !bootstrap.contains("function GetButtonMetatable"),
-        "GetButtonMetatable fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
-    );
-    assert!(
-        !bootstrap.contains("function GetEditBoxMetatable"),
-        "GetEditBoxMetatable fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
-    );
-    assert!(
-        !bootstrap.contains("function secretwrap"),
-        "secretwrap fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
-    );
-    assert!(
-        !bootstrap.contains("function GetCallstackHeight"),
-        "GetCallstackHeight fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
-    );
-    assert!(
-        !bootstrap.contains("function SetErrorCallstackHeight"),
-        "SetErrorCallstackHeight fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
-    );
-    assert!(
-        !bootstrap.contains("function AddSourceLocationExclude"),
-        "AddSourceLocationExclude fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
-    );
+    for symbol in [
+        "GetGlobalEnvironment",
+        "GetButtonMetatable",
+        "GetEditBoxMetatable",
+        "secretwrap",
+        "GetCallstackHeight",
+        "GetErrorCallstackHeight",
+        "SetErrorCallstackHeight",
+        "debugstack",
+        "debuglocals",
+        "AddSourceLocationExclude",
+    ] {
+        assert!(
+            !bootstrap.contains(&format!("function {symbol}")),
+            "{symbol} fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+        );
+    }
 }
 
 #[test]
