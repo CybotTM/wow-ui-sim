@@ -1846,12 +1846,6 @@ if IsInventoryItemProfessionBag == nil then
   end
 end
 
-if GetSendMailPrice == nil then
-  function GetSendMailPrice()
-    return 0
-  end
-end
-
 if GetMerchantFilter == nil then
   function GetMerchantFilter()
     return 0

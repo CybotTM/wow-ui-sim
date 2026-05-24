@@ -202,6 +202,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function UnitThreatPercentageOfLead",
             "temporary unit threat workaround",
         ),
+        ("function GetSendMailPrice", "Rust mail verb surface"),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (
