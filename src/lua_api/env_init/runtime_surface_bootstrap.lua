@@ -1096,43 +1096,9 @@ if LocalizedClassList == nil then
   end
 end
 
-if UnitIsPossessed == nil then
-  function UnitIsPossessed(_unit)
-    return false
-  end
-end
-
-if LE_REALM_RELATION_SAME == nil then
-  LE_REALM_RELATION_SAME = 0
-end
-
-if UnitRealmRelationship == nil then
-  function UnitRealmRelationship(_unit)
-    return LE_REALM_RELATION_SAME
-  end
-end
-
 if UnitPosition == nil then
   function UnitPosition(_unit)
     return 0, 0, 0, 0
-  end
-end
-
-if UnitInPartyIsAI == nil then
-  function UnitInPartyIsAI(_unit)
-    return false
-  end
-end
-
-if UnitIsPVPFreeForAll == nil then
-  function UnitIsPVPFreeForAll(_unit)
-    return false
-  end
-end
-
-if UnitPhaseReason == nil then
-  function UnitPhaseReason(_unit)
-    return nil
   end
 end
 

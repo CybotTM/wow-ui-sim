@@ -52,6 +52,41 @@ pub(super) fn unit_targets_vehicle_in_raid_ui(state: &mut LuaState) -> LuaResult
     Ok(1)
 }
 
+/// `UnitIsPossessed(unit)` — possession is not modeled in current SimState.
+pub(super) fn unit_is_possessed(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// `UnitRealmRelationship(unit)` — all simulated unit tokens are same-realm.
+pub(super) fn unit_realm_relationship(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+/// `UnitInPartyIsAI(unit)` — follower/AI party members are not modeled.
+pub(super) fn unit_in_party_is_ai(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// `UnitIsPVPFreeForAll(unit)` — FFA PVP is not modeled.
+pub(super) fn unit_is_pvp_free_for_all(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// `UnitPhaseReason(unit)` — no phase/Chromie-time reason is modeled.
+pub(super) fn unit_phase_reason(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
 /// `UnitInOtherParty(unit)` — sim does not model cross-party; always false.
 pub(super) fn unit_in_other_party(state: &mut LuaState) -> LuaResult<u32> {
     let _ = Option::<String>::from_stack(state, 1)?;

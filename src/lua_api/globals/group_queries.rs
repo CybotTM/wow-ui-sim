@@ -79,9 +79,29 @@ fn register_unit_queries(state: &mut LuaState) {
 }
 
 fn register_unit_relationships(state: &mut LuaState) {
+    table_set(
+        state,
+        Val::Table(state.global),
+        "LE_REALM_RELATION_SAME",
+        Val::Num(0.0),
+    );
+    state.gc.barrier_back(state.global);
     register_unit_reaction_relationships(state);
     register_unit_membership_relationships(state);
     register_unit_group_roles(state);
+    set_global(state, "UnitIsPossessed", relationships::unit_is_possessed);
+    set_global(
+        state,
+        "UnitRealmRelationship",
+        relationships::unit_realm_relationship,
+    );
+    set_global(state, "UnitInPartyIsAI", relationships::unit_in_party_is_ai);
+    set_global(
+        state,
+        "UnitIsPVPFreeForAll",
+        relationships::unit_is_pvp_free_for_all,
+    );
+    set_global(state, "UnitPhaseReason", relationships::unit_phase_reason);
     set_global(state, "UnitHasLFGDeserter", always_false);
     set_global(
         state,

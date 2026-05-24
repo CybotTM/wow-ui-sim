@@ -170,6 +170,18 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary client-info workaround",
         ),
         ("function PlayerHasToy", "Rust ToyBox owner"),
+        ("function UnitIsPossessed", "Rust unit relationship owner"),
+        ("LE_REALM_RELATION_SAME", "Rust unit relationship owner"),
+        (
+            "function UnitRealmRelationship",
+            "Rust unit relationship owner",
+        ),
+        ("function UnitInPartyIsAI", "Rust unit relationship owner"),
+        (
+            "function UnitIsPVPFreeForAll",
+            "Rust unit relationship owner",
+        ),
+        ("function UnitPhaseReason", "Rust unit relationship owner"),
         (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
