@@ -221,6 +221,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary secure reference workaround",
         ),
         ("function IsInJailersTower", "Rust Torghast state surface"),
+        (
+            "function IsInventoryItemProfessionBag",
+            "temporary inventory query workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (
