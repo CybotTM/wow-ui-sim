@@ -1846,17 +1846,6 @@ if IsInventoryItemProfessionBag == nil then
   end
 end
 
-if GetMerchantFilter == nil then
-  function GetMerchantFilter()
-    return 0
-  end
-end
-
-if SetMerchantFilter == nil then
-  function SetMerchantFilter(_filter)
-  end
-end
-
 if AbbreviateNumbers == nil then
   function AbbreviateNumbers(value)
     return tostring(value or 0)
