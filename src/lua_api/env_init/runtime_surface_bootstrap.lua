@@ -1854,12 +1854,6 @@ if StoreSecureReference == nil then
   end
 end
 
-if UnitStagger == nil then
-  function UnitStagger(_unit)
-    return 0
-  end
-end
-
 if GetPossessInfo == nil then
   function GetPossessInfo(_index)
     return nil, nil, false
