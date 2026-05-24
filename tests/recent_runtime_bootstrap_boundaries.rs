@@ -266,6 +266,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function Settings.RegisterCanvasLayoutCategory",
             "temporary Settings surface workaround",
         ),
+        (
+            "function GetInventoryItemTexture",
+            "Rust inventory probe surface",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (

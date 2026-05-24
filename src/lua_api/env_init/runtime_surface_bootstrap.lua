@@ -1772,12 +1772,6 @@ if GetReleaseTimeRemaining == nil then
   end
 end
 
-if GetInventoryItemTexture == nil then
-  function GetInventoryItemTexture(_unit, _slot)
-    return nil
-  end
-end
-
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 BaseActionButtonMixin = BaseActionButtonMixin or {}
 
