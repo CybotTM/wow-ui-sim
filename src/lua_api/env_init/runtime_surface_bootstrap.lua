@@ -187,14 +187,6 @@ end
 
 __wow_ensure_startup_navigation_surface()
 
-if abs == nil and math ~= nil then abs = math.abs end
-if ceil == nil and math ~= nil then ceil = math.ceil end
-if floor == nil and math ~= nil then floor = math.floor end
-if max == nil and math ~= nil then max = math.max end
-if min == nil and math ~= nil then min = math.min end
-if strlen == nil and string ~= nil then strlen = string.len end
-if sort == nil and table ~= nil then sort = table.sort end
-
 local function __wow_ensure_item_button_surface(button)
   if type(button) ~= "table" then
     return button

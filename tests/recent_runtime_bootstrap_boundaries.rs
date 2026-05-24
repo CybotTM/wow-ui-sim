@@ -591,6 +591,13 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary trade-skill UI workaround",
         ),
         ("function IsArtifactRelicItem", "Rust item socket owner"),
+        ("if abs == nil", "globals compat-overrides owner"),
+        ("if ceil == nil", "globals compat-overrides owner"),
+        ("if floor == nil", "globals compat-overrides owner"),
+        ("if max == nil", "globals compat-overrides owner"),
+        ("if min == nil", "globals compat-overrides owner"),
+        ("if strlen == nil", "globals compat-overrides owner"),
+        ("if sort == nil", "globals compat-overrides owner"),
 ];
 
 #[test]

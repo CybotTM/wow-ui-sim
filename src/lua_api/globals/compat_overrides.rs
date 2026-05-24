@@ -385,3 +385,35 @@ fn frame_children_iter(state: &mut LuaState) -> LuaResult<u32> {
     state.push(child_val);
     Ok(2)
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn installs_legacy_math_and_table_aliases() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let result: String = env
+            .eval(
+                r#"
+                local values = { 3, 1, 2 }
+                sort(values)
+
+                if abs(-4) ~= 4 then return "bad_abs" end
+                if ceil(1.2) ~= 2 then return "bad_ceil" end
+                if floor(1.8) ~= 1 then return "bad_floor" end
+                if max(1, 3, 2) ~= 3 then return "bad_max" end
+                if min(1, 3, 2) ~= 1 then return "bad_min" end
+                if strlen("abcd") ~= 4 then return "bad_strlen" end
+                if values[1] ~= 1 or values[2] ~= 2 or values[3] ~= 3 then
+                    return "bad_sort"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("legacy alias probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
