@@ -1032,20 +1032,6 @@ end
 -- iterates the returned category / session / cooldown list with ipairs.
 -- None of these subsystems are simulated; return empty tables.
 
-for _, __wow_camera_verb in ipairs({
-  "MoveViewOutStart", "MoveViewOutStop",
-  "MoveViewInStart", "MoveViewInStop",
-  "MoveViewLeftStart", "MoveViewLeftStop",
-  "MoveViewRightStart", "MoveViewRightStop",
-  "MoveViewUpStart", "MoveViewUpStop",
-  "MoveViewDownStart", "MoveViewDownStop",
-}) do
-  if _G[__wow_camera_verb] == nil then
-    _G[__wow_camera_verb] = function()
-    end
-  end
-end
-
 if GetPVPLifetimeStats == nil then
   function GetPVPLifetimeStats()
     return 0, 0

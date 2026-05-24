@@ -22,6 +22,20 @@ if IsTutorialFlagged == nil then
     return false
   end
 end
+
+for _, __wow_camera_verb in ipairs({
+  "MoveViewOutStart", "MoveViewOutStop",
+  "MoveViewInStart", "MoveViewInStop",
+  "MoveViewLeftStart", "MoveViewLeftStop",
+  "MoveViewRightStart", "MoveViewRightStop",
+  "MoveViewUpStart", "MoveViewUpStop",
+  "MoveViewDownStart", "MoveViewDownStop",
+}) do
+  if _G[__wow_camera_verb] == nil then
+    _G[__wow_camera_verb] = function()
+    end
+  end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -44,6 +58,17 @@ mod tests {
                 if currentFov ~= 0 or minFov ~= 30 or maxFov ~= 110 then return "fov" end
                 if GetTutorialsEnabled() ~= false then return "tutorials" end
                 if IsTutorialFlagged(1) ~= false then return "tutorial_flagged" end
+                for _, name in ipairs({
+                    "MoveViewOutStart", "MoveViewOutStop",
+                    "MoveViewInStart", "MoveViewInStop",
+                    "MoveViewLeftStart", "MoveViewLeftStop",
+                    "MoveViewRightStart", "MoveViewRightStop",
+                    "MoveViewUpStart", "MoveViewUpStop",
+                    "MoveViewDownStart", "MoveViewDownStop",
+                }) do
+                    if type(_G[name]) ~= "function" then return name .. "_missing" end
+                    if pcall(_G[name], 1.0, 0, true) ~= true then return name .. "_call" end
+                end
                 return "ok"
                 "#,
             )
