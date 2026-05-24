@@ -170,6 +170,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary client-info workaround",
         ),
         ("function PlayerHasToy", "Rust ToyBox owner"),
+        (
+            "function GetNumSpecializations",
+            "Rust C_SpecializationInfo owner",
+        ),
+        (
+            "function GetSpecializationInfoForClassID",
+            "Rust C_SpecializationInfo owner",
+        ),
         ("function UnitIsPossessed", "Rust unit relationship owner"),
         ("LE_REALM_RELATION_SAME", "Rust unit relationship owner"),
         (

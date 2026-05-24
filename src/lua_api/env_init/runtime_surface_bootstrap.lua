@@ -1132,19 +1132,6 @@ if GetTotemInfo == nil then
   end
 end
 
-if GetNumSpecializations == nil then
-  function GetNumSpecializations()
-    return 3
-  end
-end
-
-if GetSpecializationInfoForClassID == nil then
-  function GetSpecializationInfoForClassID(classID, index, _sex)
-    local specID = ((tonumber(classID) or 0) * 100) + (tonumber(index) or 1)
-    return specID, "Spec " .. tostring(index or 1), "", 0, "DAMAGER", false, true
-  end
-end
-
 if GetDifficultyInfo == nil then
   function GetDifficultyInfo(_difficultyID)
     return "Normal", 0, false, false, false, false
