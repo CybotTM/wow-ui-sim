@@ -659,12 +659,6 @@ if GetErrorCallstackHeight == nil then
   end
 end
 
-if GetDungeonDifficultyID == nil then
-  function GetDungeonDifficultyID()
-    return 1
-  end
-end
-
 if debugstack == nil then
   local function debugstack_source(info)
     local source = info and info.source or nil

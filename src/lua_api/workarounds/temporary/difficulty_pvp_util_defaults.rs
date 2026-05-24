@@ -119,6 +119,12 @@ if rawget(PVPUtil, "GetCurrentSeasonNumber") == nil then
         return 0
     end
 end
+
+if GetDungeonDifficultyID == nil then
+    function GetDungeonDifficultyID()
+        return DifficultyUtil.ID.DungeonNormal
+    end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -151,6 +157,7 @@ mod tests {
                 if DifficultyUtil.IsPrimaryRaid(DifficultyUtil.ID.DungeonMythic) ~= false then return "primary_false" end
                 if DifficultyUtil.GetMaxPlayers(DifficultyUtil.ID.DungeonNormal) ~= 5 then return "dungeon_players" end
                 if DifficultyUtil.GetMaxPlayers(DifficultyUtil.ID.Raid25Heroic) ~= 25 then return "raid_players" end
+                if GetDungeonDifficultyID() ~= DifficultyUtil.ID.DungeonNormal then return "current_dungeon_difficulty" end
 
                 if PVPUtil.GetTierName(1) ~= "" then return "tier_name" end
                 if PVPUtil.GetTierDescription(1) ~= "" then return "tier_description" end

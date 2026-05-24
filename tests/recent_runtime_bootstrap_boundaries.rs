@@ -189,6 +189,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function IsTutorialFlagged",
             "temporary camera/tutorial workaround",
         ),
+        (
+            "function GetDungeonDifficultyID",
+            "temporary difficulty/PVP utility workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (
