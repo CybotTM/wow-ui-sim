@@ -744,12 +744,6 @@ if GetDungeonDifficultyID == nil then
   end
 end
 
-if UnitGetAvailableRoles == nil then
-  function UnitGetAvailableRoles()
-    return true, true, true
-  end
-end
-
 if debugstack == nil then
   local function debugstack_source(info)
     local source = info and info.source or nil

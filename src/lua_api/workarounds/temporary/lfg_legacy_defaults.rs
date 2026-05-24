@@ -67,6 +67,12 @@ if UnitGroupRolesAssignedEnum == nil then
     end
 end
 
+if UnitGetAvailableRoles == nil then
+    function UnitGetAvailableRoles()
+        return true, true, true
+    end
+end
+
 if rawget(C_LFGInfo or {}, "CanPlayerUseGroupFinder") == nil then
     C_LFGInfo = C_LFGInfo or __wow_namespace()
     function C_LFGInfo.CanPlayerUseGroupFinder()
@@ -195,6 +201,35 @@ mod tests {
             .expect("legacy unit group role probe should run");
 
         assert_eq!(roles, ("NONE".to_string(), -1));
+    }
+
+    #[test]
+    fn installs_unit_available_role_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let roles: (bool, bool, bool) = env
+            .eval(r#"return UnitGetAvailableRoles("player")"#)
+            .expect("legacy available role probe should run");
+
+        assert_eq!(roles, (true, true, true));
+    }
+
+    #[test]
+    fn preserves_existing_unit_available_role_function() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(r#"function UnitGetAvailableRoles() return false, true, false end"#)
+            .expect("fixture should install existing available role function");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("legacy LFG defaults should apply");
+        }
+
+        let roles: (bool, bool, bool) = env
+            .eval(r#"return UnitGetAvailableRoles("player")"#)
+            .expect("legacy available role preservation probe should run");
+
+        assert_eq!(roles, (false, true, false));
     }
 
     #[test]

@@ -182,6 +182,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "Rust vehicle possession state",
         ),
         (
+            "function UnitGetAvailableRoles",
+            "temporary legacy LFG workaround",
+        ),
+        (
             "function GetCurrentEnvironment",
             "temporary debug/environment workaround",
         ),
