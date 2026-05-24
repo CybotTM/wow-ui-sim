@@ -1846,12 +1846,6 @@ if IsInventoryItemProfessionBag == nil then
   end
 end
 
-if BNGetInfo == nil then
-  function BNGetInfo()
-    return nil
-  end
-end
-
 if GetLFGDeserterExpiration == nil then
   function GetLFGDeserterExpiration()
     return 0

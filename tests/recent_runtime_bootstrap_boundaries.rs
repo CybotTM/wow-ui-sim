@@ -209,6 +209,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function AbbreviateNumbers",
             "temporary formatting utility workaround",
         ),
+        ("function BNGetInfo", "temporary Battle.net account workaround"),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (
