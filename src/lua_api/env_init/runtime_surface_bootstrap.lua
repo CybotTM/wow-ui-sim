@@ -1102,18 +1102,6 @@ if LocalizedClassList == nil then
   end
 end
 
-if UnitName == nil then
-  function UnitName(unit)
-    return UnitNameUnmodified(unit)
-  end
-end
-
-if UnitGUID == nil then
-  function UnitGUID(unit)
-    return "Player-0-00000000-" .. tostring(unit or "player")
-  end
-end
-
 if UnitIsConnected == nil then
   function UnitIsConnected(_unit)
     return true
@@ -1142,15 +1130,6 @@ if UnitPosition == nil then
   end
 end
 
-if UnitLevel == nil then
-  function UnitLevel(unit)
-    if unit == "player" or unit == "pet" then
-      return GetMaxPlayerLevel and GetMaxPlayerLevel() or 80
-    end
-    return 1
-  end
-end
-
 if UnitEffectiveLevel == nil then
   function UnitEffectiveLevel(unit)
     return UnitLevel(unit)
@@ -1171,12 +1150,6 @@ end
 
 if UnitInPartyIsAI == nil then
   function UnitInPartyIsAI(_unit)
-    return false
-  end
-end
-
-if UnitAffectingCombat == nil then
-  function UnitAffectingCombat(_unit)
     return false
   end
 end

@@ -150,6 +150,13 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GetProfessionSkillLineID",
             "temporary trade-skill UI workaround",
         ),
+        ("function UnitName", "Rust unit query owner"),
+        ("function UnitGUID", "Rust unit metadata owner"),
+        ("function UnitLevel", "Rust unit query owner"),
+        (
+            "function UnitAffectingCombat",
+            "Rust unit combat owner",
+        ),
         (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
