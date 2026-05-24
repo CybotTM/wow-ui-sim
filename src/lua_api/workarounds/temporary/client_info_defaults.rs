@@ -65,6 +65,18 @@ if IsRestrictedAccount == nil then
   end
 end
 
+if IsVeteranTrialAccount == nil then
+  function IsVeteranTrialAccount()
+    return false
+  end
+end
+
+if IsAccountSecured == nil then
+  function IsAccountSecured()
+    return true
+  end
+end
+
 if IsMacClient == nil then
   function IsMacClient()
     return false
@@ -175,6 +187,7 @@ mod tests {
                 local isExpansionTrial, expansionTrialRemaining = GetExpansionTrialInfo()
                 if isExpansionTrial ~= false or expansionTrialRemaining ~= 0 then return "expansion_trial_info" end
                 if IsTrialAccount() ~= false or IsRestrictedAccount() ~= false then return "account_restrictions" end
+                if IsVeteranTrialAccount() ~= false or IsAccountSecured() ~= true then return "account_status" end
                 if IsMacClient() ~= false or IsWindowsClient() ~= false then return "platform" end
                 local primaryGraphicsApi, fallbackGraphicsApi = GetGraphicsAPIs()
                 if primaryGraphicsApi ~= "D3D12" or fallbackGraphicsApi ~= "D3D11" then return "graphics_api" end

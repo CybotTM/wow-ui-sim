@@ -210,6 +210,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary client-info workaround",
         ),
         (
+            "function IsVeteranTrialAccount",
+            "temporary client-info workaround",
+        ),
+        (
+            "function IsAccountSecured",
+            "temporary client-info workaround",
+        ),
+        (
             "function GetFileStreamingStatus",
             "temporary client-info workaround",
         ),

@@ -1857,18 +1857,6 @@ if SetMerchantFilter == nil then
   end
 end
 
-if IsVeteranTrialAccount == nil then
-  function IsVeteranTrialAccount()
-    return false
-  end
-end
-
-if IsAccountSecured == nil then
-  function IsAccountSecured()
-    return true
-  end
-end
-
 if AbbreviateNumbers == nil then
   function AbbreviateNumbers(value)
     return tostring(value or 0)
