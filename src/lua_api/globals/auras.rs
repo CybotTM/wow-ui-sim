@@ -34,6 +34,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, RustFn, Val};
 
 const AURA_DATA_HASH_FIELDS: usize = 23;
+const AURA_FILTER_COUNT: usize = 4;
 
 pub fn register_all(state: &mut LuaState) {
     let ns = ensure_c_unit_auras(state);
@@ -107,10 +108,12 @@ fn install_legacy_aura_globals(state: &mut LuaState) {
 
 fn install_aura_util_methods(state: &mut LuaState) {
     let aura_util = ensure_global_table(state, "AuraUtil");
+    ensure_aura_filters(state, aura_util);
     install_methods(
         state,
         aura_util,
         &[
+            ("CreateFilterString", aura_util_create_filter_string),
             ("UnpackAuraData", aura_util_unpack_aura_data),
             ("ForEachAura", aura_util_for_each_aura),
             ("FindAura", aura_util_find_aura),
@@ -121,6 +124,28 @@ fn install_aura_util_methods(state: &mut LuaState) {
             ),
         ],
     );
+}
+
+fn ensure_aura_filters(state: &mut LuaState, aura_util: Val) {
+    if matches!(table_get(state, aura_util, "AuraFilters"), Val::Table(_)) {
+        return;
+    }
+
+    let filters = create_table_with_capacity(state, AURA_FILTER_COUNT);
+    let helpful = create_string(state, "HELPFUL");
+    let harmful = create_string(state, "HARMFUL");
+    let raid = create_string(state, "RAID");
+    let include_nameplate_only = create_string(state, "INCLUDE_NAME_PLATE_ONLY");
+    table_set(state, filters, "Helpful", helpful);
+    table_set(state, filters, "Harmful", harmful);
+    table_set(state, filters, "Raid", raid);
+    table_set(
+        state,
+        filters,
+        "IncludeNameplateOnly",
+        include_nameplate_only,
+    );
+    table_set(state, aura_util, "AuraFilters", filters);
 }
 
 fn ensure_runtime_aura_state(state: &mut LuaState, ns: Val) {
@@ -469,6 +494,28 @@ fn unit_aura(state: &mut LuaState) -> LuaResult<u32> {
         .into_iter()
         .nth(index.saturating_sub(1) as usize);
     Ok(push_legacy_aura_result(state, aura.as_ref(), &unit))
+}
+
+fn aura_util_create_filter_string(state: &mut LuaState) -> LuaResult<u32> {
+    let args = state.top.saturating_sub(state.base);
+    let mut filters = Vec::new();
+
+    for index in 1..=args {
+        let Val::Str(value_ref) = stack_val(state, index as i32) else {
+            continue;
+        };
+        let Some(value) = state.gc.string_arena.get(value_ref) else {
+            continue;
+        };
+        if !value.data().is_empty() {
+            filters.push(value.data().to_vec());
+        }
+    }
+
+    let joined = filters.join(b"|".as_slice());
+    let lua_string = state.gc.intern_string(&joined);
+    state.push(Val::Str(lua_string));
+    Ok(1)
 }
 
 fn aura_util_unpack_aura_data(state: &mut LuaState) -> LuaResult<u32> {
