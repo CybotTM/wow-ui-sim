@@ -26,6 +26,8 @@ Settings = Settings or settings_surface_namespace({
     end,
 })
 
+EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
+
 do
     local settingsPanel = rawget(_G, "SettingsPanel")
     local categories = rawget(Settings, "_categories")
@@ -325,5 +327,15 @@ mod tests {
             .expect("Settings.GetCategory preservation probe should run");
 
         assert_eq!(value, "existing:KrowiTest");
+    }
+
+    #[test]
+    fn installs_edit_mode_account_settings_mixin_table() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let mixin_type: String = env
+            .eval(r#"return type(EditModeAccountSettingsMixin)"#)
+            .expect("EditMode account settings mixin probe should run");
+
+        assert_eq!(mixin_type, "table");
     }
 }

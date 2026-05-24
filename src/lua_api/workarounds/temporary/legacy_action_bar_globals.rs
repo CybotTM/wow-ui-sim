@@ -9,6 +9,8 @@ if ActionButtonUtil == nil then
   ActionButtonUtil = {}
 end
 
+BaseActionButtonMixin = BaseActionButtonMixin or {}
+
 local function __wow_legacy_action_bar_noop()
 end
 
@@ -209,6 +211,7 @@ mod tests {
                 r#"
                 local enum = ActionButtonUtil and ActionButtonUtil.ActionBarActionStatus
                 if not enum then return "missing_enum" end
+                if type(BaseActionButtonMixin) ~= "table" then return "missing_base_mixin" end
                 if enum.NotMissing ~= 1 or enum.MissingFromAllBars ~= 2 then return "bad_enum" end
                 if type(ActionButtonUtil.ActionBarButtonNames) ~= "table" then return "missing_names" end
                 if ActionButtonUtil.GetActionBarStatusForSpell(1) ~= enum.NotMissing then return "spell" end

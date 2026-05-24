@@ -648,9 +648,6 @@ end
 -- iterates the returned category / session / cooldown list with ipairs.
 -- None of these subsystems are simulated; return empty tables.
 
-EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
-BaseActionButtonMixin = BaseActionButtonMixin or {}
-
 if C_CharacterCreation == nil then
   C_CharacterCreation = __wow_namespace()
 end

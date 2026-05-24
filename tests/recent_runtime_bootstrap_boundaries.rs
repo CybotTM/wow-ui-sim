@@ -612,6 +612,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "TextureKitConstants =",
             "temporary shared XML utility workaround",
         ),
+        (
+            "EditModeAccountSettingsMixin =",
+            "temporary Settings/EditMode workaround",
+        ),
+        (
+            "BaseActionButtonMixin =",
+            "temporary legacy action-bar workaround",
+        ),
 ];
 
 #[test]
