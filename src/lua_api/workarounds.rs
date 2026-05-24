@@ -232,6 +232,7 @@ fn apply_feature_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::R
     temporary::callback_registry_defaults::apply_bootstrap(lua)?;
     temporary::macro_defaults::apply_bootstrap(lua)?;
     temporary::object_api_request_load_callbacks::apply_bootstrap(lua)?;
+    temporary::player_location_defaults::apply_bootstrap(lua)?;
     temporary::profession_specs_defaults::apply_bootstrap(lua)?;
     temporary::proxy_object_factories::apply_bootstrap(lua)?;
     temporary::seconds_formatter_defaults::apply_bootstrap(lua)?;

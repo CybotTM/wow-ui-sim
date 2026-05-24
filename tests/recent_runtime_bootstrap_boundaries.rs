@@ -185,6 +185,27 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function UnitGetAvailableRoles",
             "temporary legacy LFG workaround",
         ),
+        ("PlayerLocation = {}", "temporary PlayerLocation workaround"),
+        (
+            "function PlayerLocation:CreateFromGUID",
+            "temporary PlayerLocation workaround",
+        ),
+        (
+            "function PlayerLocation:CreateFromUnit",
+            "temporary PlayerLocation workaround",
+        ),
+        (
+            "function PlayerLocation:CreateFromCommunityChatData",
+            "temporary PlayerLocation workaround",
+        ),
+        (
+            "function PlayerLocation:CreateFromBattleNetID",
+            "temporary PlayerLocation workaround",
+        ),
+        (
+            "function PlayerLocation:CreateFromVoiceID",
+            "temporary PlayerLocation workaround",
+        ),
         (
             "function ChatFrameUtil.ProcessMessageEventFilters",
             "temporary chat-window workaround",
