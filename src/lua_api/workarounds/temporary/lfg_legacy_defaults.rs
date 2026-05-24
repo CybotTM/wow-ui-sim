@@ -7,6 +7,54 @@ const LFG_LEGACY_DEFAULTS_LUA: &str = r#"
 if GetLFGCategoryForID == nil then
     function GetLFGCategoryForID() return 0 end
 end
+
+local __wow_lfg_role_icons = {
+    GUIDE = "UI-LFG-RoleIcon-Leader",
+    TANK = "UI-LFG-RoleIcon-Tank",
+    HEALER = "UI-LFG-RoleIcon-Healer",
+    DAMAGER = "UI-LFG-RoleIcon-DPS",
+    NONE = "UI-LFG-RoleIcon-DPS",
+}
+
+local __wow_lfg_role_icons_disabled = {
+    GUIDE = "UI-LFG-RoleIcon-Leader-Disabled",
+    TANK = "UI-LFG-RoleIcon-Tank-Disabled",
+    HEALER = "UI-LFG-RoleIcon-Healer-Disabled",
+    DAMAGER = "UI-LFG-RoleIcon-DPS-Disabled",
+    NONE = "UI-LFG-RoleIcon-DPS-Disabled",
+}
+
+if GetIconForRole == nil then
+    function GetIconForRole(role, showDisabled)
+        local iconSet = showDisabled and __wow_lfg_role_icons_disabled or __wow_lfg_role_icons
+        return iconSet[role] or iconSet.NONE
+    end
+end
+
+local function __wow_lfg_role_name_from_enum(role)
+    if role == 0 then
+        return "TANK"
+    end
+    if role == 1 then
+        return "HEALER"
+    end
+    if role == 2 then
+        return "DAMAGER"
+    end
+    if Constants ~= nil
+        and Constants.LFG_ROLEConstants ~= nil
+        and role == Constants.LFG_ROLEConstants.LFG_ROLE_NO_ROLE then
+        return "GUIDE"
+    end
+    return "NONE"
+end
+
+if GetIconForRoleEnum == nil then
+    function GetIconForRoleEnum(role, showDisabled)
+        return GetIconForRole(__wow_lfg_role_name_from_enum(role), showDisabled)
+    end
+end
+
 if rawget(C_LFGInfo or {}, "CanPlayerUseGroupFinder") == nil then
     C_LFGInfo = C_LFGInfo or __wow_namespace()
     function C_LFGInfo.CanPlayerUseGroupFinder()
@@ -76,6 +124,52 @@ mod tests {
             .expect("legacy LFG category probe should run");
 
         assert_eq!(category_id, 0);
+    }
+
+    #[test]
+    fn installs_lfg_role_icon_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let icons: (String, String, String, String, String) = env
+            .eval(
+                r#"
+                return GetIconForRole("TANK", false),
+                       GetIconForRole("HEALER", true),
+                       GetIconForRoleEnum(Enum.LFGRole.Damage, false),
+                       GetIconForRoleEnum(Constants.LFG_ROLEConstants.LFG_ROLE_NO_ROLE, false),
+                       GetIconForRoleEnum(999, true)
+                "#,
+            )
+            .expect("legacy LFG role icon probe should run");
+
+        assert_eq!(
+            icons,
+            (
+                "UI-LFG-RoleIcon-Tank".to_string(),
+                "UI-LFG-RoleIcon-Healer-Disabled".to_string(),
+                "UI-LFG-RoleIcon-DPS".to_string(),
+                "UI-LFG-RoleIcon-Leader".to_string(),
+                "UI-LFG-RoleIcon-DPS-Disabled".to_string(),
+            )
+        );
+    }
+
+    #[test]
+    fn preserves_existing_lfg_role_icon_function() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec("function GetIconForRole() return 'existing' end")
+            .expect("fixture should install existing LFG icon function");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("legacy LFG defaults should apply");
+        }
+
+        let icon: String = env
+            .eval("return GetIconForRole('TANK', false)")
+            .expect("legacy LFG icon preservation probe should run");
+
+        assert_eq!(icon, "existing");
     }
 
     #[test]

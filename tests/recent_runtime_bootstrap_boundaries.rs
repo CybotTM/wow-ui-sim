@@ -133,6 +133,14 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "temporary map runtime workaround",
         ),
         (
+            "function GetIconForRole",
+            "temporary legacy LFG workaround",
+        ),
+        (
+            "function GetIconForRoleEnum",
+            "temporary legacy LFG workaround",
+        ),
+        (
             "function GetCurrentEnvironment",
             "temporary debug/environment workaround",
         ),
