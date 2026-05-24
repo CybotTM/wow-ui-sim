@@ -1076,26 +1076,6 @@ if SetGamePadCursorControl == nil then
   end
 end
 
-if LocalizedClassList == nil then
-  function LocalizedClassList(_female)
-    return {
-      WARRIOR = "Warrior",
-      PALADIN = "Paladin",
-      HUNTER = "Hunter",
-      ROGUE = "Rogue",
-      PRIEST = "Priest",
-      DEATHKNIGHT = "Death Knight",
-      SHAMAN = "Shaman",
-      MAGE = "Mage",
-      WARLOCK = "Warlock",
-      MONK = "Monk",
-      DRUID = "Druid",
-      DEMONHUNTER = "Demon Hunter",
-      EVOKER = "Evoker",
-    }
-  end
-end
-
 if UnitPosition == nil then
   function UnitPosition(_unit)
     return 0, 0, 0, 0

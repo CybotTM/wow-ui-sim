@@ -13,7 +13,7 @@
 use crate::lua_api::game_data::{CLASS_LABELS, class_info_by_index};
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_string_static,
+    borrow_state, borrow_state_mut, create_string, create_string_static, create_table, table_set,
 };
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -113,6 +113,19 @@ fn get_class_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(3)
 }
 
+fn localized_class_list(state: &mut LuaState) -> LuaResult<u32> {
+    let classes = create_table(state);
+    for (class_file, class_name) in crate::lua_api::game_data::CLASS_FILES
+        .iter()
+        .zip(CLASS_LABELS.iter())
+    {
+        let value = create_string_static(state, class_name);
+        table_set(state, classes, class_file, value);
+    }
+    state.push(classes);
+    Ok(1)
+}
+
 fn get_shapeshift_form_id(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Nil);
     Ok(1)
@@ -126,6 +139,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "SetCurrentTitle", set_current_title)?;
     LuaApiMut::register_function(lua, "GetNumClasses", get_num_classes)?;
     LuaApiMut::register_function(lua, "GetClassInfo", get_class_info)?;
+    LuaApiMut::register_function(lua, "LocalizedClassList", localized_class_list)?;
     LuaApiMut::register_function(lua, "GetShapeshiftFormID", get_shapeshift_form_id)?;
     Ok(())
 }
