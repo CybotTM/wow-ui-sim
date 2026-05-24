@@ -1590,11 +1590,6 @@ if CloseAllWindows == nil then
   end
 end
 
-if AddTooltipDataAccessor == nil then
-  function AddTooltipDataAccessor()
-  end
-end
-
 if GetScreenWidth == nil then
   function GetScreenWidth()
     return 1024
@@ -1782,12 +1777,6 @@ if GetInventoryItemTexture == nil then
     return nil
   end
 end
-
-TooltipDataProcessor = TooltipDataProcessor or __wow_namespace({
-  AllTypes = 0,
-  AddTooltipPostCall = __wow_noop,
-  AddLinePostCall = __wow_noop,
-})
 
 UIWidgetManager = UIWidgetManager or __wow_namespace({
   RegisterWidgetVisTypeTemplate = __wow_noop,

@@ -241,6 +241,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function SetItemButtonNormalTextureVertexColor",
             "temporary item-button helper workaround",
         ),
+        (
+            "TooltipDataProcessor",
+            "temporary tooltip data processor workaround",
+        ),
+        (
+            "function AddTooltipDataAccessor",
+            "temporary tooltip data processor workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (
