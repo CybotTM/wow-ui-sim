@@ -143,6 +143,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "Rust screen-size runtime owner",
         ),
         (
+            "function GetNumLanguages",
+            "temporary inert language workaround",
+        ),
+        (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
         ),

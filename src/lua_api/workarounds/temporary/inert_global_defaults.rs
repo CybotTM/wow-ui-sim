@@ -20,6 +20,17 @@ end
 if GetAlternativeDefaultLanguage == nil then
     function GetAlternativeDefaultLanguage() return nil end
 end
+if GetNumLanguages == nil then
+    function GetNumLanguages() return 1 end
+end
+if GetLanguageByIndex == nil then
+    function GetLanguageByIndex(index)
+        if index == 1 then
+            return GetDefaultLanguage()
+        end
+        return nil
+    end
+end
 if GetMaxBattlefieldID == nil then
     function GetMaxBattlefieldID() return 0 end
 end
@@ -241,6 +252,10 @@ mod tests {
                 local languageName, languageID = GetDefaultLanguage()
                 if languageName ~= "Common" or languageID ~= 1 then return "language" end
                 if GetAlternativeDefaultLanguage() ~= nil then return "alt_language" end
+                if GetNumLanguages() ~= 1 then return "num_languages" end
+                local indexedLanguageName, indexedLanguageID = GetLanguageByIndex(1)
+                if indexedLanguageName ~= "Common" or indexedLanguageID ~= 1 then return "indexed_language" end
+                if GetLanguageByIndex(2) ~= nil then return "missing_indexed_language" end
                 if GetMaxBattlefieldID() ~= 0 then return "battlefield_id" end
                 if IsActiveBattlefieldArena() ~= false then return "battlefield_arena" end
                 if IsPVPTimerRunning() ~= false then return "pvp_timer" end
@@ -291,6 +306,12 @@ mod tests {
             function IsPlayerInWorld() return false end
             function GetCurrentRegionName() return "EU" end
             function GetAlternativeDefaultLanguage() return "Orcish", 2 end
+            function GetNumLanguages() return 2 end
+            function GetLanguageByIndex(index)
+                if index == 1 then return "Common", 1 end
+                if index == 2 then return "Orcish", 2 end
+                return nil
+            end
             function IsPVPTimerRunning() return true end
             function HasArtifactEquipped() return true end
             C_SocialRestrictions.IsChatDisabled = function() return true end
@@ -317,6 +338,9 @@ mod tests {
                 if GetCurrentRegionName() ~= "EU" then return "overwrote_global" end
                 local altLanguageName, altLanguageID = GetAlternativeDefaultLanguage()
                 if altLanguageName ~= "Orcish" or altLanguageID ~= 2 then return "overwrote_alt_language" end
+                if GetNumLanguages() ~= 2 then return "overwrote_num_languages" end
+                local indexedLanguageName, indexedLanguageID = GetLanguageByIndex(2)
+                if indexedLanguageName ~= "Orcish" or indexedLanguageID ~= 2 then return "overwrote_indexed_language" end
                 if IsPVPTimerRunning() ~= true then return "overwrote_pvp_timer" end
                 if HasArtifactEquipped() ~= true then return "overwrote_artifact" end
                 if C_SocialRestrictions.IsChatDisabled() ~= true then return "overwrote_namespace_member" end

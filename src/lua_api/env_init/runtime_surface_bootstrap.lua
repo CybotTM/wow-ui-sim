@@ -1108,12 +1108,6 @@ if LocalizedClassList == nil then
   end
 end
 
-if GetNumLanguages == nil then
-  function GetNumLanguages()
-    return 0
-  end
-end
-
 if UnitName == nil then
   function UnitName(unit)
     return UnitNameUnmodified(unit)
