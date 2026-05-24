@@ -74,6 +74,7 @@ pub(crate) mod perks_activities_state;
 pub(crate) mod player_location_defaults;
 pub(crate) mod player_spells_onload_backfill;
 pub(crate) mod pool_constructor_defaults;
+pub(crate) mod possess_info_defaults;
 pub(crate) mod post_event_action_button_refresh;
 pub(crate) mod post_event_frame_layout;
 pub(crate) mod private_aura_state;

@@ -1854,12 +1854,6 @@ if StoreSecureReference == nil then
   end
 end
 
-if GetPossessInfo == nil then
-  function GetPossessInfo(_index)
-    return nil, nil, false
-  end
-end
-
 if IsInJailersTower == nil then
   function IsInJailersTower()
     return false

@@ -215,6 +215,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary legacy LFG workaround",
         ),
         ("function UnitStagger", "temporary unit stagger workaround"),
+        ("function GetPossessInfo", "temporary possess info workaround"),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (
