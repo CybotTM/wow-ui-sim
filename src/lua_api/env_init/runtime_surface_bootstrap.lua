@@ -1783,63 +1783,6 @@ if GetInventoryItemTexture == nil then
   end
 end
 
-if SetItemButtonTexture == nil then
-  function SetItemButtonTexture(button, texture)
-    if type(button) ~= "table" then
-      return
-    end
-    local icon = button.icon or button.Icon
-    if icon ~= nil and type(icon.SetTexture) == "function" then
-      icon:SetTexture(texture)
-      if texture ~= nil and type(icon.Show) == "function" then
-        icon:Show()
-      end
-    end
-  end
-end
-
-if SetItemButtonCount == nil then
-  function SetItemButtonCount(button, count)
-    if type(button) ~= "table" then
-      return
-    end
-    local countText = button.Count
-    if countText ~= nil and type(countText.SetText) == "function" then
-      if count == nil or count == 0 then
-        countText:SetText("")
-      else
-        countText:SetText(tostring(count))
-      end
-    end
-  end
-end
-
-if SetItemButtonTextureVertexColor == nil then
-  function SetItemButtonTextureVertexColor(button, r, g, b)
-    if type(button) ~= "table" then
-      return
-    end
-    local icon = button.icon or button.Icon
-    if icon ~= nil and type(icon.SetVertexColor) == "function" then
-      icon:SetVertexColor(r or 1, g or 1, b or 1)
-    end
-  end
-end
-
-if SetItemButtonNormalTextureVertexColor == nil then
-  function SetItemButtonNormalTextureVertexColor(button, r, g, b)
-    if type(button) ~= "table" then
-      return
-    end
-    local normalTexture = button.NormalTexture or button.normalTexture
-    if normalTexture ~= nil and type(normalTexture.SetVertexColor) == "function" then
-      normalTexture:SetVertexColor(r or 1, g or 1, b or 1)
-      return
-    end
-    SetItemButtonTextureVertexColor(button, r, g, b)
-  end
-end
-
 TooltipDataProcessor = TooltipDataProcessor or __wow_namespace({
   AllTypes = 0,
   AddTooltipPostCall = __wow_noop,

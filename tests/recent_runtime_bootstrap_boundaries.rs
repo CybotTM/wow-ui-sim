@@ -225,6 +225,22 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function IsInventoryItemProfessionBag",
             "temporary inventory query workaround",
         ),
+        (
+            "function SetItemButtonTexture",
+            "temporary item-button helper workaround",
+        ),
+        (
+            "function SetItemButtonCount",
+            "temporary item-button helper workaround",
+        ),
+        (
+            "function SetItemButtonTextureVertexColor",
+            "temporary item-button helper workaround",
+        ),
+        (
+            "function SetItemButtonNormalTextureVertexColor",
+            "temporary item-button helper workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (

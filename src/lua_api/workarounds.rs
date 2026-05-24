@@ -238,6 +238,7 @@ fn apply_core_dispatcher_and_format_defaults(lua: &mut rilua::Lua) -> crate::Res
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::inert_global_defaults::apply_bootstrap(lua)?;
     temporary::inventory_query_defaults::apply_bootstrap(lua)?;
+    temporary::item_button_helper_defaults::apply_bootstrap(lua)?;
     temporary::weapon_enchant_defaults::apply_bootstrap(lua)?;
     Ok(())
 }
