@@ -1789,12 +1789,6 @@ TooltipDataProcessor = TooltipDataProcessor or __wow_namespace({
   AddLinePostCall = __wow_noop,
 })
 
-EventRegistry = EventRegistry or __wow_namespace({
-  RegisterCallback = __wow_noop,
-  TriggerEvent = __wow_noop,
-  RegisterFrameEventAndCallback = __wow_noop,
-})
-
 UIWidgetManager = UIWidgetManager or __wow_namespace({
   RegisterWidgetVisTypeTemplate = __wow_noop,
 })

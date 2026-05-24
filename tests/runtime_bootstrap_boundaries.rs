@@ -213,6 +213,10 @@ fn callback_registry_defaults_are_not_runtime_bootstrap_fallbacks() {
         !bootstrap.contains("CVarCallbackRegistry"),
         "CVarCallbackRegistry defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
     );
+    assert!(
+        !bootstrap.contains("EventRegistry"),
+        "EventRegistry defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
+    );
 }
 
 #[test]
