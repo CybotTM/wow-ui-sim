@@ -5,6 +5,7 @@
 //! All flags live on `state.player`:
 //!
 //! - `UnitHasVehicleUI(unit)`         → `player.has_vehicle_ui`
+//! - `UnitHasVehiclePlayerFrameUI(unit)` → `player.has_vehicle_ui`
 //! - `UnitControllingVehicle(unit)`   → `player.controlling_vehicle`
 //! - `UnitOnTaxi(unit)`               → `player.on_taxi`
 //! - `UnitVehicleSkin(unit)`          → `player.vehicle_skin` (`""` when none)
@@ -45,6 +46,12 @@ where
 /// `UnitHasVehicleUI(unit)` — true when the override action bar is currently
 /// shown. Only `"player"` is modeled.
 fn unit_has_vehicle_ui(state: &mut LuaState) -> LuaResult<u32> {
+    push_player_flag(state, |sim| sim.player.has_vehicle_ui)
+}
+
+/// `UnitHasVehiclePlayerFrameUI(unit)` — true when PlayerFrame should swap to
+/// vehicle art. Only `"player"` is modeled.
+fn unit_has_vehicle_player_frame_ui(state: &mut LuaState) -> LuaResult<u32> {
     push_player_flag(state, |sim| sim.player.has_vehicle_ui)
 }
 
@@ -120,6 +127,11 @@ fn taxi_request_early_landing(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UnitHasVehicleUI", unit_has_vehicle_ui)?;
+    LuaApiMut::register_function(
+        lua,
+        "UnitHasVehiclePlayerFrameUI",
+        unit_has_vehicle_player_frame_ui,
+    )?;
     LuaApiMut::register_function(lua, "UnitControllingVehicle", unit_controlling_vehicle)?;
     LuaApiMut::register_function(lua, "UnitOnTaxi", unit_on_taxi)?;
     LuaApiMut::register_function(lua, "UnitVehicleSkin", unit_vehicle_skin)?;

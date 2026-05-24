@@ -140,7 +140,6 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "UnitIsPVPSanctioned",
     "UnitIsQuestBoss",
     "UnitIsTapDenied",
-    "UnitHasVehiclePlayerFrameUI",
     "UnitLeadsAnyGroup",
     "UnitPVPName",
     "UnitPlayerControlled",

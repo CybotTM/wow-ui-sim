@@ -39,16 +39,6 @@ fn stub_zero_returns_zero() {
 }
 
 #[test]
-fn unit_has_vehicle_player_frame_ui_returns_false() {
-    let env = make_env();
-    let result: (String, bool) = env
-        .eval(r#"return type(UnitHasVehiclePlayerFrameUI), UnitHasVehiclePlayerFrameUI("player")"#)
-        .unwrap();
-
-    assert_eq!(result, ("function".to_string(), false));
-}
-
-#[test]
 fn stub_empty_table_returns_table() {
     let env = make_env();
     env.register_rilua_function("__test_stub_empty_table", stub_empty_table)

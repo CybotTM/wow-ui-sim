@@ -25,6 +25,31 @@ fn unit_has_vehicle_ui_returns_false_for_non_player() {
 }
 
 #[test]
+fn unit_has_vehicle_player_frame_ui_reads_player_flag() {
+    let env = WowLuaEnv::new().expect("env");
+    let before: bool = env
+        .eval("return UnitHasVehiclePlayerFrameUI('player')")
+        .unwrap();
+    assert!(!before);
+
+    env.state().borrow_mut().player.has_vehicle_ui = true;
+    let after: bool = env
+        .eval("return UnitHasVehiclePlayerFrameUI('player')")
+        .unwrap();
+    assert!(after);
+}
+
+#[test]
+fn unit_has_vehicle_player_frame_ui_returns_false_for_non_player() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().player.has_vehicle_ui = true;
+    let target: bool = env
+        .eval("return UnitHasVehiclePlayerFrameUI('target')")
+        .unwrap();
+    assert!(!target);
+}
+
+#[test]
 fn unit_controlling_vehicle_reads_player_flag() {
     let env = WowLuaEnv::new().expect("env");
     env.state().borrow_mut().player.controlling_vehicle = true;
