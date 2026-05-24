@@ -507,6 +507,19 @@ fn request_load_callbacks_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
+fn quest_objective_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+
+    for fallback in ["GetTasksTable", "SpellCanTargetQuest", "GetNumAutoQuestPopUps", "GetAutoQuestPopUp"] {
+        let owner = "temporary quest objective workaround";
+        assert!(
+            !bootstrap.contains(&format!("function {fallback}")),
+            "{fallback} must live in the explicit {owner} boundary, not runtime bootstrap"
+        );
+    }
+}
+
+#[test]
 fn tail_inert_globals_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 

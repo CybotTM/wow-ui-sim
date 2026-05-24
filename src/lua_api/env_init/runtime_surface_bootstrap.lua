@@ -1028,29 +1028,6 @@ if CombatLogGetCurrentEntry == nil then
   end
 end
 
--- Bonus / world-quest objective trackers iterate the task list at startup.
--- Return an empty table so the `for ... in ipairs(tasksTable)` loops no-op.
-if GetTasksTable == nil then
-  function GetTasksTable()
-    return {}
-  end
-end
-
-if SpellCanTargetQuest == nil then
-  function SpellCanTargetQuest()
-    return false
-  end
-end
-
--- Auto quest popups (tutorial toasts). Not simulated; `for i = 1, N do`
--- loops in AutoQuestPopUpTracker iterate zero times.
-if GetNumAutoQuestPopUps == nil then
-  function GetNumAutoQuestPopUps() return 0 end
-end
-if GetAutoQuestPopUp == nil then
-  function GetAutoQuestPopUp(_index) return nil, nil end
-end
-
 -- AccountStore / DamageMeter / CooldownViewer: Blizzard data-provider init
 -- iterates the returned category / session / cooldown list with ipairs.
 -- None of these subsystems are simulated; return empty tables.
