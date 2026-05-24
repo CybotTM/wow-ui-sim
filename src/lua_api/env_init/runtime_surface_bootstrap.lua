@@ -366,31 +366,6 @@ do
   end
 end
 
-ChatFrameUtil = ChatFrameUtil or {}
-if ChatFrameUtil.ProcessMessageEventFilters == nil then
-  function ChatFrameUtil.ProcessMessageEventFilters(_frame, event, ...)
-    return false, event, ...
-  end
-end
-if ChatFrameUtil.GetChatWindowName == nil then
-  function ChatFrameUtil.GetChatWindowName(index)
-    return string.format("Chat Window %d", tonumber(index) or 1)
-  end
-end
-if ChatFrameUtil.GetCommunitiesChannelColor == nil then
-  function ChatFrameUtil.GetCommunitiesChannelColor(_clubId, streamId)
-    if tonumber(streamId) == 2 then
-      return 0.25, 0.75, 0.25
-    end
-    return 0.25, 1, 0.25
-  end
-end
-if ChatFrameUtil.GetCommunitiesChannelLocalID == nil then
-  function ChatFrameUtil.GetCommunitiesChannelLocalID(_clubId, _streamId)
-    return nil
-  end
-end
-
 ChatTypeGroup = ChatTypeGroup or {
   SYSTEM = { "SYSTEM", "ERRORS", "IGNORED", "ACHIEVEMENT", "CHANNEL_NOTICE_USER" },
   SAY = { "SAY" },
@@ -548,18 +523,6 @@ do
   LootFrame = LootFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "LootFrame", uiParent))
   GossipFrame = GossipFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "GossipFrame", uiParent))
   FriendsFrame = FriendsFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "FriendsFrame", uiParent))
-end
-
-if GetChannelName == nil then
-  function GetChannelName(channel)
-    if type(channel) == "number" then
-      return 0, nil, 0, false
-    end
-    if type(channel) == "string" then
-      return 0, channel, 0, false
-    end
-    return 0, nil, 0, false
-  end
 end
 
 if GetActionInfo == nil then
@@ -5296,32 +5259,6 @@ local function __wow_register_chat_frame_globals()
     }
   end
 
-  if ChatFrameUtil == nil then
-    ChatFrameUtil = {}
-  end
-  if ChatFrameUtil.ProcessMessageEventFilters == nil then
-    function ChatFrameUtil.ProcessMessageEventFilters(_frame, event, ...)
-      return false, event, ...
-    end
-  end
-  if ChatFrameUtil.GetChatWindowName == nil then
-    function ChatFrameUtil.GetChatWindowName(id)
-      return "Chat Window " .. tostring(id or 1)
-    end
-  end
-  if ChatFrameUtil.GetCommunitiesChannelColor == nil then
-    function ChatFrameUtil.GetCommunitiesChannelColor(_clubId, streamId)
-      if tonumber(streamId) == 2 then
-        return 0.25, 0.75, 0.25
-      end
-      return 0.25, 1, 0.25
-    end
-  end
-  if ChatFrameUtil.GetCommunitiesChannelLocalID == nil then
-    function ChatFrameUtil.GetCommunitiesChannelLocalID(_clubId, _streamId)
-      return nil
-    end
-  end
 end
 
 local function __wow_register_catalog_shop_inbound_globals()

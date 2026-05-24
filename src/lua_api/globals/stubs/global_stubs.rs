@@ -166,7 +166,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetGossipNumOptions / GetGossipNumAvailableQuests /
     // GetGossipNumActiveQuests are SimState-backed in gossip_probes.rs,
     // not stubs.
-    "GetChannelName",
+    // GetChannelName is SimState-backed in channel_verbs.rs, not a stub.
     "GetCameraZoom",
     "GetGuildBankTabCost",
     "GetGuildBankTabInfo",

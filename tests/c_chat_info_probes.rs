@@ -34,13 +34,14 @@ fn chat_info_temporary_defaults_are_available() {
 #[test]
 fn chat_info_state_backed_channel_methods_still_win() {
     let env = env();
-    let (count, shortcut, general_id): (i32, String, i32) = env
+    let (count, shortcut, general_id, channel_id, channel_name): (i32, String, i32, i32, String) = env
         .eval(
             r#"
             JoinChannelByName("General")
             return C_ChatInfo.GetNumActiveChannels(),
                 C_ChatInfo.GetChannelShortcut(1),
-                C_ChatInfo.GetGeneralChannelLocalID()
+                C_ChatInfo.GetGeneralChannelLocalID(),
+                GetChannelName("General")
             "#,
         )
         .expect("C_ChatInfo state-backed channel methods should remain active");
@@ -48,4 +49,6 @@ fn chat_info_state_backed_channel_methods_still_win() {
     assert_eq!(count, 1);
     assert_eq!(shortcut, "1");
     assert_eq!(general_id, 1);
+    assert_eq!(channel_id, 1);
+    assert_eq!(channel_name, "General");
 }

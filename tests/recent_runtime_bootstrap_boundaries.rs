@@ -186,6 +186,23 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary legacy LFG workaround",
         ),
         (
+            "function ChatFrameUtil.ProcessMessageEventFilters",
+            "temporary chat-window workaround",
+        ),
+        (
+            "function ChatFrameUtil.GetChatWindowName",
+            "temporary chat-window workaround",
+        ),
+        (
+            "function ChatFrameUtil.GetCommunitiesChannelColor",
+            "temporary chat-window workaround",
+        ),
+        (
+            "function ChatFrameUtil.GetCommunitiesChannelLocalID",
+            "temporary chat-window workaround",
+        ),
+        ("function GetChannelName", "Rust channel state surface"),
+        (
             "function GetCurrentEnvironment",
             "temporary debug/environment workaround",
         ),
