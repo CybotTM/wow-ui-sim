@@ -225,6 +225,12 @@ if AbbreviateLargeNumbers == nil then
     return tostring(math.floor(tonumber(value) or 0))
   end
 end
+
+if AbbreviateNumbers == nil then
+  function AbbreviateNumbers(value)
+    return tostring(value or 0)
+  end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -267,6 +273,7 @@ mod tests {
                 if ConsoleGetFontHeight() ~= 18 then return "console_font" end
                 if type(ConsoleGetColorFromType(0).GetRGB) ~= "function" then return "console_color" end
                 if AbbreviateLargeNumbers(123.9) ~= "123" then return "abbrev" end
+                if AbbreviateNumbers(456.7) ~= "456.7" then return "abbrev_numbers" end
                 return "ok"
                 "#,
             )

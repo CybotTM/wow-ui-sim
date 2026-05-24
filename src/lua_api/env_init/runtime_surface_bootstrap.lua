@@ -1846,12 +1846,6 @@ if IsInventoryItemProfessionBag == nil then
   end
 end
 
-if AbbreviateNumbers == nil then
-  function AbbreviateNumbers(value)
-    return tostring(value or 0)
-  end
-end
-
 if BNGetInfo == nil then
   function BNGetInfo()
     return nil
