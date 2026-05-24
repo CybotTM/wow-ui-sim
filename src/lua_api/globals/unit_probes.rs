@@ -20,8 +20,14 @@
 //! | `mouseover` / `pet` /  | no sim state → false                                 |
 //! | `npcN`, etc.           |                                                      |
 //!
-//! Caller-visible signature: `UnitIsPlayer(unit: string) -> boolean`. Returns
-//! `false` for non-string args (matches WoW's "nil → false" behaviour).
+//! Caller-visible signatures:
+//!
+//! - `UnitIsPlayer(unit: string) -> boolean`
+//! - `UnitIsHumanPlayer(unit: string) -> boolean`
+//!
+//! Returns `false` for non-string args (matches WoW's "nil → false"
+//! behaviour). The sim does not model non-human player controllers yet, so
+//! `UnitIsHumanPlayer` follows the same token resolution as `UnitIsPlayer`.
 
 use crate::lua_api::methods::borrow_state;
 use crate::lua_api::state::SimState;
@@ -30,6 +36,14 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub fn unit_is_player(state: &mut LuaState) -> LuaResult<u32> {
+    push_unit_is_player(state)
+}
+
+pub fn unit_is_human_player(state: &mut LuaState) -> LuaResult<u32> {
+    push_unit_is_player(state)
+}
+
+fn push_unit_is_player(state: &mut LuaState) -> LuaResult<u32> {
     let unit = match crate::lua_bridge::stack_val(state, 1) {
         Val::Str(s) => {
             let arena = &state.gc.string_arena;
@@ -89,6 +103,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
     table_set_rust_fn_static(state, state.global, "UnitIsPlayer", unit_is_player)?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "UnitIsHumanPlayer",
+        unit_is_human_player,
+    )?;
     Ok(())
 }
 

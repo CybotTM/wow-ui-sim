@@ -261,6 +261,20 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function CombatLog_Object_IsA",
             "temporary combat-log state workaround",
         ),
+        ("function UnitIsHumanPlayer", "Rust unit probe owner"),
+        ("function IsTargetLoose", "Rust targeting owner"),
+        (
+            "LE_TOKEN_REDEEM_TYPE_GAME_TIME",
+            "enum missing-constants surface",
+        ),
+        (
+            "LE_TOKEN_REDEEM_TYPE_BALANCE",
+            "enum missing-constants surface",
+        ),
+        (
+            "LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP",
+            "enum missing-constants surface",
+        ),
         ("AuraUtil.AuraFilters", "Rust aura owner"),
         ("AuraUtil.CreateFilterString", "Rust aura owner"),
         ("AuraUtil.UnpackAuraData", "Rust aura owner"),

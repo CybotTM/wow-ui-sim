@@ -11,6 +11,7 @@
 //! | `AssistUnit`         | `PLAYER_TARGET_CHANGED`    |
 //! | `ClearTarget`        | `PLAYER_TARGET_CHANGED`    |
 //! | `ClearFocus`         | `PLAYER_FOCUS_CHANGED`     |
+//! | `IsTargetLoose`      | none (query only)          |
 //! | `CanBeRaidTarget`    | none (query only)          |
 //! | `GetRaidTargetIndex` | none (query only)          |
 //! | `SetRaidTarget`      | `RAID_TARGET_UPDATE`       |
@@ -288,6 +289,12 @@ pub fn clear_focus(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `IsTargetLoose()` — false until the sim models soft/loose targeting.
+pub fn is_target_loose(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(rilua::Val::Bool(false));
+    Ok(1)
+}
+
 /// `CanBeRaidTarget(unit)` — true when the token resolves to a live unit.
 pub fn can_be_raid_target(state: &mut LuaState) -> LuaResult<u32> {
     let token = match Option::<String>::from_stack(state, 1)? {
@@ -449,6 +456,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     table_set_rust_fn_static(state, g, "AssistUnit", assist_unit)?;
     table_set_rust_fn_static(state, g, "ClearTarget", clear_target)?;
     table_set_rust_fn_static(state, g, "ClearFocus", clear_focus)?;
+    table_set_rust_fn_static(state, g, "IsTargetLoose", is_target_loose)?;
     table_set_rust_fn_static(state, g, "CanBeRaidTarget", can_be_raid_target)?;
     table_set_rust_fn_static(state, g, "GetRaidTargetIndex", get_raid_target_index)?;
     table_set_rust_fn_static(state, g, "SetRaidTarget", set_raid_target)?;

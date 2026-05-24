@@ -517,25 +517,11 @@ end
 -- A_Admin.SetStoreFrameShown(true) to exercise MainMenuBarMicroButtons'
 -- pushed-state rendering for the Store micro-button.
 
--- UnitIsPlayer is registered from Rust (src/lua_api/globals/rilua_unit_probes.rs).
+-- UnitIsPlayer / UnitIsHumanPlayer are registered from Rust
+-- (src/lua_api/globals/unit_probes.rs).
 -- It resolves tokens against SimState: "player"/"self" always true, "target"/
 -- "focus" read the respective TargetInfo.is_player flag, "partyN" (N=1..4)
 -- checks sim.party_members[N-1] is populated, everything else false.
-
-if UnitIsHumanPlayer == nil then
-  function UnitIsHumanPlayer(unit)
-    if UnitIsPlayer ~= nil then
-      return UnitIsPlayer(unit)
-    end
-    return false
-  end
-end
-
-if IsTargetLoose == nil then
-  function IsTargetLoose()
-    return false
-  end
-end
 
 if SetPortraitTexture == nil then
   function SetPortraitTexture(texture, unit, _disablePortraitMask)
@@ -575,18 +561,6 @@ if SetPortraitTextureFromCreatureDisplayID == nil then
   end
 end
 
-
-if LE_TOKEN_REDEEM_TYPE_GAME_TIME == nil then
-  LE_TOKEN_REDEEM_TYPE_GAME_TIME = 1
-end
-
-if LE_TOKEN_REDEEM_TYPE_BALANCE == nil then
-  LE_TOKEN_REDEEM_TYPE_BALANCE = 2
-end
-
-if LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP == nil then
-  LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP = 10
-end
 
 if issecure == nil then
   function issecure()
