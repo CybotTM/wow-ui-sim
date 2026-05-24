@@ -707,41 +707,33 @@ fn achievement_category_queries_are_not_runtime_bootstrap_fallbacks() {
 }
 
 #[test]
-fn reload_ui_is_not_runtime_bootstrap_fallback() {
+fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 
-    assert!(
-        !bootstrap.contains("function ReloadUI"),
-        "ReloadUI must be registered by the Rust event API, not runtime bootstrap"
-    );
-}
-
-#[test]
-fn inert_world_defaults_are_not_runtime_bootstrap_fallbacks() {
-    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
-
-    for symbol in [
-        "HasArtifactEquipped",
-        "IsPVPTimerRunning",
-        "GetAlternativeDefaultLanguage",
+    for (needle, owner) in [
+        ("function ReloadUI", "Rust event API"),
+        ("HasArtifactEquipped", "temporary inert-global workaround"),
+        ("IsPVPTimerRunning", "temporary inert-global workaround"),
+        (
+            "GetAlternativeDefaultLanguage",
+            "temporary inert-global workaround",
+        ),
+        ("UI_SPECIAL_FRAMES", "Rust global table surface"),
+        ("UISpecialFrames =", "Rust global table surface"),
+        ("StaticPopup_Show", "temporary StaticPopup workaround"),
+        ("StaticPopup_Hide", "temporary StaticPopup workaround"),
+        (
+            "StaticPopup_AddShowCondition",
+            "temporary StaticPopup workaround",
+        ),
+        (
+            "StaticPopupDialogs = StaticPopupDialogs or {}",
+            "Rust global table surface",
+        ),
     ] {
         assert!(
-            !bootstrap.contains(&format!("function {symbol}")),
-            "{symbol} fallback must live in the explicit temporary inert-global workaround boundary"
+            !bootstrap.contains(needle),
+            "{needle} fallback must live in the explicit {owner}, not runtime bootstrap"
         );
     }
-}
-
-#[test]
-fn special_frame_tables_are_not_runtime_bootstrap_fallbacks() {
-    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
-
-    assert!(
-        !bootstrap.contains("UI_SPECIAL_FRAMES"),
-        "UI_SPECIAL_FRAMES must be seeded by the Rust global table surface, not runtime bootstrap"
-    );
-    assert!(
-        !bootstrap.contains("UISpecialFrames ="),
-        "UISpecialFrames must be seeded by the Rust global table surface, not runtime bootstrap"
-    );
 }

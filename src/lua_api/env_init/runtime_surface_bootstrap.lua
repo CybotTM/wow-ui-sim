@@ -3,17 +3,6 @@ end
 
 local __wow_clock_start = os.clock and os.clock() or 0
 
-if StaticPopup_Hide == nil then
-  function StaticPopup_Hide(_which, _data)
-  end
-end
-
-if StaticPopup_Show == nil then
-  function StaticPopup_Show(_which, _text_arg1, _text_arg2, _data)
-    return nil
-  end
-end
-
 local function __wow_dispatcher_invoke_callback(callbackData, ...)
   local callback = callbackData and callbackData.Callback
   if type(callback) == "function" then
@@ -2369,13 +2358,6 @@ if LocalizedClassList == nil then
       DEMONHUNTER = "Demon Hunter",
       EVOKER = "Evoker",
     }
-  end
-end
-
-StaticPopupDialogs = StaticPopupDialogs or {}
-
-if StaticPopup_AddShowCondition == nil then
-  function StaticPopup_AddShowCondition()
   end
 end
 
