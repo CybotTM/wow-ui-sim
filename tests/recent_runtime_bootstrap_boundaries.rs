@@ -112,6 +112,26 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "function __wow_apply_chat_voice_button_surface",
             "temporary chat voice button workaround",
         ),
+        (
+            "function C_Map.GetBestMapForUnit",
+            "temporary map runtime workaround",
+        ),
+        (
+            "function C_Map.GetFallbackWorldMapID",
+            "temporary map runtime workaround",
+        ),
+        (
+            "function C_Map.MapHasArt",
+            "temporary map runtime workaround",
+        ),
+        (
+            "function MapUtil.GetDisplayableMapForPlayer",
+            "temporary map runtime workaround",
+        ),
+        (
+            "function MapUtil.IsShadowlandsZoneMap",
+            "temporary map runtime workaround",
+        ),
     ] {
         assert!(
             !bootstrap.contains(needle),
