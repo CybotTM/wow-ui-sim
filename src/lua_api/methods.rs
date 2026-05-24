@@ -20,8 +20,10 @@ use rilua::{LuaResult, Val, runtime_error};
 use std::cell::{Ref, RefMut};
 use std::rc::Rc;
 
+mod frame_fields;
 mod frame_metatable;
 mod hot_static_literals;
+pub use frame_fields::{get_existing_frame_fields, get_or_create_frame_fields};
 use frame_metatable::frame_metatable_for_widget_type;
 
 /// Extract the frame ID (u64) from a Lua argument (a backed table).
@@ -131,41 +133,6 @@ pub fn extract_frame_id(state: &LuaState, val: Val) -> Option<u64> {
     };
     let (lo, hi) = state.gc.tables.get(table_ref)?.backing()?;
     Some(pack_id(lo, hi))
-}
-
-/// Get or create the per-frame fields table in the `__rilua_frame_fields`
-/// registry entry.
-pub fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
-    let fields_registry = registry_table_or_create(state, "__rilua_frame_fields");
-    let Val::Table(fields_reg_ref) = fields_registry else {
-        return Val::Nil;
-    };
-
-    let existing = state
-        .gc
-        .tables
-        .get(fields_reg_ref)
-        .map(|t| {
-            let int_val = t.get_int(frame_id as i64);
-            if int_val != Val::Nil {
-                int_val
-            } else {
-                t.get(Val::Num(frame_id as f64), &state.gc.string_arena)
-            }
-        })
-        .unwrap_or(Val::Nil);
-    let fields = if let Val::Table(_) = existing {
-        existing
-    } else {
-        let created = Val::Table(state.gc.alloc_table(Table::with_sizes(0, 4)));
-        if let Some(reg) = state.gc.tables.get_mut(fields_reg_ref) {
-            let _ = reg.raw_set(Val::Num(frame_id as f64), created, &state.gc.string_arena);
-        }
-        state.gc.barrier_back(fields_reg_ref);
-        created
-    };
-
-    fields
 }
 
 pub(crate) fn get_frame_env_for_debug(state: &mut LuaState) -> LuaResult<u32> {
@@ -283,7 +250,7 @@ fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>, id: u64
 }
 
 /// Get a numeric-keyed value from a table.
-fn table_get_num(state: &LuaState, table: GcRef<Table>, key: f64) -> Val {
+pub(super) fn table_get_num(state: &LuaState, table: GcRef<Table>, key: f64) -> Val {
     state
         .gc
         .tables

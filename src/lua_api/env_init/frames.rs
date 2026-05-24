@@ -4,7 +4,7 @@ use crate::lua_api::frame::methods::{
     button_anchor_hierarchy, core_state, map_frames, misc, text_attribute_event, widgets,
 };
 use crate::lua_api::methods::{
-    borrow_state_mut, extract_frame_id, get_frame_env_for_debug, get_or_create_frame_fields,
+    borrow_state_mut, extract_frame_id, get_existing_frame_fields, get_frame_env_for_debug,
     registry_set, table_set_static, val_to_string,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -85,7 +85,7 @@ fn frame_newindex(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u3
     };
 
     assign_frame_table_field(state, table_ref, key_val, value);
-    assign_frame_fields_value(state, parent_id, key_val, value);
+    assign_existing_frame_fields_value(state, parent_id, key_val, value);
 
     let Some(key) = string_key(state, key_val) else {
         return Ok(0);
@@ -112,13 +112,13 @@ fn assign_frame_table_field(
 }
 
 #[cfg_attr(feature = "rehash-stats", track_caller)]
-fn assign_frame_fields_value(
+fn assign_existing_frame_fields_value(
     state: &mut rilua::vm::state::LuaState,
     frame_id: u64,
     key_val: Val,
     value: Val,
 ) {
-    let fields = get_or_create_frame_fields(state, frame_id);
+    let fields = get_existing_frame_fields(state, frame_id);
     let Val::Table(fields_ref) = fields else {
         return;
     };

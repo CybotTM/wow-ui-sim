@@ -26,6 +26,31 @@ fn test_frame_debug_env_does_not_change_table_length() {
 }
 
 #[test]
+fn test_frame_debug_env_snapshots_existing_newindex_fields() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (String, f64, String, f64, f64) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "TestFrameDebugEnvSnapshot", UIParent)
+            frame.beforeEnv = "before"
+            frame.count = 1
+            local fields = debug.getfenv(frame)[1]
+            frame.afterEnv = "after"
+            frame.count = 2
+            return fields.beforeEnv, fields.count, fields.afterEnv, frame.count, rawget(frame, "count")
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(result.0, "before");
+    assert_eq!(result.1, 1.0);
+    assert_eq!(result.2, "after");
+    assert_eq!(result.3, 2.0);
+    assert_eq!(result.4, 2.0);
+}
+
+#[test]
 fn test_widget_misc_group_timer_method_surface_is_registered() {
     let env = WowLuaEnv::new().unwrap();
     let missing_method: Option<String> = env
