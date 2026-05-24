@@ -258,3 +258,10 @@ fn test_movement_states_are_independent() {
     assert!(!falling);
     assert!(!swimming);
 }
+
+#[test]
+fn unit_position_defaults_to_origin_until_world_coordinates_are_modeled() {
+    let env = env();
+    let position: (f64, f64, f64, f64) = env.eval(r#"return UnitPosition("player")"#).unwrap();
+    assert_eq!(position, (0.0, 0.0, 0.0, 0.0));
+}

@@ -1076,12 +1076,6 @@ if SetGamePadCursorControl == nil then
   end
 end
 
-if UnitPosition == nil then
-  function UnitPosition(_unit)
-    return 0, 0, 0, 0
-  end
-end
-
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 BaseActionButtonMixin = BaseActionButtonMixin or {}
 

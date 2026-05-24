@@ -9,6 +9,7 @@
 //! - `IsSwimming()`     — `player.movement.swimming`
 
 use crate::lua_api::methods::borrow_state;
+use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -78,6 +79,15 @@ fn is_outdoors(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn unit_position(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(4)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsPlayerMoving", is_player_moving)?;
     LuaApiMut::register_function(lua, "IsMounted", is_mounted)?;
@@ -90,5 +100,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsDrivableArea", is_drivable_area)?;
     LuaApiMut::register_function(lua, "IsIndoors", is_indoors)?;
     LuaApiMut::register_function(lua, "IsOutdoors", is_outdoors)?;
+    LuaApiMut::register_function(lua, "UnitPosition", unit_position)?;
     Ok(())
 }

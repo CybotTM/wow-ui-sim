@@ -188,6 +188,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GetUnitTotalModifiedMaxHealthPercent",
             "Rust unit stats owner",
         ),
+        ("function UnitPosition", "Rust movement/map-position owner"),
         ("function UnitIsPossessed", "Rust unit relationship owner"),
         ("LE_REALM_RELATION_SAME", "Rust unit relationship owner"),
         (
