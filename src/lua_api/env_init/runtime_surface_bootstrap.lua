@@ -1846,14 +1846,6 @@ if IsInventoryItemProfessionBag == nil then
   end
 end
 
-if StoreSecureReference == nil then
-  function StoreSecureReference(name, value)
-    if type(name) == "string" then
-      rawset(_G, name, value)
-    end
-  end
-end
-
 if IsInJailersTower == nil then
   function IsInJailersTower()
     return false

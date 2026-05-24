@@ -156,26 +156,48 @@ pub(crate) fn apply_temporary_bootstrap(lua: &mut rilua::Lua) -> crate::Result<(
 }
 
 fn apply_temporary_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    apply_runtime_state_bootstrap(lua)?;
+    apply_account_and_social_state_bootstrap(lua)?;
+    apply_player_state_bootstrap(lua)?;
+    apply_secure_and_store_state_bootstrap(lua)?;
+    apply_unit_state_bootstrap(lua)?;
+    temporary::uiparent_onupdate_worklists::apply_bootstrap(lua)?;
+    temporary::video_options_state::apply_bootstrap(lua)
+}
+
+fn apply_runtime_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::event_scheduler_state::apply_bootstrap(lua)?;
-    temporary::battle_net_account_defaults::apply_bootstrap(lua)?;
     temporary::combat_log_state::apply_bootstrap(lua)?;
     temporary::damage_meter_state::apply_bootstrap(lua)?;
     temporary::encounter_state::apply_bootstrap(lua)?;
     temporary::housing_catalog_state::apply_bootstrap(lua)?;
     temporary::map_runtime_state::apply_bootstrap(lua)?;
-    temporary::merchant_filter_state::apply_bootstrap(lua)?;
     temporary::perks_activities_state::apply_bootstrap(lua)?;
+    temporary::private_aura_state::apply_bootstrap(lua)?;
+    temporary::reputation_state::apply_bootstrap(lua)
+}
+
+fn apply_account_and_social_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    temporary::battle_net_account_defaults::apply_bootstrap(lua)?;
+    temporary::merchant_filter_state::apply_bootstrap(lua)
+}
+
+fn apply_player_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::player_spells_onload_backfill::apply_bootstrap(lua)?;
     temporary::possess_info_defaults::apply_bootstrap(lua)?;
-    temporary::private_aura_state::apply_bootstrap(lua)?;
-    temporary::reputation_state::apply_bootstrap(lua)?;
+    Ok(())
+}
+
+fn apply_secure_and_store_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    temporary::secure_reference_defaults::apply_bootstrap(lua)?;
     temporary::secure_transfer_state::apply_bootstrap(lua)?;
-    temporary::store_glue_state::apply_bootstrap(lua)?;
+    temporary::store_glue_state::apply_bootstrap(lua)
+}
+
+fn apply_unit_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::unit_auras_state::apply_bootstrap(lua)?;
     temporary::unit_stagger_defaults::apply_bootstrap(lua)?;
-    temporary::unit_threat_defaults::apply_bootstrap(lua)?;
-    temporary::uiparent_onupdate_worklists::apply_bootstrap(lua)?;
-    temporary::video_options_state::apply_bootstrap(lua)
+    temporary::unit_threat_defaults::apply_bootstrap(lua)
 }
 
 fn apply_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
