@@ -578,12 +578,6 @@ if IsTargetLoose == nil then
   end
 end
 
-if UnitThreatSituation == nil then
-  function UnitThreatSituation(_unit, _other_unit)
-    return 0
-  end
-end
-
 if UnitDetailedThreatSituation == nil then
   function UnitDetailedThreatSituation(_unit, _other_unit)
     return false, 0, 0, 0, 0
