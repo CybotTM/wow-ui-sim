@@ -283,6 +283,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function SetPortraitTextureFromCreatureDisplayID",
             "temporary portrait texture workaround",
         ),
+        ("function issecure", "rilua taint runtime"),
         ("AuraUtil.AuraFilters", "Rust aura owner"),
         ("AuraUtil.CreateFilterString", "Rust aura owner"),
         ("AuraUtil.UnpackAuraData", "Rust aura owner"),

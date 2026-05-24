@@ -523,12 +523,6 @@ end
 -- "focus" read the respective TargetInfo.is_player flag, "partyN" (N=1..4)
 -- checks sim.party_members[N-1] is populated, everything else false.
 
-if issecure == nil then
-  function issecure()
-    return not (debug and debug.getstacktaint and debug.getstacktaint())
-  end
-end
-
 local __wow_namespace_names = setmetatable({}, { __mode = "k" })
 local __wow_logged_nil_symbols = {}
 local __wow_namespace_mt = {
