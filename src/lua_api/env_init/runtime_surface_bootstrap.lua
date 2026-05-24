@@ -1778,10 +1778,6 @@ if GetInventoryItemTexture == nil then
   end
 end
 
-UIWidgetManager = UIWidgetManager or __wow_namespace({
-  RegisterWidgetVisTypeTemplate = __wow_noop,
-})
-
 Settings = Settings or __wow_namespace({
   GetOrCreateSettingsGroup = function()
     return __wow_namespace({

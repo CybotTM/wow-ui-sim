@@ -249,6 +249,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function AddTooltipDataAccessor",
             "temporary tooltip data processor workaround",
         ),
+        (
+            "UIWidgetManager = UIWidgetManager",
+            "temporary UI widget manager workaround",
+        ),
+        (
+            "RegisterWidgetVisTypeTemplate = __wow_noop",
+            "temporary UI widget manager workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (
