@@ -4,7 +4,7 @@
 //! startup Lua, but they are still shallow compatibility defaults rather than a
 //! modeled formatting subsystem.
 
-const FORMATTING_UTILITY_DEFAULTS_LUA: &str = r#"
+const FORMATTING_UTILITY_DEFAULTS_LUA: &str = r##"
 if GetText == nil then
   function GetText(token)
     if type(token) ~= "string" then
@@ -59,6 +59,63 @@ if CalculateStringEditDistance == nil then
     end
 
     return previousRow[secondLen]
+  end
+end
+
+if strsplittable == nil then
+  function strsplittable(delimiter, input, limit)
+    return { strsplit(delimiter, input, limit) }
+  end
+end
+
+if MergeTable == nil then
+  function MergeTable(dest, src)
+    if type(dest) ~= "table" or type(src) ~= "table" then
+      return dest
+    end
+    for key, value in pairs(src) do
+      dest[key] = value
+    end
+    return dest
+  end
+end
+
+if tFilter == nil then
+  function tFilter(t, predicate)
+    if type(t) ~= "table" or type(predicate) ~= "function" then
+      return t
+    end
+    local out = 1
+    local len = #t
+    for i = 1, len do
+      local value = t[i]
+      if value ~= nil and predicate(value, i, t) then
+        if out ~= i then
+          t[out] = value
+        end
+        out = out + 1
+      end
+    end
+    for i = out, len do
+      t[i] = nil
+    end
+    return t
+  end
+end
+
+if mapvalues == nil then
+  function mapvalues(fn, ...)
+    local count = select("#", ...)
+    if count == 0 then
+      return
+    end
+
+    local values = {}
+    for index = 1, count do
+      values[index] = fn(select(index, ...))
+    end
+
+    return unpack(values, 1, count)
   end
 end
 
@@ -231,7 +288,7 @@ if AbbreviateNumbers == nil then
     return tostring(value or 0)
   end
 end
-"#;
+"##;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(FORMATTING_UTILITY_DEFAULTS_LUA)?;
@@ -256,6 +313,14 @@ mod tests {
                 if BACK ~= "Back" or NEXT ~= "Next" or PREVIEW ~= "Preview" then return "text_defaults" end
                 if BreakUpLargeNumbers(12345) ~= "12345" then return "breakup" end
                 if CalculateStringEditDistance("kitten", "sitting") ~= 3 then return "edit_distance" end
+                local split = strsplittable(",", "a,b")
+                if split[1] ~= "a" or split[2] ~= "b" then return "strsplittable" end
+                local merged = MergeTable({ a = 1 }, { b = 2 })
+                if merged.a ~= 1 or merged.b ~= 2 then return "merge_table" end
+                local filtered = tFilter({ 1, 2, 3, 4 }, function(value) return value % 2 == 0 end)
+                if #filtered ~= 2 or filtered[1] ~= 2 or filtered[2] ~= 4 then return "tfilter" end
+                local firstMapped, secondMapped = mapvalues(function(value) return value * 2 end, 2, 3)
+                if firstMapped ~= 4 or secondMapped ~= 6 then return "mapvalues" end
                 local first, second = ("a,b,c"):split(",")
                 if first ~= "a" or second ~= "b" then return "split_method" end
                 local appended = tAppendAll({ "a" }, { "b", "c" })

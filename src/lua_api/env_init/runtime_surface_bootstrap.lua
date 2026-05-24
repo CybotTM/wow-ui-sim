@@ -195,47 +195,6 @@ if min == nil and math ~= nil then min = math.min end
 if strlen == nil and string ~= nil then strlen = string.len end
 if sort == nil and table ~= nil then sort = table.sort end
 
-if strsplittable == nil then
-  function strsplittable(delimiter, input, limit)
-    return { strsplit(delimiter, input, limit) }
-  end
-end
-
-if MergeTable == nil then
-  function MergeTable(dest, src)
-    if type(dest) ~= "table" or type(src) ~= "table" then
-      return dest
-    end
-    for key, value in pairs(src) do
-      dest[key] = value
-    end
-    return dest
-  end
-end
-
-if tFilter == nil then
-  function tFilter(t, predicate)
-    if type(t) ~= "table" or type(predicate) ~= "function" then
-      return t
-    end
-    local out = 1
-    local len = #t
-    for i = 1, len do
-      local value = t[i]
-      if value ~= nil and predicate(value, i, t) then
-        if out ~= i then
-          t[out] = value
-        end
-        out = out + 1
-      end
-    end
-    for i = out, len do
-      t[i] = nil
-    end
-    return t
-  end
-end
-
 local function __wow_ensure_item_button_surface(button)
   if type(button) ~= "table" then
     return button
@@ -632,22 +591,6 @@ end
 if issecure == nil then
   function issecure()
     return not (debug and debug.getstacktaint and debug.getstacktaint())
-  end
-end
-
-if mapvalues == nil then
-  function mapvalues(fn, ...)
-    local count = select("#", ...)
-    if count == 0 then
-      return
-    end
-
-    local values = {}
-    for index = 1, count do
-      values[index] = fn(select(index, ...))
-    end
-
-    return unpack(values, 1, count)
   end
 end
 
