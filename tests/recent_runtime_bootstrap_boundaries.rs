@@ -132,6 +132,26 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "function MapUtil.IsShadowlandsZoneMap",
             "temporary map runtime workaround",
         ),
+        (
+            "function GetCurrentEnvironment",
+            "temporary debug/environment workaround",
+        ),
+        (
+            "function SwapToGlobalEnvironment",
+            "temporary debug/environment workaround",
+        ),
+        (
+            "function CreateSecureDelegate",
+            "temporary debug/environment workaround",
+        ),
+        (
+            "function secureexecuterange",
+            "temporary secureexecuterange workaround",
+        ),
+        (
+            "function debug.getfenv",
+            "temporary debug/environment workaround",
+        ),
     ] {
         assert!(
             !bootstrap.contains(needle),

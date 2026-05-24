@@ -279,11 +279,11 @@ fn blizzard_environment_cleanup_secure_namespaces_get_restored_post_load() {
 fn blizzard_environment_cleanup_create_secure_delegate_gets_restored_post_load() {
     // EnvironmentCleanup.lua nils a list of secure-factory helpers (CreateForbiddenFrame line
     // 4, SecureMixin / CreateFromSecureMixins / CreateSecureDelegate / CreateSecureMixinCopy
-    // lines 275-278, loadstring_untainted line 279, secretunwrap line 280). Of those, only
-    // `CreateSecureDelegate` is currently provided by the simulator's bootstrap
-    // (shared_bootstrap.lua:1170), so the per-addon `patch_environment_cleanup` hook
-    // (src/loader/addon.rs:169) is what makes it reachable again after the cleanup pass.
-    // The other six helpers are simulator gaps — never seeded, so their nilling is a no-op.
+    // lines 275-278, loadstring_untainted line 279, secretunwrap line 280). Of those,
+    // `CreateSecureDelegate` is provided by the simulator's temporary debug/environment
+    // workaround and `loadstring_untainted` is provided by the taint bootstrap. Capture the
+    // current restored surface here so EnvironmentCleanup does not silently remove simulator
+    // glue that downstream secure/restricted code depends on.
     let env = load_full_game_ui();
 
     let create_secure_delegate_restored: bool = env
@@ -292,26 +292,34 @@ fn blizzard_environment_cleanup_create_secure_delegate_gets_restored_post_load()
     assert!(
         create_secure_delegate_restored,
         "After Blizzard_EnvironmentCleanup loads, `patch_environment_cleanup` (src/loader/\
-         addon.rs:169) must restore CreateSecureDelegate via shared_bootstrap.lua:1170 — \
+         addon.rs:169) must restore CreateSecureDelegate via the temporary debug/environment workaround — \
          simulator-side glue that wraps insecure functions as secure delegates depends on it"
     );
 
-    let unseeded_helpers_remain_nil: (bool, bool, bool, bool, bool, bool) = env
+    let loadstring_untainted_restored: bool = env
+        .eval("return type(loadstring_untainted) == 'function'")
+        .expect("loadstring_untainted probe should succeed");
+    assert!(
+        loadstring_untainted_restored,
+        "After Blizzard_EnvironmentCleanup loads, loadstring_untainted must still expose the \
+         original untainted compiler function for restricted execution helpers"
+    );
+
+    let unseeded_helpers_remain_nil: (bool, bool, bool, bool, bool) = env
         .eval(
             "return CreateForbiddenFrame == nil, \
                     SecureMixin == nil, \
                     CreateFromSecureMixins == nil, \
                     CreateSecureMixinCopy == nil, \
-                    loadstring_untainted == nil, \
                     secretunwrap == nil",
         )
         .expect("unseeded-helper probe should succeed");
     assert_eq!(
         unseeded_helpers_remain_nil,
-        (true, true, true, true, true, true),
+        (true, true, true, true, true),
         "Simulator does not seed CreateForbiddenFrame / SecureMixin / CreateFromSecureMixins / \
-         CreateSecureMixinCopy / loadstring_untainted / secretunwrap (no entries in \
-         runtime_surface_bootstrap.lua / shared_bootstrap.lua), so EnvironmentCleanup.lua's \
+         CreateSecureMixinCopy / secretunwrap (no entries in \
+         runtime_surface_bootstrap.lua / shared_bootstrap.lua / temporary workarounds), so EnvironmentCleanup.lua's \
          nil assignments are effectively a no-op and the post-load restoration leaves them \
          nil. If any becomes non-nil, somebody added a simulator stub and this test should \
          flip to verify the restoration path covers it"

@@ -77,6 +77,7 @@ pub(crate) mod proxy_object_factories;
 pub(crate) mod quest_log_mixin;
 pub(crate) mod reputation_state;
 pub(crate) mod seconds_formatter_defaults;
+pub(crate) mod secure_execute_range;
 pub(crate) mod secure_transfer_state;
 pub(crate) mod settings_canvas_visibility;
 pub(crate) mod shared_xml_anim_mixins;

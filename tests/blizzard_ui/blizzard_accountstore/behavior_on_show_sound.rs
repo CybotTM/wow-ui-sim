@@ -219,7 +219,7 @@ fn on_show_fires_account_store_shown_state_event_registry_with_true_payload() {
              body errored before reaching the trigger line — but the only line above is \
              `PlaySound(SOUNDKIT.ACCOUNT_STORE_OPEN)`, which is a PCALL-style fire-and-forget, \
              (b) `EventRegistry:TriggerEvent` did not dispatch the callback (a regression in \
-             secureexecuterange's Lua fallback at `runtime_surface_bootstrap.lua` — rilua's C \
+             secureexecuterange's temporary Lua workaround — rilua's C \
              impl is a no-op stub), or (c) the callback was registered against a different \
              event name (a regression in `EventRegistry:RegisterCallback`'s string-keying). A \
              count > 1 means the trigger fired multiple times (worth investigating because it \

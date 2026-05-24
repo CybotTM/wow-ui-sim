@@ -195,6 +195,7 @@ fn apply_core_foundation_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::container_portrait_texture::apply_bootstrap(lua)?;
     temporary::debug_environment_defaults::apply_bootstrap(lua)?;
     temporary::difficulty_pvp_util_defaults::apply_bootstrap(lua)?;
+    temporary::secure_execute_range::apply_bootstrap(lua)?;
     apply_core_dispatcher_and_format_defaults(lua)
 }
 

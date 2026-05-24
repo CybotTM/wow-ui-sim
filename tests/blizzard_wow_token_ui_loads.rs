@@ -348,7 +348,7 @@ fn inbound_bridge_functions_publish_into_secure_environment() {
             "{fn_name} must publish in `__secureenv` as a function — \
              Blizzard_WowTokenUIInbound.lua calls `SwapToGlobalEnvironment()` at line 2 \
              intending to switch fenv back to `_G`, but the simulator's \
-             SwapToGlobalEnvironment stub at shared_bootstrap.lua:1163-1167 just returns _G \
+             SwapToGlobalEnvironment temporary debug/environment workaround just returns _G \
              without actually setfenv'ing — it's a no-op. The lua_file loader wired the \
              whole addon's fenv to `__secureenv` via mark_secure_state at \
              src/loader/lua_file.rs:58, so file-scope function declarations end up there. \
