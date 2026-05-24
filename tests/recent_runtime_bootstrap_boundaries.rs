@@ -74,6 +74,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GetCharacterListGroupsInfo",
             "temporary glue character-select workaround",
         ),
+        (
+            "function CanAutoSetGamePadCursorControl",
+            "temporary gamepad cursor-control workaround",
+        ),
+        (
+            "function SetGamePadCursorControl",
+            "temporary gamepad cursor-control workaround",
+        ),
         ("ChatTypeInfo =", "temporary chat-window workaround"),
         ("function GetChatTypeIndex", "temporary chat-window workaround"),
         ("function GetChatWindowInfo", "temporary chat-window workaround"),

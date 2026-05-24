@@ -1032,17 +1032,6 @@ end
 -- iterates the returned category / session / cooldown list with ipairs.
 -- None of these subsystems are simulated; return empty tables.
 
-if CanAutoSetGamePadCursorControl == nil then
-  function CanAutoSetGamePadCursorControl(_enabled)
-    return false
-  end
-end
-
-if SetGamePadCursorControl == nil then
-  function SetGamePadCursorControl(_enabled)
-  end
-end
-
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 BaseActionButtonMixin = BaseActionButtonMixin or {}
 
