@@ -525,12 +525,6 @@ do
   FriendsFrame = FriendsFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "FriendsFrame", uiParent))
 end
 
-if GetActionInfo == nil then
-  function GetActionInfo()
-    return nil, nil, nil
-  end
-end
-
 -- GetInventorySlotInfo is registered from Rust
 -- (src/lua_api/globals/inventory_slot.rs). Returns the canonical
 -- (slotId, textureFileID, checkRelic) triple; case-insensitive on the

@@ -185,6 +185,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function UnitGetAvailableRoles",
             "temporary legacy LFG workaround",
         ),
+        ("function GetActionInfo", "Rust action slot state surface"),
         ("PlayerLocation = {}", "temporary PlayerLocation workaround"),
         (
             "function PlayerLocation:CreateFromGUID",
