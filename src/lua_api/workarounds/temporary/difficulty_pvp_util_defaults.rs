@@ -130,6 +130,12 @@ if GetDungeonDifficultyID == nil then
         return DifficultyUtil.ID.DungeonNormal
     end
 end
+if GetDifficultyInfo == nil then
+    function GetDifficultyInfo(difficultyID)
+        return DifficultyUtil.GetDifficultyName(difficultyID) or PLAYER_DIFFICULTY1 or "Normal",
+            0, false, false, false, false
+    end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -163,6 +169,12 @@ mod tests {
                 if DifficultyUtil.GetMaxPlayers(DifficultyUtil.ID.DungeonNormal) ~= 5 then return "dungeon_players" end
                 if DifficultyUtil.GetMaxPlayers(DifficultyUtil.ID.Raid25Heroic) ~= 25 then return "raid_players" end
                 if GetDungeonDifficultyID() ~= DifficultyUtil.ID.DungeonNormal then return "current_dungeon_difficulty" end
+                local difficultyName, instanceType, isHeroic, isChallengeMode, displayHeroic, displayMythic =
+                    GetDifficultyInfo(DifficultyUtil.ID.DungeonHeroic)
+                if difficultyName ~= "Heroic" then return "difficulty_info_name" end
+                if instanceType ~= 0 then return "difficulty_info_instance_type" end
+                if isHeroic ~= false or isChallengeMode ~= false then return "difficulty_info_flags" end
+                if displayHeroic ~= false or displayMythic ~= false then return "difficulty_info_display" end
 
                 if PVPUtil.GetTierName(1) ~= "" then return "tier_name" end
                 if PVPUtil.GetTierDescription(1) ~= "" then return "tier_description" end

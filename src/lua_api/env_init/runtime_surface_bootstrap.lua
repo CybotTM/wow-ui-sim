@@ -1126,12 +1126,6 @@ if GetUnitTotalModifiedMaxHealthPercent == nil then
   end
 end
 
-if GetDifficultyInfo == nil then
-  function GetDifficultyInfo(_difficultyID)
-    return "Normal", 0, false, false, false, false
-  end
-end
-
 if GetReleaseTimeRemaining == nil then
   function GetReleaseTimeRemaining()
     return 0
