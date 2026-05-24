@@ -1032,15 +1032,6 @@ end
 -- iterates the returned category / session / cooldown list with ipairs.
 -- None of these subsystems are simulated; return empty tables.
 
-if GetQuestResetTime == nil then
-  function GetQuestResetTime()
-    if C_DateAndTime and type(C_DateAndTime.GetSecondsUntilDailyReset) == "function" then
-      return C_DateAndTime.GetSecondsUntilDailyReset()
-    end
-    return 86400
-  end
-end
-
 if GetChatTypeIndex == nil then
   function GetChatTypeIndex()
     return 1

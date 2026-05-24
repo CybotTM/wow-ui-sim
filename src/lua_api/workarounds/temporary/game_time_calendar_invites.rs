@@ -42,6 +42,15 @@ if GameTime_GetTime == nil then
         return "12:00"
     end
 end
+
+if GetQuestResetTime == nil then
+    function GetQuestResetTime()
+        if C_DateAndTime and type(C_DateAndTime.GetSecondsUntilDailyReset) == "function" then
+            return C_DateAndTime.GetSecondsUntilDailyReset()
+        end
+        return 86400
+    end
+end
 "#;
 
 const GAME_TIME_CALENDAR_INVITES_LUA: &str = r#"
@@ -97,6 +106,7 @@ mod tests {
                 r#"
                 local hour, minute = GetGameTime()
                 if hour ~= 12 or minute ~= 0 then return "clock" end
+                if GetQuestResetTime() ~= C_DateAndTime.GetSecondsUntilDailyReset() then return "quest_reset" end
                 if type(time) ~= "function" then return "time_missing" end
                 local value = time({ year = "2024", month = "1", day = "2", hour = "3", min = "4", sec = "5" })
                 if type(value) ~= "number" then return "time_value" end

@@ -180,6 +180,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ),
         ("function GetTotemInfo", "temporary totem defaults workaround"),
         (
+            "function GetQuestResetTime",
+            "temporary GameTime/calendar workaround",
+        ),
+        (
             "function GetDifficultyInfo",
             "temporary difficulty/PVP utility workaround",
         ),
