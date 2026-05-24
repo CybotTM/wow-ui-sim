@@ -270,6 +270,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GetInventoryItemTexture",
             "Rust inventory probe surface",
         ),
+        (
+            "function GetNumArenaOpponentSpecs",
+            "temporary inert global workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (

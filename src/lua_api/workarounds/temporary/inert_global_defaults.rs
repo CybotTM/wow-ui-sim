@@ -161,6 +161,11 @@ if GetNumArenaOpponents == nil then
         return 0
     end
 end
+if GetNumArenaOpponentSpecs == nil then
+    function GetNumArenaOpponentSpecs()
+        return 0
+    end
+end
 
 if GetItemLevelColor == nil then
     function GetItemLevelColor()
@@ -269,6 +274,7 @@ mod tests {
                 if #GetSpellConfirmationPromptsInfo() ~= 0 then return "spell_prompts" end
                 if #GetActiveLootRollIDs() ~= 0 then return "loot_rolls" end
                 if GetNumArenaOpponents() ~= 0 then return "arena" end
+                if GetNumArenaOpponentSpecs() ~= 0 then return "arena_specs" end
                 return "ok"
                 "#,
             )
@@ -294,6 +300,7 @@ mod tests {
             function BNGetNumFriends() return 5, 4, 3, 2 end
             function Ambiguate() return "Existing" end
             function WorldLootObjectExists() return true end
+            function GetNumArenaOpponentSpecs() return 3 end
             "#,
         )
         .expect("fixture should install existing members");
@@ -326,6 +333,7 @@ mod tests {
                 if type(ClearCursorHoveredItem) ~= "function" then return "missing_cursor_hover_default" end
                 if UnitInSubgroup("player") ~= false then return "bad_player_subgroup_default" end
                 if GetNumGuildPerks() ~= 0 then return "bad_guild_perks_default" end
+                if GetNumArenaOpponentSpecs() ~= 3 then return "overwrote_arena_specs" end
                 return "ok"
                 "#,
             )

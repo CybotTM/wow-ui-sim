@@ -629,12 +629,6 @@ if LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP == nil then
   LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP = 10
 end
 
-if GetNumArenaOpponentSpecs == nil then
-  function GetNumArenaOpponentSpecs()
-    return 0
-  end
-end
-
 if GetErrorCallstackHeight == nil then
   function GetErrorCallstackHeight()
     return 0
