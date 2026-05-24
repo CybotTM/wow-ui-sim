@@ -166,6 +166,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ),
         ("function GetShapeshiftForm", "Rust shapeshift owner"),
         (
+            "function GetMaxPlayerLevel",
+            "temporary client-info workaround",
+        ),
+        (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
         ),

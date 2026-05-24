@@ -1118,12 +1118,6 @@ if UnitPosition == nil then
   end
 end
 
-if GetMaxPlayerLevel == nil then
-  function GetMaxPlayerLevel()
-    return 80
-  end
-end
-
 if PlayerHasToy == nil then
   function PlayerHasToy(itemID)
     return C_ToyBox ~= nil and C_ToyBox.GetToyInfo ~= nil and C_ToyBox.GetToyInfo(itemID) ~= nil

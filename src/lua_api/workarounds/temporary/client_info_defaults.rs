@@ -112,6 +112,12 @@ if GetAccountExpansionLevel == nil then
   end
 end
 
+if GetMaxPlayerLevel == nil then
+  function GetMaxPlayerLevel()
+    return 80
+  end
+end
+
 if GetMaxLevelForExpansionLevel == nil then
   function GetMaxLevelForExpansionLevel(_expansion_level)
     return GetMaxPlayerLevel()
@@ -194,6 +200,7 @@ mod tests {
                 if not pcall(RequestTimePlayed) then return "time_played" end
                 if GetClientDisplayExpansionLevel() ~= 10 then return "client_expansion" end
                 if GetAccountExpansionLevel() ~= 10 then return "account_expansion" end
+                if GetMaxPlayerLevel() ~= 80 then return "max_player_level" end
                 if GetMaxLevelForExpansionLevel(0) ~= GetMaxPlayerLevel() then return "max_level" end
                 if GetMaxLevelForPlayerExpansion() ~= GetMaxPlayerLevel() then return "player_max_level" end
                 local info = GetExpansionDisplayInfo(10)
