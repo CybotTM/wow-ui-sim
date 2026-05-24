@@ -19,6 +19,12 @@ ChatTypeInfo.BN_WHISPER = ChatTypeInfo.BN_WHISPER or {
   id = 19,
 }
 
+if GetChatTypeIndex == nil then
+  function GetChatTypeIndex(_chatType)
+    return 1
+  end
+end
+
 ChatFrameUtil = ChatFrameUtil or {}
 
 if ChatFrameUtil.ProcessMessageEventFilters == nil then
@@ -143,6 +149,7 @@ mod tests {
                   return "system_color"
                 end
                 if ChatTypeInfo.BN_WHISPER.id ~= 19 then return "bn_whisper" end
+                if GetChatTypeIndex("SAY") ~= 1 then return "chat_type_index" end
                 if type(ChatFrameUtil.ProcessMessageEventFilters) ~= "function" then return "filters_function" end
                 if ChatFrameUtil.GetChatWindowName(3) ~= "Chat Window 3" then return "window_name" end
 

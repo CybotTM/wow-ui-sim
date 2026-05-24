@@ -1032,12 +1032,6 @@ end
 -- iterates the returned category / session / cooldown list with ipairs.
 -- None of these subsystems are simulated; return empty tables.
 
-if GetChatTypeIndex == nil then
-  function GetChatTypeIndex()
-    return 1
-  end
-end
-
 if GetScenariosChoiceOrder == nil then
   function GetScenariosChoiceOrder()
     return {}

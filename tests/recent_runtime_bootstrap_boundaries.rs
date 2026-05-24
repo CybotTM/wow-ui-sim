@@ -75,6 +75,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary glue character-select workaround",
         ),
         ("ChatTypeInfo =", "temporary chat-window workaround"),
+        ("function GetChatTypeIndex", "temporary chat-window workaround"),
         ("function GetChatWindowInfo", "temporary chat-window workaround"),
         ("function SetChatWindowShown", "temporary chat-window workaround"),
         (
