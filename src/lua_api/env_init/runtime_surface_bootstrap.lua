@@ -1041,18 +1041,6 @@ if GetQuestResetTime == nil then
   end
 end
 
-local __wow_modified_clicks = __wow_modified_clicks or {}
-if GetModifiedClick == nil then
-  function GetModifiedClick(action)
-    return __wow_modified_clicks[action] or "NONE"
-  end
-end
-if SetModifiedClick == nil then
-  function SetModifiedClick(action, modifier)
-    __wow_modified_clicks[action] = modifier or "NONE"
-  end
-end
-
 if UnitClass == nil then
   function UnitClass(_unit)
     return "Paladin", "PALADIN", 2

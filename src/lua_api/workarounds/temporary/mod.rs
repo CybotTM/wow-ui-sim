@@ -66,6 +66,7 @@ pub(crate) mod map_canvas_scroll_container;
 pub(crate) mod map_exploration_pin;
 pub(crate) mod map_runtime_state;
 pub(crate) mod merchant_filter_state;
+pub(crate) mod modified_click_defaults;
 pub(crate) mod mount_journal_dynamic_flight_popup;
 pub(crate) mod object_api_request_load_callbacks;
 pub(crate) mod objective_tracker_quest_header;

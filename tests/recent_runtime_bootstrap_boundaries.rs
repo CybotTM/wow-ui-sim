@@ -108,6 +108,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary difficulty/PVP utility workaround",
         ),
         (
+            "function GetModifiedClick",
+            "temporary modified-click settings workaround",
+        ),
+        (
+            "function SetModifiedClick",
+            "temporary modified-click settings workaround",
+        ),
+        (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
         ),
