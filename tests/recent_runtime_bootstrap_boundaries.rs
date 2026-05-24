@@ -194,6 +194,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary difficulty/PVP utility workaround",
         ),
         ("function UnitThreatSituation", "Rust unit threat surface"),
+        (
+            "function UnitDetailedThreatSituation",
+            "temporary unit threat workaround",
+        ),
+        (
+            "function UnitThreatPercentageOfLead",
+            "temporary unit threat workaround",
+        ),
         ("function GetActionInfo", "Rust action slot state surface"),
         ("function IsTrialAccount", "temporary client-info workaround"),
         (

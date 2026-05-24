@@ -578,18 +578,6 @@ if IsTargetLoose == nil then
   end
 end
 
-if UnitDetailedThreatSituation == nil then
-  function UnitDetailedThreatSituation(_unit, _other_unit)
-    return false, 0, 0, 0, 0
-  end
-end
-
-if UnitThreatPercentageOfLead == nil then
-  function UnitThreatPercentageOfLead(_unit, _other_unit)
-    return 0
-  end
-end
-
 if SetPortraitTexture == nil then
   function SetPortraitTexture(texture, unit, _disablePortraitMask)
     if not texture then
