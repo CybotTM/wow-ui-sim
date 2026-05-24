@@ -72,6 +72,16 @@ if UnitGetAvailableRoles == nil then
         return true, true, true
     end
 end
+if GetLFDRoleRestrictions == nil then
+    function GetLFDRoleRestrictions(_lfgID)
+        return false, false, false
+    end
+end
+if GetLFGRoleShortageRewards == nil then
+    function GetLFGRoleShortageRewards(_lfgID, _shortageIndex)
+        return false, false, false, false, 0, 0, 0
+    end
+end
 
 if rawget(C_LFGInfo or {}, "CanPlayerUseGroupFinder") == nil then
     C_LFGInfo = C_LFGInfo or __wow_namespace()
@@ -218,6 +228,34 @@ mod tests {
     }
 
     #[test]
+    fn installs_role_restriction_and_shortage_reward_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                local tank, healer, damage = GetLFDRoleRestrictions(1)
+                if tank ~= false or healer ~= false or damage ~= false then
+                    return "restrictions"
+                end
+
+                local eligible, forTank, forHealer, forDamage, itemID, money, xp = GetLFGRoleShortageRewards(1, 1)
+                if eligible ~= false or forTank ~= false or forHealer ~= false or forDamage ~= false then
+                    return "reward_flags"
+                end
+                if itemID ~= 0 or money ~= 0 or xp ~= 0 then
+                    return "reward_values"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("legacy LFG role defaults probe should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
     fn preserves_existing_unit_available_role_function() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
         env.exec(r#"function UnitGetAvailableRoles() return false, true, false end"#)
@@ -233,6 +271,50 @@ mod tests {
             .expect("legacy available role preservation probe should run");
 
         assert_eq!(roles, (false, true, false));
+    }
+
+    #[test]
+    fn preserves_existing_role_restriction_and_shortage_reward_functions() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            function GetLFDRoleRestrictions()
+                return true, false, true
+            end
+            function GetLFGRoleShortageRewards()
+                return true, true, false, true, 17, 23, 31
+            end
+            "#,
+        )
+        .expect("fixture should install existing LFG role functions");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("legacy LFG defaults should apply");
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                local tank, healer, damage = GetLFDRoleRestrictions(1)
+                if tank ~= true or healer ~= false or damage ~= true then
+                    return "restrictions"
+                end
+
+                local eligible, forTank, forHealer, forDamage, itemID, money, xp = GetLFGRoleShortageRewards(1, 1)
+                if eligible ~= true or forTank ~= true or forHealer ~= false or forDamage ~= true then
+                    return "reward_flags"
+                end
+                if itemID ~= 17 or money ~= 23 or xp ~= 31 then
+                    return "reward_values"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("legacy LFG role preservation probe should run");
+
+        assert_eq!(result, "ok");
     }
 
     #[test]

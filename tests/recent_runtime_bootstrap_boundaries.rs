@@ -116,6 +116,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary modified-click settings workaround",
         ),
         (
+            "function GetLFDRoleRestrictions",
+            "temporary legacy LFG workaround",
+        ),
+        (
+            "function GetLFGRoleShortageRewards",
+            "temporary legacy LFG workaround",
+        ),
+        (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
         ),
