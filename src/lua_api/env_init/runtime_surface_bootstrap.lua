@@ -1846,12 +1846,6 @@ if IsInventoryItemProfessionBag == nil then
   end
 end
 
-if GetLFGDeserterExpiration == nil then
-  function GetLFGDeserterExpiration()
-    return 0
-  end
-end
-
 if StoreSecureReference == nil then
   function StoreSecureReference(name, value)
     if type(name) == "string" then

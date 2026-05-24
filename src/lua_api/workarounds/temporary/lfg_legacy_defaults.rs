@@ -122,6 +122,9 @@ end
 if GetPartyLFGID == nil then
     function GetPartyLFGID() return 0 end
 end
+if GetLFGDeserterExpiration == nil then
+    function GetLFGDeserterExpiration() return 0 end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -271,6 +274,7 @@ mod tests {
             GetLFGQueuedList = nil
             GetLFGReadyCheckUpdate = nil
             GetPartyLFGID = nil
+            GetLFGDeserterExpiration = nil
             "#,
         )
         .expect("fixture should clear legacy LFG globals");
@@ -309,6 +313,7 @@ mod tests {
                 local ready, accepted = GetLFGReadyCheckUpdate()
                 if ready ~= false or accepted ~= false then return "ready" end
                 if GetPartyLFGID() ~= 0 then return "party_id" end
+                if GetLFGDeserterExpiration() ~= 0 then return "deserter" end
                 return "ok"
                 "#,
             )
