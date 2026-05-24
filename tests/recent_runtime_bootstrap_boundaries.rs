@@ -178,6 +178,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "Rust global false stub",
         ),
         (
+            "function UnitInVehicle",
+            "Rust vehicle possession state",
+        ),
+        (
             "function GetCurrentEnvironment",
             "temporary debug/environment workaround",
         ),

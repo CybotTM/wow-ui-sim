@@ -4,6 +4,7 @@
 //!
 //! All flags live on `state.player`:
 //!
+//! - `UnitInVehicle(unit)`            → `player.in_vehicle`
 //! - `UnitHasVehicleUI(unit)`         → `player.has_vehicle_ui`
 //! - `UnitHasVehiclePlayerFrameUI(unit)` → `player.has_vehicle_ui`
 //! - `UnitControllingVehicle(unit)`   → `player.controlling_vehicle`
@@ -47,6 +48,12 @@ where
 /// shown. Only `"player"` is modeled.
 fn unit_has_vehicle_ui(state: &mut LuaState) -> LuaResult<u32> {
     push_player_flag(state, |sim| sim.player.has_vehicle_ui)
+}
+
+/// `UnitInVehicle(unit)` — true when the player is currently seated in a
+/// vehicle. Only `"player"` is modeled.
+fn unit_in_vehicle(state: &mut LuaState) -> LuaResult<u32> {
+    push_player_flag(state, |sim| sim.player.in_vehicle)
 }
 
 /// `UnitHasVehiclePlayerFrameUI(unit)` — true when PlayerFrame should swap to
@@ -126,6 +133,7 @@ fn taxi_request_early_landing(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "UnitInVehicle", unit_in_vehicle)?;
     LuaApiMut::register_function(lua, "UnitHasVehicleUI", unit_has_vehicle_ui)?;
     LuaApiMut::register_function(
         lua,

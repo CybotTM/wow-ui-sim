@@ -744,12 +744,6 @@ if GetDungeonDifficultyID == nil then
   end
 end
 
-if UnitInVehicle == nil then
-  function UnitInVehicle()
-    return false
-  end
-end
-
 if UnitGetAvailableRoles == nil then
   function UnitGetAvailableRoles()
     return true, true, true
