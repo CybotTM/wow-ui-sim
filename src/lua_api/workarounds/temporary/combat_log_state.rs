@@ -85,12 +85,50 @@ local function StoreMessage(currentState, message, red, green, blue, order)
     end
 end
 
+local function ObjectMatchesFilter(objectType, mask)
+    local object = math.max(0, tonumber(objectType) or 0)
+    local filter = math.max(0, tonumber(mask) or 0)
+    while object > 0 and filter > 0 do
+        if object % 2 == 1 and filter % 2 == 1 then
+            return true
+        end
+        object = math.floor(object / 2)
+        filter = math.floor(filter / 2)
+    end
+    return false
+end
+
 C_CombatLog._state = CombatLogState()
 C_CombatLogSecure._state = C_CombatLog._state
+
+if rawget(C_CombatLog, "AddEventFilter") == nil then
+    function C_CombatLog.AddEventFilter(_filter)
+        return true
+    end
+end
+
+if rawget(C_CombatLog, "ClearEventFilters") == nil then
+    function C_CombatLog.ClearEventFilters()
+        CombatLogState().filteredEventsEnabled = false
+        return true
+    end
+end
+
+if rawget(C_CombatLog, "DoesObjectMatchFilter") == nil then
+    function C_CombatLog.DoesObjectMatchFilter(objectType, mask)
+        return ObjectMatchesFilter(objectType, mask)
+    end
+end
 
 if rawget(C_CombatLog, "GetEntryCount") == nil then
     function C_CombatLog.GetEntryCount()
         return CountEntries(CombatLogState())
+    end
+end
+
+if rawget(C_CombatLog, "GetCurrentEntryInfo") == nil then
+    function C_CombatLog.GetCurrentEntryInfo()
+        return CombatLogState().currentEntry
     end
 end
 
@@ -212,6 +250,61 @@ if rawget(C_CombatLogSecure, "CreateCombatLogMessage") == nil then
         return true
     end
 end
+
+if rawget(_G, "CombatLog_Object_IsA") == nil then
+    CombatLog_Object_IsA = C_CombatLog.DoesObjectMatchFilter
+end
+
+if rawget(_G, "CombatLogAddFilter") == nil then
+    CombatLogAddFilter = C_CombatLog.AddEventFilter
+end
+
+if rawget(_G, "CombatLogResetFilter") == nil then
+    CombatLogResetFilter = C_CombatLog.ClearEventFilters
+end
+
+if rawget(_G, "CombatLogClearEntries") == nil then
+    CombatLogClearEntries = C_CombatLog.ClearEntries
+end
+
+if rawget(_G, "CombatLogGetCurrentEntry") == nil then
+    CombatLogGetCurrentEntry = C_CombatLog.GetCurrentEntryInfo
+end
+
+if rawget(_G, "CombatLogGetCurrentEventInfo") == nil then
+    CombatLogGetCurrentEventInfo = C_CombatLog.GetCurrentEventInfo
+end
+
+if rawget(_G, "CombatLogGetNumEntries") == nil then
+    CombatLogGetNumEntries = C_CombatLog.GetEntryCount
+end
+
+if rawget(_G, "CombatLogGetRetentionTime") == nil then
+    CombatLogGetRetentionTime = C_CombatLog.GetEntryRetentionTime
+end
+
+if rawget(_G, "CombatLogSetRetentionTime") == nil then
+    CombatLogSetRetentionTime = C_CombatLog.SetEntryRetentionTime
+end
+
+if rawget(_G, "CombatLogShowCurrentEntry") == nil then
+    CombatLogShowCurrentEntry = C_CombatLog.ShouldShowCurrentEntry
+end
+
+if rawget(_G, "CombatLogAdvanceEntry") == nil then
+    function CombatLogAdvanceEntry(step)
+        local currentState = CombatLogState()
+        local amount = tonumber(step) or 0
+        currentState.currentEntry = math.max(0, currentState.currentEntry + amount)
+        return true
+    end
+end
+
+if rawget(_G, "CombatLogSetCurrentEntry") == nil then
+    function CombatLogSetCurrentEntry(entry)
+        CombatLogState().currentEntry = math.max(0, tonumber(entry) or 0)
+    end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -236,6 +329,36 @@ mod tests {
                 local message, red, green, blue = CombatLogInbound.GenerateMessage()
                 if message ~= "" or red ~= 1 or green ~= 1 or blue ~= 1 then
                     return "bad_inbound_default"
+                end
+                if CombatLog_Object_IsA ~= C_CombatLog.DoesObjectMatchFilter then
+                    return "bad_object_alias"
+                end
+                if CombatLogAddFilter ~= C_CombatLog.AddEventFilter then
+                    return "bad_add_filter_alias"
+                end
+                if CombatLogClearEntries ~= C_CombatLog.ClearEntries then
+                    return "bad_clear_alias"
+                end
+                if CombatLogGetCurrentEntry ~= C_CombatLog.GetCurrentEntryInfo then
+                    return "bad_current_alias"
+                end
+                if CombatLogGetCurrentEventInfo ~= C_CombatLog.GetCurrentEventInfo then
+                    return "bad_event_alias"
+                end
+                if CombatLogGetNumEntries ~= C_CombatLog.GetEntryCount then
+                    return "bad_count_alias"
+                end
+                if CombatLogGetRetentionTime ~= C_CombatLog.GetEntryRetentionTime then
+                    return "bad_retention_get_alias"
+                end
+                if CombatLogResetFilter ~= C_CombatLog.ClearEventFilters then
+                    return "bad_reset_alias"
+                end
+                if CombatLogSetRetentionTime ~= C_CombatLog.SetEntryRetentionTime then
+                    return "bad_retention_set_alias"
+                end
+                if CombatLogShowCurrentEntry ~= C_CombatLog.ShouldShowCurrentEntry then
+                    return "bad_show_alias"
                 end
                 C_CombatLog._state.entries = {
                     { "first", 1 },
@@ -275,6 +398,22 @@ mod tests {
                 end
                 if C_CombatLog._state.createdMessages[1].message ~= "created" then
                     return "bad_created_message"
+                end
+                CombatLogSetCurrentEntry(5)
+                if CombatLogGetCurrentEntry() ~= 5 then
+                    return "bad_legacy_current_entry"
+                end
+                if not CombatLogAdvanceEntry(2) or CombatLogGetCurrentEntry() ~= 7 then
+                    return "bad_legacy_advance"
+                end
+                if not CombatLogAddFilter("anything") then
+                    return "bad_legacy_filter"
+                end
+                if not CombatLogResetFilter() then
+                    return "bad_legacy_reset"
+                end
+                if not CombatLog_Object_IsA(0x21, 0x01) or CombatLog_Object_IsA(0x20, 0x01) then
+                    return "bad_legacy_object_match"
                 end
                 C_CombatLog.ClearEntries()
                 if C_CombatLog.GetEntryCount() ~= 0 or C_CombatLog.ShouldShowCurrentEntry() then

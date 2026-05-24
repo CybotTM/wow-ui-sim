@@ -213,6 +213,54 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GetUnitTotalModifiedMaxHealthPercent",
             "Rust unit stats owner",
         ),
+        (
+            "function CombatLogAddFilter",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogResetFilter",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogAdvanceEntry",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogGetCurrentEntry",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogGetCurrentEventInfo",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogGetNumEntries",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogSetCurrentEntry",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogShowCurrentEntry",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogClearEntries",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogSetRetentionTime",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLogGetRetentionTime",
+            "temporary combat-log state workaround",
+        ),
+        (
+            "function CombatLog_Object_IsA",
+            "temporary combat-log state workaround",
+        ),
         ("AuraUtil.AuraFilters", "Rust aura owner"),
         ("AuraUtil.CreateFilterString", "Rust aura owner"),
         ("AuraUtil.UnpackAuraData", "Rust aura owner"),
