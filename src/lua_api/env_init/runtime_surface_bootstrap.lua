@@ -5484,13 +5484,6 @@ if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
       __wow_ensure_achievement_search_previews()
       __wow_patch_achievement_search_preview_selection()
       __wow_patch_achievement_summary_empty_text_overlap()
-    elseif addonName == "Blizzard_GlueXML_Mainline"
-      or addonName == "Blizzard_GlueXML"
-      or addonName == "Blizzard_CharacterCreate" then
-      __wow_ensure_glue_character_select_surface()
-    elseif addonName == "Blizzard_ProfessionsBook"
-      or addonName == "Blizzard_PlayerSpells" then
-      __wow_ensure_spellbook_surface()
     elseif addonName == "Blizzard_Dispatcher" then
       __wow_ensure_dispatcher_surface()
     elseif addonName == "Blizzard_ChatFrame"

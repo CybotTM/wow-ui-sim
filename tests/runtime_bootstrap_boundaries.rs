@@ -730,6 +730,14 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "StaticPopupDialogs = StaticPopupDialogs or {}",
             "Rust global table surface",
         ),
+        (
+            "__wow_ensure_glue_character_select_surface",
+            "temporary client-info workaround",
+        ),
+        (
+            "__wow_ensure_spellbook_surface",
+            "temporary legacy spell workaround",
+        ),
     ] {
         assert!(
             !bootstrap.contains(needle),
