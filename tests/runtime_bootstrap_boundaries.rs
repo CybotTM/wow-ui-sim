@@ -626,12 +626,9 @@ fn shared_xml_utility_defaults_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 
     for fallback in [
-        "CreateAnchor",
-        "GetFinalNameFromTextureKit",
-        "SetClampedTextureRotation",
-        "CopyValuesAsKeys",
-        "GetMicroIconForRole",
-        "PingSystemInitializer",
+        "CreateAnchor", "GetFinalNameFromTextureKit", "SetClampedTextureRotation", "CopyValuesAsKeys",
+        "GetMicroIconForRole", "PingSystemInitializer", "EnumUtil.MakeEnum", "CreateCounter",
+        "GetOrCreateTableEntry", "GenerateClosure",
     ] {
         assert!(
             !bootstrap.contains(fallback),

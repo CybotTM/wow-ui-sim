@@ -4,7 +4,7 @@
 //! files. Keep shallow compatibility defaults here for isolated addon closure
 //! tests that do not load those providers.
 
-const SHARED_XML_UTILITY_DEFAULTS_LUA: &str = r#"
+const SHARED_XML_UTILITY_DEFAULTS_LUA: &str = r##"
 if type(CreateAnchor) ~= "function" then
   function CreateAnchor(point, relativeTo, relativePoint, x, y)
     return {
@@ -50,6 +50,61 @@ if type(CopyValuesAsKeys) ~= "function" then
   end
 end
 
+if EnumUtil == nil then
+  EnumUtil = {}
+end
+
+if EnumUtil.MakeEnum == nil then
+  function EnumUtil.MakeEnum(...)
+    local enum = {}
+    for index = 1, select("#", ...) do
+      local name = select(index, ...)
+      enum[name] = index
+    end
+    return enum
+  end
+end
+
+if CreateCounter == nil then
+  function CreateCounter()
+    local nextID = 0
+    return function()
+      nextID = nextID + 1
+      return nextID
+    end
+  end
+end
+
+if GetOrCreateTableEntry == nil then
+  function GetOrCreateTableEntry(tbl, key)
+    local value = tbl[key]
+    if value == nil then
+      value = {}
+      tbl[key] = value
+    end
+    return value
+  end
+end
+
+if GenerateClosure == nil then
+  function GenerateClosure(fn, ...)
+    local bound = { n = select("#", ...), ... }
+    return function(...)
+      local args = {}
+      local argCount = 0
+      for i = 1, bound.n do
+        argCount = argCount + 1
+        args[argCount] = bound[i]
+      end
+      for i = 1, select("#", ...) do
+        argCount = argCount + 1
+        args[argCount] = select(i, ...)
+      end
+      return fn(unpack(args, 1, argCount))
+    end
+  end
+end
+
 if type(GetMicroIconForRole) ~= "function" then
   function GetMicroIconForRole(role)
     if type(role) ~= "string" then
@@ -63,7 +118,7 @@ if type(PingSystemInitializer) ~= "function" then
   function PingSystemInitializer(_category)
   end
 end
-"#;
+"##;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(SHARED_XML_UTILITY_DEFAULTS_LUA)?;
@@ -91,6 +146,18 @@ mod tests {
                 if GetFinalNameFromTextureKit("%s_topper", "") ~= "topper" then return "texture_kit_empty" end
                 local keys = CopyValuesAsKeys({ "a", "b" })
                 if keys.a ~= true or keys.b ~= true then return "copy_values" end
+                local enum = EnumUtil.MakeEnum("Foo", "Bar")
+                if enum.Foo ~= 1 or enum.Bar ~= 2 then return "enum" end
+                local counter = CreateCounter()
+                if counter() ~= 1 or counter() ~= 2 then return "counter" end
+                local tableEntryStore = {}
+                local entry = GetOrCreateTableEntry(tableEntryStore, "entry")
+                entry.value = 9
+                if GetOrCreateTableEntry(tableEntryStore, "entry").value ~= 9 then return "table_entry" end
+                local closure = GenerateClosure(function(first, second, third)
+                  return first .. second .. third
+                end, "a", "b")
+                if closure("c") ~= "abc" then return "closure" end
                 if GetMicroIconForRole("TANK") ~= "roleicon-tank" then return "role_icon" end
                 local rotated = 0
                 SetClampedTextureRotation({ SetRotation = function(_, value) rotated = value end }, 90)
@@ -112,6 +179,10 @@ mod tests {
             function CreateAnchor() return "existing_anchor" end
             function GetFinalNameFromTextureKit() return "existing_texture" end
             function CopyValuesAsKeys() return "existing_copy" end
+            EnumUtil = { MakeEnum = function() return "existing_enum" end }
+            function CreateCounter() return "existing_counter" end
+            function GetOrCreateTableEntry() return "existing_entry" end
+            function GenerateClosure() return "existing_closure" end
             "#,
         )
         .expect("fixture should install existing utility globals");
@@ -127,6 +198,10 @@ mod tests {
                 if CreateAnchor() ~= "existing_anchor" then return "overwrote_anchor" end
                 if GetFinalNameFromTextureKit() ~= "existing_texture" then return "overwrote_texture" end
                 if CopyValuesAsKeys() ~= "existing_copy" then return "overwrote_copy" end
+                if EnumUtil.MakeEnum() ~= "existing_enum" then return "overwrote_enum" end
+                if CreateCounter() ~= "existing_counter" then return "overwrote_counter" end
+                if GetOrCreateTableEntry() ~= "existing_entry" then return "overwrote_table_entry" end
+                if GenerateClosure() ~= "existing_closure" then return "overwrote_closure" end
                 if type(SetClampedTextureRotation) ~= "function" then return "missing_rotation" end
                 if type(GetMicroIconForRole) ~= "function" then return "missing_role_icon" end
                 if type(PingSystemInitializer) ~= "function" then return "missing_ping" end
