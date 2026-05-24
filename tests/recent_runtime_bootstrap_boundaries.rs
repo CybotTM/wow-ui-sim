@@ -157,6 +157,14 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "temporary inventory query workaround",
         ),
         (
+            "function GetChatWindowChannels",
+            "Rust chat-window state probe",
+        ),
+        (
+            "function IsInventoryItemLocked",
+            "Rust inventory state probe",
+        ),
+        (
             "function GetCurrentEnvironment",
             "temporary debug/environment workaround",
         ),
