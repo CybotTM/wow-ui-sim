@@ -147,6 +147,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary inert language workaround",
         ),
         (
+            "function GetProfessionSkillLineID",
+            "temporary trade-skill UI workaround",
+        ),
+        (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
         ),

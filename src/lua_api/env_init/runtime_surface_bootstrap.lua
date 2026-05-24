@@ -1065,12 +1065,6 @@ if GetRandomScenarioInfo == nil then
   end
 end
 
-if GetProfessionSkillLineID == nil then
-  function GetProfessionSkillLineID()
-    return 0
-  end
-end
-
 if UnitIsGhost == nil then
   function UnitIsGhost(_unit)
     return false

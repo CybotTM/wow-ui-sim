@@ -15,6 +15,20 @@ if rawget(C_TradeSkillUI, "GetProfessionSkillLineID") == nil then
     end
 end
 
+if GetProfessionSkillLineID == nil then
+    function GetProfessionSkillLineID(professionID)
+        if type(C_TradeSkillUI) == "table"
+            and type(C_TradeSkillUI.GetProfessionSkillLineID) == "function"
+        then
+            local ok, skillLineID = pcall(C_TradeSkillUI.GetProfessionSkillLineID, professionID)
+            if ok then
+                return skillLineID
+            end
+        end
+        return tonumber(professionID) or 0
+    end
+end
+
 if rawget(C_TradeSkillUI, "IsGuildTradeSkillsEnabled") == nil then
     function C_TradeSkillUI.IsGuildTradeSkillsEnabled()
         return false
@@ -68,6 +82,15 @@ mod tests {
                 end
                 if pcall(C_TradeSkillUI.GetProfessionSkillLineID, "bad") then
                     return "lost_rust_type_check"
+                end
+                if GetProfessionSkillLineID(164) ~= 164 then
+                    return "bad_global_skill_line"
+                end
+                if GetProfessionSkillLineID() ~= 0 then
+                    return "bad_global_default"
+                end
+                if GetProfessionSkillLineID("bad") ~= 0 then
+                    return "bad_global_tolerance"
                 end
                 if C_TradeSkillUI.IsGuildTradeSkillsEnabled() then
                     return "bad_guild_flag"
