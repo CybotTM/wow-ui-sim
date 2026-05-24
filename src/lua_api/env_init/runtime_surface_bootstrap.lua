@@ -1108,24 +1108,6 @@ if LocalizedClassList == nil then
   end
 end
 
-if GetScreenWidth == nil then
-  function GetScreenWidth()
-    return 1024
-  end
-end
-
-if GetScreenHeight == nil then
-  function GetScreenHeight()
-    return 768
-  end
-end
-
-if GetPhysicalScreenSize == nil then
-  function GetPhysicalScreenSize()
-    return GetScreenWidth(), GetScreenHeight()
-  end
-end
-
 if GetNumLanguages == nil then
   function GetNumLanguages()
     return 0

@@ -136,6 +136,12 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function CloseAllWindows",
             "temporary UIParent panel workaround",
         ),
+        ("function GetScreenWidth", "Rust screen-size runtime owner"),
+        ("function GetScreenHeight", "Rust screen-size runtime owner"),
+        (
+            "function GetPhysicalScreenSize",
+            "Rust screen-size runtime owner",
+        ),
         (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
