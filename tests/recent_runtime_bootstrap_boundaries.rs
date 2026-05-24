@@ -174,6 +174,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary content tracking workaround",
         ),
         (
+            "function UnitHasVehiclePlayerFrameUI",
+            "Rust global false stub",
+        ),
+        (
             "function GetCurrentEnvironment",
             "temporary debug/environment workaround",
         ),
