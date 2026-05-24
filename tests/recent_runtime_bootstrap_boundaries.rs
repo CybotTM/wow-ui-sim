@@ -1,9 +1,6 @@
-#[test]
-fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
-    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
-    let shared_bootstrap = include_str!("../src/lua_api/env_init/shared_bootstrap.lua");
+type BootstrapFallbackOwner = (&'static str, &'static str);
 
-    for (needle, owner) in [
+const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ("function ReloadUI", "Rust event API"),
         ("HasArtifactEquipped", "temporary inert-global workaround"),
         ("IsPVPTimerRunning", "temporary inert-global workaround"),
@@ -165,6 +162,18 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "Rust inventory state probe",
         ),
         (
+            "ContentTrackingUtil = {}",
+            "temporary content tracking workaround",
+        ),
+        (
+            "function ContentTrackingUtil.IsContentTrackingEnabled",
+            "temporary content tracking workaround",
+        ),
+        (
+            "function ContentTrackingUtil.MakeCombinedID",
+            "temporary content tracking workaround",
+        ),
+        (
             "function GetCurrentEnvironment",
             "temporary debug/environment workaround",
         ),
@@ -184,7 +193,14 @@ fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
             "function debug.getfenv",
             "temporary debug/environment workaround",
         ),
-    ] {
+];
+
+#[test]
+fn recently_moved_startup_defaults_are_not_runtime_bootstrap_fallbacks() {
+    let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+    let shared_bootstrap = include_str!("../src/lua_api/env_init/shared_bootstrap.lua");
+
+    for &(needle, owner) in RECENTLY_MOVED_BOOTSTRAP_FALLBACKS {
         assert!(
             !bootstrap.contains(needle),
             "{needle} fallback must live in the explicit {owner}, not runtime bootstrap"

@@ -25,6 +25,7 @@ pub(crate) mod color_defaults;
 pub(crate) mod combat_log_state;
 pub(crate) mod container_frame_token_tracker;
 pub(crate) mod container_portrait_texture;
+pub(crate) mod content_tracking_defaults;
 pub(crate) mod cpp_mixin_stubs;
 pub(crate) mod damage_meter_scrollbox;
 pub(crate) mod damage_meter_state;

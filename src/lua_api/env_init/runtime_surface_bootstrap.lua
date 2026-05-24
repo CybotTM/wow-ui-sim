@@ -183,50 +183,6 @@ local function __wow_ensure_startup_navigation_surface()
     function HelpOpenWebTicketButton_OnUpdate() end
   end
 
-  if type(ContentTrackingUtil) ~= "table" then
-    ContentTrackingUtil = {}
-  end
-  if rawget(ContentTrackingUtil, "IsTrackingModifierDown") == nil then
-    function ContentTrackingUtil.IsTrackingModifierDown() return false end
-  end
-  if rawget(ContentTrackingUtil, "IsContentTrackingEnabled") == nil then
-    function ContentTrackingUtil.IsContentTrackingEnabled() return false end
-  end
-  if rawget(ContentTrackingUtil, "RegisterTrackableElement") == nil then
-    function ContentTrackingUtil.RegisterTrackableElement() end
-  end
-  if rawget(ContentTrackingUtil, "UnregisterTrackableElement") == nil then
-    function ContentTrackingUtil.UnregisterTrackableElement() end
-  end
-  if rawget(ContentTrackingUtil, "ProcessChatLink") == nil then
-    function ContentTrackingUtil.ProcessChatLink() return false end
-  end
-  if rawget(ContentTrackingUtil, "GetTrackingMapInfoByEncounterID") == nil then
-    function ContentTrackingUtil.GetTrackingMapInfoByEncounterID() return nil end
-  end
-  if rawget(ContentTrackingUtil, "IsContentTrackedInEncounter") == nil then
-    function ContentTrackingUtil.IsContentTrackedInEncounter() return false end
-  end
-  if rawget(ContentTrackingUtil, "OpenMapToTrackable") == nil then
-    function ContentTrackingUtil.OpenMapToTrackable() return false end
-  end
-  if rawget(ContentTrackingUtil, "DisplayTrackingError") == nil then
-    function ContentTrackingUtil.DisplayTrackingError() end
-  end
-  if rawget(ContentTrackingUtil, "MakeCombinedID") == nil then
-    function ContentTrackingUtil.MakeCombinedID(trackableType, trackableID)
-      return tostring(trackableType or 0) .. ":" .. tostring(trackableID or 0)
-    end
-  end
-  if rawget(ContentTrackingUtil, "SplitCombinedID") == nil then
-    function ContentTrackingUtil.SplitCombinedID(combinedID)
-      if type(combinedID) ~= "string" then
-        return nil, nil
-      end
-      local a, b = string.match(combinedID, "^(.-):(.-)$")
-      return tonumber(a), tonumber(b)
-    end
-  end
 end
 
 __wow_ensure_startup_navigation_surface()
