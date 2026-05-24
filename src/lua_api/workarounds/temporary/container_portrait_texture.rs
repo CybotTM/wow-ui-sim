@@ -1,11 +1,49 @@
-//! Temporary C_Container bag portrait texture helper.
+//! Temporary portrait texture helpers.
 //!
-//! Real WoW derives bag portrait art from equipped inventory data. The
-//! simulator only has a shallow inventory icon path today, so this helper keeps
-//! Blizzard bag frames rendering while the richer inventory/equipment model is
-//! still missing.
+//! Real WoW derives bag portrait art from equipped inventory data, live unit
+//! display data, or creature display IDs. The simulator only has shallow class
+//! and inventory icon paths today, so these helpers keep Blizzard portrait
+//! textures rendering while richer model/portrait state is still missing.
 
 const CONTAINER_PORTRAIT_TEXTURE_LUA: &str = r#"
+if SetPortraitTexture == nil then
+  function SetPortraitTexture(texture, unit, _disablePortraitMask)
+    if not texture then
+      return
+    end
+
+    if UnitIsPlayer ~= nil and UnitIsPlayer(unit) then
+      local _, classFile = UnitClass(unit)
+      if classFile then
+        local coords = CLASS_ICON_TCOORDS and CLASS_ICON_TCOORDS[classFile]
+        if coords and texture.SetTexture and texture.SetTexCoord then
+          texture:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
+          texture:SetTexCoord(unpack(coords))
+          return
+        end
+
+        local atlas = GetClassAtlas and GetClassAtlas(classFile)
+        if atlas and texture.SetAtlas then
+          texture:SetAtlas(atlas)
+          return
+        end
+      end
+    end
+
+    if texture.SetTexture then
+      texture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
+    end
+  end
+end
+
+if SetPortraitTextureFromCreatureDisplayID == nil then
+  function SetPortraitTextureFromCreatureDisplayID(texture, _creatureDisplayID)
+    if texture and texture.SetTexture then
+      texture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
+    end
+  end
+end
+
 -- C_Container's metatable can expose generated method stubs through __index;
 -- rawget keeps this workaround tied to the explicit table slot.
 if C_Container ~= nil and type(rawget(C_Container, "SetBagPortraitTexture")) ~= "function" then
@@ -72,6 +110,60 @@ mod tests {
             .expect("bag portrait helper should run");
 
         assert_eq!(texture, "portrait_texture");
+    }
+
+    #[test]
+    fn installs_unit_portrait_texture_helpers_when_missing() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            rawset(_G, "SetPortraitTexture", nil)
+            rawset(_G, "SetPortraitTextureFromCreatureDisplayID", nil)
+            UnitIsPlayer = function()
+              return true
+            end
+            UnitClass = function()
+              return "Paladin", "PALADIN"
+            end
+            CLASS_ICON_TCOORDS = {
+              PALADIN = { 0, 0.25, 0, 0.25 },
+            }
+            "#,
+        )
+        .expect("fixture should reset portrait helpers");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("portrait helpers should apply");
+        }
+
+        let result: (String, f64, f64, f64, f64, String) = env
+            .eval(
+                r#"
+                local frame = CreateFrame("Frame")
+                local playerPortrait = frame:CreateTexture(nil, "ARTWORK")
+                SetPortraitTexture(playerPortrait, "player")
+                local left, right, top, bottom = playerPortrait:GetTexCoord()
+
+                local creaturePortrait = frame:CreateTexture(nil, "ARTWORK")
+                SetPortraitTextureFromCreatureDisplayID(creaturePortrait, 1)
+
+                return playerPortrait:GetTexture(),
+                    left,
+                    right,
+                    top,
+                    bottom,
+                    creaturePortrait:GetTexture()
+                "#,
+            )
+            .expect("portrait helpers should run");
+
+        assert_eq!(result.0, "Interface\\TargetingFrame\\UI-Classes-Circles");
+        assert_eq!(
+            (result.1, result.2, result.3, result.4),
+            (0.0, 0.25, 0.0, 0.25)
+        );
+        assert_eq!(result.5, "Interface\\ICONS\\INV_Misc_QuestionMark");
     }
 
     #[test]

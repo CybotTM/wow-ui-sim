@@ -275,6 +275,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP",
             "enum missing-constants surface",
         ),
+        (
+            "function SetPortraitTexture",
+            "temporary portrait texture workaround",
+        ),
+        (
+            "function SetPortraitTextureFromCreatureDisplayID",
+            "temporary portrait texture workaround",
+        ),
         ("AuraUtil.AuraFilters", "Rust aura owner"),
         ("AuraUtil.CreateFilterString", "Rust aura owner"),
         ("AuraUtil.UnpackAuraData", "Rust aura owner"),

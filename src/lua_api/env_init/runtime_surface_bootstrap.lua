@@ -523,45 +523,6 @@ end
 -- "focus" read the respective TargetInfo.is_player flag, "partyN" (N=1..4)
 -- checks sim.party_members[N-1] is populated, everything else false.
 
-if SetPortraitTexture == nil then
-  function SetPortraitTexture(texture, unit, _disablePortraitMask)
-    if not texture then
-      return
-    end
-
-    if UnitIsPlayer ~= nil and UnitIsPlayer(unit) then
-      local _, classFile = UnitClass(unit)
-      if classFile then
-        local coords = CLASS_ICON_TCOORDS and CLASS_ICON_TCOORDS[classFile]
-        if coords and texture.SetTexture and texture.SetTexCoord then
-          texture:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
-          texture:SetTexCoord(unpack(coords))
-          return
-        end
-
-        local atlas = GetClassAtlas and GetClassAtlas(classFile)
-        if atlas and texture.SetAtlas then
-          texture:SetAtlas(atlas)
-          return
-        end
-      end
-    end
-
-    if texture.SetTexture then
-      texture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
-    end
-  end
-end
-
-if SetPortraitTextureFromCreatureDisplayID == nil then
-  function SetPortraitTextureFromCreatureDisplayID(texture, _creatureDisplayID)
-    if texture and texture.SetTexture then
-      texture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
-    end
-  end
-end
-
-
 if issecure == nil then
   function issecure()
     return not (debug and debug.getstacktaint and debug.getstacktaint())
