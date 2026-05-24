@@ -273,6 +273,8 @@ fn client_info_defaults_are_not_runtime_bootstrap_fallbacks() {
         "GetNormalizedRealmName",
         "GetRealmID",
         "GetExpansionLevel",
+        "IsExpansionTrial",
+        "GetExpansionTrialInfo",
         "IsMacClient",
         "IsWindowsClient",
         "RequestTimePlayed",

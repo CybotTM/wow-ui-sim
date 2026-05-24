@@ -14,20 +14,6 @@ if StaticPopup_Show == nil then
   end
 end
 
-if IsExpansionTrial == nil then
-  function IsExpansionTrial()
-    return false
-  end
-end
-
-local function __wow_ensure_glue_character_select_surface()
-  IsExpansionTrial = function()
-    return false
-  end
-end
-
-__wow_ensure_glue_character_select_surface()
-
 local function __wow_ensure_spellbook_surface()
   rawset(_G, "IsSelectedSpellBookItem", function(_slotIndex, _unit)
     return false
@@ -2621,12 +2607,6 @@ end
 if GetReleaseTimeRemaining == nil then
   function GetReleaseTimeRemaining()
     return 0
-  end
-end
-
-if GetExpansionTrialInfo == nil then
-  function GetExpansionTrialInfo()
-    return false, 0
   end
 end
 

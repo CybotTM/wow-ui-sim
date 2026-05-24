@@ -35,6 +35,18 @@ if GetExpansionLevel == nil then
   end
 end
 
+if IsExpansionTrial == nil then
+  function IsExpansionTrial()
+    return false
+  end
+end
+
+if GetExpansionTrialInfo == nil then
+  function GetExpansionTrialInfo()
+    return false, 0
+  end
+end
+
 if IsMacClient == nil then
   function IsMacClient()
     return false
@@ -116,6 +128,9 @@ mod tests {
                 if GetRealmName() ~= "SimulatedRealm" or GetNormalizedRealmName() ~= "SimulatedRealm" then return "realm" end
                 if GetRealmID() ~= 1 then return "realm_id" end
                 if GetExpansionLevel() ~= 10 then return "expansion" end
+                if IsExpansionTrial() ~= false then return "expansion_trial" end
+                local isExpansionTrial, expansionTrialRemaining = GetExpansionTrialInfo()
+                if isExpansionTrial ~= false or expansionTrialRemaining ~= 0 then return "expansion_trial_info" end
                 if IsMacClient() ~= false or IsWindowsClient() ~= false then return "platform" end
                 if not pcall(RequestTimePlayed) then return "time_played" end
                 if GetClientDisplayExpansionLevel() ~= 10 then return "client_expansion" end
