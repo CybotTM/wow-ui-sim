@@ -17,5 +17,6 @@ pub(crate) fn restore_post_cleanup_globals(
     crate::lua_api::env_init::init_enum_globals(lua)?;
     crate::lua_api::globals::register::register_globals(lua, state)?;
     super::debug_environment_defaults::apply_bootstrap(lua)?;
-    super::secure_execute_range::apply_bootstrap(lua)
+    super::secure_execute_range::apply_bootstrap(lua)?;
+    super::ui_parent_panel_toggles::apply_bootstrap(lua)
 }

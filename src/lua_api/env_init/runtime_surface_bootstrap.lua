@@ -1108,17 +1108,6 @@ if LocalizedClassList == nil then
   end
 end
 
-if RegisterUIPanel == nil then
-  function RegisterUIPanel()
-  end
-end
-
-if CloseAllWindows == nil then
-  function CloseAllWindows()
-    return false
-  end
-end
-
 if GetScreenWidth == nil then
   function GetScreenWidth()
     return 1024

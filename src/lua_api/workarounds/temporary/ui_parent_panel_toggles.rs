@@ -7,11 +7,96 @@
 
 use crate::lua_api::{LoaderEnv, WowLuaEnv};
 
+const PANEL_REGISTRATION_DEFAULTS_LUA: &str = r#"
+if type(UIPanelWindows) ~= "table" then
+    UIPanelWindows = {}
+end
+
+if RegisterUIPanel == nil then
+    function RegisterUIPanel(panel, attributes)
+        if panel == nil or type(panel.GetName) ~= "function" then
+            return
+        end
+
+        local name = panel:GetName()
+        if name == nil or UIPanelWindows[name] ~= nil then
+            return
+        end
+
+        local entry = {}
+        if type(attributes) == "table" then
+            for key, value in pairs(attributes) do
+                entry[key] = value
+                if type(panel.SetAttributeNoHandler) == "function" then
+                    panel:SetAttributeNoHandler("UIPanelLayout-" .. key, value)
+                elseif type(panel.SetAttribute) == "function" then
+                    panel:SetAttribute("UIPanelLayout-" .. key, value)
+                end
+            end
+        end
+        UIPanelWindows[name] = entry
+        panel.editModeManuallyShown = true
+        if type(panel.SetAttributeNoHandler) == "function" then
+            panel:SetAttributeNoHandler("UIPanelLayout-defined", true)
+        elseif type(panel.SetAttribute) == "function" then
+            panel:SetAttribute("UIPanelLayout-defined", true)
+        end
+    end
+end
+
+if CloseAllWindows == nil then
+    function CloseAllWindows()
+        return false
+    end
+end
+"#;
+
 const GETGLOBAL_HELPER_LUA: &str = r#"
 local function __wow_getglobal(name)
     return getglobal(name)
 end
 _G.__wow_panel_getglobal = __wow_getglobal
+"#;
+
+const DIRECT_TOGGLE_REGISTERED_PANELS_LUA: &str = r#"
+if type(RegisterUIPanel) == "function" and rawget(_G, "__wow_register_uipanel_direct_toggle_wrapper") ~= RegisterUIPanel then
+    local originalRegisterUIPanel = RegisterUIPanel
+    local wrapper = function(frame, attributes)
+        local results = { originalRegisterUIPanel(frame, attributes) }
+        if frame ~= nil then
+            frame.editModeManuallyShown = true
+        end
+        return unpack(results)
+    end
+    RegisterUIPanel = wrapper
+    rawset(_G, "__wow_register_uipanel_direct_toggle_wrapper", wrapper)
+end
+
+if type(ShowUIPanel) == "function" and rawget(_G, "__wow_show_uipanel_direct_toggle_wrapper") ~= ShowUIPanel then
+    local originalShowUIPanel = ShowUIPanel
+    local wrapper = function(frame, ...)
+        if frame ~= nil and frame.editModeManuallyShown and type(frame.Show) == "function" then
+            frame:Show()
+            return
+        end
+        return originalShowUIPanel(frame, ...)
+    end
+    ShowUIPanel = wrapper
+    rawset(_G, "__wow_show_uipanel_direct_toggle_wrapper", wrapper)
+end
+
+if type(HideUIPanel) == "function" and rawget(_G, "__wow_hide_uipanel_direct_toggle_wrapper") ~= HideUIPanel then
+    local originalHideUIPanel = HideUIPanel
+    local wrapper = function(frame, ...)
+        if frame ~= nil and frame.editModeManuallyShown and type(frame.Hide) == "function" then
+            frame:Hide()
+            return
+        end
+        return originalHideUIPanel(frame, ...)
+    end
+    HideUIPanel = wrapper
+    rawset(_G, "__wow_hide_uipanel_direct_toggle_wrapper", wrapper)
+end
 "#;
 
 const TOGGLE_ACHIEVEMENT_FRAME_LUA: &str = r#"
@@ -168,8 +253,15 @@ function ToggleCollectionsJournal(tabIndex)
 end
 "#;
 
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(PANEL_REGISTRATION_DEFAULTS_LUA)?;
+    lua.exec(DIRECT_TOGGLE_REGISTERED_PANELS_LUA)?;
+    Ok(())
+}
+
 pub(crate) fn patch(env: &WowLuaEnv) {
     let _ = env.exec(GETGLOBAL_HELPER_LUA);
+    let _ = env.exec(DIRECT_TOGGLE_REGISTERED_PANELS_LUA);
     let _ = env.exec(TOGGLE_ACHIEVEMENT_FRAME_LUA);
     let _ = env.exec(TOGGLE_ENCOUNTER_JOURNAL_LUA);
     let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
@@ -186,6 +278,118 @@ pub(crate) fn patch_encounter_journal_loader(env: &LoaderEnv<'_>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn installs_panel_registration_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec("RegisterUIPanel = nil; CloseAllWindows = nil; UIPanelWindows = nil")
+            .expect("fixture should clear panel globals");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("panel defaults should apply");
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                local panel = CreateFrame("Frame", "FallbackPanelRegistrationFrame", UIParent)
+                RegisterUIPanel(panel, { area = "center", pushable = 0, whileDead = 1 })
+                local entry = UIPanelWindows.FallbackPanelRegistrationFrame
+                if type(entry) ~= "table" then return "missing_entry" end
+                if entry.area ~= "center" or entry.pushable ~= 0 or entry.whileDead ~= 1 then
+                    return "bad_attributes"
+                end
+                if panel:GetAttribute("UIPanelLayout-defined") ~= true then return "defined_attribute" end
+                if panel:GetAttribute("UIPanelLayout-area") ~= "center" then return "area_attribute" end
+                if panel:GetAttribute("UIPanelLayout-pushable") ~= 0 then return "pushable_attribute" end
+                if panel.editModeManuallyShown ~= true then return "direct_toggle_flag" end
+
+                RegisterUIPanel(panel, { area = "left", pushable = 3 })
+                if entry.area ~= "center" or entry.pushable ~= 0 then return "overwrote" end
+                if CloseAllWindows() ~= false then return "close_result" end
+
+                return "ok"
+                "#,
+            )
+            .expect("panel defaults probe should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn preserves_existing_panel_globals() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            RegisterUIPanel = function()
+                registeredByExisting = true
+            end
+            CloseAllWindows = function()
+                return "existing"
+            end
+            "#,
+        )
+        .expect("fixture should install existing panel globals");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("panel defaults should apply");
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                RegisterUIPanel()
+                if registeredByExisting ~= true then return "register" end
+                if CloseAllWindows() ~= "existing" then return "close" end
+                return "ok"
+                "#,
+            )
+            .expect("panel preservation probe should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn patch_marks_registered_panels_for_direct_toggle() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            registeredPanel = nil
+            RegisterUIPanel = function(frame)
+                registeredPanel = frame
+            end
+            local panel = CreateFrame("Frame", "DirectTogglePanel", UIParent)
+            ShowUIPanel = function()
+                return "blocked"
+            end
+            HideUIPanel = function()
+                return "blocked"
+            end
+            "#,
+        )
+        .expect("fixture should install real-ish panel globals");
+
+        patch(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                RegisterUIPanel(DirectTogglePanel, {})
+                if registeredPanel ~= DirectTogglePanel then return "original" end
+                if DirectTogglePanel.editModeManuallyShown ~= true then return "flag" end
+                ShowUIPanel(DirectTogglePanel)
+                if not DirectTogglePanel:IsShown() then return "show" end
+                HideUIPanel(DirectTogglePanel)
+                if DirectTogglePanel:IsShown() then return "hide" end
+                return "ok"
+                "#,
+            )
+            .expect("direct-toggle registration probe should run");
+
+        assert_eq!(result, "ok");
+    }
 
     #[test]
     fn installs_getglobal_helper_and_toggle_functions() {

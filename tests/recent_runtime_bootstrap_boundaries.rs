@@ -129,6 +129,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ("function UnitSex", "Rust unit state owner"),
         ("function UnitIsDead", "Rust unit liveness owner"),
         (
+            "function RegisterUIPanel",
+            "temporary UIParent panel workaround",
+        ),
+        (
+            "function CloseAllWindows",
+            "temporary UIParent panel workaround",
+        ),
+        (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
         ),
