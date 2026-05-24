@@ -290,6 +290,10 @@ fn client_info_defaults_are_not_runtime_bootstrap_fallbacks() {
         "GetMaxLevelForExpansionLevel",
         "GetMaxLevelForPlayerExpansion",
         "GetExpansionDisplayInfo",
+        "PartialPlayTime",
+        "NoPlayTime",
+        "GetBillingTimeRested",
+        "GetReleaseTimeRemaining",
     ] {
         assert!(
             !bootstrap.contains(&format!("function {symbol}")),

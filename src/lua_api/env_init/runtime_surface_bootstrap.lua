@@ -1082,30 +1082,6 @@ if UnitPosition == nil then
   end
 end
 
-if PartialPlayTime == nil then
-  function PartialPlayTime()
-    return false
-  end
-end
-
-if NoPlayTime == nil then
-  function NoPlayTime()
-    return false
-  end
-end
-
-if GetBillingTimeRested == nil then
-  function GetBillingTimeRested()
-    return 0
-  end
-end
-
-if GetReleaseTimeRemaining == nil then
-  function GetReleaseTimeRemaining()
-    return 0
-  end
-end
-
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 BaseActionButtonMixin = BaseActionButtonMixin or {}
 

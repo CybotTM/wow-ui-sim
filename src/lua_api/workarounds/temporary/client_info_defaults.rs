@@ -130,6 +130,30 @@ if GetMaxLevelForPlayerExpansion == nil then
   end
 end
 
+if PartialPlayTime == nil then
+  function PartialPlayTime()
+    return false
+  end
+end
+
+if NoPlayTime == nil then
+  function NoPlayTime()
+    return false
+  end
+end
+
+if GetBillingTimeRested == nil then
+  function GetBillingTimeRested()
+    return 0
+  end
+end
+
+if GetReleaseTimeRemaining == nil then
+  function GetReleaseTimeRemaining()
+    return 0
+  end
+end
+
 if GetExpansionDisplayInfo == nil then
   function GetExpansionDisplayInfo(_expansionLevel, _desiredReleaseType)
     return {
@@ -203,6 +227,10 @@ mod tests {
                 if GetMaxPlayerLevel() ~= 80 then return "max_player_level" end
                 if GetMaxLevelForExpansionLevel(0) ~= GetMaxPlayerLevel() then return "max_level" end
                 if GetMaxLevelForPlayerExpansion() ~= GetMaxPlayerLevel() then return "player_max_level" end
+                if PartialPlayTime() ~= false then return "partial_play_time" end
+                if NoPlayTime() ~= false then return "no_play_time" end
+                if GetBillingTimeRested() ~= 0 then return "billing_rested" end
+                if GetReleaseTimeRemaining() ~= 0 then return "release_time" end
                 local info = GetExpansionDisplayInfo(10)
                 if type(info) ~= "table" or info.textureKit ~= "" or type(info.features) ~= "table" then return "display_info" end
                 if GetFileStreamingStatus() ~= 0 or GetBackgroundLoadingStatus() ~= 0 then return "streaming_status" end
