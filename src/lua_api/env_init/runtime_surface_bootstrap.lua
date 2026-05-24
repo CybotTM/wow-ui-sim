@@ -1065,12 +1065,6 @@ if GetRandomScenarioInfo == nil then
   end
 end
 
-if UnitIsGhost == nil then
-  function UnitIsGhost(_unit)
-    return false
-  end
-end
-
 if CanAutoSetGamePadCursorControl == nil then
   function CanAutoSetGamePadCursorControl(_enabled)
     return false
@@ -1099,12 +1093,6 @@ if LocalizedClassList == nil then
       DEMONHUNTER = "Demon Hunter",
       EVOKER = "Evoker",
     }
-  end
-end
-
-if UnitIsConnected == nil then
-  function UnitIsConnected(_unit)
-    return true
   end
 end
 

@@ -143,11 +143,13 @@ fn register_unit_group_roles(state: &mut LuaState) {
 
 fn register_unit_liveness(state: &mut LuaState) {
     set_global(state, "UnitIsDead", relationships::unit_is_dead);
+    set_global(state, "UnitIsGhost", relationships::unit_is_ghost);
     set_global(
         state,
         "UnitIsDeadOrGhost",
         relationships::unit_is_dead_or_ghost,
     );
+    set_global(state, "UnitIsConnected", relationships::unit_is_connected);
     set_global(state, "UnitIsCorpse", relationships::unit_is_corpse);
     set_global(
         state,

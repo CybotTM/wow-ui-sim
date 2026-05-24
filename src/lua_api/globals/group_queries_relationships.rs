@@ -259,6 +259,30 @@ pub(super) fn unit_is_dead(state: &mut LuaState) -> LuaResult<u32> {
     unit_is_dead_or_ghost(state)
 }
 
+/// `UnitIsGhost(unit)` — the sim has no separate ghost state today.
+pub(super) fn unit_is_ghost(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// `UnitIsConnected(unit)` — true for currently known local, target, focus,
+/// and group unit tokens. The sim does not model offline party members yet.
+pub(super) fn unit_is_connected(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let connected = {
+        let st = borrow_state(state)?;
+        match unit.as_str() {
+            "player" | "pet" | "vehicle" => true,
+            "target" => st.current_target.is_some(),
+            "focus" => st.current_focus.is_some(),
+            other => visible_party_member(&st, other).is_some(),
+        }
+    };
+    state.push(Val::Bool(connected));
+    Ok(1)
+}
+
 /// `UnitIsCorpse(unit)` — true when the unit is dead (same as DeadOrGhost
 /// for the sim, which doesn't distinguish ghost runs from corpse runs).
 pub(super) fn unit_is_corpse(state: &mut LuaState) -> LuaResult<u32> {
