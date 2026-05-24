@@ -1118,12 +1118,6 @@ if UnitPosition == nil then
   end
 end
 
-if PlayerHasToy == nil then
-  function PlayerHasToy(itemID)
-    return C_ToyBox ~= nil and C_ToyBox.GetToyInfo ~= nil and C_ToyBox.GetToyInfo(itemID) ~= nil
-  end
-end
-
 if UnitInPartyIsAI == nil then
   function UnitInPartyIsAI(_unit)
     return false

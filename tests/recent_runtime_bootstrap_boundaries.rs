@@ -169,6 +169,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GetMaxPlayerLevel",
             "temporary client-info workaround",
         ),
+        ("function PlayerHasToy", "Rust ToyBox owner"),
         (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",

@@ -214,6 +214,22 @@ fn test_toy_box_is_toy_usable_uncollected() {
 }
 
 #[test]
+fn test_player_has_toy_reads_collected_toy_state() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if not PlayerHasToy(166779) then return "missing_collected" end
+            if PlayerHasToy(187421) then return "uncollected_present" end
+            if PlayerHasToy(1) then return "unknown_present" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_toy_box_get_set_is_favorite() {
     let env = env();
     let result: String = env

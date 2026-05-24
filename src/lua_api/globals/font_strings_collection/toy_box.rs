@@ -93,6 +93,18 @@ fn toy_is_usable(state: &mut LuaState) -> LuaResult<u32> {
     usable.into_stack(state)
 }
 
+fn player_has_toy(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    let has_toy = borrow_state(state)?
+        .world
+        .toys
+        .iter()
+        .find(|t| t.item_id == item_id as u32)
+        .map(|t| t.is_collected)
+        .unwrap_or(false);
+    has_toy.into_stack(state)
+}
+
 fn toy_get_link(state: &mut LuaState) -> LuaResult<u32> {
     let item_id = i32::from_stack(state, 1)?;
     let link = {
@@ -186,5 +198,6 @@ pub fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
     let b = register_toy_favorites(b)?;
     let t = register_toy_filter_stubs(b)?.build();
     set_global_val(lua.state_mut(), "C_ToyBox", t);
+    LuaApiMut::register_function(lua, "PlayerHasToy", player_has_toy)?;
     Ok(())
 }
