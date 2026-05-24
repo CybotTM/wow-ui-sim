@@ -1429,18 +1429,6 @@ if GetActiveTimerunningSeasonID == nil then
   end
 end
 
-if GetMinRenderScale == nil then
-  function GetMinRenderScale()
-    return 0.5
-  end
-end
-
-if GetMaxRenderScale == nil then
-  function GetMaxRenderScale()
-    return 1.0
-  end
-end
-
 if GetCharacterUndeleteStatus == nil then
   function GetCharacterUndeleteStatus()
     return false, false, 0, 0

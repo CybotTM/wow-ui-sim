@@ -381,11 +381,16 @@ fn performance_metric_defaults_are_not_runtime_bootstrap_fallbacks() {
 #[test]
 fn display_scale_defaults_are_not_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
+    let shared_bootstrap = include_str!("../src/lua_api/env_init/shared_bootstrap.lua");
 
     for symbol in ["GetDefaultScale", "GetMinRenderScale", "GetMaxRenderScale"] {
         assert!(
             !bootstrap.contains(&format!("function {symbol}")),
             "{symbol} fallback must live in the explicit temporary workaround boundary, not runtime bootstrap"
+        );
+        assert!(
+            !shared_bootstrap.contains(&format!("function {symbol}")),
+            "{symbol} fallback must live in the explicit temporary workaround boundary, not shared bootstrap"
         );
     }
 }
