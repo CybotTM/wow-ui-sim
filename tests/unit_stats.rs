@@ -273,7 +273,8 @@ fn paperdoll_attribute_helpers_return_numbers() {
 #[test]
 fn paperdoll_health_and_ap_sp_helpers_are_available() {
     let env = env();
-    let (stamina, hp_max, hp_per_stam, health_mod, ap_to_sp, sp_to_ap): (
+    let (stamina, hp_max, hp_per_stam, health_mod, health_mod_percent, ap_to_sp, sp_to_ap): (
+        f64,
         f64,
         f64,
         f64,
@@ -287,6 +288,7 @@ fn paperdoll_health_and_ap_sp_helpers_are_available() {
                    UnitHealthMax("player"),
                    UnitHPPerStamina("player"),
                    GetUnitMaxHealthModifier("player"),
+                   GetUnitTotalModifiedMaxHealthPercent("player"),
                    HasAPEffectsSpellPower(),
                    HasSPEffectsAttackPower()
             "#,
@@ -299,6 +301,7 @@ fn paperdoll_health_and_ap_sp_helpers_are_available() {
     );
     assert!(hp_per_stam > 0.0);
     assert!(health_mod > 0.0);
+    assert_eq!(health_mod_percent, 0.0);
     assert!(ap_to_sp, "seeded protection paladin is a physical spec");
     assert!(!sp_to_ap);
 }

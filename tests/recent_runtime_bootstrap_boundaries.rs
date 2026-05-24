@@ -184,6 +184,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary difficulty/PVP utility workaround",
         ),
         ("function LocalizedClassList", "Rust class info owner"),
+        (
+            "function GetUnitTotalModifiedMaxHealthPercent",
+            "Rust unit stats owner",
+        ),
         ("function UnitIsPossessed", "Rust unit relationship owner"),
         ("LE_REALM_RELATION_SAME", "Rust unit relationship owner"),
         (

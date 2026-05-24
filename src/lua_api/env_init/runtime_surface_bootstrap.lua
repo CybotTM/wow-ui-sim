@@ -1100,12 +1100,6 @@ if GetBillingTimeRested == nil then
   end
 end
 
-if GetUnitTotalModifiedMaxHealthPercent == nil then
-  function GetUnitTotalModifiedMaxHealthPercent(_unit)
-    return 0
-  end
-end
-
 if GetReleaseTimeRemaining == nil then
   function GetReleaseTimeRemaining()
     return 0

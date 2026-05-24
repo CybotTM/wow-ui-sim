@@ -543,6 +543,15 @@ fn get_unit_max_health_modifier(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `GetUnitTotalModifiedMaxHealthPercent(unit)` — percent change from the
+/// unmodified max-health baseline. The current stat model has no bonus max
+/// health modifiers, so the seeded default is 0.
+fn get_unit_total_modified_max_health_percent(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = unit_token_at(state, 1);
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
 /// `HasAPEffectsSpellPower()` and `HasSPEffectsAttackPower()` return class/spec
 /// crossover flags in retail. The simulator currently models no crossover.
 fn has_ap_effects_spell_power(state: &mut LuaState) -> LuaResult<u32> {
@@ -590,6 +599,11 @@ fn register_paperdoll_helpers(lua: &mut rilua::Lua) -> crate::Result<()> {
         lua,
         "GetUnitMaxHealthModifier",
         get_unit_max_health_modifier,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "GetUnitTotalModifiedMaxHealthPercent",
+        get_unit_total_modified_max_health_percent,
     )?;
     LuaApiMut::register_function(lua, "HasAPEffectsSpellPower", has_ap_effects_spell_power)?;
     LuaApiMut::register_function(lua, "HasSPEffectsAttackPower", has_sp_effects_attack_power)?;
