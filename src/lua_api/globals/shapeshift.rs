@@ -2,6 +2,8 @@
 //!
 //! Mirrors the live API shape:
 //!
+//! - `GetNumShapeshiftForms()` → `state.shapeshift_forms.len()`.
+//! - `GetShapeshiftForm()` → active 1-based form index, or `0` when none.
 //! - `GetShapeshiftFormInfo(index)` → `(texture, isActive, isCastable, spellID)`
 //!   from `state.shapeshift_forms[index-1]`.
 //! - `GetShapeshiftFormCooldown(index)` → `(start, duration, enable)` from
@@ -11,10 +13,9 @@
 //!   clears every other form's `is_active`, and fires `UPDATE_SHAPESHIFT_FORM`
 //!   so `StanceBarMixin:OnEvent` re-runs `Update`.
 //!
-//! `GetNumShapeshiftForms` lives in `social_probes.rs` (it predates this
-//! module). The existing `runtime_surface_bootstrap.lua` `if ... == nil`
-//! guards on `GetShapeshiftFormInfo` are now no-ops — registration here runs
-//! before the bootstrap script.
+//! The existing `runtime_surface_bootstrap.lua` `if ... == nil` guards on
+//! shapeshift APIs are no-ops — registration here runs before the bootstrap
+//! script.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_api::script_helpers::fire_named_event_state;
@@ -46,6 +47,26 @@ fn push_form_info(
     state.push(Val::Bool(is_castable));
     state.push(Val::Num(spell_id as f64));
     4
+}
+
+/// `GetNumShapeshiftForms()` — number of currently available stance/forms.
+fn get_num_shapeshift_forms(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.shapeshift_forms.len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+/// `GetShapeshiftForm()` — active 1-based stance/form index, or `0` when no
+/// form is active.
+fn get_shapeshift_form(state: &mut LuaState) -> LuaResult<u32> {
+    let active_index = borrow_state(state)?
+        .shapeshift_forms
+        .iter()
+        .position(|form| form.is_active)
+        .map(|index| index + 1)
+        .unwrap_or(0);
+    state.push(Val::Num(active_index as f64));
+    Ok(1)
 }
 
 /// `GetShapeshiftFormInfo(index)` — `(texture, isActive, isCastable, spellID)`.
@@ -125,6 +146,8 @@ fn cast_shapeshift_form(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "GetNumShapeshiftForms", get_num_shapeshift_forms)?;
+    LuaApiMut::register_function(lua, "GetShapeshiftForm", get_shapeshift_form)?;
     LuaApiMut::register_function(lua, "GetShapeshiftFormInfo", get_shapeshift_form_info)?;
     LuaApiMut::register_function(
         lua,

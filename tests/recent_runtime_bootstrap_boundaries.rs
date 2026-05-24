@@ -161,6 +161,11 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "Rust unit combat owner",
         ),
         (
+            "function GetNumShapeshiftForms",
+            "Rust shapeshift owner",
+        ),
+        ("function GetShapeshiftForm", "Rust shapeshift owner"),
+        (
             "__wow_ensure_chat_voice_button_surface",
             "temporary chat voice button workaround",
         ),

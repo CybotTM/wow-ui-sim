@@ -1172,18 +1172,6 @@ if GetUnitTotalModifiedMaxHealthPercent == nil then
   end
 end
 
-if GetNumShapeshiftForms == nil then
-  function GetNumShapeshiftForms()
-    return 0
-  end
-end
-
-if GetShapeshiftForm == nil then
-  function GetShapeshiftForm()
-    return 0
-  end
-end
-
 if GetTotemInfo == nil then
   function GetTotemInfo(_slot)
     return false, nil, 0, 0, nil

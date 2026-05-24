@@ -9,7 +9,6 @@
 //!   fires `UNIT_NAME_UPDATE("player")` so the title pane refreshes.
 //! - `GetNumClasses()`          → `CLASS_LABELS.len()` (13 — the
 //!   canonical retail class count).
-//! - `GetNumShapeshiftForms()`  → `SimState.shapeshift_forms.len()`.
 
 use crate::lua_api::game_data::{CLASS_LABELS, class_info_by_index};
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
@@ -114,12 +113,6 @@ fn get_class_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(3)
 }
 
-fn get_num_shapeshift_forms(state: &mut LuaState) -> LuaResult<u32> {
-    let n = borrow_state(state)?.shapeshift_forms.len() as f64;
-    state.push(Val::Num(n));
-    Ok(1)
-}
-
 fn get_shapeshift_form_id(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Nil);
     Ok(1)
@@ -133,7 +126,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "SetCurrentTitle", set_current_title)?;
     LuaApiMut::register_function(lua, "GetNumClasses", get_num_classes)?;
     LuaApiMut::register_function(lua, "GetClassInfo", get_class_info)?;
-    LuaApiMut::register_function(lua, "GetNumShapeshiftForms", get_num_shapeshift_forms)?;
     LuaApiMut::register_function(lua, "GetShapeshiftFormID", get_shapeshift_form_id)?;
     Ok(())
 }

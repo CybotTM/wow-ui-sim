@@ -100,6 +100,19 @@ fn cast_shapeshift_form_activates_target_form() {
 }
 
 #[test]
+fn get_shapeshift_form_reports_active_form_index() {
+    let env = env_with_druid_forms();
+    {
+        let mut state = env.state().borrow_mut();
+        state.shapeshift_forms[1].is_active = true;
+    }
+
+    let active_index: i32 = env.eval("return GetShapeshiftForm()").unwrap();
+
+    assert_eq!(active_index, 2);
+}
+
+#[test]
 fn cast_shapeshift_form_clears_previously_active_form() {
     let env = env_with_druid_forms();
     {
