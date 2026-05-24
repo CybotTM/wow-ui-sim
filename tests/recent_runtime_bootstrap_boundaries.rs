@@ -185,6 +185,18 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary GameTime/calendar workaround",
         ),
         (
+            "function GetScenariosChoiceOrder",
+            "Rust battlefield/LFG scenario owner",
+        ),
+        (
+            "function GetNumRandomScenarios",
+            "Rust battlefield/LFG scenario owner",
+        ),
+        (
+            "function GetRandomScenarioInfo",
+            "Rust battlefield/LFG scenario owner",
+        ),
+        (
             "function GetDifficultyInfo",
             "temporary difficulty/PVP utility workaround",
         ),

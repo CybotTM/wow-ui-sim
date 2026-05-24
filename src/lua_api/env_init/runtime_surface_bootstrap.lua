@@ -1032,24 +1032,6 @@ end
 -- iterates the returned category / session / cooldown list with ipairs.
 -- None of these subsystems are simulated; return empty tables.
 
-if GetScenariosChoiceOrder == nil then
-  function GetScenariosChoiceOrder()
-    return {}
-  end
-end
-
-if GetNumRandomScenarios == nil then
-  function GetNumRandomScenarios()
-    return 0
-  end
-end
-
-if GetRandomScenarioInfo == nil then
-  function GetRandomScenarioInfo(_)
-    return nil
-  end
-end
-
 if CanAutoSetGamePadCursorControl == nil then
   function CanAutoSetGamePadCursorControl(_enabled)
     return false

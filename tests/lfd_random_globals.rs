@@ -62,6 +62,28 @@ fn raid_finder_dungeon_globals_are_inert_when_no_raids_are_seeded() {
 }
 
 #[test]
+fn scenario_finder_globals_are_inert_without_scenario_data() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local order = GetScenariosChoiceOrder()
+            if type(order) ~= "table" then return "order_type=" .. type(order) end
+            if #order ~= 0 then return "order_count=" .. #order end
+            if GetNumRandomScenarios() ~= 0 then return "count" end
+            if GetRandomScenarioInfo(1) ~= nil then return "info" end
+            if GetRandomScenarioBestChoice() ~= nil then return "best_choice" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Scenario Finder globals should be inert: {result}"
+    );
+}
+
+#[test]
 fn get_random_dungeon_best_choice() {
     let env = env();
     let result: String = env

@@ -446,6 +446,22 @@ fn get_random_scenario_best_choice(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_scenarios_choice_order(state: &mut LuaState) -> LuaResult<u32> {
+    let t = create_table(state);
+    state.push(t);
+    Ok(1)
+}
+
+fn get_num_random_scenarios(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_random_scenario_info(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
 /// `GetLFGDungeonRewards(dungeonID)` → 7 numbers describing rewards. The
 /// sim has no reward data, so all zeros (and nil spellID). Called from
 /// the random-dungeon panel when a positive-id random dungeon is shown.
@@ -638,6 +654,9 @@ fn register_lfd_state_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetRandomScenarioBestChoice",
         get_random_scenario_best_choice,
     )?;
+    LuaApiMut::register_function(lua, "GetScenariosChoiceOrder", get_scenarios_choice_order)?;
+    LuaApiMut::register_function(lua, "GetNumRandomScenarios", get_num_random_scenarios)?;
+    LuaApiMut::register_function(lua, "GetRandomScenarioInfo", get_random_scenario_info)?;
     Ok(())
 }
 
