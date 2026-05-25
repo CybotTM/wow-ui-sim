@@ -15,6 +15,7 @@ pub(crate) mod auction_house_browse_results_event;
 pub(crate) mod auction_house_categories_refresh_count;
 pub(crate) mod auction_house_search_context_aliases;
 pub(crate) mod auth_challenge_frame_parent;
+pub(crate) mod auto_complete_defaults;
 pub(crate) mod base_nine_slice_dialog_defaults;
 pub(crate) mod battle_net_account_defaults;
 pub(crate) mod behavioral_messaging_defaults;

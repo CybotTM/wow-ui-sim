@@ -1,5 +1,4 @@
 pub mod c_auth_challenge;
-pub mod c_auto_complete;
 pub mod c_black_market;
 pub mod c_calendar;
 pub mod c_campaign_covenant_defaults;
