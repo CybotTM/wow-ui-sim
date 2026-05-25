@@ -20,6 +20,11 @@ NEXT = NEXT or "Next"
 PREVIEW = PREVIEW or "Preview"
 CUSTOMIZE = CUSTOMIZE or "Customize"
 FINISH = FINISH or "Finish"
+EVERY_X_PERCENT = EVERY_X_PERCENT or "%d%%"
+TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN = TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN or "Known"
+ERR_QUEST_SESSION_RESULT_RESYNC = ERR_QUEST_SESSION_RESULT_RESYNC or "Resync"
+CLASS_SORT_ORDER = CLASS_SORT_ORDER or { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "DEATHKNIGHT", "SHAMAN", "MAGE", "WARLOCK", "MONK", "DRUID", "DEMONHUNTER", "EVOKER" }
+MAX_CLASSES = MAX_CLASSES or #CLASS_SORT_ORDER
 
 if BreakUpLargeNumbers == nil then
   function BreakUpLargeNumbers(value)
@@ -302,6 +307,20 @@ mod tests {
     #[test]
     fn installs_formatting_utility_defaults() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            EVERY_X_PERCENT = nil
+            TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN = nil
+            ERR_QUEST_SESSION_RESULT_RESYNC = nil
+            CLASS_SORT_ORDER = nil
+            MAX_CLASSES = nil
+            "#,
+        )
+        .expect("fixture should clear moved constants");
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("formatting defaults should reapply");
+        }
 
         let result: String = env
             .eval(
@@ -311,6 +330,11 @@ mod tests {
                 if GetText("MISSING_TOKEN") ~= "MISSING_TOKEN" then return "gettext_missing" end
                 if GetText(42) ~= 42 then return "gettext_passthrough" end
                 if BACK ~= "Back" or NEXT ~= "Next" or PREVIEW ~= "Preview" then return "text_defaults" end
+                if EVERY_X_PERCENT ~= "%d%%" then return "every_percent" end
+                if TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN ~= "Known" then return "transmog_known" end
+                if type(ERR_QUEST_SESSION_RESULT_RESYNC) ~= "string" or ERR_QUEST_SESSION_RESULT_RESYNC == "" then return "quest_resync" end
+                if CLASS_SORT_ORDER[1] ~= "WARRIOR" or CLASS_SORT_ORDER[13] ~= "EVOKER" then return "class_sort_order" end
+                if MAX_CLASSES ~= 13 then return "max_classes" end
                 if BreakUpLargeNumbers(12345) ~= "12345" then return "breakup" end
                 if CalculateStringEditDistance("kitten", "sitting") ~= 3 then return "edit_distance" end
                 local split = strsplittable(",", "a,b")

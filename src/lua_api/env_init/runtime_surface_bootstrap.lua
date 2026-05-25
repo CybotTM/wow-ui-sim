@@ -3767,13 +3767,6 @@ __wow_register_addon_compartment()
 __wow_register_alert_frame()
 __wow_register_misc_global_frames()
 
-EVERY_X_PERCENT = EVERY_X_PERCENT or "%d%%"
-TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN = TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN or "Known"
-ERR_QUEST_SESSION_RESULT_RESYNC = ERR_QUEST_SESSION_RESULT_RESYNC or "Resync"
-CLASS_SORT_ORDER = CLASS_SORT_ORDER or { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "DEATHKNIGHT", "SHAMAN", "MAGE", "WARLOCK", "MONK", "DRUID", "DEMONHUNTER", "EVOKER" }
-EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE = false
-CLOCK_TICKER_Y_OVERRIDE = CLOCK_TICKER_Y_OVERRIDE or false
-
 local __global_mt = getmetatable(_G) or {}
 local __prev_index = __global_mt.__index
 local __prev_newindex = __global_mt.__newindex

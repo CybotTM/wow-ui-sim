@@ -628,6 +628,30 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "function GameRulesUtil.ShouldShowPlayerCastBar",
             "temporary game-rules namespace workaround",
         ),
+        (
+            "EVERY_X_PERCENT =",
+            "temporary formatting utility workaround",
+        ),
+        (
+            "TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN =",
+            "temporary formatting utility workaround",
+        ),
+        (
+            "ERR_QUEST_SESSION_RESULT_RESYNC =",
+            "temporary formatting utility workaround",
+        ),
+        (
+            "CLASS_SORT_ORDER =",
+            "temporary formatting utility workaround",
+        ),
+        (
+            "EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE =",
+            "temporary inert-global workaround",
+        ),
+        (
+            "CLOCK_TICKER_Y_OVERRIDE =",
+            "temporary inert-global workaround",
+        ),
 ];
 
 #[test]

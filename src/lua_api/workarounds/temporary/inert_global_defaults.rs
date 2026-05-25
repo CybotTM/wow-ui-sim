@@ -48,6 +48,8 @@ if UnitExists == nil then
         return unit == "player"
     end
 end
+EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE = false
+CLOCK_TICKER_Y_OVERRIDE = CLOCK_TICKER_Y_OVERRIDE or false
 
 C_SocialRestrictions = C_SocialRestrictions or __wow_namespace()
 if rawget(C_SocialRestrictions, "IsChatDisabled") == nil then
@@ -261,6 +263,8 @@ mod tests {
                 if IsPVPTimerRunning() ~= false then return "pvp_timer" end
                 if HasArtifactEquipped() ~= false then return "artifact" end
                 if UnitExists("player") ~= true or UnitExists("target") ~= false then return "unit" end
+                if EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE ~= false then return "toast_offset" end
+                if CLOCK_TICKER_Y_OVERRIDE ~= false then return "clock_ticker" end
                 if C_SocialRestrictions.IsChatDisabled() ~= false then return "social" end
                 if C_Commentator.IsSpectating() ~= false then return "spectating" end
                 if C_Commentator.SendAddonMessage("A", "B", "WHISPER") ~= Enum.SendAddonMessageResult.Success then return "send" end
@@ -317,6 +321,8 @@ mod tests {
             C_SocialRestrictions.IsChatDisabled = function() return true end
             C_Commentator.ExistingMember = 7
             C_FriendList.GetNumFriends = function() return 3 end
+            EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE = true
+            CLOCK_TICKER_Y_OVERRIDE = true
             ACCOUNT_BINDINGS = 9
             function BNGetNumFriends() return 5, 4, 3, 2 end
             function Ambiguate() return "Existing" end
@@ -358,6 +364,8 @@ mod tests {
                 if UnitInSubgroup("player") ~= false then return "bad_player_subgroup_default" end
                 if GetNumGuildPerks() ~= 0 then return "bad_guild_perks_default" end
                 if GetNumArenaOpponentSpecs() ~= 3 then return "overwrote_arena_specs" end
+                if EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE ~= false then return "toast_offset_overwrite" end
+                if CLOCK_TICKER_Y_OVERRIDE ~= true then return "overwrote_clock_ticker" end
                 return "ok"
                 "#,
             )
