@@ -283,7 +283,6 @@ fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     warband_scene::register_warband_scene_surface(state)?;
     c_api::register_nameplate_tables(state)?;
     ui_widget_manager::register_ui_widget_manager_surface(state)?;
-    c_api::register_ui_widget_power_bar_tables(state)?;
     anima_diversion::register_anima_diversion_surface(state)?;
     garrison::register_garrison_talent_surface(state)?;
     Ok(())

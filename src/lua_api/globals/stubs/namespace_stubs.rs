@@ -135,7 +135,6 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
         "GetObjectiveTrackerWidgetSetID",
         stub_nil,
     ),
-    ("C_UIWidgetManager", "GetPowerBarWidgetSetID", stub_zero),
     ("C_UIWidgetManager", "GetTopCenterWidgetSetID", stub_nil),
     ("C_UIWidgetManager", "GetWidgetSetInfo", stub_nil),
     // C_VoiceChat GetActiveChannelID / GetChannel / GetChannels /

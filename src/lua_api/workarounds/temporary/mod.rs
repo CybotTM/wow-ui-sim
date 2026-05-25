@@ -128,6 +128,7 @@ pub(crate) mod transmog_util_defaults;
 pub(crate) mod ui_frame_manager_defaults;
 pub(crate) mod ui_parent_panel_toggles;
 pub(crate) mod ui_widget_manager_defaults;
+pub(crate) mod ui_widget_power_bar_defaults;
 pub(crate) mod uiparent_managed_frame_mixin;
 pub(crate) mod uiparent_onupdate_worklists;
 pub(crate) mod unit_auras_state;

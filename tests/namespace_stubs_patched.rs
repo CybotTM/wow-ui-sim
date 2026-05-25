@@ -1,6 +1,6 @@
 //! Pins namespace entries that must not fall through to generic nil stubs.
 //!
-//! `C_UIWidgetManager.GetPowerBarWidgetSetID` is an explicit temporary shim,
+//! `C_UIWidgetManager.GetPowerBarWidgetSetID` is an explicit temporary workaround,
 //! while the `C_PlayerInfo` probes are state-backed through
 //! `missing_surface::player_info`.
 
