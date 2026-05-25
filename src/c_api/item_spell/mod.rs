@@ -7,7 +7,6 @@ pub(crate) mod helpers;
 use super::c_spell;
 use super::c_spell_book;
 use super::temporary_shims::c_container_defaults;
-use super::temporary_shims::c_equipment_set_lock_state;
 use super::temporary_shims::c_item_targeting;
 use super::temporary_shims::c_spell_book_call_pet;
 use super::temporary_shims::c_spell_static_fallbacks;
@@ -29,7 +28,6 @@ pub(crate) fn register_item_and_spell_surfaces(state: &mut LuaState) -> LuaResul
     c_container_defaults::register_c_container_default_shims(state)?;
     c_currency::register_c_currency_info(state)?;
     c_equipment_set::register_c_equipment_set(state)?;
-    c_equipment_set_lock_state::register_c_equipment_set_lock_state(state)?;
     c_currency::register_c_bank(state)?;
     c_spell::register_c_spell_surface(state)?;
     c_spell_static_fallbacks::register_c_spell_static_fallbacks(state)?;
