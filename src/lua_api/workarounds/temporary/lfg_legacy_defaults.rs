@@ -124,6 +124,30 @@ if rawget(C_LFGInfo or {}, "IsInLFGFollowerDungeon") == nil then
         return false
     end
 end
+if rawget(C_LFGInfo or {}, "CanPlayerUseLFR") == nil then
+    C_LFGInfo = C_LFGInfo or __wow_namespace()
+    function C_LFGInfo.CanPlayerUseLFR()
+        return true, nil
+    end
+end
+if rawget(C_LFGInfo or {}, "GetDungeonInfo") == nil then
+    C_LFGInfo = C_LFGInfo or __wow_namespace()
+    function C_LFGInfo.GetDungeonInfo(_dungeonID)
+        return {}
+    end
+end
+if rawget(C_LFGInfo or {}, "GetLFDLockStates") == nil then
+    C_LFGInfo = C_LFGInfo or __wow_namespace()
+    function C_LFGInfo.GetLFDLockStates(_lfgID)
+        return {}
+    end
+end
+if rawget(C_LFGInfo or {}, "GetAllEntriesForCategory") == nil then
+    C_LFGInfo = C_LFGInfo or __wow_namespace()
+    function C_LFGInfo.GetAllEntriesForCategory(_categoryID)
+        return {}
+    end
+end
 if GetLFGProposal == nil then
     function GetLFGProposal()
         return false, 0, 0, 0, "", "", "", false, 0, 0, 0, false, false, nil, false
@@ -378,6 +402,10 @@ mod tests {
             r#"
             C_LFGInfo.CanPlayerUseGroupFinder = nil
             C_LFGInfo.IsInLFGFollowerDungeon = nil
+            C_LFGInfo.CanPlayerUseLFR = nil
+            C_LFGInfo.GetDungeonInfo = nil
+            C_LFGInfo.GetLFDLockStates = nil
+            C_LFGInfo.GetAllEntriesForCategory = nil
             GetLFGProposal = nil
             GetLFGProposalEncounter = nil
             GetLFGInfoServer = nil
@@ -401,6 +429,11 @@ mod tests {
                 local canUse, reason = C_LFGInfo.CanPlayerUseGroupFinder()
                 if canUse ~= false or reason ~= "" then return "group_finder" end
                 if C_LFGInfo.IsInLFGFollowerDungeon() ~= false then return "follower" end
+                local canUseLfr, lfrReason = C_LFGInfo.CanPlayerUseLFR()
+                if canUseLfr ~= true or lfrReason ~= nil then return "lfr" end
+                if #C_LFGInfo.GetDungeonInfo(1) ~= 0 then return "dungeon_info" end
+                if #C_LFGInfo.GetLFDLockStates(1) ~= 0 then return "lock_states" end
+                if #C_LFGInfo.GetAllEntriesForCategory(1) ~= 0 then return "category_entries" end
 
                 local proposalExists, id, typeID, subtypeID, name, bg, role, responded, bosses, completed, members, leader, holiday, proposalCategory, silent = GetLFGProposal()
                 if proposalExists ~= false or id ~= 0 or typeID ~= 0 or subtypeID ~= 0 then return "proposal_ids" end

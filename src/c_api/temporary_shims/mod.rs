@@ -14,7 +14,6 @@ pub mod c_date_and_time;
 pub mod c_gossip_info;
 pub mod c_item_targeting;
 pub mod c_level_link_spell_lock;
-pub mod c_lfg_info;
 pub mod c_major_faction_display;
 pub mod c_map_groups;
 pub mod c_merchant_raid_defaults;
