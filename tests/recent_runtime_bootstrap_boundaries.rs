@@ -2,6 +2,15 @@ type BootstrapFallbackOwner = (&'static str, &'static str);
 
 const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ("function ReloadUI", "Rust event API"),
+        ("AlertFrame =", "temporary AlertFrame workaround"),
+        (
+            "__wow_register_alert_frame",
+            "temporary AlertFrame workaround",
+        ),
+        (
+            "AddQueuedAlertFrameSubSystem",
+            "temporary AlertFrame workaround",
+        ),
         ("HasArtifactEquipped", "temporary inert-global workaround"),
         ("IsPVPTimerRunning", "temporary inert-global workaround"),
         (

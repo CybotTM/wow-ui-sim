@@ -339,44 +339,6 @@ do
   local objectiveHeader = __wow_ensure_named_child(objectiveTracker, "Header", "Frame")
   __wow_ensure_named_child(objectiveHeader, "MinimizeButton", "Button")
 
-  local alertFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "AlertFrame", uiParent))
-  if alertFrame ~= nil then
-    alertFrame.alertFrameSubSystems = alertFrame.alertFrameSubSystems or {}
-    if alertFrame.AddQueuedAlertFrameSubSystem == nil then
-      function alertFrame:AddQueuedAlertFrameSubSystem(templateName, factory, _maxVisible, anchorSlot)
-        local subsystem = {
-          templateName = templateName,
-          factory = factory,
-          anchorPriority = 1000 + math.max(0, (tonumber(anchorSlot) or 1) - 1) * 10,
-          queuedAlerts = {},
-          canShowMoreCondition = nil,
-        }
-        function subsystem:SetCanShowMoreConditionFunc(func)
-          self.canShowMoreCondition = func
-        end
-        function subsystem:AddAlert(alert)
-          if self.canShowMoreCondition ~= nil and not self.canShowMoreCondition() and #self.queuedAlerts >= 2 then
-            return false
-          end
-          self.queuedAlerts[#self.queuedAlerts + 1] = alert
-          return true
-        end
-        function subsystem:RemoveAlert(alert)
-          for i = #self.queuedAlerts, 1, -1 do
-            if self.queuedAlerts[i] == alert then
-              table.remove(self.queuedAlerts, i)
-            end
-          end
-        end
-        function subsystem:ClearAllAlerts()
-          self.queuedAlerts = {}
-        end
-        self.alertFrameSubSystems[#self.alertFrameSubSystems + 1] = subsystem
-        return subsystem
-      end
-    end
-  end
-
 end
 
 -- GetInventorySlotInfo is registered from Rust
@@ -3351,46 +3313,6 @@ local function __wow_seed_global_frame_path(root, path)
   return current
 end
 
-local function __wow_register_alert_frame()
-  local frame = __wow_make_named_frame("Frame", "AlertFrame", UIParent)
-  frame.alertFrameSubSystems = frame.alertFrameSubSystems or {}
-  if frame.AddQueuedAlertFrameSubSystem == nil then
-    function frame:AddQueuedAlertFrameSubSystem(template, setupFn, maxAlerts, anchorSlot)
-      local subsystem = {
-        template = template,
-        setupFn = setupFn,
-        maxAlerts = tonumber(maxAlerts) or 0,
-        anchorPriority = 1000 + ((#self.alertFrameSubSystems + 1) * 10),
-        anchorSlot = anchorSlot,
-        queuedAlerts = {},
-      }
-
-      function subsystem:SetCanShowMoreConditionFunc(fn)
-        self.canShowMoreConditionFunc = fn
-      end
-
-      function subsystem:AddAlert(alert)
-        if self.maxAlerts > 0 and #self.queuedAlerts >= self.maxAlerts then
-          return false
-        end
-        table.insert(self.queuedAlerts, alert)
-        return true
-      end
-
-      function subsystem:RemoveAlert(alert)
-        __wow_remove_array_value(self.queuedAlerts, alert)
-      end
-
-      function subsystem:ClearAllAlerts()
-        self.queuedAlerts = {}
-      end
-
-      table.insert(self.alertFrameSubSystems, subsystem)
-      return subsystem
-    end
-  end
-end
-
 local function __wow_register_catalog_shop_inbound_globals()
   local function ensure_inbound_interface(name)
     if rawget(_G, name) ~= nil then
@@ -3582,7 +3504,6 @@ end
 __wow_register_core_frame_methods()
 __wow_register_catalog_shop_inbound_globals()
 __wow_register_dropdown_globals()
-__wow_register_alert_frame()
 __wow_register_misc_global_frames()
 
 local __global_mt = getmetatable(_G) or {}

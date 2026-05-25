@@ -215,6 +215,7 @@ fn apply_core_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Resu
 
 fn apply_core_foundation_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::addon_compartment_defaults::apply_bootstrap(lua)?;
+    temporary::alert_frame_defaults::apply_bootstrap(lua)?;
     temporary::adventure_journal_fallbacks::apply_bootstrap(lua)?;
     temporary::camera_tutorial_defaults::apply_bootstrap(lua)?;
     temporary::catalog_shop_product_card_defaults::apply_bootstrap(lua)?;

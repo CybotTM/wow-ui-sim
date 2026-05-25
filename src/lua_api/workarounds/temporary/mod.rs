@@ -5,6 +5,7 @@ pub(crate) mod action_bar_button_event_fanout;
 pub(crate) mod addon_compartment_defaults;
 pub(crate) mod adventure_journal_fallbacks;
 pub(crate) mod adventure_map_frame_surface;
+pub(crate) mod alert_frame_defaults;
 pub(crate) mod artifact_ui_show_panel_guard;
 pub(crate) mod assisted_combat_manager_defaults;
 pub(crate) mod auction_house_browse_results_event;
