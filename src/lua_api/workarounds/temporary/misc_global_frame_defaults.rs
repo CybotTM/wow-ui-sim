@@ -1,0 +1,112 @@
+//! Temporary misc global frame defaults.
+//!
+//! These are shallow startup placeholders for global frames whose real behavior
+//! is owned by Blizzard addons. Keep them outside the generic runtime bootstrap
+//! so their workaround status remains visible.
+
+const MISC_GLOBAL_FRAME_DEFAULTS_LUA: &str = r#"
+local function ensure_named_frame(widgetType, name, parent)
+    local existing = rawget(_G, name)
+    if existing ~= nil then
+        return existing
+    end
+    if type(CreateFrame) ~= "function" then
+        return nil
+    end
+    local frame = CreateFrame(widgetType or "Frame", name, parent)
+    rawset(_G, name, frame)
+    return frame
+end
+
+local function ensure_child_frame(parent, key)
+    if type(parent) ~= "table" then
+        return nil
+    end
+    local child = rawget(parent, key)
+    if child ~= nil then
+        return child
+    end
+    child = CreateFrame("Frame", nil, parent)
+    rawset(parent, key, child)
+    return child
+end
+
+local function ensure_game_menu_button_pool(gameMenu)
+    if gameMenu == nil
+        or gameMenu.buttonPool ~= nil
+        or type(CreateFramePool) ~= "function" then
+        return
+    end
+
+    local buttonPool = CreateFramePool("Button", gameMenu)
+    local function ensure_button_text(text)
+        local button = buttonPool:Acquire()
+        if type(button.SetText) == "function" then
+            button:SetText(text)
+        end
+        if type(button.Show) == "function" then
+            button:Show()
+        end
+    end
+
+    ensure_button_text(GAMEMENU_OPTIONS or "Options")
+    ensure_button_text(LOGOUT or "Logout")
+    gameMenu.buttonPool = buttonPool
+end
+
+local gameMenu = ensure_named_frame("Frame", "GameMenuFrame", UIParent)
+if type(gameMenu) == "table" then
+    if type(gameMenu.Hide) == "function" then
+        gameMenu:Hide()
+    end
+    ensure_game_menu_button_pool(gameMenu)
+end
+
+local objective = ensure_named_frame("Frame", "ObjectiveTrackerFrame", UIParent)
+local objectiveHeader = ensure_child_frame(objective, "Header")
+ensure_child_frame(objectiveHeader, "MinimizeButton")
+"#;
+
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(MISC_GLOBAL_FRAME_DEFAULTS_LUA)?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn installs_misc_global_frame_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                if type(GameMenuFrame) ~= "table" then return "game_menu" end
+                if GameMenuFrame:IsVisible() then return "game_menu_visible" end
+                if type(CreateFramePool) == "function" then
+                    if GameMenuFrame.buttonPool == nil then return "button_pool" end
+                    if type(GameMenuFrame.buttonPool.EnumerateActive) ~= "function" then return "button_pool_iter" end
+
+                    local buttonCount = 0
+                    for button in GameMenuFrame.buttonPool:EnumerateActive() do
+                        buttonCount = buttonCount + 1
+                        if button:GetText() == nil or button:GetText() == "" then
+                            return "button_text"
+                        end
+                    end
+                    if buttonCount == 0 then return "buttons" end
+                end
+
+                if type(ObjectiveTrackerFrame) ~= "table" then return "objective" end
+                if type(ObjectiveTrackerFrame.Header) ~= "table" then return "header" end
+                if type(ObjectiveTrackerFrame.Header.MinimizeButton) ~= "table" then return "minimize" end
+                return "ok"
+                "#,
+            )
+            .expect("misc global frame defaults probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}

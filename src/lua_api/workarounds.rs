@@ -263,6 +263,7 @@ fn apply_core_legacy_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::modified_click_defaults::apply_bootstrap(lua)?;
     temporary::performance_metric_defaults::apply_bootstrap(lua)?;
     temporary::pool_constructor_defaults::apply_bootstrap(lua)?;
+    temporary::misc_global_frame_defaults::apply_bootstrap(lua)?;
     Ok(())
 }
 

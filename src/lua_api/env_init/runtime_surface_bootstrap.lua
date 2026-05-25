@@ -3281,67 +3281,7 @@ local function __wow_register_core_frame_methods()
   end
 end
 
-local function __wow_make_named_frame(widgetType, name, parent)
-  local existing = rawget(_G, name)
-  if existing ~= nil then
-    return existing
-  end
-  local frame = CreateFrame(widgetType or "Frame", name, parent)
-  rawset(_G, name, frame)
-  return frame
-end
-
-local function __wow_seed_global_frame_path(root, path)
-  local current = root
-  for index = 1, #path do
-    local name = path[index]
-    local child = current[name]
-    if child == nil then
-      local child_type = (index == #path and name == "Title") and "FontString" or "Frame"
-      if child_type == "FontString" then
-        child = current:CreateFontString(nil, "OVERLAY")
-        if type(child.SetText) == "function" then
-          child:SetText("")
-        end
-      else
-        child = CreateFrame("Frame", nil, current)
-      end
-      current[name] = child
-    end
-    current = child
-  end
-  return current
-end
-
-local function __wow_register_misc_global_frames()
-  local gameMenu = __wow_make_named_frame("Frame", "GameMenuFrame", UIParent)
-  if type(gameMenu.Hide) == "function" then
-    gameMenu:Hide()
-  end
-  if gameMenu.buttonPool == nil and type(CreateFramePool) == "function" then
-    local buttonPool = CreateFramePool("Button", gameMenu)
-    local function ensure_button_text(text)
-      local button = buttonPool:Acquire()
-      if type(button.SetText) == "function" then
-        button:SetText(text)
-      end
-      if type(button.Show) == "function" then
-        button:Show()
-      end
-      return button
-    end
-    ensure_button_text(GAMEMENU_OPTIONS or "Options")
-    ensure_button_text(LOGOUT or "Logout")
-    gameMenu.buttonPool = buttonPool
-  end
-
-  local objective = __wow_make_named_frame("Frame", "ObjectiveTrackerFrame", UIParent)
-  __wow_seed_global_frame_path(objective, { "Header", "MinimizeButton" })
-
-end
-
 __wow_register_core_frame_methods()
-__wow_register_misc_global_frames()
 
 local __global_mt = getmetatable(_G) or {}
 local __prev_index = __global_mt.__index
