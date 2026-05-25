@@ -1,12 +1,13 @@
 use crate::common;
 
-use std::{cell::RefCell, path::PathBuf, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 use wow_ui_sim::render::WowFontSystem;
 
-fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+fn blizzard_ui_dir() -> std::path::PathBuf {
+    default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
 }
 
 fn setup_full_ui() -> WowLuaEnv {

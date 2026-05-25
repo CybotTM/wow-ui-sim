@@ -1,30 +1,6 @@
 local function __wow_noop()
 end
 
-local function __wow_ensure_named_frame(frameType, name, parent)
-  local existing = rawget(_G, name)
-  if existing ~= nil then
-    return existing
-  end
-  if CreateFrame == nil then
-    return nil
-  end
-  return CreateFrame(frameType or "Frame", name, parent)
-end
-
-local function __wow_ensure_named_child(parent, key, frameType, name)
-  if parent == nil then
-    return nil
-  end
-  local existing = rawget(parent, key)
-  if existing ~= nil then
-    return existing
-  end
-  local child = CreateFrame(frameType or "Frame", name, parent)
-  rawset(parent, key, child)
-  return child
-end
-
 local function __wow_install_frame_helpers(frame)
   if frame == nil then
     return nil
@@ -224,30 +200,6 @@ do
       end
     end
   end
-end
-
-do
-  local uiParent = UIParent
-  __wow_install_frame_helpers(uiParent)
-  local objectiveTracker = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "ObjectiveTrackerFrame", uiParent))
-  if objectiveTracker ~= nil and rawget(objectiveTracker, "OnAdded") == nil then
-    function objectiveTracker:OnAdded(backgroundAlpha)
-      if not self.init then
-        self.init = true
-        if type(ObjectiveTrackerContainerMixin) == "table" and type(ObjectiveTrackerContainerMixin.Init) == "function" then
-          ObjectiveTrackerContainerMixin.Init(self)
-        elseif self.Header and self.Header.Text and type(self.Header.Text.SetText) == "function" then
-          self.Header.Text:SetText(self.headerText or "")
-        end
-      end
-      if type(self.SetBackgroundAlpha) == "function" then
-        self:SetBackgroundAlpha(backgroundAlpha)
-      end
-    end
-  end
-  local objectiveHeader = __wow_ensure_named_child(objectiveTracker, "Header", "Frame")
-  __wow_ensure_named_child(objectiveHeader, "MinimizeButton", "Button")
-
 end
 
 -- GetInventorySlotInfo is registered from Rust

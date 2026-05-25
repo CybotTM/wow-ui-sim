@@ -23,19 +23,18 @@
 
 use crate::common;
 
-use std::path::PathBuf;
-
 use wow_ui_sim::iced_app::{
     RegistryQuadBatchParams, build_quad_batch_for_registry_with_quest_blobs,
 };
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 use wow_ui_sim::render::{GlyphAtlas, WowFontSystem};
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::settle_headless_startup;
 
-fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+fn blizzard_ui_dir() -> std::path::PathBuf {
+    default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
 }
 
 fn load_settled_game_ui() -> WowLuaEnv {

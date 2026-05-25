@@ -63,6 +63,22 @@ if type(gameMenu) == "table" then
 end
 
 local objective = ensure_named_frame("Frame", "ObjectiveTrackerFrame", UIParent)
+if objective ~= nil and rawget(objective, "OnAdded") == nil then
+    function objective:OnAdded(backgroundAlpha)
+        if not self.init then
+            self.init = true
+            if type(ObjectiveTrackerContainerMixin) == "table" and type(ObjectiveTrackerContainerMixin.Init) == "function" then
+                ObjectiveTrackerContainerMixin.Init(self)
+            elseif self.Header and self.Header.Text and type(self.Header.Text.SetText) == "function" then
+                self.Header.Text:SetText(self.headerText or "")
+            end
+        end
+        if type(self.SetBackgroundAlpha) == "function" then
+            self:SetBackgroundAlpha(backgroundAlpha)
+        end
+    end
+end
+
 local objectiveHeader = ensure_child_frame(objective, "Header")
 ensure_child_frame(objectiveHeader, "MinimizeButton")
 "#;
@@ -106,6 +122,55 @@ mod tests {
                 "#,
             )
             .expect("misc global frame defaults probe should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn installs_objective_tracker_on_added_default() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            ObjectiveTrackerFrame.OnAdded = nil
+            ObjectiveTrackerFrame.init = nil
+            ObjectiveTrackerFrame.headerText = "Tracked"
+            ObjectiveTrackerFrame.backgroundAlpha = nil
+            ObjectiveTrackerFrame.SetBackgroundAlpha = function(self, alpha)
+                self.backgroundAlpha = alpha
+            end
+            ObjectiveTrackerFrame.Header.Text = {
+                text = nil,
+                SetText = function(self, text)
+                    self.text = text
+                end,
+            }
+            ObjectiveTrackerContainerMixin = {
+                initialized = false,
+                Init = function(self)
+                    ObjectiveTrackerContainerMixin.initialized = self == ObjectiveTrackerFrame
+                end,
+            }
+            "#,
+        )
+        .expect("fixture should clear objective tracker OnAdded");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("misc global frame defaults should apply");
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                if type(ObjectiveTrackerFrame.OnAdded) ~= "function" then return "missing" end
+                ObjectiveTrackerFrame:OnAdded(0.25)
+                if ObjectiveTrackerFrame.init ~= true then return "init_flag" end
+                if ObjectiveTrackerContainerMixin.initialized ~= true then return "mixin_init" end
+                if ObjectiveTrackerFrame.backgroundAlpha ~= 0.25 then return "background_alpha" end
+                return "ok"
+                "#,
+            )
+            .expect("objective tracker OnAdded probe should run");
 
         assert_eq!(result, "ok");
     }
