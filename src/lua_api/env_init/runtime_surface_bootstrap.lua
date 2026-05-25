@@ -317,20 +317,6 @@ do
   end
 end
 
-ChatTypeGroup = ChatTypeGroup or {
-  SYSTEM = { "SYSTEM", "ERRORS", "IGNORED", "ACHIEVEMENT", "CHANNEL_NOTICE_USER" },
-  SAY = { "SAY" },
-  YELL = { "YELL" },
-  WHISPER = { "WHISPER", "WHISPER_INFORM" },
-  PARTY = { "PARTY", "PARTY_LEADER" },
-  RAID = { "RAID", "RAID_LEADER", "RAID_WARNING" },
-  GUILD = { "GUILD", "OFFICER" },
-  CHANNEL = { "CHANNEL", "CHANNEL_JOIN", "CHANNEL_LEAVE" },
-  EMOTE = { "EMOTE" },
-  BN_WHISPER = { "BN_WHISPER", "BN_WHISPER_INFORM", "BN_INLINE_TOAST_ALERT" },
-  INSTANCE_CHAT = { "INSTANCE_CHAT", "INSTANCE_CHAT_LEADER" },
-}
-
 do
   local uiParent = UIParent
   __wow_install_frame_helpers(uiParent)
@@ -3511,22 +3497,6 @@ end
 local function __wow_register_chat_frame_globals()
   if rawget(_G, "ChatFrame1") == nil then
     CreateFrame("ScrollingMessageFrame", "ChatFrame1", UIParent)
-  end
-
-  if ChatTypeGroup == nil then
-    ChatTypeGroup = {
-      SYSTEM = { "SYSTEM", "IGNORED", "SKILL", "LOOT", "CHANNEL_NOTICE_USER" },
-      SAY = { "SAY" },
-      PARTY = { "PARTY", "PARTY_LEADER" },
-      RAID = { "RAID", "RAID_LEADER", "RAID_WARNING" },
-      GUILD = { "GUILD", "OFFICER" },
-      WHISPER = { "WHISPER", "WHISPER_INFORM" },
-      CHANNEL = { "CHANNEL", "CHANNEL_JOIN", "CHANNEL_LEAVE" },
-      EMOTE = { "EMOTE", "TEXT_EMOTE" },
-      BN_WHISPER = { "BN_WHISPER", "BN_WHISPER_INFORM", "BN_INLINE_TOAST_ALERT" },
-      YELL = { "YELL" },
-      INSTANCE_CHAT = { "INSTANCE_CHAT", "INSTANCE_CHAT_LEADER" },
-    }
   end
 
 end

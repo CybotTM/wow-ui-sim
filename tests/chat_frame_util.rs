@@ -24,6 +24,26 @@ fn add_system_message_registered_on_chat_frame_util() {
 }
 
 #[test]
+fn chat_type_group_registered_on_chat_frame_surface() {
+    let env = env();
+    let (system_count, system_first, system_last, raid_warning): (i32, String, String, String) =
+        env.eval(
+            r#"
+            return #ChatTypeGroup.SYSTEM,
+                   ChatTypeGroup.SYSTEM[1],
+                   ChatTypeGroup.SYSTEM[5],
+                   ChatTypeGroup.RAID[3]
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(system_count, 5);
+    assert_eq!(system_first, "SYSTEM");
+    assert_eq!(system_last, "CHANNEL_NOTICE_USER");
+    assert_eq!(raid_warning, "RAID_WARNING");
+}
+
+#[test]
 fn add_system_message_pushes_to_system_chat_log() {
     let env = env();
     env.exec(r#"ChatFrameUtil.AddSystemMessage("hello, world")"#)

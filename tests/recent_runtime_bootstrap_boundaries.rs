@@ -652,6 +652,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "CLOCK_TICKER_Y_OVERRIDE =",
             "temporary inert-global workaround",
         ),
+        ("ChatTypeGroup =", "Rust chat-frame utility owner"),
 ];
 
 #[test]

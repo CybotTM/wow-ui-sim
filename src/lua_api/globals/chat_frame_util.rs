@@ -17,7 +17,8 @@
 //! `ChatFrame1EditBox` when present.
 
 use crate::lua_api::methods::{
-    borrow_state_mut, call_function_state, create_string, table_get, val_to_string,
+    borrow_state_mut, call_function_state, create_string, create_string_static, create_table,
+    table_get, table_set, table_set_num, table_set_static, val_to_string,
 };
 use crate::lua_api::state::ChatEditOpenState;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -30,6 +31,31 @@ const SYSTEM_R: f64 = 1.0;
 const SYSTEM_G: f64 = 1.0;
 const SYSTEM_B: f64 = 0.0;
 const SYSTEM_ID: f64 = 1.0;
+const CHAT_TYPE_GROUPS: &[(&str, &[&str])] = &[
+    (
+        "SYSTEM",
+        &[
+            "SYSTEM",
+            "ERRORS",
+            "IGNORED",
+            "ACHIEVEMENT",
+            "CHANNEL_NOTICE_USER",
+        ],
+    ),
+    ("SAY", &["SAY"]),
+    ("YELL", &["YELL"]),
+    ("WHISPER", &["WHISPER", "WHISPER_INFORM"]),
+    ("PARTY", &["PARTY", "PARTY_LEADER"]),
+    ("RAID", &["RAID", "RAID_LEADER", "RAID_WARNING"]),
+    ("GUILD", &["GUILD", "OFFICER"]),
+    ("CHANNEL", &["CHANNEL", "CHANNEL_JOIN", "CHANNEL_LEAVE"]),
+    ("EMOTE", &["EMOTE"]),
+    (
+        "BN_WHISPER",
+        &["BN_WHISPER", "BN_WHISPER_INFORM", "BN_INLINE_TOAST_ALERT"],
+    ),
+    ("INSTANCE_CHAT", &["INSTANCE_CHAT", "INSTANCE_CHAT_LEADER"]),
+];
 
 fn ensure_chat_frame_util_table(state: &mut LuaState) -> GcRef<Table> {
     let key = state.gc.intern_string_static(b"ChatFrameUtil");
@@ -51,6 +77,28 @@ fn ensure_chat_frame_util_table(state: &mut LuaState) -> GcRef<Table> {
     }
     state.gc.barrier_back(global);
     new_ref
+}
+
+fn install_chat_type_group(state: &mut LuaState) {
+    let globals = Val::Table(state.global);
+    if !matches!(table_get(state, globals, "ChatTypeGroup"), Val::Nil) {
+        return;
+    }
+
+    let group_table = create_table(state);
+    for (group_name, events) in CHAT_TYPE_GROUPS {
+        let event_table = create_table(state);
+        let Val::Table(event_table_ref) = event_table else {
+            unreachable!("create_table must return a table");
+        };
+        for (index, event_name) in events.iter().enumerate() {
+            let event_value = create_string_static(state, event_name);
+            table_set_num(state, event_table_ref, (index + 1) as f64, event_value);
+        }
+        table_set(state, group_table, group_name, event_table);
+    }
+
+    table_set_static(state, globals, "ChatTypeGroup", group_table);
 }
 
 fn default_chat_frame(state: &mut LuaState) -> Val {
@@ -157,6 +205,7 @@ fn invoke_edit_box_method(
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
+    install_chat_type_group(state);
     let table_ref = ensure_chat_frame_util_table(state);
     table_set_rust_fn_static(state, table_ref, "AddSystemMessage", add_system_message)?;
     table_set_rust_fn_static(state, table_ref, "OpenChat", open_chat)?;
