@@ -1,20 +1,19 @@
-use std::path::PathBuf;
-
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::settle_headless_startup;
 use wow_ui_sim::toc::TocFile;
 
-fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+fn blizzard_ui_dir() -> std::path::PathBuf {
+    default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
 }
 
-fn glue_parent_dir() -> PathBuf {
+fn glue_parent_dir() -> std::path::PathBuf {
     blizzard_ui_dir().join("Blizzard_GlueParent")
 }
 
-fn glue_parent_toc() -> PathBuf {
+fn glue_parent_toc() -> std::path::PathBuf {
     glue_parent_dir().join("Blizzard_GlueParent_Mainline.toc")
 }
 
