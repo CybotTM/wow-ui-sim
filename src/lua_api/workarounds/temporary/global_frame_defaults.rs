@@ -14,6 +14,27 @@ local function ensure_named_frame(frameType, name)
     return CreateFrame(frameType or "Frame", name, UIParent)
 end
 
+local function ensure_child_frame(parent, key)
+    if type(parent) ~= "table" then
+        return nil
+    end
+    local child = rawget(parent, key)
+    if child ~= nil then
+        return child
+    end
+    if type(CreateFrame) == "function" then
+        local ok, frame = pcall(CreateFrame, "Frame", nil, parent)
+        if ok then
+            child = frame
+        end
+    end
+    if child == nil then
+        child = {}
+    end
+    rawset(parent, key, child)
+    return child
+end
+
 ensure_named_frame("Frame", "EventToastManagerFrame")
 ensure_named_frame("Frame", "EditModeManagerFrame")
 ensure_named_frame("Frame", "RolePollPopup")
@@ -26,6 +47,12 @@ ensure_named_frame("Frame", "RaidWarningFrame")
 ensure_named_frame("Frame", "GossipFrame")
 ensure_named_frame("Frame", "FriendsFrame")
 ensure_named_frame("Frame", "HelpFrame")
+
+local buffFrame = ensure_named_frame("Frame", "BuffFrame")
+local auraContainer = ensure_child_frame(buffFrame, "AuraContainer")
+if type(auraContainer) == "table" and auraContainer.iconScale == nil then
+    auraContainer.iconScale = 1.0
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -61,12 +88,19 @@ mod tests {
                     "GossipFrame",
                     "FriendsFrame",
                     "HelpFrame",
+                    "BuffFrame",
                 }
                 for _, name in ipairs(names) do
                     local frame = rawget(_G, name)
                     if type(frame) ~= "table" then
                         return name
                     end
+                end
+                if type(BuffFrame.AuraContainer) ~= "table" then
+                    return "BuffFrame.AuraContainer"
+                end
+                if BuffFrame.AuraContainer.iconScale ~= 1.0 then
+                    return "BuffFrame.AuraContainer.iconScale"
                 end
                 return "ok"
                 "#,

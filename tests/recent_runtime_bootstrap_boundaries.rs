@@ -688,6 +688,8 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ("GossipFrame =", "temporary global-frame workaround"),
         ("FriendsFrame =", "temporary global-frame workaround"),
         ("HelpFrame =", "temporary global-frame workaround"),
+        ("BuffFrame =", "temporary global-frame workaround"),
+        ("AuraContainer.iconScale", "temporary global-frame workaround"),
 ];
 
 #[test]

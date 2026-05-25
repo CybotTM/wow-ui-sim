@@ -339,12 +339,6 @@ do
   local objectiveHeader = __wow_ensure_named_child(objectiveTracker, "Header", "Frame")
   __wow_ensure_named_child(objectiveHeader, "MinimizeButton", "Button")
 
-  local buffFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "BuffFrame", uiParent))
-  local auraContainer = __wow_ensure_named_child(buffFrame, "AuraContainer", "Frame")
-  if auraContainer ~= nil and auraContainer.iconScale == nil then
-    auraContainer.iconScale = 1.0
-  end
-
   local addonCompartmentFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Button", "AddonCompartmentFrame", uiParent))
   if addonCompartmentFrame ~= nil then
     addonCompartmentFrame.registeredAddons = addonCompartmentFrame.registeredAddons or {}
@@ -3617,15 +3611,6 @@ local function __wow_register_misc_global_frames()
 
   local objective = __wow_make_named_frame("Frame", "ObjectiveTrackerFrame", UIParent)
   __wow_seed_global_frame_path(objective, { "Header", "MinimizeButton" })
-
-  local buff_frame = rawget(_G, "BuffFrame")
-  local aura_container = rawget(_G, "BuffFrameAuraContainer")
-  if buff_frame ~= nil and aura_container ~= nil and buff_frame.AuraContainer == nil then
-    buff_frame.AuraContainer = aura_container
-  end
-  if buff_frame ~= nil and buff_frame.AuraContainer ~= nil and buff_frame.AuraContainer.iconScale == nil then
-    buff_frame.AuraContainer.iconScale = 1.0
-  end
 
 end
 
