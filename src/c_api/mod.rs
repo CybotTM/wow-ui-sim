@@ -44,13 +44,12 @@ mod registration;
 pub(crate) use helpers::{ensure_global_table, ensure_namespace, global_val, set_global_val};
 pub use permanent_shims::c_map_api;
 pub(crate) use registration::{
-    register_addon_policy_tables, register_character_progression_tables,
-    register_character_services_tables, register_configuration_warning_tables,
-    register_gossip_info_tables, register_interaction_tables, register_item_power_tables,
-    register_map_environment_tables, register_map_prefix_tables, register_nameplate_tables,
-    register_party_info_fallback_tables, register_pet_battle_fallback_tables,
-    register_spell_and_widget_tables, register_ui_widget_power_bar_tables,
-    register_world_activity_tables,
+    register_character_progression_tables, register_character_services_tables,
+    register_configuration_warning_tables, register_gossip_info_tables,
+    register_interaction_tables, register_item_power_tables, register_map_environment_tables,
+    register_map_prefix_tables, register_nameplate_tables, register_party_info_fallback_tables,
+    register_pet_battle_fallback_tables, register_spell_and_widget_tables,
+    register_ui_widget_power_bar_tables, register_world_activity_tables,
 };
 
 use rilua::LuaResult;

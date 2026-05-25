@@ -5,6 +5,7 @@ pub(crate) mod achievement_search_preview;
 pub(crate) mod achievement_ui_access_defaults;
 pub(crate) mod action_bar_button_event_fanout;
 pub(crate) mod addon_compartment_defaults;
+pub(crate) mod addons_beta_policy_defaults;
 pub(crate) mod adventure_journal_fallbacks;
 pub(crate) mod adventure_map_frame_surface;
 pub(crate) mod alert_frame_defaults;

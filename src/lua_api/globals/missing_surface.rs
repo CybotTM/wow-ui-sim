@@ -89,7 +89,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_legacy_global_shims(lua)?;
     let state = lua.state_mut();
     seed_placeholder_global_tables(state);
-    c_api::register_addon_policy_tables(state)?;
     register_item_trait_surfaces(state)?;
     register_world_namespace_surfaces(state)?;
     register_social_namespace_surfaces(state)?;

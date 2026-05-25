@@ -220,11 +220,8 @@ fn apply_core_foundation_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn apply_core_foundation_frame_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
-    temporary::addon_compartment_defaults::apply_bootstrap(lua)?;
-    temporary::achievement_ui_access_defaults::apply_bootstrap(lua)?;
-    temporary::achievement_search_preview::apply_bootstrap(lua)?;
-    temporary::alert_frame_defaults::apply_bootstrap(lua)?;
-    temporary::adventure_journal_fallbacks::apply_bootstrap(lua)?;
+    apply_core_foundation_addon_defaults(lua)?;
+    apply_core_foundation_journal_defaults(lua)?;
     temporary::camera_tutorial_defaults::apply_bootstrap(lua)?;
     temporary::catalog_shop_inbound_globals::apply_bootstrap(lua)?;
     temporary::catalog_shop_product_card_defaults::apply_bootstrap(lua)?;
@@ -240,6 +237,18 @@ fn apply_core_foundation_frame_defaults(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::edit_mode_cache_defaults::apply_bootstrap(lua)?;
     temporary::global_frame_defaults::apply_bootstrap(lua)?;
     Ok(())
+}
+
+fn apply_core_foundation_addon_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
+    temporary::addon_compartment_defaults::apply_bootstrap(lua)?;
+    temporary::addons_beta_policy_defaults::apply_bootstrap(lua)
+}
+
+fn apply_core_foundation_journal_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
+    temporary::achievement_ui_access_defaults::apply_bootstrap(lua)?;
+    temporary::achievement_search_preview::apply_bootstrap(lua)?;
+    temporary::alert_frame_defaults::apply_bootstrap(lua)?;
+    temporary::adventure_journal_fallbacks::apply_bootstrap(lua)
 }
 
 fn apply_core_foundation_state_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
