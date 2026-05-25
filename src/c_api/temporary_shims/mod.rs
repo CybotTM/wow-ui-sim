@@ -11,7 +11,6 @@ pub mod c_major_faction_display;
 pub mod c_map_groups;
 pub mod c_minimap;
 pub mod c_mythic_plus;
-pub mod c_paper_doll_stagger;
 pub mod c_party_info_instance_abandon;
 pub mod c_party_info_static_fallbacks;
 pub mod c_perks_program;

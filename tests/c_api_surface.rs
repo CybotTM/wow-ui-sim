@@ -147,3 +147,18 @@ fn merchant_and_raid_defaults_are_not_c_api_temporary_shims() {
         "C_MerchantFrame and C_RaidLocks no-state defaults should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn paper_doll_stagger_default_is_not_c_api_temporary_shim() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_paper_doll_stagger"),
+        "unmodeled PaperDoll stagger defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !registration.contains("c_paper_doll_stagger"),
+        "C_PaperDollInfo.GetStaggerPercentage should not be wired through c_api registration"
+    );
+}

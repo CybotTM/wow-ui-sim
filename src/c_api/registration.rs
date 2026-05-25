@@ -1,9 +1,9 @@
 use super::permanent_shims::c_nameplate;
 use super::temporary_shims::{
     c_character_services, c_click_bindings, c_gossip_info, c_major_faction_display, c_map_groups,
-    c_mythic_plus, c_paper_doll_stagger, c_party_info_instance_abandon,
-    c_party_info_static_fallbacks, c_pet_battles_static_fallbacks, c_spell_classification,
-    c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks,
+    c_mythic_plus, c_party_info_instance_abandon, c_party_info_static_fallbacks,
+    c_pet_battles_static_fallbacks, c_spell_classification, c_spell_counts, c_spell_priority_aura,
+    c_spell_static_fallbacks,
 };
 use super::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -27,7 +27,6 @@ pub(crate) fn register_spell_and_widget_tables(state: &mut LuaState) -> LuaResul
 
 pub(crate) fn register_item_power_tables(state: &mut LuaState) -> LuaResult<()> {
     c_paper_doll_info::register_c_paper_doll_info_surface(state)?;
-    c_paper_doll_stagger::register_c_paper_doll_stagger_shim(state)?;
     c_artifact_ui::register_c_artifact_ui_surface(state)?;
     c_artifact_relic_forge_ui::register_c_artifact_relic_forge_ui_surface(state)?;
     c_azerite_item::register_c_azerite_item_surface(state)?;
