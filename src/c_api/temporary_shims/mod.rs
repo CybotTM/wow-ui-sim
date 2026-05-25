@@ -16,7 +16,6 @@ pub mod c_cooldown_viewer;
 pub mod c_date_and_time;
 pub mod c_gossip_info;
 pub mod c_item_targeting;
-pub mod c_journal_defaults;
 pub mod c_level_link_spell_lock;
 pub mod c_lfg_info;
 pub mod c_major_faction_display;

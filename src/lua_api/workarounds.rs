@@ -251,7 +251,8 @@ fn apply_core_foundation_journal_defaults(lua: &mut rilua::Lua) -> crate::Result
     temporary::achievement_ui_access_defaults::apply_bootstrap(lua)?;
     temporary::achievement_search_preview::apply_bootstrap(lua)?;
     temporary::alert_frame_defaults::apply_bootstrap(lua)?;
-    temporary::adventure_journal_fallbacks::apply_bootstrap(lua)
+    temporary::adventure_journal_fallbacks::apply_bootstrap(lua)?;
+    temporary::loot_journal_defaults::apply_bootstrap(lua)
 }
 
 fn apply_core_foundation_state_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
