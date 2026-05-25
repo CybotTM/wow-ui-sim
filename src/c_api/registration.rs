@@ -3,7 +3,7 @@ use super::temporary_shims::{
     c_character_services, c_click_bindings, c_gossip_info, c_major_faction_display, c_map_groups,
     c_merchant_raid_defaults, c_mythic_plus, c_paper_doll_stagger, c_party_info_instance_abandon,
     c_party_info_static_fallbacks, c_pet_battles_static_fallbacks, c_spell_classification,
-    c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks, c_spell_target,
+    c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks,
 };
 use super::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -21,7 +21,6 @@ pub(crate) fn register_spell_and_widget_tables(state: &mut LuaState) -> LuaResul
     c_spell_counts::register_c_spell_count_shims(state)?;
     c_spell_priority_aura::register_c_spell_priority_aura(state)?;
     c_spell_static_fallbacks::register_c_spell_static_fallbacks(state)?;
-    c_spell_target::register_c_spell_target_shims(state)?;
     c_spell_diminish::register_c_spell_diminish_surface(state)?;
     c_widget::register_c_widget_surface(state)
 }

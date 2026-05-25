@@ -125,6 +125,7 @@ pub(crate) mod shared_xml_utility_defaults;
 pub(crate) mod social_queue_defaults;
 pub(crate) mod sound_driver_defaults;
 pub(crate) mod source_patches;
+pub(crate) mod spell_target_defaults;
 pub(crate) mod startup_windows;
 pub(crate) mod static_model_info_defaults;
 pub(crate) mod static_popup_defaults;

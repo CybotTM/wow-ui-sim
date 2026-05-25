@@ -143,7 +143,7 @@ fn blizzard_deprecated_spell_script_installs_four_direct_aliases() {
         installed,
         "Deprecated_SpellScript.lua lines 9-12 publish 4 direct global aliases (no closure \
          wrapping — plain right-hand-side reads of C_Spell.<Method>): \
-         TargetSpellReplacesBonusTree (registered at c_spell.rs:124, returns false); \
+         TargetSpellReplacesBonusTree (temporary target-spell metadata default, returns false); \
          GetMaxSpellStartRecoveryOffset → C_Spell.GetSpellQueueWindow (UNSTUBBED — resolves \
          via `__wow_namespace_mt.__index` to no-op); GetSpellQueueWindow → \
          C_Spell.GetSpellQueueWindow (same UNSTUBBED method, both globals share the same \

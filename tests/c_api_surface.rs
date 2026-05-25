@@ -117,3 +117,18 @@ fn item_targeting_defaults_are_not_c_api_temporary_shims() {
         "C_Item IsHelpfulItem/IsHarmfulItem defaults should not be wired through c_api item registration"
     );
 }
+
+#[test]
+fn spell_target_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_spell_target"),
+        "unmodeled C_Spell target-spell metadata defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !registration.contains("c_spell_target"),
+        "C_Spell TargetSpell* defaults should not be wired through c_api registration"
+    );
+}
