@@ -690,6 +690,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ("HelpFrame =", "temporary global-frame workaround"),
         ("BuffFrame =", "temporary global-frame workaround"),
         ("AuraContainer.iconScale", "temporary global-frame workaround"),
+        (
+            "AddonCompartmentFrame =",
+            "temporary addon-compartment workaround",
+        ),
+        (
+            "__wow_register_addon_compartment",
+            "temporary addon-compartment workaround",
+        ),
 ];
 
 #[test]

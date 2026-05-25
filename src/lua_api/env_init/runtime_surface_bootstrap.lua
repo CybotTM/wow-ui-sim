@@ -339,21 +339,6 @@ do
   local objectiveHeader = __wow_ensure_named_child(objectiveTracker, "Header", "Frame")
   __wow_ensure_named_child(objectiveHeader, "MinimizeButton", "Button")
 
-  local addonCompartmentFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Button", "AddonCompartmentFrame", uiParent))
-  if addonCompartmentFrame ~= nil then
-    addonCompartmentFrame.registeredAddons = addonCompartmentFrame.registeredAddons or {}
-    if addonCompartmentFrame.RegisterAddon == nil then
-      function addonCompartmentFrame:RegisterAddon(addon)
-        self.registeredAddons[#self.registeredAddons + 1] = addon or true
-      end
-    end
-    if addonCompartmentFrame.UnregisterAddon == nil then
-      function addonCompartmentFrame:UnregisterAddon()
-        table.remove(self.registeredAddons)
-      end
-    end
-  end
-
   local alertFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "AlertFrame", uiParent))
   if alertFrame ~= nil then
     alertFrame.alertFrameSubSystems = alertFrame.alertFrameSubSystems or {}
@@ -3366,26 +3351,6 @@ local function __wow_seed_global_frame_path(root, path)
   return current
 end
 
-local function __wow_register_addon_compartment()
-  local frame = __wow_make_named_frame("Frame", "AddonCompartmentFrame", UIParent)
-  frame.registeredAddons = frame.registeredAddons or {}
-  if frame.RegisterAddon == nil then
-    function frame:RegisterAddon(addon)
-      self.registeredAddons = self.registeredAddons or {}
-      table.insert(self.registeredAddons, addon)
-    end
-  end
-  if frame.UnregisterAddon == nil then
-    function frame:UnregisterAddon(addon)
-      self.registeredAddons = self.registeredAddons or {}
-      if addon == nil then
-        return
-      end
-      __wow_remove_array_value(self.registeredAddons, addon)
-    end
-  end
-end
-
 local function __wow_register_alert_frame()
   local frame = __wow_make_named_frame("Frame", "AlertFrame", UIParent)
   frame.alertFrameSubSystems = frame.alertFrameSubSystems or {}
@@ -3617,7 +3582,6 @@ end
 __wow_register_core_frame_methods()
 __wow_register_catalog_shop_inbound_globals()
 __wow_register_dropdown_globals()
-__wow_register_addon_compartment()
 __wow_register_alert_frame()
 __wow_register_misc_global_frames()
 
