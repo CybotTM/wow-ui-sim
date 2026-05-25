@@ -312,6 +312,7 @@ fn apply_feature_tool_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::base_nine_slice_dialog_defaults::apply_bootstrap(lua)?;
     temporary::callback_registry_defaults::apply_bootstrap(lua)?;
     temporary::macro_defaults::apply_bootstrap(lua)?;
+    temporary::navigation_defaults::apply_bootstrap(lua)?;
     temporary::object_api_request_load_callbacks::apply_bootstrap(lua)?;
     temporary::ping_defaults::apply_bootstrap(lua)?;
     temporary::player_location_defaults::apply_bootstrap(lua)?;

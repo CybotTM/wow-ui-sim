@@ -1,0 +1,90 @@
+//! Temporary `C_Navigation` defaults.
+//!
+//! Quest/navigation target state is not modeled yet. These inert defaults keep
+//! Blizzard navigation UI callable until a real navigation backend owns them.
+
+const NAVIGATION_DEFAULTS_LUA: &str = r#"
+C_Navigation = C_Navigation or __wow_namespace()
+
+local function installNavigationDefault(name, fn)
+    if rawget(C_Navigation, name) == nil then
+        C_Navigation[name] = fn
+    end
+end
+
+installNavigationDefault("WasClampedToScreen", function()
+    return false
+end)
+
+installNavigationDefault("GetTargetState", function()
+    return 0
+end)
+
+installNavigationDefault("HasValidScreenPosition", function()
+    return false
+end)
+
+installNavigationDefault("GetDistance", function()
+    return 0
+end)
+
+installNavigationDefault("GetNearestPartyMemberToken", function()
+    return nil
+end)
+
+installNavigationDefault("GetFrame", function()
+    return nil
+end)
+"#;
+
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(NAVIGATION_DEFAULTS_LUA)?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn installs_safe_empty_navigation_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: (bool, i32, bool, i32, bool, bool) = env
+            .eval(
+                r#"
+                return
+                    C_Navigation.WasClampedToScreen(),
+                    C_Navigation.GetTargetState(),
+                    C_Navigation.HasValidScreenPosition(),
+                    C_Navigation.GetDistance(),
+                    C_Navigation.GetNearestPartyMemberToken() == nil,
+                    C_Navigation.GetFrame() == nil
+                "#,
+            )
+            .expect("navigation defaults should be callable");
+
+        assert_eq!(result, (false, 0, false, 0, true, true));
+    }
+
+    #[test]
+    fn preserves_existing_navigation_provider() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            function C_Navigation.GetDistance()
+                return 42
+            end
+            "#,
+        )
+        .expect("fixture should install existing navigation provider");
+
+        super::apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
+
+        let distance: i32 = env
+            .eval("return C_Navigation.GetDistance()")
+            .expect("existing navigation provider should remain callable");
+
+        assert_eq!(distance, 42);
+    }
+}
