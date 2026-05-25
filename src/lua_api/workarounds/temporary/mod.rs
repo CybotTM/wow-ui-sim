@@ -134,6 +134,7 @@ pub(crate) mod top_level_parent_defaults;
 pub(crate) mod totem_defaults;
 pub(crate) mod trade_skill_ui_fallbacks;
 pub(crate) mod transmog_util_defaults;
+pub(crate) mod tts_settings_defaults;
 pub(crate) mod ui_frame_manager_defaults;
 pub(crate) mod ui_parent_panel_toggles;
 pub(crate) mod ui_widget_manager_defaults;

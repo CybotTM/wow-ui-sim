@@ -267,6 +267,7 @@ fn apply_core_foundation_state_defaults(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::secure_execute_range::apply_bootstrap(lua)?;
     temporary::settings_surface_defaults::apply_bootstrap(lua)?;
     temporary::tooltip_data_processor_defaults::apply_bootstrap(lua)?;
+    temporary::tts_settings_defaults::apply_bootstrap(lua)?;
     temporary::ui_widget_manager_defaults::apply_bootstrap(lua)?;
     Ok(())
 }

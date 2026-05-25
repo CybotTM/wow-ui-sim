@@ -38,4 +38,3 @@ pub mod c_tracking_defaults;
 pub mod c_trade_info;
 pub mod c_transmog_outfit_slots;
 pub mod c_transmog_sets;
-pub mod c_tts_settings;
