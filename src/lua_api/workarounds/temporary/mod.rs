@@ -65,6 +65,7 @@ pub(crate) mod inventory_query_defaults;
 pub(crate) mod item_button_helper_defaults;
 pub(crate) mod item_quality_color_data_methods;
 pub(crate) mod item_socketing_tooltips;
+pub(crate) mod item_upgrade_availability_defaults;
 pub(crate) mod kiosk_namespace_defaults;
 pub(crate) mod legacy_action_bar_globals;
 pub(crate) mod legacy_container_globals;
