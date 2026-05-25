@@ -295,6 +295,12 @@ fn apply_core_legacy_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn apply_feature_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    apply_feature_tool_defaults(lua)?;
+    apply_feature_model_defaults(lua)?;
+    apply_feature_ui_defaults(lua)
+}
+
+fn apply_feature_tool_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::assisted_combat_manager_defaults::apply_bootstrap(lua)?;
     temporary::base_nine_slice_dialog_defaults::apply_bootstrap(lua)?;
     temporary::callback_registry_defaults::apply_bootstrap(lua)?;
@@ -305,12 +311,19 @@ fn apply_feature_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::R
     temporary::proxy_object_factories::apply_bootstrap(lua)?;
     temporary::quest_objective_defaults::apply_bootstrap(lua)?;
     temporary::seconds_formatter_defaults::apply_bootstrap(lua)?;
-    temporary::shared_xml_utility_defaults::apply_bootstrap(lua)?;
+    temporary::scripted_animation_effect_defaults::apply_bootstrap(lua)?;
+    temporary::shared_xml_utility_defaults::apply_bootstrap(lua)
+}
+
+fn apply_feature_model_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::sound_driver_defaults::apply_bootstrap(lua)?;
     temporary::static_model_info_defaults::apply_bootstrap(lua)?;
     temporary::static_popup_defaults::apply_bootstrap(lua)?;
     temporary::texture_file_data_defaults::apply_bootstrap(lua)?;
-    temporary::top_level_parent_defaults::apply_bootstrap(lua)?;
+    temporary::top_level_parent_defaults::apply_bootstrap(lua)
+}
+
+fn apply_feature_ui_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::trade_skill_ui_fallbacks::apply_bootstrap(lua)?;
     temporary::transmog_util_defaults::apply_bootstrap(lua)?;
     temporary::ui_parent_panel_toggles::apply_bootstrap(lua)?;

@@ -36,7 +36,6 @@ pub mod c_prototype_dialog;
 pub mod c_reincarnation;
 pub mod c_restricted_actions;
 pub mod c_scenario;
-pub mod c_scripted_animations;
 pub mod c_shared_character_services;
 pub mod c_social_queue;
 pub mod c_specialization_mastery;
