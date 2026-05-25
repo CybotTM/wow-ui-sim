@@ -203,6 +203,44 @@ fn blizzard_game_menu_loads_via_full_game_ui_without_errors() {
 }
 
 #[test]
+fn blizzard_game_menu_exit_button_requests_quit_after_full_game_load() {
+    let env = load_full_game_ui();
+
+    let result: String = env
+        .eval(
+            r#"
+            GameMenuFrame:Show()
+
+            local quitButton
+            for button in GameMenuFrame.buttonPool:EnumerateActive() do
+                if button:GetText() == EXIT_GAME then
+                    quitButton = button
+                    break
+                end
+            end
+            if not quitButton then
+                return "missing-quit-button"
+            end
+
+            local onclick = quitButton:GetScript("OnClick")
+            if type(onclick) ~= "function" then
+                return "missing-onclick"
+            end
+
+            local ok, err = pcall(function() quitButton:Click() end)
+            if not ok then
+                return "onclick-error:" .. tostring(err)
+            end
+
+            return A_Admin.IsSimulatorExitRequested() and "quit-requested" or "quit-not-requested"
+        "#,
+        )
+        .expect("full-load GameMenu exit button probe should run");
+
+    assert_eq!(result, "quit-requested");
+}
+
+#[test]
 fn blizzard_game_menu_is_addon_loaded_returns_true_after_full_game_ui_load() {
     let env = load_full_game_ui();
 

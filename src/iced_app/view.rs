@@ -573,7 +573,8 @@ impl App {
 
 #[cfg(test)]
 mod key_dispatch_tests {
-    use super::should_dispatch_wow_key;
+    use super::{message_from_keyboard_event, should_dispatch_wow_key};
+    use crate::iced_app::Message;
 
     #[test]
     fn escape_dispatches_even_when_iced_captures_event() {
@@ -595,6 +596,29 @@ mod key_dispatch_tests {
             iced::event::Status::Captured,
             "CTRL-Q"
         ));
+    }
+
+    #[test]
+    fn ctrl_q_control_character_event_dispatches_quit_binding() {
+        let event = iced::Event::Keyboard(iced::keyboard::Event::KeyPressed {
+            key: iced::keyboard::Key::Character("\u{11}".into()),
+            modified_key: iced::keyboard::Key::Character("\u{11}".into()),
+            physical_key: iced::keyboard::key::Physical::Unidentified(
+                iced::keyboard::key::NativeCode::Unidentified,
+            ),
+            location: iced::keyboard::Location::Standard,
+            modifiers: iced::keyboard::Modifiers::CTRL,
+            text: None,
+            repeat: false,
+        });
+
+        let message = message_from_keyboard_event(&event, iced::event::Status::Captured)
+            .expect("Ctrl+Q should dispatch even when iced captures the event");
+
+        assert!(
+            matches!(message, Message::KeyPress(key, None, _) if key == "CTRL-Q"),
+            "Ctrl+Q control-character event should map to CTRL-Q"
+        );
     }
 }
 
