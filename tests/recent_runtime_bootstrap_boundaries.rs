@@ -662,6 +662,27 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary legacy container workaround",
         ),
         ("ChatFrame1", "temporary chat-window workaround"),
+        (
+            "EventToastManagerFrame =",
+            "temporary global-frame workaround",
+        ),
+        (
+            "EditModeManagerFrame =",
+            "temporary global-frame workaround",
+        ),
+        ("RolePollPopup =", "temporary global-frame workaround"),
+        ("TimerTracker =", "temporary global-frame workaround"),
+        ("UIErrorsFrame =", "temporary global-frame workaround"),
+        ("SideDressUpFrame =", "temporary global-frame workaround"),
+        (
+            "ContainerFrameCombinedBags =",
+            "temporary global-frame workaround",
+        ),
+        ("LootFrame =", "temporary global-frame workaround"),
+        ("RaidWarningFrame =", "temporary global-frame workaround"),
+        ("GossipFrame =", "temporary global-frame workaround"),
+        ("FriendsFrame =", "temporary global-frame workaround"),
+        ("HelpFrame =", "temporary global-frame workaround"),
 ];
 
 #[test]

@@ -434,16 +434,6 @@ do
     end
   end
 
-  EventToastManagerFrame = EventToastManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EventToastManagerFrame", uiParent))
-  EditModeManagerFrame = EditModeManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EditModeManagerFrame", uiParent))
-  RolePollPopup = RolePollPopup or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "RolePollPopup", uiParent))
-  TimerTracker = TimerTracker or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "TimerTracker", uiParent))
-  UIErrorsFrame = UIErrorsFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("MessageFrame", "UIErrorsFrame", uiParent))
-  SideDressUpFrame = SideDressUpFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "SideDressUpFrame", uiParent))
-  ContainerFrameCombinedBags = ContainerFrameCombinedBags or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "ContainerFrameCombinedBags", uiParent))
-  LootFrame = LootFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "LootFrame", uiParent))
-  GossipFrame = GossipFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "GossipFrame", uiParent))
-  FriendsFrame = FriendsFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "FriendsFrame", uiParent))
 end
 
 -- GetInventorySlotInfo is registered from Rust
@@ -3640,19 +3630,6 @@ local function __wow_register_dropdown_globals()
 end
 
 local function __wow_register_misc_global_frames()
-  __wow_make_named_frame("Frame", "EventToastManagerFrame", UIParent)
-  __wow_make_named_frame("Frame", "EditModeManagerFrame", UIParent)
-  __wow_make_named_frame("Frame", "RolePollPopup", UIParent)
-  __wow_make_named_frame("Frame", "TimerTracker", UIParent)
-  __wow_make_named_frame("Frame", "UIErrorsFrame", UIParent)
-  __wow_make_named_frame("Frame", "SideDressUpFrame", UIParent)
-  __wow_make_named_frame("Frame", "ContainerFrameCombinedBags", UIParent)
-  __wow_make_named_frame("Frame", "LootFrame", UIParent)
-  __wow_make_named_frame("Frame", "RaidWarningFrame", UIParent)
-  __wow_make_named_frame("Frame", "GossipFrame", UIParent)
-  __wow_make_named_frame("Frame", "FriendsFrame", UIParent)
-  __wow_make_named_frame("Frame", "HelpFrame", UIParent)
-
   local gameMenu = __wow_make_named_frame("Frame", "GameMenuFrame", UIParent)
   if type(gameMenu.Hide) == "function" then
     gameMenu:Hide()
