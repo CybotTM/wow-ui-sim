@@ -3,7 +3,6 @@ pub mod c_character_services;
 pub mod c_chat_info;
 pub mod c_click_bindings;
 pub mod c_club_notifications;
-pub mod c_collections_filter_defaults;
 pub mod c_color_pvp_defaults;
 pub mod c_configuration_warnings;
 pub mod c_container_defaults;

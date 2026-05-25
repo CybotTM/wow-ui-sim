@@ -85,9 +85,6 @@ fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_glue_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_chat_info::register_c_chat_info_shims(state)?;
-    temporary_shims::c_collections_filter_defaults::register_collection_filter_default_shims(
-        state,
-    )?;
     temporary_shims::c_color_pvp_defaults::register_color_and_pvp_default_shims(state)?;
     temporary_shims::c_campaign_covenant_defaults::register_campaign_covenant_default_shims(state)?;
     temporary_shims::c_club_notifications::register_c_club_notification_shims(state)?;

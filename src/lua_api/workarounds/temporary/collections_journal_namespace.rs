@@ -5,6 +5,27 @@
 
 use crate::lua_api::LoaderEnv;
 
+const COLLECTIONS_FILTER_DEFAULTS_LUA: &str = r#"
+local defaultFilterNamespaces = {
+    "C_ToyBoxInfo",
+    "C_HeirloomInfo",
+    "C_TransmogCollection",
+}
+
+for _, namespaceName in ipairs(defaultFilterNamespaces) do
+    local namespace = rawget(_G, namespaceName)
+    if namespace == nil then
+        namespace = {}
+        rawset(_G, namespaceName, namespace)
+    end
+    if rawget(namespace, "IsUsingDefaultFilters") == nil then
+        function namespace.IsUsingDefaultFilters()
+            return true
+        end
+    end
+end
+"#;
+
 const COLLECTIONS_JOURNAL_NAMESPACE_WORKAROUND_LUA: &str = r#"
 if type(C_MountJournal) == "table" then
     if rawget(C_MountJournal, "IsUsingDefaultFilters") == nil then
@@ -54,6 +75,11 @@ if type(MountJournalToggleDynamicFlightFlyoutButtonMixin) == "table"
 end
 "#;
 
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(COLLECTIONS_FILTER_DEFAULTS_LUA)?;
+    Ok(())
+}
+
 pub(crate) fn patch(env: &LoaderEnv<'_>) {
     let _ = env.exec(COLLECTIONS_JOURNAL_NAMESPACE_WORKAROUND_LUA);
 }
@@ -62,6 +88,58 @@ pub(crate) fn patch(env: &LoaderEnv<'_>) {
 mod tests {
     use super::*;
     use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn seeds_missing_collections_filter_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                if C_ToyBoxInfo.IsUsingDefaultFilters() ~= true then return "toybox" end
+                if C_HeirloomInfo.IsUsingDefaultFilters() ~= true then return "heirloom" end
+                if C_TransmogCollection.IsUsingDefaultFilters() ~= true then return "transmog" end
+                return "ok"
+                "#,
+            )
+            .expect("collections filter defaults should be callable");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn preserves_existing_collections_filter_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            C_ToyBoxInfo.IsUsingDefaultFilters = function()
+                return false
+            end
+            C_HeirloomInfo.IsUsingDefaultFilters = function()
+                return false
+            end
+            C_TransmogCollection.IsUsingDefaultFilters = function()
+                return false
+            end
+            "#,
+        )
+        .expect("fixture should install collection filter functions");
+
+        apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
+
+        let result: String = env
+            .eval(
+                r#"
+                if C_ToyBoxInfo.IsUsingDefaultFilters() ~= false then return "toybox" end
+                if C_HeirloomInfo.IsUsingDefaultFilters() ~= false then return "heirloom" end
+                if C_TransmogCollection.IsUsingDefaultFilters() ~= false then return "transmog" end
+                return "ok"
+                "#,
+            )
+            .expect("existing collection filter functions should remain callable");
+
+        assert_eq!(result, "ok");
+    }
 
     #[test]
     fn seeds_missing_mount_and_pet_journal_defaults() {

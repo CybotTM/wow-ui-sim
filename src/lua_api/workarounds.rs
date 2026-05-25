@@ -230,6 +230,7 @@ fn apply_core_foundation_frame_defaults(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::chat_voice_button_surface::apply_bootstrap(lua)?;
     temporary::chat_window_defaults::apply_bootstrap(lua)?;
     temporary::client_info_defaults::apply_bootstrap(lua)?;
+    temporary::collections_journal_namespace::apply_bootstrap(lua)?;
     temporary::color_defaults::apply_bootstrap(lua)?;
     temporary::content_tracking_defaults::apply_bootstrap(lua)?;
     temporary::container_portrait_texture::apply_bootstrap(lua)?;
