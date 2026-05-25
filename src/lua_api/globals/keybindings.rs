@@ -245,6 +245,10 @@ pub const BINDING_ACTIONS: &[BindingAction] = &[
         action: "TOGGLESIMCOMMANDS",
         lua_code: "if SimCommands then SimCommands:Toggle() end",
     },
+    BindingAction {
+        action: "QUIT",
+        lua_code: "Quit()",
+    },
 ];
 
 /// Default key→action assignments seeded by `init_keybindings`.
@@ -392,6 +396,10 @@ const DEFAULT_KEYS: &[DefaultKey] = &[
     DefaultKey {
         key: "CTRL-P",
         action: "TOGGLESIMCOMMANDS",
+    },
+    DefaultKey {
+        key: "CTRL-Q",
+        action: "QUIT",
     },
 ];
 

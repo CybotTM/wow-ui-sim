@@ -29,7 +29,6 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "DoBattlefieldMaintenance",
     "DoEmote",
     "ExpandSkillHeader",
-    "ForceLogout",
     "ForceTaint",
     "DropCursorMoney",
     "InspectUnit",

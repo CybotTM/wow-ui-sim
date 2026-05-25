@@ -3,13 +3,32 @@
 use iced::keyboard::key::Named;
 
 /// Convert an iced keyboard key to a WoW key name string.
-pub(super) fn iced_key_to_wow(key: &iced::keyboard::Key) -> Option<String> {
+pub(super) fn iced_key_to_wow(
+    key: &iced::keyboard::Key,
+    modifiers: iced::keyboard::Modifiers,
+) -> Option<String> {
     use iced::keyboard::Key;
-    match key {
+    let key_name = match key {
         Key::Named(named) => iced_named_key_to_wow(named),
         Key::Character(c) => Some(c.to_uppercase()),
         _ => None,
+    }?;
+    Some(apply_wow_modifiers(key_name, modifiers))
+}
+
+fn apply_wow_modifiers(key_name: String, modifiers: iced::keyboard::Modifiers) -> String {
+    let mut parts = Vec::new();
+    if modifiers.control() {
+        parts.push("CTRL");
     }
+    if modifiers.alt() {
+        parts.push("ALT");
+    }
+    if modifiers.shift() {
+        parts.push("SHIFT");
+    }
+    parts.push(&key_name);
+    parts.join("-")
 }
 
 /// Convert an iced named key to a WoW key name.
@@ -58,15 +77,21 @@ mod tests {
     #[test]
     fn maps_named_keys_to_wow_names() {
         assert_eq!(
-            iced_key_to_wow(&Key::Named(Named::Escape)),
+            iced_key_to_wow(
+                &Key::Named(Named::Escape),
+                iced::keyboard::Modifiers::empty()
+            ),
             Some("ESCAPE".to_string())
         );
         assert_eq!(
-            iced_key_to_wow(&Key::Named(Named::F10)),
+            iced_key_to_wow(&Key::Named(Named::F10), iced::keyboard::Modifiers::empty()),
             Some("F10".to_string())
         );
         assert_eq!(
-            iced_key_to_wow(&Key::Named(Named::ArrowLeft)),
+            iced_key_to_wow(
+                &Key::Named(Named::ArrowLeft),
+                iced::keyboard::Modifiers::empty()
+            ),
             Some("LEFT".to_string())
         );
     }
@@ -74,13 +99,30 @@ mod tests {
     #[test]
     fn maps_character_keys_to_uppercase() {
         assert_eq!(
-            iced_key_to_wow(&Key::Character("b".into())),
+            iced_key_to_wow(
+                &Key::Character("b".into()),
+                iced::keyboard::Modifiers::empty()
+            ),
             Some("B".to_string())
         );
     }
 
     #[test]
+    fn prefixes_control_modifier_for_wow_key_name() {
+        assert_eq!(
+            iced_key_to_wow(&Key::Character("q".into()), iced::keyboard::Modifiers::CTRL),
+            Some("CTRL-Q".to_string())
+        );
+    }
+
+    #[test]
     fn returns_none_for_unmapped_named_keys() {
-        assert_eq!(iced_key_to_wow(&Key::Named(Named::Shift)), None);
+        assert_eq!(
+            iced_key_to_wow(
+                &Key::Named(Named::Shift),
+                iced::keyboard::Modifiers::empty()
+            ),
+            None
+        );
     }
 }

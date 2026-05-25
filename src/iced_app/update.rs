@@ -2,7 +2,7 @@
 
 #[cfg(not(target_os = "linux"))]
 use crate::inspector_server_stub::ScreenshotData;
-use iced::Task;
+use iced::{Task, window};
 #[cfg(target_os = "linux")]
 use iced_layout_inspector::server::ScreenshotData;
 use rilua::Val;
@@ -23,6 +23,10 @@ pub(super) fn request_redraw_task<T>() -> Task<T> {
     ))
 }
 
+fn request_window_close_task() -> Task<Message> {
+    window::latest().and_then(window::close)
+}
+
 impl App {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         let ipc_task = self.process_ipc();
@@ -31,7 +35,8 @@ impl App {
             Message::ProcessTimers(captured_at) => self.handle_process_timers(captured_at),
             msg => self.dispatch_simple_message(msg),
         };
-        Task::batch([task, ipc_task])
+        let exit_task = self.take_simulator_exit_task();
+        Task::batch([task, ipc_task, exit_task])
     }
 
     fn dispatch_simple_message(&mut self, message: Message) -> Task<Message> {
@@ -73,6 +78,16 @@ impl App {
 
     fn toggle_frames_panel(&mut self) {
         self.frames_panel_collapsed = !self.frames_panel_collapsed;
+    }
+
+    fn take_simulator_exit_task(&self) -> Task<Message> {
+        let env = self.env.borrow();
+        let mut state = env.state().borrow_mut();
+        if !state.simulator_exit_requested {
+            return Task::none();
+        }
+        state.simulator_exit_requested = false;
+        request_window_close_task()
     }
 
     fn handle_key_press_message(

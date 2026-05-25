@@ -228,6 +228,46 @@ fn test_game_menu_buttons_created_on_show() {
 }
 
 #[test]
+fn test_game_menu_exit_button_requests_simulator_quit() {
+    test_timeout! {
+        let env = setup_env();
+
+        env.exec("GameMenuFrame:Show()").unwrap();
+
+        let result: String = env
+            .eval(
+                r#"
+                local quitButton
+                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                    if btn:GetText() == EXIT_GAME then
+                        quitButton = btn
+                        break
+                    end
+                end
+                if not quitButton then
+                    return "missing-quit-button"
+                end
+
+                local onclick = quitButton:GetScript("OnClick")
+                if type(onclick) ~= "function" then
+                    return "missing-onclick"
+                end
+
+                local ok, err = pcall(onclick, quitButton, "LeftButton", false)
+                if not ok then
+                    return "onclick-error:" .. tostring(err)
+                end
+
+                return A_Admin.IsSimulatorExitRequested() and "quit-requested" or "quit-not-requested"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(result, "quit-requested");
+    }
+}
+
+#[test]
 fn test_game_menu_options_button_hitbox_matches_visual_center() {
     test_timeout! {
         let env = setup_env();

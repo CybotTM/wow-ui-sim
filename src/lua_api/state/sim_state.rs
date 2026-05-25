@@ -294,4 +294,5 @@ pub struct SimState {
     pub keybindings: Keybindings,
     pub debug_borders: bool,
     pub debug_anchors: bool,
+    pub simulator_exit_requested: bool,
 }

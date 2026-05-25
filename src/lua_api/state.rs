@@ -1,5 +1,4 @@
 //! Shared state types for the WoW Lua API.
-
 use crate::cvars::CVarStorage;
 use crate::event::{EventQueue, ScriptRegistry};
 use crate::lua_api::animation::AnimGroupState;
@@ -313,6 +312,7 @@ macro_rules! build_empty_sim_state {
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
+            simulator_exit_requested: false,
         }
     };
 }

@@ -144,6 +144,16 @@ fn default_keybindings_dispatch_on_init() {
 }
 
 #[test]
+fn default_ctrl_q_binding_requests_simulator_exit() {
+    let env = env();
+
+    env.send_key_press("CTRL-Q", None).unwrap();
+
+    let requested: bool = env.eval("return A_Admin.IsSimulatorExitRequested()").unwrap();
+    assert!(requested, "CTRL-Q should dispatch the default Quit binding");
+}
+
+#[test]
 fn action_button_key_dispatch_casts_once_through_button_down() {
     let env = env();
     env.exec(

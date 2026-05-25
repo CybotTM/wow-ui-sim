@@ -84,3 +84,38 @@ fn key_press_requests_redraw_after_lua_visual_mutation() {
         "keypress visual mutation should request an immediate redraw"
     );
 }
+
+#[test]
+fn ctrl_q_key_press_requests_window_close() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    let _ = app.update(Message::KeyPress(
+        "CTRL-Q".to_string(),
+        None,
+        Instant::now(),
+    ));
+
+    assert!(
+        !app.env.borrow().state().borrow().simulator_exit_requested,
+        "update should consume the simulator exit request after creating the close task"
+    );
+
+    app.env
+        .borrow()
+        .state()
+        .borrow_mut()
+        .simulator_exit_requested = true;
+    let close_task = app.take_simulator_exit_task();
+    let action = pollster::block_on(async {
+        iced_runtime::task::into_stream(close_task)
+            .expect("exit request should create a window operation")
+            .next()
+            .await
+            .expect("close task should emit a window lookup")
+    });
+
+    assert!(
+        matches!(action, Action::Window(WindowAction::GetLatest(_))),
+        "exit request should start a latest-window lookup before closing it"
+    );
+}

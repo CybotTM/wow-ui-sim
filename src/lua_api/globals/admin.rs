@@ -171,7 +171,11 @@ fn register_modifier_keys(b: TableBuilder) -> LuaResult<TableBuilder> {
     b.set_function("SetShiftKeyDown", set_shift_key_down)?
         .set_function("SetControlKeyDown", set_control_key_down)?
         .set_function("SetAltKeyDown", set_alt_key_down)?
-        .set_function("SetMetaKeyDown", set_meta_key_down)
+        .set_function("SetMetaKeyDown", set_meta_key_down)?
+        .set_function(
+            "IsSimulatorExitRequested",
+            super::session_exit::is_simulator_exit_requested,
+        )
 }
 
 fn register_guild_and_game_rules(b: TableBuilder) -> LuaResult<TableBuilder> {

@@ -63,7 +63,7 @@ fn message_from_keyboard_event(
         return Some(Message::ReloadUI);
     }
 
-    let wow_key = super::keybinds::iced_key_to_wow(key)?;
+    let wow_key = super::keybinds::iced_key_to_wow(key, *modifiers)?;
     if !should_dispatch_wow_key(status, &wow_key) {
         return None;
     }
