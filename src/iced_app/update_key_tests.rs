@@ -89,15 +89,26 @@ fn key_press_requests_redraw_after_lua_visual_mutation() {
 fn ctrl_q_key_press_requests_window_close() {
     let mut app = build_test_app(ScreenKind::Game);
 
-    let _ = app.update(Message::KeyPress(
+    let task = app.update(Message::KeyPress(
         "CTRL-Q".to_string(),
         None,
         Instant::now(),
     ));
+    let close_action = pollster::block_on(async {
+        iced_runtime::task::into_stream(task)
+            .expect("ctrl-q should create task actions")
+            .next()
+            .await
+            .expect("ctrl-q should emit a window-close action")
+    });
 
     assert!(
         !app.env.borrow().state().borrow().simulator_exit_requested,
         "update should consume the simulator exit request after creating the close task"
+    );
+    assert!(
+        matches!(close_action, Action::Window(WindowAction::GetLatest(_))),
+        "CTRL-Q should start a latest-window lookup before closing it; got {close_action:?}"
     );
 
     app.env

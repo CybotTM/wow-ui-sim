@@ -268,6 +268,46 @@ fn test_game_menu_exit_button_requests_simulator_quit() {
 }
 
 #[test]
+fn test_game_menu_macro_button_callback_is_callable() {
+    test_timeout! {
+        let env = setup_env();
+
+        env.exec("GameMenuFrame:Show()").unwrap();
+
+        let result: String = env
+            .eval(
+                r#"
+                local macroButton
+                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                    if btn:GetText() == MACROS then
+                        macroButton = btn
+                        break
+                    end
+                end
+                if not macroButton then
+                    return "missing-macro-button"
+                end
+
+                local onclick = macroButton:GetScript("OnClick")
+                if type(onclick) ~= "function" then
+                    return "missing-onclick"
+                end
+
+                local ok, err = pcall(onclick, macroButton, "LeftButton", false)
+                if not ok then
+                    return "onclick-error:" .. tostring(err)
+                end
+
+                return type(MacroFrame) == "table" and MacroFrame:IsShown() and "macro-shown" or "macro-not-shown"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(result, "macro-shown");
+    }
+}
+
+#[test]
 fn test_game_menu_options_button_hitbox_matches_visual_center() {
     test_timeout! {
         let env = setup_env();

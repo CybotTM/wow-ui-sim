@@ -36,7 +36,7 @@ impl App {
             msg => self.dispatch_simple_message(msg),
         };
         let exit_task = self.take_simulator_exit_task();
-        Task::batch([task, ipc_task, exit_task])
+        Task::batch([exit_task, task, ipc_task])
     }
 
     fn dispatch_simple_message(&mut self, message: Message) -> Task<Message> {
