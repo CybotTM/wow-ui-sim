@@ -28,8 +28,65 @@ Settings = Settings or settings_surface_namespace({
 
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 
+local function ensure_settings_frame(parent, key, frameType)
+    local child = rawget(parent, key)
+    if child ~= nil then
+        return child
+    end
+    if type(CreateFrame) == "function" then
+        local ok, frame = pcall(CreateFrame, frameType or "Frame", nil, parent)
+        if ok then
+            child = frame
+        end
+    end
+    if child == nil then
+        child = {}
+    end
+    rawset(parent, key, child)
+    return child
+end
+
+local function ensure_settings_preview(settingsPanel, key)
+    local preview = ensure_settings_frame(settingsPanel, key, "Frame")
+    if rawget(preview, "RegisterWithSettingInitializer") == nil then
+        function preview:RegisterWithSettingInitializer(_initializer) end
+    end
+    if rawget(preview, "SetValueAccessor") == nil then
+        function preview:SetValueAccessor(_getValue) end
+    end
+    if rawget(preview, "UpdatePreview") == nil then
+        function preview:UpdatePreview(_value) end
+    end
+    return preview
+end
+
 do
     local settingsPanel = rawget(_G, "SettingsPanel")
+    if settingsPanel == nil and type(CreateFrame) == "function" then
+        settingsPanel = CreateFrame("Frame", "SettingsPanel", UIParent)
+    end
+    if type(settingsPanel) == "table" then
+        local container = ensure_settings_frame(settingsPanel, "Container", "Frame")
+        local settingsList = ensure_settings_frame(container, "SettingsList", "Frame")
+        local scrollBox = ensure_settings_frame(settingsList, "ScrollBox", "Frame")
+        ensure_settings_frame(scrollBox, "ScrollTarget", "Frame")
+        local header = ensure_settings_frame(settingsList, "Header", "Frame")
+        if rawget(header, "Title") == nil then
+            local title = nil
+            if type(header.CreateFontString) == "function" then
+                title = header:CreateFontString(nil, "OVERLAY")
+                if type(title.SetText) == "function" then
+                    title:SetText("")
+                end
+            else
+                title = { text = "", GetText = function(self) return self.text end }
+            end
+            rawset(header, "Title", title)
+        end
+        ensure_settings_preview(settingsPanel, "AccessibilityFontPreview")
+        ensure_settings_preview(settingsPanel, "QuestTextPreview")
+    end
+
     local categories = rawget(Settings, "_categories")
     if type(categories) ~= "table" then
         categories = {}

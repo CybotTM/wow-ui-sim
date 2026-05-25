@@ -662,6 +662,9 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary legacy container workaround",
         ),
         ("ChatFrame1", "temporary chat-window workaround"),
+        ("SettingsPanel", "temporary Settings surface workaround"),
+        ("AccessibilityFontPreview", "temporary Settings surface workaround"),
+        ("QuestTextPreview", "temporary Settings surface workaround"),
         (
             "EventToastManagerFrame =",
             "temporary global-frame workaround",

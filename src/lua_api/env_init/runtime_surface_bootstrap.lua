@@ -320,38 +320,6 @@ end
 do
   local uiParent = UIParent
   __wow_install_frame_helpers(uiParent)
-  local settingsPanel = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "SettingsPanel", uiParent))
-  local settingsContainer = __wow_ensure_named_child(settingsPanel, "Container", "Frame")
-  local settingsList = __wow_ensure_named_child(settingsContainer, "SettingsList", "Frame")
-  local scrollBox = __wow_ensure_named_child(settingsList, "ScrollBox", "Frame")
-  __wow_ensure_named_child(scrollBox, "ScrollTarget", "Frame")
-  local header = __wow_ensure_named_child(settingsList, "Header", "Frame")
-  if header ~= nil and rawget(header, "Title") == nil and header.CreateFontString ~= nil then
-    local title = header:CreateFontString(nil, "OVERLAY")
-    title:SetText("")
-    rawset(header, "Title", title)
-  end
-
-  local function __wow_seed_settings_preview(parent, key)
-    local preview = __wow_install_frame_helpers(__wow_ensure_named_child(parent, key, "Frame"))
-    if rawget(preview, "RegisterWithSettingInitializer") == nil then
-      function preview:RegisterWithSettingInitializer(_initializer)
-      end
-    end
-    if rawget(preview, "SetValueAccessor") == nil then
-      function preview:SetValueAccessor(_getValue)
-      end
-    end
-    if rawget(preview, "UpdatePreview") == nil then
-      function preview:UpdatePreview(_value)
-      end
-    end
-    return preview
-  end
-
-  __wow_seed_settings_preview(settingsPanel, "AccessibilityFontPreview")
-  __wow_seed_settings_preview(settingsPanel, "QuestTextPreview")
-
   local objectiveTracker = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "ObjectiveTrackerFrame", uiParent))
   if objectiveTracker ~= nil and rawget(objectiveTracker, "OnAdded") == nil then
     function objectiveTracker:OnAdded(backgroundAlpha)
@@ -3650,12 +3618,6 @@ local function __wow_register_misc_global_frames()
     ensure_button_text(LOGOUT or "Logout")
     gameMenu.buttonPool = buttonPool
   end
-
-  local settings = __wow_make_named_frame("Frame", "SettingsPanel", UIParent)
-  __wow_seed_global_frame_path(settings, { "Container", "SettingsList", "ScrollBox", "ScrollTarget" })
-  __wow_seed_global_frame_path(settings, { "Container", "SettingsList", "Header", "Title" })
-  __wow_seed_global_frame_path(settings, { "AccessibilityFontPreview" })
-  __wow_seed_global_frame_path(settings, { "QuestTextPreview" })
 
   local objective = __wow_make_named_frame("Frame", "ObjectiveTrackerFrame", UIParent)
   __wow_seed_global_frame_path(objective, { "Header", "MinimizeButton" })
