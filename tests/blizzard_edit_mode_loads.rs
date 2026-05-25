@@ -7,7 +7,8 @@ use wow_ui_sim::startup::fire_startup_events_for_screen;
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be synced")
 }
 
 fn edit_mode_toc() -> PathBuf {
@@ -388,7 +389,7 @@ fn blizzard_edit_mode_loads_mainline_overrides_excludes_wrath_only_files() {
 }
 
 #[test]
-fn blizzard_edit_mode_directory_ships_seven_subdirs_for_game_variants() {
+fn blizzard_edit_mode_directory_ships_six_subdirs_for_game_variants() {
     let dir = blizzard_ui_dir().join("Blizzard_EditMode");
     let entries: Vec<String> = std::fs::read_dir(&dir)
         .expect("Blizzard_EditMode dir should read")
@@ -401,14 +402,12 @@ fn blizzard_edit_mode_directory_ships_seven_subdirs_for_game_variants() {
         subdirs.contains(&&"Shared".to_string())
             && subdirs.contains(&&"Mainline".to_string())
             && subdirs.contains(&&"Classic".to_string())
-            && subdirs.contains(&&"Mists".to_string())
             && subdirs.contains(&&"Standard".to_string())
             && subdirs.contains(&&"WoWHack".to_string())
-            && subdirs.contains(&&"WoWLabs".to_string())
-            && subdirs.contains(&&"Wrath".to_string()),
-        "Blizzard_EditMode must ship 8 subdirs for game-type / family variants: Shared \
-         (game-agnostic engine), Mainline ([Family] for retail), Classic, Mists, Standard \
-         ([Game] for retail), WoWHack, WoWLabs, Wrath. The TOC's `[Family]` and `[Game]` \
+            && subdirs.contains(&&"WoWLabs".to_string()),
+        "Blizzard_EditMode must ship 6 subdirs for game-type / family variants: Shared \
+         (game-agnostic engine), Mainline ([Family] for retail), Classic, Standard \
+         ([Game] for retail), WoWHack, WoWLabs. The TOC's `[Family]` and `[Game]` \
          template substitutions plus `[AllowLoadGameType ...]` per-file filters select \
          which ones contribute files at load time. Got subdirs: {subdirs:?}"
     );
