@@ -1,21 +1,20 @@
-use std::path::PathBuf;
-
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::settle_headless_startup;
 use wow_ui_sim::toc::TocFile;
 
-fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+fn blizzard_ui_dir() -> std::path::PathBuf {
+    default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
 }
 
-fn timerunning_dir() -> PathBuf {
+fn timerunning_dir() -> std::path::PathBuf {
     blizzard_ui_dir().join("Blizzard_TimerunningCharacterCreate")
 }
 
-fn timerunning_toc() -> PathBuf {
+fn timerunning_toc() -> std::path::PathBuf {
     timerunning_dir().join("Blizzard_TimerunningCharacterCreate.toc")
 }
 
