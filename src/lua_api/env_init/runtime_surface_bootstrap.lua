@@ -319,7 +319,8 @@ end
 
 -- C_LFGList is state-backed via `src/lua_api/globals/lfg_list.rs`.
 -- C_AddOnProfiler is state-backed via `src/c_api/c_addon_profiler.rs`.
--- C_Ping.GetDefaultPingOptions is a temporary shim in `src/c_api/temporary_shims/c_ping.rs`.
+-- C_Ping.GetDefaultPingOptions is a temporary workaround in
+-- `src/lua_api/workarounds/temporary/ping_defaults.rs`.
 -- C_ZoneAbility is state-backed via `src/lua_api/globals/missing_surface/zone_ability.rs`.
 
 -- AccountStore / DamageMeter / CooldownViewer: Blizzard data-provider init
