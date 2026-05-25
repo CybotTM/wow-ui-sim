@@ -51,6 +51,103 @@ if CloseAllWindows == nil then
 end
 "#;
 
+const STARTUP_NAVIGATION_DEFAULTS_LUA: &str = r#"
+local uiParent = rawget(_G, "UIParent")
+
+local function ensure_frame(name)
+    local frame = rawget(_G, name)
+    if frame == nil and type(CreateFrame) == "function" then
+        frame = CreateFrame("Frame", name, uiParent)
+        rawset(_G, name, frame)
+    end
+    return frame
+end
+
+local function set_frame_visibility(name, visible)
+    local frame = ensure_frame(name)
+    if frame == nil then
+        return nil
+    end
+
+    if type(frame.Show) == "function" and visible then
+        frame:Show()
+    elseif type(frame.Hide) == "function" and not visible then
+        frame:Hide()
+    else
+        rawset(frame, "visible", visible and true or false)
+    end
+    return frame
+end
+
+local function toggle_single_frame(name, extraNames)
+    local frame = ensure_frame(name)
+    if frame == nil then
+        return false
+    end
+
+    local isShown = type(frame.IsShown) == "function" and frame:IsShown()
+    local newVisible = not isShown
+    set_frame_visibility(name, newVisible)
+    if type(extraNames) == "table" then
+        for _, extraName in ipairs(extraNames) do
+            set_frame_visibility(extraName, newVisible)
+        end
+    end
+    return newVisible
+end
+
+for _, name in ipairs({
+    "MainActionBar",
+    "MultiBarBottomLeft",
+    "MultiBarBottomRight",
+    "MultiBarRight",
+    "MultiBarLeft",
+    "MailFrame",
+    "InboxFrame",
+    "PVEFrame",
+    "SettingsPanel",
+}) do
+    local frame = ensure_frame(name)
+    if frame ~= nil and rawget(frame, "MarkAllSettingsDirty") == nil then
+        function frame:MarkAllSettingsDirty() end
+    end
+end
+
+for _, name in ipairs({ "MailFrame", "InboxFrame", "PVEFrame" }) do
+    set_frame_visibility(name, false)
+end
+
+if rawget(_G, "ToggleMailFrame") == nil then
+    function ToggleMailFrame()
+        toggle_single_frame("MailFrame", { "InboxFrame" })
+    end
+end
+
+if rawget(_G, "OpenAllBags") == nil then
+    function OpenAllBags()
+        set_frame_visibility("ContainerFrameCombinedBags", true)
+    end
+end
+
+if rawget(_G, "ToggleLFDParentFrame") == nil then
+    function ToggleLFDParentFrame()
+        return toggle_single_frame("PVEFrame")
+    end
+end
+
+if rawget(_G, "UpdateRaidAndPartyFrames") == nil then
+    function UpdateRaidAndPartyFrames()
+        if PartyFrame and type(PartyFrame.UpdatePartyFrames) == "function" then
+            pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+        end
+    end
+end
+
+if rawget(_G, "HelpOpenWebTicketButton_OnUpdate") == nil then
+    function HelpOpenWebTicketButton_OnUpdate() end
+end
+"#;
+
 const GETGLOBAL_HELPER_LUA: &str = r#"
 local function __wow_getglobal(name)
     return getglobal(name)
@@ -255,6 +352,7 @@ end
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(PANEL_REGISTRATION_DEFAULTS_LUA)?;
+    lua.exec(STARTUP_NAVIGATION_DEFAULTS_LUA)?;
     lua.exec(DIRECT_TOGGLE_REGISTERED_PANELS_LUA)?;
     Ok(())
 }
@@ -347,6 +445,77 @@ mod tests {
                 "#,
             )
             .expect("panel preservation probe should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn installs_startup_navigation_defaults() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            ToggleMailFrame = nil
+            OpenAllBags = nil
+            ToggleLFDParentFrame = nil
+            UpdateRaidAndPartyFrames = nil
+            HelpOpenWebTicketButton_OnUpdate = nil
+            SettingsPanel = nil
+            MailFrame = nil
+            InboxFrame = nil
+            PVEFrame = nil
+            ContainerFrameCombinedBags = nil
+            "#,
+        )
+        .expect("fixture should clear startup navigation globals");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("startup navigation defaults should apply");
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                if type(ToggleMailFrame) ~= "function" then return "mail_function" end
+                if type(OpenAllBags) ~= "function" then return "bags_function" end
+                if type(ToggleLFDParentFrame) ~= "function" then return "lfd_function" end
+                if type(UpdateRaidAndPartyFrames) ~= "function" then return "raid_function" end
+                if type(HelpOpenWebTicketButton_OnUpdate) ~= "function" then return "help_function" end
+                if type(SettingsPanel.MarkAllSettingsDirty) ~= "function" then return "settings_method" end
+                SettingsPanel:MarkAllSettingsDirty()
+
+                MailFrame:Hide()
+                InboxFrame:Hide()
+                ToggleMailFrame()
+                if not MailFrame:IsShown() then return "mail_show" end
+                if not InboxFrame:IsShown() then return "inbox_show" end
+                ToggleMailFrame()
+                if MailFrame:IsShown() then return "mail_hide" end
+                if InboxFrame:IsShown() then return "inbox_hide" end
+
+                OpenAllBags()
+                if not ContainerFrameCombinedBags:IsShown() then return "bags_show" end
+
+                PVEFrame:Hide()
+                ToggleLFDParentFrame()
+                if not PVEFrame:IsShown() then return "lfd_show" end
+                ToggleLFDParentFrame()
+                if PVEFrame:IsShown() then return "lfd_hide" end
+
+                PartyFrame = {
+                    updated = false,
+                    UpdatePartyFrames = function(self)
+                        self.updated = true
+                    end,
+                }
+                UpdateRaidAndPartyFrames()
+                if PartyFrame.updated ~= true then return "raid_update" end
+
+                HelpOpenWebTicketButton_OnUpdate()
+                return "ok"
+                "#,
+            )
+            .expect("startup navigation defaults probe should run");
 
         assert_eq!(result, "ok");
     }
