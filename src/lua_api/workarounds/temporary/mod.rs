@@ -39,6 +39,7 @@ pub(crate) mod difficulty_pvp_util_defaults;
 pub(crate) mod dispatcher_callback_defaults;
 pub(crate) mod dispatcher_surface;
 pub(crate) mod display_scale_defaults;
+pub(crate) mod dropdown_list_defaults;
 pub(crate) mod encounter_state;
 pub(crate) mod environment_cleanup_restore;
 pub(crate) mod event_scheduler_state;

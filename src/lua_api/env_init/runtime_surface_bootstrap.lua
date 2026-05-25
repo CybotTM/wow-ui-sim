@@ -3313,112 +3313,6 @@ local function __wow_seed_global_frame_path(root, path)
   return current
 end
 
-local function __wow_register_dropdown_globals()
-  local function __wow_seed_dropdown_button_template_children(button, button_name)
-    local highlight = __wow_ensure_named_child(button, "Highlight", "Texture", button_name .. "Highlight")
-    if highlight ~= nil and highlight.Hide ~= nil then
-      highlight:Hide()
-    end
-
-    local check = __wow_ensure_named_child(button, "Check", "Texture", button_name .. "Check")
-    if check ~= nil and check.SetTexture ~= nil then
-      check:SetTexture("Interface\\Common\\UI-DropDownRadioChecks")
-    end
-
-    local uncheck = __wow_ensure_named_child(button, "UnCheck", "Texture", button_name .. "UnCheck")
-    if uncheck ~= nil and uncheck.SetTexture ~= nil then
-      uncheck:SetTexture("Interface\\Common\\UI-DropDownRadioChecks")
-    end
-
-    local icon = __wow_ensure_named_child(button, "Icon", "Texture", button_name .. "Icon")
-    if icon ~= nil and icon.Hide ~= nil then
-      icon:Hide()
-    end
-
-    local color_swatch = __wow_ensure_named_child(button, "ColorSwatch", "Button", button_name .. "ColorSwatch")
-    if color_swatch ~= nil then
-      if color_swatch.Hide ~= nil then
-        color_swatch:Hide()
-      end
-      local color = __wow_ensure_named_child(color_swatch, "Color", "Texture", button_name .. "ColorSwatchColor")
-      if color ~= nil then
-        rawset(color_swatch, "Color", color)
-      end
-    end
-
-    local expand_arrow = __wow_ensure_named_child(button, "ExpandArrow", "Button", button_name .. "ExpandArrow")
-    if expand_arrow ~= nil and expand_arrow.Hide ~= nil then
-      expand_arrow:Hide()
-    end
-
-    local invisible_button = __wow_ensure_named_child(button, "invisibleButton", "Button", button_name .. "InvisibleButton")
-    if invisible_button ~= nil and invisible_button.Hide ~= nil then
-      invisible_button:Hide()
-    end
-
-    local new_feature = __wow_ensure_named_child(button, "NewFeature", "Frame", button_name .. "NewFeature")
-    if new_feature ~= nil and new_feature.Hide ~= nil then
-      new_feature:Hide()
-    end
-
-    local text = __wow_ensure_named_child(button, "Text", "FontString", button_name .. "NormalText")
-    if text ~= nil then
-      if text.SetFontObject ~= nil then
-        text:SetFontObject("GameFontHighlightSmall")
-      end
-      if text.SetText ~= nil then
-        text:SetText("")
-      end
-    end
-  end
-
-  local function __wow_seed_dropdown_list(level)
-    local list_name = "DropDownList" .. tostring(level)
-    local list = __wow_install_frame_helpers(__wow_ensure_named_frame("Button", list_name, UIParent))
-    if list == nil then
-      return
-    end
-
-    if list.SetFrameStrata ~= nil then
-      list:SetFrameStrata("FULLSCREEN_DIALOG")
-    end
-    if list.SetClampedToScreen ~= nil then
-      list:SetClampedToScreen(true)
-    end
-    if list.Hide ~= nil then
-      list:Hide()
-    end
-    list.numButtons = 0
-    list.maxWidth = 0
-
-    for index = 1, 8 do
-      local button_name = list_name .. "Button" .. tostring(index)
-      local button = __wow_ensure_named_child(list, "Button" .. tostring(index), "Button", button_name)
-      if button ~= nil then
-        if button.Hide ~= nil then
-          button:Hide()
-        end
-        __wow_seed_dropdown_button_template_children(button, button_name)
-      end
-    end
-
-    if level == 1 then
-      local button1 = rawget(list, "Button1")
-      local normal_text = button1 ~= nil and rawget(button1, "Text") or nil
-      if normal_text ~= nil and normal_text.GetFont ~= nil then
-        local _, font_height = normal_text:GetFont()
-        if font_height ~= nil then
-          UIDROPDOWNMENU_DEFAULT_TEXT_HEIGHT = font_height
-        end
-      end
-    end
-  end
-
-  for level = 1, 3 do
-    __wow_seed_dropdown_list(level)
-  end
-end
-
 local function __wow_register_misc_global_frames()
   local gameMenu = __wow_make_named_frame("Frame", "GameMenuFrame", UIParent)
   if type(gameMenu.Hide) == "function" then
@@ -3447,7 +3341,6 @@ local function __wow_register_misc_global_frames()
 end
 
 __wow_register_core_frame_methods()
-__wow_register_dropdown_globals()
 __wow_register_misc_global_frames()
 
 local __global_mt = getmetatable(_G) or {}

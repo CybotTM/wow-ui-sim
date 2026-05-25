@@ -240,6 +240,7 @@ fn apply_core_dispatcher_and_format_defaults(lua: &mut rilua::Lua) -> crate::Res
     temporary::dispatcher_callback_defaults::apply_bootstrap(lua)?;
     temporary::dispatcher_surface::apply_bootstrap(lua)?;
     temporary::display_scale_defaults::apply_bootstrap(lua)?;
+    temporary::dropdown_list_defaults::apply_bootstrap(lua)?;
     temporary::formatting_utility_defaults::apply_bootstrap(lua)?;
     temporary::game_time_calendar_invites::apply_bootstrap(lua)?;
     temporary::gamepad_cursor_control_defaults::apply_bootstrap(lua)?;
