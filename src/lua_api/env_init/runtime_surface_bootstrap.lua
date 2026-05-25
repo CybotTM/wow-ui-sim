@@ -72,52 +72,6 @@ local function __wow_install_frame_helpers(frame)
   return frame
 end
 
-local function __wow_ensure_item_button_surface(button)
-  if type(button) ~= "table" then
-    return button
-  end
-
-  local icon = rawget(button, "icon")
-  if icon == nil and type(button.CreateTexture) == "function" then
-    icon = button:CreateTexture(nil, "BORDER")
-    button.icon = icon
-  end
-  if icon ~= nil then
-    if type(icon.SetParentKey) == "function" then
-      pcall(icon.SetParentKey, icon, "icon", true)
-    end
-    if type(icon.ClearAllPoints) == "function" then
-      icon:ClearAllPoints()
-    end
-    if type(icon.SetPoint) == "function" then
-      icon:SetPoint("TOPLEFT", button, "TOPLEFT")
-      icon:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT")
-    end
-  end
-
-  local border = rawget(button, "IconBorder")
-  if border == nil and type(button.CreateTexture) == "function" then
-    border = button:CreateTexture(nil, "OVERLAY")
-    button.IconBorder = border
-  end
-  if border ~= nil then
-    if type(border.SetParentKey) == "function" then
-      pcall(border.SetParentKey, border, "IconBorder", true)
-    end
-    if type(border.SetSize) == "function" then
-      border:SetSize(37, 37)
-    end
-    if type(border.ClearAllPoints) == "function" then
-      border:ClearAllPoints()
-    end
-    if type(border.SetPoint) == "function" then
-      border:SetPoint("CENTER", button, "CENTER")
-    end
-  end
-
-  return button
-end
-
 if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
   __wow_original_CreateFrame = CreateFrame
 
@@ -133,9 +87,6 @@ if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
     local created = __wow_install_frame_helpers(__wow_original_CreateFrame(...))
     if frameType == "GameTooltip" and created and created.SetFrameStrata ~= nil then
       created:SetFrameStrata("TOOLTIP")
-    end
-    if frameType == "ItemButton" then
-      created = __wow_ensure_item_button_surface(created)
     end
     local parent = select(3, ...)
     if type(parent) == "table" and type(inherits) == "string" then
@@ -242,7 +193,6 @@ end
 -- checks sim.party_members[N-1] is populated, everything else false.
 
 local __wow_namespace_names = setmetatable({}, { __mode = "k" })
-local __wow_logged_nil_symbols = {}
 local __wow_namespace_mt = {
   __index = function(t, key)
     __wow_log_nil_symbol_access(__wow_namespace_names[t], key)
@@ -259,14 +209,16 @@ function __wow_log_nil_symbol_access(container, key)
     return
   end
 
-  if __wow_logged_nil_symbols == nil then
-    __wow_logged_nil_symbols = {}
+  local loggedNilSymbols = rawget(_G, "__wow_logged_nil_symbols")
+  if type(loggedNilSymbols) ~= "table" then
+    loggedNilSymbols = {}
+    rawset(_G, "__wow_logged_nil_symbols", loggedNilSymbols)
   end
   local cacheKey = tostring(container) .. "\001" .. tostring(key)
-  if __wow_logged_nil_symbols[cacheKey] then
+  if loggedNilSymbols[cacheKey] then
     return
   end
-  __wow_logged_nil_symbols[cacheKey] = true
+  loggedNilSymbols[cacheKey] = true
 
   local source
   local line

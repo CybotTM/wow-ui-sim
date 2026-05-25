@@ -5,6 +5,67 @@
 //! fallback in the generic runtime bootstrap.
 
 const ITEM_BUTTON_HELPER_DEFAULTS_LUA: &str = r#"
+local function ensure_item_button_surface(button)
+    if type(button) ~= "table" then
+        return button
+    end
+
+    local icon = rawget(button, "icon")
+    if icon == nil and type(button.CreateTexture) == "function" then
+        icon = button:CreateTexture(nil, "BORDER")
+        button.icon = icon
+    end
+    if icon ~= nil then
+        if type(icon.SetParentKey) == "function" then
+            pcall(icon.SetParentKey, icon, "icon", true)
+        end
+        if type(icon.ClearAllPoints) == "function" then
+            icon:ClearAllPoints()
+        end
+        if type(icon.SetPoint) == "function" then
+            icon:SetPoint("TOPLEFT", button, "TOPLEFT")
+            icon:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT")
+        end
+    end
+
+    local border = rawget(button, "IconBorder")
+    if border == nil and type(button.CreateTexture) == "function" then
+        border = button:CreateTexture(nil, "OVERLAY")
+        button.IconBorder = border
+    end
+    if border ~= nil then
+        if type(border.SetParentKey) == "function" then
+            pcall(border.SetParentKey, border, "IconBorder", true)
+        end
+        if type(border.SetSize) == "function" then
+            border:SetSize(37, 37)
+        end
+        if type(border.ClearAllPoints) == "function" then
+            border:ClearAllPoints()
+        end
+        if type(border.SetPoint) == "function" then
+            border:SetPoint("CENTER", button, "CENTER")
+        end
+    end
+
+    return button
+end
+
+if type(CreateFrame) == "function"
+    and rawget(_G, "__wow_item_button_surface_original_create_frame") ~= CreateFrame then
+    local originalCreateFrame = CreateFrame
+    rawset(_G, "__wow_item_button_surface_original_create_frame", originalCreateFrame)
+
+    function CreateFrame(...)
+        local frameType = select(1, ...)
+        local created = originalCreateFrame(...)
+        if frameType == "ItemButton" then
+            return ensure_item_button_surface(created)
+        end
+        return created
+    end
+end
+
 if SetItemButtonTexture == nil then
     function SetItemButtonTexture(button, texture)
         if type(button) ~= "table" then
@@ -145,6 +206,38 @@ mod tests {
         assert_close(result.5, 0.4);
         assert_close(result.6, 0.5);
         assert_close(result.7, 0.6);
+    }
+
+    #[test]
+    fn installs_item_button_create_frame_surface() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            local originalCreateFrame = __wow_original_CreateFrame or CreateFrame
+            CreateFrame = originalCreateFrame
+            __wow_item_button_surface_original_create_frame = nil
+            "#,
+        )
+        .expect("fixture should remove runtime ItemButton CreateFrame wrapper");
+
+        apply_again(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                local button = CreateFrame("ItemButton", "WorkaroundItemButtonSurface", UIParent)
+                if type(button.icon) ~= "table" then return "icon" end
+                if type(button.IconBorder) ~= "table" then return "border" end
+                if button.icon:GetParent() ~= button then return "icon_parent" end
+                if button.IconBorder:GetParent() ~= button then return "border_parent" end
+                local borderWidth, borderHeight = button.IconBorder:GetSize()
+                if borderWidth ~= 37 or borderHeight ~= 37 then return "border_size" end
+                return "ok"
+                "#,
+            )
+            .expect("item-button CreateFrame surface probe should run");
+
+        assert_eq!(result, "ok");
     }
 
     #[test]
