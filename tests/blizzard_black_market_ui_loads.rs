@@ -2,11 +2,13 @@ use std::path::PathBuf;
 
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::fire_startup_events_for_screen;
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    default_blizzard_ui_addons_path()
+        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
 }
 
 fn black_market_toc() -> PathBuf {
@@ -80,17 +82,17 @@ fn black_market_global_strings_exist() {
 }
 
 #[test]
-fn black_market_default_stub_returns_match_view_only_empty_state() {
+fn black_market_defaults_match_view_only_empty_state() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     let view_only: bool = env
         .eval("return C_BlackMarket.IsViewOnly()")
         .expect("IsViewOnly should return a value");
-    assert!(!view_only, "IsViewOnly stub should report false");
+    assert!(!view_only, "IsViewOnly default should report false");
 
     let num_items: f64 = env
         .eval("return C_BlackMarket.GetNumItems()")
         .expect("GetNumItems should return a number");
-    assert_eq!(num_items, 0.0, "GetNumItems stub should report 0");
+    assert_eq!(num_items, 0.0, "GetNumItems default should report 0");
 }
 
 #[test]

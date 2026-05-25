@@ -19,6 +19,7 @@ pub(crate) mod auto_complete_defaults;
 pub(crate) mod base_nine_slice_dialog_defaults;
 pub(crate) mod battle_net_account_defaults;
 pub(crate) mod behavioral_messaging_defaults;
+pub(crate) mod black_market_defaults;
 pub(crate) mod callback_registry_defaults;
 pub(crate) mod camera_tutorial_defaults;
 pub(crate) mod catalog_shop_inbound_globals;
