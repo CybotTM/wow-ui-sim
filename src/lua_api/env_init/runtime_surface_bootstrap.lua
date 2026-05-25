@@ -335,13 +335,6 @@ end
 -- The earlier __wow_merge_namespace at the top of this file already
 -- installed the C_PetBattles namespace with stub methods; our Rust
 -- registration overrides the two that the PLAN called out.
-function HasCompletedAnyAchievement()
-  return true
-end
-function CanShowAchievementUI()
-  return true
-end
-
 local __wow_store_state = rawget(_G, "__wow_store_state")
 if type(__wow_store_state) ~= "table" then
   local featuredGroupID = 501
