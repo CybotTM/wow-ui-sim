@@ -116,6 +116,24 @@ C_ColorUtil = __wow_color_merge_namespace(C_ColorUtil, {
     return "|c" .. code .. tostring(text or "") .. "|r"
   end,
 })
+
+C_ColorOverrides = __wow_color_merge_namespace(C_ColorOverrides, {
+  GetColorForQuality = function(_quality)
+    return CreateColor(1, 1, 1, 1)
+  end,
+})
+
+C_PvP = __wow_color_merge_namespace(C_PvP, {
+  IsInBrawl = function()
+    return false
+  end,
+  IsSoloShuffle = function()
+    return false
+  end,
+  GetArenaCrowdControlInfo = function(_unit)
+    return nil, 0, 0
+  end,
+})
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -158,6 +176,60 @@ mod tests {
                 "#,
             )
             .expect("color defaults probe should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn installs_color_override_and_pvp_defaults_without_replacing_existing_methods() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                local color = C_ColorOverrides.GetColorForQuality(1)
+                if color.r ~= 1 or color.g ~= 1 or color.b ~= 1 or color.a ~= 1 then return "color" end
+                if C_PvP.IsInBrawl() ~= false then return "brawl" end
+                if C_PvP.IsSoloShuffle() ~= false then return "shuffle" end
+                local spellID, startTime, duration = C_PvP.GetArenaCrowdControlInfo("player")
+                if spellID ~= nil or startTime ~= 0 or duration ~= 0 then return "cc" end
+                C_PvP.SetLocklistMap(566)
+                if C_PvP.GetLocklistMap(1) ~= 566 then return "state-backed" end
+                return "ok"
+                "#,
+            )
+            .expect("color/PvP defaults should be callable");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn preserves_existing_color_override_and_pvp_functions() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            C_ColorOverrides.GetColorForQuality = function()
+                return { r = 0.1, g = 0.2, b = 0.3, a = 0.4 }
+            end
+            C_PvP.IsInBrawl = function()
+                return true
+            end
+            "#,
+        )
+        .expect("fixture should install existing functions");
+
+        super::apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
+
+        let result: String = env
+            .eval(
+                r#"
+                local color = C_ColorOverrides.GetColorForQuality(1)
+                if color.r ~= 0.1 or color.g ~= 0.2 or color.b ~= 0.3 or color.a ~= 0.4 then return "color" end
+                if C_PvP.IsInBrawl() ~= true then return "brawl" end
+                return "ok"
+                "#,
+            )
+            .expect("existing color/PvP functions should remain callable");
 
         assert_eq!(result, "ok");
     }
