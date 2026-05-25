@@ -1,7 +1,7 @@
 use super::permanent_shims::c_nameplate;
 use super::temporary_shims::{
     c_character_services, c_click_bindings, c_gossip_info, c_major_faction_display, c_map_groups,
-    c_merchant_raid_defaults, c_mythic_plus, c_paper_doll_stagger, c_party_info_instance_abandon,
+    c_mythic_plus, c_paper_doll_stagger, c_party_info_instance_abandon,
     c_party_info_static_fallbacks, c_pet_battles_static_fallbacks, c_spell_classification,
     c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks,
 };
@@ -65,8 +65,7 @@ pub(crate) fn register_gossip_info_tables(state: &mut LuaState) -> LuaResult<()>
 }
 
 pub(crate) fn register_world_activity_tables(state: &mut LuaState) -> LuaResult<()> {
-    c_mythic_plus::register_c_mythic_plus_shims(state)?;
-    c_merchant_raid_defaults::register_c_merchant_and_raid_defaults(state)
+    c_mythic_plus::register_c_mythic_plus_shims(state)
 }
 
 pub(crate) fn register_nameplate_tables(state: &mut LuaState) -> LuaResult<()> {

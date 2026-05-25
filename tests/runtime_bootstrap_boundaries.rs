@@ -452,11 +452,11 @@ fn merchant_and_raid_lock_defaults_are_not_runtime_bootstrap_fallbacks() {
 
     assert!(
         !bootstrap.contains("C_MerchantFrame"),
-        "C_MerchantFrame defaults must live in the explicit temporary C API shim boundary, not runtime bootstrap"
+        "C_MerchantFrame defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
     );
     assert!(
         !bootstrap.contains("C_RaidLocks"),
-        "C_RaidLocks defaults must live in the explicit temporary C API shim boundary, not runtime bootstrap"
+        "C_RaidLocks defaults must live in the explicit temporary workaround boundary, not runtime bootstrap"
     );
 }
 

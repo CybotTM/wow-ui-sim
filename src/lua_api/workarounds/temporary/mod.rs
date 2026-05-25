@@ -88,6 +88,7 @@ pub(crate) mod map_canvas_scroll_container;
 pub(crate) mod map_exploration_pin;
 pub(crate) mod map_runtime_state;
 pub(crate) mod merchant_filter_state;
+pub(crate) mod merchant_raid_defaults;
 pub(crate) mod misc_global_frame_defaults;
 pub(crate) mod modified_click_defaults;
 pub(crate) mod mount_journal_dynamic_flight_popup;

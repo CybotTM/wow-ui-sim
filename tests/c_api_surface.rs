@@ -132,3 +132,18 @@ fn spell_target_defaults_are_not_c_api_temporary_shims() {
         "C_Spell TargetSpell* defaults should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn merchant_and_raid_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_merchant_raid_defaults"),
+        "unmodeled C_MerchantFrame and C_RaidLocks defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !registration.contains("c_merchant_raid_defaults"),
+        "C_MerchantFrame and C_RaidLocks no-state defaults should not be wired through c_api registration"
+    );
+}
