@@ -1,7 +1,7 @@
 use super::permanent_shims::c_nameplate;
 use super::temporary_shims::{
-    c_behavioral_messaging, c_character_services, c_click_bindings, c_configuration_warnings,
-    c_gossip_info, c_major_faction_display, c_map_groups, c_merchant_raid_defaults, c_mythic_plus,
+    c_character_services, c_click_bindings, c_configuration_warnings, c_gossip_info,
+    c_major_faction_display, c_map_groups, c_merchant_raid_defaults, c_mythic_plus,
     c_paper_doll_stagger, c_party_info_instance_abandon, c_party_info_static_fallbacks,
     c_pet_battles_static_fallbacks, c_spell_classification, c_spell_counts, c_spell_priority_aura,
     c_spell_static_fallbacks, c_spell_target, c_ui_widget_manager_power_bar,
@@ -48,7 +48,6 @@ pub(crate) fn register_character_progression_tables(state: &mut LuaState) -> Lua
 pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()> {
     c_ardenweald_gardening::register_c_ardenweald_gardening_surface(state)?;
     c_arrow_callout_manager::register_c_arrow_callout_manager_surface(state)?;
-    c_behavioral_messaging::register_c_behavioral_messaging(state)?;
     c_click_bindings::register_c_click_bindings_fallback(state)?;
     c_player_interaction_manager::register_c_player_interaction_manager_surface(state)
 }
