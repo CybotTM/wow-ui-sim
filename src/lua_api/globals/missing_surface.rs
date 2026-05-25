@@ -290,7 +290,6 @@ fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     battle_net::register_battle_net_surface(state)?;
-    c_api::register_configuration_warning_tables(state)?;
     character_services::register_character_services_surface(state)?;
     c_api::register_character_services_tables(state)?;
     chat_bubbles::register_chat_bubbles_surface(state)?;

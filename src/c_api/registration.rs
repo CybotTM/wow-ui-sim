@@ -1,10 +1,9 @@
 use super::permanent_shims::c_nameplate;
 use super::temporary_shims::{
-    c_character_services, c_click_bindings, c_configuration_warnings, c_gossip_info,
-    c_major_faction_display, c_map_groups, c_merchant_raid_defaults, c_mythic_plus,
-    c_paper_doll_stagger, c_party_info_instance_abandon, c_party_info_static_fallbacks,
-    c_pet_battles_static_fallbacks, c_spell_classification, c_spell_counts, c_spell_priority_aura,
-    c_spell_static_fallbacks, c_spell_target,
+    c_character_services, c_click_bindings, c_gossip_info, c_major_faction_display, c_map_groups,
+    c_merchant_raid_defaults, c_mythic_plus, c_paper_doll_stagger, c_party_info_instance_abandon,
+    c_party_info_static_fallbacks, c_pet_battles_static_fallbacks, c_spell_classification,
+    c_spell_counts, c_spell_priority_aura, c_spell_static_fallbacks, c_spell_target,
 };
 use super::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -73,10 +72,6 @@ pub(crate) fn register_world_activity_tables(state: &mut LuaState) -> LuaResult<
 
 pub(crate) fn register_nameplate_tables(state: &mut LuaState) -> LuaResult<()> {
     c_nameplate::register_c_nameplate(state)
-}
-
-pub(crate) fn register_configuration_warning_tables(state: &mut LuaState) -> LuaResult<()> {
-    c_configuration_warnings::register_c_configuration_warnings(state)
 }
 
 pub(crate) fn register_character_services_tables(state: &mut LuaState) -> LuaResult<()> {

@@ -87,3 +87,18 @@ fn c_addons_scripts_disallowed_for_beta_defaults_false() {
 
     assert_eq!(result, ("function".to_string(), false));
 }
+
+#[test]
+fn configuration_warnings_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_configuration_warnings"),
+        "unmodeled C_ConfigurationWarnings defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !registration.contains("c_configuration_warnings"),
+        "C_ConfigurationWarnings should not be wired through c_api registration"
+    );
+}
