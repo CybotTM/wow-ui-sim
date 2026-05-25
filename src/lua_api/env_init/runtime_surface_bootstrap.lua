@@ -3313,61 +3313,6 @@ local function __wow_seed_global_frame_path(root, path)
   return current
 end
 
-local function __wow_register_catalog_shop_inbound_globals()
-  local function ensure_inbound_interface(name)
-    if rawget(_G, name) ~= nil then
-      return
-    end
-
-    local inbound = {}
-
-    function inbound.IsShown()
-      return false
-    end
-
-    function inbound.SetShown(_shown, _contextKey)
-    end
-
-    function inbound.EscapePressed()
-      return false
-    end
-
-    function inbound.SelectSubscriptionProduct()
-    end
-
-    function inbound.SetTokenCategory()
-    end
-
-    function inbound.CheckForFree(_event)
-    end
-
-    function inbound.OpenGamesCategory()
-    end
-
-    function inbound.SetGamesCategory()
-    end
-
-    function inbound.SetServicesCategory()
-    end
-
-    function inbound.SelectBoost(_boostType, _reason, _guid)
-    end
-
-    function inbound.SelectGameTimeProduct()
-    end
-
-    function inbound.SelectSpecificProduct(_productID)
-    end
-
-    rawset(_G, name, inbound)
-  end
-
-  ensure_inbound_interface("CatalogShopInboundInterface")
-  ensure_inbound_interface("CatalogShopTopUpFlowInboundInterface")
-  ensure_inbound_interface("CatalogShopRefundFlowInboundInterface")
-  ensure_inbound_interface("SimpleCheckoutInboundInterface")
-end
-
 local function __wow_register_dropdown_globals()
   local function __wow_seed_dropdown_button_template_children(button, button_name)
     local highlight = __wow_ensure_named_child(button, "Highlight", "Texture", button_name .. "Highlight")
@@ -3502,7 +3447,6 @@ local function __wow_register_misc_global_frames()
 end
 
 __wow_register_core_frame_methods()
-__wow_register_catalog_shop_inbound_globals()
 __wow_register_dropdown_globals()
 __wow_register_misc_global_frames()
 
