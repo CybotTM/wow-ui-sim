@@ -1,5 +1,4 @@
 pub mod c_auth_challenge;
-pub mod c_calendar;
 pub mod c_campaign_covenant_defaults;
 pub mod c_character_services;
 pub mod c_chat_info;
