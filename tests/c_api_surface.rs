@@ -177,3 +177,18 @@ fn chat_info_no_state_defaults_are_not_c_api_temporary_shims() {
         "C_ChatInfo no-state defaults should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn pet_battle_static_fallbacks_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_pet_battles_static_fallbacks"),
+        "unmodeled C_PetBattles journal/trap/select defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !registration.contains("c_pet_battles_static_fallbacks"),
+        "C_PetBattles static fallbacks should not be wired through c_api registration"
+    );
+}

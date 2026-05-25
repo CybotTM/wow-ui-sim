@@ -165,6 +165,31 @@ local function __wow_pet_battle_get_ability(owner, petIndex, abilityIndex)
 end
 
 C_PetBattles._state = __wow_pet_battle_state
+
+local function __wow_pet_battle_install_default(name, fn)
+  if rawget(C_PetBattles, name) == nil then
+    C_PetBattles[name] = fn
+  end
+end
+
+__wow_pet_battle_install_default("GetAllEffectNames", function()
+end)
+
+__wow_pet_battle_install_default("GetPetInfoByPetID", function(_petID)
+end)
+
+__wow_pet_battle_install_default("IsTrapAvailable", function()
+  return false, 0
+end)
+
+__wow_pet_battle_install_default("IsPlayerNPC", function(_owner)
+  return false
+end)
+
+__wow_pet_battle_install_default("ShouldShowPetSelect", function()
+  return false
+end)
+
 C_PetBattles.IsInBattle = function()
   local battleState = C_PetBattles.GetBattleState()
   return battleState ~= 0 and battleState ~= __wow_pet_battle_finished_state
@@ -307,4 +332,66 @@ end
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(PET_BATTLE_RUNTIME_STATE_LUA)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn installs_static_pet_battle_fallbacks() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r##"
+                local trapReady, trapError = C_PetBattles.IsTrapAvailable()
+                if select("#", C_PetBattles.GetAllEffectNames()) ~= 0 then return "effects" end
+                if select("#", C_PetBattles.GetPetInfoByPetID("BattlePet-0-000000000000")) ~= 0 then return "pet-info" end
+                if trapReady ~= false or trapError ~= 0 then return "trap" end
+                if C_PetBattles.IsPlayerNPC() ~= false then return "player-npc" end
+                if C_PetBattles.ShouldShowPetSelect() ~= false then return "pet-select" end
+                return "ok"
+                "##,
+            )
+            .expect("static pet-battle fallbacks should be callable");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn preserves_existing_static_pet_battle_providers() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            C_PetBattles = C_PetBattles or __wow_namespace()
+
+            function C_PetBattles.IsTrapAvailable()
+                return true, 9
+            end
+            function C_PetBattles.IsPlayerNPC(_owner)
+                return true
+            end
+            function C_PetBattles.ShouldShowPetSelect()
+                return true
+            end
+            "#,
+        )
+        .expect("fixture should install existing C_PetBattles providers");
+
+        super::apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
+
+        let result: String = env
+            .eval(
+                r#"
+                local trapReady, trapError = C_PetBattles.IsTrapAvailable()
+                return tostring(trapReady) .. ":" .. trapError .. ":" ..
+                    tostring(C_PetBattles.IsPlayerNPC()) .. ":" ..
+                    tostring(C_PetBattles.ShouldShowPetSelect())
+                "#,
+            )
+            .expect("existing static pet-battle providers should remain callable");
+
+        assert_eq!(result, "true:9:true:true");
+    }
 }
