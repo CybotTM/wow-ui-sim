@@ -34,7 +34,6 @@ pub mod c_spell_priority_aura;
 pub mod c_spell_static_fallbacks;
 pub mod c_spell_target;
 pub mod c_super_track;
-pub mod c_tracking_defaults;
 pub mod c_trade_info;
 pub mod c_transmog_outfit_slots;
 pub mod c_transmog_sets;
