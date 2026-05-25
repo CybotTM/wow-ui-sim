@@ -107,6 +107,7 @@ pub(crate) mod proxy_object_factories;
 pub(crate) mod quest_log_mixin;
 pub(crate) mod quest_objective_defaults;
 pub(crate) mod reputation_state;
+pub(crate) mod restricted_actions_defaults;
 pub(crate) mod scripted_animation_effect_defaults;
 pub(crate) mod seconds_formatter_defaults;
 pub(crate) mod secure_execute_range;
