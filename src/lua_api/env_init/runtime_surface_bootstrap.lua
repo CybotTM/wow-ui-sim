@@ -434,20 +434,6 @@ do
     end
   end
 
-  PartyMemberFramePool = PartyMemberFramePool or {
-    EnumerateActive = function()
-      return function()
-        return nil
-      end
-    end,
-    GetNumActive = function()
-      return 0
-    end,
-  }
-  if PartyFrame ~= nil and PartyFrame.PartyMemberFramePool == nil then
-    PartyFrame.PartyMemberFramePool = PartyMemberFramePool
-  end
-
   ContainerFrameContainer = ContainerFrameContainer or { ContainerFrames = {} }
   ChatFrame1 = ChatFrame1 or __wow_install_frame_helpers(__wow_ensure_named_frame("ScrollingMessageFrame", "ChatFrame1", uiParent))
   EventToastManagerFrame = EventToastManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EventToastManagerFrame", uiParent))
@@ -3724,9 +3710,6 @@ local function __wow_register_misc_global_frames()
     ContainerFrameContainer.ContainerFrames = {}
   end
 
-  if PartyMemberFramePool == nil then
-    PartyMemberFramePool = CreateFramePool("Frame", UIParent)
-  end
 end
 
 __wow_register_core_frame_methods()

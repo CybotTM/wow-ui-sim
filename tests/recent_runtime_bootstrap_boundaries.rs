@@ -653,6 +653,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary inert-global workaround",
         ),
         ("ChatTypeGroup =", "Rust chat-frame utility owner"),
+        (
+            "PartyMemberFramePool =",
+            "temporary pool constructor workaround",
+        ),
 ];
 
 #[test]

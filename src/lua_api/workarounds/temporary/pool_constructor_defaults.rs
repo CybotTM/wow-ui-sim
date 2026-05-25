@@ -84,6 +84,13 @@ if CreateFramePool == nil then
   end
 end
 
+if PartyMemberFramePool == nil and type(CreateFramePool) == "function" then
+  PartyMemberFramePool = CreateFramePool("Frame", UIParent)
+end
+if PartyFrame ~= nil and PartyFrame.PartyMemberFramePool == nil then
+  PartyFrame.PartyMemberFramePool = PartyMemberFramePool
+end
+
 local function __wow_make_region_pool(acquire_region)
   return function(parent, layer, subLevel, template, resetter)
     local pool = {
@@ -370,6 +377,9 @@ mod tests {
                 if type(CreateFontStringPool) ~= "function" then return "font_string_pool" end
                 if type(CreateFramePoolCollection) ~= "function" then return "collection" end
                 if type(CreateFrameFactory) ~= "function" then return "factory" end
+                if type(PartyMemberFramePool) ~= "table" then return "party_pool" end
+                if PartyMemberFramePool:GetNumActive() ~= 0 then return "party_pool_active" end
+                if PartyFrame ~= nil and PartyFrame.PartyMemberFramePool ~= PartyMemberFramePool then return "party_frame_pool" end
 
                 local pool = CreateFramePool("Frame", UIParent)
                 local f1, isNew = pool:Acquire()
