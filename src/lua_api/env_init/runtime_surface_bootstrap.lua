@@ -434,7 +434,6 @@ do
     end
   end
 
-  ContainerFrameContainer = ContainerFrameContainer or { ContainerFrames = {} }
   ChatFrame1 = ChatFrame1 or __wow_install_frame_helpers(__wow_ensure_named_frame("ScrollingMessageFrame", "ChatFrame1", uiParent))
   EventToastManagerFrame = EventToastManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EventToastManagerFrame", uiParent))
   EditModeManagerFrame = EditModeManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EditModeManagerFrame", uiParent))
@@ -3702,12 +3701,6 @@ local function __wow_register_misc_global_frames()
   end
   if buff_frame ~= nil and buff_frame.AuraContainer ~= nil and buff_frame.AuraContainer.iconScale == nil then
     buff_frame.AuraContainer.iconScale = 1.0
-  end
-
-  if ContainerFrameContainer == nil then
-    ContainerFrameContainer = { ContainerFrames = {} }
-  elseif ContainerFrameContainer.ContainerFrames == nil then
-    ContainerFrameContainer.ContainerFrames = {}
   end
 
 end

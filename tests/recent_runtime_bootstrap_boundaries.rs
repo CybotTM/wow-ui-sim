@@ -657,6 +657,10 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "PartyMemberFramePool =",
             "temporary pool constructor workaround",
         ),
+        (
+            "ContainerFrameContainer =",
+            "temporary legacy container workaround",
+        ),
 ];
 
 #[test]
