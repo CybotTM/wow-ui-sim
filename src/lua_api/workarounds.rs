@@ -232,6 +232,7 @@ fn apply_core_foundation_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::difficulty_pvp_util_defaults::apply_bootstrap(lua)?;
     temporary::edit_mode_cache_defaults::apply_bootstrap(lua)?;
     temporary::global_frame_defaults::apply_bootstrap(lua)?;
+    temporary::pet_battle_runtime_state::apply_bootstrap(lua)?;
     temporary::secure_execute_range::apply_bootstrap(lua)?;
     temporary::settings_surface_defaults::apply_bootstrap(lua)?;
     temporary::tooltip_data_processor_defaults::apply_bootstrap(lua)?;

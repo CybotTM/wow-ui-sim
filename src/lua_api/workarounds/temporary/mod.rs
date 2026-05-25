@@ -82,6 +82,7 @@ pub(crate) mod objective_tracker_quest_header;
 pub(crate) mod paging_controls_page_text;
 pub(crate) mod performance_metric_defaults;
 pub(crate) mod perks_activities_state;
+pub(crate) mod pet_battle_runtime_state;
 pub(crate) mod player_location_defaults;
 pub(crate) mod player_spells_onload_backfill;
 pub(crate) mod pool_constructor_defaults;
