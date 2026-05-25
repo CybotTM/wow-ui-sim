@@ -162,3 +162,18 @@ fn paper_doll_stagger_default_is_not_c_api_temporary_shim() {
         "C_PaperDollInfo.GetStaggerPercentage should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn chat_info_no_state_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let c_api = include_str!("../src/c_api/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_chat_info"),
+        "unmodeled C_ChatInfo emote/caution/chat-line defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !c_api.contains("c_chat_info"),
+        "C_ChatInfo no-state defaults should not be wired through c_api registration"
+    );
+}
