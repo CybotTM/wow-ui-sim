@@ -86,7 +86,6 @@ fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
 fn register_glue_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
     temporary_shims::c_chat_info::register_c_chat_info_shims(state)?;
     temporary_shims::c_campaign_covenant_defaults::register_campaign_covenant_default_shims(state)?;
-    temporary_shims::c_club_notifications::register_c_club_notification_shims(state)?;
     temporary_shims::c_contribution_collector::register_c_contribution_collector(state)?;
     temporary_shims::c_cooldown_viewer::register_c_cooldown_viewer_shims(state)?;
     temporary_shims::c_date_and_time::register_c_date_and_time_shims(state)?;
