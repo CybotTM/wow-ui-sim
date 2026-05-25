@@ -192,3 +192,24 @@ fn pet_battle_static_fallbacks_are_not_c_api_temporary_shims() {
         "C_PetBattles static fallbacks should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn spell_metadata_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    for module in [
+        "c_spell_classification",
+        "c_spell_counts",
+        "c_spell_priority_aura",
+    ] {
+        assert!(
+            !temporary_shims.contains(module),
+            "unmodeled C_Spell metadata/count defaults belong in lua_api::workarounds::temporary"
+        );
+        assert!(
+            !registration.contains(module),
+            "C_Spell metadata/count defaults should not be wired through c_api registration"
+        );
+    }
+}
