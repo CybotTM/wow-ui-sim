@@ -434,7 +434,6 @@ do
     end
   end
 
-  ChatFrame1 = ChatFrame1 or __wow_install_frame_helpers(__wow_ensure_named_frame("ScrollingMessageFrame", "ChatFrame1", uiParent))
   EventToastManagerFrame = EventToastManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EventToastManagerFrame", uiParent))
   EditModeManagerFrame = EditModeManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EditModeManagerFrame", uiParent))
   RolePollPopup = RolePollPopup or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "RolePollPopup", uiParent))
@@ -3479,13 +3478,6 @@ local function __wow_register_alert_frame()
   end
 end
 
-local function __wow_register_chat_frame_globals()
-  if rawget(_G, "ChatFrame1") == nil then
-    CreateFrame("ScrollingMessageFrame", "ChatFrame1", UIParent)
-  end
-
-end
-
 local function __wow_register_catalog_shop_inbound_globals()
   local function ensure_inbound_interface(name)
     if rawget(_G, name) ~= nil then
@@ -3706,7 +3698,6 @@ local function __wow_register_misc_global_frames()
 end
 
 __wow_register_core_frame_methods()
-__wow_register_chat_frame_globals()
 __wow_register_catalog_shop_inbound_globals()
 __wow_register_dropdown_globals()
 __wow_register_addon_compartment()

@@ -27,6 +27,10 @@ end
 
 ChatFrameUtil = ChatFrameUtil or {}
 
+if rawget(_G, "ChatFrame1") == nil and type(CreateFrame) == "function" then
+  CreateFrame("ScrollingMessageFrame", "ChatFrame1", UIParent)
+end
+
 if ChatFrameUtil.ProcessMessageEventFilters == nil then
   function ChatFrameUtil.ProcessMessageEventFilters(_frame, event, ...)
     return false, event, ...
@@ -151,6 +155,8 @@ mod tests {
                 if ChatTypeInfo.BN_WHISPER.id ~= 19 then return "bn_whisper" end
                 if GetChatTypeIndex("SAY") ~= 1 then return "chat_type_index" end
                 if type(ChatFrameUtil.ProcessMessageEventFilters) ~= "function" then return "filters_function" end
+                if type(ChatFrame1) ~= "table" then return "chat_frame1" end
+                if ChatFrame1:GetObjectType() ~= "ScrollingMessageFrame" then return "chat_frame1_type" end
                 if ChatFrameUtil.GetChatWindowName(3) ~= "Chat Window 3" then return "window_name" end
 
                 local filtered, event, message = ChatFrameUtil.ProcessMessageEventFilters(nil, "CHAT_MSG_SAY", "hello")

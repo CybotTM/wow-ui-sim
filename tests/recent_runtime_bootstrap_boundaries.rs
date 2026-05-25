@@ -661,6 +661,7 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "ContainerFrameContainer =",
             "temporary legacy container workaround",
         ),
+        ("ChatFrame1", "temporary chat-window workaround"),
 ];
 
 #[test]
