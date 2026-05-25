@@ -102,3 +102,18 @@ fn configuration_warnings_defaults_are_not_c_api_temporary_shims() {
         "C_ConfigurationWarnings should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn item_targeting_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let item_spell = include_str!("../src/c_api/item_spell/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_item_targeting"),
+        "unmodeled C_Item targeting defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !item_spell.contains("c_item_targeting"),
+        "C_Item IsHelpfulItem/IsHarmfulItem defaults should not be wired through c_api item registration"
+    );
+}
