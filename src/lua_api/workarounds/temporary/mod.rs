@@ -30,6 +30,7 @@ pub(crate) mod character_frame_surface_refresh;
 pub(crate) mod character_select_selected_name;
 pub(crate) mod chat_voice_button_surface;
 pub(crate) mod chat_window_defaults;
+pub(crate) mod class_trial_defaults;
 pub(crate) mod client_info_defaults;
 pub(crate) mod collections_journal_namespace;
 pub(crate) mod color_defaults;

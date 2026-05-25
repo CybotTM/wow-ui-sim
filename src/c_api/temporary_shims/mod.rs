@@ -1,7 +1,6 @@
 pub mod c_campaign_covenant_defaults;
 pub mod c_character_services;
 pub mod c_chat_info;
-pub mod c_class_trial;
 pub mod c_click_bindings;
 pub mod c_club_notifications;
 pub mod c_collections_filter_defaults;
