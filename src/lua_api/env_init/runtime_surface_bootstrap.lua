@@ -339,10 +339,6 @@ do
   local objectiveHeader = __wow_ensure_named_child(objectiveTracker, "Header", "Frame")
   __wow_ensure_named_child(objectiveHeader, "MinimizeButton", "Button")
 
-  local lfgListFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "LFGListFrame", uiParent))
-  local searchPanel = __wow_ensure_named_child(lfgListFrame, "SearchPanel", "Frame")
-  __wow_ensure_named_child(searchPanel, "SearchBox", "EditBox")
-
   local buffFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "BuffFrame", uiParent))
   local auraContainer = __wow_ensure_named_child(buffFrame, "AuraContainer", "Frame")
   if auraContainer ~= nil and auraContainer.iconScale == nil then
@@ -3621,9 +3617,6 @@ local function __wow_register_misc_global_frames()
 
   local objective = __wow_make_named_frame("Frame", "ObjectiveTrackerFrame", UIParent)
   __wow_seed_global_frame_path(objective, { "Header", "MinimizeButton" })
-
-  local lfg_list = __wow_make_named_frame("Frame", "LFGListFrame", UIParent)
-  __wow_seed_global_frame_path(lfg_list, { "SearchPanel", "SearchBox" })
 
   local buff_frame = rawget(_G, "BuffFrame")
   local aura_container = rawget(_G, "BuffFrameAuraContainer")

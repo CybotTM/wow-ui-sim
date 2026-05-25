@@ -665,6 +665,8 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
         ("SettingsPanel", "temporary Settings surface workaround"),
         ("AccessibilityFontPreview", "temporary Settings surface workaround"),
         ("QuestTextPreview", "temporary Settings surface workaround"),
+        ("LFGListFrame", "temporary legacy LFG workaround"),
+        ("SearchPanel", "temporary legacy LFG workaround"),
         (
             "EventToastManagerFrame =",
             "temporary global-frame workaround",

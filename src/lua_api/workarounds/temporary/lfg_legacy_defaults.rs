@@ -4,6 +4,35 @@
 //! legacy global probes explicit until those callers are modeled properly.
 
 const LFG_LEGACY_DEFAULTS_LUA: &str = r#"
+local function __wow_lfg_ensure_child(parent, key, frameType)
+    local child = rawget(parent, key)
+    if child ~= nil then
+        return child
+    end
+    if type(CreateFrame) == "function" then
+        local ok, frame = pcall(CreateFrame, frameType or "Frame", nil, parent)
+        if ok then
+            child = frame
+        end
+    end
+    if child == nil then
+        child = {}
+    end
+    rawset(parent, key, child)
+    return child
+end
+
+do
+    local lfgListFrame = rawget(_G, "LFGListFrame")
+    if lfgListFrame == nil and type(CreateFrame) == "function" then
+        lfgListFrame = CreateFrame("Frame", "LFGListFrame", UIParent)
+    end
+    if type(lfgListFrame) == "table" then
+        local searchPanel = __wow_lfg_ensure_child(lfgListFrame, "SearchPanel", "Frame")
+        __wow_lfg_ensure_child(searchPanel, "SearchBox", "EditBox")
+    end
+end
+
 if GetLFGCategoryForID == nil then
     function GetLFGCategoryForID() return 0 end
 end
@@ -400,6 +429,24 @@ mod tests {
                 "#,
             )
             .expect("legacy LFG fallback shape probe should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn installs_lfg_list_frame_search_surface() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                if type(LFGListFrame) ~= "table" then return "frame" end
+                if type(LFGListFrame.SearchPanel) ~= "table" then return "panel" end
+                if type(LFGListFrame.SearchPanel.SearchBox) ~= "table" then return "box" end
+                return "ok"
+                "#,
+            )
+            .expect("LFGListFrame search surface probe should run");
 
         assert_eq!(result, "ok");
     }
