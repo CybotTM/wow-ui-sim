@@ -620,6 +620,14 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "BaseActionButtonMixin =",
             "temporary legacy action-bar workaround",
         ),
+        (
+            "GameRulesUtil =",
+            "temporary game-rules namespace workaround",
+        ),
+        (
+            "function GameRulesUtil.ShouldShowPlayerCastBar",
+            "temporary game-rules namespace workaround",
+        ),
 ];
 
 #[test]

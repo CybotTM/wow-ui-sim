@@ -9,6 +9,13 @@ if type(C_GameRules) ~= "table" then
     C_GameRules = {}
 end
 
+GameRulesUtil = GameRulesUtil or {}
+if rawget(GameRulesUtil, "ShouldShowPlayerCastBar") == nil then
+    function GameRulesUtil.ShouldShowPlayerCastBar()
+        return true
+    end
+end
+
 local function GameRulesNamespaceFallback(t, key)
     if type(__wow_record_nil_symbol_access) == "function" then
         __wow_record_nil_symbol_access("C_GameRules", key, nil, nil)
@@ -54,6 +61,12 @@ mod tests {
                 end
                 if C_GameRules.IsHardcoreActive() ~= nil then
                     return "fallback_returned_value"
+                end
+                if type(GameRulesUtil) ~= "table" then
+                    return "missing_util"
+                end
+                if GameRulesUtil.ShouldShowPlayerCastBar() ~= true then
+                    return "bad_cast_bar_rule"
                 end
                 return "ok"
                 "#,

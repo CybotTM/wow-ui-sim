@@ -985,13 +985,6 @@ if rawget(C_CharacterCreation, "CreateCharacter") == nil then
   end
 end
 
-GameRulesUtil = GameRulesUtil or {}
-if rawget(GameRulesUtil, "ShouldShowPlayerCastBar") == nil then
-  function GameRulesUtil.ShouldShowPlayerCastBar()
-    return true
-  end
-end
-
 -- Pet battles: lightly modeled, but fresh simulator state is not in a battle.
 -- `GetNumPets` is compared numerically during PetBattleFrame OnLoad refresh,
 -- so returning nil crashes `petIndex > GetNumPets(owner)`. Zero is the
