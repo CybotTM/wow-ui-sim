@@ -6,6 +6,32 @@
 
 use crate::lua_api::{LoaderEnv, WowLuaEnv};
 
+const AUTH_CHALLENGE_DEFAULTS_LUA: &str = r#"
+C_AuthChallenge = C_AuthChallenge or __wow_namespace()
+
+if rawget(C_AuthChallenge, "SetFrame") == nil then
+    function C_AuthChallenge.SetFrame(_frame)
+    end
+end
+if rawget(C_AuthChallenge, "Submit") == nil then
+    function C_AuthChallenge.Submit()
+    end
+end
+if rawget(C_AuthChallenge, "Cancel") == nil then
+    function C_AuthChallenge.Cancel()
+    end
+end
+if rawget(C_AuthChallenge, "OnTabPressed") == nil then
+    function C_AuthChallenge.OnTabPressed(_frame, _reverse)
+    end
+end
+if rawget(C_AuthChallenge, "DidChallengeSucceed") == nil then
+    function C_AuthChallenge.DidChallengeSucceed()
+        return false
+    end
+end
+"#;
+
 const AUTH_CHALLENGE_FRAME_PARENT_WORKAROUND_LUA: &str = r#"
 local authChallengeFunctions = {
     "AuthChallengeUI_OnLoad",
@@ -45,6 +71,11 @@ if inputFrame and inputFrame.Submit == nil and type(inputFrame.GetChildren) == "
 end
 "#;
 
+pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(AUTH_CHALLENGE_DEFAULTS_LUA)?;
+    Ok(())
+}
+
 pub(crate) fn patch(env: &LoaderEnv<'_>) {
     let _ = env.exec(AUTH_CHALLENGE_FRAME_PARENT_WORKAROUND_LUA);
 }
@@ -56,6 +87,45 @@ pub(crate) fn patch_env(env: &WowLuaEnv) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn auth_challenge_defaults_to_unsuccessful_noops() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        let succeeded: bool = env
+            .eval(
+                r#"
+                C_AuthChallenge.SetFrame({})
+                C_AuthChallenge.Submit()
+                C_AuthChallenge.Cancel()
+                C_AuthChallenge.OnTabPressed(nil, false)
+                return C_AuthChallenge.DidChallengeSucceed()
+                "#,
+            )
+            .expect("auth challenge defaults should be callable");
+
+        assert!(!succeeded);
+    }
+
+    #[test]
+    fn preserves_existing_auth_challenge_functions() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            function C_AuthChallenge.DidChallengeSucceed()
+                return true
+            end
+            "#,
+        )
+        .expect("fixture should install existing function");
+
+        apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
+
+        let succeeded: bool = env
+            .eval("return C_AuthChallenge.DidChallengeSucceed()")
+            .expect("existing auth challenge function should remain callable");
+
+        assert!(succeeded);
+    }
 
     #[test]
     fn restores_missing_auth_challenge_functions_from_secureenv() {

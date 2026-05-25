@@ -243,6 +243,7 @@ fn apply_core_foundation_frame_defaults(lua: &mut rilua::Lua) -> crate::Result<(
 fn apply_core_foundation_addon_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::addon_compartment_defaults::apply_bootstrap(lua)?;
     temporary::addons_beta_policy_defaults::apply_bootstrap(lua)?;
+    temporary::auth_challenge_frame_parent::apply_bootstrap(lua)?;
     temporary::auto_complete_defaults::apply_bootstrap(lua)?;
     temporary::behavioral_messaging_defaults::apply_bootstrap(lua)?;
     temporary::black_market_defaults::apply_bootstrap(lua)?;
