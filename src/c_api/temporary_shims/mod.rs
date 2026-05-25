@@ -5,7 +5,6 @@ pub mod c_click_bindings;
 pub mod c_configuration_warnings;
 pub mod c_container_defaults;
 pub mod c_contribution_collector;
-pub mod c_cooldown_viewer;
 pub mod c_date_and_time;
 pub mod c_gossip_info;
 pub mod c_item_targeting;

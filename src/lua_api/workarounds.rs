@@ -235,14 +235,19 @@ fn apply_core_foundation_frame_defaults(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::client_info_defaults::apply_bootstrap(lua)?;
     temporary::collections_journal_namespace::apply_bootstrap(lua)?;
     temporary::color_defaults::apply_bootstrap(lua)?;
-    temporary::content_tracking_defaults::apply_bootstrap(lua)?;
-    temporary::container_portrait_texture::apply_bootstrap(lua)?;
+    apply_core_foundation_tracking_defaults(lua)?;
     temporary::debug_environment_defaults::apply_bootstrap(lua)?;
     temporary::difficulty_pvp_util_defaults::apply_bootstrap(lua)?;
     temporary::edit_mode_cache_defaults::apply_bootstrap(lua)?;
     temporary::equipment_set_lock_defaults::apply_bootstrap(lua)?;
     temporary::global_frame_defaults::apply_bootstrap(lua)?;
     Ok(())
+}
+
+fn apply_core_foundation_tracking_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
+    temporary::content_tracking_defaults::apply_bootstrap(lua)?;
+    temporary::cooldown_viewer_defaults::apply_bootstrap(lua)?;
+    temporary::container_portrait_texture::apply_bootstrap(lua)
 }
 
 fn apply_core_foundation_addon_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
