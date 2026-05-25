@@ -1888,83 +1888,6 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     end
   end
 end
-local function __wow_ensure_achievement_search_previews()
-  local frame = AchievementFrame
-  local container = frame and frame.SearchPreviewContainer
-  if type(container) ~= "table" and type(container) ~= "userdata" then
-    return
-  end
-
-  local previews = container.searchPreviews
-  if type(previews) ~= "table" then
-    previews = {}
-    container.searchPreviews = previews
-  end
-
-  local count = ACHIEVEMENT_FRAME_NUM_SEARCH_PREVIEWS or 5
-  for index = 1, count do
-    if previews[index] == nil then
-      previews[index] = container["SearchPreview" .. index]
-    end
-  end
-end
-
-local function __wow_patch_achievement_search_preview_selection()
-  if rawget(_G, "__wow_achievement_search_preview_patched") then
-    return
-  end
-  if type(AchievementFrame_SetSearchPreviewSelection) ~= "function" then
-    return
-  end
-
-  local original = AchievementFrame_SetSearchPreviewSelection
-  AchievementFrame_SetSearchPreviewSelection = function(selectedIndex)
-    __wow_ensure_achievement_search_previews()
-    return original(selectedIndex)
-  end
-  __wow_achievement_search_preview_patched = true
-end
-
-local function __wow_patch_achievement_summary_empty_text_overlap()
-  if rawget(_G, "__wow_achievement_summary_empty_text_patched") then
-    return
-  end
-  if type(AchievementFrameSummary_UpdateAchievements) ~= "function" then
-    return
-  end
-
-  local original = AchievementFrameSummary_UpdateAchievements
-  AchievementFrameSummary_UpdateAchievements = function(...)
-    local numAchievements = select("#", ...)
-    local results = { original(...) }
-
-    local emptyText = rawget(_G, "AchievementFrameSummaryAchievementsEmptyText")
-    local summary = rawget(_G, "AchievementFrameSummaryAchievements")
-    local buttons = summary and summary.buttons
-    local hasVisibleSummaryButton = false
-
-    if type(buttons) == "table" then
-      for _, button in ipairs(buttons) do
-        if (type(button) == "table" or type(button) == "userdata")
-          and type(button.IsShown) == "function"
-          and button:IsShown() then
-          hasVisibleSummaryButton = true
-          break
-        end
-      end
-    end
-
-    if (type(emptyText) == "table" or type(emptyText) == "userdata")
-      and type(emptyText.SetShown) == "function" then
-      emptyText:SetShown(numAchievements == 0 and not hasVisibleSummaryButton)
-    end
-
-    return unpack(results)
-  end
-
-  __wow_achievement_summary_empty_text_patched = true
-end
-
 local function __wow_find_first_scroll_frame_child(parent)
   if parent == nil or type(parent.GetChildren) ~= "function" then
     return nil
@@ -2198,11 +2121,7 @@ __wow_patch_uiparent_onupdate_worklists()
 
 if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
   hooksecurefunc(C_AddOns, "LoadAddOn", function(addonName)
-    if addonName == "Blizzard_AchievementUI" then
-      __wow_ensure_achievement_search_previews()
-      __wow_patch_achievement_search_preview_selection()
-      __wow_patch_achievement_summary_empty_text_overlap()
-    elseif addonName == "Blizzard_CharacterSelectNavBar" then
+    if addonName == "Blizzard_CharacterSelectNavBar" then
       __wow_patch_character_select_nav_bar()
     elseif addonName == "Blizzard_UIParent"
       or addonName == "Blizzard_UIParent_Mainline"
