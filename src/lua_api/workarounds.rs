@@ -308,6 +308,7 @@ fn apply_feature_temporary_namespace_bootstrap(lua: &mut rilua::Lua) -> crate::R
     temporary::sound_driver_defaults::apply_bootstrap(lua)?;
     temporary::static_model_info_defaults::apply_bootstrap(lua)?;
     temporary::static_popup_defaults::apply_bootstrap(lua)?;
+    temporary::texture_file_data_defaults::apply_bootstrap(lua)?;
     temporary::top_level_parent_defaults::apply_bootstrap(lua)?;
     temporary::trade_skill_ui_fallbacks::apply_bootstrap(lua)?;
     temporary::transmog_util_defaults::apply_bootstrap(lua)?;

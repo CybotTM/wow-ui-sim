@@ -115,6 +115,7 @@ pub(crate) mod static_model_info_defaults;
 pub(crate) mod static_popup_defaults;
 pub(crate) mod store_glue_state;
 pub(crate) mod talent_edge_frame_level_sync;
+pub(crate) mod texture_file_data_defaults;
 pub(crate) mod tooltip_data_processor_defaults;
 pub(crate) mod tooltip_nineslice_surface;
 pub(crate) mod top_level_parent_defaults;
