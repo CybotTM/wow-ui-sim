@@ -72,3 +72,18 @@ fn c_fog_of_war_unknown_id_keeps_default_shape() {
     assert_eq!(info.1, None);
     assert_eq!(info.2, 1.0);
 }
+
+#[test]
+fn c_addons_scripts_disallowed_for_beta_defaults_false() {
+    let env = env();
+    let result: (String, bool) = env
+        .eval(
+            r#"
+            return type(C_AddOns.GetScriptsDisallowedForBeta),
+                   C_AddOns.GetScriptsDisallowedForBeta()
+        "#,
+        )
+        .expect("failed to query C_AddOns.GetScriptsDisallowedForBeta");
+
+    assert_eq!(result, ("function".to_string(), false));
+}

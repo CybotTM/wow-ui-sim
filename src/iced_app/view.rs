@@ -38,7 +38,7 @@ fn console_text_from_log_messages(log_messages: &[String]) -> String {
 }
 
 fn should_dispatch_wow_key(status: iced::event::Status, wow_key: &str) -> bool {
-    matches!(status, iced::event::Status::Ignored) || wow_key == "ESCAPE"
+    matches!(status, iced::event::Status::Ignored) || matches!(wow_key, "ESCAPE" | "CTRL-Q")
 }
 
 fn message_from_keyboard_event(
@@ -587,6 +587,14 @@ mod key_dispatch_tests {
     fn non_escape_keys_only_dispatch_when_ignored_by_iced() {
         assert!(should_dispatch_wow_key(iced::event::Status::Ignored, "M"));
         assert!(!should_dispatch_wow_key(iced::event::Status::Captured, "M"));
+    }
+
+    #[test]
+    fn ctrl_q_dispatches_even_when_iced_captures_event() {
+        assert!(should_dispatch_wow_key(
+            iced::event::Status::Captured,
+            "CTRL-Q"
+        ));
     }
 }
 

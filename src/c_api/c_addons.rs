@@ -502,6 +502,11 @@ fn c_addons_is_addon_default_enabled(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn c_addons_get_scripts_disallowed_for_beta(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
 fn c_addons_is_addon_version_check_enabled(state: &mut LuaState) -> LuaResult<u32> {
     let enabled = registry_bool(state, ADDON_VERSION_CHECK_KEY);
     state.push(Val::Bool(enabled));
