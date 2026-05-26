@@ -154,6 +154,16 @@ fn default_ctrl_q_binding_requests_simulator_exit() {
 }
 
 #[test]
+fn quit_game_global_requests_simulator_exit() {
+    let env = env();
+
+    env.exec("QuitGame()").unwrap();
+
+    let requested: bool = env.eval("return A_Admin.IsSimulatorExitRequested()").unwrap();
+    assert!(requested, "QuitGame should use the simulator exit path");
+}
+
+#[test]
 fn action_button_key_dispatch_casts_once_through_button_down() {
     let env = env();
     env.exec(

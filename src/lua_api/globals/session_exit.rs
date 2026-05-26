@@ -26,6 +26,7 @@ pub(crate) fn is_simulator_exit_requested(state: &mut LuaState) -> LuaResult<u32
 
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "Quit", request_simulator_exit)?;
+    LuaApiMut::register_function(lua, "QuitGame", request_simulator_exit)?;
     LuaApiMut::register_function(lua, "ForceQuit", request_simulator_exit)?;
     LuaApiMut::register_function(lua, "Logout", logout)?;
     LuaApiMut::register_function(lua, "ForceLogout", logout)?;

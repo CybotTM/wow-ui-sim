@@ -130,3 +130,36 @@ fn ctrl_q_key_press_requests_window_close() {
         "exit request should emit runtime exit"
     );
 }
+
+#[test]
+fn ctrl_q_key_press_exits_even_when_wow_editbox_is_focused() {
+    let mut app = build_test_app(ScreenKind::Game);
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            local editBox = CreateFrame("EditBox", "FocusedQuitShortcutEditBox", UIParent)
+            editBox:SetFocus()
+            "#,
+        )
+        .expect("focused editbox setup should succeed");
+    }
+
+    let task = app.update(Message::KeyPress(
+        "CTRL-Q".to_string(),
+        None,
+        Instant::now(),
+    ));
+    let close_action = pollster::block_on(async {
+        iced_runtime::task::into_stream(task)
+            .expect("ctrl-q should create task actions")
+            .next()
+            .await
+            .expect("ctrl-q should emit a runtime-exit action")
+    });
+
+    assert!(
+        matches!(close_action, Action::Exit),
+        "CTRL-Q should request runtime exit before Lua editbox focus can consume it; got {close_action:?}"
+    );
+}

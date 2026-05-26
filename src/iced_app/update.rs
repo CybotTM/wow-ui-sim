@@ -96,6 +96,10 @@ impl App {
         text: Option<&str>,
         captured_at: Instant,
     ) -> Task<Message> {
+        if key == "CTRL-Q" {
+            return request_runtime_exit_task();
+        }
+
         self.handle_simple_key_press(key, text, captured_at)
     }
 
