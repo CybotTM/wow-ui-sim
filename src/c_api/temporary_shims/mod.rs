@@ -5,7 +5,6 @@ pub mod c_contribution_collector;
 pub mod c_date_and_time;
 pub mod c_level_link_spell_lock;
 pub mod c_major_faction_display;
-pub mod c_map_groups;
 pub mod c_party_info_instance_abandon;
 pub mod c_party_info_static_fallbacks;
 pub mod c_perks_program;

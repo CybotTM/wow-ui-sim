@@ -1,6 +1,6 @@
 use super::permanent_shims::c_nameplate;
 use super::temporary_shims::{
-    c_character_services, c_major_faction_display, c_map_groups, c_party_info_instance_abandon,
+    c_character_services, c_major_faction_display, c_party_info_instance_abandon,
     c_party_info_static_fallbacks,
 };
 use super::{
@@ -43,8 +43,7 @@ pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()>
 }
 
 pub(crate) fn register_map_prefix_tables(state: &mut LuaState) -> LuaResult<()> {
-    c_map::register_c_map_surface(state)?;
-    c_map_groups::register_c_map_group_shims(state)
+    c_map::register_c_map_surface(state)
 }
 
 pub(crate) fn register_map_environment_tables(state: &mut LuaState) -> LuaResult<()> {

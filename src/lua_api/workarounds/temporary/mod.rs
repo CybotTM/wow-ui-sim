@@ -89,6 +89,7 @@ pub(crate) mod main_menu_microbutton_click;
 pub(crate) mod map_canvas_data_provider_pin;
 pub(crate) mod map_canvas_scroll_container;
 pub(crate) mod map_exploration_pin;
+pub(crate) mod map_group_defaults;
 pub(crate) mod map_runtime_state;
 pub(crate) mod merchant_filter_state;
 pub(crate) mod merchant_raid_defaults;

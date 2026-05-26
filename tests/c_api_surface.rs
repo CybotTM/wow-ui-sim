@@ -383,3 +383,18 @@ fn spell_static_defaults_are_not_c_api_temporary_shims() {
         "C_Spell static defaults should not be wired through shared C API registration"
     );
 }
+
+#[test]
+fn map_group_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_map_groups"),
+        "unmodeled C_Map group defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !registration.contains("c_map_groups"),
+        "C_Map group defaults should not be wired through C API registration"
+    );
+}
