@@ -303,3 +303,18 @@ fn mythic_plus_cache_defaults_are_not_c_api_temporary_shims() {
         "C_MythicPlus weekly-chest/request defaults should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn shared_character_services_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let c_api = include_str!("../src/c_api/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_shared_character_services"),
+        "unmodeled C_SharedCharacterServices upgrade-distribution defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !c_api.contains("c_shared_character_services"),
+        "C_SharedCharacterServices upgrade-distribution defaults should not be wired through c_api registration"
+    );
+}
