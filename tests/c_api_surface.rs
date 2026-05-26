@@ -398,3 +398,18 @@ fn map_group_defaults_are_not_c_api_temporary_shims() {
         "C_Map group defaults should not be wired through C API registration"
     );
 }
+
+#[test]
+fn perks_program_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let c_api = include_str!("../src/c_api/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_perks_program"),
+        "unmodeled C_PerksProgram empty-catalog defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !c_api.contains("c_perks_program"),
+        "C_PerksProgram empty-catalog defaults should not be wired through c_api registration"
+    );
+}

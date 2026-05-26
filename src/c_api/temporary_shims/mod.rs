@@ -7,7 +7,6 @@ pub mod c_level_link_spell_lock;
 pub mod c_major_faction_display;
 pub mod c_party_info_instance_abandon;
 pub mod c_party_info_static_fallbacks;
-pub mod c_perks_program;
 pub mod c_prototype_dialog;
 pub mod c_reincarnation;
 pub mod c_specialization_pvp_talents;
