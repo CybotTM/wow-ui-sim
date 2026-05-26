@@ -1733,24 +1733,6 @@ local function __wow_register_core_frame_methods()
     end
   end
 
-  if methods.SetUpdateCallback == nil then
-    function methods:SetUpdateCallback(callback)
-      self.updateCallback = callback
-    end
-  end
-
-  if methods.SetDefaultCallback == nil then
-    function methods:SetDefaultCallback(callback)
-      self.defaultCallback = callback
-    end
-  end
-
-  if methods.SetIsDefaultCallback == nil then
-    function methods:SetIsDefaultCallback(callback)
-      self.isDefaultCallback = callback
-    end
-  end
-
   if methods.SetInterpolateScroll == nil then
     function methods:SetInterpolateScroll(enabled)
       self.interpolateScroll = enabled and true or false
@@ -1887,79 +1869,6 @@ local function __wow_register_core_frame_methods()
     end
   end
 
-  if methods.SetDefaultText == nil then
-    function methods:SetDefaultText(text)
-      self.defaultText = text
-    end
-  end
-
-  if methods.SetSelectionTranslator == nil then
-    function methods:SetSelectionTranslator(translator)
-      self.selectionTranslator = translator
-    end
-  end
-
-  if methods.SetSelectionText == nil then
-    function methods:SetSelectionText(selectionFunc)
-      self.selectionFunc = selectionFunc
-    end
-  end
-
-  if methods.EnableRegenerateOnResponse == nil then
-    function methods:EnableRegenerateOnResponse()
-      self.shouldRegenerateOnResponse = true
-    end
-  end
-
-  if methods.GetSelectionText == nil then
-    function methods:GetSelectionText()
-      if type(self.selectionFunc) == "function" then
-        return self.selectionFunc({})
-      end
-      return self.defaultText
-    end
-  end
-
-  if methods.UpdateToMenuSelections == nil then
-    function methods:UpdateToMenuSelections(menuDescription, currentSelections)
-      local text = nil
-      if type(self.selectionFunc) == "function" then
-        text = self.selectionFunc(currentSelections or {})
-      end
-      if text == nil then
-        text = self.defaultText
-      end
-      if text ~= nil and type(self.SetText) == "function" then
-        self:SetText(text)
-      end
-    end
-  end
-
-  if methods.SetDefaultCallback == nil then
-    function methods:SetDefaultCallback(callback)
-      self.__wow_default_callback = callback
-    end
-  end
-
-  if methods.SetIsDefaultCallback == nil then
-    function methods:SetIsDefaultCallback(callback)
-      self.__wow_is_default_callback = callback
-    end
-  end
-
-  if methods.SetUpdateCallback == nil then
-    function methods:SetUpdateCallback(callback)
-      self.__wow_update_callback = callback
-    end
-  end
-
-  if methods.NotifyUpdate == nil then
-    function methods:NotifyUpdate(description)
-      if type(self.__wow_update_callback) == "function" then
-        self.__wow_update_callback(description)
-      end
-    end
-  end
 end
 
 __wow_register_core_frame_methods()
