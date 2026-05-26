@@ -123,7 +123,7 @@ fn prototype_dialog_surface_is_not_runtime_bootstrap_fallback() {
 
     assert!(
         !bootstrap.contains("C_PrototypeDialog"),
-        "C_PrototypeDialog must live in the explicit temporary C API shim boundary, not runtime bootstrap"
+        "C_PrototypeDialog compatibility state must live in the explicit temporary Lua workaround boundary, not runtime bootstrap"
     );
 }
 
