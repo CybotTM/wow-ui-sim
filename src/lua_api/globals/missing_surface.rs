@@ -272,13 +272,11 @@ fn register_map_and_encounter_surfaces(state: &mut LuaState) -> LuaResult<()> {
     encounter_journal::register_encounter_journal_surface(state)?;
     c_api::register_map_environment_tables(state)?;
     gossip_info::register_gossip_info_surface(state)?;
-    c_api::register_gossip_info_tables(state)?;
     Ok(())
 }
 
 fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     mythic_plus::register_mythic_plus_surface(state)?;
-    c_api::register_world_activity_tables(state)?;
     scenario_info::register_scenario_info_surface(state)?;
     warband_scene::register_warband_scene_surface(state)?;
     c_api::register_nameplate_tables(state)?;
@@ -291,7 +289,6 @@ fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
 fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     battle_net::register_battle_net_surface(state)?;
     character_services::register_character_services_surface(state)?;
-    c_api::register_character_services_tables(state)?;
     chat_bubbles::register_chat_bubbles_surface(state)?;
     club_finder::register_club_finder_surface(state)?;
     club_info::register_club_info_surface(state)?;

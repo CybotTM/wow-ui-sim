@@ -46,18 +46,6 @@ pub(crate) fn register_map_environment_tables(state: &mut LuaState) -> LuaResult
     c_map_exploration_info::register_c_map_exploration_info_surface(state)
 }
 
-pub(crate) fn register_gossip_info_tables(_state: &mut LuaState) -> LuaResult<()> {
-    Ok(())
-}
-
-pub(crate) fn register_world_activity_tables(_state: &mut LuaState) -> LuaResult<()> {
-    Ok(())
-}
-
 pub(crate) fn register_nameplate_tables(state: &mut LuaState) -> LuaResult<()> {
     c_nameplate::register_c_nameplate(state)
-}
-
-pub(crate) fn register_character_services_tables(_state: &mut LuaState) -> LuaResult<()> {
-    Ok(())
 }

@@ -427,6 +427,7 @@ fn scenario_defaults_are_not_c_api_temporary_shims() {
 fn gossip_poi_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
+    let missing_surface = include_str!("../src/lua_api/globals/missing_surface.rs");
 
     assert!(
         !temporary_shims.contains("c_gossip_info"),
@@ -435,6 +436,11 @@ fn gossip_poi_defaults_are_not_c_api_temporary_shims() {
     assert!(
         !registration.contains("c_gossip_info"),
         "C_GossipInfo POI lookup defaults should not be wired through c_api registration"
+    );
+    assert!(
+        !registration.contains("register_gossip_info_tables")
+            && !missing_surface.contains("register_gossip_info_tables"),
+        "dead C_GossipInfo fallback registration hooks should stay removed from the C API boundary"
     );
 }
 
@@ -600,6 +606,7 @@ fn pet_battle_static_defaults_have_no_c_api_fallback_registration_hook() {
 fn character_services_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
+    let missing_surface = include_str!("../src/lua_api/globals/missing_surface.rs");
 
     assert!(
         !temporary_shims.contains("c_character_services"),
@@ -608,6 +615,23 @@ fn character_services_defaults_are_not_c_api_temporary_shims() {
     assert!(
         !registration.contains("c_character_services"),
         "C_CharacterServices service/display/assignment defaults should not be wired through C API registration"
+    );
+    assert!(
+        !registration.contains("register_character_services_tables")
+            && !missing_surface.contains("register_character_services_tables"),
+        "dead C_CharacterServices fallback registration hooks should stay removed from the C API boundary"
+    );
+}
+
+#[test]
+fn world_activity_defaults_have_no_empty_c_api_registration_hook() {
+    let registration = include_str!("../src/c_api/registration.rs");
+    let missing_surface = include_str!("../src/lua_api/globals/missing_surface.rs");
+
+    assert!(
+        !registration.contains("register_world_activity_tables")
+            && !missing_surface.contains("register_world_activity_tables"),
+        "dead world-activity fallback registration hooks should stay removed from the C API boundary"
     );
 }
 
