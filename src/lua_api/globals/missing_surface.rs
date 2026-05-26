@@ -88,7 +88,6 @@ pub(crate) fn item_link_for_id(item_id: u32) -> Option<String> {
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_legacy_global_shims(lua)?;
     let state = lua.state_mut();
-    seed_placeholder_global_tables(state);
     register_item_trait_surfaces(state)?;
     register_world_namespace_surfaces(state)?;
     register_social_namespace_surfaces(state)?;
@@ -182,29 +181,6 @@ fn install_date_alias(lua: &mut rilua::Lua) -> LuaResult<()> {
         LuaApiMut::set_global_val(lua, "date", date_fn)?;
     }
     Ok(())
-}
-
-fn seed_placeholder_global_tables(state: &mut LuaState) {
-    seed_ui_special_frame_tables(state);
-    ensure_global_table(state, "StaticPopupDialogs");
-    ensure_global_table(state, "UIPanelWindows");
-    ensure_global_table(state, "SOUNDKIT");
-}
-
-fn seed_ui_special_frame_tables(state: &mut LuaState) {
-    let Ok(special_frames) = ensure_namespace(state, "UISpecialFrames") else {
-        return;
-    };
-    let key_ref = state.gc.intern_string_static(b"UI_SPECIAL_FRAMES");
-    let global = state.global;
-    if let Some(globals) = state.gc.tables.get_mut(global) {
-        let _ = globals.raw_set(
-            Val::Str(key_ref),
-            Val::Table(special_frames),
-            &state.gc.string_arena,
-        );
-    }
-    state.gc.barrier_back(global);
 }
 
 fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
@@ -564,10 +540,6 @@ fn get_multi_cast_totem_spells(state: &mut LuaState) -> LuaResult<u32> {
 fn get_mouse_button_clicked(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Nil);
     Ok(1)
-}
-
-fn ensure_global_table(state: &mut LuaState, name: &'static str) {
-    let _ = ensure_namespace(state, name);
 }
 
 /// `name` must be a `&'static str` (typically a literal like `"C_Container"`)
