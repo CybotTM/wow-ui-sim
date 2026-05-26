@@ -83,6 +83,7 @@ pub(crate) mod kiosk_namespace_defaults;
 pub(crate) mod legacy_action_bar_globals;
 pub(crate) mod legacy_container_globals;
 pub(crate) mod legacy_spell_globals;
+pub(crate) mod level_link_spell_lock_state;
 pub(crate) mod lfg_legacy_defaults;
 pub(crate) mod lfg_lock_list;
 pub(crate) mod loot_journal_defaults;

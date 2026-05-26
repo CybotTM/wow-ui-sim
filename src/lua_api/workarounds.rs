@@ -331,6 +331,7 @@ fn apply_core_dispatcher_and_format_defaults(lua: &mut rilua::Lua) -> crate::Res
 
 fn apply_core_legacy_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::kiosk_namespace_defaults::apply_bootstrap(lua)?;
+    temporary::level_link_spell_lock_state::apply_bootstrap(lua)?;
     temporary::lfg_legacy_defaults::apply_bootstrap(lua)?;
     temporary::legacy_action_bar_globals::apply_bootstrap(lua)?;
     temporary::legacy_container_globals::apply_bootstrap(lua)?;
