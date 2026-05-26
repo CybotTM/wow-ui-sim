@@ -179,6 +179,21 @@ fn chat_info_no_state_defaults_are_not_c_api_temporary_shims() {
 }
 
 #[test]
+fn container_no_state_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let item_spell = include_str!("../src/c_api/item_spell/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_container_defaults"),
+        "unmodeled C_Container purchase/quest/filter/action defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !item_spell.contains("c_container_defaults"),
+        "C_Container no-state defaults should not be wired through c_api item/spell registration"
+    );
+}
+
+#[test]
 fn pet_battle_static_fallbacks_are_not_c_api_temporary_shims() {
     let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
     let registration = include_str!("../src/c_api/registration.rs");
