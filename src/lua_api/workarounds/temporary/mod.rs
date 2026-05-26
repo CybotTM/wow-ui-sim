@@ -156,6 +156,7 @@ pub(crate) mod startup_windows;
 pub(crate) mod static_model_info_defaults;
 pub(crate) mod static_popup_defaults;
 pub(crate) mod store_glue_state;
+pub(crate) mod store_public_defaults;
 pub(crate) mod super_track_defaults;
 pub(crate) mod talent_edge_frame_level_sync;
 pub(crate) mod taxi_map_defaults;

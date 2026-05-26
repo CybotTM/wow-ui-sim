@@ -196,7 +196,8 @@ fn apply_secure_and_store_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result
     temporary::secure_reference_defaults::apply_bootstrap(lua)?;
     temporary::secure_types_defaults::apply_bootstrap(lua)?;
     temporary::secure_transfer_state::apply_bootstrap(lua)?;
-    temporary::store_glue_state::apply_bootstrap(lua)
+    temporary::store_glue_state::apply_bootstrap(lua)?;
+    temporary::store_public_defaults::apply_bootstrap(lua)
 }
 
 fn apply_unit_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -376,6 +377,10 @@ fn apply_feature_tool_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::party_info_static_defaults::apply_bootstrap(lua)?;
     temporary::ping_defaults::apply_bootstrap(lua)?;
     temporary::player_location_defaults::apply_bootstrap(lua)?;
+    apply_feature_progression_defaults(lua)
+}
+
+fn apply_feature_progression_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::profession_specs_defaults::apply_bootstrap(lua)?;
     temporary::prototype_dialog_state::apply_bootstrap(lua)?;
     temporary::proxy_object_factories::apply_bootstrap(lua)?;

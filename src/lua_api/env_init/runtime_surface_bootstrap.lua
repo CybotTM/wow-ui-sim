@@ -705,11 +705,6 @@ C_StoreSecure.IsDynamicBundle = function()
   return false
 end
 
-local __wow_store_public_state = {
-  shown = false,
-  context_key = nil,
-}
-
 local __wow_store_secure_state = {
   available = true,
   has_purchase_list = true,
@@ -956,27 +951,6 @@ end
 
 local function __wow_store_product(productID)
   return __wow_store_products[tonumber(productID) or -1]
-end
-
--- Store / shop public API: sim has no store.
-C_StorePublic = C_StorePublic or __wow_namespace()
-if rawget(C_StorePublic, "IsEnabled") == nil then
-  function C_StorePublic.IsEnabled() return true end
-end
-if rawget(C_StorePublic, "IsDisabledByParentalControls") == nil then
-  function C_StorePublic.IsDisabledByParentalControls() return false end
-end
-if rawget(C_StorePublic, "DoesGroupHavePurchaseableProducts") == nil then
-  function C_StorePublic.DoesGroupHavePurchaseableProducts(groupID)
-    local products = C_StoreSecure and C_StoreSecure.GetProducts and C_StoreSecure.GetProducts(groupID) or {}
-    return #products > 0
-  end
-end
-if rawget(C_StorePublic, "EventStoreUISetShown") == nil then
-  function C_StorePublic.EventStoreUISetShown(shown, contextKey)
-    __wow_store_public_state.shown = shown and true or false
-    __wow_store_public_state.context_key = contextKey
-  end
 end
 
 C_StoreSecure = C_StoreSecure or __wow_namespace()

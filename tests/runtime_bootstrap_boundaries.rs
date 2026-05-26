@@ -14,11 +14,11 @@ fn c_macro_namespace_is_not_generic_runtime_bootstrap_fallback() {
 fn state_backed_namespaces_are_not_generic_runtime_bootstrap_fallbacks() {
     let bootstrap = include_str!("../src/lua_api/env_init/runtime_surface_bootstrap.lua");
 
-    for namespace in ["C_PaperDollInfo", "C_Widget"] {
+    for namespace in ["C_PaperDollInfo", "C_StorePublic", "C_Widget"] {
         let fallback = format!("{namespace} = {namespace} or __wow_namespace()");
         assert!(
             !bootstrap.contains(&fallback),
-            "{namespace} must be registered by its Rust C API surface, not generic runtime bootstrap"
+            "{namespace} must be registered by Rust or an explicit workaround boundary, not generic runtime bootstrap"
         );
     }
 }
