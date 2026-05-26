@@ -1,5 +1,4 @@
 use super::permanent_shims::c_nameplate;
-use super::temporary_shims::c_party_info_instance_abandon;
 use super::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
     c_artifact_ui, c_azerite_empowered_item, c_azerite_essence, c_azerite_item, c_barber_shop,
@@ -63,8 +62,8 @@ pub(crate) fn register_character_services_tables(_state: &mut LuaState) -> LuaRe
     Ok(())
 }
 
-pub(crate) fn register_party_info_fallback_tables(state: &mut LuaState) -> LuaResult<()> {
-    c_party_info_instance_abandon::register_c_party_info_instance_abandon(state)
+pub(crate) fn register_party_info_fallback_tables(_state: &mut LuaState) -> LuaResult<()> {
+    Ok(())
 }
 
 pub(crate) fn register_pet_battle_fallback_tables(_state: &mut LuaState) -> LuaResult<()> {

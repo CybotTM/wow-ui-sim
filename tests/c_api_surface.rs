@@ -194,6 +194,21 @@ fn pet_battle_static_fallbacks_are_not_c_api_temporary_shims() {
 }
 
 #[test]
+fn party_info_instance_abandon_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_party_info_instance_abandon"),
+        "unmodeled C_PartyInfo instance-abandon vote defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !registration.contains("c_party_info_instance_abandon"),
+        "C_PartyInfo instance-abandon defaults should not be wired through c_api registration"
+    );
+}
+
+#[test]
 fn spell_metadata_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
     let registration = include_str!("../src/c_api/registration.rs");
