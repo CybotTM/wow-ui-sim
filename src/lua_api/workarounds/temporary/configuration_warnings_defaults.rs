@@ -44,6 +44,52 @@ installConfigurationWarningsDefault("SetConfigurationWarningSeen", function(warn
         seenWarnings[key] = true
     end
 end)
+
+if HasCheckedSystemRequirements == nil
+    or SetCheckedSystemRequirements == nil
+    or CheckSystemRequirements == nil
+then
+    local checkedSystemRequirements = false
+
+    if HasCheckedSystemRequirements == nil then
+        function HasCheckedSystemRequirements()
+            return checkedSystemRequirements
+        end
+    end
+
+    if SetCheckedSystemRequirements == nil then
+        function SetCheckedSystemRequirements(checked)
+            checkedSystemRequirements = not not checked
+        end
+    end
+
+    if CheckSystemRequirements == nil then
+        function CheckSystemRequirements(includeSeenWarnings)
+            if type(C_ConfigurationWarnings.GetConfigurationWarnings) ~= "function" then
+                return
+            end
+
+            local warnings = C_ConfigurationWarnings.GetConfigurationWarnings(includeSeenWarnings)
+            if type(warnings) ~= "table" then
+                return
+            end
+
+            if type(StaticPopup_Queue) ~= "function" then
+                return
+            end
+
+            for _, warning in ipairs(warnings) do
+                local text = nil
+                if type(C_ConfigurationWarnings.GetConfigurationWarningString) == "function" then
+                    text = C_ConfigurationWarnings.GetConfigurationWarningString(warning)
+                end
+                if text then
+                    StaticPopup_Queue("CONFIGURATION_WARNING", text, nil, { configurationWarning = warning })
+                end
+            end
+        end
+    end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -108,5 +154,77 @@ mod tests {
             .expect("existing configuration warning provider should remain callable");
 
         assert_eq!(warning, "existing");
+    }
+
+    #[test]
+    fn stores_checked_system_requirements_state() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let checked: (bool, bool, bool) = env
+            .eval(
+                r#"
+                local before = HasCheckedSystemRequirements()
+                SetCheckedSystemRequirements(true)
+                local afterTrue = HasCheckedSystemRequirements()
+                SetCheckedSystemRequirements(false)
+                return before, afterTrue, HasCheckedSystemRequirements()
+                "#,
+            )
+            .expect("system requirements checked state should be callable");
+
+        assert_eq!(checked, (false, true, false));
+    }
+
+    #[test]
+    fn check_system_requirements_queues_warnings_with_text() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            queued = {}
+            C_ConfigurationWarnings.GetConfigurationWarnings = function(includeSeenWarnings)
+                includeSeenArg = includeSeenWarnings
+                return { "missing-driver", "silent-warning" }
+            end
+            C_ConfigurationWarnings.GetConfigurationWarningString = function(warning)
+                if warning == "missing-driver" then
+                    return "Driver missing"
+                end
+                return nil
+            end
+            StaticPopup_Queue = function(which, text, data, info)
+                queued[#queued + 1] = {
+                    which = which,
+                    text = text,
+                    data = data,
+                    warning = info and info.configurationWarning,
+                }
+            end
+            "#,
+        )
+        .expect("configuration warning queue fixture should install");
+
+        let result: (bool, i64, String, String, Option<String>) = env
+            .eval(
+                r#"
+                CheckSystemRequirements(true)
+                return includeSeenArg,
+                    #queued,
+                    queued[1].which,
+                    queued[1].text,
+                    queued[2] and queued[2].text
+                "#,
+            )
+            .expect("system requirements should queue warnings with text");
+
+        assert_eq!(
+            result,
+            (
+                true,
+                1,
+                "CONFIGURATION_WARNING".to_string(),
+                "Driver missing".to_string(),
+                None
+            )
+        );
     }
 }
