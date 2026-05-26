@@ -61,11 +61,3 @@ pub(crate) fn register_nameplate_tables(state: &mut LuaState) -> LuaResult<()> {
 pub(crate) fn register_character_services_tables(_state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
-
-pub(crate) fn register_party_info_fallback_tables(_state: &mut LuaState) -> LuaResult<()> {
-    Ok(())
-}
-
-pub(crate) fn register_pet_battle_fallback_tables(_state: &mut LuaState) -> LuaResult<()> {
-    Ok(())
-}

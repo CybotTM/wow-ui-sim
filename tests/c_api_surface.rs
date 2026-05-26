@@ -567,6 +567,7 @@ fn perks_program_defaults_are_not_c_api_temporary_shims() {
 fn party_info_static_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
+    let missing_surface = include_str!("../src/lua_api/globals/missing_surface.rs");
 
     assert!(
         !temporary_shims.contains("c_party_info_static_fallbacks"),
@@ -575,6 +576,23 @@ fn party_info_static_defaults_are_not_c_api_temporary_shims() {
     assert!(
         !registration.contains("c_party_info_static_fallbacks"),
         "C_PartyInfo static defaults should not be wired through C API registration"
+    );
+    assert!(
+        !registration.contains("register_party_info_fallback_tables")
+            && !missing_surface.contains("register_party_info_fallback_tables"),
+        "dead C_PartyInfo fallback registration hooks should stay removed from the C API boundary"
+    );
+}
+
+#[test]
+fn pet_battle_static_defaults_have_no_c_api_fallback_registration_hook() {
+    let registration = include_str!("../src/c_api/registration.rs");
+    let missing_surface = include_str!("../src/lua_api/globals/missing_surface.rs");
+
+    assert!(
+        !registration.contains("register_pet_battle_fallback_tables")
+            && !missing_surface.contains("register_pet_battle_fallback_tables"),
+        "dead C_PetBattles fallback registration hooks should stay removed from the C API boundary"
     );
 }
 

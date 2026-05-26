@@ -45,7 +45,6 @@ pub(crate) use registration::{
     register_character_progression_tables, register_character_services_tables,
     register_gossip_info_tables, register_interaction_tables, register_item_power_tables,
     register_map_environment_tables, register_map_prefix_tables, register_nameplate_tables,
-    register_party_info_fallback_tables, register_pet_battle_fallback_tables,
     register_spell_and_widget_tables, register_world_activity_tables,
 };
 

@@ -307,11 +307,9 @@ fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
 fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     death_recap::register_death_recap_surface(state)?;
     party_info::register_party_info_surface(state)?;
-    c_api::register_party_info_fallback_tables(state)?;
     player_info::register_player_info_surface(state)?;
     lfg_info::register_lfg_info_surface(state)?;
     pet_battles::register_pet_battles_surface(state)?;
-    c_api::register_pet_battle_fallback_tables(state)?;
     account_services::register_account_services_surface(state)?;
     account_store::register_account_store_surface(state)?;
     report_system::register_report_system_surface(state)?;
