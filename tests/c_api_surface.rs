@@ -243,3 +243,18 @@ fn super_track_defaults_are_not_c_api_temporary_shims() {
         "C_SuperTrack no-active-target defaults should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn trade_info_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let c_api = include_str!("../src/c_api/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_trade_info"),
+        "unmodeled C_TradeInfo warning/no-op defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !c_api.contains("c_trade_info"),
+        "C_TradeInfo warning/no-op defaults should not be wired through c_api registration"
+    );
+}

@@ -352,7 +352,8 @@ fn apply_feature_model_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::taxi_map_defaults::apply_bootstrap(lua)?;
     temporary::texture_file_data_defaults::apply_bootstrap(lua)?;
     temporary::top_level_parent_defaults::apply_bootstrap(lua)?;
-    temporary::tracking_namespace_defaults::apply_bootstrap(lua)
+    temporary::tracking_namespace_defaults::apply_bootstrap(lua)?;
+    temporary::trade_info_defaults::apply_bootstrap(lua)
 }
 
 fn apply_feature_ui_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {

@@ -20,6 +20,5 @@ pub mod c_specialization_mastery;
 pub mod c_specialization_pvp_talents;
 pub mod c_spell_book_call_pet;
 pub mod c_spell_static_fallbacks;
-pub mod c_trade_info;
 pub mod c_transmog_outfit_slots;
 pub mod c_transmog_sets;
