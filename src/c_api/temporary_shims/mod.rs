@@ -12,7 +12,6 @@ pub mod c_party_info_static_fallbacks;
 pub mod c_perks_program;
 pub mod c_prototype_dialog;
 pub mod c_reincarnation;
-pub mod c_specialization_mastery;
 pub mod c_specialization_pvp_talents;
 pub mod c_spell_book_call_pet;
 pub mod c_spell_static_fallbacks;
