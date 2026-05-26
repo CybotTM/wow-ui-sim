@@ -76,13 +76,8 @@ fn register_glue_and_display_tables(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
-    register_glue_auxiliary_shims(state)?;
     register_service_auxiliary_shims(state)?;
     register_token_texture_xml_tables(state)
-}
-
-fn register_glue_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
-    temporary_shims::c_contribution_collector::register_c_contribution_collector(state)
 }
 
 fn register_service_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
