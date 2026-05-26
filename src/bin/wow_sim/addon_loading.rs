@@ -323,7 +323,13 @@ struct LoadStats {
     total_timing: LoadTiming,
     success_count: usize,
     fail_count: usize,
-    addon_times: Vec<(String, std::time::Duration)>,
+    addon_timings: Vec<AddonTiming>,
+}
+
+#[derive(Clone)]
+struct AddonTiming {
+    name: String,
+    timing: LoadTiming,
 }
 
 struct AddonMetadata {
@@ -427,7 +433,10 @@ fn mark_addon_loaded(env: &WowLuaEnv, name: &str, r: &LoadResult) {
 
 fn record_addon_success(name: &str, r: &LoadResult, stats: &mut LoadStats) {
     print_verbose_addon_status(name, r);
-    stats.addon_times.push((name.to_string(), r.timing.total()));
+    stats.addon_timings.push(AddonTiming {
+        name: name.to_string(),
+        timing: r.timing.clone(),
+    });
     print_addon_warnings(name, &r.warnings);
     stats.total_lua += r.lua_files;
     stats.total_xml += r.xml_files;
@@ -549,7 +558,7 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
     );
     print_timing_breakdown(&stats.total_timing);
     print_cache_stats(&stats.total_timing);
-    print_slowest_addons(&stats.addon_times);
+    print_slowest_addons(&stats.addon_timings);
 }
 
 fn print_lua_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -> f64) {
@@ -624,13 +633,28 @@ fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -
     );
 }
 
-fn print_slowest_addons(addon_times: &[(String, std::time::Duration)]) {
-    let mut sorted = addon_times.to_vec();
-    sorted.sort_by(|a, b| b.1.cmp(&a.1));
+fn print_slowest_addons(addon_timings: &[AddonTiming]) {
+    let sorted = slowest_addons(addon_timings);
     println!("\nSlowest addons:");
-    for (name, time) in sorted.iter().take(10) {
-        println!("  {:>7.1?}  {}", time, name);
+    for addon in sorted.iter().take(10) {
+        let timing = &addon.timing;
+        println!(
+            "  {:>7.1?}  {} (lua={:.1?} compile={:.1?} call={:.1?} sv={:.1?} xml={:.1?})",
+            timing.total(),
+            addon.name,
+            timing.lua_exec_time,
+            timing.lua_compile_time,
+            timing.lua_call_time,
+            timing.saved_vars_time,
+            timing.xml_parse_time + timing.xml_process_time
+        );
     }
+}
+
+fn slowest_addons(addon_timings: &[AddonTiming]) -> Vec<AddonTiming> {
+    let mut sorted = addon_timings.to_vec();
+    sorted.sort_by(|a, b| b.timing.total().cmp(&a.timing.total()));
+    sorted
 }
 
 #[cfg(test)]
@@ -689,5 +713,28 @@ mod tests {
         let names: Vec<_> = addons.iter().map(|(name, _)| name.as_str()).collect();
 
         assert_eq!(names, ["CurrentAddon"]);
+    }
+
+    #[test]
+    fn slowest_addons_sorts_by_total_timing() {
+        let fast = AddonTiming {
+            name: "FastAddon".to_string(),
+            timing: LoadTiming {
+                lua_exec_time: std::time::Duration::from_millis(10),
+                ..Default::default()
+            },
+        };
+        let slow = AddonTiming {
+            name: "SlowAddon".to_string(),
+            timing: LoadTiming {
+                lua_exec_time: std::time::Duration::from_millis(20),
+                ..Default::default()
+            },
+        };
+
+        let sorted = slowest_addons(&[fast, slow]);
+
+        assert_eq!(sorted[0].name, "SlowAddon");
+        assert_eq!(sorted[1].name, "FastAddon");
     }
 }
