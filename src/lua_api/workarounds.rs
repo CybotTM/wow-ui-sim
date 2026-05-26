@@ -318,6 +318,7 @@ fn apply_core_dispatcher_and_format_defaults(lua: &mut rilua::Lua) -> crate::Res
     temporary::item_targeting_defaults::apply_bootstrap(lua)?;
     temporary::item_upgrade_availability_defaults::apply_bootstrap(lua)?;
     temporary::spell_metadata_defaults::apply_bootstrap(lua)?;
+    temporary::spell_static_defaults::apply_bootstrap(lua)?;
     temporary::spell_target_defaults::apply_bootstrap(lua)?;
     temporary::weapon_enchant_defaults::apply_bootstrap(lua)?;
     Ok(())

@@ -363,3 +363,23 @@ fn spell_book_static_defaults_are_not_c_api_temporary_shims() {
         "C_SpellBook static defaults should not be wired through c_api item/spell registration"
     );
 }
+
+#[test]
+fn spell_static_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let item_spell = include_str!("../src/c_api/item_spell/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_spell_static_fallbacks"),
+        "unmodeled C_Spell charges/override/visibility/Maw defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !item_spell.contains("c_spell_static_fallbacks"),
+        "C_Spell static defaults should not be wired through item/spell C API registration"
+    );
+    assert!(
+        !registration.contains("c_spell_static_fallbacks"),
+        "C_Spell static defaults should not be wired through shared C API registration"
+    );
+}

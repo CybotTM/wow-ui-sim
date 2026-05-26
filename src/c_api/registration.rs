@@ -1,7 +1,7 @@
 use super::permanent_shims::c_nameplate;
 use super::temporary_shims::{
     c_character_services, c_major_faction_display, c_map_groups, c_party_info_instance_abandon,
-    c_party_info_static_fallbacks, c_spell_static_fallbacks,
+    c_party_info_static_fallbacks,
 };
 use super::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -15,7 +15,6 @@ use rilua::vm::state::LuaState;
 
 pub(crate) fn register_spell_and_widget_tables(state: &mut LuaState) -> LuaResult<()> {
     c_spell::register_c_spell_surface(state)?;
-    c_spell_static_fallbacks::register_c_spell_static_fallbacks(state)?;
     c_spell_diminish::register_c_spell_diminish_surface(state)?;
     c_widget::register_c_widget_surface(state)
 }
