@@ -284,14 +284,25 @@ impl<'a, 's> Parser<'a, 's> {
         let quote = self
             .next_byte()
             .ok_or_else(|| self.error("expected string"))?;
+        let start = self.pos;
         let mut out = Vec::new();
         while let Some(byte) = self.next_byte() {
             if byte == quote {
+                if out.is_empty() {
+                    return std::str::from_utf8(&self.bytes[start..self.pos - 1])
+                        .map(|value| value.to_string())
+                        .map_err(|_| self.error("string is not UTF-8"));
+                }
                 return String::from_utf8(out).map_err(|_| self.error("string is not UTF-8"));
             }
             if byte != b'\\' {
-                out.push(byte);
+                if !out.is_empty() {
+                    out.push(byte);
+                }
                 continue;
+            }
+            if out.is_empty() {
+                out.extend_from_slice(&self.bytes[start..self.pos - 1]);
             }
             self.parse_escape(&mut out)?;
         }
@@ -576,6 +587,11 @@ mod tests {
         .unwrap();
 
         assert!(matches!(get_global(state, "TEST_SV"), Val::Table(_)));
+        drop(lua);
+
+        let (name, count): (String, i32) = env.eval("return TEST_SV.name, TEST_SV.count").unwrap();
+        assert_eq!(name, "hello\nworld");
+        assert_eq!(count, 3);
     }
 
     #[test]
