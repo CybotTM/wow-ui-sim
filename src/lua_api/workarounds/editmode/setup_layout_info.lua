@@ -54,6 +54,7 @@
             copy[i] = {
                 system = systemInfo.system,
                 systemIndex = systemInfo.systemIndex,
+                hidden = systemInfo.hidden,
                 isInDefaultPosition = systemInfo.isInDefaultPosition,
                 anchorInfo = copyAnchorInfo(systemInfo.anchorInfo),
                 settings = copySettings(systemInfo.settings),
@@ -350,43 +351,87 @@
             end
         end
 
-        local function syncStatusTrackingBar2()
-            local shown = getAccountSettingBool(accountEnum.ShowStatusTrackingBar2)
+        local function getActiveLayoutInfo()
+            local layoutInfo = emm.layoutInfo
+            if type(layoutInfo) ~= "table" or type(layoutInfo.layouts) ~= "table" then
+                return nil
+            end
+            return layoutInfo.layouts[layoutInfo.activeLayout]
+        end
+
+        local function getStatusTrackingSystemInfo(systemIndex)
+            local editModeSystem = Enum and Enum.EditModeSystem
+            if not editModeSystem or editModeSystem.StatusTrackingBar == nil then
+                return nil
+            end
+            local activeLayout = getActiveLayoutInfo()
+            for _, systemInfo in ipairs(activeLayout and activeLayout.systems or {}) do
+                if systemInfo.system == editModeSystem.StatusTrackingBar
+                    and systemInfo.systemIndex == systemIndex then
+                    return systemInfo
+                end
+            end
+            return nil
+        end
+
+        local function setStatusTrackingContainerAvailable(container, available)
             local manager = StatusTrackingBarManager
-            local secondary = SecondaryStatusTrackingBarContainer
-            if shown == nil or type(manager) ~= "table" or type(manager.barContainers) ~= "table"
-                or type(secondary) ~= "table" then
-                return
+            if type(manager) ~= "table" or type(manager.barContainers) ~= "table"
+                or type(container) ~= "table" then
+                return false
             end
 
-            local secondaryIndex = nil
+            local containerIndex = nil
             for index, barContainer in ipairs(manager.barContainers) do
-                if barContainer == secondary then
-                    secondaryIndex = index
+                if barContainer == container then
+                    containerIndex = index
                     break
                 end
             end
 
-            if shown then
-                if not secondaryIndex then
-                    table.insert(manager.barContainers, secondary)
+            if available then
+                if not containerIndex then
+                    table.insert(manager.barContainers, container)
                 end
-            elseif secondaryIndex then
-                table.remove(manager.barContainers, secondaryIndex)
-                if type(secondary.SetShownBar) == "function" and StatusTrackingBarInfo
-                    and StatusTrackingBarInfo.BarsEnum then
-                    pcall(secondary.SetShownBar, secondary, StatusTrackingBarInfo.BarsEnum.None)
-                end
-                if type(secondary.Hide) == "function" then
-                    pcall(secondary.Hide, secondary)
+                return true
+            end
+
+            if containerIndex then
+                table.remove(manager.barContainers, containerIndex)
+            end
+            if type(container.SetShownBar) == "function" and StatusTrackingBarInfo
+                and StatusTrackingBarInfo.BarsEnum then
+                pcall(container.SetShownBar, container, StatusTrackingBarInfo.BarsEnum.None)
+            end
+            if type(container.Hide) == "function" then
+                pcall(container.Hide, container)
+            end
+            return true
+        end
+
+        local function syncStatusTrackingBars()
+            local statusTrackingIndices = Enum and Enum.EditModeStatusTrackingBarSystemIndices
+            if statusTrackingIndices then
+                local primaryInfo = getStatusTrackingSystemInfo(statusTrackingIndices.StatusTrackingBar1)
+                if primaryInfo and primaryInfo.hidden then
+                    setStatusTrackingContainerAvailable(MainStatusTrackingBarContainer, false)
                 end
             end
 
-            if type(manager.UpdateBarsShown) == "function" then
+            local shown = getAccountSettingBool(accountEnum.ShowStatusTrackingBar2)
+            local manager = StatusTrackingBarManager
+            local secondary = SecondaryStatusTrackingBarContainer
+            if shown == nil then
+                return
+            end
+
+            setStatusTrackingContainerAvailable(secondary, shown)
+
+            if type(manager) == "table" and type(manager.UpdateBarsShown) == "function" then
                 pcall(manager.UpdateBarsShown, manager)
             end
         end
-        syncStatusTrackingBar2()
+        syncStatusTrackingBars()
     end
     if emm.InitializeAccountSettings then
         emm:InitializeAccountSettings()

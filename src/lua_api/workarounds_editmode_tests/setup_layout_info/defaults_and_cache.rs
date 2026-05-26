@@ -116,6 +116,13 @@ const ACCOUNT_SETTING_STUBS: &str = r#"
                 Preset = 0,
                 Account = 1,
             },
+            EditModeSystem = {
+                StatusTrackingBar = 15,
+            },
+            EditModeStatusTrackingBarSystemIndices = {
+                StatusTrackingBar1 = 1,
+                StatusTrackingBar2 = 2,
+            },
             EditModeAccountSetting = {
                 ShowGrid = 0,
                 GridSpacing = 1,
@@ -157,7 +164,23 @@ const ACCOUNT_SETTING_STUBS: &str = r#"
             GetLayouts = function()
                 return {
                     activeLayout = 1,
-                    layouts = {},
+                    layouts = {
+                        {
+                            layoutIndex = 1,
+                            layoutName = "Hidden XP",
+                            layoutType = Enum.EditModeLayoutType.Account,
+                            systems = {
+                                {
+                                    system = Enum.EditModeSystem.StatusTrackingBar,
+                                    systemIndex = Enum.EditModeStatusTrackingBarSystemIndices.StatusTrackingBar1,
+                                    hidden = true,
+                                    isInDefaultPosition = false,
+                                    anchorInfo = { point = "CENTER" },
+                                    settings = {},
+                                },
+                            },
+                        },
+                    },
                 }
             end,
             GetAccountSettings = function()
@@ -267,6 +290,16 @@ const ACCOUNT_SETTING_STUBS: &str = r#"
                 None = -1,
             },
         }
+        MainStatusTrackingBarContainer = {
+            hidden = false,
+            shownBar = 4,
+        }
+        function MainStatusTrackingBarContainer:SetShownBar(barIndex)
+            self.shownBar = barIndex
+        end
+        function MainStatusTrackingBarContainer:Hide()
+            self.hidden = true
+        end
         SecondaryStatusTrackingBarContainer = {
             hidden = false,
             shownBar = 1,
@@ -279,7 +312,7 @@ const ACCOUNT_SETTING_STUBS: &str = r#"
         end
         StatusTrackingBarManager = {
             barContainers = {
-                { name = "main" },
+                MainStatusTrackingBarContainer,
                 SecondaryStatusTrackingBarContainer,
             },
             updated = false,
@@ -391,13 +424,17 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
 
     let (
         status_tracking_container_count,
+        status_tracking_main_hidden,
+        status_tracking_main_bar,
         status_tracking_secondary_hidden,
         status_tracking_secondary_bar,
         status_tracking_manager_updated,
-    ): (i32, bool, i32, bool) = env
+    ): (i32, bool, i32, bool, i32, bool) = env
         .eval(
             r#"
             return #StatusTrackingBarManager.barContainers,
+                MainStatusTrackingBarContainer.hidden,
+                MainStatusTrackingBarContainer.shownBar,
                 SecondaryStatusTrackingBarContainer.hidden,
                 SecondaryStatusTrackingBarContainer.shownBar,
                 StatusTrackingBarManager.updated
@@ -406,8 +443,16 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
         .expect("read status tracking manager profile state");
 
     assert_eq!(
-        status_tracking_container_count, 1,
-        "disabled status tracking bar 2 should be removed from manager capacity"
+        status_tracking_container_count, 0,
+        "profile-hidden status tracking bars should be removed from manager capacity"
+    );
+    assert!(
+        status_tracking_main_hidden,
+        "profile-hidden status tracking bar 1 should hide the main container"
+    );
+    assert_eq!(
+        status_tracking_main_bar, -1,
+        "profile-hidden status tracking bar 1 should clear the main shown bar"
     );
     assert!(
         status_tracking_secondary_hidden,

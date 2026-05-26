@@ -442,6 +442,55 @@ fn edit_mode_cache_decodes_repeated_setting_chunks_as_large_value() {
     assert_eq!(setting, 5);
     assert_eq!(value, 100);
 }
+
+#[test]
+fn edit_mode_wtf_cache_marks_hidden_status_tracking_bar_systems() {
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let wtf_path = temp.path().join("WTF");
+    let account_path = wtf_path.join("Account/TestAccount");
+    let character_path = account_path.join("Test Realm/Testchar");
+    std::fs::create_dir_all(&character_path).expect("create WTF dirs");
+    std::fs::write(
+        account_path.join("edit-mode-cache-account.txt"),
+        concat!(
+            "1 0 ",
+            "1 Hidden 1 ",
+            "15 0 0 4 4 UIParent 0.0 0.0 -1 #",
+            "\0"
+        ),
+    )
+    .expect("write account edit mode cache");
+    std::fs::write(character_path.join("edit-mode-cache-character.txt"), "1\0")
+        .expect("write character edit mode cache");
+
+    let env = WowLuaEnv::new().expect("create Lua environment");
+    let mut saved_vars = SavedVariablesManager::with_storage_dir(temp.path().join("local-sv"));
+    saved_vars.set_wtf_config(WtfConfig::new(
+        &wtf_path,
+        "TestAccount",
+        "Test Realm",
+        "Testchar",
+    ));
+    env.loader_env()
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1))
+        .expect("load edit mode cache");
+
+    let (system, system_index, hidden): (i32, i32, bool) = env
+        .eval(
+            r#"
+            local system = C_EditMode.GetLayouts().layouts[1].systems[1]
+            return system.system, system.systemIndex, system.hidden == true
+            "#,
+        )
+        .expect("read hidden status tracking system");
+
+    assert_eq!(system, 15);
+    assert_eq!(system_index, 1);
+    assert!(
+        hidden,
+        "StatusTrackingBar1 should preserve the WTF profile hidden marker"
+    );
+}
 struct EnvVarGuard {
     key: &'static str,
     previous: Option<std::ffi::OsString>,

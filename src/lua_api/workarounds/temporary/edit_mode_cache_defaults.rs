@@ -160,9 +160,14 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     _, cursor = __wow_edit_mode_read(tokens, cursor)
     settingsText, cursor = __wow_edit_mode_read(tokens, cursor)
 
+    local statusTrackingSystem = Enum and Enum.EditModeSystem
+      and Enum.EditModeSystem.StatusTrackingBar
+    local hidden = system == statusTrackingSystem and isInDefaultPosition == 0
+
     return {
       system = system,
       systemIndex = systemIndex,
+      hidden = hidden,
       isInDefaultPosition = isInDefaultPosition ~= 0,
       anchorInfo = {
         point = __wow_edit_mode_frame_points[point] or "CENTER",
