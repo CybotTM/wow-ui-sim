@@ -307,8 +307,19 @@ fn apply_core_foundation_state_defaults(lua: &mut rilua::Lua) -> crate::Result<(
 }
 
 fn apply_core_dispatcher_and_format_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
+    apply_dispatcher_and_date_defaults(lua)?;
+    apply_format_and_game_defaults(lua)?;
+    apply_inventory_and_spell_defaults(lua)
+}
+
+fn apply_dispatcher_and_date_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::dispatcher_callback_defaults::apply_bootstrap(lua)?;
     temporary::dispatcher_surface::apply_bootstrap(lua)?;
+    temporary::date_and_time_defaults::apply_bootstrap(lua)?;
+    Ok(())
+}
+
+fn apply_format_and_game_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::display_scale_defaults::apply_bootstrap(lua)?;
     temporary::dropdown_list_defaults::apply_bootstrap(lua)?;
     temporary::formatting_utility_defaults::apply_bootstrap(lua)?;
@@ -318,6 +329,10 @@ fn apply_core_dispatcher_and_format_defaults(lua: &mut rilua::Lua) -> crate::Res
     temporary::glue_character_select_defaults::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::inert_global_defaults::apply_bootstrap(lua)?;
+    Ok(())
+}
+
+fn apply_inventory_and_spell_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::inventory_query_defaults::apply_bootstrap(lua)?;
     temporary::item_button_helper_defaults::apply_bootstrap(lua)?;
     temporary::item_targeting_defaults::apply_bootstrap(lua)?;
