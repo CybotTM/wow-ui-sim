@@ -99,21 +99,12 @@ fn fire_frame_lifecycle(
     timing: &mut LoadTiming,
 ) {
     let lifecycle = lifecycle_scripts(frame, inherits);
-    if name == "PlayerSpellsFrame" {
-        eprintln!(
-            "[lifecycle] {} on_load={} on_show={}",
-            name, lifecycle.on_load, lifecycle.on_show
-        );
-    }
     if !lifecycle.any() {
         return;
     }
 
     let lifecycle_start = Instant::now();
     fire_lifecycle_scripts(env, frame_id, name, lifecycle);
-    if name == "PlayerSpellsFrame" {
-        eprintln!("[lifecycle] {} fired", name);
-    }
     timing.frame_lifecycle_time += lifecycle_start.elapsed();
     timing.lifecycle_fire_count += 1;
 }

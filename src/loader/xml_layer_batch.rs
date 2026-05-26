@@ -391,12 +391,36 @@ fn append_parent_array_entry(
     let Val::Table(array_ref) = array else {
         return Ok(());
     };
+    if table_array_contains_value(state, array_ref, child) {
+        return Ok(());
+    }
     let next_index = next_table_array_index(state, array_ref);
     if let Some(table) = state.gc.tables.get_mut(array_ref) {
         let _ = table.raw_set(Val::Num(next_index as f64), child, &state.gc.string_arena);
     }
     state.gc.barrier_back(array_ref);
     Ok(())
+}
+
+fn table_array_contains_value(
+    state: &rilua::vm::state::LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    value: rilua::Val,
+) -> bool {
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        return false;
+    };
+    let mut index = 1_i64;
+    loop {
+        let existing = table.get_int(index);
+        if matches!(existing, rilua::Val::Nil) {
+            return false;
+        }
+        if existing == value {
+            return true;
+        }
+        index += 1;
+    }
 }
 
 fn next_table_array_index(

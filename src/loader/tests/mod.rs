@@ -8,6 +8,7 @@ mod runtime_template_parenting;
 mod runtime_template_xml;
 mod screen_selection;
 mod xml_basics;
+mod xml_template_onload_order;
 
 use super::addon::AddonContext;
 use super::lua_file::load_lua_file;

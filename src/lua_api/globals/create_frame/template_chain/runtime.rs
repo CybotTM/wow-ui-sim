@@ -15,9 +15,26 @@ pub(super) fn create_template_child_frames(
     parent_name: &str,
     subst_parent: &str,
     frame: &crate::xml::FrameXml,
+    deferred_on_loads: &mut Vec<u64>,
 ) -> LuaResult<()> {
-    create_direct_child_frames(state, state_rc, parent_id, parent_name, subst_parent, frame)?;
-    create_scroll_child_frames(state, state_rc, parent_id, parent_name, subst_parent, frame)?;
+    create_direct_child_frames(
+        state,
+        state_rc,
+        parent_id,
+        parent_name,
+        subst_parent,
+        frame,
+        deferred_on_loads,
+    )?;
+    create_scroll_child_frames(
+        state,
+        state_rc,
+        parent_id,
+        parent_name,
+        subst_parent,
+        frame,
+        deferred_on_loads,
+    )?;
     Ok(())
 }
 
@@ -28,6 +45,7 @@ fn create_direct_child_frames(
     _parent_name: &str,
     subst_parent: &str,
     frame: &crate::xml::FrameXml,
+    deferred_on_loads: &mut Vec<u64>,
 ) -> LuaResult<()> {
     frame.try_for_each_frame_element(|child_frame, child_tag| {
         create_template_child_frame(
@@ -37,6 +55,7 @@ fn create_direct_child_frames(
             subst_parent,
             child_frame,
             child_tag,
+            deferred_on_loads,
         )?;
         Ok::<(), rilua::LuaError>(())
     })
@@ -49,6 +68,7 @@ fn create_scroll_child_frames(
     _parent_name: &str,
     subst_parent: &str,
     frame: &crate::xml::FrameXml,
+    deferred_on_loads: &mut Vec<u64>,
 ) -> LuaResult<()> {
     let Some(scroll_child) = frame.scroll_child() else {
         return Ok(());
@@ -66,6 +86,7 @@ fn create_scroll_child_frames(
             subst_parent,
             child_frame,
             child_tag,
+            deferred_on_loads,
         )?;
         if !registered_scroll_child && let Some(child_id) = child_id {
             let mut sim = borrow_state_mut(state)?;
@@ -86,6 +107,7 @@ fn create_template_child_frame(
     subst_parent: &str,
     child_frame: &crate::xml::FrameXml,
     child_tag: &'static str,
+    deferred_on_loads: &mut Vec<u64>,
 ) -> LuaResult<Option<u64>> {
     let Some((frame, widget_type_name, intrinsic)) =
         super::template_child_type(child_frame, child_tag)
@@ -113,6 +135,7 @@ fn create_template_child_frame(
         subst_parent,
         frame,
         inherited_chain.as_deref(),
+        deferred_on_loads,
     )?;
     Ok(Some(child_id))
 }
@@ -126,11 +149,20 @@ fn finalize_runtime_template_child(
     subst_parent: &str,
     frame: &crate::xml::FrameXml,
     _inherited_chain: Option<&str>,
+    deferred_on_loads: &mut Vec<u64>,
 ) -> LuaResult<()> {
     let child_subst = child_runtime_subst(frame, child_name, subst_parent);
     apply_runtime_child_direct_properties(state_rc, child_id, frame, child_subst);
     ensure_runtime_button_texture_slots(state, child_id, frame)?;
-    create_template_child_frames(state, state_rc, child_id, child_name, child_subst, frame)?;
+    create_template_child_frames(
+        state,
+        state_rc,
+        child_id,
+        child_name,
+        child_subst,
+        frame,
+        deferred_on_loads,
+    )?;
     // `apply_runtime_template_chain()` already loaded inherited layers/extras
     // onto the runtime child. The finalize pass should only apply the
     // child frame's own direct loader-backed content or it duplicates named
@@ -142,13 +174,8 @@ fn finalize_runtime_template_child(
         state, child_id,
     )?;
     super::resolve_runtime_template_named_anchors(state, child_id)?;
-    fire_frame_on_load(state, child_id)?;
+    deferred_on_loads.push(child_id);
     publish_anonymous_wrapper_layer_keys_to_parent(state, parent_id, frame, child_subst)?;
-
-    // Child `OnLoad` handlers can re-anchor against runtime-created siblings.
-    // Re-resolve once more so late sibling targets created or fixed in `OnLoad`
-    // are updated.
-    super::resolve_runtime_template_named_anchors(state, child_id)?;
     Ok(())
 }
 

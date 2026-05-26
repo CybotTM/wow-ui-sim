@@ -81,8 +81,8 @@ fn apply_runtime_template_chain_impl(
     apply_template_parent_links(state, frame_id, &chain)?;
     apply_chain_entries(state, frame_id, &chain)?;
     apply_direct_frame_key_values(state, frame_id, direct_frame);
-    create_runtime_template_child_frames(state, &state_rc, frame_id, &frame_name, &chain)?;
     apply_runtime_template_loader_effects(state, frame_id, inherits, &frame_name, &chain)?;
+    create_runtime_template_child_frames(state, &state_rc, frame_id, &frame_name, &chain)?;
 
     finalize_template_frame(
         state,
@@ -111,6 +111,7 @@ fn create_runtime_template_child_frames(
     frame_name: &str,
     chain: &[Arc<crate::xml::TemplateEntry>],
 ) -> LuaResult<()> {
+    let mut deferred_on_loads = Vec::new();
     for entry in chain {
         runtime::create_template_child_frames(
             state,
@@ -119,7 +120,17 @@ fn create_runtime_template_child_frames(
             frame_name,
             frame_name,
             &entry.frame,
+            &mut deferred_on_loads,
         )?;
+    }
+    fire_deferred_child_on_loads(state, &deferred_on_loads)?;
+    Ok(())
+}
+
+fn fire_deferred_child_on_loads(state: &mut LuaState, child_ids: &[u64]) -> LuaResult<()> {
+    for child_id in child_ids {
+        runtime::fire_frame_on_load(state, *child_id)?;
+        resolve_runtime_template_named_anchors(state, *child_id)?;
     }
     Ok(())
 }
