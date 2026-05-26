@@ -7,4 +7,3 @@ pub mod c_prototype_dialog;
 pub mod c_reincarnation;
 pub mod c_specialization_pvp_talents;
 pub mod c_transmog_outfit_slots;
-pub mod c_transmog_sets;

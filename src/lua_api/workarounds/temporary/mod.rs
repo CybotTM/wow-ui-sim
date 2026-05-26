@@ -159,6 +159,7 @@ pub(crate) mod totem_defaults;
 pub(crate) mod tracking_namespace_defaults;
 pub(crate) mod trade_info_defaults;
 pub(crate) mod trade_skill_ui_fallbacks;
+pub(crate) mod transmog_sets_defaults;
 pub(crate) mod transmog_util_defaults;
 pub(crate) mod tts_settings_defaults;
 pub(crate) mod ui_frame_manager_defaults;

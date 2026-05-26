@@ -133,7 +133,7 @@ fn transmog_sets_surface_is_not_runtime_bootstrap_fallback() {
 
     assert!(
         !bootstrap.contains("C_TransmogSets"),
-        "C_TransmogSets defaults must live in the explicit temporary C API shim boundary, not runtime bootstrap"
+        "C_TransmogSets defaults must live in the explicit temporary Lua workaround boundary, not runtime bootstrap"
     );
 }
 

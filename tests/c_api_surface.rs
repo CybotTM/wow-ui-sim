@@ -209,6 +209,21 @@ fn party_info_instance_abandon_defaults_are_not_c_api_temporary_shims() {
 }
 
 #[test]
+fn transmog_sets_empty_inventory_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let c_api = include_str!("../src/c_api/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_transmog_sets"),
+        "unmodeled C_TransmogSets empty wardrobe-set defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !c_api.contains("c_transmog_sets"),
+        "C_TransmogSets empty inventory defaults should not be wired through c_api registration"
+    );
+}
+
+#[test]
 fn spell_metadata_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
     let registration = include_str!("../src/c_api/registration.rs");

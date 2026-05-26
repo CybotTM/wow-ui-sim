@@ -22,7 +22,7 @@ Current API shape:
 - Wardrobe filter dropdowns rely on normal mouse dispatch to the dropdown button. Decorative child regions must remain visual-only hit-test descent candidates, not final click targets; otherwise the filter button's `OnMouseDown` never opens its Blizzard menu even though the menu description and filter callbacks are valid.
 - `C_TransmogOutfitInfo.GetAllSlotLocationInfo` reports weapon appearance slots with `Enum.TransmogCollectionType.None`; Blizzard derives weapon browsing categories through `IsEitherHand()` and `GetCategoryInfo()`. Reporting weapon collection categories there makes `TransmogLocationMixin:GetArmorCategoryID()` non-nil for weapons, and Wardrobe's armor-only model setup path then indexes missing `MAINHANDSLOT` / `SECONDARYHANDSLOT` entries in `WARDROBE_MODEL_SETUP`.
 - Tooltip and visual-state helpers such as `GetAppearanceSourceInfo`, `GetAppearanceInfoBySource`, `GetIsAppearanceFavorite`, `SetIsAppearanceFavorite`, `IsNewAppearance`, and `ClearNewAppearance` are not backed by first-class visual/source state.
-- `C_TransmogSets` currently lives in the explicit temporary C API shim boundary and returns empty/default values. That is enough to keep the UI from crashing, but not enough for real set-tab filtering.
+- `C_TransmogSets` currently lives in the explicit temporary Lua workaround boundary and returns empty/default values. That is enough to keep the UI from crashing, but not enough for real set-tab filtering.
 
 Implementation direction:
 
@@ -40,7 +40,7 @@ Implementation direction:
 - [Blizzard_TransmogShared.lua](../../../vendor/wow-ui-source/Interface/AddOns/Blizzard_TransmogShared/Blizzard_TransmogShared.lua) — shared tooltip/favorite/source helpers
 - [transmog_collection.rs](../../../src/lua_api/globals/missing_surface/transmog_collection.rs) — current Rust `C_TransmogCollection` surface
 - [transmog.rs](../../../src/lua_api/globals/missing_surface/transmog.rs) — current Rust `C_Transmog` surface
-- [c_transmog_sets.rs](../../../src/c_api/temporary_shims/c_transmog_sets.rs) — current temporary empty/default `C_TransmogSets` surface
+- [transmog_sets_defaults.rs](../../../src/lua_api/workarounds/temporary/transmog_sets_defaults.rs) — current temporary empty/default `C_TransmogSets` surface
 
 ## See Also
 
