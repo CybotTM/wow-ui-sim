@@ -167,6 +167,7 @@ fn apply_temporary_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
 
 fn apply_runtime_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::global_placeholder_tables::apply_bootstrap(lua)?;
+    temporary::frame_helper_defaults::apply_bootstrap(lua)?;
     temporary::event_scheduler_state::apply_bootstrap(lua)?;
     temporary::combat_log_state::apply_bootstrap(lua)?;
     temporary::damage_meter_state::apply_bootstrap(lua)?;
