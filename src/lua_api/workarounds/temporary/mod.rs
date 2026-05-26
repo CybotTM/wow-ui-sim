@@ -129,6 +129,7 @@ pub(crate) mod proxy_object_factories;
 pub(crate) mod pvp_talent_defaults;
 pub(crate) mod quest_log_mixin;
 pub(crate) mod quest_objective_defaults;
+pub(crate) mod reincarnation_defaults;
 pub(crate) mod reputation_state;
 pub(crate) mod restricted_actions_defaults;
 pub(crate) mod scenario_defaults;

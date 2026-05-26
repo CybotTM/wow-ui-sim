@@ -78,7 +78,6 @@ fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_service_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
-    temporary_shims::c_reincarnation::register_c_reincarnation_shims(state)?;
     temporary_shims::c_transmog_outfit_slots::register_c_transmog_outfit_slot_shims(state)
 }
 
