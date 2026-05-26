@@ -1,4 +1,3 @@
-pub mod c_campaign_covenant_defaults;
 pub mod c_contribution_collector;
 pub mod c_date_and_time;
 pub mod c_prototype_dialog;
