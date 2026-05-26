@@ -1,8 +1,7 @@
 use super::permanent_shims::c_nameplate;
 use super::temporary_shims::{
-    c_character_services, c_click_bindings, c_gossip_info, c_major_faction_display, c_map_groups,
-    c_mythic_plus, c_party_info_instance_abandon, c_party_info_static_fallbacks,
-    c_spell_static_fallbacks,
+    c_character_services, c_click_bindings, c_major_faction_display, c_map_groups, c_mythic_plus,
+    c_party_info_instance_abandon, c_party_info_static_fallbacks, c_spell_static_fallbacks,
 };
 use super::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -55,8 +54,8 @@ pub(crate) fn register_map_environment_tables(state: &mut LuaState) -> LuaResult
     c_map_exploration_info::register_c_map_exploration_info_surface(state)
 }
 
-pub(crate) fn register_gossip_info_tables(state: &mut LuaState) -> LuaResult<()> {
-    c_gossip_info::register_c_gossip_info_shims(state)
+pub(crate) fn register_gossip_info_tables(_state: &mut LuaState) -> LuaResult<()> {
+    Ok(())
 }
 
 pub(crate) fn register_world_activity_tables(state: &mut LuaState) -> LuaResult<()> {

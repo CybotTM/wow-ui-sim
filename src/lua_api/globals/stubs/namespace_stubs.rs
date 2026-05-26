@@ -50,7 +50,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // static-seeded in missing_surface/encounter_journal.rs, not stubs.
     // C_GossipInfo GetActiveQuests / GetAvailableQuests / GetOptions are
     // SimState-backed in missing_surface/gossip_info.rs. GetPoiForUiMapID
-    // lives in temporary_shims until gossip POI state exists.
+    // lives in workarounds::temporary until gossip POI state exists.
     // C_Heirloom GetHeirloomInfo is WorldState-backed in
     // missing_surface/heirloom.rs, not a stub.
     // GetHeirloomItemIDFromDisplayedSlot was a misnamed stub (the real

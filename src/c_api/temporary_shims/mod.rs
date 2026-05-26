@@ -4,7 +4,6 @@ pub mod c_click_bindings;
 pub mod c_container_defaults;
 pub mod c_contribution_collector;
 pub mod c_date_and_time;
-pub mod c_gossip_info;
 pub mod c_level_link_spell_lock;
 pub mod c_major_faction_display;
 pub mod c_map_groups;
