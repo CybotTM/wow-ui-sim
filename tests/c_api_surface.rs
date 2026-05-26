@@ -1,7 +1,21 @@
+use std::fs;
+
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("failed to create Lua environment")
+}
+
+fn c_api_temporary_shims_source() -> String {
+    fs::read_to_string("src/c_api/temporary_shims/mod.rs").unwrap_or_default()
+}
+
+#[test]
+fn c_api_temporary_shims_module_is_removed() {
+    assert!(
+        !std::path::Path::new("src/c_api/temporary_shims/mod.rs").exists(),
+        "temporary compatibility defaults should live under lua_api::workarounds, not c_api::temporary_shims"
+    );
 }
 
 #[test]
@@ -90,7 +104,7 @@ fn c_addons_scripts_disallowed_for_beta_defaults_false() {
 
 #[test]
 fn configuration_warnings_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -105,7 +119,7 @@ fn configuration_warnings_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn item_targeting_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let item_spell = include_str!("../src/c_api/item_spell/mod.rs");
 
     assert!(
@@ -120,7 +134,7 @@ fn item_targeting_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn spell_target_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -135,7 +149,7 @@ fn spell_target_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn merchant_and_raid_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -150,7 +164,7 @@ fn merchant_and_raid_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn paper_doll_stagger_default_is_not_c_api_temporary_shim() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -165,7 +179,7 @@ fn paper_doll_stagger_default_is_not_c_api_temporary_shim() {
 
 #[test]
 fn chat_info_no_state_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -180,7 +194,7 @@ fn chat_info_no_state_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn container_no_state_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let item_spell = include_str!("../src/c_api/item_spell/mod.rs");
 
     assert!(
@@ -195,7 +209,7 @@ fn container_no_state_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn pet_battle_static_fallbacks_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -210,7 +224,7 @@ fn pet_battle_static_fallbacks_are_not_c_api_temporary_shims() {
 
 #[test]
 fn party_info_instance_abandon_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -225,7 +239,7 @@ fn party_info_instance_abandon_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn transmog_sets_empty_inventory_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -240,7 +254,7 @@ fn transmog_sets_empty_inventory_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn level_link_spell_lock_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -255,7 +269,7 @@ fn level_link_spell_lock_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn campaign_covenant_placeholder_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -270,7 +284,7 @@ fn campaign_covenant_placeholder_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn date_and_time_deterministic_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -285,7 +299,7 @@ fn date_and_time_deterministic_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn contribution_collector_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -300,7 +314,7 @@ fn contribution_collector_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn prototype_dialog_temporary_state_is_not_c_api_temporary_shim() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -315,7 +329,7 @@ fn prototype_dialog_temporary_state_is_not_c_api_temporary_shim() {
 
 #[test]
 fn pvp_talent_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -330,7 +344,7 @@ fn pvp_talent_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn spell_metadata_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     for module in [
@@ -351,7 +365,7 @@ fn spell_metadata_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn minimap_tracking_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -366,7 +380,7 @@ fn minimap_tracking_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn super_track_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -381,7 +395,7 @@ fn super_track_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn trade_info_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -396,7 +410,7 @@ fn trade_info_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn scenario_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -411,7 +425,7 @@ fn scenario_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn gossip_poi_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -426,7 +440,7 @@ fn gossip_poi_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn mythic_plus_cache_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -441,7 +455,7 @@ fn mythic_plus_cache_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn shared_character_services_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -456,7 +470,7 @@ fn shared_character_services_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn specialization_mastery_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -471,7 +485,7 @@ fn specialization_mastery_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn click_bindings_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api_registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -486,7 +500,7 @@ fn click_bindings_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn spell_book_static_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let item_spell = include_str!("../src/c_api/item_spell/mod.rs");
 
     assert!(
@@ -501,7 +515,7 @@ fn spell_book_static_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn spell_static_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let item_spell = include_str!("../src/c_api/item_spell/mod.rs");
     let registration = include_str!("../src/c_api/registration.rs");
 
@@ -521,7 +535,7 @@ fn spell_static_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn map_group_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -536,7 +550,7 @@ fn map_group_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn perks_program_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -551,7 +565,7 @@ fn perks_program_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn party_info_static_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -566,7 +580,7 @@ fn party_info_static_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn character_services_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -581,7 +595,7 @@ fn character_services_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn major_faction_display_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");
 
     assert!(
@@ -596,7 +610,7 @@ fn major_faction_display_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn reincarnation_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
@@ -611,7 +625,7 @@ fn reincarnation_defaults_are_not_c_api_temporary_shims() {
 
 #[test]
 fn transmog_outfit_slot_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let temporary_shims = c_api_temporary_shims_source();
     let c_api = include_str!("../src/c_api/mod.rs");
 
     assert!(
