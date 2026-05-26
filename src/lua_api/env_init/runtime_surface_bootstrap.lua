@@ -1898,59 +1898,10 @@ local function __wow_preserve_nil_global(key)
       or key:match("^EMOTE%d+_CMD%d+$") ~= nil
       or key:match("^EMOTE%d+_TOKEN$") ~= nil
 end
-local function __wow_make_settings_initializer_placeholder()
-  local initializer = {
-    data = {},
-  }
-
-  function initializer:SetSearchIgnoredInLayout(layout)
-    self.searchIgnoredInLayout = layout
-  end
-
-  function initializer:SetParentInitializer(parentInitializer, modifyPredicate)
-    self.parentInitializer = parentInitializer
-    self.modifyPredicate = modifyPredicate
-  end
-
-  function initializer:SetKioskProtected()
-    self.kioskProtected = true
-  end
-
-  function initializer:GetName()
-    return self.name or ""
-  end
-
-  return initializer
-end
-
 local function __wow_prepare_global_assignment(key, value)
-  if key == "Settings" and type(value) == "table" and value.PingSoundsInitializer == nil then
-    value.PingSoundsInitializer = __wow_make_settings_initializer_placeholder()
-  elseif key == "SettingsRegistrar" and type(value) == "table" then
-    local registrar_mt = getmetatable(value) or {}
-    local registrar_prev_newindex = registrar_mt.__newindex
-
-    registrar_mt.__newindex = function(tbl, subkey, subvalue)
-      if subkey == "AddRegistrant" and type(subvalue) == "function" then
-        local original = subvalue
-        subvalue = function(self, registrant)
-          if type(rawget(_G, "Settings")) == "table" and rawget(Settings, "PingSoundsInitializer") == nil then
-            rawset(Settings, "PingSoundsInitializer", __wow_make_settings_initializer_placeholder())
-          end
-          return original(self, registrant)
-        end
-      end
-      if registrar_prev_newindex ~= nil then
-        if type(registrar_prev_newindex) == "function" then
-          registrar_prev_newindex(tbl, subkey, subvalue)
-          return
-        end
-        registrar_prev_newindex[subkey] = subvalue
-        return
-      end
-      rawset(tbl, subkey, subvalue)
-    end
-    setmetatable(value, registrar_mt)
+  local prepare = rawget(_G, "__wow_prepare_temporary_global_assignment")
+  if type(prepare) == "function" then
+    return prepare(key, value)
   end
   return value
 end
@@ -2013,7 +1964,3 @@ __global_mt.__newindex = function(t, key, value)
 end
 setmetatable(_G, __global_mt)
 __wow_seed_namespace_names()
-
-if type(rawget(_G, "Settings")) == "table" then
-  __wow_prepare_global_assignment("Settings", rawget(_G, "Settings"))
-end

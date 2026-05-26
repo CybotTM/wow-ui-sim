@@ -14,6 +14,77 @@ local function settings_surface_namespace(fields)
     return table
 end
 
+local function settings_make_initializer_placeholder()
+    local initializer = {
+        data = {},
+    }
+
+    function initializer:SetSearchIgnoredInLayout(layout)
+        self.searchIgnoredInLayout = layout
+    end
+
+    function initializer:SetParentInitializer(parentInitializer, modifyPredicate)
+        self.parentInitializer = parentInitializer
+        self.modifyPredicate = modifyPredicate
+    end
+
+    function initializer:SetKioskProtected()
+        self.kioskProtected = true
+    end
+
+    function initializer:GetName()
+        return self.name or ""
+    end
+
+    return initializer
+end
+
+local function ensure_ping_sounds_initializer(settings)
+    if type(settings) == "table" and rawget(settings, "PingSoundsInitializer") == nil then
+        rawset(settings, "PingSoundsInitializer", settings_make_initializer_placeholder())
+    end
+end
+
+local function patch_settings_registrar_assignment(registrar)
+    if type(registrar) ~= "table" or rawget(registrar, "__wow_ping_sounds_registrar_guard") then
+        return registrar
+    end
+
+    rawset(registrar, "__wow_ping_sounds_registrar_guard", true)
+    local registrar_mt = getmetatable(registrar) or {}
+    local registrar_prev_newindex = registrar_mt.__newindex
+
+    registrar_mt.__newindex = function(tbl, subkey, subvalue)
+        if subkey == "AddRegistrant" and type(subvalue) == "function" then
+            local original = subvalue
+            subvalue = function(self, registrant)
+                ensure_ping_sounds_initializer(rawget(_G, "Settings"))
+                return original(self, registrant)
+            end
+        end
+        if registrar_prev_newindex ~= nil then
+            if type(registrar_prev_newindex) == "function" then
+                registrar_prev_newindex(tbl, subkey, subvalue)
+                return
+            end
+            registrar_prev_newindex[subkey] = subvalue
+            return
+        end
+        rawset(tbl, subkey, subvalue)
+    end
+    setmetatable(registrar, registrar_mt)
+    return registrar
+end
+
+function __wow_prepare_temporary_global_assignment(key, value)
+    if key == "Settings" then
+        ensure_ping_sounds_initializer(value)
+    elseif key == "SettingsRegistrar" then
+        value = patch_settings_registrar_assignment(value)
+    end
+    return value
+end
+
 Settings = Settings or settings_surface_namespace({
     GetOrCreateSettingsGroup = function()
         return settings_surface_namespace({
@@ -25,6 +96,12 @@ Settings = Settings or settings_surface_namespace({
         })
     end,
 })
+__wow_prepare_temporary_global_assignment("Settings", Settings)
+
+local existingRegistrar = rawget(_G, "SettingsRegistrar")
+if type(existingRegistrar) == "table" then
+    __wow_prepare_temporary_global_assignment("SettingsRegistrar", existingRegistrar)
+end
 
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 
@@ -394,5 +471,64 @@ mod tests {
             .expect("EditMode account settings mixin probe should run");
 
         assert_eq!(mixin_type, "table");
+    }
+
+    #[test]
+    fn global_settings_assignment_installs_ping_sounds_initializer_placeholder() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: (String, String, bool, bool, bool) = env
+            .eval(
+                r#"
+                rawset(_G, "Settings", nil)
+                Settings = {}
+                local initializer = Settings.PingSoundsInitializer
+                initializer:SetSearchIgnoredInLayout("probe-layout")
+                initializer:SetParentInitializer("parent-initializer", "predicate")
+                initializer:SetKioskProtected()
+                return type(initializer),
+                       initializer:GetName(),
+                       initializer.searchIgnoredInLayout == "probe-layout",
+                       initializer.parentInitializer == "parent-initializer",
+                       initializer.kioskProtected == true
+                "#,
+            )
+            .expect("Settings assignment hook probe should run");
+
+        assert_eq!(
+            result,
+            ("table".to_string(), String::new(), true, true, true)
+        );
+    }
+
+    #[test]
+    fn settings_registrar_assignment_restores_missing_ping_sounds_initializer() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: (String, String, String) = env
+            .eval(
+                r#"
+                rawset(_G, "Settings", {})
+                rawset(_G, "SettingsRegistrar", nil)
+                SettingsRegistrar = {}
+                SettingsRegistrar.AddRegistrant = function(_self, registrant)
+                    return type(Settings.PingSoundsInitializer),
+                           Settings.PingSoundsInitializer:GetName(),
+                           registrant
+                end
+                rawset(Settings, "PingSoundsInitializer", nil)
+                return SettingsRegistrar:AddRegistrant("probe-registrant")
+                "#,
+            )
+            .expect("SettingsRegistrar assignment hook probe should run");
+
+        assert_eq!(
+            result,
+            (
+                "table".to_string(),
+                String::new(),
+                "probe-registrant".to_string()
+            )
+        );
     }
 }
