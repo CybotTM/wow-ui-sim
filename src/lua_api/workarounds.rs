@@ -398,6 +398,7 @@ fn apply_feature_model_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::top_level_parent_defaults::apply_bootstrap(lua)?;
     temporary::tracking_namespace_defaults::apply_bootstrap(lua)?;
     temporary::transmog_sets_defaults::apply_bootstrap(lua)?;
+    temporary::transmog_outfit_slot_defaults::apply_bootstrap(lua)?;
     temporary::trade_info_defaults::apply_bootstrap(lua)
 }
 

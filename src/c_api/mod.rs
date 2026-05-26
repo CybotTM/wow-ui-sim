@@ -2,7 +2,6 @@
 //!
 //! Real/state-backed surfaces live at the root of this module. Intentionally
 //! unsupported compatibility gaps stay isolated under `permanent_shims`.
-//! Stopgap empty-result stubs with a path to real impl live under `temporary_shims`.
 
 pub mod c_addon_profiler;
 pub mod c_addons;
@@ -36,7 +35,6 @@ pub mod c_wowtoken_secure;
 pub mod c_xml_util;
 pub mod item_spell;
 pub mod permanent_shims;
-pub mod temporary_shims;
 
 mod helpers;
 mod registration;
@@ -73,12 +71,7 @@ fn register_glue_and_display_tables(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
-    register_service_auxiliary_shims(state)?;
     register_token_texture_xml_tables(state)
-}
-
-fn register_service_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
-    temporary_shims::c_transmog_outfit_slots::register_c_transmog_outfit_slot_shims(state)
 }
 
 fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {

@@ -608,3 +608,18 @@ fn reincarnation_defaults_are_not_c_api_temporary_shims() {
         "C_Reincarnation mutable defaults should not be wired through C API registration"
     );
 }
+
+#[test]
+fn transmog_outfit_slot_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let c_api = include_str!("../src/c_api/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_transmog_outfit_slots"),
+        "unmodeled C_TransmogOutfitInfo slot/outfit defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !c_api.contains("c_transmog_outfit_slots"),
+        "C_TransmogOutfitInfo slot/outfit defaults should not be wired through C API registration"
+    );
+}
