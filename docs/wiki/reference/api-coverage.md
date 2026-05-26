@@ -12,12 +12,13 @@ Current state of WoW API implementation across C_* namespaces, LE_* constants, a
 
 C_* support lives in `src/c_api/`, a peer of `src/lua_api/` per the C-API boundary policy. Each namespace is its own module (`c_spell.rs`, `c_spell_book.rs`, `c_map.rs`, `c_addons.rs`, `c_widget.rs`, `c_texture.rs`, `c_paper_doll_info.rs`, `c_addon_profiler.rs`, `c_configuration_warnings.rs`, `c_fog_of_war.rs`, `c_map_exploration_info.rs`, `c_spec.rs`, `c_wowtoken_secure.rs`, `c_xml_util.rs`, `item_spell/`, …).
 
-Two shim sub-trees are kept explicit, not hidden:
+Permanent C API shims are kept explicit, not hidden:
 
 - `src/c_api/permanent_shims/` — intentionally unsupported domains with documented rationale (currently `c_model_info` for the 3D-model gap and `c_map_api` for legacy map glue).
-- `src/c_api/temporary_shims/` — explicit stopgaps with a retirement path (currently `c_lfg_info`).
 
-Default behavior for missing methods (returning nil/false/0) is provided directly from the per-namespace modules and from a small set of upgraded global stubs (~25 player/unit/system globals returning correct typed defaults). The previous monolithic `generated_stubs.rs` (~19K lines) and `c_stubs_api*.rs` / `c_misc_api*.rs` files have been retired; ownership now lives in the per-namespace files alongside real logic.
+Temporary compatibility defaults with a retirement path live under `src/lua_api/workarounds/temporary/`, even when they populate `C_*` namespace tables. This keeps unmodeled data shapes visible as simulator workarounds instead of pretending they are state-backed C API implementations.
+
+Default behavior for missing methods (returning nil/false/0) is provided directly from the per-namespace modules, temporary Lua workarounds, and a small set of upgraded global stubs (~25 player/unit/system globals returning correct typed defaults). The previous monolithic `generated_stubs.rs` (~19K lines), `c_stubs_api*.rs` / `c_misc_api*.rs` files, and `src/c_api/temporary_shims/` module have been retired; ownership now lives in the per-namespace files, permanent-shim modules, or explicit Lua workaround modules.
 
 ## Well-Implemented Namespaces
 
@@ -59,7 +60,7 @@ Only 16 C_* namespaces from BlizzardUI are completely unregistered. All are eith
 
 To implement a missing method, locate (or create) its namespace module under `src/c_api/`, add the method to the registry, and return values matching `Blizzard_APIDocumentationGenerated/*.lua`. State-backed implementations should read from / write to the simulator's state model rather than hardcoding constants.
 
-Per CLAUDE.md, missing or wrong `C_*` behavior should default to **implementing the backing system or state model** — not adding a shim. Shims belong in `permanent_shims/` (intentional gap, documented rationale) or `temporary_shims/` (stopgap with retirement path).
+Per CLAUDE.md, missing or wrong `C_*` behavior should default to **implementing the backing system or state model** — not adding a shim. Permanent C API shims belong in `permanent_shims/` only for intentional unsupported domains. Temporary unmodeled defaults belong in `src/lua_api/workarounds/temporary/` with a retirement path.
 
 The signature audit in `docs/c-api-signature-audit.md` documents the exact parameter/return types for high-priority namespaces. Live gaps come from `wow-cli audit-api --gaps`, which can also emit a PLAN.md-ready checkbox list (`--format plan`).
 
