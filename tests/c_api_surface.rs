@@ -314,6 +314,21 @@ fn prototype_dialog_temporary_state_is_not_c_api_temporary_shim() {
 }
 
 #[test]
+fn pvp_talent_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let c_api = include_str!("../src/c_api/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_specialization_pvp_talents"),
+        "unmodeled PvP talent placeholder defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !c_api.contains("c_specialization_pvp_talents"),
+        "PvP talent placeholder defaults should not be wired through c_api registration"
+    );
+}
+
+#[test]
 fn spell_metadata_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
     let registration = include_str!("../src/c_api/registration.rs");

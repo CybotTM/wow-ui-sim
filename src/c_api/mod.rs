@@ -62,9 +62,6 @@ pub(crate) fn register_utility_bootstrap_tables(state: &mut LuaState) -> LuaResu
 
 fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<()> {
     c_spec::register_c_specialization_info(state)?;
-    temporary_shims::c_specialization_pvp_talents::register_c_specialization_pvp_talent_shims(
-        state,
-    )?;
     permanent_shims::c_model_info::register_c_model_info(state)?;
     Ok(())
 }
