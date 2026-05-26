@@ -13,27 +13,10 @@ use rilua::{LuaResult, Val};
 const ZONE_ABILITY_ICON: &str = "Interface\\ICONS\\INV_Misc_QuestionMark";
 
 pub(super) fn register_zone_ability_surface(state: &mut LuaState) -> LuaResult<()> {
-    ensure_spellbook_override_lookup(state)?;
     let ns_ref = ensure_namespace(state, "C_ZoneAbility")?;
     ensure_zone_ability_state(state);
     table_set_rust_fn_static(state, ns_ref, "GetActiveAbilities", get_active_abilities)?;
     table_set_rust_fn_static(state, ns_ref, "GetZoneAbilityIcon", get_zone_ability_icon)?;
-    Ok(())
-}
-
-fn ensure_spellbook_override_lookup(state: &mut LuaState) -> LuaResult<()> {
-    let spell_book = ensure_namespace(state, "C_SpellBook")?;
-    if matches!(
-        table_get(state, Val::Table(spell_book), "FindSpellOverrideByID"),
-        Val::Nil
-    ) {
-        table_set_rust_fn_static(
-            state,
-            spell_book,
-            "FindSpellOverrideByID",
-            find_spell_override_by_id,
-        )?;
-    }
     Ok(())
 }
 
@@ -95,12 +78,6 @@ fn get_zone_ability_icon(state: &mut LuaState) -> LuaResult<u32> {
     let _spell_id = u32::from_stack(state, 1)?;
     let texture = create_string(state, ZONE_ABILITY_ICON);
     state.push(texture);
-    Ok(1)
-}
-
-fn find_spell_override_by_id(state: &mut LuaState) -> LuaResult<u32> {
-    let _spell_id = u32::from_stack(state, 1)?;
-    state.push(Val::Nil);
     Ok(1)
 }
 

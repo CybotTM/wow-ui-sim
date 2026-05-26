@@ -348,3 +348,18 @@ fn click_bindings_defaults_are_not_c_api_temporary_shims() {
         "C_ClickBindings profile defaults should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn spell_book_static_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let item_spell = include_str!("../src/c_api/item_spell/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_spell_book_call_pet"),
+        "unmodeled C_SpellBook call-pet and deprecated spellbook defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !item_spell.contains("c_spell_book_call_pet"),
+        "C_SpellBook static defaults should not be wired through c_api item/spell registration"
+    );
+}
