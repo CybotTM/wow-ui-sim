@@ -226,6 +226,11 @@ fn apply_core_foundation_frame_defaults(lua: &mut rilua::Lua) -> crate::Result<(
     apply_core_foundation_addon_defaults(lua)?;
     apply_core_foundation_chat_defaults(lua)?;
     apply_core_foundation_journal_defaults(lua)?;
+    apply_core_foundation_catalog_defaults(lua)?;
+    apply_core_foundation_environment_defaults(lua)
+}
+
+fn apply_core_foundation_catalog_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::camera_tutorial_defaults::apply_bootstrap(lua)?;
     temporary::catalog_shop_inbound_globals::apply_bootstrap(lua)?;
     temporary::catalog_shop_product_card_defaults::apply_bootstrap(lua)?;
@@ -234,6 +239,10 @@ fn apply_core_foundation_frame_defaults(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::client_info_defaults::apply_bootstrap(lua)?;
     temporary::collections_journal_namespace::apply_bootstrap(lua)?;
     temporary::color_defaults::apply_bootstrap(lua)?;
+    Ok(())
+}
+
+fn apply_core_foundation_environment_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     apply_core_foundation_tracking_defaults(lua)?;
     temporary::debug_environment_defaults::apply_bootstrap(lua)?;
     temporary::difficulty_pvp_util_defaults::apply_bootstrap(lua)?;
@@ -242,6 +251,7 @@ fn apply_core_foundation_frame_defaults(lua: &mut rilua::Lua) -> crate::Result<(
     temporary::global_frame_defaults::apply_bootstrap(lua)?;
     temporary::gossip_poi_defaults::apply_bootstrap(lua)?;
     temporary::merchant_raid_defaults::apply_bootstrap(lua)?;
+    temporary::mythic_plus_cache_defaults::apply_bootstrap(lua)?;
     Ok(())
 }
 

@@ -1,6 +1,6 @@
 use super::permanent_shims::c_nameplate;
 use super::temporary_shims::{
-    c_character_services, c_click_bindings, c_major_faction_display, c_map_groups, c_mythic_plus,
+    c_character_services, c_click_bindings, c_major_faction_display, c_map_groups,
     c_party_info_instance_abandon, c_party_info_static_fallbacks, c_spell_static_fallbacks,
 };
 use super::{
@@ -58,8 +58,8 @@ pub(crate) fn register_gossip_info_tables(_state: &mut LuaState) -> LuaResult<()
     Ok(())
 }
 
-pub(crate) fn register_world_activity_tables(state: &mut LuaState) -> LuaResult<()> {
-    c_mythic_plus::register_c_mythic_plus_shims(state)
+pub(crate) fn register_world_activity_tables(_state: &mut LuaState) -> LuaResult<()> {
+    Ok(())
 }
 
 pub(crate) fn register_nameplate_tables(state: &mut LuaState) -> LuaResult<()> {

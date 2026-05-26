@@ -95,6 +95,7 @@ pub(crate) mod minimap_tracking_defaults;
 pub(crate) mod misc_global_frame_defaults;
 pub(crate) mod modified_click_defaults;
 pub(crate) mod mount_journal_dynamic_flight_popup;
+pub(crate) mod mythic_plus_cache_defaults;
 pub(crate) mod navigation_defaults;
 pub(crate) mod object_api_request_load_callbacks;
 pub(crate) mod objective_tracker_quest_header;
