@@ -5,13 +5,145 @@
 
 use crate::lua_api::{LoaderEnv, WowLuaEnv};
 
-const CATALOG_SHOP_SOUNDKIT_DEFAULTS_LUA: &str = r#"
+const CATALOG_SHOP_DEFAULTS_LUA: &str = r#"
 SOUNDKIT = SOUNDKIT or {}
 if SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU == nil then
     SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU = 303824
 end
 if SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON == nil then
     SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON = 303826
+end
+
+local catalogShopConstantsDefaults = {
+    ScrollViewType = {
+        List = 1,
+        Grid = 2,
+    },
+    ScrollViewElementType = {
+        Header = 1,
+        Product = 2,
+    },
+    Default = {
+        PreviewBackgroundTexture = "shop-bg-map-blue",
+    },
+    CardTemplate = {
+        Header = "CatalogShopSectionHeaderTemplate",
+        HeaderPersonalized = "CatalogShopSectionHeaderOptOutLinkTemplate",
+        Wide = "WideCatalogShopProductCardTemplate",
+        WideCardToken = "WideWoWTokenCatalogShopCardTemplate",
+        WideCardSubscription = "WideSubscriptionCatalogShopCardTemplate",
+        WideCardGameTime = "WideGameTimeCatalogShopCardTemplate",
+        Small = "SmallCatalogShopProductCardTemplate",
+        SmallServices = "SmallCatalogShopServicesCardTemplate",
+        SmallSubscription = "SmallCatalogShopSubscriptionCardTemplate",
+        SmallGameTime = "SmallCatalogShopGameTimeCardTemplate",
+        SmallTender = "SmallCatalogShopTenderCardTemplate",
+        SmallToys = "SmallCatalogShopToysCardTemplate",
+        SmallAccess = "SmallCatalogShopAccessCardTemplate",
+        SmallDecor = "SmallCatalogShopDecorCardTemplate",
+        SmallRoom = "SmallCatalogShopRoomCardTemplate",
+        SmallExteriorType = "SmallCatalogShopExteriorTypeCardTemplate",
+        Details = "DetailsCatalogShopProductCardTemplate",
+        DetailsServices = "DetailsCatalogShopServicesCardTemplate",
+        DetailsSubscription = "DetailsCatalogShopSubscriptionCardTemplate",
+        DetailsGameTime = "DetailsCatalogShopGameTimeCardTemplate",
+        DetailsTender = "DetailsCatalogShopTenderCardTemplate",
+        DetailsToys = "DetailsCatalogShopToysCardTemplate",
+        DetailsAccess = "DetailsCatalogShopAccessCardTemplate",
+        DetailsDecor = "DetailsCatalogShopDecorCardTemplate",
+        DetailsRoom = "DetailsCatalogShopRoomCardTemplate",
+        DetailsExteriorType = "DetailsCatalogShopExteriorTypeCardTemplate",
+    },
+    ModelSceneContext = {
+        SmallCard = 1,
+        WideCard = 2,
+        PreviewScene = 3,
+    },
+    ScreenPadding = {
+        Horizontal = 100,
+        Vertical = 100,
+    },
+    DefaultActorTag = {
+        Pet = "pet",
+        Mount = "mount",
+        Toy = "actor",
+        Celebrate = "fanfare",
+        Transmog = "transmog",
+        Decor = "decor",
+    },
+    ProductType = {
+        Pet = "Pet",
+        Mount = "Mount",
+        Toy = "Toy",
+        Transmog = "Transmog",
+        Services = "Services",
+        Token = "WoW Token",
+        Bundle = "Bundle",
+        Subscription = "Subscription",
+        TradersTenders = "Tender",
+        Decor = "Decor",
+        Access = "Access",
+        GameTime = "Game Time",
+        Room = "Room",
+        HousingExteriorType = "Housing Exteriors",
+    },
+    GameTypes = {
+        Classic = "classic",
+        Modern = "modern",
+    },
+    GameTypeGlobalStringTag = {
+        Classic = CATALOG_SHOP_WOW_FLAVOR_CLASSIC,
+        Modern = CATALOG_SHOP_WOW_FLAVOR_MODERN,
+    },
+    ShopGlobalStringTag = {
+        MissingLicenseCaptionText = CATALOG_SHOP_MISSING_LICENSE_ITEM,
+    },
+    DefaultCameraTag = {
+        Primary = "primary",
+    },
+    DefaultAnimID = {
+        MountSelfIdle = 618,
+        MountSpecialAnimKit = 1371,
+        PetDefault = 23877,
+    },
+    Celebrate = {
+        CreatureID = 27823,
+        SpellVisualID = 259750,
+    },
+    NoResults = {
+        BackgroundTexture = "shop-bg-map-blue",
+    },
+    LicenseTermTypes = {
+        NotApplicable = 0,
+        Days = 1,
+        Years = 2,
+        Fixed = 3,
+        Hours = 4,
+        Minutes = 5,
+        Weeks = 6,
+        Months = 7,
+    },
+    CategoryLinks = {
+        Pets = "pets",
+        Mounts = "mounts",
+        Transmogs = "transmogs",
+        Subscriptions = "subscriptions",
+        GameTime = "gametimeoffers",
+        GameUpgrades = "game upgrades",
+        Services = "services",
+        Featured = "featured",
+        Housing = "housing",
+    },
+}
+
+if type(CatalogShopConstants) ~= "table" then
+    CatalogShopConstants = {}
+end
+
+for key, value in pairs(catalogShopConstantsDefaults) do
+    if CatalogShopConstants[key] == nil then
+        CatalogShopConstants[key] = value
+    end
 end
 "#;
 
@@ -60,7 +192,7 @@ rawset(_G, "__wow_catalog_shop_product_card_defaults_wrapped", true)
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    lua.exec(CATALOG_SHOP_SOUNDKIT_DEFAULTS_LUA)?;
+    lua.exec(CATALOG_SHOP_DEFAULTS_LUA)?;
     Ok(())
 }
 
@@ -77,24 +209,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn installs_catalog_shop_soundkit_defaults() {
+    fn installs_catalog_shop_defaults() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
         {
             let mut lua = env.lua.borrow_mut();
-            super::apply_bootstrap(&mut lua).expect("catalog shop soundkit defaults should apply");
+            super::apply_bootstrap(&mut lua).expect("catalog shop defaults should apply");
         }
 
-        let (nav, button): (i64, i64) = env
+        let (nav, button, product_type, details_card): (i64, i64, i64, String) = env
             .eval(
                 r#"
                 return SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU,
-                    SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON
+                    SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON,
+                    CatalogShopConstants.ScrollViewElementType.Product,
+                    CatalogShopConstants.CardTemplate.Details
                 "#,
             )
-            .expect("catalog shop soundkit defaults should be readable");
+            .expect("catalog shop defaults should be readable");
 
         assert_eq!(nav, 303824);
         assert_eq!(button, 303826);
+        assert_eq!(product_type, 2);
+        assert_eq!(details_card, "DetailsCatalogShopProductCardTemplate");
     }
 
     fn install_layout_fixture(env: &WowLuaEnv) {
