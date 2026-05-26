@@ -428,3 +428,18 @@ fn party_info_static_defaults_are_not_c_api_temporary_shims() {
         "C_PartyInfo static defaults should not be wired through C API registration"
     );
 }
+
+#[test]
+fn character_services_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_character_services"),
+        "unmodeled C_CharacterServices service/display/assignment defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !registration.contains("c_character_services"),
+        "C_CharacterServices service/display/assignment defaults should not be wired through C API registration"
+    );
+}

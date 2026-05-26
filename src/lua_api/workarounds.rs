@@ -261,6 +261,7 @@ fn apply_core_foundation_environment_defaults(lua: &mut rilua::Lua) -> crate::Re
 
 fn apply_core_foundation_chat_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::c_chat_info_defaults::apply_bootstrap(lua)?;
+    temporary::character_services_defaults::apply_bootstrap(lua)?;
     temporary::chat_voice_button_surface::apply_bootstrap(lua)?;
     temporary::chat_window_defaults::apply_bootstrap(lua)
 }
