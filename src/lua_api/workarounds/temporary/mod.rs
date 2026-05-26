@@ -32,6 +32,7 @@ pub(crate) mod character_select_selected_name;
 pub(crate) mod chat_voice_button_surface;
 pub(crate) mod chat_window_defaults;
 pub(crate) mod class_trial_defaults;
+pub(crate) mod click_bindings_defaults;
 pub(crate) mod client_info_defaults;
 pub(crate) mod club_notification_defaults;
 pub(crate) mod collections_journal_namespace;

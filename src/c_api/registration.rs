@@ -1,7 +1,7 @@
 use super::permanent_shims::c_nameplate;
 use super::temporary_shims::{
-    c_character_services, c_click_bindings, c_major_faction_display, c_map_groups,
-    c_party_info_instance_abandon, c_party_info_static_fallbacks, c_spell_static_fallbacks,
+    c_character_services, c_major_faction_display, c_map_groups, c_party_info_instance_abandon,
+    c_party_info_static_fallbacks, c_spell_static_fallbacks,
 };
 use super::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
@@ -40,7 +40,6 @@ pub(crate) fn register_character_progression_tables(state: &mut LuaState) -> Lua
 pub(crate) fn register_interaction_tables(state: &mut LuaState) -> LuaResult<()> {
     c_ardenweald_gardening::register_c_ardenweald_gardening_surface(state)?;
     c_arrow_callout_manager::register_c_arrow_callout_manager_surface(state)?;
-    c_click_bindings::register_c_click_bindings_fallback(state)?;
     c_player_interaction_manager::register_c_player_interaction_manager_surface(state)
 }
 
