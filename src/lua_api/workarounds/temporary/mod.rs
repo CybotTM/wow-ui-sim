@@ -102,6 +102,7 @@ pub(crate) mod navigation_defaults;
 pub(crate) mod object_api_request_load_callbacks;
 pub(crate) mod objective_tracker_quest_header;
 pub(crate) mod paging_controls_page_text;
+pub(crate) mod party_info_static_defaults;
 pub(crate) mod performance_metric_defaults;
 pub(crate) mod perks_activities_state;
 pub(crate) mod perks_program_defaults;

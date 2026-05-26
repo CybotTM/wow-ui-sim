@@ -413,3 +413,18 @@ fn perks_program_defaults_are_not_c_api_temporary_shims() {
         "C_PerksProgram empty-catalog defaults should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn party_info_static_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let registration = include_str!("../src/c_api/registration.rs");
+
+    assert!(
+        !temporary_shims.contains("c_party_info_static_fallbacks"),
+        "unmodeled C_PartyInfo invite/Torghast/walk-in defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !registration.contains("c_party_info_static_fallbacks"),
+        "C_PartyInfo static defaults should not be wired through C API registration"
+    );
+}
