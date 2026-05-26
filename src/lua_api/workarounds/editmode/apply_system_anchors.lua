@@ -145,11 +145,11 @@
             end
             local castBarSettings = Enum and Enum.EditModeCastBarSetting
             if not castBarSettings then
-                return false
+                return true
             end
             local lockSetting = castBarSettings.LockToPlayerFrame
             if lockSetting == nil then
-                return false
+                return true
             end
             if systemFrame.GetSettingValueBool then
                 local ok, locked = pcall(systemFrame.GetSettingValueBool, systemFrame, lockSetting)
@@ -201,6 +201,70 @@
             return true
         end
 
+        local function apply_hidden_visibility(systemFrame)
+            if not systemFrame then
+                return
+            end
+            if systemFrame.SetShownBase then
+                pcall(systemFrame.SetShownBase, systemFrame, false)
+            elseif systemFrame.Hide then
+                pcall(systemFrame.Hide, systemFrame)
+            elseif systemFrame.SetShown then
+                pcall(systemFrame.SetShown, systemFrame, false)
+            end
+        end
+
+        local function profile_hides_system(systemFrame)
+            local systemInfo = systemFrame and systemFrame.systemInfo
+            return type(systemInfo) == "table" and systemInfo.hidden == true
+        end
+
+        local function install_profile_hidden_shown_state_guard(systemFrame)
+            if not profile_hides_system(systemFrame)
+                or type(systemFrame.UpdateShownState) ~= "function"
+                or systemFrame.__wow_profile_hidden_update_shown_state_guard then
+                return
+            end
+
+            systemFrame.__wow_profile_hidden = true
+            systemFrame.__wow_profile_hidden_update_shown_state_guard = true
+            systemFrame.UpdateShownState = function(self)
+                local noneIndex = -1
+                if StatusTrackingBarInfo and StatusTrackingBarInfo.BarsEnum then
+                    noneIndex = StatusTrackingBarInfo.BarsEnum.None or noneIndex
+                end
+
+                local shouldShow = self.shownBarIndex ~= noneIndex or self.isInEditMode
+                if self.__wow_profile_hidden and not self.isInEditMode then
+                    shouldShow = false
+                end
+
+                if self.SetShownBase then
+                    pcall(self.SetShownBase, self, shouldShow)
+                elseif self.SetShown then
+                    pcall(self.SetShown, self, shouldShow)
+                elseif shouldShow and self.Show then
+                    pcall(self.Show, self)
+                elseif not shouldShow and self.Hide then
+                    pcall(self.Hide, self)
+                end
+
+                if UIParent_ManageFramePositions then
+                    pcall(UIParent_ManageFramePositions)
+                end
+            end
+        end
+
+        local function should_hide_after_system_update(systemFrame, wasShown)
+            install_profile_hidden_shown_state_guard(systemFrame)
+
+            if not wasShown then
+                return true
+            end
+
+            return profile_hides_system(systemFrame)
+        end
+
         local function preserve_hidden_state(systemFrame, update)
             if not systemFrame or type(update) ~= "function" then
                 return
@@ -216,8 +280,8 @@
 
             update()
 
-            if not wasShown and systemFrame.Hide then
-                pcall(systemFrame.Hide, systemFrame)
+            if should_hide_after_system_update(systemFrame, wasShown) then
+                apply_hidden_visibility(systemFrame)
             end
         end
 
@@ -635,9 +699,7 @@
                 if seed_system_frame(systemFrame) then
                     replay_system_settings(systemFrame)
                     if is_unlocked_cast_bar(systemFrame) then
-                        if not apply_anchor_info_directly(systemFrame) then
-                            apply_system_anchor_if_safe(systemFrame)
-                        end
+                        apply_anchor_info_directly(systemFrame)
                     else
                         apply_system_anchor_if_safe(systemFrame)
                     end

@@ -10,5 +10,7 @@ mod cast_and_player;
 mod self_relative;
 #[path = "apply_system_anchors/singletons.rs"]
 mod singletons;
+#[path = "apply_system_anchors/status_tracking.rs"]
+mod status_tracking;
 #[path = "apply_system_anchors/unit_frames.rs"]
 mod unit_frames;
