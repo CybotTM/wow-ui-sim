@@ -91,7 +91,6 @@ fn register_glue_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_service_auxiliary_shims(state: &mut LuaState) -> LuaResult<()> {
-    temporary_shims::c_minimap::register_c_minimap_shims(state)?;
     temporary_shims::c_prototype_dialog::register_c_prototype_dialog_shims(state)?;
     temporary_shims::c_reincarnation::register_c_reincarnation_shims(state)?;
     temporary_shims::c_scenario::register_c_scenario_shims(state)?;

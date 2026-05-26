@@ -213,3 +213,18 @@ fn spell_metadata_defaults_are_not_c_api_temporary_shims() {
         );
     }
 }
+
+#[test]
+fn minimap_tracking_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let c_api = include_str!("../src/c_api/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_minimap"),
+        "unmodeled C_Minimap tracking/radius defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !c_api.contains("c_minimap"),
+        "C_Minimap tracking/radius defaults should not be wired through c_api registration"
+    );
+}
