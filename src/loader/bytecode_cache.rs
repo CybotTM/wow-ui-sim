@@ -105,10 +105,11 @@ fn pack_path() -> Option<PathBuf> {
 ///
 /// Current-key hits borrow directly from the in-memory pack instead of cloning
 /// the cached chunk. Legacy hits still clone once because promotion appends a
-/// second entry under the current hash.
-pub fn with_cached_bytecode<R>(
+/// second entry under the current hash. The legacy key is computed only after a
+/// current-key miss.
+pub fn with_cached_bytecode_deferred<R>(
     hash: u64,
-    legacy_hash: u64,
+    legacy_hash: impl FnOnce() -> u64,
     callback: impl FnOnce(&[u8]) -> R,
 ) -> Option<R> {
     let mut state = cache_state().lock().ok()?;
@@ -191,12 +192,13 @@ fn load_pack_from_path(state: &mut CacheState, pack: &Path) -> bool {
 fn lookup_with_legacy_fallback(
     state: &mut CacheState,
     hash: u64,
-    legacy_hash: u64,
+    legacy_hash: impl FnOnce() -> u64,
 ) -> Option<Vec<u8>> {
     if let Some((offset, len)) = state.index.get(&hash).copied() {
         return Some(state.values[offset..offset + len].to_vec());
     }
 
+    let legacy_hash = legacy_hash();
     let (offset, len) = state.index.get(&legacy_hash).copied()?;
     let bytecode = state.values[offset..offset + len].to_vec();
 
@@ -211,7 +213,7 @@ fn lookup_with_legacy_fallback(
 fn with_cached_bytecode_from_state<R>(
     state: &mut CacheState,
     hash: u64,
-    legacy_hash: u64,
+    legacy_hash: impl FnOnce() -> u64,
     callback: impl FnOnce(&[u8]) -> R,
 ) -> Option<R> {
     if let Some((offset, len)) = state.index.get(&hash).copied() {
@@ -529,7 +531,7 @@ mod tests {
         state.values.extend_from_slice(b"compiled");
         state.index.insert(legacy_hash, (0, b"compiled".len()));
 
-        let loaded = lookup_with_legacy_fallback(&mut state, current_hash, legacy_hash)
+        let loaded = lookup_with_legacy_fallback(&mut state, current_hash, || legacy_hash)
             .expect("legacy entry should be found");
         assert_eq!(loaded, b"compiled");
         assert_eq!(
@@ -546,11 +548,13 @@ mod tests {
         state.index.insert(SENTINEL_HASH, (0, state.values.len()));
         let pack_ptr = state.values.as_ptr();
 
-        let borrowed =
-            with_cached_bytecode_from_state(&mut state, SENTINEL_HASH, SENTINEL_HASH, |bytes| {
-                bytes.as_ptr() == pack_ptr
-            })
-            .expect("current cache hit should call callback");
+        let borrowed = with_cached_bytecode_from_state(
+            &mut state,
+            SENTINEL_HASH,
+            || SENTINEL_HASH,
+            |bytes| bytes.as_ptr() == pack_ptr,
+        )
+        .expect("current cache hit should call callback");
 
         assert!(
             borrowed,
