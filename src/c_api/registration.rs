@@ -1,5 +1,5 @@
 use super::permanent_shims::c_nameplate;
-use super::temporary_shims::{c_major_faction_display, c_party_info_instance_abandon};
+use super::temporary_shims::c_party_info_instance_abandon;
 use super::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
     c_artifact_ui, c_azerite_empowered_item, c_azerite_essence, c_azerite_item, c_barber_shop,
@@ -29,7 +29,6 @@ pub(crate) fn register_character_progression_tables(state: &mut LuaState) -> Lua
     c_barber_shop::register_c_barber_shop_surface(state)?;
     c_cursor::register_c_cursor_surface(state)?;
     c_major_factions::register_c_major_factions_surface(state)?;
-    c_major_faction_display::register_c_major_faction_display_shims(state)?;
     c_allied_races::register_c_allied_races_surface(state)
 }
 

@@ -87,6 +87,7 @@ pub(crate) mod lfg_lock_list;
 pub(crate) mod loot_journal_defaults;
 pub(crate) mod macro_defaults;
 pub(crate) mod main_menu_microbutton_click;
+pub(crate) mod major_faction_display_defaults;
 pub(crate) mod map_canvas_data_provider_pin;
 pub(crate) mod map_canvas_scroll_container;
 pub(crate) mod map_exploration_pin;
