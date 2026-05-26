@@ -340,6 +340,7 @@ fn apply_feature_tool_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::profession_specs_defaults::apply_bootstrap(lua)?;
     temporary::proxy_object_factories::apply_bootstrap(lua)?;
     temporary::quest_objective_defaults::apply_bootstrap(lua)?;
+    temporary::scenario_defaults::apply_bootstrap(lua)?;
     temporary::seconds_formatter_defaults::apply_bootstrap(lua)?;
     temporary::scripted_animation_effect_defaults::apply_bootstrap(lua)?;
     temporary::shared_xml_utility_defaults::apply_bootstrap(lua)

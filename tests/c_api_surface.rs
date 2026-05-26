@@ -258,3 +258,18 @@ fn trade_info_defaults_are_not_c_api_temporary_shims() {
         "C_TradeInfo warning/no-op defaults should not be wired through c_api registration"
     );
 }
+
+#[test]
+fn scenario_defaults_are_not_c_api_temporary_shims() {
+    let temporary_shims = include_str!("../src/c_api/temporary_shims/mod.rs");
+    let c_api = include_str!("../src/c_api/mod.rs");
+
+    assert!(
+        !temporary_shims.contains("c_scenario"),
+        "unmodeled C_Scenario not-in-scenario defaults belong in lua_api::workarounds::temporary"
+    );
+    assert!(
+        !c_api.contains("c_scenario"),
+        "C_Scenario not-in-scenario defaults should not be wired through c_api registration"
+    );
+}
