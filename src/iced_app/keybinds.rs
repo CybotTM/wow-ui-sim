@@ -10,31 +10,20 @@ pub(super) fn iced_key_to_wow(
     use iced::keyboard::Key;
     let key_name = match key {
         Key::Named(named) => iced_named_key_to_wow(named),
-        Key::Character(c) => Some(iced_character_key_to_wow(c)),
+        Key::Character(c) => return iced_character_key_to_wow(c, modifiers),
         _ => None,
     }?;
     Some(apply_wow_modifiers(key_name, modifiers))
 }
 
-fn iced_character_key_to_wow(key: &str) -> String {
-    if let Some(control_key) = ascii_control_key_to_letter(key) {
-        return control_key.to_string();
+fn iced_character_key_to_wow(key: &str, modifiers: iced::keyboard::Modifiers) -> Option<String> {
+    if let Some(control_key) = crate::key_names::ascii_control_key_to_letter(key) {
+        return Some(apply_wow_modifiers(
+            control_key.to_string(),
+            modifiers | iced::keyboard::Modifiers::CTRL,
+        ));
     }
-    key.to_uppercase()
-}
-
-fn ascii_control_key_to_letter(key: &str) -> Option<char> {
-    let mut chars = key.chars();
-    let key = chars.next()?;
-    if chars.next().is_some() || !key.is_ascii_control() {
-        return None;
-    }
-
-    let code = key as u32;
-    (1..=26)
-        .contains(&code)
-        .then(|| char::from_u32((b'A' as u32) + code - 1))
-        .flatten()
+    Some(apply_wow_modifiers(key.to_uppercase(), modifiers))
 }
 
 fn apply_wow_modifiers(key_name: String, modifiers: iced::keyboard::Modifiers) -> String {
@@ -142,6 +131,17 @@ mod tests {
             iced_key_to_wow(
                 &Key::Character("\u{11}".into()),
                 iced::keyboard::Modifiers::CTRL
+            ),
+            Some("CTRL-Q".to_string())
+        );
+    }
+
+    #[test]
+    fn maps_control_character_without_modifier_to_control_key_name() {
+        assert_eq!(
+            iced_key_to_wow(
+                &Key::Character("\u{11}".into()),
+                iced::keyboard::Modifiers::empty()
             ),
             Some("CTRL-Q".to_string())
         );

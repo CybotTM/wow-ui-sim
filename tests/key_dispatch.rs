@@ -154,6 +154,19 @@ fn default_ctrl_q_binding_requests_simulator_exit() {
 }
 
 #[test]
+fn ctrl_q_control_character_without_modifier_requests_simulator_exit() {
+    let env = env();
+
+    env.send_key_press("\u{11}", None).unwrap();
+
+    let requested: bool = env.eval("return A_Admin.IsSimulatorExitRequested()").unwrap();
+    assert!(
+        requested,
+        "Ctrl+Q may arrive from iced as ASCII DC1 without a modifier flag"
+    );
+}
+
+#[test]
 fn quit_game_global_requests_simulator_exit() {
     let env = env();
 

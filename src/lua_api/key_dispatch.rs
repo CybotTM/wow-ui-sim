@@ -68,6 +68,13 @@ fn printable_text_for_editbox_key<'a>(key: &'a str, text: Option<&'a str>) -> Op
     None
 }
 
+fn normalized_key_name(key: &str) -> String {
+    if let Some(control_key) = crate::key_names::ascii_control_key_to_letter(key) {
+        return format!("CTRL-{control_key}");
+    }
+    key.to_string()
+}
+
 // ── WowLuaEnv impl ───────────────────────────────────────────────────────────
 
 impl WowLuaEnv {
@@ -76,6 +83,8 @@ impl WowLuaEnv {
     /// `text` is the raw Unicode character(s) for typing into a focused
     /// EditBox. Pass `None` for non-printable keys.
     pub fn send_key_press(&self, key: &str, text: Option<&str>) -> Result<()> {
+        let normalized = normalized_key_name(key);
+        let key = normalized.as_str();
         if key == "ESCAPE" {
             self.dispatch_escape()
         } else {
