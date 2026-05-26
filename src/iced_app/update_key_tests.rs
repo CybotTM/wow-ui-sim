@@ -99,7 +99,7 @@ fn ctrl_q_key_press_requests_window_close() {
             .expect("ctrl-q should create task actions")
             .next()
             .await
-            .expect("ctrl-q should emit a window-close action")
+            .expect("ctrl-q should emit a runtime-exit action")
     });
 
     assert!(
@@ -107,8 +107,8 @@ fn ctrl_q_key_press_requests_window_close() {
         "update should consume the simulator exit request after creating the close task"
     );
     assert!(
-        matches!(close_action, Action::Window(WindowAction::GetLatest(_))),
-        "CTRL-Q should start a latest-window lookup before closing it; got {close_action:?}"
+        matches!(close_action, Action::Exit),
+        "CTRL-Q should request runtime exit; got {close_action:?}"
     );
 
     app.env
@@ -119,14 +119,14 @@ fn ctrl_q_key_press_requests_window_close() {
     let close_task = app.take_simulator_exit_task();
     let action = pollster::block_on(async {
         iced_runtime::task::into_stream(close_task)
-            .expect("exit request should create a window operation")
+            .expect("exit request should create a runtime operation")
             .next()
             .await
-            .expect("close task should emit a window lookup")
+            .expect("close task should emit runtime exit")
     });
 
     assert!(
-        matches!(action, Action::Window(WindowAction::GetLatest(_))),
-        "exit request should start a latest-window lookup before closing it"
+        matches!(action, Action::Exit),
+        "exit request should emit runtime exit"
     );
 }

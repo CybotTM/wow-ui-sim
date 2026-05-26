@@ -268,6 +268,40 @@ fn test_game_menu_exit_button_requests_simulator_quit() {
 }
 
 #[test]
+fn test_game_menu_all_enabled_buttons_have_callable_callbacks() {
+    test_timeout! {
+        let env = setup_env();
+
+        env.exec("GameMenuFrame:Show()").unwrap();
+
+        let result: String = env
+            .eval(
+                r#"
+                local failures = {}
+                for btn in GameMenuFrame.buttonPool:EnumerateActive() do
+                    if btn:IsEnabled() then
+                        local text = btn:GetText() or "<unnamed>"
+                        local onclick = btn:GetScript("OnClick")
+                        if type(onclick) ~= "function" then
+                            table.insert(failures, text .. ":missing")
+                        else
+                            local ok, err = pcall(onclick, btn, "LeftButton", false)
+                            if not ok then
+                                table.insert(failures, text .. ":" .. tostring(err))
+                            end
+                        end
+                    end
+                end
+                return table.concat(failures, "\n")
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(result, "");
+    }
+}
+
+#[test]
 fn test_game_menu_macro_button_callback_is_callable() {
     test_timeout! {
         let env = setup_env();

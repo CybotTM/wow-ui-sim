@@ -2,7 +2,7 @@
 
 #[cfg(not(target_os = "linux"))]
 use crate::inspector_server_stub::ScreenshotData;
-use iced::{Task, window};
+use iced::Task;
 #[cfg(target_os = "linux")]
 use iced_layout_inspector::server::ScreenshotData;
 use rilua::Val;
@@ -23,8 +23,8 @@ pub(super) fn request_redraw_task<T>() -> Task<T> {
     ))
 }
 
-fn request_window_close_task() -> Task<Message> {
-    window::latest().and_then(window::close)
+fn request_runtime_exit_task() -> Task<Message> {
+    iced_runtime::exit()
 }
 
 impl App {
@@ -87,7 +87,7 @@ impl App {
             return Task::none();
         }
         state.simulator_exit_requested = false;
-        request_window_close_task()
+        request_runtime_exit_task()
     }
 
     fn handle_key_press_message(
