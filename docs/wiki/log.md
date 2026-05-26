@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-26] update | EditMode cache with no saved vars
+
+Updated `investigations/editmode-layout.md` with the `--no-saved-vars` status
+tracking regression. EditMode profile cache files are not Lua SavedVariables, so
+startup now loads them through a separate WTF cache path when Lua SavedVariables
+are disabled.
+
 ## [2026-05-14] add | Hybrid scrollbar thumb texture
 
 Created `investigations/hybrid-scrollbar-thumb-texture.md` after replacing the

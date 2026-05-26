@@ -119,6 +119,14 @@ those systems after loading their saved `systemInfo`. Unit-frame
 which keeps ScriptErrors clean without dropping the saved setting from the
 profile data.
 
+Follow-up: `--no-saved-vars` must not skip the EditMode cache. EditMode profile
+data lives in `edit-mode-cache-account.txt` and
+`edit-mode-cache-character.txt`, not Lua SavedVariables files. Skipping that
+cache made the simulator fall back to no active profile, so profile-hidden
+systems such as the status tracking / XP bar could become visible even though
+the real client hides them. Startup now uses a separate EditMode-cache-only WTF
+loader when Lua SavedVariables are disabled.
+
 Regression coverage lives in `tests/edit_mode_api.rs`.
 
 ## Files Modified

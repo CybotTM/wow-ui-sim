@@ -2,6 +2,7 @@ mod addon_loading;
 mod cache_texture;
 #[cfg(feature = "gui")]
 mod gui_commands;
+mod saved_var_config;
 mod startup_trace;
 use cache_texture::run_cache_texture;
 use clap::{Parser, Subcommand};
@@ -19,7 +20,7 @@ use wow_ui_sim::screen::ScreenKind;
 #[derive(Parser)]
 #[command(name = "wow-sim", about = "WoW UI Simulator", version)]
 struct Args {
-    /// Skip loading WTF SavedVariables (faster startup)
+    /// Skip loading WTF Lua SavedVariables (EditMode cache still loads)
     #[arg(long)]
     no_saved_vars: bool,
 
@@ -273,10 +274,22 @@ fn init_and_load(
     // rather walk them once in a final full_gc than mark them on every
     // threshold hit.
     startup_trace::time_load_step("stop GC", || env.gc_stop());
-    let mut saved_vars =
-        startup_trace::time_load_step("configure saved variables", || configure_saved_vars(args));
+    let mut saved_vars = startup_trace::time_load_step("configure saved variables", || {
+        saved_var_config::configure_saved_vars(args.no_saved_vars)
+    });
+    let edit_mode_cache_vars = if saved_vars.is_none() {
+        startup_trace::time_load_step(
+            "configure edit mode cache",
+            saved_var_config::configure_edit_mode_cache_vars,
+        )
+    } else {
+        None
+    };
     startup_trace::time_load_step("load edit mode cache", || {
-        addon_loading::load_edit_mode_cache(&env, saved_vars.as_ref())
+        addon_loading::load_edit_mode_cache(
+            &env,
+            saved_vars.as_ref().or(edit_mode_cache_vars.as_ref()),
+        )
     });
     startup_trace::time_load_step("load Blizzard addons", || {
         addon_loading::load_blizzard_addons(&env, &mut saved_vars, screen)
@@ -328,28 +341,6 @@ fn resolve_exec_lua(arg: &Option<String>) -> Option<String> {
             s.clone()
         }
     })
-}
-
-fn configure_saved_vars(args: &Args) -> Option<SavedVariablesManager> {
-    let skip = args.no_saved_vars
-        || std::env::var("WOW_SIM_NO_SAVED_VARS")
-            .map(|v| v == "1")
-            .unwrap_or(false);
-    if skip {
-        logging::println_elapsed("SavedVariables loading disabled");
-        return None;
-    }
-    let mut saved_vars = SavedVariablesManager::new();
-    if let Some(wtf) = wow_ui_sim::paths::default_wtf_config() {
-        logging::println_elapsed(&format!(
-            "WTF import source (read-only): {} @ {}/{}",
-            wtf.account, wtf.realm, wtf.character
-        ));
-        saved_vars.set_wtf_config(wtf);
-    } else {
-        logging::println_elapsed("WTF config: no WoW WTF directory found");
-    }
-    Some(saved_vars)
 }
 
 fn init_sound(env: &WowLuaEnv) {
