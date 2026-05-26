@@ -166,6 +166,7 @@ const ACCOUNT_SETTING_STUBS: &str = r#"
                     { setting = Enum.EditModeAccountSetting.GridSpacing, value = 42 },
                     { setting = Enum.EditModeAccountSetting.SettingsExpanded, value = 0 },
                     { setting = Enum.EditModeAccountSetting.ShowExternalDefensives, value = 0 },
+                    { setting = Enum.EditModeAccountSetting.ShowStatusTrackingBar2, value = 0 },
                     { setting = Enum.EditModeAccountSetting.EnableSnap, value = 0 },
                     { setting = Enum.EditModeAccountSetting.EnableAdvancedOptions, value = 0 },
                     { setting = Enum.EditModeAccountSetting.ShowTimerBars, value = 0 },
@@ -219,6 +220,8 @@ const ACCOUNT_SETTING_STUBS: &str = r#"
             encounterEventsShown = true,
             damageMeterShown = true,
             externalDefensivesShown = true,
+            statusTrackingBar2Shown = true,
+            statusTrackingBar2Refreshed = false,
             totemActionBarShown = true,
             expanded = true,
         }
@@ -227,6 +230,12 @@ const ACCOUNT_SETTING_STUBS: &str = r#"
         end
         function EditModeManagerFrame.AccountSettings:SetExternalDefensivesShown(value)
             self.externalDefensivesShown = value
+        end
+        function EditModeManagerFrame.AccountSettings:SetStatusTrackingBar2Shown(value)
+            self.statusTrackingBar2Shown = value
+        end
+        function EditModeManagerFrame.AccountSettings:RefreshStatusTrackingBar2()
+            self.statusTrackingBar2Refreshed = true
         end
         function EditModeManagerFrame.AccountSettings:SetTimerBarsShown(value)
             self.timerBarsShown = value
@@ -251,6 +260,32 @@ const ACCOUNT_SETTING_STUBS: &str = r#"
         end
         function EditModeManagerFrame.AccountSettings:SetTotemActionBarShown(value)
             self.totemActionBarShown = value
+        end
+
+        StatusTrackingBarInfo = {
+            BarsEnum = {
+                None = -1,
+            },
+        }
+        SecondaryStatusTrackingBarContainer = {
+            hidden = false,
+            shownBar = 1,
+        }
+        function SecondaryStatusTrackingBarContainer:SetShownBar(barIndex)
+            self.shownBar = barIndex
+        end
+        function SecondaryStatusTrackingBarContainer:Hide()
+            self.hidden = true
+        end
+        StatusTrackingBarManager = {
+            barContainers = {
+                { name = "main" },
+                SecondaryStatusTrackingBarContainer,
+            },
+            updated = false,
+        }
+        function StatusTrackingBarManager:UpdateBarsShown()
+            self.updated = true
         end
         "#;
 
@@ -277,6 +312,8 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
         advanced_options_enabled,
         settings_expanded,
         external_defensives_shown,
+        status_tracking_bar2_shown,
+        status_tracking_bar2_refreshed,
         timer_bars_shown,
         vehicle_seat_indicator_shown,
         archaeology_bar_shown,
@@ -303,6 +340,8 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
         bool,
         bool,
         bool,
+        bool,
+        bool,
     ) = env
         .eval(
             r#"
@@ -315,6 +354,8 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
                 EditModeManagerFrame.advancedOptionsEnabled,
                 EditModeManagerFrame.AccountSettings.expanded,
                 EditModeManagerFrame.AccountSettings.externalDefensivesShown,
+                EditModeManagerFrame.AccountSettings.statusTrackingBar2Shown,
+                EditModeManagerFrame.AccountSettings.statusTrackingBar2Refreshed,
                 EditModeManagerFrame.AccountSettings.timerBarsShown,
                 EditModeManagerFrame.AccountSettings.vehicleSeatIndicatorShown,
                 EditModeManagerFrame.AccountSettings.archaeologyBarShown,
@@ -339,6 +380,47 @@ fn setup_layout_info_initializes_account_settings_from_saved_cache() {
     assert!(!advanced_options_enabled);
     assert!(!settings_expanded);
     assert!(!external_defensives_shown);
+    assert!(
+        !status_tracking_bar2_shown,
+        "saved status tracking bar 2 visibility should be applied during account initialization"
+    );
+    assert!(
+        status_tracking_bar2_refreshed,
+        "status tracking bar 2 must refresh after non-user account settings update the checkbox"
+    );
+
+    let (
+        status_tracking_container_count,
+        status_tracking_secondary_hidden,
+        status_tracking_secondary_bar,
+        status_tracking_manager_updated,
+    ): (i32, bool, i32, bool) = env
+        .eval(
+            r#"
+            return #StatusTrackingBarManager.barContainers,
+                SecondaryStatusTrackingBarContainer.hidden,
+                SecondaryStatusTrackingBarContainer.shownBar,
+                StatusTrackingBarManager.updated
+            "#,
+        )
+        .expect("read status tracking manager profile state");
+
+    assert_eq!(
+        status_tracking_container_count, 1,
+        "disabled status tracking bar 2 should be removed from manager capacity"
+    );
+    assert!(
+        status_tracking_secondary_hidden,
+        "disabled status tracking bar 2 should hide the secondary container"
+    );
+    assert_eq!(
+        status_tracking_secondary_bar, -1,
+        "disabled status tracking bar 2 should clear the secondary shown bar"
+    );
+    assert!(
+        status_tracking_manager_updated,
+        "status tracking manager should recompute visible bars after profile visibility changes"
+    );
     assert!(
         !timer_bars_shown,
         "saved timer bars visibility should be applied during account initialization"

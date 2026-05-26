@@ -340,6 +340,53 @@
         for _, settingInfo in ipairs(accountSettingSetters) do
             applyFrameSetting(settingInfo.setting, accountSettings, settingInfo.setter, true)
         end
+
+        local accountSettingRefreshers = {
+            "RefreshStatusTrackingBar2",
+        }
+        for _, refresher in ipairs(accountSettingRefreshers) do
+            if type(accountSettings[refresher]) == "function" then
+                pcall(accountSettings[refresher], accountSettings)
+            end
+        end
+
+        local function syncStatusTrackingBar2()
+            local shown = getAccountSettingBool(accountEnum.ShowStatusTrackingBar2)
+            local manager = StatusTrackingBarManager
+            local secondary = SecondaryStatusTrackingBarContainer
+            if shown == nil or type(manager) ~= "table" or type(manager.barContainers) ~= "table"
+                or type(secondary) ~= "table" then
+                return
+            end
+
+            local secondaryIndex = nil
+            for index, barContainer in ipairs(manager.barContainers) do
+                if barContainer == secondary then
+                    secondaryIndex = index
+                    break
+                end
+            end
+
+            if shown then
+                if not secondaryIndex then
+                    table.insert(manager.barContainers, secondary)
+                end
+            elseif secondaryIndex then
+                table.remove(manager.barContainers, secondaryIndex)
+                if type(secondary.SetShownBar) == "function" and StatusTrackingBarInfo
+                    and StatusTrackingBarInfo.BarsEnum then
+                    pcall(secondary.SetShownBar, secondary, StatusTrackingBarInfo.BarsEnum.None)
+                end
+                if type(secondary.Hide) == "function" then
+                    pcall(secondary.Hide, secondary)
+                end
+            end
+
+            if type(manager.UpdateBarsShown) == "function" then
+                pcall(manager.UpdateBarsShown, manager)
+            end
+        end
+        syncStatusTrackingBar2()
     end
     if emm.InitializeAccountSettings then
         emm:InitializeAccountSettings()
