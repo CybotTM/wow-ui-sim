@@ -693,12 +693,7 @@ fn run_dump_tree(env: &WowLuaEnv, command: DumpTreeCommand<'_>) {
     }
     run_extra_update_ticks(env, 3);
     apply_delay(command.delay);
-    {
-        let mut font_system = wow_ui_sim::render::font::WowFontSystem::new();
-        let mut state = env.state().borrow_mut();
-        wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_system);
-        state.ensure_layout_rects();
-    }
+    update_dump_layout_rects(env);
     let state = env.state().borrow();
     let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
     wow_ui_sim::dump::print_frame_tree(
@@ -711,6 +706,19 @@ fn run_dump_tree(env: &WowLuaEnv, command: DumpTreeCommand<'_>) {
         command.width as f32,
         command.height as f32,
     );
+}
+
+#[cfg(feature = "gui")]
+fn update_dump_layout_rects(env: &WowLuaEnv) {
+    let mut font_system = wow_ui_sim::render::font::WowFontSystem::new();
+    let mut state = env.state().borrow_mut();
+    wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_system);
+    state.ensure_layout_rects();
+}
+
+#[cfg(not(feature = "gui"))]
+fn update_dump_layout_rects(env: &WowLuaEnv) {
+    env.state().borrow_mut().ensure_layout_rects();
 }
 
 #[cfg(test)]

@@ -280,7 +280,7 @@ fn casc_resolution_contains_fdid(fdid: u32) -> bool {
 }
 
 #[cfg(not(feature = "casc"))]
-fn try_casc_font_bytes(_filename: &str) -> Option<Vec<u8>> {
+fn try_casc_font_bytes(_font_file: &WowFontFile) -> Option<Vec<u8>> {
     None
 }
 
