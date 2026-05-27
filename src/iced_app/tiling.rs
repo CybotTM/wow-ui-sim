@@ -3,9 +3,6 @@
 use crate::render::{BlendMode, QuadBatch};
 use iced::{Point, Rectangle, Size};
 
-/// If UVs describe a sub-region (not full [0,1]×[0,1]), return a `@crop:` path
-/// that isolates the sub-region in its own GPU atlas slot, plus remapped [0,1] UVs.
-/// This prevents bilinear filtering from bleeding into adjacent texture content.
 pub(super) fn crop_path_for_subregion(tex_path: &str, uvs: &Rectangle) -> (String, Rectangle) {
     let is_full = (uvs.x).abs() < 0.001
         && (uvs.y).abs() < 0.001
@@ -30,17 +27,47 @@ enum TileDir {
     Grid,
 }
 
-/// Result of analyzing raw 8-arg SetTexCoord for UV-repeat tiling.
 struct UvRepeatInfo {
-    /// Base UV region for one tile (U range of the texture strip).
     u_min: f32,
     u_max: f32,
-    /// V range for one tile (coordStart to coordEnd or 0.0 to 1.0).
-    v_start: f32,
-    /// Tile direction on screen.
+    v_min: f32,
+    v_max: f32,
+    repeat_x: f32,
+    repeat_y: f32,
     dir: TileDir,
-    /// Whether UV mapping is rotated (U→vertical, V→horizontal on screen).
     rotated: bool,
+}
+
+struct UvRepeatMetrics {
+    u_min: f32,
+    u_max: f32,
+    v_min: f32,
+    v_max: f32,
+    repeat_x: f32,
+    repeat_y: f32,
+}
+
+impl UvRepeatMetrics {
+    fn into_info(self, dir: TileDir, rotated: bool) -> UvRepeatInfo {
+        UvRepeatInfo {
+            u_min: self.u_min,
+            u_max: self.u_max,
+            v_min: self.v_min,
+            v_max: self.v_max,
+            repeat_x: self.repeat_x,
+            repeat_y: self.repeat_y,
+            dir,
+            rotated,
+        }
+    }
+}
+
+struct UvRepeatEdges {
+    any_x_repeats: bool,
+    left_y_repeats: bool,
+    right_y_repeats: bool,
+    bottom_y_repeats: bool,
+    top_y_repeats: bool,
 }
 
 /// Compute the natural pixel size of one tile. For atlas-backed textures this
@@ -73,66 +100,94 @@ fn tile_dimensions(f: &crate::widget::Frame, uv_w: f32, uv_h: f32) -> (f32, f32)
 /// TopEdge/BottomEdge: Y coords on left corners have repeats, UV is rotated.
 /// LeftEdge/RightEdge: Y coords on bottom corners have repeats, UV is standard.
 fn analyze_uv_repeat(raw: &[f32; 8]) -> UvRepeatInfo {
+    let metrics = uv_repeat_metrics(raw);
+    let edges = uv_repeat_edges(raw, &metrics);
+
+    if is_rotated_horizontal_repeat(&edges) {
+        return metrics.into_info(TileDir::Horizontal, true);
+    }
+
+    if is_standard_vertical_repeat(&edges) {
+        return metrics.into_info(TileDir::Vertical, false);
+    }
+
+    if is_standard_horizontal_repeat(&edges) {
+        return metrics.into_info(TileDir::Horizontal, false);
+    }
+
+    metrics.into_info(TileDir::Grid, false)
+}
+
+fn uv_repeat_metrics(raw: &[f32; 8]) -> UvRepeatMetrics {
     let [ul_x, ul_y, ll_x, ll_y, ur_x, ur_y, lr_x, lr_y] = *raw;
 
-    let left_y_repeats = ul_y > 1.0 || ll_y > 1.0;
-    let right_y_repeats = ur_y > 1.0 || lr_y > 1.0;
-    let bottom_y_repeats = ll_y > 1.0 || lr_y > 1.0;
-    let top_y_repeats = ul_y > 1.0 || ur_y > 1.0;
-    let any_x_repeats = ul_x > 1.0 || ll_x > 1.0 || ur_x > 1.0 || lr_x > 1.0;
+    let max_x = ul_x.max(ll_x).max(ur_x).max(lr_x);
+    let max_y = ul_y.max(ll_y).max(ur_y).max(lr_y);
 
-    let u_min = ul_x.min(ll_x).min(ur_x).min(lr_x);
-    let u_max = ul_x.max(ll_x).max(ur_x).max(lr_x).min(1.0);
-    let v_start = ul_y.min(ll_y).min(ur_y).min(lr_y);
-
-    // Y repeats on left XOR right → TopEdge/BottomEdge (rotated: V→horizontal)
-    if (left_y_repeats ^ right_y_repeats) && !any_x_repeats {
-        return UvRepeatInfo {
-            u_min,
-            u_max,
-            v_start,
-            dir: TileDir::Horizontal,
-            rotated: true,
-        };
-    }
-
-    // Y repeats on bottom XOR top → LeftEdge/RightEdge (standard: V→vertical)
-    if (bottom_y_repeats ^ top_y_repeats) && !any_x_repeats {
-        return UvRepeatInfo {
-            u_min,
-            u_max,
-            v_start,
-            dir: TileDir::Vertical,
-            rotated: false,
-        };
-    }
-
-    // Both axes repeat or unknown → grid
-    UvRepeatInfo {
-        u_min,
-        u_max,
-        v_start,
-        dir: TileDir::Grid,
-        rotated: false,
+    UvRepeatMetrics {
+        u_min: ul_x.min(ll_x).min(ur_x).min(lr_x),
+        u_max: max_x.min(1.0),
+        v_min: ul_y.min(ll_y).min(ur_y).min(lr_y),
+        v_max: max_y.min(1.0),
+        repeat_x: max_x.max(1.0),
+        repeat_y: max_y.max(1.0),
     }
 }
 
-/// Determine tile pixel size for UV-repeat tiling.
-fn uv_repeat_tile_size(f: &crate::widget::Frame) -> (f32, f32) {
+fn uv_repeat_edges(raw: &[f32; 8], metrics: &UvRepeatMetrics) -> UvRepeatEdges {
+    let [_ul_x, ul_y, _ll_x, ll_y, _ur_x, ur_y, _lr_x, lr_y] = *raw;
+
+    UvRepeatEdges {
+        any_x_repeats: metrics.repeat_x > 1.0,
+        left_y_repeats: ul_y > 1.0 || ll_y > 1.0,
+        right_y_repeats: ur_y > 1.0 || lr_y > 1.0,
+        bottom_y_repeats: ll_y > 1.0 || lr_y > 1.0,
+        top_y_repeats: ul_y > 1.0 || ur_y > 1.0,
+    }
+}
+
+fn is_rotated_horizontal_repeat(edges: &UvRepeatEdges) -> bool {
+    (edges.left_y_repeats ^ edges.right_y_repeats) && !edges.any_x_repeats
+}
+
+fn is_standard_vertical_repeat(edges: &UvRepeatEdges) -> bool {
+    (edges.bottom_y_repeats ^ edges.top_y_repeats) && !edges.any_x_repeats
+}
+
+fn is_standard_horizontal_repeat(edges: &UvRepeatEdges) -> bool {
+    edges.any_x_repeats && !edges.top_y_repeats && !edges.bottom_y_repeats
+}
+
+fn uv_repeat_tile_size(
+    f: &crate::widget::Frame,
+    bounds: Rectangle,
+    info: &UvRepeatInfo,
+) -> (f32, f32) {
     if let Some(atlas_name) = f.atlas.as_deref()
         && let Some(info) = crate::atlas::get_atlas_info(atlas_name)
     {
         return (info.width() as f32, info.height() as f32);
     }
 
+    let repeat_w = bounds.width / info.repeat_x.max(1.0);
+    let repeat_h = bounds.height / info.repeat_y.max(1.0);
     if f.width > 1.0 && f.height > 1.0 {
-        (f.width, f.height)
+        (
+            repeat_w.min(f.width).max(1.0),
+            repeat_h.min(f.height).max(1.0),
+        )
     } else if f.height > 1.0 {
-        (f.height, f.height)
+        (
+            repeat_w.min(f.height).max(1.0),
+            repeat_h.min(f.height).max(1.0),
+        )
     } else if f.width > 1.0 {
-        (f.width, f.width)
+        (
+            repeat_w.min(f.width).max(1.0),
+            repeat_h.min(f.width).max(1.0),
+        )
     } else {
-        (32.0, 32.0) // fallback for backdrop edges
+        (repeat_w.max(1.0), repeat_h.max(1.0))
     }
 }
 
@@ -171,6 +226,11 @@ pub(super) fn emit_tiled_texture(
     emit_standard_tiled_texture(batch, bounds, &config, f);
 }
 
+pub(super) fn has_uv_repeat(f: &crate::widget::Frame) -> bool {
+    f.tex_coords_quad
+        .is_some_and(|raw| raw.iter().any(|&value| value > 1.0))
+}
+
 fn emit_uv_repeat_if_needed(
     batch: &mut QuadBatch,
     bounds: Rectangle,
@@ -181,7 +241,7 @@ fn emit_uv_repeat_if_needed(
     let Some(raw) = &f.tex_coords_quad else {
         return false;
     };
-    if !raw.iter().any(|&v| v > 1.0) {
+    if !has_uv_repeat(f) {
         return false;
     }
     emit_uv_repeat_tiled(batch, bounds, raw, tex_path, f, alpha);
@@ -294,7 +354,7 @@ fn emit_uv_repeat_tiled(
 ) {
     let tint = frame_tint(f, alpha);
     let info = analyze_uv_repeat(raw);
-    let tile_size = uv_repeat_tile_size(f);
+    let tile_size = uv_repeat_tile_size(f, bounds, &info);
 
     if info.rotated {
         emit_rotated_horiz_tiles(
@@ -365,8 +425,8 @@ fn emit_standard_uv_repeat_tiles(
 
 fn uv_repeat_region(tex_path: &str, info: &UvRepeatInfo) -> (String, Rectangle) {
     let base_uvs = Rectangle::new(
-        Point::new(info.u_min, info.v_start),
-        Size::new(info.u_max - info.u_min, 1.0 - info.v_start),
+        Point::new(info.u_min, info.v_min),
+        Size::new(info.u_max - info.u_min, info.v_max - info.v_min),
     );
     crop_path_for_subregion(tex_path, &base_uvs)
 }
@@ -376,10 +436,10 @@ fn uv_repeat_region(tex_path: &str, info: &UvRepeatInfo) -> (String, Rectangle) 
 fn emit_rotated_horiz_tiles(batch: &mut QuadBatch, strip: RotatedHorizTileStrip<'_>) {
     // Crop the UV sub-region into its own atlas slot to prevent bilinear bleed.
     let sub_uvs = Rectangle::new(
-        Point::new(strip.info.u_min, strip.info.v_start),
+        Point::new(strip.info.u_min, strip.info.v_min),
         Size::new(
             strip.info.u_max - strip.info.u_min,
-            1.0 - strip.info.v_start,
+            strip.info.v_max - strip.info.v_min,
         ),
     );
     let (cropped_path, _) = crop_path_for_subregion(strip.tex_path, &sub_uvs);
@@ -555,7 +615,10 @@ mod tests {
         let info = UvRepeatInfo {
             u_min: 0.25,
             u_max: 0.75,
-            v_start: 0.4,
+            v_min: 0.4,
+            v_max: 1.0,
+            repeat_x: 1.0,
+            repeat_y: 1.0,
             dir: TileDir::Grid,
             rotated: false,
         };

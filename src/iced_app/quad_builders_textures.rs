@@ -9,7 +9,7 @@ use super::super::slice_render::{
     emit_stretch_slice_atlas, emit_three_slice_h_atlas, emit_tile_slice_atlas,
 };
 use super::super::statusbar::StatusBarFill;
-use super::super::tiling::emit_tiled_texture;
+use super::super::tiling::{emit_tiled_texture, has_uv_repeat};
 
 /// Build quads for a Texture widget, optionally clipped by a StatusBar fill.
 pub(crate) fn build_texture_quads(
@@ -354,7 +354,7 @@ fn emit_basic_textured_fill(
     alpha: f32,
 ) {
     let uvs = uv_rect(texture.uvs);
-    if f.horiz_tile || f.vert_tile {
+    if f.horiz_tile || f.vert_tile || has_uv_repeat(f) {
         emit_tiled_texture(batch, bounds, &uvs, texture.path, f, alpha);
         return;
     }
@@ -509,8 +509,8 @@ pub(crate) fn build_minimap_quads(
 #[cfg(test)]
 mod tests {
     use super::{
-        BlendMode, TexturedSlice, emit_texture_fill, remap_atlas_crop, stretch_slice_render,
-        tile_slice_render,
+        BlendMode, TexturedSlice, build_texture_quads, emit_texture_fill, remap_atlas_crop,
+        stretch_slice_render, tile_slice_render,
     };
     use crate::atlas::get_render_atlas_info;
     use crate::iced_app::slice_render::{tile_slice_center_height, tile_slice_center_width};
@@ -616,6 +616,37 @@ mod tests {
         assert_eq!(render.atlas_height_px, 107.0);
         assert_eq!(tile_slice_center_width(render), Some((208.0, 1.0)));
         assert_eq!(tile_slice_center_height(render), Some((330.0, 1.0)));
+    }
+
+    #[test]
+    fn uv_repeat_texcoords_emit_tiled_quads_without_tile_flags() {
+        let mut batch = QuadBatch::new();
+        let mut frame = Frame::new(WidgetType::Texture, None, None);
+        frame.texture = Some(r"Interface\AddOns\Details\images\background".to_string());
+        frame.tex_coords = Some((0.0, 2.109, 0.0, 0.872));
+        frame.tex_coords_quad = Some([0.0, 0.0, 0.0, 0.872, 2.109, 0.0, 2.109, 0.872]);
+
+        build_texture_quads(
+            &mut batch,
+            Rectangle::new(Point::ORIGIN, Size::new(270.0, 112.0)),
+            &frame,
+            None,
+            1.0,
+        );
+
+        assert_eq!(batch.vertices.len(), 12);
+        assert_eq!(batch.texture_requests.len(), 3);
+        assert!(
+            batch
+                .vertices
+                .iter()
+                .all(|vertex| vertex.local_uv[0] <= 1.0 && vertex.local_uv[1] <= 1.0),
+            "UV-repeat quads must not sample beyond their atlas slot: {:?}",
+            batch.vertices
+        );
+        assert_eq!(batch.vertices[1].position[0], 128.02277);
+        assert_eq!(batch.vertices[5].position[0], 256.04553);
+        assert_eq!(batch.vertices[9].position[0], 270.0);
     }
 
     #[test]
