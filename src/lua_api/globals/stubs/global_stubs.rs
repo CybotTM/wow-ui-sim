@@ -114,7 +114,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "InCinematic",
     // IsOnGroundFloorInJailersTower is SimState-backed in torghast.rs, not a stub.
     "IsInCinematicScene",
-    // IsShiftKeyDown is SimState-backed in modifier_keys.rs, not a stub.
+    // IsShiftKeyDown is SimState-backed in globals::real::modifier_keys, not a stub.
     "IsThreatWarningEnabled",
     "NeedToDisplayDisclaimer",
     "PetUsesPetFrame",

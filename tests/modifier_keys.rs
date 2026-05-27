@@ -13,6 +13,18 @@ fn all(env: &WowLuaEnv) -> (bool, bool, bool, bool, bool) {
 }
 
 #[test]
+fn modifier_keys_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/modifier_keys.rs").exists(),
+        "modifier-key globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/modifier_keys.rs").exists(),
+        "modifier-key globals should stay classified as real modeled Lua globals",
+    );
+}
+
+#[test]
 fn defaults_all_false() {
     let env = WowLuaEnv::new().unwrap();
     let (shift, ctrl, alt, meta, any) = all(&env);

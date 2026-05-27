@@ -5,7 +5,8 @@
 //! returns true iff any of shift/control/alt is held (meta is *not* included
 //! — Blizzard keeps that on its own probe).
 //!
-//! All keys default to `false` in the sim (no real input). Admin API
+//! All keys default to `false` in the sim because no physical keyboard state
+//! is captured in headless tests. Admin API
 //! `A_Admin.SetShiftKeyDown(b)` / `SetControlKeyDown` / `SetAltKeyDown` /
 //! `SetMetaKeyDown` toggles them for tests that want to exercise
 //! modifier-aware UI paths (e.g. `IsModifiedClick("CHATLINK")`).
