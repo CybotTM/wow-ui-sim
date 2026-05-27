@@ -1,10 +1,8 @@
-//! C_SpecializationInfo and UIWidgetContainerMixin implementations.
+//! `C_SpecializationInfo` implementation.
 
 use crate::lua_api::game_data::{CLASS_LABELS, CastingState};
 use crate::lua_api::globals::spellbook_data;
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, frame_id_from_stack,
-};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use crate::specializations;
@@ -92,27 +90,6 @@ fn register_c_specialization_info_methods(
     for (name, rust_fn) in C_SPECIALIZATION_INFO_METHODS {
         table_set_rust_fn_static(state, table_ref, name, *rust_fn)?;
     }
-    Ok(())
-}
-
-pub fn register_widget_container_mixin(state: &mut LuaState) -> LuaResult<()> {
-    let mixin = create_table(state);
-    let Val::Table(mixin_ref) = mixin else {
-        unreachable!("create_table must return a table");
-    };
-    table_set_rust_fn_static(state, mixin_ref, "OnLoad", ui_widget_container_on_load)?;
-    table_set_rust_fn_static(
-        state,
-        mixin_ref,
-        "GetNumWidgetsShowing",
-        ui_widget_container_get_num_widgets_showing,
-    )?;
-    let key_ref = state.gc.intern_string(b"UIWidgetContainerMixin");
-    let global_ref = state.global;
-    if let Some(global) = state.gc.tables.get_mut(global_ref) {
-        let _ = global.raw_set(Val::Str(key_ref), mixin, &state.gc.string_arena);
-    }
-    state.gc.barrier_back(global_ref);
     Ok(())
 }
 
@@ -457,32 +434,4 @@ pub fn player_is_timerunning(state: &mut LuaState) -> LuaResult<u32> {
     let active = borrow_state(state)?.timerunning_season_id.is_some();
     state.push(Val::Bool(active));
     Ok(1)
-}
-
-fn ui_widget_container_get_num_widgets_showing(state: &mut LuaState) -> LuaResult<u32> {
-    let frame_id = frame_id_from_stack(state, 1)?;
-    let count = {
-        let sim = borrow_state(state)?;
-        sim.widgets
-            .get(frame_id)
-            .map(|frame| {
-                frame
-                    .children
-                    .iter()
-                    .filter(|&&child_id| {
-                        sim.widgets
-                            .get(child_id)
-                            .map(|child| child.visible)
-                            .unwrap_or(false)
-                    })
-                    .count()
-            })
-            .unwrap_or(0) as f64
-    };
-    state.push(Val::Num(count));
-    Ok(1)
-}
-
-fn ui_widget_container_on_load(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
 }
