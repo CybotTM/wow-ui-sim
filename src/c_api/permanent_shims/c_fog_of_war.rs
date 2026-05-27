@@ -1,6 +1,12 @@
-//! `C_FogOfWar` probe surface for world-map fog pins.
+//! Permanent `C_FogOfWar` lookup surface.
+//!
+//! The simulator does not model player-specific fog discovery state. This
+//! namespace exposes stable DB2-derived fog visualization rows so world-map
+//! fog pins can render deterministic assets without pretending the richer
+//! discovery system is state-backed.
 
-use crate::c_api::{ensure_namespace, permanent_shims::c_map_api};
+use super::c_map_api;
+use crate::c_api::ensure_namespace;
 use crate::lua_api::methods::{create_string, create_table, table_set};
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
