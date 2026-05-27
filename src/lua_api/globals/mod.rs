@@ -63,7 +63,6 @@ pub mod keybindings;
 pub mod lfg_info;
 pub mod lfg_list;
 pub mod loader_script_bindings;
-pub mod loot_method;
 pub mod lua_duration_object;
 pub mod mail_probes;
 pub mod mail_verbs;

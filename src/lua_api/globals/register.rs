@@ -205,7 +205,7 @@ fn register_progression_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> 
     super::xp_honor_rest::register_all(lua)?;
     super::talent_spec_probes::register_all(lua)?;
     super::battlefield_lfg_probes::register_all(lua)?;
-    super::loot_method::register_all(lua)?;
+    super::real::loot_method::register_all(lua)?;
     Ok(())
 }
 

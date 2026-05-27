@@ -1,4 +1,4 @@
-//! Loot-method probe + refresh globals.
+//! State-backed loot-method probe + refresh globals.
 //!
 //! Migrates 3 entries off `GLOBAL_ZERO_STUBS`:
 //!

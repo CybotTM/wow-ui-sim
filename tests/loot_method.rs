@@ -1,4 +1,4 @@
-//! Integration tests for `src/lua_api/globals/loot_method.rs`.
+//! Integration tests for `src/lua_api/globals/real/loot_method.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -7,6 +7,18 @@ fn env() -> WowLuaEnv {
 }
 
 // ── GetLootMethod ─────────────────────────────────────────────────────────────
+
+#[test]
+fn loot_method_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/loot_method.rs").exists(),
+        "loot-method globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/loot_method.rs").exists(),
+        "loot-method globals should stay classified as real modeled Lua globals",
+    );
+}
 
 #[test]
 fn get_loot_method_defaults_to_personal_loot() {

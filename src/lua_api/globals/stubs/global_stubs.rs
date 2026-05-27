@@ -52,7 +52,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "RequestRandomBattlegroundInstanceInfo",
     "RequestRatedInfo",
     "RemoveChatWindowChannel",
-    // RequestPartyLootMethod is SimState-backed in loot_method.rs, not a stub.
+    // RequestPartyLootMethod is SimState-backed in globals::real::loot_method, not a stub.
     "RequestRaidInfo",
     // QuestMapFrame::UpdatePOIs still calls this legacy helper after
     // QuestMapUpdateAllQuests; the sim's quest blob rendering is state-backed
@@ -110,7 +110,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "HasLFGRestrictions",
     "IsCharacterNewlyBoosted",
     // GetLootMethod / GetMasterLooterThreshold are SimState-backed in
-    // loot_method.rs, not stubs.
+    // globals::real::loot_method, not stubs.
     "InCinematic",
     // IsOnGroundFloorInJailersTower is SimState-backed in torghast.rs, not a stub.
     "IsInCinematicScene",
