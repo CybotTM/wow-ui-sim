@@ -64,6 +64,28 @@ fn character_create_screen_updates_glue_login_state() {
 }
 
 #[test]
+fn glue_login_permanent_defaults_remain_registered() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let defaults: (bool, bool, Option<String>, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local clearResult = C_Login.ClearLastError()
+            return C_Login.IsLauncherLogin(),
+                   C_Login.IsReconnectLoginPossible(),
+                   C_Login.GetLastError(),
+                   clearResult == nil,
+                   C_Login.AttemptedLauncherLogin(),
+                   C_Login.IsNewPlayer(),
+                   C_Glue.IsFirstLoadThisSession()
+        "#,
+        )
+        .expect("glue login defaults should be queryable");
+
+    assert_eq!(defaults, (false, false, None, true, false, false, false));
+}
+
+#[test]
 fn screen_size_globals_follow_canvas_dimensions() {
     let env = WowLuaEnv::new().unwrap();
     env.set_screen_size(813.0, 822.0);

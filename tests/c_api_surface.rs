@@ -103,6 +103,41 @@ fn c_addons_scripts_disallowed_for_beta_defaults_false() {
 }
 
 #[test]
+fn glue_login_static_defaults_are_permanent_shims() {
+    let c_login = include_str!("../src/c_api/c_login.rs");
+    let c_glue = include_str!("../src/c_api/c_glue.rs");
+    let permanent_login = include_str!("../src/c_api/permanent_shims/c_login.rs");
+    let permanent_glue = include_str!("../src/c_api/permanent_shims/c_glue.rs");
+
+    for name in [
+        "IsLauncherLogin",
+        "IsReconnectLoginPossible",
+        "GetLastError",
+        "ClearLastError",
+        "AttemptedLauncherLogin",
+        "IsNewPlayer",
+    ] {
+        assert!(
+            !c_login.contains(name),
+            "{name} is a static glue default and should not live in the state-backed C_Login module"
+        );
+        assert!(
+            permanent_login.contains(name),
+            "{name} should be isolated under permanent C_Login shims"
+        );
+    }
+
+    assert!(
+        !c_glue.contains("IsFirstLoadThisSession"),
+        "first-load session default should not live in the state-backed C_Glue module"
+    );
+    assert!(
+        permanent_glue.contains("IsFirstLoadThisSession"),
+        "first-load session default should be isolated under permanent C_Glue shims"
+    );
+}
+
+#[test]
 fn configuration_warnings_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");

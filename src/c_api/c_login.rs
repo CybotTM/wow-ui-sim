@@ -1,6 +1,6 @@
 //! `C_Login` glue-screen connection state helpers.
 
-use crate::c_api::ensure_namespace;
+use crate::c_api::{ensure_namespace, permanent_shims};
 use crate::lua_api::methods::borrow_state;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
@@ -10,12 +10,7 @@ pub fn register_c_login(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Login")?;
     table_set_rust_fn_static(state, ns, "IsLoginReady", c_login_is_login_ready)?;
     table_set_rust_fn_static(state, ns, "GetState", c_login_get_state)?;
-    table_set_rust_fn_static(state, ns, "IsLauncherLogin", c_login_false)?;
-    table_set_rust_fn_static(state, ns, "IsReconnectLoginPossible", c_login_false)?;
-    table_set_rust_fn_static(state, ns, "GetLastError", c_login_get_last_error)?;
-    table_set_rust_fn_static(state, ns, "ClearLastError", c_login_noop)?;
-    table_set_rust_fn_static(state, ns, "AttemptedLauncherLogin", c_login_false)?;
-    table_set_rust_fn_static(state, ns, "IsNewPlayer", c_login_false)?;
+    permanent_shims::c_login::register_c_login_defaults(state, ns)?;
     Ok(())
 }
 
@@ -34,18 +29,4 @@ fn c_login_get_state(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(has_realm_list));
     state.push(Val::Bool(false));
     Ok(5)
-}
-
-fn c_login_false(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
-fn c_login_get_last_error(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
-    Ok(1)
-}
-
-fn c_login_noop(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
 }
