@@ -40,6 +40,11 @@ Follow the workflow in `SCHEMA.md`: check existing pages first (update > create)
 
 - Treat the WoW `C_*` API surface as a first-class simulator subsystem, not as "Lua globals" or miscellaneous glue.
 - `c_api` belongs at the same architectural level as `lua_api`, because it is a compatibility contract exposed to Lua, not a subcategory of Lua itself.
+- Put code in `src/c_api/` when it implements a `C_*` namespace, `Enum.*` data used by those namespaces, or a backing model whose public contract is exposed through `C_*` calls. Legacy non-`C_*` globals may call into that model, but they should not make the model look like Lua glue.
+- Put code in `src/lua_api/globals/real/` only when it implements real modeled non-`C_*` Lua globals or mixins backed by simulator state/behavior (for example `GetNetStats`, modifier-key probes, or legacy globals that wrap an existing model).
+- Put unmodeled compatibility defaults, no-op behavior, and "returns plausible placeholder values so Blizzard Lua continues" code under `src/lua_api/workarounds/temporary/` or `src/lua_api/workarounds/permanent/`, not under `lua_api/globals/real/`.
+- Use `temporary` workarounds for gaps that should be replaced by a modeled system; name the missing backing system in comments or tests. Use `permanent` workarounds only for intentionally unsupported domains with a documented rationale.
+- Do not add new modules to the base `src/lua_api/globals/` directory as a classification escape hatch. Before moving anything out of `c_api`, decide whether it is real modeled Lua API, temporary workaround, or permanent unsupported-scope workaround.
 - When a `C_*` function is missing or wrong, default to implementing the backing system or state model. Do not reach for shims just to satisfy a failing test.
 - Use **temporary shims** only as explicit stopgaps with a clear retirement path. Keep them isolated and named as temporary.
 - Use **permanent shims** only for intentionally unsupported domains with a documented rationale. The existing 3D/model gap is the baseline example, not the default pattern.
