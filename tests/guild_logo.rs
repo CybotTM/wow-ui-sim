@@ -2,6 +2,26 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+#[test]
+fn guild_logo_global_is_classified_as_real_lua_api() {
+    let globals_mod = include_str!("../src/lua_api/globals/mod.rs");
+    let real_mod = include_str!("../src/lua_api/globals/real/mod.rs");
+    let registrar = include_str!("../src/lua_api/globals/register.rs");
+
+    assert!(
+        !globals_mod.contains("pub mod guild_logo;"),
+        "state-backed guild logo surface should not live in the globals base module"
+    );
+    assert!(
+        real_mod.contains("pub mod guild_logo;"),
+        "state-backed guild logo surface should be classified under globals::real"
+    );
+    assert!(
+        registrar.contains("real::guild_logo::register_all"),
+        "global registrar should wire GetGuildLogoInfo through globals::real"
+    );
+}
+
 fn all_ten(env: &WowLuaEnv) -> (f64, f64, f64, f64, f64, f64, f64, f64, f64, String) {
     env.eval(
         r#"
