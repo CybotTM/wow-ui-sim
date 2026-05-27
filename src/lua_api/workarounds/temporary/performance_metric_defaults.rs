@@ -45,6 +45,18 @@ if GetFrameCPUUsage == nil then
     return 0, 0
   end
 end
+
+if GetDownloadedPercentage == nil then
+  function GetDownloadedPercentage()
+    return 1
+  end
+end
+
+if GetMovieDownloadProgress == nil then
+  function GetMovieDownloadProgress(_movieID)
+    return false, 0, 0
+  end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -71,6 +83,9 @@ mod tests {
                 if GetAddOnCPUUsage("missing") ~= 0 then return "addon_cpu" end
                 local frame, children = GetFrameCPUUsage(UIParent, true)
                 if frame ~= 0 or children ~= 0 then return "frame_cpu" end
+                if GetDownloadedPercentage() ~= 1 then return "downloaded" end
+                local inProgress, downloaded, total = GetMovieDownloadProgress(1)
+                if inProgress or downloaded ~= 0 or total ~= 0 then return "movie_download" end
                 return "ok"
                 "#,
             )

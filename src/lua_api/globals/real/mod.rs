@@ -8,6 +8,7 @@ pub mod container_legacy;
 pub mod guild_logo;
 pub mod item_legacy;
 pub mod locale_info;
+pub mod net_stats;
 pub mod specialization_helpers;
 pub mod specialization_legacy;
 pub mod spell_flyout_legacy;

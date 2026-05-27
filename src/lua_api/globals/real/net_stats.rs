@@ -1,4 +1,4 @@
-//! Network status globals used by the performance bar tooltip.
+//! Network status global used by the performance bar tooltip.
 //!
 //! WoW's real `GetNetStats()` returns `(bandwidthIn, bandwidthOut, latencyHome,
 //! latencyWorld)` in (kB/s, kB/s, ms, ms). The sim has no network socket so
@@ -29,42 +29,9 @@ pub fn get_net_stats(state: &mut LuaState) -> LuaResult<u32> {
     Ok(4)
 }
 
-/// `GetDownloadedPercentage() -> number`.
-///
-/// The simulator has no streaming-install pipeline, so the practical default
-/// is "fully downloaded".
-pub fn get_downloaded_percentage(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(1.0));
-    Ok(1)
-}
-
-/// `GetMovieDownloadProgress(movieID) -> (inProgress, downloaded, total)`.
-///
-/// The simulator has no cinematic download pipeline. Return a stable "not
-/// downloading" tuple so Blizzard_PerformanceBar tooltip code can execute
-/// without nil-global errors.
-pub fn get_movie_download_progress(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    Ok(3)
-}
-
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
     table_set_rust_fn_static(state, state.global, "GetNetStats", get_net_stats)?;
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetDownloadedPercentage",
-        get_downloaded_percentage,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetMovieDownloadProgress",
-        get_movie_download_progress,
-    )?;
     Ok(())
 }

@@ -3,6 +3,33 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 #[test]
+fn network_globals_are_classified_by_backing_model() {
+    let globals_mod = include_str!("../src/lua_api/globals/mod.rs");
+    let real_mod = include_str!("../src/lua_api/globals/real/mod.rs");
+    let registrar = include_str!("../src/lua_api/globals/register.rs");
+    let performance_defaults =
+        include_str!("../src/lua_api/workarounds/temporary/performance_metric_defaults.rs");
+
+    assert!(
+        !globals_mod.contains("pub mod net_stats;"),
+        "state-backed network stats should not live in the globals base module"
+    );
+    assert!(
+        real_mod.contains("pub mod net_stats;"),
+        "state-backed GetNetStats should be classified under globals::real"
+    );
+    assert!(
+        registrar.contains("real::net_stats::register_all"),
+        "global registrar should wire GetNetStats through globals::real"
+    );
+    assert!(
+        performance_defaults.contains("GetDownloadedPercentage")
+            && performance_defaults.contains("GetMovieDownloadProgress"),
+        "unmodeled download pipeline defaults belong in temporary workarounds"
+    );
+}
+
+#[test]
 fn get_net_stats_defaults_to_zero() {
     let env = WowLuaEnv::new().expect("env");
     let (bw_in, bw_out, lat_home, lat_world): (f64, f64, f64, f64) = env

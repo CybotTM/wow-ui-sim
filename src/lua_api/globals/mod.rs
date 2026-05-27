@@ -73,7 +73,6 @@ pub mod modifier_keys;
 pub mod mouse_probes;
 pub mod movement_probes;
 pub mod movement_verbs;
-pub mod net_stats;
 pub mod offer_verbs;
 pub mod panel_toggle_verbs;
 pub mod permanent_shims;

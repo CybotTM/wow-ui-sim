@@ -71,7 +71,7 @@ pub(super) fn set_item_level(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `A_Admin.SetNetStats(bandwidthIn, bandwidthOut, latencyHome, latencyWorld)`.
 /// All four arguments are optional; missing values default to 0. Drives the
-/// values returned by `GetNetStats` (registered in `net_stats.rs`).
+/// values returned by `GetNetStats` (registered in `real::net_stats`).
 pub(super) fn set_net_stats(state: &mut LuaState) -> LuaResult<u32> {
     let bandwidth_in = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0);
     let bandwidth_out = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0);
