@@ -154,6 +154,7 @@ macro_rules! build_empty_sim_state {
             xml_load_addon_depth: $runtime.xml_load_addon_depth,
             loading_forbidden: $runtime.loading_forbidden,
             app_frame_metrics: AppFrameMetrics::default(),
+            addon_performance_messages_shown: HashSet::new(),
             talents: super::talent_state::TalentState::new(),
             lua_errors: $collections.lua_errors,
             lua_error_records: $collections.lua_error_records,
@@ -330,23 +331,23 @@ use super::game_data::{
 };
 pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
-    AchievementStatistic, AddonEnableSnapshot, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics,
-    AreaPoiInfo, AuctionBrowseResult, AuctionItemClassFilter, AuctionReplicateItem, AuctionRowInfo,
-    AuctionSellQuote, AuctionSellQuoteKind, AuctionSortSpec, AzeriteEssenceInfo,
-    AzeriteEssenceMilestoneInfo, AzeriteEssenceState, BagItem, BarberShopAlternateFormRace,
-    BarberShopCategory, BarberShopCharacterData, BarberShopOption, BarberShopState, BidAuction,
-    BnetFriend, BnetGameAccount, BrowseQuery, ChatBubble, CommodityPurchaseQuote,
-    CommoditySearchResultInfo, CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo,
-    CursorItemOrigin, DeathRecapEntry, EquipmentManagerState, EquipmentSet, EquippedItem,
-    GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey, ItemSearchResultInfo,
-    ItemSearchResults, KillingBlowInfo, LfdDungeonInfo, LfgActivityGroupInfo, LfgActivityInfo,
-    LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, LfgRoleSelection, LootRollInfo,
-    LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MovementState,
-    MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
-    MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer,
-    PlayerState, PlayerXpState, SEEDED_LOCAL_CHARACTER_GUID, SEEDED_LOCAL_CHARACTER_NAME,
-    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState,
-    TokenAuctionInfo, WorldState, WowTokenState,
+    AchievementStatistic, AddonEnableSnapshot, AddonInfo, AddonPerformanceMessageKey,
+    AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo, AuctionBrowseResult, AuctionItemClassFilter,
+    AuctionReplicateItem, AuctionRowInfo, AuctionSellQuote, AuctionSellQuoteKind, AuctionSortSpec,
+    AzeriteEssenceInfo, AzeriteEssenceMilestoneInfo, AzeriteEssenceState, BagItem,
+    BarberShopAlternateFormRace, BarberShopCategory, BarberShopCharacterData, BarberShopOption,
+    BarberShopState, BidAuction, BnetFriend, BnetGameAccount, BrowseQuery, ChatBubble,
+    CommodityPurchaseQuote, CommoditySearchResultInfo, CommoditySearchResults, CraftingState,
+    CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquipmentManagerState,
+    EquipmentSet, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey,
+    ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfdDungeonInfo, LfgActivityGroupInfo,
+    LfgActivityInfo, LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, LfgRoleSelection,
+    LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer,
+    MovementState, MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary,
+    MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction,
+    PendingTimer, PlayerState, PlayerXpState, SEEDED_LOCAL_CHARACTER_GUID,
+    SEEDED_LOCAL_CHARACTER_NAME, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
+    SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -432,7 +433,6 @@ impl EmptyStateCollections {
         c.bag_items = default_backpack_items();
         c
     }
-
     fn empty() -> Self {
         Self::default()
     }

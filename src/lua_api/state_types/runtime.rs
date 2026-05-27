@@ -90,6 +90,14 @@ pub struct AppFrameMetrics {
     pub session_frame_count: u64,
 }
 
+/// Message identity recorded by `C_AddOnProfiler.AddPerformanceMessageShown`.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct AddonPerformanceMessageKey {
+    pub message_type: i32,
+    pub metric: i32,
+    pub add_on_name: Option<String>,
+}
+
 /// Information about a loaded addon.
 #[derive(Debug, Clone)]
 pub struct AddonInfo {

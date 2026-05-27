@@ -1,6 +1,9 @@
 //! C_AddOnProfiler: per-addon and application performance metrics.
 
-use crate::lua_api::methods::{borrow_state, create_table, table_set_num, val_to_string};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_table, table_get, table_set_num, val_to_string,
+};
+use crate::lua_api::state::AddonPerformanceMessageKey;
 use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -139,6 +142,16 @@ struct PerformanceMessage {
     message_type: i32,
 }
 
+impl PerformanceMessage {
+    fn key(&self) -> AddonPerformanceMessageKey {
+        AddonPerformanceMessageKey {
+            message_type: self.message_type,
+            metric: self.metric,
+            add_on_name: self.add_on_name.clone(),
+        }
+    }
+}
+
 fn find_highest_specific_addon_metric(
     sim: &crate::lua_api::SimState,
     metric: i32,
@@ -263,10 +276,18 @@ fn find_performance_message(sim: &crate::lua_api::SimState) -> Option<Performanc
     if let Some(message) =
         find_specific_performance_message(sim, metric, warning_threshold, error_threshold)
     {
-        return Some(message);
+        return (!sim
+            .addon_performance_messages_shown
+            .contains(&message.key()))
+        .then_some(message);
     }
 
-    overall_threshold.and_then(|threshold| find_overall_performance_message(sim, metric, threshold))
+    overall_threshold
+        .and_then(|threshold| find_overall_performance_message(sim, metric, threshold))
+        .filter(|message| {
+            !sim.addon_performance_messages_shown
+                .contains(&message.key())
+        })
 }
 
 fn push_performance_message(state: &mut LuaState, message: PerformanceMessage) -> LuaResult<u32> {
@@ -373,8 +394,36 @@ fn c_addon_profiler_get_top_k_addons_for_metric(state: &mut LuaState) -> LuaResu
     Ok(1)
 }
 
-fn c_addon_profiler_add_performance_message_shown(_state: &mut LuaState) -> LuaResult<u32> {
+fn c_addon_profiler_add_performance_message_shown(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(key) = performance_message_key_from_lua(state, stack_val(state, 1)) else {
+        return Ok(0);
+    };
+    borrow_state_mut(state)?
+        .addon_performance_messages_shown
+        .insert(key);
     Ok(0)
+}
+
+fn performance_message_key_from_lua(
+    state: &mut LuaState,
+    message: Val,
+) -> Option<AddonPerformanceMessageKey> {
+    let message_type = i32_from_table_field(state, message, "type")?;
+    let metric = i32_from_table_field(state, message, "metric")?;
+    let add_on_name_val = table_get(state, message, "addOnName");
+    let add_on_name = val_to_string(state, add_on_name_val);
+    Some(AddonPerformanceMessageKey {
+        message_type,
+        metric,
+        add_on_name,
+    })
+}
+
+fn i32_from_table_field(state: &mut LuaState, table: Val, key: &str) -> Option<i32> {
+    match table_get(state, table, key) {
+        Val::Num(value) if value.is_finite() && value.fract() == 0.0 => Some(value as i32),
+        _ => None,
+    }
 }
 
 fn c_addon_profiler_is_enabled(state: &mut LuaState) -> LuaResult<u32> {

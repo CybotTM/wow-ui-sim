@@ -138,6 +138,7 @@ pub struct SimState {
     pub executing_addon_index: Option<u16>,
     pub loading_forbidden: bool,
     pub app_frame_metrics: AppFrameMetrics,
+    pub addon_performance_messages_shown: HashSet<AddonPerformanceMessageKey>,
     pub talents: crate::lua_api::talent_state::TalentState,
     pub lua_errors: Vec<String>,
     pub lua_error_records: Vec<LuaErrorRecord>,

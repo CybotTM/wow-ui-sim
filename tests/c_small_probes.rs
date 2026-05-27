@@ -83,33 +83,8 @@ fn check_for_performance_message_returns_nil_by_default() {
 #[test]
 fn check_for_performance_message_returns_table_when_threshold_exceeded() {
     let env = env();
-    // Seed an addon with high recent-average time and a low cvar threshold.
-    {
-        let mut state = env.state().borrow_mut();
-        // Set a warning threshold of 0.01 (1%) so any non-trivial addon time triggers it.
-        state.cvars.set("addonPerformanceMsgWarning", "0.01");
-        // Add a fake addon with high metric values so it dominates the average.
-        state.app_frame_metrics.session_frame_count = 1;
-        state.app_frame_metrics.session_total_ms = 1000.0;
-        state.app_frame_metrics.recent_frame_ms.push_back(1000.0);
-        state.addons.push(AddonInfo {
-            folder_name: "HeavyAddon".into(),
-            title: "Heavy".into(),
-            enabled: true,
-            loaded: true,
-            runtime: AddonRuntimeMetrics {
-                session_frame_count: 1,
-                session_total_ms: 900.0,
-                recent_frames: {
-                    let mut d = std::collections::VecDeque::new();
-                    d.push_back(900.0);
-                    d
-                },
-                ..Default::default()
-            },
-            ..Default::default()
-        });
-    }
+    seed_heavy_addon_performance_message(&env);
+
     let is_table: bool = env
         .eval(
             r#"
@@ -119,4 +94,48 @@ fn check_for_performance_message_returns_table_when_threshold_exceeded() {
         )
         .unwrap();
     assert!(is_table, "threshold exceeded → returns a message table");
+}
+
+#[test]
+fn add_performance_message_shown_suppresses_matching_message() {
+    let env = env();
+    seed_heavy_addon_performance_message(&env);
+
+    let result: String = env
+        .eval(
+            r#"
+            local msg = C_AddOnProfiler.CheckForPerformanceMessage()
+            if type(msg) ~= "table" then return "missing" end
+            C_AddOnProfiler.AddPerformanceMessageShown(msg)
+            return C_AddOnProfiler.CheckForPerformanceMessage() == nil and "ok" or "repeat"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+fn seed_heavy_addon_performance_message(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    state.cvars.set("addonPerformanceMsgWarning", "0.01");
+    state.app_frame_metrics.session_frame_count = 1;
+    state.app_frame_metrics.session_total_ms = 1000.0;
+    state.app_frame_metrics.recent_frame_ms.push_back(1000.0);
+    state.addons.push(AddonInfo {
+        folder_name: "HeavyAddon".into(),
+        title: "Heavy".into(),
+        enabled: true,
+        loaded: true,
+        runtime: AddonRuntimeMetrics {
+            session_frame_count: 1,
+            session_total_ms: 900.0,
+            recent_frames: {
+                let mut frames = std::collections::VecDeque::new();
+                frames.push_back(900.0);
+                frames
+            },
+            ..Default::default()
+        },
+        ..Default::default()
+    });
 }
