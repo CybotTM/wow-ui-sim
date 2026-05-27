@@ -539,7 +539,7 @@ fn emit_matching_subtree<F>(
     let Some(frame) = ctx.widgets.get(id) else {
         return;
     };
-    if ctx.visible_only && !frame.visible {
+    if ctx.visible_only && !ctx.widgets.is_ancestor_visible(id) {
         return;
     }
     let name = resolve_display_name(ctx.widgets, frame, id);
@@ -650,6 +650,7 @@ fn collect_key_matches_recursive(
         collect_key_matches_recursive(widgets, child_id, re, result);
     }
 }
+
 fn collect_root_frames(widgets: &WidgetRegistry) -> Vec<(u64, Option<String>)> {
     widgets
         .iter_ids()
@@ -667,6 +668,7 @@ fn collect_root_frames(widgets: &WidgetRegistry) -> Vec<(u64, Option<String>)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::LayoutRect;
 
     #[test]
     fn mask_detail_line_lists_resolved_unknown_and_missing_masks() {
@@ -684,5 +686,53 @@ mod tests {
             .expect("mask line should exist when masks are present");
 
         assert_eq!(line, "    [masks] Interface/Masks/QuestMask, missing");
+    }
+
+    #[test]
+    fn filter_key_visible_only_excludes_children_of_hidden_parents() {
+        let mut widgets = WidgetRegistry::default();
+        let mut parent = Frame::new(WidgetType::Frame, Some("HiddenParent".to_string()), None);
+        parent.visible = false;
+        parent.layout_rect = Some(LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: 100.0,
+            height: 100.0,
+        });
+        let parent_id = parent.id;
+
+        let mut child = Frame::new(
+            WidgetType::Frame,
+            Some("LocallyVisibleChild".to_string()),
+            Some(parent_id),
+        );
+        child.visible = true;
+        child.layout_rect = Some(LayoutRect {
+            x: 10.0,
+            y: 10.0,
+            width: 20.0,
+            height: 20.0,
+        });
+        let child_id = child.id;
+
+        widgets.register(parent);
+        widgets.register(child);
+        widgets.add_child(parent_id, child_id);
+
+        let lines = build_tree(
+            &widgets,
+            &[],
+            None,
+            Some("LocallyVisibleChild"),
+            true,
+            false,
+            100.0,
+            100.0,
+        );
+
+        assert!(
+            lines.is_empty(),
+            "visible-only filter-key dump should exclude hidden-ancestor children: {lines:?}"
+        );
     }
 }
