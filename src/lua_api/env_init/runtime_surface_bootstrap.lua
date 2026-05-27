@@ -1103,7 +1103,7 @@ if rawget(C_StoreSecure, "ClearPreGeneratedExternalTransactionID") == nil then
 end
 
 -- GetAvailableLocaleInfo is registered from Rust
--- (src/lua_api/globals/locale_info.rs). Returns the 12-locale retail list
+-- (src/lua_api/globals/real/locale_info.rs). Returns the 12-locale retail list
 -- as { localeId, localeName, englishName, displayName } entries.
 -- GuildControlSetRank / GuildControlGetRankName / GuildControlGetNumRanks /
 -- GuildControlGetRankFlags are registered from Rust
