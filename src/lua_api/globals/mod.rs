@@ -95,6 +95,8 @@ pub mod session_exit;
 pub mod set_cvar_verb;
 pub mod shapeshift;
 pub mod social_probes;
+pub mod specialization_helpers;
+pub mod specialization_legacy;
 pub mod spell_api;
 pub mod spell_macro_verbs;
 pub mod spell_state_probes;
