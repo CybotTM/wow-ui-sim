@@ -60,6 +60,7 @@ pub mod inventory_counts;
 pub mod inventory_probes;
 pub mod inventory_slot;
 pub mod inventory_verbs;
+pub mod item_legacy;
 pub mod keybindings;
 pub mod lfg_info;
 pub mod lfg_list;
