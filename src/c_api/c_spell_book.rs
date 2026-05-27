@@ -187,13 +187,6 @@ fn register_spell_flyout_queries(
 ) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetFlyoutInfo", get_flyout_info)?;
     table_set_rust_fn_static(state, table_ref, "GetFlyoutSlotInfo", get_flyout_slot_info)?;
-    table_set_rust_fn_static(state, state.global, "GetFlyoutInfo", get_flyout_info)?;
-    table_set_rust_fn_static(
-        state,
-        state.global,
-        "GetFlyoutSlotInfo",
-        get_flyout_slot_info,
-    )?;
     Ok(())
 }
 
@@ -517,7 +510,7 @@ fn c_spell_book_has_pet_spells(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn get_flyout_info(state: &mut LuaState) -> LuaResult<u32> {
+pub(crate) fn get_flyout_info(state: &mut LuaState) -> LuaResult<u32> {
     let flyout_id = u32::from_stack(state, 1)?;
     let Some(flyout) = spell_flyout_info(state, flyout_id)? else {
         push_empty_flyout_info(state);
@@ -548,7 +541,7 @@ fn push_empty_flyout_info(state: &mut LuaState) {
     state.push(Val::Bool(false));
 }
 
-fn get_flyout_slot_info(state: &mut LuaState) -> LuaResult<u32> {
+pub(crate) fn get_flyout_slot_info(state: &mut LuaState) -> LuaResult<u32> {
     let flyout_id = u32::from_stack(state, 1)?;
     let slot_index = u32::from_stack(state, 2)? as usize;
     let Some(slot) = spell_flyout_slot(state, flyout_id, slot_index)? else {
