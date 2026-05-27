@@ -623,10 +623,15 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     register_system_tables(state)?;
     crate::c_api::register_utility_bootstrap_tables(state)?;
     c_addons::register_legacy_addon_globals(state)?;
-    crate::lua_api::globals::item_legacy::register_legacy_item_globals(state)?;
-    crate::lua_api::globals::spell_flyout_legacy::register_legacy_spell_flyout_globals(state)?;
-    crate::lua_api::globals::specialization_legacy::register_legacy_specialization_globals(state)?;
-    crate::lua_api::globals::ui_widget_container::register_widget_container_mixin(state)?;
+    crate::lua_api::globals::real::container_legacy::register_legacy_container_globals(state)?;
+    crate::lua_api::globals::real::item_legacy::register_legacy_item_globals(state)?;
+    crate::lua_api::globals::real::spell_flyout_legacy::register_legacy_spell_flyout_globals(
+        state,
+    )?;
+    crate::lua_api::globals::real::specialization_legacy::register_legacy_specialization_globals(
+        state,
+    )?;
+    crate::lua_api::globals::real::ui_widget_container::register_widget_container_mixin(state)?;
 
     Ok(())
 }

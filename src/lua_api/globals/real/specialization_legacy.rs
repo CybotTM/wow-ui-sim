@@ -5,7 +5,7 @@
 //! C API boundary contains only `C_*` namespace surfaces.
 
 use crate::lua_api::game_data::CLASS_LABELS;
-use crate::lua_api::globals::specialization_helpers::push_specialization_identity;
+use crate::lua_api::globals::real::specialization_helpers::push_specialization_identity;
 use crate::lua_api::methods::{borrow_state, create_string};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use crate::specializations;

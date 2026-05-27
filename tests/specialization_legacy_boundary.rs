@@ -13,7 +13,7 @@ fn legacy_specialization_globals_are_not_c_api_surface() {
     );
     assert!(
         utility_registration
-            .contains("specialization_legacy::register_legacy_specialization_globals"),
+            .contains("real::specialization_legacy::register_legacy_specialization_globals"),
         "legacy specialization globals should be registered from the Lua globals layer"
     );
 }

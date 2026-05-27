@@ -12,7 +12,7 @@ fn legacy_spell_flyout_globals_are_not_c_api_registration() {
     );
     assert!(
         utility_registration
-            .contains("spell_flyout_legacy::register_legacy_spell_flyout_globals"),
+            .contains("real::spell_flyout_legacy::register_legacy_spell_flyout_globals"),
         "legacy flyout globals should be registered from the Lua globals layer"
     );
 }

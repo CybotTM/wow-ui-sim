@@ -1,7 +1,7 @@
 //! `C_SpecializationInfo` implementation.
 
 use crate::lua_api::game_data::CastingState;
-use crate::lua_api::globals::specialization_helpers::push_specialization_identity;
+use crate::lua_api::globals::real::specialization_helpers::push_specialization_identity;
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_api::script_helpers::fire_named_event_state;

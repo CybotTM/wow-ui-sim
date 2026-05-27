@@ -39,7 +39,6 @@ fn c_item_upgrade_clear(state: &mut LuaState) -> LuaResult<u32> {
 pub(crate) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Container")?;
     register_container_query_methods(state, table_ref)?;
-    register_legacy_container_globals(state)?;
     Ok(())
 }
 
@@ -89,20 +88,7 @@ fn register_container_methods(
     Ok(())
 }
 
-fn register_legacy_container_globals(state: &mut LuaState) -> LuaResult<()> {
-    let global = state.global;
-    register_container_methods(
-        state,
-        global,
-        &[
-            ("GetContainerNumSlots", c_container_get_num_slots),
-            ("GetContainerItemID", c_container_get_item_id),
-            ("GetContainerItemLink", c_container_get_item_link),
-        ],
-    )
-}
-
-fn c_container_get_num_slots(state: &mut LuaState) -> LuaResult<u32> {
+pub(crate) fn c_container_get_num_slots(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     state.push(Val::Num(container_slot_count(bag) as f64));
     Ok(1)
@@ -223,7 +209,7 @@ fn c_container_get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
     Ok(3)
 }
 
-fn c_container_get_item_id(state: &mut LuaState) -> LuaResult<u32> {
+pub(crate) fn c_container_get_item_id(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let slot = i32::from_stack(state, 2)?;
     let item_id = borrow_state(state)?
@@ -236,7 +222,7 @@ fn c_container_get_item_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn c_container_get_item_link(state: &mut LuaState) -> LuaResult<u32> {
+pub(crate) fn c_container_get_item_link(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let slot = i32::from_stack(state, 2)?;
     let link = borrow_state(state)?

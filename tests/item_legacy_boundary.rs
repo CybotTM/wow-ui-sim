@@ -10,7 +10,7 @@ fn legacy_get_item_id_global_is_not_c_item_registration() {
         "legacy GetItemID global should not be registered from c_api::item_spell::c_item"
     );
     assert!(
-        utility_registration.contains("item_legacy::register_legacy_item_globals"),
+        utility_registration.contains("real::item_legacy::register_legacy_item_globals"),
         "legacy GetItemID global should be registered from the Lua globals layer"
     );
 }

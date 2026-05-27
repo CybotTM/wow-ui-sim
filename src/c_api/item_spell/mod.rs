@@ -9,6 +9,9 @@ use super::c_spell_book;
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
+pub(crate) use c_container::{
+    c_container_get_item_id, c_container_get_item_link, c_container_get_num_slots,
+};
 pub(crate) use c_item::{
     c_item_get_item_id, item_link_for_id, parse_item_guid, parse_item_id_from_val,
     parse_prefixed_id, push_item_info, spell_link_for_id,
