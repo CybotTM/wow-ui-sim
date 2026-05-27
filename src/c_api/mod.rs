@@ -28,7 +28,6 @@ pub mod c_spell;
 pub mod c_spell_book;
 pub mod c_spell_diminish;
 pub mod c_texture;
-pub mod c_ui;
 pub mod c_widget;
 pub mod c_wow_token_public;
 pub mod c_wowtoken_secure;
@@ -65,7 +64,7 @@ fn register_specialization_and_model_tables(state: &mut LuaState) -> LuaResult<(
 fn register_glue_and_display_tables(state: &mut LuaState) -> LuaResult<()> {
     c_glue::register_c_glue(state)?;
     c_login::register_c_login(state)?;
-    c_ui::register_c_ui(state)
+    permanent_shims::c_ui::register_c_ui(state)
 }
 
 fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {

@@ -636,6 +636,21 @@ fn world_activity_defaults_have_no_empty_c_api_registration_hook() {
 }
 
 #[test]
+fn display_safe_area_defaults_are_permanent_shims() {
+    let c_api = include_str!("../src/c_api/mod.rs");
+    let permanent_shims = include_str!("../src/c_api/permanent_shims/mod.rs");
+
+    assert!(
+        !c_api.contains("pub mod c_ui;"),
+        "static C_UI display-safe-area defaults should not live as a root state-backed C API module"
+    );
+    assert!(
+        permanent_shims.contains("pub mod c_ui;"),
+        "static C_UI display-safe-area defaults should stay in permanent_shims"
+    );
+}
+
+#[test]
 fn major_faction_display_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = c_api_temporary_shims_source();
     let registration = include_str!("../src/c_api/registration.rs");

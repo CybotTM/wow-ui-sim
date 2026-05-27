@@ -1,4 +1,8 @@
-//! `C_UI` display-safe-area helpers.
+//! Permanent `C_UI` display-safe-area shim.
+//!
+//! The simulator renders into a rectangular desktop window and does not model
+//! mobile/TV safe-area display hardware such as notches. Keep these static
+//! "no notch" answers isolated from state-backed root C API modules.
 
 use crate::c_api::ensure_namespace;
 use crate::lua_bridge::table_set_rust_fn_static;
