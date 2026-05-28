@@ -56,7 +56,6 @@ pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
     register_spell_methods(state, ns, SPELL_QUERY_METHODS)?;
     register_spell_methods(state, ns, SPELL_BOOLEAN_METHODS)?;
-    register_spell_methods(state, ns, SPELL_TARGET_METHODS)?;
     register_legacy_spell_globals(state)?;
     Ok(())
 }

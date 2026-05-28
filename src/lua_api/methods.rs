@@ -135,16 +135,6 @@ pub fn extract_frame_id(state: &LuaState, val: Val) -> Option<u64> {
     Some(pack_id(lo, hi))
 }
 
-/// Get the table used for per-frame Lua fields.
-///
-/// Frame refs are backed Lua tables, so their normal custom fields live on
-/// the frame table itself. `debug.getfenv(frame)[1]` is a compatibility view
-/// onto this same table, but it must not occupy raw numeric key `1` on the
-/// frame: oUF and other addons use frames as array-like containers.
-pub fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
-    frame_ref(state, frame_id).unwrap_or(Val::Nil)
-}
-
 pub(crate) fn get_frame_env_for_debug(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let fields = get_or_create_frame_fields(state, frame_id);

@@ -4,7 +4,7 @@ use crate::c_api::ensure_namespace;
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_string_static, create_table,
-    create_table_with_capacity, frame_ref, table_set_num, table_set_static,
+    create_table_with_capacity, frame_ref, table_set, table_set_num, table_set_static,
 };
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
@@ -121,6 +121,18 @@ fn register_spell_book_item_status_queries(
         "GetSpellBookItemPowerCost",
         c_spell_book_get_spell_book_item_power_cost,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetSpellBookItemAutoCast",
+        c_spell_book_get_spell_book_item_auto_cast,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetSpellBookItemLossOfControlCooldownInfo",
+        c_spell_book_get_spell_book_item_loss_of_control_cooldown_info,
+    )?;
     Ok(())
 }
 
@@ -178,6 +190,12 @@ fn register_spell_book_owned_state_queries(
         table_ref,
         "HasPetSpells",
         c_spell_book_has_pet_spells,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetOverrideSpell",
+        c_spell_book_get_override_spell,
     )?;
     Ok(())
 }

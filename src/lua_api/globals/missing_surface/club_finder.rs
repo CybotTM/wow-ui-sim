@@ -34,7 +34,6 @@ fn register_club_finder_default_handlers(
     register_same_handler(state, table_ref, TRUE_METHODS, return_true)?;
     register_same_handler(state, table_ref, FALSE_METHODS, return_false)?;
     register_same_handler(state, table_ref, ZERO_METHODS, return_zero)?;
-    table_set_rust_fn_static(state, table_ref, "GetClubFinderDisableReason", noop)?;
     Ok(())
 }
 
@@ -149,6 +148,8 @@ const FALSE_METHODS: &[&str] = &[
     "IsListingEnabledFromFlags",
     "IsPostingBanned",
 ];
+
+const ZERO_METHODS: &[&str] = &["GetClubFinderDisableReason"];
 
 const NOOP_METHODS: &[&str] = &[
     "ApplicantAcceptClubInvite",
@@ -399,5 +400,10 @@ fn return_true(state: &mut LuaState) -> LuaResult<u32> {
 
 fn return_false(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn return_zero(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
     Ok(1)
 }

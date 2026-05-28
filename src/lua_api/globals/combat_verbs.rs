@@ -18,7 +18,6 @@
 //!   whether anything was interrupted
 //! - `SpellCanTargetItem()`   — false until item-targeting cursor exists
 //! - `SpellCanTargetItemID()` — false until item-targeting cursor exists
-//! - `SpellStopCasting()`     — clears `SimState.casting`, returns true if it did
 //! - `SpellStopTargeting()`   — no-op companion to `SpellIsTargeting`
 //! - `UseAction(slot)`        — cast/execute the spell in an action bar slot
 //! - `ActionButtonDown(id)` / `ActionButtonUp(id)` — main bar key dispatch
@@ -476,13 +475,6 @@ fn spell_stop_targeting(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// `SpellStopCasting()` — cancel the active cast when one exists.
-fn spell_stop_casting(state: &mut LuaState) -> LuaResult<u32> {
-    let stopped = borrow_state_mut(state)?.casting.take().is_some();
-    state.push(Val::Bool(stopped));
-    Ok(1)
-}
-
 fn use_action(state: &mut LuaState) -> LuaResult<u32> {
     let Some(slot) = stack_u32(state, 1) else {
         crate::logging::eprintln_elapsed("[spellcast] UseAction ignored reason=missing_slot");
@@ -618,7 +610,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ClickSpecialAbility", click_special_ability)?;
     LuaApiMut::register_function(lua, "SpellTargetUnit", spell_target_unit)?;
     LuaApiMut::register_function(lua, "SpellIsTargeting", spell_is_targeting)?;
-    LuaApiMut::register_function(lua, "SpellStopCasting", spell_stop_casting)?;
     LuaApiMut::register_function(lua, "SpellCanTargetItem", spell_can_target_item)?;
     LuaApiMut::register_function(lua, "SpellCanTargetItemID", spell_can_target_item_id)?;
     LuaApiMut::register_function(lua, "SpellStopCasting", spell_stop_casting)?;
