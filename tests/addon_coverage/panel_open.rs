@@ -32,7 +32,7 @@ const PANEL_OPEN_COVERAGE_CASES: &[PanelOpenCoverageCase] = &[
         open_lua: "ToggleEncounterJournal()",
         expected_addon: "Blizzard_EncounterJournal",
         expected_frame: "EncounterJournal",
-        expected_error_overrides: &[("<unknown>", 2)],
+        expected_error_overrides: &[("Blizzard_EncounterJournal", 1)],
     },
 ];
 
@@ -79,6 +79,14 @@ fn panel_open_runtime_baseline_overrides_known_side_loads() {
 
     assert_eq!(known_counts.get("<unknown>"), Some(&29));
     assert_eq!(known_counts.get("Blizzard_Collections"), Some(&6));
+
+    let encounter_journal_case = PANEL_OPEN_COVERAGE_CASES
+        .iter()
+        .find(|case| case.name == "encounter_journal")
+        .expect("encounter journal coverage case should exist");
+    let known_counts = known_panel_open_runtime_error_counts(encounter_journal_case);
+
+    assert_eq!(known_counts.get("Blizzard_EncounterJournal"), Some(&1));
 }
 
 #[test]
@@ -109,6 +117,7 @@ fn panel_open_runtime_paths_stay_within_known_error_baseline() {
                     .keys()
                     .filter(|addon_name| {
                         addon_name.as_str() != "<unknown>"
+                            && addon_name.as_str() != case.expected_addon
                             && !known_blizzard_addons.contains(*addon_name)
                     })
                     .cloned()

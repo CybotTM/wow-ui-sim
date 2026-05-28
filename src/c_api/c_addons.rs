@@ -1,23 +1,23 @@
 use super::helpers::set_global_val;
 use crate::addon_enable_state::save_local_addon_enable_overrides;
-use crate::loader::LoadError;
+use crate::lua_api::AddonEnableSnapshot;
 use crate::lua_api::methods::{
-    borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, registry_get,
-    registry_set, state_handle, val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_table, registry_get, registry_set,
+    val_to_string,
 };
-use crate::lua_api::{AddonEnableSnapshot, LoaderEnv};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::{LuaResult, Val, vm::state::LuaState};
 use std::path::{Path, PathBuf};
-use std::{collections::HashSet, io};
 
 #[path = "c_addons_missing.rs"]
 mod c_addons_missing;
 #[path = "c_addons_registration.rs"]
 mod c_addons_registration;
+#[path = "c_addons_runtime.rs"]
+mod c_addons_runtime;
 
 const ADDON_VERSION_CHECK_KEY: &str = "__addon_version_check_enabled";
-const GAME_RUNTIME_FOUNDATIONS: &[&str] = &[
+pub(super) const GAME_RUNTIME_FOUNDATIONS: &[&str] = &[
     "Blizzard_SharedXMLBase",
     "Blizzard_Menu",
     "Blizzard_SharedXML",
@@ -26,7 +26,7 @@ const GAME_RUNTIME_FOUNDATIONS: &[&str] = &[
     "Blizzard_UIPanelTemplates",
     "Blizzard_FrameXMLUtil",
 ];
-const GLUE_RUNTIME_FOUNDATIONS: &[&str] = &[
+pub(super) const GLUE_RUNTIME_FOUNDATIONS: &[&str] = &[
     "Blizzard_GlueXMLBase",
     "Blizzard_GlueParent",
     "Blizzard_GlueMenuFrame",
@@ -188,7 +188,7 @@ fn default_runtime_addon_bases() -> Vec<PathBuf> {
     ]
 }
 
-fn find_runtime_addon_toc(state: &LuaState, addon_name: &str) -> Option<PathBuf> {
+pub(super) fn find_runtime_addon_toc(state: &LuaState, addon_name: &str) -> Option<PathBuf> {
     let (bases, screen_kind) = {
         let sim = borrow_state(state).ok()?;
         (
@@ -532,16 +532,13 @@ pub fn c_addons_load_addon(state: &mut LuaState) -> LuaResult<u32> {
     if with_addon(state, stack_val(state, 1), |a| a.loaded).unwrap_or(false) {
         return push_load_result(state, true, None);
     }
-    if is_addon_loading_by_name(state, &addon_name) {
+    if c_addons_runtime::is_addon_loading_by_name(state, &addon_name) {
         return push_load_result(state, true, None);
     }
     if addon_is_disabled(state, &addon_name) {
         return push_load_result(state, false, Some("DISABLED"));
     }
-    let loader_env = LoaderEnv::from_parts_active(borrow_lua(state)?, state_handle(state)?, state);
-    crate::lua_api::workarounds::apply_for_runtime_addon_preload(&loader_env, &addon_name);
-    let mut loading = HashSet::new();
-    match load_runtime_addon_recursive(state, &loader_env, &addon_name, &mut loading) {
+    match c_addons_runtime::load_runtime_addon(state, &addon_name) {
         Ok(()) => push_load_result(state, true, None),
         Err(error) => push_load_result(state, false, Some(&error.to_string())),
     }
@@ -550,7 +547,7 @@ pub fn c_addons_load_addon(state: &mut LuaState) -> LuaResult<u32> {
 /// `true` iff the addon is registered AND its `enabled` flag is false.
 /// Unregistered addons are not considered disabled — `LoadAddOn` will
 /// fall through to `MISSING` (or auto-register at load time).
-fn addon_is_disabled(state: &LuaState, addon_name: &str) -> bool {
+pub(super) fn addon_is_disabled(state: &LuaState, addon_name: &str) -> bool {
     let Ok(sim) = borrow_state(state) else {
         return false;
     };
@@ -559,173 +556,6 @@ fn addon_is_disabled(state: &LuaState, addon_name: &str) -> bool {
         .find(|a| a.folder_name == addon_name)
         .map(|a| !a.enabled)
         .unwrap_or(false)
-}
-
-fn load_runtime_addon_recursive(
-    state: &mut LuaState,
-    loader_env: &LoaderEnv<'_>,
-    addon_name: &str,
-    loading: &mut HashSet<String>,
-) -> Result<(), LoadError> {
-    if is_addon_loaded_by_name(state, addon_name) {
-        return Ok(());
-    }
-    if !loading.insert(addon_name.to_string()) {
-        return Ok(());
-    }
-
-    let result = load_runtime_addon_with_dependencies(state, loader_env, addon_name, loading);
-    loading.remove(addon_name);
-    result
-}
-
-fn load_runtime_addon_with_dependencies(
-    state: &mut LuaState,
-    loader_env: &LoaderEnv<'_>,
-    addon_name: &str,
-    loading: &mut HashSet<String>,
-) -> Result<(), LoadError> {
-    let origin = crate::loader::runtime_load_addon_origin(
-        borrow_state(state)
-            .map(|sim| sim.xml_load_addon_depth)
-            .unwrap_or(0),
-    );
-    crate::loader::trace_load_addon(origin, format!("begin {addon_name}"));
-    let toc_path = find_runtime_addon_toc(state, addon_name)
-        .ok_or_else(|| missing_runtime_addon_error(addon_name))?;
-    crate::loader::trace_load_addon(origin, format!("toc {}", toc_path.display()));
-    let toc = crate::toc::TocFile::from_file(&toc_path).map_err(LoadError::Toc)?;
-
-    for dependency in runtime_foundation_dependencies(state, addon_name) {
-        crate::loader::trace_load_addon(origin, format!("{addon_name} -> foundation {dependency}"));
-        load_runtime_addon_recursive(state, loader_env, dependency, loading)?;
-    }
-
-    for dependency in runtime_addon_dependencies(state, &toc) {
-        crate::loader::trace_load_addon(origin, format!("{addon_name} -> dep {dependency}"));
-        if addon_is_disabled(state, &dependency) {
-            return Err(disabled_dep_error(&dependency));
-        }
-        load_runtime_addon_recursive(state, loader_env, &dependency, loading)?;
-    }
-
-    crate::loader::trace_load_addon(origin, format!("files {addon_name}"));
-    let result = load_runtime_addon_files(state, loader_env, &toc)?;
-    for warning in &result.warnings {
-        crate::loader::trace_load_addon(origin, format!("warning {addon_name}: {warning}"));
-    }
-    crate::loader::trace_load_addon(origin, format!("loaded {addon_name}"));
-    crate::lua_api::workarounds::apply_for_runtime_addon_load(loader_env, addon_name);
-    mark_addon_loaded(loader_env, addon_name);
-    fire_addon_loaded(state, loader_env, addon_name);
-    crate::loader::trace_load_addon(origin, format!("event {addon_name}"));
-    Ok(())
-}
-
-fn load_runtime_addon_files(
-    state: &mut LuaState,
-    loader_env: &LoaderEnv<'_>,
-    toc: &crate::toc::TocFile,
-) -> Result<crate::loader::LoadResult, LoadError> {
-    if !toc.loads_as_blizzard_code() {
-        return crate::loader::load_addon_from_toc(loader_env, toc);
-    }
-
-    let saved_taints = crate::lua_api::taint::clear_active_stack_taint(state);
-    let result = crate::loader::load_addon_from_toc(loader_env, toc);
-    crate::lua_api::taint::restore_active_stack_taint(state, saved_taints);
-    result
-}
-
-fn runtime_addon_dependencies(state: &LuaState, toc: &crate::toc::TocFile) -> Vec<String> {
-    let mut deps = toc.dependencies();
-    let mut seen: HashSet<String> = deps.iter().cloned().collect();
-    for dep in toc.optional_deps() {
-        if find_runtime_addon_toc(state, &dep).is_some() && seen.insert(dep.clone()) {
-            deps.push(dep);
-        }
-    }
-    deps
-}
-
-fn runtime_foundation_dependencies(state: &LuaState, addon_name: &str) -> Vec<&'static str> {
-    if !addon_name.starts_with("Blizzard_") {
-        return Vec::new();
-    }
-
-    let screen_kind = borrow_state(state)
-        .ok()
-        .map(|sim| sim.screen_kind)
-        .unwrap_or(crate::screen::ScreenKind::Game);
-    let foundations = match screen_kind {
-        crate::screen::ScreenKind::Game => GAME_RUNTIME_FOUNDATIONS,
-        crate::screen::ScreenKind::Login
-        | crate::screen::ScreenKind::CharacterSelect
-        | crate::screen::ScreenKind::CharacterCreate => GLUE_RUNTIME_FOUNDATIONS,
-    };
-    let end = foundations
-        .iter()
-        .position(|candidate| *candidate == addon_name)
-        .unwrap_or(foundations.len());
-    foundations[..end]
-        .iter()
-        .copied()
-        .filter(|dependency| find_runtime_addon_toc(state, dependency).is_some())
-        .collect()
-}
-
-fn is_addon_loaded_by_name(state: &LuaState, addon_name: &str) -> bool {
-    borrow_state(state)
-        .ok()
-        .and_then(|sim| {
-            sim.addons
-                .iter()
-                .find(|addon| addon.folder_name == addon_name)
-                .map(|addon| addon.loaded)
-        })
-        .unwrap_or(false)
-}
-
-fn is_addon_loading_by_name(state: &LuaState, addon_name: &str) -> bool {
-    borrow_state(state)
-        .ok()
-        .map(|sim| {
-            sim.loading_addon_stack.iter().any(|loading_idx| {
-                sim.addons
-                    .get(*loading_idx as usize)
-                    .map(|addon| addon.folder_name == addon_name)
-                    .unwrap_or(false)
-            })
-        })
-        .unwrap_or(false)
-}
-
-fn missing_runtime_addon_error(addon_name: &str) -> LoadError {
-    LoadError::Io(io::Error::new(
-        io::ErrorKind::NotFound,
-        format!("runtime addon not found: {addon_name}"),
-    ))
-}
-
-/// Construct the `LoadError` whose `Display` renders to exactly
-/// `"DEP_DISABLED"` — that string flows back through
-/// `c_addons_load_addon`'s `error.to_string()` and becomes the second
-/// return of `LoadAddOn`, matching real WoW.
-fn disabled_dep_error(dependency: &str) -> LoadError {
-    LoadError::DepDisabled(dependency.to_string())
-}
-
-fn fire_addon_loaded(state: &mut LuaState, loader_env: &LoaderEnv<'_>, addon_name: &str) {
-    let addon_name_val = create_string(state, addon_name);
-    let _ = loader_env.fire_event_with_args("ADDON_LOADED", &[addon_name_val]);
-}
-
-fn mark_addon_loaded(loader_env: &LoaderEnv, addon_name: &str) {
-    let mut sim = loader_env.state().borrow_mut();
-    if let Some(addon) = sim.addons.iter_mut().find(|a| a.folder_name == addon_name) {
-        addon.loaded = true;
-        addon.enabled = true;
-    }
 }
 
 fn push_load_result(

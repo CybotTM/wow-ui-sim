@@ -81,7 +81,7 @@ const PANEL_COVERAGE_ADDONS: &[(&str, &str)] = &[
 ];
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
 }
 
 fn panel_coverage_roots() -> Vec<&'static str> {
@@ -297,15 +297,15 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
 
             assert_eq!(
                 count_blizzard_directories(),
-                315,
-                "expected the current Blizzard UI checkout to contain 315 Blizzard_* directories"
+                311,
+                "expected the current Blizzard UI checkout to contain 311 Blizzard_* directories"
             );
 
             let addons = discover_all_blizzard_addons(&blizzard_ui_dir());
             assert_eq!(
                 addons.len(),
-                313,
-                "expected the current Blizzard UI checkout to expose 313 loadable Blizzard addons; Blizzard_LevelUpDisplay and Blizzard_TalentUI only ship legacy Mists TOCs"
+                309,
+                "expected the current Blizzard UI checkout to expose 309 loadable Blizzard addons; Blizzard_LevelUpDisplay and Blizzard_TalentUI only ship legacy Mists TOCs"
             );
 
             let known_addons: HashSet<_> = addons.iter().map(|(name, _)| name.clone()).collect();
@@ -345,7 +345,7 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
             );
             assert!(
                 invalid_addons.is_empty(),
-                "full Blizzard load attributed Lua errors to names outside the 315 Blizzard addons: {:?}\n{}",
+                "full Blizzard load attributed Lua errors to names outside the current Blizzard addon set: {:?}\n{}",
                 invalid_addons,
                 format_per_addon_report(&grouped_errors),
             );

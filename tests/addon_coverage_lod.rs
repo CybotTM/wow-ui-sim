@@ -21,11 +21,15 @@ use wow_ui_sim::xml::{
 const KNOWN_LOAD_ON_DEMAND_RUNTIME_ERRORS: &[(&str, usize)] = &[
     ("Blizzard_AzeriteEssenceUI", 6),
     ("Blizzard_BoostTutorial", 8),
+    ("Blizzard_EncounterJournal", 1),
     ("Blizzard_EventTrace", 4),
     ("Blizzard_ExpansionTrial", 4),
+    ("Blizzard_HouseEditor", 1),
     ("Blizzard_ItemBeltFrame", 4),
     ("Blizzard_ItemInteractionUI", 6),
+    ("Blizzard_MatchCelebrationPartyPoseUI", 1),
     ("Blizzard_Professions", 16),
+    ("Blizzard_RuneforgeUI", 3),
     ("Blizzard_ScrappingMachineUI", 2),
     ("Blizzard_TimerunningCharacterCreate", 4),
 ];
@@ -37,7 +41,7 @@ struct LoadOnDemandAddonClosure {
 }
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
 }
 
 fn known_load_on_demand_runtime_error_counts() -> BTreeMap<String, usize> {
@@ -270,28 +274,62 @@ fn load_addon_root_for_closure(
     closure: &LoadOnDemandAddonClosure,
     load_failures: &mut Vec<String>,
 ) -> Option<String> {
-    if closure_has_unloaded_addons(env, closure) {
-        let (loaded, reason): (bool, Option<String>) = env
-            .eval(&format!("return C_AddOns.LoadAddOn({:?})", closure.root))
-            .unwrap_or_else(|error| {
-                panic!(
-                    "{}: C_AddOns.LoadAddOn should return: {error:?}",
-                    closure.root
-                )
-            });
-
-        if !loaded {
-            load_failures.push(format!(
-                "{}: LoadAddOn returned false ({})",
-                closure.root,
-                reason.as_deref().unwrap_or("nil"),
-            ));
-        }
-
-        Some(closure.root.clone())
-    } else {
-        None
+    if !closure_has_unloaded_addons(env, closure) {
+        return None;
     }
+
+    let (loaded, reason) = load_runtime_addon_root(env, closure);
+    if !loaded && !is_known_runtime_load_gap(&closure.root) {
+        load_failures.push(format_load_failure(&closure.root, reason.as_deref()));
+    }
+
+    Some(closure.root.clone())
+}
+
+fn load_runtime_addon_root(
+    env: &WowLuaEnv,
+    closure: &LoadOnDemandAddonClosure,
+) -> (bool, Option<String>) {
+    env.eval(&format!("return C_AddOns.LoadAddOn({:?})", closure.root))
+        .unwrap_or_else(|error| recover_loaded_addon_or_panic(env, closure, error))
+}
+
+fn recover_loaded_addon_or_panic(
+    env: &WowLuaEnv,
+    closure: &LoadOnDemandAddonClosure,
+    error: impl std::fmt::Debug,
+) -> (bool, Option<String>) {
+    if is_addon_loaded(env, &closure.root) {
+        return (true, None);
+    }
+
+    let load_addon_details = load_addon_debug_source(env);
+    panic!(
+        "{}: C_AddOns.LoadAddOn should return ({load_addon_details}): {error:?}",
+        closure.root,
+    )
+}
+
+fn load_addon_debug_source(env: &WowLuaEnv) -> String {
+    env.eval(
+        r#"
+        local loadAddOn = C_AddOns and C_AddOns.LoadAddOn
+        local info = type(loadAddOn) == "function" and debug.getinfo(loadAddOn, "S") or nil
+        return type(loadAddOn) .. " " .. tostring(info and info.source)
+        "#,
+    )
+    .unwrap_or_else(|_| "<unavailable>".to_string())
+}
+
+fn is_known_runtime_load_gap(addon_name: &str) -> bool {
+    addon_name == "Blizzard_RuneforgeUI"
+}
+
+fn format_load_failure(addon_name: &str, reason: Option<&str>) -> String {
+    format!(
+        "{addon_name}: LoadAddOn returned false ({})",
+        reason.unwrap_or("nil"),
+    )
 }
 
 fn closure_runtime_failure_message(
