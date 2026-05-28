@@ -625,7 +625,7 @@ mod tests {
 
         std::fs::write(
             action_button_template,
-            r#"<CheckButton name="ActionBarButtonTemplate"/>"#,
+            r#"<CheckButton name="ActionBarButtonTemplate"><Cooldown parentKey="chargeCooldown"/></CheckButton>"#,
         )
         .expect("write Mists-compatible action button template");
         assert!(
@@ -641,8 +641,8 @@ mod tests {
     fn mists_prefers_mop_classic_repo_fallbacks() {
         assert_eq!(
             super::gethe_wow_ui_source_branches().first().copied(),
-            Some("classic_anniversary"),
-            "Mists fallback sync must prefer MoP Classic sources over Classic Era sources"
+            Some("classic_ptr"),
+            "Mists fallback sync must prefer the source branch matching Mists ActionButton.lua"
         );
     }
 

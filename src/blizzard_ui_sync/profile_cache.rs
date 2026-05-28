@@ -11,8 +11,8 @@ const DEFAULT_GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
 ];
 
 const MISTS_GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
-    "classic_anniversary",
     "classic_ptr",
+    "classic_anniversary",
     "classic_beta",
     "classic",
     "classic_era",
@@ -103,6 +103,7 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
     match entry {
         "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml" => {
             file_contains(path, "ActionBarButtonTemplate")
+                && file_contains(path, r#"parentKey="chargeCooldown""#)
         }
         _ => true,
     }
