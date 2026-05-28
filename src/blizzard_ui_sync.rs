@@ -560,7 +560,6 @@ mod tests {
         header.set_cksum();
         builder.append_data(&mut header, path, contents)
     }
-
     #[test]
     fn manifest_preserves_blizzard_addon_case() {
         let first = manifest_entries()
@@ -686,6 +685,9 @@ mod tests {
                 "Blizzard_NamePlates/Blizzard_NamePlates.toc" => {
                     "Mainline\\Blizzard_ClassNameplateBar.lua [AllowLoadGameType mainline]\n"
                 }
+                "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua" => {
+                    "function PlayerCastingBarMixin:OnShow()\nend\n"
+                }
                 _ => "placeholder",
             };
             std::fs::write(path, contents).expect("write required cache entry");
@@ -702,7 +704,6 @@ mod tests {
         std::fs::create_dir_all(source_path.parent().expect("source parent"))
             .expect("create source parent");
         std::fs::write(&source_path, "from repo\n").expect("write source fallback");
-
         let copied = copy_repo_fallback_entry_from_root(entry, &out_path, &source_root)
             .expect("copy fallback entry");
 

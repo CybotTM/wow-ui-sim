@@ -77,11 +77,18 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_FrameXMLBase/Classic/IconDataProvider.lua",
     "Blizzard_FrameXMLBase/TBC/Localization.lua",
     "Blizzard_FrameXMLBase/Wrath/Constants.lua",
+    "Blizzard_FrameXML/Classic/AlertFrameSystems.lua",
+    "Blizzard_FrameXML/Classic/AlertFrameSystems.xml",
+    "Blizzard_FrameXML/Classic/AlertFrames.lua",
+    "Blizzard_FrameXML/Classic/AlertFrames.xml",
     "Blizzard_FrameXML/Classic/CombatFeedback.lua",
     "Blizzard_BuffFrame/Classic/BuffFrame.lua",
     "Blizzard_GameTooltip/Blizzard_GameTooltip_Classic.toc",
     "Blizzard_GameTooltip/Classic/GameTooltip.lua",
     "Blizzard_GameTooltip/Classic/GameTooltip.xml",
+    "Blizzard_ItemButton/Blizzard_ItemButton_Classic.toc",
+    "Blizzard_ItemButton/Classic/ItemButtonTemplate.lua",
+    "Blizzard_ItemButton/Classic/ItemButtonTemplate.xml",
     "Blizzard_LevelUpDisplay/Cata/LevelUpDisplay.lua",
     "Blizzard_NamePlates/Blizzard_NamePlates.toc",
     "Blizzard_Settings_Shared/Blizzard_Settings_Shared_Classic.toc",
@@ -93,6 +100,10 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_UIPanelTemplates/Classic/AutoCastTemplates.xml",
     "Blizzard_UIPanelTemplates/Classic/UIPanelTemplates.lua",
     "Blizzard_UIPanelTemplates/Classic/UIPanelTemplates.xml",
+    "Blizzard_UIPanels_Game/Blizzard_UIPanels_Game_Mists.toc",
+    "Blizzard_UIPanels_Game/Classic/CastingBarFrame.lua",
+    "Blizzard_UIPanels_Game/Classic/CastingBarFrame.xml",
+    "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua",
     "Blizzard_UnitFrame/Cata/EclipseBarFrame.lua",
     "Blizzard_UnitFrame/Cata/EclipseBarFrame.xml",
     "Blizzard_UnitFrame/Cata/RuneFrame.lua",
@@ -160,6 +171,9 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
             path,
             "Blizzard_ClassNameplateBar.lua [AllowLoadGameType mainline]",
         ),
+        "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua" => {
+            file_contains(path, "function PlayerCastingBarMixin:OnShow()")
+        }
         _ => true,
     }
 }
