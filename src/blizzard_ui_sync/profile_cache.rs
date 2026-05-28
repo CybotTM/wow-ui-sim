@@ -45,6 +45,7 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_FrameXMLUtil/Classic/QuestUtils.lua",
     "Blizzard_FrameXMLUtil/Classic/RaidWarning.lua",
     "Blizzard_FrameXMLUtil/Classic/TransmogUtil.lua",
+    "Blizzard_MainMenuBarBagButtons/Classic/MainMenuBarBagButtons.lua",
     "Blizzard_SharedXML/Classic/ClassicCvarUtil.lua",
     "Blizzard_SharedXML/Classic/Dialog/DialogTemplates.xml",
     "Blizzard_SharedXML/Classic/Frame/MainMenuFrameTemplates.xml",
