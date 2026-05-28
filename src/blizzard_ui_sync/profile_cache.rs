@@ -37,6 +37,14 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_ActionBar/Classic/StatusTrackingBar.xml",
     "Blizzard_ActionBar/Classic/StatusTrackingBarTemplate.xml",
     "Blizzard_ActionBar/Classic/StatusTrackingManagerOverrides.lua",
+    "Blizzard_FrameXMLUtil/Blizzard_FrameXMLUtil_Classic.toc",
+    "Blizzard_FrameXMLUtil/Classic/ArenaUtil.lua",
+    "Blizzard_FrameXMLUtil/Classic/AuraUtil.lua",
+    "Blizzard_FrameXMLUtil/Classic/Cooldown.xml",
+    "Blizzard_FrameXMLUtil/Classic/MapUtil.lua",
+    "Blizzard_FrameXMLUtil/Classic/QuestUtils.lua",
+    "Blizzard_FrameXMLUtil/Classic/RaidWarning.lua",
+    "Blizzard_FrameXMLUtil/Classic/TransmogUtil.lua",
     "Blizzard_SharedXML/Classic/ClassicCvarUtil.lua",
     "Blizzard_SharedXML/Classic/Dialog/DialogTemplates.xml",
     "Blizzard_SharedXML/Classic/Frame/MainMenuFrameTemplates.xml",
@@ -63,6 +71,11 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_SharedXML/Classic/UIDropDownMenuTemplates.xml",
     "Blizzard_SharedXML/TBC/ClassColors.lua",
     "Blizzard_SharedXML/Wrath/SoundKitConstants.lua",
+    "Blizzard_UIPanelTemplates/Blizzard_UIPanelTemplates_Classic.toc",
+    "Blizzard_UIPanelTemplates/Classic/AutoCastTemplates.lua",
+    "Blizzard_UIPanelTemplates/Classic/AutoCastTemplates.xml",
+    "Blizzard_UIPanelTemplates/Classic/UIPanelTemplates.lua",
+    "Blizzard_UIPanelTemplates/Classic/UIPanelTemplates.xml",
 ];
 
 pub(super) fn required_profile_cache_entries() -> &'static [&'static str] {
