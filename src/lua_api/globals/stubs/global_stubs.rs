@@ -202,7 +202,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // SimState-backed in talent_spec_probes.rs, not stubs.
     // GetNumTitles is SimState-backed in social_probes.rs, not a stub.
     // GetPetExperience / GetPetHappiness / GetPetLoyalty /
-    // GetPetTimeInCombat are SimState-backed in pet_stats.rs, not stubs.
+    // GetPetTimeInCombat are SimState-backed in real/pet_stats.rs, not stubs.
     // GetPvpTalentSlotInfo is SimState-backed in talent_spec_probes.rs,
     // not a stub.
     // GetQuestLogTimeLeft / QuestMapUpdateAllQuests are SimState-backed in

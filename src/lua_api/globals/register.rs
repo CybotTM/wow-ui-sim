@@ -184,7 +184,7 @@ fn register_actor_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::player_probes::register_all(lua)?;
     super::unit_stats::register_all(lua)?;
     super::real::combat_stats::register_all(lua)?;
-    super::pet_stats::register_all(lua)?;
+    super::real::pet_stats::register_all(lua)?;
     super::cooldown_probes::register_all(lua)?;
     Ok(())
 }

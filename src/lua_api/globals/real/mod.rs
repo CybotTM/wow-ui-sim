@@ -16,6 +16,7 @@ pub mod loot_method;
 pub mod modifier_keys;
 pub mod net_stats;
 pub mod pet_bar;
+pub mod pet_stats;
 pub mod shapeshift;
 pub mod specialization_helpers;
 pub mod specialization_legacy;

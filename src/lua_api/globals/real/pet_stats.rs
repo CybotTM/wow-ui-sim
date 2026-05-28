@@ -1,4 +1,4 @@
-//! Legacy hunter / warlock pet-stat probe globals.
+//! Legacy hunter / warlock pet-stat probe globals backed by `SimState`.
 //!
 //! Migrates 4 entries off `GLOBAL_ZERO_STUBS`:
 //!

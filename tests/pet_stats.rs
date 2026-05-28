@@ -1,4 +1,4 @@
-//! Integration tests for `src/lua_api/globals/pet_stats.rs`.
+//! Integration tests for `src/lua_api/globals/real/pet_stats.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -89,4 +89,16 @@ fn get_pet_time_in_combat_reads_pet_state() {
     env.state().borrow_mut().pet.time_in_combat = 45;
     let seconds: i32 = env.eval("return GetPetTimeInCombat()").unwrap();
     assert_eq!(seconds, 45);
+}
+
+#[test]
+fn pet_stats_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/pet_stats.rs").exists(),
+        "pet-stat globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/pet_stats.rs").exists(),
+        "pet-stat globals should stay classified as real modeled Lua globals",
+    );
 }
