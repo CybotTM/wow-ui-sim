@@ -122,6 +122,39 @@ Core.lua
 }
 
 #[test]
+#[cfg(feature = "client-mists")]
+fn mists_profile_skips_retail_only_deprecated_arena_ui() {
+    let ui = TempBlizzardUiDir::new("mists-retail-only-addon");
+    ui.add_addon(
+        "Blizzard_Deprecated_ArenaUI",
+        r#"
+## Title: Blizzard_Deprecated_ArenaUI
+## AllowLoad: Game
+Deprecated_ArenaUI.xml
+"#,
+    );
+    ui.add_addon(
+        "Blizzard_UnitFrame",
+        r#"
+## Title: Blizzard_UnitFrame
+## AllowLoad: Game
+UnitFrame.lua
+"#,
+    );
+
+    let addons: Vec<String> = discover_blizzard_addons_for_screen(&ui.path, ScreenKind::Game)
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect();
+
+    assert_eq!(
+        addons,
+        vec!["Blizzard_UnitFrame"],
+        "Mists should not load Blizzard_Deprecated_ArenaUI from the retail cache because it is absent from the Classic PTR/Mists source tree"
+    );
+}
+
+#[test]
 fn cyclic_addons_still_emit_dependencies_before_load_first_addon() {
     let ui = TempBlizzardUiDir::new("load-first-cycle");
     ui.add_addon(

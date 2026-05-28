@@ -545,6 +545,7 @@ fn discover_blizzard_addon_toc_pools_for_screen(
         let dir_name = path.file_name().unwrap().to_str().unwrap().to_string();
         if !dir_name.starts_with("Blizzard_")
             || excluded_addons_for_screen(screen).contains(&dir_name.as_str())
+            || excluded_addons_for_active_profile().contains(&dir_name.as_str())
         {
             continue;
         }
@@ -576,6 +577,13 @@ fn excluded_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
             "Blizzard_CharacterCustomize",
             "Blizzard_TimerunningCharacterCreate",
         ],
+    }
+}
+
+fn excluded_addons_for_active_profile() -> &'static [&'static str] {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Mists => &["Blizzard_Deprecated_ArenaUI"],
+        _ => &[],
     }
 }
 
