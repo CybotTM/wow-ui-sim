@@ -36,7 +36,10 @@ pub(super) fn secure_cmd_option_parse(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn resolve_cmd_option<'a>(text: &'a str, sim: &crate::lua_api::SimState) -> Option<&'a str> {
+pub(super) fn resolve_cmd_option<'a>(
+    text: &'a str,
+    sim: &crate::lua_api::SimState,
+) -> Option<&'a str> {
     text.split(';')
         .filter_map(parse_cmd_option_clause)
         .find_map(|clause| clause.matches(sim).then_some(clause.value))

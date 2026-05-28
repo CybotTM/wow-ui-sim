@@ -83,7 +83,14 @@ fn should_include_in_integration_harness(path: &Path) -> bool {
     let Some(file_name) = path.file_name().and_then(|name| name.to_str()) else {
         return false;
     };
-    !matches!(file_name, "frame_positions.rs" | "integration.rs")
+    !matches!(
+        file_name,
+        "blizzard_addon_closure_harness.rs"
+            | "blizzard_addon_smoke_targets.rs"
+            | "frame_positions.rs"
+            | "integration.rs"
+            | "mists_addonlist_interactions.rs"
+    )
 }
 
 fn module_name_for_path(path: &Path) -> String {

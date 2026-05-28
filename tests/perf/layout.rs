@@ -368,6 +368,7 @@ fn emit_perf_tooltip_quads(
             tooltip_data: Some(&tooltip_data),
             id: tooltip_id,
             eff_alpha: tooltip_frame.alpha,
+            eff_scale: tooltip_frame.effective_scale,
             draw_background: true,
         },
         &mut text_ctx,

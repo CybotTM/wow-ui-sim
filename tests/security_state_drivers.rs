@@ -57,6 +57,73 @@ fn test_state_drivers_apply_visibility_and_attributes() {
 }
 
 #[test]
+fn test_state_driver_resolves_first_matching_clause_and_runs_state_snippet() {
+    let env = env();
+    let (shown, state_value, fade_value): (bool, String, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            frame:Show()
+            frame:SetAttribute("_onstate-vis", [[
+                if newstate == "show" then
+                    self:Show()
+                    self:SetAttribute("fade", false)
+                elseif newstate == "hide" then
+                    self:Hide()
+                end
+            ]])
+
+            RegisterStateDriver(frame, "vis", "[petbattle]hide;hide;show")
+
+            return frame:IsShown(),
+                frame:GetAttribute("state-vis"),
+                frame:GetAttribute("fade") == false
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        !shown,
+        "unconditional hide clauses should win over later fallback show clauses"
+    );
+    assert_eq!(state_value, "hide");
+    assert!(
+        !fade_value,
+        "hide state should run the secure state snippet rather than the show branch"
+    );
+}
+
+#[test]
+fn test_state_attribute_set_runs_matching_state_snippet() {
+    let env = env();
+    let (shown, ran_state): (bool, String) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            frame:Show()
+            frame:SetAttribute("_onstate-vis", [[
+                self:SetAttribute("ran", tostring(newstate))
+                if newstate == "hide" then
+                    self:Hide()
+                end
+            ]])
+
+            frame:SetAttribute("state-vis", "hide")
+
+            return frame:IsShown(),
+                frame:GetAttribute("ran")
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        !shown,
+        "state attribute changes should execute matching _onstate snippets"
+    );
+    assert_eq!(ran_state, "hide");
+}
+
+#[test]
 fn test_unregister_state_drivers_leaves_last_resolved_values_in_place() {
     let env = env();
     let (shown, custom_state): (bool, String) = env

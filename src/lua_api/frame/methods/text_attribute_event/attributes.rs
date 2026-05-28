@@ -12,7 +12,7 @@ use crate::lua_api::script_helpers::{
 use crate::lua_api::taint::{clear_active_stack_taint, restore_active_stack_taint};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
-use rilua::{LuaApiMut, LuaResult, Val};
+use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
 pub(super) fn get_attribute(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
@@ -95,11 +95,66 @@ pub(super) fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
             dispatch_direct_attribute_changed(state, frame, name_arg, value);
         }
     }
+    if changed {
+        run_state_attribute_snippet(state, id, &name, value)?;
+    }
     Ok(0)
 }
 
 fn should_dispatch_unchanged_attribute(name: &str, value: Val) -> bool {
     name == "createframes" && matches!(value, Val::Bool(true))
+}
+
+fn run_state_attribute_snippet(
+    state: &mut LuaState,
+    id: u64,
+    attribute: &str,
+    value: Val,
+) -> LuaResult<()> {
+    let Some(state_name) = attribute.strip_prefix("state-") else {
+        return Ok(());
+    };
+    let snippet_attribute = format!("_onstate-{state_name}");
+    let snippet_body = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|frame| frame.attributes.get(&snippet_attribute))
+            .and_then(attribute_string)
+            .map(str::to_string)
+    };
+    let Some(snippet_body) = snippet_body else {
+        return Ok(());
+    };
+
+    let snippet = compile_state_attribute_snippet(state, &snippet_body)?;
+    let frame = frame_ref(state, id)?;
+    if let Err(error) =
+        protected_lua_pcall_state(state, Val::Function(snippet.gc_ref()), &[frame, value])
+    {
+        call_error_handler_state(state, &error);
+    }
+    Ok(())
+}
+
+fn attribute_string(attribute: &crate::widget::AttributeValue) -> Option<&str> {
+    match attribute {
+        crate::widget::AttributeValue::String(value) => Some(value.as_str()),
+        _ => None,
+    }
+}
+
+fn compile_state_attribute_snippet(state: &mut LuaState, body: &str) -> LuaResult<rilua::Function> {
+    let loader = state.load(&format!(
+        "return function(self, newstate) local strsub = string.sub; {body} end"
+    ))?;
+    let closure = call_function_state(state, Val::Function(loader.gc_ref()), &[])?;
+    let Val::Function(func_ref) = closure else {
+        return Err(runtime_error(
+            "state attribute snippet loader did not return a function",
+        ));
+    };
+    Ok(rilua::Function::from_gc_ref(func_ref))
 }
 
 /// True when the caller cannot mutate protected state for the current frame.
