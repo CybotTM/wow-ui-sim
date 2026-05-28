@@ -4,6 +4,7 @@
 //! state/behavior. Unmodeled compatibility defaults belong under
 //! `lua_api::workarounds::{temporary,permanent}` instead.
 
+pub mod action_highlights;
 pub mod container_legacy;
 pub mod guild_logo;
 pub mod item_legacy;

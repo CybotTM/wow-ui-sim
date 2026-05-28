@@ -1,4 +1,4 @@
-//! Action-highlight bookkeeping globals consumed by `Blizzard_ActionBar`.
+//! State-backed action-highlight bookkeeping globals consumed by `Blizzard_ActionBar`.
 //!
 //! Mirrors `Blizzard_ActionBar/Shared/ActionButton.lua` lines 27-107:
 //!
@@ -92,15 +92,15 @@ fn clear_new_action_highlight(state: &mut LuaState) -> LuaResult<u32> {
     let Some(spell_id) = sim.action_bars.get(&(action as u32)).copied() else {
         return Ok(0);
     };
-    let identical_slots: Vec<i32> = sim
+    let identical_slots: std::collections::HashSet<i32> = sim
         .action_bars
         .iter()
         .filter(|(_, bound)| **bound == spell_id)
         .map(|(slot, _)| *slot as i32)
         .collect();
-    for slot in identical_slots {
-        sim.action_highlights.new.remove(&slot);
-    }
+    sim.action_highlights
+        .new
+        .retain(|slot| !identical_slots.contains(slot));
     Ok(0)
 }
 
@@ -111,12 +111,11 @@ fn get_new_action_highlight_mark(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let marked = borrow_state(state)?.action_highlights.new.contains(&action);
-    if marked {
-        state.push(Val::Bool(true));
-    } else {
-        state.push(Val::Nil);
-    }
+    let value = match borrow_state(state)?.action_highlights.new.get(&action) {
+        Some(_) => Val::Bool(true),
+        None => Val::Nil,
+    };
+    state.push(value);
     Ok(1)
 }
 

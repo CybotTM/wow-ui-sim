@@ -1,5 +1,5 @@
 //! Integration tests for the action-highlight globals registered in
-//! `src/lua_api/globals/action_highlights.rs`.
+//! `src/lua_api/globals/real/action_highlights.rs`.
 //!
 //! Verifies that `MarkNewActionHighlight`/`ClearNewActionHighlight`/
 //! `GetNewActionHighlightMark`, `ClearOnBarHighlightMarks`/
@@ -12,6 +12,18 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("WowLuaEnv init")
+}
+
+#[test]
+fn action_highlight_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/action_highlights.rs").exists(),
+        "action-highlight globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/action_highlights.rs").exists(),
+        "action-highlight globals should stay classified as real modeled Lua globals",
+    );
 }
 
 #[test]
