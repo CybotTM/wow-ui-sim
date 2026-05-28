@@ -1,4 +1,4 @@
-//! Glyph cursor globals consumed by
+//! State-backed glyph cursor globals consumed by
 //! `Blizzard_ActionBar/Shared/SpellFlyout.lua`'s
 //! `SpellFlyoutPopupButtonMixin:UpdateGlyphState` and the spellbook glyph
 //! attach flow. All read from / write to `state.glyph: GlyphState`.

@@ -1,5 +1,5 @@
 //! Integration tests for the glyph cursor globals registered in
-//! `src/lua_api/globals/glyph_state.rs`.
+//! `src/lua_api/globals/real/glyph_state.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -7,6 +7,18 @@ fn arm_cursor_glyph(env: &WowLuaEnv, name: &str) {
     let mut state = env.state().borrow_mut();
     state.glyph.pending_glyph_name = Some(name.to_string());
     state.glyph.pending_glyph_removal = false;
+}
+
+#[test]
+fn glyph_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/glyph_state.rs").exists(),
+        "glyph globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/glyph_state.rs").exists(),
+        "glyph globals should stay classified as real modeled Lua globals",
+    );
 }
 
 #[test]

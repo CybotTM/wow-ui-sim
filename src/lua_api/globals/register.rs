@@ -196,7 +196,7 @@ fn register_action_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::shapeshift::register_all(lua)?;
     super::real::pet_bar::register_all(lua)?;
     super::vehicle_possession::register_all(lua)?;
-    super::glyph_state::register_all(lua)?;
+    super::real::glyph_state::register_all(lua)?;
     super::action_bar_state::register_all(lua)?;
     Ok(())
 }

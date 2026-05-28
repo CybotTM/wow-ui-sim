@@ -6,6 +6,7 @@
 
 pub mod action_highlights;
 pub mod container_legacy;
+pub mod glyph_state;
 pub mod guild_logo;
 pub mod item_legacy;
 pub mod locale_info;

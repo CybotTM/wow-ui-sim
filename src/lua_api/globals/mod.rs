@@ -43,7 +43,6 @@ pub mod faction_probes;
 pub mod font_strings_collection;
 pub mod game_rules;
 pub mod global_frames;
-pub mod glyph_state;
 pub mod gossip_probes;
 pub mod group_queries;
 pub mod group_verbs;
