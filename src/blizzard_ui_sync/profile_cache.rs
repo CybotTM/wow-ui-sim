@@ -46,6 +46,8 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_FrameXMLUtil/Classic/RaidWarning.lua",
     "Blizzard_FrameXMLUtil/Classic/TransmogUtil.lua",
     "Blizzard_MainMenuBarBagButtons/Classic/MainMenuBarBagButtons.lua",
+    "Blizzard_MicroMenu/Blizzard_MicroMenu_Classic.toc",
+    "Blizzard_MicroMenu/Shared/MicroMenuContainer.lua",
     "Blizzard_SharedXML/Classic/ClassicCvarUtil.lua",
     "Blizzard_SharedXML/Classic/Dialog/DialogTemplates.xml",
     "Blizzard_SharedXML/Classic/Frame/MainMenuFrameTemplates.xml",
@@ -166,6 +168,13 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
         "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml" => {
             file_contains(path, "ActionBarButtonTemplate")
                 && file_contains(path, r#"parentKey="chargeCooldown""#)
+        }
+        "Blizzard_MicroMenu/Blizzard_MicroMenu_Classic.toc" => file_contains(
+            path,
+            r#"Cata\MainMenuBarMicroButtons.xml [AllowLoadGameType mists]"#,
+        ),
+        "Blizzard_MicroMenu/Shared/MicroMenuContainer.lua" => {
+            !file_contains(path, "PostAddButtonCallback")
         }
         "Blizzard_NamePlates/Blizzard_NamePlates.toc" => file_contains(
             path,

@@ -105,13 +105,11 @@ fn sync_blizzard_ui_entries<'a>(
     write_complete_marker(root)?;
     Ok(summary)
 }
-
 enum EntrySyncResult {
     Present,
     Extracted,
     Missing,
 }
-
 fn sync_manifest_entry(
     root: &Path,
     entry: &str,
@@ -398,8 +396,7 @@ fn copy_fallback_file(source_path: &Path, out_path: &Path) -> crate::Result<()> 
     Ok(())
 }
 
-/// Synthesized fallbacks for trivial Blizzard UI files when both CASC and the
-/// repo fallback miss. Only used for files whose content is small and well-known.
+/// Synthesized fallbacks for small, well-known Blizzard UI files.
 fn synthesized_fallback_content_for(entry: &str) -> Option<&'static str> {
     match entry.replace('\\', "/").as_str() {
         "Blizzard_LoadLocale/LoadLocale.lua" => Some(concat!(
@@ -681,6 +678,9 @@ mod tests {
             let contents = match *entry {
                 "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml" => {
                     r#"<CheckButton name="ActionBarButtonTemplate"><Cooldown parentKey="chargeCooldown"/></CheckButton>"#
+                }
+                "Blizzard_MicroMenu/Blizzard_MicroMenu_Classic.toc" => {
+                    "Cata\\MainMenuBarMicroButtons.xml [AllowLoadGameType mists]\n"
                 }
                 "Blizzard_NamePlates/Blizzard_NamePlates.toc" => {
                     "Mainline\\Blizzard_ClassNameplateBar.lua [AllowLoadGameType mainline]\n"
