@@ -360,4 +360,47 @@ mod tests {
             "ContainerFrame_Update wrapper should call through"
         );
     }
+
+    #[test]
+    fn post_load_aura_util_for_each_aura_preserves_packed_and_tuple_callbacks() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            AuraUtil = {}
+            function UnitAura(_unitToken, index, _filter)
+              if index == 1 then
+                return "Blessing of Kings", 135995, 0, nil, 0, 0, "player",
+                  false, false, 20217, true, false, true, false, 1
+              end
+            end
+            "#,
+        )
+        .expect("aura setup should run");
+
+        super::apply(&env);
+
+        let result: (String, i32, String) = env
+            .eval(
+                r#"
+                local packedType, packedSpellID, tupleName
+                AuraUtil.ForEachAura("player", "HELPFUL", 5, function(auraData)
+                  packedType = type(auraData)
+                  packedSpellID = auraData.spellId
+                  return true
+                end, true)
+                AuraUtil.ForEachAura("player", "HELPFUL", 5, function(name)
+                  tupleName = name
+                  return true
+                end)
+                return packedType, packedSpellID, tupleName
+                "#,
+            )
+            .expect("patched ForEachAura should run");
+
+        assert_eq!(
+            result,
+            ("table".to_string(), 20217, "Blessing of Kings".to_string()),
+            "Mists ForEachAura wrapper must preserve packed aura callbacks while keeping tuple compatibility"
+        );
+    }
 }

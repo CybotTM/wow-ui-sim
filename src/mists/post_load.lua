@@ -529,7 +529,31 @@ local function PatchMistsAuraUtilForEachAura()
     return
   end
 
-  function AuraUtil.ForEachAura(unitToken, filter, maxCount, callback)
+  local function PackAuraData(name, icon, applications, dispelName, duration, expirationTime,
+      sourceUnit, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff,
+      castByPlayer, nameplateShowAll, timeMod, shouldConsolidate)
+    return {
+      name = name,
+      icon = icon,
+      applications = applications,
+      dispelName = dispelName,
+      duration = duration,
+      expirationTime = expirationTime,
+      sourceUnit = sourceUnit,
+      isStealable = isStealable,
+      nameplateShowPersonal = nameplateShowPersonal,
+      spellId = spellID,
+      canApplyAura = canApplyAura,
+      isBossAura = isBossDebuff,
+      isFromPlayerOrPlayerPet = castByPlayer,
+      nameplateShowAll = nameplateShowAll,
+      timeMod = timeMod,
+      shouldConsolidate = shouldConsolidate,
+      points = {},
+    }
+  end
+
+  function AuraUtil.ForEachAura(unitToken, filter, maxCount, callback, usePackedAura)
     if type(callback) ~= "function" then
       return
     end
@@ -542,10 +566,18 @@ local function PatchMistsAuraUtilForEachAura()
       if not name then
         return
       end
-      if callback(name, icon, applications, dispelName, duration, expirationTime, sourceUnit,
-          isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff,
-          castByPlayer, nameplateShowAll, timeMod, shouldConsolidate) then
-        return
+      if usePackedAura then
+        if callback(PackAuraData(name, icon, applications, dispelName, duration, expirationTime,
+            sourceUnit, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff,
+            castByPlayer, nameplateShowAll, timeMod, shouldConsolidate)) then
+          return
+        end
+      else
+        if callback(name, icon, applications, dispelName, duration, expirationTime, sourceUnit,
+            isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff,
+            castByPlayer, nameplateShowAll, timeMod, shouldConsolidate) then
+          return
+        end
       end
       index = index + 1
     end

@@ -868,6 +868,7 @@ Blizzard_BuffFrame/Blizzard_BuffFrame.toc
 Blizzard_BuffFrame/BuffFrame.lua
 Blizzard_BuffFrame/BuffFrame.xml
 Blizzard_BuffFrame/BuffFrameTemplates.xml
+Blizzard_BuffFrame/Classic/BuffFrame.lua
 Blizzard_BuffFrame/ExternalDefensivesFrame.lua
 Blizzard_BuffFrame/ExternalDefensivesFrame.xml
 Blizzard_CUFProfiles/Blizzard_CUFProfiles.toc
