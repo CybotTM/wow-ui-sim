@@ -210,7 +210,7 @@ fn register_progression_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> 
 }
 
 fn register_world_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
-    super::mouse_probes::register_all(lua)?;
+    super::real::mouse_probes::register_all(lua)?;
     super::movement_probes::register_all(lua)?;
     super::faction_probes::register_all(lua)?;
     super::real::gossip_probes::register_all(lua)?;

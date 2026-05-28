@@ -1,4 +1,4 @@
-//! Mouse-input probe globals.
+//! Mouse-input probe globals backed by simulator input state.
 //!
 //! Migrates 2 entries off `GLOBAL_ZERO_STUBS`:
 //!

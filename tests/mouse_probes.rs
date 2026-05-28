@@ -1,4 +1,4 @@
-//! Integration tests for `src/lua_api/globals/mouse_probes.rs`.
+//! Integration tests for `src/lua_api/globals/real/mouse_probes.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -116,4 +116,16 @@ fn is_mouse_button_down_reads_named_button_state() {
     assert!(left);
     assert!(!right);
     assert!(!unknown);
+}
+
+#[test]
+fn mouse_probe_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/mouse_probes.rs").exists(),
+        "mouse probe globals are modeled through simulator input state and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/mouse_probes.rs").exists(),
+        "mouse probe globals should stay classified as real modeled Lua globals",
+    );
 }

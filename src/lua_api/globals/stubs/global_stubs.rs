@@ -158,7 +158,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetCurrentArenaSeason",
     "GetCurrentGuildBankTab",
     "GetNumBattlefieldFlagPositions",
-    // GetCursorPosition is SimState-backed in mouse_probes.rs, not a stub.
+    // GetCursorPosition is SimState-backed in real/mouse_probes.rs, not a stub.
     // GetArenaOpponentSpec is SimState-backed in talent_spec_probes.rs,
     // not a stub.
     // GetFactionInfoByID is SimState-backed in faction_probes.rs, not a stub.
