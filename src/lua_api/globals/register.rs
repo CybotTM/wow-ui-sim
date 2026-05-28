@@ -84,6 +84,7 @@ fn register_frame_foundation_globals(lua: &mut rilua::Lua) -> crate::Result<()> 
     super::create_frame::register_all(lua)?;
     super::font_strings_collection::register_all(lua)?;
     super::utility_system_spell::register_all(lua)?;
+    super::real::frame_level_helpers::register_all(lua)?;
     super::real::net_stats::register_all(lua)?;
     super::store_frame::register_all(lua)?;
     Ok(())
