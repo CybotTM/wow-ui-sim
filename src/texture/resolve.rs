@@ -226,7 +226,8 @@ impl TextureManager {
             }
         }
 
-        if is_legacy_paperdoll_slot_path(normalized_path)
+        if cfg!(feature = "client-mists")
+            && is_legacy_paperdoll_slot_path(normalized_path)
             && let Some(result) = try_blizzard_interface_art_resolve(self, normalized_path)
         {
             return Some(result);
