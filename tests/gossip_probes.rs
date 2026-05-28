@@ -1,4 +1,4 @@
-//! Integration tests for `src/lua_api/globals/gossip_probes.rs`.
+//! Integration tests for `src/lua_api/globals/real/gossip_probes.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -85,4 +85,16 @@ fn gossip_closed_event_reaches_listeners() {
     env.fire_event("GOSSIP_CLOSED").unwrap();
     let fired: bool = env.eval("return __gossip_closed_fired").unwrap();
     assert!(fired);
+}
+
+#[test]
+fn gossip_probe_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/gossip_probes.rs").exists(),
+        "gossip probe globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/gossip_probes.rs").exists(),
+        "gossip probe globals should stay classified as real modeled Lua globals",
+    );
 }

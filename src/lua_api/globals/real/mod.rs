@@ -9,6 +9,7 @@ pub mod action_highlights;
 pub mod combat_stats;
 pub mod container_legacy;
 pub mod glyph_state;
+pub mod gossip_probes;
 pub mod guild_logo;
 pub mod item_legacy;
 pub mod locale_info;

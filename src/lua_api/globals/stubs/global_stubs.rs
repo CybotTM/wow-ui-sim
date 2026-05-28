@@ -163,7 +163,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // not a stub.
     // GetFactionInfoByID is SimState-backed in faction_probes.rs, not a stub.
     // GetGossipNumOptions / GetGossipNumAvailableQuests /
-    // GetGossipNumActiveQuests are SimState-backed in gossip_probes.rs,
+    // GetGossipNumActiveQuests are SimState-backed in real/gossip_probes.rs,
     // not stubs.
     // GetChannelName is SimState-backed in channel_verbs.rs, not a stub.
     "GetCameraZoom",

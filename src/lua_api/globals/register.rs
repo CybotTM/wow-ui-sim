@@ -213,7 +213,7 @@ fn register_world_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::mouse_probes::register_all(lua)?;
     super::movement_probes::register_all(lua)?;
     super::faction_probes::register_all(lua)?;
-    super::gossip_probes::register_all(lua)?;
+    super::real::gossip_probes::register_all(lua)?;
     super::torghast::register_all(lua)?;
     super::instance_info::register_all(lua)?;
     super::state_backed_queries::register_all(lua)?;
