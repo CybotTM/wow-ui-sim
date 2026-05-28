@@ -6,6 +6,18 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
+#[test]
+fn combat_stats_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/combat_stats.rs").exists(),
+        "combat stat globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/combat_stats.rs").exists(),
+        "combat stat globals should stay classified as real modeled Lua globals",
+    );
+}
+
 // ============================================================================
 // UnitStat
 // ============================================================================

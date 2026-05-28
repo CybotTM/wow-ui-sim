@@ -1,4 +1,4 @@
-//! Character combat-rating globals backed by `PlayerState.stats`.
+//! State-backed character combat-rating globals backed by `PlayerState.stats`.
 
 use crate::lua_api::methods::borrow_state;
 use crate::lua_bridge::FromStack;
