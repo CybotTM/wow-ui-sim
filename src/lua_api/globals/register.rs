@@ -193,7 +193,7 @@ fn register_action_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::inventory_probes::register_all(lua)?;
     super::inventory_counts::register_all(lua)?;
     super::real::action_highlights::register_all(lua)?;
-    super::shapeshift::register_all(lua)?;
+    super::real::shapeshift::register_all(lua)?;
     super::real::pet_bar::register_all(lua)?;
     super::real::vehicle_possession::register_all(lua)?;
     super::real::glyph_state::register_all(lua)?;

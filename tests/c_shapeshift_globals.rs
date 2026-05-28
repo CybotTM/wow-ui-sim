@@ -1,5 +1,5 @@
 //! Integration tests for the shapeshift/stance globals registered in
-//! `src/lua_api/globals/shapeshift.rs`.
+//! `src/lua_api/globals/real/shapeshift.rs`.
 //!
 //! Verifies `GetShapeshiftFormInfo`, `GetShapeshiftFormCooldown`, and
 //! `CastShapeshiftForm` against `state.shapeshift_forms` /
@@ -31,6 +31,18 @@ fn env_with_druid_forms() -> WowLuaEnv {
         ];
     }
     env
+}
+
+#[test]
+fn shapeshift_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/shapeshift.rs").exists(),
+        "shapeshift/stance globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/shapeshift.rs").exists(),
+        "shapeshift/stance globals should stay classified as real modeled Lua globals",
+    );
 }
 
 #[test]

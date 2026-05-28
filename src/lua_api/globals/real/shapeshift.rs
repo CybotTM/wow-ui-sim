@@ -1,4 +1,4 @@
-//! Shapeshift / stance globals consumed by `Blizzard_ActionBar/Shared/StanceBar.lua`.
+//! State-backed shapeshift / stance globals consumed by `Blizzard_ActionBar/Shared/StanceBar.lua`.
 //!
 //! Mirrors the live API shape:
 //!
