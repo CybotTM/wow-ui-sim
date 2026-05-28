@@ -1,4 +1,4 @@
-//! Action-bar transition globals consumed by `Blizzard_ActionBar/Shared/MultiActionBars.lua`,
+//! State-backed action-bar transition globals consumed by `Blizzard_ActionBar/Shared/MultiActionBars.lua`,
 //! `Shared/StanceBar.lua`, and `Shared/VehicleLeaveButton.lua`.
 //!
 //! Globals registered:

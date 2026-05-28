@@ -1,7 +1,6 @@
 //! Global WoW API modules that still exist in the current tree.
 
 pub mod action_bar_api;
-pub mod action_bar_state;
 pub mod admin;
 pub mod admin_actionbars_bags;
 pub mod admin_addons;

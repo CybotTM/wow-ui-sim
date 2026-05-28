@@ -1,7 +1,19 @@
 //! Integration tests for the action-bar transition globals registered in
-//! `src/lua_api/globals/action_bar_state.rs`.
+//! `src/lua_api/globals/real/action_bar_state.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
+
+#[test]
+fn action_bar_state_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/action_bar_state.rs").exists(),
+        "action-bar transition globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/action_bar_state.rs").exists(),
+        "action-bar transition globals should stay classified as real modeled Lua globals",
+    );
+}
 
 #[test]
 fn action_bar_busy_defaults_to_false() {
