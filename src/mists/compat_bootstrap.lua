@@ -1409,6 +1409,73 @@ if rawget(_G, "SetGlyphNameFilter") == nil then
   end
 end
 
+-- Blizzard_ActionBar/Classic/MainMenuBar.lua/xml in the current Mists source
+-- still calls legacy global micro-menu and pet-bar helpers. The loaded Mists
+-- MicroMenu/PetActionBar implementations moved that behavior onto mixins, so
+-- keep the old globals as delegates rather than switching the whole addon to an
+-- older, incompatible source family.
+local function MistsForEachMicroButton(callback)
+  if type(MICRO_BUTTONS) ~= "table" then
+    return
+  end
+
+  for index = 1, #MICRO_BUTTONS do
+    local button = _G[MICRO_BUTTONS[index]]
+    if button then
+      callback(button)
+    end
+  end
+end
+
+if rawget(_G, "UpdateMicroButtonsParent") == nil then
+  function UpdateMicroButtonsParent(parent)
+    rawset(_G, "__wow_sim_mists_micro_button_parent", parent)
+    MistsForEachMicroButton(function(button)
+      button:SetParent(parent)
+    end)
+  end
+end
+
+if rawget(_G, "MoveMicroButtons") == nil then
+  function MoveMicroButtons(anchor, anchorTo, relAnchor, x, y, isStacked)
+    if CharacterMicroButton then
+      CharacterMicroButton:ClearAllPoints()
+      CharacterMicroButton:SetPoint(anchor, anchorTo, relAnchor, x, y)
+    end
+    if PVPMicroButton and SocialsMicroButton then
+      PVPMicroButton:ClearAllPoints()
+      if isStacked then
+        PVPMicroButton:SetPoint("TOPLEFT", CharacterMicroButton, "BOTTOMLEFT", 0, 23)
+      else
+        PVPMicroButton:SetPoint("BOTTOMLEFT", SocialsMicroButton, "BOTTOMRIGHT", -2, 0)
+      end
+    end
+  end
+end
+
+if rawget(_G, "OverrideMicroMenuPosition") == nil then
+  function OverrideMicroMenuPosition(parent, anchor, anchorTo, relAnchor, x, y, isStacked)
+    UpdateMicroButtonsParent(parent)
+    MoveMicroButtons(anchor, anchorTo, relAnchor, x, y, isStacked)
+  end
+end
+
+if rawget(_G, "ShowPetActionBar") == nil then
+  function ShowPetActionBar(_doNotSlide)
+    if PetActionBar == nil or (PetHasActionBar and not PetHasActionBar()) then
+      return
+    end
+
+    if PetActionBar.Update then
+      PetActionBar:Update()
+    end
+    PetActionBar:Show()
+    if UIParent_ManageFramePositions then
+      UIParent_ManageFramePositions()
+    end
+  end
+end
+
 -- Blizzard_UnitFrame/Mists/PriestBar.xml references these mixins, but the
 -- Mists source tree does not ship a matching PriestBar.lua. Keep the
 -- non-priest startup path explicit and hidden; fuller priest shadow orb

@@ -157,13 +157,14 @@ struct RepoFallbackSource {
 impl RepoFallbackSource {
     fn copy_entry(&mut self, entry: &str, out_path: &Path) -> crate::Result<bool> {
         for root in self.roots()?.iter() {
-            if copy_repo_fallback_entry_from_root(entry, out_path, root)? {
+            if copy_repo_fallback_entry_from_root(entry, out_path, root)?
+                && entry_is_present_and_usable(entry, out_path)
+            {
                 return Ok(true);
             }
         }
         Ok(false)
     }
-
     fn roots(&mut self) -> crate::Result<&[PathBuf]> {
         if self.roots.is_none() {
             self.roots = Some(repo_fallback_roots()?);
@@ -171,7 +172,6 @@ impl RepoFallbackSource {
         Ok(self.roots.as_deref().expect("fallback roots initialized"))
     }
 }
-
 fn copy_repo_fallback_entry_from_root(
     entry: &str,
     out_path: &Path,
