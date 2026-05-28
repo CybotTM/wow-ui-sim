@@ -19,6 +19,34 @@ const GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
 ];
 const GETHE_ARCHIVE_DOWNLOAD_RETRIES: usize = 3;
 const GETHE_ARCHIVE_USER_AGENT: &str = concat!("wow-ui-sim/", env!("CARGO_PKG_VERSION"));
+const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
+    "Blizzard_SharedXML/Classic/ClassicCvarUtil.lua",
+    "Blizzard_SharedXML/Classic/Dialog/DialogTemplates.xml",
+    "Blizzard_SharedXML/Classic/Frame/MainMenuFrameTemplates.xml",
+    "Blizzard_SharedXML/Classic/GameTooltipTemplate.xml",
+    "Blizzard_SharedXML/Classic/GlueCheck.lua",
+    "Blizzard_SharedXML/Classic/ModelFrames.lua",
+    "Blizzard_SharedXML/Classic/ModelFrames.xml",
+    "Blizzard_SharedXML/Classic/NineSliceLayouts.lua",
+    "Blizzard_SharedXML/Classic/Scroll/TrimScrollBar.xml",
+    "Blizzard_SharedXML/Classic/ScrollDefine.lua",
+    "Blizzard_SharedXML/Classic/ScrollDefine.xml",
+    "Blizzard_SharedXML/Classic/SecureCurrencyUtil.lua",
+    "Blizzard_SharedXML/Classic/Selector/Blizzard_ScrollBoxSelector.xml",
+    "Blizzard_SharedXML/Classic/SharedUIPanelTemplates.lua",
+    "Blizzard_SharedXML/Classic/SharedUIPanelTemplates.xml",
+    "Blizzard_SharedXML/Classic/SharedUtils.lua",
+    "Blizzard_SharedXML/Classic/SliderTemplates.xml",
+    "Blizzard_SharedXML/Classic/Sound.lua",
+    "Blizzard_SharedXML/Classic/Stubs.lua",
+    "Blizzard_SharedXML/Classic/Stubs.xml",
+    "Blizzard_SharedXML/Classic/UIDropDownMenu.lua",
+    "Blizzard_SharedXML/Classic/UIDropDownMenu.xml",
+    "Blizzard_SharedXML/Classic/UIDropDownMenuTemplates.lua",
+    "Blizzard_SharedXML/Classic/UIDropDownMenuTemplates.xml",
+    "Blizzard_SharedXML/TBC/ClassColors.lua",
+    "Blizzard_SharedXML/Wrath/SoundKitConstants.lua",
+];
 #[cfg(feature = "casc")]
 static CASC_CONFIGURED: OnceLock<bool> = OnceLock::new();
 
@@ -39,7 +67,21 @@ pub fn default_cache_addons_path() -> crate::Result<PathBuf> {
 
 pub fn cached_blizzard_ui_addons_path() -> Option<PathBuf> {
     let path = default_cache_addons_path().ok()?;
-    path.join(COMPLETE_MARKER).is_file().then_some(path)
+    let is_complete = path.join(COMPLETE_MARKER).is_file();
+    (is_complete && cache_has_required_profile_files(&path)).then_some(path)
+}
+
+fn cache_has_required_profile_files(root: &Path) -> bool {
+    required_profile_cache_entries()
+        .iter()
+        .all(|entry| root.join(entry).is_file())
+}
+
+fn required_profile_cache_entries() -> &'static [&'static str] {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Mists => MISTS_REQUIRED_PROFILE_CACHE_ENTRIES,
+        _ => &[],
+    }
 }
 
 pub fn sync_blizzard_ui() -> crate::Result<SyncSummary> {
@@ -435,12 +477,18 @@ fn manifest_entry_fdid(entry: &str) -> Option<u32> {
 
 #[cfg(test)]
 fn manifest_entry_is_repo_fallback_only(entry: &str) -> bool {
+    if MISTS_REQUIRED_PROFILE_CACHE_ENTRIES.contains(&entry) {
+        return true;
+    }
+
     matches!(
         entry,
         "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster.lua"
             | "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster.toc"
             | "Blizzard_CooldownBroadcaster/MessageQueue.lua"
             | "Blizzard_CooldownBroadcaster/TrackedCooldowns.lua"
+            | "Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua"
+            | "Blizzard_CombatLog/Wrath/Blizzard_CombatLog.xml"
     )
 }
 
@@ -566,6 +614,33 @@ mod tests {
             missing.is_empty(),
             "unmapped Blizzard UI files: {missing:?}"
         );
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_required_cache_entries_are_in_manifest() {
+        let manifest: std::collections::HashSet<_> = manifest_entries().collect();
+
+        for entry in super::required_profile_cache_entries() {
+            assert!(
+                manifest.contains(entry),
+                "Mists cache-required file must be synced by the Blizzard UI manifest: {entry}"
+            );
+        }
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_cache_is_incomplete_when_required_profile_files_are_missing() {
+        let root = unique_temp_dir("mists-required-files");
+        std::fs::create_dir_all(&root).expect("create cache root");
+
+        assert!(
+            !super::cache_has_required_profile_files(&root),
+            "Mists cache marker must not be trusted when profile-required TOC files are absent"
+        );
+
+        std::fs::remove_dir_all(root).expect("remove cache root");
     }
 
     #[test]
