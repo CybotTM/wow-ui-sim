@@ -54,10 +54,12 @@ const WOW_TOKEN_PUBLIC_METHODS: &[(&str, WowTokenPublicMethod)] = &[
         "UpdateListedAuctionableTokens",
         c_wow_token_public_update_listed_auctionable_tokens,
     ),
+    #[cfg(feature = "client-mists")]
     (
         "GetNumListedAuctionableTokens",
         c_wow_token_public_get_num_listed_auctionable_tokens,
     ),
+    #[cfg(feature = "client-mists")]
     (
         "GetListedAuctionableTokenInfo",
         c_wow_token_public_get_listed_auctionable_token_info,
@@ -115,12 +117,14 @@ fn c_wow_token_public_update_listed_auctionable_tokens(_state: &mut LuaState) ->
     Ok(0)
 }
 
+#[cfg(feature = "client-mists")]
 fn c_wow_token_public_get_num_listed_auctionable_tokens(state: &mut LuaState) -> LuaResult<u32> {
     let count = borrow_state(state)?.wow_token.listed_auctionable.len() as f64;
     state.push(Val::Num(count));
     Ok(1)
 }
 
+#[cfg(feature = "client-mists")]
 fn c_wow_token_public_get_listed_auctionable_token_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1)?;
     if index < 1 {
