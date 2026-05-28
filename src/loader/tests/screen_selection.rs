@@ -155,6 +155,52 @@ UnitFrame.lua
 }
 
 #[test]
+fn deprecated_chat_and_combat_compat_addons_load_after_base_addons() {
+    let ui = TempBlizzardUiDir::new("deprecated-compat-order");
+    for addon in [
+        "Blizzard_DeprecatedChatInfo",
+        "Blizzard_ChatFrameBase",
+        "Blizzard_DeprecatedCombatLog",
+        "Blizzard_CombatLogBase",
+    ] {
+        ui.add_addon(addon, "## AllowLoad: Game\nCore.lua\n");
+    }
+
+    let addons: Vec<String> = discover_blizzard_addons_for_screen(&ui.path, ScreenKind::Game)
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect();
+
+    let index = |name: &str| addons.iter().position(|addon| addon == name).unwrap();
+    assert!(index("Blizzard_ChatFrameBase") < index("Blizzard_DeprecatedChatInfo"));
+    assert!(index("Blizzard_CombatLogBase") < index("Blizzard_DeprecatedCombatLog"));
+}
+
+#[test]
+fn deprecated_combat_log_pulls_load_on_demand_combat_log_base() {
+    let ui = TempBlizzardUiDir::new("deprecated-combat-log-lod");
+    ui.add_addon(
+        "Blizzard_DeprecatedCombatLog",
+        "## AllowLoad: Game\nDeprecated.lua\n",
+    );
+    ui.add_addon(
+        "Blizzard_CombatLogBase",
+        "## AllowLoad: Game\n## LoadOnDemand: 1\nBase.lua\n",
+    );
+
+    let addons: Vec<String> = discover_blizzard_addons_for_screen(&ui.path, ScreenKind::Game)
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect();
+
+    assert_eq!(
+        addons,
+        vec!["Blizzard_CombatLogBase", "Blizzard_DeprecatedCombatLog"],
+        "implicit deprecated-combat-log dependency should pull the LOD base addon before loading deprecated globals"
+    );
+}
+
+#[test]
 fn cyclic_addons_still_emit_dependencies_before_load_first_addon() {
     let ui = TempBlizzardUiDir::new("load-first-cycle");
     ui.add_addon(

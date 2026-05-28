@@ -66,10 +66,16 @@ fn promote_foundational_addons_to_load_first(addons: &mut HashMap<String, (PathB
 }
 
 fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
-    HashMap::from([(
-        "Blizzard_UIPanels_Game".to_string(),
-        vec!["Blizzard_MoneyFrame".to_string()],
-    )])
+    HashMap::from([
+        (
+            "Blizzard_UIPanels_Game".to_string(),
+            vec!["Blizzard_MoneyFrame".to_string()],
+        ),
+        (
+            "Blizzard_DeprecatedCombatLog".to_string(),
+            vec!["Blizzard_CombatLogBase".to_string()],
+        ),
+    ])
 }
 
 /// TOC suffix matching the active client profile (e.g. `_Mainline` for retail,
@@ -381,11 +387,11 @@ pub fn discover_blizzard_addons_for_screen(
         return Vec::new();
     };
 
-    // Pull LOD addons that are required by non-LOD addons
-    pull_required_lod_addons(&mut addons, &mut lod_pool);
+    let extra_dependencies = implicit_blizzard_startup_dependencies();
+    // Pull LOD addons that are required by non-LOD addons or implicit startup deps.
+    pull_required_lod_addons(&mut addons, &mut lod_pool, &extra_dependencies);
 
     promote_foundational_addons_to_load_first(&mut addons);
-    let extra_dependencies = implicit_blizzard_startup_dependencies();
     topological_sort_addons_with_extra_dependencies(addons, &extra_dependencies)
 }
 
@@ -591,10 +597,16 @@ fn excluded_addons_for_active_profile() -> &'static [&'static str] {
 fn pull_required_lod_addons(
     addons: &mut HashMap<String, (PathBuf, TocFile)>,
     lod_pool: &mut HashMap<String, (PathBuf, TocFile)>,
+    extra_dependencies: &HashMap<String, Vec<String>>,
 ) {
     let mut needed: Vec<String> = addons
         .values()
         .flat_map(|(_, toc)| toc.dependencies())
+        .chain(
+            addons
+                .keys()
+                .flat_map(|name| extra_dependencies.get(name).into_iter().flatten().cloned()),
+        )
         .filter(|dep| lod_pool.contains_key(dep))
         .collect();
 
