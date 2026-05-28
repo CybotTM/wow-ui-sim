@@ -72,6 +72,7 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_SharedXML/Classic/UIDropDownMenuTemplates.xml",
     "Blizzard_SharedXML/TBC/ClassColors.lua",
     "Blizzard_SharedXML/Wrath/SoundKitConstants.lua",
+    "Blizzard_NamePlates/Blizzard_NamePlates.toc",
     "Blizzard_UIPanelTemplates/Blizzard_UIPanelTemplates_Classic.toc",
     "Blizzard_UIPanelTemplates/Classic/AutoCastTemplates.lua",
     "Blizzard_UIPanelTemplates/Classic/AutoCastTemplates.xml",
@@ -140,6 +141,10 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
             file_contains(path, "ActionBarButtonTemplate")
                 && file_contains(path, r#"parentKey="chargeCooldown""#)
         }
+        "Blizzard_NamePlates/Blizzard_NamePlates.toc" => file_contains(
+            path,
+            "Blizzard_ClassNameplateBar.lua [AllowLoadGameType mainline]",
+        ),
         _ => true,
     }
 }

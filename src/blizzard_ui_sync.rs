@@ -118,11 +118,11 @@ fn sync_manifest_entry(
     fallback_source: &mut RepoFallbackSource,
 ) -> crate::Result<EntrySyncResult> {
     let out_path = root.join(entry);
-    if out_path.is_file() && cache_entry_is_usable(entry, &out_path) {
+    if entry_is_present_and_usable(entry, &out_path) {
         return Ok(EntrySyncResult::Present);
     }
 
-    if extract_manifest_entry(entry, &out_path)? {
+    if extract_manifest_entry(entry, &out_path)? && entry_is_present_and_usable(entry, &out_path) {
         return Ok(EntrySyncResult::Extracted);
     }
 
@@ -136,6 +136,10 @@ fn sync_manifest_entry(
     }
 
     Ok(EntrySyncResult::Missing)
+}
+
+fn entry_is_present_and_usable(entry: &str, path: &Path) -> bool {
+    path.is_file() && cache_entry_is_usable(entry, path)
 }
 
 fn extract_manifest_entry(entry: &str, out_path: &Path) -> crate::Result<bool> {
@@ -515,7 +519,7 @@ mod tests {
     use flate2::Compression;
     use flate2::write::GzEncoder;
     use std::io;
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn unique_temp_dir(label: &str) -> PathBuf {
@@ -609,15 +613,11 @@ mod tests {
     #[cfg(feature = "client-mists")]
     fn mists_cache_rejects_old_classic_action_button_template() {
         let root = unique_temp_dir("mists-action-button-template");
-        for entry in super::required_profile_cache_entries() {
-            let path = root.join(entry);
-            std::fs::create_dir_all(path.parent().expect("entry has parent"))
-                .expect("create entry parent");
-            std::fs::write(path, "placeholder").expect("write placeholder");
-        }
+        write_mists_required_cache_entries(&root);
 
         let action_button_template =
             root.join("Blizzard_ActionBar/Classic/ActionButtonTemplate.xml");
+        std::fs::write(&action_button_template, "placeholder").expect("write placeholder");
         assert!(
             !super::cache_has_required_profile_files(&root),
             "Mists cache marker must not be trusted when ActionButtonTemplate.xml is the old Classic Era variant"
@@ -638,12 +638,58 @@ mod tests {
 
     #[test]
     #[cfg(feature = "client-mists")]
+    fn mists_cache_rejects_mainline_nameplates_toc_without_game_type_gates() {
+        let root = unique_temp_dir("mists-nameplates-toc");
+        write_mists_required_cache_entries(&root);
+
+        let nameplates_toc = root.join("Blizzard_NamePlates/Blizzard_NamePlates.toc");
+        std::fs::write(&nameplates_toc, "Blizzard_ClassNameplateBar.lua\n")
+            .expect("write ungated nameplates toc");
+        assert!(
+            !super::cache_has_required_profile_files(&root),
+            "Mists cache marker must not be trusted when Blizzard_NamePlates.toc would load Mainline class bar files"
+        );
+
+        std::fs::write(
+            nameplates_toc,
+            "Mainline\\Blizzard_ClassNameplateBar.lua [AllowLoadGameType mainline]\n",
+        )
+        .expect("write Mists-compatible nameplates toc");
+        assert!(
+            super::cache_has_required_profile_files(&root),
+            "Mists cache should be complete when Blizzard_NamePlates.toc preserves Mainline game-type gates"
+        );
+
+        std::fs::remove_dir_all(root).expect("remove cache root");
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
     fn mists_prefers_mop_classic_repo_fallbacks() {
         assert_eq!(
             super::gethe_wow_ui_source_branches().first().copied(),
             Some("classic_ptr"),
             "Mists fallback sync must prefer the source branch matching Mists ActionButton.lua"
         );
+    }
+
+    #[cfg(feature = "client-mists")]
+    fn write_mists_required_cache_entries(root: &Path) {
+        for entry in super::required_profile_cache_entries() {
+            let path = root.join(entry);
+            std::fs::create_dir_all(path.parent().expect("entry has parent"))
+                .expect("create entry parent");
+            let contents = match *entry {
+                "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml" => {
+                    r#"<CheckButton name="ActionBarButtonTemplate"><Cooldown parentKey="chargeCooldown"/></CheckButton>"#
+                }
+                "Blizzard_NamePlates/Blizzard_NamePlates.toc" => {
+                    "Mainline\\Blizzard_ClassNameplateBar.lua [AllowLoadGameType mainline]\n"
+                }
+                _ => "placeholder",
+            };
+            std::fs::write(path, contents).expect("write required cache entry");
+        }
     }
 
     #[test]
