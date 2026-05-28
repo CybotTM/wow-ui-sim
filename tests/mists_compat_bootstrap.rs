@@ -661,6 +661,29 @@ fn mists_bootstrap_supplies_settings_label_globals() {
 }
 
 #[test]
+fn mists_bootstrap_supplies_hidden_non_priest_priest_bar_mixins() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let result: (String, String, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "MistsPriestBarMixinProbe", UIParent)
+            PriestBarMixin.OnLoad(frame)
+            return type(PriestBarMixin.OnLoad),
+                type(PriestBarOrbMixin),
+                frame:IsShown()
+            "#,
+        )
+        .expect("Mists priest bar mixin probe should run");
+
+    assert_eq!(
+        result,
+        ("function".to_string(), "table".to_string(), false),
+        "Mists should define priest bar mixins and hide the frame for non-priest startup"
+    );
+}
+
+#[test]
 fn mists_create_forbidden_frame_forwards_to_create_frame() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 

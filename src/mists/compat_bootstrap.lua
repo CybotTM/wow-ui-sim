@@ -1408,3 +1408,68 @@ if rawget(_G, "SetGlyphNameFilter") == nil then
   function SetGlyphNameFilter(_text)
   end
 end
+
+-- Blizzard_UnitFrame/Mists/PriestBar.xml references these mixins, but the
+-- Mists source tree does not ship a matching PriestBar.lua. Keep the
+-- non-priest startup path explicit and hidden; fuller priest shadow orb
+-- behavior belongs in a modeled class-resource implementation.
+if rawget(_G, "PriestBarOrbMixin") == nil then
+  PriestBarOrbMixin = {}
+end
+
+if rawget(_G, "PriestBarMixin") == nil then
+  PriestBarMixin = {}
+end
+
+if PriestBarMixin.OnLoad == nil then
+  function PriestBarMixin:OnLoad()
+    local _localizedClass, class = UnitClass("player")
+    if class ~= "PRIEST" then
+      self:Hide()
+      return
+    end
+    self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
+    if self.Update then
+      self:Update()
+    end
+  end
+end
+
+if PriestBarMixin.OnEvent == nil then
+  function PriestBarMixin:OnEvent()
+    if self.Update then
+      self:Update()
+    end
+  end
+end
+
+if PriestBarMixin.Update == nil then
+  function PriestBarMixin:Update()
+    local shadowOrbs = UnitPower("player", Enum.PowerType.ShadowOrbs) or 0
+    for index = 1, 3 do
+      local orb = self["orb" .. index]
+      if orb then
+        orb:SetShown(index <= shadowOrbs)
+      end
+    end
+  end
+end
+
+if PriestBarMixin.OnEnter == nil then
+  function PriestBarMixin:OnEnter()
+    if GameTooltip_SetDefaultAnchor and GameTooltip then
+      GameTooltip_SetDefaultAnchor(GameTooltip, self)
+      GameTooltip:SetText(SHADOW_ORBS or SPELL_POWER_SHADOW_ORBS or "Shadow Orbs", 1, 1, 1)
+      GameTooltip:Show()
+    end
+  end
+end
+
+if PriestBarMixin.OnLeave == nil then
+  function PriestBarMixin:OnLeave()
+    if GameTooltip then
+      GameTooltip:Hide()
+    end
+  end
+end
