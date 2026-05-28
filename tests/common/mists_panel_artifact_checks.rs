@@ -1,6 +1,9 @@
 use std::collections::BTreeSet;
 use std::path::Path;
 
+#[path = "mists_panel_interaction_checks.rs"]
+mod mists_panel_interaction_checks;
+
 pub fn panel_slugs(repo_root: &Path, artifact_root: &str) -> Vec<String> {
     read_panel_baseline(repo_root)
         .lines()
@@ -266,8 +269,7 @@ fn panel_table_rows(baseline: &str) -> Vec<&str> {
 
     for line in baseline.lines() {
         if !found_header {
-            found_header = crate::mists_panel_interaction_checks::markdown_table_columns(line)
-                .first()
+            found_header = mists_panel_interaction_checks::markdown_table_columns(line).first()
                 == Some(&"Panel");
             continue;
         }
@@ -275,7 +277,7 @@ fn panel_table_rows(baseline: &str) -> Vec<&str> {
             break;
         }
 
-        let columns = crate::mists_panel_interaction_checks::markdown_table_columns(line);
+        let columns = mists_panel_interaction_checks::markdown_table_columns(line);
         if line.starts_with('|') && !is_separator_row(&columns) {
             rows.push(line);
         }
@@ -288,7 +290,7 @@ fn assert_panel_rows_have_four_columns(rows: &[&str]) {
     let malformed_rows = rows
         .iter()
         .copied()
-        .filter(|row| crate::mists_panel_interaction_checks::markdown_table_columns(row).len() != 4)
+        .filter(|row| mists_panel_interaction_checks::markdown_table_columns(row).len() != 4)
         .collect::<Vec<_>>();
 
     assert!(
@@ -302,7 +304,7 @@ fn assert_panel_rows_have_known_statuses(rows: &[&str]) {
         .iter()
         .copied()
         .filter(|row| {
-            let columns = crate::mists_panel_interaction_checks::markdown_table_columns(row);
+            let columns = mists_panel_interaction_checks::markdown_table_columns(row);
             !is_known_panel_status(columns[1])
         })
         .collect::<Vec<_>>();
@@ -318,7 +320,7 @@ fn assert_panel_rows_have_no_empty_fields(rows: &[&str]) {
         .iter()
         .copied()
         .filter(|row| {
-            crate::mists_panel_interaction_checks::markdown_table_columns(row)
+            mists_panel_interaction_checks::markdown_table_columns(row)
                 .iter()
                 .any(|column| column.is_empty())
         })
@@ -335,7 +337,7 @@ fn assert_panel_rows_have_unique_panel_names(rows: &[&str]) {
     let duplicate_panel_names = rows
         .iter()
         .filter_map(|row| {
-            crate::mists_panel_interaction_checks::markdown_table_columns(row)
+            mists_panel_interaction_checks::markdown_table_columns(row)
                 .first()
                 .copied()
                 .map(str::to_owned)
@@ -385,7 +387,7 @@ fn is_known_panel_status(status: &str) -> bool {
 }
 
 fn watch_or_fail_panel_name(row: &str) -> Option<String> {
-    let columns = crate::mists_panel_interaction_checks::markdown_table_columns(row);
+    let columns = mists_panel_interaction_checks::markdown_table_columns(row);
     let panel_name = columns.first()?;
     let status = columns.get(1)?;
 

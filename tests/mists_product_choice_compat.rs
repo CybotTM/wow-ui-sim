@@ -2,9 +2,15 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-const PRODUCT_CHOICE_LUA: &str = include_str!(
-    "../Interface/BlizzardUI/Mists/AddOns/Blizzard_UIPanels_Game/Classic/ProductChoice.lua"
-);
+fn product_choice_lua() -> String {
+    std::fs::read_to_string(
+        wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
+        .join("Blizzard_UIPanels_Game/Classic/ProductChoice.lua"),
+    )
+    .expect("Mists ProductChoice Lua should be available in the profile UI source")
+}
 
 #[test]
 fn mists_product_choice_alerts_reproduce_nil_choices_length() {
@@ -17,7 +23,8 @@ fn mists_product_choice_alerts_reproduce_nil_choices_length() {
         "#,
     )
     .expect("install nil ProductChoice choices fixture");
-    env.exec(PRODUCT_CHOICE_LUA)
+    let source = product_choice_lua();
+    env.exec(&source)
         .expect("ProductChoice.lua should define functions before events fire");
 
     let (product_choice_type, get_choices_type, choices_type, ok, err): (
@@ -55,7 +62,8 @@ fn mists_product_choice_alerts_reproduce_nil_choices_length() {
 #[test]
 fn mists_product_choice_empty_choices_are_available_data() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
-    env.exec(PRODUCT_CHOICE_LUA)
+    let source = product_choice_lua();
+    env.exec(&source)
         .expect("ProductChoice.lua should define functions before events fire");
 
     let (choices_type, choices_count, ok, err): (String, i32, bool, String) = env

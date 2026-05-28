@@ -5,6 +5,8 @@
 //! primary profession row. Mirrors the same test on master so layouts can be
 //! cross-checked across branches.
 
+#![cfg(feature = "client-mists")]
+
 use crate::common;
 
 use std::path::PathBuf;

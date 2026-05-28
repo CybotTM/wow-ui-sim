@@ -21,17 +21,16 @@ type MistsStartupApiShape = (
     String,
 );
 
-const HONOR_FRAME_SHARED_LUA: &str = include_str!(
-    "../Interface/BlizzardUI/Mists/AddOns/Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua"
-);
-const WORLD_MAP_CATA_LUA: &str = include_str!(
-    "../Interface/BlizzardUI/Mists/AddOns/Blizzard_WorldMap/Cata/Blizzard_WorldMap.lua"
-);
-
 fn blizzard_ui_dir() -> std::path::PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
         "CARGO_MANIFEST_DIR"
     )))
+}
+
+fn mists_lua_source(relative_path: &str) -> String {
+    std::fs::read_to_string(blizzard_ui_dir().join(relative_path)).unwrap_or_else(|error| {
+        panic!("Mists Lua source {relative_path} should be readable: {error}")
+    })
 }
 
 fn mists_money_input_frame_xml_path() -> std::path::PathBuf {
@@ -246,7 +245,8 @@ fn mists_trade_player_input_money_frame_widget_has_copper_child() {
 #[test]
 fn mists_world_map_set_opacity_reproduces_nil_opacity_arithmetic() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
-    env.exec(WORLD_MAP_CATA_LUA)
+    let source = mists_lua_source("Blizzard_WorldMap/Cata/Blizzard_WorldMap.lua");
+    env.exec(&source)
         .expect("Cata/Mists WorldMap Lua should define opacity helpers");
 
     let (ok, err): (bool, String) = env
@@ -338,7 +338,8 @@ fn mists_honor_frame_shared_reproduces_missing_honor_system_enabled() {
         "#,
     )
     .expect("install HonorFrame reproduction fixtures");
-    env.exec(HONOR_FRAME_SHARED_LUA)
+    let source = mists_lua_source("Blizzard_UIPanels_Game/Classic/HonorFrame_Shared.lua");
+    env.exec(&source)
         .expect("HonorFrame_Shared.lua should define functions before OnLoad runs");
 
     let (ok, err): (bool, String) = env

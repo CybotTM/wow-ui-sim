@@ -2,10 +2,15 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-const CLUB_FINDER_LUA: &str =
-    include_str!("../Interface/BlizzardUI/Mists/AddOns/Blizzard_Communities/ClubFinder.lua");
-const COLOR_UTIL_LUA: &str =
-    include_str!("../Interface/BlizzardUI/Mists/AddOns/Blizzard_SharedXML/ColorUtil.lua");
+fn mists_lua_source(relative_path: &str) -> String {
+    std::fs::read_to_string(
+        wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
+        .join(relative_path),
+    )
+    .unwrap_or_else(|error| panic!("Mists Lua source {relative_path} should be readable: {error}"))
+}
 
 fn load_club_finder_lua(env: &WowLuaEnv) {
     let loader = format!(
@@ -26,7 +31,7 @@ fn load_club_finder_lua(env: &WowLuaEnv) {
         local chunk = assert(loadstring(source))
         chunk("Blizzard_Communities", {{}})
         "#,
-        CLUB_FINDER_LUA
+        mists_lua_source("Blizzard_Communities/ClubFinder.lua")
     );
 
     env.exec(&loader)
@@ -34,7 +39,8 @@ fn load_club_finder_lua(env: &WowLuaEnv) {
 }
 
 fn load_color_util_lua(env: &WowLuaEnv) {
-    env.exec(COLOR_UTIL_LUA)
+    let source = mists_lua_source("Blizzard_SharedXML/ColorUtil.lua");
+    env.exec(&source)
         .expect("Mists ColorUtil Lua should define class color helpers");
 }
 

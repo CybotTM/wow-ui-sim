@@ -1,13 +1,22 @@
+#![cfg(feature = "client-mists")]
+
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-const NAMEPLATES_TBC_LUA: &str = include_str!(
-    "../Interface/BlizzardUI/Mists/AddOns/Blizzard_NamePlates/TBC/Blizzard_NamePlates.lua"
-);
+fn nameplates_tbc_lua() -> String {
+    std::fs::read_to_string(
+        wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
+        .join("Blizzard_NamePlates/TBC/Blizzard_NamePlates.lua"),
+    )
+    .expect("Mists NamePlates Lua should be available in the profile UI source")
+}
 
 #[test]
 fn nameplate_options_reproduce_nil_vertical_scale_arithmetic() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
-    env.exec(NAMEPLATES_TBC_LUA)
+    let source = nameplates_tbc_lua();
+    env.exec(&source)
         .expect("TBC/Mists NamePlates Lua should define option helpers");
 
     let (ok, err): (bool, String) = env
@@ -54,7 +63,8 @@ fn nameplate_options_reproduce_nil_vertical_scale_arithmetic() {
 #[test]
 fn nameplate_options_default_vertical_scale_updates_sizes() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
-    env.exec(NAMEPLATES_TBC_LUA)
+    let source = nameplates_tbc_lua();
+    env.exec(&source)
         .expect("TBC/Mists NamePlates Lua should define option helpers");
 
     let result: (

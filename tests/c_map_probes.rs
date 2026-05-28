@@ -94,7 +94,7 @@ fn get_map_children_info_with_all_descendants_walks_tree() {
 }
 
 #[test]
-fn get_map_info_exposes_cosmic_parent_for_mists_world_map() {
+fn get_map_info_exposes_cosmic_parent_for_seeded_world_maps() {
     let env = env();
     let (cosmic_type, azeroth_parent, dorn_parent): (i32, i32, i32) = env
         .eval(

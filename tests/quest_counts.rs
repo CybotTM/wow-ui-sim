@@ -94,6 +94,7 @@ fn quest_watch_poi_probe_handles_all_watched_quests() {
     assert_eq!(result, "ok");
 }
 
+#[cfg(feature = "client-mists")]
 #[test]
 fn get_quest_pois_fills_legacy_output_table() {
     let env = env();

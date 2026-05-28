@@ -2,8 +2,15 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-const TOKEN_UI_CATA_LUA: &str =
-    include_str!("../Interface/BlizzardUI/Mists/AddOns/Blizzard_TokenUI/Cata/Blizzard_TokenUI.lua");
+fn token_ui_cata_lua() -> String {
+    std::fs::read_to_string(
+        wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
+        .join("Blizzard_TokenUI/Cata/Blizzard_TokenUI.lua"),
+    )
+    .expect("Mists TokenUI Lua should be available in the profile UI source")
+}
 
 #[test]
 fn token_frame_update_reproduces_missing_currency_list_size() {
@@ -22,7 +29,8 @@ fn token_frame_update_reproduces_missing_currency_list_size() {
     )
     .expect("install TokenFrame reproduction fixtures");
 
-    env.exec(TOKEN_UI_CATA_LUA)
+    let source = token_ui_cata_lua();
+    env.exec(&source)
         .expect("Mists Cata TokenUI Lua should define TokenFrame helpers");
 
     let (ok, err): (bool, String) = env
@@ -58,7 +66,8 @@ fn legacy_currency_list_size_wraps_c_currency_info() {
     )
     .expect("install TokenFrame compatibility fixtures");
 
-    env.exec(TOKEN_UI_CATA_LUA)
+    let source = token_ui_cata_lua();
+    env.exec(&source)
         .expect("Mists Cata TokenUI Lua should define TokenFrame helpers");
 
     let (legacy_size, namespaced_size, update_ok, err): (i32, i32, bool, String) = env

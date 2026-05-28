@@ -92,6 +92,7 @@ fn unit_damage_returns_seven_values() {
     assert_eq!(pct, 1.0, "damage multiplier defaults to 1x");
 }
 
+#[cfg(feature = "client-mists")]
 #[test]
 fn unit_ranged_damage_returns_legacy_ranged_shape() {
     let env = env();
@@ -105,6 +106,7 @@ fn unit_ranged_damage_returns_legacy_ranged_shape() {
     assert_eq!(pct, 1.0);
 }
 
+#[cfg(feature = "client-mists")]
 #[test]
 fn legacy_weapon_speed_and_ranged_attack_are_numeric() {
     let env = env();

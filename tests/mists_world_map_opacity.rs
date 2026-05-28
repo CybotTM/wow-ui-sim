@@ -1,13 +1,22 @@
+#![cfg(feature = "client-mists")]
+
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-const WORLD_MAP_CATA_LUA: &str = include_str!(
-    "../Interface/BlizzardUI/Mists/AddOns/Blizzard_WorldMap/Cata/Blizzard_WorldMap.lua"
-);
+fn world_map_cata_lua() -> String {
+    std::fs::read_to_string(
+        wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
+        .join("Blizzard_WorldMap/Cata/Blizzard_WorldMap.lua"),
+    )
+    .expect("Mists WorldMap Lua should be available in the profile UI source")
+}
 
 #[test]
 fn world_map_opacity_default_feeds_set_opacity() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
-    env.exec(WORLD_MAP_CATA_LUA)
+    let source = world_map_cata_lua();
+    env.exec(&source)
         .expect("Cata/Mists WorldMap Lua should define opacity helpers");
 
     let (opacity, ok, err, frame_alpha, scroll_alpha, quest_alpha): (

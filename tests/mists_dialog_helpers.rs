@@ -2,8 +2,15 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-const MONEY_FRAME_LUA: &str =
-    include_str!("../Interface/BlizzardUI/Mists/AddOns/Blizzard_MoneyFrame/Classic/MoneyFrame.lua");
+fn money_frame_lua() -> String {
+    std::fs::read_to_string(
+        wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
+        .join("Blizzard_MoneyFrame/Classic/MoneyFrame.lua"),
+    )
+    .expect("Mists MoneyFrame Lua should be available in the profile UI source")
+}
 
 fn load_money_frame_lua(env: &WowLuaEnv) {
     let loader = format!(
@@ -14,7 +21,7 @@ fn load_money_frame_lua(env: &WowLuaEnv) {
         local chunk = assert(loadstring(source))
         chunk("Blizzard_MoneyFrame", {{ MoneyTypeInfo = {{}} }})
         "#,
-        MONEY_FRAME_LUA
+        money_frame_lua()
     );
 
     env.exec(&loader)

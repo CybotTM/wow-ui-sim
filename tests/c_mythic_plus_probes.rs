@@ -49,6 +49,7 @@ fn get_current_affixes_reflects_mutation() {
 
 // ── C_ChallengeMode legacy map surface ───────────────────────────────────────
 
+#[cfg(feature = "client-mists")]
 #[test]
 fn challenge_mode_map_table_seeds_mists_challenge_map() {
     let env = env();

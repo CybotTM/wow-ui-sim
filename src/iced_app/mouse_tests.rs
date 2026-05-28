@@ -26,7 +26,7 @@ fn mists_main_menu_micro_button_opens_game_menu_from_mouse_hit_test() {
         )
     };
 
-    let hit_id = app.hit_test_mouse_button(click_pos, "LeftButton");
+    let hit_id = app.hit_test_mouse_button(click_pos, "LeftButton", false);
     assert_eq!(
         hit_id,
         Some(button_id),

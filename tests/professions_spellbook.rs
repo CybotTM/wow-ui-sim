@@ -70,6 +70,7 @@ fn test_mining_skill_line_in_spellbook() {
     assert_eq!(name, "Mining");
 }
 
+#[cfg(feature = "client-mists")]
 #[test]
 fn test_legacy_spell_tabs_expose_backing_skill_lines() {
     let env = env();
@@ -88,6 +89,7 @@ fn test_legacy_spell_tabs_expose_backing_skill_lines() {
     assert!(item_count > 0, "first spell tab should contain spells");
 }
 
+#[cfg(feature = "client-mists")]
 #[test]
 fn test_legacy_spellbook_item_globals_return_mists_shape() {
     let env = env();
@@ -128,6 +130,7 @@ fn test_legacy_spellbook_item_globals_return_mists_shape() {
     assert!(!is_passive);
 }
 
+#[cfg(feature = "client-mists")]
 #[test]
 fn legacy_spellbook_item_info_has_classic_shape() {
     let env = env();
