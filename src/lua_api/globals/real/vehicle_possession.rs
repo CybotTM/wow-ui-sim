@@ -1,4 +1,4 @@
-//! Vehicle / possess / taxi globals consumed by
+//! State-backed vehicle / possess / taxi globals consumed by
 //! `Blizzard_ActionBar/Shared/VehicleLeaveButton.lua` and
 //! `Blizzard_ActionBar/Shared/PossessActionBar.lua`.
 //!

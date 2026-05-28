@@ -1,9 +1,21 @@
 //! Integration tests for the vehicle / possess / taxi globals registered in
-//! `src/lua_api/globals/vehicle_possession.rs` plus the channel branch of
+//! `src/lua_api/globals/real/vehicle_possession.rs` plus the channel branch of
 //! `UnitChannelInfo` in `globals/utility_system_spell/spell_api.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::state::CastingState;
+
+#[test]
+fn vehicle_possession_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/vehicle_possession.rs").exists(),
+        "vehicle/possess/taxi globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/vehicle_possession.rs").exists(),
+        "vehicle/possess/taxi globals should stay classified as real modeled Lua globals",
+    );
+}
 
 #[test]
 fn unit_has_vehicle_ui_reads_player_flag() {
