@@ -306,6 +306,7 @@ fn init_and_load(
     startup_trace::time_load_step("load Blizzard addons", || {
         addon_loading::load_blizzard_addons(&env, &mut saved_vars, screen)
     });
+    #[cfg(feature = "client-mists")]
     startup_trace::time_load_step("apply post-Blizzard load workarounds", || {
         apply_post_load_workarounds(&env)
     });
