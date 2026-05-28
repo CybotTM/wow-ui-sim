@@ -11,7 +11,7 @@
 #   2. Symlink Interface/AddOns/<name> -> source/<subpath>
 #   3. Build wow-sim with the addon's profile feature
 #   4. Run lua-errors, save to target/addon-harness/<name>-lua-errors.json
-#   5. Diff message-set against docs/baselines/<profile>-lua-errors.json and
+#   5. Diff message-set against docs/baselines/mists-lua-errors.json and
 #      report the count of *addon-induced* errors (= new vs baseline)
 #   6. Tear down the symlink so the test directory is clean for the next run
 #

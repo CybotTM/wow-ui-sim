@@ -1,6 +1,6 @@
 # Mists Load-On-Demand Addon Audit
 
-Captured 2026-05-12 on `classic-profile-rollout`.
+Captured 2026-05-12 on the Mists rollout branch.
 
 This audit accounts for every Blizzard addon directory under
 `Interface/BlizzardUI/Mists/AddOns` that has at least one `.toc` file with

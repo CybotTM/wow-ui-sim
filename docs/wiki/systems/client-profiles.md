@@ -85,18 +85,18 @@ Wrath ships its UI as a flat `Interface/FrameXML/` tree alongside `Interface/Add
 
 ## CI matrix
 
-`.github/workflows/test.yml` `client-profile-smoke` fans out across `[wrath, mists, era, anniversary]` (one matrix entry per non-retail profile). Each entry: `setup-blizzard-ui.sh <profile>` → `cargo build --features client-<profile>` → `cargo check --tests` → `lua-errors > <profile>-lua-errors.json`. Retail stays on the dedicated `cargo-test` job because tests are written against the retail UI surface.
+`.github/workflows/test.yml` `client-profile-smoke` currently runs the Mists profile only. The job runs `setup-blizzard-ui.sh mists` → `cargo build --features client-mists` → `cargo check --tests` → `lua-errors > lua-errors.json`, then diffs against `docs/baselines/mists-lua-errors.json`. Retail stays on the dedicated `cargo-test` job because tests are written against the retail UI surface.
 
-`.github/workflows/addon-harness.yml` further fans out across `(profile, addon)` pairs derived dynamically from `tools/classic-addon-manifest.tsv`. See [[../reference/classic-addon-targets]] (Phase 8.1 picks doc) for the workflow.
+The addon harness is Mists-only and is driven locally by `scripts/test-classic-addons.sh` / `scripts/ci-mists-guard.sh` from `tools/classic-addon-manifest.tsv`. See `docs/baselines/classic-addon-test-targets.md` for the retained addon picks.
 
-## Per-profile baselines
+## Mists baselines
 
 Captured in `docs/baselines/`:
 
-- `<profile>-lua-errors.json` — boot-time error snapshots (retail 0 / wrath 66 / mists 54 / era 98 / anniversary 93 after Phase 7.5)
-- `startup-bench.tsv` — wall-clock from invocation to JSON emit
-- `memory-bench.tsv` — rilua heap, RSS peak, widget count
-- `flamegraphs.md` — instructions for `scripts/bench-flamegraph.sh`
+- `mists-lua-errors.json` — clean boot-time error snapshot
+- `mists-panels.md`, `mists-panel-interactions.md`, and `mists-panel-visuals.tsv` — panel parity artifacts
+- `mists-test-coverage.md`, `mists-release-proof.md`, and `mists-lod-audit.md` — retained Mists proof notes
+- `classic-addon-test-targets.md` — Mists addon harness target set
 
 ## Sources
 

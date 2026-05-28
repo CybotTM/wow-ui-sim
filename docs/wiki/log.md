@@ -164,8 +164,9 @@ standardizing the Wrath 3.3.5 source on `Gethe/wow-ui-source` tag `3.3.5`
 (`c4e0255f`). Documented that Wrath's symlink points at the checkout root
 because Gethe's 3.3.5 tag stores `AddOns/` and `FrameXML/` at repo root,
 unlike newer profiles that keep sources under `Interface/`.
-Recaptured `docs/baselines/wrath-lua-errors.json` against the Gethe source
-(128 distinct startup messages).
+Recaptured the Wrath startup snapshot against the Gethe source (128 distinct
+startup messages). The snapshot file was later removed from the Mists-only
+merge scope.
 
 ## [2026-05-08] update | Windows default GUI build and headless CI compile
 

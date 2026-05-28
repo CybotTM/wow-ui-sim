@@ -63,7 +63,7 @@ jobs:
 
       - name: Diff against committed baseline
         # Compares the just-captured lua-errors.json against the committed
-        # baseline at docs/baselines/<profile>-lua-errors.json. Reports
+        # Mists baseline at docs/baselines/mists-lua-errors.json. Reports
         # regressed (new) and fixed (gone) error messages for visibility
         # in the PR; does NOT fail the job on regression — baselines move
         # quickly during dev. Bump to --exit-on-regression once they

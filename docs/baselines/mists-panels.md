@@ -1,6 +1,6 @@
 # Mists Panel Parity Baseline
 
-Captured 2026-05-12 on `classic-profile-rollout` after the panel parity audit
+Captured 2026-05-12 on the Mists rollout branch after the panel parity audit
 and the clean installed-addon harness run. This baseline tracks the human-facing
 panel state for Pandaria Classic separately from the machine-readable
 `lua-errors` baseline.

@@ -1,6 +1,6 @@
 # Mists Blizzard UI Test Coverage Index
 
-Captured 2026-05-14 on `classic-profile-rollout`.
+Captured 2026-05-14 on the Mists rollout branch.
 
 This index ties the Mists panel parity rows to the local `client-mists` tests
 and to the comparable retail Blizzard UI coverage board in

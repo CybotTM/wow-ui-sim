@@ -29,7 +29,7 @@ produce render output, and stay free of `lua-errors`; it is not evidence that
 the rendered art matches local asset-backed Mists captures.
 
 Latest local asset-backed HUD recapture: 2026-05-14 on
-`classic-profile-rollout`, retained under `target/mists-local-visual-audit/`.
+the Mists rollout branch, retained under `target/mists-local-visual-audit/`.
 `idle-hud-recapture.webp` and `target-hud-recapture.webp` show the player and
 target unit frames using Mists art, populated action buttons, bag slots, micro
 buttons, minimap art, quest tracker text, and no gray placeholder bars or broken
@@ -41,7 +41,7 @@ paths behind those captures. The focused regression test is
 
 ## Local Non-Release Completion Audit
 
-Latest local debug-profile audit: 2026-05-14 on `classic-profile-rollout`,
+Latest local debug-profile audit: 2026-05-14 on the Mists rollout branch,
 with artifacts retained under `target/mists-local-completion-audit/`.
 Focused local refreshes on 2026-05-16 rechecked the current saved-vars panel
 artifact tree, installed-addon startup matrix, and live connected-GUI smoke
@@ -91,7 +91,7 @@ evidence without reintroducing release-proof or CI texture work.
 
 ## Local Installed-Addon Panel Sample
 
-Latest bounded local sample: 2026-05-14 on `classic-profile-rollout`, using
+Latest bounded local sample: 2026-05-14 on the Mists rollout branch, using
 debug `wow-sim` plus the installed `BlizzMove` and `DeModal` UI-mutating addons
 under test.
 

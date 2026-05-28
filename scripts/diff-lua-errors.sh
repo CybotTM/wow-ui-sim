@@ -3,7 +3,7 @@
 #
 # Used by:
 #   - .github/workflows/test.yml — diff the PR's lua-errors against the
-#     committed baseline at docs/baselines/<profile>-lua-errors.json
+#     committed lua-errors baseline
 #   - scripts/test-classic-addons.sh — diff the addon run against the
 #     profile baseline to compute "addon-induced errors"
 #   - manual debugging: scripts/diff-lua-errors.sh BASELINE NEW

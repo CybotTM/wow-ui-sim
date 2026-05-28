@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared source resolution for classic-profile addon harnesses.
+# Shared source resolution for Mists addon harnesses.
 
 classic_addon_fixture_root() {
     echo "${CLASSIC_ADDON_FIXTURE_ROOT:-$REPO_ROOT/tools/classic-addon-fixtures}"
