@@ -1,6 +1,6 @@
 use super::{
-    call_error_handler, call_error_handler_state, get_scripts_for_dispatch,
-    protected_lua_pcall_state, registry_table, table_get_str,
+    call_error_handler, call_error_handler_state, get_script_handlers_for_dispatch,
+    get_scripts_for_dispatch, protected_lua_pcall_state, registry_table, table_get_str,
 };
 use crate::lua_api::handler_timing;
 use crate::lua_api::methods::{create_string, frame_ref};
@@ -9,8 +9,11 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApi, LuaApiMut, Val};
+use std::borrow::Cow;
 use std::collections::HashSet;
 use std::time::Instant;
+
+const BUILTIN_ADDON_NAME: &str = "__BuiltIn";
 
 /// Get event listeners in registration order from rilua's registry.
 pub fn get_event_listeners(state: &mut LuaState, event: &str) -> Vec<u64> {
@@ -180,7 +183,7 @@ pub fn dispatch_on_update(
     for &frame_id in frame_ids {
         let handlers = {
             let state = lua.state_mut();
-            get_scripts_for_dispatch(state, frame_id, "OnUpdate")
+            get_script_handlers_for_dispatch(state, frame_id, "OnUpdate")
         };
         if handlers.is_empty() {
             continue;
@@ -189,11 +192,22 @@ pub fn dispatch_on_update(
             let state = lua.state_mut();
             frame_ref(state, frame_id)?
         };
-        for handler_val in handlers {
-            let Val::Function(func_ref) = handler_val else {
+        for handler in handlers {
+            let Val::Function(func_ref) = handler.handler else {
                 continue;
             };
-            dispatch_on_update_handler(lua, frame_id, frame_val, elapsed_val, func_ref);
+            let registered_source = {
+                let state = lua.state_mut();
+                super::get_script_source_binding(state, frame_id, "OnUpdate", handler.binding)
+            };
+            dispatch_on_update_handler(
+                lua,
+                frame_id,
+                frame_val,
+                elapsed_val,
+                func_ref,
+                registered_source,
+            );
         }
     }
     Ok(())
@@ -205,13 +219,23 @@ fn dispatch_on_update_handler(
     frame_val: Val,
     elapsed_val: Val,
     func_ref: GcRef<Closure>,
+    registered_source: Option<String>,
 ) {
     let (owner_addon, addon_name, frame_name) = handler_log_metadata(lua.state(), frame_id);
     let func = rilua::Function::from_gc_ref(func_ref);
     let start = Instant::now();
     let previous_addon = replace_executing_addon(lua.state(), owner_addon);
     if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
-        let error = handler_error_message("OnUpdate", frame_name.as_deref(), &e.to_string());
+        let source =
+            registered_source.or_else(|| handler_error_source_label(lua.state(), func_ref));
+        let error = handler_error_message(
+            "OnUpdate",
+            frame_id,
+            frame_name.as_deref(),
+            addon_name.as_deref(),
+            source.as_deref(),
+            &e.to_string(),
+        );
         call_error_handler(lua, &error);
     }
     replace_executing_addon(lua.state(), previous_addon);
@@ -228,10 +252,30 @@ fn dispatch_on_update_handler(
     );
 }
 
-fn handler_error_message(handler_name: &str, frame_name: Option<&str>, error: &str) -> String {
+fn handler_error_message(
+    handler_name: &str,
+    frame_id: u64,
+    frame_name: Option<&str>,
+    addon_name: Option<&str>,
+    source: Option<&str>,
+    error: &str,
+) -> String {
+    let frame = handler_frame_label(frame_name, frame_id);
+    let addon = addon_name.unwrap_or(BUILTIN_ADDON_NAME);
+    let mut message = format!("[{handler_name}] frame={frame} addon={addon}");
+    if let Some(source) = source.filter(|source| !source.is_empty()) {
+        message.push_str(" source=");
+        message.push_str(source);
+    }
+    message.push_str(": ");
+    message.push_str(error);
+    message
+}
+
+fn handler_frame_label(frame_name: Option<&str>, frame_id: u64) -> Cow<'_, str> {
     match frame_name {
-        Some(name) => format!("[{handler_name}] {name}: {error}"),
-        None => format!("[{handler_name}] <unnamed>: {error}"),
+        Some(name) if !name.is_empty() => Cow::Borrowed(name),
+        _ => Cow::Owned(format!("#{frame_id}")),
     }
 }
 
@@ -301,6 +345,17 @@ fn log_dispatched_handler(
 
 fn handler_source_label(state: &LuaState, func_ref: GcRef<Closure>) -> Option<String> {
     handler_timing::lua_closure_source_label(state, func_ref)
+}
+
+fn handler_error_source_label(state: &LuaState, func_ref: GcRef<Closure>) -> Option<String> {
+    let closure = state.gc.closures.get(func_ref)?;
+    let lua_closure = closure.as_lua()?;
+    let proto = lua_closure.proto.as_ref();
+    if proto.short_source.is_empty() {
+        return None;
+    }
+
+    Some(format!("{}:{}", proto.short_source, proto.line_defined))
 }
 
 fn record_frame_timing(state: &LuaState, owner_addon: Option<u16>, start: &Instant) {

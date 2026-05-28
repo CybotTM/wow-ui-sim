@@ -14,11 +14,14 @@ use crate::lua_api::methods::{call_function_state, val_to_string};
 
 mod event_dispatch;
 mod on_update_cache;
+mod source_metadata;
 #[cfg(test)]
 mod tests;
 
 pub use event_dispatch::{dispatch_on_update, fire_named_event_state, get_event_listeners};
 pub use on_update_cache::reconcile_on_update_runtime_cache_if_dirty;
+pub use source_metadata::get_script_source_binding;
+use source_metadata::{remove_script_source_binding, set_script_source_binding};
 
 // ── Registry helpers ────────────────────────────────────────────────
 
@@ -57,6 +60,12 @@ impl ScriptBinding {
             Self::Postcall => SCRIPTS_POSTCALL_KEY,
         }
     }
+}
+
+#[derive(Clone, Debug)]
+pub struct ScriptDispatchHandler {
+    pub binding: ScriptBinding,
+    pub handler: Val,
 }
 
 /// Get a named table from rilua's registry, returning None if absent.
@@ -183,6 +192,7 @@ pub fn set_script_binding(
         script_frame_table(state, scripts, widget_id, true).expect("created handler table");
     let handler_key = script_handler_key_ref(state, handler_name);
     table_set_str_ref(state, handlers, handler_key, func);
+    set_script_source_binding(state, widget_id, handler_name, binding, func);
     sync_on_update_cache(state, widget_id, handler_name);
 
     state.top = stack_slot;
@@ -205,6 +215,7 @@ pub fn remove_script_binding(
             table_set_str_ref(state, handlers, handler_key, Val::Nil);
         }
     }
+    remove_script_source_binding(state, widget_id, handler_name, binding);
     sync_on_update_cache(state, widget_id, handler_name);
 }
 
@@ -244,6 +255,17 @@ pub fn get_scripts_for_dispatch(
     widget_id: u64,
     handler_name: &str,
 ) -> Vec<Val> {
+    get_script_handlers_for_dispatch(state, widget_id, handler_name)
+        .into_iter()
+        .map(|handler| handler.handler)
+        .collect()
+}
+
+pub fn get_script_handlers_for_dispatch(
+    state: &mut LuaState,
+    widget_id: u64,
+    handler_name: &str,
+) -> Vec<ScriptDispatchHandler> {
     let handler_key = script_handler_key_ref(state, handler_name);
     let mut scripts = Vec::with_capacity(3);
     for binding in [
@@ -252,7 +274,10 @@ pub fn get_scripts_for_dispatch(
         ScriptBinding::Postcall,
     ] {
         if let Some(script) = get_script_binding_ref(state, widget_id, handler_key, binding) {
-            scripts.push(script);
+            scripts.push(ScriptDispatchHandler {
+                binding,
+                handler: script,
+            });
         }
     }
     scripts
