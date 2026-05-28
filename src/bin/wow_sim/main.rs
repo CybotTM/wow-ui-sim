@@ -407,15 +407,8 @@ fn runtime_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
         return Ok(path);
     }
 
-    if wow_ui_sim::client_profile::ACTIVE == wow_ui_sim::client_profile::ClientProfile::Retail {
-        return recover_missing_blizzard_ui_addons_path(wow_ui_sim::Error::Other(format!(
-            "missing Blizzard UI cache at {}",
-            path.display()
-        )));
-    }
-
-    Err(wow_ui_sim::Error::Other(format!(
-        "missing Blizzard UI sources for {:?} profile at {}",
+    recover_missing_blizzard_ui_addons_path(wow_ui_sim::Error::Other(format!(
+        "missing Blizzard UI cache for {:?} profile at {}",
         wow_ui_sim::client_profile::ACTIVE,
         path.display()
     )))

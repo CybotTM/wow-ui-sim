@@ -117,17 +117,14 @@ pub fn blizzard_ui_root() -> PathBuf {
 
 /// Path to the AddOns directory for the active profile.
 ///
-/// Retail uses the CASC-synced cache when present. Classic profiles still use
-/// the profile-specific vendor trees because the retail cache manifest does not
-/// contain Wrath/Mists/Era/Anniversary UI sources.
+/// Prefer the cache-managed Blizzard UI source tree for every client profile.
+/// The repo-local profile trees are legacy fallbacks for tests and old working
+/// copies; normal runtime loading should come from `~/.cache/wow-ui-sim`.
 pub fn blizzard_ui_addons_dir() -> PathBuf {
-    if ACTIVE == ClientProfile::Retail {
-        if let Some(cache_path) = crate::blizzard_ui_sync::cached_blizzard_ui_addons_path() {
-            return cache_path;
-        }
-    }
-
-    blizzard_ui_root().join("AddOns")
+    blizzard_ui_addons_dir_under_with_cache(
+        &PathBuf::from(env!("CARGO_MANIFEST_DIR")),
+        crate::blizzard_ui_sync::cached_blizzard_ui_addons_path(),
+    )
 }
 
 /// Absolute path to the AddOns directory for the active profile, anchored at `root`.
@@ -135,10 +132,15 @@ pub fn blizzard_ui_addons_dir() -> PathBuf {
 /// Tests typically pass `Path::new(env!("CARGO_MANIFEST_DIR"))` so the path resolves
 /// regardless of the test's current working directory.
 pub fn blizzard_ui_addons_dir_under(root: &Path) -> PathBuf {
-    if ACTIVE == ClientProfile::Retail {
-        if let Some(cache_path) = crate::blizzard_ui_sync::cached_blizzard_ui_addons_path() {
-            return cache_path;
-        }
+    blizzard_ui_addons_dir_under_with_cache(
+        root,
+        crate::blizzard_ui_sync::cached_blizzard_ui_addons_path(),
+    )
+}
+
+fn blizzard_ui_addons_dir_under_with_cache(root: &Path, cache_path: Option<PathBuf>) -> PathBuf {
+    if let Some(cache_path) = cache_path {
+        return cache_path;
     }
 
     root.join("Interface/BlizzardUI")
@@ -155,4 +157,20 @@ pub fn blizzard_ui_addons_dir_under(root: &Path) -> PathBuf {
 pub fn blizzard_ui_framexml_toc() -> Option<PathBuf> {
     let toc = blizzard_ui_root().join("FrameXML").join("FrameXML.toc");
     toc.exists().then_some(toc)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_prefers_completed_cache_over_repo_vendor_tree() {
+        let root = tempfile::tempdir().expect("tempdir");
+        let cache_path = root.path().join("cache/blizzard-ui");
+        let resolved =
+            blizzard_ui_addons_dir_under_with_cache(root.path(), Some(cache_path.clone()));
+
+        assert_eq!(resolved, cache_path);
+    }
 }
