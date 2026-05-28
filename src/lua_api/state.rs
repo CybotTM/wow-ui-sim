@@ -242,7 +242,7 @@ macro_rules! build_empty_sim_state {
             torghast: TorghastState::default(),
             titles: Vec::new(),
             current_title: -1,
-            shapeshift_forms: Vec::new(),
+            shapeshift_forms: default_paladin_aura_forms(),
             shapeshift_cooldowns: ::std::collections::HashMap::new(),
             pet_actions: vec![PetActionSlot::default(); 10],
             glyph: GlyphState::default(),
@@ -571,6 +571,38 @@ const INITIAL_ANIM_GROUP_ID: u64 = 1;
 const INITIAL_CAST_ID: u32 = 1;
 const DEFAULT_SCREEN_WIDTH: f32 = 1024.0;
 const DEFAULT_SCREEN_HEIGHT: f32 = 768.0;
+
+fn default_paladin_aura_forms() -> Vec<ShapeshiftForm> {
+    const PALADIN_AURA_FORMS: &[(u32, &str)] = &[
+        (465, "Devotion Aura"),
+        (32223, "Crusader Aura"),
+        (183435, "Retribution Aura"),
+    ];
+
+    PALADIN_AURA_FORMS
+        .iter()
+        .map(|(spell_id, fallback_name)| ShapeshiftForm {
+            name: spell_name_or_fallback(*spell_id, fallback_name).to_string(),
+            texture: spell_texture_path(*spell_id),
+            spell_id: *spell_id,
+            is_active: false,
+            is_castable: true,
+        })
+        .collect()
+}
+
+fn spell_name_or_fallback<'a>(spell_id: u32, fallback: &'a str) -> &'a str {
+    crate::spells::get_spell(spell_id)
+        .map(|spell| spell.name)
+        .unwrap_or(fallback)
+}
+
+fn spell_texture_path(spell_id: u32) -> String {
+    crate::spells::get_spell(spell_id)
+        .and_then(|spell| crate::manifest_interface_data::get_texture_path(spell.icon_file_data_id))
+        .unwrap_or("Interface/Icons/INV_Misc_QuestionMark")
+        .to_string()
+}
 
 impl EmptyRuntimeState {
     fn new() -> Self {

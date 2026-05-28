@@ -34,6 +34,35 @@ fn env_with_druid_forms() -> WowLuaEnv {
 }
 
 #[test]
+fn seeded_paladin_exposes_three_aura_forms() {
+    let env = WowLuaEnv::new().expect("WowLuaEnv init");
+
+    let (count, first_name, second_name, third_name): (
+        i32,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+    ) = env
+        .eval(
+            r#"
+            local names = {}
+            for i = 1, GetNumShapeshiftForms() do
+                local _texture, _active, _castable, spellID = GetShapeshiftFormInfo(i)
+                local info = C_Spell.GetSpellInfo(spellID)
+                names[i] = info and info.name or nil
+            end
+            return GetNumShapeshiftForms(), names[1], names[2], names[3]
+            "#,
+        )
+        .expect("seeded Paladin shapeshift aura probe");
+
+    assert_eq!(count, 3);
+    assert_eq!(first_name.as_deref(), Some("Devotion Aura"));
+    assert_eq!(second_name.as_deref(), Some("Crusader Aura"));
+    assert_eq!(third_name.as_deref(), Some("Retribution Aura"));
+}
+
+#[test]
 fn shapeshift_globals_live_under_real_globals_boundary() {
     assert!(
         !std::path::Path::new("src/lua_api/globals/shapeshift.rs").exists(),

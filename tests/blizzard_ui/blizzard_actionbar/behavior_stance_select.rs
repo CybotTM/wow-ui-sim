@@ -61,13 +61,12 @@
 //! stayed unchecked — pinning the cross-button isolation.
 //!
 //! Why the test calls `StanceBar:Update()` after populating sim state but
-//! before the Select call: cold-start `state.shapeshift_forms` is empty, so
-//! `StanceBar:Update()` runs once during PLAYER_ENTERING_WORLD with
-//! `numForms = 0`, takes the early-out, and leaves `actionButtons` checked
-//! state untouched. The test fixture re-runs Update after populating state,
-//! which sets `self.numForms = 2` and dispatches the first `UpdateState`
-//! call — at this point both buttons read `isActive = false` so both are
-//! unchecked. That gives a clean cold state for the Select(2) round trip.
+//! before the Select call: the simulator seeds Paladin aura forms by default,
+//! while this test needs a two-form Bear/Cat fixture for a precise transition.
+//! Re-running Update after overwriting the state sets `self.numForms = 2` and
+//! dispatches the first `UpdateState` call — at this point both buttons read
+//! `isActive = false` so both are unchecked. That gives a clean cold state for
+//! the Select(2) round trip.
 //!
 //! Why the test pre-populates state via the Rust `state().borrow_mut()`
 //! seam rather than firing some Lua event: there is no sim-side Lua API for
@@ -134,6 +133,46 @@ use wow_ui_sim::lua_api::state::ShapeshiftForm;
 
 const ROOT: &str = "Blizzard_ActionBarController";
 const TARGET_INDEX: i32 = 2;
+
+#[test]
+fn seeded_paladin_aura_forms_populate_stance_bar_buttons() {
+    test_timeout! {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        env.exec("StanceBar:Update()")
+            .expect("seeded Paladin StanceBar update must run cleanly");
+
+        let (num_forms, shown, first_spell, second_spell, third_spell, fourth_visible): (
+            i32,
+            bool,
+            i32,
+            i32,
+            i32,
+            bool,
+        ) = env
+            .eval(
+                r#"
+                return StanceBar.numForms,
+                    StanceBar:IsShown() and true or false,
+                    StanceButton1.spellID or 0,
+                    StanceButton2.spellID or 0,
+                    StanceButton3.spellID or 0,
+                    StanceButton4:IsShown() and true or false
+                "#,
+            )
+            .expect("seeded Paladin StanceBar button probe must run cleanly");
+
+        assert_eq!(num_forms, 3);
+        assert!(shown, "StanceBar should show when the player has Paladin aura forms");
+        assert_eq!(first_spell, 465);
+        assert_eq!(second_spell, 32223);
+        assert_eq!(third_spell, 183435);
+        assert!(
+            !fourth_visible,
+            "Only the three seeded Paladin aura buttons should be visible"
+        );
+    });
+    }
+}
 
 #[test]
 fn stance_bar_select_fans_cast_shapeshift_form_and_flips_target_button_to_checked() {
