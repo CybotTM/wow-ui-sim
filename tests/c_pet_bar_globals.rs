@@ -1,5 +1,5 @@
 //! Integration tests for the pet action-bar globals registered in
-//! `src/lua_api/globals/pet_bar.rs`.
+//! `src/lua_api/globals/real/pet_bar.rs`.
 //!
 //! Verifies `GetNumPetActions`, `GetPetActionInfo`, `GetPetActionCooldown`,
 //! `CastPetAction`, `TogglePetAutocast`, `CancelPetPossess`, and
@@ -38,6 +38,18 @@ fn env_with_pet_slots() -> WowLuaEnv {
         };
     }
     env
+}
+
+#[test]
+fn pet_bar_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/pet_bar.rs").exists(),
+        "pet action-bar globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/pet_bar.rs").exists(),
+        "pet action-bar globals should stay classified as real modeled Lua globals",
+    );
 }
 
 #[test]

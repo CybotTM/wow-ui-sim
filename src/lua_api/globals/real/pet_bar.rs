@@ -1,4 +1,4 @@
-//! Pet action-bar globals consumed by `Blizzard_ActionBar/Shared/PetActionBar.lua`.
+//! State-backed pet action-bar globals consumed by `Blizzard_ActionBar/Shared/PetActionBar.lua`.
 //!
 //! Mirrors the live API shape:
 //!
