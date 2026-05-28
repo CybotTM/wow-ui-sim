@@ -1,5 +1,10 @@
 //! CASC-backed Blizzard UI source synchronization.
 
+mod profile_cache;
+
+use self::profile_cache::{
+    cache_entry_is_usable, gethe_wow_ui_source_branches, required_profile_cache_entries,
+};
 use std::io::{self, Read};
 use std::path::{Component, Path, PathBuf};
 #[cfg(feature = "casc")]
@@ -8,45 +13,8 @@ use std::time::Duration;
 
 const BLIZZARD_UI_MANIFEST: &str = include_str!("../data/blizzard-ui-files.txt");
 const COMPLETE_MARKER: &str = ".wow-ui-sim-blizzard-ui-complete";
-const GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
-    "live",
-    "beta",
-    "classic",
-    "classic_era",
-    "classic_anniversary",
-    "classic_beta",
-    "classic_ptr",
-];
 const GETHE_ARCHIVE_DOWNLOAD_RETRIES: usize = 3;
 const GETHE_ARCHIVE_USER_AGENT: &str = concat!("wow-ui-sim/", env!("CARGO_PKG_VERSION"));
-const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
-    "Blizzard_SharedXML/Classic/ClassicCvarUtil.lua",
-    "Blizzard_SharedXML/Classic/Dialog/DialogTemplates.xml",
-    "Blizzard_SharedXML/Classic/Frame/MainMenuFrameTemplates.xml",
-    "Blizzard_SharedXML/Classic/GameTooltipTemplate.xml",
-    "Blizzard_SharedXML/Classic/GlueCheck.lua",
-    "Blizzard_SharedXML/Classic/ModelFrames.lua",
-    "Blizzard_SharedXML/Classic/ModelFrames.xml",
-    "Blizzard_SharedXML/Classic/NineSliceLayouts.lua",
-    "Blizzard_SharedXML/Classic/Scroll/TrimScrollBar.xml",
-    "Blizzard_SharedXML/Classic/ScrollDefine.lua",
-    "Blizzard_SharedXML/Classic/ScrollDefine.xml",
-    "Blizzard_SharedXML/Classic/SecureCurrencyUtil.lua",
-    "Blizzard_SharedXML/Classic/Selector/Blizzard_ScrollBoxSelector.xml",
-    "Blizzard_SharedXML/Classic/SharedUIPanelTemplates.lua",
-    "Blizzard_SharedXML/Classic/SharedUIPanelTemplates.xml",
-    "Blizzard_SharedXML/Classic/SharedUtils.lua",
-    "Blizzard_SharedXML/Classic/SliderTemplates.xml",
-    "Blizzard_SharedXML/Classic/Sound.lua",
-    "Blizzard_SharedXML/Classic/Stubs.lua",
-    "Blizzard_SharedXML/Classic/Stubs.xml",
-    "Blizzard_SharedXML/Classic/UIDropDownMenu.lua",
-    "Blizzard_SharedXML/Classic/UIDropDownMenu.xml",
-    "Blizzard_SharedXML/Classic/UIDropDownMenuTemplates.lua",
-    "Blizzard_SharedXML/Classic/UIDropDownMenuTemplates.xml",
-    "Blizzard_SharedXML/TBC/ClassColors.lua",
-    "Blizzard_SharedXML/Wrath/SoundKitConstants.lua",
-];
 #[cfg(feature = "casc")]
 static CASC_CONFIGURED: OnceLock<bool> = OnceLock::new();
 
@@ -72,16 +40,10 @@ pub fn cached_blizzard_ui_addons_path() -> Option<PathBuf> {
 }
 
 fn cache_has_required_profile_files(root: &Path) -> bool {
-    required_profile_cache_entries()
-        .iter()
-        .all(|entry| root.join(entry).is_file())
-}
-
-fn required_profile_cache_entries() -> &'static [&'static str] {
-    match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Mists => MISTS_REQUIRED_PROFILE_CACHE_ENTRIES,
-        _ => &[],
-    }
+    required_profile_cache_entries().iter().all(|entry| {
+        let path = root.join(entry);
+        path.is_file() && cache_entry_is_usable(entry, &path)
+    })
 }
 
 pub fn sync_blizzard_ui() -> crate::Result<SyncSummary> {
@@ -156,7 +118,7 @@ fn sync_manifest_entry(
     fallback_source: &mut RepoFallbackSource,
 ) -> crate::Result<EntrySyncResult> {
     let out_path = root.join(entry);
-    if out_path.is_file() {
+    if out_path.is_file() && cache_entry_is_usable(entry, &out_path) {
         return Ok(EntrySyncResult::Present);
     }
 
@@ -227,7 +189,7 @@ fn repo_fallback_roots() -> crate::Result<Vec<PathBuf>> {
         roots.push(root);
     }
 
-    for branch in GETHE_WOW_UI_SOURCE_BRANCHES {
+    for branch in gethe_wow_ui_source_branches() {
         roots.push(ensure_cached_wow_ui_source_branch(branch)?);
     }
     Ok(roots)
@@ -477,7 +439,7 @@ fn manifest_entry_fdid(entry: &str) -> Option<u32> {
 
 #[cfg(test)]
 fn manifest_entry_is_repo_fallback_only(entry: &str) -> bool {
-    if MISTS_REQUIRED_PROFILE_CACHE_ENTRIES.contains(&entry) {
+    if profile_cache::MISTS_REQUIRED_PROFILE_CACHE_ENTRIES.contains(&entry) {
         return true;
     }
 
@@ -641,6 +603,47 @@ mod tests {
         );
 
         std::fs::remove_dir_all(root).expect("remove cache root");
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_cache_rejects_old_classic_action_button_template() {
+        let root = unique_temp_dir("mists-action-button-template");
+        for entry in super::required_profile_cache_entries() {
+            let path = root.join(entry);
+            std::fs::create_dir_all(path.parent().expect("entry has parent"))
+                .expect("create entry parent");
+            std::fs::write(path, "placeholder").expect("write placeholder");
+        }
+
+        let action_button_template =
+            root.join("Blizzard_ActionBar/Classic/ActionButtonTemplate.xml");
+        assert!(
+            !super::cache_has_required_profile_files(&root),
+            "Mists cache marker must not be trusted when ActionButtonTemplate.xml is the old Classic Era variant"
+        );
+
+        std::fs::write(
+            action_button_template,
+            r#"<CheckButton name="ActionBarButtonTemplate"/>"#,
+        )
+        .expect("write Mists-compatible action button template");
+        assert!(
+            super::cache_has_required_profile_files(&root),
+            "Mists cache should be complete when required files exist and ActionButtonTemplate.xml defines ActionBarButtonTemplate"
+        );
+
+        std::fs::remove_dir_all(root).expect("remove cache root");
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_prefers_mop_classic_repo_fallbacks() {
+        assert_eq!(
+            super::gethe_wow_ui_source_branches().first().copied(),
+            Some("classic_anniversary"),
+            "Mists fallback sync must prefer MoP Classic sources over Classic Era sources"
+        );
     }
 
     #[test]
