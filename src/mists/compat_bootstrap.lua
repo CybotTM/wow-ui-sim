@@ -1409,6 +1409,74 @@ if rawget(_G, "SetGlyphNameFilter") == nil then
   end
 end
 
+-- Blizzard_ActionBar/Classic/MainMenuBar.xml still calls the legacy
+-- TextStatusBar globals, while the loaded Mists TextStatusBar addon exposes
+-- the modern TextStatusBarMixin methods. Keep both source families compatible
+-- by delegating the old global calls to the mixin methods when present.
+if rawget(_G, "TextStatusBar_Initialize") == nil then
+  function TextStatusBar_Initialize(bar)
+    if bar and bar.InitializeTextStatusBar then
+      return bar:InitializeTextStatusBar()
+    end
+  end
+end
+
+if rawget(_G, "SetTextStatusBarText") == nil then
+  function SetTextStatusBarText(bar, text, leftText, rightText)
+    if bar and bar.SetBarText then
+      return bar:SetBarText(text, leftText, rightText)
+    end
+  end
+end
+
+if rawget(_G, "SetTextStatusBarTextPrefix") == nil then
+  function SetTextStatusBarTextPrefix(bar, prefix)
+    if bar and bar.SetBarTextPrefix then
+      return bar:SetBarTextPrefix(prefix)
+    end
+  end
+end
+
+if rawget(_G, "TextStatusBar_OnEvent") == nil then
+  function TextStatusBar_OnEvent(bar, event, ...)
+    if bar and bar.TextStatusBarOnEvent then
+      return bar:TextStatusBarOnEvent(event, ...)
+    end
+  end
+end
+
+if rawget(_G, "TextStatusBar_UpdateTextString") == nil then
+  function TextStatusBar_UpdateTextString(bar)
+    if bar and bar.UpdateTextString then
+      return bar:UpdateTextString()
+    end
+  end
+end
+
+if rawget(_G, "TextStatusBar_OnValueChanged") == nil then
+  function TextStatusBar_OnValueChanged(bar)
+    if bar and bar.OnStatusBarValueChanged then
+      return bar:OnStatusBarValueChanged()
+    end
+  end
+end
+
+if rawget(_G, "ShowTextStatusBarText") == nil then
+  function ShowTextStatusBarText(bar)
+    if bar and bar.ShowStatusBarText then
+      return bar:ShowStatusBarText()
+    end
+  end
+end
+
+if rawget(_G, "HideTextStatusBarText") == nil then
+  function HideTextStatusBarText(bar)
+    if bar and bar.HideStatusBarText then
+      return bar:HideStatusBarText()
+    end
+  end
+end
+
 -- Blizzard_ActionBar/Classic/MainMenuBar.lua/xml in the current Mists source
 -- still calls legacy global micro-menu and pet-bar helpers. The loaded Mists
 -- MicroMenu/PetActionBar implementations moved that behavior onto mixins, so
