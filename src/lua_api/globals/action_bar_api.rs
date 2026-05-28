@@ -174,8 +174,10 @@ fn get_temp_shapeshift_bar_index(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn push_special_bar_index(state: &mut LuaState, has_bar: bool, index: i32) -> LuaResult<u32> {
-    let _ = has_bar;
-    push_i32(state, index)
+    if cfg!(feature = "client-mists") || has_bar || index != 1 {
+        return push_i32(state, index);
+    }
+    push_nil(state)
 }
 
 fn get_bonus_bar_index(state: &mut LuaState) -> LuaResult<u32> {

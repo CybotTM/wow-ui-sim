@@ -19,8 +19,9 @@
 //! - `GetSkillLineInfo(idx)`      → nil — matches `GetNumSkillLines`.
 //! - `GetSelectedSkill()`         → 0 — same rationale.
 
+use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::globals::spellbook_data;
-use crate::lua_api::methods::{create_string, create_table, table_set};
+use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -54,7 +55,12 @@ fn get_talent_info_by_specialization(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `GetNumSpellTabs()` — legacy spellbook tabs map to skill lines.
 fn get_num_spell_tabs(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(spellbook_data::num_skill_lines() as f64));
+    let tab_count = if cfg!(feature = "client-mists") {
+        spellbook_data::num_skill_lines() as f64
+    } else {
+        1.0
+    };
+    state.push(Val::Num(tab_count));
     Ok(1)
 }
 
@@ -62,6 +68,10 @@ fn get_num_spell_tabs(state: &mut LuaState) -> LuaResult<u32> {
 /// `(name, icon, offset, numSpells, isGuild, offSpecID, shouldHide, specID)`.
 fn get_spell_tab_info(state: &mut LuaState) -> LuaResult<u32> {
     let tab_index = stack_i32(state, 1).unwrap_or(0);
+    if !cfg!(feature = "client-mists") {
+        return get_retail_spell_tab_info(state, tab_index);
+    }
+
     let Some(skill_line) = spellbook_data::get_skill_line(tab_index) else {
         state.push(Val::Nil);
         return Ok(1);
@@ -82,6 +92,30 @@ fn get_spell_tab_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     state.push(Val::Num(spec_id as f64));
     Ok(8)
+}
+
+fn get_retail_spell_tab_info(state: &mut LuaState, tab_index: i32) -> LuaResult<u32> {
+    if tab_index != 1 {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+
+    let (class_label, spec_id) = {
+        let sim = borrow_state(state)?;
+        let class_index = sim.player.class_index.max(1).min(CLASS_LABELS.len() as i32);
+        let class_label = CLASS_LABELS[class_index as usize - 1];
+        (class_label, sim.player.active_spec_index)
+    };
+
+    let name = create_string(state, class_label);
+    let icon = create_string(state, "Interface\\Icons\\Spell_Holy_PowerWordShield");
+    state.push(name);
+    state.push(icon);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(false));
+    state.push(Val::Num(spec_id as f64));
+    Ok(6)
 }
 
 /// `GetPvpTalentSlotInfo(slotIndex)` — retail returns a table with

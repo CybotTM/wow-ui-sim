@@ -455,8 +455,10 @@ fn locklist_map_name(map_id: u32) -> Option<&'static str> {
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_world_pvp_globals(lua)?;
-    register_honor_stat_globals(lua)?;
-    register_battleground_globals(lua)?;
+    if cfg!(feature = "client-mists") {
+        register_honor_stat_globals(lua)?;
+        register_battleground_globals(lua)?;
+    }
     Ok(())
 }
 
