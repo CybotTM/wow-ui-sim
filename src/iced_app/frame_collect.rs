@@ -234,6 +234,7 @@ mod tests {
     use super::intra_strata_sort_key;
     use crate::widget::{AnchorPoint, Frame, WidgetRegistry, WidgetType};
 
+    #[cfg(feature = "gui")]
     #[test]
     fn excluded_overlay_names_are_not_hittable() {
         let mut registry = WidgetRegistry::new();

@@ -10,7 +10,7 @@ fn blizzard_ui_dir() -> PathBuf {
     blizzard_ui_candidates()
         .into_iter()
         .find(|path| path.exists())
-        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
+        .unwrap_or_else(|| wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available"))
 }
 
 fn blizzard_ui_candidates() -> Vec<PathBuf> {

@@ -102,7 +102,7 @@ fn button_frame_template_top_tile_streaks_can_be_hidden_in_on_load() {
 }
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
 }
 
 fn load_addon_or_panic(env: &WowLuaEnv, addon: &str) {

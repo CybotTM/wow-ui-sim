@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 use crate::common;
 use crate::perf_anchor;
 

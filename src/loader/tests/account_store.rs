@@ -13,8 +13,9 @@ fn test_account_store_icon_card_sets_icon_size() {
 }
 
 fn extract_icon_card_update_lua() -> String {
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("Interface/BlizzardUI/Blizzard_AccountStore/Blizzard_AccountStoreCardTemplates.lua");
+    let path = crate::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
+        .join("Blizzard_AccountStore/Blizzard_AccountStoreCardTemplates.lua");
     let source = std::fs::read_to_string(path).unwrap();
     let start = source.find("AccountStoreIconCardMixin = {};").unwrap();
     let end = source

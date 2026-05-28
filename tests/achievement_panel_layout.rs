@@ -175,6 +175,7 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
 "#;
 
 #[test]
+#[cfg(feature = "gui")]
 fn achievement_frame_layout_stays_locked() {
     test_timeout! {
         let env = common::panel_fixtures::setup_env();
@@ -187,6 +188,7 @@ fn achievement_frame_layout_stays_locked() {
 }
 
 #[test]
+#[cfg(feature = "gui")]
 fn achievement_summary_empty_text_does_not_overlap_summary_entries() {
     test_timeout! {
         let env = common::panel_fixtures::setup_env();
@@ -226,6 +228,7 @@ fn achievement_summary_empty_text_does_not_overlap_summary_entries() {
 }
 
 #[test]
+#[cfg(feature = "gui")]
 fn achievement_frame_toggle_hides_visible_panel_tree() {
     test_timeout! {
         let env = common::panel_fixtures::setup_env();

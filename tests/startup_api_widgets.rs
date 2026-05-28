@@ -10,7 +10,8 @@ fn load_blizzard_addons(env: &wow_ui_sim::lua_api::WowLuaEnv) {
 
     env.set_screen_size(1024.0, 768.0);
 
-    let ui = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
+    let ui = wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available");
     let addons = wow_ui_sim::loader::discover_blizzard_addons(&ui);
     let mut loaded_menu = false;
     for (name, toc_path) in addons {

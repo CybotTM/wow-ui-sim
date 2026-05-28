@@ -20,6 +20,7 @@ fn test_normalize_wow_path() {
     );
 }
 
+#[cfg(feature = "casc")]
 #[test]
 fn test_load_webp_texture() {
     let mut mgr = TextureManager::new();
@@ -540,6 +541,7 @@ fn test_load_texture_prefer_bc_reuses_cached_bc_buffer() {
     );
 }
 
+#[cfg(feature = "casc")]
 #[test]
 fn test_preloaded_talent_textures_cover_active_class_atlas_entries() {
     let mut mgr = TextureManager::new();
@@ -619,6 +621,7 @@ fn check_icon_cached(mgr: &TextureManager, missing: &mut Vec<String>, node_id: u
     }
 }
 
+#[cfg(feature = "casc")]
 #[test]
 fn test_preloaded_talent_icons_are_cached() {
     let mut mgr = TextureManager::new();

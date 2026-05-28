@@ -2,7 +2,9 @@ use std::path::PathBuf;
 use wow_ui_sim::xml::{XmlElement, parse_xml, parse_xml_file};
 
 fn blizzard_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI/Blizzard_SharedXMLBase")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
+        .join("Blizzard_SharedXMLBase")
 }
 
 #[test]

@@ -29,12 +29,22 @@ pub fn load_blizzard_addon_closure_for_screen_into_env(
     for (name, toc_path) in
         discover_blizzard_addon_closure_for_screen_with_overrides(ui_dir, screen, roots, overrides)
     {
-        if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
-            panic!("{name} should load in the Blizzard addon closure harness: {error}");
+        if !is_addon_loaded(env, &name) {
+            if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
+                panic!("{name} should load in the Blizzard addon closure harness: {error}");
+            }
         }
         loaded.push(name);
     }
     loaded
+}
+
+fn is_addon_loaded(env: &WowLuaEnv, name: &str) -> bool {
+    env.state()
+        .borrow()
+        .addons
+        .iter()
+        .any(|addon| addon.folder_name == name && addon.loaded)
 }
 
 pub fn build_blizzard_addon_closure_env(

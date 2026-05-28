@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 //! Integration tests for GameMenuFrame.
 //!
 //! Verifies that GameMenuFrame exists, is hidden by default, creates its
@@ -14,7 +16,7 @@ use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 
 fn blizzard_ui_dir() -> PathBuf {
     default_blizzard_ui_addons_path()
-        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
+        .unwrap_or_else(|_| wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available"))
 }
 
 /// Minimal addon set needed to load GameMenuFrame (mirrors test_keybindings.rs).

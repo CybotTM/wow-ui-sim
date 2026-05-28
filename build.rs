@@ -38,7 +38,7 @@ fn generate_integration_test_harness() {
     for perf_module in discover_perf_helper_modules(&tests_dir.join("perf")) {
         let module_name = format!("perf_{}", module_name_for_path(&perf_module));
         contents.push_str(&format!(
-            "#[path = {perf_module:?}]\npub(crate) mod {module_name};\n\n"
+            "#[cfg(feature = \"gui\")]\n#[path = {perf_module:?}]\npub(crate) mod {module_name};\n\n"
         ));
     }
     contents.push_str(&format!(

@@ -27,7 +27,8 @@ fn has_local_addons() -> bool {
 }
 
 fn blizzard_addons_base() -> std::path::PathBuf {
-    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 /// Load all Blizzard addons needed for AddonList + scan user addons.

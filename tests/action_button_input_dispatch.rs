@@ -6,7 +6,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::startup::fire_startup_events;
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
 }
 
 fn blizzard_toc(addon: &str, toc_name: &str) -> PathBuf {
@@ -113,7 +113,7 @@ fn seed_action_slot(env: &WowLuaEnv, slot: u32, spell_id: u32) {
 #[test]
 fn action_button_down_and_up_toggle_state_and_fire_action() {
     let env = build_action_bar_env();
-    seed_action_slot(&env, 1, 853);
+    seed_action_slot(&env, 1, 19750);
     env.fire_event("ACTIONBAR_SLOT_CHANGED").unwrap();
 
     let before: (String, bool) = env

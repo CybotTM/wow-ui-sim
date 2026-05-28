@@ -283,7 +283,7 @@ pub fn discover_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)
 
 /// Discover every Blizzard addon directory in a BlizzardUI tree, including LoadOnDemand addons.
 ///
-/// This is stricter than `discover_blizzard_addons_for_screen`: it includes all 315
+/// This is stricter than `discover_blizzard_addons_for_screen`: it includes all
 /// `Blizzard_*` directories present in the checkout, regardless of screen restrictions
 /// or `LoadOnDemand`, then sorts them by dependencies. Foundational shared XML
 /// addons (`Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_SharedXMLGame`)

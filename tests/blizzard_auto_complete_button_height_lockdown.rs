@@ -1,12 +1,9 @@
 use crate::common;
 
-use std::path::Path;
-
 use common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 use wow_ui_sim::xml::{FrameXml, UiXml, XmlElement, parse_xml_file};
 
 const ROOT: &str = "Blizzard_AutoComplete";
-const XML_PATH: &str = "Interface/BlizzardUI/Blizzard_AutoComplete/AutoComplete.xml";
 const EXPECTED_BUTTON_COUNT: usize = 5;
 const EXPECTED_DEFAULT_Y_OFFSET: f64 = 3.0;
 const EXPECTED_BUTTON_TOP_PADDING: f32 = 10.0;
@@ -36,7 +33,10 @@ fn blizzard_auto_complete_button_count_and_magic_offset_stay_locked() {
         });
     });
 
-    let ui = parse_xml_file(Path::new(XML_PATH)).expect("AutoComplete.xml should parse");
+    let xml_path = wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
+        .join("Blizzard_AutoComplete/AutoComplete.xml");
+    let ui = parse_xml_file(&xml_path).expect("AutoComplete.xml should parse");
     let box_frame = find_top_level_frame(&ui, "AutoCompleteBox");
     let buttons = auto_complete_buttons(box_frame);
 

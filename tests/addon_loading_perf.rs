@@ -1,3 +1,5 @@
+#![cfg(feature = "gui")]
+
 use crate::common;
 use crate::perf_addon_loading;
 use crate::perf_base_game;
