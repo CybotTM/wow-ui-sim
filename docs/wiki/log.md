@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-28] investigation | action button icon mask coverage
+
+Created `investigations/action-button-icon-mask.md` after tracing vanished main
+action-bar icons to mask sampling, not action state. The prior minimap mask fix
+made the shader sample RGB mask intensity; action-bar icon masks store coverage
+in alpha, so their black visible regions went transparent. The renderer now
+marks alpha-backed masks with a shader flag while retaining RGB coverage for
+opaque black/white masks.
+
 ## [2026-05-26] update | EditMode cache with no saved vars
 
 Updated `investigations/editmode-layout.md` with the `--no-saved-vars` status

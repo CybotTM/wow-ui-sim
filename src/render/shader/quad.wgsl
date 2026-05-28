@@ -196,13 +196,18 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         color = vec4f(vec3f(lum), color.a);
     }
 
-    // Mask texture sampling. WoW masks may encode coverage in RGB with opaque
-    // alpha (for black/white masks) or in alpha (for alpha masks), so both
-    // channels contribute.
+    // Mask texture sampling. Some WoW masks encode coverage in alpha even
+    // when visible regions are black; others encode coverage as white-on-black
+    // RGB with opaque alpha.
     if in.mask_tex_index >= 0 {
         let mask_color = sample_tiered_texture(in.mask_tex_index, in.mask_tex_coords);
-        let mask_intensity = max(mask_color.r, max(mask_color.g, mask_color.b));
-        color.a *= mask_color.a * mask_intensity;
+        const FLAG_MASK_ALPHA_COVERAGE: u32 = 0x800u;
+        if (in.flags & FLAG_MASK_ALPHA_COVERAGE) != 0u {
+            color.a *= mask_color.a;
+        } else {
+            let mask_intensity = max(mask_color.r, max(mask_color.g, mask_color.b));
+            color.a *= mask_color.a * mask_intensity;
+        }
     }
 
     // Brightness boost — the simulator has no 3D game world behind the UI,
