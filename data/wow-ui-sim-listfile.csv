@@ -1675,6 +1675,7 @@
 5613723;interface/addons/blizzard_framexml/talentframetemplates.xml
 5612706;interface/addons/blizzard_framexml/talkingheadui.lua
 5612662;interface/addons/blizzard_framexml/talkingheadui.xml
+5612608;interface/addons/blizzard_framexml/tbc/worldstateframe.lua
 5613718;interface/addons/blizzard_framexml/timer.lua
 5612511;interface/addons/blizzard_framexml/timer.xml
 5612572;interface/addons/blizzard_framexml/topbannermanager.lua

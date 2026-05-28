@@ -1587,6 +1587,7 @@ Blizzard_FrameXML/SharedPetBattleTemplates.lua
 Blizzard_FrameXML/SharedPetBattleTemplates.xml
 Blizzard_FrameXML/SpellActivationOverlay.lua
 Blizzard_FrameXML/SpellActivationOverlay.xml
+Blizzard_FrameXML/TBC/WorldStateFrame.lua
 Blizzard_FrameXML/SplashFrame.lua
 Blizzard_FrameXML/SplashFrame.xml
 Blizzard_FrameXML/TabardModelFrameMixin.lua

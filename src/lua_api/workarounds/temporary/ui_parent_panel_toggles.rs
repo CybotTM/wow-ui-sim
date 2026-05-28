@@ -43,6 +43,26 @@ if RegisterUIPanel == nil then
     end
 end
 
+if ShowUIPanel == nil then
+    function ShowUIPanel(frame)
+        if frame ~= nil and type(frame.Show) == "function" then
+            frame:Show()
+            return true
+        end
+        return false
+    end
+end
+
+if HideUIPanel == nil then
+    function HideUIPanel(frame)
+        if frame ~= nil and type(frame.Hide) == "function" then
+            frame:Hide()
+            return true
+        end
+        return false
+    end
+end
+
 if CloseAllWindows == nil then
     function CloseAllWindows()
         return false
