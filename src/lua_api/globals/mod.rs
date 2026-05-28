@@ -29,7 +29,6 @@ pub mod channel_verbs;
 pub mod chat_frame_util;
 pub mod chat_window_verbs;
 pub mod close_frames;
-pub mod combat_probes;
 pub mod combat_verbs;
 pub mod compat_overrides;
 pub mod cooldown_probes;

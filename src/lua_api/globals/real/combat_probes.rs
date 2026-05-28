@@ -1,4 +1,4 @@
-//! Combat / lockdown probe globals that read SimState directly.
+//! Combat / lockdown probe globals backed by `SimState`.
 //!
 //! Migrates 6 entries off `GLOBAL_FALSE_STUBS` onto real Rust impls:
 //!
