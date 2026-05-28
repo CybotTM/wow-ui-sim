@@ -35,6 +35,7 @@ enum LuaSourcePatchOp {
 }
 
 const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
+    #[cfg(feature = "client-mists")]
     LuaSourcePatch {
         suffix: "/Blizzard_StoreUISecure.lua",
         operations: &[
@@ -48,6 +49,7 @@ const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
             },
         ],
     },
+    #[cfg(feature = "client-mists")]
     LuaSourcePatch {
         suffix: "/HybridScrollFrame.lua",
         operations: &[LuaSourcePatchOp::ReplaceOnce {
@@ -55,6 +57,7 @@ const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
             to: "\t\t\tif self.scrollBar.thumbTexture then self.scrollBar.thumbTexture:Hide(); end",
         }],
     },
+    #[cfg(feature = "client-mists")]
     LuaSourcePatch {
         suffix: "/Blizzard_SimpleCheckout.lua",
         operations: &[LuaSourcePatchOp::ReplaceOnce {
