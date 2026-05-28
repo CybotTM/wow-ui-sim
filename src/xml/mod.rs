@@ -1,6 +1,7 @@
 //! XML parsing for WoW UI definition files.
 
 mod parse;
+mod profile_templates;
 mod template;
 mod types;
 mod types_animation;

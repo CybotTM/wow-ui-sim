@@ -684,6 +684,36 @@ fn mists_bootstrap_supplies_hidden_non_priest_priest_bar_mixins() {
 }
 
 #[test]
+fn mists_intrinsic_templates_supply_legacy_item_button_template_children() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let result: (String, String, String, String, String) = env
+        .eval(
+            r#"
+            local button = CreateFrame("CheckButton", "MistsLegacyBagSlotTemplateProbe", UIParent, "ItemButtonTemplate")
+            return type(button),
+                type(MistsLegacyBagSlotTemplateProbeCount),
+                type(MistsLegacyBagSlotTemplateProbeNormalTexture),
+                type(button.Count),
+                type(button.NormalTexture)
+            "#,
+        )
+        .expect("Mists legacy ItemButtonTemplate probe should run");
+
+    assert_eq!(
+        result,
+        (
+            "table".to_string(),
+            "table".to_string(),
+            "table".to_string(),
+            "table".to_string(),
+            "table".to_string(),
+        ),
+        "Mists bag slot XML expects ItemButtonTemplate to create Count and NormalTexture children"
+    );
+}
+
+#[test]
 fn mists_create_forbidden_frame_forwards_to_create_frame() {
     let env = WowLuaEnv::new().expect("Lua environment should initialize");
 

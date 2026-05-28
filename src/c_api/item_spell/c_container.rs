@@ -55,6 +55,10 @@ fn register_container_query_methods(
         &[
             ("GetContainerNumSlots", c_container_get_num_slots),
             ("GetContainerNumFreeSlots", c_container_get_num_free_slots),
+            (
+                "CalculateTotalNumberOfFreeBagSlots",
+                c_container_calculate_total_number_of_free_bag_slots,
+            ),
             ("GetContainerFreeSlots", c_container_get_free_slots),
             ("HasContainerItem", c_container_has_item),
             ("GetBagSlotFlag", c_container_get_bag_slot_flag),
@@ -103,6 +107,21 @@ fn c_container_get_num_free_slots(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(free));
     state.push(Val::Num(0.0));
     Ok(2)
+}
+
+fn c_container_calculate_total_number_of_free_bag_slots(state: &mut LuaState) -> LuaResult<u32> {
+    let free_slots = {
+        let sim = borrow_state(state)?;
+        (0..=4)
+            .map(|bag| {
+                let occupied = sim.bag_occupied_slots(bag);
+                (container_slot_count(bag) - occupied).max(0)
+            })
+            .sum::<i32>()
+    };
+
+    state.push(Val::Num(free_slots as f64));
+    Ok(1)
 }
 
 fn c_container_get_free_slots(state: &mut LuaState) -> LuaResult<u32> {

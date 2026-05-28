@@ -300,6 +300,7 @@ fn collect_template_chain(
 pub fn register_intrinsic_templates() {
     register_intrinsic_frame_templates();
     register_button_frame_template();
+    super::profile_templates::register_all();
 }
 
 struct IntrinsicFrameTemplate {

@@ -102,6 +102,22 @@ fn test_c_container_free_slots_tracks_items() {
 }
 
 #[test]
+fn test_c_container_total_free_bag_slots_tracks_equipped_bags() {
+    let env = env();
+    env.exec("A_Admin.ClearBags()").unwrap();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+
+    let total_free: i32 = env
+        .eval("return C_Container.CalculateTotalNumberOfFreeBagSlots()")
+        .unwrap();
+
+    assert_eq!(
+        total_free, 79,
+        "Backpack plus four equipped bag slots should expose 80 total slots"
+    );
+}
+
+#[test]
 fn test_c_container_free_slot_list_returns_table() {
     let env = env();
     let (kind, count, first_free): (String, i32, i32) = env
