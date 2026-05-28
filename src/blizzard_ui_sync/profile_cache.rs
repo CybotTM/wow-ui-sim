@@ -81,6 +81,7 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_GameTooltip/Blizzard_GameTooltip_Classic.toc",
     "Blizzard_GameTooltip/Classic/GameTooltip.lua",
     "Blizzard_GameTooltip/Classic/GameTooltip.xml",
+    "Blizzard_LevelUpDisplay/Cata/LevelUpDisplay.lua",
     "Blizzard_NamePlates/Blizzard_NamePlates.toc",
     "Blizzard_Settings_Shared/Blizzard_Settings_Shared_Classic.toc",
     "Blizzard_Settings_Shared/Classic/AudioOverrides.lua",
