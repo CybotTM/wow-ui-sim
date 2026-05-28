@@ -94,7 +94,7 @@ if UI_LOCALE == nil then
   end
 end
 
-local function __wow_pack_results(...)
+function __wow_pack_results(...)
   return { n = select("#", ...), ... }
 end
 
@@ -537,6 +537,9 @@ end
 
 tWipe = tWipe or table.wipe
 
+__wow_hooksecurefunc_registry = __wow_hooksecurefunc_registry or {}
+__wow_hooksecurefunc_wrapper_ids = __wow_hooksecurefunc_wrapper_ids or {}
+
 function hooksecurefunc(target, methodName, hook)
   local object = target
   local key = methodName
@@ -552,16 +555,54 @@ function hooksecurefunc(target, methodName, hook)
     return
   end
 
+  if object == C_AddOns and key == "LoadAddOn" then
+    return
+  end
+
   local original = object[key]
   if type(original) ~= "function" then
     return
   end
 
-  object[key] = function(...)
-    local results = __wow_pack_results(original(...))
-    callback(...)
-    return unpack(results, 1, results.n)
+  local existingId = __wow_hooksecurefunc_wrapper_ids[original]
+  if existingId ~= nil and __wow_hooksecurefunc_registry[existingId] ~= nil then
+    table.insert(__wow_hooksecurefunc_registry[existingId].callbacks, callback)
+    return
   end
+
+  local hookId = #__wow_hooksecurefunc_registry + 1
+  __wow_hooksecurefunc_registry[hookId] = {
+    original = original,
+    callbacks = { callback },
+  }
+
+  local wrapperSource = string.format([[
+    return function(...)
+      local entry = _G.__wow_hooksecurefunc_registry[%d]
+      local function packResults(...)
+        return { n = select("#", ...), ... }
+      end
+      local function unpackResults(list, first, last)
+        first = first or 1
+        last = last or list.n or #list
+        if first > last then
+          return
+        end
+        return list[first], unpackResults(list, first + 1, last)
+      end
+      local results = packResults(entry.original(...))
+      for _, registeredCallback in ipairs(entry.callbacks) do
+        if type(registeredCallback) == "function" then
+          pcall(registeredCallback, ...)
+        end
+      end
+      return unpackResults(results, 1, results.n)
+    end
+  ]], hookId)
+  local wrapper = assert(loadstring(wrapperSource))()
+
+  __wow_hooksecurefunc_wrapper_ids[wrapper] = hookId
+  object[key] = wrapper
 end
 
 if getn == nil then

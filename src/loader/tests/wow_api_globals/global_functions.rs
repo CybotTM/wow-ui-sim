@@ -154,6 +154,22 @@ fn test_hooksecurefunc() {
 }
 
 #[test]
+fn test_hooksecurefunc_multiple_hooks_share_stable_wrapper() {
+    let (t, _) = load_test_lua(
+        "test-hooksecure-multiple",
+        r#"
+        local obj = { calls = {}, MyMethod = function(self, value) table.insert(self.calls, "orig:" .. value) end }
+        hooksecurefunc(obj, "MyMethod", function(self, value) table.insert(self.calls, "first:" .. value) end)
+        hooksecurefunc(obj, "MyMethod", function(self, value) table.insert(self.calls, "second:" .. value) end)
+        collectgarbage()
+        obj:MyMethod("ok")
+        HOOK_CALLS = table.concat(obj.calls, ",")
+    "#,
+    );
+    t.assert_lua_str("return HOOK_CALLS", "orig:ok,first:ok,second:ok");
+}
+
+#[test]
 fn test_hooksecurefunc_on_frame_userdata() {
     let (t, _) = load_test_lua(
         "test-hooksecure-ud",

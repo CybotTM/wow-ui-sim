@@ -105,6 +105,10 @@ if type(CVarCallbackRegistry.SetCVarCachable) ~= "function" then
   end
 end
 
+function CVarCallbackRegistry:GetCVarValueBool(name)
+  return GetCVarBool(name) == true
+end
+
 if type(CallbackRegistrantMixin) ~= "table" then
   CallbackRegistrantMixin = {}
 end

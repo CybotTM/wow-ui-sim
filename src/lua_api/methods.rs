@@ -23,7 +23,7 @@ use std::rc::Rc;
 mod frame_fields;
 mod frame_metatable;
 mod hot_static_literals;
-pub use frame_fields::{get_existing_frame_fields, get_or_create_frame_fields};
+pub use frame_fields::get_or_create_frame_fields;
 use frame_metatable::frame_metatable_for_widget_type;
 
 /// Extract the frame ID (u64) from a Lua argument (a backed table).

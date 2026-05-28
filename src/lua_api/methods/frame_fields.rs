@@ -29,15 +29,6 @@ pub fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
     created
 }
 
-/// Return an existing per-frame fields table without creating one.
-pub fn get_existing_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
-    let fields_registry = registry_get(state, "__rilua_frame_fields");
-    let Val::Table(fields_reg_ref) = fields_registry else {
-        return Val::Nil;
-    };
-    get_frame_fields_from_registry(state, fields_reg_ref, frame_id)
-}
-
 fn get_frame_fields_from_registry(
     state: &LuaState,
     fields_reg_ref: GcRef<Table>,

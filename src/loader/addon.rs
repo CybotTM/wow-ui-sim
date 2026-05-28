@@ -156,6 +156,7 @@ fn patch_account_store_set_storefront(env: &LoaderEnv<'_>, result: &mut LoadResu
 }
 
 fn patch_shared_xml_anim_mixins(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    crate::lua_api::workarounds::patch_callback_registry_defaults(env);
     if let Err(e) = crate::lua_api::workarounds::patch_shared_xml_anim_mixins(env) {
         push_patch_warning(
             result,
@@ -428,8 +429,7 @@ mod tests {
     #[test]
     fn cached_blizzard_ui_context_is_not_tainted() {
         let env = WowLuaEnv::new().unwrap();
-        let addon_dir =
-            Path::new(r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\Blizzard_Menu");
+        let addon_dir = Path::new("/tmp/wow-ui-sim/blizzard-ui/Blizzard_Menu");
         let toc = TocFile::parse(
             addon_dir,
             "## Title: Blizzard Menu\n## AllowLoad: Both\nMenu.lua",
@@ -446,9 +446,7 @@ mod tests {
     #[test]
     fn secure_environment_context_is_not_tainted() {
         let env = WowLuaEnv::new().unwrap();
-        let addon_dir = Path::new(
-            r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\Blizzard_ClassTrialSecure",
-        );
+        let addon_dir = Path::new("/tmp/wow-ui-sim/blizzard-ui/Blizzard_ClassTrialSecure");
         let toc = TocFile::parse(
             addon_dir,
             "## Title: Blizzard Class Trial Secure\n## UseSecureEnvironment: 1\nSecure.lua",
@@ -466,9 +464,7 @@ mod tests {
     #[test]
     fn blizzard_folder_context_is_not_tainted_without_allow_load() {
         let env = WowLuaEnv::new().unwrap();
-        let addon_dir = Path::new(
-            r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\Blizzard_PersonalResourceDisplay",
-        );
+        let addon_dir = Path::new("/tmp/wow-ui-sim/blizzard-ui/Blizzard_PersonalResourceDisplay");
         let toc = TocFile::parse(
             addon_dir,
             "## Title: Blizzard_PersonalResourceDisplay\n## AllowLoadGameType: mainline\nMain.lua",
@@ -486,7 +482,7 @@ mod tests {
     #[test]
     fn path_alone_does_not_make_addon_untainted() {
         let env = WowLuaEnv::new().unwrap();
-        let addon_dir = Path::new(r"C:\Users\adeia\AppData\Local\wow-ui-sim\blizzard-ui\TestAddon");
+        let addon_dir = Path::new("/tmp/wow-ui-sim/blizzard-ui/TestAddon");
         let toc = TocFile::parse(addon_dir, "## Title: TestAddon\nMain.lua");
 
         let ctx = build_addon_context(&env.loader_env(), &toc, "TestAddon").unwrap();
