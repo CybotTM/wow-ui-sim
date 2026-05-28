@@ -1514,6 +1514,8 @@ Blizzard_FrameXML/Classic/AlertFrameSystems.lua
 Blizzard_FrameXML/Classic/AlertFrameSystems.xml
 Blizzard_FrameXML/Classic/AlertFrames.lua
 Blizzard_FrameXML/Classic/AlertFrames.xml
+Blizzard_FrameXML/Classic/ColorPickerFrame.lua
+Blizzard_FrameXML/Classic/ColorPickerFrame.xml
 Blizzard_FrameXML/Classic/CombatFeedback.lua
 Blizzard_FrameXML/CustomBindingHandler.lua
 Blizzard_FrameXML/CustomBindingManager.lua

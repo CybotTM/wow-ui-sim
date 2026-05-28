@@ -1595,6 +1595,8 @@
 5612329;interface/addons/blizzard_framexml/classic/alertframes.xml
 5613275;interface/addons/blizzard_framexml/classic/alertframesystems.lua
 5614141;interface/addons/blizzard_framexml/classic/alertframesystems.xml
+5613171;interface/addons/blizzard_framexml/classic/colorpickerframe.lua
+5613041;interface/addons/blizzard_framexml/classic/colorpickerframe.xml
 5613006;interface/addons/blizzard_framexml/classic/combatfeedback.lua
 5613810;interface/addons/blizzard_framexml/custombindinghandler.lua
 5613612;interface/addons/blizzard_framexml/custombindingmanager.lua

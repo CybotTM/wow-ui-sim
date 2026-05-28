@@ -110,6 +110,8 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_FrameXML/Classic/AlertFrameSystems.xml",
     "Blizzard_FrameXML/Classic/AlertFrames.lua",
     "Blizzard_FrameXML/Classic/AlertFrames.xml",
+    "Blizzard_FrameXML/Classic/ColorPickerFrame.lua",
+    "Blizzard_FrameXML/Classic/ColorPickerFrame.xml",
     "Blizzard_FrameXML/Classic/CombatFeedback.lua",
     "Blizzard_BuffFrame/Classic/BuffFrame.lua",
     "Blizzard_GameTooltip/Blizzard_GameTooltip_Classic.toc",
