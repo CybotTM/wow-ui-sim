@@ -39,20 +39,8 @@ runtime surface) takes precedence.
 
 ## When NOT to add a shim
 
-If the same gap shows up across **multiple** addons under the same
-profile, promote it to the profile-level bootstrap instead:
-
-| Profile | Bootstrap file |
-|---------|----------------|
-| wrath   | `src/wrath/compat_bootstrap.lua` |
-| mists   | `src/mists/compat_bootstrap.lua` |
-| era / anniversary | `src/era/compat_bootstrap.lua` |
+If the same gap shows up across **multiple** Mists addons, promote it to
+`src/mists/compat_bootstrap.lua` or to a Rust backing model instead.
 
 Per-addon shims should stay narrow — addon-specific quirks, not
 broadly-missing APIs.
-
-## Example
-
-`tools/classic-addon-compat/Bartender4/` ships an empty seed shim that
-demonstrates the layout. It currently no-ops; populate it once Phase 8.4
-runs the harness and surfaces real Bartender4 gaps.

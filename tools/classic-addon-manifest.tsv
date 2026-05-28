@@ -1,9 +1,9 @@
-# Classic-profile addon test manifest. Read by scripts/test-classic-addons.sh.
+# Mists addon test manifest. Read by scripts/test-classic-addons.sh.
 # Tab-separated; lines starting with # are comments; blank lines ignored.
 #
 # Columns:
 #   name     Slug used as Interface/AddOns/<name> and vendor/addons/<name>
-#   profile  Cargo client-* feature without the prefix (wrath|mists|era|anniversary)
+#   profile  Cargo client-* feature without the prefix (currently mists)
 #   url      Git repo URL, or local:<absolute-path> for installed addons
 #   ref      Branch / tag / SHA to pin (avoid HEAD — pin everything).
 #            Use "-" for local sources.
@@ -14,10 +14,6 @@
 # See docs/baselines/classic-addon-test-targets.md for picks rationale.
 
 name	profile	url	ref	subpath
-Bartender4	wrath	https://github.com/Nevcairiel/Bartender4.git	master	.
-DBM-Wrath	wrath	https://github.com/DeadlyBossMods/DBM-Wrath.git	master	DBM-Core
-AtlasLootClassic	wrath	https://github.com/Hoizame/AtlasLootClassic.git	wotlk	AtlasLootClassic
-Skada-WoTLK	wrath	https://github.com/bkader/Skada-WoTLK.git	master	Skada
 AllTheThings	mists	mists-addon:AllTheThings	-	.
 Auctionator	mists	mists-addon:Auctionator	-	.
 BlizzMove	mists	mists-addon:BlizzMove	-	.
@@ -27,4 +23,3 @@ Leatrix_Maps	mists	mists-addon:Leatrix_Maps	-	.
 Leatrix_Plus	mists	mists-addon:Leatrix_Plus	-	.
 Plater	mists	mists-addon:Plater	-	.
 SimpleItemLevel	mists	mists-addon:SimpleItemLevel	-	.
-pfQuest-Vanilla	era	https://github.com/shagu/pfQuest.git	master	.

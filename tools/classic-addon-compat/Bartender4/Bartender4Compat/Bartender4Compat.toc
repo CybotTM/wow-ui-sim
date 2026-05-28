@@ -1,8 +1,0 @@
-## Title: Bartender4Compat
-## Author: wow-ui-sim
-## Notes: Compatibility shims that load before Bartender4 under the addon harness.
-## DefaultState: enabled
-## LoadFirst: 1
-## AllowLoad: Game
-
-Bartender4Compat.lua

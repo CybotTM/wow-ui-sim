@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Third-party-addon test harness for the classic client profiles (Phase 8.2).
+# Third-party-addon test harness for the Mists client profile.
 #
 # Reads tools/classic-addon-manifest.tsv. For each entry:
 #   1. Resolve the addon source:
@@ -21,8 +21,8 @@
 #
 # Usage:
 #   scripts/test-classic-addons.sh                    # run every addon in manifest
-#   scripts/test-classic-addons.sh Bartender4         # run a single addon by name
-#   scripts/test-classic-addons.sh --profile wrath    # filter by profile
+#   scripts/test-classic-addons.sh AllTheThings       # run a single addon by name
+#   scripts/test-classic-addons.sh --profile mists    # filter by profile
 #   scripts/test-classic-addons.sh --skip-clone       # use already-cloned vendors
 #   scripts/test-classic-addons.sh --skip-build       # use an existing wow-sim binary
 #   scripts/test-classic-addons.sh --keep-symlinks    # don't tear down on finish

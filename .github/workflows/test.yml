@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        profile: [wrath, mists, era, anniversary]
+        profile: [mists]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
