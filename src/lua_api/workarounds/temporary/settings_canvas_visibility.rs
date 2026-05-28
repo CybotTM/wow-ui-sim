@@ -7,7 +7,7 @@
 
 use crate::lua_api::WowLuaEnv;
 
-const SETTINGS_CANVAS_LAYOUT_HIDE_LUA: &str = r#"
+pub(crate) const SETTINGS_CANVAS_LAYOUT_HIDE_LUA: &str = r#"
 local function __wow_hide_settings_canvas_frame(frame, layout)
     if type(frame) ~= "table" or type(frame.Hide) ~= "function" then
         return

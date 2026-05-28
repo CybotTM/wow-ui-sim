@@ -406,6 +406,7 @@ mod tests {
 
     #[test]
     fn click_hit_testing_handles_deep_visible_child_chain_iteratively() {
+        let env = crate::lua_api::WowLuaEnv::new().expect("Lua env should initialize");
         let mut registry = WidgetRegistry::new();
         let hit_rect = rect(0.0, 0.0, 100.0, 100.0);
         let root = register_frame(&mut registry, WidgetType::Frame, None, hit_rect);
@@ -421,10 +422,12 @@ mod tests {
         assert_eq!(
             deepest_click_target_through_visible_children(
                 &registry,
+                &env,
                 &grid,
                 root,
                 Point::new(50.0, 50.0),
-                "LeftButton"
+                "LeftButton",
+                true
             ),
             Some(leaf)
         );

@@ -606,7 +606,7 @@ pub fn apply_for_runtime_addon_preload(env: &crate::lua_api::LoaderEnv<'_>, addo
 }
 #[cfg(test)]
 mod tests {
-    use super::SETTINGS_CANVAS_LAYOUT_HIDE_LUA;
+    use super::temporary::settings_canvas_visibility::SETTINGS_CANVAS_LAYOUT_HIDE_LUA;
     use crate::lua_api::WowLuaEnv;
 
     #[test]
