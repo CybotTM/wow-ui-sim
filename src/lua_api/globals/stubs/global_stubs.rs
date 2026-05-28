@@ -209,7 +209,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // quest_surface.rs, not stubs.
     // GetRaidRosterInfo is SimState-backed in group_queries.rs, not a stub.
     "GetRelicSlotType",
-    // GetRestState is SimState-backed in xp_honor_rest.rs, not a stub.
+    // GetRestState is SimState-backed in real/xp_honor_rest.rs, not a stub.
     // GetSelectedSkill / GetSkillLineInfo are SimState-backed in
     // talent_spec_probes.rs, not stubs.
     "GetSelectedSocial",
@@ -224,7 +224,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetTradePlayerItemInfo",
     "GetTradeSkillInfo",
     "GetTradeTargetItemInfo",
-    // GetXPExhaustion is SimState-backed in xp_honor_rest.rs, not a stub.
+    // GetXPExhaustion is SimState-backed in real/xp_honor_rest.rs, not a stub.
     // UnitArmor / UnitAttackPower / UnitCriticalStrike / UnitDamage /
     // UnitDefense / UnitDodge / UnitParry / UnitSpellHaste / UnitStat /
     // UnitResistance / UnitRangedAttackPower / UnitRangedCriticalStrike /
@@ -244,7 +244,7 @@ static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("GetActionBarToggles", stub_action_bar_toggles),
     ("GetReadyCheckStatus", stub_nil),
     ("GetReadyCheckTimeLeft", stub_zero),
-    // GetRestrictedAccountData is SimState-backed in xp_honor_rest.rs.
+    // GetRestrictedAccountData is SimState-backed in real/xp_honor_rest.rs.
     ("GetClassicExpansionLevel", stub_current_expansion_level),
     ("ClassicExpansionAtLeast", stub_classic_expansion_at_least),
     ("GetCurrentRegion", stub_current_region),

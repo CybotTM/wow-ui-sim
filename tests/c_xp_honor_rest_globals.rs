@@ -1,5 +1,5 @@
 //! Integration tests for the XP / honor / rest globals registered in
-//! `src/lua_api/globals/xp_honor_rest.rs`.
+//! `src/lua_api/globals/real/xp_honor_rest.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -152,4 +152,16 @@ fn get_restricted_account_data_returns_three_values() {
     assert!((lvl - 60.0).abs() < 1e-6);
     assert!((money - 250_000.0).abs() < 1e-6);
     assert!((prof - 100.0).abs() < 1e-6);
+}
+
+#[test]
+fn xp_honor_rest_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/xp_honor_rest.rs").exists(),
+        "XP, honor, and rest globals are modeled through PlayerXpState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/xp_honor_rest.rs").exists(),
+        "XP, honor, and rest globals should stay classified as real modeled Lua globals",
+    );
 }

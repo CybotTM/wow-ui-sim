@@ -103,7 +103,6 @@ pub mod unit_stats;
 pub mod utility_system_spell;
 pub mod voice_chat_verbs;
 pub mod wowlabs;
-pub mod xp_honor_rest;
 pub mod zone_text;
 
 pub use crate::c_api::c_map_api;
