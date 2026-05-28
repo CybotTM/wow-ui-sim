@@ -76,6 +76,10 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "SortBags",
     "SortReagentBag",
     "SwitchAchievementSearchTab",
+    // Classic/Mists Blizzard UI calls this host layout callback from action
+    // bars, arena frames, and managed power bars. The simulator's Rust layout
+    // pass computes frame positions directly, so the Lua callback is a no-op.
+    "UIParent_ManageFramePositions",
     "PlayerFrame_AttachCastBar",
     "PlayerFrame_DetachCastBar",
     "StopCinematic",
