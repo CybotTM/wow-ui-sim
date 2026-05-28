@@ -35,7 +35,6 @@ if RegisterUIPanel == nil then
             end
         end
         UIPanelWindows[name] = entry
-        panel.editModeManuallyShown = true
         if type(panel.SetAttributeNoHandler) == "function" then
             panel:SetAttributeNoHandler("UIPanelLayout-defined", true)
         elseif type(panel.SetAttribute) == "function" then
@@ -153,47 +152,6 @@ local function __wow_getglobal(name)
     return getglobal(name)
 end
 _G.__wow_panel_getglobal = __wow_getglobal
-"#;
-
-const DIRECT_TOGGLE_REGISTERED_PANELS_LUA: &str = r#"
-if type(RegisterUIPanel) == "function" and rawget(_G, "__wow_register_uipanel_direct_toggle_wrapper") ~= RegisterUIPanel then
-    local originalRegisterUIPanel = RegisterUIPanel
-    local wrapper = function(frame, attributes)
-        local results = { originalRegisterUIPanel(frame, attributes) }
-        if frame ~= nil then
-            frame.editModeManuallyShown = true
-        end
-        return unpack(results)
-    end
-    RegisterUIPanel = wrapper
-    rawset(_G, "__wow_register_uipanel_direct_toggle_wrapper", wrapper)
-end
-
-if type(ShowUIPanel) == "function" and rawget(_G, "__wow_show_uipanel_direct_toggle_wrapper") ~= ShowUIPanel then
-    local originalShowUIPanel = ShowUIPanel
-    local wrapper = function(frame, ...)
-        if frame ~= nil and frame.editModeManuallyShown and type(frame.Show) == "function" then
-            frame:Show()
-            return
-        end
-        return originalShowUIPanel(frame, ...)
-    end
-    ShowUIPanel = wrapper
-    rawset(_G, "__wow_show_uipanel_direct_toggle_wrapper", wrapper)
-end
-
-if type(HideUIPanel) == "function" and rawget(_G, "__wow_hide_uipanel_direct_toggle_wrapper") ~= HideUIPanel then
-    local originalHideUIPanel = HideUIPanel
-    local wrapper = function(frame, ...)
-        if frame ~= nil and frame.editModeManuallyShown and type(frame.Hide) == "function" then
-            frame:Hide()
-            return
-        end
-        return originalHideUIPanel(frame, ...)
-    end
-    HideUIPanel = wrapper
-    rawset(_G, "__wow_hide_uipanel_direct_toggle_wrapper", wrapper)
-end
 "#;
 
 const TOGGLE_ACHIEVEMENT_FRAME_LUA: &str = r#"
@@ -353,13 +311,11 @@ end
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(PANEL_REGISTRATION_DEFAULTS_LUA)?;
     lua.exec(STARTUP_NAVIGATION_DEFAULTS_LUA)?;
-    lua.exec(DIRECT_TOGGLE_REGISTERED_PANELS_LUA)?;
     Ok(())
 }
 
 pub(crate) fn patch(env: &WowLuaEnv) {
     let _ = env.exec(GETGLOBAL_HELPER_LUA);
-    let _ = env.exec(DIRECT_TOGGLE_REGISTERED_PANELS_LUA);
     let _ = env.exec(TOGGLE_ACHIEVEMENT_FRAME_LUA);
     let _ = env.exec(TOGGLE_ENCOUNTER_JOURNAL_LUA);
     let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
@@ -401,7 +357,7 @@ mod tests {
                 if panel:GetAttribute("UIPanelLayout-defined") ~= true then return "defined_attribute" end
                 if panel:GetAttribute("UIPanelLayout-area") ~= "center" then return "area_attribute" end
                 if panel:GetAttribute("UIPanelLayout-pushable") ~= 0 then return "pushable_attribute" end
-                if panel.editModeManuallyShown ~= true then return "direct_toggle_flag" end
+                if panel.editModeManuallyShown ~= nil then return "direct_toggle_flag" end
 
                 RegisterUIPanel(panel, { area = "left", pushable = 3 })
                 if entry.area ~= "center" or entry.pushable ~= 0 then return "overwrote" end
@@ -521,7 +477,7 @@ mod tests {
     }
 
     #[test]
-    fn patch_marks_registered_panels_for_direct_toggle() {
+    fn patch_preserves_registered_panel_manager_behavior() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
         env.exec(
             r#"
@@ -530,11 +486,13 @@ mod tests {
                 registeredPanel = frame
             end
             local panel = CreateFrame("Frame", "DirectTogglePanel", UIParent)
+            showCalled = false
+            hideCalled = false
             ShowUIPanel = function()
-                return "blocked"
+                showCalled = true
             end
             HideUIPanel = function()
-                return "blocked"
+                hideCalled = true
             end
             "#,
         )
@@ -547,15 +505,15 @@ mod tests {
                 r#"
                 RegisterUIPanel(DirectTogglePanel, {})
                 if registeredPanel ~= DirectTogglePanel then return "original" end
-                if DirectTogglePanel.editModeManuallyShown ~= true then return "flag" end
+                if DirectTogglePanel.editModeManuallyShown ~= nil then return "flag" end
                 ShowUIPanel(DirectTogglePanel)
-                if not DirectTogglePanel:IsShown() then return "show" end
+                if showCalled ~= true then return "show" end
                 HideUIPanel(DirectTogglePanel)
-                if DirectTogglePanel:IsShown() then return "hide" end
+                if hideCalled ~= true then return "hide" end
                 return "ok"
                 "#,
             )
-            .expect("direct-toggle registration probe should run");
+            .expect("panel manager registration probe should run");
 
         assert_eq!(result, "ok");
     }

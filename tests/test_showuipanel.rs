@@ -639,6 +639,36 @@ fn register_ui_panel_populates_uipanel_windows_without_overwriting() {
 }
 
 #[test]
+fn registered_ui_panel_closes_with_escape_stack() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            local panel = CreateFrame("Frame", "EscClosableUIPanelTestFrame", UIParent)
+            panel:SetSize(300, 400)
+            panel:Hide()
+
+            RegisterUIPanel(panel, { area = "center", pushable = 0, whileDead = 1 })
+            if panel.editModeManuallyShown ~= nil then
+                return "edit_mode_flag"
+            end
+
+            ShowUIPanel(panel)
+            if not panel:IsShown() then
+                return "show_failed"
+            end
+
+            CloseAllWindows()
+            if panel:IsShown() then
+                return "close_failed"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "registered UIPanels must stay in the CloseAllWindows/Escape stack: {result}");
+    }
+}
+
+#[test]
 fn startup_without_world_map_does_not_error_in_quest_map_refresh() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
