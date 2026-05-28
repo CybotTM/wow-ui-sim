@@ -13,8 +13,8 @@ Runtime `C_AddOns.LoadAddOn()` has an extra boundary: it can be called from a ta
 Verification on Windows:
 
 ```powershell
-cargo test --lib loader::addon::tests --no-default-features --features sound,gui
-cargo build --bin wow-sim --no-default-features --features sound,gui
+cargo test --lib loader::addon::tests --no-default-features --features sound,gui,client-retail
+cargo build --bin wow-sim --no-default-features --features sound,gui,client-retail
 $env:WOW_INSTALL_PATH='C:\World of Warcraft'
 $env:WOW_SIM_NO_ADDONS='1'
 $env:WOW_SIM_NO_SAVED_VARS='1'

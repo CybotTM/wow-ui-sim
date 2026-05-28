@@ -85,7 +85,7 @@ sha2 = "0.10"
 # fast-build is opt-in because the iced dylib hits MSVC's LNK1189 object limit
 # on Windows. Local Linux dev/debug builds can use `--features fast-build` for
 # faster incremental rebuilds. Release builds should use:
-#   cargo build --release --no-default-features --features sound,gui
+#   cargo build --release --no-default-features --features sound,gui,client-retail
 # to produce a fully static binary not tied to a specific rustc version.
 default = ["sound", "gui", "casc", "client-retail"]
 sound = ["rodio", "casc"]

@@ -26,6 +26,7 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     register_spell_book_item_actions(state, table_ref)?;
     register_spell_book_state_queries(state, table_ref)?;
     register_spell_flyout_queries(state, table_ref)?;
+    #[cfg(feature = "client-mists")]
     crate::c_api::legacy_spell_book::register_legacy_spell_book_globals(state)?;
     Ok(())
 }

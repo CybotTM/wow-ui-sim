@@ -763,3 +763,15 @@ after another verified clean capture.
 - `PLAN.mists.md` tracks the Pandaria Classic startup/addon effort only.
 - Prefer upstream simulator state/model fixes over downstream Blizzard Lua shims.
 - Shims are acceptable only when they represent a real legacy API compatibility surface or an explicitly temporary stopgap with a retirement path.
+
+## Non-Mists Merge Review Queue
+
+- [x] Resolve branch-scope blocker: use clean worktree `../wow-ui-sim-classic-clean` at `309c02c7b`, whose merge-base with `master` is `32b3ef0b`; ignore the filter-branch-rewritten `../wow-ui-sim-classic` tip `f4b607913` for merge review.
+- [x] Fix release aliases for the new client-profile feature guard: `xtask` now builds release artifacts with `sound,gui,client-retail`, and stale no-default-feature examples mention `client-retail`.
+- [x] Review profile infrastructure outside `src/mists/`: keep `Cargo.toml`, `src/client_profile.rs`, `src/lib.rs`, `src/paths.rs`, `src/toc/`, `src/loader/`, and `src/bin/` as the shared profile-selection layer; `cargo check --bin wow-sim --no-default-features --features sound,gui,casc,client-retail` passes.
+- [ ] Review shared Lua API changes under `src/lua_api/`: integrated first gate pass by moving `auction_verbs`, `bank_storage_verbs`, and legacy profession/trainer registrations behind `client-mists`; continue reviewing remaining shared Lua changes.
+- [ ] Review shared C API changes under `src/c_api/`: integrated first gate pass by moving `legacy_spell_book` and legacy specialization global registrations behind `client-mists`; continue reviewing remaining shared C API model changes.
+- [ ] Review rendering/layout/input changes under `src/iced_app/`, `src/render/`, `src/layout.rs`, `src/texture/`, and `src/widget/`: prove retail/default behavior does not regress or isolate behind profile gates.
+- [x] Review non-Mists compatibility modules under `src/wrath/` and `src/era/`: keep because `src/lib.rs` gates them out of retail; fixed stale `src/wrath/mod.rs` docs that incorrectly claimed Mists never compiles the shared module.
+- [ ] Review test churn outside `tests/mists_*`: keep tests that protect profile-neutral behavior; gate classic-only tests by feature; drop duplicates.
+- [ ] Review scripts, CI, docs, and baseline artifacts outside Mists-specific paths: keep tooling required for profile selection; drop stale or branch-only proof artifacts.

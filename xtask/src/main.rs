@@ -1,7 +1,7 @@
 use std::env;
 use std::process::{Command, ExitCode};
 
-const RELEASE_FEATURES: &str = "sound,gui";
+const RELEASE_FEATURES: &str = "sound,gui,client-retail";
 
 fn main() -> ExitCode {
     match run() {

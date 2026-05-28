@@ -22,8 +22,10 @@ pub mod admin_vault;
 pub mod admin_zone_economy;
 pub mod adventure_map;
 pub mod archaeology;
+#[cfg(feature = "client-mists")]
 pub mod auction_verbs;
 pub mod auras;
+#[cfg(feature = "client-mists")]
 pub mod bank_storage_verbs;
 pub mod battlefield_lfg_probes;
 pub mod battlefield_verbs;
