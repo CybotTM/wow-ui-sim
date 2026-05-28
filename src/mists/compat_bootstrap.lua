@@ -249,6 +249,10 @@ if rawget(_G, "IsRaidMarkerActive") == nil then
   function IsRaidMarkerActive() return false end
 end
 
+if rawget(_G, "IsRaidMarkerSystemEnabled") == nil then
+  function IsRaidMarkerSystemEnabled() return false end
+end
+
 if rawget(_G, "LFD_IsEmpowered") == nil then
   function LFD_IsEmpowered() return true end
 end

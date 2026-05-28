@@ -121,6 +121,20 @@ fn mists_bootstrap_exposes_classic_addon_compatibility_globals() {
 }
 
 #[test]
+fn mists_bootstrap_exposes_raid_marker_system_probe() {
+    let env = WowLuaEnv::new().expect("Lua environment should initialize");
+
+    let enabled: bool = env
+        .eval("return IsRaidMarkerSystemEnabled()")
+        .expect("Mists raid marker system probe should be callable");
+
+    assert!(
+        !enabled,
+        "headless simulator should leave raid marker placement disabled by default"
+    );
+}
+
+#[test]
 fn mists_toc_game_token_resolves_to_mists_subdirectory() {
     let toc = TocFile::parse(
         std::path::Path::new("Blizzard_CharacterFrame"),
