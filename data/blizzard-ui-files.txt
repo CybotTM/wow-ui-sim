@@ -1495,6 +1495,7 @@ Blizzard_FrameXML/Cata/CharacterFrameTemplates.lua
 Blizzard_FrameXML/Cata/CharacterFrameTemplates.xml
 Blizzard_FrameXML/Cata/TalentFrameBase.lua
 Blizzard_FrameXML/Cata/WorldStateFrame.xml
+Blizzard_FrameXML/Classic/CombatFeedback.lua
 Blizzard_FrameXML/CustomBindingHandler.lua
 Blizzard_FrameXML/CustomBindingManager.lua
 Blizzard_FrameXML/CustomizationDebugFrame.lua

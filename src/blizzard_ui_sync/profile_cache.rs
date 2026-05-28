@@ -77,6 +77,7 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_FrameXMLBase/Classic/IconDataProvider.lua",
     "Blizzard_FrameXMLBase/TBC/Localization.lua",
     "Blizzard_FrameXMLBase/Wrath/Constants.lua",
+    "Blizzard_FrameXML/Classic/CombatFeedback.lua",
     "Blizzard_NamePlates/Blizzard_NamePlates.toc",
     "Blizzard_Settings_Shared/Blizzard_Settings_Shared_Classic.toc",
     "Blizzard_Settings_Shared/Classic/AudioOverrides.lua",
