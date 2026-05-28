@@ -1,4 +1,4 @@
-//! Player-state probe globals reading from `SimState`.
+//! Player-state probe globals backed by `SimState`.
 //!
 //! Migrates 5 entries off `GLOBAL_FALSE_STUBS` onto real Rust impls:
 //!

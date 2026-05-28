@@ -72,7 +72,6 @@ pub mod panel_toggle_verbs;
 pub mod permanent_shims;
 pub mod pet_battles;
 pub mod photo_sharing;
-pub mod player_probes;
 pub mod profession_data;
 pub mod pvp_probes;
 pub mod quest_surface;

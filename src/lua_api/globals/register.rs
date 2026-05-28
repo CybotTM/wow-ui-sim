@@ -181,7 +181,7 @@ fn register_actor_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::combat_probes::register_all(lua)?;
     super::spell_state_probes::register_all(lua)?;
     super::pvp_probes::register_all(lua)?;
-    super::player_probes::register_all(lua)?;
+    super::real::player_probes::register_all(lua)?;
     super::unit_stats::register_all(lua)?;
     super::real::combat_stats::register_all(lua)?;
     super::real::pet_stats::register_all(lua)?;

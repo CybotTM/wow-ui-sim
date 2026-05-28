@@ -1,4 +1,4 @@
-//! Integration tests for `src/lua_api/globals/player_probes.rs`.
+//! Integration tests for `src/lua_api/globals/real/player_probes.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -79,4 +79,16 @@ fn player_has_hearthstone_false_when_flag_off() {
     env.state().borrow_mut().has_hearthstone = false;
     let b: bool = env.eval("return PlayerHasHearthstone()").unwrap();
     assert!(!b);
+}
+
+#[test]
+fn player_probe_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/player_probes.rs").exists(),
+        "player probe globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/player_probes.rs").exists(),
+        "player probe globals should stay classified as real modeled Lua globals",
+    );
 }
