@@ -1691,7 +1691,10 @@ Blizzard_GameModeSelect/Classic/GameModeSelectConstants.lua
 Blizzard_GameModeSelect/GameModeSelect.lua
 Blizzard_GameModeSelect/GameModeSelect.xml
 Blizzard_GameModeSelect/Mainline/GameModeSelectConstants.lua
+Blizzard_GameTooltip/Blizzard_GameTooltip_Classic.toc
 Blizzard_GameTooltip/Blizzard_GameTooltip_Mainline.toc
+Blizzard_GameTooltip/Classic/GameTooltip.lua
+Blizzard_GameTooltip/Classic/GameTooltip.xml
 Blizzard_GameTooltip/HealthBar.lua
 Blizzard_GameTooltip/Mainline/GameTooltip.lua
 Blizzard_GameTooltip/Mainline/GameTooltip.xml
