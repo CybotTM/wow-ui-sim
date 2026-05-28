@@ -104,7 +104,6 @@ pub mod unit_misc;
 pub mod unit_probes;
 pub mod unit_stats;
 pub mod utility_system_spell;
-pub mod voice_chat_probes;
 pub mod voice_chat_verbs;
 pub mod wowlabs;
 pub mod xp_honor_rest;

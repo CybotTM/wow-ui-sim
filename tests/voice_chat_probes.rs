@@ -1,4 +1,4 @@
-//! Integration tests for `src/lua_api/globals/voice_chat_probes.rs`.
+//! Integration tests for `src/lua_api/globals/real/voice_chat_probes.rs`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -78,4 +78,16 @@ fn voice_chat_is_talking_reads_state_field() {
     env.state().borrow_mut().voice_chat.talking = true;
     let b: bool = env.eval("return VoiceChat_IsTalking()").unwrap();
     assert!(b);
+}
+
+#[test]
+fn voice_chat_probe_globals_live_under_real_globals_boundary() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/voice_chat_probes.rs").exists(),
+        "voice chat probe globals are modeled through SimState and belong under globals::real",
+    );
+    assert!(
+        std::path::Path::new("src/lua_api/globals/real/voice_chat_probes.rs").exists(),
+        "voice chat probe globals should stay classified as real modeled Lua globals",
+    );
 }

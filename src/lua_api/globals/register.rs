@@ -225,7 +225,7 @@ fn register_social_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::social_probes::register_all(lua)?;
     super::guild_probes::register_all(lua)?;
     super::mail_probes::register_all(lua)?;
-    super::voice_chat_probes::register_all(lua)?;
+    super::real::voice_chat_probes::register_all(lua)?;
     Ok(())
 }
 

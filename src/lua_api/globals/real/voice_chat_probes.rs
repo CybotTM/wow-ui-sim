@@ -1,4 +1,4 @@
-//! Voice chat state probes reading from `SimState.voice_chat`.
+//! Voice chat state probes backed by `SimState.voice_chat`.
 //!
 //! Migrates 6 entries off `GLOBAL_FALSE_STUBS`:
 //!

@@ -24,3 +24,4 @@ pub mod specialization_legacy;
 pub mod spell_flyout_legacy;
 pub mod ui_widget_container;
 pub mod vehicle_possession;
+pub mod voice_chat_probes;
