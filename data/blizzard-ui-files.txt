@@ -1600,6 +1600,9 @@ Blizzard_FrameXMLBase/AnimatedStatusBar.xml
 Blizzard_FrameXMLBase/Blizzard_FrameXMLBase_Mainline.toc
 Blizzard_FrameXMLBase/Blizzard_FrameXMLBase_Mists.toc
 Blizzard_FrameXMLBase/Cata/Constants.lua
+Blizzard_FrameXMLBase/Classic/Constants.lua
+Blizzard_FrameXMLBase/Classic/FrameLocks.lua
+Blizzard_FrameXMLBase/Classic/IconDataProvider.lua
 Blizzard_FrameXMLBase/Constants.lua
 Blizzard_FrameXMLBase/FlowContainer.lua
 Blizzard_FrameXMLBase/GradualAnimatedStatusBar.lua
@@ -1612,7 +1615,9 @@ Blizzard_FrameXMLBase/PlayerMovementFrameFader.lua
 Blizzard_FrameXMLBase/PowerDependencyLine.lua
 Blizzard_FrameXMLBase/PowerDependencyLine.xml
 Blizzard_FrameXMLBase/Shared/Constants.lua
+Blizzard_FrameXMLBase/TBC/Localization.lua
 Blizzard_FrameXMLBase/WoWLabs/GameModeConstants.lua
+Blizzard_FrameXMLBase/Wrath/Constants.lua
 Blizzard_FrameXMLUtil/AchievementUtil.lua
 Blizzard_FrameXMLUtil/AdventureGuideUtil.lua
 Blizzard_FrameXMLUtil/AnimationSystem.lua
