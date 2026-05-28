@@ -240,12 +240,68 @@ fn test_c_item_get_item_sub_class_info_armor() {
 }
 
 #[test]
+fn test_c_item_get_item_sub_class_info_valid_auction_subclass_fallback() {
+    let env = env();
+    let name: String = env.eval("return C_Item.GetItemSubClassInfo(0, 11)").unwrap();
+    assert_eq!(name, "Combat Curio");
+}
+
+#[test]
+fn test_c_item_get_item_sub_class_info_syndicator_search_bootstrap_labels() {
+    let env = env();
+    let mismatches: String = env
+        .eval(
+            r#"
+            local checks = {
+                {9, {
+                    "leatherworking", "tailoring", "engineering", "blacksmithing",
+                    "cooking", "alchemy", "first aid", "enchanting", "fishing",
+                    "jewelcrafting", "inscription",
+                }},
+                {17, {
+                    "dragonkin", "flying", "undead", "critter", "magic",
+                    "elemental", "beast", "aquatic", [0] = "humanoid",
+                }},
+                {16, {
+                    "warrior", "paladin", "hunter", "rogue", "priest",
+                    "death knight", "shaman", "mage", "warlock", "monk",
+                    "druid", "demon hunter",
+                }},
+                {0, {
+                    "potions", "elixirs", "flasks & phials", nil, "food & drink",
+                    nil, "bandages", "other", "vantus runes", "utility curio",
+                    "combat curio", [0] = "explosives and devices",
+                }},
+                {15, {[5] = "mount"}},
+                {20, {
+                    [0] = "decor", "housing dye", "room", "room customization",
+                    "exterior customization", "service item",
+                }},
+            }
+            local mismatches = {}
+            for _, classChecks in ipairs(checks) do
+                local classID, subclasses = classChecks[1], classChecks[2]
+                for subclassID, expected in pairs(subclasses) do
+                    local actual = C_Item.GetItemSubClassInfo(classID, subclassID)
+                    if actual and actual:lower() ~= expected then
+                        table.insert(mismatches, classID .. ":" .. subclassID .. ":" .. actual .. ":" .. expected)
+                    end
+                end
+            end
+            return table.concat(mismatches, "|")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(mismatches, "");
+}
+
+#[test]
 fn test_c_item_get_item_sub_class_info_unknown() {
     let env = env();
-    let name: String = env
+    let name: Option<String> = env
         .eval("return C_Item.GetItemSubClassInfo(99, 99)")
         .unwrap();
-    assert_eq!(name, "Unknown");
+    assert_eq!(name, None);
 }
 
 #[test]

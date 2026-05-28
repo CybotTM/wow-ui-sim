@@ -27,6 +27,16 @@ const ITEM_CLASS_NAMES: &[(i32, &str)] = &[
 ];
 
 const ITEM_SUBCLASS_NAMES: &[(i32, i32, &str)] = &[
+    (0, 0, "Explosives and Devices"),
+    (0, 1, "Potions"),
+    (0, 2, "Elixirs"),
+    (0, 3, "Flasks & Phials"),
+    (0, 5, "Food & Drink"),
+    (0, 7, "Bandages"),
+    (0, 8, "Other"),
+    (0, 9, "Vantus Runes"),
+    (0, 10, "Utility Curio"),
+    (0, 11, "Combat Curio"),
     (2, 0, "One-Handed Axes"),
     (2, 1, "Two-Handed Axes"),
     (2, 2, "Bows"),
@@ -65,6 +75,45 @@ const ITEM_SUBCLASS_NAMES: &[(i32, i32, &str)] = &[
     (7, 16, "Inscription"),
     (7, 18, "Optional Reagents"),
     (7, 19, "Finishing Reagents"),
+    (9, 1, "Leatherworking"),
+    (9, 2, "Tailoring"),
+    (9, 3, "Engineering"),
+    (9, 4, "Blacksmithing"),
+    (9, 5, "Cooking"),
+    (9, 6, "Alchemy"),
+    (9, 7, "First Aid"),
+    (9, 8, "Enchanting"),
+    (9, 9, "Fishing"),
+    (9, 10, "Jewelcrafting"),
+    (9, 11, "Inscription"),
+    (15, 5, "Mount"),
+    (16, 1, "Warrior"),
+    (16, 2, "Paladin"),
+    (16, 3, "Hunter"),
+    (16, 4, "Rogue"),
+    (16, 5, "Priest"),
+    (16, 6, "Death Knight"),
+    (16, 7, "Shaman"),
+    (16, 8, "Mage"),
+    (16, 9, "Warlock"),
+    (16, 10, "Monk"),
+    (16, 11, "Druid"),
+    (16, 12, "Demon Hunter"),
+    (17, 0, "Humanoid"),
+    (17, 1, "Dragonkin"),
+    (17, 2, "Flying"),
+    (17, 3, "Undead"),
+    (17, 4, "Critter"),
+    (17, 5, "Magic"),
+    (17, 6, "Elemental"),
+    (17, 7, "Beast"),
+    (17, 8, "Aquatic"),
+    (20, 0, "Decor"),
+    (20, 1, "Housing Dye"),
+    (20, 2, "Room"),
+    (20, 3, "Room Customization"),
+    (20, 4, "Exterior Customization"),
+    (20, 5, "Service Item"),
 ];
 
 const INV_TYPE_EQUIP_LOCS: &[(u8, &str)] = &[
@@ -115,12 +164,47 @@ pub(crate) fn item_class_name(class_id: i32) -> &'static str {
 }
 
 pub(super) fn item_subclass_name(class_id: i32, subclass_id: i32) -> &'static str {
-    ITEM_SUBCLASS_NAMES
+    if let Some(name) = ITEM_SUBCLASS_NAMES
         .iter()
         .find_map(|(class, subclass, name)| {
             (*class == class_id && *subclass == subclass_id).then_some(*name)
         })
-        .unwrap_or("Unknown")
+    {
+        return name;
+    }
+
+    if is_known_item_subclass_id(class_id, subclass_id) {
+        return "Other";
+    }
+
+    "Unknown"
+}
+
+fn is_known_item_subclass_id(class_id: i32, subclass_id: i32) -> bool {
+    subclass_id >= 0 && subclass_id < standard_item_subclass_count(class_id)
+}
+
+fn standard_item_subclass_count(class_id: i32) -> i32 {
+    match class_id {
+        0 => 13,  // Consumable
+        1 => 8,   // Container
+        2 => 21,  // Weapon
+        3 => 12,  // Gem
+        4 => 12,  // Armor
+        5 => 3,   // Reagent
+        6 => 6,   // Projectile
+        7 => 21,  // Tradegoods
+        9 => 12,  // Recipe
+        12 => 1,  // Quest
+        13 => 1,  // Key
+        15 => 7,  // Miscellaneous
+        16 => 13, // Glyph
+        17 => 9,  // Battle Pet
+        18 => 1,  // WoW Token
+        19 => 14, // Profession
+        20 => 6,  // Housing
+        _ => 0,
+    }
 }
 
 pub(crate) fn inv_type_to_subclass(inv_type: u8) -> &'static str {
