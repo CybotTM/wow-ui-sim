@@ -86,6 +86,11 @@ function __wow_prepare_temporary_global_assignment(key, value)
 end
 
 Settings = Settings or settings_surface_namespace({
+    SetOnValueChangedCallback = function()
+        return {
+            Disconnect = settings_surface_noop,
+        }
+    end,
     GetOrCreateSettingsGroup = function()
         return settings_surface_namespace({
             AddInitializer = settings_surface_noop,
@@ -393,6 +398,25 @@ mod tests {
                 "function".to_string()
             )
         );
+    }
+
+    #[test]
+    fn installs_settings_value_changed_callback_noop() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: (String, String) = env
+            .eval(
+                r#"
+                local handle = Settings.SetOnValueChangedCallback(
+                    "PROXY_STATUS_TEXT",
+                    function() error("callback should not run during registration") end
+                )
+                return type(Settings.SetOnValueChangedCallback), type(handle.Disconnect)
+                "#,
+            )
+            .unwrap();
+
+        assert_eq!(result, ("function".to_string(), "function".to_string()));
     }
 
     #[test]
