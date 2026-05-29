@@ -21,6 +21,12 @@ pub(crate) fn patch_quest_objective_defaults_for_addon_load(env: &crate::lua_api
     temporary::quest_objective_defaults::patch_loader(env);
 }
 
+pub(crate) fn patch_action_bar_button_event_fanout_for_addon_load(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) {
+    temporary::action_bar_button_event_fanout::patch_loader(env);
+}
+
 struct WorkaroundStep {
     label: &'static str,
     apply: fn(&crate::lua_api::WowLuaEnv),

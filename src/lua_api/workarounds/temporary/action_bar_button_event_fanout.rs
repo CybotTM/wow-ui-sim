@@ -4,7 +4,7 @@
 //! Keep this isolated until the simulator models that ActionBarButtonEventsFrame
 //! setup path directly.
 
-use crate::lua_api::WowLuaEnv;
+use crate::lua_api::{LoaderEnv, WowLuaEnv};
 
 const ACTION_BAR_BUTTON_EVENT_FANOUT_WORKAROUND_LUA: &str = r##"
 if type(ActionBarButtonEventsFrameMixin) ~= "table" then
@@ -72,11 +72,28 @@ local function for_each_frame(self, func)
     for_each_button_frame(self, func)
 end
 
+local function ensure_action_bar_onload(frame)
+    if type(frame) ~= "table" or type(frame.actionButtons) == "table" then
+        return
+    end
+    if type(frame.GetScript) ~= "function" then
+        return
+    end
+
+    local onLoad = frame:GetScript("OnLoad")
+    if type(onLoad) == "function" then
+        onLoad(frame)
+    end
+end
+
 ActionBarButtonEventsFrameMixin.OnEvent = on_event
 ActionBarButtonEventsFrameMixin.OnCountdownForCooldownsChanged = on_countdown_for_cooldowns_changed
 ActionBarButtonEventsFrameMixin.ForEachFrame = for_each_frame
 
 if type(ActionBarButtonEventsFrame) == "table" then
+    if type(ActionBarButtonEventsFrame.frames) ~= "table" then
+        ActionBarButtonEventsFrame.frames = {}
+    end
     ActionBarButtonEventsFrame.OnEvent = on_event
     ActionBarButtonEventsFrame.OnCountdownForCooldownsChanged = on_countdown_for_cooldowns_changed
     ActionBarButtonEventsFrame.ForEachFrame = for_each_frame
@@ -84,9 +101,17 @@ if type(ActionBarButtonEventsFrame) == "table" then
         ActionBarButtonEventsFrame:SetScript("OnEvent", on_event)
     end
 end
+
+ensure_action_bar_onload(StanceBar)
 "##;
 
 pub(crate) fn patch(env: &WowLuaEnv) {
+    let trace_fanout = std::env::var_os("WOW_SIM_TRACE_ACTIONBAR_BUTTON_FANOUT").is_some();
+    let script = script(trace_fanout);
+    let _ = env.exec(&script);
+}
+
+pub(crate) fn patch_loader(env: &LoaderEnv<'_>) {
     let trace_fanout = std::env::var_os("WOW_SIM_TRACE_ACTIONBAR_BUTTON_FANOUT").is_some();
     let script = script(trace_fanout);
     let _ = env.exec(&script);
@@ -193,6 +218,90 @@ mod tests {
             .expect("installed action-bar event script should be readable");
 
         assert!(script_installed);
+    }
+
+    #[test]
+    fn initializes_missing_frame_registry_on_existing_event_frame() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            ActionBarButtonEventsFrameMixin = {}
+            ActionBarButtonEventsFrame = {}
+            "#,
+        )
+        .expect("action-bar event frame fixture should install");
+
+        env.exec(&script(false))
+            .expect("action-bar fanout patch should install");
+
+        let frames_type: String = env
+            .eval("return type(ActionBarButtonEventsFrame.frames)")
+            .expect("frame registry type should be readable");
+
+        assert_eq!(frames_type, "table");
+    }
+
+    #[test]
+    fn runs_stance_bar_onload_when_action_buttons_are_missing() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            ActionBarButtonEventsFrameMixin = {}
+            StanceBar = {
+                loaded = 0,
+                GetScript = function(self, name)
+                    if name == "OnLoad" then
+                        return function(frame)
+                            frame.loaded = frame.loaded + 1
+                            frame.actionButtons = {}
+                        end
+                    end
+                end,
+            }
+            "#,
+        )
+        .expect("stance bar fixture should install");
+
+        env.exec(&script(false))
+            .expect("action-bar fanout patch should install");
+
+        let (loaded, action_buttons_type): (i32, String) = env
+            .eval("return StanceBar.loaded, type(StanceBar.actionButtons)")
+            .expect("stance bar load state should be readable");
+
+        assert_eq!(loaded, 1);
+        assert_eq!(action_buttons_type, "table");
+    }
+
+    #[test]
+    fn does_not_rerun_stance_bar_onload_when_action_buttons_exist() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            ActionBarButtonEventsFrameMixin = {}
+            StanceBar = {
+                loaded = 0,
+                actionButtons = {},
+                GetScript = function(self, name)
+                    if name == "OnLoad" then
+                        return function(frame)
+                            frame.loaded = frame.loaded + 1
+                        end
+                    end
+                end,
+            }
+            "#,
+        )
+        .expect("stance bar fixture should install");
+
+        env.exec(&script(false))
+            .expect("action-bar fanout patch should install");
+
+        let loaded: i32 = env
+            .eval("return StanceBar.loaded")
+            .expect("stance bar load count should be readable");
+
+        assert_eq!(loaded, 0);
     }
 
     fn install_action_bar_event_surface(env: &WowLuaEnv) {

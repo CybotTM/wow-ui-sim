@@ -564,7 +564,6 @@ mod tests {
             .expect("manifest should not be empty");
         assert!(first.starts_with("Blizzard_"));
     }
-
     #[test]
     fn manifest_entries_resolve_through_limited_listfile() {
         let missing: Vec<_> = manifest_entries()
@@ -577,7 +576,6 @@ mod tests {
             "unmapped Blizzard UI files: {missing:?}"
         );
     }
-
     #[test]
     #[cfg(feature = "client-mists")]
     fn mists_required_cache_entries_are_in_manifest() {
@@ -590,7 +588,6 @@ mod tests {
             );
         }
     }
-
     #[test]
     #[cfg(feature = "client-mists")]
     fn mists_cache_is_incomplete_when_required_profile_files_are_missing() {
@@ -678,6 +675,9 @@ mod tests {
             let contents = match *entry {
                 "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml" => {
                     r#"<CheckButton name="ActionBarButtonTemplate"><Cooldown parentKey="chargeCooldown"/></CheckButton>"#
+                }
+                "Blizzard_ActionBar/Classic/PossessActionBar.xml" => {
+                    r#"<Frame name="PossessActionBar" mixin="PossessActionBarMixin"/>"#
                 }
                 "Blizzard_MicroMenu/Blizzard_MicroMenu_Classic.toc" => {
                     "Cata\\MainMenuBarMicroButtons.xml [AllowLoadGameType mists]\n"

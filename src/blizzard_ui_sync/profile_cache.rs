@@ -282,6 +282,10 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
             file_contains(path, "ActionBarButtonTemplate")
                 && file_contains(path, r#"parentKey="chargeCooldown""#)
         }
+        "Blizzard_ActionBar/Classic/PossessActionBar.xml" => {
+            file_contains(path, r#"name="PossessActionBar""#)
+                && file_contains(path, "PossessActionBarMixin")
+        }
         "Blizzard_MicroMenu/Blizzard_MicroMenu_Classic.toc" => file_contains(
             path,
             r#"Cata\MainMenuBarMicroButtons.xml [AllowLoadGameType mists]"#,
