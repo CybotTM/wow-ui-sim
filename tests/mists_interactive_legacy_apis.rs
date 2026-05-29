@@ -16,6 +16,7 @@ fn mists_bootstrap_supplies_interactive_legacy_panel_apis() {
             local setCurrencyOk = pcall(function() GameTooltip:SetCurrencyToken(1) end)
             return {
                 type(GetUnitSpeed) == "function" and baseSpeed == 0 and runSpeed > 0 and flightSpeed > 0 and swimSpeed > 0,
+                BASE_MOVEMENT_SPEED == runSpeed,
                 type(HasPetUI) == "function" and HasPetUI() == false,
                 type(GetNumFactions) == "function" and GetNumFactions() == C_Reputation.GetNumFactions(),
                 type(GetFactionInfo) == "function" and type(factionName) == "string" and factionName ~= "" and type(factionDescription) == "string" and type(standingID) == "number" and type(barMin) == "number" and type(barMax) == "number" and type(barValue) == "number" and type(atWarWith) == "boolean" and type(canToggleAtWar) == "boolean" and type(isHeader) == "boolean" and type(isCollapsed) == "boolean" and type(hasRep) == "boolean" and type(isChild) == "boolean" and type(factionID) == "number",

@@ -49,8 +49,10 @@ const INT_DEFS: &[&[crate::lua_api::globals::strings::string_data::IntDef]] = &[
     string_data::FRAME_TUTORIAL_CONSTANTS,
 ];
 
-const FLOAT_DEFS: &[&[crate::lua_api::globals::strings::string_data::FloatDef]] =
-    &[string_data::TAXI_FLOAT_CONSTANTS];
+const FLOAT_DEFS: &[&[crate::lua_api::globals::strings::string_data::FloatDef]] = &[
+    string_data::TAXI_FLOAT_CONSTANTS,
+    string_data::MOVEMENT_FLOAT_CONSTANTS,
+];
 
 const STRING_DEFS: &[&[crate::lua_api::globals::strings::string_data::StringDef]] =
     &[string_data::FONT_COLOR_CODE_STRINGS];

@@ -138,6 +138,8 @@ pub const TAXI_FLOAT_CONSTANTS: &[FloatDef] = &[
     ("TAXIROUTE_LINEFACTOR_2", 1.0),
 ];
 
+pub const MOVEMENT_FLOAT_CONSTANTS: &[FloatDef] = &[("BASE_MOVEMENT_SPEED", 7.0)];
+
 // ============================================================================
 // Keyboard Modifier Text
 // ============================================================================
