@@ -196,6 +196,46 @@ fn test_event_dispatch_errors_include_handler_context() {
 }
 
 #[test]
+fn test_gc_keeps_mixin_methods_attached_to_frame_refs() {
+    let env = env();
+    env.exec(
+        r#"
+        FrameRefGcErrors = {}
+        FrameRefGcHelperRan = false
+        seterrorhandler(function(msg)
+            table.insert(FrameRefGcErrors, msg)
+        end)
+
+        local mixin = {}
+        function mixin:Helper()
+            FrameRefGcHelperRan = true
+        end
+        function mixin:OnEvent()
+            self:Helper()
+        end
+
+        local frame = CreateFrame("Frame")
+        Mixin(frame, mixin)
+        frame:RegisterEvent("PLAYER_LOGIN")
+        frame:SetScript("OnEvent", frame.OnEvent)
+
+        mixin = nil
+        frame = nil
+        collectgarbage("collect")
+        "#,
+    )
+    .unwrap();
+
+    env.fire_event("PLAYER_LOGIN").ok();
+
+    let (ran, error_count, error): (bool, i32, String) = env
+        .eval("return FrameRefGcHelperRan, #FrameRefGcErrors, FrameRefGcErrors[1] or ''")
+        .unwrap();
+    assert!(ran, "mixin helper attached to the frame table should run");
+    assert_eq!(error_count, 0, "unexpected Lua error: {error}");
+}
+
+#[test]
 fn test_error_handler_receives_event_args() {
     // Verify that when OnEvent errors, the error handler is called
     // even when the event has arguments
