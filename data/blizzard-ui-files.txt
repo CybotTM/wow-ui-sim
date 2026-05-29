@@ -1463,6 +1463,12 @@ Blizzard_Flyout/Blizzard_Flyout.toc
 Blizzard_Flyout/Flyout.lua
 Blizzard_Flyout/Flyout.xml
 Blizzard_Fonts_Shared/Blizzard_Fonts_Shared.toc
+Blizzard_Fonts_Shared/Classic/FontStyles.xml
+Blizzard_Fonts_Shared/Classic/Fonts.xml
+Blizzard_Fonts_Shared/Classic/GameFontStyles.xml
+Blizzard_Fonts_Shared/Classic/GameFonts.xml
+Blizzard_Fonts_Shared/Classic/GlueFontStyles.xml
+Blizzard_Fonts_Shared/Classic/GlueFonts.xml
 Blizzard_Fonts_Shared/Mainline/FontStyles.xml
 Blizzard_Fonts_Shared/Mainline/Fonts.xml
 Blizzard_Fonts_Shared/Mainline/GameFontStyles.xml
@@ -2246,6 +2252,12 @@ Blizzard_MirrorTimer/Blizzard_MirrorTimer.toc
 Blizzard_MirrorTimer/MirrorTimer.lua
 Blizzard_MirrorTimer/MirrorTimer.xml
 Blizzard_MoneyFrame/Blizzard_MoneyFrame_Mainline.toc
+Blizzard_MoneyFrame/Blizzard_MoneyFrame_Classic.toc
+Blizzard_MoneyFrame/Classic/Localization.lua
+Blizzard_MoneyFrame/Classic/MoneyFrame.lua
+Blizzard_MoneyFrame/Classic/MoneyFrame.xml
+Blizzard_MoneyFrame/Classic/MoneyInputFrame.lua
+Blizzard_MoneyFrame/Classic/MoneyInputFrame.xml
 Blizzard_MoneyFrame/Mainline/Localization.lua
 Blizzard_MoneyFrame/Mainline/MoneyFrame.lua
 Blizzard_MoneyFrame/Mainline/MoneyFrame.xml

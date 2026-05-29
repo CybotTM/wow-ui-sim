@@ -47,6 +47,9 @@ fn load_mists_money_frame_env() -> WowLuaEnv {
         let mut state = env.state().borrow_mut();
         state.addon_base_paths = vec![blizzard_ui_dir()];
     }
+    let fonts_toc = mists_blizzard_toc("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc");
+    load_addon(&env.loader_env(), &fonts_toc).expect("Blizzard_Fonts_Shared should load");
+
     let toc_path = mists_blizzard_toc("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Classic.toc");
     load_addon(&env.loader_env(), &toc_path).expect("Blizzard_MoneyFrame should load");
     env

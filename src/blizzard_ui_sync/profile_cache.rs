@@ -60,6 +60,18 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_FrameXMLUtil/Classic/QuestUtils.lua",
     "Blizzard_FrameXMLUtil/Classic/RaidWarning.lua",
     "Blizzard_FrameXMLUtil/Classic/TransmogUtil.lua",
+    "Blizzard_Fonts_Shared/Classic/FontStyles.xml",
+    "Blizzard_Fonts_Shared/Classic/Fonts.xml",
+    "Blizzard_Fonts_Shared/Classic/GameFontStyles.xml",
+    "Blizzard_Fonts_Shared/Classic/GameFonts.xml",
+    "Blizzard_Fonts_Shared/Classic/GlueFontStyles.xml",
+    "Blizzard_Fonts_Shared/Classic/GlueFonts.xml",
+    "Blizzard_MoneyFrame/Blizzard_MoneyFrame_Classic.toc",
+    "Blizzard_MoneyFrame/Classic/Localization.lua",
+    "Blizzard_MoneyFrame/Classic/MoneyFrame.lua",
+    "Blizzard_MoneyFrame/Classic/MoneyFrame.xml",
+    "Blizzard_MoneyFrame/Classic/MoneyInputFrame.lua",
+    "Blizzard_MoneyFrame/Classic/MoneyInputFrame.xml",
     "Blizzard_ObjectAPI/Blizzard_ObjectAPI_Classic.toc",
     "Blizzard_ObjectAPI/Classic/ContinuableContainer.lua",
     "Blizzard_ObjectAPI/Classic/Item.lua",
@@ -292,6 +304,17 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
         ),
         "Blizzard_MicroMenu/Shared/MicroMenuContainer.lua" => {
             !file_contains(path, "PostAddButtonCallback")
+        }
+        "Blizzard_Fonts_Shared/Classic/GameFonts.xml" => {
+            file_contains(path, r#"FontFamily name="PriceFont""#)
+        }
+        "Blizzard_MoneyFrame/Blizzard_MoneyFrame_Classic.toc" => {
+            file_contains(path, "Classic\\MoneyInputFrame.lua")
+                && file_contains(path, "## AllowLoadGameType: classic")
+        }
+        "Blizzard_MoneyFrame/Classic/MoneyInputFrame.xml" => {
+            file_contains(path, r#"name="MoneyInputFrameTemplate""#)
+                && file_contains(path, r#"parentKey="copper""#)
         }
         "Blizzard_NamePlates/Blizzard_NamePlates.toc" => file_contains(
             path,
