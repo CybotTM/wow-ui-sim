@@ -1,5 +1,3 @@
-use super::XmlElement;
-
 pub(super) fn register_all() {
     register_mists_templates();
 }
@@ -29,9 +27,9 @@ fn parse_mists_legacy_item_button_template() -> super::FrameXml {
 }
 
 #[cfg(feature = "client-mists")]
-fn button_frame(element: XmlElement) -> Option<super::FrameXml> {
+fn button_frame(element: super::XmlElement) -> Option<super::FrameXml> {
     match element {
-        XmlElement::Button(frame) => Some(frame),
+        super::XmlElement::Button(frame) => Some(frame),
         _ => None,
     }
 }
