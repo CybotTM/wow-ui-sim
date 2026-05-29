@@ -36,6 +36,34 @@ for _, mixin in ipairs(mixins) do
         end
     end
 end
+
+if type(ScriptAnimatedModelSceneMixin) == "table"
+    and type(ScriptAnimatedModelSceneMixin.RefreshModelScene) == "function"
+    and not ScriptAnimatedModelSceneMixin.__wow_uisim_delayed_actions_patched then
+    ScriptAnimatedModelSceneMixin.__wow_uisim_delayed_actions_patched = true
+
+    local originalRefreshModelScene = ScriptAnimatedModelSceneMixin.RefreshModelScene
+    function ScriptAnimatedModelSceneMixin:RefreshModelScene(...)
+        if type(self.IsModelSceneSet) == "function"
+            and not self:IsModelSceneSet()
+            and self.delayedActions == nil then
+            self.delayedActions = {}
+        end
+        return originalRefreshModelScene(self, ...)
+    end
+
+    local originalExecuteOrDelayUntilSceneSet = ScriptAnimatedModelSceneMixin.ExecuteOrDelayUntilSceneSet
+    if type(originalExecuteOrDelayUntilSceneSet) == "function" then
+        function ScriptAnimatedModelSceneMixin:ExecuteOrDelayUntilSceneSet(...)
+            if type(self.IsModelSceneSet) == "function"
+                and not self:IsModelSceneSet()
+                and self.delayedActions == nil then
+                self.delayedActions = {}
+            end
+            return originalExecuteOrDelayUntilSceneSet(self, ...)
+        end
+    end
+end
 "#;
 
 pub(crate) fn patch(env: &LoaderEnv<'_>) -> Result<(), crate::Error> {
@@ -122,6 +150,64 @@ mod tests {
             .expect("existing SetPlaying method should run");
 
         assert!(preserved);
+    }
+
+    #[test]
+    fn restores_script_animated_model_scene_delayed_actions_queue() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            ScriptAnimatedModelSceneMixin = {}
+            function ScriptAnimatedModelSceneMixin:IsModelSceneSet()
+                return self.modelSceneSet
+            end
+            function ScriptAnimatedModelSceneMixin:RefreshModelScene()
+                local sceneShouldBeSet = not self:IsModelSceneSet()
+                if sceneShouldBeSet then
+                    self.modelSceneSet = true
+                end
+                if sceneShouldBeSet then
+                    for _, action in ipairs(self.delayedActions) do
+                        action()
+                    end
+                    self.delayedActions = nil
+                end
+            end
+            function ScriptAnimatedModelSceneMixin:ExecuteOrDelayUntilSceneSet(action)
+                if self:IsModelSceneSet() then
+                    action()
+                    return
+                end
+                table.insert(self.delayedActions, action)
+            end
+            "#,
+        )
+        .expect("script animated model scene fixture should install");
+
+        patch_env(&env);
+
+        let (refresh_ok, delay_ok): (bool, bool) = env
+            .eval(
+                r#"
+                local scene = { delayedActions = nil }
+                setmetatable(scene, { __index = ScriptAnimatedModelSceneMixin })
+                scene:RefreshModelScene()
+
+                local delayedScene = { delayedActions = nil }
+                setmetatable(delayedScene, { __index = ScriptAnimatedModelSceneMixin })
+                local actionQueued = false
+                delayedScene:ExecuteOrDelayUntilSceneSet(function()
+                    actionQueued = true
+                end)
+
+                return scene.modelSceneSet == true and scene.delayedActions == nil,
+                    actionQueued == false and #delayedScene.delayedActions == 1
+                "#,
+            )
+            .expect("ScriptAnimatedModelScene delayed-action patch should run");
+
+        assert!(refresh_ok);
+        assert!(delay_ok);
     }
 
     fn install_animation_mixin_fixture(env: &WowLuaEnv) {
