@@ -167,6 +167,35 @@ fn test_error_handler_receives_event_dispatch_traceback() {
 }
 
 #[test]
+fn test_event_dispatch_errors_include_handler_context() {
+    let env = env();
+    env.exec(
+        r#"
+        ContextErrors = {}
+        seterrorhandler(function(msg)
+            table.insert(ContextErrors, msg)
+        end)
+
+        local f = CreateFrame("Frame", "ContextErrorFrame")
+        f:RegisterEvent("PLAYER_LOGIN")
+        f:SetScript("OnEvent", function()
+            error("context boom")
+        end)
+        "#,
+    )
+    .unwrap();
+
+    env.fire_event("PLAYER_LOGIN").ok();
+
+    let msg: String = env.eval("return ContextErrors[1] or ''").unwrap();
+    assert!(
+        msg.contains("[OnEvent] frame=ContextErrorFrame addon=__BuiltIn"),
+        "error should include event handler context, got: {msg}"
+    );
+    assert!(msg.contains("context boom"), "error message was: {msg}");
+}
+
+#[test]
 fn test_error_handler_receives_event_args() {
     // Verify that when OnEvent errors, the error handler is called
     // even when the event has arguments

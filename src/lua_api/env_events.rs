@@ -130,6 +130,38 @@ fn widget_handler_source_label(lua: &rilua::Lua, handler: Val) -> Option<String>
     handler_timing::lua_closure_source_label(lua.state(), func_ref)
 }
 
+fn widget_handler_error_message(
+    state: &Rc<RefCell<SimState>>,
+    widget_id: u64,
+    addon_idx: Option<u16>,
+    handler_name: &str,
+    source: Option<&str>,
+    error: &str,
+) -> String {
+    let (addon_name, frame_name) = {
+        let sim = state.borrow();
+        let addon_name = addon_idx
+            .and_then(|idx| sim.addons.get(idx as usize))
+            .map(|addon| addon.folder_name.clone())
+            .unwrap_or_else(|| "__BuiltIn".to_string());
+        let frame_name = sim
+            .widgets
+            .get(widget_id)
+            .and_then(|frame| frame.name.clone())
+            .unwrap_or_else(|| format!("#{widget_id}"));
+        (addon_name, frame_name)
+    };
+
+    let mut message = format!("[{handler_name}] frame={frame_name} addon={addon_name}");
+    if let Some(source) = source.filter(|source| !source.is_empty()) {
+        message.push_str(" source=");
+        message.push_str(source);
+    }
+    message.push_str(": ");
+    message.push_str(error);
+    message
+}
+
 fn global_hash_entries(
     state: &rilua::vm::state::LuaState,
     globals: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
@@ -275,7 +307,16 @@ impl WowLuaEnv {
         self.state.borrow_mut().executing_addon_index = addon_idx;
         let call_result = call_rilua_function(lua, handler, call_args);
         if let Err(error) = call_result {
-            call_error_handler(lua, &error.to_string());
+            let source = widget_handler_source_label(lua, handler);
+            let error = widget_handler_error_message(
+                &self.state,
+                widget_id,
+                addon_idx,
+                handler_name,
+                source.as_deref(),
+                &error.to_string(),
+            );
+            call_error_handler(lua, &error);
         }
         self.state.borrow_mut().executing_addon_index = None;
         let elapsed = start.elapsed();
