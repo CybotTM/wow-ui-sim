@@ -75,6 +75,10 @@ fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
             "Blizzard_DeprecatedCombatLog".to_string(),
             vec!["Blizzard_CombatLogBase".to_string()],
         ),
+        (
+            "Blizzard_ObjectiveTracker".to_string(),
+            vec!["Blizzard_POIButton".to_string()],
+        ),
     ])
 }
 

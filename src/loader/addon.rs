@@ -117,6 +117,7 @@ fn apply_blizzard_post_load_patches(
         "Blizzard_MapCanvas" => patch_map_canvas_scroll_container(env, result),
         "Blizzard_SharedMapDataProviders" => patch_unit_position_frame_mixin(env, result),
         "Blizzard_UIPanels_Game" => patch_quest_log_mixin(env, result),
+        "Blizzard_FrameXMLUtil" => patch_quest_objective_defaults(env),
         "Blizzard_PlayerSpells" => patch_playerspells_onload_backfill(env, result),
         _ => {}
     }
@@ -153,6 +154,10 @@ fn patch_account_store_set_storefront(env: &LoaderEnv<'_>, result: &mut LoadResu
             &e,
         );
     }
+}
+
+fn patch_quest_objective_defaults(env: &LoaderEnv<'_>) {
+    crate::lua_api::workarounds::patch_quest_objective_defaults_for_addon_load(env);
 }
 
 fn patch_shared_xml_anim_mixins(env: &LoaderEnv<'_>, result: &mut LoadResult) {

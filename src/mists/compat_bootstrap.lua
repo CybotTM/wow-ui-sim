@@ -1477,6 +1477,17 @@ if rawget(_G, "HideTextStatusBarText") == nil then
   end
 end
 
+-- ObjectiveTracker checks whether the retail splash screen is open before
+-- adding auto-quest blocks. The Mists source tree used here does not include a
+-- SplashFrame addon, so keep the unsupported splash surface closed.
+if rawget(_G, "SplashFrame") == nil and type(CreateFrame) == "function" then
+  SplashFrame = CreateFrame("Frame", "SplashFrame", UIParent)
+  SplashFrame:Hide()
+  function SplashFrame:Close()
+    self:Hide()
+  end
+end
+
 -- Blizzard_ActionBar/Classic/MainMenuBar.lua/xml in the current Mists source
 -- still calls legacy global micro-menu and pet-bar helpers. The loaded Mists
 -- MicroMenu/PetActionBar implementations moved that behavior onto mixins, so

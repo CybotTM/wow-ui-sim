@@ -4,6 +4,8 @@
 //! quest state, or auto quest popup toasts yet. Keep these startup-safe empty
 //! defaults in the workaround layer instead of the central runtime bootstrap.
 
+use crate::lua_api::LoaderEnv;
+
 const QUEST_OBJECTIVE_DEFAULTS_LUA: &str = r#"
 -- Bonus / world-quest objective trackers iterate the task list at startup.
 -- Return an empty table so the `for ... in ipairs(tasksTable)` loops no-op.
@@ -27,11 +29,73 @@ end
 if GetAutoQuestPopUp == nil then
   function GetAutoQuestPopUp(_index) return nil, nil end
 end
+
+-- Retail-backed ObjectiveTracker code asks ObjectAPI's QuestCache for quest
+-- objects. Classic/Mists profile source does not always load ObjectAPI's
+-- retail Quest.lua, so provide a thin cache backed by the modeled C_QuestLog
+-- quest surface.
+if QuestCache == nil then
+  Enum = Enum or {}
+  Enum.QuestClassification = Enum.QuestClassification or {}
+  Enum.QuestClassification.Campaign = Enum.QuestClassification.Campaign or -1
+  Enum.QuestClassification.Calling = Enum.QuestClassification.Calling or -2
+
+  local Quest = {}
+  Quest.__index = Quest
+
+  function Quest:GetID()
+    return self.questID
+  end
+
+  function Quest:GetQuestLogIndex()
+    return C_QuestLog.GetLogIndexForQuestID(self.questID)
+  end
+
+  function Quest:IsComplete()
+    return C_QuestLog.IsComplete(self.questID)
+  end
+
+  function Quest:IsDisabledForSession()
+    return C_QuestLog.IsQuestDisabledForSession(self.questID)
+  end
+
+  function Quest:IsCalling()
+    return self:GetQuestClassification() == Enum.QuestClassification.Calling
+  end
+
+  function Quest:GetQuestClassification()
+    return C_QuestInfoSystem.GetQuestClassification(self.questID)
+  end
+
+  QuestCache = {}
+
+  function QuestCache:Get(questID)
+    local quest = setmetatable({ questID = questID }, Quest)
+    quest.title = C_QuestLog.GetTitleForQuestID(questID) or ""
+    quest.requiredMoney = C_QuestLog.GetRequiredMoney(questID) or 0
+    quest.isAutoComplete = false
+    quest.isBounty = false
+    quest.isTask = false
+    return quest
+  end
+end
+
+QuestUtil = QuestUtil or {}
+if QuestUtil.CanCreateQuestGroup == nil then
+  function QuestUtil.CanCreateQuestGroup(_questID) return false end
+end
+if QuestUtil.QuestShowsItemByIndex == nil then
+  function QuestUtil.QuestShowsItemByIndex(_questLogIndex, _isQuestComplete) return false end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(QUEST_OBJECTIVE_DEFAULTS_LUA)?;
     Ok(())
+}
+
+pub(crate) fn patch_loader(env: &LoaderEnv<'_>) {
+    let _ = env.exec(QUEST_OBJECTIVE_DEFAULTS_LUA);
 }
 
 #[cfg(test)]
@@ -51,6 +115,14 @@ mod tests {
                 if GetNumAutoQuestPopUps() ~= 0 then return "popup_count" end
                 local popupQuestID, popupType = GetAutoQuestPopUp(1)
                 if popupQuestID ~= nil or popupType ~= nil then return "popup_entry" end
+                local quest = QuestCache:Get(401)
+                if quest:GetID() ~= 401 then return "quest_id" end
+                if type(quest.title) ~= "string" then return "quest_title" end
+                if quest:IsComplete() ~= false then return "quest_complete" end
+                if quest:IsDisabledForSession() ~= false then return "quest_disabled" end
+                if type(quest:GetQuestClassification()) ~= "number" then return "quest_classification" end
+                if QuestUtil.CanCreateQuestGroup(401) ~= false then return "quest_group" end
+                if QuestUtil.QuestShowsItemByIndex(1, false) ~= false then return "quest_item" end
                 return "ok"
                 "#,
             )
@@ -89,6 +161,30 @@ mod tests {
                 "#,
             )
             .expect("quest objective preservation probe should run");
+
+        assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn reapply_restores_quest_util_defaults_after_addon_reset() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec("QuestUtil = {}")
+            .expect("fixture should reset QuestUtil like FrameXMLUtil");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("quest objective defaults should reapply");
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                if QuestUtil.CanCreateQuestGroup(401) ~= false then return "quest_group" end
+                if QuestUtil.QuestShowsItemByIndex(1, false) ~= false then return "quest_item" end
+                return "ok"
+                "#,
+            )
+            .expect("quest util defaults should be callable after reapply");
 
         assert_eq!(result, "ok");
     }

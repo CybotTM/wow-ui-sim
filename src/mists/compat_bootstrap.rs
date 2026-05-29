@@ -55,4 +55,24 @@ mod tests {
             "init,text:XP:L:R,prefix:XP,event:CVAR_UPDATE:status,update,value,show,hide"
         );
     }
+
+    #[test]
+    fn mists_splash_frame_default_starts_closed_and_can_close() {
+        let env = WowLuaEnv::new().expect("env");
+
+        let result: String = env
+            .eval(
+                r#"
+                if SplashFrame == nil then return "missing" end
+                if SplashFrame:IsShown() then return "shown" end
+                SplashFrame:Show()
+                SplashFrame:Close()
+                if SplashFrame:IsShown() then return "not_closed" end
+                return "ok"
+                "#,
+            )
+            .expect("splash frame probe should run");
+
+        assert_eq!(result, "ok");
+    }
 }

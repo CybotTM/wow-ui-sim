@@ -201,6 +201,30 @@ fn deprecated_combat_log_pulls_load_on_demand_combat_log_base() {
 }
 
 #[test]
+fn objective_tracker_pulls_poi_button_owner_templates() {
+    let ui = TempBlizzardUiDir::new("objective-tracker-poi-button");
+    ui.add_addon(
+        "Blizzard_ObjectiveTracker",
+        "## AllowLoad: Game\nObjectiveTracker.lua\n",
+    );
+    ui.add_addon(
+        "Blizzard_POIButton",
+        "## AllowLoad: Game\n## LoadOnDemand: 1\nPOIButtonOwner.xml\n",
+    );
+
+    let addons: Vec<String> = discover_blizzard_addons_for_screen(&ui.path, ScreenKind::Game)
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect();
+
+    assert_eq!(
+        addons,
+        vec!["Blizzard_POIButton", "Blizzard_ObjectiveTracker"],
+        "ObjectiveTracker inherits POIButtonOwnerTemplate without declaring the addon"
+    );
+}
+
+#[test]
 fn cyclic_addons_still_emit_dependencies_before_load_first_addon() {
     let ui = TempBlizzardUiDir::new("load-first-cycle");
     ui.add_addon(

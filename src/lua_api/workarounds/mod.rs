@@ -17,6 +17,10 @@ pub(crate) use runtime_surfaces::{
     patch_shared_xml_anim_mixins, patch_unit_position_frame_mixin,
 };
 
+pub(crate) fn patch_quest_objective_defaults_for_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
+    temporary::quest_objective_defaults::patch_loader(env);
+}
+
 struct WorkaroundStep {
     label: &'static str,
     apply: fn(&crate::lua_api::WowLuaEnv),
@@ -527,6 +531,9 @@ fn patch_runtime_core_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_
         "Blizzard_SharedTalentUI" | "Blizzard_PlayerSpells"
     ) {
         temporary::talent_edge_frame_level_sync::patch_loader(env);
+    }
+    if addon_name == "Blizzard_FrameXMLUtil" {
+        temporary::quest_objective_defaults::patch_loader(env);
     }
     patch_runtime_map_addon_surfaces(env, addon_name);
 }
