@@ -37,6 +37,15 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_ActionBar/Classic/StatusTrackingBar.xml",
     "Blizzard_ActionBar/Classic/StatusTrackingBarTemplate.xml",
     "Blizzard_ActionBar/Classic/StatusTrackingManagerOverrides.lua",
+    "Blizzard_ChatFrame/Classic/BattlegroundChatFilters.lua",
+    "Blizzard_ChatFrame/Classic/BattlegroundChatFilters.xml",
+    "Blizzard_ChatFrame/Classic/ChatConfigFrame.xml",
+    "Blizzard_ChatFrame/Classic/ChatConfigFrame_Shared.lua",
+    "Blizzard_ChatFrame/Classic/Localization.lua",
+    "Blizzard_ChatFrame/Classic/TextToSpeechFrameConstants.lua",
+    "Blizzard_ChatFrame/Classic/VoiceChatHeadsetButton.lua",
+    "Blizzard_ChatFrame/Classic/VoiceChatHeadsetButton.xml",
+    "Blizzard_ChatFrame/Wrath/ChatConfigFrame.lua",
     "Blizzard_ChatFrameBase/Blizzard_ChatFrameBase_Classic.toc",
     "Blizzard_ChatFrameBase/Classic/ChannelFrameButtonMixin.lua",
     "Blizzard_ChatFrameBase/Classic/ChatEmoteConstants.lua",
@@ -298,6 +307,7 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
             file_contains(path, r#"name="PossessActionBar""#)
                 && file_contains(path, "PossessActionBarMixin")
         }
+        "Blizzard_ChatFrame/Classic/ChatConfigFrame.xml" => mists_chat_config_is_usable(path),
         "Blizzard_MicroMenu/Blizzard_MicroMenu_Classic.toc" => file_contains(
             path,
             r#"Cata\MainMenuBarMicroButtons.xml [AllowLoadGameType mists]"#,
@@ -308,14 +318,8 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
         "Blizzard_Fonts_Shared/Classic/GameFonts.xml" => {
             file_contains(path, r#"FontFamily name="PriceFont""#)
         }
-        "Blizzard_MoneyFrame/Blizzard_MoneyFrame_Classic.toc" => {
-            file_contains(path, "Classic\\MoneyInputFrame.lua")
-                && file_contains(path, "## AllowLoadGameType: classic")
-        }
-        "Blizzard_MoneyFrame/Classic/MoneyInputFrame.xml" => {
-            file_contains(path, r#"name="MoneyInputFrameTemplate""#)
-                && file_contains(path, r#"parentKey="copper""#)
-        }
+        "Blizzard_MoneyFrame/Blizzard_MoneyFrame_Classic.toc" => mists_money_toc_is_usable(path),
+        "Blizzard_MoneyFrame/Classic/MoneyInputFrame.xml" => mists_money_input_is_usable(path),
         "Blizzard_NamePlates/Blizzard_NamePlates.toc" => file_contains(
             path,
             "Blizzard_ClassNameplateBar.lua [AllowLoadGameType mainline]",
@@ -325,6 +329,21 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
         }
         _ => true,
     }
+}
+
+fn mists_chat_config_is_usable(path: &Path) -> bool {
+    file_contains(path, r#"name="ChatConfigCheckButtonTemplate""#)
+        && file_contains(path, r#"name="$parentText""#)
+}
+
+fn mists_money_toc_is_usable(path: &Path) -> bool {
+    file_contains(path, "Classic\\MoneyInputFrame.lua")
+        && file_contains(path, "## AllowLoadGameType: classic")
+}
+
+fn mists_money_input_is_usable(path: &Path) -> bool {
+    file_contains(path, r#"name="MoneyInputFrameTemplate""#)
+        && file_contains(path, r#"parentKey="copper""#)
 }
 
 fn file_contains(path: &Path, needle: &str) -> bool {
