@@ -193,6 +193,10 @@ fn default_runtime_addon_bases() -> Vec<PathBuf> {
 }
 
 pub(super) fn find_runtime_addon_toc(state: &LuaState, addon_name: &str) -> Option<PathBuf> {
+    if crate::loader::is_addon_excluded_for_active_profile(addon_name) {
+        return None;
+    }
+
     let (bases, screen_kind) = {
         let sim = borrow_state(state).ok()?;
         (
@@ -583,4 +587,106 @@ fn push_load_result(
 fn legacy_get_addon_enable_state(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(2.0));
     Ok(1)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lua_api::WowLuaEnv;
+    use rilua::LuaApi;
+    use std::path::{Path, PathBuf};
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_runtime_addon_lookup_respects_profile_exclusion() {
+        let ui = TempAddonBase::new("mists-excluded-uiparent-panel-manager");
+        ui.add_addon(
+            "Blizzard_UIParentPanelManager",
+            "Blizzard_UIParentPanelManager_Mists.toc",
+            r#"
+## Title: Blizzard_UIParentPanelManager
+## AllowLoad: Game
+Classic\UIParentPanelManager.lua
+"#,
+        );
+
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.state().borrow_mut().addon_base_paths = vec![ui.path.clone()];
+
+        let found = {
+            let lua = env.rilua();
+            find_runtime_addon_toc(lua.state(), "Blizzard_UIParentPanelManager")
+        };
+
+        assert!(
+            found.is_none(),
+            "runtime LoadAddOn lookup must not bypass Mists profile exclusions"
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_runtime_addon_lookup_keeps_allowed_addons_available() {
+        let ui = TempAddonBase::new("mists-allowed-addon");
+        ui.add_addon(
+            "Blizzard_AllowedRuntimeAddon",
+            "Blizzard_AllowedRuntimeAddon.toc",
+            r#"
+## Title: Blizzard_AllowedRuntimeAddon
+## AllowLoad: Game
+Core.lua
+"#,
+        );
+
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.state().borrow_mut().addon_base_paths = vec![ui.path.clone()];
+
+        let found = {
+            let lua = env.rilua();
+            find_runtime_addon_toc(lua.state(), "Blizzard_AllowedRuntimeAddon")
+        };
+
+        assert!(
+            found.is_some(),
+            "allowed runtime addons should still resolve"
+        );
+    }
+
+    struct TempAddonBase {
+        path: PathBuf,
+    }
+
+    impl TempAddonBase {
+        fn new(suffix: &str) -> Self {
+            let unique = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("system clock should be after epoch")
+                .as_nanos();
+            let path = std::env::temp_dir().join(format!("wow-sim-c-addons-{suffix}-{unique}"));
+            std::fs::create_dir_all(&path).expect("temp addon base should be created");
+            Self { path }
+        }
+
+        fn add_addon(&self, addon_name: &str, toc_name: &str, toc_contents: &str) {
+            let addon_dir = self.path.join(addon_name);
+            std::fs::create_dir_all(&addon_dir).expect("addon dir should be created");
+            std::fs::write(addon_dir.join(toc_name), toc_contents).expect("toc should be written");
+            std::fs::write(addon_dir.join("Core.lua"), "").expect("Core.lua should be written");
+            write_parent_file(&addon_dir, Path::new("Classic/UIParentPanelManager.lua"));
+        }
+    }
+
+    impl Drop for TempAddonBase {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.path);
+        }
+    }
+
+    fn write_parent_file(addon_dir: &Path, file_path: &Path) {
+        let path = addon_dir.join(file_path);
+        std::fs::create_dir_all(path.parent().expect("file path should have parent"))
+            .expect("parent dir should be created");
+        std::fs::write(path, "").expect("file should be written");
+    }
 }

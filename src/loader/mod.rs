@@ -605,6 +605,10 @@ fn excluded_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
     }
 }
 
+pub(crate) fn is_addon_excluded_for_active_profile(addon_name: &str) -> bool {
+    excluded_addons_for_active_profile().contains(&addon_name)
+}
+
 fn excluded_addons_for_active_profile() -> &'static [&'static str] {
     match crate::client_profile::ACTIVE {
         crate::client_profile::ClientProfile::Mists => &[
