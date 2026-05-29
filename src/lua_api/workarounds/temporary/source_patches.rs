@@ -59,6 +59,14 @@ const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
     },
     #[cfg(feature = "client-mists")]
     LuaSourcePatch {
+        suffix: "/Blizzard_MapCanvas.lua",
+        operations: &[LuaSourcePatchOp::ReplaceOnce {
+            from: "function MapCanvasMixin:AddDataProvider(dataProvider)\n\tself.dataProviders[dataProvider] = true;\n\tdataProvider:OnAdded(self);\nend",
+            to: "function MapCanvasMixin:AddDataProvider(dataProvider)\n\tif type(dataProvider) == \"table\" and type(MapCanvasDataProviderMixin) == \"table\" then\n\t\tdataProvider.OnAdded = dataProvider.OnAdded or MapCanvasDataProviderMixin.OnAdded;\n\t\tdataProvider.OnRemoved = dataProvider.OnRemoved or MapCanvasDataProviderMixin.OnRemoved;\n\t\tdataProvider.RemoveAllData = dataProvider.RemoveAllData or MapCanvasDataProviderMixin.RemoveAllData;\n\t\tdataProvider.RefreshAllData = dataProvider.RefreshAllData or MapCanvasDataProviderMixin.RefreshAllData;\n\tend\n\tself.dataProviders[dataProvider] = true;\n\tdataProvider:OnAdded(self);\nend",
+        }],
+    },
+    #[cfg(feature = "client-mists")]
+    LuaSourcePatch {
         suffix: "/Blizzard_SimpleCheckout.lua",
         operations: &[LuaSourcePatchOp::ReplaceOnce {
             from: "self:SetPoint(\"TOPLEFT\", UIParent, \"TOPLEFT\");",
@@ -352,5 +360,16 @@ mod tests {
             r"@Interface\AddOns\Blizzard_PetBattleUI\Blizzard_PetBattleUI.lua",
         );
         assert!(patch.is_some());
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_map_canvas_add_data_provider_backfills_provider_defaults() {
+        let source = b"function MapCanvasMixin:AddDataProvider(dataProvider)\n\tself.dataProviders[dataProvider] = true;\n\tdataProvider:OnAdded(self);\nend";
+        let patched = patch_lua_source(source, "@/Blizzard_MapCanvas.lua");
+        let patched = std::str::from_utf8(&patched).expect("patched source should be utf8");
+
+        assert!(patched.contains("MapCanvasDataProviderMixin.OnAdded"));
+        assert!(patched.contains("dataProvider:OnAdded(self);"));
     }
 }

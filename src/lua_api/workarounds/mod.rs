@@ -514,6 +514,8 @@ fn refresh_post_event_surfaces(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
+    #[cfg(feature = "client-mists")]
+    crate::mists::post_load::apply_for_runtime_addon_load(env, addon_name);
     patch_runtime_core_addon_surfaces(env, addon_name);
     patch_runtime_journal_addon_surfaces(env, addon_name);
     patch_runtime_feature_addon_surfaces(env, addon_name);
@@ -549,8 +551,6 @@ fn patch_runtime_journal_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, add
         patch_toggle_collections_journal_for_runtime_addon_load(env);
         temporary::collections_journal_namespace::patch(env);
     }
-    #[cfg(feature = "client-mists")]
-    crate::mists::post_load::apply_for_runtime_addon_load(env, addon_name);
     if addon_name == "Blizzard_EncounterJournal" {
         patch_toggle_encounter_journal_for_runtime_addon_load(env);
     }

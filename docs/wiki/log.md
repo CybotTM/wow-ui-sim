@@ -1142,6 +1142,10 @@ Created all 10 systems/ pages from source docs in docs/:
 
 Updated index.md systems/ table.
 
+## [2026-05-28] ingest | Mists WorldMap startup failure cluster
+
+Created `investigations/mists-world-map-startup.md` after fixing Mists startup errors around `WorldMapFrame`, `WorldMapTrackQuest`, `UpdateUIPanelPositions`, `FogOfWarFrameMixin`, and MapCanvas provider `OnAdded` defaults. Updated `index.md` with the new investigation page.
+
 ## [2026-04-10] ingest | Initial bulk ingest from 30+ existing docs
 
 Bootstrapped wiki from root-level documentation files. Created pages across systems/, design/, investigations/, and reference/ categories.

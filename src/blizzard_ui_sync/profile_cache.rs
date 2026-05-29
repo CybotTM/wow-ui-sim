@@ -102,6 +102,9 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_SettingsDefinitions_Frame/Classic/KeybindingsOverrides.lua",
     "Blizzard_SettingsDefinitions_Frame/Classic/SocialOverrides.lua",
     "Blizzard_SettingsDefinitions_Frame/CombatAudioAlertUtil.lua",
+    "Blizzard_SharedMapDataProviders/Blizzard_SharedMapDataProviders_Mists.toc",
+    "Blizzard_SharedMapDataProviders/Wrath/BonusObjectiveDataProvider.lua",
+    "Blizzard_SharedMapDataProviders/Wrath/DeathMapDataProvider.xml",
     "Blizzard_UIWidgets/Blizzard_UIWidgets.toc",
     "Blizzard_UIWidgets/Blizzard_UIWidgetAnimationTemplates.lua",
     "Blizzard_UIWidgets/Blizzard_UIWidgetAnimationTemplates.xml",
@@ -240,6 +243,13 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_UIPanels_Game/Classic/CastingBarFrame.lua",
     "Blizzard_UIPanels_Game/Classic/CastingBarFrame.xml",
     "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua",
+    "Blizzard_WorldMap/Blizzard_WorldMapTooltip.xml",
+    "Blizzard_WorldMap/Blizzard_WorldMap_Mists.toc",
+    "Blizzard_WorldMap/Cata/Blizzard_WorldMap.lua",
+    "Blizzard_WorldMap/Cata/Blizzard_WorldMap.xml",
+    "Blizzard_WorldMap/WM_InvasionDataProvider.lua",
+    "Blizzard_WorldMap/WM_InvasionDataProvider.xml",
+    "Blizzard_WorldMap/Wrath/QuestLogOwnerMixin.lua",
     "Blizzard_UnitFrame/Cata/EclipseBarFrame.lua",
     "Blizzard_UnitFrame/Cata/EclipseBarFrame.xml",
     "Blizzard_UnitFrame/Cata/RuneFrame.lua",
@@ -298,7 +308,13 @@ pub(super) fn cache_entry_is_usable(entry: &str, path: &Path) -> bool {
 }
 
 fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
-    match entry {
+    mists_core_cache_entry_is_usable(entry, path)
+        .or_else(|| mists_map_cache_entry_is_usable(entry, path))
+        .unwrap_or(true)
+}
+
+fn mists_core_cache_entry_is_usable(entry: &str, path: &Path) -> Option<bool> {
+    let is_usable = match entry {
         "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml" => {
             file_contains(path, "ActionBarButtonTemplate")
                 && file_contains(path, r#"parentKey="chargeCooldown""#)
@@ -327,8 +343,23 @@ fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
         "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua" => {
             file_contains(path, "function PlayerCastingBarMixin:OnShow()")
         }
-        _ => true,
-    }
+        _ => return None,
+    };
+
+    Some(is_usable)
+}
+
+fn mists_map_cache_entry_is_usable(entry: &str, path: &Path) -> Option<bool> {
+    let is_usable = match entry {
+        "Blizzard_SharedMapDataProviders/Blizzard_SharedMapDataProviders_Mists.toc" => {
+            mists_shared_map_data_providers_toc_is_usable(path)
+        }
+        "Blizzard_WorldMap/Blizzard_WorldMap_Mists.toc" => mists_world_map_toc_is_usable(path),
+        "Blizzard_WorldMap/Cata/Blizzard_WorldMap.xml" => mists_world_map_xml_is_usable(path),
+        _ => return None,
+    };
+
+    Some(is_usable)
 }
 
 fn mists_chat_config_is_usable(path: &Path) -> bool {
@@ -344,6 +375,21 @@ fn mists_money_toc_is_usable(path: &Path) -> bool {
 fn mists_money_input_is_usable(path: &Path) -> bool {
     file_contains(path, r#"name="MoneyInputFrameTemplate""#)
         && file_contains(path, r#"parentKey="copper""#)
+}
+
+fn mists_shared_map_data_providers_toc_is_usable(path: &Path) -> bool {
+    file_contains(path, "## AllowLoadGameType: mists")
+        && file_contains(path, "Wrath\\BonusObjectiveDataProvider.lua")
+}
+
+fn mists_world_map_toc_is_usable(path: &Path) -> bool {
+    file_contains(path, "## AllowLoadGameType: mists")
+        && file_contains(path, "Cata\\Blizzard_WorldMap.xml")
+}
+
+fn mists_world_map_xml_is_usable(path: &Path) -> bool {
+    file_contains(path, r#"name="WorldMapTrackQuest""#)
+        && file_contains(path, r#"parentKey="WorldMapOptionsDropDown""#)
 }
 
 fn file_contains(path: &Path, needle: &str) -> bool {

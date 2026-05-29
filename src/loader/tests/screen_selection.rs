@@ -194,6 +194,51 @@ Shared\GameMenuFrame.lua [AllowLoadGameType standard, wowhack]
 }
 
 #[test]
+#[cfg(feature = "client-mists")]
+fn mists_profile_uses_world_map_mists_toc() {
+    let ui = TempBlizzardUiDir::new("mists-world-map-toc");
+    ui.add_addon_toc(
+        "Blizzard_WorldMap",
+        "Blizzard_WorldMap_Mainline.toc",
+        r#"
+## Title: Blizzard_WorldMap
+## AllowLoad: Game
+Blizzard_WorldMap.xml
+"#,
+    );
+    ui.add_addon_toc(
+        "Blizzard_WorldMap",
+        "Blizzard_WorldMap_Mists.toc",
+        r#"
+## Title: Blizzard_WorldMap
+## AllowLoad: Game
+## AllowLoadGameType: mists
+Cata\Blizzard_WorldMap.xml
+"#,
+    );
+
+    let addons: Vec<(String, String)> =
+        discover_blizzard_addons_for_screen(&ui.path, ScreenKind::Game)
+            .into_iter()
+            .map(|(name, toc_path)| {
+                (
+                    name,
+                    toc_path.file_name().unwrap().to_string_lossy().into_owned(),
+                )
+            })
+            .collect();
+
+    assert_eq!(
+        addons,
+        vec![(
+            "Blizzard_WorldMap".to_string(),
+            "Blizzard_WorldMap_Mists.toc".to_string()
+        )],
+        "Mists should prefer the shipped Mists WorldMap TOC over the retail Mainline TOC"
+    );
+}
+
+#[test]
 fn deprecated_chat_and_combat_compat_addons_load_after_base_addons() {
     let ui = TempBlizzardUiDir::new("deprecated-compat-order");
     for addon in [

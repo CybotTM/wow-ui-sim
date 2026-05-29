@@ -15,6 +15,106 @@ if Syndicator ~= nil and SYNDICATOR_CONFIG == nil then
   SYNDICATOR_CONFIG = {}
 end
 
+if type(UpdateUIPanelPositions) ~= "function" then
+  function UpdateUIPanelPositions(frame)
+    if frame ~= nil and type(frame.OnFrameSizeChanged) == "function" then
+      pcall(function()
+        frame:OnFrameSizeChanged()
+      end)
+    end
+    return true
+  end
+end
+
+if type(MaximizeUIPanel) ~= "function" then
+  function MaximizeUIPanel(frame)
+    if frame ~= nil and type(frame.Show) == "function" then
+      frame:Show()
+    end
+    return true
+  end
+end
+
+if type(RestoreUIPanelArea) ~= "function" then
+  function RestoreUIPanelArea(_frame)
+    return true
+  end
+end
+
+if type(FogOfWarFrameMixin) ~= "table" then
+  FogOfWarFrameMixin = {}
+
+  function FogOfWarFrameMixin:OnLoad()
+    if type(self.RegisterEvent) == "function" then
+      self:RegisterEvent("FOG_OF_WAR_UPDATED")
+    end
+  end
+
+  function FogOfWarFrameMixin:OnEvent(event, ...)
+    if event == "FOG_OF_WAR_UPDATED" then
+      self:TryFindingBestFogOfWarID(true)
+    end
+  end
+
+  function FogOfWarFrameMixin:SetFogOfWarID(fogOfWarID, forceUpdate)
+    if self.fogOfWarID ~= fogOfWarID or forceUpdate then
+      self.fogOfWarID = fogOfWarID
+      self:UpdateFogOfWar()
+    end
+  end
+
+  function FogOfWarFrameMixin:OnUiMapChanged(_uiMapID)
+    self:TryFindingBestFogOfWarID()
+  end
+
+  function FogOfWarFrameMixin:UpdateFogOfWar()
+    local fogOfWarInfo = nil
+    if self.fogOfWarID ~= nil and C_FogOfWar ~= nil and type(C_FogOfWar.GetFogOfWarInfo) == "function" then
+      fogOfWarInfo = C_FogOfWar.GetFogOfWarInfo(self.fogOfWarID)
+    end
+
+    if type(fogOfWarInfo) == "table" then
+      if type(self.SetFogOfWarBackgroundAtlas) == "function" then
+        self:SetFogOfWarBackgroundAtlas(fogOfWarInfo.backgroundAtlas)
+      end
+      if type(self.SetFogOfWarMaskAtlas) == "function" then
+        self:SetFogOfWarMaskAtlas(fogOfWarInfo.maskAtlas)
+      end
+      if type(self.SetMaskScalar) == "function" then
+        self:SetMaskScalar(fogOfWarInfo.maskScalar)
+      end
+      if type(self.Show) == "function" then
+        self:Show()
+      end
+    elseif type(self.Hide) == "function" then
+      self:Hide()
+    end
+  end
+
+  function FogOfWarFrameMixin:TryFindingBestFogOfWarID(forceUpdate)
+    if type(self.GetUiMapID) ~= "function" then
+      return
+    end
+    local uiMapID = self:GetUiMapID()
+    if uiMapID == nil or C_FogOfWar == nil or type(C_FogOfWar.GetFogOfWarForMap) ~= "function" then
+      return
+    end
+    self:SetFogOfWarID(C_FogOfWar.GetFogOfWarForMap(uiMapID), forceUpdate)
+  end
+
+  function FogOfWarFrameMixin:OnShow()
+    self:TryFindingBestFogOfWarID()
+  end
+end
+
+if WorldMapFrame ~= nil
+   and type(WorldMapFrame.WorldMapLevelDropDown) == "table"
+   and WorldMapFrame.WorldMapLevelDropDown.header == nil then
+  WorldMapFrame.WorldMapLevelDropDown.header =
+    CreateFrame("Frame", nil, WorldMapFrame.WorldMapLevelDropDown)
+  WorldMapFrame.WorldMapLevelDropDown.header:Hide()
+end
+
 if type(Settings) == "table" then
   local categoriesByID = rawget(Settings, "__wow_sim_mists_categories_by_id")
   if type(categoriesByID) ~= "table" then

@@ -10,7 +10,11 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if matches!(
         addon_name,
-        "Blizzard_CharacterFrame" | "Blizzard_Collections" | "Blizzard_TalentUI"
+        "Blizzard_CharacterFrame"
+            | "Blizzard_Collections"
+            | "Blizzard_MapCanvas"
+            | "Blizzard_SharedMapDataProviders"
+            | "Blizzard_TalentUI"
     ) {
         let _ = env.exec(MISTS_POST_LOAD_LUA);
     }
@@ -180,6 +184,66 @@ mod tests {
             sub_hidden,
             "registered settings canvas subcategory frames should start hidden"
         );
+    }
+
+    #[test]
+    fn post_load_supplies_world_map_panel_position_defaults() {
+        let env = WowLuaEnv::new().expect("env");
+
+        super::apply(&env);
+
+        let (update_kind, maximize_kind, restore_kind): (String, String, String) = env
+            .eval(
+                r#"
+                return type(UpdateUIPanelPositions), type(MaximizeUIPanel), type(RestoreUIPanelArea)
+                "#,
+            )
+            .expect("panel position default probe should run");
+
+        assert_eq!(update_kind, "function");
+        assert_eq!(maximize_kind, "function");
+        assert_eq!(restore_kind, "function");
+    }
+
+    #[test]
+    fn post_load_supplies_fog_of_war_frame_mixin() {
+        let env = WowLuaEnv::new().expect("env");
+
+        super::apply(&env);
+
+        let (mixin_kind, on_load_kind, try_find_kind): (String, String, String) = env
+            .eval(
+                r#"
+                return type(FogOfWarFrameMixin),
+                       type(FogOfWarFrameMixin.OnLoad),
+                       type(FogOfWarFrameMixin.TryFindingBestFogOfWarID)
+                "#,
+            )
+            .expect("fog of war mixin probe should run");
+
+        assert_eq!(mixin_kind, "table");
+        assert_eq!(on_load_kind, "function");
+        assert_eq!(try_find_kind, "function");
+    }
+
+    #[test]
+    fn post_load_adds_world_map_level_dropdown_header() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            WorldMapFrame = CreateFrame("Frame", "WorldMapFrame", UIParent)
+            WorldMapFrame.WorldMapLevelDropDown = CreateFrame("Frame", nil, WorldMapFrame)
+            "#,
+        )
+        .expect("world map fixture should run");
+
+        super::apply(&env);
+
+        let header_kind: String = env
+            .eval("return type(WorldMapFrame.WorldMapLevelDropDown.header)")
+            .expect("world map header probe should run");
+
+        assert_eq!(header_kind, "table");
     }
 
     #[test]
