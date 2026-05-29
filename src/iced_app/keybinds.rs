@@ -16,6 +16,18 @@ pub(super) fn iced_key_to_wow(
     Some(apply_wow_modifiers(key_name, modifiers))
 }
 
+/// Convert an iced physical key fallback to a WoW key name string.
+pub(super) fn iced_physical_key_to_wow(
+    physical_key: &iced::keyboard::key::Physical,
+    modifiers: iced::keyboard::Modifiers,
+) -> Option<String> {
+    let iced::keyboard::key::Physical::Code(code) = physical_key else {
+        return None;
+    };
+    let key_name = iced_physical_code_to_wow(*code)?;
+    Some(apply_wow_modifiers(key_name.to_string(), modifiers))
+}
+
 fn iced_character_key_to_wow(key: &str, modifiers: iced::keyboard::Modifiers) -> Option<String> {
     if let Some(control_key) = crate::key_names::ascii_control_key_to_letter(key) {
         return Some(apply_wow_modifiers(
@@ -39,6 +51,12 @@ fn apply_wow_modifiers(key_name: String, modifiers: iced::keyboard::Modifiers) -
     }
     parts.push(&key_name);
     parts.join("-")
+}
+
+fn iced_physical_code_to_wow(code: iced::keyboard::key::Code) -> Option<&'static str> {
+    PHYSICAL_ALPHA_KEYS
+        .iter()
+        .find_map(|(candidate, wow_key)| (*candidate == code).then_some(*wow_key))
 }
 
 /// Convert an iced named key to a WoW key name.
@@ -79,10 +97,40 @@ const WOW_NAMED_KEYS: &[(Named, &str)] = &[
     (Named::F12, "F12"),
 ];
 
+const PHYSICAL_ALPHA_KEYS: &[(iced::keyboard::key::Code, &str)] = &[
+    (iced::keyboard::key::Code::KeyA, "A"),
+    (iced::keyboard::key::Code::KeyB, "B"),
+    (iced::keyboard::key::Code::KeyC, "C"),
+    (iced::keyboard::key::Code::KeyD, "D"),
+    (iced::keyboard::key::Code::KeyE, "E"),
+    (iced::keyboard::key::Code::KeyF, "F"),
+    (iced::keyboard::key::Code::KeyG, "G"),
+    (iced::keyboard::key::Code::KeyH, "H"),
+    (iced::keyboard::key::Code::KeyI, "I"),
+    (iced::keyboard::key::Code::KeyJ, "J"),
+    (iced::keyboard::key::Code::KeyK, "K"),
+    (iced::keyboard::key::Code::KeyL, "L"),
+    (iced::keyboard::key::Code::KeyM, "M"),
+    (iced::keyboard::key::Code::KeyN, "N"),
+    (iced::keyboard::key::Code::KeyO, "O"),
+    (iced::keyboard::key::Code::KeyP, "P"),
+    (iced::keyboard::key::Code::KeyQ, "Q"),
+    (iced::keyboard::key::Code::KeyR, "R"),
+    (iced::keyboard::key::Code::KeyS, "S"),
+    (iced::keyboard::key::Code::KeyT, "T"),
+    (iced::keyboard::key::Code::KeyU, "U"),
+    (iced::keyboard::key::Code::KeyV, "V"),
+    (iced::keyboard::key::Code::KeyW, "W"),
+    (iced::keyboard::key::Code::KeyX, "X"),
+    (iced::keyboard::key::Code::KeyY, "Y"),
+    (iced::keyboard::key::Code::KeyZ, "Z"),
+];
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use iced::keyboard::Key;
+    use iced::keyboard::key::{Code, Physical};
 
     #[test]
     fn maps_named_keys_to_wow_names() {
@@ -143,6 +191,14 @@ mod tests {
                 &Key::Character("\u{11}".into()),
                 iced::keyboard::Modifiers::empty()
             ),
+            Some("CTRL-Q".to_string())
+        );
+    }
+
+    #[test]
+    fn maps_physical_key_q_fallback_to_control_key_name() {
+        assert_eq!(
+            iced_physical_key_to_wow(&Physical::Code(Code::KeyQ), iced::keyboard::Modifiers::CTRL),
             Some("CTRL-Q".to_string())
         );
     }

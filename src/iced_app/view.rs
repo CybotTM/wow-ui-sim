@@ -51,6 +51,7 @@ fn message_from_keyboard_event(
     let iced::Event::Keyboard(keyboard::Event::KeyPressed {
         key,
         modifiers,
+        physical_key,
         text,
         ..
     }) = event
@@ -63,7 +64,8 @@ fn message_from_keyboard_event(
         return Some(Message::ReloadUI);
     }
 
-    let wow_key = super::keybinds::iced_key_to_wow(key, *modifiers)?;
+    let wow_key = super::keybinds::iced_key_to_wow(key, *modifiers)
+        .or_else(|| super::keybinds::iced_physical_key_to_wow(physical_key, *modifiers))?;
     if !should_dispatch_wow_key(status, &wow_key) {
         return None;
     }
@@ -618,6 +620,27 @@ mod key_dispatch_tests {
         assert!(
             matches!(message, Message::KeyPress(key, None, _) if key == "CTRL-Q"),
             "Ctrl+Q control-character event should map to CTRL-Q"
+        );
+    }
+
+    #[test]
+    fn ctrl_q_unidentified_logical_event_dispatches_quit_binding_from_physical_key() {
+        let event = iced::Event::Keyboard(iced::keyboard::Event::KeyPressed {
+            key: iced::keyboard::Key::Unidentified,
+            modified_key: iced::keyboard::Key::Unidentified,
+            physical_key: iced::keyboard::key::Physical::Code(iced::keyboard::key::Code::KeyQ),
+            location: iced::keyboard::Location::Standard,
+            modifiers: iced::keyboard::Modifiers::CTRL,
+            text: None,
+            repeat: false,
+        });
+
+        let message = message_from_keyboard_event(&event, iced::event::Status::Captured)
+            .expect("Ctrl+Q should dispatch from physical KeyQ when logical key is unidentified");
+
+        assert!(
+            matches!(message, Message::KeyPress(key, None, _) if key == "CTRL-Q"),
+            "Ctrl+Q physical-key fallback should map to CTRL-Q"
         );
     }
 }
