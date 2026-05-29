@@ -327,6 +327,24 @@ fn test_is_allowed_game_type() {
 }
 
 #[test]
+#[cfg(feature = "client-mists")]
+fn mists_allows_mainline_game_menu_shared_files() {
+    let contents = r#"
+## Title: Blizzard_GameMenu
+Shared\GameMenuFrame.lua [AllowLoadGameType standard, wowhack]
+Shared\GameMenuFrame.xml [AllowLoadGameType standard, wowhack]
+WoWLabs\GameMenuFrame.lua [AllowLoadGameType plunderstorm]
+Shared\Localization.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/Blizzard_GameMenu"), contents);
+
+    assert_eq!(toc.files.len(), 3);
+    assert_eq!(toc.files[0], PathBuf::from("Shared/GameMenuFrame.lua"));
+    assert_eq!(toc.files[1], PathBuf::from("Shared/GameMenuFrame.xml"));
+    assert_eq!(toc.files[2], PathBuf::from("Shared/Localization.lua"));
+}
+
+#[test]
 fn test_is_game_type_restricted() {
     let plunderstorm = TocFile::parse(
         Path::new("/addons/Test"),

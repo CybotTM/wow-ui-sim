@@ -64,6 +64,13 @@ fn is_allowed_game_type(line: &str) -> bool {
     types.split(',').any(|t| allowed.contains(&t.trim()))
 }
 
+fn is_mists_game_menu_shared_file(addon_dir: &Path, line: &str) -> bool {
+    crate::client_profile::ACTIVE == crate::client_profile::ClientProfile::Mists
+        && addon_dir.file_name().and_then(|name| name.to_str()) == Some("Blizzard_GameMenu")
+        && (line.contains("Shared\\GameMenuFrame.") || line.contains("Shared/GameMenuFrame."))
+        && line.contains("standard")
+}
+
 /// Resolve addon name from Title metadata or directory name.
 fn resolve_addon_name(metadata: &HashMap<String, String>, addon_dir: &Path) -> String {
     metadata.get("Title").cloned().unwrap_or_else(|| {
@@ -163,6 +170,7 @@ fn game_subdir() -> &'static str {
 
 /// Process a non-metadata, non-comment TOC line as a file path entry.
 fn push_file_entry(
+    addon_dir: &Path,
     files: &mut Vec<PathBuf>,
     file_env_overrides: &mut Vec<Option<bool>>,
     line: &str,
@@ -170,7 +178,10 @@ fn push_file_entry(
     if line.contains("[AllowLoadTextLocale") && !line.contains("enUS") {
         return;
     }
-    if line.contains("[AllowLoadGameType") && !is_allowed_game_type(line) {
+    if line.contains("[AllowLoadGameType")
+        && !is_allowed_game_type(line)
+        && !is_mists_game_menu_shared_file(addon_dir, line)
+    {
         return;
     }
     let line = line.replace("[TextLocale]", "enUS");
@@ -209,7 +220,7 @@ impl TocFile {
             if line.starts_with('#') {
                 continue;
             }
-            push_file_entry(&mut files, &mut file_env_overrides, line);
+            push_file_entry(addon_dir, &mut files, &mut file_env_overrides, line);
         }
 
         TocFile {

@@ -280,13 +280,14 @@ impl App {
         let env = self.env.borrow();
         let button_val = env.lua_string("LeftButton");
 
+        if self.frame_mouse_on_edge(frame_id, "LeftButton", false) {
+            let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val.clone()]);
+        }
+
         if self.mouse_down_frame == Some(frame_id) && clicks_on_up {
             self.fire_left_click_sequence(frame_id, &env, &button_val, false);
         }
 
-        if self.frame_mouse_on_edge(frame_id, "LeftButton", false) {
-            let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val.clone()]);
-        }
         self.fire_propagated_mouse_script(
             frame_id,
             &env,
@@ -709,6 +710,10 @@ mod test_support;
 #[cfg(test)]
 #[path = "mouse_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "mouse_game_menu_tests.rs"]
+mod game_menu_tests;
 
 #[cfg(test)]
 #[path = "mouse_drag_scaled_tests.rs"]

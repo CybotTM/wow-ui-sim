@@ -131,6 +131,15 @@ fn scan_for_compatible_flavor_toc(addon_dir: &Path) -> Option<PathBuf> {
     })
 }
 
+fn profile_specific_fallback_toc(addon_name: &str) -> Option<String> {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Mists if addon_name == "Blizzard_GameMenu" => {
+            Some(format!("{addon_name}_Mainline.toc"))
+        }
+        _ => None,
+    }
+}
+
 /// Find the TOC file for an addon directory.
 ///
 /// Picks the variant matching the active client profile (e.g. `_Mists.toc`
@@ -145,6 +154,12 @@ pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
     ];
     for variant in &toc_variants {
         let toc_path = addon_dir.join(variant);
+        if toc_path.exists() {
+            return Some(toc_path);
+        }
+    }
+    if let Some(fallback) = profile_specific_fallback_toc(addon_name) {
+        let toc_path = addon_dir.join(fallback);
         if toc_path.exists() {
             return Some(toc_path);
         }
@@ -592,7 +607,10 @@ fn excluded_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
 
 fn excluded_addons_for_active_profile() -> &'static [&'static str] {
     match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Mists => &["Blizzard_Deprecated_ArenaUI"],
+        crate::client_profile::ClientProfile::Mists => &[
+            "Blizzard_Deprecated_ArenaUI",
+            "Blizzard_UIParentPanelManager",
+        ],
         _ => &[],
     }
 }

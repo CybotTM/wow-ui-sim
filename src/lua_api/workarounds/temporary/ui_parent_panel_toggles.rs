@@ -68,6 +68,24 @@ if CloseAllWindows == nil then
         return false
     end
 end
+
+if CloseMenus == nil then
+    function CloseMenus()
+        local closed = false
+        if type(UIMenus) == "table" then
+            for _, name in pairs(UIMenus) do
+                local menu = _G[name]
+                if menu ~= nil and type(menu.IsShown) == "function" and menu:IsShown() then
+                    if type(menu.Hide) == "function" then
+                        menu:Hide()
+                        closed = true
+                    end
+                end
+            end
+        end
+        return closed
+    end
+end
 "#;
 
 const STARTUP_NAVIGATION_DEFAULTS_LUA: &str = r#"
@@ -352,6 +370,9 @@ pub(crate) fn patch_encounter_journal_loader(env: &LoaderEnv<'_>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[path = "close_menus.rs"]
+    mod close_menus_tests;
 
     #[test]
     fn installs_panel_registration_defaults() {

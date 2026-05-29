@@ -76,9 +76,13 @@ impl TempBlizzardUiDir {
     }
 
     fn add_addon(&self, name: &str, toc_contents: &str) {
+        self.add_addon_toc(name, &format!("{name}.toc"), toc_contents);
+    }
+
+    fn add_addon_toc(&self, name: &str, toc_name: &str, toc_contents: &str) {
         let addon_dir = self.path.join(name);
         std::fs::create_dir_all(&addon_dir).unwrap();
-        std::fs::write(addon_dir.join(format!("{name}.toc")), toc_contents).unwrap();
+        std::fs::write(addon_dir.join(toc_name), toc_contents).unwrap();
     }
 }
 
@@ -151,6 +155,41 @@ UnitFrame.lua
         addons,
         vec!["Blizzard_UnitFrame"],
         "Mists should not load Blizzard_Deprecated_ArenaUI from the retail cache because it is absent from the Classic PTR/Mists source tree"
+    );
+}
+
+#[test]
+#[cfg(feature = "client-mists")]
+fn mists_profile_uses_mainline_game_menu_fallback() {
+    let ui = TempBlizzardUiDir::new("mists-game-menu-mainline");
+    ui.add_addon_toc(
+        "Blizzard_GameMenu",
+        "Blizzard_GameMenu_Mainline.toc",
+        r#"
+## Title: Blizzard_GameMenu
+## AllowLoad: Game
+Shared\GameMenuFrame.lua [AllowLoadGameType standard, wowhack]
+"#,
+    );
+
+    let addons: Vec<(String, String)> =
+        discover_blizzard_addons_for_screen(&ui.path, ScreenKind::Game)
+            .into_iter()
+            .map(|(name, toc_path)| {
+                (
+                    name,
+                    toc_path.file_name().unwrap().to_string_lossy().into_owned(),
+                )
+            })
+            .collect();
+
+    assert_eq!(
+        addons,
+        vec![(
+            "Blizzard_GameMenu".to_string(),
+            "Blizzard_GameMenu_Mainline.toc".to_string()
+        )],
+        "Mists should load the only shipped GameMenu toc so the game menu buttons are real"
     );
 }
 
