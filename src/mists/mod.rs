@@ -9,5 +9,6 @@
 //! show up as nil-call errors in the mists baseline. Frame methods are NOT
 //! registered (mists handles backdrop via templates, not direct methods).
 
+pub mod character_frame_preload;
 pub mod compat_bootstrap;
 pub mod post_load;

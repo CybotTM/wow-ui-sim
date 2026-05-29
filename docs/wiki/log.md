@@ -1173,3 +1173,7 @@ Updated `reference/api-coverage.md` after moving the last `src/c_api/temporary_s
 ## [2026-05-23] update | transmog sets shim boundary
 
 Updated `investigations/appearances-wardrobe-api.md` after moving `C_TransmogSets` empty/default set APIs out of `runtime_surface_bootstrap.lua` and into `src/c_api/temporary_shims/c_transmog_sets.rs`. The investigation still records the same wardrobe contract: `GetBaseSets()` and related set APIs must return empty tables rather than nil until real set inventory state exists.
+
+## [2026-05-29] ingest | Mists Syndicator and Baganator startup cleanup
+
+Created `investigations/mists-syndicator-baganator-startup.md` after fixing full-profile Mists startup errors. The investigation records the Mists-gated item taxonomy overrides needed by Syndicator and the minimal CharacterFrame/TokenUI bootstrap path needed by Baganator.

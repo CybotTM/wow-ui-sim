@@ -50,6 +50,7 @@ fn load_runtime_addon_with_dependencies(
         .ok_or_else(|| missing_runtime_addon_error(addon_name))?;
     crate::loader::trace_load_addon(origin, format!("toc {}", toc_path.display()));
     let toc = crate::toc::TocFile::from_file(&toc_path).map_err(LoadError::Toc)?;
+    apply_mists_runtime_preload(loader_env, &toc, &toc_path, origin)?;
 
     for dependency in runtime_foundation_dependencies(state, addon_name) {
         crate::loader::trace_load_addon(origin, format!("{addon_name} -> foundation {dependency}"));
@@ -75,6 +76,33 @@ fn load_runtime_addon_with_dependencies(
     fire_addon_loaded(state, loader_env, addon_name);
     loader_env.state().borrow_mut().invalidate_strata_buckets();
     crate::loader::trace_load_addon(origin, format!("event {addon_name}"));
+    Ok(())
+}
+
+#[cfg(feature = "client-mists")]
+fn apply_mists_runtime_preload(
+    loader_env: &LoaderEnv<'_>,
+    toc: &crate::toc::TocFile,
+    toc_path: &std::path::Path,
+    origin: crate::loader::LoadAddonTraceOrigin,
+) -> Result<(), LoadError> {
+    if let Some(result) =
+        crate::mists::character_frame_preload::ensure_before_addon(loader_env, toc, toc_path)?
+    {
+        for warning in &result.warnings {
+            crate::loader::trace_load_addon(origin, format!("warning {}: {warning}", result.name));
+        }
+    }
+    Ok(())
+}
+
+#[cfg(not(feature = "client-mists"))]
+fn apply_mists_runtime_preload(
+    _loader_env: &LoaderEnv<'_>,
+    _toc: &crate::toc::TocFile,
+    _toc_path: &std::path::Path,
+    _origin: crate::loader::LoadAddonTraceOrigin,
+) -> Result<(), LoadError> {
     Ok(())
 }
 

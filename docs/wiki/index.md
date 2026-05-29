@@ -50,6 +50,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[mists-elvui-startup-compat]] | Mists ElvUI startup errors came from separate simulator surface gaps: trim aliases, MessageFrame-only methods visible on plain frames, AuraUtil tuple shape, unanchored Slider label fontstrings, physical-vs-UI screen-size globals, and chat hook globals |
 | [[mists-addon-panel-resume-error]] | Mists addon-panel matrix must resume from first unproven addon; rerunning passed rows from `AllTheThings` was the mistake, and `--start-at` / `.passed` markers guard against repeating it |
 | [[mists-heirloom-tooltip]] | Mists Collections heirloom buttons need `GameTooltip:SetHeirloomByItemID`, routed through `C_TooltipInfo.GetHeirloomByItemID`, so heirloom tooltip initialization does not throw |
+| [[mists-syndicator-baganator-startup]] | Mists full-profile startup errors in Syndicator and Baganator came from Classic/Mists item taxonomy labels plus TokenUI loading before a minimal CharacterFrame parent existed |
 | [[minimap-map-ring-alignment]] | Active minimap bug is map texture/mask/ring alignment, not the SimCommands minimap button; debug the minimap render mask/clip and ring aperture directly |
 | [[casc-fdid-1579624-root-debug]] | FDID 1579624 root/CASC resolution data, CRLF hash proof, and parser debugging checklist |
 | [[windows-casc-blizzard-taint]] | Windows CASC-synced Blizzard UI cache needed TOC/folder-name taint semantics plus runtime LoadAddOn stack-taint clearing |

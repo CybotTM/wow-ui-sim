@@ -316,6 +316,17 @@ fn load_addon_path(
         format!("toc {}", toc_path.display()),
     );
     let toc = TocFile::from_file(toc_path)?;
+    #[cfg(feature = "client-mists")]
+    if let Ok(Some(result)) =
+        crate::mists::character_frame_preload::ensure_before_addon(env, &toc, toc_path)
+    {
+        for warning in &result.warnings {
+            trace_load_addon(
+                LoadAddonTraceOrigin::Toc,
+                format!("warning {}: {warning}", result.name),
+            );
+        }
+    }
     trace_load_addon(LoadAddonTraceOrigin::Toc, format!("files {addon_name}"));
     let result = addon::load_addon_internal(env, &toc, saved_vars_mgr)?;
     for warning in &result.warnings {

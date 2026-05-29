@@ -7,27 +7,58 @@
 use crate::lua_api::WowLuaEnv;
 
 const CONTAINER_FRAME_TOKEN_TRACKER_LUA: &str = r#"
-if type(ContainerFrameSettingsManager) ~= "table" then
-    return
-end
-if ContainerFrameSettingsManager.TokenTracker ~= nil then
-    return
-end
-if type(ContainerFrameSettingsManager.OnAddonLoaded) ~= "function" then
-    return
-end
-
 local tokenUiLoaded = false
 if type(C_AddOns) == "table" and type(C_AddOns.IsAddOnLoaded) == "function" then
     tokenUiLoaded = C_AddOns.IsAddOnLoaded("Blizzard_TokenUI")
 end
 
-if tokenUiLoaded then
+local function ensureBackpackTokenFrame()
+    if not tokenUiLoaded or type(BackpackTokenFrame) == "table" then
+        return
+    end
+
+    if type(BackpackTokenFrameTemplate) == "table" then
+        pcall(
+            CreateFrame,
+            "FRAME",
+            "BackpackTokenFrame",
+            UIParent,
+            "BackpackTokenFrameTemplate"
+        )
+    end
     pcall(
-        ContainerFrameSettingsManager.OnAddonLoaded,
-        ContainerFrameSettingsManager,
-        "Blizzard_TokenUI"
+        function()
+            if type(BackpackTokenFrame) ~= "table" then
+                BackpackTokenFrame = CreateFrame(
+                    "Frame",
+                    "BackpackTokenFrame",
+                    UIParent
+                )
+            end
+        end
     )
+end
+
+if type(ContainerFrameSettingsManager) ~= "table" then
+    ensureBackpackTokenFrame()
+    return
+end
+if ContainerFrameSettingsManager.TokenTracker ~= nil and type(BackpackTokenFrame) == "table" then
+    return
+end
+
+if tokenUiLoaded then
+    if type(ContainerFrameSettingsManager.OnAddonLoaded) == "function" then
+        pcall(
+            ContainerFrameSettingsManager.OnAddonLoaded,
+            ContainerFrameSettingsManager,
+            "Blizzard_TokenUI"
+        )
+    end
+    ensureBackpackTokenFrame()
+    if type(BackpackTokenFrame) == "table" and ContainerFrameSettingsManager.TokenTracker == nil then
+        ContainerFrameSettingsManager.TokenTracker = BackpackTokenFrame
+    end
 end
 "#;
 
@@ -145,5 +176,28 @@ mod tests {
 
         assert!(!has_tracker);
         assert_eq!(call_count, 0);
+    }
+
+    #[test]
+    fn creates_backpack_token_frame_without_settings_manager() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            C_AddOns = {
+                IsAddOnLoaded = function(addonName)
+                    return addonName == "Blizzard_TokenUI"
+                end,
+            }
+            "#,
+        )
+        .expect("container frame fixture should install");
+
+        patch(&env);
+
+        let has_backpack_token_frame: bool = env
+            .eval("return type(BackpackTokenFrame) == 'table'")
+            .expect("backpack token frame state should be readable");
+
+        assert!(has_backpack_token_frame);
     }
 }

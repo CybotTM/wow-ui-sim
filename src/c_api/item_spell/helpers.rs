@@ -157,6 +157,10 @@ pub(crate) fn inv_type_to_class_id(inv_type: u8) -> i32 {
 }
 
 pub(crate) fn item_class_name(class_id: i32) -> &'static str {
+    if let Some(name) = mists_item_class_name(class_id) {
+        return name;
+    }
+
     ITEM_CLASS_NAMES
         .iter()
         .find_map(|(id, name)| (*id == class_id).then_some(*name))
@@ -164,6 +168,10 @@ pub(crate) fn item_class_name(class_id: i32) -> &'static str {
 }
 
 pub(super) fn item_subclass_name(class_id: i32, subclass_id: i32) -> &'static str {
+    if let Some(name) = mists_item_subclass_name(class_id, subclass_id) {
+        return name;
+    }
+
     if let Some(name) = ITEM_SUBCLASS_NAMES
         .iter()
         .find_map(|(class, subclass, name)| {
@@ -178,6 +186,41 @@ pub(super) fn item_subclass_name(class_id: i32, subclass_id: i32) -> &'static st
     }
 
     "Unknown"
+}
+
+#[cfg(feature = "client-mists")]
+fn mists_item_class_name(class_id: i32) -> Option<&'static str> {
+    match class_id {
+        7 => Some("Trade Goods"),
+        _ => None,
+    }
+}
+
+#[cfg(not(feature = "client-mists"))]
+fn mists_item_class_name(_class_id: i32) -> Option<&'static str> {
+    None
+}
+
+#[cfg(feature = "client-mists")]
+fn mists_item_subclass_name(class_id: i32, subclass_id: i32) -> Option<&'static str> {
+    match (class_id, subclass_id) {
+        (0, 1) => Some("Potion"),
+        (0, 2) => Some("Elixir"),
+        (0, 3) => Some("Flask"),
+        (0, 4) => Some("Scroll"),
+        (0, 6) => Some("Item Enhancement"),
+        (0, 7) => Some("Bandage"),
+        (2, 11) => Some("One-Handed Exotics"),
+        (2, 12) => Some("Two-Handed Exotics"),
+        (7, 2) => Some("Explosives"),
+        (7, 3) => Some("Devices"),
+        _ => None,
+    }
+}
+
+#[cfg(not(feature = "client-mists"))]
+fn mists_item_subclass_name(_class_id: i32, _subclass_id: i32) -> Option<&'static str> {
+    None
 }
 
 fn is_known_item_subclass_id(class_id: i32, subclass_id: i32) -> bool {
