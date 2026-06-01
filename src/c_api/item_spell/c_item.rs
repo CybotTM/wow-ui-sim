@@ -105,6 +105,11 @@ fn register_c_item_metadata_queries(
             ("GetItemNameByID", c_item_get_item_name_by_id),
             ("GetItemQualityByID", c_item_get_item_quality_by_id),
             ("GetItemQuality", c_item_get_item_quality),
+            (
+                "GetItemMaxStackSizeByID",
+                c_item_get_item_max_stack_size_by_id,
+            ),
+            ("GetItemMaxStackSize", c_item_get_item_max_stack_size),
             ("GetItemInfoInstant", c_item_get_item_info_instant),
             ("GetItemInfo", c_item_get_item_info),
             (
@@ -312,6 +317,34 @@ fn item_quality_for_id(item_id: u32) -> f64 {
     items::get_item(item_id)
         .map(|item| item.quality as f64)
         .unwrap_or_else(|| if item_id == 1 { 1.0 } else { 0.0 })
+}
+
+fn c_item_get_item_max_stack_size_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(item_id) = parse_item_id_from_val(state, stack_val(state, 1)) else {
+        return Ok(0);
+    };
+    state.push(Val::Num(item_max_stack_size_for_id(item_id)));
+    Ok(1)
+}
+
+fn c_item_get_item_max_stack_size(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(item_id) = item_id_from_location_or_item_info(state, stack_val(state, 1)) else {
+        return Ok(0);
+    };
+    state.push(Val::Num(item_max_stack_size_for_id(item_id)));
+    Ok(1)
+}
+
+fn item_max_stack_size_for_id(item_id: u32) -> f64 {
+    items::get_item(item_id)
+        .map(|item| item.stackable.max(1) as f64)
+        .unwrap_or_else(|| {
+            if item_id_has_synthetic_data(item_id) {
+                1.0
+            } else {
+                0.0
+            }
+        })
 }
 
 fn c_item_get_item_info_instant(state: &mut LuaState) -> LuaResult<u32> {

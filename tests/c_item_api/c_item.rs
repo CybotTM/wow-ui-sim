@@ -18,6 +18,8 @@ fn test_c_item_surface_registers_expected_methods() {
                 "GetItemIconByID",
                 "GetItemNameByID",
                 "GetItemQualityByID",
+                "GetItemMaxStackSizeByID",
+                "GetItemMaxStackSize",
                 "GetItemInfoInstant",
                 "GetItemInfo",
                 "GetDetailedItemLevelInfo",
@@ -149,6 +151,42 @@ fn test_c_item_get_item_quality_by_id() {
     let env = env();
     let quality: i32 = env.eval("return C_Item.GetItemQualityByID(1)").unwrap();
     assert_eq!(quality, 1);
+}
+
+#[test]
+fn test_c_item_get_item_max_stack_size_by_id() {
+    let env = env();
+    let stack_size: i32 = env
+        .eval("return C_Item.GetItemMaxStackSizeByID(6948)")
+        .unwrap();
+    assert_eq!(stack_size, 1);
+}
+
+#[test]
+fn test_c_item_get_item_max_stack_size_by_id_synthetic_item() {
+    let env = env();
+    let stack_size: i32 = env
+        .eval("return C_Item.GetItemMaxStackSizeByID(999999999)")
+        .unwrap();
+    assert_eq!(stack_size, 1);
+}
+
+#[test]
+fn test_c_item_get_item_max_stack_size_invalid_item_returns_nil() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_Item.GetItemMaxStackSizeByID(nil) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
+fn test_c_item_get_item_max_stack_size_from_item_link() {
+    let env = env();
+    let stack_size: i32 = env
+        .eval("return C_Item.GetItemMaxStackSize('|Hitem:6948::::::::80:70:::::::::|h[Hearthstone]|h')")
+        .unwrap();
+    assert_eq!(stack_size, 1);
 }
 
 #[test]
