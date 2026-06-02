@@ -76,7 +76,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // and Request* live in workarounds::temporary until cache/refresh state exists.
     // C_NamePlate GetNamePlateForUnit / GetNamePlates are registered in
     // missing_surface/nameplate.rs (nil and empty-table respectively).
-    // C_PartyInfo probes are registered in missing_surface/party_info.rs.
+    // C_PartyInfo probes are registered in c_api/c_party_info.rs.
     // Most C_PetBattles probes are registered in
     // missing_surface/pet_battles.rs; static pet-journal fallbacks live in
     // lua_api::workarounds::temporary until the broader journal model exists.
@@ -185,7 +185,7 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // missing_surface/small_namespaces.rs, not a stub.
     // C_MythicPlus IsMythicPlusActive / IsWeeklyRewardAvailable are SimState-backed
     // in missing_surface/mythic_plus.rs, not stubs.
-    // C_PartyInfo probes are registered in missing_surface/party_info.rs.
+    // C_PartyInfo probes are registered in c_api/c_party_info.rs.
     // C_PvP.IsMatchConsideredArena is registered in
     // missing_surface/small_namespaces.rs, not a stub.
     // C_PhotoSharing.IsAuthorized / IsEnabled are SimState-backed in photo_sharing.rs.
@@ -212,7 +212,7 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
     // missing_surface/small_namespaces.rs, not a stub.
     // C_MythicPlus GetOwnedKeystoneLevel / GetWeeklyBestForMap are SimState-backed
     // in missing_surface/mythic_plus.rs, not stubs.
-    // C_PartyInfo GetActiveGroupType is registered in missing_surface/party_info.rs.
+    // C_PartyInfo GetActiveGroupType is registered in c_api/c_party_info.rs.
     // C_QuestLog probes are registered in missing_surface/quest_log.rs.
     // C_Spell GetSpellCooldown is SimState-backed in missing_surface/c_spell.rs.
     // C_SummonInfo GetSummonConfirmTimeLeft is SimState-backed in
@@ -270,7 +270,7 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     ("C_Map", "GetMapBannersForMap", stub_empty_table),
     ("C_Map", "GetMapLinksForMap", stub_empty_table),
     // C_NamePlate GetNamePlates is registered in missing_surface/nameplate.rs.
-    // C_PartyInfo GetActiveCategories is registered in missing_surface/party_info.rs.
+    // C_PartyInfo GetActiveCategories is registered in c_api/c_party_info.rs.
     ("C_QuestLine", "GetAvailableQuestLines", stub_empty_table),
     ("C_QuestLine", "GetForceVisibleQuests", stub_empty_table),
     ("C_ResearchInfo", "GetDigSitesForMap", stub_empty_table),

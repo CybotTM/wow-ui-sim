@@ -1,16 +1,12 @@
-//! `C_PartyInfo` probe surface backed by the existing
-//! `SimState.party_members` / `party_group_active` fields.
+//! `C_PartyInfo` probe surface backed by group state.
 //!
-//! Migrates 10 entries off the namespace stub tables:
-//!
-//! - `C_PartyInfo.GetActiveCategories()` — empty array when solo;
-//!   `{1}` (Home category) when in a party or raid.
-//! - `C_PartyInfo.GetActiveGroupType()` — 1 if in raid (≥6 members),
-//!   0 if in party, nil when solo.
-//! - `C_PartyInfo.IsPartyFull()` — true when party is at capacity
-//!   (≥5 for party, ≥40 for raid).
+//! `GetActiveCategories`, `GetActiveGroupType`, and `IsPartyFull` read the
+//! existing party roster model. `LeaveParty` mutates the same roster path as the
+//! legacy global `LeaveParty`. Static loot-method defaults remain here because
+//! they are coherent seeded `C_PartyInfo` values, while unrelated instance
+//! abandon defaults stay in temporary workarounds.
 
-use super::{ensure_namespace, set_table_array};
+use crate::c_api::helpers::{ensure_namespace, set_table_array};
 use crate::lua_api::globals::group_queries::active_party_count;
 use crate::lua_api::methods::create_table;
 use crate::lua_bridge::FromStack;
@@ -22,7 +18,7 @@ use rilua::{LuaResult, Val};
 
 const AVAILABLE_LOOT_METHODS: [i32; 5] = [0, 1, 2, 3, 4];
 
-pub(super) fn register_party_info_surface(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_party_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_PartyInfo")?;
     register_group_membership_probes(state, table_ref)?;
     register_loot_method_probes(state, table_ref)?;
@@ -72,8 +68,6 @@ fn register_loot_method_probes(state: &mut LuaState, table_ref: GcRef<Table>) ->
     Ok(())
 }
 
-/// `GetActiveCategories()` — returns `{}` when solo, `{1}` (Home) when
-/// grouped. The category id `1` corresponds to `Enum.PartyCategory.Home`.
 fn c_party_info_get_active_categories(state: &mut LuaState) -> LuaResult<u32> {
     let member_count = active_party_count(state)?;
     let array = create_table(state);
@@ -84,43 +78,31 @@ fn c_party_info_get_active_categories(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-/// `GetActiveGroupType()` — 1 for raid (party ≥ 6), 0 for party, nil
-/// when solo. Mirrors `Enum.PartyGroupType.Raid = 1, Party = 0`.
 fn c_party_info_get_active_group_type(state: &mut LuaState) -> LuaResult<u32> {
     let member_count = active_party_count(state)?;
     if member_count == 0 {
         state.push(Val::Nil);
     } else if member_count >= 6 {
-        state.push(Val::Num(1.0)); // Raid
+        state.push(Val::Num(1.0));
     } else {
-        state.push(Val::Num(0.0)); // Party
+        state.push(Val::Num(0.0));
     }
     Ok(1)
 }
 
-/// `IsPartyFull()` — true when at the capacity limit for the group type.
-/// Party capacity is 5 members (excluding player), raid is 40 (excluding
-/// player), so full party = 4 party slots filled + player = 5 total,
-/// meaning party_members.len() >= 4. Retail: party can hold 4 others +
-/// player = 5 total; raid holds 39 others + player = 40. We count
-/// party_members (others only), so full = 4 for party, 39 for raid.
 fn c_party_info_is_party_full(state: &mut LuaState) -> LuaResult<u32> {
     let member_count = active_party_count(state)?;
     let full = if member_count == 0 {
         false
     } else if member_count >= 6 {
-        // In raid mode: full at 39 others + player = 40 total.
         member_count >= 39
     } else {
-        // In party mode: full at 4 others + player = 5 total.
         member_count >= 4
     };
     state.push(Val::Bool(full));
     Ok(1)
 }
 
-/// `LeaveParty()` — namespace entry point for the same group state mutation
-/// used by the legacy global `LeaveParty()`.
 fn c_party_info_leave_party(state: &mut LuaState) -> LuaResult<u32> {
     crate::lua_api::globals::group_verbs::clear_party_roster(state)?;
     crate::lua_api::globals::group_verbs::push_event(state, "GROUP_ROSTER_UPDATE")?;
