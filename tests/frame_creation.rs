@@ -5,6 +5,8 @@
 
 #[path = "frame_creation/visibility_scripts.rs"]
 mod visibility_scripts;
+#[path = "frame_creation/set_point_overrides.rs"]
+mod set_point_overrides;
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::widget::WidgetType;
@@ -25,6 +27,48 @@ fn test_frame_level_default_zero() {
         )
         .unwrap();
     assert_eq!(level, 0, "newly created frame should have level 0");
+}
+
+// ============================================================================
+// SetPoint 3-arg form with Lua override (EditMode SetPointOverride pattern)
+// ============================================================================
+
+#[test]
+fn test_set_point_3arg_with_fixed_override() {
+    let env = WowLuaEnv::new().unwrap();
+    let (x, y): (f64, f64) = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "TestParent3Arg")
+            parent:SetSize(800, 600)
+            parent:SetPoint("CENTER")
+            local child = CreateFrame("Frame", "TestChild3Arg", parent)
+            child:SetSize(100, 50)
+
+            -- Simulate the FIXED SetPointOverride that detects 3-arg form
+            child.SetPointBase = child.SetPoint
+            child.SetPoint = function(self, point, relativeTo, relativePoint, offsetX, offsetY)
+                if type(relativeTo) == "number" then
+                    offsetX = relativeTo
+                    offsetY = relativePoint
+                    relativeTo = nil
+                    relativePoint = nil
+                end
+                self:SetPointBase(point, relativeTo, relativePoint, offsetX, offsetY)
+            end
+
+            -- 3-arg form: SetPoint("TOPRIGHT", 10, 20) should work
+            child:SetPoint("TOPRIGHT", 10, 20)
+            local _, _, _, ox, oy = child:GetPoint(1)
+            return ox, oy
+        "#,
+        )
+        .unwrap();
+    assert_eq!(
+        (x, y),
+        (10.0, 20.0),
+        "3-arg SetPoint through fixed override preserves offsets"
+    );
 }
 
 #[test]
@@ -692,85 +736,5 @@ fn test_create_frame_with_frame_in_name_position() {
     assert!(
         parent_nil,
         "CreateFrame with frame as name should have nil parent"
-    );
-}
-
-// ============================================================================
-// SetPoint 3-arg form with Lua override (EditMode SetPointOverride pattern)
-// ============================================================================
-
-#[test]
-fn test_set_point_3arg_with_fixed_override() {
-    let env = WowLuaEnv::new().unwrap();
-    let (x, y): (f64, f64) = env
-        .eval(
-            r#"
-            local parent = CreateFrame("Frame", "TestParent3Arg")
-            parent:SetSize(800, 600)
-            parent:SetPoint("CENTER")
-            local child = CreateFrame("Frame", "TestChild3Arg", parent)
-            child:SetSize(100, 50)
-
-            -- Simulate the FIXED SetPointOverride that detects 3-arg form
-            child.SetPointBase = child.SetPoint
-            child.SetPoint = function(self, point, relativeTo, relativePoint, offsetX, offsetY)
-                if type(relativeTo) == "number" then
-                    offsetX = relativeTo
-                    offsetY = relativePoint
-                    relativeTo = nil
-                    relativePoint = nil
-                end
-                self:SetPointBase(point, relativeTo, relativePoint, offsetX, offsetY)
-            end
-
-            -- 3-arg form: SetPoint("TOPRIGHT", 10, 20) should work
-            child:SetPoint("TOPRIGHT", 10, 20)
-            local _, _, _, ox, oy = child:GetPoint(1)
-            return ox, oy
-        "#,
-        )
-        .unwrap();
-    assert_eq!(
-        (x, y),
-        (10.0, 20.0),
-        "3-arg SetPoint through fixed override preserves offsets"
-    );
-}
-
-#[test]
-fn test_set_point_5arg_with_fixed_override() {
-    let env = WowLuaEnv::new().unwrap();
-    let (x, y): (f64, f64) = env
-        .eval(
-            r#"
-            local parent = CreateFrame("Frame", "TestParent5Arg")
-            parent:SetSize(800, 600)
-            parent:SetPoint("CENTER")
-            local child = CreateFrame("Frame", "TestChild5Arg", parent)
-            child:SetSize(100, 50)
-
-            -- Same fixed override
-            child.SetPointBase = child.SetPoint
-            child.SetPoint = function(self, point, relativeTo, relativePoint, offsetX, offsetY)
-                if type(relativeTo) == "number" then
-                    offsetX = relativeTo
-                    offsetY = relativePoint
-                    relativeTo = nil
-                    relativePoint = nil
-                end
-                self:SetPointBase(point, relativeTo, relativePoint, offsetX, offsetY)
-            end
-
-            -- 5-arg form: SetPoint("TOPLEFT", parent, "TOPRIGHT", 5, -10)
-            child:SetPoint("TOPLEFT", parent, "TOPRIGHT", 5, -10)
-            local _, _, _, ox, oy = child:GetPoint(1)
-            return ox, oy
-        "#,
-        )
-        .unwrap();
-    assert_eq!(
-        (x, y),
-        (5.0, -10.0),
-        "5-arg SetPoint through fixed override preserves offsets"
     );
 }
