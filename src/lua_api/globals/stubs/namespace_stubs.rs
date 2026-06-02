@@ -195,8 +195,8 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // TargetSpell* are SimState/spell-data-backed in missing_surface/c_spell.rs.
     // C_SummonInfo IsSummonSkippingStartExperience is SimState-backed in
     // c_api/c_summon_info.rs, not a stub.
-    // C_StableInfo.IsAtPetStable is registered in
-    // missing_surface/small_namespaces.rs, not a stub.
+    // C_StableInfo.IsAtPetStable is SimState-backed in c_api/c_stable_info.rs,
+    // not a stub.
     // C_VoiceChat IsDeafened / IsEnabled / IsMuted / IsParentalDisabled /
     // IsTalking are SimState-backed in missing_surface/voice_chat.rs, not stubs.
     // C_WowLabs

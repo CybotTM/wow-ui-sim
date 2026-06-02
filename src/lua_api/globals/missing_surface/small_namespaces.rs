@@ -3,7 +3,6 @@
 //! Migrates 9 entries off the namespace stub tables:
 //!
 //! - `C_TrophyHall.GetTrophyInfo()` — nil (no trophy data in simulator)
-//! - `C_StableInfo.IsAtPetStable()` — reads `SimState.pet_stables_open`
 //! - `C_GarrisonInfo.HasGarrison()` — false (garrison not simulated)
 //! - `C_GarrisonInfo.GetGarrisonType()` — 0 (no garrison type)
 //! - `C_AssistedCombat.*` — empty rotation/action spell state by default
@@ -24,7 +23,6 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
     register_flat_namespace(state, "C_TrophyHall", C_TROPHY_HALL_METHODS)?;
-    register_flat_namespace(state, "C_StableInfo", C_STABLE_INFO_METHODS)?;
     register_flat_namespace(state, "C_GarrisonInfo", C_GARRISON_INFO_METHODS)?;
     register_flat_namespace(state, "C_AssistedCombat", C_ASSISTED_COMBAT_METHODS)?;
     register_flat_namespace(state, "C_Map", C_MAP_METHODS)?;
@@ -58,9 +56,6 @@ fn register_flat_namespace(
 
 const C_TROPHY_HALL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
     &[("GetTrophyInfo", c_trophy_hall_get_trophy_info)];
-
-const C_STABLE_INFO_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
-    &[("IsAtPetStable", c_stable_info_is_at_pet_stable)];
 
 const C_GARRISON_INFO_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("HasGarrison", c_garrison_info_has_garrison),
@@ -205,12 +200,6 @@ const C_SOULBINDS_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
 fn c_trophy_hall_get_trophy_info(_state: &mut LuaState) -> LuaResult<u32> {
     // No trophy-hall data in the simulator.
     Ok(0)
-}
-
-fn c_stable_info_is_at_pet_stable(state: &mut LuaState) -> LuaResult<u32> {
-    let open = borrow_state(state)?.pet_stables_open;
-    state.push(Val::Bool(open));
-    Ok(1)
 }
 
 fn c_garrison_info_has_garrison(state: &mut LuaState) -> LuaResult<u32> {
