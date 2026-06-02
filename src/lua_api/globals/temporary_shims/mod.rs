@@ -5,12 +5,8 @@
 
 use rilua::LuaResult;
 
-mod legacy_talent_skill_probes;
-
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
-    super::missing_surface::register_all(lua)?;
-    legacy_talent_skill_probes::register_all(lua)?;
-    Ok(())
+    super::missing_surface::register_all(lua)
 }
 
 pub fn register_quest_log_overrides(lua: &mut rilua::Lua) -> LuaResult<()> {

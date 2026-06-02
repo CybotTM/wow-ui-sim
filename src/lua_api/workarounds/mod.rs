@@ -376,6 +376,7 @@ fn apply_core_legacy_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::legacy_action_bar_globals::apply_bootstrap(lua)?;
     temporary::legacy_container_globals::apply_bootstrap(lua)?;
     temporary::legacy_spell_globals::apply_bootstrap(lua)?;
+    temporary::legacy_talent_skill_defaults::apply_bootstrap(lua)?;
     temporary::modified_click_defaults::apply_bootstrap(lua)?;
     temporary::performance_metric_defaults::apply_bootstrap(lua)?;
     temporary::pool_constructor_defaults::apply_bootstrap(lua)?;

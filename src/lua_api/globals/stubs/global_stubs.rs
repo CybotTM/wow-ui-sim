@@ -166,7 +166,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetCurrentGuildBankTab",
     "GetNumBattlefieldFlagPositions",
     // GetCursorPosition is SimState-backed in real/mouse_probes.rs, not a stub.
-    // GetArenaOpponentSpec is an explicit legacy probe shim, not a
+    // GetArenaOpponentSpec lives in workarounds::temporary, not a
     // generated zero stub.
     // GetFactionInfoByID is SimState-backed in faction_probes.rs, not a stub.
     // GetGossipNumOptions / GetGossipNumAvailableQuests /
@@ -206,26 +206,26 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetNumQuestLogEntries is SimState-backed in quest_surface.rs, not a stub.
     // GetNumShapeshiftForms is SimState-backed in social_probes.rs, not a stub.
     // GetNumSpellTabs is spellbook-backed in real/spell_tabs.rs.
-    // GetNumSkillLines / GetNumTalentTabs are explicit legacy probe shims,
+    // GetNumSkillLines / GetNumTalentTabs live in workarounds::temporary,
     // not generated zero stubs.
     // GetNumTitles is SimState-backed in social_probes.rs, not a stub.
     // GetPetExperience / GetPetHappiness / GetPetLoyalty /
     // GetPetTimeInCombat are SimState-backed in real/pet_stats.rs, not stubs.
-    // GetPvpTalentSlotInfo is an explicit legacy probe shim, not a
+    // GetPvpTalentSlotInfo lives in workarounds::temporary, not a
     // generated nil/default stub.
     // GetQuestLogTimeLeft / QuestMapUpdateAllQuests are SimState-backed in
     // quest_surface.rs, not stubs.
     // GetRaidRosterInfo is SimState-backed in group_queries.rs, not a stub.
     "GetRelicSlotType",
     // GetRestState is SimState-backed in real/xp_honor_rest.rs, not a stub.
-    // GetSelectedSkill / GetSkillLineInfo are explicit legacy probe shims,
+    // GetSelectedSkill / GetSkillLineInfo live in workarounds::temporary,
     // not generated zero/nil stubs.
     "GetSelectedSocial",
     // GetSpellAutocast / GetSpellBonusDamage / GetSpellBonusHealing /
     // GetSpellCooldown / GetSpellLevelLearned are SimState-backed in
     // cooldown_probes.rs, not stubs.
     // GetSpellTabInfo is spellbook-backed in real/spell_tabs.rs.
-    // GetTalentInfo is an explicit legacy probe shim, not a generated nil stub.
+    // GetTalentInfo lives in workarounds::temporary, not a generated nil stub.
     "GetSummonConfirmSummoner",
     "GetSummonConfirmTimeLeft",
     // GetTitleName is SimState-backed in social_probes.rs, not a stub.
