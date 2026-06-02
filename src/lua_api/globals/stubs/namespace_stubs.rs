@@ -57,7 +57,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // GetHeirloomItemIDFromDisplayedSlot was a misnamed stub (the real
     // API is `FromDisplayedIndex`, now registered in heirloom.rs).
     // C_IncomingSummon HasIncomingSummon / IncomingSummonStatus are
-    // SimState-backed in missing_surface/summon_info.rs, not stubs.
+    // SimState-backed in c_api/c_summon_info.rs, not stubs.
     // C_Item GetItemIconByID / GetItemNameByID / GetItemQualityByID
     // are ITEM_DB-backed in missing_surface/item_spell/c_item.rs, not
     // stubs.
@@ -90,7 +90,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // missing_surface/c_spell.rs, not stubs.
     // C_SummonInfo GetSummonReason / GetSummonConfirmTimeLeft /
     // IsSummonSkippingStartExperience are SimState-backed in
-    // missing_surface/summon_info.rs, not stubs.
+    // c_api/c_summon_info.rs, not stubs.
     // C_System.GetFrameStack is backed by SimState.hovered_frame in
     // missing_surface/small_probes.rs, not a stub.
     // C_Timer.NewTimerID is backed by next_timer_id() in
@@ -194,7 +194,7 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_Spell GetVisibilityInfo / IsPriorityAura / IsSelfBuff / IsSpellUsable /
     // TargetSpell* are SimState/spell-data-backed in missing_surface/c_spell.rs.
     // C_SummonInfo IsSummonSkippingStartExperience is SimState-backed in
-    // missing_surface/summon_info.rs, not a stub.
+    // c_api/c_summon_info.rs, not a stub.
     // C_StableInfo.IsAtPetStable is registered in
     // missing_surface/small_namespaces.rs, not a stub.
     // C_VoiceChat IsDeafened / IsEnabled / IsMuted / IsParentalDisabled /
@@ -216,7 +216,7 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
     // C_QuestLog probes are registered in missing_surface/quest_log.rs.
     // C_Spell GetSpellCooldown is SimState-backed in missing_surface/c_spell.rs.
     // C_SummonInfo GetSummonConfirmTimeLeft is SimState-backed in
-    // missing_surface/summon_info.rs, not a stub.
+    // c_api/c_summon_info.rs, not a stub.
     // C_TradeSkillUI
     ("C_TradeSkillUI", "GetNumRecipes", stub_zero),
     ("C_TradeSkillUI", "GetNumTradeSkills", stub_zero),

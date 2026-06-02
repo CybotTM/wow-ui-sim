@@ -94,3 +94,15 @@ fn modeled_c_report_system_lives_in_c_api() {
         "C_ReportSystem should have an explicit C API owner"
     );
 }
+
+#[test]
+fn modeled_c_summon_info_lives_in_c_api() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/missing_surface/summon_info.rs").exists(),
+        "modeled C_SummonInfo state belongs under src/c_api, not lua_api::globals::missing_surface"
+    );
+    assert!(
+        std::path::Path::new("src/c_api/c_summon_info.rs").exists(),
+        "C_SummonInfo should have an explicit C API owner"
+    );
+}
