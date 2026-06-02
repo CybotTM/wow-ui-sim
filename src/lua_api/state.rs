@@ -4,10 +4,10 @@ use crate::event::{EventQueue, ScriptRegistry};
 use crate::lua_api::animation::AnimGroupState;
 use crate::lua_api::message_frame::MessageFrameData;
 use crate::lua_api::simple_html::SimpleHtmlData;
-use crate::lua_api::tooltip::{TooltipData, build_cursor_anchor};
+use crate::lua_api::tooltip::TooltipData;
 use crate::screen::ScreenKind;
 use crate::sound::SoundManager;
-use crate::widget::{Anchor, WidgetRegistry};
+use crate::widget::WidgetRegistry;
 use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 use std::time::Instant;
@@ -369,6 +369,7 @@ pub use super::frame_substates::{
     FogOfWarFrameState, PendingPlayerReport, QuestBlobState, UnitPositionFrameState,
     UnitPositionPlayerPingTexture, UnitPositionUnit,
 };
+mod cursor_tooltips;
 mod defaults;
 mod sim_state;
 mod support_types;
@@ -693,10 +694,7 @@ impl SimState {
         let Some((mx, my)) = pos else {
             return;
         };
-        let cursor_tooltips = self.collect_cursor_tooltip_positions(mx, my);
-        for (tooltip_id, anchor) in cursor_tooltips {
-            self.reanchor_tooltip_to_cursor(tooltip_id, anchor);
-        }
+        cursor_tooltips::reanchor_visible_cursor_tooltips(self, mx, my);
     }
 
     pub fn set_active_drag_frame(&mut self, frame_id: Option<u64>) {
@@ -722,38 +720,6 @@ impl SimState {
         std::mem::take(&mut self.pending_texture_preloads)
             .into_iter()
             .collect()
-    }
-
-    fn collect_cursor_tooltip_positions(&self, mx: f32, my: f32) -> Vec<(u64, Anchor)> {
-        self.tooltips
-            .iter()
-            .filter_map(|(&tooltip_id, td)| {
-                let visible = self.widgets.get(tooltip_id)?.visible;
-                (td.anchor_type.starts_with("ANCHOR_CURSOR") && visible).then(|| {
-                    let anchor =
-                        build_cursor_anchor(mx, my, td.anchor_x_offset, td.anchor_y_offset);
-                    (tooltip_id, anchor)
-                })
-            })
-            .collect()
-    }
-
-    fn reanchor_tooltip_to_cursor(&mut self, tooltip_id: u64, anchor: Anchor) {
-        if self
-            .widgets
-            .get(tooltip_id)
-            .is_some_and(|frame| frame.anchors == [anchor.clone()])
-        {
-            return;
-        }
-        let Some(frame) = self.widgets.get_mut_visual(tooltip_id) else {
-            return;
-        };
-        frame.anchors.clear();
-        frame.anchors.push(anchor);
-        let _ = frame;
-        self.widgets.mark_rect_dirty(tooltip_id);
-        self.widgets.mark_visual_dirty(tooltip_id);
     }
 }
 
