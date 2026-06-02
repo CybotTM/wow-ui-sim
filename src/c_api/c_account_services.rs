@@ -1,10 +1,10 @@
 //! `C_AccountServices` probe surface backed by `SimState` account-save flags.
 //!
-//! The Account Save UI only needs four simple probes. The sim keeps the
+//! The Account Save UI only needs four simple probes. The simulator keeps the
 //! mutable state in `SimState` so tests can flip the flags directly and verify
-//! the UI response without touching bootstrap glue.
+//! the UI response without bootstrap glue.
 
-use super::ensure_namespace;
+use crate::c_api::helpers::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
@@ -14,28 +14,32 @@ const ACCOUNT_EXPORT_SUCCESS: f64 = 0.0;
 const ACCOUNT_EXPORT_ALREADY_IN_PROGRESS: f64 = 11.0;
 const ACCOUNT_EXPORT_UNAVAILABLE: f64 = 10.0;
 
-pub(super) fn register_account_services_surface(state: &mut LuaState) -> LuaResult<()> {
-    let table_ref = ensure_namespace(state, "C_AccountServices")?;
+pub(crate) fn register_c_account_services_surface(state: &mut LuaState) -> LuaResult<()> {
+    let account_services = ensure_namespace(state, "C_AccountServices")?;
     table_set_rust_fn_static(
         state,
-        table_ref,
+        account_services,
         "IsAccountSaveEnabled",
         is_account_save_enabled,
     )?;
     table_set_rust_fn_static(
         state,
-        table_ref,
+        account_services,
         "IsAccountSaveInProgress",
         is_account_save_in_progress,
     )?;
     table_set_rust_fn_static(
         state,
-        table_ref,
+        account_services,
         "IsAccountLockedPostSave",
         is_account_locked_post_save,
     )?;
-    table_set_rust_fn_static(state, table_ref, "SaveAccountData", save_account_data)?;
-    Ok(())
+    table_set_rust_fn_static(
+        state,
+        account_services,
+        "SaveAccountData",
+        save_account_data,
+    )
 }
 
 fn is_account_save_enabled(state: &mut LuaState) -> LuaResult<u32> {

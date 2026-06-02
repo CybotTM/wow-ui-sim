@@ -1,6 +1,5 @@
 //! Restored rilua API surface for item, spell, tooltip, and small legacy globals.
 
-mod account_services;
 mod account_store;
 mod achievement_info;
 mod anima_diversion;
@@ -280,7 +279,7 @@ fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     player_info::register_player_info_surface(state)?;
     c_api::c_lfg_info::register_c_lfg_info_surface(state)?;
     pet_battles::register_pet_battles_surface(state)?;
-    account_services::register_account_services_surface(state)?;
+    c_api::c_account_services::register_c_account_services_surface(state)?;
     account_store::register_account_store_surface(state)?;
     c_api::c_report_system::register_c_report_system_surface(state)?;
     zone_ability::register_zone_ability_surface(state)?;

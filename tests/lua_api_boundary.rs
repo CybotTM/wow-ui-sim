@@ -121,3 +121,15 @@ fn modeled_c_stable_info_lives_in_c_api() {
         "C_StableInfo should have an explicit C API owner"
     );
 }
+
+#[test]
+fn modeled_c_account_services_lives_in_c_api() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/missing_surface/account_services.rs").exists(),
+        "modeled C_AccountServices state belongs under src/c_api, not lua_api::globals::missing_surface"
+    );
+    assert!(
+        std::path::Path::new("src/c_api/c_account_services.rs").exists(),
+        "C_AccountServices should have an explicit C API owner"
+    );
+}
