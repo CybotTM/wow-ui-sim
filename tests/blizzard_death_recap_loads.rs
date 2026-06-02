@@ -237,7 +237,7 @@ fn blizzard_death_recap_c_namespace_is_available() {
         namespace_present,
         "C_DeathRecap should be registered with at least GetKillingBlows + \
          GetMostRecentDeathRecap (backed by SimState.death_recaps in \
-         src/lua_api/globals/missing_surface/death_recap.rs). \
+         src/c_api/c_death_recap.rs). \
          DeathRecapMixin:BuildDataProvider also calls C_DeathRecap.GetRecapEvents(recapID) and \
          C_DeathRecap.GetRecapMaxHealth(recapID) — both guarded with `or {{}}` / nil fallback \
          so the addon load itself does not require those probes to be present"

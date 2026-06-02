@@ -1,22 +1,20 @@
 //! `C_DeathRecap` probe surface backed by `SimState.death_recaps`.
 //!
-//! Migrates 2 entries off the namespace stub tables:
-//!
-//! - `C_DeathRecap.GetKillingBlows()` — returns an array of
-//!   `KillingBlowInfo` tables from the most-recent death recap entry,
-//!   or an empty array when no deaths have been recorded.
-//! - `C_DeathRecap.GetMostRecentDeathRecap()` — returns the most
-//!   recent `DeathRecapEntry` as a table (recap_id, zone_name,
-//!   killing_blows array), or nil when the list is empty.
+//! - `C_DeathRecap.GetKillingBlows()` returns an array of `KillingBlowInfo`
+//!   tables from the most recent death recap entry, or an empty array when no
+//!   deaths have been recorded.
+//! - `C_DeathRecap.GetMostRecentDeathRecap()` returns the most recent
+//!   `DeathRecapEntry` as a table (`recapID`, `zoneName`, `killingBlows`), or
+//!   nil when the list is empty.
 
-use super::{ensure_namespace, set_table_array};
+use crate::c_api::helpers::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::state::{DeathRecapEntry, KillingBlowInfo};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-pub(super) fn register_death_recap_surface(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_death_recap_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_DeathRecap")?;
     table_set_rust_fn_static(
         state,

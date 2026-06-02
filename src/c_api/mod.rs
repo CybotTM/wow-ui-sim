@@ -15,6 +15,7 @@ pub mod c_azerite_essence;
 pub mod c_azerite_item;
 pub mod c_barber_shop;
 pub mod c_cursor;
+pub mod c_death_recap;
 pub mod c_glue;
 pub mod c_lfg_info;
 pub mod c_login;

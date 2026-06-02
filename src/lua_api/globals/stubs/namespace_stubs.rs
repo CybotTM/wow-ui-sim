@@ -45,7 +45,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // `currency_info` map) in missing_surface/item_spell/c_currency.rs,
     // not stubs.
     // C_DeathRecap GetKillingBlows / GetMostRecentDeathRecap are
-    // SimState-backed in missing_surface/death_recap.rs, not stubs.
+    // SimState-backed in c_api/c_death_recap.rs, not stubs.
     // C_EncounterJournal GetEncounterInfo / GetInstanceInfo are
     // static-seeded in missing_surface/encounter_journal.rs, not stubs.
     // C_GossipInfo GetActiveQuests / GetAvailableQuests / GetOptions are
