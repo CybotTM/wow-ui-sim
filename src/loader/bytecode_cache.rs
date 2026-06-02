@@ -157,21 +157,20 @@ fn ensure_loaded(state: &mut CacheState) {
 }
 
 fn load_pack_from_path(state: &mut CacheState, pack: &Path) -> bool {
+    load_pack_from_path_with_max(state, pack, MAX_PACK_SIZE)
+}
+
+fn load_pack_from_path_with_max(state: &mut CacheState, pack: &Path, max_pack_size: u64) -> bool {
     let Ok(mut file) = std::fs::File::open(pack) else {
         return false;
     };
-
-    if file.metadata().map(|meta| meta.len()).unwrap_or(0) > MAX_PACK_SIZE {
-        drop(file);
-        let _ = std::fs::remove_file(pack);
-        return false;
-    }
 
     let mut bytes = Vec::new();
     if file.read_to_end(&mut bytes).is_err() {
         return false;
     }
 
+    let oversized = bytes.len() as u64 > max_pack_size;
     let original_len = bytes.len();
     let Some(valid_len) = load_pack_bytes(state, bytes) else {
         // Pack file existed but was wrong magic or wrong whitelist version.
@@ -180,6 +179,21 @@ fn load_pack_from_path(state: &mut CacheState, pack: &Path) -> bool {
         let _ = std::fs::remove_file(pack);
         return false;
     };
+
+    if oversized {
+        compact_loaded_pack(state);
+        if state.values.len() as u64 <= max_pack_size {
+            drop(file);
+            let _ = std::fs::write(pack, &state.values);
+            return true;
+        }
+
+        drop(file);
+        let _ = std::fs::remove_file(pack);
+        state.values.clear();
+        state.index.clear();
+        return false;
+    }
 
     if valid_len < original_len {
         drop(file);
@@ -260,6 +274,29 @@ fn load_pack_bytes(state: &mut CacheState, mut bytes: Vec<u8>) -> Option<usize> 
     state.values = bytes;
     state.index = index;
     Some(pos)
+}
+
+fn compact_loaded_pack(state: &mut CacheState) {
+    let entries: Vec<(u64, Vec<u8>)> = state
+        .index
+        .iter()
+        .map(|(&hash, &(offset, len))| (hash, state.values[offset..offset + len].to_vec()))
+        .collect();
+    let mut bytes = Vec::with_capacity(PACK_HEADER_LEN);
+    let mut index = HashMap::with_capacity(entries.len());
+    bytes.extend_from_slice(PACK_MAGIC);
+    bytes.extend_from_slice(&WHITELIST_VERSION.to_le_bytes());
+
+    for (hash, bytecode) in entries {
+        bytes.extend_from_slice(&hash.to_le_bytes());
+        bytes.extend_from_slice(&(bytecode.len() as u32).to_le_bytes());
+        let offset = bytes.len();
+        bytes.extend_from_slice(&bytecode);
+        index.insert(hash, (offset, bytecode.len()));
+    }
+
+    state.values = bytes;
+    state.index = index;
 }
 
 fn truncate_pack(path: &Path, len: usize) -> std::io::Result<()> {
@@ -467,6 +504,66 @@ mod tests {
             Some((payload_offset, 3))
         );
         assert_eq!(&state.values[payload_offset..payload_offset + 3], b"xyz");
+    }
+
+    #[test]
+    fn oversized_pack_compacts_instead_of_discarding() {
+        let bytes = synth_pack_bytes(
+            PACK_MAGIC,
+            WHITELIST_VERSION,
+            &[(SENTINEL_HASH, b"stale"), (SENTINEL_HASH, b"fresh")],
+        );
+        let path = temp_pack_path("oversized-compact");
+        std::fs::write(&path, &bytes).expect("write synthetic pack");
+
+        let compacted_limit = (PACK_HEADER_LEN + 12 + b"fresh".len()) as u64;
+        let mut state = CacheState::default();
+        assert!(load_pack_from_path_with_max(
+            &mut state,
+            &path,
+            compacted_limit
+        ));
+
+        let (offset, len) = state
+            .index
+            .get(&SENTINEL_HASH)
+            .copied()
+            .expect("compacted pack keeps current entry");
+        assert_eq!(&state.values[offset..offset + len], b"fresh");
+        assert_eq!(
+            std::fs::metadata(&path)
+                .expect("compacted pack remains")
+                .len(),
+            compacted_limit
+        );
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn oversized_pack_discards_when_compacted_pack_still_exceeds_limit() {
+        let bytes = synth_pack_bytes(PACK_MAGIC, WHITELIST_VERSION, &[(SENTINEL_HASH, b"fresh")]);
+        let path = temp_pack_path("oversized-discard");
+        std::fs::write(&path, &bytes).expect("write synthetic pack");
+
+        let mut state = CacheState::default();
+        assert!(!load_pack_from_path_with_max(
+            &mut state,
+            &path,
+            (PACK_HEADER_LEN + 12 + b"fresh".len() - 1) as u64
+        ));
+
+        assert!(state.index.is_empty());
+        assert!(state.values.is_empty());
+        assert!(!path.exists());
+    }
+
+    fn temp_pack_path(test_name: &str) -> PathBuf {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system time before unix epoch")
+            .as_nanos();
+        std::env::temp_dir().join(format!("wow-ui-sim-{test_name}-{unique}.pack"))
     }
 
     #[test]
