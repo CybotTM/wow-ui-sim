@@ -45,3 +45,15 @@ fn modeled_c_social_lives_in_c_api() {
         "C_Social should have an explicit C API owner"
     );
 }
+
+#[test]
+fn modeled_c_chat_bubbles_lives_in_c_api() {
+    assert!(
+        !std::path::Path::new("src/lua_api/globals/missing_surface/chat_bubbles.rs").exists(),
+        "modeled C_ChatBubbles state belongs under src/c_api, not lua_api::globals::missing_surface"
+    );
+    assert!(
+        std::path::Path::new("src/c_api/c_chat_bubbles.rs").exists(),
+        "C_ChatBubbles should have an explicit C API owner"
+    );
+}

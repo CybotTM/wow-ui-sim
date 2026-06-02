@@ -34,7 +34,8 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_CharacterServices GetActiveCharacterUpgradeBoostType /
     // GetActiveClassTrialBoostType are SimState-backed in
     // missing_surface/character_services.rs, not stubs.
-    // C_ChatBubbles.GetAllChatBubbles — real impl in missing_surface/chat_bubbles.rs
+    // C_ChatBubbles.GetAllChatBubbles is SimState-backed in
+    // c_api/c_chat_bubbles.rs, not a stub.
     // C_ClassTalents GetActiveConfigID / GetConfigIDsBySpecID /
     // GetHeroTalentSpecsForClassSpec / GetTraitTreeForSpec are
     // TalentState-backed in missing_surface/traits.rs, not stubs.

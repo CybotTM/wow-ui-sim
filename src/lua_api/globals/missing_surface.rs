@@ -9,7 +9,6 @@ mod auction_house;
 mod battle_net;
 mod character_select;
 mod character_services;
-mod chat_bubbles;
 mod club_finder;
 mod club_info;
 mod creature_info;
@@ -267,7 +266,7 @@ fn register_world_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
 fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     battle_net::register_battle_net_surface(state)?;
     character_services::register_character_services_surface(state)?;
-    chat_bubbles::register_chat_bubbles_surface(state)?;
+    c_api::c_chat_bubbles::register_c_chat_bubbles_surface(state)?;
     club_finder::register_club_finder_surface(state)?;
     club_info::register_club_info_surface(state)?;
     friend_list::register_friend_list_surface(state)?;

@@ -1,21 +1,18 @@
 //! `C_ChatBubbles` probe surface backed by `SimState.chat_bubbles`.
 //!
-//! Migrates 1 entry off the namespace stub table:
-//!
-//! - `C_ChatBubbles.GetAllChatBubbles(includeForbidden?)` — returns an
-//!   array of lightweight tables representing world chat bubbles, one
-//!   per entry in `SimState.chat_bubbles`. Each table carries `message`,
-//!   `sender`, and `chatType`. Since the simulator does not render 3D
-//!   speech bubbles there is no real Frame backing them; `frame_id` is
-//!   included as `frameID` when present.
+//! `C_ChatBubbles.GetAllChatBubbles(includeForbidden?)` returns an array of
+//! lightweight tables representing world chat bubbles, one per entry in
+//! `SimState.chat_bubbles`. Each table carries `message`, `sender`, and
+//! `chatType`. Since the simulator does not render 3D speech bubbles there is
+//! no real Frame backing them; `frame_id` is included as `frameID` when present.
 
-use super::{ensure_namespace, set_table_array};
+use crate::c_api::helpers::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-pub(super) fn register_chat_bubbles_surface(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_chat_bubbles_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_ChatBubbles")?;
     table_set_rust_fn_static(
         state,
