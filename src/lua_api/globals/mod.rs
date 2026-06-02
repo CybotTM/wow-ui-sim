@@ -58,7 +58,6 @@ pub mod inventory_probes;
 pub mod inventory_slot;
 pub mod inventory_verbs;
 pub mod keybindings;
-pub mod lfg_info;
 pub mod lfg_list;
 pub mod loader_script_bindings;
 pub mod lua_duration_object;

@@ -60,9 +60,9 @@ fn blizzard_deprecated_lfg_toc_is_minimal_with_no_flags_or_deps() {
     assert!(
         toc.dependencies().is_empty(),
         "Blizzard_DeprecatedLFG declares NO dependencies — both target namespaces \
-         (C_LFGInfo, C_LFGList) are bootstrapped at env init via runtime_surface_bootstrap.\
-         lua and the explicit Rust registrations at src/lua_api/globals/lfg_info.rs and \
-         lfg_list.rs"
+         (C_LFGInfo, C_LFGList) are bootstrapped at env init via runtime_surface_bootstrap.lua \
+         and the explicit Rust registrations at src/c_api/c_lfg_info.rs and \
+         src/lua_api/globals/lfg_list.rs"
     );
 
     let toc_text = std::fs::read_to_string(deprecated_lfg_toc())

@@ -119,7 +119,6 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
 
 fn register_core_surfaces(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::lfg_list::register_all(lua)?;
-    super::lfg_info::register_all(lua)?;
     super::real::locale_info::register_all(lua)?;
     super::missing_surface::register_all(lua)?;
     super::quest_surface::register_all(lua)?;

@@ -15,16 +15,27 @@
 //! - `C_LFGInfo.IsLFGModeActiveForCategory(categoryID)` — returns true
 //!   when the category id is in `lfg_active_categories`, false otherwise.
 
-use super::ensure_namespace;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::c_api::ensure_namespace;
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_set,
+};
 use crate::lua_api::state_types::LfgCategoryInfo;
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 use std::collections::HashSet;
 
-pub(super) fn register_lfg_info_surface(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_lfg_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_LFGInfo")?;
+    register_access_methods(state, table_ref)?;
+    register_category_methods(state, table_ref)?;
+    register_dungeon_methods(state, table_ref)?;
+    Ok(())
+}
+
+fn register_access_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -32,6 +43,16 @@ pub(super) fn register_lfg_info_surface(state: &mut LuaState) -> LuaResult<()> {
         can_player_use_group_finder,
     )?;
     table_set_rust_fn_static(state, table_ref, "CanPlayerUseLFD", can_player_use_lfd)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CanPlayerUsePremadeGroup",
+        can_player_use_premade_group,
+    )?;
+    Ok(())
+}
+
+fn register_category_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -53,6 +74,16 @@ pub(super) fn register_lfg_info_surface(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
+fn register_dungeon_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsLFGFollowerDungeon",
+        is_lfg_follower_dungeon,
+    )?;
+    Ok(())
+}
+
 fn can_player_use_group_finder(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
     state.push(Val::Nil);
@@ -63,6 +94,12 @@ fn can_player_use_lfd(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
     state.push(Val::Nil);
     Ok(2)
+}
+
+pub(crate) fn can_player_use_premade_group(state: &mut LuaState) -> LuaResult<u32> {
+    let v = borrow_state(state)?.can_use_premade_group;
+    state.push(Val::Bool(v));
+    Ok(1)
 }
 
 fn get_lfg_category_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -154,4 +191,30 @@ fn is_lfg_mode_active_for_category(state: &mut LuaState) -> LuaResult<u32> {
 
 fn is_lfg_category_active(active_categories: &HashSet<i32>, category_id: i32) -> bool {
     active_categories.contains(&category_id)
+}
+
+/// `C_LFGInfo.IsLFGFollowerDungeon(dungeonID)` -> bool.
+fn is_lfg_follower_dungeon(state: &mut LuaState) -> LuaResult<u32> {
+    let dungeon_id = match stack_val(state, 1) {
+        Val::Num(n) => n as i32,
+        _ => {
+            state.push(Val::Bool(false));
+            return Ok(1);
+        }
+    };
+    let is_follower = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .find(|d| d.dungeon_id == dungeon_id)
+        .map(|d| d.is_follower_dungeon)
+        .unwrap_or(false);
+    state.push(Val::Bool(is_follower));
+    Ok(1)
+}
+
+/// `A_Admin.SetCanUsePremadeGroup(b?)` — no-arg defaults to true.
+pub fn admin_set_can_use_premade_group(state: &mut LuaState) -> LuaResult<u32> {
+    let v = Option::<bool>::from_stack(state, 1)?.unwrap_or(true);
+    borrow_state_mut(state)?.can_use_premade_group = v;
+    Ok(0)
 }

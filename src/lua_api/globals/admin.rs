@@ -243,7 +243,7 @@ fn register_lfg_services(b: TableBuilder) -> LuaResult<TableBuilder> {
     )?
     .set_function(
         "SetCanUsePremadeGroup",
-        super::lfg_info::admin_set_can_use_premade_group,
+        crate::c_api::c_lfg_info::admin_set_can_use_premade_group,
     )?
     .set_function("GetLfgQueuePopDelay", get_lfg_queue_pop_delay)?
     .set_function("SetLfgQueuePopDelay", set_lfg_queue_pop_delay)

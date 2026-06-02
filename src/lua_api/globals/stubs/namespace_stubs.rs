@@ -62,7 +62,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // stubs.
     // C_LFGInfo CanPlayerUseLFD / GetLFGCategoryInfo / GetSystemPanelData /
     // IsLFGModeActiveForCategory are SimState-backed in
-    // missing_surface/lfg_info.rs, not stubs.
+    // c_api/c_lfg_info.rs, not stubs.
     // C_LossOfControl.GetActiveLossOfControlData /
     // GetActiveLossOfControlDataCount are registered in
     // missing_surface/small_namespaces.rs, not stubs.
@@ -178,8 +178,8 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ("C_TradeSkillUI", "AreAnyInventorySlotsFiltered", stub_false),
     ("C_TradeSkillUI", "IsInventorySlotFiltered", stub_false),
     // C_LFGInfo — CanPlayerUseLFD / GetLFGCategoryInfo / GetSystemPanelData /
-    // IsLFGModeActiveForCategory are SimState-backed in missing_surface/lfg_info.rs.
-    // CanPlayerUsePremadeGroup is SimState-backed in lfg_info.rs.
+    // IsLFGModeActiveForCategory are SimState-backed in c_api/c_lfg_info.rs.
+    // CanPlayerUsePremadeGroup is SimState-backed in c_api/c_lfg_info.rs.
     // C_Map.IsMapValidForNavigation is registered in
     // missing_surface/small_namespaces.rs, not a stub.
     // C_MythicPlus IsMythicPlusActive / IsWeeklyRewardAvailable are SimState-backed
@@ -265,7 +265,7 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
         "GetRecruiterAbilityCategories",
         stub_empty_table,
     ),
-    // C_LFGInfo GetSystemPanelData is SimState-backed in missing_surface/lfg_info.rs.
+    // C_LFGInfo GetSystemPanelData is SimState-backed in c_api/c_lfg_info.rs.
     ("C_Map", "GetMapBannersForMap", stub_empty_table),
     ("C_Map", "GetMapLinksForMap", stub_empty_table),
     // C_NamePlate GetNamePlates is registered in missing_surface/nameplate.rs.
