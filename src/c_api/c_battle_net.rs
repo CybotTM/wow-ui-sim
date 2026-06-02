@@ -19,23 +19,41 @@
 //!   number of game accounts for a 1-based friend index, or 0 when out
 //!   of range.
 
-use super::ensure_namespace;
+use crate::c_api::helpers::ensure_namespace;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_set,
 };
 use crate::lua_api::state_types::{BnetFriend, BnetGameAccount};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
-pub(super) fn register_battle_net_surface(state: &mut LuaState) -> LuaResult<()> {
+type BattleNetTable = GcRef<Table>;
+
+pub(crate) fn register_c_battle_net_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_BattleNet")?;
+    register_texture_methods(state, table_ref)?;
+    register_friend_query_methods(state, table_ref)
+}
+
+fn register_texture_methods(state: &mut LuaState, table_ref: BattleNetTable) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
         "AreHighResTexturesInstalled",
         c_bnet_are_high_res_textures_installed,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "InstallHighResTextures",
+        c_bnet_install_high_res_textures,
+    )
+}
+
+fn register_friend_query_methods(state: &mut LuaState, table_ref: BattleNetTable) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetNumFriends", c_bnet_get_num_friends)?;
     table_set_rust_fn_static(
         state,
@@ -60,14 +78,7 @@ pub(super) fn register_battle_net_surface(state: &mut LuaState) -> LuaResult<()>
         table_ref,
         "GetFriendNumAccounts",
         c_bnet_get_friend_num_accounts,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "InstallHighResTextures",
-        c_bnet_install_high_res_textures,
-    )?;
-    Ok(())
+    )
 }
 
 fn c_bnet_are_high_res_textures_installed(state: &mut LuaState) -> LuaResult<u32> {
