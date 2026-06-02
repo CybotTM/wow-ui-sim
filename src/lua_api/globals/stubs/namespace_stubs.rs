@@ -78,7 +78,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_PartyInfo probes are registered in missing_surface/party_info.rs.
     // Most C_PetBattles probes are registered in
     // missing_surface/pet_battles.rs; static pet-journal fallbacks live in
-    // temporary_shims until the broader journal model exists.
+    // lua_api::workarounds::temporary until the broader journal model exists.
     // GetBattleState / GetNumPets remain in pet_battles.rs (env_init) so
     // `petIndex > GetNumPets(...)` keeps working as a numeric comparison.
     // C_PlayerInfo probes are registered in missing_surface/player_info.rs.

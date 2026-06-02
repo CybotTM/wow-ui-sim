@@ -94,7 +94,6 @@ pub mod strings;
 pub mod stubs;
 pub mod targeting_verbs;
 pub mod template;
-pub mod temporary_shims;
 pub mod torghast;
 pub mod trade_verbs;
 pub mod transmog_outfit_info;
