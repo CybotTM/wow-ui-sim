@@ -10,11 +10,11 @@ use rilua::vm::state::LuaState;
 use std::path::Path;
 use std::time::Instant;
 
-use super::LoadTiming;
 use super::addon::AddonContext;
 use super::bytecode_cache;
 use super::bytecode_cache::PutResult;
 use super::error::LoadError;
+use super::{LoadTiming, LuaFileTiming};
 
 /// Load a Lua file into the environment with addon varargs.
 pub fn load_lua_file(
@@ -30,10 +30,46 @@ pub fn load_lua_file(
     let chunk_name = wow_chunk_name(path);
     let patched_source = crate::lua_api::workarounds::patch_lua_source(&bytes, &chunk_name);
 
+    let timing_before = LuaFileTimingSnapshot::from_load_timing(timing);
     let func = compile_lua_file(env, &patched_source, &chunk_name, timing)?;
     execute_lua_file(env, func, ctx, &chunk_name, timing)?;
+    super::record_lua_file_timing(timing_before.diff(&chunk_name, timing));
 
     Ok(())
+}
+
+struct LuaFileTimingSnapshot {
+    compile_time: std::time::Duration,
+    call_time: std::time::Duration,
+    cache_hits: u32,
+    cache_misses: u32,
+    cache_lookup_misses: u32,
+    cache_replay_failures: u32,
+}
+
+impl LuaFileTimingSnapshot {
+    fn from_load_timing(timing: &LoadTiming) -> Self {
+        Self {
+            compile_time: timing.lua_compile_time,
+            call_time: timing.lua_call_time,
+            cache_hits: timing.cache_hits,
+            cache_misses: timing.cache_misses,
+            cache_lookup_misses: timing.cache_lookup_misses,
+            cache_replay_failures: timing.cache_replay_failures,
+        }
+    }
+
+    fn diff(self, chunk_name: &str, timing: &LoadTiming) -> LuaFileTiming {
+        LuaFileTiming {
+            chunk_name: chunk_name.to_string(),
+            compile_time: timing.lua_compile_time - self.compile_time,
+            call_time: timing.lua_call_time - self.call_time,
+            cache_hits: timing.cache_hits - self.cache_hits,
+            cache_misses: timing.cache_misses - self.cache_misses,
+            cache_lookup_misses: timing.cache_lookup_misses - self.cache_lookup_misses,
+            cache_replay_failures: timing.cache_replay_failures - self.cache_replay_failures,
+        }
+    }
 }
 
 fn compile_lua_file(

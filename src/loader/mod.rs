@@ -29,6 +29,7 @@ use crate::screen::ScreenKind;
 use crate::toc::TocFile;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
+use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 
 pub use addon_order::sort_addons_by_dependencies;
@@ -39,6 +40,59 @@ pub(crate) use load_addon_trace::{
 };
 pub use xml_frame::create_frame_from_xml;
 pub use xml_frame::{fast_create_frame_profile_body_report, fast_create_frame_profile_report};
+
+const ENV_PROFILE_LUA_FILES: &str = "WOW_SIM_PROFILE_LUA_FILES";
+
+#[derive(Debug, Clone)]
+pub struct LuaFileTiming {
+    pub chunk_name: String,
+    pub compile_time: Duration,
+    pub call_time: Duration,
+    pub cache_hits: u32,
+    pub cache_misses: u32,
+    pub cache_lookup_misses: u32,
+    pub cache_replay_failures: u32,
+}
+
+impl LuaFileTiming {
+    pub fn total_time(&self) -> Duration {
+        self.compile_time + self.call_time
+    }
+}
+
+fn lua_file_timing_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| {
+        std::env::var_os(ENV_PROFILE_LUA_FILES).is_some_and(|value| {
+            let value = value.to_string_lossy();
+            value != "0" && !value.eq_ignore_ascii_case("false")
+        })
+    })
+}
+
+fn lua_file_timings() -> &'static Mutex<Vec<LuaFileTiming>> {
+    static TIMINGS: OnceLock<Mutex<Vec<LuaFileTiming>>> = OnceLock::new();
+    TIMINGS.get_or_init(|| Mutex::new(Vec::new()))
+}
+
+pub(crate) fn record_lua_file_timing(timing: LuaFileTiming) {
+    if !lua_file_timing_enabled() {
+        return;
+    }
+    if let Ok(mut timings) = lua_file_timings().lock() {
+        timings.push(timing);
+    }
+}
+
+pub fn lua_file_timings_snapshot() -> Vec<LuaFileTiming> {
+    if !lua_file_timing_enabled() {
+        return Vec::new();
+    }
+    lua_file_timings()
+        .lock()
+        .map(|timings| timings.clone())
+        .unwrap_or_default()
+}
 
 /// Addons that ship the shared XML template library which Blizzard's other
 /// addons inherit from (`ButtonFrameTemplate`, `PortraitFrameBaseTemplate`,

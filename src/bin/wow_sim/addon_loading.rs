@@ -19,6 +19,10 @@ use blizzard_dependencies::load_required_blizzard_dependencies_for_addons;
 use cache_summary::{format_cache_info, print_cache_stats};
 mod enable_state;
 use enable_state::{addon_enable_overrides, addon_enabled, dependency_aware_enable_overrides};
+mod lua_file_profile;
+use lua_file_profile::print_slowest_lua_files;
+mod slowest_addons;
+use slowest_addons::print_slowest_addons;
 
 pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
 
@@ -49,20 +53,7 @@ pub fn load_blizzard_addons(
     saved_vars: &mut Option<SavedVariablesManager>,
     screen: ScreenKind,
 ) {
-    let profile = client_profile::ACTIVE;
-    let addons_dir = client_profile::blizzard_ui_addons_dir();
-    if !addons_dir.exists() {
-        eprintln!(
-            "FATAL: {} is missing: Blizzard UI source not set up for {:?} profile.\n\
-             Run from the repo root:\n\
-             \t./scripts/setup-blizzard-ui.sh {}",
-            addons_dir.display(),
-            profile,
-            profile.subdir().to_lowercase(),
-        );
-        std::process::exit(1);
-    }
-
+    let addons_dir = blizzard_ui_addons_dir_or_exit();
     let verbose = std::env::var("WOW_SIM_VERBOSE").is_ok();
     let blizzard_start = std::time::Instant::now();
     let mut total_timing = LoadTiming::default();
@@ -99,6 +90,24 @@ pub fn load_blizzard_addons(
 
     env.sync_string_metatable_to_global_string();
     print_blizzard_summary(blizzard_start.elapsed(), &total_timing);
+}
+
+fn blizzard_ui_addons_dir_or_exit() -> PathBuf {
+    let profile = client_profile::ACTIVE;
+    let addons_dir = client_profile::blizzard_ui_addons_dir();
+    if addons_dir.exists() {
+        return addons_dir;
+    }
+
+    eprintln!(
+        "FATAL: {} is missing: Blizzard UI source not set up for {:?} profile.\n\
+         Run from the repo root:\n\
+         \t./scripts/setup-blizzard-ui.sh {}",
+        addons_dir.display(),
+        profile,
+        profile.subdir().to_lowercase(),
+    );
+    std::process::exit(1);
 }
 
 fn load_one_blizzard_addon(
@@ -584,6 +593,7 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
     print_timing_breakdown(&stats.total_timing);
     print_cache_stats(&stats.total_timing);
     print_slowest_addons(&stats.addon_timings);
+    print_slowest_lua_files();
 }
 
 fn print_lua_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -> f64) {
@@ -658,30 +668,6 @@ fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -
     );
 }
 
-fn print_slowest_addons(addon_timings: &[AddonTiming]) {
-    let sorted = slowest_addons(addon_timings);
-    println!("\nSlowest addons:");
-    for addon in sorted.iter().take(10) {
-        let timing = &addon.timing;
-        println!(
-            "  {:>7.1?}  {} (lua={:.1?} compile={:.1?} call={:.1?} sv={:.1?} xml={:.1?})",
-            timing.total(),
-            addon.name,
-            timing.lua_exec_time,
-            timing.lua_compile_time,
-            timing.lua_call_time,
-            timing.saved_vars_time,
-            timing.xml_parse_time + timing.xml_process_time
-        );
-    }
-}
-
-fn slowest_addons(addon_timings: &[AddonTiming]) -> Vec<AddonTiming> {
-    let mut sorted = addon_timings.to_vec();
-    sorted.sort_by(|a, b| b.timing.total().cmp(&a.timing.total()));
-    sorted
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -748,29 +734,6 @@ mod tests {
         let names: Vec<_> = addons.iter().map(|(name, _)| name.as_str()).collect();
 
         assert_eq!(names, ["CurrentAddon"]);
-    }
-
-    #[test]
-    fn slowest_addons_sorts_by_total_timing() {
-        let fast = AddonTiming {
-            name: "FastAddon".to_string(),
-            timing: LoadTiming {
-                lua_exec_time: std::time::Duration::from_millis(10),
-                ..Default::default()
-            },
-        };
-        let slow = AddonTiming {
-            name: "SlowAddon".to_string(),
-            timing: LoadTiming {
-                lua_exec_time: std::time::Duration::from_millis(20),
-                ..Default::default()
-            },
-        };
-
-        let sorted = slowest_addons(&[fast, slow]);
-
-        assert_eq!(sorted[0].name, "SlowAddon");
-        assert_eq!(sorted[1].name, "FastAddon");
     }
 
     #[test]
