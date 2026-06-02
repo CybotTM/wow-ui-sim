@@ -1,21 +1,16 @@
-//! `C_CharacterServices` probe surface backed by
-//! `SimState.character_services`.
+//! `C_CharacterServices` probe surface backed by `SimState.character_services`.
 //!
-//! Migrates 3 entries off the namespace stub tables:
-//!
-//! - `C_CharacterServices.GetActiveCharacterUpgradeBoostType()` — returns nil
-//!   when no upgrade boost is pending, or the boost-type integer when one is
-//!   active.
-//! - `C_CharacterServices.GetActiveClassTrialBoostType()` — returns nil when
-//!   no class trial is running, or the trial-type integer when one is active.
+//! Active boost probes live here because they read modeled simulator state.
+//! Static display/assignment defaults for unmodeled service flows stay in
+//! `lua_api::workarounds::temporary::character_services_defaults`.
 
-use super::ensure_namespace;
+use crate::c_api::helpers::ensure_namespace;
 use crate::lua_api::methods::borrow_state;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-pub(super) fn register_character_services_surface(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_character_services_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_CharacterServices")?;
     table_set_rust_fn_static(
         state,

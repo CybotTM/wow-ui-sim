@@ -33,7 +33,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // are SimState-backed in missing_surface/battle_net.rs, not stubs.
     // C_CharacterServices GetActiveCharacterUpgradeBoostType /
     // GetActiveClassTrialBoostType are SimState-backed in
-    // missing_surface/character_services.rs, not stubs.
+    // c_api/c_character_services.rs, not stubs.
     // C_ChatBubbles.GetAllChatBubbles is SimState-backed in
     // c_api/c_chat_bubbles.rs, not a stub.
     // C_ClassTalents GetActiveConfigID / GetConfigIDsBySpecID /
@@ -159,8 +159,8 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // missing_surface/small_namespaces.rs, not a stub.
     // C_BattleNet
     ("C_BattleNet", "IsAccountMuted", stub_false),
-    // C_CharacterServices HasRequiredServiceForCharacterUpgrade is
-    // SimState-backed in missing_surface/character_services.rs, not a stub.
+    // C_CharacterServices HasRequiredServiceForCharacterUpgrade lives in
+    // workarounds::temporary::character_services_defaults, not a stub.
     // C_ClassTalents CanChangeTalents / GetHasStarterBuild /
     // IsStarterBuildActive are TalentState-backed in
     // missing_surface/traits.rs, not stubs.
