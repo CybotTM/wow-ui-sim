@@ -576,6 +576,7 @@ mod tests {
             "unmapped Blizzard UI files: {missing:?}"
         );
     }
+
     #[test]
     #[cfg(feature = "client-mists")]
     fn mists_required_cache_entries_are_in_manifest() {
@@ -712,7 +713,6 @@ mod tests {
             std::fs::read_to_string(&out_path).expect("read copied fallback"),
             "from repo\n"
         );
-
         std::fs::remove_dir_all(source_root).expect("remove source temp dir");
         std::fs::remove_dir_all(out_root).expect("remove output temp dir");
     }

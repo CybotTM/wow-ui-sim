@@ -20,6 +20,11 @@ const MISTS_GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
     "beta",
 ];
 
+const RETAIL_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
+    "Blizzard_FrameXMLUtil/RuneforgeUtil.xml",
+    "Blizzard_FrameXMLUtil/RuneforgeUtil.lua",
+];
+
 pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml",
     "Blizzard_ActionBar/Classic/ActionButtonUtilOverrides.lua",
@@ -288,6 +293,7 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
 
 pub(super) fn required_profile_cache_entries() -> &'static [&'static str] {
     match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => RETAIL_REQUIRED_PROFILE_CACHE_ENTRIES,
         crate::client_profile::ClientProfile::Mists => MISTS_REQUIRED_PROFILE_CACHE_ENTRIES,
         _ => &[],
     }
@@ -302,7 +308,17 @@ pub(super) fn gethe_wow_ui_source_branches() -> &'static [&'static str] {
 
 pub(super) fn cache_entry_is_usable(entry: &str, path: &Path) -> bool {
     match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => retail_cache_entry_is_usable(entry, path),
         crate::client_profile::ClientProfile::Mists => mists_cache_entry_is_usable(entry, path),
+        _ => true,
+    }
+}
+
+fn retail_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
+    match entry {
+        "Blizzard_FrameXMLUtil/RuneforgeUtil.xml" => {
+            file_contains(path, r#"<Script file="RuneforgeUtil.lua"/>"#)
+        }
         _ => true,
     }
 }
@@ -394,4 +410,57 @@ fn mists_world_map_xml_is_usable(path: &Path) -> bool {
 
 fn file_contains(path: &Path, needle: &str) -> bool {
     std::fs::read_to_string(path).is_ok_and(|contents| contents.contains(needle))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{cache_entry_is_usable, required_profile_cache_entries};
+    use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn unique_temp_dir(label: &str) -> PathBuf {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time before unix epoch")
+            .as_nanos();
+        std::env::temp_dir().join(format!(
+            "wow-ui-sim-profile-cache-{label}-{}-{unique}",
+            std::process::id()
+        ))
+    }
+
+    #[test]
+    #[cfg(feature = "client-retail")]
+    fn retail_requires_runeforge_util_cache_entries() {
+        let required = required_profile_cache_entries();
+
+        assert!(required.contains(&"Blizzard_FrameXMLUtil/RuneforgeUtil.xml"));
+        assert!(required.contains(&"Blizzard_FrameXMLUtil/RuneforgeUtil.lua"));
+    }
+
+    #[test]
+    #[cfg(feature = "client-retail")]
+    fn retail_rejects_runeforge_xml_without_script_include() {
+        let root = unique_temp_dir("retail-runeforge-util");
+        std::fs::create_dir_all(&root).expect("create cache root");
+        let runeforge_xml = root.join("RuneforgeUtil.xml");
+
+        std::fs::write(&runeforge_xml, r#"<Ui></Ui>"#).expect("write stale RuneforgeUtil.xml");
+        assert!(
+            !cache_entry_is_usable("Blizzard_FrameXMLUtil/RuneforgeUtil.xml", &runeforge_xml),
+            "Retail cache must reject RuneforgeUtil.xml without the Lua include"
+        );
+
+        std::fs::write(
+            &runeforge_xml,
+            r#"<Ui><Script file="RuneforgeUtil.lua"/></Ui>"#,
+        )
+        .expect("write RuneforgeUtil.xml with Lua include");
+        assert!(
+            cache_entry_is_usable("Blizzard_FrameXMLUtil/RuneforgeUtil.xml", &runeforge_xml),
+            "Retail cache should accept RuneforgeUtil.xml with the Lua include"
+        );
+
+        std::fs::remove_dir_all(root).expect("remove cache root");
+    }
 }
