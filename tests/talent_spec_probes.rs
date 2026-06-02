@@ -1,4 +1,4 @@
-//! Integration tests for `src/lua_api/globals/talent_spec_probes.rs`.
+//! Integration tests for legacy talent/skill probe and spell-tab globals.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 

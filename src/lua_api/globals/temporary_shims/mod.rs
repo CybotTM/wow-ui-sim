@@ -1,12 +1,16 @@
 //! Temporary-shim namespace wrapper for lua_api globals.
 //!
-//! Real implementations live in `super::missing_surface`; this module exists
-//! so the directory tree makes the shim split explicit.
+//! Broad generated defaults still live in `super::missing_surface`; narrower
+//! unsupported compatibility surfaces live beside this module.
 
 use rilua::LuaResult;
 
+mod legacy_talent_skill_probes;
+
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
-    super::missing_surface::register_all(lua)
+    super::missing_surface::register_all(lua)?;
+    legacy_talent_skill_probes::register_all(lua)?;
+    Ok(())
 }
 
 pub fn register_quest_log_overrides(lua: &mut rilua::Lua) -> LuaResult<()> {

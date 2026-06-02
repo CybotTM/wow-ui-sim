@@ -166,8 +166,8 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetCurrentGuildBankTab",
     "GetNumBattlefieldFlagPositions",
     // GetCursorPosition is SimState-backed in real/mouse_probes.rs, not a stub.
-    // GetArenaOpponentSpec is SimState-backed in talent_spec_probes.rs,
-    // not a stub.
+    // GetArenaOpponentSpec is an explicit legacy probe shim, not a
+    // generated zero stub.
     // GetFactionInfoByID is SimState-backed in faction_probes.rs, not a stub.
     // GetGossipNumOptions / GetGossipNumAvailableQuests /
     // GetGossipNumActiveQuests are SimState-backed in real/gossip_probes.rs,
@@ -205,26 +205,27 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetNumLootItems is SimState-backed in inventory_counts.rs, not a stub.
     // GetNumQuestLogEntries is SimState-backed in quest_surface.rs, not a stub.
     // GetNumShapeshiftForms is SimState-backed in social_probes.rs, not a stub.
-    // GetNumSkillLines / GetNumSpellTabs / GetNumTalentTabs are
-    // SimState-backed in talent_spec_probes.rs, not stubs.
+    // GetNumSpellTabs is spellbook-backed in real/spell_tabs.rs.
+    // GetNumSkillLines / GetNumTalentTabs are explicit legacy probe shims,
+    // not generated zero stubs.
     // GetNumTitles is SimState-backed in social_probes.rs, not a stub.
     // GetPetExperience / GetPetHappiness / GetPetLoyalty /
     // GetPetTimeInCombat are SimState-backed in real/pet_stats.rs, not stubs.
-    // GetPvpTalentSlotInfo is SimState-backed in talent_spec_probes.rs,
-    // not a stub.
+    // GetPvpTalentSlotInfo is an explicit legacy probe shim, not a
+    // generated nil/default stub.
     // GetQuestLogTimeLeft / QuestMapUpdateAllQuests are SimState-backed in
     // quest_surface.rs, not stubs.
     // GetRaidRosterInfo is SimState-backed in group_queries.rs, not a stub.
     "GetRelicSlotType",
     // GetRestState is SimState-backed in real/xp_honor_rest.rs, not a stub.
-    // GetSelectedSkill / GetSkillLineInfo are SimState-backed in
-    // talent_spec_probes.rs, not stubs.
+    // GetSelectedSkill / GetSkillLineInfo are explicit legacy probe shims,
+    // not generated zero/nil stubs.
     "GetSelectedSocial",
     // GetSpellAutocast / GetSpellBonusDamage / GetSpellBonusHealing /
     // GetSpellCooldown / GetSpellLevelLearned are SimState-backed in
     // cooldown_probes.rs, not stubs.
-    // GetSpellTabInfo / GetTalentInfo are SimState-backed in
-    // talent_spec_probes.rs, not stubs.
+    // GetSpellTabInfo is spellbook-backed in real/spell_tabs.rs.
+    // GetTalentInfo is an explicit legacy probe shim, not a generated nil stub.
     "GetSummonConfirmSummoner",
     "GetSummonConfirmTimeLeft",
     // GetTitleName is SimState-backed in social_probes.rs, not a stub.
