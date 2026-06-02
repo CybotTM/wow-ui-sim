@@ -49,10 +49,10 @@ fn test_c_item_surface_registers_expected_methods() {
 }
 
 #[test]
-fn test_c_item_get_item_info_returns_nil() {
+fn test_c_item_get_item_info_returns_placeholder_for_unknown_positive_id() {
     let env = env();
-    let is_nil: bool = env.eval("return C_Item.GetItemInfo(42) == nil").unwrap();
-    assert!(is_nil);
+    let item_name: String = env.eval("return C_Item.GetItemInfo(42)").unwrap();
+    assert_eq!(item_name, "Unknown");
 }
 
 #[test]
@@ -172,12 +172,21 @@ fn test_c_item_get_item_max_stack_size_by_id_synthetic_item() {
 }
 
 #[test]
-fn test_c_item_get_item_max_stack_size_invalid_item_returns_nil() {
+fn test_c_item_get_item_max_stack_size_invalid_item_returns_numeric_fallback() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return C_Item.GetItemMaxStackSizeByID(nil) == nil")
+    let stack_size: i32 = env
+        .eval("return C_Item.GetItemMaxStackSizeByID(nil)")
         .unwrap();
-    assert!(is_nil);
+    assert_eq!(stack_size, 0);
+}
+
+#[test]
+fn test_c_item_get_item_max_stack_size_invalid_item_is_comparable() {
+    let env = env();
+    let is_stackable: bool = env
+        .eval("return C_Item.GetItemMaxStackSizeByID('not an item') > 1")
+        .unwrap();
+    assert!(!is_stackable);
 }
 
 #[test]

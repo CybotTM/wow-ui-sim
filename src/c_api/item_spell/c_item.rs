@@ -320,9 +320,7 @@ fn item_quality_for_id(item_id: u32) -> f64 {
 }
 
 fn c_item_get_item_max_stack_size_by_id(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(item_id) = parse_item_id_from_val(state, stack_val(state, 1)) else {
-        return Ok(0);
-    };
+    let item_id = parse_item_id_from_val(state, stack_val(state, 1)).unwrap_or(0);
     state.push(Val::Num(item_max_stack_size_for_id(item_id)));
     Ok(1)
 }
