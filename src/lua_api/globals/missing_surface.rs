@@ -37,7 +37,6 @@ mod report_system;
 mod scenario_info;
 mod small_namespaces;
 mod small_probes;
-mod social;
 mod summon_info;
 mod tooltip_info;
 mod traits;
@@ -274,7 +273,7 @@ fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     friend_list::register_friend_list_surface(state)?;
     recruit_a_friend::register_recruit_a_friend_surface(state)?;
     voice_chat::register_voice_chat_surface(state)?;
-    social::register_social_surface(state)?;
+    c_api::c_social::register_c_social_surface(state)?;
     summon_info::register_summon_info_surface(state)?;
     character_select::register_character_select_surface(state)?;
     Ok(())

@@ -24,6 +24,7 @@ pub mod c_map;
 pub mod c_map_exploration_info;
 pub mod c_paper_doll_info;
 pub mod c_player_interaction_manager;
+pub mod c_social;
 pub mod c_spec;
 pub mod c_spell;
 pub mod c_spell_book;
