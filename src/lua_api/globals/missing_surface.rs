@@ -30,7 +30,6 @@ pub(crate) mod professions;
 mod quest_choice;
 mod quest_log;
 mod recruit_a_friend;
-mod report_system;
 mod scenario_info;
 mod small_namespaces;
 mod small_probes;
@@ -284,7 +283,7 @@ fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     pet_battles::register_pet_battles_surface(state)?;
     account_services::register_account_services_surface(state)?;
     account_store::register_account_store_surface(state)?;
-    report_system::register_report_system_surface(state)?;
+    c_api::c_report_system::register_c_report_system_surface(state)?;
     zone_ability::register_zone_ability_surface(state)?;
     small_namespaces::register_small_namespaces(state)?;
     small_probes::register_small_probes_surface(state)?;

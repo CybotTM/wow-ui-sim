@@ -1,11 +1,9 @@
-//! `C_ReportSystem` probe surface backed by `SimState` report tokens.
+//! `C_ReportSystem` probe surface backed by report state.
 //!
-//! The report UI only needs a token generator and a send path that
-//! emits `REPORT_PLAYER_RESULT` when a report is submitted. Pending
-//! reports live in `SimState.pending_player_reports` so tests can inspect
-//! or clear them deterministically.
+//! Report tokens and pending reports live in `SimState.pending_player_reports`
+//! so tests and addon flows can inspect or clear them deterministically.
 
-use super::ensure_namespace;
+use crate::c_api::helpers::ensure_namespace;
 use crate::event::{Event, EventArg};
 use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_api::state::PendingPlayerReport;
@@ -13,7 +11,7 @@ use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-pub(super) fn register_report_system_surface(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_report_system_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_ReportSystem")?;
     table_set_rust_fn_static(
         state,
