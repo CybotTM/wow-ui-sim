@@ -587,20 +587,19 @@ pub(super) fn c_tooltip_get_quest_log_item(state: &mut LuaState) -> LuaResult<u3
 
 pub(super) fn c_tooltip_get_shapeshift(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 1)?;
-    let name = {
+    let form = {
         let sim = borrow_state(state)?;
         let zero_based = usize::try_from(slot.saturating_sub(1)).unwrap_or(usize::MAX);
-        sim.shapeshift_forms
-            .get(zero_based)
-            .map(|form| form.name.clone())
+        sim.shapeshift_forms.get(zero_based).cloned()
     };
-    let Some(name) = name else {
+    let Some(form) = form else {
         state.push(Val::Nil);
         return Ok(1);
     };
     let tooltip = empty_tooltip(state, TOOLTIP_TYPE_SPELL);
     let lines = table_get(state, tooltip, "lines");
-    push_plain_line(state, lines, 1, &name);
+    push_plain_line(state, lines, 1, &form.name);
+    table_set(state, tooltip, "id", Val::Num(form.spell_id as f64));
     state.push(tooltip);
     Ok(1)
 }

@@ -45,6 +45,7 @@ const TOOLTIP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetItem", get_item),
     ("SetSpellByID", set_spell_by_id),
     ("SetSpellBookItem", set_spell_book_item),
+    ("SetShapeshift", set_shapeshift),
     ("SetItemByID", set_item_by_id),
     ("SetMountBySpellID", set_mount_by_spell_id),
     ("SetCompanionPet", set_companion_pet),

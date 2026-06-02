@@ -39,6 +39,27 @@ fn test_addline_and_numlines() {
 }
 
 #[test]
+fn test_set_shapeshift_populates_spell_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let (name, spell_id, data_id, lines): (String, i32, i32, i32) = env
+        .eval(
+            r#"
+            local data = C_TooltipInfo.GetShapeshift(1)
+            GameTooltip:SetShapeshift(1)
+            local name, spellID = GameTooltip:GetSpell()
+            return name, spellID, data.id, GameTooltip:NumLines()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(name, "Devotion Aura");
+    assert_eq!(spell_id, 465);
+    assert_eq!(data_id, 465);
+    assert_eq!(lines, 1);
+}
+
+#[test]
 fn test_adddoubleline_and_numlines() {
     let env = WowLuaEnv::new().unwrap();
 

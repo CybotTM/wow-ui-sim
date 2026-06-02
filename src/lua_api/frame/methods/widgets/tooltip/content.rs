@@ -5,7 +5,8 @@ use super::line_frames::{table_array_get, tooltip_line_from_table};
 use super::sizing::refresh_tooltip_geometry;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, call_function_state_multi, create_string,
-    frame_id_from_stack, frame_ref, table_get, val_to_string,
+    create_table, frame_id_from_stack, frame_ref, table_get, table_set, table_set_num,
+    val_to_string,
 };
 use crate::lua_api::script_helpers::{call_void_function_with_fallback_state, get_script};
 use crate::lua_api::state::SEEDED_LOCAL_CHARACTER_GUID;
@@ -32,6 +33,7 @@ fn apply_tooltip_table(
     let lines = tooltip_lines_from_table(state, lines_table);
     let allow_show_with_no_lines = tooltip_allows_showing_without_lines(state, tooltip_id)?;
     let has_lines = !lines.is_empty();
+    set_primary_tooltip_data(state, tooltip_id, tooltip)?;
 
     let mut sim = borrow_state_mut(state)?;
     apply_tooltip_lines(
@@ -43,6 +45,41 @@ fn apply_tooltip_table(
         has_lines || allow_show_with_no_lines,
     );
     Ok(has_lines)
+}
+
+fn set_primary_tooltip_data(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    tooltip_data: Val,
+) -> LuaResult<()> {
+    let tooltip = frame_ref(state, tooltip_id)?;
+    let info = primary_tooltip_info(state, tooltip);
+    table_set(state, info, "tooltipData", tooltip_data);
+    table_set(state, tooltip, "processingInfo", info);
+
+    let info_list = primary_tooltip_info_list(state, tooltip);
+    if let Val::Table(info_list_ref) = info_list {
+        table_set_num(state, info_list_ref, 1.0, info);
+    }
+    Ok(())
+}
+
+fn primary_tooltip_info(state: &mut LuaState, tooltip: Val) -> Val {
+    match table_get(state, tooltip, "processingInfo") {
+        Val::Table(_) => table_get(state, tooltip, "processingInfo"),
+        _ => create_table(state),
+    }
+}
+
+fn primary_tooltip_info_list(state: &mut LuaState, tooltip: Val) -> Val {
+    match table_get(state, tooltip, "infoList") {
+        Val::Table(_) => table_get(state, tooltip, "infoList"),
+        _ => {
+            let info_list = create_table(state);
+            table_set(state, tooltip, "infoList", info_list);
+            info_list
+        }
+    }
 }
 
 fn tooltip_allows_showing_without_lines(state: &LuaState, tooltip_id: u64) -> LuaResult<bool> {
@@ -203,6 +240,31 @@ pub(super) fn set_spell_by_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_shapeshift(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let slot = match stack_val(state, 2) {
+        Val::Num(value) if value > 0.0 => value as usize,
+        _ => return Ok(0),
+    };
+    let Some((name, spell_id)) = shapeshift_tooltip_data(state, slot)? else {
+        return Ok(0);
+    };
+
+    set_tooltip_single_line(state, tooltip_id, name, Some(spell_id))?;
+    let tooltip_data = spell_tooltip_data(state, spell_id);
+    set_primary_tooltip_data(state, tooltip_id, tooltip_data)?;
+    fire_tooltip_script(state, tooltip_id, "OnTooltipSetSpell");
+    Ok(0)
+}
+
+fn shapeshift_tooltip_data(state: &mut LuaState, slot: usize) -> LuaResult<Option<(String, u32)>> {
+    let zero_based = slot.saturating_sub(1);
+    Ok(borrow_state(state)?
+        .shapeshift_forms
+        .get(zero_based)
+        .map(|form| (form.name.clone(), form.spell_id)))
+}
+
 pub(super) fn set_item_by_id(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
     let item_id = stack_val(state, 2);
@@ -343,6 +405,15 @@ fn set_tooltip_single_line(
     let mut sim = borrow_state_mut(state)?;
     apply_tooltip_lines(&mut sim, tooltip_id, vec![line], None, spell_id, true);
     Ok(())
+}
+
+fn spell_tooltip_data(state: &mut LuaState, spell_id: u32) -> Val {
+    let tooltip = create_table(state);
+    let lines = create_table(state);
+    table_set(state, tooltip, "type", Val::Num(1.0));
+    table_set(state, tooltip, "id", Val::Num(spell_id as f64));
+    table_set(state, tooltip, "lines", lines);
+    tooltip
 }
 
 pub(super) fn set_mount_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
