@@ -100,6 +100,25 @@ fn get_instance_info_returns_nil_for_absent_lfg_dungeon_id() {
 }
 
 #[test]
+fn is_in_lfg_dungeon_reflects_lfg_instance_state() {
+    let env = env();
+    let default_result: bool = env.eval("return IsInLFGDungeon()").unwrap();
+    assert!(
+        !default_result,
+        "open-world startup should not report an active LFG dungeon"
+    );
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.world.in_instance = true;
+        state.world.instance_lfg_dungeon_id = Some(258);
+    }
+
+    let lfg_result: bool = env.eval("return IsInLFGDungeon()").unwrap();
+    assert!(lfg_result, "seeded LFG instance state should be visible");
+}
+
+#[test]
 fn saved_raid_instance_counts_default_to_empty_lists() {
     let env = env();
     let (saved_instances, world_bosses): (i32, i32) = env

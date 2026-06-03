@@ -20,6 +20,8 @@
 //!   no raid-lock backing store is seeded by default.
 //! - `GetSavedInstanceInfo(index)` / `GetSavedWorldBossInfo(index)` → no
 //!   values for empty slots.
+//! - `IsInLFGDungeon()` → true only when the seeded world state is inside an
+//!   instance with an LFG dungeon id.
 
 use crate::lua_api::methods::{borrow_state, create_string, create_string_static, val_to_string};
 use crate::lua_bridge::stack_val;
@@ -90,6 +92,15 @@ fn get_instance_info(state: &mut LuaState) -> LuaResult<u32> {
     let snap = snapshot_instance_info(state)?;
     push_instance_info_fields(state, snap);
     Ok(10)
+}
+
+fn is_in_lfg_dungeon(state: &mut LuaState) -> LuaResult<u32> {
+    let result = {
+        let sim = borrow_state(state)?;
+        sim.world.in_instance && sim.world.instance_lfg_dungeon_id.is_some()
+    };
+    state.push(Val::Bool(result));
+    Ok(1)
 }
 
 fn get_mirror_timer_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -195,6 +206,7 @@ fn push_nil_values(state: &mut LuaState, count: usize) {
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetInstanceInfo", get_instance_info)?;
+    LuaApiMut::register_function(lua, "IsInLFGDungeon", is_in_lfg_dungeon)?;
     LuaApiMut::register_function(lua, "GetMirrorTimerInfo", get_mirror_timer_info)?;
     LuaApiMut::register_function(lua, "GetMirrorTimerProgress", get_mirror_timer_progress)?;
     LuaApiMut::register_function(lua, "GetWorldElapsedTimers", get_world_elapsed_timers)?;
