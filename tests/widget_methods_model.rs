@@ -556,6 +556,50 @@ fn test_model_scene_project_3d_point_uses_camera_projection() {
 }
 
 #[test]
+fn test_model_scene_get_player_actor_returns_reusable_stub_actor() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local scene = CreateFrame("ModelScene", "TestModelScenePlayerActor", UIParent)
+        local actor1 = scene:GetPlayerActor()
+        local actor2 = scene:GetPlayerActor()
+
+        _G.player_actor_state = {
+            actor_exists = actor1 ~= nil,
+            actor_reused = actor1 == actor2,
+            actor_type = actor1 and actor1:GetObjectType(),
+            set_model_by_unit = actor1 and actor1:SetModelByUnit("player"),
+            actor_count = scene:GetNumActors(),
+            actor_is_index1 = scene:GetActorAtIndex(1) == actor1,
+        }
+    "#,
+    )
+    .unwrap();
+
+    let actor_state: (bool, bool, String, bool, i64, bool) = env
+        .eval(
+            r#"
+            local s = _G.player_actor_state
+            return s.actor_exists,
+                   s.actor_reused,
+                   s.actor_type,
+                   s.set_model_by_unit,
+                   s.actor_count,
+                   s.actor_is_index1
+        "#,
+        )
+        .unwrap();
+
+    assert!(actor_state.0);
+    assert!(actor_state.1);
+    assert_eq!(actor_state.2, "ModelSceneActor");
+    assert!(actor_state.3);
+    assert_eq!(actor_state.4, 1);
+    assert!(actor_state.5);
+}
+
+#[test]
 fn test_model_scene_actor_management_tracks_created_indexed_and_taken_actors() {
     let env = WowLuaEnv::new().unwrap();
 

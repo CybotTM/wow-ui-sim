@@ -82,6 +82,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[lfd-role-icon-slowness]] | LFD role icons use small button atlas crops from a 2048x2048 shared LFG prompt BLP; persistent crop caching avoids re-decoding the full source texture for repeated crop requests |
 | [[mask-texture]] | UV computation, useAtlasSize default, SmallActionButtonMixin override |
 | [[method-dispatch-refactor]] | Runtime pollution fixed; target: direct Rust dispatch |
+| [[modelscene-player-actor-stub]] | ModelScene keeps 3D rendering stubbed, but `GetPlayerActor():SetModelByUnit("player")` must return a reusable actor for addon probes |
 | [[micro-menu-atlas-revert]] | Micro menu normal icons could disappear after hover because button atlas setters skipped child `atlas_tex_coords`, preventing restored normal textures from using isolated atlas crop requests |
 | [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
 | [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; now tracks compact-raid cleanup, the `GameTimeFrame_SetDate()` calendar-atlas no-op fix, and the AuraButton OnUpdate lock-down (`~0.86ms` → `31.44us`, budgeted at `<=0.5ms`) |

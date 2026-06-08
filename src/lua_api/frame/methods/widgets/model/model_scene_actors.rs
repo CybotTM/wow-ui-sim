@@ -68,6 +68,16 @@ pub(super) fn scene_get_actor_by_tag(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub(super) fn scene_get_player_actor(state: &mut LuaState) -> LuaResult<u32> {
+    let scene_id = frame_id_from_stack(state, 1)?;
+    let actor_id = find_actor_by_tag(state, scene_id, "player")
+        .map(Ok)
+        .unwrap_or_else(|| create_player_actor(state, scene_id))?;
+    let actor = frame_ref(state, actor_id)?;
+    state.push(actor);
+    Ok(1)
+}
+
 pub(super) fn scene_get_num_actors(state: &mut LuaState) -> LuaResult<u32> {
     let scene_id = frame_id_from_stack(state, 1)?;
     let count = borrow_state(state)?
@@ -76,6 +86,37 @@ pub(super) fn scene_get_num_actors(state: &mut LuaState) -> LuaResult<u32> {
         .map(|scene| scene.model_scene_actor_ids.len() as f64)
         .unwrap_or(0.0);
     count.into_stack(state)
+}
+
+fn find_actor_by_tag(state: &mut LuaState, scene_id: u64, tag: &str) -> Option<u64> {
+    borrow_state(state)
+        .ok()?
+        .widgets
+        .get(scene_id)?
+        .model_scene_actor_tags
+        .iter()
+        .find(|(existing, _)| existing == tag)
+        .map(|(_, id)| *id)
+}
+
+fn create_player_actor(state: &mut LuaState, scene_id: u64) -> LuaResult<u64> {
+    let actor_id = create_frame_instance(
+        state,
+        WidgetType::Frame,
+        "ModelSceneActor",
+        None,
+        Some(scene_id),
+        true,
+        None,
+    )?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(scene) = sim.widgets.get_mut_visual(scene_id) {
+        scene.model_scene_actor_ids.push(actor_id);
+        scene
+            .model_scene_actor_tags
+            .push(("player".to_string(), actor_id));
+    }
+    Ok(actor_id)
 }
 
 pub(super) fn scene_get_actor_at_index(state: &mut LuaState) -> LuaResult<u32> {

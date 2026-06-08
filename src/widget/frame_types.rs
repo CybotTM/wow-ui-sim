@@ -227,6 +227,7 @@ pub struct ModelSceneState {
 pub struct PlayerModelState {
     pub do_blend: bool,
     pub keep_model_on_hide: bool,
+    pub last_unit: Option<String>,
     pub last_item: Option<String>,
     pub last_item_appearance: Option<String>,
     pub active_anim_kit: Option<i32>,

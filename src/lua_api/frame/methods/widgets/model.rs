@@ -318,6 +318,18 @@ pub(super) fn can_set_unit(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub(super) fn set_model_by_unit(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let unit = stringish_arg(state, 2);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.player_model_state.last_unit = unit;
+    }
+    drop(sim);
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
 fn stringish_arg(state: &LuaState, index: i32) -> Option<String> {
     match stack_val(state, index) {
         Val::Str(str_ref) => {
@@ -593,6 +605,7 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetKeepModelOnHide", get_keep_model_on_hide),
     ("SetItem", set_item),
     ("SetItemAppearance", set_item_appearance),
+    ("SetModelByUnit", set_model_by_unit),
     ("PlayAnimKit", play_anim_kit),
     ("StopAnimKit", stop_anim_kit),
     ("CanSetUnit", can_set_unit),
@@ -716,6 +729,7 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetNumActors", scene_get_num_actors),
     ("GetActorAtIndex", scene_get_actor_at_index),
     ("GetActorByTag", scene_get_actor_by_tag),
+    ("GetPlayerActor", scene_get_player_actor),
     ("TakeActor", scene_take_actor),
     ("SetResetCallback", scene_set_reset_callback),
     ("ClearScene", scene_clear_scene),

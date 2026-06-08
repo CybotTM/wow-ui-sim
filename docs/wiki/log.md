@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-08] investigation | ModelScene player actor stub
+
+Created `investigations/modelscene-player-actor-stub.md` after Collectionator's transmog recovery helper crashed while calling `GetPlayerActor():SetModelByUnit("player")`. Documented the compatibility boundary: 3D rendering remains intentionally stubbed, but ModelScene actor object methods must exist for addon probes.
+
 ## [2026-06-08] investigation | FontString default anchors
 
 Created `investigations/fontstring-default-anchors.md` after real-client testing showed unanchored XML `FontString` layer children use `justifyH` for their implicit anchor point. Updated `index.md` with the new investigation page.
