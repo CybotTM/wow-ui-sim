@@ -44,6 +44,41 @@ local probes = {
         end,
     },
     {
+        name = "frame-font-anchor-top-only",
+        kind = "FrameLayerFontString",
+        object = function()
+            return JustifyProbeFrameFontAnchorTopOnly
+        end,
+    },
+    {
+        name = "frame-font-anchor-bottom-only",
+        kind = "FrameLayerFontString",
+        object = function()
+            return JustifyProbeFrameFontAnchorBottomOnly
+        end,
+    },
+    {
+        name = "frame-font-anchor-left-only",
+        kind = "FrameLayerFontString",
+        object = function()
+            return JustifyProbeFrameFontAnchorLeftOnly
+        end,
+    },
+    {
+        name = "frame-font-anchor-right-only",
+        kind = "FrameLayerFontString",
+        object = function()
+            return JustifyProbeFrameFontAnchorRightOnly
+        end,
+    },
+    {
+        name = "frame-font-anchor-top-left",
+        kind = "FrameLayerFontString",
+        object = function()
+            return JustifyProbeFrameFontAnchorTopLeft
+        end,
+    },
+    {
         name = "button-text-left-top",
         kind = "ButtonText",
         object = function()
@@ -69,6 +104,27 @@ local probes = {
         kind = "ButtonText",
         object = function()
             return JustifyProbeFrameButtonSizedText and JustifyProbeFrameButtonSizedText.ButtonText
+        end,
+    },
+    {
+        name = "button-text-anchor-top-only",
+        kind = "ButtonText",
+        object = function()
+            return JustifyProbeFrameButtonTextAnchorTopOnly and JustifyProbeFrameButtonTextAnchorTopOnly.ButtonText
+        end,
+    },
+    {
+        name = "button-text-anchor-bottom-only",
+        kind = "ButtonText",
+        object = function()
+            return JustifyProbeFrameButtonTextAnchorBottomOnly and JustifyProbeFrameButtonTextAnchorBottomOnly.ButtonText
+        end,
+    },
+    {
+        name = "button-text-anchor-left-only",
+        kind = "ButtonText",
+        object = function()
+            return JustifyProbeFrameButtonTextAnchorLeftOnly and JustifyProbeFrameButtonTextAnchorLeftOnly.ButtonText
         end,
     },
     {

@@ -19,6 +19,32 @@
                 <FontString name="$parentFontWidthHeight" inherits="GameFontNormal" text="WidthHeight" justifyH="LEFT" justifyV="BOTTOM">
                     <Size x="180" y="40"/>
                 </FontString>
+
+                <FontString name="$parentFontAnchorTopOnly" inherits="GameFontNormal" text="TopOnly" justifyH="RIGHT" justifyV="TOP">
+                    <Anchors>
+                        <Anchor point="TOP"/>
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentFontAnchorBottomOnly" inherits="GameFontNormal" text="BottomOnly" justifyH="LEFT" justifyV="BOTTOM">
+                    <Anchors>
+                        <Anchor point="BOTTOM"/>
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentFontAnchorLeftOnly" inherits="GameFontNormal" text="LeftOnly" justifyH="RIGHT" justifyV="TOP">
+                    <Anchors>
+                        <Anchor point="LEFT"/>
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentFontAnchorRightOnly" inherits="GameFontNormal" text="RightOnly" justifyH="LEFT" justifyV="BOTTOM">
+                    <Anchors>
+                        <Anchor point="RIGHT"/>
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentFontAnchorTopLeft" inherits="GameFontNormal" text="TopLeft" justifyH="RIGHT" justifyV="BOTTOM">
+                    <Anchors>
+                        <Anchor point="TOPLEFT"/>
+                    </Anchors>
+                </FontString>
             </Layer>
         </Layers>
         <Frames>
@@ -52,6 +78,42 @@
                     <Layer level="ARTWORK">
                         <FontString parentKey="ButtonText" inherits="GameFontNormal" text="BSized" justifyH="RIGHT" justifyV="BOTTOM">
                             <Size x="100" y="20"/>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Button>
+            <Button name="$parentButtonTextAnchorTopOnly">
+                <Size x="140" y="34"/>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="ButtonText" inherits="GameFontNormal" text="BTopOnly" justifyH="RIGHT" justifyV="TOP">
+                            <Anchors>
+                                <Anchor point="TOP"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Button>
+            <Button name="$parentButtonTextAnchorBottomOnly">
+                <Size x="140" y="34"/>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="ButtonText" inherits="GameFontNormal" text="BBottomOnly" justifyH="LEFT" justifyV="BOTTOM">
+                            <Anchors>
+                                <Anchor point="BOTTOM"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Button>
+            <Button name="$parentButtonTextAnchorLeftOnly">
+                <Size x="140" y="34"/>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="ButtonText" inherits="GameFontNormal" text="BLeftOnly" justifyH="RIGHT" justifyV="TOP">
+                            <Anchors>
+                                <Anchor point="LEFT"/>
+                            </Anchors>
                         </FontString>
                     </Layer>
                 </Layers>

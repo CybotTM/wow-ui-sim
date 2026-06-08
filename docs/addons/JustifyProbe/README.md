@@ -8,6 +8,8 @@ It specifically tests:
 - the implicit `Button.ButtonText` `FontString`;
 - `EditBox:GetFontString()`;
 - direct and button text variants with no `<Size>`, width-only `<Size>`, height-only `<Size>`, and width+height `<Size>` where relevant.
+- explicit vertical-only anchors (`TOP`, `BOTTOM`) to distinguish "no points" from "not horizontally anchored";
+- explicit horizontal anchors (`LEFT`, `RIGHT`, `TOPLEFT`) as controls.
 
 ## Install
 
@@ -57,3 +59,4 @@ Run this in retail, then compare:
 - whether `Button.ButtonText` gets the same default anchor behavior;
 - whether `EditBox:GetFontString()` does not get that default behavior;
 - whether explicit `<Size>` width/height changes anchor generation or only dimensions.
+- whether vertical-only anchors still trigger default horizontal anchoring.
