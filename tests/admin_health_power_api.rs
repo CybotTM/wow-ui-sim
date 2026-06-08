@@ -82,6 +82,53 @@ fn unit_health_percent_ignores_legacy_truthy_curve_argument() {
 }
 
 #[test]
+fn unit_detailed_heal_prediction_populates_calculator() {
+    let env = env();
+    let (
+        return_count,
+        health,
+        health_max,
+        heals,
+        healer_heals,
+        incoming_amount,
+        incoming_from_healer,
+        incoming_from_others,
+        incoming_clamped,
+        has_secret_values,
+    ): (i32, i32, i32, i32, i32, i32, i32, i32, bool, bool) = env
+        .eval(
+            r##"
+            A_Admin.SetPlayerHealth(75000, 200000)
+            local calculator = CreateUnitHealPredictionCalculator()
+            local returnCount = select("#", UnitGetDetailedHealPrediction("player", nil, calculator))
+            local predicted = calculator:GetPredictedValues()
+            local amount, fromHealer, fromOthers, clamped = calculator:GetIncomingHeals()
+            return returnCount,
+                   predicted.health,
+                   predicted.healthMax,
+                   predicted.totalIncomingHeals,
+                   predicted.totalIncomingHealsFromHealer,
+                   amount,
+                   fromHealer,
+                   fromOthers,
+                   clamped,
+                   calculator:HasSecretValues()
+        "##,
+        )
+        .unwrap();
+    assert_eq!(return_count, 0);
+    assert_eq!(health, 75000);
+    assert_eq!(health_max, 200000);
+    assert_eq!(heals, 0);
+    assert_eq!(healer_heals, 0);
+    assert_eq!(incoming_amount, 0);
+    assert_eq!(incoming_from_healer, 0);
+    assert_eq!(incoming_from_others, 0);
+    assert!(!incoming_clamped);
+    assert!(!has_secret_values);
+}
+
+#[test]
 fn test_set_player_health_full() {
     let env = env();
     let (cur, max): (i32, i32) = env

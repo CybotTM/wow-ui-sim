@@ -7,6 +7,8 @@ use crate::lua_api::state_types::SecondaryPowerState;
 use crate::lua_bridge::stack_val;
 use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table as RiluaTable;
+use rilua::{LuaError, RuntimeError};
 use rilua::{LuaResult, Val};
 
 // ── Unit vitals ──────────────────────────────────────────────────────────────
@@ -205,6 +207,54 @@ fn unit_get_total_heal_absorbs(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn unit_get_detailed_heal_prediction(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    let calculator = stack_val(state, 3);
+    let vitals = lookup_unit_vitals(state, &unit);
+    let predicted_values = heal_prediction_values_table(state, &vitals)?;
+    set_calculator_field(state, calculator, "_predictedValues", predicted_values)?;
+    set_calculator_field(state, calculator, "_hasSecretValues", Val::Bool(false))?;
+    Ok(0)
+}
+
+fn heal_prediction_values_table(state: &mut LuaState, vitals: &UnitVitals) -> LuaResult<Val> {
+    let mut table = RiluaTable::new();
+    set_table_number(state, &mut table, "health", vitals.health as f64)?;
+    set_table_number(state, &mut table, "healthMax", vitals.health_max as f64)?;
+    set_table_number(state, &mut table, "totalDamageAbsorbs", 0.0)?;
+    set_table_number(state, &mut table, "totalHealAbsorbs", 0.0)?;
+    set_table_number(state, &mut table, "totalIncomingHeals", 0.0)?;
+    set_table_number(state, &mut table, "totalIncomingHealsFromHealer", 0.0)?;
+    Ok(Val::Table(state.gc.alloc_table(table)))
+}
+
+fn set_table_number(
+    state: &mut LuaState,
+    table: &mut RiluaTable,
+    field: &str,
+    value: f64,
+) -> LuaResult<()> {
+    let key = Val::Str(state.gc.intern_string(field.as_bytes()));
+    table.raw_set(key, Val::Num(value), &state.gc.string_arena)
+}
+
+fn set_calculator_field(
+    state: &mut LuaState,
+    calculator: Val,
+    field: &str,
+    value: Val,
+) -> LuaResult<()> {
+    if !matches!(calculator, Val::Table(_)) {
+        return Err(LuaError::Runtime(RuntimeError {
+            message: "UnitHealPredictionCalculator expected".into(),
+            level: 0,
+            traceback: Vec::new(),
+        }));
+    }
+    let key = Val::Str(state.gc.intern_string(field.as_bytes()));
+    state.settable(calculator, key, value)
+}
+
 // ── Cast info readers ────────────────────────────────────────────────────────
 //
 // CastSpellByID / CastSpellByName are registered from
@@ -296,6 +346,11 @@ pub(super) fn register_spell_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "UnitGetIncomingHeals", unit_get_incoming_heals)?;
     LuaApiMut::register_function(lua, "UnitGetTotalAbsorbs", unit_get_total_absorbs)?;
     LuaApiMut::register_function(lua, "UnitGetTotalHealAbsorbs", unit_get_total_heal_absorbs)?;
+    LuaApiMut::register_function(
+        lua,
+        "UnitGetDetailedHealPrediction",
+        unit_get_detailed_heal_prediction,
+    )?;
     LuaApiMut::register_function(lua, "UnitCastingInfo", unit_casting_info)?;
     LuaApiMut::register_function(lua, "UnitChannelInfo", unit_channel_info)?;
     LuaApiMut::register_function(
