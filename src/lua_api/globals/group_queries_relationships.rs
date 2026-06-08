@@ -98,18 +98,32 @@ pub(super) fn unit_in_other_party(state: &mut LuaState) -> LuaResult<u32> {
 /// `focus`, and visible party tokens. Everything else defaults to false.
 pub(super) fn unit_in_range(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
-    let in_range = {
-        let st = borrow_state(state)?;
-        match unit.as_str() {
-            "player" | "pet" | "vehicle" => true,
-            "target" => st.current_target.is_some(),
-            "focus" => st.current_focus.is_some(),
-            other => visible_party_member(&st, other).is_some(),
-        }
-    };
+    let in_range = unit_is_in_range(state, &unit)?;
     state.push(Val::Bool(in_range));
     state.push(Val::Bool(!unit.is_empty()));
     Ok(2)
+}
+
+/// `CheckInteractDistance(unit, index)` — sim reuses the coarse in-range
+/// model used by `UnitInRange`; distance buckets are not modeled separately.
+pub(super) fn check_interact_distance(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = String::from_stack(state, 1)?;
+    let dist_index = i32::from_stack(state, 2)?;
+    let valid_index = matches!(dist_index, 1..=4);
+    let in_range = valid_index && unit_is_in_range(state, &unit)?;
+    state.push(Val::Bool(in_range));
+    Ok(1)
+}
+
+fn unit_is_in_range(state: &LuaState, unit: &str) -> LuaResult<bool> {
+    let st = borrow_state(state)?;
+    let in_range = match unit {
+        "player" | "pet" | "vehicle" => true,
+        "target" => st.current_target.is_some(),
+        "focus" => st.current_focus.is_some(),
+        other => visible_party_member(&st, other).is_some(),
+    };
+    Ok(in_range)
 }
 
 /// `UnitInBattleground(unit)` — true when the player is currently in an

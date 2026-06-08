@@ -54,6 +54,34 @@ fn test_set_player_health_both_values() {
 }
 
 #[test]
+fn unit_health_percent_uses_player_health_values() {
+    let env = env();
+    let percent: f64 = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerHealth(5000, 20000)
+            return UnitHealthPercent("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(percent, 25.0);
+}
+
+#[test]
+fn unit_health_percent_ignores_legacy_truthy_curve_argument() {
+    let env = env();
+    let percent: f64 = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerHealth(12345, 100000)
+            return UnitHealthPercent("player", true, true)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(percent, 12.345);
+}
+
+#[test]
 fn test_set_player_health_full() {
     let env = env();
     let (cur, max): (i32, i32) = env

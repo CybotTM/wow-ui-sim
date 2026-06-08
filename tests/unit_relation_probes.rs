@@ -89,6 +89,28 @@ fn unit_in_range_false_for_empty_target() {
     assert!(!b);
 }
 
+#[test]
+fn check_interact_distance_true_for_player() {
+    let env = env();
+    let b: bool = env.eval(r#"return CheckInteractDistance("player", 1)"#).unwrap();
+    assert!(b);
+}
+
+#[test]
+fn check_interact_distance_false_for_empty_target() {
+    let env = env();
+    env.state().borrow_mut().current_target = None;
+    let b: bool = env.eval(r#"return CheckInteractDistance("target", 1)"#).unwrap();
+    assert!(!b);
+}
+
+#[test]
+fn check_interact_distance_false_for_invalid_index() {
+    let env = env();
+    let b: bool = env.eval(r#"return CheckInteractDistance("player", 5)"#).unwrap();
+    assert!(!b);
+}
+
 // ── UnitInBattleground ────────────────────────────────────────────────────────
 
 #[test]

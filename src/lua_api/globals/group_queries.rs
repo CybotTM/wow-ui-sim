@@ -76,6 +76,11 @@ fn register_unit_queries(state: &mut LuaState) {
     set_global(state, "UnitInRange", relationships::unit_in_range);
     set_global(
         state,
+        "CheckInteractDistance",
+        relationships::check_interact_distance,
+    );
+    set_global(
+        state,
         "UnitInBattleground",
         relationships::unit_in_battleground,
     );

@@ -106,6 +106,18 @@ fn unit_health_max(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn unit_health_percent(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    let vitals = lookup_unit_vitals(state, &unit);
+    let percent = if vitals.health_max > 0 {
+        (vitals.health as f64 / vitals.health_max as f64) * 100.0
+    } else {
+        0.0
+    };
+    state.push(Val::Num(percent));
+    Ok(1)
+}
+
 fn unit_power(state: &mut LuaState) -> LuaResult<u32> {
     let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
     let vitals = lookup_unit_vitals(state, &unit);
@@ -276,6 +288,7 @@ fn push_cast_info(
 pub(super) fn register_spell_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "UnitHealth", unit_health)?;
     LuaApiMut::register_function(lua, "UnitHealthMax", unit_health_max)?;
+    LuaApiMut::register_function(lua, "UnitHealthPercent", unit_health_percent)?;
     LuaApiMut::register_function(lua, "UnitPower", unit_power)?;
     LuaApiMut::register_function(lua, "UnitPowerMax", unit_power_max)?;
     LuaApiMut::register_function(lua, "UnitPowerBarID", unit_power_bar_id)?;
