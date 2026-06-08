@@ -1,4 +1,4 @@
-## Interface: 110200
+## Interface: 120005
 ## Title: Justify Probe
 ## Notes: Captures default anchor behavior for unanchored justified FontStrings and ButtonText.
 ## Author: Alessio
