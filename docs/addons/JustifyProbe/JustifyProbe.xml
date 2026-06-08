@@ -1,0 +1,71 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Frame name="JustifyProbeFrame" parent="UIParent" hidden="true">
+        <Size x="420" y="360"/>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+        <Layers>
+            <Layer level="ARTWORK">
+                <FontString name="$parentFontLeftTop" inherits="GameFontNormal" text="FLT" justifyH="LEFT" justifyV="TOP"/>
+                <FontString name="$parentFontCenterMiddle" inherits="GameFontNormal" text="FCM" justifyH="CENTER" justifyV="MIDDLE"/>
+                <FontString name="$parentFontRightBottom" inherits="GameFontNormal" text="FRB" justifyH="RIGHT" justifyV="BOTTOM"/>
+
+                <FontString name="$parentFontWidthOnly" inherits="GameFontNormal" text="WidthOnly" justifyH="RIGHT" justifyV="BOTTOM">
+                    <Size x="160"/>
+                </FontString>
+                <FontString name="$parentFontHeightOnly" inherits="GameFontNormal" text="HeightOnly" justifyH="CENTER" justifyV="TOP">
+                    <Size y="36"/>
+                </FontString>
+                <FontString name="$parentFontWidthHeight" inherits="GameFontNormal" text="WidthHeight" justifyH="LEFT" justifyV="BOTTOM">
+                    <Size x="180" y="40"/>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentButtonLeftTop">
+                <Size x="140" y="34"/>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="ButtonText" inherits="GameFontNormal" text="BLT" justifyH="LEFT" justifyV="TOP"/>
+                    </Layer>
+                </Layers>
+            </Button>
+            <Button name="$parentButtonCenterMiddle">
+                <Size x="140" y="34"/>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="ButtonText" inherits="GameFontNormal" text="BCM" justifyH="CENTER" justifyV="MIDDLE"/>
+                    </Layer>
+                </Layers>
+            </Button>
+            <Button name="$parentButtonRightBottom">
+                <Size x="140" y="34"/>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="ButtonText" inherits="GameFontNormal" text="BRB" justifyH="RIGHT" justifyV="BOTTOM"/>
+                    </Layer>
+                </Layers>
+            </Button>
+            <Button name="$parentButtonSizedText">
+                <Size x="140" y="34"/>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="ButtonText" inherits="GameFontNormal" text="BSized" justifyH="RIGHT" justifyV="BOTTOM">
+                            <Size x="100" y="20"/>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Button>
+            <EditBox name="$parentEditBox" autoFocus="false" letters="64">
+                <Size x="180" y="32"/>
+                <FontString inherits="GameFontNormal" text="EditText" justifyH="RIGHT" justifyV="BOTTOM"/>
+            </EditBox>
+            <EditBox name="$parentEditBoxSized" autoFocus="false" letters="64">
+                <Size x="180" y="32"/>
+                <FontString inherits="GameFontNormal" text="EditSized" justifyH="CENTER" justifyV="TOP">
+                    <Size x="120" y="18"/>
+                </FontString>
+            </EditBox>
+        </Frames>
+    </Frame>
+</Ui>

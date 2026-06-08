@@ -1,0 +1,9 @@
+## Interface: 110200
+## Title: Justify Probe
+## Notes: Captures default anchor behavior for unanchored justified FontStrings and ButtonText.
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: JustifyProbeDB
+
+JustifyProbe.xml
+JustifyProbe.lua

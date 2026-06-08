@@ -1,0 +1,59 @@
+# JustifyProbe
+
+JustifyProbe captures live WoW behavior for unanchored justified FontStrings.
+
+It specifically tests:
+
+- direct unanchored `FontString` children in a frame layer;
+- the implicit `Button.ButtonText` `FontString`;
+- `EditBox:GetFontString()`;
+- direct and button text variants with no `<Size>`, width-only `<Size>`, height-only `<Size>`, and width+height `<Size>` where relevant.
+
+## Install
+
+Copy the folder to:
+
+```text
+World of Warcraft/_retail_/Interface/AddOns/JustifyProbe/
+```
+
+## Run
+
+Log in and the addon captures once automatically after `PLAYER_LOGIN`.
+It captures again on `PLAYER_LOGOUT`, so `/reload` or logging out persists the latest probe to SavedVariables.
+
+Manual commands:
+
+```text
+/justifyprobe
+/jprobe
+```
+
+Results are saved to:
+
+```text
+WTF/Account/<ACCOUNT>/SavedVariables/JustifyProbe.lua
+```
+
+The latest run is in:
+
+```lua
+JustifyProbeDB.latest
+```
+
+Historical runs are kept in:
+
+```lua
+JustifyProbeDB.runs
+```
+
+Each probe records object name, `GetNumPoints()`, each `GetPoint(i)`, width, height, `GetJustifyH()`, `GetJustifyV()`, and text.
+
+## Expected Use
+
+Run this in retail, then compare:
+
+- whether unanchored frame-layer FontStrings get a default single anchor from horizontal justification;
+- whether `Button.ButtonText` gets the same default anchor behavior;
+- whether `EditBox:GetFontString()` does not get that default behavior;
+- whether explicit `<Size>` width/height changes anchor generation or only dimensions.
