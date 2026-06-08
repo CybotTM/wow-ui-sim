@@ -69,6 +69,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[editmode-layout]] | 3 frame regressions from EditMode overrides after `__index` ordering fix; fenv workaround |
 | [[editbox-render-text-cache]] | SimCommands search text can disappear from stale `text_stripped` cache or because opaque EditBox child regions render above the internal text/caret emitter |
 | [[explicit-xml-parent-anchors]] | Nested XML frames with `parent="..."` must use that explicit parent for implicit anchors; fixed PaperDoll sidebar tabs anchoring to `PaperDollFrame` instead of `CharacterFrameInsetRight` |
+| [[fontstring-default-anchors]] | Unanchored XML `FontString` layer children pick their implicit anchor from `justifyH` (`LEFT`/`CENTER`/`RIGHT`), while `justifyV` does not affect the default point |
 | [[generated-stubs-audit]] | 6 priority findings in generated_stubs.rs affecting startup/panel-load paths |
 | [[chatframe-scrollbar-anchor-reapply]] | Inherited child anchor reapply used the child name for `$parent...` substitution, pushing `ChatFrame1` scrollbar descendants off-screen |
 | [[crafting-cast-bar]] | `C_TradeSkillUI.CraftRecipe` updated inventory but did not start player casting or fire `UNIT_SPELLCAST_START`, so Blizzard's professions overlay cast bar had no backing spellbar state |

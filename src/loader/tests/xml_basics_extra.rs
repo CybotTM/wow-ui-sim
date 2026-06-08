@@ -150,18 +150,25 @@ fn fontstring_font_attribute_applies_font_object() {
 }
 
 #[test]
-fn layer_fontstring_without_anchors_gets_default_center_point() {
+fn layer_fontstring_without_anchors_uses_justify_h_default_point() {
     let ctx = load_test_xml(
-        "layer-fontstring-default-anchor",
+        "layer-fontstring-justify-h-default-anchor",
         r#"
         <Ui xmlns="http://www.blizzard.com/wow/ui/">
-            <Frame name="DefaultFontStringAnchorParent" parent="UIParent">
-                <Size x="300" y="40"/>
+            <Frame name="DefaultFontStringAnchorParent" parent="UIParent" hidden="true">
+                <Size><AbsDimension x="200" y="100"/></Size>
+                <Anchors><Anchor point="CENTER"/></Anchors>
                 <Layers>
-                    <Layer level="BACKGROUND">
-                        <FontString name="$parentText" inherits="GameFontHighlight" text="Title Text">
-                            <Size x="235" y="20"/>
-                        </FontString>
+                    <Layer level="ARTWORK">
+                        <FontString name="$parentLeftTop"      inherits="GameFontNormal" text="LT" justifyH="LEFT"   justifyV="TOP"/>
+                        <FontString name="$parentLeftMiddle"   inherits="GameFontNormal" text="LM" justifyH="LEFT"   justifyV="MIDDLE"/>
+                        <FontString name="$parentLeftBottom"   inherits="GameFontNormal" text="LB" justifyH="LEFT"   justifyV="BOTTOM"/>
+                        <FontString name="$parentCenterTop"    inherits="GameFontNormal" text="CT" justifyH="CENTER" justifyV="TOP"/>
+                        <FontString name="$parentCenterMiddle" inherits="GameFontNormal" text="CM" justifyH="CENTER" justifyV="MIDDLE"/>
+                        <FontString name="$parentCenterBottom" inherits="GameFontNormal" text="CB" justifyH="CENTER" justifyV="BOTTOM"/>
+                        <FontString name="$parentRightTop"     inherits="GameFontNormal" text="RT" justifyH="RIGHT"  justifyV="TOP"/>
+                        <FontString name="$parentRightMiddle"  inherits="GameFontNormal" text="RM" justifyH="RIGHT"  justifyV="MIDDLE"/>
+                        <FontString name="$parentRightBottom"  inherits="GameFontNormal" text="RB" justifyH="RIGHT"  justifyV="BOTTOM"/>
                     </Layer>
                 </Layers>
             </Frame>
@@ -169,18 +176,39 @@ fn layer_fontstring_without_anchors_gets_default_center_point() {
         "#,
     );
 
-    ctx.assert_lua_true(
+    ctx.assert_lua_str(
         r#"
-        (function()
-            local point, relativeTo, relativePoint, x, y = DefaultFontStringAnchorParentText:GetPoint(1)
-            return point == "CENTER"
-                and relativeTo == DefaultFontStringAnchorParent
-                and relativePoint == "CENTER"
-                and x == 0
-                and y == 0
+        return (function()
+            local cases = {
+                { DefaultFontStringAnchorParentLeftTop, "LEFT" },
+                { DefaultFontStringAnchorParentLeftMiddle, "LEFT" },
+                { DefaultFontStringAnchorParentLeftBottom, "LEFT" },
+                { DefaultFontStringAnchorParentCenterTop, "CENTER" },
+                { DefaultFontStringAnchorParentCenterMiddle, "CENTER" },
+                { DefaultFontStringAnchorParentCenterBottom, "CENTER" },
+                { DefaultFontStringAnchorParentRightTop, "RIGHT" },
+                { DefaultFontStringAnchorParentRightMiddle, "RIGHT" },
+                { DefaultFontStringAnchorParentRightBottom, "RIGHT" },
+            }
+
+            local results = {}
+            for index, case in ipairs(cases) do
+                local region, expected = case[1], case[2]
+                local point, relativeTo, relativePoint, x, y = region:GetPoint(1)
+                results[index] = tostring(
+                    region:GetNumPoints() == 1
+                        and point == expected
+                        and relativeTo == DefaultFontStringAnchorParent
+                        and relativePoint == expected
+                        and x == 0
+                        and y == 0
+                )
+            end
+
+            return table.concat(results, "|")
         end)()
         "#,
-        "XML layer FontStrings without explicit anchors should default to parent center",
+        "true|true|true|true|true|true|true|true|true",
     );
 }
 

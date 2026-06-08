@@ -214,7 +214,18 @@ fn append_fontstring_anchor_code(
             "parent",
         ));
     } else if fontstring.set_all_points != Some(true) {
-        code.push_str("\n        fs:SetPoint(\"CENTER\", parent, \"CENTER\", 0, 0)\n        ");
+        let default_point = default_fontstring_anchor_point(fontstring);
+        code.push_str(&format!(
+            "\n        fs:SetPoint(\"{default_point}\", parent, \"{default_point}\", 0, 0)\n        "
+        ));
+    }
+}
+
+fn default_fontstring_anchor_point(fontstring: &crate::xml::FontStringXml) -> &str {
+    match fontstring.justify_h.as_deref() {
+        Some("LEFT") => "LEFT",
+        Some("RIGHT") => "RIGHT",
+        _ => "CENTER",
     }
 }
 

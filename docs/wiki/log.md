@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-08] investigation | FontString default anchors
+
+Created `investigations/fontstring-default-anchors.md` after real-client testing showed unanchored XML `FontString` layer children use `justifyH` for their implicit anchor point. Updated `index.md` with the new investigation page.
+
 ## [2026-05-28] investigation | action button icon mask coverage
 
 Created `investigations/action-button-icon-mask.md` after tracing vanished main
