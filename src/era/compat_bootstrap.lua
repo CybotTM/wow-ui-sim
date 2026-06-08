@@ -155,7 +155,11 @@ end
 
 if rawget(_G, "CreateForbiddenFrame") == nil then
   function CreateForbiddenFrame(frameType, name, parent, template)
-    return CreateFrame(frameType or "Frame", name, parent, template)
+    local frame = CreateFrame(frameType or "Frame", name, parent, template)
+    if frame and type(frame.SetForbidden) == "function" then
+      frame:SetForbidden(true)
+    end
+    return frame
   end
 end
 

@@ -129,6 +129,21 @@ path = "tests/mists_compat_bootstrap.rs"
 required-features = ["client-mists"]
 
 [[test]]
+name = "mists_forbidden_frames"
+path = "tests/mists_forbidden_frames.rs"
+required-features = ["client-mists"]
+
+[[test]]
+name = "era_compat_bootstrap"
+path = "tests/era_compat_bootstrap.rs"
+required-features = ["client-era"]
+
+[[test]]
+name = "anniversary_compat_bootstrap"
+path = "tests/era_compat_bootstrap.rs"
+required-features = ["client-anniversary"]
+
+[[test]]
 name = "mists_world_map_opacity"
 path = "tests/mists_world_map_opacity.rs"
 required-features = ["client-mists"]

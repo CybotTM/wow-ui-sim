@@ -52,7 +52,7 @@ pub fn enumerate_frames(state: &mut LuaState) -> LuaResult<u32> {
 
     let next_id = {
         let sim = borrow_state(state)?;
-        sim.widgets.next_id_after(after_id)
+        sim.widgets.next_enumerable_id_after(after_id)
     };
 
     if let Some(next_id) = next_id {
@@ -374,5 +374,43 @@ mod tests {
             .expect("EnumerateFrames should be callable");
 
         assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn enumerate_frames_skips_forbidden_frames() {
+        let env = WowLuaEnv::new().expect("env");
+
+        let result: (bool, bool, bool) = env
+            .eval(
+                r#"
+                local forbidden = CreateFrame("Frame", "EnumerateForbiddenProbe", UIParent)
+                forbidden:SetForbidden(true)
+                local visible = CreateFrame("Frame", "EnumerateVisibleProbe", UIParent)
+
+                local sawForbidden = false
+                local sawVisible = false
+                local object = EnumerateFrames()
+                while object do
+                    if object == forbidden then
+                        sawForbidden = true
+                    end
+                    if object == visible then
+                        sawVisible = true
+                    end
+                    object = EnumerateFrames(object)
+                end
+
+                return sawForbidden, sawVisible, forbidden:IsForbidden()
+            "#,
+            )
+            .expect(
+                "EnumerateFrames should skip forbidden frames without invalidating direct handles",
+            );
+
+        assert_eq!(
+            result,
+            (false, true, true),
+            "forbidden frames should remain directly usable but hidden from EnumerateFrames"
+        );
     }
 }

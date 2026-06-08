@@ -387,11 +387,11 @@ impl WidgetRegistry {
         paths.into_iter().collect()
     }
 
-    /// Get the next widget ID after `after_id` in creation order.
-    /// Returns `None` when enumeration is complete.
-    pub fn next_id_after(&self, after_id: u64) -> Option<u64> {
-        let idx = self.ordered_ids.partition_point(|&id| id <= after_id);
-        self.ordered_ids.get(idx).copied()
+    pub fn next_enumerable_id_after(&self, after_id: u64) -> Option<u64> {
+        let ids = &self.ordered_ids[self.ordered_ids.partition_point(|&id| id <= after_id)..];
+        ids.iter()
+            .copied()
+            .find(|id| self.widgets.get(id).is_some_and(|frame| !frame.forbidden))
     }
 
     /// Clear all cached layout rects (e.g. after screen resize).
