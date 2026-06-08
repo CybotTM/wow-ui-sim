@@ -10,6 +10,10 @@ Created `investigations/playerspells-runtime-load.md` after fixing the retail `T
 
 Created `investigations/modelscene-player-actor-stub.md` after Collectionator's transmog recovery helper crashed while calling `GetPlayerActor():SetModelByUnit("player")`. Documented the compatibility boundary: 3D rendering remains intentionally stubbed, but ModelScene actor object methods must exist for addon probes.
 
+## [2026-06-08] update | FontString default anchors
+
+Updated `investigations/fontstring-default-anchors.md` after follow-up retail JustifyProbe data showed XML `ButtonText` uses the same `justifyH` implicit anchor as layer `FontString`, explicit vertical-only anchors suppress the default, and EditBox backing FontStrings remain unanchored even with XML `TextInsets`.
+
 ## [2026-06-08] investigation | FontString default anchors
 
 Created `investigations/fontstring-default-anchors.md` after real-client testing showed unanchored XML `FontString` layer children use `justifyH` for their implicit anchor point. Updated `index.md` with the new investigation page.

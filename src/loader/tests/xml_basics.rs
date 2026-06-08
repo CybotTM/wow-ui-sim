@@ -1,6 +1,8 @@
 use super::*;
 #[path = "xml_basics_extra.rs"]
 mod xml_basics_extra;
+#[path = "xml_text_region_defaults.rs"]
+mod xml_text_region_defaults;
 
 #[test]
 fn test_nested_xml_frame_parent_attribute_overrides_containing_frame() {

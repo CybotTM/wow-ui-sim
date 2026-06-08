@@ -57,7 +57,7 @@ fn install_default_children(
     frame_id: u64,
 ) -> LuaResult<()> {
     if widget_type == WidgetType::EditBox {
-        register_named_child(state, frame_id, "Text", WidgetType::FontString)?;
+        register_named_child(state, frame_id, "Text", WidgetType::FontString, false)?;
         return Ok(());
     }
 
@@ -71,7 +71,7 @@ fn install_default_children(
         ("Text", WidgetType::FontString),
         ("ThumbTexture", WidgetType::Texture),
     ] {
-        register_named_child(state, frame_id, key, child_type)?;
+        register_named_child(state, frame_id, key, child_type, true)?;
     }
     Ok(())
 }
@@ -81,10 +81,13 @@ fn register_named_child(
     parent_id: u64,
     key: &str,
     child_type: WidgetType,
+    anchor_slider_label: bool,
 ) -> LuaResult<u64> {
     let mut child = Frame::new(child_type, None, Some(parent_id));
     child.parent_key = Some(key.to_string());
-    anchor_slider_label_child(&mut child, parent_id, key);
+    if anchor_slider_label {
+        anchor_slider_label_child(&mut child, parent_id, key);
+    }
     let child_id = child.id;
     {
         let mut sim = borrow_state_mut(state)?;

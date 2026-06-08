@@ -1,5 +1,9 @@
 local addonName = ...
 
+local firstFontStringRegion
+local getOrCreateMessageFrame
+local getOrCreateScrollingMessageFrame
+
 local probes = {
     {
         name = "frame-font-left-top",
@@ -131,14 +135,110 @@ local probes = {
         name = "editbox-font",
         kind = "EditBoxFontString",
         object = function()
-            return JustifyProbeFrameEditBoxText
+            return firstFontStringRegion(JustifyProbeFrameEditBox)
+        end,
+        owner = function()
+            return JustifyProbeFrameEditBox
         end,
     },
     {
         name = "editbox-font-sized",
         kind = "EditBoxFontString",
         object = function()
-            return JustifyProbeFrameEditBoxSizedText
+            return firstFontStringRegion(JustifyProbeFrameEditBoxSized)
+        end,
+        owner = function()
+            return JustifyProbeFrameEditBoxSized
+        end,
+    },
+    {
+        name = "editbox-font-inset",
+        kind = "EditBoxFontString",
+        object = function()
+            return firstFontStringRegion(JustifyProbeFrameEditBoxInset)
+        end,
+        owner = function()
+            return JustifyProbeFrameEditBoxInset
+        end,
+    },
+    {
+        name = "messageframe-font",
+        kind = "MessageFrameFontString",
+        object = function()
+            return firstFontStringRegion(getOrCreateMessageFrame(false))
+        end,
+        owner = function()
+            return getOrCreateMessageFrame(false)
+        end,
+    },
+    {
+        name = "messageframe-font-inset",
+        kind = "MessageFrameFontString",
+        object = function()
+            return firstFontStringRegion(getOrCreateMessageFrame(true))
+        end,
+        owner = function()
+            return getOrCreateMessageFrame(true)
+        end,
+    },
+    {
+        name = "messageframe-owner",
+        kind = "MessageFrameOwner",
+        object = function()
+            return getOrCreateMessageFrame(false)
+        end,
+        owner = function()
+            return getOrCreateMessageFrame(false)
+        end,
+    },
+    {
+        name = "messageframe-owner-inset",
+        kind = "MessageFrameOwner",
+        object = function()
+            return getOrCreateMessageFrame(true)
+        end,
+        owner = function()
+            return getOrCreateMessageFrame(true)
+        end,
+    },
+    {
+        name = "scrolling-messageframe-font",
+        kind = "ScrollingMessageFrameFontString",
+        object = function()
+            return firstFontStringRegion(getOrCreateScrollingMessageFrame(false))
+        end,
+        owner = function()
+            return getOrCreateScrollingMessageFrame(false)
+        end,
+    },
+    {
+        name = "scrolling-messageframe-font-inset",
+        kind = "ScrollingMessageFrameFontString",
+        object = function()
+            return firstFontStringRegion(getOrCreateScrollingMessageFrame(true))
+        end,
+        owner = function()
+            return getOrCreateScrollingMessageFrame(true)
+        end,
+    },
+    {
+        name = "scrolling-messageframe-owner",
+        kind = "ScrollingMessageFrameOwner",
+        object = function()
+            return getOrCreateScrollingMessageFrame(false)
+        end,
+        owner = function()
+            return getOrCreateScrollingMessageFrame(false)
+        end,
+    },
+    {
+        name = "scrolling-messageframe-owner-inset",
+        kind = "ScrollingMessageFrameOwner",
+        object = function()
+            return getOrCreateScrollingMessageFrame(true)
+        end,
+        owner = function()
+            return getOrCreateScrollingMessageFrame(true)
         end,
     },
 }
@@ -156,6 +256,127 @@ local function call(method, object, ...)
         return false
     end
     return pcall(object[method], object, ...)
+end
+
+local function captureTextInsets(object)
+    local ok, left, right, top, bottom = call("GetTextInsets", object)
+    if not ok then
+        return nil
+    end
+    return {
+        left = left,
+        right = right,
+        top = top,
+        bottom = bottom,
+    }
+end
+
+local function captureOwner(object)
+    if not object then
+        return nil
+    end
+
+    local okName, objectName = call("GetName", object)
+    local okType, objectType = call("GetObjectType", object)
+    local okRegions, regions = pcall(function()
+        return { object:GetRegions() }
+    end)
+
+    local regionTypes = {}
+    if okRegions and type(regions) == "table" then
+        for index, region in ipairs(regions) do
+            local okRegionType, regionType = call("GetObjectType", region)
+            regionTypes[index] = okRegionType and regionType or type(region)
+        end
+    end
+
+    return {
+        objectName = okName and objectName or nil,
+        objectType = okType and objectType or nil,
+        textInsets = captureTextInsets(object),
+        regionTypes = regionTypes,
+    }
+end
+
+firstFontStringRegion = function(owner)
+    if not owner then
+        return nil
+    end
+
+    local ok, regions = pcall(function()
+        return { owner:GetRegions() }
+    end)
+    if not ok or type(regions) ~= "table" then
+        return nil
+    end
+
+    for _, region in ipairs(regions) do
+        local okType, objectType = call("GetObjectType", region)
+        if okType and objectType == "FontString" then
+            return region
+        end
+        if type(region) == "table" and type(region.GetText) == "function" and type(region.GetNumPoints) == "function" then
+            return region
+        end
+    end
+
+    return nil
+end
+
+getOrCreateMessageFrame = function(withInsets)
+    local name = withInsets and "JustifyProbeLuaMessageFrameInset" or "JustifyProbeLuaMessageFrame"
+    local frame = _G[name]
+    if not frame then
+        frame = CreateFrame("MessageFrame", name, JustifyProbeFrame)
+        frame:SetSize(180, 32)
+        if frame.SetFontObject then
+            frame:SetFontObject(GameFontNormal)
+        end
+        if frame.SetJustifyH then
+            frame:SetJustifyH("RIGHT")
+        end
+        if frame.SetJustifyV then
+            frame:SetJustifyV("BOTTOM")
+        end
+        if withInsets and frame.SetTextInsets then
+            frame:SetTextInsets(7, 11, 13, 17)
+        end
+    end
+    if frame.Clear then
+        frame:Clear()
+    end
+    if frame.AddMessage then
+        frame:AddMessage(withInsets and "MessageInset" or "MessageText")
+    end
+    return frame
+end
+
+getOrCreateScrollingMessageFrame = function(withInsets)
+    local name = withInsets and "JustifyProbeLuaScrollingMessageFrameInset" or "JustifyProbeLuaScrollingMessageFrame"
+    local frame = _G[name]
+    if not frame then
+        frame = CreateFrame("ScrollingMessageFrame", name, JustifyProbeFrame)
+        frame:SetSize(180, 32)
+        if frame.SetFontObject then
+            frame:SetFontObject(GameFontNormal)
+        end
+        if frame.SetJustifyH then
+            frame:SetJustifyH("RIGHT")
+        end
+        if frame.SetJustifyV then
+            frame:SetJustifyV("BOTTOM")
+        end
+        if withInsets and frame.SetTextInsets then
+            frame:SetTextInsets(7, 11, 13, 17)
+        end
+    end
+    if frame.Clear then
+        frame:Clear()
+    end
+    if frame.AddMessage then
+        frame:AddMessage(withInsets and "ScrollingInset" or "ScrollingText")
+    end
+    return frame
 end
 
 local function capturePoint(object, index)
@@ -180,11 +401,13 @@ end
 
 local function captureObject(probe)
     local object = probe.object()
+    local owner = probe.owner and probe.owner() or nil
     if not object then
         return {
             name = probe.name,
             kind = probe.kind,
             missing = true,
+            owner = captureOwner(owner),
         }
     end
 
@@ -195,6 +418,7 @@ local function captureObject(probe)
     local okJustifyH, justifyH = call("GetJustifyH", object)
     local okJustifyV, justifyV = call("GetJustifyV", object)
     local okText, text = call("GetText", object)
+    local okObjectType, objectType = call("GetObjectType", object)
 
     local points = {}
     if okNumPoints and type(numPoints) == "number" then
@@ -207,6 +431,7 @@ local function captureObject(probe)
         name = probe.name,
         kind = probe.kind,
         objectName = okName and objectName or nil,
+        objectType = okObjectType and objectType or nil,
         numPoints = okNumPoints and numPoints or nil,
         points = points,
         width = okWidth and width or nil,
@@ -214,6 +439,8 @@ local function captureObject(probe)
         justifyH = okJustifyH and justifyH or nil,
         justifyV = okJustifyV and justifyV or nil,
         text = okText and text or nil,
+        textInsets = captureTextInsets(object),
+        owner = captureOwner(owner),
     }
 end
 
@@ -231,7 +458,16 @@ local function capture()
     }
 
     for index, probe in ipairs(probes) do
-        run.probes[index] = captureObject(probe)
+        local ok, result = pcall(captureObject, probe)
+        if ok then
+            run.probes[index] = result
+        else
+            run.probes[index] = {
+                name = probe.name,
+                kind = probe.kind,
+                error = tostring(result),
+            }
+        end
     end
 
     db.latest = run

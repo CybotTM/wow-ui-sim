@@ -561,6 +561,15 @@ pub fn apply_xml_hit_rect_insets(state: &Rc<RefCell<SimState>>, frame_id: u64, f
     }
 }
 
+/// Apply text insets from instance XML.
+pub fn apply_xml_text_insets(state: &Rc<RefCell<SimState>>, frame_id: u64, frame: &FrameXml) {
+    if let Some(insets) = frame.text_insets()
+        && let Some(frame) = state.borrow_mut().widgets.get_mut_visual(frame_id)
+    {
+        frame.editbox_text_insets = (insets.left(), insets.right(), insets.top(), insets.bottom());
+    }
+}
+
 /// Resolve and apply clampedToScreen from template chain + instance XML.
 pub fn apply_xml_clamped_to_screen(
     state: &Rc<RefCell<SimState>>,

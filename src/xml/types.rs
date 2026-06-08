@@ -299,6 +299,14 @@ impl FrameXml {
         })
     }
 
+    /// Get the TextInsets element if present.
+    pub fn text_insets(&self) -> Option<&InsetsXml> {
+        self.children.iter().find_map(|c| match c {
+            FrameChildElement::TextInsets(i) => Some(i),
+            _ => None,
+        })
+    }
+
     /// Get the BarTexture element if present (StatusBar-specific).
     pub fn bar_texture(&self) -> Option<&TextureXml> {
         self.children.iter().find_map(|c| match c {

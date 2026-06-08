@@ -312,24 +312,6 @@ fn resolve_button_text_child<'a>(
         .find_map(|entry| entry.frame.button_text().cloned())
 }
 
-fn apply_button_text_default_anchor(button_text: &mut crate::xml::FontStringXml) {
-    if button_text.anchors.is_some() || button_text.set_all_points == Some(true) {
-        return;
-    }
-
-    button_text.anchors = Some(crate::xml::AnchorsXml {
-        anchors: vec![crate::xml::AnchorXml {
-            point: Some("CENTER".to_string()),
-            relative_to: None,
-            relative_key: None,
-            relative_point: None,
-            x: None,
-            y: None,
-            offset: None,
-        }],
-    });
-}
-
 /// Generate Lua code to set text on a button and its Text fontstring child.
 fn generate_set_text_code(button_name: &str, text_key: &str) -> String {
     format!(
@@ -452,7 +434,6 @@ pub fn apply_button_text(
         if button_text.parent_key.is_none() {
             button_text.parent_key = Some("Text".to_string());
         }
-        apply_button_text_default_anchor(&mut button_text);
         super::xml_fontstring::create_fontstring_from_xml(
             env,
             &button_text,
