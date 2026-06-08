@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-08] investigation | PlayerSpells runtime load
+
+Created `investigations/playerspells-runtime-load.md` after fixing the retail `TOGGLETALENTS` keybind path. The note records the `C_AddOns.LoadAddOn` call-frame preservation issue plus the temporary PlayerSpells ModelScene/PvP talent backfills needed for `Blizzard_PlayerSpells` demand-load.
+
 ## [2026-06-08] investigation | ModelScene player actor stub
 
 Created `investigations/modelscene-player-actor-stub.md` after Collectionator's transmog recovery helper crashed while calling `GetPlayerActor():SetModelByUnit("player")`. Documented the compatibility boundary: 3D rendering remains intentionally stubbed, but ModelScene actor object methods must exist for addon probes.

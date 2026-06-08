@@ -26,13 +26,12 @@ if rawget(C_SpecializationInfo, "GetPvpTalentSlotInfo") == nil then
             return nil
         end
 
-        return {
-            enabled = true,
-            locked = false,
-            selectedTalentID = 0,
-            slotIndex = slotIndex,
-            availableTalentIDs = {},
-        }
+            return {
+                enabled = true,
+                locked = false,
+                slotIndex = slotIndex,
+                availableTalentIDs = {},
+            }
     end
 end
 
@@ -104,6 +103,10 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
+pub(crate) fn patch_loader(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(PVP_TALENT_DEFAULTS_LUA);
+}
+
 #[cfg(test)]
 mod tests {
     use crate::lua_api::WowLuaEnv;
@@ -112,7 +115,7 @@ mod tests {
     fn installs_pvp_talent_default_shapes() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
-        let result: (bool, bool, i32, i32, i32, i32, String, bool, bool, bool) = env
+        let result: (bool, bool, bool, i32, i32, i32, String, bool, bool, bool) = env
             .eval(
                 r#"
                 local slot = C_SpecializationInfo.GetPvpTalentSlotInfo(2)
@@ -121,7 +124,7 @@ mod tests {
                 local setResult = C_SpecializationInfo.SetPvpTalentLocked(123, true)
                 return slot.enabled,
                        slot.locked,
-                       slot.selectedTalentID,
+                       slot.selectedTalentID == nil,
                        slot.slotIndex,
                        #slot.availableTalentIDs,
                        C_SpecializationInfo.GetPvpTalentSlotUnlockLevel(2),
@@ -138,7 +141,7 @@ mod tests {
             (
                 true,
                 false,
-                0,
+                true,
                 2,
                 0,
                 30,

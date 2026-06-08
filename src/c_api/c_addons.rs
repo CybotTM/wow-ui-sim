@@ -548,7 +548,14 @@ pub fn c_addons_load_addon(state: &mut LuaState) -> LuaResult<u32> {
     if addon_is_disabled(state, &addon_name) {
         return push_load_result(state, false, Some("DISABLED"));
     }
-    match c_addons_runtime::load_runtime_addon(state, &addon_name) {
+    let saved_top = state.top;
+    let saved_base = state.base;
+    let saved_ci = state.ci;
+    let result = c_addons_runtime::load_runtime_addon(state, &addon_name);
+    state.top = saved_top;
+    state.base = saved_base;
+    state.ci = saved_ci;
+    match result {
         Ok(()) => push_load_result(state, true, None),
         Err(error) => push_load_result(state, false, Some(&error.to_string())),
     }

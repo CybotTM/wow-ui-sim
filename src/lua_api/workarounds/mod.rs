@@ -541,6 +541,9 @@ fn patch_runtime_core_addon_surfaces(env: &crate::lua_api::LoaderEnv<'_>, addon_
     ) {
         temporary::talent_edge_frame_level_sync::patch_loader(env);
     }
+    if addon_name == "Blizzard_PlayerSpells" {
+        temporary::pvp_talent_defaults::patch_loader(env);
+    }
     if addon_name == "Blizzard_FrameXMLUtil" {
         temporary::quest_objective_defaults::patch_loader(env);
     }

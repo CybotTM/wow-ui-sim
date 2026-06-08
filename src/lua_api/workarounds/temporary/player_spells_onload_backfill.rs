@@ -40,15 +40,19 @@ for key, value in pairs(spellBookCategories) do
     end
 end
 
-local function load_player_spells_frame()
-    if not PlayerSpellsFrame
-        and type(C_AddOns) == "table"
-        and type(C_AddOns.IsAddOnLoaded) == "function"
-        and type(C_AddOns.LoadAddOn) == "function"
-        and not C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells")
-    then
-        C_AddOns.LoadAddOn("Blizzard_PlayerSpells")
+if type(PlayerSpellsFrame_LoadUI) ~= "function" then
+    function PlayerSpellsFrame_LoadUI()
+        if type(C_AddOns) == "table" and type(C_AddOns.LoadAddOn) == "function" then
+            return C_AddOns.LoadAddOn("Blizzard_PlayerSpells")
+        end
+        if type(UIParentLoadAddOn) == "function" then
+            return UIParentLoadAddOn("Blizzard_PlayerSpells")
+        end
+        return nil
     end
+end
+
+local function load_player_spells_frame()
     if not PlayerSpellsFrame and type(PlayerSpellsFrame_LoadUI) == "function" then
         PlayerSpellsFrame_LoadUI()
     end
@@ -148,9 +152,43 @@ local function backfill_onload(frame, needs_init)
         frame:OnLoad()
         return
     end
-    local handler = frame.GetScript and frame:GetScript("OnLoad")
+    local handler = nil
+    if type(frame.GetScript) == "function" then
+        handler = frame:GetScript("OnLoad")
+    end
     if type(handler) == "function" then
         handler(frame)
+    end
+end
+
+local function backfill_pvp_talent_slot_setup(frame)
+    if not frame then
+        return
+    end
+
+    if type(frame.ReleaseAllCameras) == "function" and type(frame.cameras) ~= "table" then
+        if type(frame.OnLoad) == "function" then
+            frame:OnLoad()
+        else
+            frame.cameras = {}
+            frame.tagToCamera = {}
+            frame.tagToActor = {}
+        end
+    end
+
+    if type(frame.Slots) == "table" then
+        for slotIndex, slot in ipairs(frame.Slots) do
+            if slot and slot.slotIndex == nil and type(slot.SetUp) == "function" then
+                slot:SetUp(slotIndex)
+            end
+        end
+    end
+
+    if type(frame.GetChildren) == "function" then
+        local children = { frame:GetChildren() }
+        for _, child in ipairs(children) do
+            backfill_pvp_talent_slot_setup(child)
+        end
     end
 end
 
@@ -169,6 +207,7 @@ local function backfill_playerspells_tab(frame_tab)
             PlayerSpellsFrame.TalentsFrame,
             PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame.initialBasePanOffsetX == nil
         )
+        backfill_pvp_talent_slot_setup(PlayerSpellsFrame.TalentsFrame)
     elseif frame_tab == PlayerSpellsUtil.FrameTabs.SpellBook then
         backfill_onload(
             PlayerSpellsFrame.SpellBookFrame,
@@ -178,6 +217,13 @@ local function backfill_playerspells_tab(frame_tab)
 end
 
 if PlayerSpellsFrame then
+    if type(PlayerSpellsFrame.IsInspecting) ~= "function"
+        and type(PlayerSpellsFrameMixin) == "table"
+        and type(Mixin) == "function"
+    then
+        Mixin(PlayerSpellsFrame, PlayerSpellsFrameMixin)
+    end
+
     backfill_onload(PlayerSpellsFrame, PlayerSpellsFrame.internalTabTracker == nil)
     if not __wow_uisim_playerspells_backfill_wrapped then
         __wow_uisim_playerspells_backfill_wrapped = true
@@ -245,6 +291,7 @@ mod tests {
                 if type(PlayerSpellsUtil.GetCurrentTabID) ~= "function" then return "current_tab" end
                 if type(PlayerSpellsUtil.ToggleClassTalentFrame) ~= "function" then return "talent_toggle" end
                 if type(PlayerSpellsUtil.OpenToSpellBookTabAtSpell) ~= "function" then return "spell_at" end
+                if type(PlayerSpellsFrame_LoadUI) ~= "function" then return "load_ui" end
                 if type(TogglePlayerSpellsFrame) ~= "function" then return "global_toggle" end
                 return "ok"
                 "#,
