@@ -6,7 +6,7 @@ It specifically tests:
 
 - direct unanchored `FontString` children in a frame layer;
 - the implicit `Button.ButtonText` `FontString`;
-- `EditBox:GetFontString()`;
+- named FontString elements inside EditBox definitions;
 - direct and button text variants with no `<Size>`, width-only `<Size>`, height-only `<Size>`, and width+height `<Size>` where relevant.
 - explicit vertical-only anchors (`TOP`, `BOTTOM`) to distinguish "no points" from "not horizontally anchored";
 - explicit horizontal anchors (`LEFT`, `RIGHT`, `TOPLEFT`) as controls.
@@ -57,6 +57,6 @@ Run this in retail, then compare:
 
 - whether unanchored frame-layer FontStrings get a default single anchor from horizontal justification;
 - whether `Button.ButtonText` gets the same default anchor behavior;
-- whether `EditBox:GetFontString()` does not get that default behavior;
+- whether EditBox FontString children do not get that default behavior;
 - whether explicit `<Size>` width/height changes anchor generation or only dimensions.
 - whether vertical-only anchors still trigger default horizontal anchoring.

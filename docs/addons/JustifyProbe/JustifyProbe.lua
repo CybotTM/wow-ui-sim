@@ -131,14 +131,14 @@ local probes = {
         name = "editbox-font",
         kind = "EditBoxFontString",
         object = function()
-            return JustifyProbeFrameEditBox and JustifyProbeFrameEditBox:GetFontString()
+            return JustifyProbeFrameEditBoxText
         end,
     },
     {
         name = "editbox-font-sized",
         kind = "EditBoxFontString",
         object = function()
-            return JustifyProbeFrameEditBoxSized and JustifyProbeFrameEditBoxSized:GetFontString()
+            return JustifyProbeFrameEditBoxSizedText
         end,
     },
 }

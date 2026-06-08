@@ -120,11 +120,11 @@
             </Button>
             <EditBox name="$parentEditBox" autoFocus="false" letters="64">
                 <Size x="180" y="32"/>
-                <FontString inherits="GameFontNormal" text="EditText" justifyH="RIGHT" justifyV="BOTTOM"/>
+                <FontString name="$parentEditBoxText" inherits="GameFontNormal" text="EditText" justifyH="RIGHT" justifyV="BOTTOM"/>
             </EditBox>
             <EditBox name="$parentEditBoxSized" autoFocus="false" letters="64">
                 <Size x="180" y="32"/>
-                <FontString inherits="GameFontNormal" text="EditSized" justifyH="CENTER" justifyV="TOP">
+                <FontString name="$parentEditBoxSizedText" inherits="GameFontNormal" text="EditSized" justifyH="CENTER" justifyV="TOP">
                     <Size x="120" y="18"/>
                 </FontString>
             </EditBox>
