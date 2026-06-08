@@ -303,6 +303,19 @@ fn init_and_load(
             saved_vars.as_ref().or(edit_mode_cache_vars.as_ref()),
         )
     });
+    startup_trace::time_load_step("load ServerSnapshot action bars", || {
+        if let Some(saved_vars) = saved_vars.as_mut() {
+            match wow_ui_sim::server_snapshot_import::load_from_saved_variables(&env, saved_vars) {
+                Ok(imported) if imported > 0 => logging::println_elapsed(&format!(
+                    "ServerSnapshot imported {imported} action bar spell slot(s)"
+                )),
+                Ok(_) => {}
+                Err(error) => logging::println_elapsed(&format!(
+                    "ServerSnapshot action bar import failed: {error}"
+                )),
+            }
+        }
+    });
     startup_trace::time_load_step("load Blizzard addons", || {
         addon_loading::load_blizzard_addons(&env, &mut saved_vars, screen)
     });

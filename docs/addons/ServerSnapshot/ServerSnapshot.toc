@@ -1,0 +1,8 @@
+## Interface: 110200
+## Title: Server Snapshot
+## Notes: Saves server-backed character UI state such as action bars into SavedVariables.
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: ServerSnapshotDB
+
+ServerSnapshot.lua

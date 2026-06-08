@@ -1129,6 +1129,10 @@ Updated `investigations/appearances-wardrobe-api.md` with the follow-up Wardrobe
 
 ## [2026-05-18] investigation | ElvUI tooltip scale clipping
 
+## [2026-06-08] ingest | ServerSnapshot action bar import
+
+Created `systems/server-snapshot-action-bars.md` after adding startup import for action-bar spell slots captured by the ServerSnapshot addon. Updated `index.md` with the new systems page.
+
 Updated `investigations/tooltip-double-shell.md` with the follow-up ElvUI tooltip clipping root cause. Tooltip frame bounds were scaled by ElvUI effective scale, but internal `GameTooltip` glyph emission was not; tooltip text now scales font size, line spacing, and text insets with the frame effective scale.
 
 Updated `investigations/appearances-wardrobe-api.md` with the Wardrobe class dropdown casing/color contract and the `C_TransmogSets.GetBaseSets()` nil fallback stack overflow. Documented that class display names come from localized `className`, colors from uppercase `classFile`, and empty set surfaces must return tables.

@@ -75,6 +75,7 @@ pub mod render;
 pub mod saved_variables;
 pub mod screen;
 pub mod self_test;
+pub mod server_snapshot_import;
 pub mod sound;
 #[path = "../data/spec_display_spells.rs"]
 pub mod spec_display_spells;
