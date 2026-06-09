@@ -370,6 +370,30 @@ fn test_frame_identity_slots_dispatch_surrogate_methods() {
 }
 
 #[test]
+fn test_frame_identity_slot_can_redirect_method_receiver() {
+    let env = env();
+    let (a_before, b_protected, redirected): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local a = CreateFrame("Frame", "IdentityRedirectA", UIParent)
+            local b = CreateFrame("Frame", "IdentityRedirectB", UIParent)
+            A_Admin.SetFrameProtected("IdentityRedirectB", true)
+            local aBefore = a:IsProtected()
+            local bProtected = b:IsProtected()
+
+            a[0] = b[0]
+
+            return aBefore, bProtected, a:IsProtected()
+            "#,
+        )
+        .unwrap();
+
+    assert!(!a_before);
+    assert!(b_protected);
+    assert!(redirected, "methods should dispatch through the frame[0] token");
+}
+
+#[test]
 fn test_execute_attribute_calls_function_attribute_and_returns_success_tuple() {
     let env = env();
     let (success, first, second, called): (bool, String, i64, bool) = env

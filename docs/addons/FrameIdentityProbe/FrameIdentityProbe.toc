@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: Frame Identity Probe
+## Notes: Captures real-client frame[0] dispatch behavior
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: FrameIdentityProbeDB
+
+FrameIdentityProbe.lua

@@ -42,15 +42,13 @@ fn frame_id_from_val(state: &LuaState, val: Val) -> LuaResult<u64> {
     let Some(table) = state.gc.tables.get(table_ref) else {
         return Err(runtime_error("expected frame-backed table"));
     };
-    if let Some(backing) = table.backing() {
+    if let Some(backing) = frame_identity_backing(state, table).or_else(|| table.backing()) {
         return Ok((backing.0 as u64) | ((backing.1 as u64) << 32));
     }
-    let backing = frame_surrogate_backing(state, table)
-        .ok_or_else(|| runtime_error("expected frame-backed table"))?;
-    Ok((backing.0 as u64) | ((backing.1 as u64) << 32))
+    Err(runtime_error("expected frame-backed table"))
 }
 
-fn frame_surrogate_backing(state: &LuaState, table: &Table) -> Option<(u32, u32)> {
+fn frame_identity_backing(state: &LuaState, table: &Table) -> Option<(u32, u32)> {
     let Val::Table(identity_ref) = table.get_int(0) else {
         return None;
     };
