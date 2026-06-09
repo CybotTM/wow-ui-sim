@@ -51,14 +51,14 @@ fn frame_id_from_val(state: &LuaState, val: Val) -> LuaResult<u64> {
 }
 
 fn frame_surrogate_backing(state: &LuaState, table: &Table) -> Option<(u32, u32)> {
-    let Val::Table(real_frame_ref) = table.get_int(1) else {
+    let Val::Table(identity_ref) = table.get_int(0) else {
         return None;
     };
     state
         .gc
         .tables
-        .get(real_frame_ref)
-        .and_then(|real_frame| real_frame.backing())
+        .get(identity_ref)
+        .and_then(|identity| identity.backing())
 }
 
 /// Borrow `SimState` immutably from rilua's app_data.

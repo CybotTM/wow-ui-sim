@@ -116,8 +116,19 @@ fn table_collected_error() -> LuaError {
 /// Pre-sizes hash part to 64 slots for typical frame properties/children.
 /// Methods are accessed via metatable __index, not stored directly.
 pub fn create_frame_table(state: &mut LuaState, index: u32, generation: u32) -> GcRef<RiluaTable> {
+    let mut identity = RiluaTable::with_sizes(0, 0);
+    identity.set_backing(Some((index, generation)));
+    let identity_ref = state.gc.alloc_table(identity);
+
     let mut table = RiluaTable::with_sizes(0, 64);
     table.set_backing(Some((index, generation)));
+    table
+        .raw_set(
+            Val::Num(0.0),
+            Val::Table(identity_ref),
+            &state.gc.string_arena,
+        )
+        .expect("numeric frame identity slot should be settable");
     state.gc.alloc_table(table)
 }
 

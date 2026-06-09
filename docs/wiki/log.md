@@ -1131,6 +1131,10 @@ Created `investigations/dialog-background-dxt3-stripes.md` to document the escap
 
 Updated `investigations/editmode-layout.md` with the Mists 5.5.4 action-bar root cause: default managed action bars can remain at Blizzard's temporary `TOPLEFT UIParent` anchor when the manual EditMode layout pass aborts before clearing `layoutApplyInProgress`. Documented the Rust-side finalizer that clears the guard and replays `UpdateActionBarPositions()`, the modeled `UnitIsCivilian` fallback for Classic TargetFrame, and the ObjectiveTracker phantom duplicate root cause: bundled-addon startup exposed legacy `WatchFrame` alongside modern `ObjectiveTrackerFrame`.
 
+## [2026-06-09] investigation | frame surrogate identity slot
+
+Created `investigations/frame-surrogate-identity-slot.md` after replacing the simulator-only frame surrogate `[1]` dispatch path with a `[0]` identity token model. Updated `index.md` with the new investigation page.
+
 ## [2026-05-01] ingest | editbox render text cache investigation
 
 Created `investigations/editbox-render-text-cache.md` to document the SimCommands search-box input bug: keyboard input updated `Frame.text` but left `text_stripped` stale after `SetText("")`, causing glyph rendering to shape an empty string. Updated `index.md` with the new investigation page.

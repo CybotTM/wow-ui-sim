@@ -338,6 +338,38 @@ fn test_protect_only_sets_protected_for_secure_callers() {
 }
 
 #[test]
+fn test_frame_identity_slots_dispatch_surrogate_methods() {
+    let env = env();
+    let (has_identity, zero_name, zero_protected, legacy_success): (bool, String, bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "IdentitySlotFrame", UIParent)
+            A_Admin.SetFrameProtected("IdentitySlotFrame", true)
+
+            local zeroSlotSurrogate = { [0] = frame[0] }
+            setmetatable(zeroSlotSurrogate, getmetatable(frame))
+
+            local oneSlotSurrogate = { [1] = frame }
+            setmetatable(oneSlotSurrogate, getmetatable(frame))
+            local legacySuccess = pcall(function()
+                return oneSlotSurrogate:GetName()
+            end)
+
+            return frame[0] ~= nil,
+                zeroSlotSurrogate:GetName(),
+                zeroSlotSurrogate:IsProtected(),
+                legacySuccess
+            "#,
+        )
+        .unwrap();
+
+    assert!(has_identity, "frame[0] should expose a dispatch identity token");
+    assert_eq!(zero_name, "IdentitySlotFrame");
+    assert!(zero_protected);
+    assert!(!legacy_success, "[1]-only surrogates should not dispatch");
+}
+
+#[test]
 fn test_execute_attribute_calls_function_attribute_and_returns_success_tuple() {
     let env = env();
     let (success, first, second, called): (bool, String, i64, bool) = env
