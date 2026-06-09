@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: Anim Script Probe
+## Notes: Probes which script handlers the engine accepts on animations
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: AnimScriptProbeDB
+
+AnimScriptProbe.lua

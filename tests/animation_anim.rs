@@ -253,16 +253,64 @@ fn animation_pause_uses_group_pause_state() {
 #[test]
 fn animation_set_has_script() {
     let env = setup();
+    // HasScript reports type-support, not binding-presence (matches live client):
+    // OnFinished is supported on an Alpha animation whether or not a handler is set.
     env.exec(
         r#"
         local f = CreateFrame("Frame", "TestAnimScript", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
-        assert(anim:HasScript("OnFinished") == false)
+        assert(anim:HasScript("OnFinished") == true)
         anim:SetScript("OnFinished", function() end)
         assert(anim:HasScript("OnFinished") == true)
+        assert(anim:GetScript("OnFinished") ~= nil)
         anim:SetScript("OnFinished", nil)
-        assert(anim:HasScript("OnFinished") == false)
+        assert(anim:HasScript("OnFinished") == true)
+        assert(anim:GetScript("OnFinished") == nil)
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn animation_script_support_matches_real_client() {
+    let env = setup();
+    // Ground truth captured from build 12.0.5.67823 via docs/addons/AnimScriptProbe.
+    // Animation subtypes support {OnLoad, OnUpdate, OnPlay, OnPause, OnStop,
+    // OnFinished}; AnimationGroup adds OnLoop. Neither supports OnEvent or the
+    // frame-style handlers (OnShow/OnHide/OnEnter/OnLeave).
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestAnimMatrix", UIParent)
+        local ag = f:CreateAnimationGroup()
+        local anim = ag:CreateAnimation("Alpha")
+
+        local supported = { "OnLoad", "OnUpdate", "OnPlay", "OnPause", "OnStop", "OnFinished" }
+        local rejected = { "OnEvent", "OnShow", "OnHide", "OnEnter", "OnLeave" }
+
+        for _, h in ipairs(supported) do
+            assert(anim:HasScript(h) == true, "Animation should support " .. h)
+            assert(ag:HasScript(h) == true, "AnimationGroup should support " .. h)
+        end
+        for _, h in ipairs(rejected) do
+            assert(anim:HasScript(h) == false, "Animation should reject " .. h)
+            assert(ag:HasScript(h) == false, "AnimationGroup should reject " .. h)
+        end
+
+        -- OnLoop: group only.
+        assert(ag:HasScript("OnLoop") == true, "AnimationGroup should support OnLoop")
+        assert(anim:HasScript("OnLoop") == false, "Animation should reject OnLoop")
+
+        -- SetScript must error on a rejected handler (engine raises).
+        assert(pcall(anim.SetScript, anim, "OnEvent", function() end) == false,
+            "Animation SetScript(OnEvent) should error")
+        assert(pcall(ag.SetScript, ag, "OnEvent", function() end) == false,
+            "AnimationGroup SetScript(OnEvent) should error")
+
+        -- Frame is the inverse: frame handlers yes, animation handlers no.
+        assert(f:HasScript("OnEvent") == true, "Frame should support OnEvent")
+        assert(f:HasScript("OnPlay") == false, "Frame should reject OnPlay")
+        assert(f:HasScript("OnLoop") == false, "Frame should reject OnLoop")
     "#,
     )
     .unwrap();

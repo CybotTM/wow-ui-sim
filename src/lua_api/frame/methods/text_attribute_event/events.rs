@@ -244,12 +244,11 @@ pub(super) fn has_script(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let handler_name = val_to_string(state, stack_val(state, 2))
         .ok_or_else(|| runtime_error("HasScript: handler name required"))?;
-    let binding = optional_script_binding_from_stack(state, 3)?;
-    let has_script = if is_animation_script_container(state, frame_id) {
-        get_rilua_script_binding(state, frame_id, &handler_name, binding).is_some()
-    } else {
-        script_supported(state, frame_id, &handler_name)
-    };
+    // HasScript reports whether the object *type* supports the handler, not
+    // whether a handler is currently bound (use GetScript for that). This
+    // matches the live client, including animations — e.g.
+    // `Alpha:HasScript("OnFinished")` is always true regardless of binding.
+    let has_script = script_supported(state, frame_id, &handler_name);
     state.push(Val::Bool(has_script));
     Ok(1)
 }
@@ -302,8 +301,53 @@ fn script_supported_for_widget(
     object_type_name: Option<&str>,
     handler_name: &str,
 ) -> bool {
+    // Animation objects support only their own handler set — they do NOT share
+    // the frame-style common handlers (OnEvent, OnShow, OnEnter, ...). Real
+    // client (12.0.5) rejects those on animations and animation groups.
+    if let Some(name) = object_type_name {
+        if is_animation_group_object_type(name) {
+            return is_animation_group_script_handler(handler_name);
+        }
+        if is_animation_object_type(name) {
+            return is_animation_script_handler(handler_name);
+        }
+    }
     is_widget_agnostic_script_handler(handler_name)
         || is_widget_specific_script_handler(widget_type, object_type_name, handler_name)
+}
+
+fn is_animation_group_object_type(object_type_name: &str) -> bool {
+    object_type_name == "AnimationGroup"
+}
+
+fn is_animation_object_type(object_type_name: &str) -> bool {
+    matches!(
+        object_type_name,
+        "Alpha"
+            | "Translation"
+            | "Scale"
+            | "Rotation"
+            | "LineTranslation"
+            | "LineScale"
+            | "Path"
+            | "FlipBook"
+            | "VertexColor"
+            | "Animation"
+    )
+}
+
+/// Handlers supported on every Animation subtype (Alpha, Translation, ...).
+/// Matches real-client ground truth captured by `docs/addons/AnimScriptProbe`.
+fn is_animation_script_handler(handler_name: &str) -> bool {
+    matches!(
+        handler_name,
+        "OnLoad" | "OnUpdate" | "OnPlay" | "OnPause" | "OnStop" | "OnFinished"
+    )
+}
+
+/// AnimationGroup supports the Animation handler set plus OnLoop.
+fn is_animation_group_script_handler(handler_name: &str) -> bool {
+    is_animation_script_handler(handler_name) || handler_name == "OnLoop"
 }
 
 fn is_widget_agnostic_script_handler(handler_name: &str) -> bool {
@@ -371,6 +415,10 @@ fn supports_enable_disable_script(widget_type: WidgetType) -> bool {
 }
 
 fn is_common_script_handler(handler_name: &str) -> bool {
+    // NOTE: the animation handlers (OnPlay/OnPause/OnStop/OnFinished/OnLoop) are
+    // intentionally NOT here. They are gated per animation type in
+    // `script_supported_for_widget`; the live client rejects them on
+    // non-animation widgets such as Frame.
     matches!(
         handler_name,
         "OnLoad"
@@ -388,11 +436,6 @@ fn is_common_script_handler(handler_name: &str) -> bool {
             | "OnReceiveDrag"
             | "OnSizeChanged"
             | "OnAttributeChanged"
-            | "OnPlay"
-            | "OnFinished"
-            | "OnStop"
-            | "OnLoop"
-            | "OnPause"
     )
 }
 
@@ -413,33 +456,6 @@ fn is_hyperlink_script_handler(handler_name: &str) -> bool {
     matches!(
         handler_name,
         "OnHyperlinkClick" | "OnHyperlinkEnter" | "OnHyperlinkLeave"
-    )
-}
-
-fn is_animation_script_container(state: &LuaState, frame_id: u64) -> bool {
-    let Ok(sim) = borrow_state(state) else {
-        return false;
-    };
-    let Some(object_type_name) = sim
-        .widgets
-        .get(frame_id)
-        .and_then(|frame| frame.object_type_name.as_deref())
-    else {
-        return false;
-    };
-    matches!(
-        object_type_name,
-        "AnimationGroup"
-            | "Alpha"
-            | "Translation"
-            | "Scale"
-            | "Rotation"
-            | "LineTranslation"
-            | "LineScale"
-            | "Path"
-            | "FlipBook"
-            | "VertexColor"
-            | "Animation"
     )
 }
 

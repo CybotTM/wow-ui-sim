@@ -189,6 +189,31 @@ Then in WoW:
 4. Log in.
 5. For SavedVariables, `/reload` or log out once after the addon runs.
 
+## Read SavedVariables Back (probe round-trip)
+
+For probe/data-collection addons (e.g. `AnimScriptProbe`, `ServerSnapshot`) the
+useful output lands in the SavedVariables file. WoW only flushes it on `/reload`
+or logout, so step 5 above is mandatory before pulling.
+
+The account name is part of the path and varies per install, so glob it rather
+than guessing:
+
+```bash
+# List candidate files (resolves the <ACCOUNT> segment)
+ssh desktop 'dir /s /b "C:\World of Warcraft\_retail_\WTF\Account\*\SavedVariables\MyAddon.lua"'
+
+# Pull it back (the shell glob expands the <ACCOUNT> wildcard on the remote side)
+scp desktop:'C:/World of Warcraft/_retail_/WTF/Account/*/SavedVariables/MyAddon.lua' /tmp/
+```
+
+The pulled file is plain Lua (`MyAddonDB = { ... }`), so it can be parsed
+directly or loaded into the simulator's Lua env for comparison against
+wow-ui-sim behavior. This is the canonical way to capture **real-client ground
+truth** for a behavior the simulator or a schema can't confirm on its own.
+
+If the pull returns nothing: the addon never loaded, was not enabled, or the
+client was not `/reload`ed/logged-out after the addon wrote its data.
+
 ## Package for Sharing
 
 Zip the addon folder itself:

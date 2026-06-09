@@ -265,16 +265,22 @@ fn group_get_parent_returns_frame() {
 #[test]
 fn set_script_has_script() {
     let env = setup();
+    // HasScript reports type-support, not binding-presence (matches live client):
+    // a group supports OnFinished regardless of whether a handler is bound. Use
+    // GetScript to observe binding presence.
     env.exec(
         r#"
         local f = CreateFrame("Frame", "TestAnimFrame16", UIParent)
         local ag = f:CreateAnimationGroup()
-        assert(ag:HasScript("OnFinished") == false)
+        assert(ag:HasScript("OnFinished") == true)
+        assert(ag:GetScript("OnFinished") == nil)
         ag:SetScript("OnFinished", function() end)
-        assert(ag:HasScript("OnFinished") == true, "Should have OnFinished after SetScript")
+        assert(ag:HasScript("OnFinished") == true)
+        assert(ag:GetScript("OnFinished") ~= nil, "Should have OnFinished handler after SetScript")
         -- Remove script
         ag:SetScript("OnFinished", nil)
-        assert(ag:HasScript("OnFinished") == false, "Should not have OnFinished after removing")
+        assert(ag:HasScript("OnFinished") == true)
+        assert(ag:GetScript("OnFinished") == nil, "Handler should be cleared after removing")
     "#,
     )
     .unwrap();
