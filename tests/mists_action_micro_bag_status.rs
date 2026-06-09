@@ -1,12 +1,24 @@
 #![cfg(feature = "client-mists")]
 
+use std::path::PathBuf;
 use std::process::Command;
+
+fn wow_sim_binary() -> PathBuf {
+    std::env::var_os("CARGO_BIN_EXE_wow-sim")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("target")
+                .join("debug")
+                .join("wow-sim")
+        })
+}
 
 #[test]
 fn mists_action_micro_bag_and_status_bars_are_interactive() {
     let output = Command::new("timeout")
         .arg("90")
-        .arg(env!("CARGO_BIN_EXE_wow-sim"))
+        .arg(wow_sim_binary())
         .args([
             "--no-addons",
             "--no-saved-vars",
@@ -26,12 +38,16 @@ fn mists_action_micro_bag_and_status_bars_are_interactive() {
             if not ActionButton1 then
                 error("ActionButton1 missing")
             end
-            ActionButton_Update(ActionButton1)
+            ActionButton1:UpdateAction(true)
             if ActionButton1.action ~= 1 then
                 error("ActionButton1 action mismatch: " .. tostring(ActionButton1.action))
             end
             if not ActionButton1Icon or not ActionButton1Icon:GetTexture() then
                 error("ActionButton1 icon did not update from seeded action")
+            end
+            local actionButtonBottom = ActionButton1:GetBottom()
+            if actionButtonBottom == nil or actionButtonBottom > 80 then
+                error("ActionButton1 was not positioned on the bottom action bar: " .. tostring(actionButtonBottom))
             end
 
             local microButtons = {
@@ -93,8 +109,8 @@ fn mists_action_micro_bag_and_status_bars_are_interactive() {
             A_Admin.ClearBags()
             A_Admin.AddBagItem(0, 1, 6948, 1)
             MainMenuBarBackpackButton_UpdateFreeSlots()
-            if CalculateTotalNumberOfFreeBagSlots() ~= 79 then
-                error("total free bag slots mismatch: " .. tostring(CalculateTotalNumberOfFreeBagSlots()))
+            if C_Container.CalculateTotalNumberOfFreeBagSlots() ~= 79 then
+                error("total free bag slots mismatch: " .. tostring(C_Container.CalculateTotalNumberOfFreeBagSlots()))
             end
             if MainMenuBarBackpackButton.freeSlots ~= 79 then
                 error("backpack free slots mismatch: " .. tostring(MainMenuBarBackpackButton.freeSlots))
@@ -103,20 +119,59 @@ fn mists_action_micro_bag_and_status_bars_are_interactive() {
                 error("backpack slot count changed")
             end
 
-            if not MainMenuExpBar or not MainMenuExpBar.TextString then
-                error("MainMenuExpBar TextStatusBar surface missing")
-            end
-            MainMenuExpBar:SetMinMaxValues(0, 100)
-            MainMenuExpBar:SetValue(25)
-            ShowTextStatusBarText(MainMenuExpBar)
-            local text = MainMenuExpBar.TextString:GetText()
-            if not text or not text:find("25") then
-                error("MainMenuExpBar text did not include current value: " .. tostring(text))
+            if MainMenuExpBar then
+                if not MainMenuExpBar.TextString then
+                    error("MainMenuExpBar TextStatusBar surface missing")
+                end
+                MainMenuExpBar:SetMinMaxValues(0, 100)
+                MainMenuExpBar:SetValue(25)
+                ShowTextStatusBarText(MainMenuExpBar)
+                local text = MainMenuExpBar.TextString:GetText()
+                if not text or not text:find("25") then
+                    error("MainMenuExpBar text did not include current value: " .. tostring(text))
+                end
+            elseif not (
+                StatusTrackingBarManager
+                and StatusTrackingBarManager.MainStatusTrackingBarContainer
+                and StatusTrackingBarManager.MainStatusTrackingBarContainer:IsShown()
+            ) then
+                error("Mists status tracking bar surface missing")
             end
             "#,
             "dump-tree",
             "--filter-key",
             "MainMenuBar",
+        ])
+        .output()
+        .expect("failed to run wow-sim");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        output.status.success(),
+        "wow-sim failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert_no_lua_errors(&stdout, &stderr);
+}
+
+#[test]
+fn mists_objective_tracker_hides_legacy_watch_frame() {
+    let output = Command::new("timeout")
+        .arg("90")
+        .arg(wow_sim_binary())
+        .args([
+            "--no-saved-vars",
+            "--exec-lua",
+            r#"
+            if ObjectiveTrackerFrame == nil or not ObjectiveTrackerFrame:IsVisible() then
+                error("ObjectiveTrackerFrame is missing or hidden")
+            end
+            if WatchFrame ~= nil and WatchFrame:IsVisible() then
+                error("legacy WatchFrame is visible alongside ObjectiveTrackerFrame")
+            end
+            "#,
+            "lua-errors",
         ])
         .output()
         .expect("failed to run wow-sim");

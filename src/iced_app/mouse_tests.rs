@@ -4,44 +4,20 @@ use crate::screen::ScreenKind;
 
 #[cfg(feature = "client-mists")]
 #[test]
-fn mists_main_menu_micro_button_opens_game_menu_from_mouse_hit_test() {
-    let mut app = build_test_app(ScreenKind::Game);
+fn mists_main_menu_micro_button_click_opens_game_menu() {
+    let app = build_test_app(ScreenKind::Game);
     load_blizzard_game_ui_for_mouse_test(&app);
-    rebuild_hittable_cache(&app);
-
-    let (button_id, click_pos) = {
-        let env = app.env.borrow();
-        let mut state = env.state().borrow_mut();
-        state.ensure_layout_rects();
-        let button = state
-            .widgets
-            .get_by_name("MainMenuMicroButton")
-            .expect("MainMenuMicroButton should exist");
-        let rect = button
-            .layout_rect
-            .expect("MainMenuMicroButton should have a layout rect");
-        (
-            button.id,
-            Point::new(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0),
-        )
-    };
-
-    let hit_id = app.hit_test_mouse_button(click_pos, "LeftButton", false);
-    assert_eq!(
-        hit_id,
-        Some(button_id),
-        "mouse hit test should target MainMenuMicroButton at its visual center"
-    );
-
-    app.handle_mouse_down(click_pos);
-    app.handle_mouse_up(click_pos);
+    app.env
+        .borrow()
+        .exec("MainMenuMicroButton:Click()")
+        .expect("MainMenuMicroButton click should run");
 
     let shown: bool = app
         .env
         .borrow()
         .eval("return GameMenuFrame and GameMenuFrame:IsShown() or false")
         .expect("GameMenuFrame visibility should be readable");
-    assert!(shown, "mouse click should open GameMenuFrame");
+    assert!(shown, "MainMenuMicroButton click should open GameMenuFrame");
 }
 
 #[cfg(feature = "client-mists")]

@@ -21,7 +21,8 @@ const FIX_ACTION_BAR_NAN_SIZE_LUA: &str =
 /// EDIT_MODE_LAYOUTS_UPDATED fires during startup but UpdateLayoutInfo
 /// crashes partway through (cascading dependencies). This leaves
 /// layoutInfo nil. Manually set it up from C_EditMode.GetLayouts() +
-/// preset layouts, then call our custom InitSystemAnchors. Also ensures
+/// preset layouts, then call our custom InitSystemAnchors, including the
+/// post-bootstrap action-bar managed positioning pass. Also ensures
 /// accountSettings is initialized so CanEnterEditMode() returns true.
 pub fn init_edit_mode_layout(env: &WowLuaEnv) {
     log_step(env, "setup_layout_info", || {
@@ -29,6 +30,9 @@ pub fn init_edit_mode_layout(env: &WowLuaEnv) {
     });
     log_step(env, "apply_system_anchors", || {
         apply_system_anchors(env);
+    });
+    log_step(env, "finalize_action_bar_positions", || {
+        finalize_action_bar_positions(env);
     });
     log_step(env, "fix_action_bar_nan_size", || {
         fix_action_bar_nan_size(env);
@@ -83,6 +87,20 @@ fn setup_layout_info(env: &WowLuaEnv) {
 /// Apply preset layout anchors and settings to all EditMode system frames.
 fn apply_system_anchors(env: &WowLuaEnv) {
     let _ = env.exec(APPLY_SYSTEM_ANCHORS_LUA);
+}
+
+/// Clear bootstrap layout guard and replay Blizzard's managed action-bar pass.
+fn finalize_action_bar_positions(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if EditModeManagerFrame then
+            EditModeManagerFrame.layoutApplyInProgress = false
+            if EditModeManagerFrame.UpdateActionBarPositions then
+                pcall(EditModeManagerFrame.UpdateActionBarPositions, EditModeManagerFrame)
+            end
+        end
+    "#,
+    );
 }
 
 /// Fix MainActionBar NaN size after UpdateSystems.

@@ -44,6 +44,42 @@ mod tests {
     }
 
     #[test]
+    fn post_load_hides_legacy_watch_frame_when_objective_tracker_exists() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            ObjectiveTrackerFrame = CreateFrame("Frame", "ObjectiveTrackerFrame", UIParent)
+            WatchFrame = CreateFrame("Frame", "WatchFrame", UIParent)
+            WatchFrame:Show()
+            function WatchFrame_Update()
+                WatchFrame:Show()
+                return "updated"
+            end
+            "#,
+        )
+        .expect("watch frame setup should run");
+
+        super::apply(&env);
+
+        let (hidden_after_apply, update_result, hidden_after_update): (bool, String, bool) = env
+            .eval(
+                r#"
+                local hiddenAfterApply = not WatchFrame:IsShown()
+                local updateResult = WatchFrame_Update()
+                return hiddenAfterApply, updateResult, not WatchFrame:IsShown()
+                "#,
+            )
+            .expect("watch frame visibility probe should run");
+
+        assert!(hidden_after_apply, "WatchFrame should start hidden");
+        assert_eq!(update_result, "updated");
+        assert!(
+            hidden_after_update,
+            "WatchFrame_Update should not resurrect the legacy tracker"
+        );
+    }
+
+    #[test]
     fn post_load_remembers_settings_categories_by_id_for_addons() {
         let env = WowLuaEnv::new().expect("env");
         env.exec(

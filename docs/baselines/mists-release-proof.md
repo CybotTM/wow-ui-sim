@@ -358,5 +358,5 @@ The proof ran from `2026-05-14T00:35:20Z` to `2026-05-14T02:29:12Z`.
 - The latest audited Mists panel workflows have no `Missing` rows in
   `docs/baselines/mists-panel-interactions.md`.
 - Mists-specific differences remain expected rather than gaps: Pandaria-era
-  talents/glyphs, pre-EditMode interface options, and legacy LoD service frames
+  talents/glyphs, 5.5.4 EditMode-aware interface options, and legacy LoD service frames
   intentionally do not match retail-only workflows one-for-one.

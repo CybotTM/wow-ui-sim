@@ -344,6 +344,13 @@ pub(super) fn unit_is_corpse(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `UnitIsCivilian(unit)` — civilian NPC flags are not modeled today.
+pub(super) fn unit_is_civilian(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
 /// `UnitIsUnconscious(unit)` — unconscious state is specific to DK
 /// start-zone / Monk Transcendence flavour retail mechanics that the
 /// sim doesn't model; always false.

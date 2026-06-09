@@ -110,6 +110,9 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_SharedMapDataProviders/Blizzard_SharedMapDataProviders_Mists.toc",
     "Blizzard_SharedMapDataProviders/Wrath/BonusObjectiveDataProvider.lua",
     "Blizzard_SharedMapDataProviders/Wrath/DeathMapDataProvider.xml",
+    "Blizzard_UIParentPanelManager/Blizzard_UIParentPanelManager_Classic.toc",
+    "Blizzard_UIParentPanelManager/Classic/UIPanelWindows.lua",
+    "Blizzard_UIParentPanelManager/Classic/UIParentPanelManagerOverrides.lua",
     "Blizzard_UIWidgets/Blizzard_UIWidgets.toc",
     "Blizzard_UIWidgets/Blizzard_UIWidgetAnimationTemplates.lua",
     "Blizzard_UIWidgets/Blizzard_UIWidgetAnimationTemplates.xml",
@@ -324,21 +327,38 @@ fn retail_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
 }
 
 fn mists_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
-    mists_core_cache_entry_is_usable(entry, path)
+    mists_action_bar_cache_entry_is_usable(entry, path)
+        .or_else(|| mists_core_cache_entry_is_usable(entry, path))
         .or_else(|| mists_map_cache_entry_is_usable(entry, path))
         .unwrap_or(true)
 }
 
-fn mists_core_cache_entry_is_usable(entry: &str, path: &Path) -> Option<bool> {
+fn mists_action_bar_cache_entry_is_usable(entry: &str, path: &Path) -> Option<bool> {
     let is_usable = match entry {
         "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml" => {
             file_contains(path, "ActionBarButtonTemplate")
                 && file_contains(path, r#"parentKey="chargeCooldown""#)
         }
+        "Blizzard_ActionBar/Classic/MainMenuBar.lua" => {
+            file_contains(path, "function MainMenuBar_SetMaxLevelBarShown(shown)")
+        }
+        "Blizzard_ActionBar/Classic/MainMenuBar.xml" => {
+            file_contains(path, r#"name="MainMenuBarMaxLevelBar""#)
+                && !file_contains(path, "ExpBar_Update()")
+                && !file_contains(path, "ExhaustionTick_OnUpdate")
+        }
         "Blizzard_ActionBar/Classic/PossessActionBar.xml" => {
             file_contains(path, r#"name="PossessActionBar""#)
                 && file_contains(path, "PossessActionBarMixin")
         }
+        _ => return None,
+    };
+
+    Some(is_usable)
+}
+
+fn mists_core_cache_entry_is_usable(entry: &str, path: &Path) -> Option<bool> {
+    let is_usable = match entry {
         "Blizzard_ChatFrame/Classic/ChatConfigFrame.xml" => mists_chat_config_is_usable(path),
         "Blizzard_MicroMenu/Blizzard_MicroMenu_Classic.toc" => file_contains(
             path,
@@ -414,7 +434,9 @@ fn file_contains(path: &Path, needle: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{cache_entry_is_usable, required_profile_cache_entries};
+    use super::cache_entry_is_usable;
+    #[cfg(feature = "client-retail")]
+    use super::required_profile_cache_entries;
     use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -459,6 +481,69 @@ mod tests {
         assert!(
             cache_entry_is_usable("Blizzard_FrameXMLUtil/RuneforgeUtil.xml", &runeforge_xml),
             "Retail cache should accept RuneforgeUtil.xml with the Lua include"
+        );
+
+        std::fs::remove_dir_all(root).expect("remove cache root");
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_rejects_main_menu_bar_without_max_level_bar_helper() {
+        let root = unique_temp_dir("mists-main-menu-bar");
+        std::fs::create_dir_all(&root).expect("create cache root");
+        let main_menu_bar = root.join("MainMenuBar.lua");
+
+        std::fs::write(&main_menu_bar, "function MainMenuBar_OnLoad() end")
+            .expect("write stale MainMenuBar.lua");
+        assert!(
+            !cache_entry_is_usable("Blizzard_ActionBar/Classic/MainMenuBar.lua", &main_menu_bar),
+            "Mists 5.5.4 cache must reject MainMenuBar.lua without MainMenuBar_SetMaxLevelBarShown"
+        );
+
+        std::fs::write(
+            &main_menu_bar,
+            "function MainMenuBar_SetMaxLevelBarShown(shown) end",
+        )
+        .expect("write current MainMenuBar.lua");
+        assert!(
+            cache_entry_is_usable("Blizzard_ActionBar/Classic/MainMenuBar.lua", &main_menu_bar),
+            "Mists 5.5.4 cache should accept MainMenuBar.lua with MainMenuBar_SetMaxLevelBarShown"
+        );
+
+        std::fs::remove_dir_all(root).expect("remove cache root");
+    }
+
+    #[test]
+    #[cfg(feature = "client-mists")]
+    fn mists_rejects_main_menu_bar_xml_with_legacy_exp_bar_scripts() {
+        let root = unique_temp_dir("mists-main-menu-bar-xml");
+        std::fs::create_dir_all(&root).expect("create cache root");
+        let main_menu_bar_xml = root.join("MainMenuBar.xml");
+
+        std::fs::write(
+            &main_menu_bar_xml,
+            r#"<Ui><Frame name="MainMenuBarMaxLevelBar"/><OnLoad>ExpBar_Update()</OnLoad></Ui>"#,
+        )
+        .expect("write stale MainMenuBar.xml");
+        assert!(
+            !cache_entry_is_usable(
+                "Blizzard_ActionBar/Classic/MainMenuBar.xml",
+                &main_menu_bar_xml
+            ),
+            "Mists 5.5.4 cache must reject MainMenuBar.xml with old ExpBar_Update hooks"
+        );
+
+        std::fs::write(
+            &main_menu_bar_xml,
+            r#"<Ui><Frame name="MainMenuBarMaxLevelBar"/></Ui>"#,
+        )
+        .expect("write current MainMenuBar.xml");
+        assert!(
+            cache_entry_is_usable(
+                "Blizzard_ActionBar/Classic/MainMenuBar.xml",
+                &main_menu_bar_xml
+            ),
+            "Mists 5.5.4 cache should accept MainMenuBar.xml without legacy ExpBar script hooks"
         );
 
         std::fs::remove_dir_all(root).expect("remove cache root");

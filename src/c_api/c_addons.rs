@@ -606,14 +606,15 @@ mod tests {
 
     #[test]
     #[cfg(feature = "client-mists")]
-    fn mists_runtime_addon_lookup_respects_profile_exclusion() {
-        let ui = TempAddonBase::new("mists-excluded-uiparent-panel-manager");
+    fn mists_runtime_addon_lookup_accepts_classic_panel_manager() {
+        let ui = TempAddonBase::new("mists-classic-uiparent-panel-manager");
         ui.add_addon(
             "Blizzard_UIParentPanelManager",
-            "Blizzard_UIParentPanelManager_Mists.toc",
+            "Blizzard_UIParentPanelManager_Classic.toc",
             r#"
 ## Title: Blizzard_UIParentPanelManager
 ## AllowLoad: Game
+## AllowLoadGameType: classic
 Classic\UIParentPanelManager.lua
 "#,
         );
@@ -627,8 +628,8 @@ Classic\UIParentPanelManager.lua
         };
 
         assert!(
-            found.is_none(),
-            "runtime LoadAddOn lookup must not bypass Mists profile exclusions"
+            found.is_some(),
+            "Mists should resolve the 5.5.4 Classic UIParentPanelManager variant"
         );
     }
 

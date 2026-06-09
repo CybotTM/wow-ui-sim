@@ -29,6 +29,15 @@ fn unit_is_dead_true_when_player_health_zero() {
 }
 
 #[test]
+fn unit_is_civilian_is_available_and_false_for_modeled_units() {
+    let env = env();
+    let player_civilian: bool = env.eval(r#"return UnitIsCivilian("player")"#).unwrap();
+    let target_civilian: bool = env.eval(r#"return UnitIsCivilian("target")"#).unwrap();
+    assert!(!player_civilian);
+    assert!(!target_civilian);
+}
+
+#[test]
 fn unit_is_dead_tracks_party_member_dead_since() {
     let env = env();
     {

@@ -91,8 +91,8 @@ fn blizzard_mirror_timer_find_toc_resolves_bare_variant() {
         resolved,
         mirror_timer_toc(),
         "Blizzard_MirrorTimer ships exactly one bare TOC (no `_Mainline.toc` / `_Classic.toc` \
-         variants — the timer-bar surface is mainline-only and Classic clients use the legacy \
-         pre-EditMode bar layout). `find_toc_file` falls through the `_Mainline.toc` lookup \
+         variants — the timer-bar surface is mainline-only and Classic clients use their profile \
+         action-bar layout). `find_toc_file` falls through the `_Mainline.toc` lookup \
          and resolves to the bare TOC"
     );
 }

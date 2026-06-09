@@ -2,6 +2,16 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-08] update | Mists 5.5.4 EditMode
+
+Updated `investigations/editmode-layout.md` after bumping the Mists Blizzard UI
+source pin to 5.5.4. Startup was clean with the existing `C_EditMode` fallback,
+but a real frame tick exposed missing `MIRRORTIMER_NUMTIMERS` in
+`WorldFrame_OnUpdate`; the mirror-timer Rust surface now publishes the constant.
+The update also records that Mists now loads `Blizzard_UIParentPanelManager`
+through its `_Classic.toc`, so the simulator no longer excludes that addon and
+the cache manifest now carries the Classic panel-manager files.
+
 ## [2026-06-08] investigation | PlayerSpells runtime load
 
 Created `investigations/playerspells-runtime-load.md` after fixing the retail `TOGGLETALENTS` keybind path. The note records the `C_AddOns.LoadAddOn` call-frame preservation issue plus the temporary PlayerSpells ModelScene/PvP talent backfills needed for `Blizzard_PlayerSpells` demand-load.
@@ -1116,6 +1126,10 @@ Updated `systems/casc-asset-cache.md` and `reference/cli-commands.md` for `wow-c
 ## [2026-04-29] ingest | dialog background DXT3 stripes
 
 Created `investigations/dialog-background-dxt3-stripes.md` to document the escape-menu background stripe root cause: DXT3 BLPs were incorrectly mapped to BC3 on the raw compressed upload path. Updated `index.md` with the new investigation page.
+
+## [2026-06-09] update | Mists 5.5.4 EditMode action-bar and UnitIsCivilian
+
+Updated `investigations/editmode-layout.md` with the Mists 5.5.4 action-bar root cause: default managed action bars can remain at Blizzard's temporary `TOPLEFT UIParent` anchor when the manual EditMode layout pass aborts before clearing `layoutApplyInProgress`. Documented the Rust-side finalizer that clears the guard and replays `UpdateActionBarPositions()`, the modeled `UnitIsCivilian` fallback for Classic TargetFrame, and the ObjectiveTracker phantom duplicate root cause: bundled-addon startup exposed legacy `WatchFrame` alongside modern `ObjectiveTrackerFrame`.
 
 ## [2026-05-01] ingest | editbox render text cache investigation
 

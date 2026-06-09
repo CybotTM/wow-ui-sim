@@ -169,6 +169,15 @@ fn get_mirror_timer_info_returns_unknown_sentinel_when_unset() {
 }
 
 #[test]
+fn mirror_timer_count_matches_blizzard_fixed_timer_slots() {
+    let env = env();
+
+    let timer_count: i32 = env.eval("return MIRRORTIMER_NUMTIMERS").unwrap();
+
+    assert_eq!(timer_count, 3);
+}
+
+#[test]
 fn get_mirror_timer_info_returns_seven_values_by_index() {
     let env = env();
     {

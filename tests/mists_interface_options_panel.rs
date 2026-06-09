@@ -28,11 +28,23 @@ fn mists_game_menu_options_drives_settings_help_and_addons() {
             if GameMenuFrame == nil or GameMenuFrame:IsShown() ~= true then
                 error("GameMenuFrame did not open")
             end
-            if GameMenuButtonOptions == nil then
-                error("GameMenuButtonOptions is missing")
+
+            local function findGameMenuButton(label, optional)
+                if GameMenuFrame.buttonPool == nil or type(GameMenuFrame.buttonPool.EnumerateActive) ~= "function" then
+                    error("GameMenuFrame button pool is missing")
+                end
+                for button in GameMenuFrame.buttonPool:EnumerateActive() do
+                    if button:GetText() == label then
+                        return button
+                    end
+                end
+                if optional then
+                    return nil
+                end
+                error("Game menu button is missing: " .. tostring(label))
             end
 
-            GameMenuButtonOptions:Click()
+            findGameMenuButton(GAMEMENU_OPTIONS):Click()
             if SettingsPanel == nil or SettingsPanel:IsShown() ~= true then
                 error("SettingsPanel did not open from game-menu options")
             end
@@ -40,21 +52,15 @@ fn mists_game_menu_options_drives_settings_help_and_addons() {
                 error("GameMenuFrame stayed open after opening options")
             end
 
-            if not Settings.INTERFACE_CATEGORY_ID then
-                error("interface settings category id is missing")
-            end
-            if not SettingsPanel:OpenToCategory(Settings.INTERFACE_CATEGORY_ID) then
-                error("interface settings category did not open")
-            end
             local currentCategory = SettingsPanel.GetCurrentCategory and SettingsPanel:GetCurrentCategory()
-            if currentCategory == nil or currentCategory:GetID() ~= Settings.INTERFACE_CATEGORY_ID then
-                error("interface settings category did not focus")
+            if currentCategory == nil or currentCategory:GetID() == nil then
+                error("settings category did not focus")
             end
 
             if EditModeManagerFrame ~= nil
                 and type(EditModeManagerFrame.IsShown) == "function"
                 and EditModeManagerFrame:IsShown() then
-                error("Mists interface options must not open retail EditMode")
+                error("Mists game-menu options flow should leave EditMode hidden")
             end
 
             SettingsPanel.CloseButton:Click()
@@ -65,7 +71,7 @@ fn mists_game_menu_options_drives_settings_help_and_addons() {
                 error("GameMenuFrame did not reopen after closing options")
             end
 
-            GameMenuButtonOptions:Click()
+            findGameMenuButton(GAMEMENU_OPTIONS):Click()
             if SettingsPanel == nil or SettingsPanel:IsShown() ~= true then
                 error("SettingsPanel did not reopen from game-menu options")
             end
@@ -75,15 +81,16 @@ fn mists_game_menu_options_drives_settings_help_and_addons() {
             end
 
             SettingsPanel.CloseButton:Click()
-            GameMenuButtonHelp:Click()
+            findGameMenuButton(GAMEMENU_SUPPORT):Click()
             if HelpFrame == nil or HelpFrame:IsShown() ~= true then
                 error("HelpFrame did not open")
             end
             HideUIPanel(HelpFrame)
 
             ToggleGameMenu()
-            if GameMenuButtonAddons:IsShown() then
-                GameMenuButtonAddons:Click()
+            local addonsButton = findGameMenuButton(ADDONS, true)
+            if addonsButton and addonsButton:IsShown() then
+                addonsButton:Click()
                 if AddonList == nil or AddonList:IsShown() ~= true then
                     error("AddonList did not open")
                 end

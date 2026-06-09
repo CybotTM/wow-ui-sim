@@ -127,6 +127,45 @@ systems such as the status tracking / XP bar could become visible even though
 the real client hides them. Startup now uses a separate EditMode-cache-only WTF
 loader when Lua SavedVariables are disabled.
 
+Follow-up: Mists Classic 5.5.4 (`Gethe/wow-ui-source@0fa05055`) added a real
+`Blizzard_EditMode` addon for the Mists profile. The existing `C_EditMode`
+layout/cache fallback was enough for startup, but ticking the loaded tree exposed
+a legacy mirror-timer constant gap: `Blizzard_UIParent/Classic/WorldFrame.lua`
+iterates `for i=1, MIRRORTIMER_NUMTIMERS` while processing hidden mirror timers.
+`GetMirrorTimerInfo()` and `GetMirrorTimerProgress()` were already modeled in
+Rust, so the matching constant now lives in the same mirror-timer registration
+surface instead of a Mists-only bootstrap shim.
+
+The same patch also made `Blizzard_UIParentPanelManager` loadable for Mists
+through the `_Classic.toc` variant. The simulator's Mists profile must not
+exclude that addon anymore, and it must prefer `_Classic.toc` for this addon so
+stale cached `_Mists.toc` files from older pins cannot win TOC selection.
+The Blizzard UI cache manifest includes the Classic panel-manager TOC,
+`UIPanelWindows.lua`, and Mists overrides now; without those files
+`GameMenuFrame` opens as a raw frame but `ShowUIPanel(GameMenuFrame)` has no
+panel registration to dispatch through.
+
+Mists 5.5.4 EditMode added a second startup hazard for action bars. Blizzard's
+`EditModeSystemMixin:ApplySystemAnchor()` intentionally parks default bottom/right
+action bars at `TOPLEFT UIParent` while `layoutApplyInProgress` is true, then
+expects `EditModeManagerFrame:UpdateActionBarPositions()` to move them. The sim's
+manual `apply_system_anchors.lua` path can abort before its cleanup tail, leaving
+`MainActionBar`, action buttons, and the micro-menu at the temporary top-left
+anchor. `workarounds_editmode.rs` now runs a separate
+`finalize_action_bar_positions` step after `apply_system_anchors`: it clears
+`layoutApplyInProgress` and calls Blizzard's managed action-bar positioning pass.
+
+The Mists TargetFrame EditMode refresh also requires Classic global
+`UnitIsCivilian`. The simulator registers it in the modeled unit-query surface
+and currently returns false because civilian NPC flags are not modeled.
+
+ObjectiveTracker phantom duplicate was the legacy-plus-modern tracker path, but
+only when bundled addons create the legacy quest watch surface. Clean no-addons
+startup has `WatchFrame` nil; bundled-addon startup showed visible `WatchFrame`
+quest text overlapping modern `ObjectiveTrackerFrame` quest text. Mists
+`post_load.lua` now hides `WatchFrame` when `ObjectiveTrackerFrame` exists and
+wraps `WatchFrame_Update()` so legacy quest-log code cannot resurrect it.
+
 Regression coverage lives in `tests/edit_mode_api.rs`.
 
 ## Files Modified
@@ -139,12 +178,21 @@ Regression coverage lives in `tests/edit_mode_api.rs`.
 - `src/bin/wow_sim/main.rs`
 - `src/bin/wow_sim/addon_loading.rs`
 - `tests/edit_mode_api.rs`
+- `src/lua_api/globals/instance_info.rs`
+- `tests/instance_info.rs`
+- `tests/blizzard_ui_parent_loads.rs`
+- `src/loader/mod.rs`
+- `src/blizzard_ui_sync/profile_cache.rs`
+- `tests/mists_interface_options_panel.rs`
 
 ## Sources
 
 - [editmode-layout-fixes.md](../../editmode-layout-fixes.md) — full investigation
 - [runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — `C_EditMode` fallback state
 - [saved_variables.rs](../../../src/saved_variables.rs) — WTF cache import bridge
+- [instance_info.rs](../../../src/lua_api/globals/instance_info.rs) — mirror-timer API and `MIRRORTIMER_NUMTIMERS`
+- [loader/mod.rs](../../../src/loader/mod.rs) — Mists panel-manager TOC selection
+- [profile_cache.rs](../../../src/blizzard_ui_sync/profile_cache.rs) — Mists Blizzard UI cache requirements
 
 ## See Also
 

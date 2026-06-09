@@ -190,6 +190,11 @@ fn profile_specific_fallback_toc(addon_name: &str) -> Option<String> {
         crate::client_profile::ClientProfile::Mists if addon_name == "Blizzard_GameMenu" => {
             Some(format!("{addon_name}_Mainline.toc"))
         }
+        crate::client_profile::ClientProfile::Mists
+            if addon_name == "Blizzard_UIParentPanelManager" =>
+        {
+            Some(format!("{addon_name}_Classic.toc"))
+        }
         _ => None,
     }
 }
@@ -202,18 +207,18 @@ fn profile_specific_fallback_toc(addon_name: &str) -> Option<String> {
 /// flavor toc.
 pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
     let addon_name = addon_dir.file_name()?.to_str()?;
+    if let Some(fallback) = profile_specific_fallback_toc(addon_name) {
+        let toc_path = addon_dir.join(fallback);
+        if toc_path.exists() {
+            return Some(toc_path);
+        }
+    }
     let toc_variants = [
         format!("{}{}.toc", addon_name, active_profile_toc_suffix()),
         format!("{}.toc", addon_name),
     ];
     for variant in &toc_variants {
         let toc_path = addon_dir.join(variant);
-        if toc_path.exists() {
-            return Some(toc_path);
-        }
-    }
-    if let Some(fallback) = profile_specific_fallback_toc(addon_name) {
-        let toc_path = addon_dir.join(fallback);
         if toc_path.exists() {
             return Some(toc_path);
         }
@@ -676,10 +681,7 @@ pub(crate) fn is_addon_excluded_for_active_profile(addon_name: &str) -> bool {
 
 fn excluded_addons_for_active_profile() -> &'static [&'static str] {
     match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Mists => &[
-            "Blizzard_Deprecated_ArenaUI",
-            "Blizzard_UIParentPanelManager",
-        ],
+        crate::client_profile::ClientProfile::Mists => &["Blizzard_Deprecated_ArenaUI"],
         _ => &[],
     }
 }

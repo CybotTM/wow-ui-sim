@@ -668,32 +668,7 @@ mod tests {
     }
 
     #[cfg(feature = "client-mists")]
-    fn write_mists_required_cache_entries(root: &Path) {
-        for entry in super::required_profile_cache_entries() {
-            let path = root.join(entry);
-            std::fs::create_dir_all(path.parent().expect("entry has parent"))
-                .expect("create entry parent");
-            let contents = match *entry {
-                "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml" => {
-                    r#"<CheckButton name="ActionBarButtonTemplate"><Cooldown parentKey="chargeCooldown"/></CheckButton>"#
-                }
-                "Blizzard_ActionBar/Classic/PossessActionBar.xml" => {
-                    r#"<Frame name="PossessActionBar" mixin="PossessActionBarMixin"/>"#
-                }
-                "Blizzard_MicroMenu/Blizzard_MicroMenu_Classic.toc" => {
-                    "Cata\\MainMenuBarMicroButtons.xml [AllowLoadGameType mists]\n"
-                }
-                "Blizzard_NamePlates/Blizzard_NamePlates.toc" => {
-                    "Mainline\\Blizzard_ClassNameplateBar.lua [AllowLoadGameType mainline]\n"
-                }
-                "Blizzard_UIPanels_Game/Shared/CastingBarFrame.lua" => {
-                    "function PlayerCastingBarMixin:OnShow()\nend\n"
-                }
-                _ => "placeholder",
-            };
-            std::fs::write(path, contents).expect("write required cache entry");
-        }
-    }
+    include!("blizzard_ui_sync_mists_test_fixture.rs");
 
     #[test]
     fn repo_fallback_copies_manifest_entry_from_addons_root() {

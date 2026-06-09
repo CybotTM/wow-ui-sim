@@ -30,7 +30,7 @@ impl ClientProfile {
         match self {
             ClientProfile::Retail => 120005,
             ClientProfile::Wrath => 38001,
-            ClientProfile::Mists => 50503,
+            ClientProfile::Mists => 50504,
             ClientProfile::Era | ClientProfile::Anniversary => 11507,
         }
     }

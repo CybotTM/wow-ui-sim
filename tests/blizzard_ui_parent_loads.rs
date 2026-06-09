@@ -413,6 +413,23 @@ fn full_game_load_publishes_free_functions() {
 }
 
 #[test]
+fn world_frame_onupdate_runs_without_mirror_timer_constant_errors() {
+    let env = load_full_game_ui();
+
+    let before = env.state().borrow().lua_errors.len();
+    env.fire_on_update(0.016)
+        .expect("WorldFrame OnUpdate should tick");
+    let new_errors = env.state().borrow().lua_errors[before..].to_vec();
+
+    assert!(
+        new_errors.is_empty(),
+        "WorldFrame_OnUpdate should not emit Lua errors after a frame tick. \
+         Mists 5.5.4 iterates 1..MIRRORTIMER_NUMTIMERS while processing \
+         hidden mirror timers. New errors: {new_errors:?}"
+    );
+}
+
+#[test]
 fn full_game_load_registers_virtual_templates() {
     let _env = load_full_game_ui();
 

@@ -740,7 +740,7 @@ mod tests {
     #[cfg(feature = "client-mists")]
     fn scan_addons_accepts_mists_interface_version() {
         let temp = tempfile::tempdir().expect("tempdir");
-        write_addon_with_toc(temp.path(), "ElvUI", "## Interface: 50503\nmain.lua\n");
+        write_addon_with_toc(temp.path(), "ElvUI", "## Interface: 50504\nmain.lua\n");
 
         let addons = scan_addons(temp.path(), &[], ScreenKind::Game);
         let names: Vec<_> = addons.iter().map(|(name, _)| name.as_str()).collect();

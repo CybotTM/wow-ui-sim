@@ -38,7 +38,7 @@ case "$PROFILE" in
         ;;
     mists)
         REPO_URL="https://github.com/Gethe/wow-ui-source.git"
-        DEFAULT_REF="33d87412adad30d52eadcd5b334049788ebaae31"  # branch classic HEAD
+        DEFAULT_REF="0fa050554e3e3c8ad559ff258516d9c86b70815d"  # tag 5.5.4
         SPARSE_PATHS=("Interface/AddOns")
         SUBDIR="Mists"
         LINK_SUBDIR="Interface"

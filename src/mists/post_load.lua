@@ -6,6 +6,22 @@ if AuctionHouseFrame and rawget(_G, "__wow_sim_mists_auction_house_hidden_on_sta
   rawset(_G, "__wow_sim_mists_auction_house_hidden_on_startup", true)
 end
 
+if ObjectiveTrackerFrame and WatchFrame then
+  WatchFrame:Hide()
+  if rawget(_G, "__wow_sim_mists_watch_frame_hidden_for_objective_tracker") ~= true then
+    local originalWatchFrameUpdate = WatchFrame_Update
+    function WatchFrame_Update(...)
+      local result
+      if type(originalWatchFrameUpdate) == "function" then
+        result = originalWatchFrameUpdate(...)
+      end
+      WatchFrame:Hide()
+      return result
+    end
+    rawset(_G, "__wow_sim_mists_watch_frame_hidden_for_objective_tracker", true)
+  end
+end
+
 if VideoOptionsFrame == nil and type(CreateFrame) == "function" then
   VideoOptionsFrame = CreateFrame("Frame", "VideoOptionsFrame", UIParent)
   VideoOptionsFrame:Hide()

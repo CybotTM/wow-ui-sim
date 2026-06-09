@@ -29,7 +29,7 @@ if rawget(_G, "ClassicExpansionAtMost") == nil then
 end
 
 function GetBuildInfo()
-  return "5.5.3", "61837", "May 16 2026", 50503, "", " "
+  return "5.5.4", "68042", "Jun 2 2026", 50504, "", " "
 end
 
 if rawget(_G, "C_ArtifactUI") ~= nil then

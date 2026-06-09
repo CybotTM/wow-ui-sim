@@ -179,6 +179,7 @@ fn register_unit_liveness(state: &mut LuaState) {
     );
     set_global(state, "UnitIsConnected", relationships::unit_is_connected);
     set_global(state, "UnitIsCorpse", relationships::unit_is_corpse);
+    set_global(state, "UnitIsCivilian", relationships::unit_is_civilian);
     set_global(
         state,
         "UnitIsUnconscious",

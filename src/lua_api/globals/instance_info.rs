@@ -205,6 +205,7 @@ fn push_nil_values(state: &mut LuaState, count: usize) {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::set_global_val(lua, "MIRRORTIMER_NUMTIMERS", Val::Num(3.0))?;
     LuaApiMut::register_function(lua, "GetInstanceInfo", get_instance_info)?;
     LuaApiMut::register_function(lua, "IsInLFGDungeon", is_in_lfg_dungeon)?;
     LuaApiMut::register_function(lua, "GetMirrorTimerInfo", get_mirror_timer_info)?;
