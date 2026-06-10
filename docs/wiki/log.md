@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-10] update | Frame identity token userdata
+
+Updated `investigations/frame-surrogate-identity-slot.md` after switching `frame[0]` from a tiny backed table to a `FrameIdentity` userdata token. Recorded that DevTools dumping also needs raw frame iteration plus `dumpobject` returning nil so `[0]` renders as opaque userdata.
+
 ## [2026-06-08] update | Mists 5.5.4 EditMode
 
 Updated `investigations/editmode-layout.md` after bumping the Mists Blizzard UI

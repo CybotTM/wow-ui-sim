@@ -213,6 +213,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     install_print(lua)?;
     install_addframetext(lua)?;
     install_a_print(lua)?;
+    install_dumpobject(lua)?;
     install_legacy_aliases(lua)?;
     install_nil_symbol_logger(lua)?;
     install_next(lua)?;
@@ -247,6 +248,16 @@ fn install_a_print(lua: &mut rilua::Lua) -> LuaResult<()> {
     lua.exec(A_PRINT_LUA)
         .map_err(|e| runtime_error(format!("A_Print install: {e}")))?;
     Ok(())
+}
+
+fn install_dumpobject(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(lua, "dumpobject", dumpobject)?;
+    Ok(())
+}
+
+fn dumpobject(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
 }
 
 fn install_legacy_aliases(lua: &mut rilua::Lua) -> LuaResult<()> {

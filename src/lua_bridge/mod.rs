@@ -29,6 +29,7 @@ pub use macros::push_lua_result;
 #[doc(hidden)]
 pub use macros::run_method_body;
 pub use multivalue::MultiValue;
+pub use table_builder::FrameIdentity;
 pub use table_builder::TableBuilder;
 pub use table_builder::create_frame_table;
 pub(crate) use table_builder::table_set_rust_fn;

@@ -8,8 +8,15 @@ use rilua::vm::closure::{Closure, RustClosure, RustFn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table as RiluaTable;
+use rilua::vm::value::Userdata;
 
 use crate::lua_bridge::IntoStack;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct FrameIdentity {
+    pub index: u32,
+    pub generation: u32,
+}
 
 // ---------------------------------------------------------------------------
 // Free helper (also used by macros)
@@ -116,16 +123,16 @@ fn table_collected_error() -> LuaError {
 /// Pre-sizes hash part to 64 slots for typical frame properties/children.
 /// Methods are accessed via metatable __index, not stored directly.
 pub fn create_frame_table(state: &mut LuaState, index: u32, generation: u32) -> GcRef<RiluaTable> {
-    let mut identity = RiluaTable::with_sizes(0, 0);
-    identity.set_backing(Some((index, generation)));
-    let identity_ref = state.gc.alloc_table(identity);
+    let identity_ref = state
+        .gc
+        .alloc_userdata(Userdata::new(Box::new(FrameIdentity { index, generation })));
 
     let mut table = RiluaTable::with_sizes(0, 64);
     table.set_backing(Some((index, generation)));
     table
         .raw_set(
             Val::Num(0.0),
-            Val::Table(identity_ref),
+            Val::Userdata(identity_ref),
             &state.gc.string_arena,
         )
         .expect("numeric frame identity slot should be settable");

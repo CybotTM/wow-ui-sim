@@ -8,8 +8,8 @@
 use super::SimState;
 use super::env::WowLuaAppData;
 use super::hot_literals::{hot_metatable_key, metatable_idx};
-use crate::lua_bridge::create_frame_table;
 use crate::lua_bridge::stack_val;
+use crate::lua_bridge::{FrameIdentity, create_frame_table};
 use crate::widget::WidgetType;
 use rilua::vm::callinfo::LUA_MULTRET;
 use rilua::vm::execute::{CallResult, execute};
@@ -49,14 +49,24 @@ fn frame_id_from_val(state: &LuaState, val: Val) -> LuaResult<u64> {
 }
 
 fn frame_identity_backing(state: &LuaState, table: &Table) -> Option<(u32, u32)> {
-    let Val::Table(identity_ref) = table.get_int(0) else {
-        return None;
-    };
-    state
-        .gc
-        .tables
-        .get(identity_ref)
-        .and_then(|identity| identity.backing())
+    frame_identity_backing_from_val(state, table.get_int(0))
+}
+
+fn frame_identity_backing_from_val(state: &LuaState, val: Val) -> Option<(u32, u32)> {
+    match val {
+        Val::Userdata(identity_ref) => state
+            .gc
+            .userdata
+            .get(identity_ref)
+            .and_then(|identity| identity.downcast_ref::<FrameIdentity>())
+            .map(|identity| (identity.index, identity.generation)),
+        Val::Table(identity_ref) => state
+            .gc
+            .tables
+            .get(identity_ref)
+            .and_then(|identity| identity.backing()),
+        _ => None,
+    }
 }
 
 /// Borrow `SimState` immutably from rilua's app_data.
