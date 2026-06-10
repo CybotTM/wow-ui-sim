@@ -571,7 +571,6 @@ local events = {
     UPDATE_OVERRIDE_ACTIONBAR = true,
     UPDATE_POSSESS_BAR = true,
     SPELLS_CHANGED = true,
-    LEARNED_SPELL_IN_TAB = true,
     PLAYER_TALENT_UPDATE = true,
     ACTIVE_TALENT_GROUP_CHANGED = true,
     TRAIT_CONFIG_UPDATED = true,
@@ -582,7 +581,7 @@ local events = {
 
 local frame = CreateFrame("Frame")
 for event in pairs(events) do
-    frame:RegisterEvent(event)
+    pcall(frame.RegisterEvent, frame, event)
 end
 
 frame:SetScript("OnEvent", function(_, event)
