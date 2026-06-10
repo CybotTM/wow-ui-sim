@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: DevTools Dump Probe
+## Notes: Captures real-client DevTools_Dump output for frame tables
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: DevToolsDumpProbeDB
+
+DevToolsDumpProbe.lua
