@@ -44,9 +44,11 @@ end
 local keybindings = snapshot.keybindings
 if type(keybindings) == "table" then
     local keys = keybindings.keys
+    local sampledKeys = {}
     if type(keys) == "table" then
         for key, action in pairs(keys) do
             if type(key) == "string" and type(action) == "string" then
+                sampledKeys[key] = true
                 SetBinding(key, action)
             end
         end
@@ -57,7 +59,7 @@ if type(keybindings) == "table" then
         for _, entry in pairs(entries) do
             if type(entry) == "table" and type(entry.action) == "string" and type(entry.keys) == "table" then
                 for _, key in ipairs(entry.keys) do
-                    if type(key) == "string" and key ~= "" then
+                    if type(key) == "string" and key ~= "" and not sampledKeys[key] then
                         SetBinding(key, entry.action)
                     end
                 end
@@ -254,6 +256,48 @@ mod tests {
 
         assert_eq!(imported, 0);
         assert_eq!(f1_action, "");
+        assert_eq!(map_action, "TOGGLEWORLDMAP");
+    }
+
+    #[test]
+    fn apply_loaded_snapshot_keeps_sampled_keybinding_over_entry_collision() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            ServerSnapshotDB = {
+                lastCharacterKey = "Realm/Character",
+                characters = {
+                    ["Realm/Character"] = {
+                        capturedAt = 1,
+                        keybindings = {
+                            keys = {
+                                C = "TOGGLECHARACTER0",
+                            },
+                            entries = {
+                                {
+                                    action = "HOUSING_TOGGLEDECORSNAPMODE",
+                                    keys = { "C" },
+                                },
+                                {
+                                    action = "TOGGLEWORLDMAP",
+                                    keys = { "CTRL-M" },
+                                },
+                            },
+                        },
+                        actionBars = { slots = {} },
+                    },
+                },
+            }
+            "#,
+        )
+        .expect("seed snapshot");
+
+        apply_loaded_snapshot(&env).expect("apply snapshot");
+        let (c_action, map_action): (String, String) = env
+            .eval(r#"return GetBindingAction("C"), GetBindingAction("CTRL-M")"#)
+            .expect("read bindings");
+
+        assert_eq!(c_action, "TOGGLECHARACTER0");
         assert_eq!(map_action, "TOGGLEWORLDMAP");
     }
 }
