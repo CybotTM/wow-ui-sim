@@ -600,6 +600,54 @@ fn test_model_scene_get_player_actor_returns_reusable_stub_actor() {
 }
 
 #[test]
+fn test_model_scene_mixin_transition_resolves_collectionator_player_actor() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local scene = CreateFrame("ModelScene", "TestCollectionatorPlayerModelScene", UIParent, "ModelSceneMixinTemplate")
+        scene:TransitionToModelSceneID(596, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, true)
+        local actor = scene:GetPlayerActor()
+
+        _G.collectionator_player_actor_state = {
+            lifecycle_methods_visible = type(scene.OnReleased) == "function"
+                and type(scene.ApplyFromModelSceneActorInfo) == "function",
+            actor_exists = actor ~= nil,
+            actor_type = actor and actor:GetObjectType(),
+            set_model_by_unit = actor and actor:SetModelByUnit("player"),
+            human_male_actor = scene:GetActorByTag("human-male") ~= nil,
+            human_actor = scene:GetActorByTag("human") ~= nil,
+            player_actor = scene:GetActorByTag("player") ~= nil,
+        }
+    "#,
+    )
+    .unwrap();
+
+    let actor_state: (bool, bool, String, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local s = _G.collectionator_player_actor_state
+            return s.lifecycle_methods_visible,
+                   s.actor_exists,
+                   s.actor_type,
+                   s.set_model_by_unit,
+                   s.human_male_actor,
+                   s.human_actor,
+                   s.player_actor
+        "#,
+        )
+        .unwrap();
+
+    assert!(actor_state.0);
+    assert!(actor_state.1);
+    assert_eq!(actor_state.2, "ModelSceneActor");
+    assert!(actor_state.3);
+    assert!(actor_state.4);
+    assert!(actor_state.5);
+    assert!(actor_state.6);
+}
+
+#[test]
 fn test_model_scene_actor_management_tracks_created_indexed_and_taken_actors() {
     let env = WowLuaEnv::new().unwrap();
 

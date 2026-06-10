@@ -468,10 +468,22 @@ fn ability(name: &str, description: &str, icon: i64) -> AlliedRaceRacialAbility 
 /// dedup'd values of `Actor_X_ModelID` in
 /// `Blizzard_AlliedRacesUI/Blizzard_AlliedRacesFrameUI.lua` plus the
 /// `"player"` fallback the mixin defaults to when the model id is unknown.
+///
+/// Scene `596` is used by addon model previews such as Collectionator's
+/// transmog-source recovery helper. It only needs player lookup tags because
+/// 3D rendering itself is intentionally out of scope.
 pub fn default_model_scenes() -> HashMap<i64, Vec<String>> {
     let mut scenes = HashMap::new();
     scenes.insert(727, allied_races_scene_actor_tags());
+    scenes.insert(596, player_model_scene_actor_tags());
     scenes
+}
+
+fn player_model_scene_actor_tags() -> Vec<String> {
+    ["human-male", "human", "player", "player-rider"]
+        .iter()
+        .map(|s| (*s).to_string())
+        .collect()
 }
 
 fn allied_races_scene_actor_tags() -> Vec<String> {

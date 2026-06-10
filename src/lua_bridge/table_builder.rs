@@ -63,10 +63,6 @@ fn install_rust_fn(
     func: RustFn,
 ) -> LuaResult<()> {
     let key = Val::Str(key_ref);
-    if table_has_matching_rust_fn(state, table_ref, key, func) {
-        return Ok(());
-    }
-
     let closure = Closure::Rust(RustClosure::new(func, name));
     let closure_ref = state.gc.alloc_closure(closure);
     let stack_slot = state.top;
@@ -82,29 +78,6 @@ fn install_rust_fn(
     state.gc.barrier_back(table_ref);
     state.top = stack_slot;
     result
-}
-
-fn table_has_matching_rust_fn(
-    state: &LuaState,
-    table_ref: GcRef<RiluaTable>,
-    key: Val,
-    func: RustFn,
-) -> bool {
-    let existing_value = state
-        .gc
-        .tables
-        .get(table_ref)
-        .map(|table| table.get(key, &state.gc.string_arena));
-
-    let Some(Val::Function(closure_ref)) = existing_value else {
-        return false;
-    };
-
-    let Some(Closure::Rust(existing_closure)) = state.gc.closures.get(closure_ref) else {
-        return false;
-    };
-
-    std::ptr::fn_addr_eq(existing_closure.func, func)
 }
 
 fn table_collected_error() -> LuaError {

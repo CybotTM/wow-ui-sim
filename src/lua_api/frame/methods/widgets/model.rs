@@ -566,6 +566,8 @@ pub(super) fn stub_true(state: &mut LuaState) -> LuaResult<u32> {
     true.into_stack(state)
 }
 
+const SKIP_3D_RENDERING: rilua::vm::closure::RustFn = stub_variadic;
+
 // ---------------------------------------------------------------------------
 // register_model
 // ---------------------------------------------------------------------------
@@ -621,13 +623,14 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetCameraTarget", set_camera_target),
     ("GetCameraRoll", get_camera_roll),
     ("SetCameraRoll", set_camera_roll),
-    // Variadic no-op stubs — 3D rendering is intentionally out of scope
-    ("SetAutoDress", stub_variadic),
-    ("SetCamDistanceScale", stub_variadic),
-    ("SetCamera", stub_variadic),
-    ("SetPortraitZoom", stub_variadic),
-    ("SetLight", stub_variadic),
-    ("ResetLights", stub_variadic),
+    // 3D rendering is intentionally out of scope. These absorb visual-only
+    // model/camera calls while preserving the Lua API surface.
+    ("SetAutoDress", SKIP_3D_RENDERING),
+    ("SetCamDistanceScale", SKIP_3D_RENDERING),
+    ("SetCamera", SKIP_3D_RENDERING),
+    ("SetPortraitZoom", SKIP_3D_RENDERING),
+    ("SetLight", SKIP_3D_RENDERING),
+    ("ResetLights", SKIP_3D_RENDERING),
     ("RefreshUnit", refresh_unit),
     ("RefreshCamera", refresh_camera),
     (
@@ -635,30 +638,34 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
         scene_transition_to_model_scene_id,
     ),
     ("SetFromModelSceneID", stub_variadic),
-    ("CycleVariation", stub_variadic),
-    ("AdvanceTime", stub_variadic),
-    ("ClearTransform", stub_variadic),
-    ("SetTransform", stub_variadic),
-    ("SetPitch", stub_variadic),
-    ("SetRoll", stub_variadic),
-    ("UseModelCenterToTransform", stub_variadic),
-    ("SetViewTranslation", stub_variadic),
-    ("SetModelDrawLayer", stub_variadic),
-    ("ReplaceIconTexture", stub_variadic),
-    ("SetGlow", stub_variadic),
-    ("SetGradientMask", stub_variadic),
-    ("SetCustomCamera", stub_variadic),
-    ("MakeCurrentCameraCustom", stub_variadic),
+    ("CycleVariation", SKIP_3D_RENDERING),
+    ("AdvanceTime", SKIP_3D_RENDERING),
+    ("ClearTransform", SKIP_3D_RENDERING),
+    ("SetTransform", SKIP_3D_RENDERING),
+    ("SetPitch", SKIP_3D_RENDERING),
+    ("SetRoll", SKIP_3D_RENDERING),
+    ("UseModelCenterToTransform", SKIP_3D_RENDERING),
+    ("SetViewTranslation", SKIP_3D_RENDERING),
+    ("SetModelDrawLayer", SKIP_3D_RENDERING),
+    ("ReplaceIconTexture", SKIP_3D_RENDERING),
+    ("SetGlow", SKIP_3D_RENDERING),
+    ("SetGradientMask", SKIP_3D_RENDERING),
+    ("SetCustomCamera", SKIP_3D_RENDERING),
+    ("MakeCurrentCameraCustom", SKIP_3D_RENDERING),
+    // ModelSceneActorMixin lifecycle methods. The simulator does not render
+    // 3D models, but Blizzard's ModelScene pools call these on acquired actors.
+    ("ApplyFromModelSceneActorInfo", stub_variadic),
+    ("OnReleased", stub_variadic),
     // DressUpModel / transmog wardrobe — no real 3D, just absorb the calls
-    ("SetUseTransmogSkin", stub_variadic),
-    ("SetUseTransmogChoices", stub_variadic),
-    ("SetObeyHideInTransmogFlag", stub_variadic),
-    ("TryOn", stub_variadic),
-    ("UndressSlot", stub_variadic),
-    ("Undress", stub_variadic),
-    ("SetUnit", stub_variadic),
-    ("UpdateCamera", stub_variadic),
-    ("FreezeAnimation", stub_variadic),
+    ("SetUseTransmogSkin", SKIP_3D_RENDERING),
+    ("SetUseTransmogChoices", SKIP_3D_RENDERING),
+    ("SetObeyHideInTransmogFlag", SKIP_3D_RENDERING),
+    ("TryOn", SKIP_3D_RENDERING),
+    ("UndressSlot", SKIP_3D_RENDERING),
+    ("Undress", SKIP_3D_RENDERING),
+    ("SetUnit", SKIP_3D_RENDERING),
+    ("UpdateCamera", SKIP_3D_RENDERING),
+    ("FreezeAnimation", SKIP_3D_RENDERING),
     // Typed return stubs
     ("GetModelSceneID", stub_zero),
     ("GetCamDistanceScale", stub_one),
