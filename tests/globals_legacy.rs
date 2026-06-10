@@ -337,6 +337,35 @@ fn test_fontstring_runtime_lookup_hides_extra_title_methods() {
 }
 
 #[test]
+fn duplicate_named_frame_gets_fresh_identity_and_fields() {
+    let env = env();
+    let result: (bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local original = CreateFrame("Frame", "DuplicateNamedFrameProbe")
+            original.customField = "original-field"
+            original[1] = "original-array"
+            local originalIdentity = original[0]
+
+            local replacement = CreateFrame("Frame", "DuplicateNamedFrameProbe")
+
+            return original ~= replacement,
+                   DuplicateNamedFrameProbe == replacement,
+                   replacement[0] ~= originalIdentity,
+                   replacement.customField == nil,
+                   replacement[1] == nil
+            "#,
+        )
+        .unwrap();
+
+    assert!(result.0, "duplicate named frame should create a new object");
+    assert!(result.1, "global name should point at the replacement frame");
+    assert!(result.2, "replacement should have a fresh identity token");
+    assert!(result.3, "replacement should not inherit hash fields");
+    assert!(result.4, "replacement should not inherit array fields");
+}
+
+#[test]
 fn test_statusbar_runtime_lookup_hides_extra_methods() {
     let env = env();
     let result: (bool, bool, bool) = env

@@ -286,7 +286,6 @@ fn register_global_name(
         return Ok(());
     }
     let frame_val = frame_ref(state, frame_id)?;
-    migrate_existing_global_frame_fields(state, &name, frame_val);
     let key = state.gc.intern_string(name.as_bytes());
     let global = state.global;
     if let Some(globals) = state.gc.tables.get_mut(global) {
@@ -308,45 +307,6 @@ fn should_preserve_existing_root_frame_name(
         return Ok(false);
     }
     Ok(borrow_state(state)?.widgets.get_id_by_name(name).is_some())
-}
-
-fn migrate_existing_global_frame_fields(state: &mut LuaState, name: &str, new_frame: Val) {
-    let Val::Table(new_ref) = new_frame else {
-        return;
-    };
-    let key = state.gc.intern_string(name.as_bytes());
-    let existing = state
-        .gc
-        .tables
-        .get(state.global)
-        .map(|globals| globals.get_str(key, &state.gc.string_arena))
-        .unwrap_or(Val::Nil);
-    let Val::Table(existing_ref) = existing else {
-        return;
-    };
-
-    let array_values = state
-        .gc
-        .tables
-        .get(existing_ref)
-        .map(|table| table.array_slice().to_vec())
-        .unwrap_or_default();
-    let hash_entries = state
-        .gc
-        .tables
-        .get(existing_ref)
-        .map(|table| table.hash_entries())
-        .unwrap_or_default();
-
-    if let Some(new_table) = state.gc.tables.get_mut(new_ref) {
-        for (index, value) in array_values.into_iter().enumerate() {
-            let _ = new_table.raw_set(Val::Num((index + 1) as f64), value, &state.gc.string_arena);
-        }
-        for (entry_key, value) in hash_entries {
-            let _ = new_table.raw_set(entry_key, value, &state.gc.string_arena);
-        }
-    }
-    state.gc.barrier_back(new_ref);
 }
 
 pub(crate) fn apply_parent_sub(name: &str, parent_id: Option<u64>, state: &SimState) -> String {

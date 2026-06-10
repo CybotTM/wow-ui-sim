@@ -18,7 +18,9 @@ Lua-visible behavior changes from `frame[0] == nil` to `type(frame[0]) == "userd
 
 `extract_frame_id(state, val)` is dispatch-aware: it prefers `val[0]` and only falls back to native table backing when the identity slot is absent. Code that needs the original Lua table's frame id must use `native_frame_id_from_val` explicitly.
 
-Regression coverage lives in `security_api::test_frame_identity_slots_dispatch_surrogate_methods` and `frame_table_iteration::{frame_pairs_enumerates_identity_and_array_slots, frame_identity_userdata_is_opaque_to_dumpobject, frame_arguments_resolve_through_identity_slot}`.
+Duplicate named `CreateFrame` calls must produce a fresh identity token and must not migrate Lua table fields from the old global binding. Retail `12.0.5.67823` and wowless both agreed on the important behavior: recreating `CreateFrame("Frame", "SameName")` creates a distinct Lua object, leaves the original object's custom fields in place, gives the replacement a different `[0]`, and leaves the replacement's old custom hash/array fields nil. The simulator previously copied the old global frame table into the replacement, including stale `[0]`, which made startup handlers dispatch through the retired widget and produced `pairs`/`tinsert` errors.
+
+Regression coverage lives in `security_api::test_frame_identity_slots_dispatch_surrogate_methods`, `frame_table_iteration::{frame_pairs_enumerates_identity_and_array_slots, frame_identity_userdata_is_opaque_to_dumpobject, frame_arguments_resolve_through_identity_slot}`, and `globals_legacy::duplicate_named_frame_gets_fresh_identity_and_fields`.
 
 ## Sources
 
@@ -26,6 +28,8 @@ Regression coverage lives in `security_api::test_frame_identity_slots_dispatch_s
 - [table_builder.rs](../../../src/lua_bridge/table_builder.rs) - backed frame table and identity-token creation
 - [security_api.rs](../../../tests/security_api.rs) - regression coverage for `[0]` surrogate dispatch
 - [frame_table_iteration.rs](../../../tests/frame_table_iteration.rs) - regression coverage for frame pair iteration, userdata identity, and `dumpobject`
+- [globals_legacy.rs](../../../tests/globals_legacy.rs) - regression coverage for duplicate named `CreateFrame` fresh identity and no field migration
+- [helpers_shared.rs](../../../src/lua_api/globals/create_frame/helpers_shared.rs) - global name registration for runtime `CreateFrame`
 - [FrameIdentityProbe](../../../docs/addons/FrameIdentityProbe) - real-client SavedVariables probe for slot `0` reassignment behavior
 - [[taint-system]] - Restricted Environment and secure-handler context
 
