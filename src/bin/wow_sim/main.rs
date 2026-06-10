@@ -1,5 +1,6 @@
 mod addon_loading;
 mod cache_texture;
+mod exec_lua;
 #[cfg(feature = "gui")]
 mod gui_commands;
 mod saved_var_config;
@@ -675,10 +676,11 @@ struct DumpTreeCommand<'a> {
 
 fn run_dump_tree(env: &WowLuaEnv, command: DumpTreeCommand<'_>) {
     settle_headless_startup(env);
-    if let Some(code) = command.exec_lua
-        && let Err(e) = env.exec_maybe_secure(code, command.exec_lua_secure)
-    {
-        eprintln!("[exec-lua] error: {e}");
+    if let Some(code) = command.exec_lua {
+        let code = exec_lua::wrap_headless_exec_lua(code);
+        if let Err(e) = env.exec_maybe_secure(&code, command.exec_lua_secure) {
+            eprintln!("[exec-lua] error: {e}");
+        }
     }
     run_extra_update_ticks(env, 3);
     apply_delay(command.delay);
