@@ -75,6 +75,12 @@ The other profiles discover a different addon set:
 
 Counts above are the discovered set after filtering by `is_allowed_game_type` and `default_enabled`; the on-disk addon directory may carry many more `_Cata.toc` / `_TBC.toc` / etc. variants the active profile skips.
 
+## Third-Party Addon Enable State
+
+Third-party addon state starts from the real character `WTF/Account/{account}/{realm}/{character}/AddOns.txt` when WTF import is enabled. The simulator-local `~/.local/share/wow-sim/AddOns.txt` overlays that state instead of replacing it, so a partial local save from the in-sim AddOn UI does not accidentally re-enable every real-client-disabled addon that is missing from the local file.
+
+The effective state pass is dependency-aware. Required dependencies can be enabled for explicitly enabled addons, but addons whose required dependency is explicitly disabled are disabled even when the dependent addon's own TOC default is enabled. This prevents data-shard addons such as RaiderIO DB modules from loading without their required base addon.
+
 ## XML Element Handlers
 
 | Category | Elements |
@@ -93,7 +99,7 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 
 ## Startup Sequence
 
-1. Create `WowLuaEnv`, set paths, configure SavedVariables
+1. Create `WowLuaEnv`, set paths, configure SavedVariables, import account `bindings-cache.wtf`
 2. Load 27 Blizzard addons in dependency order
 3. Load third-party addons alphabetically
 4. Apply post-load workarounds (UpdateMicroButtons stub, WorldMapFrame scroll init, etc.)

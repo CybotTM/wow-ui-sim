@@ -637,6 +637,9 @@ pub struct Keybindings {
     /// Keyed by key name; the value is the bound action. Actions can be
     /// bound to at most 2 keys (WoW's documented limit).
     pub base: Vec<(String, String)>,
+    /// Keys explicitly unbound by WTF `NONE` rows or `SetBinding(key, nil)`.
+    /// These shadow simulator defaults during key dispatch.
+    pub unbound: std::collections::HashSet<String>,
     /// Override bindings set by `SetOverrideBinding(owner, isPriority, key, action)`.
     /// Stored as a flat list so `ClearOverrideBindings` can drop the
     /// whole set.
@@ -677,14 +680,20 @@ impl Keybindings {
             .unwrap_or_default()
     }
 
+    pub fn shadows_default_key(&self, key: &str) -> bool {
+        self.unbound.contains(key) || self.base.iter().any(|(bound_key, _)| bound_key == key)
+    }
+
     /// Bind `key` to `action`. An empty action unbinds `key`. A second
     /// key binding to the same action evicts the oldest key still bound
     /// (WoW's 2-keys-per-action limit).
     pub fn set(&mut self, key: &str, action: &str) {
         self.base.retain(|(k, _)| k != key);
         if action.is_empty() {
+            self.unbound.insert(key.to_string());
             return;
         }
+        self.unbound.remove(key);
         let bound: Vec<usize> = self
             .base
             .iter()

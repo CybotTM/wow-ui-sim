@@ -436,6 +436,7 @@ const DEFAULT_KEYS: &[DefaultKey] = &[
 /// only expose user-set bindings.
 pub fn init_keybindings(state: &mut crate::lua_api::SimState) {
     state.keybindings.base.clear();
+    state.keybindings.unbound.clear();
     state.keybindings.overrides.clear();
 }
 
@@ -449,11 +450,15 @@ pub fn init_keybindings(state: &mut crate::lua_api::SimState) {
 ///
 /// Returns `true` if a binding was found and executed, `false` otherwise.
 pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bool> {
-    let user_action = borrow_state(lua.state_mut())?
-        .keybindings
-        .action_for_key(key);
+    let (user_action, shadows_default) = {
+        let sim = borrow_state(lua.state_mut())?;
+        let user_action = sim.keybindings.action_for_key(key);
+        (user_action, sim.keybindings.shadows_default_key(key))
+    };
     let action = if !user_action.is_empty() {
         user_action
+    } else if shadows_default {
+        String::new()
     } else {
         default_action_for_key(key)
             .map(str::to_string)

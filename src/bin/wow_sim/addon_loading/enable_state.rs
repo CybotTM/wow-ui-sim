@@ -22,10 +22,18 @@ pub(super) fn addon_enabled(
 pub(super) fn addon_enable_overrides(
     saved_vars: Option<&SavedVariablesManager>,
 ) -> Option<HashMap<String, bool>> {
-    if let Ok(overrides) = read_addon_enable_overrides(&local_addons_txt_path()) {
-        return Some(overrides);
+    let mut overrides = character_addon_enable_overrides(saved_vars).unwrap_or_default();
+
+    if let Ok(local_overrides) = read_addon_enable_overrides(&local_addons_txt_path()) {
+        overrides.extend(local_overrides);
     }
 
+    (!overrides.is_empty()).then_some(overrides)
+}
+
+fn character_addon_enable_overrides(
+    saved_vars: Option<&SavedVariablesManager>,
+) -> Option<HashMap<String, bool>> {
     let config = saved_vars?.wtf_config()?;
     let path = config
         .wtf_path
@@ -74,7 +82,7 @@ fn collect_new_dependency_enables(
 ) -> Vec<String> {
     let mut newly_enabled = Vec::new();
     for (name, toc) in addon_tocs {
-        if !effective.get(name).copied().unwrap_or(false) {
+        if !effective_addon_enabled(name, toc, effective) {
             continue;
         }
         for dependency in toc.dependencies() {
@@ -84,7 +92,12 @@ fn collect_new_dependency_enables(
             if character_overrides.get(&dependency) == Some(&false) {
                 continue;
             }
-            if !effective.get(&dependency).copied().unwrap_or(false) {
+            let Some(dependency_toc) = addon_tocs.get(&dependency) else {
+                continue;
+            };
+            if !effective.contains_key(&dependency)
+                || !effective_addon_enabled(&dependency, dependency_toc, effective)
+            {
                 newly_enabled.push(dependency);
             }
         }
@@ -98,7 +111,7 @@ fn collect_new_dependency_disables(
 ) -> Vec<String> {
     let mut newly_disabled = Vec::new();
     for (name, toc) in addon_tocs {
-        if !effective.get(name).copied().unwrap_or(false) {
+        if !effective_addon_enabled(name, toc, effective) {
             continue;
         }
         if toc
@@ -110,6 +123,13 @@ fn collect_new_dependency_disables(
         }
     }
     newly_disabled
+}
+
+fn effective_addon_enabled(name: &str, toc: &TocFile, effective: &HashMap<String, bool>) -> bool {
+    effective
+        .get(name)
+        .copied()
+        .unwrap_or(toc.default_enabled())
 }
 
 #[cfg(test)]
@@ -222,7 +242,7 @@ mod tests {
     }
 
     #[test]
-    fn addon_enable_overrides_prefers_local_addons_txt() {
+    fn addon_enable_overrides_merges_local_over_character_addons_txt() {
         let _guard = ADDONS_TXT_ENV_LOCK.lock().expect("env lock");
         let temp = tempfile::tempdir().expect("tempdir");
         let local_path = temp.path().join("local-AddOns.txt");
@@ -234,7 +254,7 @@ mod tests {
         std::fs::create_dir_all(&addon_state_dir).expect("create character dir");
         std::fs::write(
             addon_state_dir.join("AddOns.txt"),
-            "LocalDisabled: enabled\n",
+            "LocalDisabled: enabled\nWtfDisabled: disabled\n",
         )
         .expect("write WTF AddOns.txt");
         let mut saved_vars = SavedVariablesManager::new();
@@ -248,6 +268,7 @@ mod tests {
         let overrides = addon_enable_overrides(Some(&saved_vars)).expect("read overrides");
 
         assert_eq!(overrides.get("LocalDisabled"), Some(&false));
+        assert_eq!(overrides.get("WtfDisabled"), Some(&false));
     }
 
     #[test]
@@ -328,6 +349,26 @@ mod tests {
             ("PluginAddon".to_string(), true),
             ("RequiredAddon".to_string(), false),
         ]);
+
+        let effective =
+            dependency_aware_enable_overrides(&addons, Some(&overrides)).expect("effective map");
+
+        assert_eq!(effective.get("RequiredAddon"), Some(&false));
+        assert_eq!(effective.get("PluginAddon"), Some(&false));
+    }
+
+    #[test]
+    fn dependency_aware_overrides_disable_default_enabled_addons_with_disabled_required_deps() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        let addons = vec![
+            write_addon_toc(
+                temp.path(),
+                "PluginAddon",
+                "## Interface: 120005\n## Dependencies: RequiredAddon\n",
+            ),
+            write_addon_toc(temp.path(), "RequiredAddon", "## Interface: 120005\n"),
+        ];
+        let overrides = HashMap::from([("RequiredAddon".to_string(), false)]);
 
         let effective =
             dependency_aware_enable_overrides(&addons, Some(&overrides)).expect("effective map");

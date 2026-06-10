@@ -290,6 +290,9 @@ fn init_and_load(
     let mut saved_vars = startup_trace::time_load_step("configure saved variables", || {
         saved_var_config::configure_saved_vars(args.no_saved_vars)
     });
+    startup_trace::time_load_step("load keybindings", || {
+        saved_var_config::load_keybindings_from_wtf(&env, saved_vars.as_ref())
+    });
     let edit_mode_cache_vars = if saved_vars.is_none() {
         startup_trace::time_load_step(
             "configure edit mode cache",

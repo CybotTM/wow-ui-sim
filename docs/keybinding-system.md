@@ -5,9 +5,10 @@
 The simulator implements WoW's keybinding system: actions are defined with Lua code to execute, and keys are mapped to those actions. When a key is pressed and no EditBox has focus, the binding fires.
 
 **Key Files:**
-- `src/lua_api/keybindings.rs` - Binding storage, defaults, and dispatch
+- `src/lua_api/globals/keybindings.rs` - Binding storage, defaults, and dispatch
+- `src/keybinding_cache.rs` - WTF `bindings-cache.wtf` parser/import
 - `src/lua_api/key_dispatch.rs` - Key press pipeline (integrates bindings)
-- `src/lua_api/globals/strings/mod.rs` - Lua API functions (GetBindingKey, SetBinding, etc.)
+- `src/lua_api/globals/keybindings_c_api.rs` - `C_KeyBindings` namespace functions
 - `src/iced_app/keybinds.rs` - iced key → WoW key name conversion
 
 ---
@@ -81,7 +82,9 @@ iced KeyPressed event
 | `J` | `TOGGLEGUILDTAB` | Guild |
 | `M` | `TOGGLEWORLDMAP` | World map |
 
-Note: Some keys differ from WoW defaults (WoW uses P for spellbook, Y for achievements, I for LFG). These are simulator-specific overrides for convenience.
+Note: Some keys differ from WoW defaults (WoW uses P for spellbook, Y for achievements, I for LFG). These are simulator-specific fallbacks for convenience.
+
+When WTF import is enabled, startup also imports account-wide `bindings-cache.wtf`. Imported `bind KEY ACTION` rows populate `SimState.keybindings`; imported `bind KEY NONE` rows explicitly shadow simulator defaults so a real-client unbind does not fall through to the sim fallback.
 
 ---
 
@@ -113,14 +116,14 @@ Note: Some keys differ from WoW defaults (WoW uses P for spellbook, Y for achiev
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `SaveBindings` | `(which)` | No-op (bindings reset each session) |
-| `LoadBindings` | `(which)` | No-op |
+| `SaveBindings` | `(which)` | No-op (runtime changes stay in memory) |
+| `LoadBindings` | `(which)` | No-op (WTF import happens during startup) |
 
 ---
 
 ## Adding New Bindings
 
-To add a new binding action, edit `src/lua_api/keybindings.rs`:
+To add a new binding action, edit `src/lua_api/globals/keybindings.rs`:
 
 1. Add to `BINDING_ACTIONS` array:
    ```rust

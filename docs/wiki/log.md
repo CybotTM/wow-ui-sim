@@ -7,6 +7,7 @@ Chronological record of wiki operations.
 Updated `investigations/frame-surrogate-identity-slot.md` after switching `frame[0]` from a tiny backed table to a `FrameIdentity` userdata token. Recorded that DevTools dumping also needs raw frame iteration plus `dumpobject` returning nil so `[0]` renders as opaque userdata.
 Updated it again after making `extract_frame_id` dispatch-aware and adding `native_frame_id_from_val` for the rare cases that need the original table backing.
 Updated it again after real-client and wowless duplicate-name probes showed replacement frames get fresh identity and do not migrate custom Lua fields; recorded the simulator fix that removed old-global field copying during `CreateFrame` registration.
+Updated `systems/addon-loading.md` after fixing third-party addon enable-state merging and startup keybinding import. Recorded that local `AddOns.txt` overlays real WTF state, required-dependency disables apply to default-enabled dependents, and `bindings-cache.wtf` imports before addon loading.
 
 ## [2026-06-08] update | Mists 5.5.4 EditMode
 

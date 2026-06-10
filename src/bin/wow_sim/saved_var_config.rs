@@ -1,4 +1,5 @@
 use wow_ui_sim::logging;
+use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 
 pub fn configure_saved_vars(no_saved_vars_arg: bool) -> Option<SavedVariablesManager> {
@@ -32,6 +33,23 @@ pub fn configure_edit_mode_cache_vars() -> Option<SavedVariablesManager> {
     } else {
         logging::println_elapsed("EditMode cache: no WoW WTF directory found");
         None
+    }
+}
+
+pub fn load_keybindings_from_wtf(env: &WowLuaEnv, saved_vars: Option<&SavedVariablesManager>) {
+    let Some(config) = saved_vars.and_then(SavedVariablesManager::wtf_config) else {
+        return;
+    };
+    match wow_ui_sim::keybinding_cache::load_wtf_account_bindings(config) {
+        Ok(entries) => {
+            let mut state = env.state().borrow_mut();
+            wow_ui_sim::keybinding_cache::apply_bindings_cache(&mut state.keybindings, &entries);
+            logging::println_elapsed(&format!("Loaded {} keybinding(s) from WTF", entries.len()));
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => {
+            logging::println_elapsed(&format!("Failed to load keybindings from WTF: {error}"))
+        }
     }
 }
 

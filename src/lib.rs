@@ -46,6 +46,7 @@ pub mod inspector_server_stub;
 #[path = "../data/items.rs"]
 pub mod items;
 mod key_names;
+pub mod keybinding_cache;
 pub mod layout;
 pub mod limited_listfile;
 pub mod loader;

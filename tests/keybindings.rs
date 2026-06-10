@@ -261,6 +261,17 @@ fn save_load_bindings_are_noops_but_do_not_error() {
 }
 
 #[test]
+fn explicit_unbind_blocks_default_key_dispatch() {
+    let env = env();
+    env.exec(r#"SetBinding("F1", "")"#).unwrap();
+
+    env.send_key_press("F1", None).unwrap();
+    let has_target: bool = env.eval("return UnitExists('target')").unwrap();
+
+    assert!(!has_target, "explicit unbind should shadow the F1 default");
+}
+
+#[test]
 fn c_keybindings_index_resolves_registry_rows() {
     let env = env();
     let (has_index, action, category, key, custom_type_is_nil, tags_empty): (

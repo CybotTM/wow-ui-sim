@@ -80,6 +80,22 @@ impl WtfConfig {
             .join(format!("{}.lua", addon_name))
     }
 
+    pub fn account_bindings_cache_file(&self) -> PathBuf {
+        self.wtf_path
+            .join("Account")
+            .join(&self.account)
+            .join("bindings-cache.wtf")
+    }
+
+    pub fn character_click_bindings_cache_file(&self) -> PathBuf {
+        self.wtf_path
+            .join("Account")
+            .join(&self.account)
+            .join(&self.realm)
+            .join(&self.character)
+            .join("click-bindings-cache.txt")
+    }
+
     pub fn character_saved_vars_file(&self, addon_name: &str) -> PathBuf {
         self.character_saved_vars_path()
             .join(format!("{}.lua", addon_name))
