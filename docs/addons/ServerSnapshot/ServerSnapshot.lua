@@ -600,3 +600,18 @@ if type(hooksecurefunc) == "function" and type(AddonList_OnOkay) == "function" t
         addon:Snapshot("AddonList_OnOkay")
     end)
 end
+
+local function safeSnapshot(reason)
+    local ok, err = pcall(addon.Snapshot, addon, reason)
+    if not ok and DEFAULT_CHAT_FRAME then
+        DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": snapshot failed: " .. tostring(err))
+    end
+end
+
+safeSnapshot("load")
+
+if C_Timer and type(C_Timer.After) == "function" then
+    C_Timer.After(1, function()
+        safeSnapshot("delayed-load")
+    end)
+end
