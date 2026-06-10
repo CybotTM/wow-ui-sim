@@ -36,6 +36,7 @@ pub mod c_spell;
 pub mod c_spell_book;
 pub mod c_spell_diminish;
 pub mod c_stable_info;
+pub mod c_string_util;
 pub mod c_summon_info;
 pub mod c_texture;
 pub mod c_widget;
@@ -86,6 +87,7 @@ fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {
+    c_string_util::register_c_string_util(state)?;
     c_wowtoken_secure::register_c_wowtoken_secure(state)?;
     c_wow_token_public::register_c_wow_token_public(state)?;
     c_texture::register_c_texture(state)?;

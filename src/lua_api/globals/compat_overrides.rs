@@ -9,11 +9,10 @@
 //! - **`A_Print`** — secure alias stored in the registry under
 //!   `__sim_print`. Lua wrapper so calls from tainted code still land
 //!   in the log panel. `self_test.rs` relies on this symbol (~7 sites).
-//! - **`next`** — short-circuits frame references so
-//!   `for k, v in pairs(frame)` yields nothing (matches real WoW where
-//!   frames aren't iterable Lua tables). rilua's default `next` on
-//!   userdata actually surfaces raw backing entries — surprising for
-//!   addons that probe the frame by accident.
+//! - **`next`** — routed through the native rilua implementation so
+//!   table-backed frame refs expose their real per-frame slots. Retail
+//!   frames are iterable table-like values: `DevTools_Dump(frame)` can see
+//!   array entries as well as frame identity slot `[0]`.
 //! - **`ipairs`** — `ipairs(frame)` returns a children iterator that
 //!   yields `(i, childFrame)` pairs in insertion order. Preserves the
 //!   master-era affordance used by a handful of Blizzard UI paths.
@@ -346,7 +345,7 @@ fn append_val(state: &LuaState, val: Val, out: &mut String) {
     }
 }
 
-// ── next(frame, ...) terminator ──────────────────────────────────────────────
+// ── next(...) compatibility ──────────────────────────────────────────────────
 
 fn install_next(lua: &mut rilua::Lua) -> LuaResult<()> {
     let existing = registry_get(lua.state_mut(), ORIGINAL_NEXT_KEY);
@@ -362,16 +361,6 @@ fn install_next(lua: &mut rilua::Lua) -> LuaResult<()> {
 }
 
 fn custom_next(state: &mut LuaState) -> LuaResult<u32> {
-    let tbl = stack_val(state, 1);
-    let key = stack_val(state, 2);
-    if extract_frame_id(state, tbl).is_some() {
-        // Frames aren't iterable tables; yield the terminator immediately
-        // regardless of key. Matches WoW's real behaviour.
-        let _ = key;
-        state.push(Val::Nil);
-        return Ok(1);
-    }
-    let _ = key;
     lua_next(state)
 }
 
