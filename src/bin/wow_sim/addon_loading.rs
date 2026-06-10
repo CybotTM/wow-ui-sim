@@ -251,7 +251,7 @@ pub fn load_third_party_addons(
     }
 
     logging::println_elapsed(&format!("Loading {} addons...", addons.len()));
-    let enable_overrides = addon_enable_overrides(saved_vars.as_ref());
+    let enable_overrides = merged_addon_enable_overrides(env, saved_vars);
     let effective_enable_overrides =
         dependency_aware_enable_overrides(&addons, enable_overrides.as_ref());
     let mut stats = LoadStats::default();
@@ -266,6 +266,24 @@ pub fn load_third_party_addons(
         );
     }
     print_load_summary(&addons, &stats);
+}
+
+fn merged_addon_enable_overrides(
+    env: &WowLuaEnv,
+    saved_vars: &mut Option<SavedVariablesManager>,
+) -> Option<HashMap<String, bool>> {
+    let mut overrides = addon_enable_overrides(saved_vars.as_ref()).unwrap_or_default();
+
+    if let Some(saved_vars) = saved_vars.as_mut() {
+        match wow_ui_sim::server_snapshot_import::load_addon_enable_overrides(env, saved_vars) {
+            Ok(snapshot_overrides) => overrides.extend(snapshot_overrides),
+            Err(error) => logging::println_elapsed(&format!(
+                "ServerSnapshot addon enable import failed: {error}"
+            )),
+        }
+    }
+
+    (!overrides.is_empty()).then_some(overrides)
 }
 
 fn is_addon_loaded(env: &WowLuaEnv, name: &str) -> bool {

@@ -305,6 +305,154 @@ local function snapshotMacros()
     return macros
 end
 
+local function addonApi()
+    if type(C_AddOns) == "table" then
+        return C_AddOns
+    end
+    return nil
+end
+
+local function addonNameAt(index)
+    local cAddOns = addonApi()
+    if cAddOns and type(cAddOns.GetAddOnName) == "function" then
+        return first(cAddOns.GetAddOnName, index)
+    end
+
+    local ok, name = call(GetAddOnInfo, index)
+    if ok then
+        return name
+    end
+    return nil
+end
+
+local function addonEnableState(index)
+    local cAddOns = addonApi()
+    if cAddOns and type(cAddOns.GetAddOnEnableState) == "function" then
+        return first(cAddOns.GetAddOnEnableState, index)
+    end
+
+    local ok, enabled = call(GetAddOnEnableState, index)
+    if ok then
+        return enabled
+    end
+    return nil
+end
+
+local function addonInfo(index)
+    local cAddOns = addonApi()
+    if cAddOns and type(cAddOns.GetAddOnInfo) == "function" then
+        local ok, name, title, notes, loadable, reason = call(cAddOns.GetAddOnInfo, index)
+        if ok then
+            return name, title, notes, loadable, reason
+        end
+    end
+
+    local ok, name, title, notes, loadable, reason = call(GetAddOnInfo, index)
+    if ok then
+        return name, title, notes, loadable, reason
+    end
+    return nil
+end
+
+local function snapshotAddons()
+    local cAddOns = addonApi()
+    local count = nil
+    if cAddOns and type(cAddOns.GetNumAddOns) == "function" then
+        count = first(cAddOns.GetNumAddOns)
+    end
+    if type(count) ~= "number" then
+        count = first(GetNumAddOns)
+    end
+    if type(count) ~= "number" then
+        return nil
+    end
+
+    local addons = {
+        count = count,
+        entries = {},
+        order = {},
+    }
+
+    for index = 1, count do
+        local folderName = addonNameAt(index)
+        local infoName, title, notes, loadable, reason = addonInfo(index)
+        folderName = folderName or infoName
+        if type(folderName) == "string" and folderName ~= "" then
+            local enableState = addonEnableState(index)
+            local enabled = nil
+            if type(enableState) == "number" then
+                enabled = enableState > 0
+            elseif type(enableState) == "boolean" then
+                enabled = enableState
+            end
+
+            table.insert(addons.order, folderName)
+            addons.entries[folderName] = {
+                index = index,
+                title = title,
+                notes = notes,
+                loadable = loadable,
+                reason = reason,
+                enableState = enableState,
+                enabled = enabled,
+            }
+        end
+    end
+
+    return addons
+end
+
+local KEYBINDING_PROBE_KEYS = {
+    "ESCAPE", "SPACE", "F1", "F2", "F3", "F4", "F5", "F6",
+    "F7", "F8", "F9", "F10", "F11", "F12",
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+    "-", "=", "CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-5",
+    "SHIFT-1", "SHIFT-2", "SHIFT-3", "SHIFT-4", "SHIFT-5",
+    "ALT-1", "ALT-2", "ALT-3", "ALT-4", "ALT-5",
+    "B", "C", "G", "I", "J", "K", "L", "M", "N", "O", "P",
+    "U", "Y", "Z", "SHIFT-B", "SHIFT-C", "SHIFT-I", "SHIFT-J",
+    "SHIFT-M", "SHIFT-P", "CTRL-M",
+}
+
+local function snapshotKeybindings()
+    local count = first(GetNumBindings)
+    if type(count) ~= "number" then
+        return nil
+    end
+
+    local bindings = {
+        count = count,
+        entries = {},
+        keys = {},
+    }
+
+    for index = 1, count do
+        local ok, action, category, key1, key2 = call(GetBinding, index)
+        if ok and type(action) == "string" and action ~= "" then
+            local keys = {}
+            if type(key1) == "string" and key1 ~= "" then
+                table.insert(keys, key1)
+            end
+            if type(key2) == "string" and key2 ~= "" then
+                table.insert(keys, key2)
+            end
+            table.insert(bindings.entries, {
+                index = index,
+                action = action,
+                category = category,
+                keys = keys,
+            })
+        end
+    end
+
+    for _, key in ipairs(KEYBINDING_PROBE_KEYS) do
+        local action = first(GetBindingAction, key)
+        bindings.keys[key] = type(action) == "string" and action or ""
+    end
+
+    return bindings
+end
+
 local function snapshotTalentConfig()
     local classTalents = C_ClassTalents
     if type(classTalents) ~= "table" then
@@ -383,6 +531,8 @@ function addon:Snapshot(reason)
         actionBars = snapshotActionBars(),
         spellBook = snapshotSpellBook(),
         macros = snapshotMacros(),
+        addons = snapshotAddons(),
+        keybindings = snapshotKeybindings(),
         talents = snapshotTalentConfig(),
         pvpTalents = snapshotPvpTalents(),
     }
@@ -427,6 +577,7 @@ local events = {
     TRAIT_CONFIG_UPDATED = true,
     PLAYER_SPECIALIZATION_CHANGED = true,
     UPDATE_MACROS = true,
+    UPDATE_BINDINGS = true,
 }
 
 local frame = CreateFrame("Frame")
@@ -442,4 +593,10 @@ SLASH_SERVERSNAPSHOT1 = "/serversnapshot"
 SLASH_SERVERSNAPSHOT2 = "/ssnap"
 SlashCmdList.SERVERSNAPSHOT = function()
     printStatus("slash")
+end
+
+if type(hooksecurefunc) == "function" and type(AddonList_OnOkay) == "function" then
+    hooksecurefunc("AddonList_OnOkay", function()
+        addon:Snapshot("AddonList_OnOkay")
+    end)
 end

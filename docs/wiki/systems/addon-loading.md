@@ -77,7 +77,9 @@ Counts above are the discovered set after filtering by `is_allowed_game_type` an
 
 ## Third-Party Addon Enable State
 
-Third-party addon state starts from the real character `WTF/Account/{account}/{realm}/{character}/AddOns.txt` when WTF import is enabled. The simulator-local `~/.local/share/wow-sim/AddOns.txt` overlays that state instead of replacing it, so a partial local save from the in-sim AddOn UI does not accidentally re-enable every real-client-disabled addon that is missing from the local file.
+Third-party addon state starts from the real character `WTF/Account/{account}/{realm}/{character}/AddOns.txt` when WTF import is enabled. When the `ServerSnapshot` addon has written `ServerSnapshotDB`, the captured `characters[...].addons.entries[*].enabled` values overlay the file state before third-party addon loading. This is the preferred live-client source because the AddOn List UI can expose per-character/dependency state that is not reliably represented by `AddOns.txt` rows alone.
+
+The simulator-local `~/.local/share/wow-sim/AddOns.txt` remains a compatibility overlay after the real WTF file. Avoid treating it as the primary source for real-client state; it is a simulator UI save artifact, not a live-client snapshot.
 
 The effective state pass is dependency-aware. Required dependencies can be enabled for explicitly enabled addons, but addons whose required dependency is explicitly disabled are disabled even when the dependent addon's own TOC default is enabled. This prevents data-shard addons such as RaiderIO DB modules from loading without their required base addon.
 
@@ -99,9 +101,9 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 
 ## Startup Sequence
 
-1. Create `WowLuaEnv`, set paths, configure SavedVariables, import account `bindings-cache.wtf`
+1. Create `WowLuaEnv`, set paths, configure SavedVariables, import account `bindings-cache.wtf`, and import `ServerSnapshotDB` action bars/keybindings when present
 2. Load 27 Blizzard addons in dependency order
-3. Load third-party addons alphabetically
+3. Load third-party addons alphabetically, overlaying `ServerSnapshotDB` addon states when present
 4. Apply post-load workarounds (UpdateMicroButtons stub, WorldMapFrame scroll init, etc.)
 5. Fire startup events: `ADDON_LOADED("WoWUISim")`, `VARIABLES_LOADED`, `PLAYER_LOGIN`, `PLAYER_ENTERING_WORLD(true, false)`, `UPDATE_BINDINGS`, `DISPLAY_SIZE_CHANGED`, `UI_SCALE_CHANGED`
 6. Launch GUI, dump frame tree, or render screenshot

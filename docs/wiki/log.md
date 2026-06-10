@@ -8,6 +8,7 @@ Updated `investigations/frame-surrogate-identity-slot.md` after switching `frame
 Updated it again after making `extract_frame_id` dispatch-aware and adding `native_frame_id_from_val` for the rare cases that need the original table backing.
 Updated it again after real-client and wowless duplicate-name probes showed replacement frames get fresh identity and do not migrate custom Lua fields; recorded the simulator fix that removed old-global field copying during `CreateFrame` registration.
 Updated `systems/addon-loading.md` after fixing third-party addon enable-state merging and startup keybinding import. Recorded that local `AddOns.txt` overlays real WTF state, required-dependency disables apply to default-enabled dependents, and `bindings-cache.wtf` imports before addon loading.
+Updated it again after extending the existing `ServerSnapshot` addon to capture AddOn List enable state and keybindings. Recorded that `ServerSnapshotDB` is the preferred live-client overlay for addon state because `AddOns.txt` alone is not reliable for the per-character UI state.
 
 ## [2026-06-08] update | Mists 5.5.4 EditMode
 
