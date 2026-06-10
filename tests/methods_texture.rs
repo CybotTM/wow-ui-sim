@@ -31,6 +31,15 @@ fn setup_texture(env: &WowLuaEnv, prefix: &str) -> (String, String) {
     (frame_name, tex_name)
 }
 
+fn assert_coords_close(actual: [f64; 8], expected: [f64; 8]) {
+    for (actual, expected) in actual.into_iter().zip(expected) {
+        assert!(
+            (actual - expected).abs() < 0.0001,
+            "expected {expected}, got {actual}"
+        );
+    }
+}
+
 // ============================================================================
 // SetTexture / GetTexture
 // ============================================================================
@@ -136,12 +145,19 @@ fn test_set_texture_after_atlas_resets_atlas_tex_coords() {
     ))
     .unwrap();
 
-    let (left, right, top, bottom): (f64, f64, f64, f64) =
-        env.eval(&format!("return {tex}:GetTexCoord()")).unwrap();
-    assert_eq!(
-        (left, right, top, bottom),
-        (0.0, 1.0, 0.0, 1.0),
-        "SetTexture should render a full file texture after replacing an atlas"
+    let coords: (i64, f64, f64, f64, f64, f64, f64, f64, f64) = env
+        .eval(&format!(
+            r##"
+            return select("#", {tex}:GetTexCoord()), {tex}:GetTexCoord()
+        "##
+        ))
+        .unwrap();
+    assert_eq!(coords.0, 8);
+    assert_coords_close(
+        [
+            coords.1, coords.2, coords.3, coords.4, coords.5, coords.6, coords.7, coords.8,
+        ],
+        [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0],
     );
 }
 
@@ -311,6 +327,48 @@ fn test_set_tex_coord_basic() {
     assert!((coords.1 - 0.9).abs() < 0.001);
     assert!((coords.2 - 0.2).abs() < 0.001);
     assert!((coords.3 - 0.8).abs() < 0.001);
+}
+
+#[test]
+fn test_get_tex_coord_returns_wow_corner_form_for_rect_coords() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "GetTexCoordCorners");
+
+    let default: (i64, f64, f64, f64, f64, f64, f64, f64, f64) = env
+        .eval(&format!(
+            r##"
+            return select("#", {tex}:GetTexCoord()), {tex}:GetTexCoord()
+        "##
+        ))
+        .unwrap();
+
+    assert_eq!(default.0, 8);
+    assert_coords_close(
+        [
+            default.1, default.2, default.3, default.4, default.5, default.6, default.7,
+            default.8,
+        ],
+        [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0],
+    );
+
+    env.exec(&format!("{tex}:SetTexCoord(0.1, 0.9, 0.2, 0.8)"))
+        .unwrap();
+
+    let rect: (i64, f64, f64, f64, f64, f64, f64, f64, f64) = env
+        .eval(&format!(
+            r##"
+            return select("#", {tex}:GetTexCoord()), {tex}:GetTexCoord()
+        "##
+        ))
+        .unwrap();
+
+    assert_eq!(rect.0, 8);
+    assert_coords_close(
+        [
+            rect.1, rect.2, rect.3, rect.4, rect.5, rect.6, rect.7, rect.8,
+        ],
+        [0.1, 0.2, 0.1, 0.8, 0.9, 0.2, 0.9, 0.8],
+    );
 }
 
 #[test]

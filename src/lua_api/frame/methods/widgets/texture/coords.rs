@@ -126,11 +126,24 @@ pub(super) fn get_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
         }
         if let Some((left, right, top, bottom)) = frame.tex_coords {
             drop(sim);
-            return (left as f64, right as f64, top as f64, bottom as f64).into_stack(state);
+            return push_rect_tex_coords_as_corners(state, left, right, top, bottom);
         }
     }
     drop(sim);
-    (0.0, 1.0, 0.0, 1.0).into_stack(state)
+    push_rect_tex_coords_as_corners(state, 0.0, 1.0, 0.0, 1.0)
+}
+
+fn push_rect_tex_coords_as_corners(
+    state: &mut LuaState,
+    left: f32,
+    right: f32,
+    top: f32,
+    bottom: f32,
+) -> LuaResult<u32> {
+    for value in [left, top, left, bottom, right, top, right, bottom] {
+        state.push(Val::Num(value as f64));
+    }
+    Ok(8)
 }
 
 pub(super) fn reset_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
