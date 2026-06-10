@@ -89,7 +89,7 @@ fn get_crit_chance(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_spell_crit_chance(state: &mut LuaState) -> LuaResult<u32> {
-    let _school = i32::from_stack(state, 1)?;
+    let _school = Option::<i32>::from_stack(state, 1)?;
     get_crit_chance(state)
 }
 

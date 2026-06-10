@@ -164,6 +164,7 @@ fn test_paper_doll_combat_stat_helpers_return_safe_numbers() {
             local base, combat = GetManaRegen()
             local values = {
                 GetSpellCritChance(2),
+                GetSpellCritChance(),
                 GetRangedCritChance(),
                 GetCombatRatingBonusForCombatRatingValue(CR_CRIT_MELEE or 9, 180),
                 GetSpeed(),
