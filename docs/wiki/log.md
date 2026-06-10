@@ -16,6 +16,8 @@ but simple shown sibling frames kept `GetFrameLevel()` at `1`/`10` and
 Updated it again after fixing wow-ui-sim so `GetRaisedFrameLevel()` returns the
 retail-observed `0` for the simple sibling probe while keeping internal
 `raise_order` as render/hit-order bookkeeping.
+Updated it again after adding explicit regression coverage for wildcard
+`GetAttribute(prefix, name, suffix)` preserving a stored false value.
 
 ## [2026-06-10] update | Frame identity token userdata
 

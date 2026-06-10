@@ -30,6 +30,39 @@ fn mark_frame_protected(env: &WowLuaEnv, frame_global: &str) {
 }
 
 #[test]
+fn get_attribute_wildcard_lookup_preserves_explicit_false() {
+    let env = env();
+    let (direct_false, wildcard_false, direct_true, wildcard_true, wildcard_string): (
+        bool,
+        bool,
+        bool,
+        bool,
+        String,
+    ) = env
+        .eval(
+            r#"
+        local frame = CreateFrame("Button", "AttributeWildcardFalseProbe", UIParent)
+        frame:SetAttribute("harmtype1", false)
+        frame:SetAttribute("helptype1", true)
+        frame:SetAttribute("*type2", "spell")
+
+        return frame:GetAttribute("harmtype1") == false,
+            frame:GetAttribute("harm", "type", "1") == false,
+            frame:GetAttribute("helptype1") == true,
+            frame:GetAttribute("help", "type", "1") == true,
+            frame:GetAttribute("help", "type", "2")
+    "#,
+        )
+        .unwrap();
+
+    assert!(direct_false);
+    assert!(wildcard_false);
+    assert!(direct_true);
+    assert!(wildcard_true);
+    assert_eq!(wildcard_string, "spell");
+}
+
+#[test]
 fn secure_caller_can_set_attribute_on_protected_frame() {
     let env = env();
     env.exec(
