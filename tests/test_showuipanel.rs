@@ -669,6 +669,45 @@ fn registered_ui_panel_closes_with_escape_stack() {
 }
 
 #[test]
+fn sequential_registered_ui_panels_reenter_close_stack() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            local first = CreateFrame("Frame", "SequentialUIPanelFirst", UIParent)
+            first:SetSize(300, 400)
+            first:Hide()
+            RegisterUIPanel(first, { area = "center", pushable = 0, whileDead = 1 })
+
+            local second = CreateFrame("Frame", "SequentialUIPanelSecond", UIParent)
+            second:SetSize(300, 400)
+            second:Hide()
+            RegisterUIPanel(second, { area = "center", pushable = 0, whileDead = 1 })
+
+            ShowUIPanel(first)
+            if not first:IsShown() then
+                return "first_show_failed"
+            end
+
+            ShowUIPanel(second)
+            if not second:IsShown() then
+                return "second_show_failed"
+            end
+
+            CloseAllWindows()
+            if second:IsShown() then
+                return "second_close_failed"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result, "ok",
+            "sequential registered UIPanel shows must keep the active panel in the CloseAllWindows/Escape stack: {result}"
+        );
+    }
+}
+
+#[test]
 fn startup_without_world_map_does_not_error_in_quest_map_refresh() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");

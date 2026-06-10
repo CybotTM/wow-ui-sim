@@ -79,30 +79,23 @@ pub(super) fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
         sim.widgets.get(id).is_some_and(|frame| frame.forbidden)
     };
     let changed = store_simple_attribute(state, id, &name, value)?;
-    let compatibility_dispatch = should_dispatch_unchanged_attribute(&name, value);
-    if changed || secure_delegate_dispatch || compatibility_dispatch {
-        let frame = frame_ref(state, id)?;
-        if let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
-            dispatch_attribute_changed(
-                state,
-                handler,
-                frame,
-                name_arg,
-                value,
-                secure_delegate_dispatch,
-            );
-        } else {
-            dispatch_direct_attribute_changed(state, frame, name_arg, value);
-        }
+    let frame = frame_ref(state, id)?;
+    if let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
+        dispatch_attribute_changed(
+            state,
+            handler,
+            frame,
+            name_arg,
+            value,
+            secure_delegate_dispatch,
+        );
+    } else {
+        dispatch_direct_attribute_changed(state, frame, name_arg, value);
     }
     if changed {
         run_state_attribute_snippet(state, id, &name, value)?;
     }
     Ok(0)
-}
-
-fn should_dispatch_unchanged_attribute(name: &str, value: Val) -> bool {
-    name == "createframes" && matches!(value, Val::Bool(true))
 }
 
 fn run_state_attribute_snippet(

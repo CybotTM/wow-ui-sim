@@ -204,12 +204,12 @@ fn insecure_caller_cannot_set_attribute_no_handler_on_protected_frame() {
 }
 
 #[test]
-fn unchanged_scalar_attribute_does_not_refire_on_attribute_changed() {
+fn unchanged_scalar_attribute_refires_on_attribute_changed() {
     let env = env();
     let count: i32 = env
         .eval(
             r#"
-            local frame = CreateFrame("Frame", "UnchangedAttributeNoRefire", UIParent)
+            local frame = CreateFrame("Frame", "UnchangedAttributeRefire", UIParent)
             local count = 0
             frame:SetScript("OnAttributeChanged", function()
                 count = count + 1
@@ -224,8 +224,8 @@ fn unchanged_scalar_attribute_does_not_refire_on_attribute_changed() {
         .unwrap();
 
     assert_eq!(
-        count, 1,
-        "unchanged scalar attributes should not re-fire OnAttributeChanged"
+        count, 2,
+        "SetAttribute should fire OnAttributeChanged for each write, even when the value is unchanged"
     );
 }
 
