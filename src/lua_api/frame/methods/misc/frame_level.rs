@@ -62,12 +62,11 @@ fn highest_frame_level(
 
 pub fn get_raised_frame_level(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let level = borrow_state(state)?
-        .widgets
-        .get(id)
-        .map(|f| f.frame_level + f.raise_order)
-        .unwrap_or(0);
-    state.push(Val::Num(level as f64));
+    // Retail 12.0.5 reports 0 for simple sibling frames before and after
+    // Raise()/Lower(). Internal raise_order remains render bookkeeping, not
+    // part of this Lua-visible getter.
+    let _ = id;
+    state.push(Val::Num(0.0));
     Ok(1)
 }
 

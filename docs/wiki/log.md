@@ -2,6 +2,21 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-10] investigation | Retail core behavior probes
+
+Created `investigations/retail-core-behavior-probes.md` after adding and
+installing `CoreBehaviorProbe`. Recorded the retail `12.0.5.67823`
+observations for `SetForbidden`, `CreateForbiddenFrame`, invalid
+`RegisterUnitEvent`, wildcard false attributes, and the improved Raise/Lower
+probe that needs a fresh live-client capture before simulator behavior changes.
+Updated it after the fresh reload capture: `Raise()` and `Lower()` succeeded,
+but simple shown sibling frames kept `GetFrameLevel()` at `1`/`10` and
+`GetRaisedFrameLevel()` at `0` before and after under both a private parent and
+`UIParent`.
+Updated it again after fixing wow-ui-sim so `GetRaisedFrameLevel()` returns the
+retail-observed `0` for the simple sibling probe while keeping internal
+`raise_order` as render/hit-order bookkeeping.
+
 ## [2026-06-10] update | Frame identity token userdata
 
 Updated `investigations/frame-surrogate-identity-slot.md` after switching `frame[0]` from a tiny backed table to a `FrameIdentity` userdata token. Recorded that DevTools dumping also needs raw frame iteration plus `dumpobject` returning nil so `[0]` renders as opaque userdata.

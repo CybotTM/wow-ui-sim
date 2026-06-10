@@ -5,6 +5,28 @@ fn env() -> WowLuaEnv {
 }
 
 #[test]
+fn test_addon_created_normal_frame_set_forbidden_is_noop() {
+    let env = env();
+    let (before, after_true, after_false): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "NormalSetForbiddenProbe", UIParent)
+            local before = frame:IsForbidden()
+            frame:SetForbidden(true)
+            local afterTrue = frame:IsForbidden()
+            frame:SetForbidden(false)
+            local afterFalse = frame:IsForbidden()
+            return before, afterTrue, afterFalse
+            "#,
+        )
+        .unwrap();
+
+    assert!(!before);
+    assert!(!after_true);
+    assert!(!after_false);
+}
+
+#[test]
 fn test_insecure_combat_blocks_protected_parent_and_anchored_frame_mutations() {
     let env = env();
     let (protected_width, protected_height, anchored_width, parent_height, parent_kept, blocked): (

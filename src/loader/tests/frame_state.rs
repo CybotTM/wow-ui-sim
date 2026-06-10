@@ -34,7 +34,7 @@ fn test_frame_level_methods_follow_parent_level_and_raise_state() {
         assert(ParentLevelFrame:GetHighestFrameLevel(true) == 31, "highest level should reflect deepest descendant")
 
         ChildLevelFrame:Raise()
-        assert(ChildLevelFrame:GetRaisedFrameLevel() > ChildLevelFrame:GetFrameLevel(), "raised frame level should include raise order")
+        assert(ChildLevelFrame:GetRaisedFrameLevel() == 0, "retail keeps simple raised frame level hidden from Lua")
 
         ChildLevelFrame:SetUsingParentLevel(true)
 

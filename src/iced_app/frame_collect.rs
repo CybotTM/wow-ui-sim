@@ -99,7 +99,8 @@ fn effective_frame_level(frame: &crate::widget::Frame) -> i32 {
 ///
 /// Non-regions sort by effective raised level `(frame_level + raise_order)`.
 /// `Raise()` changes `raise_order` without mutating `frame_level`, so render
-/// ordering needs the combined value to match WoW's `GetRaisedFrameLevel()`.
+/// ordering uses the combined internal value even though retail does not expose
+/// it through `GetRaisedFrameLevel()` for simple sibling frames.
 /// Regions follow the same parent effective level within the same parent draw
 /// layer so later-created overlays do not get buried under earlier background
 /// textures. FontStrings (type_flag=1) render above Textures (type_flag=0) in

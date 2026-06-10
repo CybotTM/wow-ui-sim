@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: CoreBehaviorProbe
+## Notes: Core behavior probe
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: CoreBehaviorProbeDB
+
+CoreBehaviorProbe.lua

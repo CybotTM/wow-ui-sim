@@ -6,6 +6,75 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().unwrap()
 }
 
+#[test]
+fn test_raise_lower_do_not_change_lua_visible_raised_frame_level() {
+    let env = env();
+    let (
+        before_low_level,
+        before_high_level,
+        before_low_raised,
+        before_high_raised,
+        after_raise_low_level,
+        after_raise_high_level,
+        after_raise_low_raised,
+        after_raise_high_raised,
+        after_lower_low_level,
+        after_lower_high_level,
+        after_lower_low_raised,
+        after_lower_high_raised,
+    ): (i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+        local parent = CreateFrame("Frame", "RaiseLowerLuaVisibleParent", UIParent)
+        parent:SetSize(100, 100)
+        parent:Show()
+
+        local low = CreateFrame("Frame", "RaiseLowerLuaVisibleLow", parent)
+        low:SetFrameLevel(1)
+        low:Show()
+
+        local high = CreateFrame("Frame", "RaiseLowerLuaVisibleHigh", parent)
+        high:SetFrameLevel(10)
+        high:Show()
+
+        local beforeLowLevel = low:GetFrameLevel()
+        local beforeHighLevel = high:GetFrameLevel()
+        local beforeLowRaised = low:GetRaisedFrameLevel()
+        local beforeHighRaised = high:GetRaisedFrameLevel()
+
+        low:Raise()
+
+        local afterRaiseLowLevel = low:GetFrameLevel()
+        local afterRaiseHighLevel = high:GetFrameLevel()
+        local afterRaiseLowRaised = low:GetRaisedFrameLevel()
+        local afterRaiseHighRaised = high:GetRaisedFrameLevel()
+
+        high:Lower()
+
+        return beforeLowLevel,
+            beforeHighLevel,
+            beforeLowRaised,
+            beforeHighRaised,
+            afterRaiseLowLevel,
+            afterRaiseHighLevel,
+            afterRaiseLowRaised,
+            afterRaiseHighRaised,
+            low:GetFrameLevel(),
+            high:GetFrameLevel(),
+            low:GetRaisedFrameLevel(),
+            high:GetRaisedFrameLevel()
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!((before_low_level, before_high_level), (1, 10));
+    assert_eq!((before_low_raised, before_high_raised), (0, 0));
+    assert_eq!((after_raise_low_level, after_raise_high_level), (1, 10));
+    assert_eq!((after_raise_low_raised, after_raise_high_raised), (0, 0));
+    assert_eq!((after_lower_low_level, after_lower_high_level), (1, 10));
+    assert_eq!((after_lower_low_raised, after_lower_high_raised), (0, 0));
+}
+
 // ============================================================================
 // SetFixedFrameLevel + SetParent interaction
 // ============================================================================

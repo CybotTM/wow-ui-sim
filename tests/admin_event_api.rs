@@ -404,7 +404,7 @@ fn test_fire_event_runs_matching_unit_event_callback() {
 #[test]
 fn test_register_unit_event_reports_registered_unit() {
     let env = env();
-    let (registered, unit, invalid_registered): (bool, String, bool) = env
+    let (registered, unit, invalid_registered, invalid_unit_is_nil): (bool, String, bool, bool) = env
         .eval(
             r#"
             local f = CreateFrame("Frame")
@@ -413,14 +413,15 @@ fn test_register_unit_event_reports_registered_unit() {
 
             local invalid = CreateFrame("Frame")
             invalid:RegisterUnitEvent("UNIT_HEALTH", "not_a_unit")
-            local invalidRegistered = invalid:IsEventRegistered("UNIT_HEALTH")
+            local invalidRegistered, invalidUnit = invalid:IsEventRegistered("UNIT_HEALTH")
 
-            return registered, unit, invalidRegistered
+            return registered, unit, invalidRegistered, invalidUnit == nil
             "#,
         )
         .unwrap();
 
     assert!(registered);
     assert_eq!(unit, "player");
-    assert!(!invalid_registered);
+    assert!(invalid_registered);
+    assert!(invalid_unit_is_nil);
 }

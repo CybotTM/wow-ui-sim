@@ -410,16 +410,25 @@ pub(super) fn get_frame_ref(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_forbidden(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    // TODO: combat lockdown check
-    let forbidden = match stack_val(state, 2) {
-        Val::Bool(b) => b,
-        _ => true,
-    };
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.forbidden = forbidden;
+    #[cfg(feature = "client-retail")]
+    {
+        let _ = id;
+        return Ok(0);
     }
-    Ok(0)
+
+    #[cfg(not(feature = "client-retail"))]
+    {
+        // TODO: combat lockdown check
+        let forbidden = match stack_val(state, 2) {
+            Val::Bool(b) => b,
+            _ => true,
+        };
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut(id) {
+            frame.forbidden = forbidden;
+        }
+        Ok(0)
+    }
 }
 
 pub(super) fn is_forbidden(state: &mut LuaState) -> LuaResult<u32> {

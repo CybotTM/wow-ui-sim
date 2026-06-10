@@ -44,13 +44,14 @@ pub(super) fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    if !super::unit_event::is_valid_unit_filter(&unit) {
-        state.push(Val::Bool(false));
-        return Ok(1);
-    }
+    let valid_unit = super::unit_event::is_valid_unit_filter(&unit);
     let newly_registered = {
         let mut sim = borrow_state_mut(state)?;
-        sim.widgets.register_unit_event_listener(id, &event, &unit)
+        if valid_unit {
+            sim.widgets.register_unit_event_listener(id, &event, &unit)
+        } else {
+            sim.widgets.register_event_listener(id, &event)
+        }
     };
     if newly_registered {
         rilua_hlist_register_individual(state, id, &event)?;
