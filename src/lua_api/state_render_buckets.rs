@@ -28,10 +28,6 @@ pub(super) fn is_region(wt: crate::widget::WidgetType) -> bool {
     )
 }
 
-pub(super) fn effective_frame_level(frame: &crate::widget::Frame) -> i32 {
-    frame.frame_level.saturating_add(frame.raise_order)
-}
-
 pub(super) fn is_strata_root_boundary(frame: &crate::widget::Frame) -> bool {
     matches!(frame.name.as_deref(), Some("UIParent" | "WorldFrame"))
 }
@@ -536,18 +532,11 @@ fn split_font_regions(
 
 fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
     frames.sort_by(|&a, &b| match (widgets.get(a), widgets.get(b)) {
-        (Some(frame_a), Some(frame_b)) => (
-            effective_frame_level(frame_a),
-            frame_a.frame_level,
-            frame_a.raise_order,
-            a,
-        )
-            .cmp(&(
-                effective_frame_level(frame_b),
-                frame_b.frame_level,
-                frame_b.raise_order,
-                b,
-            )),
+        (Some(frame_a), Some(frame_b)) => (frame_a.frame_level, frame_a.raise_order, a).cmp(&(
+            frame_b.frame_level,
+            frame_b.raise_order,
+            b,
+        )),
         _ => a.cmp(&b),
     });
 }

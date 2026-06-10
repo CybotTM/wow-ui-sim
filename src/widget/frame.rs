@@ -50,10 +50,9 @@ pub struct Frame {
     pub registered_unit_events: HashMap<String, String>,
     /// Frame level (draw order within strata).
     pub frame_level: i32,
-    /// Raise/Lower order offset applied on top of `frame_level`.
-    /// Render order uses the effective raised level (`frame_level + raise_order`)
-    /// so Raise() can outrank higher raw sibling levels without mutating the
-    /// frame's actual level.
+    /// Raise/Lower ordering within the raw `frame_level`.
+    /// Retail does not let Raise()/Lower() jump across different frame levels,
+    /// so render and hit sorting use this only as a same-level tie-breaker.
     pub raise_order: i32,
     /// Whether frame level was explicitly set (not inherited from parent).
     pub has_fixed_frame_level: bool,

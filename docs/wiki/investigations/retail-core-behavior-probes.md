@@ -18,7 +18,9 @@ The simulator now matches the confirmed retail behavior for invalid `RegisterUni
 
 The first Raise/Lower probe was too weak because both frames reported `GetRaisedFrameLevel() == 0` before and after. The improved probe creates paired low/high siblings under both a private parent and `UIParent`, snapshots `GetFrameLevel()`, `GetRaisedFrameLevel()`, strata, show/visible state before/after `Raise()` and `Lower()`, and records whether the relative raised levels changed.
 
-The fresh retail capture from `2026-06-10T16:26:09` kept the same values in both cases: low frame level `1`, high frame level `10`, both raised-frame levels `0`, and both frames visible/shown before and after `Raise()` and `Lower()`. The calls succeeded, but the probe found no Lua-visible ordering change for simple shown sibling frames. The simulator keeps its internal `raise_order` for render/hit ordering, but no longer exposes that bookkeeping through `GetRaisedFrameLevel()`.
+The fresh retail capture from `2026-06-10T16:26:09` kept the same values in both cases: low frame level `1`, high frame level `10`, both raised-frame levels `0`, and both frames visible/shown before and after `Raise()` and `Lower()`. The calls succeeded, but the probe found no Lua-visible ordering change for simple shown sibling frames.
+
+The follow-up hit-order capture from `2026-06-10T16:52:38` kept mouse focus on the high frame before `low:Raise()`, after `low:Raise()`, and after `high:Lower()`. Both frames were full-screen, mouse-enabled, visible, shown, and in `DIALOG` strata; low had frame level `1`, high had frame level `10`, and both reported raised-frame level `0`. The simulator now keeps internal `raise_order` only as a same-raw-level tie-breaker, so Raise/Lower no longer lets lower frame levels overtake higher ones.
 
 ## Sources
 

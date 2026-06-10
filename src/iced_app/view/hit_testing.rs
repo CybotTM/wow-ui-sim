@@ -238,12 +238,7 @@ fn hit_sort_key(
     frame: &crate::widget::Frame,
     id: u64,
 ) -> (crate::widget::FrameStrata, i32, i32, u64) {
-    (
-        frame.frame_strata,
-        frame.frame_level.saturating_add(frame.raise_order),
-        frame.frame_level,
-        id,
-    )
+    (frame.frame_strata, frame.frame_level, frame.raise_order, id)
 }
 
 fn frame_has_mouse_button_action(

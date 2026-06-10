@@ -209,6 +209,99 @@ local function probeRaise()
     }
 end
 
+local function currentMouseFocus()
+    if type(GetMouseFoci) == "function" then
+        local values = { GetMouseFoci() }
+        if #values == 1 and type(values[1]) == "table" then
+            return values[1][1]
+        end
+        return values[1]
+    end
+
+    if type(GetMouseFocus) == "function" then
+        return GetMouseFocus()
+    end
+end
+
+local function focusSnapshot(low, high)
+    local focus = currentMouseFocus()
+    local which = "other"
+    if focus == low then
+        which = "low"
+    elseif focus == high then
+        which = "high"
+    elseif focus == nil then
+        which = "nil"
+    end
+
+    return {
+        which = which,
+        focus = valueSummary(focus),
+        getMouseFocusType = type(GetMouseFocus),
+        getMouseFociType = type(GetMouseFoci),
+        low = frameLevelSnapshot(low),
+        high = frameLevelSnapshot(high),
+    }
+end
+
+local function makeRaiseHitFrame(level)
+    local frame = CreateFrame("Frame", nil, UIParent)
+    frame:SetAllPoints(UIParent)
+    frame:SetFrameStrata("DIALOG")
+    frame:SetFrameLevel(level)
+    frame:EnableMouse(true)
+    frame:Show()
+    return frame
+end
+
+local function startRaiseHitProbe()
+    CoreBehaviorProbeDB.raiseHit = {
+        status = "pending",
+    }
+
+    if type(C_Timer) ~= "table" or type(C_Timer.After) ~= "function" then
+        CoreBehaviorProbeDB.raiseHit = {
+            status = "skipped",
+            reason = "C_Timer.After missing",
+        }
+        return
+    end
+
+    local low = makeRaiseHitFrame(1)
+    local high = makeRaiseHitFrame(10)
+
+    C_Timer.After(0, function()
+        local before = focusSnapshot(low, high)
+        local raise = callProtected(function()
+            return low:Raise()
+        end)
+
+        C_Timer.After(0, function()
+            local afterRaise = focusSnapshot(low, high)
+            local lower = callProtected(function()
+                return high:Lower()
+            end)
+
+            C_Timer.After(0, function()
+                local afterLower = focusSnapshot(low, high)
+                low:Hide()
+                high:Hide()
+
+                CoreBehaviorProbeDB.raiseHit = {
+                    status = "captured",
+                    before = before,
+                    raise = raise,
+                    afterRaise = afterRaise,
+                    lower = lower,
+                    afterLower = afterLower,
+                }
+
+                print("CoreBehaviorProbe Raise/Lower hit capture complete; /reload or logout to flush SavedVariables")
+            end)
+        end)
+    end)
+end
+
 local function runProbe()
     CoreBehaviorProbeDB = {
         addonName = addonName,
@@ -219,6 +312,7 @@ local function runProbe()
         attributeFalseWildcard = probeAttributeFalseWildcard(),
         raise = probeRaise(),
     }
+    startRaiseHitProbe()
 
     print("CoreBehaviorProbe captured; /reload or logout to flush SavedVariables")
 end

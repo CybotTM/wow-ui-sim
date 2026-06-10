@@ -1,5 +1,6 @@
 //! Tests for frame level behavior: SetFrameLevel, SetFixedFrameLevel, SetParent interaction.
 
+use wow_ui_sim::iced_app::frame_collect::collect_hittable_frames;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
@@ -73,6 +74,58 @@ fn test_raise_lower_do_not_change_lua_visible_raised_frame_level() {
     assert_eq!((after_raise_low_raised, after_raise_high_raised), (0, 0));
     assert_eq!((after_lower_low_level, after_lower_high_level), (1, 10));
     assert_eq!((after_lower_low_raised, after_lower_high_raised), (0, 0));
+}
+
+#[test]
+fn test_raise_lower_do_not_cross_raw_frame_levels_for_hit_order() {
+    let env = env();
+    env.exec(
+        r#"
+        local low = CreateFrame("Frame", "RaiseLowerHitLow", UIParent)
+        low:SetAllPoints(UIParent)
+        low:SetFrameStrata("DIALOG")
+        low:SetFrameLevel(1)
+        low:EnableMouse(true)
+        low:Show()
+
+        local high = CreateFrame("Frame", "RaiseLowerHitHigh", UIParent)
+        high:SetAllPoints(UIParent)
+        high:SetFrameStrata("DIALOG")
+        high:SetFrameLevel(10)
+        high:EnableMouse(true)
+        high:Show()
+    "#,
+    )
+    .unwrap();
+
+    assert_eq!(top_hittable_probe_frame(&env), "RaiseLowerHitHigh");
+
+    env.exec("RaiseLowerHitLow:Raise()").unwrap();
+    assert_eq!(top_hittable_probe_frame(&env), "RaiseLowerHitHigh");
+
+    env.exec("RaiseLowerHitHigh:Lower()").unwrap();
+    assert_eq!(top_hittable_probe_frame(&env), "RaiseLowerHitHigh");
+}
+
+fn top_hittable_probe_frame(env: &WowLuaEnv) -> String {
+    let mut state = env.state().borrow_mut();
+    state.ensure_layout_rects();
+    let strata_buckets = state
+        .get_strata_buckets()
+        .expect("strata buckets should be available")
+        .clone();
+    let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
+
+    collected
+        .hittable
+        .iter()
+        .rev()
+        .find_map(|(id, _)| {
+            let frame = state.widgets.get(*id)?;
+            let name = frame.name.as_deref()?;
+            name.starts_with("RaiseLowerHit").then(|| name.to_string())
+        })
+        .expect("probe frame should be hittable")
 }
 
 // ============================================================================

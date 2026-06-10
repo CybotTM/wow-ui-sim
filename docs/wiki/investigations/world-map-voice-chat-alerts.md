@@ -82,7 +82,7 @@ Fix:
 
 - Treat `UIParent` and `WorldFrame` as **strata root boundaries**, not normal render roots.
 - Stop the cached-bucket repair path at those boundaries so showing `WorldMapFrame` invalidates/rebuilds the relevant strata ordering instead of splicing under `UIParent`.
-- Use effective raised level (`frame_level + raise_order`) for intra-strata sort keys and for internal `Raise()`/`Lower()` bookkeeping so UIPanel raises participate in render order without mutating Lua-visible `GetFrameLevel()`.
+- Use raw `frame_level` first and `raise_order` only as a same-level tie-breaker for intra-strata sort keys and internal `Raise()`/`Lower()` bookkeeping.
 
 Verification after the fix:
 

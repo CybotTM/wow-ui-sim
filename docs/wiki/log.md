@@ -18,6 +18,10 @@ retail-observed `0` for the simple sibling probe while keeping internal
 `raise_order` as render/hit-order bookkeeping.
 Updated it again after adding explicit regression coverage for wildcard
 `GetAttribute(prefix, name, suffix)` preserving a stored false value.
+Updated it again after the hit-order capture showed the higher raw frame level
+kept mouse focus before and after `Raise()`/`Lower()`; wow-ui-sim now treats
+`raise_order` as a same-level tie-breaker instead of adding it to
+`frame_level`.
 
 ## [2026-06-10] update | Frame identity token userdata
 

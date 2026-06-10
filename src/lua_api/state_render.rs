@@ -8,8 +8,8 @@ mod state_render_buckets;
 #[path = "state_render_repairs.rs"]
 mod state_render_repairs;
 use state_render_buckets::{
-    dfs_emit, effective_frame_level, is_region, is_strata_root_boundary,
-    should_trace_strata_invalidations, uses_parent_alpha_fallback,
+    dfs_emit, is_region, is_strata_root_boundary, should_trace_strata_invalidations,
+    uses_parent_alpha_fallback,
 };
 use state_render_repairs::{build_strata_bucket_repair_plan, splice_strata_bucket_repair};
 
@@ -138,19 +138,14 @@ impl SimState {
             .collect()
     }
 
-    /// Sort root frame IDs so explicit Raise() wins for top-level panel trees.
+    /// Sort root frame IDs so explicit Raise() wins within the same raw level.
     fn sort_by_frame_level(&self, ids: &mut [u64]) {
         ids.sort_by(|&a, &b| {
             let fa = self.widgets.get(a);
             let fb = self.widgets.get(b);
             match (fa, fb) {
                 (Some(fa), Some(fb)) => {
-                    (fa.raise_order, effective_frame_level(fa), fa.frame_level, a).cmp(&(
-                        fb.raise_order,
-                        effective_frame_level(fb),
-                        fb.frame_level,
-                        b,
-                    ))
+                    (fa.frame_level, fa.raise_order, a).cmp(&(fb.frame_level, fb.raise_order, b))
                 }
                 _ => a.cmp(&b),
             }
@@ -517,28 +512,21 @@ impl SimState {
         frame.frame_strata
     }
 
-    /// Raise a frame above all siblings in the same strata.
+    /// Raise a frame above same-level siblings in the same strata.
     ///
-    /// `Raise()` does not mutate `frame_level`, so we store enough
-    /// `raise_order` to move the frame's effective raised level above the
-    /// highest sibling in the same strata.
+    /// `Raise()` does not mutate `frame_level`, and retail does not let a lower
+    /// raw frame level jump above a higher one. `raise_order` is only a
+    /// same-level tie-breaker.
     pub fn raise_frame(&mut self, id: u64) {
-        let (parent_id, strata, level, current_effective_level) = match self.widgets.get(id) {
-            Some(f) => (
-                f.parent_id,
-                f.frame_strata,
-                f.frame_level,
-                effective_frame_level(f),
-            ),
+        let (parent_id, strata, level) = match self.widgets.get(id) {
+            Some(f) => (f.parent_id, f.frame_strata, f.frame_level),
             None => return,
         };
-        let sibling_max_effective_level =
-            self.sibling_effective_level_range(id, parent_id, strata).1;
-        let target_effective_level = sibling_max_effective_level.max(current_effective_level);
+        let sibling_max_order = self
+            .sibling_raise_order_range(id, parent_id, strata, level)
+            .1;
         if let Some(f) = self.widgets.get_mut_visual(id) {
-            f.raise_order = target_effective_level
-                .saturating_add(1)
-                .saturating_sub(level);
+            f.raise_order = sibling_max_order.saturating_add(1);
         }
         // Re-sort the affected subtree in strata buckets.
         // Avoid setting strata_buckets = None: Show/Hide calls later in the
@@ -549,26 +537,22 @@ impl SimState {
         }
     }
 
-    /// Lower a frame below all siblings in the same strata.
+    /// Lower a frame below same-level siblings in the same strata.
     ///
-    /// Mirrors `Raise()` by adjusting only `raise_order` and leaving the raw
-    /// `frame_level` unchanged.
+    /// Mirrors `Raise()` by adjusting only the same-level tie-breaker.
     pub fn lower_frame(&mut self, id: u64) {
-        let (parent_id, strata, level, current_effective_level) = match self.widgets.get(id) {
-            Some(f) => (
-                f.parent_id,
-                f.frame_strata,
-                f.frame_level,
-                effective_frame_level(f),
-            ),
+        let (parent_id, strata, level, current_order) = match self.widgets.get(id) {
+            Some(f) => (f.parent_id, f.frame_strata, f.frame_level, f.raise_order),
             None => return,
         };
-        let min_effective_level = self.sibling_effective_level_range(id, parent_id, strata).0;
-        if current_effective_level < min_effective_level {
+        let min_order = self
+            .sibling_raise_order_range(id, parent_id, strata, level)
+            .0;
+        if current_order < min_order {
             return; // Already at bottom
         }
         if let Some(f) = self.widgets.get_mut_visual(id) {
-            f.raise_order = min_effective_level.saturating_sub(1).saturating_sub(level);
+            f.raise_order = min_order.saturating_sub(1);
         }
         if self.strata_buckets.is_some() {
             self.remove_subtree_from_buckets(id);
@@ -576,12 +560,13 @@ impl SimState {
         }
     }
 
-    /// Return (min, max) effective frame level among siblings of `id` in the given strata.
-    fn sibling_effective_level_range(
+    /// Return (min, max) raise order among same-level siblings.
+    fn sibling_raise_order_range(
         &self,
         id: u64,
         parent_id: Option<u64>,
         strata: crate::widget::FrameStrata,
+        level: i32,
     ) -> (i32, i32) {
         let sibling_ids: Vec<u64> = if let Some(pid) = parent_id {
             self.widgets
@@ -605,7 +590,8 @@ impl SimState {
             .filter(|&&sid| sid != id)
             .filter_map(|&sid| self.widgets.get(sid))
             .filter(|f| f.frame_strata == strata)
-            .map(effective_frame_level)
+            .filter(|f| f.frame_level == level)
+            .map(|f| f.raise_order)
             .collect();
         let min = levels.iter().copied().min().unwrap_or(0);
         let max = levels.iter().copied().max().unwrap_or(0);

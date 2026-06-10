@@ -86,10 +86,6 @@ fn count_subtree_frames(registry: &crate::widget::WidgetRegistry, root_id: u64) 
 /// Sort key type for frame rendering order within a strata bucket.
 pub type IntraStrataKey = (i32, i32, u64, u8, i32, i32, u8, u64);
 
-fn effective_frame_level(frame: &crate::widget::Frame) -> i32 {
-    frame.frame_level.saturating_add(frame.raise_order)
-}
-
 /// Intra-strata sort key for rendering order within the same frame strata.
 ///
 /// In WoW, regions (Texture/FontString) render as part of their parent frame,
@@ -97,11 +93,10 @@ fn effective_frame_level(frame: &crate::widget::Frame) -> i32 {
 /// their parent via `parent_id`, ensuring all regions of a frame render
 /// immediately after that frame (before any higher-level content).
 ///
-/// Non-regions sort by effective raised level `(frame_level + raise_order)`.
-/// `Raise()` changes `raise_order` without mutating `frame_level`, so render
-/// ordering uses the combined internal value even though retail does not expose
-/// it through `GetRaisedFrameLevel()` for simple sibling frames.
-/// Regions follow the same parent effective level within the same parent draw
+/// Non-regions sort by raw `frame_level`, then `raise_order` as a same-level
+/// tie-breaker. Retail does not expose or apply Raise()/Lower() as a way to
+/// cross raw frame levels in the simple sibling probes.
+/// Regions follow the same parent ordering within the same parent draw
 /// layer so later-created overlays do not get buried under earlier background
 /// textures. FontStrings (type_flag=1) render above Textures (type_flag=0) in
 /// the same draw layer per WoW rules.
@@ -114,22 +109,22 @@ pub fn intra_strata_sort_key(
         f.widget_type,
         WidgetType::Texture | WidgetType::FontString | WidgetType::Line
     ) {
-        let (parent_level, parent_frame_level, parent_id) = f
+        let (parent_frame_level, parent_raise_order, parent_id) = f
             .parent_id
             .and_then(|pid| {
                 registry
                     .get(pid)
-                    .map(|p| (effective_frame_level(p), p.frame_level, pid))
+                    .map(|p| (p.frame_level, p.raise_order, pid))
             })
-            .unwrap_or((effective_frame_level(f), f.frame_level, id));
+            .unwrap_or((f.frame_level, f.raise_order, id));
         let type_flag = if f.widget_type == WidgetType::FontString {
             1u8
         } else {
             0u8
         };
         (
-            parent_level,
             parent_frame_level,
+            parent_raise_order,
             parent_id,
             1,
             f.draw_layer as i32,
@@ -138,7 +133,7 @@ pub fn intra_strata_sort_key(
             id,
         )
     } else {
-        (effective_frame_level(f), f.frame_level, id, 0, 0, 0, 0, 0)
+        (f.frame_level, f.raise_order, id, 0, 0, 0, 0, 0)
     }
 }
 
@@ -188,8 +183,8 @@ fn hittable_frame_entry(
         (
             id,
             frame.frame_strata,
-            effective_frame_level(frame),
             frame.frame_level,
+            frame.raise_order,
             rect,
         )
     })
