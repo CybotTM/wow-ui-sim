@@ -9,6 +9,8 @@ use rilua::RuntimeError;
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
+use super::table_builder::FrameIdentity;
+
 // ---------------------------------------------------------------------------
 // Stack helpers
 // ---------------------------------------------------------------------------
@@ -136,7 +138,9 @@ impl<A: FrameArena + 'static> FromStack for FrameRef<A> {
             .gc
             .tables
             .get(table_ref)
-            .and_then(|table| table.backing())
+            .and_then(|table| {
+                frame_identity_backing(state, table.get_int(0)).or_else(|| table.backing())
+            })
             .ok_or_else(|| type_error("frame-backed table", "table", index))?;
 
         let frame_ref = Self {
@@ -146,6 +150,23 @@ impl<A: FrameArena + 'static> FromStack for FrameRef<A> {
         };
         let _ = frame_ref.get(state)?;
         Ok(frame_ref)
+    }
+}
+
+fn frame_identity_backing(state: &LuaState, val: Val) -> Option<(u32, u32)> {
+    match val {
+        Val::Userdata(identity_ref) => state
+            .gc
+            .userdata
+            .get(identity_ref)
+            .and_then(|identity| identity.downcast_ref::<FrameIdentity>())
+            .map(|identity| (identity.index, identity.generation)),
+        Val::Table(identity_ref) => state
+            .gc
+            .tables
+            .get(identity_ref)
+            .and_then(|identity| identity.backing()),
+        _ => None,
     }
 }
 

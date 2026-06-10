@@ -66,3 +66,24 @@ fn frame_identity_userdata_is_opaque_to_dumpobject() {
     assert_eq!(dumpobject_type, "function");
     assert!(dump_result_is_nil);
 }
+
+#[test]
+fn frame_arguments_resolve_through_identity_slot() {
+    let env = env();
+    let parent_name: String = env
+        .eval(
+            r#"
+            local a = CreateFrame("Frame", "IdentityArgA")
+            local b = CreateFrame("Frame", "IdentityArgB")
+            local child = CreateFrame("Frame", "IdentityArgChild")
+
+            a[0] = b[0]
+            child:SetParent(a)
+
+            return child:GetParent():GetName()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(parent_name, "IdentityArgB");
+}

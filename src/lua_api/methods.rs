@@ -36,16 +36,17 @@ pub fn frame_id_from_stack(state: &LuaState, index: i32) -> LuaResult<u64> {
 }
 
 fn frame_id_from_val(state: &LuaState, val: Val) -> LuaResult<u64> {
+    dispatch_frame_id_from_val(state, val)
+        .ok_or_else(|| runtime_error("expected frame-backed table"))
+}
+
+fn dispatch_frame_id_from_val(state: &LuaState, val: Val) -> Option<u64> {
     let Val::Table(table_ref) = val else {
-        return Err(runtime_error("expected frame table as self argument"));
+        return None;
     };
-    let Some(table) = state.gc.tables.get(table_ref) else {
-        return Err(runtime_error("expected frame-backed table"));
-    };
-    if let Some(backing) = frame_identity_backing(state, table).or_else(|| table.backing()) {
-        return Ok((backing.0 as u64) | ((backing.1 as u64) << 32));
-    }
-    Err(runtime_error("expected frame-backed table"))
+    let table = state.gc.tables.get(table_ref)?;
+    let backing = frame_identity_backing(state, table).or_else(|| table.backing())?;
+    Some(pack_id(backing.0, backing.1))
 }
 
 fn frame_identity_backing(state: &LuaState, table: &Table) -> Option<(u32, u32)> {
@@ -133,8 +134,16 @@ pub fn frame_ref(state: &mut LuaState, id: u64) -> LuaResult<Val> {
     Ok(val)
 }
 
-/// Extract frame ID from a `Val` (must be a backed table).
+/// Extract the WoW dispatch frame ID from a `Val`.
+///
+/// Prefer the `frame[0]` identity token and fall back to the table's native
+/// backing only when the identity slot is missing or invalid.
 pub fn extract_frame_id(state: &LuaState, val: Val) -> Option<u64> {
+    dispatch_frame_id_from_val(state, val)
+}
+
+/// Extract the native frame table ID, ignoring `frame[0]` dispatch overrides.
+pub fn native_frame_id_from_val(state: &LuaState, val: Val) -> Option<u64> {
     let Val::Table(table_ref) = val else {
         return None;
     };

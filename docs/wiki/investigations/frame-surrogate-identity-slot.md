@@ -16,7 +16,9 @@ Real-client probe on retail `12.0.5.67823` confirmed slot `0` is the dispatch id
 
 Lua-visible behavior changes from `frame[0] == nil` to `type(frame[0]) == "userdata"`, so regressions should first check code that inspected slot `0` directly.
 
-Regression coverage lives in `security_api::test_frame_identity_slots_dispatch_surrogate_methods` and `frame_table_iteration::{frame_pairs_enumerates_identity_and_array_slots, frame_identity_userdata_is_opaque_to_dumpobject}`.
+`extract_frame_id(state, val)` is dispatch-aware: it prefers `val[0]` and only falls back to native table backing when the identity slot is absent. Code that needs the original Lua table's frame id must use `native_frame_id_from_val` explicitly.
+
+Regression coverage lives in `security_api::test_frame_identity_slots_dispatch_surrogate_methods` and `frame_table_iteration::{frame_pairs_enumerates_identity_and_array_slots, frame_identity_userdata_is_opaque_to_dumpobject, frame_arguments_resolve_through_identity_slot}`.
 
 ## Sources
 
