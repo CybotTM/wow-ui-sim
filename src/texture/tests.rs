@@ -314,6 +314,30 @@ fn test_get_or_load_texture_size_uses_metadata_without_populating_rgba_cache() {
 }
 
 #[test]
+fn test_mislabeled_png_with_jpg_extension_loads_by_content() {
+    let temp_dir = TempDir::new().unwrap();
+    let base = temp_dir.path();
+
+    let mislabeled_path = base.join("mislabeled.jpg");
+    let img = image::RgbaImage::from_pixel(3, 2, image::Rgba([9, 8, 7, 255]));
+    img.save_with_format(&mislabeled_path, image::ImageFormat::Png)
+        .unwrap();
+
+    let mut mgr = TextureManager::new().with_addons_path(base);
+    let data = mgr
+        .load("Interface/AddOns/mislabeled")
+        .expect("PNG content should load even when the extension is .jpg");
+
+    assert_eq!((data.width, data.height), (3, 2));
+    assert_eq!(&data.pixels[0..4], &[9, 8, 7, 255]);
+
+    let dims = mgr
+        .get_or_load_texture_size("Interface/AddOns/mislabeled")
+        .expect("dimension lookup should also sniff PNG content");
+    assert_eq!(dims, (3, 2));
+}
+
+#[test]
 fn test_sub_region_uses_cached_base_texture() {
     let temp_dir = TempDir::new().unwrap();
     let base = temp_dir.path();

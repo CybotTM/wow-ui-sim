@@ -448,8 +448,11 @@ fn load_texture_file(path: &Path) -> Result<TextureData, Box<dyn std::error::Err
             pixels: Arc::<[u8]>::from(pixels),
         })
     } else {
-        // Use standard image crate for other formats
-        let img = image::open(path)?;
+        // Use standard image crate for other formats. Guess from file
+        // contents so mislabeled addon assets still load.
+        let img = image::ImageReader::open(path)?
+            .with_guessed_format()?
+            .decode()?;
         let rgba = img.to_rgba8();
         let (width, height) = rgba.dimensions();
         Ok(TextureData {
@@ -467,7 +470,10 @@ pub(crate) fn read_texture_dimensions(
     if ext.eq_ignore_ascii_case("blp") {
         return read_blp_dimensions(path);
     }
-    Ok(image::image_dimensions(path)?)
+    let dimensions = image::ImageReader::open(path)?
+        .with_guessed_format()?
+        .into_dimensions()?;
+    Ok(dimensions)
 }
 
 fn read_blp_dimensions(
