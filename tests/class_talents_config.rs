@@ -137,6 +137,26 @@ fn initialize_view_loadout_drives_trait_node_spec_visibility() {
 }
 
 #[test]
+fn get_node_info_uses_config_spec_visibility_over_stale_view_spec() {
+    let env = env();
+    let prot_visible: bool = env
+        .eval(
+            r#"
+            C_ClassTalents.InitializeViewLoadout(65, 80)
+            local protConfig = C_ClassTalents.GetConfigIDsBySpecID(66)[1]
+            local protNode = C_Traits.GetNodeInfo(protConfig, 99838)
+            return protNode and protNode.isVisible or false
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        prot_visible,
+        "GetNodeInfo(configID, nodeID) should use configID's spec visibility, not a stale view spec"
+    );
+}
+
+#[test]
 fn non_paladin_view_loadouts_have_consistent_subtree_visibility_and_currency() {
     let env = env();
     let result: String = env

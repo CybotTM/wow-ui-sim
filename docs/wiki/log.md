@@ -1223,3 +1223,7 @@ Updated `investigations/appearances-wardrobe-api.md` after moving `C_TransmogSet
 ## [2026-05-29] ingest | Mists Syndicator and Baganator startup cleanup
 
 Created `investigations/mists-syndicator-baganator-startup.md` after fixing full-profile Mists startup errors. The investigation records the Mists-gated item taxonomy overrides needed by Syndicator and the minimal CharacterFrame/TokenUI bootstrap path needed by Baganator.
+
+## [2026-06-10] update | class talent config-scoped visibility
+
+Updated `investigations/class-talents-trait-loadout-state.md` after fixing a full-addon/SavedVariables talent panel regression where `C_Traits.GetNodeInfo(configID, nodeID)` discarded `configID` and evaluated Protection nodes against a stale view spec.

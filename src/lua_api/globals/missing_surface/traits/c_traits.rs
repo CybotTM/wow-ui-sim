@@ -61,9 +61,9 @@ fn c_traits_get_config_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_traits_get_node_info(state: &mut LuaState) -> LuaResult<u32> {
-    let _config_id = i32::from_stack(state, 1)?;
+    let config_id = i32::from_stack(state, 1)?;
     let node_id = i32::from_stack(state, 2)?;
-    let info = push_node_info(state, node_id);
+    let info = push_node_info(state, config_id, node_id);
     state.push(info);
     Ok(1)
 }
@@ -184,7 +184,7 @@ fn c_traits_get_trait_description(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_traits_get_condition_info(state: &mut LuaState) -> LuaResult<u32> {
-    let _config_id = i32::from_stack(state, 1)?;
+    let config_id = i32::from_stack(state, 1)?;
     let cond_id = u32::from_stack(state, 2)?;
     let Some(cond) = TRAIT_COND_DB.get(&cond_id) else {
         state.push(Val::Nil);
@@ -193,7 +193,7 @@ fn c_traits_get_condition_info(state: &mut LuaState) -> LuaResult<u32> {
 
     let info = create_table_with_capacity(state, CONDITION_INFO_HASH_FIELDS);
     push_condition_base_fields(state, info, cond_id, cond);
-    let is_met = trait_condition_is_met(state, cond);
+    let is_met = trait_condition_is_met(state, config_id, cond);
     push_condition_state_fields(state, info, cond, is_met);
     push_condition_optional_fields(state, info, cond);
     state.push(info);
@@ -221,14 +221,20 @@ fn push_condition_base_fields(
     );
 }
 
-fn trait_condition_is_met(state: &LuaState, cond: &crate::traits::TraitCondInfo) -> bool {
+fn trait_condition_is_met(
+    state: &LuaState,
+    config_id: i32,
+    cond: &crate::traits::TraitCondInfo,
+) -> bool {
     match borrow_state(state).ok() {
         Some(sim) => match cond.cond_type {
             0 => {
                 cond.currency_id == 0
                     || sim.talents.spent_for_currency(cond.currency_id) >= cond.spent_amount
             }
-            1 => spec_set_contains_active_spec(cond.spec_set_id, &sim),
+            1 => {
+                spec_set_contains_spec(cond.spec_set_id, spec_id_for_config_query(config_id, &sim))
+            }
             2 => sim.player.level as u32 >= cond.required_level,
             _ => true,
         },

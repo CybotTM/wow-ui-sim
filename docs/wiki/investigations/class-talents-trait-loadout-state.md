@@ -94,10 +94,36 @@ Relevant tests:
 - `tests/admin_spec_talent_api.rs`
 - `tests/spell_api.rs`
 
+## Config-scoped node visibility regression (2026-06-10)
+
+Full addon startup with live SavedVariables could open the Paladin talents panel with the class tree visible and the Protection tree absent. The missing nodes were not a renderer or anchor problem: Blizzard's `InstantiateTalentButton` path received every Protection/spec node with `nodeInfo.isVisible == false`.
+
+### Symptom
+
+- `C_ClassTalents.GetActiveConfigID()` still returned Protection config `201`
+- `C_Traits.GetNodeInfo(201, protectionNodeID).isVisible` returned `false` after a stale Holy view loadout
+- the resulting screenshot showed the Protection header and background, but no Protection node buttons
+
+### Root Cause
+
+`C_Traits.GetNodeInfo(configID, nodeID)` parsed `configID` and then discarded it. Node visibility fell back to the global viewer/player spec through `view_spec_id.or_else(player_spec_id)`. If an addon path or SavedVariables left `view_spec_id` on another spec, querying a real Protection config still evaluated Protection nodes against the stale viewer spec.
+
+`C_Traits.GetConditionInfo(configID, condID)` had the same discarded-config shape for spec-set conditions, so it could disagree with config-scoped node queries too.
+
+### Fix
+
+Node and condition visibility now derive an effective spec from the supplied config ID when it is a real saved class-talent config (`101/102`, `201/202`, `301/302`). The view config (`Constants.TraitConsts.VIEW_TRAIT_CONFIG_ID`) still falls back to the current view/player spec.
+
+Regression coverage:
+
+- `get_node_info_uses_config_spec_visibility_over_stale_view_spec` initializes a Holy view loadout, queries a Protection config node, and requires it to stay visible.
+
 ## Sources
 
-- [traits.rs](/syncthing/Sync/Projects/wow/wow-ui-sim-rilua/src/lua_api/globals/missing_surface/traits.rs) — spec-condition visibility logic
-- [hero_talents.rs](/syncthing/Sync/Projects/wow/wow-ui-sim-rilua/tests/hero_talents.rs) — regression coverage for hero subtree node visibility
+- [traits.rs](../../../src/lua_api/globals/missing_surface/traits.rs) — spec-condition and config-scoped node visibility logic
+- [c_traits.rs](../../../src/lua_api/globals/missing_surface/traits/c_traits.rs) — `C_Traits.GetNodeInfo` / `GetConditionInfo` config handling
+- [hero_talents.rs](../../../tests/hero_talents.rs) — regression coverage for hero subtree node visibility
+- [class_talents_config.rs](../../../tests/class_talents_config.rs) — regression coverage for config-scoped node visibility
 
 ## See Also
 

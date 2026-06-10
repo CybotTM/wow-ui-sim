@@ -89,19 +89,17 @@ fn fire_trait_tree_currency_info_updated_for_node(state: &mut LuaState, node_id:
 
 fn current_spec_id(state: &LuaState) -> Option<u32> {
     let sim = borrow_state(state).ok()?;
-    sim.talents.view_spec_id.or_else(|| player_spec_id(&sim))
+    current_spec_id_from_sim(&sim)
 }
+
+fn current_spec_id_from_sim(sim: &crate::lua_api::SimState) -> Option<u32> {
+    sim.talents.view_spec_id.or_else(|| player_spec_id(sim))
+}
+
 fn player_spec_id(state: &crate::lua_api::SimState) -> Option<u32> {
     specializations::specs_for_class(state.player.class_index as u32)
         .nth(state.player.active_spec_index.max(1) as usize - 1)
         .map(|spec| spec.id)
-}
-
-fn current_spec_set_id(state: &LuaState) -> u32 {
-    match current_spec_id(state) {
-        Some(spec_id) => hero_talents::spec_id_to_spec_set(spec_id),
-        _ => 0,
-    }
 }
 
 fn config_name(config_id: i32) -> &'static str {
@@ -136,12 +134,12 @@ fn trait_node_spec_set(node: &crate::traits::TraitNodeInfo) -> u32 {
         .unwrap_or(0)
 }
 
-fn trait_node_is_visible(state: &LuaState, node_id: u32) -> bool {
+fn trait_node_is_visible_for_spec(node_id: u32, spec_id: Option<u32>) -> bool {
     let Some(node) = TRAIT_NODE_DB.get(&node_id) else {
         return true;
     };
     let required_spec_set = trait_node_spec_set(node);
-    required_spec_set == 0 || required_spec_set == current_spec_set_id(state)
+    spec_set_contains_spec(required_spec_set, spec_id)
 }
 
 fn push_u32_array(state: &mut LuaState, values: impl IntoIterator<Item = u32>) -> Val {
@@ -214,21 +212,20 @@ fn total_node_max_ranks(node: &crate::traits::TraitNodeInfo) -> u32 {
     }
 }
 
-fn spec_set_contains_active_spec(spec_set_id: u32, state: &crate::lua_api::SimState) -> bool {
-    if spec_set_id == 0 {
-        return true;
-    }
-    let active_spec_id = state
-        .talents
-        .view_spec_id
-        .or_else(|| player_spec_id(state))
-        .unwrap_or(66);
-    hero_talents::spec_id_to_spec_set(active_spec_id) == spec_set_id
+fn spec_set_contains_spec(spec_set_id: u32, spec_id: Option<u32>) -> bool {
+    spec_set_id == 0 || spec_id.map(hero_talents::spec_id_to_spec_set) == Some(spec_set_id)
 }
 
 fn check_spec_conditions_met(
     node: &crate::traits::TraitNodeInfo,
     state: &crate::lua_api::SimState,
+) -> bool {
+    check_spec_conditions_met_for_spec(node, current_spec_id_from_sim(state).or(Some(66)))
+}
+
+fn check_spec_conditions_met_for_spec(
+    node: &crate::traits::TraitNodeInfo,
+    spec_id: Option<u32>,
 ) -> bool {
     let mut saw_spec_condition = false;
     let mut has_matching_spec = false;
@@ -240,7 +237,7 @@ fn check_spec_conditions_met(
             continue;
         }
         saw_spec_condition = true;
-        if spec_set_contains_active_spec(cond.spec_set_id, state) {
+        if spec_set_contains_spec(cond.spec_set_id, spec_id) {
             has_matching_spec = true;
         }
     }
@@ -475,25 +472,34 @@ struct NodeDbRuntimeFields {
     active_source_nodes: Vec<u32>,
 }
 
+fn spec_id_for_config_query(config_id: i32, sim: &crate::lua_api::SimState) -> Option<u32> {
+    config_spec_id(config_id).or_else(|| current_spec_id_from_sim(sim))
+}
+
 fn node_db_runtime_fields(
     state: &LuaState,
     lookup_node_id: Option<u32>,
     node: &crate::traits::TraitNodeInfo,
+    config_id: i32,
 ) -> NodeDbRuntimeFields {
     match borrow_state(state).ok() {
-        Some(sim) => NodeDbRuntimeFields {
-            ranks_purchased: lookup_node_id
-                .and_then(|id| sim.talents.node_ranks.get(&id).copied())
-                .unwrap_or(0),
-            active_entry_id: lookup_node_id
-                .and_then(|id| sim.talents.node_selections.get(&id).copied()),
-            active_hero_subtree: sim.talents.active_hero_subtree(),
-            is_spec_visible: check_spec_conditions_met(node, &sim),
-            is_available: check_node_available(node, &sim),
-            meets_edge_requirements: check_edge_requirements(node, &sim),
-            has_currency: lookup_node_id.is_none_or(|node_id| check_has_currency(node_id, &sim)),
-            active_source_nodes: ranked_node_ids(&sim),
-        },
+        Some(sim) => {
+            let spec_id = spec_id_for_config_query(config_id, &sim);
+            NodeDbRuntimeFields {
+                ranks_purchased: lookup_node_id
+                    .and_then(|id| sim.talents.node_ranks.get(&id).copied())
+                    .unwrap_or(0),
+                active_entry_id: lookup_node_id
+                    .and_then(|id| sim.talents.node_selections.get(&id).copied()),
+                active_hero_subtree: sim.talents.active_hero_subtree(),
+                is_spec_visible: check_spec_conditions_met_for_spec(node, spec_id),
+                is_available: check_node_available(node, &sim),
+                meets_edge_requirements: check_edge_requirements(node, &sim),
+                has_currency: lookup_node_id
+                    .is_none_or(|node_id| check_has_currency(node_id, &sim)),
+                active_source_nodes: ranked_node_ids(&sim),
+            }
+        }
         None => NodeDbRuntimeFields {
             ranks_purchased: 0,
             active_entry_id: None,
@@ -515,25 +521,34 @@ fn ranked_node_ids(sim: &crate::lua_api::SimState) -> Vec<u32> {
         .collect()
 }
 
-fn push_node_db_fields(state: &mut LuaState, info: Val, lookup_node_id: Option<u32>) {
+fn push_node_db_fields(
+    state: &mut LuaState,
+    info: Val,
+    config_id: i32,
+    lookup_node_id: Option<u32>,
+) {
     let Some(node) = lookup_node_id.and_then(|id| TRAIT_NODE_DB.get(&id)) else {
         push_missing_node_db_fields(state, info);
         return;
     };
 
-    let runtime = node_db_runtime_fields(state, lookup_node_id, node);
-    push_existing_node_db_fields(state, info, lookup_node_id, node, runtime);
+    let runtime = node_db_runtime_fields(state, lookup_node_id, node, config_id);
+    push_existing_node_db_fields(state, info, config_id, lookup_node_id, node, runtime);
 }
 
 fn push_existing_node_db_fields(
     state: &mut LuaState,
     info: Val,
+    config_id: i32,
     lookup_node_id: Option<u32>,
     node: &crate::traits::TraitNodeInfo,
     runtime: NodeDbRuntimeFields,
 ) {
     let total_max_ranks = total_node_max_ranks(node);
-    let is_visible = lookup_node_id.is_some_and(|id| trait_node_is_visible(state, id))
+    let spec_id = borrow_state(state)
+        .ok()
+        .and_then(|sim| spec_id_for_config_query(config_id, &sim));
+    let is_visible = lookup_node_id.is_some_and(|id| trait_node_is_visible_for_spec(id, spec_id))
         && runtime.is_spec_visible;
     let can_purchase_rank = runtime.ranks_purchased < total_max_ranks
         && runtime.is_available
@@ -669,14 +684,14 @@ fn push_missing_node_status_fields(state: &mut LuaState, info: Val) {
     table_set(state, info, "cascadeRepurchaseEntryID", Val::Nil);
 }
 
-fn push_node_info(state: &mut LuaState, node_id: i32) -> Val {
+fn push_node_info(state: &mut LuaState, config_id: i32, node_id: i32) -> Val {
     let info = create_table_with_capacity(state, NODE_INFO_HASH_FIELDS);
     table_set(state, info, "ID", Val::Num(node_id as f64));
     table_set(state, info, "id", Val::Num(node_id as f64));
     let lookup_node_id = u32::try_from(node_id).ok();
     push_node_active_entry(state, info, lookup_node_id);
     push_node_rank_fields(state, info, lookup_node_id);
-    push_node_db_fields(state, info, lookup_node_id);
+    push_node_db_fields(state, info, config_id, lookup_node_id);
     info
 }
 

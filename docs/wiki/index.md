@@ -67,7 +67,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[character-select-performance]] | Lazy atlas crop stalls (fixed), first-resize relayout deduplication (partial) |
 | [[class-talents-artifact]] | Gold blob ruled out as lossy WebP encoding artifact, not a live render bug |
 | [[class-talents-edge-frame-levels]] | Class-talent connector edges were rendering above node icons; edge-frame-level workaround now patches both mixin + live frame and re-levels active edges |
-| [[class-talents-trait-loadout-state]] | `PlayerSpells` trait queries now read live loadout state; hero subtree visibility now uses correct spec-condition OR semantics so full node/edge layouts render |
+| [[class-talents-trait-loadout-state]] | `PlayerSpells` trait queries now read live loadout state; hero subtree visibility uses correct spec-condition OR semantics; config-scoped `GetNodeInfo` ignores stale view spec |
 | [[editmode-layout]] | 3 frame regressions from EditMode overrides after `__index` ordering fix; fenv workaround |
 | [[editbox-render-text-cache]] | SimCommands search text can disappear from stale `text_stripped` cache or because opaque EditBox child regions render above the internal text/caret emitter |
 | [[explicit-xml-parent-anchors]] | Nested XML frames with `parent="..."` must use that explicit parent for implicit anchors; fixed PaperDoll sidebar tabs anchoring to `PaperDollFrame` instead of `CharacterFrameInsetRight` |
