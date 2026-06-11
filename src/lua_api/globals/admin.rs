@@ -591,6 +591,7 @@ pub(super) fn build_admin_buff(
         is_stealable: false,
         can_apply_aura: true,
         is_from_player_or_player_pet: true,
+        dispel_type: None,
         aura_instance_id: (st.player.buffs.len() + 1) as i32,
     }
 }

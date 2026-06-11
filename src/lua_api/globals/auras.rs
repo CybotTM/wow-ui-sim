@@ -23,7 +23,9 @@
 //! docs/wiki/investigations/partyframe-tree.md).
 
 use crate::lua_api::game_data::AuraInfo;
-use crate::lua_api::globals::font_strings_collection::colors::make_rilua_color_table;
+use crate::lua_api::globals::font_strings_collection::colors::{
+    debuff_type_color, make_rilua_color_table,
+};
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, create_table_with_capacity,
     table_get, table_set, table_set_num,
@@ -209,6 +211,7 @@ fn target_fixture_auras() -> Vec<AuraInfo> {
             is_stealable: false,
             can_apply_aura: false,
             is_from_player_or_player_pet: false,
+            dispel_type: None,
             aura_instance_id: 1,
         },
         AuraInfo {
@@ -223,6 +226,7 @@ fn target_fixture_auras() -> Vec<AuraInfo> {
             is_stealable: false,
             can_apply_aura: false,
             is_from_player_or_player_pet: false,
+            dispel_type: Some("Magic".to_string()),
             aura_instance_id: 2,
         },
     ]
@@ -396,8 +400,13 @@ fn get_debuff_data_by_index(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_aura_dispel_type_color(state: &mut LuaState) -> LuaResult<u32> {
-    // AuraInfo does not model dispel type yet, so simulated auras are not dispellable.
-    let color = make_rilua_color_table(state, 1.0, 1.0, 1.0, 0.0)?;
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let aura_id = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
+    let color = find_aura_by_instance_id(state, &unit, aura_id)
+        .and_then(|aura| aura.dispel_type)
+        .and_then(|dispel_type| debuff_type_color(&dispel_type))
+        .unwrap_or((1.0, 1.0, 1.0, 0.0));
+    let color = make_rilua_color_table(state, color.0, color.1, color.2, color.3)?;
     state.push(color);
     Ok(1)
 }
@@ -686,7 +695,7 @@ fn write_aura_identity(state: &mut LuaState, t: Val, aura: &AuraInfo, unit: &str
     };
     let source = create_string(state, source_unit);
     let empty_points = create_table(state);
-    let dispel = create_string(state, "");
+    let dispel = create_string(state, aura.dispel_type.as_deref().unwrap_or(""));
 
     table_set(state, t, "name", name);
     table_set(state, t, "icon", Val::Num(aura.icon as f64));
@@ -743,6 +752,7 @@ mod tests {
             is_stealable: false,
             can_apply_aura: false,
             is_from_player_or_player_pet: true,
+            dispel_type: None,
             aura_instance_id: 1,
         }
     }

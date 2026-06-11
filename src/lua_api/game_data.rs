@@ -74,6 +74,8 @@ pub struct AuraInfo {
     pub is_stealable: bool,
     pub can_apply_aura: bool,
     pub is_from_player_or_player_pet: bool,
+    /// Magic, Curse, Disease, or Poison for dispellable debuffs.
+    pub dispel_type: Option<String>,
     /// Unique instance ID for this aura.
     pub aura_instance_id: i32,
 }
@@ -217,6 +219,7 @@ fn apply_player_aura_spell(
         is_stealable: false,
         can_apply_aura: true,
         is_from_player_or_player_pet: true,
+        dispel_type: None,
         aura_instance_id,
     });
     true
@@ -396,6 +399,7 @@ fn make_party_buff(
         is_stealable: false,
         can_apply_aura: true,
         is_from_player_or_player_pet: source_unit == "player",
+        dispel_type: None,
         aura_instance_id,
     }
 }
@@ -420,6 +424,7 @@ fn make_party_debuff(
         is_stealable: false,
         can_apply_aura: false,
         is_from_player_or_player_pet: false,
+        dispel_type: None,
         aura_instance_id,
     }
 }
@@ -606,6 +611,7 @@ fn build_auras_from_indices(indices: &[usize]) -> Vec<AuraInfo> {
                 is_stealable: false,
                 can_apply_aura: can_apply,
                 is_from_player_or_player_pet: source == "player",
+                dispel_type: None,
                 aura_instance_id: (i + 1) as i32,
             }
         })

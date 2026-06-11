@@ -26,11 +26,11 @@ fn clear_buffs_and_insert(env: &WowLuaEnv, auras: Vec<AuraInfo>) {
     state.player.buffs.extend(auras);
 }
 
-fn admin_buff(name: &str, spell_id: i32, aura_instance_id: i32, is_helpful: bool) -> AuraInfo {
+fn admin_aura(name: &str, spell_id: i32, aura_instance_id: i32, is_helpful: bool) -> AuraInfo {
     AuraInfo {
         name: name.into(),
         spell_id,
-        icon: 0,
+        icon: 135841,
         duration: 60.0,
         expiration_time: 60.0,
         applications: 1,
@@ -39,7 +39,19 @@ fn admin_buff(name: &str, spell_id: i32, aura_instance_id: i32, is_helpful: bool
         is_stealable: false,
         can_apply_aura: true,
         is_from_player_or_player_pet: true,
+        dispel_type: None,
         aura_instance_id,
+    }
+}
+
+fn admin_buff(name: &str, spell_id: i32, aura_instance_id: i32, is_helpful: bool) -> AuraInfo {
+    admin_aura(name, spell_id, aura_instance_id, is_helpful)
+}
+
+fn dispellable_debuff(name: &str, spell_id: i32, aura_instance_id: i32, dispel_type: &str) -> AuraInfo {
+    AuraInfo {
+        dispel_type: Some(dispel_type.to_string()),
+        ..admin_aura(name, spell_id, aura_instance_id, false)
     }
 }
 
@@ -151,6 +163,30 @@ fn get_aura_dispel_type_color_is_transparent_for_non_dispellable_aura() {
         alpha.abs() < 0.001,
         "non-dispellable auras should produce an alpha-0 color"
     );
+}
+
+#[test]
+fn dispellable_debuff_surfaces_type_icon_and_color() {
+    let env = env();
+    clear_buffs_and_insert(&env, vec![dispellable_debuff("Arcane Shock", 88, 888, "Magic")]);
+
+    let (dispel_name, icon, r, g, b, a): (String, i64, f64, f64, f64, f64) = env
+        .eval(
+            r#"
+            local aura = C_UnitAuras.GetAuraDataByIndex("player", 1, "HARMFUL")
+            local color = C_UnitAuras.GetAuraDispelTypeColor("player", aura.auraInstanceID, CreateColor(1, 1, 1, 1))
+            local r, g, b, a = color:GetRGBA()
+            return aura.dispelName, aura.icon, r, g, b, a
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(dispel_name, "Magic");
+    assert_eq!(icon, 135841);
+    assert!((r - 0.2).abs() < 0.001);
+    assert!((g - 0.6).abs() < 0.001);
+    assert!((b - 1.0).abs() < 0.001);
+    assert!((a - 1.0).abs() < 0.001);
 }
 
 #[test]

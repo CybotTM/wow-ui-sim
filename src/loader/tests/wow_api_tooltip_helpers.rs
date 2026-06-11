@@ -13,6 +13,7 @@ pub(super) fn flash_of_light_aura() -> crate::lua_api::game_data::AuraInfo {
         is_stealable: false,
         can_apply_aura: true,
         is_from_player_or_player_pet: true,
+        dispel_type: None,
         aura_instance_id: 1,
     }
 }

@@ -85,6 +85,13 @@ const DEBUFF_TYPE_COLORS_DATA: &[(&str, (f64, f64, f64, f64))] = &[
     ("Poison", (0.0, 0.6, 0.0, 1.0)),
 ];
 
+pub fn debuff_type_color(debuff_type: &str) -> Option<(f64, f64, f64, f64)> {
+    DEBUFF_TYPE_COLORS_DATA
+        .iter()
+        .find(|(name, _)| *name == debuff_type)
+        .map(|(_, color)| *color)
+}
+
 // ── Color table field accessor helpers ───────────────────────────────────────
 
 fn color_channel(state: &mut LuaState, this: Val, key: &str, default: f64) -> f64 {
