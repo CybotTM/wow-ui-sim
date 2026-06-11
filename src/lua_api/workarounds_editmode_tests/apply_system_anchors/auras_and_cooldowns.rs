@@ -105,7 +105,9 @@ fn apply_system_anchors_replays_active_widescreen_aura_frame_settings() {
             }
         end
         function EditModeManagerFrame:UpdateSystem(systemFrame)
-            systemFrame:UpdateSystem(systemFrame.systemInfo)
+            -- Mirrors EditModeManagerFrameMixin:UpdateSystem -- the manager
+            -- resolves the active layout itself; nothing pre-seeds the frame.
+            systemFrame:UpdateSystem(self:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex))
         end
         "#,
     )
@@ -424,5 +426,116 @@ fn apply_system_anchors_updates_each_cooldown_viewer_profile_row() {
     assert_eq!(
         bar_width_scale_3, None,
         "active Widescreen row should not invent absent BarWidthScale"
+    );
+}
+
+#[test]
+fn apply_system_anchors_preserves_first_apply_dirtiness_for_manager_update() {
+    // Regression: seed_system_frame builds the settingMap before the fallback
+    // emm.UpdateSystem runs. UpdateSystem's own UpdateSettingMap(true) then
+    // diffed against that identical map, reset dirtySettings to {}, and every
+    // dirty-gated per-setting handler was skipped — DebuffFrame's
+    // ShowDispelType never reached UpdateSystemSettingShowDispelType, so
+    // dispellable player debuffs rendered the plain border instead of the
+    // dispel-icon atlas.
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.exec(
+        r#"
+        Enum = {
+            EditModeSystem = { AuraFrame = 6 },
+            EditModeAuraFrameSystemIndices = { DebuffFrame = 2 },
+            EditModeAuraFrameSetting = { ShowDispelType = 10 },
+        }
+        UIParent = { name = "UIParent" }
+        EditModeUtil = {
+            IsBottomAnchoredActionBar = function() return false end,
+            IsRightAnchoredActionBar = function() return false end,
+        }
+
+        -- Faithful Blizzard-style dirty gating: handlers only run for settings
+        -- the UpdateSettingMap diff marked dirty.
+        local frame = {
+            system = Enum.EditModeSystem.AuraFrame,
+            systemIndex = Enum.EditModeAuraFrameSystemIndices.DebuffFrame,
+            name = "DebuffFrame",
+            dirtySettings = {},
+            appliedSettings = {},
+        }
+        function frame:GetName() return self.name end
+        function frame:SetHasActiveChanges(value) self.hasActiveChanges = value end
+        function frame:MarkAllSettingsDirty() self.settingMap = nil end
+        function frame:IsSettingDirty(setting) return self.dirtySettings[setting] end
+        function frame:ClearDirtySetting(setting) self.dirtySettings[setting] = nil end
+        function frame:UpdateSettingMap(updateDirtySettings)
+            local old = self.settingMap
+            self.settingMap = {}
+            for _, info in ipairs(self.systemInfo.settings or {}) do
+                self.settingMap[info.setting] = { value = info.value }
+            end
+            if updateDirtySettings then
+                self.dirtySettings = {}
+                for setting, info in pairs(self.settingMap) do
+                    if not old or not old[setting] or old[setting].value ~= info.value then
+                        self.dirtySettings[setting] = true
+                    end
+                end
+            end
+        end
+        function frame:GetSettingValue(setting)
+            local info = self.settingMap and self.settingMap[setting]
+            return info and info.value
+        end
+        function frame:UpdateSystemSetting(setting, entireSystemUpdate)
+            if not self:IsSettingDirty(setting) then return end
+            self.appliedSettings[setting] = self:GetSettingValue(setting)
+            self:ClearDirtySetting(setting)
+        end
+        function frame:UpdateSystem(systemInfo)
+            self.systemInfo = systemInfo
+            self:UpdateSettingMap(true)
+            for _, info in ipairs(systemInfo.settings or {}) do
+                self:UpdateSystemSetting(info.setting, true)
+            end
+        end
+
+        EditModeManagerFrame = {
+            layoutInfo = {},
+            registeredSystemFrames = { frame },
+        }
+        function EditModeManagerFrame:InitSystemAnchors() end
+        function EditModeManagerFrame:GetActiveLayoutSystemInfo(system, systemIndex)
+            return {
+                system = system,
+                systemIndex = systemIndex,
+                isInDefaultPosition = false,
+                anchorInfo = { point = "TOPRIGHT", relativeTo = UIParent, relativePoint = "TOPRIGHT", offsetX = -270, offsetY = -155 },
+                settings = {
+                    { setting = Enum.EditModeAuraFrameSetting.ShowDispelType, value = 1 },
+                },
+            }
+        end
+        function EditModeManagerFrame:UpdateSystem(systemFrame)
+            -- Mirrors EditModeManagerFrameMixin:UpdateSystem -- the manager
+            -- resolves the active layout itself; nothing pre-seeds the frame.
+            systemFrame:UpdateSystem(self:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex))
+        end
+        "#,
+    )
+    .expect("install dirty-gated aura frame stubs");
+
+    env.exec(APPLY_SYSTEM_ANCHORS_LUA)
+        .expect("apply system anchors");
+
+    let applied: f64 = env
+        .eval(
+            r#"
+            local frame = EditModeManagerFrame.registeredSystemFrames[1]
+            return frame.appliedSettings[Enum.EditModeAuraFrameSetting.ShowDispelType] or -1
+            "#,
+        )
+        .expect("read applied ShowDispelType");
+    assert_eq!(
+        applied, 1.0,
+        "seeded settingMap must not swallow first-apply dirtiness for dirty-gated setting handlers"
     );
 }

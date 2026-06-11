@@ -93,7 +93,9 @@ fn apply_system_anchors_hides_profile_hidden_status_tracking_bars() {
             }
         end
         function EditModeManagerFrame:UpdateSystem(systemFrame)
-            systemFrame:UpdateSystem(systemFrame.systemInfo)
+            -- Mirrors EditModeManagerFrameMixin:UpdateSystem -- the manager
+            -- resolves the active layout itself; nothing pre-seeds the frame.
+            systemFrame:UpdateSystem(self:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex))
         end
         "#,
     )

@@ -336,7 +336,9 @@ fn apply_system_anchors_replays_active_widescreen_singleton_settings() {
             }
         end
         function EditModeManagerFrame:UpdateSystem(systemFrame)
-            systemFrame:UpdateSystem(systemFrame.systemInfo)
+            -- Mirrors EditModeManagerFrameMixin:UpdateSystem -- the manager
+            -- resolves the active layout itself; nothing pre-seeds the frame.
+            systemFrame:UpdateSystem(self:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex))
         end
         "#,
     )
@@ -458,7 +460,9 @@ fn apply_system_anchors_preserves_addon_hidden_singleton_visibility() {
             }
         end
         function EditModeManagerFrame:UpdateSystem(systemFrame)
-            systemFrame:UpdateSystem(systemFrame.systemInfo)
+            -- Mirrors EditModeManagerFrameMixin:UpdateSystem -- the manager
+            -- resolves the active layout itself; nothing pre-seeds the frame.
+            systemFrame:UpdateSystem(self:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex))
         end
         "#,
     )
@@ -635,7 +639,9 @@ fn apply_system_anchors_replays_remaining_active_widescreen_system_settings() {
             return systemsByKey[key]
         end
         function EditModeManagerFrame:UpdateSystem(systemFrame)
-            systemFrame:UpdateSystem(systemFrame.systemInfo)
+            -- Mirrors EditModeManagerFrameMixin:UpdateSystem -- the manager
+            -- resolves the active layout itself; nothing pre-seeds the frame.
+            systemFrame:UpdateSystem(self:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex))
         end
         "#,
     )

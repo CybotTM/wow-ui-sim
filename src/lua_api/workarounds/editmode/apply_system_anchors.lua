@@ -86,12 +86,22 @@
             ensure_setting_display_info_map(systemFrame)
         end
 
-        local function seed_system_frame(systemFrame)
+        -- Read-only lookup of the active layout's systemInfo for branch
+        -- decisions. Must not mutate the frame: pre-building the settingMap
+        -- before the real UpdateSystem runs turns Blizzard's first apply into
+        -- a no-change diff and silently skips every dirty-gated per-setting
+        -- handler (e.g. DebuffFrame ShowDispelType).
+        local function lookup_system_info(systemFrame)
             local systemIndex = systemFrame.systemIndex
             local systemInfo = emm:GetActiveLayoutSystemInfo(systemFrame.system, systemIndex)
             if not systemInfo and systemIndex == nil then
                 systemInfo = emm:GetActiveLayoutSystemInfo(systemFrame.system, -1)
             end
+            return systemInfo
+        end
+
+        local function seed_system_frame(systemFrame)
+            local systemInfo = lookup_system_info(systemFrame)
             if not systemInfo then
                 return
             end
@@ -705,20 +715,27 @@
                     end
                 end
             else
-                local seeded = seed_system_frame(systemFrame)
-                if seeded
-                    and anchor_targets_system_frame(systemFrame, systemFrame.systemInfo and systemFrame.systemInfo.anchorInfo) then
+                local systemInfo = lookup_system_info(systemFrame)
+                if systemInfo
+                    and anchor_targets_system_frame(systemFrame, systemInfo.anchorInfo) then
                     -- Saved layouts can contain self-relative anchors for dependent
                     -- systems such as BuffFrame. Seed their layout state, but do
                     -- not hand that impossible anchor to SetPoint during startup.
+                    seed_system_frame(systemFrame)
                     replay_system_settings(systemFrame)
                     refresh_system_layout_after_setting_replay(systemFrame)
-                else
+                elseif systemInfo then
                     preserve_hidden_state(systemFrame, function()
-                        pcall(emm.UpdateSystem, emm, systemFrame)
-                        if seeded then
-                            apply_system_anchor_if_safe(systemFrame)
-                        end
+                        -- Mirrors EditModeManagerFrameMixin:UpdateSystem with
+                        -- the systemInfo resolved above (covering the saved
+                        -- -1 index quirk for singleton rows the manager's own
+                        -- nil-index lookup would miss). Deliberately NOT
+                        -- seeded first: UpdateSystem must see the frame's real
+                        -- pre-apply settingMap (usually absent on startup) so
+                        -- its UpdateSettingMap diff marks settings dirty and
+                        -- the per-setting handlers actually run.
+                        pcall(systemFrame.UpdateSystem, systemFrame, systemInfo)
+                        apply_system_anchor_if_safe(systemFrame)
                     end)
                 end
             end
