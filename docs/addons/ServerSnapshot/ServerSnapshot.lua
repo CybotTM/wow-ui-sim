@@ -410,8 +410,8 @@ local KEYBINDING_PROBE_KEYS = {
     "SHIFT-1", "SHIFT-2", "SHIFT-3", "SHIFT-4", "SHIFT-5",
     "ALT-1", "ALT-2", "ALT-3", "ALT-4", "ALT-5",
     "B", "C", "G", "I", "J", "K", "L", "M", "N", "O", "P",
-    "U", "Y", "Z", "SHIFT-B", "SHIFT-C", "SHIFT-I", "SHIFT-J",
-    "SHIFT-M", "SHIFT-P", "CTRL-M",
+    "S", "U", "Y", "Z", "ALT-P", "SHIFT-B", "SHIFT-C", "SHIFT-I",
+    "SHIFT-J", "SHIFT-M", "SHIFT-P", "SHIFT-S", "SHIFT-T", "CTRL-M",
 }
 
 local function snapshotKeybindings()

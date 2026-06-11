@@ -44,25 +44,10 @@ end
 local keybindings = snapshot.keybindings
 if type(keybindings) == "table" then
     local keys = keybindings.keys
-    local sampledKeys = {}
     if type(keys) == "table" then
         for key, action in pairs(keys) do
             if type(key) == "string" and type(action) == "string" then
-                sampledKeys[key] = true
                 SetBinding(key, action)
-            end
-        end
-    end
-
-    local entries = keybindings.entries
-    if type(entries) == "table" then
-        for _, entry in pairs(entries) do
-            if type(entry) == "table" and type(entry.action) == "string" and type(entry.keys) == "table" then
-                for _, key in ipairs(entry.keys) do
-                    if type(key) == "string" and key ~= "" and not sampledKeys[key] then
-                        SetBinding(key, entry.action)
-                    end
-                end
             end
         end
     end
@@ -260,7 +245,7 @@ mod tests {
     }
 
     #[test]
-    fn apply_loaded_snapshot_keeps_sampled_keybinding_over_entry_collision() {
+    fn apply_loaded_snapshot_ignores_binding_rows_for_key_actions() {
         let env = WowLuaEnv::new().expect("env");
         env.exec(
             r#"
@@ -282,6 +267,10 @@ mod tests {
                                     action = "TOGGLEWORLDMAP",
                                     keys = { "CTRL-M" },
                                 },
+                                {
+                                    action = "HOUSING_LAYOUTCAMERA_DOWN",
+                                    keys = { "S" },
+                                },
                             },
                         },
                         actionBars = { slots = {} },
@@ -293,11 +282,18 @@ mod tests {
         .expect("seed snapshot");
 
         apply_loaded_snapshot(&env).expect("apply snapshot");
-        let (c_action, map_action): (String, String) = env
-            .eval(r#"return GetBindingAction("C"), GetBindingAction("CTRL-M")"#)
+        let (c_action, map_action, s_action): (String, String, String) = env
+            .eval(r#"return GetBindingAction("C"), GetBindingAction("CTRL-M"), GetBindingAction("S")"#)
             .expect("read bindings");
 
         assert_eq!(c_action, "TOGGLECHARACTER0");
-        assert_eq!(map_action, "TOGGLEWORLDMAP");
+        assert_eq!(
+            map_action, "",
+            "binding rows are metadata and must not create unsampled key overrides"
+        );
+        assert_eq!(
+            s_action, "",
+            "binding rows are metadata and must not let contextual housing actions shadow defaults"
+        );
     }
 }

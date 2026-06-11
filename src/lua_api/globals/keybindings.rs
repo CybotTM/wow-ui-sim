@@ -1,17 +1,5 @@
 //! Keybinding global registrations.
-//!
-//! Backs WoW's binding API against `SimState.keybindings` plus a small static
-//! command registry. User-set bindings live first in `GetBinding(index)`;
-//! registry rows follow so Blizzard settings panels can render bindable
-//! commands even before the user changes anything.
-//!
-//! Override bindings (`SetOverrideBinding` / `ClearOverrideBindings`)
-//! shadow base bindings during lookup and are matched by WoW's
-//! `GetBindingAction(key, checkOverride=true)` / `GetBindingKey`
-//! semantics.
-//!
-//! `init_keybindings` / `dispatch_key_binding` are called by the key
-//! dispatch module to seed default bindings and execute bound actions.
+//! Backs WoW's binding API against `SimState.keybindings` plus a static command registry.
 
 #[path = "keybindings_c_api.rs"]
 mod keybindings_c_api;
@@ -135,6 +123,10 @@ pub const BINDING_ACTIONS: &[BindingAction] = &[
         lua_code: "PlayerSpellsUtil.ToggleSpellBookFrame()",
     },
     BindingAction {
+        action: "TOGGLEPROFESSIONBOOK",
+        lua_code: "ToggleProfessionsBook()",
+    },
+    BindingAction {
         action: "TOGGLETALENTS",
         lua_code: "PlayerSpellsUtil.ToggleClassTalentFrame()",
     },
@@ -160,7 +152,7 @@ pub const BINDING_ACTIONS: &[BindingAction] = &[
     },
     BindingAction {
         action: "TOGGLESOCIAL",
-        lua_code: "if not ToggleFriendsFrame then LoadAddOn('Blizzard_FriendsFrame') end if ToggleFriendsFrame then ToggleFriendsFrame() end",
+        lua_code: "if not FriendsFrame then LoadAddOn('Blizzard_FriendsFrame') end if ToggleFriendsFrame then ToggleFriendsFrame() end",
     },
     BindingAction {
         action: "TOGGLEGUILDTAB",
@@ -427,13 +419,7 @@ const DEFAULT_KEYS: &[DefaultKey] = &[
     },
 ];
 
-/// Keep the user binding store empty on fresh envs.
-///
-/// Default simulator bindings still exist, but `dispatch_key_binding()`
-/// resolves them from `DEFAULT_KEYS` directly rather than materializing them in
-/// `SimState.keybindings`. That keeps retail-like behavior for key presses
-/// without polluting `GetBindingAction()` / `GetNumBindings()` lookups, which
-/// only expose user-set bindings.
+/// Keep user bindings empty; default key dispatch reads `DEFAULT_KEYS` directly.
 pub fn init_keybindings(state: &mut crate::lua_api::SimState) {
     state.keybindings.base.clear();
     state.keybindings.unbound.clear();

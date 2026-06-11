@@ -272,6 +272,47 @@ fn explicit_unbind_blocks_default_key_dispatch() {
 }
 
 #[test]
+fn profession_book_binding_dispatches_registered_toggle() {
+    let env = env();
+    env.exec(
+        r#"
+        __profession_toggle_count = 0
+        function ToggleProfessionsBook()
+            __profession_toggle_count = __profession_toggle_count + 1
+        end
+        SetBinding("ALT-P", "TOGGLEPROFESSIONBOOK")
+        "#,
+    )
+    .unwrap();
+
+    env.send_key_press("ALT-P", None).unwrap();
+    let count: i32 = env.eval("return __profession_toggle_count").unwrap();
+
+    assert_eq!(
+        count, 1,
+        "TOGGLEPROFESSIONBOOK keybind should dispatch ToggleProfessionsBook()"
+    );
+}
+
+#[test]
+fn social_binding_dispatches_friends_panel_toggle() {
+    let env = env();
+    env.exec(
+        r#"
+        CreateFrame("Frame", "FriendsFrame")
+        FriendsFrame:Hide()
+        SetBinding("S", "TOGGLESOCIAL")
+        "#,
+    )
+    .unwrap();
+
+    env.send_key_press("S", None).unwrap();
+    let shown: bool = env.eval("return FriendsFrame:IsShown()").unwrap();
+
+    assert!(shown, "TOGGLESOCIAL keybind should show FriendsFrame");
+}
+
+#[test]
 fn c_keybindings_index_resolves_registry_rows() {
     let env = env();
     let (has_index, action, category, key, custom_type_is_nil, tags_empty): (
