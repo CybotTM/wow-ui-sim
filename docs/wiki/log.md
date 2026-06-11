@@ -1188,6 +1188,10 @@ Updated `investigations/tooltip-double-shell.md` with the follow-up ElvUI toolti
 
 Updated `investigations/appearances-wardrobe-api.md` with the Wardrobe class dropdown casing/color contract and the `C_TransmogSets.GetBaseSets()` nil fallback stack overflow. Documented that class display names come from localized `className`, colors from uppercase `classFile`, and empty set surfaces must return tables.
 
+## [2026-06-11] create | Class talent edge lines
+
+Created `investigations/class-talents-edge-lines.md`. Talent connector lines were missing because `IsRectValid()` reported dirty-but-resolvable talent buttons as invalid, causing Blizzard's edge positioning to skip `Line:SetStartPoint()` / `SetEndPoint()`. A second render-list gate also filtered endpoint-positioned `Line` widgets and arrowhead textures under anchorless edge-frame parents. Fixed by resolving dirty rects inside `IsRectValid()` and allowing parent-independent line/anchor geometry through render-list filtering while preserving the ordinary unanchored-parent guard.
+
 ## [2026-04-12] ingest | transparent wrapper render-order investigation
 
 Created `investigations/transparent-wrapper-render-order.md` for the world map / quest log render-order fix. Updated it after a follow-up regression to document the depth-aware transparent-wrapper hoist in `state_render.rs`, including both world-map visibility coverage (`world_map_tiles_render_after_tiled_background`) and world-quest pin ordering coverage.

@@ -103,10 +103,15 @@ fn test_set_size_marks_dirty() {
         VALID_BEFORE = f:IsRectValid()
         f:SetSize(100, 60)
         VALID_AFTER = f:IsRectValid()
+        LEFT_AFTER = f:GetLeft()
     "#,
     );
     t.assert_lua_true("return VALID_BEFORE", "valid after resolution");
-    assert!(!t.env.eval::<bool>("return VALID_AFTER").unwrap());
+    t.assert_lua_true(
+        "return VALID_AFTER",
+        "IsRectValid should resolve dirty anchored layout",
+    );
+    assert!(t.env.eval::<f64>("return LEFT_AFTER").unwrap().is_finite());
 }
 
 #[test]

@@ -187,6 +187,9 @@ fn has_renderable_rect(
     if !has_own_renderable_rect(registry, frame, id) {
         return false;
     }
+    if has_parent_independent_geometry(frame) {
+        return true;
+    }
     let mut current = frame.parent_id;
     while let Some(parent_id) = current {
         let Some(parent) = registry.get(parent_id) else {
@@ -206,9 +209,48 @@ fn has_own_renderable_rect(
     id: u64,
 ) -> bool {
     !frame.anchors.is_empty()
+        || has_line_endpoint_geometry(frame)
         || frame.name.as_deref() == Some("UIParent")
         || id == 1
         || is_statusbar_bar_child(registry, frame)
+}
+
+fn has_line_endpoint_geometry(frame: &crate::widget::Frame) -> bool {
+    matches!(frame.widget_type, WidgetType::Line)
+        && frame
+            .line_start
+            .as_ref()
+            .is_some_and(|anchor| anchor.target_id.is_some())
+        && frame
+            .line_end
+            .as_ref()
+            .is_some_and(|anchor| anchor.target_id.is_some())
+}
+
+fn has_parent_independent_geometry(frame: &crate::widget::Frame) -> bool {
+    has_parent_independent_line_geometry(frame) || has_parent_independent_anchor_geometry(frame)
+}
+
+fn has_parent_independent_line_geometry(frame: &crate::widget::Frame) -> bool {
+    if !has_line_endpoint_geometry(frame) {
+        return false;
+    }
+    let parent_id = frame.parent_id;
+    let start_target = frame
+        .line_start
+        .as_ref()
+        .and_then(|anchor| anchor.target_id);
+    let end_target = frame.line_end.as_ref().and_then(|anchor| anchor.target_id);
+    start_target != parent_id && end_target != parent_id
+}
+
+fn has_parent_independent_anchor_geometry(frame: &crate::widget::Frame) -> bool {
+    !frame.anchors.is_empty()
+        && frame.anchors.iter().all(|anchor| {
+            anchor
+                .relative_to_id
+                .is_some_and(|target_id| Some(target_id as u64) != frame.parent_id)
+        })
 }
 
 fn is_statusbar_bar_child(
@@ -667,3 +709,7 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "strata_emit_endpoint_tests.rs"]
+mod endpoint_tests;

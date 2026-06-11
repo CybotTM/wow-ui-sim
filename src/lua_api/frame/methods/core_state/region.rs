@@ -11,17 +11,16 @@ use rilua::{LuaResult, Val};
 
 pub fn is_rect_valid(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    let sim = borrow_state(state)?;
+    let mut sim = borrow_state_mut(state)?;
     let has_anchors = sim
         .widgets
         .get(id)
         .map(|f| !f.anchors.is_empty())
         .unwrap_or(false);
-    let result = if !has_anchors {
-        false
-    } else {
-        !sim.widgets.is_rect_dirty(id)
-    };
+    if has_anchors {
+        sim.resolve_rect_if_dirty(id);
+    }
+    let result = has_anchors && !sim.widgets.is_rect_dirty(id);
     drop(sim);
     state.push(Val::Bool(result));
     Ok(1)

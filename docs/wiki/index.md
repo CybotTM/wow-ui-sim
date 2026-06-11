@@ -69,6 +69,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[talent-performance]] | Lazy `_G` lookup (431ms→263ms), rect-dirty stale cache causing infinite OnUpdate loop, shallow `issecretvalue` for pool releases (2159ms→2.6ms) |
 | [[character-select-performance]] | Lazy atlas crop stalls (fixed), first-resize relayout deduplication (partial) |
 | [[class-talents-artifact]] | Gold blob ruled out as lossy WebP encoding artifact, not a live render bug |
+| [[class-talents-edge-lines]] | Class-talent connector lines disappeared because `IsRectValid()` did not resolve dirty anchored buttons and endpoint-positioned Line widgets under anchorless edge frames were filtered before quad emission |
 | [[class-talents-edge-frame-levels]] | Class-talent connector edges were rendering above node icons; edge-frame-level workaround now patches both mixin + live frame and re-levels active edges |
 | [[class-talents-trait-loadout-state]] | `PlayerSpells` trait queries now read live loadout state; hero subtree visibility uses correct spec-condition OR semantics; config-scoped `GetNodeInfo` ignores stale view spec |
 | [[editmode-layout]] | 3 frame regressions from EditMode overrides after `__index` ordering fix; fenv workaround |
