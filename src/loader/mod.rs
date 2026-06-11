@@ -168,21 +168,40 @@ fn other_profile_toc_suffixes() -> &'static [&'static str] {
     }
 }
 
-/// Scan `addon_dir` for any .toc file whose name doesn't carry an
-/// excluded-flavor suffix (used as a last-resort fallback in `find_toc_file`).
+/// Scan `addon_dir` for a .toc file matching the folder name that doesn't
+/// carry an excluded-flavor suffix (used as a last-resort fallback in
+/// `find_toc_file` for case mismatches and unusual flavor suffixes).
+///
+/// WoW only loads TOCs whose stem is the folder name plus an optional
+/// `_`/`-` flavor suffix. Renaming a folder (e.g. `MyAddon.disabled`) must
+/// disable the addon -- its `MyAddon.toc` no longer matches the folder name.
 fn scan_for_compatible_flavor_toc(addon_dir: &Path) -> Option<PathBuf> {
     let exclude_suffixes = other_profile_toc_suffixes();
+    let folder_name = addon_dir.file_name()?.to_str()?.to_ascii_lowercase();
     let entries = std::fs::read_dir(addon_dir).ok()?;
     entries.flatten().find_map(|entry| {
         let path = entry.path();
         if path.extension().map(|e| e == "toc").unwrap_or(false) {
             let name = path.file_name()?.to_str()?;
+            let stem = path.file_stem()?.to_str()?.to_ascii_lowercase();
+            if !toc_stem_matches_folder(&stem, &folder_name) {
+                return None;
+            }
             if !exclude_suffixes.iter().any(|s| name.contains(s)) {
                 return Some(path);
             }
         }
         None
     })
+}
+
+/// Whether a lowercased TOC stem names the lowercased addon folder: an exact
+/// match or the folder name followed by a `_`/`-` flavor suffix.
+fn toc_stem_matches_folder(stem: &str, folder_name: &str) -> bool {
+    let Some(rest) = stem.strip_prefix(folder_name) else {
+        return false;
+    };
+    rest.is_empty() || rest.starts_with('_') || rest.starts_with('-')
 }
 
 fn profile_specific_fallback_toc(addon_name: &str) -> Option<String> {

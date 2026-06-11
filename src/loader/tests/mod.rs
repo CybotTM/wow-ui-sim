@@ -1,6 +1,7 @@
 //! Tests for the addon loader.
 
 mod account_store;
+mod toc_discovery;
 mod button_text;
 mod button_textures;
 mod lua_loading;
