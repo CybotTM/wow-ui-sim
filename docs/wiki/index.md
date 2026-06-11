@@ -80,6 +80,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[crafting-cast-bar]] | `C_TradeSkillUI.CraftRecipe` updated inventory but did not start player casting or fire `UNIT_SPELLCAST_START`, so Blizzard's professions overlay cast bar had no backing spellbar state |
 | [[hero-spec-dialog-anchors]] | LIGHTSMITH/TEMPLAR selection dialog: layer-children batched out of XML order + runtime templates skipped named-anchor re-resolution, dropping panel content to spec-frame edge |
 | [[hero-spec-icon-bug]] | Retired — 5 layers of evidence confirm icon renders correctly |
+| [[xml-scale-attribute]] | XML `scale` attribute was silently dropped (no `FrameXml` field); hero talents `scale="0.85"` never applied, node buttons overflowed the fixed 284×362 backplate |
 | [[hit-testing]] | Two-phase algorithm: HitGrid spatial index + depth-first child drill-down |
 | [[journeys-midnight-empty]] | Journeys tab was empty because current expansion was Midnight but default major-faction data only seeded War Within rows |
 | [[keybinding-system]] | Two Lua tables, key press pipeline, default bindings, Lua API |

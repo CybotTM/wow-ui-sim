@@ -1256,3 +1256,7 @@ Created `investigations/casc-root-v2-parsing-missing-textures.md` after the magi
 ## [2026-06-11] update | EditMode first-apply dirtiness + player debuff modeling
 
 Updated `investigations/casc-root-v2-parsing-missing-textures.md` with parts 2-3: the dispel swirly was also blocked by the EditMode startup workaround seeding frames before UpdateSystem (destroying first-apply setting dirtiness, so ShowDispelType never applied), and by the absence of any player-debuff modeling. Fixed in c527f05fa (lookup-then-UpdateSystem flow mirroring EditModeManagerFrameMixin) and 2ac3057b6 (A_Admin.AddDebuff + UNIT_AURA isFullUpdate payloads + nilable dispelName).
+
+## [2026-06-11] create | XML scale attribute ignored
+
+Created `investigations/xml-scale-attribute.md`. The hero talents box didn't encompass its node buttons: `FrameXml` had no `@scale` field, so all 127 `scale="..."` attributes in Blizzard XML were silently dropped — including `HeroTalentsTreeNodesContainerTemplate`'s `scale="0.85"`, whose absence left only 212 of the needed 272 local units inside the fixed 284×362 backplate. Fixed in 91835d898 by parsing `@scale` and applying it through the template chain in both the XML loader and runtime CreateFrame paths, mirroring alpha.
