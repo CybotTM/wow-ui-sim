@@ -45,6 +45,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 |------|---------|
 | [[action-button-icon-mask]] | Main action-button icons vanished because `UI-HUD-ActionBar-IconFrame-Mask` stores coverage in alpha while the minimap mask fix sampled RGB intensity; renderer now marks alpha-backed masks with a shader flag |
 | [[action-bar-spell-icons]] | 4 bugs: SetDrawLayer no-op, draw order, sublevel ignored, textureSubLevel not parsed |
+| [[casc-root-v2-parsing-missing-textures]] | Dispel debuff borders (and ~89% of all fdids) unextractable because cascette-rs misparsed 12.0.5 TSFM v2 root blocks (split content flags / NoNameHash bit); fixed via pin bumps + `casc_refresh` + clearing `.missing` markers |
 | [[addon-load-order]] | Bag buttons partially initialized at load; workaround mirrors real WoW event recovery |
 | [[paladin-aura-stance-bar]] | Paladin aura/stance bar vanished because default `SimState.shapeshift_forms` was empty even though the player is seeded as Paladin; state now seeds Devotion, Crusader, and Retribution Aura forms |
 | [[mists-panel-stack-overflow-layout-cycle]] | Achievements/Talents panel clicks aborted from layout cache recursion on cyclic parent/anchor dependencies; `headless-click-probe` now exercises the real GUI click path |

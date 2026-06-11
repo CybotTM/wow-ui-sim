@@ -96,4 +96,5 @@ The GUI startup path uses the cache only. If the completion marker is missing, s
 ## See Also
 
 - [[texture-atlas]] — `TextureManager` structure, BLP/PNG/WebP support, atlas database
+- [[casc-root-v2-parsing-missing-textures]] — root v2 misparse that silently dropped 89% of fdids from the resolution cache; rebuild steps after parser changes
 - [[rendering-pipeline]] — font system and downstream consumers of CASC assets
