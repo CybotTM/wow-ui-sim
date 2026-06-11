@@ -135,6 +135,36 @@ local function probeAttributeFalseWildcard()
     }
 end
 
+local function probeGetAttributeArity()
+    local frame = CreateFrame("Frame", "CoreBehaviorAttributeArityProbe", UIParent)
+    frame:SetAttribute("helptype1", "specific")
+    frame:SetAttribute("*type1", false)
+
+    return {
+        oneName = callProtected(function()
+            return frame:GetAttribute("helptype1")
+        end),
+        oneNil = callProtected(function()
+            return frame:GetAttribute(nil)
+        end),
+        twoNilName = callProtected(function()
+            return frame:GetAttribute(nil, "type")
+        end),
+        twoPrefixName = callProtected(function()
+            return frame:GetAttribute("help", "type")
+        end),
+        threeNilSuffix = callProtected(function()
+            return frame:GetAttribute("help", "type", nil)
+        end),
+        threeNilPrefix = callProtected(function()
+            return frame:GetAttribute(nil, "type", "1")
+        end),
+        threePrefixNameSuffix = callProtected(function()
+            return frame:GetAttribute("help", "type", "1")
+        end),
+    }
+end
+
 local function frameLevelSnapshot(frame)
     return {
         frameLevel = frame:GetFrameLevel(),
@@ -310,11 +340,20 @@ local function runProbe()
         createForbiddenFrame = probeCreateForbiddenFrame(),
         registerUnitEvent = probeRegisterUnitEvent(),
         attributeFalseWildcard = probeAttributeFalseWildcard(),
+        getAttributeArity = probeGetAttributeArity(),
         raise = probeRaise(),
     }
-    startRaiseHitProbe()
-
     print("CoreBehaviorProbe captured; /reload or logout to flush SavedVariables")
+end
+
+SLASH_COREBEHAVIORPROBE1 = "/corebehaviorprobe"
+SlashCmdList.COREBEHAVIORPROBE = function(command)
+    if command == "raisehit" then
+        startRaiseHitProbe()
+        print("CoreBehaviorProbe raise-hit capture started; keep the mouse over the client")
+    else
+        print("CoreBehaviorProbe commands: /corebehaviorprobe raisehit")
+    end
 end
 
 local frame = CreateFrame("Frame")

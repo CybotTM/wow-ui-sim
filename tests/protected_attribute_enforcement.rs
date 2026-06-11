@@ -32,7 +32,15 @@ fn mark_frame_protected(env: &WowLuaEnv, frame_global: &str) {
 #[test]
 fn get_attribute_wildcard_lookup_preserves_explicit_false() {
     let env = env();
-    let (direct_false, wildcard_false, direct_true, wildcard_true, wildcard_string): (
+    let (
+        direct_false,
+        wildcard_false,
+        nil_prefix_wildcard_false,
+        direct_true,
+        wildcard_true,
+        wildcard_string,
+    ): (
+        bool,
         bool,
         bool,
         bool,
@@ -43,11 +51,13 @@ fn get_attribute_wildcard_lookup_preserves_explicit_false() {
             r#"
         local frame = CreateFrame("Button", "AttributeWildcardFalseProbe", UIParent)
         frame:SetAttribute("harmtype1", false)
+        frame:SetAttribute("*type1", false)
         frame:SetAttribute("helptype1", true)
         frame:SetAttribute("*type2", "spell")
 
         return frame:GetAttribute("harmtype1") == false,
             frame:GetAttribute("harm", "type", "1") == false,
+            frame:GetAttribute(nil, "type", "1") == false,
             frame:GetAttribute("helptype1") == true,
             frame:GetAttribute("help", "type", "1") == true,
             frame:GetAttribute("help", "type", "2")
@@ -57,9 +67,42 @@ fn get_attribute_wildcard_lookup_preserves_explicit_false() {
 
     assert!(direct_false);
     assert!(wildcard_false);
+    assert!(nil_prefix_wildcard_false);
     assert!(direct_true);
     assert!(wildcard_true);
     assert_eq!(wildcard_string, "spell");
+}
+
+#[test]
+fn get_attribute_reports_live_client_arity_errors() {
+    let env = env();
+    let (one_nil_ok, two_nil_name_ok, two_prefix_name_ok, three_nil_suffix_ok): (
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+        local frame = CreateFrame("Button", "AttributeArityProbe", UIParent)
+        return pcall(function() return frame:GetAttribute(nil) end),
+            pcall(function() return frame:GetAttribute(nil, "type") end),
+            pcall(function() return frame:GetAttribute("help", "type") end),
+            pcall(function() return frame:GetAttribute("help", "type", nil) end)
+    "#,
+        )
+        .unwrap();
+
+    assert!(!one_nil_ok, "nil direct name should raise an arity error");
+    assert!(
+        !two_nil_name_ok,
+        "nil prefix without explicit suffix should raise an arity error"
+    );
+    assert!(two_prefix_name_ok, "two string args are valid wildcard lookup");
+    assert!(
+        three_nil_suffix_ok,
+        "explicit nil suffix is valid wildcard lookup"
+    );
 }
 
 #[test]

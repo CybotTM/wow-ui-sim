@@ -16,14 +16,11 @@ use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
 pub(super) fn get_attribute(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    let arg_count = state.top.saturating_sub(state.base);
     let first = val_to_string(state, stack_val(state, 2));
     let second = val_to_string(state, stack_val(state, 3));
     let third = val_to_string(state, stack_val(state, 4));
-    let keys = build_attribute_keys(state, first, second, third);
-    let Some(keys) = keys else {
-        state.push(Val::Nil);
-        return Ok(1);
-    };
+    let keys = build_attribute_keys(arg_count, first, second, third)?;
     let attr = {
         let sim = borrow_state(state)?;
         sim.widgets.get(id).and_then(|frame| {
@@ -37,19 +34,20 @@ pub(super) fn get_attribute(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn build_attribute_keys(
-    _state: &LuaState,
+    arg_count: usize,
     first: Option<String>,
     second: Option<String>,
     third: Option<String>,
-) -> Option<Vec<String>> {
+) -> LuaResult<Vec<String>> {
     match (first, second, third) {
-        (Some(name), None, None) => Some(vec![name]),
-        (Some(prefix), Some(name), suffix) => Some(attribute_lookup_keys(
+        (Some(name), None, None) if arg_count == 2 => Ok(vec![name]),
+        (Some(prefix), Some(name), suffix) => Ok(attribute_lookup_keys(
             &prefix,
             &name,
             suffix.as_deref().unwrap_or_default(),
         )),
-        _ => None,
+        (None, Some(name), Some(suffix)) => Ok(attribute_lookup_keys("", &name, &suffix)),
+        _ => Err(runtime_error("Arguments: (\"name\")")),
     }
 }
 
