@@ -310,26 +310,41 @@ fn test_secure_handler_unwrap_script_restores_original_handler() {
 }
 
 #[test]
-fn test_protect_only_sets_protected_for_secure_callers() {
+fn test_protect_methods_are_not_public_addon_surface() {
     let env = env();
-    env.exec(r#"ProtectMethodFrame = CreateFrame("Frame", "ProtectMethodFrame", UIParent)"#)
-        .unwrap();
-
-    let insecure_protected: bool = env
+    let (protect_type, set_protected_type, protect_errors, set_protected_errors): (
+        String,
+        String,
+        bool,
+        bool,
+    ) = env
         .eval(
             r#"
-            forceinsecure()
-            ProtectMethodFrame:Protect()
-            return ProtectMethodFrame:IsProtected()
+            local frame = CreateFrame("Frame", "ProtectMethodFrame", UIParent)
+            local protectOk = pcall(function()
+                frame:Protect()
+            end)
+            local setProtectedOk = pcall(function()
+                frame:SetProtected(true)
+            end)
+            return type(frame.Protect), type(frame.SetProtected), not protectOk, not setProtectedOk
             "#,
         )
         .unwrap();
-    assert!(!insecure_protected);
+    assert_eq!(protect_type, "nil");
+    assert_eq!(set_protected_type, "nil");
+    assert!(protect_errors);
+    assert!(set_protected_errors);
+}
 
+#[test]
+fn test_admin_can_mark_frame_protected_for_internal_setup() {
+    let env = env();
     let secure_protected: bool = env
         .eval(
             r#"
-            ProtectMethodFrame:Protect()
+            ProtectMethodFrame = CreateFrame("Frame", "ProtectMethodFrame", UIParent)
+            A_Admin.SetFrameProtected("ProtectMethodFrame", true)
             return ProtectMethodFrame:IsProtected()
             "#,
         )

@@ -20,7 +20,6 @@ pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
         is_preventing_secret_values,
     )?;
     table_set_rust_fn_static(state, mt, "IsProtected", is_protected)?;
-    table_set_rust_fn_static(state, mt, "Protect", protect)?;
     table_set_rust_fn_static(
         state,
         mt,
@@ -102,19 +101,6 @@ pub fn is_protected(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(protected));
     state.push(Val::Bool(protected));
     Ok(2)
-}
-
-pub fn protect(state: &mut LuaState) -> LuaResult<u32> {
-    if !rilua::api::state_is_secure(state) {
-        return Ok(0);
-    }
-
-    let id = frame_id_from_stack(state, 1)?;
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut(id) {
-        frame.is_protected = true;
-    }
-    Ok(0)
 }
 
 pub fn set_prevent_secret_values(state: &mut LuaState) -> LuaResult<u32> {
