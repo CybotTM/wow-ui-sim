@@ -1272,3 +1272,7 @@ Created `investigations/journeys-renown-card-text-anchor.md`. Reported as text z
 ## [2026-06-11] ingest | Mouse dead at frozen 50 FPS (probe blockers + idle tick stall)
 
 Created `investigations/mouse-dead-probe-blockers-idle-ticks.md`. CoreBehaviorProbe (loaded from a renamed `.disabled` folder) left two full-screen mouse-enabled DIALOG blockers over UIParent because its 3-deep C_Timer.After cleanup chain stalls: pending C_Timers do not wake the tick loop once the app idles (open bug), and the frozen tick loop also freezes the FPS display at its last value. Loader fixed in b580ea005 to only accept TOCs naming their folder.
+
+## [2026-06-11] update | tick-subscription churn root cause fixed
+
+Updated `investigations/mouse-dead-probe-blockers-idle-ticks.md`: the idle timer stall was subscription churn — compute_tick_interval returned the raw shrinking remaining-time of the next C_Timer, changing the iced time::every identity on every update, so continuous input (mouse moves) recreated the tick stream before it could fire. Fixed in 397742569 with quantized interval buckets.

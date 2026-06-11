@@ -21,9 +21,15 @@ In a full-addon GUI session (`WOW_SIM_EDIT_MODE_LAYOUT=Ultrawide`), the mouse st
 
 `makeRaiseHitFrame` (Raise/Lower hit probe) creates two full-screen `SetAllPoints(UIParent)` + `DIALOG` + `EnableMouse(true)` frames (levels 1 and 10) and hides them only at the end of a 3-deep `C_Timer.After(0)` chain. `CoreBehaviorProbeDB.raiseHit.status` stuck at `"pending"` ⇒ chain never completed ⇒ blockers persist for the whole session.
 
-### Cause 2 (OPEN sim bug): pending C_Timers don't wake the idle tick loop
+### Cause 2 (fixed): subscription churn starved timer ticks under continuous input
 
-Verified live: an `After(0)` queued while the app is idle never fires; force-dirtying a frame runs exactly one tick (one callback), then the chain stalls again. Statically, `compute_tick_interval` (`src/iced_app/app.rs`) consults `env.next_timer_delay()` (reads `state.rilua_timers`, which `C_Timer.After` feeds), so the subscription *should* wake — but live it doesn't once idle. Something in the subscription/idle path drops it. **Until fixed, any timer chain queued while idle stalls** (and the FPS display freezes with it). Owner: active WIP in `update_runtime.rs` / tick scheduling.
+`compute_tick_interval` returned the raw *remaining time* to the next pending C_Timer. iced keys the `time::every` subscription identity by the interval value and rebuilds the subscription set after **every** update — so each incoming message (every mouse move, every IPC command) produced a different interval, tore down the tick stream, and reset its first fire. Under continuous input the stream was recreated before it ever fired: ProcessTimers starved, pending `C_Timer` chains stalled, OnUpdate stopped, and the FPS display froze. The user moving the mouse to "wake" the UI was exactly what kept it dead.
+
+The default layout masked it because something keeps strata perpetually dirty there (constant fast-tick interval → stable stream); `Ultrawide` reached a clean state and exposed the shrinking-interval path.
+
+Fixed in commit `397742569`: `stable_timer_interval` quantizes the timer wait into fixed buckets (16/50/250/1000 ms), so the subscription identity survives successive updates (at most one stream recreation per bucket boundary; timers still fire within one tick of their deadline). Regression tests: `stable_timer_interval_uses_fixed_buckets`, `compute_tick_interval_is_stable_while_pending_timer_shrinks` (fails against the raw-delay code).
+
+Note: the FPS-display-freezes-with-ticks coupling (`update_fps_counter` only runs in `finish_timer_tick`) is still true and worth decoupling someday — a dead tick loop should read 0 FPS, not the last value.
 
 ### Cause 3 (fixed): renamed `.disabled` addon folders still loaded
 
