@@ -727,3 +727,62 @@ fn sample_display_metrics_split_frame_budget() {
     assert!((metrics.tick_ms - 1.5).abs() < 0.001);
     assert!((metrics.other_ms - 96.0).abs() < 0.001);
 }
+
+// ── Tick interval stability ──────────────────────────────────────────────────
+
+#[test]
+fn stable_timer_interval_uses_fixed_buckets() {
+    use crate::iced_app::app::stable_timer_interval;
+    use std::time::Duration;
+    assert_eq!(
+        stable_timer_interval(Duration::from_millis(0)),
+        Duration::from_millis(16)
+    );
+    assert_eq!(
+        stable_timer_interval(Duration::from_millis(40)),
+        Duration::from_millis(16)
+    );
+    assert_eq!(
+        stable_timer_interval(Duration::from_millis(120)),
+        Duration::from_millis(50)
+    );
+    assert_eq!(
+        stable_timer_interval(Duration::from_millis(800)),
+        Duration::from_millis(250)
+    );
+    assert_eq!(
+        stable_timer_interval(Duration::from_secs(600)),
+        Duration::from_millis(1000)
+    );
+}
+
+#[test]
+fn compute_tick_interval_is_stable_while_pending_timer_shrinks() {
+    // iced keys the time::every subscription by the interval value and the
+    // subscription set is rebuilt after every update. If this returns the raw
+    // remaining time, every update recreates the tick stream (resetting its
+    // first fire), and under continuous input ProcessTimers starves: pending
+    // C_Timer chains stall and the FPS display freezes at its last value.
+    let mut app = build_test_app(ScreenKind::Game);
+    app.gui_startup_complete.set(true);
+    app.strata_dirty.set(0);
+    app.textures_pending.set(false);
+    app.selected_rot_level = "Off".to_string();
+
+    {
+        let env = app.env.borrow();
+        env.exec("C_Timer.After(0.8, function() end)").unwrap();
+    }
+
+    let first = app.compute_tick_interval();
+    std::thread::sleep(std::time::Duration::from_millis(5));
+    let second = app.compute_tick_interval();
+
+    assert!(first.is_some(), "pending timer must schedule a tick");
+    assert_eq!(
+        first, second,
+        "tick interval must stay identical across updates while a pending \
+         timer's remaining time shrinks, or the iced subscription is torn \
+         down and recreated before it can ever fire"
+    );
+}

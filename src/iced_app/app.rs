@@ -541,7 +541,7 @@ impl App {
 
         // Timer tick: wake up when next C_Timer fires (min 16ms)
         if let Some(delay) = env.next_timer_delay() {
-            return Some(delay.max(std::time::Duration::from_millis(16)));
+            return Some(stable_timer_interval(delay));
         }
         drop(env);
 
@@ -560,6 +560,32 @@ impl App {
         // nothing else is active (e.g., buff duration countdown text).
         Some(std::time::Duration::from_secs(1))
     }
+}
+
+/// Quantize a pending-timer delay into one of a few fixed tick intervals.
+///
+/// iced keys `time::every` subscription identity by the interval value, and
+/// the subscription set is re-evaluated after every `update()`. Returning the
+/// raw remaining time produces a different interval on each update, which
+/// tears down and recreates the tick stream — resetting its first-fire delay
+/// — every time any message arrives. Under continuous input (mouse movement,
+/// IPC commands) the stream is recreated before it ever fires and timer
+/// ticks starve completely: pending `C_Timer.After` chains stall, the
+/// FPS display freezes at its last value, and anything waiting on a timer
+/// (e.g. CoreBehaviorProbe's blocker cleanup) never runs. Fixed buckets keep
+/// the interval — and therefore the subscription — stable while a timer's
+/// remaining time shrinks; the stream is recreated at most once per bucket
+/// boundary, and each bucket interval is at most the remaining time, so
+/// timers still fire within one tick of their deadline.
+pub(crate) fn stable_timer_interval(delay: std::time::Duration) -> std::time::Duration {
+    const BUCKETS_MS: &[u64] = &[1000, 250, 50, 16];
+    let delay_ms = delay.as_millis().min(u128::from(u64::MAX)) as u64;
+    let bucket = BUCKETS_MS
+        .iter()
+        .copied()
+        .find(|&bucket| delay_ms >= bucket)
+        .unwrap_or(16);
+    std::time::Duration::from_millis(bucket)
 }
 
 fn fast_tick_interval() -> std::time::Duration {
