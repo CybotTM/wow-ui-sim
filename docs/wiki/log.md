@@ -1252,3 +1252,7 @@ Updated `investigations/class-talents-trait-loadout-state.md` after fixing a ful
 ## [2026-06-11] ingest | CASC root v2 misparse dropped 89% of fdids
 
 Created `investigations/casc-root-v2-parsing-missing-textures.md` after the magic-dispel debuff border atlas resolved correctly but its texture (`interface/hud/uidebuffframes.blp`) could not be extracted. cascette-rs 0d0e79a misparsed 12.0.5 TSFM v2 root blocks (split content-flags fields, wrong NoNameHash bit), silently dropping 2.8M of 3.19M root records. Fixed by pinning cascette-rs c5de2b9 / asset-resolver 3ab8a14 (wow-ui-sim 598a29909), rebuilding the resolution cache (346K → 1.88M entries), and clearing 904 stale `.missing` markers.
+
+## [2026-06-11] update | EditMode first-apply dirtiness + player debuff modeling
+
+Updated `investigations/casc-root-v2-parsing-missing-textures.md` with parts 2-3: the dispel swirly was also blocked by the EditMode startup workaround seeding frames before UpdateSystem (destroying first-apply setting dirtiness, so ShowDispelType never applied), and by the absence of any player-debuff modeling. Fixed in c527f05fa (lookup-then-UpdateSystem flow mirroring EditModeManagerFrameMixin) and 2ac3057b6 (A_Admin.AddDebuff + UNIT_AURA isFullUpdate payloads + nilable dispelName).

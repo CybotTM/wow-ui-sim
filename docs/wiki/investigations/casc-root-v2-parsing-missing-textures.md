@@ -1,6 +1,6 @@
 # CASC Root v2 Misparsing Dropped 89% of FDIDs (Missing Textures)
 
-The dispel-type debuff border ("blue swirly", atlas `ui-debuff-border-magic-icon`) never rendered because its texture `interface/hud/uidebuffframes.blp` (fdid 7553349) could not be extracted from CASC. Root cause was not in wow-ui-sim at all: the pinned cascette-rs rev misparsed the 12.0.5 TSFM v2 root file, silently dropping ~89% of all fdid→content-key records. Any texture whose fdid lived in the lost range was unextractable, and the failure was masked by `.missing` markers and silent error recovery.
+The dispel-type debuff border ("blue swirly", atlas `ui-debuff-border-magic-icon`) never rendered. TWO independent root causes stacked: (1) the pinned cascette-rs rev misparsed the 12.0.5 TSFM v2 root file, silently dropping ~89% of all fdid→content-key records, so the border texture `interface/hud/uidebuffframes.blp` (fdid 7553349) could not be extracted from CASC; (2) the EditMode startup workaround destroyed first-apply setting dirtiness, so `DebuffFrame.AuraContainer.showDispelType` was never set and the code picked the no-icon atlas variant even after textures worked. A third gap — no way to put a dispellable debuff on the player — hid both.
 
 ## Content
 
@@ -38,6 +38,53 @@ Verification: a hand-rolled parser using `(cf1|cf2) & 0x10000000` for NoNameHash
 
 - `RootFile::parse` still swallows mid-file block errors silently.
 - The `num_records > 1_000_000` "sanity check" returns an empty block **without skipping its record bytes**, guaranteeing misalignment if a legit block ever exceeds 1M records.
+
+### Part 2: EditMode first-apply dirtiness (swirly still missing after texture fix)
+
+With textures extractable, the swirly still didn't render. The dispel-icon
+atlas variant is gated by `containerFrame.showDispelType`
+(`Blizzard_BuffFrame/BuffFrame.lua:1105`), set only by
+`EditModeAuraFrameSystemMixin:UpdateSystemSettingShowDispelType` — a
+**dirty-gated** per-setting handler.
+
+- Blizzard derives dirtiness in `EditModeSystemMixin:UpdateSystem` by diffing
+  incoming settings against the frame's previous `settingMap`; on first apply
+  the map is absent → all settings dirty → all handlers run. The manager also
+  exposes `forceFullUpdate` → `MarkAllSettingsDirty()` for re-applies.
+- The sim's `apply_system_anchors.lua` workaround **seeded** frames
+  (`systemInfo` + `UpdateSettingMap(true)`) before handing them to the real
+  `UpdateSystem`. The second `UpdateSettingMap` diffed against the identical
+  seeded map and reset `dirtySettings = {}` — every dirty-gated handler across
+  every system on the fallback path silently skipped.
+- Fix (commit `c527f05fa`): read-only `lookup_system_info` for branch
+  decisions; the fallback mirrors `EditModeManagerFrameMixin:UpdateSystem`
+  directly with the resolved info (also covering the saved-layout `-1` index
+  quirk for singletons). Replay-path frames still seed — seeding itself marks
+  first-apply dirtiness correctly there. Fixed `frame_positions::buff_frame`.
+- `frame_positions` still fails 4 (player_frame, focus_frame,
+  paladin_power_bar, casting_bar) — **pre-existing on master** (verified in a
+  clean worktree at 798b79893), not caused by this change.
+
+### Part 3: player debuff modeling (commit `2ac3057b6`)
+
+The only Magic-debuff fixture was on the **target**, and retail TargetFrame
+debuffs use color-tinted borders (`SetAuraBorderColor`), never the dispel-icon
+atlas — that appears on the player DebuffFrame, CooldownViewer, and private
+auras. Added `A_Admin.AddDebuff(spellId, name, icon, duration, stacks,
+dispelType)`; admin aura verbs now fire `UNIT_AURA` with `isFullUpdate = true`
+(Blizzard's aura listeners ignore the event without an update payload);
+`dispelName` is nil (not `""`) for non-dispellable auras per retail contract.
+
+Verify end-to-end:
+
+```bash
+wow-sim --no-addons --no-saved-vars \
+  --exec-lua '@-' --delay 500 screenshot -o /tmp/swirly.webp <<'EOF'
+A_Admin.AddDebuff(589, "Shadow Word: Pain", 136207, 30, 1, "Magic")
+EOF
+```
+
+The debuff renders left of the minimap with the blue border + dispel swirl.
 
 ## Sources
 
