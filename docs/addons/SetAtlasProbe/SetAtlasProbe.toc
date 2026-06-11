@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: SetAtlasProbe
+## Notes: Captures Texture:SetAtlas argument behavior
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: SetAtlasProbeDB
+
+SetAtlasProbe.lua

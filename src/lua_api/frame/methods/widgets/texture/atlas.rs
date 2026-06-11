@@ -6,16 +6,22 @@ use crate::lua_api::methods::{
 };
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
+use rilua::{LuaResult, Val, runtime_error};
 
 pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    let arg_count = state.top.saturating_sub(state.base);
+    if arg_count < 2 {
+        return set_atlas_usage_error();
+    }
     let atlas_name = match stack_val(state, 2) {
         Val::Str(_) => super::super::shared::opt_string(state, 2),
+        Val::Nil => None,
         Val::Num(element_id) if element_id > 0.0 => {
             crate::atlas::get_atlas_name_by_element_id(element_id as u32).map(str::to_string)
         }
-        _ => None,
+        Val::Num(_) => None,
+        _ => return set_atlas_usage_error(),
     };
     let Some(atlas_name) = atlas_name else {
         return Ok(0);
@@ -39,6 +45,13 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     apply_atlas(&mut sim.widgets, id, &atlas_name, &lookup, use_atlas_size);
     Ok(0)
+}
+
+fn set_atlas_usage_error() -> LuaResult<u32> {
+    Err(runtime_error(
+        "SetAtlas(): Usage: (\"atlasName\"[, useAtlasSize, filterMode, resetTexCoords, \
+         wrapModeHorizontal, wrapModeVertical])",
+    ))
 }
 
 fn clear_atlas_texture(widgets: &mut crate::widget::WidgetRegistry, id: u64) {
@@ -259,19 +272,9 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
         let Some((path, file_data_id)) = resolve_texture_value(state, texture_val) else {
             return Ok(0);
         };
-        let had_render_source = frame.texture.is_some()
-            || frame.texture_file_data_id.is_some()
-            || frame.color_texture.is_some()
-            || frame.atlas.is_some()
-            || frame.atlas_tex_coords.is_some();
+        let had_render_source = texture_has_render_source(frame);
         let has_render_source = path.is_some() || file_data_id.is_some();
-        let changed = frame.texture != path
-            || frame.texture_file_data_id != file_data_id
-            || frame.color_texture.is_some()
-            || frame.atlas.is_some()
-            || frame.atlas_tex_coords.is_some()
-            || horiz_tile.is_some_and(|enabled| frame.horiz_tile != enabled)
-            || vert_tile.is_some_and(|enabled| frame.vert_tile != enabled);
+        let changed = texture_assignment_changed(frame, &path, file_data_id, horiz_tile, vert_tile);
         frame.texture = path;
         frame.texture_file_data_id = file_data_id;
         frame.color_texture = None;
@@ -288,6 +291,30 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
         sim.invalidate_strata_buckets();
     }
     Ok(0)
+}
+
+fn texture_has_render_source(frame: &crate::widget::Frame) -> bool {
+    frame.texture.is_some()
+        || frame.texture_file_data_id.is_some()
+        || frame.color_texture.is_some()
+        || frame.atlas.is_some()
+        || frame.atlas_tex_coords.is_some()
+}
+
+fn texture_assignment_changed(
+    frame: &crate::widget::Frame,
+    path: &Option<String>,
+    file_data_id: Option<i64>,
+    horiz_tile: Option<bool>,
+    vert_tile: Option<bool>,
+) -> bool {
+    frame.texture.as_ref() != path.as_ref()
+        || frame.texture_file_data_id != file_data_id
+        || frame.color_texture.is_some()
+        || frame.atlas.is_some()
+        || frame.atlas_tex_coords.is_some()
+        || horiz_tile.is_some_and(|enabled| frame.horiz_tile != enabled)
+        || vert_tile.is_some_and(|enabled| frame.vert_tile != enabled)
 }
 
 fn apply_texture_tiling_flags(
