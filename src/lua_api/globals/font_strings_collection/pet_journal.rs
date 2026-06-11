@@ -387,10 +387,12 @@ fn register_pet_loadout_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn pet_get_loadout_info(state: &mut LuaState) -> LuaResult<u32> {
-    for _ in 0..6 {
-        state.push(Val::Num(0.0));
-    }
-    Ok(6)
+    state.push(Val::Nil);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(false));
+    Ok(5)
 }
 
 fn register_pet_summon_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {

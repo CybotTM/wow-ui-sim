@@ -79,6 +79,25 @@ fn test_pet_journal_get_num_collected_info() {
     assert_eq!(total, 10);
 }
 
+#[test]
+fn test_pet_journal_empty_loadout_slot_has_nil_pet_id() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local petID, ability1ID, ability2ID, ability3ID, locked = C_PetJournal.GetPetLoadOutInfo(1)
+            if petID ~= nil then return "petID=" .. tostring(petID) end
+            if ability1ID ~= 0 then return "ability1ID=" .. tostring(ability1ID) end
+            if ability2ID ~= 0 then return "ability2ID=" .. tostring(ability2ID) end
+            if ability3ID ~= 0 then return "ability3ID=" .. tostring(ability3ID) end
+            if locked ~= false then return "locked=" .. tostring(locked) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "empty loadout slot shape: {result}");
+}
+
 // ============================================================================
 // C_MountJournal
 // ============================================================================
@@ -146,6 +165,11 @@ fn test_mount_journal_get_is_favorite() {
     let (is_fav, can_fav): (bool, bool) =
         env.eval("return C_MountJournal.GetIsFavorite(1)").unwrap();
     assert!(!is_fav);
+    assert!(can_fav);
+
+    let (is_fav, can_fav): (bool, bool) =
+        env.eval("return C_MountJournal.GetIsFavorite(0)").unwrap();
+    assert!(!is_fav);
     assert!(!can_fav);
 }
 
@@ -211,6 +235,21 @@ fn test_toy_box_is_toy_usable_uncollected() {
     let env = env();
     let usable: bool = env.eval("return C_ToyBox.IsToyUsable(187421)").unwrap();
     assert!(!usable, "uncollected toy should not be usable");
+}
+
+#[test]
+fn test_toy_box_info_filter_helpers_exist() {
+    let env = env();
+    let ok: bool = env
+        .eval(
+            r#"
+            return type(C_ToyBoxInfo) == "table"
+                and C_ToyBoxInfo.IsUsingDefaultFilters() == true
+                and C_ToyBoxInfo.IsToySourceValid(1) == true
+            "#,
+        )
+        .unwrap();
+    assert!(ok);
 }
 
 #[test]

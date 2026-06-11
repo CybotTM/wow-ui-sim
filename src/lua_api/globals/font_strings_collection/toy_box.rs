@@ -204,12 +204,27 @@ fn register_toy_type_filter_stubs(b: TableBuilder) -> LuaResult<TableBuilder> {
     .set_function("SetSourceTypeFilter", |_state| Ok(0))
 }
 
+fn register_toy_box_info(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let table = TableBuilder::new(lua.state_mut())
+        .set_function("IsUsingDefaultFilters", |state| true.into_stack(state))?
+        .set_function("SetDefaultFilters", |_state| Ok(0))?
+        .set_function("IsToySourceValid", |state| {
+            let source_index = i32::from_stack(state, 1)?;
+            (source_index > 0).into_stack(state)
+        })?
+        .set_function("ClearFanfare", |_state| Ok(0))?
+        .build();
+    set_global_val(lua.state_mut(), "C_ToyBoxInfo", table);
+    Ok(())
+}
+
 pub fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
     let b = TableBuilder::new(lua.state_mut());
     let b = register_toy_queries(b)?;
     let b = register_toy_favorites(b)?;
     let t = register_toy_filter_stubs(b)?.build();
     set_global_val(lua.state_mut(), "C_ToyBox", t);
+    register_toy_box_info(lua)?;
     LuaApiMut::register_function(lua, "PlayerHasToy", player_has_toy)?;
     LuaApiMut::register_function(lua, "UseToy", use_toy)?;
     Ok(())
