@@ -438,6 +438,37 @@ fn store_catalog_button_slice_geometry_stays_bounded() {
 }
 
 #[test]
+fn store_product_card_buy_button_click_completes_without_store_upvalue_error() {
+    let env = load_full_game_ui();
+    let result: (bool, Option<String>) = env
+        .eval(
+            r#"
+            StoreFrame:Show()
+            C_StoreSecure.GetProductList()
+            local button
+            for activeCard in StoreFrame.productCardPoolCollection:EnumerateActive() do
+                if activeCard.BuyButton then
+                    button = activeCard.BuyButton
+                    break
+                end
+            end
+            assert(button, "expected at least one active store card buy button")
+
+            return pcall(function()
+                button:Click()
+            end)
+            "#,
+        )
+        .expect("store product card buy button click should return pcall result");
+
+    assert!(
+        result.0,
+        "store product card buy button click should not throw: {:?}",
+        result.1
+    );
+}
+
+#[test]
 fn secure_env_tracks_latest_ninesliceutil_in_full_game_ui() {
     let env = load_full_game_ui();
     let (global_disable, secure_disable, same_table): (String, String, bool) = env

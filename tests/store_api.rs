@@ -148,9 +148,18 @@ const STORE_SECURE_VAS_SCRIPT: &str = r#"
         return "initial_purchase_failed"
     end
 
+    if C_StoreSecure.HasPurchaseInProgress() ~= true then
+        return "purchase_state_not_marked_in_progress"
+    end
+
+    local purchaseConfirmationProductID, purchaseWalletName, _, _, purchaseDollars, purchaseCents = C_StoreSecure.GetConfirmationInfo()
+    if purchaseConfirmationProductID ~= 2003 or purchaseWalletName ~= "Blizzard Balance" or purchaseDollars ~= 10 or purchaseCents ~= 0 then
+        return "wrong_purchase_confirmation_info:" .. tostring(purchaseConfirmationProductID) .. ":" .. tostring(purchaseWalletName) .. ":" .. tostring(purchaseDollars) .. ":" .. tostring(purchaseCents)
+    end
+
     local completionProductID, completionGuid, completionRealm, shouldHandle = C_StoreSecure.GetVASCompletionInfo()
     if completionProductID ~= 2003 or completionGuid ~= character.guid or completionRealm ~= "Kalimdor" or shouldHandle ~= false then
-        return "wrong_completion_info_before_disconnect"
+        return "wrong_completion_info_before_disconnect:" .. tostring(completionProductID) .. ":" .. tostring(completionGuid) .. ":" .. tostring(completionRealm) .. ":" .. tostring(shouldHandle)
     end
 
     local duplicatePurchase = C_StoreSecure.PurchaseVASProduct(

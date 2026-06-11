@@ -837,7 +837,7 @@ local __wow_store_products = {
 local function __wow_store_realm_name(address)
   if address == 101 then
     return "Azeroth"
-  elseif address == 102 then
+  elseif address == 102 or address == 202 then
     return "Kalimdor"
   end
   return tostring(address or "")
@@ -874,8 +874,8 @@ end
 if rawget(C_StoreSecure, "HasDistributionList") == nil then
   function C_StoreSecure.HasDistributionList() return C_StoreSecure._state.has_distribution_list end
 end
-if rawget(C_StoreSecure, "HasPurchaseInProgress") == nil then
-  function C_StoreSecure.HasPurchaseInProgress() return C_StoreSecure._state.purchase_in_progress end
+function C_StoreSecure.HasPurchaseInProgress()
+  return C_StoreSecure._state.purchase_in_progress
 end
 if rawget(C_StoreSecure, "IsRegionLocked") == nil then
   function C_StoreSecure.IsRegionLocked() return C_StoreSecure._state.region_locked end
@@ -958,97 +958,79 @@ if rawget(C_StoreSecure, "GetDistributionList") == nil then
     return {}
   end
 end
-if rawget(C_StoreSecure, "GetFailureInfo") == nil then
-  function C_StoreSecure.GetFailureInfo()
-    return C_StoreSecure._state.failure_code, C_StoreSecure._state.failure_reason
+function C_StoreSecure.GetFailureInfo()
+  return C_StoreSecure._state.failure_code, C_StoreSecure._state.failure_reason
+end
+function C_StoreSecure.AckFailure()
+  C_StoreSecure._state.failure_code = nil
+  C_StoreSecure._state.failure_reason = nil
+end
+function C_StoreSecure.ClearPreGeneratedExternalTransactionID()
+  C_StoreSecure._state.pre_generated_external_transaction_id = false
+end
+function C_StoreSecure.OpenNydusLink(productID)
+  local normalized = tonumber(productID) or 0
+  if normalized == 1003 then
+    normalized = 2003
+  end
+  local product = __wow_store_product(normalized)
+  if product then
+    C_StoreSecure._state.confirmation_product_id = normalized
+    C_StoreSecure._state.confirmation_wallet_name = "Blizzard Balance"
+    C_StoreSecure._state.confirmation_current_dollars = product.sharedData.currentDollars
+    C_StoreSecure._state.confirmation_current_cents = product.sharedData.currentCents
   end
 end
-if rawget(C_StoreSecure, "AckFailure") == nil then
-  function C_StoreSecure.AckFailure()
-    C_StoreSecure._state.failure_code = nil
-    C_StoreSecure._state.failure_reason = nil
-  end
-end
-if rawget(C_StoreSecure, "ClearPreGeneratedExternalTransactionID") == nil then
-  function C_StoreSecure.ClearPreGeneratedExternalTransactionID()
-    C_StoreSecure._state.pre_generated_external_transaction_id = false
-  end
-end
-if rawget(C_StoreSecure, "OpenNydusLink") == nil then
-  function C_StoreSecure.OpenNydusLink(productID)
-    local normalized = tonumber(productID) or 0
-    if normalized == 1003 then
-      normalized = 2003
-    end
-    local product = __wow_store_product(normalized)
-    if product then
-      C_StoreSecure._state.confirmation_product_id = normalized
-      C_StoreSecure._state.confirmation_wallet_name = "Blizzard Balance"
-      C_StoreSecure._state.confirmation_current_dollars = product.sharedData.currentDollars
-      C_StoreSecure._state.confirmation_current_cents = product.sharedData.currentCents
-    end
-  end
-end
-if rawget(C_StoreSecure, "GetConfirmationInfo") == nil then
-  function C_StoreSecure.GetConfirmationInfo()
-    return C_StoreSecure._state.confirmation_product_id, C_StoreSecure._state.confirmation_wallet_name, nil, nil, C_StoreSecure._state.confirmation_current_dollars, C_StoreSecure._state.confirmation_current_cents
-  end
+function C_StoreSecure.GetConfirmationInfo()
+  return C_StoreSecure._state.confirmation_product_id, C_StoreSecure._state.confirmation_wallet_name, nil, nil, C_StoreSecure._state.confirmation_current_dollars, C_StoreSecure._state.confirmation_current_cents
 end
 if rawget(C_StoreSecure, "GetUnrevokedBoostInfo") == nil then
   function C_StoreSecure.GetUnrevokedBoostInfo()
     return "Level 70 Character Boost", "Simhero", "Azeroth"
   end
 end
-if rawget(C_StoreSecure, "GetVASCompletionInfo") == nil then
-  function C_StoreSecure.GetVASCompletionInfo()
-    return C_StoreSecure._state.completion_product_id, C_StoreSecure._state.completion_guid, C_StoreSecure._state.completion_realm_name, C_StoreSecure._state.completion_should_handle
-  end
+function C_StoreSecure.GetVASCompletionInfo()
+  return C_StoreSecure._state.completion_product_id, C_StoreSecure._state.completion_guid, C_StoreSecure._state.completion_realm_name, C_StoreSecure._state.completion_should_handle
 end
-if rawget(C_StoreSecure, "SetDisconnectOnLogout") == nil then
-  function C_StoreSecure.SetDisconnectOnLogout(disconnectOnLogout)
-    C_StoreSecure._state.disconnect_on_logout = disconnectOnLogout and true or false
-    if C_StoreSecure._state.completion_product_id then
-      C_StoreSecure._state.completion_should_handle = C_StoreSecure._state.disconnect_on_logout
-    end
-  end
-end
-if rawget(C_StoreSecure, "SetVASProductReady") == nil then
-  function C_StoreSecure.SetVASProductReady(ready)
-    if ready and C_StoreSecure._state.completion_product_id then
-      C_StoreSecure._state.purchase_in_progress = false
-      FireEvent("STORE_VAS_PURCHASE_COMPLETE")
-    end
-  end
-end
-if rawget(C_StoreSecure, "PurchaseVASProduct") == nil then
-  function C_StoreSecure.PurchaseVASProduct(productID, guid, _name, _oldGuildName, _newGuildMasterGuid, realmValue, _wowAccountGuid, _bnetAccountGuid, _transferFactionChangeBundle, _isGuildFollow)
-    if C_StoreSecure._state.completion_product_id and C_StoreSecure._state.pre_generated_external_transaction_id then
-      C_StoreSecure._state.failure_code = Enum.StoreError.Other
-      C_StoreSecure._state.failure_reason = "DuplicateVASPurchase"
-      return false
-    end
-
-    local product = __wow_store_product(productID)
-    if not product then
-      C_StoreSecure._state.failure_code = Enum.StoreError.Other
-      C_StoreSecure._state.failure_reason = "UnknownVASProduct"
-      return false
-    end
-
-    C_StoreSecure._state.confirmation_product_id = productID
-    C_StoreSecure._state.confirmation_wallet_name = "Blizzard Balance"
-    C_StoreSecure._state.confirmation_current_dollars = product.sharedData.currentDollars
-    C_StoreSecure._state.confirmation_current_cents = product.sharedData.currentCents
-    C_StoreSecure._state.completion_product_id = productID
-    C_StoreSecure._state.completion_guid = guid
-    C_StoreSecure._state.completion_realm_name = __wow_store_realm_name(realmValue)
+function C_StoreSecure.SetDisconnectOnLogout(disconnectOnLogout)
+  C_StoreSecure._state.disconnect_on_logout = disconnectOnLogout and true or false
+  if C_StoreSecure._state.completion_product_id then
     C_StoreSecure._state.completion_should_handle = C_StoreSecure._state.disconnect_on_logout
-    C_StoreSecure._state.purchase_in_progress = true
-    C_StoreSecure._state.pre_generated_external_transaction_id = true
-    C_StoreSecure._state.failure_code = nil
-    C_StoreSecure._state.failure_reason = nil
-    return true
   end
+end
+function C_StoreSecure.SetVASProductReady(ready)
+  if ready and C_StoreSecure._state.completion_product_id then
+    C_StoreSecure._state.purchase_in_progress = false
+    FireEvent("STORE_VAS_PURCHASE_COMPLETE")
+  end
+end
+function C_StoreSecure.PurchaseVASProduct(productID, guid, _name, _oldGuildName, _newGuildMasterGuid, realmValue, _wowAccountGuid, _bnetAccountGuid, _transferFactionChangeBundle, _isGuildFollow)
+  if C_StoreSecure._state.completion_product_id and C_StoreSecure._state.pre_generated_external_transaction_id then
+    C_StoreSecure._state.failure_code = Enum.StoreError.Other
+    C_StoreSecure._state.failure_reason = "DuplicateVASPurchase"
+    return false
+  end
+
+  local product = __wow_store_product(productID)
+  if not product then
+    C_StoreSecure._state.failure_code = Enum.StoreError.Other
+    C_StoreSecure._state.failure_reason = "UnknownVASProduct"
+    return false
+  end
+
+  C_StoreSecure._state.confirmation_product_id = productID
+  C_StoreSecure._state.confirmation_wallet_name = "Blizzard Balance"
+  C_StoreSecure._state.confirmation_current_dollars = product.sharedData.currentDollars
+  C_StoreSecure._state.confirmation_current_cents = product.sharedData.currentCents
+  C_StoreSecure._state.completion_product_id = productID
+  C_StoreSecure._state.completion_guid = guid
+  C_StoreSecure._state.completion_realm_name = __wow_store_realm_name(realmValue)
+  C_StoreSecure._state.completion_should_handle = C_StoreSecure._state.disconnect_on_logout
+  C_StoreSecure._state.purchase_in_progress = true
+  C_StoreSecure._state.pre_generated_external_transaction_id = true
+  C_StoreSecure._state.failure_code = nil
+  C_StoreSecure._state.failure_reason = nil
+  return true
 end
 if rawget(C_StoreSecure, "PurchaseProduct") == nil then
   function C_StoreSecure.PurchaseProduct(productID)
