@@ -182,6 +182,21 @@ fn test_color_globals_expose_expected_rgb_values() {
         )
         .unwrap();
     assert!(debuff_ok);
+
+    let legacy_debuff_color_ok: bool = env
+        .eval(
+            r#"
+            local texture = UIParent:CreateTexture()
+            texture:SetVertexColor(DEBUFF_TYPE_MAGIC_COLOR:GetRGBA())
+            local r, g, b, a = texture:GetVertexColor()
+            return math.abs(r - 0.2) < 0.0001
+                and math.abs(g - 0.6) < 0.0001
+                and math.abs(b - 1.0) < 0.0001
+                and math.abs(a - 1.0) < 0.0001
+            "#,
+        )
+        .unwrap();
+    assert!(legacy_debuff_color_ok);
 }
 
 // ---------------------------------------------------------------------------

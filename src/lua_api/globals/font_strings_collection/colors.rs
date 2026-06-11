@@ -58,6 +58,12 @@ pub(super) const NAMED_COLOR_GLOBALS: &[(&'static str, (f64, f64, f64, f64))] = 
     ("PANEL_BACKGROUND_COLOR", (0.15, 0.15, 0.15, 1.0)),
     ("EDIT_MODE_GRID_LINE_COLOR", (1.0, 1.0, 1.0, 0.3)),
     ("EDIT_MODE_GRID_CENTER_LINE_COLOR", (0.0, 0.8, 1.0, 0.6)),
+    ("DEBUFF_TYPE_CURSE_COLOR", (0.6, 0.0, 1.0, 1.0)),
+    ("DEBUFF_TYPE_DISEASE_COLOR", (0.6, 0.4, 0.0, 1.0)),
+    ("DEBUFF_TYPE_MAGIC_COLOR", (0.2, 0.6, 1.0, 1.0)),
+    ("DEBUFF_TYPE_POISON_COLOR", (0.0, 0.6, 0.0, 1.0)),
+    ("DEBUFF_TYPE_BLEED_COLOR", (1.0, 0.0, 0.0, 1.0)),
+    ("DEBUFF_TYPE_NONE_COLOR", (1.0, 1.0, 1.0, 0.0)),
 ];
 
 pub(super) const RAID_CLASS_COLORS_DATA: &[(&'static str, (f64, f64, f64, f64))] = &[
