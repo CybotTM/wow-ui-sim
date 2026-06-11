@@ -372,6 +372,35 @@ fn test_get_tex_coord_returns_wow_corner_form_for_rect_coords() {
 }
 
 #[test]
+fn test_get_tex_coord_round_trips_through_set_tex_coord() {
+    let env = env();
+    let (_, source) = setup_texture(&env, "TexCoordRoundTripSource");
+    let (_, target) = setup_texture(&env, "TexCoordRoundTripTarget");
+
+    let count: i64 = env
+        .eval(&format!(
+            r##"
+            {source}:SetTexCoord(0.1, 0.9, 0.2, 0.8)
+            {target}:SetTexCoord({source}:GetTexCoord())
+            return select("#", {target}:GetTexCoord())
+            "##
+        ))
+        .unwrap();
+
+    assert_eq!(count, 8);
+
+    let coords: (f64, f64, f64, f64, f64, f64, f64, f64) = env
+        .eval(&format!("return {target}:GetTexCoord()"))
+        .unwrap();
+    assert_coords_close(
+        [
+            coords.0, coords.1, coords.2, coords.3, coords.4, coords.5, coords.6, coords.7,
+        ],
+        [0.1, 0.2, 0.1, 0.8, 0.9, 0.2, 0.9, 0.8],
+    );
+}
+
+#[test]
 fn test_set_tex_coord_with_atlas_remaps() {
     let env = env();
     // Manually set up atlas_tex_coords via Rust, then call SetTexCoord

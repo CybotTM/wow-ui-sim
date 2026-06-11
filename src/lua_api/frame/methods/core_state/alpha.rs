@@ -65,7 +65,9 @@ pub fn get_effective_alpha(state: &mut LuaState) -> LuaResult<u32> {
 pub fn set_alpha_from_boolean(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let flag = arg_bool(state, 2);
-    let new_alpha: f32 = if flag { 1.0 } else { 0.0 };
+    let alpha_if_true = opt_f32_or(state, 3, 1.0);
+    let alpha_if_false = opt_f32_or(state, 4, 0.0);
+    let new_alpha = if flag { alpha_if_true } else { alpha_if_false }.clamp(0.0, 1.0);
     let mut sim = borrow_state_mut(state)?;
     let changed = sim
         .widgets
@@ -81,6 +83,13 @@ pub fn set_alpha_from_boolean(state: &mut LuaState) -> LuaResult<u32> {
     }
     sim.widgets.propagate_effective_alpha(id, parent_eff);
     Ok(0)
+}
+
+fn opt_f32_or(state: &LuaState, index: i32, default: f32) -> f32 {
+    match crate::lua_bridge::stack_val(state, index) {
+        Val::Num(n) => n as f32,
+        _ => default,
+    }
 }
 
 pub fn set_ignore_parent_alpha(state: &mut LuaState) -> LuaResult<u32> {
@@ -168,6 +177,32 @@ mod tests {
         assert!(
             env.state().borrow().strata_buckets.is_some(),
             "SetAlpha crossing from zero should not invalidate strata buckets",
+        );
+    }
+
+    #[test]
+    fn set_alpha_from_boolean_uses_supplied_alpha_values() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "AlphaBoolCustomFrame", UIParent)
+            frame:SetAlphaFromBoolean(true, 0.5, 0.25)
+            "#,
+        )
+        .unwrap();
+
+        let true_alpha: f64 = env.eval("return AlphaBoolCustomFrame:GetAlpha()").unwrap();
+        assert!(
+            (true_alpha - 0.5).abs() < 0.001,
+            "true branch should use alphaIfTrue"
+        );
+
+        env.exec(r#"AlphaBoolCustomFrame:SetAlphaFromBoolean(false, 0.5, 0.25)"#)
+            .unwrap();
+        let false_alpha: f64 = env.eval("return AlphaBoolCustomFrame:GetAlpha()").unwrap();
+        assert!(
+            (false_alpha - 0.25).abs() < 0.001,
+            "false branch should use alphaIfFalse"
         );
     }
 

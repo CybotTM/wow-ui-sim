@@ -132,6 +132,28 @@ fn get_debuff_data_by_index_returns_nil_when_no_debuffs() {
 }
 
 #[test]
+fn get_aura_dispel_type_color_is_transparent_for_non_dispellable_aura() {
+    let env = env();
+    clear_buffs_and_insert(&env, vec![admin_buff("Plain Debuff", 77, 777, false)]);
+
+    let alpha: f64 = env
+        .eval(
+            r#"
+            local aura = C_UnitAuras.GetAuraDataByIndex("player", 1, "HARMFUL")
+            local color = C_UnitAuras.GetAuraDispelTypeColor("player", aura.auraInstanceID, CreateColor(1, 1, 1, 1))
+            local _, _, _, a = color:GetRGBA()
+            return a
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        alpha.abs() < 0.001,
+        "non-dispellable auras should produce an alpha-0 color"
+    );
+}
+
+#[test]
 fn get_aura_data_by_aura_instance_id_returns_nil_for_unknown_id() {
     let env = env();
     clear_buffs_and_insert(&env, vec![admin_buff("Buff", 1, 111, true)]);

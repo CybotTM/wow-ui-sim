@@ -23,6 +23,7 @@
 //! docs/wiki/investigations/partyframe-tree.md).
 
 use crate::lua_api::game_data::AuraInfo;
+use crate::lua_api::globals::font_strings_collection::colors::make_rilua_color_table;
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, create_table_with_capacity,
     table_get, table_set, table_set_num,
@@ -88,6 +89,7 @@ fn install_c_unit_auras_methods(state: &mut LuaState, ns: Val) {
             ("GetUnitAuras", get_unit_auras),
             ("GetBuffDataByIndex", get_buff_data_by_index),
             ("GetDebuffDataByIndex", get_debuff_data_by_index),
+            ("GetAuraDispelTypeColor", get_aura_dispel_type_color),
             ("GetPlayerAuraBySpellID", get_player_aura_by_spell_id),
             ("AddBlockedAura", add_blocked_aura),
             ("SwitchAuraDataProvider", switch_aura_data_provider),
@@ -393,6 +395,13 @@ fn get_debuff_data_by_index(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_aura_dispel_type_color(state: &mut LuaState) -> LuaResult<u32> {
+    // AuraInfo does not model dispel type yet, so simulated auras are not dispellable.
+    let color = make_rilua_color_table(state, 1.0, 1.0, 1.0, 0.0)?;
+    state.push(color);
+    Ok(1)
+}
+
 fn get_player_aura_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
     let spell_id = Option::<f64>::from_stack(state, 1)?.unwrap_or_default() as i32;
     let found = collect_unit_auras(state, "player", AuraFilter::Helpful)
@@ -411,10 +420,7 @@ fn get_player_aura_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
 // ── Aura lookup helpers ──────────────────────────────────────────────────────
 
 fn push_aura_by_instance_id(state: &mut LuaState, unit: &str, aura_instance_id: i32) {
-    let found = collect_unit_auras(state, unit, AuraFilter::Helpful)
-        .into_iter()
-        .chain(collect_unit_auras(state, unit, AuraFilter::Harmful))
-        .find(|a| a.aura_instance_id == aura_instance_id);
+    let found = find_aura_by_instance_id(state, unit, aura_instance_id);
     match found {
         Some(aura) => {
             let table = build_aura_table(state, &aura, unit);
@@ -422,6 +428,17 @@ fn push_aura_by_instance_id(state: &mut LuaState, unit: &str, aura_instance_id: 
         }
         None => state.push(Val::Nil),
     }
+}
+
+fn find_aura_by_instance_id(
+    state: &mut LuaState,
+    unit: &str,
+    aura_instance_id: i32,
+) -> Option<AuraInfo> {
+    collect_unit_auras(state, unit, AuraFilter::Helpful)
+        .into_iter()
+        .chain(collect_unit_auras(state, unit, AuraFilter::Harmful))
+        .find(|a| a.aura_instance_id == aura_instance_id)
 }
 
 fn push_aura_at_filtered_index(state: &mut LuaState, unit: &str, filter: AuraFilter, index: i32) {
