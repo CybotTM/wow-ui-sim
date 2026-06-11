@@ -1268,3 +1268,7 @@ Created `investigations/xml-scale-attribute.md`. The hero talents box didn't enc
 ## [2026-06-11] ingest | Journeys renown card text anchor fallback
 
 Created `investigations/journeys-renown-card-text-anchor.md`. Reported as text z-ordering, but the Journeys "Renowns" card name/level FontStrings were anchored to the wrong target: their `relativeKey="$parent.IconFrame"` failed eager resolution (loader creates Layers before child Frames) and SetPoint silently fell back to the parent card, pushing the text under the adjacent column. Fixed in 7c0c0f987 by storing unresolved $parent key expressions on the anchor for the existing post-children lazy resolution pass.
+
+## [2026-06-11] ingest | Mouse dead at frozen 50 FPS (probe blockers + idle tick stall)
+
+Created `investigations/mouse-dead-probe-blockers-idle-ticks.md`. CoreBehaviorProbe (loaded from a renamed `.disabled` folder) left two full-screen mouse-enabled DIALOG blockers over UIParent because its 3-deep C_Timer.After cleanup chain stalls: pending C_Timers do not wake the tick loop once the app idles (open bug), and the frozen tick loop also freezes the FPS display at its last value. Loader fixed in b580ea005 to only accept TOCs naming their folder.
