@@ -695,14 +695,20 @@ fn write_aura_identity(state: &mut LuaState, t: Val, aura: &AuraInfo, unit: &str
     };
     let source = create_string(state, source_unit);
     let empty_points = create_table(state);
-    let dispel = create_string(state, aura.dispel_type.as_deref().unwrap_or(""));
+    // Retail contract: dispelName is nilable — absent for non-dispellable auras.
+    let dispel = aura
+        .dispel_type
+        .as_deref()
+        .map(|d| create_string(state, d));
 
     table_set(state, t, "name", name);
     table_set(state, t, "icon", Val::Num(aura.icon as f64));
     table_set(state, t, "applications", Val::Num(aura.applications as f64));
     table_set(state, t, "charges", Val::Num(aura.applications as f64));
     table_set(state, t, "stackCount", Val::Num(aura.applications as f64));
-    table_set(state, t, "dispelName", dispel);
+    if let Some(dispel) = dispel {
+        table_set(state, t, "dispelName", dispel);
+    }
     table_set(state, t, "duration", Val::Num(aura.duration));
     table_set(state, t, "expirationTime", Val::Num(aura.expiration_time));
     table_set(state, t, "sourceUnit", source);

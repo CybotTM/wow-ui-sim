@@ -245,3 +245,71 @@ fn aura_data_table_carries_retail_fields() {
     assert!(is_helpful);
     assert!(!is_harmful);
 }
+
+#[test]
+fn admin_add_debuff_models_dispellable_player_debuff_and_fires_unit_aura() {
+    let env = env();
+    clear_buffs_and_insert(&env, vec![]);
+
+    let (name, dispel, is_harmful, fired): (String, String, bool, bool) = env
+        .eval(
+            r#"
+            local fired = false
+            local listener = CreateFrame("Frame")
+            listener:RegisterEvent("UNIT_AURA")
+            listener:SetScript("OnEvent", function(_, event, unit, updateInfo)
+                if unit == "player" and updateInfo and updateInfo.isFullUpdate then
+                    fired = true
+                end
+            end)
+            A_Admin.AddDebuff(589, "Shadow Word: Pain", "136207", 30, 1, "Magic")
+            local a = C_UnitAuras.GetAuraDataByIndex("player", 1, "HARMFUL")
+            return a.name, tostring(a.dispelName), a.isHarmful, fired
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Shadow Word: Pain");
+    assert_eq!(dispel, "Magic");
+    assert!(is_harmful);
+    assert!(
+        fired,
+        "AddDebuff must fire UNIT_AURA with isFullUpdate so BuffFrame/DebuffFrame listeners refresh"
+    );
+}
+
+#[test]
+fn admin_add_debuff_without_dispel_type_has_nil_dispel_name() {
+    let env = env();
+    clear_buffs_and_insert(&env, vec![]);
+
+    let dispel_is_nil: bool = env
+        .eval(
+            r#"
+            A_Admin.AddDebuff(770, "Faerie Fire", "136033", 40, 1)
+            local a = C_UnitAuras.GetAuraDataByIndex("player", 1, "HARMFUL")
+            return a ~= nil and a.dispelName == nil
+            "#,
+        )
+        .unwrap();
+    assert!(dispel_is_nil, "omitted dispelType must surface as nil dispelName");
+}
+
+#[test]
+fn admin_add_buff_and_debuff_accept_numeric_icon() {
+    let env = env();
+    clear_buffs_and_insert(&env, vec![]);
+
+    let (buff_icon, debuff_icon): (f64, f64) = env
+        .eval(
+            r#"
+            A_Admin.AddBuff(21562, "Power Word: Fortitude", 135987, 0, 0)
+            A_Admin.AddDebuff(589, "Shadow Word: Pain", 136207, 30, 1, "Magic")
+            local b = C_UnitAuras.GetAuraDataByIndex("player", 1, "HELPFUL")
+            local d = C_UnitAuras.GetAuraDataByIndex("player", 1, "HARMFUL")
+            return b.icon, d.icon
+            "#,
+        )
+        .unwrap();
+    assert_eq!(buff_icon, 135987.0, "documented numeric icon form must work for AddBuff");
+    assert_eq!(debuff_icon, 136207.0, "documented numeric icon form must work for AddDebuff");
+}

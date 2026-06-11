@@ -22,6 +22,27 @@ A_Admin.AddBuff(12345, "Test Buff", 136001, 30.0, 5)
 local name, icon, count = UnitBuff("player", 1)
 ```
 
+### A_Admin.AddDebuff(spellId, name, icon, duration, stacks, dispelType)
+
+Adds a debuff (harmful aura) to the player's aura list.
+
+- **spellId** `number` -- Spell ID for the aura
+- **name** `string` -- Display name
+- **icon** `string` -- File data ID for the aura icon texture
+- **duration** `number` -- Duration in seconds (0 = permanent/no expiry)
+- **stacks** `number` -- Stack count (`applications` in aura data)
+- **dispelType** `string?` -- Optional dispel type: `"Magic"`, `"Curse"`, `"Disease"`, `"Poison"`, or `"Bleed"`. Omit for a non-dispellable debuff (`dispelName` will be nil).
+- **Affects:** `UnitDebuff("player", index)`, `C_UnitAuras.GetAuraDataByIndex("player", index, "HARMFUL")`; dispellable debuffs render the dispel-icon border atlas (e.g. `ui-debuff-border-magic-icon`) in the player DebuffFrame
+- **Fires:** `UNIT_AURA` (with `isFullUpdate = true`)
+- **Example:**
+```lua
+-- Magic debuff: blue border + dispel swirl in DebuffFrame
+A_Admin.AddDebuff(589, "Shadow Word: Pain", "136207", 30, 1, "Magic")
+
+-- Non-dispellable debuff: plain border
+A_Admin.AddDebuff(770, "Faerie Fire", "136033", 40, 1)
+```
+
 ### A_Admin.RemoveBuff(spellId)
 
 Removes the buff with the given spell ID from the player's aura list.

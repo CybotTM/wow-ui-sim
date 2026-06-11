@@ -34,7 +34,7 @@ use super::admin_auction_house::{
     clear_auction_item_search_results, clear_auction_replicate_items, clear_owned_auctions,
     set_auction_throttle_ready,
 };
-use super::admin_buffs::{add_buff, clear_buffs, remove_buff};
+use super::admin_buffs::{add_buff, add_debuff, clear_buffs, remove_buff};
 use super::admin_collections::{
     add_transmog, add_transmog_appearance, collect_campsite, collect_heirloom, collect_mount,
     collect_pet, collect_toy, earn_achievement, has_achievement, remove_transmog,
@@ -105,6 +105,7 @@ fn register_player(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetTalentSelection", set_talent_selection)?
         .set_function("ResetTalents", reset_talents)?
         .set_function("AddBuff", add_buff)?
+        .set_function("AddDebuff", add_debuff)?
         .set_function("RemoveBuff", remove_buff)?
         .set_function("ClearBuffs", clear_buffs)?
         .set_function("EquipItem", equip_item)?
@@ -574,6 +575,21 @@ pub(super) fn build_admin_buff(
     duration: f64,
     stacks: i32,
 ) -> AuraInfo {
+    build_admin_aura(st, spell_id, name, icon, duration, stacks, true, None)
+}
+
+/// Build an AuraInfo for admin-added auras (buffs or debuffs).
+#[allow(clippy::too_many_arguments)]
+pub(super) fn build_admin_aura(
+    st: &crate::lua_api::state::SimState,
+    spell_id: i32,
+    name: String,
+    icon: String,
+    duration: f64,
+    stacks: i32,
+    is_helpful: bool,
+    dispel_type: Option<String>,
+) -> AuraInfo {
     let expiration_time = if duration > 0.0 {
         st.start_time.elapsed().as_secs_f64() + duration
     } else {
@@ -587,11 +603,11 @@ pub(super) fn build_admin_buff(
         expiration_time,
         applications: stacks,
         source_unit: "player".to_string(),
-        is_helpful: true,
+        is_helpful,
         is_stealable: false,
-        can_apply_aura: true,
-        is_from_player_or_player_pet: true,
-        dispel_type: None,
+        can_apply_aura: is_helpful,
+        is_from_player_or_player_pet: is_helpful,
+        dispel_type,
         aura_instance_id: (st.player.buffs.len() + 1) as i32,
     }
 }
