@@ -13,7 +13,7 @@ use rilua::{LuaResult, Val, runtime_error};
 
 use super::shared::{
     frame_global_or_ref, opt_f32, parse_anchor_point_with_compat_warning, resolve_anchor_target_id,
-    resolve_relative_point_from_val,
+    resolve_relative_point_from_val, unresolved_anchor_key_expr,
 };
 
 // ── Line anchor helpers ───────────────────────────────────────────────────────
@@ -133,11 +133,19 @@ pub(super) fn get_end_point(state: &mut LuaState) -> LuaResult<u32> {
 
 // ── SetPoint args parsing ─────────────────────────────────────────────────────
 
+type ParsedSetPointArgs = (
+    Option<usize>,
+    Option<String>,
+    crate::widget::AnchorPoint,
+    f32,
+    f32,
+);
+
 pub(super) fn parse_set_point_args(
     state: &mut LuaState,
     frame_id: u64,
     point: crate::widget::AnchorPoint,
-) -> LuaResult<(Option<usize>, crate::widget::AnchorPoint, f32, f32)> {
+) -> LuaResult<ParsedSetPointArgs> {
     let arg3 = stack_val(state, 3);
     let arg4 = stack_val(state, 4);
     let arg5 = stack_val(state, 5);
@@ -147,35 +155,43 @@ pub(super) fn parse_set_point_args(
         if arg4 == Val::Nil {
             let x_offset = num_opt(arg5).unwrap_or(0.0);
             let y_offset = num_opt(arg6).unwrap_or(0.0);
-            return Ok((None, point, x_offset, y_offset));
+            return Ok((None, None, point, x_offset, y_offset));
         }
         if matches!(arg4, Val::Num(_)) {
             let x_offset = num_opt(arg4).unwrap_or(0.0);
             let y_offset = num_opt(arg5).unwrap_or(0.0);
-            return Ok((None, point, x_offset, y_offset));
+            return Ok((None, None, point, x_offset, y_offset));
         }
 
         let relative_point = resolve_relative_point_from_val(state, arg4, point)?;
         let x_offset = num_opt(arg5).unwrap_or(0.0);
         let y_offset = num_opt(arg6).unwrap_or(0.0);
-        return Ok((None, relative_point, x_offset, y_offset));
+        return Ok((None, None, relative_point, x_offset, y_offset));
     }
 
     if let (Some(x_offset), Some(y_offset)) = (num_opt(arg3), num_opt(arg4)) {
-        return Ok((None, point, x_offset, y_offset));
+        return Ok((None, None, point, x_offset, y_offset));
     }
 
     let relative_to = resolve_anchor_target_id(state, frame_id, arg3);
+    // A $parent-style key that fails eager resolution is kept for lazy
+    // resolution: the XML loader creates <Layers> regions before child
+    // <Frames>, so the referenced sibling may not exist yet.
+    let pending_key = if relative_to.is_none() {
+        unresolved_anchor_key_expr(state, arg3)
+    } else {
+        None
+    };
     if matches!(arg4, Val::Num(_)) {
         let x_offset = num_opt(arg4).unwrap_or(0.0);
         let y_offset = num_opt(arg5).unwrap_or(0.0);
-        return Ok((relative_to, point, x_offset, y_offset));
+        return Ok((relative_to, pending_key, point, x_offset, y_offset));
     }
 
     let relative_point = resolve_relative_point_from_val(state, arg4, point)?;
     let x_offset = num_opt(arg5).unwrap_or(0.0);
     let y_offset = num_opt(arg6).unwrap_or(0.0);
-    Ok((relative_to, relative_point, x_offset, y_offset))
+    Ok((relative_to, pending_key, relative_point, x_offset, y_offset))
 }
 
 fn num_opt(v: Val) -> Option<f32> {
@@ -382,10 +398,13 @@ fn push_anchor_values(
     Ok(5)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 struct SetPointRequest {
     point: crate::widget::AnchorPoint,
     relative_to: Option<usize>,
+    /// Unresolved `$parent`-style key expression, stored on the anchor for
+    /// lazy resolution via `resolve_named_anchor_targets_for_frame`.
+    pending_key: Option<String>,
     relative_point: crate::widget::AnchorPoint,
     x_offset: f32,
     y_offset: f32,
@@ -401,7 +420,7 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
     }
 
     let request = set_point_request(state, id, point)?;
-    if is_set_point_unchanged(state, id, request)? {
+    if is_set_point_unchanged(state, id, &request)? {
         return Ok(0);
     }
 
@@ -434,14 +453,22 @@ fn set_point_request(
     id: u64,
     point: crate::widget::AnchorPoint,
 ) -> LuaResult<SetPointRequest> {
-    let (relative_to, relative_point, x_offset, y_offset) = parse_set_point_args(state, id, point)?;
-    let resolved_relative_to = match relative_to {
-        Some(relative_to) => Some(relative_to),
-        None => set_point_parent_id(state, id)?,
+    let (relative_to, pending_key, relative_point, x_offset, y_offset) =
+        parse_set_point_args(state, id, point)?;
+    // Pending keys keep relative_to_id unset: layout falls back to the parent
+    // until the finalize pass resolves the key against the parent table.
+    let resolved_relative_to = if pending_key.is_some() {
+        None
+    } else {
+        match relative_to {
+            Some(relative_to) => Some(relative_to),
+            None => set_point_parent_id(state, id)?,
+        }
     };
     Ok(SetPointRequest {
         point,
         relative_to: resolved_relative_to,
+        pending_key,
         relative_point,
         x_offset,
         y_offset,
@@ -461,8 +488,11 @@ fn set_point_parent_id(state: &mut LuaState, id: u64) -> LuaResult<Option<usize>
 fn is_set_point_unchanged(
     state: &mut LuaState,
     id: u64,
-    request: SetPointRequest,
+    request: &SetPointRequest,
 ) -> LuaResult<bool> {
+    if request.pending_key.is_some() {
+        return Ok(false);
+    }
     let sim = borrow_state(state)?;
     let unchanged = sim
         .widgets
@@ -520,13 +550,22 @@ fn apply_set_point(
         sim.widgets.add_anchor_dependent(rel_id as u64, id);
     }
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.set_point(
-            request.point,
-            request.relative_to,
-            request.relative_point,
-            request.x_offset,
-            request.y_offset,
-        );
+        match request.pending_key {
+            Some(pending_key) => frame.set_point_with_name(
+                request.point,
+                Some(pending_key),
+                request.relative_point,
+                request.x_offset,
+                request.y_offset,
+            ),
+            None => frame.set_point(
+                request.point,
+                request.relative_to,
+                request.relative_point,
+                request.x_offset,
+                request.y_offset,
+            ),
+        }
     }
     sim.widgets.mark_rect_dirty(id);
     Ok(0)

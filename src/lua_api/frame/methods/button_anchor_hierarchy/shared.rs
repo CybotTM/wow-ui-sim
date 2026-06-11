@@ -23,6 +23,19 @@ pub(super) fn opt_string(state: &LuaState, index: i32) -> Option<String> {
     }
 }
 
+/// Return the `$parent`-style key expression for an anchor target that could
+/// not be resolved eagerly. The XML loader creates `<Layers>` regions before
+/// child `<Frames>`, so a region anchor like `relativeKey="$parent.IconFrame"`
+/// can reference a frame that does not exist yet at SetPoint time. The
+/// expression is stored on the anchor (`Anchor.relative_to`) so
+/// `resolve_named_anchor_targets_for_frame` resolves it once the template's
+/// children have been created.
+pub(super) fn unresolved_anchor_key_expr(state: &mut LuaState, value: Val) -> Option<String> {
+    let name = val_to_string(state, value)?;
+    let is_key_expr = name.starts_with("$parent") || name.starts_with("$Parent");
+    is_key_expr.then_some(name)
+}
+
 pub(super) fn resolve_anchor_target_id(
     state: &mut LuaState,
     frame_id: u64,

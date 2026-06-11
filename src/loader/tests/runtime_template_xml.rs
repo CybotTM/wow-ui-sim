@@ -645,3 +645,60 @@ fn test_catalog_shop_xml_numeric_error_without_main_onload() {
         "CatalogShop xml still introduced numeric load error with product card layout disabled: {targeted:?}"
     );
 }
+
+#[test]
+fn test_layer_region_anchored_to_child_frame_defined_after_layers() {
+    // Mirrors RenownCardButtonTemplate (Blizzard_Journeys.xml): a <Layers>
+    // FontString anchors via relativeKey to a child frame from the <Frames>
+    // section. The loader creates layer regions before child frames, so the
+    // key cannot resolve at SetPoint time — it must be stored on the anchor
+    // and resolved by the post-children finalize pass. Before that fix the
+    // anchor silently fell back to the parent button and the text rendered
+    // off the right edge of the card (behind the next column's card).
+    let t = load_test_xml(
+        "layer-region-keyed-to-child-frame",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Button name="KeyedAnchorCard" parent="UIParent">
+                <Size x="374" y="112"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT"/>
+                </Anchors>
+                <Frames>
+                    <Frame parentKey="IconFrame">
+                        <Size x="60" y="60"/>
+                        <Anchors>
+                            <Anchor point="LEFT" x="20"/>
+                        </Anchors>
+                    </Frame>
+                </Frames>
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString parentKey="Name" justifyH="LEFT">
+                            <Size x="225" y="20"/>
+                            <Anchors>
+                                <Anchor point="LEFT" relativeKey="$parent.IconFrame" relativePoint="RIGHT" x="5" y="5"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Button>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local card = KeyedAnchorCard
+            local point, relTo, relPoint, x = card.Name:GetPoint(1)
+            assert(relTo == card.IconFrame,
+                "Name must anchor to IconFrame, got " .. tostring(relTo == card and "the card" or relTo))
+            assert(point == "LEFT" and relPoint == "RIGHT" and x == 5, "anchor shape preserved")
+            local expected = card.IconFrame:GetRight() + 5
+            assert(math.abs(card.Name:GetLeft() - expected) < 0.01,
+                ("Name left %s should be IconFrame right + 5 (%s)"):format(card.Name:GetLeft(), expected))
+        "#,
+        )
+        .unwrap();
+}
