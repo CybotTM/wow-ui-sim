@@ -53,3 +53,14 @@ pub(super) fn build_hooked_script(state: &mut LuaState, old: Val, hook: Val) -> 
     state.top = call_base;
     Ok(result)
 }
+
+pub(super) fn reject_unsupported_hook_binding(
+    state: &mut LuaState,
+    binding: ScriptBinding,
+) -> bool {
+    if binding == ScriptBinding::Normal {
+        return false;
+    }
+    state.push(Val::Bool(false));
+    true
+}

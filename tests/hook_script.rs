@@ -78,6 +78,41 @@ fn test_hook_script_with_no_existing_handler() {
 }
 
 #[test]
+fn test_hook_script_rejects_pre_and_post_binding_slots() {
+    let env = WowLuaEnv::new().unwrap();
+    let (hook0_empty, hook2_empty, get0_nil, get2_nil, hook0_after_set, hook2_after_set): (
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+        local f = CreateFrame("Frame")
+        local hook0Empty = f:HookScript("OnShow", function() end, 0)
+        local hook2Empty = f:HookScript("OnShow", function() end, 2)
+        local get0Nil = f:GetScript("OnShow", 0) == nil
+        local get2Nil = f:GetScript("OnShow", 2) == nil
+
+        f:SetScript("OnShow", function() end)
+        local hook0AfterSet = f:HookScript("OnShow", function() end, 0)
+        local hook2AfterSet = f:HookScript("OnShow", function() end, 2)
+        return hook0Empty, hook2Empty, get0Nil, get2Nil, hook0AfterSet, hook2AfterSet
+    "#,
+        )
+        .unwrap();
+
+    assert!(!hook0_empty);
+    assert!(!hook2_empty);
+    assert!(get0_nil);
+    assert!(get2_nil);
+    assert!(!hook0_after_set);
+    assert!(!hook2_after_set);
+}
+
+#[test]
 fn test_multiple_hook_scripts_chain_in_order() {
     let env = WowLuaEnv::new().unwrap();
     let order: Vec<String> = env

@@ -16,7 +16,7 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val, runtime_error};
-use script_binding_args::{build_hooked_script, optional_script_binding_from_stack};
+use script_binding_args as binding_args;
 
 pub(super) fn register_event(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
@@ -234,7 +234,7 @@ pub(super) fn get_script(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let handler_name = val_to_string(state, stack_val(state, 2))
         .ok_or_else(|| runtime_error("GetScript: handler name required"))?;
-    let binding = optional_script_binding_from_stack(state, 3)?;
+    let binding = binding_args::optional_script_binding_from_stack(state, 3)?;
     let handler =
         get_rilua_script_binding(state, frame_id, &handler_name, binding).unwrap_or(Val::Nil);
     state.push(handler);
@@ -260,14 +260,17 @@ pub(super) fn hook_script(state: &mut LuaState) -> LuaResult<u32> {
         .ok_or_else(|| runtime_error("HookScript: handler name required"))?;
     ensure_script_supported(state, frame_id, &handler_name)?;
     let hook = stack_val(state, 3);
-    let binding = optional_script_binding_from_stack(state, 4)?;
+    let binding = binding_args::optional_script_binding_from_stack(state, 4)?;
     if !matches!(hook, Val::Function(_)) {
         return Err(runtime_error(format!(
             "HookScript: hook for '{handler_name}' must be a function"
         )));
     }
+    if binding_args::reject_unsupported_hook_binding(state, binding) {
+        return Ok(1);
+    }
     let old = get_rilua_script_binding(state, frame_id, &handler_name, binding).unwrap_or(Val::Nil);
-    let chained = build_hooked_script(state, old, hook)?;
+    let chained = binding_args::build_hooked_script(state, old, hook)?;
     set_rilua_script_binding(state, frame_id, &handler_name, binding, chained);
     imply_mouse_enabled_for_mouse_handler(state, frame_id, &handler_name)?;
     state.push(Val::Bool(true));
