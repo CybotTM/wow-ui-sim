@@ -51,7 +51,7 @@ const PARENT_TEMPLATE_XML: &str = r#"
 /// Base template mirroring `HeroTalentsTreeNodesContainerTemplate`.
 const HERO_NODES_CONTAINER_TEMPLATE_XML: &str = r#"
     <Ui>
-        <Frame name="HeroNodesContainerTemplate" virtual="true">
+        <Frame name="HeroNodesContainerTemplate" scale="0.85" virtual="true">
             <Anchors>
                 <Anchor point="TOP" y="-90"/>
             </Anchors>
@@ -105,8 +105,13 @@ fn setup_env() -> WowLuaEnv {
 fn child_inline_anchors_keep_expected_world_map_scroll_layout() {
     let env = setup_env();
 
-    env.exec(r#"CreateFrame("Frame", "TestParentFrame", UIParent, "ParentTemplate")"#)
-        .unwrap();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestParentFrame", UIParent, "ParentTemplate")
+        f:SetPoint("TOPLEFT")
+        "#,
+    )
+    .unwrap();
 
     let result: (f64, f64, f64, f64, i32) = env
         .eval(
@@ -116,19 +121,19 @@ fn child_inline_anchors_keep_expected_world_map_scroll_layout() {
                 error("ScrollContainer is nil")
             end
 
-            return container:GetLeft(), container:GetTop(), container:GetWidth(), container:GetHeight(), container:GetNumPoints()
+            return container:GetLeft(), container:GetTop() - UIParent:GetTop(), container:GetWidth(), container:GetHeight(), container:GetNumPoints()
             "#,
         )
         .unwrap();
 
-    let (left, top, width, height, num_points) = result;
+    let (left, top_delta, width, height, num_points) = result;
     assert_eq!(
         left, 0.0,
         "world-map style container should stay flush to parent left"
     );
     assert_eq!(
-        top, 1200.0,
-        "GetTop() uses WoW bottom-left coordinates, so a frame flush to the screen top should report the screen height"
+        top_delta, 0.0,
+        "world-map style container should stay flush to the screen top"
     );
     assert_eq!(
         width, 800.0,
@@ -188,5 +193,42 @@ fn child_inline_anchors_preserve_inherited_hero_nodes_top_anchor() {
     assert_eq!(
         result, "ok",
         "hero nodes container should keep inherited TOP and inline anchors: {result}"
+    );
+}
+
+/// The XML `scale` attribute must be inherited from templates. Blizzard's
+/// `HeroTalentsTreeNodesContainerTemplate` declares `scale="0.85"`; without it
+/// the hero talent buttons overflow the fixed 284x362 backplate.
+#[test]
+fn template_scale_attribute_is_inherited_and_affects_layout() {
+    let env = setup_env();
+
+    env.exec(r#"CreateFrame("Frame", "TestHeroNodesHost", UIParent, "HeroNodesHostTemplate")"#)
+        .unwrap();
+
+    let (scale, effective_scale, height): (f64, f64, f64) = env
+        .eval(
+            r#"
+            local container = TestHeroNodesHost.NodesContainer
+            return container:GetScale(), container:GetEffectiveScale(), container:GetHeight()
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        (scale - 0.85).abs() < 1e-6,
+        "scale=\"0.85\" from inherited template, got {scale}"
+    );
+    assert!(
+        (effective_scale - 0.85).abs() < 1e-6,
+        "effective scale should include the template scale, got {effective_scale}"
+    );
+    // Anchor offsets apply in the scaled child's coordinate space, so the
+    // local height is 362/0.85 - 90 - 60 ≈ 275.88. This is what gives the
+    // hero talent buttons (272 local units tall) room inside the backplate.
+    let expected = 362.0 / 0.85 - 90.0 - 60.0;
+    assert!(
+        (height - expected).abs() < 0.01,
+        "container local height should be {expected}, got {height}"
     );
 }

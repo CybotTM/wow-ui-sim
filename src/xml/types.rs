@@ -132,6 +132,8 @@ pub struct FrameXml {
     pub hidden: Option<bool>,
     #[serde(rename = "@alpha")]
     pub alpha: Option<f32>,
+    #[serde(rename = "@scale")]
+    pub scale: Option<f32>,
     #[serde(rename = "@virtual")]
     pub is_virtual: Option<bool>,
     #[serde(rename = "@intrinsic")]

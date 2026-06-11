@@ -244,6 +244,26 @@ pub fn set_alpha(state: &Rc<RefCell<SimState>>, frame_id: u64, alpha: f32) {
     s.widgets.propagate_effective_alpha(frame_id, parent_eff);
 }
 
+/// Set frame scale directly.
+pub fn set_scale(state: &Rc<RefCell<SimState>>, frame_id: u64, scale: f32) {
+    if scale <= 0.0 {
+        return;
+    }
+    let mut s = state.borrow_mut();
+    let parent_eff = s
+        .widgets
+        .get(frame_id)
+        .and_then(|f| f.parent_id)
+        .and_then(|pid| s.widgets.get(pid))
+        .map(|p| p.effective_scale)
+        .unwrap_or(1.0);
+    if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
+        frame.scale = scale;
+    }
+    s.widgets.propagate_effective_scale(frame_id, parent_eff);
+    s.widgets.mark_rect_dirty(frame_id);
+}
+
 /// Set toplevel directly.
 pub fn set_toplevel(state: &Rc<RefCell<SimState>>, frame_id: u64, toplevel: bool) {
     let mut s = state.borrow_mut();
@@ -426,6 +446,27 @@ pub fn apply_xml_alpha(
     }
     if let Some(a) = alpha {
         set_alpha(state, frame_id, a);
+    }
+}
+
+/// Resolve and apply scale from template chain + instance XML.
+pub fn apply_xml_scale(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    frame: &FrameXml,
+    inherits: &str,
+) {
+    let mut scale = frame.scale;
+    if scale.is_none() && !inherits.is_empty() {
+        for entry in &*crate::xml::get_template_chain(inherits) {
+            if let Some(s) = entry.frame.scale {
+                scale = Some(s);
+                break;
+            }
+        }
+    }
+    if let Some(s) = scale {
+        set_scale(state, frame_id, s);
     }
 }
 
