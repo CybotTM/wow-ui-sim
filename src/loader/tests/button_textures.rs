@@ -19,11 +19,15 @@ fn test_xml_button_normal_texture_keeps_tex_coords() {
         return (function()
             local tex = ButtonTextureTexCoordsButton:GetNormalTexture()
             if not tex then return false end
-            local left, right, top, bottom = tex:GetTexCoord()
-            return math.abs(left - 0.36230469) < 0.00001
-                and math.abs(right - 0.38183594) < 0.00001
-                and math.abs(top - 0.95898438) < 0.00001
-                and math.abs(bottom - 0.99804688) < 0.00001
+            local leftTopX, leftTopY, leftBottomX, leftBottomY, rightTopX, rightTopY, rightBottomX, rightBottomY = tex:GetTexCoord()
+            return math.abs(leftTopX - 0.36230469) < 0.00001
+                and math.abs(leftTopY - 0.95898438) < 0.00001
+                and math.abs(leftBottomX - 0.36230469) < 0.00001
+                and math.abs(leftBottomY - 0.99804688) < 0.00001
+                and math.abs(rightTopX - 0.38183594) < 0.00001
+                and math.abs(rightTopY - 0.95898438) < 0.00001
+                and math.abs(rightBottomX - 0.38183594) < 0.00001
+                and math.abs(rightBottomY - 0.99804688) < 0.00001
         end)()
         "#,
         "XML NormalTexture TexCoords should be applied to the generated button texture child",

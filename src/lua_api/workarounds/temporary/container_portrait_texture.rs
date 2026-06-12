@@ -143,7 +143,7 @@ mod tests {
                 local frame = CreateFrame("Frame")
                 local playerPortrait = frame:CreateTexture(nil, "ARTWORK")
                 SetPortraitTexture(playerPortrait, "player")
-                local left, right, top, bottom = playerPortrait:GetTexCoord()
+                local left, top, _, bottom, right = playerPortrait:GetTexCoord()
 
                 local creaturePortrait = frame:CreateTexture(nil, "ARTWORK")
                 SetPortraitTextureFromCreatureDisplayID(creaturePortrait, 1)
