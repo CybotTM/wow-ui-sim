@@ -242,14 +242,48 @@ fn roman_font_overrides_with_all_fields() {
         }],
     };
     let code = build_roman_font_overrides("TestFont", &ff);
-    assert!(code.contains("TestFont.__font = \"Fonts/Test.TTF\""));
-    assert!(code.contains("TestFont.__height = 14"));
-    assert!(code.contains("TestFont.__outline = \"OUTLINE\""));
+    let env = crate::lua_api::WowLuaEnv::new().expect("env");
+    let lua_code = FONT_FAMILY_LUA_TEMPLATE.replace("{name}", "TestFont");
+    env.exec(&lua_code)
+        .expect("font family template should load");
+    env.exec(&code)
+        .expect("roman font overrides should apply to font object");
+
+    let (path, height, flags): (String, f64, String) = env
+        .eval(
+            r#"
+            local font = TestFont:GetFontObjectForAlphabet("roman")
+            return font:GetFont()
+            "#,
+        )
+        .expect("roman font override values should be observable");
+
+    assert_eq!(path, "Fonts/Test.TTF");
+    assert_eq!(height, 14.0);
+    assert_eq!(flags, "OUTLINE");
 }
 
 #[test]
 fn font_family_template_supports_simple_font_alphabet_lookup() {
-    assert!(FONT_FAMILY_LUA_TEMPLATE.contains("GetFontObjectForAlphabet"));
+    let env = crate::lua_api::WowLuaEnv::new().expect("env");
+    let lua_code = FONT_FAMILY_LUA_TEMPLATE.replace("{name}", "XmlFamilyAlphabetProbe");
+    env.exec(&lua_code)
+        .expect("font family template should load");
+
+    let (same_object, path, height, flags): (bool, String, f64, String) = env
+        .eval(
+            r#"
+            local font = XmlFamilyAlphabetProbe:GetFontObjectForAlphabet("roman")
+            local path, height, flags = font:GetFont()
+            return font == XmlFamilyAlphabetProbe, path, height, flags
+            "#,
+        )
+        .expect("font family alphabet lookup should return a usable font object");
+
+    assert!(same_object);
+    assert_eq!(path, "Fonts/FRIZQT__.TTF");
+    assert_eq!(height, 12.0);
+    assert_eq!(flags, "");
 }
 
 #[test]
@@ -289,7 +323,33 @@ fn font_family_template_supports_shadow_methods() {
 
 #[test]
 fn font_template_supports_simple_font_alphabet_lookup() {
-    assert!(FONT_LUA_TEMPLATE.contains("GetFontObjectForAlphabet"));
+    let env = crate::lua_api::WowLuaEnv::new().expect("env");
+    let lua_code = build_font_lua_code(
+        "XmlFontAlphabetProbe",
+        &crate::xml::FontXml {
+            font: Some("Fonts\\Alphabet.TTF".to_string()),
+            height: Some(18.0),
+            outline: Some("THICKOUTLINE".to_string()),
+            ..Default::default()
+        },
+        "Fonts/Alphabet.TTF",
+    );
+    env.exec(&lua_code).expect("font template should load");
+
+    let (same_object, path, height, flags): (bool, String, f64, String) = env
+        .eval(
+            r#"
+            local font = XmlFontAlphabetProbe:GetFontObjectForAlphabet("roman")
+            local path, height, flags = font:GetFont()
+            return font == XmlFontAlphabetProbe, path, height, flags
+            "#,
+        )
+        .expect("font alphabet lookup should return a usable font object");
+
+    assert!(same_object);
+    assert_eq!(path, "Fonts/Alphabet.TTF");
+    assert_eq!(height, 18.0);
+    assert_eq!(flags, "THICKOUTLINE");
 }
 
 #[test]
@@ -320,7 +380,23 @@ fn roman_font_overrides_partial_fields() {
         }],
     };
     let code = build_roman_font_overrides("TestFont", &ff);
-    assert!(!code.contains("__font"));
-    assert!(code.contains("TestFont.__height = 16"));
-    assert!(!code.contains("__outline"));
+    let env = crate::lua_api::WowLuaEnv::new().expect("env");
+    let lua_code = FONT_FAMILY_LUA_TEMPLATE.replace("{name}", "TestFont");
+    env.exec(&lua_code)
+        .expect("font family template should load");
+    env.exec(&code)
+        .expect("partial roman font overrides should apply to font object");
+
+    let (path, height, flags): (String, f64, String) = env
+        .eval(
+            r#"
+            local font = TestFont:GetFontObjectForAlphabet("roman")
+            return font:GetFont()
+            "#,
+        )
+        .expect("partial roman font override values should be observable");
+
+    assert_eq!(path, "Fonts/FRIZQT__.TTF");
+    assert_eq!(height, 16.0);
+    assert_eq!(flags, "");
 }
