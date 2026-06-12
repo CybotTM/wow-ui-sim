@@ -2,6 +2,17 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-12] investigation | Lib test failure sweep
+
+Created `investigations/lib-test-failure-sweep-2026-06.md` after root-causing
+nine accumulated `cargo test --lib` failures: runtime foundation order
+(Blizzard_ScriptErrors), the silently-refused
+`hooksecurefunc(C_AddOns, "LoadAddOn")` target (two workarounds rewired through
+`apply_blizzard_post_load_patches`; one dead hook remains in
+`runtime_surface_bootstrap.lua`), two more classic-rebase code losses, drifting
+duplicated Lua installers, and tests stale against deliberate semantic changes.
+Updated `index.md`.
+
 ## [2026-06-10] investigation | Retail core behavior probes
 
 Created `investigations/retail-core-behavior-probes.md` after adding and
