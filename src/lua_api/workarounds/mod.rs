@@ -456,8 +456,7 @@ pub(crate) fn apply_cpp_mixin_stubs_after_lua_file(env: &crate::lua_api::LoaderE
 }
 
 pub(crate) fn patch_callback_registry_defaults(env: &crate::lua_api::LoaderEnv<'_>) {
-    let mut lua = env.lua().borrow_mut();
-    let _ = temporary::callback_registry_defaults::apply_bootstrap(&mut lua);
+    let _ = temporary::callback_registry_defaults::patch_for_addon_load(env);
 }
 
 fn patch_edit_mode_manager(env: &crate::lua_api::WowLuaEnv) {

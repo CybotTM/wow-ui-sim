@@ -237,6 +237,13 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
+/// Addon-load variant: goes through `LoaderEnv::with_state` so a runtime
+/// `LoadAddOn` initiated from inside Lua (RefCell already mutably borrowed by
+/// the outer entry point) doesn't panic on a second `borrow_mut`.
+pub(crate) fn patch_for_addon_load(env: &crate::lua_api::LoaderEnv<'_>) -> crate::Result<()> {
+    env.exec(CALLBACK_REGISTRY_DEFAULTS_LUA)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::lua_api::WowLuaEnv;
