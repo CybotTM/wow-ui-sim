@@ -373,12 +373,27 @@ impl App {
         }
     }
 
+    /// Maximum time ticks may be dropped as stale before one is force-processed.
+    /// Stale-dropping is a backlog optimization, not a license to starve: under
+    /// sustained main-thread saturation (heavy draws plus input-driven redraws)
+    /// every tick arrives older than the stale threshold. If all of them were
+    /// dropped, OnUpdate handlers and C_Timer callbacks would never run and the
+    /// FPS display (refreshed in finish_timer_tick) would freeze at its last
+    /// value while the app looks alive.
+    const STALE_TICK_PROGRESS_BUDGET: std::time::Duration = std::time::Duration::from_millis(250);
+
     fn drop_stale_timer_tick(&self, captured_at: Instant) -> bool {
         let age = captured_at.elapsed();
         let interval = self
             .compute_tick_interval()
             .unwrap_or(std::time::Duration::from_secs(1));
         if !should_drop_stale_timer_tick(age, interval) {
+            self.last_timer_tick_processed.set(Instant::now());
+            return false;
+        }
+
+        if self.last_timer_tick_processed.get().elapsed() >= Self::STALE_TICK_PROGRESS_BUDGET {
+            self.last_timer_tick_processed.set(Instant::now());
             return false;
         }
 
@@ -386,6 +401,11 @@ impl App {
         self.dropped_stale_timer_ticks.set(dropped);
         let oldest = self.oldest_dropped_timer_tick_age.get().max(age);
         self.oldest_dropped_timer_tick_age.set(oldest);
+        if crate::logging::gui_trace_enabled() {
+            crate::logging::eprintln_gui_trace(&format!(
+                "tick dropped stale age={age:.1?} interval={interval:.1?} dropped_total={dropped}"
+            ));
+        }
         true
     }
 

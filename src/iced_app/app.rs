@@ -129,6 +129,11 @@ pub struct App {
     pub(crate) main_thread_phase: RefCell<(&'static str, std::time::Instant)>,
     /// Count of stale timer ticks dropped since the last key log.
     pub(crate) dropped_stale_timer_ticks: std::cell::Cell<u32>,
+    /// When the last non-dropped timer tick was processed. Guarantees tick
+    /// forward progress: under sustained main-thread saturation every tick
+    /// arrives stale, and dropping all of them starves OnUpdate / C_Timer
+    /// processing entirely.
+    pub(crate) last_timer_tick_processed: std::cell::Cell<std::time::Instant>,
     /// Oldest age among dropped stale timer ticks since the last key log.
     pub(crate) oldest_dropped_timer_tick_age: std::cell::Cell<std::time::Duration>,
     /// FPS counter: frame count since last update (interior mutability for draw()).
@@ -252,6 +257,7 @@ macro_rules! app_from_initial_state {
             ready_texture_path_cache: RefCell::new(FxHashSet::default()),
             main_thread_phase: RefCell::new(("boot", $now)),
             dropped_stale_timer_ticks: std::cell::Cell::new(0),
+            last_timer_tick_processed: std::cell::Cell::new($now),
             oldest_dropped_timer_tick_age: std::cell::Cell::new(std::time::Duration::ZERO),
             frame_count: std::cell::Cell::new(0),
             draw_time_accum_ms: std::cell::Cell::new(0.0),

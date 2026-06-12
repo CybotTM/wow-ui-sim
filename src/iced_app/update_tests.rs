@@ -786,3 +786,37 @@ fn compute_tick_interval_is_stable_while_pending_timer_shrinks() {
          down and recreated before it can ever fire"
     );
 }
+
+#[test]
+fn stale_timer_ticks_cannot_starve_processing_indefinitely() {
+    // Under sustained main-thread saturation every tick arrives older than
+    // the stale threshold. Dropping all of them starves OnUpdate / C_Timer
+    // processing and freezes the FPS display at its last value. After
+    // STALE_TICK_PROGRESS_BUDGET without a processed tick, a stale tick must
+    // be processed anyway.
+    let mut app = build_test_app(ScreenKind::Game);
+    app.gui_startup_complete.set(true);
+    app.strata_dirty.set(1); // fast 16ms interval -> 100ms stale threshold
+    let stale = std::time::Instant::now() - std::time::Duration::from_secs(1);
+
+    // Budget exceeded: stale tick is processed, not dropped.
+    app.last_timer_tick_processed
+        .set(std::time::Instant::now() - std::time::Duration::from_millis(300));
+    let ticks_before = app.tick_count.get();
+    let _ = app.handle_process_timers(stale);
+    assert_eq!(
+        app.tick_count.get(),
+        ticks_before + 1,
+        "stale tick must be force-processed after the progress budget"
+    );
+    assert_eq!(app.dropped_stale_timer_ticks.get(), 0);
+
+    // Budget fresh (just processed): the next stale tick is dropped.
+    let _ = app.handle_process_timers(stale);
+    assert_eq!(
+        app.tick_count.get(),
+        ticks_before + 1,
+        "stale tick within the budget must still be dropped"
+    );
+    assert_eq!(app.dropped_stale_timer_ticks.get(), 1);
+}
