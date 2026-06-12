@@ -24,8 +24,9 @@ static HIT_TEST_EXCLUDED_NAMES: LazyLock<FxHashSet<&'static str>> =
 ///
 /// Rects are in unscaled WoW coordinates (caller applies UI_SCALE).
 pub struct CollectedFrames {
-    /// Frames eligible for hit testing, sorted by strata/level/id (low to high).
-    pub hittable: Vec<(u64, crate::LayoutRect)>,
+    /// Frames eligible for hit testing with their render-order key, sorted
+    /// by strata/level/raise-order/id (low to high).
+    pub hittable: Vec<(u64, super::hit_grid::HitOrderKey, crate::LayoutRect)>,
 }
 
 /// Collect all frame IDs in the subtree rooted at the named frame.
@@ -162,7 +163,9 @@ pub fn collect_hittable_frames(
     CollectedFrames {
         hittable: hittable
             .into_iter()
-            .map(|(id, _, _, _, r)| (id, r))
+            .map(|(id, strata, level, raise_order, r)| {
+                (id, (strata, level, raise_order, id), r)
+            })
             .collect(),
     }
 }
@@ -308,7 +311,7 @@ mod tests {
         let collected_ids: Vec<u64> = collected
             .hittable
             .into_iter()
-            .map(|(id, _rect)| id)
+            .map(|(id, _key, _rect)| id)
             .collect();
 
         assert_eq!(collected_ids, vec![included_id]);

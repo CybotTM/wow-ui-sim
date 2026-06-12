@@ -410,8 +410,8 @@ fn topmost_hit_at(env: &wow_ui_sim::lua_api::WowLuaEnv, point: Point) -> Option<
     hittable
         .iter()
         .rev()
-        .find(|(_, rect)| rect_contains(rect, point))
-        .map(|(id, _)| *id)
+        .find(|(_, rect, _)| rect_contains(rect, point))
+        .map(|(id, _, _)| *id)
 }
 
 fn frame_label(env: &wow_ui_sim::lua_api::WowLuaEnv, id: u64) -> String {

@@ -528,6 +528,8 @@ impl SimState {
         if let Some(f) = self.widgets.get_mut_visual(id) {
             f.raise_order = sibling_max_order.saturating_add(1);
         }
+        // raise_order is part of the hit-grid render-order key.
+        self.pending_hit_grid_changes.push((id, true));
         // Re-sort the affected subtree in strata buckets.
         // Avoid setting strata_buckets = None: Show/Hide calls later in the
         // same handler chain rely on buckets being Some for surgical insert/remove.
@@ -554,6 +556,8 @@ impl SimState {
         if let Some(f) = self.widgets.get_mut_visual(id) {
             f.raise_order = min_order.saturating_sub(1);
         }
+        // raise_order is part of the hit-grid render-order key.
+        self.pending_hit_grid_changes.push((id, true));
         if self.strata_buckets.is_some() {
             self.remove_subtree_from_buckets(id);
             self.invalidate_strata_buckets();

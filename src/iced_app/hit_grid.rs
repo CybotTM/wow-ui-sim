@@ -7,6 +7,13 @@
 use iced::{Point, Rectangle};
 use std::collections::HashMap;
 
+/// Render-order key for hit testing: `(strata, frame_level, raise_order, id)`.
+///
+/// Matches the sort in `collect_hittable_frames`, so incremental inserts land
+/// at the same position a full rebuild would produce. Cells scan in reverse,
+/// so the highest key wins the hit.
+pub type HitOrderKey = (crate::widget::FrameStrata, i32, i32, u64);
+
 /// Cell size in screen pixels. Each cell is CELL_SIZE × CELL_SIZE.
 /// 64px gives ~192 cells at 1024×768 and ~510 at 1920×1080.
 const CELL_SIZE: f32 = 64.0;
@@ -14,10 +21,12 @@ const CELL_SIZE: f32 = 64.0;
 /// Spatial grid for O(1) cell lookup + O(k) scan within the cell.
 pub struct HitGrid {
     /// Flat array of cells, indexed by `row * cols + col`.
-    /// Each cell holds frame IDs that overlap it, in strata/level order (low→high).
+    /// Each cell holds frame IDs that overlap it, in render-order (low→high).
     cells: Vec<Vec<u64>>,
     /// Rectangle for each hittable frame, keyed by frame ID.
     rects: HashMap<u64, Rectangle>,
+    /// Render-order key per frame; keeps incremental inserts ordered.
+    keys: HashMap<u64, HitOrderKey>,
     cols: usize,
     rows: usize,
 }
@@ -28,15 +37,21 @@ impl HitGrid {
     /// `hittable` must be sorted lowest-strata-first (same order as
     /// `build_hittable_rects` produces), so reverse iteration yields the
     /// topmost frame.
-    pub fn new(hittable: Vec<(u64, Rectangle)>, screen_w: f32, screen_h: f32) -> Self {
+    pub fn new(
+        hittable: Vec<(u64, Rectangle, HitOrderKey)>,
+        screen_w: f32,
+        screen_h: f32,
+    ) -> Self {
         let cols = (screen_w / CELL_SIZE).ceil() as usize;
         let rows = (screen_h / CELL_SIZE).ceil() as usize;
         let cell_count = cols * rows;
         let mut cells: Vec<Vec<u64>> = vec![Vec::new(); cell_count];
         let mut rects = HashMap::with_capacity(hittable.len());
+        let mut keys = HashMap::with_capacity(hittable.len());
 
-        for &(id, rect) in &hittable {
+        for &(id, rect, key) in &hittable {
             rects.insert(id, rect);
+            keys.insert(id, key);
             let (c0, r0, c1, r1) = cell_range(rect, cols, rows);
             for row in r0..=r1 {
                 for col in c0..=c1 {
@@ -45,11 +60,21 @@ impl HitGrid {
             }
         }
 
-        Self {
+        let mut grid = Self {
             cells,
             rects,
+            keys,
             cols,
             rows,
+        };
+        grid.sort_cells();
+        grid
+    }
+
+    fn sort_cells(&mut self) {
+        let keys = &self.keys;
+        for cell in &mut self.cells {
+            cell.sort_by_key(|id| keys.get(id).copied());
         }
     }
 
@@ -76,6 +101,7 @@ impl HitGrid {
     ///
     /// Uses the stored rect to find which cells contained the frame.
     pub fn remove(&mut self, id: u64) {
+        self.keys.remove(&id);
         let Some(rect) = self.rects.remove(&id) else {
             return;
         };
@@ -88,16 +114,25 @@ impl HitGrid {
         }
     }
 
-    /// Insert a frame into the grid.
+    /// Insert a frame into the grid at its render-order position.
     ///
-    /// Appends to each overlapping cell. Caller must ensure the frame is not
-    /// already in the grid (call `remove` first to update an existing frame).
-    pub fn insert(&mut self, id: u64, rect: Rectangle) {
+    /// A plain append would make the newest insert the topmost hit in its
+    /// cells regardless of strata/level — every incremental update would
+    /// shadow overlapping frames (the staleness bug that previously forced
+    /// full rebuilds). Caller must ensure the frame is not already in the
+    /// grid (call `remove` first to update an existing frame).
+    pub fn insert(&mut self, id: u64, rect: Rectangle, key: HitOrderKey) {
         self.rects.insert(id, rect);
+        self.keys.insert(id, key);
+        let keys = &self.keys;
         let (c0, r0, c1, r1) = cell_range(rect, self.cols, self.rows);
         for row in r0..=r1 {
             for col in c0..=c1 {
-                self.cells[row * self.cols + col].push(id);
+                let cell = &mut self.cells[row * self.cols + col];
+                let pos = cell.partition_point(|other| {
+                    keys.get(other).copied().is_some_and(|other_key| other_key <= key)
+                });
+                cell.insert(pos, id);
             }
         }
     }
@@ -140,6 +175,22 @@ mod tests {
         Rectangle::new(Point::new(x, y), Size::new(w, h))
     }
 
+    /// Assign render-order keys following list order (low to high), matching
+    /// the sorted input contract of `HitGrid::new`.
+    fn keyed(hittable: &[(u64, Rectangle)]) -> Vec<(u64, Rectangle, HitOrderKey)> {
+        hittable
+            .iter()
+            .enumerate()
+            .map(|(i, &(id, r))| {
+                (
+                    id,
+                    r,
+                    (crate::widget::FrameStrata::Medium, i as i32, 0, id),
+                )
+            })
+            .collect()
+    }
+
     #[test]
     fn topmost_matches_linear_scan() {
         // 3 overlapping frames at different strata (sorted low→high).
@@ -148,7 +199,7 @@ mod tests {
             (2, rect(50.0, 50.0, 100.0, 100.0)), // mid strata, overlaps
             (3, rect(80.0, 80.0, 40.0, 40.0)),   // high strata, small
         ];
-        let grid = HitGrid::new(hittable.clone(), 256.0, 256.0);
+        let grid = HitGrid::new(keyed(&hittable), 256.0, 256.0);
 
         // Points that should hit different frames.
         let cases = [
@@ -171,7 +222,7 @@ mod tests {
     fn frame_spanning_multiple_cells() {
         // One frame spanning several cells.
         let hittable = vec![(1, rect(10.0, 10.0, 200.0, 200.0))];
-        let grid = HitGrid::new(hittable, 256.0, 256.0);
+        let grid = HitGrid::new(keyed(&hittable), 256.0, 256.0);
 
         // Test points in different cells within the frame.
         assert_eq!(
@@ -196,7 +247,7 @@ mod tests {
     #[test]
     fn contains_checks_rect() {
         let hittable = vec![(1, rect(100.0, 100.0, 50.0, 50.0))];
-        let grid = HitGrid::new(hittable, 256.0, 256.0);
+        let grid = HitGrid::new(keyed(&hittable), 256.0, 256.0);
 
         assert!(grid.contains(1, Point::new(120.0, 120.0)));
         assert!(!grid.contains(1, Point::new(90.0, 90.0)));
@@ -209,7 +260,7 @@ mod tests {
         let hittable = vec![
             (1, rect(60.0, 60.0, 10.0, 10.0)), // spans cells (0,0) and (1,1)
         ];
-        let grid = HitGrid::new(hittable, 128.0, 128.0);
+        let grid = HitGrid::new(keyed(&hittable), 128.0, 128.0);
 
         assert_eq!(
             grid.topmost_matching_at(Point::new(63.0, 63.0), |_| true),
@@ -226,6 +277,45 @@ mod tests {
     }
 
     #[test]
+    fn incremental_insert_respects_render_order() {
+        // A lower frame re-inserted incrementally (e.g. after moving) must
+        // NOT shadow a higher overlapping frame. The old append-based insert
+        // made the newest insert win every overlapping cell, which is the
+        // staleness bug that previously forced full grid rebuilds.
+        let hittable = vec![
+            (1, rect(0.0, 0.0, 200.0, 200.0)),
+            (2, rect(50.0, 50.0, 100.0, 100.0)),
+        ];
+        let mut grid = HitGrid::new(keyed(&hittable), 256.0, 256.0);
+
+        // Re-insert the bottom frame with its original (lowest) key.
+        grid.remove(1);
+        grid.insert(
+            1,
+            rect(0.0, 0.0, 200.0, 200.0),
+            (crate::widget::FrameStrata::Medium, 0, 0, 1),
+        );
+
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(60.0, 60.0), |_| true),
+            Some(2),
+            "re-inserted bottom frame must stay below the overlapping top frame"
+        );
+
+        // A frame inserted with a HIGHER key still wins.
+        grid.remove(2);
+        grid.insert(
+            2,
+            rect(50.0, 50.0, 100.0, 100.0),
+            (crate::widget::FrameStrata::Medium, 1, 0, 2),
+        );
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(60.0, 60.0), |_| true),
+            Some(2)
+        );
+    }
+
+    #[test]
     fn many_frames_stress_test() {
         // 1000 non-overlapping 10x10 frames in a grid pattern.
         let mut hittable = Vec::new();
@@ -234,7 +324,7 @@ mod tests {
             let y = (i / 50) as f32 * 20.0;
             hittable.push((i, rect(x, y, 10.0, 10.0)));
         }
-        let grid = HitGrid::new(hittable.clone(), 1000.0, 400.0);
+        let grid = HitGrid::new(keyed(&hittable), 1000.0, 400.0);
 
         // Check every frame is hittable at its center.
         for &(id, r) in &hittable {

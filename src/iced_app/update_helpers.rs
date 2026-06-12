@@ -31,7 +31,8 @@ pub(super) fn apply_subtree_hit_grid_change(
         if became_visible {
             grid.remove(id);
             if let Some(rect) = hittable_rect(registry, id, f) {
-                grid.insert(id, rect);
+                let key = (f.frame_strata, f.frame_level, f.raise_order, id);
+                grid.insert(id, rect, key);
             }
         } else {
             grid.remove(id);

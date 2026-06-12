@@ -278,9 +278,9 @@ mod tests {
             .expect("scaled hit inset button should exist");
         let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
         let hittable = build_hittable_rects(&collected, &state.widgets);
-        let (_, rect) = hittable
+        let (_, rect, _) = hittable
             .iter()
-            .find(|(id, _)| *id == frame_id)
+            .find(|(id, _, _)| *id == frame_id)
             .expect("scaled hit inset button should be hittable");
 
         assert_eq!(rect.width, 12.5);

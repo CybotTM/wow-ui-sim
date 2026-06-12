@@ -420,11 +420,11 @@ pub fn build_quad_batch_for_registry_with_quest_blobs(
 pub fn build_hittable_rects(
     collected: &CollectedFrames,
     registry: &crate::widget::WidgetRegistry,
-) -> Vec<(u64, Rectangle)> {
+) -> Vec<(u64, Rectangle, super::hit_grid::HitOrderKey)> {
     collected
         .hittable
         .iter()
-        .map(|&(id, r)| {
+        .map(|&(id, key, r)| {
             let (il, ir, it, ib) = registry
                 .get(id)
                 .map(super::frame_collect::scaled_hit_rect_insets)
@@ -438,6 +438,7 @@ pub fn build_hittable_rects(
                         (r.height - it - ib).max(0.0) * UI_SCALE,
                     ),
                 ),
+                key,
             )
         })
         .collect()

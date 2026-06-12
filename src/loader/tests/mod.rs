@@ -459,6 +459,7 @@ fn test_hit_rect_insets_shrinks_hittable_rect() {
     let collected = CollectedFrames {
         hittable: vec![(
             id,
+            (crate::widget::FrameStrata::Medium, 1, 0, id),
             LayoutRect {
                 x: 100.0,
                 y: 50.0,
@@ -470,7 +471,7 @@ fn test_hit_rect_insets_shrinks_hittable_rect() {
 
     let result = build_hittable_rects(&collected, &registry);
     assert_eq!(result.len(), 1);
-    let (rid, rect) = &result[0];
+    let (rid, rect, _key) = &result[0];
     assert_eq!(*rid, id);
 
     let scale = crate::render::texture::UI_SCALE;

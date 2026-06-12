@@ -45,6 +45,9 @@ pub fn set_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
     }
     if strata_changed {
         sim.invalidate_strata_buckets();
+        // Strata is part of the hit-grid render-order key; re-insert the
+        // subtree at its new position.
+        sim.queue_hit_grid_eligibility_change(id);
     }
     Ok(0)
 }
@@ -114,6 +117,9 @@ pub fn set_frame_level(state: &mut LuaState) -> LuaResult<u32> {
     }
     super::super::methods_hierarchy::propagate_strata_level_pub(&mut sim.widgets, id);
     sim.invalidate_strata_buckets();
+    // Frame level is part of the hit-grid render-order key; re-insert the
+    // subtree at its new position.
+    sim.queue_hit_grid_eligibility_change(id);
     Ok(0)
 }
 

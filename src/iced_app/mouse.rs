@@ -118,9 +118,9 @@ impl App {
         }
 
         self.fire_hover_transition(new_hovered);
-        // OnEnter/OnLeave scripts may show/hide tooltips or change widget state.
-        // Apply incremental HitGrid updates before the next hit_test.
-        self.apply_hit_grid_changes();
+        // OnEnter/OnLeave scripts may show/hide tooltips or change widget
+        // state; hit_test freshens the grid on entry, so the pending changes
+        // coalesce until the next query instead of being applied eagerly here.
         self.flush_mouse_move_visual_updates();
     }
 

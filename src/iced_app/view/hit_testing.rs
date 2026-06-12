@@ -320,6 +320,7 @@ mod tests {
                         Point::new(rect.x, rect.y),
                         Size::new(rect.width, rect.height),
                     ),
+                    (frame.frame_strata, frame.frame_level, frame.raise_order, id),
                 ))
             })
             .collect();

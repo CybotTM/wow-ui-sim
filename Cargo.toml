@@ -109,6 +109,10 @@ debug = "line-tables-only"
 [profile.dev]
 lto = false
 debug = "line-tables-only"
+# Hit-grid rebuilds, layout resolution, and texture decode are pure data
+# traversal; opt-level 0 makes them ~5-10x slower and visibly degrades GUI
+# input latency in dev builds.
+opt-level = 1
 
 [[test]]
 name = "frame_positions"

@@ -49,13 +49,13 @@ fn hit_test_like_gui(env: &WowLuaEnv, pos: Point) -> Option<u64> {
     let rect_for = |id| {
         hittable
             .iter()
-            .find_map(|(hid, rect)| (*hid == id).then_some(*rect))
+            .find_map(|(hid, rect, _)| (*hid == id).then_some(*rect))
     };
 
     let mut current = hittable
         .iter()
         .rev()
-        .find_map(|(id, rect)| rect.contains(pos).then_some(*id))?;
+        .find_map(|(id, rect, _)| rect.contains(pos).then_some(*id))?;
 
     loop {
         let next = state.widgets.get(current).and_then(|frame| {

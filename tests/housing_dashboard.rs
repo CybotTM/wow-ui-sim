@@ -18,10 +18,11 @@ fn hit_test_like_gui(env: &WowLuaEnv, pos: Point) -> Option<u64> {
         .clone();
     let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
     let hittable = build_hittable_rects(&collected, &state.widgets);
-    let hittable_by_id: HashMap<u64, Rectangle> = hittable.iter().copied().collect();
+    let hittable_by_id: HashMap<u64, Rectangle> =
+        hittable.iter().map(|&(id, rect, _)| (id, rect)).collect();
 
     // Phase 1: topmost hittable frame whose subtree contains a hittable target at pos.
-    let initial_id = hittable.iter().rev().find_map(|(id, rect)| {
+    let initial_id = hittable.iter().rev().find_map(|(id, rect, _)| {
         (rect.contains(pos) && deepest_hover(&state.widgets, &hittable_by_id, *id, pos).is_some())
             .then_some(*id)
     })?;
@@ -486,12 +487,12 @@ fn plot_pin_is_hit_testable_at_screen_position() {
                     .expect("visible strata buckets")
                     .clone();
                 let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
-                let pin_in_grid = collected.hittable.iter().any(|(id, _)| *id == pin_frame_id);
+                let pin_in_grid = collected.hittable.iter().any(|(id, _, _)| *id == pin_frame_id);
                 let pin_grid_rect = collected
                     .hittable
                     .iter()
-                    .find(|(id, _)| *id == pin_frame_id)
-                    .map(|(_, r)| *r);
+                    .find(|(id, _, _)| *id == pin_frame_id)
+                    .map(|(_, _, r)| *r);
                 let pin_contains = pin_grid_rect.map(|r| {
                     pos.x >= r.x
                         && pos.x < r.x + r.width
@@ -503,7 +504,7 @@ fn plot_pin_is_hit_testable_at_screen_position() {
                     .iter()
                     .rev()
                     .take(8)
-                    .map(|(id, r)| {
+                    .map(|(id, _, r)| {
                         let f = state.widgets.get(*id);
                         let raise = f.map(|f| f.raise_order).unwrap_or(0);
                         let level = f.map(|f| f.frame_level).unwrap_or(0);

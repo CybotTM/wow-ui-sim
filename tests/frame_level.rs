@@ -120,7 +120,7 @@ fn top_hittable_probe_frame(env: &WowLuaEnv) -> String {
         .hittable
         .iter()
         .rev()
-        .find_map(|(id, _)| {
+        .find_map(|(id, _, _)| {
             let frame = state.widgets.get(*id)?;
             let name = frame.name.as_deref()?;
             name.starts_with("RaiseLowerHit").then(|| name.to_string())
