@@ -34,6 +34,9 @@ pub fn init_edit_mode_layout(env: &WowLuaEnv) {
     log_step(env, "finalize_action_bar_positions", || {
         finalize_action_bar_positions(env);
     });
+    log_step(env, "invoke_anchor_changed_hooks", || {
+        invoke_anchor_changed_hooks(env);
+    });
     log_step(env, "fix_action_bar_nan_size", || {
         fix_action_bar_nan_size(env);
     });
@@ -98,6 +101,33 @@ fn finalize_action_bar_positions(env: &WowLuaEnv) {
             if EditModeManagerFrame.UpdateActionBarPositions then
                 pcall(EditModeManagerFrame.UpdateActionBarPositions, EditModeManagerFrame)
             end
+        end
+    "#,
+    );
+}
+
+/// Replay Blizzard's post-apply anchor-changed broadcast.
+///
+/// Blizzard's layout-apply pass ends with
+/// `InvokeOnAnyEditModeSystemAnchorChanged(force)` so systems whose layout
+/// depends on their final screen position re-run it. MicroMenu re-anchors
+/// itself inside MicroMenuContainer based on which screen quadrant the
+/// container's center is in; our workaround applies saved anchors after each
+/// system's `UpdateSystem`, so without this broadcast the micro menu keeps
+/// the quadrant computed from the container's pre-anchor position and ends
+/// up one QueueStatusButton slot away from where Blizzard's layout puts it
+/// on the first interactive re-layout.
+pub(crate) fn invoke_anchor_changed_hooks(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if EditModeManagerFrame
+            and EditModeManagerFrame.InvokeOnAnyEditModeSystemAnchorChanged then
+            local force = true
+            pcall(
+                EditModeManagerFrame.InvokeOnAnyEditModeSystemAnchorChanged,
+                EditModeManagerFrame,
+                force
+            )
         end
     "#,
     );

@@ -87,6 +87,12 @@ impl WowLuaEnv {
         // alone. Ground truth: docs/wiki/investigations/display-size-ui-scale-events.md
         let _ = self.fire_event("DISPLAY_SIZE_CHANGED");
         let _ = self.fire_event("UI_SCALE_CHANGED");
+        // Our EditMode anchor apply runs before the GUI knows its real window
+        // size, so position-dependent system layouts (MicroMenu picks its
+        // anchor corner from the container's screen quadrant) are computed
+        // against the default dimensions. Replay Blizzard's anchor-changed
+        // broadcast now that frames sit at their final screen positions.
+        crate::lua_api::workarounds_editmode::invoke_anchor_changed_hooks(self);
     }
 
     /// Select which UI surface should be loaded.
