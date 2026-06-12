@@ -315,7 +315,13 @@ local function __wow_register_core_frame_methods()
 
   function __wow_mark_layout_frame_dirty(frame)
     if frame and frame.IsLayoutFrame and frame:IsLayoutFrame() then
+      -- Blizzard's BaseLayoutMixin:MarkDirty installs its own OnUpdate; keep an
+      -- already installed custom OnUpdate script in place.
+      local currentOnUpdate = frame.GetScript and frame:GetScript("OnUpdate") or nil
       frame:MarkDirty()
+      if currentOnUpdate and frame.GetScript and frame:GetScript("OnUpdate") ~= currentOnUpdate then
+        frame:SetScript("OnUpdate", currentOnUpdate)
+      end
       return true
     end
     return false
