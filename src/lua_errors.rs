@@ -435,7 +435,7 @@ mod tests {
         assert_eq!(lines[1], "  TraceAddon: 1 error(s)");
         assert_eq!(
             lines[2],
-            "    boom\n    stack traceback:\n    \t[C]: in function 'error'"
+            "    Interface/AddOns/TraceAddon/Main.lua:4: boom\n    stack traceback:\n    \t[C]: in function 'error'"
         );
     }
 }
