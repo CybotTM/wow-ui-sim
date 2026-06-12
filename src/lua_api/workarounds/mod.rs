@@ -459,6 +459,14 @@ pub(crate) fn patch_callback_registry_defaults(env: &crate::lua_api::LoaderEnv<'
     let _ = temporary::callback_registry_defaults::patch_for_addon_load(env);
 }
 
+pub(crate) fn patch_dispatcher_surface_for_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = temporary::dispatcher_surface::patch_for_addon_load(env);
+}
+
+pub(crate) fn patch_achievement_search_preview_for_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = temporary::achievement_search_preview::patch_for_addon_load(env);
+}
+
 fn patch_edit_mode_manager(env: &crate::lua_api::WowLuaEnv) {
     crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
 }

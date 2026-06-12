@@ -84,24 +84,22 @@ local function patch_summary_empty_text_overlap()
     __wow_achievement_summary_empty_text_patched = true
 end
 
-local function patch_achievement_ui()
-    ensure_search_previews()
-    patch_search_preview_selection()
-    patch_summary_empty_text_overlap()
-end
-
-if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
-    hooksecurefunc(C_AddOns, "LoadAddOn", function(addonName)
-        if addonName == "Blizzard_AchievementUI" then
-            patch_achievement_ui()
-        end
-    end)
-end
+ensure_search_previews()
+patch_search_preview_selection()
+patch_summary_empty_text_overlap()
 "##;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(ACHIEVEMENT_SEARCH_PREVIEW_LUA)?;
     Ok(())
+}
+
+/// Re-apply the search/summary repairs after Blizzard_AchievementUI loads.
+/// Wired through `apply_blizzard_post_load_patches`; the Lua
+/// `hooksecurefunc(C_AddOns, "LoadAddOn", ...)` route no longer works because
+/// the shared bootstrap hooksecurefunc deliberately refuses that target.
+pub(crate) fn patch_for_addon_load(env: &crate::lua_api::LoaderEnv<'_>) -> crate::Result<()> {
+    env.exec(ACHIEVEMENT_SEARCH_PREVIEW_LUA)
 }
 
 #[cfg(test)]
@@ -112,12 +110,13 @@ mod tests {
     fn patches_achievement_search_preview_after_addon_load() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
-        let result: String = env
-            .eval(
-                r#"
-                local calls = {}
-                C_AddOns.LoadAddOn("NotAchievementUI")
-
+        // Install the pre-patch surface the way Blizzard_AchievementUI would
+        // have left it, then run the same patch entry the loader fires from
+        // apply_blizzard_post_load_patches. Loading the real addon here would
+        // overwrite these probes with the genuine Blizzard functions.
+        env.exec(
+            r#"
+                calls = {}
                 AchievementFrame = {
                     SearchPreviewContainer = {
                         SearchPreview1 = "one",
@@ -137,8 +136,16 @@ mod tests {
                 AchievementFrameSummary_UpdateAchievements = function(numAchievements)
                     return numAchievements
                 end
+            "#,
+        )
+        .expect("achievement fixture should install");
 
-                C_AddOns.LoadAddOn("Blizzard_AchievementUI")
+        super::patch_for_addon_load(&env.loader_env())
+            .expect("achievement post-load patch should apply");
+
+        let result: String = env
+            .eval(
+                r#"
                 local selectionResult = AchievementFrame_SetSearchPreviewSelection(2)
                 local summaryResult = AchievementFrameSummary_UpdateAchievements(0)
                 local previews = AchievementFrame.SearchPreviewContainer.searchPreviews

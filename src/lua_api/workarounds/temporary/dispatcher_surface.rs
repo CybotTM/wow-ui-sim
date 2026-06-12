@@ -391,22 +391,19 @@ local function __wow_ensure_dispatcher_surface()
 end
 
 __wow_ensure_dispatcher_surface()
-
-
-
-if C_AddOns and type(C_AddOns.LoadAddOn) == "function" and not rawget(_G, "__wow_dispatcher_surface_load_hooked") then
-  rawset(_G, "__wow_dispatcher_surface_load_hooked", true)
-  hooksecurefunc(C_AddOns, "LoadAddOn", function(addonName)
-    if addonName == "Blizzard_Dispatcher" then
-      __wow_ensure_dispatcher_surface()
-    end
-  end)
-end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(DISPATCHER_SURFACE_LUA)?;
     Ok(())
+}
+
+/// Re-install the simulator Dispatcher surface after Blizzard_Dispatcher
+/// loads. Wired through `apply_blizzard_post_load_patches`; the Lua
+/// `hooksecurefunc(C_AddOns, "LoadAddOn", ...)` route no longer works because
+/// the shared bootstrap hooksecurefunc deliberately refuses that target.
+pub(crate) fn patch_for_addon_load(env: &crate::lua_api::LoaderEnv<'_>) -> crate::Result<()> {
+    env.exec(DISPATCHER_SURFACE_LUA)
 }
 
 #[cfg(test)]
