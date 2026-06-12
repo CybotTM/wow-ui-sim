@@ -37,7 +37,7 @@ fn build_test_app_with_texture_manager(
     let (_cmd_tx, cmd_rx) = mpsc::channel(1);
     let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
 
-    App::build_app(AppInit {
+    let app = App::build_app(AppInit {
         env,
         log_messages: Vec::new(),
         texture_manager,
@@ -49,7 +49,9 @@ fn build_test_app_with_texture_manager(
         debug_anchors: false,
         saved_vars: None,
         config: crate::config::SimConfig::default(),
-    })
+    });
+    app.gui_startup_complete.set(true);
+    app
 }
 
 fn build_test_app_with_addon_textures(screen_kind: ScreenKind, addons_path: &Path) -> App {

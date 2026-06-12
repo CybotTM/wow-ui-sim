@@ -63,7 +63,14 @@ pub(super) fn add_debuff(state: &mut LuaState) -> LuaResult<u32> {
         let mut st = borrow_state_mut(state)?;
         let is_helpful = false;
         let debuff = build_admin_aura(
-            &st, spell_id, name, icon, duration, stacks, is_helpful, dispel_type,
+            &st,
+            spell_id,
+            name,
+            icon,
+            duration,
+            stacks,
+            is_helpful,
+            dispel_type,
         );
         st.player.buffs.push(debuff);
     }
@@ -73,16 +80,55 @@ pub(super) fn add_debuff(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn remove_buff(state: &mut LuaState) -> LuaResult<u32> {
     let spell_id = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?
-        .player
-        .buffs
-        .retain(|a| a.spell_id != spell_id);
+    {
+        let mut st = borrow_state_mut(state)?;
+        st.player.buffs.retain(|a| a.spell_id != spell_id);
+    }
     fire_player_unit_aura(state);
     Ok(0)
 }
 
 pub(super) fn clear_buffs(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.player.buffs.clear();
+    {
+        let mut st = borrow_state_mut(state)?;
+        st.player.buffs.clear();
+    }
     fire_player_unit_aura(state);
     Ok(0)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn add_debuff_populates_player_harmful_aura_queries() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let result: String = env
+            .eval(
+                r#"
+                A_Admin.ClearBuffs()
+                A_Admin.AddDebuff(589, "Shadow Word: Pain", "136207", 30, 1, "Magic")
+
+                local name, icon, count, debuffName = UnitDebuff("player", 1)
+                if name ~= "Shadow Word: Pain" then
+                    return "missing_unit_debuff"
+                end
+                if debuffName ~= "Magic" then
+                    return "missing_dispel_name"
+                end
+
+                local aura = C_UnitAuras.GetAuraDataByIndex("player", 1, "HARMFUL")
+                if not aura or aura.dispelName ~= "Magic" then
+                    return "missing_harmful_aura_data"
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("admin aura probe should run");
+
+        assert_eq!(result, "ok");
+    }
 }

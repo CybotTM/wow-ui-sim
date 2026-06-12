@@ -293,6 +293,15 @@ mod tests {
         let mut registry = WidgetRegistry::new();
         let excluded_id = register_hittable_frame(&mut registry, "UIParent", 10);
         let included_id = register_hittable_frame(&mut registry, "ClickableFrame", 20);
+        registry.get_mut(included_id).unwrap().parent_id = Some(excluded_id);
+        registry.get_mut(included_id).unwrap().set_point(
+            AnchorPoint::TopLeft,
+            Some(excluded_id as usize),
+            AnchorPoint::TopLeft,
+            20.0,
+            0.0,
+        );
+        registry.add_child(excluded_id, included_id);
 
         let strata_buckets = vec![vec![excluded_id, included_id]];
         let collected = super::collect_hittable_frames(&registry, &strata_buckets);

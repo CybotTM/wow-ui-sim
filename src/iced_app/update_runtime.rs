@@ -8,9 +8,7 @@ use super::app::App;
 use super::update::{
     TickStageTimings, log_slow_tick, request_redraw_task, should_drop_stale_timer_tick,
 };
-use super::update_helpers::{
-    apply_subtree_hit_grid_change, get_checked_attribute, is_toggleable_checkbutton,
-};
+use super::update_helpers::{get_checked_attribute, is_toggleable_checkbutton};
 
 struct TimerTickOutcome {
     combined: u16,
@@ -190,22 +188,18 @@ impl App {
         if changes.is_empty() && layout_roots.is_empty() && hit_grid_roots.is_empty() {
             return;
         }
-        drop(state);
 
-        let mut grid_ref = self.cached_hittable.borrow_mut();
-        let Some(grid) = grid_ref.as_mut() else {
+        let Some(strata_buckets) = state.get_strata_buckets().cloned() else {
             return;
         };
-        let state = env.state().borrow();
-        for root_id in hit_grid_roots {
-            apply_subtree_hit_grid_change(grid, &state.widgets, root_id, true);
-        }
-        for root_id in layout_roots {
-            apply_subtree_hit_grid_change(grid, &state.widgets, root_id, true);
-        }
-        for (root_id, became_visible) in changes {
-            apply_subtree_hit_grid_change(grid, &state.widgets, root_id, became_visible);
-        }
+        let collected = super::frame_collect::collect_hittable_frames(&state.widgets, &strata_buckets);
+        let hittable = super::strata_emit::build_hittable_rects(&collected, &state.widgets);
+        let screen_size = self.screen_size.get();
+        *self.cached_hittable.borrow_mut() = Some(super::hit_grid::HitGrid::new(
+            hittable,
+            screen_size.width,
+            screen_size.height,
+        ));
     }
 
     pub(super) fn is_frame_enabled(&self, frame_id: u64) -> bool {
@@ -270,7 +264,6 @@ impl App {
             env.set_screen_size(size.width, size.height);
             *self.cached_hittable.borrow_mut() = None;
             self.mark_all_strata_dirty();
-            let _ = env.fire_event("DISPLAY_SIZE_CHANGED");
             self.rebuild_hit_grid_after_screen_resize(size);
         }
     }

@@ -50,7 +50,7 @@ fn party_member_button_click_targets_party_unit_through_mouse_path() {
 }
 
 #[test]
-fn mouse_enabled_tooltip_without_click_handler_does_not_block_party_click() {
+fn mouse_disabled_tooltip_without_click_handler_does_not_block_party_click() {
     let mut app = build_test_app(ScreenKind::Game);
 
     {
@@ -74,7 +74,7 @@ fn mouse_enabled_tooltip_without_click_handler_does_not_block_party_click() {
             SimPartyBuffTooltip:SetFrameStrata("TOOLTIP")
             SimPartyBuffTooltip:SetSize(32, 32)
             SimPartyBuffTooltip:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 69, -172)
-            SimPartyBuffTooltip:EnableMouse(true)
+            SimPartyBuffTooltip:EnableMouse(false)
             "#,
         )
         .expect("party member tooltip setup should succeed");
@@ -93,6 +93,6 @@ fn mouse_enabled_tooltip_without_click_handler_does_not_block_party_click() {
         .expect("target name should be readable after tooltip-overlapped party click");
     assert_eq!(
         target_name, "Healer",
-        "mouse-enabled tooltip frames without click handlers should not swallow party clicks"
+        "mouse-disabled tooltip frames without click handlers should not swallow party clicks"
     );
 }

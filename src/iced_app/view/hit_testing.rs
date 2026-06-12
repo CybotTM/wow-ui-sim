@@ -63,7 +63,9 @@ fn deepest_hover_target_through_visible_children(
     frame_id: u64,
     pos: iced::Point,
 ) -> Option<u64> {
-    deepest_target_through_visible_children(widgets, grid, frame_id, pos, |_, _| true)
+    deepest_target_through_visible_children(widgets, grid, frame_id, pos, |frame, _| {
+        frame.mouse_enabled || matches!(frame.widget_type, crate::widget::WidgetType::EditBox)
+    })
 }
 
 fn deepest_click_target_through_visible_children(
@@ -100,15 +102,16 @@ fn deepest_target_through_visible_children(
                     continue;
                 };
                 stack.push(HitVisit::Check(current_id));
-                let child_ids = visible_descendants_at_point_by_z_order(widgets, frame, pos);
-                stack.extend(child_ids.into_iter().rev().map(HitVisit::Enter));
+                let mut child_ids = visible_descendants_at_point_by_z_order(widgets, frame, pos);
+                while let Some(child_id) = child_ids.pop() {
+                    stack.push(HitVisit::Enter(child_id));
+                }
             }
             HitVisit::Check(current_id) => {
                 let Some(frame) = widgets.get(current_id) else {
                     continue;
                 };
-                if target_contains_point(widgets, grid, current_id, frame, pos)
-                    && accepts_frame(frame, current_id)
+                if target_contains_point(widgets, current_id, pos) && accepts_frame(frame, current_id)
                 {
                     return Some(current_id);
                 }
@@ -126,16 +129,13 @@ enum HitVisit {
 
 fn target_contains_point(
     widgets: &crate::widget::WidgetRegistry,
-    grid: &crate::iced_app::hit_grid::HitGrid,
     frame_id: u64,
-    frame: &crate::widget::Frame,
     pos: iced::Point,
 ) -> bool {
-    if grid.contains(frame_id, pos) && ancestor_clips_contain(widgets, frame_id, pos) {
-        frame.effective_alpha > 0.0
-    } else {
-        false
-    }
+    widgets
+        .get(frame_id)
+        .is_some_and(|frame| frame_visually_contains(widgets, frame_id, frame, pos))
+        && ancestor_clips_contain(widgets, frame_id, pos)
 }
 
 fn visible_descendants_at_point_by_z_order(
@@ -174,7 +174,6 @@ fn child_visually_contains(child: &crate::widget::Frame, pos: iced::Point) -> bo
     rect_contains_screen_point(child.layout_rect, pos)
 }
 
-#[cfg(test)]
 fn frame_visually_contains(
     widgets: &crate::widget::WidgetRegistry,
     frame_id: u64,
@@ -253,6 +252,10 @@ fn frame_has_mouse_button_action(
     }
 
     if crate::iced_app::mouse::frame_click_registration_accepts_button(frame, button_name) {
+        return true;
+    }
+
+    if down {
         return true;
     }
 

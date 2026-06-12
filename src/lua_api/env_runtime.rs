@@ -83,7 +83,6 @@ impl WowLuaEnv {
         }
         install_screen_size_globals(self, width, height);
         let _ = self.fire_event("DISPLAY_SIZE_CHANGED");
-        let _ = self.fire_event("UI_SCALE_CHANGED");
     }
 
     /// Select which UI surface should be loaded.

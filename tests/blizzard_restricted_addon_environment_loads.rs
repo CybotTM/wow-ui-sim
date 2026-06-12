@@ -675,11 +675,20 @@ fn virtual_templates_stay_off_global_scope() {
 fn named_manager_frames_publish_globally_under_secure_template() {
     let env = load_full_game_ui();
     for fname in NAMED_MANAGER_FRAMES {
-        let exists: bool = env
+        let (exists, is_protected, blocked_insecure_attribute): (bool, bool, bool) = env
             .eval(&format!(
                 "return type({fname}) == 'table' and \
                     type({fname}.IsObjectType) == 'function' and \
-                    {fname}:IsObjectType('Frame')"
+                    {fname}:IsObjectType('Frame'), \
+                    {fname}:IsProtected(), \
+                    (function() \
+                        A_Admin.SetInCombat(true); \
+                        forceinsecure(); \
+                        {fname}:SetAttribute('codex-protected-probe', 'blocked'); \
+                        debug.setstacktaint(nil); \
+                        A_Admin.SetInCombat(false); \
+                        return {fname}:GetAttribute('codex-protected-probe') == nil; \
+                    end)()"
             ))
             .unwrap_or_else(|err| panic!("{fname} frame probe failed: {err}"));
         assert!(
@@ -695,6 +704,21 @@ fn named_manager_frames_publish_globally_under_secure_template() {
              the Lua side to file-local `LOCAL_UpdateFrame` / `LOCAL_API_Frame` — only the \
              CreateFrame name argument exposes them globally, so the OnUpdate handlers are \
              scoped to their respective files while debug tooling can still locate the frames"
+        );
+        assert!(
+            is_protected,
+            "{fname} must report IsProtected=true — Blizzard creates it with \
+             CreateFrame(\"Frame\", \"{fname}\", nil, \"SecureFrameTemplate\"), and \
+             SecureFrameTemplate is declared protected=\"true\" in \
+             Blizzard_FrameXML/SecureTemplatesBase.xml. This checks the real Blizzard frame \
+             behavior, not just the simulator's synthetic A_Admin.SetFrameProtected helper."
+        );
+        assert!(
+            blocked_insecure_attribute,
+            "{fname} must reject insecure in-combat SetAttribute writes because its \
+             protection comes from the real Blizzard SecureFrameTemplate inheritance. \
+             A false result means IsProtected() is only cosmetic and the protected-frame \
+             enforcement path is not using the XML/template-derived protection flag."
         );
     }
 }
