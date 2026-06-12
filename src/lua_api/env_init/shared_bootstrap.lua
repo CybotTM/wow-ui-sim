@@ -857,6 +857,9 @@ do
   local frameIndex = frameMeta and frameMeta.__index
   if type(frameIndex) == "table" then
     if frameIndex.AddDataProvider == nil then
+      -- Keep in sync with the AddDataProvider fallback in
+      -- workarounds/temporary/frame_helper_defaults.rs: whichever installs
+      -- first wins the == nil guard.
       function frameIndex:AddDataProvider(provider)
         local fields = debug.getfenv(self)
         if type(fields) ~= "table" then
@@ -878,6 +881,15 @@ do
           end
         end
         providers[#providers + 1] = provider
+        if type(provider) == "table" and type(provider.OnAdded) == "function" then
+          pcall(provider.OnAdded, provider, self)
+        end
+        if type(provider) == "table" and provider.pin ~= nil then
+          provider.pin.dataProvider = provider
+        end
+        if type(provider) == "table" and provider.pin == nil then
+          provider.pin = { dataProvider = provider }
+        end
       end
     end
 
