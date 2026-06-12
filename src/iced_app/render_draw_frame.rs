@@ -22,7 +22,7 @@ impl App {
         let overlay = self.build_overlay();
         let texture_load = self.load_draw_textures(&mut quads, &overlay);
 
-        self.log_draw_frame(&quads, &texture_load);
+        self.log_draw_frame(start.elapsed(), &quads, &texture_load);
         self.record_draw_time(start.elapsed());
 
         self.build_draw_primitive(
@@ -71,8 +71,14 @@ impl App {
         }
     }
 
-    fn log_draw_frame(&self, quads: &DrawQuadRebuild, texture_load: &DrawTextureLoad) {
+    fn log_draw_frame(
+        &self,
+        total_dur: std::time::Duration,
+        quads: &DrawQuadRebuild,
+        texture_load: &DrawTextureLoad,
+    ) {
         log_draw_metrics(DrawLogMetrics {
+            total_dur,
             quad_dur: quads.quad_dur,
             tex_dur: texture_load.tex_dur,
             dirty_before: quads.dirty_before,
