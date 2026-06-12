@@ -54,6 +54,7 @@ fn headless_click_probe_plan(
         "achievements" => Ok(achievements_click_probe_plan()),
         "talents" => Ok(talents_click_probe_plan()),
         "mounts" => Ok(mounts_click_probe_plan()),
+        "micromenu" => Ok(micromenu_click_probe_plan()),
         _ => Err(format!("unknown headless click probe panel: {panel}").into()),
     }
 }
@@ -159,6 +160,52 @@ fn mounts_click_probe_plan() -> HeadlessClickProbePlan<'static> {
                     tostring(MountJournal.selectedMountID),
                     tostring(__mount_probe_target_id),
                     table.concat(__mount_probe_log, ",")
+                ))
+            end
+        "#,
+        ),
+    }
+}
+
+fn micromenu_click_probe_plan() -> HeadlessClickProbePlan<'static> {
+    HeadlessClickProbePlan {
+        setup_lua: r#"
+            if not LFDMicroButton or not LFDMicroButton:IsShown() then
+                error("LFDMicroButton missing or hidden")
+            end
+            print(string.format(
+                "[micromenu-probe] LFD rect l=%s r=%s level=%d  Collections l=%s  Guild l=%s",
+                tostring(LFDMicroButton:GetLeft()),
+                tostring(LFDMicroButton:GetRight()),
+                LFDMicroButton:GetFrameLevel(),
+                tostring(CollectionsMicroButton and CollectionsMicroButton:GetLeft()),
+                tostring(GuildMicroButton and GuildMicroButton:GetLeft())
+            ))
+            if PVEFrame and PVEFrame:IsShown() then
+                error("PVEFrame already open; probe needs it closed")
+            end
+            local function rectOf(frame)
+                if not frame then return "nil" end
+                return string.format("(%s,%s %sx%s)",
+                    tostring(frame:GetLeft()), tostring(frame:GetTop()),
+                    tostring(frame:GetWidth()), tostring(frame:GetHeight()))
+            end
+            __micro_rects = function()
+                return string.format(
+                    "LFD=%s MicroMenu=%s Container=%s",
+                    rectOf(LFDMicroButton), rectOf(MicroMenu), rectOf(MicroMenuContainer))
+            end
+            __micro_before = __micro_rects()
+        "#,
+        clicks: &[wow_ui_sim::iced_app::NamedClick {
+            frame_name: "LFDMicroButton",
+        }],
+        verify_lua: Some(
+            r#"
+            if not PVEFrame or not PVEFrame:IsShown() then
+                error(string.format(
+                    "LFDMicroButton click did not open PVEFrame; before=[%s] after=[%s]",
+                    tostring(__micro_before), __micro_rects()
                 ))
             end
         "#,

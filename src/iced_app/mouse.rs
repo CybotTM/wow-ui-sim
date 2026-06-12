@@ -311,12 +311,27 @@ impl App {
         }
         let env = self.env.borrow();
         let state = env.state().borrow();
+        let describe = |id: u64| {
+            state
+                .widgets
+                .get(id)
+                .map(|frame| {
+                    format!(
+                        "{}(rect={:?})",
+                        frame.name.as_deref().unwrap_or("<anon>"),
+                        frame.layout_rect
+                    )
+                })
+                .unwrap_or_else(|| "<missing>".to_string())
+        };
         let registered = state
             .widgets
             .get(frame_id)
             .map(|frame| frame.registered_click_buttons.clone());
+        let down_label = self.mouse_down_frame.map(describe);
         eprintln!(
-            "[click-dispatch] release frame={frame_id} mouse_down_frame={:?} clicks_on_up={clicks_on_up} registered={registered:?}",
+            "[click-dispatch] release frame={frame_id} {} mouse_down_frame={:?} {down_label:?} clicks_on_up={clicks_on_up} registered={registered:?}",
+            describe(frame_id),
             self.mouse_down_frame
         );
     }
