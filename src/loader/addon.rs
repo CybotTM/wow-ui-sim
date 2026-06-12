@@ -111,6 +111,8 @@ fn apply_blizzard_post_load_patches(
     #[cfg(feature = "client-mists")]
     crate::mists::post_load::apply_for_runtime_addon_load(env, folder_name);
 
+    crate::lua_api::workarounds::patch_runtime_surface_for_addon_load(env, folder_name);
+
     match folder_name {
         "Blizzard_EnvironmentCleanup" => patch_environment_cleanup(env, result),
         "Blizzard_AccountStore" => patch_account_store_set_storefront(env, result),

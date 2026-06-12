@@ -467,6 +467,36 @@ pub(crate) fn patch_achievement_search_preview_for_addon_load(env: &crate::lua_a
     let _ = temporary::achievement_search_preview::patch_for_addon_load(env);
 }
 
+/// Re-run the runtime-surface bootstrap repair hooks for addons whose load
+/// replaces the patched objects. The bootstrap exposes these as `__wow_patch_*`
+/// globals; the old `hooksecurefunc(C_AddOns, "LoadAddOn")` route is refused
+/// by the shared bootstrap and never fired.
+pub(crate) fn patch_runtime_surface_for_addon_load(
+    env: &crate::lua_api::LoaderEnv<'_>,
+    folder_name: &str,
+) {
+    let patch_fns: &[&str] = match folder_name {
+        "Blizzard_CharacterSelectNavBar" => &["__wow_patch_character_select_nav_bar"],
+        "Blizzard_UIParent"
+        | "Blizzard_UIParent_Mainline"
+        | "Blizzard_FrameXML"
+        | "Blizzard_ChatFrameBase" => &["__wow_patch_uiparent_onupdate_worklists"],
+        "Blizzard_MapCanvas"
+        | "Blizzard_SharedMapDataProviders"
+        | "Blizzard_WorldMap"
+        | "Blizzard_BattlefieldMap" => &[
+            "__wow_patch_map_canvas_scroll_container_methods",
+            "__wow_patch_fog_of_war_pin_methods",
+        ],
+        _ => return,
+    };
+    for patch_fn in patch_fns {
+        let _ = env.exec(&format!(
+            r#"if type({patch_fn}) == "function" then {patch_fn}() end"#
+        ));
+    }
+}
+
 fn patch_edit_mode_manager(env: &crate::lua_api::WowLuaEnv) {
     crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
 }
@@ -632,6 +662,25 @@ pub fn apply_for_runtime_addon_preload(env: &crate::lua_api::LoaderEnv<'_>, addo
 mod tests {
     use super::temporary::settings_canvas_visibility::SETTINGS_CANVAS_LAYOUT_HIDE_LUA;
     use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn runtime_surface_exposes_post_load_patch_globals() {
+        // patch_runtime_surface_for_addon_load and the CreateFrame wrapper in
+        // frame_helper_defaults.rs call these by global name from other
+        // chunks; if the bootstrap keeps them local, the arms silently no-op.
+        let env = WowLuaEnv::new().expect("env should initialize");
+        for patch_fn in [
+            "__wow_patch_character_select_nav_bar",
+            "__wow_patch_uiparent_onupdate_worklists",
+            "__wow_patch_map_canvas_scroll_container_methods",
+            "__wow_patch_fog_of_war_pin_methods",
+        ] {
+            let is_function: bool = env
+                .eval(&format!(r#"return type({patch_fn}) == "function""#))
+                .expect("patch global probe should run");
+            assert!(is_function, "{patch_fn} should be a global function");
+        }
+    }
 
     #[test]
     fn settings_canvas_registration_hides_frame_until_displayed() {

@@ -1379,24 +1379,15 @@ end
 
 __wow_patch_uiparent_onupdate_worklists()
 
-if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
-  hooksecurefunc(C_AddOns, "LoadAddOn", function(addonName)
-    if addonName == "Blizzard_CharacterSelectNavBar" then
-      __wow_patch_character_select_nav_bar()
-    elseif addonName == "Blizzard_UIParent"
-      or addonName == "Blizzard_UIParent_Mainline"
-      or addonName == "Blizzard_FrameXML"
-      or addonName == "Blizzard_ChatFrameBase" then
-      __wow_patch_uiparent_onupdate_worklists()
-    elseif addonName == "Blizzard_MapCanvas"
-      or addonName == "Blizzard_SharedMapDataProviders"
-      or addonName == "Blizzard_WorldMap"
-      or addonName == "Blizzard_BattlefieldMap" then
-      __wow_patch_map_canvas_scroll_container_methods()
-      __wow_patch_fog_of_war_pin_methods()
-    end
-  end)
-end
+-- hooksecurefunc(C_AddOns, "LoadAddOn", ...) is deliberately refused by the
+-- shared bootstrap, so these re-apply hooks run from Rust via
+-- apply_blizzard_post_load_patches (patch_runtime_surface_for_addon_load).
+-- Exposed as globals so post-load patch snippets (and the CreateFrame wrapper
+-- in frame_helper_defaults.rs) can reach them from other chunks.
+rawset(_G, "__wow_patch_character_select_nav_bar", __wow_patch_character_select_nav_bar)
+rawset(_G, "__wow_patch_uiparent_onupdate_worklists", __wow_patch_uiparent_onupdate_worklists)
+rawset(_G, "__wow_patch_map_canvas_scroll_container_methods", __wow_patch_map_canvas_scroll_container_methods)
+rawset(_G, "__wow_patch_fog_of_war_pin_methods", __wow_patch_fog_of_war_pin_methods)
 
 AUTOCOMPLETE_LIST = AUTOCOMPLETE_LIST or {}
 AUTOCOMPLETE_LIST.ADDFRIEND = AUTOCOMPLETE_LIST.ADDFRIEND or {}
