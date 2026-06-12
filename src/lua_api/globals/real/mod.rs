@@ -21,6 +21,7 @@ pub mod mouse_probes;
 pub mod net_stats;
 pub mod pet_bar;
 pub mod pet_stats;
+pub mod player_identity;
 pub mod player_probes;
 pub mod shapeshift;
 pub mod specialization_helpers;
