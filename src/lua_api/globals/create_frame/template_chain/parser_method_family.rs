@@ -647,4 +647,33 @@ mod tests {
             _ => panic!("expected self field string-arg method parser"),
         }
     }
+
+    #[test]
+    fn does_not_fuse_two_string_args_into_one() {
+        // MountListButtonTemplate's inline OnLoad. The generic single
+        // string-arg parser must not swallow this as one fused argument —
+        // that registered mount-list rows for an unmatchable click edge and
+        // broke real mouse clicks (selection never switched).
+        let parsed = parse_method_family(r#"self:RegisterForClicks("LeftButtonUp", "RightButtonUp")"#);
+
+        match parsed {
+            Some(FastHandlerRef::MethodWithStringArg { arg, .. }) => {
+                panic!("two-arg call fused into single string arg: {arg:?}")
+            }
+            _ => {}
+        }
+    }
+
+    #[test]
+    fn accepts_string_arg_containing_comma() {
+        let parsed = parse_method_family(r#"self:SetText("Hello, world")"#);
+
+        match parsed {
+            Some(FastHandlerRef::MethodWithStringArg {
+                method_name: "SetText",
+                arg: "Hello, world",
+            }) => {}
+            _ => panic!("expected comma inside one string literal to stay a single arg"),
+        }
+    }
 }

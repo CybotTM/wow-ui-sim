@@ -420,15 +420,19 @@ fn parse_string_literal_args(args: &str) -> Option<Vec<&str>> {
     }
     let mut values = Vec::new();
     for part in args.split(',') {
-        let part = part.trim();
-        let value = part.strip_prefix('"')?.strip_suffix('"')?;
-        values.push(value);
+        values.push(parse_single_string_literal(part.trim())?);
     }
     Some(values)
 }
 
 fn parse_single_string_literal(arg: &str) -> Option<&str> {
-    arg.strip_prefix('"')?.strip_suffix('"')
+    let value = arg.strip_prefix('"')?.strip_suffix('"')?;
+    // A quote inside the stripped value means `arg` was not one string
+    // literal (e.g. the two-arg list `"LeftButtonUp", "RightButtonUp"`).
+    // Fusing it would pass garbage to the method (mount-list rows ended up
+    // registered for a click edge that can never match). Reject so the
+    // multi-arg parsers or the compiled-Lua slow path handle the statement.
+    (!value.contains('"')).then_some(value)
 }
 
 fn parse_single_bool_literal(arg: &str) -> Option<bool> {
