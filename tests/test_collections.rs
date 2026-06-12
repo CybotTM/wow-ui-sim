@@ -223,6 +223,26 @@ fn pet_journal_get_pet_info_by_pet_id_has_strings_for_card_fields() {
 }
 
 #[test]
+fn pet_journal_get_pet_model_scene_info_returns_numeric_scene_ids() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local petID, speciesID = C_PetJournal.GetPetInfoByIndex(1)
+            local cardModelSceneID, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(speciesID)
+            if type(cardModelSceneID) ~= "number" then return "card_type=" .. type(cardModelSceneID) end
+            if type(loadoutModelSceneID) ~= "number" then return "loadout_type=" .. type(loadoutModelSceneID) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "PetJournal model scene info must be numeric for ModelScene:TransitionToModelSceneID: {result}"
+    );
+}
+
+#[test]
 fn pet_journal_get_pet_stats_reports_collected_pets_alive() {
     let env = env();
     let result: String = env

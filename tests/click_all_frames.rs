@@ -259,7 +259,7 @@ fn collect_click_errors(env: &WowLuaEnv, name: &str) -> Vec<String> {
 }
 
 fn is_known_collections_side_load_error(line: &str) -> bool {
-    line.contains("PetJournal:") || line.contains("HeirloomsJournal:")
+    line.contains("HeirloomsJournal:")
 }
 
 /// Click a frame by name, return errors. Skips if frame doesn't exist.
@@ -282,7 +282,7 @@ fn click_named(env: &WowLuaEnv, name: &str) -> Vec<String> {
 
 #[test]
 fn collections_micro_button_side_load_filter_keeps_unrelated_errors() {
-    assert!(is_known_collections_side_load_error(
+    assert!(!is_known_collections_side_load_error(
         "[CollectionsMicroButton] [OnLoad] PetJournal: pending surface gap"
     ));
     assert!(is_known_collections_side_load_error(

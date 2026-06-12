@@ -18,6 +18,8 @@ const PET_ATTACK_PER_LEVEL: i32 = 2;
 const BASE_PET_SPEED: i32 = 10;
 const UNKNOWN_PET_ABILITY_ICON: u32 = 134400;
 const PET_ABILITY_LEVELS: [i32; 3] = [1, 2, 4];
+const DEFAULT_PET_CARD_MODEL_SCENE_ID: i32 = 596;
+const DEFAULT_PET_LOADOUT_MODEL_SCENE_ID: i32 = 596;
 
 fn pet_get_num_pets(state: &mut LuaState) -> LuaResult<u32> {
     let st = borrow_state(state)?;
@@ -203,6 +205,19 @@ fn pet_get_info_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(push_pet_info_by_species_id(state, &pet))
 }
 
+fn pet_get_model_scene_info_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
+    let species_id = u32::from_stack(state, 1)?;
+    if find_pet_by_species_id(state, species_id).is_none() {
+        return Ok(0);
+    }
+
+    (
+        DEFAULT_PET_CARD_MODEL_SCENE_ID,
+        DEFAULT_PET_LOADOUT_MODEL_SCENE_ID,
+    )
+        .into_stack(state)
+}
+
 fn find_pet_by_stack_arg(state: &LuaState, index: i32) -> Option<PetInfoSnapshot> {
     match stack_val(state, index) {
         Val::Str(value) => {
@@ -358,10 +373,10 @@ fn register_pet_info_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
     .set_function("GetPetInfoByIndex", pet_get_info_by_index)?
     .set_function("GetPetInfoByPetID", pet_get_info_by_pet_id)?
     .set_function("GetPetInfoBySpeciesID", pet_get_info_by_species_id)?
-    .set_function("GetPetModelSceneInfoBySpeciesID", |state| {
-        state.push(Val::Nil);
-        Ok(1)
-    })
+    .set_function(
+        "GetPetModelSceneInfoBySpeciesID",
+        pet_get_model_scene_info_by_species_id,
+    )
 }
 
 fn register_pet_ability_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
