@@ -18,6 +18,11 @@ mod c_addons_runtime;
 
 const ADDON_VERSION_CHECK_KEY: &str = "__addon_version_check_enabled";
 pub(super) const GAME_RUNTIME_FOUNDATIONS: &[&str] = &[
+    // Blizzard_SharedXMLBase's TOC depends on Blizzard_ScriptErrors; unless it
+    // loads first, the recursive dependency walk re-enters the foundation
+    // chain mid-SharedXMLBase and runs Blizzard_SharedXML before
+    // SharedXMLBase's own files (FlagsUtil, MathUtil, CallbackRegistry).
+    "Blizzard_ScriptErrors",
     "Blizzard_SharedXMLBase",
     "Blizzard_Menu",
     "Blizzard_SharedXML",
