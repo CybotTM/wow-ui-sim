@@ -30,10 +30,14 @@ to run "after addon X loads" logic never installs — silently.
 - `dispatcher_surface` and `achievement_search_preview` were rewired through
   `apply_blizzard_post_load_patches` (`src/loader/addon.rs`), which fires for
   both startup and runtime loads and is the canonical per-addon post-load hook.
-- **Still dead**: `runtime_surface_bootstrap.lua` (~line 1383) hooks
-  `C_AddOns.LoadAddOn` for `Blizzard_CharacterSelectNavBar`, UIParent
-  worklists, and MapCanvas/FogOfWar pins. Some of those have partial
-  post-load-patch coverage; the nav-bar arm appears uncovered. Not yet fixed.
+- The third dead hook — `runtime_surface_bootstrap.lua` for
+  `Blizzard_CharacterSelectNavBar`, UIParent worklists, and MapCanvas/FogOfWar
+  pins — was rewired in `fa3c18300`: the `__wow_patch_*` functions are exposed
+  as globals and fired from `patch_runtime_surface_for_addon_load`. That commit
+  also fixed the CreateFrame wrapper in `frame_helper_defaults.rs`, which
+  called `__wow_patch_map_canvas_scroll_container_methods` by global name
+  while it was still chunk-local (nil). A guard test asserts the four globals
+  stay exposed.
 
 Rule of thumb: never use `hooksecurefunc(C_AddOns, "LoadAddOn", ...)` in
 simulator-owned Lua; add an arm to `apply_blizzard_post_load_patches` instead.
