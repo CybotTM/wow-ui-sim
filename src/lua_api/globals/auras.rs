@@ -696,10 +696,7 @@ fn write_aura_identity(state: &mut LuaState, t: Val, aura: &AuraInfo, unit: &str
     let source = create_string(state, source_unit);
     let empty_points = create_table(state);
     // Retail contract: dispelName is nilable — absent for non-dispellable auras.
-    let dispel = aura
-        .dispel_type
-        .as_deref()
-        .map(|d| create_string(state, d));
+    let dispel = aura.dispel_type.as_deref().map(|d| create_string(state, d));
 
     table_set(state, t, "name", name);
     table_set(state, t, "icon", Val::Num(aura.icon as f64));
