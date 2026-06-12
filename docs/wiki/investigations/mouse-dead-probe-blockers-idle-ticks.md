@@ -29,6 +29,8 @@ The default layout masked it because something keeps strata perpetually dirty th
 
 Fixed in commit `397742569`: `stable_timer_interval` quantizes the timer wait into fixed buckets (16/50/250/1000 ms), so the subscription identity survives successive updates (at most one stream recreation per bucket boundary; timers still fire within one tick of their deadline). Regression tests: `stable_timer_interval_uses_fixed_buckets`, `compute_tick_interval_is_stable_while_pending_timer_shrinks` (fails against the raw-delay code).
 
+**Deeper mechanism (commit `f82d53b55`):** interval churn was real but not sufficient — the starvation reproduced with stable intervals. `drop_stale_timer_tick` discards ticks older than `max(2×interval, 100ms)`; under sustained main-thread saturation (heavy draws plus input-driven redraws on perpetually-dirty strata) every tick arrives stale and **all** of them were dropped — OnUpdate and C_Timer dead while the app keeps drawing, and moving the mouse (each move forces a redraw when strata are dirty) sustains the saturation. Fixed by force-processing a stale tick whenever none was processed within a 250ms budget. Diagnose with `WOW_SIM_GUI_TRACE=1`: `tick dropped stale age=... dropped_total=...` lines, and `subscription tick interval=...` lines.
+
 Note: the FPS-display-freezes-with-ticks coupling (`update_fps_counter` only runs in `finish_timer_tick`) is still true and worth decoupling someday — a dead tick loop should read 0 FPS, not the last value.
 
 ### Cause 3 (fixed): renamed `.disabled` addon folders still loaded
