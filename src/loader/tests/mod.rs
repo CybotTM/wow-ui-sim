@@ -1,7 +1,6 @@
 //! Tests for the addon loader.
 
 mod account_store;
-mod toc_discovery;
 mod button_text;
 mod button_textures;
 mod lua_loading;
@@ -10,6 +9,7 @@ mod runtime_template_misc;
 mod runtime_template_parenting;
 mod runtime_template_xml;
 mod screen_selection;
+mod toc_discovery;
 mod xml_basics;
 mod xml_template_onload_order;
 

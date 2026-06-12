@@ -111,7 +111,8 @@ fn deepest_target_through_visible_children(
                 let Some(frame) = widgets.get(current_id) else {
                     continue;
                 };
-                if target_contains_point(widgets, current_id, pos) && accepts_frame(frame, current_id)
+                if target_contains_point(widgets, current_id, pos)
+                    && accepts_frame(frame, current_id)
                 {
                     return Some(current_id);
                 }

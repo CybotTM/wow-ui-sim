@@ -163,9 +163,7 @@ pub fn collect_hittable_frames(
     CollectedFrames {
         hittable: hittable
             .into_iter()
-            .map(|(id, strata, level, raise_order, r)| {
-                (id, (strata, level, raise_order, id), r)
-            })
+            .map(|(id, strata, level, raise_order, r)| (id, (strata, level, raise_order, id), r))
             .collect(),
     }
 }

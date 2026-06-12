@@ -37,11 +37,7 @@ impl HitGrid {
     /// `hittable` must be sorted lowest-strata-first (same order as
     /// `build_hittable_rects` produces), so reverse iteration yields the
     /// topmost frame.
-    pub fn new(
-        hittable: Vec<(u64, Rectangle, HitOrderKey)>,
-        screen_w: f32,
-        screen_h: f32,
-    ) -> Self {
+    pub fn new(hittable: Vec<(u64, Rectangle, HitOrderKey)>, screen_w: f32, screen_h: f32) -> Self {
         let cols = (screen_w / CELL_SIZE).ceil() as usize;
         let rows = (screen_h / CELL_SIZE).ceil() as usize;
         let cell_count = cols * rows;
@@ -130,7 +126,9 @@ impl HitGrid {
             for col in c0..=c1 {
                 let cell = &mut self.cells[row * self.cols + col];
                 let pos = cell.partition_point(|other| {
-                    keys.get(other).copied().is_some_and(|other_key| other_key <= key)
+                    keys.get(other)
+                        .copied()
+                        .is_some_and(|other_key| other_key <= key)
                 });
                 cell.insert(pos, id);
             }
@@ -181,13 +179,7 @@ mod tests {
         hittable
             .iter()
             .enumerate()
-            .map(|(i, &(id, r))| {
-                (
-                    id,
-                    r,
-                    (crate::widget::FrameStrata::Medium, i as i32, 0, id),
-                )
-            })
+            .map(|(i, &(id, r))| (id, r, (crate::widget::FrameStrata::Medium, i as i32, 0, id)))
             .collect()
     }
 

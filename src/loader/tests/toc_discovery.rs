@@ -18,7 +18,11 @@ fn find_toc_file_ignores_renamed_disabled_folder() {
     // left full-screen mouse-blocker frames up; real WoW refuses to load a
     // folder whose TOC stem doesn't match the folder name.
     let tmp = tempfile::tempdir().unwrap();
-    let dir = make_addon_dir(tmp.path(), "CoreBehaviorProbe.disabled", &["CoreBehaviorProbe.toc"]);
+    let dir = make_addon_dir(
+        tmp.path(),
+        "CoreBehaviorProbe.disabled",
+        &["CoreBehaviorProbe.toc"],
+    );
     assert_eq!(find_toc_file(&dir), None);
 }
 
@@ -33,10 +37,7 @@ fn find_toc_file_accepts_exact_match() {
 fn find_toc_file_scan_accepts_case_mismatch_and_flavor_suffix() {
     let tmp = tempfile::tempdir().unwrap();
     let dir = make_addon_dir(tmp.path(), "MyAddon", &["myaddon_standard.toc"]);
-    assert_eq!(
-        find_toc_file(&dir),
-        Some(dir.join("myaddon_standard.toc"))
-    );
+    assert_eq!(find_toc_file(&dir), Some(dir.join("myaddon_standard.toc")));
 }
 
 #[test]
