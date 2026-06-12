@@ -4,7 +4,20 @@
 //! needs enough state for startup UI paths until input settings are modeled.
 
 const MODIFIED_CLICK_DEFAULTS_LUA: &str = r#"
-local __wow_modified_clicks = __wow_modified_clicks or {}
+local __wow_modified_clicks = __wow_modified_clicks
+if type(__wow_modified_clicks) ~= "table" then
+    -- Same retail defaults the runtime surface bootstrap seeds; keep the two
+    -- installers agreeing on the shared state table.
+    __wow_modified_clicks = {
+        AUTOLOOTTOGGLE = "SHIFT",
+        CHATLINK = "SHIFT",
+        COMPAREITEMS = "SHIFT",
+        DRESSUP = "CTRL",
+        FOCUSCAST = "NONE",
+        SELFCAST = "ALT",
+    }
+    rawset(_G, "__wow_modified_clicks", __wow_modified_clicks)
+end
 if GetModifiedClick == nil then
     function GetModifiedClick(action)
         return __wow_modified_clicks[action] or "NONE"
@@ -40,9 +53,9 @@ mod tests {
         let result: String = env
             .eval(
                 r#"
-                if GetModifiedClick("SELFCAST") ~= "NONE" then return "default" end
-                SetModifiedClick("SELFCAST", "ALT")
-                if GetModifiedClick("SELFCAST") ~= "ALT" then return "updated" end
+                if GetModifiedClick("SELFCAST") ~= "ALT" then return "default" end
+                SetModifiedClick("SELFCAST", "CTRL")
+                if GetModifiedClick("SELFCAST") ~= "CTRL" then return "updated" end
                 SetModifiedClick("SELFCAST", nil)
                 if GetModifiedClick("SELFCAST") ~= "NONE" then return "nil_default" end
                 return "ok"
