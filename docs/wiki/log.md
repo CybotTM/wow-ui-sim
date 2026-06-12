@@ -1299,3 +1299,7 @@ Updated `investigations/display-size-ui-scale-events.md`. Moved the `DISPLAY_SIZ
 ## [2026-06-12] update | hit-grid ordered insertion (the core mouse-freeze fix)
 
 Updated `investigations/mouse-dead-probe-blockers-idle-ticks.md` with cause 4: full hit-grid rebuilds per hover transition (180-470ms each) saturated the main thread; the rebuilds were themselves a workaround for append-only HitGrid::insert breaking render order. Fixed with per-frame render-order keys + binary insertion, producer coverage for level/strata/raise changes, hover-time coalescing, and dev opt-level 1 (a7b131f65, telemetry 0c2668a3a).
+
+## [2026-06-12] create | Mount Journal clicks never switched selection
+
+Created `investigations/mount-journal-click-selection.md`. Real mouse clicks on mount rows fired OnMouseDown/OnMouseUp but never OnClick while `row:Click()` worked, because the startup-XML fast path's `parse_single_string_literal` stripped only the outer quotes — the generic MethodWithStringArg parser fused `RegisterForClicks("LeftButtonUp", "RightButtonUp")` into one garbage registration entry that no click edge can match. Fixed by rejecting interior quotes so multi-arg calls fall through to the dedicated parser. Added a `headless-click-probe mounts` panel (dotted-path frame resolution for anonymous ScrollBox rows + post-click `verify_lua`) and a `WOW_SIM_DEBUG_CLICK_DISPATCH=1` dispatch trace.
