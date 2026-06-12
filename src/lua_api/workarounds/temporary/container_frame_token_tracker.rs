@@ -48,7 +48,9 @@ if ContainerFrameSettingsManager.TokenTracker ~= nil and type(BackpackTokenFrame
 end
 
 if tokenUiLoaded then
-    if type(ContainerFrameSettingsManager.OnAddonLoaded) == "function" then
+    if ContainerFrameSettingsManager.TokenTracker == nil
+        and type(ContainerFrameSettingsManager.OnAddonLoaded) == "function"
+    then
         pcall(
             ContainerFrameSettingsManager.OnAddonLoaded,
             ContainerFrameSettingsManager,
