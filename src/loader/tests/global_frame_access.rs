@@ -76,8 +76,13 @@ fn test_global_overwritten_by_recreate() {
     assert_eq!(t.env.eval::<f64>("return F2_WIDTH").unwrap(), 200.0);
 }
 
+// Duplicate named CreateFrame keeps the replacement fresh instead of copying
+// Lua table fields from the previous global binding — copying would let stale
+// frame identity tokens dispatch replacement-frame methods through retired
+// widgets. See `duplicate_named_frame_gets_fresh_identity_and_fields` in
+// tests/globals_legacy.rs.
 #[test]
-fn test_recreated_named_parent_keeps_lua_child_field() {
+fn test_recreated_named_parent_drops_lua_child_field() {
     let (t, _) = load_test_lua(
         "test-g-recreate-parentkey",
         r#"
@@ -87,17 +92,22 @@ fn test_recreated_named_parent_keeps_lua_child_field() {
 
         local parent2 = CreateFrame("Frame", "RecreatedParent", UIParent)
 
-        CHILD_FIELD_PRESERVED = (parent2.Child == child)
-        CHILD_GLOBAL_MATCHES = (_G["RecreatedParent"].Child == _G["RecreatedParentChild"])
+        OLD_FIELD_KEPT = (parent1.Child == child)
+        CHILD_FIELD_FRESH = (parent2.Child == nil)
+        GLOBAL_IS_REPLACEMENT = (_G["RecreatedParent"] == parent2)
         "#,
     );
     t.assert_lua_true(
-        "return CHILD_FIELD_PRESERVED",
-        "recreated named parent should keep Lua child field assignments",
+        "return OLD_FIELD_KEPT",
+        "original frame should keep its own Lua child field",
     );
     t.assert_lua_true(
-        "return CHILD_GLOBAL_MATCHES",
-        "global recreated parent should still expose the child by Lua field",
+        "return CHILD_FIELD_FRESH",
+        "recreated named parent should not inherit Lua child field assignments",
+    );
+    t.assert_lua_true(
+        "return GLOBAL_IS_REPLACEMENT",
+        "global name should point at the replacement frame",
     );
 }
 
@@ -115,7 +125,7 @@ fn test_recreated_named_frame_retires_old_widget_and_reparents_children() {
 
         OLD_PARENT_HIDDEN = not oldParent:IsShown()
         CHILD_PARENT_IS_NEW = child:GetParent() == newParent
-        NEW_PARENT_HAS_CHILD = newParent.Child == child
+        NEW_PARENT_CHILD_FIELD_FRESH = newParent.Child == nil
         GLOBAL_IS_NEW_PARENT = _G.RecreatedVisibleParent == newParent
         "#,
     );
@@ -128,8 +138,8 @@ fn test_recreated_named_frame_retires_old_widget_and_reparents_children() {
         "children of the stale frame should be reparented to the replacement",
     );
     t.assert_lua_true(
-        "return NEW_PARENT_HAS_CHILD",
-        "replacement frame should keep parentKey-style child fields",
+        "return NEW_PARENT_CHILD_FIELD_FRESH",
+        "replacement frame should not inherit parentKey-style child fields",
     );
     t.assert_lua_true(
         "return GLOBAL_IS_NEW_PARENT",

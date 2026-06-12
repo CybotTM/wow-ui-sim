@@ -416,8 +416,15 @@ fn test_set_point_dirties_resolved_rect() {
         VALID_BEFORE = f:IsRectValid()
         f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 5, -5)
         VALID_AFTER = f:IsRectValid()
+        LEFT_AFTER = f:GetLeft()
     "#,
     );
     t.assert_lua_true("return VALID_BEFORE", "valid after resolution");
-    assert!(!t.env.eval::<bool>("return VALID_AFTER").unwrap());
+    // IsRectValid resolves a dirty anchored rect on demand, so the new
+    // SetPoint must already be reflected rather than reported as invalid.
+    t.assert_lua_true(
+        "return VALID_AFTER",
+        "IsRectValid should resolve the re-anchored rect",
+    );
+    assert_eq!(t.env.eval::<f64>("return LEFT_AFTER").unwrap(), 5.0);
 }
