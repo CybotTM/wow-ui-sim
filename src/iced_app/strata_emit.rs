@@ -163,9 +163,7 @@ pub(super) fn build_render_list(
         if !has_renderable_rect(registry, f, id) {
             continue;
         }
-        let rect = f.layout_rect.unwrap_or_else(|| {
-            crate::layout::compute_frame_rect(registry, id, screen_size.0, screen_size.1)
-        });
+        let rect = render_rect_for_frame(f, registry, id, screen_size);
         let clip_rect = resolve_clip_rect(id, registry);
         let eff_alpha = resolve_eff_alpha(f, registry);
         if eff_alpha <= 0.0 {
@@ -177,6 +175,56 @@ pub(super) fn build_render_list(
         list.push((id, rect, clip_rect, eff_alpha));
     }
     list
+}
+
+fn render_rect_for_frame(
+    frame: &crate::widget::Frame,
+    registry: &crate::widget::WidgetRegistry,
+    id: u64,
+    screen_size: (f32, f32),
+) -> crate::LayoutRect {
+    if matches!(frame.widget_type, WidgetType::Line)
+        && let Some(rect) = line_endpoint_bounds(frame, registry)
+    {
+        return rect;
+    }
+    frame.layout_rect.unwrap_or_else(|| {
+        crate::layout::compute_frame_rect(registry, id, screen_size.0, screen_size.1)
+    })
+}
+
+fn line_endpoint_bounds(
+    frame: &crate::widget::Frame,
+    registry: &crate::widget::WidgetRegistry,
+) -> Option<crate::LayoutRect> {
+    let start = resolve_line_endpoint_position(frame.line_start.as_ref()?, registry)?;
+    let end = resolve_line_endpoint_position(frame.line_end.as_ref()?, registry)?;
+    let min_x = start.0.min(end.0);
+    let min_y = start.1.min(end.1);
+    let max_x = start.0.max(end.0);
+    let max_y = start.1.max(end.1);
+    Some(crate::LayoutRect {
+        x: min_x,
+        y: min_y,
+        width: (max_x - min_x).max(1.0),
+        height: (max_y - min_y).max(1.0),
+    })
+}
+
+fn resolve_line_endpoint_position(
+    anchor: &crate::widget::LineAnchor,
+    registry: &crate::widget::WidgetRegistry,
+) -> Option<(f32, f32)> {
+    use super::layout::anchor_position;
+
+    let target_id = anchor.target_id?;
+    let rect = registry.get(target_id)?.layout_rect?;
+    let (ax, ay) = anchor_position(anchor.point, rect.x, rect.y, rect.width, rect.height);
+    let ui_scale = crate::render::texture::UI_SCALE;
+    Some((
+        (ax + anchor.x_offset) * ui_scale,
+        (ay - anchor.y_offset) * ui_scale,
+    ))
 }
 
 fn has_renderable_rect(

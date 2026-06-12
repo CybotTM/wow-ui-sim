@@ -11,6 +11,10 @@ fn render_list_keeps_line_with_endpoint_geometry_under_unanchored_edge_frame() {
 
     assert_eq!(render_list.len(), 1);
     assert_eq!(render_list[0].0, line_id);
+    assert!(
+        render_list[0].1.width > 0.0 && render_list[0].1.height > 0.0,
+        "line render rect should be derived from endpoints"
+    );
     assert_line_emits_quad(&registry, line_id);
 }
 
