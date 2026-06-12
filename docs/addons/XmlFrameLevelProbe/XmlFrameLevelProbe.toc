@@ -1,0 +1,6 @@
+## Interface: 120005
+## Title: XmlFrameLevelProbe
+## Notes: Captures retail XML frameLevel semantics (absolute vs parent-relative, fixed flags)
+## SavedVariables: XmlFrameLevelProbeDB
+XmlFrameLevelProbe.xml
+XmlFrameLevelProbe.lua

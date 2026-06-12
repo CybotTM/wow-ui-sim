@@ -1,0 +1,32 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Frame name="XmlFrameLevelProbeTemplate" frameLevel="10" virtual="true"/>
+
+    <Frame name="XmlFrameLevelProbeParent" parent="UIParent" frameLevel="50" hidden="true">
+        <Size x="10" y="10"/>
+    </Frame>
+
+    <!-- bare frameLevel: absolute or parent-relative offset? -->
+    <Frame name="XmlFrameLevelProbeChildPlain" parent="XmlFrameLevelProbeParent" frameLevel="10" hidden="true">
+        <Size x="10" y="10"/>
+    </Frame>
+
+    <!-- explicit fixedFrameLevel -->
+    <Frame name="XmlFrameLevelProbeChildFixed" parent="XmlFrameLevelProbeParent" frameLevel="10" fixedFrameLevel="true" hidden="true">
+        <Size x="10" y="10"/>
+    </Frame>
+
+    <!-- useParentLevel -->
+    <Frame name="XmlFrameLevelProbeChildUPL" parent="XmlFrameLevelProbeParent" useParentLevel="true" hidden="true">
+        <Size x="10" y="10"/>
+    </Frame>
+
+    <!-- no level attributes at all: baseline -->
+    <Frame name="XmlFrameLevelProbeChildBare" parent="XmlFrameLevelProbeParent" hidden="true">
+        <Size x="10" y="10"/>
+    </Frame>
+
+    <!-- frameLevel inherited from a template -->
+    <Frame name="XmlFrameLevelProbeChildTemplated" parent="XmlFrameLevelProbeParent" inherits="XmlFrameLevelProbeTemplate" hidden="true">
+        <Size x="10" y="10"/>
+    </Frame>
+</Ui>
