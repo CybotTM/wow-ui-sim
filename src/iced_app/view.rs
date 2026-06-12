@@ -284,9 +284,17 @@ impl App {
         let keyboard = keyboard_subscription();
 
         if let Some(interval) = self.compute_tick_interval() {
+            if crate::logging::gui_trace_enabled() {
+                crate::logging::eprintln_gui_trace(&format!(
+                    "subscription tick interval={interval:?}"
+                ));
+            }
             let timer = timer_subscription(interval);
             Subscription::batch([timer, keyboard])
         } else {
+            if crate::logging::gui_trace_enabled() {
+                crate::logging::eprintln_gui_trace("subscription tick interval=none");
+            }
             keyboard
         }
     }
