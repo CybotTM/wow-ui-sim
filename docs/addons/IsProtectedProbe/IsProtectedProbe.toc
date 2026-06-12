@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: IsProtectedProbe
+## Notes: Captures IsProtected propagation behavior
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: IsProtectedProbeDB
+
+IsProtectedProbe.lua

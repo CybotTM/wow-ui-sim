@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: Texture SetTexture Probe
+## Notes: Captures retail Texture:SetTexture nil/no-arg behavior.
+## Author: wow-ui-sim
+## Version: 1
+## SavedVariables: TextureSetTextureProbeDB
+
+TextureSetTextureProbe.lua

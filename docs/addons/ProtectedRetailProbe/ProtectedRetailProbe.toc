@@ -1,0 +1,9 @@
+## Interface: 120005
+## Title: Protected Retail Probe
+## Notes: Captures retail protected/forbidden frame behavior from addon scope.
+## Author: wow-ui-sim
+## Version: 1
+## SavedVariables: ProtectedRetailProbeDB
+
+ProtectedRetailProbe.xml
+ProtectedRetailProbe.lua
