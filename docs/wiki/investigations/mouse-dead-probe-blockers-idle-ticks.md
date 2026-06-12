@@ -33,6 +33,10 @@ Fixed in commit `397742569`: `stable_timer_interval` quantizes the timer wait in
 
 Note: the FPS-display-freezes-with-ticks coupling (`update_fps_counter` only runs in `finish_timer_tick`) is still true and worth decoupling someday — a dead tick loop should read 0 FPS, not the last value.
 
+### Cause 4 (fixed, the core): full hit-grid rebuilds per hover transition
+
+The WIP full-rebuild-on-change in `apply_hit_grid_changes` cost 180-470ms per hover transition with a full addon set (~200K widgets, debug build); mouse motion and grid-dirtying ticks saturated the main thread completely. The full rebuild itself was a workaround for the REAL staleness bug: `HitGrid::insert` was append-only while `topmost_matching_at` relies on render order, so every incremental re-insert shadowed all overlapping frames (wrong hover/click targets). Fixed in `a7b131f65`: per-frame render-order key `(strata, frame_level, raise_order, id)` with binary insertion; `SetFrameLevel`/`SetFrameStrata`/`Raise`/`Lower` now queue re-inserts (their key components changed); hover transitions coalesce grid changes into the next `hit_test`; dev profile uses `opt-level = 1`. Hover latency: 230ms → 13-32ms. Draw stalls >500ms now always log a stage breakdown (`0c2668a3a`).
+
 ### Cause 3 (fixed): renamed `.disabled` addon folders still loaded
 
 `find_toc_file`'s last-resort scan accepted any `.toc` in the folder, so `CoreBehaviorProbe.disabled/CoreBehaviorProbe.toc` loaded. Real WoW only loads a TOC whose stem is the folder name plus an optional `_`/`-` flavor suffix — that rule is exactly what makes rename-to-disable work. Fixed in commit `b580ea005` (`toc_stem_matches_folder`, tests in `src/loader/tests/toc_discovery.rs`); case-mismatch and flavor-suffix fallbacks still work.

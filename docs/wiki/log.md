@@ -1276,3 +1276,15 @@ Created `investigations/mouse-dead-probe-blockers-idle-ticks.md`. CoreBehaviorPr
 ## [2026-06-11] update | tick-subscription churn root cause fixed
 
 Updated `investigations/mouse-dead-probe-blockers-idle-ticks.md`: the idle timer stall was subscription churn — compute_tick_interval returned the raw shrinking remaining-time of the next C_Timer, changing the iced time::every identity on every update, so continuous input (mouse moves) recreated the tick stream before it could fire. Fixed in 397742569 with quantized interval buckets.
+
+## [2026-06-12] create | DISPLAY_SIZE_CHANGED / UI_SCALE_CHANGED firing conditions
+
+Created `investigations/display-size-ui-scale-events.md`. A live retail probe (`docs/addons/ScaleEventProbe`, 12.0.5.67823) disproved the sim's "resize never fires UI_SCALE_CHANGED" assumption: retail fires the two events as an ordered pair (display-first) on every display/scale recalculation — drag resize emits repeated ordered pairs during the drag, maximize/restore and resolution/fullscreen transitions can emit double-pairs even when dimensions are unchanged, scale slider and useUiScale changes also emit the pair, and startup fires the pair twice pre-PLAYER_LOGIN. Events fire before CVAR_UPDATE with GetEffectiveScale() already updated. Fixed `set_screen_size` to fire the pair and inverted the resize regression test to assert order. Startup ordering (sim fires post-login) and no-op dedupe remain divergent.
+
+## [2026-06-12] update | Startup display/scale event ordering matched to retail
+
+Updated `investigations/display-size-ui-scale-events.md`. Moved the `DISPLAY_SIZE_CHANGED`/`UI_SCALE_CHANGED` pair from `fire_post_login_events` into `fire_login_sequence` (after `VARIABLES_LOADED`, before `PLAYER_LOGIN`) — retail fires both pairs pre-login and none post-login. With the `set_screen_size` pair during GUI canvas startup this yields two pre-login pairs, matching the probe capture. Same-size window transitions reclassified as an observability limit (iced exposes no OS window-state signal). Verified: lib failure set unchanged, `lua-errors` clean with and without addons; new regression test pins pair-before-login ordering.
+
+## [2026-06-12] update | hit-grid ordered insertion (the core mouse-freeze fix)
+
+Updated `investigations/mouse-dead-probe-blockers-idle-ticks.md` with cause 4: full hit-grid rebuilds per hover transition (180-470ms each) saturated the main thread; the rebuilds were themselves a workaround for append-only HitGrid::insert breaking render order. Fixed with per-frame render-order keys + binary insertion, producer coverage for level/strata/raise changes, hover-time coalescing, and dev opt-level 1 (a7b131f65, telemetry 0c2668a3a).
