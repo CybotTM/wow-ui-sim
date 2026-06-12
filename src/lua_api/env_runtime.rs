@@ -82,7 +82,11 @@ impl WowLuaEnv {
             update_screen_widgets_for_dimensions(&mut state, width, height);
         }
         install_screen_size_globals(self, width, height);
+        // Retail fires these as an ordered pair on every display/scale
+        // recalculation (resize, scale slider, resolution change) — never one
+        // alone. Ground truth: docs/wiki/investigations/display-size-ui-scale-events.md
         let _ = self.fire_event("DISPLAY_SIZE_CHANGED");
+        let _ = self.fire_event("UI_SCALE_CHANGED");
     }
 
     /// Select which UI surface should be loaded.

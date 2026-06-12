@@ -306,6 +306,13 @@ fn fire_login_sequence(env: &WowLuaEnv, skip_is_logged_in: bool) {
 
     fire("VARIABLES_LOADED");
 
+    // Retail fires the display/scale pair before PLAYER_LOGIN (live probe:
+    // docs/wiki/investigations/display-size-ui-scale-events.md). The first
+    // pre-login pair comes from set_screen_size during GUI canvas startup;
+    // this is the second, after variables load and the UI scale applies.
+    fire("DISPLAY_SIZE_CHANGED");
+    fire("UI_SCALE_CHANGED");
+
     // In WoW, IsLoggedIn() returns true once the player is logged in.
     // AceAddon-3.0 checks IsLoggedIn() before enabling addons from its queue.
     if !skip_is_logged_in {
@@ -485,8 +492,10 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     fire("PLAYER_CAN_GLIDE_CHANGED");
     fire("PLAYER_IS_GLIDING_CHANGED");
     fire("UPDATE_BINDINGS");
-    fire("DISPLAY_SIZE_CHANGED");
-    fire("UI_SCALE_CHANGED");
+    // Retail does not fire DISPLAY_SIZE_CHANGED / UI_SCALE_CHANGED after
+    // PLAYER_LOGIN at startup — both pairs fire pre-login (see
+    // docs/wiki/investigations/display-size-ui-scale-events.md). The pair is
+    // fired in fire_login_sequence and by set_screen_size instead.
     fire("UPDATE_CHAT_WINDOWS");
     // Drives LFDQueueFrame_SetType, which shows the Specific/Follower
     // sub-frame whose OnShow=LFDQueueFrame_Update populates the dungeon

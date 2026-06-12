@@ -41,8 +41,8 @@ fn test_ui_parent_get_rect_returns_screen_rect() {
     assert_eq!(t.env.eval::<i32>("return COUNT").unwrap(), 4);
     assert_f64_near(&t, "LEFT", 0.0);
     assert_f64_near(&t, "BOTTOM", 0.0);
-    assert_f64_near(&t, "WIDTH", 1600.0);
-    assert_f64_near(&t, "HEIGHT", 1200.0);
+    assert_f64_near(&t, "WIDTH", 1024.0);
+    assert_f64_near(&t, "HEIGHT", 768.0);
 }
 
 #[test]

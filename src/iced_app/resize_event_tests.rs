@@ -34,25 +34,24 @@ fn build_test_app() -> App {
     })
 }
 
+// Retail (12.0.5, live probe via docs/addons/ScaleEventProbe) fires
+// DISPLAY_SIZE_CHANGED then UI_SCALE_CHANGED as an ordered pair on every
+// display/scale recalculation; neither event ever fires alone. See
+// docs/wiki/investigations/display-size-ui-scale-events.md.
 #[test]
-fn resizing_window_fires_display_size_changed_without_ui_scale_changed() {
+fn resizing_window_fires_display_size_changed_then_ui_scale_changed() {
     let app = build_test_app();
     app.env.borrow().set_screen_size(800.0, 600.0);
     app.env
         .borrow()
         .exec(
             r#"
-            __display_size_changed = 0
-            __ui_scale_changed = 0
+            __event_order = {}
             local frame = CreateFrame("Frame")
             frame:RegisterEvent("DISPLAY_SIZE_CHANGED")
             frame:RegisterEvent("UI_SCALE_CHANGED")
             frame:SetScript("OnEvent", function(_, event)
-                if event == "DISPLAY_SIZE_CHANGED" then
-                    __display_size_changed = __display_size_changed + 1
-                elseif event == "UI_SCALE_CHANGED" then
-                    __ui_scale_changed = __ui_scale_changed + 1
-                end
+                table.insert(__event_order, event)
             end)
             "#,
         )
@@ -60,17 +59,49 @@ fn resizing_window_fires_display_size_changed_without_ui_scale_changed() {
 
     app.sync_screen_size_to_state(Size::new(1024.0, 768.0));
 
-    let (display_count, scale_count): (f64, f64) = app
+    let order: String = app
         .env
         .borrow()
-        .eval("return __display_size_changed, __ui_scale_changed")
-        .expect("event counters should be readable");
+        .eval("return table.concat(__event_order, ',')")
+        .expect("event order should be readable");
     assert_eq!(
-        display_count, 1.0,
-        "window resize should fire display event"
+        order, "DISPLAY_SIZE_CHANGED,UI_SCALE_CHANGED",
+        "window resize should fire the retail event pair, display-first"
     );
-    assert_eq!(
-        scale_count, 0.0,
-        "window resize should not imply scale event"
+}
+
+// Retail fires the display/scale pair before PLAYER_LOGIN and never after it
+// at startup (live probe, see the wiki investigation page).
+#[test]
+fn startup_fires_display_scale_pair_before_player_login_not_after() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_mode(ScreenKind::Game);
+    env.exec(
+        r#"
+        __startup_seq = {}
+        local frame = CreateFrame("Frame")
+        frame:RegisterEvent("DISPLAY_SIZE_CHANGED")
+        frame:RegisterEvent("UI_SCALE_CHANGED")
+        frame:RegisterEvent("PLAYER_LOGIN")
+        frame:SetScript("OnEvent", function(_, event)
+            table.insert(__startup_seq, event)
+        end)
+        "#,
+    )
+    .expect("startup sequence recorder should install");
+
+    crate::startup::fire_startup_events_headless(&env);
+
+    let seq: String = env
+        .eval("return table.concat(__startup_seq, ',')")
+        .expect("startup sequence should be readable");
+    assert!(
+        seq.contains("DISPLAY_SIZE_CHANGED,UI_SCALE_CHANGED,PLAYER_LOGIN"),
+        "pair should fire immediately before PLAYER_LOGIN, got: {seq}"
+    );
+    let after_login = seq.split("PLAYER_LOGIN").nth(1).unwrap_or("");
+    assert!(
+        !after_login.contains("DISPLAY_SIZE_CHANGED") && !after_login.contains("UI_SCALE_CHANGED"),
+        "pair must not fire after PLAYER_LOGIN at startup, got: {seq}"
     );
 }

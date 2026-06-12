@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: ScaleEventProbe
+## Notes: Logs DISPLAY_SIZE_CHANGED / UI_SCALE_CHANGED firing conditions
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: ScaleEventProbeDB
+
+ScaleEventProbe.lua
