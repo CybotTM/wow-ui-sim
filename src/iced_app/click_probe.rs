@@ -16,6 +16,10 @@ use crate::saved_variables::SavedVariablesManager;
 
 #[derive(Debug, Clone, Copy)]
 pub struct NamedClick<'a> {
+    /// Frame to click. Either a global frame name, or a dotted path whose
+    /// first segment is a global frame name and each later segment is a
+    /// parentKey (`children_keys`) lookup or a 1-based `#N` child index,
+    /// e.g. `MountJournal.ScrollBox.ScrollTarget.#2`.
     pub frame_name: &'a str,
 }
 
@@ -25,6 +29,7 @@ pub fn run_headless_named_click_probe(
     screen_size: Size,
     setup_lua: &str,
     clicks: &[NamedClick<'_>],
+    verify_lua: Option<&str>,
 ) -> Result<(), String> {
     install_boot_params(env, saved_vars);
     let (mut app, _) = App::boot();
@@ -56,6 +61,15 @@ pub fn run_headless_named_click_probe(
         );
     }
 
+    if let Some(verify_lua) = verify_lua {
+        let _ = app.update(Message::ProcessTimers(Instant::now()));
+        app.env
+            .borrow()
+            .exec(verify_lua)
+            .map_err(|error| format!("verify Lua failed: {error}"))?;
+        eprintln!("[headless-click-probe] verify Lua passed");
+    }
+
     Ok(())
 }
 
@@ -70,6 +84,7 @@ fn click_named_frame(app: &mut App, screen_size: Size, frame_name: &str) -> Resu
     rebuild_hittable_cache(app, screen_size);
     let point = named_frame_center(app, frame_name)?;
     let _ = app.update(Message::CanvasEvent(CanvasMessage::MouseMove(point)));
+    log_hovered_frame(app, frame_name, point);
     rebuild_hittable_cache(app, screen_size);
     let _ = app.update(Message::CanvasEvent(CanvasMessage::MouseDown(point)));
     rebuild_hittable_cache(app, screen_size);
@@ -77,10 +92,63 @@ fn click_named_frame(app: &mut App, screen_size: Size, frame_name: &str) -> Resu
     Ok(())
 }
 
+fn log_hovered_frame(app: &App, frame_name: &str, point: iced::Point) {
+    let env = app.env.borrow();
+    let state = env.state().borrow();
+    let hovered = state.hovered_frame;
+    let label = hovered
+        .and_then(|id| state.widgets.get(id))
+        .map(|frame| {
+            format!(
+                "{} (type={:?} level={} parent_key={:?})",
+                frame.name.as_deref().unwrap_or("<anon>"),
+                frame.widget_type,
+                frame.frame_level,
+                frame.parent_key,
+            )
+        })
+        .unwrap_or_else(|| "<none>".to_string());
+    eprintln!(
+        "[headless-click-probe] hover at ({:.1}, {:.1}) targeting {frame_name}: hovered={:?} {label}",
+        point.x, point.y, hovered
+    );
+}
+
 fn named_frame_center(app: &App, frame_name: &str) -> Result<iced::Point, String> {
     let env = app.env.borrow();
     let state = env.state().borrow();
-    let frame_id = state
+    let frame_id = resolve_frame_path(&state, frame_name)?;
+    let frame = state
+        .widgets
+        .get(frame_id)
+        .expect("selected frame should exist");
+    let rect = frame
+        .layout_rect
+        .ok_or_else(|| format!("frame has no layout rect: {frame_name}"))?;
+    Ok(iced::Point::new(
+        (rect.x + rect.width / 2.0) * UI_SCALE,
+        (rect.y + rect.height / 2.0) * UI_SCALE,
+    ))
+}
+
+fn resolve_frame_path(
+    state: &crate::lua_api::state::SimState,
+    path: &str,
+) -> Result<u64, String> {
+    let mut segments = path.split('.');
+    let root_name = segments.next().expect("split yields at least one segment");
+    let mut frame_id = find_global_frame(state, root_name)?;
+    for segment in segments {
+        frame_id = resolve_child_segment(state, frame_id, segment, path)?;
+    }
+    Ok(frame_id)
+}
+
+fn find_global_frame(
+    state: &crate::lua_api::state::SimState,
+    frame_name: &str,
+) -> Result<u64, String> {
+    state
         .widgets
         .iter_ids()
         .filter(|id| {
@@ -93,18 +161,36 @@ fn named_frame_center(app: &App, frame_name: &str) -> Result<iced::Point, String
             let frame = state.widgets.get(*id).expect("filtered frame should exist");
             (frame.visible, frame.layout_rect.is_some(), *id)
         })
-        .ok_or_else(|| format!("frame not found: {frame_name}"))?;
-    let frame = state
+        .ok_or_else(|| format!("frame not found: {frame_name}"))
+}
+
+fn resolve_child_segment(
+    state: &crate::lua_api::state::SimState,
+    parent_id: u64,
+    segment: &str,
+    path: &str,
+) -> Result<u64, String> {
+    let parent = state
         .widgets
-        .get(frame_id)
-        .expect("selected frame should exist");
-    let rect = frame
-        .layout_rect
-        .ok_or_else(|| format!("frame has no layout rect: {frame_name}"))?;
-    Ok(iced::Point::new(
-        (rect.x + rect.width / 2.0) * UI_SCALE,
-        (rect.y + rect.height / 2.0) * UI_SCALE,
-    ))
+        .get(parent_id)
+        .ok_or_else(|| format!("frame path parent missing: {path}"))?;
+    if let Some(index) = segment.strip_prefix('#') {
+        let index: usize = index
+            .parse()
+            .ok()
+            .filter(|index| *index >= 1)
+            .ok_or_else(|| format!("invalid 1-based child index '{segment}' in frame path: {path}"))?;
+        return parent
+            .children
+            .get(index - 1)
+            .copied()
+            .ok_or_else(|| format!("child {segment} out of range in frame path: {path}"));
+    }
+    parent
+        .children_keys
+        .get(segment)
+        .copied()
+        .ok_or_else(|| format!("parentKey '{segment}' not found in frame path: {path}"))
 }
 
 fn rebuild_hittable_cache(app: &App, screen_size: Size) {

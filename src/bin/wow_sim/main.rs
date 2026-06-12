@@ -132,7 +132,7 @@ enum Commands {
     #[cfg(feature = "gui")]
     #[command(hide = true)]
     HeadlessClickProbe {
-        #[arg(value_parser = ["achievements", "talents"])]
+        #[arg(value_parser = ["achievements", "talents", "mounts"])]
         panel: String,
         #[arg(long, default_value_t = 1024)]
         width: u32,

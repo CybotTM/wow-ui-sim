@@ -36,6 +36,7 @@ pub(super) fn dispatch_headless_click_probe(
         iced::Size::new(width as f32, height as f32),
         plan.setup_lua,
         plan.clicks,
+        plan.verify_lua,
     )
     .map_err(Box::<dyn std::error::Error>::from)
 }
@@ -43,6 +44,7 @@ pub(super) fn dispatch_headless_click_probe(
 struct HeadlessClickProbePlan<'a> {
     setup_lua: &'a str,
     clicks: &'a [wow_ui_sim::iced_app::NamedClick<'a>],
+    verify_lua: Option<&'a str>,
 }
 
 fn headless_click_probe_plan(
@@ -51,6 +53,7 @@ fn headless_click_probe_plan(
     match panel {
         "achievements" => Ok(achievements_click_probe_plan()),
         "talents" => Ok(talents_click_probe_plan()),
+        "mounts" => Ok(mounts_click_probe_plan()),
         _ => Err(format!("unknown headless click probe panel: {panel}").into()),
     }
 }
@@ -118,6 +121,48 @@ fn achievements_click_probe_plan() -> HeadlessClickProbePlan<'static> {
                 frame_name: "AchievementFrameTab1",
             },
         ],
+        verify_lua: None,
+    }
+}
+
+fn mounts_click_probe_plan() -> HeadlessClickProbePlan<'static> {
+    HeadlessClickProbePlan {
+        setup_lua: r#"
+            C_AddOns.LoadAddOn("Blizzard_Collections")
+            ToggleCollectionsJournal(1)
+            if not MountJournal or not MountJournal:IsShown() then
+                error("MountJournal did not open")
+            end
+            local row = MountJournal.ScrollBox:GetFrames()[2]
+            if not row or not row.mountID then
+                error("mount list row 2 missing or has no mountID")
+            end
+            __mount_probe_target_id = row.mountID
+            if MountJournal.selectedMountID == __mount_probe_target_id then
+                error("mount list row 2 is already selected; probe needs a selection change")
+            end
+            __mount_probe_log = {}
+            for _, script in ipairs({ "OnMouseDown", "OnMouseUp", "OnClick" }) do
+                row:HookScript(script, function(_, button)
+                    table.insert(__mount_probe_log, script .. ":" .. tostring(button))
+                end)
+            end
+        "#,
+        clicks: &[wow_ui_sim::iced_app::NamedClick {
+            frame_name: "MountJournal.ScrollBox.ScrollTarget.#2",
+        }],
+        verify_lua: Some(
+            r#"
+            if MountJournal.selectedMountID ~= __mount_probe_target_id then
+                error(string.format(
+                    "mount selection did not switch: selected=%s want=%s row_scripts=[%s]",
+                    tostring(MountJournal.selectedMountID),
+                    tostring(__mount_probe_target_id),
+                    table.concat(__mount_probe_log, ",")
+                ))
+            end
+        "#,
+        ),
     }
 }
 
@@ -140,6 +185,7 @@ fn talents_click_probe_plan() -> HeadlessClickProbePlan<'static> {
                 frame_name: "PlayerTalentFrameTab1",
             },
         ],
+        verify_lua: None,
     }
 }
 

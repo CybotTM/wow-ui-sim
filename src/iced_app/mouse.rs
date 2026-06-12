@@ -277,6 +277,7 @@ impl App {
         }
 
         let clicks_on_up = self.frame_clicks_on_edge(frame_id, "LeftButton", false);
+        self.log_click_dispatch_if_enabled(frame_id, clicks_on_up);
         let env = self.env.borrow();
         let button_val = env.lua_string("LeftButton");
 
@@ -300,6 +301,24 @@ impl App {
 
     fn cursor_holds_item(&self) -> bool {
         self.env.borrow().state().borrow().cursor_item.is_some()
+    }
+
+    /// Diagnostic trace for why a left-click did or didn't fire OnClick.
+    /// Enable with WOW_SIM_DEBUG_CLICK_DISPATCH=1.
+    fn log_click_dispatch_if_enabled(&self, frame_id: u64, clicks_on_up: bool) {
+        if std::env::var_os("WOW_SIM_DEBUG_CLICK_DISPATCH").is_none() {
+            return;
+        }
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        let registered = state
+            .widgets
+            .get(frame_id)
+            .map(|frame| frame.registered_click_buttons.clone());
+        eprintln!(
+            "[click-dispatch] release frame={frame_id} mouse_down_frame={:?} clicks_on_up={clicks_on_up} registered={registered:?}",
+            self.mouse_down_frame
+        );
     }
 
     fn fire_left_click_sequence(
