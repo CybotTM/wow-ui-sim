@@ -60,6 +60,12 @@ pub struct Frame {
     /// When set, propagate_strata_level uses parent_level + offset instead
     /// of the default parent_level + 1.
     pub frame_level_offset: Option<i32>,
+    /// Whether `useParentLevel`/`SetUsingParentLevel(true)` was explicitly
+    /// requested. This is what `IsUsingParentLevel()` reports — distinct from
+    /// merely being non-fixed: a bare XML `frameLevel` is non-fixed (it shifts
+    /// with parent level changes) yet reports `IsUsingParentLevel() == false`
+    /// (verified against retail 12.0.5 via XmlFrameLevelProbe).
+    pub uses_parent_level: bool,
     /// Frame strata (major draw order).
     pub frame_strata: FrameStrata,
     /// Whether frame strata was explicitly set (not inherited from parent).

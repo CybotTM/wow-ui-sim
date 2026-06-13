@@ -13,7 +13,7 @@ fn test_frame_level_methods_follow_parent_level_and_raise_state() {
 
         ParentLevelFrame:SetFrameLevel(10)
 
-        assert(ChildLevelFrame:IsUsingParentLevel(), "child should inherit parent level by default")
+        assert(not ChildLevelFrame:IsUsingParentLevel(), "a default child tracks parent level (+1) but does NOT report IsUsingParentLevel (verified vs retail 12.0.5 via XmlFrameLevelProbe childBare)")
         assert(ChildLevelFrame:GetFrameLevel() == 11, "child should inherit parent level plus default offset")
         assert(GrandchildLevelFrame:GetFrameLevel() == 12, "grandchild should inherit recursively")
         assert(ParentLevelFrame:GetHighestFrameLevel() == 10, "default highest level should use self")

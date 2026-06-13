@@ -41,7 +41,10 @@ pub fn apply_xml_frame_level(
         return;
     }
     if let Some(level) = frame_level.level {
-        set_xml_frame_level(state, frame_id, level, frame_level.fixed.unwrap_or(true));
+        // Real client (XmlFrameLevelProbe, 12.0.5): a bare XML `frameLevel` is
+        // an absolute level that is NOT fixed — it shifts with parent level
+        // changes. Only an explicit `fixedFrameLevel="true"` pins it.
+        set_xml_frame_level(state, frame_id, level, frame_level.fixed.unwrap_or(false));
     }
 }
 
@@ -131,18 +134,23 @@ fn set_fixed_xml_frame_level(sim: &mut SimState, frame_id: u64, level: i32) {
     if let Some(frame) = sim.widgets.get_mut_visual(frame_id) {
         frame.frame_level_offset = None;
         frame.has_fixed_frame_level = true;
+        frame.uses_parent_level = false;
         frame.frame_level = level;
     }
 }
 
 fn set_parent_relative_xml_frame_level(sim: &mut SimState, frame_id: u64, level: i32) {
-    let parent_level = parent_frame_level(sim, frame_id);
+    // The XML `frameLevel` value is the absolute level (real client). The frame
+    // still tracks its parent: later parent level changes shift it by the
+    // parent's delta, which the propagation pass applies as
+    // `parent_level + frame_level_offset`. So the stored offset is the gap
+    // captured now: (absolute level - parent level at this moment).
+    let parent_level = parent_frame_level(sim, frame_id).unwrap_or(0);
     if let Some(frame) = sim.widgets.get_mut_visual(frame_id) {
-        frame.frame_level_offset = Some(level);
         frame.has_fixed_frame_level = false;
-        frame.frame_level = parent_level
-            .map(|parent_level| parent_level.saturating_add(level))
-            .unwrap_or(level);
+        frame.uses_parent_level = false;
+        frame.frame_level = level;
+        frame.frame_level_offset = Some(level - parent_level);
     }
 }
 
@@ -153,6 +161,7 @@ fn set_xml_frame_level_to_parent(state: &Rc<RefCell<SimState>>, frame_id: u64) {
     if let Some(frame) = sim.widgets.get_mut_visual(frame_id) {
         frame.frame_level_offset = Some(0);
         frame.has_fixed_frame_level = false;
+        frame.uses_parent_level = true;
         if let Some(parent_level) = parent_level {
             frame.frame_level = parent_level;
         }

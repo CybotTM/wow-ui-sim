@@ -72,10 +72,13 @@ pub fn get_raised_frame_level(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn is_using_parent_level(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    // IsUsingParentLevel is only true when useParentLevel / SetUsingParentLevel
+    // was explicitly requested — NOT for every non-fixed frame. A bare XML
+    // frameLevel is non-fixed yet reports false (XmlFrameLevelProbe, 12.0.5).
     let val = borrow_state(state)?
         .widgets
         .get(id)
-        .map(|f| !f.has_fixed_frame_level)
+        .map(|f| f.uses_parent_level)
         .unwrap_or(false);
     state.push(Val::Bool(val));
     Ok(1)
@@ -89,6 +92,10 @@ pub fn set_using_parent_level(state: &mut LuaState) -> LuaResult<u32> {
     let inherited_level = inherited_parent_level(&sim.widgets, id);
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.has_fixed_frame_level = !using_parent_level;
+        // uses_parent_level is the explicit flag IsUsingParentLevel() reports —
+        // set it only here and via XML useParentLevel, NOT for every non-fixed
+        // frame (a bare frameLevel is non-fixed yet reports false).
+        frame.uses_parent_level = using_parent_level;
         if let Some(level) = inherited_level.filter(|_| using_parent_level) {
             frame.frame_level = level;
         }

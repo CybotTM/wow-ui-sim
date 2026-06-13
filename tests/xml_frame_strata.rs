@@ -133,6 +133,9 @@ fn test_xml_frame_level_uses_parent_relative_offset() {
         }
     }
 
+    // Ground truth (XmlFrameLevelProbe, retail 12.0.5): a bare XML
+    // `frameLevel` is the ABSOLUTE level (10), not a parent-relative offset,
+    // and the frame does NOT report IsUsingParentLevel.
     let (parent_level, child_level, child_uses_parent): (i32, i32, bool) = env
         .eval(
             r#"
@@ -140,9 +143,16 @@ fn test_xml_frame_level_uses_parent_relative_offset() {
             "#,
         )
         .unwrap();
-    assert_eq!(child_level - parent_level, 10);
-    assert!(child_uses_parent);
+    assert_eq!(parent_level, 50);
+    assert_eq!(
+        child_level, 10,
+        "bare XML frameLevel is absolute, not parent + offset"
+    );
+    assert!(!child_uses_parent);
 
+    // It is still non-fixed: a later parent level change shifts the child by
+    // the parent's delta (probe: parent 50->60 moved childPlain 10->20). Here
+    // parent 50->300 is +250, so the child's absolute 10 becomes 260.
     let updated_child_level: i32 = env
         .eval(
             r#"
@@ -151,7 +161,7 @@ fn test_xml_frame_level_uses_parent_relative_offset() {
             "#,
         )
         .unwrap();
-    assert_eq!(updated_child_level, 310);
+    assert_eq!(updated_child_level, 260);
 }
 
 #[test]
@@ -186,6 +196,9 @@ fn test_xml_fixed_frame_level_stops_parent_propagation_after_initial_offset() {
         }
     }
 
+    // Ground truth (XmlFrameLevelProbe childFixed): absolute level 10, fixed,
+    // not using parent level. Parent is 50, so the gap is -40 — the prior
+    // `== 10` offset assertion was the disproven April model.
     let (parent_level, child_level, child_uses_parent): (i32, i32, bool) = env
         .eval(
             r#"
@@ -193,7 +206,8 @@ fn test_xml_fixed_frame_level_stops_parent_propagation_after_initial_offset() {
             "#,
         )
         .unwrap();
-    assert_eq!(child_level - parent_level, 10);
+    assert_eq!(parent_level, 50);
+    assert_eq!(child_level, 10, "fixed XML frameLevel is absolute");
     assert!(!child_uses_parent);
 
     let (child_before, child_after): (i32, i32) = env
@@ -260,6 +274,9 @@ fn test_xml_frame_level_inherited_from_template_is_parent_relative_offset() {
         }
     }
 
+    // Ground truth (XmlFrameLevelProbe childTemplated): a frameLevel inherited
+    // from a template behaves like an instance bare frameLevel — absolute 10,
+    // non-fixed, not using parent level. Parent is 80, so the gap is -70.
     let (parent_level, child_level, child_uses_parent): (i32, i32, bool) = env
         .eval(
             r#"
@@ -267,8 +284,12 @@ fn test_xml_frame_level_inherited_from_template_is_parent_relative_offset() {
             "#,
         )
         .unwrap();
-    assert_eq!(child_level - parent_level, 10);
-    assert!(child_uses_parent);
+    assert_eq!(parent_level, 80);
+    assert_eq!(
+        child_level, 10,
+        "template-inherited XML frameLevel is absolute, not parent + offset"
+    );
+    assert!(!child_uses_parent);
 }
 
 #[test]

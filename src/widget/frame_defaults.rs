@@ -30,6 +30,7 @@ macro_rules! frame_defaults {
             raise_order: 0,
             has_fixed_frame_level: false,
             frame_level_offset: None,
+            uses_parent_level: false,
             frame_strata: FrameStrata::Medium,
             has_fixed_frame_strata: false,
             flattens_render_layers: false,
