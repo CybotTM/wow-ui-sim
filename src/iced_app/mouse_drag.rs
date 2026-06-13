@@ -70,7 +70,7 @@ pub(super) fn active_motion_drag_frame(
 
 pub(super) fn clamp_axis_to_viewport(position: f32, size: f32, viewport_size: f32) -> f32 {
     if size >= viewport_size {
-        0.0
+        position
     } else {
         position.clamp(0.0, viewport_size - size)
     }
@@ -279,4 +279,23 @@ pub(super) fn find_slider_drag_target(
         current = frame.parent_id;
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::clamp_axis_to_viewport;
+
+    #[test]
+    fn oversized_frame_drag_does_not_snap_axis_to_viewport_origin() {
+        let position = 84.0;
+        let size = 900.0;
+        let viewport_size = 768.0;
+
+        assert_eq!(
+            clamp_axis_to_viewport(position, size, viewport_size),
+            position,
+            "oversized frames cannot fit inside the viewport, so clamping to \
+             zero would make panels jump to the top or left edge on first drag"
+        );
+    }
 }
