@@ -281,6 +281,7 @@ if CreateUnitHealPredictionCalculator == nil then
     self._healAbsorbMode = 0
     self._incomingHealClampMode = 0
     self._incomingHealOverflowPercent = 1
+    self._maximumHealthMode = 0
     self._predictedValues = healPredictionDefaultValues()
     self._hasSecretValues = false
   end
@@ -322,6 +323,15 @@ if CreateUnitHealPredictionCalculator == nil then
     return self._incomingHealOverflowPercent or 1
   end
 
+  function healPredictionMethods:GetMaximumHealth()
+    local values = self._predictedValues or healPredictionDefaultValues()
+    return values.healthMax or 0
+  end
+
+  function healPredictionMethods:GetMaximumHealthMode()
+    return self._maximumHealthMode or 0
+  end
+
   function healPredictionMethods:GetPredictedValues()
     return healPredictionCopyValues(self._predictedValues)
   end
@@ -352,6 +362,10 @@ if CreateUnitHealPredictionCalculator == nil then
 
   function healPredictionMethods:SetIncomingHealOverflowPercent(percent)
     self._incomingHealOverflowPercent = percent or 1
+  end
+
+  function healPredictionMethods:SetMaximumHealthMode(mode)
+    self._maximumHealthMode = mode or 0
   end
 
   function healPredictionMethods:SetPredictedValues(values)

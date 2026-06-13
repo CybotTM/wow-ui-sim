@@ -286,6 +286,23 @@ fn heal_prediction_set_get_roundtrip() {
 }
 
 #[test]
+fn heal_prediction_maximum_health_methods_read_predicted_health_max() {
+    let env = WowLuaEnv::new().unwrap();
+    let max_health: i64 = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerHealth(75000, 200000)
+            local hp = CreateUnitHealPredictionCalculator()
+            hp:SetMaximumHealthMode(Enum.UnitMaximumHealthMode.Default)
+            UnitGetDetailedHealPrediction("player", nil, hp)
+            return hp:GetMaximumHealth()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(max_health, 200000);
+}
+
+#[test]
 fn heal_prediction_tostring() {
     let env = WowLuaEnv::new().unwrap();
     let has_prefix: bool = env
