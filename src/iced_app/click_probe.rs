@@ -131,10 +131,7 @@ fn named_frame_center(app: &App, frame_name: &str) -> Result<iced::Point, String
     ))
 }
 
-fn resolve_frame_path(
-    state: &crate::lua_api::state::SimState,
-    path: &str,
-) -> Result<u64, String> {
+fn resolve_frame_path(state: &crate::lua_api::state::SimState, path: &str) -> Result<u64, String> {
     let mut segments = path.split('.');
     let root_name = segments.next().expect("split yields at least one segment");
     let mut frame_id = find_global_frame(state, root_name)?;
@@ -179,7 +176,9 @@ fn resolve_child_segment(
             .parse()
             .ok()
             .filter(|index| *index >= 1)
-            .ok_or_else(|| format!("invalid 1-based child index '{segment}' in frame path: {path}"))?;
+            .ok_or_else(|| {
+                format!("invalid 1-based child index '{segment}' in frame path: {path}")
+            })?;
         return parent
             .children
             .get(index - 1)

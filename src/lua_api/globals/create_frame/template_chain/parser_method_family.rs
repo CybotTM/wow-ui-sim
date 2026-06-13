@@ -654,7 +654,8 @@ mod tests {
         // string-arg parser must not swallow this as one fused argument —
         // that registered mount-list rows for an unmatchable click edge and
         // broke real mouse clicks (selection never switched).
-        let parsed = parse_method_family(r#"self:RegisterForClicks("LeftButtonUp", "RightButtonUp")"#);
+        let parsed =
+            parse_method_family(r#"self:RegisterForClicks("LeftButtonUp", "RightButtonUp")"#);
 
         match parsed {
             Some(FastHandlerRef::MethodWithStringArg { arg, .. }) => {

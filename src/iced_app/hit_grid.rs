@@ -115,9 +115,12 @@ impl HitGrid {
     /// A plain append would make the newest insert the topmost hit in its
     /// cells regardless of strata/level — every incremental update would
     /// shadow overlapping frames (the staleness bug that previously forced
-    /// full rebuilds). Caller must ensure the frame is not already in the
-    /// grid (call `remove` first to update an existing frame).
+    /// full rebuilds). Reinserting the same frame ID replaces the old cells so
+    /// callers do not need to coordinate a separate remove/insert sequence.
     pub fn insert(&mut self, id: u64, rect: Rectangle, key: HitOrderKey) {
+        if let Some(old_rect) = self.rects.get(&id).copied() {
+            self.remove_from_cells(id, old_rect);
+        }
         self.rects.insert(id, rect);
         self.keys.insert(id, key);
         let keys = &self.keys;
@@ -131,6 +134,16 @@ impl HitGrid {
                         .is_some_and(|other_key| other_key <= key)
                 });
                 cell.insert(pos, id);
+            }
+        }
+    }
+
+    fn remove_from_cells(&mut self, id: u64, rect: Rectangle) {
+        let (c0, r0, c1, r1) = cell_range(rect, self.cols, self.rows);
+        for row in r0..=r1 {
+            for col in c0..=c1 {
+                let cell = &mut self.cells[row * self.cols + col];
+                cell.retain(|&fid| fid != id);
             }
         }
     }
@@ -304,6 +317,24 @@ mod tests {
         assert_eq!(
             grid.topmost_matching_at(Point::new(60.0, 60.0), |_| true),
             Some(2)
+        );
+    }
+
+    #[test]
+    fn reinserting_same_id_replaces_stale_cells() {
+        let mut grid = HitGrid::new(vec![], 128.0, 128.0);
+        let key = (crate::widget::FrameStrata::Medium, 0, 0, 1);
+
+        grid.insert(1, rect(10.0, 10.0, 20.0, 20.0), key);
+        grid.insert(1, rect(90.0, 90.0, 20.0, 20.0), key);
+
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(20.0, 20.0), |_| true),
+            None
+        );
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(100.0, 100.0), |_| true),
+            Some(1)
         );
     }
 
