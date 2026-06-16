@@ -208,8 +208,20 @@ end
 if rawget(C_FunctionContainers, "CreateCallback") == nil then
   local functionContainerMethods = {}
 
+  -- Cancelling a container cancels every timer it backs. A container can back
+  -- more than one timer (the same callback object fed into multiple
+  -- C_Timer.New* calls), so the bound timer handles are tracked in a list.
   function functionContainerMethods:Cancel()
     self._cancelled = true
+    local handles = rawget(self, "_timerHandles")
+    if handles then
+      for index = 1, #handles do
+        local handle = handles[index]
+        if type(handle) == "table" and type(handle.Cancel) == "function" then
+          handle:Cancel()
+        end
+      end
+    end
   end
 
   function functionContainerMethods:IsCancelled()
@@ -228,6 +240,83 @@ if rawget(C_FunctionContainers, "CreateCallback") == nil then
       _callback = fn,
       _cancelled = false,
     })
+  end
+
+  -- Real-WoW C_Timer contract (verified on retail 12.0.7 via
+  -- docs/addons/TimerCallbackProbe): a ticker IS a FunctionContainer.
+  -- C_Timer.After/NewTimer/NewTicker accept either a plain function or a
+  -- FunctionContainer as the callback, and NewTimer/NewTicker return the
+  -- callback container itself. Feeding a returned ticker back into another
+  -- C_Timer.New* call therefore reuses the same callback object, while each
+  -- registration keeps its own independent iteration count.
+  --
+  -- The Rust C_Timer engine schedules and fires plain functions, so this layer
+  -- only adds the container contract on top: coerce the callback to a
+  -- container, register its function, and hand back the container.
+  if C_Timer and rawget(C_Timer, "__wow_container_wrapped") == nil then
+    local CreateCallback = C_FunctionContainers.CreateCallback
+    local rawAfter = C_Timer.After
+    local rawNewTimer = C_Timer.NewTimer
+    local rawNewTicker = C_Timer.NewTicker
+
+    local function asContainer(callback, fnName)
+      local kind = type(callback)
+      if kind == "function" then
+        return CreateCallback(callback)
+      end
+      if kind == "table" and type(callback._callback) == "function" then
+        return callback
+      end
+      error("bad argument #2 to '" .. fnName .. "' (function or callback expected)", 3)
+    end
+
+    local function bindHandle(container, handle)
+      local handles = rawget(container, "_timerHandles")
+      if not handles then
+        handles = {}
+        container._timerHandles = handles
+      end
+      handles[#handles + 1] = handle
+      -- The container has no id of its own (retail tickers are opaque), but the
+      -- Rust engine and timer-queue test helpers locate a pending timer by id.
+      -- Surface the underlying timer's __id; for a reused container backing
+      -- multiple timers, the most recent registration wins.
+      if type(handle) == "table" then
+        container.__id = handle.__id
+      end
+    end
+
+    -- The engine fires this closure each tick; it invokes the wrapped function
+    -- with the container itself as the argument (retail passes the ticker), and
+    -- stops if the container was cancelled.
+    local function makeInvoker(container)
+      local fn = container._callback
+      return function()
+        if container._cancelled then
+          return
+        end
+        return fn(container)
+      end
+    end
+
+    function C_Timer.After(seconds, callback)
+      local container = asContainer(callback, "After")
+      return rawAfter(seconds, makeInvoker(container))
+    end
+
+    function C_Timer.NewTimer(seconds, callback)
+      local container = asContainer(callback, "NewTimer")
+      bindHandle(container, rawNewTimer(seconds, makeInvoker(container)))
+      return container
+    end
+
+    function C_Timer.NewTicker(seconds, callback, iterations)
+      local container = asContainer(callback, "NewTicker")
+      bindHandle(container, rawNewTicker(seconds, makeInvoker(container), iterations))
+      return container
+    end
+
+    C_Timer.__wow_container_wrapped = true
   end
 end
 
