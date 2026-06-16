@@ -67,6 +67,10 @@ fn timer_callback_table(state: &mut LuaState) -> rilua::vm::gc::arena::GcRef<Tab
             &state.gc.string_arena,
         );
     }
+    // Track the registry -> callback-table edge so the incremental collector
+    // does not reclaim the freshly inserted table (the registry may already be
+    // marked black). Without this, callbacks vanish under GC pressure.
+    state.gc.barrier_back(state.registry);
     new_table
 }
 
