@@ -148,12 +148,24 @@ The simulator diverges on every container-related point:
 The plain-function path matches retail (both reach 8/8). The gap is the
 FunctionContainer model: it should be the same object a ticker returns and accepts.
 
-### Sim fix sketch (follow-up)
+### Fix (landed)
 
-- Model `C_FunctionContainers` callbacks as the canonical timer-callback type, and
-  make `C_Timer.After/NewTimer/NewTicker` accept a container as the callback.
-- Have `NewTicker`/`NewTimer` **return that callback object** (wrapping a plain
-  function in one), instead of a separate `{__id, Cancel}` handle.
-- Keep iteration count per-registration (the sim already does this correctly — the
-  plain-function control passes), so a reused callback object stays independent.
-- Drop the invented `:Invoke`; retail containers expose neither `:Invoke` nor `()`.
+Implemented in the container layer (`proxy_object_factories.rs`), engine
+unchanged:
+
+- `C_Timer.After/NewTimer/NewTicker` accept a function **or** a container; a
+  plain function is wrapped in a fresh container.
+- `NewTimer`/`NewTicker` **return the callback container** (so a returned ticker
+  can be fed back in); per-registration iteration count is independent.
+- `container:Cancel()` cancels every timer the container backs.
+
+Notes:
+
+- Iteration state was already per-registration — the plain-function control
+  passed before the fix too.
+- The invented `:Invoke` is **kept** (retail lacks it) because an in-repo test
+  addon (`FcTest`) depends on it; treat that and `type()=="table"` (retail
+  userdata) as known low-fidelity deviations, not behavior gaps.
+- Fixing this surfaced a latent GC bug: the timer-callback registry table was
+  created without a write barrier, so it could be collected under the extra
+  allocation, dropping all timer callbacks. Fixed alongside.
