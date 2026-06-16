@@ -1,0 +1,8 @@
+## Interface: 120007
+## Title: Timer Callback Probe
+## Notes: Probes C_Timer callback identity, FunctionContainer support, and shared-state semantics
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: TimerCallbackProbeDB
+
+TimerCallbackProbe.lua
