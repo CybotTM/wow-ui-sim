@@ -29,16 +29,19 @@ pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
 /// Addon names that are test-only and should not be loaded in GUI mode.
 pub const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData", "WowBehaviorTest", "WowDiscovery"];
 
-pub fn load_edit_mode_cache(env: &WowLuaEnv, saved_vars: Option<&SavedVariablesManager>) {
+pub fn load_edit_mode_cache(
+    env: &WowLuaEnv,
+    saved_vars: Option<&SavedVariablesManager>,
+    snapshot_layout: Option<&str>,
+) {
     let Some(saved_vars) = saved_vars else {
         return;
     };
 
     let active_spec_index = env.state().borrow().player.active_spec_index;
-    match env
-        .loader_env()
-        .with_state(|state| saved_vars.load_edit_mode_cache(state, active_spec_index))
-    {
+    match env.loader_env().with_state(|state| {
+        saved_vars.load_edit_mode_cache(state, active_spec_index, snapshot_layout)
+    }) {
         Ok(true) => logging::println_elapsed("Loaded EditMode layout cache from WTF"),
         Ok(false) => {}
         Err(error) => logging::println_elapsed(&format!(

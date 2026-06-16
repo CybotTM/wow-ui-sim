@@ -51,7 +51,22 @@ Snapshots are stored by character key:
 ServerSnapshotDB.characters["Realm/Character"]
 ```
 
-Each snapshot includes metadata, action bar slot contents, addon enable states, sampled keybinding state, spellbook data when available, macros when available, and talent/loadout details where Blizzard exposes a public API.
+Each snapshot includes metadata, action bar slot contents, addon enable states, sampled keybinding state, spellbook data when available, macros when available, talent/loadout details where Blizzard exposes a public API, and the active EditMode layout.
+
+### EditMode layout
+
+`snapshot.editMode` records the live client's EditMode state:
+
+```lua
+editMode = {
+    activeLayoutName = "Ultrawide",   -- EditModeManagerFrame:GetActiveLayoutInfo().layoutName
+    activeLayout = 3,                 -- C_EditMode.GetLayouts().activeLayout index
+    layoutNames = { "Modern", "Classic", "Ultrawide" },
+}
+```
+
+The addon refreshes this on `EDIT_MODE_LAYOUTS_UPDATED` (i.e. when you switch
+layouts in Edit Mode), so the captured name tracks whatever you last selected.
 
 ## wow-ui-sim Import
 
@@ -66,6 +81,17 @@ If present, the simulator loads `ServerSnapshotDB`, picks `lastCharacterKey` whe
 Before third-party addon loading, wow-ui-sim uses the captured `addons.entries[*].enabled` values as an enable-state overlay. This is more reliable than trying to infer the AddOn List UI state from `AddOns.txt` alone.
 
 Before Blizzard addons load, wow-ui-sim applies captured keybindings and clears/seeds spell action slots from the captured action bar data. Empty action slots and non-spell action entries such as macros are ignored today.
+
+The simulator also reads `snapshot.editMode.activeLayoutName` and uses it as the
+preferred EditMode layout when loading the WTF EditMode cache. This means the
+simulator selects the same layout the live client was using, instead of relying
+on the (sometimes stale) `edit-mode-cache-character.txt` active-layout index.
+The `WOW_SIM_EDIT_MODE_LAYOUT` env var still takes precedence as an explicit
+manual override; the layout selection priority is:
+
+1. `WOW_SIM_EDIT_MODE_LAYOUT` env var (manual override)
+2. `snapshot.editMode.activeLayoutName` (captured from the live client)
+3. the active-layout index in `edit-mode-cache-character.txt`
 
 ## Notes
 

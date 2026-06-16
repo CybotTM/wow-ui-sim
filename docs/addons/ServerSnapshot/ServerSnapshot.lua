@@ -515,6 +515,47 @@ local function snapshotPvpTalents()
     return result
 end
 
+local function editModeActiveLayoutName()
+    -- EditModeManagerFrame resolves presets + saved layouts and tracks the
+    -- active one, so its layoutName is the value the live client is using.
+    local emm = EditModeManagerFrame
+    if type(emm) == "table" and type(emm.GetActiveLayoutInfo) == "function" then
+        local ok, info = call(emm.GetActiveLayoutInfo, emm)
+        if ok and type(info) == "table" and type(info.layoutName) == "string" then
+            return info.layoutName
+        end
+    end
+    return nil
+end
+
+local function snapshotEditMode()
+    local result = {
+        activeLayoutName = editModeActiveLayoutName(),
+    }
+
+    local cEditMode = C_EditMode
+    if type(cEditMode) == "table" and type(cEditMode.GetLayouts) == "function" then
+        local ok, layoutInfo = call(cEditMode.GetLayouts)
+        if ok and type(layoutInfo) == "table" then
+            result.activeLayout = tonumber(layoutInfo.activeLayout)
+            if type(layoutInfo.layouts) == "table" then
+                local names = {}
+                for index, layout in ipairs(layoutInfo.layouts) do
+                    if type(layout) == "table" then
+                        names[index] = layout.layoutName
+                    end
+                end
+                result.layoutNames = names
+            end
+        end
+    end
+
+    if result.activeLayoutName == nil and result.layoutNames == nil then
+        return nil
+    end
+    return result
+end
+
 function addon:Snapshot(reason)
     local db = ensureDatabase()
     local characterKey = getCharacterKey()
@@ -535,6 +576,7 @@ function addon:Snapshot(reason)
         keybindings = snapshotKeybindings(),
         talents = snapshotTalentConfig(),
         pvpTalents = snapshotPvpTalents(),
+        editMode = snapshotEditMode(),
     }
 
     db.characters[characterKey] = snapshot
@@ -577,6 +619,7 @@ local events = {
     PLAYER_SPECIALIZATION_CHANGED = true,
     UPDATE_MACROS = true,
     UPDATE_BINDINGS = true,
+    EDIT_MODE_LAYOUTS_UPDATED = true,
 }
 
 local frame = CreateFrame("Frame")

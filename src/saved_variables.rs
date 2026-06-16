@@ -219,10 +219,18 @@ impl SavedVariablesManager {
         Ok(loaded)
     }
 
+    /// Load the EditMode layout cache and select the active layout.
+    ///
+    /// The active layout is chosen with this priority:
+    /// 1. `WOW_SIM_EDIT_MODE_LAYOUT` env var (explicit manual override)
+    /// 2. `snapshot_layout` (the active layout name captured by ServerSnapshot
+    ///    from a live client — see `server_snapshot_import`)
+    /// 3. the active-layout index recorded in the WTF character cache
     pub fn load_edit_mode_cache(
         &self,
         state: &mut LuaState,
         active_spec_index: i32,
+        snapshot_layout: Option<&str>,
     ) -> crate::Result<bool> {
         let Some(config) = self.wtf_config.as_ref() else {
             return Ok(false);
@@ -238,7 +246,9 @@ impl SavedVariablesManager {
         let load_cache = table_get_static(state, c_edit_mode, "__LoadCache");
         let account_arg = optional_string_arg(state, account_cache.as_deref());
         let character_arg = optional_string_arg(state, character_cache.as_deref());
-        let preferred_layout = std::env::var(EDIT_MODE_LAYOUT_ENV).ok();
+        let preferred_layout = std::env::var(EDIT_MODE_LAYOUT_ENV)
+            .ok()
+            .or_else(|| snapshot_layout.map(str::to_string));
         let preferred_layout_arg = optional_string_arg(state, preferred_layout.as_deref());
         call_function_state(
             state,

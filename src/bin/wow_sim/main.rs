@@ -301,10 +301,35 @@ fn init_and_load(
     } else {
         None
     };
+    // ServerSnapshot records the live client's active EditMode layout name.
+    // Read it first so the cache loader can select that layout instead of the
+    // (sometimes stale) WTF character-cache index. Loading the snapshot here
+    // also primes `ServerSnapshotDB` for the action bar import below.
+    let snapshot_edit_mode_layout = startup_trace::time_load_step(
+        "read ServerSnapshot edit mode layout",
+        || -> Option<String> {
+            let saved_vars = saved_vars.as_mut()?;
+            match wow_ui_sim::server_snapshot_import::load_edit_mode_layout(&env, saved_vars) {
+                Ok(layout) => layout,
+                Err(error) => {
+                    logging::println_elapsed(&format!(
+                        "ServerSnapshot edit mode layout import failed: {error}"
+                    ));
+                    None
+                }
+            }
+        },
+    );
+    if let Some(layout) = snapshot_edit_mode_layout.as_deref() {
+        logging::println_elapsed(&format!(
+            "ServerSnapshot active EditMode layout: {layout}"
+        ));
+    }
     startup_trace::time_load_step("load edit mode cache", || {
         addon_loading::load_edit_mode_cache(
             &env,
             saved_vars.as_ref().or(edit_mode_cache_vars.as_ref()),
+            snapshot_edit_mode_layout.as_deref(),
         )
     });
     startup_trace::time_load_step("load ServerSnapshot action bars", || {

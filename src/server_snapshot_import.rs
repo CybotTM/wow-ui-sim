@@ -10,13 +10,18 @@ use std::collections::HashMap;
 
 const SERVER_SNAPSHOT_ADDON: &str = "ServerSnapshot";
 
-const APPLY_SNAPSHOT_LUA: &str = r#"
+/// Lua prelude that resolves the snapshot to use into a local `snapshot`.
+///
+/// Picks `lastCharacterKey` when present, otherwise the newest capture. Leaves
+/// `snapshot` as nil when no usable snapshot exists; each consumer below handles
+/// that case explicitly.
+const CHOOSE_SNAPSHOT_PRELUDE: &str = r#"
 local db = rawget(_G, "ServerSnapshotDB")
-if type(db) ~= "table" or type(db.characters) ~= "table" then
-    return 0
-end
-
 local function chooseSnapshot()
+    if type(db) ~= "table" or type(db.characters) ~= "table" then
+        return nil
+    end
+
     local key = db.lastCharacterKey
     if type(key) == "string" and type(db.characters[key]) == "table" then
         return db.characters[key]
@@ -37,6 +42,9 @@ local function chooseSnapshot()
 end
 
 local snapshot = chooseSnapshot()
+"#;
+
+const APPLY_SNAPSHOT_BODY: &str = r#"
 if type(snapshot) ~= "table" then
     return 0
 end
@@ -77,33 +85,7 @@ end
 return imported
 "#;
 
-const SNAPSHOT_ADDON_ENABLE_OVERRIDES_LUA: &str = r#"
-local db = rawget(_G, "ServerSnapshotDB")
-if type(db) ~= "table" or type(db.characters) ~= "table" then
-    return ""
-end
-
-local function chooseSnapshot()
-    local key = db.lastCharacterKey
-    if type(key) == "string" and type(db.characters[key]) == "table" then
-        return db.characters[key]
-    end
-
-    local newestSnapshot = nil
-    local newestCapturedAt = nil
-    for _, snapshot in pairs(db.characters) do
-        if type(snapshot) == "table" then
-            local capturedAt = tonumber(snapshot.capturedAt) or 0
-            if newestSnapshot == nil or capturedAt > newestCapturedAt then
-                newestSnapshot = snapshot
-                newestCapturedAt = capturedAt
-            end
-        end
-    end
-    return newestSnapshot
-end
-
-local snapshot = chooseSnapshot()
+const ENABLE_OVERRIDES_BODY: &str = r#"
 local entries = type(snapshot) == "table"
     and type(snapshot.addons) == "table"
     and snapshot.addons.entries
@@ -121,9 +103,21 @@ end
 return table.concat(rows, "\n")
 "#;
 
+const EDIT_MODE_LAYOUT_BODY: &str = r#"
+local editMode = type(snapshot) == "table" and snapshot.editMode or nil
+if type(editMode) ~= "table" then
+    return ""
+end
+return type(editMode.activeLayoutName) == "string" and editMode.activeLayoutName or ""
+"#;
+
+fn snapshot_chunk(body: &str) -> String {
+    format!("{CHOOSE_SNAPSHOT_PRELUDE}{body}")
+}
+
 /// Apply an already-loaded `ServerSnapshotDB` global to the simulator action bar model.
 pub fn apply_loaded_snapshot(env: &WowLuaEnv) -> crate::Result<i64> {
-    env.eval(APPLY_SNAPSHOT_LUA)
+    env.eval(&snapshot_chunk(APPLY_SNAPSHOT_BODY))
 }
 
 pub fn load_addon_enable_overrides(
@@ -132,8 +126,26 @@ pub fn load_addon_enable_overrides(
 ) -> crate::Result<HashMap<String, bool>> {
     env.loader_env()
         .with_state(|state| saved_vars.load_wtf_for_addon(state, SERVER_SNAPSHOT_ADDON))?;
-    let text: String = env.eval(SNAPSHOT_ADDON_ENABLE_OVERRIDES_LUA)?;
+    let text: String = env.eval(&snapshot_chunk(ENABLE_OVERRIDES_BODY))?;
     Ok(parse_addon_enable_overrides_text(&text))
+}
+
+/// Read the active EditMode layout name captured by ServerSnapshot from a live
+/// client. Returns `None` when no snapshot, no captured EditMode data, or an
+/// empty layout name is present.
+///
+/// This feeds the EditMode cache loader as the preferred active layout, so the
+/// simulator picks the same layout the live client had instead of relying on
+/// the (sometimes stale) WTF `edit-mode-cache-character.txt` index or a manual
+/// `WOW_SIM_EDIT_MODE_LAYOUT` override.
+pub fn load_edit_mode_layout(
+    env: &WowLuaEnv,
+    saved_vars: &mut SavedVariablesManager,
+) -> crate::Result<Option<String>> {
+    env.loader_env()
+        .with_state(|state| saved_vars.load_wtf_for_addon(state, SERVER_SNAPSHOT_ADDON))?;
+    let name: String = env.eval(&snapshot_chunk(EDIT_MODE_LAYOUT_BODY))?;
+    Ok((!name.is_empty()).then_some(name))
 }
 
 fn parse_addon_enable_overrides_text(text: &str) -> HashMap<String, bool> {
@@ -152,17 +164,16 @@ fn parse_addon_enable_overrides_text(text: &str) -> HashMap<String, bool> {
 /// Load ServerSnapshot SavedVariables from the configured WTF source and apply them.
 ///
 /// Returns the number of spell action slots imported. Missing saved variables are a
-/// clean no-op.
+/// clean no-op. `load_wtf_for_addon` is idempotent (it tracks already-loaded
+/// addons), so this is safe to call after `load_edit_mode_layout` has already
+/// pulled `ServerSnapshotDB` into the environment — `apply_loaded_snapshot`
+/// no-ops when no usable snapshot is present.
 pub fn load_from_saved_variables(
     env: &WowLuaEnv,
     saved_vars: &mut SavedVariablesManager,
 ) -> crate::Result<i64> {
-    let loaded = env
-        .loader_env()
+    env.loader_env()
         .with_state(|state| saved_vars.load_wtf_for_addon(state, SERVER_SNAPSHOT_ADDON))?;
-    if loaded == 0 {
-        return Ok(0);
-    }
     apply_loaded_snapshot(env)
 }
 
@@ -208,6 +219,52 @@ mod tests {
         let overrides = load_addon_enable_overrides(&env, &mut saved_vars).expect("overrides");
 
         assert!(overrides.is_empty());
+    }
+
+    #[test]
+    fn load_edit_mode_layout_reads_captured_active_layout_name() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            ServerSnapshotDB = {
+                lastCharacterKey = "Realm/Character",
+                characters = {
+                    ["Realm/Character"] = {
+                        capturedAt = 1,
+                        editMode = {
+                            activeLayout = 3,
+                            activeLayoutName = "Ultrawide",
+                        },
+                    },
+                },
+            }
+            "#,
+        )
+        .expect("seed snapshot");
+        let mut saved_vars = SavedVariablesManager::new();
+
+        let layout = load_edit_mode_layout(&env, &mut saved_vars).expect("layout");
+
+        assert_eq!(layout.as_deref(), Some("Ultrawide"));
+    }
+
+    #[test]
+    fn load_edit_mode_layout_tolerates_missing_edit_mode_data() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            ServerSnapshotDB = {
+                lastCharacterKey = "Realm/Character",
+                characters = { ["Realm/Character"] = { capturedAt = 1 } },
+            }
+            "#,
+        )
+        .expect("seed snapshot");
+        let mut saved_vars = SavedVariablesManager::new();
+
+        let layout = load_edit_mode_layout(&env, &mut saved_vars).expect("layout");
+
+        assert_eq!(layout, None);
     }
 
     #[test]

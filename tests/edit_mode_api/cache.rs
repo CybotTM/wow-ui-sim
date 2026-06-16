@@ -75,6 +75,7 @@ fn edit_mode_layout_api_persists_active_layout_and_saved_layouts() {
 
 #[test]
 fn edit_mode_layout_api_loads_wtf_cache_files() {
+    let _env_guard = EnvVarGuard::unset(EDIT_MODE_LAYOUT_ENV);
     let temp = tempfile::tempdir().expect("create temp dir");
     let wtf_path = temp.path().join("WTF");
     let account_path = wtf_path.join("Account/TestAccount");
@@ -105,7 +106,7 @@ fn edit_mode_layout_api_loads_wtf_cache_files() {
         "Testchar",
     ));
     env.loader_env()
-        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2))
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2, None))
         .expect("load edit mode cache");
 
     let (
@@ -208,7 +209,7 @@ fn edit_mode_wtf_cache_can_override_active_layout_by_name() {
         "Testchar",
     ));
     env.loader_env()
-        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2))
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2, None))
         .expect("load edit mode cache");
 
     let (active, active_name): (i32, String) = env
@@ -225,7 +226,113 @@ fn edit_mode_wtf_cache_can_override_active_layout_by_name() {
 }
 
 #[test]
+fn edit_mode_snapshot_layout_selects_active_layout_by_name() {
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let wtf_path = temp.path().join("WTF");
+    let account_path = wtf_path.join("Account/TestAccount");
+    let character_path = account_path.join("Test Realm/Testchar");
+    std::fs::create_dir_all(&character_path).expect("create WTF dirs");
+    std::fs::write(
+        account_path.join("edit-mode-cache-account.txt"),
+        concat!(
+            "2 0 ",
+            "9 Ultrawide 1 ",
+            "0 0 0 4 4 UIParent 0.0 0.0 -1 ## ",
+            "10 Widescreen 1 ",
+            "0 0 0 4 4 UIParent 0.0 0.0 -1 ##",
+            "\0"
+        ),
+    )
+    .expect("write account edit mode cache");
+    // Character cache resolves to layout index 2 (Widescreen); the snapshot
+    // name must win and select Ultrawide instead.
+    std::fs::write(
+        character_path.join("edit-mode-cache-character.txt"),
+        "2 2 2 2 0 0\0",
+    )
+    .expect("write character edit mode cache");
+
+    let _guard = EnvVarGuard::unset(EDIT_MODE_LAYOUT_ENV);
+    let env = WowLuaEnv::new().expect("create Lua environment");
+    let mut saved_vars = SavedVariablesManager::with_storage_dir(temp.path().join("local-sv"));
+    saved_vars.set_wtf_config(WtfConfig::new(
+        &wtf_path,
+        "TestAccount",
+        "Test Realm",
+        "Testchar",
+    ));
+    env.loader_env()
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2, Some("Ultrawide")))
+        .expect("load edit mode cache");
+
+    let (active, active_name): (i32, String) = env
+        .eval(
+            r#"
+            local info = C_EditMode.GetLayouts()
+            return info.activeLayout, info.layouts[info.activeLayout].layoutName
+            "#,
+        )
+        .expect("read snapshot-selected active edit mode layout");
+
+    assert_eq!(active, 1);
+    assert_eq!(active_name, "Ultrawide");
+}
+
+#[test]
+fn edit_mode_env_override_beats_snapshot_layout() {
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let wtf_path = temp.path().join("WTF");
+    let account_path = wtf_path.join("Account/TestAccount");
+    let character_path = account_path.join("Test Realm/Testchar");
+    std::fs::create_dir_all(&character_path).expect("create WTF dirs");
+    std::fs::write(
+        account_path.join("edit-mode-cache-account.txt"),
+        concat!(
+            "2 0 ",
+            "9 Ultrawide 1 ",
+            "0 0 0 4 4 UIParent 0.0 0.0 -1 ## ",
+            "10 Widescreen 1 ",
+            "0 0 0 4 4 UIParent 0.0 0.0 -1 ##",
+            "\0"
+        ),
+    )
+    .expect("write account edit mode cache");
+    std::fs::write(
+        character_path.join("edit-mode-cache-character.txt"),
+        "2 2 2 2 0 0\0",
+    )
+    .expect("write character edit mode cache");
+
+    let _guard = EnvVarGuard::set(EDIT_MODE_LAYOUT_ENV, "Widescreen");
+    let env = WowLuaEnv::new().expect("create Lua environment");
+    let mut saved_vars = SavedVariablesManager::with_storage_dir(temp.path().join("local-sv"));
+    saved_vars.set_wtf_config(WtfConfig::new(
+        &wtf_path,
+        "TestAccount",
+        "Test Realm",
+        "Testchar",
+    ));
+    // Env var (Widescreen) is the explicit manual override and must beat the
+    // snapshot-captured layout (Ultrawide).
+    env.loader_env()
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2, Some("Ultrawide")))
+        .expect("load edit mode cache");
+
+    let active_name: String = env
+        .eval(
+            r#"
+            local info = C_EditMode.GetLayouts()
+            return info.layouts[info.activeLayout].layoutName
+            "#,
+        )
+        .expect("read active edit mode layout");
+
+    assert_eq!(active_name, "Widescreen");
+}
+
+#[test]
 fn edit_mode_wtf_cache_decodes_frame_point_numbers_like_wow() {
+    let _env_guard = EnvVarGuard::unset(EDIT_MODE_LAYOUT_ENV);
     let temp = tempfile::tempdir().expect("create temp dir");
     let wtf_path = temp.path().join("WTF");
     let account_path = wtf_path.join("Account/TestAccount");
@@ -258,7 +365,7 @@ fn edit_mode_wtf_cache_decodes_frame_point_numbers_like_wow() {
         "Testchar",
     ));
     env.loader_env()
-        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1))
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1, None))
         .expect("load edit mode cache");
 
     let (minimap_point, action_bar_point, cast_bar_point): (String, String, String) = env
@@ -279,6 +386,7 @@ fn edit_mode_wtf_cache_decodes_frame_point_numbers_like_wow() {
 
 #[test]
 fn edit_mode_account_cache_preserves_all_legacy_values_and_fills_new_defaults() {
+    let _env_guard = EnvVarGuard::unset(EDIT_MODE_LAYOUT_ENV);
     let temp = tempfile::tempdir().expect("create temp dir");
     let wtf_path = temp.path().join("WTF");
     let account_path = wtf_path.join("Account/TestAccount");
@@ -305,7 +413,7 @@ fn edit_mode_account_cache_preserves_all_legacy_values_and_fills_new_defaults() 
         "Testchar",
     ));
     env.loader_env()
-        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1))
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1, None))
         .expect("load edit mode cache");
 
     let saved_values: String = env
@@ -334,6 +442,7 @@ fn edit_mode_account_cache_preserves_all_legacy_values_and_fills_new_defaults() 
 
 #[test]
 fn edit_mode_wtf_cache_normalizes_indexed_system_rows() {
+    let _env_guard = EnvVarGuard::unset(EDIT_MODE_LAYOUT_ENV);
     let temp = tempfile::tempdir().expect("create temp dir");
     let wtf_path = temp.path().join("WTF");
     let account_path = wtf_path.join("Account/TestAccount");
@@ -369,7 +478,7 @@ fn edit_mode_wtf_cache_normalizes_indexed_system_rows() {
         "Testchar",
     ));
     env.loader_env()
-        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2))
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2, None))
         .expect("load edit mode cache");
 
     let (layout_name, indices): (String, String) = env
@@ -395,6 +504,7 @@ fn edit_mode_wtf_cache_normalizes_indexed_system_rows() {
 
 #[test]
 fn edit_mode_cache_decodes_repeated_setting_chunks_as_large_value() {
+    let _env_guard = EnvVarGuard::unset(EDIT_MODE_LAYOUT_ENV);
     let temp = tempfile::tempdir().expect("create temp dir");
     let wtf_path = temp.path().join("WTF");
     let account_path = wtf_path.join("Account/TestAccount");
@@ -425,7 +535,7 @@ fn edit_mode_cache_decodes_repeated_setting_chunks_as_large_value() {
         "Testchar",
     ));
     env.loader_env()
-        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2))
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 2, None))
         .expect("load edit mode cache");
 
     let (settings_count, setting, value): (i32, i32, i32) = env
@@ -445,6 +555,7 @@ fn edit_mode_cache_decodes_repeated_setting_chunks_as_large_value() {
 
 #[test]
 fn edit_mode_wtf_cache_marks_hidden_status_tracking_bar_systems() {
+    let _env_guard = EnvVarGuard::unset(EDIT_MODE_LAYOUT_ENV);
     let temp = tempfile::tempdir().expect("create temp dir");
     let wtf_path = temp.path().join("WTF");
     let account_path = wtf_path.join("Account/TestAccount");
@@ -472,7 +583,7 @@ fn edit_mode_wtf_cache_marks_hidden_status_tracking_bar_systems() {
         "Testchar",
     ));
     env.loader_env()
-        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1))
+        .with_state(|state| saved_vars.load_edit_mode_cache(state, 1, None))
         .expect("load edit mode cache");
 
     let (system, system_index, hidden): (i32, i32, bool) = env
@@ -491,18 +602,47 @@ fn edit_mode_wtf_cache_marks_hidden_status_tracking_bar_systems() {
         "StatusTrackingBar1 should preserve the WTF profile hidden marker"
     );
 }
+/// `WOW_SIM_EDIT_MODE_LAYOUT` is process-global, but `load_edit_mode_cache`
+/// reads it, so every test that loads the EditMode cache must serialize against
+/// concurrent mutators. Holding this lock for the test body keeps a mutator's
+/// transient env value invisible to other tests' cache loads.
+fn edit_mode_env_lock() -> &'static std::sync::Mutex<()> {
+    static LOCK: std::sync::OnceLock<std::sync::Mutex<()>> = std::sync::OnceLock::new();
+    LOCK.get_or_init(|| std::sync::Mutex::new(()))
+}
+
 struct EnvVarGuard {
     key: &'static str,
     previous: Option<std::ffi::OsString>,
+    _lock: std::sync::MutexGuard<'static, ()>,
 }
 
 impl EnvVarGuard {
     fn set(key: &'static str, value: &str) -> Self {
-        let previous = std::env::var_os(key);
+        let guard = Self::acquire(key);
         unsafe {
             std::env::set_var(key, value);
         }
-        Self { key, previous }
+        guard
+    }
+
+    fn unset(key: &'static str) -> Self {
+        let guard = Self::acquire(key);
+        unsafe {
+            std::env::remove_var(key);
+        }
+        guard
+    }
+
+    fn acquire(key: &'static str) -> Self {
+        let lock = edit_mode_env_lock()
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        Self {
+            key,
+            previous: std::env::var_os(key),
+            _lock: lock,
+        }
     }
 }
 
