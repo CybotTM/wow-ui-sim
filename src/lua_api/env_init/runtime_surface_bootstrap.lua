@@ -1,6 +1,19 @@
 local function __wow_noop()
 end
 
+-- WoW exposes debug.iscfunction (not a stock Lua 5.1 function): true for native
+-- (C) functions, false for Lua closures. Back it with debug.getinfo's "what"
+-- field (what == "C" for native functions).
+if debug and rawget(debug, "iscfunction") == nil and type(debug.getinfo) == "function" then
+  function debug.iscfunction(fn)
+    if type(fn) ~= "function" then
+      return false
+    end
+    local info = debug.getinfo(fn, "S")
+    return info ~= nil and info.what == "C"
+  end
+end
+
 SOUNDKIT = SOUNDKIT or {}
 if SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU == nil then
   SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU = 303824
