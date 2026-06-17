@@ -50,9 +50,9 @@ bytemuck = { version = "1.21", features = ["derive"], optional = true }
 pollster = { version = "0.4", optional = true }
 webp = { version = "0.3.1", optional = true }
 rustc-hash = "2.1.2"
-asset-resolver = { git = "https://github.com/world-of-osso/asset-resolver", rev = "8e4a05a014a5c3950b04fee0898a58d2e3bf00d5", optional = true }
-cascette-client-storage = { git = "https://github.com/Osso/cascette-rs", rev = "7c4091855de01e43fc3446a57597907ac69f2f9e", features = ["local-install"], optional = true }
-cascette-crypto = { git = "https://github.com/Osso/cascette-rs", rev = "7c4091855de01e43fc3446a57597907ac69f2f9e", optional = true }
+asset-resolver = { git = "https://github.com/world-of-osso/asset-resolver", rev = "76f98d44fe332a4d5f0d02ebe1f5f89e37ff5c56", optional = true }
+cascette-client-storage = { git = "https://github.com/Osso/cascette-rs", rev = "3992ef0fb9a81f10841a763619440a68647611ff", features = ["local-install"], optional = true }
+cascette-crypto = { git = "https://github.com/Osso/cascette-rs", rev = "3992ef0fb9a81f10841a763619440a68647611ff", optional = true }
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
 tar = "0.4.45"
 flate2 = "1.1.9"
