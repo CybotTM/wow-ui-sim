@@ -8,7 +8,7 @@ use crate::startup::{fire_one_on_update_tick, process_pending_timers};
 use std::path::PathBuf;
 
 const MAX_ASYNC_TICKS: u32 = 500;
-const ADDON_BASE_PATHS: &[&str] = &["./Interface/AddOns", "./Interface/TestAddOns"];
+const ADDON_BASE_PATHS: &[&str] = &["Interface/AddOns", "Interface/TestAddOns"];
 
 /// Reset test registry between files (TestFramework globals stay alive).
 const TEST_RESET: &str = r#"
@@ -34,8 +34,9 @@ end
 "#;
 
 /// Start a single async test by index. Sets up __async_done tracking.
+/// `idx` is prepended by `run_async_test` as `local idx = <n>` — this chunk has
+/// no varargs, so it must use that local rather than `...`.
 const ASYNC_START: &str = r#"
-local idx = ...
 local t = __addon_tests[idx]
 __async_done = false
 __async_error = nil
@@ -78,11 +79,19 @@ fn load_test_framework(env: &WowLuaEnv) {
 }
 
 fn resolve_addon_root(addon_name: &str) -> Option<PathBuf> {
-    ADDON_BASE_PATHS
-        .iter()
-        .map(PathBuf::from)
-        .map(|base| base.join(addon_name))
-        .find(|path| path.exists())
+    // wow-sim chdir's to the executable directory at startup (for GUI asset
+    // loading), so the addon dirs are not necessarily under the current dir:
+    // in a dev build cwd is `target/<profile>/` and the addon dirs live at the
+    // repo root above it; in a deployed layout `Interface/` sits next to the
+    // binary (cwd). Walk up from cwd until a base path resolves so `run-tests`
+    // works from either location.
+    let cwd = std::env::current_dir().ok()?;
+    cwd.ancestors().find_map(|root| {
+        ADDON_BASE_PATHS
+            .iter()
+            .map(|base| root.join(base).join(addon_name))
+            .find(|path| path.exists())
+    })
 }
 
 fn resolve_addon_toc_path(addon_name: &str) -> Option<PathBuf> {
