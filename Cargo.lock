@@ -249,7 +249,7 @@ dependencies = [
 [[package]]
 name = "asset-resolver"
 version = "0.1.0"
-source = "git+https://github.com/world-of-osso/asset-resolver?rev=3ab8a14#3ab8a14c8cc4d597bdd07a2cb8f16bfcb4e3ef29"
+source = "git+https://github.com/world-of-osso/asset-resolver?rev=8e4a05a014a5c3950b04fee0898a58d2e3bf00d5#8e4a05a014a5c3950b04fee0898a58d2e3bf00d5"
 dependencies = [
  "binrw",
  "cascette-client-storage",
@@ -667,7 +667,7 @@ dependencies = [
 [[package]]
 name = "cascette-client-storage"
 version = "0.2.0"
-source = "git+https://github.com/Osso/cascette-rs?rev=c5de2b9f6109edde30e08328089193b6b5650f43#c5de2b9f6109edde30e08328089193b6b5650f43"
+source = "git+https://github.com/Osso/cascette-rs?rev=7c4091855de01e43fc3446a57597907ac69f2f9e#7c4091855de01e43fc3446a57597907ac69f2f9e"
 dependencies = [
  "binrw",
  "cascette-crypto",
@@ -691,7 +691,7 @@ dependencies = [
 [[package]]
 name = "cascette-crypto"
 version = "0.2.0"
-source = "git+https://github.com/Osso/cascette-rs?rev=c5de2b9f6109edde30e08328089193b6b5650f43#c5de2b9f6109edde30e08328089193b6b5650f43"
+source = "git+https://github.com/Osso/cascette-rs?rev=7c4091855de01e43fc3446a57597907ac69f2f9e#7c4091855de01e43fc3446a57597907ac69f2f9e"
 dependencies = [
  "binrw",
  "cipher",
@@ -704,7 +704,7 @@ dependencies = [
 [[package]]
 name = "cascette-formats"
 version = "0.2.0"
-source = "git+https://github.com/Osso/cascette-rs?rev=c5de2b9f6109edde30e08328089193b6b5650f43#c5de2b9f6109edde30e08328089193b6b5650f43"
+source = "git+https://github.com/Osso/cascette-rs?rev=7c4091855de01e43fc3446a57597907ac69f2f9e#7c4091855de01e43fc3446a57597907ac69f2f9e"
 dependencies = [
  "binrw",
  "cascette-crypto",
@@ -1312,7 +1312,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -3026,7 +3026,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3953,7 +3953,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4348,7 +4348,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.4.15",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4361,7 +4361,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5055,7 +5055,7 @@ dependencies = [
  "getrandom 0.3.4",
  "once_cell",
  "rustix 1.1.3",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
