@@ -72,6 +72,16 @@ pub enum LuaCommand {
         crop: Option<String>,
         respond: mpsc::Sender<Response>,
     },
+    MouseMove {
+        x: f32,
+        y: f32,
+        respond: mpsc::Sender<Response>,
+    },
+    MouseClick {
+        x: f32,
+        y: f32,
+        respond: mpsc::Sender<Response>,
+    },
 }
 
 pub fn socket_path() -> PathBuf {
