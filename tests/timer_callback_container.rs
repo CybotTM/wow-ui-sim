@@ -50,19 +50,20 @@ fn newticker_accepts_container_and_returns_it() {
 #[test]
 fn newticker_wraps_plain_function_in_a_container() {
     let env = env();
-    // A plain function is wrapped: the return is a cancelable container, not the fn.
-    let (is_table, is_not_fn, has_cancel): (bool, bool, bool) = env
+    // A plain function is wrapped: the return is a cancelable userdata container,
+    // not the fn (matches retail: NewTicker returns a userdata FunctionContainer).
+    let (is_userdata, is_not_fn, has_cancel): (bool, bool, bool) = env
         .eval(
             r#"
             local f = function() end
             local obj = C_Timer.NewTicker(3600, f, 1)
-            local r = { type(obj) == "table", obj ~= f, type(obj.Cancel) == "function" }
+            local r = { type(obj) == "userdata", obj ~= f, type(obj.Cancel) == "function" }
             if obj.Cancel then obj:Cancel() end
             return r[1], r[2], r[3]
             "#,
         )
         .unwrap();
-    assert!(is_table && is_not_fn && has_cancel);
+    assert!(is_userdata && is_not_fn && has_cancel);
 }
 
 #[test]
@@ -85,6 +86,54 @@ fn shared_container_two_tickers_keep_independent_counts() {
         .unwrap();
     let total = pump_until(&env, "_G.__tcc_total", 8, 4);
     assert_eq!(total, 8, "shared callback container must fire 5+3 times (state not shared)");
+}
+
+#[test]
+fn fired_callback_receives_proxy_equal_to_handle() {
+    let env = env();
+    // Retail: the callback gets a proxy of the handle that == the handle but is a
+    // distinct table key, and shares the handle's fields.
+    let _: () = env
+        .eval(
+            r#"
+            _G.__tcp = { fired = false }
+            local t
+            local cb = function(handle)
+                _G.__tcp.nargs = select('#', handle)
+                _G.__tcp.eq_handle = (handle == t)
+                _G.__tcp.distinct_key = (({ [t] = true })[handle] == nil)
+                _G.__tcp.shares_field = (handle.foo == "bar")
+                _G.__tcp.fired = true
+            end
+            t = C_Timer.NewTimer(0.02, cb)
+            t.foo = "bar"
+            "#,
+        )
+        .unwrap();
+
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(3);
+    while std::time::Instant::now() < deadline {
+        process_pending_timers(&env);
+        if env.eval::<bool>("return _G.__tcp.fired").unwrap() {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(15));
+    }
+
+    let (fired, nargs, eq, distinct, shares): (bool, f64, bool, bool, bool) = env
+        .eval(
+            r#"
+            local r = _G.__tcp
+            return r.fired, r.nargs or -1, r.eq_handle == true,
+                   r.distinct_key == true, r.shares_field == true
+            "#,
+        )
+        .unwrap();
+    assert!(fired, "timer must fire");
+    assert_eq!(nargs as i32, 1, "callback receives exactly one argument");
+    assert!(eq, "the fired proxy must compare == to the returned handle");
+    assert!(distinct, "the proxy must be a distinct raw table key from the handle");
+    assert!(shares, "the proxy must share the handle's fields");
 }
 
 #[test]

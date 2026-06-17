@@ -206,14 +206,82 @@ if rawget(C_CurveUtil, "CreateColorCurve") == nil then
 end
 
 if rawget(C_FunctionContainers, "CreateCallback") == nil then
-  local functionContainerMethods = {}
+  -- Userdata-backed C objects, mirroring retail (verified via
+  -- docs/addons/TimerCallbackProbe + Interface/AddOns/FcTest): type()=="userdata",
+  -- getmetatable()==false, read-only methods, per-instance field storage, and
+  -- proxy/handle equality (a fired ticker's argument == the handle but is a
+  -- distinct table key, sharing the handle's fields). Modeled on wowless's
+  -- luaobjects: one shared metatable per object kind (built via newproxy(true)),
+  -- instances via newproxy(prototype), and a weak map from each userdata to its
+  -- backing state table. __eq compares backing identity, so a proxy and its
+  -- source compare equal while remaining distinct as raw table keys.
+  local backing = setmetatable({}, { __mode = "k" })
 
-  -- Cancelling a container cancels every timer it backs. A container can back
-  -- more than one timer (the same callback object fed into multiple
-  -- C_Timer.New* calls), so the bound timer handles are tracked in a list.
-  function functionContainerMethods:Cancel()
+  local function buildPrototype(methods)
+    local proto = newproxy(true)
+    local mt = getmetatable(proto)
+    mt.__index = function(u, key)
+      local method = methods[key]
+      if method ~= nil then
+        return method
+      end
+      local state = backing[u]
+      return state and state[key]
+    end
+    mt.__newindex = function(u, key, value)
+      if methods[key] ~= nil then
+        error("attempt to assign read-only key '" .. tostring(key) .. "'", 2)
+      end
+      local state = backing[u]
+      if state then
+        state[key] = value
+      end
+    end
+    mt.__eq = function(a, b)
+      return backing[a] == backing[b]
+    end
+    mt.__metatable = false -- set last; getmetatable() returns false afterwards
+    return proto
+  end
+
+  -- A fresh object: distinct userdata with its own backing state table.
+  local function newObject(proto, initialState)
+    local u = newproxy(proto)
+    backing[u] = initialState or {}
+    return u
+  end
+
+  -- A proxy of an object: distinct userdata sharing the SAME backing, so it
+  -- compares == to the source and shares fields, but is a distinct table key.
+  local function newProxyOf(u)
+    local state = backing[u]
+    if not state then
+      return u
+    end
+    local p = newproxy(u) -- shares u's metatable
+    backing[p] = state
+    return p
+  end
+
+  -- Retail rejects C functions as callbacks. debug.getinfo reports what=="C"
+  -- for native functions and "Lua"/"main" for Lua closures (works for closures
+  -- with upvalues, unlike string.dump).
+  local function isLuaFunction(fn)
+    if type(fn) ~= "function" then
+      return false
+    end
+    local info = debug.getinfo(fn, "S")
+    return info ~= nil and info.what ~= "C"
+  end
+
+  local methods = {}
+
+  -- Cancelling a container cancels every timer it backs. One container can back
+  -- multiple timers (the same callback object fed into multiple C_Timer.New*
+  -- calls), so the bound timer handles are tracked in a list.
+  function methods:Cancel()
     self._cancelled = true
-    local handles = rawget(self, "_timerHandles")
+    local handles = self._timerHandles
     if handles then
       for index = 1, #handles do
         local handle = handles[index]
@@ -224,22 +292,28 @@ if rawget(C_FunctionContainers, "CreateCallback") == nil then
     end
   end
 
-  function functionContainerMethods:IsCancelled()
+  function methods:IsCancelled()
     return self._cancelled == true
   end
 
-  function functionContainerMethods:Invoke(...)
-    if self._cancelled or type(self._callback) ~= "function" then
-      return nil
+  -- Invoke calls the wrapped function and returns nothing (retail/wowless).
+  function methods:Invoke(...)
+    if self._cancelled then
+      return
     end
-    return self._callback(...)
+    local callback = self._callback
+    if type(callback) == "function" then
+      callback(...)
+    end
   end
 
+  local containerProto = buildPrototype(methods)
+
   function C_FunctionContainers.CreateCallback(fn)
-    return __wow_make_proxy_object("LuaFunctionContainer", functionContainerMethods, {
-      _callback = fn,
-      _cancelled = false,
-    })
+    if not isLuaFunction(fn) then
+      error("Usage: C_FunctionContainers.CreateCallback(callback)", 2)
+    end
+    return newObject(containerProto, { _callback = fn, _cancelled = false })
   end
 
   -- Real-WoW C_Timer contract (verified on retail 12.0.7 via
@@ -264,14 +338,14 @@ if rawget(C_FunctionContainers, "CreateCallback") == nil then
       if kind == "function" then
         return CreateCallback(callback)
       end
-      if kind == "table" and type(callback._callback) == "function" then
+      if kind == "userdata" and backing[callback] then
         return callback
       end
       error("bad argument #2 to '" .. fnName .. "' (function or callback expected)", 3)
     end
 
     local function bindHandle(container, handle)
-      local handles = rawget(container, "_timerHandles")
+      local handles = container._timerHandles
       if not handles then
         handles = {}
         container._timerHandles = handles
@@ -287,15 +361,17 @@ if rawget(C_FunctionContainers, "CreateCallback") == nil then
     end
 
     -- The engine fires this closure each tick; it invokes the wrapped function
-    -- with the container itself as the argument (retail passes the ticker), and
-    -- stops if the container was cancelled.
+    -- with a proxy of the container (retail passes a proxy of the ticker that
+    -- compares == to the handle), and stops if the container was cancelled. The
+    -- proxy is built once per registration to avoid per-tick allocation.
     local function makeInvoker(container)
       local fn = container._callback
+      local proxy = newProxyOf(container)
       return function()
         if container._cancelled then
           return
         end
-        return fn(container)
+        return fn(proxy)
       end
     end
 
@@ -505,8 +581,11 @@ mod tests {
                 curve:AddPoint(0, 10)
                 curve:AddPoint(10, 20)
                 if curve:Evaluate(5) ~= 15 then return "evaluate" end
-                local callback = C_FunctionContainers.CreateCallback(function(value) return value + 1 end)
-                if callback:Invoke(41) ~= 42 then return "invoke" end
+                local invoked = nil
+                local callback = C_FunctionContainers.CreateCallback(function(value) invoked = value end)
+                if type(callback) ~= "userdata" then return "callback_type" end
+                callback:Invoke(41)
+                if invoked ~= 41 then return "invoke" end
                 local value = { name = "proxy-value" }
                 if ProxyUtil.CreateProxy(value) ~= value then return "proxy_identity" end
                 local directory = ProxyUtil.CreateProxyDirectory()

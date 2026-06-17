@@ -103,7 +103,7 @@ wrong.
 static:
   createCallbackType        = userdata     (sim: table)
   containerCallableViaParen = false        (sim: false)
-  containerHasInvoke        = false         (sim: true  ← sim invents :Invoke)
+  containerHasInvoke        = false*        (*probe artifact — see note below)
   newTickerAcceptsContainer = true          (sim: false ← "function expected, got table")
   newTickerReturnType       = userdata
   tickerEqualsContainer     = true          (sim: returns a fresh {__id,Cancel} handle)
@@ -124,11 +124,19 @@ plainFunction (control):
 
 **The Feronn test encodes genuine retail behavior — the simulator has the bug, not the test.**
 
+> **Probe-bug correction:** `containerHasInvoke = false` above is a **false
+> negative**. The probe checked `type(cb)=="table" and type(cb.Invoke)=="function"`,
+> but retail `cb` is *userdata*, so the `and` short-circuited regardless of whether
+> `:Invoke` exists. Retail containers **do** have `:Invoke` — confirmed by the
+> retail-ground-truth test `Interface/AddOns/FcTest`. Don't read this row as
+> "retail lacks Invoke".
+
 On retail:
 
 - `C_FunctionContainers.CreateCallback(fn)` returns a **userdata** cancelable
-  object. It is **not** callable via `()` and has **no** `:Invoke` method — the
-  timer engine invokes it internally.
+  object with `:Cancel`, `:IsCancelled`, and `:Invoke` methods, a protected
+  metatable (`getmetatable() == false`), and per-instance field storage. It is
+  not callable via `()`.
 - `C_Timer.NewTicker` **accepts that container as its callback** and **returns the
   very same object** (`tickerEqualsContainer = true`; in the async run
   `obj1EqualsCb = true`). A ticker *is* a FunctionContainer.
@@ -139,33 +147,40 @@ On retail:
 - A plain-function callback is wrapped into a container too
   (`plainTickerEqualsFn = false`).
 
-The simulator diverges on every container-related point:
+The simulator (before the fix) diverged on every container-related point:
 
-1. `CreateCallback` → a Lua **table** with an invented `:Invoke` (retail: userdata, no `:Invoke`).
-2. `NewTicker` **rejects** a container callback (`bad argument #2 (function expected, got table)`); retail accepts it.
-3. `NewTicker` returns a fresh opaque `{__id, Cancel}` handle, not the callback container; retail returns the container itself.
+1. `CreateCallback` → a Lua **table** (retail: userdata).
+2. `NewTicker` **rejected** a container callback (`bad argument #2 (function expected, got table)`); retail accepts it.
+3. `NewTicker` returned a fresh opaque `{__id, Cancel}` handle, not the callback container; retail returns the container itself.
 
-The plain-function path matches retail (both reach 8/8). The gap is the
-FunctionContainer model: it should be the same object a ticker returns and accepts.
+The plain-function path matched retail (both reach 8/8). The gap was the
+FunctionContainer model.
 
 ### Fix (landed)
 
-Implemented in the container layer (`proxy_object_factories.rs`), engine
-unchanged:
+Containers are now **real userdata**, modeled on wowless's `luaobjects` using
+rilua's `newproxy` (one shared metatable per kind; instances via `newproxy(proto)`;
+a weak map from each userdata to its backing state table; `__eq` compares backing
+identity). This matches `FcTest` and the retail capture:
 
-- `C_Timer.After/NewTimer/NewTicker` accept a function **or** a container; a
-  plain function is wrapped in a fresh container.
-- `NewTimer`/`NewTicker` **return the callback container** (so a returned ticker
-  can be fed back in); per-registration iteration count is independent.
+- `CreateCallback` returns userdata: `type()=="userdata"`, `getmetatable()==false`,
+  `:Invoke`/`:Cancel`/`:IsCancelled`, read-only methods, per-instance fields,
+  rejects C functions (via `debug.getinfo(...).what=="C"`). `:Invoke` calls the
+  wrapped function and **returns nothing**.
+- `C_Timer.After/NewTimer/NewTicker` accept a function **or** a container; a plain
+  function is wrapped in a fresh container.
+- `NewTimer`/`NewTicker` **return the callback container** (a returned ticker can
+  be fed back in); per-registration iteration count is independent.
+- A fired callback receives a **proxy** of the container: `proxy == handle` (via
+  `__eq`) yet a distinct raw table key, sharing the handle's fields.
 - `container:Cancel()` cancels every timer the container backs.
 
 Notes:
 
 - Iteration state was already per-registration — the plain-function control
   passed before the fix too.
-- The invented `:Invoke` is **kept** (retail lacks it) because an in-repo test
-  addon (`FcTest`) depends on it; treat that and `type()=="table"` (retail
-  userdata) as known low-fidelity deviations, not behavior gaps.
 - Fixing this surfaced a latent GC bug: the timer-callback registry table was
   created without a write barrier, so it could be collected under the extra
-  allocation, dropping all timer callbacks. Fixed alongside.
+  allocation, dropping all timer callbacks. Fixed alongside (separate commit).
+- An inline self-test in `proxy_object_factories.rs` wrongly expected `:Invoke`
+  to return a value; corrected to match retail (returns nothing).
