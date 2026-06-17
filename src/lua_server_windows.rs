@@ -101,6 +101,14 @@ pub mod client {
         Err(UNSUPPORTED.into())
     }
 
+    pub fn mouse_move<P: AsRef<Path>>(_socket: P, _x: f32, _y: f32) -> Result<String, String> {
+        Err(UNSUPPORTED.into())
+    }
+
+    pub fn mouse_click<P: AsRef<Path>>(_socket: P, _x: f32, _y: f32) -> Result<String, String> {
+        Err(UNSUPPORTED.into())
+    }
+
     pub fn ping<P: AsRef<Path>>(_socket: P) -> Result<(), String> {
         Err(UNSUPPORTED.into())
     }
