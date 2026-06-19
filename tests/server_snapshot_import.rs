@@ -193,3 +193,46 @@ fn server_snapshot_addon_derives_active_edit_mode_layout_name_from_c_api() {
 
     assert_eq!(active_layout_name, "Ultrawide");
 }
+
+#[test]
+fn server_snapshot_addon_loads_edit_mode_before_capturing_layout_name() {
+    let env = WowLuaEnv::new().expect("Lua env");
+
+    env.exec(
+        r#"
+        ServerSnapshotDB = nil
+        EditModeManagerFrame = nil
+        C_EditMode = nil
+        ServerSnapshotTestLoadCalls = 0
+        UIParentLoadAddOn = function(name)
+            if name == "Blizzard_EditMode" then
+                ServerSnapshotTestLoadCalls = ServerSnapshotTestLoadCalls + 1
+                EditModeManagerFrame = {
+                    GetActiveLayoutInfo = function()
+                        return { layoutName = "Ultrawide" }
+                    end,
+                }
+                return true
+            end
+            return false
+        end
+        "#,
+    )
+    .expect("seed lazy EditMode addon");
+
+    env.exec(SERVER_SNAPSHOT_ADDON_LUA)
+        .expect("load ServerSnapshot addon");
+
+    let (load_calls, active_layout_name): (i64, String) = env
+        .eval(
+            r#"
+            local snapshot = ServerSnapshot:Snapshot("test")
+            local editMode = snapshot.editMode or {}
+            return ServerSnapshotTestLoadCalls, editMode.activeLayoutName or ""
+            "#,
+        )
+        .expect("snapshot active layout");
+
+    assert!(load_calls >= 1);
+    assert_eq!(active_layout_name, "Ultrawide");
+}

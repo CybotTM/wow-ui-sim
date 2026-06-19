@@ -528,7 +528,21 @@ local function editModeActiveLayoutName()
     return nil
 end
 
+local function loadEditModeAddon()
+    if type(UIParentLoadAddOn) == "function" then
+        local ok, loaded = call(UIParentLoadAddOn, "Blizzard_EditMode")
+        if ok and loaded then
+            return
+        end
+    end
+    if type(C_AddOns) == "table" and type(C_AddOns.LoadAddOn) == "function" then
+        call(C_AddOns.LoadAddOn, "Blizzard_EditMode")
+    end
+end
+
 local function snapshotEditMode()
+    loadEditModeAddon()
+
     local result = {
         activeLayoutName = editModeActiveLayoutName(),
     }
