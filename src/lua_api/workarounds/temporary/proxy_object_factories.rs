@@ -488,6 +488,11 @@ if CreateUnitHealPredictionCalculator == nil then
     return self._incomingHealOverflowPercent or 1
   end
 
+  function healPredictionMethods:GetCurrentHealth()
+    local values = self._predictedValues or healPredictionDefaultValues()
+    return values.health or 0
+  end
+
   function healPredictionMethods:GetMaximumHealth()
     local values = self._predictedValues or healPredictionDefaultValues()
     return values.healthMax or 0

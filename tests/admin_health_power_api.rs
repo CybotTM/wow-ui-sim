@@ -94,8 +94,10 @@ fn unit_detailed_heal_prediction_populates_calculator() {
         incoming_from_healer,
         incoming_from_others,
         incoming_clamped,
+        current_health,
+        maximum_health,
         has_secret_values,
-    ): (i32, i32, i32, i32, i32, i32, i32, i32, bool, bool) = env
+    ): (i32, i32, i32, i32, i32, i32, i32, i32, bool, i32, i32, bool) = env
         .eval(
             r##"
             A_Admin.SetPlayerHealth(75000, 200000)
@@ -112,6 +114,8 @@ fn unit_detailed_heal_prediction_populates_calculator() {
                    fromHealer,
                    fromOthers,
                    clamped,
+                   calculator:GetCurrentHealth(),
+                   calculator:GetMaximumHealth(),
                    calculator:HasSecretValues()
         "##,
         )
@@ -125,6 +129,8 @@ fn unit_detailed_heal_prediction_populates_calculator() {
     assert_eq!(incoming_from_healer, 0);
     assert_eq!(incoming_from_others, 0);
     assert!(!incoming_clamped);
+    assert_eq!(current_health, 75000);
+    assert_eq!(maximum_health, 200000);
     assert!(!has_secret_values);
 }
 
