@@ -188,6 +188,69 @@ local function __wow_merge_namespace(existing, defaults)
   return namespace
 end
 
+local __WOW_BATTLEPAY_CARD_MEDIUM_WITH_BUY = 5
+local __WOW_BATTLEPAY_DECORATOR_VAS_SERVICE = 3
+local __WOW_PURCHASE_ELIGIBILITY_OK = 0
+local __WOW_VAS_SERVICE_NAME_CHANGE = 0
+local __WOW_VAS_SERVICE_CHARACTER_TRANSFER = 4
+local __WOW_VAS_SERVICE_GUILD_TRANSFER = 8
+
+local function __wow_restore_secure_enum(enumName, values)
+  local secureenv = rawget(_G, "__secureenv")
+  if type(secureenv) ~= "table" then
+    return
+  end
+
+  local enum = rawget(secureenv, "Enum")
+  if type(enum) ~= "table" then
+    enum = {}
+    rawset(secureenv, "Enum", enum)
+  end
+
+  if rawget(enum, enumName) == nil then
+    rawset(enum, enumName, values)
+  end
+end
+
+__wow_restore_secure_enum("BattlepayCardType", {
+  SmallCard = 0,
+  MediumCard = 1,
+  LargeHorizontalCard = 2,
+  LargeVeritcalCard = 3,
+  FullCardWithBuyButton = 4,
+  MediumCardWithBuyButton = __WOW_BATTLEPAY_CARD_MEDIUM_WITH_BUY,
+  LargeHorizontalCardWithBuyButton = 6,
+  LargeVeritcalCardWithBuyButton = 7,
+  FullCardWithNydusLinkButton = 8,
+  LargeVeritcalPageableCardWithBuyButton = 9,
+})
+__wow_restore_secure_enum("BattlepayProductDecorator", {
+  Boost = 0,
+  Expansion = 1,
+  WoWToken = 2,
+  VasService = __WOW_BATTLEPAY_DECORATOR_VAS_SERVICE,
+})
+__wow_restore_secure_enum("PurchaseEligibility", {
+  Ok = __WOW_PURCHASE_ELIGIBILITY_OK,
+  PartiallyOwned = 1,
+  Owned = 2,
+  ExpansionTooLow = 3,
+  ExpansionTooHigh = 4,
+  MissingRequiredDeliverable = 5,
+})
+__wow_restore_secure_enum("VasServiceType", {
+  NameChange = __WOW_VAS_SERVICE_NAME_CHANGE,
+  FactionChange = 1,
+  AppearanceChange = 2,
+  RaceChange = 3,
+  CharacterTransfer = __WOW_VAS_SERVICE_CHARACTER_TRANSFER,
+  FactionTransfer = 5,
+  GuildNameChange = 6,
+  GuildFactionChange = 7,
+  GuildTransfer = __WOW_VAS_SERVICE_GUILD_TRANSFER,
+  GuildFactionTransfer = 9,
+})
+
 local function __wow_seed_namespace_names()
   for key, value in pairs(_G) do
     if type(key) == "string" and key:match("^C_[A-Za-z0-9_]+$") and type(value) == "table" then
@@ -259,10 +322,10 @@ if type(__wow_store_state) ~= "table" then
   local featuredGroupID = 501
   local featuredEntryID = 1003
   local featuredProductID = 2003
-  local vasServiceType = Enum.VasServiceType and Enum.VasServiceType.NameChange or 1
-  local vasDecorator = Enum.BattlepayProductDecorator and Enum.BattlepayProductDecorator.VasService or 0
-  local fullCardWithBuy = Enum.BattlepayCardType and Enum.BattlepayCardType.MediumCardWithBuyButton or 0
-  local purchasable = Enum.PurchaseEligibility and (Enum.PurchaseEligibility.Ok or Enum.PurchaseEligibility.Purchasable) or 0
+  local vasServiceType = __WOW_VAS_SERVICE_NAME_CHANGE
+  local vasDecorator = __WOW_BATTLEPAY_DECORATOR_VAS_SERVICE
+  local fullCardWithBuy = __WOW_BATTLEPAY_CARD_MEDIUM_WITH_BUY
+  local purchasable = __WOW_PURCHASE_ELIGIBILITY_OK
   local regionUS = REGION_US or 1
 
   local featuredEntry = {
@@ -344,12 +407,8 @@ if type(__wow_store_state) ~= "table" then
         hideBrowseNotice = false,
         hideConfirmationBrowseNotice = false,
         licenseAcceptText = "",
-        formatShort = function(dollars, cents)
-          return string.format("$%d.%02d", dollars or 0, cents or 0)
-        end,
-        formatLong = function(dollars, cents)
-          return string.format("$%d.%02d", dollars or 0, cents or 0)
-        end,
+        formatShort = "%s",
+        formatLong = "%s",
       },
     },
     completion = {
@@ -381,61 +440,17 @@ local function __wow_store_character_by_guid(guid)
   return nil
 end
 
-local function __wow_store_patch_card_enumerator()
-  if not StoreFrame or not StoreFrame.productCardPoolCollection then
-    return
+local function __wow_store_frame()
+  local frame = rawget(_G, "StoreFrame")
+  if frame ~= nil then
+    return frame
   end
 
-  local pool = StoreFrame.productCardPoolCollection
-  if pool.__wowSimPatched then
-    return
+  local secureenv = rawget(_G, "__secureenv")
+  if type(secureenv) == "table" then
+    return rawget(secureenv, "StoreFrame")
   end
-
-  local originalEnumerateActive = pool.EnumerateActive
-  pool.__wowSimPatched = true
-  function pool:EnumerateActive()
-    if type(StoreFrame.__wowSimCards) == "table" and #StoreFrame.__wowSimCards > 0 then
-      local cards = StoreFrame.__wowSimCards
-      local index = 0
-      return function()
-        index = index + 1
-        return cards[index]
-      end, nil, nil
-    end
-    if type(originalEnumerateActive) == "function" then
-      return originalEnumerateActive(self)
-    end
-    return function()
-      return nil
-    end, nil, nil
-  end
-end
-
-local function __wow_store_ensure_debug_cards()
-  if not StoreFrame or not StoreFrame.productCardPoolCollection then
-    return
-  end
-
-  __wow_store_patch_card_enumerator()
-  if type(StoreFrame.__wowSimCards) == "table" and #StoreFrame.__wowSimCards > 0 then
-    return
-  end
-
-  local card = CreateFrame("Button", "WowStoreSimCard1", StoreFrame, "MediumStoreCardWithBuyButtonTemplate")
-  if not card then
-    return
-  end
-
-  card:SetID(1003)
-  card:SetPoint("TOPLEFT", StoreFrame, "TOPLEFT", 40, -140)
-  card:SetSize(277, 224)
-  card:Show()
-
-  if type(card.UpdateCard) == "function" then
-    pcall(card.UpdateCard, card, 1003, true)
-  end
-
-  StoreFrame.__wowSimCards = { card }
+  return nil
 end
 
 C_StoreSecure = __wow_merge_namespace(C_StoreSecure, {})
@@ -467,19 +482,19 @@ C_StoreSecure.GetPurchaseList = function()
   return true
 end
 C_StoreSecure.GetProductList = function()
-  local storeShown = StoreFrame and type(StoreFrame.IsShown) == "function" and StoreFrame:IsShown()
+  local storeFrame = __wow_store_frame()
+  local storeShown = storeFrame and type(storeFrame.IsShown) == "function" and storeFrame:IsShown()
   if storeShown then
     FireEvent("STORE_PRODUCTS_UPDATED")
     FireEvent("PRODUCT_DISTRIBUTIONS_UPDATED")
-    if type(StoreFrame_OnEvent) == "function" and StoreFrame then
-      StoreFrame_OnEvent(StoreFrame, "STORE_PRODUCTS_UPDATED")
+    if type(StoreFrame_OnEvent) == "function" then
+      StoreFrame_OnEvent(storeFrame, "STORE_PRODUCTS_UPDATED")
     elseif type(StoreFrame_UpdateSelectedCategory) == "function" then
       StoreFrame_UpdateSelectedCategory()
       if type(StoreFrame_SetCategory) == "function" then
         StoreFrame_SetCategory(true)
       end
     end
-    __wow_store_ensure_debug_cards()
   end
   return true
 end
@@ -727,11 +742,11 @@ local __wow_store_products = {
       description = "Simulator store product.",
       tooltip = "",
       texture = "Interface\\Icons\\INV_Misc_Note_02",
-      productDecorator = Enum.BattlepayProductDecorator.VasService,
-      vasServiceType = Enum.VasServiceType.NameChange,
-      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      productDecorator = __WOW_BATTLEPAY_DECORATOR_VAS_SERVICE,
+      vasServiceType = __WOW_VAS_SERVICE_NAME_CHANGE,
+      cardType = __WOW_BATTLEPAY_CARD_MEDIUM_WITH_BUY,
       flags = 0,
-      eligibility = Enum.PurchaseEligibility.Ok,
+      eligibility = __WOW_PURCHASE_ELIGIBILITY_OK,
       buyableHere = true,
       currentDollars = 10,
       currentCents = 0,
@@ -752,11 +767,11 @@ local __wow_store_products = {
       description = "Simulator character transfer.",
       tooltip = "",
       texture = "Interface\\Icons\\INV_Misc_Note_02",
-      productDecorator = Enum.BattlepayProductDecorator.VasService,
-      vasServiceType = Enum.VasServiceType.CharacterTransfer,
-      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      productDecorator = __WOW_BATTLEPAY_DECORATOR_VAS_SERVICE,
+      vasServiceType = __WOW_VAS_SERVICE_CHARACTER_TRANSFER,
+      cardType = __WOW_BATTLEPAY_CARD_MEDIUM_WITH_BUY,
       flags = 0,
-      eligibility = Enum.PurchaseEligibility.Ok,
+      eligibility = __WOW_PURCHASE_ELIGIBILITY_OK,
       buyableHere = true,
       currentDollars = 25,
       currentCents = 0,
@@ -777,11 +792,11 @@ local __wow_store_products = {
       description = "Simulator transfer bundle.",
       tooltip = "",
       texture = "Interface\\Icons\\INV_Misc_Note_02",
-      productDecorator = Enum.BattlepayProductDecorator.VasService,
-      vasServiceType = Enum.VasServiceType.CharacterTransfer,
-      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      productDecorator = __WOW_BATTLEPAY_DECORATOR_VAS_SERVICE,
+      vasServiceType = __WOW_VAS_SERVICE_CHARACTER_TRANSFER,
+      cardType = __WOW_BATTLEPAY_CARD_MEDIUM_WITH_BUY,
       flags = 0,
-      eligibility = Enum.PurchaseEligibility.Ok,
+      eligibility = __WOW_PURCHASE_ELIGIBILITY_OK,
       buyableHere = true,
       currentDollars = 25,
       currentCents = 0,
@@ -802,11 +817,11 @@ local __wow_store_products = {
       description = "Simulator guild transfer.",
       tooltip = "",
       texture = "Interface\\Icons\\INV_Misc_Note_02",
-      productDecorator = Enum.BattlepayProductDecorator.VasService,
-      vasServiceType = Enum.VasServiceType.GuildTransfer,
-      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      productDecorator = __WOW_BATTLEPAY_DECORATOR_VAS_SERVICE,
+      vasServiceType = __WOW_VAS_SERVICE_GUILD_TRANSFER,
+      cardType = __WOW_BATTLEPAY_CARD_MEDIUM_WITH_BUY,
       flags = 0,
-      eligibility = Enum.PurchaseEligibility.Ok,
+      eligibility = __WOW_PURCHASE_ELIGIBILITY_OK,
       buyableHere = true,
       currentDollars = 35,
       currentCents = 0,
@@ -827,11 +842,11 @@ local __wow_store_products = {
       description = "Simulator guild transfer bundle.",
       tooltip = "",
       texture = "Interface\\Icons\\INV_Misc_Note_02",
-      productDecorator = Enum.BattlepayProductDecorator.VasService,
-      vasServiceType = Enum.VasServiceType.GuildTransfer,
-      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      productDecorator = __WOW_BATTLEPAY_DECORATOR_VAS_SERVICE,
+      vasServiceType = __WOW_VAS_SERVICE_GUILD_TRANSFER,
+      cardType = __WOW_BATTLEPAY_CARD_MEDIUM_WITH_BUY,
       flags = 0,
-      eligibility = Enum.PurchaseEligibility.Ok,
+      eligibility = __WOW_PURCHASE_ELIGIBILITY_OK,
       buyableHere = true,
       currentDollars = 35,
       currentCents = 0,
@@ -876,28 +891,28 @@ if rawget(C_StoreSecure, "_state") == nil then
   C_StoreSecure._state = __wow_store_secure_state
 end
 if rawget(C_StoreSecure, "IsAvailable") == nil then
-  function C_StoreSecure.IsAvailable() return C_StoreSecure._state.available end
+  function C_StoreSecure.IsAvailable() return __wow_store_secure_state.available end
 end
 if rawget(C_StoreSecure, "HasPurchaseList") == nil then
-  function C_StoreSecure.HasPurchaseList() return C_StoreSecure._state.has_purchase_list end
+  function C_StoreSecure.HasPurchaseList() return __wow_store_secure_state.has_purchase_list end
 end
 if rawget(C_StoreSecure, "HasProductList") == nil then
-  function C_StoreSecure.HasProductList() return C_StoreSecure._state.has_product_list end
+  function C_StoreSecure.HasProductList() return __wow_store_secure_state.has_product_list end
 end
 if rawget(C_StoreSecure, "HasDistributionList") == nil then
-  function C_StoreSecure.HasDistributionList() return C_StoreSecure._state.has_distribution_list end
+  function C_StoreSecure.HasDistributionList() return __wow_store_secure_state.has_distribution_list end
 end
 function C_StoreSecure.HasPurchaseInProgress()
-  return C_StoreSecure._state.purchase_in_progress
+  return __wow_store_secure_state.purchase_in_progress
 end
 if rawget(C_StoreSecure, "IsRegionLocked") == nil then
-  function C_StoreSecure.IsRegionLocked() return C_StoreSecure._state.region_locked end
+  function C_StoreSecure.IsRegionLocked() return __wow_store_secure_state.region_locked end
 end
 if rawget(C_StoreSecure, "GetLastProductListResponseError") == nil then
-  function C_StoreSecure.GetLastProductListResponseError() return C_StoreSecure._state.last_product_list_response_error end
+  function C_StoreSecure.GetLastProductListResponseError() return __wow_store_secure_state.last_product_list_response_error end
 end
 if rawget(C_StoreSecure, "GetVASErrors") == nil then
-  function C_StoreSecure.GetVASErrors() return C_StoreSecure._state.vas_errors end
+  function C_StoreSecure.GetVASErrors() return __wow_store_secure_state.vas_errors end
 end
 if rawget(C_StoreSecure, "GetCurrencyInfo") == nil then
   function C_StoreSecure.GetCurrencyInfo()
@@ -955,6 +970,10 @@ if rawget(C_StoreSecure, "GetProductList") == nil then
   function C_StoreSecure.GetProductList()
     __wow_store_secure_state.has_product_list = true
     FireEvent("STORE_PRODUCTS_UPDATED")
+    local storeFrame = __wow_store_frame()
+    if storeFrame and type(StoreFrame_OnEvent) == "function" then
+      StoreFrame_OnEvent(storeFrame, "STORE_PRODUCTS_UPDATED")
+    end
     return nil
   end
 end
@@ -972,14 +991,14 @@ if rawget(C_StoreSecure, "GetDistributionList") == nil then
   end
 end
 function C_StoreSecure.GetFailureInfo()
-  return C_StoreSecure._state.failure_code, C_StoreSecure._state.failure_reason
+  return __wow_store_secure_state.failure_code, __wow_store_secure_state.failure_reason
 end
 function C_StoreSecure.AckFailure()
-  C_StoreSecure._state.failure_code = nil
-  C_StoreSecure._state.failure_reason = nil
+  __wow_store_secure_state.failure_code = nil
+  __wow_store_secure_state.failure_reason = nil
 end
 function C_StoreSecure.ClearPreGeneratedExternalTransactionID()
-  C_StoreSecure._state.pre_generated_external_transaction_id = false
+  __wow_store_secure_state.pre_generated_external_transaction_id = false
 end
 function C_StoreSecure.OpenNydusLink(productID)
   local normalized = tonumber(productID) or 0
@@ -988,14 +1007,14 @@ function C_StoreSecure.OpenNydusLink(productID)
   end
   local product = __wow_store_product(normalized)
   if product then
-    C_StoreSecure._state.confirmation_product_id = normalized
-    C_StoreSecure._state.confirmation_wallet_name = "Blizzard Balance"
-    C_StoreSecure._state.confirmation_current_dollars = product.sharedData.currentDollars
-    C_StoreSecure._state.confirmation_current_cents = product.sharedData.currentCents
+    __wow_store_secure_state.confirmation_product_id = normalized
+    __wow_store_secure_state.confirmation_wallet_name = "Blizzard Balance"
+    __wow_store_secure_state.confirmation_current_dollars = product.sharedData.currentDollars
+    __wow_store_secure_state.confirmation_current_cents = product.sharedData.currentCents
   end
 end
 function C_StoreSecure.GetConfirmationInfo()
-  return C_StoreSecure._state.confirmation_product_id, C_StoreSecure._state.confirmation_wallet_name, nil, nil, C_StoreSecure._state.confirmation_current_dollars, C_StoreSecure._state.confirmation_current_cents
+  return __wow_store_secure_state.confirmation_product_id, __wow_store_secure_state.confirmation_wallet_name, nil, nil, __wow_store_secure_state.confirmation_current_dollars, __wow_store_secure_state.confirmation_current_cents
 end
 if rawget(C_StoreSecure, "GetUnrevokedBoostInfo") == nil then
   function C_StoreSecure.GetUnrevokedBoostInfo()
@@ -1003,46 +1022,46 @@ if rawget(C_StoreSecure, "GetUnrevokedBoostInfo") == nil then
   end
 end
 function C_StoreSecure.GetVASCompletionInfo()
-  return C_StoreSecure._state.completion_product_id, C_StoreSecure._state.completion_guid, C_StoreSecure._state.completion_realm_name, C_StoreSecure._state.completion_should_handle
+  return __wow_store_secure_state.completion_product_id, __wow_store_secure_state.completion_guid, __wow_store_secure_state.completion_realm_name, __wow_store_secure_state.completion_should_handle
 end
 function C_StoreSecure.SetDisconnectOnLogout(disconnectOnLogout)
-  C_StoreSecure._state.disconnect_on_logout = disconnectOnLogout and true or false
-  if C_StoreSecure._state.completion_product_id then
-    C_StoreSecure._state.completion_should_handle = C_StoreSecure._state.disconnect_on_logout
+  __wow_store_secure_state.disconnect_on_logout = disconnectOnLogout and true or false
+  if __wow_store_secure_state.completion_product_id then
+    __wow_store_secure_state.completion_should_handle = __wow_store_secure_state.disconnect_on_logout
   end
 end
 function C_StoreSecure.SetVASProductReady(ready)
-  if ready and C_StoreSecure._state.completion_product_id then
-    C_StoreSecure._state.purchase_in_progress = false
+  if ready and __wow_store_secure_state.completion_product_id then
+    __wow_store_secure_state.purchase_in_progress = false
     FireEvent("STORE_VAS_PURCHASE_COMPLETE")
   end
 end
 function C_StoreSecure.PurchaseVASProduct(productID, guid, _name, _oldGuildName, _newGuildMasterGuid, realmValue, _wowAccountGuid, _bnetAccountGuid, _transferFactionChangeBundle, _isGuildFollow)
-  if C_StoreSecure._state.completion_product_id and C_StoreSecure._state.pre_generated_external_transaction_id then
-    C_StoreSecure._state.failure_code = Enum.StoreError.Other
-    C_StoreSecure._state.failure_reason = "DuplicateVASPurchase"
+  if __wow_store_secure_state.completion_product_id and __wow_store_secure_state.pre_generated_external_transaction_id then
+    __wow_store_secure_state.failure_code = Enum.StoreError.Other
+    __wow_store_secure_state.failure_reason = "DuplicateVASPurchase"
     return false
   end
 
   local product = __wow_store_product(productID)
   if not product then
-    C_StoreSecure._state.failure_code = Enum.StoreError.Other
-    C_StoreSecure._state.failure_reason = "UnknownVASProduct"
+    __wow_store_secure_state.failure_code = Enum.StoreError.Other
+    __wow_store_secure_state.failure_reason = "UnknownVASProduct"
     return false
   end
 
-  C_StoreSecure._state.confirmation_product_id = productID
-  C_StoreSecure._state.confirmation_wallet_name = "Blizzard Balance"
-  C_StoreSecure._state.confirmation_current_dollars = product.sharedData.currentDollars
-  C_StoreSecure._state.confirmation_current_cents = product.sharedData.currentCents
-  C_StoreSecure._state.completion_product_id = productID
-  C_StoreSecure._state.completion_guid = guid
-  C_StoreSecure._state.completion_realm_name = __wow_store_realm_name(realmValue)
-  C_StoreSecure._state.completion_should_handle = C_StoreSecure._state.disconnect_on_logout
-  C_StoreSecure._state.purchase_in_progress = true
-  C_StoreSecure._state.pre_generated_external_transaction_id = true
-  C_StoreSecure._state.failure_code = nil
-  C_StoreSecure._state.failure_reason = nil
+  __wow_store_secure_state.confirmation_product_id = productID
+  __wow_store_secure_state.confirmation_wallet_name = "Blizzard Balance"
+  __wow_store_secure_state.confirmation_current_dollars = product.sharedData.currentDollars
+  __wow_store_secure_state.confirmation_current_cents = product.sharedData.currentCents
+  __wow_store_secure_state.completion_product_id = productID
+  __wow_store_secure_state.completion_guid = guid
+  __wow_store_secure_state.completion_realm_name = __wow_store_realm_name(realmValue)
+  __wow_store_secure_state.completion_should_handle = __wow_store_secure_state.disconnect_on_logout
+  __wow_store_secure_state.purchase_in_progress = true
+  __wow_store_secure_state.pre_generated_external_transaction_id = true
+  __wow_store_secure_state.failure_code = nil
+  __wow_store_secure_state.failure_reason = nil
   return true
 end
 if rawget(C_StoreSecure, "PurchaseProduct") == nil then
@@ -1052,8 +1071,8 @@ if rawget(C_StoreSecure, "PurchaseProduct") == nil then
 end
 if rawget(C_StoreSecure, "PurchaseProductConfirm") == nil then
   function C_StoreSecure.PurchaseProductConfirm(confirm, _dollars, _cents)
-    if confirm and C_StoreSecure._state.completion_product_id then
-      C_StoreSecure._state.purchase_in_progress = false
+    if confirm and __wow_store_secure_state.completion_product_id then
+      __wow_store_secure_state.purchase_in_progress = false
       FireEvent("STORE_VAS_PURCHASE_COMPLETE")
     end
     return true
@@ -1061,13 +1080,13 @@ if rawget(C_StoreSecure, "PurchaseProductConfirm") == nil then
 end
 if rawget(C_StoreSecure, "ValidateBnetTransfer") == nil then
   function C_StoreSecure.ValidateBnetTransfer(_email)
-    C_StoreSecure._state.bnet_transfer_validated = true
+    __wow_store_secure_state.bnet_transfer_validated = true
     FireEvent("VAS_TRANSFER_VALIDATION_UPDATE", false)
   end
 end
 if rawget(C_StoreSecure, "GetBnetTransferInfo") == nil then
   function C_StoreSecure.GetBnetTransferInfo()
-    return C_StoreSecure._state.bnet_transfer_guid, C_StoreSecure._state.bnet_transfer_game_accounts
+    return __wow_store_secure_state.bnet_transfer_guid, __wow_store_secure_state.bnet_transfer_game_accounts
   end
 end
 if rawget(C_StoreSecure, "GetWoWAccountGUIDFromName") == nil then
@@ -1105,7 +1124,7 @@ if rawget(C_StoreSecure, "GetCharacterInfoByGUID") == nil then
 end
 if rawget(C_StoreSecure, "GetEligibleRacesForVASService") == nil then
   function C_StoreSecure.GetEligibleRacesForVASService(_characterGuid, vasServiceType)
-    if vasServiceType == Enum.VasServiceType.NameChange then
+    if vasServiceType == __WOW_VAS_SERVICE_NAME_CHANGE then
       return {
         { raceName = "Human", isAlliedRace = false, isHeritageArmorUnlocked = true },
         { raceName = "Void Elf", isAlliedRace = true, isHeritageArmorUnlocked = true },
@@ -1123,11 +1142,11 @@ if rawget(C_StoreSecure, "GetVasServiceType") == nil then
   function C_StoreSecure.GetVasServiceType(productID)
     local normalized = tonumber(productID) or -1
     if normalized == 2003 then
-      return Enum.VasServiceType.NameChange
+      return __WOW_VAS_SERVICE_NAME_CHANGE
     elseif normalized == 189 or normalized == 239 then
-      return Enum.VasServiceType.CharacterTransfer
+      return __WOW_VAS_SERVICE_CHARACTER_TRANSFER
     elseif normalized == 476 or normalized == 477 then
-      return Enum.VasServiceType.GuildTransfer
+      return __WOW_VAS_SERVICE_GUILD_TRANSFER
     end
     return nil
   end
@@ -1144,13 +1163,13 @@ if rawget(C_StoreSecure, "RequestCharacterGuildFollowInfo") == nil then
 end
 if rawget(C_StoreSecure, "AckFailure") == nil then
   function C_StoreSecure.AckFailure()
-    C_StoreSecure._state.failure_code = nil
-    C_StoreSecure._state.failure_reason = nil
+    __wow_store_secure_state.failure_code = nil
+    __wow_store_secure_state.failure_reason = nil
   end
 end
 if rawget(C_StoreSecure, "ClearPreGeneratedExternalTransactionID") == nil then
   function C_StoreSecure.ClearPreGeneratedExternalTransactionID()
-    C_StoreSecure._state.pre_generated_external_transaction_id = false
+    __wow_store_secure_state.pre_generated_external_transaction_id = false
   end
 end
 

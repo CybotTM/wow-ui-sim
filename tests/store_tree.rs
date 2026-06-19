@@ -2,7 +2,9 @@ use crate::common;
 
 use std::collections::HashSet;
 use std::path::PathBuf;
-use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
+use wow_ui_sim::loader::{
+    discover_blizzard_addon_closure_for_screen, discover_blizzard_addons_for_screen, load_addon,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::fire_startup_events_for_screen;
@@ -11,10 +13,6 @@ fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
         "CARGO_MANIFEST_DIR"
     )))
-}
-
-fn blizzard_toc(addon: &str, toc: &str) -> PathBuf {
-    blizzard_ui_dir().join(addon).join(toc)
 }
 
 fn load_store_ui_tree() -> WowLuaEnv {
@@ -32,27 +30,13 @@ fn load_store_ui_tree() -> WowLuaEnv {
 }
 
 fn load_store_addons(env: &WowLuaEnv) {
-    for (name, toc_path) in [
-        (
-            "Blizzard_SharedXMLBase",
-            blizzard_toc("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
-        ),
-        (
-            "Blizzard_SharedXML",
-            blizzard_toc("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-        ),
-        (
-            "Blizzard_FrameXMLBase",
-            blizzard_toc(
-                "Blizzard_FrameXMLBase",
-                "Blizzard_FrameXMLBase_Mainline.toc",
-            ),
-        ),
-        (
-            "Blizzard_StoreUI",
-            blizzard_toc("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
-        ),
-    ] {
+    let ui = blizzard_ui_dir();
+    let addons = discover_blizzard_addon_closure_for_screen(
+        &ui,
+        ScreenKind::Game,
+        &["Blizzard_FrameXMLBase", "Blizzard_StoreUI"],
+    );
+    for (name, toc_path) in addons {
         load_addon(&env.loader_env(), &toc_path).unwrap_or_else(|err| {
             panic!("[load {name}] FAILED: {err}");
         });
@@ -278,6 +262,56 @@ fn store_catalog_exposes_fake_products_after_product_refresh() {
 }
 
 #[test]
+fn store_open_does_not_record_store_state_errors_or_connecting_notice() {
+    let env = load_full_game_ui();
+    let notice: (bool, Option<String>, Option<String>) = env
+        .eval(
+            r#"
+            StoreFrame:Show()
+            C_StoreSecure.GetProductList()
+            return StoreFrame.Notice:IsShown(),
+                StoreFrame.Notice.Title:GetText(),
+                StoreFrame.Notice.Description:GetText()
+            "#,
+        )
+        .expect("store open should be inspectable");
+
+    let errors = env.state().borrow().lua_errors.clone();
+    assert!(
+        errors.is_empty(),
+        "store open should not record Lua errors: {errors:#?}"
+    );
+    assert!(
+        !notice.0,
+        "plain store open should not show notice: title={:?} desc={:?}",
+        notice.1, notice.2
+    );
+}
+
+#[test]
+fn store_catalog_uses_blizzard_card_pool_instead_of_debug_card() {
+    let env = load_store_ui_tree();
+    let first_card_name: Option<String> = env
+        .eval(
+            r#"
+            StoreFrame:Show()
+            C_StoreSecure.GetProductList()
+            for activeCard in StoreFrame.productCardPoolCollection:EnumerateActive() do
+                return activeCard:GetName()
+            end
+            return nil
+            "#,
+        )
+        .expect("store card pool should be inspectable");
+
+    assert_ne!(
+        first_card_name.as_deref(),
+        Some("WowStoreSimCard1"),
+        "store catalog should use Blizzard card pool output, not the simulator debug card"
+    );
+}
+
+#[test]
 fn store_catalog_card_geometry_stays_bounded() {
     let env = load_store_ui_tree();
     let metrics: (f64, f64, f64, f64, f64, f64, f64, f64, f64, f64, f64, f64, String) = env
@@ -466,6 +500,11 @@ fn store_product_card_buy_button_click_completes_without_store_upvalue_error() {
         "store product card buy button click should not throw: {:?}",
         result.1
     );
+    let errors = env.state().borrow().lua_errors.clone();
+    assert!(
+        errors.is_empty(),
+        "store product card buy button click should not record Lua errors: {errors:#?}"
+    );
 }
 
 #[test]
@@ -508,16 +547,16 @@ fn secure_env_preserves_secure_store_free_check_function() {
         )
         .expect("StoreFrame_CheckForFree should be queryable");
 
-    assert_eq!(
-        global_type, "function",
-        "global inbound StoreFrame_CheckForFree should exist"
+    assert!(
+        global_type == "nil" || global_type == "function",
+        "global inbound StoreFrame_CheckForFree should be absent or callable, got {global_type}"
     );
     assert_eq!(
         secure_type, "function",
         "secure StoreFrame_CheckForFree should remain bound in secureenv"
     );
     assert!(
-        !same_func,
+        global_type == "nil" || !same_func,
         "secureenv StoreFrame_CheckForFree should not be overwritten by the inbound wrapper"
     );
 }

@@ -333,6 +333,37 @@ fn test_frame_pool_collection_get_or_create_pool() {
 }
 
 #[test]
+fn test_frame_pool_collection_returns_proxy_surface() {
+    let env = env();
+    env.exec(
+        r#"
+        local coll = CreateFramePoolCollection()
+        assert(coll.pools == nil, "Collection proxy must not expose the private pool map")
+        assert(type(coll.GetPool) == "function", "Collection proxy should expose GetPool")
+
+        local template = ""
+        coll:CreatePool("Frame", UIParent, template)
+
+        local pool = coll:GetPool(template)
+        assert(pool ~= nil, "GetPool should return the created pool proxy")
+
+        local frame = coll:Acquire(template)
+        assert(frame ~= nil, "Collection Acquire should acquire from the created pool")
+        assert(frame:GetObjectType() == "Frame", "Collection Acquire should return a frame")
+
+        local secureenv = rawget(_G, "__secureenv")
+        assert(type(secureenv) == "table", "secureenv should be installed")
+        local secureCreator = rawget(secureenv, "CreateFramePoolCollection")
+        assert(type(secureCreator) == "function", "secureenv should expose CreateFramePoolCollection")
+        local secureColl = secureCreator()
+        assert(secureColl.pools == nil, "Secure collection proxy must not expose the private pool map")
+        assert(type(secureColl.GetPool) == "function", "Secure collection proxy should expose GetPool")
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
 fn test_frame_pool_collection_acquire_from_pool() {
     let env = env();
     env.exec(

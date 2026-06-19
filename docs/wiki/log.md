@@ -1256,6 +1256,10 @@ Pages created:
 
 Created `investigations/addon-startup-settings-and-item-load.md` to capture the root causes behind addon startup errors: registered Settings canvases must start hidden, forbidden attribute delegates need secure dispatch, item subclasses must return enUS keyword-compatible names or nil, and positive live item IDs need synthetic placeholder item info so item-load callbacks terminate.
 
+## [2026-06-19] create | Retail Store secure pool constructor mismatch
+
+Created `investigations/store-secure-pool-constructors.md` after fixing the retail Store blank/red card state. Root cause: Store code runs in `__secureenv`, whose `CreateFramePoolCollection` still pointed at the simulator fallback after `Blizzard_SharedXMLBase` installed Blizzard's proxy-backed constructor in `_G`. The fix syncs real pool/factory constructors into `__secureenv` after SharedXMLBase loads and pins the behavior with Store tree, pool surface, and text-cache corruption tests.
+
 ## [2026-05-26] update | C API temporary shim module retired
 
 Updated `reference/api-coverage.md` after moving the last `src/c_api/temporary_shims` surface (`C_TransmogOutfitInfo` slot/outfit defaults) into `src/lua_api/workarounds/temporary/` and deleting the empty C API temporary-shim module. Temporary unmodeled `C_*` defaults now belong in Lua workaround modules; `src/c_api/permanent_shims/` remains only for intentional unsupported domains.

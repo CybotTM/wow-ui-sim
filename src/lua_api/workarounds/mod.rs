@@ -475,6 +475,10 @@ pub(crate) fn patch_runtime_surface_for_addon_load(
     env: &crate::lua_api::LoaderEnv<'_>,
     folder_name: &str,
 ) {
+    if folder_name == "Blizzard_SharedXMLBase" {
+        let _ = temporary::pool_constructor_defaults::sync_secure_env_after_shared_xml_base(env);
+    }
+
     let patch_fns: &[&str] = match folder_name {
         "Blizzard_CharacterSelectNavBar" => &["__wow_patch_character_select_nav_bar"],
         "Blizzard_UIParent"

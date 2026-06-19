@@ -44,6 +44,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | Page | Summary |
 |------|---------|
 | [[lib-test-failure-sweep-2026-06]] | Nine accumulated lib-test failures: ScriptErrors missing from runtime foundations inverted the SharedXMLBase load order; `hooksecurefunc(C_AddOns, "LoadAddOn")` is silently refused so post-load repairs must use `apply_blizzard_post_load_patches`; two more pieces of code lost in the classic rebase; duplicated `== nil`-guarded Lua installers drifting; tests stale against deliberate semantic changes |
+| [[store-secure-pool-constructors]] | Retail Store blank/red cards came from `__secureenv.CreateFramePoolCollection` retaining the simulator fallback after `Blizzard_SharedXMLBase` replaced `_G` with Blizzard's proxy-backed constructor; post-load sync now keeps secure Store code on the real pool surface |
 | [[action-button-icon-mask]] | Main action-button icons vanished because `UI-HUD-ActionBar-IconFrame-Mask` stores coverage in alpha while the minimap mask fix sampled RGB intensity; renderer now marks alpha-backed masks with a shader flag |
 | [[action-bar-spell-icons]] | 4 bugs: SetDrawLayer no-op, draw order, sublevel ignored, textureSubLevel not parsed |
 | [[journeys-renown-card-text-anchor]] | Journeys renown card text invisible because a Layers region's `relativeKey="$parent.IconFrame"` anchor fell back to the parent (child Frames created after Layers); SetPoint now stores unresolved $parent keys for the finalize pass to resolve |

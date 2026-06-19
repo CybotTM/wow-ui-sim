@@ -1,16 +1,13 @@
 use std::path::PathBuf;
 
-use wow_ui_sim::loader::load_addon;
+use wow_ui_sim::loader::{discover_blizzard_addon_closure_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::screen::ScreenKind;
 
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
         "CARGO_MANIFEST_DIR"
     )))
-}
-
-fn blizzard_toc(addon: &str, toc: &str) -> PathBuf {
-    blizzard_ui_dir().join(addon).join(toc)
 }
 
 fn load_store_ui_tree() -> WowLuaEnv {
@@ -28,27 +25,13 @@ fn load_store_ui_tree() -> WowLuaEnv {
 }
 
 fn load_store_addons(env: &WowLuaEnv) {
-    for (name, toc_path) in [
-        (
-            "Blizzard_SharedXMLBase",
-            blizzard_toc("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
-        ),
-        (
-            "Blizzard_SharedXML",
-            blizzard_toc("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-        ),
-        (
-            "Blizzard_FrameXMLBase",
-            blizzard_toc(
-                "Blizzard_FrameXMLBase",
-                "Blizzard_FrameXMLBase_Mainline.toc",
-            ),
-        ),
-        (
-            "Blizzard_StoreUI",
-            blizzard_toc("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
-        ),
-    ] {
+    let ui = blizzard_ui_dir();
+    let addons = discover_blizzard_addon_closure_for_screen(
+        &ui,
+        ScreenKind::Game,
+        &["Blizzard_FrameXMLBase", "Blizzard_StoreUI"],
+    );
+    for (name, toc_path) in addons {
         load_addon(&env.loader_env(), &toc_path).unwrap_or_else(|err| {
             panic!("[load {name}] FAILED: {err}");
         });
