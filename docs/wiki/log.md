@@ -1331,3 +1331,7 @@ Created `investigations/mount-journal-click-selection.md`. Real mouse clicks on 
 ## [2026-06-12] create | Micro menu clicks missed from stale quadrant anchor
 
 Created `investigations/micro-menu-click-offset.md`. GUI clicks on micro-menu buttons (LFD/Group Finder) did nothing: MicroMenuMixin:Layout anchors the menu inside MicroMenuContainer by screen quadrant, but the sim ran it before saved anchors and the real window size were applied, so the first press snapped the whole bar one QueueStatusButton slot (~46.5px) between mouse-down and mouse-up and the same-frame guard skipped OnClick. Fixed by replaying Blizzard's `InvokeOnAnyEditModeSystemAnchorChanged(force)` at the end of init_edit_mode_layout and from set_screen_size after the DISPLAY_SIZE_CHANGED/UI_SCALE_CHANGED pair. Added `headless-click-probe micromenu` regression panel.
+
+## [2026-06-19] create | Post-load workaround audit
+
+Created `investigations/post-load-workaround-audit.md` while auditing retail post-load hooks. The page records duplicate loader-side hooks retired for AccountStore, MapCanvas, and FrameXMLUtil, and classifies the remaining sampled hooks with current temporary rationale plus retirement paths.
