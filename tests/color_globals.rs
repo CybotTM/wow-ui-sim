@@ -53,3 +53,20 @@ fn rust_created_color_tables_expose_byte_channel_methods() {
 
     assert_eq!(channels, (255, 209, 0, 255, "FFD100".to_string()));
 }
+
+#[test]
+fn item_quality_colors_include_color_objects_for_all_retail_qualities() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let quality: (String, String, f64, f64, f64) = env
+        .eval(
+            r#"
+            local legendary = ITEM_QUALITY_COLORS[Enum.ItemQuality.Legendary]
+            local r, g, b = legendary.color:GetRGB()
+            return legendary.hex, legendary.color:GenerateHexColor(), r, g, b
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(quality, ("|cffff8000".to_string(), "ffff7f00".to_string(), 1.0, 0.5, 0.0));
+}

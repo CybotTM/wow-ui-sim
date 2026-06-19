@@ -1,7 +1,10 @@
 //! Color tables — make_rilua_color_table, named color globals, RAID_CLASS_COLORS,
 //! C_ClassColor, and tooltip / item-quality / class-name / icon-list stubs.
 
-use crate::lua_api::methods::{create_string, create_table, table_get, table_set, val_to_string};
+use crate::lua_api::globals::strings::string_data::game_enums::ITEM_QUALITY_COLORS_DATA;
+use crate::lua_api::methods::{
+    create_string, create_table, table_get, table_set, table_set_num, val_to_string,
+};
 use crate::lua_bridge::table_set_rust_fn_static;
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
 use rilua::vm::state::LuaState;
@@ -247,11 +250,35 @@ pub fn register_rilua_tooltip_colors(lua: &mut rilua::Lua) -> LuaResult<()> {
 }
 
 pub fn register_rilua_item_quality_colors(lua: &mut rilua::Lua) -> LuaResult<()> {
-    // TODO: iterate ITEM_QUALITY_COLORS_DATA from string_data
     let state = lua.state_mut();
     let t = create_table(state);
+    let Val::Table(table_ref) = t else {
+        unreachable!("create_table must return table");
+    };
+    for (quality, r, g, b, hex) in ITEM_QUALITY_COLORS_DATA {
+        let entry = make_item_quality_color_entry(state, *r, *g, *b, hex)?;
+        table_set_num(state, table_ref, f64::from(*quality), entry);
+    }
     set_global_val(state, "ITEM_QUALITY_COLORS", t);
     Ok(())
+}
+
+fn make_item_quality_color_entry(
+    state: &mut LuaState,
+    r: f64,
+    g: f64,
+    b: f64,
+    hex: &str,
+) -> LuaResult<Val> {
+    let entry = create_table(state);
+    table_set(state, entry, "r", Val::Num(r));
+    table_set(state, entry, "g", Val::Num(g));
+    table_set(state, entry, "b", Val::Num(b));
+    let hex_markup = create_string(state, &format!("|c{hex}"));
+    table_set(state, entry, "hex", hex_markup);
+    let color = make_rilua_color_table(state, r, g, b, 1.0)?;
+    table_set(state, entry, "color", color);
+    Ok(entry)
 }
 
 pub fn register_rilua_class_name_tables(lua: &mut rilua::Lua) -> LuaResult<()> {
