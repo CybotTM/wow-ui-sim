@@ -4,9 +4,11 @@ mod exec_lua;
 #[cfg(feature = "gui")]
 mod gui_commands;
 mod saved_var_config;
+mod startup;
 mod startup_trace;
 use cache_texture::run_cache_texture;
 use clap::{Parser, Subcommand};
+use startup::init_and_load;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -242,127 +244,6 @@ fn redirect_if_quiet(args: &Args) -> Option<i32> {
     } else {
         None
     }
-}
-
-fn init_and_load(
-    args: &Args,
-    screen: ScreenKind,
-) -> Result<
-    (
-        WowLuaEnv,
-        Rc<RefCell<WowFontSystem>>,
-        Option<SavedVariablesManager>,
-    ),
-    Box<dyn std::error::Error>,
-> {
-    let env = WowLuaEnv::new().expect("failed to create Lua env");
-    let (w, h) = match &args.command {
-        #[cfg(feature = "gui")]
-        Some(Commands::Screenshot { width, height, .. }) => (*width as f32, *height as f32),
-        Some(Commands::DumpTree { width, height, .. }) => (*width as f32, *height as f32),
-        None => {
-            // For GUI command, start directly at the logical default size (1024x768)
-            (1024.0, 768.0)
-        }
-        _ => (1600.0, 1200.0),
-    };
-    let phase_start = Instant::now();
-    env.set_screen_size(w, h);
-    logging::eprintln_elapsed(&format!(
-        "[Startup] screen size set to {w:.0}x{h:.0} in {:.2?}",
-        phase_start.elapsed()
-    ));
-
-    let phase_start = Instant::now();
-    let font_system = Rc::new(RefCell::new(startup_trace::font_system_for_command(args)));
-    logging::eprintln_elapsed(&format!(
-        "[Startup] font system created in {:.2?}",
-        phase_start.elapsed()
-    ));
-    init_environment(args, &env, &font_system)?;
-    env.set_screen_mode(screen);
-
-    // Pause GC across addon loading — addons allocate monotonically
-    // (closures + frame tables + registry entries stay live), and we'd
-    // rather walk them once in a final full_gc than mark them on every
-    // threshold hit.
-    startup_trace::time_load_step("stop GC", || env.gc_stop());
-    let mut saved_vars = startup_trace::time_load_step("configure saved variables", || {
-        saved_var_config::configure_saved_vars(args.no_saved_vars)
-    });
-    startup_trace::time_load_step("load keybindings", || {
-        saved_var_config::load_keybindings_from_wtf(&env, saved_vars.as_ref())
-    });
-    let edit_mode_cache_vars = if saved_vars.is_none() {
-        startup_trace::time_load_step(
-            "configure edit mode cache",
-            saved_var_config::configure_edit_mode_cache_vars,
-        )
-    } else {
-        None
-    };
-    // ServerSnapshot records the live client's active EditMode layout name.
-    // Read it first so the cache loader can select that layout instead of the
-    // (sometimes stale) WTF character-cache index. Loading the snapshot here
-    // also primes `ServerSnapshotDB` for the action bar import below.
-    let snapshot_edit_mode_layout = startup_trace::time_load_step(
-        "read ServerSnapshot edit mode layout",
-        || -> Option<String> {
-            let saved_vars = saved_vars.as_mut()?;
-            match wow_ui_sim::server_snapshot_import::load_edit_mode_layout(&env, saved_vars) {
-                Ok(layout) => layout,
-                Err(error) => {
-                    logging::println_elapsed(&format!(
-                        "ServerSnapshot edit mode layout import failed: {error}"
-                    ));
-                    None
-                }
-            }
-        },
-    );
-    if let Some(layout) = snapshot_edit_mode_layout.as_deref() {
-        logging::println_elapsed(&format!("ServerSnapshot active EditMode layout: {layout}"));
-    }
-    startup_trace::time_load_step("load edit mode cache", || {
-        addon_loading::load_edit_mode_cache(
-            &env,
-            saved_vars.as_ref().or(edit_mode_cache_vars.as_ref()),
-            snapshot_edit_mode_layout.as_deref(),
-        )
-    });
-    startup_trace::time_load_step("load ServerSnapshot action bars", || {
-        if let Some(saved_vars) = saved_vars.as_mut() {
-            match wow_ui_sim::server_snapshot_import::load_from_saved_variables(&env, saved_vars) {
-                Ok(imported) if imported > 0 => logging::println_elapsed(&format!(
-                    "ServerSnapshot imported {imported} action bar spell slot(s)"
-                )),
-                Ok(_) => {}
-                Err(error) => logging::println_elapsed(&format!(
-                    "ServerSnapshot action bar import failed: {error}"
-                )),
-            }
-        }
-    });
-    startup_trace::time_load_step("load Blizzard addons", || {
-        addon_loading::load_blizzard_addons(&env, &mut saved_vars, screen)
-    });
-    #[cfg(feature = "client-mists")]
-    startup_trace::time_load_step("apply post-Blizzard load workarounds", || {
-        apply_post_load_workarounds(&env)
-    });
-    startup_trace::time_load_step("load third-party addons", || {
-        addon_loading::load_third_party_addons(
-            args.skip_addons(),
-            args.is_test_command(),
-            &env,
-            &mut saved_vars,
-            screen,
-        )
-    });
-    startup_trace::time_load_step("sync addon names to Lua", || env.sync_addon_names_to_lua());
-    apply_post_load_workarounds(&env);
-    restart_gc_after_bootstrap(&env);
-    Ok((env, font_system, saved_vars))
 }
 
 fn apply_post_load_workarounds(env: &WowLuaEnv) {
