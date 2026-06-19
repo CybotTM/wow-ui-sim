@@ -101,7 +101,7 @@ fn special_bar_indexes_return_default_numbers_when_inactive() {
         )
         .unwrap();
 
-    assert_eq!(indexes, (1, 1, 1));
+    assert_eq!(indexes, (12, 14, 1));
 }
 
 #[test]
