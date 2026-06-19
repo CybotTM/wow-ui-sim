@@ -16,6 +16,21 @@ if UnitThreatPercentageOfLead == nil then
     return 0
   end
 end
+
+if GetThreatStatusColor == nil then
+  local colors = {
+    [0] = { 0.69, 0.69, 0.69 },
+    [1] = { 1.00, 1.00, 0.47 },
+    [2] = { 1.00, 0.60, 0.00 },
+    [3] = { 1.00, 0.00, 0.00 },
+  }
+
+  function GetThreatStatusColor(status)
+    local color = colors[status]
+    if color == nil then return nil end
+    return color[1], color[2], color[3]
+  end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -40,6 +55,9 @@ mod tests {
                     return "detailed"
                 end
                 if UnitThreatPercentageOfLead("player", "target") ~= 0 then return "lead" end
+                local r, g, b = GetThreatStatusColor(3)
+                if r ~= 1 or g ~= 0 or b ~= 0 then return "color" end
+                if GetThreatStatusColor(99) ~= nil then return "unknown-color" end
                 return "ok"
                 "#,
             )
