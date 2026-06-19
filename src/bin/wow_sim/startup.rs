@@ -149,6 +149,9 @@ fn load_startup_addons(
     startup_trace::time_load_step("load Blizzard addons", || {
         addon_loading::load_blizzard_addons(env, saved_vars, screen)
     });
+    startup_trace::time_load_step("prepare chat frame for third-party addons", || {
+        wow_ui_sim::lua_api::chat_init::prepare_for_third_party_addons(env)
+    });
     #[cfg(feature = "client-mists")]
     startup_trace::time_load_step("apply post-Blizzard load workarounds", || {
         apply_post_load_workarounds(env)

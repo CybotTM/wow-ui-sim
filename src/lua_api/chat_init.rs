@@ -7,8 +7,18 @@ use super::WowLuaEnv;
 
 /// Show ChatFrame1 and set DEFAULT_CHAT_FRAME after addon loading.
 pub fn show_chat_frame(env: &WowLuaEnv) {
-    let _ = env.exec(SHOW_CHAT_FRAME_LUA);
+    activate_chat_frame(env);
     start_fake_chat(env);
+}
+
+/// Prepare the real Blizzard chat frame before third-party addons run.
+pub fn prepare_for_third_party_addons(env: &WowLuaEnv) {
+    init_chat_type_colors(env);
+    activate_chat_frame(env);
+}
+
+fn activate_chat_frame(env: &WowLuaEnv) {
+    let _ = env.exec(SHOW_CHAT_FRAME_LUA);
 }
 
 /// Initialize r,g,b on ChatTypeInfo entries.
