@@ -8,9 +8,7 @@ use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::fire_startup_events_for_screen;
 
 fn blizzard_ui_dir() -> PathBuf {
-    default_blizzard_ui_addons_path()
-        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
-
+    default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
 }
 
 fn calendar_toc() -> PathBuf {

@@ -2,34 +2,33 @@
 
 The addon loading pipeline discovers addon directories, parses TOC files, loads Lua and XML files in declared order, applies templates, fires startup events, and initializes SavedVariables.
 
-## Vendor sources & per-profile setup
+## Blizzard UI cache & per-profile setup
 
-The Blizzard UI source isn't checked into this repo — `Interface/BlizzardUI/` and `vendor/` are gitignored. Each client profile points at its own sparse-checkout symlink:
+The Blizzard UI source isn't checked into this repo. Runtime loading reads the active profile from a user-cache tree:
 
 ```
-Interface/BlizzardUI/Retail      -> vendor/wow-ui-source-retail/Interface
-Interface/BlizzardUI/Wrath       -> vendor/wow-ui-source-wrath
-Interface/BlizzardUI/Mists       -> vendor/wow-ui-source-mists/Interface
-Interface/BlizzardUI/Era         -> vendor/wow-ui-source-era/Interface
-Interface/BlizzardUI/Anniversary -> vendor/wow-ui-source-anniversary/Interface
+~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns
+~/.cache/wow-ui-sim/blizzard-ui/wrath/AddOns
+~/.cache/wow-ui-sim/blizzard-ui/mists/AddOns
+~/.cache/wow-ui-sim/blizzard-ui/era/AddOns
+~/.cache/wow-ui-sim/blizzard-ui/anniversary/AddOns
 ```
 
-The active profile (selected by the `client-*` cargo feature; see [[client-profiles]]) is the only one the loader reads from at runtime, but multiple profiles can coexist on disk so a developer can flip between them without re-cloning.
+The active profile (selected by the `client-*` cargo feature; see [[client-profiles]]) is the only one the loader reads from at runtime. Multiple profile caches can coexist on disk so a developer can flip features without replacing another profile's files.
 
-`scripts/setup-blizzard-ui.sh <profile> [ref]` clones / refreshes a single profile's vendor checkout. It pins a specific SHA per profile (defaults documented inline in the script) and creates the matching symlink. Idempotent — safe to re-run.
+`wow-cli casc sync-blizzard-ui` populates the active profile cache from the committed manifest in `data/blizzard-ui-files.txt`. It writes `.wow-ui-sim-blizzard-ui-complete` plus `.wow-ui-sim-blizzard-ui-provenance` after the manifest is synced. CASC is primary; the Gethe `wow-ui-source` archive remains a fallback source for files that are not available through the local listfile mapping.
+
+`scripts/setup-blizzard-ui.sh` and `scripts/setup-blizzard-ui.ps1` are compatibility wrappers around the same sync command. Their optional profile argument is accepted for old workflows, but the Cargo feature still selects the active profile.
 
 ```bash
-./scripts/setup-blizzard-ui.sh retail        # use the pinned SHA
-./scripts/setup-blizzard-ui.sh wrath
-./scripts/setup-blizzard-ui.sh mists
-./scripts/setup-blizzard-ui.sh era
-./scripts/setup-blizzard-ui.sh anniversary
-./scripts/setup-blizzard-ui.sh retail v12.0.5  # override the pinned ref
+wow-cli casc sync-blizzard-ui
+./scripts/setup-blizzard-ui.sh
+./scripts/init-worktree.sh
 ```
 
-`scripts/init-worktree.sh` is the bootstrap: in a fresh git worktree it calls the per-profile setup for `(retail wrath mists era anniversary)` so the worktree is buildable for all five profiles. Without these symlinks the loader fatals at startup with `Interface/BlizzardUI/<Profile>/AddOns is missing` and benchmarks / tests silently fail on global nil-call errors.
+`scripts/init-worktree.sh` is the bootstrap for a fresh worktree: it syncs the active profile cache so startup, benchmarks, and tests can find Blizzard addon sources. Without the completed cache, runtime paths report the missing `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns` tree instead of falling back to repo-local symlinks.
 
-The vendor-source list is canonical:
+The fallback source list is canonical:
 
 | Profile     | Vendor repo                                                | Pinned ref                                               |
 |-------------|------------------------------------------------------------|----------------------------------------------------------|

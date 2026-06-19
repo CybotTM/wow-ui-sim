@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-19] update | Blizzard UI profile cache migration
+
+Updated `systems/addon-loading.md` after moving runtime Blizzard UI loading to
+profile-scoped user-cache roots under
+`~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns`. Documented
+`wow-cli casc sync-blizzard-ui` as the canonical cache population path, the
+completion/provenance marker pair, and the setup-script compatibility wrappers.
+
 ## [2026-06-12] investigation | Lib test failure sweep
 
 Created `investigations/lib-test-failure-sweep-2026-06.md` after root-causing

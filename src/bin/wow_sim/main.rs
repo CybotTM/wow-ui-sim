@@ -321,9 +321,7 @@ fn init_and_load(
         },
     );
     if let Some(layout) = snapshot_edit_mode_layout.as_deref() {
-        logging::println_elapsed(&format!(
-            "ServerSnapshot active EditMode layout: {layout}"
-        ));
+        logging::println_elapsed(&format!("ServerSnapshot active EditMode layout: {layout}"));
     }
     startup_trace::time_load_step("load edit mode cache", || {
         addon_loading::load_edit_mode_cache(
@@ -492,7 +490,7 @@ fn startup_blizzard_ui_help(error: wow_ui_sim::Error) -> Box<dyn std::error::Err
              4. Re-launch wow-ui-sim after the repair completes."
         ),
         _ => format!(
-            "{error}\n\nThe simulator stores Blizzard UI source in ~/.cache/wow-ui-sim/blizzard-ui and tries to sync it from local WoW CASC automatically. Make sure WoW is installed or set WOW_INSTALL_PATH/WOW_DATA_PATH, or run `wow-cli casc sync-blizzard-ui` after configuring CASC."
+            "{error}\n\nThe simulator stores Blizzard UI source in ~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns and tries to sync it from local WoW CASC automatically. Make sure WoW is installed or set WOW_INSTALL_PATH/WOW_DATA_PATH, or run `wow-cli casc sync-blizzard-ui` after configuring CASC."
         ),
     };
     Box::<dyn std::error::Error>::from(message)

@@ -12,30 +12,8 @@ use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 pub fn blizzard_ui_dir() -> PathBuf {
-    blizzard_ui_candidates()
-        .into_iter()
-        .find(|path| path.exists())
-        .unwrap_or_else(|| wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available"))
-}
-
-fn blizzard_ui_candidates() -> Vec<PathBuf> {
-    let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let mut candidates = vec![
-        blizzard_ui_cache_dir(),
-        project_root.join("Interface/BlizzardUI"),
-        project_root.join("../reference-addons.new/wow-ui-source/Interface/AddOns"),
-        project_root.join("../Interface/AddOns"),
-    ];
-    candidates.retain(|path| !path.as_os_str().is_empty());
-    candidates
-}
-
-fn blizzard_ui_cache_dir() -> PathBuf {
-    std::env::var_os("HOME")
-        .map(PathBuf::from)
-        .map(|home| home.join(".cache/wow-ui-sim/blizzard-ui"))
-        .unwrap_or_default()
-
+    wow_ui_sim::paths::default_blizzard_ui_addons_path()
+        .expect("Blizzard UI cache should be available")
 }
 
 /// Blizzard addons needed for the panel system (dependency order).
@@ -43,7 +21,10 @@ pub const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -88,7 +69,10 @@ pub const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil_Mainline.toc"),
+    (
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_FrameXMLUtil_Mainline.toc",
+    ),
     ("Blizzard_Menu", "Blizzard_Menu.toc"),
     ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
     ("Blizzard_TimeManager", "Blizzard_TimeManager_Mainline.toc"),

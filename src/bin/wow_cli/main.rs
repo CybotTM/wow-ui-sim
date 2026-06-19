@@ -240,7 +240,7 @@ enum GenerateTarget {
 
 #[derive(Subcommand)]
 enum CascTarget {
-    /// Extract Blizzard UI source files from local CASC into ~/.cache/wow-ui-sim
+    /// Extract Blizzard UI source files from local CASC into the profile-scoped cache
     SyncBlizzardUi,
 }
 

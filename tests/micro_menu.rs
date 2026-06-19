@@ -11,9 +11,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 
 fn blizzard_ui_dir() -> PathBuf {
-    default_blizzard_ui_addons_path()
-        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
-
+    default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
 }
 
 /// Blizzard addons in dependency order (mirrors BLIZZARD_ADDONS in main.rs).

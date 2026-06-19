@@ -13,7 +13,10 @@ pub(crate) const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -88,9 +91,7 @@ pub(crate) const BLIZZARD_TOKEN_UI_ADDON: (&str, &str) =
     ("Blizzard_TokenUI", "Blizzard_TokenUI.toc");
 
 pub(crate) fn blizzard_ui_dir() -> PathBuf {
-    default_blizzard_ui_addons_path()
-        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
-
+    default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
 }
 
 pub(crate) fn setup_env() -> WowLuaEnv {

@@ -60,7 +60,8 @@ RUN git clone --filter=blob:none --no-checkout --depth=1 --branch ${BLIZZARD_UI_
     && git sparse-checkout set Interface/AddOns \
     && git checkout ${BLIZZARD_UI_TAG} \
     && rm -rf /wow-ui-source/.git \
-    && touch /wow-ui-source/Interface/AddOns/.wow-ui-sim-blizzard-ui-complete
+    && touch /wow-ui-source/Interface/AddOns/.wow-ui-sim-blizzard-ui-complete \
+    && printf 'profile=retail\nsource=gethe-image-build\nfallback=none\n' > /wow-ui-source/Interface/AddOns/.wow-ui-sim-blizzard-ui-provenance
 
 # =============================================================================
 # Runtime Stage
@@ -79,7 +80,7 @@ COPY --from=builder /build/target/release/wow-sim /app/wow-sim
 # simulator checks. The .wow-ui-sim-blizzard-ui-complete marker is
 # created in the blizzard-ui stage and tells the runtime the cache
 # is ready, skipping the CASC sync attempt.
-COPY --from=blizzard-ui /wow-ui-source/Interface/AddOns/ /root/.cache/wow-ui-sim/blizzard-ui/
+COPY --from=blizzard-ui /wow-ui-source/Interface/AddOns/ /root/.cache/wow-ui-sim/blizzard-ui/retail/AddOns/
 
 # TestFramework: assertion library loaded automatically by `run-tests`
 COPY Interface/AddOns/TestFramework/ /app/Interface/AddOns/TestFramework/

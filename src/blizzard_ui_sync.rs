@@ -13,6 +13,7 @@ use std::time::Duration;
 
 const BLIZZARD_UI_MANIFEST: &str = include_str!("../data/blizzard-ui-files.txt");
 const COMPLETE_MARKER: &str = ".wow-ui-sim-blizzard-ui-complete";
+const PROVENANCE_FILE: &str = ".wow-ui-sim-blizzard-ui-provenance";
 const GETHE_ARCHIVE_DOWNLOAD_RETRIES: usize = 3;
 const GETHE_ARCHIVE_USER_AGENT: &str = concat!("wow-ui-sim/", env!("CARGO_PKG_VERSION"));
 #[cfg(feature = "casc")]
@@ -29,7 +30,11 @@ pub struct SyncSummary {
 
 pub fn default_cache_addons_path() -> crate::Result<PathBuf> {
     dirs::cache_dir()
-        .map(|dir| dir.join("wow-ui-sim/blizzard-ui"))
+        .map(|dir| {
+            dir.join("wow-ui-sim/blizzard-ui")
+                .join(crate::client_profile::ACTIVE.cache_subdir())
+                .join("AddOns")
+        })
         .ok_or_else(|| crate::Error::Other("could not determine user cache directory".to_string()))
 }
 
@@ -481,9 +486,23 @@ fn write_complete_marker(root: &Path) -> crate::Result<()> {
             root.display()
         ))
     })?;
+    write_provenance(root)?;
     std::fs::write(root.join(COMPLETE_MARKER), b"ok\n").map_err(|e| {
         crate::Error::Other(format!(
             "could not write Blizzard UI cache marker in {}: {e}",
+            root.display()
+        ))
+    })
+}
+
+fn write_provenance(root: &Path) -> crate::Result<()> {
+    let contents = format!(
+        "profile={}\nsource=casc-primary\nfallback=wow-ui-source\n",
+        crate::client_profile::ACTIVE.cache_subdir()
+    );
+    std::fs::write(root.join(PROVENANCE_FILE), contents).map_err(|e| {
+        crate::Error::Other(format!(
+            "could not write Blizzard UI cache provenance in {}: {e}",
             root.display()
         ))
     })
@@ -557,6 +576,37 @@ mod tests {
         header.set_cksum();
         builder.append_data(&mut header, path, contents)
     }
+
+    #[test]
+    fn default_cache_addons_path_is_profile_scoped_addons_root() {
+        let path = super::default_cache_addons_path().expect("cache path");
+
+        assert!(
+            path.ends_with(
+                PathBuf::from(crate::client_profile::ACTIVE.cache_subdir()).join("AddOns")
+            ),
+            "cache path should end with profile/AddOns, got {}",
+            path.display()
+        );
+    }
+
+    #[test]
+    fn complete_marker_writes_profile_provenance() {
+        let root = unique_temp_dir("provenance");
+
+        super::write_complete_marker(&root).expect("write complete marker");
+
+        let provenance =
+            std::fs::read_to_string(root.join(super::PROVENANCE_FILE)).expect("read provenance");
+        assert!(provenance.contains(&format!(
+            "profile={}",
+            crate::client_profile::ACTIVE.cache_subdir()
+        )));
+        assert!(provenance.contains("source=casc-primary"));
+        assert!(provenance.contains("fallback=wow-ui-source"));
+        std::fs::remove_dir_all(root).expect("remove cache root");
+    }
+
     #[test]
     fn manifest_preserves_blizzard_addon_case() {
         let first = manifest_entries()
