@@ -1,0 +1,6 @@
+## Interface: 120007
+## Title: EditMode Layout Probe
+## Notes: Captures live EditMode layout API state for wow-ui-sim debugging.
+## SavedVariables: EditModeLayoutProbeDB
+
+EditModeLayoutProbe.lua
