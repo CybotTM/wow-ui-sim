@@ -34,7 +34,10 @@ pub(super) fn addon_enable_overrides(
 fn character_addon_enable_overrides(
     saved_vars: Option<&SavedVariablesManager>,
 ) -> Option<HashMap<String, bool>> {
-    let config = saved_vars?.wtf_config()?;
+    let config = saved_vars
+        .and_then(SavedVariablesManager::wtf_config)
+        .cloned()
+        .or_else(wow_ui_sim::paths::default_wtf_config)?;
     let path = config
         .wtf_path
         .join("Account")
@@ -86,23 +89,30 @@ fn collect_new_dependency_enables(
             continue;
         }
         for dependency in toc.dependencies() {
-            if !addon_tocs.contains_key(&dependency) {
-                continue;
-            }
-            if character_overrides.get(&dependency) == Some(&false) {
-                continue;
-            }
-            let Some(dependency_toc) = addon_tocs.get(&dependency) else {
-                continue;
-            };
-            if !effective.contains_key(&dependency)
-                || !effective_addon_enabled(&dependency, dependency_toc, effective)
-            {
+            if should_enable_dependency(&dependency, addon_tocs, character_overrides, effective) {
                 newly_enabled.push(dependency);
             }
         }
     }
     newly_enabled
+}
+
+fn should_enable_dependency(
+    dependency: &str,
+    addon_tocs: &HashMap<String, TocFile>,
+    character_overrides: &HashMap<String, bool>,
+    effective: &HashMap<String, bool>,
+) -> bool {
+    if character_overrides.get(dependency) == Some(&false) {
+        return false;
+    }
+
+    let Some(dependency_toc) = addon_tocs.get(dependency) else {
+        return false;
+    };
+
+    !effective.contains_key(dependency)
+        || !effective_addon_enabled(dependency, dependency_toc, effective)
 }
 
 fn collect_new_dependency_disables(
@@ -161,6 +171,52 @@ mod tests {
                     Some(previous) => std::env::set_var("WOW_SIM_ADDONS_TXT", previous),
                     None => std::env::remove_var("WOW_SIM_ADDONS_TXT"),
                 }
+            }
+        }
+    }
+
+    struct ScopedWtfEnv {
+        previous_wtf_path: Option<std::ffi::OsString>,
+        previous_account: Option<std::ffi::OsString>,
+        previous_realm: Option<std::ffi::OsString>,
+        previous_character: Option<std::ffi::OsString>,
+    }
+
+    impl ScopedWtfEnv {
+        fn set(path: &Path, account: &str, realm: &str, character: &str) -> Self {
+            let previous_wtf_path = std::env::var_os("WOW_SIM_WTF_PATH");
+            let previous_account = std::env::var_os("WOW_SIM_WTF_ACCOUNT");
+            let previous_realm = std::env::var_os("WOW_SIM_WTF_REALM");
+            let previous_character = std::env::var_os("WOW_SIM_WTF_CHARACTER");
+            unsafe {
+                std::env::set_var("WOW_SIM_WTF_PATH", path);
+                std::env::set_var("WOW_SIM_WTF_ACCOUNT", account);
+                std::env::set_var("WOW_SIM_WTF_REALM", realm);
+                std::env::set_var("WOW_SIM_WTF_CHARACTER", character);
+            }
+            Self {
+                previous_wtf_path,
+                previous_account,
+                previous_realm,
+                previous_character,
+            }
+        }
+    }
+
+    impl Drop for ScopedWtfEnv {
+        fn drop(&mut self) {
+            restore_env_var("WOW_SIM_WTF_PATH", &self.previous_wtf_path);
+            restore_env_var("WOW_SIM_WTF_ACCOUNT", &self.previous_account);
+            restore_env_var("WOW_SIM_WTF_REALM", &self.previous_realm);
+            restore_env_var("WOW_SIM_WTF_CHARACTER", &self.previous_character);
+        }
+    }
+
+    fn restore_env_var(name: &str, previous: &Option<std::ffi::OsString>) {
+        unsafe {
+            match previous {
+                Some(previous) => std::env::set_var(name, previous),
+                None => std::env::remove_var(name),
             }
         }
     }
@@ -239,6 +295,29 @@ mod tests {
 
         assert_eq!(overrides.get("EnabledAddon"), Some(&true));
         assert_eq!(overrides.get("DisabledAddon"), Some(&false));
+    }
+
+    #[test]
+    fn addon_enable_overrides_reads_character_addons_txt_without_saved_variables_manager() {
+        let _guard = ADDONS_TXT_ENV_LOCK.lock().expect("env lock");
+        let temp = tempfile::tempdir().expect("tempdir");
+        let local_path = temp.path().join("missing-local-AddOns.txt");
+        let _addons_env = ScopedAddonsTxtEnv::set(&local_path);
+
+        let wtf_dir = temp.path().join("wtf");
+        let addon_state_dir = wtf_dir.join("Account/Test/Burning Blade/Palaky");
+        std::fs::create_dir_all(&addon_state_dir).expect("create character dir");
+        std::fs::write(
+            addon_state_dir.join("AddOns.txt"),
+            "EnabledAddon: enabled\nEllesmereUIActionBars: disabled\n",
+        )
+        .expect("write WTF AddOns.txt");
+        let _wtf_env = ScopedWtfEnv::set(&wtf_dir, "Test", "Burning Blade", "Palaky");
+
+        let overrides = addon_enable_overrides(None).expect("read overrides");
+
+        assert_eq!(overrides.get("EnabledAddon"), Some(&true));
+        assert_eq!(overrides.get("EllesmereUIActionBars"), Some(&false));
     }
 
     #[test]
