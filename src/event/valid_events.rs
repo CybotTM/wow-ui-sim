@@ -84,6 +84,16 @@ pub fn is_callback_event(name: &str) -> bool {
     CALLBACK_EVENTS.binary_search(&name).is_ok()
 }
 
+#[cfg(all(test, feature = "client-retail"))]
+mod tests {
+    use super::is_registerable_event;
+
+    #[test]
+    fn url_texture_request_result_is_registerable() {
+        assert!(is_registerable_event("URL_TEXTURE_REQUEST_RESULT"));
+    }
+}
+
 pub fn callback_events() -> &'static [&'static str] {
     CALLBACK_EVENTS
 }
