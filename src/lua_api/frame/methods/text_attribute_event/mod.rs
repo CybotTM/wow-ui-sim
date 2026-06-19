@@ -222,6 +222,7 @@ fn register_attribute_core(state: &mut LuaState, table: GcRef<Table>) -> LuaResu
         "ExecuteAttribute",
         attributes::execute_attribute,
     )?;
+    table_set_rust_fn_static(state, table, "ChildUpdate", attributes::child_update)?;
     register_call_method(state, table)?;
     Ok(())
 }

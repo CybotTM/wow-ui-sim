@@ -124,6 +124,60 @@ fn test_state_attribute_set_runs_matching_state_snippet() {
 }
 
 #[test]
+fn test_child_update_runs_matching_protected_child_snippet() {
+    let env = env();
+    let action: i32 = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "ChildUpdateParent")
+            local child = CreateFrame("Button", "ChildUpdateChild", parent)
+            A_Admin.SetFrameProtected("ChildUpdateChild", true)
+
+            child:SetAttributeNoHandler(
+                "_childupdate-page",
+                "self:SetAttribute('action', (tonumber(message) or 1) * 12)"
+            )
+            parent:ChildUpdate("page", 3)
+
+            return child:GetAttribute("action")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(action, 36);
+}
+
+#[test]
+fn test_state_driver_snippet_can_call_child_update() {
+    let env = env();
+    let action: i32 = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "StateDriverChildUpdateParent")
+            local child = CreateFrame("Button", "StateDriverChildUpdateChild", parent)
+            A_Admin.SetFrameProtected("StateDriverChildUpdateChild", true)
+
+            parent:SetAttributeNoHandler("_onstate-page", [[
+                local page = tonumber(newstate) or 1
+                self:SetAttribute("actionpage", page)
+                self:ChildUpdate("page", page)
+            ]])
+            child:SetAttributeNoHandler(
+                "_childupdate-page",
+                "self:SetAttribute('action', (tonumber(message) or 1) * 12)"
+            )
+
+            RegisterStateDriver(parent, "page", "3")
+
+            return child:GetAttribute("action")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(action, 36);
+}
+
+#[test]
 fn test_unregister_state_drivers_leaves_last_resolved_values_in_place() {
     let env = env();
     let (shown, custom_state): (bool, String) = env

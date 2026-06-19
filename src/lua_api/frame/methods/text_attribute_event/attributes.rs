@@ -248,6 +248,72 @@ pub(super) fn clear_attributes(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn child_update(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let script_id = val_to_string(state, stack_val(state, 2));
+    let message = stack_val(state, 3);
+    let child_updates = child_update_snippets(state, id, script_id.as_deref())?;
+    let script_id_value = script_id
+        .as_deref()
+        .map(|value| create_string(state, value))
+        .unwrap_or(Val::Nil);
+
+    for (child_id, body) in child_updates {
+        let snippet = compile_child_update_snippet(state, &body)?;
+        let child = frame_ref(state, child_id)?;
+        if let Err(error) = protected_lua_pcall_state(
+            state,
+            Val::Function(snippet.gc_ref()),
+            &[child, script_id_value, message],
+        ) {
+            call_error_handler_state(state, &error);
+        }
+    }
+    Ok(0)
+}
+
+fn child_update_snippets(
+    state: &mut LuaState,
+    id: u64,
+    script_id: Option<&str>,
+) -> LuaResult<Vec<(u64, String)>> {
+    let sim = borrow_state(state)?;
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(Vec::new());
+    };
+    let specific_attribute = script_id.map(|id| format!("_childupdate-{id}"));
+    let updates = frame
+        .children
+        .iter()
+        .filter_map(|child_id| {
+            let child = sim.widgets.get(*child_id)?;
+            if !child.is_protected {
+                return None;
+            }
+            let body = specific_attribute
+                .as_deref()
+                .and_then(|attribute| child.attributes.get(attribute))
+                .or_else(|| child.attributes.get("_childupdate"))
+                .and_then(attribute_string)?;
+            Some((*child_id, body.to_string()))
+        })
+        .collect();
+    Ok(updates)
+}
+
+fn compile_child_update_snippet(state: &mut LuaState, body: &str) -> LuaResult<rilua::Function> {
+    let loader = state.load(&format!(
+        "return function(self, scriptid, message) local strsub = string.sub; {body} end"
+    ))?;
+    let closure = call_function_state(state, Val::Function(loader.gc_ref()), &[])?;
+    let Val::Function(func_ref) = closure else {
+        return Err(runtime_error(
+            "ChildUpdate: snippet loader did not return a function",
+        ));
+    };
+    Ok(rilua::Function::from_gc_ref(func_ref))
+}
+
 pub(super) fn execute_attribute(state: &mut LuaState) -> LuaResult<u32> {
     let call = match execute_attribute_call(state)? {
         Ok(call) => call,
