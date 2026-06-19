@@ -4676,6 +4676,14 @@ if not Enum.DamageMeterSpellDetailsDisplayTypeMeta then
   }
 end
 
+if not Enum.DamageMeterSourceDisplayTypeMeta then
+  Enum.DamageMeterSourceDisplayTypeMeta = {
+    MaxValue = 2,
+    MinValue = 0,
+    NumValues = 3,
+  }
+end
+
 if not Enum.DamageMeterStorageType then
   Enum.DamageMeterStorageType = {
     Absorbs = 2,
@@ -5042,9 +5050,25 @@ end
 
 if not Enum.EditModePersonalResourceDisplaySettingMeta then
   Enum.EditModePersonalResourceDisplaySettingMeta = {
-    MaxValue = 1,
+    MaxValue = 14,
     MinValue = 0,
-    NumValues = 2,
+    NumValues = 15,
+  }
+end
+
+if not Enum.PersonalResourceDisplayVisibleSettingMeta then
+  Enum.PersonalResourceDisplayVisibleSettingMeta = {
+    MaxValue = 2,
+    MinValue = 0,
+    NumValues = 3,
+  }
+end
+
+if not Enum.WorldTierDifficultyMeta then
+  Enum.WorldTierDifficultyMeta = {
+    MaxValue = 3,
+    MinValue = 1,
+    NumValues = 3,
   }
 end
 

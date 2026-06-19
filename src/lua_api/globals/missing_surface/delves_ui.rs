@@ -8,6 +8,7 @@ use rilua::{LuaResult, Val};
 
 const ACTIVE_TIER_FIELD: &str = "__wow_ui_sim_active_tier";
 const DEFAULT_ACTIVE_TIER: i32 = 4;
+const WORLD_TIER_NORMAL: f64 = 1.0;
 const DELVE_HEADER: &str = "Fungal Folly";
 const DELVE_DESCRIPTION: &str = "The Fungal Folly winds deeper with every tier.";
 const DELVE_ENTRANCE_MAP_ID: i32 = 2339;
@@ -32,7 +33,7 @@ pub(super) fn register_delves_ui_surface(state: &mut LuaState) -> LuaResult<()> 
     Ok(())
 }
 
-const METHODS: [(&str, rilua::vm::closure::RustFn); 26] = [
+const METHODS: [(&str, rilua::vm::closure::RustFn); 27] = [
     ("GetActiveDelveTier", get_active_delve_tier),
     (
         "GetCompanionInfoForActivePlayer",
@@ -78,6 +79,10 @@ const METHODS: [(&str, rilua::vm::closure::RustFn); 26] = [
     ("GetTieredEntrancePDEID", get_tiered_entrance_pde_id),
     ("GetTraitTreeForCompanion", get_trait_tree_for_companion),
     ("GetUnseenCuriosBySlotType", get_unseen_curios_by_slot_type),
+    (
+        "GetWorldTierDifficultyForActivePlayer",
+        get_world_tier_difficulty_for_active_player,
+    ),
     ("HasActiveDelve", has_active_delve),
     ("IsDelveEntranceTierEnabled", is_delve_entrance_tier_enabled),
     (
@@ -221,6 +226,11 @@ fn get_trait_tree_for_companion(state: &mut LuaState) -> LuaResult<u32> {
 fn get_unseen_curios_by_slot_type(state: &mut LuaState) -> LuaResult<u32> {
     let unseen = create_table(state);
     state.push(unseen);
+    Ok(1)
+}
+
+fn get_world_tier_difficulty_for_active_player(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(WORLD_TIER_NORMAL));
     Ok(1)
 }
 

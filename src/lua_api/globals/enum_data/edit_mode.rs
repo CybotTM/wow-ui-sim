@@ -306,7 +306,28 @@ pub const COOLDOWN_VIEWER_VISIBLE_SETTING: SeqEnumDef = (
 
 pub const EDIT_MODE_PERSONAL_RESOURCE_DISPLAY_SETTING: SeqEnumDef = (
     "EditModePersonalResourceDisplaySetting",
-    &["HideHealthAndPower", "OnlyShowInCombat"],
+    &[
+        "HideHealth",
+        "DeprecatedOnlyShowInCombat",
+        "HidePower",
+        "HideClassInfo",
+        "HealthBarHeight",
+        "PowerBarHeight",
+        "Padding",
+        "Opacity",
+        "VisibleSetting",
+        "Size",
+        "HideClassInfoOnPlayerFrame",
+        "ShowClassColor",
+        "BarWidth",
+        "ShowBarText",
+        "HideAltPower",
+    ],
+);
+
+pub const PERSONAL_RESOURCE_DISPLAY_VISIBLE_SETTING: SeqEnumDef = (
+    "PersonalResourceDisplayVisibleSetting",
+    &["Always", "InCombat", "Hidden"],
 );
 
 pub const EDIT_MODE_ENCOUNTER_EVENTS_SETTING: SeqEnumDef = (
@@ -379,6 +400,9 @@ pub const DAMAGE_METER_NUMBERS: SeqEnumDef =
 
 pub const DAMAGE_METER_VISIBILITY: SeqEnumDef =
     ("DamageMeterVisibility", &["Always", "InCombat", "Hidden"]);
+
+pub const DAMAGE_METER_SOURCE_DISPLAY_TYPE: SeqEnumDef =
+    ("DamageMeterSourceDisplayType", &["None", "Ally", "Enemy"]);
 
 pub const RAID_AURA_ORGANIZATION_TYPE: SeqEnumDef = (
     "RaidAuraOrganizationType",

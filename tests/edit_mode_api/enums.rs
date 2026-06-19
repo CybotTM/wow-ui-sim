@@ -213,6 +213,7 @@ fn edit_mode_profile_option_enums_match_blizzard_docs() {
             CooldownViewerOrientation = { Horizontal = 0, Vertical = 1 },
             CooldownViewerVisibleSetting = { Always = 0, InCombat = 1, Hidden = 2 },
             DamageMeterNumbers = { Minimal = 0, Compact = 1, Complete = 2 },
+            DamageMeterSourceDisplayType = { None = 0, Ally = 1, Enemy = 2 },
             DamageMeterStyle = { Default = 0, Thin = 1, Bordered = 2, FullBackground = 3 },
             DamageMeterVisibility = { Always = 0, InCombat = 1, Hidden = 2 },
             EditModeActionBarSystemIndices = {
@@ -232,6 +233,7 @@ fn edit_mode_profile_option_enums_match_blizzard_docs() {
             EncounterEventsVisibility = { Always = 0, InEncounter = 1, DeprecatedHidden = 2 },
             MicroMenuOrder = { Default = 0, Reverse = 1 },
             MicroMenuOrientation = { Horizontal = 0, Vertical = 1 },
+            PersonalResourceDisplayVisibleSetting = { Always = 0, InCombat = 1, Hidden = 2 },
             RaidAuraOrganizationType = { Legacy = 0, BuffsTopDebuffsBottom = 1, BuffsRightDebuffsLeft = 2 },
             ViewArenaSize = { Two = 0, Three = 1 },
             ViewRaidSize = { Ten = 0, TwentyFive = 1, Forty = 2 },
@@ -287,7 +289,12 @@ fn edit_mode_profile_option_enums_match_blizzard_docs() {
             EditModeMicroMenuSetting = { "Orientation", "Order", "Size", "EyeSize" },
             EditModeMinimapSetting = { "HeaderUnderneath", "RotateMinimap", "Size" },
             EditModeObjectiveTrackerSetting = { "Height", "Opacity", "TextSize" },
-            EditModePersonalResourceDisplaySetting = { "HideHealthAndPower", "OnlyShowInCombat" },
+            EditModePersonalResourceDisplaySetting = {
+                "HideHealth", "DeprecatedOnlyShowInCombat", "HidePower", "HideClassInfo",
+                "HealthBarHeight", "PowerBarHeight", "Padding", "Opacity", "VisibleSetting",
+                "Size", "HideClassInfoOnPlayerFrame", "ShowClassColor", "BarWidth",
+                "ShowBarText", "HideAltPower",
+            },
             EditModeStatusTrackingBarSetting = { "Height", "Width", "TextSize", "Size" },
             EditModeTimerBarsSetting = { "Size" },
             EditModeUnitFrameSetting = {

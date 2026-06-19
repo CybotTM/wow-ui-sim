@@ -462,6 +462,11 @@ pub const NEIGHBORHOOD_OWNER_TYPE: SeqEnumDef =
 pub const TIERED_ENTRANCE_REWARD_TYPE: EnumDef =
     ("TieredEntranceRewardType", &[("Item", 0), ("Currency", 1)]);
 
+pub const WORLD_TIER_DIFFICULTY: EnumDef = (
+    "WorldTierDifficulty",
+    &[("Normal", 1), ("Heroic", 2), ("Mythic", 3)],
+);
+
 // ============================================================================
 // Ping / Voice Enums
 // ============================================================================

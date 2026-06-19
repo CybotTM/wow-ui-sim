@@ -77,6 +77,11 @@ const DELVES_UI_SCRIPT: &str = r#"
         return "wrong_unknown_tier_result"
     end
 
+    local worldTierDifficulty = C_DelvesUI.GetWorldTierDifficultyForActivePlayer()
+    if worldTierDifficulty ~= Enum.WorldTierDifficulty.Normal then
+        return "wrong_world_tier_difficulty:" .. tostring(worldTierDifficulty)
+    end
+
     C_DelvesUI.SelectDelveEntranceTier(2)
     local selectedActiveTier = C_DelvesUI.GetActiveDelveTier()
     if not selectedActiveTier or selectedActiveTier.tier ~= 2 or selectedActiveTier.modifierUIWidgetSetID ~= 4402 then
