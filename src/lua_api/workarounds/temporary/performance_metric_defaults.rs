@@ -58,6 +58,8 @@ if GetMovieDownloadProgress == nil then
   end
 end
 
+MAINMENUBAR_COMMUNICATION_PROTOCOL_LABEL = MAINMENUBAR_COMMUNICATION_PROTOCOL_LABEL or "Protocol: %s (home) %s (world)"
+
 if GetProtocolTypes == nil then
   function GetProtocolTypes()
     return 1, 1
@@ -94,6 +96,7 @@ mod tests {
                 if inProgress or downloaded ~= 0 or total ~= 0 then return "movie_download" end
                 local protocolHome, protocolWorld = GetProtocolTypes()
                 if protocolHome ~= 1 or protocolWorld ~= 1 then return "protocol_types" end
+                if type(MAINMENUBAR_COMMUNICATION_PROTOCOL_LABEL) ~= "string" then return "protocol_label" end
                 return "ok"
                 "#,
             )

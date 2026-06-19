@@ -7,7 +7,7 @@
 const CLIENT_INFO_DEFAULTS_LUA: &str = r#"
 if GetBuildInfo == nil then
   function GetBuildInfo()
-    return "12.0.5", "66102", "Apr 14 2026", 120005, "", " "
+    return "12.0.7", "68256", "Jun 17 2026", 120007, "", " "
   end
 end
 
@@ -206,7 +206,7 @@ mod tests {
             .eval(
                 r#"
                 local version, build, date, interface = GetBuildInfo()
-                if version ~= "12.0.5" or build ~= "66102" or date ~= "Apr 14 2026" or interface ~= 120005 then
+                if version ~= "12.0.7" or build ~= "68256" or date ~= "Jun 17 2026" or interface ~= 120007 then
                   return "build"
                 end
                 if GetRealmName() ~= "SimulatedRealm" or GetNormalizedRealmName() ~= "SimulatedRealm" then return "realm" end

@@ -53,7 +53,23 @@ end
 
 if rawget(C_ClickBindings, "MakeModifiers") == nil then
     function C_ClickBindings.MakeModifiers()
-        return 0
+        local modifiers = 0
+        if type(IsShiftKeyDown) == "function" and IsShiftKeyDown() then
+            modifiers = modifiers + 1
+        end
+        if type(IsControlKeyDown) == "function" and IsControlKeyDown() then
+            modifiers = modifiers + 2
+        end
+        if type(IsAltKeyDown) == "function" and IsAltKeyDown() then
+            modifiers = modifiers + 4
+        end
+        return modifiers
+    end
+end
+
+if rawget(_G, "MakeModifiers") == nil then
+    function MakeModifiers()
+        return C_ClickBindings.MakeModifiers()
     end
 end
 
@@ -88,7 +104,7 @@ mod tests {
         env.exec("ClearTarget()").expect("target should clear");
 
         let binding_type: i32 = env
-            .eval("return C_ClickBindings.GetBindingType('LeftButton', C_ClickBindings.MakeModifiers())")
+            .eval("return C_ClickBindings.GetBindingType('LeftButton', MakeModifiers())")
             .expect("binding type should be queryable");
         assert_eq!(binding_type, 2);
 
@@ -99,6 +115,24 @@ mod tests {
             .eval("return UnitName('target')")
             .expect("target should be readable");
         assert_eq!(target_name, "Thrynn");
+    }
+
+    #[test]
+    fn make_modifiers_reads_modeled_modifier_keys() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        let initial: i32 = env
+            .eval("return MakeModifiers()")
+            .expect("initial modifiers");
+        assert_eq!(initial, 0);
+
+        env.exec("A_Admin.SetShiftKeyDown(true)")
+            .expect("shift should set");
+        env.exec("A_Admin.SetAltKeyDown(true)")
+            .expect("alt should set");
+
+        let shifted_alt: i32 = env.eval("return MakeModifiers()").expect("held modifiers");
+        assert_eq!(shifted_alt, 5);
     }
 
     #[test]

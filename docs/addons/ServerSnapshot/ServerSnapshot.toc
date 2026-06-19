@@ -1,4 +1,4 @@
-## Interface: 120005
+## Interface: 120007
 ## Title: Server Snapshot
 ## Notes: Saves character UI state such as action bars, addons, and keybindings into SavedVariables.
 ## Author: Alessio

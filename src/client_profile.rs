@@ -37,7 +37,7 @@ impl ClientProfile {
 
     pub const fn interface_version(self) -> u32 {
         match self {
-            ClientProfile::Retail => 120005,
+            ClientProfile::Retail => 120007,
             ClientProfile::Wrath => 38001,
             ClientProfile::Mists => 50504,
             ClientProfile::Era | ClientProfile::Anniversary => 11507,
@@ -198,5 +198,10 @@ mod tests {
             "Blizzard UI fallback path should be profile-scoped cache AddOns root, got {}",
             resolved.display()
         );
+    }
+
+    #[test]
+    fn retail_interface_matches_current_live_build() {
+        assert_eq!(ClientProfile::Retail.interface_version(), 120007);
     }
 }

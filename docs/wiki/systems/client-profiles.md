@@ -10,7 +10,7 @@ Feature ↔ profile ↔ vendor source ↔ TOC suffix:
 
 | Feature              | Profile     | Vendor (`scripts/setup-blizzard-ui.sh`) | Primary TOC suffix |
 |----------------------|-------------|-----------------------------------------|--------------------|
-| `client-retail`      | Retail      | `Gethe/wow-ui-source@b062d332` (12.0.5) | `_Mainline`        |
+| `client-retail`      | Retail      | `Gethe/wow-ui-source@37181615` (12.0.7) | `_Mainline`        |
 | `client-wrath`       | Wrath       | `Gethe/wow-ui-source@c4e0255f` (3.3.5) | `_Wrath`     |
 | `client-mists`       | Mists       | `Gethe/wow-ui-source@0fa05055` (5.5.4) | `_Mists`          |
 | `client-era`         | Era         | `Gethe/wow-ui-source@e0099491` (1.15.8 build 67156) | `_Vanilla` |

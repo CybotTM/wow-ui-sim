@@ -32,7 +32,7 @@ The fallback source list is canonical:
 
 | Profile     | Vendor repo                                                | Pinned ref                                               |
 |-------------|------------------------------------------------------------|----------------------------------------------------------|
-| Retail      | `Gethe/wow-ui-source`                                      | `b062d332` (12.0.5)                                      |
+| Retail      | `Gethe/wow-ui-source`                                      | `37181615` (12.0.7)                                      |
 | Wrath       | `Gethe/wow-ui-source` tag `3.3.5`                    | `c4e0255f`                                               |
 | Mists       | `Gethe/wow-ui-source` branch `classic`                     | `33d87412`                                               |
 | Era         | `Gethe/wow-ui-source` branch `classic_era`                 | `e0099491` (1.15.8 build 67156)                          |

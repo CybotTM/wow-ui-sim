@@ -321,3 +321,22 @@ fn performance_api_shims_are_safe_noops() {
 
     assert_eq!(result, (60.0, 0.0, 0.0, 0.0, 0.0));
 }
+
+#[test]
+fn performance_bar_on_enter_builds_tooltip_without_format_errors() {
+    let env = load_full_game_ui();
+
+    let result: String = env
+        .eval(
+            r#"
+            local frame = MainMenuMicroButton and MainMenuMicroButton.MainMenuBarPerformanceBar
+            if not frame then return "missing_frame" end
+            local ok, err = pcall(MainMenuBarPerformanceBarFrame_OnEnter, frame)
+            if not ok then return tostring(err) end
+            return "ok"
+            "#,
+        )
+        .expect("PerformanceBar OnEnter probe should run");
+
+    assert_eq!(result, "ok");
+}

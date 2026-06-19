@@ -7,7 +7,7 @@ use crate::screen::ScreenKind;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-pub const RETAIL_INTERFACE_VERSION: u32 = 120005;
+pub const RETAIL_INTERFACE_VERSION: u32 = 120007;
 pub const ACTIVE_INTERFACE_VERSION: u32 = crate::client_profile::ACTIVE.interface_version();
 
 /// Parsed TOC file contents.
