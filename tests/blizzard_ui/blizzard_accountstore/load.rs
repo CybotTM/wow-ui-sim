@@ -22,16 +22,10 @@
 //! fully initialized panel manager — without that baseline the lane would
 //! emit nil-call errors at file scope.
 //!
-//! Why the closure-walked `loaded` set won't contain `Blizzard_UIParentPanelManager`:
-//! the simulator's TOC parser only recognises `## OptionalDeps:` (plural,
-//! `src/toc.rs:229-234`), but this addon's TOC uses `## OptionalDep:`
-//! (singular). The closure walker therefore won't pull
-//! `Blizzard_UIParentPanelManager` transitively. The panel-addons baseline
-//! covers the gap at runtime, so this load smoke still passes — but a
-//! future regression to the singular-form parsing surface would fail the
-//! companion `every TOC dependency present in loaded set` task, not this
-//! one. Keeping the two assertions in separate tests means a TOC-parser
-//! regression doesn't drown out unrelated Lua-error regressions.
+//! The TOC parser recognizes both `## OptionalDep:` and `## OptionalDeps:`, so
+//! the closure-walked `loaded` set should contain `Blizzard_UIParentPanelManager`
+//! directly. The panel-addons baseline still pre-loads it for the smoke-shape
+//! harness, but the dependency closure is now the source of truth for this lane.
 //!
 //! Assertion pinned: loading the smoke-shape closure rooted at
 //! `Blizzard_AccountStore` completes cleanly with zero lane-specific Lua
@@ -47,8 +41,8 @@
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_AccountStore";
-const REQUIRED_DEPS: &[&str] = &["Blizzard_SharedXML", "Blizzard_StaticPopup"];
 const OPTIONAL_DEP: &str = "Blizzard_UIParentPanelManager";
+const REQUIRED_DEPS: &[&str] = &["Blizzard_SharedXML", "Blizzard_StaticPopup", OPTIONAL_DEP];
 const LANE_FILE_SCOPE_GLOBALS: &[&str] = &[
     "AccountStoreMixin",
     "FullscreenAccountStoreContainerMixin",
@@ -131,27 +125,9 @@ fn account_store_dependency_closure_includes_every_declared_dep() {
             optional_dep_loaded,
             "OptionalDep `{OPTIONAL_DEP}` MUST be available at runtime when the smoke-shape \
              harness finishes loading `Blizzard_AccountStore`. Note: this addon's TOC declares \
-             the dep using the singular form `## OptionalDep:`, but the simulator's TOC parser \
-             only recognises the plural `## OptionalDeps:` (src/toc.rs:229-234). The closure \
-             walker therefore won't pull `{OPTIONAL_DEP}` transitively — it lands in the runtime \
-             solely via the panel-addons baseline that `with_blizzard_addon_smoke_shape` runs \
-             before walking the closure (`tests/common/panel_fixtures.rs:53-56`). A regression \
-             that drops `{OPTIONAL_DEP}` from the `PANEL_ADDONS` baseline, OR that fixes the \
-             singular-form parser without adding the addon to the closure for this lane, would \
-             flip this assertion. The test queries `C_AddOns.IsAddOnLoaded` because that surface \
-             reads from `sim.addons` (the runtime registry the panel baseline populates), not \
-             from the closure walker's per-call output. Closure-walked set: {loaded:?}"
-        );
-
-        assert!(
-            !loaded.iter().any(|name| name == OPTIONAL_DEP),
-            "Documented gap: `{OPTIONAL_DEP}` is currently NOT expected in the closure-walked \
-             `loaded` set, because the AccountStore TOC uses singular `## OptionalDep:` and the \
-             parser only handles plural `## OptionalDeps:`. If a future change extends the parser \
-             to accept the singular form, this assertion will flip and serve as a tripwire — \
-             remove this negative assertion and add `{OPTIONAL_DEP}` to `REQUIRED_DEPS` (or move \
-             it into a positive list) so the closure walker is the single source of truth. Got \
-             `{OPTIONAL_DEP}` unexpectedly present in: {loaded:?}"
+             the dep using the singular form `## OptionalDep:`, so this assertion pins both the \
+             parser's singular-form support and the runtime registry state read by \
+             `C_AddOns.IsAddOnLoaded`. Closure-walked set: {loaded:?}"
         );
     });
 }
