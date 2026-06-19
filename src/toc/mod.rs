@@ -103,6 +103,13 @@ fn replace_template_vars(value: &str) -> String {
     value.replace("@project-version@", "dev")
 }
 
+fn metadata_key_allows_repeats(key: &str) -> bool {
+    matches!(
+        key,
+        "Dep" | "Dependencies" | "RequiredDep" | "RequiredDeps" | "OptionalDep" | "OptionalDeps"
+    )
+}
+
 /// Process a `## Key: Value` metadata line into the map.
 ///
 /// Skips `Interface` lines whose value consists entirely of unresolved
@@ -117,7 +124,18 @@ fn insert_metadata(metadata: &mut HashMap<String, String>, rest: &str) {
     if key == "Interface" && is_all_template_versions(value) {
         return;
     }
-    metadata.insert(key.to_string(), replace_template_vars(value));
+    let value = replace_template_vars(strip_annotations(value));
+    if metadata_key_allows_repeats(key) {
+        metadata
+            .entry(key.to_string())
+            .and_modify(|existing| {
+                existing.push(',');
+                existing.push_str(&value);
+            })
+            .or_insert(value);
+    } else {
+        metadata.insert(key.to_string(), value);
+    }
 }
 
 fn parse_load_into_environment(line: &str) -> Option<bool> {
@@ -142,6 +160,13 @@ fn split_metadata_list(value: &str) -> Vec<String> {
     } else {
         value.split_whitespace().map(ToString::to_string).collect()
     }
+}
+
+fn collect_metadata_lists(metadata: &HashMap<String, String>, keys: &[&str]) -> Vec<String> {
+    keys.iter()
+        .filter_map(|key| metadata.get(*key))
+        .flat_map(|value| split_metadata_list(value))
+        .collect()
 }
 
 /// Resolve the `[Family]` TOC substitution per active client profile. Retail
@@ -258,14 +283,12 @@ impl TocFile {
 
     /// Get required dependencies.
     ///
-    /// WoW TOC files use three variant keys: `RequiredDep`, `RequiredDeps`, `Dependencies`.
+    /// WoW TOC files use variant keys including Blizzard's repeated `Dep`.
     pub fn dependencies(&self) -> Vec<String> {
-        self.metadata
-            .get("RequiredDep")
-            .or_else(|| self.metadata.get("Dependencies"))
-            .or_else(|| self.metadata.get("RequiredDeps"))
-            .map(|s| split_metadata_list(s))
-            .unwrap_or_default()
+        collect_metadata_lists(
+            &self.metadata,
+            &["Dep", "RequiredDep", "Dependencies", "RequiredDeps"],
+        )
     }
 
     /// Get `LoadWith` triggers — addon names that, when loaded, should trigger
@@ -279,10 +302,7 @@ impl TocFile {
 
     /// Get optional dependencies.
     pub fn optional_deps(&self) -> Vec<String> {
-        self.metadata
-            .get("OptionalDeps")
-            .map(|s| split_metadata_list(s))
-            .unwrap_or_default()
+        collect_metadata_lists(&self.metadata, &["OptionalDep", "OptionalDeps"])
     }
 
     /// Check if addon uses the secure Lua environment (UseSecureEnvironment: 1).

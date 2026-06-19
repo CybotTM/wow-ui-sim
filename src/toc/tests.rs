@@ -42,6 +42,43 @@ BattlefieldMap.lua
 }
 
 #[test]
+fn test_parse_repeated_dep_metadata() {
+    let contents = r#"
+## Title: Blizzard_CatalogShopRefundFlow
+## Dep: Blizzard_SharedXML
+## Dep: Blizzard_CatalogShopSharedUtil
+## Dep: Blizzard_AsyncRequest
+Core.lua
+"#;
+    let toc = TocFile::parse(
+        Path::new("/addons/Blizzard_CatalogShopRefundFlow"),
+        contents,
+    );
+
+    assert_eq!(
+        toc.dependencies(),
+        vec![
+            "Blizzard_SharedXML",
+            "Blizzard_CatalogShopSharedUtil",
+            "Blizzard_AsyncRequest",
+        ]
+    );
+}
+
+#[test]
+fn test_parse_repeated_optional_dep_metadata() {
+    let contents = r#"
+## Title: Blizzard_OptionalChain
+## OptionalDep: Blizzard_A
+## OptionalDep: Blizzard_B
+Core.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/Blizzard_OptionalChain"), contents);
+
+    assert_eq!(toc.optional_deps(), vec!["Blizzard_A", "Blizzard_B"]);
+}
+
+#[test]
 fn test_parse_blizzard_toc() {
     let contents = r#"
 ## Title: Blizzard_SharedXMLBase
