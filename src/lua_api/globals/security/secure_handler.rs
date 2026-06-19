@@ -39,27 +39,31 @@ if _G.__secure_handler_original_scripts == nil then
     _G.__secure_handler_original_scripts = setmetatable({}, { __mode = "k" })
 end
 
-function SecureHandlerSetFrameRef(frame, label, refFrame)
-    if frame == nil or type(label) ~= "string" or refFrame == nil then
-        return
+if type(SecureHandlerSetFrameRef) ~= "function" then
+    function SecureHandlerSetFrameRef(frame, label, refFrame)
+        if frame == nil or type(label) ~= "string" or refFrame == nil then
+            return
+        end
+        local refs = _G.__secure_handler_frame_refs[frame]
+        if refs == nil then
+            refs = {}
+            _G.__secure_handler_frame_refs[frame] = refs
+        end
+        refs[label] = refFrame
     end
-    local refs = _G.__secure_handler_frame_refs[frame]
-    if refs == nil then
-        refs = {}
-        _G.__secure_handler_frame_refs[frame] = refs
-    end
-    refs[label] = refFrame
 end
 
-function SecureHandlerGetFrameRef(frame, label)
-    if frame == nil or type(label) ~= "string" then
-        return nil
+if type(SecureHandlerGetFrameRef) ~= "function" then
+    function SecureHandlerGetFrameRef(frame, label)
+        if frame == nil or type(label) ~= "string" then
+            return nil
+        end
+        local refs = _G.__secure_handler_frame_refs[frame]
+        if refs == nil then
+            return nil
+        end
+        return refs[label]
     end
-    local refs = _G.__secure_handler_frame_refs[frame]
-    if refs == nil then
-        return nil
-    end
-    return refs[label]
 end
 
 local function readonly_copy(source)
@@ -112,13 +116,15 @@ local function compile_snippet(body, chunk_name)
     return closure
 end
 
-function SecureHandlerExecute(frame, body, ...)
-    if frame == nil or type(body) ~= "string" then
-        return
+if type(SecureHandlerExecute) ~= "function" then
+    function SecureHandlerExecute(frame, body, ...)
+        if frame == nil or type(body) ~= "string" then
+            return
+        end
+        local closure = compile_snippet(body, "SecureHandlerExecute")
+        if closure == nil then return end
+        pcall(closure, frame, ...)
     end
-    local closure = compile_snippet(body, "SecureHandlerExecute")
-    if closure == nil then return end
-    pcall(closure, frame, ...)
 end
 
 local function original_scripts_for_frame(frame)
@@ -130,47 +136,51 @@ local function original_scripts_for_frame(frame)
     return scripts
 end
 
-function SecureHandlerWrapScript(frame, script, header, preBody, postBody)
-    if frame == nil or type(script) ~= "string" or type(preBody) ~= "string" then
-        return
-    end
-    local owner = header or frame
-    local pre_closure = compile_snippet(preBody, "SecureHandlerWrapScript-pre")
-    local post_closure
-    if type(postBody) == "string" then
-        post_closure = compile_snippet(postBody, "SecureHandlerWrapScript-post")
-    end
-    local original = frame.GetScript and frame:GetScript(script) or nil
-    local scripts = original_scripts_for_frame(frame)
-    if scripts[script] == nil then
-        scripts[script] = original or false
-    end
-    frame:SetScript(script, function(self, ...)
-        if pre_closure then
-            pcall(pre_closure, owner, ...)
+if type(SecureHandlerWrapScript) ~= "function" then
+    function SecureHandlerWrapScript(frame, script, header, preBody, postBody)
+        if frame == nil or type(script) ~= "string" or type(preBody) ~= "string" then
+            return
         end
-        if original then
-            pcall(original, self, ...)
+        local owner = header or frame
+        local pre_closure = compile_snippet(preBody, "SecureHandlerWrapScript-pre")
+        local post_closure
+        if type(postBody) == "string" then
+            post_closure = compile_snippet(postBody, "SecureHandlerWrapScript-post")
         end
-        if post_closure then
-            pcall(post_closure, owner, ...)
+        local original = frame.GetScript and frame:GetScript(script) or nil
+        local scripts = original_scripts_for_frame(frame)
+        if scripts[script] == nil then
+            scripts[script] = original or false
         end
-    end)
+        frame:SetScript(script, function(self, ...)
+            if pre_closure then
+                pcall(pre_closure, owner, ...)
+            end
+            if original then
+                pcall(original, self, ...)
+            end
+            if post_closure then
+                pcall(post_closure, owner, ...)
+            end
+        end)
+    end
 end
 
-function SecureHandlerUnwrapScript(frame, script)
-    if frame == nil or type(script) ~= "string" then
-        return
+if type(SecureHandlerUnwrapScript) ~= "function" then
+    function SecureHandlerUnwrapScript(frame, script)
+        if frame == nil or type(script) ~= "string" then
+            return
+        end
+        local scripts = _G.__secure_handler_original_scripts[frame]
+        if scripts == nil or scripts[script] == nil then
+            return
+        end
+        local original = scripts[script]
+        scripts[script] = nil
+        if original == false then
+            original = nil
+        end
+        frame:SetScript(script, original)
     end
-    local scripts = _G.__secure_handler_original_scripts[frame]
-    if scripts == nil or scripts[script] == nil then
-        return
-    end
-    local original = scripts[script]
-    scripts[script] = nil
-    if original == false then
-        original = nil
-    end
-    frame:SetScript(script, original)
 end
 "#;

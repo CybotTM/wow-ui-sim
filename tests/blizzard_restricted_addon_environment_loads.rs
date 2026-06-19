@@ -522,6 +522,16 @@ fn rtable_namespace_publishes_with_restricted_table_helpers() {
 }
 
 #[test]
+fn secure_handler_execute_persists_restricted_tables_for_show_handlers() {
+    let env = load_full_game_ui();
+    let count: String = env
+        .eval(r#"local frame = CreateFrame("Button", "SecureHandlerExecutePersistenceProbe", UIParent, "SecureHandlerShowHideTemplate"); frame:Hide(); frame:Execute([[ keybinds = table.new("ALT-X") ]]); frame:SetAttribute("_onshow", [[ self:SetAttribute("observedCount", tostring(table.maxn(keybinds))) ]]); frame:Show(); return frame:GetAttribute("observedCount")"#)
+        .unwrap();
+
+    assert_eq!(count, "1");
+}
+
+#[test]
 fn secure_handlers_publish_full_global_surface() {
     let env = load_full_game_ui();
     for fname in SECURE_HANDLER_GLOBALS {
