@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-19] update | Bag button OnLoad load-order resolved
+
+Marked `investigations/addon-load-order.md` RESOLVED. The historical
+`PaperDollItemSlotButton_OnLoad`-before-definition failure no longer reproduces:
+OnLoad completes (verified via `CharacterBag0Slot` event registration and clean
+`lua-errors`), and the replay workaround was removed (`70fca4e25`, `d4f1287f9`).
+Fixed dead `workarounds_bags.rs` / `l.rs` path references in both the wiki page
+and the legacy `docs/addon-load-order-investigation.md`.
+
 ## [2026-06-19] update | Blizzard UI profile cache migration
 
 Updated `systems/addon-loading.md` after moving runtime Blizzard UI loading to

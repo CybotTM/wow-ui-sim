@@ -1,5 +1,15 @@
 # Addon Load Order Investigation
 
+> **Status: RESOLVED (verified 2026-06-19).** This symptom no longer reproduces.
+> `PaperDollItemSlotButton_OnLoad` is defined by the time the bag buttons load,
+> their `OnLoadInternal` runs to completion (e.g.
+> `CharacterBag0Slot:IsEventRegistered("ITEM_LOCK_CHANGED")` is `true`, which is
+> set after the OnLoad call), and `lua-errors` reports no PaperDoll errors. The
+> `workarounds_bags.rs` re-run referenced below has been removed (`70fca4e25`
+> dropped the replay, `d4f1287f9` deleted the file). The analysis below is kept
+> for historical context. See the wiki version:
+> [investigations/addon-load-order.md](wiki/investigations/addon-load-order.md).
+
 ## Problem
 
 `Blizzard_MainMenuBarBagButtons` calls `PaperDollItemSlotButton_OnLoad(self)` during OnLoad, but that function is defined in `Blizzard_UIPanels_Game/Mainline/PaperDollFrame.lua` which loads later.
@@ -28,17 +38,17 @@ Relevant positions in `ui-toc-list.txt`:
 2. `Blizzard_UIPanels_Game` loads later:
    - `PaperDollFrame.lua:1496` defines `PaperDollItemSlotButton_OnLoad`
 
-## Current Workaround
+## Historical Workaround (removed)
 
-`src/lua_api/workarounds_bags.rs` re-runs `PaperDollItemSlotButton_OnLoad`, `PaperDollItemSlotButton_Update`, and `UpdateTextures` on each bag button after all addons are loaded.
+`src/lua_api/workarounds_bags.rs` used to re-run `PaperDollItemSlotButton_OnLoad`, `PaperDollItemSlotButton_Update`, and `UpdateTextures` on each bag button after all addons loaded. This replay was dropped (`70fca4e25`) and the file later deleted (`d4f1287f9`) once OnLoad began completing on its own. The only surviving bag-adjacent workaround is `src/lua_api/workarounds/temporary/character_frame_surface_refresh.rs`, which re-runs `PaperDollItemSlotButton_Update` and icon textures on the character panel — not `_OnLoad`.
 
 ## Resolution
 
 **The real client has this same error.** Both WoW and wowless wrap OnLoad script handlers in `xpcall` — the error is caught, the rest of `OnLoadInternal` is skipped, but frame creation continues. Confirmed in wowless: `wowless/modules/security.lua` uses `xpcall(fun, ErrorHandler, ...)` for all script dispatch.
 
-Our loader does the same (`xml_lifecycle.rs:10-11` catches OnLoad errors and continues). The bag buttons are left in a partially initialized state. Later events (`PLAYER_ENTERING_WORLD`, `BAG_UPDATE_DELAYED`) and the workaround re-run the skipped initialization.
+Our loader does the same (`loader/xml_lifecycle.rs` catches OnLoad errors and continues). In the current build OnLoad no longer errors, so no recovery is needed; historically, later events (`PLAYER_ENTERING_WORLD`, `BAG_UPDATE_DELAYED`) and the now-removed replay re-ran any skipped initialization.
 
-**There is no missing load order mechanism.** The workaround in `workarounds_bags.rs` is the correct approach — it mirrors what the real client does via events recovering from the partial OnLoad.
+**There is no missing load order mechanism.** The architectural conclusion still holds — relying on `xpcall` recovery mirrors the real client — but the specific partial-OnLoad failure no longer occurs.
 
 ## Other Functions Called Before Defined
 
