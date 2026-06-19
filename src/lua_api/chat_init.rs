@@ -107,9 +107,18 @@ fn fix_chat_scrollbar_anchors(env: &WowLuaEnv) {
 }
 
 const SHOW_CHAT_FRAME_LUA: &str = r#"
+    local function __wow_prepare_default_chat_frame()
+        if ChatFrame1 and ChatFrame1EditBox then
+            DEFAULT_CHAT_FRAME = ChatFrame1
+            ChatFrame1.editBox = ChatFrame1EditBox
+        elseif DEFAULT_CHAT_FRAME and ChatFrame1EditBox and DEFAULT_CHAT_FRAME.editBox == nil then
+            DEFAULT_CHAT_FRAME.editBox = ChatFrame1EditBox
+        end
+    end
+
     if ChatFrame1 then
         ChatFrame1:Show()
-        DEFAULT_CHAT_FRAME = ChatFrame1
+        __wow_prepare_default_chat_frame()
         if type(__wow_send_chat_message) == "function" then
             SendChatMessage = __wow_send_chat_message
             if type(C_ChatInfo) == "table" then
@@ -146,6 +155,20 @@ const SHOW_CHAT_FRAME_LUA: &str = r#"
         if ChatFrame1.ScrollBar then
             ChatFrame1.ScrollBar:SetWidth(23)
         end
+        local function __wow_guard_reinitialize(target)
+            if target and not target.__wowDefaultChatFrameGuarded then
+                local originalReinitialize = target.Reinitialize
+                if type(originalReinitialize) == "function" then
+                    target.Reinitialize = function(self, ...)
+                        __wow_prepare_default_chat_frame()
+                        return originalReinitialize(self, ...)
+                    end
+                    target.__wowDefaultChatFrameGuarded = true
+                end
+            end
+        end
+        __wow_guard_reinitialize(ChatFrameMenuButtonMixin)
+        __wow_guard_reinitialize(ChatFrameMenuButton)
     end
 "#;
 
