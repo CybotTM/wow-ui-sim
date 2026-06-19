@@ -198,6 +198,22 @@ fn test_set_player_power_both_values() {
 }
 
 #[test]
+fn unit_power_percent_uses_current_over_max_power() {
+    let env = env();
+    let (default_percent, updated_percent): (f64, f64) = env
+        .eval(
+            r#"
+            local defaultPercent = UnitPowerPercent("player", 0, true, 1)
+            A_Admin.SetPlayerPower(300, 1000, 0)
+            return defaultPercent, UnitPowerPercent("player", 0, true, 1)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(default_percent, 50.0);
+    assert_eq!(updated_percent, 30.0);
+}
+
+#[test]
 fn test_set_player_power_type_changes() {
     let env = env();
     let power_type: i32 = env
