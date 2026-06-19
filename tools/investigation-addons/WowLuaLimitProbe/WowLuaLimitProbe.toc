@@ -1,0 +1,7 @@
+## Interface: 120007
+## Title: WoW Lua Limit Probe
+## Notes: Probes real-client Lua compiler local/register limits.
+## Author: wow-ui-sim
+## SavedVariables: WowLuaLimitProbeDB
+
+WowLuaLimitProbe.lua
