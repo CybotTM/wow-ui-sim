@@ -18,6 +18,38 @@ Investigation into why `Blizzard_MainMenuBarBagButtons` historically called func
   `PaperDollItemSlotButton_OnLoad` call, proving OnLoad completed rather than
   erroring partway and being swallowed by `xpcall`.
 
+## Why it works now (root cause)
+
+`PaperDollItemSlotButton_OnLoad` is defined in
+`Blizzard_UIPanels_Game/.../PaperDollFrame.lua`. The bag buttons
+(`Blizzard_MainMenuBarBagButtons`, which declares no dependencies) call it during
+their XML `OnLoad`, and `OnLoad` fires synchronously in
+`src/loader/xml_frame/finalize.rs` during that addon's load. So this only works
+if `Blizzard_UIPanels_Game` loads first.
+
+It would not by any naive ordering: alphabetically `M` < `U`, in
+`ui-toc-list.txt` the bag addon is line 209 vs UIPanels_Game line 327, and plain
+topological sort leaves the dep-less bag addon free to load early. All three give
+the historically broken order.
+
+What flips it is the **two-pass eager loader** (`topological_sort_addons` →
+`emit_early_addons` in `src/loader/addon_order.rs`), via a **transitive
+`LoadFirst`**:
+
+1. `Blizzard_EnvironmentCleanup` has `## LoadFirst: 1` **and**
+   `## Dependencies: ... Blizzard_UIPanels_Game ...`.
+2. The early pass emits each `LoadFirst` addon through `emit_addon_recursive`,
+   which emits that addon's dependencies **first, recursively**.
+3. So `Blizzard_UIPanels_Game` is pulled into the early pass — before any
+   non-`LoadFirst` addon, including `Blizzard_MainMenuBarBagButtons` in the later
+   "remaining" pass.
+
+By the time the bag buttons' XML finalizes and fires `OnLoad`,
+`PaperDollItemSlotButton_OnLoad` already exists, so `OnLoadInternal` runs to
+completion. Note the irony vs. the historical analysis below: `UIPanels_Game` is
+not itself `LoadFirst` on Mainline, but `LoadFirst` still fixes this
+**transitively** through `EnvironmentCleanup`'s dependency edge.
+
 ## What changed
 
 The OnLoad re-run replay was removed as obsolete:

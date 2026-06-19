@@ -9,7 +9,10 @@ Marked `investigations/addon-load-order.md` RESOLVED. The historical
 OnLoad completes (verified via `CharacterBag0Slot` event registration and clean
 `lua-errors`), and the replay workaround was removed (`70fca4e25`, `d4f1287f9`).
 Fixed dead `workarounds_bags.rs` / `l.rs` path references in both the wiki page
-and the legacy `docs/addon-load-order-investigation.md`.
+and the legacy `docs/addon-load-order-investigation.md`. Documented the root
+cause: transitive `LoadFirst` — `Blizzard_EnvironmentCleanup` (`LoadFirst: 1`)
+depends on `Blizzard_UIPanels_Game`, and the eager two-pass loader emits a
+LoadFirst addon's deps first, so the definer loads before the bag buttons.
 
 ## [2026-06-19] update | Blizzard UI profile cache migration
 

@@ -50,6 +50,16 @@ Our loader does the same (`loader/xml_lifecycle.rs` catches OnLoad errors and co
 
 **There is no missing load order mechanism.** The architectural conclusion still holds — relying on `xpcall` recovery mirrors the real client — but the specific partial-OnLoad failure no longer occurs.
 
+### Why it no longer fails: transitive LoadFirst
+
+Although `Blizzard_UIPanels_Game` is not itself `LoadFirst` on Mainline, the two-pass eager loader (`topological_sort_addons` → `emit_early_addons` in `src/loader/addon_order.rs`) pulls it into the early pass anyway:
+
+- `Blizzard_EnvironmentCleanup` is `## LoadFirst: 1` and lists `Blizzard_UIPanels_Game` in its `## Dependencies`.
+- `emit_addon_recursive` emits a LoadFirst addon's dependencies first, recursively, so `Blizzard_UIPanels_Game` (and thus `PaperDollItemSlotButton_OnLoad`) loads before any non-LoadFirst addon.
+- `Blizzard_MainMenuBarBagButtons` (no deps) loads in the later "remaining" pass, by which point the function exists, so its XML `OnLoad` completes.
+
+So the original "Addons With LoadFirst (Mainline)" note below is correct that UIPanels_Game lacks `LoadFirst` directly — but `LoadFirst` still resolves this transitively through `EnvironmentCleanup`'s dependency edge, combined with the eager recursive-dependency emission that the loader didn't do at the time of the original investigation.
+
 ## Other Functions Called Before Defined
 
 Same pattern — `Blizzard_MainMenuBarBagButtons` also uses:
