@@ -310,11 +310,27 @@ pub(super) fn gethe_wow_ui_source_branches() -> &'static [&'static str] {
 }
 
 pub(super) fn cache_entry_is_usable(entry: &str, path: &Path) -> bool {
+    if text_manifest_entry(entry) && !is_valid_utf8_file(path) {
+        return false;
+    }
+
     match crate::client_profile::ACTIVE {
         crate::client_profile::ClientProfile::Retail => retail_cache_entry_is_usable(entry, path),
         crate::client_profile::ClientProfile::Mists => mists_cache_entry_is_usable(entry, path),
         _ => true,
     }
+}
+
+fn text_manifest_entry(entry: &str) -> bool {
+    let lower = entry.to_ascii_lowercase();
+    lower.ends_with(".lua")
+        || lower.ends_with(".xml")
+        || lower.ends_with(".toc")
+        || lower.ends_with(".xsd")
+}
+
+fn is_valid_utf8_file(path: &Path) -> bool {
+    std::fs::read_to_string(path).is_ok()
 }
 
 fn retail_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
@@ -484,6 +500,21 @@ mod tests {
         );
 
         std::fs::remove_dir_all(root).expect("remove cache root");
+    }
+
+    #[test]
+    fn text_manifest_entries_reject_binary_cache_data() {
+        let root = unique_temp_dir("binary-text-entry");
+        std::fs::create_dir_all(&root).expect("create temp root");
+        let lua_path = root.join("Bad.lua");
+        std::fs::write(&lua_path, [0xff, 0xfe, 0xfd]).expect("write binary lua");
+
+        assert!(
+            !cache_entry_is_usable("Blizzard_Test/Bad.lua", &lua_path),
+            "text manifest entries must reject binary cache contents"
+        );
+
+        std::fs::remove_dir_all(root).expect("remove temp root");
     }
 
     #[test]

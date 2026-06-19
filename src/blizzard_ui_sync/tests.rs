@@ -210,6 +210,34 @@ fn repo_fallback_copies_manifest_entry_from_addons_root() {
 }
 
 #[test]
+fn sync_replaces_binary_text_cache_entry_from_fallback() {
+    let source_root = unique_temp_dir("source-valid-text");
+    let out_root = unique_temp_dir("out-binary-text");
+    let entry = "Blizzard_Test/Test.lua";
+    let source_path = source_root.join(entry);
+    let out_path = out_root.join(entry);
+    std::fs::create_dir_all(source_path.parent().expect("source parent"))
+        .expect("create source parent");
+    std::fs::create_dir_all(out_path.parent().expect("out parent")).expect("create out parent");
+    std::fs::write(&source_path, "from repo\n").expect("write source fallback");
+    std::fs::write(&out_path, [0xff, 0xfe, 0xfd]).expect("write corrupt cache entry");
+
+    let mut fallback_source = super::RepoFallbackSource {
+        roots: Some(vec![source_root.clone()]),
+    };
+    let result = super::sync_manifest_entry(&out_root, entry, &mut fallback_source)
+        .expect("sync manifest entry");
+
+    assert!(matches!(result, super::EntrySyncResult::Extracted));
+    assert_eq!(
+        std::fs::read_to_string(&out_path).expect("read repaired cache entry"),
+        "from repo\n"
+    );
+    std::fs::remove_dir_all(source_root).expect("remove source temp dir");
+    std::fs::remove_dir_all(out_root).expect("remove output temp dir");
+}
+
+#[test]
 fn repo_fallback_accepts_gethe_repo_root() {
     let repo_root = unique_temp_dir("repo");
     let addons_root = repo_root.join("Interface/AddOns");
