@@ -160,6 +160,7 @@ pub fn blizzard_ui_framexml_toc() -> Option<PathBuf> {
 }
 
 #[cfg(test)]
+#[cfg_attr(not(feature = "client-mists"), allow(unused_imports))]
 mod tests {
     use super::*;
 

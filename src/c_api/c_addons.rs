@@ -602,6 +602,7 @@ fn legacy_get_addon_enable_state(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 #[cfg(test)]
+#[cfg_attr(not(feature = "client-mists"), allow(dead_code, unused_imports))]
 mod tests {
     use super::*;
     use crate::lua_api::WowLuaEnv;

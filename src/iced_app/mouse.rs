@@ -745,7 +745,7 @@ mod test_support;
 #[path = "mouse_tests.rs"]
 mod tests;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "client-mists"))]
 #[path = "mouse_game_menu_tests.rs"]
 mod game_menu_tests;
 

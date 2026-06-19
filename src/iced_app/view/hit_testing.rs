@@ -84,7 +84,7 @@ fn deepest_click_target_through_visible_children(
 
 fn deepest_target_through_visible_children(
     widgets: &crate::widget::WidgetRegistry,
-    grid: &crate::iced_app::hit_grid::HitGrid,
+    _grid: &crate::iced_app::hit_grid::HitGrid,
     frame_id: u64,
     pos: iced::Point,
     accepts_frame: impl Fn(&crate::widget::Frame, u64) -> bool,

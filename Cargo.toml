@@ -148,7 +148,7 @@ required-features = ["client-era"]
 
 [[test]]
 name = "anniversary_compat_bootstrap"
-path = "tests/era_compat_bootstrap.rs"
+path = "tests/anniversary_compat_bootstrap.rs"
 required-features = ["client-anniversary"]
 
 [[test]]
