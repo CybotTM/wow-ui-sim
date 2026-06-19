@@ -1,6 +1,8 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::saved_variables::{SavedVariablesManager, WtfConfig};
 
+const SERVER_SNAPSHOT_ADDON_LUA: &str = include_str!("../docs/addons/ServerSnapshot/ServerSnapshot.lua");
+
 #[test]
 fn server_snapshot_action_bars_seed_get_action_info() {
     let env = WowLuaEnv::new().expect("Lua env");
@@ -151,4 +153,43 @@ fn server_snapshot_loads_from_wtf_saved_variables_file() {
         .expect("read imported action");
     assert_eq!(action_type, "spell");
     assert_eq!(spell_id, 19750);
+}
+
+#[test]
+fn server_snapshot_addon_derives_active_edit_mode_layout_name_from_c_api() {
+    let env = WowLuaEnv::new().expect("Lua env");
+
+    env.exec(
+        r#"
+        ServerSnapshotDB = nil
+        EditModeManagerFrame = nil
+        C_EditMode = {
+            GetLayouts = function()
+                return {
+                    activeLayout = 3,
+                    layouts = {
+                        { layoutName = "Modern" },
+                        { layoutName = "Classic" },
+                        { layoutName = "Ultrawide" },
+                    },
+                }
+            end,
+        }
+        "#,
+    )
+    .expect("seed EditMode API");
+
+    env.exec(SERVER_SNAPSHOT_ADDON_LUA)
+        .expect("load ServerSnapshot addon");
+
+    let active_layout_name: String = env
+        .eval(
+            r#"
+            local snapshot = ServerSnapshot:Snapshot("test")
+            return snapshot.editMode.activeLayoutName or ""
+            "#,
+        )
+        .expect("snapshot active layout");
+
+    assert_eq!(active_layout_name, "Ultrawide");
 }

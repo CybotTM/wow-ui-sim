@@ -546,6 +546,9 @@ local function snapshotEditMode()
                     end
                 end
                 result.layoutNames = names
+                if result.activeLayoutName == nil and result.activeLayout ~= nil then
+                    result.activeLayoutName = names[result.activeLayout]
+                end
             end
         end
     end
