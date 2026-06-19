@@ -57,6 +57,12 @@ if GetMovieDownloadProgress == nil then
     return false, 0, 0
   end
 end
+
+if GetProtocolTypes == nil then
+  function GetProtocolTypes()
+    return 1, 1
+  end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -86,6 +92,8 @@ mod tests {
                 if GetDownloadedPercentage() ~= 1 then return "downloaded" end
                 local inProgress, downloaded, total = GetMovieDownloadProgress(1)
                 if inProgress or downloaded ~= 0 or total ~= 0 then return "movie_download" end
+                local protocolHome, protocolWorld = GetProtocolTypes()
+                if protocolHome ~= 1 or protocolWorld ~= 1 then return "protocol_types" end
                 return "ok"
                 "#,
             )
