@@ -319,6 +319,7 @@ fn apply_system_anchors_replays_player_frame_size_without_cast_bar_side_effect()
                 anchorInfo = { point = "BOTTOM", relativeTo = UIParent, relativePoint = "BOTTOM", offsetX = 0, offsetY = 0 },
             },
             dirtySettings = {},
+            setPointBaseCalls = 0,
         }
         function frame:GetName() return "PlayerFrame" end
         function frame:SetHasActiveChanges() end
@@ -342,7 +343,23 @@ fn apply_system_anchors_replays_player_frame_size_without_cast_bar_side_effect()
             if value <= 0 then error("player frame received non-positive scale") end
             self.scale = value
         end
-        function frame:ApplySystemAnchor() end
+        function frame:ClearAllPointsBase()
+            self.clearedPoints = true
+        end
+        function frame:SetPointBase(point, relativeTo, relativePoint, offsetX, offsetY)
+            self.setPointBaseCalls = self.setPointBaseCalls + 1
+            self.point = point
+            self.relativeTo = relativeTo
+            self.relativePoint = relativePoint
+            self.offsetX = offsetX
+            self.offsetY = offsetY
+        end
+        function frame:ApplySystemAnchor()
+            self.anchorCalls = (self.anchorCalls or 0) + 1
+            if PlayerCastingBarFrame.ApplySystemAnchor then
+                PlayerCastingBarFrame:ApplySystemAnchor()
+            end
+        end
         function frame:UpdateSystemSetting(setting)
             if setting == Enum.EditModeUnitFrameSetting.FrameSize then
                 self:SetScale(self:GetSettingValue(setting) / 100)
@@ -362,11 +379,32 @@ fn apply_system_anchors_replays_player_frame_size_without_cast_bar_side_effect()
     env.exec(APPLY_SYSTEM_ANCHORS_LUA)
         .expect("apply system anchors should avoid player-frame cast-bar side effects");
 
-    let scale: f64 = env
-        .eval("return EditModeManagerFrame.registeredSystemFrames[1].scale")
-        .expect("read converted player frame scale");
+    let (scale, set_point_calls, anchor_calls, point, relative_point): (
+        f64,
+        i64,
+        i64,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local f = EditModeManagerFrame.registeredSystemFrames[1]
+            return f.scale, f.setPointBaseCalls, f.anchorCalls or 0, f.point, f.relativePoint
+            "#,
+        )
+        .expect("read converted player frame scale and direct anchor replay");
 
     assert_eq!(scale, 1.0);
+    assert_eq!(
+        set_point_calls, 1,
+        "player frame should apply its saved anchorInfo through base SetPoint"
+    );
+    assert_eq!(
+        anchor_calls, 0,
+        "direct player-frame anchor replay should avoid cast-bar ApplySystemAnchor side effects"
+    );
+    assert_eq!(point, "BOTTOM");
+    assert_eq!(relative_point, "BOTTOM");
 }
 
 #[test]

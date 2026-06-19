@@ -708,7 +708,9 @@
             elseif skips_full_startup_scale_update(systemFrame) then
                 if seed_system_frame(systemFrame) then
                     replay_system_settings(systemFrame)
-                    if is_unlocked_cast_bar(systemFrame) then
+                    if system_frame_name(systemFrame) == "PlayerFrame" then
+                        apply_anchor_info_directly(systemFrame)
+                    elseif is_unlocked_cast_bar(systemFrame) then
                         apply_anchor_info_directly(systemFrame)
                     else
                         apply_system_anchor_if_safe(systemFrame)

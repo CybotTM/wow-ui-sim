@@ -106,8 +106,8 @@ const POSITION_TESTS: &[TestCase] = &[
     // Player / Target / Group frames
     ("player_frame",               "PlayerFrame",                    268.0,  850.0,  232.0, 100.0, 1.0),
     ("target_frame",               "TargetFrame",                   1100.0,  850.0,  232.0, 100.0, 1.0),
-    ("focus_frame",                "FocusFrame",                    1320.0,  860.0, 174.0,  75.0, 1.0),
-    ("paladin_power_bar",          "PaladinPowerBarFrame",           341.5,  922.0,  150.0,  43.0, 1.0),
+    ("focus_frame",                "FocusFrame",                    1320.0,  835.0, 232.0, 100.0, 1.0),
+    ("paladin_power_bar",          "PaladinPowerBarFrame",           314.0,  945.0,  150.0,  43.0, 1.0),
     ("party_frame",                "PartyFrame",                      22.0,  147.0,  120.0, 244.0, 1.0),
     ("compact_party_frame",        "CompactPartyFrame",               22.0,  147.0,   98.0, 234.0, 1.0),
     // HUD elements
@@ -136,7 +136,7 @@ const POSITION_TESTS: &[TestCase] = &[
     // Managed containers
     ("right_managed_container",    "UIParentRightManagedFrameContainer", 1335.0, 260.0, 260.0, 847.0, 1.0),
     // Casting bar (hidden — no active cast; attached to PlayerFrame via PlayerFrame_AttachCastBar)
-    ("casting_bar",                "PlayerCastingBarFrame",              326.0,  980.0,  150.0,  10.0, 1.0),
+    ("casting_bar",                "PlayerCastingBarFrame",              696.0,  594.5,  208.0,  11.0, 1.0),
 ];
 
 /// ActionButton1 only checks x position (y/size depend on bar layout).
