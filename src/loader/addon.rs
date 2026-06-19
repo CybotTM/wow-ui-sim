@@ -118,11 +118,9 @@ fn apply_blizzard_post_load_patches(
         "Blizzard_SharedXML" => patch_shared_xml_anim_mixins(env, result),
         "Blizzard_UIParent" => patch_uiparent_managed_frame_mixin(env, result),
         "Blizzard_GlueParent" => patch_glueparent_uiparent_attributes(env, result),
-        "Blizzard_MapCanvas" => patch_map_canvas_scroll_container(env, result),
         "Blizzard_SharedMapDataProviders" => patch_unit_position_frame_mixin(env, result),
         "Blizzard_UIPanels_Game" => patch_quest_log_mixin(env, result),
         "Blizzard_ActionBar" => patch_action_bar_button_event_fanout(env),
-        "Blizzard_FrameXMLUtil" => patch_quest_objective_defaults(env),
         "Blizzard_PlayerSpells" => patch_playerspells_onload_backfill(env, result),
         "Blizzard_Dispatcher" => {
             crate::lua_api::workarounds::patch_dispatcher_surface_for_addon_load(env)
@@ -156,10 +154,6 @@ fn patch_environment_cleanup(env: &LoaderEnv<'_>, result: &mut LoadResult) {
     }
 }
 
-fn patch_quest_objective_defaults(env: &LoaderEnv<'_>) {
-    crate::lua_api::workarounds::patch_quest_objective_defaults_for_addon_load(env);
-}
-
 fn patch_action_bar_button_event_fanout(env: &LoaderEnv<'_>) {
     crate::lua_api::workarounds::patch_action_bar_button_event_fanout_for_addon_load(env);
 }
@@ -171,17 +165,6 @@ fn patch_shared_xml_anim_mixins(env: &LoaderEnv<'_>, result: &mut LoadResult) {
             result,
             "Blizzard_SharedXML",
             "patch Blizzard_SharedXML animation mixins",
-            &e,
-        );
-    }
-}
-
-fn patch_map_canvas_scroll_container(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = crate::lua_api::workarounds::patch_map_canvas_scroll_container(env) {
-        push_patch_warning(
-            result,
-            "Blizzard_MapCanvas",
-            "patch map canvas scroll container",
             &e,
         );
     }

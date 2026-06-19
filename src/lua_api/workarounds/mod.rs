@@ -13,13 +13,9 @@ pub use runtime_surfaces::patch_uiparent_managed_frame_mixin;
 use runtime_surfaces::*;
 pub(crate) use runtime_surfaces::{
     patch_account_store_set_storefront, patch_glueparent_uiparent_attributes,
-    patch_map_canvas_scroll_container, patch_playerspells_onload_backfill, patch_quest_log_mixin,
-    patch_shared_xml_anim_mixins, patch_unit_position_frame_mixin,
+    patch_playerspells_onload_backfill, patch_quest_log_mixin, patch_shared_xml_anim_mixins,
+    patch_unit_position_frame_mixin,
 };
-
-pub(crate) fn patch_quest_objective_defaults_for_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
-    temporary::quest_objective_defaults::patch_loader(env);
-}
 
 pub(crate) fn patch_action_bar_button_event_fanout_for_addon_load(
     env: &crate::lua_api::LoaderEnv<'_>,

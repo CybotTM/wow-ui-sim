@@ -192,12 +192,6 @@ pub(crate) fn patch_shared_xml_anim_mixins(
     temporary::shared_xml_anim_mixins::patch(env)
 }
 
-pub(crate) fn patch_map_canvas_scroll_container(
-    env: &crate::lua_api::LoaderEnv<'_>,
-) -> Result<(), crate::Error> {
-    temporary::map_canvas_scroll_container::patch(env)
-}
-
 pub(crate) fn patch_glueparent_uiparent_attributes(
     env: &crate::lua_api::LoaderEnv<'_>,
 ) -> Result<(), crate::Error> {
