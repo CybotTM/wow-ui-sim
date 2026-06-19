@@ -29,13 +29,27 @@ const CREATE_SECURE_ENV_LUA: &str = r##"
     return secureenv
 "##;
 
-fn secure_env_table(
+pub(crate) fn secure_env_table(
     state: &mut LuaState,
 ) -> LuaResult<rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>> {
     match registry_get(state, "__secureenv") {
         Val::Table(table_ref) => Ok(table_ref),
         _ => Err(runtime_error("secure environment not initialized")),
     }
+}
+
+pub(crate) fn set_secure_env_key_state(
+    state: &mut LuaState,
+    key: &str,
+    value: Val,
+) -> LuaResult<()> {
+    let secureenv_ref = secure_env_table(state)?;
+    let key_ref = state.gc.intern_string(key.as_bytes());
+    if let Some(secureenv) = state.gc.tables.get_mut(secureenv_ref) {
+        let _ = secureenv.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(secureenv_ref);
+    Ok(())
 }
 
 /// Create the secure environment as a shallow copy of `_G` with fallback.

@@ -220,3 +220,152 @@ fn test_collect_lua_error_prefers_executing_addon_name() {
         Some("ExecutingAddon")
     );
 }
+
+#[test]
+fn scoped_modifier_scripts_use_given_env_for_scripts_and_mixins() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_dir = std::env::temp_dir().join("wow-sim-test-scoped-modifier-env");
+    std::fs::create_dir_all(&temp_dir).unwrap();
+    let xml_path = temp_dir.join("test.xml");
+    let file_script = temp_dir.join("scoped-file.lua");
+    std::fs::write(
+        &file_script,
+        r#"
+        local addonName, addonEnv = ...
+        _G.ScopedFileUsesAddonEnv = getfenv(1) == addonEnv
+        _G.ScopedFileGlobalFallbackWorks = type(CreateFrame) == "function"
+        "#,
+    )
+    .unwrap();
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
+            <ScopedModifier scriptsUseGivenEnv="true" hideFromGlobalEnv="true">
+                <Script>
+                    local addonName, addonEnv = ...
+                    _G.ScopedInlineUsesAddonEnv = getfenv(1) == addonEnv
+                    _G.ScopedInlineGlobalFallbackWorks = type(CreateFrame) == "function"
+                    ScopedLocalMixin = {
+                        DescribeScope = function(self)
+                            return "scoped"
+                        end,
+                    }
+                </Script>
+                <Script file="scoped-file.lua"/>
+                <Frame name="ScopedHiddenFrame" mixin="ScopedLocalMixin">
+                    <Scripts>
+                        <OnLoad>
+                            _G.ScopedMixinResult = self:DescribeScope()
+                        </OnLoad>
+                    </Scripts>
+                </Frame>
+                <Script>
+                    local addonName, addonEnv = ...
+                    setmetatable(addonEnv, { __index = { ScopedCustomFallback = "custom", _G = _G } })
+                </Script>
+                <ScopedModifier scriptsUseGivenEnv="true">
+                    <Script>
+                        _G.ScopedNestedCustomFallback = ScopedCustomFallback
+                    </Script>
+                </ScopedModifier>
+            </ScopedModifier>
+            <ScopedModifier addToSecureEnv="true">
+                <Frame name="ScopedSecureFrame"/>
+            </ScopedModifier>
+            <ScopedModifier addToSecureEnv="true" hideFromGlobalEnv="true">
+                <Frame name="ScopedSecureOnlyFrame"/>
+            </ScopedModifier>
+        </Ui>"#,
+    )
+    .unwrap();
+
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
+
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
+
+    let inline_uses_env: bool = env.eval("return ScopedInlineUsesAddonEnv == true").unwrap();
+    let inline_fallback: bool = env
+        .eval("return ScopedInlineGlobalFallbackWorks == true")
+        .unwrap();
+    let file_uses_env: bool = env.eval("return ScopedFileUsesAddonEnv == true").unwrap();
+    let file_fallback: bool = env
+        .eval("return ScopedFileGlobalFallbackWorks == true")
+        .unwrap();
+    let nested_custom_fallback: String = env.eval("return ScopedNestedCustomFallback").unwrap();
+    let mixin_result: String = env.eval("return ScopedMixinResult").unwrap();
+    let frame_hidden_from_global: bool = env.eval("return ScopedHiddenFrame == nil").unwrap();
+    let frame_added_to_secure_env: bool = env
+        .eval("return __secureenv.ScopedSecureFrame == ScopedSecureFrame")
+        .unwrap();
+    let secure_only_frame_added_to_secure_env: bool = env
+        .eval("return __secureenv.ScopedSecureOnlyFrame ~= nil")
+        .unwrap();
+    let secure_only_frame_hidden_from_global: bool =
+        env.eval("return ScopedSecureOnlyFrame == nil").unwrap();
+
+    assert!(inline_uses_env, "inline XML script should run in addon env");
+    assert!(inline_fallback, "scoped env should fall back to _G");
+    assert!(file_uses_env, "file XML script should run in addon env");
+    assert!(file_fallback, "file scoped env should fall back to _G");
+    assert_eq!(nested_custom_fallback, "custom");
+    assert_eq!(mixin_result, "scoped");
+    assert!(
+        frame_hidden_from_global,
+        "hideFromGlobalEnv should keep named scoped frames out of _G"
+    );
+    assert!(
+        frame_added_to_secure_env,
+        "addToSecureEnv should copy named scoped frames into secureenv"
+    );
+    assert!(
+        secure_only_frame_added_to_secure_env,
+        "addToSecureEnv should copy named frames into secureenv even when hidden from _G"
+    );
+    assert!(
+        secure_only_frame_hidden_from_global,
+        "hideFromGlobalEnv should still hide names when addToSecureEnv is also set"
+    );
+}
+
+#[test]
+fn scoped_modifier_scripts_use_secure_env_fallback_for_secure_addons() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("__secureenv.ScopedSecureEnvOnlyValue = 'secure-fallback'")
+        .unwrap();
+
+    let temp_dir = std::env::temp_dir().join("wow-sim-test-scoped-modifier-secure-env");
+    std::fs::create_dir_all(&temp_dir).unwrap();
+    let xml_path = temp_dir.join("test.xml");
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
+            <ScopedModifier scriptsUseGivenEnv="true">
+                <Script>
+                    assert(ScopedSecureEnvOnlyValue == "secure-fallback")
+                </Script>
+            </ScopedModifier>
+        </Ui>"#,
+    )
+    .unwrap();
+
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, true, false).unwrap();
+
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
+    assert!(env.state().borrow().lua_errors.is_empty());
+}

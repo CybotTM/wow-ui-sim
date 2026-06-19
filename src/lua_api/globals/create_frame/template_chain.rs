@@ -322,6 +322,8 @@ fn apply_template_scripts_impl(
             .map_err(|error| rilua::runtime_error(error.to_string()));
     state.global_slots = saved_slots;
     let func = func?;
+    crate::lua_api::loader_env::apply_loading_scoped_fenv_state(state, &func)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
     let frame = frame_ref(state, frame_id)?;
     match crate::lua_api::script_helpers::call_void_function_with_fallback_state(
         state,

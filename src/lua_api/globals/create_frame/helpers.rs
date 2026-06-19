@@ -172,9 +172,24 @@ pub(crate) fn apply_frame_mixins(state: &mut LuaState, frame_id: u64, mixins: Op
         .map(str::trim)
         .filter(|name| !name.is_empty())
     {
-        let mixin_val = resolve_global_path(state, mixin_name);
+        let mixin_val = resolve_scoped_or_global_path(state, mixin_name);
         copy_table_into_frame(state, frame_id, mixin_val);
     }
+}
+
+fn resolve_scoped_or_global_path(state: &mut LuaState, path: &str) -> Val {
+    let scoped_env = {
+        borrow_state(state)
+            .ok()
+            .and_then(|sim| sim.loading_scoped_script_env)
+    };
+    if let Some(scoped_env) = scoped_env {
+        let current = resolve_table_path(state, scoped_env, path);
+        if current != Val::Nil {
+            return current;
+        }
+    }
+    resolve_global_path(state, path)
 }
 
 pub(super) fn resolve_global_path(state: &mut LuaState, path: &str) -> Val {

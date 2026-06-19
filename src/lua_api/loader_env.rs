@@ -7,9 +7,9 @@ use crate::Result;
 use crate::lua_api::methods::create_table;
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_bridge::table_set_rust_fn_static;
-use rilua::LuaApiMut;
 use rilua::Val;
 use rilua::vm::state::LuaState;
+use rilua::{Function, LuaApiMut};
 use std::cell::{Ref, RefMut};
 use std::marker::PhantomData;
 use std::ptr::NonNull;
@@ -106,6 +106,7 @@ impl<'a> LoaderEnv<'a> {
             if self.loading_addon_uses_secure_env() {
                 mark_secure_state(state, &func)?;
             }
+            apply_loading_scoped_fenv_state(state, &func)?;
             crate::lua_api::script_helpers::call_void_function_with_fallback_state(
                 state,
                 Val::Function(func.gc_ref()),
@@ -199,6 +200,19 @@ impl<'a> LoaderEnv<'a> {
     pub fn state(&self) -> &Rc<std::cell::RefCell<SimState>> {
         &self.state
     }
+}
+
+pub(crate) fn apply_loading_scoped_fenv_state(state: &mut LuaState, func: &Function) -> Result<()> {
+    let scoped_env = {
+        let sim = super::methods::borrow_state(state)?;
+        sim.loading_scoped_script_env
+    };
+    let Some(Val::Table(env_ref)) = scoped_env else {
+        return Ok(());
+    };
+    let env = rilua::Table::from_gc_ref(env_ref);
+    rilua::api::state_set_fenv(state, func, &env)?;
+    Ok(())
 }
 
 pub(crate) fn create_addon_table(lua: &mut rilua::Lua) -> Result<Val> {

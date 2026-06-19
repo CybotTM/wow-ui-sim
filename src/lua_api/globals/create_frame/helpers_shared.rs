@@ -286,13 +286,25 @@ fn register_global_name(
         return Ok(());
     }
     let frame_val = frame_ref(state, frame_id)?;
-    let key = state.gc.intern_string(name.as_bytes());
-    let global = state.global;
-    if let Some(globals) = state.gc.tables.get_mut(global) {
-        let _ = globals.raw_set(Val::Str(key), frame_val, &state.gc.string_arena);
+    let (hide_from_global_env, add_to_secure_env) = {
+        let sim = borrow_state(state)?;
+        (
+            sim.loading_hide_from_global_env,
+            sim.loading_add_to_secure_env,
+        )
+    };
+    if !hide_from_global_env {
+        let key = state.gc.intern_string(name.as_bytes());
+        let global = state.global;
+        if let Some(globals) = state.gc.tables.get_mut(global) {
+            let _ = globals.raw_set(Val::Str(key), frame_val, &state.gc.string_arena);
+        }
+        state.gc.barrier_back(global);
+        crate::lua_api::global_slots::refresh_installed_slots_for_name(state, &name);
     }
-    state.gc.barrier_back(global);
-    crate::lua_api::global_slots::refresh_installed_slots_for_name(state, &name);
+    if add_to_secure_env {
+        crate::lua_api::globals::security::set_secure_env_key_state(state, &name, frame_val)?;
+    }
     Ok(())
 }
 

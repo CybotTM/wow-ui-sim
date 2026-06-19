@@ -136,6 +136,8 @@ fn execute_compiled_lua_file(
     if ctx.use_secure_env {
         mark_secure_state(state, &func).map_err(|e| report_lua_load_error(state, e))?;
     }
+    crate::lua_api::loader_env::apply_loading_scoped_fenv_state(state, &func)
+        .map_err(|e| report_lua_load_error(state, e))?;
     let result = if ctx.taint {
         exec_addon_func(state, func, ctx)
     } else {

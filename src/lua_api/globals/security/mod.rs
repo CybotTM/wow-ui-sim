@@ -33,6 +33,7 @@ mod state_drivers;
 mod value_access;
 
 pub use loader_env::{compile_chunk_rilua, exec_chunk_rilua};
+pub(crate) use secure_env::set_secure_env_key_state;
 pub use secure_env::{
     create_secure_environment, mark_secure, mark_secure_state, set_in_both_envs_rilua,
 };

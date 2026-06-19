@@ -28,6 +28,12 @@ pub struct UiXml {
 pub struct ScopedModifierXml {
     #[serde(rename = "@forbidden", default)]
     pub forbidden: Option<bool>,
+    #[serde(rename = "@scriptsUseGivenEnv", default)]
+    pub scripts_use_given_env: Option<bool>,
+    #[serde(rename = "@addToSecureEnv", default)]
+    pub add_to_secure_env: Option<bool>,
+    #[serde(rename = "@hideFromGlobalEnv", default)]
+    pub hide_from_global_env: Option<bool>,
     #[serde(rename = "@fullLockdown", default)]
     pub full_lockdown: Option<bool>,
     #[serde(rename = "$value", default)]

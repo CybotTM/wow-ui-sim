@@ -150,6 +150,9 @@ mod tests {
     fn frame_element_frame_data_ignores_scoped_modifier() {
         let scoped = ScopedModifierXml {
             forbidden: Some(true),
+            scripts_use_given_env: None,
+            add_to_secure_env: None,
+            hide_from_global_env: None,
             full_lockdown: None,
             elements: Vec::new(),
         };

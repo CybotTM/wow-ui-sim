@@ -2,10 +2,10 @@
 
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::globals::security::mark_secure_state;
-use crate::lua_api::methods::create_string;
+use crate::lua_api::methods::{create_string, registry_get};
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::xml::{FrameXml, XmlElement, parse_xml_file};
-use rilua::{Function, LuaApiMut};
+use rilua::{Function, LuaApiMut, Val};
 use std::path::Path;
 use std::time::Instant;
 
@@ -130,16 +130,125 @@ fn process_scoped_modifier(
     ctx: &AddonContext,
     timing: &mut LoadTiming,
 ) -> Result<usize, LoadError> {
-    let prev_forbidden = env.state().borrow().loading_forbidden;
-    if scoped.forbidden.unwrap_or(false) || scoped.full_lockdown.unwrap_or(false) {
-        env.state().borrow_mut().loading_forbidden = true;
-    }
+    let scoped_env = scoped
+        .scripts_use_given_env
+        .unwrap_or(false)
+        .then(|| scoped_script_env(env, ctx))
+        .transpose()?;
+    let saved_scope = enter_scoped_modifier(env, scoped, scoped_env);
     let mut count = 0;
-    for child in &scoped.elements {
+    let result = scoped.elements.iter().try_for_each(|child| {
         count += process_element(env, child, xml_dir, ctx, timing)?;
+        Ok::<(), LoadError>(())
+    });
+    restore_scoped_modifier(env, saved_scope);
+    result.map(|()| count)
+}
+
+struct SavedScopedModifier {
+    forbidden: bool,
+    script_env: Option<Val>,
+    add_to_secure_env: bool,
+    hide_from_global_env: bool,
+}
+
+fn enter_scoped_modifier(
+    env: &LoaderEnv<'_>,
+    scoped: &crate::xml::ScopedModifierXml,
+    scoped_env: Option<Val>,
+) -> SavedScopedModifier {
+    let mut state = env.state().borrow_mut();
+    let saved = SavedScopedModifier {
+        forbidden: state.loading_forbidden,
+        script_env: state.loading_scoped_script_env,
+        add_to_secure_env: state.loading_add_to_secure_env,
+        hide_from_global_env: state.loading_hide_from_global_env,
+    };
+    if scoped.forbidden.unwrap_or(false) || scoped.full_lockdown.unwrap_or(false) {
+        state.loading_forbidden = true;
     }
-    env.state().borrow_mut().loading_forbidden = prev_forbidden;
-    Ok(count)
+    if let Some(scoped_env) = scoped_env {
+        state.loading_scoped_script_env = Some(scoped_env);
+    }
+    if scoped.add_to_secure_env.unwrap_or(false) {
+        state.loading_add_to_secure_env = true;
+    }
+    if scoped.hide_from_global_env.unwrap_or(false) {
+        state.loading_hide_from_global_env = true;
+    }
+    saved
+}
+
+fn restore_scoped_modifier(env: &LoaderEnv<'_>, saved: SavedScopedModifier) {
+    let mut state = env.state().borrow_mut();
+    state.loading_forbidden = saved.forbidden;
+    state.loading_scoped_script_env = saved.script_env;
+    state.loading_add_to_secure_env = saved.add_to_secure_env;
+    state.loading_hide_from_global_env = saved.hide_from_global_env;
+}
+
+fn scoped_script_env(env: &LoaderEnv<'_>, ctx: &AddonContext) -> Result<Val, LoadError> {
+    let Val::Table(env_ref) = ctx.table else {
+        return Err(LoadError::Lua(
+            "ScopedModifier scriptsUseGivenEnv requires addon environment table".to_string(),
+        ));
+    };
+    env.with_state(|state| {
+        let fallback = scoped_script_fallback_env(state, ctx.use_secure_env);
+        ensure_scoped_script_env_fallback(state, env_ref, fallback);
+        Ok::<(), crate::Error>(())
+    })
+    .map_err(|e| LoadError::Lua(e.to_string()))?;
+    Ok(ctx.table)
+}
+
+fn scoped_script_fallback_env(state: &mut rilua::vm::state::LuaState, use_secure_env: bool) -> Val {
+    if use_secure_env {
+        let secureenv = registry_get(state, "__secureenv");
+        if matches!(secureenv, Val::Table(_)) {
+            return secureenv;
+        }
+    }
+    Val::Table(state.global)
+}
+
+fn ensure_scoped_script_env_fallback(
+    state: &mut rilua::vm::state::LuaState,
+    env_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    fallback: Val,
+) {
+    let index_key = state.gc.intern_string_static(b"__index");
+    let metatable_ref = match state
+        .gc
+        .tables
+        .get(env_ref)
+        .and_then(|table| table.metatable())
+    {
+        Some(metatable_ref) => metatable_ref,
+        None => {
+            let metatable = crate::lua_api::methods::create_table(state);
+            let Val::Table(metatable_ref) = metatable else {
+                unreachable!("create_table must return table");
+            };
+            if let Some(table) = state.gc.tables.get_mut(env_ref) {
+                table.set_metatable(Some(metatable_ref));
+            }
+            state.gc.barrier_back(env_ref);
+            metatable_ref
+        }
+    };
+    let has_index = state
+        .gc
+        .tables
+        .get(metatable_ref)
+        .is_some_and(|table| table.get_str(index_key, &state.gc.string_arena) != Val::Nil);
+    if has_index {
+        return;
+    }
+    if let Some(metatable) = state.gc.tables.get_mut(metatable_ref) {
+        let _ = metatable.raw_set(Val::Str(index_key), fallback, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(metatable_ref);
 }
 
 /// Process a Script element (file reference or inline code).
@@ -173,9 +282,19 @@ fn run_inline_script(
     let func = compile_inline_script(env, inline, timing)?;
     let call_start = Instant::now();
     mark_inline_script_secure(env, ctx, &func)?;
+    apply_inline_script_scope(env, &func)?;
     call_inline_script(env, ctx, &func)?;
     record_inline_script_call_timing(timing, call_start);
     Ok(())
+}
+
+fn apply_inline_script_scope(env: &LoaderEnv<'_>, func: &Function) -> Result<(), LoadError> {
+    env.with_state(|state| {
+        crate::lua_api::loader_env::apply_loading_scoped_fenv_state(state, func).map_err(|e| {
+            call_error_handler_state(state, &e.to_string());
+            LoadError::Lua(e.to_string())
+        })
+    })
 }
 
 fn compile_inline_script(

@@ -123,6 +123,10 @@ name = "integration"
 path = "tests/integration.rs"
 
 [[test]]
+name = "scoped_modifier_addon_smoke"
+path = "tests/scoped_modifier_addon_smoke.rs"
+
+[[test]]
 name = "pandaria_installed_addons"
 path = "tests/pandaria_installed_addons.rs"
 required-features = ["client-mists"]

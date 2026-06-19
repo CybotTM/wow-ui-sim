@@ -268,6 +268,9 @@ fn scoped_modifier_returns_none() {
     use crate::xml::ScopedModifierXml;
     let sm = ScopedModifierXml {
         forbidden: None,
+        scripts_use_given_env: None,
+        add_to_secure_env: None,
+        hide_from_global_env: None,
         full_lockdown: None,
         elements: vec![],
     };
