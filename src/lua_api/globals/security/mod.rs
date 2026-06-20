@@ -24,6 +24,7 @@
 use rilua::{LuaApiMut, LuaResult, Val};
 
 mod cmd_option;
+mod environment;
 mod loader_env;
 mod secret_values;
 mod secure_env;
@@ -46,6 +47,7 @@ pub(crate) use secret_values::mark_secret_value;
 /// as rilua `RustFn`s. Elune C-runtime functions are excluded.
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "securecallmethod", securecallmethod::securecallmethod)?;
+    environment::register_environment_helpers(lua)?;
     LuaApiMut::register_function(
         lua,
         "issecurevariable",

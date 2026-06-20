@@ -10,24 +10,6 @@ if AddSourceLocationExclude == nil then
   end
 end
 
-if GetGlobalEnvironment == nil then
-  function GetGlobalEnvironment()
-    return _G
-  end
-end
-
-if GetCurrentEnvironment == nil then
-  function GetCurrentEnvironment()
-    return _G
-  end
-end
-
-if SwapToGlobalEnvironment == nil then
-  function SwapToGlobalEnvironment()
-    return _G
-  end
-end
-
 if CreateSecureDelegate == nil then
   function CreateSecureDelegate(fn)
     return fn
@@ -231,9 +213,6 @@ mod tests {
             .eval(
                 r#"
                 local marker = function() return "wrapped" end
-                if GetGlobalEnvironment() ~= _G then return "global_environment" end
-                if GetCurrentEnvironment() ~= _G then return "current_environment" end
-                if SwapToGlobalEnvironment() ~= _G then return "swap_global_environment" end
                 if CreateSecureDelegate(marker)() ~= "wrapped" then return "secure_delegate" end
                 if type(GetButtonMetatable()) ~= "table" then return "button_metatable" end
                 if type(GetEditBoxMetatable()) ~= "table" then return "editbox_metatable" end
