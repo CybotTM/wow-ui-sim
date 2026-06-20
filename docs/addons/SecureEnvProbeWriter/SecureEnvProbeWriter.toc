@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: Secure Env Probe Writer
+## Notes: Ground-truth writer for secure environment probes
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: SecureEnvProbeDB
+
+SecureEnvProbeWriter.lua

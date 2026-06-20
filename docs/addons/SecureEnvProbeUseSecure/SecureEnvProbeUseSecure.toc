@@ -1,0 +1,9 @@
+## Interface: 120005
+## Title: Secure Env Probe UseSecureEnvironment
+## Notes: Tests addon-level UseSecureEnvironment behavior
+## Author: Alessio
+## Version: 0.1.0
+## Dependencies: SecureEnvProbeWriter
+## UseSecureEnvironment: 1
+
+SecureEnvProbeUseSecure.lua

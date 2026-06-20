@@ -1,0 +1,9 @@
+## Interface: 120005
+## Title: Secure Env Probe LoadInto
+## Notes: Tests per-file [LoadIntoEnvironment secure] behavior
+## Author: Alessio
+## Version: 0.1.0
+## Dependencies: SecureEnvProbeWriter
+
+SecureEnvProbeLoadIntoSecure.lua [LoadIntoEnvironment secure]
+SecureEnvProbeLoadIntoAfter.lua
