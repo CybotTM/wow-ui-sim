@@ -323,16 +323,11 @@ fn ui_parent_panel_manager_diagnostic_files_carry_allow_load_environment_global_
         .expect("UIParentPanelManager.lua must appear in body");
     assert_eq!(
         panel_manager.file_use_secure_env(panel_idx),
-        None,
-        "SIMULATOR GAP — `[AllowLoadEnvironment Global]` is silently ignored by the simulator \
-         parser. The `parse_load_into_environment` function at src/toc.rs:108-117 ONLY \
-         recognizes the `[LoadIntoEnvironment ...]` keyword, not the `[AllowLoadEnvironment ...]` \
-         keyword UIParentPanelManager uses. The unit test at src/toc.rs:562-564 pins this \
-         behavior. Effect: all three panel-manager files surface as `None` (default fenv) \
-         instead of the requested global override. Currently dormant because the addon itself \
-         runs with the default (global) fenv. The gap matters for any future secure-env \
-         wrapper around UIParentPanelManager that would otherwise correctly route ShowUIPanel \
-         / HideUIPanel writes through the global env"
+        Some(false),
+        "`[AllowLoadEnvironment Global]` must map to a per-file global-env override. \
+         UIParentPanelManager currently inherits a global default, but the explicit override \
+         matters if a future secure-env wrapper would otherwise isolate ShowUIPanel / \
+         HideUIPanel writes"
     );
 }
 

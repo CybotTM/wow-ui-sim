@@ -232,18 +232,11 @@ fn shared_xml_diagnostic_files_carry_allow_load_environment_global_in_raw_form()
     let dump_idx = position_in(&body, "Dump.lua").expect("Dump.lua must appear in SharedXML body");
     assert_eq!(
         shared.file_use_secure_env(dump_idx),
-        None,
-        "SIMULATOR GAP — `[AllowLoadEnvironment Global]` is silently ignored by the simulator \
-         parser. The `parse_load_into_environment` function at src/toc.rs:108-117 ONLY \
-         recognizes the `[LoadIntoEnvironment ...]` keyword (with `secure` / `global` values), \
-         not the `[AllowLoadEnvironment ...]` keyword used throughout SharedXML. The unit test \
-         at src/toc.rs:562-564 pins this behavior explicitly. Effect: Dump.lua, \
-         DebugBarManager.lua, HelpTip.lua, HelpTip.xml, SharedBasicControls.lua all surface \
-         as `None` (default fenv) instead of the requested global override. Real WoW honors \
-         `AllowLoadEnvironment`; the simulator does not. This is currently dormant because \
-         SharedXML itself runs with the default (global) fenv, so the override is a no-op for \
-         this lane. The gap matters for any future secure-env wrapper around the lane that \
-         would otherwise route Dump.lua's `dump()` global through the secure environment"
+        Some(false),
+        "`[AllowLoadEnvironment Global]` must map to the same per-file global-env override as \
+         `[LoadIntoEnvironment Global]`. SharedXML currently runs in the default global fenv, \
+         but preserving the explicit override keeps these diagnostics correct if the lane ever \
+         gains a secure-env default"
     );
 }
 
@@ -406,8 +399,8 @@ fn lane_publishes_foundational_globals_after_full_game_load() {
              live at file scope. `Mixin` is from SharedXMLBase/Mixin.lua; `CallbackRegistryMixin` \
              from SharedXMLBase/CallbackRegistry.lua; `FrameUtil`/`AnchorUtil`/`TableUtil` \
              from SharedXMLBase; `HelpTip` from SharedXML/HelpTip.lua (carries \
-             `[AllowLoadEnvironment Global]` annotation, but the simulator ignores that \
-             override — see shared_xml_diagnostic_files_carry_allow_load_environment_global_in_raw_form); \
+             `[AllowLoadEnvironment Global]`, which the TOC parser maps to a global-env \
+             override); \
              `ScrollUtil` from SharedXML/Shared/Scroll/ScrollUtil.lua; `CreateColor` \
              constructor + `ColorMixin` table from SharedXMLBase/Color.lua (the global is the \
              constructor function `CreateColor`, not a `Color` global — `ColorMixin` is the \

@@ -21,7 +21,7 @@ pub struct TocFile {
     pub metadata: HashMap<String, String>,
     /// Files to load in order (relative paths)
     pub files: Vec<PathBuf>,
-    /// Per-file environment override from `[LoadIntoEnvironment ...]` annotations.
+    /// Per-file environment override from TOC environment annotations.
     /// `None` means inherit the addon's default environment.
     pub file_env_overrides: Vec<Option<bool>>,
 }
@@ -141,9 +141,13 @@ fn insert_metadata(metadata: &mut HashMap<String, String>, rest: &str) {
 
 fn parse_load_into_environment(line: &str) -> Option<bool> {
     let lower = line.to_ascii_lowercase();
-    if lower.contains("[loadintoenvironment secure]") {
+    if lower.contains("[loadintoenvironment secure]")
+        || lower.contains("[allowloadenvironment secure]")
+    {
         Some(true)
-    } else if lower.contains("[loadintoenvironment global]") {
+    } else if lower.contains("[loadintoenvironment global]")
+        || lower.contains("[allowloadenvironment global]")
+    {
         Some(false)
     } else {
         None

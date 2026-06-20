@@ -208,20 +208,18 @@ fn blizzard_objective_tracker_toc_declares_eager_game_only_with_three_required_d
 fn blizzard_objective_tracker_toc_declares_dependencies_in_raw_bytes() {
     let raw = std::fs::read_to_string(objective_tracker_toc())
         .expect("Blizzard_ObjectiveTracker TOC reads utf-8");
-    assert!(
-        raw.contains(
-            "## RequiredDep: Blizzard_MawBuffs, Blizzard_TieredEntranceTraits, \
-                      Blizzard_TransmogShared"
-        ),
-        "TOC must declare the 3 RequiredDeps in a single comma-separated `## RequiredDep:` line \
-         (singular `RequiredDep`, not the plural `Dependencies` alias). Pinning the exact \
-         spelling guards against silent reordering or a refactor that flips singular→plural"
-    );
-    assert!(
-        raw.contains("## OptionalDeps: Blizzard_UIWidgets, Blizzard_UIWidgets_WoWLabs"),
-        "TOC must declare the 2 OptionalDeps in a single comma-separated `## OptionalDeps:` line \
-         (canonical retail spelling here is plural `OptionalDeps`)"
-    );
+    for dep in [
+        "## Dep: Blizzard_MawBuffs",
+        "## Dep: Blizzard_TieredEntranceTraits",
+        "## Dep: Blizzard_TransmogShared",
+        "## Dep: Blizzard_UIWidgets",
+    ] {
+        assert!(
+            raw.contains(dep),
+            "TOC must declare dependency line `{dep}`. Retail currently uses repeated `## Dep:` \
+             lines here rather than comma-separated RequiredDep/OptionalDeps metadata"
+        );
+    }
     assert!(
         !raw.contains("## LoadOnDemand"),
         "TOC must NOT declare `## LoadOnDemand` in any form — the absence (rather than \
@@ -246,11 +244,8 @@ fn blizzard_objective_tracker_toc_declares_dependencies_in_raw_bytes() {
         "TOC must annotate the manager file with the per-file `[AllowLoadEnvironment Global]` \
          marker. The marker tells the retail engine to load the manager into the global \
          environment (rather than a sandboxed addon environment); the simulator's TOC parser \
-         strips the annotation via `strip_annotations` at src/toc.rs:30 but does NOT map \
-         `AllowLoadEnvironment` to a `file_env_overrides` slot (only `[LoadIntoEnvironment \
-         secure]` / `[LoadIntoEnvironment global]` are mapped at src/toc.rs:108-117). The \
-         net effect: the file loads as if the annotation were absent, which is correct for \
-         the simulator because it has no addon-environment sandbox to opt out of"
+         strips the annotation from the path and maps it to a `file_env_overrides` slot, the \
+         same as `[LoadIntoEnvironment global]`"
     );
 }
 
