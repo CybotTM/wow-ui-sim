@@ -313,6 +313,13 @@ pub(super) fn gethe_wow_ui_source_branches() -> &'static [&'static str] {
     }
 }
 
+pub(super) fn sync_entry_belongs_to_active_profile(entry: &str) -> bool {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Ptr => ptr_sync_entry(entry),
+        _ => true,
+    }
+}
+
 pub(super) fn cache_entry_is_usable(entry: &str, path: &Path) -> bool {
     if text_manifest_entry(entry) && !is_valid_utf8_file(path) {
         return false;
@@ -324,6 +331,31 @@ pub(super) fn cache_entry_is_usable(entry: &str, path: &Path) -> bool {
         crate::client_profile::ClientProfile::Mists => mists_cache_entry_is_usable(entry, path),
         _ => true,
     }
+}
+
+fn ptr_sync_entry(entry: &str) -> bool {
+    !legacy_profile_entry(entry) && !ptr_removed_mainline_entry(entry)
+}
+
+fn legacy_profile_entry(entry: &str) -> bool {
+    entry.contains("/Classic/")
+        || entry.contains("/Mists/")
+        || entry.contains("/Wrath/")
+        || entry.contains("/Cata/")
+        || entry.contains("/TBC/")
+        || entry.contains("_Classic.toc")
+        || entry.contains("_Mists.toc")
+        || entry.contains("_Wrath.toc")
+        || entry.contains("_Vanilla.toc")
+}
+
+fn ptr_removed_mainline_entry(entry: &str) -> bool {
+    matches!(
+        entry,
+        "Blizzard_WorldMap/Blizzard_WorldMapTooltip.xml"
+            | "Blizzard_WorldMap/WM_InvasionDataProvider.lua"
+            | "Blizzard_WorldMap/WM_InvasionDataProvider.xml"
+    )
 }
 
 fn text_manifest_entry(entry: &str) -> bool {

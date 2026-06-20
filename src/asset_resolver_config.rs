@@ -8,7 +8,31 @@ static RESOLVER: OnceLock<asset_resolver::CascListfileResolver> = OnceLock::new(
 
 #[cfg(feature = "casc")]
 pub fn resolver() -> &'static asset_resolver::CascListfileResolver {
+    configure_casc_product_env();
     RESOLVER.get_or_init(|| asset_resolver::CascListfileResolver::new(config()))
+}
+
+#[cfg(feature = "casc")]
+fn configure_casc_product_env() {
+    if std::env::var_os("WOW_PRODUCT").is_some() {
+        return;
+    }
+
+    unsafe {
+        std::env::set_var("WOW_PRODUCT", active_profile_casc_product());
+    }
+}
+
+#[cfg(feature = "casc")]
+fn active_profile_casc_product() -> &'static str {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Ptr => "wowt",
+        crate::client_profile::ClientProfile::Wrath
+        | crate::client_profile::ClientProfile::Mists => "wow_classic",
+        crate::client_profile::ClientProfile::Era
+        | crate::client_profile::ClientProfile::Anniversary => "wow_classic_era",
+        crate::client_profile::ClientProfile::Retail => "wow",
+    }
 }
 
 #[cfg(feature = "casc")]
@@ -40,6 +64,12 @@ mod tests {
         let resolver = super::new_test_resolver();
 
         assert!(resolver.lookup_path("not/a/real/path.blp").is_none());
+    }
+
+    #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_profile_selects_wowt_product() {
+        assert_eq!(super::active_profile_casc_product(), "wowt");
     }
 }
 

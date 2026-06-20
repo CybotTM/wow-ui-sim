@@ -57,7 +57,7 @@ pub fn sync_blizzard_ui() -> crate::Result<SyncSummary> {
 }
 
 pub fn sync_blizzard_ui_to(root: &Path) -> crate::Result<SyncSummary> {
-    sync_blizzard_ui_entries(root, manifest_entries())
+    sync_blizzard_ui_entries(root, sync_manifest_entries())
 }
 
 pub fn manifest_entries() -> impl Iterator<Item = &'static str> {
@@ -65,6 +65,10 @@ pub fn manifest_entries() -> impl Iterator<Item = &'static str> {
         .lines()
         .map(str::trim)
         .filter(|line| !line.is_empty())
+}
+
+fn sync_manifest_entries() -> impl Iterator<Item = &'static str> {
+    manifest_entries().filter(|entry| profile_cache::sync_entry_belongs_to_active_profile(entry))
 }
 
 fn sync_blizzard_ui_entries<'a>(

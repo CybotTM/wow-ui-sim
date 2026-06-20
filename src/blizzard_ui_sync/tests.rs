@@ -96,6 +96,26 @@ fn manifest_entries_resolve_through_limited_listfile() {
 }
 
 #[test]
+#[cfg(feature = "client-ptr")]
+fn ptr_sync_manifest_excludes_legacy_profile_entries() {
+    let active: Vec<_> = super::sync_manifest_entries().collect();
+
+    assert!(!active.contains(&"Blizzard_ActionBar/Classic/ActionButtonTemplate.xml"));
+    assert!(!active.contains(&"Blizzard_UnitFrame/Mists/ShardBar.lua"));
+    assert!(!active.contains(&"Blizzard_ChatFrame/Wrath/ChatConfigFrame.lua"));
+}
+
+#[test]
+#[cfg(feature = "client-ptr")]
+fn ptr_sync_manifest_excludes_removed_world_map_entries() {
+    let active: Vec<_> = super::sync_manifest_entries().collect();
+
+    assert!(!active.contains(&"Blizzard_WorldMap/Blizzard_WorldMapTooltip.xml"));
+    assert!(!active.contains(&"Blizzard_WorldMap/WM_InvasionDataProvider.lua"));
+    assert!(!active.contains(&"Blizzard_WorldMap/WM_InvasionDataProvider.xml"));
+}
+
+#[test]
 #[cfg(feature = "client-mists")]
 fn mists_required_cache_entries_are_in_manifest() {
     let manifest: std::collections::HashSet<_> = manifest_entries().collect();

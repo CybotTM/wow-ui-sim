@@ -35,7 +35,7 @@ Runtime Blizzard UI files live under the user cache:
 
 Populate it with `wow-cli casc sync-blizzard-ui` or the compatibility wrapper `scripts/setup-blizzard-ui.sh`. Do not use `Interface/BlizzardUI/` or repo-local `vendor/wow-ui-source-*` checkouts for runtime loading.
 
-When CASC cannot provide a text entry, sync falls back to cache-managed `Gethe/wow-ui-source` archives under `~/.cache/wow-ui-sim/wow-ui-source/`. PTR prefers the `ptr` branch, then `live`, then `beta`.
+When CASC cannot provide a text entry, sync falls back to cache-managed `Gethe/wow-ui-source` archives under `~/.cache/wow-ui-sim/wow-ui-source/`. PTR uses the `wowt` CASC product, prefers the `ptr` source branch, then `live`, then `beta`, and filters the all-profile manifest down to active mainline PTR files before deciding whether the cache is complete.
 
 Local install discovery uses the active profile's WoW flavor directory. PTR reads addons, WTF, and BlizzardInterfaceArt from `_ptr_`; retail continues to use `_retail_` with optional `_beta_` addon fallback.
 

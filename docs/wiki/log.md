@@ -20,6 +20,9 @@ Updated `systems/client-profiles.md` after adding the `client-ptr` profile for
 12.1 PTR. Documented the new `ptr` Blizzard UI cache scope, `120100` interface
 version, mainline TOC/game-type behavior, and fallback preference for the
 cache-managed `Gethe/wow-ui-source@ptr` archive before live/beta.
+Updated again after the first PTR cache sync investigation: PTR sync now selects
+the `wowt` CASC product automatically and filters legacy-profile manifest entries
+before cache-completeness checks.
 
 ## [2026-06-19] update | Blizzard UI profile cache migration
 
