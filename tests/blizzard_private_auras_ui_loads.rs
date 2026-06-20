@@ -20,6 +20,9 @@ fn private_auras_toc() -> PathBuf {
 }
 
 const PRIVATE_AURAS_TOC_FILES: &[&str] = &[
+    "Shared/PrivateAurasTooltip.lua",
+    "Mainline/PrivateAurasTooltip.lua",
+    "Mainline/PrivateAurasTooltip.xml",
     "Blizzard_PrivateAurasUI.lua",
     "Blizzard_PrivateAurasUI.xml",
     "PrivateAuraInit.lua",
@@ -132,19 +135,20 @@ fn blizzard_private_auras_ui_toc_declares_secure_game_only_addon() {
 }
 
 #[test]
-fn blizzard_private_auras_ui_toc_uses_singular_dep_form_simulator_does_not_recognize() {
+fn blizzard_private_auras_ui_toc_uses_singular_dep_form() {
     let toc = TocFile::from_file(&private_auras_toc()).expect("Blizzard_PrivateAurasUI TOC parses");
 
     let dependencies = toc.dependencies();
-    assert!(
-        dependencies.is_empty(),
-        "TOC declares 3 deps in the SINGULAR `## Dep:` form which the simulator's \
-         `dependencies()` parser at src/toc.rs:210-217 does NOT recognize — it accepts \
-         only `Dependencies`, `RequiredDep`, or `RequiredDeps`. Result: returns empty \
-         despite raw bytes containing 3 dep lines. This is harmless because \
-         Blizzard_FrameXMLUtil / Blizzard_GameTooltip / Blizzard_SharedXMLGame all \
-         alphabetically precede Blizzard_PrivateAurasUI, so they happen to load first \
-         under the eager name-sorted sweep"
+    assert_eq!(
+        dependencies,
+        [
+            "Blizzard_SharedXMLGame",
+            "Blizzard_FrameXMLUtil",
+            "Blizzard_GameTooltip"
+        ],
+        "TOC declares deps in Blizzard's singular `## Dep:` form; the simulator must \
+         recognize those hard dependencies so load order does not depend on alphabetical \
+         discovery"
     );
 
     assert!(
@@ -223,7 +227,7 @@ fn blizzard_private_auras_ui_toc_declares_metadata_in_raw_bytes() {
 }
 
 #[test]
-fn blizzard_private_auras_ui_toc_lists_three_files_in_order() {
+fn blizzard_private_auras_ui_toc_lists_files_in_order() {
     let toc = TocFile::from_file(&private_auras_toc()).expect("Blizzard_PrivateAurasUI TOC parses");
     let listed: Vec<String> = toc
         .files
@@ -232,15 +236,13 @@ fn blizzard_private_auras_ui_toc_lists_three_files_in_order() {
         .collect();
     assert_eq!(
         listed, PRIVATE_AURAS_TOC_FILES,
-        "TOC body must list exactly 3 files in this order: Blizzard_PrivateAurasUI.lua \
+        "TOC body must list tooltip setup first, then Blizzard_PrivateAurasUI.lua \
          (publishes 5 mixin globals + addon-private PrivateAuras.unitWatchers / \
-         PrivateAuras.PrivateAuraUnitWatcher bindings), then \
-         Blizzard_PrivateAurasUI.xml (defines 4 virtual templates + 2 named frames inside \
-         a `<ScopedModifier forbidden hideFromGlobalEnv>` wrapper), then PrivateAuraInit.lua \
-         (wires C_UnitAurasPrivate.SetPrivateAuraAnchorAddedCallback / \
-         SetPrivateAuraAnchorRemovedCallback callbacks and replays existing anchors via \
-         GetPrivateAuraAnchors). Order matters: PrivateAuraInit.lua must run last because \
-         it asserts `PrivateAuras.unitWatchers ~= nil` which the .lua chunk creates"
+         PrivateAuras.PrivateAuraUnitWatcher bindings), Blizzard_PrivateAurasUI.xml \
+         (defines aura templates inside a `<ScopedModifier forbidden hideFromGlobalEnv>` \
+         wrapper), and finally PrivateAuraInit.lua (wires C_UnitAurasPrivate callbacks). \
+         Order matters: PrivateAuraInit.lua must run last because it asserts \
+         `PrivateAuras.unitWatchers ~= nil` which the .lua chunk creates"
     );
 }
 
@@ -424,8 +426,11 @@ fn blizzard_private_auras_ui_xml_uses_scoped_modifier_wrapper() {
         raw.contains("inherits=\"RaidBossEmoteFrameTemplate\""),
         "RaidBossEmoteFramePrivate must inherit RaidBossEmoteFrameTemplate"
     );
+    let tooltip_raw =
+        std::fs::read_to_string(private_auras_dir().join("Mainline/PrivateAurasTooltip.xml"))
+            .expect("Mainline/PrivateAurasTooltip.xml reads utf-8");
     assert!(
-        raw.contains("inherits=\"SharedTooltipArtTemplate\""),
+        tooltip_raw.contains("inherits=\"SharedTooltipArtTemplate\""),
         "PrivateAurasTooltip must inherit SharedTooltipArtTemplate — the standard tooltip \
          art surface (border, NineSlice background) reused by every Blizzard tooltip"
     );

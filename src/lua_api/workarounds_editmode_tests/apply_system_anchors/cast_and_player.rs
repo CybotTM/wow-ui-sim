@@ -433,6 +433,7 @@ fn apply_system_anchors_seeds_unit_frame_settings_without_full_startup_update() 
             systemIndex = 1,
             name = "PlayerFrame",
             anchorCalls = 0,
+            setPointBaseCalls = 0,
             updatedSettings = {},
         }
 
@@ -450,6 +451,15 @@ fn apply_system_anchors_seeds_unit_frame_settings_without_full_startup_update() 
 
         function frame:ApplySystemAnchor()
             self.anchorCalls = self.anchorCalls + 1
+        end
+
+        function frame:SetPointBase(point, relativeTo, relativePoint, offsetX, offsetY)
+            self.setPointBaseCalls = self.setPointBaseCalls + 1
+            self.point = point
+            self.relativeTo = relativeTo
+            self.relativePoint = relativePoint
+            self.offsetX = offsetX
+            self.offsetY = offsetY
         end
 
         function frame:UpdateSystemSetting(setting, entireSystemUpdate)
@@ -504,17 +514,19 @@ fn apply_system_anchors_seeds_unit_frame_settings_without_full_startup_update() 
 
     let (
         anchor_calls,
+        set_point_base_calls,
         has_active_changes,
         setting_map_updated,
         updated_setting,
         entire_update,
         buffs_on_top,
         buffs_attempted,
-    ): (i32, bool, bool, i32, bool, bool, bool) = env
+    ): (i32, i32, bool, bool, i32, bool, bool, bool) = env
         .eval(
             r#"
             local frame = EditModeManagerFrame.registeredSystemFrames[1]
             return frame.anchorCalls,
+                frame.setPointBaseCalls,
                 frame.hasActiveChanges,
                 frame.settingMapUpdated,
                 frame.updatedSettings[1] and frame.updatedSettings[1].setting,
@@ -525,7 +537,14 @@ fn apply_system_anchors_seeds_unit_frame_settings_without_full_startup_update() 
         )
         .expect("read unit frame state");
 
-    assert_eq!(anchor_calls, 1, "saved unit frame anchor should apply");
+    assert_eq!(
+        set_point_base_calls, 1,
+        "saved unit frame anchor should apply through base SetPoint"
+    );
+    assert_eq!(
+        anchor_calls, 0,
+        "PlayerFrame direct anchor replay should avoid ApplySystemAnchor side effects"
+    );
     assert!(!has_active_changes, "system should be seeded as clean");
     assert!(
         setting_map_updated,

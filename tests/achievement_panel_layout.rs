@@ -63,13 +63,13 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
         return "achievement_not_shown"
     end
 
-    local frame_rect, frame_err = expect_rect(AchievementFrame, "achievement_frame", 0, 164, 768, 500)
+    local frame_rect, frame_err = expect_rect(AchievementFrame, "achievement_frame", 96, 152, 768, 500)
     if not frame_rect then return frame_err end
-    if not has_point(AchievementFrame, "TOPLEFT", UIParent, "TOPLEFT", 0, -104, 0.1) then
+    if not has_point(AchievementFrame, "TOPLEFT", UIParent, "TOPLEFT", 96, -116, 0.1) then
         return "achievement_frame_anchor_mismatch"
     end
 
-    local close_rect, close_err = expect_rect(AchievementFrameCloseButton, "achievement_close_button", 744, 640, 24, 24)
+    local close_rect, close_err = expect_rect(AchievementFrameCloseButton, "achievement_close_button", 840, 628, 24, 24)
     if not close_rect then return close_err end
     if not has_point(AchievementFrameCloseButton, "TOPRIGHT", AchievementFrame, "TOPRIGHT", 0, 0, 0.1) then
         return "achievement_close_button_anchor_mismatch"
@@ -81,8 +81,8 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
     local categories_rect, categories_err = expect_rect(
         AchievementFrameCategories,
         "achievement_categories",
-        21,
-        184,
+        117,
+        172,
         175,
         461
     )
@@ -97,8 +97,8 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
     local categories_bg_rect, categories_bg_err = expect_rect(
         AchievementFrameCategoriesBG,
         "achievement_categories_bg",
-        25,
-        187,
+        121,
+        175,
         195,
         454
     )
@@ -111,7 +111,7 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
     end
 
     local background = AchievementFrame.Background
-    local bg_rect, bg_err = expect_rect(background, "achievement_background", 16, 180, 736, 468)
+    local bg_rect, bg_err = expect_rect(background, "achievement_background", 112, 168, 736, 468)
     if not bg_rect then return bg_err end
     if not has_point(background, "TOPLEFT", AchievementFrame, "TOPLEFT", 16, -16, 0.1) then
         return "achievement_background_top_anchor_mismatch"
@@ -120,7 +120,7 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
         return "achievement_background_bottom_anchor_mismatch"
     end
 
-    local header_rect, header_err = expect_rect(AchievementFrame.Header, "achievement_header", 26, 626, 726, 106)
+    local header_rect, header_err = expect_rect(AchievementFrame.Header, "achievement_header", 122, 614, 726, 106)
     if not header_rect then return header_err end
     if not has_point(AchievementFrame.Header, "BOTTOMLEFT", AchievementFrame, "TOPLEFT", 26, -38, 0.1) then
         return "achievement_header_anchor_mismatch"
@@ -129,8 +129,8 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
     local scrollbox_rect, scrollbox_err = expect_rect(
         AchievementFrameCategories.ScrollBox,
         "achievement_categories_scrollbox",
-        21,
-        189,
+        117,
+        177,
         175,
         451
     )
@@ -139,7 +139,7 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
         return "achievement_categories_scrollbox_hidden"
     end
 
-    local summary_rect, summary_err = expect_rect(AchievementFrameSummary, "achievement_summary", 218, 184, 530, 461)
+    local summary_rect, summary_err = expect_rect(AchievementFrameSummary, "achievement_summary", 314, 172, 530, 461)
     if not summary_rect then return summary_err end
     if not AchievementFrameSummary:IsShown() then
         return "achievement_summary_hidden"
@@ -157,8 +157,8 @@ const ACHIEVEMENT_LAYOUT_ASSERTIONS_LUA: &str = r#"
     local status_rect, status_err = expect_rect(
         AchievementFrameSummaryCategoriesStatusBar,
         "achievement_summary_categories_status_bar",
-        239,
-        384,
+        335,
+        372,
         488,
         21
     )

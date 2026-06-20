@@ -457,6 +457,10 @@ fn manifest_entry_is_repo_fallback_only(entry: &str) -> bool {
             | "Blizzard_CooldownBroadcaster/TrackedCooldowns.lua"
             | "Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua"
             | "Blizzard_CombatLog/Wrath/Blizzard_CombatLog.xml"
+            | "Blizzard_PrivateAurasUI/Mainline/PrivateAurasTooltip.lua"
+            | "Blizzard_PrivateAurasUI/Mainline/PrivateAurasTooltip.xml"
+            | "Blizzard_PrivateAurasUI/PrivateAuraInit.lua"
+            | "Blizzard_PrivateAurasUI/Shared/PrivateAurasTooltip.lua"
     )
 }
 
