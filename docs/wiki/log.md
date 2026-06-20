@@ -1345,3 +1345,7 @@ Created `investigations/micro-menu-click-offset.md`. GUI clicks on micro-menu bu
 ## [2026-06-19] create | Post-load workaround audit
 
 Created `investigations/post-load-workaround-audit.md` while auditing retail post-load hooks. The page records duplicate loader-side hooks retired for AccountStore, MapCanvas, and FrameXMLUtil, and classifies the remaining sampled hooks with current temporary rationale plus retirement paths.
+
+## [2026-06-20] update | Third-party addon metadata pre-registration
+
+Updated `systems/addon-loading.md` after fixing `!BugGrabber`'s false no-display warning when `BugSack` is present. The system page now records the invariant that discovered third-party addon metadata must be registered in `C_AddOns` before eager third-party Lua executes, while actual file loading still follows enabled, non-`LoadOnDemand`, dependency-sorted order.

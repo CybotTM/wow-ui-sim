@@ -82,6 +82,8 @@ The simulator-local `~/.local/share/wow-sim/AddOns.txt` remains a compatibility 
 
 The effective state pass is dependency-aware. Required dependencies can be enabled for explicitly enabled addons, but addons whose required dependency is explicitly disabled are disabled even when the dependent addon's own TOC default is enabled. This prevents data-shard addons such as RaiderIO DB modules from loading without their required base addon.
 
+Third-party addon metadata is registered in `C_AddOns` for the full discovered, dependency-sorted addon list before any eager third-party Lua executes. The loader then runs only enabled, non-`LoadOnDemand` addons in order. This matches addons that inspect TOC metadata during file load: for example, `!BugGrabber` scans `C_AddOns.GetNumAddOns()` and `GetAddOnMetadata(i, "X-BugGrabber-Display")` before `BugSack` Lua runs, so `BugSack` must already be visible as an enabled addon with its display metadata even though its files load later.
+
 ## XML Element Handlers
 
 | Category | Elements |
@@ -114,6 +116,7 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 ## Sources
 
 - [addon-loading-pipeline.md](../../addon-loading-pipeline.md) — TOC parsing, load flow, XML handlers, SavedVariables, load order
+- [addon_loading.rs](../../../src/bin/wow_sim/addon_loading.rs) — third-party addon discovery, metadata pre-registration, enable-state application, and load loop
 
 ## See Also
 
