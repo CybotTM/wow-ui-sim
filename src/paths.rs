@@ -138,13 +138,49 @@ fn interface_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
     }
 
     for root in install_roots_for_candidates(install_root) {
-        paths.push(root.join("_retail_/BlizzardInterfaceArt/Interface"));
-        paths.push(root.join("_retail_/Interface"));
-        paths.push(root.join("_beta_/BlizzardInterfaceArt/Interface"));
-        paths.push(root.join("_beta_/Interface"));
+        paths.extend(interface_paths_for_install_root(&root));
     }
 
     paths
+}
+
+pub fn blizzard_interface_art_root_for_install_root(root: &Path) -> Option<PathBuf> {
+    let path = match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => root.join("_retail_/BlizzardInterfaceArt"),
+        crate::client_profile::ClientProfile::Ptr => root.join("_ptr_/BlizzardInterfaceArt"),
+        crate::client_profile::ClientProfile::Wrath
+        | crate::client_profile::ClientProfile::Mists => {
+            root.join("_classic_/BlizzardInterfaceArt")
+        }
+        crate::client_profile::ClientProfile::Era
+        | crate::client_profile::ClientProfile::Anniversary => {
+            root.join("_classic_era_/BlizzardInterfaceArt")
+        }
+    };
+    Some(path)
+}
+
+fn interface_paths_for_install_root(root: &Path) -> Vec<PathBuf> {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => vec![
+            root.join("_retail_/BlizzardInterfaceArt/Interface"),
+            root.join("_retail_/Interface"),
+            root.join("_beta_/BlizzardInterfaceArt/Interface"),
+            root.join("_beta_/Interface"),
+        ],
+        crate::client_profile::ClientProfile::Ptr => vec![
+            root.join("_ptr_/BlizzardInterfaceArt/Interface"),
+            root.join("_ptr_/Interface"),
+        ],
+        crate::client_profile::ClientProfile::Wrath
+        | crate::client_profile::ClientProfile::Mists => {
+            vec![root.join("_classic_/Interface")]
+        }
+        crate::client_profile::ClientProfile::Era
+        | crate::client_profile::ClientProfile::Anniversary => {
+            vec![root.join("_classic_era_/Interface")]
+        }
+    }
 }
 
 fn addons_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
@@ -203,6 +239,9 @@ fn addon_paths_for_install_root(root: &Path) -> Vec<PathBuf> {
             }
             paths
         }
+        crate::client_profile::ClientProfile::Ptr => {
+            vec![root.join("_ptr_/Interface/AddOns")]
+        }
         crate::client_profile::ClientProfile::Wrath
         | crate::client_profile::ClientProfile::Mists => {
             vec![root.join("_classic_/Interface/AddOns")]
@@ -252,6 +291,9 @@ fn wtf_paths_for_install_root(root: &Path) -> Vec<PathBuf> {
     match crate::client_profile::ACTIVE {
         crate::client_profile::ClientProfile::Retail => {
             vec![root.join("_retail_/WTF"), root.join("_beta_/WTF")]
+        }
+        crate::client_profile::ClientProfile::Ptr => {
+            vec![root.join("_ptr_/WTF")]
         }
         crate::client_profile::ClientProfile::Wrath
         | crate::client_profile::ClientProfile::Mists => {
@@ -432,6 +474,32 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_wtf_candidates_use_ptr_install_flavor_only() {
+        let install_root = PathBuf::from("/tmp/wow-install");
+
+        let candidates = wtf_paths_for_install_root(&install_root);
+
+        assert_eq!(candidates.as_slice(), &[install_root.join("_ptr_/WTF")]);
+    }
+
+    #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_interface_candidates_use_ptr_install_flavor() {
+        let install_root = PathBuf::from("/tmp/wow-install");
+
+        let candidates = interface_paths_for_install_root(&install_root);
+
+        assert_eq!(
+            candidates.as_slice(),
+            &[
+                install_root.join("_ptr_/BlizzardInterfaceArt/Interface"),
+                install_root.join("_ptr_/Interface"),
+            ]
+        );
+    }
+
+    #[test]
     fn addon_candidates_do_not_mix_beta_addons_into_retail_loads() {
         let install_root = PathBuf::from("/tmp/wow-install");
 
@@ -503,6 +571,16 @@ mod tests {
         assert_eq!(
             addon_paths_for_install_root(root),
             vec![root.join("_classic_/Interface/AddOns")]
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_addon_candidates_use_ptr_install_flavor_only() {
+        let root = Path::new("/tmp/wow-install");
+        assert_eq!(
+            addon_paths_for_install_root(root),
+            vec![root.join("_ptr_/Interface/AddOns")]
         );
     }
 }

@@ -1,4 +1,4 @@
-//! WoW client profile selection — retail, wrath, mists, era, anniversary.
+//! WoW client profile selection — retail, PTR, wrath, mists, era, anniversary.
 //!
 //! Exactly one `client-*` cargo feature must be enabled. The active profile
 //! determines which profile-scoped Blizzard UI cache the addon loader reads.
@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ClientProfile {
     Retail,
+    Ptr,
     Wrath,
     Mists,
     Era,
@@ -18,6 +19,7 @@ impl ClientProfile {
     pub fn subdir(self) -> &'static str {
         match self {
             ClientProfile::Retail => "Retail",
+            ClientProfile::Ptr => "Ptr",
             ClientProfile::Wrath => "Wrath",
             ClientProfile::Mists => "Mists",
             ClientProfile::Era => "Era",
@@ -28,6 +30,7 @@ impl ClientProfile {
     pub fn cache_subdir(self) -> &'static str {
         match self {
             ClientProfile::Retail => "retail",
+            ClientProfile::Ptr => "ptr",
             ClientProfile::Wrath => "wrath",
             ClientProfile::Mists => "mists",
             ClientProfile::Era => "era",
@@ -38,6 +41,7 @@ impl ClientProfile {
     pub const fn interface_version(self) -> u32 {
         match self {
             ClientProfile::Retail => 120007,
+            ClientProfile::Ptr => 120100,
             ClientProfile::Wrath => 38001,
             ClientProfile::Mists => 50504,
             ClientProfile::Era | ClientProfile::Anniversary => 11507,
@@ -50,12 +54,24 @@ impl ClientProfile {
     not(feature = "client-mists"),
     not(feature = "client-era"),
     not(feature = "client-anniversary"),
+    not(feature = "client-ptr"),
     feature = "client-retail",
 ))]
 pub const ACTIVE: ClientProfile = ClientProfile::Retail;
 
 #[cfg(all(
     not(feature = "client-retail"),
+    not(feature = "client-wrath"),
+    not(feature = "client-mists"),
+    not(feature = "client-era"),
+    not(feature = "client-anniversary"),
+    feature = "client-ptr",
+))]
+pub const ACTIVE: ClientProfile = ClientProfile::Ptr;
+
+#[cfg(all(
+    not(feature = "client-retail"),
+    not(feature = "client-ptr"),
     not(feature = "client-mists"),
     not(feature = "client-era"),
     not(feature = "client-anniversary"),
@@ -65,6 +81,7 @@ pub const ACTIVE: ClientProfile = ClientProfile::Wrath;
 
 #[cfg(all(
     not(feature = "client-retail"),
+    not(feature = "client-ptr"),
     not(feature = "client-wrath"),
     not(feature = "client-era"),
     not(feature = "client-anniversary"),
@@ -74,6 +91,7 @@ pub const ACTIVE: ClientProfile = ClientProfile::Mists;
 
 #[cfg(all(
     not(feature = "client-retail"),
+    not(feature = "client-ptr"),
     not(feature = "client-wrath"),
     not(feature = "client-mists"),
     not(feature = "client-anniversary"),
@@ -83,6 +101,7 @@ pub const ACTIVE: ClientProfile = ClientProfile::Era;
 
 #[cfg(all(
     not(feature = "client-retail"),
+    not(feature = "client-ptr"),
     not(feature = "client-wrath"),
     not(feature = "client-mists"),
     not(feature = "client-era"),
@@ -95,6 +114,11 @@ pub const ACTIVE: ClientProfile = ClientProfile::Anniversary;
     all(feature = "client-retail", feature = "client-mists"),
     all(feature = "client-retail", feature = "client-era"),
     all(feature = "client-retail", feature = "client-anniversary"),
+    all(feature = "client-retail", feature = "client-ptr"),
+    all(feature = "client-ptr", feature = "client-wrath"),
+    all(feature = "client-ptr", feature = "client-mists"),
+    all(feature = "client-ptr", feature = "client-era"),
+    all(feature = "client-ptr", feature = "client-anniversary"),
     all(feature = "client-wrath", feature = "client-mists"),
     all(feature = "client-wrath", feature = "client-era"),
     all(feature = "client-wrath", feature = "client-anniversary"),
@@ -103,18 +127,19 @@ pub const ACTIVE: ClientProfile = ClientProfile::Anniversary;
     all(feature = "client-era", feature = "client-anniversary"),
 ))]
 compile_error!(
-    "Exactly one of client-retail, client-wrath, client-mists, client-era, client-anniversary must be enabled"
+    "Exactly one of client-retail, client-ptr, client-wrath, client-mists, client-era, client-anniversary must be enabled"
 );
 
 #[cfg(not(any(
     feature = "client-retail",
+    feature = "client-ptr",
     feature = "client-wrath",
     feature = "client-mists",
     feature = "client-era",
     feature = "client-anniversary",
 )))]
 compile_error!(
-    "Exactly one of client-retail, client-wrath, client-mists, client-era, client-anniversary must be enabled"
+    "Exactly one of client-retail, client-ptr, client-wrath, client-mists, client-era, client-anniversary must be enabled"
 );
 
 /// Path to the AddOns directory for the active profile.
@@ -203,5 +228,13 @@ mod tests {
     #[test]
     fn retail_interface_matches_current_live_build() {
         assert_eq!(ClientProfile::Retail.interface_version(), 120007);
+    }
+
+    #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_uses_12_1_interface_and_cache_scope() {
+        assert_eq!(ACTIVE, ClientProfile::Ptr);
+        assert_eq!(ACTIVE.interface_version(), 120100);
+        assert_eq!(ACTIVE.cache_subdir(), "ptr");
     }
 }

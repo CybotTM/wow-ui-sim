@@ -42,6 +42,28 @@ BattlefieldMap.lua
 }
 
 #[test]
+#[cfg(feature = "client-ptr")]
+fn ptr_profile_allows_beta_and_ptr_tocs() {
+    let toc = TocFile::parse(
+        Path::new("/addons/Blizzard_PTRFeedback"),
+        "## Title: Blizzard_PTRFeedback\n## OnlyBetaAndPTR: 1\nPTRFeedback.lua\n",
+    );
+
+    assert!(!toc.is_ptr_only());
+}
+
+#[test]
+#[cfg(not(feature = "client-ptr"))]
+fn non_ptr_profiles_restrict_beta_and_ptr_tocs() {
+    let toc = TocFile::parse(
+        Path::new("/addons/Blizzard_PTRFeedback"),
+        "## Title: Blizzard_PTRFeedback\n## OnlyBetaAndPTR: 1\nPTRFeedback.lua\n",
+    );
+
+    assert!(toc.is_ptr_only());
+}
+
+#[test]
 fn test_parse_repeated_dep_metadata() {
     let contents = r#"
 ## Title: Blizzard_CatalogShopRefundFlow

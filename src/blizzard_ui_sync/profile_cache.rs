@@ -10,6 +10,8 @@ const DEFAULT_GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
     "classic_ptr",
 ];
 
+const PTR_GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &["ptr", "live", "beta"];
+
 const MISTS_GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
     "classic_ptr",
     "classic_anniversary",
@@ -296,7 +298,8 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
 
 pub(super) fn required_profile_cache_entries() -> &'static [&'static str] {
     match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Retail => RETAIL_REQUIRED_PROFILE_CACHE_ENTRIES,
+        crate::client_profile::ClientProfile::Retail
+        | crate::client_profile::ClientProfile::Ptr => RETAIL_REQUIRED_PROFILE_CACHE_ENTRIES,
         crate::client_profile::ClientProfile::Mists => MISTS_REQUIRED_PROFILE_CACHE_ENTRIES,
         _ => &[],
     }
@@ -304,6 +307,7 @@ pub(super) fn required_profile_cache_entries() -> &'static [&'static str] {
 
 pub(super) fn gethe_wow_ui_source_branches() -> &'static [&'static str] {
     match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Ptr => PTR_GETHE_WOW_UI_SOURCE_BRANCHES,
         crate::client_profile::ClientProfile::Mists => MISTS_GETHE_WOW_UI_SOURCE_BRANCHES,
         _ => DEFAULT_GETHE_WOW_UI_SOURCE_BRANCHES,
     }
@@ -315,7 +319,8 @@ pub(super) fn cache_entry_is_usable(entry: &str, path: &Path) -> bool {
     }
 
     match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Retail => retail_cache_entry_is_usable(entry, path),
+        crate::client_profile::ClientProfile::Retail
+        | crate::client_profile::ClientProfile::Ptr => retail_cache_entry_is_usable(entry, path),
         crate::client_profile::ClientProfile::Mists => mists_cache_entry_is_usable(entry, path),
         _ => true,
     }
@@ -451,7 +456,7 @@ fn file_contains(path: &Path, needle: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::cache_entry_is_usable;
-    #[cfg(feature = "client-retail")]
+    #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
     use super::required_profile_cache_entries;
     use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
@@ -474,6 +479,25 @@ mod tests {
 
         assert!(required.contains(&"Blizzard_FrameXMLUtil/RuneforgeUtil.xml"));
         assert!(required.contains(&"Blizzard_FrameXMLUtil/RuneforgeUtil.lua"));
+    }
+
+    #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_requires_runeforge_util_cache_entries() {
+        let required = required_profile_cache_entries();
+
+        assert!(required.contains(&"Blizzard_FrameXMLUtil/RuneforgeUtil.xml"));
+        assert!(required.contains(&"Blizzard_FrameXMLUtil/RuneforgeUtil.lua"));
+    }
+
+    #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_prefers_ptr_repo_fallbacks() {
+        assert_eq!(
+            super::gethe_wow_ui_source_branches().first().copied(),
+            Some("ptr"),
+            "PTR fallback sync must prefer the Gethe PTR branch before live/beta"
+        );
     }
 
     #[test]

@@ -97,6 +97,7 @@ intern-stats = ["rilua/intern-stats"]
 # Client profile features — exactly one must be enabled. Selects which
 # Interface/BlizzardUI/<Profile>/ subdir the loader reads vendor sources from.
 client-retail = []
+client-ptr = []
 client-wrath = []
 client-mists = []
 client-era = []

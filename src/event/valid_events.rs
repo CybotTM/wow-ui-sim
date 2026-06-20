@@ -10,22 +10,22 @@
 //! `is_valid_event` = registerable OR non-registerable (for C_EventUtils).
 //! `is_registerable_event` = only registerable (for RegisterEvent).
 
-#[cfg(feature = "client-retail")]
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use super::valid_events_a::EVENTS_A;
-#[cfg(feature = "client-retail")]
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use super::valid_events_a_tail::EVENTS_A_TAIL;
-#[cfg(feature = "client-retail")]
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use super::valid_events_b::EVENTS_B;
-#[cfg(feature = "client-retail")]
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use super::valid_events_c::EVENTS_C;
 
 /// Check if an event can be passed to `RegisterEvent()`.
 ///
-/// Under non-retail client profiles the validator is permissive: the
+/// Under non-mainline client profiles the validator is permissive: the
 /// wrath/mists/era/anniversary event lists predate the events.yaml dataset
-/// (which is mainline-only), so rejecting unknown events would break
-/// legitimate WotLK/MoP/Vanilla code paths. The retail profile keeps strict
-/// validation against the generated event tables.
+/// (which is mainline-only), so rejecting unknown events would break legitimate
+/// WotLK/MoP/Vanilla code paths. Retail and PTR keep strict validation against
+/// the generated event tables.
 #[cfg(any(
     feature = "client-wrath",
     feature = "client-mists",
@@ -36,7 +36,7 @@ pub fn is_registerable_event(name: &str) -> bool {
     crate::wrath::is_registerable_event(name)
 }
 
-#[cfg(feature = "client-retail")]
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub fn is_registerable_event(name: &str) -> bool {
     let first = name.as_bytes().first().copied().unwrap_or(0);
     if first <= b'G' {

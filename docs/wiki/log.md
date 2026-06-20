@@ -14,6 +14,13 @@ cause: transitive `LoadFirst` — `Blizzard_EnvironmentCleanup` (`LoadFirst: 1`)
 depends on `Blizzard_UIPanels_Game`, and the eager two-pass loader emits a
 LoadFirst addon's deps first, so the definer loads before the bag buttons.
 
+## [2026-06-19] update | PTR client profile
+
+Updated `systems/client-profiles.md` after adding the `client-ptr` profile for
+12.1 PTR. Documented the new `ptr` Blizzard UI cache scope, `120100` interface
+version, mainline TOC/game-type behavior, and fallback preference for the
+cache-managed `Gethe/wow-ui-source@ptr` archive before live/beta.
+
 ## [2026-06-19] update | Blizzard UI profile cache migration
 
 Updated `systems/addon-loading.md` after moving runtime Blizzard UI loading to

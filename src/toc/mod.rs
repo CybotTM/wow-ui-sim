@@ -53,7 +53,8 @@ fn is_allowed_game_type(line: &str) -> bool {
     };
     let types = &rest[..end];
     let allowed: &[&str] = match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Retail => &["mainline", "standard"],
+        crate::client_profile::ClientProfile::Retail
+        | crate::client_profile::ClientProfile::Ptr => &["mainline", "standard"],
         crate::client_profile::ClientProfile::Wrath => &["wrath", "wrath_classic", "classic"],
         crate::client_profile::ClientProfile::Mists => &["mists", "mists_classic", "classic"],
         crate::client_profile::ClientProfile::Era => &["vanilla", "classic_era", "classic"],
@@ -174,7 +175,8 @@ fn collect_metadata_lists(metadata: &HashMap<String, String>, keys: &[&str]) -> 
 /// FrameXML doesn't use the substitution, so the value there doesn't matter.
 fn family_subdir() -> &'static str {
     match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Retail => "Mainline",
+        crate::client_profile::ClientProfile::Retail
+        | crate::client_profile::ClientProfile::Ptr => "Mainline",
         crate::client_profile::ClientProfile::Wrath
         | crate::client_profile::ClientProfile::Mists
         | crate::client_profile::ClientProfile::Era
@@ -185,7 +187,8 @@ fn family_subdir() -> &'static str {
 /// Resolve the `[Game]` TOC substitution per active client profile.
 fn game_subdir() -> &'static str {
     match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Retail => "Standard",
+        crate::client_profile::ClientProfile::Retail
+        | crate::client_profile::ClientProfile::Ptr => "Standard",
         crate::client_profile::ClientProfile::Wrath => "Wrath",
         crate::client_profile::ClientProfile::Mists => "Mists",
         crate::client_profile::ClientProfile::Era
@@ -352,13 +355,14 @@ impl TocFile {
             .unwrap_or(false)
     }
 
-    /// Check if addon is PTR/Beta-only (e.g. Blizzard_PTRFeedback).
+    /// Check if addon is PTR/Beta-only and should not load on this profile.
     /// These addons have `OnlyBetaAndPTR: 1` and should not load on live clients.
     pub fn is_ptr_only(&self) -> bool {
         self.metadata
             .get("OnlyBetaAndPTR")
             .map(|v| v == "1")
             .unwrap_or(false)
+            && crate::client_profile::ACTIVE != crate::client_profile::ClientProfile::Ptr
     }
 
     /// Check if addon is restricted to a game type incompatible with the active client profile.
@@ -369,7 +373,8 @@ impl TocFile {
         }
 
         let allowed: &[&str] = match crate::client_profile::ACTIVE {
-            crate::client_profile::ClientProfile::Retail => &["mainline", "standard"],
+            crate::client_profile::ClientProfile::Retail
+            | crate::client_profile::ClientProfile::Ptr => &["mainline", "standard"],
             crate::client_profile::ClientProfile::Wrath => &["wrath", "wrath_classic", "classic"],
             crate::client_profile::ClientProfile::Mists => &["mists", "mists_classic", "classic"],
             crate::client_profile::ClientProfile::Era => &["vanilla", "classic_era", "classic"],

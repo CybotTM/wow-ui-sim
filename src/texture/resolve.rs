@@ -29,7 +29,8 @@ fn casc_enabled() -> bool {
 
 #[cfg(feature = "casc")]
 fn blizzard_interface_art_root() -> Option<PathBuf> {
-    asset_resolver::wow_install_path().map(|root| root.join("_retail_/BlizzardInterfaceArt"))
+    asset_resolver::wow_install_path()
+        .and_then(|root| crate::paths::blizzard_interface_art_root_for_install_root(&root))
 }
 
 #[cfg(not(feature = "casc"))]

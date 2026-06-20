@@ -136,11 +136,12 @@ fn implicit_blizzard_startup_dependencies() -> HashMap<String, Vec<String>> {
     ])
 }
 
-/// TOC suffix matching the active client profile (e.g. `_Mainline` for retail,
+/// TOC suffix matching the active client profile (e.g. `_Mainline` for retail/PTR,
 /// `_Vanilla` for era/anniversary).
 fn active_profile_toc_suffix() -> &'static str {
     match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Retail => "_Mainline",
+        crate::client_profile::ClientProfile::Retail
+        | crate::client_profile::ClientProfile::Ptr => "_Mainline",
         crate::client_profile::ClientProfile::Wrath => "_Wrath",
         crate::client_profile::ClientProfile::Mists => "_Mists",
         crate::client_profile::ClientProfile::Era
@@ -152,7 +153,8 @@ fn active_profile_toc_suffix() -> &'static str {
 /// scanning for an addon's compatible flavor toc.
 fn other_profile_toc_suffixes() -> &'static [&'static str] {
     match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Retail => {
+        crate::client_profile::ClientProfile::Retail
+        | crate::client_profile::ClientProfile::Ptr => {
             &["_Cata", "_Wrath", "_TBC", "_Vanilla", "_Mists"]
         }
         crate::client_profile::ClientProfile::Wrath => {
