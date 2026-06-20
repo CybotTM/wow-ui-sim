@@ -258,16 +258,13 @@ pub fn load_third_party_addons(
     let effective_enable_overrides =
         dependency_aware_enable_overrides(&addons, enable_overrides.as_ref());
     let mut stats = LoadStats::default();
-    for (name, toc_path) in &addons {
-        load_or_register_single_addon(
-            env,
-            name,
-            toc_path,
-            saved_vars,
-            effective_enable_overrides.as_ref(),
-            &mut stats,
-        );
-    }
+    load_discovered_addons(
+        env,
+        &addons,
+        saved_vars,
+        effective_enable_overrides.as_ref(),
+        &mut stats,
+    );
     print_load_summary(&addons, &stats);
 }
 
@@ -425,18 +422,50 @@ fn parse_addon_metadata(name: &str, toc_path: &Path) -> AddonMetadata {
     }
 }
 
-fn load_or_register_single_addon(
+fn load_discovered_addons(
     env: &WowLuaEnv,
-    name: &str,
-    toc_path: &Path,
+    addons: &[(String, PathBuf)],
     saved_vars: &mut Option<SavedVariablesManager>,
     enable_overrides: Option<&HashMap<String, bool>>,
     stats: &mut LoadStats,
 ) {
-    let metadata = parse_addon_metadata(name, toc_path);
-    let enabled = addon_enabled(name, &metadata, enable_overrides);
-    let should_load = enabled && !metadata.load_on_demand;
-    env.register_addon(AddonInfo {
+    register_discovered_addons(env, addons, enable_overrides);
+    for (name, toc_path) in addons {
+        load_registered_single_addon(env, name, toc_path, saved_vars, stats);
+    }
+}
+
+fn register_discovered_addons(
+    env: &WowLuaEnv,
+    addons: &[(String, PathBuf)],
+    enable_overrides: Option<&HashMap<String, bool>>,
+) {
+    for (name, toc_path) in addons {
+        let metadata = parse_addon_metadata(name, toc_path);
+        let enabled = addon_enabled(name, &metadata, enable_overrides);
+        register_or_update_addon(env, name, metadata, enabled);
+    }
+}
+
+fn register_or_update_addon(env: &WowLuaEnv, name: &str, metadata: AddonMetadata, enabled: bool) {
+    let mut state = env.state().borrow_mut();
+    if let Some(addon) = state
+        .addons
+        .iter_mut()
+        .find(|addon| addon.folder_name == name)
+    {
+        addon.title = metadata.title;
+        addon.notes = metadata.notes;
+        addon.enabled = enabled;
+        addon.load_on_demand = metadata.load_on_demand;
+        addon.use_secure_env = metadata.use_secure_env;
+        addon.dependencies = metadata.dependencies;
+        addon.metadata = metadata.metadata;
+        addon.default_enabled = metadata.default_enabled;
+        return;
+    }
+
+    state.addons.push(AddonInfo {
         folder_name: name.to_string(),
         title: metadata.title,
         notes: metadata.notes,
@@ -449,7 +478,16 @@ fn load_or_register_single_addon(
         default_enabled: metadata.default_enabled,
         ..Default::default()
     });
-    if !should_load {
+}
+
+fn load_registered_single_addon(
+    env: &WowLuaEnv,
+    name: &str,
+    toc_path: &Path,
+    saved_vars: &mut Option<SavedVariablesManager>,
+    stats: &mut LoadStats,
+) {
+    if !should_load_registered_addon(env, name) {
         return;
     }
 
@@ -469,6 +507,15 @@ fn load_or_register_single_addon(
             stats.fail_count += 1;
         }
     }
+}
+
+fn should_load_registered_addon(env: &WowLuaEnv, name: &str) -> bool {
+    env.state()
+        .borrow()
+        .addons
+        .iter()
+        .find(|addon| addon.folder_name == name)
+        .is_some_and(|addon| addon.enabled && !addon.loaded && !addon.load_on_demand)
 }
 
 fn print_verbose_addon_start(name: &str) {
@@ -690,82 +737,4 @@ fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn write_addon(root: &Path, name: &str) -> PathBuf {
-        write_addon_with_toc(
-            root,
-            name,
-            &format!(
-                "## Interface: {}\nmain.lua\n",
-                wow_ui_sim::toc::ACTIVE_INTERFACE_VERSION
-            ),
-        )
-    }
-
-    fn write_addon_with_toc(root: &Path, name: &str, toc: &str) -> PathBuf {
-        let addon_dir = root.join(name);
-        std::fs::create_dir_all(&addon_dir).expect("create addon dir");
-        let toc_path = addon_dir.join(format!("{name}.toc"));
-        std::fs::write(&toc_path, toc).expect("write toc");
-        std::fs::write(addon_dir.join("main.lua"), "").expect("write lua");
-        toc_path
-    }
-
-    #[test]
-    fn scan_addon_paths_merges_roots_and_keeps_first_duplicate() {
-        let temp = tempfile::tempdir().expect("tempdir");
-        let sim_root = temp.path().join("sim");
-        let wow_root = temp.path().join("wow");
-        let sim_shared_toc = write_addon(&sim_root, "SharedAddon");
-        write_addon(&sim_root, "SimulatorOnly");
-        write_addon(&wow_root, "SharedAddon");
-        write_addon(&wow_root, "WowOnly");
-
-        let addons = scan_addon_paths(&[sim_root.clone(), wow_root], &[], ScreenKind::Game);
-        let names: Vec<_> = addons.iter().map(|(name, _)| name.as_str()).collect();
-        let shared_toc = addons
-            .iter()
-            .find(|(name, _)| name == "SharedAddon")
-            .map(|(_, toc)| toc)
-            .expect("shared addon should be present");
-
-        assert_eq!(names, ["SharedAddon", "SimulatorOnly", "WowOnly"]);
-        assert_eq!(
-            shared_toc, &sim_shared_toc,
-            "the first addon root should win duplicate addon names"
-        );
-    }
-
-    #[test]
-    fn scan_addons_skips_out_of_date_interfaces_by_default() {
-        let temp = tempfile::tempdir().expect("tempdir");
-        write_addon_with_toc(
-            temp.path(),
-            "CurrentAddon",
-            &format!(
-                "## Interface: {}\nmain.lua\n",
-                wow_ui_sim::toc::ACTIVE_INTERFACE_VERSION
-            ),
-        );
-        write_addon_with_toc(temp.path(), "OldAddon", "## Interface: 120001\nmain.lua\n");
-
-        let addons = scan_addons(temp.path(), &[], ScreenKind::Game);
-        let names: Vec<_> = addons.iter().map(|(name, _)| name.as_str()).collect();
-
-        assert_eq!(names, ["CurrentAddon"]);
-    }
-
-    #[test]
-    #[cfg(feature = "client-mists")]
-    fn scan_addons_accepts_mists_interface_version() {
-        let temp = tempfile::tempdir().expect("tempdir");
-        write_addon_with_toc(temp.path(), "ElvUI", "## Interface: 50504\nmain.lua\n");
-
-        let addons = scan_addons(temp.path(), &[], ScreenKind::Game);
-        let names: Vec<_> = addons.iter().map(|(name, _)| name.as_str()).collect();
-
-        assert_eq!(names, ["ElvUI"]);
-    }
-}
+mod tests;
