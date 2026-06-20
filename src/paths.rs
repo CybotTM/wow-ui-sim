@@ -277,7 +277,7 @@ fn wtf_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
         paths.extend(wtf_paths_for_install_root(&root));
     }
 
-    if !cfg!(windows) {
+    if !cfg!(windows) && project_wtf_fallback_enabled() {
         paths.push(PathBuf::from("/syncthing/Sync/Projects/wow/WTF"));
         if let Some(home) = dirs::home_dir() {
             paths.push(home.join("Projects/wow/WTF"));
@@ -285,6 +285,13 @@ fn wtf_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
     }
 
     paths
+}
+
+fn project_wtf_fallback_enabled() -> bool {
+    matches!(
+        crate::client_profile::ACTIVE,
+        crate::client_profile::ClientProfile::Retail
+    )
 }
 
 fn wtf_paths_for_install_root(root: &Path) -> Vec<PathBuf> {
@@ -439,6 +446,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "client-retail")]
     fn wtf_candidates_prefer_install_root_before_project_mirror_on_linux() {
         let install_root = PathBuf::from("/tmp/wow-install");
 
@@ -471,6 +479,19 @@ mod tests {
         let candidates = wtf_paths_for_install_root(&install_root);
 
         assert_eq!(candidates.as_slice(), &[install_root.join("_classic_/WTF")]);
+    }
+
+    #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_wtf_candidates_exclude_retail_project_mirror() {
+        let install_root = PathBuf::from("/tmp/wow-install");
+
+        let candidates = wtf_path_candidates(Some(&install_root));
+
+        assert!(
+            !candidates.iter().any(|path| path.ends_with("Projects/wow/WTF")),
+            "PTR must not fall back to retail WTF mirrors: {candidates:#?}"
+        );
     }
 
     #[test]
