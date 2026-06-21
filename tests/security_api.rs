@@ -219,6 +219,59 @@ fn test_issecurevariable_returns_true() {
     assert!(val);
 }
 
+#[test]
+fn addon_tainted_global_helper_taints_blizzard_call_path() {
+    let env = env();
+    let (
+        slot_secure,
+        slot_owner,
+        before_call_secure,
+        callee_secure,
+        callee_taint,
+        after_call_secure,
+    ): (bool, String, bool, bool, String, bool) = env
+        .eval(
+            r#"
+            local function addonWriteGlobalHelper()
+                debug.setstacktaint("TaintProbeAddon")
+                CooldownFrame_Set = function()
+                    return issecure(), debug.getstacktaint()
+                end
+                local secure, owner = issecurevariable(_G, "CooldownFrame_Set")
+                debug.setstacktaint(nil)
+                return secure, owner
+            end
+
+            local slotSecure, slotOwner = addonWriteGlobalHelper()
+            local beforeCallSecure = issecure()
+            local calleeSecure, calleeTaint = CooldownFrame_Set()
+            local afterCallSecure = issecure()
+
+            return slotSecure, slotOwner, beforeCallSecure, calleeSecure, calleeTaint or "", afterCallSecure
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        !slot_secure,
+        "addon writes to _G must taint the global slot"
+    );
+    assert_eq!(slot_owner, "TaintProbeAddon");
+    assert!(
+        before_call_secure,
+        "Blizzard-style caller starts from a secure stack"
+    );
+    assert!(
+        !callee_secure,
+        "calling through the tainted global helper must run insecure"
+    );
+    assert_eq!(callee_taint, "TaintProbeAddon");
+    assert!(
+        !after_call_secure,
+        "reading/calling a tainted global must taint the caller's execution path"
+    );
+}
+
 // ============================================================================
 // SecureHandler stubs
 // ============================================================================
