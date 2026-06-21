@@ -221,6 +221,162 @@ fn shared_table_mutation_propagates_both_ways() {
     );
 }
 
+/// Read a global through a function whose fenv is secureenv, mirroring how
+/// a `[LoadIntoEnvironment secure]` chunk resolves names.
+const SECURE_READ_PROBE: &str = r#"
+    local result
+    local probe = function() result = %NAME% end
+    debug.setfenv(probe, __secureenv)
+    probe()
+    return result
+"#;
+
+#[test]
+fn late_global_is_visible_to_secure_via_index_fallback() {
+    // CLAIM A: a global registered on _G AFTER secureenv was created is not
+    // in secureenv's own slot, so a secure read falls through __index to _G
+    // and sees it. This is the "_G.MyAddonGlobal = 6 is linked" behavior.
+    let env = env();
+
+    // Insecure write → lands on _G (genv), absent from secureenv's own slot.
+    env.exec(r#"lateGlobalProbe = 6"#).unwrap();
+
+    let (in_secureenv_own_slot, secure_sees): (String, f64) = env
+        .eval(
+            r#"
+            return type(rawget(__secureenv, "lateGlobalProbe")),
+                   (function()
+                       local result
+                       local probe = function() result = lateGlobalProbe end
+                       debug.setfenv(probe, __secureenv)
+                       probe()
+                       return result
+                   end)()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        in_secureenv_own_slot, "nil",
+        "late global must NOT be in secureenv's own slot"
+    );
+    assert_eq!(
+        secure_sees, 6.0,
+        "secure code must see the late _G global through __index fallback"
+    );
+}
+
+#[test]
+fn late_global_link_is_live_not_snapshot() {
+    // CLAIM B: the fall-through link is live. Re-binding the _G global to a
+    // new value must be visible to a subsequent secure read — it is not
+    // frozen at first access.
+    let env = env();
+
+    env.exec(r#"liveLinkProbe = 6"#).unwrap();
+    let first: f64 = env
+        .eval(&SECURE_READ_PROBE.replace("%NAME%", "liveLinkProbe"))
+        .unwrap();
+    assert_eq!(first, 6.0);
+
+    // Re-bind on _G (insecure), then read again through secureenv.
+    env.exec(r#"liveLinkProbe = 7"#).unwrap();
+    let second: f64 = env
+        .eval(&SECURE_READ_PROBE.replace("%NAME%", "liveLinkProbe"))
+        .unwrap();
+    assert_eq!(
+        second, 7.0,
+        "secure read must track the live _G value, not a snapshot"
+    );
+}
+
+#[test]
+fn secure_write_severs_the_link_to_global_env() {
+    // CLAIM C: once secure code writes the name, the value lands in
+    // secureenv's own slot, which shadows the __index fallback. From then on
+    // the secure side is decoupled from _G — exactly the "frozen" behavior,
+    // produced on demand rather than at creation.
+    let env = env();
+
+    env.exec(r#"severProbe = 10"#).unwrap();
+
+    // Secure write → secureenv own slot.
+    env.exec_rilua_secure(r#"severProbe = 99"#).unwrap();
+
+    // Insecure re-bind on _G afterwards.
+    env.exec(r#"severProbe = 11"#).unwrap();
+
+    let (secure_sees, g_value): (f64, f64) = env
+        .eval(
+            r#"
+            local result
+            local probe = function() result = severProbe end
+            debug.setfenv(probe, __secureenv)
+            probe()
+            return result, rawget(_G, "severProbe")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        secure_sees, 99.0,
+        "after a secure write, secure reads its own slot, not _G"
+    );
+    assert_eq!(g_value, 11.0, "_G keeps its own independent value");
+}
+
+#[test]
+fn global_copied_at_creation_is_frozen_against_later_g_rebind() {
+    // CLAIM D: a primitive global present at secureenv creation was copied
+    // into secureenv's own slot. Re-binding it on _G later does NOT change
+    // the secure read — the copy is decoupled. Contrast with CLAIM A/B where
+    // the name was absent at creation and stays live.
+    let env = env();
+
+    // Discover a primitive global that exists in BOTH envs' own slots with
+    // equal value (i.e. it was copied at creation). pairs() walks raw keys,
+    // so it ignores the __index metatable and yields only copied keys.
+    let key: String = env
+        .eval(
+            r#"
+            for k, v in pairs(__secureenv) do
+                if (type(v) == "number" or type(v) == "string")
+                   and type(k) == "string"
+                   and rawget(_G, k) == v then
+                    return k
+                end
+            end
+            return ""
+            "#,
+        )
+        .unwrap();
+    assert!(
+        !key.is_empty(),
+        "expected at least one copied primitive global at creation"
+    );
+
+    // Rebind the _G slot to a sentinel string the original could not equal.
+    let probe = format!(
+        r#"
+            local sentinel = "__frozen_sentinel__"
+            rawset(_G, {key:?}, sentinel)
+            local result
+            local probe = function() result = rawget(__secureenv, {key:?}) end
+            probe()
+            return tostring(result), tostring(rawget(_G, {key:?})), tostring(result == sentinel)
+            "#,
+    );
+    let (secure_value, g_value, secure_equals_sentinel): (String, String, String) =
+        env.eval(&probe).unwrap();
+
+    assert_eq!(g_value, "__frozen_sentinel__", "_G rebind must have applied");
+    assert_eq!(
+        secure_equals_sentinel, "false",
+        "secureenv's copied value (key {key}) must NOT follow the _G rebind"
+    );
+    assert_ne!(secure_value, "__frozen_sentinel__");
+}
+
 #[test]
 fn secureenv_reads_replaced_soundkit_from_global_env() {
     let env = env();
