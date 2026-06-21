@@ -89,6 +89,8 @@ fn c_traits_get_entry_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "isDisplayError", Val::Bool(false));
     let condition_ids = create_table(state);
     table_set(state, info, "conditionIDs", condition_ids);
+    let entry_cost = create_table(state);
+    table_set(state, info, "entryCost", entry_cost);
     if entry.sub_tree_id == 0 {
         table_set(state, info, "subTreeID", Val::Nil);
     } else {

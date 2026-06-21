@@ -672,6 +672,32 @@ fn test_c_traits_get_node_info_exposes_non_nil_rank_delta_fields() {
 }
 
 #[test]
+fn test_c_traits_get_entry_info_exposes_entry_cost_table() {
+    let env = WowLuaEnv::new().unwrap();
+    let entries_have_costs: bool = env
+        .eval(
+            r#"
+            local nodeIDs = C_Traits.GetTreeNodes(790)
+            for _, nodeID in ipairs(nodeIDs) do
+                local nodeInfo = C_Traits.GetNodeInfo(1, nodeID)
+                for _, entryID in ipairs(nodeInfo.entryIDs) do
+                    local entryInfo = C_Traits.GetEntryInfo(1, entryID)
+                    if not entryInfo or type(entryInfo.entryCost) ~= "table" then
+                        return false
+                    end
+                end
+            end
+            return true
+            "#,
+        )
+        .unwrap();
+    assert!(
+        entries_have_costs,
+        "C_Traits.GetEntryInfo should always provide an entryCost array",
+    );
+}
+
+#[test]
 fn test_c_spell_get_spell_description_returns_compact_trait_text() {
     let env = WowLuaEnv::new().unwrap();
     let has_description: bool = env
