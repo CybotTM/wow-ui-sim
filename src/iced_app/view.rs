@@ -48,13 +48,19 @@ fn message_from_keyboard_event(
     use iced::keyboard;
     use std::time::Instant;
 
-    let iced::Event::Keyboard(keyboard::Event::KeyPressed {
+    let iced::Event::Keyboard(keyboard_event) = event else {
+        return None;
+    };
+    if let keyboard::Event::ModifiersChanged(modifiers) = keyboard_event {
+        return Some(Message::ModifiersChanged(*modifiers));
+    }
+    let keyboard::Event::KeyPressed {
         key,
         modifiers,
         physical_key,
         text,
         ..
-    }) = event
+    } = keyboard_event
     else {
         return None;
     };

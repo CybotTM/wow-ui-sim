@@ -82,6 +82,47 @@ fn left_button_up_fires_mouse_up_before_click() {
 }
 
 #[test]
+fn right_click_handlers_see_held_alt_modifier() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            AltRightButton = CreateFrame("Button", "AltRightButton", UIParent)
+            AltRightButton:SetSize(100, 100)
+            AltRightButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            AltRightButton:RegisterForClicks("RightButtonUp")
+            AltRightButton:SetScript("OnClick", function(_, button)
+                __alt_right_button = button
+                __alt_right_seen = IsAltKeyDown()
+            end)
+
+            __alt_right_button = nil
+            __alt_right_seen = false
+            "#,
+        )
+        .expect("alt right-click setup should succeed");
+    }
+
+    let _ = app.update(crate::iced_app::Message::ModifiersChanged(
+        iced::keyboard::Modifiers::ALT,
+    ));
+    rebuild_hittable_cache(&app);
+    let click_pos = Point::new(150.0, 150.0);
+    app.handle_right_mouse_down(click_pos);
+    app.handle_right_mouse_up(click_pos);
+
+    let (button, alt_seen): (String, bool) = app
+        .env
+        .borrow()
+        .eval("return __alt_right_button, __alt_right_seen")
+        .expect("alt right-click result should be readable");
+    assert_eq!(button, "RightButton");
+    assert!(alt_seen, "right-click handlers should see held Alt");
+}
+
+#[test]
 fn register_for_clicks_left_button_down_fires_click_on_mouse_down_only() {
     let mut app = build_test_app(ScreenKind::Game);
 

@@ -70,6 +70,7 @@ impl App {
             Message::ToggleOptionsModal => self.options_modal_visible = !self.options_modal_visible,
             Message::CloseOptionsModal => self.options_modal_visible = false,
             Message::MovementToggled(field, val) => self.handle_movement_toggled(field, val),
+            Message::ModifiersChanged(modifiers) => self.handle_modifiers_changed(modifiers),
             // Handled in update() directly:
             Message::CanvasEvent(_) | Message::ProcessTimers(_) => unreachable!(),
         }
@@ -144,6 +145,15 @@ impl App {
         }
 
         self.handle_key_press(key, text, captured_at)
+    }
+
+    fn handle_modifiers_changed(&self, modifiers: iced::keyboard::Modifiers) {
+        let env = self.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.modifier_keys.shift = modifiers.shift();
+        state.modifier_keys.control = modifiers.control();
+        state.modifier_keys.alt = modifiers.alt();
+        state.modifier_keys.meta = modifiers.logo();
     }
 
     // ── Event handlers ──────────────────────────────────────────────────
