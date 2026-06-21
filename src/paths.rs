@@ -489,7 +489,9 @@ mod tests {
         let candidates = wtf_path_candidates(Some(&install_root));
 
         assert!(
-            !candidates.iter().any(|path| path.ends_with("Projects/wow/WTF")),
+            !candidates
+                .iter()
+                .any(|path| path.ends_with("Projects/wow/WTF")),
             "PTR must not fall back to retail WTF mirrors: {candidates:#?}"
         );
     }
