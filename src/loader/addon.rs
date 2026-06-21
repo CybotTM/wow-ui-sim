@@ -36,6 +36,25 @@ struct LoadingAddonGuard {
     state: Rc<RefCell<SimState>>,
 }
 
+#[derive(Clone, Copy)]
+enum EnvironmentPass {
+    Normal,
+    SecureReplay,
+}
+
+impl EnvironmentPass {
+    fn use_secure_env(self, ctx: &AddonContext<'_>) -> bool {
+        match self {
+            Self::Normal => ctx.use_secure_env,
+            Self::SecureReplay => true,
+        }
+    }
+
+    fn loads_xml(self) -> bool {
+        matches!(self, Self::Normal)
+    }
+}
+
 impl Drop for LoadingAddonGuard {
     fn drop(&mut self) {
         let mut state = self.state.borrow_mut();
@@ -91,7 +110,15 @@ pub fn load_addon_internal(
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
     let addon_name = result.name.clone();
 
-    load_addon_files(env, toc, folder_name, &ctx, &mut result);
+    load_addon_files(
+        env,
+        toc,
+        folder_name,
+        &ctx,
+        EnvironmentPass::Normal,
+        &mut result,
+    );
+    maybe_replay_blizzard_lua_in_secure_env(env, toc, folder_name, &ctx, &mut result);
     maybe_restore_clobbered_saved_variables(env, folder_name, saved_vars_mgr);
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
@@ -309,6 +336,7 @@ fn load_addon_files(
     toc: &TocFile,
     folder_name: &str,
     ctx: &AddonContext,
+    pass: EnvironmentPass,
     result: &mut LoadResult,
 ) {
     let overlay_dir = Path::new("Interface/AddOns").join(folder_name);
@@ -317,19 +345,53 @@ fn load_addon_files(
         if should_skip_addon_file(toc, file_rel) {
             continue;
         }
+        if matches!(pass, EnvironmentPass::SecureReplay) && toc.file_use_secure_env(index).is_some()
+        {
+            continue;
+        }
+        if !toc.file_allows_environment(index, pass.use_secure_env(ctx)) {
+            continue;
+        }
         let resolved_file = resolve_addon_file_path(&overlay_dir, file_rel, file);
         let file_ctx = AddonContext {
             name: ctx.name,
             table: ctx.table,
             addon_root: ctx.addon_root,
-            use_secure_env: toc.file_use_secure_env(index).unwrap_or(ctx.use_secure_env),
+            use_secure_env: toc
+                .file_use_secure_env(index)
+                .unwrap_or_else(|| pass.use_secure_env(ctx)),
             taint: ctx.taint,
         };
         if std::env::var("WOW_SIM_VERBOSE").is_ok() {
             println!("  loading file {}", file_rel.display());
         }
-        load_addon_file(env, &file_ctx, result, &resolved_file);
+        load_addon_file(env, &file_ctx, result, &resolved_file, pass);
     }
+}
+
+fn maybe_replay_blizzard_lua_in_secure_env(
+    env: &LoaderEnv<'_>,
+    toc: &TocFile,
+    folder_name: &str,
+    ctx: &AddonContext,
+    result: &mut LoadResult,
+) {
+    if !is_secure_replay_library_addon(folder_name) || ctx.use_secure_env {
+        return;
+    }
+
+    load_addon_files(
+        env,
+        toc,
+        folder_name,
+        ctx,
+        EnvironmentPass::SecureReplay,
+        result,
+    );
+}
+
+fn is_secure_replay_library_addon(folder_name: &str) -> bool {
+    matches!(folder_name, "Blizzard_SharedXMLBase")
 }
 
 fn should_skip_addon_file(toc: &TocFile, file_rel: &Path) -> bool {
@@ -367,6 +429,7 @@ fn load_addon_file(
     ctx: &AddonContext<'_>,
     result: &mut LoadResult,
     file: &std::path::Path,
+    pass: EnvironmentPass,
 ) {
     if !file.is_file() {
         result.warnings.push(format!(
@@ -378,7 +441,8 @@ fn load_addon_file(
 
     match file.extension().and_then(|ext| ext.to_str()).unwrap_or("") {
         "lua" => load_addon_lua_file(env, ctx, result, file),
-        "xml" => load_addon_xml_file(env, ctx, result, file),
+        "xml" if pass.loads_xml() => load_addon_xml_file(env, ctx, result, file),
+        "xml" => {}
         _ => result
             .warnings
             .push(format!("{}: unknown file type", file.display())),

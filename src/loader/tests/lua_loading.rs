@@ -171,3 +171,49 @@ fn test_text_to_speech_checkload_recovers_clobbered_dropdown_globals() {
     std::fs::remove_file(&lua_path).ok();
     std::fs::remove_dir_all(&temp_dir).ok();
 }
+
+#[test]
+fn blizzard_lua_files_replay_into_secure_environment() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_root = std::env::temp_dir().join("wow-sim-secure-replay-test");
+    let addon_dir = temp_root.join("Blizzard_SharedXMLBase");
+    std::fs::create_dir_all(&addon_dir).unwrap();
+    std::fs::write(
+        addon_dir.join("Core.lua"),
+        r#"ReplayLibraryValue = { marker = "shared" }"#,
+    )
+    .unwrap();
+    std::fs::write(
+        addon_dir.join("GlobalOnly.lua"),
+        r#"ReplayGlobalOnlyValue = "global-only""#,
+    )
+    .unwrap();
+
+    let toc = crate::toc::TocFile::parse(
+        &addon_dir,
+        r#"
+## Title: Blizzard_SharedXMLBase
+## AllowLoad: Game
+Core.lua
+GlobalOnly.lua [AllowLoadEnvironment Global]
+"#,
+    );
+
+    let result = load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+    assert_eq!(result.lua_files, 3);
+
+    let (global_marker, secure_marker, global_only_type): (String, String, String) = env
+        .eval(
+            r#"
+            return _G.ReplayLibraryValue.marker,
+                   __secureenv.ReplayLibraryValue.marker,
+                   type(rawget(__secureenv, "ReplayGlobalOnlyValue"))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(global_marker, "shared");
+    assert_eq!(secure_marker, "shared");
+    assert_eq!(global_only_type, "nil");
+
+    std::fs::remove_dir_all(&temp_root).ok();
+}

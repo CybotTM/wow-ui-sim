@@ -7,7 +7,7 @@ The taint system enforces WoW's secure/insecure execution boundary. The simulato
 Full retail taint simulation remains out of scope. What the simulator does implement:
 
 - **Protected-frame gating**: `can_change_protected_state_for()` blocks protected mutations when the caller is insecure and the player is in combat
-- **Dual Lua environment**: `genv` (`_G`) for addon code vs `secureenv` for Blizzard secure code
+- **Dual Lua environment**: `genv` (`_G`) for addon code vs `secureenv` for Blizzard secure code. `secureenv` is a separate shallow copy, not a live overlay over `_G`.
 - **Elune runtime taint**: `issecure`, `securecall`, `issecurevariable`, `forceinsecure`, and `debug.*taint*` helpers come from Elune
 - **securecallmethod()**: simulator-provided helper that Elune omits
 - **Secret values**: simulator-owned identity values and tainted `CallMethod` payloads/results are tracked by fallback accessors
@@ -37,7 +37,11 @@ When blocked, callers emit `ADDON_ACTION_BLOCKED` via `emit_addon_action_blocked
 Two environments share the same Lua state:
 
 - **genv** (`_G`): addon code; `Blizzard_EnvironmentCleanup` nils secure APIs here
-- **secureenv**: shallow copy of `_G` at startup with `__index = _G` fallback; retains secure APIs after cleanup; addons with `UseSecureEnvironment: 1` in TOC run here via `setfenv`
+- **secureenv**: shallow copy of `_G` at startup with no `__index = _G` fallback; retains secure APIs after cleanup; addons with `UseSecureEnvironment: 1` in TOC run here via `setfenv`
+
+Retail probe result, 2026-06-20: wrapping `_G.CooldownFrame_Set` and `_G.CooldownFrame_Clear` printed for normal CooldownViewer callers but did not print from `Blizzard_PrivateAurasUI` during a Mythic+ private-aura display. PrivateAurasUI is `UseSecureEnvironment: 1`, so its cooldown code did not reach the live `_G` override. That falsifies the simulator's previous `secureenv` metatable fallback model.
+
+Blizzard source also matches this: outbound bridge files explicitly capture `local secureEnv = GetCurrentEnvironment()`, call `SwapToGlobalEnvironment()`, then assign bridge tables back into `secureEnv` (for example `secureEnv.WowTokenOutbound = WowTokenOutbound`). Those manual exports are necessary only when secureenv does not fall through to `_G`.
 
 `set_in_both_envs_rilua(key, value)` registers named frames in both environments so frame globals are visible from both.
 

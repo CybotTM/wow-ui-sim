@@ -289,8 +289,11 @@ Debug.lua [AllowLoadEnvironment Global, SomeFlag]
     assert_eq!(toc.files[1], PathBuf::from("Dump.lua"));
     assert_eq!(toc.files[2], PathBuf::from("Debug.lua"));
     assert_eq!(toc.file_use_secure_env(0), None);
-    assert_eq!(toc.file_use_secure_env(1), Some(false));
+    assert_eq!(toc.file_use_secure_env(1), None);
     assert_eq!(toc.file_use_secure_env(2), None);
+    assert_eq!(toc.file_allow_load_environment(0), None);
+    assert_eq!(toc.file_allow_load_environment(1), Some(false));
+    assert_eq!(toc.file_allow_load_environment(2), None);
 }
 
 #[test]
@@ -313,7 +316,7 @@ Public.lua [LoadIntoEnvironment global]
 }
 
 #[test]
-fn test_parse_allow_load_environment_annotations_as_file_overrides() {
+fn test_parse_allow_load_environment_annotations_as_pass_filters() {
     let contents = r#"
 ## Title: TestAddon
 Core.lua
@@ -329,9 +332,17 @@ Debug.lua [AllowLoadEnvironment Global, SomeFlag]
     assert_eq!(toc.files[2], PathBuf::from("Public.lua"));
     assert_eq!(toc.files[3], PathBuf::from("Debug.lua"));
     assert_eq!(toc.file_use_secure_env(0), None);
-    assert_eq!(toc.file_use_secure_env(1), Some(true));
-    assert_eq!(toc.file_use_secure_env(2), Some(false));
+    assert_eq!(toc.file_use_secure_env(1), None);
+    assert_eq!(toc.file_use_secure_env(2), None);
     assert_eq!(toc.file_use_secure_env(3), None);
+    assert_eq!(toc.file_allow_load_environment(0), None);
+    assert_eq!(toc.file_allow_load_environment(1), Some(true));
+    assert_eq!(toc.file_allow_load_environment(2), Some(false));
+    assert_eq!(toc.file_allow_load_environment(3), None);
+    assert!(toc.file_allows_environment(1, true));
+    assert!(!toc.file_allows_environment(1, false));
+    assert!(toc.file_allows_environment(2, false));
+    assert!(!toc.file_allows_environment(2, true));
 }
 
 #[test]

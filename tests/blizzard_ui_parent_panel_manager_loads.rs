@@ -257,16 +257,22 @@ fn toc_raw_bytes_pin_directives_and_body_files_with_inline_annotations() {
 }
 
 #[test]
-fn allow_load_environment_annotations_set_global_env_overrides() {
+fn allow_load_environment_annotations_set_global_pass_filters() {
     let toc = TocFile::from_file(&ui_parent_panel_manager_toc()).expect("TOC parses");
 
     assert_eq!(toc.file_use_secure_env(0), None);
     for index in 1..4 {
         assert_eq!(
             toc.file_use_secure_env(index),
+            None,
+            "File index {index} carries `[AllowLoadEnvironment Global]`; it must not map to a \
+             per-file fenv override"
+        );
+        assert_eq!(
+            toc.file_allow_load_environment(index),
             Some(false),
             "File index {index} carries `[AllowLoadEnvironment Global]`, which must map to a \
-             per-file global-env override"
+             global-pass filter"
         );
     }
 }

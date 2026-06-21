@@ -140,12 +140,9 @@ fn toc_declares_metadata_in_raw_bytes_with_escalate_and_global_env() {
     assert!(
         raw.contains("Blizzard_ScriptErrors.lua [AllowLoadEnvironment Global]"),
         "Body line must carry the `[AllowLoadEnvironment Global]` postfix on the \
-         single Lua file — this loads the file into the GLOBAL Lua environment (not \
-         the addon's per-addon sandbox env) so that ScriptErrors / ScriptErrorsMixin \
-         / AddLuaErrorHandler / HandleLuaError can be referenced by every other \
-         Blizzard addon directly. The simulator's TOC parser strips this annotation \
-         in `parse_toc_metadata` (src/toc.rs:28) so the path resolves to the bare \
-         filename"
+         single Lua file — this is a global-load-pass filter, not an fenv override. \
+         The simulator's TOC parser strips this annotation so the path resolves to \
+         the bare filename"
     );
 }
 

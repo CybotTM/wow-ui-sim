@@ -21,9 +21,12 @@ pub struct TocFile {
     pub metadata: HashMap<String, String>,
     /// Files to load in order (relative paths)
     pub files: Vec<PathBuf>,
-    /// Per-file environment override from TOC environment annotations.
+    /// Per-file environment override from `[LoadIntoEnvironment ...]`.
     /// `None` means inherit the addon's default environment.
     pub file_env_overrides: Vec<Option<bool>>,
+    /// Per-file load-pass filter from `[AllowLoadEnvironment ...]`.
+    /// `None` means the file can load in any environment pass.
+    pub file_env_allows: Vec<Option<bool>>,
 }
 
 /// Strip inline annotations like `[AllowLoadEnvironment Global]` from a TOC line.
@@ -141,13 +144,20 @@ fn insert_metadata(metadata: &mut HashMap<String, String>, rest: &str) {
 
 fn parse_load_into_environment(line: &str) -> Option<bool> {
     let lower = line.to_ascii_lowercase();
-    if lower.contains("[loadintoenvironment secure]")
-        || lower.contains("[allowloadenvironment secure]")
-    {
+    if lower.contains("[loadintoenvironment secure]") {
         Some(true)
-    } else if lower.contains("[loadintoenvironment global]")
-        || lower.contains("[allowloadenvironment global]")
-    {
+    } else if lower.contains("[loadintoenvironment global]") {
+        Some(false)
+    } else {
+        None
+    }
+}
+
+fn parse_allow_load_environment(line: &str) -> Option<bool> {
+    let lower = line.to_ascii_lowercase();
+    if lower.contains("[allowloadenvironment secure]") {
+        Some(true)
+    } else if lower.contains("[allowloadenvironment global]") {
         Some(false)
     } else {
         None
@@ -205,6 +215,7 @@ fn push_file_entry(
     addon_dir: &Path,
     files: &mut Vec<PathBuf>,
     file_env_overrides: &mut Vec<Option<bool>>,
+    file_env_allows: &mut Vec<Option<bool>>,
     line: &str,
 ) {
     if line.contains("[AllowLoadTextLocale") && !line.contains("enUS") {
@@ -223,6 +234,7 @@ fn push_file_entry(
     if !file_path.is_empty() {
         files.push(PathBuf::from(file_path));
         file_env_overrides.push(parse_load_into_environment(&line));
+        file_env_allows.push(parse_allow_load_environment(&line));
     }
 }
 
@@ -239,6 +251,7 @@ impl TocFile {
         let mut metadata = HashMap::new();
         let mut files = Vec::new();
         let mut file_env_overrides = Vec::new();
+        let mut file_env_allows = Vec::new();
 
         for line in contents.lines() {
             let line = line.trim();
@@ -252,7 +265,13 @@ impl TocFile {
             if line.starts_with('#') {
                 continue;
             }
-            push_file_entry(addon_dir, &mut files, &mut file_env_overrides, line);
+            push_file_entry(
+                addon_dir,
+                &mut files,
+                &mut file_env_overrides,
+                &mut file_env_allows,
+                line,
+            );
         }
 
         TocFile {
@@ -261,6 +280,7 @@ impl TocFile {
             metadata,
             files,
             file_env_overrides,
+            file_env_allows,
         }
     }
 
@@ -323,6 +343,18 @@ impl TocFile {
     /// Get the per-file environment override for a TOC entry.
     pub fn file_use_secure_env(&self, index: usize) -> Option<bool> {
         self.file_env_overrides.get(index).copied().flatten()
+    }
+
+    /// Get the environment pass filter for a TOC entry.
+    pub fn file_allow_load_environment(&self, index: usize) -> Option<bool> {
+        self.file_env_allows.get(index).copied().flatten()
+    }
+
+    /// Whether a file should load in the requested environment pass.
+    pub fn file_allows_environment(&self, index: usize, use_secure_env: bool) -> bool {
+        self.file_allow_load_environment(index)
+            .map(|allowed_secure_env| allowed_secure_env == use_secure_env)
+            .unwrap_or(true)
     }
 
     /// Default enabled state — `## DefaultState: disabled` ships the addon

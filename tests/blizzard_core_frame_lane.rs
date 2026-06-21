@@ -304,11 +304,8 @@ fn ui_parent_panel_manager_diagnostic_files_carry_allow_load_environment_global_
     ] {
         assert!(
             raw.contains(entry),
-            "Raw bytes must contain `{entry}` — these three files explicitly request the global \
-             fenv. The override matters because UIParentPanelManager's body publishes \
-             ShowUIPanel / HideUIPanel as globals consumed by both protected and insecure code; \
-             if a future secure-env wrapper isolates the addon, these files must still write \
-             to the global table"
+            "Raw bytes must contain `{entry}` — these three files explicitly restrict the line \
+             to the global load pass. The annotation is a load-pass filter, not an fenv override"
         );
     }
 
@@ -323,11 +320,13 @@ fn ui_parent_panel_manager_diagnostic_files_carry_allow_load_environment_global_
         .expect("UIParentPanelManager.lua must appear in body");
     assert_eq!(
         panel_manager.file_use_secure_env(panel_idx),
+        None,
+        "`[AllowLoadEnvironment Global]` must not map to a per-file fenv override"
+    );
+    assert_eq!(
+        panel_manager.file_allow_load_environment(panel_idx),
         Some(false),
-        "`[AllowLoadEnvironment Global]` must map to a per-file global-env override. \
-         UIParentPanelManager currently inherits a global default, but the explicit override \
-         matters if a future secure-env wrapper would otherwise isolate ShowUIPanel / \
-         HideUIPanel writes"
+        "`[AllowLoadEnvironment Global]` is a global-pass filter"
     );
 }
 

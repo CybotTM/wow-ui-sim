@@ -3,6 +3,8 @@
 //! `create_secure_environment` and `mark_secure` mirror the old mlua
 //! secureenv path: create a shallow copy of `_G`, give it its own `Enum`,
 //! expose it as `__secureenv`, and retarget secure addon chunks to that env.
+//! Secureenv is deliberately separate from `_G`; later `_G` writes are not
+//! visible unless a Blizzard bridge explicitly copies them into secureenv.
 
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
@@ -25,9 +27,8 @@ const CREATE_SECURE_ENV_LUA: &str = r##"
         secureenv.Enum = se
     end
     secureenv._G = secureenv
-    setmetatable(secureenv, { __index = genv })
     return secureenv
-"##;
+	"##;
 
 pub(crate) fn secure_env_table(
     state: &mut LuaState,
@@ -52,11 +53,11 @@ pub(crate) fn set_secure_env_key_state(
     Ok(())
 }
 
-/// Create the secure environment as a shallow copy of `_G` with fallback.
+/// Create the secure environment as a shallow copy of `_G`.
 ///
 /// This preserves secure APIs when `Blizzard_EnvironmentCleanup` nils them
-/// from `_G`, while still seeing globals registered later through the
-/// metatable `__index` fallback.
+/// from `_G`. Later `_G` registrations do not fall through; secure-visible
+/// exports must be written directly into secureenv.
 pub fn create_secure_environment(lua: &mut rilua::Lua) -> LuaResult<()> {
     if matches!(LuaApiMut::get_global_val(lua, "__secureenv"), Val::Table(_)) {
         return Ok(());

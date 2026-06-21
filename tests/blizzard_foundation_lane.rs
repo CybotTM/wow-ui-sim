@@ -220,7 +220,7 @@ fn shared_xml_diagnostic_files_carry_allow_load_environment_global_in_raw_form()
         assert!(
             raw.contains(diagnostic),
             "SharedXML raw bytes must contain `{diagnostic}` — these entries explicitly request \
-             the global fenv even when the surrounding addon runs under a different environment"
+             the global load pass even when another environment pass is being replayed"
         );
     }
 
@@ -232,11 +232,14 @@ fn shared_xml_diagnostic_files_carry_allow_load_environment_global_in_raw_form()
     let dump_idx = position_in(&body, "Dump.lua").expect("Dump.lua must appear in SharedXML body");
     assert_eq!(
         shared.file_use_secure_env(dump_idx),
+        None,
+        "`[AllowLoadEnvironment Global]` must not map to the same per-file fenv override as \
+         `[LoadIntoEnvironment Global]`"
+    );
+    assert_eq!(
+        shared.file_allow_load_environment(dump_idx),
         Some(false),
-        "`[AllowLoadEnvironment Global]` must map to the same per-file global-env override as \
-         `[LoadIntoEnvironment Global]`. SharedXML currently runs in the default global fenv, \
-         but preserving the explicit override keeps these diagnostics correct if the lane ever \
-         gains a secure-env default"
+        "`[AllowLoadEnvironment Global]` marks a global-only load pass"
     );
 }
 

@@ -1349,3 +1349,7 @@ Created `investigations/post-load-workaround-audit.md` while auditing retail pos
 ## [2026-06-20] update | Third-party addon metadata pre-registration
 
 Updated `systems/addon-loading.md` after fixing `!BugGrabber`'s false no-display warning when `BugSack` is present. The system page now records the invariant that discovered third-party addon metadata must be registered in `C_AddOns` before eager third-party Lua executes, while actual file loading still follows enabled, non-`LoadOnDemand`, dependency-sorted order.
+
+## [2026-06-21] update | secureenv no-fallback retail probe
+
+Updated `systems/taint-system.md` and `investigations/store-secure-pool-constructors.md` after a retail PrivateAurasUI cooldown-wrapper probe showed secure code does not hit late `_G` overrides. The simulator now models secureenv as a separate shallow copy without `__index = _G`; `Blizzard_SharedXMLBase` Lua is replayed into secureenv to populate shared secure symbols directly instead of copying constructors from `_G` after load.

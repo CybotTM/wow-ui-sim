@@ -124,8 +124,8 @@ fn toc_is_secure_environment_eager_on_both_screens() {
         "SimpleCheckout MUST set `## UseSecureEnvironment: 1` — the \
          checkout overlay handles real-money microtransactions, so its \
          compiled chunks run under `mark_secure_state` which swaps the \
-         chunk's fenv to `__secureenv` (a shallow `_G` copy with \
-         `__index = _G` fallback). The Inbound / Outbound files \
+         chunk's fenv to `__secureenv` (a shallow `_G` copy without a \
+         live `_G` fallback). The Inbound / Outbound files \
          deliberately call SwapToGlobalEnvironment / \
          GetCurrentEnvironment to tunnel state across the secure \
          boundary"

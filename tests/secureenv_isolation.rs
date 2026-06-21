@@ -133,7 +133,7 @@ fn two_secure_chunks_share_one_secureenv() {
     )
     .unwrap();
 
-    let (first_binding, copy_binding, mt_index_is_genv): (String, String, bool) = env
+    let (first_binding, copy_binding, has_g_fallback): (String, String, bool) = env
         .eval(
             r#"
             return tostring(rawget(__secureenv, "secureenvSharedBetweenChunks")),
@@ -151,10 +151,7 @@ fn two_secure_chunks_share_one_secureenv() {
         copy_binding, "defined-by-first-chunk",
         "second chunk must see the first chunk's binding through the shared secureenv"
     );
-    assert!(
-        mt_index_is_genv,
-        "secureenv's metatable should still fall back to _G (no accidental rebuild)"
-    );
+    assert!(!has_g_fallback, "secureenv must not fall back to live _G");
 }
 
 #[test]
@@ -201,23 +198,22 @@ fn shared_table_mutation_propagates_both_ways() {
     // envs already reference. Since shallow copy shares table refs,
     // this assignment should be visible from _G as well.
     let env = env();
-    env.exec(r#"secureenvSharedContainer = {}"#).unwrap();
 
-    // Secure chunk reads secureenvSharedContainer via __index fallback to
-    // _G (it's the same table reference) and mutates a field on it.
+    // `math` exists when secureenv is created, so the shallow copy shares
+    // the same table reference with _G.
     env.exec_rilua_secure(
         r#"
-            secureenvSharedContainer.filled = "from-secure"
+            math.secureenvSharedContainer = "from-secure"
         "#,
     )
     .unwrap();
 
     let from_g: String = env
-        .eval(r#"return tostring(rawget(_G, "secureenvSharedContainer").filled)"#)
+        .eval(r#"return tostring(rawget(_G, "math").secureenvSharedContainer)"#)
         .unwrap();
     assert_eq!(
         from_g, "from-secure",
-        "mutations to a pre-existing shared table should be visible from _G"
+        "mutations to a table copied at secureenv creation should be visible from _G"
     );
 }
 
@@ -228,20 +224,19 @@ const SECURE_READ_PROBE: &str = r#"
     local probe = function() result = %NAME% end
     debug.setfenv(probe, __secureenv)
     probe()
-    return result
+    return type(result)
 "#;
 
 #[test]
-fn late_global_is_visible_to_secure_via_index_fallback() {
-    // CLAIM A: a global registered on _G AFTER secureenv was created is not
-    // in secureenv's own slot, so a secure read falls through __index to _G
-    // and sees it. This is the "_G.MyAddonGlobal = 6 is linked" behavior.
+fn late_global_is_not_visible_to_secure_without_explicit_export() {
+    // A global registered on _G AFTER secureenv was created is not in
+    // secureenv's own slot and does not fall through to _G.
     let env = env();
 
     // Insecure write → lands on _G (genv), absent from secureenv's own slot.
     env.exec(r#"lateGlobalProbe = 6"#).unwrap();
 
-    let (in_secureenv_own_slot, secure_sees): (String, f64) = env
+    let (in_secureenv_own_slot, secure_sees_type): (String, String) = env
         .eval(
             r#"
             return type(rawget(__secureenv, "lateGlobalProbe")),
@@ -250,7 +245,7 @@ fn late_global_is_visible_to_secure_via_index_fallback() {
                        local probe = function() result = lateGlobalProbe end
                        debug.setfenv(probe, __secureenv)
                        probe()
-                       return result
+                       return type(result)
                    end)()
             "#,
         )
@@ -260,42 +255,30 @@ fn late_global_is_visible_to_secure_via_index_fallback() {
         in_secureenv_own_slot, "nil",
         "late global must NOT be in secureenv's own slot"
     );
-    assert_eq!(
-        secure_sees, 6.0,
-        "secure code must see the late _G global through __index fallback"
-    );
+    assert_eq!(secure_sees_type, "nil", "secure code must not see late _G globals");
 }
 
 #[test]
-fn late_global_link_is_live_not_snapshot() {
-    // CLAIM B: the fall-through link is live. Re-binding the _G global to a
-    // new value must be visible to a subsequent secure read — it is not
-    // frozen at first access.
+fn late_global_rebind_stays_invisible_to_secure() {
     let env = env();
 
     env.exec(r#"liveLinkProbe = 6"#).unwrap();
-    let first: f64 = env
+    let first: String = env
         .eval(&SECURE_READ_PROBE.replace("%NAME%", "liveLinkProbe"))
         .unwrap();
-    assert_eq!(first, 6.0);
+    assert_eq!(first, "nil");
 
-    // Re-bind on _G (insecure), then read again through secureenv.
     env.exec(r#"liveLinkProbe = 7"#).unwrap();
-    let second: f64 = env
+    let second: String = env
         .eval(&SECURE_READ_PROBE.replace("%NAME%", "liveLinkProbe"))
         .unwrap();
-    assert_eq!(
-        second, 7.0,
-        "secure read must track the live _G value, not a snapshot"
-    );
+    assert_eq!(second, "nil", "secure reads must remain independent from _G rebinds");
 }
 
 #[test]
 fn secure_write_severs_the_link_to_global_env() {
-    // CLAIM C: once secure code writes the name, the value lands in
-    // secureenv's own slot, which shadows the __index fallback. From then on
-    // the secure side is decoupled from _G — exactly the "frozen" behavior,
-    // produced on demand rather than at creation.
+    // Once secure code writes the name, the value lands in secureenv's own
+    // slot. The secure side is decoupled from _G.
     let env = env();
 
     env.exec(r#"severProbe = 10"#).unwrap();
@@ -327,10 +310,9 @@ fn secure_write_severs_the_link_to_global_env() {
 
 #[test]
 fn global_copied_at_creation_is_frozen_against_later_g_rebind() {
-    // CLAIM D: a primitive global present at secureenv creation was copied
+    // A primitive global present at secureenv creation was copied
     // into secureenv's own slot. Re-binding it on _G later does NOT change
-    // the secure read — the copy is decoupled. Contrast with CLAIM A/B where
-    // the name was absent at creation and stays live.
+    // the secure read — the copy is decoupled.
     let env = env();
 
     // Discover a primitive global that exists in BOTH envs' own slots with
@@ -378,7 +360,7 @@ fn global_copied_at_creation_is_frozen_against_later_g_rebind() {
 }
 
 #[test]
-fn secureenv_reads_replaced_soundkit_from_global_env() {
+fn secureenv_does_not_read_late_soundkit_from_global_env() {
     let env = env();
 
     env.exec(
@@ -388,19 +370,19 @@ fn secureenv_reads_replaced_soundkit_from_global_env() {
     )
     .unwrap();
 
-    let sound_id: f64 = env
+    let sound_type: String = env
         .eval(
             r#"
             local result
             local probe = function()
-                result = SOUNDKIT.UI_IG_STORE_WINDOW_OPEN_BUTTON
+                result = SOUNDKIT
             end
             debug.setfenv(probe, __secureenv)
             probe()
-            return result
+            return type(result)
             "#,
         )
         .unwrap();
 
-    assert_eq!(sound_id, 39512.0);
+    assert_eq!(sound_type, "nil");
 }

@@ -361,36 +361,6 @@ pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
-pub(crate) fn sync_secure_env_after_shared_xml_base(
-    env: &crate::lua_api::LoaderEnv<'_>,
-) -> crate::Result<()> {
-    env.exec(
-        r#"
-        local secureenv = rawget(_G, "__secureenv")
-        if type(secureenv) == "table" then
-          for _, name in ipairs({
-            "CreateFramePool",
-            "CreateTexturePool",
-            "CreateFontStringPool",
-            "CreateObjectPool",
-            "CreateSecureFramePool",
-            "CreateSecureTexturePool",
-            "CreateSecureFontStringPool",
-            "CreateSecureObjectPool",
-            "CreateFramePoolCollection",
-            "CreateSecureFramePoolCollection",
-            "CreateFrameFactory",
-          }) do
-            local value = rawget(_G, name)
-            if type(value) == "function" then
-              rawset(secureenv, name, value)
-            end
-          end
-        end
-        "#,
-    )
-}
-
 #[cfg(test)]
 mod tests {
     use crate::lua_api::WowLuaEnv;

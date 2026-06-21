@@ -316,10 +316,10 @@ fn blizzard_private_auras_ui_publishes_five_mixins_into_secure_env() {
             .unwrap_or_else(|err| panic!("rawget(__secureenv, '{name}') probe failed: {err}"));
         assert_eq!(
             in_secure_env, "table",
-            "__secureenv.{name} must publish as a table — Blizzard_PrivateAurasUI.lua \
+             "__secureenv.{name} must publish as a table — Blizzard_PrivateAurasUI.lua \
              runs under `## UseSecureEnvironment: 1`, so mark_secure_state at \
              src/lua_api/globals/security/secure_env.rs:82 swaps the chunk's fenv to \
-             __secureenv (a shallow _G copy with `__index = _G` fallback). Plain \
+             __secureenv (a shallow _G copy without a live `_G` fallback). Plain \
              top-level assignments like `CompactDispelDebuffMixin = {{}}` therefore \
              write into __secureenv, not _G. The 5 mixins exposed are: \
              CompactDispelDebuffMixin (raid-frame dispel overlay debuff icon), \

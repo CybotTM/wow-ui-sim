@@ -8,7 +8,7 @@ The Store addon runs with `UseSecureEnvironment: 1`, so `StoreFrame_OnLoad` reso
 
 That stale secure constructor produced a private collection shape with an exposed `pools` table and no `GetPool` method. Store product cards then came from the fallback collection instead of Blizzard's pool proxy path, which broke normal card setup and made the visible Store card area look corrupt even though the Blizzard source files were valid.
 
-The fix is to sync the real pool/factory constructors from `_G` into `__secureenv` immediately after `Blizzard_SharedXMLBase` loads. The runtime Store data fallback also avoids relying on Store enum globals that `Blizzard_EnvironmentCleanup` removes, and keeps Store secure state in a local table so namespace fallbacks cannot turn `_state` into a function.
+The original simulator fix synced the real pool/factory constructors from `_G` into `__secureenv` immediately after `Blizzard_SharedXMLBase` loaded. Retail probing later showed `secureenv` has no `_G` fallback, so the replacement model is to load Blizzard Lua library files in the secure environment pass as well. That makes secureenv receive the Blizzard constructors directly instead of copying them from `_G` after the fact. The runtime Store data fallback also avoids relying on Store enum globals that `Blizzard_EnvironmentCleanup` removes, and keeps Store secure state in a local table so namespace fallbacks cannot turn `_state` into a function.
 
 Regression coverage:
 
@@ -20,7 +20,7 @@ Regression coverage:
 ## Sources
 
 - [runtime_surface_bootstrap.lua](../../src/lua_api/env_init/runtime_surface_bootstrap.lua) — Store fallback state, enum restoration, and secure Store defaults
-- [pool_constructor_defaults.rs](../../src/lua_api/workarounds/temporary/pool_constructor_defaults.rs) — fallback pool constructors and secureenv constructor sync
+- [pool_constructor_defaults.rs](../../src/lua_api/workarounds/temporary/pool_constructor_defaults.rs) — fallback pool constructors for isolated partial loads
 - [store_tree.rs](../../tests/store_tree.rs) — Store regression coverage
 - [pool_api.rs](../../tests/pool_api.rs) — pool collection surface regression coverage
 
