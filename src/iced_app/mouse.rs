@@ -240,6 +240,7 @@ impl App {
         self.mouse_down_frame = None;
         self.clear_pressed_frame();
         self.flush_post_script_updates();
+        self.update_hovered_frame(pos);
     }
 
     fn clear_pressed_frame(&mut self) {
@@ -465,6 +466,7 @@ impl App {
             self.flush_post_script_updates();
         }
         self.right_mouse_down_frame = None;
+        self.update_hovered_frame(pos);
     }
 
     fn frame_clicks_on_edge(&self, frame_id: u64, button_name: &str, down: bool) -> bool {

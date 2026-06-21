@@ -100,6 +100,64 @@ fn hit_test_reflects_frames_shown_by_previous_clicks() {
 }
 
 #[test]
+fn click_release_refreshes_hover_when_script_hides_frame() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            SelfHidingHoverButton = CreateFrame("Button", "SelfHidingHoverButton", UIParent)
+            SelfHidingHoverButton:SetSize(100, 100)
+            SelfHidingHoverButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            SelfHidingHoverButton:EnableMouse(true)
+            SelfHidingHoverButton:SetScript("OnEnter", function()
+                __self_hide_enter = (__self_hide_enter or 0) + 1
+            end)
+            SelfHidingHoverButton:SetScript("OnLeave", function()
+                __self_hide_leave = (__self_hide_leave or 0) + 1
+            end)
+            SelfHidingHoverButton:SetScript("OnClick", function(self)
+                self:Hide()
+            end)
+            __self_hide_enter = 0
+            __self_hide_leave = 0
+            "#,
+        )
+        .expect("self-hiding hover setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    let click_pos = Point::new(150.0, 150.0);
+    app.handle_mouse_move(click_pos);
+    app.handle_mouse_down(click_pos);
+    app.handle_mouse_up(click_pos);
+
+    let (enter_count, leave_count): (f64, f64) = app
+        .env
+        .borrow()
+        .eval("return __self_hide_enter, __self_hide_leave")
+        .expect("hover counters should be readable");
+    let hovered_name = app.hovered_frame.and_then(|id| {
+        app.env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .get(id)
+            .and_then(|frame| frame.name.clone())
+    });
+
+    assert_eq!(enter_count, 1.0, "button should enter hover before click");
+    assert_eq!(leave_count, 1.0, "hiding on click should fire OnLeave");
+    assert_ne!(
+        hovered_name.as_deref(),
+        Some("SelfHidingHoverButton"),
+        "hidden clicked frame must not remain the hover target"
+    );
+}
+
+#[test]
 fn mouse_edge_scripts_imply_mouse_enabled_and_update_hit_grid() {
     let mut app = build_test_app(ScreenKind::Game);
 
