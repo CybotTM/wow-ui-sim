@@ -740,33 +740,5 @@ fn mark_button_state_visuals_dirty(state: &mut crate::lua_api::SimState, frame_i
 }
 
 #[cfg(test)]
-#[path = "mouse_test_support.rs"]
-mod test_support;
-
-#[cfg(test)]
-#[path = "mouse_tests.rs"]
-mod tests;
-
-#[cfg(all(test, feature = "client-mists"))]
-#[path = "mouse_game_menu_tests.rs"]
-mod game_menu_tests;
-
-#[cfg(test)]
-#[path = "mouse_drag_scaled_tests.rs"]
-mod drag_scaled_tests;
-
-#[cfg(test)]
-#[path = "mouse_registration_tests.rs"]
-mod registration_tests;
-
-#[cfg(test)]
-#[path = "mouse_party_tests.rs"]
-mod party_tests;
-
-#[cfg(test)]
-#[path = "mouse_hover_tests.rs"]
-mod hover_tests;
-
-#[cfg(test)]
-#[path = "mouse_hit_grid_tests.rs"]
-mod hit_grid_tests;
+#[path = "mouse_test_modules.rs"]
+mod mouse_test_modules;

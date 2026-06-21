@@ -1,5 +1,6 @@
 use super::*;
 use crate::iced_app::app::AppInit;
+use crate::iced_app::hit_grid::HitGrid;
 use crate::iced_app::{build_hittable_rects, frame_collect::collect_hittable_frames};
 use crate::lua_api::WowLuaEnv;
 use crate::render::{GlyphAtlas, WowFontSystem};
@@ -50,7 +51,7 @@ pub(super) fn rebuild_hittable_cache(app: &App) {
         .clone();
     let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
     let hittable = build_hittable_rects(&collected, &state.widgets);
-    let grid = super::super::hit_grid::HitGrid::new(hittable, 800.0, 600.0);
+    let grid = HitGrid::new(hittable, 800.0, 600.0);
     *app.cached_hittable.borrow_mut() = Some(grid);
 }
 
