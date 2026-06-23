@@ -438,6 +438,91 @@ fn explicit_load_creates_transmog_frame_global() {
 }
 
 #[test]
+fn refresh_weapon_dropdown_counts_sparse_weapon_categories() {
+    let env = load_full_game_ui();
+
+    load_addon(&env.loader_env(), &transmog_toc())
+        .expect("Blizzard_Transmog must load via Rust loader");
+
+    let result: String = env
+        .eval(
+            r#"
+            local originalGetCollectionInfo = C_TransmogOutfitInfo.GetCollectionInfoForSlotAndOption
+            local originalFirst = FIRST_TRANSMOG_COLLECTION_WEAPON_TYPE
+            local originalLast = LAST_TRANSMOG_COLLECTION_WEAPON_TYPE
+
+            FIRST_TRANSMOG_COLLECTION_WEAPON_TYPE = 10
+            LAST_TRANSMOG_COLLECTION_WEAPON_TYPE = 12
+            C_TransmogOutfitInfo.GetCollectionInfoForSlotAndOption = function(_slot, _option, categoryID)
+                if categoryID == 10 or categoryID == 12 then
+                    return { isWeapon = true, name = "weapon-" .. categoryID }
+                end
+                return nil
+            end
+
+            local state = { hidden = 0, shown = 0, radios = 0 }
+            local rootDescription = {
+                SetTag = function() end,
+                CreateRadio = function()
+                    state.radios = state.radios + 1
+                end,
+            }
+
+            local dropdown = {
+                Hide = function()
+                    state.hidden = state.hidden + 1
+                end,
+                Show = function()
+                    state.shown = state.shown + 1
+                end,
+                SetupMenu = function(_, callback)
+                    callback(dropdown, rootDescription)
+                end,
+            }
+
+            local transmogLocation = {
+                IsIllusion = function() return false end,
+                GetSlot = function() return 16 end,
+            }
+
+            local wardrobe = {
+                activeCategoryID = 10,
+                WeaponDropdown = dropdown,
+                GetSelectedSlotCallback = function()
+                    return {
+                        transmogLocation = transmogLocation,
+                        currentWeaponOptionInfo = { weaponOption = 1 },
+                    }
+                end,
+                SetActiveCategory = function(_, categoryID)
+                    state.selected = categoryID
+                end,
+                RefreshFilterButtons = function()
+                    state.refreshed = true
+                end,
+            }
+
+            TransmogWardrobeItemsMixin.RefreshWeaponDropdown(wardrobe)
+
+            C_TransmogOutfitInfo.GetCollectionInfoForSlotAndOption = originalGetCollectionInfo
+            FIRST_TRANSMOG_COLLECTION_WEAPON_TYPE = originalFirst
+            LAST_TRANSMOG_COLLECTION_WEAPON_TYPE = originalLast
+
+            return string.format("%d/%d/%d", state.hidden, state.shown, state.radios)
+            "#,
+        )
+        .expect("RefreshWeaponDropdown probe");
+
+    assert_eq!(
+        result, "0/1/2",
+        "RefreshWeaponDropdown must treat sparse weapon categories 10 and 12 \
+         as two valid categories. This exercises Blizzard_Transmog.lua:1914 \
+         (`table.count(validCategories) <= 1`) instead of only proving that \
+         Blizzard_Transmog loads."
+    );
+}
+
+#[test]
 fn explicit_load_registers_ui_panel_via_registration_lua() {
     let env = load_full_game_ui();
 
