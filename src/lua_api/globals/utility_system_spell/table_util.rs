@@ -100,34 +100,55 @@ pub fn table_util_find_indexed_mismatch(state: &mut LuaState) -> LuaResult<u32> 
     Ok(1)
 }
 
-/// table.count(tbl) — count every non-nil key/value pair.
+/// table.count(tbl) — count total entries and array-index entries.
 pub fn table_count(state: &mut LuaState) -> LuaResult<u32> {
     let input = stack_val(state, 1);
     let Val::Table(table_ref) = input else {
-        state.push(Val::Nil);
-        return Ok(1);
+        return Ok(0);
     };
 
-    let count = count_table_entries(state, table_ref)?;
-    state.push(Val::Num(count as f64));
-    Ok(1)
+    let counts = count_table_entries(state, table_ref)?;
+    state.push(Val::Num(counts.total_nodes as f64));
+    state.push(Val::Num(counts.array_nodes as f64));
+    state.push(Val::Num(counts.max_array_index as f64));
+    Ok(3)
+}
+
+#[derive(Default)]
+struct TableCounts {
+    total_nodes: usize,
+    array_nodes: usize,
+    max_array_index: usize,
 }
 
 fn count_table_entries(
     state: &LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<Table>,
-) -> LuaResult<usize> {
+) -> LuaResult<TableCounts> {
     let Some(table) = state.gc.tables.get(table_ref) else {
-        return Ok(0);
+        return Ok(TableCounts::default());
     };
 
-    let mut count = 0;
+    let mut counts = TableCounts::default();
     let mut key = Val::Nil;
     while let Some((next_key, _)) = table.next(key, &state.gc.string_arena)? {
-        count += 1;
+        counts.total_nodes += 1;
+        count_array_key(next_key, &mut counts);
         key = next_key;
     }
-    Ok(count)
+    Ok(counts)
+}
+
+fn count_array_key(key: Val, counts: &mut TableCounts) {
+    let Val::Num(number) = key else {
+        return;
+    };
+    let array_index = number as usize;
+    if array_index == 0 || array_index as f64 != number {
+        return;
+    }
+    counts.array_nodes += 1;
+    counts.max_array_index = counts.max_array_index.max(array_index);
 }
 
 fn copy_array_slice(

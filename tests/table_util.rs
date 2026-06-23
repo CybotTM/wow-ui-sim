@@ -7,7 +7,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn table_count_counts_all_non_nil_entries() {
     let env = env();
-    let count: i32 = env
+    let counts: (i32, i32, i32) = env
         .eval(
             r#"
             local labels = {
@@ -21,7 +21,20 @@ fn table_count_counts_all_non_nil_entries() {
             "#,
         )
         .unwrap();
-    assert_eq!(count, 4, "table.count should count array and hash entries");
+    assert_eq!(
+        counts,
+        (4, 3, 4),
+        "table.count should return total nodes, array nodes, and max array index"
+    );
+}
+
+#[test]
+fn table_count_returns_nothing_for_non_tables() {
+    let env = env();
+    let returned_count: i32 = env
+        .eval("return select('#', table.count('not-table'))")
+        .unwrap();
+    assert_eq!(returned_count, 0, "non-table inputs should return nothing");
 }
 
 #[test]
