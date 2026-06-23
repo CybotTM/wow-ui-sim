@@ -237,7 +237,7 @@ fn on_hide_fires_account_store_shown_state_event_registry_with_false_payload() {
              either (a) OnHide errored before reaching the trigger line — but the only line \
              above is `PlaySound(SOUNDKIT.ACCOUNT_STORE_CLOSE)`, which is fire-and-forget, (b) \
              `EventRegistry:TriggerEvent` did not dispatch the callback (a regression in \
-             secureexecuterange's Lua fallback), or (c) the callback was registered against a \
+             rilua's native secureexecuterange traversal), or (c) the callback was registered against a \
              different event name (a regression in event-keying)."
         );
 

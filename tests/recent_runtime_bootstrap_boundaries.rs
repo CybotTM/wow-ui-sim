@@ -594,10 +594,6 @@ const RECENTLY_MOVED_BOOTSTRAP_FALLBACKS: &[BootstrapFallbackOwner] = &[
             "temporary debug/environment workaround",
         ),
         (
-            "function secureexecuterange",
-            "temporary secureexecuterange workaround",
-        ),
-        (
             "function debug.getfenv",
             "temporary debug/environment workaround",
         ),
