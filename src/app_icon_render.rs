@@ -4,6 +4,7 @@
 //! and the build-time generator that writes `installer/wow-sim.ico`.
 
 pub const SIZE: u32 = 128;
+pub const FREEDESKTOP_APP_ID: &str = "com.ossonet.WowUiSim";
 
 pub fn render_icon() -> Vec<u8> {
     let mut pixels = vec![0; (SIZE * SIZE * 4) as usize];

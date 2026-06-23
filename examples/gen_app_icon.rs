@@ -16,8 +16,10 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 
-use image::{ImageBuffer, Rgba, codecs::png::PngEncoder};
-use wow_ui_sim::app_icon_render::{SIZE, render_icon};
+use image::{ImageBuffer, Rgba, codecs::png::PngEncoder, imageops::FilterType};
+use wow_ui_sim::app_icon_render::{FREEDESKTOP_APP_ID, SIZE, render_icon};
+
+const HICOLOR_ICON_SIZES: &[u32] = &[16, 32, 48, 64, 128];
 
 fn main() -> std::io::Result<()> {
     let pixels = render_icon();
@@ -32,20 +34,55 @@ fn main() -> std::io::Result<()> {
     let png_path: PathBuf = [env!("CARGO_MANIFEST_DIR"), "installer", "wow-sim.png"]
         .iter()
         .collect();
-    let mut png_writer = BufWriter::new(File::create(&png_path)?);
-    png_writer.write_all(&png_bytes)?;
-    png_writer.flush()?;
+    write_bytes(&png_path, &png_bytes)?;
     println!("wrote {} ({} bytes)", png_path.display(), png_bytes.len());
+
+    for size in HICOLOR_ICON_SIZES {
+        let resized = image::imageops::resize(&image, *size, *size, FilterType::Lanczos3);
+        let icon_png = encode_png(&resized);
+        let icon_path = hicolor_icon_path(*size);
+        write_bytes(&icon_path, &icon_png)?;
+        println!("wrote {} ({} bytes)", icon_path.display(), icon_png.len());
+    }
 
     let ico_bytes = wrap_png_in_ico(&png_bytes, SIZE);
     let ico_path: PathBuf = [env!("CARGO_MANIFEST_DIR"), "installer", "wow-sim.ico"]
         .iter()
         .collect();
-    let mut ico_writer = BufWriter::new(File::create(&ico_path)?);
-    ico_writer.write_all(&ico_bytes)?;
-    ico_writer.flush()?;
+    write_bytes(&ico_path, &ico_bytes)?;
     println!("wrote {} ({} bytes)", ico_path.display(), ico_bytes.len());
     Ok(())
+}
+
+fn encode_png(image: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Vec<u8> {
+    let mut png_bytes: Vec<u8> = Vec::with_capacity(64 * 1024);
+    image
+        .write_with_encoder(PngEncoder::new(&mut png_bytes))
+        .expect("PNG encoding failed");
+    png_bytes
+}
+
+fn hicolor_icon_path(size: u32) -> PathBuf {
+    [
+        env!("CARGO_MANIFEST_DIR"),
+        "installer",
+        "linux",
+        "hicolor",
+        &format!("{size}x{size}"),
+        "apps",
+        &format!("{FREEDESKTOP_APP_ID}.png"),
+    ]
+    .iter()
+    .collect()
+}
+
+fn write_bytes(path: &std::path::Path, bytes: &[u8]) -> std::io::Result<()> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    let mut writer = BufWriter::new(File::create(path)?);
+    writer.write_all(bytes)?;
+    writer.flush()
 }
 
 /// Wrap a PNG byte stream in a single-entry ICO container.

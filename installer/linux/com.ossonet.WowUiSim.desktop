@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=WoW UI Simulator
+Comment=World of Warcraft UI simulator for addon development
+Exec=wow-sim
+Icon=com.ossonet.WowUiSim
+Terminal=false
+Categories=Development;
+StartupWMClass=wow-sim
