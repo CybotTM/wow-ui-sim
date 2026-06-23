@@ -5,6 +5,26 @@ fn env() -> WowLuaEnv {
 }
 
 #[test]
+fn table_count_counts_all_non_nil_entries() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            local labels = {
+                "first",
+                "second",
+                [4] = "fourth",
+                rank = "leader",
+                skipped = nil,
+            }
+            return table.count(labels)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 4, "table.count should count array and hash entries");
+}
+
+#[test]
 fn table_util_find_indexed_mismatch_returns_nil_for_equal_arrays() {
     let env = env();
     let mismatch_index: Option<i32> = env

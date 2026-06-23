@@ -1,5 +1,6 @@
 //! C_TableUtil and tInvert implementations.
 
+use crate::lua_api::methods::table_get_static;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -99,6 +100,36 @@ pub fn table_util_find_indexed_mismatch(state: &mut LuaState) -> LuaResult<u32> 
     Ok(1)
 }
 
+/// table.count(tbl) — count every non-nil key/value pair.
+pub fn table_count(state: &mut LuaState) -> LuaResult<u32> {
+    let input = stack_val(state, 1);
+    let Val::Table(table_ref) = input else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let count = count_table_entries(state, table_ref)?;
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn count_table_entries(
+    state: &LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<Table>,
+) -> LuaResult<usize> {
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        return Ok(0);
+    };
+
+    let mut count = 0;
+    let mut key = Val::Nil;
+    while let Some((next_key, _)) = table.next(key, &state.gc.string_arena)? {
+        count += 1;
+        key = next_key;
+    }
+    Ok(count)
+}
+
 fn copy_array_slice(
     state: &LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
@@ -154,6 +185,8 @@ fn call_table_util_comparator(
 }
 
 pub fn register_table_util(state: &mut LuaState) -> LuaResult<()> {
+    register_table_library_extensions(state)?;
+
     let table_ref = state.gc.alloc_table(Table::new());
     table_set_rust_fn_static(
         state,
@@ -172,4 +205,12 @@ pub fn register_table_util(state: &mut LuaState) -> LuaResult<()> {
     }
     state.gc.barrier_back(global_ref);
     Ok(())
+}
+
+fn register_table_library_extensions(state: &mut LuaState) -> LuaResult<()> {
+    let table_library = table_get_static(state, Val::Table(state.global), "table");
+    let Val::Table(table_ref) = table_library else {
+        return Ok(());
+    };
+    table_set_rust_fn_static(state, table_ref, "count", table_count)
 }
