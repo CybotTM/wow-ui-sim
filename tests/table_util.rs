@@ -38,6 +38,20 @@ fn table_count_returns_nothing_for_non_tables() {
 }
 
 #[test]
+fn table_count_errors_for_nil() {
+    let env = env();
+    let ok: bool = env.eval("return pcall(table.count, nil)").unwrap();
+    assert!(!ok, "nil input should raise instead of returning nothing");
+}
+
+#[test]
+fn table_count_errors_for_missing_argument() {
+    let env = env();
+    let ok: bool = env.eval("return pcall(table.count)").unwrap();
+    assert!(!ok, "missing input should raise like nil");
+}
+
+#[test]
 fn table_util_find_indexed_mismatch_returns_nil_for_equal_arrays() {
     let env = env();
     let mismatch_index: Option<i32> = env

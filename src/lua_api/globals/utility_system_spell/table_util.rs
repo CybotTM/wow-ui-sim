@@ -4,7 +4,7 @@ use crate::lua_api::methods::table_get_static;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaResult, Val};
+use rilua::{LuaError, LuaResult, RuntimeError, Val};
 
 /// tInvert(t) — return a new table with keys/values swapped.
 ///
@@ -103,6 +103,10 @@ pub fn table_util_find_indexed_mismatch(state: &mut LuaState) -> LuaResult<u32> 
 /// table.count(tbl) — count total entries and array-index entries.
 pub fn table_count(state: &mut LuaState) -> LuaResult<u32> {
     let input = stack_val(state, 1);
+    if matches!(input, Val::Nil) {
+        return Err(table_count_nil_error());
+    }
+
     let Val::Table(table_ref) = input else {
         return Ok(0);
     };
@@ -112,6 +116,14 @@ pub fn table_count(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(counts.array_nodes as f64));
     state.push(Val::Num(counts.max_array_index as f64));
     Ok(3)
+}
+
+fn table_count_nil_error() -> LuaError {
+    LuaError::Runtime(RuntimeError {
+        message: "bad argument #1 to 'count' (table expected, got nil)".into(),
+        level: 0,
+        traceback: vec![],
+    })
 }
 
 #[derive(Default)]
