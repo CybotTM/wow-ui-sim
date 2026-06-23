@@ -46,7 +46,7 @@ fn create_children_and_finalize(
     timing.frame_layer_children_time += layer_start.elapsed();
     create_child_frames(env, frame, name, subst_parent, inherits, timing)?;
     let anim_start = Instant::now();
-    apply_animation_groups(env, frame, name, inherits)?;
+    apply_animation_groups(env, frame, frame_id, inherits)?;
     timing.frame_anim_time += anim_start.elapsed();
     timing.frame_button_time += apply_frame_button_extras(env, frame, name, inherits)?;
     env.with_state(|state| {

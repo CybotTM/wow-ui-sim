@@ -4,7 +4,8 @@ use crate::lua_api::LoaderEnv;
 
 use super::error::LoadError;
 use super::helpers::{
-    escape_lua_string, generate_set_point_code, lua_global_ref, lua_table_field_ref, rand_id,
+    escape_lua_string, generate_set_point_code, lua_frame_ref_by_id, lua_global_ref,
+    lua_table_field_ref, rand_id,
 };
 use super::helpers_anim::generate_animation_group_code;
 
@@ -12,16 +13,16 @@ use super::helpers_anim::generate_animation_group_code;
 pub(crate) fn apply_animation_groups(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
-    name: &str,
+    frame_id: u64,
     inherits: &str,
 ) -> Result<(), LoadError> {
     if let Some(anims) = frame.animations() {
-        exec_animation_groups(env, anims, name);
+        exec_animation_groups(env, anims, frame_id);
     }
     if !inherits.is_empty() {
         for template_entry in &*crate::xml::get_template_chain(inherits) {
             if let Some(anims) = template_entry.frame.animations() {
-                exec_animation_groups(env, anims, name);
+                exec_animation_groups(env, anims, frame_id);
             }
         }
     }
@@ -29,12 +30,12 @@ pub(crate) fn apply_animation_groups(
 }
 
 /// Generate and execute Lua code for a set of animation groups on a frame.
-fn exec_animation_groups(env: &LoaderEnv<'_>, anims: &crate::xml::AnimationsXml, name: &str) {
+fn exec_animation_groups(env: &LoaderEnv<'_>, anims: &crate::xml::AnimationsXml, frame_id: u64) {
     let mut anim_code = format!(
         r#"
             local frame = {}
             "#,
-        lua_global_ref(name)
+        lua_frame_ref_by_id(frame_id)
     );
     for anim_group_xml in &anims.animations {
         if anim_group_xml.is_virtual == Some(true) {

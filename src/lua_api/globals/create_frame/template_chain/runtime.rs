@@ -169,7 +169,7 @@ fn finalize_runtime_template_child(
     // onto the runtime child. The finalize pass should only apply the
     // child frame's own direct loader-backed content or it duplicates named
     // inherited regions (for example `$parentBackground`).
-    apply_runtime_template_loader_effects(state, child_name, child_subst, frame, None)?;
+    apply_runtime_template_loader_effects(state, child_id, child_name, child_subst, frame, None)?;
     repair_runtime_direct_layer_parent_keys(state, child_id, child_subst, frame)?;
     crate::lua_api::globals::template::repair_direct_child_parent_keys(state, child_id)?;
     crate::lua_api::globals::template::repair_transparent_wrapper_parent_key_aliases(
@@ -421,6 +421,7 @@ fn apply_child_template_properties(
 
 pub(super) fn apply_runtime_template_loader_effects(
     state: &mut LuaState,
+    frame_id: u64,
     frame_name: &str,
     name_parent: &str,
     frame: &crate::xml::FrameXml,
@@ -433,6 +434,7 @@ pub(super) fn apply_runtime_template_loader_effects(
     apply_loader_frame_extras(
         &loader_env,
         frame,
+        frame_id,
         frame_name,
         name_parent,
         inherits,
@@ -463,6 +465,7 @@ fn apply_loader_chain_layers(
 fn apply_loader_frame_extras(
     loader_env: &LoaderEnv,
     frame: &crate::xml::FrameXml,
+    frame_id: u64,
     frame_name: &str,
     name_parent: &str,
     inherits: &str,
@@ -482,10 +485,8 @@ fn apply_loader_frame_extras(
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
     crate::loader::button::apply_button_fonts(loader_env, frame, frame_name, inherits)
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::xml_frame_extras::apply_animation_groups(
-        loader_env, frame, frame_name, inherits,
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::xml_frame_extras::apply_animation_groups(loader_env, frame, frame_id, inherits)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
     crate::loader::xml_frame_extras::apply_bar_texture(loader_env, frame, frame_name, inherits)
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
     crate::loader::xml_frame_extras::apply_thumb_texture(loader_env, frame, frame_name, inherits)

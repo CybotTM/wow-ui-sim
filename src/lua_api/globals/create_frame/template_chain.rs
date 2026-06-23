@@ -145,6 +145,7 @@ fn apply_runtime_template_loader_effects(
     let runtime_frame = crate::xml::FrameXml::default();
     runtime::apply_runtime_template_loader_effects(
         state,
+        frame_id,
         frame_name,
         frame_name,
         &runtime_frame,

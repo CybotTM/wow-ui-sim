@@ -222,6 +222,62 @@ fn test_collect_lua_error_prefers_executing_addon_name() {
 }
 
 #[test]
+fn secure_env_xml_animation_groups_attach_to_named_frames() {
+    const ADDON_NAME: &str = "SecureAnimAddon";
+
+    let env = WowLuaEnv::new().unwrap();
+    env.register_addon(crate::lua_api::AddonInfo {
+        folder_name: ADDON_NAME.to_string(),
+        title: ADDON_NAME.to_string(),
+        enabled: true,
+        loaded: true,
+        use_secure_env: true,
+        ..Default::default()
+    });
+    super::set_loading_addon_index(&env, ADDON_NAME);
+
+    let temp_dir = std::env::temp_dir().join("wow-sim-secure-env-xml-animations");
+    std::fs::create_dir_all(&temp_dir).unwrap();
+    let xml_path = temp_dir.join("test.xml");
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
+            <Frame name="SecureAnimFrame" parent="UIParent">
+                <Animations>
+                    <AnimationGroup parentKey="Pulse">
+                        <Animation duration="1" order="1" />
+                    </AnimationGroup>
+                </Animations>
+            </Frame>
+        </Ui>"#,
+    )
+    .unwrap();
+
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx =
+        AddonContext::new(env.lua(), ADDON_NAME, addon_table, &temp_dir, true, false).unwrap();
+
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
+
+    drop(ctx);
+    let test_ctx = super::TestCtx { env, temp_dir };
+    let has_animation_group: bool = test_ctx
+        .env
+        .eval("return SecureAnimFrame.Pulse ~= nil")
+        .expect("animation parentKey should be readable");
+    assert!(
+        has_animation_group,
+        "secure XML animation setup should resolve the frame outside the secure fenv"
+    );
+}
+
+#[test]
 fn scoped_modifier_scripts_use_given_env_for_scripts_and_mixins() {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join("wow-sim-test-scoped-modifier-env");
