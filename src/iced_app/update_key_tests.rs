@@ -86,6 +86,67 @@ fn key_press_requests_redraw_after_lua_visual_mutation() {
 }
 
 #[test]
+fn key_press_flushes_onupdate_layout_before_redraw() {
+    let mut app = build_test_app(ScreenKind::Game);
+    app.screen_size.set(Size::new(1024.0, 768.0));
+    app.strata_dirty.set(0);
+    app.textures_pending.set(false);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "KeyPressLayoutFlushFrame", UIParent)
+            frame:SetSize(10, 10)
+            frame:SetPoint("CENTER")
+            frame:Show()
+
+            local editBox = CreateFrame("EditBox", "KeyPressLayoutFlushEditBox", UIParent)
+            editBox:SetSize(120, 20)
+            editBox:SetPoint("CENTER")
+            editBox:Show()
+            editBox:SetFocus()
+            editBox:SetScript("OnTextChanged", function()
+                frame:SetScript("OnUpdate", function(self)
+                    self:SetWidth(42)
+                    self:SetScript("OnUpdate", nil)
+                end)
+            end)
+        "#,
+        )
+        .expect("create focused editbox and layout probe");
+        let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
+    }
+
+    let task = app.update(Message::KeyPress(
+        "A".to_string(),
+        Some("a".to_string()),
+        Instant::now(),
+    ));
+    let action = pollster::block_on(async {
+        iced_runtime::task::into_stream(task)
+            .expect("keypress layout mutation should request redraw")
+            .next()
+            .await
+            .expect("task should emit a redraw action")
+    });
+
+    let width: f32 = app
+        .env
+        .borrow()
+        .eval("return KeyPressLayoutFlushFrame:GetWidth()")
+        .expect("read layout frame width");
+    assert_eq!(
+        width, 42.0,
+        "keypress should flush OnUpdate layout before requesting redraw"
+    );
+    assert!(
+        matches!(action, Action::Window(WindowAction::RedrawAll)),
+        "keypress layout mutation should request redraw after flushing"
+    );
+}
+
+#[test]
 fn ctrl_q_key_press_requests_window_close() {
     let mut app = build_test_app(ScreenKind::Game);
 

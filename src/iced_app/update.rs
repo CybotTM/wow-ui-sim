@@ -216,7 +216,7 @@ impl App {
             dispatch_started.elapsed(),
             captured_at.elapsed()
         ));
-        self.invalidate_after_lua_mutation();
+        self.flush_post_script_updates();
         if self.key_press_needs_redraw() {
             request_redraw_task()
         } else {
