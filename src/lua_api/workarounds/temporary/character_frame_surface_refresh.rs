@@ -7,10 +7,6 @@
 use crate::lua_api::WowLuaEnv;
 
 const CHARACTER_FRAME_SURFACE_REFRESH_WORKAROUND_LUA: &str = r#"
-if type(CHARACTERFRAME_SUBFRAMES) ~= "table" then
-    CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
-end
-
 local function get_character_panel_slot_buttons()
     local slotFrameNames = {
         "CharacterHeadSlot",
@@ -275,5 +271,23 @@ mod tests {
 
         assert_eq!(original_count, 1);
         assert_eq!(title_count, 2);
+    }
+
+    #[test]
+    fn patch_does_not_create_character_subframe_list() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec("CHARACTERFRAME_SUBFRAMES = nil")
+            .expect("character subframes fixture should install");
+
+        patch(&env);
+
+        let exists: bool = env
+            .eval("return CHARACTERFRAME_SUBFRAMES ~= nil")
+            .expect("character subframes probe should run");
+
+        assert!(
+            !exists,
+            "Character frame refresh patch must not synthesize CharacterFrame.lua globals"
+        );
     }
 }

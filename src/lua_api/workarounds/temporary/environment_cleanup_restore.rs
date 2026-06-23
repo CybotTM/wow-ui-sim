@@ -8,12 +8,6 @@ use crate::lua_api::SimState;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-const CHARACTER_FRAME_SUBFRAMES_RESTORE_LUA: &str = r#"
-if type(CHARACTERFRAME_SUBFRAMES) ~= "table" then
-    CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
-end
-"#;
-
 pub(crate) fn restore_post_cleanup_globals(
     lua: &mut rilua::Lua,
     _state: Rc<RefCell<SimState>>,
@@ -22,6 +16,5 @@ pub(crate) fn restore_post_cleanup_globals(
     crate::lua_api::env_init::init_runtime_surface_bootstrap(lua)?;
     crate::lua_api::env_init::init_enum_globals(lua)?;
     super::debug_environment_defaults::apply_bootstrap(lua)?;
-    lua.exec(CHARACTER_FRAME_SUBFRAMES_RESTORE_LUA)?;
     super::ui_parent_panel_toggles::apply_bootstrap(lua)
 }

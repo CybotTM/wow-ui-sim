@@ -336,3 +336,20 @@ fn test_post_cleanup_restore_preserves_existing_globals() {
         "EnvironmentCleanup restore must not rerun base global registration over loaded Blizzard globals"
     );
 }
+
+#[test]
+fn test_post_cleanup_restore_does_not_create_character_subframes() {
+    let env = env();
+    env.exec("CHARACTERFRAME_SUBFRAMES = nil").unwrap();
+
+    env.restore_post_cleanup_globals();
+
+    let exists: bool = env
+        .eval("return CHARACTERFRAME_SUBFRAMES ~= nil")
+        .expect("character subframe global probe should run");
+
+    assert!(
+        !exists,
+        "EnvironmentCleanup restore must not synthesize CharacterFrame.lua globals"
+    );
+}
