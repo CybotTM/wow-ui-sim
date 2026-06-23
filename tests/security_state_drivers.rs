@@ -305,3 +305,34 @@ fn test_create_secure_delegate_survives_nil() {
         "CreateSecureDelegate should work after restore_post_cleanup_globals"
     );
 }
+
+#[test]
+fn test_post_cleanup_restore_preserves_existing_globals() {
+    let env = env();
+    env.exec(
+        r#"
+        GetTime = function() return "blizzard-gettime" end
+        ToggleCharacter = function() return "blizzard-toggle-character" end
+        "#,
+    )
+    .unwrap();
+
+    env.restore_post_cleanup_globals();
+
+    let result: (String, String) = env
+        .eval(
+            r#"
+            return GetTime(), ToggleCharacter()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result,
+        (
+            "blizzard-gettime".to_string(),
+            "blizzard-toggle-character".to_string()
+        ),
+        "EnvironmentCleanup restore must not rerun base global registration over loaded Blizzard globals"
+    );
+}

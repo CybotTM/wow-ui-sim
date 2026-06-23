@@ -16,12 +16,11 @@ end
 
 pub(crate) fn restore_post_cleanup_globals(
     lua: &mut rilua::Lua,
-    state: Rc<RefCell<SimState>>,
+    _state: Rc<RefCell<SimState>>,
 ) -> crate::Result<()> {
     crate::lua_api::env_init::init_shared_bootstrap(lua)?;
     crate::lua_api::env_init::init_runtime_surface_bootstrap(lua)?;
     crate::lua_api::env_init::init_enum_globals(lua)?;
-    crate::lua_api::globals::register::register_globals(lua, state)?;
     super::debug_environment_defaults::apply_bootstrap(lua)?;
     super::secure_execute_range::apply_bootstrap(lua)?;
     lua.exec(CHARACTER_FRAME_SUBFRAMES_RESTORE_LUA)?;
