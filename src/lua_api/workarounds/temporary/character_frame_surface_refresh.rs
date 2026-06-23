@@ -7,6 +7,10 @@
 use crate::lua_api::WowLuaEnv;
 
 const CHARACTER_FRAME_SURFACE_REFRESH_WORKAROUND_LUA: &str = r#"
+if type(CHARACTERFRAME_SUBFRAMES) ~= "table" then
+    CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
+end
+
 local function get_character_panel_slot_buttons()
     local slotFrameNames = {
         "CharacterHeadSlot",

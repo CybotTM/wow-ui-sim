@@ -103,6 +103,8 @@ fn setup_env() -> WowLuaEnv {
     }
 
     env.apply_post_load_workarounds();
+    env.exec(r#"CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }"#)
+        .expect("character subframe fixture should restore cleanup-pruned constant");
     fire_startup_events(&env);
     env
 }
@@ -665,6 +667,36 @@ fn registered_ui_panel_closes_with_escape_stack() {
             return "ok"
         "#).unwrap();
         assert_eq!(result, "ok", "registered UIPanels must stay in the CloseAllWindows/Escape stack: {result}");
+    }
+}
+
+#[test]
+fn escape_key_closes_character_frame_before_game_menu() {
+    test_timeout! {
+        let env = setup_env();
+        let shown: bool = env.eval(r#"
+            CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
+            ToggleCharacter("PaperDollFrame", true)
+            return CharacterFrame:IsShown()
+        "#).unwrap();
+        assert!(shown, "CharacterFrame should be shown before Escape");
+
+        env.send_key_press("ESCAPE", None).unwrap();
+
+        let result: String = env.eval(r#"
+            if CharacterFrame:IsShown() then
+                return "character_frame_still_shown"
+            end
+            if GameMenuFrame and GameMenuFrame:IsShown() then
+                return "game_menu_opened"
+            end
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "Escape should close CharacterFrame through ToggleGameMenu/CloseAllWindows before opening GameMenuFrame: {result}"
+        );
     }
 }
 

@@ -331,17 +331,28 @@ pub fn panel_tokens() -> &'static [(&'static str, &'static str)] {
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
-    LuaApiMut::register_function(lua, "ToggleCharacter", toggle_character)?;
-    LuaApiMut::register_function(lua, "ToggleSpellBook", toggle_spell_book)?;
-    LuaApiMut::register_function(lua, "ToggleTalentFrame", toggle_talent_frame)?;
-    LuaApiMut::register_function(lua, "ToggleQuestLog", toggle_quest_log)?;
-    LuaApiMut::register_function(lua, "ToggleWorldMap", toggle_world_map)?;
-    LuaApiMut::register_function(lua, "ToggleFriendsFrame", toggle_friends_frame)?;
-    LuaApiMut::register_function(lua, "ToggleGuildFrame", toggle_guild_frame)?;
-    LuaApiMut::register_function(lua, "ToggleHelpFrame", toggle_help_frame)?;
-    LuaApiMut::register_function(lua, "ToggleSocialPanel", toggle_social_panel)?;
-    LuaApiMut::register_function(lua, "ToggleMinimap", toggle_minimap)?;
-    LuaApiMut::register_function(lua, "ToggleCollectionsJournal", toggle_collections_journal)?;
-    LuaApiMut::register_function(lua, "ToggleEncounterJournal", toggle_encounter_journal)?;
+    register_function_if_missing(lua, "ToggleCharacter", toggle_character)?;
+    register_function_if_missing(lua, "ToggleSpellBook", toggle_spell_book)?;
+    register_function_if_missing(lua, "ToggleTalentFrame", toggle_talent_frame)?;
+    register_function_if_missing(lua, "ToggleQuestLog", toggle_quest_log)?;
+    register_function_if_missing(lua, "ToggleWorldMap", toggle_world_map)?;
+    register_function_if_missing(lua, "ToggleFriendsFrame", toggle_friends_frame)?;
+    register_function_if_missing(lua, "ToggleGuildFrame", toggle_guild_frame)?;
+    register_function_if_missing(lua, "ToggleHelpFrame", toggle_help_frame)?;
+    register_function_if_missing(lua, "ToggleSocialPanel", toggle_social_panel)?;
+    register_function_if_missing(lua, "ToggleMinimap", toggle_minimap)?;
+    register_function_if_missing(lua, "ToggleCollectionsJournal", toggle_collections_journal)?;
+    register_function_if_missing(lua, "ToggleEncounterJournal", toggle_encounter_journal)?;
+    Ok(())
+}
+
+fn register_function_if_missing(
+    lua: &mut rilua::Lua,
+    name: &str,
+    func: rilua::RustFn,
+) -> crate::Result<()> {
+    if matches!(LuaApiMut::get_global_val(lua, name), Val::Nil) {
+        LuaApiMut::register_function(lua, name, func)?;
+    }
     Ok(())
 }

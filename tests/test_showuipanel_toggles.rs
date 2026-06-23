@@ -104,6 +104,8 @@ fn setup_env() -> WowLuaEnv {
     }
 
     env.apply_post_load_workarounds();
+    env.exec(r#"CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }"#)
+        .expect("character subframe fixture should restore cleanup-pruned constant");
     fire_startup_events(&env);
     env
 }
@@ -553,6 +555,7 @@ fn toggle_character_reputation_frame_selects_and_toggles_reputation_panel() {
         let env = setup_env();
 
         let result: String = env.eval(r#"
+            CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
             if not ToggleCharacter then
                 return "missing_toggle_character"
             end
@@ -582,6 +585,44 @@ fn toggle_character_reputation_frame_selects_and_toggles_reputation_panel() {
             result,
             "ok",
             "ToggleCharacter(\"ReputationFrame\") should select and toggle the reputation panel: {result}"
+        );
+    }
+}
+
+#[test]
+fn character_reputation_tab_click_selects_reputation_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            CHARACTERFRAME_SUBFRAMES = { "PaperDollFrame", "ReputationFrame", "TokenFrame" }
+            ToggleCharacter("PaperDollFrame", true)
+            if not CharacterFrameTab2 then
+                return "missing_reputation_tab"
+            end
+
+            local onClick = CharacterFrameTab2:GetScript("OnClick")
+            if type(onClick) ~= "function" then
+                return "missing_onclick"
+            end
+
+            onClick(CharacterFrameTab2, "LeftButton")
+            if not CharacterFrame or not CharacterFrame:IsShown() then
+                return "character_frame_not_shown"
+            end
+            if not ReputationFrame or not ReputationFrame:IsShown() then
+                return "reputation_frame_not_shown"
+            end
+            if PaperDollFrame and PaperDollFrame:IsShown() then
+                return "paperdoll_should_be_hidden"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "CharacterFrameTab2 OnClick should select the reputation panel: {result}"
         );
     }
 }

@@ -191,16 +191,33 @@ end
 rawset(_G, "__wow_catalog_shop_product_card_defaults_wrapped", true)
 "#;
 
+const CATALOG_SHOP_ESCAPE_DEFAULTS_LUA: &str = r#"
+if type(CatalogShopInboundInterface) == "table" then
+    local originalEscapePressed = CatalogShopInboundInterface.EscapePressed
+    if type(originalEscapePressed) == "function" and not rawget(_G, "__wow_catalog_shop_escape_wrapped") then
+        CatalogShopInboundInterface.EscapePressed = function(...)
+            if CatalogShopFrame == nil then
+                return false
+            end
+            return originalEscapePressed(...)
+        end
+        rawset(_G, "__wow_catalog_shop_escape_wrapped", true)
+    end
+end
+"#;
+
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(CATALOG_SHOP_DEFAULTS_LUA)?;
     Ok(())
 }
 
 pub(crate) fn patch(env: &WowLuaEnv) {
+    let _ = env.exec(CATALOG_SHOP_ESCAPE_DEFAULTS_LUA);
     let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
 }
 
 pub(crate) fn patch_for_runtime_addon_load(env: &LoaderEnv<'_>) {
+    let _ = env.exec(CATALOG_SHOP_ESCAPE_DEFAULTS_LUA);
     let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
 }
 

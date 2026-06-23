@@ -43,9 +43,26 @@ if rawget(C_StorePublic, "EventStoreUISetShown") == nil then
 end
 "#;
 
+const STORE_FRAME_ESCAPE_DEFAULTS_LUA: &str = r#"
+if type(StoreFrame_EscapePressed) == "function" and not rawget(_G, "__wow_store_frame_escape_wrapped") then
+    local originalEscapePressed = StoreFrame_EscapePressed
+    StoreFrame_EscapePressed = function(...)
+        if StoreFrame == nil then
+            return false
+        end
+        return originalEscapePressed(...)
+    end
+    rawset(_G, "__wow_store_frame_escape_wrapped", true)
+end
+"#;
+
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(STORE_PUBLIC_DEFAULTS_LUA)?;
     Ok(())
+}
+
+pub(crate) fn patch(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(STORE_FRAME_ESCAPE_DEFAULTS_LUA);
 }
 
 #[cfg(test)]

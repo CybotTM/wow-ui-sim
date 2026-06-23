@@ -66,6 +66,7 @@ pub(super) fn patch_talent_edge_frame_level_sync(env: &crate::lua_api::WowLuaEnv
 }
 
 pub(super) fn patch_catalog_shop_product_card_defaults(env: &crate::lua_api::WowLuaEnv) {
+    temporary::store_public_defaults::patch(env);
     temporary::catalog_shop_product_card_defaults::patch(env);
 }
 
