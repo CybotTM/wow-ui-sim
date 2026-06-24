@@ -100,8 +100,12 @@ local function ensure_frame(name)
     return frame
 end
 
-local function set_frame_visibility(name, visible)
-    local frame = ensure_frame(name)
+local function existing_frame(name)
+    return rawget(_G, name)
+end
+
+local function set_existing_frame_visibility(name, visible)
+    local frame = existing_frame(name)
     if frame == nil then
         return nil
     end
@@ -117,17 +121,17 @@ local function set_frame_visibility(name, visible)
 end
 
 local function toggle_single_frame(name, extraNames)
-    local frame = ensure_frame(name)
+    local frame = existing_frame(name)
     if frame == nil then
         return false
     end
 
     local isShown = type(frame.IsShown) == "function" and frame:IsShown()
     local newVisible = not isShown
-    set_frame_visibility(name, newVisible)
+    set_existing_frame_visibility(name, newVisible)
     if type(extraNames) == "table" then
         for _, extraName in ipairs(extraNames) do
-            set_frame_visibility(extraName, newVisible)
+            set_existing_frame_visibility(extraName, newVisible)
         end
     end
     return newVisible
@@ -139,10 +143,6 @@ for _, name in ipairs({
     "MultiBarBottomRight",
     "MultiBarRight",
     "MultiBarLeft",
-    "MailFrame",
-    "InboxFrame",
-    "PVEFrame",
-    "SettingsPanel",
 }) do
     local frame = ensure_frame(name)
     if frame ~= nil and rawget(frame, "MarkAllSettingsDirty") == nil then
@@ -150,13 +150,28 @@ for _, name in ipairs({
     end
 end
 
-for _, name in ipairs({ "MailFrame", "InboxFrame", "PVEFrame" }) do
-    set_frame_visibility(name, false)
+for _, name in ipairs({
+    "MailFrame",
+    "InboxFrame",
+    "PVEFrame",
+    "SettingsPanel",
+}) do
+    local frame = existing_frame(name)
+    if frame ~= nil and rawget(frame, "MarkAllSettingsDirty") == nil then
+        function frame:MarkAllSettingsDirty() end
+    end
 end
 
 if rawget(_G, "OpenAllBags") == nil then
     function OpenAllBags()
-        set_frame_visibility("ContainerFrameCombinedBags", true)
+        if set_existing_frame_visibility("ContainerFrameCombinedBags", true) ~= nil then
+            return
+        end
+        for i = 1, 6 do
+            if set_existing_frame_visibility("ContainerFrame" .. i, true) ~= nil then
+                return
+            end
+        end
     end
 end
 
@@ -454,6 +469,11 @@ mod tests {
             InboxFrame = nil
             PVEFrame = nil
             ContainerFrameCombinedBags = nil
+
+            SettingsPanel = CreateFrame("Frame", "SettingsPanel")
+            PVEFrame = CreateFrame("Frame", "PVEFrame")
+            PVEFrame:Hide()
+            ContainerFrameCombinedBags = CreateFrame("Frame", "ContainerFrameCombinedBags")
             "#,
         )
         .expect("fixture should clear startup navigation globals");
@@ -470,13 +490,16 @@ mod tests {
                 if type(ToggleLFDParentFrame) ~= "function" then return "lfd_function" end
                 if type(UpdateRaidAndPartyFrames) ~= "function" then return "raid_function" end
                 if type(HelpOpenWebTicketButton_OnUpdate) ~= "function" then return "help_function" end
+
+                if MailFrame ~= nil then return "mail_placeholder" end
+                if InboxFrame ~= nil then return "inbox_placeholder" end
+
                 if type(SettingsPanel.MarkAllSettingsDirty) ~= "function" then return "settings_method" end
                 SettingsPanel:MarkAllSettingsDirty()
 
                 OpenAllBags()
                 if not ContainerFrameCombinedBags:IsShown() then return "bags_show" end
 
-                PVEFrame:Hide()
                 ToggleLFDParentFrame()
                 if not PVEFrame:IsShown() then return "lfd_show" end
                 ToggleLFDParentFrame()

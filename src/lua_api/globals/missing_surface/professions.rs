@@ -308,6 +308,16 @@ fn c_trade_skill_ui_get_profession_skill_line_id(state: &mut LuaState) -> LuaRes
     Ok(1)
 }
 
+fn c_trade_skill_ui_get_trade_skill_display_name(state: &mut LuaState) -> LuaResult<u32> {
+    let skill_line_id = i32::from_stack(state, 1)?;
+    let display_name = profession_data::get_profession_by_skill_line_id(skill_line_id)
+        .map(|profession| profession.name)
+        .unwrap_or("");
+    let name = create_string(state, display_name);
+    state.push(name);
+    Ok(1)
+}
+
 fn c_trade_skill_ui_get_profession_slots(state: &mut LuaState) -> LuaResult<u32> {
     let profession = i32::from_stack(state, 1)?;
     let slots = profession_slots(profession);

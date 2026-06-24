@@ -503,6 +503,12 @@ pub fn get_profession(profession_id: i32) -> Option<&'static ProfessionInfo> {
         .find(|p| p.profession_id == profession_id)
 }
 
+pub fn get_profession_by_skill_line_id(skill_line_id: i32) -> Option<&'static ProfessionInfo> {
+    PROFESSIONS
+        .iter()
+        .find(|p| p.skill_line_id == skill_line_id)
+}
+
 pub fn get_profession_by_index(index: usize) -> Option<&'static ProfessionInfo> {
     PROFESSIONS.get(index)
 }

@@ -6,7 +6,10 @@
 //! - `C_Map.GetMapArtID(uiMapID)` — returns the `art_id` for the
 //!   seeded map, or nothing (retail `mayreturnnothing`).
 //! - `C_Map.GetMapInfo(uiMapID)` — returns a `UiMapDetails`-shaped
-//!   table for seeded maps, or nothing for unknown ids.
+//!   table for seeded maps. For valid-looking positive map IDs that are
+//!   not yet seeded, it returns a minimal generic map record instead of
+//!   crashing addon startup paths that walk retail UiMap.db2 IDs. Absurd
+//!   sentinel IDs still return nothing.
 //! - `C_Map.GetMapInfoAtPosition(uiMapID, normalizedX, normalizedY)`
 //!   — resolves a normalized point on a parent map back to the leaf
 //!   zone whose `child_rects` entry contains the point. Returns
@@ -89,6 +92,7 @@ fn register_c_map_methods(state: &mut LuaState, table_ref: LuaTableRef) -> LuaRe
 const DEFAULT_PLAYER_MAP_ID: i32 = 2248;
 const DEFAULT_MAP_ART_BACKGROUND_ATLAS: &str = "AdventureMap_TileBg";
 const MAP_DETAILS_HASH_FIELDS: usize = 5;
+const MAX_GENERIC_UI_MAP_ID: i32 = 10_000;
 
 fn c_map_get_map_art_background_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let ui_map_id = i32::from_stack(state, 1)?;
@@ -177,12 +181,19 @@ fn c_map_get_map_art_layer_textures(state: &mut LuaState) -> LuaResult<u32> {
 fn c_map_get_map_info(state: &mut LuaState) -> LuaResult<u32> {
     let ui_map_id = i32::from_stack(state, 1)?;
     let map = borrow_state(state)?.maps.get(&ui_map_id).cloned();
-    let Some(map) = map else {
-        return Ok(0);
+    let details = match map {
+        Some(map) => push_map_details_table(state, &map),
+        None if should_return_generic_map_info(ui_map_id) => {
+            push_generic_map_details_table(state, ui_map_id)
+        }
+        None => return Ok(0),
     };
-    let details = push_map_details_table(state, &map);
     state.push(details);
     Ok(1)
+}
+
+fn should_return_generic_map_info(ui_map_id: i32) -> bool {
+    (1..=MAX_GENERIC_UI_MAP_ID).contains(&ui_map_id)
 }
 
 fn c_map_get_map_info_at_position(state: &mut LuaState) -> LuaResult<u32> {
@@ -289,6 +300,17 @@ fn push_map_details_table(state: &mut LuaState, map: &MapData) -> Val {
     table_set_static(state, t, "mapType", Val::Num(map.map_type as f64));
     table_set_static(state, t, "parentMapID", Val::Num(map.parent_map_id as f64));
     table_set_static(state, t, "flags", Val::Num(map.flags as f64));
+    t
+}
+
+fn push_generic_map_details_table(state: &mut LuaState, ui_map_id: i32) -> Val {
+    let t = create_table_with_capacity(state, MAP_DETAILS_HASH_FIELDS);
+    let name = create_string(state, &format!("Map {ui_map_id}"));
+    table_set_static(state, t, "mapID", Val::Num(ui_map_id as f64));
+    table_set_static(state, t, "name", name);
+    table_set_static(state, t, "mapType", Val::Num(3.0));
+    table_set_static(state, t, "parentMapID", Val::Num(0.0));
+    table_set_static(state, t, "flags", Val::Num(0.0));
     t
 }
 

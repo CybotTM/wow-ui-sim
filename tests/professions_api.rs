@@ -120,6 +120,23 @@ fn test_get_profession_skill_line_id_maps_known_profession_enums() {
 }
 
 #[test]
+fn test_trade_skill_display_name_maps_known_skill_lines() {
+    let env = env();
+    let (blacksmithing, mining, unknown): (String, String, String) = env
+        .eval(
+            r#"
+            return C_TradeSkillUI.GetTradeSkillDisplayName(164),
+                   C_TradeSkillUI.GetTradeSkillDisplayName(186),
+                   C_TradeSkillUI.GetTradeSkillDisplayName(999999)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(blacksmithing, "Blacksmithing");
+    assert_eq!(mining, "Mining");
+    assert_eq!(unknown, "");
+}
+
+#[test]
 fn test_profession_info_exposes_spell_slots_for_professions_book_buttons() {
     let env = env();
     let (num_spells_1, num_spells_2, bs_spell_id, mining_spell_id): (i32, i32, i32, i32) = env

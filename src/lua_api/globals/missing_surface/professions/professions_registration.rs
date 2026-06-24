@@ -16,15 +16,16 @@ use super::{
     c_trade_skill_ui_get_recipe_num_reagents, c_trade_skill_ui_get_recipe_output_item_data,
     c_trade_skill_ui_get_recipe_reagent_info, c_trade_skill_ui_get_recipe_reagent_item_link,
     c_trade_skill_ui_get_recipe_schematic, c_trade_skill_ui_get_recipes_tracked,
-    c_trade_skill_ui_get_trade_skill_line, c_trade_skill_ui_get_trade_skill_list_link,
-    c_trade_skill_ui_get_trade_skill_texture, c_trade_skill_ui_is_data_source_changing,
-    c_trade_skill_ui_is_npc_crafting, c_trade_skill_ui_is_recipe_craftable,
-    c_trade_skill_ui_is_recipe_in_skill_line, c_trade_skill_ui_is_recipe_learned,
-    c_trade_skill_ui_is_recipe_tracked, c_trade_skill_ui_is_runeforging,
-    c_trade_skill_ui_is_trade_skill_guild, c_trade_skill_ui_is_trade_skill_guild_member,
-    c_trade_skill_ui_is_trade_skill_linked, c_trade_skill_ui_is_trade_skill_ready,
-    c_trade_skill_ui_open_trade_skill, c_trade_skill_ui_set_profession_child_skill_line_id,
-    c_trade_skill_ui_set_recipe_tracked, ensure_namespace,
+    c_trade_skill_ui_get_trade_skill_display_name, c_trade_skill_ui_get_trade_skill_line,
+    c_trade_skill_ui_get_trade_skill_list_link, c_trade_skill_ui_get_trade_skill_texture,
+    c_trade_skill_ui_is_data_source_changing, c_trade_skill_ui_is_npc_crafting,
+    c_trade_skill_ui_is_recipe_craftable, c_trade_skill_ui_is_recipe_in_skill_line,
+    c_trade_skill_ui_is_recipe_learned, c_trade_skill_ui_is_recipe_tracked,
+    c_trade_skill_ui_is_runeforging, c_trade_skill_ui_is_trade_skill_guild,
+    c_trade_skill_ui_is_trade_skill_guild_member, c_trade_skill_ui_is_trade_skill_linked,
+    c_trade_skill_ui_is_trade_skill_ready, c_trade_skill_ui_open_trade_skill,
+    c_trade_skill_ui_set_profession_child_skill_line_id, c_trade_skill_ui_set_recipe_tracked,
+    ensure_namespace,
 };
 use crate::lua_api::methods::create_table;
 use crate::lua_bridge::table_set_rust_fn_static;
@@ -127,6 +128,10 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
     ),
     ("GetRecipeSchematic", c_trade_skill_ui_get_recipe_schematic),
     ("GetRecipesTracked", c_trade_skill_ui_get_recipes_tracked),
+    (
+        "GetTradeSkillDisplayName",
+        c_trade_skill_ui_get_trade_skill_display_name,
+    ),
     ("GetTradeSkillLine", c_trade_skill_ui_get_trade_skill_line),
     (
         "GetTradeSkillListLink",

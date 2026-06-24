@@ -61,6 +61,31 @@ fn test_get_map_info_has_shadowlands_compat_maps() {
 }
 
 #[test]
+fn test_get_map_info_returns_generic_details_for_unseeded_retail_maps() {
+    let env = env();
+    let (map_id, name, parent_id): (i32, String, i32) = env
+        .eval(
+            r#"
+            local info = C_Map.GetMapInfo(630)
+            return info.mapID, info.name, info.parentMapID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(map_id, 630);
+    assert_eq!(name, "Map 630");
+    assert_eq!(parent_id, 0);
+}
+
+#[test]
+fn test_get_map_info_returns_nil_for_absurd_sentinel_map_ids() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_Map.GetMapInfo(999999999) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
 fn test_get_best_map_for_unit() {
     let env = env();
     let map_id: i32 = env

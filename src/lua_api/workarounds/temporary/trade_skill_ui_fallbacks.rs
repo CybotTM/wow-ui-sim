@@ -115,7 +115,7 @@ mod tests {
                 if GetTradeSkillTexture() ~= C_TradeSkillUI.GetTradeSkillTexture() then
                     return "bad_global_texture"
                 end
-                if C_TradeSkillUI.GetTradeSkillDisplayName() ~= "" then
+                if C_TradeSkillUI.GetTradeSkillDisplayName(164) ~= "Blacksmithing" then
                     return "bad_display_name"
                 end
                 if type(C_TradeSkillUI.OpenTradeSkill) ~= "function" then

@@ -525,6 +525,11 @@ fn toggle_lfd_parent_frame_opens_and_closes_group_finder_panel() {
         let env = setup_env();
 
         let result: String = env.eval(r#"
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_GroupFinder")
+            if not loaded then
+                return "group_finder_load_failed:" .. tostring(reason)
+            end
+
             if not ToggleLFDParentFrame then
                 return "missing_toggle_lfd_parent_frame"
             end
