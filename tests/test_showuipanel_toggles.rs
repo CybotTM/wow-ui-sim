@@ -628,7 +628,7 @@ fn character_reputation_tab_click_selects_reputation_panel() {
 }
 
 #[test]
-fn toggle_mail_frame_opens_and_closes_mail_panel() {
+fn admin_open_mailbox_opens_and_closes_mail_panel() {
     test_timeout! {
         let env = setup_env();
 
@@ -636,11 +636,16 @@ fn toggle_mail_frame_opens_and_closes_mail_panel() {
             A_Admin.ClearInbox()
             A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
 
-            if not ToggleMailFrame then
-                return "missing_toggle_mail_frame"
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_MailFrame")
+            if not loaded then
+                return "mail_load_failed:" .. tostring(reason)
             end
 
-            ToggleMailFrame()
+            if not A_Admin.OpenMailbox or not A_Admin.CloseMailbox then
+                return "missing_mailbox_admin_api"
+            end
+
+            A_Admin.OpenMailbox()
             if not MailFrame or not MailFrame:IsShown() then
                 return "mail_frame_not_shown"
             end
@@ -648,7 +653,7 @@ fn toggle_mail_frame_opens_and_closes_mail_panel() {
                 return "inbox_frame_not_shown"
             end
 
-            ToggleMailFrame()
+            A_Admin.CloseMailbox()
             if MailFrame and MailFrame:IsShown() then
                 return "mail_frame_not_hidden"
             end
@@ -658,7 +663,7 @@ fn toggle_mail_frame_opens_and_closes_mail_panel() {
         assert_eq!(
             result,
             "ok",
-            "ToggleMailFrame() should open and close the mail panel: {result}"
+            "A_Admin mailbox interaction should open and close the mail panel: {result}"
         );
     }
 }

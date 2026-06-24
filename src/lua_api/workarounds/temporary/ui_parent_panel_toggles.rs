@@ -154,12 +154,6 @@ for _, name in ipairs({ "MailFrame", "InboxFrame", "PVEFrame" }) do
     set_frame_visibility(name, false)
 end
 
-if rawget(_G, "ToggleMailFrame") == nil then
-    function ToggleMailFrame()
-        toggle_single_frame("MailFrame", { "InboxFrame" })
-    end
-end
-
 if rawget(_G, "OpenAllBags") == nil then
     function OpenAllBags()
         set_frame_visibility("ContainerFrameCombinedBags", true)
@@ -451,7 +445,6 @@ mod tests {
         let env = WowLuaEnv::new().expect("lua env should initialize");
         env.exec(
             r#"
-            ToggleMailFrame = nil
             OpenAllBags = nil
             ToggleLFDParentFrame = nil
             UpdateRaidAndPartyFrames = nil
@@ -473,22 +466,12 @@ mod tests {
         let result: String = env
             .eval(
                 r#"
-                if type(ToggleMailFrame) ~= "function" then return "mail_function" end
                 if type(OpenAllBags) ~= "function" then return "bags_function" end
                 if type(ToggleLFDParentFrame) ~= "function" then return "lfd_function" end
                 if type(UpdateRaidAndPartyFrames) ~= "function" then return "raid_function" end
                 if type(HelpOpenWebTicketButton_OnUpdate) ~= "function" then return "help_function" end
                 if type(SettingsPanel.MarkAllSettingsDirty) ~= "function" then return "settings_method" end
                 SettingsPanel:MarkAllSettingsDirty()
-
-                MailFrame:Hide()
-                InboxFrame:Hide()
-                ToggleMailFrame()
-                if not MailFrame:IsShown() then return "mail_show" end
-                if not InboxFrame:IsShown() then return "inbox_show" end
-                ToggleMailFrame()
-                if MailFrame:IsShown() then return "mail_hide" end
-                if InboxFrame:IsShown() then return "inbox_hide" end
 
                 OpenAllBags()
                 if not ContainerFrameCombinedBags:IsShown() then return "bags_show" end

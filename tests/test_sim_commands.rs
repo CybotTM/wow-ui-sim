@@ -238,16 +238,19 @@ fn builtin_open_mailbox_registered() {
 }
 
 #[test]
-fn builtin_open_mailbox_fires_event() {
+fn builtin_open_mailbox_starts_mail_interaction() {
     let env = env();
     let result: String = env
         .eval(
             r#"
             local fired = false
+            local mailInfo = Enum.PlayerInteractionType.MailInfo
             local f = CreateFrame("Frame")
-            f:RegisterEvent("MAIL_SHOW")
-            f:SetScript("OnEvent", function(self, event)
-                if event == "MAIL_SHOW" then fired = true end
+            f:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_SHOW")
+            f:SetScript("OnEvent", function(self, event, interactionType)
+                if event == "PLAYER_INTERACTION_MANAGER_FRAME_SHOW" and interactionType == mailInfo then
+                    fired = true
+                end
             end)
             for _, cmd in ipairs(SimCommands:GetCommands()) do
                 if cmd.name == "Open Mailbox" then
@@ -259,7 +262,10 @@ fn builtin_open_mailbox_fires_event() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Open Mailbox should fire MAIL_SHOW: {result}");
+    assert_eq!(
+        result, "ok",
+        "Open Mailbox should start the MailInfo interaction: {result}"
+    );
 }
 
 #[test]

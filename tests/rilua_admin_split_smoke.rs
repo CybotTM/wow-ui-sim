@@ -95,6 +95,43 @@ fn admin_guild_mail_premade_and_encounter_still_queue_state() {
 }
 
 #[test]
+fn admin_mailbox_interaction_updates_state_and_fires_events() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local mailInfo = Enum.PlayerInteractionType.MailInfo
+            local opened = false
+            local closed = false
+            local frame = CreateFrame("Frame")
+            frame:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_SHOW")
+            frame:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_HIDE")
+            frame:SetScript("OnEvent", function(self, event, interactionType)
+                if interactionType ~= mailInfo then
+                    return
+                end
+                if event == "PLAYER_INTERACTION_MANAGER_FRAME_SHOW" then
+                    opened = true
+                elseif event == "PLAYER_INTERACTION_MANAGER_FRAME_HIDE" then
+                    closed = true
+                end
+            end)
+
+            A_Admin.OpenMailbox()
+            A_Admin.CloseMailbox()
+
+            return opened and closed and "ok" or "missing_event"
+            "#,
+        )
+        .expect("mailbox admin interaction");
+    assert_eq!(result, "ok");
+    assert!(
+        env.state().borrow().active_player_interactions.is_empty(),
+        "CloseMailbox should remove the active MailInfo interaction"
+    );
+}
+
+#[test]
 fn admin_fire_event_still_preserves_payloads() {
     let env = env();
     let (received, arg1, arg2): (bool, bool, bool) = env

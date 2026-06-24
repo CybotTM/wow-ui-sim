@@ -1,7 +1,7 @@
 -- Built-in commands for the SimCommands palette.
 
-SimCommands:Register("Open Mailbox", "Fire MAIL_SHOW event", function()
-    FireEvent("MAIL_SHOW")
+SimCommands:Register("Open Mailbox", "Open simulated mailbox interaction", function()
+    A_Admin.OpenMailbox()
 end, "UI Panels")
 
 SimCommands:Register("Open Bank", "Fire BANKFRAME_OPENED event", function()

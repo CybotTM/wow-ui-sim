@@ -5,7 +5,6 @@ fn startup_navigation_defaults_are_not_runtime_bootstrap_fallbacks() {
 
     for needle in [
         "__wow_ensure_startup_navigation_surface",
-        "function ToggleMailFrame",
         "function OpenAllBags",
         "function ToggleLFDParentFrame",
         "function UpdateRaidAndPartyFrames",
