@@ -108,6 +108,7 @@ fn start_crafting_cast(state: &mut LuaState, plan: &CraftPlan) {
         start_time: now,
         end_time: now + CRAFTING_CAST_DURATION_SECONDS,
         cast_id,
+        num_empower_stages: 0,
     });
     drop(sim);
 

@@ -487,6 +487,7 @@ fn set_casting(state: &mut LuaState) -> LuaResult<u32> {
         start_time: now,
         end_time: now + duration,
         cast_id,
+        num_empower_stages: 0,
     });
     Ok(0)
 }

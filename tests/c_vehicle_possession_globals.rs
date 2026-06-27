@@ -246,6 +246,7 @@ fn unit_channel_info_returns_channel_state() {
             start_time: 100.0,
             end_time: 108.0,
             cast_id: 42,
+            num_empower_stages: 0,
         });
     }
 
@@ -255,14 +256,46 @@ fn unit_channel_info_returns_channel_state() {
     assert_eq!(name, "Tranquility");
 
     let spell_id: i64 = env
-        .eval("return select(9, UnitChannelInfo('player'))")
+        .eval("return select(8, UnitChannelInfo('player'))")
         .unwrap();
     assert_eq!(spell_id, 740);
+
+    let not_interruptible: bool = env
+        .eval("return select(7, UnitChannelInfo('player'))")
+        .unwrap();
+    assert!(!not_interruptible);
 
     let start_ms: f64 = env
         .eval("return select(4, UnitChannelInfo('player'))")
         .unwrap();
     assert!((start_ms - 100_000.0).abs() < 1e-6);
+
+    let num_empower_stages: i64 = env
+        .eval("return select(10, UnitChannelInfo('player'))")
+        .unwrap();
+    assert_eq!(num_empower_stages, 0);
+}
+
+#[test]
+fn unit_channel_info_returns_empower_stage_count() {
+    let env = WowLuaEnv::new().expect("env");
+    {
+        let mut state = env.state().borrow_mut();
+        state.channeling = Some(CastingState {
+            spell_id: 361469,
+            spell_name: "Living Flame".to_string(),
+            icon_path: "Interface/Icons/Ability_Evoker_LivingFlame".to_string(),
+            start_time: 100.0,
+            end_time: 103.0,
+            cast_id: 43,
+            num_empower_stages: 4,
+        });
+    }
+
+    let num_empower_stages: i64 = env
+        .eval("return select(10, UnitChannelInfo('player'))")
+        .unwrap();
+    assert_eq!(num_empower_stages, 4);
 }
 
 #[test]
@@ -277,6 +310,7 @@ fn unit_channel_info_only_for_player() {
             start_time: 0.0,
             end_time: 8.0,
             cast_id: 1,
+            num_empower_stages: 0,
         });
     }
     let target_nil: bool = env.eval("return UnitChannelInfo('target') == nil").unwrap();

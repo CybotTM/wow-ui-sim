@@ -273,9 +273,20 @@ fn set_calculator_field(
 // CastSpellByID / CastSpellByName are registered from
 // `src/lua_api/globals/combat_verbs.rs` — they drive `SimState.casting`.
 
+#[derive(Clone, Copy)]
 enum CastSlot {
     Casting,
     Channeling,
+}
+
+struct CastInfoSnapshot {
+    spell_name: String,
+    icon_path: String,
+    start_time: f64,
+    end_time: f64,
+    cast_id: u32,
+    spell_id: u32,
+    num_empower_stages: u32,
 }
 
 fn unit_casting_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -291,59 +302,59 @@ fn push_unit_cast_info(state: &mut LuaState, slot: CastSlot) -> LuaResult<u32> {
     if unit != "player" {
         return Ok(0);
     }
-    let Some((spell_name, icon_path, start_time, end_time, cast_id, spell_id)) =
-        extract_cast_info(state, slot)?
-    else {
+    let Some(cast_info) = extract_cast_info(state, slot)? else {
         return Ok(0);
     };
-    push_cast_info(
-        state, spell_name, icon_path, start_time, end_time, cast_id, spell_id,
-    );
+    if matches!(slot, CastSlot::Channeling) {
+        push_channel_info(state, &cast_info);
+        return Ok(10);
+    }
+    push_cast_info(state, &cast_info);
     Ok(9)
 }
 
-fn extract_cast_info(
-    state: &mut LuaState,
-    slot: CastSlot,
-) -> LuaResult<Option<(String, String, f64, f64, u32, u32)>> {
+fn extract_cast_info(state: &mut LuaState, slot: CastSlot) -> LuaResult<Option<CastInfoSnapshot>> {
     let sim = borrow_state(state)?;
     let source = match slot {
         CastSlot::Casting => sim.casting.as_ref(),
         CastSlot::Channeling => sim.channeling.as_ref(),
     };
-    Ok(source.map(|cast| {
-        (
-            cast.spell_name.clone(),
-            cast.icon_path.clone(),
-            cast.start_time,
-            cast.end_time,
-            cast.cast_id,
-            cast.spell_id,
-        )
+    Ok(source.map(|cast| CastInfoSnapshot {
+        spell_name: cast.spell_name.clone(),
+        icon_path: cast.icon_path.clone(),
+        start_time: cast.start_time,
+        end_time: cast.end_time,
+        cast_id: cast.cast_id,
+        spell_id: cast.spell_id,
+        num_empower_stages: cast.num_empower_stages,
     }))
 }
 
-fn push_cast_info(
-    state: &mut LuaState,
-    spell_name: String,
-    icon_path: String,
-    start_time: f64,
-    end_time: f64,
-    cast_id: u32,
-    spell_id: u32,
-) {
-    let spell_name_val = create_string(state, &spell_name);
-    let spell_name_display_val = create_string(state, &spell_name);
-    let icon_path_val = create_string(state, &icon_path);
+fn push_common_cast_fields(state: &mut LuaState, cast_info: &CastInfoSnapshot) {
+    let spell_name_val = create_string(state, &cast_info.spell_name);
+    let spell_name_display_val = create_string(state, &cast_info.spell_name);
+    let icon_path_val = create_string(state, &cast_info.icon_path);
     state.push(spell_name_val);
     state.push(spell_name_display_val);
     state.push(icon_path_val);
-    state.push(Val::Num(start_time * 1000.0));
-    state.push(Val::Num(end_time * 1000.0));
+    state.push(Val::Num(cast_info.start_time * 1000.0));
+    state.push(Val::Num(cast_info.end_time * 1000.0));
     state.push(Val::Bool(false));
-    state.push(Val::Num(cast_id as f64));
+}
+
+fn push_cast_info(state: &mut LuaState, cast_info: &CastInfoSnapshot) {
+    push_common_cast_fields(state, cast_info);
+    state.push(Val::Num(cast_info.cast_id as f64));
     state.push(Val::Bool(false));
-    state.push(Val::Num(spell_id as f64));
+    state.push(Val::Num(cast_info.spell_id as f64));
+}
+
+fn push_channel_info(state: &mut LuaState, cast_info: &CastInfoSnapshot) {
+    push_common_cast_fields(state, cast_info);
+    state.push(Val::Bool(false));
+    state.push(Val::Num(cast_info.spell_id as f64));
+    state.push(Val::Bool(cast_info.num_empower_stages > 0));
+    state.push(Val::Num(cast_info.num_empower_stages as f64));
 }
 
 // ── Registration ─────────────────────────────────────────────────────────────

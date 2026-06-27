@@ -90,6 +90,7 @@ pub struct CastingState {
     /// GetTime() at cast end (seconds).
     pub end_time: f64,
     pub cast_id: u32,
+    pub num_empower_stages: u32,
 }
 
 /// Per-spell cooldown tracking.
