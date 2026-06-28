@@ -2,7 +2,8 @@
 
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref,
-    sync_child_to_rilua, table_get, table_get_static, val_to_string,
+    registry_table_or_create, sync_child_to_rilua, table_get, table_get_static, table_set,
+    val_to_string,
 };
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
@@ -12,6 +13,7 @@ use std::collections::HashSet;
 use super::shared::{bind_named_child_global, opt_string};
 
 const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
+const FONT_OBJECTS_REGISTRY_KEY: &str = "__font_objects";
 
 /// GetFontString() -> fontstring
 pub(super) fn get_font_string(state: &mut LuaState) -> LuaResult<u32> {
@@ -207,7 +209,7 @@ pub(super) fn create_font_string(state: &mut LuaState) -> LuaResult<u32> {
             fontstring.draw_layer = draw_layer;
         }
     }
-    apply_font_inherit(state, &mut fontstring, inherits.as_deref());
+    let inherited_font_object = apply_font_inherit(state, &mut fontstring, inherits.as_deref());
     let child_id = fontstring.id;
     {
         let mut sim = borrow_state_mut(state)?;
@@ -217,6 +219,9 @@ pub(super) fn create_font_string(state: &mut LuaState) -> LuaResult<u32> {
     }
     if let Some(ref n) = name {
         bind_named_child_global(state, n, child_id)?;
+    }
+    if let Some(font_object) = inherited_font_object {
+        store_font_object_for_frame(state, child_id, font_object);
     }
     apply_font_string_template_mixins(state, child_id, inherits.as_deref());
     let val = frame_ref(state, child_id)?;
@@ -243,10 +248,12 @@ fn apply_font_inherit(
     state: &mut LuaState,
     fontstring: &mut crate::widget::Frame,
     inherits: Option<&str>,
-) {
-    let Some(inherits) = inherits else { return };
+) -> Option<Val> {
+    let Some(inherits) = inherits else {
+        return None;
+    };
     let mut visited = HashSet::new();
-    apply_font_inherit_names(state, fontstring, inherits, &mut visited);
+    apply_font_inherit_names(state, fontstring, inherits, &mut visited)
 }
 
 fn apply_font_inherit_names(
@@ -254,32 +261,37 @@ fn apply_font_inherit_names(
     fontstring: &mut crate::widget::Frame,
     inherits: &str,
     visited: &mut HashSet<String>,
-) {
+) -> Option<Val> {
+    let mut inherited_font_object = None;
     for name in inherits.split(',').map(str::trim) {
         if name.is_empty() || !visited.insert(name.to_string()) {
             continue;
         }
-        if apply_font_object_by_name(state, fontstring, name) {
+        if let Some(font_object) = apply_font_object_by_name(state, fontstring, name) {
+            inherited_font_object.get_or_insert(font_object);
             continue;
         }
         if let Some(template) = crate::xml::get_font_string_template(name) {
-            apply_font_string_template(state, fontstring, &template, visited);
+            let template_font_object =
+                apply_font_string_template(state, fontstring, &template, visited);
+            inherited_font_object = inherited_font_object.or(template_font_object);
         }
     }
+    inherited_font_object
 }
 
 fn apply_font_object_by_name(
     state: &mut LuaState,
     fontstring: &mut crate::widget::Frame,
     name: &str,
-) -> bool {
+) -> Option<Val> {
     let font_object = table_get(state, Val::Table(state.global), name);
     if !matches!(font_object, Val::Table(_)) {
-        return false;
+        return None;
     }
 
-    apply_font_object_fields(state, fontstring, font_object);
-    true
+    apply_font_object_fields(state, fontstring, font_object.clone());
+    Some(font_object)
 }
 
 fn apply_font_string_template(
@@ -287,14 +299,22 @@ fn apply_font_string_template(
     fontstring: &mut crate::widget::Frame,
     template: &crate::xml::FontStringXml,
     visited: &mut HashSet<String>,
-) {
+) -> Option<Val> {
+    let mut inherited_font_object = None;
     if let Some(inherits) = template.inherits.as_deref() {
-        apply_font_inherit_names(state, fontstring, inherits, visited);
+        inherited_font_object = apply_font_inherit_names(state, fontstring, inherits, visited);
     }
     if let Some(font) = template.font.as_deref() {
-        apply_font_inherit_names(state, fontstring, font, visited);
+        let font_object = apply_font_inherit_names(state, fontstring, font, visited);
+        inherited_font_object = inherited_font_object.or(font_object);
     }
     apply_font_string_template_fields(state, fontstring, template);
+    inherited_font_object
+}
+
+fn store_font_object_for_frame(state: &mut LuaState, frame_id: u64, font_object: Val) {
+    let store = registry_table_or_create(state, FONT_OBJECTS_REGISTRY_KEY);
+    table_set(state, store, &frame_id.to_string(), font_object);
 }
 
 fn apply_font_string_template_fields(

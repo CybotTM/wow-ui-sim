@@ -1,6 +1,8 @@
 use super::*;
 #[path = "xml_basics_extra.rs"]
 mod xml_basics_extra;
+#[path = "xml_font_virtual.rs"]
+mod xml_font_virtual;
 #[path = "xml_text_region_defaults.rs"]
 mod xml_text_region_defaults;
 

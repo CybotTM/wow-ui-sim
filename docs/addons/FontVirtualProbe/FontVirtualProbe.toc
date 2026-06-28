@@ -1,0 +1,9 @@
+## Interface: 120007
+## Title: Font Virtual Probe
+## Notes: Tests whether virtual and concrete XML Font objects publish globals.
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: FontVirtualProbeDB
+
+FontVirtualProbe.xml
+FontVirtualProbe.lua

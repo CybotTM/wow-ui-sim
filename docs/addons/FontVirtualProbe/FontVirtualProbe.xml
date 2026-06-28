@@ -1,0 +1,18 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Font name="FontVirtualProbeVirtualFont" virtual="true" font="Fonts\FRIZQT__.TTF" height="17">
+        <Color r="0.2" g="0.4" b="0.6"/>
+    </Font>
+
+    <Font name="FontVirtualProbeConcreteFont" font="Fonts\FRIZQT__.TTF" height="19">
+        <Color r="0.7" g="0.3" b="0.1"/>
+    </Font>
+
+    <Frame name="FontVirtualProbeFrame" hidden="true">
+        <Layers>
+            <Layer level="ARTWORK">
+                <FontString name="FontVirtualProbeVirtualString" inherits="FontVirtualProbeVirtualFont" text="virtual font probe"/>
+                <FontString name="FontVirtualProbeConcreteString" inherits="FontVirtualProbeConcreteFont" text="concrete font probe"/>
+            </Layer>
+        </Layers>
+    </Frame>
+</Ui>
