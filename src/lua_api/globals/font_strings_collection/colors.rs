@@ -34,6 +34,7 @@ pub(super) const NAMED_COLOR_GLOBALS: &[(&'static str, (f64, f64, f64, f64))] = 
     ("BLACK_FONT_COLOR", (0.0, 0.0, 0.0, 1.0)),
     ("YELLOW_FONT_COLOR", (1.0, 1.0, 0.0, 1.0)),
     ("LIGHTYELLOW_FONT_COLOR", (1.0, 1.0, 0.6, 1.0)),
+    ("UNIT_LEVEL_NON_ATTACKABLE", (1.0, 1.0, 0.0, 1.0)),
     ("ORANGE_FONT_COLOR", (1.0, 0.5, 0.25, 1.0)),
     ("WHITE_FONT_COLOR", (1.0, 1.0, 1.0, 1.0)),
     ("DISABLED_FONT_COLOR", (0.5, 0.5, 0.5, 1.0)),

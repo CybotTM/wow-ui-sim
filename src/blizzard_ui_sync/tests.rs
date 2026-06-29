@@ -5,7 +5,7 @@ use super::{
 use flate2::Compression;
 use flate2::write::GzEncoder;
 use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 fn unique_temp_dir(label: &str) -> PathBuf {
@@ -205,7 +205,7 @@ fn mists_prefers_mop_classic_repo_fallbacks() {
 }
 
 #[cfg(feature = "client-mists")]
-include!("blizzard_ui_sync_mists_test_fixture.rs");
+include!("../blizzard_ui_sync_mists_test_fixture.rs");
 
 #[test]
 fn repo_fallback_copies_manifest_entry_from_addons_root() {

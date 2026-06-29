@@ -2,6 +2,17 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-29] update | Mists 5.5.4 lua-errors cleanup
+
+Updated `investigations/mists-world-map-startup.md` after reducing Mists
+5.5.4 startup `lua-errors` to `[]`. Recorded the root causes: escaped
+`Interface/AddOns` XML paths, missing profile-cache manifest files
+(`Blizzard_UIParent/Classic/*`, `Blizzard_SharedXML/Classic/GameTooltipTemplate.lua`),
+`QuestUtil` being reset by `Blizzard_FrameXMLUtil/Classic/QuestUtils.lua`,
+Mists XML referencing unshipped `WorldStateProvingGrounds_*` helpers, missing
+native EditMode frame methods, and missing `UNIT_LEVEL_NON_ATTACKABLE` color.
+Updated `index.md`.
+
 ## [2026-06-19] update | Bag button OnLoad load-order resolved
 
 Marked `investigations/addon-load-order.md` RESOLVED. The historical

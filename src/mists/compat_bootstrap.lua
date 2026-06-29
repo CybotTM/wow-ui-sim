@@ -202,6 +202,67 @@ if rawget(_G, "GetQuestTimers") == nil then
   function GetQuestTimers() end
 end
 
+-- Blizzard_FrameXML/Mists/WorldStateFrame.xml still declares the old
+-- proving-grounds world-state frame, but the matching Lua helpers are not
+-- shipped in the current Mists Classic UI source cache. Model the startup-safe
+-- behavior the XML needs: register the score event and update the frame's local
+-- display fields from the event/timer data when present.
+if rawget(_G, "WorldStateProvingGrounds_OnLoad") == nil then
+  function WorldStateProvingGrounds_OnLoad(self)
+    if self and type(self.RegisterEvent) == "function" then
+      self:RegisterEvent("PROVING_GROUNDS_SCORE_UPDATE")
+      self:RegisterEvent("WORLD_STATE_TIMER_START")
+      self:RegisterEvent("WORLD_STATE_TIMER_STOP")
+    end
+  end
+end
+
+if rawget(_G, "WorldStateProvingGrounds_OnEvent") == nil then
+  function WorldStateProvingGrounds_OnEvent(self, event, ...)
+    if self == nil then
+      return
+    end
+    if event == "PROVING_GROUNDS_SCORE_UPDATE" and self.Score and type(self.Score.SetText) == "function" then
+      local score = ...
+      self.Score:SetText(tostring(score or 0))
+      if type(self.Score.Show) == "function" then self.Score:Show() end
+      if self.ScoreLabel and type(self.ScoreLabel.Show) == "function" then self.ScoreLabel:Show() end
+    elseif event == "WORLD_STATE_TIMER_STOP" and type(self.Hide) == "function" then
+      self:Hide()
+    end
+  end
+end
+
+if rawget(_G, "WorldStateProvingGroundsTimer_OnUpdate") == nil then
+  function WorldStateProvingGroundsTimer_OnUpdate(self, elapsed)
+    if WorldStateProvingGroundsFrame == nil or WorldStateProvingGroundsFrame.statusBar == nil then
+      return
+    end
+    local frame = WorldStateProvingGroundsFrame
+    local statusBar = frame.statusBar
+    local value = 0
+    if type(statusBar.GetValue) == "function" then
+      value = statusBar:GetValue() or 0
+    end
+    local nextValue = math.max(0, value - (elapsed or 0))
+    if type(statusBar.SetValue) == "function" then
+      statusBar:SetValue(nextValue)
+    end
+    if statusBar.timeLeft and type(statusBar.timeLeft.SetText) == "function" then
+      statusBar.timeLeft:SetText(tostring(math.ceil(nextValue)))
+    end
+  end
+end
+
+if rawget(_G, "WorldStateProvingGroundsAnim_OnFinished") == nil then
+  function WorldStateProvingGroundsAnim_OnFinished(animGroup)
+    local frame = animGroup and type(animGroup.GetParent) == "function" and animGroup:GetParent() or WorldStateProvingGroundsFrame
+    if frame and frame.Glow and type(frame.Glow.SetAlpha) == "function" then
+      frame.Glow:SetAlpha(0)
+    end
+  end
+end
+
 if rawget(_G, "GetRuneType") == nil then
   function GetRuneType() return 1 end
 end

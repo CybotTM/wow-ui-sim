@@ -82,10 +82,21 @@ end
 
 QuestUtil = QuestUtil or {}
 if QuestUtil.CanCreateQuestGroup == nil then
-  function QuestUtil.CanCreateQuestGroup(_questID) return false end
+  function QuestUtil.CanCreateQuestGroup(questID)
+    if C_LFGList ~= nil and type(C_LFGList.CanCreateQuestGroup) == "function" then
+      return C_LFGList.CanCreateQuestGroup(questID)
+    end
+    return false
+  end
 end
 if QuestUtil.QuestShowsItemByIndex == nil then
-  function QuestUtil.QuestShowsItemByIndex(_questLogIndex, _isQuestComplete) return false end
+  function QuestUtil.QuestShowsItemByIndex(questLogIndex, isQuestComplete)
+    if type(GetQuestLogSpecialItemInfo) ~= "function" then
+      return false
+    end
+    local _, item, _, showItemWhenComplete = GetQuestLogSpecialItemInfo(questLogIndex)
+    return item ~= nil and (not isQuestComplete or showItemWhenComplete)
+  end
 end
 "#;
 
@@ -187,5 +198,30 @@ mod tests {
             .expect("quest util defaults should be callable after reapply");
 
         assert_eq!(result, "ok");
+    }
+
+    #[test]
+    fn quest_util_group_creation_uses_lfg_list_backing_when_available() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            QuestUtil = {}
+            C_LFGList.CanCreateQuestGroup = function(questID)
+              return questID == 401
+            end
+            "#,
+        )
+        .expect("fixture should install LFG backing");
+
+        {
+            let mut lua = env.lua.borrow_mut();
+            super::apply_bootstrap(&mut lua).expect("quest objective defaults should reapply");
+        }
+
+        let can_create: bool = env
+            .eval("return QuestUtil.CanCreateQuestGroup(401)")
+            .expect("quest group probe should run");
+
+        assert!(can_create);
     }
 }

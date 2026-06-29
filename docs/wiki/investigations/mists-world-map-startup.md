@@ -1,6 +1,6 @@
 # Mists World Map Startup
 
-Mists addon startup can fail on third-party WorldMap users when the Mists-specific Blizzard WorldMap cache files are absent or when Cata/Mists map providers inherit incomplete simulator surfaces. The fix is to load the real Mists `Blizzard_WorldMap` / `Blizzard_SharedMapDataProviders` files, keep the unsafe Mists `Blizzard_UIParentPanelManager` exclusion in place, and provide narrow Mists compatibility surfaces for the map calls that otherwise depended on that panel manager.
+Mists addon startup can fail when profile-scoped Blizzard cache files are absent, when XML paths escape through `Interface/AddOns`, or when Mists-era FrameXML mixes classic helper Lua with newer XML/templates. The fix is to load the real profile files where they exist, resolve escaped addon-root paths against the active cache, and keep narrow Mists compatibility only for helpers missing from the current source tree.
 
 ## Content
 
@@ -26,11 +26,32 @@ Implementation notes:
 - `src/lua_api/workarounds/temporary/source_patches.rs` owns the Mists `Blizzard_MapCanvas.lua` source patch that backfills provider callbacks before `OnAdded`.
 - The final startup baseline after this fix kept only the unrelated Syndicator `tradeskill` and Baganator `TokenFramePopup` errors.
 
+## Mists 5.5.4 lua-errors cleanup
+
+A later Mists 5.5.4 refresh exposed a second set of startup roots. The key falsifier was that most visible nils were downstream of missing vendor files or loader path resolution, not missing simulator stubs.
+
+Observed roots and fixes:
+
+- `MapCanvasMixin`/WorldMap nils were caused by XML script paths like `..\..\..\Interface\AddOns\Blizzard_MapCanvas\...` escaping the profile cache tree. `resolve_path_with_fallback()` now detects `Interface/AddOns/` after normalization and resolves it from the nearest `AddOns` ancestor.
+- `UIParentBottomManagedFrameContainer` / `UIParentRightManagedFrameContainer` nils came from missing real Mists Classic `Blizzard_UIParent/Classic/*.lua|xml` files in the manifest/profile-cache required list.
+- `GameTooltipTemplate` method errors (`OnLoadGameTooltip`) came from `Blizzard_SharedXML/Classic/GameTooltipTemplate.xml` loading without its paired `Classic/GameTooltipTemplate.lua`; the manifest/profile-cache required list now includes the real Lua file.
+- `QuestUtil.CanCreateQuestGroup` was not fixed by a broader global stub. `Blizzard_FrameXMLUtil/Classic/QuestUtils.lua` resets `QuestUtil = {}` during addon load, so quest objective defaults must be reapplied on the startup loader's `Blizzard_FrameXMLUtil` post-load path, not only on runtime `C_AddOns.LoadAddOn`; the helper now delegates to modeled `C_LFGList.CanCreateQuestGroup` when available.
+- `WorldStateProvingGrounds_*` functions are referenced by `Blizzard_FrameXML/Mists/WorldStateFrame.xml`, but the current Mists Classic source cache does not ship matching Lua helpers. The Mists bootstrap supplies profile-scoped handlers that register/update the proving-grounds world-state frame and no-op safely when the simulator has no scenario state.
+- Managed EditMode calls (`IsEditModeDragging`, `IsInitialized`, `IsInDefaultPosition`, `IsSystemSettingDefault`) belong on the native frame metatable because Blizzard code calls them as frame methods. A Lua shim in a bootstrap is insufficient when runtime dispatch hits `FrameRef` userdata.
+- `UNIT_LEVEL_NON_ATTACKABLE` is a named color global needed by Blizzard font/color code; it belongs with the existing color global registry.
+
+Verification after these fixes:
+
+- `WOW_SIM_NO_ADDONS=1 WOW_SIM_NO_SAVED_VARS=1 timeout 90 target/debug/wow-sim lua-errors` under `client-mists` returned `[]`.
+- The normal default retail build was restored with `cargo build --bin wow-sim --bin wow-cli`.
+
 ## Sources
 
 - [data/blizzard-ui-files.txt](../../../data/blizzard-ui-files.txt) — Mists WorldMap and SharedMapDataProviders cache manifest entries.
 - [profile_cache.rs](../../../src/blizzard_ui_sync/profile_cache.rs) — Mists cache-entry allowlist and usability checks.
-- [post_load.lua](../../../src/mists/post_load.lua) — Mists-only compatibility surfaces.
+- [helpers.rs](../../../src/loader/helpers.rs) — XML script path resolution for escaped `Interface/AddOns` paths.
+- [compat_bootstrap.lua](../../../src/mists/compat_bootstrap.lua) — Mists-only startup compatibility surfaces, including proving-grounds world-state handlers.
+- [post_load.lua](../../../src/mists/post_load.lua) — Mists-only post-load compatibility surfaces.
 - [source_patches.rs](../../../src/lua_api/workarounds/temporary/source_patches.rs) — MapCanvas provider callback source patch.
 
 ## See Also

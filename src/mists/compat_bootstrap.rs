@@ -75,4 +75,32 @@ mod tests {
 
         assert_eq!(result, "ok");
     }
+
+    #[test]
+    fn proving_grounds_world_state_handlers_are_startup_safe() {
+        let env = WowLuaEnv::new().expect("env");
+
+        let result: String = env
+            .eval(
+                r#"
+                local frame = CreateFrame("Frame", "MistsProvingGroundsProbe", UIParent)
+                frame:RegisterEvent("PROVING_GROUNDS_SCORE_UPDATE")
+                frame.statusBar = CreateFrame("StatusBar", nil, frame)
+                frame.statusBar.timeLeft = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+                frame.Wave = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+                frame.Score = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+
+                WorldStateProvingGrounds_OnLoad(frame)
+                WorldStateProvingGrounds_OnEvent(frame, "PROVING_GROUNDS_SCORE_UPDATE", 42)
+                WorldStateProvingGroundsTimer_OnUpdate(frame, 0.25)
+                WorldStateProvingGroundsAnim_OnFinished({ GetParent = function() return frame end })
+
+                if frame.Score:GetText() ~= "42" then return "score" end
+                return "ok"
+                "#,
+            )
+            .expect("proving grounds handlers should run");
+
+        assert_eq!(result, "ok");
+    }
 }

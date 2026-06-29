@@ -2994,6 +2994,7 @@ Blizzard_SharedXML/LoopingSoundEffect.lua
 Blizzard_SharedXML/Classic/ClassicCvarUtil.lua
 Blizzard_SharedXML/Classic/Dialog/DialogTemplates.xml
 Blizzard_SharedXML/Classic/Frame/MainMenuFrameTemplates.xml
+Blizzard_SharedXML/Classic/GameTooltipTemplate.lua
 Blizzard_SharedXML/Classic/GameTooltipTemplate.xml
 Blizzard_SharedXML/Classic/GlueCheck.lua
 Blizzard_SharedXML/Classic/ModelFrames.lua
@@ -3615,6 +3616,11 @@ Blizzard_UIPanels_Game/Shared/WorldMapPOIQuantizer.lua
 Blizzard_UIParent/Blizzard_UIParent_Mainline.toc
 Blizzard_UIParent/Blizzard_UIParent_Mists.toc
 Blizzard_UIParent/ChatBubbleTemplates.xml
+Blizzard_UIParent/Classic/UIParent.lua
+Blizzard_UIParent/Classic/UIParent.xml
+Blizzard_UIParent/Classic/UIParentDebugMenu.lua
+Blizzard_UIParent/Classic/WorldFrame.lua
+Blizzard_UIParent/Classic/WorldFrame.xml
 Blizzard_UIParent/Mainline/UIParent.lua
 Blizzard_UIParent/Mainline/UIParent.xml
 Blizzard_UIParent/Mainline/WorldFrame.lua

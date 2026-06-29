@@ -462,6 +462,10 @@ pub(crate) fn patch_achievement_search_preview_for_addon_load(env: &crate::lua_a
     let _ = temporary::achievement_search_preview::patch_for_addon_load(env);
 }
 
+pub(crate) fn patch_quest_objective_defaults_for_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
+    temporary::quest_objective_defaults::patch_loader(env);
+}
+
 /// Re-run the runtime-surface bootstrap repair hooks for addons whose load
 /// replaces the patched objects. The bootstrap exposes these as `__wow_patch_*`
 /// globals; the old `hooksecurefunc(C_AddOns, "LoadAddOn")` route is refused

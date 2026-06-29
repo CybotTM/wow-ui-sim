@@ -22,6 +22,25 @@ fn test_normalize_path_empty() {
 }
 
 #[test]
+fn test_resolve_path_with_interface_addons_escape() {
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let cache_addons = temp.path().join("AddOns");
+    let addon_root = cache_addons.join("Blizzard_MapCanvas");
+    let target_dir = cache_addons.join("Blizzard_MapCanvas");
+    std::fs::create_dir_all(&target_dir).expect("create target dir");
+    let target = target_dir.join("Blizzard_MapCanvasDetailLayer.lua");
+    std::fs::write(&target, "-- detail layer").expect("write target");
+
+    let resolved = resolve_path_with_fallback(
+        &addon_root,
+        &addon_root,
+        r"..\..\..\Interface\AddOns\Blizzard_MapCanvas\Blizzard_MapCanvasDetailLayer.lua",
+    );
+
+    assert_eq!(resolved, target);
+}
+
+#[test]
 fn test_resolve_lua_escapes_decimal() {
     // \32 = space (ASCII 32)
     assert_eq!(resolve_lua_escapes(r":\32"), ": ");

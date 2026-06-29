@@ -41,6 +41,10 @@ pub fn resolve_path_case_insensitive(base: &Path, path: &str) -> Option<PathBuf>
 pub fn resolve_path_with_fallback(xml_dir: &Path, addon_root: &Path, file: &str) -> PathBuf {
     let normalized = normalize_path(file);
 
+    if let Some(interface_path) = resolve_interface_addons_path(addon_root, &normalized) {
+        return interface_path;
+    }
+
     // Try case-sensitive first (faster)
     let primary = xml_dir.join(&normalized);
     if primary.exists() {
@@ -65,6 +69,24 @@ pub fn resolve_path_with_fallback(xml_dir: &Path, addon_root: &Path, file: &str)
 
     // Return primary path (will result in error with correct path)
     primary
+}
+
+fn resolve_interface_addons_path(addon_root: &Path, normalized: &str) -> Option<PathBuf> {
+    let suffix = normalized.split("Interface/AddOns/").nth(1)?;
+    let addons_root = find_addons_root(addon_root)?;
+    let candidate = addons_root.join(suffix);
+
+    if candidate.exists() {
+        return Some(candidate);
+    }
+
+    resolve_path_case_insensitive(&addons_root, suffix)
+}
+
+fn find_addons_root(path: &Path) -> Option<PathBuf> {
+    path.ancestors()
+        .find(|ancestor| ancestor.file_name().and_then(|name| name.to_str()) == Some("AddOns"))
+        .map(Path::to_path_buf)
 }
 
 /// Get size values from a SizeXml, checking both direct attributes and AbsDimension.

@@ -147,6 +147,9 @@ fn apply_blizzard_post_load_patches(
         "Blizzard_GlueParent" => patch_glueparent_uiparent_attributes(env, result),
         "Blizzard_SharedMapDataProviders" => patch_unit_position_frame_mixin(env, result),
         "Blizzard_UIPanels_Game" => patch_quest_log_mixin(env, result),
+        "Blizzard_FrameXMLUtil" => {
+            crate::lua_api::workarounds::patch_quest_objective_defaults_for_addon_load(env);
+        }
         "Blizzard_ActionBar" => patch_action_bar_button_event_fanout(env),
         "Blizzard_PlayerSpells" => patch_playerspells_onload_backfill(env, result),
         "Blizzard_Dispatcher" => {
