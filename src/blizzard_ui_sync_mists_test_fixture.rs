@@ -1,4 +1,4 @@
-fn write_mists_required_cache_entries(root: &Path) {
+fn write_mists_required_cache_entries(root: &std::path::Path) {
     for entry in super::required_profile_cache_entries() {
         let path = root.join(entry);
         std::fs::create_dir_all(path.parent().expect("entry has parent"))

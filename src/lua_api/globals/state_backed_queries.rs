@@ -32,6 +32,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UnitSex", unit_sex)?;
     LuaApiMut::register_function(lua, "UnitHonorLevel", unit_honor_level)?;
     LuaApiMut::register_function(lua, "UnitPowerBarTimerInfo", unit_power_bar_timer_info)?;
+    LuaApiMut::register_function(lua, "SetCursor", set_cursor)?;
     LuaApiMut::register_function(lua, "ResetCursor", reset_cursor)?;
     LuaApiMut::register_function(lua, "GetSpecialization", get_specialization)?;
     LuaApiMut::register_function(lua, "GuildQuit", guild_quit)?;
@@ -339,6 +340,11 @@ fn unit_power_bar_timer_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn set_cursor(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
 fn reset_cursor(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
@@ -437,7 +443,25 @@ fn register_c_weekly_rewards(state: &mut LuaState) -> LuaResult<()> {
         "CanClaimRewards",
         c_weekly_rewards_can_claim_rewards,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetConquestWeeklyProgress",
+        c_weekly_rewards_get_conquest_weekly_progress,
+    )?;
     Ok(())
+}
+
+fn c_weekly_rewards_get_conquest_weekly_progress(state: &mut LuaState) -> LuaResult<u32> {
+    let progress = create_table(state);
+    table_set(state, progress, "progress", Val::Num(0.0));
+    table_set(state, progress, "maxProgress", Val::Num(0.0));
+    table_set(state, progress, "displayType", Val::Num(0.0));
+    table_set(state, progress, "unlocksCompleted", Val::Num(0.0));
+    table_set(state, progress, "maxUnlocks", Val::Num(0.0));
+    table_set(state, progress, "sampleItemHyperlink", Val::Nil);
+    state.push(progress);
+    Ok(1)
 }
 
 fn c_weekly_rewards_get_activities(state: &mut LuaState) -> LuaResult<u32> {

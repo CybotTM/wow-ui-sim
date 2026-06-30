@@ -164,14 +164,26 @@ pub(super) fn default_world_pvp_areas() -> Vec<WorldPvpBattlegroundInfo> {
 }
 
 pub(super) fn default_holiday_bg_info() -> RandomBGInfo {
+    default_bg_info(108, 2, "Warsong Scramble")
+}
+
+pub(super) fn default_random_bg_info() -> RandomBGInfo {
+    default_bg_info(0, 0, "Random Battleground")
+}
+
+pub(super) fn default_random_epic_bg_info() -> RandomBGInfo {
+    default_bg_info(0, 0, "Random Epic Battleground")
+}
+
+fn default_bg_info(bg_id: i32, bg_index: i32, name: &str) -> RandomBGInfo {
     RandomBGInfo {
-        bg_id: 108,
-        bg_index: 2,
+        bg_id,
+        bg_index,
         can_queue: true,
         has_random_win_today: false,
         max_level: 80,
         min_level: 10,
-        name: "Warsong Scramble".into(),
+        name: name.into(),
     }
 }
 

@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-06-29] investigation | Retail/PTR full startup Lua errors
+
+Created `investigations/retail-ptr-full-startup-lua-errors.md` after full GUI
+startup logs exposed handler-time errors missed by `lua-errors`. Recorded the
+PVPUI API gaps (`C_WeeklyRewards`, `C_PvP`, legacy PVP role globals,
+`ClearBattlemaster`), PTR cursor gap, Store inbound nil `StoreFrame` fallback
+issue, and verification with clean retail/PTR startup logs. Updated `index.md`.
+
 ## [2026-06-29] update | Mists 5.5.4 lua-errors cleanup
 
 Updated `investigations/mists-world-map-startup.md` after reducing Mists

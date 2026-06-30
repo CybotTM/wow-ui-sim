@@ -205,10 +205,16 @@ const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
     },
     LuaSourcePatch {
         suffix: "/Blizzard_Shared_StoreUIInbound.lua",
-        operations: &[LuaSourcePatchOp::Replace {
-            from: "function StoreFrame_IsShown()\n\treturn StoreFrame:GetAttribute(\"isshown\");\nend",
-            to: "function StoreFrame_IsShown()\n\tif type(StoreFrame) ~= \"table\" or type(StoreFrame.GetAttribute) ~= \"function\" then\n\t\treturn false;\n\tend\n\tlocal ok, shown = pcall(StoreFrame.GetAttribute, StoreFrame, \"isshown\");\n\treturn ok and shown or false;\nend",
-        }],
+        operations: &[
+            LuaSourcePatchOp::Replace {
+                from: "function StoreFrame_SetShown(shown, contextKey)\n\tlocal wasShown = StoreFrame_IsShown();",
+                to: "function StoreFrame_SetShown(shown, contextKey)\n\tif type(StoreFrame) ~= \"table\" or type(StoreFrame.SetAttribute) ~= \"function\" then\n\t\treturn false;\n\tend\n\tlocal wasShown = StoreFrame_IsShown();",
+            },
+            LuaSourcePatchOp::Replace {
+                from: "function StoreFrame_IsShown()\n\treturn StoreFrame:GetAttribute(\"isshown\");\nend",
+                to: "function StoreFrame_IsShown()\n\tif type(StoreFrame) ~= \"table\" or type(StoreFrame.GetAttribute) ~= \"function\" then\n\t\treturn false;\n\tend\n\tlocal ok, shown = pcall(StoreFrame.GetAttribute, StoreFrame, \"isshown\");\n\treturn ok and shown or false;\nend",
+            },
+        ],
     },
     LuaSourcePatch {
         suffix: "/MinimalSlider.lua",
@@ -360,6 +366,26 @@ mod tests {
             r"@Interface\AddOns\Blizzard_PetBattleUI\Blizzard_PetBattleUI.lua",
         );
         assert!(patch.is_some());
+    }
+
+    #[test]
+    fn store_ui_inbound_guards_missing_store_frame() {
+        let source = br#"function StoreFrame_SetShown(shown, contextKey)
+	local wasShown = StoreFrame_IsShown();
+	StoreFrame:SetAttribute("action", shown and "Show" or "Hide");
+end
+
+function StoreFrame_IsShown()
+	return StoreFrame:GetAttribute("isshown");
+end"#;
+        let patched = patch_lua_source(source, "@/Blizzard_Shared_StoreUIInbound.lua");
+        let patched = std::str::from_utf8(&patched).expect("patched source should be utf8");
+
+        assert!(patched.contains(
+            "if type(StoreFrame) ~= \"table\" or type(StoreFrame.SetAttribute) ~= \"function\" then"
+        ));
+        assert!(patched.contains("return false"));
+        assert!(patched.contains("return ok and shown or false"));
     }
 
     #[test]

@@ -90,7 +90,11 @@ const C_PVP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ),
     (
         "GetRandomBGInfo",
-        super::super::pvp_probes::get_holiday_bg_info,
+        super::super::pvp_probes::get_random_bg_info,
+    ),
+    (
+        "GetRandomEpicBGInfo",
+        super::super::pvp_probes::get_random_epic_bg_info,
     ),
     ("GetLocklistMap", super::super::pvp_probes::get_locklist_map),
     (

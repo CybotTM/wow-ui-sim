@@ -40,6 +40,8 @@ pub fn seeded_world_state() -> WorldState {
         guild_can_speak_in_chat: true,
         world_pvp_areas: default_world_pvp_areas(),
         holiday_bg_info: Some(default_holiday_bg_info()),
+        random_bg_info: Some(default_random_bg_info()),
+        random_epic_bg_info: Some(default_random_epic_bg_info()),
         ..WorldState::default()
     };
     apply_collection_defaults(&mut ws);
@@ -202,14 +204,26 @@ fn default_world_pvp_areas() -> Vec<WorldPvpBattlegroundInfo> {
 }
 
 fn default_holiday_bg_info() -> RandomBGInfo {
+    default_bg_info(108, 2, "Warsong Scramble")
+}
+
+fn default_random_bg_info() -> RandomBGInfo {
+    default_bg_info(0, 0, "Random Battleground")
+}
+
+fn default_random_epic_bg_info() -> RandomBGInfo {
+    default_bg_info(0, 0, "Random Epic Battleground")
+}
+
+fn default_bg_info(bg_id: i32, bg_index: i32, name: &str) -> RandomBGInfo {
     RandomBGInfo {
-        bg_id: 108,
-        bg_index: 2,
+        bg_id,
+        bg_index,
         can_queue: true,
         has_random_win_today: false,
         max_level: 80,
         min_level: 10,
-        name: "Warsong Scramble".into(),
+        name: name.into(),
     }
 }
 

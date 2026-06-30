@@ -12,6 +12,8 @@
 //! - `IsSubZonePVP()`           — `world.is_sub_zone_pvp`.
 //! - `GetWorldPVPAreaInfo(idx)`  — seeded battleground info table.
 //! - `GetHolidayBGInfo()`       — seeded random BG info table.
+//! - `GetRandomBGInfo()`        — random BG table; default row when unseeded.
+//! - `GetRandomEpicBGInfo()`    — random epic BG table; default row when unseeded.
 //! - `GetNumBattlegroundTypes()` — seeded world/specific battleground rows.
 //! - `GetBattlegroundInfo(idx)`  — legacy row tuple for Mists HonorFrame.
 //! - `GetLocklistMap(idx)`      — mutable locklist slot lookup.
@@ -22,7 +24,7 @@
 
 use crate::lua_api::methods::{borrow_state, val_to_string};
 use crate::lua_api::methods::{borrow_state_mut, create_string, create_table, table_set};
-use crate::lua_api::state_types::PvpHonorState;
+use crate::lua_api::state_types::{PvpHonorState, RandomBGInfo};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -98,6 +100,33 @@ pub(super) fn get_pvp_last_honor_gain(state: &mut LuaState) -> LuaResult<u32> {
     let honor = borrow_state(state)?.pvp_last_honor_gain;
     state.push(Val::Num(honor as f64));
     Ok(1)
+}
+
+fn get_pvp_roles(state: &mut LuaState) -> LuaResult<u32> {
+    let roles = borrow_state(state)?.lfg_roles.clone();
+    state.push(Val::Bool(roles.tank));
+    state.push(Val::Bool(roles.healer));
+    state.push(Val::Bool(roles.dps));
+    Ok(3)
+}
+
+fn set_pvp_roles(state: &mut LuaState) -> LuaResult<u32> {
+    let tank = stack_bool(state, 1);
+    let healer = stack_bool(state, 2);
+    let dps = stack_bool(state, 3);
+    let mut sim = borrow_state_mut(state)?;
+    sim.lfg_roles.tank = tank;
+    sim.lfg_roles.healer = healer;
+    sim.lfg_roles.dps = dps;
+    Ok(0)
+}
+
+fn stack_bool(state: &LuaState, index: i32) -> bool {
+    matches!(stack_val(state, index), Val::Bool(true))
+}
+
+fn clear_battlemaster(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }
 
 fn get_personal_rated_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -254,6 +283,24 @@ pub(super) fn get_holiday_bg_info(state: &mut LuaState) -> LuaResult<u32> {
     let Some(info) = borrow_state(state)?.world.holiday_bg_info.clone() else {
         return Ok(0);
     };
+    push_random_bg_info(state, info)
+}
+
+pub(super) fn get_random_bg_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(info) = borrow_state(state)?.world.random_bg_info.clone() else {
+        return Ok(0);
+    };
+    push_random_bg_info(state, info)
+}
+
+pub(super) fn get_random_epic_bg_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(info) = borrow_state(state)?.world.random_epic_bg_info.clone() else {
+        return Ok(0);
+    };
+    push_random_bg_info(state, info)
+}
+
+fn push_random_bg_info(state: &mut LuaState, info: RandomBGInfo) -> LuaResult<u32> {
     let table = create_table(state);
     table_set(state, table, "bgID", Val::Num(info.bg_id as f64));
     table_set(state, table, "bgIndex", Val::Num(info.bg_index as f64));
@@ -455,9 +502,9 @@ fn locklist_map_name(map_id: u32) -> Option<&'static str> {
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_world_pvp_globals(lua)?;
+    register_battleground_globals(lua)?;
     if cfg!(feature = "client-mists") {
         register_honor_stat_globals(lua)?;
-        register_battleground_globals(lua)?;
     }
     Ok(())
 }
@@ -466,6 +513,9 @@ fn register_world_pvp_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsInActiveWorldPVP", is_in_active_world_pvp)?;
     LuaApiMut::register_function(lua, "GetPVPDesired", get_pvp_desired)?;
     LuaApiMut::register_function(lua, "GetPVPLastHonorGain", get_pvp_last_honor_gain)?;
+    LuaApiMut::register_function(lua, "GetPVPRoles", get_pvp_roles)?;
+    LuaApiMut::register_function(lua, "SetPVPRoles", set_pvp_roles)?;
+    LuaApiMut::register_function(lua, "ClearBattlemaster", clear_battlemaster)?;
     LuaApiMut::register_function(lua, "GetPersonalRatedInfo", get_personal_rated_info)?;
     LuaApiMut::register_function(lua, "IsSubZonePVP", is_sub_zone_pvp)?;
     LuaApiMut::register_function(lua, "GetWorldPVPAreaInfo", get_world_pvp_area_info)?;

@@ -5,7 +5,7 @@ use super::{
 use flate2::Compression;
 use flate2::write::GzEncoder;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 fn unique_temp_dir(label: &str) -> PathBuf {

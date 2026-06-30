@@ -126,11 +126,6 @@ fn get_num_battleground_entries(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn get_num_battleground_types(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
-    Ok(1)
-}
-
 /// `GetWorldPVPQueueStatus(index)` — retail returns 7 values. The sim
 /// doesn't seed world PvP queues, so every index reports the inert queue
 /// shape Blizzard UI uses for "not queued".
@@ -609,7 +604,6 @@ fn register_battlefield_queue_globals(lua: &mut rilua::Lua) -> crate::Result<()>
         "GetNumBattlegroundEntries",
         get_num_battleground_entries,
     )?;
-    LuaApiMut::register_function(lua, "GetNumBattlegroundTypes", get_num_battleground_types)?;
     LuaApiMut::register_function(lua, "GetWorldPVPQueueStatus", get_world_pvp_queue_status)?;
     Ok(())
 }

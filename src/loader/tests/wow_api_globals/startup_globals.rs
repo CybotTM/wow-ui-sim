@@ -349,6 +349,62 @@ fn test_startup_social_and_lfg_globals_exist() {
     assert_eq!(group_count, 0);
     assert_eq!(queue_config_ty, "table");
 }
+
+#[test]
+fn test_startup_pvp_queue_surfaces_are_safe() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local weeklyProgress = C_WeeklyRewards.GetConquestWeeklyProgress()
+            if type(weeklyProgress) ~= "table" then return "weekly_type" end
+            if type(weeklyProgress.progress) ~= "number" then return "weekly_progress" end
+            if type(weeklyProgress.maxProgress) ~= "number" then return "weekly_max" end
+            if type(weeklyProgress.displayType) ~= "number" then return "weekly_display" end
+            if type(weeklyProgress.unlocksCompleted) ~= "number" then return "weekly_unlocks" end
+            if type(weeklyProgress.maxUnlocks) ~= "number" then return "weekly_max_unlocks" end
+
+            local randomBGInfo = C_PvP.GetRandomBGInfo()
+            if type(randomBGInfo) ~= "table" then return "random_bg_type" end
+            if type(randomBGInfo.canQueue) ~= "boolean" then return "random_bg_queue" end
+            if type(randomBGInfo.minLevel) ~= "number" then return "random_bg_min" end
+            if randomBGInfo.name ~= "Random Battleground" then return "random_bg_name" end
+
+            local epicBGInfo = C_PvP.GetRandomEpicBGInfo()
+            if type(epicBGInfo) ~= "table" then return "epic_bg_type" end
+            if type(epicBGInfo.canQueue) ~= "boolean" then return "epic_bg_queue" end
+            if type(epicBGInfo.minLevel) ~= "number" then return "epic_bg_min" end
+            if epicBGInfo.name ~= "Random Epic Battleground" then return "epic_bg_name" end
+
+            SetPVPRoles(true, false, true)
+            local tank, healer, dps = GetPVPRoles()
+            if tank ~= true or healer ~= false or dps ~= true then return "roles" end
+            if ClearBattlemaster() ~= nil then return "clear" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn test_startup_cursor_surface_accepts_texture_paths() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            if type(SetCursor) ~= "function" then return "set_type" end
+            if type(ResetCursor) ~= "function" then return "reset_type" end
+            if SetCursor("Interface\\CURSOR\\UI-Cursor-Move.blp") ~= true then return "set_result" end
+            ResetCursor()
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
 #[test]
 fn test_startup_time_and_service_globals_exist() {
     let env = WowLuaEnv::new().unwrap();

@@ -416,6 +416,10 @@ pub struct WorldState {
     pub world_pvp_areas: Vec<WorldPvpBattlegroundInfo>,
     /// Seeded holiday battleground info returned by `C_PvP.GetHolidayBGInfo()`.
     pub holiday_bg_info: Option<RandomBGInfo>,
+    /// Seeded random battleground info returned by `C_PvP.GetRandomBGInfo()`.
+    pub random_bg_info: Option<RandomBGInfo>,
+    /// Seeded random epic battleground info returned by `C_PvP.GetRandomEpicBGInfo()`.
+    pub random_epic_bg_info: Option<RandomBGInfo>,
     /// Player-managed battleground locklist returned by `C_PvP.GetLocklistMap()`.
     pub locklist_maps: Vec<u32>,
     /// Current zone's PvP type, returned by `C_PvP.GetZonePVPInfo()` as its
