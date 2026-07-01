@@ -449,14 +449,6 @@ impl App {
         (m0 | m1 | m2 | m3 | m4, timings)
     }
 
-    fn mark_active_cooldown_widgets_dirty(&self) {
-        let env = self.env.borrow();
-        let state = env.state().borrow();
-        for id in super::app::active_cooldown_widget_ids(&state) {
-            state.widgets.mark_visual_dirty(id);
-        }
-    }
-
     pub(super) fn take_render_dirty_with_ids(&self) -> (u16, Option<FxHashSet<u64>>) {
         self.env
             .borrow()

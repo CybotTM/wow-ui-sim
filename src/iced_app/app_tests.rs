@@ -82,6 +82,50 @@ fn active_cooldown_widget_uses_fast_tick_interval() {
 }
 
 #[test]
+fn slow_mod_rate_cooldown_keeps_fast_tick_after_real_duration() {
+    let app = build_test_app(ScreenKind::Game);
+    app.strata_dirty.set(0);
+    app.textures_pending.set(false);
+
+    app.env
+        .borrow()
+        .exec(
+            r#"
+            local cooldown = CreateFrame("Cooldown", "SlowModRateCooldown", UIParent)
+            cooldown:SetCooldown(GetTime() - 11, 10, 0.5)
+        "#,
+        )
+        .expect("slow mod-rate cooldown should be created");
+
+    assert_eq!(
+        app.compute_tick_interval(),
+        Some(std::time::Duration::from_millis(DEFAULT_FAST_TICK_MS)),
+    );
+}
+
+#[test]
+fn fast_mod_rate_completed_cooldown_returns_to_idle_tick() {
+    let app = build_test_app(ScreenKind::Game);
+    app.strata_dirty.set(0);
+    app.textures_pending.set(false);
+
+    app.env
+        .borrow()
+        .exec(
+            r#"
+            local cooldown = CreateFrame("Cooldown", "FastModRateDoneCooldown", UIParent)
+            cooldown:SetCooldown(GetTime() - 5.1, 10, 2)
+        "#,
+        )
+        .expect("fast mod-rate cooldown should be created");
+
+    assert_eq!(
+        app.compute_tick_interval(),
+        Some(std::time::Duration::from_secs(1)),
+    );
+}
+
+#[test]
 fn gui_startup_uses_first_real_canvas_size_for_display_size_changed() {
     let app = build_test_app(ScreenKind::Game);
     app.env

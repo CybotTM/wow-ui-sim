@@ -107,6 +107,8 @@ pub struct App {
     >,
     /// Dirty frame IDs from the last timer tick. `None` means full rebuild needed.
     pub(crate) pending_dirty_ids: RefCell<Option<rustc_hash::FxHashSet<u64>>>,
+    /// Cooldown widgets that were visually active on the previous timer tick.
+    pub(crate) previous_active_cooldown_widget_ids: RefCell<FxHashSet<u64>>,
     /// Spatial grid for fast hit testing (rebuilt when layout changes).
     pub(crate) cached_hittable: RefCell<Option<super::hit_grid::HitGrid>>,
     /// Per-strata dirty bitmask — bit `i` means strata index `i` needs re-emit.
@@ -246,6 +248,7 @@ macro_rules! app_from_initial_state {
             cached_strata_quads: RefCell::new(std::array::from_fn(|_| None)),
             cached_frame_snapshots: RefCell::new(std::array::from_fn(|_| None)),
             pending_dirty_ids: RefCell::new(None),
+            previous_active_cooldown_widget_ids: RefCell::new(FxHashSet::default()),
             cached_hittable: RefCell::new(None),
             strata_dirty: std::cell::Cell::new((1u16 << crate::widget::FrameStrata::COUNT) - 1),
             textures_pending: std::cell::Cell::new(false),
@@ -514,6 +517,18 @@ impl App {
         *self.pending_dirty_ids.borrow_mut() = None;
     }
 
+    pub(crate) fn mark_active_cooldown_widgets_dirty(&self) {
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        let active_ids: FxHashSet<u64> = active_cooldown_widget_ids(&state).into_iter().collect();
+        let previous_ids = self.previous_active_cooldown_widget_ids.borrow();
+        for id in active_ids.iter().chain(previous_ids.iter()) {
+            state.widgets.mark_visual_dirty(*id);
+        }
+        drop(previous_ids);
+        *self.previous_active_cooldown_widget_ids.borrow_mut() = active_ids;
+    }
+
     /// Determine how often the timer subscription should tick.
     ///
     /// Returns `Some(interval)` when periodic work is needed (animations,
@@ -655,7 +670,16 @@ fn is_active_cooldown_widget(frame: &Frame, now: f64) -> bool {
     matches!(frame.widget_type, WidgetType::Cooldown)
         && !frame.cooldown_paused
         && frame.cooldown_duration > 0.0
-        && now < frame.cooldown_start + frame.cooldown_duration
+        && cooldown_elapsed_since_start(frame, now) < frame.cooldown_duration
+}
+
+fn cooldown_elapsed_since_start(frame: &Frame, now: f64) -> f64 {
+    let mod_rate = if frame.cooldown_mod_rate > 0.0 {
+        frame.cooldown_mod_rate
+    } else {
+        1.0
+    };
+    (now - frame.cooldown_start) * mod_rate
 }
 
 impl Drop for App {

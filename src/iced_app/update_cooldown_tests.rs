@@ -78,23 +78,117 @@ fn process_timers_invalidates_active_cooldown_widgets() {
     );
 }
 
+#[test]
+fn process_timers_invalidates_slow_mod_rate_cooldowns_after_real_duration() {
+    let mut app = build_test_app(ScreenKind::Game);
+    prepare_incremental_tick(&mut app);
+
+    let cooldown_id = create_cooldown(&app, "SlowModRateActiveTick", 11.0, 10.0, 0.5);
+
+    let task = app.handle_process_timers(Instant::now());
+    let action = pollster::block_on(async {
+        iced_runtime::task::into_stream(task)
+            .expect("slow mod-rate cooldown should request a redraw")
+            .next()
+            .await
+            .expect("task should emit a redraw action")
+    });
+
+    assert!(
+        matches!(action, Action::Window(WindowAction::RedrawAll)),
+        "slow mod-rate cooldown progress should still redraw after real duration"
+    );
+    assert_pending_dirty_contains(&app, cooldown_id);
+}
+
+#[test]
+fn process_timers_marks_fast_mod_rate_cooldown_completion_once() {
+    let mut app = build_test_app(ScreenKind::Game);
+    prepare_incremental_tick(&mut app);
+
+    let cooldown_id = create_cooldown(&app, "FastModRateCompletionTick", 4.9, 10.0, 2.0);
+    let _ = app.handle_process_timers(Instant::now());
+    clear_tick_dirty(&app);
+
+    set_cooldown(&app, "FastModRateCompletionTick", 5.1, 10.0, 2.0);
+    clear_tick_dirty(&app);
+
+    let _ = app.handle_process_timers(Instant::now());
+    assert_pending_dirty_contains(&app, cooldown_id);
+
+    clear_tick_dirty(&app);
+    let _ = app.handle_process_timers(Instant::now());
+    assert_pending_dirty_excludes(&app, cooldown_id);
+}
+
 fn create_active_cooldown(app: &App) -> u64 {
+    create_cooldown(app, "ActiveCooldownTick", 0.0, 30.0, 1.0)
+}
+
+fn prepare_incremental_tick(app: &mut App) {
+    app.screen_size.set(Size::new(1024.0, 768.0));
+    app.selected_rot_level = "Off".to_string();
+    app.strata_dirty.set(0);
+    app.textures_pending.set(false);
+    *app.pending_dirty_ids.borrow_mut() = Some(FxHashSet::default());
+}
+
+fn create_cooldown(app: &App, name: &str, elapsed: f64, duration: f64, mod_rate: f64) -> u64 {
     let env = app.env.borrow();
-    env.exec(
+    env.exec(&format!(
         r#"
-        local cooldown = CreateFrame("Cooldown", "ActiveCooldownTick", UIParent)
+        local cooldown = CreateFrame("Cooldown", "{name}", UIParent)
         cooldown:SetSize(36, 36)
         cooldown:SetPoint("CENTER")
-        cooldown:SetCooldown(GetTime(), 30)
+        cooldown:SetCooldown(GetTime() - {elapsed}, {duration}, {mod_rate})
     "#,
-    )
-    .expect("active cooldown should be created");
+    ))
+    .expect("cooldown should be created");
 
     let state = env.state().borrow();
     let cooldown_id = state
         .widgets
-        .get_id_by_name("ActiveCooldownTick")
+        .get_id_by_name(name)
         .expect("cooldown widget should be registered");
     let _ = state.widgets.take_render_dirty_with_ids();
     cooldown_id
+}
+
+fn set_cooldown(app: &App, name: &str, elapsed: f64, duration: f64, mod_rate: f64) {
+    app.env
+        .borrow()
+        .exec(&format!(
+            r#"
+            {name}:SetCooldown(GetTime() - {elapsed}, {duration}, {mod_rate})
+        "#,
+        ))
+        .expect("cooldown should be updated");
+}
+
+fn clear_tick_dirty(app: &App) {
+    app.strata_dirty.set(0);
+    *app.pending_dirty_ids.borrow_mut() = Some(FxHashSet::default());
+    let env = app.env.borrow();
+    let state = env.state().borrow();
+    let _ = state.widgets.take_render_dirty_with_ids();
+}
+
+fn assert_pending_dirty_contains(app: &App, cooldown_id: u64) {
+    assert!(
+        app.pending_dirty_ids
+            .borrow()
+            .as_ref()
+            .is_some_and(|ids| ids.contains(&cooldown_id)),
+        "cooldown should use incremental dirty IDs"
+    );
+}
+
+fn assert_pending_dirty_excludes(app: &App, cooldown_id: u64) {
+    assert!(
+        !app.pending_dirty_ids
+            .borrow()
+            .as_ref()
+            .is_some_and(|ids| ids.contains(&cooldown_id)),
+        "completed cooldown should not stay dirty after final redraw"
+    );
 }
