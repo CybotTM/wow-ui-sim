@@ -452,14 +452,18 @@ fn test_new_bag_item_button_icon_matches_its_slot_after_refresh() {
             if width < 30 or height < 30 then
                 return string.format("icon_too_small_%s_%s", tostring(width), tostring(height))
             end
-            local left, right, top, bottom = button.icon:GetTexCoord()
-            if left ~= 0 or right ~= 1 or top ~= 0 or bottom ~= 1 then
+            local tlx, tly, blx, bly, trx, try, brx, bry = button.icon:GetTexCoord()
+            if tlx ~= 0 or tly ~= 0 or blx ~= 0 or bly ~= 1 or trx ~= 1 or try ~= 0 or brx ~= 1 or bry ~= 1 then
                 return string.format(
-                    "icon_has_stale_tex_coords_%s_%s_%s_%s",
-                    tostring(left),
-                    tostring(right),
-                    tostring(top),
-                    tostring(bottom)
+                    "icon_has_stale_tex_coords_%s_%s_%s_%s_%s_%s_%s_%s",
+                    tostring(tlx),
+                    tostring(tly),
+                    tostring(blx),
+                    tostring(bly),
+                    tostring(trx),
+                    tostring(try),
+                    tostring(brx),
+                    tostring(bry)
                 )
             end
             return "ok"

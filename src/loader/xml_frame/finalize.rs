@@ -4,7 +4,9 @@ use std::collections::BTreeSet;
 use std::time::Instant;
 
 use crate::loader::LoadTiming;
-use crate::loader::button::{apply_button_fonts, apply_button_text, apply_button_textures};
+use crate::loader::button::{
+    apply_button_fonts_with_ref, apply_button_text_with_ref, apply_button_textures_with_ref,
+};
 use crate::loader::error::LoadError;
 use crate::loader::xml_frame_extras::{
     apply_animation_groups, apply_bar_texture, apply_thumb_texture, init_action_bar_tables,
@@ -42,13 +44,13 @@ fn create_children_and_finalize(
 ) -> Result<(), LoadError> {
     seed_child_parent_arrays(env, frame, frame_id)?;
     let layer_start = Instant::now();
-    create_layer_children(env, frame, name, subst_parent, inherits, timing)?;
+    create_layer_children(env, frame, frame_id, name, subst_parent, inherits, timing)?;
     timing.frame_layer_children_time += layer_start.elapsed();
     create_child_frames(env, frame, name, subst_parent, inherits, timing)?;
     let anim_start = Instant::now();
     apply_animation_groups(env, frame, frame_id, inherits)?;
     timing.frame_anim_time += anim_start.elapsed();
-    timing.frame_button_time += apply_frame_button_extras(env, frame, name, inherits)?;
+    timing.frame_button_time += apply_frame_button_extras(env, frame, frame_id, name, inherits)?;
     env.with_state(|state| {
         crate::lua_api::globals::template::repair_direct_child_parent_keys(state, frame_id)
             .map_err(|error| LoadError::Lua(error.to_string()))
@@ -74,16 +76,18 @@ fn create_children_and_finalize(
 fn apply_frame_button_extras(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
+    frame_id: u64,
     name: &str,
     inherits: &str,
 ) -> Result<std::time::Duration, LoadError> {
     let button_start = Instant::now();
+    let frame_ref_name = format!("__frame_{frame_id}");
     // `CreateFrame(..., inherits)` already installs template-owned button
     // texture/text extras. The XML finalize pass should only apply the
     // frame's direct extras or inherited ButtonText regions get created twice.
-    apply_button_textures(env, frame, name, inherits)?;
-    apply_button_text(env, frame, name, "")?;
-    apply_button_fonts(env, frame, name, "")?;
+    apply_button_textures_with_ref(env, frame, name, &frame_ref_name, inherits)?;
+    apply_button_text_with_ref(env, frame, name, &frame_ref_name, "")?;
+    apply_button_fonts_with_ref(env, frame, name, &frame_ref_name, "")?;
     apply_bar_texture(env, frame, name, inherits)?;
     apply_thumb_texture(env, frame, name, inherits)?;
     init_action_bar_tables(env, frame, name);
@@ -182,15 +186,18 @@ fn seed_child_parent_arrays(
 fn create_layer_children(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
+    frame_id: u64,
     name: &str,
     subst_parent: &str,
     _inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
+    let parent_ref_name = format!("__frame_{frame_id}");
     crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
         env,
         frame,
         name,
+        &parent_ref_name,
         subst_parent,
         timing,
     )

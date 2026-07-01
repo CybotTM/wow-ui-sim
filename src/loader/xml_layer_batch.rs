@@ -129,7 +129,7 @@ fn append_single_texture<'a>(
 /// directly preserves the XML order Blizzard authors rely on.
 fn append_layer_children_code<'a>(
     frame: &'a xml::FrameXml,
-    parent_name: &str,
+    parent_ref_name: &str,
     name_parent: &str,
     batch: &mut String,
     attachments: &mut Vec<ParentKeyAttachment>,
@@ -144,7 +144,7 @@ fn append_layer_children_code<'a>(
             for element in &layer.elements {
                 append_layer_element_code(
                     element,
-                    parent_name,
+                    parent_ref_name,
                     name_parent,
                     draw_layer,
                     sub_level,
@@ -161,7 +161,7 @@ fn append_layer_children_code<'a>(
 
 fn append_layer_element_code<'a>(
     element: &'a xml::LayerElement,
-    parent_name: &str,
+    parent_ref_name: &str,
     name_parent: &str,
     draw_layer: &str,
     sub_level: i32,
@@ -174,7 +174,7 @@ fn append_layer_element_code<'a>(
     if let xml::LayerElement::FontString(fs) = element {
         append_single_fontstring(
             fs,
-            parent_name,
+            parent_ref_name,
             name_parent,
             draw_layer,
             sub_level,
@@ -195,7 +195,7 @@ fn append_layer_element_code<'a>(
     }
     append_single_texture(
         &ct,
-        parent_name,
+        parent_ref_name,
         name_parent,
         batch,
         attachments,
@@ -206,7 +206,7 @@ fn append_layer_element_code<'a>(
 
 fn append_single_fontstring(
     fontstring: &xml::FontStringXml,
-    parent_name: &str,
+    parent_ref_name: &str,
     name_parent: &str,
     draw_layer: &str,
     sub_level: i32,
@@ -222,7 +222,7 @@ fn append_single_fontstring(
     let resolved_text = resolve_fontstring_text(fontstring.text.as_deref());
     let code = build_fontstring_lua(
         fontstring,
-        parent_name,
+        parent_ref_name,
         name_parent,
         draw_layer,
         sub_level,
@@ -452,6 +452,7 @@ pub fn create_layer_children_batched_with_name_parent(
     env: &LoaderEnv<'_>,
     frame: &xml::FrameXml,
     parent_name: &str,
+    parent_ref_name: &str,
     name_parent: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
@@ -462,7 +463,7 @@ pub fn create_layer_children_batched_with_name_parent(
 
     append_layer_children_code(
         frame,
-        parent_name,
+        parent_ref_name,
         name_parent,
         &mut batch,
         &mut attachments,
