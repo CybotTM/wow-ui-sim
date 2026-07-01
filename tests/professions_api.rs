@@ -105,6 +105,37 @@ fn test_profession_info_mining() {
 }
 
 #[test]
+fn get_profession_info_exposes_skill_line_name_for_addon_lookup() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local skillLinesLUT = {}
+            for _, skillLine in ipairs(C_TradeSkillUI.GetAllProfessionTradeSkillLines()) do
+                skillLinesLUT[C_TradeSkillUI.GetTradeSkillDisplayName(skillLine)] = skillLine
+            end
+
+            local professions = { GetProfessions() }
+            local skills = {}
+            for i = 1, 2 do
+                local profidx = professions[i]
+                if profidx then
+                    local profname = select(11, GetProfessionInfo(profidx))
+                    skills[skillLinesLUT[profname]] = true
+                end
+            end
+
+            if skills[164] ~= true then return "missing_blacksmithing" end
+            if skills[186] ~= true then return "missing_mining" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_get_profession_skill_line_id_maps_known_profession_enums() {
     let env = env();
     let (blacksmithing, mining): (i32, i32) = env

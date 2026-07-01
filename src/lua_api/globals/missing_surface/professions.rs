@@ -389,7 +389,7 @@ fn push_global_profession_info(state: &mut LuaState, profession: &profession_dat
     let name = create_string(state, profession.name);
     let icon = create_string(state, profession_icon_path(profession.profession_id));
     let skill_line_name = if profession.parent_profession_name.is_empty() {
-        Val::Nil
+        create_string(state, profession.name)
     } else {
         create_string(state, profession.parent_profession_name)
     };
