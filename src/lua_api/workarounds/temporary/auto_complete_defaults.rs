@@ -16,6 +16,16 @@ if GetAutoCompleteRealms == nil then
         return C_AutoComplete.GetAutoCompleteRealms()
     end
 end
+local existingGetAutoCompleteResults = rawget(C_AutoComplete, "GetAutoCompleteResults")
+if existingGetAutoCompleteResults == nil then
+    function C_AutoComplete.GetAutoCompleteResults()
+        return {}
+    end
+else
+    function C_AutoComplete.GetAutoCompleteResults(...)
+        return existingGetAutoCompleteResults(...) or {}
+    end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -43,6 +53,69 @@ mod tests {
 
         assert_eq!(namespace_count, 0);
         assert_eq!(global_count, 0);
+    }
+
+    #[test]
+    fn installs_empty_result_default_when_surface_is_missing() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        env.exec("C_AutoComplete.GetAutoCompleteResults = nil")
+            .expect("fixture should clear autocomplete result function");
+        super::apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
+
+        let count: i32 = env
+            .eval(
+                r#"
+                return #C_AutoComplete.GetAutoCompleteResults("name", 1, 0, true, nil, nil)
+                "#,
+            )
+            .expect("autocomplete result default should be callable");
+
+        assert_eq!(count, 0);
+    }
+
+    #[test]
+    fn converts_nil_autocomplete_results_to_empty_table() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        env.exec("function C_AutoComplete.GetAutoCompleteResults() end")
+            .expect("fixture should install nil-returning autocomplete result function");
+        super::apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
+
+        let count: i32 = env
+            .eval(
+                r#"
+                return #C_AutoComplete.GetAutoCompleteResults("name", 1, 0, true, nil, nil)
+                "#,
+            )
+            .expect("autocomplete nil result should be converted to a table");
+
+        assert_eq!(count, 0);
+    }
+
+    #[test]
+    fn preserves_existing_autocomplete_results() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        env.exec(
+            r#"
+            function C_AutoComplete.GetAutoCompleteResults()
+                return { "modeled-result" }
+            end
+            "#,
+        )
+        .expect("fixture should install modeled autocomplete result function");
+        super::apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
+
+        let result: String = env
+            .eval(
+                r#"
+                return C_AutoComplete.GetAutoCompleteResults("name", 1, 0, true, nil, nil)[1]
+                "#,
+            )
+            .expect("existing autocomplete result function should remain callable");
+
+        assert_eq!(result, "modeled-result");
     }
 
     #[test]
