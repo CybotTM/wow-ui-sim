@@ -15,9 +15,7 @@ const CREATE_SECURE_ENV_LUA: &str = r##"
     local genv = _G
     local secureenv = {}
     for k, v in pairs(genv) do
-        if k ~= "SOUNDKIT" then
-            secureenv[k] = v
-        end
+        secureenv[k] = v
     end
     if genv.Enum then
         local se = {}
@@ -115,4 +113,19 @@ pub fn set_in_both_envs_rilua(lua: &mut rilua::Lua, key: &str, val: Val) -> LuaR
         secureenv.raw_set(state, Val::Str(key_ref), val)?;
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn secure_environment_includes_soundkit_table() {
+        let env = WowLuaEnv::new().expect("lua env");
+        let soundkit_type: String = env
+            .eval(r#"return type(rawget(__secureenv, "SOUNDKIT"))"#)
+            .expect("secureenv SOUNDKIT type");
+
+        assert_eq!(soundkit_type, "table");
+    }
 }
