@@ -1,6 +1,5 @@
 //! C_SpecializationInfo and UIWidgetContainerMixin implementations.
 
-#[cfg(feature = "client-mists")]
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::game_data::CastingState;
 use crate::lua_api::globals::spellbook_data;
@@ -17,7 +16,6 @@ use rilua::{LuaResult, Val};
 
 use super::helpers::set_global_val;
 
-#[cfg(feature = "client-mists")]
 const CLASS_FILES: &[&str] = &[
     "WARRIOR",
     "PALADIN",
@@ -59,7 +57,6 @@ const C_SPECIALIZATION_INFO_METHODS: &[(&str, RustLuaFn)] = &[
     ("SetSpecialization", c_spec_set_specialization),
 ];
 
-#[cfg(feature = "client-mists")]
 const LEGACY_SPECIALIZATION_GLOBALS: &[(&str, RustLuaFn)] = &[
     ("GetNumSpecGroups", get_num_spec_groups),
     ("GetNumSpecializations", get_num_specializations),
@@ -90,7 +87,6 @@ pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
     };
     register_c_specialization_info_methods(state, t_ref)?;
     set_global_val(state, "C_SpecializationInfo", t);
-    #[cfg(feature = "client-mists")]
     register_legacy_specialization_globals(state)?;
     Ok(())
 }
@@ -282,7 +278,6 @@ fn start_specialization_change(state: &mut LuaState, target_index: i32) -> LuaRe
     Ok(true)
 }
 
-#[cfg(feature = "client-mists")]
 fn set_specialization(state: &mut LuaState) -> LuaResult<u32> {
     let requested_index = match stack_val(state, 1) {
         Val::Num(n) => n as i32,
@@ -296,7 +291,6 @@ fn set_specialization(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-mists")]
 fn activate_specialization_now(state: &mut LuaState, target_index: i32) -> LuaResult<()> {
     {
         let mut sim = borrow_state_mut(state)?;
@@ -312,7 +306,6 @@ fn activate_specialization_now(state: &mut LuaState, target_index: i32) -> LuaRe
     Ok(())
 }
 
-#[cfg(feature = "client-mists")]
 fn register_legacy_specialization_globals(state: &mut LuaState) -> LuaResult<()> {
     for (name, rust_fn) in LEGACY_SPECIALIZATION_GLOBALS {
         table_set_rust_fn_static(state, state.global, name, *rust_fn)?;
@@ -320,13 +313,11 @@ fn register_legacy_specialization_globals(state: &mut LuaState) -> LuaResult<()>
     Ok(())
 }
 
-#[cfg(feature = "client-mists")]
 fn get_num_spec_groups(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(1.0));
     Ok(1)
 }
 
-#[cfg(feature = "client-mists")]
 fn get_num_specializations(state: &mut LuaState) -> LuaResult<u32> {
     let class_id = borrow_state(state)?.player.class_index.max(1) as u32;
     let count = specializations::specs_for_class(class_id).count() as f64;
@@ -334,7 +325,6 @@ fn get_num_specializations(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-mists")]
 fn get_specialization_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
     let spec_id = match stack_val(state, 1) {
         Val::Num(n) => n as u32,
@@ -359,7 +349,6 @@ fn get_specialization_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(7)
 }
 
-#[cfg(feature = "client-mists")]
 fn get_specialization_info_for_class_id(state: &mut LuaState) -> LuaResult<u32> {
     let class_id = match stack_val(state, 1) {
         Val::Num(n) => n as u32,
@@ -377,7 +366,6 @@ fn get_specialization_info_for_class_id(state: &mut LuaState) -> LuaResult<u32> 
     Ok(9)
 }
 
-#[cfg(feature = "client-mists")]
 fn get_inspect_specialization(state: &mut LuaState) -> LuaResult<u32> {
     let unit = match stack_val(state, 1) {
         Val::Str(s) => state
@@ -402,17 +390,14 @@ fn get_inspect_specialization(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-mists")]
 fn get_specialization_role(state: &mut LuaState) -> LuaResult<u32> {
     push_specialization_role(state, requested_spec_role)
 }
 
-#[cfg(feature = "client-mists")]
 fn get_specialization_role_by_id(state: &mut LuaState) -> LuaResult<u32> {
     push_specialization_role(state, requested_spec_role_by_id)
 }
 
-#[cfg(feature = "client-mists")]
 fn push_specialization_role(
     state: &mut LuaState,
     role_lookup: fn(&LuaState) -> Option<&'static str>,
@@ -426,7 +411,6 @@ fn push_specialization_role(
     Ok(1)
 }
 
-#[cfg(feature = "client-mists")]
 fn get_specialization_role_enum(state: &mut LuaState) -> LuaResult<u32> {
     let Some(role) = requested_spec_role(state) else {
         state.push(Val::Nil);
@@ -436,7 +420,6 @@ fn get_specialization_role_enum(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-mists")]
 fn get_specialization_role_enum_by_id(state: &mut LuaState) -> LuaResult<u32> {
     let Some(role) = requested_spec_role_by_id(state) else {
         state.push(Val::Nil);
@@ -446,7 +429,6 @@ fn get_specialization_role_enum_by_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-mists")]
 fn requested_spec_role_by_id(state: &LuaState) -> Option<&'static str> {
     let spec_id = match stack_val(state, 1) {
         Val::Num(n) => n as u32,
@@ -455,7 +437,6 @@ fn requested_spec_role_by_id(state: &LuaState) -> Option<&'static str> {
     specializations::spec_by_id(spec_id).map(|spec| spec.role)
 }
 
-#[cfg(feature = "client-mists")]
 fn get_lfg_string_from_enum(state: &mut LuaState) -> LuaResult<u32> {
     let role = match stack_val(state, 1) {
         Val::Num(0.0) => "TANK",
@@ -468,7 +449,6 @@ fn get_lfg_string_from_enum(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-mists")]
 fn requested_spec_role(state: &LuaState) -> Option<&'static str> {
     let requested_index = match stack_val(state, 1) {
         Val::Num(n) => n as i32,
@@ -503,7 +483,6 @@ fn player_spec_by_index(
     specializations::specs_for_class(class_id).nth((requested_spec_index - 1) as usize)
 }
 
-#[cfg(feature = "client-mists")]
 fn active_player_spec(state: &LuaState) -> Option<&'static specializations::SpecInfo> {
     let (class_id, active_spec_index) = {
         let sim = borrow_state(state).ok()?;
@@ -522,7 +501,6 @@ fn push_specialization_info(state: &mut LuaState, spec: &specializations::SpecIn
     state.push(Val::Bool(true));
 }
 
-#[cfg(feature = "client-mists")]
 fn push_class_specialization_info(state: &mut LuaState, spec: &specializations::SpecInfo) {
     push_specialization_identity(state, spec);
     state.push(Val::Bool(false));
@@ -558,7 +536,6 @@ fn spec_display_spell_ids(spec_id: i32) -> Option<Vec<u32>> {
     None
 }
 
-#[cfg(feature = "client-mists")]
 fn role_enum_value(role: &str) -> f64 {
     match role {
         "TANK" => 0.0,

@@ -122,14 +122,32 @@ fn load_runtime_addon_files(
 }
 
 fn runtime_addon_dependencies(state: &LuaState, toc: &crate::toc::TocFile) -> Vec<String> {
-    let mut deps = toc.dependencies();
-    let mut seen: HashSet<String> = deps.iter().cloned().collect();
+    let mut deps = Vec::new();
+    let mut seen = HashSet::new();
+
+    for dep in toc.dependencies() {
+        if required_dependency_applies_to_screen(state, &dep) && seen.insert(dep.clone()) {
+            deps.push(dep);
+        }
+    }
     for dep in toc.optional_deps() {
         if super::find_runtime_addon_toc(state, &dep).is_some() && seen.insert(dep.clone()) {
             deps.push(dep);
         }
     }
     deps
+}
+
+fn required_dependency_applies_to_screen(state: &LuaState, dependency: &str) -> bool {
+    let is_glue = borrow_state(state)
+        .map(|sim| sim.screen_kind.is_glue())
+        .unwrap_or(false);
+
+    match (dependency, is_glue) {
+        ("Blizzard_GlueParent", false) => false,
+        ("Blizzard_UIParent", true) => false,
+        _ => true,
+    }
 }
 
 fn runtime_foundation_dependencies(state: &LuaState, addon_name: &str) -> Vec<&'static str> {

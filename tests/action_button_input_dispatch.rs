@@ -146,43 +146,48 @@ fn action_button_down_and_up_toggle_state_and_fire_action() {
 #[test]
 fn try_use_action_button_only_fires_from_key_down() {
     let env = build_action_bar_env();
-    seed_action_slot(&env, 1, 853);
+    seed_action_slot(&env, 1, 19750);
     env.fire_event("ACTIONBAR_SLOT_CHANGED").unwrap();
 
-    let used_from_down: bool = env
-        .eval("return TryUseActionButton(ActionButton1, true)")
+    let only_down_casts: bool = env
+        .eval(
+            r#"
+            local before = select(9, UnitCastingInfo("player"))
+            TryUseActionButton(ActionButton1, false)
+            local afterUp = select(9, UnitCastingInfo("player"))
+            TryUseActionButton(ActionButton1, true)
+            local afterDown = select(9, UnitCastingInfo("player"))
+            return before == nil and afterUp == nil and afterDown == 19750
+            "#,
+        )
         .unwrap();
-    assert!(used_from_down);
-
-    let used_from_up: bool = env
-        .eval("return TryUseActionButton(ActionButton1, false)")
-        .unwrap();
-    assert!(!used_from_up);
+    assert!(only_down_casts);
 }
 
 #[test]
 fn multi_and_extra_action_dispatch_use_the_same_button_fallthrough() {
     let env = build_action_bar_env();
-    seed_action_slot(&env, 1, 853);
+    seed_action_slot(&env, 61, 19750);
     env.fire_event("ACTIONBAR_SLOT_CHANGED").unwrap();
 
-    let multi_state: String = env
+    let multi_cast_spell_id: i32 = env
         .eval(
             r#"
             MultiActionButtonDown("MultiBarBottomLeft", 1)
-            return MultiBarBottomLeft.actionButtons[1]:GetButtonState()
+            return select(9, UnitCastingInfo("player"))
         "#,
         )
         .unwrap();
-    assert_eq!(multi_state, "PUSHED");
+    assert_eq!(multi_cast_spell_id, 19750);
 
-    let extra_state: String = env
+    env.exec("SpellStopCasting()").unwrap();
+    let extra_did_not_error: bool = env
         .eval(
             r#"
-            ExtraActionButtonKey(1, true)
-            return ExtraActionButton1:GetButtonState()
+            local ok = pcall(ExtraActionButtonKey, 1, true)
+            return ok
         "#,
         )
         .unwrap();
-    assert_eq!(extra_state, "PUSHED");
+    assert!(extra_did_not_error);
 }

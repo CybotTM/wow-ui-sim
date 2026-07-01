@@ -91,10 +91,10 @@ fn get_num_battleground_entries_one_when_queued() {
 }
 
 #[test]
-fn get_num_battleground_types_reports_no_listed_battlegrounds() {
+fn get_num_battleground_types_reports_seeded_battlegrounds() {
     let env = env();
     let n: i32 = env.eval("return GetNumBattlegroundTypes()").unwrap();
-    assert_eq!(n, 0);
+    assert_eq!(n, 6);
 }
 
 // ── GetLFGDungeonInfo / Mode / NumEncounters ──────────────────────────────────

@@ -63,7 +63,7 @@ if inputFrame and inputFrame.Submit == nil and type(inputFrame.GetChildren) == "
         if type(child.GetObjectType) == "function"
             and child:GetObjectType() == "Button"
             and type(child.GetText) == "function"
-            and child:GetText() == BLIZZARD_CHALLENGE_SUBMIT then
+            and (child:GetText() == BLIZZARD_CHALLENGE_SUBMIT or child:GetText() == "Submit") then
             inputFrame.Submit = child
             break
         end

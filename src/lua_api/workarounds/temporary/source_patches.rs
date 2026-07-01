@@ -204,6 +204,13 @@ const LUA_SOURCE_PATCHES: &[LuaSourcePatch] = &[
         ],
     },
     LuaSourcePatch {
+        suffix: "/Blizzard_WowTokenUIInbound.lua",
+        operations: &[LuaSourcePatchOp::Replace {
+            from: "function WowToken_IsWowTokenAuctionDialogShown()\n\treturn WowTokenDialog:GetAttribute(\"isauctiondialogshown\");\nend",
+            to: "function WowToken_IsWowTokenAuctionDialogShown()\n\tif type(WowTokenDialog) ~= \"table\" or type(WowTokenDialog.GetAttribute) ~= \"function\" then\n\t\treturn false;\n\tend\n\tlocal ok, shown = pcall(WowTokenDialog.GetAttribute, WowTokenDialog, \"isauctiondialogshown\");\n\treturn ok and shown or false;\nend",
+        }],
+    },
+    LuaSourcePatch {
         suffix: "/Blizzard_Shared_StoreUIInbound.lua",
         operations: &[
             LuaSourcePatchOp::Replace {

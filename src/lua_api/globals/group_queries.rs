@@ -280,8 +280,8 @@ fn get_raid_roster_info(state: &mut LuaState) -> LuaResult<u32> {
 
 fn raid_roster_member(state: &LuaState, index: usize) -> LuaResult<Option<PartyMember>> {
     let st = borrow_state(state)?;
-    let raid_active = st.party_group_active && st.party_members.len() >= 6;
-    if !raid_active || index == 0 {
+    let roster_count = st.party_members.len() + 1;
+    if !st.party_group_active || index == 0 || index > roster_count {
         return Ok(None);
     }
     let member = if index == 1 {
