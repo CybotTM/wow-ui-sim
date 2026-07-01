@@ -128,6 +128,10 @@ name = "frame_edit_mode_methods"
 path = "tests/frame_edit_mode_methods.rs"
 
 [[test]]
+name = "c_autocomplete"
+path = "tests/c_autocomplete.rs"
+
+[[test]]
 name = "scoped_modifier_addon_smoke"
 path = "tests/scoped_modifier_addon_smoke.rs"
 

@@ -11,6 +11,7 @@ pub mod c_ardenweald_gardening;
 pub mod c_arrow_callout_manager;
 pub mod c_artifact_relic_forge_ui;
 pub mod c_artifact_ui;
+pub mod c_auto_complete;
 pub mod c_azerite_empowered_item;
 pub mod c_azerite_essence;
 pub mod c_azerite_item;

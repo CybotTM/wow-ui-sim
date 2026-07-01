@@ -1,8 +1,9 @@
-//! Temporary autocomplete realm defaults.
+//! Temporary autocomplete realm defaults and legacy global forwarders.
 //!
-//! Realm/name completion data is not modeled yet. Blizzard's deprecated global
-//! forwards to `C_AutoComplete`, so both surfaces return empty realm lists until
-//! completion data has backing simulator state.
+//! Realm completion data is not modeled yet, so realm probes return an empty
+//! list. Character/name completion is modeled in `c_api::c_auto_complete`; this
+//! bootstrap only exposes the deprecated global forwarder in raw `WowLuaEnv`
+//! tests where Blizzard_DeprecatedAutoComplete has not been loaded.
 
 const AUTO_COMPLETE_DEFAULTS_LUA: &str = r#"
 C_AutoComplete = C_AutoComplete or __wow_namespace()
@@ -16,14 +17,9 @@ if GetAutoCompleteRealms == nil then
         return C_AutoComplete.GetAutoCompleteRealms()
     end
 end
-local existingGetAutoCompleteResults = rawget(C_AutoComplete, "GetAutoCompleteResults")
-if existingGetAutoCompleteResults == nil then
-    function C_AutoComplete.GetAutoCompleteResults()
-        return {}
-    end
-else
-    function C_AutoComplete.GetAutoCompleteResults(...)
-        return existingGetAutoCompleteResults(...) or {}
+if GetAutoCompleteResults == nil then
+    function GetAutoCompleteResults(name, numResults, cursorPosition, allowFullMatch, includeFlags, excludeFlags)
+        return C_AutoComplete.GetAutoCompleteResults(name, numResults, cursorPosition, not not allowFullMatch, includeFlags, excludeFlags)
     end
 end
 "#;
@@ -56,51 +52,14 @@ mod tests {
     }
 
     #[test]
-    fn installs_empty_result_default_when_surface_is_missing() {
-        let env = WowLuaEnv::new().expect("lua env should initialize");
-
-        env.exec("C_AutoComplete.GetAutoCompleteResults = nil")
-            .expect("fixture should clear autocomplete result function");
-        super::apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
-
-        let count: i32 = env
-            .eval(
-                r#"
-                return #C_AutoComplete.GetAutoCompleteResults("name", 1, 0, true, nil, nil)
-                "#,
-            )
-            .expect("autocomplete result default should be callable");
-
-        assert_eq!(count, 0);
-    }
-
-    #[test]
-    fn converts_nil_autocomplete_results_to_empty_table() {
-        let env = WowLuaEnv::new().expect("lua env should initialize");
-
-        env.exec("function C_AutoComplete.GetAutoCompleteResults() end")
-            .expect("fixture should install nil-returning autocomplete result function");
-        super::apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
-
-        let count: i32 = env
-            .eval(
-                r#"
-                return #C_AutoComplete.GetAutoCompleteResults("name", 1, 0, true, nil, nil)
-                "#,
-            )
-            .expect("autocomplete nil result should be converted to a table");
-
-        assert_eq!(count, 0);
-    }
-
-    #[test]
-    fn preserves_existing_autocomplete_results() {
+    fn installs_legacy_results_forwarder() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
         env.exec(
             r#"
-            function C_AutoComplete.GetAutoCompleteResults()
-                return { "modeled-result" }
+            GetAutoCompleteResults = nil
+            function C_AutoComplete.GetAutoCompleteResults(_name, _numResults, _cursorPosition, allowFullMatch)
+                return { allowFullMatch and "coerced" or "not-coerced" }
             end
             "#,
         )
@@ -110,12 +69,37 @@ mod tests {
         let result: String = env
             .eval(
                 r#"
-                return C_AutoComplete.GetAutoCompleteResults("name", 1, 0, true, nil, nil)[1]
+                return GetAutoCompleteResults("name", 1, 0, 1, nil, nil)[1]
                 "#,
             )
-            .expect("existing autocomplete result function should remain callable");
+            .expect("legacy autocomplete result function should forward to C_AutoComplete");
 
-        assert_eq!(result, "modeled-result");
+        assert_eq!(result, "coerced");
+    }
+
+    #[test]
+    fn preserves_existing_legacy_results_forwarder() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+
+        env.exec(
+            r#"
+            function GetAutoCompleteResults()
+                return { "legacy-modeled-result" }
+            end
+            "#,
+        )
+        .expect("fixture should install legacy autocomplete result function");
+        super::apply_bootstrap(&mut env.rilua_mut()).expect("workaround should apply");
+
+        let result: String = env
+            .eval(
+                r#"
+                return GetAutoCompleteResults("name", 1, 0, true, nil, nil)[1]
+                "#,
+            )
+            .expect("existing legacy autocomplete result function should remain callable");
+
+        assert_eq!(result, "legacy-modeled-result");
     }
 
     #[test]
