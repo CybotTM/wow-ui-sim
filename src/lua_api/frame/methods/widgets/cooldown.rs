@@ -2,8 +2,8 @@
 
 use super::shared::{animation_group_id_for_frame, opt_string, val_to_bool, val_to_f64};
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, frame_id_from_stack, frame_ref,
-    sync_child_to_rilua, table_get,
+    borrow_state, borrow_state_mut, call_function_state, call_function_state_multi,
+    frame_id_from_stack, frame_ref, sync_child_to_rilua, table_get,
 };
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
@@ -578,8 +578,42 @@ pub(super) fn set_edge_color(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-pub(super) fn set_tex_coord_range(_state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: parse two Vector2 args
+fn vector2_from_stack(state: &mut LuaState, index: i32) -> Option<(f32, f32)> {
+    let vector = stack_val(state, index);
+    vector2_from_xy_fields(state, vector).or_else(|| vector2_from_get_xy(state, vector))
+}
+
+fn vector2_from_xy_fields(state: &mut LuaState, vector: Val) -> Option<(f32, f32)> {
+    let Val::Num(x) = table_get(state, vector, "x") else {
+        return None;
+    };
+    let Val::Num(y) = table_get(state, vector, "y") else {
+        return None;
+    };
+    Some((x as f32, y as f32))
+}
+
+fn vector2_from_get_xy(state: &mut LuaState, vector: Val) -> Option<(f32, f32)> {
+    let get_xy = table_get(state, vector, "GetXY");
+    let values = call_function_state_multi(state, get_xy, &[vector]).ok()?;
+    let [Val::Num(x), Val::Num(y), ..] = values.as_slice() else {
+        return None;
+    };
+    Some((*x as f32, *y as f32))
+}
+
+pub(super) fn set_tex_coord_range(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((low_x, low_y)) = vector2_from_stack(state, 2) else {
+        return Ok(0);
+    };
+    let Some((high_x, high_y)) = vector2_from_stack(state, 3) else {
+        return Ok(0);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.cooldown_tex_coord_range = Some((low_x, low_y, high_x, high_y));
+    }
     Ok(0)
 }
 

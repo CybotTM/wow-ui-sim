@@ -2,6 +2,32 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::widget::Color;
 
 #[test]
+fn cooldown_set_tex_coord_range_persists_vector_bounds() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local cd = CreateFrame("Cooldown", "CooldownTexCoordProbe", UIParent)
+        local low = { x = 0.125, y = 0.25 }
+        local high = { GetXY = function() return 0.75, 0.875 end }
+        cd:SetSwipeTexture("Interface\\Cooldown\\swipe")
+        cd:SetTexCoordRange(low, high)
+        "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let cooldown_id = state.widgets.get_id_by_name("CooldownTexCoordProbe").unwrap();
+    let cooldown = state.widgets.get(cooldown_id).unwrap();
+
+    assert_eq!(
+        cooldown.cooldown_tex_coord_range,
+        Some((0.125, 0.25, 0.75, 0.875)),
+        "SetTexCoordRange should parse WoW-style Vector2D tables and persist swipe UV bounds"
+    );
+}
+
+#[test]
 fn cooldown_widget_methods_persist_runtime_state() {
     let env = WowLuaEnv::new().unwrap();
 
