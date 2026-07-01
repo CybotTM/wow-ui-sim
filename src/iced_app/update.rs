@@ -41,6 +41,18 @@ impl App {
 
     fn dispatch_simple_message(&mut self, message: Message) -> Task<Message> {
         match message {
+            Message::KeyPress(key, text, captured_at) => {
+                self.handle_key_press_message(&key, text.as_deref(), captured_at)
+            }
+            message => {
+                self.dispatch_non_key_message(message);
+                Task::none()
+            }
+        }
+    }
+
+    fn dispatch_non_key_message(&mut self, message: Message) {
+        match message {
             Message::FireEvent(event) => self.handle_fire_event(&event),
             Message::Scroll(dx, dy) => self.handle_scroll(dx, dy),
             Message::ReloadUI => self.handle_reload_ui(),
@@ -59,9 +71,6 @@ impl App {
             Message::ToggleFramesPanel => self.toggle_frames_panel(),
             Message::XpLevelChanged(ref label) => self.handle_xp_level_changed(label),
             Message::PartySizeChanged(ref label) => self.handle_party_size_changed(label),
-            Message::KeyPress(ref key, ref text, captured_at) => {
-                return self.handle_key_press_message(key, text.as_deref(), captured_at);
-            }
             Message::PlayerClassChanged(ref name) => self.handle_player_class_changed(name),
             Message::PlayerRaceChanged(ref name) => self.handle_player_race_changed(name),
             Message::RotDamageLevelChanged(ref label) => {
@@ -71,10 +80,11 @@ impl App {
             Message::CloseOptionsModal => self.options_modal_visible = false,
             Message::MovementToggled(field, val) => self.handle_movement_toggled(field, val),
             Message::ModifiersChanged(modifiers) => self.handle_modifiers_changed(modifiers),
-            // Handled in update() directly:
-            Message::CanvasEvent(_) | Message::ProcessTimers(_) => unreachable!(),
+            // Handled before dispatch_non_key_message() or directly in update():
+            Message::KeyPress(_, _, _) | Message::CanvasEvent(_) | Message::ProcessTimers(_) => {
+                unreachable!()
+            }
         }
-        Task::none()
     }
 
     fn toggle_frames_panel(&mut self) {
@@ -431,9 +441,20 @@ impl App {
         timings.casting = started.elapsed();
         let (m3, ids3) = self.take_render_dirty_with_ids();
 
+        self.mark_active_cooldown_widgets_dirty();
+        let (m4, ids4) = self.take_render_dirty_with_ids();
+
         *self.pending_dirty_ids.borrow_mut() =
-            merge_dirty_ids([pending_before, ids0, ids1, ids2, ids3]);
-        (m0 | m1 | m2 | m3, timings)
+            merge_dirty_ids([pending_before, ids0, ids1, ids2, ids3, ids4]);
+        (m0 | m1 | m2 | m3 | m4, timings)
+    }
+
+    fn mark_active_cooldown_widgets_dirty(&self) {
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        for id in super::app::active_cooldown_widget_ids(&state) {
+            state.widgets.mark_visual_dirty(id);
+        }
     }
 
     pub(super) fn take_render_dirty_with_ids(&self) -> (u16, Option<FxHashSet<u64>>) {
@@ -715,6 +736,10 @@ fn sample_display_metrics(
 #[cfg(test)]
 #[path = "update_tests.rs"]
 mod update_tests;
+
+#[cfg(test)]
+#[path = "update_cooldown_tests.rs"]
+mod update_cooldown_tests;
 
 #[cfg(test)]
 #[path = "update_key_tests.rs"]

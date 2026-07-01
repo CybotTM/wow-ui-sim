@@ -16,6 +16,7 @@ use crate::lua_server;
 use crate::render::{GlyphAtlas, WowFontSystem};
 use crate::saved_variables::SavedVariablesManager;
 use crate::texture::TextureManager;
+use crate::widget::{Frame, WidgetType};
 use debug_server::ScreenshotData;
 #[cfg(target_os = "linux")]
 use iced_layout_inspector::server as debug_server;
@@ -608,7 +609,7 @@ fn parse_fast_tick_ms(value: &str) -> Option<u64> {
     (tick_ms > 0).then_some(tick_ms)
 }
 
-/// Check if any GCD or spell cooldowns are still active.
+/// Check if any GCD, spell, or visible Cooldown widgets are still active.
 fn has_active_cooldowns(state: &crate::lua_api::SimState) -> bool {
     let now = state.start_time.elapsed().as_secs_f64();
     if let Some((start, dur)) = state.gcd {
@@ -616,10 +617,45 @@ fn has_active_cooldowns(state: &crate::lua_api::SimState) -> bool {
             return true;
         }
     }
-    state
+    if state
         .spell_cooldowns
         .values()
         .any(|cd| now < cd.start + cd.duration)
+    {
+        return true;
+    }
+    has_active_cooldown_widget(state, now)
+}
+
+pub(super) fn active_cooldown_widget_ids(state: &crate::lua_api::SimState) -> Vec<u64> {
+    let now = state.start_time.elapsed().as_secs_f64();
+    state
+        .widgets
+        .iter_ids()
+        .filter(|&id| is_visible_active_cooldown_widget(state, id, now))
+        .collect()
+}
+
+fn has_active_cooldown_widget(state: &crate::lua_api::SimState, now: f64) -> bool {
+    state
+        .widgets
+        .iter_ids()
+        .any(|id| is_visible_active_cooldown_widget(state, id, now))
+}
+
+fn is_visible_active_cooldown_widget(state: &crate::lua_api::SimState, id: u64, now: f64) -> bool {
+    state
+        .widgets
+        .get(id)
+        .is_some_and(|frame| is_active_cooldown_widget(frame, now))
+        && state.widgets.is_ancestor_visible(id)
+}
+
+fn is_active_cooldown_widget(frame: &Frame, now: f64) -> bool {
+    matches!(frame.widget_type, WidgetType::Cooldown)
+        && !frame.cooldown_paused
+        && frame.cooldown_duration > 0.0
+        && now < frame.cooldown_start + frame.cooldown_duration
 }
 
 impl Drop for App {

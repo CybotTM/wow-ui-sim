@@ -60,6 +60,28 @@ fn game_screen_keeps_idle_on_update_heartbeat() {
 }
 
 #[test]
+fn active_cooldown_widget_uses_fast_tick_interval() {
+    let app = build_test_app(ScreenKind::Game);
+    app.strata_dirty.set(0);
+    app.textures_pending.set(false);
+
+    app.env
+        .borrow()
+        .exec(
+            r#"
+            local cooldown = CreateFrame("Cooldown", "FastTickCooldown", UIParent)
+            cooldown:SetCooldown(GetTime(), 30)
+        "#,
+        )
+        .expect("active cooldown should be created");
+
+    assert_eq!(
+        app.compute_tick_interval(),
+        Some(std::time::Duration::from_millis(DEFAULT_FAST_TICK_MS)),
+    );
+}
+
+#[test]
 fn gui_startup_uses_first_real_canvas_size_for_display_size_changed() {
     let app = build_test_app(ScreenKind::Game);
     app.env
