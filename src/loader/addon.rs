@@ -3,12 +3,10 @@
 mod nil_symbol_reports;
 
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::loader_env::create_addon_table_state;
-use crate::lua_api::methods::{registry_table_or_create, table_get, table_set};
 use crate::lua_api::state::SimState;
 use crate::saved_variables::SavedVariablesManager;
 use crate::toc::TocFile;
-use rilua::{LuaApiMut, Val};
+use rilua::Val;
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
@@ -301,7 +299,9 @@ fn build_addon_context<'a>(
     toc: &'a TocFile,
     folder_name: &'a str,
 ) -> Result<AddonContext<'a>, LoadError> {
-    let addon_table = get_or_create_addon_table(env, folder_name)?;
+    let addon_table = env
+        .create_addon_table()
+        .map_err(|e| LoadError::Lua(e.to_string()))?;
 
     Ok(AddonContext {
         name: folder_name,
@@ -310,22 +310,6 @@ fn build_addon_context<'a>(
         use_secure_env: toc.is_secure_env(),
         taint: !is_blizzard_addon(toc),
     })
-}
-
-fn get_or_create_addon_table(env: &LoaderEnv<'_>, folder_name: &str) -> Result<Val, LoadError> {
-    const ADDON_PRIVATE_TABLES: &str = "__wow_addon_private_tables";
-
-    let mut lua = env.rilua_mut();
-    let state = lua.state_mut();
-    let cache = registry_table_or_create(state, ADDON_PRIVATE_TABLES);
-    let existing = table_get(state, cache, folder_name);
-    if matches!(existing, Val::Table(_)) {
-        return Ok(existing);
-    }
-
-    let addon_table = create_addon_table_state(state).map_err(|e| LoadError::Lua(e.to_string()))?;
-    table_set(state, cache, folder_name, addon_table);
-    Ok(addon_table)
 }
 
 fn register_loading_addon(
