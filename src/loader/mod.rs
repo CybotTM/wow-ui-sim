@@ -433,28 +433,10 @@ pub fn load_addon_from_toc_with_saved_vars(
     addon::load_addon_internal(env, toc, Some(saved_vars_mgr))
 }
 
-/// Load only `[Bootstrap]` entries for a LoadOnDemand addon during startup.
-pub fn load_bootstrap_files_from_toc(
-    env: &LoaderEnv<'_>,
-    toc: &TocFile,
-) -> Result<LoadResult, LoadError> {
-    addon::load_bootstrap_files_internal(env, toc)
-}
-
-/// `[Bootstrap]` files load inline during normal TOC loading; no separate pass runs.
-pub fn load_blizzard_bootstrap_files_for_screen(
-    _env: &LoaderEnv<'_>,
-    _blizzard_ui_dir: &Path,
-    _screen: ScreenKind,
-) -> Result<Vec<LoadResult>, LoadError> {
-    Ok(Vec::new())
-}
-
 /// Discover all Blizzard addons in a BlizzardUI directory, topologically sorted by dependencies.
 ///
 /// Scans for `Blizzard_*` subdirectories, parses their TOC files, filters out `LoadOnDemand`
-/// addons unless they are required by a non-LOD addon or contain startup `[Bootstrap]`
-/// entries, and returns them in dependency order.
+/// addons, and returns the remaining addons in dependency order.
 pub fn discover_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)> {
     discover_blizzard_addons_for_screen(blizzard_ui_dir, ScreenKind::Game)
 }

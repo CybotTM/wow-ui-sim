@@ -126,36 +126,6 @@ pub fn load_addon_internal(
     Ok(result)
 }
 
-/// Load only `[Bootstrap]` entries for a LoadOnDemand addon during startup.
-pub fn load_bootstrap_files_internal(
-    env: &LoaderEnv<'_>,
-    toc: &TocFile,
-) -> Result<LoadResult, LoadError> {
-    let folder_name = toc
-        .addon_dir
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or(&toc.name);
-
-    let mut result = LoadResult {
-        name: toc.name.clone(),
-        lua_files: 0,
-        xml_files: 0,
-        timing: LoadTiming::default(),
-        warnings: Vec::new(),
-    };
-
-    if !toc.has_bootstrap_files() || addon_bootstrap_loaded(env, folder_name) {
-        return Ok(result);
-    }
-
-    let _loading_guard = register_loading_addon(env, folder_name, toc);
-    let ctx = build_addon_context(env, toc, folder_name)?;
-    load_bootstrap_files(env, toc, folder_name, &ctx, &mut result);
-    mark_addon_bootstrap_loaded(env, folder_name);
-    Ok(result)
-}
-
 /// Run hand-written workarounds that must fire after specific Blizzard addons
 /// finish loading (e.g. restoring globals the addon's cleanup wiped, or
 /// monkey-patching mixins that don't quite line up with our stub state).
@@ -296,27 +266,6 @@ fn mark_addon_loaded(env: &LoaderEnv<'_>, folder_name: &str) {
     state.loading_addon_index = None;
 }
 
-fn mark_addon_bootstrap_loaded(env: &LoaderEnv<'_>, folder_name: &str) {
-    let mut state = env.state().borrow_mut();
-    if let Some(addon) = state
-        .addons
-        .iter_mut()
-        .find(|addon| addon.folder_name == folder_name)
-    {
-        addon.bootstrap_loaded = true;
-    }
-}
-
-fn addon_bootstrap_loaded(env: &LoaderEnv<'_>, folder_name: &str) -> bool {
-    env.state()
-        .borrow()
-        .addons
-        .iter()
-        .find(|addon| addon.folder_name == folder_name)
-        .map(|addon| addon.bootstrap_loaded)
-        .unwrap_or(false)
-}
-
 fn build_addon_context<'a>(
     env: &LoaderEnv<'a>,
     toc: &'a TocFile,
@@ -403,12 +352,8 @@ fn load_addon_files(
     result: &mut LoadResult,
 ) {
     let overlay_dir = Path::new("Interface/AddOns").join(folder_name);
-    let skip_loaded_bootstrap = addon_bootstrap_loaded(env, folder_name);
 
     for (index, (file_rel, file)) in toc.files.iter().zip(toc.file_paths()).enumerate() {
-        if skip_loaded_bootstrap && toc.file_is_bootstrap(index) {
-            continue;
-        }
         if should_skip_addon_file(toc, file_rel) {
             continue;
         }
@@ -433,27 +378,6 @@ fn load_addon_files(
             println!("  loading file {}", file_rel.display());
         }
         load_addon_file(env, &file_ctx, result, &resolved_file, pass);
-    }
-}
-
-fn load_bootstrap_files(
-    env: &LoaderEnv<'_>,
-    toc: &TocFile,
-    folder_name: &str,
-    ctx: &AddonContext,
-    result: &mut LoadResult,
-) {
-    let overlay_dir = Path::new("Interface/AddOns").join(folder_name);
-
-    for (index, (file_rel, file)) in toc.files.iter().zip(toc.file_paths()).enumerate() {
-        if !toc.file_is_bootstrap(index) {
-            continue;
-        }
-        let resolved_file = resolve_addon_file_path(&overlay_dir, file_rel, file);
-        if std::env::var("WOW_SIM_VERBOSE").is_ok() {
-            println!("  loading bootstrap file {}", file_rel.display());
-        }
-        load_addon_file(env, ctx, result, &resolved_file, EnvironmentPass::Normal);
     }
 }
 

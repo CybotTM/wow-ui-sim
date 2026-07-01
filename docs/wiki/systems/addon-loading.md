@@ -46,11 +46,11 @@ The fallback source list is canonical:
 
 TOC parsing strips `#` comments, skips `[AllowLoadTextLocale]` lines for non-enUS, skips `[AllowLoadGameType]` lines unless the inline gametype matches the active profile's allow-list (retail: mainline/standard; wrath: wrath/wrath_classic/classic; mists: mists/mists_classic/classic; era: vanilla/classic_era/classic; anniversary: vanilla/classic_anniversary/classic), substitutes `[Family]` for the profile's family-subdir (Mainline retail, Classic everywhere else), substitutes `[Game]` for the active profile's game subdir, and normalizes backslashes. Path resolution is case-insensitive for Windows/macOS compatibility. See [[client-profiles]] for the full profile-aware tables.
 
-`[Bootstrap]` does not reorder TOC files. A line such as `Bootstrap.lua [Bootstrap]` stays in `files` at that exact position. For non-LoadOnDemand addons, the bootstrap file executes inline with the surrounding TOC files. For LoadOnDemand addons discovered during startup, only annotated bootstrap files execute during the startup scan; normal files wait for `C_AddOns.LoadAddOn`. A self `C_AddOns.LoadAddOn(thisAddon)` call from an executing bootstrap file is a benign reentrancy no-op and does not load normal files early. PTR-only bootstrap files must still be represented in the cache manifest/profile required-entry set so stale completed caches are rejected when the file is missing.
+`[Bootstrap]` does not reorder TOC files and does not create a separate startup/bootstrap pass. A line such as `Bootstrap.lua [Bootstrap]` stays in `files` at that exact position and executes inline only when the addon itself loads. LoadOnDemand addons discovered during startup remain registered metadata only; their annotated bootstrap files do not execute until `C_AddOns.LoadAddOn` loads the addon normally. A self `C_AddOns.LoadAddOn(thisAddon)` call from an executing `[Bootstrap]` file is a benign reentrancy no-op and does not recursively load later normal files early. PTR-only bootstrap files must still be represented in the cache manifest/profile required-entry set so stale completed caches are rejected when the file is missing.
 
 ## Load Flow (`src/loader/addon.rs`)
 
-During startup, addon discovery includes non-LoadOnDemand addons and LoadOnDemand addons that contain `[Bootstrap]` entries. The sorted startup loop preserves addon order: non-LoadOnDemand addons load their full TOC, while LoadOnDemand addons execute only annotated bootstrap files without marking the addon loaded and without firing `ADDON_LOADED`. This matches the pattern where LoD addons expose tiny public loader globals before `VARIABLES_LOADED`, while the full addon body still loads later on demand.
+During startup, addon discovery includes non-LoadOnDemand addons only. LoadOnDemand addons are registered for metadata and later demand-load resolution, but no files from those TOCs execute during startup just because they carry `[Bootstrap]`. When a LoadOnDemand addon is explicitly loaded, the normal TOC loader runs every file in declared order, including any `[Bootstrap]` entries at their inline positions.
 
 `AddonContext` holds `name`, private Lua `table`, and `addon_root`. Per-file process:
 1. Check local overlay at `./Interface/AddOns/{addon}/{file}` first, fall back to addon root
@@ -64,7 +64,7 @@ During startup, addon discovery includes non-LoadOnDemand addons and LoadOnDeman
 
 Retail and PTR Blizzard addons are discovered from the active profile cache, filtered by screen/profile metadata, and topologically sorted from TOC dependencies plus simulator implicit startup dependencies. Foundational SharedXML addons are promoted to `LoadFirst` so templates exist before other Blizzard addons instantiate frames. Older docs referred to a 27-addon hardcoded retail list; current runtime loading is discovery-based.
 
-Third-party addons load after the Blizzard startup pass. Third-party LoadOnDemand addons with `[Bootstrap]` entries are registered during discovery and execute those bootstrap files in the same sorted startup order; non-LoadOnDemand third-party addons execute `[Bootstrap]` inline with normal files.
+Third-party addons load after the Blizzard startup pass. Third-party LoadOnDemand addons are registered during discovery but do not execute `[Bootstrap]` entries at startup. Non-LoadOnDemand third-party addons execute `[Bootstrap]` inline with normal files.
 
 The non-retail profiles discover different addon sets:
 
@@ -103,7 +103,7 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 ## Startup Sequence
 
 1. Create `WowLuaEnv`, set paths, configure SavedVariables, import account `bindings-cache.wtf`, and import `ServerSnapshotDB` action bars/keybindings when present
-2. Load Blizzard startup addons in dependency order (full load for non-LoD, bootstrap-only for LoD addons with `[Bootstrap]` files)
+2. Load Blizzard startup addons in dependency order (full load for non-LoD addons only; no bootstrap-only LoD pass)
 3. Load third-party startup addons alphabetically/dependency-sorted, overlaying `ServerSnapshotDB` addon states when present (same full-load vs bootstrap-only split)
 4. Apply post-load workarounds (UpdateMicroButtons stub, WorldMapFrame scroll init, etc.)
 5. Fire startup events: `ADDON_LOADED("WoWUISim")`, `VARIABLES_LOADED`, `PLAYER_LOGIN`, `PLAYER_ENTERING_WORLD(true, false)`, `UPDATE_BINDINGS`, `DISPLAY_SIZE_CHANGED`, `UI_SCALE_CHANGED`
@@ -116,9 +116,9 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 ## Sources
 
 - [addon-loading-pipeline.md](../../addon-loading-pipeline.md) — TOC parsing, load flow, XML handlers, SavedVariables, load order
-- [addon_loading.rs](../../../src/bin/wow_sim/addon_loading.rs) — Blizzard eager load, Blizzard bootstrap pass hook, third-party addon discovery, metadata pre-registration, enable-state application, and load loop
+- [addon_loading.rs](../../../src/bin/wow_sim/addon_loading.rs) — Blizzard eager load, third-party addon discovery, metadata pre-registration, enable-state application, and load loop
 - [toc/mod.rs](../../../src/toc/mod.rs) — TOC metadata, normal file list, `[Bootstrap]` parsing, path resolution
-- [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution and bootstrap-only file execution
+- [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution; `[Bootstrap]` entries remain inline
 - [blizzard-ui-files.txt](../../../data/blizzard-ui-files.txt) — committed Blizzard UI cache manifest, including bootstrap files needed by the active profile cache
 - [blizzard_ui_sync.rs](../../../src/blizzard_ui_sync.rs) and [profile_cache.rs](../../../src/blizzard_ui_sync/profile_cache.rs) — profile-filtered cache sync and repo-fallback handling for manifest entries
 

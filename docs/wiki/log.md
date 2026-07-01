@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-01] update | Bootstrap TOC semantics
+
+Updated `systems/addon-loading.md` after correcting `[Bootstrap]` semantics:
+annotated entries stay in normal TOC order, no standalone bootstrap pass runs,
+and LoadOnDemand addons execute those files only during normal `C_AddOns.LoadAddOn`.
+Updated `index.md` summary wording.
+
 ## [2026-06-29] investigation | Retail/PTR full startup Lua errors
 
 Created `investigations/retail-ptr-full-startup-lua-errors.md` after full GUI

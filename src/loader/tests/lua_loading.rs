@@ -214,68 +214,6 @@ After.lua
 }
 
 #[test]
-fn lod_bootstrap_startup_loads_only_bootstrap_then_runtime_skips_it() {
-    let env = WowLuaEnv::new().unwrap();
-    let temp_root = std::env::temp_dir().join("wow-sim-lod-bootstrap-startup-test");
-    let addon_dir = temp_root.join("LoDBootstrapProbe");
-    std::fs::create_dir_all(&addon_dir).unwrap();
-    std::fs::write(
-        addon_dir.join("Bootstrap.lua"),
-        r#"
-        LoDBootstrapProbeEvents = LoDBootstrapProbeEvents or {}
-        table.insert(LoDBootstrapProbeEvents, "bootstrap")
-        "#,
-    )
-    .unwrap();
-    std::fs::write(
-        addon_dir.join("Normal.lua"),
-        r#"
-        LoDBootstrapProbeEvents = LoDBootstrapProbeEvents or {}
-        table.insert(LoDBootstrapProbeEvents, "normal")
-        "#,
-    )
-    .unwrap();
-
-    let toc = crate::toc::TocFile::parse(
-        &addon_dir,
-        r#"
-## Title: LoDBootstrapProbe
-## LoadOnDemand: 1
-Bootstrap.lua [Bootstrap]
-Normal.lua
-"#,
-    );
-
-    crate::loader::load_bootstrap_files_from_toc(&env.loader_env(), &toc).unwrap();
-    let (events, loaded, lod): (String, bool, bool) = env
-        .eval(
-            r#"
-            return table.concat(LoDBootstrapProbeEvents, ","),
-                   C_AddOns.IsAddOnLoaded("LoDBootstrapProbe"),
-                   C_AddOns.IsAddOnLoadOnDemand("LoDBootstrapProbe")
-            "#,
-        )
-        .unwrap();
-    assert_eq!(events, "bootstrap");
-    assert!(
-        !loaded,
-        "bootstrap startup load must not mark LoD addon loaded"
-    );
-    assert!(
-        lod,
-        "bootstrap startup load should preserve LoadOnDemand metadata"
-    );
-
-    load_addon_from_toc(&env.loader_env(), &toc).unwrap();
-    let events: String = env
-        .eval("return table.concat(LoDBootstrapProbeEvents, ',')")
-        .unwrap();
-    assert_eq!(events, "bootstrap,normal");
-
-    std::fs::remove_dir_all(&temp_root).ok();
-}
-
-#[test]
 fn bootstrap_self_load_addon_is_noop_without_recursive_normal_file_load() {
     let env = WowLuaEnv::new().unwrap();
     let temp_root = std::env::temp_dir().join("wow-sim-bootstrap-self-load-test");
