@@ -62,6 +62,7 @@ impl Drop for WowLuaEnv {
         if let Ok(state) = self.state.try_borrow() {
             crate::lua_errors::print_suppressed_error_summary(&state);
         }
+        clear_app_data_handles(&self.lua);
     }
 }
 
@@ -285,4 +286,36 @@ fn install_app_data_lua_handle(lua: &Rc<RefCell<rilua::Lua>>, handle: &Rc<RefCel
         .app_data_mut::<WowLuaAppData>()
         .expect("WowLuaEnv rilua app_data should always exist");
     app_data.lua = Some(Rc::clone(handle));
+}
+
+fn clear_app_data_handles(lua: &Rc<RefCell<rilua::Lua>>) {
+    let Ok(mut lua_ref) = lua.try_borrow_mut() else {
+        return;
+    };
+
+    let Some(app_data) = lua_ref.state_mut().app_data_mut::<WowLuaAppData>() else {
+        return;
+    };
+
+    app_data.lua = None;
+    app_data.font_system = None;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::WowLuaEnv;
+    use std::rc::Rc;
+
+    #[test]
+    fn drop_releases_rilua_vm() {
+        let env = WowLuaEnv::new().expect("env");
+        let weak_lua = Rc::downgrade(&env.lua);
+
+        drop(env);
+
+        assert!(
+            weak_lua.upgrade().is_none(),
+            "WowLuaEnv must not leave a self-cycle through rilua app_data"
+        );
+    }
 }
