@@ -455,6 +455,7 @@ fn is_secure_replay_library_addon(folder_name: &str) -> bool {
             | "Blizzard_SharedXML"
             | "Blizzard_CatalogShopSharedTemplates"
             | "Blizzard_AsyncRequest"
+            | "Blizzard_GameTooltip"
     )
 }
 

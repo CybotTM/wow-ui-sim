@@ -332,6 +332,44 @@ GlobalOnly.lua [AllowLoadEnvironment Global]
 }
 
 #[test]
+fn blizzard_game_tooltip_lua_replays_into_secure_environment() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_root = std::env::temp_dir().join("wow-sim-game-tooltip-secure-replay-test");
+    let addon_dir = temp_root.join("Blizzard_GameTooltip");
+    std::fs::create_dir_all(&addon_dir).unwrap();
+    std::fs::write(
+        addon_dir.join("GameTooltip.lua"),
+        r#"GameTooltip_OnLoad = function() return "secure-visible" end"#,
+    )
+    .unwrap();
+
+    let toc = crate::toc::TocFile::parse(
+        &addon_dir,
+        r#"
+## Title: Blizzard_GameTooltip
+## AllowLoad: Both
+GameTooltip.lua
+"#,
+    );
+
+    let result = load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+    assert_eq!(result.lua_files, 2);
+
+    let (global_type, secure_result): (String, String) = env
+        .eval(
+            r#"
+            return type(_G.GameTooltip_OnLoad),
+                   __secureenv.GameTooltip_OnLoad()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(global_type, "function");
+    assert_eq!(secure_result, "secure-visible");
+
+    std::fs::remove_dir_all(&temp_root).ok();
+}
+
+#[test]
 fn blizzard_async_request_lua_replays_into_secure_environment() {
     let env = WowLuaEnv::new().unwrap();
     let temp_root = std::env::temp_dir().join("wow-sim-async-request-secure-replay-test");
