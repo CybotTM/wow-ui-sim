@@ -216,7 +216,7 @@ fn generate_mixin_code(texture: &crate::xml::TextureXml) -> String {
 
 fn emit_create_header(
     tex_name: &str,
-    parent_ref_name: &str,
+    parent_name: &str,
     create_method: &str,
     draw_layer: &str,
     sub_level: i32,
@@ -226,7 +226,7 @@ fn emit_create_header(
         local parent = {}
         local tex = parent:{}("{}", "{}")
         "#,
-        lua_global_ref(parent_ref_name),
+        lua_global_ref(parent_name),
         create_method,
         escape_lua_string(tex_name),
         escape_lua_string(draw_layer)
@@ -290,7 +290,7 @@ fn emit_masked_textures(texture: &crate::xml::TextureXml, is_mask: bool) -> Stri
 pub(super) fn build_texture_lua(
     tex_name: &str,
     texture: &crate::xml::TextureXml,
-    parent_ref_name: &str,
+    parent_name: &str,
     subst_parent_name: &str,
     draw_layer: &str,
     is_mask: bool,
@@ -304,13 +304,7 @@ pub(super) fn build_texture_lua(
     } else {
         "CreateTexture"
     };
-    let mut code = emit_create_header(
-        tex_name,
-        parent_ref_name,
-        create_method,
-        draw_layer,
-        sub_level,
-    );
+    let mut code = emit_create_header(tex_name, parent_name, create_method, draw_layer, sub_level);
     code.push_str(&generate_mixin_code(texture));
     code.push_str(&emit_line_thickness(texture, is_line));
     code.push_str(&generate_texture_source_code(texture, is_mask));

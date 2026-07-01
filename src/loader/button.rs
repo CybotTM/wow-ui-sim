@@ -7,7 +7,7 @@ use super::helpers::{escape_lua_string, generate_set_point_code, get_size_values
 
 /// Generate the setter portion of button texture Lua code (atlas or file path).
 fn generate_texture_setter_code(
-    button_ref_name: &str,
+    button_name: &str,
     method: &str,
     texture: &crate::xml::TextureXml,
 ) -> String {
@@ -15,14 +15,14 @@ fn generate_texture_setter_code(
     if let Some(atlas) = &texture.atlas {
         format!(
             "do\n    local tex = {}:{}()\n    if tex then tex:SetAtlas(\"{}\") end\nend\n",
-            lua_global_ref(button_ref_name),
+            lua_global_ref(button_name),
             getter,
             escape_lua_string(atlas)
         )
     } else if let Some(file) = &texture.file {
         format!(
             "{}:{}(\"{}\")\n",
-            lua_global_ref(button_ref_name),
+            lua_global_ref(button_name),
             method,
             escape_lua_string(file)
         )
@@ -34,7 +34,6 @@ fn generate_texture_setter_code(
 /// Generate the global registration snippet for a named button texture.
 fn generate_texture_global_snippet(
     button_name: &str,
-    button_ref_name: &str,
     method: &str,
     texture: &crate::xml::TextureXml,
 ) -> String {
@@ -46,7 +45,7 @@ fn generate_texture_global_snippet(
             let resolved = n.replace("$parent", button_name);
             format!(
                 "do local t = {}:{}() if t then _G[\"{}\"] = t end end\n",
-                lua_global_ref(button_ref_name),
+                lua_global_ref(button_name),
                 getter,
                 escape_lua_string(&resolved),
             )
@@ -56,14 +55,13 @@ fn generate_texture_global_snippet(
 
 fn generate_texture_layout_snippet(
     button_name: &str,
-    button_ref_name: &str,
     method: &str,
     texture: &crate::xml::TextureXml,
 ) -> String {
     let getter = method.replace("Set", "Get");
     let mut code = format!(
         "do\n    local parent = {button_ref}\n    local tex = parent and parent:{getter}()\n    if tex then\n",
-        button_ref = lua_global_ref(button_ref_name),
+        button_ref = lua_global_ref(button_name),
         getter = getter,
     );
 
@@ -116,7 +114,7 @@ fn generate_texture_tex_coords_snippet(texture: &crate::xml::TextureXml) -> Stri
 /// etc.) still exists via the getter/setter methods; this only mirrors the extra
 /// Lua field expected by Blizzard code.
 fn generate_texture_parent_key_snippet(
-    button_ref_name: &str,
+    button_name: &str,
     method: &str,
     texture: &crate::xml::TextureXml,
 ) -> String {
@@ -126,7 +124,7 @@ fn generate_texture_parent_key_snippet(
     let getter = method.replace("Set", "Get");
     format!(
         "do local b = {button_ref} local t = b and b:{getter}() if b and t then b[\"{parent_key}\"] = t end end\n",
-        button_ref = lua_global_ref(button_ref_name),
+        button_ref = lua_global_ref(button_name),
         getter = getter,
         parent_key = escape_lua_string(parent_key),
     )
@@ -136,25 +134,22 @@ fn generate_texture_parent_key_snippet(
 /// and register the texture as a global if it has a `$parent`-prefixed name.
 fn generate_button_texture_code(
     button_name: &str,
-    button_ref_name: &str,
     method: &str,
     texture: &crate::xml::TextureXml,
 ) -> String {
-    let mut code = generate_texture_setter_code(button_ref_name, method, texture);
+    let mut code = generate_texture_setter_code(button_name, method, texture);
     code.push_str(&generate_texture_layout_snippet(
         button_name,
-        button_ref_name,
         method,
         texture,
     ));
     code.push_str(&generate_texture_parent_key_snippet(
-        button_ref_name,
+        button_name,
         method,
         texture,
     ));
     code.push_str(&generate_texture_global_snippet(
         button_name,
-        button_ref_name,
         method,
         texture,
     ));
@@ -166,11 +161,10 @@ fn generate_button_texture_code(
 /// First ensures texture children exist for ALL XML texture slots (atlas, file, or empty),
 /// then generates Lua code to set atlas/file on them. This ordering is critical: Lua code
 /// calls `Get*Texture()` which returns nil if the child doesn't exist yet.
-pub fn apply_button_textures_with_ref(
+pub fn apply_button_textures(
     env: &LoaderEnv<'_>,
     frame_xml: &crate::xml::FrameXml,
     button_name: &str,
-    button_ref_name: &str,
     inherits: &str,
 ) -> Result<(), LoadError> {
     let texture_slots = button_texture_slots(frame_xml, inherits);
@@ -178,7 +172,7 @@ pub fn apply_button_textures_with_ref(
     // Create texture children for ALL slots BEFORE running Lua code.
     // The Lua atlas path calls Get*Texture() which needs the child to exist.
     ensure_button_texture_children(env, &texture_slots, button_name);
-    apply_button_texture_lua(env, &texture_slots, button_ref_name, button_name)
+    apply_button_texture_lua(env, &texture_slots, button_name)
 }
 
 type SlotAccessor = fn(&crate::xml::FrameXml) -> Option<&crate::xml::TextureXml>;
@@ -248,15 +242,13 @@ fn resolve_button_texture_slot(
 fn apply_button_texture_lua(
     env: &LoaderEnv<'_>,
     texture_slots: &[(&'static str, &'static str, Option<crate::xml::TextureXml>); 6],
-    button_ref_name: &str,
     button_name: &str,
 ) -> Result<(), LoadError> {
     let lua_code: String = texture_slots
         .iter()
         .filter_map(|(method, _, tex)| {
-            tex.as_ref().map(|texture| {
-                generate_button_texture_code(button_name, button_ref_name, method, texture)
-            })
+            tex.as_ref()
+                .map(|texture| generate_button_texture_code(button_name, method, texture))
         })
         .collect();
 
@@ -321,14 +313,14 @@ fn resolve_button_text_child<'a>(
 }
 
 /// Generate Lua code to set text on a button and its Text fontstring child.
-fn generate_set_text_code(button_ref_name: &str, text_key: &str) -> String {
+fn generate_set_text_code(button_name: &str, text_key: &str) -> String {
     format!(
         "local frame = {ref}\nif frame then\n\
          local text = _G[\"{key}\"] or \"{key}\"\n\
          if frame.SetText then frame:SetText(text) end\n\
          if frame.Text and frame.Text.SetText then frame.Text:SetText(text) end\n\
          end\n",
-        ref = lua_global_ref(button_ref_name),
+        ref = lua_global_ref(button_name),
         key = escape_lua_string(text_key),
     )
 }
@@ -394,11 +386,10 @@ fn generate_button_font_setter(button_name: &str, method: &str, style: &str) -> 
 /// but is otherwise inert; this turns those declarations into runtime
 /// `Button:SetNormalFontObject(_G["GameFontNormalSmall"])` calls so the button text
 /// child picks up the font/size/outline/color from the font object.
-pub fn apply_button_fonts_with_ref(
+pub fn apply_button_fonts(
     env: &LoaderEnv<'_>,
     frame_xml: &crate::xml::FrameXml,
     button_name: &str,
-    button_ref_name: &str,
     inherits: &str,
 ) -> Result<(), LoadError> {
     let slots: [(
@@ -415,7 +406,7 @@ pub fn apply_button_fonts_with_ref(
         .filter_map(|(method, accessor)| {
             let font_ref = resolve_button_font_slot(frame_xml, inherits, *accessor)?;
             let style = font_ref_style(&font_ref)?.to_string();
-            Some(generate_button_font_setter(button_ref_name, method, &style))
+            Some(generate_button_font_setter(button_name, method, &style))
         })
         .collect();
 
@@ -433,28 +424,26 @@ pub fn apply_button_fonts_with_ref(
 }
 
 /// Apply button text from the text attribute and ButtonText child element.
-pub fn apply_button_text_with_ref(
+pub fn apply_button_text(
     env: &LoaderEnv<'_>,
     frame_xml: &crate::xml::FrameXml,
     button_name: &str,
-    button_ref_name: &str,
     inherits: &str,
 ) -> Result<(), LoadError> {
     if let Some(mut button_text) = resolve_button_text_child(frame_xml, inherits) {
         if button_text.parent_key.is_none() {
             button_text.parent_key = Some("Text".to_string());
         }
-        super::xml_fontstring::create_fontstring_from_xml_with_ref(
+        super::xml_fontstring::create_fontstring_from_xml(
             env,
             &button_text,
             button_name,
-            button_ref_name,
             "ARTWORK",
             0,
         )?;
     }
     if let Some(text_key) = resolve_button_text_key(frame_xml, inherits) {
-        env.exec(&generate_set_text_code(button_ref_name, &text_key))
+        env.exec(&generate_set_text_code(button_name, &text_key))
             .ok();
     }
     Ok(())

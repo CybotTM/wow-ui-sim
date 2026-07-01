@@ -117,7 +117,7 @@ pub(super) fn sync_fontstring_text_to_rust(env: &LoaderEnv<'_>, fs_name: &str, t
 /// Generate the CreateFontString call and draw layer setup.
 fn build_fontstring_create_code(
     fontstring: &crate::xml::FontStringXml,
-    parent_ref_name: &str,
+    parent_name: &str,
     draw_layer: &str,
     sub_level: i32,
     fs_name: &str,
@@ -128,7 +128,7 @@ fn build_fontstring_create_code(
         local parent = {}
         local fs = parent:CreateFontString("{}", "{}", {})
         "#,
-        lua_global_ref(parent_ref_name),
+        lua_global_ref(parent_name),
         escape_lua_string(fs_name),
         escape_lua_string(draw_layer),
         if inherits.is_empty() {
@@ -294,7 +294,7 @@ fn fontstring_onload_should_fire_immediately(scripts: &crate::xml::ScriptsXml) -
 /// Build the Lua code string that creates and configures a fontstring.
 pub(super) fn build_fontstring_lua(
     fontstring: &crate::xml::FontStringXml,
-    parent_ref_name: &str,
+    parent_name: &str,
     subst_parent_name: &str,
     draw_layer: &str,
     sub_level: i32,
@@ -302,7 +302,7 @@ pub(super) fn build_fontstring_lua(
     resolved_text: &Option<String>,
 ) -> String {
     let mut code =
-        build_fontstring_create_code(fontstring, parent_ref_name, draw_layer, sub_level, fs_name);
+        build_fontstring_create_code(fontstring, parent_name, draw_layer, sub_level, fs_name);
     code.push_str(&generate_fontstring_mixin_code(fontstring));
     code.push_str(&build_fontstring_extra_code(
         fontstring,
@@ -313,11 +313,10 @@ pub(super) fn build_fontstring_lua(
 }
 
 /// Create a fontstring from XML definition.
-pub fn create_fontstring_from_xml_with_ref(
+pub fn create_fontstring_from_xml(
     env: &LoaderEnv<'_>,
     fontstring: &crate::xml::FontStringXml,
     parent_name: &str,
-    parent_ref_name: &str,
     draw_layer: &str,
     sub_level: i32,
 ) -> Result<(), LoadError> {
@@ -329,7 +328,7 @@ pub fn create_fontstring_from_xml_with_ref(
     let resolved_text = resolve_fontstring_text(fontstring.text.as_deref());
     let lua_code = build_fontstring_lua(
         fontstring,
-        parent_ref_name,
+        parent_name,
         parent_name,
         draw_layer,
         sub_level,
@@ -396,15 +395,7 @@ mod tests {
             text: Some("ADDON_FORCE_LOAD".to_string()),
             ..Default::default()
         };
-        create_fontstring_from_xml_with_ref(
-            &env.loader_env(),
-            &fs,
-            "TestFSParent",
-            "TestFSParent",
-            "ARTWORK",
-            0,
-        )
-        .unwrap();
+        create_fontstring_from_xml(&env.loader_env(), &fs, "TestFSParent", "ARTWORK", 0).unwrap();
 
         let text: String = env.eval("return TestFSResolved:GetText()").unwrap();
         assert_eq!(text, "Load out of date AddOns");
@@ -452,15 +443,8 @@ mod tests {
             mixin: Some("TestFontStringMixin".to_string()),
             ..Default::default()
         };
-        create_fontstring_from_xml_with_ref(
-            &env.loader_env(),
-            &fs,
-            "TestFSMixinParent",
-            "TestFSMixinParent",
-            "ARTWORK",
-            0,
-        )
-        .unwrap();
+        create_fontstring_from_xml(&env.loader_env(), &fs, "TestFSMixinParent", "ARTWORK", 0)
+            .unwrap();
 
         let result: String = env.eval("return TestFSMixed:Describe()").unwrap();
         assert_eq!(result, "mixed");
