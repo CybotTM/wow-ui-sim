@@ -433,36 +433,28 @@ pub fn load_addon_from_toc_with_saved_vars(
     addon::load_addon_internal(env, toc, Some(saved_vars_mgr))
 }
 
-/// Load Blizzard `[Bootstrap]` files without marking their LoadOnDemand addons loaded.
-pub fn load_blizzard_bootstrap_files_for_screen(
+/// Load only `[Bootstrap]` entries for a LoadOnDemand addon during startup.
+pub fn load_bootstrap_files_from_toc(
     env: &LoaderEnv<'_>,
-    blizzard_ui_dir: &Path,
-    screen: ScreenKind,
+    toc: &TocFile,
+) -> Result<LoadResult, LoadError> {
+    addon::load_bootstrap_files_internal(env, toc)
+}
+
+/// `[Bootstrap]` files load inline during normal TOC loading; no separate pass runs.
+pub fn load_blizzard_bootstrap_files_for_screen(
+    _env: &LoaderEnv<'_>,
+    _blizzard_ui_dir: &Path,
+    _screen: ScreenKind,
 ) -> Result<Vec<LoadResult>, LoadError> {
-    let Some((addons, lod_pool)) =
-        discover_blizzard_addon_toc_pools_for_screen(blizzard_ui_dir, screen)
-    else {
-        return Ok(Vec::new());
-    };
-    let toc_map: HashMap<String, (PathBuf, TocFile)> = addons.into_iter().chain(lod_pool).collect();
-    let sorted = topological_sort_addons(toc_map);
-    let mut results = Vec::new();
-
-    for (_, toc_path) in sorted {
-        let toc = TocFile::from_file(&toc_path)?;
-        if toc.bootstrap_files().is_empty() {
-            continue;
-        }
-        results.push(addon::load_bootstrap_files_internal(env, &toc)?);
-    }
-
-    Ok(results)
+    Ok(Vec::new())
 }
 
 /// Discover all Blizzard addons in a BlizzardUI directory, topologically sorted by dependencies.
 ///
 /// Scans for `Blizzard_*` subdirectories, parses their TOC files, filters out `LoadOnDemand`
-/// addons (unless required by a non-LOD addon), and returns them in dependency order.
+/// addons unless they are required by a non-LOD addon or contain startup `[Bootstrap]`
+/// entries, and returns them in dependency order.
 pub fn discover_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)> {
     discover_blizzard_addons_for_screen(blizzard_ui_dir, ScreenKind::Game)
 }

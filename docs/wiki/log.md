@@ -1373,6 +1373,10 @@ Updated `systems/addon-loading.md` after fixing `!BugGrabber`'s false no-display
 
 Updated `systems/taint-system.md` and `investigations/store-secure-pool-constructors.md` after a retail PrivateAurasUI cooldown-wrapper probe showed secure code does not hit late `_G` overrides. The simulator now models secureenv as a separate shallow copy without `__index = _G`; `Blizzard_SharedXMLBase` Lua is replayed into secureenv to populate shared secure symbols directly instead of copying constructors from `_G` after load.
 
-## [2026-06-30] update | Blizzard TOC `[Bootstrap]` pass
+## [2026-06-30] update | Initial TOC `[Bootstrap]` support
 
-Updated `systems/addon-loading.md` after adding parser and loader support for Blizzard TOC file entries annotated with `[Bootstrap]`. `TocFile` now separates those paths from normal addon files so eager/runtime `LoadAddOn` does not execute them as addon body files, and the Blizzard startup load now runs a bootstrap-only pass after eager Blizzard addons and before third-party addons/startup events without marking the owning LoD addon loaded. The page records the CooldownBroadcaster-style invariant: lightweight LoD glue can exist before `VARIABLES_LOADED` while the full addon still loads on demand, and the committed Blizzard UI manifest now includes `Blizzard_CooldownBroadcaster_Bootstrap.lua` so cache sync can provide the motivating file.
+Added parser and loader support for TOC entries annotated with `[Bootstrap]`, motivated by LoD bootstrap glue such as `Blizzard_CooldownBroadcaster_Bootstrap.lua`. This was later corrected on 2026-07-01 after a live-client third-party probe showed `[Bootstrap]` does not reorder TOC files.
+
+## [2026-07-01] correction | `[Bootstrap]` preserves TOC order
+
+Updated `systems/addon-loading.md` after live-client probes showed `[Bootstrap]` is not a separate pass and must not move files out of TOC order. `TocFile` now keeps annotated files in `files` and records a per-file bootstrap flag. Startup loads full TOCs for non-LoD addons and only annotated bootstrap files for LoD addons, preserving addon order; runtime `LoadAddOn` skips already-executed bootstrap files and a self `LoadAddOn(thisAddon)` call from bootstrap remains a benign reentrancy no-op.

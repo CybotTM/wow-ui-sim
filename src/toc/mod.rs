@@ -21,9 +21,9 @@ pub struct TocFile {
     pub metadata: HashMap<String, String>,
     /// Files to load in order during normal addon loading (relative paths).
     pub files: Vec<PathBuf>,
-    /// Files annotated with `[Bootstrap]`, retained for a future Blizzard
-    /// bootstrap pass and excluded from normal addon loading.
-    pub bootstrap_files: Vec<PathBuf>,
+    /// Files annotated with `[Bootstrap]`, aligned with `files`.
+    /// The annotation does not reorder files or create a separate load pass.
+    pub file_is_bootstrap: Vec<bool>,
     /// Per-file environment override from `[LoadIntoEnvironment ...]`.
     /// `None` means inherit the addon's default environment.
     pub file_env_overrides: Vec<Option<bool>>,
@@ -220,7 +220,7 @@ fn game_subdir() -> &'static str {
 #[derive(Default)]
 struct ParsedFileEntries {
     files: Vec<PathBuf>,
-    bootstrap_files: Vec<PathBuf>,
+    file_is_bootstrap: Vec<bool>,
     file_env_overrides: Vec<Option<bool>>,
     file_env_allows: Vec<Option<bool>>,
 }
@@ -245,11 +245,7 @@ impl ParsedFileEntries {
             return;
         }
 
-        if has_bootstrap_annotation(&line) {
-            self.bootstrap_files.push(PathBuf::from(file_path));
-            return;
-        }
-
+        self.file_is_bootstrap.push(has_bootstrap_annotation(&line));
         self.files.push(PathBuf::from(file_path));
         self.file_env_overrides
             .push(parse_load_into_environment(&line));
@@ -291,7 +287,7 @@ impl TocFile {
             name: resolve_addon_name(&metadata, addon_dir),
             metadata,
             files: file_entries.files,
-            bootstrap_files: file_entries.bootstrap_files,
+            file_is_bootstrap: file_entries.file_is_bootstrap,
             file_env_overrides: file_entries.file_env_overrides,
             file_env_allows: file_entries.file_env_allows,
         }
@@ -353,9 +349,25 @@ impl TocFile {
             .unwrap_or(false)
     }
 
-    /// Get files annotated with `[Bootstrap]`, excluded from normal addon loading.
-    pub fn bootstrap_files(&self) -> &[PathBuf] {
-        &self.bootstrap_files
+    /// Whether a TOC file entry is annotated with `[Bootstrap]`.
+    pub fn file_is_bootstrap(&self, index: usize) -> bool {
+        self.file_is_bootstrap.get(index).copied().unwrap_or(false)
+    }
+
+    /// Whether this TOC has any entries annotated with `[Bootstrap]`.
+    pub fn has_bootstrap_files(&self) -> bool {
+        self.file_is_bootstrap
+            .iter()
+            .any(|is_bootstrap| *is_bootstrap)
+    }
+
+    /// Get files annotated with `[Bootstrap]` in normal TOC order.
+    pub fn bootstrap_files(&self) -> Vec<&PathBuf> {
+        self.files
+            .iter()
+            .enumerate()
+            .filter_map(|(index, file)| self.file_is_bootstrap(index).then_some(file))
+            .collect()
     }
 
     /// Get the per-file environment override for a TOC entry.
@@ -485,15 +497,6 @@ impl TocFile {
     /// Uses case-insensitive matching for compatibility with WoW (Windows/macOS).
     pub fn file_paths(&self) -> Vec<PathBuf> {
         self.files
-            .iter()
-            .map(|f| resolve_path_case_insensitive(&self.addon_dir, f))
-            .collect()
-    }
-
-    /// Get absolute paths for all `[Bootstrap]` files.
-    /// Uses case-insensitive matching for compatibility with WoW (Windows/macOS).
-    pub fn bootstrap_file_paths(&self) -> Vec<PathBuf> {
-        self.bootstrap_files
             .iter()
             .map(|f| resolve_path_case_insensitive(&self.addon_dir, f))
             .collect()

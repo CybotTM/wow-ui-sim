@@ -42,15 +42,15 @@ The fallback source list is canonical:
 
 `find_toc_file()` (`src/loader/mod.rs`) prefers `{AddonName}<suffix>.toc` (suffix is profile-dependent: `_Mainline` retail, `_Wrath` wrath, `_Mists` mists, `_Vanilla` era + anniversary) over `{AddonName}.toc` over the first `.toc` whose name doesn't carry another profile's suffix. The suffix table and exclude list live in `active_profile_toc_suffix()` / `other_profile_toc_suffixes()`. See [[client-profiles]].
 
-`TocFile` fields: `addon_dir`, `name`, `metadata: HashMap<String, String>` (Interface version, Title, Dependencies, RequiredDeps, OptionalDeps, LoadOnDemand, SavedVariables, SavedVariablesPerCharacter), `files: Vec<PathBuf>` for normal addon loading, and `bootstrap_files: Vec<PathBuf>` for inline `[Bootstrap]` entries.
+`TocFile` fields: `addon_dir`, `name`, `metadata: HashMap<String, String>` (Interface version, Title, Dependencies, RequiredDeps, OptionalDeps, LoadOnDemand, SavedVariables, SavedVariablesPerCharacter), `files: Vec<PathBuf>` for TOC-order addon loading, and `file_is_bootstrap: Vec<bool>` marking inline `[Bootstrap]` entries without moving them.
 
 TOC parsing strips `#` comments, skips `[AllowLoadTextLocale]` lines for non-enUS, skips `[AllowLoadGameType]` lines unless the inline gametype matches the active profile's allow-list (retail: mainline/standard; wrath: wrath/wrath_classic/classic; mists: mists/mists_classic/classic; era: vanilla/classic_era/classic; anniversary: vanilla/classic_anniversary/classic), substitutes `[Family]` for the profile's family-subdir (Mainline retail, Classic everywhere else), substitutes `[Game]` for the active profile's game subdir, and normalizes backslashes. Path resolution is case-insensitive for Windows/macOS compatibility. See [[client-profiles]] for the full profile-aware tables.
 
-`[Bootstrap]` is special: a line such as `Blizzard_Foo_Bootstrap.lua [Bootstrap]` is excluded from `files` so normal eager loading and runtime `C_AddOns.LoadAddOn` do not execute it as part of the addon body. The path is retained in `bootstrap_files` for the Blizzard bootstrap pass. PTR-only bootstrap files must also be represented in the cache manifest/profile required-entry set so stale completed caches are rejected when the bootstrap file is missing.
+`[Bootstrap]` does not reorder TOC files. A line such as `Bootstrap.lua [Bootstrap]` stays in `files` at that exact position. For non-LoadOnDemand addons, the bootstrap file executes inline with the surrounding TOC files. For LoadOnDemand addons discovered during startup, only annotated bootstrap files execute during the startup scan; normal files wait for `C_AddOns.LoadAddOn`. A self `C_AddOns.LoadAddOn(thisAddon)` call from an executing bootstrap file is a benign reentrancy no-op and does not load normal files early. PTR-only bootstrap files must still be represented in the cache manifest/profile required-entry set so stale completed caches are rejected when the file is missing.
 
 ## Load Flow (`src/loader/addon.rs`)
 
-Before third-party addons load, `load_blizzard_addons()` runs a Blizzard-only bootstrap pass after the eager Blizzard addon pass and before startup events. The pass scans the active Blizzard UI cache, finds screen-allowed Blizzard TOCs with `bootstrap_files`, and executes those files without marking the owning `LoadOnDemand` addon loaded and without firing `ADDON_LOADED`. This matches the Blizzard pattern where LoD addons expose tiny public loader globals such as `CooldownBroadcaster_LoadUI()` before `VARIABLES_LOADED`, while the full addon body still loads later on demand.
+During startup, addon discovery includes non-LoadOnDemand addons and LoadOnDemand addons that contain `[Bootstrap]` entries. The sorted startup loop preserves addon order: non-LoadOnDemand addons load their full TOC, while LoadOnDemand addons execute only annotated bootstrap files without marking the addon loaded and without firing `ADDON_LOADED`. This matches the pattern where LoD addons expose tiny public loader globals before `VARIABLES_LOADED`, while the full addon body still loads later on demand.
 
 `AddonContext` holds `name`, private Lua `table`, and `addon_root`. Per-file process:
 1. Check local overlay at `./Interface/AddOns/{addon}/{file}` first, fall back to addon root
@@ -64,7 +64,7 @@ Before third-party addons load, `load_blizzard_addons()` runs a Blizzard-only bo
 
 Retail and PTR Blizzard addons are discovered from the active profile cache, filtered by screen/profile metadata, and topologically sorted from TOC dependencies plus simulator implicit startup dependencies. Foundational SharedXML addons are promoted to `LoadFirst` so templates exist before other Blizzard addons instantiate frames. Older docs referred to a 27-addon hardcoded retail list; current runtime loading is discovery-based.
 
-Third-party addons load after the eager Blizzard pass and the Blizzard `[Bootstrap]` pass.
+Third-party addons load after the Blizzard startup pass. Third-party LoadOnDemand addons with `[Bootstrap]` entries are registered during discovery and execute those bootstrap files in the same sorted startup order; non-LoadOnDemand third-party addons execute `[Bootstrap]` inline with normal files.
 
 The non-retail profiles discover different addon sets:
 
@@ -103,12 +103,11 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 ## Startup Sequence
 
 1. Create `WowLuaEnv`, set paths, configure SavedVariables, import account `bindings-cache.wtf`, and import `ServerSnapshotDB` action bars/keybindings when present
-2. Load Blizzard eager addons in dependency order
-3. Run the Blizzard `[Bootstrap]` pass for screen-allowed bootstrap files without marking their LoD addons loaded
-4. Load third-party addons alphabetically, overlaying `ServerSnapshotDB` addon states when present
-5. Apply post-load workarounds (UpdateMicroButtons stub, WorldMapFrame scroll init, etc.)
-6. Fire startup events: `ADDON_LOADED("WoWUISim")`, `VARIABLES_LOADED`, `PLAYER_LOGIN`, `PLAYER_ENTERING_WORLD(true, false)`, `UPDATE_BINDINGS`, `DISPLAY_SIZE_CHANGED`, `UI_SCALE_CHANGED`
-7. Launch GUI, dump frame tree, or render screenshot
+2. Load Blizzard startup addons in dependency order (full load for non-LoD, bootstrap-only for LoD addons with `[Bootstrap]` files)
+3. Load third-party startup addons alphabetically/dependency-sorted, overlaying `ServerSnapshotDB` addon states when present (same full-load vs bootstrap-only split)
+4. Apply post-load workarounds (UpdateMicroButtons stub, WorldMapFrame scroll init, etc.)
+5. Fire startup events: `ADDON_LOADED("WoWUISim")`, `VARIABLES_LOADED`, `PLAYER_LOGIN`, `PLAYER_ENTERING_WORLD(true, false)`, `UPDATE_BINDINGS`, `DISPLAY_SIZE_CHANGED`, `UI_SCALE_CHANGED`
+6. Launch GUI, dump frame tree, or render screenshot
 
 ## Error Handling
 

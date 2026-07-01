@@ -113,6 +113,8 @@ pub struct AddonInfo {
     pub loaded: bool,
     /// Load on demand flag.
     pub load_on_demand: bool,
+    /// Whether `[Bootstrap]` files have already executed for this addon.
+    pub bootstrap_loaded: bool,
     /// Whether the addon loads Lua/XML chunks in the secure environment.
     pub use_secure_env: bool,
     /// Optional security status reported by `C_AddOns.GetAddOnSecurity`.
@@ -142,6 +144,7 @@ impl Default for AddonInfo {
             enabled: false,
             loaded: false,
             load_on_demand: false,
+            bootstrap_loaded: false,
             use_secure_env: false,
             security: None,
             load_time_secs: 0.0,

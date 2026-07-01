@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use wow_ui_sim::client_profile;
 use wow_ui_sim::loader::{
     LoadResult, LoadTiming, discover_blizzard_addons_for_screen, load_addon,
-    load_addon_with_saved_vars, load_blizzard_bootstrap_files_for_screen,
+    load_addon_with_saved_vars,
 };
 use wow_ui_sim::logging;
 use wow_ui_sim::lua_api::{AddonInfo, WowLuaEnv};
@@ -91,7 +91,6 @@ pub fn load_blizzard_addons(
         }
     }
 
-    load_blizzard_bootstrap_files(env, &addons_dir, screen, verbose, &mut total_timing);
     env.sync_string_metatable_to_global_string();
     print_blizzard_summary(blizzard_start.elapsed(), &total_timing);
 }
@@ -115,23 +114,6 @@ fn blizzard_ui_addons_dir_or_exit() -> PathBuf {
     std::process::exit(1);
 }
 
-fn load_blizzard_bootstrap_files(
-    env: &WowLuaEnv,
-    addons_dir: &Path,
-    screen: ScreenKind,
-    verbose: bool,
-    timing: &mut LoadTiming,
-) {
-    match load_blizzard_bootstrap_files_for_screen(&env.loader_env(), addons_dir, screen) {
-        Ok(results) => {
-            for result in results {
-                record_blizzard_bootstrap_success(verbose, timing, result);
-            }
-        }
-        Err(error) => println!("Blizzard bootstrap files failed: {error}"),
-    }
-}
-
 fn load_one_blizzard_addon(
     env: &WowLuaEnv,
     name: &str,
@@ -140,6 +122,16 @@ fn load_one_blizzard_addon(
     verbose: bool,
     timing: &mut LoadTiming,
 ) {
+    let toc = match wow_ui_sim::toc::TocFile::from_file(toc_path) {
+        Ok(toc) => toc,
+        Err(error) => {
+            println!("{} failed: {}", name, error);
+            return;
+        }
+    };
+    if toc.is_load_on_demand() {
+        return;
+    }
     let result = match saved_vars {
         Some(saved_vars) => load_addon_with_saved_vars(&env.loader_env(), toc_path, saved_vars),
         None => load_addon(&env.loader_env(), toc_path),
@@ -160,20 +152,6 @@ fn record_blizzard_addon_success(
     print_verbose_blizzard_status(name, verbose, &result);
     print_nil_global_warnings(&result);
     fire_addon_loaded(env, name);
-    timing.accumulate(&result.timing);
-}
-
-fn record_blizzard_bootstrap_success(verbose: bool, timing: &mut LoadTiming, result: LoadResult) {
-    if verbose {
-        println!(
-            "{} bootstrap loaded: {} Lua, {} XML, {} warnings",
-            result.name,
-            result.lua_files,
-            result.xml_files,
-            result.warnings.len()
-        );
-    }
-    print_nil_global_warnings(&result);
     timing.accumulate(&result.timing);
 }
 
@@ -387,8 +365,8 @@ fn loadable_toc_path(path: &Path, screen: ScreenKind) -> Option<PathBuf> {
     let supported_game_type = !toc.is_ptr_only() && !toc.is_game_type_restricted();
     let supported_interface = load_out_of_date_addons()
         || toc.supports_interface_version(wow_ui_sim::toc::ACTIVE_INTERFACE_VERSION);
-    let eager_addon = !toc.is_load_on_demand();
-    (supports_screen && supported_game_type && supported_interface && eager_addon)
+    let startup_loadable = !toc.is_load_on_demand();
+    (supports_screen && supported_game_type && supported_interface && startup_loadable)
         .then_some(toc_path)
 }
 
@@ -505,6 +483,7 @@ fn register_or_update_addon(env: &WowLuaEnv, name: &str, metadata: AddonMetadata
         enabled,
         loaded: false,
         load_on_demand: metadata.load_on_demand,
+        bootstrap_loaded: false,
         use_secure_env: metadata.use_secure_env,
         dependencies: metadata.dependencies,
         metadata: metadata.metadata,
@@ -525,6 +504,17 @@ fn load_registered_single_addon(
     }
 
     print_verbose_addon_start(name);
+    let toc = match TocFile::from_file(toc_path) {
+        Ok(toc) => toc,
+        Err(e) => {
+            println!("✗ {} failed: {}", name, e);
+            stats.fail_count += 1;
+            return;
+        }
+    };
+    if toc.is_load_on_demand() {
+        return;
+    }
     let result = match saved_vars.as_mut() {
         Some(sv) => load_addon_with_saved_vars(&env.loader_env(), toc_path, sv),
         None => load_addon(&env.loader_env(), toc_path),
