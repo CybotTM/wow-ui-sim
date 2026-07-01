@@ -451,7 +451,7 @@ fn maybe_replay_blizzard_lua_in_secure_env(
 fn is_secure_replay_library_addon(folder_name: &str) -> bool {
     matches!(
         folder_name,
-        "Blizzard_SharedXMLBase" | "Blizzard_CatalogShopSharedTemplates"
+        "Blizzard_SharedXMLBase" | "Blizzard_SharedXML" | "Blizzard_CatalogShopSharedTemplates"
     )
 }
 
