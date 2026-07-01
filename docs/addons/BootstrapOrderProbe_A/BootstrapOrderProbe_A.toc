@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: Bootstrap Order Probe A
+## Notes: First eager addon for [Bootstrap] ordering probe
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: BootstrapOrderProbeDB
+
+A.lua

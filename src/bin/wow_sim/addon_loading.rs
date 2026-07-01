@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use wow_ui_sim::client_profile;
 use wow_ui_sim::loader::{
     LoadResult, LoadTiming, discover_blizzard_addons_for_screen, load_addon,
-    load_addon_with_saved_vars,
+    load_addon_with_saved_vars, load_blizzard_bootstrap_files_for_screen,
 };
 use wow_ui_sim::logging;
 use wow_ui_sim::lua_api::{AddonInfo, WowLuaEnv};
@@ -91,19 +91,21 @@ pub fn load_blizzard_addons(
         }
     }
 
+    load_blizzard_bootstrap_files(env, &addons_dir, screen, verbose, &mut total_timing);
     env.sync_string_metatable_to_global_string();
     print_blizzard_summary(blizzard_start.elapsed(), &total_timing);
 }
 
 fn blizzard_ui_addons_dir_or_exit() -> PathBuf {
     let profile = client_profile::ACTIVE;
-    let addons_dir = client_profile::blizzard_ui_addons_dir();
-    if addons_dir.exists() {
+    if let Some(addons_dir) = wow_ui_sim::blizzard_ui_sync::cached_blizzard_ui_addons_path() {
         return addons_dir;
     }
 
+    let addons_dir = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path()
+        .unwrap_or_else(|_| client_profile::blizzard_ui_addons_dir());
     eprintln!(
-        "FATAL: {} is missing: Blizzard UI source not set up for {:?} profile.\n\
+        "FATAL: {} is missing or stale: Blizzard UI source not set up for {:?} profile.\n\
          Run from the repo root:\n\
          \t./scripts/setup-blizzard-ui.sh {}",
         addons_dir.display(),
@@ -111,6 +113,23 @@ fn blizzard_ui_addons_dir_or_exit() -> PathBuf {
         profile.subdir().to_lowercase(),
     );
     std::process::exit(1);
+}
+
+fn load_blizzard_bootstrap_files(
+    env: &WowLuaEnv,
+    addons_dir: &Path,
+    screen: ScreenKind,
+    verbose: bool,
+    timing: &mut LoadTiming,
+) {
+    match load_blizzard_bootstrap_files_for_screen(&env.loader_env(), addons_dir, screen) {
+        Ok(results) => {
+            for result in results {
+                record_blizzard_bootstrap_success(verbose, timing, result);
+            }
+        }
+        Err(error) => println!("Blizzard bootstrap files failed: {error}"),
+    }
 }
 
 fn load_one_blizzard_addon(
@@ -141,6 +160,20 @@ fn record_blizzard_addon_success(
     print_verbose_blizzard_status(name, verbose, &result);
     print_nil_global_warnings(&result);
     fire_addon_loaded(env, name);
+    timing.accumulate(&result.timing);
+}
+
+fn record_blizzard_bootstrap_success(verbose: bool, timing: &mut LoadTiming, result: LoadResult) {
+    if verbose {
+        println!(
+            "{} bootstrap loaded: {} Lua, {} XML, {} warnings",
+            result.name,
+            result.lua_files,
+            result.xml_files,
+            result.warnings.len()
+        );
+    }
+    print_nil_global_warnings(&result);
     timing.accumulate(&result.timing);
 }
 

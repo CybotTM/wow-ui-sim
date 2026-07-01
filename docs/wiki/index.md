@@ -31,7 +31,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, 200+ globals, C_* namespaces, spell-description token resolution, timer system, animation system |
 | [[event-system]] | EventQueue, 36+ script handler types, dispatch flow, OnUpdate tick, startup event sequence, XML script setup |
 | [[xml-template-system]] | XML parsing (30+ element types), template registry, inheritance chain resolution, XML-to-widget Lua code generation, inline scripts |
-| [[addon-loading]] | TOC parsing, Blizzard load order (27 addons), per-file Lua/XML loading, SavedVariables, startup sequence |
+| [[addon-loading]] | TOC parsing, discovered Blizzard load order, `[Bootstrap]` pass, per-file Lua/XML loading, SavedVariables, startup sequence |
 | [[server-snapshot-action-bars]] | Imports action-bar spell slots captured by the ServerSnapshot addon from real WoW SavedVariables before Blizzard action-bar UI loads |
 | [[client-profiles]] | Five client expansions (retail/wrath/mists/era/anniversary) selected by mutually-exclusive cargo features; profile-aware loader, per-profile compat bootstraps, vendor pinning, CI matrix |
 | [[texture-atlas]] | TextureManager (BLP/PNG/WebP), ~50K-entry compiled atlas database, nine-slice kit detection, UV remapping |

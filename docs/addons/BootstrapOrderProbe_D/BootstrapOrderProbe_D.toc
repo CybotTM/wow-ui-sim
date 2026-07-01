@@ -1,0 +1,9 @@
+## Interface: 120005
+## Title: Bootstrap Order Probe D Non-LoD
+## Notes: Non-LoD addon with a [Bootstrap] file
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: BootstrapOrderProbeDB
+
+Bootstrap.lua [Bootstrap]
+Normal.lua

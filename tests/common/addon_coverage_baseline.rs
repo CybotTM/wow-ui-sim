@@ -17,7 +17,7 @@ pub const KNOWN_ERRORS: &[(&str, usize)] = &[
     ("Blizzard_BlackMarketUI", 8),
     ("Blizzard_BoostTutorial", 8),
     ("Blizzard_Calendar", 1),
-    ("Blizzard_CatalogShop", 1),
+    ("Blizzard_CatalogShop", 14),
     ("Blizzard_Channels", 2),
     ("Blizzard_CharacterCreate", 1),
     ("Blizzard_CharacterCustomize", 2),

@@ -457,6 +457,7 @@ fn manifest_entry_is_repo_fallback_only(entry: &str) -> bool {
         entry,
         "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster.lua"
             | "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster.toc"
+            | "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster_Bootstrap.lua"
             | "Blizzard_CooldownBroadcaster/MessageQueue.lua"
             | "Blizzard_CooldownBroadcaster/TrackedCooldowns.lua"
             | "Blizzard_CombatLog/Wrath/Blizzard_CombatLog.lua"

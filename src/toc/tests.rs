@@ -297,6 +297,39 @@ Debug.lua [AllowLoadEnvironment Global, SomeFlag]
 }
 
 #[test]
+fn test_parse_bootstrap_annotation_excludes_regular_files() {
+    let contents = r#"
+## Title: TestAddon
+Core.lua
+Bootstrap.lua [Bootstrap]
+After.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    assert_eq!(
+        toc.files,
+        vec![PathBuf::from("Core.lua"), PathBuf::from("After.lua")]
+    );
+    assert_eq!(toc.bootstrap_files(), &[PathBuf::from("Bootstrap.lua")]);
+}
+
+#[test]
+fn test_parse_bootstrap_annotation_keeps_path_substitutions_and_filters() {
+    let contents = r#"
+## Title: TestAddon
+[Game]\Bootstrap.lua [Bootstrap]
+Ignored.lua [Bootstrap] [AllowLoadGameType plunderstorm]
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    assert!(toc.files.is_empty());
+    assert_eq!(
+        toc.bootstrap_files(),
+        &[PathBuf::from(format!("{}/Bootstrap.lua", game_subdir()))]
+    );
+}
+
+#[test]
 fn test_parse_load_into_environment_annotations() {
     let contents = r#"
 ## Title: TestAddon

@@ -323,13 +323,13 @@ fn init_environment(
 }
 
 fn runtime_blizzard_ui_addons_path_with_setup() -> wow_ui_sim::Result<PathBuf> {
-    let path = wow_ui_sim::client_profile::blizzard_ui_addons_dir();
-    if path.exists() {
+    if let Some(path) = wow_ui_sim::blizzard_ui_sync::cached_blizzard_ui_addons_path() {
         return Ok(path);
     }
 
+    let path = wow_ui_sim::blizzard_ui_sync::default_cache_addons_path()?;
     recover_missing_blizzard_ui_addons_path(wow_ui_sim::Error::Other(format!(
-        "missing Blizzard UI cache for {:?} profile at {}",
+        "missing or stale Blizzard UI cache for {:?} profile at {}",
         wow_ui_sim::client_profile::ACTIVE,
         path.display()
     )))

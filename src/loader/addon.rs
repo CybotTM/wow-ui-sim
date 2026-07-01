@@ -3,10 +3,12 @@
 mod nil_symbol_reports;
 
 use crate::lua_api::LoaderEnv;
+use crate::lua_api::loader_env::create_addon_table_state;
+use crate::lua_api::methods::{registry_table_or_create, table_get, table_set};
 use crate::lua_api::state::SimState;
 use crate::saved_variables::SavedVariablesManager;
 use crate::toc::TocFile;
-use rilua::Val;
+use rilua::{LuaApiMut, Val};
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
@@ -123,6 +125,35 @@ pub fn load_addon_internal(
     apply_blizzard_post_load_patches(env, folder_name, &mut result);
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
     mark_addon_loaded(env, folder_name);
+    Ok(result)
+}
+
+/// Load only `[Bootstrap]` files from a Blizzard TOC without marking the addon loaded.
+pub fn load_bootstrap_files_internal(
+    env: &LoaderEnv<'_>,
+    toc: &TocFile,
+) -> Result<LoadResult, LoadError> {
+    let folder_name = toc
+        .addon_dir
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or(&toc.name);
+
+    let mut result = LoadResult {
+        name: toc.name.clone(),
+        lua_files: 0,
+        xml_files: 0,
+        timing: LoadTiming::default(),
+        warnings: Vec::new(),
+    };
+
+    if toc.bootstrap_files().is_empty() {
+        return Ok(result);
+    }
+
+    let _loading_guard = register_loading_addon(env, folder_name, toc);
+    let ctx = build_addon_context(env, toc, folder_name)?;
+    load_bootstrap_files(env, toc, folder_name, &ctx, &mut result);
     Ok(result)
 }
 
@@ -270,9 +301,7 @@ fn build_addon_context<'a>(
     toc: &'a TocFile,
     folder_name: &'a str,
 ) -> Result<AddonContext<'a>, LoadError> {
-    let addon_table = env
-        .create_addon_table()
-        .map_err(|e| LoadError::Lua(e.to_string()))?;
+    let addon_table = get_or_create_addon_table(env, folder_name)?;
 
     Ok(AddonContext {
         name: folder_name,
@@ -281,6 +310,22 @@ fn build_addon_context<'a>(
         use_secure_env: toc.is_secure_env(),
         taint: !is_blizzard_addon(toc),
     })
+}
+
+fn get_or_create_addon_table(env: &LoaderEnv<'_>, folder_name: &str) -> Result<Val, LoadError> {
+    const ADDON_PRIVATE_TABLES: &str = "__wow_addon_private_tables";
+
+    let mut lua = env.rilua_mut();
+    let state = lua.state_mut();
+    let cache = registry_table_or_create(state, ADDON_PRIVATE_TABLES);
+    let existing = table_get(state, cache, folder_name);
+    if matches!(existing, Val::Table(_)) {
+        return Ok(existing);
+    }
+
+    let addon_table = create_addon_table_state(state).map_err(|e| LoadError::Lua(e.to_string()))?;
+    table_set(state, cache, folder_name, addon_table);
+    Ok(addon_table)
 }
 
 fn register_loading_addon(
@@ -295,6 +340,14 @@ fn register_loading_addon(
     state.loading_addon_stack.push(addon_idx);
     state.loading_addon_index = Some(addon_idx);
     if let Some(addon) = state.addons.get_mut(addon_idx as usize) {
+        addon.title = toc
+            .metadata
+            .get("Title")
+            .cloned()
+            .unwrap_or_else(|| folder_name.to_string());
+        addon.notes = toc.metadata.get("Notes").cloned().unwrap_or_default();
+        addon.enabled = true;
+        addon.load_on_demand = toc.is_load_on_demand();
         addon.use_secure_env = toc.is_secure_env();
         addon.metadata = toc.metadata.clone();
         addon.dependencies = toc.dependencies();
@@ -372,6 +425,24 @@ fn load_addon_files(
     }
 }
 
+fn load_bootstrap_files(
+    env: &LoaderEnv<'_>,
+    toc: &TocFile,
+    folder_name: &str,
+    ctx: &AddonContext,
+    result: &mut LoadResult,
+) {
+    let overlay_dir = Path::new("Interface/AddOns").join(folder_name);
+
+    for (file_rel, file) in toc.bootstrap_files().iter().zip(toc.bootstrap_file_paths()) {
+        let resolved_file = resolve_addon_file_path(&overlay_dir, file_rel, file);
+        if std::env::var("WOW_SIM_VERBOSE").is_ok() {
+            println!("  loading bootstrap file {}", file_rel.display());
+        }
+        load_addon_file(env, ctx, result, &resolved_file, EnvironmentPass::Normal);
+    }
+}
+
 fn maybe_replay_blizzard_lua_in_secure_env(
     env: &LoaderEnv<'_>,
     toc: &TocFile,
@@ -394,7 +465,10 @@ fn maybe_replay_blizzard_lua_in_secure_env(
 }
 
 fn is_secure_replay_library_addon(folder_name: &str) -> bool {
-    matches!(folder_name, "Blizzard_SharedXMLBase")
+    matches!(
+        folder_name,
+        "Blizzard_SharedXMLBase" | "Blizzard_CatalogShopSharedTemplates"
+    )
 }
 
 fn should_skip_addon_file(toc: &TocFile, file_rel: &Path) -> bool {

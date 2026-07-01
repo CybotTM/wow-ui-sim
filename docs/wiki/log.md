@@ -1372,3 +1372,7 @@ Updated `systems/addon-loading.md` after fixing `!BugGrabber`'s false no-display
 ## [2026-06-21] update | secureenv no-fallback retail probe
 
 Updated `systems/taint-system.md` and `investigations/store-secure-pool-constructors.md` after a retail PrivateAurasUI cooldown-wrapper probe showed secure code does not hit late `_G` overrides. The simulator now models secureenv as a separate shallow copy without `__index = _G`; `Blizzard_SharedXMLBase` Lua is replayed into secureenv to populate shared secure symbols directly instead of copying constructors from `_G` after load.
+
+## [2026-06-30] update | Blizzard TOC `[Bootstrap]` pass
+
+Updated `systems/addon-loading.md` after adding parser and loader support for Blizzard TOC file entries annotated with `[Bootstrap]`. `TocFile` now separates those paths from normal addon files so eager/runtime `LoadAddOn` does not execute them as addon body files, and the Blizzard startup load now runs a bootstrap-only pass after eager Blizzard addons and before third-party addons/startup events without marking the owning LoD addon loaded. The page records the CooldownBroadcaster-style invariant: lightweight LoD glue can exist before `VARIABLES_LOADED` while the full addon still loads on demand, and the committed Blizzard UI manifest now includes `Blizzard_CooldownBroadcaster_Bootstrap.lua` so cache sync can provide the motivating file.

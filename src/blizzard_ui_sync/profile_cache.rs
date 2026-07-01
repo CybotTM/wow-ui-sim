@@ -27,6 +27,12 @@ const RETAIL_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_FrameXMLUtil/RuneforgeUtil.lua",
 ];
 
+const PTR_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
+    "Blizzard_FrameXMLUtil/RuneforgeUtil.xml",
+    "Blizzard_FrameXMLUtil/RuneforgeUtil.lua",
+    "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster_Bootstrap.lua",
+];
+
 pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_ActionBar/Classic/ActionButtonTemplate.xml",
     "Blizzard_ActionBar/Classic/ActionButtonUtilOverrides.lua",
@@ -304,8 +310,8 @@ pub(super) const MISTS_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
 
 pub(super) fn required_profile_cache_entries() -> &'static [&'static str] {
     match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Retail
-        | crate::client_profile::ClientProfile::Ptr => RETAIL_REQUIRED_PROFILE_CACHE_ENTRIES,
+        crate::client_profile::ClientProfile::Retail => RETAIL_REQUIRED_PROFILE_CACHE_ENTRIES,
+        crate::client_profile::ClientProfile::Ptr => PTR_REQUIRED_PROFILE_CACHE_ENTRIES,
         crate::client_profile::ClientProfile::Mists => MISTS_REQUIRED_PROFILE_CACHE_ENTRIES,
         _ => &[],
     }
@@ -321,6 +327,7 @@ pub(super) fn gethe_wow_ui_source_branches() -> &'static [&'static str] {
 
 pub(super) fn sync_entry_belongs_to_active_profile(entry: &str) -> bool {
     match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => retail_sync_entry(entry),
         crate::client_profile::ClientProfile::Ptr => ptr_sync_entry(entry),
         _ => true,
     }
@@ -339,8 +346,19 @@ pub(super) fn cache_entry_is_usable(entry: &str, path: &Path) -> bool {
     }
 }
 
+fn retail_sync_entry(entry: &str) -> bool {
+    !ptr_only_entry(entry)
+}
+
 fn ptr_sync_entry(entry: &str) -> bool {
     !legacy_profile_entry(entry) && !ptr_removed_mainline_entry(entry)
+}
+
+fn ptr_only_entry(entry: &str) -> bool {
+    matches!(
+        entry,
+        "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster_Bootstrap.lua"
+    )
 }
 
 fn legacy_profile_entry(entry: &str) -> bool {
@@ -526,6 +544,29 @@ mod tests {
 
         assert!(required.contains(&"Blizzard_FrameXMLUtil/RuneforgeUtil.xml"));
         assert!(required.contains(&"Blizzard_FrameXMLUtil/RuneforgeUtil.lua"));
+    }
+
+    #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_requires_cooldown_broadcaster_bootstrap_cache_entry() {
+        let required = required_profile_cache_entries();
+
+        assert!(
+            required.contains(
+                &"Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster_Bootstrap.lua"
+            )
+        );
+        assert!(super::sync_entry_belongs_to_active_profile(
+            "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster_Bootstrap.lua"
+        ));
+    }
+
+    #[test]
+    #[cfg(feature = "client-retail")]
+    fn retail_excludes_ptr_only_cooldown_broadcaster_bootstrap() {
+        assert!(!super::sync_entry_belongs_to_active_profile(
+            "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster_Bootstrap.lua"
+        ));
     }
 
     #[test]

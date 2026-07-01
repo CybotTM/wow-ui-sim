@@ -433,6 +433,32 @@ pub fn load_addon_from_toc_with_saved_vars(
     addon::load_addon_internal(env, toc, Some(saved_vars_mgr))
 }
 
+/// Load Blizzard `[Bootstrap]` files without marking their LoadOnDemand addons loaded.
+pub fn load_blizzard_bootstrap_files_for_screen(
+    env: &LoaderEnv<'_>,
+    blizzard_ui_dir: &Path,
+    screen: ScreenKind,
+) -> Result<Vec<LoadResult>, LoadError> {
+    let Some((addons, lod_pool)) =
+        discover_blizzard_addon_toc_pools_for_screen(blizzard_ui_dir, screen)
+    else {
+        return Ok(Vec::new());
+    };
+    let toc_map: HashMap<String, (PathBuf, TocFile)> = addons.into_iter().chain(lod_pool).collect();
+    let sorted = topological_sort_addons(toc_map);
+    let mut results = Vec::new();
+
+    for (_, toc_path) in sorted {
+        let toc = TocFile::from_file(&toc_path)?;
+        if toc.bootstrap_files().is_empty() {
+            continue;
+        }
+        results.push(addon::load_bootstrap_files_internal(env, &toc)?);
+    }
+
+    Ok(results)
+}
+
 /// Discover all Blizzard addons in a BlizzardUI directory, topologically sorted by dependencies.
 ///
 /// Scans for `Blizzard_*` subdirectories, parses their TOC files, filters out `LoadOnDemand`

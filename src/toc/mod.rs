@@ -19,8 +19,11 @@ pub struct TocFile {
     pub name: String,
     /// Metadata key-value pairs (## Key: Value)
     pub metadata: HashMap<String, String>,
-    /// Files to load in order (relative paths)
+    /// Files to load in order during normal addon loading (relative paths).
     pub files: Vec<PathBuf>,
+    /// Files annotated with `[Bootstrap]`, retained for a future Blizzard
+    /// bootstrap pass and excluded from normal addon loading.
+    pub bootstrap_files: Vec<PathBuf>,
     /// Per-file environment override from `[LoadIntoEnvironment ...]`.
     /// `None` means inherit the addon's default environment.
     pub file_env_overrides: Vec<Option<bool>>,
@@ -164,6 +167,10 @@ fn parse_allow_load_environment(line: &str) -> Option<bool> {
     }
 }
 
+fn has_bootstrap_annotation(line: &str) -> bool {
+    line.to_ascii_lowercase().contains("[bootstrap]")
+}
+
 fn split_metadata_list(value: &str) -> Vec<String> {
     if value.contains(',') {
         value
@@ -210,31 +217,44 @@ fn game_subdir() -> &'static str {
     }
 }
 
-/// Process a non-metadata, non-comment TOC line as a file path entry.
-fn push_file_entry(
-    addon_dir: &Path,
-    files: &mut Vec<PathBuf>,
-    file_env_overrides: &mut Vec<Option<bool>>,
-    file_env_allows: &mut Vec<Option<bool>>,
-    line: &str,
-) {
-    if line.contains("[AllowLoadTextLocale") && !line.contains("enUS") {
-        return;
-    }
-    if line.contains("[AllowLoadGameType")
-        && !is_allowed_game_type(line)
-        && !is_mists_game_menu_shared_file(addon_dir, line)
-    {
-        return;
-    }
-    let line = line.replace("[TextLocale]", "enUS");
-    let line = line.replace("[Family]", family_subdir());
-    let line = line.replace("[Game]", game_subdir());
-    let file_path = strip_annotations(&line).replace('\\', "/");
-    if !file_path.is_empty() {
-        files.push(PathBuf::from(file_path));
-        file_env_overrides.push(parse_load_into_environment(&line));
-        file_env_allows.push(parse_allow_load_environment(&line));
+#[derive(Default)]
+struct ParsedFileEntries {
+    files: Vec<PathBuf>,
+    bootstrap_files: Vec<PathBuf>,
+    file_env_overrides: Vec<Option<bool>>,
+    file_env_allows: Vec<Option<bool>>,
+}
+
+impl ParsedFileEntries {
+    /// Process a non-metadata, non-comment TOC line as a file path entry.
+    fn push_file_entry(&mut self, addon_dir: &Path, line: &str) {
+        if line.contains("[AllowLoadTextLocale") && !line.contains("enUS") {
+            return;
+        }
+        if line.contains("[AllowLoadGameType")
+            && !is_allowed_game_type(line)
+            && !is_mists_game_menu_shared_file(addon_dir, line)
+        {
+            return;
+        }
+        let line = line.replace("[TextLocale]", "enUS");
+        let line = line.replace("[Family]", family_subdir());
+        let line = line.replace("[Game]", game_subdir());
+        let file_path = strip_annotations(&line).replace('\\', "/");
+        if file_path.is_empty() {
+            return;
+        }
+
+        if has_bootstrap_annotation(&line) {
+            self.bootstrap_files.push(PathBuf::from(file_path));
+            return;
+        }
+
+        self.files.push(PathBuf::from(file_path));
+        self.file_env_overrides
+            .push(parse_load_into_environment(&line));
+        self.file_env_allows
+            .push(parse_allow_load_environment(&line));
     }
 }
 
@@ -249,9 +269,7 @@ impl TocFile {
     /// - `@project-version@` in any value: replaced with `dev`.
     pub fn parse(addon_dir: &Path, contents: &str) -> Self {
         let mut metadata = HashMap::new();
-        let mut files = Vec::new();
-        let mut file_env_overrides = Vec::new();
-        let mut file_env_allows = Vec::new();
+        let mut file_entries = ParsedFileEntries::default();
 
         for line in contents.lines() {
             let line = line.trim();
@@ -265,22 +283,17 @@ impl TocFile {
             if line.starts_with('#') {
                 continue;
             }
-            push_file_entry(
-                addon_dir,
-                &mut files,
-                &mut file_env_overrides,
-                &mut file_env_allows,
-                line,
-            );
+            file_entries.push_file_entry(addon_dir, line);
         }
 
         TocFile {
             addon_dir: addon_dir.to_path_buf(),
             name: resolve_addon_name(&metadata, addon_dir),
             metadata,
-            files,
-            file_env_overrides,
-            file_env_allows,
+            files: file_entries.files,
+            bootstrap_files: file_entries.bootstrap_files,
+            file_env_overrides: file_entries.file_env_overrides,
+            file_env_allows: file_entries.file_env_allows,
         }
     }
 
@@ -338,6 +351,11 @@ impl TocFile {
             .get("UseSecureEnvironment")
             .map(|v| v == "1")
             .unwrap_or(false)
+    }
+
+    /// Get files annotated with `[Bootstrap]`, excluded from normal addon loading.
+    pub fn bootstrap_files(&self) -> &[PathBuf] {
+        &self.bootstrap_files
     }
 
     /// Get the per-file environment override for a TOC entry.
@@ -467,6 +485,15 @@ impl TocFile {
     /// Uses case-insensitive matching for compatibility with WoW (Windows/macOS).
     pub fn file_paths(&self) -> Vec<PathBuf> {
         self.files
+            .iter()
+            .map(|f| resolve_path_case_insensitive(&self.addon_dir, f))
+            .collect()
+    }
+
+    /// Get absolute paths for all `[Bootstrap]` files.
+    /// Uses case-insensitive matching for compatibility with WoW (Windows/macOS).
+    pub fn bootstrap_file_paths(&self) -> Vec<PathBuf> {
+        self.bootstrap_files
             .iter()
             .map(|f| resolve_path_case_insensitive(&self.addon_dir, f))
             .collect()

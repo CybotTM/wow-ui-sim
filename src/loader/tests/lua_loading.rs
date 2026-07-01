@@ -173,6 +173,119 @@ fn test_text_to_speech_checkload_recovers_clobbered_dropdown_globals() {
 }
 
 #[test]
+fn third_party_bootstrap_files_are_not_loaded() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_root = std::env::temp_dir().join("wow-sim-third-party-bootstrap-skip-test");
+    let addon_dir = temp_root.join("ThirdPartyBootstrapProbe");
+    std::fs::create_dir_all(&addon_dir).unwrap();
+    std::fs::write(
+        addon_dir.join("Bootstrap.lua"),
+        r#"ThirdPartyBootstrapProbeEvents = { "bootstrap" }"#,
+    )
+    .unwrap();
+    std::fs::write(
+        addon_dir.join("Normal.lua"),
+        r#"
+        ThirdPartyBootstrapProbeEvents = ThirdPartyBootstrapProbeEvents or {}
+        table.insert(ThirdPartyBootstrapProbeEvents, "normal")
+        "#,
+    )
+    .unwrap();
+
+    let toc = crate::toc::TocFile::parse(
+        &addon_dir,
+        r#"
+## Title: ThirdPartyBootstrapProbe
+Bootstrap.lua [Bootstrap]
+Normal.lua
+"#,
+    );
+
+    load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+    let events: String = env
+        .eval("return table.concat(ThirdPartyBootstrapProbeEvents, ',')")
+        .unwrap();
+    assert_eq!(events, "normal");
+
+    std::fs::remove_dir_all(&temp_root).ok();
+}
+
+#[test]
+fn blizzard_bootstrap_pass_loads_lod_bootstrap_without_marking_addon_loaded() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_root = std::env::temp_dir().join("wow-sim-bootstrap-pass-test");
+    let addon_dir = temp_root.join("Blizzard_BootstrapProbe");
+    std::fs::create_dir_all(&addon_dir).unwrap();
+    std::fs::write(
+        addon_dir.join("Blizzard_BootstrapProbe.toc"),
+        r#"
+## Title: Blizzard_BootstrapProbe
+## LoadOnDemand: 1
+Bootstrap.lua [Bootstrap]
+Normal.lua
+"#,
+    )
+    .unwrap();
+    std::fs::write(
+        addon_dir.join("Bootstrap.lua"),
+        r#"
+        local _, private = ...
+        private.bootstrapSeen = true
+        BootstrapProbeEvents = BootstrapProbeEvents or {}
+        table.insert(BootstrapProbeEvents, "bootstrap")
+        function BootstrapProbe_LoadUI()
+            return C_AddOns.LoadAddOn("Blizzard_BootstrapProbe")
+        end
+        "#,
+    )
+    .unwrap();
+    std::fs::write(
+        addon_dir.join("Normal.lua"),
+        r#"
+        local _, private = ...
+        BootstrapProbeEvents = BootstrapProbeEvents or {}
+        table.insert(BootstrapProbeEvents, private.bootstrapSeen and "normal sees bootstrap" or "normal missing bootstrap")
+        "#,
+    )
+    .unwrap();
+
+    crate::loader::load_blizzard_bootstrap_files_for_screen(
+        &env.loader_env(),
+        &temp_root,
+        crate::screen::ScreenKind::Game,
+    )
+    .unwrap();
+
+    let (events, loader_ty, loaded, lod): (String, String, bool, bool) = env
+        .eval(
+            r#"
+            return table.concat(BootstrapProbeEvents, ","),
+                   type(BootstrapProbe_LoadUI),
+                   C_AddOns.IsAddOnLoaded("Blizzard_BootstrapProbe"),
+                   C_AddOns.IsAddOnLoadOnDemand("Blizzard_BootstrapProbe")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(events, "bootstrap");
+    assert_eq!(loader_ty, "function");
+    assert!(!loaded, "bootstrap pass must not mark LoD addon loaded");
+    assert!(
+        lod,
+        "bootstrap registration should preserve LoadOnDemand metadata"
+    );
+
+    let toc = crate::toc::TocFile::from_file(&addon_dir.join("Blizzard_BootstrapProbe.toc"))
+        .expect("probe toc should parse");
+    load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+    let events: String = env
+        .eval("return table.concat(BootstrapProbeEvents, ',')")
+        .unwrap();
+    assert_eq!(events, "bootstrap,normal sees bootstrap");
+
+    std::fs::remove_dir_all(&temp_root).ok();
+}
+
+#[test]
 fn blizzard_lua_files_replay_into_secure_environment() {
     let env = WowLuaEnv::new().unwrap();
     let temp_root = std::env::temp_dir().join("wow-sim-secure-replay-test");

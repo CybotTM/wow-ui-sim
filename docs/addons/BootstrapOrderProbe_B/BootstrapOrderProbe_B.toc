@@ -1,0 +1,10 @@
+## Interface: 120005
+## Title: Bootstrap Order Probe B LoD
+## Notes: LoadOnDemand addon with a [Bootstrap] file
+## Author: Alessio
+## Version: 0.1.0
+## LoadOnDemand: 1
+## SavedVariables: BootstrapOrderProbeDB
+
+Bootstrap.lua [Bootstrap]
+Normal.lua
