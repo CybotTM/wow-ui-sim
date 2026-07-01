@@ -531,7 +531,11 @@ fn load_addon_xml_file(
     result: &mut LoadResult,
     file: &std::path::Path,
 ) {
-    match load_xml_file(env, file, ctx, &mut result.timing) {
+    let restore_add_to_secure_env = enable_secure_xml_frame_exports(env, ctx);
+    let load_result = load_xml_file(env, file, ctx, &mut result.timing);
+    restore_secure_xml_frame_exports(env, restore_add_to_secure_env);
+
+    match load_result {
         Ok(count) => {
             result.xml_files += 1;
             result.lua_files += count;
@@ -540,6 +544,24 @@ fn load_addon_xml_file(
             .warnings
             .push(format!("{}: {}", file.display(), error)),
     }
+}
+
+fn enable_secure_xml_frame_exports(env: &LoaderEnv<'_>, ctx: &AddonContext<'_>) -> Option<bool> {
+    if !ctx.use_secure_env {
+        return None;
+    }
+
+    let mut state = env.state().borrow_mut();
+    let previous = state.loading_add_to_secure_env;
+    state.loading_add_to_secure_env = true;
+    Some(previous)
+}
+
+fn restore_secure_xml_frame_exports(env: &LoaderEnv<'_>, previous: Option<bool>) {
+    let Some(previous) = previous else {
+        return;
+    };
+    env.state().borrow_mut().loading_add_to_secure_env = previous;
 }
 
 #[cfg(test)]

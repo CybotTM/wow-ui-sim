@@ -332,6 +332,46 @@ GlobalOnly.lua [AllowLoadEnvironment Global]
 }
 
 #[test]
+fn secure_xml_named_frames_bind_into_secure_environment() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_root = std::env::temp_dir().join("wow-sim-secure-xml-frame-test");
+    let addon_dir = temp_root.join("SecureXmlAddon");
+    std::fs::create_dir_all(&addon_dir).unwrap();
+    std::fs::write(
+        addon_dir.join("Frame.xml"),
+        r#"<Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <GameTooltip name="SecureXmlTooltip"/>
+        </Ui>"#,
+    )
+    .unwrap();
+
+    let toc = crate::toc::TocFile::parse(
+        &addon_dir,
+        r#"
+## Title: SecureXmlAddon
+## UseSecureEnvironment: 1
+Frame.xml
+"#,
+    );
+
+    let result = load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+    assert_eq!(result.xml_files, 1);
+
+    let (global_type, secure_same): (String, bool) = env
+        .eval(
+            r#"
+            return type(_G.SecureXmlTooltip),
+                   __secureenv.SecureXmlTooltip == _G.SecureXmlTooltip
+            "#,
+        )
+        .unwrap();
+    assert_eq!(global_type, "table");
+    assert!(secure_same);
+
+    std::fs::remove_dir_all(&temp_root).ok();
+}
+
+#[test]
 fn blizzard_shared_xml_lua_replays_into_secure_environment() {
     let env = WowLuaEnv::new().unwrap();
     let temp_root = std::env::temp_dir().join("wow-sim-sharedxml-secure-replay-test");
