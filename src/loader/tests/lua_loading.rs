@@ -332,6 +332,44 @@ GlobalOnly.lua [AllowLoadEnvironment Global]
 }
 
 #[test]
+fn blizzard_async_request_lua_replays_into_secure_environment() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_root = std::env::temp_dir().join("wow-sim-async-request-secure-replay-test");
+    let addon_dir = temp_root.join("Blizzard_AsyncRequest");
+    std::fs::create_dir_all(&addon_dir).unwrap();
+    std::fs::write(
+        addon_dir.join("Blizzard_AsyncRequest.lua"),
+        r#"AsyncRequests = { marker = "secure-visible" }"#,
+    )
+    .unwrap();
+
+    let toc = crate::toc::TocFile::parse(
+        &addon_dir,
+        r#"
+## Title: Blizzard_AsyncRequest
+## AllowLoad: Both
+Blizzard_AsyncRequest.lua
+"#,
+    );
+
+    let result = load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+    assert_eq!(result.lua_files, 2);
+
+    let (global_marker, secure_marker): (String, String) = env
+        .eval(
+            r#"
+            return _G.AsyncRequests.marker,
+                   __secureenv.AsyncRequests.marker
+            "#,
+        )
+        .unwrap();
+    assert_eq!(global_marker, "secure-visible");
+    assert_eq!(secure_marker, "secure-visible");
+
+    std::fs::remove_dir_all(&temp_root).ok();
+}
+
+#[test]
 fn secure_xml_named_frames_bind_into_secure_environment() {
     let env = WowLuaEnv::new().unwrap();
     let temp_root = std::env::temp_dir().join("wow-sim-secure-xml-frame-test");
