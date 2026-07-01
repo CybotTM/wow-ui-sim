@@ -583,6 +583,11 @@ fn test_catalog_shop_xml_numeric_error_without_main_onload() {
         let _ = crate::loader::load_addon(&env.loader_env(), toc_path);
     }
 
+    let shared_templates_toc =
+        ui.join("Blizzard_CatalogShopSharedTemplates/Blizzard_CatalogShopSharedTemplates.toc");
+    crate::loader::load_addon(&env.loader_env(), &shared_templates_toc)
+        .expect("catalog shop shared templates should load");
+
     let toc_path = ui.join("Blizzard_CatalogShop/Blizzard_CatalogShop.toc");
     let toc = crate::toc::TocFile::from_file(&toc_path).expect("catalog shop toc");
     let addon_table = env.create_addon_table().expect("catalog shop addon table");

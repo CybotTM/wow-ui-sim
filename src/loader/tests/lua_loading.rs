@@ -280,7 +280,7 @@ Normal.lua
     let events: String = env
         .eval("return table.concat(BootstrapProbeEvents, ',')")
         .unwrap();
-    assert_eq!(events, "bootstrap,normal missing bootstrap");
+    assert_eq!(events, "bootstrap,normal sees bootstrap");
 
     std::fs::remove_dir_all(&temp_root).ok();
 }

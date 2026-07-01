@@ -430,7 +430,14 @@ pub(super) fn apply_runtime_template_loader_effects(
     let loader_env = LoaderEnv::from_parts_active(borrow_lua(state)?, state_handle(state)?, state);
     let inherits = inherits.unwrap_or("");
     let mut timing = crate::loader::LoadTiming::default();
-    apply_loader_chain_layers(&loader_env, inherits, frame_name, name_parent, &mut timing)?;
+    apply_loader_chain_layers(
+        &loader_env,
+        inherits,
+        frame_id,
+        frame_name,
+        name_parent,
+        &mut timing,
+    )?;
     apply_loader_frame_extras(
         &loader_env,
         frame,
@@ -445,15 +452,18 @@ pub(super) fn apply_runtime_template_loader_effects(
 fn apply_loader_chain_layers(
     loader_env: &LoaderEnv,
     inherits: &str,
+    frame_id: u64,
     frame_name: &str,
     name_parent: &str,
     timing: &mut crate::loader::LoadTiming,
 ) -> LuaResult<()> {
+    let parent_ref_name = format!("__frame_{frame_id}");
     for entry in &*crate::xml::get_template_chain(inherits) {
         crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
             loader_env,
             &entry.frame,
             frame_name,
+            &parent_ref_name,
             name_parent,
             timing,
         )
@@ -471,20 +481,40 @@ fn apply_loader_frame_extras(
     inherits: &str,
     timing: &mut crate::loader::LoadTiming,
 ) -> LuaResult<()> {
+    let parent_ref_name = format!("__frame_{frame_id}");
     crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
         loader_env,
         frame,
         frame_name,
+        &parent_ref_name,
         name_parent,
         timing,
     )
     .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::button::apply_button_textures(loader_env, frame, frame_name, inherits)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::button::apply_button_text(loader_env, frame, frame_name, inherits)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::button::apply_button_fonts(loader_env, frame, frame_name, inherits)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::button::apply_button_textures_with_ref(
+        loader_env,
+        frame,
+        frame_name,
+        &parent_ref_name,
+        inherits,
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::button::apply_button_text_with_ref(
+        loader_env,
+        frame,
+        frame_name,
+        &parent_ref_name,
+        inherits,
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::button::apply_button_fonts_with_ref(
+        loader_env,
+        frame,
+        frame_name,
+        &parent_ref_name,
+        inherits,
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
     crate::loader::xml_frame_extras::apply_animation_groups(loader_env, frame, frame_id, inherits)
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
     crate::loader::xml_frame_extras::apply_bar_texture(loader_env, frame, frame_name, inherits)
