@@ -42,7 +42,7 @@ pub(super) fn build_cooldown_quads(
     if !f.cooldown_draw_swipe || f.cooldown_duration <= 0.0 {
         return;
     }
-    let elapsed_since_start = elapsed_secs - f.cooldown_start;
+    let elapsed_since_start = cooldown_elapsed_since_start(f, elapsed_secs);
     let progress = (elapsed_since_start / f.cooldown_duration).clamp(0.0, 1.0);
     if progress >= 1.0 {
         return; // Cooldown finished, no overlay
@@ -103,7 +103,7 @@ pub(super) fn emit_cooldown_bling_overlay(batch: &mut QuadBatch, frame: &FrameQu
     if !f.cooldown_draw_bling || f.cooldown_duration <= 0.0 {
         return;
     }
-    let elapsed_since_start = frame.elapsed_secs - f.cooldown_start;
+    let elapsed_since_start = cooldown_elapsed_since_start(f, frame.elapsed_secs);
     let progress = (elapsed_since_start / f.cooldown_duration).clamp(0.0, 1.0);
     if progress < 1.0 {
         return;
@@ -167,11 +167,20 @@ fn cooldown_remaining_seconds(f: &crate::widget::Frame, elapsed_secs: f64) -> Op
     if f.cooldown_hide_countdown || f.cooldown_duration <= 0.0 {
         return None;
     }
-    let remaining = (f.cooldown_duration - (elapsed_secs - f.cooldown_start)).max(0.0);
+    let remaining = (f.cooldown_duration - cooldown_elapsed_since_start(f, elapsed_secs)).max(0.0);
     if remaining <= 0.0 || f.cooldown_display_duration_ms < f.cooldown_min_countdown_duration_ms {
         return None;
     }
     Some(remaining)
+}
+
+fn cooldown_elapsed_since_start(f: &crate::widget::Frame, elapsed_secs: f64) -> f64 {
+    let mod_rate = if f.cooldown_mod_rate > 0.0 {
+        f.cooldown_mod_rate
+    } else {
+        1.0
+    };
+    (elapsed_secs - f.cooldown_start) * mod_rate
 }
 
 pub(super) fn cooldown_countdown_text(f: &crate::widget::Frame, remaining: f64) -> Option<String> {
@@ -208,8 +217,8 @@ pub(super) fn scale_rect_from_center(bounds: Rectangle, scale: f32) -> Rectangle
 #[cfg(test)]
 mod tests {
     use super::{
-        build_cooldown_quads, cooldown_countdown_text, emit_cooldown_bling_overlay,
-        emit_cooldown_edge_overlay,
+        build_cooldown_quads, cooldown_countdown_text, cooldown_remaining_seconds,
+        emit_cooldown_bling_overlay, emit_cooldown_edge_overlay,
     };
     use crate::iced_app::quad_builders::FrameQuadEmit;
     use crate::render::{QuadBatch, shader::FLAG_CIRCLE_CLIP};
@@ -248,6 +257,74 @@ mod tests {
         assert_eq!(batch.vertices[3].mask_tex_coords, [0.2, 0.9]);
         assert_eq!(batch.texture_requests.len(), 1);
         assert_eq!(batch.texture_requests[0].path, "Interface/CooldownSwipe");
+    }
+
+    #[test]
+    fn cooldown_swipe_progress_uses_mod_rate() {
+        let bounds = Rectangle::new(Point::new(10.0, 20.0), Size::new(40.0, 50.0));
+        let mut cooldown = Frame::new(WidgetType::Cooldown, None, None);
+        cooldown.cooldown_duration = 10.0;
+        cooldown.cooldown_start = 0.0;
+
+        let mut fast_batch = QuadBatch::new();
+        cooldown.cooldown_mod_rate = 2.0;
+        build_cooldown_quads(&mut fast_batch, bounds, &cooldown, 2.5, 1.0);
+        assert_eq!(
+            fast_batch.vertices[0].tex_coords[0], 0.5,
+            "double mod rate should make 2.5s of real time advance 5s into a 10s cooldown"
+        );
+
+        let mut slow_batch = QuadBatch::new();
+        cooldown.cooldown_mod_rate = 0.5;
+        build_cooldown_quads(&mut slow_batch, bounds, &cooldown, 2.5, 1.0);
+        assert_eq!(
+            slow_batch.vertices[0].tex_coords[0], 0.125,
+            "half mod rate should make 2.5s of real time advance 1.25s into a 10s cooldown"
+        );
+    }
+
+    #[test]
+    fn cooldown_bling_completion_uses_mod_rate() {
+        let mut batch = QuadBatch::new();
+        let mut cooldown = Frame::new(WidgetType::Cooldown, None, None);
+        cooldown.cooldown_duration = 10.0;
+        cooldown.cooldown_start = 0.0;
+        cooldown.cooldown_mod_rate = 2.0;
+        cooldown.cooldown_draw_bling = true;
+        cooldown.cooldown_bling_texture = Some("Interface/CooldownBling".to_string());
+
+        let registry = WidgetRegistry::default();
+        let frame = FrameQuadEmit {
+            id: cooldown.id,
+            widget: &cooldown,
+            bounds: Rectangle::new(Point::new(10.0, 20.0), Size::new(40.0, 40.0)),
+            clip_bounds: None,
+            bar_fill: None,
+            pressed_frame: None,
+            hovered_frame: None,
+            message_frames: None,
+            tooltip_data: None,
+            quest_blobs: None,
+            registry: &registry,
+            elapsed_secs: 5.0,
+            eff_alpha: 1.0,
+        };
+
+        emit_cooldown_bling_overlay(&mut batch, &frame);
+
+        assert_eq!(batch.texture_requests.len(), 1);
+        assert_eq!(batch.texture_requests[0].path, "Interface/CooldownBling");
+    }
+
+    #[test]
+    fn cooldown_countdown_remaining_uses_mod_rate() {
+        let mut cooldown = Frame::new(WidgetType::Cooldown, None, None);
+        cooldown.cooldown_duration = 10.0;
+        cooldown.cooldown_start = 0.0;
+        cooldown.cooldown_mod_rate = 2.0;
+        cooldown.cooldown_display_duration_ms = 10_000.0;
+
+        assert_eq!(cooldown_remaining_seconds(&cooldown, 2.0), Some(6.0));
     }
 
     #[test]
