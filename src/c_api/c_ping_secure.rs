@@ -16,32 +16,50 @@ const CALLBACK_TABLE_KEY: &str = "__wow_ping_secure_callbacks";
 pub(crate) fn register_c_ping_secure_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_PingSecure")?;
     table_set_rust_fn_static(state, table_ref, "CreateFrame", create_frame)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "SetPendingPingOffScreenCallback",
-        set_pending_ping_off_screen_callback,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "SetPingCooldownStartedCallback",
-        set_ping_cooldown_started_callback,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "SetPingRadialWheelCreatedCallback",
-        set_ping_radial_wheel_created_callback,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "SetTogglePingListenerCallback",
-        set_toggle_ping_listener_callback,
-    )?;
+    register_callback_setters(state, table_ref)
+}
+
+fn register_callback_setters(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    for (name, function) in PING_SECURE_CALLBACK_SETTERS {
+        table_set_rust_fn_static(state, table_ref, name, *function)?;
+    }
     Ok(())
 }
+
+const PING_SECURE_CALLBACK_SETTERS: &[(&str, fn(&mut LuaState) -> LuaResult<u32>)] = &[
+    (
+        "SetPendingPingOffScreenCallback",
+        set_pending_ping_off_screen_callback,
+    ),
+    (
+        "SetPingCooldownStartedCallback",
+        set_ping_cooldown_started_callback,
+    ),
+    (
+        "SetPingPinFrameAddedCallback",
+        set_ping_pin_frame_added_callback,
+    ),
+    (
+        "SetPingPinFrameRemovedCallback",
+        set_ping_pin_frame_removed_callback,
+    ),
+    (
+        "SetPingPinFrameScreenClampStateUpdatedCallback",
+        set_ping_pin_frame_screen_clamp_state_updated_callback,
+    ),
+    (
+        "SetPingRadialWheelCreatedCallback",
+        set_ping_radial_wheel_created_callback,
+    ),
+    ("SetSendMacroPingCallback", set_send_macro_ping_callback),
+    (
+        "SetTogglePingListenerCallback",
+        set_toggle_ping_listener_callback,
+    ),
+];
 
 fn create_frame(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
@@ -55,8 +73,24 @@ fn set_ping_cooldown_started_callback(state: &mut LuaState) -> LuaResult<u32> {
     set_callback(state, "pingCooldownStarted")
 }
 
+fn set_ping_pin_frame_added_callback(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback(state, "pingPinFrameAdded")
+}
+
+fn set_ping_pin_frame_removed_callback(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback(state, "pingPinFrameRemoved")
+}
+
+fn set_ping_pin_frame_screen_clamp_state_updated_callback(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback(state, "pingPinFrameScreenClampStateUpdated")
+}
+
 fn set_ping_radial_wheel_created_callback(state: &mut LuaState) -> LuaResult<u32> {
     set_callback(state, "pingRadialWheelCreated")
+}
+
+fn set_send_macro_ping_callback(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback(state, "sendMacroPing")
 }
 
 fn set_toggle_ping_listener_callback(state: &mut LuaState) -> LuaResult<u32> {
@@ -103,12 +137,20 @@ mod tests {
                 if type(C_PingSecure.CreateFrame) ~= "function" then return "create_frame" end
                 if type(C_PingSecure.SetPendingPingOffScreenCallback) ~= "function" then return "pending_callback" end
                 if type(C_PingSecure.SetPingCooldownStartedCallback) ~= "function" then return "cooldown_callback" end
+                if type(C_PingSecure.SetPingPinFrameAddedCallback) ~= "function" then return "pin_added_callback" end
+                if type(C_PingSecure.SetPingPinFrameRemovedCallback) ~= "function" then return "pin_removed_callback" end
+                if type(C_PingSecure.SetPingPinFrameScreenClampStateUpdatedCallback) ~= "function" then return "pin_clamp_callback" end
                 if type(C_PingSecure.SetPingRadialWheelCreatedCallback) ~= "function" then return "radial_callback" end
+                if type(C_PingSecure.SetSendMacroPingCallback) ~= "function" then return "send_macro_callback" end
                 if type(C_PingSecure.SetTogglePingListenerCallback) ~= "function" then return "toggle_callback" end
                 C_PingSecure.CreateFrame()
                 C_PingSecure.SetPendingPingOffScreenCallback(function() end)
                 C_PingSecure.SetPingCooldownStartedCallback(function() end)
+                C_PingSecure.SetPingPinFrameAddedCallback(function() end)
+                C_PingSecure.SetPingPinFrameRemovedCallback(function() end)
+                C_PingSecure.SetPingPinFrameScreenClampStateUpdatedCallback(function() end)
                 C_PingSecure.SetPingRadialWheelCreatedCallback(function() end)
+                C_PingSecure.SetSendMacroPingCallback(function() end)
                 C_PingSecure.SetTogglePingListenerCallback(function() end)
                 if type(rawget(__secureenv, "C_PingSecure")) ~= "table" then return "secure_namespace" end
                 return "ok"
