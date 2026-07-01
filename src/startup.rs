@@ -271,7 +271,16 @@ pub fn settle_headless_startup(env: &WowLuaEnv) {
 pub fn collect_lua_error_startup(env: &WowLuaEnv) {
     let screen = env.state().borrow().screen_kind;
     fire_startup_events_for_screen(env, screen);
+    run_lua_error_update_ticks(env);
+}
+
+/// Run a small OnUpdate/timer slice for `lua-errors` without full headless
+/// layout/render settling.
+pub fn run_lua_error_update_ticks(env: &WowLuaEnv) {
     process_pending_timers(env);
+    fire_one_on_update_tick(env);
+    process_pending_timers(env);
+    run_extra_update_ticks(env, 2);
 }
 
 /// Fire startup events for headless test mode (skips IsLoggedIn override).

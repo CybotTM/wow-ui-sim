@@ -1,7 +1,7 @@
 //! `lua-errors` subcommand: load UI, collect Lua errors, output unique errors as JSON.
 
 use crate::lua_api::{SimState, WowLuaEnv};
-use crate::startup::collect_lua_error_startup;
+use crate::startup::{collect_lua_error_startup, run_lua_error_update_ticks};
 use std::collections::BTreeMap;
 
 const ERRORS_BY_ADDON_ENV: &str = "WOW_SIM_LUA_ERRORS_BY_ADDON";
@@ -67,6 +67,7 @@ pub fn run_lua_errors(
         if let Err(e) = env.exec_maybe_secure(&probe_code, exec_lua_secure) {
             eprintln!("[exec-lua] error: {e}");
         }
+        run_lua_error_update_ticks(env);
     }
 
     print_rehash_stats();
@@ -348,6 +349,7 @@ mod tests {
     use super::{collect_unique_errors, errors_by_addon_lines, grouped_errors_by_addon};
     use crate::lua_api::AddonInfo;
     use crate::lua_api::WowLuaEnv;
+    use crate::startup::collect_lua_error_startup;
     use rilua::LuaApi;
 
     #[test]
@@ -364,6 +366,32 @@ mod tests {
         assert_eq!(
             errors[0].message,
             "repeated boom\nstack traceback:\n\t[C]: in function 'error'"
+        );
+    }
+
+    #[test]
+    fn collect_lua_error_startup_captures_deferred_on_update_errors() {
+        let env = WowLuaEnv::new().expect("lua env");
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "LuaErrorsDeferredOnUpdateProbe", UIParent)
+            frame:SetScript("OnUpdate", function(self)
+                self:SetScript("OnUpdate", function()
+                    error("deferred onupdate boom")
+                end)
+            end)
+            "#,
+        )
+        .expect("install deferred OnUpdate probe");
+
+        collect_lua_error_startup(&env);
+
+        let errors = env.state().borrow().lua_errors.clone();
+        assert!(
+            errors
+                .iter()
+                .any(|error| error.contains("deferred onupdate boom")),
+            "lua-errors startup collection should run enough OnUpdate ticks to catch deferred handler errors: {errors:?}"
         );
     }
 
