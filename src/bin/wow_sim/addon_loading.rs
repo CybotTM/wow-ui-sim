@@ -61,10 +61,6 @@ pub fn load_blizzard_addons(
     let blizzard_start = std::time::Instant::now();
     let mut total_timing = LoadTiming::default();
 
-    // Keep GC stopped during bulk loading. `init_and_load` restarts and
-    // collects once after third-party addons and post-load workarounds have
-    // finished, so restarting here would make third-party addon load pay
-    // incremental GC costs.
     env.gc_stop();
 
     // Wrath ships a top-level FrameXML.toc that pre-dates the retail Blizzard_*
@@ -122,16 +118,6 @@ fn load_one_blizzard_addon(
     verbose: bool,
     timing: &mut LoadTiming,
 ) {
-    let toc = match wow_ui_sim::toc::TocFile::from_file(toc_path) {
-        Ok(toc) => toc,
-        Err(error) => {
-            println!("{} failed: {}", name, error);
-            return;
-        }
-    };
-    if toc.is_load_on_demand() {
-        return;
-    }
     let result = match saved_vars {
         Some(saved_vars) => load_addon_with_saved_vars(&env.loader_env(), toc_path, saved_vars),
         None => load_addon(&env.loader_env(), toc_path),
