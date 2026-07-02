@@ -1,0 +1,9 @@
+## Interface: 120100
+## Title: Xml Method Binding Probe
+## Notes: Captures real-client XML method binding timing behavior
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: XmlMethodBindingProbeDB
+
+XmlMethodBindingProbe.xml
+XmlMethodBindingProbe.lua

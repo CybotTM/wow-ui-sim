@@ -335,6 +335,115 @@ fn test_xml_method_script_binds_after_inherited_template_overrides() {
 }
 
 #[test]
+fn test_partitioned_xml_method_script_uses_forbidden_object_table() {
+    let t = load_test_xml(
+        "partitioned-xml-method-script-forbidden-self",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                PartitionedMethodPrivateMixin = {}
+                function PartitionedMethodPrivateMixin:OnLoad_Intrinsic()
+                    self.loadedSecret = true
+                end
+                function PartitionedMethodPrivateMixin:OnEvent_Intrinsic(event)
+                    self.eventSecret = event
+                end
+            </Script>
+            <ScopedModifier useForbiddenObjectTable="true">
+                <Frame name="PartitionedMethodFrame" parent="UIParent">
+                    <Mixins>
+                        <Mixin key="PartitionedMethodPrivateMixin" source="secure"/>
+                    </Mixins>
+                    <Scripts>
+                        <OnLoad method="OnLoad_Intrinsic"/>
+                        <OnEvent method="OnEvent_Intrinsic"/>
+                    </Scripts>
+                </Frame>
+            </ScopedModifier>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local handler = PartitionedMethodFrame:GetScript("OnEvent")
+            assert(type(handler) == "function", "OnEvent method binding should install a handler")
+            handler(PartitionedMethodFrame, "XML_METHOD_PROBE")
+        "#,
+        )
+        .unwrap();
+
+    t.assert_lua_true(
+        "return PartitionedMethodFrame.loadedSecret == nil",
+        "private XML method script should not write to public frame",
+    );
+    t.assert_lua_true(
+        "return GetForbiddenObjectTable(PartitionedMethodFrame).loadedSecret == true",
+        "private XML method script should run with forbidden self",
+    );
+    t.assert_lua_true(
+        "return GetForbiddenObjectTable(PartitionedMethodFrame).eventSecret == 'XML_METHOD_PROBE'",
+        "private XML event method should run with forbidden self",
+    );
+}
+
+#[test]
+fn test_xml_method_script_handler_storage_is_separate_from_object_field() {
+    let t = load_test_xml(
+        "xml-method-binding-script-storage",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                XmlMethodStorageLog = {}
+                XmlMethodStorageObservations = {}
+                XmlMethodStorageMixin = {}
+                function XmlMethodStorageMixin:OnHide()
+                    table.insert(XmlMethodStorageLog, "hide1")
+                end
+            </Script>
+            <Frame name="XmlMethodStorageFrame" parent="UIParent" mixin="XmlMethodStorageMixin">
+                <Scripts>
+                    <OnLoad>
+                        table.insert(XmlMethodStorageLog, "load")
+                        XmlMethodStorageObservations.initialEqual = self:GetScript("OnHide") == self.OnHide
+                        self.OnHide = function()
+                            table.insert(XmlMethodStorageLog, "hide2")
+                        end
+                        XmlMethodStorageObservations.afterFieldAssignmentEqual = self:GetScript("OnHide") == self.OnHide
+                        self:OnHide()
+                        self:SetScript("OnHide", function()
+                            table.insert(XmlMethodStorageLog, "hide3")
+                        end)
+                        XmlMethodStorageObservations.afterSetScriptEqual = self:GetScript("OnHide") == self.OnHide
+                        self:Hide()
+                    </OnLoad>
+                    <OnHide method="OnHide"/>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.assert_lua_str(
+        "return table.concat(XmlMethodStorageLog, ',')",
+        "load,hide2,hide3",
+    );
+    t.assert_lua_true(
+        "return XmlMethodStorageObservations.initialEqual == true",
+        "XML method binding should initially install the same function visible on the object field",
+    );
+    t.assert_lua_true(
+        "return XmlMethodStorageObservations.afterFieldAssignmentEqual == false",
+        "object field assignment should not replace the script handler",
+    );
+    t.assert_lua_true(
+        "return XmlMethodStorageObservations.afterSetScriptEqual == false",
+        "SetScript should not replace the object field",
+    );
+}
+
+#[test]
 fn test_xml_method_script_binds_before_sibling_onload_mutation() {
     let t = load_test_xml(
         "xml-method-binding-before-execution",

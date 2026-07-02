@@ -1,0 +1,142 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Script>
+        XmlMethodBindingProbeLog = {
+            siblingMutation = {},
+            setScriptObjectTable = {},
+        }
+
+        local function summarizeValue(value)
+            return {
+                type = type(value),
+                tostring = tostring(value),
+            }
+        end
+
+        local function protectedCall(fn)
+            local ok, result = pcall(fn)
+            if ok then
+                return {
+                    ok = true,
+                    value = summarizeValue(result),
+                }
+            end
+            return {
+                ok = false,
+                error = tostring(result),
+            }
+        end
+
+        function XmlMethodBindingProbeSnapshotScriptState(frame, label)
+            local getScriptResult = protectedCall(function()
+                return frame:GetScript("OnHide")
+            end)
+            local fieldResult = protectedCall(function()
+                return frame.OnHide
+            end)
+            local rawgetResult = protectedCall(function()
+                return rawget(frame, "OnHide")
+            end)
+            local pairsResult = protectedCall(function()
+                local keys = {}
+                for key in pairs(frame) do
+                    table.insert(keys, tostring(key))
+                end
+                table.sort(keys)
+                return table.concat(keys, ",")
+            end)
+            local equalResult = protectedCall(function()
+                return frame:GetScript("OnHide") == frame.OnHide
+            end)
+            XmlMethodBindingProbeLog.setScriptObjectTable[#XmlMethodBindingProbeLog.setScriptObjectTable + 1] = {
+                label = label,
+                getScript = getScriptResult,
+                field = fieldResult,
+                rawget = rawgetResult,
+                pairs = pairsResult,
+                getScriptEqualsField = equalResult,
+            }
+        end
+
+        local function record(caseName, value)
+            XmlMethodBindingProbeLog[caseName] = XmlMethodBindingProbeLog[caseName] or {}
+            table.insert(XmlMethodBindingProbeLog[caseName], value)
+        end
+
+        XmlMethodBindingProbeHideMixin = {}
+        function XmlMethodBindingProbeHideMixin:OnHide()
+            record("siblingMutation", "hide1")
+        end
+
+        function XmlMethodBindingProbeBaseFoo(self)
+            XmlMethodBindingProbeLog.inheritedMethod = "base"
+        end
+
+        function XmlMethodBindingProbeOverrideFoo(self)
+            XmlMethodBindingProbeLog.inheritedMethod = "override"
+        end
+
+        function XmlMethodBindingProbeTextBaseFoo(self)
+            XmlMethodBindingProbeLog.inheritedScriptText = "base"
+        end
+
+        function XmlMethodBindingProbeTextOverrideFoo(self)
+            XmlMethodBindingProbeLog.inheritedScriptText = "override"
+        end
+    </Script>
+
+    <Frame name="XmlMethodBindingProbeSiblingFrame" parent="UIParent" mixin="XmlMethodBindingProbeHideMixin">
+        <Scripts>
+            <OnLoad>
+                table.insert(XmlMethodBindingProbeLog.siblingMutation, "load")
+                XmlMethodBindingProbeSnapshotScriptState(self, "beforeFieldAssignment")
+                self.OnHide = function()
+                    table.insert(XmlMethodBindingProbeLog.siblingMutation, "hide2")
+                end
+                XmlMethodBindingProbeSnapshotScriptState(self, "afterFieldAssignment")
+                self:OnHide()
+                self:SetScript("OnHide", function()
+                    table.insert(XmlMethodBindingProbeLog.siblingMutation, "hide3")
+                end)
+                XmlMethodBindingProbeSnapshotScriptState(self, "afterSetScript")
+                self:Hide()
+            </OnLoad>
+            <OnHide method="OnHide"/>
+        </Scripts>
+    </Frame>
+
+    <Frame name="XmlMethodBindingProbeBaseTemplate" virtual="true">
+        <KeyValues>
+            <KeyValue key="Foo" value="XmlMethodBindingProbeBaseFoo" type="global"/>
+        </KeyValues>
+        <Scripts>
+            <OnLoad method="Foo"/>
+        </Scripts>
+    </Frame>
+
+    <Frame name="XmlMethodBindingProbeOverrideTemplate" virtual="true" inherits="XmlMethodBindingProbeBaseTemplate">
+        <KeyValues>
+            <KeyValue key="Foo" value="XmlMethodBindingProbeOverrideFoo" type="global"/>
+        </KeyValues>
+    </Frame>
+
+    <Frame name="XmlMethodBindingProbeInheritedFrame" parent="UIParent" inherits="XmlMethodBindingProbeOverrideTemplate" hidden="true"/>
+
+    <Frame name="XmlMethodBindingProbeTextBaseTemplate" virtual="true">
+        <KeyValues>
+            <KeyValue key="Foo" value="XmlMethodBindingProbeTextBaseFoo" type="global"/>
+        </KeyValues>
+        <Scripts>
+            <OnLoad>
+                self:Foo()
+            </OnLoad>
+        </Scripts>
+    </Frame>
+
+    <Frame name="XmlMethodBindingProbeTextOverrideTemplate" virtual="true" inherits="XmlMethodBindingProbeTextBaseTemplate">
+        <KeyValues>
+            <KeyValue key="Foo" value="XmlMethodBindingProbeTextOverrideFoo" type="global"/>
+        </KeyValues>
+    </Frame>
+
+    <Frame name="XmlMethodBindingProbeTextFrame" parent="UIParent" inherits="XmlMethodBindingProbeTextOverrideTemplate" hidden="true"/>
+</Ui>

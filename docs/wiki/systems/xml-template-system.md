@@ -67,7 +67,7 @@ Three `ScriptBodyXml` forms:
 - `method="X"` — binds the method function after XML composition, before lifecycle execution
 - Inline body — wraps as `function(self, ...) <body> end`
 
-For `method="X"`, the simulator captures `frame.X` when the script handler is installed if the method exists. Later runtime field mutation during a sibling script body does not change the already-bound script handler. If the method is absent at install time, the compatibility fallback keeps a live lookup path so legacy tests/addons that define the method after XML load can still dispatch.
+For `method="X"`, live PTR 12.1 probing showed two separate stores: the object field (`frame.X`) and the script handler returned by `GetScript`. XML method binding installs the currently composed method function as the script handler. Later `frame.X = otherFunction` changes direct `frame:X()` calls but does not change `GetScript`; later `SetScript` changes `GetScript` but does not change `frame.X`. Under `ScopedModifier useForbiddenObjectTable="true"`, private mixin script methods are resolved from the forbidden object table and invoked with the forbidden self, matching `Blizzard_AuraContainer.xml`'s private `OnLoad_Intrinsic`/`OnEvent_Intrinsic` pattern. If the method is absent at install time, the simulator keeps a compatibility live-lookup fallback for legacy tests/addons that define the method after XML load.
 
 `inherit="prepend"` or `"append"` chains new/existing handlers, both wrapped in `pcall`. Without `inherit`, new handler replaces old.
 

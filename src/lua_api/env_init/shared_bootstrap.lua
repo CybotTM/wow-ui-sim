@@ -85,11 +85,30 @@ function __wow_xml_set_key_value(object, key, value)
   end
 end
 
+local function __wow_resolve_forbidden_xml_method(object, methodName)
+  if object == nil or not __wow_xml_object_uses_forbidden_table(object) then
+    return nil, nil
+  end
+
+  local forbidden = GetForbiddenObjectTable(object)
+  local method = rawget(forbidden, methodName)
+  if type(method) == "function" then
+    return method, forbidden
+  end
+
+  return nil, nil
+end
+
 function __wow_bind_xml_method(object, methodName)
   local bound = object and object[methodName]
   if type(bound) == "function" then
-    return function(self, ...)
-      return bound(self, ...)
+    return bound
+  end
+
+  local forbiddenBound, forbidden = __wow_resolve_forbidden_xml_method(object, methodName)
+  if forbiddenBound ~= nil then
+    return function(_self, ...)
+      return forbiddenBound(forbidden, ...)
     end
   end
 
@@ -97,6 +116,11 @@ function __wow_bind_xml_method(object, methodName)
     local current = self and self[methodName]
     if type(current) == "function" then
       return current(self, ...)
+    end
+
+    local forbiddenCurrent, currentForbidden = __wow_resolve_forbidden_xml_method(self, methodName)
+    if forbiddenCurrent ~= nil then
+      return forbiddenCurrent(currentForbidden, ...)
     end
   end
 end
