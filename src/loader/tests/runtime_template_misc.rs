@@ -299,6 +299,42 @@ fn test_frame_literal_mixins_block_applies_mixins() {
 }
 
 #[test]
+fn test_xml_method_script_binds_after_inherited_template_overrides() {
+    let t = load_test_xml(
+        "xml-method-binding-after-template-overrides",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                XmlTemplateMethodBindingResult = nil
+                function XmlTemplateMethodBindingBase(self)
+                    XmlTemplateMethodBindingResult = "base"
+                end
+                function XmlTemplateMethodBindingOverride(self)
+                    XmlTemplateMethodBindingResult = "override"
+                end
+            </Script>
+            <Frame name="XmlMethodBindingBaseTemplate" virtual="true">
+                <KeyValues>
+                    <KeyValue key="Foo" value="XmlTemplateMethodBindingBase" type="global"/>
+                </KeyValues>
+                <Scripts>
+                    <OnLoad method="Foo"/>
+                </Scripts>
+            </Frame>
+            <Frame name="XmlMethodBindingOverrideTemplate" virtual="true" inherits="XmlMethodBindingBaseTemplate">
+                <KeyValues>
+                    <KeyValue key="Foo" value="XmlTemplateMethodBindingOverride" type="global"/>
+                </KeyValues>
+            </Frame>
+            <Frame name="XmlMethodBindingOverrideFrame" parent="UIParent" inherits="XmlMethodBindingOverrideTemplate"/>
+        </Ui>
+        "#,
+    );
+
+    t.assert_lua_str("return XmlTemplateMethodBindingResult", "override");
+}
+
+#[test]
 fn test_xml_method_script_binds_before_sibling_onload_mutation() {
     let t = load_test_xml(
         "xml-method-binding-before-execution",
