@@ -4,8 +4,8 @@ use crate::lua_api::frame::methods::methods_helpers::{
     can_change_protected_state_for, emit_addon_action_blocked,
 };
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id,
-    frame_id_from_stack, frame_ref, table_get,
+    borrow_state, borrow_state_mut, call_function_state, clear_child_from_rilua_parent_key,
+    create_string, extract_frame_id, frame_id_from_stack, frame_ref, table_get,
 };
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
 use crate::widget::{AnchorPoint, Frame, WidgetRegistry};
@@ -242,11 +242,16 @@ pub(super) fn get_additional_regions(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn get_parent_key(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::methods::create_string;
     let id = frame_id_from_stack(state, 1)?;
     let key = {
         let sim = borrow_state(state)?;
-        sim.widgets.get(id).and_then(|f| f.parent_key.clone())
+        sim.widgets.get(id).and_then(|child| {
+            child.parent_key.clone().or_else(|| {
+                child
+                    .parent_id
+                    .and_then(|parent_id| find_parent_key_for_child(&sim.widgets, parent_id, id))
+            })
+        })
     };
     match key {
         Some(k) => {
@@ -264,7 +269,7 @@ pub(super) fn get_parent_key(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn set_parent_key(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let key = String::from_stack(state, 2)?;
-    let _remove_old = bool::from_stack(state, 3)?;
+    let clear_existing = bool::from_stack(state, 3)?;
     let parent_id = {
         let sim = borrow_state(state)?;
         sim.widgets.get(id).and_then(|f| f.parent_id)
@@ -272,17 +277,84 @@ pub(super) fn set_parent_key(state: &mut LuaState) -> LuaResult<u32> {
     let Some(pid) = parent_id else {
         return Ok(0);
     };
-    {
-        let mut sim = borrow_state_mut(state)?;
-        if let Some(child) = sim.widgets.get_mut(id) {
-            child.parent_key = Some(key.clone());
-        }
-        if let Some(parent) = sim.widgets.get_mut_visual(pid) {
-            parent.children_keys.insert(key.clone(), id);
-        }
+
+    let aliases_to_clear = update_parent_key_state(state, pid, id, &key, clear_existing)?;
+
+    for alias in aliases_to_clear {
+        clear_child_from_rilua_parent_key(state, pid, &alias, id)?;
     }
     crate::lua_api::methods::sync_child_to_rilua(state, pid, &key, id)?;
     Ok(0)
+}
+
+fn update_parent_key_state(
+    state: &mut LuaState,
+    parent_id: u64,
+    child_id: u64,
+    key: &str,
+    clear_existing: bool,
+) -> LuaResult<Vec<String>> {
+    let mut sim = borrow_state_mut(state)?;
+    let existing_key = existing_parent_key_for_child(&sim.widgets, parent_id, child_id);
+    let aliases_to_clear = if clear_existing {
+        parent_keys_for_child(&sim.widgets, parent_id, child_id)
+    } else {
+        Vec::new()
+    };
+
+    if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+        if clear_existing {
+            parent
+                .children_keys
+                .retain(|_, mapped_id| *mapped_id != child_id);
+        }
+        parent.children_keys.insert(key.to_string(), child_id);
+    }
+    if let Some(child) = sim.widgets.get_mut(child_id) {
+        child.parent_key = if clear_existing {
+            Some(key.to_string())
+        } else {
+            existing_key.or_else(|| Some(key.to_string()))
+        };
+    }
+    Ok(aliases_to_clear)
+}
+
+fn existing_parent_key_for_child(
+    widgets: &WidgetRegistry,
+    parent_id: u64,
+    child_id: u64,
+) -> Option<String> {
+    widgets
+        .get(child_id)
+        .and_then(|child| child.parent_key.clone())
+        .or_else(|| find_parent_key_for_child(widgets, parent_id, child_id))
+}
+
+fn find_parent_key_for_child(
+    widgets: &WidgetRegistry,
+    parent_id: u64,
+    child_id: u64,
+) -> Option<String> {
+    widgets.get(parent_id).and_then(|parent| {
+        parent
+            .children_keys
+            .iter()
+            .find_map(|(key, mapped_id)| (*mapped_id == child_id).then(|| key.clone()))
+    })
+}
+
+fn parent_keys_for_child(widgets: &WidgetRegistry, parent_id: u64, child_id: u64) -> Vec<String> {
+    widgets
+        .get(parent_id)
+        .map(|parent| {
+            parent
+                .children_keys
+                .iter()
+                .filter_map(|(key, mapped_id)| (*mapped_id == child_id).then(|| key.clone()))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 // ── Create methods ────────────────────────────────────────────────────────────

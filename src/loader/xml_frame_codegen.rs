@@ -162,14 +162,63 @@ fn resolve_inherited_string(
 /// `apply_templates_from_registry` → `apply_single_template` → `apply_mixin`,
 /// so we only need the frame's own mixin attribute here.
 fn append_mixins_code(lua_code: &mut String, frame: &crate::xml::FrameXml, _inherits: &str) {
-    // Only direct mixins — template mixins are applied during CreateFrame
-    let all_mixins = collect_mixins_from_attr(frame.combined_mixin().as_deref());
+    // Only direct mixins — template mixins are applied during CreateFrame.
+    for mixin in collect_frame_mixins(frame) {
+        append_single_mixin_code(lua_code, &mixin);
+    }
+}
 
-    for m in &all_mixins {
-        lua_code.push_str(&format!(
-            "\n        do local m = {m} or (__secureenv and rawget(__secureenv, \"{m}\")) \
-             if m then Mixin(frame, m) end end"
-        ));
+fn append_single_mixin_code(lua_code: &mut String, mixin: &FrameMixin) {
+    let name = &mixin.name;
+    let lookup = if mixin.source.as_deref() == Some("secure") {
+        format!("(__secureenv and rawget(__secureenv, \"{name}\")) or {name}")
+    } else {
+        format!("{name} or (__secureenv and rawget(__secureenv, \"{name}\"))")
+    };
+    lua_code.push_str(&format!(
+        "\n        do local m = {lookup} if m then Mixin(frame, m) end end"
+    ));
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct FrameMixin {
+    name: String,
+    source: Option<String>,
+}
+
+fn collect_frame_mixins(frame: &crate::xml::FrameXml) -> Vec<FrameMixin> {
+    let mut mixins = Vec::new();
+    let mut seen = FxHashSet::default();
+    append_attr_mixins(&mut mixins, &mut seen, frame.combined_mixin().as_deref());
+    append_block_mixins(&mut mixins, &mut seen, frame.mixins());
+    mixins
+}
+
+fn append_attr_mixins(
+    mixins: &mut Vec<FrameMixin>,
+    seen: &mut FxHashSet<String>,
+    mixin_attr: Option<&str>,
+) {
+    for name in collect_mixins_from_attr(mixin_attr) {
+        if seen.insert(name.clone()) {
+            mixins.push(FrameMixin { name, source: None });
+        }
+    }
+}
+
+fn append_block_mixins(
+    mixins: &mut Vec<FrameMixin>,
+    seen: &mut FxHashSet<String>,
+    mixins_xml: Option<&crate::xml::MixinsXml>,
+) {
+    let Some(mixins_xml) = mixins_xml else { return };
+    for entry in &mixins_xml.entries {
+        if seen.insert(entry.key.clone()) {
+            mixins.push(FrameMixin {
+                name: entry.key.clone(),
+                source: entry.source.clone(),
+            });
+        }
     }
 }
 
@@ -284,7 +333,7 @@ fn append_scripts_code(lua_code: &mut String, frame: &crate::xml::FrameXml) {
 
 #[cfg(test)]
 mod tests {
-    use super::collect_mixins_from_attr;
+    use super::{FrameMixin, collect_frame_mixins, collect_mixins_from_attr};
 
     #[test]
     fn collect_mixins_from_attr_keeps_first_unique_mixin_order() {
@@ -297,6 +346,48 @@ mod tests {
                 "AlphaMixin".to_string(),
                 "BetaMixin".to_string(),
                 "GammaMixin".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn collect_frame_mixins_appends_block_entries_after_attr_entries() {
+        let mut frame = crate::xml::FrameXml {
+            mixin: Some("AlphaMixin".to_string()),
+            ..Default::default()
+        };
+        frame.children.push(crate::xml::FrameChildElement::Mixins(
+            crate::xml::MixinsXml {
+                entries: vec![
+                    crate::xml::MixinXml {
+                        key: "SecureMixin".to_string(),
+                        source: Some("secure".to_string()),
+                        target_partition: Some("public".to_string()),
+                        inbound_partition: Some("forbidden".to_string()),
+                        secure_delegates: Some(true),
+                    },
+                    crate::xml::MixinXml {
+                        key: "AlphaMixin".to_string(),
+                        source: Some("secure".to_string()),
+                        target_partition: None,
+                        inbound_partition: None,
+                        secure_delegates: None,
+                    },
+                ],
+            },
+        ));
+
+        assert_eq!(
+            collect_frame_mixins(&frame),
+            vec![
+                FrameMixin {
+                    name: "AlphaMixin".to_string(),
+                    source: None,
+                },
+                FrameMixin {
+                    name: "SecureMixin".to_string(),
+                    source: Some("secure".to_string()),
+                },
             ]
         );
     }

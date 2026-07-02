@@ -88,6 +88,36 @@ fn representative_missing_enums_are_available_with_expected_values() {
 }
 
 #[test]
+fn seconds_formatter_enums_are_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local interval = Enum.SecondsFormatterInterval
+            if type(interval) ~= "table" then
+                return "missing_interval"
+            end
+            if interval.Seconds ~= 0 or interval.Minutes ~= 1 or interval.Hours ~= 2 or interval.Days ~= 3 then
+                return "wrong_interval"
+            end
+
+            local abbreviation = Enum.SecondsFormatterAbbreviation
+            if type(abbreviation) ~= "table" then
+                return "missing_abbreviation"
+            end
+            if abbreviation.None ~= 0 or abbreviation.OneLetter ~= 1 or abbreviation.TwoLetters ~= 2 or abbreviation.Full ~= 3 then
+                return "wrong_abbreviation"
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn cooldown_layout_enums_are_available_with_expected_values() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

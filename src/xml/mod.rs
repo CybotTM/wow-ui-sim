@@ -30,8 +30,8 @@ pub use types_fonts::{FontFamilyMemberXml, FontFamilyXml, FontXml};
 pub use types_support::{
     AbsDimensionXml, AnchorXml, AnchorsXml, AnimationsXml, AttributeXml, AttributesXml,
     BackdropXml, BindingXml, ColorXml, FontRefXml, GradientXml, InsetsXml, KeyValueXml,
-    KeyValuesXml, ModifiedClickXml, OffsetXml, ResizeBoundsXml, ScriptBodyXml, ScriptsXml,
-    ScrollChildXml, SizeXml,
+    KeyValuesXml, MixinXml, MixinsXml, ModifiedClickXml, OffsetXml, ResizeBoundsXml, ScriptBodyXml,
+    ScriptsXml, ScrollChildXml, SizeXml,
 };
 
 #[cfg(test)]
@@ -82,6 +82,42 @@ mod tests {
         };
 
         assert_eq!(child.parent_key.as_deref(), Some("angleurKey"));
+    }
+
+    #[test]
+    fn test_parse_frame_mixins_block() {
+        let xml = r#"
+            <Ui>
+                <Frame name="AuraContainer" intrinsic="true">
+                    <Mixins>
+                        <Mixin key="AuraContainerInboundMixin" source="secure" targetPartition="public" inboundPartition="forbidden" secureDelegates="true"/>
+                        <Mixin key="AuraContainerPrivateMixin" source="secure"/>
+                    </Mixins>
+                </Frame>
+            </Ui>
+        "#;
+
+        let ui = parse_xml(xml).unwrap();
+        let frame = match &ui.elements[0] {
+            XmlElement::Frame(frame) => frame,
+            other => panic!("expected frame, got {:?}", other),
+        };
+        let mixins = frame.mixins().expect("Mixins block should parse");
+
+        assert_eq!(mixins.entries.len(), 2);
+        assert_eq!(mixins.entries[0].key, "AuraContainerInboundMixin");
+        assert_eq!(mixins.entries[0].source.as_deref(), Some("secure"));
+        assert_eq!(
+            mixins.entries[0].target_partition.as_deref(),
+            Some("public")
+        );
+        assert_eq!(
+            mixins.entries[0].inbound_partition.as_deref(),
+            Some("forbidden")
+        );
+        assert_eq!(mixins.entries[0].secure_delegates, Some(true));
+        assert_eq!(mixins.entries[1].key, "AuraContainerPrivateMixin");
+        assert_eq!(mixins.entries[1].source.as_deref(), Some("secure"));
     }
 
     #[test]

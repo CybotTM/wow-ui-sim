@@ -8,6 +8,7 @@ The Blizzard UI source isn't checked into this repo. Runtime loading reads the a
 
 ```
 ~/.cache/wow-ui-sim/blizzard-ui/retail/AddOns
+~/.cache/wow-ui-sim/blizzard-ui/ptr/AddOns
 ~/.cache/wow-ui-sim/blizzard-ui/wrath/AddOns
 ~/.cache/wow-ui-sim/blizzard-ui/mists/AddOns
 ~/.cache/wow-ui-sim/blizzard-ui/era/AddOns
@@ -16,7 +17,7 @@ The Blizzard UI source isn't checked into this repo. Runtime loading reads the a
 
 The active profile (selected by the `client-*` cargo feature; see [[client-profiles]]) is the only one the loader reads from at runtime. Multiple profile caches can coexist on disk so a developer can flip features without replacing another profile's files.
 
-`wow-cli casc sync-blizzard-ui` populates the active profile cache from the committed manifest in `data/blizzard-ui-files.txt`. It writes `.wow-ui-sim-blizzard-ui-complete` plus `.wow-ui-sim-blizzard-ui-provenance` after the manifest is synced. CASC is primary; the Gethe `wow-ui-source` archive remains a fallback source for files that are not available through the local listfile mapping.
+`wow-cli casc sync-blizzard-ui` populates the active profile cache from the matching committed manifest in `data/blizzard-ui-files/<profile>.txt`. It writes `.wow-ui-sim-blizzard-ui-complete` plus `.wow-ui-sim-blizzard-ui-provenance` after the manifest is synced. Each profile manifest is paired with the active CASC product selected by the `client-*` feature (`wow` for retail, `wowt` for PTR). PTR currently carries a real 12.1 delta (`Blizzard_AuraContainer/*`); the non-PTR manifests start from the previous shared baseline and still rely on profile filtering/TOC selection for cross-profile entries until each list is independently curated.
 
 `scripts/setup-blizzard-ui.sh` and `scripts/setup-blizzard-ui.ps1` are compatibility wrappers around the same sync command. Their optional profile argument is accepted for old workflows, but the Cargo feature still selects the active profile.
 
@@ -28,15 +29,7 @@ wow-cli casc sync-blizzard-ui
 
 `scripts/init-worktree.sh` is the bootstrap for a fresh worktree: it syncs the active profile cache so startup, benchmarks, and tests can find Blizzard addon sources. Without the completed cache, or when required profile files are missing from an otherwise completed cache, startup re-runs the sync/reports the stale `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns` tree instead of falling back to repo-local symlinks.
 
-The fallback source list is canonical:
-
-| Profile     | Vendor repo                                                | Pinned ref                                               |
-|-------------|------------------------------------------------------------|----------------------------------------------------------|
-| Retail      | `Gethe/wow-ui-source`                                      | `37181615` (12.0.7)                                      |
-| Wrath       | `Gethe/wow-ui-source` tag `3.3.5`                    | `c4e0255f`                                               |
-| Mists       | `Gethe/wow-ui-source` branch `classic`                     | `33d87412`                                               |
-| Era         | `Gethe/wow-ui-source` branch `classic_era`                 | `e0099491` (1.15.8 build 67156)                          |
-| Anniversary | `Gethe/wow-ui-source` branch `classic_anniversary`         | `b29b0d0a` (2.5.5 build 67157)                           |
+There is no repo-source fallback for Blizzard UI cache population. Missing manifest entries fail the sync so the CASC/listfile/install problem stays visible. If active-product CASC metadata resolves a file but the local streaming install lacks the archive chunk, sync may fetch that missing authoritative chunk from Blizzard CDN by encoding key; this is still CASC-backed, not a source mirror.
 
 ## Addon Discovery and TOC Parsing
 
@@ -70,7 +63,7 @@ The non-retail profiles discover different addon sets:
 
 - **Wrath** ships its UI as a flat `Interface/FrameXML/` tree alongside `Interface/AddOns/`, with no `Blizzard_FrameXML` addon. The loader detects this via `client_profile::blizzard_ui_framexml_toc()` (Some → wrath layout, None → addon layout) and synthesizes a virtual `FrameXML` addon that loads before the regular `Blizzard_*` discovery pass. Wrath ships 24 `Blizzard_*` addons + the synthetic FrameXML.
 - **Mists** ships ~112 `Blizzard_*` addons (most retail addons exist with `_Mists.toc` variants).
-- **Era / Anniversary** ship the `Gethe/wow-ui-source` multi-flavor addon set (Era uses ~35 `Blizzard_*_Vanilla.toc` variants; Anniversary uses the same vanilla TOCs against a 2.5.5 build).
+- **Era / Anniversary** ship the vanilla multi-flavor addon set (Era uses ~35 `Blizzard_*_Vanilla.toc` variants; Anniversary uses the same vanilla TOCs against a 2.5.5 build).
 
 Counts above are the discovered set after filtering by `is_allowed_game_type` and `default_enabled`; the on-disk addon directory may carry many more `_Cata.toc` / `_TBC.toc` / etc. variants the active profile skips.
 
@@ -119,8 +112,8 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 - [addon_loading.rs](../../../src/bin/wow_sim/addon_loading.rs) — Blizzard eager load, third-party addon discovery, metadata pre-registration, enable-state application, and load loop
 - [toc/mod.rs](../../../src/toc/mod.rs) — TOC metadata, normal file list, `[Bootstrap]` parsing, path resolution
 - [loader/addon.rs](../../../src/loader/addon.rs) — normal addon file execution; `[Bootstrap]` entries remain inline
-- [blizzard-ui-files.txt](../../../data/blizzard-ui-files.txt) — committed Blizzard UI cache manifest, including bootstrap files needed by the active profile cache
-- [blizzard_ui_sync.rs](../../../src/blizzard_ui_sync.rs) and [profile_cache.rs](../../../src/blizzard_ui_sync/profile_cache.rs) — profile-filtered cache sync and repo-fallback handling for manifest entries
+- [blizzard-ui-files](../../../data/blizzard-ui-files) — committed per-profile Blizzard UI cache manifests, including bootstrap files needed by each active profile cache
+- [blizzard_ui_sync.rs](../../../src/blizzard_ui_sync.rs) and [profile_cache.rs](../../../src/blizzard_ui_sync/profile_cache.rs) — active-profile cache sync and profile-specific cache usability checks
 
 ## See Also
 

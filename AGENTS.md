@@ -111,8 +111,8 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 
 ## WoW Game Files
 
-- `~/.cache/wow-ui-sim/blizzard-ui` - Blizzard UI source cache used by retail runtime loading. Populate with `wow-cli casc sync-blizzard-ui`; the file list comes from `data/blizzard-ui-files.txt`.
-- `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns` - Profile-scoped Blizzard UI runtime cache. Populate with `wow-cli casc sync-blizzard-ui` or `./scripts/init-worktree.sh`; the file list comes from `data/blizzard-ui-files.txt`. The active Cargo `client-*` feature selects the cache subdirectory (`retail`, `wrath`, `mists`, `era`, `anniversary`).
+- `~/.cache/wow-ui-sim/blizzard-ui` - Blizzard UI source cache used by profile runtime loading. Populate with `wow-cli casc sync-blizzard-ui`; the active profile's file list comes from `data/blizzard-ui-files/<profile>.txt`.
+- `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns` - Profile-scoped Blizzard UI runtime cache. Populate with `wow-cli casc sync-blizzard-ui` or `./scripts/init-worktree.sh`; the active Cargo `client-*` feature selects both the cache subdirectory (`retail`, `ptr`, `wrath`, `mists`, `era`, `anniversary`) and the matching manifest in `data/blizzard-ui-files/`.
 - WoW install (default `/syncthing/World of Warcraft`, override via `WOW_INSTALL_PATH` or `WOW_DATA_PATH`; `asset_resolver::wow_install_path()` also tries common Linux/Wine/Lutris/WSL/macOS paths). The simulator reads textures and fonts directly from CASC via the `asset-resolver` crate (gated behind the `casc` feature, on by default). Set `WOW_SIM_CASC=0` to disable.
 - `~/Projects/wow/WTF` - SavedVariables from real WoW installation
 
@@ -233,7 +233,7 @@ The simulator uses **rilua** — a pure-Rust Lua 5.1 VM that bakes Elune-style t
 
 ## Client Profiles
 
-The simulator builds for one of five client profiles per cargo build (`client-retail` default; `client-wrath`, `client-mists`, `client-era`, `client-anniversary` selectable via `--no-default-features --features "sound,gui,casc,client-<profile>"`). Exactly one profile feature must be enabled — `src/client_profile.rs` enforces this with a `compile_error!`. See `docs/wiki/systems/client-profiles.md` for the full architecture.
+The simulator builds for one of six client profiles per cargo build (`client-retail` default; `client-ptr`, `client-wrath`, `client-mists`, `client-era`, `client-anniversary` selectable via `--no-default-features --features "sound,gui,casc,client-<profile>"`). Exactly one profile feature must be enabled — `src/client_profile.rs` enforces this with a `compile_error!`. See `docs/wiki/systems/client-profiles.md` for the full architecture.
 
 ### Where stubs go
 
@@ -268,7 +268,7 @@ If you find yourself writing `#[cfg(any(...))]` on a third site to gate the same
 
 ### Vendor pinning
 
-The Blizzard UI runtime cache is populated from the committed manifest and records a provenance file beside the completion marker. Manifest or fallback-source changes are deliberate changes — they tend to surface new gaps (or fix old ones) in the matching baseline at `docs/baselines/<profile>-lua-errors.json`. Re-capture the baseline after such a change and commit both together.
+The Blizzard UI runtime cache is populated from the committed per-profile manifests and records a provenance file beside the completion marker. Manifest or listfile-source changes are deliberate changes — they tend to surface new gaps (or fix old ones) in the matching baseline at `docs/baselines/<profile>-lua-errors.json`. Re-capture the baseline after such a change and commit both together.
 
 ## Performance
 

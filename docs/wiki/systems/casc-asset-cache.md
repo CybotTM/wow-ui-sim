@@ -8,7 +8,7 @@ The simulator reads textures and fonts from a live WoW install via three stacked
 |---|---|---|---|---|
 | FDID resolution | `fdid → (content_key, encoding_key)` | `~/.cache/asset-resolver/casc/<product>/<build-key>/resolution.sqlite` (~85 MB, ~1.87 M rows) | `asset-resolver` on first miss or stale cache; `casc_refresh` can prewarm it | Persistent across processes; rebuilt when WoW patches |
 | BLP byte cache | Extracted BLP files keyed by listfile path | `~/.cache/wow-ui-sim/casc-extract/<Interface/...>.blp` | `asset_resolver::ensure_cached` on first miss | Persistent across processes; never invalidated automatically |
-| Blizzard UI source cache | Extracted Blizzard Lua/XML/TOC source files | `~/.cache/wow-ui-sim/blizzard-ui/<Blizzard_...>` | `wow-cli casc sync-blizzard-ui` or GUI startup when the cache is missing | Persistent across processes; guarded by `.wow-ui-sim-blizzard-ui-complete` |
+| Blizzard UI source cache | Extracted Blizzard Lua/XML/TOC source files | `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns/<Blizzard_...>` | `wow-cli casc sync-blizzard-ui` or GUI startup when the cache is missing | Persistent across processes; guarded by `.wow-ui-sim-blizzard-ui-complete` |
 | In-memory texture cache | `TextureData` (decoded RGBA) keyed by normalised wow path | `TextureManager::cache` | `TextureManager::load` on first hit | Per-process |
 
 The resolution sqlite is generated cache data, not repo data. wow-ui-sim constructs `asset-resolver` with an explicit cache root: `$ASSET_RESOLVER_CACHE_DIR` when set, otherwise `$XDG_CACHE_HOME/asset-resolver` or `~/.cache/asset-resolver`. The path is product/build-key scoped so retail, classic, and future patch builds do not overwrite each other. Runtime loading no longer depends on `GAME_ENGINE_SHARED_ROOT` or a sibling game-engine checkout.
@@ -69,7 +69,9 @@ The BLP byte cache is roughly **10× faster** than re-extracting steady-state, a
 
 ## Blizzard UI source cache
 
-`data/blizzard-ui-files.txt` is a manifest of Blizzard UI source files that are present in the simulator's limited listfile. `wow-cli casc sync-blizzard-ui` resolves each manifest entry as `Interface/AddOns/<entry>`, extracts it from local CASC into `~/.cache/wow-ui-sim/blizzard-ui`, and preserves Blizzard's original addon/file casing on disk.
+`data/blizzard-ui-files/<profile>.txt` manifests list the Blizzard UI source files for each supported profile. `wow-cli casc sync-blizzard-ui` resolves each active-profile manifest entry as `Interface/AddOns/<entry>`, extracts it from the active CASC product into `~/.cache/wow-ui-sim/blizzard-ui/<profile>/AddOns`, and preserves Blizzard's original addon/file casing on disk. The bundled limited listfile is generated from the union of those profile manifests plus tracked `data/listfile-overrides.csv` rows for paths that the upstream community listfile has not published yet.
+
+Local install archives are tried first through `asset-resolver`. If the active product root/encoding metadata resolves an FDID but the local streaming install lacks that archive chunk, sync downloads the missing authoritative CASC blob from Blizzard's CDN by encoding key via the public `Osso/casc-extract` library. CDN archive indexes persist under `~/.cache/casc-extract/<product>-<build>/indices`.
 
 The GUI startup path uses the cache only. If the completion marker is missing, startup syncs the manifest from CASC and rechecks the cache. The old `Interface/BlizzardUI` symlink and `vendor/wow-ui-source` checkout are not part of runtime discovery.
 
@@ -79,14 +81,16 @@ The GUI startup path uses the cache only. If the completion marker is missing, s
 - **Wrong cache override**: an invalid `$ASSET_RESOLVER_CACHE_DIR` can put generated CASC metadata in an unexpected place or one without write permission. Unset it to use `~/.cache/asset-resolver`.
 - **Case-variant duplicates**: `out_path` uses the case returned by the listfile lookup. If a caller passes a non-canonical case to `lookup_path`, the BLP can land under `interface/...` or `INTERFACE/...` instead of `Interface/...`. The cache currently has 4 such stragglers out of 1747 files; harmless but wasteful.
 - **Listfile/CASC drift**: when the live archives have GC'd a file the encoding manifest still references, CASC extract fails with "missing resolution entry" or "missing archive location". The loader writes a `.missing` sentinel and falls back to `<wow>/_retail_/BlizzardInterfaceArt/` for the next request.
-- **Partial Blizzard UI source sync**: the source cache is ignored unless `.wow-ui-sim-blizzard-ui-complete` exists. Re-run `wow-cli casc sync-blizzard-ui` after fixing CASC/listfile issues.
+- **Partial Blizzard UI source sync**: the source cache is ignored unless `.wow-ui-sim-blizzard-ui-complete` exists. Re-run `wow-cli casc sync-blizzard-ui` after fixing CASC/listfile issues. Missing Blizzard UI source files are not filled from repo mirrors; if local archives lack chunks that the active product metadata still references, sync may fetch those chunks from Blizzard CDN and cache the archive indexes under `~/.cache/casc-extract/`.
 
 ## Sources
 
 - [`docs/specs/casc-loading.md`](../../specs/casc-loading.md) — behavioral contract for CASC loading
 - `src/texture/resolve.rs` — `casc_enabled`, `try_casc_resolve`, `casc_extract_dir`
 - `src/blizzard_ui_sync.rs` — Blizzard UI source manifest sync into the user cache
-- `data/blizzard-ui-files.txt` — manifest of Blizzard UI source files extractable from CASC
+- `Osso/casc-extract` — public helper crate used for missing CASC CDN chunks by encoding key
+- `data/blizzard-ui-files/` — per-profile manifests of Blizzard UI source files extractable from CASC
+- `data/listfile-overrides.csv` — tracked temporary path→FDID rows for manifest files absent from the upstream community listfile
 - `src/texture.rs` — `TextureManager::load` and the in-memory cache
 - `asset-resolver/src/casc_resolver.rs` — `init_casc`, resolution metadata refresh, `extract_fdid_to_path`, `Installation::initialize`
 - `asset-resolver/src/casc_cache.rs` — `CascResolutionCache::open`, freshness check, `build_resolution_cache`, `resolve_fdid`

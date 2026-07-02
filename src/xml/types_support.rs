@@ -10,6 +10,27 @@ pub struct AnimationsXml {
     pub animations: Vec<AnimationGroupXml>,
 }
 
+/// Literal frame mixin list (`<Mixins><Mixin key="..."/></Mixins>`).
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct MixinsXml {
+    #[serde(rename = "Mixin", default)]
+    pub entries: Vec<MixinXml>,
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct MixinXml {
+    #[serde(rename = "@key")]
+    pub key: String,
+    #[serde(rename = "@source")]
+    pub source: Option<String>,
+    #[serde(rename = "@targetPartition")]
+    pub target_partition: Option<String>,
+    #[serde(rename = "@inboundPartition")]
+    pub inbound_partition: Option<String>,
+    #[serde(rename = "@secureDelegates")]
+    pub secure_delegates: Option<bool>,
+}
+
 /// Font reference (for NormalFont, HighlightFont, etc.)
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct FontRefXml {

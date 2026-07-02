@@ -47,7 +47,7 @@ Verification after these fixes:
 
 ## Sources
 
-- [data/blizzard-ui-files.txt](../../../data/blizzard-ui-files.txt) — Mists WorldMap and SharedMapDataProviders cache manifest entries.
+- [data/blizzard-ui-files/mists.txt](../../../data/blizzard-ui-files/mists.txt) — Mists WorldMap and SharedMapDataProviders cache manifest entries.
 - [profile_cache.rs](../../../src/blizzard_ui_sync/profile_cache.rs) — Mists cache-entry allowlist and usability checks.
 - [helpers.rs](../../../src/loader/helpers.rs) — XML script path resolution for escaped `Interface/AddOns` paths.
 - [compat_bootstrap.lua](../../../src/mists/compat_bootstrap.lua) — Mists-only startup compatibility surfaces, including proving-grounds world-state handlers.

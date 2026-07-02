@@ -18,7 +18,8 @@ DEFAULT_SOURCE = (
 DEFAULT_OUTPUT = ROOT / "data/wow-ui-sim-listfile.csv"
 MANIFEST_PATH = ROOT / "data/manifest_interface_data.rs"
 ATLAS_PATH = ROOT / "data/atlas.rs"
-BLIZZARD_UI_FILE_MANIFEST = ROOT / "data/blizzard-ui-files.txt"
+BLIZZARD_UI_FILE_MANIFEST_DIR = ROOT / "data/blizzard-ui-files"
+LISTFILE_OVERRIDES = ROOT / "data/listfile-overrides.csv"
 SCAN_PATHS = [
     ROOT / "src",
     ROOT / "Interface/AddOns",
@@ -57,6 +58,7 @@ EXTENSIONS = ["blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF"]
 def main() -> None:
     args = parse_args()
     by_path, by_fdid = load_source(args.source)
+    load_listfile_overrides(by_path, by_fdid)
     requested_paths, requested_fdids = collect_requests()
     blizzard_files = collect_blizzard_ui_files()
     rows = resolve_rows(
@@ -84,6 +86,20 @@ def parse_args() -> argparse.Namespace:
 def load_source(path: Path) -> tuple[dict[str, tuple[int, str]], dict[int, str]]:
     by_path: dict[str, tuple[int, str]] = {}
     by_fdid: dict[int, str] = {}
+    load_listfile_rows(path, by_path, by_fdid)
+    return by_path, by_fdid
+
+
+def load_listfile_overrides(
+    by_path: dict[str, tuple[int, str]], by_fdid: dict[int, str]
+) -> None:
+    if LISTFILE_OVERRIDES.exists():
+        load_listfile_rows(LISTFILE_OVERRIDES, by_path, by_fdid)
+
+
+def load_listfile_rows(
+    path: Path, by_path: dict[str, tuple[int, str]], by_fdid: dict[int, str]
+) -> None:
     with path.open("r", encoding="utf-8", errors="replace", newline="") as handle:
         for raw in handle:
             raw = raw.rstrip("\r\n")
@@ -97,7 +113,6 @@ def load_source(path: Path) -> tuple[dict[str, tuple[int, str]], dict[int, str]]
             normalized = normalize_path(asset_path)
             by_path[normalized] = (fdid, normalized)
             by_fdid.setdefault(fdid, normalized)
-    return by_path, by_fdid
 
 
 def collect_requests() -> tuple[set[str], set[int]]:
@@ -136,13 +151,20 @@ def scan_literal_paths() -> set[str]:
 
 
 def collect_blizzard_ui_files() -> set[str]:
-    if not BLIZZARD_UI_FILE_MANIFEST.exists():
-        return set()
-    return {
-        normalize_path(f"interface/addons/{line.strip()}")
-        for line in BLIZZARD_UI_FILE_MANIFEST.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    }
+    files: set[str] = set()
+    for manifest in blizzard_ui_manifest_paths():
+        files.update(
+            normalize_path(f"interface/addons/{line.strip()}")
+            for line in manifest.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        )
+    return files
+
+
+def blizzard_ui_manifest_paths() -> list[Path]:
+    if not BLIZZARD_UI_FILE_MANIFEST_DIR.is_dir():
+        return []
+    return sorted(BLIZZARD_UI_FILE_MANIFEST_DIR.glob("*.txt"))
 
 
 def extract_interface_literals(path: Path) -> set[str]:

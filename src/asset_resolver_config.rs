@@ -13,7 +13,7 @@ pub fn resolver() -> &'static asset_resolver::CascListfileResolver {
 }
 
 #[cfg(feature = "casc")]
-fn configure_casc_product_env() {
+pub(crate) fn configure_casc_product_env() {
     if std::env::var_os("WOW_PRODUCT").is_some() {
         return;
     }
@@ -24,7 +24,7 @@ fn configure_casc_product_env() {
 }
 
 #[cfg(feature = "casc")]
-fn active_profile_casc_product() -> &'static str {
+pub(crate) fn active_profile_casc_product() -> &'static str {
     match crate::client_profile::ACTIVE {
         crate::client_profile::ClientProfile::Ptr => "wowt",
         crate::client_profile::ClientProfile::Wrath

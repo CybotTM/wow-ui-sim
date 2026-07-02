@@ -1,27 +1,5 @@
 use std::path::Path;
 
-const DEFAULT_GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
-    "live",
-    "beta",
-    "classic",
-    "classic_era",
-    "classic_anniversary",
-    "classic_beta",
-    "classic_ptr",
-];
-
-const PTR_GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &["ptr", "live", "beta"];
-
-const MISTS_GETHE_WOW_UI_SOURCE_BRANCHES: &[&str] = &[
-    "classic_ptr",
-    "classic_anniversary",
-    "classic_beta",
-    "classic",
-    "classic_era",
-    "live",
-    "beta",
-];
-
 const RETAIL_REQUIRED_PROFILE_CACHE_ENTRIES: &[&str] = &[
     "Blizzard_FrameXMLUtil/RuneforgeUtil.xml",
     "Blizzard_FrameXMLUtil/RuneforgeUtil.lua",
@@ -317,14 +295,6 @@ pub(super) fn required_profile_cache_entries() -> &'static [&'static str] {
     }
 }
 
-pub(super) fn gethe_wow_ui_source_branches() -> &'static [&'static str] {
-    match crate::client_profile::ACTIVE {
-        crate::client_profile::ClientProfile::Ptr => PTR_GETHE_WOW_UI_SOURCE_BRANCHES,
-        crate::client_profile::ClientProfile::Mists => MISTS_GETHE_WOW_UI_SOURCE_BRANCHES,
-        _ => DEFAULT_GETHE_WOW_UI_SOURCE_BRANCHES,
-    }
-}
-
 pub(super) fn sync_entry_belongs_to_active_profile(entry: &str) -> bool {
     match crate::client_profile::ACTIVE {
         crate::client_profile::ClientProfile::Retail => retail_sync_entry(entry),
@@ -567,16 +537,6 @@ mod tests {
         assert!(!super::sync_entry_belongs_to_active_profile(
             "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster_Bootstrap.lua"
         ));
-    }
-
-    #[test]
-    #[cfg(feature = "client-ptr")]
-    fn ptr_prefers_ptr_repo_fallbacks() {
-        assert_eq!(
-            super::gethe_wow_ui_source_branches().first().copied(),
-            Some("ptr"),
-            "PTR fallback sync must prefer the Gethe PTR branch before live/beta"
-        );
     }
 
     #[test]

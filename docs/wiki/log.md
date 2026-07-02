@@ -2,6 +2,24 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-02] update | Blizzard UI CDN missing chunks
+
+Updated `systems/casc-asset-cache.md`, `systems/addon-loading.md`, and `PLAN.md`
+after wiring Blizzard UI sync to fetch missing authoritative CASC chunks from
+Blizzard CDN by encoding key via public `Osso/casc-extract` when local streaming
+install archives are incomplete. Recorded that repo/source mirrors remain
+disabled and CDN archive indexes persist under `~/.cache/casc-extract/`.
+
+## [2026-07-01] update | Per-profile Blizzard UI manifests
+
+Updated `systems/addon-loading.md`, `systems/casc-asset-cache.md`, and `index.md`
+after splitting the Blizzard UI cache manifest into profile-specific files under
+`data/blizzard-ui-files/`. Recorded that the active `client-*` profile selects
+both the manifest and CASC product (`wow` vs `wowt`) so PTR-only addon files no
+longer have to be shoehorned into the retail manifest. Documented that Blizzard
+UI cache population has no repo-source fallback; tracked listfile overrides are
+used only to teach CASC path→FDID mappings until upstream listfiles catch up.
+
 ## [2026-07-01] update | Bootstrap TOC semantics
 
 Updated `systems/addon-loading.md` after correcting `[Bootstrap]` semantics:

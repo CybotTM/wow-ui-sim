@@ -172,9 +172,22 @@ pub(crate) fn apply_frame_mixins(state: &mut LuaState, frame_id: u64, mixins: Op
         .map(str::trim)
         .filter(|name| !name.is_empty())
     {
-        let mixin_val = resolve_scoped_or_global_path(state, mixin_name);
-        copy_table_into_frame(state, frame_id, mixin_val);
+        apply_frame_mixin(state, frame_id, mixin_name, None);
     }
+}
+
+pub(crate) fn apply_frame_mixin(
+    state: &mut LuaState,
+    frame_id: u64,
+    mixin_name: &str,
+    source: Option<&str>,
+) {
+    let mixin_val = if source == Some("secure") {
+        resolve_secure_or_scoped_global_path(state, mixin_name)
+    } else {
+        resolve_scoped_or_global_path(state, mixin_name)
+    };
+    copy_table_into_frame(state, frame_id, mixin_val);
 }
 
 fn resolve_scoped_or_global_path(state: &mut LuaState, path: &str) -> Val {
@@ -199,6 +212,15 @@ pub(super) fn resolve_global_path(state: &mut LuaState, path: &str) -> Val {
     }
     let secureenv = registry_get(state, "__secureenv");
     resolve_table_path(state, secureenv, path)
+}
+
+fn resolve_secure_or_scoped_global_path(state: &mut LuaState, path: &str) -> Val {
+    let secureenv = registry_get(state, "__secureenv");
+    let secure_value = resolve_table_path(state, secureenv, path);
+    if secure_value != Val::Nil {
+        return secure_value;
+    }
+    resolve_scoped_or_global_path(state, path)
 }
 
 fn resolve_table_path(state: &mut LuaState, root: Val, path: &str) -> Val {

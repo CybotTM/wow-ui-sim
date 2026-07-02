@@ -201,6 +201,35 @@ pub fn sync_child_to_rilua(
     Ok(())
 }
 
+/// Remove `parent_table[key]` when it still points at the requested child.
+pub fn clear_child_from_rilua_parent_key(
+    state: &mut LuaState,
+    parent_id: u64,
+    key: &str,
+    child_id: u64,
+) -> LuaResult<()> {
+    let parent_val = frame_ref(state, parent_id)?;
+    let child_val = frame_ref(state, child_id)?;
+    let Val::Table(parent_ref) = parent_val else {
+        return Ok(());
+    };
+    let key_ref = intern_string_maybe_static(state, key);
+    let points_at_child = state
+        .gc
+        .tables
+        .get(parent_ref)
+        .map(|t| t.get_str(key_ref, &state.gc.string_arena) == child_val)
+        .unwrap_or(false);
+    if !points_at_child {
+        return Ok(());
+    }
+    if let Some(t) = state.gc.tables.get_mut(parent_ref) {
+        let _ = t.raw_set(Val::Str(key_ref), Val::Nil, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(parent_ref);
+    Ok(())
+}
+
 /// Publish the frame-ref cache under the legacy debug alias.
 pub fn publish_frame_ref_cache_alias(state: &mut LuaState) {
     let cache = frame_ref_cache(state);

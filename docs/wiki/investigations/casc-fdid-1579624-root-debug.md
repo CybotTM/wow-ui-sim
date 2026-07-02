@@ -29,7 +29,7 @@ data/wow-ui-sim-listfile.csv:
 data/full-community-listfile.csv:
 1579624;interface/addons/blizzard_apidocumentation/baseapimixin.lua
 
-data/blizzard-ui-files.txt:
+data/blizzard-ui-files/retail.txt:
 Blizzard_APIDocumentation/BaseAPIMixin.lua
 ```
 
@@ -158,7 +158,7 @@ If a Windows-side parser cannot find FDID `1579624` or `615960` in root:
 
 - [data/wow-ui-sim-listfile.csv](../../../data/wow-ui-sim-listfile.csv) — local FDID-to-path listfile entry.
 - [data/full-community-listfile.csv](../../../data/full-community-listfile.csv) — community listfile entry.
-- [data/blizzard-ui-files.txt](../../../data/blizzard-ui-files.txt) — Blizzard UI manifest path.
+- [data/blizzard-ui-files/retail.txt](../../../data/blizzard-ui-files/retail.txt) — Blizzard UI manifest path.
 - `~/.cache/asset-resolver/casc/wow/7b498dd7e196bf4161d631064f617189/resolution.sqlite` — local FDID to content/encoding key cache.
 - `/syncthing/World of Warcraft/.build.info` — active local WoW product/build metadata.
 - `https://raw.githubusercontent.com/Gethe/wow-ui-source/12.0.5/Interface/AddOns/Blizzard_APIDocumentation/BaseAPIMixin.lua` — Gethe source mirror used for CRLF hash comparison.

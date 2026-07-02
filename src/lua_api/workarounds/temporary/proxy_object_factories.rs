@@ -15,6 +15,10 @@ C_FunctionContainers = C_FunctionContainers or __wow_namespace({
   CreateCallback = nil,
 })
 
+C_StringUtil = C_StringUtil or __wow_namespace({
+  CreateSecondsFormatter = nil,
+})
+
 ProxyUtil = ProxyUtil or {}
 ProxyConvertableMixin = ProxyConvertableMixin or {}
 ProxyUtil.CreateProxy = ProxyUtil.CreateProxy or function(value) return value end
@@ -202,6 +206,38 @@ if rawget(C_CurveUtil, "CreateColorCurve") == nil then
       points = {},
       curveType = 0,
     })
+  end
+end
+
+if rawget(C_StringUtil, "CreateSecondsFormatter") == nil then
+  local secondsFormatterMethods = {}
+
+  function secondsFormatterMethods:SetDefaultAbbreviation(abbreviation)
+    self.defaultAbbreviation = abbreviation
+  end
+
+  function secondsFormatterMethods:SetMinInterval(interval)
+    self.minInterval = interval
+  end
+
+  function secondsFormatterMethods:SetMaxInterval(interval)
+    self.maxInterval = interval
+  end
+
+  function secondsFormatterMethods:SetMaxIntervalCurve(curve)
+    self.maxIntervalCurve = curve
+  end
+
+  function secondsFormatterMethods:SetDesiredUnitCount(count)
+    self.desiredUnitCount = count
+  end
+
+  function secondsFormatterMethods:Format(seconds)
+    return tostring(seconds or 0)
+  end
+
+  function C_StringUtil.CreateSecondsFormatter()
+    return __wow_make_proxy_object("SecondsFormatter", secondsFormatterMethods, {})
   end
 end
 
@@ -573,6 +609,7 @@ mod tests {
                 if type(C_CurveUtil.CreateCurve) ~= "function" then return "curve" end
                 if type(C_CurveUtil.CreateColorCurve) ~= "function" then return "color_curve" end
                 if type(C_FunctionContainers.CreateCallback) ~= "function" then return "callback" end
+                if type(C_StringUtil.CreateSecondsFormatter) ~= "function" then return "seconds_formatter_factory" end
                 if type(ProxyUtil.CreateProxy) ~= "function" then return "proxy" end
                 if type(ProxyUtil.CreateProxyMixin) ~= "function" then return "proxy_mixin" end
                 if type(ProxyUtil.CreateProxyDirectory) ~= "function" then return "proxy_directory" end
@@ -586,6 +623,13 @@ mod tests {
                 curve:AddPoint(0, 10)
                 curve:AddPoint(10, 20)
                 if curve:Evaluate(5) ~= 15 then return "evaluate" end
+                local formatter = C_StringUtil.CreateSecondsFormatter()
+                if type(formatter) ~= "table" then return "seconds_formatter_type" end
+                formatter:SetDefaultAbbreviation(Enum.SecondsFormatterAbbreviation.OneLetter)
+                formatter:SetMinInterval(Enum.SecondsFormatterInterval.Seconds)
+                formatter:SetMaxIntervalCurve(curve)
+                formatter:SetDesiredUnitCount(1)
+                if formatter.defaultAbbreviation ~= Enum.SecondsFormatterAbbreviation.OneLetter then return "seconds_formatter_abbrev" end
                 local invoked = nil
                 local callback = C_FunctionContainers.CreateCallback(function(value) invoked = value end)
                 if type(callback) ~= "userdata" then return "callback_type" end

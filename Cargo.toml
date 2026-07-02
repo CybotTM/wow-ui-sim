@@ -53,6 +53,7 @@ rustc-hash = "2.1.2"
 asset-resolver = { git = "https://github.com/world-of-osso/asset-resolver", rev = "76f98d44fe332a4d5f0d02ebe1f5f89e37ff5c56", optional = true }
 cascette-client-storage = { git = "https://github.com/Osso/cascette-rs", rev = "3992ef0fb9a81f10841a763619440a68647611ff", features = ["local-install"], optional = true }
 cascette-crypto = { git = "https://github.com/Osso/cascette-rs", rev = "3992ef0fb9a81f10841a763619440a68647611ff", optional = true }
+casc-extract = { git = "https://github.com/Osso/casc-extract", rev = "14579a656414778ce376f776f612e0f6eef58b54", optional = true }
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
 tar = "0.4.45"
 flate2 = "1.1.9"
@@ -90,7 +91,7 @@ sha2 = "0.10"
 default = ["sound", "gui", "casc", "client-retail"]
 sound = ["rodio", "casc"]
 gui = ["casc", "dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp", "dep:winapi"]
-casc = ["dep:asset-resolver", "dep:cascette-client-storage", "dep:cascette-crypto"]
+casc = ["dep:asset-resolver", "dep:cascette-client-storage", "dep:cascette-crypto", "dep:casc-extract"]
 fast-build = ["gui", "dep:iced-dynamic"]
 rehash-stats = ["rilua/rehash-stats"]
 intern-stats = ["rilua/intern-stats"]
@@ -130,6 +131,10 @@ path = "tests/frame_edit_mode_methods.rs"
 [[test]]
 name = "c_autocomplete"
 path = "tests/c_autocomplete.rs"
+
+[[test]]
+name = "enum_diff_coverage"
+path = "tests/enum_diff_coverage.rs"
 
 [[test]]
 name = "scoped_modifier_addon_smoke"

@@ -1,6 +1,40 @@
 -- Hand-maintained compatibility enums for Blizzard UI surfaces that are
 -- missing from the generated wowless globals snapshot.
 
+if not Enum.SecondsFormatterInterval then
+  Enum.SecondsFormatterInterval = {
+    Seconds = 0,
+    Minutes = 1,
+    Hours = 2,
+    Days = 3,
+  }
+end
+
+if not Enum.SecondsFormatterIntervalMeta then
+  Enum.SecondsFormatterIntervalMeta = {
+    MinValue = 0,
+    MaxValue = 3,
+    NumValues = 4,
+  }
+end
+
+if not Enum.SecondsFormatterAbbreviation then
+  Enum.SecondsFormatterAbbreviation = {
+    None = 0,
+    OneLetter = 1,
+    TwoLetters = 2,
+    Full = 3,
+  }
+end
+
+if not Enum.SecondsFormatterAbbreviationMeta then
+  Enum.SecondsFormatterAbbreviationMeta = {
+    MinValue = 0,
+    MaxValue = 3,
+    NumValues = 4,
+  }
+end
+
 if not Enum.CooldownLayoutStatus then
   Enum.CooldownLayoutStatus = {
     Success = 0,

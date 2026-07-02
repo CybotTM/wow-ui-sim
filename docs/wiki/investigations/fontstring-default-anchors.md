@@ -31,7 +31,7 @@ MessageFrame and ScrollingMessageFrame probes did not expose FontString regions 
 - [direct.rs](../../../src/lua_api/globals/template/direct.rs) - XML `TextInsets` application to frame state
 - [xml_basics_extra.rs](../../../src/loader/tests/xml_basics_extra.rs) - regression test covering all nine `justifyH` x `justifyV` permutations
 - [xml_text_region_defaults.rs](../../../src/loader/tests/xml_text_region_defaults.rs) - regression tests for `ButtonText`, explicit anchor preservation, and EditBox `TextInsets`
-- [data/blizzard-ui-files.txt](../../../data/blizzard-ui-files.txt) - retail Blizzard UI manifest used to confirm real usage
+- [data/blizzard-ui-files/retail.txt](../../../data/blizzard-ui-files/retail.txt) - retail Blizzard UI manifest used to confirm real usage
 
 ## See Also
 

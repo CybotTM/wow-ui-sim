@@ -380,6 +380,16 @@ fn apply_fast_frame_mixins_and_scripts(
         frame_id,
         setup.frame.combined_mixin().as_deref(),
     );
+    if let Some(mixins) = setup.frame.mixins() {
+        for mixin in &mixins.entries {
+            crate::lua_api::globals::create_frame::apply_frame_mixin(
+                state,
+                frame_id,
+                &mixin.key,
+                mixin.source.as_deref(),
+            );
+        }
+    }
 
     if let Some(scripts) = setup.frame.scripts() {
         crate::lua_api::globals::create_frame::apply_template_scripts(state, frame_id, scripts)

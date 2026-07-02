@@ -9,8 +9,8 @@ use super::types_elements::{
 use super::types_fonts::{FontFamilyXml, FontXml};
 use super::types_support::{
     AnchorsXml, AnimationsXml, AttributesXml, BackdropXml, BindingXml, ColorXml, FontRefXml,
-    InsetsXml, KeyValuesXml, ModifiedClickXml, ResizeBoundsXml, ScriptsXml, ScrollChildXml,
-    SizeXml,
+    InsetsXml, KeyValuesXml, MixinsXml, ModifiedClickXml, ResizeBoundsXml, ScriptsXml,
+    ScrollChildXml, SizeXml,
 };
 
 /// Root element of a WoW UI XML file.
@@ -198,6 +198,14 @@ impl FrameXml {
             (None, Some(sm)) => Some(sm.clone()),
             (None, None) => None,
         }
+    }
+
+    /// Get the literal `<Mixins>` block if present.
+    pub fn mixins(&self) -> Option<&MixinsXml> {
+        self.children.iter().find_map(|c| match c {
+            FrameChildElement::Mixins(m) => Some(m),
+            _ => None,
+        })
     }
 
     /// Get the Size element if present.
@@ -485,6 +493,7 @@ pub enum FrameChildElement {
     Layers(LayersXml),
     Frames(FramesXml),
     KeyValues(KeyValuesXml),
+    Mixins(MixinsXml),
     Attributes(AttributesXml),
     Animations(AnimationsXml),
     NormalTexture(TextureXml),

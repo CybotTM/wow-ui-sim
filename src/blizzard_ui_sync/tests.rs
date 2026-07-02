@@ -1,10 +1,5 @@
-use super::{
-    copy_repo_fallback_entry_from_root, manifest_entries, manifest_entry_fdid,
-    manifest_entry_is_repo_fallback_only, normalize_source_root, unpack_wow_ui_source_archive,
-};
-use flate2::Compression;
-use flate2::write::GzEncoder;
-use std::io;
+use super::{manifest_entries, manifest_entry_fdid, manifest_entry_is_allowed_unmapped};
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -19,34 +14,6 @@ fn unique_temp_dir(label: &str) -> PathBuf {
     ))
 }
 
-fn build_test_archive() -> io::Result<Vec<u8>> {
-    let encoder = GzEncoder::new(Vec::new(), Compression::default());
-    let mut builder = tar::Builder::new(encoder);
-    write_tar_file(
-        &mut builder,
-        "wow-ui-source-live/Interface/AddOns/Blizzard_Test/Test.lua",
-        b"from archive\n",
-    )?;
-    write_tar_file(
-        &mut builder,
-        "wow-ui-source-live/README.md",
-        b"not an addon\n",
-    )?;
-    builder.into_inner()?.finish()
-}
-
-fn write_tar_file(
-    builder: &mut tar::Builder<GzEncoder<Vec<u8>>>,
-    path: &str,
-    contents: &[u8],
-) -> io::Result<()> {
-    let mut header = tar::Header::new_gnu();
-    header.set_size(contents.len() as u64);
-    header.set_mode(0o644);
-    header.set_cksum();
-    builder.append_data(&mut header, path, contents)
-}
-
 #[test]
 fn default_cache_addons_path_is_profile_scoped_addons_root() {
     let path = super::default_cache_addons_path().expect("cache path");
@@ -55,6 +22,71 @@ fn default_cache_addons_path_is_profile_scoped_addons_root() {
         path.ends_with(PathBuf::from(crate::client_profile::ACTIVE.cache_subdir()).join("AddOns")),
         "cache path should end with profile/AddOns, got {}",
         path.display()
+    );
+}
+
+#[test]
+#[cfg(feature = "casc")]
+fn fdid_extraction_uses_local_casc_before_cdn() {
+    let out_path = PathBuf::from("Interface/AddOns/Test.lua");
+    let calls = RefCell::new(Vec::new());
+
+    let extracted = super::extract_fdid_with_cdn_fallback(
+        42,
+        &out_path,
+        |fdid, path| {
+            calls
+                .borrow_mut()
+                .push(format!("local:{fdid}:{}", path.display()));
+            Ok(true)
+        },
+        |fdid, path| {
+            calls
+                .borrow_mut()
+                .push(format!("cdn:{fdid}:{}", path.display()));
+            Ok(true)
+        },
+    )
+    .expect("extract");
+
+    assert!(extracted);
+    assert_eq!(
+        calls.into_inner(),
+        vec!["local:42:Interface/AddOns/Test.lua"]
+    );
+}
+
+#[test]
+#[cfg(feature = "casc")]
+fn fdid_extraction_uses_cdn_after_local_casc_miss() {
+    let out_path = PathBuf::from("Interface/AddOns/Test.lua");
+    let calls = RefCell::new(Vec::new());
+
+    let extracted = super::extract_fdid_with_cdn_fallback(
+        42,
+        &out_path,
+        |fdid, path| {
+            calls
+                .borrow_mut()
+                .push(format!("local:{fdid}:{}", path.display()));
+            Ok(false)
+        },
+        |fdid, path| {
+            calls
+                .borrow_mut()
+                .push(format!("cdn:{fdid}:{}", path.display()));
+            Ok(true)
+        },
+    )
+    .expect("extract");
+
+    assert!(extracted);
+    assert_eq!(
+        calls.into_inner(),
+        vec![
+            "local:42:Interface/AddOns/Test.lua",
+            "cdn:42:Interface/AddOns/Test.lua"
+        ]
     );
 }
 
@@ -70,8 +102,8 @@ fn complete_marker_writes_profile_provenance() {
         "profile={}",
         crate::client_profile::ACTIVE.cache_subdir()
     )));
-    assert!(provenance.contains("source=casc-primary"));
-    assert!(provenance.contains("fallback=wow-ui-source"));
+    assert!(provenance.contains("source=casc-local-or-cdn"));
+    assert!(provenance.contains("fallback=none"));
     std::fs::remove_dir_all(root).expect("remove cache root");
 }
 
@@ -82,11 +114,37 @@ fn manifest_preserves_blizzard_addon_case() {
         .expect("manifest should not be empty");
     assert!(first.starts_with("Blizzard_"));
 }
+
+#[test]
+#[cfg(feature = "client-ptr")]
+fn ptr_manifest_includes_ptr_only_aura_container() {
+    let manifest: Vec<_> = manifest_entries().collect();
+
+    assert!(manifest.contains(&"Blizzard_AuraContainer/Blizzard_AuraContainer.toc"));
+}
+
+#[test]
+#[cfg(feature = "client-retail")]
+fn retail_manifest_excludes_ptr_only_aura_container() {
+    let manifest: Vec<_> = manifest_entries().collect();
+
+    assert!(!manifest.contains(&"Blizzard_AuraContainer/Blizzard_AuraContainer.toc"));
+}
+
+#[test]
+#[cfg(feature = "client-ptr")]
+fn ptr_aura_container_resolves_through_limited_listfile() {
+    let entry = "Blizzard_AuraContainer/Blizzard_AuraContainer.toc";
+
+    assert_eq!(manifest_entry_fdid(entry), Some(8154511));
+    assert!(!manifest_entry_is_allowed_unmapped(entry));
+}
+
 #[test]
 fn manifest_entries_resolve_through_limited_listfile() {
     let missing: Vec<_> = manifest_entries()
         .filter(|entry| manifest_entry_fdid(entry).is_none())
-        .filter(|entry| !manifest_entry_is_repo_fallback_only(entry))
+        .filter(|entry| !manifest_entry_is_allowed_unmapped(entry))
         .take(10)
         .collect();
     assert!(
@@ -194,96 +252,5 @@ fn mists_cache_rejects_mainline_nameplates_toc_without_game_type_gates() {
     std::fs::remove_dir_all(root).expect("remove cache root");
 }
 
-#[test]
-#[cfg(feature = "client-mists")]
-fn mists_prefers_mop_classic_repo_fallbacks() {
-    assert_eq!(
-        super::gethe_wow_ui_source_branches().first().copied(),
-        Some("classic_ptr"),
-        "Mists fallback sync must prefer the source branch matching Mists ActionButton.lua"
-    );
-}
-
 #[cfg(feature = "client-mists")]
 include!("../blizzard_ui_sync_mists_test_fixture.rs");
-
-#[test]
-fn repo_fallback_copies_manifest_entry_from_addons_root() {
-    let source_root = unique_temp_dir("source");
-    let out_root = unique_temp_dir("out");
-    let entry = "Blizzard_Test/Test.lua";
-    let source_path = source_root.join(entry);
-    let out_path = out_root.join(entry);
-    std::fs::create_dir_all(source_path.parent().expect("source parent"))
-        .expect("create source parent");
-    std::fs::write(&source_path, "from repo\n").expect("write source fallback");
-    let copied = copy_repo_fallback_entry_from_root(entry, &out_path, &source_root)
-        .expect("copy fallback entry");
-
-    assert!(copied);
-    assert_eq!(
-        std::fs::read_to_string(&out_path).expect("read copied fallback"),
-        "from repo\n"
-    );
-    std::fs::remove_dir_all(source_root).expect("remove source temp dir");
-    std::fs::remove_dir_all(out_root).expect("remove output temp dir");
-}
-
-#[test]
-fn sync_replaces_binary_text_cache_entry_from_fallback() {
-    let source_root = unique_temp_dir("source-valid-text");
-    let out_root = unique_temp_dir("out-binary-text");
-    let entry = "Blizzard_Test/Test.lua";
-    let source_path = source_root.join(entry);
-    let out_path = out_root.join(entry);
-    std::fs::create_dir_all(source_path.parent().expect("source parent"))
-        .expect("create source parent");
-    std::fs::create_dir_all(out_path.parent().expect("out parent")).expect("create out parent");
-    std::fs::write(&source_path, "from repo\n").expect("write source fallback");
-    std::fs::write(&out_path, [0xff, 0xfe, 0xfd]).expect("write corrupt cache entry");
-
-    let mut fallback_source = super::RepoFallbackSource {
-        roots: Some(vec![source_root.clone()]),
-    };
-    let result = super::sync_manifest_entry(&out_root, entry, &mut fallback_source)
-        .expect("sync manifest entry");
-
-    assert!(matches!(result, super::EntrySyncResult::Extracted));
-    assert_eq!(
-        std::fs::read_to_string(&out_path).expect("read repaired cache entry"),
-        "from repo\n"
-    );
-    std::fs::remove_dir_all(source_root).expect("remove source temp dir");
-    std::fs::remove_dir_all(out_root).expect("remove output temp dir");
-}
-
-#[test]
-fn repo_fallback_accepts_gethe_repo_root() {
-    let repo_root = unique_temp_dir("repo");
-    let addons_root = repo_root.join("Interface/AddOns");
-    std::fs::create_dir_all(&addons_root).expect("create addons root");
-
-    let normalized = normalize_source_root(repo_root.clone());
-
-    assert_eq!(normalized, Some(addons_root));
-    std::fs::remove_dir_all(repo_root).expect("remove repo temp dir");
-}
-
-#[test]
-fn archive_unpack_extracts_only_interface_addons() {
-    let repo_root = unique_temp_dir("archive");
-    let archive = build_test_archive().expect("build test archive");
-
-    unpack_wow_ui_source_archive(&archive[..], &repo_root).expect("unpack archive");
-
-    assert_eq!(
-        std::fs::read_to_string(repo_root.join("Interface/AddOns/Blizzard_Test/Test.lua"))
-            .expect("read unpacked addon file"),
-        "from archive\n"
-    );
-    assert!(
-        !repo_root.join("README.md").exists(),
-        "non-addon archive file should not be unpacked"
-    );
-    std::fs::remove_dir_all(repo_root).expect("remove repo temp dir");
-}
