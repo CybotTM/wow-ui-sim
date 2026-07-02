@@ -405,6 +405,60 @@ Blizzard_AsyncRequest.lua
 }
 
 #[test]
+fn secure_addon_load_into_environment_global_overrides_default_secure_environment() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_root = std::env::temp_dir().join("wow-sim-secure-global-override-test");
+    let addon_dir = temp_root.join("Blizzard_AuraContainerProbe");
+    std::fs::create_dir_all(&addon_dir).unwrap();
+    std::fs::write(addon_dir.join("Secure.lua"), r#"SecureOnly = "secure""#).unwrap();
+    std::fs::write(addon_dir.join("Inbound.lua"), r#"InboundOnly = "global""#).unwrap();
+    std::fs::write(
+        addon_dir.join("Frame.xml"),
+        r#"<Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="GlobalOverrideXmlFrame"/>
+        </Ui>"#,
+    )
+    .unwrap();
+
+    let toc = crate::toc::TocFile::parse(
+        &addon_dir,
+        r#"
+## Title: Blizzard_AuraContainerProbe
+## UseSecureEnvironment: 1
+Secure.lua
+Frame.xml [LoadIntoEnvironment global]
+Inbound.lua [LoadIntoEnvironment global]
+"#,
+    );
+
+    let result = load_addon_from_toc(&env.loader_env(), &toc).unwrap();
+    assert_eq!(result.lua_files, 2);
+    assert_eq!(result.xml_files, 1);
+
+    let probe: (String, String, String, String, String, String) = env
+        .eval(
+            r#"
+            return type(rawget(_G, "SecureOnly")),
+                   rawget(__secureenv, "SecureOnly"),
+                   rawget(_G, "InboundOnly"),
+                   type(rawget(__secureenv, "InboundOnly")),
+                   type(rawget(_G, "GlobalOverrideXmlFrame")),
+                   type(rawget(__secureenv, "GlobalOverrideXmlFrame"))
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(probe.0, "nil");
+    assert_eq!(probe.1, "secure");
+    assert_eq!(probe.2, "global");
+    assert_eq!(probe.3, "nil");
+    assert_eq!(probe.4, "table");
+    assert_eq!(probe.5, "nil");
+
+    std::fs::remove_dir_all(&temp_root).ok();
+}
+
+#[test]
 fn secure_xml_named_frames_bind_into_secure_environment() {
     let env = WowLuaEnv::new().unwrap();
     let temp_root = std::env::temp_dir().join("wow-sim-secure-xml-frame-test");
