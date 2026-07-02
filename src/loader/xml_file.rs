@@ -2,7 +2,7 @@
 
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::globals::security::mark_secure_state;
-use crate::lua_api::methods::{create_string, registry_get};
+use crate::lua_api::methods::{create_string, registry_get, table_set_static};
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::xml::{FrameXml, XmlElement, parse_xml_file};
 use rilua::{Function, LuaApiMut, Val};
@@ -136,13 +136,20 @@ fn process_scoped_modifier(
         .then(|| scoped_script_env(env, ctx))
         .transpose()?;
     let saved_scope = enter_scoped_modifier(env, scoped, scoped_env);
+    set_loading_forbidden_object_table_global(
+        env,
+        scoped.use_forbidden_object_table.unwrap_or(false),
+    )?;
     let mut count = 0;
     let result = scoped.elements.iter().try_for_each(|child| {
         count += process_element(env, child, xml_dir, ctx, timing)?;
         Ok::<(), LoadError>(())
     });
+    let restore_forbidden_object_table = saved_scope.use_forbidden_object_table;
     restore_scoped_modifier(env, saved_scope);
-    result.map(|()| count)
+    let restore_result =
+        set_loading_forbidden_object_table_global(env, restore_forbidden_object_table);
+    result.and(restore_result).map(|()| count)
 }
 
 struct SavedScopedModifier {
@@ -150,6 +157,7 @@ struct SavedScopedModifier {
     script_env: Option<Val>,
     add_to_secure_env: bool,
     hide_from_global_env: bool,
+    use_forbidden_object_table: bool,
 }
 
 fn enter_scoped_modifier(
@@ -163,6 +171,7 @@ fn enter_scoped_modifier(
         script_env: state.loading_scoped_script_env,
         add_to_secure_env: state.loading_add_to_secure_env,
         hide_from_global_env: state.loading_hide_from_global_env,
+        use_forbidden_object_table: state.loading_use_forbidden_object_table,
     };
     if scoped.forbidden.unwrap_or(false) || scoped.full_lockdown.unwrap_or(false) {
         state.loading_forbidden = true;
@@ -176,6 +185,9 @@ fn enter_scoped_modifier(
     if scoped.hide_from_global_env.unwrap_or(false) {
         state.loading_hide_from_global_env = true;
     }
+    if scoped.use_forbidden_object_table.unwrap_or(false) {
+        state.loading_use_forbidden_object_table = true;
+    }
     saved
 }
 
@@ -185,6 +197,23 @@ fn restore_scoped_modifier(env: &LoaderEnv<'_>, saved: SavedScopedModifier) {
     state.loading_scoped_script_env = saved.script_env;
     state.loading_add_to_secure_env = saved.add_to_secure_env;
     state.loading_hide_from_global_env = saved.hide_from_global_env;
+    state.loading_use_forbidden_object_table = saved.use_forbidden_object_table;
+}
+
+fn set_loading_forbidden_object_table_global(
+    env: &LoaderEnv<'_>,
+    enabled: bool,
+) -> Result<(), LoadError> {
+    env.with_state(|state| {
+        table_set_static(
+            state,
+            Val::Table(state.global),
+            "__wowLoadingUseForbiddenObjectTable",
+            if enabled { Val::Bool(true) } else { Val::Nil },
+        );
+        Ok::<(), crate::Error>(())
+    })
+    .map_err(|error| LoadError::Lua(error.to_string()))
 }
 
 fn scoped_script_env(env: &LoaderEnv<'_>, ctx: &AddonContext) -> Result<Val, LoadError> {

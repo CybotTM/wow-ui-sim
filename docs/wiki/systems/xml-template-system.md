@@ -48,6 +48,18 @@ The `inherits` parameter in `CreateFrame()` triggers `apply_templates_from_regis
 
 Called from `CreateFrame()` at runtime (no `LoaderEnv` access). `apply_single_template()` order: Mixin → Size → Anchors → SetAllPoints → KeyValues → Layers → button textures → child frames → Scripts. OnLoad for ALL template-created children is deferred until after the entire chain is applied.
 
+## Partitioned 12.1 Mixins
+
+PTR 12.1 adds AuraContainer XML that wraps frames in `<ScopedModifier useForbiddenObjectTable="true">` and applies secure mixins with `targetPartition`, `inboundPartition`, and `secureDelegates` attributes.
+
+The simulator models this as two Lua object partitions per frame:
+- **public** — the normal frame object exposed to addon/public code
+- **forbidden** — a per-frame table returned by `GetForbiddenObjectTable(frame)`
+
+When `useForbiddenObjectTable` is active during XML loading, frame-local `<KeyValues>` are written to the forbidden table rather than the public frame. A mixin with `targetPartition="public"` installs its fields on the public frame. A secure mixin without an explicit target inside that scope installs on the forbidden table. Function values with `inboundPartition="forbidden"` are exposed as delegates: calls through the public method replace `self` with the forbidden table before invoking the secure/source function. `secureDelegates="true"` uses the same delegate path for public secure-source methods.
+
+This is intentionally simulator-side compatibility behavior, not a Blizzard source fallback. It keeps private AuraContainer state off the public frame while allowing public inbound methods to operate on the private/forbidden state.
+
 ## Inline Scripts
 
 Three `ScriptBodyXml` forms:
@@ -66,6 +78,9 @@ Three `ScriptBodyXml` forms:
 ## Sources
 
 - [xml-template-system.md](../../xml-template-system.md) — XML types, registry, inheritance, conversion pipeline, inline scripts
+- `src/lua_api/env_init/shared_bootstrap.lua` — `GetForbiddenObjectTable` and XML partition helper functions
+- `src/loader/xml_frame_codegen.rs` — XML codegen for partition-aware Mixins and KeyValues
+- `src/loader/tests/runtime_template_misc.rs` — regression coverage for forbidden object tables and secure delegates
 
 ## See Also
 

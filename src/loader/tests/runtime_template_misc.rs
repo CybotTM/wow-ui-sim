@@ -117,3 +117,183 @@ fn test_anonymous_runtime_template_uses_registry_frame_refs_without_global_alias
         "anonymous runtime template frame should stay reachable",
     );
 }
+
+#[test]
+fn test_partitioned_mixins_use_forbidden_object_table() {
+    let t = load_test_xml(
+        "partitioned-mixins-use-forbidden-object-table",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                PartitionedInboundMixin = {};
+                function PartitionedInboundMixin:ReadSecret()
+                    return self.secret;
+                end
+                function PartitionedInboundMixin:WriteSecret(value)
+                    self.secret = value;
+                end
+
+                PartitionedPrivateMixin = {};
+                function PartitionedPrivateMixin:PrivateReadSecret()
+                    return self.secret;
+                end
+            </Script>
+            <ScopedModifier useForbiddenObjectTable="true">
+                <Frame name="PartitionedFrame" parent="UIParent">
+                    <KeyValues>
+                        <KeyValue key="secret" value="hidden" type="string"/>
+                    </KeyValues>
+                    <Mixins>
+                        <Mixin key="PartitionedInboundMixin" source="secure" targetPartition="public" inboundPartition="forbidden" secureDelegates="true"/>
+                        <Mixin key="PartitionedPrivateMixin" source="secure"/>
+                    </Mixins>
+                </Frame>
+            </ScopedModifier>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            assert(type(GetForbiddenObjectTable) == "function", "forbidden object table helper should exist")
+            local forbidden = GetForbiddenObjectTable(PartitionedFrame)
+            assert(type(forbidden) == "table", "forbidden partition should be a table")
+            assert(forbidden ~= PartitionedFrame, "forbidden partition should be distinct from public frame")
+            assert(PartitionedFrame.secret == nil, "KeyValues should not leak onto public partition")
+            assert(forbidden.secret == "hidden", "KeyValues should land on forbidden partition")
+            assert(PartitionedFrame.PrivateReadSecret == nil, "private mixin should not be installed on public partition")
+            assert(type(forbidden.PrivateReadSecret) == "function", "private mixin should install on forbidden partition")
+            assert(PartitionedFrame:ReadSecret() == "hidden", "public delegate should call with forbidden self")
+            PartitionedFrame:WriteSecret("changed")
+            assert(forbidden.secret == "changed", "delegate writes should update forbidden partition")
+            assert(PartitionedFrame.secret == nil, "delegate writes should not leak onto public partition")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_plain_literal_mixins_block_still_applies_to_public_frame() {
+    let t = load_test_xml(
+        "plain-literal-mixins-block",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                PlainLiteralMixin = {};
+                function PlainLiteralMixin:MarkPlain()
+                    self.plainApplied = true;
+                end
+            </Script>
+            <Frame name="PlainLiteralMixinFrame" parent="UIParent">
+                <Mixins>
+                    <Mixin key="PlainLiteralMixin"/>
+                </Mixins>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            assert(type(PlainLiteralMixinFrame.MarkPlain) == "function", "plain literal Mixins block should apply to public frame")
+            PlainLiteralMixinFrame:MarkPlain()
+            assert(PlainLiteralMixinFrame.plainApplied == true, "plain literal mixin should run with public self")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_partitioned_runtime_template_uses_forbidden_object_table() {
+    let t = load_test_xml(
+        "partitioned-runtime-template-use-forbidden-object-table",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                PartitionedTemplateInboundMixin = {};
+                function PartitionedTemplateInboundMixin:ReadSecret()
+                    return self.secret;
+                end
+
+                PartitionedTemplatePrivateMixin = {};
+                function PartitionedTemplatePrivateMixin:PrivateReadSecret()
+                    return self.secret;
+                end
+            </Script>
+            <ScopedModifier useForbiddenObjectTable="true">
+                <Frame name="PartitionedRuntimeTemplate" virtual="true">
+                    <KeyValues>
+                        <KeyValue key="secret" value="template-hidden" type="string"/>
+                    </KeyValues>
+                    <Mixins>
+                        <Mixin key="PartitionedTemplateInboundMixin" source="secure" targetPartition="public" inboundPartition="forbidden" secureDelegates="true"/>
+                        <Mixin key="PartitionedTemplatePrivateMixin" source="secure"/>
+                    </Mixins>
+                </Frame>
+            </ScopedModifier>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local frame = CreateFrame("Frame", "PartitionedRuntimeFrame", UIParent, "PartitionedRuntimeTemplate")
+            local forbidden = GetForbiddenObjectTable(frame)
+            assert(frame.secret == nil, "runtime template KeyValues should not leak onto public partition")
+            assert(forbidden.secret == "template-hidden", "runtime template KeyValues should land on forbidden partition")
+            assert(type(frame.ReadSecret) == "function", "runtime template inbound mixin should expose public delegate")
+            assert(frame.PrivateReadSecret == nil, "runtime template private mixin should not be public")
+            assert(type(forbidden.PrivateReadSecret) == "function", "runtime template private mixin should be forbidden")
+            assert(frame:ReadSecret() == "template-hidden", "runtime template delegate should use forbidden self")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_frame_literal_mixins_block_applies_mixins() {
+    let t = load_test_xml(
+        "frame-literal-mixins-block",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                LiteralAuraContainerInboundMixin = {};
+                function LiteralAuraContainerInboundMixin:MarkInbound()
+                    self.inboundApplied = true;
+                end
+                LiteralAuraContainerPrivateMixin = {};
+                function LiteralAuraContainerPrivateMixin:MarkPrivate()
+                    self.privateApplied = true;
+                end
+            </Script>
+            <ScopedModifier useForbiddenObjectTable="true">
+                <Frame name="LiteralAuraContainer" parent="UIParent">
+                    <Mixins>
+                        <Mixin key="LiteralAuraContainerInboundMixin" source="secure" targetPartition="public" inboundPartition="forbidden" secureDelegates="true"/>
+                        <Mixin key="LiteralAuraContainerPrivateMixin" source="secure"/>
+                    </Mixins>
+                </Frame>
+            </ScopedModifier>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local forbidden = GetForbiddenObjectTable(LiteralAuraContainer)
+            assert(LiteralAuraContainer.MarkInbound ~= nil, "literal Mixins block should apply first mixin")
+            assert(LiteralAuraContainer.MarkPrivate == nil, "private secure mixin should not apply to public partition")
+            assert(forbidden.MarkPrivate ~= nil, "private secure mixin should apply to forbidden partition")
+            LiteralAuraContainer:MarkInbound()
+            forbidden:MarkPrivate()
+            assert(LiteralAuraContainer.inboundApplied == nil, "inbound delegate should not write to public partition")
+            assert(forbidden.inboundApplied == true, "inbound delegate should run with forbidden self")
+            assert(forbidden.privateApplied == true, "second literal mixin method should run on forbidden partition")
+        "#,
+        )
+        .unwrap();
+}

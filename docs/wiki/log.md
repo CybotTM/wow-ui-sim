@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-02] update | 12.1 XML partitioned mixins
+
+Updated `systems/xml-template-system.md` after implementing PTR 12.1
+`ScopedModifier useForbiddenObjectTable` and partitioned mixin semantics for
+AuraContainer-style XML. Recorded public vs forbidden frame partitions,
+partition-aware KeyValues, `targetPartition`, `inboundPartition` self
+substitution, and `secureDelegates` public delegate behavior.
+
 ## [2026-07-02] update | Blizzard UI CDN missing chunks
 
 Updated `systems/casc-asset-cache.md`, `systems/addon-loading.md`, and `PLAN.md`

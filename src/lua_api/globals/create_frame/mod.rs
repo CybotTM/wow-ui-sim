@@ -14,7 +14,9 @@ pub mod helpers_shared;
 mod template_chain;
 
 pub(crate) use helpers::{append_parent_array_entry, apply_frame_mixin, apply_frame_mixins};
-pub(crate) use helpers_shared::{apply_parent_sub, create_frame_instance};
+pub(crate) use helpers_shared::{
+    apply_parent_sub, create_frame_instance, mark_frame_uses_forbidden_object_table,
+};
 
 use crate::lua_api::methods::{borrow_state, extract_frame_id, frame_ref, val_to_string};
 use crate::lua_bridge::FromStack;

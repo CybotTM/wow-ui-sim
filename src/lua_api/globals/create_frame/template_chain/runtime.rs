@@ -407,11 +407,13 @@ fn apply_child_template_properties(
     if let Some(intrinsic) = intrinsic {
         crate::lua_api::globals::template::set_intrinsic(state, child_id, intrinsic);
     }
+    super::apply_template_partition_marker(state, child_id, frame);
     crate::lua_api::globals::create_frame::apply_frame_mixins(
         state,
         child_id,
         frame.combined_mixin().as_deref(),
     );
+    super::apply_block_mixins(state, child_id, frame.mixins());
     super::apply_template_key_values(state, child_id, frame.all_key_values());
     if let Some(scripts) = frame.scripts() {
         super::apply_template_scripts(state, child_id, scripts)?;
@@ -430,7 +432,7 @@ pub(super) fn apply_runtime_template_loader_effects(
     let loader_env = LoaderEnv::from_parts_active(borrow_lua(state)?, state_handle(state)?, state);
     let inherits = inherits.unwrap_or("");
     let mut timing = crate::loader::LoadTiming::default();
-    apply_loader_chain_layers(
+    super::runtime_loader_effects::apply_loader_chain_layers(
         &loader_env,
         inherits,
         frame_id,
@@ -438,7 +440,7 @@ pub(super) fn apply_runtime_template_loader_effects(
         name_parent,
         &mut timing,
     )?;
-    apply_loader_frame_extras(
+    super::runtime_loader_effects::apply_loader_frame_extras(
         &loader_env,
         frame,
         frame_id,
@@ -447,82 +449,6 @@ pub(super) fn apply_runtime_template_loader_effects(
         inherits,
         &mut timing,
     )
-}
-
-fn apply_loader_chain_layers(
-    loader_env: &LoaderEnv,
-    inherits: &str,
-    frame_id: u64,
-    frame_name: &str,
-    name_parent: &str,
-    timing: &mut crate::loader::LoadTiming,
-) -> LuaResult<()> {
-    let parent_ref_name = format!("__frame_{frame_id}");
-    for entry in &*crate::xml::get_template_chain(inherits) {
-        crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
-            loader_env,
-            &entry.frame,
-            frame_name,
-            &parent_ref_name,
-            name_parent,
-            timing,
-        )
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    }
-    Ok(())
-}
-
-fn apply_loader_frame_extras(
-    loader_env: &LoaderEnv,
-    frame: &crate::xml::FrameXml,
-    frame_id: u64,
-    frame_name: &str,
-    name_parent: &str,
-    inherits: &str,
-    timing: &mut crate::loader::LoadTiming,
-) -> LuaResult<()> {
-    let parent_ref_name = format!("__frame_{frame_id}");
-    crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
-        loader_env,
-        frame,
-        frame_name,
-        &parent_ref_name,
-        name_parent,
-        timing,
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::button::apply_button_textures_with_ref(
-        loader_env,
-        frame,
-        frame_name,
-        &parent_ref_name,
-        inherits,
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::button::apply_button_text_with_ref(
-        loader_env,
-        frame,
-        frame_name,
-        &parent_ref_name,
-        inherits,
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::button::apply_button_fonts_with_ref(
-        loader_env,
-        frame,
-        frame_name,
-        &parent_ref_name,
-        inherits,
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::xml_frame_extras::apply_animation_groups(loader_env, frame, frame_id, inherits)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::xml_frame_extras::apply_bar_texture(loader_env, frame, frame_name, inherits)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::xml_frame_extras::apply_thumb_texture(loader_env, frame, frame_name, inherits)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::xml_frame_extras::init_action_bar_tables(loader_env, frame, frame_name);
-    Ok(())
 }
 
 pub(super) fn ensure_runtime_button_texture_slots(

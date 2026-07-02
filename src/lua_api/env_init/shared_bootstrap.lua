@@ -28,6 +28,102 @@ if CreateAndInitFromMixin == nil then
   end
 end
 
+local __wow_forbidden_object_tables = setmetatable({}, { __mode = "k" })
+
+local function __wow_frame_fields(object)
+  local ok, env = pcall(debug.getfenv, object)
+  if ok and type(env) == "table" and type(env[1]) == "table" then
+    return env[1]
+  end
+  if type(object) == "table" then
+    return object
+  end
+  return nil
+end
+
+local function __wow_rawget_object(object, key)
+  local fields = __wow_frame_fields(object)
+  if type(fields) == "table" then
+    return rawget(fields, key)
+  end
+  return nil
+end
+
+local function __wow_public_set(object, key, value)
+  object[key] = value
+end
+
+function GetForbiddenObjectTable(object)
+  if __wow_frame_fields(object) == nil then
+    return object
+  end
+  local forbidden = __wow_forbidden_object_tables[object]
+  if forbidden == nil then
+    forbidden = { __wowPublicObject = object }
+    __wow_forbidden_object_tables[object] = forbidden
+  end
+  return forbidden
+end
+
+local function __wow_xml_object_partition(object, partition)
+  if partition == "forbidden" or partition == "secure" then
+    return GetForbiddenObjectTable(object)
+  end
+  return object
+end
+
+local function __wow_xml_object_uses_forbidden_table(object)
+  return __wow_rawget_object(object, "__wowUseForbiddenObjectTable") == true
+    or rawget(_G, "__wowLoadingUseForbiddenObjectTable") == true
+end
+
+function __wow_xml_set_key_value(object, key, value)
+  if __wow_xml_object_uses_forbidden_table(object) then
+    rawset(GetForbiddenObjectTable(object), key, value)
+  else
+    __wow_public_set(object, key, value)
+  end
+end
+
+local function __wow_xml_mixin_target_partition(object, targetPartition)
+  if targetPartition ~= nil and targetPartition ~= "" then
+    return targetPartition
+  end
+  if __wow_xml_object_uses_forbidden_table(object) then
+    return "forbidden"
+  end
+  return "public"
+end
+
+function __wow_apply_xml_mixin(object, mixin, targetPartition, inboundPartition, secureDelegates)
+  if type(mixin) ~= "table" then
+    return object
+  end
+
+  local targetName = __wow_xml_mixin_target_partition(object, targetPartition)
+  local target = __wow_xml_object_partition(object, targetName)
+  local inboundName = inboundPartition
+  local wrapInbound = inboundName ~= nil and inboundName ~= ""
+
+  for key, value in pairs(mixin) do
+    local applied = value
+    if type(value) == "function" and (wrapInbound or secureDelegates == true) then
+      local fn = value
+      applied = function(_self, ...)
+        local delegateSelf = wrapInbound and __wow_xml_object_partition(object, inboundName) or object
+        return fn(delegateSelf, ...)
+      end
+    end
+
+    if target == object then
+      __wow_public_set(object, key, applied)
+    else
+      rawset(target, key, applied)
+    end
+  end
+  return object
+end
+
 SOUNDKIT = SOUNDKIT or {}
 if SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU == nil then
   SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU = 303824

@@ -36,6 +36,8 @@ pub struct ScopedModifierXml {
     pub hide_from_global_env: Option<bool>,
     #[serde(rename = "@fullLockdown", default)]
     pub full_lockdown: Option<bool>,
+    #[serde(rename = "@useForbiddenObjectTable", default)]
+    pub use_forbidden_object_table: Option<bool>,
     #[serde(rename = "$value", default)]
     pub elements: Vec<XmlElement>,
 }
@@ -183,6 +185,9 @@ pub struct FrameXml {
     /// non-EditBox widgets.
     #[serde(rename = "@letters")]
     pub letters: Option<i32>,
+
+    #[serde(skip)]
+    pub use_forbidden_object_table: bool,
 
     // Child elements collected via $value to allow multiples
     #[serde(rename = "$value", default)]

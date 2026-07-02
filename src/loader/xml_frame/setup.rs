@@ -248,38 +248,70 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
     let scripts_need_slow_path = setup.frame.scripts().is_some_and(|scripts| {
         !crate::lua_api::globals::create_frame::scripts_support_fast_install(scripts)
     });
+    let miss_reasons = fast_create_miss_reasons(setup, scripts_need_slow_path);
 
     if !fast_create_frame_profiling_enabled() {
-        return setup.explicit_parent
-            && setup.name != setup.parent
-            && setup.frame.xml_attributes().is_none()
-            && !scripts_need_slow_path;
+        return miss_reasons.is_empty();
     }
 
-    let mut miss_reasons = Vec::new();
+    let miss_body = fast_create_script_miss_body(setup, scripts_need_slow_path);
+    record_fast_create_frame_profile(&miss_reasons, miss_body.as_deref());
+    miss_reasons.is_empty()
+}
 
+fn fast_create_miss_reasons(
+    setup: &SetupFrame<'_>,
+    scripts_need_slow_path: bool,
+) -> Vec<&'static str> {
+    let mut miss_reasons = Vec::new();
+    append_fast_create_miss_reasons(setup, scripts_need_slow_path, &mut miss_reasons);
+    miss_reasons
+}
+
+fn append_fast_create_miss_reasons(
+    setup: &SetupFrame<'_>,
+    scripts_need_slow_path: bool,
+    miss_reasons: &mut Vec<&'static str>,
+) {
+    append_fast_create_parent_misses(setup, miss_reasons);
+    append_fast_create_xml_misses(setup, miss_reasons);
+    if scripts_need_slow_path {
+        miss_reasons.push("scripts");
+    }
+}
+
+fn append_fast_create_parent_misses(setup: &SetupFrame<'_>, miss_reasons: &mut Vec<&'static str>) {
     if !setup.explicit_parent {
         miss_reasons.push("no_explicit_parent");
     }
     if setup.name == setup.parent {
         miss_reasons.push("root_frame_reuse");
     }
+}
+
+fn append_fast_create_xml_misses(setup: &SetupFrame<'_>, miss_reasons: &mut Vec<&'static str>) {
     if setup.frame.xml_attributes().is_some() {
         miss_reasons.push("xml_attributes");
     }
-    if scripts_need_slow_path {
-        miss_reasons.push("scripts");
+    if setup.frame.mixins().is_some() {
+        miss_reasons.push("mixins_block");
     }
+    if setup.frame.key_values().is_some() {
+        miss_reasons.push("key_values");
+    }
+}
 
-    let miss_body = if scripts_need_slow_path {
-        setup.frame.scripts().and_then(|scripts| {
-            crate::lua_api::globals::create_frame::first_fast_install_miss(scripts)
-        })
-    } else {
-        None
-    };
-    record_fast_create_frame_profile(&miss_reasons, miss_body.as_deref());
-    miss_reasons.is_empty()
+fn fast_create_script_miss_body(
+    setup: &SetupFrame<'_>,
+    scripts_need_slow_path: bool,
+) -> Option<String> {
+    if !scripts_need_slow_path {
+        return None;
+    }
+    setup
+        .frame
+        .scripts()
+        .and_then(crate::lua_api::globals::create_frame::first_fast_install_miss)
 }
 
 fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), LoadError> {

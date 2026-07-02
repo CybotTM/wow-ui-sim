@@ -168,6 +168,12 @@ fn append_mixins_code(lua_code: &mut String, frame: &crate::xml::FrameXml, _inhe
     }
 }
 
+fn lua_option_string(value: Option<&str>) -> String {
+    value
+        .map(|value| format!("\"{}\"", escape_lua_string(value)))
+        .unwrap_or_else(|| "nil".to_string())
+}
+
 fn append_single_mixin_code(lua_code: &mut String, mixin: &FrameMixin) {
     let name = &mixin.name;
     let lookup = if mixin.source.as_deref() == Some("secure") {
@@ -175,8 +181,11 @@ fn append_single_mixin_code(lua_code: &mut String, mixin: &FrameMixin) {
     } else {
         format!("{name} or (__secureenv and rawget(__secureenv, \"{name}\"))")
     };
+    let target_partition = lua_option_string(mixin.target_partition.as_deref());
+    let inbound_partition = lua_option_string(mixin.inbound_partition.as_deref());
+    let secure_delegates = mixin.secure_delegates.unwrap_or(false);
     lua_code.push_str(&format!(
-        "\n        do local m = {lookup} if m then Mixin(frame, m) end end"
+        "\n        do local m = {lookup} if m then __wow_apply_xml_mixin(frame, m, {target_partition}, {inbound_partition}, {secure_delegates}) end end"
     ));
 }
 
@@ -184,6 +193,9 @@ fn append_single_mixin_code(lua_code: &mut String, mixin: &FrameMixin) {
 struct FrameMixin {
     name: String,
     source: Option<String>,
+    target_partition: Option<String>,
+    inbound_partition: Option<String>,
+    secure_delegates: Option<bool>,
 }
 
 fn collect_frame_mixins(frame: &crate::xml::FrameXml) -> Vec<FrameMixin> {
@@ -201,7 +213,13 @@ fn append_attr_mixins(
 ) {
     for name in collect_mixins_from_attr(mixin_attr) {
         if seen.insert(name.clone()) {
-            mixins.push(FrameMixin { name, source: None });
+            mixins.push(FrameMixin {
+                name,
+                source: None,
+                target_partition: None,
+                inbound_partition: None,
+                secure_delegates: None,
+            });
         }
     }
 }
@@ -217,6 +235,9 @@ fn append_block_mixins(
             mixins.push(FrameMixin {
                 name: entry.key.clone(),
                 source: entry.source.clone(),
+                target_partition: entry.target_partition.clone(),
+                inbound_partition: entry.inbound_partition.clone(),
+                secure_delegates: entry.secure_delegates,
             });
         }
     }
@@ -261,12 +282,11 @@ fn append_key_values_from_xml(
     if let Some(key_values) = key_values {
         for kv in &key_values.values {
             let value = format_key_value_lua(&kv.value, kv.value_type.as_deref());
-            let field_ref = lua_table_field_ref("frame", &kv.key);
+            let key = escape_lua_string(&kv.key);
             lua_code.push_str(&format!(
                 r#"
-        {} = {}
-        "#,
-                field_ref, value
+        __wow_xml_set_key_value(frame, "{key}", {value})
+        "#
             ));
         }
     }
@@ -383,10 +403,16 @@ mod tests {
                 FrameMixin {
                     name: "AlphaMixin".to_string(),
                     source: None,
+                    target_partition: None,
+                    inbound_partition: None,
+                    secure_delegates: None,
                 },
                 FrameMixin {
                     name: "SecureMixin".to_string(),
                     source: Some("secure".to_string()),
+                    target_partition: Some("public".to_string()),
+                    inbound_partition: Some("forbidden".to_string()),
+                    secure_delegates: Some(true),
                 },
             ]
         );

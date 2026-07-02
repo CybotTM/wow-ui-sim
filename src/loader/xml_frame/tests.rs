@@ -272,6 +272,7 @@ fn scoped_modifier_returns_none() {
         add_to_secure_env: None,
         hide_from_global_env: None,
         full_lockdown: None,
+        use_forbidden_object_table: None,
         elements: vec![],
     };
     assert_eq!(resolve(&FrameElement::ScopedModifier(sm)), None);

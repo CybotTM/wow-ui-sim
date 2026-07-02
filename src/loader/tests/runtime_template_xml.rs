@@ -1,46 +1,6 @@
 use super::*;
 
 #[test]
-fn test_frame_literal_mixins_block_applies_mixins() {
-    let t = load_test_xml(
-        "frame-literal-mixins-block",
-        r#"
-        <Ui xmlns="http://www.blizzard.com/wow/ui/">
-            <Script>
-                LiteralAuraContainerInboundMixin = {};
-                function LiteralAuraContainerInboundMixin:MarkInbound()
-                    self.inboundApplied = true;
-                end
-                LiteralAuraContainerPrivateMixin = {};
-                function LiteralAuraContainerPrivateMixin:MarkPrivate()
-                    self.privateApplied = true;
-                end
-            </Script>
-            <Frame name="LiteralAuraContainer" parent="UIParent">
-                <Mixins>
-                    <Mixin key="LiteralAuraContainerInboundMixin" source="secure" targetPartition="public" inboundPartition="forbidden" secureDelegates="true"/>
-                    <Mixin key="LiteralAuraContainerPrivateMixin" source="secure"/>
-                </Mixins>
-            </Frame>
-        </Ui>
-        "#,
-    );
-
-    t.env
-        .exec(
-            r#"
-            assert(LiteralAuraContainer.MarkInbound ~= nil, "literal Mixins block should apply first mixin")
-            assert(LiteralAuraContainer.MarkPrivate ~= nil, "literal Mixins block should apply second mixin")
-            LiteralAuraContainer:MarkInbound()
-            LiteralAuraContainer:MarkPrivate()
-            assert(LiteralAuraContainer.inboundApplied == true, "first literal mixin method should run")
-            assert(LiteralAuraContainer.privateApplied == true, "second literal mixin method should run")
-        "#,
-        )
-        .unwrap();
-}
-
-#[test]
 fn test_fontstring_template_inherits_apply_mixin_methods() {
     let t = load_test_xml(
         "fontstring-template-mixin-inherits",

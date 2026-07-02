@@ -2,7 +2,7 @@
 
 use crate::lua_api::hot_literals::{hot_metatable_key, metatable_idx};
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, extract_frame_id, frame_ref,
+    borrow_state, call_function_state, create_string, create_table, extract_frame_id, frame_ref,
     get_or_create_frame_fields, registry_get, table_get, table_set,
 };
 use rilua::vm::state::LuaState;
@@ -182,12 +182,67 @@ pub(crate) fn apply_frame_mixin(
     mixin_name: &str,
     source: Option<&str>,
 ) {
+    apply_frame_mixin_with_partitions(state, frame_id, mixin_name, source, None, None, false);
+}
+
+pub(crate) fn apply_frame_mixin_with_partitions(
+    state: &mut LuaState,
+    frame_id: u64,
+    mixin_name: &str,
+    source: Option<&str>,
+    target_partition: Option<&str>,
+    inbound_partition: Option<&str>,
+    secure_delegates: bool,
+) {
     let mixin_val = if source == Some("secure") {
         resolve_secure_or_scoped_global_path(state, mixin_name)
     } else {
         resolve_scoped_or_global_path(state, mixin_name)
     };
+    if source == Some("secure")
+        || target_partition.is_some()
+        || inbound_partition.is_some()
+        || secure_delegates
+    {
+        apply_xml_mixin_helper(
+            state,
+            frame_id,
+            mixin_val,
+            target_partition,
+            inbound_partition,
+            secure_delegates,
+        );
+        return;
+    }
     copy_table_into_frame(state, frame_id, mixin_val);
+}
+
+fn apply_xml_mixin_helper(
+    state: &mut LuaState,
+    frame_id: u64,
+    mixin_val: Val,
+    target_partition: Option<&str>,
+    inbound_partition: Option<&str>,
+    secure_delegates: bool,
+) {
+    let helper = resolve_global_path(state, "__wow_apply_xml_mixin");
+    let Ok(frame) = frame_ref(state, frame_id) else {
+        return;
+    };
+    let args = [
+        frame,
+        mixin_val,
+        optional_string_val(state, target_partition),
+        optional_string_val(state, inbound_partition),
+        Val::Bool(secure_delegates),
+    ];
+    let _ = call_function_state(state, helper, &args);
+}
+
+fn optional_string_val(state: &mut LuaState, value: Option<&str>) -> Val {
+    value
+        .map(|value| create_string(state, value))
+        .unwrap_or(Val::Nil)
 }
 
 fn resolve_scoped_or_global_path(state: &mut LuaState, path: &str) -> Val {

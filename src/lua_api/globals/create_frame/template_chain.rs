@@ -5,12 +5,16 @@ mod builders;
 mod fast_types;
 mod parser;
 mod runtime;
+mod runtime_loader_effects;
 mod runtime_synthetic_children;
 
 pub(super) use fast_types::{FastHandlerRef, FastLiteralValue, FastScriptInstall};
 
-use super::helpers::{append_parent_array_entry, apply_frame_mixins, resolve_global_path};
-use crate::lua_api::methods::{borrow_state, create_string, frame_ref};
+use super::helpers::{
+    append_parent_array_entry, apply_frame_mixin_with_partitions, apply_frame_mixins,
+    resolve_global_path,
+};
+use crate::lua_api::methods::{borrow_state, call_function_state, create_string, frame_ref};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use rustc_hash::FxHashSet;
@@ -67,6 +71,7 @@ fn apply_runtime_template_chain_impl(
 ) -> LuaResult<()> {
     let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
         if let Some(frame) = direct_frame {
+            apply_template_partition_marker(state, frame_id, frame);
             apply_template_key_values(state, frame_id, frame.all_key_values());
         }
         return Ok(());
@@ -100,6 +105,7 @@ fn apply_direct_frame_key_values(
     direct_frame: Option<&crate::xml::FrameXml>,
 ) {
     if let Some(frame) = direct_frame {
+        apply_template_partition_marker(state, frame_id, frame);
         apply_template_key_values(state, frame_id, frame.all_key_values());
     }
 }
@@ -195,7 +201,9 @@ fn apply_chain_entries(
 ) -> LuaResult<()> {
     for entry in chain {
         runtime::ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
+        apply_template_partition_marker(state, frame_id, &entry.frame);
         apply_frame_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
+        apply_block_mixins(state, frame_id, entry.frame.mixins());
         apply_template_key_values(state, frame_id, entry.frame.all_key_values());
         let entry_is_intrinsic = entry.frame.intrinsic == Some(true);
         if let Some(scripts) = entry.frame.scripts() {
@@ -267,26 +275,57 @@ pub(crate) fn resolve_runtime_template_named_anchors(
 // Script helpers
 // ---------------------------------------------------------------------------
 
+pub(super) fn apply_template_partition_marker(
+    state: &mut LuaState,
+    frame_id: u64,
+    frame: &crate::xml::FrameXml,
+) {
+    if frame.use_forbidden_object_table {
+        crate::lua_api::globals::create_frame::mark_frame_uses_forbidden_object_table(
+            state, frame_id,
+        );
+    }
+}
+
+pub(super) fn apply_block_mixins(
+    state: &mut LuaState,
+    frame_id: u64,
+    mixins: Option<&crate::xml::MixinsXml>,
+) {
+    let Some(mixins) = mixins else { return };
+    for mixin in &mixins.entries {
+        apply_frame_mixin_with_partitions(
+            state,
+            frame_id,
+            &mixin.key,
+            mixin.source.as_deref(),
+            mixin.target_partition.as_deref(),
+            mixin.inbound_partition.as_deref(),
+            mixin.secure_delegates.unwrap_or(false),
+        );
+    }
+}
+
 fn apply_template_key_values<'a>(
     state: &mut LuaState,
     frame_id: u64,
     key_values: impl Iterator<Item = &'a crate::xml::KeyValuesXml>,
 ) {
     let frame = frame_ref(state, frame_id).ok();
-    let Some(Val::Table(frame_ref)) = frame else {
-        return;
-    };
+    let Some(frame) = frame else { return };
 
     for key_block in key_values {
         for entry in &key_block.values {
             let value = template_key_value(state, &entry.value, entry.value_type.as_deref());
-            let key = create_string(state, &entry.key);
-            if let Some(table) = state.gc.tables.get_mut(frame_ref) {
-                let _ = table.raw_set(key, value, &state.gc.string_arena);
-            }
-            state.gc.barrier_back(frame_ref);
+            apply_template_key_value(state, frame, &entry.key, value);
         }
     }
+}
+
+fn apply_template_key_value(state: &mut LuaState, frame: Val, key: &str, value: Val) {
+    let helper = resolve_global_path(state, "__wow_xml_set_key_value");
+    let key = create_string(state, key);
+    let _ = call_function_state(state, helper, &[frame, key, value]);
 }
 
 pub(crate) fn apply_template_scripts(

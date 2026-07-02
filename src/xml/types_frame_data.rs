@@ -154,6 +154,7 @@ mod tests {
             add_to_secure_env: None,
             hide_from_global_env: None,
             full_lockdown: None,
+            use_forbidden_object_table: None,
             elements: Vec::new(),
         };
 

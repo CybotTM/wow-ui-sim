@@ -140,6 +140,7 @@ pub struct SimState {
     pub loading_scoped_script_env: Option<rilua::Val>,
     pub loading_add_to_secure_env: bool,
     pub loading_hide_from_global_env: bool,
+    pub loading_use_forbidden_object_table: bool,
     pub app_frame_metrics: AppFrameMetrics,
     pub addon_performance_messages_shown: HashSet<AddonPerformanceMessageKey>,
     pub talents: crate::lua_api::talent_state::TalentState,

@@ -1,7 +1,10 @@
 //! Minimal CreateFrame helpers kept alive while the implementation moves to rilua.
 
 use crate::lua_api::SimState;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_ref, sync_child_to_rilua};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, frame_ref, get_or_create_frame_fields,
+    sync_child_to_rilua,
+};
 use crate::widget::{AnchorPoint, Frame, FrameStrata, WidgetType};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -41,6 +44,7 @@ pub fn create_frame_instance(
         preserve_existing_name_binding,
     )?;
     install_default_children(state, widget_type, frame_id)?;
+    mark_loading_forbidden_object_table_scope(state, frame_id)?;
     if widget_type == WidgetType::MessageFrame {
         crate::lua_api::frame::methods::widgets::message_frame::install_message_frame_fields(
             state, frame_id,
@@ -49,6 +53,25 @@ pub fn create_frame_instance(
     register_global_name(state, name, frame_id, preserve_existing_name_binding)?;
 
     Ok(frame_id)
+}
+
+fn mark_loading_forbidden_object_table_scope(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
+    let use_forbidden_object_table = borrow_state(state)?.loading_use_forbidden_object_table;
+    if use_forbidden_object_table {
+        mark_frame_uses_forbidden_object_table(state, frame_id);
+    }
+    Ok(())
+}
+
+pub(crate) fn mark_frame_uses_forbidden_object_table(state: &mut LuaState, frame_id: u64) {
+    let fields = get_or_create_frame_fields(state, frame_id);
+    let marker_key = create_string(state, "__wowUseForbiddenObjectTable");
+    if let Val::Table(fields_ref) = fields {
+        if let Some(table) = state.gc.tables.get_mut(fields_ref) {
+            let _ = table.raw_set(marker_key, Val::Bool(true), &state.gc.string_arena);
+        }
+        state.gc.barrier_back(fields_ref);
+    }
 }
 
 fn install_default_children(
