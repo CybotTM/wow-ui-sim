@@ -297,3 +297,38 @@ fn test_frame_literal_mixins_block_applies_mixins() {
         )
         .unwrap();
 }
+
+#[test]
+fn test_xml_method_script_binds_before_sibling_onload_mutation() {
+    let t = load_test_xml(
+        "xml-method-binding-before-execution",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                XmlMethodBindingLog = {}
+                XmlMethodBindingMixin = {}
+                function XmlMethodBindingMixin:OnHide()
+                    table.insert(XmlMethodBindingLog, "hide1")
+                end
+            </Script>
+            <Frame name="XmlMethodBindingFrame" parent="UIParent" mixin="XmlMethodBindingMixin">
+                <Scripts>
+                    <OnLoad>
+                        table.insert(XmlMethodBindingLog, "load")
+                        self.OnHide = function()
+                            table.insert(XmlMethodBindingLog, "hide2")
+                        end
+                        self:Hide()
+                    </OnLoad>
+                    <OnHide method="OnHide"/>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.assert_lua_str(
+        "return table.concat(XmlMethodBindingLog, ',')",
+        "load,hide1",
+    );
+}

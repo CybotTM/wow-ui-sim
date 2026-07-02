@@ -85,6 +85,22 @@ function __wow_xml_set_key_value(object, key, value)
   end
 end
 
+function __wow_bind_xml_method(object, methodName)
+  local bound = object and object[methodName]
+  if type(bound) == "function" then
+    return function(self, ...)
+      return bound(self, ...)
+    end
+  end
+
+  return function(self, ...)
+    local current = self and self[methodName]
+    if type(current) == "function" then
+      return current(self, ...)
+    end
+  end
+end
+
 local function __wow_xml_mixin_target_partition(object, targetPartition)
   if targetPartition ~= nil and targetPartition ~= "" then
     return targetPartition

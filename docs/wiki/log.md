@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-02] update | XML method binding timing
+
+Updated `systems/xml-template-system.md` after pinning XML `method="..."`
+script binding timing: method functions are captured after XML composition and
+before lifecycle execution, so runtime field reassignment inside sibling script
+bodies does not alter already-bound handlers.
+
 ## [2026-07-02] update | 12.1 XML partitioned mixins
 
 Updated `systems/xml-template-system.md` after implementing PTR 12.1

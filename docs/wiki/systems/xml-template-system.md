@@ -64,8 +64,10 @@ This is intentionally simulator-side compatibility behavior, not a Blizzard sour
 
 Three `ScriptBodyXml` forms:
 - `function="X"` — uses X directly
-- `method="X"` — wraps as `function(self, ...) self:X(...) end`
+- `method="X"` — binds the method function after XML composition, before lifecycle execution
 - Inline body — wraps as `function(self, ...) <body> end`
+
+For `method="X"`, the simulator captures `frame.X` when the script handler is installed if the method exists. Later runtime field mutation during a sibling script body does not change the already-bound script handler. If the method is absent at install time, the compatibility fallback keeps a live lookup path so legacy tests/addons that define the method after XML load can still dispatch.
 
 `inherit="prepend"` or `"append"` chains new/existing handlers, both wrapped in `pcall`. Without `inherit`, new handler replaces old.
 
@@ -80,7 +82,7 @@ Three `ScriptBodyXml` forms:
 - [xml-template-system.md](../../xml-template-system.md) — XML types, registry, inheritance, conversion pipeline, inline scripts
 - `src/lua_api/env_init/shared_bootstrap.lua` — `GetForbiddenObjectTable` and XML partition helper functions
 - `src/loader/xml_frame_codegen.rs` — XML codegen for partition-aware Mixins and KeyValues
-- `src/loader/tests/runtime_template_misc.rs` — regression coverage for forbidden object tables and secure delegates
+- `src/loader/tests/runtime_template_misc.rs` — regression coverage for forbidden object tables, secure delegates, and XML `method=` binding timing
 
 ## See Also
 

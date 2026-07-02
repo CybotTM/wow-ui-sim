@@ -396,7 +396,7 @@ fn append_script_handler_with_options(
         return;
     }
 
-    let Some(new_handler) = build_handler_expr(handler_name, script) else {
+    let Some(new_handler) = build_handler_expr(target, handler_name, script) else {
         code.push_str(&format!(
             "\n        {target}:SetScript(\"{handler_name}\", nil)\n        "
         ));
@@ -536,14 +536,21 @@ fn handler_params(handler_name: &str) -> &'static str {
 }
 
 /// Build the Lua expression for a script handler (without setting it).
-fn build_handler_expr(handler_name: &str, script: &crate::xml::ScriptBodyXml) -> Option<String> {
+fn build_handler_expr(
+    target: &str,
+    handler_name: &str,
+    script: &crate::xml::ScriptBodyXml,
+) -> Option<String> {
     if let Some(func) = &script.function {
         if func.is_empty() {
             return None;
         }
         Some(func.clone())
     } else if let Some(method) = &script.method {
-        Some(format!("function(self, ...) self:{method}(...) end"))
+        Some(format!(
+            "__wow_bind_xml_method({target}, \"{}\")",
+            escape_lua_string(method)
+        ))
     } else {
         let body = script.body.as_deref()?.trim();
         if body.is_empty() {
