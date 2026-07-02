@@ -88,6 +88,38 @@ fn representative_missing_enums_are_available_with_expected_values() {
 }
 
 #[test]
+fn sparse_large_max_value_meta_enums_are_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local checks = {
+                { "AccountStateLoadedFlagsMeta", "MaxValue", -2147483648 },
+                { "BagFlagMeta", "MaxValue", 134217728 },
+                { "BattlePetSpeciesFlagsMeta", "MaxValue", 65536 },
+                { "BnetAccountFlagMeta", "MaxValue", 524288 },
+            }
+
+            for _, check in ipairs(checks) do
+                local enumTable = Enum[check[1]]
+                if type(enumTable) ~= "table" then
+                    return "missing_enum:" .. check[1]
+                end
+
+                if enumTable[check[2]] ~= check[3] then
+                    return "wrong_value:" .. check[1] .. "." .. check[2] .. "=" .. tostring(enumTable[check[2]])
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn seconds_formatter_enums_are_available_with_expected_values() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
