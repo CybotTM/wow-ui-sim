@@ -8,6 +8,8 @@ on:
 
 env:
   WOW_SIM_CASC: "0"
+  WOW_INSTALL_PATH: ""
+  WOW_DATA_PATH: ""
 
 jobs:
   cargo-test:
