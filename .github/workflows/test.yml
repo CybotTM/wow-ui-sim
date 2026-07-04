@@ -25,6 +25,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y mold libasound2-dev
 
       - name: Fetch Blizzard UI source (retail)
+        if: ${{ env.WOW_INSTALL_PATH != '' || env.WOW_DATA_PATH != '' }}
         run: ./scripts/setup-blizzard-ui.sh retail
 
       - name: Use CI cargo config
@@ -53,6 +54,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y mold libasound2-dev
 
       - name: Fetch Blizzard UI source (${{ matrix.profile }})
+        if: ${{ env.WOW_INSTALL_PATH != '' || env.WOW_DATA_PATH != '' }}
         run: ./scripts/setup-blizzard-ui.sh ${{ matrix.profile }}
 
       - name: Use CI cargo config
@@ -74,13 +76,13 @@ jobs:
         run: WOW_SIM_NO_ADDONS=1 WOW_SIM_NO_SAVED_VARS=1 timeout 90 ./target/debug/wow-sim --no-addons --no-saved-vars lua-errors > lua-errors.json
 
       - name: Diff against committed baseline
+        if: ${{ env.WOW_INSTALL_PATH != '' || env.WOW_DATA_PATH != '' }}
         # Compares the just-captured lua-errors.json against the committed
         # Mists baseline at docs/baselines/mists-lua-errors.json. Reports
         # regressed (new) and fixed (gone) error messages for visibility
         # in the PR; does NOT fail the job on regression — baselines move
         # quickly during dev. Bump to --exit-on-regression once they
         # stabilize.
-        if: always()
         run: ./scripts/diff-lua-errors.sh docs/baselines/${{ matrix.profile }}-lua-errors.json lua-errors.json
 
       - name: Enforce Mists zero-error and panel parity guard
@@ -121,6 +123,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y mold libasound2-dev
 
       - name: Fetch Blizzard UI source (mists)
+        if: ${{ env.WOW_INSTALL_PATH != '' || env.WOW_DATA_PATH != '' }}
         run: ./scripts/setup-blizzard-ui.sh mists
 
       - name: Use CI cargo config
