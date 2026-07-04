@@ -8,6 +8,7 @@ use wow_ui_sim::loader::{
     load_addon_with_saved_vars,
 };
 use wow_ui_sim::logging;
+use wow_ui_sim::lua_api::state::LuaErrorRecord;
 use wow_ui_sim::lua_api::{AddonInfo, WowLuaEnv};
 use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
@@ -23,6 +24,8 @@ mod lua_file_profile;
 use lua_file_profile::print_slowest_lua_files;
 mod slowest_addons;
 use slowest_addons::print_slowest_addons;
+mod warning_report;
+use warning_report::print_addon_warnings;
 
 pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
 
@@ -489,6 +492,12 @@ fn load_registered_single_addon(
         return;
     }
 
+    if let Some(message) = missing_required_dependency_error(env, name) {
+        record_addon_load_error(env, name, message);
+        stats.fail_count += 1;
+        return;
+    }
+
     print_verbose_addon_start(name);
     let toc = match TocFile::from_file(toc_path) {
         Ok(toc) => toc,
@@ -525,6 +534,42 @@ fn should_load_registered_addon(env: &WowLuaEnv, name: &str) -> bool {
         .iter()
         .find(|addon| addon.folder_name == name)
         .is_some_and(|addon| addon.enabled && !addon.loaded && !addon.load_on_demand)
+}
+
+fn missing_required_dependency_error(env: &WowLuaEnv, name: &str) -> Option<String> {
+    let state = env.state().borrow();
+    let addon = state
+        .addons
+        .iter()
+        .find(|addon| addon.folder_name == name)?;
+    let missing: Vec<_> = addon
+        .dependencies
+        .iter()
+        .filter(|dependency| {
+            !state
+                .addons
+                .iter()
+                .any(|addon| addon.folder_name == **dependency)
+        })
+        .cloned()
+        .collect();
+
+    (!missing.is_empty()).then(|| {
+        format!(
+            "{name} missing required TOC dependencies: {}",
+            missing.join(", ")
+        )
+    })
+}
+
+fn record_addon_load_error(env: &WowLuaEnv, name: &str, message: String) {
+    let mut state = env.state().borrow_mut();
+    state.lua_errors.push(message.clone());
+    state.lua_error_records.push(LuaErrorRecord {
+        message: message.clone(),
+        addon_name: Some(name.to_string()),
+    });
+    *state.lua_error_counts.entry(message).or_insert(0) += 1;
 }
 
 fn print_verbose_addon_start(name: &str) {
@@ -581,82 +626,6 @@ fn print_verbose_addon_status(name: &str, r: &LoadResult) {
         t.lua_call_time,
         t.saved_vars_time
     );
-}
-
-const VERBOSE_WARNING_ADDONS: &[&str] = &[
-    "BetterWardrobe",
-    "Plumber",
-    "BetterBlizzFrames",
-    "Baganator",
-    "Angleur",
-    "ExtraQuestButton",
-    "WaypointUI",
-    "TomTom",
-    "WorldQuestTracker",
-    "SavedInstances",
-    "Rarity",
-    "SimpleItemLevel",
-    "TalentLoadoutManager",
-    "Simulationcraft",
-    "TomCats",
-    "RaiderIO",
-    "!BugGrabber",
-    "CraftSim",
-    "AdvancedInterfaceOptions",
-    "BlizzMove_Debug",
-    "ClickableRaidBuffs",
-    "Dejunk",
-    "Cell",
-    "AngryKeystones",
-    "AutoPotion",
-    "BigWigs_Plugins",
-    "BugSack",
-    "Clicked",
-    "DeathNote",
-    "DeModal",
-    "ElvUI_OptionsUI",
-    "DragonRaceTimes",
-    "DynamicCam",
-    "DialogueUI",
-    "Chattynator",
-    "AstralKeys",
-    "Leatrix_Plus",
-    "CooldownToGo_Options",
-    "HousingItemTracker",
-    "idTip",
-    "Macroriffic",
-    "NameplateSCT",
-    "Krowi_ExtendedVendorUI",
-    "OmniCD",
-    "Auctionator",
-    "EditModeExpanded",
-    "GlobalIgnoreList",
-    "AllTheThings",
-    "BigWigs_KhazAlgar",
-    "LegionRemixHelper",
-    "Collectionator",
-    "Syndicator",
-    "BigWigs",
-    "!KalielsTracker",
-    "KRaidSkipTracker",
-    "MacroToolkit",
-    "MinimapButtonButton",
-    "OribosExchange",
-];
-
-fn print_addon_warnings(name: &str, warnings: &[String]) {
-    if std::env::var("WOW_SIM_DEBUG_NIL_GLOBALS").is_err() {
-        return;
-    }
-    if warnings.is_empty() || !VERBOSE_WARNING_ADDONS.contains(&name) {
-        return;
-    }
-    for (i, w) in warnings.iter().take(10).enumerate() {
-        println!("  [{}] {}", i + 1, w);
-    }
-    if warnings.len() > 10 {
-        println!("  ... and {} more", warnings.len() - 10);
-    }
 }
 
 fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {

@@ -36,6 +36,50 @@ fn write_addon_with_lua(root: &Path, name: &str, metadata: &str, lua: &str) -> P
 }
 
 #[test]
+fn lua_errors_reports_enabled_addon_with_missing_required_dependency() {
+    let temp = tempfile::tempdir().expect("tempdir");
+    let dependent_toc = write_addon_with_lua(
+        temp.path(),
+        "DependentAddon",
+        "## Dependencies: MissingRequiredAddon\n",
+        "_G.DependentAddonLoaded = true\n",
+    );
+    let addons = vec![("DependentAddon".to_string(), dependent_toc)];
+    let env = WowLuaEnv::new().expect("create Lua env");
+    let mut saved_vars = None;
+    let mut stats = LoadStats::default();
+
+    load_discovered_addons(&env, &addons, &mut saved_vars, None, &mut stats);
+
+    let state = env.state().borrow();
+    assert_eq!(state.lua_errors.len(), 1);
+    assert_eq!(
+        state.lua_errors[0],
+        "DependentAddon missing required TOC dependencies: MissingRequiredAddon"
+    );
+    assert_eq!(state.lua_error_counts.get(&state.lua_errors[0]), Some(&1));
+    assert_eq!(state.lua_error_records.len(), 1);
+    assert_eq!(
+        state.lua_error_records[0].addon_name.as_deref(),
+        Some("DependentAddon")
+    );
+    assert!(
+        !state
+            .addons
+            .iter()
+            .find(|addon| addon.folder_name == "DependentAddon")
+            .expect("registered dependent addon")
+            .loaded,
+        "addon with a missing required dependency should not load"
+    );
+    drop(state);
+    let dependent_loaded: Option<bool> = env
+        .eval("return DependentAddonLoaded")
+        .expect("read global");
+    assert_eq!(dependent_loaded, None);
+}
+
+#[test]
 fn earlier_addon_can_see_later_addon_metadata_before_later_loads() {
     let temp = tempfile::tempdir().expect("tempdir");
     let early_toc = write_addon_with_lua(
