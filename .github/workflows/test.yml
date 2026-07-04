@@ -17,7 +17,7 @@ jobs:
           submodules: recursive
 
       - name: Install mold
-        run: sudo apt-get update && sudo apt-get install -y mold
+        run: sudo apt-get update && sudo apt-get install -y mold libasound2-dev
 
       - name: Fetch Blizzard UI source (retail)
         run: ./scripts/setup-blizzard-ui.sh retail
@@ -45,7 +45,7 @@ jobs:
           submodules: recursive
 
       - name: Install mold
-        run: sudo apt-get update && sudo apt-get install -y mold
+        run: sudo apt-get update && sudo apt-get install -y mold libasound2-dev
 
       - name: Fetch Blizzard UI source (${{ matrix.profile }})
         run: ./scripts/setup-blizzard-ui.sh ${{ matrix.profile }}
@@ -112,7 +112,7 @@ jobs:
           submodules: recursive
 
       - name: Install mold
-        run: sudo apt-get update && sudo apt-get install -y mold
+        run: sudo apt-get update && sudo apt-get install -y mold libasound2-dev
 
       - name: Fetch Blizzard UI source (mists)
         run: ./scripts/setup-blizzard-ui.sh mists
