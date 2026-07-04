@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  WOW_SIM_CASC: "0"
+
 jobs:
   cargo-test:
     name: cargo test (retail)
