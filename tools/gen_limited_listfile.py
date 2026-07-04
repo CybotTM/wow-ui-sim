@@ -172,9 +172,7 @@ def extract_interface_literals(path: Path) -> set[str]:
         text = path.read_text(encoding="utf-8", errors="ignore")
     except OSError:
         return set()
-    matches = re.findall(
-        r"(?i)(?:Interface|Fonts)[\\/][A-Za-z0-9_ .@+()/\\-]+", text
-    )
+    matches = re.findall(r"(?i)(?:Interface|Fonts)[\\/][A-Za-z0-9_ .@+()/\\-]+", text)
     return {trim_literal_path(match) for match in matches}
 
 
@@ -202,7 +200,9 @@ def resolve_rows(
     return sorted(rows.items(), key=lambda row: row[1])
 
 
-def resolve_path(by_path: dict[str, tuple[int, str]], path: str) -> tuple[int, str] | None:
+def resolve_path(
+    by_path: dict[str, tuple[int, str]], path: str
+) -> tuple[int, str] | None:
     for candidate in path_candidates(path):
         if row := by_path.get(candidate):
             return row

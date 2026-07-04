@@ -21,7 +21,9 @@ class LimitedListfileGenerationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            with patch.object(gen_limited_listfile, "BLIZZARD_UI_FILE_MANIFEST_DIR", manifest_dir):
+            with patch.object(
+                gen_limited_listfile, "BLIZZARD_UI_FILE_MANIFEST_DIR", manifest_dir
+            ):
                 blizzard_files = gen_limited_listfile.collect_blizzard_ui_files()
 
             self.assertEqual(

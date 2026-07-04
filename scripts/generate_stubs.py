@@ -141,8 +141,8 @@ def parse_apis(apis):
 TOOLTIP_DATA_CLOSURE = (
     "|lua, _: MultiValue| {\n"
     "            let t = lua.create_table()?;\n"
-    "            t.set(\"type\", 0)?;\n"
-    "            t.set(\"lines\", lua.create_table()?)?;\n"
+    '            t.set("type", 0)?;\n'
+    '            t.set("lines", lua.create_table()?)?;\n'
     "            Ok(Value::Table(t))\n"
     "        }"
 )
@@ -186,7 +186,10 @@ def generate_rust(globals_funcs, c_namespaces, existing):
     # --- Global stubs (split into chunks) ---
     global_names = sorted(n for n in globals_funcs if n not in existing)
     chunk_size = 40
-    chunks = [global_names[i : i + chunk_size] for i in range(0, len(global_names), chunk_size)]
+    chunks = [
+        global_names[i : i + chunk_size]
+        for i in range(0, len(global_names), chunk_size)
+    ]
 
     w("fn register_global_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {")
     for i in range(len(chunks)):
@@ -220,7 +223,9 @@ def generate_rust(globals_funcs, c_namespaces, existing):
 
         if len(method_names) > 40:
             # Split large namespaces into sub-functions
-            sub_chunks = [method_names[j : j + 40] for j in range(0, len(method_names), 40)]
+            sub_chunks = [
+                method_names[j : j + 40] for j in range(0, len(method_names), 40)
+            ]
 
             w(f"fn {fn_name}(lua: &Lua, g: &mlua::Table) -> Result<()> {{")
             w(f'    let t: mlua::Table = match g.get::<Value>("{ns}")? {{')
