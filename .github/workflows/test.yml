@@ -67,7 +67,8 @@ jobs:
       - name: cargo check --tests (catch profile-gated test rot)
         run: cargo check --tests --no-default-features --features "sound gui casc client-${{ matrix.profile }}"
 
-      - name: lua-errors smoke (must exit 0)
+      - name: lua-errors smoke (requires WoW install)
+        if: ${{ env.WOW_INSTALL_PATH != '' || env.WOW_DATA_PATH != '' }}
         run: WOW_SIM_NO_ADDONS=1 WOW_SIM_NO_SAVED_VARS=1 timeout 90 ./target/debug/wow-sim --no-addons --no-saved-vars lua-errors > lua-errors.json
 
       - name: Diff against committed baseline
@@ -81,7 +82,7 @@ jobs:
         run: ./scripts/diff-lua-errors.sh docs/baselines/${{ matrix.profile }}-lua-errors.json lua-errors.json
 
       - name: Enforce Mists zero-error and panel parity guard
-        if: matrix.profile == 'mists'
+        if: ${{ matrix.profile == 'mists' && (env.WOW_INSTALL_PATH != '' || env.WOW_DATA_PATH != '') }}
         run: ./scripts/ci-mists-guard.sh --skip-build
 
       - name: Upload error baseline
@@ -145,6 +146,7 @@ jobs:
           key: mists-release-proof
 
       - name: Run Mists release proof
+        if: ${{ env.WOW_INSTALL_PATH != '' || env.WOW_DATA_PATH != '' }}
         run: xvfb-run -a ./scripts/ci-mists-release-proof.sh --skip-clone
 
       - name: Upload Mists release proof artifacts
