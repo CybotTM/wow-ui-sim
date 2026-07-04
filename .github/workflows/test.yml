@@ -16,6 +16,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install mold
+        run: sudo apt-get update && sudo apt-get install -y mold
+
       - name: Fetch Blizzard UI source (retail)
         run: ./scripts/setup-blizzard-ui.sh retail
 
@@ -40,6 +43,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Install mold
+        run: sudo apt-get update && sudo apt-get install -y mold
 
       - name: Fetch Blizzard UI source (${{ matrix.profile }})
         run: ./scripts/setup-blizzard-ui.sh ${{ matrix.profile }}
@@ -104,6 +110,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Install mold
+        run: sudo apt-get update && sudo apt-get install -y mold
 
       - name: Fetch Blizzard UI source (mists)
         run: ./scripts/setup-blizzard-ui.sh mists
