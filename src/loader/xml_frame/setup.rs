@@ -7,6 +7,7 @@ use std::time::Instant;
 use crate::loader::LoadTiming;
 use crate::loader::error::LoadError;
 use crate::lua_api::LoaderEnv;
+use crate::lua_api::frame::methods::forbidden_aspects;
 use crate::lua_api::methods::{create_string, frame_ref, table_get, table_set};
 use rilua::Val;
 
@@ -488,20 +489,46 @@ fn apply_xml_forbidden_aspects(env: &LoaderEnv<'_>, frame_id: u64, frame: &crate
     let Some(forbidden_aspects) = frame.forbidden_aspects() else {
         return;
     };
-    let mask = forbidden_aspects
-        .aspects
-        .iter()
-        .fold(0_u64, |mask, aspect| {
-            mask | forbidden_aspect_mask(&aspect.aspect)
-        });
+    let mut mask = 0_u64;
+    let mut parent_mask = 0_u64;
+    let mut layout_mask = 0_u64;
+    for aspect in &forbidden_aspects.aspects {
+        let aspect_mask = forbidden_aspect_mask(&aspect.aspect);
+        mask |= aspect_mask;
+        let inheritance = forbidden_aspect_inheritance_mask(aspect.inheritance.as_deref());
+        if inheritance & forbidden_aspects::INHERITANCE_PARENT != 0 {
+            parent_mask |= aspect_mask;
+        }
+        if inheritance & forbidden_aspects::INHERITANCE_LAYOUT != 0 {
+            layout_mask |= aspect_mask;
+        }
+    }
     if mask == 0 {
         return;
     }
     let _ = env.with_state(|state| {
-        let frame = frame_ref(state, frame_id)?;
-        table_set(state, frame, "__forbiddenAspects", Val::Num(mask as f64));
+        forbidden_aspects::set_forbidden_aspects(state, frame_id, mask);
+        forbidden_aspects::set_inheritable_forbidden_aspects(
+            state,
+            frame_id,
+            parent_mask,
+            layout_mask,
+        );
         Ok::<(), crate::Error>(())
     });
+}
+
+fn forbidden_aspect_inheritance_mask(inheritance: Option<&str>) -> u64 {
+    let Some(inheritance) = inheritance else {
+        return forbidden_aspects::INHERITANCE_PARENT | forbidden_aspects::INHERITANCE_LAYOUT;
+    };
+    inheritance
+        .split([',', ' ', '|'])
+        .fold(0_u64, |mask, value| match value {
+            "Parent" => mask | forbidden_aspects::INHERITANCE_PARENT,
+            "Layout" => mask | forbidden_aspects::INHERITANCE_LAYOUT,
+            _ => mask,
+        })
 }
 
 fn forbidden_aspect_mask(aspect: &str) -> u64 {

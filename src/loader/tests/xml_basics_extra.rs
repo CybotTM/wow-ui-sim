@@ -556,6 +556,44 @@ fn test_patch_12_1_xml_on_update_mode_and_forbidden_aspects() {
     t.assert_lua_str("return tostring(PATCH_121_XML_ONUPDATE)", "nil");
 }
 
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn test_patch_12_1_xml_forbidden_aspect_inheritance_modes() {
+    let t = load_test_xml(
+        "test-patch-12-1-xml-forbidden-aspect-inheritance",
+        r#"<Ui>
+            <Frame name="Patch121ParentOnlyForbidden" parent="UIParent">
+                <ForbiddenAspects>
+                    <ForbiddenAspect aspect="UntrustedScriptExecution" inheritance="Parent"/>
+                </ForbiddenAspects>
+            </Frame>
+            <Frame name="Patch121LayoutOnlyForbidden" parent="UIParent">
+                <ForbiddenAspects>
+                    <ForbiddenAspect aspect="ScriptedInput" inheritance="Layout"/>
+                </ForbiddenAspects>
+            </Frame>
+        </Ui>"#,
+    );
+
+    let inheritance_matches: bool = t
+        .env
+        .eval(
+            r#"
+            local parentMask = Patch121ParentOnlyForbidden:GetInheritableForbiddenAspects(Enum.ForbiddenAspectInheritance.Parent)
+            local parentLayoutMask = Patch121ParentOnlyForbidden:GetInheritableForbiddenAspects(Enum.ForbiddenAspectInheritance.Layout)
+            local layoutMask = Patch121LayoutOnlyForbidden:GetInheritableForbiddenAspects(Enum.ForbiddenAspectInheritance.Layout)
+            local layoutParentMask = Patch121LayoutOnlyForbidden:GetInheritableForbiddenAspects(Enum.ForbiddenAspectInheritance.Parent)
+            return parentMask ~= 0 and parentLayoutMask == 0 and layoutMask ~= 0 and layoutParentMask == 0
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        inheritance_matches,
+        "XML ForbiddenAspect inheritance should distinguish parent and layout propagation"
+    );
+}
+
 #[test]
 fn test_xml_all_script_handlers() {
     let t = load_test_xml(

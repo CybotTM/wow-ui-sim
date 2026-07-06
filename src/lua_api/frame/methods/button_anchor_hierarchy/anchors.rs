@@ -1,5 +1,7 @@
 //! Anchor methods: SetPoint, GetPoint, ClearAllPoints, line endpoints, etc.
 
+#[cfg(feature = "retail-12-1-0")]
+use crate::lua_api::frame::methods::forbidden_aspects;
 use crate::lua_api::frame::methods::methods_helpers::{
     can_change_protected_state_for, emit_addon_action_blocked,
 };
@@ -422,6 +424,17 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
     let request = set_point_request(state, id, point)?;
     if is_set_point_unchanged(state, id, &request)? {
         return Ok(0);
+    }
+
+    #[cfg(feature = "retail-12-1-0")]
+    if let Some(relative_to) = request.relative_to {
+        forbidden_aspects::ensure_forbidden_aspects_already_owned(
+            state,
+            id,
+            relative_to as u64,
+            forbidden_aspects::INHERITANCE_LAYOUT,
+            "SetPoint",
+        )?;
     }
 
     ensure_no_anchor_cycle(state, id, request.relative_to, "SetPoint")?;

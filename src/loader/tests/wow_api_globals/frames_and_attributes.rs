@@ -154,6 +154,40 @@ fn test_patch_12_1_frame_texture_statusbar_method_surface() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_forbidden_aspects_block_parent_and_layout_gain() {
+    let env = WowLuaEnv::new().unwrap();
+    let (parent_blocked, parent_allowed, layout_blocked, layout_allowed): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local aspect = Enum.ForbiddenScriptObjectAspect.UntrustedScriptExecution
+            local parent = CreateFrame("Frame")
+            parent:AddForbiddenAspects(aspect)
+
+            local child = CreateFrame("Frame")
+            local parentBlocked = not pcall(function() child:SetParent(parent) end)
+            child:AddForbiddenAspects(aspect)
+            local parentAllowed = pcall(function() child:SetParent(parent) end)
+
+            local anchor = CreateFrame("Frame")
+            anchor:AddForbiddenAspects(aspect)
+            local layoutChild = CreateFrame("Frame")
+            local layoutBlocked = not pcall(function() layoutChild:SetPoint("CENTER", anchor, "CENTER") end)
+            layoutChild:AddForbiddenAspects(aspect)
+            local layoutAllowed = pcall(function() layoutChild:SetPoint("CENTER", anchor, "CENTER") end)
+
+            return parentBlocked, parentAllowed, layoutBlocked, layoutAllowed
+            "#,
+        )
+        .unwrap();
+
+    assert!(parent_blocked);
+    assert!(parent_allowed);
+    assert!(layout_blocked);
+    assert!(layout_allowed);
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_clear_scripts_removes_handlers() {
     let env = WowLuaEnv::new().unwrap();
     let (before_ty, after_ty): (String, String) = env

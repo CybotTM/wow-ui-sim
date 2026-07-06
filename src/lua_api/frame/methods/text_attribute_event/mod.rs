@@ -75,36 +75,39 @@ fn stack_bitmask_arg(state: &mut LuaState, index: usize) -> u64 {
 }
 
 #[cfg(feature = "retail-12-1-0")]
-fn stored_forbidden_aspects(state: &mut LuaState, fields: Val) -> u64 {
-    match table_get(state, fields, "__forbiddenAspects") {
-        Val::Num(value) if value > 0.0 => value as u64,
-        _ => 0,
-    }
-}
-
-#[cfg(feature = "retail-12-1-0")]
 fn add_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
-    let fields = frame_fields_from_stack(state)?;
-    let mut mask = stored_forbidden_aspects(state, fields);
+    let id = frame_id_from_stack(state, 1)?;
+    let mut mask =
+        crate::lua_api::frame::methods::forbidden_aspects::stored_forbidden_aspects(state, id);
     let count = (state.top.saturating_sub(1)) as usize;
     for index in 2..=count {
         mask |= stack_bitmask_arg(state, index);
     }
-    table_set(state, fields, "__forbiddenAspects", Val::Num(mask as f64));
+    crate::lua_api::frame::methods::forbidden_aspects::set_forbidden_aspects(state, id, mask);
     Ok(0)
 }
 
 #[cfg(feature = "retail-12-1-0")]
 fn get_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
-    let fields = frame_fields_from_stack(state)?;
-    let mask = stored_forbidden_aspects(state, fields);
+    let id = frame_id_from_stack(state, 1)?;
+    let mask =
+        crate::lua_api::frame::methods::forbidden_aspects::stored_forbidden_aspects(state, id);
     state.push(Val::Num(mask as f64));
     Ok(1)
 }
 
 #[cfg(feature = "retail-12-1-0")]
 fn get_inheritable_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
-    get_forbidden_aspects(state)
+    let id = frame_id_from_stack(state, 1)?;
+    let inheritance = stack_bitmask_arg(state, 2);
+    let mask =
+        crate::lua_api::frame::methods::forbidden_aspects::stored_inheritable_forbidden_aspects(
+            state,
+            id,
+            inheritance,
+        );
+    state.push(Val::Num(mask as f64));
+    Ok(1)
 }
 
 #[cfg(feature = "retail-12-1-0")]
@@ -116,8 +119,9 @@ fn get_object_table(state: &mut LuaState) -> LuaResult<u32> {
 
 #[cfg(feature = "retail-12-1-0")]
 fn has_any_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
-    let fields = frame_fields_from_stack(state)?;
-    let aspects = stored_forbidden_aspects(state, fields);
+    let id = frame_id_from_stack(state, 1)?;
+    let aspects =
+        crate::lua_api::frame::methods::forbidden_aspects::stored_forbidden_aspects(state, id);
     state.push(Val::Bool(aspects != 0));
     Ok(1)
 }

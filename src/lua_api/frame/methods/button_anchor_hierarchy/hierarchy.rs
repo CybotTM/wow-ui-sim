@@ -1,5 +1,7 @@
 //! Hierarchy methods (parent/children/regions) and create-region methods.
 
+#[cfg(feature = "retail-12-1-0")]
+use crate::lua_api::frame::methods::forbidden_aspects;
 use crate::lua_api::frame::methods::methods_helpers::{
     can_change_protected_state_for, emit_addon_action_blocked,
 };
@@ -44,6 +46,16 @@ pub(super) fn set_parent(state: &mut LuaState) -> LuaResult<u32> {
     if !can_change_protected_state_for(state, id) {
         emit_addon_action_blocked(state, id, "SetParent");
         return Ok(0);
+    }
+    #[cfg(feature = "retail-12-1-0")]
+    if let Some(parent_id) = new_parent_id {
+        forbidden_aspects::ensure_forbidden_aspects_already_owned(
+            state,
+            id,
+            parent_id,
+            forbidden_aspects::INHERITANCE_PARENT,
+            "SetParent",
+        )?;
     }
     let mut sim = borrow_state_mut(state)?;
     let old_parent_id = sim.widgets.get(id).and_then(|frame| frame.parent_id);
