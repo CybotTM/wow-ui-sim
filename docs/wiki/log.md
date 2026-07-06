@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-06] investigation | Patch 12.1 API audit
+
+Created `investigations/patch-12-1-api-audit.md` after bridging compatible 12.1 API gaps and pausing exact-behavior work. Recorded committed bridge points, verification logs, and the blocked areas that require live PTR behavior: UnitAura secrecy, Private Script Objects/Forbidden Partition, full ForbiddenAspect enforcement, AuraContainer/AuraButton/ManagedAuraContainer, DurationTextBinding/RadialProgress script objects, and exact structure payloads.
+
 ## [2026-07-06] update | Retail API epoch features
 
 Updated `systems/client-profiles.md` after introducing cumulative retail API epoch features (`retail-12-0-7`, `retail-12-1-0`) alongside mutually-exclusive `client-*` profile features. Recorded that API surface gates belong on epoch features while PTR cache, CASC product, install paths, and vendor manifest behavior remain `client-ptr` profile concerns.
