@@ -174,6 +174,8 @@ fn test_patch_12_1_safe_global_bridges() {
             local lfgInfo = C_LFGList.GetSearchResultInfo(7)
             if type(lfgInfo) == "table" and lfgInfo.censored ~= false then return "lfg-censored-field" end
             if C_PvP.CanSurrenderArena() ~= false then return "pvp" end
+            if C_EncounterJournal.GetBaseDifficultyID(1) ~= nil then return "ej-base-difficulty" end
+            if C_EncounterJournal.InstanceHasDifficultyID(1, 1) ~= false then return "ej-instance-difficulty" end
             if C_QuestHub.IsAreaPOICurrentlyRelatedToHub(1, 2) ~= false then return "quest-hub" end
             if C_RecruitAFriend.IsSystemEnabled() ~= false then return "raf-enabled" end
             if C_RecruitAFriend.IsSystemSupported() ~= false then return "raf-supported" end
@@ -185,6 +187,25 @@ fn test_patch_12_1_safe_global_bridges() {
             if C_FriendList.IsLegacyFriendSystemEnabled() ~= false then return "legacy-friends" end
             if C_SocialRestrictions.IsFriendsDisabled() ~= false then return "friends-disabled" end
             if C_SocialUI.IsSystemEnabled() ~= false then return "social-ui" end
+            if C_Discord.IsEnabled() ~= false then return "discord-enabled" end
+            if C_Discord.IsUserOAuthed() ~= false then return "discord-oauth" end
+            if C_Discord.GetNumDiscordChannels() ~= 0 then return "discord-channels" end
+            if C_Discord.GetNumDiscordServers() ~= 0 then return "discord-servers" end
+            if type(C_Discord.GetServerLinkableChannels()) ~= "table" then return "discord-linkable" end
+            C_Discord.Authorize()
+            C_Discord.GuildLink()
+            C_Discord.GuildUnlink()
+            C_Discord.RefreshAuth()
+            C_Discord.SetGuildSetting("setting", true)
+            C_Discord.UpdateDiscordServers()
+            C_Discord.UpdateGuildLobby()
+            if C_Discord.GetDiscordChannelName(1) ~= nil then return "discord-channel-name" end
+            if C_Discord.GetDiscordUserID() ~= nil then return "discord-user-id" end
+            if C_Discord.GetDisplayNameType() ~= 0 then return "discord-display-type" end
+            if C_Discord.GetGuildLinkStatus() ~= nil then return "discord-guild-status" end
+            if C_Discord.GetServerName(1) ~= nil then return "discord-server-name" end
+            if C_Discord.IsGuildChannelLinked(1) ~= false then return "discord-linked" end
+            if C_Discord.IsGuildSettingSet("setting") ~= false then return "discord-setting" end
             C_LFGList.ConfirmCensoredActiveEntry()
             C_LFGList.RevealCensoredActiveEntry()
             C_LFGList.RevealCensoredSearchResult(1)
@@ -195,6 +216,13 @@ fn test_patch_12_1_safe_global_bridges() {
             if C_BattleNet.AreTitleFriendCustomNamesEnabled() ~= false then return "bnet-title-names" end
             if C_BattleNet.IsBattleNetFriendsListEnabled() ~= false then return "bnet-list-enabled" end
             if C_BattleNet.IsBattleNetFriendsListSupported() ~= false then return "bnet-list-supported" end
+            if C_BattleNet.BNCheckTitleFriendInviteToUnit("player") ~= false then return "bnet-title-invite" end
+            if C_BattleNet.GetCustomTitleFriendName(1) ~= nil then return "bnet-title-name" end
+            if C_BattleNet.GetFriendInviteInfo(1) ~= nil then return "bnet-invite-info" end
+            C_BattleNet.SendVerifiedBattleNetFriendInvite("Player-Realm")
+            C_BattleNet.SetAppearOffline(false)
+            C_BattleNet.SetCustomTitleFriendName(1, "Name")
+            C_BattleNet.SetFriendTags(1, {})
             local bnetInfo = C_BattleNet.GetFriendAccountInfo(1)
             if type(bnetInfo) == "table" then
                 if type(bnetInfo.friendTags) ~= "table" then return "bnet-friend-tags-field" end
@@ -207,6 +235,41 @@ fn test_patch_12_1_safe_global_bridges() {
             if C_UnitAuras.GetHiddenGroupBuffs()[456] ~= true then return "hidden-buffs" end
             local slotID, icon, checkRelic = C_PaperDollInfo.GetInventorySlotInfo("MainHandSlot")
             if slotID ~= 16 or type(icon) ~= "number" or checkRelic ~= false then return "paperdoll-slot" end
+            if C_HouseEditor.GetHouseEditorPlayerType() ~= nil then return "house-editor-player" end
+            C_Housing.HouseFinderIgnoreNeighborhood(1)
+            if C_Housing.IsInsideOwnedHouseOrPlot() ~= false then return "housing-owned-house-or-plot" end
+            if C_Housing.IsInsideOwnedHouse() ~= false then return "housing-owned-house" end
+            if C_Housing.IsInsideOwnedPlot() ~= false then return "housing-owned-plot" end
+            C_Housing.ResetHouse()
+            if C_HousingBlueprint.CanImportTypeFromCurrentLocation(1) ~= false then return "blueprint-can-import" end
+            C_HousingBlueprint.DeleteBlueprint("id")
+            C_HousingBlueprint.ExportBlueprint("id")
+            C_HousingBlueprint.ExportRoomBlueprint("id")
+            if C_HousingBlueprint.GetBlueprintHyperlink("code") ~= nil then return "blueprint-link" end
+            if C_HousingBlueprint.GetBlueprintTypeForCode("code") ~= nil then return "blueprint-type" end
+            if C_HousingBlueprint.GetExportAvailability() ~= nil then return "blueprint-export-availability" end
+            if C_HousingBlueprint.GetFeatureAvailability() ~= nil then return "blueprint-feature-availability" end
+            if C_HousingBlueprint.GetImportAvailability() ~= nil then return "blueprint-import-availability" end
+            C_HousingBlueprint.ImportBlueprint("code")
+            if C_HousingBlueprint.IsShareCodeValid("code") ~= false then return "blueprint-share-code" end
+            C_HousingBlueprint.RenameBlueprint("id", "name")
+            C_HousingBlueprint.RequestBlueprintCollection()
+            C_HousingBlueprint.RequestBlueprintContents("id")
+            C_HousingBlueprint.RequestBlueprintContentsForContext({})
+            C_HousingBlueprint.StartImportRoomBlueprint("code")
+            C_HousingCustomizeMode.ApplyPetToSelectedDecor("pet")
+            if C_HousingCustomizeMode.GetSelectedDecorPetInfo() ~= nil then return "housing-pet-info" end
+            if C_HousingDecor.AnyDecorPlacedInRoom(1) ~= false then return "housing-room-decor" end
+            if C_HousingDecor.GetBothMaxPlacementBudgets() ~= nil then return "housing-max-budgets" end
+            if C_HousingDecor.GetBothSpentPlacementBudgets() ~= nil then return "housing-spent-budgets" end
+            if C_HousingDecor.GetDecorAssignedPetName("guid") ~= nil then return "housing-pet-name" end
+            if C_HousingDecor.GetDecorCanAttachPet("guid") ~= false then return "housing-can-attach-pet" end
+            if C_HousingDecor.GetMaxPetPlacementBudget() ~= nil then return "housing-max-pets" end
+            if C_HousingDecor.GetSpentPetPlacementBudget() ~= nil then return "housing-spent-pets" end
+            if C_HousingLayout.GetBaseRoomFloor(1) ~= nil then return "housing-base-floor" end
+            if C_HousingLayout.GetRoomPlayerIsIn() ~= nil then return "housing-player-room" end
+            if C_HousingLayout.GetSelectedBlueprintFloorplan() ~= nil then return "housing-blueprint-floorplan" end
+            if C_HousingLayout.HasSelectedBlueprintFloorplan() ~= false then return "housing-has-blueprint-floorplan" end
             if C_Item.DoesItemMatchSpellItemCondition(6948, 6603) ~= false then return "item-condition" end
             if C_Spell.TargetSpellChecksItemCondition(6603) ~= false then return "spell-condition" end
             local _, spellIcon, conditionalIcon = C_Spell.GetSpellTexture(6603)

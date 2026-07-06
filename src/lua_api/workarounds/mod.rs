@@ -350,6 +350,7 @@ fn apply_format_and_game_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::glue_character_select_defaults::apply_bootstrap(lua)?;
     temporary::guild_info_namespace_fallback::apply_bootstrap(lua)?;
     temporary::inert_global_defaults::apply_bootstrap(lua)?;
+    temporary::patch_12_1_inert_defaults::apply_bootstrap(lua)?;
     Ok(())
 }
 
