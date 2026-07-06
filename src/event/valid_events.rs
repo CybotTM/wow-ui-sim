@@ -39,6 +39,13 @@ pub fn is_registerable_event(name: &str) -> bool {
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub fn is_registerable_event(name: &str) -> bool {
     #[cfg(feature = "client-ptr")]
+    if PATCH_12_1_REMOVED_REGISTERABLE_EVENTS
+        .binary_search(&name)
+        .is_ok()
+    {
+        return false;
+    }
+    #[cfg(feature = "client-ptr")]
     if PATCH_12_1_REGISTERABLE_EVENTS.binary_search(&name).is_ok() {
         return true;
     }
@@ -49,6 +56,9 @@ pub fn is_registerable_event(name: &str) -> bool {
     let chunk = if first <= b'P' { EVENTS_B } else { EVENTS_C };
     chunk.contains(&name)
 }
+
+#[cfg(feature = "client-ptr")]
+const PATCH_12_1_REMOVED_REGISTERABLE_EVENTS: &[&str] = &["BATTLETAG_INVITE_SHOW"];
 
 #[cfg(feature = "client-ptr")]
 const PATCH_12_1_REGISTERABLE_EVENTS: &[&str] = &[
@@ -153,6 +163,7 @@ mod ptr_tests {
         assert!(is_registerable_event("GROUP_BUFF_VISUAL_ALERTS_CHANGED"));
         assert!(is_registerable_event("HOUSING_BLUEPRINT_IMPORT_STARTED"));
         assert!(is_registerable_event("UNIT_PING_PIN_ADDED"));
+        assert!(!is_registerable_event("BATTLETAG_INVITE_SHOW"));
     }
 }
 

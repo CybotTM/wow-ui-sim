@@ -84,6 +84,9 @@ impl CVarStorage {
     /// Get a CVar value (override takes precedence over default).
     pub fn get(&self, name: &str) -> Option<String> {
         let key = name.to_lowercase();
+        if is_profile_removed_cvar_key(&key) {
+            return None;
+        }
         // Check overrides first
         if let Some(value) = self.overrides.read().unwrap().get(&key) {
             return Some(value.clone());
@@ -98,6 +101,9 @@ impl CVarStorage {
     /// Get the default value for a CVar.
     pub fn get_default(&self, name: &str) -> Option<String> {
         let key = name.to_lowercase();
+        if is_profile_removed_cvar_key(&key) {
+            return None;
+        }
         self.defaults
             .get(&key)
             .cloned()
@@ -129,6 +135,7 @@ impl CVarStorage {
         for key in self.overrides.read().unwrap().keys() {
             keys.insert(key.clone());
         }
+        keys.retain(|key| !is_profile_removed_cvar_key(key));
         let mut sorted: Vec<String> = keys
             .into_iter()
             .map(|k| {
@@ -152,7 +159,7 @@ impl CVarStorage {
     /// Register a new CVar with a default value.
     pub fn register(&self, name: &str, default: Option<&str>) {
         let key = name.to_lowercase();
-        if self.defaults.contains_key(&key) {
+        if self.defaults.contains_key(&key) || is_profile_removed_cvar_key(&key) {
             return;
         }
 
@@ -191,6 +198,7 @@ impl Default for CVarStorage {
 fn parse_default_cvars() -> (HashMap<String, String>, HashMap<String, String>) {
     let (mut defaults, mut original_names) = parse_cvar_yaml(include_str!("cvars.yaml"));
     insert_profile_cvars(&mut defaults, &mut original_names);
+    remove_profile_cvars(&mut defaults, &mut original_names);
     (defaults, original_names)
 }
 
@@ -221,6 +229,39 @@ fn insert_cvar_defaults(
         defaults.insert(key, value.to_string());
     }
 }
+
+#[cfg(feature = "client-ptr")]
+fn remove_profile_cvars(
+    defaults: &mut HashMap<String, String>,
+    original_names: &mut HashMap<String, String>,
+) {
+    for key in PTR_REMOVED_CVARS.iter().map(|name| name.to_lowercase()) {
+        defaults.remove(&key);
+        original_names.remove(&key);
+    }
+}
+
+#[cfg(not(feature = "client-ptr"))]
+fn remove_profile_cvars(
+    _defaults: &mut HashMap<String, String>,
+    _original_names: &mut HashMap<String, String>,
+) {
+}
+
+#[cfg(feature = "client-ptr")]
+fn is_profile_removed_cvar_key(key: &str) -> bool {
+    PTR_REMOVED_CVARS
+        .iter()
+        .any(|removed| removed.eq_ignore_ascii_case(key))
+}
+
+#[cfg(not(feature = "client-ptr"))]
+fn is_profile_removed_cvar_key(_key: &str) -> bool {
+    false
+}
+
+#[cfg(feature = "client-ptr")]
+const PTR_REMOVED_CVARS: &[&str] = &["lastLockedDelvesCompanionAbilities", "SlugSupersampling"];
 
 #[cfg(feature = "client-ptr")]
 const PTR_CVARS: &[(&str, &str)] = &[

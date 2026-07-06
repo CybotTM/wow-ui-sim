@@ -286,6 +286,7 @@ fn test_global_functions_callable() {
         "GetInventoryItemLink",
         "GetInventoryItemTexture",
         "GetInventoryItemsForSlot",
+        #[cfg(not(feature = "client-ptr"))]
         "GetInventorySlotInfo",
         "GetFramerate",
         "format",

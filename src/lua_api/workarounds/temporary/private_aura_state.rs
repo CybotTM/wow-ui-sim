@@ -199,6 +199,8 @@ end
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(PRIVATE_AURA_STATE_LUA)?;
+    #[cfg(feature = "client-ptr")]
+    lua.exec("C_UnitAuras.TriggerPrivateAuraShowDispelType = nil")?;
     Ok(())
 }
 
@@ -243,12 +245,14 @@ mod tests {
                 if C_UnitAurasPrivate._state.warningTextFrame ~= "warning" then
                     return "bad_warning_frame"
                 end
-                C_UnitAurasPrivate.SetShowDispelTypeCallback(function(value)
-                    dispel = value
-                end)
-                C_UnitAuras.TriggerPrivateAuraShowDispelType(true)
-                if dispel ~= true or C_UnitAurasPrivate._state.lastShowDispelType ~= true then
-                    return "bad_dispel"
+                if C_UnitAuras.TriggerPrivateAuraShowDispelType ~= nil then
+                    C_UnitAurasPrivate.SetShowDispelTypeCallback(function(value)
+                        dispel = value
+                    end)
+                    C_UnitAuras.TriggerPrivateAuraShowDispelType(true)
+                    if dispel ~= true or C_UnitAurasPrivate._state.lastShowDispelType ~= true then
+                        return "bad_dispel"
+                    end
                 end
                 C_UnitAurasPrivate.AddPrivateAuraUpdateCallback("player", function(source, info)
                     updateSource = source.name

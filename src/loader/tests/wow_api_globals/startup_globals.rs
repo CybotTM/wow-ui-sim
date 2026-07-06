@@ -113,6 +113,35 @@ fn test_patch_12_1_cvars_and_enums_exist() {
 
 #[cfg(feature = "client-ptr")]
 #[test]
+fn test_patch_12_1_strict_removed_symbols_are_hidden() {
+    let env = WowLuaEnv::new().unwrap();
+    crate::ptr::compat_bootstrap::apply_post_load(&env);
+    let result: String = env
+        .eval(
+            r#"
+            if type(C_DyeColor) == "table" and C_DyeColor.GetDyeColorForItemLocation ~= nil then return "dye-location" end
+            if type(C_DyeColor) == "table" and C_DyeColor.GetDyeColorForItem ~= nil then return "dye-item" end
+            if type(C_Housing) == "table" and C_Housing.IsInsideOwnHouse ~= nil then return "housing-own" end
+            if type(C_Ping) == "table" and C_Ping.GetContextualPingTypeForUnit ~= nil then return "ping-context" end
+            if type(C_RecruitAFriend) == "table" and C_RecruitAFriend.IsEnabled ~= nil then return "raf-enabled" end
+            if type(C_SuperTrack) == "table" and C_SuperTrack.GetNextWaypointForMap ~= nil then return "supertrack-waypoint" end
+            if type(C_UnitAuras) == "table" and C_UnitAuras.TriggerPrivateAuraShowDispelType ~= nil then return "private-aura-dispel" end
+            if GetInventorySlotInfo ~= nil then return "inventory-global" end
+            if Enum.EditModeUnitFrameSetting.IconSize ~= nil then return "editmode-iconsize" end
+            if GetCVar("lastLockedDelvesCompanionAbilities") ~= nil then return "delves-cvar" end
+            if GetCVar("SlugSupersampling") ~= nil then return "slug-cvar" end
+            local frame = CreateFrame("Frame")
+            if pcall(function() frame:RegisterEvent("BATTLETAG_INVITE_SHOW") end) then return "battletag-event" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
 fn test_patch_12_1_safe_global_bridges() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
