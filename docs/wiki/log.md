@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-06] investigation | Patch 12.0.7 API audit
+
+Created `investigations/patch-12-0-7-api-audit.md` after bridging compatible 12.0.7 API gaps and pausing exact-behavior work. Recorded additive/inert API bridges, verification logs, and blocked areas requiring live behavior: restricted unit-token returns, `ENCOUNTER_END` payloads, EncounterEvents color state, SimulateMouse taint/focus restrictions, debug secret propagation, secure raidtarget actions, M+ CalendarTime returns, aura security changes, widget secret aspects, and deprecated/removal timing.
+
 ## [2026-07-06] investigation | Patch 12.1 API audit
 
 Created `investigations/patch-12-1-api-audit.md` after bridging compatible 12.1 API gaps and pausing exact-behavior work. Recorded committed bridge points, verification logs, and the blocked areas that require live PTR behavior: UnitAura secrecy, Private Script Objects/Forbidden Partition, full ForbiddenAspect enforcement, AuraContainer/AuraButton/ManagedAuraContainer, DurationTextBinding/RadialProgress script objects, and exact structure payloads.
