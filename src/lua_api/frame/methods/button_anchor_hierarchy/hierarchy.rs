@@ -395,7 +395,7 @@ pub(super) fn create_texture(state: &mut LuaState) -> LuaResult<u32> {
     create_texture_like(state, None)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 pub(super) fn create_vector_graphics(state: &mut LuaState) -> LuaResult<u32> {
     create_texture_like(state, Some("VectorGraphics"))
 }

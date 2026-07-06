@@ -87,9 +87,9 @@ const MAP_FRAME_METHODS: &[MethodBinding] = &[
     method!("SetArchBlobRingTexture", set_arch_blob_ring_texture),
     method!("SetArchBlobRingAlpha", set_arch_blob_ring_alpha),
     method!("SetArchBlobRingScalar", set_arch_blob_ring_scalar),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     method!("SetIconScale", set_icon_scale),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     method!("GetIconScale", get_icon_scale),
     method!("SetZoom", set_zoom),
     method!("GetZoom", get_zoom),
@@ -111,7 +111,7 @@ fn register_methods(
     Ok(())
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn set_icon_scale(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let scale = match stack_val(state, 2) {
@@ -123,7 +123,7 @@ fn set_icon_scale(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn get_icon_scale(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let fields = get_or_create_frame_fields(state, id);

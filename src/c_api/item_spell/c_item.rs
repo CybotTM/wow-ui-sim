@@ -83,7 +83,7 @@ fn register_c_item_existence_queries(
         &[
             ("DoesItemExist", c_item_does_item_exist),
             ("DoesItemExistByID", c_item_does_item_exist_by_id),
-            #[cfg(feature = "client-ptr")]
+            #[cfg(feature = "retail-12-1-0")]
             (
                 "DoesItemMatchSpellItemCondition",
                 c_item_does_item_match_spell_item_condition,
@@ -162,7 +162,7 @@ fn register_c_item_methods(
     Ok(())
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn c_item_does_item_match_spell_item_condition(state: &mut LuaState) -> LuaResult<u32> {
     // Spell-item condition metadata is not modeled; default to no match.
     state.push(Val::Bool(false));

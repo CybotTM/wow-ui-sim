@@ -95,10 +95,18 @@ casc = ["dep:asset-resolver", "dep:cascette-client-storage", "dep:cascette-crypt
 fast-build = ["gui", "dep:iced-dynamic"]
 rehash-stats = ["rilua/rehash-stats"]
 intern-stats = ["rilua/intern-stats"]
+# Retail API epoch features are cumulative patch gates. Client-channel
+# features select one runtime profile and point at the current API epoch for
+# that channel.
+retail-12-0-0 = []
+retail-12-0-5 = ["retail-12-0-0"]
+retail-12-0-7 = ["retail-12-0-5"]
+retail-12-1-0 = ["retail-12-0-7"]
+
 # Client profile features — exactly one must be enabled. Selects which
 # Interface/BlizzardUI/<Profile>/ subdir the loader reads vendor sources from.
-client-retail = []
-client-ptr = []
+client-retail = ["retail-12-0-7"]
+client-ptr = ["retail-12-1-0"]
 client-wrath = []
 client-mists = []
 client-era = []

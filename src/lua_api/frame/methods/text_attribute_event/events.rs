@@ -40,6 +40,7 @@ pub(super) fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Bool(false));
         return Ok(1);
     };
+    ensure_registerable_event(state, id, &event)?;
     let Some(unit) = val_to_string(state, stack_val(state, 3)) else {
         state.push(Val::Bool(false));
         return Ok(1);
@@ -99,6 +100,16 @@ fn ensure_registerable_event(state: &mut LuaState, id: u64, event: &str) -> LuaR
     }
 
     let sim = borrow_state(state)?;
+    #[cfg(feature = "retail-12-1-0")]
+    if event == "BATTLETAG_INVITE_SHOW" {
+        let loading_blizzard_addon = sim
+            .loading_addon_index
+            .and_then(|idx| sim.addons.get(idx as usize))
+            .is_some_and(|addon| addon.folder_name.starts_with("Blizzard_"));
+        if loading_blizzard_addon {
+            return Ok(());
+        }
+    }
     let frame_name = sim
         .widgets
         .get(id)

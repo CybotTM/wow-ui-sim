@@ -11,7 +11,7 @@ mod text;
 mod unit_event;
 
 use crate::lua_api::methods::call_function_state;
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 use crate::lua_api::methods::{
     create_table, frame_id_from_stack, get_or_create_frame_fields, table_get, table_set,
     val_to_string,
@@ -28,12 +28,12 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     register_text_methods(state, table)?;
     register_attribute_methods(state, table)?;
     register_event_methods(state, table)?;
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     register_patch_12_1_methods(state, table)?;
     Ok(())
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn register_patch_12_1_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "AddForbiddenAspects", add_forbidden_aspects)?;
     table_set_rust_fn_static(state, table, "GetForbiddenAspects", get_forbidden_aspects)?;
@@ -60,13 +60,13 @@ fn register_patch_12_1_methods(state: &mut LuaState, table: GcRef<Table>) -> Lua
     Ok(())
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn frame_fields_from_stack(state: &mut LuaState) -> LuaResult<Val> {
     let id = frame_id_from_stack(state, 1)?;
     Ok(get_or_create_frame_fields(state, id))
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn stack_bitmask_arg(state: &mut LuaState, index: usize) -> u64 {
     match crate::lua_bridge::stack_val(state, index as i32) {
         Val::Num(value) if value > 0.0 => value as u64,
@@ -74,7 +74,7 @@ fn stack_bitmask_arg(state: &mut LuaState, index: usize) -> u64 {
     }
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn stored_forbidden_aspects(state: &mut LuaState, fields: Val) -> u64 {
     match table_get(state, fields, "__forbiddenAspects") {
         Val::Num(value) if value > 0.0 => value as u64,
@@ -82,7 +82,7 @@ fn stored_forbidden_aspects(state: &mut LuaState, fields: Val) -> u64 {
     }
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn add_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     let mut mask = stored_forbidden_aspects(state, fields);
@@ -94,7 +94,7 @@ fn add_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn get_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     let mask = stored_forbidden_aspects(state, fields);
@@ -102,19 +102,19 @@ fn get_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn get_inheritable_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
     get_forbidden_aspects(state)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn get_object_table(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     state.push(fields);
     Ok(1)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn has_any_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     let aspects = stored_forbidden_aspects(state, fields);
@@ -122,7 +122,7 @@ fn has_any_forbidden_aspects(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn roleset_table(state: &mut LuaState, fields: Val) -> Val {
     let rolesets = table_get(state, fields, "__rolesets");
     if matches!(rolesets, Val::Table(_)) {
@@ -133,7 +133,7 @@ fn roleset_table(state: &mut LuaState, fields: Val) -> Val {
     rolesets
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn add_roleset(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     let rolesets = roleset_table(state, fields);
@@ -143,7 +143,7 @@ fn add_roleset(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn set_rolesets(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     let rolesets = create_table(state);
@@ -158,7 +158,7 @@ fn set_rolesets(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn remove_roleset(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     let rolesets = roleset_table(state, fields);
@@ -168,7 +168,7 @@ fn remove_roleset(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn get_roleset_names(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     let rolesets = roleset_table(state, fields);
@@ -176,7 +176,7 @@ fn get_roleset_names(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn set_on_update_mode(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     let value = crate::lua_bridge::stack_val(state, 2);
@@ -187,7 +187,7 @@ fn set_on_update_mode(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn get_on_update_mode(state: &mut LuaState) -> LuaResult<u32> {
     let fields = frame_fields_from_stack(state)?;
     let mode = table_get(state, fields, "__onUpdateMode");
@@ -200,7 +200,7 @@ fn get_on_update_mode(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn clear_scripts(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     crate::lua_api::script_helpers::remove_all_scripts(state, id);

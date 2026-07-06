@@ -54,7 +54,7 @@ fn register_texture_methods(state: &mut LuaState, table_ref: BattleNetTable) -> 
 }
 
 fn register_friend_query_methods(state: &mut LuaState, table_ref: BattleNetTable) -> LuaResult<()> {
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     register_patch_12_1_friend_query_methods(state, table_ref)?;
     table_set_rust_fn_static(state, table_ref, "GetNumFriends", c_bnet_get_num_friends)?;
     table_set_rust_fn_static(
@@ -83,7 +83,7 @@ fn register_friend_query_methods(state: &mut LuaState, table_ref: BattleNetTable
     )
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn register_patch_12_1_friend_query_methods(
     state: &mut LuaState,
     table_ref: BattleNetTable,
@@ -120,7 +120,7 @@ fn register_patch_12_1_friend_query_methods(
     )
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn c_bnet_feature_disabled(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
@@ -346,23 +346,23 @@ fn write_account_status_fields(state: &mut LuaState, t: Val, friend: &BnetFriend
     write_presence_and_link_fields(state, t, friend);
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn write_patch_12_1_account_fields(state: &mut LuaState, t: Val) {
     let friend_tags = create_table(state);
     table_set(state, t, "friendLevel", Val::Num(0.0));
     table_set(state, t, "friendTags", friend_tags);
 }
 
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 fn write_patch_12_1_account_fields(_state: &mut LuaState, _t: Val) {}
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn write_patch_12_1_game_account_fields(state: &mut LuaState, t: Val, ga: &BnetGameAccount) {
     let class_filename = create_string(state, &ga.class_name.to_uppercase());
     table_set(state, t, "classFilename", class_filename);
 }
 
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 fn write_patch_12_1_game_account_fields(_state: &mut LuaState, _t: Val, _ga: &BnetGameAccount) {}
 
 /// `customMessage` + `customMessageTime` + `appearOffline` — the

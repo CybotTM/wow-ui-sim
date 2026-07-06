@@ -202,22 +202,22 @@ fn parse_default_cvars() -> (HashMap<String, String>, HashMap<String, String>) {
     (defaults, original_names)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn insert_profile_cvars(
     defaults: &mut HashMap<String, String>,
     original_names: &mut HashMap<String, String>,
 ) {
-    insert_cvar_defaults(defaults, original_names, PTR_CVARS);
+    insert_cvar_defaults(defaults, original_names, PATCH_12_1_CVARS);
 }
 
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 fn insert_profile_cvars(
     _defaults: &mut HashMap<String, String>,
     _original_names: &mut HashMap<String, String>,
 ) {
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn insert_cvar_defaults(
     defaults: &mut HashMap<String, String>,
     original_names: &mut HashMap<String, String>,
@@ -230,41 +230,45 @@ fn insert_cvar_defaults(
     }
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn remove_profile_cvars(
     defaults: &mut HashMap<String, String>,
     original_names: &mut HashMap<String, String>,
 ) {
-    for key in PTR_REMOVED_CVARS.iter().map(|name| name.to_lowercase()) {
+    for key in PATCH_12_1_REMOVED_CVARS
+        .iter()
+        .map(|name| name.to_lowercase())
+    {
         defaults.remove(&key);
         original_names.remove(&key);
     }
 }
 
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 fn remove_profile_cvars(
     _defaults: &mut HashMap<String, String>,
     _original_names: &mut HashMap<String, String>,
 ) {
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn is_profile_removed_cvar_key(key: &str) -> bool {
-    PTR_REMOVED_CVARS
+    PATCH_12_1_REMOVED_CVARS
         .iter()
         .any(|removed| removed.eq_ignore_ascii_case(key))
 }
 
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 fn is_profile_removed_cvar_key(_key: &str) -> bool {
     false
 }
 
-#[cfg(feature = "client-ptr")]
-const PTR_REMOVED_CVARS: &[&str] = &["lastLockedDelvesCompanionAbilities", "SlugSupersampling"];
+#[cfg(feature = "retail-12-1-0")]
+const PATCH_12_1_REMOVED_CVARS: &[&str] =
+    &["lastLockedDelvesCompanionAbilities", "SlugSupersampling"];
 
-#[cfg(feature = "client-ptr")]
-const PTR_CVARS: &[(&str, &str)] = &[
+#[cfg(feature = "retail-12-1-0")]
+const PATCH_12_1_CVARS: &[(&str, &str)] = &[
     ("accessibilityScreenNarrationEnabled", "0"),
     ("accessibilityScreenNarrationSpeechRate", "1.0"),
     ("accessibilityScreenNarrationSpeechVolume", "1.0"),

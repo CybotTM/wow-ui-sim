@@ -205,7 +205,7 @@ fn pet_get_info_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(push_pet_info_by_species_id(state, &pet))
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn pet_get_info_table_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
     let species_id = u32::from_stack(state, 1)?;
     let Some(pet) = find_pet_by_species_id(state, species_id) else {
@@ -240,7 +240,7 @@ fn pet_get_info_table_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn register_patch_12_1_pet_info_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
     tb.set_function(
         "GetPetInfoTableBySpeciesID",
@@ -248,7 +248,7 @@ fn register_patch_12_1_pet_info_stubs(tb: TableBuilder) -> LuaResult<TableBuilde
     )
 }
 
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 fn register_patch_12_1_pet_info_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
     Ok(tb)
 }

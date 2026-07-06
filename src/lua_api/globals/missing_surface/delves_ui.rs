@@ -396,13 +396,13 @@ fn build_tier_info(state: &mut LuaState, row: TierInfoRow) -> Val {
     entry
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn set_patch_12_1_tier_info_fields(state: &mut LuaState, entry: Val) {
     table_set(state, entry, "overrideTooltipSpellID", Val::Nil);
     table_set(state, entry, "isLFG", Val::Bool(false));
 }
 
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 fn set_patch_12_1_tier_info_fields(_state: &mut LuaState, _entry: Val) {}
 
 fn store_active_tier(state: &mut LuaState, tier: i32) {

@@ -68,7 +68,7 @@ pub mod map_exploration;
 pub mod mists;
 pub mod paths;
 pub mod profession_item_overrides;
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 pub mod ptr;
 #[path = "../data/quest_poi_blobs.rs"]
 pub mod quest_poi_blobs;

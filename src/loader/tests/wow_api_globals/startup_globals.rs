@@ -79,7 +79,7 @@ fn test_startup_utility_globals_exist() {
     assert_eq!(kiosk_enabled_ty, "function");
     assert!(!kiosk_enabled);
 }
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_cvars_and_enums_exist() {
     let env = WowLuaEnv::new().unwrap();
@@ -111,7 +111,7 @@ fn test_patch_12_1_cvars_and_enums_exist() {
     assert_eq!(tiered_lairs, "number");
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_strict_removed_symbols_are_hidden() {
     let env = WowLuaEnv::new().unwrap();
@@ -132,6 +132,7 @@ fn test_patch_12_1_strict_removed_symbols_are_hidden() {
             if GetCVar("SlugSupersampling") ~= nil then return "slug-cvar" end
             local frame = CreateFrame("Frame")
             if pcall(function() frame:RegisterEvent("BATTLETAG_INVITE_SHOW") end) then return "battletag-event" end
+            if pcall(function() frame:RegisterUnitEvent("BATTLETAG_INVITE_SHOW", "player") end) then return "battletag-unit-event" end
             return "ok"
             "#,
         )
@@ -140,7 +141,7 @@ fn test_patch_12_1_strict_removed_symbols_are_hidden() {
     assert_eq!(result, "ok");
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_safe_global_bridges() {
     let env = WowLuaEnv::new().unwrap();

@@ -4,14 +4,14 @@
 //! They are compatibility defaults until the simulator has a real client/session
 //! metadata model.
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 const CLIENT_VERSION: &str = "12.1.0";
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 const CLIENT_VERSION: &str = "12.0.7";
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 const CLIENT_INTERFACE: u32 = 120100;
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 const CLIENT_INTERFACE: u32 = 120007;
 
 const CLIENT_INFO_DEFAULTS_LUA: &str = r#"

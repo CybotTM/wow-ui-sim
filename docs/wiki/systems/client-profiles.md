@@ -1,6 +1,6 @@
 # Client Profiles
 
-The simulator targets six WoW client profiles concurrently — retail, PTR, wrath (3.3.5a), mists (5.4 / MoP Classic), era (1.x / Vanilla), and anniversary — selected at compile time via mutually-exclusive cargo features. Each profile uses a profile-scoped Blizzard UI cache and routes the loader through profile-aware suffix and gametype filters.
+The simulator targets six WoW client profiles concurrently — retail, PTR, wrath (3.3.5a), mists (5.4 / MoP Classic), era (1.x / Vanilla), and anniversary — selected at compile time via mutually-exclusive cargo features. Each profile uses a profile-scoped Blizzard UI cache and routes the loader through profile-aware suffix and gametype filters. Mainline API surface differences are gated by cumulative retail API epoch features so `client-retail` and `client-ptr` can point at different patch-note lifetimes without making PTR itself the API truth. Retail-family API availability is gated separately by cumulative patch epoch features so a profile/channel points at an API epoch instead of hard-coding every API delta to `client-ptr`.
 
 ## Active profile selection
 
@@ -8,22 +8,47 @@ The simulator targets six WoW client profiles concurrently — retail, PTR, wrat
 
 Feature ↔ profile ↔ vendor source ↔ TOC suffix:
 
-| Feature              | Profile     | Cache subdir | Interface | Primary TOC suffix |
-|----------------------|-------------|--------------|-----------|--------------------|
-| `client-retail`      | Retail      | `retail`     | `120007`  | `_Mainline`        |
-| `client-ptr`         | Ptr         | `ptr`        | `120100`  | `_Mainline`        |
-| `client-wrath`       | Wrath       | `wrath`      | `38001`   | `_Wrath`           |
-| `client-mists`       | Mists       | `mists`      | `50504`   | `_Mists`           |
-| `client-era`         | Era         | `era`        | `11507`   | `_Vanilla`         |
-| `client-anniversary` | Anniversary | `anniversary`| `11507`   | `_Vanilla`         |
+| Feature              | Profile     | Cache subdir | Default API epoch | Primary TOC suffix |
+|----------------------|-------------|--------------|-------------------|--------------------|
+| `client-retail`      | Retail      | `retail`     | `retail-12-0-7` (`120007`) | `_Mainline` |
+| `client-ptr`         | Ptr         | `ptr`        | `retail-12-1-0` (`120100`) | `_Mainline` |
+| `client-wrath`       | Wrath       | `wrath`      | `38001`          | `_Wrath`           |
+| `client-mists`       | Mists       | `mists`      | `50504`          | `_Mists`           |
+| `client-era`         | Era         | `era`        | `11507`          | `_Vanilla`         |
+| `client-anniversary` | Anniversary | `anniversary`| `11507`          | `_Vanilla`         |
 
-Helper functions in `src/client_profile.rs`:
+Retail-family epoch features are cumulative: `retail-12-0-7` includes earlier 12.0 epochs, and `retail-12-1-0` includes `retail-12-0-7`. `client-retail` currently enables `retail-12-0-7`; `client-ptr` enables `retail-12-1-0`. API surfaces, CVars, enums, events, XML elements, frame methods, and strict removals introduced by patch notes should gate on the epoch feature (`retail-12-1-0`) rather than on the channel feature (`client-ptr`). Channel/vendor behavior stays profile-gated: PTR CASC product `wowt`, `_ptr_` install paths, and `data/blizzard-ui-files/ptr.txt` remain `client-ptr` concerns.
 
+Helper functions/constants in `src/client_profile.rs`:
+
+- `ACTIVE_INTERFACE_VERSION` → active TOC/API interface selected by the profile's epoch
+- `RETAIL_API_INTERFACE_VERSION` → retail-family interface selected by the highest enabled retail epoch
 - `cache_subdir()` → profile cache directory name under `~/.cache/wow-ui-sim/blizzard-ui/`
-- `interface_version()` → active TOC interface version
+- `interface_version()` → legacy profile default, not the preferred API-epoch selector
 - `blizzard_ui_addons_dir()` → completed cache path for the active profile, or the profile-scoped default cache path
 - `blizzard_ui_addons_dir_under(root)` — test fallback path anchored at `root`
 - `blizzard_ui_framexml_toc()` → wrath-only `<cache>/FrameXML/FrameXML.toc`; retail/PTR/mists/era/anniversary collapsed FrameXML into `Blizzard_*` addons
+
+## Retail API epochs
+
+Mainline API additions/removals use cumulative Cargo features named after the patch epoch. Current chain:
+
+```toml
+retail-12-0-0 = []
+retail-12-0-5 = ["retail-12-0-0"]
+retail-12-0-7 = ["retail-12-0-5"]
+retail-12-1-0 = ["retail-12-0-7"]
+
+client-retail = ["retail-12-0-7"]
+client-ptr = ["retail-12-1-0"]
+```
+
+Rules:
+
+- `client-*` features select runtime profile: cache subdir, CASC product, install flavor, TOC profile, and interface version.
+- `retail-*` features select mainline API epoch: C_* additions, globals/removals, events, CVars, XML elements, frame methods, and patch-note compatibility bootstraps.
+- Patch features are cumulative. Gate additions with `#[cfg(feature = "retail-12-1-0")]`; gate removals/lifetimes with `#[cfg(all(feature = "retail-12-0-0", not(feature = "retail-12-1-0")))]` or the smallest applicable lower epoch.
+- Do not gate patch-note API deltas on `client-ptr`. PTR is only the current channel pointing at the future epoch; when retail catches up, moving `client-retail` to `retail-12-1-0` should enable the same API surface.
 
 ## Runtime Cache
 
@@ -80,7 +105,7 @@ Promotion rule: a stub starts in the per-addon shim (`tools/classic-addon-compat
 
 The wrath module is shared with mists/era/anniversary at the cfg level (`src/lib.rs`: `#[cfg(any(client-wrath, client-mists, client-era, client-anniversary))] pub mod wrath;`) because all four profiles need its `frame_methods::register_all` (no-op stubs for backdrop / depth / player-texture methods that vendor frames call directly). Only wrath actually loads `compat_bootstrap.lua` itself; mists has its own; era + anniversary share `src/era/compat_bootstrap.lua`. The wrath-only `compat_frame_proxies.lua` (real `Blizzard_SharedXML` would shadow it on mists) is gated tighter at `#[cfg(feature = "client-wrath")]`.
 
-`src/event/valid_events.rs` follows the same shape: retail/PTR use the strict generated `EVENTS_A/B/C` tables; wrath/mists/era/anniversary route through `crate::wrath::is_registerable_event(name)` which accepts any non-empty event name (the mainline `events.yaml` doesn't cover pre-Cataclysm or vanilla).
+`src/event/valid_events.rs` follows the same shape: retail/PTR use the strict generated `EVENTS_A/B/C` tables; wrath/mists/era/anniversary route through `crate::wrath::is_registerable_event(name)` which accepts any non-empty event name (the mainline `events.yaml` doesn't cover pre-Cataclysm or vanilla). Patch-specific event additions/removals inside the mainline table gate on the retail epoch feature, not on `client-ptr`.
 
 ## Synthetic FrameXML addon (wrath only)
 
@@ -103,7 +128,8 @@ Captured in `docs/baselines/`:
 
 ## Sources
 
-- `src/client_profile.rs` — enum, `ACTIVE` const, profile path helpers
+- `Cargo.toml` — mutually-exclusive `client-*` profile features and cumulative `retail-*` API epoch features
+- `src/client_profile.rs` — enum, `ACTIVE` const, profile path helpers, active API interface constants
 - `src/loader/mod.rs` — `find_toc_file`, `active_profile_toc_suffix`, `other_profile_toc_suffixes`
 - `src/toc/mod.rs` — `is_allowed_game_type`, `family_subdir`, `TocFile::is_game_type_restricted`
 - `src/lib.rs` — `pub mod wrath`/`mists`/`era` cfg gates

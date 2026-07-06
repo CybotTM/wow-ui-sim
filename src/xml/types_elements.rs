@@ -346,12 +346,12 @@ pub struct FramesXml {
 #[serde(rename_all = "PascalCase")]
 pub enum FrameElement {
     Frame(FrameXml),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     AuraContainer(FrameXml),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     ManagedAuraContainer(FrameXml),
     Button(FrameXml),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     AuraButton(FrameXml),
     ItemButton(FrameXml),
     CheckButton(FrameXml),
@@ -419,15 +419,15 @@ type WidgetTagMapping = (&'static str, WidgetMapping);
 
 const DIRECT_WIDGET_MAPPINGS: &[WidgetTagMapping] = &[
     ("Frame", ("Frame", None)),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     ("AuraContainer", ("Frame", Some("AuraContainer"))),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     (
         "ManagedAuraContainer",
         ("Frame", Some("ManagedAuraContainer")),
     ),
     ("Button", ("Button", None)),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     ("AuraButton", ("Button", Some("AuraButton"))),
     ("ItemButton", ("Button", Some("ItemButton"))),
     ("CheckButton", ("CheckButton", None)),

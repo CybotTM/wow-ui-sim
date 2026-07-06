@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-06] update | Retail API epoch features
+
+Updated `systems/client-profiles.md` after introducing cumulative retail API epoch features (`retail-12-0-7`, `retail-12-1-0`) alongside mutually-exclusive `client-*` profile features. Recorded that API surface gates belong on epoch features while PTR cache, CASC product, install paths, and vendor manifest behavior remain `client-ptr` profile concerns.
+
 ## [2026-07-02] update | XML method binding timing
 
 Updated `systems/xml-template-system.md` after live PTR probing and simulator

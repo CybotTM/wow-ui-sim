@@ -400,7 +400,7 @@ pub(super) fn get_status_bar_desaturated(state: &mut LuaState) -> LuaResult<u32>
 // register_statusbar
 // ---------------------------------------------------------------------------
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn set_render_mode(state: &mut LuaState) -> LuaResult<u32> {
     let id = crate::lua_api::methods::frame_id_from_stack(state, 1)?;
     let fields = crate::lua_api::methods::get_or_create_frame_fields(state, id);
@@ -412,7 +412,7 @@ fn set_render_mode(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn get_render_mode(state: &mut LuaState) -> LuaResult<u32> {
     let id = crate::lua_api::methods::frame_id_from_stack(state, 1)?;
     let fields = crate::lua_api::methods::get_or_create_frame_fields(state, id);
@@ -445,9 +445,9 @@ const STATUSBAR_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetTimerDuration", set_timer_duration),
     ("GetTimerDuration", get_timer_duration),
     // Render mode
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     ("SetRenderMode", set_render_mode),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     ("GetRenderMode", get_render_mode),
     // Desaturation
     ("SetStatusBarDesaturated", set_desaturated),

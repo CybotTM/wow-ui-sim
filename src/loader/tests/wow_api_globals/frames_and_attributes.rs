@@ -51,7 +51,7 @@ fn test_create_frame_exposes_core_event_methods() {
     );
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_frame_texture_statusbar_method_surface() {
     let env = WowLuaEnv::new().unwrap();
@@ -152,7 +152,7 @@ fn test_patch_12_1_frame_texture_statusbar_method_surface() {
     assert!(is_set);
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_clear_scripts_removes_handlers() {
     let env = WowLuaEnv::new().unwrap();
@@ -172,7 +172,7 @@ fn test_patch_12_1_clear_scripts_removes_handlers() {
     assert_eq!(after_ty, "nil");
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_disabled_on_update_mode_skips_dispatch() {
     let env = WowLuaEnv::new().unwrap();
@@ -193,7 +193,7 @@ fn test_patch_12_1_disabled_on_update_mode_skips_dispatch() {
     assert_eq!(calls, 0);
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_run_always_on_update_fires_while_hidden() {
     let env = WowLuaEnv::new().unwrap();
@@ -215,7 +215,7 @@ fn test_patch_12_1_run_always_on_update_fires_while_hidden() {
     assert_eq!(calls, 1);
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_run_when_visible_on_update_skips_hidden() {
     let env = WowLuaEnv::new().unwrap();
@@ -237,7 +237,7 @@ fn test_patch_12_1_run_when_visible_on_update_skips_hidden() {
     assert_eq!(calls, 0);
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_aura_frame_types_create() {
     let env = WowLuaEnv::new().unwrap();

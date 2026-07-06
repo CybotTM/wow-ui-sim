@@ -10,13 +10,13 @@
 //! `is_valid_event` = registerable OR non-registerable (for C_EventUtils).
 //! `is_registerable_event` = only registerable (for RegisterEvent).
 
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(any(feature = "client-retail", feature = "retail-12-1-0"))]
 use super::valid_events_a::EVENTS_A;
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(any(feature = "client-retail", feature = "retail-12-1-0"))]
 use super::valid_events_a_tail::EVENTS_A_TAIL;
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(any(feature = "client-retail", feature = "retail-12-1-0"))]
 use super::valid_events_b::EVENTS_B;
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(any(feature = "client-retail", feature = "retail-12-1-0"))]
 use super::valid_events_c::EVENTS_C;
 
 /// Check if an event can be passed to `RegisterEvent()`.
@@ -36,16 +36,16 @@ pub fn is_registerable_event(name: &str) -> bool {
     crate::wrath::is_registerable_event(name)
 }
 
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(any(feature = "client-retail", feature = "retail-12-1-0"))]
 pub fn is_registerable_event(name: &str) -> bool {
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     if PATCH_12_1_REMOVED_REGISTERABLE_EVENTS
         .binary_search(&name)
         .is_ok()
     {
         return false;
     }
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     if PATCH_12_1_REGISTERABLE_EVENTS.binary_search(&name).is_ok() {
         return true;
     }
@@ -57,10 +57,10 @@ pub fn is_registerable_event(name: &str) -> bool {
     chunk.contains(&name)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 const PATCH_12_1_REMOVED_REGISTERABLE_EVENTS: &[&str] = &["BATTLETAG_INVITE_SHOW"];
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 const PATCH_12_1_REGISTERABLE_EVENTS: &[&str] = &[
     "BATTLE_NET_FRIEND_TAG_ENABLED_STATUS_UPDATED",
     "BATTLE_NET_TITLE_FRIEND_CUSTOM_NAME_ENABLED_STATUS_UPDATED",
@@ -151,8 +151,8 @@ mod retail_tests {
     }
 }
 
-#[cfg(all(test, feature = "client-ptr"))]
-mod ptr_tests {
+#[cfg(all(test, feature = "retail-12-1-0"))]
+mod patch_12_1_tests {
     use super::is_registerable_event;
 
     #[test]

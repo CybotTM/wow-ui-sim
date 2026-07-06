@@ -66,7 +66,7 @@ fn test_wipe_function() {
     t.assert_lua_true("return WIPE_A_NIL", "wipe should clear named keys");
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_global_security_helpers() {
     let env = WowLuaEnv::new().unwrap();
@@ -286,7 +286,7 @@ fn test_global_functions_callable() {
         "GetInventoryItemLink",
         "GetInventoryItemTexture",
         "GetInventoryItemsForSlot",
-        #[cfg(not(feature = "client-ptr"))]
+        #[cfg(not(feature = "retail-12-1-0"))]
         "GetInventorySlotInfo",
         "GetFramerate",
         "format",

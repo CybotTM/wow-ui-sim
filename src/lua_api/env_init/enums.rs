@@ -32,7 +32,7 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     }
     lua.exec(MISSING_ENUMS_LUA)?;
     lua.exec(COMPAT_ENUMS_LUA)?;
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     {
         let state = lua.state_mut();
         let enum_table = ensure_global_table(state, "Enum");
@@ -56,7 +56,7 @@ pub(crate) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn ensure_on_update_mode_enum(state: &mut rilua::vm::state::LuaState, enum_table: Val) {
     let existing = table_get(state, enum_table, "OnUpdateMode");
     if matches!(existing, Val::Table(_)) {

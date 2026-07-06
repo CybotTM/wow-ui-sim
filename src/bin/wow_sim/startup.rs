@@ -152,7 +152,7 @@ fn load_startup_addons(
     startup_trace::time_load_step("prepare chat frame for third-party addons", || {
         wow_ui_sim::lua_api::chat_init::prepare_for_third_party_addons(env)
     });
-    #[cfg(feature = "client-mists")]
+    #[cfg(any(feature = "client-mists", feature = "retail-12-1-0"))]
     startup_trace::time_load_step("apply post-Blizzard load workarounds", || {
         apply_post_load_workarounds(env)
     });

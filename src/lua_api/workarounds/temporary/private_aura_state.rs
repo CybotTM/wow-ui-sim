@@ -199,7 +199,7 @@ end
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(PRIVATE_AURA_STATE_LUA)?;
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     lua.exec("C_UnitAuras.TriggerPrivateAuraShowDispelType = nil")?;
     Ok(())
 }

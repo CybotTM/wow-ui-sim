@@ -63,7 +63,7 @@ pub(super) fn init_lua_state(
     crate::mists::compat_bootstrap::init(lua)?;
     #[cfg(any(feature = "client-era", feature = "client-anniversary"))]
     crate::era::compat_bootstrap::init(lua)?;
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     crate::ptr::compat_bootstrap::init(lua)?;
     // secureenv is shallow-copied from `_G` here. It keeps its copy of
     // the dangerous globals (dofile / loadfile / require / string.dump /

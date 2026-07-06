@@ -33,7 +33,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[xml-template-system]] | XML parsing (30+ element types), template registry, inheritance chain resolution, XML-to-widget Lua code generation, inline scripts |
 | [[addon-loading]] | TOC parsing, discovered Blizzard load order, inline `[Bootstrap]` semantics, per-file Lua/XML loading, SavedVariables, startup sequence |
 | [[server-snapshot-action-bars]] | Imports action-bar spell slots captured by the ServerSnapshot addon from real WoW SavedVariables before Blizzard action-bar UI loads |
-| [[client-profiles]] | Six client profiles (retail/PTR/wrath/mists/era/anniversary) selected by mutually-exclusive cargo features; profile-aware loader, per-profile manifests, compat bootstraps, vendor pinning, CI matrix |
+| [[client-profiles]] | Six client profiles selected by mutually-exclusive cargo features, plus cumulative retail API epoch features; profile-aware loader, per-profile manifests, compat bootstraps, vendor pinning, CI matrix |
 | [[texture-atlas]] | TextureManager (BLP/PNG/WebP), ~50K-entry compiled atlas database, nine-slice kit detection, UV remapping |
 | [[frame-data-flow]] | Parallel Lua/Rust systems, global tables (__frame_fields/__scripts), method lookup order, Mixin() application, event dispatch flow |
 | [[taint-system]] | Protected-frame gating, dual Lua environment (genv/secureenv), Elune-backed issecure/securecall, Blizzard `issecure()` call-site matrix, SecureHandler fallback, state/attribute drivers |

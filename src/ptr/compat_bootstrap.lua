@@ -28,9 +28,6 @@ __wow_fill_enum("EditModeAccountSetting", { "ShowRaidWarning" })
 __wow_fill_enum("EditModeMinimapSetting", { "IconScale" })
 __wow_fill_enum("EditModeSystem", { "RaidWarning" })
 __wow_fill_enum("EditModeUnitFrameSetting", { "BuffIconSize", "DebuffIconSize" })
-if Enum and Enum.EditModeUnitFrameSetting then
-  Enum.EditModeUnitFrameSetting.IconSize = nil
-end
 __wow_fill_enum("FragmentID", { "FMapObject", "FWorldStateListenerData" })
 __wow_fill_enum("FrameTutorialAccount", { "HousingPetBeds" })
 __wow_fill_enum("HouseFinderSuggestionReason", { "Relinquished" })

@@ -177,7 +177,7 @@ pub const EVENTS_A: &[&str] = &[
     "BATTLEGROUND_OBJECTIVES_UPDATE",
     "BATTLEGROUND_POINTS_UPDATE",
     "BATTLEPET_FORCE_NAME_DECLENSION",
-    #[cfg(not(feature = "client-ptr"))]
+    #[cfg(not(feature = "retail-12-1-0"))]
     "BATTLETAG_INVITE_SHOW",
     "BATTLE_PET_CURSOR_CLEAR",
     "BEHAVIORAL_NOTIFICATION",

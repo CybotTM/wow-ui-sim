@@ -113,6 +113,10 @@ end
 local __wow_namespace_names = setmetatable({}, { __mode = "k" })
 local __wow_namespace_mt = {
   __index = function(t, key)
+    local removed = rawget(t, "__wow_ptr_removed_keys") or rawget(t, "__wow_removed_keys")
+    if type(removed) == "table" and removed[key] then
+      return nil
+    end
     __wow_log_nil_symbol_access(__wow_namespace_names[t], key)
     local fn = function()
       return nil

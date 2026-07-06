@@ -93,14 +93,14 @@ const SPELL_BOOLEAN_METHODS: &[(&str, SpellScriptFn)] = &[
     ("IsSpellHelpful", is_spell_helpful),
     ("IsSpellHarmful", is_spell_harmful),
     ("IsSpellUsable", is_spell_usable),
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     (
         "TargetSpellChecksItemCondition",
         target_spell_checks_item_condition,
     ),
 ];
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn target_spell_checks_item_condition(state: &mut LuaState) -> LuaResult<u32> {
     // Spell-item condition metadata is not modeled; default to no match.
     state.push(Val::Bool(false));
@@ -183,12 +183,12 @@ fn get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
     let texture = create_string(state, "Interface\\ICONS\\INV_Misc_QuestionMark");
     state.push(texture);
     state.push(Val::Num(icon_id as f64));
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     {
         state.push(Val::Nil);
         return Ok(3);
     }
-    #[cfg(not(feature = "client-ptr"))]
+    #[cfg(not(feature = "retail-12-1-0"))]
     Ok(2)
 }
 

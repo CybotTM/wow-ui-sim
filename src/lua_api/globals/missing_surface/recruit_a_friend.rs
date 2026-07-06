@@ -17,11 +17,11 @@ pub(super) fn register_recruit_a_friend_surface(state: &mut LuaState) -> LuaResu
         "GetSummonFriendCooldown",
         get_summon_friend_cooldown,
     )?;
-    #[cfg(not(feature = "client-ptr"))]
+    #[cfg(not(feature = "retail-12-1-0"))]
     table_set_rust_fn_static(state, ns, "IsEnabled", is_enabled)?;
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     table_set_rust_fn_static(state, ns, "IsSystemEnabled", is_enabled)?;
-    #[cfg(feature = "client-ptr")]
+    #[cfg(feature = "retail-12-1-0")]
     table_set_rust_fn_static(state, ns, "IsSystemSupported", is_system_supported)?;
     table_set_rust_fn_static(state, ns, "IsRecruitingEnabled", is_recruiting_enabled)?;
     table_set_rust_fn_static(state, ns, "CanSummonFriend", can_summon_friend)?;
@@ -78,7 +78,7 @@ fn is_enabled(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn is_system_supported(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)

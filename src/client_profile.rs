@@ -15,6 +15,24 @@ pub enum ClientProfile {
     Anniversary,
 }
 
+#[cfg(feature = "retail-12-1-0")]
+pub const RETAIL_API_INTERFACE_VERSION: u32 = 120100;
+
+#[cfg(not(feature = "retail-12-1-0"))]
+pub const RETAIL_API_INTERFACE_VERSION: u32 = 120007;
+
+#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+pub const ACTIVE_INTERFACE_VERSION: u32 = RETAIL_API_INTERFACE_VERSION;
+
+#[cfg(feature = "client-wrath")]
+pub const ACTIVE_INTERFACE_VERSION: u32 = 38001;
+
+#[cfg(feature = "client-mists")]
+pub const ACTIVE_INTERFACE_VERSION: u32 = 50504;
+
+#[cfg(any(feature = "client-era", feature = "client-anniversary"))]
+pub const ACTIVE_INTERFACE_VERSION: u32 = 11507;
+
 impl ClientProfile {
     pub fn subdir(self) -> &'static str {
         match self {
@@ -40,8 +58,7 @@ impl ClientProfile {
 
     pub const fn interface_version(self) -> u32 {
         match self {
-            ClientProfile::Retail => 120007,
-            ClientProfile::Ptr => 120100,
+            ClientProfile::Retail | ClientProfile::Ptr => RETAIL_API_INTERFACE_VERSION,
             ClientProfile::Wrath => 38001,
             ClientProfile::Mists => 50504,
             ClientProfile::Era | ClientProfile::Anniversary => 11507,
@@ -142,6 +159,20 @@ compile_error!(
     "Exactly one of client-retail, client-ptr, client-wrath, client-mists, client-era, client-anniversary must be enabled"
 );
 
+#[cfg(all(feature = "client-ptr", not(feature = "retail-12-1-0")))]
+compile_error!("client-ptr must enable the retail-12-1-0 API epoch");
+
+#[cfg(all(
+    any(
+        feature = "retail-12-0-0",
+        feature = "retail-12-0-5",
+        feature = "retail-12-0-7",
+        feature = "retail-12-1-0"
+    ),
+    not(any(feature = "client-retail", feature = "client-ptr"))
+))]
+compile_error!("retail API epoch features require client-retail or client-ptr");
+
 /// Path to the AddOns directory for the active profile.
 ///
 /// Prefer a completed cache-managed Blizzard UI source tree for every client
@@ -201,6 +232,30 @@ pub fn blizzard_ui_framexml_toc() -> Option<PathBuf> {
 #[cfg_attr(not(feature = "client-mists"), allow(unused_imports))]
 mod tests {
     use super::*;
+
+    #[test]
+    #[cfg(all(feature = "client-retail", not(feature = "retail-12-1-0")))]
+    fn retail_client_points_at_current_retail_api_epoch() {
+        assert_eq!(ACTIVE, ClientProfile::Retail);
+        assert_eq!(ACTIVE_INTERFACE_VERSION, 120007);
+        assert!(cfg!(feature = "retail-12-0-7"));
+    }
+
+    #[test]
+    #[cfg(all(feature = "client-retail", feature = "retail-12-1-0"))]
+    fn retail_client_can_point_at_patch_12_1_api_epoch() {
+        assert_eq!(ACTIVE, ClientProfile::Retail);
+        assert_eq!(ACTIVE_INTERFACE_VERSION, 120100);
+        assert_eq!(RETAIL_API_INTERFACE_VERSION, 120100);
+    }
+
+    #[test]
+    #[cfg(feature = "client-ptr")]
+    fn ptr_client_points_at_patch_12_1_api_epoch() {
+        assert!(cfg!(feature = "retail-12-0-7"));
+        assert!(cfg!(feature = "retail-12-1-0"));
+        assert_eq!(ACTIVE_INTERFACE_VERSION, 120100);
+    }
 
     #[test]
     #[cfg(feature = "client-mists")]

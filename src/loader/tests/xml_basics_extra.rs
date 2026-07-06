@@ -32,7 +32,7 @@ fn xml_process_time_excludes_script_file_load_time() {
     );
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn patch_12_1_aura_widgets_parse_as_xml_elements() {
     let ctx = load_test_xml(
@@ -522,7 +522,7 @@ fn test_xml_set_all_points_keeps_explicit_anchors_authoritative() {
     );
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_xml_on_update_mode_and_forbidden_aspects() {
     let t = load_test_xml(

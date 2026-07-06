@@ -258,10 +258,11 @@ MistsCore.lua
 
 #[test]
 fn test_supports_interface_version() {
-    let current = TocFile::parse(
-        Path::new("/addons/TestAddon"),
-        "## Interface: 120007, 120001\nCore.lua\n",
+    let contents = format!(
+        "## Interface: {}, 120001\nCore.lua\n",
+        RETAIL_INTERFACE_VERSION
     );
+    let current = TocFile::parse(Path::new("/addons/TestAddon"), &contents);
     let old = TocFile::parse(
         Path::new("/addons/TestAddon"),
         "## Interface: 120001\nCore.lua\n",

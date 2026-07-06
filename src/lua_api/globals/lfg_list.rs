@@ -219,12 +219,12 @@ fn set_search_result_requirement_fields(state: &mut LuaState, info: Val) {
     set_patch_12_1_search_result_fields(state, info);
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn set_patch_12_1_search_result_fields(state: &mut LuaState, info: Val) {
     table_set(state, info, "censored", Val::Bool(false));
 }
 
-#[cfg(not(feature = "client-ptr"))]
+#[cfg(not(feature = "retail-12-1-0"))]
 fn set_patch_12_1_search_result_fields(_state: &mut LuaState, _info: Val) {}
 
 fn get_search_result_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -652,29 +652,29 @@ fn register_search_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> Lua
     )
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn confirm_censored_active_entry(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn does_censored_text_match(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn is_censored_active_entry_unresolved(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn reveal_censored_active_entry(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-#[cfg(feature = "client-ptr")]
+#[cfg(feature = "retail-12-1-0")]
 fn reveal_censored_search_result(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
@@ -684,18 +684,18 @@ fn register_listing_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> Lu
         state,
         table_ref,
         &[
-            #[cfg(feature = "client-ptr")]
+            #[cfg(feature = "retail-12-1-0")]
             ("ConfirmCensoredActiveEntry", confirm_censored_active_entry),
-            #[cfg(feature = "client-ptr")]
+            #[cfg(feature = "retail-12-1-0")]
             ("DoesCensoredTextMatch", does_censored_text_match),
-            #[cfg(feature = "client-ptr")]
+            #[cfg(feature = "retail-12-1-0")]
             (
                 "IsCensoredActiveEntryUnresolved",
                 is_censored_active_entry_unresolved,
             ),
-            #[cfg(feature = "client-ptr")]
+            #[cfg(feature = "retail-12-1-0")]
             ("RevealCensoredActiveEntry", reveal_censored_active_entry),
-            #[cfg(feature = "client-ptr")]
+            #[cfg(feature = "retail-12-1-0")]
             ("RevealCensoredSearchResult", reveal_censored_search_result),
             ("GetNumApplications", counts::get_num_applications),
             ("GetNumApplicants", counts::get_num_applicants),
