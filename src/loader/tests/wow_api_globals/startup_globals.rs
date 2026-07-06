@@ -116,6 +116,7 @@ fn test_patch_12_1_cvars_and_enums_exist() {
 fn test_patch_12_1_strict_removed_symbols_are_hidden() {
     let env = WowLuaEnv::new().unwrap();
     crate::ptr::compat_bootstrap::apply_post_load(&env);
+    crate::ptr::compat_bootstrap::apply_strict_removals(&env);
     let result: String = env
         .eval(
             r#"

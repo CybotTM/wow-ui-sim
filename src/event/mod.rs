@@ -3,13 +3,13 @@
 use std::collections::HashMap;
 
 pub mod valid_events;
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(feature = "retail-12-0-0")]
 mod valid_events_a;
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(feature = "retail-12-0-0")]
 mod valid_events_a_tail;
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(feature = "retail-12-0-0")]
 mod valid_events_b;
-#[cfg(any(feature = "client-retail", feature = "client-ptr"))]
+#[cfg(feature = "retail-12-0-0")]
 mod valid_events_c;
 pub use valid_events::{
     callback_events, is_callback_event, is_registerable_event, is_restricted_event, is_valid_event,
