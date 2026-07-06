@@ -21,8 +21,9 @@
 
 use crate::event::Event;
 use crate::lua_api::game_data::PartyMember;
+use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::globals::unit_api::parse_party_index;
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult};
@@ -156,9 +157,65 @@ fn kick_unit(state: &mut LuaState) -> LuaResult<u32> {
     uninvite_unit(state)
 }
 
-/// `ReadyCheck()` — fire `READY_CHECK`.
+pub(crate) fn start_ready_check(state: &mut LuaState) -> LuaResult<()> {
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.ready_check.active = true;
+        sim.ready_check.response = None;
+    }
+    dispatch_event_now(state, "READY_CHECK", &[])
+}
+
+pub(crate) fn confirm_ready_check(state: &mut LuaState) -> LuaResult<()> {
+    let is_ready = Option::<bool>::from_stack(state, 1)?.unwrap_or(false);
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.ready_check.active = false;
+        sim.ready_check.response = Some(is_ready);
+    }
+    let player = create_string(state, "player");
+    dispatch_event_now(
+        state,
+        "READY_CHECK_CONFIRM",
+        &[player, rilua::Val::Bool(is_ready)],
+    )?;
+    dispatch_event_now(state, "READY_CHECK_FINISHED", &[])
+}
+
+fn get_ready_check_status(state: &mut LuaState) -> LuaResult<u32> {
+    let (active, response) = {
+        let sim = borrow_state(state)?;
+        (sim.ready_check.active, sim.ready_check.response)
+    };
+    let status = match response {
+        Some(true) => Some("ready"),
+        Some(false) => Some("notready"),
+        None if active => Some("waiting"),
+        None => None,
+    };
+    match status {
+        Some(value) => {
+            let value = create_string(state, value);
+            state.push(value);
+        }
+        None => state.push(rilua::Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_ready_check_time_left(state: &mut LuaState) -> LuaResult<u32> {
+    let time_left = if borrow_state(state)?.ready_check.active {
+        30.0
+    } else {
+        0.0
+    };
+    state.push(rilua::Val::Num(time_left));
+    Ok(1)
+}
+
+/// `ReadyCheck()` — start a ready check and fire `READY_CHECK`.
 fn ready_check(state: &mut LuaState) -> LuaResult<u32> {
-    push_event(state, "READY_CHECK")?;
+    start_ready_check(state)?;
     Ok(0)
 }
 
@@ -171,5 +228,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UninviteUnit", uninvite_unit)?;
     LuaApiMut::register_function(lua, "KickUnit", kick_unit)?;
     LuaApiMut::register_function(lua, "ReadyCheck", ready_check)?;
+    LuaApiMut::register_function(lua, "GetReadyCheckStatus", get_ready_check_status)?;
+    LuaApiMut::register_function(lua, "GetReadyCheckTimeLeft", get_ready_check_time_left)?;
     Ok(())
 }

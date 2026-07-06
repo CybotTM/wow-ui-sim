@@ -309,6 +309,7 @@ macro_rules! build_empty_sim_state {
             is_party_lfg: false,
             everyone_assistant: false,
             party_leader_index: None,
+            ready_check: ReadyCheckState::default(),
             voice_chat: VoiceChatState::default(),
             known_spells: ::std::collections::HashSet::new(),
             harmful_spells: ::std::collections::HashSet::new(),

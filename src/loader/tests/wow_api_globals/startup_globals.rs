@@ -122,9 +122,29 @@ fn test_patch_12_0_7_safe_global_bridges() {
             if C_HousingCustomizeMode.RoomConnectionSupportsDoorType(1, 1) ~= false then return "housing-door" end
             if C_HousingLayout.CanSetViewedFloor(1) ~= false then return "housing-floor" end
             if type(C_MerchantFrame.GetMerchantCurrencies()) ~= "table" then return "merchant-currencies" end
-            C_PartyInfo.ConfirmReadyCheck(true)
-            C_PartyInfo.DemoteAssistant("player")
+            local readyFrame = CreateFrame("Frame")
+            readyFrame.events = {}
+            readyFrame:RegisterEvent("READY_CHECK")
+            readyFrame:RegisterEvent("READY_CHECK_CONFIRM")
+            readyFrame:RegisterEvent("READY_CHECK_FINISHED")
+            readyFrame:SetScript("OnEvent", function(self, event, ...)
+                table.insert(self.events, { event, ... })
+            end)
+            if GetReadyCheckStatus("player") ~= nil then return "ready-initial-status" end
             C_PartyInfo.DoReadyCheck()
+            if readyFrame.events[1] == nil or readyFrame.events[1][1] ~= "READY_CHECK" then return "ready-start-event" end
+            if GetReadyCheckStatus("player") ~= "waiting" then return "ready-waiting-status" end
+            if GetReadyCheckTimeLeft() <= 0 then return "ready-time-left" end
+            C_PartyInfo.ConfirmReadyCheck(true)
+            if readyFrame.events[2][1] ~= "READY_CHECK_CONFIRM" then return "ready-confirm-event" end
+            if readyFrame.events[2][2] ~= "player" or readyFrame.events[2][3] ~= true then return "ready-confirm-args" end
+            if readyFrame.events[3][1] ~= "READY_CHECK_FINISHED" then return "ready-finished-event" end
+            if GetReadyCheckStatus("player") ~= "ready" then return "ready-confirmed-status" end
+            if GetReadyCheckTimeLeft() ~= 0 then return "ready-finished-time" end
+            C_PartyInfo.DoReadyCheck()
+            C_PartyInfo.ConfirmReadyCheck(false)
+            if GetReadyCheckStatus("player") ~= "notready" then return "ready-declined-status" end
+            C_PartyInfo.DemoteAssistant("player")
             if C_PartyInfo.IsGUIDInGroup("Player-1") ~= false then return "party-guid" end
             C_PartyInfo.PromoteToAssistant("player")
             C_PartyInfo.PromoteToLeader("player")

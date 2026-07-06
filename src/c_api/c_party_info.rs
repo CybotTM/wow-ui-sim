@@ -43,6 +43,18 @@ fn register_group_membership_probes(
     )?;
     table_set_rust_fn_static(state, table_ref, "IsPartyFull", c_party_info_is_party_full)?;
     table_set_rust_fn_static(state, table_ref, "LeaveParty", c_party_info_leave_party)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "DoReadyCheck",
+        c_party_info_do_ready_check,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "ConfirmReadyCheck",
+        c_party_info_confirm_ready_check,
+    )?;
     Ok(())
 }
 
@@ -106,6 +118,16 @@ fn c_party_info_is_party_full(state: &mut LuaState) -> LuaResult<u32> {
 fn c_party_info_leave_party(state: &mut LuaState) -> LuaResult<u32> {
     crate::lua_api::globals::group_verbs::clear_party_roster(state)?;
     crate::lua_api::globals::group_verbs::push_event(state, "GROUP_ROSTER_UPDATE")?;
+    Ok(0)
+}
+
+fn c_party_info_do_ready_check(state: &mut LuaState) -> LuaResult<u32> {
+    crate::lua_api::globals::group_verbs::start_ready_check(state)?;
+    Ok(0)
+}
+
+fn c_party_info_confirm_ready_check(state: &mut LuaState) -> LuaResult<u32> {
+    crate::lua_api::globals::group_verbs::confirm_ready_check(state)?;
     Ok(0)
 }
 

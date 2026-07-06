@@ -196,6 +196,12 @@ pub struct ExtraActionButtonState {
 /// the cap) return `0`, which is the sentinel the mixin checks to skip
 /// `SetBarValues`.
 #[derive(Clone, Debug, Default)]
+pub struct ReadyCheckState {
+    pub active: bool,
+    pub response: Option<bool>,
+}
+
+#[derive(Clone, Debug, Default)]
 pub struct HousingState {
     pub tracked_house_guid: Option<String>,
     pub current_level: i32,

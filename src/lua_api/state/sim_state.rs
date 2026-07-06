@@ -291,6 +291,7 @@ pub struct SimState {
     pub is_party_lfg: bool,
     pub everyone_assistant: bool,
     pub party_leader_index: Option<usize>,
+    pub ready_check: ReadyCheckState,
     pub voice_chat: VoiceChatState,
     pub known_spells: ::std::collections::HashSet<u32>,
     pub harmful_spells: ::std::collections::HashSet<u32>,

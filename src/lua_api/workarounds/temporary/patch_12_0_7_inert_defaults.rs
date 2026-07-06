@@ -110,11 +110,7 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     set_default(merchantFrame, "GetMerchantCurrencies", return_empty_table)
 
     local partyInfo = ensure_namespace("C_PartyInfo")
-    set_default(partyInfo, "ConfirmReadyCheck", noop)
     set_default(partyInfo, "DemoteAssistant", noop)
-    set_default(partyInfo, "DoReadyCheck", function()
-        if type(ReadyCheck) == "function" then ReadyCheck() end
-    end)
     set_default(partyInfo, "IsGUIDInGroup", return_false)
     set_default(partyInfo, "PromoteToAssistant", noop)
     set_default(partyInfo, "PromoteToLeader", noop)
