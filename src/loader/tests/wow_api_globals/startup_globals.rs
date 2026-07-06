@@ -248,6 +248,18 @@ fn test_patch_12_1_safe_global_bridges() {
         .eval(
             r#"
             if C_CVar.AreCVarsLoaded() ~= true then return "cvars" end
+            local durationBinding = C_DurationUtil.CreateDurationTextBinding(5)
+            if type(durationBinding.ClearTextColorCurve) ~= "function" then return "duration-color-clear" end
+            if type(durationBinding.GetFormattedTextColor) ~= "function" then return "duration-color-formatted" end
+            if type(durationBinding.GetTextColorCurve) ~= "function" then return "duration-color-get" end
+            if type(durationBinding.SetTextColorCurve) ~= "function" then return "duration-color-set" end
+            local curve = { r = 1 }
+            durationBinding:SetTextColorCurve(curve)
+            if durationBinding:GetTextColorCurve() ~= curve then return "duration-color-curve" end
+            local r, g, b, a = durationBinding:GetFormattedTextColor()
+            if r ~= 1 or g ~= 1 or b ~= 1 or a ~= 1 then return "duration-color-rgba" end
+            durationBinding:ClearTextColorCurve()
+            if durationBinding:GetTextColorCurve() ~= nil then return "duration-color-cleared" end
             if C_CombatAudioAlert.SpeakText("test") ~= 0 then return "combat-audio" end
             if #C_CooldownViewer.GetGroupBuffItems() ~= 0 then return "cooldown-group-buffs" end
             if #C_DyeColor.GetDyeColorsForItem(1) ~= 0 then return "dye-item" end

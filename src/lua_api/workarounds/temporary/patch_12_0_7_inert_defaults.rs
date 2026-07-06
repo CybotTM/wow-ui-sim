@@ -46,6 +46,7 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     set_default(delves, "GetWorldTierDifficultyForActivePlayer", return_nil)
 
     local durationUtil = ensure_namespace("C_DurationUtil")
+    local isPatch121 = type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100
     local function create_duration_clock(initialTime)
         local clock = { time = initialTime or 0 }
         function clock:GetTime() return self.time end
@@ -89,6 +90,12 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
         function binding:SetTimeModifier(value) self.timeModifier = value or 0 end
         function binding:SetUpdateInterval(value) self.updateInterval = value or 1 end
         function binding:SetZeroDurationText(text) self.zeroDurationText = text end
+        if isPatch121 then
+            function binding:ClearTextColorCurve() self.textColorCurve = nil end
+            function binding:GetFormattedTextColor() return 1, 1, 1, 1 end
+            function binding:GetTextColorCurve() return self.textColorCurve end
+            function binding:SetTextColorCurve(curve) self.textColorCurve = curve end
+        end
         return binding
     end
     set_default(durationUtil, "CreateManualClock", create_duration_clock)
