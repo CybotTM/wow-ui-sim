@@ -79,6 +79,76 @@ fn test_startup_utility_globals_exist() {
     assert_eq!(kiosk_enabled_ty, "function");
     assert!(!kiosk_enabled);
 }
+#[cfg(feature = "retail-12-0-7")]
+#[test]
+fn test_patch_12_0_7_safe_global_bridges() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            if C_BattleNet.InviteFriend == nil then return "bnet-invite" end
+            C_BattleNet.InviteFriend("Player-Realm")
+            if type(C_Container.CalculateTotalNumberOfFreeBagSlots()) ~= "number" then return "container-free" end
+            if type(C_DelvesUI.GetDelveEntranceTitleString(1)) ~= "string" then return "delve-title" end
+            if type(C_DelvesUI.GetWorldTierDifficultyForActivePlayer()) ~= "number" then return "delve-world-tier" end
+            local clock = C_DurationUtil.CreateManualClock(5)
+            if clock:GetTime() ~= 5 then return "clock-time" end
+            clock:AdvanceTime(2)
+            if clock:GetTime() ~= 7 then return "clock-advance" end
+            clock:RewindTime(3)
+            if clock:GetTime() ~= 4 then return "clock-rewind" end
+            clock:ResetTime()
+            if clock:GetTime() ~= 0 then return "clock-reset" end
+            local binding = C_DurationUtil.CreateDurationTextBinding(10)
+            if binding:GetDuration() ~= 10 then return "duration-value" end
+            binding:SetDuration(3)
+            if binding:GetFormattedText() ~= "3" then return "duration-text" end
+            if binding:IsEnabled() ~= true then return "duration-enabled" end
+            binding:Disable()
+            if binding:IsActive() ~= false then return "duration-disabled" end
+            binding:Enable()
+            if binding:GetClock() == nil then return "duration-clock" end
+            local r, g, b, a = C_EncounterTimeline.GetEventColor(1)
+            if r ~= 1 or g ~= 1 or b ~= 1 or a ~= 1 then return "event-color" end
+            if C_HousingCatalog.GetCatalogCategoryAndSubcategoryNames(1) ~= nil then return "housing-catalog" end
+            if C_HousingCustomizeMode.RoomConnectionSupportsDoorType(1, 1) ~= false then return "housing-door" end
+            if C_HousingLayout.CanSetViewedFloor(1) ~= false then return "housing-floor" end
+            if type(C_MerchantFrame.GetMerchantCurrencies()) ~= "table" then return "merchant-currencies" end
+            C_PartyInfo.ConfirmReadyCheck(true)
+            C_PartyInfo.DemoteAssistant("player")
+            C_PartyInfo.DoReadyCheck()
+            if C_PartyInfo.IsGUIDInGroup("Player-1") ~= false then return "party-guid" end
+            C_PartyInfo.PromoteToAssistant("player")
+            C_PartyInfo.PromoteToLeader("player")
+            C_PartyInfo.SetEveryoneIsAssistant(true)
+            C_PartyInfo.UninviteUnit("party1")
+            C_PingSecure.SetPendingPingOffScreenCallback(function() return "ping" end)
+            if type(GetSecurePendingPingOffScreenCallback()) ~= "function" then return "ping-callback" end
+            C_PingSecure.ClearPendingPingOffScreenCallback()
+            if GetSecurePendingPingOffScreenCallback() ~= nil then return "ping-clear" end
+            if type(C_QuestHub.GetDragonridingRacesForAreaPOI(1)) ~= "table" then return "dragonraces" end
+            if C_UIFileAsset.GetFileID(123) ~= 123 then return "file-id-number" end
+            if C_UIFileAsset.GetFileID("Interface/Unknown") ~= nil then return "file-id-path" end
+            if C_UIFileAsset.IsKnownFile("Interface/Unknown") ~= false then return "file-known" end
+            if C_UIFileAsset.IsLooseFile("Interface/Unknown") ~= false then return "file-loose" end
+            if GetEventCPUUsage() ~= 0 then return "event-cpu" end
+            if GetFunctionCPUUsage(function() end) ~= 0 then return "function-cpu" end
+            if GetScriptCPUUsage(CreateFrame("Frame"), "OnShow") ~= 0 then return "script-cpu" end
+            local buttonCallback = function() return "button" end
+            SetSecurePendingButtonCallback(buttonCallback)
+            if GetSecurePendingButtonCallback() ~= buttonCallback then return "button-callback" end
+            local toggleCallback = function() return "toggle" end
+            SetSecurePendingToggleRunCallback(toggleCallback)
+            if GetSecurePendingToggleRunCallback() ~= toggleCallback then return "toggle-callback" end
+            if type(GameTooltip_AddMoneyLine) ~= "function" then return "money-line" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
 #[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_cvars_and_enums_exist() {

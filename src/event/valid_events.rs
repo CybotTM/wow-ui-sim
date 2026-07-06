@@ -49,6 +49,13 @@ pub fn is_registerable_event(name: &str) -> bool {
     if PATCH_12_1_REGISTERABLE_EVENTS.binary_search(&name).is_ok() {
         return true;
     }
+    #[cfg(feature = "retail-12-0-7")]
+    if PATCH_12_0_7_REGISTERABLE_EVENTS
+        .binary_search(&name)
+        .is_ok()
+    {
+        return true;
+    }
     let first = name.as_bytes().first().copied().unwrap_or(0);
     if first <= b'G' {
         return EVENTS_A.contains(&name) || EVENTS_A_TAIL.contains(&name);
@@ -56,6 +63,9 @@ pub fn is_registerable_event(name: &str) -> bool {
     let chunk = if first <= b'P' { EVENTS_B } else { EVENTS_C };
     chunk.contains(&name)
 }
+
+#[cfg(feature = "retail-12-0-7")]
+const PATCH_12_0_7_REGISTERABLE_EVENTS: &[&str] = &["ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED"];
 
 #[cfg(feature = "retail-12-1-0")]
 const PATCH_12_1_REMOVED_REGISTERABLE_EVENTS: &[&str] = &["BATTLETAG_INVITE_SHOW"];
@@ -148,6 +158,14 @@ mod retail_tests {
     #[test]
     fn url_texture_request_result_is_registerable() {
         assert!(is_registerable_event("URL_TEXTURE_REQUEST_RESULT"));
+    }
+
+    #[cfg(feature = "retail-12-0-7")]
+    #[test]
+    fn patch_12_0_7_events_are_registerable() {
+        assert!(is_registerable_event(
+            "ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED"
+        ));
     }
 }
 
