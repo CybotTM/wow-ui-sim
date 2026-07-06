@@ -56,6 +56,7 @@ fn register_texture_methods(state: &mut LuaState, table_ref: BattleNetTable) -> 
 fn register_friend_query_methods(state: &mut LuaState, table_ref: BattleNetTable) -> LuaResult<()> {
     #[cfg(feature = "retail-12-1-0")]
     register_patch_12_1_friend_query_methods(state, table_ref)?;
+    table_set_rust_fn_static(state, table_ref, "InviteFriend", c_bnet_invite_friend)?;
     table_set_rust_fn_static(state, table_ref, "GetNumFriends", c_bnet_get_num_friends)?;
     table_set_rust_fn_static(
         state,
@@ -136,6 +137,73 @@ fn c_bnet_get_num_friends(state: &mut LuaState) -> LuaResult<u32> {
     let count = borrow_state(state)?.bnet_friends.len();
     state.push(Val::Num(count as f64));
     Ok(1)
+}
+
+fn c_bnet_invite_friend(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(raw_name) = Option::<String>::from_stack(state, 1)? else {
+        return Ok(0);
+    };
+    let friend_name = raw_name.trim();
+    if friend_name.is_empty() {
+        return Ok(0);
+    }
+
+    let mut sim = borrow_state_mut(state)?;
+    if sim
+        .bnet_friends
+        .iter()
+        .any(|friend| is_same_bnet_friend(friend, friend_name))
+    {
+        return Ok(0);
+    }
+
+    let next_index = sim.bnet_friends.len() as i32 + 1;
+    let next_account_id = next_bnet_account_id(&sim.bnet_friends);
+    sim.bnet_friends.push(invited_bnet_friend(
+        friend_name,
+        next_index,
+        next_account_id,
+    ));
+    Ok(0)
+}
+
+fn is_same_bnet_friend(friend: &BnetFriend, name: &str) -> bool {
+    friend.battle_tag.eq_ignore_ascii_case(name) || friend.account_name.eq_ignore_ascii_case(name)
+}
+
+fn next_bnet_account_id(friends: &[BnetFriend]) -> i32 {
+    friends
+        .iter()
+        .map(|friend| friend.bnet_account_id)
+        .max()
+        .unwrap_or(100_000)
+        + 1
+}
+
+fn invited_bnet_friend(name: &str, friend_index: i32, account_id: i32) -> BnetFriend {
+    BnetFriend {
+        friend_index,
+        bnet_account_guid: format!("BNet-0-{account_id}"),
+        bnet_account_id: account_id,
+        battle_tag: name.to_string(),
+        account_name: account_name_from_invite(name),
+        note: String::new(),
+        custom_message: String::new(),
+        custom_message_time: 0,
+        appear_offline: false,
+        is_battle_tag_friend: true,
+        is_friend: true,
+        is_favorite: false,
+        is_afk: false,
+        is_dnd: false,
+        last_online_time: 0,
+        raf_link_type: 0,
+        game_accounts: Vec::new(),
+    }
+}
+
+fn account_name_from_invite(name: &str) -> String {
+    name.split('#').next().unwrap_or(name).to_string()
 }
 
 fn c_bnet_get_friend_account_info(state: &mut LuaState) -> LuaResult<u32> {

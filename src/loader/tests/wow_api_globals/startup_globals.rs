@@ -86,8 +86,16 @@ fn test_patch_12_0_7_safe_global_bridges() {
     let result: String = env
         .eval(
             r#"
-            if C_BattleNet.InviteFriend == nil then return "bnet-invite" end
-            C_BattleNet.InviteFriend("Player-Realm")
+            local initialBNetFriends = C_BattleNet.GetNumFriends()
+            C_BattleNet.InviteFriend("Jaina#3000")
+            if C_BattleNet.GetNumFriends() ~= initialBNetFriends + 1 then return "bnet-invite-count" end
+            local invitedInfo = C_BattleNet.GetFriendAccountInfo(initialBNetFriends + 1)
+            if type(invitedInfo) ~= "table" then return "bnet-invite-info" end
+            if invitedInfo.battleTag ~= "Jaina#3000" then return "bnet-invite-tag" end
+            if invitedInfo.accountName ~= "Jaina" then return "bnet-invite-account" end
+            if invitedInfo.isFriend ~= true then return "bnet-invite-friend" end
+            C_BattleNet.InviteFriend("Jaina#3000")
+            if C_BattleNet.GetNumFriends() ~= initialBNetFriends + 1 then return "bnet-invite-duplicate" end
             if type(C_Container.CalculateTotalNumberOfFreeBagSlots()) ~= "number" then return "container-free" end
             if type(C_DelvesUI.GetDelveEntranceTitleString(1)) ~= "string" then return "delve-title" end
             if type(C_DelvesUI.GetWorldTierDifficultyForActivePlayer()) ~= "number" then return "delve-world-tier" end

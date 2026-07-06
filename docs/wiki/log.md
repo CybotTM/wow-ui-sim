@@ -4,7 +4,7 @@ Chronological record of wiki operations.
 
 ## [2026-07-06] investigation | Patch 12.0.7 API audit
 
-Created `investigations/patch-12-0-7-api-audit.md` after bridging compatible 12.0.7 API gaps and pausing exact-behavior work. Recorded additive/inert API bridges, verification logs, and blocked areas requiring live behavior: restricted unit-token returns, `ENCOUNTER_END` payloads, EncounterEvents color state, SimulateMouse taint/focus restrictions, debug secret propagation, secure raidtarget actions, M+ CalendarTime returns, aura security changes, widget secret aspects, and deprecated/removal timing.
+Created `investigations/patch-12-0-7-api-audit.md` after bridging compatible 12.0.7 API gaps and pausing exact-behavior work. Recorded additive/inert API bridges, verification logs, and blocked areas requiring live behavior: restricted unit-token returns, `ENCOUNTER_END` payloads, EncounterEvents color state, SimulateMouse taint/focus restrictions, debug secret propagation, secure raidtarget actions, M+ CalendarTime returns, aura security changes, widget secret aspects, and deprecated/removal timing. Updated after `C_BattleNet.InviteFriend` moved from inert bridge to modeled `SimState.bnet_friends` mutation.
 
 ## [2026-07-06] investigation | Patch 12.1 API audit
 

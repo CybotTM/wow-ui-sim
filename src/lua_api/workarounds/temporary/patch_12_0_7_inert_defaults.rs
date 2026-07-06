@@ -41,9 +41,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
         end
     end
 
-    local battleNet = ensure_namespace("C_BattleNet")
-    set_default(battleNet, "InviteFriend", noop)
-
     local delves = ensure_namespace("C_DelvesUI")
     set_default(delves, "GetDelveEntranceTitleString", function() return "" end)
     set_default(delves, "GetWorldTierDifficultyForActivePlayer", return_nil)

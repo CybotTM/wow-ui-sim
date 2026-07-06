@@ -10,9 +10,11 @@ The audit source was the Warcraft Wiki Patch 12.0.7 API changes page, saved loca
 
 ### Completed compatible bridge work
 
-The simulator now provides safe 12.0.7 additive probes for API names that can be inert without pretending to model live game state:
+The simulator now provides a modeled 12.0.7 Battle.net friend-list mutation:
 
-- `C_BattleNet.InviteFriend`
+- `C_BattleNet.InviteFriend` appends a queryable offline Battle.net friend to `SimState.bnet_friends`, ignores empty/duplicate invites, and is visible through `GetNumFriends`/`GetFriendAccountInfo`.
+
+The simulator also provides safe 12.0.7 additive probes for API names that can be inert without pretending to model live game state:
 - `C_DelvesUI.GetDelveEntranceTitleString`
 - `C_DurationUtil.CreateManualClock`
 - `C_DurationUtil.CreateDurationTextBinding`
@@ -34,7 +36,8 @@ Already-existing coverage from prior work included `C_Container.CalculateTotalNu
 
 Key implementation locations:
 
-- `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — version-gated inert 12.0.7 defaults.
+- `src/c_api/c_battle_net.rs` — modeled `C_BattleNet.InviteFriend` backed by `SimState.bnet_friends`.
+- `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — version-gated inert 12.0.7 defaults for still-unmodeled APIs.
 - `src/lua_api/workarounds/mod.rs`, `src/lua_api/workarounds/temporary/mod.rs` — bootstrap registration.
 - `src/event/valid_events.rs` — 12.0.7 event registration gate.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — regression test for safe 12.0.7 global bridges.
@@ -85,6 +88,7 @@ If the exact-behavior work resumes, create live PTR probe addons for restricted-
 ## Sources
 
 - `/tmp/warcraft_patch_12_0_7_api_changes.txt` — local snapshot of the patch API-change source.
+- `src/c_api/c_battle_net.rs` — modeled Battle.net friend-list APIs.
 - `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — implemented inert 12.0.7 bridge defaults.
 - `src/event/valid_events.rs` — 12.0.7 event gate.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — 12.0.7 safe bridge regression coverage.
