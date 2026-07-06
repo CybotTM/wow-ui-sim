@@ -317,6 +317,8 @@ pub struct KeyValueXml {
     pub value: String,
     #[serde(rename = "@type")]
     pub value_type: Option<String>,
+    #[serde(rename = "@source")]
+    pub source: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Clone)]

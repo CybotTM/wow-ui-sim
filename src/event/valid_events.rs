@@ -38,6 +38,10 @@ pub fn is_registerable_event(name: &str) -> bool {
 
 #[cfg(any(feature = "client-retail", feature = "client-ptr"))]
 pub fn is_registerable_event(name: &str) -> bool {
+    #[cfg(feature = "client-ptr")]
+    if PATCH_12_1_REGISTERABLE_EVENTS.binary_search(&name).is_ok() {
+        return true;
+    }
     let first = name.as_bytes().first().copied().unwrap_or(0);
     if first <= b'G' {
         return EVENTS_A.contains(&name) || EVENTS_A_TAIL.contains(&name);
@@ -45,6 +49,49 @@ pub fn is_registerable_event(name: &str) -> bool {
     let chunk = if first <= b'P' { EVENTS_B } else { EVENTS_C };
     chunk.contains(&name)
 }
+
+#[cfg(feature = "client-ptr")]
+const PATCH_12_1_REGISTERABLE_EVENTS: &[&str] = &[
+    "BATTLE_NET_FRIEND_TAG_ENABLED_STATUS_UPDATED",
+    "BATTLE_NET_TITLE_FRIEND_CUSTOM_NAME_ENABLED_STATUS_UPDATED",
+    "CHAT_MSG_GUILD_DISCORD",
+    "CONFIRM_BATTLE_NET_FRIEND_INVITE_SHOW",
+    "DISCORD_GUILD_ACHIEVEMENT",
+    "DISCORD_GUILD_LOBBY_UPDATE",
+    "DISCORD_GUILD_SETTINGS_UPDATE",
+    "DISCORD_LINK_UPDATE",
+    "DISCORD_SERVER_LIST_UPDATE",
+    "DISCORD_STATUS_UPDATE",
+    "GROUP_BUFF_VISUAL_ALERTS_CHANGED",
+    "GUILD_RANKS_UPDATE_ACTIVE_PLAYER",
+    "HIDDEN_GROUP_BUFFS_CHANGED",
+    "HOUSE_RESET_COMPLETED",
+    "HOUSE_RESET_FAILED",
+    "HOUSING_BLUEPRINTS_AVAILABILITY_CHANGED",
+    "HOUSING_BLUEPRINT_COLLECTION_FAILURE",
+    "HOUSING_BLUEPRINT_COLLECTION_RECEIVED",
+    "HOUSING_BLUEPRINT_CONTENTS_FAILURE",
+    "HOUSING_BLUEPRINT_CONTENTS_RECEIVED",
+    "HOUSING_BLUEPRINT_DELETE_FAILURE",
+    "HOUSING_BLUEPRINT_DELETE_SUCCESS",
+    "HOUSING_BLUEPRINT_EXPORT_FAILURE",
+    "HOUSING_BLUEPRINT_EXPORT_SUCCESS",
+    "HOUSING_BLUEPRINT_IMPORT_FAILURE",
+    "HOUSING_BLUEPRINT_IMPORT_STARTED",
+    "HOUSING_BLUEPRINT_IMPORT_SUCCESS",
+    "HOUSING_BLUEPRINT_RENAME_FAILURE",
+    "HOUSING_BLUEPRINT_RENAME_SUCCESS",
+    "HOUSING_NEW_DECOR_PLACE_COMPLETE",
+    "IGNORE_NEIGHBORHOOD_RESPONSE",
+    "LEGACY_FRIEND_SYSTEM_STATUS_UPDATED",
+    "LFG_LIST_CENSORED_ACTIVE_ENTRY_UPDATE",
+    "LFG_LIST_REVEALED_CENSORED_ACTIVE_ENTRY",
+    "SOCIAL_UI_FRIENDS_LIST_SYSTEM_STATUS_UPDATED",
+    "SOCIAL_UI_SOCIAL_QUEUE_SYSTEM_STATUS_UPDATED",
+    "SOCIAL_UI_SYSTEM_STATUS_UPDATED",
+    "UNIT_PING_PIN_ADDED",
+    "UNIT_PING_PIN_REMOVED",
+];
 
 /// Check if an event name is known to the WoW client (registerable or not).
 pub fn is_valid_event(name: &str) -> bool {
@@ -85,12 +132,27 @@ pub fn is_callback_event(name: &str) -> bool {
 }
 
 #[cfg(all(test, feature = "client-retail"))]
-mod tests {
+mod retail_tests {
     use super::is_registerable_event;
 
     #[test]
     fn url_texture_request_result_is_registerable() {
         assert!(is_registerable_event("URL_TEXTURE_REQUEST_RESULT"));
+    }
+}
+
+#[cfg(all(test, feature = "client-ptr"))]
+mod ptr_tests {
+    use super::is_registerable_event;
+
+    #[test]
+    fn patch_12_1_events_are_registerable() {
+        assert!(is_registerable_event(
+            "BATTLE_NET_FRIEND_TAG_ENABLED_STATUS_UPDATED"
+        ));
+        assert!(is_registerable_event("GROUP_BUFF_VISUAL_ALERTS_CHANGED"));
+        assert!(is_registerable_event("HOUSING_BLUEPRINT_IMPORT_STARTED"));
+        assert!(is_registerable_event("UNIT_PING_PIN_ADDED"));
     }
 }
 

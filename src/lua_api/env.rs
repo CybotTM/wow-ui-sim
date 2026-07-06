@@ -246,6 +246,10 @@ impl WowLuaEnv {
         log("[Startup] apply_post_load_workarounds: workarounds complete");
         self.restore_post_cleanup_globals();
         log("[Startup] apply_post_load_workarounds: globals restored");
+        #[cfg(feature = "client-ptr")]
+        crate::ptr::compat_bootstrap::apply_post_load(self);
+        #[cfg(feature = "client-ptr")]
+        log("[Startup] apply_post_load_workarounds: PTR compatibility restored");
         let _ = self.exec(
             "rawset(_G, 'seterrorhandler', debug.newsecurefunction(rawget(_G, 'seterrorhandler')))",
         );

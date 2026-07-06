@@ -83,6 +83,11 @@ fn register_c_item_existence_queries(
         &[
             ("DoesItemExist", c_item_does_item_exist),
             ("DoesItemExistByID", c_item_does_item_exist_by_id),
+            #[cfg(feature = "client-ptr")]
+            (
+                "DoesItemMatchSpellItemCondition",
+                c_item_does_item_match_spell_item_condition,
+            ),
             ("GetItemID", c_item_get_item_id),
             ("IsItemDataCached", c_item_is_item_data_cached),
             ("IsItemDataCachedByID", c_item_is_item_data_cached_by_id),
@@ -155,6 +160,13 @@ fn register_c_item_methods(
         table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
+}
+
+#[cfg(feature = "client-ptr")]
+fn c_item_does_item_match_spell_item_condition(state: &mut LuaState) -> LuaResult<u32> {
+    // Spell-item condition metadata is not modeled; default to no match.
+    state.push(Val::Bool(false));
+    Ok(1)
 }
 
 fn c_item_does_item_exist(state: &mut LuaState) -> LuaResult<u32> {

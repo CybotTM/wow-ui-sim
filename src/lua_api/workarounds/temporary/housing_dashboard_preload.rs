@@ -22,6 +22,21 @@ if type(C_Housing) == "table" then
         end
     end
 
+    function C_Housing.HouseFinderIgnoreNeighborhood()
+    end
+
+    function C_Housing.IsInsideOwnedHouse()
+        return false
+    end
+
+    function C_Housing.IsInsideOwnedHouseOrPlot()
+        return false
+    end
+
+    function C_Housing.IsInsideOwnedPlot()
+        return false
+    end
+
     if type(ClearCachedActivitiesForPlayer) ~= "function" then
         function ClearCachedActivitiesForPlayer() end
     end
@@ -196,13 +211,30 @@ mod tests {
             map_id,
             texture_suffix,
             faction_match,
+            inside_house,
+            inside_house_or_plot,
+            inside_plot,
             started,
             hidden_dashboard,
             shown_finder,
             loaded_house_finder,
             neighborhood_events,
             event_count,
-        ): (bool, i64, String, bool, bool, bool, bool, bool, i64, i64) = env
+        ): (
+            bool,
+            i64,
+            String,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            i64,
+            i64,
+        ) = env
             .eval(
                 r#"
                 local started = C_Housing.StartTutorial()
@@ -210,6 +242,9 @@ mod tests {
                     C_Housing.GetUIMapIDForNeighborhood("wow-ui-sim-neighborhood-umber-grove"),
                     C_Housing.GetNeighborhoodTextureSuffix("wow-ui-sim-neighborhood-dawnmeadow"),
                     C_Housing.DoesFactionMatchNeighborhood("ignored"),
+                    C_Housing.IsInsideOwnedHouse(),
+                    C_Housing.IsInsideOwnedHouseOrPlot(),
+                    C_Housing.IsInsideOwnedPlot(),
                     started,
                     HousingDashboardFrame.hidden,
                     HouseFinderFrame.shown,
@@ -224,6 +259,9 @@ mod tests {
         assert_eq!(map_id, 2248);
         assert_eq!(texture_suffix, "elwynn");
         assert!(faction_match);
+        assert!(!inside_house);
+        assert!(!inside_house_or_plot);
+        assert!(!inside_plot);
         assert!(started);
         assert!(hidden_dashboard);
         assert!(shown_finder);

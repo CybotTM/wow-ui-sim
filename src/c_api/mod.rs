@@ -31,6 +31,7 @@ pub mod c_paper_doll_info;
 pub mod c_party_info;
 pub mod c_ping_secure;
 pub mod c_player_interaction_manager;
+pub mod c_pvp;
 pub mod c_report_system;
 pub mod c_social;
 pub mod c_spec;
@@ -90,6 +91,7 @@ fn register_auxiliary_utility_tables(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {
     c_string_util::register_c_string_util(state)?;
+    c_pvp::register_c_pvp_surface(state)?;
     c_ping_secure::register_c_ping_secure_surface(state)?;
     c_wowtoken_secure::register_c_wowtoken_secure(state)?;
     c_wow_token_public::register_c_wow_token_public(state)?;

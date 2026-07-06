@@ -87,7 +87,13 @@ pub(super) fn register_virtual_or_intrinsic(
                 _ => base.to_string(),
             });
         }
-        crate::xml::register_template(name, widget_type, registered);
+        let local_source = template_local_source(env);
+        crate::xml::register_template_with_local_source(
+            name,
+            widget_type,
+            registered,
+            local_source,
+        );
     }
     if let Some(ref sm) = frame.secure_mixin {
         super::secure_mixin::apply_secure_mixins(env, sm);
@@ -97,6 +103,21 @@ pub(super) fn register_virtual_or_intrinsic(
     } else {
         None // child virtual frames are still created
     }
+}
+
+fn template_local_source(env: &LoaderEnv<'_>) -> Option<rilua::Val> {
+    let scoped_env = env.state().borrow().loading_scoped_script_env;
+    if scoped_env.is_some() {
+        return scoped_env;
+    }
+    env.with_state(|state| {
+        let globals = rilua::Val::Table(state.global);
+        let addon_table =
+            crate::lua_api::methods::table_get_static(state, globals, "__wow_loading_addon_table");
+        Ok::<rilua::Val, crate::Error>(addon_table)
+    })
+    .ok()
+    .filter(|value| !matches!(value, rilua::Val::Nil))
 }
 
 /// Prepend intrinsic base template to the inherits chain.

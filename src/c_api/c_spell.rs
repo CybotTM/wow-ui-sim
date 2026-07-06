@@ -6,7 +6,7 @@
 //! - `GetSpellCooldown(spellID)` → `SpellCooldownInfo` table from
 //!   `SimState.spell_cooldowns` (start/duration/isEnabled/isActive/modRate).
 //! - `GetSpellDescription(spellID)` → localized spell description, or empty.
-//! - `GetSpellTexture(spellID)` → `(fallbackTexturePath, fileDataID)`.
+//! - `GetSpellTexture(spellID)` → `(fallbackTexturePath, fileDataID, conditionalIconID)`.
 //! - `GetSpellPowerCost(spellID)` → `SpellPowerCostInfo[]` table or nil.
 //! - `GetSchoolString(mask)` → localized school name for a bitmask.
 //! - `PickupSpell(spellID)` → sets cursor to a spell and fires `CURSOR_CHANGED`.
@@ -93,7 +93,19 @@ const SPELL_BOOLEAN_METHODS: &[(&str, SpellScriptFn)] = &[
     ("IsSpellHelpful", is_spell_helpful),
     ("IsSpellHarmful", is_spell_harmful),
     ("IsSpellUsable", is_spell_usable),
+    #[cfg(feature = "client-ptr")]
+    (
+        "TargetSpellChecksItemCondition",
+        target_spell_checks_item_condition,
+    ),
 ];
+
+#[cfg(feature = "client-ptr")]
+fn target_spell_checks_item_condition(state: &mut LuaState) -> LuaResult<u32> {
+    // Spell-item condition metadata is not modeled; default to no match.
+    state.push(Val::Bool(false));
+    Ok(1)
+}
 
 fn register_spell_methods(
     state: &mut LuaState,
@@ -171,6 +183,12 @@ fn get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
     let texture = create_string(state, "Interface\\ICONS\\INV_Misc_QuestionMark");
     state.push(texture);
     state.push(Val::Num(icon_id as f64));
+    #[cfg(feature = "client-ptr")]
+    {
+        state.push(Val::Nil);
+        return Ok(3);
+    }
+    #[cfg(not(feature = "client-ptr"))]
     Ok(2)
 }
 

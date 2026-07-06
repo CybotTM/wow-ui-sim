@@ -400,6 +400,32 @@ pub(super) fn get_status_bar_desaturated(state: &mut LuaState) -> LuaResult<u32>
 // register_statusbar
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "client-ptr")]
+fn set_render_mode(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::methods::frame_id_from_stack(state, 1)?;
+    let fields = crate::lua_api::methods::get_or_create_frame_fields(state, id);
+    let value = crate::lua_bridge::stack_val(state, 2);
+    let mode = crate::lua_api::methods::val_to_string(state, value)
+        .map(|mode| crate::lua_api::methods::create_string(state, &mode))
+        .unwrap_or(value);
+    crate::lua_api::methods::table_set(state, fields, "__statusBarRenderMode", mode);
+    Ok(0)
+}
+
+#[cfg(feature = "client-ptr")]
+fn get_render_mode(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::methods::frame_id_from_stack(state, 1)?;
+    let fields = crate::lua_api::methods::get_or_create_frame_fields(state, id);
+    let mode = crate::lua_api::methods::table_get(state, fields, "__statusBarRenderMode");
+    if matches!(mode, Val::Nil) {
+        let default_mode = crate::lua_api::methods::create_string(state, "Standard");
+        state.push(default_mode);
+    } else {
+        state.push(mode);
+    }
+    Ok(1)
+}
+
 const STATUSBAR_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     // Colors + texture
     ("SetStatusBarColor", set_status_bar_color),
@@ -418,6 +444,11 @@ const STATUSBAR_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetToTargetValue", set_to_target_value),
     ("SetTimerDuration", set_timer_duration),
     ("GetTimerDuration", get_timer_duration),
+    // Render mode
+    #[cfg(feature = "client-ptr")]
+    ("SetRenderMode", set_render_mode),
+    #[cfg(feature = "client-ptr")]
+    ("GetRenderMode", get_render_mode),
     // Desaturation
     ("SetStatusBarDesaturated", set_desaturated),
     ("GetStatusBarDesaturated", get_status_bar_desaturated),

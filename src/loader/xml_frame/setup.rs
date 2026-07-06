@@ -7,7 +7,7 @@ use std::time::Instant;
 use crate::loader::LoadTiming;
 use crate::loader::error::LoadError;
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::methods::{frame_ref, table_get};
+use crate::lua_api::methods::{create_string, frame_ref, table_get, table_set};
 use rilua::Val;
 
 pub(super) struct SetupFrame<'a> {
@@ -461,6 +461,59 @@ fn apply_xml_properties_direct(
     direct::apply_xml_id(state, frame_id, frame);
     direct::apply_xml_letters(state, frame_id, frame, inherits);
     direct::apply_xml_slider_orientation(state, frame_id, frame, inherits);
+    apply_xml_on_update_mode(env, frame_id, frame);
+    apply_xml_forbidden_aspects(env, frame_id, frame);
+}
+
+fn apply_xml_on_update_mode(env: &LoaderEnv<'_>, frame_id: u64, frame: &crate::xml::FrameXml) {
+    let Some(mode) = frame.on_update_mode.as_deref() else {
+        return;
+    };
+    let normalized = match mode.to_ascii_lowercase().as_str() {
+        "disabled" => "Disabled",
+        "runwhenvisibleonce" => "RunWhenVisibleOnce",
+        "runonce" => "RunOnce",
+        "runalways" => "RunAlways",
+        _ => "RunWhenVisible",
+    };
+    let _ = env.with_state(|state| {
+        let frame = frame_ref(state, frame_id)?;
+        let mode = create_string(state, normalized);
+        table_set(state, frame, "__onUpdateMode", mode);
+        Ok::<(), crate::Error>(())
+    });
+}
+
+fn apply_xml_forbidden_aspects(env: &LoaderEnv<'_>, frame_id: u64, frame: &crate::xml::FrameXml) {
+    let Some(forbidden_aspects) = frame.forbidden_aspects() else {
+        return;
+    };
+    let mask = forbidden_aspects
+        .aspects
+        .iter()
+        .fold(0_u64, |mask, aspect| {
+            mask | forbidden_aspect_mask(&aspect.aspect)
+        });
+    if mask == 0 {
+        return;
+    }
+    let _ = env.with_state(|state| {
+        let frame = frame_ref(state, frame_id)?;
+        table_set(state, frame, "__forbiddenAspects", Val::Num(mask as f64));
+        Ok::<(), crate::Error>(())
+    });
+}
+
+fn forbidden_aspect_mask(aspect: &str) -> u64 {
+    match aspect {
+        "UntrustedScriptExecution" => 1,
+        "UntrustedLayoutScriptExecution" => 2,
+        "EventRegistrations" => 4,
+        "AlwaysPropagateInput" => 8,
+        "ScriptedInput" => 16,
+        "QueryFocus" => 32,
+        _ => 0,
+    }
 }
 
 /// Set the `intrinsic` property on intrinsic frames (e.g. frame.intrinsic = "DropdownButton").

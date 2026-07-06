@@ -21,6 +21,15 @@ if SpellCanTargetQuest == nil then
   end
 end
 
+if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
+  C_QuestHub = C_QuestHub or __wow_namespace()
+  if rawget(C_QuestHub, "IsAreaPOICurrentlyRelatedToHub") == nil then
+    function C_QuestHub.IsAreaPOICurrentlyRelatedToHub()
+      return false
+    end
+  end
+end
+
 -- Auto quest popups (tutorial toasts). Not simulated; `for i = 1, N do`
 -- loops in AutoQuestPopUpTracker iterate zero times.
 if GetNumAutoQuestPopUps == nil then

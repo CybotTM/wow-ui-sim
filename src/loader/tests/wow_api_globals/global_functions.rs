@@ -66,6 +66,38 @@ fn test_wipe_function() {
     t.assert_lua_true("return WIPE_A_NIL", "wipe should clear named keys");
 }
 
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_global_security_helpers() {
+    let env = WowLuaEnv::new().unwrap();
+    let (specialization_system, copied_value, copied_nested, same_nested, table_security): (
+        String,
+        i32,
+        i32,
+        bool,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local source = { value = 7, nested = { value = 9 } }
+            local copy = securecopy(source)
+            settablesecurity({}, "secure")
+            return type(GetSpecializationSystem()),
+                copy.value,
+                copy.nested.value,
+                copy.nested == source.nested,
+                type(settablesecurity)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(specialization_system, "string");
+    assert_eq!(copied_value, 7);
+    assert_eq!(copied_nested, 9);
+    assert!(!same_nested, "securecopy should deep-copy nested tables");
+    assert_eq!(table_security, "function");
+}
+
 #[test]
 fn test_copy_table_deep() {
     let (t, _) = load_test_lua(

@@ -39,7 +39,7 @@ pub(crate) fn fire(
     env.gc_stop();
 
     reconcile_runtime_cache(env);
-    let frame_ids = visible_on_update_frame_ids(env);
+    let frame_ids = on_update_frame_ids(env);
 
     {
         let started = Instant::now();
@@ -75,19 +75,11 @@ fn reconcile_runtime_cache(env: &super::env::WowLuaEnv) {
     super::script_helpers::reconcile_on_update_runtime_cache_if_dirty(&mut lua);
 }
 
-fn visible_on_update_frame_ids(env: &super::env::WowLuaEnv) -> Vec<u64> {
-    let mut sim = env.state().borrow_mut();
-    if sim.visible_on_update_cache.is_none() {
-        let mut visible = sim
-            .on_update_frames
-            .iter()
-            .copied()
-            .filter(|&id| sim.widgets.is_ancestor_visible(id))
-            .collect::<Vec<_>>();
-        visible.sort_unstable();
-        sim.visible_on_update_cache = Some(visible);
-    }
-    sim.visible_on_update_cache.clone().unwrap_or_default()
+fn on_update_frame_ids(env: &super::env::WowLuaEnv) -> Vec<u64> {
+    let sim = env.state().borrow();
+    let mut frame_ids = sim.on_update_frames.iter().copied().collect::<Vec<_>>();
+    frame_ids.sort_unstable();
+    frame_ids
 }
 
 fn dispatch_on_update_handlers(

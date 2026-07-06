@@ -194,10 +194,10 @@ pub(crate) fn apply_frame_mixin_with_partitions(
     inbound_partition: Option<&str>,
     secure_delegates: bool,
 ) {
-    let mixin_val = if source == Some("secure") {
-        resolve_secure_or_scoped_global_path(state, mixin_name)
-    } else {
-        resolve_scoped_or_global_path(state, mixin_name)
+    let mixin_val = match source {
+        Some("secure") => resolve_secure_or_scoped_global_path(state, mixin_name),
+        Some("local") => resolve_local_template_path(state, mixin_name),
+        _ => resolve_scoped_or_global_path(state, mixin_name),
     };
     if source == Some("secure")
         || target_partition.is_some()
@@ -267,6 +267,13 @@ pub(super) fn resolve_global_path(state: &mut LuaState, path: &str) -> Val {
     }
     let secureenv = registry_get(state, "__secureenv");
     resolve_table_path(state, secureenv, path)
+}
+
+fn resolve_local_template_path(state: &mut LuaState, path: &str) -> Val {
+    let globals = Val::Table(state.global);
+    let local_source =
+        crate::lua_api::methods::table_get_static(state, globals, "__wow_loading_addon_table");
+    resolve_table_path(state, local_source, path)
 }
 
 fn resolve_secure_or_scoped_global_path(state: &mut LuaState, path: &str) -> Val {

@@ -13,6 +13,36 @@ if rawget(C_UnitAuras, "SetPrivateWarningTextAnchor") == nil then
     function C_UnitAuras.SetPrivateWarningTextAnchor()
     end
 end
+
+if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
+    if type(C_UnitAuras._groupBuffVisualAlerts) ~= "table" then
+        C_UnitAuras._groupBuffVisualAlerts = {}
+    end
+    if rawget(C_UnitAuras, "GetGroupBuffVisualAlerts") == nil then
+        function C_UnitAuras.GetGroupBuffVisualAlerts()
+            return C_UnitAuras._groupBuffVisualAlerts
+        end
+    end
+    if rawget(C_UnitAuras, "SetGroupBuffVisualAlerts") == nil then
+        function C_UnitAuras.SetGroupBuffVisualAlerts(alerts)
+            C_UnitAuras._groupBuffVisualAlerts = type(alerts) == "table" and alerts or {}
+        end
+    end
+
+    if type(C_UnitAuras._hiddenGroupBuffs) ~= "table" then
+        C_UnitAuras._hiddenGroupBuffs = {}
+    end
+    if rawget(C_UnitAuras, "GetHiddenGroupBuffs") == nil then
+        function C_UnitAuras.GetHiddenGroupBuffs()
+            return C_UnitAuras._hiddenGroupBuffs
+        end
+    end
+    if rawget(C_UnitAuras, "SetHiddenGroupBuffs") == nil then
+        function C_UnitAuras.SetHiddenGroupBuffs(hiddenBuffs)
+            C_UnitAuras._hiddenGroupBuffs = type(hiddenBuffs) == "table" and hiddenBuffs or {}
+        end
+    end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {

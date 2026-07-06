@@ -1,6 +1,7 @@
 //! Template registry for virtual frames.
 
 use super::types::{FrameChildElement, FrameXml};
+use rilua::Val;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -11,6 +12,7 @@ pub struct TemplateEntry {
     pub name: String,
     pub widget_type: String,
     pub frame: FrameXml,
+    pub local_source: Option<Val>,
 }
 
 #[derive(Default)]
@@ -60,6 +62,15 @@ fn with_anim_group_template_registry_mut<R>(
 
 /// Register a template (virtual frame) in the global registry.
 pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
+    register_template_with_local_source(name, widget_type, frame, None);
+}
+
+pub fn register_template_with_local_source(
+    name: &str,
+    widget_type: &str,
+    frame: FrameXml,
+    local_source: Option<Val>,
+) {
     with_template_registry_mut(|registry| {
         let lower = name.to_ascii_lowercase();
         registry.entries.insert(
@@ -68,6 +79,7 @@ pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
                 name: name.to_string(),
                 widget_type: widget_type.to_string(),
                 frame,
+                local_source,
             }),
         );
         registry.entries_ci.insert(lower, name.to_string());

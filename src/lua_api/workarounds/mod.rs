@@ -193,7 +193,8 @@ fn apply_runtime_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     temporary::map_runtime_state::apply_bootstrap(lua)?;
     temporary::perks_activities_state::apply_bootstrap(lua)?;
     temporary::private_aura_state::apply_bootstrap(lua)?;
-    temporary::reputation_state::apply_bootstrap(lua)
+    temporary::reputation_state::apply_bootstrap(lua)?;
+    temporary::roleset_defaults::apply_bootstrap(lua)
 }
 
 fn apply_account_and_social_state_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -353,6 +354,7 @@ fn apply_format_and_game_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn apply_inventory_and_spell_defaults(lua: &mut rilua::Lua) -> crate::Result<()> {
+    temporary::dye_color_defaults::apply_bootstrap(lua)?;
     temporary::inventory_query_defaults::apply_bootstrap(lua)?;
     temporary::item_button_helper_defaults::apply_bootstrap(lua)?;
     temporary::item_targeting_defaults::apply_bootstrap(lua)?;

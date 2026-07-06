@@ -79,6 +79,117 @@ fn test_startup_utility_globals_exist() {
     assert_eq!(kiosk_enabled_ty, "function");
     assert!(!kiosk_enabled);
 }
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_cvars_and_enums_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (screen_narration, discord_enabled, ping_target, group_buff, raid_warning, tiered_lairs): (
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            return type(GetCVar("accessibilityScreenNarrationEnabled")),
+                type(GetCVar("discordClientEnabled")),
+                type(GetCVar("pingTarget")),
+                type(Enum.CooldownViewerCategory.GroupBuff),
+                type(Enum.EditModeSystem.RaidWarning),
+                type(Enum.TieredEntranceType.Lairs)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(screen_narration, "string");
+    assert_eq!(discord_enabled, "string");
+    assert_eq!(ping_target, "string");
+    assert_eq!(group_buff, "number");
+    assert_eq!(raid_warning, "number");
+    assert_eq!(tiered_lairs, "number");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_safe_global_bridges() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            if C_CVar.AreCVarsLoaded() ~= true then return "cvars" end
+            if C_CombatAudioAlert.SpeakText("test") ~= 0 then return "combat-audio" end
+            if #C_CooldownViewer.GetGroupBuffItems() ~= 0 then return "cooldown-group-buffs" end
+            if #C_DyeColor.GetDyeColorsForItem(1) ~= 0 then return "dye-item" end
+            if #C_DyeColor.GetDyeColorsForItemLocation({}) ~= 0 then return "dye-location" end
+            if type(C_DelvesUI.GetFlavorNodeForCompanion(1)) ~= "number" then return "delve-flavor-node" end
+            if type(C_DelvesUI.GetFlavorNodeNameForCompanion(1)) ~= "string" then return "delve-flavor-name" end
+            if C_GuildInfo.IsDiscordStreamSeparate() ~= false then return "guild-discord" end
+            if C_Sound.PlaySoundWithOptions(1, { volumeOverride = 0.5 }) ~= nil then return "sound" end
+            if C_Navigation.GetNextWaypointForMap(1) ~= nil then return "navigation" end
+            if type(C_Ping.SendMacroPing({ type = Enum.PingSubjectType.ActionReady })) ~= "number" then return "ping-macro" end
+            local _, _, _, _, _, _, _, _, _, _, _, speciesID = C_PetJournal.GetPetInfoByIndex(1)
+            if speciesID then
+                local petInfo = C_PetJournal.GetPetInfoTableBySpeciesID(speciesID)
+                if type(petInfo) ~= "table" or petInfo.speciesID ~= speciesID then return "pet-table" end
+                if petInfo.canAttachToDecor ~= false or petInfo.creatureModelScale ~= 1 then return "pet-12-1-fields" end
+            end
+            local delveTierInfo = C_DelvesUI.GetActiveDelveTier()
+            if type(delveTierInfo) == "table" then
+                if delveTierInfo.overrideTooltipSpellID ~= nil then return "delve-override-tooltip" end
+                if delveTierInfo.isLFG ~= false then return "delve-is-lfg" end
+            end
+            local lfgInfo = C_LFGList.GetSearchResultInfo(7)
+            if type(lfgInfo) == "table" and lfgInfo.censored ~= false then return "lfg-censored-field" end
+            if C_PvP.CanSurrenderArena() ~= false then return "pvp" end
+            if C_QuestHub.IsAreaPOICurrentlyRelatedToHub(1, 2) ~= false then return "quest-hub" end
+            if C_RecruitAFriend.IsSystemEnabled() ~= false then return "raf-enabled" end
+            if C_RecruitAFriend.IsSystemSupported() ~= false then return "raf-supported" end
+            local canSummon, summonReason = C_RecruitAFriend.CanSummonFriend("player")
+            if canSummon ~= false or summonReason ~= nil then return "raf-summon" end
+            if C_Roleset.ApplyRolesetFilters({}) ~= true then return "roleset" end
+            if C_SocialQueue.IsSystemEnabled() ~= false then return "social-queue-enabled" end
+            if C_SocialQueue.IsSystemSupported() ~= false then return "social-queue-supported" end
+            if C_FriendList.IsLegacyFriendSystemEnabled() ~= false then return "legacy-friends" end
+            if C_SocialRestrictions.IsFriendsDisabled() ~= false then return "friends-disabled" end
+            if C_SocialUI.IsSystemEnabled() ~= false then return "social-ui" end
+            C_LFGList.ConfirmCensoredActiveEntry()
+            C_LFGList.RevealCensoredActiveEntry()
+            C_LFGList.RevealCensoredSearchResult(1)
+            if C_LFGList.DoesCensoredTextMatch("foo", "bar") ~= false then return "lfg-censored-match" end
+            if C_LFGList.IsCensoredActiveEntryUnresolved() ~= false then return "lfg-censored-active" end
+            if C_BattleNet.AreFriendTagsEnabled() ~= false then return "bnet-tags" end
+            if C_BattleNet.AreTitleFriendsEnabled() ~= false then return "bnet-title" end
+            if C_BattleNet.AreTitleFriendCustomNamesEnabled() ~= false then return "bnet-title-names" end
+            if C_BattleNet.IsBattleNetFriendsListEnabled() ~= false then return "bnet-list-enabled" end
+            if C_BattleNet.IsBattleNetFriendsListSupported() ~= false then return "bnet-list-supported" end
+            local bnetInfo = C_BattleNet.GetFriendAccountInfo(1)
+            if type(bnetInfo) == "table" then
+                if type(bnetInfo.friendTags) ~= "table" then return "bnet-friend-tags-field" end
+                if type(bnetInfo.friendLevel) ~= "number" then return "bnet-friend-level-field" end
+                if type(bnetInfo.gameAccountInfo) == "table" and type(bnetInfo.gameAccountInfo.classFilename) ~= "string" then return "bnet-class-filename-field" end
+            end
+            C_UnitAuras.SetGroupBuffVisualAlerts({ [123] = true })
+            if C_UnitAuras.GetGroupBuffVisualAlerts()[123] ~= true then return "group-alerts" end
+            C_UnitAuras.SetHiddenGroupBuffs({ [456] = true })
+            if C_UnitAuras.GetHiddenGroupBuffs()[456] ~= true then return "hidden-buffs" end
+            local slotID, icon, checkRelic = C_PaperDollInfo.GetInventorySlotInfo("MainHandSlot")
+            if slotID ~= 16 or type(icon) ~= "number" or checkRelic ~= false then return "paperdoll-slot" end
+            if C_Item.DoesItemMatchSpellItemCondition(6948, 6603) ~= false then return "item-condition" end
+            if C_Spell.TargetSpellChecksItemCondition(6603) ~= false then return "spell-condition" end
+            local _, spellIcon, conditionalIcon = C_Spell.GetSpellTexture(6603)
+            if type(spellIcon) ~= "number" or conditionalIcon ~= nil then return "spell-texture" end
+            local slotID2 = C_PaperDollInfo.GetInventorySlotInfoForInvSlot("MainHandSlot")
+            if slotID2 ~= 16 then return "paperdoll-invslot" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
 #[test]
 fn test_startup_service_globals_exist() {
     let env = WowLuaEnv::new().unwrap();

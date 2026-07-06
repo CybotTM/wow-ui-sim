@@ -35,6 +35,12 @@ end)
 installNavigationDefault("GetFrame", function()
     return nil
 end)
+
+if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
+    installNavigationDefault("GetNextWaypointForMap", function()
+        return nil
+    end)
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {

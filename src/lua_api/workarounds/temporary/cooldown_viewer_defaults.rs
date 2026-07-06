@@ -21,6 +21,12 @@ installCooldownViewerDefault("GetCooldownViewerCooldownInfo", function()
     return nil
 end)
 
+if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
+    installCooldownViewerDefault("GetGroupBuffItems", function()
+        return {}
+    end)
+end
+
 installCooldownViewerDefault("GetCooldownID", function()
     return nil
 end)

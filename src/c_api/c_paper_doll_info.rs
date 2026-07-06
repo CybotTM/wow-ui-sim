@@ -15,6 +15,8 @@ const HIGH_LEVEL_ARMOR_FORMULA_MIN_LEVEL: f64 = 60.0;
 pub(crate) fn register_c_paper_doll_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_PaperDollInfo")?;
     table_set_rust_fn_static(state, ns, "GetArmorEffectiveness", get_armor_effectiveness)?;
+    #[cfg(feature = "client-ptr")]
+    register_patch_12_1_inventory_slot_methods(state, ns)?;
     table_set_rust_fn_static(
         state,
         ns,
@@ -30,6 +32,25 @@ pub(crate) fn register_c_paper_doll_info_surface(state: &mut LuaState) -> LuaRes
     )?;
     table_set_rust_fn_static(state, ns, "GetInspectGuildInfo", get_inspect_guild_info)?;
     Ok(())
+}
+
+#[cfg(feature = "client-ptr")]
+fn register_patch_12_1_inventory_slot_methods(
+    state: &mut LuaState,
+    ns: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetInventorySlotInfo",
+        inventory_slot::get_inventory_slot_info,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetInventorySlotInfoForInvSlot",
+        inventory_slot::get_inventory_slot_info,
+    )
 }
 
 fn get_armor_effectiveness(state: &mut LuaState) -> LuaResult<u32> {

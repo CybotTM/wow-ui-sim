@@ -54,7 +54,7 @@ impl CVarStorage {
     /// Create storage with defaults parsed from YAML, loading persisted overrides from disk.
     pub fn new() -> Self {
         let path = default_storage_path();
-        let (defaults, original_names) = parse_cvar_yaml(include_str!("cvars.yaml"));
+        let (defaults, original_names) = parse_default_cvars();
         let overrides = load_overrides(&path);
         Self {
             defaults,
@@ -69,7 +69,7 @@ impl CVarStorage {
     /// Create storage with a custom path (for testing).
     #[cfg(test)]
     fn with_path(path: PathBuf) -> Self {
-        let (defaults, original_names) = parse_cvar_yaml(include_str!("cvars.yaml"));
+        let (defaults, original_names) = parse_default_cvars();
         let overrides = load_overrides(&path);
         Self {
             defaults,
@@ -187,6 +187,64 @@ impl Default for CVarStorage {
         Self::new()
     }
 }
+
+fn parse_default_cvars() -> (HashMap<String, String>, HashMap<String, String>) {
+    let (mut defaults, mut original_names) = parse_cvar_yaml(include_str!("cvars.yaml"));
+    insert_profile_cvars(&mut defaults, &mut original_names);
+    (defaults, original_names)
+}
+
+#[cfg(feature = "client-ptr")]
+fn insert_profile_cvars(
+    defaults: &mut HashMap<String, String>,
+    original_names: &mut HashMap<String, String>,
+) {
+    insert_cvar_defaults(defaults, original_names, PTR_CVARS);
+}
+
+#[cfg(not(feature = "client-ptr"))]
+fn insert_profile_cvars(
+    _defaults: &mut HashMap<String, String>,
+    _original_names: &mut HashMap<String, String>,
+) {
+}
+
+#[cfg(feature = "client-ptr")]
+fn insert_cvar_defaults(
+    defaults: &mut HashMap<String, String>,
+    original_names: &mut HashMap<String, String>,
+    values: &[(&str, &str)],
+) {
+    for &(name, value) in values {
+        let key = name.to_lowercase();
+        original_names.insert(key.clone(), name.to_string());
+        defaults.insert(key, value.to_string());
+    }
+}
+
+#[cfg(feature = "client-ptr")]
+const PTR_CVARS: &[(&str, &str)] = &[
+    ("accessibilityScreenNarrationEnabled", "0"),
+    ("accessibilityScreenNarrationSpeechRate", "1.0"),
+    ("accessibilityScreenNarrationSpeechVolume", "1.0"),
+    ("accessibilityScreenNarrationVoice", ""),
+    ("AftermathShaderDebug", "0"),
+    ("discordClientEnabled", "0"),
+    ("discordDisplayName", ""),
+    ("nameplateCheckDistanceForTarget", "60"),
+    ("nameplateForceShowUnitName", "0"),
+    ("nameplateNotSelectedAlpha", "0.600000"),
+    ("nameplatePlayRemovalAnimation", "1"),
+    ("nameplateShowAllPersonalAuras", "1"),
+    ("nameplateShowFriendlyRealmName", "0"),
+    ("nameplateShowFriends", "0"),
+    ("pingTarget", "0"),
+    ("raidFramesDispelIndicatorOverlayAnimation", "1"),
+    ("showPingsOnRaidFrames", "1"),
+    ("showScreenNarrationDialog", "1"),
+    ("taintLogObjectSecrets", "0"),
+    ("userFontScaleGlue", "1.0"),
+];
 
 /// Load persisted overrides from disk.
 fn load_overrides(path: &PathBuf) -> HashMap<String, String> {

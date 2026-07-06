@@ -69,7 +69,7 @@ pub(crate) fn lookup_slot(name: &str) -> Option<(i32, i32)> {
         .map(|(_, id, icon)| (*id, *icon))
 }
 
-pub fn get_inventory_slot_info(state: &mut LuaState) -> LuaResult<u32> {
+pub(crate) fn get_inventory_slot_info(state: &mut LuaState) -> LuaResult<u32> {
     let name_val = crate::lua_bridge::stack_val(state, 1);
     let name = match name_val {
         Val::Str(s) => state

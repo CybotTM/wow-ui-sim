@@ -5,6 +5,8 @@ mod blocking_loads;
 mod color;
 mod coords;
 mod draw_shadow;
+#[cfg(feature = "client-ptr")]
+mod radial;
 mod rotation_mask;
 
 use crate::lua_bridge::table_set_rust_fn;
@@ -54,6 +56,74 @@ const TEXTURE_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetRotation", rotation_mask::get_rotation),
     // Mask
     ("SetMask", rotation_mask::set_mask),
+    // Radial progress bar
+    #[cfg(feature = "client-ptr")]
+    ("ClearRadialProgressBar", radial::clear_radial_progress_bar),
+    #[cfg(feature = "client-ptr")]
+    (
+        "SetRadialProgressBarPercent",
+        radial::set_radial_progress_bar_percent,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "GetRadialProgressBarPercent",
+        radial::get_radial_progress_bar_percent,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "SetRadialProgressBarStartOffset",
+        radial::set_radial_progress_bar_start_offset,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "GetRadialProgressBarStartOffset",
+        radial::get_radial_progress_bar_start_offset,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "SetRadialProgressBarEndOffset",
+        radial::set_radial_progress_bar_end_offset,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "GetRadialProgressBarEndOffset",
+        radial::get_radial_progress_bar_end_offset,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "SetRadialProgressBarFeather",
+        radial::set_radial_progress_bar_feather,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "GetRadialProgressBarFeather",
+        radial::get_radial_progress_bar_feather,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "SetRadialProgressBarReverse",
+        radial::set_radial_progress_bar_reverse,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "GetRadialProgressBarReverse",
+        radial::get_radial_progress_bar_reverse,
+    ),
+    #[cfg(feature = "client-ptr")]
+    (
+        "SetVisualRadialProgressBarMode",
+        radial::set_visual_radial_progress_bar_mode,
+    ),
+    // VectorGraphics compatibility methods. The simulator stores SVG metadata
+    // on the Texture-backed object; rendering SVG paths is not modeled yet.
+    #[cfg(feature = "client-ptr")]
+    ("ClearSVG", radial::clear_svg),
+    #[cfg(feature = "client-ptr")]
+    ("GetSVGFileID", radial::get_svg_file_id),
+    #[cfg(feature = "client-ptr")]
+    ("HasSVG", radial::has_svg),
+    #[cfg(feature = "client-ptr")]
+    ("SetSVG", radial::set_svg),
     // Tex coords + thickness
     ("SetTexCoord", coords::set_tex_coord),
     ("GetTexCoord", coords::get_tex_coord),

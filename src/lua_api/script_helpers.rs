@@ -203,6 +203,23 @@ pub fn remove_script(state: &mut LuaState, widget_id: u64, handler_name: &str) {
     remove_script_binding(state, widget_id, handler_name, ScriptBinding::Normal);
 }
 
+pub fn remove_all_scripts(state: &mut LuaState, widget_id: u64) {
+    for binding in [
+        ScriptBinding::Precall,
+        ScriptBinding::Normal,
+        ScriptBinding::Postcall,
+    ] {
+        if let Some(scripts) = registry_table(state, binding.registry_key())
+            && let Some(table) = state.gc.tables.get_mut(scripts)
+        {
+            let _ = table.raw_set(Val::Num(widget_id as f64), Val::Nil, &state.gc.string_arena);
+            state.gc.barrier_back(scripts);
+        }
+    }
+    sync_on_update_cache(state, widget_id, "OnUpdate");
+    sync_on_update_cache(state, widget_id, "OnPostUpdate");
+}
+
 pub fn remove_script_binding(
     state: &mut LuaState,
     widget_id: u64,

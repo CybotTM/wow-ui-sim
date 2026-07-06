@@ -32,6 +32,34 @@ fn xml_process_time_excludes_script_file_load_time() {
     );
 }
 
+#[cfg(feature = "client-ptr")]
+#[test]
+fn patch_12_1_aura_widgets_parse_as_xml_elements() {
+    let ctx = load_test_xml(
+        "patch-12-1-aura-widget-tags",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <AuraContainer name="Patch121AuraContainerTemplate" virtual="true"/>
+            <AuraButton name="Patch121AuraButtonTemplate" virtual="true"/>
+            <ManagedAuraContainer name="Patch121ManagedAuraContainerTemplate" virtual="true"/>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        "return CreateFrame('AuraContainer', nil, UIParent, 'Patch121AuraContainerTemplate'):GetObjectType() == 'AuraContainer'",
+        "AuraContainer XML tag should register a virtual template",
+    );
+    ctx.assert_lua_true(
+        "return CreateFrame('AuraButton', nil, UIParent, 'Patch121AuraButtonTemplate'):GetObjectType() == 'AuraButton'",
+        "AuraButton XML tag should register a virtual template",
+    );
+    ctx.assert_lua_true(
+        "return CreateFrame('ManagedAuraContainer', nil, UIParent, 'Patch121ManagedAuraContainerTemplate'):GetObjectType() == 'ManagedAuraContainer'",
+        "ManagedAuraContainer XML tag should register a virtual template",
+    );
+}
+
 #[test]
 fn missing_xml_include_reports_path_to_lua_error_handler() {
     let env = WowLuaEnv::new().unwrap();
@@ -492,6 +520,40 @@ fn test_xml_set_all_points_keeps_explicit_anchors_authoritative() {
     "#,
         "true|true",
     );
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_xml_on_update_mode_and_forbidden_aspects() {
+    let t = load_test_xml(
+        "test-patch-12-1-xml-forbidden-aspects",
+        r#"<Ui>
+            <Button name="Patch121AuraButton" parent="UIParent" onUpdateMode="disabled">
+                <ForbiddenAspects>
+                    <ForbiddenAspect aspect="UntrustedScriptExecution"/>
+                    <ForbiddenAspect aspect="ScriptedInput"/>
+                </ForbiddenAspects>
+                <Scripts>
+                    <OnUpdate>
+                        PATCH_121_XML_ONUPDATE = (PATCH_121_XML_ONUPDATE or 0) + 1
+                    </OnUpdate>
+                </Scripts>
+            </Button>
+        </Ui>"#,
+    );
+
+    t.assert_lua_true(
+        r#"
+        return FlagsUtil.IsSet(
+            Patch121AuraButton:GetForbiddenAspects(),
+            Enum.ForbiddenScriptObjectAspect.UntrustedScriptExecution
+        )
+        "#,
+        "XML ForbiddenAspects should initialize the forbidden bitmask",
+    );
+
+    t.env.fire_on_update(0.016).unwrap();
+    t.assert_lua_str("return tostring(PATCH_121_XML_ONUPDATE)", "nil");
 }
 
 #[test]

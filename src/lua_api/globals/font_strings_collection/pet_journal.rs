@@ -205,6 +205,54 @@ fn pet_get_info_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(push_pet_info_by_species_id(state, &pet))
 }
 
+#[cfg(feature = "client-ptr")]
+fn pet_get_info_table_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
+    let species_id = u32::from_stack(state, 1)?;
+    let Some(pet) = find_pet_by_species_id(state, species_id) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let info = create_table(state);
+    let name = create_string(state, &pet.name);
+    table_set(state, info.clone(), "name", name);
+    table_set(state, info.clone(), "icon", Val::Num(pet.icon as f64));
+    table_set(
+        state,
+        info.clone(),
+        "petType",
+        Val::Num(pet.pet_type as f64),
+    );
+    table_set(
+        state,
+        info.clone(),
+        "speciesID",
+        Val::Num(pet.species_id as f64),
+    );
+    table_set(state, info.clone(), "isWild", Val::Bool(false));
+    table_set(state, info.clone(), "canBattle", Val::Bool(pet.quality > 0));
+    table_set(state, info.clone(), "isTradeable", Val::Bool(false));
+    table_set(state, info.clone(), "isUnique", Val::Bool(false));
+    table_set(state, info.clone(), "obtainable", Val::Bool(true));
+    table_set(state, info.clone(), "canAttachToDecor", Val::Bool(false));
+    table_set(state, info.clone(), "creatureModelScale", Val::Num(1.0));
+    state.push(info);
+    Ok(1)
+}
+
+#[cfg(feature = "client-ptr")]
+fn register_patch_12_1_pet_info_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function(
+        "GetPetInfoTableBySpeciesID",
+        pet_get_info_table_by_species_id,
+    )
+}
+
+#[cfg(not(feature = "client-ptr"))]
+fn register_patch_12_1_pet_info_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    Ok(tb)
+}
+
 fn pet_get_model_scene_info_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
     let species_id = u32::from_stack(state, 1)?;
     if find_pet_by_species_id(state, species_id).is_none() {
@@ -366,14 +414,16 @@ fn register_pet_count_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn register_pet_info_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
-    tb.set_function("GetBattlePetLink", |state| {
-        state.push(Val::Nil);
-        Ok(1)
-    })?
-    .set_function("GetPetInfoByIndex", pet_get_info_by_index)?
-    .set_function("GetPetInfoByPetID", pet_get_info_by_pet_id)?
-    .set_function("GetPetInfoBySpeciesID", pet_get_info_by_species_id)?
-    .set_function(
+    let tb = tb
+        .set_function("GetBattlePetLink", |state| {
+            state.push(Val::Nil);
+            Ok(1)
+        })?
+        .set_function("GetPetInfoByIndex", pet_get_info_by_index)?
+        .set_function("GetPetInfoByPetID", pet_get_info_by_pet_id)?
+        .set_function("GetPetInfoBySpeciesID", pet_get_info_by_species_id)?;
+    let tb = register_patch_12_1_pet_info_stubs(tb)?;
+    tb.set_function(
         "GetPetModelSceneInfoBySpeciesID",
         pet_get_model_scene_info_by_species_id,
     )

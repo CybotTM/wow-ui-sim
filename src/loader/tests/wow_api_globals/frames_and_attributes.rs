@@ -51,6 +51,212 @@ fn test_create_frame_exposes_core_event_methods() {
     );
 }
 
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_frame_texture_statusbar_method_surface() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        forbidden_ty,
+        object_table_ty,
+        roleset_ty,
+        roleset_names_ty,
+        on_update_mode,
+        radial_percent,
+        radial_reverse,
+        status_render_mode,
+        minimap_icon_scale_ty,
+        clear_scripts_ty,
+        vector_ty,
+        vector_object_type,
+        vector_has_svg,
+        vector_file_id,
+    ): (
+        String,
+        String,
+        String,
+        String,
+        String,
+        f64,
+        bool,
+        String,
+        String,
+        String,
+        String,
+        String,
+        bool,
+        i64,
+    ) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            frame:AddForbiddenAspects(Enum.ForbiddenScriptObjectAspect.UntrustedScriptExecution)
+            frame:SetRolesets("combat", "healer")
+            frame:SetOnUpdateMode(Enum.OnUpdateMode.RunAlways)
+
+            local tex = frame:CreateTexture(nil, "ARTWORK")
+            tex:SetRadialProgressBarPercent(0.75)
+            tex:SetRadialProgressBarReverse(true)
+
+            local status = CreateFrame("StatusBar")
+            status:SetRenderMode("Standard")
+
+            local vector = frame:CreateVectorGraphics(nil, "ARTWORK")
+            vector:SetSVG(12345)
+
+            return type(frame.GetForbiddenAspects),
+                type(frame:GetObjectTable()),
+                type(frame.AddRoleset),
+                type(frame:GetRolesetNames()),
+                frame:GetOnUpdateMode(),
+                tex:GetRadialProgressBarPercent(),
+                tex:GetRadialProgressBarReverse(),
+                status:GetRenderMode(),
+                type(Minimap.SetIconScale),
+                type(frame.ClearScripts),
+                type(frame.CreateVectorGraphics),
+                vector:GetObjectType(),
+                vector:HasSVG(),
+                vector:GetSVGFileID()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(forbidden_ty, "function");
+    assert_eq!(object_table_ty, "table");
+    assert_eq!(roleset_ty, "function");
+    assert_eq!(roleset_names_ty, "table");
+    assert_eq!(on_update_mode, "RunAlways");
+    assert_eq!(radial_percent, 0.75);
+    assert!(radial_reverse);
+    assert_eq!(status_render_mode, "Standard");
+    assert_eq!(minimap_icon_scale_ty, "function");
+    assert_eq!(clear_scripts_ty, "function");
+    assert_eq!(vector_ty, "function");
+    assert_eq!(vector_object_type, "VectorGraphics");
+    assert!(vector_has_svg);
+    assert_eq!(vector_file_id, 12345);
+
+    let (forbidden_mask_ty, inheritable_mask_ty, is_set): (String, String, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            frame:AddForbiddenAspects(Enum.ForbiddenScriptObjectAspect.UntrustedScriptExecution)
+            return type(frame:GetForbiddenAspects()),
+                type(frame:GetInheritableForbiddenAspects(Enum.ForbiddenAspectInheritance.Parent)),
+                FlagsUtil.IsSet(frame:GetForbiddenAspects(), Enum.ForbiddenScriptObjectAspect.UntrustedScriptExecution)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(forbidden_mask_ty, "number");
+    assert_eq!(inheritable_mask_ty, "number");
+    assert!(is_set);
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_clear_scripts_removes_handlers() {
+    let env = WowLuaEnv::new().unwrap();
+    let (before_ty, after_ty): (String, String) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            frame:SetScript("OnShow", function() end)
+            local before = type(frame:GetScript("OnShow"))
+            frame:ClearScripts()
+            return before, type(frame:GetScript("OnShow"))
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(before_ty, "function");
+    assert_eq!(after_ty, "nil");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_disabled_on_update_mode_skips_dispatch() {
+    let env = WowLuaEnv::new().unwrap();
+    env.eval::<()>(
+        r#"
+        Patch121OnUpdateCalls = 0
+        Patch121OnUpdateFrame = CreateFrame("Frame", nil, UIParent)
+        Patch121OnUpdateFrame:SetScript("OnUpdate", function()
+            Patch121OnUpdateCalls = Patch121OnUpdateCalls + 1
+        end)
+        Patch121OnUpdateFrame:SetOnUpdateMode(Enum.OnUpdateMode.Disabled)
+        "#,
+    )
+    .unwrap();
+
+    env.fire_on_update(0.016).unwrap();
+    let calls: i64 = env.eval("return Patch121OnUpdateCalls").unwrap();
+    assert_eq!(calls, 0);
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_run_always_on_update_fires_while_hidden() {
+    let env = WowLuaEnv::new().unwrap();
+    env.eval::<()>(
+        r#"
+        Patch121HiddenRunAlwaysCalls = 0
+        Patch121HiddenRunAlwaysFrame = CreateFrame("Frame", nil, UIParent)
+        Patch121HiddenRunAlwaysFrame:Hide()
+        Patch121HiddenRunAlwaysFrame:SetOnUpdateMode(Enum.OnUpdateMode.RunAlways)
+        Patch121HiddenRunAlwaysFrame:SetScript("OnUpdate", function()
+            Patch121HiddenRunAlwaysCalls = Patch121HiddenRunAlwaysCalls + 1
+        end)
+        "#,
+    )
+    .unwrap();
+
+    env.fire_on_update(0.016).unwrap();
+    let calls: i64 = env.eval("return Patch121HiddenRunAlwaysCalls").unwrap();
+    assert_eq!(calls, 1);
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_run_when_visible_on_update_skips_hidden() {
+    let env = WowLuaEnv::new().unwrap();
+    env.eval::<()>(
+        r#"
+        Patch121HiddenVisibleCalls = 0
+        Patch121HiddenVisibleFrame = CreateFrame("Frame", nil, UIParent)
+        Patch121HiddenVisibleFrame:Hide()
+        Patch121HiddenVisibleFrame:SetOnUpdateMode(Enum.OnUpdateMode.RunWhenVisible)
+        Patch121HiddenVisibleFrame:SetScript("OnUpdate", function()
+            Patch121HiddenVisibleCalls = Patch121HiddenVisibleCalls + 1
+        end)
+        "#,
+    )
+    .unwrap();
+
+    env.fire_on_update(0.016).unwrap();
+    let calls: i64 = env.eval("return Patch121HiddenVisibleCalls").unwrap();
+    assert_eq!(calls, 0);
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn test_patch_12_1_aura_frame_types_create() {
+    let env = WowLuaEnv::new().unwrap();
+    let (container_type, button_type, managed_type): (String, String, String) = env
+        .eval(
+            r#"
+            local container = CreateFrame("AuraContainer", nil, UIParent)
+            local button = CreateFrame("AuraButton", nil, container)
+            local managed = CreateFrame("ManagedAuraContainer", nil, UIParent)
+            return container:GetObjectType(), button:GetObjectType(), managed:GetObjectType()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(container_type, "AuraContainer");
+    assert_eq!(button_type, "AuraButton");
+    assert_eq!(managed_type, "ManagedAuraContainer");
+}
+
 #[test]
 fn test_get_frame_metatable_without_instance_returns_shared_metatable() {
     let env = WowLuaEnv::new().unwrap();

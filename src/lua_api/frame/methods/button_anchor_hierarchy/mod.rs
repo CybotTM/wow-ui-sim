@@ -278,6 +278,13 @@ fn register_hierarchy_regions(state: &mut LuaState, table: GcRef<Table>) -> LuaR
 
 fn register_hierarchy_creation(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "CreateTexture", hierarchy::create_texture)?;
+    #[cfg(feature = "client-ptr")]
+    table_set_rust_fn_static(
+        state,
+        table,
+        "CreateVectorGraphics",
+        hierarchy::create_vector_graphics,
+    )?;
     table_set_rust_fn_static(
         state,
         table,

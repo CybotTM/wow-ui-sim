@@ -2,7 +2,7 @@
 
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::globals::security::mark_secure_state;
-use crate::lua_api::methods::{create_string, registry_get, table_set_static};
+use crate::lua_api::methods::{create_string, registry_get, table_get_static, table_set_static};
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::xml::{FrameXml, XmlElement, parse_xml_file};
 use rilua::{Function, LuaApiMut, Val};
@@ -115,7 +115,7 @@ fn process_element(
         XmlElement::Animation(_) | XmlElement::Binding(_) | XmlElement::ModifiedClick(_) => Ok(0),
         _ => {
             let frame_start = Instant::now();
-            process_frame_element(env, element, timing)?;
+            process_frame_element(env, element, ctx, timing)?;
             timing.xml_frame_create_time += frame_start.elapsed();
             Ok(0)
         }
@@ -464,12 +464,43 @@ fn register_virtual_anim_group(anim_group: &crate::xml::AnimationGroupXml) {
 fn process_frame_element(
     env: &LoaderEnv<'_>,
     element: &XmlElement,
+    ctx: &AddonContext,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    if let Some((frame_xml, widget_type, intrinsic)) = resolve_frame_element(element) {
-        create_frame_from_xml(env, frame_xml, widget_type, None, None, intrinsic, timing)?;
-    }
+    let Some((frame_xml, widget_type, intrinsic)) = resolve_frame_element(element) else {
+        return Ok(());
+    };
+
+    let _addon_table_guard = LoadingAddonTableGuard::install(env, ctx.table);
+    create_frame_from_xml(env, frame_xml, widget_type, None, None, intrinsic, timing)?;
     Ok(())
+}
+
+struct LoadingAddonTableGuard<'env, 'lua> {
+    env: &'env LoaderEnv<'lua>,
+    previous: Val,
+}
+
+impl<'env, 'lua> LoadingAddonTableGuard<'env, 'lua> {
+    fn install(env: &'env LoaderEnv<'lua>, addon_table: Val) -> Self {
+        let previous = set_loading_addon_table(env, addon_table).unwrap_or(Val::Nil);
+        Self { env, previous }
+    }
+}
+
+impl Drop for LoadingAddonTableGuard<'_, '_> {
+    fn drop(&mut self) {
+        let _ = set_loading_addon_table(self.env, self.previous);
+    }
+}
+
+fn set_loading_addon_table(env: &LoaderEnv<'_>, value: Val) -> Result<Val, crate::Error> {
+    env.with_state(|state| {
+        let globals = Val::Table(state.global);
+        let previous = table_get_static(state, globals, "__wow_loading_addon_table");
+        table_set_static(state, globals, "__wow_loading_addon_table", value);
+        Ok(previous)
+    })
 }
 
 /// Lua template for Font objects. Placeholders: {name}, {font_path}, {font_height},

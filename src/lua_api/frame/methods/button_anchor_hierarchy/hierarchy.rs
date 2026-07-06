@@ -392,6 +392,15 @@ fn register_child_with_strata(
 }
 
 pub(super) fn create_texture(state: &mut LuaState) -> LuaResult<u32> {
+    create_texture_like(state, None)
+}
+
+#[cfg(feature = "client-ptr")]
+pub(super) fn create_vector_graphics(state: &mut LuaState) -> LuaResult<u32> {
+    create_texture_like(state, Some("VectorGraphics"))
+}
+
+fn create_texture_like(state: &mut LuaState, object_type_name: Option<&str>) -> LuaResult<u32> {
     use crate::widget::{Frame, WidgetType};
     let parent_id = frame_id_from_stack(state, 1)?;
     let name_raw: Option<String> = Option::<String>::from_stack(state, 2)?;
@@ -401,6 +410,9 @@ pub(super) fn create_texture(state: &mut LuaState) -> LuaResult<u32> {
 
     let name = resolve_child_name(state, name_raw, parent_id);
     let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(parent_id));
+    if let Some(object_type_name) = object_type_name {
+        texture.object_type_name = Some(object_type_name.to_string());
+    }
     apply_draw_layer(&mut texture, layer);
     if let Some(inherits) = inherits.as_deref()
         && let Some((width, height)) = crate::xml::get_texture_template_size(&inherits)

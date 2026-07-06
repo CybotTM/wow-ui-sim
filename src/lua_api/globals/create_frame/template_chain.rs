@@ -203,8 +203,10 @@ fn apply_chain_entries(
         runtime::ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
         apply_template_partition_marker(state, frame_id, &entry.frame);
         apply_frame_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
+        let previous_local_source = install_template_local_source(state, entry.local_source);
         apply_block_mixins(state, frame_id, entry.frame.mixins());
         apply_template_key_values(state, frame_id, entry.frame.all_key_values());
+        restore_template_local_source(state, previous_local_source);
         let entry_is_intrinsic = entry.frame.intrinsic == Some(true);
         if let Some(scripts) = entry.frame.scripts() {
             apply_template_scripts_impl(state, frame_id, scripts, entry_is_intrinsic)?;
@@ -287,6 +289,31 @@ pub(super) fn apply_template_partition_marker(
     }
 }
 
+fn install_template_local_source(state: &mut LuaState, local_source: Option<Val>) -> Val {
+    let globals = Val::Table(state.global);
+    let previous =
+        crate::lua_api::methods::table_get_static(state, globals, "__wow_loading_addon_table");
+    if let Some(local_source) = local_source {
+        crate::lua_api::methods::table_set_static(
+            state,
+            globals,
+            "__wow_loading_addon_table",
+            local_source,
+        );
+    }
+    previous
+}
+
+fn restore_template_local_source(state: &mut LuaState, previous: Val) {
+    let globals = Val::Table(state.global);
+    crate::lua_api::methods::table_set_static(
+        state,
+        globals,
+        "__wow_loading_addon_table",
+        previous,
+    );
+}
+
 pub(super) fn apply_block_mixins(
     state: &mut LuaState,
     frame_id: u64,
@@ -316,7 +343,13 @@ fn apply_template_key_values<'a>(
 
     for key_block in key_values {
         for entry in &key_block.values {
-            let value = template_key_value(state, &entry.value, entry.value_type.as_deref());
+            let value = template_key_value(
+                state,
+                &entry.key,
+                &entry.value,
+                entry.value_type.as_deref(),
+                entry.source.as_deref(),
+            );
             apply_template_key_value(state, frame, &entry.key, value);
         }
     }
@@ -597,15 +630,53 @@ fn state_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlySc
     ]
 }
 
-fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {
-    match value_type {
-        Some("number") => value.parse::<f64>().map(Val::Num).unwrap_or(Val::Nil),
-        Some("boolean") => Val::Bool(value.eq_ignore_ascii_case("true")),
-        Some("global") => resolve_global_path(state, value),
+fn template_key_value(
+    state: &mut LuaState,
+    key: &str,
+    value: &str,
+    value_type: Option<&str>,
+    source: Option<&str>,
+) -> Val {
+    match (value_type, source) {
+        (Some("number"), _) => value.parse::<f64>().map(Val::Num).unwrap_or(Val::Nil),
+        (Some("boolean"), _) => Val::Bool(value.eq_ignore_ascii_case("true")),
+        (Some("global"), _) => resolve_global_path(state, value),
+        (Some("local"), _) | (_, Some("local")) => {
+            let local_key = if value.is_empty() { key } else { value };
+            resolve_local_template_path(state, local_key)
+        }
         // Auto-detect numbers when type is not specified (WoW behavior)
-        None if value.parse::<f64>().is_ok() => Val::Num(value.parse().unwrap()),
+        (None, _) if value.parse::<f64>().is_ok() => Val::Num(value.parse().unwrap()),
         _ => create_string(state, value),
     }
+}
+
+fn resolve_local_template_path(state: &mut LuaState, path: &str) -> Val {
+    let globals = Val::Table(state.global);
+    let local_source =
+        crate::lua_api::methods::table_get_static(state, globals, "__wow_loading_addon_table");
+    resolve_table_path(state, local_source, path)
+}
+
+fn resolve_table_path(state: &mut LuaState, root: Val, path: &str) -> Val {
+    let mut current = root;
+    for segment in path
+        .split('.')
+        .map(str::trim)
+        .filter(|segment| !segment.is_empty())
+    {
+        let Val::Table(table_ref) = current else {
+            return Val::Nil;
+        };
+        let key = state.gc.intern_string(segment.as_bytes());
+        current = state
+            .gc
+            .tables
+            .get(table_ref)
+            .map(|table| table.get_str(key, &state.gc.string_arena))
+            .unwrap_or(Val::Nil);
+    }
+    current
 }
 
 #[cfg(test)]

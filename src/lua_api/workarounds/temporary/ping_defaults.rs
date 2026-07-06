@@ -11,6 +11,15 @@ if rawget(C_Ping, "GetDefaultPingOptions") == nil then
         return {}
     end
 end
+
+if rawget(C_Ping, "SendMacroPing") == nil then
+    function C_Ping.SendMacroPing()
+        if Enum and Enum.PingResult and Enum.PingResult.FailedSilent then
+            return Enum.PingResult.FailedSilent
+        end
+        return nil
+    end
+end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -26,11 +35,16 @@ mod tests {
     fn installs_empty_default_ping_options() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
-        let count: i32 = env
-            .eval("local options = C_Ping.GetDefaultPingOptions(); return #options")
+        let result: (i32, String) = env
+            .eval(
+                r#"
+                local options = C_Ping.GetDefaultPingOptions()
+                return #options, type(C_Ping.SendMacroPing({ type = Enum.PingSubjectType.ActionReady }))
+                "#,
+            )
             .expect("default ping options should be queryable");
 
-        assert_eq!(count, 0);
+        assert_eq!(result, (0, "number".to_string()));
     }
 
     #[test]

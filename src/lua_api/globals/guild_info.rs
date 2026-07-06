@@ -4,6 +4,7 @@
 //! Backed by `SimState::world`:
 //!
 //! - `GetClubId()` — returns `world.guild_club_id` string, or nil.
+//! - `IsDiscordStreamSeparate()` — false; Discord guild stream separation is not modeled.
 //! - `IsGuildOfficer()` — `world.guild_is_officer` (default false).
 //! - `CanSpeakInGuildChat()` — `world.guild_can_speak_in_chat` (default true;
 //!   retail's "no explicit mute" baseline keeps addons' chat input enabled).
@@ -48,6 +49,11 @@ pub fn get_club_id(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => state.push(Val::Nil),
     }
+    Ok(1)
+}
+
+pub fn is_discord_stream_separate(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
     Ok(1)
 }
 
@@ -208,6 +214,12 @@ fn register_guild_identity_methods(state: &mut LuaState, table_ref: GcRef<Table>
     table_set_rust_fn_static(state, table_ref, "GetClubId", get_club_id)?;
     table_set_rust_fn_static(state, table_ref, "GuildRoster", guild_roster)?;
     table_set_rust_fn_static(state, table_ref, "GetGuildNewsInfo", get_guild_news_info)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsDiscordStreamSeparate",
+        is_discord_stream_separate,
+    )?;
     table_set_rust_fn_static(state, table_ref, "IsGuildOfficer", is_guild_officer)?;
     Ok(())
 }

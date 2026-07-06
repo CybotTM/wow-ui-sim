@@ -12,6 +12,16 @@ local function installSocialQueueDefault(name, fn)
     end
 end
 
+if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
+    installSocialQueueDefault("IsSystemEnabled", function()
+        return false
+    end)
+
+    installSocialQueueDefault("IsSystemSupported", function()
+        return false
+    end)
+end
+
 installSocialQueueDefault("GetAllGroups", function()
     return {}
 end)

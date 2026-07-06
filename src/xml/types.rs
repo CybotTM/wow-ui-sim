@@ -48,7 +48,13 @@ pub struct ScopedModifierXml {
 pub enum XmlElement {
     // Frame-like widgets
     Frame(FrameXml),
+    #[cfg(feature = "client-ptr")]
+    AuraContainer(FrameXml),
+    #[cfg(feature = "client-ptr")]
+    ManagedAuraContainer(FrameXml),
     Button(FrameXml),
+    #[cfg(feature = "client-ptr")]
+    AuraButton(FrameXml),
     ItemButton(FrameXml),
     CheckButton(FrameXml),
     EditBox(FrameXml),
@@ -181,6 +187,8 @@ pub struct FrameXml {
     pub toplevel: Option<bool>,
     #[serde(rename = "@protected")]
     pub protected: Option<bool>,
+    #[serde(rename = "@onUpdateMode")]
+    pub on_update_mode: Option<String>,
     /// EditBox `letters` attribute — caps `SetMaxLetters`. Ignored on
     /// non-EditBox widgets.
     #[serde(rename = "@letters")]
@@ -233,6 +241,13 @@ impl FrameXml {
     pub fn scripts(&self) -> Option<&ScriptsXml> {
         self.children.iter().find_map(|c| match c {
             FrameChildElement::Scripts(s) => Some(s),
+            _ => None,
+        })
+    }
+
+    pub fn forbidden_aspects(&self) -> Option<&ForbiddenAspectsXml> {
+        self.children.iter().find_map(|c| match c {
+            FrameChildElement::ForbiddenAspects(aspects) => Some(aspects),
             _ => None,
         })
     }
@@ -488,6 +503,20 @@ fn standalone_frame_child_tag(child: &FrameChildElement) -> Option<(&FrameXml, &
     }
 }
 
+#[derive(Debug, Deserialize, Clone, Default)]
+pub struct ForbiddenAspectsXml {
+    #[serde(rename = "ForbiddenAspect", default)]
+    pub aspects: Vec<ForbiddenAspectXml>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct ForbiddenAspectXml {
+    #[serde(rename = "@aspect")]
+    pub aspect: String,
+    #[serde(rename = "@inheritance")]
+    pub inheritance: Option<String>,
+}
+
 /// Child elements that can appear inside a Frame.
 #[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "PascalCase")]
@@ -499,6 +528,7 @@ pub enum FrameChildElement {
     Frames(FramesXml),
     KeyValues(KeyValuesXml),
     Mixins(MixinsXml),
+    ForbiddenAspects(ForbiddenAspectsXml),
     Attributes(AttributesXml),
     Animations(AnimationsXml),
     NormalTexture(TextureXml),

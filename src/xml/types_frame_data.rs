@@ -21,6 +21,13 @@ macro_rules! impl_frame_data_for {
             }
 
             fn as_primary_frame_data(&self) -> Option<(&FrameXml, &'static str)> {
+                #[cfg(feature = "client-ptr")]
+                if let Some(frame_data) =
+                    frame_variant_data!(self, AuraContainer, ManagedAuraContainer, AuraButton,)
+                {
+                    return Some(frame_data);
+                }
+
                 frame_variant_data!(
                     self,
                     Frame,

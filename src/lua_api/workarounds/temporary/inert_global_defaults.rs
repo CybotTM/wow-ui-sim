@@ -55,6 +55,15 @@ C_SocialRestrictions = C_SocialRestrictions or __wow_namespace()
 if rawget(C_SocialRestrictions, "IsChatDisabled") == nil then
     function C_SocialRestrictions.IsChatDisabled() return false end
 end
+if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
+    if rawget(C_SocialRestrictions, "IsFriendsDisabled") == nil then
+        function C_SocialRestrictions.IsFriendsDisabled() return false end
+    end
+    C_SocialUI = C_SocialUI or __wow_namespace()
+    if rawget(C_SocialUI, "IsSystemEnabled") == nil then
+        function C_SocialUI.IsSystemEnabled() return false end
+    end
+end
 C_Commentator = C_Commentator or __wow_namespace()
 if rawget(C_Commentator, "IsSpectating") == nil then
     function C_Commentator.IsSpectating() return false end
@@ -68,6 +77,11 @@ end
 C_GuildBank = C_GuildBank or __wow_namespace()
 
 C_FriendList = C_FriendList or __wow_namespace()
+if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
+    if rawget(C_FriendList, "IsLegacyFriendSystemEnabled") == nil then
+        function C_FriendList.IsLegacyFriendSystemEnabled() return false end
+    end
+end
 if rawget(C_FriendList, "GetNumFriends") == nil then
     function C_FriendList.GetNumFriends() return 0 end
 end

@@ -4,10 +4,20 @@
 //! They are compatibility defaults until the simulator has a real client/session
 //! metadata model.
 
+#[cfg(feature = "client-ptr")]
+const CLIENT_VERSION: &str = "12.1.0";
+#[cfg(not(feature = "client-ptr"))]
+const CLIENT_VERSION: &str = "12.0.7";
+
+#[cfg(feature = "client-ptr")]
+const CLIENT_INTERFACE: u32 = 120100;
+#[cfg(not(feature = "client-ptr"))]
+const CLIENT_INTERFACE: u32 = 120007;
+
 const CLIENT_INFO_DEFAULTS_LUA: &str = r#"
 if GetBuildInfo == nil then
   function GetBuildInfo()
-    return "12.0.7", "68256", "Jun 17 2026", 120007, "", " "
+    return "__WOW_CLIENT_VERSION__", "68256", "Jun 17 2026", __WOW_CLIENT_INTERFACE__, "", " "
   end
 end
 
@@ -190,7 +200,10 @@ end
 "#;
 
 pub(crate) fn apply_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    lua.exec(CLIENT_INFO_DEFAULTS_LUA)?;
+    let code = CLIENT_INFO_DEFAULTS_LUA
+        .replace("__WOW_CLIENT_VERSION__", CLIENT_VERSION)
+        .replace("__WOW_CLIENT_INTERFACE__", &CLIENT_INTERFACE.to_string());
+    lua.exec(&code)?;
     Ok(())
 }
 
@@ -202,11 +215,12 @@ mod tests {
     fn installs_client_info_defaults() {
         let env = WowLuaEnv::new().expect("lua env should initialize");
 
-        let result: String = env
-            .eval(
-                r#"
+        let expected_version = super::CLIENT_VERSION;
+        let expected_interface = super::CLIENT_INTERFACE;
+        let script = format!(
+            r#"
                 local version, build, date, interface = GetBuildInfo()
-                if version ~= "12.0.7" or build ~= "68256" or date ~= "Jun 17 2026" or interface ~= 120007 then
+                if version ~= "{}" or build ~= "68256" or date ~= "Jun 17 2026" or interface ~= {} then
                   return "build"
                 end
                 if GetRealmName() ~= "SimulatedRealm" or GetNormalizedRealmName() ~= "SimulatedRealm" then return "realm" end
@@ -237,7 +251,10 @@ mod tests {
                 if GetWebTicket() ~= nil then return "web_ticket" end
                 return "ok"
                 "#,
-            )
+            expected_version, expected_interface
+        );
+        let result: String = env
+            .eval(&script)
             .expect("client info defaults probe should run");
 
         assert_eq!(result, "ok");

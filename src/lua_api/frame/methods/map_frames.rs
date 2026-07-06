@@ -87,6 +87,10 @@ const MAP_FRAME_METHODS: &[MethodBinding] = &[
     method!("SetArchBlobRingTexture", set_arch_blob_ring_texture),
     method!("SetArchBlobRingAlpha", set_arch_blob_ring_alpha),
     method!("SetArchBlobRingScalar", set_arch_blob_ring_scalar),
+    #[cfg(feature = "client-ptr")]
+    method!("SetIconScale", set_icon_scale),
+    #[cfg(feature = "client-ptr")]
+    method!("GetIconScale", get_icon_scale),
     method!("SetZoom", set_zoom),
     method!("GetZoom", get_zoom),
     method!("GetZoomLevels", get_zoom_levels),
@@ -105,6 +109,29 @@ fn register_methods(
         table_set_rust_fn_static(state, mt, method.name, method.func)?;
     }
     Ok(())
+}
+
+#[cfg(feature = "client-ptr")]
+fn set_icon_scale(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let scale = match stack_val(state, 2) {
+        Val::Num(value) => value,
+        _ => 1.0,
+    };
+    let fields = get_or_create_frame_fields(state, id);
+    table_set(state, fields, "__minimapIconScale", Val::Num(scale));
+    Ok(0)
+}
+
+#[cfg(feature = "client-ptr")]
+fn get_icon_scale(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let fields = get_or_create_frame_fields(state, id);
+    match table_get(state, fields, "__minimapIconScale") {
+        Val::Num(value) => state.push(Val::Num(value)),
+        _ => state.push(Val::Num(1.0)),
+    }
+    Ok(1)
 }
 
 fn get_ui_map_id(state: &mut LuaState) -> LuaResult<u32> {

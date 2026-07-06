@@ -23,6 +23,8 @@ const COMPANION_DISPLAY_ID: f64 = 111999.0;
 const ROLE_NODE_ID: f64 = 9301.0;
 const UTILITY_CURIO_NODE_ID: f64 = 9302.0;
 const COMBAT_CURIO_NODE_ID: f64 = 9303.0;
+const FLAVOR_NODE_ID: f64 = 9304.0;
+const FLAVOR_NODE_NAME: &str = "Brann's Favorite";
 
 pub(super) fn register_delves_ui_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_DelvesUI")?;
@@ -33,7 +35,7 @@ pub(super) fn register_delves_ui_surface(state: &mut LuaState) -> LuaResult<()> 
     Ok(())
 }
 
-const METHODS: [(&str, rilua::vm::closure::RustFn); 27] = [
+const METHODS: [(&str, rilua::vm::closure::RustFn); 29] = [
     ("GetActiveDelveTier", get_active_delve_tier),
     (
         "GetCompanionInfoForActivePlayer",
@@ -69,6 +71,11 @@ const METHODS: [(&str, rilua::vm::closure::RustFn); 27] = [
     ("GetDelveEntranceTiers", get_delve_entrance_tiers),
     ("GetDelvesMinRequiredLevel", get_delves_min_required_level),
     ("GetFactionForCompanion", get_faction_for_companion),
+    ("GetFlavorNodeForCompanion", get_flavor_node_for_companion),
+    (
+        "GetFlavorNodeNameForCompanion",
+        get_flavor_node_name_for_companion,
+    ),
     ("GetPlayerCompanionPDEID", get_player_companion_pde_id),
     ("GetRoleNodeForCompanion", get_role_node_for_companion),
     ("GetRoleSubtreeForCompanion", get_role_subtree_for_companion),
@@ -180,6 +187,19 @@ fn get_delves_min_required_level(state: &mut LuaState) -> LuaResult<u32> {
 fn get_faction_for_companion(state: &mut LuaState) -> LuaResult<u32> {
     let _companion_id = f64::from_stack(state, 1).ok();
     state.push(Val::Num(COMPANION_FACTION_ID));
+    Ok(1)
+}
+
+fn get_flavor_node_for_companion(state: &mut LuaState) -> LuaResult<u32> {
+    let _companion_id = f64::from_stack(state, 1).ok();
+    state.push(Val::Num(FLAVOR_NODE_ID));
+    Ok(1)
+}
+
+fn get_flavor_node_name_for_companion(state: &mut LuaState) -> LuaResult<u32> {
+    let _companion_id = f64::from_stack(state, 1).ok();
+    let name = create_string(state, FLAVOR_NODE_NAME);
+    state.push(name);
     Ok(1)
 }
 
@@ -372,8 +392,18 @@ fn build_tier_info(state: &mut LuaState, row: TierInfoRow) -> Val {
         }
         None => table_set(state, entry, "lockedReason", Val::Nil),
     }
+    set_patch_12_1_tier_info_fields(state, entry);
     entry
 }
+
+#[cfg(feature = "client-ptr")]
+fn set_patch_12_1_tier_info_fields(state: &mut LuaState, entry: Val) {
+    table_set(state, entry, "overrideTooltipSpellID", Val::Nil);
+    table_set(state, entry, "isLFG", Val::Bool(false));
+}
+
+#[cfg(not(feature = "client-ptr"))]
+fn set_patch_12_1_tier_info_fields(_state: &mut LuaState, _entry: Val) {}
 
 fn store_active_tier(state: &mut LuaState, tier: i32) {
     if let Ok(ns) = ensure_namespace(state, "C_DelvesUI") {

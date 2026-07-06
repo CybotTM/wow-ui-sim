@@ -571,6 +571,82 @@ fn test_anonymous_runtime_template_mixin_and_key_values_apply() {
 }
 
 #[test]
+fn test_runtime_template_local_mixin_and_key_value_apply() {
+    let env = WowLuaEnv::new().unwrap();
+    preload_shared_templates(&env);
+    let temp_dir = std::env::temp_dir().join("wow-sim-runtime-template-local-source");
+    std::fs::create_dir_all(&temp_dir).unwrap();
+    let lua_path = temp_dir.join("test.lua");
+    let xml_path = temp_dir.join("test.xml");
+    std::fs::write(
+        &lua_path,
+        r#"
+        local _addonName, addon = ...
+        addon.localToken = "from-local-keyvalue"
+        addon.Nested = {}
+        addon.Nested.LocalMixin = {
+            DescribeLocal = function(self)
+                return self.localToken
+            end,
+        }
+        "#,
+    )
+    .unwrap();
+    std::fs::write(
+        &xml_path,
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="RuntimeTemplateLocalSource" virtual="true">
+                <Mixins>
+                    <Mixin key="Nested.LocalMixin" source="local"/>
+                </Mixins>
+                <KeyValues>
+                    <KeyValue key="localToken" type="local"/>
+                </KeyValues>
+            </Frame>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+
+    register_loading_test_addon(&env);
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_lua_file(
+        &env.loader_env(),
+        &lua_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
+
+    let result: String = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "RuntimeTemplateLocalSourceInstance", UIParent, "RuntimeTemplateLocalSource")
+            return frame:DescribeLocal()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "from-local-keyvalue");
+
+    let _ = std::fs::remove_dir_all(&temp_dir);
+}
+
+#[test]
 fn test_runtime_template_method_scripts_apply() {
     let t = load_test_xml(
         "runtime-template-method-scripts",

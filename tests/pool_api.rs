@@ -638,6 +638,7 @@ fn test_create_line_applies_inherited_line_template_mixins_and_key_values() {
                     key: "isRuntimeLine".to_string(),
                     value: "true".to_string(),
                     value_type: Some("boolean".to_string()),
+                    source: None,
                 }],
             })],
             ..Default::default()

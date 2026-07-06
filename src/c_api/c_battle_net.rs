@@ -54,6 +54,8 @@ fn register_texture_methods(state: &mut LuaState, table_ref: BattleNetTable) -> 
 }
 
 fn register_friend_query_methods(state: &mut LuaState, table_ref: BattleNetTable) -> LuaResult<()> {
+    #[cfg(feature = "client-ptr")]
+    register_patch_12_1_friend_query_methods(state, table_ref)?;
     table_set_rust_fn_static(state, table_ref, "GetNumFriends", c_bnet_get_num_friends)?;
     table_set_rust_fn_static(
         state,
@@ -79,6 +81,49 @@ fn register_friend_query_methods(state: &mut LuaState, table_ref: BattleNetTable
         "GetFriendNumAccounts",
         c_bnet_get_friend_num_accounts,
     )
+}
+
+#[cfg(feature = "client-ptr")]
+fn register_patch_12_1_friend_query_methods(
+    state: &mut LuaState,
+    table_ref: BattleNetTable,
+) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "AreFriendTagsEnabled",
+        c_bnet_feature_disabled,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "AreTitleFriendCustomNamesEnabled",
+        c_bnet_feature_disabled,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "AreTitleFriendsEnabled",
+        c_bnet_feature_disabled,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsBattleNetFriendsListEnabled",
+        c_bnet_feature_disabled,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsBattleNetFriendsListSupported",
+        c_bnet_feature_disabled,
+    )
+}
+
+#[cfg(feature = "client-ptr")]
+fn c_bnet_feature_disabled(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
 }
 
 fn c_bnet_are_high_res_textures_installed(state: &mut LuaState) -> LuaResult<u32> {
@@ -201,6 +246,7 @@ fn push_account_info_table(
     let t = create_table(state);
     write_account_identity_fields(state, t, friend);
     write_account_status_fields(state, t, friend);
+    write_patch_12_1_account_fields(state, t);
     attach_game_account_field(state, t, game_account);
     t
 }
@@ -211,6 +257,7 @@ fn push_game_account_info_table(state: &mut LuaState, ga: &BnetGameAccount) -> V
     write_game_account_character(state, t, ga);
     write_game_account_presence(state, t, ga);
     write_game_account_meta(state, t, ga);
+    write_patch_12_1_game_account_fields(state, t, ga);
     t
 }
 
@@ -298,6 +345,24 @@ fn write_account_status_fields(state: &mut LuaState, t: Val, friend: &BnetFriend
     write_friend_relationship_flags(state, t, friend);
     write_presence_and_link_fields(state, t, friend);
 }
+
+#[cfg(feature = "client-ptr")]
+fn write_patch_12_1_account_fields(state: &mut LuaState, t: Val) {
+    table_set(state, t, "friendLevel", Val::Num(0.0));
+    table_set(state, t, "friendTags", create_table(state));
+}
+
+#[cfg(not(feature = "client-ptr"))]
+fn write_patch_12_1_account_fields(_state: &mut LuaState, _t: Val) {}
+
+#[cfg(feature = "client-ptr")]
+fn write_patch_12_1_game_account_fields(state: &mut LuaState, t: Val, ga: &BnetGameAccount) {
+    let class_filename = create_string(state, &ga.class_name.to_uppercase());
+    table_set(state, t, "classFilename", class_filename);
+}
+
+#[cfg(not(feature = "client-ptr"))]
+fn write_patch_12_1_game_account_fields(_state: &mut LuaState, _t: Val, _ga: &BnetGameAccount) {}
 
 /// `customMessage` + `customMessageTime` + `appearOffline` — the
 /// user-set status block visible in the Battle.net friends panel.

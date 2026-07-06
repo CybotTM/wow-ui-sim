@@ -176,10 +176,10 @@ fn lua_option_string(value: Option<&str>) -> String {
 
 fn append_single_mixin_code(lua_code: &mut String, mixin: &FrameMixin) {
     let name = &mixin.name;
-    let lookup = if mixin.source.as_deref() == Some("secure") {
-        format!("(__secureenv and rawget(__secureenv, \"{name}\")) or {name}")
-    } else {
-        format!("{name} or (__secureenv and rawget(__secureenv, \"{name}\"))")
+    let lookup = match mixin.source.as_deref() {
+        Some("secure") => format!("(__secureenv and rawget(__secureenv, \"{name}\")) or {name}"),
+        Some("local") => format!("__wow_xml_lookup_local(\"{}\")", escape_lua_string(name)),
+        _ => format!("{name} or (__secureenv and rawget(__secureenv, \"{name}\"))"),
     };
     let target_partition = lua_option_string(mixin.target_partition.as_deref());
     let inbound_partition = lua_option_string(mixin.inbound_partition.as_deref());
@@ -281,7 +281,12 @@ fn append_key_values_from_xml(
 ) {
     if let Some(key_values) = key_values {
         for kv in &key_values.values {
-            let value = format_key_value_lua(&kv.value, kv.value_type.as_deref());
+            let value = format_key_value_lua(
+                &kv.key,
+                &kv.value,
+                kv.value_type.as_deref(),
+                kv.source.as_deref(),
+            );
             let key = escape_lua_string(&kv.key);
             lua_code.push_str(&format!(
                 r#"
@@ -302,7 +307,12 @@ pub(super) fn generate_key_values_code(
     };
     let mut code = String::new();
     for kv in &key_values.values {
-        let value = format_key_value_lua(&kv.value, kv.value_type.as_deref());
+        let value = format_key_value_lua(
+            &kv.key,
+            &kv.value,
+            kv.value_type.as_deref(),
+            kv.source.as_deref(),
+        );
         let field_ref = lua_table_field_ref(var_name, &kv.key);
         code.push_str(&format!("\n        {field_ref} = {value}\n        "));
     }
@@ -310,14 +320,26 @@ pub(super) fn generate_key_values_code(
 }
 
 /// Format a KeyValue's value as a Lua expression based on its type.
-fn format_key_value_lua(value: &str, value_type: Option<&str>) -> String {
-    match value_type {
-        Some("number") => value.to_string(),
-        Some("boolean") => value.to_lowercase(),
-        Some("global") if !value.is_empty() => value.to_string(),
-        Some("global") => "nil".to_string(),
+fn format_key_value_lua(
+    key: &str,
+    value: &str,
+    value_type: Option<&str>,
+    source: Option<&str>,
+) -> String {
+    match (value_type, source) {
+        (Some("number"), _) => value.to_string(),
+        (Some("boolean"), _) => value.to_lowercase(),
+        (Some("global"), _) if !value.is_empty() => value.to_string(),
+        (Some("global"), _) => "nil".to_string(),
+        (Some("local"), _) | (_, Some("local")) => {
+            let local_key = if value.is_empty() { key } else { value };
+            format!(
+                "__wow_xml_lookup_local(\"{}\")",
+                escape_lua_string(local_key)
+            )
+        }
         // Auto-detect numbers when type is not specified (WoW behavior)
-        None if value.parse::<f64>().is_ok() => value.to_string(),
+        (None, _) if value.parse::<f64>().is_ok() => value.to_string(),
         _ => format!("\"{}\"", escape_lua_string(value)),
     }
 }
