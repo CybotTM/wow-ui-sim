@@ -17,7 +17,7 @@ if rawget(C_Ping, "SendMacroPing") == nil then
         if Enum and Enum.PingResult and Enum.PingResult.FailedSilent then
             return Enum.PingResult.FailedSilent
         end
-        return nil
+        return 0
     end
 end
 "#;

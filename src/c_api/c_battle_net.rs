@@ -348,8 +348,9 @@ fn write_account_status_fields(state: &mut LuaState, t: Val, friend: &BnetFriend
 
 #[cfg(feature = "client-ptr")]
 fn write_patch_12_1_account_fields(state: &mut LuaState, t: Val) {
+    let friend_tags = create_table(state);
     table_set(state, t, "friendLevel", Val::Num(0.0));
-    table_set(state, t, "friendTags", create_table(state));
+    table_set(state, t, "friendTags", friend_tags);
 }
 
 #[cfg(not(feature = "client-ptr"))]
