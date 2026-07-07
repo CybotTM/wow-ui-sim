@@ -16,6 +16,7 @@ The simulator now provides modeled 12.0.7 social/party mutations:
 - `C_PartyInfo.DoReadyCheck` / `ReadyCheck` start a ready-check state, dispatch `READY_CHECK`, and expose `GetReadyCheckStatus("player") == "waiting"` with positive `GetReadyCheckTimeLeft()`.
 - `C_PartyInfo.ConfirmReadyCheck(ready)` records ready/not-ready state, dispatches `READY_CHECK_CONFIRM` and `READY_CHECK_FINISHED`, and clears the time-left value.
 - `C_PartyInfo.IsGUIDInGroup(guid)` now reads the existing simulator party roster and synthetic `UnitGUID("partyN")` values instead of always returning false.
+- `C_PartyInfo.SetEveryoneIsAssistant`, `PromoteToAssistant`, `DemoteAssistant`, and `PromoteToLeader` now mutate existing party assistant/leader state used by `IsEveryoneAssistant`, `IsGroupLeader`, and `UnitIsGroupLeader`.
 
 The simulator also provides safe 12.0.7 additive probes for API names that can be inert without pretending to model live game state:
 - `C_DelvesUI.GetDelveEntranceTitleString`
@@ -26,7 +27,7 @@ The simulator also provides safe 12.0.7 additive probes for API names that can b
 - `C_HousingCustomizeMode.RoomConnectionSupportsDoorType`
 - `C_HousingLayout.CanSetViewedFloor`
 - `C_MerchantFrame.GetMerchantCurrencies`
-- `C_PartyInfo.ConfirmReadyCheck`, `DemoteAssistant`, `DoReadyCheck`, `PromoteToAssistant`, `PromoteToLeader`, `SetEveryoneIsAssistant`, `UninviteUnit`
+- `C_PartyInfo.ConfirmReadyCheck`, `DoReadyCheck`, `UninviteUnit`
 - `C_PingSecure.ClearPendingPingOffScreenCallback`
 - `C_QuestHub.GetDragonridingRacesForAreaPOI`
 - `C_UIFileAsset.GetFileID`, `IsKnownFile`, `IsLooseFile` (now best-effort modeled from the bundled limited listfile)
@@ -40,7 +41,7 @@ Already-existing coverage from prior work included `C_Container.CalculateTotalNu
 Key implementation locations:
 
 - `src/c_api/c_battle_net.rs` — modeled `C_BattleNet.InviteFriend` backed by `SimState.bnet_friends`.
-- `src/c_api/c_party_info.rs`, `src/lua_api/globals/group_verbs.rs`, `src/lua_api/state/support_types.rs` — modeled ready-check state, C_PartyInfo ready-check methods, GUID-in-group membership, global ready-check status/time probes, and immediate ready-check event dispatch.
+- `src/c_api/c_party_info.rs`, `src/lua_api/globals/group_verbs.rs`, `src/lua_api/state/support_types.rs` — modeled ready-check state, C_PartyInfo ready-check methods, GUID-in-group membership, party assistant/leader mutators, global ready-check status/time probes, and immediate ready-check event dispatch.
 - `src/c_api/c_ui_file_asset.rs` — best-effort `C_UIFileAsset` path/fileDataID lookup backed by the bundled limited listfile.
 - `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — version-gated inert 12.0.7 defaults for still-unmodeled APIs.
 - `src/lua_api/workarounds/mod.rs`, `src/lua_api/workarounds/temporary/mod.rs` — bootstrap registration.
@@ -75,6 +76,7 @@ Rust readability metrics are under `/tmp/rust_readability_12_0_7` with no high-c
 - **DurationTextBinding formatting** — the binding object now follows the documented method surface for non-secret state and stores duration objects from `C_DurationUtil.CreateDuration`, but exact Blizzard formatting/component semantics and secret-value handling still need live probes.
 - **Tooltip money line formatting** — `GameTooltip_AddMoneyLine` uses the existing `GetMoneyString` fallback with thousands grouping and optional prefix text. Exact embedded-atlas/MoneyFormatter output remains a later fidelity improvement if addon screenshots require it.
 - **Party GUID membership** — `C_PartyInfo.IsGUIDInGroup` treats the local player and synthetic party member GUIDs as in-group only while `SimState.party_group_active` is true. Exact instance-party category filtering and cross-realm GUID details remain future fidelity work if addons depend on them.
+- **Party role mutators** — `C_PartyInfo` leader/assistant mutators write the existing simulator group-role fields. Individual assistant tracking is not modeled yet, so `PromoteToAssistant` and `DemoteAssistant` map to the coarse `everyone_assistant` flag until a per-member assistant model is needed.
 
 ### Paused / blocked items
 

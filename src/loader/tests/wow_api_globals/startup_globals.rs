@@ -172,9 +172,16 @@ fn test_patch_12_0_7_safe_global_bridges() {
             if C_PartyInfo.IsGUIDInGroup(UnitGUID("player")) ~= true then return "party-guid-player" end
             if C_PartyInfo.IsGUIDInGroup(UnitGUID("party1")) ~= true then return "party-guid-member" end
             if C_PartyInfo.IsGUIDInGroup("Player-9-UNKNOWN") ~= false then return "party-guid-unknown" end
-            C_PartyInfo.PromoteToAssistant("player")
-            C_PartyInfo.PromoteToLeader("player")
             C_PartyInfo.SetEveryoneIsAssistant(true)
+            if IsEveryoneAssistant() ~= true then return "party-everyone-assistant" end
+            C_PartyInfo.DemoteAssistant("player")
+            if IsEveryoneAssistant() ~= false then return "party-demote-assistant" end
+            C_PartyInfo.PromoteToAssistant("party1")
+            if IsEveryoneAssistant() ~= true then return "party-promote-assistant" end
+            C_PartyInfo.PromoteToLeader("party1")
+            if IsGroupLeader() ~= false or UnitIsGroupLeader("party1") ~= true then return "party-promote-leader" end
+            C_PartyInfo.PromoteToLeader("player")
+            if IsGroupLeader() ~= true then return "party-promote-player-leader" end
             C_PartyInfo.UninviteUnit("party1")
             C_PingSecure.SetPendingPingOffScreenCallback(function() return "ping" end)
             if type(GetSecurePendingPingOffScreenCallback()) ~= "function" then return "ping-callback" end

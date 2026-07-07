@@ -189,10 +189,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     set_default(merchantFrame, "GetMerchantCurrencies", return_empty_table)
 
     local partyInfo = ensure_namespace("C_PartyInfo")
-    set_default(partyInfo, "DemoteAssistant", noop)
-    set_default(partyInfo, "PromoteToAssistant", noop)
-    set_default(partyInfo, "PromoteToLeader", noop)
-    set_default(partyInfo, "SetEveryoneIsAssistant", noop)
     set_default(partyInfo, "UninviteUnit", function(unit)
         if type(UninviteUnit) == "function" then UninviteUnit(unit) end
     end)

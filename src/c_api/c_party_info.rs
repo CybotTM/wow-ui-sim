@@ -9,7 +9,7 @@
 
 use crate::c_api::helpers::{ensure_namespace, set_table_array};
 use crate::lua_api::globals::group_queries::active_party_count;
-use crate::lua_api::methods::{borrow_state, create_table};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
 use crate::lua_api::state::SEEDED_LOCAL_CHARACTER_GUID;
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
@@ -51,6 +51,30 @@ fn register_group_membership_probes(
         c_party_info_is_guid_in_group,
     )?;
     table_set_rust_fn_static(state, table_ref, "LeaveParty", c_party_info_leave_party)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "DemoteAssistant",
+        c_party_info_demote_assistant,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "PromoteToAssistant",
+        c_party_info_promote_to_assistant,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "PromoteToLeader",
+        c_party_info_promote_to_leader,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SetEveryoneIsAssistant",
+        c_party_info_set_everyone_is_assistant,
+    )?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -143,9 +167,48 @@ fn party_member_guid(index: usize) -> String {
     format!("Player-0000-000000{:02}", index + 2)
 }
 
+fn party_member_index_from_unit(state: &mut LuaState, unit: &str) -> LuaResult<Option<usize>> {
+    if unit == "player" {
+        return Ok(None);
+    }
+    if let Some(index) = crate::lua_api::globals::unit_api::parse_party_index(unit) {
+        return Ok(Some(index));
+    }
+    let sim = borrow_state(state)?;
+    Ok(sim
+        .party_members
+        .iter()
+        .position(|member| member.name == unit))
+}
+
 fn c_party_info_leave_party(state: &mut LuaState) -> LuaResult<u32> {
     crate::lua_api::globals::group_verbs::clear_party_roster(state)?;
     crate::lua_api::globals::group_verbs::push_event(state, "GROUP_ROSTER_UPDATE")?;
+    Ok(0)
+}
+
+fn c_party_info_demote_assistant(state: &mut LuaState) -> LuaResult<u32> {
+    let _unit = Option::<String>::from_stack(state, 1)?;
+    borrow_state_mut(state)?.everyone_assistant = false;
+    Ok(0)
+}
+
+fn c_party_info_promote_to_assistant(state: &mut LuaState) -> LuaResult<u32> {
+    let _unit = Option::<String>::from_stack(state, 1)?;
+    borrow_state_mut(state)?.everyone_assistant = true;
+    Ok(0)
+}
+
+fn c_party_info_promote_to_leader(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let leader_index = party_member_index_from_unit(state, &unit)?;
+    borrow_state_mut(state)?.party_leader_index = leader_index;
+    Ok(0)
+}
+
+fn c_party_info_set_everyone_is_assistant(state: &mut LuaState) -> LuaResult<u32> {
+    let enabled = Option::<bool>::from_stack(state, 1)?.unwrap_or(false);
+    borrow_state_mut(state)?.everyone_assistant = enabled;
     Ok(0)
 }
 
