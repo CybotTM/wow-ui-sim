@@ -31,7 +31,7 @@ The simulator also provides safe 12.0.7 additive probes for API names that can b
 - `C_UIFileAsset.GetFileID`, `IsKnownFile`, `IsLooseFile` (now best-effort modeled from the bundled limited listfile)
 - `GetEventCPUUsage`, `GetFunctionCPUUsage`, `GetScriptCPUUsage`
 - secure pending callback getters/setters: button, ping off-screen, toggle run
-- `GameTooltip_AddMoneyLine`
+- `GameTooltip_AddMoneyLine` (now best-effort formats copper through the simulator money formatter before adding the tooltip line)
 - `ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED` registration under `retail-12-0-7`
 
 Already-existing coverage from prior work included `C_Container.CalculateTotalNumberOfFreeBagSlots`, `C_DelvesUI.GetWorldTierDifficultyForActivePlayer`, `C_PingSecure.SetPendingPingOffScreenCallback`, and `URL_TEXTURE_REQUEST_RESULT` registration.
@@ -72,6 +72,7 @@ Rust readability metrics are under `/tmp/rust_readability_12_0_7` with no high-c
 - **C_UIFileAsset path semantics** — `GetFileID` and `IsKnownFile` are backed by `data/wow-ui-sim-listfile.csv` through `limited_listfile`, with slash/case normalization and numeric IDs passed through. `IsLooseFile` currently returns false because loose-file install/source semantics are not modeled. Replace this with exact client behavior if PTR probes show different extension handling or loose-file rules.
 - **Encounter timeline color state** — `C_EncounterTimeline.GetEventColor` mirrors the existing temporary `C_EncounterEvents` color table, including alpha, and falls back to white when no event color is configured. Exact five-second-warning/custom-color behavior and event firing still need probes.
 - **DurationTextBinding formatting** — the binding object now follows the documented method surface for non-secret state and stores duration objects from `C_DurationUtil.CreateDuration`, but exact Blizzard formatting/component semantics and secret-value handling still need live probes.
+- **Tooltip money line formatting** — `GameTooltip_AddMoneyLine` uses the existing `GetMoneyString` fallback with thousands grouping and optional prefix text. Exact embedded-atlas/MoneyFormatter output remains a later fidelity improvement if addon screenshots require it.
 
 ### Paused / blocked items
 

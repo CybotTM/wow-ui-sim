@@ -223,9 +223,15 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     if SetSecurePendingToggleRunCallback == nil then SetSecurePendingToggleRunCallback = set_callback("toggleRun") end
 
     if GameTooltip_AddMoneyLine == nil then
+        local function format_tooltip_money(money)
+            if type(GetMoneyString) == "function" then
+                return GetMoneyString(money or 0, true)
+            end
+            return tostring(money or 0)
+        end
         function GameTooltip_AddMoneyLine(tooltip, money, prefixText)
             if tooltip and type(tooltip.AddLine) == "function" then
-                local text = tostring(money or 0)
+                local text = format_tooltip_money(money)
                 if prefixText then text = tostring(prefixText) .. text end
                 tooltip:AddLine(text)
             end
