@@ -156,8 +156,10 @@ fn test_patch_12_0_7_safe_global_bridges() {
             if GetSecurePendingPingOffScreenCallback() ~= nil then return "ping-clear" end
             if type(C_QuestHub.GetDragonridingRacesForAreaPOI(1)) ~= "table" then return "dragonraces" end
             if C_UIFileAsset.GetFileID(123) ~= 123 then return "file-id-number" end
-            if C_UIFileAsset.GetFileID("Interface/Unknown") ~= nil then return "file-id-path" end
-            if C_UIFileAsset.IsKnownFile("Interface/Unknown") ~= false then return "file-known" end
+            if C_UIFileAsset.GetFileID("Interface\\Icons\\Trade_Engineering.blp") ~= 136243 then return "file-id-known-path" end
+            if C_UIFileAsset.GetFileID("Interface/Unknown") ~= nil then return "file-id-unknown-path" end
+            if C_UIFileAsset.IsKnownFile("Interface/Icons/Trade_Engineering.blp") ~= true then return "file-known-path" end
+            if C_UIFileAsset.IsKnownFile("Interface/Unknown") ~= false then return "file-known-unknown" end
             if C_UIFileAsset.IsLooseFile("Interface/Unknown") ~= false then return "file-loose" end
             if GetEventCPUUsage() ~= 0 then return "event-cpu" end
             if GetFunctionCPUUsage(function() end) ~= 0 then return "function-cpu" end

@@ -28,7 +28,7 @@ The simulator also provides safe 12.0.7 additive probes for API names that can b
 - `C_PartyInfo.ConfirmReadyCheck`, `DemoteAssistant`, `DoReadyCheck`, `IsGUIDInGroup`, `PromoteToAssistant`, `PromoteToLeader`, `SetEveryoneIsAssistant`, `UninviteUnit`
 - `C_PingSecure.ClearPendingPingOffScreenCallback`
 - `C_QuestHub.GetDragonridingRacesForAreaPOI`
-- `C_UIFileAsset.GetFileID`, `IsKnownFile`, `IsLooseFile`
+- `C_UIFileAsset.GetFileID`, `IsKnownFile`, `IsLooseFile` (now best-effort modeled from the bundled limited listfile)
 - `GetEventCPUUsage`, `GetFunctionCPUUsage`, `GetScriptCPUUsage`
 - secure pending callback getters/setters: button, ping off-screen, toggle run
 - `GameTooltip_AddMoneyLine`
@@ -40,6 +40,7 @@ Key implementation locations:
 
 - `src/c_api/c_battle_net.rs` — modeled `C_BattleNet.InviteFriend` backed by `SimState.bnet_friends`.
 - `src/c_api/c_party_info.rs`, `src/lua_api/globals/group_verbs.rs`, `src/lua_api/state/support_types.rs` — modeled ready-check state, C_PartyInfo ready-check methods, global ready-check status/time probes, and immediate ready-check event dispatch.
+- `src/c_api/c_ui_file_asset.rs` — best-effort `C_UIFileAsset` path/fileDataID lookup backed by the bundled limited listfile.
 - `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — version-gated inert 12.0.7 defaults for still-unmodeled APIs.
 - `src/lua_api/workarounds/mod.rs`, `src/lua_api/workarounds/temporary/mod.rs` — bootstrap registration.
 - `src/event/valid_events.rs` — 12.0.7 event registration gate.
@@ -66,9 +67,13 @@ Full proof logs after the final bridge pass:
 
 Rust readability metrics are under `/tmp/rust_readability_12_0_7` with no high-complexity findings.
 
+### Best-effort modeled guesses needing later probes
+
+- **C_UIFileAsset path semantics** — `GetFileID` and `IsKnownFile` are backed by `data/wow-ui-sim-listfile.csv` through `limited_listfile`, with slash/case normalization and numeric IDs passed through. `IsLooseFile` currently returns false because loose-file install/source semantics are not modeled. Replace this with exact client behavior if PTR probes show different extension handling or loose-file rules.
+
 ### Paused / blocked items
 
-Do not implement these as guesses. They need live Blizzard behavior, generated docs, or targeted probe addons:
+Security/error-shape-sensitive items still need live Blizzard behavior, generated docs, or targeted probe addons:
 
 - **Unit identity restricted-token behavior** — 12.0.7 changed restricted unit APIs such as `UnitGUID`, `UnitAura`, and health/power APIs from Lua errors to nil/default returns for unsupported PvP-restricted tokens. Need exact token matrix, return values, and addon-vs-Blizzard behavior.
 - **Encounter payloads** — `ENCOUNTER_END` now includes `encounterUnitStatus` tables with `creatureID`, `creatureName`, and `remainingHealthPercent`. Need real event payload shape and simulator encounter state backing before modeling.
@@ -93,6 +98,7 @@ If the exact-behavior work resumes, create live PTR probe addons for restricted-
 - `/tmp/warcraft_patch_12_0_7_api_changes.txt` — local snapshot of the patch API-change source.
 - `src/c_api/c_battle_net.rs` — modeled Battle.net friend-list APIs.
 - `src/c_api/c_party_info.rs`, `src/lua_api/globals/group_verbs.rs`, `src/lua_api/state/support_types.rs` — modeled ready-check behavior.
+- `src/c_api/c_ui_file_asset.rs` — best-effort UI file-asset lookup.
 - `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — implemented inert 12.0.7 bridge defaults.
 - `src/event/valid_events.rs` — 12.0.7 event gate.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — 12.0.7 safe bridge regression coverage.

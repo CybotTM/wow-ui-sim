@@ -42,6 +42,7 @@ pub mod c_stable_info;
 pub mod c_string_util;
 pub mod c_summon_info;
 pub mod c_texture;
+pub mod c_ui_file_asset;
 pub mod c_widget;
 pub mod c_wow_token_public;
 pub mod c_wowtoken_secure;
@@ -96,5 +97,6 @@ fn register_token_texture_xml_tables(state: &mut LuaState) -> LuaResult<()> {
     c_wowtoken_secure::register_c_wowtoken_secure(state)?;
     c_wow_token_public::register_c_wow_token_public(state)?;
     c_texture::register_c_texture(state)?;
+    c_ui_file_asset::register_c_ui_file_asset(state)?;
     c_xml_util::register_c_xml_util(state)
 }

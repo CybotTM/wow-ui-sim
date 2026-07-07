@@ -139,14 +139,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     local questHub = ensure_namespace("C_QuestHub")
     set_default(questHub, "GetDragonridingRacesForAreaPOI", return_empty_table)
 
-    local uiFileAsset = ensure_namespace("C_UIFileAsset")
-    set_default(uiFileAsset, "GetFileID", function(asset)
-        if type(asset) == "number" then return asset end
-        return nil
-    end)
-    set_default(uiFileAsset, "IsKnownFile", return_false)
-    set_default(uiFileAsset, "IsLooseFile", return_false)
-
     if GetEventCPUUsage == nil then function GetEventCPUUsage() return 0 end end
     if GetFunctionCPUUsage == nil then function GetFunctionCPUUsage() return 0 end end
     if GetScriptCPUUsage == nil then function GetScriptCPUUsage() return 0 end end
