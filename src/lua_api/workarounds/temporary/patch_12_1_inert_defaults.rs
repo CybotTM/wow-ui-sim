@@ -51,10 +51,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
     set_default(discord, "UpdateDiscordServers", noop)
     set_default(discord, "UpdateGuildLobby", noop)
 
-    local encounterJournal = ensure_namespace("C_EncounterJournal")
-    set_default(encounterJournal, "GetBaseDifficultyID", return_nil)
-    set_default(encounterJournal, "InstanceHasDifficultyID", return_false)
-
     local houseEditor = ensure_namespace("C_HouseEditor")
     set_default(houseEditor, "GetHouseEditorPlayerType", return_nil)
 

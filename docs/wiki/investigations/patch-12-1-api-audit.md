@@ -16,7 +16,8 @@ The 12.1 compatibility work is currently captured by these commits:
 - `16b7d85d6` — modeled 12.1 forbidden aspect inheritance for compatible frame/object behavior.
 - `4b5fc502d` — bridged remaining inert social, Discord, Battle.net title-friend, encounter-journal, and housing/blueprint probes.
 - `85c2b11d3` — added 12.1 `DurationTextBinding` color-curve compatibility methods on the table returned by `C_DurationUtil.CreateDurationTextBinding`.
-- pending commit — modeled 12.1 Battle.net title-friend custom names/tags as best-effort per-friend metadata on `SimState.bnet_friends`.
+- `15f4ecc18` — modeled 12.1 Battle.net title-friend custom names/tags as best-effort per-friend metadata on `SimState.bnet_friends`.
+- pending commit — modeled 12.1 Encounter Journal difficulty helpers from generated instance data (`is_raid` → base/valid difficulty guesses).
 
 Key implementation locations:
 
@@ -52,6 +53,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | `DurationTextBinding` color methods | Implemented as compatibility methods on `C_DurationUtil.CreateDurationTextBinding(...)`: `ClearTextColorCurve`, `GetFormattedTextColor`, `GetTextColorCurve`, `SetTextColorCurve`. |
 | Discord / pending Battle.net title-friend invites / housing blueprint/editor APIs | Present as inert compatibility defaults unless backed by existing simulator state. These are callable stubs, not real service models. |
 | Battle.net title-friend custom names/tags | Best-effort modeled on `SimState.bnet_friends`: `SetCustomTitleFriendName` stores/clears a per-friend custom title name returned by `GetCustomTitleFriendName`; `SetFriendTags` stores array tags reflected in `GetFriendAccountInfo(...).friendTags`. Exact PTR behavior still needs probes. |
+| Encounter Journal difficulty helpers | Best-effort modeled from generated Encounter Journal instance data: `GetBaseDifficultyID` returns `1` for dungeons and `14` for raids; `InstanceHasDifficultyID` accepts common dungeon IDs `1/2/8/23` and raid IDs `14/15/16/17`. Exact per-instance difficulty masks need generated data or PTR probes. |
 
 ### Paused / blocked items
 
@@ -63,7 +65,7 @@ Do not implement these as guesses. They need real Blizzard PTR probes, generated
 - **AuraContainer / AuraButton / ManagedAuraContainer** — object names and compatible creation/XML paths are bridged, but full aura assignment, filtering, sorting, forbidden partition placement, automatic button management, tooltip behavior, and secret `IsShown` behavior are not modeled.
 - **RadialProgress script object** — texture/statusbar radial-progress-bar widget methods are bridged, but the standalone `RadialProgress:*` script object has no known constructor path in the current API audit. Do not invent a global constructor just to satisfy method names.
 - **Full DurationTextBinding object fidelity** — compatibility methods exist, including 12.1 color-curve methods, but exact Blizzard object lifetime, metatable identity, formatter semantics, and color-curve interpolation remain unproven.
-- **Changed structure payloads with real data** — inert compatibility fields were added where safe, and Battle.net title-friend custom names/tags now have a best-effort simulator model. Exact payloads for pending Battle.net invites, Discord, housing, cooldown viewer, pet journal, LFG, player choice, tiered entrance, and private aura structures require backing models or live captures before claiming behavioral fidelity.
+- **Changed structure payloads with real data** — inert compatibility fields were added where safe, and Battle.net title-friend custom names/tags plus Encounter Journal difficulty helpers now have best-effort simulator models. Exact payloads for pending Battle.net invites, Discord, housing, cooldown viewer, pet journal, LFG, player choice, tiered entrance, and private aura structures require backing models or live captures before claiming behavioral fidelity.
 - **Deprecated wrappers vs strict removals timing** — strict removed symbols are hidden for addon-facing 12.1 checks after startup. Current Blizzard UI still reads some removed/changed values during load, so moving removals earlier can break startup. Revisit only with current PTR Blizzard UI that no longer needs those load-time values.
 
 ### Practical next step

@@ -284,8 +284,13 @@ fn test_patch_12_1_safe_global_bridges() {
             local lfgInfo = C_LFGList.GetSearchResultInfo(7)
             if type(lfgInfo) == "table" and lfgInfo.censored ~= false then return "lfg-censored-field" end
             if C_PvP.CanSurrenderArena() ~= false then return "pvp" end
-            if C_EncounterJournal.GetBaseDifficultyID(1) ~= nil then return "ej-base-difficulty" end
-            if C_EncounterJournal.InstanceHasDifficultyID(1, 1) ~= false then return "ej-instance-difficulty" end
+            if C_EncounterJournal.GetBaseDifficultyID(63) ~= 1 then return "ej-base-difficulty-dungeon" end
+            if C_EncounterJournal.GetBaseDifficultyID(72) ~= 14 then return "ej-base-difficulty-raid" end
+            if C_EncounterJournal.GetBaseDifficultyID(999999) ~= nil then return "ej-base-difficulty-invalid" end
+            if C_EncounterJournal.InstanceHasDifficultyID(63, 1) ~= true then return "ej-instance-difficulty-dungeon" end
+            if C_EncounterJournal.InstanceHasDifficultyID(63, 14) ~= false then return "ej-instance-difficulty-dungeon-raid" end
+            if C_EncounterJournal.InstanceHasDifficultyID(72, 14) ~= true then return "ej-instance-difficulty-raid" end
+            if C_EncounterJournal.InstanceHasDifficultyID(999999, 14) ~= false then return "ej-instance-difficulty-invalid" end
             if C_QuestHub.IsAreaPOICurrentlyRelatedToHub(1, 2) ~= false then return "quest-hub" end
             if C_RecruitAFriend.IsSystemEnabled() ~= false then return "raf-enabled" end
             if C_RecruitAFriend.IsSystemSupported() ~= false then return "raf-supported" end
