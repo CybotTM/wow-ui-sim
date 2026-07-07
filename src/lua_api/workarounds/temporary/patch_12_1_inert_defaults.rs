@@ -29,8 +29,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
 
     local battleNet = ensure_namespace("C_BattleNet")
     set_default(battleNet, "BNCheckTitleFriendInviteToUnit", return_false)
-    set_default(battleNet, "GetFriendInviteInfo", return_nil)
-    set_default(battleNet, "SendVerifiedBattleNetFriendInvite", noop)
     set_default(battleNet, "SetAppearOffline", noop)
 
     local discord = ensure_namespace("C_Discord")

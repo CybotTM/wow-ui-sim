@@ -54,6 +54,17 @@ pub struct BnetFriend {
     pub game_accounts: Vec<BnetGameAccount>,
 }
 
+/// One pending Battle.net friend invite. Best-effort backing for 12.1
+/// `C_BattleNet.GetFriendInviteInfo` and `SendVerifiedBattleNetFriendInvite`.
+#[derive(Debug, Clone)]
+pub struct BnetFriendInvite {
+    pub invite_id: i32,
+    pub battle_tag: String,
+    pub account_name: String,
+    pub friend_level: i32,
+    pub creation_timestamp: i64,
+}
+
 /// One Blizzard game account (WoW character, D3 account, etc.) attached
 /// to a `BnetFriend`. Drives `C_BattleNet.GetGameAccountInfoByGUID`.
 #[derive(Debug, Clone)]

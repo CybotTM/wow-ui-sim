@@ -25,6 +25,8 @@ use crate::lua_api::methods::{
 };
 #[cfg(feature = "retail-12-1-0")]
 use crate::lua_api::methods::{table_set_num, val_to_string};
+#[cfg(feature = "retail-12-1-0")]
+use crate::lua_api::state_types::BnetFriendInvite;
 use crate::lua_api::state_types::{BnetFriend, BnetGameAccount};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
@@ -133,7 +135,19 @@ fn register_patch_12_1_friend_query_methods(
         "SetCustomTitleFriendName",
         c_bnet_set_custom_title_friend_name,
     )?;
-    table_set_rust_fn_static(state, table_ref, "SetFriendTags", c_bnet_set_friend_tags)
+    table_set_rust_fn_static(state, table_ref, "SetFriendTags", c_bnet_set_friend_tags)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetFriendInviteInfo",
+        c_bnet_get_friend_invite_info,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SendVerifiedBattleNetFriendInvite",
+        c_bnet_send_verified_battle_net_friend_invite,
+    )
 }
 
 #[cfg(feature = "retail-12-1-0")]
@@ -186,6 +200,50 @@ fn c_bnet_set_friend_tags(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 #[cfg(feature = "retail-12-1-0")]
+fn c_bnet_get_friend_invite_info(state: &mut LuaState) -> LuaResult<u32> {
+    let invite_index = i32::from_stack(state, 1)?;
+    let invite = {
+        let sim = borrow_state(state)?;
+        sim.bnet_friend_invites
+            .get(friend_index_to_offset(invite_index))
+            .cloned()
+    };
+    match invite {
+        Some(invite) => {
+            let table = push_friend_invite_info_table(state, &invite);
+            state.push(table);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn c_bnet_send_verified_battle_net_friend_invite(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(raw_name) = Option::<String>::from_stack(state, 1)? else {
+        return Ok(0);
+    };
+    let battle_tag = raw_name.trim();
+    if battle_tag.is_empty() {
+        return Ok(0);
+    }
+
+    let mut sim = borrow_state_mut(state)?;
+    if sim
+        .bnet_friend_invites
+        .iter()
+        .any(|invite| is_same_bnet_invite(invite, battle_tag))
+    {
+        return Ok(0);
+    }
+
+    let invite_id = next_bnet_invite_id(&sim.bnet_friend_invites);
+    sim.bnet_friend_invites
+        .push(pending_bnet_friend_invite(battle_tag, invite_id));
+    Ok(0)
+}
+
+#[cfg(feature = "retail-12-1-0")]
 fn friend_index_to_offset(friend_index: i32) -> usize {
     usize::try_from(friend_index - 1).unwrap_or(usize::MAX)
 }
@@ -226,6 +284,63 @@ fn create_friend_tags_table(state: &mut LuaState, tags: &[String]) -> Val {
         let tag = create_string(state, tag);
         table_set_num(state, table_ref, (index + 1) as f64, tag);
     }
+    table
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn is_same_bnet_invite(invite: &BnetFriendInvite, name: &str) -> bool {
+    invite.battle_tag.eq_ignore_ascii_case(name) || invite.account_name.eq_ignore_ascii_case(name)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn next_bnet_invite_id(invites: &[BnetFriendInvite]) -> i32 {
+    invites
+        .iter()
+        .map(|invite| invite.invite_id)
+        .max()
+        .unwrap_or(0)
+        + 1
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn pending_bnet_friend_invite(battle_tag: &str, invite_id: i32) -> BnetFriendInvite {
+    BnetFriendInvite {
+        invite_id,
+        battle_tag: battle_tag.to_string(),
+        account_name: account_name_from_invite(battle_tag),
+        friend_level: 1,
+        creation_timestamp: current_unix_timestamp(),
+    }
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn current_unix_timestamp() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|duration| duration.as_secs() as i64)
+        .unwrap_or(0)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn push_friend_invite_info_table(state: &mut LuaState, invite: &BnetFriendInvite) -> Val {
+    let table = create_table(state);
+    let account_name = create_string(state, &invite.account_name);
+    let battle_tag = create_string(state, &invite.battle_tag);
+    table_set(state, table, "inviteID", Val::Num(invite.invite_id as f64));
+    table_set(state, table, "accountName", account_name);
+    table_set(state, table, "battleTag", battle_tag);
+    table_set(
+        state,
+        table,
+        "friendLevel",
+        Val::Num(invite.friend_level as f64),
+    );
+    table_set(
+        state,
+        table,
+        "creationTimestamp",
+        Val::Num(invite.creation_timestamp as f64),
+    );
     table
 }
 

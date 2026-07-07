@@ -338,7 +338,16 @@ fn test_patch_12_1_safe_global_bridges() {
             if C_BattleNet.BNCheckTitleFriendInviteToUnit("player") ~= false then return "bnet-title-invite" end
             if C_BattleNet.GetCustomTitleFriendName(1) ~= nil then return "bnet-title-name" end
             if C_BattleNet.GetFriendInviteInfo(1) ~= nil then return "bnet-invite-info" end
-            C_BattleNet.SendVerifiedBattleNetFriendInvite("Player-Realm")
+            C_BattleNet.SendVerifiedBattleNetFriendInvite("Anduin#4000")
+            local inviteInfo = C_BattleNet.GetFriendInviteInfo(1)
+            if type(inviteInfo) ~= "table" then return "bnet-invite-created" end
+            if inviteInfo.inviteID ~= 1 then return "bnet-invite-id" end
+            if inviteInfo.accountName ~= "Anduin" then return "bnet-invite-account" end
+            if inviteInfo.battleTag ~= "Anduin#4000" then return "bnet-invite-battletag" end
+            if type(inviteInfo.friendLevel) ~= "number" then return "bnet-invite-level" end
+            if type(inviteInfo.creationTimestamp) ~= "number" then return "bnet-invite-created-at" end
+            C_BattleNet.SendVerifiedBattleNetFriendInvite("Anduin#4000")
+            if C_BattleNet.GetFriendInviteInfo(2) ~= nil then return "bnet-invite-duplicate" end
             C_BattleNet.SetAppearOffline(false)
             C_BattleNet.SetCustomTitleFriendName(1, "Light")
             if C_BattleNet.GetCustomTitleFriendName(1) ~= "Light" then return "bnet-title-name-set" end
