@@ -20,7 +20,7 @@ The simulator also provides safe 12.0.7 additive probes for API names that can b
 - `C_DelvesUI.GetDelveEntranceTitleString`
 - `C_DurationUtil.CreateManualClock`
 - `C_DurationUtil.CreateDurationTextBinding`
-- `C_EncounterTimeline.GetEventColor`
+- `C_EncounterTimeline.GetEventColor` (now best-effort delegated to `C_EncounterEvents` color state)
 - `C_HousingCatalog.GetCatalogCategoryAndSubcategoryNames`
 - `C_HousingCustomizeMode.RoomConnectionSupportsDoorType`
 - `C_HousingLayout.CanSetViewedFloor`
@@ -70,6 +70,7 @@ Rust readability metrics are under `/tmp/rust_readability_12_0_7` with no high-c
 ### Best-effort modeled guesses needing later probes
 
 - **C_UIFileAsset path semantics** — `GetFileID` and `IsKnownFile` are backed by `data/wow-ui-sim-listfile.csv` through `limited_listfile`, with slash/case normalization and numeric IDs passed through. `IsLooseFile` currently returns false because loose-file install/source semantics are not modeled. Replace this with exact client behavior if PTR probes show different extension handling or loose-file rules.
+- **Encounter timeline color state** — `C_EncounterTimeline.GetEventColor` mirrors the existing temporary `C_EncounterEvents` color table, including alpha, and falls back to white when no event color is configured. Exact five-second-warning/custom-color behavior and event firing still need probes.
 
 ### Paused / blocked items
 
@@ -77,7 +78,7 @@ Security/error-shape-sensitive items still need live Blizzard behavior, generate
 
 - **Unit identity restricted-token behavior** — 12.0.7 changed restricted unit APIs such as `UnitGUID`, `UnitAura`, and health/power APIs from Lua errors to nil/default returns for unsupported PvP-restricted tokens. Need exact token matrix, return values, and addon-vs-Blizzard behavior.
 - **Encounter payloads** — `ENCOUNTER_END` now includes `encounterUnitStatus` tables with `creatureID`, `creatureName`, and `remainingHealthPercent`. Need real event payload shape and simulator encounter state backing before modeling.
-- **Encounter Events color state** — `C_EncounterEvents` gained color configuration and alpha support, plus `ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED`. Only timeline event color probing is bridged; persistent color state and event firing need live behavior.
+- **Encounter Events color event semantics** — `C_EncounterEvents` color state and timeline color reads are best-effort bridged, but exact five-second-warning custom-color behavior, persistence rules, and `ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED` firing need live behavior.
 - **SimulateMouse taint and focus restrictions** — 12.0.7 changed taint propagation and imposed forbidden/locked/script-inaccessible/protected focus restrictions. This overlaps secure input and combat lockdown; implement only after exact behavior is known.
 - **debugstack/debuglocals secret propagation** — returning secret values based on current/caller stack secret access requires rilua secret-value semantics, not a simple Lua stub.
 - **Secure `raidtarget` `set-unmarked` and `/tm ~N` behavior** — secure action and macro execution behavior needs real secure-state tests.

@@ -140,6 +140,7 @@ if rawget(C_EncounterEvents, "GetEventInfo") == nil then
                 r = event.color.r,
                 g = event.color.g,
                 b = event.color.b,
+                a = event.color.a,
             }
         end
         return info
@@ -159,6 +160,7 @@ if rawget(C_EncounterEvents, "SetEventColor") == nil then
             r = tonumber(color.r) or 0,
             g = tonumber(color.g) or 0,
             b = tonumber(color.b) or 0,
+            a = tonumber(color.a) or 1,
         }
     end
 end
@@ -172,6 +174,7 @@ if rawget(C_EncounterEvents, "GetEventColor") == nil then
             r = event.color.r,
             g = event.color.g,
             b = event.color.b,
+            a = event.color.a,
         }
     end
 end
@@ -266,9 +269,9 @@ mod tests {
                 if eventInfo.encounterEventID ~= 1 then
                     return "bad_event_info"
                 end
-                C_EncounterEvents.SetEventColor(1, { r = 0.1, g = 0.2, b = 0.3 })
+                C_EncounterEvents.SetEventColor(1, { r = 0.1, g = 0.2, b = 0.3, a = 0.4 })
                 local color = C_EncounterEvents.GetEventColor(1)
-                if color.r ~= 0.1 or color.g ~= 0.2 or color.b ~= 0.3 then
+                if color.r ~= 0.1 or color.g ~= 0.2 or color.b ~= 0.3 or color.a ~= 0.4 then
                     return "bad_color"
                 end
                 C_EncounterEvents.SetEventSound(1, 5, { file = 123, channel = "Master", volume = 0.5 })

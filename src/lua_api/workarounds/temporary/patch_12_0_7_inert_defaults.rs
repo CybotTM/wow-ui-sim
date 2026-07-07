@@ -102,7 +102,15 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     set_default(durationUtil, "CreateDurationTextBinding", create_duration_text_binding)
 
     local encounterTimeline = ensure_namespace("C_EncounterTimeline")
-    set_default(encounterTimeline, "GetEventColor", function() return 1, 1, 1, 1 end)
+    set_default(encounterTimeline, "GetEventColor", function(eventID)
+        if type(C_EncounterEvents) == "table" and type(C_EncounterEvents.GetEventColor) == "function" then
+            local color = C_EncounterEvents.GetEventColor(eventID)
+            if type(color) == "table" then
+                return color.r or 1, color.g or 1, color.b or 1, color.a or 1
+            end
+        end
+        return 1, 1, 1, 1
+    end)
 
     local housingCatalog = ensure_namespace("C_HousingCatalog")
     set_default(housingCatalog, "GetCatalogCategoryAndSubcategoryNames", return_nil)
