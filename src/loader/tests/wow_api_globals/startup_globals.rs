@@ -331,11 +331,15 @@ fn test_patch_12_1_safe_global_bridges() {
             if C_BattleNet.GetFriendInviteInfo(1) ~= nil then return "bnet-invite-info" end
             C_BattleNet.SendVerifiedBattleNetFriendInvite("Player-Realm")
             C_BattleNet.SetAppearOffline(false)
-            C_BattleNet.SetCustomTitleFriendName(1, "Name")
-            C_BattleNet.SetFriendTags(1, {})
+            C_BattleNet.SetCustomTitleFriendName(1, "Light")
+            if C_BattleNet.GetCustomTitleFriendName(1) ~= "Light" then return "bnet-title-name-set" end
+            C_BattleNet.SetCustomTitleFriendName(1, nil)
+            if C_BattleNet.GetCustomTitleFriendName(1) ~= nil then return "bnet-title-name-cleared" end
+            C_BattleNet.SetFriendTags(1, { "raid", "guild" })
             local bnetInfo = C_BattleNet.GetFriendAccountInfo(1)
             if type(bnetInfo) == "table" then
                 if type(bnetInfo.friendTags) ~= "table" then return "bnet-friend-tags-field" end
+                if bnetInfo.friendTags[1] ~= "raid" or bnetInfo.friendTags[2] ~= "guild" then return "bnet-friend-tags-values" end
                 if type(bnetInfo.friendLevel) ~= "number" then return "bnet-friend-level-field" end
                 if type(bnetInfo.gameAccountInfo) == "table" and type(bnetInfo.gameAccountInfo.classFilename) ~= "string" then return "bnet-class-filename-field" end
             end

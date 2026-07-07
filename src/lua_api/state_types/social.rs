@@ -26,6 +26,10 @@ pub struct BnetFriend {
     pub account_name: String,
     /// Custom note set on this friend.
     pub note: String,
+    /// Best-effort 12.1 title-friend custom display name.
+    pub custom_title_friend_name: Option<String>,
+    /// Best-effort 12.1 title-friend tags, exposed as `friendTags`.
+    pub friend_tags: Vec<String>,
     /// Custom away message ("customMessage" in the retail struct).
     pub custom_message: String,
     /// Timestamp of the custom message (0 when not set).

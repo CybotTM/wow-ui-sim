@@ -8,7 +8,7 @@ Created `investigations/patch-12-0-7-api-audit.md` after bridging compatible 12.
 
 ## [2026-07-06] investigation | Patch 12.1 API audit
 
-Created `investigations/patch-12-1-api-audit.md` after bridging compatible 12.1 API gaps and pausing exact-behavior work. Recorded committed bridge points, verification logs, and the blocked areas that require live PTR behavior: UnitAura secrecy, Private Script Objects/Forbidden Partition, full ForbiddenAspect enforcement, AuraContainer/AuraButton/ManagedAuraContainer, DurationTextBinding/RadialProgress script objects, and exact structure payloads. Updated in the second pass to add an explicit implementation matrix and record 12.1 `DurationTextBinding` color-curve compatibility methods while leaving standalone `RadialProgress` paused.
+Created `investigations/patch-12-1-api-audit.md` after bridging compatible 12.1 API gaps and pausing exact-behavior work. Recorded committed bridge points, verification logs, and the blocked areas that require live PTR behavior: UnitAura secrecy, Private Script Objects/Forbidden Partition, full ForbiddenAspect enforcement, AuraContainer/AuraButton/ManagedAuraContainer, DurationTextBinding/RadialProgress script objects, and exact structure payloads. Updated in the second pass to add an explicit implementation matrix and record 12.1 `DurationTextBinding` color-curve compatibility methods while leaving standalone `RadialProgress` paused. Updated again after Battle.net title-friend custom names/tags moved from inert Lua defaults to a best-effort `SimState.bnet_friends` model.
 
 ## [2026-07-06] update | Retail API epoch features
 

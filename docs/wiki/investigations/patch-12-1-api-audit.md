@@ -15,7 +15,8 @@ The 12.1 compatibility work is currently captured by these commits:
 - `ed34635c5` — moved strict 12.1 removals after startup so Blizzard UI can still load current EditMode code.
 - `16b7d85d6` — modeled 12.1 forbidden aspect inheritance for compatible frame/object behavior.
 - `4b5fc502d` — bridged remaining inert social, Discord, Battle.net title-friend, encounter-journal, and housing/blueprint probes.
-- pending commit — added 12.1 `DurationTextBinding` color-curve compatibility methods on the table returned by `C_DurationUtil.CreateDurationTextBinding`.
+- `85c2b11d3` — added 12.1 `DurationTextBinding` color-curve compatibility methods on the table returned by `C_DurationUtil.CreateDurationTextBinding`.
+- pending commit — modeled 12.1 Battle.net title-friend custom names/tags as best-effort per-friend metadata on `SimState.bnet_friends`.
 
 Key implementation locations:
 
@@ -49,7 +50,8 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | Widget methods | Compatible 12.1 widget methods are implemented/tested: forbidden-aspect queries, texture radial-progress-bar methods, roleset/on-update mode methods, statusbar render mode, minimap icon scale, VectorGraphics/SVG stubs. |
 | Private/forbidden XML partition mechanics | Compatible XML/private table behavior is implemented/tested for `useForbiddenObjectTable`, private KeyValues, partition-aware mixins, and secure delegates. |
 | `DurationTextBinding` color methods | Implemented as compatibility methods on `C_DurationUtil.CreateDurationTextBinding(...)`: `ClearTextColorCurve`, `GetFormattedTextColor`, `GetTextColorCurve`, `SetTextColorCurve`. |
-| Discord / Battle.net title friends / housing blueprint/editor APIs | Present as inert compatibility defaults unless backed by existing simulator state. These are callable stubs, not real service models. |
+| Discord / pending Battle.net title-friend invites / housing blueprint/editor APIs | Present as inert compatibility defaults unless backed by existing simulator state. These are callable stubs, not real service models. |
+| Battle.net title-friend custom names/tags | Best-effort modeled on `SimState.bnet_friends`: `SetCustomTitleFriendName` stores/clears a per-friend custom title name returned by `GetCustomTitleFriendName`; `SetFriendTags` stores array tags reflected in `GetFriendAccountInfo(...).friendTags`. Exact PTR behavior still needs probes. |
 
 ### Paused / blocked items
 
@@ -61,12 +63,12 @@ Do not implement these as guesses. They need real Blizzard PTR probes, generated
 - **AuraContainer / AuraButton / ManagedAuraContainer** — object names and compatible creation/XML paths are bridged, but full aura assignment, filtering, sorting, forbidden partition placement, automatic button management, tooltip behavior, and secret `IsShown` behavior are not modeled.
 - **RadialProgress script object** — texture/statusbar radial-progress-bar widget methods are bridged, but the standalone `RadialProgress:*` script object has no known constructor path in the current API audit. Do not invent a global constructor just to satisfy method names.
 - **Full DurationTextBinding object fidelity** — compatibility methods exist, including 12.1 color-curve methods, but exact Blizzard object lifetime, metatable identity, formatter semantics, and color-curve interpolation remain unproven.
-- **Changed structure payloads with real data** — inert compatibility fields were added where safe, but exact payloads for Battle.net, Discord, housing, cooldown viewer, pet journal, LFG, player choice, tiered entrance, and private aura structures require backing models or live captures before claiming behavioral fidelity.
+- **Changed structure payloads with real data** — inert compatibility fields were added where safe, and Battle.net title-friend custom names/tags now have a best-effort simulator model. Exact payloads for pending Battle.net invites, Discord, housing, cooldown viewer, pet journal, LFG, player choice, tiered entrance, and private aura structures require backing models or live captures before claiming behavioral fidelity.
 - **Deprecated wrappers vs strict removals timing** — strict removed symbols are hidden for addon-facing 12.1 checks after startup. Current Blizzard UI still reads some removed/changed values during load, so moving removals earlier can break startup. Revisit only with current PTR Blizzard UI that no longer needs those load-time values.
 
 ### Practical next step
 
-If exact-behavior work resumes, create probe addons first. Target the uncertain areas above with live PTR captures, then update this page and implement only behavior that has concrete evidence. Compatible callable stubs can still be added when they do not invent observable game/security semantics.
+Best-effort simulator behavior is acceptable before PTR probes when it is backed by plausible existing state and tests document the simulator contract. Mark those guesses explicitly here, then replace them with probe-backed semantics later. For security/taint/error-shape-sensitive behavior, create probe addons before enforcing restrictions.
 
 ## Sources
 

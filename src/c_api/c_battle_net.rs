@@ -23,6 +23,8 @@ use crate::c_api::helpers::ensure_namespace;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_set,
 };
+#[cfg(feature = "retail-12-1-0")]
+use crate::lua_api::methods::{table_set_num, val_to_string};
 use crate::lua_api::state_types::{BnetFriend, BnetGameAccount};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
@@ -118,13 +120,113 @@ fn register_patch_12_1_friend_query_methods(
         table_ref,
         "IsBattleNetFriendsListSupported",
         c_bnet_feature_disabled,
-    )
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetCustomTitleFriendName",
+        c_bnet_get_custom_title_friend_name,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SetCustomTitleFriendName",
+        c_bnet_set_custom_title_friend_name,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "SetFriendTags", c_bnet_set_friend_tags)
 }
 
 #[cfg(feature = "retail-12-1-0")]
 fn c_bnet_feature_disabled(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn c_bnet_get_custom_title_friend_name(state: &mut LuaState) -> LuaResult<u32> {
+    let friend_index = i32::from_stack(state, 1)?;
+    let name = {
+        let sim = borrow_state(state)?;
+        sim.bnet_friends
+            .get(friend_index_to_offset(friend_index))
+            .and_then(|friend| friend.custom_title_friend_name.clone())
+    };
+    match name {
+        Some(name) => {
+            let name = create_string(state, &name);
+            state.push(name);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn c_bnet_set_custom_title_friend_name(state: &mut LuaState) -> LuaResult<u32> {
+    let friend_index = i32::from_stack(state, 1)?;
+    let name = Option::<String>::from_stack(state, 2)?;
+    if let Some(friend) =
+        friend_mut_by_index(&mut borrow_state_mut(state)?.bnet_friends, friend_index)
+    {
+        friend.custom_title_friend_name = name.filter(|name| !name.trim().is_empty());
+    }
+    Ok(0)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn c_bnet_set_friend_tags(state: &mut LuaState) -> LuaResult<u32> {
+    let friend_index = i32::from_stack(state, 1)?;
+    let tags = string_array_from_lua_table(state, crate::lua_bridge::stack_val(state, 2));
+    if let Some(friend) =
+        friend_mut_by_index(&mut borrow_state_mut(state)?.bnet_friends, friend_index)
+    {
+        friend.friend_tags = tags;
+    }
+    Ok(0)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn friend_index_to_offset(friend_index: i32) -> usize {
+    usize::try_from(friend_index - 1).unwrap_or(usize::MAX)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn friend_mut_by_index(friends: &mut [BnetFriend], friend_index: i32) -> Option<&mut BnetFriend> {
+    friends.get_mut(friend_index_to_offset(friend_index))
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn string_array_from_lua_table(state: &LuaState, value: Val) -> Vec<String> {
+    let Val::Table(table_ref) = value else {
+        return Vec::new();
+    };
+    state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| {
+            table
+                .array_slice()
+                .iter()
+                .copied()
+                .take_while(|value| !matches!(value, Val::Nil))
+                .filter_map(|value| val_to_string(state, value))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn create_friend_tags_table(state: &mut LuaState, tags: &[String]) -> Val {
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        return table;
+    };
+    for (index, tag) in tags.iter().enumerate() {
+        let tag = create_string(state, tag);
+        table_set_num(state, table_ref, (index + 1) as f64, tag);
+    }
+    table
 }
 
 fn c_bnet_are_high_res_textures_installed(state: &mut LuaState) -> LuaResult<u32> {
@@ -188,6 +290,8 @@ fn invited_bnet_friend(name: &str, friend_index: i32, account_id: i32) -> BnetFr
         battle_tag: name.to_string(),
         account_name: account_name_from_invite(name),
         note: String::new(),
+        custom_title_friend_name: None,
+        friend_tags: Vec::new(),
         custom_message: String::new(),
         custom_message_time: 0,
         appear_offline: false,
@@ -314,7 +418,7 @@ fn push_account_info_table(
     let t = create_table(state);
     write_account_identity_fields(state, t, friend);
     write_account_status_fields(state, t, friend);
-    write_patch_12_1_account_fields(state, t);
+    write_patch_12_1_account_fields(state, t, friend);
     attach_game_account_field(state, t, game_account);
     t
 }
@@ -415,14 +519,14 @@ fn write_account_status_fields(state: &mut LuaState, t: Val, friend: &BnetFriend
 }
 
 #[cfg(feature = "retail-12-1-0")]
-fn write_patch_12_1_account_fields(state: &mut LuaState, t: Val) {
-    let friend_tags = create_table(state);
+fn write_patch_12_1_account_fields(state: &mut LuaState, t: Val, friend: &BnetFriend) {
+    let friend_tags = create_friend_tags_table(state, &friend.friend_tags);
     table_set(state, t, "friendLevel", Val::Num(0.0));
     table_set(state, t, "friendTags", friend_tags);
 }
 
 #[cfg(not(feature = "retail-12-1-0"))]
-fn write_patch_12_1_account_fields(_state: &mut LuaState, _t: Val) {}
+fn write_patch_12_1_account_fields(_state: &mut LuaState, _t: Val, _friend: &BnetFriend) {}
 
 #[cfg(feature = "retail-12-1-0")]
 fn write_patch_12_1_game_account_fields(state: &mut LuaState, t: Val, ga: &BnetGameAccount) {
