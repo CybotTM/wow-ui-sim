@@ -303,6 +303,10 @@ fn test_patch_12_1_safe_global_bridges() {
             if C_SocialRestrictions.IsFriendsDisabled() ~= false then return "friends-disabled" end
             if C_SocialUI.IsSystemEnabled() ~= false then return "social-ui" end
             if C_Discord.IsEnabled() ~= false then return "discord-enabled" end
+            SetCVar("discordClientEnabled", "1")
+            if C_Discord.IsEnabled() ~= true then return "discord-enabled-cvar" end
+            SetCVar("discordClientEnabled", "0")
+            if C_Discord.IsEnabled() ~= false then return "discord-disabled-cvar" end
             if C_Discord.IsUserOAuthed() ~= false then return "discord-oauth" end
             if C_Discord.GetNumDiscordChannels() ~= 0 then return "discord-channels" end
             if C_Discord.GetNumDiscordServers() ~= 0 then return "discord-servers" end

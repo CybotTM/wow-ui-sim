@@ -12,6 +12,9 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
     local function return_nil() return nil end
     local function return_zero() return 0 end
     local function return_empty_table() return {} end
+    local function discord_enabled()
+        return type(GetCVar) == "function" and GetCVar("discordClientEnabled") == "1"
+    end
 
     local function ensure_namespace(name)
         _G[name] = _G[name] or __wow_namespace()
@@ -42,7 +45,7 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
     set_default(discord, "GetServerName", return_nil)
     set_default(discord, "GuildLink", noop)
     set_default(discord, "GuildUnlink", noop)
-    set_default(discord, "IsEnabled", return_false)
+    set_default(discord, "IsEnabled", discord_enabled)
     set_default(discord, "IsGuildChannelLinked", return_false)
     set_default(discord, "IsGuildSettingSet", return_false)
     set_default(discord, "IsUserOAuthed", return_false)
