@@ -19,7 +19,7 @@ The simulator now provides modeled 12.0.7 social/party mutations:
 The simulator also provides safe 12.0.7 additive probes for API names that can be inert without pretending to model live game state:
 - `C_DelvesUI.GetDelveEntranceTitleString`
 - `C_DurationUtil.CreateManualClock`
-- `C_DurationUtil.CreateDurationTextBinding`
+- `C_DurationUtil.CreateDurationTextBinding` (now best-effort tracks documented binding methods, enabled/default state, duration objects, formatter/text-format storage, and font-string update hooks)
 - `C_EncounterTimeline.GetEventColor` (now best-effort delegated to `C_EncounterEvents` color state)
 - `C_HousingCatalog.GetCatalogCategoryAndSubcategoryNames`
 - `C_HousingCustomizeMode.RoomConnectionSupportsDoorType`
@@ -71,6 +71,7 @@ Rust readability metrics are under `/tmp/rust_readability_12_0_7` with no high-c
 
 - **C_UIFileAsset path semantics** — `GetFileID` and `IsKnownFile` are backed by `data/wow-ui-sim-listfile.csv` through `limited_listfile`, with slash/case normalization and numeric IDs passed through. `IsLooseFile` currently returns false because loose-file install/source semantics are not modeled. Replace this with exact client behavior if PTR probes show different extension handling or loose-file rules.
 - **Encounter timeline color state** — `C_EncounterTimeline.GetEventColor` mirrors the existing temporary `C_EncounterEvents` color table, including alpha, and falls back to white when no event color is configured. Exact five-second-warning/custom-color behavior and event firing still need probes.
+- **DurationTextBinding formatting** — the binding object now follows the documented method surface for non-secret state and stores duration objects from `C_DurationUtil.CreateDuration`, but exact Blizzard formatting/component semantics and secret-value handling still need live probes.
 
 ### Paused / blocked items
 

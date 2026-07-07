@@ -56,40 +56,104 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
         function clock:ResetTime() self.time = 0 end
         return clock
     end
+    local function create_duration_value(initialTime)
+        if type(durationUtil.CreateDuration) == "function" then
+            local duration = durationUtil.CreateDuration()
+            duration.value = initialTime or 0
+            return duration
+        end
+        return { value = initialTime or 0 }
+    end
+    local function duration_value_to_text(duration)
+        if type(duration) == "number" then
+            return tostring(duration)
+        end
+        if type(duration) == "table" then
+            if duration.value ~= nil then
+                return tostring(duration.value)
+            end
+            if type(duration.GetRemainingDuration) == "function" then
+                local ok, value = pcall(duration.GetRemainingDuration, duration)
+                if ok and value ~= nil then return tostring(value) end
+            end
+        end
+        return "0"
+    end
     local function create_duration_text_binding(duration, fontString)
         local binding = {
-            duration = duration or 0,
+            duration = duration ~= nil and duration or create_duration_value(0),
             fontString = fontString,
             enabled = true,
             updateInterval = 1,
             timeModifier = 0,
             expiredText = nil,
             zeroDurationText = nil,
+            formatter = nil,
+            textFormat = nil,
+            textFormatComponents = nil,
             clock = create_duration_clock(0),
         }
         function binding:CanFormatText() return true end
-        function binding:CanUpdateFontString() return self.fontString ~= nil end
-        function binding:Disable() self.enabled = false end
-        function binding:Enable() self.enabled = true end
+        function binding:CanUpdateFontString() return self.fontString ~= nil and type(self.fontString.SetText) == "function" end
+        function binding:Disable() self:SetEnabled(false) end
+        function binding:Enable() self:SetEnabled(true) end
         function binding:GetClock() return self.clock end
         function binding:GetDuration() return self.duration end
         function binding:GetExpiredText() return self.expiredText end
         function binding:GetFontString() return self.fontString end
-        function binding:GetFormattedText() return tostring(self.duration) end
+        function binding:GetFormattedText()
+            local text = duration_value_to_text(self.duration)
+            if type(self.formatter) == "function" then
+                local ok, value = pcall(self.formatter, self.duration)
+                if ok and value ~= nil then text = tostring(value) end
+            elseif type(self.formatter) == "table" and type(self.formatter.Format) == "function" then
+                local ok, value = pcall(self.formatter.Format, self.formatter, self.duration)
+                if ok and value ~= nil then text = tostring(value) end
+            end
+            if type(self.textFormat) == "string" and self.textFormat ~= "" then
+                local ok, value = pcall(string.format, self.textFormat, text)
+                if ok then text = value end
+            end
+            return text
+        end
         function binding:GetTimeModifier() return self.timeModifier end
         function binding:GetUpdateInterval() return self.updateInterval end
         function binding:GetZeroDurationText() return self.zeroDurationText end
-        function binding:HasExpired() return (self.duration or 0) <= 0 end
+        function binding:HasExpired() return type(self.duration) == "number" and self.duration <= 0 end
+        function binding:HasSecretValues() return false end
         function binding:HasStarted() return true end
         function binding:IsActive() return self.enabled end
         function binding:IsEnabled() return self.enabled end
         function binding:SetClock(clock) self.clock = clock end
-        function binding:SetDuration(value) self.duration = value or 0 end
+        function binding:SetDuration(value) self.duration = value ~= nil and value or create_duration_value(0) end
+        function binding:SetEnabled(value) self.enabled = not not value end
         function binding:SetExpiredText(text) self.expiredText = text end
         function binding:SetFontString(value) self.fontString = value end
+        function binding:SetFormatter(formatter) self.formatter = formatter end
+        function binding:SetTextFormat(format, components)
+            self.textFormat = format
+            self.textFormatComponents = components
+        end
         function binding:SetTimeModifier(value) self.timeModifier = value or 0 end
+        function binding:SetToDefaults()
+            self.duration = create_duration_value(0)
+            self.enabled = true
+            self.updateInterval = 1
+            self.timeModifier = 0
+            self.expiredText = nil
+            self.zeroDurationText = nil
+            self.formatter = nil
+            self.textFormat = nil
+            self.textFormatComponents = nil
+            self.clock = create_duration_clock(0)
+        end
         function binding:SetUpdateInterval(value) self.updateInterval = value or 1 end
         function binding:SetZeroDurationText(text) self.zeroDurationText = text end
+        function binding:UpdateFontString()
+            if self:CanUpdateFontString() then
+                self.fontString:SetText(self:GetFormattedText())
+            end
+        end
         if isPatch121 then
             function binding:ClearTextColorCurve() self.textColorCurve = nil end
             function binding:GetFormattedTextColor() return 1, 1, 1, 1 end

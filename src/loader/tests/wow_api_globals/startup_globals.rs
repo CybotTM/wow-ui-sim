@@ -116,6 +116,22 @@ fn test_patch_12_0_7_safe_global_bridges() {
             if binding:IsActive() ~= false then return "duration-disabled" end
             binding:Enable()
             if binding:GetClock() == nil then return "duration-clock" end
+            if type(binding.HasSecretValues) ~= "function" then return "duration-secret-method" end
+            if binding:HasSecretValues() ~= false then return "duration-secret-values" end
+            if type(binding.SetEnabled) ~= "function" then return "duration-set-enabled-method" end
+            binding:SetEnabled(false)
+            if binding:IsEnabled() ~= false or binding:IsActive() ~= false then return "duration-set-disabled" end
+            binding:SetEnabled(true)
+            if binding:IsEnabled() ~= true then return "duration-set-enabled" end
+            local durationObject = C_DurationUtil.CreateDuration()
+            binding:SetDuration(durationObject)
+            if binding:GetDuration() ~= durationObject then return "duration-object" end
+            if type(binding.SetToDefaults) ~= "function" then return "duration-defaults-method" end
+            binding:SetExpiredText("expired")
+            binding:SetZeroDurationText("zero")
+            binding:SetToDefaults()
+            if binding:IsEnabled() ~= true then return "duration-default-enabled" end
+            if binding:GetExpiredText() ~= nil or binding:GetZeroDurationText() ~= nil then return "duration-default-text" end
             local r, g, b, a = C_EncounterTimeline.GetEventColor(1)
             if r ~= 1 or g ~= 1 or b ~= 1 or a ~= 1 then return "event-color" end
             C_EncounterEvents.SetEventColor(1, { r = 0.2, g = 0.4, b = 0.6, a = 0.8 })
