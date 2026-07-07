@@ -167,7 +167,11 @@ fn test_patch_12_0_7_safe_global_bridges() {
             C_PartyInfo.ConfirmReadyCheck(false)
             if GetReadyCheckStatus("player") ~= "notready" then return "ready-declined-status" end
             C_PartyInfo.DemoteAssistant("player")
-            if C_PartyInfo.IsGUIDInGroup("Player-1") ~= false then return "party-guid" end
+            if C_PartyInfo.IsGUIDInGroup(UnitGUID("player")) ~= false then return "party-guid-solo" end
+            InviteToGroup("Anduin")
+            if C_PartyInfo.IsGUIDInGroup(UnitGUID("player")) ~= true then return "party-guid-player" end
+            if C_PartyInfo.IsGUIDInGroup(UnitGUID("party1")) ~= true then return "party-guid-member" end
+            if C_PartyInfo.IsGUIDInGroup("Player-9-UNKNOWN") ~= false then return "party-guid-unknown" end
             C_PartyInfo.PromoteToAssistant("player")
             C_PartyInfo.PromoteToLeader("player")
             C_PartyInfo.SetEveryoneIsAssistant(true)

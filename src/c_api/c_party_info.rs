@@ -1,14 +1,16 @@
 //! `C_PartyInfo` probe surface backed by group state.
 //!
-//! `GetActiveCategories`, `GetActiveGroupType`, and `IsPartyFull` read the
-//! existing party roster model. `LeaveParty` mutates the same roster path as the
-//! legacy global `LeaveParty`. Static loot-method defaults remain here because
+//! `GetActiveCategories`, `GetActiveGroupType`, `IsPartyFull`, and
+//! `IsGUIDInGroup` read the existing party roster model. `LeaveParty` mutates
+//! the same roster path as the legacy global `LeaveParty`. Static loot-method
+//! defaults remain here because
 //! they are coherent seeded `C_PartyInfo` values, while unrelated instance
 //! abandon defaults stay in temporary workarounds.
 
 use crate::c_api::helpers::{ensure_namespace, set_table_array};
 use crate::lua_api::globals::group_queries::active_party_count;
-use crate::lua_api::methods::create_table;
+use crate::lua_api::methods::{borrow_state, create_table};
+use crate::lua_api::state::SEEDED_LOCAL_CHARACTER_GUID;
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::gc::arena::GcRef;
@@ -42,6 +44,12 @@ fn register_group_membership_probes(
         c_party_info_get_active_group_type,
     )?;
     table_set_rust_fn_static(state, table_ref, "IsPartyFull", c_party_info_is_party_full)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsGUIDInGroup",
+        c_party_info_is_guid_in_group,
+    )?;
     table_set_rust_fn_static(state, table_ref, "LeaveParty", c_party_info_leave_party)?;
     table_set_rust_fn_static(
         state,
@@ -113,6 +121,26 @@ fn c_party_info_is_party_full(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Bool(full));
     Ok(1)
+}
+
+fn c_party_info_is_guid_in_group(state: &mut LuaState) -> LuaResult<u32> {
+    let guid = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let is_member = {
+        let sim = borrow_state(state)?;
+        sim.party_group_active
+            && (guid == SEEDED_LOCAL_CHARACTER_GUID
+                || sim
+                    .party_members
+                    .iter()
+                    .enumerate()
+                    .any(|(index, _)| party_member_guid(index) == guid))
+    };
+    state.push(Val::Bool(is_member));
+    Ok(1)
+}
+
+fn party_member_guid(index: usize) -> String {
+    format!("Player-0000-000000{:02}", index + 2)
 }
 
 fn c_party_info_leave_party(state: &mut LuaState) -> LuaResult<u32> {
