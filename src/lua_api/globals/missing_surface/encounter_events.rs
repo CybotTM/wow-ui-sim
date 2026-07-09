@@ -19,6 +19,7 @@ const EVENT_IDS: &[u32] = &[1, 2, 3];
 
 pub(super) fn register_encounter_events_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_EncounterEvents")?;
+    register_encounter_timeline_surface(state)?;
     ensure_encounter_events_state(state);
     table_set_rust_fn_static(state, ns, "GetEventColor", get_event_color)?;
     table_set_rust_fn_static(state, ns, "GetEventInfo", get_event_info)?;
@@ -29,6 +30,42 @@ pub(super) fn register_encounter_events_surface(state: &mut LuaState) -> LuaResu
     table_set_rust_fn_static(state, ns, "SetEventColor", set_event_color)?;
     table_set_rust_fn_static(state, ns, "SetEventSound", set_event_sound)?;
     Ok(())
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn register_encounter_timeline_surface(state: &mut LuaState) -> LuaResult<()> {
+    let timeline = ensure_namespace(state, "C_EncounterTimeline")?;
+    table_set_rust_fn_static(state, timeline, "GetEventColor", get_timeline_event_color)
+}
+
+#[cfg(not(any(feature = "retail-12-0-7", feature = "retail-12-1-0")))]
+fn register_encounter_timeline_surface(_state: &mut LuaState) -> LuaResult<()> {
+    Ok(())
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn get_timeline_event_color(state: &mut LuaState) -> LuaResult<u32> {
+    let color = parse_event_id(stack_val(state, 1), state)
+        .and_then(|event_id| copy_event_color(state, event_id));
+    push_timeline_color_components(state, color);
+    Ok(4)
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn push_timeline_color_components(state: &mut LuaState, color: Option<Val>) {
+    let color = color.unwrap_or(Val::Nil);
+    for key in ["r", "g", "b", "a"] {
+        let component = color_component(state, color, key);
+        state.push(component);
+    }
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn color_component(state: &mut LuaState, color: Val, key: &str) -> Val {
+    match table_get(state, color, key) {
+        Val::Num(value) => Val::Num(value),
+        _ => Val::Num(1.0),
+    }
 }
 
 fn get_event_list(state: &mut LuaState) -> LuaResult<u32> {

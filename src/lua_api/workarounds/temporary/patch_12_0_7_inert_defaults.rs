@@ -1,19 +1,12 @@
-//! Temporary inert defaults for additive 12.0.7 API names.
+//! Temporary inert defaults for remaining additive 12.0.7 API names.
 //!
-//! These bridge addon-facing probes for systems the simulator does not model
-//! yet: file-asset validation, secure pending callbacks, duration text binding,
-//! title Battle.net invites, encounter timeline colors, and party-management
-//! namespace aliases. Exact security/secret behavior remains documented as
-//! paused until live client probes pin it down.
+//! This bridge is now limited to the larger duration text-binding compatibility
+//! object and security-sensitive secure pending callback globals. Exact
+//! security/secret behavior remains documented as paused until live client
+//! probes pin it down.
 
 const PATCH_12_0_7_INERT_DEFAULTS_LUA: &str = r#"
 if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
-    local function noop() end
-    local function return_false() return false end
-    local function return_nil() return nil end
-    local function return_zero() return 0 end
-    local function return_empty_table() return {} end
-
     local function ensure_namespace(name)
         _G[name] = _G[name] or __wow_namespace()
         return _G[name]
@@ -160,17 +153,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     end
     set_default(durationUtil, "CreateDurationTextBinding", create_duration_text_binding)
 
-    local encounterTimeline = ensure_namespace("C_EncounterTimeline")
-    set_default(encounterTimeline, "GetEventColor", function(eventID)
-        if type(C_EncounterEvents) == "table" and type(C_EncounterEvents.GetEventColor) == "function" then
-            local color = C_EncounterEvents.GetEventColor(eventID)
-            if type(color) == "table" then
-                return color.r or 1, color.g or 1, color.b or 1, color.a or 1
-            end
-        end
-        return 1, 1, 1, 1
-    end)
-
     if GetSecurePendingButtonCallback == nil then GetSecurePendingButtonCallback = get_callback("button") end
     if GetSecurePendingPingOffScreenCallback == nil then GetSecurePendingPingOffScreenCallback = get_callback("pendingPingOffScreen") end
     if GetSecurePendingToggleRunCallback == nil then GetSecurePendingToggleRunCallback = get_callback("toggleRun") end
@@ -178,21 +160,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     if SetSecurePendingPingOffScreenCallback == nil then SetSecurePendingPingOffScreenCallback = set_callback("pendingPingOffScreen") end
     if SetSecurePendingToggleRunCallback == nil then SetSecurePendingToggleRunCallback = set_callback("toggleRun") end
 
-    if GameTooltip_AddMoneyLine == nil then
-        local function format_tooltip_money(money)
-            if type(GetMoneyString) == "function" then
-                return GetMoneyString(money or 0, true)
-            end
-            return tostring(money or 0)
-        end
-        function GameTooltip_AddMoneyLine(tooltip, money, prefixText)
-            if tooltip and type(tooltip.AddLine) == "function" then
-                local text = format_tooltip_money(money)
-                if prefixText then text = tostring(prefixText) .. text end
-                tooltip:AddLine(text)
-            end
-        end
-    end
 end
 "#;
 

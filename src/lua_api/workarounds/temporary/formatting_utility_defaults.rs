@@ -225,6 +225,13 @@ if string.K_AddDefaultValueText == nil then
   end
 end
 
+local function __wow_format_tooltip_money(money)
+  if type(GetMoneyString) == "function" then
+    return GetMoneyString(money or 0, true)
+  end
+  return tostring(money or 0)
+end
+
 if GetMoneyString == nil then
   local function __wow_separate_thousands(n)
     local digits = tostring(n)
@@ -253,6 +260,16 @@ if GetMoneyString == nil then
     if silver > 0 then parts[#parts + 1] = silver .. "s" end
     if copper > 0 or #parts == 0 then parts[#parts + 1] = copper .. "c" end
     return table.concat(parts, " ")
+  end
+end
+
+if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 and GameTooltip_AddMoneyLine == nil then
+  function GameTooltip_AddMoneyLine(tooltip, money, prefixText)
+    if tooltip and type(tooltip.AddLine) == "function" then
+      local text = __wow_format_tooltip_money(money)
+      if prefixText then text = tostring(prefixText) .. text end
+      tooltip:AddLine(text)
+    end
   end
 end
 

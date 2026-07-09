@@ -22,7 +22,7 @@ The simulator also provides safe 12.0.7 additive probes for API names that can b
 - `C_DelvesUI.GetDelveEntranceTitleString` (now Rust-backed by the Delves UI surface; it shares the seeded entrance header text)
 - `C_DurationUtil.CreateManualClock` (now installed by the Rust `C_DurationUtil` surface alongside duration objects)
 - `C_DurationUtil.CreateDurationTextBinding` (now best-effort tracks documented binding methods, enabled/default state, duration objects, formatter/text-format storage, and font-string update hooks)
-- `C_EncounterTimeline.GetEventColor` (now best-effort delegated to `C_EncounterEvents` color state)
+- `C_EncounterTimeline.GetEventColor` (now Rust-backed best-effort delegated to `C_EncounterEvents` color state)
 - `C_HousingCatalog.GetCatalogCategoryAndSubcategoryNames` (now Rust-backed deterministic nil until a catalog model exists)
 - `C_HousingCustomizeMode.RoomConnectionSupportsDoorType` (now Rust-backed deterministic false until room-door compatibility data exists)
 - `C_HousingLayout.CanSetViewedFloor` (now Rust-backed deterministic false until viewed-floor permissions are modeled)
@@ -33,7 +33,7 @@ The simulator also provides safe 12.0.7 additive probes for API names that can b
 - `C_UIFileAsset.GetFileID`, `IsKnownFile`, `IsLooseFile` (now best-effort modeled from the bundled limited listfile)
 - `GetEventCPUUsage`, `GetFunctionCPUUsage`, `GetScriptCPUUsage` (now provided by the shared performance-metric defaults module)
 - secure pending callback getters/setters: button, ping off-screen, toggle run
-- `GameTooltip_AddMoneyLine` (now best-effort formats copper through the simulator money formatter before adding the tooltip line)
+- `GameTooltip_AddMoneyLine` (now provided by the shared formatting defaults; best-effort formats copper through the simulator money formatter before adding the tooltip line)
 - `ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED` registration under `retail-12-0-7`
 
 Already-existing coverage from prior work included `C_Container.CalculateTotalNumberOfFreeBagSlots`, `C_DelvesUI.GetWorldTierDifficultyForActivePlayer`, `C_PingSecure.SetPendingPingOffScreenCallback`, and `URL_TEXTURE_REQUEST_RESULT` registration.
@@ -49,8 +49,10 @@ Key implementation locations:
 - `src/c_api/c_ui_file_asset.rs` — best-effort `C_UIFileAsset` path/fileDataID lookup backed by the bundled limited listfile.
 - `src/c_api/c_ping_secure.rs` — Rust-backed PingSecure callback setters and clearers using the shared callback table.
 - `src/lua_api/globals/lua_duration_object.rs` — Rust-backed `C_DurationUtil.CreateDuration`, `CreateManualClock`, and current-time/default duration object surface.
+- `src/lua_api/globals/missing_surface/encounter_events.rs` — Rust-backed `C_EncounterTimeline.GetEventColor` bridge over the existing encounter-event color state.
+- `src/lua_api/workarounds/temporary/formatting_utility_defaults.rs` — shared formatting helpers, including `GetMoneyString` and the gated `GameTooltip_AddMoneyLine` best-effort helper.
 - `src/lua_api/workarounds/temporary/performance_metric_defaults.rs` — shared CPU/framerate/download metric defaults, including 12.0.7 CPU usage probes.
-- `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — version-gated inert 12.0.7 defaults for still-unmodeled APIs.
+- `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — remaining version-gated 12.0.7 defaults: `CreateDurationTextBinding` compatibility object and secure pending callback globals.
 - `src/lua_api/workarounds/mod.rs`, `src/lua_api/workarounds/temporary/mod.rs` — bootstrap registration.
 - `src/event/valid_events.rs` — 12.0.7 event registration gate.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — regression test for safe 12.0.7 global bridges.
@@ -78,12 +80,16 @@ Additional proof for the Rust-backed trivial namespace pass:
 
 - `/tmp/pi-pyrun-12-0-7-trivial-namespaces-proof.log` — `cargo fmt --check`, default `cargo check`, 12.0.7/12.1 `cargo check`, 12.0.7/12.1 focused safe bridge tests, 12.0.7 `wow-sim` build, and 12.0.7 `lua-errors`.
 
-Rust readability metrics are under `/tmp/rust_readability_12_0_7` and `/tmp/rust_readability_12_0_7_trivial_namespaces` with no high-complexity findings.
+Additional proof for the encounter-color and tooltip-money pass:
+
+- `/tmp/pi-pyrun-12-0-7-color-money-proof.log` — `cargo fmt --check`, default `cargo check`, 12.0.7/12.1 `cargo check`, 12.0.7/12.1 focused safe bridge tests, 12.0.7 `wow-sim` build, and 12.0.7 `lua-errors`.
+
+Rust readability metrics are under `/tmp/rust_readability_12_0_7`, `/tmp/rust_readability_12_0_7_trivial_namespaces`, and `/tmp/rust_readability_12_0_7_color_money` with no high-complexity findings.
 
 ### Best-effort modeled guesses needing later probes
 
 - **C_UIFileAsset path semantics** — `GetFileID` and `IsKnownFile` are backed by `data/wow-ui-sim-listfile.csv` through `limited_listfile`, with slash/case normalization and numeric IDs passed through. `IsLooseFile` currently returns false because loose-file install/source semantics are not modeled. Replace this with exact client behavior if PTR probes show different extension handling or loose-file rules.
-- **Encounter timeline color state** — `C_EncounterTimeline.GetEventColor` mirrors the existing temporary `C_EncounterEvents` color table, including alpha, and falls back to white when no event color is configured. Exact five-second-warning/custom-color behavior and event firing still need probes.
+- **Encounter timeline color state** — `C_EncounterTimeline.GetEventColor` is Rust-backed and mirrors the existing `C_EncounterEvents` color table, including alpha, then falls back to white when no event color is configured. Exact five-second-warning/custom-color behavior and event firing still need probes.
 - **DurationTextBinding formatting** — the binding object now follows the documented method surface for non-secret state and stores duration objects from `C_DurationUtil.CreateDuration`, but exact Blizzard formatting/component semantics and secret-value handling still need live probes.
 - **Tooltip money line formatting** — `GameTooltip_AddMoneyLine` uses the existing `GetMoneyString` fallback with thousands grouping and optional prefix text. Exact embedded-atlas/MoneyFormatter output remains a later fidelity improvement if addon screenshots require it.
 - **Party GUID membership** — `C_PartyInfo.IsGUIDInGroup` treats the local player and synthetic party member GUIDs as in-group only while `SimState.party_group_active` is true. Exact instance-party category filtering and cross-realm GUID details remain future fidelity work if addons depend on them.
@@ -117,7 +123,9 @@ If the exact-behavior work resumes, create live PTR probe addons for restricted-
 - `src/c_api/c_battle_net.rs` — modeled Battle.net friend-list APIs.
 - `src/c_api/c_party_info.rs`, `src/lua_api/globals/group_verbs.rs`, `src/lua_api/state/support_types.rs` — modeled ready-check behavior.
 - `src/c_api/c_ui_file_asset.rs` — best-effort UI file-asset lookup.
-- `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — implemented inert 12.0.7 bridge defaults.
+- `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — remaining 12.0.7 bridge defaults for duration text binding and secure pending callbacks.
+- `src/lua_api/globals/missing_surface/encounter_events.rs` — Rust-backed encounter timeline color bridge.
+- `src/lua_api/workarounds/temporary/formatting_utility_defaults.rs` — shared money formatting and tooltip money-line helper.
 - `src/event/valid_events.rs` — 12.0.7 event gate.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — 12.0.7 safe bridge regression coverage.
 - `docs/wiki/investigations/patch-12-1-api-audit.md` — adjacent 12.1 audit workflow and blocked-item pattern.
