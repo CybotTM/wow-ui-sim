@@ -98,6 +98,25 @@ fn test_patch_12_1_global_security_helpers() {
     assert_eq!(table_security, "function");
 }
 
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn test_patch_12_1_load_addon_with_error_handling_delegates_to_uiparent() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local original = UIParentLoadAddOn
+            UIParentLoadAddOn = function(name) return "loaded:" .. name end
+            local value = LoadAddOnWithErrorHandling("Blizzard_EditMode")
+            UIParentLoadAddOn = original
+            return value
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "loaded:Blizzard_EditMode");
+}
+
 #[test]
 fn test_copy_table_deep() {
     let (t, _) = load_test_lua(

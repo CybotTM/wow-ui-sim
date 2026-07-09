@@ -48,13 +48,13 @@ Verified proof logs for the final compatible bridge pass:
 - `/tmp/wow_12_1_inert_full_build-retail-12-1.out`
 - `/tmp/wow_12_1_inert_full_lua-retail-12-1.out`
 
-Rust readability metrics for the final bridge are under `/tmp/rust_readability_12_1_inert` with no high-complexity findings.
+Rust readability metrics for the final bridge are under `/tmp/rust_readability_12_1_inert` with no high-complexity findings. The `LoadAddOnWithErrorHandling` wrapper regression proof is `/tmp/pi-pyrun-12-1-load-addon-wrapper-test.log`; readability output is `/tmp/rust_readability_12_1_load_addon_wrapper`.
 
 ### Implementation matrix
 
 | Area | Current state |
 |------|---------------|
-| Global added APIs | Present under `retail-12-1-0` as Rust-backed APIs or compatibility bridges. `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` now contains no active Lua inert defaults. Rough source scan has no missing global-added names. |
+| Global added APIs | Present under `retail-12-1-0` as Rust-backed APIs or compatibility bridges. `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` now contains no active Lua inert defaults. Rough source scan has no missing global-added names. `LoadAddOnWithErrorHandling` is explicitly modeled as the tested canonical wrapper over `UIParentLoadAddOn`. |
 | Removed APIs | Hidden for addon-facing checks after startup by `src/ptr/strict_removals.lua`; not moved earlier because current Blizzard UI still needs some load-time compatibility. |
 | Events/CVars/Enums | Added event/CVar/enum names are gated by the 12.1 retail epoch where implemented. |
 | Widget methods | Compatible 12.1 widget methods are implemented/tested: forbidden-aspect queries, texture radial-progress-bar methods, roleset/on-update mode methods, statusbar render mode, minimap icon scale, VectorGraphics/SVG stubs. |
@@ -67,6 +67,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | Battle.net title-friend custom names/tags | Best-effort modeled on `SimState.bnet_friends`: `SetCustomTitleFriendName` stores/clears a per-friend custom title name returned by `GetCustomTitleFriendName`; `SetFriendTags` stores array tags reflected in `GetFriendAccountInfo(...).friendTags`; the related `AreFriendTagsEnabled`, `AreTitleFriendsEnabled`, `AreTitleFriendCustomNamesEnabled`, `IsBattleNetFriendsListEnabled`, and `IsBattleNetFriendsListSupported` feature probes return true because the simulator exposes those modeled surfaces. `SetAppearOffline` records local presence intent in `SimState.bnet_appear_offline`, while `BNCheckTitleFriendInviteToUnit` is a deterministic false best-effort probe because title-friend unit-invite service state is not modeled. Exact PTR behavior still needs probes. |
 | Pending Battle.net friend invites | Best-effort modeled on `SimState.bnet_friend_invites`: `SendVerifiedBattleNetFriendInvite(name)` creates one deduplicated pending invite; `GetFriendInviteInfo(index)` returns invite/account/friend-level/timestamp fields. Exact verified-invite flow, title-friend unit invite checks, and deprecated wrapper parity need probes. |
 | Encounter Journal difficulty helpers | Best-effort modeled from generated Encounter Journal instance data: `GetBaseDifficultyID` returns `1` for dungeons and `14` for raids; `InstanceHasDifficultyID` accepts common dungeon IDs `1/2/8/23` and raid IDs `14/15/16/17`. Exact per-instance difficulty masks need generated data or PTR probes. |
+| FrameXML symbol snapshot | Full 320-added/112-removed inventory is itemized in [[patch-12-1-framexml-symbol-inventory]]. Its 432 entries represent 430 distinct names because two occur in both lists. `LoadAddOnWithErrorHandling` is implemented/tested; the remaining 431 entries are explicit exception requests, not silent omissions. |
 
 ### Exception requests pending user approval
 
@@ -80,6 +81,7 @@ The following 12.1 items are not marked complete. They should remain exception-r
 - **Full DurationTextBinding object fidelity** — compatibility methods exist, including 12.1 color-curve methods, but exact Blizzard object lifetime, metatable identity, formatter semantics, and color-curve interpolation remain unproven. Request exception for fidelity beyond the documented best-effort table contract.
 - **Changed structure payloads with real service data** — safe local state now backs Battle.net title-friend metadata, pending Battle.net invites, Encounter Journal difficulty helpers, Discord local state, and housing local state. Request exception for exact payloads in Discord service responses, housing service collections/availability, cooldown viewer, pet journal, LFG, player choice, tiered entrance, and private aura structures until backing models or live captures exist.
 - **Deprecated wrappers vs strict removals timing** — strict removed symbols are hidden for addon-facing 12.1 checks after startup. Request exception for earlier removal timing until current PTR Blizzard UI no longer needs those values during load.
+- **FrameXML symbol snapshot** — [[patch-12-1-framexml-symbol-inventory]] itemizes all 432 local snapshot entries (430 distinct names; two occur in both the added and removed lists). Apart from the tested `LoadAddOnWithErrorHandling` wrapper, every other entry is explicitly exception-requested until owner addon, load-on-demand timing, current runtime availability, and behavior are proven. This prevents treating the 104 parsed globals as the entire 12.1 source scope.
 
 ### Practical next step
 
@@ -90,7 +92,9 @@ Best-effort simulator behavior is acceptable before PTR probes when it is backed
 - `/tmp/warcraft_patch_12_1_api_changes.txt` — source patch-note/API-change list used for the audit.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — regression coverage for safe bridges and strict removals.
 - `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` — now-empty version-gated hook; safe 12.1 social/housing bridges moved to Rust-backed simulator state.
+- `src/ptr/compat_bootstrap.lua` — 12.1 compatibility globals, including `LoadAddOnWithErrorHandling`.
 - `src/ptr/strict_removals.lua` — post-startup hiding of removed 12.1 symbols.
+- [[patch-12-1-framexml-symbol-inventory]] — exhaustive local FrameXML added/removed status inventory.
 - `src/lua_api/frame/methods/forbidden_aspects.rs` — compatible forbidden-aspect query/inheritance implementation.
 - `docs/wiki/systems/client-profiles.md` — retail epoch feature model.
 
@@ -100,3 +104,4 @@ Best-effort simulator behavior is acceptable before PTR probes when it is backed
 - [[xml-template-system]] — private/forbidden XML partition and mixin behavior.
 - [[lua-api]] — Lua runtime surface and C API bridge context.
 - [[taint-system]] — secure/taint behavior that overlaps with forbidden aspects and aura secrecy.
+- [[patch-12-1-framexml-symbol-inventory]] — exhaustive local FrameXML added/removed symbol status inventory.

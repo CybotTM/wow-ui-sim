@@ -134,6 +134,12 @@ if settablesecurity == nil then
   end
 end
 
+if LoadAddOnWithErrorHandling == nil then
+  function LoadAddOnWithErrorHandling(name)
+    return UIParentLoadAddOn(name)
+  end
+end
+
 C_CVar = C_CVar or {}
 if rawget(C_CVar, "AreCVarsLoaded") == nil then
   function C_CVar.AreCVarsLoaded()
