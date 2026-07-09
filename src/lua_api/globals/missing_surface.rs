@@ -238,6 +238,7 @@ fn register_map_and_encounter_surfaces(state: &mut LuaState) -> LuaResult<()> {
     creature_info::register_creature_info_surface(state)?;
     delves_ui::register_delves_ui_surface(state)?;
     encounter_journal::register_encounter_journal_surface(state)?;
+    c_api::c_quest_hub::register_c_quest_hub_surface(state)?;
     c_api::register_map_environment_tables(state)?;
     gossip_info::register_gossip_info_surface(state)?;
     Ok(())
@@ -282,6 +283,7 @@ fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_api::c_lfg_info::register_c_lfg_info_surface(state)?;
     pet_battles::register_pet_battles_surface(state)?;
     c_api::c_account_services::register_c_account_services_surface(state)?;
+    c_api::c_merchant_frame::register_c_merchant_frame_surface(state)?;
     account_store::register_account_store_surface(state)?;
     c_api::c_report_system::register_c_report_system_surface(state)?;
     zone_ability::register_zone_ability_surface(state)?;

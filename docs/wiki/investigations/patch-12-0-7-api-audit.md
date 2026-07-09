@@ -19,17 +19,17 @@ The simulator now provides modeled 12.0.7 social/party mutations:
 - `C_PartyInfo.SetEveryoneIsAssistant`, `PromoteToAssistant`, `DemoteAssistant`, and `PromoteToLeader` now mutate existing party assistant/leader state used by `IsEveryoneAssistant`, `IsGroupLeader`, and `UnitIsGroupLeader`.
 
 The simulator also provides safe 12.0.7 additive probes for API names that can be inert without pretending to model live game state:
-- `C_DelvesUI.GetDelveEntranceTitleString`
+- `C_DelvesUI.GetDelveEntranceTitleString` (now Rust-backed by the Delves UI surface; it shares the seeded entrance header text)
 - `C_DurationUtil.CreateManualClock` (now installed by the Rust `C_DurationUtil` surface alongside duration objects)
 - `C_DurationUtil.CreateDurationTextBinding` (now best-effort tracks documented binding methods, enabled/default state, duration objects, formatter/text-format storage, and font-string update hooks)
 - `C_EncounterTimeline.GetEventColor` (now best-effort delegated to `C_EncounterEvents` color state)
-- `C_HousingCatalog.GetCatalogCategoryAndSubcategoryNames`
-- `C_HousingCustomizeMode.RoomConnectionSupportsDoorType`
-- `C_HousingLayout.CanSetViewedFloor`
-- `C_MerchantFrame.GetMerchantCurrencies`
-- `C_PartyInfo.ConfirmReadyCheck`, `DoReadyCheck`, `UninviteUnit`
+- `C_HousingCatalog.GetCatalogCategoryAndSubcategoryNames` (now Rust-backed deterministic nil until a catalog model exists)
+- `C_HousingCustomizeMode.RoomConnectionSupportsDoorType` (now Rust-backed deterministic false until room-door compatibility data exists)
+- `C_HousingLayout.CanSetViewedFloor` (now Rust-backed deterministic false until viewed-floor permissions are modeled)
+- `C_MerchantFrame.GetMerchantCurrencies` (now Rust-backed deterministic empty table until merchant currency state exists)
+- `C_PartyInfo.ConfirmReadyCheck`, `DoReadyCheck`, `UninviteUnit` (now Rust-backed; `UninviteUnit` mutates the existing party roster by unit token/name)
 - `C_PingSecure.ClearPendingPingOffScreenCallback` (now Rust-backed through the shared PingSecure callback table)
-- `C_QuestHub.GetDragonridingRacesForAreaPOI`
+- `C_QuestHub.GetDragonridingRacesForAreaPOI` (now Rust-backed deterministic empty table until area-POI race content exists)
 - `C_UIFileAsset.GetFileID`, `IsKnownFile`, `IsLooseFile` (now best-effort modeled from the bundled limited listfile)
 - `GetEventCPUUsage`, `GetFunctionCPUUsage`, `GetScriptCPUUsage` (now provided by the shared performance-metric defaults module)
 - secure pending callback getters/setters: button, ping off-screen, toggle run
@@ -41,7 +41,11 @@ Already-existing coverage from prior work included `C_Container.CalculateTotalNu
 Key implementation locations:
 
 - `src/c_api/c_battle_net.rs` — modeled `C_BattleNet.InviteFriend` backed by `SimState.bnet_friends`.
-- `src/c_api/c_party_info.rs`, `src/lua_api/globals/group_verbs.rs`, `src/lua_api/state/support_types.rs` — modeled ready-check state, C_PartyInfo ready-check methods, GUID-in-group membership, party assistant/leader mutators, global ready-check status/time probes, and immediate ready-check event dispatch.
+- `src/c_api/c_party_info.rs`, `src/lua_api/globals/group_verbs.rs`, `src/lua_api/state/support_types.rs` — modeled ready-check state, C_PartyInfo ready-check methods, GUID-in-group membership, party assistant/leader mutators, C_PartyInfo roster uninvite, global ready-check status/time probes, and immediate ready-check event dispatch.
+- `src/lua_api/globals/missing_surface/delves_ui.rs` — seeded Delves UI probe data, including the 12.0.7 entrance title and world-tier difficulty methods.
+- `src/c_api/c_housing.rs` — Rust-backed 12.0.7 housing catalog/customize/layout best-effort probes plus 12.1 housing state.
+- `src/c_api/c_merchant_frame.rs` — Rust-backed deterministic empty merchant currency list.
+- `src/c_api/c_quest_hub.rs` — Rust-backed deterministic empty Dragonriding race list.
 - `src/c_api/c_ui_file_asset.rs` — best-effort `C_UIFileAsset` path/fileDataID lookup backed by the bundled limited listfile.
 - `src/c_api/c_ping_secure.rs` — Rust-backed PingSecure callback setters and clearers using the shared callback table.
 - `src/lua_api/globals/lua_duration_object.rs` — Rust-backed `C_DurationUtil.CreateDuration`, `CreateManualClock`, and current-time/default duration object surface.
@@ -70,7 +74,11 @@ Full proof logs after the final bridge pass:
 - `/tmp/wow_12_0_7_full_build-retail-12-0-7.out`
 - `/tmp/wow_12_0_7_full_lua-retail-12-0-7.out`
 
-Rust readability metrics are under `/tmp/rust_readability_12_0_7` with no high-complexity findings.
+Additional proof for the Rust-backed trivial namespace pass:
+
+- `/tmp/pi-pyrun-12-0-7-trivial-namespaces-proof.log` — `cargo fmt --check`, default `cargo check`, 12.0.7/12.1 `cargo check`, 12.0.7/12.1 focused safe bridge tests, 12.0.7 `wow-sim` build, and 12.0.7 `lua-errors`.
+
+Rust readability metrics are under `/tmp/rust_readability_12_0_7` and `/tmp/rust_readability_12_0_7_trivial_namespaces` with no high-complexity findings.
 
 ### Best-effort modeled guesses needing later probes
 

@@ -15,17 +15,16 @@ use crate::lua_api::methods::{
 #[cfg(feature = "retail-12-1-0")]
 use crate::lua_api::state::HousingState;
 #[cfg(feature = "retail-12-1-0")]
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_bridge::FromStack;
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaResult;
-#[cfg(feature = "retail-12-1-0")]
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
 use rilua::Val;
-#[cfg(feature = "retail-12-1-0")]
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
-#[cfg(feature = "retail-12-1-0")]
 use rilua::vm::table::Table;
 
-#[cfg(feature = "retail-12-1-0")]
 type NamespaceTable = GcRef<Table>;
 
 #[cfg(feature = "retail-12-1-0")]
@@ -44,6 +43,7 @@ pub(crate) fn register_c_housing_surface(state: &mut LuaState) -> LuaResult<()> 
     let customize_mode = ensure_namespace(state, "C_HousingCustomizeMode")?;
     let decor = ensure_namespace(state, "C_HousingDecor")?;
     let layout = ensure_namespace(state, "C_HousingLayout")?;
+    register_patch_12_0_7_housing_surface(state, customize_mode, layout)?;
     register_patch_12_1_c_housing_surface(
         state,
         housing,
@@ -53,6 +53,26 @@ pub(crate) fn register_c_housing_surface(state: &mut LuaState) -> LuaResult<()> 
         decor,
         layout,
     )
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn register_patch_12_0_7_housing_surface(
+    state: &mut LuaState,
+    customize_mode: NamespaceTable,
+    layout: NamespaceTable,
+) -> LuaResult<()> {
+    register_catalog_methods(state)?;
+    register_patch_12_0_7_customize_mode_methods(state, customize_mode)?;
+    register_patch_12_0_7_layout_methods(state, layout)
+}
+
+#[cfg(not(any(feature = "retail-12-0-7", feature = "retail-12-1-0")))]
+fn register_patch_12_0_7_housing_surface(
+    _state: &mut LuaState,
+    _customize_mode: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    _layout: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    Ok(())
 }
 
 #[cfg(feature = "retail-12-1-0")]
@@ -193,6 +213,22 @@ fn register_house_editor_methods(
     )
 }
 
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn register_catalog_methods(state: &mut LuaState) -> LuaResult<()> {
+    let catalog = ensure_namespace(state, "C_HousingCatalog")?;
+    table_set_rust_fn_static(
+        state,
+        catalog,
+        "GetCatalogCategoryAndSubcategoryNames",
+        get_catalog_category_and_subcategory_names,
+    )
+}
+
+#[cfg(not(any(feature = "retail-12-0-7", feature = "retail-12-1-0")))]
+fn register_catalog_methods(_state: &mut LuaState) -> LuaResult<()> {
+    Ok(())
+}
+
 #[cfg(feature = "retail-12-1-0")]
 fn register_customize_mode_methods(
     state: &mut LuaState,
@@ -209,7 +245,45 @@ fn register_customize_mode_methods(
         customize_mode,
         "GetSelectedDecorPetInfo",
         get_selected_decor_pet_info,
+    )?;
+    register_patch_12_0_7_customize_mode_methods(state, customize_mode)
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn register_patch_12_0_7_customize_mode_methods(
+    state: &mut LuaState,
+    customize_mode: NamespaceTable,
+) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        customize_mode,
+        "RoomConnectionSupportsDoorType",
+        room_connection_supports_door_type,
     )
+}
+
+#[cfg(not(any(feature = "retail-12-0-7", feature = "retail-12-1-0")))]
+fn register_patch_12_0_7_customize_mode_methods(
+    _state: &mut LuaState,
+    _customize_mode: NamespaceTable,
+) -> LuaResult<()> {
+    Ok(())
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn register_patch_12_0_7_layout_methods(
+    state: &mut LuaState,
+    layout: NamespaceTable,
+) -> LuaResult<()> {
+    table_set_rust_fn_static(state, layout, "CanSetViewedFloor", can_set_viewed_floor)
+}
+
+#[cfg(not(any(feature = "retail-12-0-7", feature = "retail-12-1-0")))]
+fn register_patch_12_0_7_layout_methods(
+    _state: &mut LuaState,
+    _layout: NamespaceTable,
+) -> LuaResult<()> {
+    Ok(())
 }
 
 #[cfg(feature = "retail-12-1-0")]
@@ -274,6 +348,18 @@ fn register_layout_methods(state: &mut LuaState, layout: NamespaceTable) -> LuaR
         "HasSelectedBlueprintFloorplan",
         has_selected_blueprint_floorplan,
     )
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn get_catalog_category_and_subcategory_names(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn room_connection_supports_door_type(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
 }
 
 #[cfg(feature = "retail-12-1-0")]
@@ -551,6 +637,12 @@ fn get_max_pet_placement_budget(state: &mut LuaState) -> LuaResult<u32> {
 fn get_spent_pet_placement_budget(state: &mut LuaState) -> LuaResult<u32> {
     let budget = { borrow_state(state)?.housing.spent_pet_placement_budget };
     push_optional_i32(state, budget);
+    Ok(1)
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn can_set_viewed_floor(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
     Ok(1)
 }
 

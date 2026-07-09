@@ -35,7 +35,7 @@ pub(super) fn register_delves_ui_surface(state: &mut LuaState) -> LuaResult<()> 
     Ok(())
 }
 
-const METHODS: [(&str, rilua::vm::closure::RustFn); 29] = [
+const METHODS: [(&str, rilua::vm::closure::RustFn); 30] = [
     ("GetActiveDelveTier", get_active_delve_tier),
     (
         "GetCompanionInfoForActivePlayer",
@@ -66,6 +66,10 @@ const METHODS: [(&str, rilua::vm::closure::RustFn); 29] = [
     (
         "GetDelveEntranceHeaderString",
         get_delve_entrance_header_string,
+    ),
+    (
+        "GetDelveEntranceTitleString",
+        get_delve_entrance_title_string,
     ),
     ("GetDelveEntranceMapID", get_delve_entrance_map_id),
     ("GetDelveEntranceTiers", get_delve_entrance_tiers),
@@ -156,6 +160,10 @@ fn get_delve_entrance_description_string(state: &mut LuaState) -> LuaResult<u32>
     let description = create_string(state, DELVE_DESCRIPTION);
     state.push(description);
     Ok(1)
+}
+
+fn get_delve_entrance_title_string(state: &mut LuaState) -> LuaResult<u32> {
+    get_delve_entrance_header_string(state)
 }
 
 fn get_delve_entrance_header_string(state: &mut LuaState) -> LuaResult<u32> {

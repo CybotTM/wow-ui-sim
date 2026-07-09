@@ -41,10 +41,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
         end
     end
 
-    local delves = ensure_namespace("C_DelvesUI")
-    set_default(delves, "GetDelveEntranceTitleString", function() return "" end)
-    set_default(delves, "GetWorldTierDifficultyForActivePlayer", return_nil)
-
     local durationUtil = ensure_namespace("C_DurationUtil")
     local isPatch121 = type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100
     local function create_duration_clock(initialTime)
@@ -174,26 +170,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
         end
         return 1, 1, 1, 1
     end)
-
-    local housingCatalog = ensure_namespace("C_HousingCatalog")
-    set_default(housingCatalog, "GetCatalogCategoryAndSubcategoryNames", return_nil)
-
-    local housingCustomizeMode = ensure_namespace("C_HousingCustomizeMode")
-    set_default(housingCustomizeMode, "RoomConnectionSupportsDoorType", return_false)
-
-    local housingLayout = ensure_namespace("C_HousingLayout")
-    set_default(housingLayout, "CanSetViewedFloor", return_false)
-
-    local merchantFrame = ensure_namespace("C_MerchantFrame")
-    set_default(merchantFrame, "GetMerchantCurrencies", return_empty_table)
-
-    local partyInfo = ensure_namespace("C_PartyInfo")
-    set_default(partyInfo, "UninviteUnit", function(unit)
-        if type(UninviteUnit) == "function" then UninviteUnit(unit) end
-    end)
-
-    local questHub = ensure_namespace("C_QuestHub")
-    set_default(questHub, "GetDragonridingRacesForAreaPOI", return_empty_table)
 
     if GetSecurePendingButtonCallback == nil then GetSecurePendingButtonCallback = get_callback("button") end
     if GetSecurePendingPingOffScreenCallback == nil then GetSecurePendingPingOffScreenCallback = get_callback("pendingPingOffScreen") end

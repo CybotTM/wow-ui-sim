@@ -182,7 +182,9 @@ fn test_patch_12_0_7_safe_global_bridges() {
             if IsGroupLeader() ~= false or UnitIsGroupLeader("party1") ~= true then return "party-promote-leader" end
             C_PartyInfo.PromoteToLeader("player")
             if IsGroupLeader() ~= true then return "party-promote-player-leader" end
+            local beforeUninvite = GetNumGroupMembers()
             C_PartyInfo.UninviteUnit("party1")
+            if GetNumGroupMembers() ~= beforeUninvite - 1 then return "party-uninvite" end
             C_PingSecure.SetPendingPingOffScreenCallback(function() return "ping" end)
             if type(GetSecurePendingPingOffScreenCallback()) ~= "function" then return "ping-callback" end
             C_PingSecure.ClearPendingPingOffScreenCallback()

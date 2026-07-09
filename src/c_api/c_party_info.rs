@@ -1,9 +1,9 @@
 //! `C_PartyInfo` probe surface backed by group state.
 //!
 //! `GetActiveCategories`, `GetActiveGroupType`, `IsPartyFull`, and
-//! `IsGUIDInGroup` read the existing party roster model. `LeaveParty` mutates
-//! the same roster path as the legacy global `LeaveParty`. Static loot-method
-//! defaults remain here because
+//! `IsGUIDInGroup` read the existing party roster model. `LeaveParty` and
+//! `UninviteUnit` mutate the same roster paths as their legacy globals. Static
+//! loot-method defaults remain here because
 //! they are coherent seeded `C_PartyInfo` values, while unrelated instance
 //! abandon defaults stay in temporary workarounds.
 
@@ -51,6 +51,7 @@ fn register_group_membership_probes(
         c_party_info_is_guid_in_group,
     )?;
     table_set_rust_fn_static(state, table_ref, "LeaveParty", c_party_info_leave_party)?;
+    table_set_rust_fn_static(state, table_ref, "UninviteUnit", c_party_info_uninvite_unit)?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -184,6 +185,27 @@ fn party_member_index_from_unit(state: &mut LuaState, unit: &str) -> LuaResult<O
 fn c_party_info_leave_party(state: &mut LuaState) -> LuaResult<u32> {
     crate::lua_api::globals::group_verbs::clear_party_roster(state)?;
     crate::lua_api::globals::group_verbs::push_event(state, "GROUP_ROSTER_UPDATE")?;
+    Ok(0)
+}
+
+fn c_party_info_uninvite_unit(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let removed = {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(index) = crate::lua_api::globals::unit_api::parse_party_index(&unit)
+            && index < sim.party_members.len()
+        {
+            sim.party_members.remove(index);
+            true
+        } else {
+            let before = sim.party_members.len();
+            sim.party_members.retain(|member| member.name != unit);
+            before != sim.party_members.len()
+        }
+    };
+    if removed {
+        crate::lua_api::globals::group_verbs::push_event(state, "GROUP_ROSTER_UPDATE")?;
+    }
     Ok(0)
 }
 
