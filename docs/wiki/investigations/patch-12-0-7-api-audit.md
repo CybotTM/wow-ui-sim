@@ -84,11 +84,21 @@ Additional proof for the encounter-color and tooltip-money pass:
 
 - `/tmp/pi-pyrun-12-0-7-color-money-proof.log` — `cargo fmt --check`, default `cargo check`, 12.0.7/12.1 `cargo check`, 12.0.7/12.1 focused safe bridge tests, 12.0.7 `wow-sim` build, and 12.0.7 `lua-errors`.
 
+Focused proof for recovered 12.0.7 CVar defaults:
+
+- `/tmp/pi-pyrun-12-0-7-cvars-test.log` — profile-gated recovered CVar defaults/removals regression test.
+
 Focused proof for the secure-pending callback Rust move:
 
 - `/tmp/pi-pyrun-12-0-7-secure-callback-final-test.log` — 12.0.7 safe bridge regression test, including button/ping/toggle callback set/get behavior.
 
 Rust readability metrics are under `/tmp/rust_readability_12_0_7`, `/tmp/rust_readability_12_0_7_trivial_namespaces`, `/tmp/rust_readability_12_0_7_color_money`, and `/tmp/rust_readability_12_0_7_secure_callbacks_final` with no high-complexity findings.
+
+### CVar changes
+
+The simulator now profile-gates the recovered exact 12.0.7.68235 CVar delta in `src/cvars.rs`: 17 additions, five removals, and the `gxWindowedResolution` default change from `1920x1080` to `auto`. `patch_12_0_7_cvar_defaults_match_retail` verifies all recovered defaults/removals under `retail-12-0-7`.
+
+**Exception request pending user approval — incomplete source count:** the local patch snapshot claimed 20 additions while naming only six. The exact historical CVar diff identifies 17 additions; three alleged additions have no names or authoritative source evidence. Do not invent unnamed CVars. Approval is required to treat those three unidentifiable claimed additions as an exception.
 
 ### Best-effort modeled guesses needing later probes
 
@@ -127,6 +137,7 @@ If the exact-behavior work resumes, create live PTR probe addons for restricted-
 - `src/c_api/c_battle_net.rs` — modeled Battle.net friend-list APIs.
 - `src/c_api/c_party_info.rs`, `src/lua_api/globals/group_verbs.rs`, `src/lua_api/state/support_types.rs` — modeled ready-check behavior.
 - `src/c_api/c_ui_file_asset.rs` — best-effort UI file-asset lookup.
+- `src/cvars.rs` — recovered exact 12.0.7 profile CVar additions/removals/default override.
 - `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — remaining documented best-effort 12.0.7 duration text-binding compatibility object.
 - `src/c_api/c_ping_secure.rs` — Rust-backed secure pending callback storage globals.
 - `src/lua_api/globals/missing_surface/encounter_events.rs` — Rust-backed encounter timeline color bridge.

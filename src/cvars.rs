@@ -202,22 +202,24 @@ fn parse_default_cvars() -> (HashMap<String, String>, HashMap<String, String>) {
     (defaults, original_names)
 }
 
-#[cfg(feature = "retail-12-1-0")]
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
 fn insert_profile_cvars(
     defaults: &mut HashMap<String, String>,
     original_names: &mut HashMap<String, String>,
 ) {
+    insert_cvar_defaults(defaults, original_names, PATCH_12_0_7_CVARS);
+    #[cfg(feature = "retail-12-1-0")]
     insert_cvar_defaults(defaults, original_names, PATCH_12_1_CVARS);
 }
 
-#[cfg(not(feature = "retail-12-1-0"))]
+#[cfg(not(any(feature = "retail-12-0-7", feature = "retail-12-1-0")))]
 fn insert_profile_cvars(
     _defaults: &mut HashMap<String, String>,
     _original_names: &mut HashMap<String, String>,
 ) {
 }
 
-#[cfg(feature = "retail-12-1-0")]
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
 fn insert_cvar_defaults(
     defaults: &mut HashMap<String, String>,
     original_names: &mut HashMap<String, String>,
@@ -230,38 +232,89 @@ fn insert_cvar_defaults(
     }
 }
 
-#[cfg(feature = "retail-12-1-0")]
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
 fn remove_profile_cvars(
     defaults: &mut HashMap<String, String>,
     original_names: &mut HashMap<String, String>,
 ) {
-    for key in PATCH_12_1_REMOVED_CVARS
-        .iter()
-        .map(|name| name.to_lowercase())
-    {
-        defaults.remove(&key);
-        original_names.remove(&key);
-    }
+    remove_cvar_defaults(defaults, original_names, PATCH_12_0_7_REMOVED_CVARS);
+    #[cfg(feature = "retail-12-1-0")]
+    remove_cvar_defaults(defaults, original_names, PATCH_12_1_REMOVED_CVARS);
 }
 
-#[cfg(not(feature = "retail-12-1-0"))]
+#[cfg(not(any(feature = "retail-12-0-7", feature = "retail-12-1-0")))]
 fn remove_profile_cvars(
     _defaults: &mut HashMap<String, String>,
     _original_names: &mut HashMap<String, String>,
 ) {
 }
 
-#[cfg(feature = "retail-12-1-0")]
-fn is_profile_removed_cvar_key(key: &str) -> bool {
-    PATCH_12_1_REMOVED_CVARS
-        .iter()
-        .any(|removed| removed.eq_ignore_ascii_case(key))
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn remove_cvar_defaults(
+    defaults: &mut HashMap<String, String>,
+    original_names: &mut HashMap<String, String>,
+    names: &[&str],
+) {
+    for key in names.iter().map(|name| name.to_lowercase()) {
+        defaults.remove(&key);
+        original_names.remove(&key);
+    }
 }
 
-#[cfg(not(feature = "retail-12-1-0"))]
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn is_profile_removed_cvar_key(key: &str) -> bool {
+    PATCH_12_0_7_REMOVED_CVARS
+        .iter()
+        .any(|removed| removed.eq_ignore_ascii_case(key))
+        || {
+            #[cfg(feature = "retail-12-1-0")]
+            {
+                PATCH_12_1_REMOVED_CVARS
+                    .iter()
+                    .any(|removed| removed.eq_ignore_ascii_case(key))
+            }
+            #[cfg(not(feature = "retail-12-1-0"))]
+            {
+                false
+            }
+        }
+}
+
+#[cfg(not(any(feature = "retail-12-0-7", feature = "retail-12-1-0")))]
 fn is_profile_removed_cvar_key(_key: &str) -> bool {
     false
 }
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+const PATCH_12_0_7_REMOVED_CVARS: &[&str] = &[
+    "debugGameEvents",
+    "frontendMatchingModes_WowLabs",
+    "last_matchmaking_party_size",
+    "lastCharacterGuid",
+    "skipStartGear",
+];
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+const PATCH_12_0_7_CVARS: &[(&str, &str)] = &[
+    ("assistedCombatReduceHighlights", "1"),
+    ("developerLog", "0"),
+    ("developerLogFilterDebug", "0"),
+    ("developerLogFilterError", "1"),
+    ("developerLogFilterFatal", "1"),
+    ("developerLogFilterNormal", "1"),
+    ("developerLogFilterSpam", "0"),
+    ("developerLogFilterWarning", "1"),
+    ("developerLogWriteToFile", "1"),
+    ("housingDecorLightRadiusIndicatorsEnabled", "1"),
+    ("housingOtherDecorLightRadiusIndicatorType", "1"),
+    ("housingSelectedDecorLightRadiusIndicatorType", "1"),
+    ("KioskCanSessionExpire", "1"),
+    ("KioskCharacterTemplateSet", "0"),
+    ("KioskLobbyKickSeconds", "30"),
+    ("ThreadPoolPerThreadAllocator", "1"),
+    ("useBLEEP", "0"),
+    ("gxWindowedResolution", "auto"),
+];
 
 #[cfg(feature = "retail-12-1-0")]
 const PATCH_12_1_REMOVED_CVARS: &[&str] =
@@ -467,5 +520,28 @@ mod tests {
         assert_eq!(storage.get("PraiseTheSun"), Some("1".to_string()));
         assert_eq!(storage.get_default("PraiseTheSun"), Some("1".to_string()));
         assert!(storage.all_keys().iter().any(|key| key == "PraiseTheSun"));
+    }
+
+    #[cfg(feature = "retail-12-0-7")]
+    #[test]
+    fn patch_12_0_7_cvar_defaults_match_retail() {
+        let storage = CVarStorage::new();
+        for (name, value) in PATCH_12_0_7_CVARS {
+            assert_eq!(storage.get(name), Some((*value).to_string()), "{name}");
+            assert_eq!(
+                storage.get_default(name),
+                Some((*value).to_string()),
+                "{name}"
+            );
+        }
+        assert!(storage.get_bool("assistedCombatReduceHighlights"));
+        assert!(!storage.get_bool("developerLogFilterDebug"));
+        assert_eq!(
+            storage.get("gxWindowedResolution"),
+            Some("auto".to_string())
+        );
+        for name in PATCH_12_0_7_REMOVED_CVARS {
+            assert_eq!(storage.get(name), None, "{name}");
+        }
     }
 }
