@@ -281,6 +281,56 @@ fn test_patch_12_1_strict_removed_symbols_are_hidden() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_housing_inside_owned_state_and_reset() {
+    let env = WowLuaEnv::new().unwrap();
+    {
+        let mut state = env.state().borrow_mut();
+        state.housing.inside_owned_house = true;
+        state.housing.inside_owned_plot = false;
+        state.housing.tracked_house_guid = Some("wow-ui-sim-house".to_string());
+        state.housing.current_level = 3;
+        state.housing.current_favor = 250;
+        state.housing.next_threshold = 500;
+        state.housing.max_level = 5;
+        state.housing.level_thresholds = vec![0, 100, 500];
+    }
+
+    let before: (bool, bool, bool) = env
+        .eval(
+            r#"
+            return C_Housing.IsInsideOwnedHouseOrPlot(),
+                C_Housing.IsInsideOwnedHouse(),
+                C_Housing.IsInsideOwnedPlot()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(before, (true, true, false));
+
+    env.exec("C_Housing.ResetHouse()").unwrap();
+
+    let after: (bool, bool, bool) = env
+        .eval(
+            r#"
+            return C_Housing.IsInsideOwnedHouseOrPlot(),
+                C_Housing.IsInsideOwnedHouse(),
+                C_Housing.IsInsideOwnedPlot()
+            "#,
+        )
+        .unwrap();
+    let state = env.state().borrow();
+
+    assert_eq!(after, (false, false, false));
+    assert_eq!(state.housing.tracked_house_guid, None);
+    assert_eq!(state.housing.current_level, 0);
+    assert_eq!(state.housing.current_favor, 0);
+    assert_eq!(state.housing.next_threshold, 0);
+    assert_eq!(state.housing.max_level, 0);
+    assert!(state.housing.level_thresholds.is_empty());
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_safe_global_bridges() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env

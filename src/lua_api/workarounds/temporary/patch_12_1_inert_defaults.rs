@@ -1,8 +1,7 @@
 //! Temporary inert defaults for additive 12.1 API names.
 //!
 //! These bridge addon-facing probes for systems the simulator does not model
-//! yet: Discord linking, pending title-friend invites, and housing
-//! blueprint/editor state. The defaults are deliberately inert and
+//! yet: Discord linking and housing blueprint/editor state. The defaults are deliberately inert and
 //! version-gated to 12.1+ so they do not widen the 12.0 retail surface.
 
 const PATCH_12_1_INERT_DEFAULTS_LUA: &str = r#"

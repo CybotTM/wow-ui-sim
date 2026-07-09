@@ -16,26 +16,32 @@ if type(HousingTutorialUtil.BoughtHouseQuestComplete) ~= "function" then
 end
 
 if type(C_Housing) == "table" then
-    function C_Housing.GetPlayerOwnedHouses()
-        if type(FireEvent) == "function" then
-            FireEvent("PLAYER_HOUSE_LIST_UPDATED", {})
+    local function set_default(key, fn)
+        if rawget(C_Housing, key) == nil then
+            C_Housing[key] = fn
         end
     end
 
-    function C_Housing.HouseFinderIgnoreNeighborhood()
-    end
+    set_default("GetPlayerOwnedHouses", function()
+        if type(FireEvent) == "function" then
+            FireEvent("PLAYER_HOUSE_LIST_UPDATED", {})
+        end
+    end)
 
-    function C_Housing.IsInsideOwnedHouse()
-        return false
-    end
+    set_default("HouseFinderIgnoreNeighborhood", function()
+    end)
 
-    function C_Housing.IsInsideOwnedHouseOrPlot()
+    set_default("IsInsideOwnedHouse", function()
         return false
-    end
+    end)
 
-    function C_Housing.IsInsideOwnedPlot()
+    set_default("IsInsideOwnedHouseOrPlot", function()
         return false
-    end
+    end)
+
+    set_default("IsInsideOwnedPlot", function()
+        return false
+    end)
 
     if type(ClearCachedActivitiesForPlayer) ~= "function" then
         function ClearCachedActivitiesForPlayer() end
