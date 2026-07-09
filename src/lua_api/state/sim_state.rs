@@ -246,6 +246,7 @@ pub struct SimState {
     pub area_pois: HashMap<i32, AreaPoiInfo>,
     pub bnet_friends: Vec<BnetFriend>,
     pub bnet_friend_invites: Vec<BnetFriendInvite>,
+    pub bnet_appear_offline: bool,
     pub social_friends: Vec<SocialFriend>,
     pub auction_browse_results: Vec<AuctionBrowseResult>,
     pub auction_replicate_items: Vec<AuctionReplicateItem>,

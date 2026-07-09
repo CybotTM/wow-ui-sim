@@ -147,6 +147,18 @@ fn register_patch_12_1_friend_query_methods(
         table_ref,
         "SendVerifiedBattleNetFriendInvite",
         c_bnet_send_verified_battle_net_friend_invite,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "BNCheckTitleFriendInviteToUnit",
+        c_bnet_check_title_friend_invite_to_unit,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SetAppearOffline",
+        c_bnet_set_appear_offline,
     )
 }
 
@@ -154,6 +166,21 @@ fn register_patch_12_1_friend_query_methods(
 fn c_bnet_feature_enabled(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
     Ok(1)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn c_bnet_check_title_friend_invite_to_unit(state: &mut LuaState) -> LuaResult<u32> {
+    // The simulator has no title-friend unit-invite service. Keep the callable
+    // probe deterministic and model-backed instead of a Lua inert default.
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn c_bnet_set_appear_offline(state: &mut LuaState) -> LuaResult<u32> {
+    let appear_offline = bool::from_stack(state, 1)?;
+    borrow_state_mut(state)?.bnet_appear_offline = appear_offline;
+    Ok(0)
 }
 
 #[cfg(feature = "retail-12-1-0")]

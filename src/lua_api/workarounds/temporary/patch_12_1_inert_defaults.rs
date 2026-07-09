@@ -1,8 +1,8 @@
 //! Temporary inert defaults for additive 12.1 API names.
 //!
 //! These bridge addon-facing probes for systems the simulator does not model
-//! yet: Discord linking and housing blueprint/editor state. The defaults are deliberately inert and
-//! version-gated to 12.1+ so they do not widen the 12.0 retail surface.
+//! yet: Discord linking. The defaults are deliberately inert and version-gated
+//! to 12.1+ so they do not widen the 12.0 retail surface.
 
 const PATCH_12_1_INERT_DEFAULTS_LUA: &str = r#"
 if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
@@ -25,10 +25,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
             namespace[key] = fn
         end
     end
-
-    local battleNet = ensure_namespace("C_BattleNet")
-    set_default(battleNet, "BNCheckTitleFriendInviteToUnit", return_false)
-    set_default(battleNet, "SetAppearOffline", noop)
 
     local discord = ensure_namespace("C_Discord")
     set_default(discord, "Authorize", noop)

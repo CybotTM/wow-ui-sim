@@ -281,6 +281,28 @@ fn test_patch_12_1_strict_removed_symbols_are_hidden() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_battle_net_presence_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: String = env
+        .eval(
+            r#"
+            C_BattleNet.SetAppearOffline(true)
+            if C_BattleNet.BNCheckTitleFriendInviteToUnit("player") ~= false then return "invite-check" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+    assert!(env.state().borrow().bnet_appear_offline);
+
+    env.exec("C_BattleNet.SetAppearOffline(false)").unwrap();
+    assert!(!env.state().borrow().bnet_appear_offline);
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_housing_inside_owned_state_and_reset() {
     let env = WowLuaEnv::new().unwrap();
     {

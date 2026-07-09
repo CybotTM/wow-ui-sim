@@ -264,6 +264,7 @@ macro_rules! build_empty_sim_state {
             area_pois: default_area_pois(),
             bnet_friends: default_bnet_friends(),
             bnet_friend_invites: Vec::new(),
+            bnet_appear_offline: false,
             social_friends: default_social_friends(),
             auction_browse_results: default_auction_browse_results(),
             auction_replicate_items: default_auction_replicate_items(),
