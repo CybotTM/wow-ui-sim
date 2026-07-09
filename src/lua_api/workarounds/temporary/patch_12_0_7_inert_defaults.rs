@@ -162,7 +162,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
         end
         return binding
     end
-    set_default(durationUtil, "CreateManualClock", create_duration_clock)
     set_default(durationUtil, "CreateDurationTextBinding", create_duration_text_binding)
 
     local encounterTimeline = ensure_namespace("C_EncounterTimeline")

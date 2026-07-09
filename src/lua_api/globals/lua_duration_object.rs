@@ -15,7 +15,9 @@
 //! `missing_surface::register_all`, so the duration surface is installed before
 //! Blizzard/addon Lua can request duration objects.
 
-use crate::lua_api::methods::{create_table, registry_get, registry_set, table_set_static};
+use crate::lua_api::methods::{
+    create_table, registry_get, registry_set, table_get, table_set, table_set_static,
+};
 use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -88,6 +90,17 @@ pub fn register_lua_duration_object(lua: &mut rilua::Lua) -> crate::Result<()> {
     let create_fn = make_closure(state, "C_DurationUtil.CreateDuration", create_duration);
     table_set_static(state, ns, "CreateDuration", create_fn);
 
+    // Install CreateManualClock only if missing.
+    let existing = crate::lua_api::methods::table_get(state, ns, "CreateManualClock");
+    if existing == Val::Nil {
+        let create_clock_fn = make_closure(
+            state,
+            "C_DurationUtil.CreateManualClock",
+            create_manual_clock,
+        );
+        table_set_static(state, ns, "CreateManualClock", create_clock_fn);
+    }
+
     // Install GetCurrentTime only if missing.
     let existing = crate::lua_api::methods::table_get(state, ns, "GetCurrentTime");
     if existing == Val::Nil {
@@ -114,10 +127,116 @@ fn create_duration(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `C_DurationUtil.CreateManualClock(initialTime)` — best-effort mutable clock table.
+fn create_manual_clock(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::lua_bridge::FromStack;
+    let time = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0);
+    let clock = create_table(state);
+    table_set(state, clock, "time", Val::Num(time));
+    install_clock_method(
+        state,
+        clock,
+        "GetTime",
+        "ManualClock.GetTime",
+        clock_get_time,
+    );
+    install_clock_method(
+        state,
+        clock,
+        "SetTime",
+        "ManualClock.SetTime",
+        clock_set_time,
+    );
+    install_clock_method(
+        state,
+        clock,
+        "AdvanceTime",
+        "ManualClock.AdvanceTime",
+        clock_advance_time,
+    );
+    install_clock_method(
+        state,
+        clock,
+        "RewindTime",
+        "ManualClock.RewindTime",
+        clock_rewind_time,
+    );
+    install_clock_method(
+        state,
+        clock,
+        "ResetTime",
+        "ManualClock.ResetTime",
+        clock_reset_time,
+    );
+    state.push(clock);
+    Ok(1)
+}
+
 /// `C_DurationUtil.GetCurrentTime()` — stub returning 0.
 fn get_current_time(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
+}
+
+fn clock_get_time(state: &mut LuaState) -> LuaResult<u32> {
+    let clock = crate::lua_bridge::stack_val(state, 1);
+    let time = clock_time(state, clock);
+    state.push(time);
+    Ok(1)
+}
+
+fn clock_set_time(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::lua_bridge::FromStack;
+    let clock = crate::lua_bridge::stack_val(state, 1);
+    let time = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0);
+    table_set(state, clock, "time", Val::Num(time));
+    Ok(0)
+}
+
+fn clock_advance_time(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::lua_bridge::FromStack;
+    let clock = crate::lua_bridge::stack_val(state, 1);
+    let delta = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0);
+    let time = clock_time_number(state, clock) + delta;
+    table_set(state, clock, "time", Val::Num(time));
+    Ok(0)
+}
+
+fn clock_rewind_time(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::lua_bridge::FromStack;
+    let clock = crate::lua_bridge::stack_val(state, 1);
+    let delta = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0);
+    let time = clock_time_number(state, clock) - delta;
+    table_set(state, clock, "time", Val::Num(time));
+    Ok(0)
+}
+
+fn clock_reset_time(state: &mut LuaState) -> LuaResult<u32> {
+    let clock = crate::lua_bridge::stack_val(state, 1);
+    table_set(state, clock, "time", Val::Num(0.0));
+    Ok(0)
+}
+
+fn clock_time(state: &mut LuaState, clock: Val) -> Val {
+    table_get(state, clock, "time")
+}
+
+fn clock_time_number(state: &mut LuaState, clock: Val) -> f64 {
+    match clock_time(state, clock) {
+        Val::Num(time) => time,
+        _ => 0.0,
+    }
+}
+
+fn install_clock_method(
+    state: &mut LuaState,
+    clock: Val,
+    key: &'static str,
+    closure_name: &'static str,
+    func: rilua::RustFn,
+) {
+    let closure = make_closure(state, closure_name, func);
+    table_set_static(state, clock, key, closure);
 }
 
 /// `__index(table, key)` — look up `key` in the instance table first, then
