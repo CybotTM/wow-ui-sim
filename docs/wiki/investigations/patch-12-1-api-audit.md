@@ -21,7 +21,8 @@ The 12.1 compatibility work is currently captured by these commits:
 - `aa889bd7f` — modeled `C_Discord.IsEnabled` from the existing `discordClientEnabled` CVar while leaving the rest of Discord as inert service placeholders.
 - pending commit — modeled pending Battle.net friend invites with `SendVerifiedBattleNetFriendInvite` and `GetFriendInviteInfo` backed by `SimState.bnet_friend_invites`.
 - `106a6617e` — made Battle.net feature probes return true for the modeled friend-list/title-friend/tag surfaces.
-- pending commit — modeled `C_Housing` owned-house/plot probes and `ResetHouse` against local `SimState.housing` flags and favor state.
+- `4728e37ab` — modeled `C_Housing` owned-house/plot probes and `ResetHouse` against local `SimState.housing` flags and favor state.
+- pending commit — modeled safe `C_HousingBlueprint` share-code/import/export calls against local `SimState.housing` blueprint state.
 
 Key implementation locations:
 
@@ -56,7 +57,8 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | Private/forbidden XML partition mechanics | Compatible XML/private table behavior is implemented/tested for `useForbiddenObjectTable`, private KeyValues, partition-aware mixins, and secure delegates. |
 | `DurationTextBinding` color methods | Implemented as compatibility methods on `C_DurationUtil.CreateDurationTextBinding(...)`: `ClearTextColorCurve`, `GetFormattedTextColor`, `GetTextColorCurve`, `SetTextColorCurve`. |
 | Housing owned-house probes | Best-effort modeled on local `SimState.housing` flags: `IsInsideOwnedHouse`, `IsInsideOwnedPlot`, and `IsInsideOwnedHouseOrPlot` reflect test/service-seeded state; `ResetHouse` clears the local owned-location and favor-bar state. Exact service payloads and zone transitions still need PTR probes. |
-| Housing blueprint/editor APIs | Present as inert compatibility defaults unless backed by existing simulator state. These are callable stubs, not real service models. |
+| Housing blueprint APIs | Best-effort modeled for safe local flows: export calls return deterministic `wow-ui-sim:*` share codes, validity/type/hyperlink helpers recognize those codes, import/delete/rename/request calls record intent in `SimState.housing`, and `CanImportTypeFromCurrentLocation` reflects the owned-house/plot state. Exact code format, availability enums, server collection payloads, and import validation still need PTR/service probes before fidelity claims. |
+| Housing editor/customize/decor/layout APIs | Present as inert compatibility defaults unless backed by existing simulator state. These are callable stubs, not real service models. |
 | Discord APIs | `C_Discord.IsEnabled` is best-effort modeled from the existing `discordClientEnabled` CVar. The rest of Discord remains inert service placeholders until a Discord server/channel state model exists. |
 | Battle.net title-friend custom names/tags | Best-effort modeled on `SimState.bnet_friends`: `SetCustomTitleFriendName` stores/clears a per-friend custom title name returned by `GetCustomTitleFriendName`; `SetFriendTags` stores array tags reflected in `GetFriendAccountInfo(...).friendTags`; the related `AreFriendTagsEnabled`, `AreTitleFriendsEnabled`, `AreTitleFriendCustomNamesEnabled`, `IsBattleNetFriendsListEnabled`, and `IsBattleNetFriendsListSupported` feature probes return true because the simulator exposes those modeled surfaces. Exact PTR behavior still needs probes. |
 | Pending Battle.net friend invites | Best-effort modeled on `SimState.bnet_friend_invites`: `SendVerifiedBattleNetFriendInvite(name)` creates one deduplicated pending invite; `GetFriendInviteInfo(index)` returns invite/account/friend-level/timestamp fields. Exact verified-invite flow, title-friend unit invite checks, and deprecated wrapper parity need probes. |

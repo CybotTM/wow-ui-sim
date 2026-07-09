@@ -331,6 +331,48 @@ fn test_patch_12_1_housing_inside_owned_state_and_reset() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_housing_blueprint_best_effort_state() {
+    let env = WowLuaEnv::new().unwrap();
+    {
+        let mut state = env.state().borrow_mut();
+        state.housing.inside_owned_house = true;
+    }
+
+    let result: (bool, bool, String, i64) = env
+        .eval(
+            r#"
+            local code = C_HousingBlueprint.ExportBlueprint("front-room")
+            C_HousingBlueprint.ImportBlueprint(code)
+            local link = C_HousingBlueprint.GetBlueprintHyperlink(code)
+            return C_HousingBlueprint.CanImportTypeFromCurrentLocation(1),
+                C_HousingBlueprint.IsShareCodeValid(code),
+                link,
+                C_HousingBlueprint.GetBlueprintTypeForCode(code)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result.0, true);
+    assert_eq!(result.1, true);
+    assert_eq!(
+        result.2,
+        "|Hhousingblueprint:wow-ui-sim:blueprint:front-room|h[Housing Blueprint]|h"
+    );
+    assert_eq!(result.3, 1);
+
+    let state = env.state().borrow();
+    assert_eq!(
+        state.housing.last_exported_blueprint_id.as_deref(),
+        Some("front-room")
+    );
+    assert_eq!(
+        state.housing.last_imported_blueprint_code.as_deref(),
+        Some("wow-ui-sim:blueprint:front-room")
+    );
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_safe_global_bridges() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
