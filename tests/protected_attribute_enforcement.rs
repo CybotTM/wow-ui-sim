@@ -249,27 +249,30 @@ fn insecure_caller_cannot_set_attribute_no_handler_on_protected_frame() {
 #[test]
 fn unchanged_scalar_attribute_refires_on_attribute_changed() {
     let env = env();
-    let count: i32 = env
-        .eval(
-            r#"
+    let (scalar_count, false_count, false_values, false_visible_during_handler, stored_false):
+        (i32, i32, bool, bool, bool) = env.eval(r#"
             local frame = CreateFrame("Frame", "UnchangedAttributeRefire", UIParent)
-            local count = 0
-            frame:SetScript("OnAttributeChanged", function()
-                count = count + 1
+            local scalarCount, falseCount = 0, 0
+            local falseValues, falseVisibleDuringHandler = true, true
+            frame:SetScript("OnAttributeChanged", function(self, name, value)
+                if name == "showgrid" then scalarCount = scalarCount + 1 end
+                if name == "flag" then
+                    falseCount = falseCount + 1
+                    falseValues = falseValues and value == false
+                    falseVisibleDuringHandler = falseVisibleDuringHandler and self:GetAttribute("flag") == nil
+                end
             end)
-
             frame:SetAttribute("showgrid", 1)
             frame:SetAttribute("showgrid", 1)
-
-            return count
-        "#,
-        )
-        .unwrap();
-
-    assert_eq!(
-        count, 2,
-        "SetAttribute should fire OnAttributeChanged for each write, even when the value is unchanged"
-    );
+            frame:SetAttribute("flag", false)
+            frame:SetAttribute("flag", false)
+            return scalarCount, falseCount, falseValues, falseVisibleDuringHandler, frame:GetAttribute("flag") == false
+        "#).unwrap();
+    assert_eq!(scalar_count, 2);
+    assert_eq!(false_count, 2);
+    assert!(false_values);
+    assert!(false_visible_during_handler);
+    assert!(stored_false);
 }
 
 #[test]

@@ -18,7 +18,7 @@ Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptP
 
 ### Exception requests pending user approval
 
-1. **Exact retained-probe regressions:** repeated `false` attribute dispatch; `ShowUIPanel` pulse then `CloseAllWindows`; exact `GetMouseFoci` shape; protected-template `IsProtected()` tuple plus descendant/anchor return values (not mutation-block propagation); `Texture:SetTexture()` no-arg clear and FDID `130828`; Store forbidden/dropdown observations. Existing subsystem tests are not exact probe replays.
+1. **Exact retained-probe regressions:** `ShowUIPanel` pulse then `CloseAllWindows`; exact `GetMouseFoci` shape; protected-template `IsProtected()` tuple plus descendant/anchor return values (not mutation-block propagation); `Texture:SetTexture()` no-arg clear and FDID `130828`; Store forbidden/dropdown observations. Existing subsystem tests are not exact probe replays. Repeated `false` attribute dispatch now has focused coverage for two writes, handler `false` arguments, nil lookup during dispatch, and final stored `false`, but is not a literal probe-addon replay.
 2. **Store forbidden lifecycle:** `StoreDropdown_SetDropdown` was nil in the retained capture, so intended dropdown population and forbidden-descendant scan were never exercised. Do not invent lifecycle behavior; need a live capture where this API exists.
 3. **XmlFrameLevel provenance:** bare/template/fixed/reparent findings are regression-tested, but the raw SavedVariables capture is missing. Approval is needed to accept the documented result as source evidence or require a fresh live capture.
 4. **Same-size window transitions:** iced supplies no observable same-size maximize/restore event, so duplicate display/scale pair emission cannot be modeled without a platform window-state signal.
@@ -51,7 +51,7 @@ Regression coverage exists in:
 
 - `tests/admin_event_api.rs` — invalid unit-filter registration fallback.
 - `tests/protected_frame_enforcement.rs` — retail `SetForbidden` no-op behavior.
-- `tests/protected_attribute_enforcement.rs` — wildcard explicit-false attribute lookup.
+- `tests/protected_attribute_enforcement.rs` — wildcard explicit-false lookup and repeated-false dispatch ordering.
 - `tests/frame_level.rs` — Raise/Lower and raised-frame-level ordering.
 - `tests/security_api.rs`, `tests/frame_table_iteration.rs`, `tests/globals_legacy.rs` — frame identity slot, surrogate dispatch, opaque identity userdata, duplicate named-frame freshness.
 - `tests/xml_frame_strata.rs` — XML `frameLevel` and `fixedFrameLevel` semantics.

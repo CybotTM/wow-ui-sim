@@ -14,6 +14,7 @@ fn sample_state() -> HousingState {
         next_threshold: 2_500,
         max_level: 10,
         level_thresholds: vec![0, 500, 1_500, 4_000, 8_500],
+        ..HousingState::default()
     }
 }
 

@@ -76,19 +76,29 @@ pub(super) fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
         let sim = borrow_state(state)?;
         sim.widgets.get(id).is_some_and(|frame| frame.forbidden)
     };
+    let dispatch = |state: &mut LuaState| -> LuaResult<()> {
+        let frame = frame_ref(state, id)?;
+        if let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
+            dispatch_attribute_changed(
+                state,
+                handler,
+                frame,
+                name_arg,
+                value,
+                secure_delegate_dispatch,
+            );
+        } else {
+            dispatch_direct_attribute_changed(state, frame, name_arg, value);
+        }
+        Ok(())
+    };
+    if value == Val::Bool(false) {
+        let _ = store_simple_attribute(state, id, &name, Val::Nil)?;
+        dispatch(state)?;
+    }
     let changed = store_simple_attribute(state, id, &name, value)?;
-    let frame = frame_ref(state, id)?;
-    if let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
-        dispatch_attribute_changed(
-            state,
-            handler,
-            frame,
-            name_arg,
-            value,
-            secure_delegate_dispatch,
-        );
-    } else {
-        dispatch_direct_attribute_changed(state, frame, name_arg, value);
+    if value != Val::Bool(false) {
+        dispatch(state)?;
     }
     if changed {
         run_state_attribute_snippet(state, id, &name, value)?;
