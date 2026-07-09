@@ -1,9 +1,8 @@
 //! Temporary inert defaults for remaining additive 12.0.7 API names.
 //!
 //! This bridge is now limited to the larger duration text-binding compatibility
-//! object and security-sensitive secure pending callback globals. Exact
-//! security/secret behavior remains documented as paused until live client
-//! probes pin it down.
+//! object. Exact duration formatting and secret-value behavior remains
+//! documented as paused until live client probes pin it down.
 
 const PATCH_12_0_7_INERT_DEFAULTS_LUA: &str = r#"
 if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
@@ -15,22 +14,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     local function set_default(namespace, key, fn)
         if rawget(namespace, key) == nil then
             namespace[key] = fn
-        end
-    end
-
-    local callbacks = {}
-    local function set_callback(key)
-        return function(callback)
-            callbacks[key] = callback
-        end
-    end
-    local function get_callback(key)
-        return function()
-            local pingCallbacks = rawget(_G, "__wow_ping_secure_callbacks")
-            if key == "pendingPingOffScreen" and type(pingCallbacks) == "table" then
-                return pingCallbacks.pendingPingOffScreen
-            end
-            return callbacks[key]
         end
     end
 
@@ -152,14 +135,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
         return binding
     end
     set_default(durationUtil, "CreateDurationTextBinding", create_duration_text_binding)
-
-    if GetSecurePendingButtonCallback == nil then GetSecurePendingButtonCallback = get_callback("button") end
-    if GetSecurePendingPingOffScreenCallback == nil then GetSecurePendingPingOffScreenCallback = get_callback("pendingPingOffScreen") end
-    if GetSecurePendingToggleRunCallback == nil then GetSecurePendingToggleRunCallback = get_callback("toggleRun") end
-    if SetSecurePendingButtonCallback == nil then SetSecurePendingButtonCallback = set_callback("button") end
-    if SetSecurePendingPingOffScreenCallback == nil then SetSecurePendingPingOffScreenCallback = set_callback("pendingPingOffScreen") end
-    if SetSecurePendingToggleRunCallback == nil then SetSecurePendingToggleRunCallback = set_callback("toggleRun") end
-
 end
 "#;
 

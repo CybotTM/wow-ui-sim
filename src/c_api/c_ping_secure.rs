@@ -16,7 +16,52 @@ const CALLBACK_TABLE_KEY: &str = "__wow_ping_secure_callbacks";
 pub(crate) fn register_c_ping_secure_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_PingSecure")?;
     table_set_rust_fn_static(state, table_ref, "CreateFrame", create_frame)?;
+    register_global_callback_accessors(state)?;
     register_callback_setters(state, table_ref)
+}
+
+fn register_global_callback_accessors(state: &mut LuaState) -> LuaResult<()> {
+    #[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+    {
+        let globals = state.global;
+        table_set_rust_fn_static(
+            state,
+            globals,
+            "GetSecurePendingButtonCallback",
+            get_button_callback,
+        )?;
+        table_set_rust_fn_static(
+            state,
+            globals,
+            "GetSecurePendingPingOffScreenCallback",
+            get_pending_ping_off_screen_callback,
+        )?;
+        table_set_rust_fn_static(
+            state,
+            globals,
+            "GetSecurePendingToggleRunCallback",
+            get_toggle_run_callback,
+        )?;
+        table_set_rust_fn_static(
+            state,
+            globals,
+            "SetSecurePendingButtonCallback",
+            set_button_callback,
+        )?;
+        table_set_rust_fn_static(
+            state,
+            globals,
+            "SetSecurePendingPingOffScreenCallback",
+            set_pending_ping_off_screen_callback,
+        )?;
+        table_set_rust_fn_static(
+            state,
+            globals,
+            "SetSecurePendingToggleRunCallback",
+            set_toggle_run_callback,
+        )?;
+    }
+    Ok(())
 }
 
 fn register_callback_setters(
@@ -74,6 +119,31 @@ fn set_pending_ping_off_screen_callback(state: &mut LuaState) -> LuaResult<u32> 
     set_callback(state, "pendingPingOffScreen")
 }
 
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn get_pending_ping_off_screen_callback(state: &mut LuaState) -> LuaResult<u32> {
+    get_callback(state, "pendingPingOffScreen")
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn set_button_callback(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback(state, "button")
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn get_button_callback(state: &mut LuaState) -> LuaResult<u32> {
+    get_callback(state, "button")
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn set_toggle_run_callback(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback(state, "toggleRun")
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn get_toggle_run_callback(state: &mut LuaState) -> LuaResult<u32> {
+    get_callback(state, "toggleRun")
+}
+
 fn clear_pending_ping_off_screen_callback(state: &mut LuaState) -> LuaResult<u32> {
     clear_callback(state, "pendingPingOffScreen")
 }
@@ -116,6 +186,14 @@ fn clear_callback(state: &mut LuaState, key: &str) -> LuaResult<u32> {
     let callbacks = callback_table(state);
     table_set(state, callbacks, key, Val::Nil);
     Ok(0)
+}
+
+#[cfg(any(feature = "retail-12-0-7", feature = "retail-12-1-0"))]
+fn get_callback(state: &mut LuaState, key: &str) -> LuaResult<u32> {
+    let callbacks = callback_table(state);
+    let callback = crate::lua_api::methods::table_get(state, callbacks, key);
+    state.push(callback);
+    Ok(1)
 }
 
 fn callback_table(state: &mut LuaState) -> Val {

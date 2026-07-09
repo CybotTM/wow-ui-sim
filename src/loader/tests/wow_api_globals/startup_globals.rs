@@ -202,6 +202,9 @@ fn test_patch_12_0_7_safe_global_bridges() {
             local buttonCallback = function() return "button" end
             SetSecurePendingButtonCallback(buttonCallback)
             if GetSecurePendingButtonCallback() ~= buttonCallback then return "button-callback" end
+            local pingGlobalCallback = function() return "ping-global" end
+            SetSecurePendingPingOffScreenCallback(pingGlobalCallback)
+            if GetSecurePendingPingOffScreenCallback() ~= pingGlobalCallback then return "ping-global-callback" end
             local toggleCallback = function() return "toggle" end
             SetSecurePendingToggleRunCallback(toggleCallback)
             if GetSecurePendingToggleRunCallback() ~= toggleCallback then return "toggle-callback" end
