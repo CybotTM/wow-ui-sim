@@ -26,7 +26,12 @@ fn register_callback_setters(
     for (name, function) in PING_SECURE_CALLBACK_SETTERS {
         table_set_rust_fn_static(state, table_ref, name, *function)?;
     }
-    Ok(())
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "ClearPendingPingOffScreenCallback",
+        clear_pending_ping_off_screen_callback,
+    )
 }
 
 const PING_SECURE_CALLBACK_SETTERS: &[(&str, fn(&mut LuaState) -> LuaResult<u32>)] = &[
@@ -69,6 +74,10 @@ fn set_pending_ping_off_screen_callback(state: &mut LuaState) -> LuaResult<u32> 
     set_callback(state, "pendingPingOffScreen")
 }
 
+fn clear_pending_ping_off_screen_callback(state: &mut LuaState) -> LuaResult<u32> {
+    clear_callback(state, "pendingPingOffScreen")
+}
+
 fn set_ping_cooldown_started_callback(state: &mut LuaState) -> LuaResult<u32> {
     set_callback(state, "pingCooldownStarted")
 }
@@ -100,6 +109,12 @@ fn set_toggle_ping_listener_callback(state: &mut LuaState) -> LuaResult<u32> {
 fn set_callback(state: &mut LuaState, key: &str) -> LuaResult<u32> {
     let callbacks = callback_table(state);
     table_set(state, callbacks, key, stack_val(state, 1));
+    Ok(0)
+}
+
+fn clear_callback(state: &mut LuaState, key: &str) -> LuaResult<u32> {
+    let callbacks = callback_table(state);
+    table_set(state, callbacks, key, Val::Nil);
     Ok(0)
 }
 
@@ -136,6 +151,7 @@ mod tests {
                 if type(C_PingSecure) ~= "table" then return "namespace" end
                 if type(C_PingSecure.CreateFrame) ~= "function" then return "create_frame" end
                 if type(C_PingSecure.SetPendingPingOffScreenCallback) ~= "function" then return "pending_callback" end
+                if type(C_PingSecure.ClearPendingPingOffScreenCallback) ~= "function" then return "clear_pending_callback" end
                 if type(C_PingSecure.SetPingCooldownStartedCallback) ~= "function" then return "cooldown_callback" end
                 if type(C_PingSecure.SetPingPinFrameAddedCallback) ~= "function" then return "pin_added_callback" end
                 if type(C_PingSecure.SetPingPinFrameRemovedCallback) ~= "function" then return "pin_removed_callback" end
@@ -144,6 +160,11 @@ mod tests {
                 if type(C_PingSecure.SetSendMacroPingCallback) ~= "function" then return "send_macro_callback" end
                 if type(C_PingSecure.SetTogglePingListenerCallback) ~= "function" then return "toggle_callback" end
                 C_PingSecure.CreateFrame()
+                local pending = function() return "pending" end
+                C_PingSecure.SetPendingPingOffScreenCallback(pending)
+                if __wow_ping_secure_callbacks.pendingPingOffScreen ~= pending then return "pending_stored" end
+                C_PingSecure.ClearPendingPingOffScreenCallback()
+                if __wow_ping_secure_callbacks.pendingPingOffScreen ~= nil then return "pending_cleared" end
                 C_PingSecure.SetPendingPingOffScreenCallback(function() end)
                 C_PingSecure.SetPingCooldownStartedCallback(function() end)
                 C_PingSecure.SetPingPinFrameAddedCallback(function() end)

@@ -193,16 +193,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
         if type(UninviteUnit) == "function" then UninviteUnit(unit) end
     end)
 
-    local pingSecure = ensure_namespace("C_PingSecure")
-    set_default(pingSecure, "ClearPendingPingOffScreenCallback", function()
-        callbacks.pendingPingOffScreen = nil
-        local pingCallbacks = rawget(_G, "__wow_ping_secure_callbacks")
-        if type(pingCallbacks) == "table" then
-            pingCallbacks.pendingPingOffScreen = nil
-        end
-    end)
-    set_default(pingSecure, "SetPendingPingOffScreenCallback", set_callback("pendingPingOffScreen"))
-
     local questHub = ensure_namespace("C_QuestHub")
     set_default(questHub, "GetDragonridingRacesForAreaPOI", return_empty_table)
 

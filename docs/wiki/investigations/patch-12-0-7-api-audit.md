@@ -28,7 +28,7 @@ The simulator also provides safe 12.0.7 additive probes for API names that can b
 - `C_HousingLayout.CanSetViewedFloor`
 - `C_MerchantFrame.GetMerchantCurrencies`
 - `C_PartyInfo.ConfirmReadyCheck`, `DoReadyCheck`, `UninviteUnit`
-- `C_PingSecure.ClearPendingPingOffScreenCallback`
+- `C_PingSecure.ClearPendingPingOffScreenCallback` (now Rust-backed through the shared PingSecure callback table)
 - `C_QuestHub.GetDragonridingRacesForAreaPOI`
 - `C_UIFileAsset.GetFileID`, `IsKnownFile`, `IsLooseFile` (now best-effort modeled from the bundled limited listfile)
 - `GetEventCPUUsage`, `GetFunctionCPUUsage`, `GetScriptCPUUsage`
@@ -43,6 +43,7 @@ Key implementation locations:
 - `src/c_api/c_battle_net.rs` — modeled `C_BattleNet.InviteFriend` backed by `SimState.bnet_friends`.
 - `src/c_api/c_party_info.rs`, `src/lua_api/globals/group_verbs.rs`, `src/lua_api/state/support_types.rs` — modeled ready-check state, C_PartyInfo ready-check methods, GUID-in-group membership, party assistant/leader mutators, global ready-check status/time probes, and immediate ready-check event dispatch.
 - `src/c_api/c_ui_file_asset.rs` — best-effort `C_UIFileAsset` path/fileDataID lookup backed by the bundled limited listfile.
+- `src/c_api/c_ping_secure.rs` — Rust-backed PingSecure callback setters and clearers using the shared callback table.
 - `src/lua_api/workarounds/temporary/patch_12_0_7_inert_defaults.rs` — version-gated inert 12.0.7 defaults for still-unmodeled APIs.
 - `src/lua_api/workarounds/mod.rs`, `src/lua_api/workarounds/temporary/mod.rs` — bootstrap registration.
 - `src/event/valid_events.rs` — 12.0.7 event registration gate.
