@@ -80,14 +80,16 @@ fn test_hook_script_with_no_existing_handler() {
 #[test]
 fn test_hook_script_rejects_pre_and_post_binding_slots() {
     let env = WowLuaEnv::new().unwrap();
-    let (hook0_empty, hook2_empty, get0_nil, get2_nil, hook0_after_set, hook2_after_set): (
-        bool,
-        bool,
-        bool,
-        bool,
-        bool,
-        bool,
-    ) = env
+    let (
+        hook0_empty,
+        hook2_empty,
+        get0_nil,
+        get2_nil,
+        normal_hook,
+        hook0_after_set,
+        hook2_after_set,
+        called,
+    ): (bool, bool, bool, bool, bool, bool, bool, Vec<String>) = env
         .eval(
             r#"
         local f = CreateFrame("Frame")
@@ -96,10 +98,13 @@ fn test_hook_script_rejects_pre_and_post_binding_slots() {
         local get0Nil = f:GetScript("OnShow", 0) == nil
         local get2Nil = f:GetScript("OnShow", 2) == nil
 
-        f:SetScript("OnShow", function() end)
-        local hook0AfterSet = f:HookScript("OnShow", function() end, 0)
-        local hook2AfterSet = f:HookScript("OnShow", function() end, 2)
-        return hook0Empty, hook2Empty, get0Nil, get2Nil, hook0AfterSet, hook2AfterSet
+        local normalHook = f:HookScript("OnShow", function() end)
+        local called = {}
+        f:SetScript("OnShow", function() table.insert(called, "normalSet") end)
+        local hook0AfterSet = f:HookScript("OnShow", function() table.insert(called, "slot0") end, 0)
+        local hook2AfterSet = f:HookScript("OnShow", function() table.insert(called, "slot2") end, 2)
+        f:GetScript("OnShow")(f)
+        return hook0Empty, hook2Empty, get0Nil, get2Nil, normalHook, hook0AfterSet, hook2AfterSet, called
     "#,
         )
         .unwrap();
@@ -108,8 +113,10 @@ fn test_hook_script_rejects_pre_and_post_binding_slots() {
     assert!(!hook2_empty);
     assert!(get0_nil);
     assert!(get2_nil);
+    assert!(normal_hook);
     assert!(!hook0_after_set);
     assert!(!hook2_after_set);
+    assert_eq!(called, ["normalSet"]);
 }
 
 #[test]
