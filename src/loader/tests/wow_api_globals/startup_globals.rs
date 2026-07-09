@@ -369,11 +369,11 @@ fn test_patch_12_1_safe_global_bridges() {
             C_LFGList.RevealCensoredSearchResult(1)
             if C_LFGList.DoesCensoredTextMatch("foo", "bar") ~= false then return "lfg-censored-match" end
             if C_LFGList.IsCensoredActiveEntryUnresolved() ~= false then return "lfg-censored-active" end
-            if C_BattleNet.AreFriendTagsEnabled() ~= false then return "bnet-tags" end
-            if C_BattleNet.AreTitleFriendsEnabled() ~= false then return "bnet-title" end
-            if C_BattleNet.AreTitleFriendCustomNamesEnabled() ~= false then return "bnet-title-names" end
-            if C_BattleNet.IsBattleNetFriendsListEnabled() ~= false then return "bnet-list-enabled" end
-            if C_BattleNet.IsBattleNetFriendsListSupported() ~= false then return "bnet-list-supported" end
+            if C_BattleNet.AreFriendTagsEnabled() ~= true then return "bnet-tags" end
+            if C_BattleNet.AreTitleFriendsEnabled() ~= true then return "bnet-title" end
+            if C_BattleNet.AreTitleFriendCustomNamesEnabled() ~= true then return "bnet-title-names" end
+            if C_BattleNet.IsBattleNetFriendsListEnabled() ~= true then return "bnet-list-enabled" end
+            if C_BattleNet.IsBattleNetFriendsListSupported() ~= true then return "bnet-list-supported" end
             if C_BattleNet.BNCheckTitleFriendInviteToUnit("player") ~= false then return "bnet-title-invite" end
             if C_BattleNet.GetCustomTitleFriendName(1) ~= nil then return "bnet-title-name" end
             if C_BattleNet.GetFriendInviteInfo(1) ~= nil then return "bnet-invite-info" end

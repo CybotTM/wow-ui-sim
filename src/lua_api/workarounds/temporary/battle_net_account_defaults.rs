@@ -14,11 +14,11 @@ end
 
 if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
   C_BattleNet = C_BattleNet or __wow_namespace()
-  C_BattleNet.AreFriendTagsEnabled = C_BattleNet.AreFriendTagsEnabled or function() return false end
-  C_BattleNet.AreTitleFriendCustomNamesEnabled = C_BattleNet.AreTitleFriendCustomNamesEnabled or function() return false end
-  C_BattleNet.AreTitleFriendsEnabled = C_BattleNet.AreTitleFriendsEnabled or function() return false end
-  C_BattleNet.IsBattleNetFriendsListEnabled = C_BattleNet.IsBattleNetFriendsListEnabled or function() return false end
-  C_BattleNet.IsBattleNetFriendsListSupported = C_BattleNet.IsBattleNetFriendsListSupported or function() return false end
+  C_BattleNet.AreFriendTagsEnabled = C_BattleNet.AreFriendTagsEnabled or function() return true end
+  C_BattleNet.AreTitleFriendCustomNamesEnabled = C_BattleNet.AreTitleFriendCustomNamesEnabled or function() return true end
+  C_BattleNet.AreTitleFriendsEnabled = C_BattleNet.AreTitleFriendsEnabled or function() return true end
+  C_BattleNet.IsBattleNetFriendsListEnabled = C_BattleNet.IsBattleNetFriendsListEnabled or function() return true end
+  C_BattleNet.IsBattleNetFriendsListSupported = C_BattleNet.IsBattleNetFriendsListSupported or function() return true end
 end
 "#;
 

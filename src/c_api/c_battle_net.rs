@@ -97,31 +97,31 @@ fn register_patch_12_1_friend_query_methods(
         state,
         table_ref,
         "AreFriendTagsEnabled",
-        c_bnet_feature_disabled,
+        c_bnet_feature_enabled,
     )?;
     table_set_rust_fn_static(
         state,
         table_ref,
         "AreTitleFriendCustomNamesEnabled",
-        c_bnet_feature_disabled,
+        c_bnet_feature_enabled,
     )?;
     table_set_rust_fn_static(
         state,
         table_ref,
         "AreTitleFriendsEnabled",
-        c_bnet_feature_disabled,
+        c_bnet_feature_enabled,
     )?;
     table_set_rust_fn_static(
         state,
         table_ref,
         "IsBattleNetFriendsListEnabled",
-        c_bnet_feature_disabled,
+        c_bnet_feature_enabled,
     )?;
     table_set_rust_fn_static(
         state,
         table_ref,
         "IsBattleNetFriendsListSupported",
-        c_bnet_feature_disabled,
+        c_bnet_feature_enabled,
     )?;
     table_set_rust_fn_static(
         state,
@@ -151,8 +151,8 @@ fn register_patch_12_1_friend_query_methods(
 }
 
 #[cfg(feature = "retail-12-1-0")]
-fn c_bnet_feature_disabled(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+fn c_bnet_feature_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
     Ok(1)
 }
 
