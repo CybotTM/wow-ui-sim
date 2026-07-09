@@ -54,7 +54,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 
 | Area | Current state |
 |------|---------------|
-| Global added APIs | Present under `retail-12-1-0` either as Rust-backed APIs or temporary compatibility defaults. Rough source scan has no missing global-added names. |
+| Global added APIs | Present under `retail-12-1-0` as Rust-backed APIs or compatibility bridges. `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` now contains no active Lua inert defaults. Rough source scan has no missing global-added names. |
 | Removed APIs | Hidden for addon-facing checks after startup by `src/ptr/strict_removals.lua`; not moved earlier because current Blizzard UI still needs some load-time compatibility. |
 | Events/CVars/Enums | Added event/CVar/enum names are gated by the 12.1 retail epoch where implemented. |
 | Widget methods | Compatible 12.1 widget methods are implemented/tested: forbidden-aspect queries, texture radial-progress-bar methods, roleset/on-update mode methods, statusbar render mode, minimap icon scale, VectorGraphics/SVG stubs. |
@@ -68,18 +68,18 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | Pending Battle.net friend invites | Best-effort modeled on `SimState.bnet_friend_invites`: `SendVerifiedBattleNetFriendInvite(name)` creates one deduplicated pending invite; `GetFriendInviteInfo(index)` returns invite/account/friend-level/timestamp fields. Exact verified-invite flow, title-friend unit invite checks, and deprecated wrapper parity need probes. |
 | Encounter Journal difficulty helpers | Best-effort modeled from generated Encounter Journal instance data: `GetBaseDifficultyID` returns `1` for dungeons and `14` for raids; `InstanceHasDifficultyID` accepts common dungeon IDs `1/2/8/23` and raid IDs `14/15/16/17`. Exact per-instance difficulty masks need generated data or PTR probes. |
 
-### Paused / blocked items
+### Exception requests pending user approval
 
-Do not implement these as guesses. They need real Blizzard PTR probes, generated Blizzard docs, or exact behavior captures before simulator changes:
+The following 12.1 items are not marked complete. They should remain exception-requested until PTR probes, generated Blizzard docs, or exact behavior captures make implementation safe:
 
-- **UnitAura secrecy and errors** — PTR notes say `C_UnitAura`/`C_TooltipInfo` aura access by index/slot/instance ID Lua-errors for addons while auras are secret, spell-ID/name access remains callable, `UNIT_AURA` payloads become fully secret, and `AuraData` structs are fully secret. The simulator must not approximate this without knowing exact taint/addon vs Blizzard call-site behavior and error shapes.
-- **Private Script Objects / Forbidden Partition** — compatible XML/private-table mechanics are modeled, but the full object partition contract is not proven. Need live behavior for public/forbidden table identity, inaccessible key paths, child object visibility, hooks, script storage, and delegate edge cases.
-- **Forbidden Aspects enforcement** — inheritance and query/add APIs are modeled, but exact restrictions for `UntrustedScriptExecution`, `UntrustedLayoutScriptExecution`, `EventRegistrations`, `AlwaysPropagateInput`, `ScriptedInput`, and `QueryFocus` need probes before blocking frame methods, focus/input queries, event registration, hooks, or script execution.
-- **AuraContainer / AuraButton / ManagedAuraContainer** — object names and compatible creation/XML paths are bridged, but full aura assignment, filtering, sorting, forbidden partition placement, automatic button management, tooltip behavior, and secret `IsShown` behavior are not modeled.
-- **RadialProgress script object** — texture/statusbar radial-progress-bar widget methods are bridged, but the standalone `RadialProgress:*` script object has no known constructor path in the current API audit. Do not invent a global constructor just to satisfy method names.
-- **Full DurationTextBinding object fidelity** — compatibility methods exist, including 12.1 color-curve methods, but exact Blizzard object lifetime, metatable identity, formatter semantics, and color-curve interpolation remain unproven.
-- **Changed structure payloads with real data** — inert compatibility fields were added where safe, and Battle.net title-friend custom names/tags, pending Battle.net invites, Encounter Journal difficulty helpers, Discord local state, and local housing state now have best-effort simulator models. Exact payloads for Discord service responses, housing service collections/availability, cooldown viewer, pet journal, LFG, player choice, tiered entrance, and private aura structures require backing models or live captures before claiming behavioral fidelity.
-- **Deprecated wrappers vs strict removals timing** — strict removed symbols are hidden for addon-facing 12.1 checks after startup. Current Blizzard UI still reads some removed/changed values during load, so moving removals earlier can break startup. Revisit only with current PTR Blizzard UI that no longer needs those load-time values.
+- **UnitAura secrecy and errors** — PTR notes say `C_UnitAura`/`C_TooltipInfo` aura access by index/slot/instance ID Lua-errors for addons while auras are secret, spell-ID/name access remains callable, `UNIT_AURA` payloads become fully secret, and `AuraData` structs are fully secret. Request exception because approximating this without exact taint/addon vs Blizzard call-site behavior and error shapes risks enforcing the wrong security boundary.
+- **Private Script Objects / Forbidden Partition** — compatible XML/private-table mechanics are modeled, but the full object partition contract is not proven. Request exception for public/forbidden table identity, inaccessible key paths, child object visibility, hooks, script storage, and delegate edge cases until live behavior is captured.
+- **Forbidden Aspects enforcement** — inheritance and query/add APIs are modeled, but exact restrictions for `UntrustedScriptExecution`, `UntrustedLayoutScriptExecution`, `EventRegistrations`, `AlwaysPropagateInput`, `ScriptedInput`, and `QueryFocus` need probes before blocking frame methods, focus/input queries, event registration, hooks, or script execution. Request exception because premature enforcement would break addons on guessed security semantics.
+- **AuraContainer / AuraButton / ManagedAuraContainer full behavior** — object names and compatible creation/XML paths are bridged, but full aura assignment, filtering, sorting, forbidden partition placement, automatic button management, tooltip behavior, and secret `IsShown` behavior are not modeled. Request exception until aura secrecy and container lifecycle probes exist.
+- **RadialProgress standalone script object fidelity** — texture/statusbar radial-progress-bar widget methods are bridged, but the standalone `RadialProgress:*` script object has no known constructor path in the current API audit. Request exception rather than inventing a global constructor.
+- **Full DurationTextBinding object fidelity** — compatibility methods exist, including 12.1 color-curve methods, but exact Blizzard object lifetime, metatable identity, formatter semantics, and color-curve interpolation remain unproven. Request exception for fidelity beyond the documented best-effort table contract.
+- **Changed structure payloads with real service data** — safe local state now backs Battle.net title-friend metadata, pending Battle.net invites, Encounter Journal difficulty helpers, Discord local state, and housing local state. Request exception for exact payloads in Discord service responses, housing service collections/availability, cooldown viewer, pet journal, LFG, player choice, tiered entrance, and private aura structures until backing models or live captures exist.
+- **Deprecated wrappers vs strict removals timing** — strict removed symbols are hidden for addon-facing 12.1 checks after startup. Request exception for earlier removal timing until current PTR Blizzard UI no longer needs those values during load.
 
 ### Practical next step
 
@@ -89,7 +89,7 @@ Best-effort simulator behavior is acceptable before PTR probes when it is backed
 
 - `/tmp/warcraft_patch_12_1_api_changes.txt` — source patch-note/API-change list used for the audit.
 - `src/loader/tests/wow_api_globals/startup_globals.rs` — regression coverage for safe bridges and strict removals.
-- `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` — inert additive 12.1 bridge surface.
+- `src/lua_api/workarounds/temporary/patch_12_1_inert_defaults.rs` — now-empty version-gated hook; safe 12.1 social/housing bridges moved to Rust-backed simulator state.
 - `src/ptr/strict_removals.lua` — post-startup hiding of removed 12.1 symbols.
 - `src/lua_api/frame/methods/forbidden_aspects.rs` — compatible forbidden-aspect query/inheritance implementation.
 - `docs/wiki/systems/client-profiles.md` — retail epoch feature model.
