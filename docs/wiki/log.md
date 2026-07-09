@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-09] investigation | Patch 12.0.5 API audit
+
+Created `investigations/patch-12-0-5-api-audit.md` to consolidate the probe-driven 12.0.5 work. Recorded that retail `12.0.5.67823` findings for forbidden frames, invalid unit-event filters, wildcard false attributes, Raise/Lower ordering, frame identity slot `[0]`, XML frame-level semantics, and display/scale event pairs are already modeled with focused tests. Documented that no `patch_12_0_5_inert_defaults` module exists and no obvious safe, already-backed 12.0.5 inert default remains unconverted.
+
 ## [2026-07-06] investigation | Patch 12.0.7 API audit
 
 Created `investigations/patch-12-0-7-api-audit.md` after bridging compatible 12.0.7 API gaps and pausing exact-behavior work. Recorded additive/inert API bridges, verification logs, and blocked areas requiring live behavior: restricted unit-token returns, `ENCOUNTER_END` payloads, EncounterEvents color state, SimulateMouse taint/focus restrictions, debug secret propagation, secure raidtarget actions, M+ CalendarTime returns, aura security changes, widget secret aspects, and deprecated/removal timing. Updated after `C_BattleNet.InviteFriend` moved from inert bridge to modeled `SimState.bnet_friends` mutation. Updated again after ready-check behavior moved from inert `C_PartyInfo` bridge to modeled state: `DoReadyCheck`/`ReadyCheck`, `ConfirmReadyCheck`, `GetReadyCheckStatus`, `GetReadyCheckTimeLeft`, and immediate ready-check event dispatch. Updated after `C_UIFileAsset` moved from inert Lua defaults to best-effort limited-listfile lookup, after timeline event colors started mirroring the existing `C_EncounterEvents` color state, after `DurationTextBinding` gained documented non-secret state methods plus best-effort duration-object storage, after `GameTooltip_AddMoneyLine` started formatting money through `GetMoneyString` instead of appending raw copper, after `C_PartyInfo.IsGUIDInGroup` moved to the simulator party roster model, and after C_PartyInfo leader/assistant mutators started updating simulator group-role state.

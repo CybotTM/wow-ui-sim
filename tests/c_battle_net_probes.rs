@@ -147,6 +147,8 @@ fn bnet_friends_reflect_sim_state_mutation() {
             battle_tag: "Custom#9999".into(),
             account_name: "Custom".into(),
             note: String::new(),
+            custom_title_friend_name: None,
+            friend_tags: Vec::new(),
             custom_message: String::new(),
             custom_message_time: 0,
             appear_offline: false,

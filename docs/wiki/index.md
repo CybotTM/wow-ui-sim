@@ -43,6 +43,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 
 | Page | Summary |
 |------|---------|
+| [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven API audit: core frame/event/attribute/identity/XML/scale behaviors are modeled and covered; no patch-specific inert-default module remains |
 | [[patch-12-0-7-api-audit]] | 12.0.7 API audit status: compatible bridges landed/verified; restricted unit-token returns, encounter payloads, SimulateMouse taint/focus restrictions, debug secret propagation, secure raidtarget actions, and widget secret/aspect behavior are paused pending live behavior |
 | [[patch-12-1-api-audit]] | 12.1 API audit status: compatible bridges landed and verified; UnitAura secrecy, full forbidden partition/aspect enforcement, AuraContainer/AuraButton/ManagedAuraContainer, DurationTextBinding/RadialProgress, and exact structure payloads are paused pending live PTR behavior |
 | [[retail-ptr-full-startup-lua-errors]] | Full GUI startup logs caught PVPUI, PTR cursor, and Store micro-button errors missed by `lua-errors`; fixes added backed PVP/cursor surfaces and guarded the Store inbound fallback |

@@ -1,0 +1,82 @@
+# Patch 12.0.5 API Audit
+
+Patch 12.0.5 work in wow-ui-sim is probe-driven rather than a single additive API-diff bridge pass. Retail `12.0.5.67823` live probes pinned core frame, event, attribute, identity, scale-event, and XML frame-level behavior; the simulator already models the safe findings with regression coverage. No dedicated `patch_12_0_5_inert_defaults` module exists.
+
+## Content
+
+### Source scope
+
+The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and the corresponding wiki investigation pages. Unlike the later 12.0.7 and 12.1 passes, this audit did not start from a patch-specific API-change page with a large additive namespace list.
+
+Primary 12.0.5 probe sources:
+
+- `CoreBehaviorProbe` for forbidden frames, invalid unit event filters, wildcard false attributes, and Raise/Lower ordering.
+- `FrameIdentityProbe` and `DevToolsDumpProbe` for frame identity slot `frame[0]` and table iteration/dump behavior.
+- `XmlFrameLevelProbe` for XML `frameLevel`, `fixedFrameLevel`, and parent-level propagation semantics.
+- `ScaleEventProbe` for `DISPLAY_SIZE_CHANGED` / `UI_SCALE_CHANGED` firing order and startup timing.
+- focused probes for texture/atlas/protected/script behavior where those were not patch-API additions.
+
+### Completed modeled work
+
+Retail `12.0.5.67823` probe results are modeled in these areas:
+
+- `CreateForbiddenFrame` is absent on current retail, and `SetForbidden(true)` on addon-created normal frames succeeds without making the frame forbidden.
+- `RegisterUnitEvent("UNIT_HEALTH", "not_a_unit")` registers the event but drops the invalid unit filter; `IsEventRegistered("UNIT_HEALTH")` returns registered with no unit filter.
+- Wildcard `GetAttribute` preserves an explicit `false` stored with `SetAttribute("*type1", false)`.
+- `Raise()` / `Lower()` only affect same-raw-level tie ordering and do not let a lower frame level overtake a higher one.
+- Frame identity dispatch uses `frame[0]` userdata tokens; surrogate tables shaped with `[0] = frame[0]` dispatch shared frame methods, while `[1]`-only surrogates do not.
+- Duplicate named `CreateFrame` calls produce fresh Lua objects and fresh identity tokens rather than copying stale custom fields from the prior global binding.
+- XML bare `frameLevel` is an absolute initial value, not a parent-relative offset, but remains non-fixed so later parent level changes shift the child by the captured parent delta; `fixedFrameLevel="true"` pins the level.
+- `DISPLAY_SIZE_CHANGED` and `UI_SCALE_CHANGED` fire as an ordered pair for observable size/scale recalculations, with startup pairs before `PLAYER_LOGIN`.
+
+Key implementation locations:
+
+- `src/lua_api/frame/methods/text_attribute_event/events.rs` — invalid `RegisterUnitEvent` filter fallback and animation handler validation.
+- `src/lua_api/frame/methods/text_attribute_event/attributes.rs` — retail forbidden-frame and attribute behavior.
+- `src/lua_api/methods.rs`, `src/lua_bridge/table_builder.rs`, `src/lua_api/globals/create_frame/helpers_shared.rs` — frame identity token dispatch and duplicate named-frame behavior.
+- `src/lua_api/globals/template/direct/frame_level.rs` — XML frame-level resolution and fixed/non-fixed propagation.
+- `src/lua_api/env_runtime.rs`, `src/startup.rs`, `src/iced_app/resize_event_tests.rs` — display/scale event pair behavior.
+
+### Verification
+
+Regression coverage exists in:
+
+- `tests/admin_event_api.rs` — invalid unit-filter registration fallback.
+- `tests/protected_frame_enforcement.rs` — retail `SetForbidden` no-op behavior.
+- `tests/protected_attribute_enforcement.rs` — wildcard explicit-false attribute lookup.
+- `tests/frame_level.rs` — Raise/Lower and raised-frame-level ordering.
+- `tests/security_api.rs`, `tests/frame_table_iteration.rs`, `tests/globals_legacy.rs` — frame identity slot, surrogate dispatch, opaque identity userdata, duplicate named-frame freshness.
+- `tests/xml_frame_strata.rs` — XML `frameLevel` and `fixedFrameLevel` semantics.
+- `src/iced_app/resize_event_tests.rs` — display/scale ordered-pair behavior.
+
+### Remaining inert/default surface
+
+There is no 12.0.5-specific inert-default module. Broad compatibility defaults still live in `src/lua_api/workarounds/temporary/` and permanent unsupported C API shims, but the 12.0.5 probe-backed findings listed above have modeled behavior and tests rather than patch-scoped inert stubs.
+
+The remaining generic defaults are intentionally outside this 12.0.5 audit unless a probe or addon failure ties one to a 12.0.5 retail behavior contract. Examples include unsupported 3D/model domains, loose/placeholder namespace defaults, and compatibility fallbacks that are tracked by their own subsystem investigations.
+
+### Paused / blocked items
+
+No obvious safe, already-backed 12.0.5 inert default remains unconverted. Future work needs new live probes or concrete addon failures for:
+
+- exact behavior of generic temporary defaults not covered by the 12.0.5 probes;
+- security/taint edge cases beyond the already-pinned forbidden-frame and frame-identity behavior;
+- high-fidelity UI output where the simulator intentionally keeps broad compatibility placeholders.
+
+## Sources
+
+- [[retail-core-behavior-probes]] — core 12.0.5 live-client behavior findings.
+- [[frame-surrogate-identity-slot]] — frame `[0]` identity-token behavior.
+- [[display-size-ui-scale-events]] — display/scale event pair behavior.
+- [XmlFrameLevelProbe](../../../docs/addons/XmlFrameLevelProbe/README.md) — live XML frame-level probe notes.
+- [CoreBehaviorProbe](../../../docs/addons/CoreBehaviorProbe/README.md) — live core behavior probe notes.
+- [FrameIdentityProbe](../../../docs/addons/FrameIdentityProbe/README.md) — live frame identity probe notes.
+- [ScaleEventProbe](../../../docs/addons/ScaleEventProbe/README.md) — live display/scale event probe notes.
+
+## See Also
+
+- [[patch-12-0-7-api-audit]] — later additive API bridge audit pattern.
+- [[patch-12-1-api-audit]] — PTR API bridge audit pattern.
+- [[lua-api]] — Lua runtime surface and frame method dispatch.
+- [[event-system]] — event registration/dispatch behavior.
+- [[xml-template-system]] — XML template and frame-level handling.
