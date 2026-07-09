@@ -413,6 +413,31 @@ fn test_patch_12_1_housing_inside_owned_state_and_reset() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_housing_blueprint_availability_state() {
+    let env = WowLuaEnv::new().unwrap();
+    {
+        let mut state = env.state().borrow_mut();
+        state.housing.blueprint_export_availability = 1;
+        state.housing.blueprint_feature_availability = 2;
+        state.housing.blueprint_import_availability = 3;
+    }
+
+    let result: String = env
+        .eval(
+            r#"
+            if C_HousingBlueprint.GetExportAvailability() ~= 1 then return "export" end
+            if C_HousingBlueprint.GetFeatureAvailability() ~= 2 then return "feature" end
+            if C_HousingBlueprint.GetImportAvailability() ~= 3 then return "import" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_housing_blueprint_best_effort_state() {
     let env = WowLuaEnv::new().unwrap();
     {
@@ -648,9 +673,9 @@ fn test_patch_12_1_safe_global_bridges() {
             C_HousingBlueprint.ExportRoomBlueprint("id")
             if C_HousingBlueprint.GetBlueprintHyperlink("code") ~= nil then return "blueprint-link" end
             if C_HousingBlueprint.GetBlueprintTypeForCode("code") ~= nil then return "blueprint-type" end
-            if C_HousingBlueprint.GetExportAvailability() ~= nil then return "blueprint-export-availability" end
-            if C_HousingBlueprint.GetFeatureAvailability() ~= nil then return "blueprint-feature-availability" end
-            if C_HousingBlueprint.GetImportAvailability() ~= nil then return "blueprint-import-availability" end
+            if C_HousingBlueprint.GetExportAvailability() ~= 0 then return "blueprint-export-availability" end
+            if C_HousingBlueprint.GetFeatureAvailability() ~= 0 then return "blueprint-feature-availability" end
+            if C_HousingBlueprint.GetImportAvailability() ~= 0 then return "blueprint-import-availability" end
             C_HousingBlueprint.ImportBlueprint("code")
             if C_HousingBlueprint.IsShareCodeValid("code") ~= false then return "blueprint-share-code" end
             C_HousingBlueprint.RenameBlueprint("id", "name")

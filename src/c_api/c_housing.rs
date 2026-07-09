@@ -133,9 +133,24 @@ fn register_blueprint_methods(state: &mut LuaState, blueprints: NamespaceTable) 
         "GetBlueprintTypeForCode",
         get_blueprint_type_for_code,
     )?;
-    table_set_rust_fn_static(state, blueprints, "GetExportAvailability", return_nil)?;
-    table_set_rust_fn_static(state, blueprints, "GetFeatureAvailability", return_nil)?;
-    table_set_rust_fn_static(state, blueprints, "GetImportAvailability", return_nil)?;
+    table_set_rust_fn_static(
+        state,
+        blueprints,
+        "GetExportAvailability",
+        get_export_availability,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        blueprints,
+        "GetFeatureAvailability",
+        get_feature_availability,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        blueprints,
+        "GetImportAvailability",
+        get_import_availability,
+    )?;
     table_set_rust_fn_static(state, blueprints, "ImportBlueprint", import_blueprint)?;
     table_set_rust_fn_static(state, blueprints, "IsShareCodeValid", is_share_code_valid)?;
     table_set_rust_fn_static(state, blueprints, "RenameBlueprint", rename_blueprint)?;
@@ -414,8 +429,23 @@ fn start_import_room_blueprint(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 #[cfg(feature = "retail-12-1-0")]
-fn return_nil(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
+fn get_export_availability(state: &mut LuaState) -> LuaResult<u32> {
+    let availability = { borrow_state(state)?.housing.blueprint_export_availability };
+    state.push(Val::Num(f64::from(availability)));
+    Ok(1)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn get_feature_availability(state: &mut LuaState) -> LuaResult<u32> {
+    let availability = { borrow_state(state)?.housing.blueprint_feature_availability };
+    state.push(Val::Num(f64::from(availability)));
+    Ok(1)
+}
+
+#[cfg(feature = "retail-12-1-0")]
+fn get_import_availability(state: &mut LuaState) -> LuaResult<u32> {
+    let availability = { borrow_state(state)?.housing.blueprint_import_availability };
+    state.push(Val::Num(f64::from(availability)));
     Ok(1)
 }
 
