@@ -107,7 +107,11 @@ fn test_patch_12_0_7_safe_global_bridges() {
             if clock:GetTime() ~= 4 then return "clock-rewind" end
             clock:ResetTime()
             if clock:GetTime() ~= 0 then return "clock-reset" end
-            local binding = C_DurationUtil.CreateDurationTextBinding(10)
+            local binding = C_DurationUtil.CreateDurationTextBinding()
+            if binding:GetDuration() == nil then return "duration-default-value" end
+            if C_DurationUtil.CreateDurationTextFormattingOptions() ~= nil then return "duration-format-options-factory" end
+            if C_DurationUtil.CreateDurationTextRawValue() ~= nil then return "duration-raw-value-factory" end
+            binding:SetDuration(10)
             if binding:GetDuration() ~= 10 then return "duration-value" end
             binding:SetDuration(3)
             if binding:GetFormattedText() ~= "3" then return "duration-text" end
@@ -126,6 +130,11 @@ fn test_patch_12_0_7_safe_global_bridges() {
             local durationObject = C_DurationUtil.CreateDuration()
             binding:SetDuration(durationObject)
             if binding:GetDuration() ~= durationObject then return "duration-object" end
+            durationObject:SetClock(clock)
+            if durationObject:GetClock() ~= clock then return "duration-object-clock" end
+            if durationObject:HasExpired() ~= false then return "duration-object-expired" end
+            if durationObject:HasStarted() ~= false then return "duration-object-started" end
+            if durationObject:IsActive() ~= false then return "duration-object-active" end
             if type(binding.SetToDefaults) ~= "function" then return "duration-defaults-method" end
             binding:SetExpiredText("expired")
             binding:SetZeroDurationText("zero")

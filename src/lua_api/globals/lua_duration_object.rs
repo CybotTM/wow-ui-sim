@@ -37,6 +37,7 @@ const METHOD_NAMES: &[&str] = &[
     "EvaluateElapsedPercent",
     "EvaluateRemainingDuration",
     "EvaluateRemainingPercent",
+    "GetClock",
     "GetClockTime",
     "GetElapsedDuration",
     "GetElapsedPercent",
@@ -46,9 +47,13 @@ const METHOD_NAMES: &[&str] = &[
     "GetRemainingPercent",
     "GetStartTime",
     "GetTotalDuration",
+    "HasExpired",
     "HasSecretValues",
+    "HasStarted",
+    "IsActive",
     "IsZero",
     "Reset",
+    "SetClock",
     "SetTimeFromEnd",
     "SetTimeFromStart",
     "SetTimeSpan",
@@ -347,6 +352,25 @@ fn m_get_mod_rate(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn m_get_clock(state: &mut LuaState) -> LuaResult<u32> {
+    let object = crate::lua_bridge::stack_val(state, 1);
+    let clock = table_get(state, object, "clock");
+    state.push(clock);
+    Ok(1)
+}
+
+fn m_set_clock(state: &mut LuaState) -> LuaResult<u32> {
+    let object = crate::lua_bridge::stack_val(state, 1);
+    let clock = crate::lua_bridge::stack_val(state, 2);
+    table_set(state, object, "clock", clock);
+    Ok(0)
+}
+
+fn m_false(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
 fn m_has_secret_values(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
@@ -447,10 +471,24 @@ fn install_lifecycle_methods(state: &mut LuaState, methods: Val) {
         m_assign,
     );
     install_method(state, methods, "Copy", "LuaDurationObject.Copy", m_copy);
+    install_method(
+        state,
+        methods,
+        "SetClock",
+        "LuaDurationObject.SetClock",
+        m_set_clock,
+    );
 }
 
-/// Install GetModRate, HasSecretValues, IsZero — read-only query methods.
+/// Install duration query methods with local best-effort state.
 fn install_query_methods(state: &mut LuaState, methods: Val) {
+    install_method(
+        state,
+        methods,
+        "GetClock",
+        "LuaDurationObject.GetClock",
+        m_get_clock,
+    );
     install_method(
         state,
         methods,
@@ -458,6 +496,9 @@ fn install_query_methods(state: &mut LuaState, methods: Val) {
         "LuaDurationObject.GetModRate",
         m_get_mod_rate,
     );
+    for key in ["HasExpired", "HasStarted", "IsActive"] {
+        install_method(state, methods, key, key, m_false);
+    }
     install_method(
         state,
         methods,

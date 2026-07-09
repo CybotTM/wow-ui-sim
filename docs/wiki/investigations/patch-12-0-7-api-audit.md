@@ -48,7 +48,7 @@ Key implementation locations:
 - `src/c_api/c_quest_hub.rs` — Rust-backed deterministic empty Dragonriding race list.
 - `src/c_api/c_ui_file_asset.rs` — best-effort `C_UIFileAsset` path/fileDataID lookup backed by the bundled limited listfile.
 - `src/c_api/c_ping_secure.rs` — Rust-backed PingSecure namespace callbacks plus the 12.0.7 secure pending button/ping/toggle getter/setter globals, all using the shared callback table.
-- `src/lua_api/globals/lua_duration_object.rs` — Rust-backed `C_DurationUtil.CreateDuration`, `CreateManualClock`, and current-time/default duration object surface.
+- `src/lua_api/globals/lua_duration_object.rs` — Rust-backed `C_DurationUtil.CreateDuration`, `CreateManualClock`, current-time/default duration object surface, and best-effort duration-object clock/lifecycle methods.
 - `src/lua_api/globals/missing_surface/encounter_events.rs` — Rust-backed `C_EncounterTimeline.GetEventColor` bridge over the existing encounter-event color state.
 - `src/lua_api/workarounds/temporary/formatting_utility_defaults.rs` — shared formatting helpers, including `GetMoneyString` and the gated `GameTooltip_AddMoneyLine` best-effort helper.
 - `src/lua_api/workarounds/temporary/performance_metric_defaults.rs` — shared CPU/framerate/download metric defaults, including 12.0.7 CPU usage probes.
@@ -88,17 +88,41 @@ Focused proof for recovered 12.0.7 CVar defaults:
 
 - `/tmp/pi-pyrun-12-0-7-cvars-test.log` — profile-gated recovered CVar defaults/removals regression test.
 
+Focused proof for duration-object best-effort methods:
+
+- `/tmp/pi-pyrun-12-0-7-duration-object-test.log` — 12.0.7 safe bridge regression test covering DurationText no-argument construction, duration object clock state, and deterministic lifecycle queries.
+
 Focused proof for the secure-pending callback Rust move:
 
 - `/tmp/pi-pyrun-12-0-7-secure-callback-final-test.log` — 12.0.7 safe bridge regression test, including button/ping/toggle callback set/get behavior.
 
-Rust readability metrics are under `/tmp/rust_readability_12_0_7`, `/tmp/rust_readability_12_0_7_trivial_namespaces`, `/tmp/rust_readability_12_0_7_color_money`, and `/tmp/rust_readability_12_0_7_secure_callbacks_final` with no high-complexity findings.
+Rust readability metrics are under `/tmp/rust_readability_12_0_7`, `/tmp/rust_readability_12_0_7_trivial_namespaces`, `/tmp/rust_readability_12_0_7_color_money`, `/tmp/rust_readability_12_0_7_secure_callbacks_final`, and `/tmp/rust_readability_12_0_7_duration_object` with no high-complexity findings.
 
 ### CVar changes
 
 The simulator now profile-gates the recovered exact 12.0.7.68235 CVar delta in `src/cvars.rs`: 17 additions, five removals, and the `gxWindowedResolution` default change from `1920x1080` to `auto`. `patch_12_0_7_cvar_defaults_match_retail` verifies all recovered defaults/removals under `retail-12-0-7`.
 
 **Exception request pending user approval — incomplete source count:** the local patch snapshot claimed 20 additions while naming only six. The exact historical CVar diff identifies 17 additions; three alleged additions have no names or authoritative source evidence. Do not invent unnamed CVars. Approval is required to treat those three unidentifiable claimed additions as an exception.
+
+### Itemized status matrix
+
+**Implemented / best-effort items:** the additive API list above is the authoritative status list for all 35 patch-added globals. The duration script-object methods exposed through `CreateManualClock`, `CreateDuration`, and `CreateDurationTextBinding` are **best-effort**. `LuaDurationObject:GetClock`, `SetClock`, `HasExpired`, `HasStarted`, and `IsActive` now provide local clock storage plus deterministic false lifecycle state. `DurationTextFormattingOptions` (`Get/SetAddRemainingText`, `Get/SetDurationType`) and `DurationTextRawValue` (`Get/SetMilliseconds`, `Get/SetSeconds`) are **exception-requested**: they appear only in a stale local extraction, not the authoritative 12.0.7 script-object listing or cached Blizzard sources. The universal `C_*` fallback can materialize no-op functions for their names, but those functions return nil and are not public factories. Implementing real objects would invent unsupported APIs.
+
+#### Exception requests pending user approval
+
+All entries below are deliberately open. They are not implemented claims, and this audit must not be marked complete without approval or a probe-backed implementation.
+
+1. **Strict API removals:** `BNInviteFriend`; `C_ClickBindings.GetStringFromModifiers`; `C_ClickBindings.MakeModifiers`; `C_Spell.GetMawPowerBorderAtlasBySpellID`; legacy globals `ConfirmReadyCheck`, `DemoteAssistant`, `DoReadyCheck`, `GetMerchantCurrencies`, `IsGUIDInGroup`, `PromoteToAssistant`, `PromoteToLeader`, `SetEveryoneIsAssistant`, `UninviteUnit`; `GetAutoCompletePresenceID`, `GetAutoCompleteResults`, `GetAutoCompleteRealms`, `IsRecognizedName`. The simulator retains these compatibility aliases; removal needs current Blizzard-source proof that startup no longer calls them.
+2. **Minimap method removals:** `SetBlipTexture`, `SetCorpsePOIArrowTexture`, `SetIconTexture`, `SetPOIArrowTexture`, `SetPlayerTexture`, `SetStaticPOIArrowTexture`. Removing currently registered methods risks breaking cached/vendor UI; needs current-source proof and approval.
+3. **Secret/aspect widget changes:** Button `GetButtonState`, `IsEnabled`, `SetButtonState`, `SetEnabled`; ScrollFrame `GetHorizontalScroll`, `GetVerticalScroll`, `SetHorizontalScroll`, `SetVerticalScroll`; valid-asset/height validation for `EditBox:SetFont`, `Font:SetFont`, `FontString:SetFont`, `MessageFrame:SetFont`, `SimpleHTML:SetFont`; conditional-secret `ModelSceneActorBase:GetModelUnitGUID`. Exact secret/aspect/asset semantics require live behavior; ModelScene additionally falls under the intentional no-3D gap.
+4. **Restricted unit-token nil/default matrix:** 12.0.7 changed `UnitGUID`, `UnitAura`, health/power, and related PvP-restricted token errors. Need exact token, caller-taint, and return-shape probes.
+5. **Encounter behavior:** `ENCOUNTER_END.encounterUnitStatus` payload; `ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED` firing; five-second warning/custom color semantics. Registration and color reads are present, but payload/firing behavior needs live encounter state.
+6. **Secure/taint behavior:** `SimulateMouse` focus/combat/protected restrictions; `debugstack`/`debuglocals` secret propagation; secure `raidtarget set-unmarked` and `/tm ~marker`; `SetFrameStrata` secret-value error change.
+7. **Mythic+/group/aura behavior:** `C_MythicPlus` `CalendarTime` result structs; solo follower-dungeon/delve `GROUP_FORMED`; `AuraData.isFromPlayerOrPlayerPet` vehicle ownership; `C_UnitAuras.AddPrivateAuraAppliedSound` active-M+ gate; `AuraFilters` removal of `IMPORTANT`.
+8. **Event payload/security changes:** secret-chat-lockdown behavior for the nine changed `CHAT_MSG_*` events; `ClubMemberOpaqueId` second argument for `CLUB_MEMBER_ADDED`, `CLUB_MEMBER_PRESENCE_UPDATED`, `CLUB_MEMBER_REMOVED`, `CLUB_MEMBER_ROLE_UPDATED`, and `CLUB_MEMBER_UPDATED`.
+9. **Duration fidelity:** exact `DurationTextBinding` formatter/component/secret semantics. Current object is documented **best-effort**, not a native-fidelity claim.
+10. **Source conflicts:** three unnamed CVar additions claimed by the local snapshot; stale `DurationTextFormattingOptions`/`DurationTextRawValue` entries. The latter names only materialize as universal-fallback no-op functions returning nil, not documented factories. Need a corrected authoritative export before implementation.
+11. **Probe reconciliation:** `EditModeLayoutProbe` has no captured/reconciled result in the audit. Need a probe result before classifying its layout behavior.
 
 ### Best-effort modeled guesses needing later probes
 
