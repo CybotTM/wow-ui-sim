@@ -281,6 +281,66 @@ fn test_patch_12_1_strict_removed_symbols_are_hidden() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_discord_state_surface() {
+    let env = WowLuaEnv::new().unwrap();
+    {
+        let mut state = env.state().borrow_mut();
+        state.discord.user_id = Some("discord-user-1".to_string());
+        state.discord.display_name_type = 2;
+        state.discord.guild_link_status = Some(4);
+        state
+            .discord
+            .servers
+            .push(crate::lua_api::state::DiscordServer {
+                name: "Sim Server".to_string(),
+            });
+        state
+            .discord
+            .channels
+            .push(crate::lua_api::state::DiscordChannel {
+                name: "raid-chat".to_string(),
+                linkable: true,
+            });
+    }
+
+    let result: String = env
+        .eval(
+            r#"
+            C_Discord.Authorize()
+            C_Discord.GuildLink()
+            C_Discord.RefreshAuth()
+            C_Discord.SetGuildSetting("raid", true)
+            C_Discord.UpdateDiscordServers()
+            C_Discord.UpdateGuildLobby()
+            local linkable = C_Discord.GetServerLinkableChannels()
+            if C_Discord.GetDiscordUserID() ~= "discord-user-1" then return "user-id" end
+            if C_Discord.GetDisplayNameType() ~= 2 then return "display-type" end
+            if C_Discord.GetGuildLinkStatus() ~= 4 then return "guild-status" end
+            if C_Discord.GetNumDiscordServers() ~= 1 then return "servers" end
+            if C_Discord.GetServerName(1) ~= "Sim Server" then return "server-name" end
+            if C_Discord.GetNumDiscordChannels() ~= 1 then return "channels" end
+            if C_Discord.GetDiscordChannelName(1) ~= "raid-chat" then return "channel-name" end
+            if linkable[1] ~= "raid-chat" then return "linkable" end
+            if C_Discord.IsUserOAuthed() ~= true then return "oauth" end
+            if C_Discord.IsGuildChannelLinked() ~= true then return "linked" end
+            if C_Discord.IsGuildSettingSet("raid") ~= true then return "setting" end
+            C_Discord.GuildUnlink()
+            if C_Discord.IsGuildChannelLinked() ~= false then return "unlinked" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+    let state = env.state().borrow();
+    assert!(state.discord.oauth_authorized);
+    assert!(state.discord.auth_refresh_requested);
+    assert!(state.discord.server_update_requested);
+    assert!(state.discord.guild_lobby_update_requested);
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_battle_net_presence_state() {
     let env = WowLuaEnv::new().unwrap();
 
@@ -533,7 +593,7 @@ fn test_patch_12_1_safe_global_bridges() {
             if C_Discord.GetGuildLinkStatus() ~= nil then return "discord-guild-status" end
             if C_Discord.GetServerName(1) ~= nil then return "discord-server-name" end
             if C_Discord.IsGuildChannelLinked(1) ~= false then return "discord-linked" end
-            if C_Discord.IsGuildSettingSet("setting") ~= false then return "discord-setting" end
+            if C_Discord.IsGuildSettingSet("setting") ~= true then return "discord-setting" end
             C_LFGList.ConfirmCensoredActiveEntry()
             C_LFGList.RevealCensoredActiveEntry()
             C_LFGList.RevealCensoredSearchResult(1)

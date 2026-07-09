@@ -276,6 +276,7 @@ fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_api::c_death_recap::register_c_death_recap_surface(state)?;
+    c_api::c_discord::register_c_discord_surface(state)?;
     c_api::c_party_info::register_c_party_info_surface(state)?;
     player_info::register_player_info_surface(state)?;
     c_api::c_lfg_info::register_c_lfg_info_surface(state)?;

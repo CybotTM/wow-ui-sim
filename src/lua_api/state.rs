@@ -179,6 +179,7 @@ macro_rules! build_empty_sim_state {
             timerunning_season_id: None,
             modifier_keys: ModifierKeys::default(),
             game_rules: GameRulesState::default(),
+            discord: DiscordState::default(),
             housing_service_enabled: true,
             housing: HousingState::default(),
             pet_battles: PetBattleState::default(),

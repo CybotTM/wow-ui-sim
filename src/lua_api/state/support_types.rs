@@ -202,6 +202,58 @@ pub struct ReadyCheckState {
 }
 
 #[derive(Clone, Debug, Default)]
+pub struct DiscordState {
+    pub oauth_authorized: bool,
+    pub auth_refresh_requested: bool,
+    pub guild_linked: bool,
+    pub guild_link_status: Option<i32>,
+    pub guild_settings: HashMap<String, bool>,
+    pub server_update_requested: bool,
+    pub guild_lobby_update_requested: bool,
+    pub user_id: Option<String>,
+    pub display_name_type: i32,
+    pub servers: Vec<DiscordServer>,
+    pub channels: Vec<DiscordChannel>,
+}
+
+impl DiscordState {
+    pub fn channel_name(&self, channel_index: i32) -> Option<&str> {
+        self.channels
+            .get(one_based_index(channel_index)?)
+            .map(|channel| channel.name.as_str())
+    }
+
+    pub fn server_name(&self, server_index: i32) -> Option<&str> {
+        self.servers
+            .get(one_based_index(server_index)?)
+            .map(|server| server.name.as_str())
+    }
+
+    pub fn linkable_channel_names(&self) -> Vec<String> {
+        self.channels
+            .iter()
+            .filter(|channel| channel.linkable)
+            .map(|channel| channel.name.clone())
+            .collect()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct DiscordServer {
+    pub name: String,
+}
+
+#[derive(Clone, Debug)]
+pub struct DiscordChannel {
+    pub name: String,
+    pub linkable: bool,
+}
+
+fn one_based_index(index: i32) -> Option<usize> {
+    usize::try_from(index.checked_sub(1)?).ok()
+}
+
+#[derive(Clone, Debug, Default)]
 pub struct HousingState {
     pub tracked_house_guid: Option<String>,
     pub inside_owned_house: bool,
