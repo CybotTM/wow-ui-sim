@@ -373,6 +373,62 @@ fn test_patch_12_1_housing_blueprint_best_effort_state() {
 
 #[cfg(feature = "retail-12-1-0")]
 #[test]
+fn test_patch_12_1_housing_editor_decor_layout_state() {
+    let env = WowLuaEnv::new().unwrap();
+    {
+        let mut state = env.state().borrow_mut();
+        state.housing.house_editor_player_type = Some(7);
+        state.housing.selected_decor_pet_guid = Some("pet-1".to_string());
+        state.housing.selected_decor_pet_name = Some("Biscuit".to_string());
+        state.housing.rooms_with_decor.push(11);
+        state
+            .housing
+            .decor_pet_names
+            .insert("decor-1".to_string(), "Biscuit".to_string());
+        state
+            .housing
+            .pet_attachable_decor_guids
+            .push("decor-1".to_string());
+        state.housing.max_indoor_placement_budget = Some(100);
+        state.housing.max_outdoor_placement_budget = Some(50);
+        state.housing.spent_indoor_placement_budget = Some(20);
+        state.housing.spent_outdoor_placement_budget = Some(5);
+        state.housing.max_pet_placement_budget = Some(3);
+        state.housing.spent_pet_placement_budget = Some(1);
+        state.housing.base_room_floors.insert(11, 2);
+        state.housing.room_player_is_in = Some(11);
+        state.housing.selected_blueprint_floorplan = Some(42);
+    }
+
+    let result: String = env
+        .eval(
+            r#"
+            local petInfo = C_HousingCustomizeMode.GetSelectedDecorPetInfo()
+            local maxIndoor, maxOutdoor = C_HousingDecor.GetBothMaxPlacementBudgets()
+            local spentIndoor, spentOutdoor = C_HousingDecor.GetBothSpentPlacementBudgets()
+            if C_HouseEditor.GetHouseEditorPlayerType() ~= 7 then return "editor-type" end
+            if petInfo.petGUID ~= "pet-1" or petInfo.petName ~= "Biscuit" then return "pet-info" end
+            if C_HousingDecor.AnyDecorPlacedInRoom(11) ~= true then return "room-decor" end
+            if C_HousingDecor.GetDecorAssignedPetName("decor-1") ~= "Biscuit" then return "pet-name" end
+            if C_HousingDecor.GetDecorCanAttachPet("decor-1") ~= true then return "can-attach" end
+            if maxIndoor ~= 100 or maxOutdoor ~= 50 then return "max-budgets" end
+            if spentIndoor ~= 20 or spentOutdoor ~= 5 then return "spent-budgets" end
+            if C_HousingDecor.GetMaxPetPlacementBudget() ~= 3 then return "max-pets" end
+            if C_HousingDecor.GetSpentPetPlacementBudget() ~= 1 then return "spent-pets" end
+            if C_HousingLayout.GetBaseRoomFloor(11) ~= 2 then return "base-floor" end
+            if C_HousingLayout.GetRoomPlayerIsIn() ~= 11 then return "player-room" end
+            if C_HousingLayout.GetSelectedBlueprintFloorplan() ~= 42 then return "floorplan" end
+            if C_HousingLayout.HasSelectedBlueprintFloorplan() ~= true then return "has-floorplan" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
 fn test_patch_12_1_safe_global_bridges() {
     let env = WowLuaEnv::new().unwrap();
     let result: String = env
@@ -521,7 +577,8 @@ fn test_patch_12_1_safe_global_bridges() {
             C_HousingBlueprint.RequestBlueprintContentsForContext({})
             C_HousingBlueprint.StartImportRoomBlueprint("code")
             C_HousingCustomizeMode.ApplyPetToSelectedDecor("pet")
-            if C_HousingCustomizeMode.GetSelectedDecorPetInfo() ~= nil then return "housing-pet-info" end
+            local selectedPet = C_HousingCustomizeMode.GetSelectedDecorPetInfo()
+            if type(selectedPet) ~= "table" or selectedPet.petGUID ~= "pet" then return "housing-pet-info" end
             if C_HousingDecor.AnyDecorPlacedInRoom(1) ~= false then return "housing-room-decor" end
             if C_HousingDecor.GetBothMaxPlacementBudgets() ~= nil then return "housing-max-budgets" end
             if C_HousingDecor.GetBothSpentPlacementBudgets() ~= nil then return "housing-spent-budgets" end

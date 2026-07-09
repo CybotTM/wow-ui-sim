@@ -51,52 +51,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120100 then
     set_default(discord, "UpdateDiscordServers", noop)
     set_default(discord, "UpdateGuildLobby", noop)
 
-    local houseEditor = ensure_namespace("C_HouseEditor")
-    set_default(houseEditor, "GetHouseEditorPlayerType", return_nil)
-
-    local housing = ensure_namespace("C_Housing")
-    set_default(housing, "HouseFinderIgnoreNeighborhood", noop)
-    set_default(housing, "IsInsideOwnedHouseOrPlot", return_false)
-    set_default(housing, "IsInsideOwnedHouse", return_false)
-    set_default(housing, "IsInsideOwnedPlot", return_false)
-    set_default(housing, "ResetHouse", noop)
-
-    local housingBlueprint = ensure_namespace("C_HousingBlueprint")
-    set_default(housingBlueprint, "CanImportTypeFromCurrentLocation", return_false)
-    set_default(housingBlueprint, "DeleteBlueprint", noop)
-    set_default(housingBlueprint, "ExportBlueprint", noop)
-    set_default(housingBlueprint, "ExportRoomBlueprint", noop)
-    set_default(housingBlueprint, "GetBlueprintHyperlink", return_nil)
-    set_default(housingBlueprint, "GetBlueprintTypeForCode", return_nil)
-    set_default(housingBlueprint, "GetExportAvailability", return_nil)
-    set_default(housingBlueprint, "GetFeatureAvailability", return_nil)
-    set_default(housingBlueprint, "GetImportAvailability", return_nil)
-    set_default(housingBlueprint, "ImportBlueprint", noop)
-    set_default(housingBlueprint, "IsShareCodeValid", return_false)
-    set_default(housingBlueprint, "RenameBlueprint", noop)
-    set_default(housingBlueprint, "RequestBlueprintCollection", noop)
-    set_default(housingBlueprint, "RequestBlueprintContentsForContext", noop)
-    set_default(housingBlueprint, "RequestBlueprintContents", noop)
-    set_default(housingBlueprint, "StartImportRoomBlueprint", noop)
-
-    local housingCustomizeMode = ensure_namespace("C_HousingCustomizeMode")
-    set_default(housingCustomizeMode, "ApplyPetToSelectedDecor", noop)
-    set_default(housingCustomizeMode, "GetSelectedDecorPetInfo", return_nil)
-
-    local housingDecor = ensure_namespace("C_HousingDecor")
-    set_default(housingDecor, "AnyDecorPlacedInRoom", return_false)
-    set_default(housingDecor, "GetBothMaxPlacementBudgets", return_nil)
-    set_default(housingDecor, "GetBothSpentPlacementBudgets", return_nil)
-    set_default(housingDecor, "GetDecorAssignedPetName", return_nil)
-    set_default(housingDecor, "GetDecorCanAttachPet", return_false)
-    set_default(housingDecor, "GetMaxPetPlacementBudget", return_nil)
-    set_default(housingDecor, "GetSpentPetPlacementBudget", return_nil)
-
-    local housingLayout = ensure_namespace("C_HousingLayout")
-    set_default(housingLayout, "GetBaseRoomFloor", return_nil)
-    set_default(housingLayout, "GetRoomPlayerIsIn", return_nil)
-    set_default(housingLayout, "GetSelectedBlueprintFloorplan", return_nil)
-    set_default(housingLayout, "HasSelectedBlueprintFloorplan", return_false)
 end
 "#;
 
