@@ -11,7 +11,7 @@ The wow-ui-sim project runs WoW addon Lua outside the game for testing and visua
 
 - Full game emulation (combat, spells, inventory, network, audio).
 - 3D model rendering. `Model`, `ModelScene`, `PlayerModel`, and `DressUpModel` use permanent stub method tables (~38 stubs in `widget_model.rs`); the simulator is 2D-UI only.
-- Protected-frame enforcement. Taint **is** tracked, but `SetAttribute` does not check `issecure()` and `SetForbidden`/`IsForbidden` are flags only — addons can still drive protected frames.
+- Full protected-frame enforcement. Taint **is** tracked; protected `SetAttribute` writes are gated through `protected_write_blocked()` / `can_change_protected_state_for()`. Retail 12.0.5 probes model absent `CreateForbiddenFrame`, absent legacy `Protect`/`SetProtected`, and normal-frame `SetForbidden(true)` as a no-op. Broader protected-frame combat and forbidden-object restrictions remain incomplete.
 
 ## Lua + Rust Dual System
 

@@ -8,13 +8,21 @@ Patch 12.0.5 work in wow-ui-sim is probe-driven rather than a single additive AP
 
 The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and the corresponding wiki investigation pages. Unlike the later 12.0.7 and 12.1 passes, this audit did not start from a patch-specific API-change page with a large additive namespace list.
 
-Primary 12.0.5 probe sources:
+Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptProbe`, `AttributeDispatchProbe`, `CoreBehaviorProbe`, `DevToolsDumpProbe`, `FrameIdentityProbe`, `HookScriptBindingProbe`, `IsProtectedProbe`, `JustifyProbe`, `ProtectedRetailProbe`, `ScaleEventProbe`, `SetAtlasProbe`, `StoreForbiddenProbe`, and `TextureSetTextureProbe`. `XmlFrameLevelProbe` findings are documented, but its raw capture was not retained.
 
-- `CoreBehaviorProbe` for forbidden frames, invalid unit event filters, wildcard false attributes, and Raise/Lower ordering.
-- `FrameIdentityProbe` and `DevToolsDumpProbe` for frame identity slot `frame[0]` and table iteration/dump behavior.
-- `XmlFrameLevelProbe` for XML `frameLevel`, `fixedFrameLevel`, and parent-level propagation semantics.
-- `ScaleEventProbe` for `DISPLAY_SIZE_CHANGED` / `UI_SCALE_CHANGED` firing order and startup timing.
-- focused probes for texture/atlas/protected/script behavior where those were not patch-API additions.
+### Itemized probe status
+
+**Implemented with focused regression coverage:** animation handler matrix/rejection (`AnimScriptProbe`); unchanged scalar attribute dispatch (`AttributeDispatchProbe`); retail forbidden-frame behavior, invalid unit-event filters, wildcard false attributes and arity, Raise/Lower ordering (`CoreBehaviorProbe`); frame iteration/dump identity, `[0]` surrogate dispatch, duplicate-frame freshness (`DevToolsDumpProbe` / `FrameIdentityProbe`); HookScript binding validation/chaining; absent legacy `Protect`/`SetProtected` methods plus normal-frame `SetForbidden` no-op; XML FontString justify/default anchors; no-arg/invalid `SetAtlas`; XML frame-level propagation; ordered display/scale event pairs.
+
+**Best-effort with existing subsystem coverage:** `ShowUIPanel` pulse/`CloseAllWindows`; `GetMouseFoci`/`GetMouseFocus` live return shape; protected-template descendant/anchor non-propagation; same-size maximize/restore duplicate scale-event pair; `Texture:SetTexture` path FDID/no-arg-clear behavior; Store forbidden/dropdown observations. These remain best-effort because their retained capture is not matched by an exact focused simulator regression.
+
+### Exception requests pending user approval
+
+1. **Exact retained-probe regressions:** repeated `false` attribute dispatch; `ShowUIPanel` pulse then `CloseAllWindows`; exact `GetMouseFoci` shape; protected-template `IsProtected()` tuple plus descendant/anchor return values (not mutation-block propagation); `Texture:SetTexture()` no-arg clear and FDID `130828`; Store forbidden/dropdown observations. Existing subsystem tests are not exact probe replays.
+2. **Store forbidden lifecycle:** `StoreDropdown_SetDropdown` was nil in the retained capture, so intended dropdown population and forbidden-descendant scan were never exercised. Do not invent lifecycle behavior; need a live capture where this API exists.
+3. **XmlFrameLevel provenance:** bare/template/fixed/reparent findings are regression-tested, but the raw SavedVariables capture is missing. Approval is needed to accept the documented result as source evidence or require a fresh live capture.
+4. **Same-size window transitions:** iced supplies no observable same-size maximize/restore event, so duplicate display/scale pair emission cannot be modeled without a platform window-state signal.
+5. **Unscoped generic defaults:** no 12.0.5 patch API diff snapshot exists locally. Generic fallbacks cannot be claimed as 12.0.5-complete without a concrete probe/addon contract.
 
 ### Completed modeled work
 
@@ -55,13 +63,9 @@ There is no 12.0.5-specific inert-default module. Broad compatibility defaults s
 
 The remaining generic defaults are intentionally outside this 12.0.5 audit unless a probe or addon failure ties one to a 12.0.5 retail behavior contract. Examples include unsupported 3D/model domains, loose/placeholder namespace defaults, and compatibility fallbacks that are tracked by their own subsystem investigations.
 
-### Paused / blocked items
+### Audit state
 
-No obvious safe, already-backed 12.0.5 inert default remains unconverted. Future work needs new live probes or concrete addon failures for:
-
-- exact behavior of generic temporary defaults not covered by the 12.0.5 probes;
-- security/taint edge cases beyond the already-pinned forbidden-frame and frame-identity behavior;
-- high-fidelity UI output where the simulator intentionally keeps broad compatibility placeholders.
+This audit is **not complete**: the exception requests above require user approval or new live evidence. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
 
 ## Sources
 
@@ -78,5 +82,6 @@ No obvious safe, already-backed 12.0.5 inert default remains unconverted. Future
 - [[patch-12-0-7-api-audit]] — later additive API bridge audit pattern.
 - [[patch-12-1-api-audit]] — PTR API bridge audit pattern.
 - [[lua-api]] — Lua runtime surface and frame method dispatch.
+- [[retail-core-behavior-probes]] — retained 12.0.5 core probe evidence.
 - [[event-system]] — event registration/dispatch behavior.
 - [[xml-template-system]] — XML template and frame-level handling.
