@@ -196,10 +196,6 @@ if type(GetBuildInfo) == "function" and select(4, GetBuildInfo()) >= 120007 then
     local questHub = ensure_namespace("C_QuestHub")
     set_default(questHub, "GetDragonridingRacesForAreaPOI", return_empty_table)
 
-    if GetEventCPUUsage == nil then function GetEventCPUUsage() return 0 end end
-    if GetFunctionCPUUsage == nil then function GetFunctionCPUUsage() return 0 end end
-    if GetScriptCPUUsage == nil then function GetScriptCPUUsage() return 0 end end
-
     if GetSecurePendingButtonCallback == nil then GetSecurePendingButtonCallback = get_callback("button") end
     if GetSecurePendingPingOffScreenCallback == nil then GetSecurePendingPingOffScreenCallback = get_callback("pendingPingOffScreen") end
     if GetSecurePendingToggleRunCallback == nil then GetSecurePendingToggleRunCallback = get_callback("toggleRun") end

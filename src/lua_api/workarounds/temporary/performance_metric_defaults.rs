@@ -46,6 +46,24 @@ if GetFrameCPUUsage == nil then
   end
 end
 
+if GetEventCPUUsage == nil then
+  function GetEventCPUUsage(_event)
+    return 0
+  end
+end
+
+if GetFunctionCPUUsage == nil then
+  function GetFunctionCPUUsage(_fn, _includeSubroutines)
+    return 0, 0
+  end
+end
+
+if GetScriptCPUUsage == nil then
+  function GetScriptCPUUsage(_frame, _script, _includeChildren)
+    return 0, 0
+  end
+end
+
 if GetDownloadedPercentage == nil then
   function GetDownloadedPercentage()
     return 1
@@ -91,6 +109,11 @@ mod tests {
                 if GetAddOnCPUUsage("missing") ~= 0 then return "addon_cpu" end
                 local frame, children = GetFrameCPUUsage(UIParent, true)
                 if frame ~= 0 or children ~= 0 then return "frame_cpu" end
+                if GetEventCPUUsage("PLAYER_LOGIN") ~= 0 then return "event_cpu" end
+                local fnUsage, fnSubroutines = GetFunctionCPUUsage(function() end, true)
+                if fnUsage ~= 0 or fnSubroutines ~= 0 then return "function_cpu" end
+                local scriptUsage, scriptChildren = GetScriptCPUUsage(UIParent, "OnShow", true)
+                if scriptUsage ~= 0 or scriptChildren ~= 0 then return "script_cpu" end
                 if GetDownloadedPercentage() ~= 1 then return "downloaded" end
                 local inProgress, downloaded, total = GetMovieDownloadProgress(1)
                 if inProgress or downloaded ~= 0 or total ~= 0 then return "movie_download" end
