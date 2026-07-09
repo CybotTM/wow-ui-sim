@@ -1,6 +1,29 @@
 use super::*;
 
 #[test]
+fn test_secure_action_button_template_is_protected_tuple_after_blizzard_framexml_load() {
+    test_timeout! {
+        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+        let (is_protected, is_protected_explicitly): (bool, bool) = env
+            .eval(
+                r#"
+                local button = CreateFrame(
+                    "Button",
+                    "SecureActionButtonTemplateIsProtectedProbe",
+                    UIParent,
+                    "SecureActionButtonTemplate"
+                )
+                return button:IsProtected()
+                "#,
+            )
+            .expect("SecureActionButtonTemplate IsProtected probe should be callable");
+
+        assert!(is_protected, "warnings:\n  {}", warnings.join("\n  "));
+        assert!(is_protected_explicitly);
+    }
+}
+
+#[test]
 fn test_c_addons_load_addon_preserves_account_store_mixin_methods() {
     test_timeout! {
         let env = load_all_addons();
