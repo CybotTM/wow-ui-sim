@@ -75,6 +75,26 @@ Local install archives are tried first through `asset-resolver`. If the active p
 
 The GUI startup path uses the cache only. If the completion marker is missing, startup syncs the manifest from CASC and rechecks the cache. The old `Interface/BlizzardUI` symlink and `vendor/wow-ui-source` checkout are not part of runtime discovery.
 
+### Retail-only isolation test
+
+Run `scripts/test-retail-casc-isolation.py` to verify the retail manifest without allowing access to any sibling WoW flavor. The script builds `wow-cli`, discovers every `_..._` directory beside `_retail_`, masks the non-retail directories with empty Bubblewrap mounts, and syncs into a fresh writable HOME/cache. Failed runs preserve the cache and `retail-casc-isolation.log`, then print manifest entries that are absent or fail profile-specific content validation.
+
+```bash
+./scripts/test-retail-casc-isolation.py
+./scripts/test-retail-casc-isolation.py --skip-build --keep-cache
+```
+
+To add a genuinely required retail file:
+
+1. Confirm a retail `_Mainline.toc` or its transitive dependency references the file. Do not copy paths from Classic, PTR, or another profile manifest.
+2. Confirm the path or FDID exists in the active retail CASC product. A file absent from retail CASC is a stale manifest candidate, not a file to fabricate locally.
+3. Add the addon-relative path to `data/blizzard-ui-files/retail.txt` using Blizzard's original casing.
+4. If the community listfile does not map the path yet, add a verified `FDID;interface/addons/...` row to `data/listfile-overrides.csv`.
+5. Regenerate the bundled subset with `python3 tools/gen_limited_listfile.py`.
+6. Run the manifest mapping test and the retail-only isolation script again.
+
+When removing an unavailable entry, first prove it is not reachable from the retail TOC/dependency graph. Extraction failure alone is insufficient because a valid retail file may require an updated FDID or listfile override.
+
 ## Failure modes
 
 - **Resolution sqlite missing or stale**: `asset-resolver` logs the open failure, extracts current `root.bin` / `encoding.bin`, rebuilds `resolution.sqlite`, then reopens it. If rebuild fails, CASC lookup fails with the underlying read/build error.
@@ -88,6 +108,7 @@ The GUI startup path uses the cache only. If the completion marker is missing, s
 - [`docs/specs/casc-loading.md`](../../specs/casc-loading.md) — behavioral contract for CASC loading
 - `src/texture/resolve.rs` — `casc_enabled`, `try_casc_resolve`, `casc_extract_dir`
 - `src/blizzard_ui_sync.rs` — Blizzard UI source manifest sync into the user cache
+- `scripts/test-retail-casc-isolation.py` — Bubblewrap test that masks non-retail WoW flavors
 - `Osso/casc-extract` — public helper crate used for missing CASC CDN chunks by encoding key
 - `data/blizzard-ui-files/` — per-profile manifests of Blizzard UI source files extractable from CASC
 - `data/listfile-overrides.csv` — tracked temporary path→FDID rows for manifest files absent from the upstream community listfile

@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-13] update | Retail-only CASC isolation test
+
+Updated `systems/casc-asset-cache.md` after adding
+`scripts/test-retail-casc-isolation.py`. Documented Bubblewrap masking of all
+non-retail WoW flavor directories, isolated writable caches, preserved failure
+logs, exact missing-entry reporting, and the verified workflow for adding or
+removing retail manifest entries.
+
 ## [2026-07-13] update | Docker headless release build
 
 Updated `reference/addon-compatibility.md` and `systems/rendering-pipeline.md` after
