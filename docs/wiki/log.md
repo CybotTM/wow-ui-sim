@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-13] update | Retail Blizzard UI manifest curation
+
+Updated `systems/client-profiles.md` and `systems/addon-loading.md` after
+`data/blizzard-ui-files/retail.txt` was independently curated to 3,591 entries,
+excluding 390 legacy-profile entries under `/Classic/`, `/Mists/`, `/Wrath/`,
+`/Cata/`, `/TBC/`, and legacy TOCs. Recorded that retail runtime uses the
+manifest contents directly, without an additional legacy-profile filter, while
+profile-aware TOC and game-type selection remains part of addon discovery.
+
 ## [2026-07-09] investigation | Patch 12.0.5 API audit
 
 Created `investigations/patch-12-0-5-api-audit.md` to consolidate the probe-driven 12.0.5 work. Recorded that retail `12.0.5.67823` findings for forbidden frames, invalid unit-event filters, wildcard false attributes, Raise/Lower ordering, frame identity slot `[0]`, XML frame-level semantics, and display/scale event pairs are already modeled with focused tests. Documented that no `patch_12_0_5_inert_defaults` module exists and no obvious safe, already-backed 12.0.5 inert default remains unconverted. Updated with all 13 retained SavedVariables probe families, explicit best-effort boundaries, and exception requests for missing exact regressions, Store lifecycle evidence, XmlFrameLevel raw provenance, same-size window transitions, and the absent patch API-diff source.

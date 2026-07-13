@@ -60,7 +60,7 @@ Runtime Blizzard UI files live under the user cache:
 
 Populate it with `wow-cli casc sync-blizzard-ui` or the compatibility wrapper `scripts/setup-blizzard-ui.sh`. Do not use `Interface/BlizzardUI/` or repo-local `vendor/wow-ui-source-*` checkouts for runtime loading.
 
-Each profile uses its own committed manifest in `data/blizzard-ui-files/<profile>.txt`. PTR uses the `wowt` CASC product and the `ptr.txt` manifest; retail uses the `wow` CASC product and `retail.txt`. This avoids mixing divergent PTR and retail addon file lists in one union manifest. The non-PTR manifests currently mirror the previous shared baseline and are expected to diverge as each profile's CASC-backed file list is curated.
+Each profile uses its own committed manifest in `data/blizzard-ui-files/<profile>.txt`. PTR uses the `wowt` CASC product and the `ptr.txt` manifest; retail uses the `wow` CASC product and `retail.txt`. This avoids mixing divergent PTR and retail addon file lists in one union manifest. The retail manifest is independently curated: `retail.txt` contains 3,591 entries and excludes 390 legacy-profile entries (`/Classic/`, `/Mists/`, `/Wrath/`, `/Cata/`, `/TBC/`, and legacy TOCs). Runtime retail does not add a second legacy-entry filter; manifest contents are authoritative. Other profile manifests remain profile-specific and may diverge as they are curated.
 
 Local install discovery uses the active profile's WoW flavor directory. PTR reads addons, WTF, and BlizzardInterfaceArt from `_ptr_`; retail continues to use `_retail_` with optional `_beta_` addon fallback.
 

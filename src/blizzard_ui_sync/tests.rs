@@ -132,6 +132,32 @@ fn retail_manifest_excludes_ptr_only_aura_container() {
 }
 
 #[test]
+#[cfg(feature = "client-retail")]
+fn retail_manifest_excludes_legacy_profile_sources() {
+    const LEGACY_PROFILE_MARKERS: [&str; 11] = [
+        "/Classic/",
+        "/Mists/",
+        "/Wrath/",
+        "/Cata/",
+        "/TBC/",
+        "_Classic.toc",
+        "_Mists.toc",
+        "_Wrath.toc",
+        "_Cata.toc",
+        "_TBC.toc",
+        "_Vanilla.toc",
+    ];
+
+    let legacy_entry = manifest_entries().find(|entry| {
+        LEGACY_PROFILE_MARKERS
+            .iter()
+            .any(|marker| entry.contains(marker))
+    });
+
+    assert_eq!(legacy_entry, None);
+}
+
+#[test]
 #[cfg(feature = "client-ptr")]
 fn ptr_aura_container_resolves_through_limited_listfile() {
     let entry = "Blizzard_AuraContainer/Blizzard_AuraContainer.toc";
