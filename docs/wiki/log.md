@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-13] update | Docker headless release build
+
+Updated `reference/addon-compatibility.md` and `systems/rendering-pipeline.md` after
+Docker CI for v0.1.29 failed because the headless release build omitted the
+required `client-retail` profile and `frame_collect` depended on the GUI-only
+`hit_grid` module. Recorded the fixed build contract
+(`--no-default-features --features client-retail`) and the shared `HitOrderKey`
+ownership split; the next tag will carry the fix.
+
 ## [2026-07-13] update | Retail Blizzard UI manifest curation
 
 Updated `systems/client-profiles.md` and `systems/addon-loading.md` after

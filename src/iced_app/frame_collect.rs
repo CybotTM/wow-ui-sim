@@ -20,13 +20,16 @@ pub const HIT_TEST_EXCLUDED: &[&str] = &[
 static HIT_TEST_EXCLUDED_NAMES: LazyLock<FxHashSet<&'static str>> =
     LazyLock::new(|| HIT_TEST_EXCLUDED.iter().copied().collect());
 
+/// Render-order key for hit testing: `(strata, frame_level, raise_order, id)`.
+pub type HitOrderKey = (FrameStrata, i32, i32, u64);
+
 /// Result of collecting frames for hit testing.
 ///
 /// Rects are in unscaled WoW coordinates (caller applies UI_SCALE).
 pub struct CollectedFrames {
     /// Frames eligible for hit testing with their render-order key, sorted
     /// by strata/level/raise-order/id (low to high).
-    pub hittable: Vec<(u64, super::hit_grid::HitOrderKey, crate::LayoutRect)>,
+    pub hittable: Vec<(u64, HitOrderKey, crate::LayoutRect)>,
 }
 
 /// Collect all frame IDs in the subtree rooted at the named frame.

@@ -41,6 +41,16 @@ docker run --rm -v ./MyAddon:/app/Interface/AddOns/MyAddon ghcr.io/osso/wow-ui-s
 
 The Docker image is headless-only (~220MB): no audio, no textures, no GPU drivers. `screenshot` is not supported in Docker. The image is optimized for `run-tests`, `self-test`, and `lua-errors`.
 
+### Release build contract
+
+The Docker builder must select a client profile explicitly:
+
+```bash
+cargo build --release --bin wow-sim --no-default-features --features client-retail --locked
+```
+
+`--no-default-features` removes the GUI dependency tree; `client-retail` supplies the required runtime profile for the headless binary. `frame_collect` owns the shared `HitOrderKey`, so headless compilation no longer depends on the GUI-only `hit_grid` module. Docker CI for v0.1.29 failed when the profile was omitted and that reverse dependency still existed; the next tag will carry both fixes.
+
 ## Load Order
 
 The simulator follows WoW's addon load order. The cached Blizzard tree provides the full chain — `Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_SharedXMLGame`, `Blizzard_FrameXMLBase`, `Blizzard_FrameXMLUtil`, `Blizzard_FrameXML`, then per-feature `Blizzard_*` addons. User and third-party addons under `Interface/AddOns/` load on top via TOC files. Per-addon SavedVariables are applied after each addon's Lua executes.
@@ -63,6 +73,8 @@ The loader now exposes `discover_blizzard_addon_closure_for_screen()` so the boo
 ## Sources
 
 - [AGENTS.md](../../../AGENTS.md) — Docker CI, Wowless integration, SavedVariables paths
+- `Dockerfile` — headless release build flags
+- `src/iced_app/frame_collect.rs` and `src/iced_app/hit_grid.rs` — shared hit-order key ownership and GUI-only grid split
 
 ## See Also
 
@@ -70,3 +82,4 @@ The loader now exposes `discover_blizzard_addon_closure_for_screen()` so the boo
 - [[cli-commands]] — `run-tests`, `lua-errors`, Docker usage
 - [[development-phases]] — Phase 5 progress and missing API work
 - [[blizzard-ui-test-lanes]] — explicit unit vs addon-bootstrap test split
+- [[rendering-pipeline]] — headless/GUI rendering and hit-testing boundaries

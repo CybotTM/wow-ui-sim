@@ -39,12 +39,12 @@ COPY tests/ tests/
 RUN cargo fetch --locked
 
 # Copy the full source tree and build the simulator binary.
-# --no-default-features skips the `sound` feature (rodio/audio) which has
-# extra system library requirements not needed for headless test runs.
+# --no-default-features skips sound, GUI, and CASC dependencies not needed for
+# headless test runs. client-retail still selects the required runtime profile.
 COPY build.rs ./
 COPY data/ data/
 COPY src/ src/
-RUN cargo build --release --bin wow-sim --no-default-features --locked \
+RUN cargo build --release --bin wow-sim --no-default-features --features client-retail --locked \
     && strip /build/target/release/wow-sim
 
 # =============================================================================

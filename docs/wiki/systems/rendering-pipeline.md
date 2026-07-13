@@ -50,9 +50,9 @@ Draw layer order: `BACKGROUND < BORDER < ARTWORK < OVERLAY < HIGHLIGHT`.
 
 `collect_ancestor_visible_ids()` BFS from roots: `eff_alpha = parent_alpha * frame.alpha`. Frames with `eff_alpha <= 0` are skipped entirely.
 
-## Hit Testing (`src/iced_app/view.rs`)
+## Hit Testing (`src/iced_app/frame_collect.rs`, `src/iced_app/hit_grid.rs`, `src/iced_app/view.rs`)
 
-Visible, mouse-enabled frames sorted by strata/level. Query iterates in reverse (highest strata first), returns first frame containing the cursor point. Several system frames (UIParent, Minimap, WorldFrame, chat frames) are excluded.
+`frame_collect` owns the shared `HitOrderKey` and collects visible, mouse-enabled frames in render order. The GUI-only `hit_grid` module imports that key for spatial indexing; headless builds do not compile the grid or its GUI dependency tree. Queries iterate in reverse (highest strata first), returning the first frame containing the cursor point. Several system frames (UIParent, Minimap, WorldFrame, chat frames) are excluded.
 
 ## Performance
 
@@ -74,3 +74,4 @@ Headless path (`src/render/software.rs`): creates a wgpu device without a window
 - [[layout-system]] — produces LayoutRect consumed by quad building
 - [[widget-system]] — WidgetType dispatch per frame type
 - [[texture-atlas]] — TextureManager and atlas resolution feeding the GPU atlas
+- [[addon-compatibility]] — Docker headless release build contract

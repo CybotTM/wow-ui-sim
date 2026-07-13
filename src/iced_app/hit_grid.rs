@@ -7,12 +7,7 @@
 use iced::{Point, Rectangle};
 use std::collections::HashMap;
 
-/// Render-order key for hit testing: `(strata, frame_level, raise_order, id)`.
-///
-/// Matches the sort in `collect_hittable_frames`, so incremental inserts land
-/// at the same position a full rebuild would produce. Cells scan in reverse,
-/// so the highest key wins the hit.
-pub type HitOrderKey = (crate::widget::FrameStrata, i32, i32, u64);
+use super::frame_collect::HitOrderKey;
 
 /// Cell size in screen pixels. Each cell is CELL_SIZE × CELL_SIZE.
 /// 64px gives ~192 cells at 1024×768 and ~510 at 1920×1080.
