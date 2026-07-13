@@ -468,7 +468,7 @@ pub fn build_quad_batch_for_registry_with_quest_blobs(
 pub fn build_hittable_rects(
     collected: &CollectedFrames,
     registry: &crate::widget::WidgetRegistry,
-) -> Vec<(u64, Rectangle, super::hit_grid::HitOrderKey)> {
+) -> Vec<(u64, Rectangle, super::frame_collect::HitOrderKey)> {
     collected
         .hittable
         .iter()
