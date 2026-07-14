@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] decision | Patch API audit exceptions approved
+
+User approved all itemized exception requests for the 12.1, 12.0.7, and 12.0.5 patch audits. The audits may close with those items retained as approved non-implemented fidelity gaps; future probe-backed work can supersede them.
+
 ## [2026-07-13] create | Mastery spells modeled, alias identity fix
 
 Created `systems/specialization-mastery-spells.md` and
