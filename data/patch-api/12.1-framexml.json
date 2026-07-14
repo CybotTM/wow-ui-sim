@@ -3044,15 +3044,31 @@
       "id": "added:InterpolatorUtil.GetSmoothProgressChange",
       "symbol": "InterpolatorUtil.GetSmoothProgressChange",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "reversed-snapshot",
+      "owner": "Blizzard_UIParent",
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/blizzard-ui-files/ptr.txt",
+          "summary": "PTR UIParent exports the helper as the global `GetSmoothProgressChange`, not `InterpolatorUtil.GetSmoothProgressChange`; focused PTR runtime proof verifies the namespace member remains absent while the global computes the expected smooth progress value.",
+          "source_hash": "fa104a0f58bb1f86949aeec78fd82388b8d1cb8da39a1f3b51b4e3bd89e4ac66"
+        }
+      ],
+      "tests": [
+        "tests/blizzard_shared_xml_loads.rs::ptr_smooth_progress_helper_is_global_not_interpolator_method"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "absent",
+          "expected_type": null
+        }
+      ],
+      "commit": "a2bcabb9c",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
+      "notes": "Classified as a reversed snapshot: PTR retains the global helper and does not publish the proposed InterpolatorUtil member; no guessed namespace alias is added.",
       "load_addon": null
     },
     {
@@ -5723,15 +5739,31 @@
       "id": "removed:GetSmoothProgressChange",
       "symbol": "GetSmoothProgressChange",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_UIParent",
+      "evidence": [
+        {
+          "kind": "source",
+          "reference": "data/blizzard-ui-files/ptr.txt",
+          "summary": "PTR UIParent still exports `GetSmoothProgressChange` globally; focused PTR runtime proof verifies it remains a function and returns 70 for the representative (100, 0, 100, 1) input.",
+          "source_hash": "fa104a0f58bb1f86949aeec78fd82388b8d1cb8da39a1f3b51b4e3bd89e4ac66"
+        }
+      ],
+      "tests": [
+        "tests/blizzard_shared_xml_loads.rs::ptr_smooth_progress_helper_is_global_not_interpolator_method"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "a2bcabb9c",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
+      "notes": "Classified as vendor-present despite the snapshot removal: the global helper remains authoritative in PTR and its focused numeric behavior is preserved.",
       "load_addon": null
     },
     {

@@ -179,7 +179,7 @@
 179. [untriaged] `added:InputUtil.ShowInspectCursor` — untriaged
 180. [untriaged] `added:InterfaceUtil.GetScreenHeightScale` — untriaged
 181. [untriaged] `added:InterfaceUtil.GetScreenWidthScale` — untriaged
-182. [untriaged] `added:InterpolatorUtil.GetSmoothProgressChange` — untriaged
+182. [best-effort] `added:InterpolatorUtil.GetSmoothProgressChange` — reversed-snapshot
 183. [untriaged] `added:IslandsPartyPoseFrame_TryShow` — untriaged
 184. [untriaged] `added:IsMouseoverCastSupported` — untriaged
 185. [untriaged] `added:IsSummonConfirmationDialogVisible` — untriaged
@@ -355,7 +355,7 @@
 355. [untriaged] `removed:GetScaledCursorPosition` — untriaged
 356. [untriaged] `removed:GetScreenHeightScale` — untriaged
 357. [untriaged] `removed:GetScreenWidthScale` — untriaged
-358. [untriaged] `removed:GetSmoothProgressChange` — untriaged
+358. [best-effort] `removed:GetSmoothProgressChange` — vendor-present
 359. [untriaged] `removed:GetSocialColoredName` — untriaged
 360. [untriaged] `removed:GetSortedSelfResurrectOptions` — untriaged
 361. [untriaged] `removed:GetUIParentOffset` — untriaged
