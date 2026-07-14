@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 AuctionHouse hide wrapper mismatch
+
+Updated the 12.1 FrameXML inventory after confirming `HideAuctionHouseFrame` has no definition in the local PTR Blizzard sources. A focused PTR runtime test loads `Blizzard_AuctionHouseUI` and verifies the snapshot-only wrapper remains absent instead of adding guessed close semantics. Current inventory: 1 implemented, 13 best-effort, and 418 exception-requested pending strict re-triage.
+
 ## [2026-07-14] investigation | 12.1 Mists-only time helper excluded
 
 Updated the 12.1 FrameXML inventory after proving `GetTimeStringFromSeconds` is defined only by `Mists/UIParent.lua` and excluded from the PTR mainline TOC. It is classified best-effort as cross-flavor snapshot contamination rather than implemented behavior. PTR tests verify absence during environment initialization, after Blizzard loading/post-load compatibility, and after startup events. Current inventory: 1 implemented, 12 best-effort, and 419 exception-requested pending strict re-triage.

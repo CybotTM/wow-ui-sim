@@ -6,6 +6,26 @@ use common::panel_fixtures::{clear_recorded_lua_errors, recorded_lua_errors};
 
 const ROOT: &str = "Blizzard_AuctionHouseUI";
 
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_auction_house_does_not_publish_snapshot_only_hide_wrapper() {
+    common::with_perf_lock(|| {
+        common::with_timeout(240, || {
+            let env = common::panel_fixtures::setup_env();
+            load_auction_house_through_runtime(&env);
+            env.apply_post_load_workarounds();
+
+            let wrapper_is_absent: bool = env
+                .eval("return HideAuctionHouseFrame == nil")
+                .expect("auction house wrapper visibility should be queryable");
+            assert!(
+                wrapper_is_absent,
+                "snapshot-only HideAuctionHouseFrame unexpectedly exists after PTR addon load"
+            );
+        });
+    });
+}
+
 #[test]
 fn auction_house_show_hide_round_trip_has_no_lua_errors() {
     common::with_perf_lock(|| {
