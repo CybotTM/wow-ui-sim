@@ -8,7 +8,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage; remaining `exception-requested` rows still require strict unsafe/impossible re-triage. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 15 best-effort, 416 exception-requested.
+**Current totals:** 1 implemented, 16 best-effort, 415 exception-requested.
 
 ### Added symbols
 
@@ -165,7 +165,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 | `HelpFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideAuctionHouseFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in the local PTR Blizzard sources; focused PTR runtime test loads `Blizzard_AuctionHouseUI` and verifies the wrapper remains absent rather than inventing behavior. |
 | `HideBarberShopFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HideBlackMarketFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `HideBlackMarketFrame` | best-effort | Classified as reversed-name snapshot mismatch: PTR defines `BlackMarketFrame_Hide` with panel-hide and close-sound behavior, not `HideBlackMarketFrame`; focused PTR test explicitly loads `Blizzard_BlackMarketUI`, verifies the authoritative helper, and confirms the reversed wrapper remains absent. |
 | `HideGarrisonMissionFrames` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideGarrisonShipyardFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideGossipFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |

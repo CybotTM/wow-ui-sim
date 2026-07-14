@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 BlackMarket hide-name mismatch
+
+Updated the 12.1 FrameXML inventory after confirming PTR defines `BlackMarketFrame_Hide` with `HideUIPanel(BlackMarketFrame)` plus close-sound behavior, while snapshot entry `HideBlackMarketFrame` is absent. A focused PTR test explicitly loads `Blizzard_BlackMarketUI`, verifies the authoritative helper, and confirms the reversed-name wrapper remains nil. Current inventory: 1 implemented, 16 best-effort, and 415 exception-requested pending strict re-triage.
+
 ## [2026-07-14] investigation | 12.1 ItemUpgrade hide-name mismatch
 
 Updated the 12.1 FrameXML inventory after confirming PTR defines `ItemUpgradeFrame_Hide` as the authoritative `HideUIPanel(ItemUpgradeFrame)` helper, while snapshot entry `HideItemUpgradeFrame` is absent. A focused PTR test explicitly loads `Blizzard_ItemUpgradeUI` and verifies the reversed-name wrapper remains nil. Current inventory: 1 implemented, 15 best-effort, and 416 exception-requested pending strict re-triage.
