@@ -216,6 +216,9 @@ struct AuditApiArgs {
         conflicts_with_all = ["format", "filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path", "patch_manifest", "index_lua_source", "source_addon"]
     )]
     index_lua_tree: Option<PathBuf>,
+    /// Restrict --index-lua-tree to files reachable from active-profile TOCs
+    #[arg(long, requires = "index_lua_tree")]
+    active_tocs: bool,
     /// Write --index-lua-tree JSON to this file instead of stdout
     #[arg(long, requires = "index_lua_tree")]
     source_index_output: Option<PathBuf>,
@@ -391,8 +394,11 @@ fn run_casc_command(target: CascTarget) {
 fn handle_audit_api(args: AuditApiArgs) {
     let fmt = parse_output_format(&args.format);
     if let Some(path) = args.index_lua_tree {
-        if let Err(error) = handle_lua_source_tree_index(&path, args.source_index_output.as_deref())
-        {
+        if let Err(error) = handle_lua_source_tree_index(
+            &path,
+            args.active_tocs,
+            args.source_index_output.as_deref(),
+        ) {
             eprintln!("Error: {error}");
             std::process::exit(1);
         }
@@ -436,8 +442,16 @@ fn handle_audit_api(args: AuditApiArgs) {
     print_audit_output(fmt, &results, gap_report.as_ref());
 }
 
-fn handle_lua_source_tree_index(path: &Path, output: Option<&Path>) -> Result<(), String> {
-    let index = audit_api::index_lua_tree(path)?;
+fn handle_lua_source_tree_index(
+    path: &Path,
+    active_tocs: bool,
+    output: Option<&Path>,
+) -> Result<(), String> {
+    let index = if active_tocs {
+        audit_api::index_active_lua_tree(path)?
+    } else {
+        audit_api::index_lua_tree(path)?
+    };
     let rendered = serde_json::to_string_pretty(&index)
         .map_err(|error| format!("failed to render source tree index: {error}"))?;
     if let Some(output) = output {

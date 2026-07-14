@@ -2,9 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] system | Active-TOC patch source reachability
+
+Added `--active-tocs` to the full-tree Lua publication index. The active compiled profile uses `find_toc_file` to select each addon's TOC, applies per-file environment rules, recursively follows XML script/include paths through the loader's addon-root fallback and case-insensitive resolver, records unresolved Lua/XML reference paths, and excludes source files selected only by other flavor TOCs. This corrects false candidate matches such as Mists-only helpers found by the raw all-files scan. Source selection remains candidate evidence; dependency order and LoD timing still require lifecycle tests.
+
 ## [2026-07-14] system | Full-tree patch source candidates
 
-Added deterministic `--index-lua-tree` scanning with relative paths, per-file hashes, and first-directory addon ownership. Pre-lexer candidate counts were discarded after review exposed comment/string/local-scope false positives; corrected counts must come from a fresh scan. Results remain candidate-only because active-profile TOC reachability, dependency order, and LoD timing are not yet applied.
+Added deterministic `--index-lua-tree` scanning with relative paths, per-file hashes, and first-directory addon ownership. Pre-lexer candidate counts were discarded after review exposed comment/string/local-scope false positives; corrected counts must come from a fresh scan. Results remain candidate-only. The later active-TOC entry applies active-profile source reachability; dependency order and LoD timing remain unapplied.
 
 ## [2026-07-14] system | Patch source candidates and initialization observations
 

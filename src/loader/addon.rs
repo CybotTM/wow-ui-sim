@@ -402,7 +402,7 @@ fn maybe_replay_blizzard_lua_in_secure_env(
     );
 }
 
-fn is_secure_replay_library_addon(folder_name: &str) -> bool {
+pub(super) fn is_secure_replay_library_addon(folder_name: &str) -> bool {
     matches!(
         folder_name,
         "Blizzard_SharedXMLBase"
@@ -413,7 +413,7 @@ fn is_secure_replay_library_addon(folder_name: &str) -> bool {
     )
 }
 
-fn should_skip_addon_file(toc: &TocFile, file_rel: &Path) -> bool {
+pub(super) fn should_skip_addon_file(toc: &TocFile, file_rel: &Path) -> bool {
     is_mists_collections_wardrobe_file(toc, file_rel)
 }
 

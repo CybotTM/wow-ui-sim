@@ -247,6 +247,13 @@ pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
     scan_for_compatible_flavor_toc(addon_dir)
 }
 
+/// Resolve an XML script/include path with the same addon-root fallback and
+/// case-insensitive semantics used by runtime XML loading.
+pub fn resolve_xml_include_path(xml_path: &Path, addon_root: &Path, file: &str) -> PathBuf {
+    let xml_dir = xml_path.parent().unwrap_or(addon_root);
+    helpers::resolve_path_with_fallback(xml_dir, addon_root, file)
+}
+
 /// Result of loading an addon.
 #[derive(Debug)]
 pub struct LoadResult {
@@ -696,8 +703,28 @@ fn excluded_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
     }
 }
 
-pub(crate) fn is_addon_excluded_for_active_profile(addon_name: &str) -> bool {
+/// Whether runtime loading excludes this addon for the active client profile.
+pub fn is_addon_excluded_for_active_profile(addon_name: &str) -> bool {
     excluded_addons_for_active_profile().contains(&addon_name)
+}
+
+/// Whether runtime loading skips this TOC entry for the active client profile.
+pub fn is_addon_toc_file_excluded_for_active_profile(toc: &TocFile, file: &Path) -> bool {
+    addon::should_skip_addon_file(toc, file)
+}
+
+/// Whether runtime loading visits this TOC entry in any environment pass.
+pub fn is_addon_toc_file_loaded_for_active_profile(
+    folder_name: &str,
+    toc: &TocFile,
+    index: usize,
+) -> bool {
+    let loads_normally = toc.file_allows_environment(index, toc.is_secure_env());
+    let replays_securely = addon::is_secure_replay_library_addon(folder_name)
+        && !toc.is_secure_env()
+        && toc.file_use_secure_env(index).is_none()
+        && toc.file_allows_environment(index, true);
+    loads_normally || replays_securely
 }
 
 fn excluded_addons_for_active_profile() -> &'static [&'static str] {

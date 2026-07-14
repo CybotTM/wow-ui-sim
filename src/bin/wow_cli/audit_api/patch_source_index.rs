@@ -1,8 +1,11 @@
 use regex::Regex;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
-use std::collections::HashMap;
-use std::path::Path;
+use std::collections::{HashMap, HashSet};
+use std::path::{Path, PathBuf};
+use wow_ui_sim::screen::ScreenKind;
+use wow_ui_sim::toc::TocFile;
+use wow_ui_sim::xml::XmlElement;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -34,6 +37,7 @@ pub struct PatchSourceTreeIndex {
     pub sources: Vec<SourceIdentity>,
     pub records: Vec<SourceIndexRecord>,
     pub ambiguities: Vec<SourceAmbiguity>,
+    pub missing: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Serialize)]
@@ -63,6 +67,19 @@ pub struct SourceIndexRecord {
 
 pub fn index_lua_tree(root: &Path) -> Result<PatchSourceTreeIndex, String> {
     let paths = collect_lua_paths(root)?;
+    index_lua_paths(root, paths, Vec::new())
+}
+
+pub fn index_active_lua_tree(root: &Path) -> Result<PatchSourceTreeIndex, String> {
+    let reachable = collect_active_lua_paths(root)?;
+    index_lua_paths(root, reachable.paths, reachable.missing)
+}
+
+fn index_lua_paths(
+    root: &Path,
+    paths: Vec<PathBuf>,
+    missing: Vec<String>,
+) -> Result<PatchSourceTreeIndex, String> {
     let mut sources = Vec::new();
     let mut records = Vec::new();
     let mut ambiguities = Vec::new();
@@ -73,15 +90,16 @@ pub fn index_lua_tree(root: &Path) -> Result<PatchSourceTreeIndex, String> {
         ambiguities.extend(indexed.ambiguities);
     }
     Ok(PatchSourceTreeIndex {
-        schema: "framexml-source-tree-index/v1",
+        schema: "framexml-source-tree-index/v2",
         files: paths.len(),
         sources,
         records,
         ambiguities,
+        missing,
     })
 }
 
-fn collect_lua_paths(root: &Path) -> Result<Vec<std::path::PathBuf>, String> {
+fn collect_lua_paths(root: &Path) -> Result<Vec<PathBuf>, String> {
     if !root.is_dir() {
         return Err(format!("source tree does not exist: {}", root.display()));
     }
@@ -97,6 +115,240 @@ fn collect_lua_paths(root: &Path) -> Result<Vec<std::path::PathBuf>, String> {
     }
     paths.sort();
     Ok(paths)
+}
+
+struct ReachableSourcePaths {
+    paths: Vec<PathBuf>,
+    missing: Vec<String>,
+}
+
+fn collect_active_lua_paths(root: &Path) -> Result<ReachableSourcePaths, String> {
+    if !root.is_dir() {
+        return Err(format!("source tree does not exist: {}", root.display()));
+    }
+    let mut paths = HashSet::new();
+    let mut missing = HashSet::new();
+    for entry in std::fs::read_dir(root)
+        .map_err(|error| format!("failed to read {}: {error}", root.display()))?
+    {
+        let addon_dir = entry
+            .map_err(|error| format!("failed to read {} entry: {error}", root.display()))?
+            .path();
+        collect_addon_lua_paths(root, &addon_dir, &mut paths, &mut missing)?;
+    }
+    let mut paths = paths.into_iter().collect::<Vec<_>>();
+    paths.sort();
+    let mut missing = missing.into_iter().collect::<Vec<_>>();
+    missing.sort();
+    Ok(ReachableSourcePaths { paths, missing })
+}
+
+fn collect_addon_lua_paths(
+    root: &Path,
+    addon_dir: &Path,
+    paths: &mut HashSet<PathBuf>,
+    missing: &mut HashSet<String>,
+) -> Result<(), String> {
+    if !addon_dir.is_dir() {
+        return Ok(());
+    }
+    let addon_name = addon_dir
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or_default();
+    if wow_ui_sim::loader::is_addon_excluded_for_active_profile(addon_name) {
+        return Ok(());
+    }
+    let Some(toc_path) = wow_ui_sim::loader::find_toc_file(addon_dir) else {
+        return Ok(());
+    };
+    let toc = TocFile::from_file(&toc_path)
+        .map_err(|error| format!("failed to parse {}: {error}", toc_path.display()))?;
+    if toc.is_ptr_only() || toc.is_game_type_restricted() || !toc.allows_screen(ScreenKind::Game) {
+        return Ok(());
+    }
+    collect_toc_lua_paths(root, &toc, paths, missing)
+}
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+enum SourceKind {
+    Lua,
+    Xml,
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+struct SourceReference {
+    path: PathBuf,
+    kind: SourceKind,
+    fatal_if_missing: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ReferenceOutcome {
+    Continue,
+    Abort,
+}
+
+fn collect_toc_lua_paths(
+    root: &Path,
+    toc: &TocFile,
+    paths: &mut HashSet<PathBuf>,
+    missing: &mut HashSet<String>,
+) -> Result<(), String> {
+    let mut visited_xml = HashSet::new();
+    for reference in toc_source_references(toc) {
+        collect_source_reference(
+            root,
+            &toc.addon_dir,
+            reference,
+            paths,
+            missing,
+            &mut visited_xml,
+        )?;
+    }
+    Ok(())
+}
+
+fn toc_source_references(toc: &TocFile) -> Vec<SourceReference> {
+    let folder_name = toc
+        .addon_dir
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or_default();
+    toc.files
+        .iter()
+        .zip(toc.file_paths())
+        .enumerate()
+        .filter(|(index, (relative, _))| {
+            !wow_ui_sim::loader::is_addon_toc_file_excluded_for_active_profile(toc, relative)
+                && wow_ui_sim::loader::is_addon_toc_file_loaded_for_active_profile(
+                    folder_name,
+                    toc,
+                    *index,
+                )
+        })
+        .filter_map(|(_, (_, absolute))| {
+            toc_source_kind(&absolute).map(|kind| SourceReference {
+                path: absolute,
+                kind,
+                fatal_if_missing: false,
+            })
+        })
+        .collect()
+}
+
+fn toc_source_kind(path: &Path) -> Option<SourceKind> {
+    match path.extension().and_then(|extension| extension.to_str()) {
+        Some("lua") => Some(SourceKind::Lua),
+        Some("xml") => Some(SourceKind::Xml),
+        _ => None,
+    }
+}
+
+fn collect_source_reference(
+    root: &Path,
+    addon_root: &Path,
+    reference: SourceReference,
+    paths: &mut HashSet<PathBuf>,
+    missing: &mut HashSet<String>,
+    visited_xml: &mut HashSet<PathBuf>,
+) -> Result<ReferenceOutcome, String> {
+    if !reference.path.is_file() {
+        missing.insert(relative_source_path(root, &reference.path));
+        return Ok(if reference.fatal_if_missing {
+            ReferenceOutcome::Abort
+        } else {
+            ReferenceOutcome::Continue
+        });
+    }
+    if reference.kind == SourceKind::Lua {
+        paths.insert(reference.path);
+        return Ok(ReferenceOutcome::Continue);
+    }
+    if !visited_xml.insert(reference.path.clone()) {
+        return Ok(ReferenceOutcome::Continue);
+    }
+    for child in read_xml_references(&reference.path, addon_root)? {
+        if collect_source_reference(root, addon_root, child, paths, missing, visited_xml)?
+            == ReferenceOutcome::Abort
+        {
+            return Ok(ReferenceOutcome::Abort);
+        }
+    }
+    Ok(ReferenceOutcome::Continue)
+}
+
+fn relative_source_path(root: &Path, path: &Path) -> String {
+    path.strip_prefix(root)
+        .unwrap_or(path)
+        .to_string_lossy()
+        .replace('\\', "/")
+}
+
+fn read_xml_references(path: &Path, addon_root: &Path) -> Result<Vec<SourceReference>, String> {
+    let xml = wow_ui_sim::xml::parse_xml_file(path)
+        .map_err(|error| format!("failed to parse {}: {error}", path.display()))?;
+    let mut references = Vec::new();
+    collect_xml_references(&xml.elements, path, addon_root, &mut references);
+    Ok(references)
+}
+
+fn collect_xml_references(
+    elements: &[XmlElement],
+    xml_path: &Path,
+    addon_root: &Path,
+    references: &mut Vec<SourceReference>,
+) {
+    for element in elements {
+        match element {
+            XmlElement::Script(script) | XmlElement::ScriptLower(script) => {
+                if let Some(file) = &script.file {
+                    push_xml_reference(
+                        references,
+                        xml_path,
+                        addon_root,
+                        file,
+                        SourceKind::Lua,
+                        true,
+                    );
+                }
+            }
+            XmlElement::Include(include) | XmlElement::IncludeLower(include) => {
+                let kind = if include.file.ends_with(".lua") {
+                    SourceKind::Lua
+                } else {
+                    SourceKind::Xml
+                };
+                push_xml_reference(
+                    references,
+                    xml_path,
+                    addon_root,
+                    &include.file,
+                    kind,
+                    kind == SourceKind::Xml,
+                );
+            }
+            XmlElement::ScopedModifier(scoped) => {
+                collect_xml_references(&scoped.elements, xml_path, addon_root, references);
+            }
+            _ => {}
+        }
+    }
+}
+
+fn push_xml_reference(
+    references: &mut Vec<SourceReference>,
+    xml_path: &Path,
+    addon_root: &Path,
+    file: &str,
+    kind: SourceKind,
+    fatal_if_missing: bool,
+) {
+    references.push(SourceReference {
+        path: wow_ui_sim::loader::resolve_xml_include_path(xml_path, addon_root, file),
+        kind,
+        fatal_if_missing,
+    });
 }
 
 struct IndexedTreeFile {
@@ -259,7 +511,36 @@ fn collect_local_declarations(source: &str) -> HashMap<String, usize> {
             pending = Some((line_index, std::mem::take(&mut text)));
         }
     }
+    collect_function_parameters(source, &mut declarations);
     declarations
+}
+
+fn collect_function_parameters(source: &str, declarations: &mut HashMap<String, usize>) {
+    let pattern = Regex::new(r"(?s)\bfunction(?:\s+([A-Za-z_][A-Za-z0-9_:.]*))?\s*\(([^)]*)\)")
+        .expect("function parameter pattern should compile");
+    for captures in pattern.captures_iter(source) {
+        let Some(parameter_list) = captures.get(2) else {
+            continue;
+        };
+        let line = source[..parameter_list.start()]
+            .bytes()
+            .filter(|byte| *byte == b'\n')
+            .count();
+        if captures
+            .get(1)
+            .is_some_and(|function_name| function_name.as_str().contains(':'))
+        {
+            declarations.entry("self".to_string()).or_insert(line);
+        }
+        for parameter in parameter_list
+            .as_str()
+            .split(',')
+            .map(str::trim)
+            .filter(|parameter| is_identifier(parameter))
+        {
+            declarations.entry(parameter.to_string()).or_insert(line);
+        }
+    }
 }
 
 fn local_declaration_complete(declaration: &str) -> bool {
@@ -303,12 +584,14 @@ fn direct_publication_symbol(
     patterns: &PublicationPatterns,
     locals: &HashMap<String, usize>,
 ) -> Option<String> {
-    let raw = patterns
+    let direct = patterns
         .function
         .captures(code)
-        .or_else(|| patterns.assignment.captures(code))
-        .or_else(|| patterns.alias.captures(code))
-        .map(|captures| captures[1].to_string());
+        .or_else(|| patterns.assignment.captures(code));
+    let alias = (!assignment_rhs_is_lua_keyword(code))
+        .then(|| patterns.alias.captures(code))
+        .flatten();
+    let raw = direct.or(alias).map(|captures| captures[1].to_string());
     if let Some(raw) = raw {
         return is_global_at_line(&raw, line, locals).then(|| normalize_global_name(&raw));
     }
@@ -331,6 +614,13 @@ fn normalize_global_name(name: &str) -> String {
         .to_string()
 }
 
+fn assignment_rhs_is_lua_keyword(code: &str) -> bool {
+    let Some((_, value)) = code.split_once('=') else {
+        return false;
+    };
+    matches!(value.trim().trim_end_matches(';'), "nil" | "true" | "false")
+}
+
 fn bracket_publication_symbol(
     line: usize,
     original: &str,
@@ -338,6 +628,7 @@ fn bracket_publication_symbol(
     patterns: &PublicationPatterns,
     locals: &HashMap<String, usize>,
 ) -> Option<String> {
+    (!assignment_rhs_is_lua_keyword(code)).then_some(())?;
     patterns.bracket_shape.is_match(code).then_some(())?;
     let captures = patterns.bracket.captures(original)?;
     let table = &captures[1];
@@ -511,6 +802,10 @@ mod tests {
             _G["AliasValue"] = ExistingFunction
             _G["Constant"] = 42
             _G["TableValue"] = {}
+            RemovedGlobal = nil
+            _G["RemovedBracket"] = nil
+            FalseGlobal = false
+            TrueGlobal = true
         "#;
 
         let records = index_lua_source("Blizzard_Test", "Bracket.lua", source);
@@ -530,6 +825,126 @@ mod tests {
     }
 
     #[test]
+    fn active_toc_index_excludes_other_flavors_and_follows_xml_scripts() {
+        let directory = tempfile::tempdir().expect("temporary directory should create");
+        let addon = directory.path().join("ExampleAddon");
+        std::fs::create_dir_all(&addon).expect("addon directory should create");
+        std::fs::write(
+            addon.join("ExampleAddon_Mainline.toc"),
+            "Mainline.lua\nMainline/Shared.xml\n",
+        )
+        .expect("mainline TOC should write");
+        std::fs::write(addon.join("ExampleAddon_Mists.toc"), "Mists.lua\n")
+            .expect("Mists TOC should write");
+        std::fs::create_dir_all(addon.join("Mainline")).expect("mainline directory should create");
+        std::fs::write(
+            addon.join("Mainline/Shared.xml"),
+            r#"<Ui><ScopedModifier><script file="MAINLINE\Nested.lua"/></ScopedModifier><include file="Missing.xml"/><Script file="NeverLoaded.lua"/></Ui>"#,
+        )
+        .expect("XML fixture should write");
+        std::fs::write(addon.join("Mainline.lua"), "function MainlineOnly() end\n")
+            .expect("mainline Lua should write");
+        std::fs::write(
+            addon.join("Mainline/Nested.lua"),
+            "function NestedReachable() end\n",
+        )
+        .expect("nested Lua should write");
+        std::fs::write(addon.join("Mists.lua"), "function MistsOnly() end\n")
+            .expect("Mists Lua should write");
+        std::fs::write(
+            addon.join("Mainline/NeverLoaded.lua"),
+            "function NeverLoadedAfterFatalInclude() end\n",
+        )
+        .expect("post-failure Lua should write");
+
+        let index = index_active_lua_tree(directory.path()).expect("active TOCs should index");
+        let symbols = index
+            .records
+            .iter()
+            .map(|record| record.symbol.as_str())
+            .collect::<Vec<_>>();
+
+        assert!(symbols.contains(&"MainlineOnly"));
+        assert!(symbols.contains(&"NestedReachable"));
+        assert!(!symbols.contains(&"MistsOnly"));
+        assert!(!symbols.contains(&"NeverLoadedAfterFatalInclude"));
+        assert_eq!(index.files, 2);
+        assert_eq!(index.missing, vec!["ExampleAddon/Mainline/Missing.xml"]);
+    }
+
+    #[cfg(feature = "client-mists")]
+    #[test]
+    fn active_toc_index_applies_profile_specific_toc_file_exclusions() {
+        let directory = tempfile::tempdir().expect("temporary directory should create");
+        let addon = directory.path().join("Blizzard_Collections");
+        std::fs::create_dir_all(&addon).expect("addon directory should create");
+        std::fs::write(
+            addon.join("Blizzard_Collections_Mists.toc"),
+            "Wardrobe.lua\nCollections.lua\n",
+        )
+        .expect("Mists TOC should write");
+        std::fs::write(addon.join("Wardrobe.lua"), "function WardrobeLeak() end\n")
+            .expect("Wardrobe Lua should write");
+        std::fs::write(
+            addon.join("Collections.lua"),
+            "function CollectionsReachable() end\n",
+        )
+        .expect("Collections Lua should write");
+
+        let index = index_active_lua_tree(directory.path()).expect("active TOCs should index");
+        let symbols = index
+            .records
+            .iter()
+            .map(|record| record.symbol.as_str())
+            .collect::<Vec<_>>();
+
+        assert!(symbols.contains(&"CollectionsReachable"));
+        assert!(!symbols.contains(&"WardrobeLeak"));
+    }
+
+    #[test]
+    fn active_toc_index_applies_toc_environment_filters() {
+        let directory = tempfile::tempdir().expect("temporary directory should create");
+        let addon = directory.path().join("EnvironmentFiltered");
+        std::fs::create_dir_all(&addon).expect("addon directory should create");
+        std::fs::write(
+            addon.join("EnvironmentFiltered_Mainline.toc"),
+            "Restricted.lua [AllowLoadEnvironment secure]\n",
+        )
+        .expect("environment-filtered TOC should write");
+        std::fs::write(
+            addon.join("Restricted.lua"),
+            "function FalsePositiveGlobal() end\n",
+        )
+        .expect("restricted Lua should write");
+
+        let index = index_active_lua_tree(directory.path()).expect("active TOCs should index");
+
+        assert!(index.records.is_empty());
+        assert_eq!(index.files, 0);
+    }
+
+    #[cfg(not(feature = "client-ptr"))]
+    #[test]
+    fn active_toc_index_excludes_ptr_only_addons_on_live_profiles() {
+        let directory = tempfile::tempdir().expect("temporary directory should create");
+        let addon = directory.path().join("PtrOnlyAddon");
+        std::fs::create_dir_all(&addon).expect("addon directory should create");
+        std::fs::write(
+            addon.join("PtrOnlyAddon.toc"),
+            "## OnlyBetaAndPTR: 1\nPtrOnly.lua\n",
+        )
+        .expect("PTR-only TOC should write");
+        std::fs::write(addon.join("PtrOnly.lua"), "function PtrOnlyGlobal() end\n")
+            .expect("PTR-only Lua should write");
+
+        let index = index_active_lua_tree(directory.path()).expect("active TOCs should index");
+
+        assert!(index.records.is_empty());
+        assert_eq!(index.files, 0);
+    }
+
+    #[test]
     fn indexes_lua_tree_with_relative_paths_and_addon_ownership() {
         let directory = tempfile::tempdir().expect("temporary directory should create");
         let addon = directory.path().join("Blizzard_One");
@@ -541,6 +956,7 @@ mod tests {
 
         let index = index_lua_tree(directory.path()).expect("tree should index");
 
+        assert_eq!(index.schema, "framexml-source-tree-index/v2");
         assert_eq!(index.files, 1);
         assert_eq!(index.sources.len(), 1);
         assert_eq!(index.sources[0].file, "Blizzard_One/Nested/One.lua");
@@ -599,6 +1015,17 @@ mod tests {
             _G["IndexedGlobal"] = function() end
             local function LocalOnly() end
             local LocalAssigned = function() end
+            local function PublishIntoParameter(Namespace)
+                Namespace.NotGlobal = function() end
+            end
+            local MultilineParameter = function(
+                OtherNamespace
+            )
+                OtherNamespace.AlsoNotGlobal = function() end
+            end
+            function Object:Publish()
+                self.ImplicitParameterIsNotGlobal = function() end
+            end
             -- function CommentedOut() end
             local text = "function StringContent() end"
         "#;
@@ -617,6 +1044,7 @@ mod tests {
                 "Namespace.Assigned",
                 "Namespace.Bracketed",
                 "IndexedGlobal",
+                "Object.Publish",
             ]
         );
         assert!(

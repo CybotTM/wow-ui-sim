@@ -19,7 +19,7 @@ pub use patch_manifest::{
     generate_initialization_observations, parse_manifest, parse_observations, render_checklist,
     render_summary, validate_complete, validate_repository,
 };
-pub use patch_source_index::{index_lua_file, index_lua_tree};
+pub use patch_source_index::{index_active_lua_tree, index_lua_file, index_lua_tree};
 pub use scanner::run_audit;
 
 /// Per-symbol occurrence data.
