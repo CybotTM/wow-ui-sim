@@ -113,6 +113,7 @@
 5613880;interface/addons/blizzard_achievementui/mainline/blizzard_achievementui.lua
 5613917;interface/addons/blizzard_achievementui/mainline/blizzard_achievementui.xml
 5612933;interface/addons/blizzard_achievementui/mainline/localization.lua
+7831514;interface/addons/blizzard_actionbar/blizzard_actionbar_classic.toc
 6716595;interface/addons/blizzard_actionbar/blizzard_actionbar_mainline.toc
 6204396;interface/addons/blizzard_actionbar/blizzard_actionbar_mists.toc
 5612765;interface/addons/blizzard_actionbar/classic/actionbuttontemplate.xml
@@ -233,6 +234,7 @@
 1579619;interface/addons/blizzard_apidocumentation/systemsapimixin.lua
 1579621;interface/addons/blizzard_apidocumentation/tablesapimixin.lua
 7569778;interface/addons/blizzard_apidocumentationgenerated/abbreviateconfigapidocumentation.lua
+7754025;interface/addons/blizzard_apidocumentationgenerated/abbreviatednumberformatterapidocumentation.lua
 5793170;interface/addons/blizzard_apidocumentationgenerated/accessibilityoptionsdocumentation.lua
 4954795;interface/addons/blizzard_apidocumentationgenerated/accountconstantsdocumentation.lua
 4637016;interface/addons/blizzard_apidocumentationgenerated/accountinfodocumentation.lua
@@ -259,6 +261,8 @@
 6163648;interface/addons/blizzard_apidocumentationgenerated/auctionhouseconstantsdocumentation.lua
 4637023;interface/addons/blizzard_apidocumentationgenerated/auctionhousedocumentation.lua
 4637020;interface/addons/blizzard_apidocumentationgenerated/auctionhouseenumsdocumentation.lua
+7733453;interface/addons/blizzard_apidocumentationgenerated/autocompletedocumentation.lua
+7733452;interface/addons/blizzard_apidocumentationgenerated/autocompleteshareddocumentation.lua
 4637027;interface/addons/blizzard_apidocumentationgenerated/azeriteconstantsdocumentation.lua
 4637025;interface/addons/blizzard_apidocumentationgenerated/azeriteempowereditemdocumentation.lua
 4637033;interface/addons/blizzard_apidocumentationgenerated/azeriteessencedocumentation.lua
@@ -295,6 +299,7 @@
 4637050;interface/addons/blizzard_apidocumentationgenerated/chatbubblesdocumentation.lua
 4637042;interface/addons/blizzard_apidocumentationgenerated/chatconstantsdocumentation.lua
 4637043;interface/addons/blizzard_apidocumentationgenerated/chatinfodocumentation.lua
+7872491;interface/addons/blizzard_apidocumentationgenerated/chatshareddocumentation.lua
 4637051;interface/addons/blizzard_apidocumentationgenerated/chromietimeuidocumentation.lua
 6018145;interface/addons/blizzard_apidocumentationgenerated/cinematicconstantsdocumentation.lua
 4637047;interface/addons/blizzard_apidocumentationgenerated/cinematicdocumentation.lua
@@ -336,6 +341,7 @@
 5126422;interface/addons/blizzard_apidocumentationgenerated/contenttrackingdocumentation.lua
 5126424;interface/addons/blizzard_apidocumentationgenerated/contenttrackingtypesdocumentation.lua
 4637070;interface/addons/blizzard_apidocumentationgenerated/contributioncollectordocumentation.lua
+7751466;interface/addons/blizzard_apidocumentationgenerated/cooldownframeconstantsdocumentation.lua
 6438301;interface/addons/blizzard_apidocumentationgenerated/cooldownviewerconstantsdocumentation.lua
 6438302;interface/addons/blizzard_apidocumentationgenerated/cooldownviewerdocumentation.lua
 4637062;interface/addons/blizzard_apidocumentationgenerated/covenantcallingsconstantsdocumentation.lua
@@ -369,6 +375,8 @@
 5920189;interface/addons/blizzard_apidocumentationgenerated/delvesuidocumentation.lua
 4637081;interface/addons/blizzard_apidocumentationgenerated/duelinfodocumentation.lua
 7221252;interface/addons/blizzard_apidocumentationgenerated/dungeonencounterconstantsdocumentation.lua
+8015795;interface/addons/blizzard_apidocumentationgenerated/durationtextbindingobjectapidocumentation.lua
+8015794;interface/addons/blizzard_apidocumentationgenerated/durationtextbindingshareddocumentation.lua
 7660128;interface/addons/blizzard_apidocumentationgenerated/durationutildocumentation.lua
 6637346;interface/addons/blizzard_apidocumentationgenerated/dyecolorinfodocumentation.lua
 6637347;interface/addons/blizzard_apidocumentationgenerated/dyecolorinfoshareddocumentation.lua
@@ -393,6 +401,7 @@
 7499850;interface/addons/blizzard_apidocumentationgenerated/expansionconstantsdocumentation.lua
 4637088;interface/addons/blizzard_apidocumentationgenerated/expansiondocumentation.lua
 5565701;interface/addons/blizzard_apidocumentationgenerated/expansioninfodocumentation.lua
+4885715;interface/addons/blizzard_apidocumentationgenerated/expansionlandingpageconstantsdocumentation.lua
 6791771;interface/addons/blizzard_apidocumentationgenerated/expansionlevelconstantsdocumentation.lua
 5177503;interface/addons/blizzard_apidocumentationgenerated/expansiontrialdocumentation.lua
 7391201;interface/addons/blizzard_apidocumentationgenerated/externaleventurldocumentation.lua
@@ -456,6 +465,7 @@
 5457904;interface/addons/blizzard_apidocumentationgenerated/housingdecoruidocumentation.lua
 7350483;interface/addons/blizzard_apidocumentationgenerated/housingexpertmodeuidocumentation.lua
 7318841;interface/addons/blizzard_apidocumentationgenerated/housingfixturepointframeapidocumentation.lua
+7753903;interface/addons/blizzard_apidocumentationgenerated/housinginspectmodeuidocumentation.lua
 5503355;interface/addons/blizzard_apidocumentationgenerated/housinglayoutpinframeapidocumentation.lua
 5503356;interface/addons/blizzard_apidocumentationgenerated/housinglayoutuidocumentation.lua
 5503354;interface/addons/blizzard_apidocumentationgenerated/housinglayoutuitypesdocumentation.lua
@@ -514,6 +524,8 @@
 7507384;interface/addons/blizzard_apidocumentationgenerated/luacurveobjectapidocumentation.lua
 7657069;interface/addons/blizzard_apidocumentationgenerated/luacurveobjectbaseapidocumentation.lua
 7507383;interface/addons/blizzard_apidocumentationgenerated/luacurveobjectconstantsdocumentation.lua
+7937110;interface/addons/blizzard_apidocumentationgenerated/luadurationclockapidocumentation.lua
+7937109;interface/addons/blizzard_apidocumentationgenerated/luadurationmanualclockapidocumentation.lua
 7660129;interface/addons/blizzard_apidocumentationgenerated/luadurationobjectapidocumentation.lua
 7660127;interface/addons/blizzard_apidocumentationgenerated/luadurationobjectshareddocumentation.lua
 6921868;interface/addons/blizzard_apidocumentationgenerated/luatableutildocumentation.lua
@@ -543,6 +555,9 @@
 6999257;interface/addons/blizzard_apidocumentationgenerated/neighborhoodinitiativedocumentation.lua
 7106802;interface/addons/blizzard_apidocumentationgenerated/neighborhoodinitiativesconstantsdocumentation.lua
 4744159;interface/addons/blizzard_apidocumentationgenerated/newitemsdocumentation.lua
+7754021;interface/addons/blizzard_apidocumentationgenerated/numericformatterapidocumentation.lua
+7754024;interface/addons/blizzard_apidocumentationgenerated/numericruleformatterapidocumentation.lua
+7754020;interface/addons/blizzard_apidocumentationgenerated/numericruleformattershareddocumentation.lua
 5200996;interface/addons/blizzard_apidocumentationgenerated/osdocumentation.lua
 4637165;interface/addons/blizzard_apidocumentationgenerated/paperdollinfodocumentation.lua
 5200997;interface/addons/blizzard_apidocumentationgenerated/parentalcontrolsdocumentation.lua
@@ -560,6 +575,7 @@
 4637151;interface/addons/blizzard_apidocumentationgenerated/petinfodocumentation.lua
 4637161;interface/addons/blizzard_apidocumentationgenerated/petjournalinfodocumentation.lua
 4637153;interface/addons/blizzard_apidocumentationgenerated/petscalingconstantsdocumentation.lua
+7792171;interface/addons/blizzard_apidocumentationgenerated/photosharinguidocumentation.lua
 5152476;interface/addons/blizzard_apidocumentationgenerated/pingconstantsdocumentation.lua
 5279564;interface/addons/blizzard_apidocumentationgenerated/pingmanagerdocumentation.lua
 5369225;interface/addons/blizzard_apidocumentationgenerated/pingmanagersecuredocumentation.lua
@@ -624,6 +640,8 @@
 4637190;interface/addons/blizzard_apidocumentationgenerated/scriptwarningsdocumentation.lua
 5684189;interface/addons/blizzard_apidocumentationgenerated/seasoninfodocumentation.lua
 4637828;interface/addons/blizzard_apidocumentationgenerated/seasonsconstantsdocumentation.lua
+7754022;interface/addons/blizzard_apidocumentationgenerated/secondsformatterapidocumentation.lua
+7754023;interface/addons/blizzard_apidocumentationgenerated/secondsformattershareddocumentation.lua
 7276829;interface/addons/blizzard_apidocumentationgenerated/secretaspectconstantsdocumentation.lua
 7644355;interface/addons/blizzard_apidocumentationgenerated/secretpredicateapidocumentation.lua
 7552722;interface/addons/blizzard_apidocumentationgenerated/secretpredicatesdocumentation.lua
@@ -711,6 +729,7 @@
 4637256;interface/addons/blizzard_apidocumentationgenerated/systemdocumentation.lua
 5222523;interface/addons/blizzard_apidocumentationgenerated/systemtimedocumentation.lua
 5730900;interface/addons/blizzard_apidocumentationgenerated/talentandglyphconstantsdocumentation.lua
+7868966;interface/addons/blizzard_apidocumentationgenerated/talentconstantsdocumentation.lua
 4637255;interface/addons/blizzard_apidocumentationgenerated/talkingheaddocumentation.lua
 5545762;interface/addons/blizzard_apidocumentationgenerated/targetscriptdocumentation.lua
 4637260;interface/addons/blizzard_apidocumentationgenerated/taximapdocumentation.lua
@@ -753,6 +772,7 @@
 7259923;interface/addons/blizzard_apidocumentationgenerated/uicovenantdisplayinfoconstantsdocumentation.lua
 7439237;interface/addons/blizzard_apidocumentationgenerated/uieventtoastconstantsdocumentation.lua
 4637272;interface/addons/blizzard_apidocumentationgenerated/uieventtoastmanagerdocumentation.lua
+7950562;interface/addons/blizzard_apidocumentationgenerated/uifileassetapidocumentation.lua
 4637282;interface/addons/blizzard_apidocumentationgenerated/uifileassetshareddocumentation.lua
 4637284;interface/addons/blizzard_apidocumentationgenerated/uiframemanagerdocumentation.lua
 4870627;interface/addons/blizzard_apidocumentationgenerated/uigenericwidgetdisplaydocumentation.lua
@@ -1172,6 +1192,7 @@
 7227847;interface/addons/blizzard_collections/shared/blizzard_wardrobe_sets.xml
 6523346;interface/addons/blizzard_collections/wrath/blizzard_wardrobe.lua
 6523343;interface/addons/blizzard_collections/wrath/blizzard_wardrobe.xml
+7744245;interface/addons/blizzard_colors/blizzard_colors.toc
 6725192;interface/addons/blizzard_colors/blizzard_colors_mainline.toc
 6725194;interface/addons/blizzard_colors/mainline/colorconstants.lua
 6725191;interface/addons/blizzard_colors/mainline/colormanager.lua
@@ -1302,6 +1323,11 @@
 1580807;interface/addons/blizzard_contribution/blizzard_contribution.lua
 1580806;interface/addons/blizzard_contribution/blizzard_contribution.toc
 1580808;interface/addons/blizzard_contribution/blizzard_contribution.xml
+7866854;interface/addons/blizzard_cooldownbroadcaster/blizzard_cooldownbroadcaster.lua
+7866855;interface/addons/blizzard_cooldownbroadcaster/blizzard_cooldownbroadcaster.toc
+8124303;interface/addons/blizzard_cooldownbroadcaster/blizzard_cooldownbroadcaster_bootstrap.lua
+7939568;interface/addons/blizzard_cooldownbroadcaster/messagequeue.lua
+7866856;interface/addons/blizzard_cooldownbroadcaster/trackedcooldowns.lua
 6367708;interface/addons/blizzard_cooldownviewer/blizzard_cooldownviewer.toc
 6367711;interface/addons/blizzard_cooldownviewer/cooldownviewer.lua
 6367709;interface/addons/blizzard_cooldownviewer/cooldownviewer.xml
@@ -1327,6 +1353,7 @@
 7655236;interface/addons/blizzard_cooldownviewer/cooldownviewervisualalerttemplates.lua
 7655237;interface/addons/blizzard_cooldownviewer/cooldownviewervisualalerttemplates.xml
 7557684;interface/addons/blizzard_cooldownviewer/pandemicalertanimation.xml
+7766667;interface/addons/blizzard_cooldownviewer/slashcommandregistration.lua
 3579924;interface/addons/blizzard_covenantcallings/blizzard_covenantcallings.toc
 3579930;interface/addons/blizzard_covenantcallings/covenantcallings.lua
 3579928;interface/addons/blizzard_covenantcallings/covenantcallings.xml
@@ -1409,11 +1436,15 @@
 7135884;interface/addons/blizzard_delvestoast/blizzard_delvestoast.xml
 5871923;interface/addons/blizzard_deprecated/11_0_0_spellbookapitransitionguide.lua
 1587032;interface/addons/blizzard_deprecated/blizzard_deprecated.toc
+7807455;interface/addons/blizzard_deprecated/deprecated_12_0_1.lua
+7929899;interface/addons/blizzard_deprecated/deprecated_12_0_7.lua
 5614266;interface/addons/blizzard_deprecated_arenaui/blizzard_deprecated_arenaui.toc
 5614265;interface/addons/blizzard_deprecated_arenaui/deprecated_arenaui.lua
 5614263;interface/addons/blizzard_deprecated_arenaui/deprecated_arenaui.xml
 7514816;interface/addons/blizzard_deprecatedactionbar/blizzard_deprecatedactionbar.toc
 7514817;interface/addons/blizzard_deprecatedactionbar/deprecated_actionbar.lua
+7733454;interface/addons/blizzard_deprecatedautocomplete/blizzard_deprecatedautocomplete.toc
+7733455;interface/addons/blizzard_deprecatedautocomplete/deprecated_autocomplete.lua
 7322751;interface/addons/blizzard_deprecatedbattlenet/blizzard_deprecatedbattlenet.toc
 7322752;interface/addons/blizzard_deprecatedbattlenet/deprecated_battlenet.lua
 7149612;interface/addons/blizzard_deprecatedchatinfo/blizzard_deprecatedchatinfo.toc
@@ -1427,6 +1458,8 @@
 6211016;interface/addons/blizzard_deprecatedglue/deprecated_glue.lua
 5559339;interface/addons/blizzard_deprecatedguildscript/blizzard_deprecatedguildscript.toc
 5559338;interface/addons/blizzard_deprecatedguildscript/deprecated_guildscript.lua
+7792788;interface/addons/blizzard_deprecatedhousingcatalog/blizzard_deprecatedhousingcatalog.toc
+7792789;interface/addons/blizzard_deprecatedhousingcatalog/deprecated_housingcatalog.lua
 7350484;interface/addons/blizzard_deprecatedinstanceencounter/blizzard_deprecatedinstanceencounter.toc
 7350485;interface/addons/blizzard_deprecatedinstanceencounter/deprecated_instanceencounter.lua
 5553338;interface/addons/blizzard_deprecateditemscript/blizzard_deprecateditemscript.toc
@@ -1435,6 +1468,8 @@
 7297697;interface/addons/blizzard_deprecateditemsocketinfo/deprecated_itemsocketinfo.lua
 6255158;interface/addons/blizzard_deprecatedlfg/blizzard_deprecatedlfg.toc
 6255157;interface/addons/blizzard_deprecatedlfg/deprecated_lfg.lua
+7875339;interface/addons/blizzard_deprecatedpartyinfo/blizzard_deprecatedpartyinfo.toc
+7875340;interface/addons/blizzard_deprecatedpartyinfo/deprecated_partyinfo.lua
 7345873;interface/addons/blizzard_deprecatedpetinfo/blizzard_deprecatedpetinfo.toc
 7345874;interface/addons/blizzard_deprecatedpetinfo/deprecated_petinfo.lua
 5568058;interface/addons/blizzard_deprecatedpvpscript/blizzard_deprecatedpvpscript.toc
@@ -1448,6 +1483,7 @@
 6937846;interface/addons/blizzard_deprecatedspecialization/deprecated_specialization_tbc.lua
 6937850;interface/addons/blizzard_deprecatedspecialization/deprecated_specialization_vanilla.lua
 6937849;interface/addons/blizzard_deprecatedspecialization/deprecated_specialization_wrath.lua
+7868967;interface/addons/blizzard_deprecatedspecialization/deprecated_talentconsts.lua
 7275888;interface/addons/blizzard_deprecatedspellbook/blizzard_deprecatedspellbook.toc
 7275890;interface/addons/blizzard_deprecatedspellbook/deprecated_spellbook.lua
 5568059;interface/addons/blizzard_deprecatedspellscript/blizzard_deprecatedspellscript.toc
@@ -1466,9 +1502,12 @@
 7110241;interface/addons/blizzard_durabilityframe/durabilityframe.xml
 7445294;interface/addons/blizzard_editmode/blizzard_editmode.toc
 7110245;interface/addons/blizzard_editmode/classic/editmodemanageroverrides.lua
+7808481;interface/addons/blizzard_editmode/classic/editmodepresetlayoutconstants.lua
 7110236;interface/addons/blizzard_editmode/classic/editmodepresetlayouts.lua
 7110229;interface/addons/blizzard_editmode/mainline/editmodemanageroverrides.lua
 7406652;interface/addons/blizzard_editmode/mainline/editmodepresetlayouts.lua
+7937111;interface/addons/blizzard_editmode/mists/editmodemanageroverrides.lua
+7808156;interface/addons/blizzard_editmode/mists/editmodepresetlayoutconstants.lua
 7553109;interface/addons/blizzard_editmode/shared/editmodeauradataprovider.lua
 7110242;interface/addons/blizzard_editmode/shared/editmodedialogs.lua
 7110233;interface/addons/blizzard_editmode/shared/editmodedialogs.xml
@@ -1487,6 +1526,8 @@
 7658508;interface/addons/blizzard_editmode/standard/editmodepresetlayoutconstants.lua
 6869110;interface/addons/blizzard_editmode/wowhack/editmodepresetlayouts.lua
 5613687;interface/addons/blizzard_editmode/wowlabs/editmodepresetlayouts.lua
+7771685;interface/addons/blizzard_editmode/wrath/editmodemanageroverrides.lua
+7808157;interface/addons/blizzard_editmode/wrath/editmodepresetlayoutconstants.lua
 5613294;interface/addons/blizzard_encounterjournal/blizzard_encounterjournal_mainline.toc
 6204371;interface/addons/blizzard_encounterjournal/blizzard_encounterjournal_mists.toc
 5797528;interface/addons/blizzard_encounterjournal/cata/blizzard_encounterjournal.lua
@@ -1546,6 +1587,11 @@
 3993873;interface/addons/blizzard_eventtrace/blizzard_eventtrace.lua
 3993868;interface/addons/blizzard_eventtrace/blizzard_eventtrace.toc
 3993870;interface/addons/blizzard_eventtrace/blizzard_eventtrace.xml
+4675161;interface/addons/blizzard_expansionlandingpage/blizzard_expansionlandingpage.lua
+4675159;interface/addons/blizzard_expansionlandingpage/blizzard_expansionlandingpage.toc
+4675165;interface/addons/blizzard_expansionlandingpage/blizzard_expansionlandingpage.xml
+7875992;interface/addons/blizzard_expansionlandingpage/blizzard_midnightlandingpage.lua
+7875993;interface/addons/blizzard_expansionlandingpage/blizzard_midnightlandingpage.xml
 5099992;interface/addons/blizzard_expansiontrial/blizzard_expansiontrial.lua
 5099990;interface/addons/blizzard_expansiontrial/blizzard_expansiontrial.toc
 5099988;interface/addons/blizzard_expansiontrial/blizzard_expansiontrial.xml
@@ -1663,6 +1709,7 @@
 5613327;interface/addons/blizzard_framexml/mainline/alertframes.xml
 5613389;interface/addons/blizzard_framexml/mainline/alertframesystems.lua
 5612796;interface/addons/blizzard_framexml/mainline/alertframesystems.xml
+7698722;interface/addons/blizzard_framexml/mainline/cinematicframebutton.xml
 5613487;interface/addons/blizzard_framexml/mainline/coinpickupframe.lua
 5612997;interface/addons/blizzard_framexml/mainline/coinpickupframe.xml
 5612887;interface/addons/blizzard_framexml/mainline/colorpickerframe.lua
@@ -1763,6 +1810,7 @@
 7260604;interface/addons/blizzard_framexmlutil/aurautil.lua
 5613558;interface/addons/blizzard_framexmlutil/azeriteessenceutil.lua
 5612418;interface/addons/blizzard_framexmlutil/azeriteutil.lua
+7868969;interface/addons/blizzard_framexmlutil/blizzard_framexmlutil.toc
 5612571;interface/addons/blizzard_framexmlutil/blizzard_framexmlutil_classic.toc
 5612413;interface/addons/blizzard_framexmlutil/blizzard_framexmlutil_mainline.toc
 5612372;interface/addons/blizzard_framexmlutil/calendarutil.lua
@@ -1781,6 +1829,7 @@
 5870068;interface/addons/blizzard_framexmlutil/currencyutil.lua
 5612669;interface/addons/blizzard_framexmlutil/difficultyutil.lua
 5908054;interface/addons/blizzard_framexmlutil/dragonridingutil.lua
+7868968;interface/addons/blizzard_framexmlutil/editmodeauradataprovider.lua
 5735486;interface/addons/blizzard_framexmlutil/fadingframe.lua
 5613676;interface/addons/blizzard_framexmlutil/itemutil.lua
 5735490;interface/addons/blizzard_framexmlutil/localization.lua
@@ -1827,6 +1876,7 @@
 5614137;interface/addons/blizzard_gametooltip/healthbar.lua
 5612388;interface/addons/blizzard_gametooltip/mainline/gametooltip.lua
 5612801;interface/addons/blizzard_gametooltip/mainline/gametooltip.xml
+7875994;interface/addons/blizzard_gametooltip/shared/gametooltipconstants.lua
 5614167;interface/addons/blizzard_garrisonbase/adventuresfollowertooltip.lua
 5612395;interface/addons/blizzard_garrisonbase/adventuresfollowertooltip.xml
 5612354;interface/addons/blizzard_garrisonbase/blizzard_garrisonbase.toc
@@ -2118,6 +2168,9 @@
 6330884;interface/addons/blizzard_housinghousesettings/blizzard_housinghousesettings.toc
 6330885;interface/addons/blizzard_housinghousesettings/blizzard_housinghousesettings.xml
 6330886;interface/addons/blizzard_housinghousesettings/blizzard_housinghousesettingsregistration.lua
+7753904;interface/addons/blizzard_housinginspectmodeui/blizzard_housinginspectmodeui.lua
+7753905;interface/addons/blizzard_housinginspectmodeui/blizzard_housinginspectmodeui.toc
+7753906;interface/addons/blizzard_housinginspectmodeui/blizzard_housinginspectmodeui.xml
 7373125;interface/addons/blizzard_housingmarketcart/blizzard_housingmarketcart.toc
 7373128;interface/addons/blizzard_housingmarketcart/blizzard_housingmarketcartitemtemplates.lua
 7373126;interface/addons/blizzard_housingmarketcart/blizzard_housingmarketcartitemtemplates.xml
@@ -2147,6 +2200,8 @@
 6225881;interface/addons/blizzard_housingtemplates/blizzard_housingcatalogtemplates.xml
 7513304;interface/addons/blizzard_housingtemplates/blizzard_housingcatalogutil.lua
 5222381;interface/addons/blizzard_housingtemplates/blizzard_housingdata.lua
+7707938;interface/addons/blizzard_housingtemplates/blizzard_housingmarketproductdisplay.lua
+7707939;interface/addons/blizzard_housingtemplates/blizzard_housingmarketproductdisplay.xml
 5222383;interface/addons/blizzard_housingtemplates/blizzard_housingtemplates.toc
 6120046;interface/addons/blizzard_housingtemplates/blizzard_housingtopbanner.lua
 6120045;interface/addons/blizzard_housingtemplates/blizzard_housingtopbanner.xml
@@ -2262,12 +2317,14 @@
 5613375;interface/addons/blizzard_mailframe/localization.lua
 5613121;interface/addons/blizzard_mailframe/mailframe.lua
 5613506;interface/addons/blizzard_mailframe/mailframe.xml
+7802444;interface/addons/blizzard_mainmenubarbagbuttons/blizzard_mainmenubarbagbuttons_classic.toc
 7465586;interface/addons/blizzard_mainmenubarbagbuttons/blizzard_mainmenubarbagbuttons_mainline.toc
 6204370;interface/addons/blizzard_mainmenubarbagbuttons/blizzard_mainmenubarbagbuttons_mists.toc
 5613866;interface/addons/blizzard_mainmenubarbagbuttons/classic/mainmenubarbagbuttons.lua
 7465588;interface/addons/blizzard_mainmenubarbagbuttons/mainline/mainmenubarbagbuttons.lua
 7465589;interface/addons/blizzard_mainmenubarbagbuttons/mainline/mainmenubarbagbuttons.xml
 6926577;interface/addons/blizzard_mainmenubarbagbuttons/mists/mainmenubarbagbuttons.xml
+7802446;interface/addons/blizzard_mainmenubarbagbuttons/mists/mainmenubarbagbuttonsconsts.lua
 7465587;interface/addons/blizzard_mainmenubarbagbuttons/shared/bagsbar.lua
 7465590;interface/addons/blizzard_mainmenubarbagbuttons/shared/mainmenubarbagmanager.lua
 4683682;interface/addons/blizzard_majorfactions/blizzard_majorfactionrenowntoast.lua
@@ -2323,7 +2380,9 @@
 7465592;interface/addons/blizzard_micromenu/blizzard_micromenu_mainline.toc
 7465595;interface/addons/blizzard_micromenu/cata/mainmenubarmicrobuttons.lua
 7465594;interface/addons/blizzard_micromenu/cata/mainmenubarmicrobuttons.xml
+7750397;interface/addons/blizzard_micromenu/cata/micromenucontaineroverrides.lua
 7465593;interface/addons/blizzard_micromenu/classic/mainmenubarmicrobuttons.lua
+7750398;interface/addons/blizzard_micromenu/classic/mainmenubarmicrobuttons.xml
 7465596;interface/addons/blizzard_micromenu/classic/micromenucontainer.xml
 7465597;interface/addons/blizzard_micromenu/classic/micromenucontaineroverrides.lua
 7465598;interface/addons/blizzard_micromenu/mainline/mainmenubarmicrobuttons.lua
@@ -2340,11 +2399,13 @@
 7579225;interface/addons/blizzard_micromenu/vanilla/micromenucontaineroverrides.lua
 7465607;interface/addons/blizzard_micromenu/wrath/mainmenubarmicrobuttons.lua
 7465609;interface/addons/blizzard_micromenu/wrath/mainmenubarmicrobuttons.xml
+7750399;interface/addons/blizzard_micromenu/wrath/micromenucontaineroverrides.lua
 7446658;interface/addons/blizzard_minimap/blizzard_minimap_classic.toc
 5612634;interface/addons/blizzard_minimap/blizzard_minimap_mainline.toc
 6204387;interface/addons/blizzard_minimap/blizzard_minimap_mists.toc
 5871924;interface/addons/blizzard_minimap/cata/minimap.lua
 5877021;interface/addons/blizzard_minimap/cata/minimap.xml
+7817655;interface/addons/blizzard_minimap/cata/minimap_overrides.lua
 5612964;interface/addons/blizzard_minimap/mainline/addoncompartment.lua
 5613624;interface/addons/blizzard_minimap/mainline/addoncompartment.xml
 5612776;interface/addons/blizzard_minimap/mainline/gametime.lua
@@ -2353,6 +2414,7 @@
 5613639;interface/addons/blizzard_minimap/mainline/minimap.xml
 7104838;interface/addons/blizzard_minimap/mists/minimap.lua
 7104833;interface/addons/blizzard_minimap/mists/minimap.xml
+7817657;interface/addons/blizzard_minimap/mists/minimap_overrides.lua
 5613448;interface/addons/blizzard_mirrortimer/blizzard_mirrortimer.toc
 5613660;interface/addons/blizzard_mirrortimer/mirrortimer.lua
 5613254;interface/addons/blizzard_mirrortimer/mirrortimer.xml
@@ -2529,6 +2591,7 @@
 5115690;interface/addons/blizzard_perksprogram/localization.lua
 7349466;interface/addons/blizzard_personalresourcedisplay/alternatepowerbars/demonhunteralternatepower.lua
 6797326;interface/addons/blizzard_personalresourcedisplay/alternatepowerbars/evokeralternatepower.lua
+7939301;interface/addons/blizzard_personalresourcedisplay/alternatepowerbars/manaalternatepower.lua
 6797327;interface/addons/blizzard_personalresourcedisplay/alternatepowerbars/monkalternatepower.lua
 6740288;interface/addons/blizzard_personalresourcedisplay/blizzard_personalresourcedisplay.lua
 6740287;interface/addons/blizzard_personalresourcedisplay/blizzard_personalresourcedisplay.toc
@@ -2541,6 +2604,11 @@
 6856485;interface/addons/blizzard_petbattleui/shared/blizzard_petbattleui.xml
 6856488;interface/addons/blizzard_petbattleui/shared/blizzard_petbattleuipatchwerks.xml
 6856487;interface/addons/blizzard_petbattleui/shared/localization.lua
+7792172;interface/addons/blizzard_photosharing/blizzard_photosharing.lua
+7792175;interface/addons/blizzard_photosharing/blizzard_photosharing.toc
+7792176;interface/addons/blizzard_photosharing/blizzard_photosharing.xml
+7792173;interface/addons/blizzard_photosharing/blizzard_photosharingbrowser.lua
+7792174;interface/addons/blizzard_photosharing/blizzard_photosharingbrowser.xml
 5279558;interface/addons/blizzard_pingui/blizzard_pingmanager.lua
 5279556;interface/addons/blizzard_pingui/blizzard_pingui.lua
 5279559;interface/addons/blizzard_pingui/blizzard_pingui.toc
@@ -2627,6 +2695,12 @@
 5121209;interface/addons/blizzard_privateaurasui/blizzard_privateaurasui.lua
 5121207;interface/addons/blizzard_privateaurasui/blizzard_privateaurasui.toc
 5143788;interface/addons/blizzard_privateaurasui/blizzard_privateaurasui.xml
+7894685;interface/addons/blizzard_privateaurasui/classic/privateaurastooltip.lua
+7894683;interface/addons/blizzard_privateaurasui/classic/privateaurastooltip.xml
+7894684;interface/addons/blizzard_privateaurasui/mainline/privateaurastooltip.lua
+7894686;interface/addons/blizzard_privateaurasui/mainline/privateaurastooltip.xml
+7868970;interface/addons/blizzard_privateaurasui/privateaurainit.lua
+7894687;interface/addons/blizzard_privateaurasui/shared/privateaurastooltip.lua
 4280188;interface/addons/blizzard_professions/blizzard_professions.toc
 4765667;interface/addons/blizzard_professions/blizzard_professionscrafterorderpage.lua
 4765665;interface/addons/blizzard_professions/blizzard_professionscrafterorderpage.xml
@@ -2743,6 +2817,7 @@
 7197129;interface/addons/blizzard_raidframe/blizzard_raidframe_mainline.toc
 7197127;interface/addons/blizzard_raidframe/mainline/raidframe.lua
 7197128;interface/addons/blizzard_raidframe/mainline/raidframe.xml
+7758097;interface/addons/blizzard_raidframe/wrath/raidframe.xml
 804037;interface/addons/blizzard_raidui/blizzard_raidui.lua
 841778;interface/addons/blizzard_raidui/blizzard_raidui.toc
 804038;interface/addons/blizzard_raidui/blizzard_raidui.xml
@@ -2993,6 +3068,8 @@
 5613095;interface/addons/blizzard_sharedmapdataproviders/wrath/deathmapdataprovider.xml
 1387407;interface/addons/blizzard_sharedmapdataproviders/zonelabeldataprovider.lua
 1387402;interface/addons/blizzard_sharedmapdataproviders/zonelabeldataprovider.xml
+7902293;interface/addons/blizzard_sharedtalentui/blizzard_autocommittraitframe.lua
+7902294;interface/addons/blizzard_sharedtalentui/blizzard_autocommittraitframe.xml
 4216641;interface/addons/blizzard_sharedtalentui/blizzard_sharedtalentbuttontemplates.lua
 4216645;interface/addons/blizzard_sharedtalentui/blizzard_sharedtalentbuttontemplates.xml
 4225404;interface/addons/blizzard_sharedtalentui/blizzard_sharedtalentedgetemplates.lua
@@ -3058,6 +3135,7 @@
 5613606;interface/addons/blizzard_sharedxml/classic/classiccvarutil.lua
 7111328;interface/addons/blizzard_sharedxml/classic/dialog/dialogtemplates.xml
 7111330;interface/addons/blizzard_sharedxml/classic/frame/mainmenuframetemplates.xml
+7895097;interface/addons/blizzard_sharedxml/classic/gametooltiptemplate.lua
 5612383;interface/addons/blizzard_sharedxml/classic/gametooltiptemplate.xml
 5612544;interface/addons/blizzard_sharedxml/classic/gluecheck.lua
 5612922;interface/addons/blizzard_sharedxml/classic/modelframes.lua
@@ -3149,6 +3227,7 @@
 5613247;interface/addons/blizzard_sharedxml/modelscenemixin.xml
 5613872;interface/addons/blizzard_sharedxml/modelscenetemplates.lua
 5613142;interface/addons/blizzard_sharedxml/modelscenetemplates.xml
+7875995;interface/addons/blizzard_sharedxml/moneyformatter.lua
 5613245;interface/addons/blizzard_sharedxml/newfeaturelabel.lua
 5613134;interface/addons/blizzard_sharedxml/newfeaturelabel.xml
 5612737;interface/addons/blizzard_sharedxml/nineslice.lua
@@ -3331,7 +3410,9 @@
 5705354;interface/addons/blizzard_sharedxmlbase/templateinfocache.lua
 5705366;interface/addons/blizzard_sharedxmlbase/textureutil.lua
 6686487;interface/addons/blizzard_sharedxmlbase/timedcallback.lua
+7868971;interface/addons/blizzard_sharedxmlgame/blizzard_sharedxmlgame.toc
 5612688;interface/addons/blizzard_sharedxmlgame/blizzard_sharedxmlgame_mainline.toc
+7868972;interface/addons/blizzard_sharedxmlgame/compactunitframesconstants.lua
 5612716;interface/addons/blizzard_sharedxmlgame/dressupmodelframemixin.lua
 7132745;interface/addons/blizzard_sharedxmlgame/mainline/listtemplates.lua
 7132743;interface/addons/blizzard_sharedxmlgame/mainline/listtemplates.xml
@@ -3438,6 +3519,7 @@
 4692728;interface/addons/blizzard_storeui/blizzard_shared_storeuisecure.lua
 5159903;interface/addons/blizzard_storeui/blizzard_shared_storeuitemplates.lua
 5159901;interface/addons/blizzard_storeui/blizzard_shared_storeuitemplates.xml
+903168;interface/addons/blizzard_storeui/blizzard_storeui.toc
 5613484;interface/addons/blizzard_storeui/blizzard_storeui_mainline.toc
 6204377;interface/addons/blizzard_storeui/blizzard_storeui_mists.toc
 4692720;interface/addons/blizzard_storeui/shared_localization.lua
@@ -3455,6 +3537,9 @@
 7430856;interface/addons/blizzard_textstatusbar/blizzard_textstatusbar.toc
 7430855;interface/addons/blizzard_textstatusbar/textstatusbar.lua
 7430857;interface/addons/blizzard_textstatusbar/textstatusbar.xml
+7713907;interface/addons/blizzard_tieredentrancetraits/blizzard_tieredentrancetraits.lua
+7713909;interface/addons/blizzard_tieredentrancetraits/blizzard_tieredentrancetraits.toc
+7713908;interface/addons/blizzard_tieredentrancetraits/blizzard_tieredentrancetraits.xml
 5612318;interface/addons/blizzard_timemanager/blizzard_timemanager_mainline.toc
 5612543;interface/addons/blizzard_timemanager/mainline/blizzard_timemanager.lua
 5613525;interface/addons/blizzard_timemanager/mainline/blizzard_timemanager.xml
@@ -3531,6 +3616,7 @@
 4095385;interface/addons/blizzard_uiframemanager/blizzard_uiframemanager.lua
 4095387;interface/addons/blizzard_uiframemanager/blizzard_uiframemanager.toc
 4095383;interface/addons/blizzard_uiframemanager/blizzard_uiframemanager.xml
+7864262;interface/addons/blizzard_uipanels_game/blizzard_uipanels_game_classic.toc
 5613975;interface/addons/blizzard_uipanels_game/blizzard_uipanels_game_mainline.toc
 6204380;interface/addons/blizzard_uipanels_game/blizzard_uipanels_game_mists.toc
 5795017;interface/addons/blizzard_uipanels_game/cata/honorframe.lua
@@ -3742,6 +3828,8 @@
 2012276;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatebase.xml
 2100397;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatebullettextlist.lua
 2100390;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatebullettextlist.xml
+7938755;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatebuttonheader.lua
+7938756;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatebuttonheader.xml
 1968579;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatecapturebar.lua
 1968578;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatecapturebar.xml
 3046634;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatecapturezone.lua
@@ -3768,8 +3856,12 @@
 5185580;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplateitemdisplay.xml
 5660730;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatemappinanimation.lua
 5660732;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatemappinanimation.xml
+7938757;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatepreyhuntprogress.lua
+7938759;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatepreyhuntprogress.xml
 2138720;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatescenarioheadercurrenciesandbackground.lua
 2138722;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatescenarioheadercurrenciesandbackground.xml
+7938758;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatescenarioheaderdelves.lua
+7938760;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatescenarioheaderdelves.xml
 3744242;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatescenarioheadertimer.lua
 3744240;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatescenarioheadertimer.xml
 4206631;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatespacer.lua
@@ -3800,6 +3892,7 @@
 3005254;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettemplatezonecontrol.xml
 1967931;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettopcenterframe.lua
 1967929;interface/addons/blizzard_uiwidgets/blizzard_uiwidgettopcenterframe.xml
+7938761;interface/addons/blizzard_uiwidgets/blizzard_widgetsutil.lua
 5614029;interface/addons/blizzard_uiwidgets/mainline/blizzard_uiwidgetanimationtemplates.lua
 5613295;interface/addons/blizzard_uiwidgets/mainline/blizzard_uiwidgetanimationtemplates.xml
 5613950;interface/addons/blizzard_uiwidgets/mainline/blizzard_uiwidgetbelowminimapframe.lua
@@ -3882,6 +3975,7 @@
 5612883;interface/addons/blizzard_uiwidgets/mainline/blizzard_uiwidgettopcenterframe.xml
 6700311;interface/addons/blizzard_uiwidgets/mainline/blizzard_widgetsutil.lua
 5613956;interface/addons/blizzard_unitframe/blizzard_unitframe_cata.toc
+7831515;interface/addons/blizzard_unitframe/blizzard_unitframe_classic.toc
 6716592;interface/addons/blizzard_unitframe/blizzard_unitframe_mainline.toc
 6204373;interface/addons/blizzard_unitframe/blizzard_unitframe_mists.toc
 6703443;interface/addons/blizzard_unitframe/blizzard_unitframe_tbc.toc
@@ -77891,6 +77985,8 @@
 7259854;interface/shop/catalogshopfxtokenrays.blp
 7241108;interface/shop/catalogshopheadermenu.blp
 7241110;interface/shop/catalogshopheadermenu2x.blp
+7746249;interface/shop/catalogshophearthsteelcurrencycounticons2x.blp
+7746247;interface/shop/catalogshophearthsteelcurrencycountlicons.blp
 7644230;interface/shop/catalogshophearthsteelfx.blp
 7644228;interface/shop/catalogshophearthsteelfx2x.blp
 7645826;interface/shop/catalogshophearthsteelfxflipbook.blp

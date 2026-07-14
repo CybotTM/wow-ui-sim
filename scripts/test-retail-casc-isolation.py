@@ -19,7 +19,9 @@ RETAIL_SYNC_EXCLUDED = {
     "Blizzard_CooldownBroadcaster/Blizzard_CooldownBroadcaster_Bootstrap.lua",
 }
 RETAIL_CONTENT_REQUIREMENTS = {
-    "Blizzard_FrameXMLUtil/RuneforgeUtil.xml": '<Script file="RuneforgeUtil.lua"/>',
+    # 12.0.7 split RuneforgeUtil.lua/.xml into separate TOC entries; the XML no
+    # longer <Script>-includes the Lua. Guard on a frame that is in the file.
+    "Blizzard_FrameXMLUtil/RuneforgeUtil.xml": 'name="RuneforgeCovenantSigilTemplate"',
 }
 
 

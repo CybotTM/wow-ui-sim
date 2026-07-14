@@ -366,8 +366,12 @@ fn is_valid_utf8_file(path: &Path) -> bool {
 
 fn retail_cache_entry_is_usable(entry: &str, path: &Path) -> bool {
     match entry {
+        // 12.0.7 split RuneforgeUtil.lua/.xml into separate TOC entries, so the
+        // XML no longer `<Script>`-includes the Lua. Guard on a frame that is
+        // present in the current file instead, to still reject a stale/wrong
+        // cached version.
         "Blizzard_FrameXMLUtil/RuneforgeUtil.xml" => {
-            file_contains(path, r#"<Script file="RuneforgeUtil.lua"/>"#)
+            file_contains(path, r#"name="RuneforgeCovenantSigilTemplate""#)
         }
         _ => true,
     }
@@ -549,17 +553,17 @@ mod tests {
         std::fs::write(&runeforge_xml, r#"<Ui></Ui>"#).expect("write stale RuneforgeUtil.xml");
         assert!(
             !cache_entry_is_usable("Blizzard_FrameXMLUtil/RuneforgeUtil.xml", &runeforge_xml),
-            "Retail cache must reject RuneforgeUtil.xml without the Lua include"
+            "Retail cache must reject RuneforgeUtil.xml without the sigil template"
         );
 
         std::fs::write(
             &runeforge_xml,
-            r#"<Ui><Script file="RuneforgeUtil.lua"/></Ui>"#,
+            r#"<Ui><Frame name="RuneforgeCovenantSigilTemplate" virtual="true"/></Ui>"#,
         )
-        .expect("write RuneforgeUtil.xml with Lua include");
+        .expect("write RuneforgeUtil.xml with sigil template");
         assert!(
             cache_entry_is_usable("Blizzard_FrameXMLUtil/RuneforgeUtil.xml", &runeforge_xml),
-            "Retail cache should accept RuneforgeUtil.xml with the Lua include"
+            "Retail cache should accept RuneforgeUtil.xml with the sigil template"
         );
 
         std::fs::remove_dir_all(root).expect("remove cache root");
