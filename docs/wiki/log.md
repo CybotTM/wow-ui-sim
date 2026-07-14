@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] system | Patch observation primitive
+
+Added a production observation primitive that resolves actual Lua global/table paths in `WowLuaEnv` and records active profile, lifecycle phase, addon, presence, and Lua type. Focused coverage observes present and absent symbols, a real TOC load-on-demand transition, explicit reset absence, and exact manifest-byte hashing. Full manifest-driven phase orchestration remains open.
+
 ## [2026-07-14] investigation | Preserve 12.0.7 API-change source
 
 Moved the 12.0.7 Warcraft Wiki source snapshot from temporary storage into `data/patch-api/sources/12.0.7-api-changes.txt` and linked the patch audit to the checked-in evidence. The 12.0.7 manifest/register remains open work.

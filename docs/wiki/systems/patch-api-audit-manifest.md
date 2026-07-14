@@ -36,7 +36,7 @@ Unknown JSON fields, blank evidence, invalid lifecycle vocabulary, and incompati
 
 Completion additionally consumes an observation artifact bound to the exact manifest hash. Each assertion requires exactly one observation matching row, flavor, phase, addon owner, presence, and Lua type. Missing, extra, duplicated, or mismatched observations fail.
 
-The validator supports the observation contract, but generation from real profile/load-phase test execution is still open. Synthetic falsifiers test wrong-flavor vendor evidence, pre-load LoD exposure, cross-flavor leakage, and post-reset resurrection. These do not replace real per-row observations.
+The production observation primitive now reads actual global/table paths from `WowLuaEnv`, records the active compiled profile and Lua type, and is tested across present, absent, direct TOC LoD before/after, and explicit reset phases. Full manifest-driven phase orchestration and checked-in per-row artifact generation remain open. Synthetic falsifiers test wrong-flavor vendor evidence, pre-load LoD exposure, cross-flavor leakage, and post-reset resurrection; they do not replace real per-row observations.
 
 ### Exception approval
 

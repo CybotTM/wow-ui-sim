@@ -1,9 +1,11 @@
 use regex::Regex;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, HashSet};
 use std::path::Path;
 use std::process::{Command, Stdio};
+use wow_ui_sim::client_profile::{ACTIVE, ClientProfile};
+use wow_ui_sim::lua_api::WowLuaEnv;
 
 const PATCH_MANIFEST_SCHEMA: &str = "framexml-patch-audit/v2";
 
@@ -127,7 +129,7 @@ impl ResolutionKind {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub enum AuditFlavor {
     Retail,
@@ -151,7 +153,7 @@ impl AuditFlavor {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub enum AuditPhase {
     Initialization,
@@ -197,7 +199,7 @@ pub enum ExpectedPresence {
     Absent,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum LuaType {
     Function,
@@ -206,9 +208,10 @@ pub enum LuaType {
     Number,
     Boolean,
     Userdata,
+    Thread,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ObservationSet {
     pub schema: String,
@@ -216,7 +219,7 @@ pub struct ObservationSet {
     pub observations: Vec<Observation>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Observation {
     pub row_id: String,
@@ -225,6 +228,100 @@ pub struct Observation {
     pub present: bool,
     pub observed_type: Option<LuaType>,
     pub addon: Option<String>,
+}
+
+impl AuditFlavor {
+    fn active() -> Self {
+        match ACTIVE {
+            ClientProfile::Retail => Self::Retail,
+            ClientProfile::Ptr => Self::Ptr,
+            ClientProfile::Wrath => Self::Wrath,
+            ClientProfile::Mists => Self::Mists,
+            ClientProfile::Era => Self::Era,
+            ClientProfile::Anniversary => Self::Anniversary,
+        }
+    }
+}
+
+pub fn observe_assertion(
+    env: &WowLuaEnv,
+    row: &PatchAuditRow,
+    assertion: &AuditAssertion,
+) -> Result<Observation, String> {
+    let active_flavor = require_active_flavor(row, assertion)?;
+    let (present, observed_type) = read_lua_symbol(env, row)?;
+    Ok(Observation {
+        row_id: row.id.clone(),
+        flavor: active_flavor,
+        phase: assertion.phase,
+        present,
+        observed_type,
+        addon: assertion.addon.clone(),
+    })
+}
+
+fn require_active_flavor(
+    row: &PatchAuditRow,
+    assertion: &AuditAssertion,
+) -> Result<AuditFlavor, String> {
+    let active_flavor = AuditFlavor::active();
+    if assertion.flavor == active_flavor {
+        return Ok(active_flavor);
+    }
+    Err(format!(
+        "row {} requires {} but active profile is {}",
+        row.id,
+        assertion.flavor.as_str(),
+        active_flavor.as_str()
+    ))
+}
+
+fn read_lua_symbol(
+    env: &WowLuaEnv,
+    row: &PatchAuditRow,
+) -> Result<(bool, Option<LuaType>), String> {
+    let symbol = serde_json::to_string(&row.symbol)
+        .map_err(|error| format!("failed to encode symbol {}: {error}", row.id))?;
+    let script = format!(
+        r#"
+        local value = _G
+        for part in string.gmatch({symbol}, "[^.]+") do
+            if type(value) ~= "table" then return false, nil end
+            value = value[part]
+            if value == nil then return false, nil end
+        end
+        return true, type(value)
+        "#
+    );
+    let (present, observed_type): (bool, Option<String>) = env
+        .eval(&script)
+        .map_err(|error| format!("failed to observe {}: {error}", row.id))?;
+    let observed_type = observed_type.as_deref().map(parse_lua_type).transpose()?;
+    Ok((present, observed_type))
+}
+
+fn parse_lua_type(lua_type: &str) -> Result<LuaType, String> {
+    match lua_type {
+        "function" => Ok(LuaType::Function),
+        "table" => Ok(LuaType::Table),
+        "string" => Ok(LuaType::String),
+        "number" => Ok(LuaType::Number),
+        "boolean" => Ok(LuaType::Boolean),
+        "userdata" => Ok(LuaType::Userdata),
+        "thread" => Ok(LuaType::Thread),
+        other => Err(format!("unsupported Lua observation type: {other}")),
+    }
+}
+
+pub fn build_observation_set(
+    manifest_json: &str,
+    observations: Vec<Observation>,
+) -> ObservationSet {
+    ObservationSet {
+        schema: "framexml-patch-observations/v1".to_string(),
+        manifest_hash: format!("{:x}", Sha256::digest(manifest_json.as_bytes())),
+        observations,
+    }
 }
 
 pub fn parse_manifest(json: &str) -> Result<PatchAuditManifest, String> {
@@ -988,6 +1085,8 @@ pub fn render_checklist(manifest: &PatchAuditManifest) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Write;
+    use wow_ui_sim::loader::load_addon;
 
     fn fixture_manifest(row: &str) -> PatchAuditManifest {
         parse_manifest(&format!(
@@ -1032,6 +1131,103 @@ mod tests {
             ""
         };
         format!(r#"{{"flavor":"{flavor}","phase":"{phase}","expected":"{expected}"{ty}}}"#)
+    }
+
+    #[test]
+    fn runtime_observations_cover_present_absent_lod_and_reset_phases() {
+        let flavor = AuditFlavor::active().as_str();
+        let env = WowLuaEnv::new().expect("environment should initialize");
+
+        env.exec("Fixture = function() end")
+            .expect("vendor fixture should publish");
+        let vendor_row = resolved_row(
+            "best-effort",
+            "vendor-present",
+            &assertion(flavor, "post-core", "present"),
+        );
+        let vendor_manifest = fixture_manifest(&vendor_row);
+        let vendor = observe_assertion(
+            &env,
+            &vendor_manifest.rows[0],
+            &vendor_manifest.rows[0].assertions[0],
+        )
+        .expect("vendor observation should succeed");
+        validate_observations(&vendor_manifest, &[vendor])
+            .expect("vendor observation should validate");
+
+        env.exec("Fixture = nil")
+            .expect("absent fixture should clear");
+        let absent_row = resolved_row(
+            "best-effort",
+            "cross-flavor",
+            &assertion(flavor, "post-load", "absent"),
+        );
+        let mut absent_manifest = fixture_manifest(&absent_row);
+        absent_manifest.target.flavor = AuditFlavor::active();
+        let absent = observe_assertion(
+            &env,
+            &absent_manifest.rows[0],
+            &absent_manifest.rows[0].assertions[0],
+        )
+        .expect("absent observation should succeed");
+        validate_observations(&absent_manifest, &[absent])
+            .expect("absent observation should validate");
+
+        let directory = tempfile::tempdir().expect("temporary addon directory should create");
+        let toc_path = directory.path().join("ObservationFixture.toc");
+        let mut toc = std::fs::File::create(&toc_path).expect("fixture TOC should create");
+        writeln!(toc, "## Title: ObservationFixture").unwrap();
+        writeln!(toc, "## LoadOnDemand: 1").unwrap();
+        writeln!(toc, "ObservationFixture.lua").unwrap();
+        std::fs::write(
+            directory.path().join("ObservationFixture.lua"),
+            "Fixture = function() end\n",
+        )
+        .expect("fixture Lua should write");
+        let lod_assertions = format!(
+            r#"{{"flavor":"{flavor}","phase":"before-addon","expected":"absent","addon":"ObservationFixture"}},{{"flavor":"{flavor}","phase":"after-addon","expected":"present","expected_type":"function","addon":"ObservationFixture"}}"#
+        );
+        let lod_row = load_on_demand_row(&lod_assertions, "ObservationFixture");
+        let mut lod_manifest = fixture_manifest(&lod_row);
+        lod_manifest.target.flavor = AuditFlavor::active();
+        let before = observe_assertion(
+            &env,
+            &lod_manifest.rows[0],
+            &lod_manifest.rows[0].assertions[0],
+        )
+        .expect("pre-load observation should succeed");
+        load_addon(&env.loader_env(), &toc_path).expect("fixture addon should load");
+        let after = observe_assertion(
+            &env,
+            &lod_manifest.rows[0],
+            &lod_manifest.rows[0].assertions[1],
+        )
+        .expect("post-load observation should succeed");
+        validate_observations(&lod_manifest, &[before, after])
+            .expect("LoD observations should validate");
+
+        env.exec("Fixture = function() end; Fixture = nil")
+            .expect("reset fixture should execute");
+        let reset_row = resolved_row(
+            "best-effort",
+            "removed",
+            &assertion(flavor, "post-reset", "absent"),
+        );
+        let reset_manifest = fixture_manifest(&reset_row);
+        let reset = observe_assertion(
+            &env,
+            &reset_manifest.rows[0],
+            &reset_manifest.rows[0].assertions[0],
+        )
+        .expect("reset observation should succeed");
+        validate_observations(&reset_manifest, &[reset])
+            .expect("reset observation should validate");
+
+        let observation_set = build_observation_set("exact manifest bytes", Vec::new());
+        assert_eq!(
+            observation_set.manifest_hash,
+            format!("{:x}", Sha256::digest(b"exact manifest bytes"))
+        );
     }
 
     #[test]
