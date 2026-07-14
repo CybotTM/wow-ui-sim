@@ -2,9 +2,9 @@
 
 Chronological record of wiki operations.
 
-## [2026-07-14] decision | Patch API audit exceptions approved
+## [2026-07-14] decision | Patch API audit exception approval superseded
 
-User approved all itemized exception requests for the 12.1, 12.0.7, and 12.0.5 patch audits. The audits may close with those items retained as approved non-implemented fidelity gaps; future probe-backed work can supersede them.
+A broad approval for documented 12.1, 12.0.7, and 12.0.5 exceptions was recorded, then superseded after review found that the full itemized checklist was not presented in chat and 12.1 FrameXML entries were mass-deferred without individual unsafe/impossible justification. Audits remain open pending re-triage and informed per-item approval.
 
 ## [2026-07-13] create | Mastery spells modeled, alias identity fix
 

@@ -69,9 +69,9 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | Encounter Journal difficulty helpers | Best-effort modeled from generated Encounter Journal instance data: `GetBaseDifficultyID` returns `1` for dungeons and `14` for raids; `InstanceHasDifficultyID` accepts common dungeon IDs `1/2/8/23` and raid IDs `14/15/16/17`. Exact per-instance difficulty masks need generated data or PTR probes. |
 | FrameXML symbol snapshot | Full 320-added/112-removed inventory is itemized in [[patch-12-1-framexml-symbol-inventory]]. Its 432 entries represent 430 distinct names because two occur in both lists. `LoadAddOnWithErrorHandling` is implemented/tested; the remaining 431 entries are explicit approved exceptions, not silent omissions. |
 
-### Approved exceptions
+### Exception requests pending informed approval
 
-User approved the documented exception set on 2026-07-14. The following 12.1 items remain non-implemented fidelity gaps; retain them as itemized approved exceptions until PTR probes, generated Blizzard docs, or exact behavior captures make implementation safe:
+A broad approval recorded on 2026-07-14 is superseded: the itemized checklist was not presented in chat and 431 FrameXML entries were mass-deferred rather than justified under the unsafe/impossible bar. The following items remain pending until re-triage and informed per-item approval:
 
 - **UnitAura secrecy and errors** — PTR notes say `C_UnitAura`/`C_TooltipInfo` aura access by index/slot/instance ID Lua-errors for addons while auras are secret, spell-ID/name access remains callable, `UNIT_AURA` payloads become fully secret, and `AuraData` structs are fully secret. Retained as an approved exception because approximating this without exact taint/addon vs Blizzard call-site behavior and error shapes risks enforcing the wrong security boundary.
 - **Private Script Objects / Forbidden Partition** — compatible XML/private-table mechanics are modeled, but the full object partition contract is not proven. Retained as an approved exception for public/forbidden table identity, inaccessible key paths, child object visibility, hooks, script storage, and delegate edge cases until live behavior is captured.

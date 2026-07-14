@@ -16,9 +16,9 @@ Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptP
 
 **Best-effort with existing subsystem coverage:** `ShowUIPanel` pulse/`CloseAllWindows`; `GetMouseFoci`/`GetMouseFocus` live return shape; protected-template descendant/anchor non-propagation; same-size maximize/restore duplicate scale-event pair; Store forbidden/dropdown observations. These remain best-effort because their retained capture is not matched by an exact focused simulator regression.
 
-### Approved exceptions
+### Exception requests pending informed approval
 
-User approved the documented exception set on 2026-07-14; approval records acceptance of these non-implemented gaps, not their implementation.
+A broad approval recorded on 2026-07-14 is superseded pending re-triage and an itemized checklist presented in chat.
 
 1. **Exact retained-probe regressions:** `ShowUIPanel` pulse then `CloseAllWindows`; exact `GetMouseFoci` shape; protected-template descendant/anchor return values (not mutation-block propagation); Store forbidden/dropdown observations. `Texture:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")` now exact-replays FDID `130828`, and no-arg `SetTexture()` clears. `SecureActionButtonTemplate:IsProtected()` explicit `(true, true)` is now replayed after real `Blizzard_FrameXML` loading. Existing subsystem tests are not exact probe replays. Repeated `false` attribute dispatch now has focused coverage for two writes, handler `false` arguments, nil lookup during dispatch, and final stored `false`, but is not a literal probe-addon replay.
 2. **Store forbidden lifecycle:** `StoreDropdown_SetDropdown` was nil in the retained capture, so intended dropdown population and forbidden-descendant scan were never exercised. Do not invent lifecycle behavior; need a live capture where this API exists.
@@ -67,7 +67,7 @@ The remaining generic defaults are intentionally outside this 12.0.5 audit unles
 
 ### Audit state
 
-This audit is complete for the approved source scope: remaining fidelity gaps are the approved exceptions above. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
+This audit remains open: remaining fidelity gaps are pending exception requests above. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
 
 ## Sources
 
