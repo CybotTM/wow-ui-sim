@@ -8,7 +8,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage; remaining `exception-requested` rows still require strict unsafe/impossible re-triage. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 18 best-effort, 413 exception-requested.
+**Current totals:** 1 implemented, 19 best-effort, 412 exception-requested.
 
 ### Added symbols
 
@@ -173,7 +173,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 | `HideInstanceBootDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideInstanceLockDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideItemUpgradeFrame` | best-effort | Classified as reversed-name snapshot mismatch: PTR defines and uses `ItemUpgradeFrame_Hide`, not `HideItemUpgradeFrame`; focused PTR test explicitly loads `Blizzard_ItemUpgradeUI` and verifies the reversed wrapper remains absent. |
-| `HideProfessionsCustomerOrdersFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `HideProfessionsCustomerOrdersFrame` | best-effort | Classified as snapshot/runtime mismatch: recursive local PTR source scan finds no definition; focused PTR test loads the required ProfessionsTemplates/AuctionHouse dependencies plus `Blizzard_ProfessionsCustomerOrders`, verifies the frame exists, and confirms the wrapper remains absent. |
 | `HideSummonConfirmationDialogs` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HouseFinderFrame_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HousingBulletinBoardFrame_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
@@ -460,6 +460,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 - `src/ptr/compat_bootstrap.rs` — focused reset, argument/return, hot-swap, missing-global, and preservation coverage for the five `DifficultyUtil` delegates.
 - `tests/blizzard_frame_xml_util_loads.rs` — full PTR Game UI lifecycle/threshold proof and older-retail non-exposure proof.
 - `tests/blizzard_garrison_ui_loads.rs` — recursive PTR Garrison source scan plus explicit LoD addon-load proof for the two absent Garrison hide wrappers.
+- `tests/blizzard_professions_customer_orders_loads.rs` — recursive PTR source scan plus explicit dependency/addon-load proof for the absent CustomerOrders hide wrapper.
 
 ## See Also
 

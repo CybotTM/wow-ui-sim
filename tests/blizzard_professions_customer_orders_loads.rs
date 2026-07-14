@@ -1,3 +1,4 @@
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use std::path::PathBuf;
 
 use wow_ui_sim::loader::discover_blizzard_addons_for_screen;
@@ -72,6 +73,30 @@ fn professions_templates_toc() -> PathBuf {
         .join("Blizzard_ProfessionsTemplates.toc")
 }
 
+fn assert_directory_omits_symbol(directory: &std::path::Path, symbol: &str) {
+    for entry in std::fs::read_dir(directory).expect("Blizzard source directory should read") {
+        let path = entry.expect("Blizzard source entry should read").path();
+        if path.is_dir() {
+            assert_directory_omits_symbol(&path, symbol);
+            continue;
+        }
+
+        let Some(extension) = path.extension().and_then(|extension| extension.to_str()) else {
+            continue;
+        };
+        if !matches!(extension, "lua" | "xml" | "toc") {
+            continue;
+        }
+
+        let source = std::fs::read_to_string(&path).expect("Blizzard source file should read");
+        assert!(
+            !source.contains(symbol),
+            "{symbol} unexpectedly exists in {}",
+            path.display()
+        );
+    }
+}
+
 fn load_full_game_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
@@ -104,6 +129,21 @@ fn load_customer_orders_with_deps(env: &WowLuaEnv) {
         .expect("Blizzard_AuctionHouseUI (Mainline) loads cleanly");
     load_addon(&env.loader_env(), &customer_orders_toc())
         .expect("Blizzard_ProfessionsCustomerOrders loads cleanly");
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_customer_orders_does_not_publish_snapshot_only_hide_wrapper() {
+    assert_directory_omits_symbol(&blizzard_ui_dir(), "HideProfessionsCustomerOrdersFrame");
+
+    let env = load_full_game_ui();
+    load_customer_orders_with_deps(&env);
+    let result: (String, bool) = env
+        .eval(
+            "return type(ProfessionsCustomerOrdersFrame), HideProfessionsCustomerOrdersFrame == nil",
+        )
+        .expect("customer orders wrapper visibility should be queryable");
+    assert_eq!(result, ("table".to_string(), true));
 }
 
 #[test]

@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 CustomerOrders hide-wrapper mismatch
+
+Updated the 12.1 FrameXML inventory after a recursive PTR source scan found no `HideProfessionsCustomerOrdersFrame` definition. A focused PTR test loads ProfessionsTemplates and AuctionHouse dependencies, explicitly loads `Blizzard_ProfessionsCustomerOrders`, verifies its frame exists, and confirms the snapshot-only wrapper remains nil. Current inventory: 1 implemented, 19 best-effort, and 412 exception-requested pending strict re-triage.
+
 ## [2026-07-14] investigation | 12.1 Garrison hide-wrapper mismatches
 
 Updated the 12.1 FrameXML inventory after confirming `HideGarrisonMissionFrames` and `HideGarrisonShipyardFrame` have no definitions in local PTR Blizzard sources. A focused PTR test loads `Blizzard_GarrisonUI` with its LoD dependencies and verifies both snapshot-only wrappers remain nil. Current inventory: 1 implemented, 18 best-effort, and 413 exception-requested pending strict re-triage.
