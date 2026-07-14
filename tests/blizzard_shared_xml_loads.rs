@@ -593,6 +593,26 @@ fn resize_layout_mixin_inherits_base_layout_capability() {
     );
 }
 
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_smooth_progress_helper_is_global_not_interpolator_method() {
+    let env = load_full_game_ui();
+
+    let (global_type, namespaced_type, smoothed): (String, String, f64) = env
+        .eval(
+            r#"
+            return type(GetSmoothProgressChange),
+                type(InterpolatorUtil.GetSmoothProgressChange),
+                GetSmoothProgressChange(100, 0, 100, 1)
+            "#,
+        )
+        .expect("smooth progress snapshot mismatch probe should succeed");
+
+    assert_eq!(global_type, "function");
+    assert_eq!(namespaced_type, "nil");
+    assert!((smoothed - 70.0).abs() < f64::EPSILON);
+}
+
 #[test]
 fn pixel_util_provides_screen_resolution_helpers() {
     let env = load_full_game_ui();
