@@ -1,4 +1,4 @@
-#![cfg(feature = "client-retail")]
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use std::path::PathBuf;
 
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
@@ -78,7 +78,7 @@ const MACRO_FREE_FUNCTIONS: &[&str] = &[
     "MacroEditButton_OnClick",
 ];
 
-fn load_full_game_ui_with_macro_ui_lod() -> WowLuaEnv {
+fn load_full_game_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Game);
@@ -99,10 +99,13 @@ fn load_full_game_ui_with_macro_ui_lod() -> WowLuaEnv {
 
     env.apply_post_load_workarounds();
     fire_startup_events_for_screen(&env, ScreenKind::Game);
+    env
+}
 
+fn load_full_game_ui_with_macro_ui_lod() -> WowLuaEnv {
+    let env = load_full_game_ui();
     load_addon(&env.loader_env(), &macro_ui_toc())
         .expect("Blizzard_MacroUI should load via explicit Rust loader call");
-
     env
 }
 
@@ -419,6 +422,39 @@ fn blizzard_macro_ui_publishes_macro_popup_frame_mixin_with_seven_methods() {
             "MacroPopupFrameMixin.{method} must be a function"
         );
     }
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_macro_save_placeholder_is_replaced_by_lod_delegate() {
+    let env = load_full_game_ui();
+
+    let placeholder_is_noop: bool = env
+        .eval(
+            r#"
+            local before = MacroFrame_SaveMacro
+            MacroFrame = { calls = 0, SaveMacro = function(self) self.calls = self.calls + 1 end }
+            before()
+            return type(before) == "function" and MacroFrame.calls == 0
+            "#,
+        )
+        .expect("startup MacroFrame_SaveMacro placeholder probe should succeed");
+    assert!(placeholder_is_noop);
+
+    load_addon(&env.loader_env(), &macro_ui_toc())
+        .expect("Blizzard_MacroUI should replace the startup placeholder");
+
+    let lod_delegate_called: bool = env
+        .eval(
+            r#"
+            MacroFrame.calls = 0
+            MacroFrame.SaveMacro = function(self) self.calls = self.calls + 1 end
+            MacroFrame_SaveMacro()
+            return MacroFrame.calls == 1
+            "#,
+        )
+        .expect("LoD MacroFrame_SaveMacro delegate probe should succeed");
+    assert!(lod_delegate_called);
 }
 
 #[test]
