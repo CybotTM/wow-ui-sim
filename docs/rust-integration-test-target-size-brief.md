@@ -113,6 +113,32 @@ one file per test and not necessarily one giant harness:
 The first priority is reducing hundreds of top-level test crates to single-digit
 or low-double-digit harness crates.
 
+### Bounded Target Policy
+
+Do not restore one Cargo target per test file. The previous layout generated
+about 916 standalone test executables averaging roughly 222 MiB each and grew a
+fresh target directory to about 201 GiB. Every new `[[test]]` entry therefore
+requires target-count review.
+
+Use a small, bounded set of grouped harnesses by subsystem or incompatible
+client-profile lane. Standalone targets are justified only when they isolate a
+real feature/profile boundary or a frequently edited workflow from the giant
+integration harness. They must accumulate related tests rather than fan out one
+target per symbol or source file.
+
+`patch_12_1_audit` is the PTR-only grouped target for 12.1 audit work. Its full,
+unfiltered command must remain at or below 60 seconds on the development host:
+
+```bash
+cargo test --test patch_12_1_audit \
+  --no-default-features --features sound,gui,casc,client-ptr
+```
+
+Keep that budget by batching related assertions into lifecycle/family tests and
+reusing each loaded UI environment within the family. Do not create one
+full-UI startup per audited symbol. If the full target approaches 60 seconds,
+optimize fixture sharing or grouping before adding another target.
+
 ## Worktree Target Strategy
 
 Per-worktree `target/` directories avoid Cargo lock contention but multiply this
