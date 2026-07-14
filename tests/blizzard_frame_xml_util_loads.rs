@@ -1,4 +1,4 @@
-#![cfg(feature = "client-retail")]
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use std::path::PathBuf;
 
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
@@ -222,6 +222,68 @@ fn blizzard_frame_xml_util_publishes_core_item_and_aura_namespaces() {
          (AuraUtil.lua — aura iteration helpers and FindAuraByName), CalendarUtil \
          (CalendarUtil.lua — date formatting and event-status mapping)"
     );
+}
+
+#[cfg(feature = "retail-12-1-0")]
+#[test]
+fn blizzard_frame_xml_util_restores_patch_12_1_difficulty_color_delegates() {
+    let env = load_full_game_ui();
+
+    let result: String = env
+        .eval(
+            r#"
+            local function matchesVendor(functionName, ...)
+                local color, highlight = DifficultyUtil[functionName](...)
+                local vendorColor, vendorHighlight = _G[functionName](...)
+                return color == vendorColor and highlight == vendorHighlight
+            end
+
+            if not matchesVendor("GetDifficultyColor", Enum.RelativeContentDifficulty.Impossible) then return "difficulty" end
+            if not matchesVendor("GetQuestDifficultyColor", UnitEffectiveLevel("player"), false) then return "quest" end
+            if not matchesVendor("GetCreatureDifficultyColor", UnitEffectiveLevel("player") + 5) then return "creature" end
+            if not matchesVendor("GetRelativeDifficultyColor", 10, 15) then return "relative-delegate" end
+            if not matchesVendor("GetScalingQuestDifficultyColor", UnitEffectiveLevel("player") + 5) then return "scaling-delegate" end
+
+            local color = DifficultyUtil.GetRelativeDifficultyColor(10, 15)
+            if color ~= QuestDifficultyColors.impossible then return "relative-plus-five" end
+            color = DifficultyUtil.GetRelativeDifficultyColor(10, 13)
+            if color ~= QuestDifficultyColors.verydifficult then return "relative-plus-three" end
+            color = DifficultyUtil.GetRelativeDifficultyColor(10, 6)
+            if color ~= QuestDifficultyColors.difficult then return "relative-minus-four" end
+
+            local playerLevel = UnitEffectiveLevel("player")
+            color = DifficultyUtil.GetScalingQuestDifficultyColor(playerLevel + 5)
+            if color ~= QuestDifficultyColors.impossible then return "scaling-plus-five" end
+            color = DifficultyUtil.GetScalingQuestDifficultyColor(playerLevel + 3)
+            if color ~= QuestDifficultyColors.verydifficult then return "scaling-plus-three" end
+            color = DifficultyUtil.GetScalingQuestDifficultyColor(playerLevel)
+            if color ~= QuestDifficultyColors.difficult then return "scaling-zero" end
+            return "ok"
+            "#,
+        )
+        .expect("12.1 DifficultyUtil delegates should survive full Game UI startup");
+
+    assert_eq!(result, "ok");
+}
+
+#[cfg(not(feature = "retail-12-1-0"))]
+#[test]
+fn blizzard_frame_xml_util_does_not_publish_patch_12_1_difficulty_color_delegates() {
+    let env = load_full_game_ui();
+
+    let result: bool = env
+        .eval(
+            r#"
+            return DifficultyUtil.GetCreatureDifficultyColor == nil
+                and DifficultyUtil.GetDifficultyColor == nil
+                and DifficultyUtil.GetQuestDifficultyColor == nil
+                and DifficultyUtil.GetRelativeDifficultyColor == nil
+                and DifficultyUtil.GetScalingQuestDifficultyColor == nil
+            "#,
+        )
+        .expect("pre-12.1 DifficultyUtil surface should be queryable");
+
+    assert!(result, "12.1 DifficultyUtil delegates leaked into an older epoch");
 }
 
 #[test]

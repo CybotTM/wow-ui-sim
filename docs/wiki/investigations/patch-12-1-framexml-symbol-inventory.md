@@ -6,7 +6,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 
 **Scope:** 320 added entries and 112 removed entries from `/tmp/warcraft_12_1_framexml.json` (432 entries total). `MacroFrame_SaveMacro` and `PlayerChoiceToggle_TryShow` occur in both source lists, so the snapshot represents 430 distinct names.
 
-**Status rule:** `LoadAddOnWithErrorHandling` is **implemented** and regression-tested as the 12.1 canonical wrapper around `UIParentLoadAddOn`. Every other inventory entry is **exception-requested** pending ownership/lifecycle evidence or an explicit user decision. Some names are present in the vendor runtime, but presence alone is not focused behavioral coverage; this inventory does not turn vendor availability into a simulator fidelity claim.
+**Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage; remaining `exception-requested` rows still require strict unsafe/impossible re-triage. Vendor presence alone is not focused behavioral coverage.
 
 ### Added symbols
 
@@ -82,11 +82,11 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 | `CooldownViewerUtil.GetSoundTypeText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `CovenantCallings_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `DebugTools_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `DifficultyUtil.GetCreatureDifficultyColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `DifficultyUtil.GetDifficultyColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `DifficultyUtil.GetQuestDifficultyColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `DifficultyUtil.GetRelativeDifficultyColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `DifficultyUtil.GetScalingQuestDifficultyColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `DifficultyUtil.GetCreatureDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
+| `DifficultyUtil.GetDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
+| `DifficultyUtil.GetQuestDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
+| `DifficultyUtil.GetRelativeDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; focused test covers `(10, 15)`, two-return fidelity, and hot-swap behavior. |
+| `DifficultyUtil.GetScalingQuestDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
 | `EditModeManagerFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `EncounterJournal_SetTabVisibe` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `EventTrace_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
@@ -453,8 +453,10 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 ## Sources
 
 - `/tmp/warcraft_12_1_framexml.json` — exact local added/removed symbol arrays.
-- `src/ptr/compat_bootstrap.lua` — implemented `LoadAddOnWithErrorHandling` wrapper.
-- `src/loader/tests/wow_api_globals/global_functions.rs` — focused wrapper regression.
+- `src/ptr/compat_bootstrap.lua` — implemented `LoadAddOnWithErrorHandling` wrapper and post-load dynamic `DifficultyUtil` color delegates.
+- `src/loader/tests/wow_api_globals/global_functions.rs` — focused `LoadAddOnWithErrorHandling` wrapper regression.
+- `src/ptr/compat_bootstrap.rs` — focused reset, argument/return, hot-swap, missing-global, and preservation coverage for the five `DifficultyUtil` delegates.
+- `tests/blizzard_frame_xml_util_loads.rs` — full PTR Game UI lifecycle/threshold proof and older-retail non-exposure proof.
 
 ## See Also
 

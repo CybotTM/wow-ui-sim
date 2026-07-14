@@ -23,6 +23,72 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
 
     #[test]
+    fn patch_12_1_post_load_restores_dynamic_difficulty_color_delegates() {
+        let env = WowLuaEnv::new().expect("env");
+        env.exec(
+            r#"
+            DifficultyUtil = {}
+            local function sentinel(name)
+                return function(...)
+                    local arguments = {...}
+                    for index, value in ipairs(arguments) do
+                        arguments[index] = tostring(value)
+                    end
+                    return name .. ":" .. table.concat(arguments, ","), name .. "-highlight"
+                end
+            end
+            GetCreatureDifficultyColor = sentinel("creature")
+            GetDifficultyColor = sentinel("difficulty")
+            GetQuestDifficultyColor = sentinel("quest")
+            GetRelativeDifficultyColor = sentinel("relative")
+            GetScalingQuestDifficultyColor = sentinel("scaling")
+            "#,
+        )
+        .expect("install sentinel globals");
+
+        super::apply_post_load(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                local cases = {
+                    { "GetCreatureDifficultyColor", { 71 }, "creature:71", "creature-highlight" },
+                    { "GetDifficultyColor", { 4 }, "difficulty:4", "difficulty-highlight" },
+                    { "GetQuestDifficultyColor", { 72, true, 99 }, "quest:72,true,99", "quest-highlight" },
+                    { "GetRelativeDifficultyColor", { 10, 15 }, "relative:10,15", "relative-highlight" },
+                    { "GetScalingQuestDifficultyColor", { 73 }, "scaling:73", "scaling-highlight" },
+                }
+                for _, case in ipairs(cases) do
+                    local color, highlight = DifficultyUtil[case[1]](unpack(case[2]))
+                    if color ~= case[3] or highlight ~= case[4] then return case[1] end
+                end
+
+                GetRelativeDifficultyColor = function(referenceLevel, targetLevel)
+                    return targetLevel - referenceLevel, "replaced"
+                end
+                local color, highlight = DifficultyUtil.GetRelativeDifficultyColor(10, 15)
+                if color ~= 5 or highlight ~= "replaced" then return "hot-swap" end
+
+                GetCreatureDifficultyColor = nil
+                local ok = pcall(DifficultyUtil.GetCreatureDifficultyColor, 70)
+                if ok then return "missing-global" end
+
+                DifficultyUtil.GetDifficultyColor = function() return "existing" end
+                return "ok"
+                "#,
+            )
+            .expect("difficulty delegates should run");
+
+        assert_eq!(result, "ok");
+
+        super::apply_post_load(&env);
+        let existing: String = env
+            .eval("return DifficultyUtil.GetDifficultyColor()")
+            .expect("existing namespace member should remain installed");
+        assert_eq!(existing, "existing");
+    }
+
+    #[test]
     fn patch_12_1_post_load_reapplies_epoch_enums_after_generated_docs_reset() {
         let env = WowLuaEnv::new().expect("env");
         env.exec("Enum.OnUpdateMode = nil; Enum.ClubStreamType.Discord = nil")

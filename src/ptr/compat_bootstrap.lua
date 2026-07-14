@@ -86,6 +86,29 @@ if not Enum.ScriptObjectOnUpdateMode then
   rawset(Enum, "ScriptObjectOnUpdateMode", Enum.OnUpdateMode)
 end
 
+if type(DifficultyUtil) ~= "table" then
+  DifficultyUtil = {}
+end
+
+local function __wow_dynamic_global_delegate(globalName)
+  return function(...)
+    return _G[globalName](...)
+  end
+end
+
+local difficultyColorDelegates = {
+  "GetCreatureDifficultyColor",
+  "GetDifficultyColor",
+  "GetQuestDifficultyColor",
+  "GetRelativeDifficultyColor",
+  "GetScalingQuestDifficultyColor",
+}
+for _, functionName in ipairs(difficultyColorDelegates) do
+  if rawget(DifficultyUtil, functionName) == nil then
+    rawset(DifficultyUtil, functionName, __wow_dynamic_global_delegate(functionName))
+  end
+end
+
 if type(FlagsUtil) ~= "table" then
   FlagsUtil = {}
 end

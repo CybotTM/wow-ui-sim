@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] update | 12.1 DifficultyUtil delegates modeled
+
+Updated the 12.1 audit and FrameXML inventory after adding five epoch-scoped, post-load `DifficultyUtil` color delegates. The delegates dynamically call the authoritative vendor globals, preserving arguments, both return values, later hotfix replacement, and explicit missing-global errors. Focused tests cover namespace reset/preservation and dynamic dispatch; full PTR Game UI startup verifies vendor threshold behavior, while older-retail startup verifies non-exposure. Inventory now records 1 implemented, 11 best-effort, and 420 pending strict exception re-triage.
+
 ## [2026-07-14] decision | Patch API audit exception approval superseded
 
 A broad approval for documented 12.1, 12.0.7, and 12.0.5 exceptions was recorded, then superseded after review found that the full itemized checklist was not presented in chat and 12.1 FrameXML entries were mass-deferred without individual unsafe/impossible justification. Audits remain open pending re-triage and informed per-item approval.
