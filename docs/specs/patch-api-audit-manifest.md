@@ -15,6 +15,8 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - [x] Reject unknown schema fields, blank values, invalid status/resolution combinations, and incomplete lifecycle contracts.
 - [x] Ingest an observation artifact tied to the exact manifest hash and compare every assertion by row, flavor, phase, addon, presence, and Lua type.
 - [x] Observe actual Lua global/table paths from a `WowLuaEnv` at caller-controlled lifecycle phases and record active profile, presence, and Lua type.
+- [x] Generate initialization-phase observations only when the compiled profile matches the manifest target.
+- [x] Index direct Lua function publications and flag mixin/metatable/dynamic-global/factory ambiguity without converting candidates into final statuses.
 - [x] Fail synthetic vendor-present, LoD, cross-flavor, and removed-after-reset observations when flavor or phase is wrong.
 - [x] Generate one compact checklist line per manifest occurrence and reject checklist or human-inventory drift.
 - [ ] Generate real runtime observations for every resolved row during focused/profile test execution.
@@ -35,7 +37,8 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 
 ## Implementation inventory
 
-- `src/bin/wow_cli/audit_api/patch_manifest.rs` — schema, repository validation, completion gates, actual Lua-state observation primitive, observation comparison, and rendering.
+- `src/bin/wow_cli/audit_api/patch_manifest.rs` — schema, repository validation, completion gates, actual Lua-state observation primitive, initialization generator, observation comparison, and rendering.
+- `src/bin/wow_cli/audit_api/patch_source_index.rs` — per-file direct-publication candidates and dynamic-publication ambiguity records.
 - `data/patch-api/sources/12.1-framexml.json` — immutable raw 12.1 patch-list snapshot.
 - `data/patch-api/12.1-framexml.json` — 432-row audit register.
 - `docs/generated/patch-12-1-framexml-checklist.md` — generated compact checklist.
@@ -43,7 +46,8 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 
 ## Tests asserting this spec
 
-- `src/bin/wow_cli/audit_api/patch_manifest.rs` — schema rejection, repository drift, exception eligibility, observation falsifiers, and actual present/absent/LoD/reset observation coverage.
+- `src/bin/wow_cli/audit_api/patch_manifest.rs` — schema rejection, repository drift, exception eligibility, observation falsifiers, profile mismatch, and actual present/absent/LoD observation coverage. Post-reset remains synthetic until a concrete reset operation is defined.
+- `src/bin/wow_cli/audit_api/patch_source_index.rs` — direct publication, local/comment/string exclusion, ambiguity, and file identity coverage.
 
 ## Out of scope
 

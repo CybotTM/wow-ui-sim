@@ -210,15 +210,32 @@ struct AuditApiArgs {
     /// Path to wowless repo (for C_* namespace allowlist filtering)
     #[arg(long, default_value_os_t = default_wowless_path())]
     wowless_path: PathBuf,
+    /// Index direct and ambiguous publication patterns in one Lua source file
+    #[arg(
+        long,
+        requires = "source_addon",
+        conflicts_with_all = ["filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path", "patch_manifest"]
+    )]
+    index_lua_source: Option<PathBuf>,
+    /// Owning addon label for --index-lua-source
+    #[arg(long, requires = "index_lua_source")]
+    source_addon: Option<String>,
     /// Validate and render a checked-in patch API audit manifest instead of scanning UI usage
     #[arg(
         long,
-        conflicts_with_all = ["filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path"]
+        conflicts_with_all = ["filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path", "index_lua_source", "source_addon"]
     )]
     patch_manifest: Option<PathBuf>,
     /// Runtime observation artifact produced for this exact manifest
     #[arg(long, requires_all = ["patch_manifest", "complete"])]
     observations: Option<PathBuf>,
+    /// Write observations for active-profile initialization assertions
+    #[arg(
+        long,
+        requires = "patch_manifest",
+        conflicts_with_all = ["observations", "complete"]
+    )]
+    observe_initialization: Option<PathBuf>,
     /// Require repository, observation, commit, and per-item approval gates
     #[arg(long, requires_all = ["patch_manifest", "observations"])]
     complete: bool,
@@ -364,10 +381,25 @@ fn run_casc_command(target: CascTarget) {
 
 fn handle_audit_api(args: AuditApiArgs) {
     let fmt = parse_output_format(&args.format);
+    if let Some(path) = args.index_lua_source {
+        let addon = args
+            .source_addon
+            .as_deref()
+            .expect("clap requires --source-addon");
+        if let Err(error) = handle_lua_source_index(&path, addon) {
+            eprintln!("Error: {error}");
+            std::process::exit(1);
+        }
+        return;
+    }
     if let Some(path) = args.patch_manifest {
-        if let Err(error) =
-            handle_patch_manifest(&path, args.observations.as_deref(), args.complete, fmt)
-        {
+        if let Err(error) = handle_patch_manifest(
+            &path,
+            args.observations.as_deref(),
+            args.observe_initialization.as_deref(),
+            args.complete,
+            fmt,
+        ) {
             eprintln!("Error: {error}");
             std::process::exit(1);
         }
@@ -387,9 +419,18 @@ fn handle_audit_api(args: AuditApiArgs) {
     print_audit_output(fmt, &results, gap_report.as_ref());
 }
 
+fn handle_lua_source_index(path: &Path, addon: &str) -> Result<(), String> {
+    let index = audit_api::index_lua_file(addon, path)?;
+    let rendered = serde_json::to_string_pretty(&index)
+        .map_err(|error| format!("failed to render source index: {error}"))?;
+    println!("{rendered}");
+    Ok(())
+}
+
 fn handle_patch_manifest(
     path: &Path,
     observations_path: Option<&Path>,
+    initialization_output: Option<&Path>,
     require_complete: bool,
     format: audit_api::OutputFormat,
 ) -> Result<(), String> {
@@ -406,6 +447,20 @@ fn handle_patch_manifest(
         audit_api::validate_complete(&manifest, &root, &json, &observations)?;
     } else {
         audit_api::validate_repository(&manifest, &root)?;
+    }
+
+    if let Some(output) = initialization_output {
+        let observations = audit_api::generate_initialization_observations(&manifest, &json)?;
+        let rendered = serde_json::to_string_pretty(&observations)
+            .map_err(|error| format!("failed to render observations: {error}"))?;
+        std::fs::write(output, format!("{rendered}\n"))
+            .map_err(|error| format!("failed to write {}: {error}", output.display()))?;
+        println!(
+            "wrote {} initialization observations to {}",
+            observations.observations.len(),
+            output.display()
+        );
+        return Ok(());
     }
 
     match format {

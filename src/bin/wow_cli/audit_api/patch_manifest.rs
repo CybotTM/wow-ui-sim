@@ -313,6 +313,30 @@ fn parse_lua_type(lua_type: &str) -> Result<LuaType, String> {
     }
 }
 
+pub fn generate_initialization_observations(
+    manifest: &PatchAuditManifest,
+    manifest_json: &str,
+) -> Result<ObservationSet, String> {
+    let active_flavor = AuditFlavor::active();
+    if manifest.target.flavor != active_flavor {
+        return Err(format!(
+            "manifest targets {} but active profile is {}",
+            manifest.target.flavor.as_str(),
+            active_flavor.as_str()
+        ));
+    }
+    let env = WowLuaEnv::new().map_err(|error| format!("failed to initialize Lua: {error}"))?;
+    let mut observations = Vec::new();
+    for row in &manifest.rows {
+        for assertion in &row.assertions {
+            if assertion.phase == AuditPhase::Initialization && assertion.flavor == active_flavor {
+                observations.push(observe_assertion(&env, row, assertion)?);
+            }
+        }
+    }
+    Ok(build_observation_set(manifest_json, observations))
+}
+
 pub fn build_observation_set(
     manifest_json: &str,
     observations: Vec<Observation>,
@@ -365,6 +389,7 @@ fn validate_manifest_rows(
     let mut counts = BTreeMap::from([("added", 0usize), ("removed", 0usize)]);
     for row in rows {
         require_text("row.symbol", &row.symbol)?;
+        validate_symbol_path(&row.symbol)?;
         let expected_id = format!("{}:{}", row.change.as_str(), row.symbol);
         if row.id != expected_id {
             return Err(format!("row {} must use id {expected_id}", row.id));
@@ -379,6 +404,20 @@ fn validate_manifest_rows(
         validate_row(row, target_flavor)?;
     }
     Ok(counts)
+}
+
+fn validate_symbol_path(symbol: &str) -> Result<(), String> {
+    let valid = symbol.split('.').all(|segment| {
+        let mut characters = segment.chars();
+        characters
+            .next()
+            .is_some_and(|first| first == '_' || first.is_ascii_alphabetic())
+            && characters.all(|character| character == '_' || character.is_ascii_alphanumeric())
+    });
+    if !valid {
+        return Err(format!("invalid symbol path: {symbol}"));
+    }
+    Ok(())
 }
 
 fn validate_direction_count(direction: &str, expected: usize, actual: usize) -> Result<(), String> {
@@ -1134,7 +1173,47 @@ mod tests {
     }
 
     #[test]
-    fn runtime_observations_cover_present_absent_lod_and_reset_phases() {
+    fn initialization_generator_rejects_manifest_for_other_profile() {
+        let row = resolved_row(
+            "best-effort",
+            "cross-flavor",
+            &assertion(AuditFlavor::active().as_str(), "initialization", "absent"),
+        );
+        let mut manifest = fixture_manifest(&row);
+        manifest.target.flavor = if AuditFlavor::active() == AuditFlavor::Ptr {
+            AuditFlavor::Retail
+        } else {
+            AuditFlavor::Ptr
+        };
+
+        let error = generate_initialization_observations(&manifest, "manifest bytes")
+            .expect_err("other-profile manifest must be rejected");
+
+        assert!(error.contains("targets"));
+    }
+
+    #[test]
+    fn initialization_generator_emits_only_active_initialization_assertions() {
+        let flavor = AuditFlavor::active().as_str();
+        let assertions = format!(
+            r#"{{"flavor":"{flavor}","phase":"initialization","expected":"absent"}},{{"flavor":"{flavor}","phase":"post-load","expected":"absent"}}"#
+        );
+        let row = resolved_row("best-effort", "cross-flavor", &assertions);
+        let mut manifest = fixture_manifest(&row);
+        manifest.target.flavor = AuditFlavor::active();
+
+        let observations = generate_initialization_observations(&manifest, "manifest bytes")
+            .expect("initialization observations should generate");
+
+        assert_eq!(observations.observations.len(), 1);
+        assert_eq!(
+            observations.observations[0].phase,
+            AuditPhase::Initialization
+        );
+    }
+
+    #[test]
+    fn runtime_observations_cover_present_absent_and_lod_phases() {
         let flavor = AuditFlavor::active().as_str();
         let env = WowLuaEnv::new().expect("environment should initialize");
 
@@ -1174,13 +1253,15 @@ mod tests {
             .expect("absent observation should validate");
 
         let directory = tempfile::tempdir().expect("temporary addon directory should create");
-        let toc_path = directory.path().join("ObservationFixture.toc");
+        let addon_directory = directory.path().join("ObservationFixture");
+        std::fs::create_dir(&addon_directory).expect("fixture addon directory should create");
+        let toc_path = addon_directory.join("ObservationFixture.toc");
         let mut toc = std::fs::File::create(&toc_path).expect("fixture TOC should create");
         writeln!(toc, "## Title: ObservationFixture").unwrap();
         writeln!(toc, "## LoadOnDemand: 1").unwrap();
         writeln!(toc, "ObservationFixture.lua").unwrap();
         std::fs::write(
-            directory.path().join("ObservationFixture.lua"),
+            addon_directory.join("ObservationFixture.lua"),
             "Fixture = function() end\n",
         )
         .expect("fixture Lua should write");
@@ -1205,23 +1286,6 @@ mod tests {
         .expect("post-load observation should succeed");
         validate_observations(&lod_manifest, &[before, after])
             .expect("LoD observations should validate");
-
-        env.exec("Fixture = function() end; Fixture = nil")
-            .expect("reset fixture should execute");
-        let reset_row = resolved_row(
-            "best-effort",
-            "removed",
-            &assertion(flavor, "post-reset", "absent"),
-        );
-        let reset_manifest = fixture_manifest(&reset_row);
-        let reset = observe_assertion(
-            &env,
-            &reset_manifest.rows[0],
-            &reset_manifest.rows[0].assertions[0],
-        )
-        .expect("reset observation should succeed");
-        validate_observations(&reset_manifest, &[reset])
-            .expect("reset observation should validate");
 
         let observation_set = build_observation_set("exact manifest bytes", Vec::new());
         assert_eq!(
@@ -1252,6 +1316,16 @@ mod tests {
             validate_repository(&manifest, root)
                 .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
         }
+    }
+
+    #[test]
+    fn malformed_symbol_paths_are_rejected() {
+        let row = r#"{"id":"added:A..B","symbol":"A..B","change":"added","status":null,"resolution":"untriaged","owner":"unknown","load_addon":null,"evidence":[],"tests":[],"assertions":[],"commit":null,"approval_id":null,"notes":"pending"}"#;
+        let manifest = fixture_manifest(row);
+
+        let error = validate_manifest(&manifest).expect_err("malformed path must fail");
+
+        assert!(error.contains("symbol path"));
     }
 
     #[test]

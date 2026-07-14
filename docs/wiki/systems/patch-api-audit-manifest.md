@@ -36,7 +36,11 @@ Unknown JSON fields, blank evidence, invalid lifecycle vocabulary, and incompati
 
 Completion additionally consumes an observation artifact bound to the exact manifest hash. Each assertion requires exactly one observation matching row, flavor, phase, addon owner, presence, and Lua type. Missing, extra, duplicated, or mismatched observations fail.
 
-The production observation primitive now reads actual global/table paths from `WowLuaEnv`, records the active compiled profile and Lua type, and is tested across present, absent, direct TOC LoD before/after, and explicit reset phases. Full manifest-driven phase orchestration and checked-in per-row artifact generation remain open. Synthetic falsifiers test wrong-flavor vendor evidence, pre-load LoD exposure, cross-flavor leakage, and post-reset resurrection; they do not replace real per-row observations.
+The production observation primitive reads actual global/table paths from `WowLuaEnv` and records the active compiled profile, presence, and Lua type. Lifecycle phase and addon are caller-supplied assertion labels, not independently inferred facts. Focused coverage exercises present, absent, and a real TOC addon whose directory/TOC identity matches the declared LoD addon. `--observe-initialization` writes assertions available immediately after environment construction and rejects a manifest built for another profile. Full manifest-driven post-core/post-load/LoD/reset orchestration and checked-in per-row artifact generation remain open. Post-reset coverage is currently a synthetic validator falsifier only; it does not claim a simulator reset operation.
+
+### Source candidates
+
+`--index-lua-source <file> --source-addon <addon>` emits direct global/table function-publication candidates with file/line ownership and separately flags mixin, metatable, dynamic `_G`, and factory constructs as ambiguities. This is candidate evidence only: it does not turn a text match or absence into a final manifest status.
 
 ### Exception approval
 
@@ -53,6 +57,9 @@ One approval token cannot silently approve multiple rows.
 ```text
 wow-cli audit-api --patch-manifest data/patch-api/12.1-framexml.json
 wow-cli audit-api --patch-manifest data/patch-api/12.1-framexml.json --format plan
+wow-cli audit-api --patch-manifest data/patch-api/12.1-framexml.json \
+  --observe-initialization observations.json
+wow-cli audit-api --index-lua-source path/to/file.lua --source-addon Blizzard_AddOn
 wow-cli audit-api --patch-manifest data/patch-api/12.1-framexml.json \
   --observations path/to/observations.json --complete
 ```

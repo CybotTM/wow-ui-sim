@@ -6,6 +6,7 @@
 mod gap;
 mod output;
 mod patch_manifest;
+mod patch_source_index;
 mod scanner;
 
 use serde::Serialize;
@@ -15,9 +16,10 @@ use std::path::PathBuf;
 pub use gap::{GapReport, build_gap_report, introspect_simulator_c_methods, scan_simulator};
 pub use output::{print_gap_plan, print_gap_text, print_json, print_text};
 pub use patch_manifest::{
-    parse_manifest, parse_observations, render_checklist, render_summary, validate_complete,
-    validate_repository,
+    generate_initialization_observations, parse_manifest, parse_observations, render_checklist,
+    render_summary, validate_complete, validate_repository,
 };
+pub use patch_source_index::index_lua_file;
 pub use scanner::run_audit;
 
 /// Per-symbol occurrence data.

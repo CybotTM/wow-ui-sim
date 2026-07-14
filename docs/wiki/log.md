@@ -2,9 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] system | Patch source candidates and initialization observations
+
+Added `--observe-initialization`, which writes actual active-profile Lua observations and rejects manifest/profile mismatches. Added `--index-lua-source` for file/line direct-publication candidates plus explicit mixin/metatable/dynamic-global/factory ambiguity records. Candidate source evidence never changes final statuses automatically. Full manifest-driven post-load/LoD/reset orchestration remains open.
+
 ## [2026-07-14] system | Patch observation primitive
 
-Added a production observation primitive that resolves actual Lua global/table paths in `WowLuaEnv` and records active profile, lifecycle phase, addon, presence, and Lua type. Focused coverage observes present and absent symbols, a real TOC load-on-demand transition, explicit reset absence, and exact manifest-byte hashing. Full manifest-driven phase orchestration remains open.
+Added a production observation primitive that resolves actual Lua global/table paths in `WowLuaEnv` and records active profile, presence, and Lua type while carrying caller-supplied phase/addon labels. Focused coverage observes present and absent symbols, a real identity-matched TOC load transition, and exact manifest-byte hashing. A concrete post-reset runtime operation and full manifest-driven phase orchestration remain open.
 
 ## [2026-07-14] investigation | Preserve 12.0.7 API-change source
 
