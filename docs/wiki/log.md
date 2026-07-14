@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 Mists-only time helper excluded
+
+Updated the 12.1 FrameXML inventory after proving `GetTimeStringFromSeconds` is defined only by `Mists/UIParent.lua` and excluded from the PTR mainline TOC. It is classified best-effort as cross-flavor snapshot contamination rather than implemented behavior. PTR tests verify absence during environment initialization, after Blizzard loading/post-load compatibility, and after startup events. Current inventory: 1 implemented, 12 best-effort, and 419 exception-requested pending strict re-triage.
+
 ## [2026-07-14] update | 12.1 DifficultyUtil delegates modeled
 
 Updated the 12.1 audit and FrameXML inventory after adding five epoch-scoped, post-load `DifficultyUtil` color delegates. The delegates dynamically call the authoritative vendor globals, preserving arguments, both return values, later hotfix replacement, and explicit missing-global errors. Focused tests cover namespace reset/preservation and dynamic dispatch; full PTR Game UI startup verifies vendor threshold behavior, while older-retail startup verifies non-exposure. Inventory now records 1 implemented, 11 best-effort, and 420 pending strict exception re-triage.

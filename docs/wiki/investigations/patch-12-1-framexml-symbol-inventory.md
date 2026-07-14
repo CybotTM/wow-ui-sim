@@ -140,7 +140,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 | `GetPlayerBottomManagedFrameContainer` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `GetRightManagedFrameContainer` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `GetTimeSinceLastQuestProgress` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetTimeStringFromSeconds` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `GetTimeStringFromSeconds` | best-effort | Classified as snapshot cross-flavor contamination: the only PTR definition is in `Mists/UIParent.lua`, loaded exclusively by `Blizzard_UIParent_Mists.toc`; PTR tests verify absence during initialization, post-load compatibility, and settled mainline startup. |
 | `GetUIPanelLayoutAttribute` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `GetUIPanelLayoutFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `GMChatFrame_OnWhisperFromGM` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
