@@ -4480,6 +4480,22 @@ if not Enum.CurrencyTokenCategoryFlagsMeta then
   }
 end
 
+if not Enum.CurrencyType then
+  Enum.CurrencyType = {
+    Copper = 0,
+    Silver = 1,
+    Gold = 2,
+  }
+end
+
+if not Enum.CurrencyTypeMeta then
+  Enum.CurrencyTypeMeta = {
+    MaxValue = 2,
+    MinValue = 0,
+    NumValues = 3,
+  }
+end
+
 if not Enum.CursorStyle then
   Enum.CursorStyle = {
     Crosshair = 1,
