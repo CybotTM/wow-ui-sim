@@ -6,7 +6,7 @@ Patch 12.0.7 API work in wow-ui-sim separates safe additive compatibility bridge
 
 ### Source scope
 
-The audit source was the Warcraft Wiki Patch 12.0.7 API changes page, saved locally as `/tmp/warcraft_patch_12_0_7_api_changes.txt` during the audit. The page covers the 12.0.5 `(67602)` to 12.0.7 `(68182)` API diff and 12.0.7 blue-post notes.
+The audit source was the Warcraft Wiki Patch 12.0.7 API changes page, preserved as the checked-in [12.0.7 API-change source snapshot](../../../data/patch-api/sources/12.0.7-api-changes.txt). The page covers the 12.0.5 `(67602)` to 12.0.7 `(68182)` API diff and 12.0.7 blue-post notes.
 
 ### Completed compatible bridge work
 

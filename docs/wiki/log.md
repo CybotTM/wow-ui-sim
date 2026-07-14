@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | Preserve 12.0.7 API-change source
+
+Moved the 12.0.7 Warcraft Wiki source snapshot from temporary storage into `data/patch-api/sources/12.0.7-api-changes.txt` and linked the patch audit to the checked-in evidence. The 12.0.7 manifest/register remains open work.
+
 ## [2026-07-14] system | Patch API audit manifest
 
 Created `systems/patch-api-audit-manifest.md` and the 432-row `data/patch-api/12.1-framexml.json` register. Reviewer correction removed false blanket exception requests: 412 pending rows now have null status and neutral `untriaged` resolution. Repository validation recomputes source/evidence hashes, verifies tests and commit ancestry, and rejects checklist/inventory drift. Completion requires an exact-manifest observation artifact and per-item unsafe/impossible approval provenance; real per-row observation generation remains open.
