@@ -2,33 +2,37 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] system | Patch API audit manifest
+
+Created `systems/patch-api-audit-manifest.md` and the 432-row `data/patch-api/12.1-framexml.json` register. Reviewer correction removed false blanket exception requests: 412 pending rows now have null status and neutral `untriaged` resolution. Repository validation recomputes source/evidence hashes, verifies tests and commit ancestry, and rejects checklist/inventory drift. Completion requires an exact-manifest observation artifact and per-item unsafe/impossible approval provenance; real per-row observation generation remains open.
+
 ## [2026-07-14] investigation | 12.1 CustomerOrders hide-wrapper mismatch
 
-Updated the 12.1 FrameXML inventory after a recursive PTR source scan found no `HideProfessionsCustomerOrdersFrame` definition. A focused PTR test loads ProfessionsTemplates and AuctionHouse dependencies, explicitly loads `Blizzard_ProfessionsCustomerOrders`, verifies its frame exists, and confirms the snapshot-only wrapper remains nil. Current inventory: 1 implemented, 19 best-effort, and 412 exception-requested pending strict re-triage.
+Updated the 12.1 FrameXML inventory after a recursive PTR source scan found no `HideProfessionsCustomerOrdersFrame` definition. A focused PTR test loads ProfessionsTemplates and AuctionHouse dependencies, explicitly loads `Blizzard_ProfessionsCustomerOrders`, verifies its frame exists, and confirms the snapshot-only wrapper remains nil. Current inventory: 1 implemented, 19 best-effort, 0 exception-requested, and 412 neutral untriaged rows.
 
 ## [2026-07-14] investigation | 12.1 Garrison hide-wrapper mismatches
 
-Updated the 12.1 FrameXML inventory after confirming `HideGarrisonMissionFrames` and `HideGarrisonShipyardFrame` have no definitions in local PTR Blizzard sources. A focused PTR test loads `Blizzard_GarrisonUI` with its LoD dependencies and verifies both snapshot-only wrappers remain nil. Current inventory: 1 implemented, 18 best-effort, and 413 exception-requested pending strict re-triage.
+Updated the 12.1 FrameXML inventory after confirming `HideGarrisonMissionFrames` and `HideGarrisonShipyardFrame` have no definitions in local PTR Blizzard sources. A focused PTR test loads `Blizzard_GarrisonUI` with its LoD dependencies and verifies both snapshot-only wrappers remain nil. At that intermediate stage, 1 row was implemented, 18 were best-effort, and 413 unresolved rows were still mislabeled as exception requests; the latest manifest entry corrects them to neutral untriaged state.
 
 ## [2026-07-14] investigation | 12.1 BlackMarket hide-name mismatch
 
-Updated the 12.1 FrameXML inventory after confirming PTR defines `BlackMarketFrame_Hide` with `HideUIPanel(BlackMarketFrame)` plus close-sound behavior, while snapshot entry `HideBlackMarketFrame` is absent. A focused PTR test explicitly loads `Blizzard_BlackMarketUI`, verifies the authoritative helper, and confirms the reversed-name wrapper remains nil. Current inventory: 1 implemented, 16 best-effort, and 415 exception-requested pending strict re-triage.
+Updated the 12.1 FrameXML inventory after confirming PTR defines `BlackMarketFrame_Hide` with `HideUIPanel(BlackMarketFrame)` plus close-sound behavior, while snapshot entry `HideBlackMarketFrame` is absent. A focused PTR test explicitly loads `Blizzard_BlackMarketUI`, verifies the authoritative helper, and confirms the reversed-name wrapper remains nil. At that intermediate stage, 1 row was implemented, 16 were best-effort, and 415 unresolved rows were still mislabeled as exception requests; the latest manifest entry corrects them to neutral untriaged state.
 
 ## [2026-07-14] investigation | 12.1 ItemUpgrade hide-name mismatch
 
-Updated the 12.1 FrameXML inventory after confirming PTR defines `ItemUpgradeFrame_Hide` as the authoritative `HideUIPanel(ItemUpgradeFrame)` helper, while snapshot entry `HideItemUpgradeFrame` is absent. A focused PTR test explicitly loads `Blizzard_ItemUpgradeUI` and verifies the reversed-name wrapper remains nil. Current inventory: 1 implemented, 15 best-effort, and 416 exception-requested pending strict re-triage.
+Updated the 12.1 FrameXML inventory after confirming PTR defines `ItemUpgradeFrame_Hide` as the authoritative `HideUIPanel(ItemUpgradeFrame)` helper, while snapshot entry `HideItemUpgradeFrame` is absent. A focused PTR test explicitly loads `Blizzard_ItemUpgradeUI` and verifies the reversed-name wrapper remains nil. At that intermediate stage, 1 row was implemented, 15 were best-effort, and 416 unresolved rows were still mislabeled as exception requests; the latest manifest entry corrects them to neutral untriaged state.
 
 ## [2026-07-14] investigation | 12.1 GuildBank hide wrapper mismatch
 
-Updated the 12.1 FrameXML inventory after confirming `HideGuildBankFrame` has no definition in local PTR Blizzard sources. A focused PTR test explicitly loads `Blizzard_GuildBankUI` and verifies the snapshot-only wrapper remains absent. Current inventory: 1 implemented, 14 best-effort, and 417 exception-requested pending strict re-triage.
+Updated the 12.1 FrameXML inventory after confirming `HideGuildBankFrame` has no definition in local PTR Blizzard sources. A focused PTR test explicitly loads `Blizzard_GuildBankUI` and verifies the snapshot-only wrapper remains absent. At that intermediate stage, 1 row was implemented, 14 were best-effort, and 417 unresolved rows were still mislabeled as exception requests; the latest manifest entry corrects them to neutral untriaged state.
 
 ## [2026-07-14] investigation | 12.1 AuctionHouse hide wrapper mismatch
 
-Updated the 12.1 FrameXML inventory after confirming `HideAuctionHouseFrame` has no definition in the local PTR Blizzard sources. A focused PTR runtime test loads `Blizzard_AuctionHouseUI` and verifies the snapshot-only wrapper remains absent instead of adding guessed close semantics. Current inventory: 1 implemented, 13 best-effort, and 418 exception-requested pending strict re-triage.
+Updated the 12.1 FrameXML inventory after confirming `HideAuctionHouseFrame` has no definition in the local PTR Blizzard sources. A focused PTR runtime test loads `Blizzard_AuctionHouseUI` and verifies the snapshot-only wrapper remains absent instead of adding guessed close semantics. At that intermediate stage, 1 row was implemented, 13 were best-effort, and 418 unresolved rows were still mislabeled as exception requests; the latest manifest entry corrects them to neutral untriaged state.
 
 ## [2026-07-14] investigation | 12.1 Mists-only time helper excluded
 
-Updated the 12.1 FrameXML inventory after proving `GetTimeStringFromSeconds` is defined only by `Mists/UIParent.lua` and excluded from the PTR mainline TOC. It is classified best-effort as cross-flavor snapshot contamination rather than implemented behavior. PTR tests verify absence during environment initialization, after Blizzard loading/post-load compatibility, and after startup events. Current inventory: 1 implemented, 12 best-effort, and 419 exception-requested pending strict re-triage.
+Updated the 12.1 FrameXML inventory after proving `GetTimeStringFromSeconds` is defined only by `Mists/UIParent.lua` and excluded from the PTR mainline TOC. It is classified best-effort as cross-flavor snapshot contamination rather than implemented behavior. PTR tests verify absence during environment initialization, after Blizzard loading/post-load compatibility, and after startup events. At that intermediate stage, 1 row was implemented, 12 were best-effort, and 419 unresolved rows were still mislabeled as exception requests; the latest manifest entry corrects them to neutral untriaged state.
 
 ## [2026-07-14] update | 12.1 DifficultyUtil delegates modeled
 

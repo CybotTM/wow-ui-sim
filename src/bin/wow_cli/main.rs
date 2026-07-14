@@ -210,6 +210,18 @@ struct AuditApiArgs {
     /// Path to wowless repo (for C_* namespace allowlist filtering)
     #[arg(long, default_value_os_t = default_wowless_path())]
     wowless_path: PathBuf,
+    /// Validate and render a checked-in patch API audit manifest instead of scanning UI usage
+    #[arg(
+        long,
+        conflicts_with_all = ["filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path"]
+    )]
+    patch_manifest: Option<PathBuf>,
+    /// Runtime observation artifact produced for this exact manifest
+    #[arg(long, requires_all = ["patch_manifest", "complete"])]
+    observations: Option<PathBuf>,
+    /// Require repository, observation, commit, and per-item approval gates
+    #[arg(long, requires_all = ["patch_manifest", "observations"])]
+    complete: bool,
 }
 
 #[derive(Subcommand)]
@@ -352,6 +364,16 @@ fn run_casc_command(target: CascTarget) {
 
 fn handle_audit_api(args: AuditApiArgs) {
     let fmt = parse_output_format(&args.format);
+    if let Some(path) = args.patch_manifest {
+        if let Err(error) =
+            handle_patch_manifest(&path, args.observations.as_deref(), args.complete, fmt)
+        {
+            eprintln!("Error: {error}");
+            std::process::exit(1);
+        }
+        return;
+    }
+
     let config = build_audit_config(
         args.ui_path,
         args.namespace,
@@ -363,6 +385,54 @@ fn handle_audit_api(args: AuditApiArgs) {
         .gaps
         .then(|| build_gap_report(&args.sim_path, &results));
     print_audit_output(fmt, &results, gap_report.as_ref());
+}
+
+fn handle_patch_manifest(
+    path: &Path,
+    observations_path: Option<&Path>,
+    require_complete: bool,
+    format: audit_api::OutputFormat,
+) -> Result<(), String> {
+    let json = std::fs::read_to_string(path)
+        .map_err(|error| format!("failed to read {}: {error}", path.display()))?;
+    let manifest = audit_api::parse_manifest(&json)?;
+    let root = patch_manifest_repository_root(path)?;
+    if require_complete {
+        let observations_path =
+            observations_path.ok_or_else(|| "--complete requires --observations".to_string())?;
+        let observations_json = std::fs::read_to_string(observations_path)
+            .map_err(|error| format!("failed to read {}: {error}", observations_path.display()))?;
+        let observations = audit_api::parse_observations(&observations_json)?;
+        audit_api::validate_complete(&manifest, &root, &json, &observations)?;
+    } else {
+        audit_api::validate_repository(&manifest, &root)?;
+    }
+
+    match format {
+        audit_api::OutputFormat::Text => println!("{}", audit_api::render_summary(&manifest)),
+        audit_api::OutputFormat::Plan => println!("{}", audit_api::render_checklist(&manifest)),
+        audit_api::OutputFormat::Json => {
+            let value: serde_json::Value = serde_json::from_str(&json)
+                .map_err(|error| format!("failed to reparse manifest JSON: {error}"))?;
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&value)
+                    .map_err(|error| format!("failed to render manifest JSON: {error}"))?
+            );
+        }
+    }
+    Ok(())
+}
+
+fn patch_manifest_repository_root(path: &Path) -> Result<PathBuf, String> {
+    let canonical = path
+        .canonicalize()
+        .map_err(|error| format!("failed to resolve {}: {error}", path.display()))?;
+    canonical
+        .ancestors()
+        .find(|ancestor| ancestor.join("Cargo.toml").is_file())
+        .map(Path::to_path_buf)
+        .ok_or_else(|| format!("no repository root found above {}", path.display()))
 }
 
 fn parse_output_format(format: &str) -> audit_api::OutputFormat {

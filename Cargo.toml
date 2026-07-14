@@ -57,6 +57,7 @@ casc-extract = { git = "https://github.com/Osso/casc-extract", rev = "14579a6564
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
 tar = "0.4.45"
 flate2 = "1.1.9"
+sha2 = "0.10"
 
 [[bin]]
 name = "wow-sim"
@@ -80,7 +81,6 @@ required-features = ["casc"]
 insta = "1.42"
 pollster = "0.4"
 tempfile = "3"
-sha2 = "0.10"
 
 [features]
 # fast-build is opt-in because the iced dylib hits MSVC's LNK1189 object limit

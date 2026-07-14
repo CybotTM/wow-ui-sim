@@ -1,469 +1,472 @@
 # Patch 12.1 FrameXML Symbol Inventory
 
-Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page prevents the broad 12.1 audit from silently treating parsed global APIs as the whole source scope.
+Exhaustive human-readable status inventory for the local 12.1 FrameXML API snapshot. The machine SSOT is `data/patch-api/12.1-framexml.json`; its generated compact checklist is `docs/generated/patch-12-1-framexml-checklist.md`. This page prevents the broad 12.1 audit from silently treating parsed global APIs as the whole source scope.
 
 ## Content
 
 **Scope:** 320 added entries and 112 removed entries from `/tmp/warcraft_12_1_framexml.json` (432 entries total). `MacroFrame_SaveMacro` and `PlayerChoiceToggle_TryShow` occur in both source lists, so the snapshot represents 430 distinct names.
 
-**Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage; remaining `exception-requested` rows still require strict unsafe/impossible re-triage. Vendor presence alone is not focused behavioral coverage.
+**Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 19 best-effort, 412 exception-requested.
+**Current totals:** 1 implemented, 19 best-effort, 0 exception-requested, 412 untriaged.
 
 ### Added symbols
 
 | Symbol | Status | Reason |
 |---|---|---|
-| `AddBehavioralMessagingTrayToStatusFrames` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AddFriendFrame_Show` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AddGMChatStatusFrameToStatusFrames` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AddTicketStatusFrameToStatusFrames` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AddWowSurveyStatusFrameToStatusFrames` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AlliedRacesFrame_TryShow` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AnchorUtil.ApplyFlowLayout` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ApplySecureDelegatesToTable` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ArchaeologyFrame_ToggleUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ArcheologyDigsiteProgressBar_OnSurveyCast` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ArdenwealdGardening_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ArtifactFrame_OnTraitsRefunded` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AuraUtil.GetAuraBorderColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `AddBehavioralMessagingTrayToStatusFrames` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AddFriendFrame_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AddGMChatStatusFrameToStatusFrames` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AddTicketStatusFrameToStatusFrames` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AddWowSurveyStatusFrameToStatusFrames` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AlliedRacesFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AnchorUtil.ApplyFlowLayout` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ApplySecureDelegatesToTable` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ArchaeologyFrame_ToggleUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ArcheologyDigsiteProgressBar_OnSurveyCast` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ArdenwealdGardening_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ArtifactFrame_OnTraitsRefunded` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AuraUtil.GetAuraBorderColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `AuraUtil.GetUnitAuras` | best-effort | Delegates to existing state-backed aura collection; focused 12.1 bridge test. |
 | `AuraUtil.IsValidFilterString` | best-effort | Rust validator accepts nonempty `HELPFUL`, `HARMFUL`, `RAID`, `INCLUDE_NAME_PLATE_ONLY`, and `PLAYER` token combinations; focused 12.1 bridge test. |
-| `AzeriteEmpoweredItemUI_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AzeriteEssenceUI_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `BattlefieldMap_ToggleUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `BehavioralMessaging_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `BehavioralMessagingTray_OnNotification` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `Blizzard_HousingCatalogUtil.AddDecorEntryTooltipTrackingText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `Blizzard_HousingCatalogUtil.TrackHousingDecorID` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `BNet_GetBattleTagComponents` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `BNet_GetBattleTagSelf` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `BNet_GetBroadcastTextSelf` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `BNet_GetFriendLevelRank` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `BNet_IsFriendLevelEqualOrHigher` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `BoostTutorial_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ChallengeModeCompleteBanner_OnChallengeModeCompleted` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ChatAdditionalColor_OpenColorPicker` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ChatFrameUtil.DiscordNameColorize` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ChatFrameUtil.FormatDiscordMessage` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ChatFrameUtil.GetNameForDiscordMessage` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CheckActiveStoreForFree` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.EnumerateInterruptCastInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.EnumerateInterruptCastSuccessInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.EnumerateSayCombatEndInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.EnumerateSayCombatStartInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.EnumeratetWhenTargetDiesInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.GetInterruptCastInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.GetInterruptCastSuccessInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.GetSayCombatEndInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.GetSayCombatStartInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatAudioAlertUtil.GetWhenTargetDiesInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CombatText_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CompactUnitFrame_GetOptionDispelIndicatorOverlayAnimation` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CompactUnitFrame_GetOptionDispelIndicatorOverlayType` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CompactUnitFrameLayoutTemplates_LayoutFrameElement` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CompactUnitFrameUtil.ApplyConfig` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CompactUnitFrameUtil.GenerateNewConfig` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ConfirmDisenchantRollDialog_Show` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ConfirmLootRollDialog_Show` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ConfirmTalentWipeDialog_Show` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ContributionCollectionFrame_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `AzeriteEmpoweredItemUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AzeriteEssenceUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BattlefieldMap_ToggleUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BehavioralMessaging_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BehavioralMessagingTray_OnNotification` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `Blizzard_HousingCatalogUtil.AddDecorEntryTooltipTrackingText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `Blizzard_HousingCatalogUtil.TrackHousingDecorID` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BNet_GetBattleTagComponents` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BNet_GetBattleTagSelf` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BNet_GetBroadcastTextSelf` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BNet_GetFriendLevelRank` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BNet_IsFriendLevelEqualOrHigher` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BoostTutorial_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ChallengeModeCompleteBanner_OnChallengeModeCompleted` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ChatAdditionalColor_OpenColorPicker` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ChatFrameUtil.DiscordNameColorize` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ChatFrameUtil.FormatDiscordMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ChatFrameUtil.GetNameForDiscordMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CheckActiveStoreForFree` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.EnumerateInterruptCastInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.EnumerateInterruptCastSuccessInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.EnumerateSayCombatEndInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.EnumerateSayCombatStartInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.EnumeratetWhenTargetDiesInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.GetInterruptCastInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.GetInterruptCastSuccessInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.GetSayCombatEndInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.GetSayCombatStartInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.GetWhenTargetDiesInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatText_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrame_GetOptionDispelIndicatorOverlayAnimation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrame_GetOptionDispelIndicatorOverlayType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrameLayoutTemplates_LayoutFrameElement` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrameUtil.ApplyConfig` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrameUtil.GenerateNewConfig` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ConfirmDisenchantRollDialog_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ConfirmLootRollDialog_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ConfirmTalentWipeDialog_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ContributionCollectionFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `CooldownManagerLayout_GetGroupBuffVisualAlerts` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
 | `CooldownManagerLayout_GetHiddenGroupBuffs` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
 | `CooldownManagerLayout_SetGroupBuffVisualAlerts` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
 | `CooldownManagerLayout_SetHiddenGroupBuffs` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
-| `CooldownViewer_MarkAuraCacheDirty` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownViewerContextMenu_AddAlertEntryButton` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownViewerContextMenu_AddNewAlertButton` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownViewerDraggedItem_Clear` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownViewerDraggedItem_Pickup` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownViewerDraggedItem_SetIsLegalTarget` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownViewerUtil.AddSoundAlertRadio` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownViewerUtil.BuildSoundMenus` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownViewerUtil.GetSoundTypeSoundKit` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownViewerUtil.GetSoundTypeText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CovenantCallings_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `DebugTools_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `CooldownViewer_MarkAuraCacheDirty` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerContextMenu_AddAlertEntryButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerContextMenu_AddNewAlertButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerDraggedItem_Clear` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerDraggedItem_Pickup` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerDraggedItem_SetIsLegalTarget` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerUtil.AddSoundAlertRadio` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerUtil.BuildSoundMenus` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerUtil.GetSoundTypeSoundKit` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerUtil.GetSoundTypeText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CovenantCallings_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `DebugTools_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `DifficultyUtil.GetCreatureDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
 | `DifficultyUtil.GetDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
 | `DifficultyUtil.GetQuestDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
 | `DifficultyUtil.GetRelativeDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; focused test covers `(10, 15)`, two-return fidelity, and hot-swap behavior. |
 | `DifficultyUtil.GetScalingQuestDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
-| `EditModeManagerFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `EncounterJournal_SetTabVisibe` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `EventTrace_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ExpansionTrial_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FadingFrame_CopyTextScalingTime` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FadingFrame_GetTextScalingMinHeight` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FadingFrame_InitSlot` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FadingFrame_SetTextScaling` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FadingFrame_StartTextScaling` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FadingFrame_StopTextScaling` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FadingFrame_UpdateTextScaling` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.BuildCharacterClassDisplayText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.BuildCharacterLevelDisplayText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.BuildCharacterNameDisplayText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.BuildFriendNameDisplayText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.BuildLocationDisplayText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.BuildTooltipBroadcastText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GameStateUsesFactions` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetBattleNetFriendGameAccountInfoIfExactlyOneDirectInviteTargetExists` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetBattleNetFriendInviteInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetBattleNetFriendInviteTypeLabel` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetBattleNetFriendPartyInviteRestrictionText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetBattleNetFriendPartyInviteRestriction` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetFormattedCharacterName` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetFriendAccountNameText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetFriendNameColorForFriendType` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetFriendNameDisplayColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetFriendNameOfflineDisplayColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetGameAccountPartyInviteRestriction` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetLastOnlineText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetRegionName` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.GetRelativeTimeText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.HasMultipleGameAccounts` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.InviteOrRequestToJoin` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.IsPlayingDifferentWoWProject` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.IsPlayingSameWoWProject` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.IsPlayingWoW` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.IsRequestInviteType` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.IsTitleFriend` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `FriendsListUtil.ShouldShowRichPresenceOnly` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GameMenuFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GameMenuFrame_IsShown` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GameMenuFrame_Show` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GameRulesUtil.IsPlayerAtEffectiveMaxLevel` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetBottomManagedFrameContainer` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetChatAdditionalColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetDiscordUserCommunityLink` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetDiscordUserLink` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetGarrisonMissionFrameNameForFollowerType` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetGarrisonTypeForFollowerType` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetPlayerBottomManagedFrameContainer` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetRightManagedFrameContainer` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetTimeSinceLastQuestProgress` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `EditModeManagerFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `EncounterJournal_SetTabVisibe` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `EventTrace_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ExpansionTrial_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FadingFrame_CopyTextScalingTime` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FadingFrame_GetTextScalingMinHeight` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FadingFrame_InitSlot` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FadingFrame_SetTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FadingFrame_StartTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FadingFrame_StopTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FadingFrame_UpdateTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.BuildCharacterClassDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.BuildCharacterLevelDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.BuildCharacterNameDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.BuildFriendNameDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.BuildLocationDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.BuildTooltipBroadcastText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GameStateUsesFactions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetBattleNetFriendGameAccountInfoIfExactlyOneDirectInviteTargetExists` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetBattleNetFriendInviteInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetBattleNetFriendInviteTypeLabel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetBattleNetFriendPartyInviteRestrictionText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetBattleNetFriendPartyInviteRestriction` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetFormattedCharacterName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetFriendAccountNameText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetFriendNameColorForFriendType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetFriendNameDisplayColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetFriendNameOfflineDisplayColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetGameAccountPartyInviteRestriction` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetLastOnlineText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetRegionName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.GetRelativeTimeText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.HasMultipleGameAccounts` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.InviteOrRequestToJoin` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.IsPlayingDifferentWoWProject` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.IsPlayingSameWoWProject` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.IsPlayingWoW` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.IsRequestInviteType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.IsTitleFriend` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.ShouldShowRichPresenceOnly` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GameMenuFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GameMenuFrame_IsShown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GameMenuFrame_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GameRulesUtil.IsPlayerAtEffectiveMaxLevel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetBottomManagedFrameContainer` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetChatAdditionalColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetDiscordUserCommunityLink` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetDiscordUserLink` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetGarrisonMissionFrameNameForFollowerType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetGarrisonTypeForFollowerType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetPlayerBottomManagedFrameContainer` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetRightManagedFrameContainer` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetTimeSinceLastQuestProgress` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GetTimeStringFromSeconds` | best-effort | Classified as snapshot cross-flavor contamination: the only PTR definition is in `Mists/UIParent.lua`, loaded exclusively by `Blizzard_UIParent_Mists.toc`; PTR tests verify absence during initialization, post-load compatibility, and settled mainline startup. |
-| `GetUIPanelLayoutAttribute` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GetUIPanelLayoutFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GMChatFrame_OnWhisperFromGM` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GossipConfirmDialog_Show` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlDiscord_Loaded_OnEvent` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlDiscord_Loaded_OnLoad` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlDiscord_SetGuildSettingsCheckboxes` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlRankDiscord_OnLoad` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_Discord_HideAll` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_Discord_Update` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_DiscordFrame_OnLoad` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_OnShow` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_SetupDiscord` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_SetupSelected` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_Setup` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_Show` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `GuildControlUI_UnlinkDiscord` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HandleQuestSessionInviteToPartyConfirmation` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HelpFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `GetUIPanelLayoutAttribute` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetUIPanelLayoutFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GMChatFrame_OnWhisperFromGM` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GossipConfirmDialog_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlDiscord_Loaded_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlDiscord_Loaded_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlDiscord_SetGuildSettingsCheckboxes` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlRankDiscord_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_Discord_HideAll` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_Discord_Update` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_DiscordFrame_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_OnShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_SetupDiscord` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_SetupSelected` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_Setup` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_UnlinkDiscord` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HandleQuestSessionInviteToPartyConfirmation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HelpFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `HideAuctionHouseFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in the local PTR Blizzard sources; focused PTR runtime test loads `Blizzard_AuctionHouseUI` and verifies the wrapper remains absent rather than inventing behavior. |
-| `HideBarberShopFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `HideBarberShopFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `HideBlackMarketFrame` | best-effort | Classified as reversed-name snapshot mismatch: PTR defines `BlackMarketFrame_Hide` with panel-hide and close-sound behavior, not `HideBlackMarketFrame`; focused PTR test explicitly loads `Blizzard_BlackMarketUI`, verifies the authoritative helper, and confirms the reversed wrapper remains absent. |
 | `HideGarrisonMissionFrames` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test loads `Blizzard_GarrisonUI` with its LoD dependencies and verifies the wrapper remains absent. |
 | `HideGarrisonShipyardFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test loads `Blizzard_GarrisonUI` with its LoD dependencies and verifies the wrapper remains absent. |
-| `HideGossipFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `HideGossipFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `HideGuildBankFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test explicitly loads `Blizzard_GuildBankUI` and verifies the wrapper remains absent. |
-| `HideInstanceBootDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HideInstanceLockDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `HideInstanceBootDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HideInstanceLockDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `HideItemUpgradeFrame` | best-effort | Classified as reversed-name snapshot mismatch: PTR defines and uses `ItemUpgradeFrame_Hide`, not `HideItemUpgradeFrame`; focused PTR test explicitly loads `Blizzard_ItemUpgradeUI` and verifies the reversed wrapper remains absent. |
 | `HideProfessionsCustomerOrdersFrame` | best-effort | Classified as snapshot/runtime mismatch: recursive local PTR source scan finds no definition; focused PTR test loads the required ProfessionsTemplates/AuctionHouse dependencies plus `Blizzard_ProfessionsCustomerOrders`, verifies the frame exists, and confirms the wrapper remains absent. |
-| `HideSummonConfirmationDialogs` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HouseFinderFrame_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HousingBulletinBoardFrame_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HousingControls_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HousingFramesUtil.IsBlueprintCollectionAvailable` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HousingFramesUtil.IsBlueprintOperationInProgress` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HousingFramesUtil.ShowBlueprintExport` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HousingFramesUtil.ShowBlueprintImport` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HousingFramesUtil.ShowBlueprintRoomExport` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HousingFramesUtil.TryOpenBlueprintCollection` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HybridMinimap_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InputBoxInstructions_OnEnter` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InputBoxInstructions_OnLeave` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InputBoxInstructions_ShowTooltipIfTruncated` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InputUtil.CursorOnUpdate` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InputUtil.CursorUpdate` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InputUtil.GetCursorDelta` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InputUtil.IsMouseOver` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InputUtil.ShowInspectCursor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InterfaceUtil.GetScreenHeightScale` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InterfaceUtil.GetScreenWidthScale` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `InterpolatorUtil.GetSmoothProgressChange` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `IslandsPartyPoseFrame_TryShow` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `IsMouseoverCastSupported` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `IsSummonConfirmationDialogVisible` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `IsTypeAdditionalChatColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ItemUtil.DisplayEquipSlotTooltip` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ItemUtil.GetEmptyEquipSlotTooltipForSlotName` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ItemUtil.GetEmptyEquipSlotTooltip` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ItemUtil.GetEquipSlotTexture` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ItemUtil.GetValidatedItemLocation` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `Kiosk_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `KioskFrame_HandlePlayerEnteringWorld` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `LandingSoulbinds_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `LFGListApplicationViewer_OpenEditMode` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `LFGListApplicationViewerRemoveEntryButton_OnClick` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `HideSummonConfirmationDialogs` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HouseFinderFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingBulletinBoardFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingControls_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingFramesUtil.IsBlueprintCollectionAvailable` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingFramesUtil.IsBlueprintOperationInProgress` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingFramesUtil.ShowBlueprintExport` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingFramesUtil.ShowBlueprintImport` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingFramesUtil.ShowBlueprintRoomExport` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingFramesUtil.TryOpenBlueprintCollection` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HybridMinimap_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InputBoxInstructions_OnEnter` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InputBoxInstructions_OnLeave` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InputBoxInstructions_ShowTooltipIfTruncated` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InputUtil.CursorOnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InputUtil.CursorUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InputUtil.GetCursorDelta` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InputUtil.IsMouseOver` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InputUtil.ShowInspectCursor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InterfaceUtil.GetScreenHeightScale` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InterfaceUtil.GetScreenWidthScale` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InterpolatorUtil.GetSmoothProgressChange` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `IslandsPartyPoseFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `IsMouseoverCastSupported` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `IsSummonConfirmationDialogVisible` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `IsTypeAdditionalChatColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ItemUtil.DisplayEquipSlotTooltip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ItemUtil.GetEmptyEquipSlotTooltipForSlotName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ItemUtil.GetEmptyEquipSlotTooltip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ItemUtil.GetEquipSlotTexture` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ItemUtil.GetValidatedItemLocation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `Kiosk_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `KioskFrame_HandlePlayerEnteringWorld` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LandingSoulbinds_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LFGListApplicationViewer_OpenEditMode` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LFGListApplicationViewerRemoveEntryButton_OnClick` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `LoadAddOnWithErrorHandling` | implemented | 12.1 wrapper in `src/ptr/compat_bootstrap.lua`; focused delegation test in `global_functions.rs`. |
-| `LocaleUtil.GetLocaleDisplayName` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `LocalizePlayerFrame_zhCN` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `LocalizePlayerFrame_zhTW` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `LootFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `MacroFrame_SaveMacro` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ManageFramePositions` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `MenuUtil.CreateHighlightButton` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `MovePad_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.CreateNarrationInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.GetCheckboxContext` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.MakeIndexInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.MakeNarrationStringForMoney` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.MakeNarrationStringFromIndexInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.MakeNarrationStringFromInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.MakeNarrationString` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.NarrateCurrentScreen` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.RegionToNarrationInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.ResolveForwardedRegion` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.SetStaticDescription` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.SetStaticName` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.ShouldBeEnabled` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NarrationUtil.ShouldRegionNavigationSkipTooltips` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `NPE_InitializeIfLoaded` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `OpacityFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `OpenEncounterJournalToJourney` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `OpenOrderHallTalentUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `OpenPlayerSpellsToGlyphTarget` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `PhotoSharingFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `PingUtil.SendMacroPing` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `PingUtil.TogglePingTarget` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `PlayerChoiceFrame_TryShow` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `PlayerChoiceToggle_TryShow` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `PVPUI_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RaidWarningUtil.AddMessage` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RaidWarningUtil.ClearBossEmotes` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RaidWarningUtil.UpdateCenterScreenAnchors` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RecentAlliesUtil.GetBestSocialUIPresenceTypeForStateData` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RecruitAFriendFrameSocialInitializeAADC` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RegionUtil.GetTopLeftMost` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RegionUtil.SortByTopLeft` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RegisterGameMenuEscHandler` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RegisterPlayerInteraction` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ReportFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ResetDiscordSettings` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `RestoreGMChatFrameSession` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SetGhostFrameShown` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SetPlayerInteractionConditions` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SettingsPanel_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SetUIPanelLayoutAttribute` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShakeFrameRandom` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShakeFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShouldDisplaySpellCooldown` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowAchievementFrameForAchievement` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowAdventureMapFrameForFollowerType` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowArtifactFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowArtifactRelicForgeFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowAuctionHouseFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowBarberShopFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowBlackMarketFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowChallengesKeystoneFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowFlightMapFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowGarrisonCapacitiveDisplayFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowGarrisonMissionFrameForFollowerType` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowGarrisonRecruiterFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowGarrisonShipyardFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowGuildBankFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowHeirloomsJournalToClosestUpgradeablePage` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowInstanceBootDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowInstanceLockDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowItemSocketingFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowItemUpgradeFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowMatchCelebrationPartyPoseFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowPendingPlayerChoiceResponseUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowPerksProgramFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowProfessionEquipmentHelpTip` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowProfessionsCustomerOrdersFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowProfessionsFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowQuestSessionGroupInviteConfirmation` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowQuestSessionGroupInviteReceivedConfirmation` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowRemixArtifactFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowRuneforgeFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowSummonConfirmationDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ShowTaxiMapFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SimpleCheckout_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIContactsFrameInitializeAADC` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.AddSeparatorToTooltip` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.GetBattleNetFriendTagInterestsUIOrder` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.GetBattleNetFriendTagRoleUIOrder` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.GetBlockedName` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.GetIconForPresenceType` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.GetLabelForBattleNetFriendTag` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.GetLabelForPresenceType` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.GetPresenceTypeForBattleNetAccountInfo` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.GetPresenceTypeSelf` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.InitializeUserScaledDropdownButton` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.InitializeUserScaledDropdownMainTitle` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.InitializeUserScaledDropdownTitle` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SocialUIUtil.SetBattleNetPresenceFromSocialUIPresence` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SoulbindViewer_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SpellFlyout_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `SplashFrame_EscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `StoreEscapePressed` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `StringUtil.JoinAlternatingConditionalColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `TextureUtil.AnimateTexCoords` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `TimeUtil.BetterDate` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `TimeUtil.GetRecentTimeDate` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ToggleRAFPanel` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `ToggleSocialUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `TryShowAnimaDiversionFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `TryShowCovenantPreviewFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `UIModeUtil.CreateExtendedBlocklist` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `UIModeUtil.CreateModifiedBlocklist` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `UIModeUtil.IsModeActive` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `UIModeUtil.RegisterMode` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `UIModeUtil.SetModeActive` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `UnitPopupSharedUtil.IsFriendshipUpgrade` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `UpdateQuestAcceptLogFullDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `VisualAlert_GetTypeTemplate` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `VisualAlert_GetTypeText` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `VisualAlertData_ForEach` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `VisualAlerts_RegisterAll` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `WarfrontsPartyPoseFrame_TryShow` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `WowSurveyStatusFrame_OnSurveyDelivered` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `LocaleUtil.GetLocaleDisplayName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LocalizePlayerFrame_zhCN` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LocalizePlayerFrame_zhTW` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LootFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `MacroFrame_SaveMacro` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ManageFramePositions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `MenuUtil.CreateHighlightButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `MovePad_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.CreateNarrationInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.GetCheckboxContext` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.MakeIndexInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.MakeNarrationStringForMoney` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.MakeNarrationStringFromIndexInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.MakeNarrationStringFromInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.MakeNarrationString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.NarrateCurrentScreen` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.RegionToNarrationInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.ResolveForwardedRegion` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.SetStaticDescription` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.SetStaticName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.ShouldBeEnabled` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.ShouldRegionNavigationSkipTooltips` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NPE_InitializeIfLoaded` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `OpacityFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `OpenEncounterJournalToJourney` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `OpenOrderHallTalentUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `OpenPlayerSpellsToGlyphTarget` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PhotoSharingFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PingUtil.SendMacroPing` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PingUtil.TogglePingTarget` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PlayerChoiceFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PlayerChoiceToggle_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PVPUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidWarningUtil.AddMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidWarningUtil.ClearBossEmotes` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidWarningUtil.UpdateCenterScreenAnchors` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RecentAlliesUtil.GetBestSocialUIPresenceTypeForStateData` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RecruitAFriendFrameSocialInitializeAADC` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RegionUtil.GetTopLeftMost` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RegionUtil.SortByTopLeft` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RegisterGameMenuEscHandler` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RegisterPlayerInteraction` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ReportFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ResetDiscordSettings` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RestoreGMChatFrameSession` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SetGhostFrameShown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SetPlayerInteractionConditions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SettingsPanel_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SetUIPanelLayoutAttribute` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShakeFrameRandom` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShakeFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShouldDisplaySpellCooldown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowAchievementFrameForAchievement` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowAdventureMapFrameForFollowerType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowArtifactFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowArtifactRelicForgeFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowAuctionHouseFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowBarberShopFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowBlackMarketFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowChallengesKeystoneFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowFlightMapFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowGarrisonCapacitiveDisplayFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowGarrisonMissionFrameForFollowerType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowGarrisonRecruiterFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowGarrisonShipyardFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowGuildBankFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowHeirloomsJournalToClosestUpgradeablePage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowInstanceBootDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowInstanceLockDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowItemSocketingFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowItemUpgradeFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowMatchCelebrationPartyPoseFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowPendingPlayerChoiceResponseUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowPerksProgramFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowProfessionEquipmentHelpTip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowProfessionsCustomerOrdersFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowProfessionsFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowQuestSessionGroupInviteConfirmation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowQuestSessionGroupInviteReceivedConfirmation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowRemixArtifactFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowRuneforgeFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowSummonConfirmationDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowTaxiMapFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SimpleCheckout_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIContactsFrameInitializeAADC` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.AddSeparatorToTooltip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.GetBattleNetFriendTagInterestsUIOrder` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.GetBattleNetFriendTagRoleUIOrder` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.GetBlockedName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.GetIconForPresenceType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.GetLabelForBattleNetFriendTag` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.GetLabelForPresenceType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.GetPresenceTypeForBattleNetAccountInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.GetPresenceTypeSelf` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.InitializeUserScaledDropdownButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.InitializeUserScaledDropdownMainTitle` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.InitializeUserScaledDropdownTitle` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.SetBattleNetPresenceFromSocialUIPresence` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SoulbindViewer_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SpellFlyout_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SplashFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `StoreEscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `StringUtil.JoinAlternatingConditionalColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TextureUtil.AnimateTexCoords` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TimeUtil.BetterDate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TimeUtil.GetRecentTimeDate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ToggleRAFPanel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ToggleSocialUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TryShowAnimaDiversionFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TryShowCovenantPreviewFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIModeUtil.CreateExtendedBlocklist` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIModeUtil.CreateModifiedBlocklist` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIModeUtil.IsModeActive` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIModeUtil.RegisterMode` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIModeUtil.SetModeActive` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UnitPopupSharedUtil.IsFriendshipUpgrade` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UpdateQuestAcceptLogFullDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `VisualAlert_GetTypeTemplate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `VisualAlert_GetTypeText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `VisualAlertData_ForEach` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `VisualAlerts_RegisterAll` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `WarfrontsPartyPoseFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `WowSurveyStatusFrame_OnSurveyDelivered` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 
 ### Removed symbols
 
 | Symbol | Status | Reason |
 |---|---|---|
-| `AddFrameLock` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `AnimatedShine_OnUpdate` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `AnimateTexCoords` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `BattleTagInviteFrame_Show` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `BetterDate` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `BFAMissionFrame_EscapePressed` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `BoostTutorial_AttemptLoad` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `BuildColoredListString` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `BuildIconArray` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `BuildListString` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `BuildMultilineTooltip` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `BuildNewLineListString` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ButtonPulse_OnUpdate` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ClassTrainerFrame_Hide` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ClassTrainerFrame_Show` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `CloseCalendarMenus` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `CommunitiesFrame_IsEnabled` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `CompactUnitFrame_GetOptionDisplayOnlyHealerPowerBars` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `CompactUnitFrame_GetOptionDisplayPowerBar` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `CompactUnitFrame_GetOptionShowDispelIndicatorOverlay` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ConvertRGBtoColorString` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `DisplayTypeUnassignedSupported` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `EventUtil.AreVariablesLoaded` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ExpansionTrial_CheckLoadUI` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `FriendsFrame_CloseQuickJoinHelpTip` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `FriendsFrameAddFriendButton_OnClick` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `FriendsFriends_InitButton` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `FriendsFriends_SetSelection` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `FriendsFriendsButton_SetSelected` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `FriendsFriendsFrame_Close` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetDungeonNameWithDifficulty` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetNotchHeight` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetScaledCursorDelta` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetScaledCursorPositionForFrame` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetScaledCursorPosition` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetScreenHeightScale` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetScreenWidthScale` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetSmoothProgressChange` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetSocialColoredName` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetSortedSelfResurrectOptions` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `GetUIParentOffset` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `HelpPlatesSupported` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `HousingControlsUtil.CanActivateHousingControls` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `IsFrameLockActive` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `IsFrameSmartShown` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `IsLevelAtEffectiveMaxLevel` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `IsPlayerAtEffectiveMaxLevel` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `KeyBindingFrame_LoadUI` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `LocalizePlayerFrame` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `LocalizezhCN` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `LocalizezhTW` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `MacroFrame_SaveMacro` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `MajorFactions_LoadUI` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `MouseIsOver` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `NPE_CheckTutorials` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `NPETutorial_AttemptToBegin` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `OpenAchievementFrameToAchievement` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `OrderHallMissionFrame_EscapePressed` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `OrderHallTalentFrame_EscapePressed` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `OutfitterUI_LoadUI` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `PingUtil.GetContextualPingTypeForUnit` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `PlayerChoiceToggle_TryShow` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `QuickJoin_JoinQueueButtonOnClick` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidBossEmoteFrame_OnEvent` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidBossEmoteFrame_OnLoad` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidBrowser_IsEmpowered` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidNotice_AddMessage` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidNotice_ClearSlot` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidNotice_Clear` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidNotice_FadeInit` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidNotice_OnUpdate` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidNotice_SetSlot` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidNotice_UpdateSlot` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidWarningFrame_OnEvent` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RaidWarningFrame_OnLoad` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RecentTimeDate` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RefreshAuras` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RegisterNewFrameLock` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `RemoveFrameLock` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ReverseQuestObjective` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `SetDesaturation` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `SetFrameLock` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ShowResurrectRequest` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `SmartHide` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `SmartShow` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `TalentFrame_LoadUI` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `TargetFrame_UpdateBuffAnchor` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `TargetFrame_UpdateDebuffAnchor` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ToggleLFGFrame` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ToggleRafPanel` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ToggleRaidBrowser` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `ToggleWoWHackCharacterUI` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `TokenFrame_LoadUI` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `TrialAccountCapReached_Inform` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIDoFramesIntersect` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIParent_ManageFramePositions` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIParent_OnEvent` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIParent_OnHide` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIParent_OnLoad` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIParent_OnShow` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIParent_Shared_OnEvent` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIParent_Shared_OnLoad` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIParent_UpdateTopFramePositions` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UIParentLoadAddOn` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UnitHasMana` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UpdateFrameLock` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `UpdateUIElementsForClientScene` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `WorldFrame_OnLoad` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `WorldFrame_OnUpdate` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `WoWHackSpellsUI_LoadUI` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `getglobal` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
-| `setglobal` | exception-requested | Strict removal requires current Blizzard UI call-site/lifecycle proof; do not hide a legacy symbol solely from this snapshot. |
+| `AddFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AnimatedShine_OnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AnimateTexCoords` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BattleTagInviteFrame_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BetterDate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BFAMissionFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BoostTutorial_AttemptLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BuildColoredListString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BuildIconArray` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BuildListString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BuildMultilineTooltip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `BuildNewLineListString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ButtonPulse_OnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ClassTrainerFrame_Hide` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ClassTrainerFrame_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CloseCalendarMenus` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CommunitiesFrame_IsEnabled` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrame_GetOptionDisplayOnlyHealerPowerBars` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrame_GetOptionDisplayPowerBar` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrame_GetOptionShowDispelIndicatorOverlay` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ConvertRGBtoColorString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `DisplayTypeUnassignedSupported` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `EventUtil.AreVariablesLoaded` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ExpansionTrial_CheckLoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsFrame_CloseQuickJoinHelpTip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsFrameAddFriendButton_OnClick` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsFriends_InitButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsFriends_SetSelection` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsFriendsButton_SetSelected` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsFriendsFrame_Close` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetDungeonNameWithDifficulty` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetNotchHeight` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetScaledCursorDelta` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetScaledCursorPositionForFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetScaledCursorPosition` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetScreenHeightScale` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetScreenWidthScale` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetSmoothProgressChange` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetSocialColoredName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetSortedSelfResurrectOptions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetUIParentOffset` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HelpPlatesSupported` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingControlsUtil.CanActivateHousingControls` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `IsFrameLockActive` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `IsFrameSmartShown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `IsLevelAtEffectiveMaxLevel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `IsPlayerAtEffectiveMaxLevel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `KeyBindingFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LocalizePlayerFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LocalizezhCN` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LocalizezhTW` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `MacroFrame_SaveMacro` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `MajorFactions_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `MouseIsOver` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NPE_CheckTutorials` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NPETutorial_AttemptToBegin` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `OpenAchievementFrameToAchievement` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `OrderHallMissionFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `OrderHallTalentFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `OutfitterUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PingUtil.GetContextualPingTypeForUnit` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PlayerChoiceToggle_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `QuickJoin_JoinQueueButtonOnClick` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidBossEmoteFrame_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidBossEmoteFrame_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidBrowser_IsEmpowered` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidNotice_AddMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidNotice_ClearSlot` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidNotice_Clear` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidNotice_FadeInit` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidNotice_OnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidNotice_SetSlot` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidNotice_UpdateSlot` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidWarningFrame_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidWarningFrame_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RecentTimeDate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RefreshAuras` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RegisterNewFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RemoveFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ReverseQuestObjective` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SetDesaturation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SetFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShowResurrectRequest` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SmartHide` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SmartShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TalentFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TargetFrame_UpdateBuffAnchor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TargetFrame_UpdateDebuffAnchor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ToggleLFGFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ToggleRafPanel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ToggleRaidBrowser` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ToggleWoWHackCharacterUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TokenFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TrialAccountCapReached_Inform` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIDoFramesIntersect` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParent_ManageFramePositions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParent_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParent_OnHide` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParent_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParent_OnShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParent_Shared_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParent_Shared_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParent_UpdateTopFramePositions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParentLoadAddOn` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UnitHasMana` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UpdateFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UpdateUIElementsForClientScene` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `WorldFrame_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `WorldFrame_OnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `WoWHackSpellsUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `getglobal` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `setglobal` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 
 ## Sources
 
-- `/tmp/warcraft_12_1_framexml.json` — exact local added/removed symbol arrays.
-- `src/ptr/compat_bootstrap.lua` — implemented `LoadAddOnWithErrorHandling` wrapper and post-load dynamic `DifficultyUtil` color delegates.
-- `src/loader/tests/wow_api_globals/global_functions.rs` — focused `LoadAddOnWithErrorHandling` wrapper regression.
-- `src/ptr/compat_bootstrap.rs` — focused reset, argument/return, hot-swap, missing-global, and preservation coverage for the five `DifficultyUtil` delegates.
-- `tests/blizzard_frame_xml_util_loads.rs` — full PTR Game UI lifecycle/threshold proof and older-retail non-exposure proof.
-- `tests/blizzard_garrison_ui_loads.rs` — recursive PTR Garrison source scan plus explicit LoD addon-load proof for the two absent Garrison hide wrappers.
-- `tests/blizzard_professions_customer_orders_loads.rs` — recursive PTR source scan plus explicit dependency/addon-load proof for the absent CustomerOrders hide wrapper.
+- [Raw 12.1 FrameXML patch list](../../../data/patch-api/sources/12.1-framexml.json) — checked-in exact added/removed symbol arrays.
+- [12.1 FrameXML audit register](../../../data/patch-api/12.1-framexml.json) — per-row machine SSOT and lifecycle/evidence metadata.
+- [Generated compact checklist](../../generated/patch-12-1-framexml-checklist.md) — one itemized line per patch-list occurrence.
+- [PTR compatibility bootstrap](../../../src/ptr/compat_bootstrap.lua) — implemented `LoadAddOnWithErrorHandling` wrapper and post-load dynamic `DifficultyUtil` color delegates.
+- [Global-function regressions](../../../src/loader/tests/wow_api_globals/global_functions.rs) — focused `LoadAddOnWithErrorHandling` wrapper regression.
+- [PTR compatibility tests](../../../src/ptr/compat_bootstrap.rs) — focused reset, argument/return, hot-swap, missing-global, and preservation coverage for the five `DifficultyUtil` delegates.
+- [FrameXMLUtil lifecycle tests](../../../tests/blizzard_frame_xml_util_loads.rs) — full PTR Game UI lifecycle/threshold proof and older-retail non-exposure proof.
+- [Garrison UI tests](../../../tests/blizzard_garrison_ui_loads.rs) — recursive PTR Garrison source scan plus explicit LoD addon-load proof for the two absent Garrison hide wrappers.
+- [Customer Orders tests](../../../tests/blizzard_professions_customer_orders_loads.rs) — recursive PTR source scan plus explicit dependency/addon-load proof for the absent CustomerOrders hide wrapper.
 
 ## See Also
 
+- [[patch-api-audit-manifest]] — manifest schema, validation, lifecycle assertions, and checklist generation.
 - [[patch-12-1-api-audit]] — patch-level implementation and exception matrix.
 - [[client-profiles]] — cumulative retail epoch feature gating.
 - [[lua-api]] — runtime Lua surface context.

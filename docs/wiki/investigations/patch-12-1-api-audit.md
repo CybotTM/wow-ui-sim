@@ -4,6 +4,8 @@ Patch 12.1 API surface work in wow-ui-sim is split between compatible bridges th
 
 ## Content
 
+The per-item machine SSOT is `data/patch-api/12.1-framexml.json`; [[patch-api-audit-manifest]] documents validation and checklist generation. Draft `untriaged` resolutions remain completion blockers and are not approved exceptions.
+
 ### Completed compatible bridge work
 
 The 12.1 compatibility work is currently captured by these commits:
@@ -19,14 +21,14 @@ The 12.1 compatibility work is currently captured by these commits:
 - `15f4ecc18` — modeled 12.1 Battle.net title-friend custom names/tags as best-effort per-friend metadata on `SimState.bnet_friends`.
 - `1211024ce` — modeled 12.1 Encounter Journal difficulty helpers from generated instance data (`is_raid` → base/valid difficulty guesses).
 - `aa889bd7f` — modeled `C_Discord.IsEnabled` from the existing `discordClientEnabled` CVar while leaving the rest of Discord as inert service placeholders.
-- pending commit — modeled pending Battle.net friend invites with `SendVerifiedBattleNetFriendInvite` and `GetFriendInviteInfo` backed by `SimState.bnet_friend_invites`.
+- `78f8053ec` — modeled pending Battle.net friend invites with `SendVerifiedBattleNetFriendInvite` and `GetFriendInviteInfo` backed by `SimState.bnet_friend_invites`.
 - `106a6617e` — made Battle.net feature probes return true for the modeled friend-list/title-friend/tag surfaces.
 - `4728e37ab` — modeled `C_Housing` owned-house/plot probes and `ResetHouse` against local `SimState.housing` flags and favor state.
 - `ec807facb` — modeled safe `C_HousingBlueprint` share-code/import/export calls against local `SimState.housing` blueprint state.
 - `96299bb1b` — modeled safe housing editor/customize/decor/layout probes against local `SimState.housing` state and removed their Lua inert defaults.
 - `fdcdd4c62` — modeled Battle.net appear-offline intent on `SimState.bnet_appear_offline` and moved the title-friend unit invite probe out of Lua inert defaults.
 - `1701c1c4e` — modeled Discord OAuth/link/settings/server/channel probes against local `SimState.discord` state and removed the final 12.1 Lua inert defaults.
-- pending commit — modeled housing blueprint availability probes as local `SimState.housing` result codes.
+- `d91e8a342` — modeled housing blueprint availability probes as local `SimState.housing` result codes.
 
 Key implementation locations:
 
@@ -67,7 +69,7 @@ Rust readability metrics for the final bridge are under `/tmp/rust_readability_1
 | Battle.net title-friend custom names/tags | Best-effort modeled on `SimState.bnet_friends`: `SetCustomTitleFriendName` stores/clears a per-friend custom title name returned by `GetCustomTitleFriendName`; `SetFriendTags` stores array tags reflected in `GetFriendAccountInfo(...).friendTags`; the related `AreFriendTagsEnabled`, `AreTitleFriendsEnabled`, `AreTitleFriendCustomNamesEnabled`, `IsBattleNetFriendsListEnabled`, and `IsBattleNetFriendsListSupported` feature probes return true because the simulator exposes those modeled surfaces. `SetAppearOffline` records local presence intent in `SimState.bnet_appear_offline`, while `BNCheckTitleFriendInviteToUnit` is a deterministic false best-effort probe because title-friend unit-invite service state is not modeled. Exact PTR behavior still needs probes. |
 | Pending Battle.net friend invites | Best-effort modeled on `SimState.bnet_friend_invites`: `SendVerifiedBattleNetFriendInvite(name)` creates one deduplicated pending invite; `GetFriendInviteInfo(index)` returns invite/account/friend-level/timestamp fields. Exact verified-invite flow, title-friend unit invite checks, and deprecated wrapper parity need probes. |
 | Encounter Journal difficulty helpers | Best-effort modeled from generated Encounter Journal instance data: `GetBaseDifficultyID` returns `1` for dungeons and `14` for raids; `InstanceHasDifficultyID` accepts common dungeon IDs `1/2/8/23` and raid IDs `14/15/16/17`. Exact per-instance difficulty masks need generated data or PTR probes. |
-| FrameXML symbol snapshot | Full 320-added/112-removed inventory is itemized in [[patch-12-1-framexml-symbol-inventory]]. Current classification: 1 implemented, 19 best-effort, and 412 exception-requested pending strict re-triage. The five `DifficultyUtil` color helpers are dynamic delegates; `GetTimeStringFromSeconds` is cross-flavor contamination; AuctionHouse/GuildBank/Garrison/CustomerOrders hide wrappers are source/runtime mismatches; ItemUpgrade and BlackMarket hide entries are reversed-name mismatches. Addon-owned mismatch claims use explicit PTR source/runtime proof. |
+| FrameXML symbol snapshot | Full 320-added/112-removed inventory is itemized in [[patch-12-1-framexml-symbol-inventory]]. Current classification: 1 implemented, 19 best-effort, 0 exception-requested, and 412 neutral untriaged rows. The five `DifficultyUtil` color helpers are dynamic delegates; `GetTimeStringFromSeconds` is cross-flavor contamination; AuctionHouse/GuildBank/Garrison/CustomerOrders hide wrappers are source/runtime mismatches; ItemUpgrade and BlackMarket hide entries are reversed-name mismatches. Addon-owned mismatch claims use explicit PTR source/runtime proof. |
 
 ### Exception requests pending informed approval
 
@@ -81,7 +83,7 @@ A broad approval recorded on 2026-07-14 is superseded: the itemized checklist wa
 - **Full DurationTextBinding object fidelity** — compatibility methods exist, including 12.1 color-curve methods, but exact Blizzard object lifetime, metatable identity, formatter semantics, and color-curve interpolation remain unproven. Retained as an approved exception for fidelity beyond the documented best-effort table contract.
 - **Changed structure payloads with real service data** — safe local state now backs Battle.net title-friend metadata, pending Battle.net invites, Encounter Journal difficulty helpers, Discord local state, and housing local state. Retained as an approved exception for exact payloads in Discord service responses, housing service collections/availability, cooldown viewer, pet journal, LFG, player choice, tiered entrance, and private aura structures until backing models or live captures exist.
 - **Deprecated wrappers vs strict removals timing** — strict removed symbols are hidden for addon-facing 12.1 checks after startup. Retained as an approved exception for earlier removal timing until current PTR Blizzard UI no longer needs those values during load.
-- **FrameXML symbol snapshot** — [[patch-12-1-framexml-symbol-inventory]] itemizes all 432 local snapshot entries (430 distinct names; two occur in both the added and removed lists). Current classification is 1 implemented, 19 best-effort, and 412 exception-requested pending strict unsafe/impossible re-triage; no blanket exception is approved.
+- **FrameXML symbol snapshot** — [[patch-12-1-framexml-symbol-inventory]] itemizes all 432 local snapshot entries (430 distinct names; two occur in both the added and removed lists). Current classification is 1 implemented, 19 best-effort, 0 exception-requested, and 412 neutral untriaged rows; no blanket exception is requested or approved.
 
 ### Practical next step
 
