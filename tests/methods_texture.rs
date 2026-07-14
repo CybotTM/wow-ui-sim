@@ -45,15 +45,21 @@ fn assert_coords_close(actual: [f64; 8], expected: [f64; 8]) {
 // ============================================================================
 
 #[test]
-fn test_set_get_texture_path() {
+fn test_set_texture_known_path_returns_fdid_and_no_args_clear() {
     let env = env();
     let (_, tex) = setup_texture(&env, "TexPath");
-    env.exec(&format!(
-        r#"{tex}:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")"#
-    ))
-    .unwrap();
-    let path: String = env.eval(&format!("return {tex}:GetTexture()")).unwrap();
-    assert_eq!(path, "Interface\\Buttons\\UI-Panel-Button-Up");
+    let (file_data_id, cleared): (i64, bool) = env
+        .eval(&format!(
+            r#"
+            {tex}:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+            local fileDataID = {tex}:GetTexture()
+            {tex}:SetTexture()
+            return fileDataID, {tex}:GetTexture() == nil
+            "#
+        ))
+        .unwrap();
+    assert_eq!(file_data_id, 130828);
+    assert!(cleared);
 }
 
 #[test]

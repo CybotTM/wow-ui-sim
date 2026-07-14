@@ -363,7 +363,8 @@ fn resolve_texture_string(state: &LuaState, value: Val) -> (Option<String>, Opti
         return (None, None);
     }
     let Ok(file_data_id) = raw.parse::<u32>() else {
-        return (Some(raw), None);
+        let file_data_id = crate::limited_listfile::lookup_texture_path(&raw);
+        return (Some(raw), file_data_id.map(i64::from));
     };
     (
         Some(resolve_file_data_id_path(file_data_id)),
