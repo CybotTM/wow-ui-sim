@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 ItemUpgrade hide-name mismatch
+
+Updated the 12.1 FrameXML inventory after confirming PTR defines `ItemUpgradeFrame_Hide` as the authoritative `HideUIPanel(ItemUpgradeFrame)` helper, while snapshot entry `HideItemUpgradeFrame` is absent. A focused PTR test explicitly loads `Blizzard_ItemUpgradeUI` and verifies the reversed-name wrapper remains nil. Current inventory: 1 implemented, 15 best-effort, and 416 exception-requested pending strict re-triage.
+
 ## [2026-07-14] investigation | 12.1 GuildBank hide wrapper mismatch
 
 Updated the 12.1 FrameXML inventory after confirming `HideGuildBankFrame` has no definition in local PTR Blizzard sources. A focused PTR test explicitly loads `Blizzard_GuildBankUI` and verifies the snapshot-only wrapper remains absent. Current inventory: 1 implemented, 14 best-effort, and 417 exception-requested pending strict re-triage.

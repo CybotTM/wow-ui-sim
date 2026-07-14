@@ -8,6 +8,8 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage; remaining `exception-requested` rows still require strict unsafe/impossible re-triage. Vendor presence alone is not focused behavioral coverage.
 
+**Current totals:** 1 implemented, 15 best-effort, 416 exception-requested.
+
 ### Added symbols
 
 | Symbol | Status | Reason |
@@ -170,7 +172,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 | `HideGuildBankFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test explicitly loads `Blizzard_GuildBankUI` and verifies the wrapper remains absent. |
 | `HideInstanceBootDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideInstanceLockDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HideItemUpgradeFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `HideItemUpgradeFrame` | best-effort | Classified as reversed-name snapshot mismatch: PTR defines and uses `ItemUpgradeFrame_Hide`, not `HideItemUpgradeFrame`; focused PTR test explicitly loads `Blizzard_ItemUpgradeUI` and verifies the reversed wrapper remains absent. |
 | `HideProfessionsCustomerOrdersFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideSummonConfirmationDialogs` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HouseFinderFrame_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |

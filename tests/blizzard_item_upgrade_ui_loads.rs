@@ -1,4 +1,4 @@
-#![cfg(feature = "client-retail")]
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use std::path::PathBuf;
 
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
@@ -546,6 +546,20 @@ fn blizzard_item_upgrade_publishes_two_free_helper_functions() {
              interaction type"
         );
     }
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_item_upgrade_does_not_publish_reversed_hide_wrapper() {
+    let env = load_full_game_ui_with_item_upgrade_lod();
+
+    let wrapper_is_absent: bool = env
+        .eval("return HideItemUpgradeFrame == nil")
+        .expect("item upgrade wrapper visibility should be queryable");
+    assert!(
+        wrapper_is_absent,
+        "snapshot-only HideItemUpgradeFrame unexpectedly exists after PTR addon load"
+    );
 }
 
 #[test]
