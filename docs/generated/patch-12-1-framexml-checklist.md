@@ -226,7 +226,7 @@
 226. [untriaged] `added:PingUtil.SendMacroPing` — untriaged
 227. [untriaged] `added:PingUtil.TogglePingTarget` — untriaged
 228. [untriaged] `added:PlayerChoiceFrame_TryShow` — untriaged
-229. [untriaged] `added:PlayerChoiceToggle_TryShow` — untriaged
+229. [best-effort] `added:PlayerChoiceToggle_TryShow` — load-on-demand
 230. [untriaged] `added:PVPUI_LoadUI` — untriaged
 231. [untriaged] `added:RaidWarningUtil.AddMessage` — untriaged
 232. [untriaged] `added:RaidWarningUtil.ClearBossEmotes` — untriaged
@@ -379,7 +379,7 @@
 379. [untriaged] `removed:OrderHallTalentFrame_EscapePressed` — untriaged
 380. [untriaged] `removed:OutfitterUI_LoadUI` — untriaged
 381. [untriaged] `removed:PingUtil.GetContextualPingTypeForUnit` — untriaged
-382. [untriaged] `removed:PlayerChoiceToggle_TryShow` — untriaged
+382. [best-effort] `removed:PlayerChoiceToggle_TryShow` — load-on-demand
 383. [untriaged] `removed:QuickJoin_JoinQueueButtonOnClick` — untriaged
 384. [untriaged] `removed:RaidBossEmoteFrame_OnEvent` — untriaged
 385. [untriaged] `removed:RaidBossEmoteFrame_OnLoad` — untriaged

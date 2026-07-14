@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 PlayerChoice toggle LoD lifecycle
+
+Classified both `PlayerChoiceToggle_TryShow` snapshot occurrences as best-effort load-on-demand vendor behavior. Focused PTR proof verifies absence before `Blizzard_PlayerChoice`, publication after explicit load, eligible-button visibility, explicit plus OnShow state updates, and nil return. Current inventory: 1 implemented, 25 best-effort, 0 exception-requested, and 406 neutral untriaged rows.
+
 ## [2026-07-14] investigation | 12.1 smooth-progress snapshot reversal
 
 Classified the proposed `InterpolatorUtil.GetSmoothProgressChange` addition as a reversed snapshot and the proposed global `GetSmoothProgressChange` removal as vendor-present. Focused PTR proof verifies the namespace member remains nil, the global remains a function, and representative input returns `70`. Current inventory: 1 implemented, 23 best-effort, 0 exception-requested, and 408 neutral untriaged rows.

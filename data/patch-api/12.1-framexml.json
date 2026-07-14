@@ -3804,16 +3804,40 @@
       "id": "added:PlayerChoiceToggle_TryShow",
       "symbol": "PlayerChoiceToggle_TryShow",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "load-on-demand",
+      "owner": "Blizzard_PlayerChoice",
+      "evidence": [
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1.rs",
+          "summary": "Focused PTR proof verifies the helper is absent before the Blizzard_PlayerChoice LoD addon, becomes a function after loading it, shows only eligible toggle buttons, updates shown buttons both explicitly and through OnShow, and returns nil.",
+          "source_hash": "2afbdcc1882560c4683ad1502ff19ea33f3965ed5dd749a146f124bd8af0c2aa"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1.rs::player_choice_toggle_is_lod_and_updates_visible_buttons"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "before-addon",
+          "expected": "absent",
+          "expected_type": null,
+          "addon": "Blizzard_PlayerChoice"
+        },
+        {
+          "flavor": "ptr",
+          "phase": "after-addon",
+          "expected": "present",
+          "expected_type": "function",
+          "addon": "Blizzard_PlayerChoice"
+        }
+      ],
+      "commit": "e1afbfd94",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
-      "load_addon": null
+      "notes": "Classified as load-on-demand vendor behavior with focused publication and button-state semantics; no simulator shim is needed.",
+      "load_addon": "Blizzard_PlayerChoice"
     },
     {
       "id": "added:PVPUI_LoadUI",
@@ -6138,16 +6162,40 @@
       "id": "removed:PlayerChoiceToggle_TryShow",
       "symbol": "PlayerChoiceToggle_TryShow",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "load-on-demand",
+      "owner": "Blizzard_PlayerChoice",
+      "evidence": [
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1.rs",
+          "summary": "Focused PTR proof disproves unconditional removal: the helper remains absent before the Blizzard_PlayerChoice LoD addon and is published with working button-state behavior after the addon loads.",
+          "source_hash": "2afbdcc1882560c4683ad1502ff19ea33f3965ed5dd749a146f124bd8af0c2aa"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1.rs::player_choice_toggle_is_lod_and_updates_visible_buttons"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "before-addon",
+          "expected": "absent",
+          "expected_type": null,
+          "addon": "Blizzard_PlayerChoice"
+        },
+        {
+          "flavor": "ptr",
+          "phase": "after-addon",
+          "expected": "present",
+          "expected_type": "function",
+          "addon": "Blizzard_PlayerChoice"
+        }
+      ],
+      "commit": "e1afbfd94",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
-      "load_addon": null
+      "notes": "Classified as retained load-on-demand vendor behavior despite the snapshot removal; no simulator shim is needed.",
+      "load_addon": "Blizzard_PlayerChoice"
     },
     {
       "id": "removed:QuickJoin_JoinQueueButtonOnClick",
