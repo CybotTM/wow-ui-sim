@@ -39,9 +39,19 @@ if rawget(C_ClickBindings, "GetProfileInfo") == nil then
     end
 end
 
-if rawget(C_ClickBindings, "GetStringFromModifiers") == nil then
-    function C_ClickBindings.GetStringFromModifiers(_modifiers)
+-- Real WoW ownership: the GLOBAL is the live API and C_ClickBindings.* is the
+-- deprecated forwarder (Blizzard_Deprecated/Deprecated_12_0_7.lua rewrites the
+-- C_ClickBindings entries to call the globals). Define the globals as the real
+-- impls so those forwarders resolve instead of recursing / calling nil.
+if rawget(_G, "GetStringFromModifiers") == nil then
+    function GetStringFromModifiers(_modifiers)
         return ""
+    end
+end
+
+if rawget(C_ClickBindings, "GetStringFromModifiers") == nil then
+    function C_ClickBindings.GetStringFromModifiers(modifiers)
+        return GetStringFromModifiers(modifiers)
     end
 end
 
@@ -51,8 +61,8 @@ if rawget(C_ClickBindings, "GetTutorialShown") == nil then
     end
 end
 
-if rawget(C_ClickBindings, "MakeModifiers") == nil then
-    function C_ClickBindings.MakeModifiers()
+if rawget(_G, "MakeModifiers") == nil then
+    function MakeModifiers()
         local modifiers = 0
         if type(IsShiftKeyDown) == "function" and IsShiftKeyDown() then
             modifiers = modifiers + 1
@@ -67,9 +77,9 @@ if rawget(C_ClickBindings, "MakeModifiers") == nil then
     end
 end
 
-if rawget(_G, "MakeModifiers") == nil then
-    function MakeModifiers()
-        return C_ClickBindings.MakeModifiers()
+if rawget(C_ClickBindings, "MakeModifiers") == nil then
+    function C_ClickBindings.MakeModifiers()
+        return MakeModifiers()
     end
 end
 
