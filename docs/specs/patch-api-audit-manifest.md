@@ -16,7 +16,8 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - [x] Ingest an observation artifact tied to the exact manifest hash and compare every assertion by row, flavor, phase, addon, presence, and Lua type.
 - [x] Observe actual Lua global/table paths from a `WowLuaEnv` at caller-controlled lifecycle phases and record active profile, presence, and Lua type.
 - [x] Generate initialization-phase observations only when the compiled profile matches the manifest target.
-- [x] Index direct Lua function publications and flag mixin/metatable/dynamic-global/factory ambiguity without converting candidates into final statuses.
+- [x] Lexically exclude Lua comments, strings, and file-local namespaces while indexing direct function/alias publications; normalize `_G` names; retain per-source SHA-256 identity; and flag every mixin/metatable/dynamic-global/factory ambiguity on a line without converting candidates into final statuses.
+- [ ] Restrict tree candidates through selected-profile TOC reachability and dependency order.
 - [x] Fail synthetic vendor-present, LoD, cross-flavor, and removed-after-reset observations when flavor or phase is wrong.
 - [x] Generate one compact checklist line per manifest occurrence and reject checklist or human-inventory drift.
 - [ ] Generate real runtime observations for every resolved row during focused/profile test execution.

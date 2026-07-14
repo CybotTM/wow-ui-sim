@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] system | Full-tree patch source candidates
+
+Added deterministic `--index-lua-tree` scanning with relative paths, per-file hashes, and first-directory addon ownership. Pre-lexer candidate counts were discarded after review exposed comment/string/local-scope false positives; corrected counts must come from a fresh scan. Results remain candidate-only because active-profile TOC reachability, dependency order, and LoD timing are not yet applied.
+
 ## [2026-07-14] system | Patch source candidates and initialization observations
 
 Added `--observe-initialization`, which writes actual active-profile Lua observations and rejects manifest/profile mismatches. Added `--index-lua-source` for file/line direct-publication candidates plus explicit mixin/metatable/dynamic-global/factory ambiguity records. Candidate source evidence never changes final statuses automatically. Full manifest-driven post-load/LoD/reset orchestration remains open.

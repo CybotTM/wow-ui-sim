@@ -210,11 +210,20 @@ struct AuditApiArgs {
     /// Path to wowless repo (for C_* namespace allowlist filtering)
     #[arg(long, default_value_os_t = default_wowless_path())]
     wowless_path: PathBuf,
+    /// Index direct and ambiguous publication patterns across an AddOns tree
+    #[arg(
+        long,
+        conflicts_with_all = ["format", "filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path", "patch_manifest", "index_lua_source", "source_addon"]
+    )]
+    index_lua_tree: Option<PathBuf>,
+    /// Write --index-lua-tree JSON to this file instead of stdout
+    #[arg(long, requires = "index_lua_tree")]
+    source_index_output: Option<PathBuf>,
     /// Index direct and ambiguous publication patterns in one Lua source file
     #[arg(
         long,
         requires = "source_addon",
-        conflicts_with_all = ["filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path", "patch_manifest"]
+        conflicts_with_all = ["format", "filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path", "patch_manifest", "index_lua_tree"]
     )]
     index_lua_source: Option<PathBuf>,
     /// Owning addon label for --index-lua-source
@@ -223,7 +232,7 @@ struct AuditApiArgs {
     /// Validate and render a checked-in patch API audit manifest instead of scanning UI usage
     #[arg(
         long,
-        conflicts_with_all = ["filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path", "index_lua_source", "source_addon"]
+        conflicts_with_all = ["filter_startup", "namespace", "ui_path", "gaps", "sim_path", "wowless_path", "index_lua_tree", "index_lua_source", "source_addon"]
     )]
     patch_manifest: Option<PathBuf>,
     /// Runtime observation artifact produced for this exact manifest
@@ -381,6 +390,14 @@ fn run_casc_command(target: CascTarget) {
 
 fn handle_audit_api(args: AuditApiArgs) {
     let fmt = parse_output_format(&args.format);
+    if let Some(path) = args.index_lua_tree {
+        if let Err(error) = handle_lua_source_tree_index(&path, args.source_index_output.as_deref())
+        {
+            eprintln!("Error: {error}");
+            std::process::exit(1);
+        }
+        return;
+    }
     if let Some(path) = args.index_lua_source {
         let addon = args
             .source_addon
@@ -417,6 +434,20 @@ fn handle_audit_api(args: AuditApiArgs) {
         .gaps
         .then(|| build_gap_report(&args.sim_path, &results));
     print_audit_output(fmt, &results, gap_report.as_ref());
+}
+
+fn handle_lua_source_tree_index(path: &Path, output: Option<&Path>) -> Result<(), String> {
+    let index = audit_api::index_lua_tree(path)?;
+    let rendered = serde_json::to_string_pretty(&index)
+        .map_err(|error| format!("failed to render source tree index: {error}"))?;
+    if let Some(output) = output {
+        std::fs::write(output, format!("{rendered}\n"))
+            .map_err(|error| format!("failed to write {}: {error}", output.display()))?;
+        println!("wrote source index to {}", output.display());
+    } else {
+        println!("{rendered}");
+    }
+    Ok(())
 }
 
 fn handle_lua_source_index(path: &Path, addon: &str) -> Result<(), String> {

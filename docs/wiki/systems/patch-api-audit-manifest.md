@@ -40,7 +40,7 @@ The production observation primitive reads actual global/table paths from `WowLu
 
 ### Source candidates
 
-`--index-lua-source <file> --source-addon <addon>` emits direct global/table function-publication candidates with file/line ownership and separately flags mixin, metatable, dynamic `_G`, and factory constructs as ambiguities. This is candidate evidence only: it does not turn a text match or absence into a final manifest status.
+`--index-lua-source <file> --source-addon <addon>` emits direct global/table function and alias publication candidates for one file. `--index-lua-tree <AddOns>` emits the same records with deterministic relative paths and first-directory addon ownership across all Lua files. The lexer masks comments, quoted/long strings, and file-local namespaces; `_G.Name` is normalized to `Name`; source identities carry SHA-256 hashes; and multiple mixin/metatable/dynamic-`_G`/factory ambiguities on one line are retained. Tree output is not yet filtered through active-profile TOCs, dependency order, or load-on-demand reachability. This is candidate evidence only: neither a text match nor absence changes a final manifest status.
 
 ### Exception approval
 
@@ -60,6 +60,8 @@ wow-cli audit-api --patch-manifest data/patch-api/12.1-framexml.json --format pl
 wow-cli audit-api --patch-manifest data/patch-api/12.1-framexml.json \
   --observe-initialization observations.json
 wow-cli audit-api --index-lua-source path/to/file.lua --source-addon Blizzard_AddOn
+wow-cli audit-api --index-lua-tree path/to/AddOns \
+  --source-index-output source-index.json
 wow-cli audit-api --patch-manifest data/patch-api/12.1-framexml.json \
   --observations path/to/observations.json --complete
 ```
