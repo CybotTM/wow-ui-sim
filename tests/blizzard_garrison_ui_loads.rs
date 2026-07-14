@@ -1,4 +1,4 @@
-#![cfg(feature = "client-retail")]
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use std::path::PathBuf;
 
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
@@ -24,6 +24,32 @@ fn garrison_ui_toc() -> PathBuf {
 fn lod_addon_toc(folder: &str) -> PathBuf {
     let dir = blizzard_ui_dir().join(folder);
     find_toc_file(&dir).unwrap_or_else(|| panic!("{folder} TOC must resolve"))
+}
+
+fn assert_directory_omits_symbols(directory: &std::path::Path, symbols: &[&str]) {
+    for entry in std::fs::read_dir(directory).expect("Blizzard source directory should read") {
+        let path = entry.expect("Blizzard source entry should read").path();
+        if path.is_dir() {
+            assert_directory_omits_symbols(&path, symbols);
+            continue;
+        }
+
+        let Some(extension) = path.extension().and_then(|extension| extension.to_str()) else {
+            continue;
+        };
+        if !matches!(extension, "lua" | "xml" | "toc") {
+            continue;
+        }
+
+        let source = std::fs::read_to_string(&path).expect("Blizzard source file should read");
+        for symbol in symbols {
+            assert!(
+                !source.contains(symbol),
+                "{symbol} unexpectedly exists in {}",
+                path.display()
+            );
+        }
+    }
 }
 
 fn load_full_game_ui_with_lod_deps() -> WowLuaEnv {
@@ -273,6 +299,26 @@ fn blizzard_garrison_ui_is_addon_loaded_returns_true_after_explicit_load() {
          LoadAddOn (the loader must register the addon's name + state in the addon-info \
          table that backs IsAddOnLoaded)"
     );
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_garrison_ui_does_not_publish_snapshot_only_hide_wrappers() {
+    let symbols = [
+        "HideGarrisonMissionFrames",
+        "HideGarrisonShipyardFrame",
+    ];
+    assert_directory_omits_symbols(&garrison_ui_dir(), &symbols);
+
+    let env = load_full_game_ui_with_lod_deps();
+    load_addon(&env.loader_env(), &garrison_ui_toc()).expect("Blizzard_GarrisonUI should load");
+
+    let wrappers_are_absent: (bool, bool) = env
+        .eval(
+            "return HideGarrisonMissionFrames == nil, HideGarrisonShipyardFrame == nil",
+        )
+        .expect("garrison hide wrapper visibility should be queryable");
+    assert_eq!(wrappers_are_absent, (true, true));
 }
 
 #[test]

@@ -8,7 +8,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage; remaining `exception-requested` rows still require strict unsafe/impossible re-triage. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 16 best-effort, 415 exception-requested.
+**Current totals:** 1 implemented, 18 best-effort, 413 exception-requested.
 
 ### Added symbols
 
@@ -166,8 +166,8 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 | `HideAuctionHouseFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in the local PTR Blizzard sources; focused PTR runtime test loads `Blizzard_AuctionHouseUI` and verifies the wrapper remains absent rather than inventing behavior. |
 | `HideBarberShopFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideBlackMarketFrame` | best-effort | Classified as reversed-name snapshot mismatch: PTR defines `BlackMarketFrame_Hide` with panel-hide and close-sound behavior, not `HideBlackMarketFrame`; focused PTR test explicitly loads `Blizzard_BlackMarketUI`, verifies the authoritative helper, and confirms the reversed wrapper remains absent. |
-| `HideGarrisonMissionFrames` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HideGarrisonShipyardFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `HideGarrisonMissionFrames` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test loads `Blizzard_GarrisonUI` with its LoD dependencies and verifies the wrapper remains absent. |
+| `HideGarrisonShipyardFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test loads `Blizzard_GarrisonUI` with its LoD dependencies and verifies the wrapper remains absent. |
 | `HideGossipFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideGuildBankFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test explicitly loads `Blizzard_GuildBankUI` and verifies the wrapper remains absent. |
 | `HideInstanceBootDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
@@ -459,6 +459,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 - `src/loader/tests/wow_api_globals/global_functions.rs` — focused `LoadAddOnWithErrorHandling` wrapper regression.
 - `src/ptr/compat_bootstrap.rs` — focused reset, argument/return, hot-swap, missing-global, and preservation coverage for the five `DifficultyUtil` delegates.
 - `tests/blizzard_frame_xml_util_loads.rs` — full PTR Game UI lifecycle/threshold proof and older-retail non-exposure proof.
+- `tests/blizzard_garrison_ui_loads.rs` — recursive PTR Garrison source scan plus explicit LoD addon-load proof for the two absent Garrison hide wrappers.
 
 ## See Also
 
