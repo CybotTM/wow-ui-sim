@@ -1,4 +1,4 @@
-#![cfg(feature = "client-retail")]
+#![cfg(any(feature = "client-retail", feature = "client-ptr"))]
 use std::path::PathBuf;
 
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file, load_addon};
@@ -206,6 +206,20 @@ fn blizzard_guild_bank_ui_loads_explicitly_without_unexpected_addon_specific_lua
             .map(|s| s.as_str())
             .collect::<Vec<_>>()
             .join("\n  ")
+    );
+}
+
+#[cfg(feature = "client-ptr")]
+#[test]
+fn ptr_guild_bank_does_not_publish_snapshot_only_hide_wrapper() {
+    let env = load_full_game_ui_with_guild_bank_lod();
+
+    let wrapper_is_absent: bool = env
+        .eval("return HideGuildBankFrame == nil")
+        .expect("guild bank wrapper visibility should be queryable");
+    assert!(
+        wrapper_is_absent,
+        "snapshot-only HideGuildBankFrame unexpectedly exists after PTR addon load"
     );
 }
 

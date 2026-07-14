@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 GuildBank hide wrapper mismatch
+
+Updated the 12.1 FrameXML inventory after confirming `HideGuildBankFrame` has no definition in local PTR Blizzard sources. A focused PTR test explicitly loads `Blizzard_GuildBankUI` and verifies the snapshot-only wrapper remains absent. Current inventory: 1 implemented, 14 best-effort, and 417 exception-requested pending strict re-triage.
+
 ## [2026-07-14] investigation | 12.1 AuctionHouse hide wrapper mismatch
 
 Updated the 12.1 FrameXML inventory after confirming `HideAuctionHouseFrame` has no definition in the local PTR Blizzard sources. A focused PTR runtime test loads `Blizzard_AuctionHouseUI` and verifies the snapshot-only wrapper remains absent instead of adding guessed close semantics. Current inventory: 1 implemented, 13 best-effort, and 418 exception-requested pending strict re-triage.

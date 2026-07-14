@@ -167,7 +167,7 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 | `HideGarrisonMissionFrames` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideGarrisonShipyardFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideGossipFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `HideGuildBankFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `HideGuildBankFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test explicitly loads `Blizzard_GuildBankUI` and verifies the wrapper remains absent. |
 | `HideInstanceBootDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideInstanceLockDialog` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `HideItemUpgradeFrame` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
