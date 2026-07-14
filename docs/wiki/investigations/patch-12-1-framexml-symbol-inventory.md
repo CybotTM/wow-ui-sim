@@ -66,10 +66,10 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 | `ConfirmLootRollDialog_Show` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `ConfirmTalentWipeDialog_Show` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `ContributionCollectionFrame_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownManagerLayout_GetGroupBuffVisualAlerts` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownManagerLayout_GetHiddenGroupBuffs` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownManagerLayout_SetGroupBuffVisualAlerts` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `CooldownManagerLayout_SetHiddenGroupBuffs` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `CooldownManagerLayout_GetGroupBuffVisualAlerts` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
+| `CooldownManagerLayout_GetHiddenGroupBuffs` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
+| `CooldownManagerLayout_SetGroupBuffVisualAlerts` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
+| `CooldownManagerLayout_SetHiddenGroupBuffs` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
 | `CooldownViewer_MarkAuraCacheDirty` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `CooldownViewerContextMenu_AddAlertEntryButton` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `CooldownViewerContextMenu_AddNewAlertButton` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |

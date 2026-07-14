@@ -134,6 +134,27 @@ if settablesecurity == nil then
   end
 end
 
+if CooldownManagerLayout_GetGroupBuffVisualAlerts == nil then
+  function CooldownManagerLayout_GetGroupBuffVisualAlerts()
+    return C_UnitAuras.GetGroupBuffVisualAlerts()
+  end
+end
+if CooldownManagerLayout_SetGroupBuffVisualAlerts == nil then
+  function CooldownManagerLayout_SetGroupBuffVisualAlerts(alerts)
+    C_UnitAuras.SetGroupBuffVisualAlerts(alerts)
+  end
+end
+if CooldownManagerLayout_GetHiddenGroupBuffs == nil then
+  function CooldownManagerLayout_GetHiddenGroupBuffs()
+    return C_UnitAuras.GetHiddenGroupBuffs()
+  end
+end
+if CooldownManagerLayout_SetHiddenGroupBuffs == nil then
+  function CooldownManagerLayout_SetHiddenGroupBuffs(hiddenBuffs)
+    C_UnitAuras.SetHiddenGroupBuffs(hiddenBuffs)
+  end
+end
+
 if LoadAddOnWithErrorHandling == nil then
   function LoadAddOnWithErrorHandling(name)
     return UIParentLoadAddOn(name)

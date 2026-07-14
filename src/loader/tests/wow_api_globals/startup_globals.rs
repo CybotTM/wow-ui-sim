@@ -676,6 +676,10 @@ fn test_patch_12_1_safe_global_bridges() {
             if C_UnitAuras.GetGroupBuffVisualAlerts()[123] ~= true then return "group-alerts" end
             C_UnitAuras.SetHiddenGroupBuffs({ [456] = true })
             if C_UnitAuras.GetHiddenGroupBuffs()[456] ~= true then return "hidden-buffs" end
+            CooldownManagerLayout_SetGroupBuffVisualAlerts({ [789] = true })
+            if CooldownManagerLayout_GetGroupBuffVisualAlerts()[789] ~= true then return "layout-group-alerts" end
+            CooldownManagerLayout_SetHiddenGroupBuffs({ [987] = true })
+            if CooldownManagerLayout_GetHiddenGroupBuffs()[987] ~= true then return "layout-hidden-buffs" end
             local slotID, icon, checkRelic = C_PaperDollInfo.GetInventorySlotInfo("MainHandSlot")
             if slotID ~= 16 or type(icon) ~= "number" or checkRelic ~= false then return "paperdoll-slot" end
             if C_HouseEditor.GetHouseEditorPlayerType() ~= nil then return "house-editor-player" end
