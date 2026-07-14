@@ -14,7 +14,7 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
-use super::helpers::set_global_val;
+use super::helpers::ensure_namespace;
 
 const CLASS_FILES: &[&str] = &[
     "WARRIOR",
@@ -81,12 +81,11 @@ const SPEC_ACTIVATION_SPELL_ID: u32 = 200749;
 const SPEC_ACTIVATION_CAST_SECONDS: f64 = 1.5;
 
 pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
-    let t = create_table(state);
-    let Val::Table(t_ref) = t else {
-        unreachable!("create_table must return a table");
-    };
+    // Reuse the existing global table if a workaround bootstrap already created
+    // it, so its gap-filler shims (mastery spells, pvp talents) are not clobbered
+    // by replacing the table with a fresh one.
+    let t_ref = ensure_namespace(state, "C_SpecializationInfo")?;
     register_c_specialization_info_methods(state, t_ref)?;
-    set_global_val(state, "C_SpecializationInfo", t);
     register_legacy_specialization_globals(state)?;
     Ok(())
 }
@@ -582,4 +581,49 @@ fn ui_widget_container_get_num_widgets_showing(state: &mut LuaState) -> LuaResul
 
 fn ui_widget_container_on_load(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+    use rilua::LuaApiMut;
+
+    /// Registering the C_SpecializationInfo namespace must merge into the
+    /// existing global table rather than replace it, or the gap-filler shims
+    /// installed by workaround bootstraps (mastery spells, pvp talents) are
+    /// clobbered and Blizzard code that calls them errors at runtime.
+    #[test]
+    fn register_preserves_existing_specialization_info_shims() {
+        let env = WowLuaEnv::new().expect("lua env should initialize");
+        env.exec(
+            r#"
+            C_SpecializationInfo = C_SpecializationInfo or {}
+            function C_SpecializationInfo.SentinelShim()
+                return "kept"
+            end
+            "#,
+        )
+        .expect("install sentinel shim");
+
+        {
+            let mut lua = env.rilua_mut();
+            super::register_c_specialization_info(lua.state_mut())
+                .expect("register C_SpecializationInfo");
+        }
+
+        let kept: String = env
+            .eval(
+                r#"return (C_SpecializationInfo.SentinelShim and C_SpecializationInfo.SentinelShim()) or "lost""#,
+            )
+            .expect("sentinel shim should remain callable");
+        assert_eq!(kept, "kept", "c_api registration clobbered a namespace shim");
+
+        let has_getspec: String = env
+            .eval(r#"return type(C_SpecializationInfo.GetSpecialization)"#)
+            .expect("GetSpecialization query");
+        assert_eq!(
+            has_getspec, "function",
+            "c_api method missing after registration"
+        );
+    }
 }
