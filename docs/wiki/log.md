@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 Macro save lifecycle
+
+Classified both `MacroFrame_SaveMacro` snapshot occurrences as best-effort vendor-present behavior. Focused PTR proof verifies the eager UIParent no-op placeholder is harmless and explicit `Blizzard_MacroUI` loading replaces it with the `MacroFrame:SaveMacro()` delegate. Current inventory: 1 implemented, 21 best-effort, 0 exception-requested, and 410 neutral untriaged rows.
+
 ## [2026-07-14] system | Active-TOC patch source reachability
 
 Added `--active-tocs` to the full-tree Lua publication index. The active compiled profile uses `find_toc_file` to select each addon's TOC, applies per-file environment rules, recursively follows XML script/include paths through the loader's addon-root fallback and case-insensitive resolver, records unresolved Lua/XML reference paths, and excludes source files selected only by other flavor TOCs. This corrects false candidate matches such as Mists-only helpers found by the raw all-files scan. Source selection remains candidate evidence; dependency order and LoD timing still require lifecycle tests.

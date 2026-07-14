@@ -199,7 +199,7 @@
 199. [untriaged] `added:LocalizePlayerFrame_zhCN` — untriaged
 200. [untriaged] `added:LocalizePlayerFrame_zhTW` — untriaged
 201. [untriaged] `added:LootFrame_EscapePressed` — untriaged
-202. [untriaged] `added:MacroFrame_SaveMacro` — untriaged
+202. [best-effort] `added:MacroFrame_SaveMacro` — vendor-present
 203. [untriaged] `added:ManageFramePositions` — untriaged
 204. [untriaged] `added:MenuUtil.CreateHighlightButton` — untriaged
 205. [untriaged] `added:MovePad_LoadUI` — untriaged
@@ -369,7 +369,7 @@
 369. [untriaged] `removed:LocalizePlayerFrame` — untriaged
 370. [untriaged] `removed:LocalizezhCN` — untriaged
 371. [untriaged] `removed:LocalizezhTW` — untriaged
-372. [untriaged] `removed:MacroFrame_SaveMacro` — untriaged
+372. [best-effort] `removed:MacroFrame_SaveMacro` — vendor-present
 373. [untriaged] `removed:MajorFactions_LoadUI` — untriaged
 374. [untriaged] `removed:MouseIsOver` — untriaged
 375. [untriaged] `removed:NPE_CheckTutorials` — untriaged
