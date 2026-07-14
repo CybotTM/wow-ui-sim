@@ -268,22 +268,21 @@ fn blizzard_deprecated_specialization_installs_two_wrapper_closures() {
 }
 
 #[test]
-fn blizzard_deprecated_specialization_get_specialization_mastery_spells_errors_with_nil_table() {
+fn blizzard_deprecated_specialization_get_specialization_mastery_spells_returns_spell_ids() {
     let env = load_full_game_ui();
 
-    let blew_up: bool = env
-        .eval("return select(1, pcall(GetSpecializationMasterySpells, 1, false, false)) == false")
-        .expect("pcall probe should succeed");
-    assert!(
-        blew_up,
-        "Calling GetSpecializationMasterySpells errors because the wrapper at line 23 calls \
-         `C_SpecializationInfo.GetSpecializationMasterySpells(...)` (UNSTUBBED — resolves via \
-         `__wow_namespace_mt.__index` to a no-op `function() return nil end` closure) and \
-         then immediately attempts `masterySpells[1]` at line 26 — indexing nil throws. \
-         pcall returns ok=false. This documents a real shim bug: the wrapper assumes the \
-         underlying API returns a table, but the unstubbed C_SpecializationInfo no-op gives \
-         nil, blowing up the deprecated path"
+    let (first, second_is_nil): (i32, bool) = env
+        .eval(
+            "local first, second = GetSpecializationMasterySpells(1, false, false) \
+             return first, second == nil",
+        )
+        .expect("deprecated wrapper should run without error");
+    assert_eq!(
+        first, 183997,
+        "spec index 1 for the default Paladin is Holy, whose mastery is Lightbringer (183997), \
+         served by the modeled C_SpecializationInfo.GetSpecializationMasterySpells"
     );
+    assert!(second_is_nil, "Holy Paladin has a single mastery spell");
 }
 
 #[test]

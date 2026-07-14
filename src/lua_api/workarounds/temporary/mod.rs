@@ -153,7 +153,6 @@ pub(crate) mod shared_xml_utility_defaults;
 pub(crate) mod social_queue_defaults;
 pub(crate) mod sound_driver_defaults;
 pub(crate) mod source_patches;
-pub(crate) mod specialization_mastery_defaults;
 pub(crate) mod spell_book_static_defaults;
 pub(crate) mod spell_metadata_defaults;
 pub(crate) mod spell_static_defaults;

@@ -510,21 +510,6 @@ fn shared_character_services_defaults_are_not_c_api_temporary_shims() {
 }
 
 #[test]
-fn specialization_mastery_defaults_are_not_c_api_temporary_shims() {
-    let temporary_shims = c_api_temporary_shims_source();
-    let c_api = include_str!("../src/c_api/mod.rs");
-
-    assert!(
-        !temporary_shims.contains("c_specialization_mastery"),
-        "unmodeled C_SpecializationInfo mastery-spell defaults belong in lua_api::workarounds::temporary"
-    );
-    assert!(
-        !c_api.contains("c_specialization_mastery"),
-        "C_SpecializationInfo mastery-spell defaults should not be wired through c_api registration"
-    );
-}
-
-#[test]
 fn click_bindings_defaults_are_not_c_api_temporary_shims() {
     let temporary_shims = c_api_temporary_shims_source();
     let c_api_registration = include_str!("../src/c_api/registration.rs");

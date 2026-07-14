@@ -6,7 +6,8 @@
 
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::globals::real::specialization_helpers::push_specialization_identity;
-use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use crate::specializations;
 use rilua::vm::state::LuaState;
@@ -38,13 +39,16 @@ const LEGACY_SPECIALIZATION_GLOBALS: &[(&str, RustLuaFn)] = &[
         "GetSpecializationInfoForClassID",
         get_specialization_info_for_class_id,
     ),
+    ("GetInspectSpecialization", get_inspect_specialization),
     ("GetSpecializationRole", get_specialization_role),
+    ("GetSpecializationRoleByID", get_specialization_role_by_id),
     ("GetSpecializationRoleEnum", get_specialization_role_enum),
     (
         "GetSpecializationRoleEnumByID",
         get_specialization_role_enum_by_id,
     ),
     ("GetLFGStringFromEnum", get_lfg_string_from_enum),
+    ("SetSpecialization", set_specialization),
 ];
 
 pub(crate) fn register_legacy_specialization_globals(state: &mut LuaState) -> LuaResult<()> {
@@ -108,7 +112,14 @@ fn get_specialization_info_for_class_id(state: &mut LuaState) -> LuaResult<u32> 
 }
 
 fn get_specialization_role(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(role) = requested_spec_role(state) else {
+    push_role_string(state, requested_spec_role)
+}
+
+fn push_role_string(
+    state: &mut LuaState,
+    role_lookup: fn(&LuaState) -> Option<&'static str>,
+) -> LuaResult<u32> {
+    let Some(role) = role_lookup(state) else {
         state.push(Val::Nil);
         return Ok(1);
     };
@@ -127,16 +138,20 @@ fn get_specialization_role_enum(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_specialization_role_enum_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(role) = requested_spec_role_by_id(state) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    state.push(Val::Num(role_enum_value(role)));
+    Ok(1)
+}
+
+fn requested_spec_role_by_id(state: &LuaState) -> Option<&'static str> {
     let spec_id = match stack_val(state, 1) {
         Val::Num(n) => n as u32,
         _ => 0,
     };
-    let Some(spec) = specializations::spec_by_id(spec_id) else {
-        state.push(Val::Nil);
-        return Ok(1);
-    };
-    state.push(Val::Num(role_enum_value(spec.role)));
-    Ok(1)
+    specializations::spec_by_id(spec_id).map(|spec| spec.role)
 }
 
 fn get_lfg_string_from_enum(state: &mut LuaState) -> LuaResult<u32> {
@@ -149,6 +164,85 @@ fn get_lfg_string_from_enum(state: &mut LuaState) -> LuaResult<u32> {
     let role = create_string(state, role);
     state.push(role);
     Ok(1)
+}
+
+fn get_inspect_specialization(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = match stack_val(state, 1) {
+        Val::Str(s) => state
+            .gc
+            .string_arena
+            .get(s)
+            .and_then(|lua_str| std::str::from_utf8(lua_str.data()).ok())
+            .unwrap_or_default()
+            .to_owned(),
+        _ => String::new(),
+    };
+    if unit.is_empty() {
+        state.push(Val::Num(0.0));
+        return Ok(1);
+    }
+
+    let Some(spec) = active_player_spec(state) else {
+        state.push(Val::Num(0.0));
+        return Ok(1);
+    };
+    state.push(Val::Num(spec.id as f64));
+    Ok(1)
+}
+
+fn get_specialization_role_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    push_role_string(state, requested_spec_role_by_id)
+}
+
+/// Legacy `SetSpecialization` switches the active spec instantly, unlike
+/// `C_SpecializationInfo.SetSpecialization` which starts an activation cast.
+fn set_specialization(state: &mut LuaState) -> LuaResult<u32> {
+    let requested_index = match stack_val(state, 1) {
+        Val::Num(n) => n as i32,
+        _ => 0,
+    };
+    let can_set = player_spec_by_index(state, requested_index).is_some();
+    if can_set {
+        activate_specialization_now(state, requested_index.max(1))?;
+    }
+    state.push(Val::Bool(can_set));
+    Ok(1)
+}
+
+fn activate_specialization_now(state: &mut LuaState, target_index: i32) -> LuaResult<()> {
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.player.active_spec_index = target_index;
+        sim.player.pending_spec_change = None;
+        sim.casting = None;
+    }
+
+    let player = create_string(state, "player");
+    fire_named_event_state(state, "PLAYER_SPECIALIZATION_CHANGED", &[player]);
+    fire_named_event_state(state, "PLAYER_TALENT_UPDATE", &[]);
+    fire_named_event_state(state, "ACTIVE_TALENT_GROUP_CHANGED", &[]);
+    Ok(())
+}
+
+fn player_spec_by_index(
+    state: &LuaState,
+    requested_index: i32,
+) -> Option<&'static specializations::SpecInfo> {
+    let class_id = borrow_state(state).ok()?.player.class_index.max(1) as u32;
+    let requested_spec_index = requested_index.max(1);
+    specializations::specs_for_class(class_id).nth((requested_spec_index - 1) as usize)
+}
+
+fn active_player_spec(state: &LuaState) -> Option<&'static specializations::SpecInfo> {
+    let (class_id, active_spec_index) = {
+        let sim = borrow_state(state).ok()?;
+        (
+            sim.player.class_index.max(1) as u32,
+            sim.player.active_spec_index,
+        )
+    };
+    let active_spec_index = active_spec_index.max(1);
+    specializations::specs_for_class(class_id).nth((active_spec_index - 1) as usize)
 }
 
 fn requested_spec_role(state: &LuaState) -> Option<&'static str> {

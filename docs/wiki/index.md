@@ -38,6 +38,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[frame-data-flow]] | Parallel Lua/Rust systems, global tables (__frame_fields/__scripts), method lookup order, Mixin() application, event dispatch flow |
 | [[taint-system]] | Protected-frame gating, dual Lua environment (genv/secureenv), Elune-backed issecure/securecall, Blizzard `issecure()` call-site matrix, SecureHandler fallback, state/attribute drivers |
 | [[casc-asset-cache]] | CASC cache layers (FDID resolution sqlite, BLP byte cache, Blizzard UI source cache, in-memory texture cache), measured timings, failure modes |
+| [[specialization-mastery-spells]] | Per-spec mastery spell IDs modeled from ChrSpecialization.db2 (`SpecInfo.mastery_spell_ids`); backs `C_SpecializationInfo.GetSpecializationMasterySpells` and the Character sheet Mastery tooltip |
 
 ## investigations/
 
@@ -57,6 +58,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[mouse-dead-probe-blockers-idle-ticks]] | Mouse input dead at "50 FPS": CoreBehaviorProbe left full-screen DIALOG mouse blockers; root cause was tick-subscription churn (raw shrinking timer delay changed the `time::every` identity every update, starving ProcessTimers under continuous input — fixed by quantized intervals), plus loader now refuses TOCs that don't name their folder |
 | [[casc-root-v2-parsing-missing-textures]] | Dispel debuff borders (and ~89% of all fdids) unextractable because cascette-rs misparsed 12.0.5 TSFM v2 root blocks (split content flags / NoNameHash bit); fixed via pin bumps + `casc_refresh` + clearing `.missing` markers |
 | [[addon-load-order]] | Bag buttons partially initialized at load; workaround mirrors real WoW event recovery |
+| [[deprecated-specialization-alias-identity]] | Deprecated specialization global aliases lost identity-equality with `C_SpecializationInfo` methods because the post-cleanup restore re-registered the namespace with fresh closures; registration is now idempotent for Rust-backed methods |
 | [[paladin-aura-stance-bar]] | Paladin aura/stance bar vanished because default `SimState.shapeshift_forms` was empty even though the player is seeded as Paladin; state now seeds Devotion, Crusader, and Retribution Aura forms |
 | [[mists-panel-stack-overflow-layout-cycle]] | Achievements/Talents panel clicks aborted from layout cache recursion on cyclic parent/anchor dependencies; `headless-click-probe` now exercises the real GUI click path |
 | [[mount-journal-click-selection]] | Mount Journal mouse clicks never switched selection: the startup-XML fast path fused multi-arg `RegisterForClicks("LeftButtonUp", "RightButtonUp")` into one garbage registration string; `Button:Click()` bypasses registration so only the real GUI dispatch path (`headless-click-probe mounts`) could see it |

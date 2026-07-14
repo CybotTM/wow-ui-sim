@@ -2,6 +2,16 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-13] create | Mastery spells modeled, alias identity fix
+
+Created `systems/specialization-mastery-spells.md` and
+`investigations/deprecated-specialization-alias-identity.md` after modeling
+`C_SpecializationInfo.GetSpecializationMasterySpells` from ChrSpecialization.db2
+(retiring the empty-table temporary shim) and fixing three pre-existing test
+failures: deprecated alias identity broken by post-cleanup re-registration, and
+legacy specialization globals / UIWidgetContainerMixin duplicated in
+`c_api/c_spec.rs` after their move to the Lua globals layer.
+
 ## [2026-07-13] update | Retail-only CASC isolation test
 
 Updated `systems/casc-asset-cache.md` after adding
