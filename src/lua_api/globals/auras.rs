@@ -118,6 +118,7 @@ fn install_aura_util_methods(state: &mut LuaState) {
         aura_util,
         &[
             ("CreateFilterString", aura_util_create_filter_string),
+            ("IsValidFilterString", aura_util_is_valid_filter_string),
             ("UnpackAuraData", aura_util_unpack_aura_data),
             ("ForEachAura", aura_util_for_each_aura),
             ("FindAura", aura_util_find_aura),
@@ -126,8 +127,22 @@ fn install_aura_util_methods(state: &mut LuaState) {
                 "GetAuraDataByAuraInstanceID",
                 aura_util_get_aura_data_by_aura_instance_id,
             ),
+            ("GetUnitAuras", get_unit_auras),
         ],
     );
+}
+
+fn aura_util_is_valid_filter_string(state: &mut LuaState) -> LuaResult<u32> {
+    let filter = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let valid = !filter.is_empty()
+        && filter.split('|').all(|token| {
+            matches!(
+                token.to_ascii_uppercase().as_str(),
+                "HELPFUL" | "HARMFUL" | "RAID" | "INCLUDE_NAME_PLATE_ONLY" | "PLAYER"
+            )
+        });
+    state.push(Val::Bool(valid));
+    Ok(1)
 }
 
 fn ensure_aura_filters(state: &mut LuaState, aura_util: Val) {

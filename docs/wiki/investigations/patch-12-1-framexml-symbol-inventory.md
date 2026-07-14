@@ -25,8 +25,8 @@ Exhaustive status inventory for the local 12.1 FrameXML API snapshot. This page 
 | `ArdenwealdGardening_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `ArtifactFrame_OnTraitsRefunded` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `AuraUtil.GetAuraBorderColor` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AuraUtil.GetUnitAuras` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
-| `AuraUtil.IsValidFilterString` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
+| `AuraUtil.GetUnitAuras` | best-effort | Delegates to existing state-backed aura collection; focused 12.1 bridge test. |
+| `AuraUtil.IsValidFilterString` | best-effort | Rust validator accepts nonempty `HELPFUL`, `HARMFUL`, `RAID`, `INCLUDE_NAME_PLATE_ONLY`, and `PLAYER` token combinations; focused 12.1 bridge test. |
 | `AzeriteEmpoweredItemUI_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `AzeriteEssenceUI_LoadUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |
 | `BattlefieldMap_ToggleUI` | exception-requested | FrameXML ownership, load-on-demand timing, and behavior not individually modeled/tested. |

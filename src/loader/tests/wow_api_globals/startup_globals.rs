@@ -556,6 +556,9 @@ fn test_patch_12_1_safe_global_bridges() {
         .eval(
             r#"
             if C_CVar.AreCVarsLoaded() ~= true then return "cvars" end
+            if AuraUtil.IsValidFilterString("HELPFUL|PLAYER") ~= true then return "aura-filter-valid" end
+            if AuraUtil.IsValidFilterString("UNKNOWN") ~= false then return "aura-filter-invalid" end
+            if type(AuraUtil.GetUnitAuras("player", "HELPFUL")) ~= "table" then return "aura-unit-auras" end
             local durationBinding = C_DurationUtil.CreateDurationTextBinding(5)
             if type(durationBinding.ClearTextColorCurve) ~= "function" then return "duration-color-clear" end
             if type(durationBinding.GetFormattedTextColor) ~= "function" then return "duration-color-formatted" end
