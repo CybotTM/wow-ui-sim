@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 54 best-effort, 0 exception-requested, 377 untriaged.
+**Current totals:** 1 implemented, 83 best-effort, 0 exception-requested, 348 untriaged.
 
 ### Added symbols
 
@@ -100,35 +100,35 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `FadingFrame_StartTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `FadingFrame_StopTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `FadingFrame_UpdateTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.BuildCharacterClassDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.BuildCharacterLevelDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.BuildCharacterNameDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.BuildFriendNameDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.BuildLocationDisplayText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.BuildTooltipBroadcastText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GameStateUsesFactions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetBattleNetFriendGameAccountInfoIfExactlyOneDirectInviteTargetExists` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetBattleNetFriendInviteInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetBattleNetFriendInviteTypeLabel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetBattleNetFriendPartyInviteRestrictionText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetBattleNetFriendPartyInviteRestriction` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetFormattedCharacterName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetFriendAccountNameText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetFriendNameColorForFriendType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetFriendNameDisplayColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetFriendNameOfflineDisplayColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetGameAccountPartyInviteRestriction` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetLastOnlineText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetRegionName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.GetRelativeTimeText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.HasMultipleGameAccounts` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.InviteOrRequestToJoin` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.IsPlayingDifferentWoWProject` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.IsPlayingSameWoWProject` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.IsPlayingWoW` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.IsRequestInviteType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.IsTitleFriend` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsListUtil.ShouldShowRichPresenceOnly` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `FriendsListUtil.BuildCharacterClassDisplayText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.BuildCharacterLevelDisplayText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.BuildCharacterNameDisplayText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.BuildFriendNameDisplayText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.BuildLocationDisplayText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.BuildTooltipBroadcastText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GameStateUsesFactions` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetBattleNetFriendGameAccountInfoIfExactlyOneDirectInviteTargetExists` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetBattleNetFriendInviteInfo` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetBattleNetFriendInviteTypeLabel` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetBattleNetFriendPartyInviteRestrictionText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetBattleNetFriendPartyInviteRestriction` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetFormattedCharacterName` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetFriendAccountNameText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetFriendNameColorForFriendType` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetFriendNameDisplayColor` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetFriendNameOfflineDisplayColor` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetGameAccountPartyInviteRestriction` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetLastOnlineText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetRegionName` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.GetRelativeTimeText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.HasMultipleGameAccounts` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.InviteOrRequestToJoin` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.IsPlayingDifferentWoWProject` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.IsPlayingSameWoWProject` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.IsPlayingWoW` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.IsRequestInviteType` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.IsTitleFriend` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
+| `FriendsListUtil.ShouldShowRichPresenceOnly` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
 | `GameMenuFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GameMenuFrame_IsShown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GameMenuFrame_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -466,6 +466,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [Input utility snapshot proof](../../../patch-tests/patch_12_1/input_util.rs) — focused PTR publication and cursor-behavior proof for the stale namespace move and retained globals.
 - [UI geometry snapshot proof](../../../patch-tests/patch_12_1/ui_geometry.rs) — focused PTR intersection, notch normalization, and UIParent offset proof for three retained globals.
 - [Combat audio snapshot proof](../../../patch-tests/patch_12_1/combat_audio.rs) — recursive PTR source scan and runtime absence proof for ten stale proposed methods.
+- [Friends list snapshot proof](../../../patch-tests/patch_12_1/friends_list.rs) — exact-qualified PTR source scan and runtime absence proof for 29 stale proposed methods.
 
 ## See Also
 

@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-07-14] investigation | 12.1 friends-list snapshot mismatch
+
+Classified all 29 proposed `FriendsListUtil` additions as stale qualified names. The falsifier first caught similarly named `FriendsFrame_*` globals; corrected exact-qualified PTR source proof shows no `FriendsListUtil.*` publications, and runtime proof confirms the namespace remains nil. Full grouped audit target: 8 tests passed in 10.32 seconds (12.541 seconds wall time). Current inventory: 1 implemented, 83 best-effort, 0 exception-requested, and 348 neutral untriaged rows.
+
 ## [2026-07-14] investigation | 12.1 combat audio snapshot mismatch
 
 Classified ten proposed `CombatAudioAlertUtil` interrupt/start/end/death additions as stale snapshot entries. Recursive PTR source proof scans Lua/XML/TOC files; runtime proof verifies the active namespace and representative real method exist while all ten proposed names remain nil. Full grouped audit target: 7 tests passed in 13.94 seconds (22.816 seconds wall time). Current inventory: 1 implemented, 54 best-effort, 0 exception-requested, and 377 neutral untriaged rows.
