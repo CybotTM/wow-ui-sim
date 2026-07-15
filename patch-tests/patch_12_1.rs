@@ -4,7 +4,10 @@ use std::{
     sync::OnceLock,
 };
 
-use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
+use wow_ui_sim::loader::{
+    discover_all_blizzard_addons, discover_blizzard_addon_closure_for_screen,
+    discover_blizzard_addons_for_screen, load_addon,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 
@@ -129,13 +132,35 @@ fn player_choice_toc() -> PathBuf {
         .join("Blizzard_PlayerChoice.toc")
 }
 
-fn load_game_ui_without_player_choice() -> WowLuaEnv {
+fn new_game_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Game);
-
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
     wow_ui_sim::xml::register_intrinsic_templates();
+    env
+}
+
+fn load_full_game_ui_with_all_lod() -> WowLuaEnv {
+    let env = new_game_env();
+    let roots = discover_all_blizzard_addons(&blizzard_ui_dir())
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect::<Vec<_>>();
+    let root_refs = roots.iter().map(String::as_str).collect::<Vec<_>>();
+
+    for (name, toc_path) in
+        discover_blizzard_addon_closure_for_screen(&blizzard_ui_dir(), ScreenKind::Game, &root_refs)
+    {
+        load_addon(&env.loader_env(), &toc_path)
+            .unwrap_or_else(|error| panic!("[load all {name}] FAILED: {error}"));
+    }
+
+    env
+}
+
+fn load_game_ui_without_player_choice() -> WowLuaEnv {
+    let env = new_game_env();
 
     for (name, toc_path) in
         discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game)

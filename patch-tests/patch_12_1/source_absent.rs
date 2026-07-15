@@ -1,4 +1,4 @@
-use super::{assert_ptr_source_omits_tokens, load_game_ui_without_player_choice};
+use super::{assert_ptr_source_omits_tokens, load_full_game_ui_with_all_lod};
 
 const SNAPSHOT_ONLY_SYMBOLS: &[&str] = &[
     "AddBehavioralMessagingTrayToStatusFrames",
@@ -183,7 +183,7 @@ const SNAPSHOT_ONLY_SYMBOLS: &[&str] = &[
 fn source_absent_additions_remain_absent() {
     assert_ptr_source_omits_tokens(SNAPSHOT_ONLY_SYMBOLS);
 
-    let env = load_game_ui_without_player_choice();
+    let env = load_full_game_ui_with_all_lod();
     let published_symbols: String = env
         .eval(
             r#"
