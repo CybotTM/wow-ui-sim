@@ -12,6 +12,8 @@ use wow_ui_sim::screen::ScreenKind;
 mod combat_audio;
 #[path = "patch_12_1/friends_list.rs"]
 mod friends_list;
+#[path = "patch_12_1/guild_control.rs"]
+mod guild_control;
 #[path = "patch_12_1/input_util.rs"]
 mod input_util;
 #[path = "patch_12_1/interface_util.rs"]
@@ -61,17 +63,25 @@ fn ptr_source_files() -> &'static Vec<(PathBuf, String)> {
     })
 }
 
-fn assert_ptr_source_omits_qualified_methods(namespace: &str, methods: &[&str]) {
+fn assert_ptr_source_omits_symbols(symbols: &[&str]) {
     for (path, source) in ptr_source_files() {
-        for method in methods {
-            let qualified_method = format!("{namespace}.{method}");
+        for symbol in symbols {
             assert!(
-                !source.contains(&qualified_method),
-                "snapshot-only method {qualified_method} unexpectedly appears in {}",
+                !source.contains(symbol),
+                "snapshot-only symbol {symbol} unexpectedly appears in {}",
                 path.display(),
             );
         }
     }
+}
+
+fn assert_ptr_source_omits_qualified_methods(namespace: &str, methods: &[&str]) {
+    let symbols = methods
+        .iter()
+        .map(|method| format!("{namespace}.{method}"))
+        .collect::<Vec<_>>();
+    let symbols = symbols.iter().map(String::as_str).collect::<Vec<_>>();
+    assert_ptr_source_omits_symbols(&symbols);
 }
 
 fn player_choice_toc() -> PathBuf {
