@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 110 best-effort, 0 exception-requested, 321 untriaged.
+**Current totals:** 1 implemented, 120 best-effort, 0 exception-requested, 311 untriaged.
 
 ### Added symbols
 
@@ -151,16 +151,16 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `GuildControlDiscord_Loaded_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GuildControlDiscord_SetGuildSettingsCheckboxes` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GuildControlRankDiscord_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_Discord_HideAll` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_Discord_Update` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_DiscordFrame_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_OnShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_SetupDiscord` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_SetupSelected` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_Setup` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlUI_UnlinkDiscord` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GuildControlUI_Discord_HideAll` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
+| `GuildControlUI_Discord_Update` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
+| `GuildControlUI_DiscordFrame_OnLoad` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
+| `GuildControlUI_LoadUI` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
+| `GuildControlUI_OnShow` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
+| `GuildControlUI_SetupDiscord` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
+| `GuildControlUI_SetupSelected` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
+| `GuildControlUI_Setup` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
+| `GuildControlUI_Show` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
+| `GuildControlUI_UnlinkDiscord` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
 | `HandleQuestSessionInviteToPartyConfirmation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `HelpFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `HideAuctionHouseFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in the local PTR Blizzard sources; focused PTR runtime test loads `Blizzard_AuctionHouseUI` and verifies the wrapper remains absent rather than inventing behavior. |
@@ -469,6 +469,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [Friends list snapshot proof](../../../patch-tests/patch_12_1/friends_list.rs) — exact-qualified PTR source scan and runtime absence proof for 29 stale proposed methods.
 - [Social UI snapshot proof](../../../patch-tests/patch_12_1/social_ui.rs) — exact-qualified PTR source scan and runtime absence proof for 13 stale proposed methods.
 - [Narration snapshot proof](../../../patch-tests/patch_12_1/narration.rs) — exact-qualified PTR source scan and runtime absence proof for 14 stale proposed methods.
+- [Guild control snapshot proof](../../../patch-tests/patch_12_1/guild_control.rs) — PTR source and runtime absence proof for ten stale proposed globals.
 
 ## See Also
 

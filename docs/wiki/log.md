@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-07-14] investigation | 12.1 GuildControl snapshot mismatch
+
+Classified ten proposed `GuildControlUI_*` additions as stale snapshot globals. Shared-corpus PTR source proof finds no occurrences and startup runtime keeps all ten nil. The first post-build target took 64.43 seconds wall time; the unchanged warm complete target passed 11 tests in 15.65 seconds (17.272 seconds wall time), satisfying the 60-second gate. Current inventory: 1 implemented, 120 best-effort, 0 exception-requested, and 311 neutral untriaged rows.
+
 ## [2026-07-14] investigation | 12.1 Narration snapshot mismatch
 
 Classified all 14 proposed `NarrationUtil` additions as stale qualified names. Shared-corpus PTR source proof and startup runtime enumeration keep the namespace nil. Full grouped audit target: 10 tests passed in 13.82 seconds (20.495 seconds wall time). Current inventory: 1 implemented, 110 best-effort, 0 exception-requested, and 321 neutral untriaged rows.
