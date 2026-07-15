@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 32 best-effort, 0 exception-requested, 399 untriaged.
+**Current totals:** 1 implemented, 41 best-effort, 0 exception-requested, 390 untriaged.
 
 ### Added symbols
 
@@ -188,11 +188,11 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `InputBoxInstructions_OnEnter` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `InputBoxInstructions_OnLeave` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `InputBoxInstructions_ShowTooltipIfTruncated` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InputUtil.CursorOnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InputUtil.CursorUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InputUtil.GetCursorDelta` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InputUtil.IsMouseOver` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InputUtil.ShowInspectCursor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InputUtil.CursorOnUpdate` | best-effort | Stale snapshot namespace move: focused PTR proof keeps the authoritative global behavior and verifies `InputUtil.CursorOnUpdate` remains nil. |
+| `InputUtil.CursorUpdate` | best-effort | Stale snapshot namespace move: focused PTR proof keeps the authoritative global behavior and verifies `InputUtil.CursorUpdate` remains nil. |
+| `InputUtil.GetCursorDelta` | best-effort | Stale snapshot namespace move: focused PTR proof keeps the authoritative global behavior and verifies `InputUtil.GetCursorDelta` remains nil. |
+| `InputUtil.IsMouseOver` | best-effort | Stale snapshot namespace move: focused PTR proof keeps the authoritative global behavior and verifies `InputUtil.IsMouseOver` remains nil. |
+| `InputUtil.ShowInspectCursor` | best-effort | Stale snapshot namespace move: focused PTR proof keeps the authoritative global behavior and verifies `InputUtil.ShowInspectCursor` remains nil. |
 | `InterfaceUtil.GetScreenHeightScale` | best-effort | Stale snapshot: active PTR has no `InterfaceUtil`; global height-scale helper remains authoritative and returns `1.0` at 768 pixels. |
 | `InterfaceUtil.GetScreenWidthScale` | best-effort | Stale snapshot: active PTR has no `InterfaceUtil`; global width-scale helper remains authoritative and returns `1.0` at 1024 pixels. |
 | `InterpolatorUtil.GetSmoothProgressChange` | best-effort | Reversed snapshot: PTR UIParent exports global `GetSmoothProgressChange`, not this namespace member; focused PTR proof confirms the member remains nil while the global computes the expected value. |
@@ -371,9 +371,9 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `FriendsFriendsFrame_Close` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GetDungeonNameWithDifficulty` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GetNotchHeight` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetScaledCursorDelta` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetScaledCursorPositionForFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetScaledCursorPosition` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetScaledCursorDelta` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
+| `GetScaledCursorPositionForFrame` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
+| `GetScaledCursorPosition` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
 | `GetScreenHeightScale` | best-effort | Vendor-present despite snapshot removal; focused PTR proof verifies function publication and `1.0` at the 768-pixel fixture height. |
 | `GetScreenWidthScale` | best-effort | Vendor-present despite snapshot removal; focused PTR proof verifies function publication and `1.0` at the 1024-pixel fixture width. |
 | `GetSmoothProgressChange` | best-effort | Vendor-present despite the snapshot removal: PTR UIParent retains this global function; focused PTR proof verifies representative input `(100, 0, 100, 1)` returns `70`. |
@@ -392,7 +392,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `LocalizezhTW` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `MacroFrame_SaveMacro` | best-effort | PTR lifecycle proof verifies the eager UIParent no-op placeholder is harmless, then explicit `Blizzard_MacroUI` loading replaces it with the `MacroFrame:SaveMacro()` delegate. |
 | `MajorFactions_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `MouseIsOver` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `MouseIsOver` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
 | `NPE_CheckTutorials` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `NPETutorial_AttemptToBegin` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `OpenAchievementFrameToAchievement` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -463,6 +463,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [FrameXMLUtil lifecycle tests](../../../tests/blizzard_frame_xml_util_loads.rs) — full PTR Game UI lifecycle/threshold proof and older-retail non-exposure proof.
 - [Garrison UI tests](../../../tests/blizzard_garrison_ui_loads.rs) — recursive PTR Garrison source scan plus explicit LoD addon-load proof for the two absent Garrison hide wrappers.
 - [Customer Orders tests](../../../tests/blizzard_professions_customer_orders_loads.rs) — recursive PTR source scan plus explicit dependency/addon-load proof for the absent CustomerOrders hide wrapper.
+- [Input utility snapshot proof](../../../patch-tests/patch_12_1/input_util.rs) — focused PTR publication and cursor-behavior proof for the stale namespace move and retained globals.
 
 ## See Also
 
