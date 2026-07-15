@@ -130,3 +130,23 @@ fn shake_helpers_are_namespaced_not_legacy_globals() {
     assert_eq!(safe_shake, "function");
     assert_eq!(safe_random, "function");
 }
+
+/// Pins the current PTRFeedback publication and its upstream undefined-state error.
+#[test]
+fn ptr_feedback_quest_progress_time_is_published_but_errors() {
+    let env = load_game_ui_without_player_choice();
+
+    let (function_type, succeeded, error): (String, bool, String) = env
+        .eval(
+            r#"
+            local succeeded, result = pcall(GetTimeSinceLastQuestProgress)
+            return type(GetTimeSinceLastQuestProgress), succeeded, tostring(result)
+            "#,
+        )
+        .expect("PTRFeedback quest progress helper probe succeeds");
+
+    assert_eq!(function_type, "function");
+    assert!(!succeeded);
+    assert!(error.contains("arithmetic"));
+    assert!(error.contains("nil"));
+}
