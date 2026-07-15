@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 120 best-effort, 0 exception-requested, 311 untriaged.
+**Current totals:** 1 implemented, 150 best-effort, 0 exception-requested, 281 untriaged.
 
 ### Added symbols
 
@@ -44,9 +44,9 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `BoostTutorial_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `ChallengeModeCompleteBanner_OnChallengeModeCompleted` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `ChatAdditionalColor_OpenColorPicker` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ChatFrameUtil.DiscordNameColorize` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ChatFrameUtil.FormatDiscordMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ChatFrameUtil.GetNameForDiscordMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ChatFrameUtil.DiscordNameColorize` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `ChatFrameUtil.FormatDiscordMessage` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `ChatFrameUtil.GetNameForDiscordMessage` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `CheckActiveStoreForFree` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `CombatAudioAlertUtil.EnumerateInterruptCastInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
 | `CombatAudioAlertUtil.EnumerateInterruptCastSuccessInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
@@ -78,10 +78,10 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `CooldownViewerDraggedItem_Clear` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `CooldownViewerDraggedItem_Pickup` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `CooldownViewerDraggedItem_SetIsLegalTarget` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CooldownViewerUtil.AddSoundAlertRadio` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CooldownViewerUtil.BuildSoundMenus` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CooldownViewerUtil.GetSoundTypeSoundKit` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CooldownViewerUtil.GetSoundTypeText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewerUtil.AddSoundAlertRadio` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `CooldownViewerUtil.BuildSoundMenus` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `CooldownViewerUtil.GetSoundTypeSoundKit` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `CooldownViewerUtil.GetSoundTypeText` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `CovenantCallings_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `DebugTools_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `DifficultyUtil.GetCreatureDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
@@ -178,12 +178,12 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `HouseFinderFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `HousingBulletinBoardFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `HousingControls_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HousingFramesUtil.IsBlueprintCollectionAvailable` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HousingFramesUtil.IsBlueprintOperationInProgress` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HousingFramesUtil.ShowBlueprintExport` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HousingFramesUtil.ShowBlueprintImport` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HousingFramesUtil.ShowBlueprintRoomExport` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HousingFramesUtil.TryOpenBlueprintCollection` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HousingFramesUtil.IsBlueprintCollectionAvailable` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `HousingFramesUtil.IsBlueprintOperationInProgress` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `HousingFramesUtil.ShowBlueprintExport` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `HousingFramesUtil.ShowBlueprintImport` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `HousingFramesUtil.ShowBlueprintRoomExport` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `HousingFramesUtil.TryOpenBlueprintCollection` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `HybridMinimap_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `InputBoxInstructions_OnEnter` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `InputBoxInstructions_OnLeave` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -200,11 +200,11 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `IsMouseoverCastSupported` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `IsSummonConfirmationDialogVisible` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `IsTypeAdditionalChatColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ItemUtil.DisplayEquipSlotTooltip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ItemUtil.GetEmptyEquipSlotTooltipForSlotName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ItemUtil.GetEmptyEquipSlotTooltip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ItemUtil.GetEquipSlotTexture` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ItemUtil.GetValidatedItemLocation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ItemUtil.DisplayEquipSlotTooltip` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `ItemUtil.GetEmptyEquipSlotTooltipForSlotName` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `ItemUtil.GetEmptyEquipSlotTooltip` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `ItemUtil.GetEquipSlotTexture` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `ItemUtil.GetValidatedItemLocation` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `Kiosk_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `KioskFrame_HandlePlayerEnteringWorld` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `LandingSoulbinds_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -239,8 +239,8 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `OpenOrderHallTalentUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `OpenPlayerSpellsToGlyphTarget` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `PhotoSharingFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `PingUtil.SendMacroPing` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `PingUtil.TogglePingTarget` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PingUtil.SendMacroPing` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `PingUtil.TogglePingTarget` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `PlayerChoiceFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `PlayerChoiceToggle_TryShow` | best-effort | PTR LoD behavior: absent before `Blizzard_PlayerChoice`, present afterward; focused proof verifies eligible button visibility, explicit plus OnShow updates, and nil return. |
 | `PVPUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -249,8 +249,8 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `RaidWarningUtil.UpdateCenterScreenAnchors` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `RecentAlliesUtil.GetBestSocialUIPresenceTypeForStateData` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `RecruitAFriendFrameSocialInitializeAADC` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RegionUtil.GetTopLeftMost` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RegionUtil.SortByTopLeft` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RegionUtil.GetTopLeftMost` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `RegionUtil.SortByTopLeft` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `RegisterGameMenuEscHandler` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `RegisterPlayerInteraction` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `ReportFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -315,17 +315,17 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `StoreEscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `StringUtil.JoinAlternatingConditionalColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `TextureUtil.AnimateTexCoords` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `TimeUtil.BetterDate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `TimeUtil.GetRecentTimeDate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TimeUtil.BetterDate` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `TimeUtil.GetRecentTimeDate` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `ToggleRAFPanel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `ToggleSocialUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `TryShowAnimaDiversionFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `TryShowCovenantPreviewFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIModeUtil.CreateExtendedBlocklist` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIModeUtil.CreateModifiedBlocklist` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIModeUtil.IsModeActive` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIModeUtil.RegisterMode` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIModeUtil.SetModeActive` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIModeUtil.CreateExtendedBlocklist` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `UIModeUtil.CreateModifiedBlocklist` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `UIModeUtil.IsModeActive` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `UIModeUtil.RegisterMode` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
+| `UIModeUtil.SetModeActive` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `UnitPopupSharedUtil.IsFriendshipUpgrade` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `UpdateQuestAcceptLogFullDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `VisualAlert_GetTypeTemplate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -399,7 +399,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `OrderHallMissionFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `OrderHallTalentFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `OutfitterUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `PingUtil.GetContextualPingTypeForUnit` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PingUtil.GetContextualPingTypeForUnit` | best-effort | Vendor-present colon-defined helper: focused PTR proof verifies GUID/result delegation to `C_Ping` despite the proposed removal. |
 | `PlayerChoiceToggle_TryShow` | best-effort | Retained PTR LoD behavior despite snapshot removal: absent before `Blizzard_PlayerChoice`, published afterward with focused button-state proof. |
 | `QuickJoin_JoinQueueButtonOnClick` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `RaidBossEmoteFrame_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -470,6 +470,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [Social UI snapshot proof](../../../patch-tests/patch_12_1/social_ui.rs) — exact-qualified PTR source scan and runtime absence proof for 13 stale proposed methods.
 - [Narration snapshot proof](../../../patch-tests/patch_12_1/narration.rs) — exact-qualified PTR source scan and runtime absence proof for 14 stale proposed methods.
 - [Guild control snapshot proof](../../../patch-tests/patch_12_1/guild_control.rs) — PTR source and runtime absence proof for ten stale proposed globals.
+- [Utility namespace snapshot proof](../../../patch-tests/patch_12_1/utility_namespaces.rs) — colon-aware source/runtime proof for 29 stale additions and one retained Ping helper.
 
 ## See Also
 
