@@ -30,6 +30,8 @@ mod shake;
 mod social_ui;
 #[path = "patch_12_1/ui_geometry.rs"]
 mod ui_geometry;
+#[path = "patch_12_1/utility_namespaces.rs"]
+mod utility_namespaces;
 
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
@@ -75,13 +77,30 @@ fn assert_ptr_source_omits_symbols(symbols: &[&str]) {
     }
 }
 
+fn assert_ptr_source_omits_qualified_symbols(symbols: &[&str]) {
+    let publications = symbols
+        .iter()
+        .flat_map(|symbol| {
+            let (namespace, method) = symbol
+                .split_once('.')
+                .expect("qualified patch symbol should contain a dot");
+            [
+                format!("{namespace}.{method}"),
+                format!("{namespace}:{method}"),
+            ]
+        })
+        .collect::<Vec<_>>();
+    let publications = publications.iter().map(String::as_str).collect::<Vec<_>>();
+    assert_ptr_source_omits_symbols(&publications);
+}
+
 fn assert_ptr_source_omits_qualified_methods(namespace: &str, methods: &[&str]) {
     let symbols = methods
         .iter()
         .map(|method| format!("{namespace}.{method}"))
         .collect::<Vec<_>>();
     let symbols = symbols.iter().map(String::as_str).collect::<Vec<_>>();
-    assert_ptr_source_omits_symbols(&symbols);
+    assert_ptr_source_omits_qualified_symbols(&symbols);
 }
 
 fn player_choice_toc() -> PathBuf {
