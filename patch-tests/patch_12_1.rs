@@ -14,6 +14,8 @@ mod player_choice;
 mod ptr_feedback;
 #[path = "patch_12_1/shake.rs"]
 mod shake;
+#[path = "patch_12_1/ui_geometry.rs"]
+mod ui_geometry;
 
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
