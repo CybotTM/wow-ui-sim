@@ -8,46 +8,46 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 150 best-effort, 0 exception-requested, 281 untriaged.
+**Current totals:** 1 implemented, 325 best-effort, 0 exception-requested, 106 untriaged.
 
 ### Added symbols
 
 | Symbol | Status | Reason |
 |---|---|---|
-| `AddBehavioralMessagingTrayToStatusFrames` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AddFriendFrame_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AddGMChatStatusFrameToStatusFrames` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AddTicketStatusFrameToStatusFrames` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AddWowSurveyStatusFrameToStatusFrames` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AlliedRacesFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AnchorUtil.ApplyFlowLayout` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ApplySecureDelegatesToTable` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ArchaeologyFrame_ToggleUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ArcheologyDigsiteProgressBar_OnSurveyCast` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ArdenwealdGardening_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ArtifactFrame_OnTraitsRefunded` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AuraUtil.GetAuraBorderColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AddBehavioralMessagingTrayToStatusFrames` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `AddFriendFrame_Show` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `AddGMChatStatusFrameToStatusFrames` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `AddTicketStatusFrameToStatusFrames` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `AddWowSurveyStatusFrameToStatusFrames` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `AlliedRacesFrame_TryShow` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `AnchorUtil.ApplyFlowLayout` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ApplySecureDelegatesToTable` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ArchaeologyFrame_ToggleUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ArcheologyDigsiteProgressBar_OnSurveyCast` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ArdenwealdGardening_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ArtifactFrame_OnTraitsRefunded` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `AuraUtil.GetAuraBorderColor` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `AuraUtil.GetUnitAuras` | best-effort | Delegates to existing state-backed aura collection; focused 12.1 bridge test. |
 | `AuraUtil.IsValidFilterString` | best-effort | Rust validator accepts nonempty `HELPFUL`, `HARMFUL`, `RAID`, `INCLUDE_NAME_PLATE_ONLY`, and `PLAYER` token combinations; focused 12.1 bridge test. |
-| `AzeriteEmpoweredItemUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AzeriteEssenceUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BattlefieldMap_ToggleUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BehavioralMessaging_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BehavioralMessagingTray_OnNotification` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `Blizzard_HousingCatalogUtil.AddDecorEntryTooltipTrackingText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `Blizzard_HousingCatalogUtil.TrackHousingDecorID` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BNet_GetBattleTagComponents` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BNet_GetBattleTagSelf` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BNet_GetBroadcastTextSelf` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BNet_GetFriendLevelRank` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BNet_IsFriendLevelEqualOrHigher` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BoostTutorial_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ChallengeModeCompleteBanner_OnChallengeModeCompleted` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ChatAdditionalColor_OpenColorPicker` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AzeriteEmpoweredItemUI_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `AzeriteEssenceUI_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `BattlefieldMap_ToggleUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `BehavioralMessaging_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `BehavioralMessagingTray_OnNotification` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `Blizzard_HousingCatalogUtil.AddDecorEntryTooltipTrackingText` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `Blizzard_HousingCatalogUtil.TrackHousingDecorID` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `BNet_GetBattleTagComponents` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `BNet_GetBattleTagSelf` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `BNet_GetBroadcastTextSelf` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `BNet_GetFriendLevelRank` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `BNet_IsFriendLevelEqualOrHigher` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `BoostTutorial_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ChallengeModeCompleteBanner_OnChallengeModeCompleted` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ChatAdditionalColor_OpenColorPicker` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `ChatFrameUtil.DiscordNameColorize` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `ChatFrameUtil.FormatDiscordMessage` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `ChatFrameUtil.GetNameForDiscordMessage` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
-| `CheckActiveStoreForFree` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CheckActiveStoreForFree` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `CombatAudioAlertUtil.EnumerateInterruptCastInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
 | `CombatAudioAlertUtil.EnumerateInterruptCastSuccessInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
 | `CombatAudioAlertUtil.EnumerateSayCombatEndInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
@@ -58,48 +58,48 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `CombatAudioAlertUtil.GetSayCombatEndInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
 | `CombatAudioAlertUtil.GetSayCombatStartInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
 | `CombatAudioAlertUtil.GetWhenTargetDiesInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
-| `CombatText_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CompactUnitFrame_GetOptionDispelIndicatorOverlayAnimation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CompactUnitFrame_GetOptionDispelIndicatorOverlayType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatText_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `CompactUnitFrame_GetOptionDispelIndicatorOverlayAnimation` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `CompactUnitFrame_GetOptionDispelIndicatorOverlayType` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `CompactUnitFrameLayoutTemplates_LayoutFrameElement` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `CompactUnitFrameUtil.ApplyConfig` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CompactUnitFrameUtil.GenerateNewConfig` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ConfirmDisenchantRollDialog_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ConfirmLootRollDialog_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ConfirmTalentWipeDialog_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ContributionCollectionFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrameUtil.GenerateNewConfig` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ConfirmDisenchantRollDialog_Show` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ConfirmLootRollDialog_Show` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ConfirmTalentWipeDialog_Show` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ContributionCollectionFrame_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `CooldownManagerLayout_GetGroupBuffVisualAlerts` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
 | `CooldownManagerLayout_GetHiddenGroupBuffs` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
 | `CooldownManagerLayout_SetGroupBuffVisualAlerts` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
 | `CooldownManagerLayout_SetHiddenGroupBuffs` | best-effort | Delegates to existing C_UnitAuras group-buff preference state; focused 12.1 bridge test. |
-| `CooldownViewer_MarkAuraCacheDirty` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CooldownViewerContextMenu_AddAlertEntryButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CooldownViewerContextMenu_AddNewAlertButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CooldownViewerDraggedItem_Clear` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CooldownViewerDraggedItem_Pickup` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CooldownViewerDraggedItem_SetIsLegalTarget` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CooldownViewer_MarkAuraCacheDirty` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `CooldownViewerContextMenu_AddAlertEntryButton` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `CooldownViewerContextMenu_AddNewAlertButton` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `CooldownViewerDraggedItem_Clear` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `CooldownViewerDraggedItem_Pickup` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `CooldownViewerDraggedItem_SetIsLegalTarget` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `CooldownViewerUtil.AddSoundAlertRadio` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `CooldownViewerUtil.BuildSoundMenus` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `CooldownViewerUtil.GetSoundTypeSoundKit` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `CooldownViewerUtil.GetSoundTypeText` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
-| `CovenantCallings_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `DebugTools_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CovenantCallings_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `DebugTools_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `DifficultyUtil.GetCreatureDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
 | `DifficultyUtil.GetDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
 | `DifficultyUtil.GetQuestDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
 | `DifficultyUtil.GetRelativeDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; focused test covers `(10, 15)`, two-return fidelity, and hot-swap behavior. |
 | `DifficultyUtil.GetScalingQuestDifficultyColor` | best-effort | 12.1 post-load dynamic delegate to the authoritative vendor global; preserves arguments, both return values, and later hotfix replacement. |
-| `EditModeManagerFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `EncounterJournal_SetTabVisibe` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `EventTrace_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ExpansionTrial_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FadingFrame_CopyTextScalingTime` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FadingFrame_GetTextScalingMinHeight` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FadingFrame_InitSlot` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FadingFrame_SetTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FadingFrame_StartTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FadingFrame_StopTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FadingFrame_UpdateTextScaling` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `EditModeManagerFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `EncounterJournal_SetTabVisibe` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `EventTrace_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ExpansionTrial_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `FadingFrame_CopyTextScalingTime` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `FadingFrame_GetTextScalingMinHeight` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `FadingFrame_InitSlot` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `FadingFrame_SetTextScaling` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `FadingFrame_StartTextScaling` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `FadingFrame_StopTextScaling` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `FadingFrame_UpdateTextScaling` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `FriendsListUtil.BuildCharacterClassDisplayText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
 | `FriendsListUtil.BuildCharacterLevelDisplayText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
 | `FriendsListUtil.BuildCharacterNameDisplayText` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
@@ -129,28 +129,28 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `FriendsListUtil.IsRequestInviteType` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
 | `FriendsListUtil.IsTitleFriend` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
 | `FriendsListUtil.ShouldShowRichPresenceOnly` | best-effort | Stale snapshot addition: recursive PTR proof finds no qualified publication, and `FriendsListUtil` remains nil after startup. |
-| `GameMenuFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GameMenuFrame_IsShown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GameMenuFrame_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GameMenuFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GameMenuFrame_IsShown` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GameMenuFrame_Show` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `GameRulesUtil.IsPlayerAtEffectiveMaxLevel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetBottomManagedFrameContainer` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetChatAdditionalColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetDiscordUserCommunityLink` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetDiscordUserLink` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetGarrisonMissionFrameNameForFollowerType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetGarrisonTypeForFollowerType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetPlayerBottomManagedFrameContainer` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetRightManagedFrameContainer` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetBottomManagedFrameContainer` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GetChatAdditionalColor` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GetDiscordUserCommunityLink` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GetDiscordUserLink` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GetGarrisonMissionFrameNameForFollowerType` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GetGarrisonTypeForFollowerType` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GetPlayerBottomManagedFrameContainer` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GetRightManagedFrameContainer` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `GetTimeSinceLastQuestProgress` | best-effort | Vendor-present in PTRFeedback. Focused proof pins publication and the current upstream nil-arithmetic invocation defect from undefined `lastProgressTime`; no guessed correction is added. |
 | `GetTimeStringFromSeconds` | best-effort | Classified as snapshot cross-flavor contamination: the only PTR definition is in `Mists/UIParent.lua`, loaded exclusively by `Blizzard_UIParent_Mists.toc`; PTR tests verify absence during initialization, post-load compatibility, and settled mainline startup. |
-| `GetUIPanelLayoutAttribute` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetUIPanelLayoutFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GMChatFrame_OnWhisperFromGM` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GossipConfirmDialog_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlDiscord_Loaded_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlDiscord_Loaded_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlDiscord_SetGuildSettingsCheckboxes` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GuildControlRankDiscord_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetUIPanelLayoutAttribute` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GetUIPanelLayoutFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GMChatFrame_OnWhisperFromGM` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GossipConfirmDialog_Show` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GuildControlDiscord_Loaded_OnEvent` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GuildControlDiscord_Loaded_OnLoad` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GuildControlDiscord_SetGuildSettingsCheckboxes` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `GuildControlRankDiscord_OnLoad` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `GuildControlUI_Discord_HideAll` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
 | `GuildControlUI_Discord_Update` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
 | `GuildControlUI_DiscordFrame_OnLoad` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
@@ -161,33 +161,33 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `GuildControlUI_Setup` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
 | `GuildControlUI_Show` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
 | `GuildControlUI_UnlinkDiscord` | best-effort | Stale snapshot addition: PTR source proof finds no occurrence, and the proposed global remains nil after startup. |
-| `HandleQuestSessionInviteToPartyConfirmation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HelpFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HandleQuestSessionInviteToPartyConfirmation` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `HelpFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `HideAuctionHouseFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in the local PTR Blizzard sources; focused PTR runtime test loads `Blizzard_AuctionHouseUI` and verifies the wrapper remains absent rather than inventing behavior. |
-| `HideBarberShopFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HideBarberShopFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `HideBlackMarketFrame` | best-effort | Classified as reversed-name snapshot mismatch: PTR defines `BlackMarketFrame_Hide` with panel-hide and close-sound behavior, not `HideBlackMarketFrame`; focused PTR test explicitly loads `Blizzard_BlackMarketUI`, verifies the authoritative helper, and confirms the reversed wrapper remains absent. |
 | `HideGarrisonMissionFrames` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test loads `Blizzard_GarrisonUI` with its LoD dependencies and verifies the wrapper remains absent. |
 | `HideGarrisonShipyardFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test loads `Blizzard_GarrisonUI` with its LoD dependencies and verifies the wrapper remains absent. |
-| `HideGossipFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HideGossipFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `HideGuildBankFrame` | best-effort | Classified as snapshot/runtime mismatch: no definition exists in local PTR Blizzard Lua sources; focused PTR test explicitly loads `Blizzard_GuildBankUI` and verifies the wrapper remains absent. |
-| `HideInstanceBootDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HideInstanceLockDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HideInstanceBootDialog` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `HideInstanceLockDialog` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `HideItemUpgradeFrame` | best-effort | Classified as reversed-name snapshot mismatch: PTR defines and uses `ItemUpgradeFrame_Hide`, not `HideItemUpgradeFrame`; focused PTR test explicitly loads `Blizzard_ItemUpgradeUI` and verifies the reversed wrapper remains absent. |
 | `HideProfessionsCustomerOrdersFrame` | best-effort | Classified as snapshot/runtime mismatch: recursive local PTR source scan finds no definition; focused PTR test loads the required ProfessionsTemplates/AuctionHouse dependencies plus `Blizzard_ProfessionsCustomerOrders`, verifies the frame exists, and confirms the wrapper remains absent. |
-| `HideSummonConfirmationDialogs` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HouseFinderFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HousingBulletinBoardFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HousingControls_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HideSummonConfirmationDialogs` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `HouseFinderFrame_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `HousingBulletinBoardFrame_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `HousingControls_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `HousingFramesUtil.IsBlueprintCollectionAvailable` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `HousingFramesUtil.IsBlueprintOperationInProgress` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `HousingFramesUtil.ShowBlueprintExport` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `HousingFramesUtil.ShowBlueprintImport` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `HousingFramesUtil.ShowBlueprintRoomExport` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `HousingFramesUtil.TryOpenBlueprintCollection` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
-| `HybridMinimap_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InputBoxInstructions_OnEnter` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InputBoxInstructions_OnLeave` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InputBoxInstructions_ShowTooltipIfTruncated` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HybridMinimap_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `InputBoxInstructions_OnEnter` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `InputBoxInstructions_OnLeave` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `InputBoxInstructions_ShowTooltipIfTruncated` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `InputUtil.CursorOnUpdate` | best-effort | Stale snapshot namespace move: focused PTR proof keeps the authoritative global behavior and verifies `InputUtil.CursorOnUpdate` remains nil. |
 | `InputUtil.CursorUpdate` | best-effort | Stale snapshot namespace move: focused PTR proof keeps the authoritative global behavior and verifies `InputUtil.CursorUpdate` remains nil. |
 | `InputUtil.GetCursorDelta` | best-effort | Stale snapshot namespace move: focused PTR proof keeps the authoritative global behavior and verifies `InputUtil.GetCursorDelta` remains nil. |
@@ -196,29 +196,29 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `InterfaceUtil.GetScreenHeightScale` | best-effort | Stale snapshot: active PTR has no `InterfaceUtil`; global height-scale helper remains authoritative and returns `1.0` at 768 pixels. |
 | `InterfaceUtil.GetScreenWidthScale` | best-effort | Stale snapshot: active PTR has no `InterfaceUtil`; global width-scale helper remains authoritative and returns `1.0` at 1024 pixels. |
 | `InterpolatorUtil.GetSmoothProgressChange` | best-effort | Reversed snapshot: PTR UIParent exports global `GetSmoothProgressChange`, not this namespace member; focused PTR proof confirms the member remains nil while the global computes the expected value. |
-| `IslandsPartyPoseFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `IsMouseoverCastSupported` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `IsSummonConfirmationDialogVisible` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `IsTypeAdditionalChatColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `IslandsPartyPoseFrame_TryShow` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `IsMouseoverCastSupported` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `IsSummonConfirmationDialogVisible` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `IsTypeAdditionalChatColor` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `ItemUtil.DisplayEquipSlotTooltip` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `ItemUtil.GetEmptyEquipSlotTooltipForSlotName` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `ItemUtil.GetEmptyEquipSlotTooltip` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `ItemUtil.GetEquipSlotTexture` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `ItemUtil.GetValidatedItemLocation` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
-| `Kiosk_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `KioskFrame_HandlePlayerEnteringWorld` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `LandingSoulbinds_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `LFGListApplicationViewer_OpenEditMode` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `LFGListApplicationViewerRemoveEntryButton_OnClick` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `Kiosk_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `KioskFrame_HandlePlayerEnteringWorld` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `LandingSoulbinds_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `LFGListApplicationViewer_OpenEditMode` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `LFGListApplicationViewerRemoveEntryButton_OnClick` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `LoadAddOnWithErrorHandling` | implemented | 12.1 wrapper in `src/ptr/compat_bootstrap.lua`; focused delegation test in `global_functions.rs`. |
-| `LocaleUtil.GetLocaleDisplayName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `LocalizePlayerFrame_zhCN` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `LocalizePlayerFrame_zhTW` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `LootFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `LocaleUtil.GetLocaleDisplayName` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `LocalizePlayerFrame_zhCN` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `LocalizePlayerFrame_zhTW` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `LootFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `MacroFrame_SaveMacro` | best-effort | PTR lifecycle proof verifies the eager UIParent no-op placeholder is harmless, then explicit `Blizzard_MacroUI` loading replaces it with the `MacroFrame:SaveMacro()` delegate. |
 | `ManageFramePositions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `MenuUtil.CreateHighlightButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `MovePad_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `MenuUtil.CreateHighlightButton` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `MovePad_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `NarrationUtil.CreateNarrationInfo` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
 | `NarrationUtil.GetCheckboxContext` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
 | `NarrationUtil.MakeIndexInfo` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
@@ -233,69 +233,69 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `NarrationUtil.SetStaticName` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
 | `NarrationUtil.ShouldBeEnabled` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
 | `NarrationUtil.ShouldRegionNavigationSkipTooltips` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
-| `NPE_InitializeIfLoaded` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `OpacityFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `OpenEncounterJournalToJourney` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `OpenOrderHallTalentUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `OpenPlayerSpellsToGlyphTarget` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `PhotoSharingFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NPE_InitializeIfLoaded` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `OpacityFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `OpenEncounterJournalToJourney` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `OpenOrderHallTalentUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `OpenPlayerSpellsToGlyphTarget` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `PhotoSharingFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `PingUtil.SendMacroPing` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `PingUtil.TogglePingTarget` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
-| `PlayerChoiceFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PlayerChoiceFrame_TryShow` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `PlayerChoiceToggle_TryShow` | best-effort | PTR LoD behavior: absent before `Blizzard_PlayerChoice`, present afterward; focused proof verifies eligible button visibility, explicit plus OnShow updates, and nil return. |
-| `PVPUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `PVPUI_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `RaidWarningUtil.AddMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `RaidWarningUtil.ClearBossEmotes` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidWarningUtil.UpdateCenterScreenAnchors` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RecentAlliesUtil.GetBestSocialUIPresenceTypeForStateData` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RecruitAFriendFrameSocialInitializeAADC` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidWarningUtil.UpdateCenterScreenAnchors` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `RecentAlliesUtil.GetBestSocialUIPresenceTypeForStateData` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `RecruitAFriendFrameSocialInitializeAADC` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `RegionUtil.GetTopLeftMost` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `RegionUtil.SortByTopLeft` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
-| `RegisterGameMenuEscHandler` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RegisterPlayerInteraction` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ReportFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ResetDiscordSettings` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RestoreGMChatFrameSession` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SetGhostFrameShown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SetPlayerInteractionConditions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SettingsPanel_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SetUIPanelLayoutAttribute` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RegisterGameMenuEscHandler` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `RegisterPlayerInteraction` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ReportFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ResetDiscordSettings` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `RestoreGMChatFrameSession` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `SetGhostFrameShown` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `SetPlayerInteractionConditions` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `SettingsPanel_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `SetUIPanelLayoutAttribute` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `ShakeFrameRandom` | best-effort | Stale snapshot: active PTR leaves the legacy global nil and publishes distinct `ScriptAnimationUtil.ShakeFrameRandom` behavior; focused no-op proof returns a cancellation function. |
 | `ShakeFrame` | best-effort | Stale snapshot: active PTR leaves the legacy global nil and publishes distinct `ScriptAnimationUtil.ShakeFrame` behavior; focused locked-region proof returns a cancellation function. |
-| `ShouldDisplaySpellCooldown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowAchievementFrameForAchievement` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowAdventureMapFrameForFollowerType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowArtifactFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowArtifactRelicForgeFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowAuctionHouseFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowBarberShopFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowBlackMarketFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowChallengesKeystoneFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowFlightMapFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowGarrisonCapacitiveDisplayFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowGarrisonMissionFrameForFollowerType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowGarrisonRecruiterFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowGarrisonShipyardFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowGuildBankFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowHeirloomsJournalToClosestUpgradeablePage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowInstanceBootDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowInstanceLockDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowItemSocketingFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowItemUpgradeFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowMatchCelebrationPartyPoseFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowPendingPlayerChoiceResponseUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowPerksProgramFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowProfessionEquipmentHelpTip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowProfessionsCustomerOrdersFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowProfessionsFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowQuestSessionGroupInviteConfirmation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowQuestSessionGroupInviteReceivedConfirmation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowRemixArtifactFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowRuneforgeFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowSummonConfirmationDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowTaxiMapFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SimpleCheckout_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIContactsFrameInitializeAADC` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShouldDisplaySpellCooldown` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowAchievementFrameForAchievement` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowAdventureMapFrameForFollowerType` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowArtifactFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowArtifactRelicForgeFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowAuctionHouseFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowBarberShopFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowBlackMarketFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowChallengesKeystoneFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowFlightMapFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowGarrisonCapacitiveDisplayFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowGarrisonMissionFrameForFollowerType` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowGarrisonRecruiterFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowGarrisonShipyardFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowGuildBankFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowHeirloomsJournalToClosestUpgradeablePage` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowInstanceBootDialog` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowInstanceLockDialog` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowItemSocketingFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowItemUpgradeFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowMatchCelebrationPartyPoseFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowPendingPlayerChoiceResponseUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowPerksProgramFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowProfessionEquipmentHelpTip` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowProfessionsCustomerOrdersFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowProfessionsFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowQuestSessionGroupInviteConfirmation` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowQuestSessionGroupInviteReceivedConfirmation` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowRemixArtifactFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowRuneforgeFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowSummonConfirmationDialog` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ShowTaxiMapFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `SimpleCheckout_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `SocialUIContactsFrameInitializeAADC` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `SocialUIUtil.AddSeparatorToTooltip` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
 | `SocialUIUtil.GetBattleNetFriendTagInterestsUIOrder` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
 | `SocialUIUtil.GetBattleNetFriendTagRoleUIOrder` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
@@ -309,31 +309,31 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `SocialUIUtil.InitializeUserScaledDropdownMainTitle` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
 | `SocialUIUtil.InitializeUserScaledDropdownTitle` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
 | `SocialUIUtil.SetBattleNetPresenceFromSocialUIPresence` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
-| `SoulbindViewer_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SpellFlyout_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SplashFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `StoreEscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `StringUtil.JoinAlternatingConditionalColor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SoulbindViewer_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `SpellFlyout_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `SplashFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `StoreEscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `StringUtil.JoinAlternatingConditionalColor` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `TextureUtil.AnimateTexCoords` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `TimeUtil.BetterDate` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `TimeUtil.GetRecentTimeDate` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
-| `ToggleRAFPanel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ToggleSocialUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `TryShowAnimaDiversionFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `TryShowCovenantPreviewFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ToggleRAFPanel` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `ToggleSocialUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `TryShowAnimaDiversionFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `TryShowCovenantPreviewFrame` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `UIModeUtil.CreateExtendedBlocklist` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `UIModeUtil.CreateModifiedBlocklist` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `UIModeUtil.IsModeActive` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `UIModeUtil.RegisterMode` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `UIModeUtil.SetModeActive` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
-| `UnitPopupSharedUtil.IsFriendshipUpgrade` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UpdateQuestAcceptLogFullDialog` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `VisualAlert_GetTypeTemplate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `VisualAlert_GetTypeText` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `VisualAlertData_ForEach` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `VisualAlerts_RegisterAll` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `WarfrontsPartyPoseFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `WowSurveyStatusFrame_OnSurveyDelivered` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UnitPopupSharedUtil.IsFriendshipUpgrade` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `UpdateQuestAcceptLogFullDialog` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `VisualAlert_GetTypeTemplate` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `VisualAlert_GetTypeText` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `VisualAlertData_ForEach` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `VisualAlerts_RegisterAll` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `WarfrontsPartyPoseFrame_TryShow` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
+| `WowSurveyStatusFrame_OnSurveyDelivered` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 
 ### Removed symbols
 
@@ -471,6 +471,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [Narration snapshot proof](../../../patch-tests/patch_12_1/narration.rs) — exact-qualified PTR source scan and runtime absence proof for 14 stale proposed methods.
 - [Guild control snapshot proof](../../../patch-tests/patch_12_1/guild_control.rs) — PTR source and runtime absence proof for ten stale proposed globals.
 - [Utility namespace snapshot proof](../../../patch-tests/patch_12_1/utility_namespaces.rs) — colon-aware source/runtime proof for 29 stale additions and one retained Ping helper.
+- [Conservative source-absence proof](../../../patch-tests/patch_12_1/source_absent.rs) — itemized bare-token source and full-load runtime absence proof for 175 proposed additions.
 
 ## See Also
 

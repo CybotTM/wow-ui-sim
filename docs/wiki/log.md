@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-07-14] investigation | 12.1 conservative source-absence batch
+
+Classified 175 proposed additions individually as stale snapshot entries. Selection requires the bare method/global token to be absent from every PTR Lua/XML/TOC file; the focused generated test then loads the complete game-compatible addon closure, including LoD roots, and reports any exact global/namespace publication. Stronger source patterns cover dot, colon, bracket, and `rawset` forms for earlier namespace families. Some all-LoD addons emit recorded Lua errors, so this remains explicitly best-effort source-plus-runtime evidence rather than an exact fidelity claim. Full target: 14 tests passed in 21.82 seconds (24.836 seconds wall time). Current inventory: 1 implemented, 325 best-effort, 0 exception-requested, and 106 neutral untriaged rows.
+
 ## [2026-07-14] investigation | 12.1 utility namespace and colon-publication audit
 
 Corrected source scanning to cover both `Namespace.Method` and `Namespace:Method` Lua publications. Earlier stale families remain absent under the stronger falsifier. Classified 29 utility additions as stale and `PingUtil.GetContextualPingTypeForUnit` as vendor-present with tested `C_Ping` forwarding. Current full target: 13 tests passed in 15.20 seconds (18.309 seconds wall time). Current inventory: 1 implemented, 150 best-effort, 0 exception-requested, and 281 neutral untriaged rows.
