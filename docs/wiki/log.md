@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 PTRFeedback quest-progress helper
+
+Classified `GetTimeSinceLastQuestProgress` as vendor-present best-effort behavior. Focused PTR proof verifies publication by PTRFeedback and pins the current upstream nil-arithmetic invocation defect caused by undefined `lastProgressTime`; simulator adds no guessed correction. Full grouped audit target: 3 tests passed in 6.625 seconds. Current inventory: 1 implemented, 28 best-effort, 0 exception-requested, and 403 neutral untriaged rows.
+
 ## [2026-07-14] investigation | 12.1 shake namespace mismatch
 
 Classified proposed legacy `ShakeFrame` and `ShakeFrameRandom` additions as stale snapshot entries. Focused PTR proof verifies both globals remain nil while the distinct `ScriptAnimationUtil` methods exist and return cancellation functions for safe no-op conditions. Full grouped audit target: 2 tests passed in 5.774 seconds. Current inventory: 1 implemented, 27 best-effort, 0 exception-requested, and 404 neutral untriaged rows.

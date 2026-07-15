@@ -2099,15 +2099,31 @@
       "id": "added:GetTimeSinceLastQuestProgress",
       "symbol": "GetTimeSinceLastQuestProgress",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_PTRFeedback",
+      "evidence": [
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1/ptr_feedback.rs",
+          "summary": "Focused PTR proof verifies the function is published by eager PTRFeedback UI, but invoking the vendor body raises nil-arithmetic because it subtracts undefined `lastProgressTime`; simulator preserves that upstream behavior rather than guessing corrected state.",
+          "source_hash": "c28191b10b2bfb121368737e766f57fc02055e43e82b722c63db034457034776"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1/ptr_feedback.rs::quest_progress_time_is_published_but_errors"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "present",
+          "expected_type": "function"
+        }
+      ],
+      "commit": "965e49c1f",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
+      "notes": "Classified as vendor-present best-effort behavior with the current upstream invocation defect documented and tested; no guessed simulator correction is added.",
       "load_addon": null
     },
     {

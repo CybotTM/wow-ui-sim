@@ -125,7 +125,7 @@
 125. [untriaged] `added:GetGarrisonTypeForFollowerType` — untriaged
 126. [untriaged] `added:GetPlayerBottomManagedFrameContainer` — untriaged
 127. [untriaged] `added:GetRightManagedFrameContainer` — untriaged
-128. [untriaged] `added:GetTimeSinceLastQuestProgress` — untriaged
+128. [best-effort] `added:GetTimeSinceLastQuestProgress` — vendor-present
 129. [best-effort] `added:GetTimeStringFromSeconds` — cross-flavor
 130. [untriaged] `added:GetUIPanelLayoutAttribute` — untriaged
 131. [untriaged] `added:GetUIPanelLayoutFrame` — untriaged
