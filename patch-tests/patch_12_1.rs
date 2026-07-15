@@ -4,6 +4,8 @@ use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 
+#[path = "patch_12_1/combat_audio.rs"]
+mod combat_audio;
 #[path = "patch_12_1/input_util.rs"]
 mod input_util;
 #[path = "patch_12_1/interface_util.rs"]
