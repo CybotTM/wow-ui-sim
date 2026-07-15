@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-07-14] investigation | 12.1 Narration snapshot mismatch
+
+Classified all 14 proposed `NarrationUtil` additions as stale qualified names. Shared-corpus PTR source proof and startup runtime enumeration keep the namespace nil. Full grouped audit target: 10 tests passed in 13.82 seconds (20.495 seconds wall time). Current inventory: 1 implemented, 110 best-effort, 0 exception-requested, and 321 neutral untriaged rows.
+
 ## [2026-07-14] investigation | 12.1 SocialUI snapshot mismatch and source-scan budget
 
 Classified all 13 proposed `SocialUIUtil` additions as stale qualified names. Exact-qualified PTR source proof and runtime enumeration keep the namespace nil. Adding a third recursive source scan first pushed complete-target wall time to 76.304 seconds; a shared `OnceLock` source corpus reduced the verified nine-test target to 14.49 seconds test time and 19.023 seconds wall time. Current inventory: 1 implemented, 96 best-effort, 0 exception-requested, and 335 neutral untriaged rows.

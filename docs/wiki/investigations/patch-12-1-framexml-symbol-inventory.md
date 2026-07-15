@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 96 best-effort, 0 exception-requested, 335 untriaged.
+**Current totals:** 1 implemented, 110 best-effort, 0 exception-requested, 321 untriaged.
 
 ### Added symbols
 
@@ -219,20 +219,20 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `ManageFramePositions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `MenuUtil.CreateHighlightButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `MovePad_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.CreateNarrationInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.GetCheckboxContext` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.MakeIndexInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.MakeNarrationStringForMoney` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.MakeNarrationStringFromIndexInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.MakeNarrationStringFromInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.MakeNarrationString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.NarrateCurrentScreen` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.RegionToNarrationInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.ResolveForwardedRegion` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.SetStaticDescription` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.SetStaticName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.ShouldBeEnabled` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NarrationUtil.ShouldRegionNavigationSkipTooltips` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NarrationUtil.CreateNarrationInfo` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.GetCheckboxContext` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.MakeIndexInfo` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.MakeNarrationStringForMoney` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.MakeNarrationStringFromIndexInfo` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.MakeNarrationStringFromInfo` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.MakeNarrationString` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.NarrateCurrentScreen` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.RegionToNarrationInfo` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.ResolveForwardedRegion` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.SetStaticDescription` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.SetStaticName` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.ShouldBeEnabled` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
+| `NarrationUtil.ShouldRegionNavigationSkipTooltips` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
 | `NPE_InitializeIfLoaded` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `OpacityFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `OpenEncounterJournalToJourney` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -468,6 +468,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [Combat audio snapshot proof](../../../patch-tests/patch_12_1/combat_audio.rs) — recursive PTR source scan and runtime absence proof for ten stale proposed methods.
 - [Friends list snapshot proof](../../../patch-tests/patch_12_1/friends_list.rs) — exact-qualified PTR source scan and runtime absence proof for 29 stale proposed methods.
 - [Social UI snapshot proof](../../../patch-tests/patch_12_1/social_ui.rs) — exact-qualified PTR source scan and runtime absence proof for 13 stale proposed methods.
+- [Narration snapshot proof](../../../patch-tests/patch_12_1/narration.rs) — exact-qualified PTR source scan and runtime absence proof for 14 stale proposed methods.
 
 ## See Also
 
