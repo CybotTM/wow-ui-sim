@@ -1,4 +1,8 @@
-use std::path::PathBuf;
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    sync::OnceLock,
+};
 
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -18,12 +22,54 @@ mod player_choice;
 mod ptr_feedback;
 #[path = "patch_12_1/shake.rs"]
 mod shake;
+#[path = "patch_12_1/social_ui.rs"]
+mod social_ui;
 #[path = "patch_12_1/ui_geometry.rs"]
 mod ui_geometry;
 
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
         .expect("Blizzard UI cache should be available")
+}
+
+fn ptr_source_files() -> &'static Vec<(PathBuf, String)> {
+    static FILES: OnceLock<Vec<(PathBuf, String)>> = OnceLock::new();
+    FILES.get_or_init(|| {
+        fn collect(path: &Path, files: &mut Vec<(PathBuf, String)>) {
+            for entry in fs::read_dir(path).expect("PTR AddOns directory should be readable") {
+                let entry = entry.expect("PTR source entry should be readable");
+                let path = entry.path();
+                if path.is_dir() {
+                    collect(&path, files);
+                    continue;
+                }
+
+                let extension = path.extension().and_then(|value| value.to_str());
+                if matches!(extension, Some("lua" | "xml" | "toc")) {
+                    let source =
+                        fs::read_to_string(&path).expect("PTR source file should be UTF-8 text");
+                    files.push((path, source));
+                }
+            }
+        }
+
+        let mut files = Vec::new();
+        collect(&blizzard_ui_dir(), &mut files);
+        files
+    })
+}
+
+fn assert_ptr_source_omits_qualified_methods(namespace: &str, methods: &[&str]) {
+    for (path, source) in ptr_source_files() {
+        for method in methods {
+            let qualified_method = format!("{namespace}.{method}");
+            assert!(
+                !source.contains(&qualified_method),
+                "snapshot-only method {qualified_method} unexpectedly appears in {}",
+                path.display(),
+            );
+        }
+    }
 }
 
 fn player_choice_toc() -> PathBuf {
