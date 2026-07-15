@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 28 best-effort, 0 exception-requested, 403 untriaged.
+**Current totals:** 1 implemented, 32 best-effort, 0 exception-requested, 399 untriaged.
 
 ### Added symbols
 
@@ -193,8 +193,8 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `InputUtil.GetCursorDelta` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `InputUtil.IsMouseOver` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `InputUtil.ShowInspectCursor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InterfaceUtil.GetScreenHeightScale` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `InterfaceUtil.GetScreenWidthScale` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `InterfaceUtil.GetScreenHeightScale` | best-effort | Stale snapshot: active PTR has no `InterfaceUtil`; global height-scale helper remains authoritative and returns `1.0` at 768 pixels. |
+| `InterfaceUtil.GetScreenWidthScale` | best-effort | Stale snapshot: active PTR has no `InterfaceUtil`; global width-scale helper remains authoritative and returns `1.0` at 1024 pixels. |
 | `InterpolatorUtil.GetSmoothProgressChange` | best-effort | Reversed snapshot: PTR UIParent exports global `GetSmoothProgressChange`, not this namespace member; focused PTR proof confirms the member remains nil while the global computes the expected value. |
 | `IslandsPartyPoseFrame_TryShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `IsMouseoverCastSupported` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -374,8 +374,8 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `GetScaledCursorDelta` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GetScaledCursorPositionForFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GetScaledCursorPosition` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetScreenHeightScale` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetScreenWidthScale` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetScreenHeightScale` | best-effort | Vendor-present despite snapshot removal; focused PTR proof verifies function publication and `1.0` at the 768-pixel fixture height. |
+| `GetScreenWidthScale` | best-effort | Vendor-present despite snapshot removal; focused PTR proof verifies function publication and `1.0` at the 1024-pixel fixture width. |
 | `GetSmoothProgressChange` | best-effort | Vendor-present despite the snapshot removal: PTR UIParent retains this global function; focused PTR proof verifies representative input `(100, 0, 100, 1)` returns `70`. |
 | `GetSocialColoredName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GetSortedSelfResurrectOptions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |

@@ -177,8 +177,8 @@
 177. [untriaged] `added:InputUtil.GetCursorDelta` — untriaged
 178. [untriaged] `added:InputUtil.IsMouseOver` — untriaged
 179. [untriaged] `added:InputUtil.ShowInspectCursor` — untriaged
-180. [untriaged] `added:InterfaceUtil.GetScreenHeightScale` — untriaged
-181. [untriaged] `added:InterfaceUtil.GetScreenWidthScale` — untriaged
+180. [best-effort] `added:InterfaceUtil.GetScreenHeightScale` — stale-snapshot
+181. [best-effort] `added:InterfaceUtil.GetScreenWidthScale` — stale-snapshot
 182. [best-effort] `added:InterpolatorUtil.GetSmoothProgressChange` — reversed-snapshot
 183. [untriaged] `added:IslandsPartyPoseFrame_TryShow` — untriaged
 184. [untriaged] `added:IsMouseoverCastSupported` — untriaged
@@ -353,8 +353,8 @@
 353. [untriaged] `removed:GetScaledCursorDelta` — untriaged
 354. [untriaged] `removed:GetScaledCursorPositionForFrame` — untriaged
 355. [untriaged] `removed:GetScaledCursorPosition` — untriaged
-356. [untriaged] `removed:GetScreenHeightScale` — untriaged
-357. [untriaged] `removed:GetScreenWidthScale` — untriaged
+356. [best-effort] `removed:GetScreenHeightScale` — vendor-present
+357. [best-effort] `removed:GetScreenWidthScale` — vendor-present
 358. [best-effort] `removed:GetSmoothProgressChange` — vendor-present
 359. [untriaged] `removed:GetSocialColoredName` — untriaged
 360. [untriaged] `removed:GetSortedSelfResurrectOptions` — untriaged

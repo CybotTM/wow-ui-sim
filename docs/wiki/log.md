@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-07-14] investigation | 12.1 screen-scale snapshot reversal
+
+Classified the proposed `InterfaceUtil.GetScreenHeightScale` and `InterfaceUtil.GetScreenWidthScale` additions as stale snapshot entries and the proposed global removals as vendor-present. Focused PTR proof verifies `InterfaceUtil` is absent, both globals remain functions, and a 1024×768 fixture returns `1.0` for each. Full grouped audit target: 4 tests passed in 10.873 seconds. Current inventory: 1 implemented, 32 best-effort, 0 exception-requested, and 399 neutral untriaged rows.
+
 ## [2026-07-14] investigation | 12.1 PTRFeedback quest-progress helper
 
 Classified `GetTimeSinceLastQuestProgress` as vendor-present best-effort behavior. Focused PTR proof verifies publication by PTRFeedback and pins the current upstream nil-arithmetic invocation defect caused by undefined `lastProgressTime`; simulator adds no guessed correction. Full grouped audit target: 3 tests passed in 6.625 seconds. Current inventory: 1 implemented, 28 best-effort, 0 exception-requested, and 403 neutral untriaged rows.
