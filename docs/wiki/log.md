@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-07-14] investigation | 12.0.7 widget compatibility matrix
+
+Focused 12.0.7 proof verifies six retained Minimap texture setters, four Button methods, four ScrollFrame methods, and five font-bearing `SetFont` methods. `ModelSceneActorBase:GetModelUnitGUID` is absent under the intentional permanent no-3D scope and remains an explicit exception candidate; no approval requested yet.
+
 ## [2026-07-14] investigation | 12.0.7 removal and event matrix
 
 Added exact 12.0.7 startup proof for all 17 proposed global removals and 17 added/changed events. Eleven removed names are nil, six remain compatibility functions, and every event registers. This corrects the earlier blanket claim that all removed wrappers remained available.

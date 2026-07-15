@@ -298,6 +298,68 @@ fn test_patch_12_0_7_removal_and_event_surface() {
     );
 }
 
+#[cfg(feature = "retail-12-0-7")]
+#[test]
+fn test_patch_12_0_7_widget_compatibility_surface() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local minimap = CreateFrame("Minimap")
+            local minimapMethods = {
+                "SetBlipTexture",
+                "SetCorpsePOIArrowTexture",
+                "SetIconTexture",
+                "SetPOIArrowTexture",
+                "SetPlayerTexture",
+                "SetStaticPOIArrowTexture",
+            }
+            for _, method in ipairs(minimapMethods) do
+                if type(minimap[method]) ~= "function" then return "Minimap:" .. method end
+            end
+
+            local button = CreateFrame("Button")
+            for _, method in ipairs({"GetButtonState", "IsEnabled", "SetButtonState", "SetEnabled"}) do
+                if type(button[method]) ~= "function" then return "Button:" .. method end
+            end
+
+            local scroll = CreateFrame("ScrollFrame")
+            for _, method in ipairs({
+                "GetHorizontalScroll", "GetVerticalScroll",
+                "SetHorizontalScroll", "SetVerticalScroll",
+            }) do
+                if type(scroll[method]) ~= "function" then return "ScrollFrame:" .. method end
+            end
+
+            local editBox = CreateFrame("EditBox")
+            local owner = CreateFrame("Frame")
+            local fontString = owner:CreateFontString()
+            local messageFrame = CreateFrame("MessageFrame")
+            local simpleHTML = CreateFrame("SimpleHTML")
+            local font = CreateFont("Patch1207Font")
+            for name, object in pairs({
+                EditBox = editBox,
+                Font = font,
+                FontString = fontString,
+                MessageFrame = messageFrame,
+                SimpleHTML = simpleHTML,
+            }) do
+                if type(object.SetFont) ~= "function" then return name .. ":SetFont" end
+            end
+
+            local scene = CreateFrame("ModelScene")
+            local actor = scene:CreateActor("patch-12-0-7")
+            if actor.GetModelUnitGUID ~= nil then
+                return "ModelSceneActorBase:GetModelUnitGUID=" .. type(actor.GetModelUnitGUID)
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
 #[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_cvars_and_enums_exist() {
