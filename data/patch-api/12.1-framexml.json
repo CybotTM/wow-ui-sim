@@ -3810,13 +3810,13 @@
       "evidence": [
         {
           "kind": "runtime",
-          "reference": "patch-tests/patch_12_1.rs",
+          "reference": "patch-tests/patch_12_1/player_choice.rs",
           "summary": "Focused PTR proof verifies the helper is absent before the Blizzard_PlayerChoice LoD addon, becomes a function after loading it, shows only eligible toggle buttons, updates shown buttons both explicitly and through OnShow, and returns nil.",
-          "source_hash": "7123641673f4ebea7a3f8e62ed0ffdc41831d6b707add3a4abbb0ac778eadb51"
+          "source_hash": "6f597f8ba8a7104c4f570456ba70e3e04400ce786fbd5506389dac4c82bbd422"
         }
       ],
       "tests": [
-        "patch-tests/patch_12_1.rs::player_choice_toggle_is_lod_and_updates_visible_buttons"
+        "patch-tests/patch_12_1/player_choice.rs::toggle_is_lod_and_updates_visible_buttons"
       ],
       "assertions": [
         {
@@ -4104,13 +4104,13 @@
       "evidence": [
         {
           "kind": "runtime",
-          "reference": "patch-tests/patch_12_1.rs",
+          "reference": "patch-tests/patch_12_1/shake.rs",
           "summary": "Focused PTR proof verifies the legacy global remains absent while `ScriptAnimationUtil.ShakeFrameRandom` is the published function and safely returns a cancellation function for a zero-duration no-op.",
-          "source_hash": "7123641673f4ebea7a3f8e62ed0ffdc41831d6b707add3a4abbb0ac778eadb51"
+          "source_hash": "9791687591a9c188997ba16afb731306d3c611bf4e34fc1c1459f3778c7b58c8"
         }
       ],
       "tests": [
-        "patch-tests/patch_12_1.rs::shake_helpers_are_namespaced_not_legacy_globals"
+        "patch-tests/patch_12_1/shake.rs::helpers_are_namespaced_not_legacy_globals"
       ],
       "assertions": [
         {
@@ -4135,13 +4135,13 @@
       "evidence": [
         {
           "kind": "runtime",
-          "reference": "patch-tests/patch_12_1.rs",
+          "reference": "patch-tests/patch_12_1/shake.rs",
           "summary": "Focused PTR proof verifies the legacy global remains absent while `ScriptAnimationUtil.ShakeFrame` is the published function and safely returns a cancellation function when animation locking prevents a shake.",
-          "source_hash": "7123641673f4ebea7a3f8e62ed0ffdc41831d6b707add3a4abbb0ac778eadb51"
+          "source_hash": "9791687591a9c188997ba16afb731306d3c611bf4e34fc1c1459f3778c7b58c8"
         }
       ],
       "tests": [
-        "patch-tests/patch_12_1.rs::shake_helpers_are_namespaced_not_legacy_globals"
+        "patch-tests/patch_12_1/shake.rs::helpers_are_namespaced_not_legacy_globals"
       ],
       "assertions": [
         {
@@ -6200,13 +6200,13 @@
       "evidence": [
         {
           "kind": "runtime",
-          "reference": "patch-tests/patch_12_1.rs",
+          "reference": "patch-tests/patch_12_1/player_choice.rs",
           "summary": "Focused PTR proof disproves unconditional removal: the helper remains absent before the Blizzard_PlayerChoice LoD addon and is published with working button-state behavior after the addon loads.",
-          "source_hash": "7123641673f4ebea7a3f8e62ed0ffdc41831d6b707add3a4abbb0ac778eadb51"
+          "source_hash": "6f597f8ba8a7104c4f570456ba70e3e04400ce786fbd5506389dac4c82bbd422"
         }
       ],
       "tests": [
-        "patch-tests/patch_12_1.rs::player_choice_toggle_is_lod_and_updates_visible_buttons"
+        "patch-tests/patch_12_1/player_choice.rs::toggle_is_lod_and_updates_visible_buttons"
       ],
       "assertions": [
         {
