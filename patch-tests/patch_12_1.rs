@@ -27,6 +27,8 @@ mod narration;
 mod player_choice;
 #[path = "patch_12_1/ptr_feedback.rs"]
 mod ptr_feedback;
+#[path = "patch_12_1/remaining_observations.rs"]
+mod remaining_observations;
 #[path = "patch_12_1/shake.rs"]
 mod shake;
 #[path = "patch_12_1/social_ui.rs"]
