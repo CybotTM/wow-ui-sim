@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 325 best-effort, 0 exception-requested, 106 untriaged.
+**Current totals:** 1 implemented, 431 best-effort, 0 exception-requested, 0 untriaged.
 
 ### Added symbols
 
@@ -61,8 +61,8 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `CombatText_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `CompactUnitFrame_GetOptionDispelIndicatorOverlayAnimation` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `CompactUnitFrame_GetOptionDispelIndicatorOverlayType` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
-| `CompactUnitFrameLayoutTemplates_LayoutFrameElement` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CompactUnitFrameUtil.ApplyConfig` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CompactUnitFrameLayoutTemplates_LayoutFrameElement` | best-effort | Stale proposed addition: all-LoD PTR runtime leaves the exact path nil. |
+| `CompactUnitFrameUtil.ApplyConfig` | best-effort | Stale proposed addition: all-LoD PTR runtime leaves the exact path nil. |
 | `CompactUnitFrameUtil.GenerateNewConfig` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `ConfirmDisenchantRollDialog_Show` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `ConfirmLootRollDialog_Show` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
@@ -132,7 +132,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `GameMenuFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `GameMenuFrame_IsShown` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `GameMenuFrame_Show` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
-| `GameRulesUtil.IsPlayerAtEffectiveMaxLevel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GameRulesUtil.IsPlayerAtEffectiveMaxLevel` | best-effort | Stale proposed addition: all-LoD PTR runtime leaves the exact path nil. |
 | `GetBottomManagedFrameContainer` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `GetChatAdditionalColor` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `GetDiscordUserCommunityLink` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
@@ -216,7 +216,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `LocalizePlayerFrame_zhTW` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `LootFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `MacroFrame_SaveMacro` | best-effort | PTR lifecycle proof verifies the eager UIParent no-op placeholder is harmless, then explicit `Blizzard_MacroUI` loading replaces it with the `MacroFrame:SaveMacro()` delegate. |
-| `ManageFramePositions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ManageFramePositions` | best-effort | Stale proposed addition: all-LoD PTR runtime leaves the exact path nil. |
 | `MenuUtil.CreateHighlightButton` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `MovePad_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `NarrationUtil.CreateNarrationInfo` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `NarrationUtil` remains nil after startup. |
@@ -244,8 +244,8 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `PlayerChoiceFrame_TryShow` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `PlayerChoiceToggle_TryShow` | best-effort | PTR LoD behavior: absent before `Blizzard_PlayerChoice`, present afterward; focused proof verifies eligible button visibility, explicit plus OnShow updates, and nil return. |
 | `PVPUI_LoadUI` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
-| `RaidWarningUtil.AddMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidWarningUtil.ClearBossEmotes` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `RaidWarningUtil.AddMessage` | best-effort | Stale proposed addition: all-LoD PTR runtime leaves the exact path nil. |
+| `RaidWarningUtil.ClearBossEmotes` | best-effort | Stale proposed addition: all-LoD PTR runtime leaves the exact path nil. |
 | `RaidWarningUtil.UpdateCenterScreenAnchors` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `RecentAlliesUtil.GetBestSocialUIPresenceTypeForStateData` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `RecruitAFriendFrameSocialInitializeAADC` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
@@ -314,7 +314,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `SplashFrame_EscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `StoreEscapePressed` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
 | `StringUtil.JoinAlternatingConditionalColor` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
-| `TextureUtil.AnimateTexCoords` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `TextureUtil.AnimateTexCoords` | best-effort | Stale proposed addition: all-LoD PTR runtime leaves the exact path nil. |
 | `TimeUtil.BetterDate` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `TimeUtil.GetRecentTimeDate` | best-effort | Stale snapshot addition: colon-aware PTR source proof finds no publication, and startup runtime leaves this method nil. |
 | `ToggleRAFPanel` | best-effort | Stale snapshot addition: bare token is absent from the complete PTR source corpus, and full explicit addon loading leaves the symbol nil. |
@@ -339,37 +339,37 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 | Symbol | Status | Reason |
 |---|---|---|
-| `AddFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AnimatedShine_OnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `AnimateTexCoords` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BattleTagInviteFrame_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BetterDate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BFAMissionFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BoostTutorial_AttemptLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BuildColoredListString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BuildIconArray` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BuildListString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BuildMultilineTooltip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `BuildNewLineListString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ButtonPulse_OnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ClassTrainerFrame_Hide` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ClassTrainerFrame_Show` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CloseCalendarMenus` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CommunitiesFrame_IsEnabled` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CompactUnitFrame_GetOptionDisplayOnlyHealerPowerBars` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CompactUnitFrame_GetOptionDisplayPowerBar` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CompactUnitFrame_GetOptionShowDispelIndicatorOverlay` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ConvertRGBtoColorString` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `DisplayTypeUnassignedSupported` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `EventUtil.AreVariablesLoaded` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ExpansionTrial_CheckLoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsFrame_CloseQuickJoinHelpTip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsFrameAddFriendButton_OnClick` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsFriends_InitButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsFriends_SetSelection` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsFriendsButton_SetSelected` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `FriendsFriendsFrame_Close` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetDungeonNameWithDifficulty` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `AddFrameLock` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `AnimatedShine_OnUpdate` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `AnimateTexCoords` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `BattleTagInviteFrame_Show` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `BetterDate` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `BFAMissionFrame_EscapePressed` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `BoostTutorial_AttemptLoad` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `BuildColoredListString` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `BuildIconArray` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `BuildListString` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `BuildMultilineTooltip` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `BuildNewLineListString` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ButtonPulse_OnUpdate` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ClassTrainerFrame_Hide` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ClassTrainerFrame_Show` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `CloseCalendarMenus` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `CommunitiesFrame_IsEnabled` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `CompactUnitFrame_GetOptionDisplayOnlyHealerPowerBars` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `CompactUnitFrame_GetOptionDisplayPowerBar` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `CompactUnitFrame_GetOptionShowDispelIndicatorOverlay` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ConvertRGBtoColorString` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `DisplayTypeUnassignedSupported` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `EventUtil.AreVariablesLoaded` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ExpansionTrial_CheckLoadUI` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `FriendsFrame_CloseQuickJoinHelpTip` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `FriendsFrameAddFriendButton_OnClick` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `FriendsFriends_InitButton` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `FriendsFriends_SetSelection` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `FriendsFriendsButton_SetSelected` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `FriendsFriendsFrame_Close` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `GetDungeonNameWithDifficulty` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
 | `GetNotchHeight` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its UI geometry behavior. |
 | `GetScaledCursorDelta` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
 | `GetScaledCursorPositionForFrame` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
@@ -377,80 +377,80 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `GetScreenHeightScale` | best-effort | Vendor-present despite snapshot removal; focused PTR proof verifies function publication and `1.0` at the 768-pixel fixture height. |
 | `GetScreenWidthScale` | best-effort | Vendor-present despite snapshot removal; focused PTR proof verifies function publication and `1.0` at the 1024-pixel fixture width. |
 | `GetSmoothProgressChange` | best-effort | Vendor-present despite the snapshot removal: PTR UIParent retains this global function; focused PTR proof verifies representative input `(100, 0, 100, 1)` returns `70`. |
-| `GetSocialColoredName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetSortedSelfResurrectOptions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetSocialColoredName` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `GetSortedSelfResurrectOptions` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
 | `GetUIParentOffset` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its UI geometry behavior. |
-| `HelpPlatesSupported` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `HousingControlsUtil.CanActivateHousingControls` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `IsFrameLockActive` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `IsFrameSmartShown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `IsLevelAtEffectiveMaxLevel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `IsPlayerAtEffectiveMaxLevel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `KeyBindingFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `LocalizePlayerFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `LocalizezhCN` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `LocalizezhTW` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `HelpPlatesSupported` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `HousingControlsUtil.CanActivateHousingControls` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `IsFrameLockActive` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `IsFrameSmartShown` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `IsLevelAtEffectiveMaxLevel` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `IsPlayerAtEffectiveMaxLevel` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `KeyBindingFrame_LoadUI` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `LocalizePlayerFrame` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `LocalizezhCN` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `LocalizezhTW` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
 | `MacroFrame_SaveMacro` | best-effort | PTR lifecycle proof verifies the eager UIParent no-op placeholder is harmless, then explicit `Blizzard_MacroUI` loading replaces it with the `MacroFrame:SaveMacro()` delegate. |
-| `MajorFactions_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `MajorFactions_LoadUI` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
 | `MouseIsOver` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
-| `NPE_CheckTutorials` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `NPETutorial_AttemptToBegin` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `OpenAchievementFrameToAchievement` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `OrderHallMissionFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `OrderHallTalentFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `OutfitterUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `NPE_CheckTutorials` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `NPETutorial_AttemptToBegin` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `OpenAchievementFrameToAchievement` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `OrderHallMissionFrame_EscapePressed` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `OrderHallTalentFrame_EscapePressed` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `OutfitterUI_LoadUI` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
 | `PingUtil.GetContextualPingTypeForUnit` | best-effort | Vendor-present colon-defined helper: focused PTR proof verifies GUID/result delegation to `C_Ping` despite the proposed removal. |
 | `PlayerChoiceToggle_TryShow` | best-effort | Retained PTR LoD behavior despite snapshot removal: absent before `Blizzard_PlayerChoice`, published afterward with focused button-state proof. |
-| `QuickJoin_JoinQueueButtonOnClick` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidBossEmoteFrame_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidBossEmoteFrame_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidBrowser_IsEmpowered` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidNotice_AddMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidNotice_ClearSlot` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidNotice_Clear` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidNotice_FadeInit` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidNotice_OnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidNotice_SetSlot` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidNotice_UpdateSlot` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidWarningFrame_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RaidWarningFrame_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RecentTimeDate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RefreshAuras` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RegisterNewFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `RemoveFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ReverseQuestObjective` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SetDesaturation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SetFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShowResurrectRequest` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SmartHide` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SmartShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `TalentFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `TargetFrame_UpdateBuffAnchor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `TargetFrame_UpdateDebuffAnchor` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ToggleLFGFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ToggleRafPanel` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ToggleRaidBrowser` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ToggleWoWHackCharacterUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `TokenFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `TrialAccountCapReached_Inform` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `QuickJoin_JoinQueueButtonOnClick` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidBossEmoteFrame_OnEvent` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidBossEmoteFrame_OnLoad` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidBrowser_IsEmpowered` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidNotice_AddMessage` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidNotice_ClearSlot` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidNotice_Clear` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidNotice_FadeInit` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidNotice_OnUpdate` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidNotice_SetSlot` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidNotice_UpdateSlot` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidWarningFrame_OnEvent` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RaidWarningFrame_OnLoad` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RecentTimeDate` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RefreshAuras` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RegisterNewFrameLock` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `RemoveFrameLock` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ReverseQuestObjective` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `SetDesaturation` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `SetFrameLock` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ShowResurrectRequest` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `SmartHide` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `SmartShow` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `TalentFrame_LoadUI` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `TargetFrame_UpdateBuffAnchor` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `TargetFrame_UpdateDebuffAnchor` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ToggleLFGFrame` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ToggleRafPanel` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ToggleRaidBrowser` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `ToggleWoWHackCharacterUI` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `TokenFrame_LoadUI` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `TrialAccountCapReached_Inform` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
 | `UIDoFramesIntersect` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its UI geometry behavior. |
-| `UIParent_ManageFramePositions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIParent_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIParent_OnHide` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIParent_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIParent_OnShow` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIParent_Shared_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIParent_Shared_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIParent_UpdateTopFramePositions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIParentLoadAddOn` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UnitHasMana` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UpdateFrameLock` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UpdateUIElementsForClientScene` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `WorldFrame_OnLoad` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `WorldFrame_OnUpdate` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `WoWHackSpellsUI_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `getglobal` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `setglobal` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIParent_ManageFramePositions` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UIParent_OnEvent` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UIParent_OnHide` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UIParent_OnLoad` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UIParent_OnShow` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UIParent_Shared_OnEvent` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UIParent_Shared_OnLoad` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UIParent_UpdateTopFramePositions` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UIParentLoadAddOn` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UnitHasMana` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UpdateFrameLock` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `UpdateUIElementsForClientScene` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `WorldFrame_OnLoad` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `WorldFrame_OnUpdate` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `WoWHackSpellsUI_LoadUI` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `getglobal` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
+| `setglobal` | best-effort | Vendor-present despite proposed removal: all-LoD PTR runtime retains a global function. |
 
 ## Sources
 
@@ -472,6 +472,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [Guild control snapshot proof](../../../patch-tests/patch_12_1/guild_control.rs) — PTR source and runtime absence proof for ten stale proposed globals.
 - [Utility namespace snapshot proof](../../../patch-tests/patch_12_1/utility_namespaces.rs) — colon-aware source/runtime proof for 29 stale additions and one retained Ping helper.
 - [Conservative source-absence proof](../../../patch-tests/patch_12_1/source_absent.rs) — itemized bare-token source and full-load runtime absence proof for 175 proposed additions.
+- [Final publication matrix](../../../patch-tests/patch_12_1/remaining_observations.rs) — exact all-LoD type contract for seven absent additions and 99 retained removals.
 
 ## See Also
 

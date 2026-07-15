@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-07-14] investigation | 12.1 final publication matrix
+
+Closed the final 106 FrameXML rows with an exact all-LoD publication matrix: seven proposed additions remain nil and 99 proposed removals remain functions. Every mismatch reports symbol, expected type, and observed type. Full target: 15 tests passed in 22.35 seconds (26.048 seconds wall time). Final 12.1 FrameXML inventory: 1 implemented, 431 best-effort, 0 exception-requested, and 0 untriaged rows.
+
 ## [2026-07-14] investigation | 12.1 conservative source-absence batch
 
 Classified 175 proposed additions individually as stale snapshot entries. Selection requires the bare method/global token to be absent from every PTR Lua/XML/TOC file; the focused generated test then loads the complete game-compatible addon closure, including LoD roots, and reports any exact global/namespace publication. Stronger source patterns cover dot, colon, bracket, and `rawset` forms for earlier namespace families. Some all-LoD addons emit recorded Lua errors, so this remains explicitly best-effort source-plus-runtime evidence rather than an exact fidelity claim. Full target: 14 tests passed in 21.82 seconds (24.836 seconds wall time). Current inventory: 1 implemented, 325 best-effort, 0 exception-requested, and 106 neutral untriaged rows.
