@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 44 best-effort, 0 exception-requested, 387 untriaged.
+**Current totals:** 1 implemented, 54 best-effort, 0 exception-requested, 377 untriaged.
 
 ### Added symbols
 
@@ -48,16 +48,16 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `ChatFrameUtil.FormatDiscordMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `ChatFrameUtil.GetNameForDiscordMessage` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `CheckActiveStoreForFree` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.EnumerateInterruptCastInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.EnumerateInterruptCastSuccessInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.EnumerateSayCombatEndInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.EnumerateSayCombatStartInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.EnumeratetWhenTargetDiesInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.GetInterruptCastInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.GetInterruptCastSuccessInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.GetSayCombatEndInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.GetSayCombatStartInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `CombatAudioAlertUtil.GetWhenTargetDiesInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `CombatAudioAlertUtil.EnumerateInterruptCastInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
+| `CombatAudioAlertUtil.EnumerateInterruptCastSuccessInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
+| `CombatAudioAlertUtil.EnumerateSayCombatEndInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
+| `CombatAudioAlertUtil.EnumerateSayCombatStartInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
+| `CombatAudioAlertUtil.EnumeratetWhenTargetDiesInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
+| `CombatAudioAlertUtil.GetInterruptCastInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
+| `CombatAudioAlertUtil.GetInterruptCastSuccessInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
+| `CombatAudioAlertUtil.GetSayCombatEndInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
+| `CombatAudioAlertUtil.GetSayCombatStartInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
+| `CombatAudioAlertUtil.GetWhenTargetDiesInfo` | best-effort | Stale snapshot addition: recursive PTR source proof finds no publication, and the active runtime namespace leaves this method nil. |
 | `CombatText_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `CompactUnitFrame_GetOptionDispelIndicatorOverlayAnimation` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `CompactUnitFrame_GetOptionDispelIndicatorOverlayType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -465,6 +465,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [Customer Orders tests](../../../tests/blizzard_professions_customer_orders_loads.rs) — recursive PTR source scan plus explicit dependency/addon-load proof for the absent CustomerOrders hide wrapper.
 - [Input utility snapshot proof](../../../patch-tests/patch_12_1/input_util.rs) — focused PTR publication and cursor-behavior proof for the stale namespace move and retained globals.
 - [UI geometry snapshot proof](../../../patch-tests/patch_12_1/ui_geometry.rs) — focused PTR intersection, notch normalization, and UIParent offset proof for three retained globals.
+- [Combat audio snapshot proof](../../../patch-tests/patch_12_1/combat_audio.rs) — recursive PTR source scan and runtime absence proof for ten stale proposed methods.
 
 ## See Also
 
