@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-07-14] investigation | 12.1 retained UI geometry globals
+
+Classified the proposed removals of `UIDoFramesIntersect`, `GetNotchHeight`, and `GetUIParentOffset` as vendor-present. Focused PTR proof covers overlap/separation/edge-touch behavior, physical-to-UI notch normalization, and maximum debug-bar/notch offset selection. Full grouped audit target: 6 tests passed in 13.438 seconds. Current inventory: 1 implemented, 44 best-effort, 0 exception-requested, and 387 neutral untriaged rows.
+
 ## [2026-07-14] investigation | 12.1 input utility snapshot reversal
 
 Classified five proposed `InputUtil` additions as stale snapshot namespace moves and four proposed global removals as vendor-present. Focused PTR proof verifies the namespace members remain nil while the legacy globals perform cursor scaling, frame-scale forwarding, mouse-offset forwarding, and inspect-cursor selection. Full grouped audit target: 5 tests passed in 9.232 seconds. Current inventory: 1 implemented, 41 best-effort, 0 exception-requested, and 390 neutral untriaged rows.

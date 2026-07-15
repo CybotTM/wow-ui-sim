@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 41 best-effort, 0 exception-requested, 390 untriaged.
+**Current totals:** 1 implemented, 44 best-effort, 0 exception-requested, 387 untriaged.
 
 ### Added symbols
 
@@ -370,7 +370,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `FriendsFriendsButton_SetSelected` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `FriendsFriendsFrame_Close` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GetDungeonNameWithDifficulty` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetNotchHeight` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetNotchHeight` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its UI geometry behavior. |
 | `GetScaledCursorDelta` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
 | `GetScaledCursorPositionForFrame` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
 | `GetScaledCursorPosition` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its cursor behavior. |
@@ -379,7 +379,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `GetSmoothProgressChange` | best-effort | Vendor-present despite the snapshot removal: PTR UIParent retains this global function; focused PTR proof verifies representative input `(100, 0, 100, 1)` returns `70`. |
 | `GetSocialColoredName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `GetSortedSelfResurrectOptions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `GetUIParentOffset` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `GetUIParentOffset` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its UI geometry behavior. |
 | `HelpPlatesSupported` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `HousingControlsUtil.CanActivateHousingControls` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `IsFrameLockActive` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -433,7 +433,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `ToggleWoWHackCharacterUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `TokenFrame_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `TrialAccountCapReached_Inform` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `UIDoFramesIntersect` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `UIDoFramesIntersect` | best-effort | Vendor-present global: focused PTR proof verifies the function remains published and exercises its UI geometry behavior. |
 | `UIParent_ManageFramePositions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `UIParent_OnEvent` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `UIParent_OnHide` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -464,6 +464,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [Garrison UI tests](../../../tests/blizzard_garrison_ui_loads.rs) — recursive PTR Garrison source scan plus explicit LoD addon-load proof for the two absent Garrison hide wrappers.
 - [Customer Orders tests](../../../tests/blizzard_professions_customer_orders_loads.rs) — recursive PTR source scan plus explicit dependency/addon-load proof for the absent CustomerOrders hide wrapper.
 - [Input utility snapshot proof](../../../patch-tests/patch_12_1/input_util.rs) — focused PTR publication and cursor-behavior proof for the stale namespace move and retained globals.
+- [UI geometry snapshot proof](../../../patch-tests/patch_12_1/ui_geometry.rs) — focused PTR intersection, notch normalization, and UIParent offset proof for three retained globals.
 
 ## See Also
 

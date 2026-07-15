@@ -349,7 +349,7 @@
 349. [untriaged] `removed:FriendsFriendsButton_SetSelected` — untriaged
 350. [untriaged] `removed:FriendsFriendsFrame_Close` — untriaged
 351. [untriaged] `removed:GetDungeonNameWithDifficulty` — untriaged
-352. [untriaged] `removed:GetNotchHeight` — untriaged
+352. [best-effort] `removed:GetNotchHeight` — vendor-present
 353. [best-effort] `removed:GetScaledCursorDelta` — vendor-present
 354. [best-effort] `removed:GetScaledCursorPositionForFrame` — vendor-present
 355. [best-effort] `removed:GetScaledCursorPosition` — vendor-present
@@ -358,7 +358,7 @@
 358. [best-effort] `removed:GetSmoothProgressChange` — vendor-present
 359. [untriaged] `removed:GetSocialColoredName` — untriaged
 360. [untriaged] `removed:GetSortedSelfResurrectOptions` — untriaged
-361. [untriaged] `removed:GetUIParentOffset` — untriaged
+361. [best-effort] `removed:GetUIParentOffset` — vendor-present
 362. [untriaged] `removed:HelpPlatesSupported` — untriaged
 363. [untriaged] `removed:HousingControlsUtil.CanActivateHousingControls` — untriaged
 364. [untriaged] `removed:IsFrameLockActive` — untriaged
@@ -412,7 +412,7 @@
 412. [untriaged] `removed:ToggleWoWHackCharacterUI` — untriaged
 413. [untriaged] `removed:TokenFrame_LoadUI` — untriaged
 414. [untriaged] `removed:TrialAccountCapReached_Inform` — untriaged
-415. [untriaged] `removed:UIDoFramesIntersect` — untriaged
+415. [best-effort] `removed:UIDoFramesIntersect` — vendor-present
 416. [untriaged] `removed:UIParent_ManageFramePositions` — untriaged
 417. [untriaged] `removed:UIParent_OnEvent` — untriaged
 418. [untriaged] `removed:UIParent_OnHide` — untriaged

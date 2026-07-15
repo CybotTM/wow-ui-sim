@@ -5717,19 +5717,19 @@
       "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
       "load_addon": null
     },
-    {
+        {
       "id": "removed:GetNotchHeight",
       "symbol": "GetNotchHeight",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_UIParent",
+      "evidence": [{"kind":"runtime","reference":"patch-tests/patch_12_1/ui_geometry.rs","summary":"Focused PTR proof disproves removal: GetNotchHeight remains a global function and its geometry behavior is exercised.","source_hash":"daa4165687dec182b36ad05b72de918fd0a610ee52108e17e7fc844393886ade"}],
+      "tests": ["patch-tests/patch_12_1/ui_geometry.rs::ui_geometry_helpers_remain_global"],
+      "assertions": [{"flavor":"ptr","phase":"post-load","expected":"present","expected_type":"function"}],
+      "commit": "030afd34b",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
+      "notes": "Classified as vendor-present despite the snapshot removal; global geometry behavior is retained and tested.",
       "load_addon": null
     },
         {
@@ -5868,19 +5868,19 @@
       "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
       "load_addon": null
     },
-    {
+        {
       "id": "removed:GetUIParentOffset",
       "symbol": "GetUIParentOffset",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_UIParent",
+      "evidence": [{"kind":"runtime","reference":"patch-tests/patch_12_1/ui_geometry.rs","summary":"Focused PTR proof disproves removal: GetUIParentOffset remains a global function and its geometry behavior is exercised.","source_hash":"daa4165687dec182b36ad05b72de918fd0a610ee52108e17e7fc844393886ade"}],
+      "tests": ["patch-tests/patch_12_1/ui_geometry.rs::ui_geometry_helpers_remain_global"],
+      "assertions": [{"flavor":"ptr","phase":"post-load","expected":"present","expected_type":"function"}],
+      "commit": "030afd34b",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
+      "notes": "Classified as vendor-present despite the snapshot removal; global geometry behavior is retained and tested.",
       "load_addon": null
     },
     {
@@ -6725,19 +6725,19 @@
       "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
       "load_addon": null
     },
-    {
+        {
       "id": "removed:UIDoFramesIntersect",
       "symbol": "UIDoFramesIntersect",
       "change": "removed",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "vendor-present",
+      "owner": "Blizzard_UIParent",
+      "evidence": [{"kind":"runtime","reference":"patch-tests/patch_12_1/ui_geometry.rs","summary":"Focused PTR proof disproves removal: UIDoFramesIntersect remains a global function and its geometry behavior is exercised.","source_hash":"daa4165687dec182b36ad05b72de918fd0a610ee52108e17e7fc844393886ade"}],
+      "tests": ["patch-tests/patch_12_1/ui_geometry.rs::ui_geometry_helpers_remain_global"],
+      "assertions": [{"flavor":"ptr","phase":"post-load","expected":"present","expected_type":"function"}],
+      "commit": "030afd34b",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
+      "notes": "Classified as vendor-present despite the snapshot removal; global geometry behavior is retained and tested.",
       "load_addon": null
     },
     {
