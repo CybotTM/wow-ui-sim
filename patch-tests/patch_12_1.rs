@@ -4,6 +4,8 @@ use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 
+#[path = "patch_12_1/interface_util.rs"]
+mod interface_util;
 #[path = "patch_12_1/player_choice.rs"]
 mod player_choice;
 #[path = "patch_12_1/ptr_feedback.rs"]
