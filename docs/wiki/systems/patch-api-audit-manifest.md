@@ -17,7 +17,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 Resolution explains the evidence outcome: vendor-present, simulator compatibility behavior, load-on-demand ownership, removal, cross-flavor contamination, stale/reversed snapshot data, unsafe behavior, or impossible behavior. Source owner and the addon passed to `LoadAddOn` are separate fields; LoD lifecycle assertions must match the declared addon. Only `unsafe` and `impossible` may use `exception-requested`.
 
-Current 12.1 FrameXML totals are **1 implemented, 83 best-effort, 0 exception-requested, and 348 untriaged**. The objective remains open.
+Current 12.1 FrameXML totals are **1 implemented, 96 best-effort, 0 exception-requested, and 335 untriaged**. The objective remains open.
 
 ### Repository evidence
 

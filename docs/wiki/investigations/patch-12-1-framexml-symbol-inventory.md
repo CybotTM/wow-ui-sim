@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 83 best-effort, 0 exception-requested, 348 untriaged.
+**Current totals:** 1 implemented, 96 best-effort, 0 exception-requested, 335 untriaged.
 
 ### Added symbols
 
@@ -296,19 +296,19 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `ShowTaxiMapFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `SimpleCheckout_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `SocialUIContactsFrameInitializeAADC` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.AddSeparatorToTooltip` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.GetBattleNetFriendTagInterestsUIOrder` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.GetBattleNetFriendTagRoleUIOrder` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.GetBlockedName` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.GetIconForPresenceType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.GetLabelForBattleNetFriendTag` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.GetLabelForPresenceType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.GetPresenceTypeForBattleNetAccountInfo` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.GetPresenceTypeSelf` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.InitializeUserScaledDropdownButton` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.InitializeUserScaledDropdownMainTitle` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.InitializeUserScaledDropdownTitle` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `SocialUIUtil.SetBattleNetPresenceFromSocialUIPresence` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `SocialUIUtil.AddSeparatorToTooltip` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.GetBattleNetFriendTagInterestsUIOrder` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.GetBattleNetFriendTagRoleUIOrder` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.GetBlockedName` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.GetIconForPresenceType` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.GetLabelForBattleNetFriendTag` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.GetLabelForPresenceType` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.GetPresenceTypeForBattleNetAccountInfo` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.GetPresenceTypeSelf` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.InitializeUserScaledDropdownButton` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.InitializeUserScaledDropdownMainTitle` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.InitializeUserScaledDropdownTitle` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
+| `SocialUIUtil.SetBattleNetPresenceFromSocialUIPresence` | best-effort | Stale snapshot addition: exact-qualified PTR source proof finds no publication, and `SocialUIUtil` remains nil after startup. |
 | `SoulbindViewer_LoadUI` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `SpellFlyout_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `SplashFrame_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
@@ -467,6 +467,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 - [UI geometry snapshot proof](../../../patch-tests/patch_12_1/ui_geometry.rs) — focused PTR intersection, notch normalization, and UIParent offset proof for three retained globals.
 - [Combat audio snapshot proof](../../../patch-tests/patch_12_1/combat_audio.rs) — recursive PTR source scan and runtime absence proof for ten stale proposed methods.
 - [Friends list snapshot proof](../../../patch-tests/patch_12_1/friends_list.rs) — exact-qualified PTR source scan and runtime absence proof for 29 stale proposed methods.
+- [Social UI snapshot proof](../../../patch-tests/patch_12_1/social_ui.rs) — exact-qualified PTR source scan and runtime absence proof for 13 stale proposed methods.
 
 ## See Also
 
