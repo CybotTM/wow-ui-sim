@@ -3812,7 +3812,7 @@
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1.rs",
           "summary": "Focused PTR proof verifies the helper is absent before the Blizzard_PlayerChoice LoD addon, becomes a function after loading it, shows only eligible toggle buttons, updates shown buttons both explicitly and through OnShow, and returns nil.",
-          "source_hash": "2afbdcc1882560c4683ad1502ff19ea33f3965ed5dd749a146f124bd8af0c2aa"
+          "source_hash": "7123641673f4ebea7a3f8e62ed0ffdc41831d6b707add3a4abbb0ac778eadb51"
         }
       ],
       "tests": [
@@ -4098,30 +4098,62 @@
       "id": "added:ShakeFrameRandom",
       "symbol": "ShakeFrameRandom",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "stale-snapshot",
+      "owner": "Blizzard_SharedXML",
+      "evidence": [
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1.rs",
+          "summary": "Focused PTR proof verifies the legacy global remains absent while `ScriptAnimationUtil.ShakeFrameRandom` is the published function and safely returns a cancellation function for a zero-duration no-op.",
+          "source_hash": "7123641673f4ebea7a3f8e62ed0ffdc41831d6b707add3a4abbb0ac778eadb51"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1.rs::shake_helpers_are_namespaced_not_legacy_globals"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "absent",
+          "expected_type": null
+        }
+      ],
+      "commit": "65493f576",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
+      "notes": "Classified as stale snapshot data: active PTR publishes the distinct namespaced ScriptAnimationUtil behavior, not the proposed legacy global.",
       "load_addon": null
     },
     {
       "id": "added:ShakeFrame",
       "symbol": "ShakeFrame",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
-      "owner": "unknown",
-      "evidence": [],
-      "tests": [],
-      "assertions": [],
-      "commit": null,
+      "status": "best-effort",
+      "resolution": "stale-snapshot",
+      "owner": "Blizzard_SharedXML",
+      "evidence": [
+        {
+          "kind": "runtime",
+          "reference": "patch-tests/patch_12_1.rs",
+          "summary": "Focused PTR proof verifies the legacy global remains absent while `ScriptAnimationUtil.ShakeFrame` is the published function and safely returns a cancellation function when animation locking prevents a shake.",
+          "source_hash": "7123641673f4ebea7a3f8e62ed0ffdc41831d6b707add3a4abbb0ac778eadb51"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_1.rs::shake_helpers_are_namespaced_not_legacy_globals"
+      ],
+      "assertions": [
+        {
+          "flavor": "ptr",
+          "phase": "post-load",
+          "expected": "absent",
+          "expected_type": null
+        }
+      ],
+      "commit": "65493f576",
       "approval_id": null,
-      "notes": "Awaiting per-item source, reachability, lifecycle, and behavior triage.",
+      "notes": "Classified as stale snapshot data: active PTR publishes the distinct namespaced ScriptAnimationUtil behavior, not the proposed legacy global.",
       "load_addon": null
     },
     {
@@ -6170,7 +6202,7 @@
           "kind": "runtime",
           "reference": "patch-tests/patch_12_1.rs",
           "summary": "Focused PTR proof disproves unconditional removal: the helper remains absent before the Blizzard_PlayerChoice LoD addon and is published with working button-state behavior after the addon loads.",
-          "source_hash": "2afbdcc1882560c4683ad1502ff19ea33f3965ed5dd749a146f124bd8af0c2aa"
+          "source_hash": "7123641673f4ebea7a3f8e62ed0ffdc41831d6b707add3a4abbb0ac778eadb51"
         }
       ],
       "tests": [

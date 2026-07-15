@@ -244,8 +244,8 @@
 244. [untriaged] `added:SetPlayerInteractionConditions` — untriaged
 245. [untriaged] `added:SettingsPanel_EscapePressed` — untriaged
 246. [untriaged] `added:SetUIPanelLayoutAttribute` — untriaged
-247. [untriaged] `added:ShakeFrameRandom` — untriaged
-248. [untriaged] `added:ShakeFrame` — untriaged
+247. [best-effort] `added:ShakeFrameRandom` — stale-snapshot
+248. [best-effort] `added:ShakeFrame` — stale-snapshot
 249. [untriaged] `added:ShouldDisplaySpellCooldown` — untriaged
 250. [untriaged] `added:ShowAchievementFrameForAchievement` — untriaged
 251. [untriaged] `added:ShowAdventureMapFrameForFollowerType` — untriaged

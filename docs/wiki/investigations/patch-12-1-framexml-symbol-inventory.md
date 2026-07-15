@@ -8,7 +8,7 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 
 **Status rule:** Each entry is classified independently. `implemented` and `best-effort` rows name their modeled behavior and focused coverage. `untriaged` is neutral draft state, not an exception request. Only individually proven unsafe/impossible rows may become `exception-requested`. Vendor presence alone is not focused behavioral coverage.
 
-**Current totals:** 1 implemented, 25 best-effort, 0 exception-requested, 406 untriaged.
+**Current totals:** 1 implemented, 27 best-effort, 0 exception-requested, 404 untriaged.
 
 ### Added symbols
 
@@ -260,8 +260,8 @@ Exhaustive human-readable status inventory for the local 12.1 FrameXML API snaps
 | `SetPlayerInteractionConditions` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `SettingsPanel_EscapePressed` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `SetUIPanelLayoutAttribute` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShakeFrameRandom` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
-| `ShakeFrame` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
+| `ShakeFrameRandom` | best-effort | Stale snapshot: active PTR leaves the legacy global nil and publishes distinct `ScriptAnimationUtil.ShakeFrameRandom` behavior; focused no-op proof returns a cancellation function. |
+| `ShakeFrame` | best-effort | Stale snapshot: active PTR leaves the legacy global nil and publishes distinct `ScriptAnimationUtil.ShakeFrame` behavior; focused locked-region proof returns a cancellation function. |
 | `ShouldDisplaySpellCooldown` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `ShowAchievementFrameForAchievement` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
 | `ShowAdventureMapFrameForFollowerType` | untriaged | Awaiting per-item source, reachability, lifecycle, and behavior triage; no exception requested. |
