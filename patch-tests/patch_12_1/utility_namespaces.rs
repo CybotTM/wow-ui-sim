@@ -1,4 +1,7 @@
-use super::{assert_ptr_source_omits_qualified_symbols, load_game_ui_without_player_choice};
+use super::{
+    assert_ptr_source_contains, assert_ptr_source_omits_qualified_symbols,
+    load_game_ui_without_player_choice,
+};
 
 const SNAPSHOT_ONLY_SYMBOLS: &[&str] = &[
     "ChatFrameUtil.DiscordNameColorize",
@@ -91,10 +94,24 @@ fn snapshot_only_utility_methods_remain_absent() {
 /// Proves the proposed PingUtil removal is reversed and still delegates to C_Ping.
 #[test]
 fn contextual_ping_helper_remains_vendor_present() {
+    assert_ptr_source_contains("function PingUtil:GetContextualPingTypeForUnit");
+
     let env = load_game_ui_without_player_choice();
-    let (helper_type, forwarded_guid, result): (String, String, i32) = env
+    let (helper_type, normal_call_succeeds, normal_result_type, forwarded_guid, result): (
+        String,
+        bool,
+        String,
+        String,
+        i32,
+    ) = env
         .eval(
             r#"
+            local normalCallSucceeds, normalResult = pcall(
+                PingUtil.GetContextualPingTypeForUnit,
+                PingUtil,
+                "Player-1-NORMAL"
+            )
+
             local forwardedGUID
             local original = C_Ping.GetContextualPingTypeForUnit
             C_Ping.GetContextualPingTypeForUnit = function(guid)
@@ -103,12 +120,18 @@ fn contextual_ping_helper_remains_vendor_present() {
             end
             local result = PingUtil:GetContextualPingTypeForUnit("Player-1-TEST")
             C_Ping.GetContextualPingTypeForUnit = original
-            return type(PingUtil.GetContextualPingTypeForUnit), forwardedGUID, result
+            return type(PingUtil.GetContextualPingTypeForUnit),
+                normalCallSucceeds,
+                type(normalResult),
+                forwardedGUID,
+                result
             "#,
         )
         .expect("contextual ping helper behavior probe succeeds");
 
     assert_eq!(helper_type, "function");
+    assert!(normal_call_succeeds);
+    assert_eq!(normal_result_type, "nil");
     assert_eq!(forwarded_guid, "Player-1-TEST");
     assert_eq!(result, 17);
 }

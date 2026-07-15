@@ -28,6 +28,8 @@ mod ptr_feedback;
 mod shake;
 #[path = "patch_12_1/social_ui.rs"]
 mod social_ui;
+#[path = "patch_12_1/source_absent.rs"]
+mod source_absent;
 #[path = "patch_12_1/ui_geometry.rs"]
 mod ui_geometry;
 #[path = "patch_12_1/utility_namespaces.rs"]
@@ -77,16 +79,34 @@ fn assert_ptr_source_omits_symbols(symbols: &[&str]) {
     }
 }
 
-fn assert_ptr_source_omits_qualified_symbols(symbols: &[&str]) {
-    let publications = symbols
+fn assert_ptr_source_omits_tokens(symbols: &[&str]) {
+    let tokens = symbols
         .iter()
-        .flat_map(|symbol| {
-            let (namespace, method) = symbol
-                .split_once('.')
-                .expect("qualified patch symbol should contain a dot");
+        .map(|symbol| symbol.split_once('.').map_or(*symbol, |(_, method)| method))
+        .collect::<Vec<_>>();
+    assert_ptr_source_omits_symbols(&tokens);
+}
+
+fn assert_ptr_source_omits_qualified_symbols(symbols: &[&str]) {
+    for symbol in symbols {
+        let (namespace, method) = symbol
+            .split_once('.')
+            .expect("qualified patch symbol should contain a dot");
+        assert_ptr_source_omits_qualified_methods(namespace, &[method]);
+    }
+}
+
+fn assert_ptr_source_omits_qualified_methods(namespace: &str, methods: &[&str]) {
+    let publications = methods
+        .iter()
+        .flat_map(|method| {
             [
                 format!("{namespace}.{method}"),
                 format!("{namespace}:{method}"),
+                format!("{namespace}[\"{method}\"]"),
+                format!("{namespace}['{method}']"),
+                format!("rawset({namespace}, \"{method}\""),
+                format!("rawset({namespace}, '{method}'"),
             ]
         })
         .collect::<Vec<_>>();
@@ -94,13 +114,13 @@ fn assert_ptr_source_omits_qualified_symbols(symbols: &[&str]) {
     assert_ptr_source_omits_symbols(&publications);
 }
 
-fn assert_ptr_source_omits_qualified_methods(namespace: &str, methods: &[&str]) {
-    let symbols = methods
-        .iter()
-        .map(|method| format!("{namespace}.{method}"))
-        .collect::<Vec<_>>();
-    let symbols = symbols.iter().map(String::as_str).collect::<Vec<_>>();
-    assert_ptr_source_omits_qualified_symbols(&symbols);
+fn assert_ptr_source_contains(symbol: &str) {
+    assert!(
+        ptr_source_files()
+            .iter()
+            .any(|(_, source)| source.contains(symbol)),
+        "expected PTR source publication {symbol} was not found",
+    );
 }
 
 fn player_choice_toc() -> PathBuf {
