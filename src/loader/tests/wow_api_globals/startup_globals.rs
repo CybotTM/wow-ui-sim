@@ -230,6 +230,74 @@ fn test_patch_12_0_7_safe_global_bridges() {
     assert_eq!(result, "ok");
 }
 
+#[cfg(feature = "retail-12-0-7")]
+#[test]
+fn test_patch_12_0_7_removal_and_event_surface() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local retained = {
+                "BNInviteFriend",
+                "C_ClickBindings.GetStringFromModifiers",
+                "C_ClickBindings.MakeModifiers",
+                "C_Spell.GetMawPowerBorderAtlasBySpellID",
+                "ConfirmReadyCheck",
+                "DemoteAssistant",
+                "DoReadyCheck",
+                "GetMerchantCurrencies",
+                "IsGUIDInGroup",
+                "PromoteToAssistant",
+                "PromoteToLeader",
+                "SetEveryoneIsAssistant",
+                "UninviteUnit",
+                "GetAutoCompletePresenceID",
+                "GetAutoCompleteResults",
+                "GetAutoCompleteRealms",
+                "IsRecognizedName",
+            }
+            local removalTypes = {}
+            for _, name in ipairs(retained) do
+                local namespaceName, methodName = string.match(name, "^([^.]+)%.(.+)$")
+                local value = namespaceName and _G[namespaceName][methodName] or _G[name]
+                table.insert(removalTypes, name .. "=" .. type(value))
+            end
+
+            local events = {
+                "ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED",
+                "URL_TEXTURE_REQUEST_RESULT",
+                "CHAT_MSG_COMBAT_FACTION_CHANGE",
+                "CHAT_MSG_COMBAT_HONOR_GAIN",
+                "CHAT_MSG_COMBAT_MISC_INFO",
+                "CHAT_MSG_COMBAT_XP_GAIN",
+                "CHAT_MSG_CURRENCY",
+                "CHAT_MSG_FILTERED",
+                "CHAT_MSG_LOOT",
+                "CHAT_MSG_MONEY",
+                "CHAT_MSG_RESTRICTED",
+                "CLUB_MEMBER_ADDED",
+                "CLUB_MEMBER_PRESENCE_UPDATED",
+                "CLUB_MEMBER_REMOVED",
+                "CLUB_MEMBER_ROLE_UPDATED",
+                "CLUB_MEMBER_UPDATED",
+                "ENCOUNTER_END",
+            }
+            local frame = CreateFrame("Frame")
+            for _, event in ipairs(events) do
+                local ok = pcall(frame.RegisterEvent, frame, event)
+                if not ok then return "event:" .. event end
+            end
+            return table.concat(removalTypes, ",")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result,
+        "BNInviteFriend=nil,C_ClickBindings.GetStringFromModifiers=function,C_ClickBindings.MakeModifiers=function,C_Spell.GetMawPowerBorderAtlasBySpellID=function,ConfirmReadyCheck=nil,DemoteAssistant=nil,DoReadyCheck=nil,GetMerchantCurrencies=nil,IsGUIDInGroup=nil,PromoteToAssistant=nil,PromoteToLeader=nil,SetEveryoneIsAssistant=nil,UninviteUnit=function,GetAutoCompletePresenceID=nil,GetAutoCompleteResults=function,GetAutoCompleteRealms=function,IsRecognizedName=nil"
+    );
+}
+
 #[cfg(feature = "retail-12-1-0")]
 #[test]
 fn test_patch_12_1_cvars_and_enums_exist() {

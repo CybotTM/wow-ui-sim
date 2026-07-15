@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-07-14] investigation | 12.0.7 removal and event matrix
+
+Added exact 12.0.7 startup proof for all 17 proposed global removals and 17 added/changed events. Eleven removed names are nil, six remain compatibility functions, and every event registers. This corrects the earlier blanket claim that all removed wrappers remained available.
+
 ## [2026-07-14] investigation | 12.1 final publication matrix
 
 Closed the final 106 FrameXML rows with an exact all-LoD publication matrix: seven proposed additions remain nil and 99 proposed removals remain functions. Every mismatch reports symbol, expected type, and observed type. Full target: 15 tests passed in 22.35 seconds (26.048 seconds wall time). Final 12.1 FrameXML inventory: 1 implemented, 431 best-effort, 0 exception-requested, and 0 untriaged rows.
