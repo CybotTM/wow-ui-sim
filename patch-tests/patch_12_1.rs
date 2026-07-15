@@ -16,6 +16,8 @@ mod friends_list;
 mod input_util;
 #[path = "patch_12_1/interface_util.rs"]
 mod interface_util;
+#[path = "patch_12_1/narration.rs"]
+mod narration;
 #[path = "patch_12_1/player_choice.rs"]
 mod player_choice;
 #[path = "patch_12_1/ptr_feedback.rs"]
