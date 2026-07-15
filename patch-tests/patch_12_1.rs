@@ -6,6 +6,8 @@ use wow_ui_sim::screen::ScreenKind;
 
 #[path = "patch_12_1/combat_audio.rs"]
 mod combat_audio;
+#[path = "patch_12_1/friends_list.rs"]
+mod friends_list;
 #[path = "patch_12_1/input_util.rs"]
 mod input_util;
 #[path = "patch_12_1/interface_util.rs"]
