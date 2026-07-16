@@ -1,0 +1,8 @@
+## Interface: 120007
+## Title: FrameStrataProbe
+## Notes: Captures retail XML PARENT, SetFrameStrata cascade, and SetParent strata behavior
+## Author: Alessio
+## Version: 0.1.0
+## SavedVariables: FrameStrataProbeDB
+FrameStrataProbe.xml
+FrameStrataProbe.lua

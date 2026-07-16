@@ -1,0 +1,64 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Frame name="FrameStrataProbeBaseHighTemplate" frameStrata="HIGH" virtual="true"/>
+    <Frame name="FrameStrataProbeDerivedParentTemplate"
+           inherits="FrameStrataProbeBaseHighTemplate"
+           frameStrata="PARENT"
+           virtual="true"/>
+
+    <!-- Group 1: parent SetFrameStrata cascade. -->
+    <Frame name="FrameStrataProbeCascadeParent" parent="UIParent" frameStrata="HIGH" hidden="true"/>
+    <Frame name="FrameStrataProbeCascadeParentChild"
+           parent="FrameStrataProbeCascadeParent"
+           frameStrata="PARENT"
+           hidden="true"/>
+    <Frame name="FrameStrataProbeCascadeDefaultChild"
+           parent="FrameStrataProbeCascadeParent"
+           hidden="true"/>
+    <Frame name="FrameStrataProbeCascadeFixedChild"
+           parent="FrameStrataProbeCascadeParent"
+           frameStrata="MEDIUM"
+           hidden="true"/>
+    <Frame name="FrameStrataProbeCascadeParentGrandchild"
+           parent="FrameStrataProbeCascadeParentChild"
+           frameStrata="PARENT"
+           hidden="true"/>
+    <Frame name="FrameStrataProbeCascadeFixedGrandchild"
+           parent="FrameStrataProbeCascadeDefaultChild"
+           frameStrata="MEDIUM"
+           hidden="true"/>
+
+    <!-- Group 2: SetParent behavior, isolated from the cascade group. -->
+    <Frame name="FrameStrataProbeReparentHigh" parent="UIParent" frameStrata="HIGH" hidden="true"/>
+    <Frame name="FrameStrataProbeReparentLow" parent="UIParent" frameStrata="LOW" hidden="true"/>
+    <Frame name="FrameStrataProbeReparentParentChild"
+           parent="FrameStrataProbeReparentHigh"
+           frameStrata="PARENT"
+           hidden="true"/>
+    <Frame name="FrameStrataProbeReparentDefaultChild"
+           parent="FrameStrataProbeReparentHigh"
+           hidden="true"/>
+    <Frame name="FrameStrataProbeReparentFixedChild"
+           parent="FrameStrataProbeReparentHigh"
+           frameStrata="MEDIUM"
+           hidden="true"/>
+    <Frame name="FrameStrataProbeReparentParentGrandchild"
+           parent="FrameStrataProbeReparentParentChild"
+           frameStrata="PARENT"
+           hidden="true"/>
+    <Frame name="FrameStrataProbeReparentFixedGrandchild"
+           parent="FrameStrataProbeReparentDefaultChild"
+           frameStrata="MEDIUM"
+           hidden="true"/>
+
+    <!-- Base-only control must remain HIGH under the LOW parent. -->
+    <Frame name="FrameStrataProbeTemplateBase"
+           parent="FrameStrataProbeReparentLow"
+           inherits="FrameStrataProbeBaseHighTemplate"
+           hidden="true"/>
+
+    <!-- Derived PARENT must override the base template's HIGH literal. -->
+    <Frame name="FrameStrataProbeTemplateParent"
+           parent="FrameStrataProbeReparentLow"
+           inherits="FrameStrataProbeDerivedParentTemplate"
+           hidden="true"/>
+</Ui>
