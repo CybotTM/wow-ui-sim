@@ -18,14 +18,22 @@ local function snapshot(frame)
     }
 end
 
-local function snapshotCascadeGroup()
+local function snapshotCreationGroup()
     return {
-        parent = snapshot(FrameStrataProbeCascadeParent),
-        parentChild = snapshot(FrameStrataProbeCascadeParentChild),
-        defaultChild = snapshot(FrameStrataProbeCascadeDefaultChild),
-        fixedChild = snapshot(FrameStrataProbeCascadeFixedChild),
-        parentGrandchild = snapshot(FrameStrataProbeCascadeParentGrandchild),
-        fixedGrandchild = snapshot(FrameStrataProbeCascadeFixedGrandchild),
+        parent = snapshot(FrameStrataProbeCreationParent),
+        parentChild = snapshot(FrameStrataProbeCreationParentChild),
+        literalChild = snapshot(FrameStrataProbeCreationLiteralChild),
+    }
+end
+
+local function snapshotParentSetGroup()
+    return {
+        parent = snapshot(FrameStrataProbeParentSetParent),
+        parentChild = snapshot(FrameStrataProbeParentSetParentChild),
+        defaultChild = snapshot(FrameStrataProbeParentSetDefaultChild),
+        explicitChild = snapshot(FrameStrataProbeParentSetExplicitChild),
+        parentGrandchild = snapshot(FrameStrataProbeParentSetParentGrandchild),
+        explicitGrandchild = snapshot(FrameStrataProbeParentSetExplicitGrandchild),
     }
 end
 
@@ -35,9 +43,9 @@ local function snapshotReparentGroup()
         lowParent = snapshot(FrameStrataProbeReparentLow),
         parentChild = snapshot(FrameStrataProbeReparentParentChild),
         defaultChild = snapshot(FrameStrataProbeReparentDefaultChild),
-        fixedChild = snapshot(FrameStrataProbeReparentFixedChild),
+        explicitChild = snapshot(FrameStrataProbeReparentExplicitChild),
         parentGrandchild = snapshot(FrameStrataProbeReparentParentGrandchild),
-        fixedGrandchild = snapshot(FrameStrataProbeReparentFixedGrandchild),
+        explicitGrandchild = snapshot(FrameStrataProbeReparentExplicitGrandchild),
     }
 end
 
@@ -46,18 +54,25 @@ local function runProbe()
         addonName = addonName,
         build = { GetBuildInfo() },
         capturedAt = date("%Y-%m-%dT%H:%M:%S"),
+        creationOnLoad = {
+            parentChild = FrameStrataProbeParentChildOnLoad,
+            literalChild = FrameStrataProbeLiteralChildOnLoad,
+        },
+        creationAtPlayerLogin = snapshotCreationGroup(),
+        templateActualParent = snapshot(FrameStrataProbeTemplateActualParent),
         templateBase = snapshot(FrameStrataProbeTemplateBase),
         templateParent = snapshot(FrameStrataProbeTemplateParent),
-        cascadeBefore = snapshotCascadeGroup(),
+        templateDerivedLow = snapshot(FrameStrataProbeTemplateDerivedLow),
+        parentSetBefore = snapshotParentSetGroup(),
         reparentBefore = snapshotReparentGroup(),
     }
 
-    FrameStrataProbeCascadeParent:SetFrameStrata("LOW")
-    db.cascadeAfterParentSetLow = snapshotCascadeGroup()
+    FrameStrataProbeParentSetParent:SetFrameStrata("LOW")
+    db.parentSetAfterLow = snapshotParentSetGroup()
 
     FrameStrataProbeReparentParentChild:SetParent(FrameStrataProbeReparentLow)
     FrameStrataProbeReparentDefaultChild:SetParent(FrameStrataProbeReparentLow)
-    FrameStrataProbeReparentFixedChild:SetParent(FrameStrataProbeReparentLow)
+    FrameStrataProbeReparentExplicitChild:SetParent(FrameStrataProbeReparentLow)
     db.reparentAfterSetParentLow = snapshotReparentGroup()
 
     FrameStrataProbeDB = db

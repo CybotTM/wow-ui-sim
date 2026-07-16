@@ -2,9 +2,9 @@
 
 Chronological record of wiki operations.
 
-## [2026-07-16] update | FrameStrata propagation evidence
+## [2026-07-16] update | FrameStrata before/after observations
 
-Updated FrameStrata documentation from `/tmp/FrameStrataProbe-retail.lua` (retail 12.0.7 build 68453, captured 2026-07-15). The `BLIZZARD` input token is ignored rather than modeled as a drawable tier. XML strata literals remain non-fixed; `PARENT` copies the parent's effective strata during creation rather than becoming a persistent enum value. Both template controls are `HIGH` under a `LOW` parent, proving the first template strata literal wins over a derived `PARENT` declaration. Parent `SetFrameStrata()` and `SetParent()` propagate effective strata through the tested non-fixed XML descendants and grandchildren, including explicit XML `MEDIUM` literals. Runtime-fixed behavior via `SetFixedFrameStrata(true)` remains unproven.
+Updated FrameStrata documentation from `/tmp/FrameStrataProbe-retail.lua` (retail 12.0.7 build 68453, captured July 15, 2026). The `BLIZZARD` input token is ignored rather than modeled as a drawable tier. The capture records effective XML strata, fixed-state flags, and before/after values around selected operations. A direct `PARENT` child matched its parent, while the original template fixtures aliased multiple explanations. The updated probe adds XML `OnLoad` capture and distinct `HIGH`, `LOW`, and `DIALOG` comparison values. Documentation avoids claims about the client's internal resolution or propagation mechanism.
 
 ## [2026-07-14] investigation | 12.0.7 widget compatibility matrix
 

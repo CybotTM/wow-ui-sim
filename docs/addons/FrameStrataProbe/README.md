@@ -1,19 +1,20 @@
 # FrameStrataProbe
 
-Captures retail behavior for three questions:
+Captures retail behavior for four questions:
 
-1. What effective strata and fixed flag does explicit XML `frameStrata="PARENT"` produce?
-2. Does parent `SetFrameStrata()` overwrite descendants with `PARENT`, default, and explicit `MEDIUM` strata?
-3. Does `SetParent()` reset those same three child categories when moving from a `HIGH` parent to a `LOW` parent?
+1. What effective strata does direct XML `frameStrata="PARENT"` expose during the child's `OnLoad`?
+2. What effective results do base and derived templates produce for literal `LOW` versus special `PARENT`?
+3. How do tested frame values differ before and after parent `SetFrameStrata("LOW")`?
+4. How do tested frame values differ before and after moving frames from a `HIGH` parent to a `LOW` parent with `SetParent()`?
 
-The groups are separate so the `SetFrameStrata()` cascade cannot affect the later `SetParent()` observations. Each group includes grandchildren to test recursive subtree behavior. A base-only template control distinguishes base literal retention from a derived template that also declares `PARENT`.
+The XML children record `OnLoad` values before Lua-file execution. The parent-set and reparent groups use separate fixtures. Each operation group records direct children and grandchildren before and after the operation.
 
 ## Usage
 
 The committed TOC targets retail `12.0.7` (`## Interface: 120007`). If probing a `12.0.5` client, change that line to `## Interface: 120005` before installation.
 
 1. Copy the `FrameStrataProbe` directory to the target client's `Interface/AddOns/` directory and enable it.
-2. Log in on any character; the probe captures automatically at `PLAYER_LOGIN`.
+2. Log in on any character; XML child values are recorded during `OnLoad`, and the complete database is assembled at `PLAYER_LOGIN`.
 3. `/reload` or log out so WoW flushes the SavedVariables file.
 4. Inspect:
 
@@ -27,34 +28,45 @@ Each frame snapshot contains `name`, `parentName`, and `frameStrata`; `hasFixedF
 
 ## Results to compare
 
-### XML `PARENT`
+### Direct XML `PARENT` effective result
 
-- `cascadeBefore.parentChild.frameStrata`: effective strata at creation; expected parent value is `HIGH`.
-- `cascadeBefore.parentChild.hasFixedFrameStrata`: whether explicit `PARENT` is classified as fixed.
-- Compare with `cascadeBefore.defaultChild` and `cascadeBefore.fixedChild` to distinguish inherited, default, and explicit XML children.
-- `templateBase.frameStrata`: control value; the capture is the base template's literal `HIGH` despite its `LOW` parent.
-- `templateParent.frameStrata`: the capture is also `HIGH`; the derived `PARENT` declaration does not override the earlier base `HIGH` literal.
-- Comparing `templateBase` with `templateParent` proves that the first strata literal wins in this template chain.
-- The XML probe does not call `SetFixedFrameStrata(true)`; runtime-fixed behavior remains unproven.
+Inspect `creationOnLoad` first:
 
-### Parent `SetFrameStrata()` cascade
+- `parentChild.parentFrameStrata` records the actual parent's value during the `PARENT` child's `OnLoad`.
+- `parentChild.frameStrata` records the `PARENT` child's effective value during `OnLoad`.
+- `literalChild.parentFrameStrata` and `literalChild.frameStrata` provide the explicit `LOW` control.
+- `creationAtPlayerLogin` records the same frames again before this probe performs any mutations.
+- No result can return the raw string `PARENT`; `GetFrameStrata()` exposes only effective strata. Equality with the parent does not identify why the values match.
+- Even a matching creation-time result would not establish a persistent symbolic `PARENT` binding; later before/after observations are recorded separately below.
 
-Compare `cascadeBefore` with `cascadeAfterParentSetLow`:
+### Template control values
+
+The fixtures expose three distinct comparison values: `HIGH`, `LOW`, and `DIALOG`.
+
+- `templateBase` declares base `HIGH`.
+- `templateDerivedLow` declares base `HIGH` plus derived literal `LOW`. Compare its effective result for equality with `HIGH`, `LOW`, and `DIALOG`.
+- `templateParent` declares base `HIGH` plus derived `PARENT`. Compare its effective result for equality with `templateBase`, `templateDerivedLow`, and `templateActualParent`. The probe records equality only; it does not expose the client's internal template-resolution mechanism.
+
+The XML probe does not call `SetFixedFrameStrata(true)`; runtime-fixed behavior remains unproven.
+
+### Before and after parent `SetFrameStrata()`
+
+Compare `parentSetBefore` with `parentSetAfterLow`:
 
 - Does the `PARENT` child become `LOW`?
 - Does the default child become `LOW`?
 - Does the explicit XML `MEDIUM` child also become `LOW`?
-- Do `parentGrandchild` and the explicit XML `MEDIUM` `fixedGrandchild` also become `LOW`?
+- Do `parentGrandchild` and the explicit XML `MEDIUM` `explicitGrandchild` also become `LOW`?
 - Do any `hasFixedFrameStrata` flags change?
 
-### `SetParent()` reset
+### Before and after `SetParent()`
 
 Compare `reparentBefore` with `reparentAfterSetParentLow`:
 
 - Does the `PARENT` child become `LOW`?
 - Does the default child become `LOW`?
-- Does the explicit XML `MEDIUM` child remain `MEDIUM` or reset to `LOW`?
-- What happens to `parentGrandchild` and the explicit XML `MEDIUM` `fixedGrandchild` when their ancestor is reparented?
+- Is the explicit XML `MEDIUM` child's later value `MEDIUM`, `LOW`, or something else?
+- What happens to `parentGrandchild` and the explicit XML `MEDIUM` `explicitGrandchild` when their ancestor is reparented?
 - Do any `hasFixedFrameStrata` flags change?
 
-The explicit XML `MEDIUM` results show that the tested XML literals participate in generic non-fixed recomputation; they are not runtime-fixed frames. The grandchildren show that reparenting propagates through the moved subtree.
+Use each snapshot's `hasFixedFrameStrata` value to determine fixed state. Compare direct-child and grandchild values before and after each operation without inferring an internal propagation mechanism.

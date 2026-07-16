@@ -191,10 +191,11 @@ The `BLIZZARD` input token is ignored; it is not a separate drawable strata tier
 ### Inheritance
 
 - Child strata/level inheritance is represented by the `has_fixed_frame_strata` / `has_fixed_frame_level` flags.
-- XML `frameStrata` literals remain non-fixed. `PARENT` is a creation directive that copies the parent's current effective strata rather than becoming a persistent enum value.
-- In a base-to-derived template chain, the first strata literal wins: a base `HIGH` remains `HIGH` when a derived template declares `PARENT`.
-- Retail probing proves that parent `SetFrameStrata()` recursively updates non-fixed XML descendants and that `SetParent()` recomputes their effective strata. These generic propagation rules explain the observed `PARENT` behavior without requiring a persistent dynamic state.
-- Behavior for frames explicitly fixed at runtime with `SetFixedFrameStrata(true)` remains unproven.
+- The retail capture recorded XML strata literals, including `PARENT`, with `HasFixedFrameStrata() == false`.
+- A direct XML `PARENT` child had the same effective strata as its parent in the captured pre-mutation snapshot. `GetFrameStrata()` cannot expose the original XML token or why the values match.
+- The prior template fixtures both returned `HIGH` under a `LOW` parent, but did not distinguish template precedence from special `PARENT` handling. The updated probe provides distinct `HIGH`, `LOW`, and `DIALOG` comparison values.
+- Before/after snapshots record effective changes around parent `SetFrameStrata()` and `SetParent()` operations without establishing an internal propagation mechanism.
+- Retail behavior for frames explicitly fixed at runtime with `SetFixedFrameStrata(true)` remains unproven.
 
 ---
 

@@ -8,7 +8,7 @@ Key field groups:
 
 **Identity & hierarchy** — `id: u64` (atomic counter), `widget_type`, `name: Option<String>`, `parent_id`, `children: Vec<u64>`, `children_keys: HashMap<String, u64>` (named child refs).
 
-**Rendering order** — `frame_strata`, `frame_level: i32`, `alpha: f32`, `scale: f32`, `draw_layer`, `draw_sub_layer`. The `BLIZZARD` input token is ignored rather than modeled as a drawable strata tier. XML strata literals remain non-fixed. `PARENT` copies the parent's effective strata during XML creation rather than becoming a persistent enum value. Generic propagation from parent `SetFrameStrata()` and later `SetParent()` operations accounts for subsequent effective-strata changes.
+**Rendering order** — `frame_strata`, `frame_level: i32`, `alpha: f32`, `scale: f32`, `draw_layer`, `draw_sub_layer`. The `BLIZZARD` input token is ignored rather than modeled as a drawable strata tier. Retail probe snapshots record effective XML strata and `HasFixedFrameStrata()` before and after selected operations; they do not expose the original XML token or internal resolution mechanism.
 
 **Input** — `mouse_enabled`, `mouse_motion_enabled`, `keyboard_enabled`, `propagate_keyboard_input`, `movable`, `resizable`.
 
@@ -46,13 +46,13 @@ pub struct WidgetRegistry {
 
 **GameTooltip** — Inserts tooltip data into `SimState.tooltips`; sets strata to TOOLTIP.
 
-## Strata Propagation Evidence
+## Strata Before/After Observations
 
-- XML `frameStrata` literals, including `PARENT`, report non-fixed state. `PARENT` resolves to the parent's current effective strata during XML creation.
-- Base-to-derived template resolution keeps the first strata literal: a base `HIGH` remains effective when a derived template declares `PARENT`.
-- Parent `SetFrameStrata()` recursively updates the tested non-fixed XML descendants and grandchildren, including explicit XML `MEDIUM` literals. `SetParent()` recomputes their effective strata through the moved subtree.
-- These generic non-fixed propagation rules explain the observed `PARENT` behavior; the probe does not establish an intrinsic persistent dynamic `PARENT` state.
-- Runtime-fixed behavior using `SetFixedFrameStrata(true)` remains unproven.
+- The retail capture recorded `HasFixedFrameStrata() == false` for the tested XML strata literals, including `PARENT`.
+- A direct XML `PARENT` child matched its parent's effective strata in the captured snapshot. That equality does not identify why the values match.
+- The earlier template fixtures both returned `HIGH` under a `LOW` parent but aliased multiple explanations. The updated probe uses distinct base `HIGH`, derived `LOW`, and actual-parent `DIALOG` values.
+- Before/after snapshots around parent `SetFrameStrata()` and `SetParent()` record direct-child and grandchild effective values without establishing an internal propagation mechanism.
+- Runtime-fixed retail behavior using `SetFixedFrameStrata(true)` remains unproven.
 
 ## Button Text Rendering and Three-Slice Issue
 
@@ -68,7 +68,7 @@ Three-slice buttons (ThreeSliceButtonTemplate) define their background as child 
 
 ## Sources
 
-- [FrameStrataProbe](../../../docs/addons/FrameStrataProbe/README.md) — retail XML `PARENT`, parent `SetFrameStrata()` cascade, and `SetParent()` observations
+- [FrameStrataProbe](../../../docs/addons/FrameStrataProbe/README.md) — retail XML `PARENT`, template comparison, and before/after operation observations
 - [widget-system.md](../../widget-system.md) — Frame struct, WidgetType, WidgetRegistry, default children, strata
 - [button-text-rendering.md](../../button-text-rendering.md) — three-slice rendering order problem and fix
 

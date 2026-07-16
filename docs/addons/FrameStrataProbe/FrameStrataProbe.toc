@@ -1,6 +1,6 @@
 ## Interface: 120007
 ## Title: FrameStrataProbe
-## Notes: Captures retail XML PARENT, SetFrameStrata cascade, and SetParent strata behavior
+## Notes: Captures retail XML PARENT and before/after frame strata observations
 ## Author: Alessio
 ## Version: 0.1.0
 ## SavedVariables: FrameStrataProbeDB

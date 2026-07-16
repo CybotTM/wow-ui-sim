@@ -82,7 +82,7 @@ Child frames inside `<Frames>` containers use a parallel enum `FrameElement` wit
 | `intrinsic` | `intrinsic` | `Option<bool>` | Engine intrinsic template (treated like virtual) |
 | `hidden` | `hidden` | `Option<bool>` | Start hidden |
 | `alpha` | `alpha` | `Option<f32>` | Initial alpha |
-| `frameStrata` | `frame_strata` | `Option<String>` | Initial non-fixed strata; `PARENT` copies the parent's effective strata at creation. Later parent `SetFrameStrata()` and `SetParent()` operations propagate effective strata through non-fixed XML subtrees. Runtime-fixed behavior via `SetFixedFrameStrata(true)` remains unproven |
+| `frameStrata` | `frame_strata` | `Option<String>` | Initial strata token. Retail snapshots record effective values and `HasFixedFrameStrata()` before/after selected operations; `GetFrameStrata()` does not expose the original `PARENT` token or the client's internal resolution mechanism |
 | `setAllPoints` | `set_all_points` | `Option<bool>` | Fill parent |
 | `enableMouse` | `enable_mouse` | `Option<bool>` | Accept mouse input |
 | `text` | `text` | `Option<String>` | Button text (localization key or literal) |

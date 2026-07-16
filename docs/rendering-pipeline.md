@@ -271,7 +271,7 @@ All tiers use 4096x4096 backing textures.
 WORLD < BACKGROUND < LOW < MEDIUM < HIGH < DIALOG < FULLSCREEN < FULLSCREEN_DIALOG < TOOLTIP
 ```
 
-The `BLIZZARD` input token is ignored; it does not participate as a drawable sorting tier. XML strata literals remain non-fixed; `PARENT` copies the parent's effective strata at creation rather than becoming a persistent enum value. Parent `SetFrameStrata()` and later `SetParent()` operations propagate effective strata through non-fixed XML frames, which accounts for the observed `PARENT` behavior without requiring intrinsic dynamic tracking. The retail capture does not exercise `SetFixedFrameStrata(true)`, so runtime-fixed behavior remains unproven.
+The `BLIZZARD` input token is ignored; it does not participate as a drawable sorting tier. Retail snapshots record effective XML strata and `HasFixedFrameStrata()` around selected operations. A direct `PARENT` child matched its parent, but `GetFrameStrata()` cannot expose the original XML token or internal resolution mechanism. Runtime-fixed retail behavior remains unproven.
 
 ### DrawLayer (lines 607-638)
 

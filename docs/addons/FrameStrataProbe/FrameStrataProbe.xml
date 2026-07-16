@@ -4,30 +4,65 @@
            inherits="FrameStrataProbeBaseHighTemplate"
            frameStrata="PARENT"
            virtual="true"/>
+    <Frame name="FrameStrataProbeDerivedLowTemplate"
+           inherits="FrameStrataProbeBaseHighTemplate"
+           frameStrata="LOW"
+           virtual="true"/>
 
-    <!-- Group 1: parent SetFrameStrata cascade. -->
-    <Frame name="FrameStrataProbeCascadeParent" parent="UIParent" frameStrata="HIGH" hidden="true"/>
-    <Frame name="FrameStrataProbeCascadeParentChild"
-           parent="FrameStrataProbeCascadeParent"
+    <!-- Group 0: direct PARENT effective result, before any mutations. -->
+    <Frame name="FrameStrataProbeCreationParent" parent="UIParent" frameStrata="DIALOG" hidden="true"/>
+    <Frame name="FrameStrataProbeCreationParentChild"
+           parent="FrameStrataProbeCreationParent"
+           frameStrata="PARENT"
+           hidden="true">
+        <Scripts>
+            <OnLoad>
+                FrameStrataProbeParentChildOnLoad = {
+                    frameStrata = self:GetFrameStrata(),
+                    parentFrameStrata = self:GetParent():GetFrameStrata(),
+                    hasFixedFrameStrata = self:HasFixedFrameStrata(),
+                }
+            </OnLoad>
+        </Scripts>
+    </Frame>
+    <Frame name="FrameStrataProbeCreationLiteralChild"
+           parent="FrameStrataProbeCreationParent"
+           frameStrata="LOW"
+           hidden="true">
+        <Scripts>
+            <OnLoad>
+                FrameStrataProbeLiteralChildOnLoad = {
+                    frameStrata = self:GetFrameStrata(),
+                    parentFrameStrata = self:GetParent():GetFrameStrata(),
+                    hasFixedFrameStrata = self:HasFixedFrameStrata(),
+                }
+            </OnLoad>
+        </Scripts>
+    </Frame>
+
+    <!-- Group 1: values before and after parent SetFrameStrata. -->
+    <Frame name="FrameStrataProbeParentSetParent" parent="UIParent" frameStrata="HIGH" hidden="true"/>
+    <Frame name="FrameStrataProbeParentSetParentChild"
+           parent="FrameStrataProbeParentSetParent"
            frameStrata="PARENT"
            hidden="true"/>
-    <Frame name="FrameStrataProbeCascadeDefaultChild"
-           parent="FrameStrataProbeCascadeParent"
+    <Frame name="FrameStrataProbeParentSetDefaultChild"
+           parent="FrameStrataProbeParentSetParent"
            hidden="true"/>
-    <Frame name="FrameStrataProbeCascadeFixedChild"
-           parent="FrameStrataProbeCascadeParent"
+    <Frame name="FrameStrataProbeParentSetExplicitChild"
+           parent="FrameStrataProbeParentSetParent"
            frameStrata="MEDIUM"
            hidden="true"/>
-    <Frame name="FrameStrataProbeCascadeParentGrandchild"
-           parent="FrameStrataProbeCascadeParentChild"
+    <Frame name="FrameStrataProbeParentSetParentGrandchild"
+           parent="FrameStrataProbeParentSetParentChild"
            frameStrata="PARENT"
            hidden="true"/>
-    <Frame name="FrameStrataProbeCascadeFixedGrandchild"
-           parent="FrameStrataProbeCascadeDefaultChild"
+    <Frame name="FrameStrataProbeParentSetExplicitGrandchild"
+           parent="FrameStrataProbeParentSetDefaultChild"
            frameStrata="MEDIUM"
            hidden="true"/>
 
-    <!-- Group 2: SetParent behavior, isolated from the cascade group. -->
+    <!-- Group 2: values before and after SetParent, using separate fixtures. -->
     <Frame name="FrameStrataProbeReparentHigh" parent="UIParent" frameStrata="HIGH" hidden="true"/>
     <Frame name="FrameStrataProbeReparentLow" parent="UIParent" frameStrata="LOW" hidden="true"/>
     <Frame name="FrameStrataProbeReparentParentChild"
@@ -37,7 +72,7 @@
     <Frame name="FrameStrataProbeReparentDefaultChild"
            parent="FrameStrataProbeReparentHigh"
            hidden="true"/>
-    <Frame name="FrameStrataProbeReparentFixedChild"
+    <Frame name="FrameStrataProbeReparentExplicitChild"
            parent="FrameStrataProbeReparentHigh"
            frameStrata="MEDIUM"
            hidden="true"/>
@@ -45,20 +80,28 @@
            parent="FrameStrataProbeReparentParentChild"
            frameStrata="PARENT"
            hidden="true"/>
-    <Frame name="FrameStrataProbeReparentFixedGrandchild"
+    <Frame name="FrameStrataProbeReparentExplicitGrandchild"
            parent="FrameStrataProbeReparentDefaultChild"
            frameStrata="MEDIUM"
            hidden="true"/>
 
-    <!-- Base-only control must remain HIGH under the LOW parent. -->
+    <!-- Three distinct values: base HIGH, derived LOW, actual parent DIALOG. -->
+    <Frame name="FrameStrataProbeTemplateActualParent"
+           parent="UIParent"
+           frameStrata="DIALOG"
+           hidden="true"/>
     <Frame name="FrameStrataProbeTemplateBase"
-           parent="FrameStrataProbeReparentLow"
+           parent="FrameStrataProbeTemplateActualParent"
            inherits="FrameStrataProbeBaseHighTemplate"
            hidden="true"/>
 
-    <!-- Actual parent is LOW; retail keeps the base template's HIGH instead of resolving derived PARENT to LOW. -->
+    <!-- Compare the PARENT template result with the derived literal control. -->
     <Frame name="FrameStrataProbeTemplateParent"
-           parent="FrameStrataProbeReparentLow"
+           parent="FrameStrataProbeTemplateActualParent"
            inherits="FrameStrataProbeDerivedParentTemplate"
+           hidden="true"/>
+    <Frame name="FrameStrataProbeTemplateDerivedLow"
+           parent="FrameStrataProbeTemplateActualParent"
+           inherits="FrameStrataProbeDerivedLowTemplate"
            hidden="true"/>
 </Ui>
