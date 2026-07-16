@@ -87,32 +87,11 @@ pub(super) fn set_frame_field(state: &mut LuaState, field_name: &str) -> LuaResu
     Ok(0)
 }
 
-/// Get a named field from the frame (arg 1)'s fields table; push result, return 1.
+/// Get a named field from the frame table in arg 1; push result, return 1.
 pub(super) fn get_frame_field(state: &mut LuaState, field_name: &str) -> LuaResult<u32> {
     let frame: Val = crate::lua_bridge::FromStack::from_stack(state, 1)?;
-    if let Some(id) = extract_frame_id(state, frame) {
-        let fields_registry = registry_get(state, "__rilua_frame_fields");
-        if let Val::Table(reg_ref) = fields_registry {
-            let frame_fields = state
-                .gc
-                .tables
-                .get(reg_ref)
-                .map(|t| t.get_int(id as i64))
-                .unwrap_or(Val::Nil);
-            if let Val::Table(ff_ref) = frame_fields {
-                let key_ref = state.gc.intern_string(field_name.as_bytes());
-                let val = state
-                    .gc
-                    .tables
-                    .get(ff_ref)
-                    .map(|t| t.get_str(key_ref, &state.gc.string_arena))
-                    .unwrap_or(Val::Nil);
-                state.push(val);
-                return Ok(1);
-            }
-        }
-    }
-    state.push(Val::Nil);
+    let value = table_get(state, frame, field_name);
+    state.push(value);
     Ok(1)
 }
 
