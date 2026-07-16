@@ -4,7 +4,7 @@ Chronological record of wiki operations.
 
 ## [2026-07-16] update | FrameStrata before/after observations
 
-Updated FrameStrata documentation from `/tmp/FrameStrataProbe-retail.lua` (retail 12.0.7 build 68453, captured July 15, 2026). The `BLIZZARD` input token is ignored rather than modeled as a drawable tier. The capture records effective XML strata, fixed-state flags, and before/after values around selected operations. A direct `PARENT` child matched its parent, while the original template fixtures aliased multiple explanations. The updated probe adds XML `OnLoad` capture and distinct `HIGH`, `LOW`, and `DIALOG` comparison values. Documentation avoids claims about the client's internal resolution or propagation mechanism.
+Updated FrameStrata documentation from `/tmp/FrameStrataProbe-parent-retail.lua` (retail 12.0.7 build 68453, captured `2026-07-16T01:21:08`). During XML `OnLoad`, the actual parent and direct `PARENT` child both reported `DIALOG`, while the literal sibling reported `LOW`. Under an actual `DIALOG` parent, base `HIGH` reported `HIGH`, derived literal `LOW` reported `LOW`, and derived `PARENT` reported `HIGH`. After the tested parent-strata and reparent operations, every tested non-fixed child and grandchild reported `LOW`, including explicit XML `MEDIUM` fixtures. Documentation avoids claims about the client's internal resolution or propagation mechanism; the capture did not test `BLIZZARD`.
 
 ## [2026-07-14] investigation | 12.0.7 widget compatibility matrix
 

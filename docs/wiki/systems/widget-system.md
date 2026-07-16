@@ -49,9 +49,9 @@ pub struct WidgetRegistry {
 ## Strata Before/After Observations
 
 - The retail capture recorded `HasFixedFrameStrata() == false` for the tested XML strata literals, including `PARENT`.
-- A direct XML `PARENT` child matched its parent's effective strata in the captured snapshot. That equality does not identify why the values match.
-- The earlier template fixtures both returned `HIGH` under a `LOW` parent but aliased multiple explanations. The updated probe uses distinct base `HIGH`, derived `LOW`, and actual-parent `DIALOG` values.
-- Before/after snapshots around parent `SetFrameStrata()` and `SetParent()` record direct-child and grandchild effective values without establishing an internal propagation mechanism.
+- During XML `OnLoad`, a direct `PARENT` child and its actual parent both reported `DIALOG`; an explicit literal sibling reported `LOW`. That equality does not identify why values match.
+- Under an actual `DIALOG` parent, the base `HIGH` instance reported `HIGH`, the derived literal `LOW` instance reported `LOW`, and the derived `PARENT` instance reported `HIGH`.
+- After parent `SetFrameStrata("LOW")` and, separately, reparenting to a `LOW` parent, every tested non-fixed direct child and grandchild reported `LOW`, including explicit XML `MEDIUM` fixtures. These snapshots do not establish an internal propagation mechanism.
 - Runtime-fixed retail behavior using `SetFixedFrameStrata(true)` remains unproven.
 
 ## Button Text Rendering and Three-Slice Issue

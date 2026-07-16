@@ -271,7 +271,7 @@ All tiers use 4096x4096 backing textures.
 WORLD < BACKGROUND < LOW < MEDIUM < HIGH < DIALOG < FULLSCREEN < FULLSCREEN_DIALOG < TOOLTIP
 ```
 
-The `BLIZZARD` input token is ignored; it does not participate as a drawable sorting tier. Retail snapshots record effective XML strata and `HasFixedFrameStrata()` around selected operations. A direct `PARENT` child matched its parent, but `GetFrameStrata()` cannot expose the original XML token or internal resolution mechanism. Runtime-fixed retail behavior remains unproven.
+The simulator ignores the `BLIZZARD` input token; it does not participate as a drawable sorting tier. The FrameStrata retail capture did not test `BLIZZARD`. During XML `OnLoad`, a direct `PARENT` child and its actual parent both reported `DIALOG`, while an explicit literal sibling reported `LOW`. `GetFrameStrata()` cannot expose the original XML token or internal resolution mechanism. Runtime-fixed retail behavior remains unproven.
 
 ### DrawLayer (lines 607-638)
 

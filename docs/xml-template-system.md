@@ -82,7 +82,7 @@ Child frames inside `<Frames>` containers use a parallel enum `FrameElement` wit
 | `intrinsic` | `intrinsic` | `Option<bool>` | Engine intrinsic template (treated like virtual) |
 | `hidden` | `hidden` | `Option<bool>` | Start hidden |
 | `alpha` | `alpha` | `Option<f32>` | Initial alpha |
-| `frameStrata` | `frame_strata` | `Option<String>` | Initial strata token. Retail snapshots record effective values and `HasFixedFrameStrata()` before/after selected operations; `GetFrameStrata()` does not expose the original `PARENT` token or the client's internal resolution mechanism |
+| `frameStrata` | `frame_strata` | `Option<String>` | Initial strata token. In the retail capture, base `HIGH` + derived literal `LOW` reported `LOW`, while base `HIGH` + derived `PARENT` reported `HIGH` under an actual `DIALOG` parent. All reported non-fixed state; `GetFrameStrata()` does not expose the original `PARENT` token or the client's internal resolution mechanism |
 | `setAllPoints` | `set_all_points` | `Option<bool>` | Fill parent |
 | `enableMouse` | `enable_mouse` | `Option<bool>` | Accept mouse input |
 | `text` | `text` | `Option<String>` | Button text (localization key or literal) |

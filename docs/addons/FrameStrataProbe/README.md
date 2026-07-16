@@ -26,47 +26,37 @@ The addon prints only a capture confirmation at `PLAYER_LOGIN`; the observations
 
 Each frame snapshot contains `name`, `parentName`, and `frameStrata`; `hasFixedFrameStrata` is included when the API returns a value. The top-level record also includes `addonName`, `build`, and `capturedAt`.
 
-## Results to compare
+## Retail capture
+
+Captured on retail `12.0.7` build `68453` at `2026-07-16T01:21:08`.
 
 ### Direct XML `PARENT` effective result
 
-Inspect `creationOnLoad` first:
+During the XML children's `OnLoad`:
 
-- `parentChild.parentFrameStrata` records the actual parent's value during the `PARENT` child's `OnLoad`.
-- `parentChild.frameStrata` records the `PARENT` child's effective value during `OnLoad`.
-- `literalChild.parentFrameStrata` and `literalChild.frameStrata` provide the explicit `LOW` control.
-- `creationAtPlayerLogin` records the same frames again before this probe performs any mutations.
-- No result can return the raw string `PARENT`; `GetFrameStrata()` exposes only effective strata. Equality with the parent does not identify why the values match.
-- Even a matching creation-time result would not establish a persistent symbolic `PARENT` binding; later before/after observations are recorded separately below.
+- The actual parent reported `DIALOG`.
+- The `PARENT` child reported `DIALOG`.
+- The explicit literal child reported `LOW` while its parent reported `DIALOG`.
+- All tested frames reported `HasFixedFrameStrata() == false`.
 
-### Template control values
+`creationAtPlayerLogin` reported the same effective values before this probe performed any mutations. `GetFrameStrata()` did not return the raw string `PARENT`; equality with the parent does not identify why the values match or establish a persistent symbolic binding.
 
-The fixtures expose three distinct comparison values: `HIGH`, `LOW`, and `DIALOG`.
+### Template comparison values
 
-- `templateBase` declares base `HIGH`.
-- `templateDerivedLow` declares base `HIGH` plus derived literal `LOW`. Compare its effective result for equality with `HIGH`, `LOW`, and `DIALOG`.
-- `templateParent` declares base `HIGH` plus derived `PARENT`. Compare its effective result for equality with `templateBase`, `templateDerivedLow`, and `templateActualParent`. The probe records equality only; it does not expose the client's internal template-resolution mechanism.
+- The actual parent reported `DIALOG`.
+- The base `HIGH` template instance reported `HIGH`.
+- The base `HIGH` plus derived literal `LOW` template instance reported `LOW`.
+- The base `HIGH` plus derived `PARENT` template instance reported `HIGH`.
+- All tested template instances reported `HasFixedFrameStrata() == false`.
 
-The XML probe does not call `SetFixedFrameStrata(true)`; runtime-fixed behavior remains unproven.
+These values distinguish the observed results but do not expose the client's internal template-resolution mechanism.
 
 ### Before and after parent `SetFrameStrata()`
 
-Compare `parentSetBefore` with `parentSetAfterLow`:
-
-- Does the `PARENT` child become `LOW`?
-- Does the default child become `LOW`?
-- Does the explicit XML `MEDIUM` child also become `LOW`?
-- Do `parentGrandchild` and the explicit XML `MEDIUM` `explicitGrandchild` also become `LOW`?
-- Do any `hasFixedFrameStrata` flags change?
+Before the operation, the parent, default child, `PARENT` child, and its grandchild reported `HIGH`; the explicit XML child and grandchild reported `MEDIUM`. After the parent was set to `LOW`, every tested frame reported `LOW`, including both explicit XML `MEDIUM` frames. All reported `HasFixedFrameStrata() == false`.
 
 ### Before and after `SetParent()`
 
-Compare `reparentBefore` with `reparentAfterSetParentLow`:
+Before reparenting, the tested children and grandchildren reported either their fixture's `HIGH` or explicit XML `MEDIUM` values. After moving the direct children to the `LOW` parent, every moved child and tested descendant reported `LOW`, including both explicit XML `MEDIUM` frames. All reported `HasFixedFrameStrata() == false`.
 
-- Does the `PARENT` child become `LOW`?
-- Does the default child become `LOW`?
-- Is the explicit XML `MEDIUM` child's later value `MEDIUM`, `LOW`, or something else?
-- What happens to `parentGrandchild` and the explicit XML `MEDIUM` `explicitGrandchild` when their ancestor is reparented?
-- Do any `hasFixedFrameStrata` flags change?
-
-Use each snapshot's `hasFixedFrameStrata` value to determine fixed state. Compare direct-child and grandchild values before and after each operation without inferring an internal propagation mechanism.
+The XML probe does not call `SetFixedFrameStrata(true)`; runtime-fixed behavior remains unproven. The snapshots establish effective before/after values, not an internal propagation mechanism.

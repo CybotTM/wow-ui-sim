@@ -18,14 +18,28 @@ pub fn apply_xml_frame_strata(
 }
 
 fn resolve_frame_strata(frame: &FrameXml, inherits: &str) -> Option<String> {
-    frame.frame_strata.clone().or_else(|| {
-        if inherits.is_empty() {
-            return None;
+    let inherited = inherited_frame_strata(inherits);
+    match frame.frame_strata.as_deref() {
+        Some(strata) if strata.eq_ignore_ascii_case("PARENT") && inherited.is_some() => inherited,
+        Some(strata) if strata.eq_ignore_ascii_case("PARENT") => Some(strata.to_owned()),
+        Some(strata) if FrameStrata::from_str(strata).is_some() => Some(strata.to_owned()),
+        Some(_) | None => inherited,
+    }
+}
+
+fn inherited_frame_strata(inherits: &str) -> Option<String> {
+    let mut resolved = None;
+    for entry in &*crate::xml::get_template_chain(inherits) {
+        let Some(strata) = entry.frame.frame_strata.as_deref() else {
+            continue;
+        };
+        if strata.eq_ignore_ascii_case("PARENT") {
+            resolved.get_or_insert_with(|| strata.to_owned());
+        } else if FrameStrata::from_str(strata).is_some() {
+            resolved = Some(strata.to_owned());
         }
-        crate::xml::get_template_chain(inherits)
-            .iter()
-            .find_map(|entry| entry.frame.frame_strata.clone())
-    })
+    }
+    resolved
 }
 
 /// Resolve and apply frame level from template chain + instance XML.

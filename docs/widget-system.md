@@ -192,9 +192,9 @@ The `BLIZZARD` input token is ignored; it is not a separate drawable strata tier
 
 - Child strata/level inheritance is represented by the `has_fixed_frame_strata` / `has_fixed_frame_level` flags.
 - The retail capture recorded XML strata literals, including `PARENT`, with `HasFixedFrameStrata() == false`.
-- A direct XML `PARENT` child had the same effective strata as its parent in the captured pre-mutation snapshot. `GetFrameStrata()` cannot expose the original XML token or why the values match.
-- The prior template fixtures both returned `HIGH` under a `LOW` parent, but did not distinguish template precedence from special `PARENT` handling. The updated probe provides distinct `HIGH`, `LOW`, and `DIALOG` comparison values.
-- Before/after snapshots record effective changes around parent `SetFrameStrata()` and `SetParent()` operations without establishing an internal propagation mechanism.
+- During XML `OnLoad`, a direct `PARENT` child and its actual parent both reported `DIALOG`; an explicit literal sibling reported `LOW`. `GetFrameStrata()` cannot expose the original XML token or why values match.
+- With an actual `DIALOG` parent, the base `HIGH` instance reported `HIGH`, the derived literal `LOW` instance reported `LOW`, and the derived `PARENT` instance reported `HIGH`.
+- After parent `SetFrameStrata("LOW")` and, separately, reparenting to a `LOW` parent, every tested non-fixed direct child and grandchild reported `LOW`, including explicit XML `MEDIUM` fixtures. These snapshots do not establish the client's internal propagation mechanism.
 - Retail behavior for frames explicitly fixed at runtime with `SetFixedFrameStrata(true)` remains unproven.
 
 ---
@@ -257,7 +257,7 @@ OnEvent, OnUpdate, OnShow, OnHide, OnClick, OnEnter, OnLeave, OnMouseDown, OnMou
 ### SetParent
 **File:** `src/lua_api/frame/methods/methods_hierarchy.rs:31-40`
 
-Removes from old parent's children list and sets the new parent. Retail capture shows `SetParent()` recomputes effective strata through the tested non-fixed XML descendants and grandchildren, including explicit XML `MEDIUM` literals. Behavior for frames made runtime-fixed with `SetFixedFrameStrata(true)` remains unproven.
+Removes from old parent's children list and sets the new parent. In the retail capture, every tested non-fixed child and grandchild reported `LOW` after its direct ancestor was moved from a `HIGH` parent to a `LOW` parent, including explicit XML `MEDIUM` fixtures. Behavior for frames made runtime-fixed with `SetFixedFrameStrata(true)` remains unproven.
 
 ### Named Children (children_keys)
 

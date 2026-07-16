@@ -53,13 +53,13 @@ fn test_create_frame_from_xml_frame_strata() {
 }
 
 #[test]
-fn test_xml_parent_frame_strata_tracks_parent_effective_strata() {
+fn test_xml_parent_frame_strata_matches_dialog_parent_and_later_change() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
 
     let xml = r#"
         <Ui>
-            <Frame name="ParentStrataHost" parent="UIParent" frameStrata="HIGH">
+            <Frame name="ParentStrataHost" parent="UIParent" frameStrata="DIALOG">
                 <Frames>
                     <Frame name="ParentStrataChild" frameStrata="PARENT"/>
                 </Frames>
@@ -85,13 +85,13 @@ fn test_xml_parent_frame_strata_tracks_parent_effective_strata() {
         .eval(
             r#"
             local initial = ParentStrataChild:GetFrameStrata()
-            ParentStrataHost:SetFrameStrata("DIALOG")
+            ParentStrataHost:SetFrameStrata("LOW")
             return initial, ParentStrataChild:GetFrameStrata(), ParentStrataChild:HasFixedFrameStrata()
             "#,
         )
         .unwrap();
-    assert_eq!(initial, "HIGH");
-    assert_eq!(updated, "DIALOG");
+    assert_eq!(initial, "DIALOG");
+    assert_eq!(updated, "LOW");
     assert!(!fixed);
 }
 
@@ -128,7 +128,7 @@ fn test_base_template_literal_precedes_derived_parent_frame_strata() {
     let instances = parse_xml(
         r#"
         <Ui>
-            <Frame name="DerivedParentStrataHost" parent="UIParent" frameStrata="LOW"/>
+            <Frame name="DerivedParentStrataHost" parent="UIParent" frameStrata="DIALOG"/>
             <Frame name="DerivedParentStrataChild" parent="DerivedParentStrataHost"
                    inherits="DerivedParentStrataTemplate"/>
         </Ui>
@@ -158,6 +158,132 @@ fn test_base_template_literal_precedes_derived_parent_frame_strata() {
         .unwrap();
     assert_eq!(strata, "HIGH");
     assert!(!fixed);
+}
+
+#[test]
+fn test_derived_template_literal_overrides_base_frame_strata() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    let templates = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="BaseHighStrataTemplateForLiteral" virtual="true" frameStrata="HIGH"/>
+            <Frame name="DerivedLowStrataTemplate" virtual="true"
+                   inherits="BaseHighStrataTemplateForLiteral" frameStrata="LOW"/>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    for element in &templates.elements {
+        if let XmlElement::Frame(frame) = element {
+            create_frame_from_xml(
+                &env.loader_env(),
+                frame,
+                "Frame",
+                None,
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+    }
+
+    let instances = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="DerivedLowStrataHost" parent="UIParent" frameStrata="DIALOG"/>
+            <Frame name="DerivedLowStrataChild" parent="DerivedLowStrataHost"
+                   inherits="DerivedLowStrataTemplate"/>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    for element in &instances.elements {
+        if let XmlElement::Frame(frame) = element {
+            create_frame_from_xml(
+                &env.loader_env(),
+                frame,
+                "Frame",
+                None,
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+    }
+
+    let (strata, fixed): (String, bool) = env
+        .eval(
+            "return DerivedLowStrataChild:GetFrameStrata(), \
+             DerivedLowStrataChild:HasFixedFrameStrata()",
+        )
+        .unwrap();
+    assert_eq!(strata, "LOW");
+    assert!(!fixed);
+}
+
+#[test]
+fn test_ignored_template_strata_does_not_erase_base_literal() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    let templates = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="BaseHighStrataTemplateForIgnored" virtual="true" frameStrata="HIGH"/>
+            <Frame name="DerivedIgnoredStrataTemplate" virtual="true"
+                   inherits="BaseHighStrataTemplateForIgnored" frameStrata="BLIZZARD"/>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    for element in &templates.elements {
+        if let XmlElement::Frame(frame) = element {
+            create_frame_from_xml(
+                &env.loader_env(),
+                frame,
+                "Frame",
+                None,
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+    }
+
+    let instances = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="DerivedIgnoredStrataHost" parent="UIParent" frameStrata="DIALOG"/>
+            <Frame name="DerivedIgnoredStrataChild" parent="DerivedIgnoredStrataHost"
+                   inherits="DerivedIgnoredStrataTemplate"/>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    for element in &instances.elements {
+        if let XmlElement::Frame(frame) = element {
+            create_frame_from_xml(
+                &env.loader_env(),
+                frame,
+                "Frame",
+                None,
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+    }
+
+    let strata: String = env
+        .eval("return DerivedIgnoredStrataChild:GetFrameStrata()")
+        .unwrap();
+    assert_eq!(strata, "HIGH");
 }
 
 #[test]
