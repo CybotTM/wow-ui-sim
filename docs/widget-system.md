@@ -186,11 +186,15 @@ Sets TOPLEFT and BOTTOMRIGHT anchors to fill parent (equivalent to SetAllPoints)
 World(0) < Background(1) < Low(2) < Medium(3) < High(4) < Dialog(5) < Fullscreen(6) < FullscreenDialog(7) < Tooltip(8)
 ```
 
+The `BLIZZARD` input token is ignored; it is not a separate drawable strata tier.
+
 ### Inheritance
 
-- Child inherits `parent.frame_strata` if `has_fixed_frame_strata = false`
-- Child inherits `parent.frame_level + 1` if `has_fixed_frame_level = false`
-- `SetFrameStrata()` marks as fixed, preventing further inheritance
+- Child strata/level inheritance is represented by the `has_fixed_frame_strata` / `has_fixed_frame_level` flags.
+- XML `frameStrata` literals remain non-fixed. `PARENT` is a creation directive that copies the parent's current effective strata rather than becoming a persistent enum value.
+- In a base-to-derived template chain, the first strata literal wins: a base `HIGH` remains `HIGH` when a derived template declares `PARENT`.
+- Retail probing proves that parent `SetFrameStrata()` recursively updates non-fixed XML descendants and that `SetParent()` recomputes their effective strata. These generic propagation rules explain the observed `PARENT` behavior without requiring a persistent dynamic state.
+- Behavior for frames explicitly fixed at runtime with `SetFixedFrameStrata(true)` remains unproven.
 
 ---
 
@@ -252,7 +256,7 @@ OnEvent, OnUpdate, OnShow, OnHide, OnClick, OnEnter, OnLeave, OnMouseDown, OnMou
 ### SetParent
 **File:** `src/lua_api/frame/methods/methods_hierarchy.rs:31-40`
 
-Removes from old parent's children list, sets new parent, re-inherits strata/level if not fixed.
+Removes from old parent's children list and sets the new parent. Retail capture shows `SetParent()` recomputes effective strata through the tested non-fixed XML descendants and grandchildren, including explicit XML `MEDIUM` literals. Behavior for frames made runtime-fixed with `SetFixedFrameStrata(true)` remains unproven.
 
 ### Named Children (children_keys)
 

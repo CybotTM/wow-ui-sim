@@ -56,7 +56,7 @@
            inherits="FrameStrataProbeBaseHighTemplate"
            hidden="true"/>
 
-    <!-- Derived PARENT must override the base template's HIGH literal. -->
+    <!-- Actual parent is LOW; retail keeps the base template's HIGH instead of resolving derived PARENT to LOW. -->
     <Frame name="FrameStrataProbeTemplateParent"
            parent="FrameStrataProbeReparentLow"
            inherits="FrameStrataProbeDerivedParentTemplate"

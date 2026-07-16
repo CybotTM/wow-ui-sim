@@ -68,7 +68,7 @@ pub struct Frame {
     pub uses_parent_level: bool,
     /// Frame strata (major draw order).
     pub frame_strata: FrameStrata,
-    /// Whether frame strata was explicitly set (not inherited from parent).
+    /// Whether automatic parent-strata propagation is blocked for this frame.
     pub has_fixed_frame_strata: bool,
     /// Whether this frame locally flattens descendant render layers.
     pub flattens_render_layers: bool,

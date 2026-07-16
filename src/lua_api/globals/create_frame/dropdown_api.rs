@@ -513,10 +513,12 @@ pub fn ui_dropdown_menu_set_anchor(state: &mut LuaState) -> LuaResult<u32> {
 pub fn ui_dropdown_menu_set_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
     let frame: Val = FromStack::from_stack(state, 1)?;
     let strata: String = FromStack::from_stack(state, 2)?;
-    if let Some(id) = extract_frame_id(state, frame) {
+    if let Some(id) = extract_frame_id(state, frame)
+        && let Some(strata) = parse_frame_strata(&strata)
+    {
         let mut sim = borrow_state_mut(state)?;
         if let Some(f) = sim.widgets.get_mut_visual(id) {
-            f.frame_strata = parse_frame_strata(&strata);
+            f.frame_strata = strata;
         }
     }
     Ok(0)

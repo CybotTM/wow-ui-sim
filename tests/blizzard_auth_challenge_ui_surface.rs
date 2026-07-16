@@ -67,11 +67,12 @@ fn blizzard_auth_challenge_ui_publishes_expected_frame_tree() {
             "AuthChallengeFrame must exist as a named frame"
         );
 
-        let parent_and_flags: (bool, bool, bool) = env
+        let parent_and_flags: (bool, bool, bool, bool) = env
             .eval(
                 "local f = _G['AuthChallengeFrame']; \
                  return f:GetParent() == UIParent, \
-                        f:GetFrameStrata() == 'BLIZZARD', \
+                        f:GetFrameStrata() == UIParent:GetFrameStrata(), \
+                        not f:HasFixedFrameStrata(), \
                         not f:IsShown()",
             )
             .expect("AuthChallengeFrame parent/flag probe should succeed");
@@ -81,9 +82,13 @@ fn blizzard_auth_challenge_ui_publishes_expected_frame_tree() {
         );
         assert!(
             parent_and_flags.1,
-            "AuthChallengeFrame must use BLIZZARD frame strata"
+            "AuthChallengeFrame must inherit UIParent's effective strata"
         );
-        assert!(parent_and_flags.2, "AuthChallengeFrame must start hidden");
+        assert!(
+            parent_and_flags.2,
+            "AuthChallengeFrame BLIZZARD token must not fix its strata"
+        );
+        assert!(parent_and_flags.3, "AuthChallengeFrame must start hidden");
 
         let keyboard_and_mouse: (bool, bool) = env
             .eval(

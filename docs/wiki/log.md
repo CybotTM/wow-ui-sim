@@ -1,5 +1,9 @@
 # Wiki Log
 
+## [2026-07-16] update | FrameStrata propagation evidence
+
+Updated FrameStrata documentation from `/tmp/FrameStrataProbe-retail.lua` (retail 12.0.7 build 68453, captured 2026-07-15). The `BLIZZARD` input token is ignored rather than modeled as a drawable tier. XML strata literals remain non-fixed; `PARENT` copies the parent's effective strata during creation rather than becoming a persistent enum value. Both template controls are `HIGH` under a `LOW` parent, proving the first template strata literal wins over a derived `PARENT` declaration. Parent `SetFrameStrata()` and `SetParent()` propagate effective strata through the tested non-fixed XML descendants and grandchildren, including explicit XML `MEDIUM` literals. Runtime-fixed behavior via `SetFixedFrameStrata(true)` remains unproven.
+
 ## [2026-07-14] investigation | 12.0.7 widget compatibility matrix
 
 Focused 12.0.7 proof verifies six retained Minimap texture setters, four Button methods, four ScrollFrame methods, and five font-bearing `SetFont` methods. `ModelSceneActorBase:GetModelUnitGUID` is absent under the intentional permanent no-3D scope and remains an explicit exception candidate; no approval requested yet.

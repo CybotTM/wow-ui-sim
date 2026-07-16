@@ -31,10 +31,14 @@ fn test_create_frame_from_xml_frame_strata() {
         .unwrap();
     }
 
-    let strata: String = env
-        .eval("return DialogStrataFrame:GetFrameStrata()")
+    let (strata, fixed): (String, bool) = env
+        .eval(
+            "return DialogStrataFrame:GetFrameStrata(), \
+             DialogStrataFrame:HasFixedFrameStrata()",
+        )
         .unwrap();
     assert_eq!(strata, "DIALOG");
+    assert!(!fixed, "XML literal frameStrata remains non-fixed");
 
     // Children should inherit the parent's strata
     let child_strata: String = env
@@ -46,6 +50,348 @@ fn test_create_frame_from_xml_frame_strata() {
         )
         .unwrap();
     assert_eq!(child_strata, "DIALOG");
+}
+
+#[test]
+fn test_xml_parent_frame_strata_tracks_parent_effective_strata() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    let xml = r#"
+        <Ui>
+            <Frame name="ParentStrataHost" parent="UIParent" frameStrata="HIGH">
+                <Frames>
+                    <Frame name="ParentStrataChild" frameStrata="PARENT"/>
+                </Frames>
+            </Frame>
+        </Ui>
+    "#;
+
+    let ui = parse_xml(xml).unwrap();
+    if let XmlElement::Frame(frame) = &ui.elements[0] {
+        create_frame_from_xml(
+            &env.loader_env(),
+            frame,
+            "Frame",
+            None,
+            None,
+            None,
+            &mut LoadTiming::default(),
+        )
+        .unwrap();
+    }
+
+    let (initial, updated, fixed): (String, String, bool) = env
+        .eval(
+            r#"
+            local initial = ParentStrataChild:GetFrameStrata()
+            ParentStrataHost:SetFrameStrata("DIALOG")
+            return initial, ParentStrataChild:GetFrameStrata(), ParentStrataChild:HasFixedFrameStrata()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(initial, "HIGH");
+    assert_eq!(updated, "DIALOG");
+    assert!(!fixed);
+}
+
+#[test]
+fn test_base_template_literal_precedes_derived_parent_frame_strata() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    let templates = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="BaseHighStrataTemplate" virtual="true" frameStrata="HIGH"/>
+            <Frame name="DerivedParentStrataTemplate" virtual="true"
+                   inherits="BaseHighStrataTemplate" frameStrata="PARENT"/>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    for element in &templates.elements {
+        if let XmlElement::Frame(frame) = element {
+            create_frame_from_xml(
+                &env.loader_env(),
+                frame,
+                "Frame",
+                None,
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+    }
+
+    let instances = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="DerivedParentStrataHost" parent="UIParent" frameStrata="LOW"/>
+            <Frame name="DerivedParentStrataChild" parent="DerivedParentStrataHost"
+                   inherits="DerivedParentStrataTemplate"/>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    for element in &instances.elements {
+        if let XmlElement::Frame(frame) = element {
+            create_frame_from_xml(
+                &env.loader_env(),
+                frame,
+                "Frame",
+                None,
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+    }
+
+    let (strata, fixed): (String, bool) = env
+        .eval(
+            "return DerivedParentStrataChild:GetFrameStrata(), \
+             DerivedParentStrataChild:HasFixedFrameStrata()",
+        )
+        .unwrap();
+    assert_eq!(strata, "HIGH");
+    assert!(!fixed);
+}
+
+#[test]
+fn test_xml_parent_frame_strata_overrides_fixed_widget_default() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    let host_xml = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="ParentStrataTooltipHost" parent="UIParent" frameStrata="HIGH"/>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    if let XmlElement::Frame(frame) = &host_xml.elements[0] {
+        create_frame_from_xml(
+            &env.loader_env(),
+            frame,
+            "Frame",
+            None,
+            None,
+            None,
+            &mut LoadTiming::default(),
+        )
+        .unwrap();
+    }
+
+    let tooltip_xml = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="ParentStrataTooltip" parent="ParentStrataTooltipHost" frameStrata="PARENT"/>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    if let XmlElement::Frame(frame) = &tooltip_xml.elements[0] {
+        create_frame_from_xml(
+            &env.loader_env(),
+            frame,
+            "GameTooltip",
+            None,
+            None,
+            None,
+            &mut LoadTiming::default(),
+        )
+        .unwrap();
+    }
+
+    let (initial, updated, fixed): (String, String, bool) = env
+        .eval(
+            r#"
+            local initial = ParentStrataTooltip:GetFrameStrata()
+            ParentStrataTooltipHost:SetFrameStrata("DIALOG")
+            return initial, ParentStrataTooltip:GetFrameStrata(), ParentStrataTooltip:HasFixedFrameStrata()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(initial, "HIGH");
+    assert_eq!(updated, "DIALOG");
+    assert!(!fixed);
+}
+
+#[test]
+fn test_xml_blizzard_frame_strata_is_ignored() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    let xml = r#"
+        <Ui>
+            <Frame name="BlizzardStrataHost" parent="UIParent" frameStrata="HIGH">
+                <Frames>
+                    <Frame name="BlizzardStrataChild" frameStrata="BLIZZARD"/>
+                </Frames>
+            </Frame>
+        </Ui>
+    "#;
+
+    let ui = parse_xml(xml).unwrap();
+    if let XmlElement::Frame(frame) = &ui.elements[0] {
+        create_frame_from_xml(
+            &env.loader_env(),
+            frame,
+            "Frame",
+            None,
+            None,
+            None,
+            &mut LoadTiming::default(),
+        )
+        .unwrap();
+    }
+
+    let strata: String = env
+        .eval("return BlizzardStrataChild:GetFrameStrata()")
+        .unwrap();
+    assert_eq!(strata, "HIGH");
+}
+
+#[test]
+fn test_set_frame_strata_blizzard_is_ignored() {
+    let env = WowLuaEnv::new().unwrap();
+    let strata: String = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", nil, UIParent)
+            frame:SetFrameStrata("HIGH")
+            frame:SetFrameStrata("BLIZZARD")
+            return frame:GetFrameStrata()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(strata, "HIGH");
+}
+
+#[test]
+fn test_set_frame_strata_overwrites_xml_literal_child_strata() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    let xml = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="OverwriteChildStrataParent" parent="UIParent" frameStrata="HIGH">
+                <Frames>
+                    <Frame parentKey="ParentChild" frameStrata="PARENT"/>
+                    <Frame parentKey="FixedChild" frameStrata="MEDIUM"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    if let XmlElement::Frame(frame) = &xml.elements[0] {
+        create_frame_from_xml(
+            &env.loader_env(),
+            frame,
+            "Frame",
+            None,
+            None,
+            None,
+            &mut LoadTiming::default(),
+        )
+        .unwrap();
+    }
+
+    let (parent_before, fixed_before, parent_after, fixed_after): (
+        String,
+        String,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local frame = OverwriteChildStrataParent
+            local parentBefore = frame.ParentChild:GetFrameStrata()
+            local fixedBefore = frame.FixedChild:GetFrameStrata()
+            frame:SetFrameStrata("LOW")
+            return parentBefore, fixedBefore,
+                   frame.ParentChild:GetFrameStrata(), frame.FixedChild:GetFrameStrata()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(parent_before, "HIGH");
+    assert_eq!(fixed_before, "MEDIUM");
+    assert_eq!(parent_after, "LOW");
+    assert_eq!(fixed_after, "LOW");
+}
+
+#[test]
+fn test_set_frame_strata_preserves_runtime_fixed_child() {
+    let env = WowLuaEnv::new().unwrap();
+    let (strata, fixed): (String, bool) = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", nil, UIParent)
+            parent:SetFrameStrata("HIGH")
+            local child = CreateFrame("Frame", nil, parent)
+            child:SetFrameStrata("MEDIUM")
+            child:SetFixedFrameStrata(true)
+            parent:SetFrameStrata("LOW")
+            return child:GetFrameStrata(), child:HasFixedFrameStrata()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(strata, "MEDIUM");
+    assert!(fixed);
+}
+
+#[test]
+fn test_set_parent_recomputes_non_fixed_xml_literal_strata() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    let xml = parse_xml(
+        r#"
+        <Ui>
+            <Frame name="ReparentHighStrata" parent="UIParent" frameStrata="HIGH"/>
+            <Frame name="ReparentLowStrata" parent="UIParent" frameStrata="LOW"/>
+            <Frame name="ReparentXmlLiteralChild" parent="ReparentHighStrata" frameStrata="MEDIUM"/>
+        </Ui>
+        "#,
+    )
+    .unwrap();
+    for element in &xml.elements {
+        if let XmlElement::Frame(frame) = element {
+            create_frame_from_xml(
+                &env.loader_env(),
+                frame,
+                "Frame",
+                None,
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+    }
+
+    let (before, after, fixed): (String, String, bool) = env
+        .eval(
+            r#"
+            local child = ReparentXmlLiteralChild
+            local before = child:GetFrameStrata()
+            child:SetParent(ReparentLowStrata)
+            return before, child:GetFrameStrata(), child:HasFixedFrameStrata()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(before, "MEDIUM");
+    assert_eq!(after, "LOW");
+    assert!(!fixed);
 }
 
 #[test]

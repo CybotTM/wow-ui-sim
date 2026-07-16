@@ -309,6 +309,7 @@ fn test_insecure_combat_blocks_protected_strata_level_and_toplevel_mutations() {
             A_Admin.SetInCombat(true)
             forceinsecure()
 
+            frame:SetFrameStrata("BLIZZARD")
             frame:SetFrameStrata("DIALOG")
             frame:SetFrameLevel(40)
             frame:SetFixedFrameLevel(true)

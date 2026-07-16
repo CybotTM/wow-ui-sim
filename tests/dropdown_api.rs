@@ -576,3 +576,18 @@ fn test_set_frame_strata() {
     let strata: String = env.eval("return DropDownList1:GetFrameStrata()").unwrap();
     assert_eq!(strata, "DIALOG");
 }
+
+#[test]
+fn test_set_frame_strata_blizzard_is_ignored() {
+    let env = env();
+    let strata: String = env
+        .eval(
+            r#"
+            UIDropDownMenu_SetFrameStrata(DropDownList1, "HIGH")
+            UIDropDownMenu_SetFrameStrata(DropDownList1, "BLIZZARD")
+            return DropDownList1:GetFrameStrata()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(strata, "HIGH");
+}

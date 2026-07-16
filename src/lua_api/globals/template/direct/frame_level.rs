@@ -13,7 +13,7 @@ pub fn apply_xml_frame_strata(
 ) {
     let strata = resolve_frame_strata(frame, inherits);
     if let Some(ref strata) = strata {
-        set_frame_strata(state, frame_id, strata);
+        apply_resolved_frame_strata(state, frame_id, strata);
     }
 }
 
@@ -88,6 +88,31 @@ fn inherited_frame_level(inherits: &str) -> ResolvedFrameLevel {
     resolved
 }
 
+fn apply_resolved_frame_strata(state: &Rc<RefCell<SimState>>, frame_id: u64, strata: &str) {
+    if strata.eq_ignore_ascii_case("PARENT") {
+        set_frame_strata_to_parent(state, frame_id);
+    } else {
+        set_frame_strata(state, frame_id, strata);
+    }
+}
+
+fn set_frame_strata_to_parent(state: &Rc<RefCell<SimState>>, frame_id: u64) {
+    let mut sim = state.borrow_mut();
+    let parent_strata = sim
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.parent_id)
+        .and_then(|parent_id| sim.widgets.get(parent_id))
+        .map(|parent| parent.frame_strata)
+        .unwrap_or_default();
+    if let Some(frame) = sim.widgets.get_mut_visual(frame_id) {
+        frame.frame_strata = parent_strata;
+        frame.has_fixed_frame_strata = false;
+    }
+    propagate_unfixed_child_strata(&mut sim, frame_id, parent_strata);
+    sim.invalidate_strata_buckets();
+}
+
 /// Set frame strata directly.
 fn set_frame_strata(state: &Rc<RefCell<SimState>>, frame_id: u64, strata_str: &str) {
     let Some(strata) = FrameStrata::from_str(strata_str) else {
@@ -96,7 +121,7 @@ fn set_frame_strata(state: &Rc<RefCell<SimState>>, frame_id: u64, strata_str: &s
     let mut sim = state.borrow_mut();
     if let Some(frame) = sim.widgets.get_mut_visual(frame_id) {
         frame.frame_strata = strata;
-        frame.has_fixed_frame_strata = true;
+        frame.has_fixed_frame_strata = false;
     }
     propagate_unfixed_child_strata(&mut sim, frame_id, strata);
     sim.invalidate_strata_buckets();

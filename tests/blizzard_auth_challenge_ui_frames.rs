@@ -27,7 +27,10 @@ local parentName = parent and parent:GetName() or "nil"
 expect(parent == UIParent,
        "AuthChallengeFrame must be parented to UIParent, got "
        .. parentName .. " (" .. tostring(parent) .. " vs " .. tostring(UIParent) .. ")")
-expect(AuthChallengeFrame:GetFrameStrata() == "BLIZZARD", "AuthChallengeFrame must use BLIZZARD strata")
+expect(AuthChallengeFrame:GetFrameStrata() == UIParent:GetFrameStrata(),
+       "AuthChallengeFrame must inherit UIParent's effective strata")
+expect(not AuthChallengeFrame:HasFixedFrameStrata(),
+       "AuthChallengeFrame BLIZZARD token must not fix its strata")
 expect(not AuthChallengeFrame:IsShown(), "AuthChallengeFrame must start hidden")
 expect(AuthChallengeFrame:IsKeyboardEnabled(), "AuthChallengeFrame must enable keyboard")
 expect(AuthChallengeFrame:IsMouseEnabled(), "AuthChallengeFrame must enable mouse")

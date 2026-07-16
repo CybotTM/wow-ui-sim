@@ -13,18 +13,18 @@ use rilua::{LuaResult, Val};
 pub fn set_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let strata = String::from_stack(state, 2)?;
+    let Some(strata) = crate::widget::FrameStrata::from_str(&strata) else {
+        return Ok(0);
+    };
     if !can_change_protected_state_for(state, id) {
         emit_addon_action_blocked(state, id, "SetFrameStrata");
         return Ok(0);
     }
     let mut sim = borrow_state_mut(state)?;
-    let Some(s) = crate::widget::FrameStrata::from_str(&strata) else {
-        return Ok(0);
-    };
     let mut strata_changed = false;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        strata_changed |= frame.frame_strata != s;
-        frame.frame_strata = s;
+        strata_changed |= frame.frame_strata != strata;
+        frame.frame_strata = strata;
         frame.has_fixed_frame_strata = true;
     }
     let mut queue: Vec<u64> = sim
@@ -39,8 +39,8 @@ pub fn set_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
         if child.has_fixed_frame_strata {
             continue;
         }
-        strata_changed |= child.frame_strata != s;
-        child.frame_strata = s;
+        strata_changed |= child.frame_strata != strata;
+        child.frame_strata = strata;
         queue.extend(child.children.iter().copied());
     }
     if strata_changed {

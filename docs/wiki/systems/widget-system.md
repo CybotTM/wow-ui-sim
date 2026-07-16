@@ -8,7 +8,7 @@ Key field groups:
 
 **Identity & hierarchy** — `id: u64` (atomic counter), `widget_type`, `name: Option<String>`, `parent_id`, `children: Vec<u64>`, `children_keys: HashMap<String, u64>` (named child refs).
 
-**Rendering order** — `frame_strata`, `frame_level: i32`, `alpha: f32`, `scale: f32`, `draw_layer`, `draw_sub_layer`. Children inherit parent strata/level unless `has_fixed_frame_strata`/`has_fixed_frame_level` is set.
+**Rendering order** — `frame_strata`, `frame_level: i32`, `alpha: f32`, `scale: f32`, `draw_layer`, `draw_sub_layer`. The `BLIZZARD` input token is ignored rather than modeled as a drawable strata tier. XML strata literals remain non-fixed. `PARENT` copies the parent's effective strata during XML creation rather than becoming a persistent enum value. Generic propagation from parent `SetFrameStrata()` and later `SetParent()` operations accounts for subsequent effective-strata changes.
 
 **Input** — `mouse_enabled`, `mouse_motion_enabled`, `keyboard_enabled`, `propagate_keyboard_input`, `movable`, `resizable`.
 
@@ -46,6 +46,14 @@ pub struct WidgetRegistry {
 
 **GameTooltip** — Inserts tooltip data into `SimState.tooltips`; sets strata to TOOLTIP.
 
+## Strata Propagation Evidence
+
+- XML `frameStrata` literals, including `PARENT`, report non-fixed state. `PARENT` resolves to the parent's current effective strata during XML creation.
+- Base-to-derived template resolution keeps the first strata literal: a base `HIGH` remains effective when a derived template declares `PARENT`.
+- Parent `SetFrameStrata()` recursively updates the tested non-fixed XML descendants and grandchildren, including explicit XML `MEDIUM` literals. `SetParent()` recomputes their effective strata through the moved subtree.
+- These generic non-fixed propagation rules explain the observed `PARENT` behavior; the probe does not establish an intrinsic persistent dynamic `PARENT` state.
+- Runtime-fixed behavior using `SetFixedFrameStrata(true)` remains unproven.
+
 ## Button Text Rendering and Three-Slice Issue
 
 Button text is emitted twice: once by `build_button_quads()` as part of the non-region frame (renders before all child regions), and once by the child `Text` FontString at Overlay draw layer (renders after Artwork textures).
@@ -60,6 +68,7 @@ Three-slice buttons (ThreeSliceButtonTemplate) define their background as child 
 
 ## Sources
 
+- [FrameStrataProbe](../../../docs/addons/FrameStrataProbe/README.md) — retail XML `PARENT`, parent `SetFrameStrata()` cascade, and `SetParent()` observations
 - [widget-system.md](../../widget-system.md) — Frame struct, WidgetType, WidgetRegistry, default children, strata
 - [button-text-rendering.md](../../button-text-rendering.md) — three-slice rendering order problem and fix
 
