@@ -20,7 +20,7 @@ The `Frame` struct is the fundamental data structure representing any widget in 
 - **`visible: bool`** (default: true) -- Frame's own visibility flag (not parent-dependent)
 - **`frame_strata: FrameStrata`** -- Major draw order (BACKGROUND < LOW < MEDIUM < HIGH < DIALOG < FULLSCREEN < TOOLTIP)
 - **`frame_level: i32`** (default: 0) -- Draw order within strata
-- **`has_fixed_frame_strata: bool`** (default: false) -- Whether strata was explicitly set
+- **`has_fixed_frame_strata: bool`** (default: false) -- Whether automatic parent-strata propagation is blocked
 - **`has_fixed_frame_level: bool`** (default: false) -- Whether level was explicitly set
 - **`alpha: f32`** (default: 1.0) -- Transparency (0.0-1.0)
 - **`scale: f32`** (default: 1.0) -- Scale factor

@@ -1,5 +1,7 @@
 # Wiki Log
 
+Chronological record of wiki operations.
+
 ## [2026-07-16] update | FrameStrata propagation evidence
 
 Updated FrameStrata documentation from `/tmp/FrameStrataProbe-retail.lua` (retail 12.0.7 build 68453, captured 2026-07-15). The `BLIZZARD` input token is ignored rather than modeled as a drawable tier. XML strata literals remain non-fixed; `PARENT` copies the parent's effective strata during creation rather than becoming a persistent enum value. Both template controls are `HIGH` under a `LOW` parent, proving the first template strata literal wins over a derived `PARENT` declaration. Parent `SetFrameStrata()` and `SetParent()` propagate effective strata through the tested non-fixed XML descendants and grandchildren, including explicit XML `MEDIUM` literals. Runtime-fixed behavior via `SetFixedFrameStrata(true)` remains unproven.
@@ -51,8 +53,6 @@ Classified the proposed removals of `UIDoFramesIntersect`, `GetNotchHeight`, and
 ## [2026-07-14] investigation | 12.1 input utility snapshot reversal
 
 Classified five proposed `InputUtil` additions as stale snapshot namespace moves and four proposed global removals as vendor-present. Focused PTR proof verifies the namespace members remain nil while the legacy globals perform cursor scaling, frame-scale forwarding, mouse-offset forwarding, and inspect-cursor selection. Full grouped audit target: 5 tests passed in 9.232 seconds. Current inventory: 1 implemented, 41 best-effort, 0 exception-requested, and 390 neutral untriaged rows.
-
-Chronological record of wiki operations.
 
 ## [2026-07-14] investigation | 12.1 screen-scale snapshot reversal
 

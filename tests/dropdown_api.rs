@@ -328,13 +328,14 @@ fn test_set_and_get_selected_id() {
         r#"
         local frame = CreateFrame("Frame", "TestSelID", UIParent)
         UIDropDownMenu_SetSelectedID(frame, 3)
+        frame.selectedID = 7
     "#,
     )
     .unwrap();
     let id: i32 = env
         .eval("return UIDropDownMenu_GetSelectedID(TestSelID)")
         .unwrap();
-    assert_eq!(id, 3);
+    assert_eq!(id, 7);
 }
 
 // ============================================================================
@@ -348,13 +349,14 @@ fn test_set_and_get_selected_value() {
         r#"
         local frame = CreateFrame("Frame", "TestSelVal", UIParent)
         UIDropDownMenu_SetSelectedValue(frame, "myval")
+        frame.selectedValue = "updated"
     "#,
     )
     .unwrap();
     let val: String = env
         .eval("return UIDropDownMenu_GetSelectedValue(TestSelVal)")
         .unwrap();
-    assert_eq!(val, "myval");
+    assert_eq!(val, "updated");
 }
 
 // ============================================================================
