@@ -435,147 +435,176 @@
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "Button.GetButtonState + SecretReturnsForAspect"
+      "symbol": "Button.GetButtonState",
+      "detail": "+ SecretReturnsForAspect"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "Button.IsEnabled + SecretReturnsForAspect"
+      "symbol": "Button.IsEnabled",
+      "detail": "+ SecretReturnsForAspect"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "Button.SetButtonState + SecretArgumentsAddAspect"
+      "symbol": "Button.SetButtonState",
+      "detail": "+ SecretArgumentsAddAspect"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "Button.SetEnabled + SecretArgumentsAddAspect, SecretArguments NotAllowed -> AllowedWhenUntainted"
+      "symbol": "Button.SetEnabled",
+      "detail": "+ SecretArgumentsAddAspect, SecretArguments NotAllowed -> AllowedWhenUntainted"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "EditBox.SetFont + RequiresValidFontHeight + RequiresValidFontAsset"
+      "symbol": "EditBox.SetFont",
+      "detail": "+ RequiresValidFontHeight + RequiresValidFontAsset"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "Font.SetFont + RequiresValidFontHeight + RequiresValidFontAsset"
+      "symbol": "Font.SetFont",
+      "detail": "+ RequiresValidFontHeight + RequiresValidFontAsset"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "FontString.SetFont + RequiresValidFontHeight + RequiresValidFontAsset, arg2.Type number -> uiFontHeight"
+      "symbol": "FontString.SetFont",
+      "detail": "+ RequiresValidFontHeight + RequiresValidFontAsset, arg2.Type number -> uiFontHeight"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "MessageFrame.SetFont + RequiresValidFontHeight + RequiresValidFontAsset"
+      "symbol": "MessageFrame.SetFont",
+      "detail": "+ RequiresValidFontHeight + RequiresValidFontAsset"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "ModelSceneActorBase.GetModelUnitGUID - ret1.ConditionalSecret"
+      "symbol": "ModelSceneActorBase.GetModelUnitGUID",
+      "detail": "- ret1.ConditionalSecret"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "ScrollFrame.GetHorizontalScroll + SecretReturnsForAspect"
+      "symbol": "ScrollFrame.GetHorizontalScroll",
+      "detail": "+ SecretReturnsForAspect"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "ScrollFrame.GetVerticalScroll + SecretReturnsForAspect"
+      "symbol": "ScrollFrame.GetVerticalScroll",
+      "detail": "+ SecretReturnsForAspect"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "ScrollFrame.SetHorizontalScroll SecretArguments NotAllowed -> AllowedWhenUntainted + SecretArgumentsAddAspect"
+      "symbol": "ScrollFrame.SetHorizontalScroll",
+      "detail": "SecretArguments NotAllowed -> AllowedWhenUntainted + SecretArgumentsAddAspect"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "ScrollFrame.SetVerticalScroll SecretArguments NotAllowed -> AllowedWhenUntainted + SecretArgumentsAddAspect"
+      "symbol": "ScrollFrame.SetVerticalScroll",
+      "detail": "SecretArguments NotAllowed -> AllowedWhenUntainted + SecretArgumentsAddAspect"
     },
     {
       "direction": "changed",
       "category": "widget-method",
-      "symbol": "SimpleHTML.SetFont + RequiresValidFontHeight + RequiresValidFontAsset"
+      "symbol": "SimpleHTML.SetFont",
+      "detail": "+ RequiresValidFontHeight + RequiresValidFontAsset"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CHAT_MSG_COMBAT_FACTION_CHANGE - SecretInChatMessagingLockdown"
+      "symbol": "CHAT_MSG_COMBAT_FACTION_CHANGE",
+      "detail": "- SecretInChatMessagingLockdown"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CHAT_MSG_COMBAT_HONOR_GAIN - SecretInChatMessagingLockdown"
+      "symbol": "CHAT_MSG_COMBAT_HONOR_GAIN",
+      "detail": "- SecretInChatMessagingLockdown"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CHAT_MSG_COMBAT_MISC_INFO - SecretInChatMessagingLockdown"
+      "symbol": "CHAT_MSG_COMBAT_MISC_INFO",
+      "detail": "- SecretInChatMessagingLockdown"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CHAT_MSG_COMBAT_XP_GAIN - SecretInChatMessagingLockdown"
+      "symbol": "CHAT_MSG_COMBAT_XP_GAIN",
+      "detail": "- SecretInChatMessagingLockdown"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CHAT_MSG_CURRENCY - SecretInChatMessagingLockdown"
+      "symbol": "CHAT_MSG_CURRENCY",
+      "detail": "- SecretInChatMessagingLockdown"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CHAT_MSG_FILTERED - SecretInChatMessagingLockdown"
+      "symbol": "CHAT_MSG_FILTERED",
+      "detail": "- SecretInChatMessagingLockdown"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CHAT_MSG_LOOT - SecretInChatMessagingLockdown"
+      "symbol": "CHAT_MSG_LOOT",
+      "detail": "- SecretInChatMessagingLockdown"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CHAT_MSG_MONEY - SecretInChatMessagingLockdown"
+      "symbol": "CHAT_MSG_MONEY",
+      "detail": "- SecretInChatMessagingLockdown"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CHAT_MSG_RESTRICTED - SecretInChatMessagingLockdown"
+      "symbol": "CHAT_MSG_RESTRICTED",
+      "detail": "- SecretInChatMessagingLockdown"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CLUB_MEMBER_ADDED [2].Type number -> ClubMemberOpaqueId"
+      "symbol": "CLUB_MEMBER_ADDED",
+      "detail": "[2].Type number -> ClubMemberOpaqueId"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CLUB_MEMBER_PRESENCE_UPDATED [2].Type number -> ClubMemberOpaqueId"
+      "symbol": "CLUB_MEMBER_PRESENCE_UPDATED",
+      "detail": "[2].Type number -> ClubMemberOpaqueId"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CLUB_MEMBER_REMOVED [2].Type number -> ClubMemberOpaqueId"
+      "symbol": "CLUB_MEMBER_REMOVED",
+      "detail": "[2].Type number -> ClubMemberOpaqueId"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CLUB_MEMBER_ROLE_UPDATED [2].Type number -> ClubMemberOpaqueId"
+      "symbol": "CLUB_MEMBER_ROLE_UPDATED",
+      "detail": "[2].Type number -> ClubMemberOpaqueId"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "CLUB_MEMBER_UPDATED [2].Type number -> ClubMemberOpaqueId"
+      "symbol": "CLUB_MEMBER_UPDATED",
+      "detail": "[2].Type number -> ClubMemberOpaqueId"
     },
     {
       "direction": "changed",
       "category": "event",
-      "symbol": "ENCOUNTER_END + encounterUnitStatus"
+      "symbol": "ENCOUNTER_END",
+      "detail": "+ encounterUnitStatus"
     },
     {
       "direction": "removed",

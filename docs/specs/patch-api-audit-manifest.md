@@ -10,7 +10,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - [x] Restrict exception requests to `unsafe` or `impossible` resolutions.
 - [x] Record target flavor/build, source owner, distinct LoD addon identity, lifecycle assertions, evidence file hashes, tests, commit, and per-item approval provenance.
 - [x] Recompute patch-source, Blizzard manifest, and evidence hashes from repository files.
-- [x] Accept legacy direction arrays or a generic categorized `occurrences` array; validate each occurrence's direction, nonblank category, symbol path, and deterministic added/changed/removed ordering.
+- [x] Accept legacy direction arrays or a generic categorized `occurrences` array; validate each occurrence's direction, nonblank category, optional nonblank change detail, symbol path, and deterministic added/changed/removed ordering.
 - [x] Verify focused test references exist and named tests occur in those files.
 - [x] Verify implementation commits resolve and are ancestors of the audited checkout.
 - [x] Reject unknown schema fields, blank values, invalid status/resolution combinations, and incomplete lifecycle contracts.
@@ -43,7 +43,10 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `src/bin/wow_cli/audit_api/patch_manifest.rs` — generic added/changed/removed schema, repository validation, completion gates, actual Lua-state observation primitive, initialization generator, observation comparison, and rendering.
 - `src/bin/wow_cli/audit_api/patch_source_index.rs` — per-file direct-publication candidates, dynamic-publication ambiguity records, all-source tree indexing, and active-profile TOC/XML reachability indexing.
 - `data/patch-api/sources/12.1-framexml.json` — immutable raw 12.1 direction-array snapshot.
-- `data/patch-api/sources/12.0.7-register.json` — categorized raw register for the 131 named 12.0.7 occurrences; unresolved unnamed CVar claims remain metadata, not invented rows.
+- `data/patch-api/sources/12.0.7-register.json` — categorized raw register for the 131 named 12.0.7 occurrences; changed rows keep a normalized symbol plus exact detail, while unresolved unnamed CVar claims remain metadata rather than invented rows.
+- `data/patch-api/12.0.7.json` — neutral 131-row occurrence manifest pending item-specific classification.
+- `docs/generated/patch-12-0-7-checklist.md` — generated neutral checklist.
+- `docs/wiki/investigations/patch-12-0-7-occurrence-inventory.md` — human-readable occurrence inventory.
 - `data/patch-api/12.1-framexml.json` — 432-row audit register.
 - `docs/generated/patch-12-1-framexml-checklist.md` — generated compact checklist.
 - `docs/wiki/investigations/patch-12-1-framexml-symbol-inventory.md` — human inventory whose symbol/status columns are drift-checked.

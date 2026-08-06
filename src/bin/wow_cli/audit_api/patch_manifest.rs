@@ -46,6 +46,7 @@ struct PatchSourceOccurrence {
     direction: ChangeDirection,
     category: String,
     symbol: String,
+    detail: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -820,6 +821,13 @@ fn source_occurrence_row_ids(source: &serde_json::Value) -> Result<Vec<String>, 
                 format!("invalid patch source occurrence direction/category/symbol: {error}")
             })?;
         require_text("patch source occurrence.category", &occurrence.category)?;
+        if occurrence
+            .detail
+            .as_deref()
+            .is_some_and(|detail| detail.trim().is_empty())
+        {
+            return Err("patch source occurrence detail must not be blank".to_string());
+        }
         validate_symbol_path(&occurrence.symbol)?;
         grouped
             .get_mut(occurrence.direction.as_str())
@@ -1591,6 +1599,46 @@ mod tests {
                 "changed:ChangedFixture",
                 "removed:RemovedFixture"
             ]
+        );
+    }
+
+    #[test]
+    fn categorized_occurrence_detail_preserves_direction_symbol_row_id() {
+        let source = serde_json::json!({
+            "occurrences": [
+                {
+                    "direction":"added",
+                    "category":"global",
+                    "symbol":"Fixture",
+                    "detail":"new global API"
+                }
+            ]
+        });
+
+        let row_ids = source_row_ids(&source)
+            .expect("nonblank occurrence detail should not affect row identity");
+
+        assert_eq!(row_ids, vec!["added:Fixture"]);
+    }
+
+    #[test]
+    fn categorized_occurrence_detail_rejects_blank_detail() {
+        let source = serde_json::json!({
+            "occurrences": [
+                {
+                    "direction":"added",
+                    "category":"global",
+                    "symbol":"Fixture",
+                    "detail":""
+                }
+            ]
+        });
+
+        let error =
+            source_row_ids(&source).expect_err("blank occurrence detail should be rejected");
+        assert!(
+            error.contains("detail must not be blank"),
+            "unexpected error: {error}"
         );
     }
 

@@ -7,7 +7,8 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 ### Files
 
 - `data/patch-api/sources/12.1-framexml.json` preserves the legacy raw 320-added/112-removed direction-array snapshot.
-- `data/patch-api/sources/12.0.7-register.json` preserves 131 named occurrences as categorized `{direction, category, symbol}` objects without inventing the unnamed CVar additions/removals omitted by the crawler excerpt.
+- `data/patch-api/sources/12.0.7-register.json` preserves 131 named occurrences as categorized `{direction, category, symbol, detail?}` objects without inventing the unnamed CVar additions/removals omitted by the crawler excerpt.
+- `data/patch-api/12.0.7.json`, `docs/generated/patch-12-0-7-checklist.md`, and [[patch-12-0-7-occurrence-inventory]] form the neutral occurrence register; all 131 rows remain untriaged until evidence is attached.
 - `data/patch-api/12.1-framexml.json` stores all 432 rows keyed by `change:symbol`.
 - `docs/generated/patch-12-1-framexml-checklist.md` contains one generated line per row.
 - `src/bin/wow_cli/audit_api/patch_manifest.rs` owns generic added/changed/removed parsing, repository validation, completion validation, observation comparison, and rendering.
@@ -28,7 +29,7 @@ Normal manifest validation recomputes:
 - every resolved row's evidence-file SHA-256;
 - focused test file and exact named `#[test]` definition existence;
 - implementation commit existence and ancestry;
-- raw source row order/count for either direction arrays or categorized `occurrences`; object sources validate direction, nonblank category, symbol path, and deterministic added/changed/removed grouping; older manifests omit `changed_count` and default it to zero;
+- raw source row order/count for either direction arrays or categorized `occurrences`; object sources validate direction, nonblank category, optional nonblank change detail, symbol path, and deterministic added/changed/removed grouping; older manifests omit `changed_count` and default it to zero;
 - generated checklist and human inventory status drift.
 
 Unknown JSON fields, blank evidence, invalid lifecycle vocabulary, and incompatible status/resolution combinations fail validation.

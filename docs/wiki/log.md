@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-06] investigation | Neutral 12.0.7 occurrence register
+
+Created the checked-in 12.0.7 machine manifest, generated checklist, and human inventory from the categorized source register. All 131 named occurrences remain neutral/untriaged: 79 added, 29 changed, and 23 removed. Changed occurrences preserve valid normalized symbol paths plus exact change details; crawler-omitted CVar names remain unresolved metadata and are not invented.
+
 ## [2026-08-06] system | Categorized 12.0.7 occurrence source
 
 Added a generic categorized patch-source format and the raw 12.0.7 occurrence register. The source contains 79 added, 29 changed, and 23 removed named occurrences (131 total), grouped from globals, script-object methods, events, widgets, and the six CVar additions actually named by the crawler excerpt. The unresolved claims for fourteen unnamed additions and five unnamed removals remain explicit metadata rather than invented symbols.

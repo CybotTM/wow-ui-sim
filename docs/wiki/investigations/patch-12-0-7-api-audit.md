@@ -8,6 +8,8 @@ Patch 12.0.7 API work in wow-ui-sim separates safe additive compatibility bridge
 
 The audit source was the Warcraft Wiki Patch 12.0.7 API changes page, preserved as the checked-in [12.0.7 API-change source snapshot](../../../data/patch-api/sources/12.0.7-api-changes.txt). The page covers the 12.0.5 `(67602)` to 12.0.7 `(68182)` API diff and 12.0.7 blue-post notes.
 
+The machine register is `data/patch-api/12.0.7.json`, sourced from the categorized `data/patch-api/sources/12.0.7-register.json`; [[patch-12-0-7-occurrence-inventory]] is its human-readable inventory. It preserves 131 named occurrences—79 added, 29 changed, and 23 removed—and currently keeps all 131 neutral/untriaged while item-specific evidence is attached. The crawler's unnamed CVar claims remain explicit source metadata rather than invented symbols.
+
 ### Completed compatible bridge work
 
 The simulator now provides modeled 12.0.7 social/party mutations:
