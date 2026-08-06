@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-06] investigation | 12.0.7 occurrence-level re-triage
+
+Classified all 131 named 12.0.7 occurrences: 34 implemented and 97 best-effort, with no untriaged or exception-requested rows. Focused profile-gated tests cover safe globals, duration methods, CVar defaults, event registration, widget compatibility, and retained/removed compatibility surfaces. Exact service payload, secrecy, and load-order fidelity limits remain explicit best-effort notes; unnamed crawler claims remain metadata.
+
 ## [2026-08-06] investigation | 12.0.7 named CVar classification
 
 Classified the six CVar additions actually named by the checked-in 12.0.7 crawler source as implemented. `patch_12_0_7_cvar_defaults_match_retail` verifies each profile-gated runtime/default value. The register now contains six implemented and 125 untriaged rows; unnamed crawler claims remain source metadata outside row classification.
