@@ -48,6 +48,10 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 - `data/patch-api/12.0.7.json` — neutral 131-row occurrence manifest pending item-specific classification.
 - `docs/generated/patch-12-0-7-checklist.md` — generated neutral checklist.
 - `docs/wiki/investigations/patch-12-0-7-occurrence-inventory.md` — human-readable occurrence inventory.
+- `data/patch-api/sources/12.0.5-probes.json` — categorized source for 38 retained probe subfindings, with prior documented states preserved separately from machine status.
+- `data/patch-api/12.0.5-probes.json` — neutral 38-row probe manifest pending item-specific evidence.
+- `docs/generated/patch-12-0-5-probe-checklist.md` — generated neutral probe checklist.
+- `docs/wiki/investigations/patch-12-0-5-probe-inventory.md` — human-readable probe inventory.
 - `data/patch-api/12.1-framexml.json` — 432-row audit register.
 - `docs/generated/patch-12-1-framexml-checklist.md` — generated compact checklist.
 - `docs/wiki/investigations/patch-12-1-framexml-symbol-inventory.md` — human inventory whose symbol/status columns are drift-checked.

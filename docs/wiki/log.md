@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-06] investigation | Neutral 12.0.5 probe register
+
+Created the checked-in 38-row probe source, machine manifest, generated checklist, and human inventory. Prior documentation states are preserved as 30 resolved, four best-effort, and four unresolved, while every machine row remains neutral/untriaged pending item-specific evidence. Removed stale broad-approval wording: Store dropdown/descendant evidence and XmlFrameLevel provenance remain unresolved, while same-size window transitions are an unapproved impossible exception candidate.
+
 ## [2026-08-06] system | Test-backed behavioral audit resolution
 
 Added a generic `behavioral` resolution for patch occurrences that are not truthfully observable as Lua global/table paths, including event registration, widget methods, CVar defaults, and probe outcomes. Behavioral rows require hashed test evidence plus a focused named test, allow implemented/best-effort status, forbid Lua presence assertions, and consume no synthetic runtime observation.

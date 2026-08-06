@@ -46,6 +46,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | Page | Summary |
 |------|---------|
 | [[patch-12-0-5-api-audit]] | 12.0.5 probe-driven API audit: core frame/event/attribute/identity/XML/scale behaviors are modeled and covered; no patch-specific inert-default module remains |
+| [[patch-12-0-5-probe-inventory]] | Neutral 38-row 12.0.5 probe register preserving 30 previously resolved, four best-effort, and four unresolved documented subfindings without pre-classifying machine status |
 | [[patch-12-0-7-api-audit]] | 12.0.7 API audit status: compatible bridges landed/verified; restricted unit-token returns, encounter payloads, SimulateMouse taint/focus restrictions, debug secret propagation, secure raidtarget actions, and widget secret/aspect behavior are paused pending live behavior |
 | [[patch-12-0-7-occurrence-inventory]] | Neutral 131-row 12.0.7 register: 79 added, 29 changed, and 23 removed named occurrences, all currently untriaged with crawler-omitted CVar names explicitly not invented |
 | [[patch-12-1-api-audit]] | 12.1 API audit status: 432-row FrameXML register complete; aura containers, DurationTextBinding, and service payloads retain explicit best-effort contracts, while UnitAura secrecy, private/forbidden enforcement, standalone RadialProgress construction, and strict-removal timing remain unapproved unsafe/impossible exception candidates |

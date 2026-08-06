@@ -10,21 +10,23 @@ The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and t
 
 Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptProbe`, `AttributeDispatchProbe`, `CoreBehaviorProbe`, `DevToolsDumpProbe`, `FrameIdentityProbe`, `HookScriptBindingProbe`, `IsProtectedProbe`, `JustifyProbe`, `ProtectedRetailProbe`, `ScaleEventProbe`, `SetAtlasProbe`, `StoreForbiddenProbe`, and `TextureSetTextureProbe`. `XmlFrameLevelProbe` findings are documented, but its raw capture was not retained.
 
+The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Prior documentation grouped them as 30 resolved, four best-effort, and four unresolved, while all 38 machine rows remain neutral/untriaged until item-specific evidence is attached.
+
 ### Itemized probe status
 
 **Implemented with focused regression coverage:** animation handler matrix/rejection (`AnimScriptProbe`); unchanged scalar attribute dispatch (`AttributeDispatchProbe`); retail forbidden-frame behavior, invalid unit-event filters, wildcard false attributes and arity, Raise/Lower ordering (`CoreBehaviorProbe`); frame iteration/dump identity, `[0]` surrogate dispatch, duplicate-frame freshness (`DevToolsDumpProbe` / `FrameIdentityProbe`); HookScript binding validation/chaining; absent legacy `Protect`/`SetProtected` methods plus normal-frame `SetForbidden` no-op; XML FontString justify/default anchors; no-arg/invalid `SetAtlas`; XML frame-level propagation; ordered display/scale event pairs.
 
-**Best-effort with existing subsystem coverage:** `ShowUIPanel` pulse/`CloseAllWindows`; `GetMouseFoci`/`GetMouseFocus` live return shape; protected-template descendant/anchor non-propagation; same-size maximize/restore duplicate scale-event pair; Store forbidden/dropdown observations. These remain best-effort because their retained capture is not matched by an exact focused simulator regression.
+**Best-effort with existing subsystem coverage:** `ShowUIPanel` pulse/`CloseAllWindows`; `GetMouseFoci`/`GetMouseFocus` live return shape; protected-template descendant/anchor observations; and secure-template/Store observations. These four subfindings retain explicit best-effort status because their subsystem coverage is not an exact focused replay of the retained probe contract.
 
-### Exception requests pending informed approval
+### Open probe gaps and exception candidates
 
-A broad approval recorded on 2026-07-14 is superseded pending re-triage and an itemized checklist presented in chat.
+A broad approval recorded on 2026-07-14 is superseded pending re-triage and an itemized checklist presented in chat. No exception approval is requested or recorded here.
 
-1. **Exact retained-probe regressions:** `ShowUIPanel` pulse then `CloseAllWindows`; exact `GetMouseFoci` shape; protected-template descendant/anchor return values (not mutation-block propagation); Store forbidden/dropdown observations. `Texture:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")` now exact-replays FDID `130828`, and no-arg `SetTexture()` clears. `SecureActionButtonTemplate:IsProtected()` explicit `(true, true)` is now replayed after real `Blizzard_FrameXML` loading. Existing subsystem tests are not exact probe replays. Repeated `false` attribute dispatch now has focused coverage for two writes, handler `false` arguments, nil lookup during dispatch, and final stored `false`, but is not a literal probe-addon replay.
-2. **Store forbidden lifecycle:** `StoreDropdown_SetDropdown` was nil in the retained capture, so intended dropdown population and forbidden-descendant scan were never exercised. Do not invent lifecycle behavior; need a live capture where this API exists.
-3. **XmlFrameLevel provenance:** bare/template/fixed/reparent findings are regression-tested, but the raw SavedVariables capture is missing. User approval on 2026-07-14 authorizes retaining this provenance gap as an exception pending a fresh live capture; the documented result is not a substitute for the missing raw capture.
-4. **Same-size window transitions:** iced supplies no observable same-size maximize/restore event, so duplicate display/scale pair emission cannot be modeled without a platform window-state signal.
-5. **Unscoped generic defaults:** no 12.0.5 patch API diff snapshot exists locally. Generic fallbacks cannot be claimed as 12.0.5-complete without a concrete probe/addon contract.
+1. **Store dropdown population:** `StoreDropdown_SetDropdown` was nil in the retained capture, so intended real/synthetic dropdown population never executed. This remains an unresolved probe gap; do not invent lifecycle behavior.
+2. **Store forbidden descendants:** the intended Store descendant scan did not produce valid lifecycle evidence. This remains an unresolved probe gap requiring a fresh capture where the Store surface exists.
+3. **XmlFrameLevel provenance:** bare/template/fixed/reparent findings are regression-tested, but the raw SavedVariables capture is missing. The documented result is not a substitute for the missing raw capture; prior broad approval is superseded and this row remains unresolved.
+4. **Same-size window transitions:** iced supplies no observable same-size maximize/restore event, so duplicate display/scale pair emission cannot currently be modeled. This is an **impossible exception candidate** pending informed approval, not an approved exception.
+5. **Patch completeness boundary:** no 12.0.5 API-diff snapshot exists locally. The 38-row register is complete only for its explicit probe contract; generic fallbacks cannot be claimed as globally patch-complete without another concrete source.
 
 ### Completed modeled work
 
