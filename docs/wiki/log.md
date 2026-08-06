@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-06] investigation | 12.0.7 approval-language correction
+
+Removed stale claims that unnamed CVar source gaps, stale duration extraction rows, and Minimap removals were already approved exceptions. The 131-row machine manifest remains fully neutral/untriaged. Crawler-omitted CVar claims stay source metadata, and potential unsafe/impossible rows remain candidates until evidence-backed classification is presented for informed approval.
+
 ## [2026-08-06] investigation | Neutral 12.0.5 probe register
 
 Created the checked-in 38-row probe source, machine manifest, generated checklist, and human inventory. Prior documentation states are preserved as 30 resolved, four best-effort, and four unresolved, while every machine row remains neutral/untriaged pending item-specific evidence. Removed stale broad-approval wording: Store dropdown/descendant evidence and XmlFrameLevel provenance remain unresolved, while same-size window transitions are an unapproved impossible exception candidate.
