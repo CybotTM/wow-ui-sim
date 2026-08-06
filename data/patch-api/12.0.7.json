@@ -1118,91 +1118,145 @@
       "id": "added:assistedCombatReduceHighlights",
       "symbol": "assistedCombatReduceHighlights",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "implemented",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail",
+          "summary": "Profile-gated retail 12.0.7 CVar default is 1; focused test verifies runtime and registered default values.",
+          "source_hash": "101a10dc683d3e71a574f9e16a5c655cf776f5d387a317962d46d2cf7f106c6e"
+        }
+      ],
+      "tests": [
+        "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "569374a7b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence."
+      "notes": "Implemented profile-gated default 1; crawler-omitted CVar claims remain outside occurrence rows."
     },
     {
       "id": "added:developerLogFilterDebug",
       "symbol": "developerLogFilterDebug",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "implemented",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail",
+          "summary": "Profile-gated retail 12.0.7 CVar default is 0; focused test verifies runtime and registered default values.",
+          "source_hash": "101a10dc683d3e71a574f9e16a5c655cf776f5d387a317962d46d2cf7f106c6e"
+        }
+      ],
+      "tests": [
+        "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "569374a7b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence."
+      "notes": "Implemented profile-gated default 0; crawler-omitted CVar claims remain outside occurrence rows."
     },
     {
       "id": "added:developerLogFilterError",
       "symbol": "developerLogFilterError",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "implemented",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail",
+          "summary": "Profile-gated retail 12.0.7 CVar default is 1; focused test verifies runtime and registered default values.",
+          "source_hash": "101a10dc683d3e71a574f9e16a5c655cf776f5d387a317962d46d2cf7f106c6e"
+        }
+      ],
+      "tests": [
+        "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "569374a7b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence."
+      "notes": "Implemented profile-gated default 1; crawler-omitted CVar claims remain outside occurrence rows."
     },
     {
       "id": "added:developerLogFilterFatal",
       "symbol": "developerLogFilterFatal",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "implemented",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail",
+          "summary": "Profile-gated retail 12.0.7 CVar default is 1; focused test verifies runtime and registered default values.",
+          "source_hash": "101a10dc683d3e71a574f9e16a5c655cf776f5d387a317962d46d2cf7f106c6e"
+        }
+      ],
+      "tests": [
+        "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "569374a7b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence."
+      "notes": "Implemented profile-gated default 1; crawler-omitted CVar claims remain outside occurrence rows."
     },
     {
       "id": "added:developerLogFilterNormal",
       "symbol": "developerLogFilterNormal",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "implemented",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail",
+          "summary": "Profile-gated retail 12.0.7 CVar default is 1; focused test verifies runtime and registered default values.",
+          "source_hash": "101a10dc683d3e71a574f9e16a5c655cf776f5d387a317962d46d2cf7f106c6e"
+        }
+      ],
+      "tests": [
+        "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "569374a7b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence."
+      "notes": "Implemented profile-gated default 1; crawler-omitted CVar claims remain outside occurrence rows."
     },
     {
       "id": "added:developerLogFilterSpam",
       "symbol": "developerLogFilterSpam",
       "change": "added",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "implemented",
+      "resolution": "behavioral",
       "owner": "cvar",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "test",
+          "reference": "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail",
+          "summary": "Profile-gated retail 12.0.7 CVar default is 0; focused test verifies runtime and registered default values.",
+          "source_hash": "101a10dc683d3e71a574f9e16a5c655cf776f5d387a317962d46d2cf7f106c6e"
+        }
+      ],
+      "tests": [
+        "src/cvars.rs::patch_12_0_7_cvar_defaults_match_retail"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "569374a7b",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence."
+      "notes": "Implemented profile-gated default 0; crawler-omitted CVar claims remain outside occurrence rows."
     },
     {
       "id": "changed:Button.GetButtonState",

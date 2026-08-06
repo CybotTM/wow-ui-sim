@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-06] investigation | 12.0.7 named CVar classification
+
+Classified the six CVar additions actually named by the checked-in 12.0.7 crawler source as implemented. `patch_12_0_7_cvar_defaults_match_retail` verifies each profile-gated runtime/default value. The register now contains six implemented and 125 untriaged rows; unnamed crawler claims remain source metadata outside row classification.
+
 ## [2026-08-06] investigation | 12.0.7 approval-language correction
 
 Removed stale claims that unnamed CVar source gaps, stale duration extraction rows, and Minimap removals were already approved exceptions. The 131-row machine manifest remains fully neutral/untriaged. Crawler-omitted CVar claims stay source metadata, and potential unsafe/impossible rows remain candidates until evidence-backed classification is presented for informed approval.

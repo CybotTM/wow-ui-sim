@@ -8,7 +8,7 @@ Patch 12.0.7 API work in wow-ui-sim separates safe additive compatibility bridge
 
 The audit source was the Warcraft Wiki Patch 12.0.7 API changes page, preserved as the checked-in [12.0.7 API-change source snapshot](../../../data/patch-api/sources/12.0.7-api-changes.txt). The page covers the 12.0.5 `(67602)` to 12.0.7 `(68182)` API diff and 12.0.7 blue-post notes.
 
-The machine register is `data/patch-api/12.0.7.json`, sourced from the categorized `data/patch-api/sources/12.0.7-register.json`; [[patch-12-0-7-occurrence-inventory]] is its human-readable inventory. It preserves 131 named occurrences—79 added, 29 changed, and 23 removed—and currently keeps all 131 neutral/untriaged while item-specific evidence is attached. The crawler's unnamed CVar claims remain explicit source metadata rather than invented symbols.
+The machine register is `data/patch-api/12.0.7.json`, sourced from the categorized `data/patch-api/sources/12.0.7-register.json`; [[patch-12-0-7-occurrence-inventory]] is its human-readable inventory. It preserves 131 named occurrences—79 added, 29 changed, and 23 removed. Six named CVar rows are implemented from exact profile-gated default evidence; 125 rows remain untriaged. The crawler's unnamed CVar claims remain explicit source metadata rather than invented symbols.
 
 ### Completed compatible bridge work
 
@@ -112,7 +112,7 @@ The simulator now profile-gates the recovered exact 12.0.7.68235 CVar delta in `
 
 #### Pending classification and exception candidates
 
-A broad approval recorded on 2026-07-14 is superseded because no occurrence-level checklist was presented. All 131 machine rows currently remain untriaged. The evidence and gaps below guide re-triage but do not assign approval or final status.
+A broad approval recorded on 2026-07-14 is superseded because no occurrence-level checklist was presented. Six named CVar rows are now evidence-backed and implemented; the other 125 machine rows remain untriaged. The evidence and gaps below guide re-triage but do not assign approval or final status.
 
 1. **Strict API removals:** exact 12.0.7 startup proof finds 11 names absent: `BNInviteFriend`, `ConfirmReadyCheck`, `DemoteAssistant`, `DoReadyCheck`, `GetMerchantCurrencies`, `IsGUIDInGroup`, `PromoteToAssistant`, `PromoteToLeader`, `SetEveryoneIsAssistant`, `GetAutoCompletePresenceID`, and `IsRecognizedName`. Six compatibility functions remain: `C_ClickBindings.GetStringFromModifiers`, `C_ClickBindings.MakeModifiers`, `C_Spell.GetMawPowerBorderAtlasBySpellID`, `UninviteUnit`, `GetAutoCompleteResults`, and `GetAutoCompleteRealms`. This is best-effort availability evidence; retained wrappers still need source/lifecycle review before strict hiding.
 2. **Minimap method removals:** `SetBlipTexture`, `SetCorpsePOIArrowTexture`, `SetIconTexture`, `SetPOIArrowTexture`, `SetPlayerTexture`, `SetStaticPOIArrowTexture`. Removing currently registered methods may break cached/vendor UI; these rows remain untriaged pending current-source proof. No exception approval is requested.

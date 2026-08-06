@@ -1,13 +1,14 @@
 # Patch 12.0.7 Occurrence Inventory
 
-Neutral occurrence-level register for the committed 12.0.7 API-change source. Every row remains `untriaged` until item-specific evidence supports `implemented`, `best-effort`, or an individually justified `exception-requested` status.
+Occurrence-level register for the committed 12.0.7 API-change source. Six named CVar rows are implemented from exact profile-gated default evidence; the remaining rows stay `untriaged` until item-specific evidence supports `implemented`, `best-effort`, or an individually justified `exception-requested` status.
 
 ## Content
 
 - **Source:** `data/patch-api/sources/12.0.7-register.json`
 - **Source SHA-256:** `389e3b19174bf77c3646028f764cf186ccfe1b7dddaca2a3b3fcba75e3bdec60`
 - **Target:** retail build `12.0.7`
-- **Rows:** 131 total — 79 added, 29 changed, 23 removed
+- **Rows:** 131 total — 6 implemented, 0 best-effort, 0 exception-requested, 125 untriaged
+- **Directions:** 79 added, 29 changed, 23 removed
 
 | Symbol | Status | Category | Direction | Note |
 |---|---|---|---|---|
@@ -84,12 +85,12 @@ Neutral occurrence-level register for the committed 12.0.7 API-change source. Ev
 | `DurationTextRawValue.SetSeconds` | untriaged | script-object-method | added | Pending occurrence-level evidence and classification for 12.0.7 script-object-method occurrence. |
 | `ENCOUNTER_TIMELINE_EVENT_COLOR_CHANGED` | untriaged | event | added | Pending occurrence-level evidence and classification for 12.0.7 event occurrence. |
 | `URL_TEXTURE_REQUEST_RESULT` | untriaged | event | added | Pending occurrence-level evidence and classification for 12.0.7 event occurrence. |
-| `assistedCombatReduceHighlights` | untriaged | cvar | added | Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence. |
-| `developerLogFilterDebug` | untriaged | cvar | added | Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence. |
-| `developerLogFilterError` | untriaged | cvar | added | Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence. |
-| `developerLogFilterFatal` | untriaged | cvar | added | Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence. |
-| `developerLogFilterNormal` | untriaged | cvar | added | Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence. |
-| `developerLogFilterSpam` | untriaged | cvar | added | Pending occurrence-level evidence and classification for 12.0.7 cvar occurrence. |
+| `assistedCombatReduceHighlights` | implemented | cvar | added | Profile-gated default `1` verified by `patch_12_0_7_cvar_defaults_match_retail`. |
+| `developerLogFilterDebug` | implemented | cvar | added | Profile-gated default `0` verified by `patch_12_0_7_cvar_defaults_match_retail`. |
+| `developerLogFilterError` | implemented | cvar | added | Profile-gated default `1` verified by `patch_12_0_7_cvar_defaults_match_retail`. |
+| `developerLogFilterFatal` | implemented | cvar | added | Profile-gated default `1` verified by `patch_12_0_7_cvar_defaults_match_retail`. |
+| `developerLogFilterNormal` | implemented | cvar | added | Profile-gated default `1` verified by `patch_12_0_7_cvar_defaults_match_retail`. |
+| `developerLogFilterSpam` | implemented | cvar | added | Profile-gated default `0` verified by `patch_12_0_7_cvar_defaults_match_retail`. |
 | `Button.GetButtonState` | untriaged | widget-method | changed | Pending occurrence-level evidence and classification for 12.0.7 widget-method occurrence. |
 | `Button.IsEnabled` | untriaged | widget-method | changed | Pending occurrence-level evidence and classification for 12.0.7 widget-method occurrence. |
 | `Button.SetButtonState` | untriaged | widget-method | changed | Pending occurrence-level evidence and classification for 12.0.7 widget-method occurrence. |
