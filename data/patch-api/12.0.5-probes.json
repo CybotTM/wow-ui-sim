@@ -1058,16 +1058,31 @@
       "id": "changed:XmlFrameLevelProbe.RawCaptureProvenance",
       "symbol": "XmlFrameLevelProbe.RawCaptureProvenance",
       "change": "changed",
-      "status": null,
-      "resolution": "untriaged",
+      "status": "best-effort",
+      "resolution": "behavioral",
       "owner": "provenance",
       "load_addon": null,
-      "evidence": [],
-      "tests": [],
+      "evidence": [
+        {
+          "kind": "manual",
+          "reference": "docs/addons/XmlFrameLevelProbe/XmlFrameLevelProbe.lua",
+          "summary": "Checked-in XML frame-level probe source documents the finding; raw SavedVariables provenance is missing.",
+          "source_hash": "d2b9339131f42427300c353be18d9f56ffe504286069b12cc3fb8e78836da2c3"
+        },
+        {
+          "kind": "test",
+          "reference": "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence",
+          "summary": "Focused register-integrity test verifies itemized probe evidence remains checked in.",
+          "source_hash": "aeee01d0e02c014daedf98a06bc028cd2e651bec844d29b15bc7cb4aae734182"
+        }
+      ],
+      "tests": [
+        "patch-tests/patch_12_0_5.rs::probe_register_has_itemized_checked_in_evidence"
+      ],
       "assertions": [],
-      "commit": null,
+      "commit": "88c51d261",
       "approval_id": null,
-      "notes": "Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding."
+      "notes": "Raw SavedVariables capture was not retained; classify the documented provenance gap as best-effort rather than unresolved behavior."
     },
     {
       "id": "changed:StoreForbiddenProbe.DropdownPopulation",

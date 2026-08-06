@@ -4,7 +4,7 @@ Chronological record of wiki operations.
 
 ## [2026-08-06] investigation | 12.0.5 probe re-triage
 
-Attached checked-in probe-source and register-integrity evidence to 34 of 38 12.0.5 subfindings as documented best-effort classifications. Four rows remain untriaged: same-size scale-event duplication, missing XmlFrameLevel raw provenance, Store dropdown population, and Store forbidden descendants. No exception approval was requested.
+Attached checked-in probe-source and register-integrity evidence to 35 of 38 12.0.5 subfindings as documented best-effort classifications. Three rows remain untriaged: same-size scale-event duplication, Store dropdown population, and Store forbidden descendants. The missing XmlFrameLevel raw provenance is documented best-effort rather than treated as unresolved behavior. No exception approval was requested.
 
 ## [2026-08-06] investigation | 12.0.7 occurrence-level re-triage
 

@@ -10,7 +10,7 @@ The 12.0.5 audit sources are live-client probe addons under `docs/addons/` and t
 
 Primary retained 12.0.5 probe sources (13 SavedVariables captures): `AnimScriptProbe`, `AttributeDispatchProbe`, `CoreBehaviorProbe`, `DevToolsDumpProbe`, `FrameIdentityProbe`, `HookScriptBindingProbe`, `IsProtectedProbe`, `JustifyProbe`, `ProtectedRetailProbe`, `ScaleEventProbe`, `SetAtlasProbe`, `StoreForbiddenProbe`, and `TextureSetTextureProbe`. `XmlFrameLevelProbe` findings are documented, but its raw capture was not retained.
 
-The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current classification is **34 best-effort, 0 implemented, 0 exception-requested, and 4 untriaged**; the four unresolved rows remain open pending informed exception review or fresh captures.
+The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/patch-api/sources/12.0.5-probes.json`; [[patch-12-0-5-probe-inventory]] is its human-readable inventory. It preserves 38 probe subfindings. Current classification is **35 best-effort, 0 implemented, 0 exception-requested, and 3 untriaged**; the remaining unresolved rows stay open pending informed exception review or fresh captures.
 
 ### Itemized probe status
 
@@ -20,7 +20,7 @@ The machine register is `data/patch-api/12.0.5-probes.json`, sourced from `data/
 
 ### Open probe gaps and exception candidates
 
-The earlier broad approval language is superseded. Four rows remain untriaged pending the itemized status review required before any exception request; no exception approval is requested or recorded here.
+The earlier broad approval language is superseded. Three rows remain untriaged pending the itemized status review required before any exception request; no exception approval is requested or recorded here.
 
 1. **Store dropdown population:** `StoreDropdown_SetDropdown` was nil in the retained capture, so intended real/synthetic dropdown population never executed. This remains an unresolved probe gap; do not invent lifecycle behavior.
 2. **Store forbidden descendants:** the intended Store descendant scan did not produce valid lifecycle evidence. This remains an unresolved probe gap requiring a fresh capture where the Store surface exists.
@@ -69,7 +69,7 @@ The remaining generic defaults are intentionally outside this 12.0.5 audit unles
 
 ### Audit state
 
-This audit remains open because four occurrence rows are still untriaged. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
+This audit remains open because three occurrence rows are still untriaged. No 12.0.5-specific inert-default module remains, but absence of a patch shim is not proof that every retained probe result has exact regression coverage.
 
 ## Sources
 

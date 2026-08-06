@@ -7,7 +7,7 @@ Itemized probe subfinding register for the 12.0.5 audit. Documented source state
 - **Source:** `data/patch-api/sources/12.0.5-probes.json`
 - **Source SHA-256:** `ba32c953e6232d408eea328fc7bfb77a33a1fff803e310aefa6a76512178b344`
 - **Target:** retail build `12.0.5`
-- **Rows:** 38 total — 0 implemented, 34 best-effort, 0 exception-requested, 4 untriaged
+- **Rows:** 38 total — 0 implemented, 35 best-effort, 0 exception-requested, 3 untriaged
 
 | Symbol | Machine Status | Documented Status | Category | Direction | Detail |
 |---|---|---|---|---|---|
@@ -46,6 +46,6 @@ Itemized probe subfinding register for the 12.0.5 audit. Documented source state
 | `XmlFrameLevelProbe.BareAndFixed` | best-effort | resolved | XML frame level | changed | Bare frameLevel versus fixedFrameLevel=true semantics. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable. |
 | `XmlFrameLevelProbe.ParentReparent` | best-effort | resolved | XML frame level | changed | Parent-level changes, unfixed-child propagation, and Lua SetFrameLevel reparenting. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable. |
 | `XmlFrameLevelProbe.Flags` | best-effort | resolved | XML frame level | changed | HasFixedFrameLevel and IsUsingParentLevel observations. Documented best-effort: checked-in probe source is retained, but raw SavedVariables capture is unavailable. |
-| `XmlFrameLevelProbe.RawCaptureProvenance` | untriaged | unresolved | provenance | changed | Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding. |
+| `XmlFrameLevelProbe.RawCaptureProvenance` | best-effort | unresolved | provenance | changed | Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding. |
 | `StoreForbiddenProbe.DropdownPopulation` | untriaged | unresolved | Store lifecycle | changed | Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding. |
 | `StoreForbiddenProbe.ForbiddenDescendants` | untriaged | unresolved | Store lifecycle | changed | Pending occurrence-level evidence and classification for the 12.0.5 probe subfinding. |

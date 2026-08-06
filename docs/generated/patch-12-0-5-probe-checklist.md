@@ -33,6 +33,6 @@
 33. [best-effort] `changed:XmlFrameLevelProbe.BareAndFixed` — behavioral
 34. [best-effort] `changed:XmlFrameLevelProbe.ParentReparent` — behavioral
 35. [best-effort] `changed:XmlFrameLevelProbe.Flags` — behavioral
-36. [untriaged] `changed:XmlFrameLevelProbe.RawCaptureProvenance` — untriaged
+36. [best-effort] `changed:XmlFrameLevelProbe.RawCaptureProvenance` — behavioral
 37. [untriaged] `changed:StoreForbiddenProbe.DropdownPopulation` — untriaged
 38. [untriaged] `changed:StoreForbiddenProbe.ForbiddenDescendants` — untriaged
