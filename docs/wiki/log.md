@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-06] system | Test-backed behavioral audit resolution
+
+Added a generic `behavioral` resolution for patch occurrences that are not truthfully observable as Lua global/table paths, including event registration, widget methods, CVar defaults, and probe outcomes. Behavioral rows require hashed test evidence plus a focused named test, allow implemented/best-effort status, forbid Lua presence assertions, and consume no synthetic runtime observation.
+
 ## [2026-08-06] investigation | Neutral 12.0.7 occurrence register
 
 Created the checked-in 12.0.7 machine manifest, generated checklist, and human inventory from the categorized source register. All 131 named occurrences remain neutral/untriaged: 79 added, 29 changed, and 23 removed. Changed occurrences preserve valid normalized symbol paths plus exact change details; crawler-omitted CVar names remain unresolved metadata and are not invented.

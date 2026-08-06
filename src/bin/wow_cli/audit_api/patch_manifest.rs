@@ -116,6 +116,7 @@ pub enum ResolutionKind {
     Untriaged,
     VendorPresent,
     Compat,
+    Behavioral,
     LoadOnDemand,
     Removed,
     CrossFlavor,
@@ -131,6 +132,7 @@ impl ResolutionKind {
             Self::Untriaged => "untriaged",
             Self::VendorPresent => "vendor-present",
             Self::Compat => "compat",
+            Self::Behavioral => "behavioral",
             Self::LoadOnDemand => "load-on-demand",
             Self::Removed => "removed",
             Self::CrossFlavor => "cross-flavor",
@@ -519,6 +521,16 @@ fn validate_evidence(row: &PatchAuditRow) -> Result<(), String> {
 }
 
 fn validate_assertions(row: &PatchAuditRow) -> Result<(), String> {
+    if row.resolution == ResolutionKind::Behavioral {
+        return if row.assertions.is_empty() {
+            Ok(())
+        } else {
+            Err(format!(
+                "row {} behavioral resolution must not carry Lua presence assertions",
+                row.id
+            ))
+        };
+    }
     if row.assertions.is_empty() {
         return Err(format!("row {} requires an assertion", row.id));
     }
@@ -565,6 +577,7 @@ fn validate_status_resolution(row: &PatchAuditRow, status: AuditStatus) -> Resul
         }
         ResolutionKind::VendorPresent
         | ResolutionKind::Compat
+        | ResolutionKind::Behavioral
         | ResolutionKind::LoadOnDemand
         | ResolutionKind::Removed => {
             matches!(status, AuditStatus::Implemented | AuditStatus::BestEffort)
@@ -615,6 +628,7 @@ fn validate_resolution_contract(
             validate_snapshot_contract(row)
         }
         ResolutionKind::VendorPresent | ResolutionKind::Compat => validate_presence_contract(row),
+        ResolutionKind::Behavioral => validate_behavioral_contract(row),
         ResolutionKind::Unsafe | ResolutionKind::Impossible | ResolutionKind::Untriaged => Ok(()),
     }
 }
@@ -649,6 +663,20 @@ fn validate_snapshot_contract(row: &PatchAuditRow) -> Result<(), String> {
         |assertion| assertion.expected == ExpectedPresence::Absent,
         "snapshot mismatch requires absence",
     )
+}
+
+fn validate_behavioral_contract(row: &PatchAuditRow) -> Result<(), String> {
+    if row
+        .evidence
+        .iter()
+        .any(|evidence| evidence.kind == EvidenceKind::Test)
+    {
+        return Ok(());
+    }
+    Err(format!(
+        "row {} behavioral resolution requires test evidence",
+        row.id
+    ))
 }
 
 fn validate_presence_contract(row: &PatchAuditRow) -> Result<(), String> {
@@ -1241,6 +1269,19 @@ mod tests {
         )
     }
 
+    fn behavioral_row(status: &str, evidence_kind: &str, assertions: &str) -> String {
+        format!(
+            r#"{{
+              "id":"added:Fixture","symbol":"Fixture","change":"added",
+              "status":"{status}","resolution":"behavioral","owner":"simulator-model",
+              "evidence":[{{"kind":"{evidence_kind}","reference":"tests/fixture.rs::fixture_test","summary":"behavior evidence","source_hash":"{}"}}],
+              "tests":["tests/fixture.rs::fixture_test"],"assertions":[{assertions}],
+              "commit":"1234567890","approval_id":null,"notes":"behavioral contract"
+            }}"#,
+            "c".repeat(64)
+        )
+    }
+
     fn assertion(flavor: &str, phase: &str, expected: &str) -> String {
         let ty = if expected == "present" {
             r#", "expected_type":"function""#
@@ -1248,6 +1289,60 @@ mod tests {
             ""
         };
         format!(r#"{{"flavor":"{flavor}","phase":"{phase}","expected":"{expected}"{ty}}}"#)
+    }
+
+    #[test]
+    fn behavioral_resolution_accepts_implemented_and_best_effort_test_rows() {
+        for status in ["implemented", "best-effort"] {
+            let manifest = fixture_manifest(&behavioral_row(status, "test", ""));
+
+            validate_manifest(&manifest).expect("behavioral test row should validate");
+        }
+    }
+
+    #[test]
+    fn behavioral_resolution_rejects_lua_presence_assertions() {
+        let row = behavioral_row(
+            "best-effort",
+            "test",
+            &assertion("ptr", "post-core", "present"),
+        );
+        let manifest = fixture_manifest(&row);
+
+        let error = validate_manifest(&manifest)
+            .expect_err("behavioral rows must not carry Lua presence assertions");
+
+        assert!(error.contains("behavioral"), "unexpected error: {error}");
+    }
+
+    #[test]
+    fn behavioral_resolution_requires_test_evidence() {
+        let row = behavioral_row("best-effort", "source", "");
+        let manifest = fixture_manifest(&row);
+
+        let error = validate_manifest(&manifest)
+            .expect_err("behavioral rows need at least one test evidence item");
+
+        assert!(error.contains("test"), "unexpected error: {error}");
+    }
+
+    #[test]
+    fn behavioral_resolution_rejects_exception_requested_status() {
+        let manifest = fixture_manifest(&behavioral_row("exception-requested", "test", ""));
+
+        let error = validate_manifest(&manifest)
+            .expect_err("behavioral resolution cannot request an unsafe exception");
+
+        assert!(error.contains("behavioral"), "unexpected error: {error}");
+    }
+
+    #[test]
+    fn behavioral_rows_accept_zero_runtime_observations() {
+        let manifest = fixture_manifest(&behavioral_row("best-effort", "test", ""));
+        validate_manifest(&manifest).expect("behavioral row should validate");
+
+        validate_observations(&manifest, &[])
+            .expect("behavioral-only manifests should require no runtime observations");
     }
 
     #[test]
