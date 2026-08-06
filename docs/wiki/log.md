@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-06] system | Generic changed-occurrence patch manifests
+
+Extended the patch-audit manifest schema to preserve `changed:symbol` occurrences alongside added and removed rows. Source JSON may include a `changed` array; manifest metadata records `changed_count`, defaulting to zero for the existing 12.1 added/removed-only register. Focused tests cover direction IDs, count mismatches, source ordering, and backward compatibility.
+
 ## [2026-08-06] investigation | 12.1 broader fidelity re-triage
 
 Reconciled the completed 432-row FrameXML register with eight broader 12.1 fidelity families that are outside that manifest. Aura containers, DurationTextBinding, and service-backed structures retain explicit best-effort contracts. UnitAura secrecy, private/forbidden security enforcement, standalone RadialProgress construction, and strict-removal timing are individually identified as unapproved unsafe/impossible exception candidates. Removed contradictory wording that described the same candidates as both approved and pending; no approval was requested or recorded.

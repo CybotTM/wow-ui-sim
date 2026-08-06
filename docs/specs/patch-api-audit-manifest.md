@@ -4,7 +4,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 
 ## What it must do
 
-- [x] Preserve every patch-list occurrence using `change:symbol`, including names present in both added and removed lists.
+- [x] Preserve every patch-list occurrence using `change:symbol`, including `added`, `changed`, and `removed` directions and names present in multiple direction lists.
 - [x] Represent pending work as neutral `untriaged` rows with a null status, not as exception requests.
 - [x] Restrict final statuses to `implemented`, `best-effort`, or `exception-requested`.
 - [x] Restrict exception requests to `unsafe` or `impossible` resolutions.
@@ -22,7 +22,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - [x] Fail synthetic vendor-present, LoD, cross-flavor, and removed-after-reset observations when flavor or phase is wrong.
 - [x] Generate one compact checklist line per manifest occurrence and reject checklist or human-inventory drift.
 - [ ] Generate real runtime observations for every resolved row during focused/profile test execution.
-- [ ] Discover and validate 12.0.7 and 12.0.5 manifests without patch-specific Rust changes.
+- [ ] Discover and validate 12.0.7 and 12.0.5 manifests without patch-specific Rust changes. Generic source validation already accepts an optional `changed` array and `changed_count` while older added/removed-only manifests default that count to zero.
 
 ## Completion contract
 
@@ -39,7 +39,7 @@ The validator does not infer semantic behavior from a symbol name. Runtime obser
 
 ## Implementation inventory
 
-- `src/bin/wow_cli/audit_api/patch_manifest.rs` — schema, repository validation, completion gates, actual Lua-state observation primitive, initialization generator, observation comparison, and rendering.
+- `src/bin/wow_cli/audit_api/patch_manifest.rs` — generic added/changed/removed schema, repository validation, completion gates, actual Lua-state observation primitive, initialization generator, observation comparison, and rendering.
 - `src/bin/wow_cli/audit_api/patch_source_index.rs` — per-file direct-publication candidates, dynamic-publication ambiguity records, all-source tree indexing, and active-profile TOC/XML reachability indexing.
 - `data/patch-api/sources/12.1-framexml.json` — immutable raw 12.1 patch-list snapshot.
 - `data/patch-api/12.1-framexml.json` — 432-row audit register.

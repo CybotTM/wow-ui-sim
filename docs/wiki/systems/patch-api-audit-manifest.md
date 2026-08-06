@@ -1,6 +1,6 @@
 # Patch API Audit Manifest
 
-Patch API audits use a checked-in JSON register for every patch-list occurrence. The register preserves duplicate names across added/removed directions, records evidence and lifecycle expectations, and generates the compact checklist used for final chat review.
+Patch API audits use a checked-in JSON register for every patch-list occurrence. The register preserves duplicate names across added, changed, and removed directions, records evidence and lifecycle expectations, and generates the compact checklist used for final chat review.
 
 ## Content
 
@@ -9,7 +9,7 @@ Patch API audits use a checked-in JSON register for every patch-list occurrence.
 - `data/patch-api/sources/12.1-framexml.json` preserves the raw 320-added/112-removed snapshot.
 - `data/patch-api/12.1-framexml.json` stores all 432 rows keyed by `change:symbol`.
 - `docs/generated/patch-12-1-framexml-checklist.md` contains one generated line per row.
-- `src/bin/wow_cli/audit_api/patch_manifest.rs` owns parsing, repository validation, completion validation, observation comparison, and rendering.
+- `src/bin/wow_cli/audit_api/patch_manifest.rs` owns generic added/changed/removed parsing, repository validation, completion validation, observation comparison, and rendering.
 
 ### Draft and final state
 
@@ -27,7 +27,7 @@ Normal manifest validation recomputes:
 - every resolved row's evidence-file SHA-256;
 - focused test file and exact named `#[test]` definition existence;
 - implementation commit existence and ancestry;
-- raw source row order/count;
+- raw source row order/count for `added`, optional `changed`, and `removed` arrays; older manifests omit `changed_count` and default it to zero;
 - generated checklist and human inventory status drift.
 
 Unknown JSON fields, blank evidence, invalid lifecycle vocabulary, and incompatible status/resolution combinations fail validation.

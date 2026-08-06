@@ -35,6 +35,8 @@ pub struct PatchListSource {
     pub path: String,
     pub hash: String,
     pub added_count: usize,
+    #[serde(default)]
+    pub changed_count: usize,
     pub removed_count: usize,
 }
 
@@ -67,6 +69,7 @@ pub struct PatchAuditRow {
 #[serde(rename_all = "lowercase")]
 pub enum ChangeDirection {
     Added,
+    Changed,
     Removed,
 }
 
@@ -74,6 +77,7 @@ impl ChangeDirection {
     fn as_str(self) -> &'static str {
         match self {
             Self::Added => "added",
+            Self::Changed => "changed",
             Self::Removed => "removed",
         }
     }
@@ -361,6 +365,11 @@ pub fn validate_manifest(manifest: &PatchAuditManifest) -> Result<(), String> {
     let actual_counts = validate_manifest_rows(&manifest.rows, manifest.target.flavor)?;
     validate_direction_count("added", manifest.source.added_count, actual_counts["added"])?;
     validate_direction_count(
+        "changed",
+        manifest.source.changed_count,
+        actual_counts["changed"],
+    )?;
+    validate_direction_count(
         "removed",
         manifest.source.removed_count,
         actual_counts["removed"],
@@ -386,7 +395,7 @@ fn validate_manifest_rows(
     target_flavor: AuditFlavor,
 ) -> Result<BTreeMap<&'static str, usize>, String> {
     let mut row_ids = HashSet::new();
-    let mut counts = BTreeMap::from([("added", 0usize), ("removed", 0usize)]);
+    let mut counts = BTreeMap::from([("added", 0usize), ("changed", 0usize), ("removed", 0usize)]);
     for row in rows {
         require_text("row.symbol", &row.symbol)?;
         validate_symbol_path(&row.symbol)?;
@@ -763,25 +772,42 @@ fn validate_source_rows(manifest: &PatchAuditManifest, root: &Path) -> Result<()
     Ok(())
 }
 
-fn source_row_ids(source: &serde_json::Value) -> Result<Vec<String>, String> {
-    let symbols = |direction: &str| -> Result<Vec<String>, String> {
-        source[direction]
-            .as_array()
-            .ok_or_else(|| format!("patch source missing {direction} array"))?
-            .iter()
-            .map(|value| {
-                value
-                    .as_str()
-                    .map(str::to_string)
-                    .ok_or_else(|| format!("patch source {direction} contains a non-string"))
-            })
-            .collect()
+fn source_symbols(
+    source: &serde_json::Value,
+    direction: &str,
+    required: bool,
+) -> Result<Vec<String>, String> {
+    let Some(values) = source.get(direction) else {
+        return if required {
+            Err(format!("patch source missing {direction} array"))
+        } else {
+            Ok(Vec::new())
+        };
     };
-    Ok(symbols("added")?
+    values
+        .as_array()
+        .ok_or_else(|| format!("patch source {direction} must be an array"))?
+        .iter()
+        .map(|value| {
+            value
+                .as_str()
+                .map(str::to_string)
+                .ok_or_else(|| format!("patch source {direction} contains a non-string"))
+        })
+        .collect()
+}
+
+fn source_row_ids(source: &serde_json::Value) -> Result<Vec<String>, String> {
+    Ok(source_symbols(source, "added", true)?
         .into_iter()
         .map(|symbol| format!("added:{symbol}"))
         .chain(
-            symbols("removed")?
+            source_symbols(source, "changed", false)?
+                .into_iter()
+                .map(|symbol| format!("changed:{symbol}")),
+        )
+        .chain(
+            source_symbols(source, "removed", true)?
                 .into_iter()
                 .map(|symbol| format!("removed:{symbol}")),
         )
@@ -1328,6 +1354,61 @@ mod tests {
         assert!(error.contains("symbol path"));
     }
 
+    fn changed_manifest(changed_count: usize, row_id: &str) -> PatchAuditManifest {
+        parse_manifest(&format!(
+            r#"{{
+              "schema":"framexml-patch-audit/v2",
+              "patch":"12.0.7",
+              "target":{{"flavor":"retail","build":"12.0.7","cache_manifest":"cache","cache_hash":"{}"}},
+              "source":{{"path":"source","hash":"{}","added_count":0,"removed_count":0,"changed_count":{changed_count}}},
+              "output":{{"checklist":"checklist","inventory":"inventory"}},
+              "rows":[{{
+                "id":"{row_id}","symbol":"Fixture","change":"changed",
+                "status":null,"resolution":"untriaged","owner":"unknown",
+                "evidence":[],"tests":[],"assertions":[],"commit":null,"approval_id":null,"notes":"pending"
+              }}]
+            }}"#,
+            "a".repeat(64),
+            "b".repeat(64)
+        ))
+        .expect("changed manifest should parse")
+    }
+
+    #[test]
+    fn changed_direction_accepts_changed_row_id_and_count() {
+        let manifest = changed_manifest(1, "changed:Fixture");
+
+        validate_manifest(&manifest).expect("changed row should validate with matching count");
+        assert_eq!(manifest.rows[0].id, "changed:Fixture");
+    }
+
+    #[test]
+    fn changed_direction_count_mismatch_is_rejected() {
+        let manifest = changed_manifest(0, "changed:Fixture");
+
+        let error = validate_manifest(&manifest).expect_err("changed count mismatch must fail");
+
+        assert!(error.contains("changed count mismatch: source=0 rows=1"));
+    }
+
+    #[test]
+    fn changed_direction_requires_changed_row_id_prefix() {
+        let manifest = changed_manifest(1, "added:Fixture");
+
+        let error = validate_manifest(&manifest).expect_err("changed rows need changed IDs");
+
+        assert!(error.contains("row added:Fixture must use id changed:Fixture"));
+    }
+
+    #[test]
+    fn missing_changed_count_defaults_to_zero() {
+        let manifest = fixture_manifest(
+            r#"{"id":"added:Fixture","symbol":"Fixture","change":"added","status":null,"resolution":"untriaged","owner":"unknown","evidence":[],"tests":[],"assertions":[],"commit":null,"approval_id":null,"notes":"pending"}"#,
+        );
+
+        assert_eq!(manifest.source.changed_count, 0);
+    }
+
     #[test]
     fn untriaged_rows_have_no_final_status() {
         let manifest = fixture_manifest(
@@ -1424,6 +1505,26 @@ mod tests {
         assert_observation_mismatch(
             assertion("ptr", "post-reset", "absent"),
             r#"{"row_id":"added:Fixture","flavor":"ptr","phase":"post-reset","present":true,"observed_type":"function","addon":null}"#,
+        );
+    }
+
+    #[test]
+    fn source_rows_include_changed_occurrences_between_added_and_removed() {
+        let source = serde_json::json!({
+            "added": ["AddedFixture"],
+            "changed": ["ChangedFixture"],
+            "removed": ["RemovedFixture"]
+        });
+
+        let row_ids = source_row_ids(&source).expect("source rows should parse");
+
+        assert_eq!(
+            row_ids,
+            vec![
+                "added:AddedFixture",
+                "changed:ChangedFixture",
+                "removed:RemovedFixture"
+            ]
         );
     }
 
