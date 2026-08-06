@@ -42,6 +42,14 @@ pub struct PatchListSource {
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
+struct PatchSourceOccurrence {
+    direction: ChangeDirection,
+    category: String,
+    symbol: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct PatchAuditOutput {
     pub checklist: String,
     pub inventory: String,
@@ -797,7 +805,35 @@ fn source_symbols(
         .collect()
 }
 
-fn source_row_ids(source: &serde_json::Value) -> Result<Vec<String>, String> {
+fn source_occurrence_row_ids(source: &serde_json::Value) -> Result<Vec<String>, String> {
+    let values = source["occurrences"]
+        .as_array()
+        .ok_or_else(|| "patch source occurrences must be an array".to_string())?;
+    let mut grouped = BTreeMap::from([
+        ("added", Vec::new()),
+        ("changed", Vec::new()),
+        ("removed", Vec::new()),
+    ]);
+    for value in values {
+        let occurrence: PatchSourceOccurrence =
+            serde_json::from_value(value.clone()).map_err(|error| {
+                format!("invalid patch source occurrence direction/category/symbol: {error}")
+            })?;
+        require_text("patch source occurrence.category", &occurrence.category)?;
+        validate_symbol_path(&occurrence.symbol)?;
+        grouped
+            .get_mut(occurrence.direction.as_str())
+            .expect("known direction")
+            .push(format!(
+                "{}:{}",
+                occurrence.direction.as_str(),
+                occurrence.symbol
+            ));
+    }
+    Ok(grouped.into_values().flatten().collect())
+}
+
+fn source_array_row_ids(source: &serde_json::Value) -> Result<Vec<String>, String> {
     Ok(source_symbols(source, "added", true)?
         .into_iter()
         .map(|symbol| format!("added:{symbol}"))
@@ -812,6 +848,14 @@ fn source_row_ids(source: &serde_json::Value) -> Result<Vec<String>, String> {
                 .map(|symbol| format!("removed:{symbol}")),
         )
         .collect())
+}
+
+fn source_row_ids(source: &serde_json::Value) -> Result<Vec<String>, String> {
+    if source.get("occurrences").is_some() {
+        source_occurrence_row_ids(source)
+    } else {
+        source_array_row_ids(source)
+    }
 }
 
 fn validate_inventory(manifest: &PatchAuditManifest, root: &Path) -> Result<(), String> {
@@ -1526,6 +1570,52 @@ mod tests {
                 "removed:RemovedFixture"
             ]
         );
+    }
+
+    #[test]
+    fn generic_occurrence_source_rows_are_grouped_by_direction() {
+        let source = serde_json::json!({
+            "occurrences": [
+                {"direction":"removed","category":"widget","symbol":"RemovedFixture"},
+                {"direction":"added","category":"global","symbol":"AddedFixture"},
+                {"direction":"changed","category":"event","symbol":"ChangedFixture"}
+            ]
+        });
+
+        let row_ids = source_row_ids(&source).expect("occurrence source rows should parse");
+
+        assert_eq!(
+            row_ids,
+            vec![
+                "added:AddedFixture",
+                "changed:ChangedFixture",
+                "removed:RemovedFixture"
+            ]
+        );
+    }
+
+    #[test]
+    fn generic_occurrence_source_rejects_invalid_direction() {
+        let source = serde_json::json!({
+            "occurrences": [
+                {"direction":"renamed","category":"global","symbol":"Fixture"}
+            ]
+        });
+
+        let error = source_row_ids(&source).expect_err("invalid direction should be rejected");
+        assert!(error.contains("direction"), "unexpected error: {error}");
+    }
+
+    #[test]
+    fn generic_occurrence_source_rejects_blank_category() {
+        let source = serde_json::json!({
+            "occurrences": [
+                {"direction":"added","category":"","symbol":"Fixture"}
+            ]
+        });
+
+        let error = source_row_ids(&source).expect_err("blank category should be rejected");
+        assert!(error.contains("category"), "unexpected error: {error}");
     }
 
     #[test]

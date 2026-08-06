@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-08-06] system | Categorized 12.0.7 occurrence source
+
+Added a generic categorized patch-source format and the raw 12.0.7 occurrence register. The source contains 79 added, 29 changed, and 23 removed named occurrences (131 total), grouped from globals, script-object methods, events, widgets, and the six CVar additions actually named by the crawler excerpt. The unresolved claims for fourteen unnamed additions and five unnamed removals remain explicit metadata rather than invented symbols.
+
 ## [2026-08-06] system | Generic changed-occurrence patch manifests
 
 Extended the patch-audit manifest schema to preserve `changed:symbol` occurrences alongside added and removed rows. Source JSON may include a `changed` array; manifest metadata records `changed_count`, defaulting to zero for the existing 12.1 added/removed-only register. Focused tests cover direction IDs, count mismatches, source ordering, and backward compatibility.
